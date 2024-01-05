@@ -55,6 +55,7 @@ internal static class ContinuousProfilerProcessor
             return;
         }
 
+        // TODO Graceful shutdown and Task.Delay https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/issues/3216
         var thread = new Thread(() =>
         {
             SampleReadingThread(new BufferProcessor(threadSamplingEnabled, allocationSamplingEnabled, continuousProfilerExporter, exportThreadSamplesMethod, exportAllocationSamplesMethod), exportInterval);
@@ -72,6 +73,7 @@ internal static class ContinuousProfilerProcessor
     {
         while (true)
         {
+            // TODO Graceful shutdown and Task.Delay https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/issues/3216
             Thread.Sleep(exportInterval);
             sampleExporter.Process();
         }
