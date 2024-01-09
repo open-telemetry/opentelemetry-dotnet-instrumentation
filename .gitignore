@@ -312,3 +312,5 @@ src/OpenTelemetry.AutoInstrumentation.Native/cmake_install.cmake
 
 # install.sh downloaded artifacts
 /otel-dotnet-auto/
+
+lychee/out.md
