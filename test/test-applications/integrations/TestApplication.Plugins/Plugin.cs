@@ -25,7 +25,7 @@ public class Plugin
         return builder.AddMeter(TestApplication.Smoke.Program.SourceName);
     }
 
-    public void ConfigureTracesOptions(HttpClientInstrumentationOptions options)
+    public void ConfigureTracesOptions(HttpClientTraceInstrumentationOptions options)
     {
 #if NETFRAMEWORK
         options.EnrichWithHttpWebRequest = (activity, message) =>

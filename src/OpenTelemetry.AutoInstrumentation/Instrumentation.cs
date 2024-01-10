@@ -162,7 +162,7 @@ internal static class Instrumentation
                 }
                 else
                 {
-                    AddLazilyLoadedMetricInstrumentations(LazyInstrumentationLoader, MetricSettings.Value.EnabledInstrumentations);
+                    AddLazilyLoadedMetricInstrumentations(LazyInstrumentationLoader, _pluginManager, MetricSettings.Value.EnabledInstrumentations);
 
                     Logger.Information("Initialized lazily-loaded metric instrumentations without initializing sdk.");
                 }
@@ -243,7 +243,7 @@ internal static class Instrumentation
         }
     }
 
-    private static void AddLazilyLoadedMetricInstrumentations(LazyInstrumentationLoader lazyInstrumentationLoader, IReadOnlyList<MetricInstrumentation> enabledInstrumentations)
+    private static void AddLazilyLoadedMetricInstrumentations(LazyInstrumentationLoader lazyInstrumentationLoader, PluginManager pluginManager, IReadOnlyList<MetricInstrumentation> enabledInstrumentations)
     {
         foreach (var instrumentation in enabledInstrumentations)
         {
@@ -251,7 +251,7 @@ internal static class Instrumentation
             {
 #if NETFRAMEWORK
                 case MetricInstrumentation.AspNet:
-                    DelayedInitialization.Metrics.AddAspNet(lazyInstrumentationLoader);
+                    DelayedInitialization.Metrics.AddAspNet(lazyInstrumentationLoader, pluginManager);
                     break;
 #endif
 #if NET6_0_OR_GREATER

@@ -8,9 +8,14 @@
   <ItemGroup>
     <PackageReference Include="Pomelo.EntityFrameworkCore.MySql" VersionOverride="$(LibraryVersion)" />
 
-    <!-- Microsoft.Extensions.Configuration.Abstractions is needed to bump reference to 7.0.0
+    <!-- Microsoft.Extensions.Configuration.Abstractions, Microsoft.Extensions.Logging.Abstractions,
+    Microsoft.Extensions.Options, and Microsoft.Extensions.DependencyInjection
+    are needed to bump reference to 8.0.0
     some versions of Pomelo.EntityFrameworkCore.MySql brings to old references -->
     <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" VersionOverride="8.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Options" VersionOverride="8.0.0" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" VersionOverride="8.0.0" />
   </ItemGroup>
 
 </Project>
