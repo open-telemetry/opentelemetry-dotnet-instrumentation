@@ -54,7 +54,7 @@ constexpr auto kMaxVolatileFunctionNameCacheSize = 2000;
   Here are the locks in use:
   - cpu_buffer_lock guarding access to the thread samples buffer
   - allocation_buffer_lock guarding access to the buffer for allocation samples
-  - name_cache_lock, guarding the
+  - name_cache_lock, guarding the data structures used for function/class name lookup
   - thread_state_lock_ guarding the thread name map
   - thread_span_context_lock guarding that data structure
   - (special) a profiling_lock so only one type of profiling (thread stacks or allocation sample) runs at a time
