@@ -87,7 +87,7 @@ static std::mutex name_cache_lock = std::mutex();
 
 static std::shared_mutex profiling_lock = std::shared_mutex();
 
-static ICorProfilerInfo10* profiler_info; // After feature sets settle down, perhaps this should be refactored and have
+static ICorProfilerInfo12* profiler_info; // After feature sets settle down, perhaps this should be refactored and have
                                           // a single static instance of ThreadSampler
 
 // Dirt-simple back pressure system to save overhead if managed code is not reading fast enough
@@ -421,7 +421,7 @@ void ContinuousProfiler::PublishBuffer()
     mdToken  function_token = 0;
     // theoretically there is a possibility to use GetFunctionInfo method, but it does not support generic methods
     const HRESULT hr =
-        info10_->GetFunctionInfo2(func_id, frame_info, nullptr, &module_id, &function_token, 0, nullptr, nullptr);
+        info12_->GetFunctionInfo2(func_id, frame_info, nullptr, &module_id, &function_token, 0, nullptr, nullptr);
     if (FAILED(hr))
     {
         trace::Logger::Debug("GetFunctionInfo2 failed. HRESULT=0x", std::setfill('0'), std::setw(8), std::hex, hr);
@@ -451,7 +451,7 @@ void NamingHelper::GetFunctionName(FunctionIdentifier function_identifier, trace
     }
 
     ComPtr<IMetaDataImport2> metadata_import;
-    HRESULT hr = info10_->GetModuleMetaData(function_identifier.module_id, ofRead, IID_IMetaDataImport2,
+    HRESULT hr = info12_->GetModuleMetaData(function_identifier.module_id, ofRead, IID_IMetaDataImport2,
                                             reinterpret_cast<IUnknown**>(&metadata_import));
     if (FAILED(hr))
     {
@@ -619,10 +619,10 @@ HRESULT __stdcall FrameCallback(_In_ FunctionID func_id,
 }
 
 // Factored out from the loop to a separate function for easier auditing and control of the thread state lock
-void CaptureSamples(ContinuousProfiler* prof, ICorProfilerInfo10* info10)
+void CaptureSamples(ContinuousProfiler* prof, ICorProfilerInfo12* info12)
 {
     ICorProfilerThreadEnum* thread_enum = nullptr;
-    HRESULT                 hr          = info10->EnumThreads(&thread_enum);
+    HRESULT                 hr          = info12->EnumThreads(&thread_enum);
     if (FAILED(hr))
     {
         trace::Logger::Debug("Could not EnumThreads. HRESULT=0x", std::setfill('0'), std::setw(8), std::hex, hr);
@@ -651,7 +651,7 @@ void CaptureSamples(ContinuousProfiler* prof, ICorProfilerInfo10* info10)
 
         // Don't reuse the hr being used for the thread enum, especially since a failed snapshot isn't fatal
         HRESULT snapshotHr =
-            info10->DoStackSnapshot(thread_id, &FrameCallback, COR_PRF_SNAPSHOT_DEFAULT, &dssp, nullptr, 0);
+            info12->DoStackSnapshot(thread_id, &FrameCallback, COR_PRF_SNAPSHOT_DEFAULT, &dssp, nullptr, 0);
         if (FAILED(snapshotHr))
         {
             trace::Logger::Debug("DoStackSnapshot failed. HRESULT=0x", std::setfill('0'), std::setw(8), std::hex,
@@ -662,7 +662,7 @@ void CaptureSamples(ContinuousProfiler* prof, ICorProfilerInfo10* info10)
     prof->cur_cpu_writer_->EndBatch();
 }
 
-void PauseClrAndCaptureSamples(ContinuousProfiler* prof, ICorProfilerInfo10* info10)
+void PauseClrAndCaptureSamples(ContinuousProfiler* prof, ICorProfilerInfo12* info12)
 {
     // before trying to suspend the runtime, acquire exclusive lock
     // it's not safe to try to suspend the runtime after other locks are acquired
@@ -678,7 +678,7 @@ void PauseClrAndCaptureSamples(ContinuousProfiler* prof, ICorProfilerInfo10* inf
 
     const auto start = std::chrono::steady_clock::now();
 
-    HRESULT hr = info10->SuspendRuntime();
+    HRESULT hr = info12->SuspendRuntime();
     if (FAILED(hr))
     {
         trace::Logger::Warn("Could not suspend runtime to sample threads. HRESULT=0x", std::setfill('0'), std::setw(8),
@@ -688,7 +688,7 @@ void PauseClrAndCaptureSamples(ContinuousProfiler* prof, ICorProfilerInfo10* inf
     {
         try
         {
-            CaptureSamples(prof, info10);
+            CaptureSamples(prof, info12);
         }
         catch (const std::exception& e)
         {
@@ -701,7 +701,7 @@ void PauseClrAndCaptureSamples(ContinuousProfiler* prof, ICorProfilerInfo10* inf
     }
     // I don't have any proof but I sure hope that if suspending fails then it's still ok to ask to resume, with no
     // ill effects
-    hr = info10->ResumeRuntime();
+    hr = info12->ResumeRuntime();
     if (FAILED(hr))
     {
         trace::Logger::Error("Could not resume runtime? HRESULT=0x", std::setfill('0'), std::setw(8), std::hex, hr);
@@ -753,7 +753,7 @@ void ContinuousProfiler::SetGlobalInfo12(ICorProfilerInfo12* cor_profiler_info12
 {
     profiler_info        = cor_profiler_info12;
     this->info12         = cor_profiler_info12;
-    this->helper.info10_ = cor_profiler_info12;
+    this->helper.info12_ = cor_profiler_info12;
 }
 
 void ContinuousProfiler::StartThreadSampling(const unsigned int threadSamplingInterval)

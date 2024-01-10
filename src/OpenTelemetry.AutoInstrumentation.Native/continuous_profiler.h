@@ -168,7 +168,7 @@ class NamingHelper
 {
 public:
     // These are permanent parts of the helper object
-    ICorProfilerInfo10* info10_ = nullptr;
+    ICorProfilerInfo12* info12_ = nullptr;
     NameCache<FunctionIdentifier, trace::WSTRING*> function_name_cache_;
     NameCache<FunctionID, std::pair<trace::WSTRING*, FunctionIdentifier>> volatile_function_name_cache_;
 
