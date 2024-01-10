@@ -5,7 +5,6 @@ using System.Runtime.CompilerServices;
 using OpenTelemetry.AutoInstrumentation.Loading;
 using OpenTelemetry.AutoInstrumentation.Logging;
 using OpenTelemetry.AutoInstrumentation.Plugins;
-using OpenTelemetry.AutoInstrumentation.Util;
 using OpenTelemetry.Metrics;
 
 namespace OpenTelemetry.AutoInstrumentation.Configurations;
@@ -25,11 +24,11 @@ internal static class EnvironmentConfigurationMetricHelper
             _ = enabledMeter switch
             {
 #if NETFRAMEWORK
-                MetricInstrumentation.AspNet => Wrappers.AddAspNetInstrumentation(builder, lazyInstrumentationLoader),
+                MetricInstrumentation.AspNet => Wrappers.AddAspNetInstrumentation(builder, lazyInstrumentationLoader, pluginManager),
 #endif
                 MetricInstrumentation.HttpClient => Wrappers.AddHttpClientInstrumentation(builder, lazyInstrumentationLoader),
                 MetricInstrumentation.NetRuntime => Wrappers.AddRuntimeInstrumentation(builder, pluginManager),
-                MetricInstrumentation.Process => Wrappers.AddProcessInstrumentation(builder, pluginManager),
+                MetricInstrumentation.Process => Wrappers.AddProcessInstrumentation(builder),
                 MetricInstrumentation.NServiceBus => builder.AddMeter("NServiceBus.Core"),
 #if NET6_0_OR_GREATER
                 MetricInstrumentation.AspNetCore => Wrappers.AddAspNetCoreInstrumentation(builder, lazyInstrumentationLoader),
@@ -51,7 +50,7 @@ internal static class EnvironmentConfigurationMetricHelper
     {
         if (settings.ConsoleExporterEnabled)
         {
-            Wrappers.AddConsoleExporter(builder, settings, pluginManager);
+            Wrappers.AddConsoleExporter(builder, pluginManager);
         }
 
         return settings.MetricExporter switch
@@ -72,9 +71,9 @@ internal static class EnvironmentConfigurationMetricHelper
         // Meters
 #if NETFRAMEWORK
         [MethodImpl(MethodImplOptions.NoInlining)]
-        public static MeterProviderBuilder AddAspNetInstrumentation(MeterProviderBuilder builder, LazyInstrumentationLoader lazyInstrumentationLoader)
+        public static MeterProviderBuilder AddAspNetInstrumentation(MeterProviderBuilder builder, LazyInstrumentationLoader lazyInstrumentationLoader, PluginManager pluginManager)
         {
-            DelayedInitialization.Metrics.AddAspNet(lazyInstrumentationLoader);
+            DelayedInitialization.Metrics.AddAspNet(lazyInstrumentationLoader, pluginManager);
             return builder.AddMeter("OpenTelemetry.Instrumentation.AspNet");
         }
 #endif
@@ -124,7 +123,7 @@ internal static class EnvironmentConfigurationMetricHelper
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]
-        public static MeterProviderBuilder AddProcessInstrumentation(MeterProviderBuilder builder, PluginManager pluginManager)
+        public static MeterProviderBuilder AddProcessInstrumentation(MeterProviderBuilder builder)
         {
             return builder.AddProcessInstrumentation();
         }
@@ -132,7 +131,7 @@ internal static class EnvironmentConfigurationMetricHelper
         // Exporters
 
         [MethodImpl(MethodImplOptions.NoInlining)]
-        public static MeterProviderBuilder AddConsoleExporter(MeterProviderBuilder builder, MetricSettings settings, PluginManager pluginManager)
+        public static MeterProviderBuilder AddConsoleExporter(MeterProviderBuilder builder, PluginManager pluginManager)
         {
             return builder.AddConsoleExporter((consoleExporterOptions, metricReaderOptions) =>
             {
