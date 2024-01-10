@@ -3,7 +3,7 @@
 > [!IMPORTANT]  
 > Continuous profiler is an experimental feature. It will be subject to change,
 > when <https://github.com/open-telemetry/oteps/pull/239> or <https://github.com/open-telemetry/oteps/pull/237>
-> will be ready and merged.
+> are merged.
 
 ## Thread sampling
 
@@ -13,16 +13,15 @@ the appropriate format.
 
 ### How does the thread sampler work?
 
-The profiler leverages [.NET profiling](https://docs.microsoft.com/en-us/dotnet/framework/unmanaged-api/profiling/)
+The profiler uses the
+[.NET profiler](https://docs.microsoft.com/en-us/dotnet/framework/unmanaged-api/profiling/)
 to perform periodic call stack sampling. For every sampling period, the runtime
- suspended and the samples for all managed thread are saved into the buffer,
- then the runtime resumes.
+suspends execution and the samples for all managed thread are saved in the buffer,
+then the runtime resumes.
 
-The separate managed-thread is processing data from the buffer and export it
-the way defined by the plugin.
-
-To make the process more efficient, the sampler uses two independent buffers to
-store samples alternatively.
+The separate managed thread processes data from the buffer and exports it
+in the format defined by the plugin. To make the process more efficient, the
+sampler uses two independent buffers to store samples alternatively.
 
 ### Requirements
 
@@ -36,15 +35,12 @@ store samples alternatively.
 
 Implement custom plugin.
 
-### Configuration settings by plugin
+### Configuration defaults
 
-* `threadSamplingEnabled = true;`
-* `var threadSamplingInterval = 10000u;` // in ms. Splunk is using 10000.
-  There is no possibility to set value lower than 1000.
-* `var exportInterval = TimeSpan.FromMilliseconds(500);` // Interval to read data
-  from buffers and call exporter, common for Thread and Allocation sampling
-* `object continuousProfilerExporter = new ConsoleExporter();` // Exporter,
-  common for Thread and Allocation sampling
+* `threadSamplingEnabled = true;`: Enables thread sampling.
+* `var threadSamplingInterval = 10000u;`: Sampling interval, in milliseconds. Lowest possible value is 1000.
+* `var exportInterval = TimeSpan.FromMilliseconds(500);`: Interval for reading the data from buffers and call the exporter. This setting is common for both thread and allocation sampling.
+* `object continuousProfilerExporter = new ConsoleExporter();`: Exporter to be used for both thread and allocation sampling.
 
 ### Escape hatch
 
@@ -54,13 +50,13 @@ data are full.
 This scenario might happen when the data processing thread is not able
 to export data the given period of time.
 
-Thread sampler will resume when any of the buffers are empty.
+Thread sampling resumes when any of the buffers are empty.
 
-### Troubleshooting the .NET profiler
+### Troubleshoot the .NET profiler
 
 #### How do I know if it's working?
 
-At the startup, the SignalFx Instrumentation for .NET logs the string
+At startup, the OpenTelemetry Instrumentation for .NET logs the string
 `ContinuousProfiler::StartThreadSampling` at `info` log level.
 
 You can grep for this in the native logs for the instrumentation
@@ -72,7 +68,7 @@ to see something like this:
 
 #### How can I see Continuous Profiling configuration?
 
-The OpenTelemetry .NET AutomaticInstrumentation logs the profiling configuration
+The OpenTelemetry .NET Automatic Instrumentation logs the profiling configuration
 at `Debug` log level during the startup. You can grep for the string
 `Continuous profiling configuration:` to see the configuration.
 
@@ -98,7 +94,7 @@ If you see these log messages, check the exporter implementation.
 #### What if I'm on an unsupported .NET version?
 
 None of the .NET Framework versions is supported. You have to switch
-to supported .NET version.
+to a supported .NET version.
 
 #### Can I tell the sampler to ignore some threads?
 
@@ -107,11 +103,11 @@ There is no such functionality. All managed threads are captured by the profiler
 ## Allocation sampling
 
 The profiler samples allocations, captures the call stack state for the .NET
-thread that triggered the allocation, and exporting it in appropriate format.
+thread that triggered the allocation, and exports it in the appropriate format.
 
 Use the memory allocation data, together with the stack traces and .NET runtime
 metrics, to investigate memory leaks and unusual consumption patterns
-in Continuous Profiling.
+in an observability back end that supports profiling.
 
 ### How does the memory profiler work?
 
