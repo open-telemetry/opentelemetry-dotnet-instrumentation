@@ -4,12 +4,15 @@
 > Continuous profiler is an experimental feature. It will be subject to change,
 > when <https://github.com/open-telemetry/oteps/pull/239> or <https://github.com/open-telemetry/oteps/pull/237>
 > are merged.
-The continuous profiler collects stack traces from the processes for two type of events:
-	
-	* Periodically, for all threads. See Thread sampling.
-	* Memory allocation events. See Memory allocation.
-	
+
+The continuous profiler collects stack traces from the processes for two type of
+events:
+
+* Periodically, for all threads. See [Thread sampling](#thread-sampling).
+* Memory allocation events. See [Allocation sampling](#allocation-sampling).
+
 You can export stack traces to any observability back end that supports profiling.
+
 ## Thread sampling
 
 You can enable thread sampling using the custom plugin, which
