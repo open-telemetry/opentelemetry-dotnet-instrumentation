@@ -24,11 +24,12 @@ sampler uses two independent buffers to store samples alternatively.
 
 ### Requirements
 
-* .NET 6.0 or higher (`ICorProfilerInfo12` available in runtime). Technically
-  it could be `ICorProfiler10`, and .NET Core 3.1/.NET 5.0, but these versions
-  are not supported by OpenTelemetry .NET AutoInstrumentation.
-* .NET Framework is not supported. `ICorProfiler10` nor `ICorProfiler12`
+* .NET 6.0 or higher (`ICorProfilerInfo12` available in runtime).
+* .NET Framework is not supported, as `ICorProfiler10` and `ICorProfiler12`
   are not available in .NET Fx.
+
+Note that `ICorProfiler10` can be used, but .NET Core 3.1 or .NET 5.0 aren't
+supported by the OpenTelemetry .NET Automatic Instrumentation.
 
 ### Enable the profiler
 
