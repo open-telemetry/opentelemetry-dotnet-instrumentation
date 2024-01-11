@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 using System.Diagnostics;
+using System.Text;
 
 namespace IntegrationTests.Helpers;
 
@@ -23,6 +24,7 @@ public class InstrumentedProcessHelper
         startInfo.RedirectStandardOutput = true;
         startInfo.RedirectStandardError = true;
         startInfo.RedirectStandardInput = false;
+        startInfo.StandardOutputEncoding = Encoding.Default;
 
         return Process.Start(startInfo);
     }

@@ -1,7 +1,13 @@
 // Copyright The OpenTelemetry Authors
 // SPDX-License-Identifier: Apache-2.0
 
+#if NET6_0_OR_GREATER
+using System.Diagnostics;
+#endif
 using OpenTelemetry.AutoInstrumentation.Configurations;
+#if NET6_0_OR_GREATER
+using OpenTelemetry.AutoInstrumentation.ContinuousProfiler;
+#endif
 using OpenTelemetry.AutoInstrumentation.Diagnostics;
 using OpenTelemetry.AutoInstrumentation.Loading;
 using OpenTelemetry.AutoInstrumentation.Logging;
@@ -79,6 +85,30 @@ internal static class Instrumentation
             _pluginManager = new PluginManager(GeneralSettings.Value);
             _pluginManager.Initializing();
 
+#if NET6_0_OR_GREATER
+            var profilerEnabled = GeneralSettings.Value.ProfilerEnabled;
+            var threadSamplingEnabled = false;
+            var allocationSamplingEnabled = false;
+            TimeSpan exportInterval = default;
+            object? continuousProfilerExporter = null;
+
+            if (profilerEnabled)
+            {
+                (threadSamplingEnabled, var threadSamplingInterval, allocationSamplingEnabled, var maxMemorySamplesPerMinute, exportInterval, continuousProfilerExporter) = _pluginManager.GetFirstContinuousConfiguration();
+                Logger.Debug($"Continuous profiling configuration: Thread sampling enabled: {threadSamplingEnabled}, thread sampling interval: {threadSamplingInterval}, allocation sampling enabled: {allocationSamplingEnabled}, max memory samples per minute: {maxMemorySamplesPerMinute}, export interval: {exportInterval}, continuous profiler exporter: {continuousProfilerExporter.GetType()}");
+
+                if (threadSamplingEnabled || allocationSamplingEnabled)
+                {
+                    NativeMethods.ConfigureNativeContinuousProfiler(threadSamplingEnabled, threadSamplingInterval, allocationSamplingEnabled, maxMemorySamplesPerMinute);
+                    Activity.CurrentChanged += ContinuousProfilerProcessor.Activity_CurrentChanged;
+                }
+            }
+            else
+            {
+                Logger.Information("CLR Profiler is not enabled. Continuous Profiler will be not started even if configured correctly.");
+            }
+#endif
+
             if (TracerSettings.Value.TracesEnabled || MetricSettings.Value.MetricsEnabled)
             {
                 // Register to shutdown events
@@ -137,6 +167,12 @@ internal static class Instrumentation
                     Logger.Information("Initialized lazily-loaded metric instrumentations without initializing sdk.");
                 }
             }
+#if NET6_0_OR_GREATER
+            if (profilerEnabled && (threadSamplingEnabled || allocationSamplingEnabled))
+            {
+                ContinuousProfilerProcessor.Initialize(threadSamplingEnabled, allocationSamplingEnabled, exportInterval, continuousProfilerExporter!);
+            }
+#endif
         }
         catch (Exception ex)
         {
