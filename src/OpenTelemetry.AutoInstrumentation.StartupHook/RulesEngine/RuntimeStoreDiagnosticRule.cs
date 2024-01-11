@@ -108,7 +108,7 @@ internal class RuntimeStoreDiagnosticRule : Rule
             }
 
             var architecture = Environment.Is64BitProcess ? "x64" : "x86";
-            var targetFramework = "net" + Environment.Version.Major.ToString() + "." + Environment.Version.Minor.ToString();
+            var targetFramework = $"net{Environment.Version.Major}.{Environment.Version.Minor}";
             var finalPath = Path.Combine(storeDirectory, architecture, targetFramework);
 
             return finalPath;
