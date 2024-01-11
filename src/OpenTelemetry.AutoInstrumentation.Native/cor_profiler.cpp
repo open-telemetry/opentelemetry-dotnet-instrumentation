@@ -29,6 +29,7 @@
 #include "stats.h"
 #include "util.h"
 #include "version.h"
+#include "continuous_profiler.h"
 
 #ifdef MACOS
 #include <mach-o/dyld.h>
@@ -62,7 +63,8 @@ CorProfiler* profiler = nullptr;
 //
 HRESULT STDMETHODCALLTYPE CorProfiler::Initialize(IUnknown* cor_profiler_info_unknown)
 {
-    auto _ = trace::Stats::Instance()->InitializeMeasure();
+    auto _                   = trace::Stats::Instance()->InitializeMeasure();
+    this->continuousProfiler = nullptr;
 
     CorProfilerBase::Initialize(cor_profiler_info_unknown);
 
@@ -103,7 +105,8 @@ HRESULT STDMETHODCALLTYPE CorProfiler::Initialize(IUnknown* cor_profiler_info_un
     if (SUCCEEDED(hr))
     {
         Logger::Debug("Interface ICorProfilerInfo12 found.");
-        this->info_ = info12;
+        this->info_   = info12;
+        this->info12_ = info12;
     }
     else
     {
@@ -113,7 +116,8 @@ HRESULT STDMETHODCALLTYPE CorProfiler::Initialize(IUnknown* cor_profiler_info_un
         {
             FailProfiler(Warn, "Failed to attach profiler: Not supported .NET Framework version (lower than 4.6.1).")
         }
-        info12 = nullptr;
+        info12        = nullptr;
+        this->info12_ = nullptr;
     }
 
     // code is ready to get runtime information
@@ -987,7 +991,7 @@ HRESULT STDMETHODCALLTYPE CorProfiler::JITInlining(FunctionID callerId, Function
 
     ModuleID calleeModuleId;
     mdToken  calleFunctionToken = mdTokenNil;
-    auto     hr                 = this->info_->GetFunctionInfo(calleeId, NULL, &calleeModuleId, &calleFunctionToken);
+    auto     hr                 = this->info_->GetFunctionInfo(calleeId, nullptr, &calleeModuleId, &calleFunctionToken);
 
     *pfShouldInline = true;
 
@@ -1123,6 +1127,54 @@ void CorProfiler::InternalAddInstrumentation(WCHAR* id, CallTargetDefinition* it
         }
 
         Logger::Info("InternalAddInstrumentation: Total integrations in profiler: ", integration_definitions_.size());
+    }
+}
+
+void CorProfiler::ConfigureContinuousProfiler(bool         threadSamplingEnabled,
+                                              unsigned int threadSamplingInterval,
+                                              bool         allocationSamplingEnabled,
+                                              unsigned int maxMemorySamplesPerMinute)
+{
+    Logger::Info("ConfigureContinuousProfiler: thread sampling enabled: ", threadSamplingEnabled,
+                 ", thread sampling interval: ", threadSamplingInterval, ", allocationSamplingEnabled: ",
+                 allocationSamplingEnabled, ", max memory samples per minute: ", maxMemorySamplesPerMinute);
+
+    if (!threadSamplingEnabled && !allocationSamplingEnabled)
+    {
+        Logger::Debug("ConfigureContinuousProfiler: Thread sampling and allocations sampling disabled.");
+        return;
+    }
+
+    DWORD pdvEventsLow;
+    DWORD pdvEventsHigh;
+    auto  hr = this->info12_->GetEventMask2(&pdvEventsLow, &pdvEventsHigh);
+    if (FAILED(hr))
+    {
+        Logger::Warn("ConfigureContinuousProfiler: Failed to take event masks for continuous profiler.");
+        return;
+    }
+
+    pdvEventsLow |= COR_PRF_MONITOR_THREADS | COR_PRF_ENABLE_STACK_SNAPSHOT;
+
+    hr = this->info12_->SetEventMask2(pdvEventsLow, pdvEventsHigh);
+    if (FAILED(hr))
+    {
+        Logger::Warn("ConfigureContinuousProfiler: Failed to set event masks for continuous profiler.");
+        return;
+    }
+
+    this->continuousProfiler = new continuous_profiler::ContinuousProfiler();
+    this->continuousProfiler->SetGlobalInfo12(this->info12_);
+    Logger::Info("ConfigureContinuousProfiler: Events masks configured for continuous profiler");
+
+    if (threadSamplingEnabled)
+    {
+        this->continuousProfiler->StartThreadSampling(threadSamplingInterval);
+    }
+
+    if (allocationSamplingEnabled)
+    {
+        this->continuousProfiler->StartAllocationSampling(maxMemorySamplesPerMinute);
     }
 }
 
@@ -2617,6 +2669,51 @@ HRESULT STDMETHODCALLTYPE CorProfiler::JITCachedFunctionSearchStarted(FunctionID
     }
 
     *pbUseCachedFunction = true;
+    return S_OK;
+}
+
+HRESULT STDMETHODCALLTYPE CorProfiler::ThreadCreated(ThreadID threadId)
+{
+    if (continuousProfiler != nullptr)
+    {
+        continuousProfiler->ThreadCreated(threadId);
+    }
+    return S_OK;
+}
+HRESULT STDMETHODCALLTYPE CorProfiler::ThreadDestroyed(ThreadID threadId)
+{
+    if (continuousProfiler != nullptr)
+    {
+        continuousProfiler->ThreadDestroyed(threadId);
+    }
+    return S_OK;
+}
+HRESULT STDMETHODCALLTYPE CorProfiler::ThreadNameChanged(ThreadID threadId, ULONG cchName, WCHAR name[])
+{
+    if (continuousProfiler != nullptr)
+    {
+        continuousProfiler->ThreadNameChanged(threadId, cchName, name);
+    }
+    return S_OK;
+}
+
+HRESULT STDMETHODCALLTYPE CorProfiler::EventPipeEventDelivered(EVENTPIPE_PROVIDER provider,
+                                                               DWORD              eventId,
+                                                               DWORD              eventVersion,
+                                                               ULONG              cbMetadataBlob,
+                                                               LPCBYTE            metadataBlob,
+                                                               ULONG              cbEventData,
+                                                               LPCBYTE            eventData,
+                                                               LPCGUID            pActivityId,
+                                                               LPCGUID            pRelatedActivityId,
+                                                               ThreadID           eventThread,
+                                                               ULONG              numStackFrames,
+                                                               UINT_PTR           stackFrames[])
+{
+    if (continuousProfiler != nullptr && eventId == 10 && eventVersion == 4)
+    {
+        continuousProfiler->AllocationTick(cbEventData, eventData);
+    }
     return S_OK;
 }
 

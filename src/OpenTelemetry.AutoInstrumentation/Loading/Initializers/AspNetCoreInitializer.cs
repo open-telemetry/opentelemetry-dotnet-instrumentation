@@ -21,7 +21,7 @@ internal class AspNetCoreInitializer : InstrumentationInitializer
         var instrumentationType = Type.GetType("OpenTelemetry.Instrumentation.AspNetCore.AspNetCoreInstrumentation, OpenTelemetry.Instrumentation.AspNetCore")!;
         var httpInListenerType = Type.GetType("OpenTelemetry.Instrumentation.AspNetCore.Implementation.HttpInListener, OpenTelemetry.Instrumentation.AspNetCore")!;
 
-        var options = new OpenTelemetry.Instrumentation.AspNetCore.AspNetCoreInstrumentationOptions();
+        var options = new OpenTelemetry.Instrumentation.AspNetCore.AspNetCoreTraceInstrumentationOptions();
         _pluginManager.ConfigureTracesOptions(options);
 
         var httpInListener = Activator.CreateInstance(httpInListenerType, args: options);

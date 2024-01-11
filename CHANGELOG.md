@@ -7,19 +7,66 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 
 ## [Unreleased](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/compare/v1.2.0..HEAD)
 
+- [Core components](https://github.com/open-telemetry/opentelemetry-dotnet/blob/main/VERSIONING.md#core-components):
+  [`1.7.0`](https://github.com/open-telemetry/opentelemetry-dotnet/releases/tag/core-1.7.0)
+- `System.Diagnostics.DiagnosticSource`: [`8.0.0`](https://www.nuget.org/packages/System.Diagnostics.DiagnosticSource/8.0.0)
+
 ### Added
 
 - Support for Host, Process, and Process Runtime resource detectors.
+- Support for `OpenTelemetry.Instrumentation.AspNet.AspNetMetricsInstrumentationOptions`
+  for plugins.
 
 ### Changed
 
+- Changed minimal supported version of `Microsoft.Extensions.Logging`
+  for `ILOGGER` instrumentation from `6.0.0` to `8.0.0`.
+- Changed supported method parameters for plugins
+  - from `OpenTelemetry.Instrumentation.AspNetCore.AspNetCoreInstrumentationOptions`
+    to `OpenTelemetry.Instrumentation.AspNetCore.AspNetCoreTraceInstrumentationOptions`,
+  - from `OpenTelemetry.Instrumentation.Http.HttpClientInstrumentationOptions`
+    to `OpenTelemetry.Instrumentation.Http.HttpClientTraceInstrumentationOptions`.
+
 #### Dependency updates
 
-- .NET Framework only, `Grpc.Core.Api` updated from `2.59.0` to `2.60.0`.
+- Updated [Core components](https://github.com/open-telemetry/opentelemetry-dotnet/blob/main/VERSIONING.md#core-components):
+  [`1.7.0`](https://github.com/open-telemetry/opentelemetry-dotnet/releases/tag/core-1.7.0).
+- Following packages updated
+  - `OpenTelemetry.Exporter.Prometheus.HttpListener` from `1.6.0-rc.1` to `1.7.0-rc.1`,
+  - `OpenTelemetry.Instrumentation.Http` from `1.6.0` to `1.7.0`,
+  - `OpenTelemetry.Instrumentation.Process` from `0.5.0-beta.3` to `0.5.0-beta.4`,
+  - `OpenTelemetry.Instrumentation.Quartz` from `1.0.0-alpha.3` to `1.0.0-beta.1`,
+  - `OpenTelemetry.Instrumentation.Runtime` from `1.5.1` to `1.7.0`,
+  - `OpenTelemetry.Instrumentation.SqlClient` from `1.6.0-beta.2` to `1.6.0-beta.3`,
+  - `OpenTelemetry.Instrumentation.StackExchangeRedis` from `1.0.0-rc9.12` to `1.0.0-rc9.13`,
+  - `OpenTelemetry.Instrumentation.Wcf` from `1.0.0-rc.13` to `1.0.0-rc.14`,
+  - `OpenTelemetry.Shims.OpenTracing` from `1.6.0-beta.1` to `1.7.0-beta.1`,
+  - `OpenTelemetry.ResourceDetectors.Azure` from `1.0.0-beta.3` to `1.0.0-beta.4`,
+  - `OpenTelemetry.ResourceDetectors.Container` from `1.0.0-beta.4` to `1.0.0-beta.5`,
+  - `OpenTelemetry.ResourceDetectors.ProcessRuntime` from `0.1.0-alpha.1` to `0.1.0-alpha.2`,
+- .NET only, following packages updated
+  - `Google.Protobuf` updated from `3.19.4` to `3.22.5`.
+  - `Microsoft.Extensions.Configuration` from `3.1.0` to `8.0.0`,
+  - `Microsoft.Extensions.Configuration.Abstractions` from `3.1.0` to `8.0.0`,
+  - `Microsoft.Extensions.Configuration.Binder` from `3.1.0` to `8.0.0`,
+  - `Microsoft.Extensions.DependencyInjection` from `3.1.0` to `8.0.0`,
+  - `Microsoft.Extensions.DependencyInjection.Abstractions` from `3.1.0` to `8.0.0`,
+  - `Microsoft.Extensions.Logging` from `6.0.0` to `8.0.0`,
+  - `Microsoft.Extensions.Options` from `3.1.0` to `8.0.0`,
+  - `Microsoft.Extensions.Options.ConfigurationExtensions` from `3.1.0` to `8.0.0`,
+  - `Microsoft.Extensions.Primitives` from `3.1.0` to `8.0.0`,
+  - `OpenTelemetry.Instrumentation.AspNetCore` from `1.6.0-beta.3` to `1.7.0`,
+  - `OpenTelemetry.Instrumentation.EntityFrameworkCore` from `1.0.0-beta.8` to `1.0.0-beta.9`,
+- .NET Framework only, following packages updated
+  - `Grpc.Core.Api` from `2.59.0` to `2.60.0`
+  - `OpenTelemetry.Instrumentation.AspNet` from `1.6.0-beta.2` to `1.7.0-beta.1`,
 
 ### Deprecated
 
 ### Removed
+
+Removed support for `Microsoft.Extensions.Logging`
+for `ILOGGER` for versions older than `8.0.0`.
 
 ### Fixed
 
