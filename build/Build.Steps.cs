@@ -309,42 +309,51 @@ partial class Build
                 .SetFramework(TargetFramework.NET6_0)
                 .SetOutput(TracerHomeDirectory / MapToFolderOutput(TargetFramework.NET6_0)));
 
-            Log.Debug("Remove files available in additional store from net folder");
-            var netFolder = TracerHomeDirectory / "net";
-            var additionalStoreFolder = TracerHomeDirectory / "store";
+            RemoveFilesInNetFolderAvailableInAdditionalStore();
 
-            var netLibraries = netFolder.GlobFiles("**/*.dll");
-            var netLibrariesByName = netLibraries.ToDictionary(x => x.Name);
-            var additionalStoreLibraries = additionalStoreFolder.GlobFiles("**/*.dll");
+            RemoveNonLibraryFilesFromOutput();
+        });
 
-            foreach (var additionalStoreLibrary in additionalStoreLibraries)
+    void RemoveNonLibraryFilesFromOutput()
+    {
+        TracerHomeDirectory.GlobFiles("**/*.xml").ForEach(file => file.DeleteFile());
+        (TracerHomeDirectory / "net").GlobFiles("*.json").ForEach(file => file.DeleteFile());
+        if (IsWin)
+        {
+            (TracerHomeDirectory / "netfx").GlobFiles("*.json").ForEach(file => file.DeleteFile());
+        }
+    }
+
+    void RemoveFilesInNetFolderAvailableInAdditionalStore()
+    {
+        Log.Debug("Removing files available in additional store from net folder");
+        var netFolder = TracerHomeDirectory / "net";
+        var additionalStoreFolder = TracerHomeDirectory / "store";
+
+        var netLibraries = netFolder.GlobFiles("**/*.dll");
+        var netLibrariesByName = netLibraries.ToDictionary(x => x.Name);
+        var additionalStoreLibraries = additionalStoreFolder.GlobFiles("**/*.dll");
+
+        foreach (var additionalStoreLibrary in additionalStoreLibraries)
+        {
+            if (netLibrariesByName.TryGetValue(additionalStoreLibrary.Name, out var netLibrary))
             {
-                if (netLibrariesByName.TryGetValue(additionalStoreLibrary.Name, out var netLibrary))
-                {
-                    var netLibraryFileVersionInfo = FileVersionInfo.GetVersionInfo(netLibrary);
-                    var additionalStoreLibraryFileVersionInfo = FileVersionInfo.GetVersionInfo(additionalStoreLibrary);
+                var netLibraryFileVersionInfo = FileVersionInfo.GetVersionInfo(netLibrary);
+                var additionalStoreLibraryFileVersionInfo = FileVersionInfo.GetVersionInfo(additionalStoreLibrary);
 
-                    if (netLibraryFileVersionInfo.FileVersion == additionalStoreLibraryFileVersionInfo.FileVersion)
-                    {
-                        Log.Debug("Delete file available in additional store from net folder " + additionalStoreLibrary.Name + " version: " + netLibraryFileVersionInfo.FileVersion);
-                        netLibrary.DeleteFile();
-                        netLibrariesByName.Remove(additionalStoreLibrary.Name);
-                    }
-                    else
-                    {
-                        Log.Warning("Cannot remove file available in additional store from net folder " + additionalStoreLibrary.Name + " net folder version: " + netLibraryFileVersionInfo.FileVersion + " additional store version " + additionalStoreLibraryFileVersionInfo.FileVersion);
-                    }
+                if (netLibraryFileVersionInfo.FileVersion == additionalStoreLibraryFileVersionInfo.FileVersion)
+                {
+                    Log.Debug("Delete file available in additional store from net folder " + additionalStoreLibrary.Name + " version: " + netLibraryFileVersionInfo.FileVersion);
+                    netLibrary.DeleteFile();
+                    netLibrariesByName.Remove(additionalStoreLibrary.Name);
+                }
+                else
+                {
+                    Log.Warning("Cannot remove file available in additional store from net folder " + additionalStoreLibrary.Name + " net folder version: " + netLibraryFileVersionInfo.FileVersion + " additional store version: " + additionalStoreLibraryFileVersionInfo.FileVersion);
                 }
             }
-
-            // Remove non-library files
-            TracerHomeDirectory.GlobFiles("**/*.xml").ForEach(file => file.DeleteFile());
-            netFolder.GlobFiles("*.json").ForEach(file => file.DeleteFile());
-            if (IsWin)
-            {
-                (TracerHomeDirectory / "netfx").GlobFiles("*.json").ForEach(file => file.DeleteFile());
-            }
-        });
+        }
+    }
 
     Target PublishNativeProfiler => _ => _
         .Unlisted()
