@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 using System.Runtime.InteropServices;
+using FluentAssertions;
 using IntegrationTests.Helpers;
 
 namespace IntegrationTests;
@@ -29,6 +30,22 @@ public class BuildTests
             .UseTextForParameters(systemName)
             .DisableDiff();
     }
+
+#if NET6_0_OR_GREATER
+    [Fact]
+    public void NetFolderDoesNotContainAnyLibraryFromAdditionalStore()
+    {
+        var distributionFolder = EnvironmentHelper.GetNukeBuildOutput();
+
+        var netFilePaths = Directory.GetFiles(Path.Join(distributionFolder, "net"), "*", SearchOption.AllDirectories);
+        var additionalStoreFilePaths = Directory.GetFiles(Path.Join(distributionFolder, "store"), "*", SearchOption.AllDirectories);
+
+        var netFileNames = netFilePaths.Select(Path.GetFileNameWithoutExtension).ToArray();
+        var additionalStoreFileNames = additionalStoreFilePaths.Select(Path.GetFileNameWithoutExtension).Distinct().ToArray();
+
+        netFileNames.Should().NotContain(additionalStoreFileNames);
+    }
+#endif
 
     private static string GetSystemName()
     {
