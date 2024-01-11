@@ -33,7 +33,7 @@ supported by the OpenTelemetry .NET Automatic Instrumentation.
 
 ### Enable the profiler
 
-Implement custom plugin.
+Implement custom plugin. See plugin section.
 
 ### Configuration defaults
 
