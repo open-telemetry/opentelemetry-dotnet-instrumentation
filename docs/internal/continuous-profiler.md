@@ -7,9 +7,8 @@
 
 ## Thread sampling
 
-Thread sampling can be enabled by the custom plugin.
-Plugin is responsible for parsing dense, data format and exporting it in
-the appropriate format.
+You can enable thread sampling using the custom plugin, which
+can parse dense thread sampling data and export it.
 
 ### How does the thread sampler work?
 
