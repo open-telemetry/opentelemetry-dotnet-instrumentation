@@ -10,7 +10,7 @@
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" />
     <PackageReference Include="NServiceBus" VersionOverride="$(LibraryVersion)" />
-    <PackageReference Include="System.Diagnostics.DiagnosticSource" Condition="'$(LibraryVersion)' != '' and '$(LibraryVersion)'&lt;'8.1.1'" />
+    <PackageReference Include="System.Diagnostics.DiagnosticSource" />
   </ItemGroup>
 
 </Project>

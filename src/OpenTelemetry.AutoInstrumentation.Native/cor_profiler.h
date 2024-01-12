@@ -24,6 +24,12 @@
 #include <unordered_set>
 #include "clr_helpers.h"
 
+// Forward declaration
+namespace continuous_profiler
+{
+class ContinuousProfiler;
+}
+
 namespace trace
 {
 
@@ -47,6 +53,9 @@ private:
     std::unordered_set<AppDomainID> first_jit_compilation_app_domains;
     bool in_azure_app_services = false;
     bool is_desktop_iis = false;
+
+    continuous_profiler::ContinuousProfiler* continuousProfiler;
+
 
     //
     // CallTarget Members
@@ -169,6 +178,25 @@ public:
 
     HRESULT STDMETHODCALLTYPE JITCachedFunctionSearchStarted(FunctionID functionId, BOOL* pbUseCachedFunction) override;
 
+    // ICorProfilerInfo callbacks to track thread naming (used by ThreadSampler only)
+    HRESULT STDMETHODCALLTYPE ThreadCreated(ThreadID threadId) override;
+    HRESULT STDMETHODCALLTYPE ThreadDestroyed(ThreadID threadId) override;
+    HRESULT STDMETHODCALLTYPE ThreadNameChanged(ThreadID threadId, ULONG cchName, WCHAR name[]) override;
+
+    // Needed for allocation sampling
+    HRESULT STDMETHODCALLTYPE EventPipeEventDelivered(EVENTPIPE_PROVIDER provider,
+                                                      DWORD              eventId,
+                                                      DWORD              eventVersion,
+                                                      ULONG              cbMetadataBlob,
+                                                      LPCBYTE            metadataBlob,
+                                                      ULONG              cbEventData,
+                                                      LPCBYTE            eventData,
+                                                      LPCGUID            pActivityId,
+                                                      LPCGUID            pRelatedActivityId,
+                                                      ThreadID           eventThread,
+                                                      ULONG              numStackFrames,
+                                                      UINT_PTR           stackFrames[]) override;
+
     //
     // ICorProfilerCallback6 methods
     //
@@ -180,6 +208,11 @@ public:
     //
     void AddInstrumentations(WCHAR* id, CallTargetDefinition* items, int size);
     void AddDerivedInstrumentations(WCHAR* id, CallTargetDefinition* items, int size);
+
+    //
+    // Continuous Profiler methods
+    //
+    void ConfigureContinuousProfiler(bool threadSamplingEnabled, unsigned int threadSamplingInterval, bool allocationSamplingEnabled, unsigned int maxMemorySamplesPerMinute);
 
     friend class TracerMethodRewriter;
 };

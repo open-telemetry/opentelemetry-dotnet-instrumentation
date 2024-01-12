@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
@@ -6,6 +6,8 @@
 
   <ItemGroup>
     <PackageReference Include="MySql.Data" VersionOverride="$(LibraryVersion)" />
+    <PackageReference Include="System.Diagnostics.DiagnosticSource" />
+    <PackageReference Include="Google.Protobuf" VersionOverride="3.22.5" />
   </ItemGroup>
 
 </Project>

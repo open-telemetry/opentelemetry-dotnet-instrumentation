@@ -78,9 +78,9 @@ internal static class DelayedInitialization
     {
 #if NETFRAMEWORK
         [MethodImpl(MethodImplOptions.NoInlining)]
-        public static void AddAspNet(LazyInstrumentationLoader lazyInstrumentationLoader)
+        public static void AddAspNet(LazyInstrumentationLoader lazyInstrumentationLoader, PluginManager pluginManager)
         {
-            new AspNetMetricsInitializer(lazyInstrumentationLoader);
+            new AspNetMetricsInitializer(lazyInstrumentationLoader, pluginManager);
         }
 #endif
 

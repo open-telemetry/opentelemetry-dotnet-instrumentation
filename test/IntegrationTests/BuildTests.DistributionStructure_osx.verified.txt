@@ -42,7 +42,6 @@
   /net/OpenTelemetry.Shims.OpenTracing.dll,
   /net/OpenTelemetry.dll,
   /net/OpenTracing.dll,
-  /net/System.Diagnostics.DiagnosticSource.dll,
   /net/System.Private.ServiceModel.dll,
   /net/System.Security.Permissions.dll,
   /net/System.ServiceModel.Primitives.dll,

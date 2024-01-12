@@ -8,13 +8,13 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Google.Protobuf" VersionOverride="3.19.4" />
+    <PackageReference Include="Google.Protobuf" VersionOverride="3.22.5" />
     <PackageReference Include="Grpc.Net.Client" VersionOverride="$(LibraryVersion)" />
     <PackageReference Include="Grpc.Net.Client.Web" Condition="'$(TargetFramework)' == 'net462'" VersionOverride="$(LibraryVersion)" />
     <PackageReference Include="Grpc.Tools" VersionOverride="2.44.0" />
-    <!-- Workaround! Microsoft.Extensions.Logging.Abstractions v.3.1.0 is minimal version supported by auto instrumentation.
-    Grpc.Net.Client prior to 2.57.0 references older version. It prevents to load required version from Additional Dependencies store-->
-    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" VersionOverride="3.1.0" Condition="'$(LibraryVersion)' != '' and '$(LibraryVersion)'&lt;'2.57.0'" />
+    <!-- Workaround! Microsoft.Extensions.Logging.Abstractions v.8.0.0 is minimal version supported by auto instrumentation.
+    Grpc.Net.Client references older version. It prevents to load required version from Additional Dependencies store-->
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" VersionOverride="8.0.0" />
     <PackageReference Include="System.Diagnostics.DiagnosticSource" />
   </ItemGroup>
 
