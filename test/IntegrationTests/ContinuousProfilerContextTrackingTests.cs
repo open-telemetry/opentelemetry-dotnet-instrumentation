@@ -37,19 +37,18 @@ public class ContinuousProfilerContextTrackingTests : TestHelper
         {
             var batch = JsonDocument.Parse(sampleBatch.TrimStart());
 
-            var samplesWithTraceContext = batch
+            var samplesWithTraceContextCount = batch
                 .RootElement
                 .EnumerateArray()
                 .Select(
                     sample =>
                         ConvertToPropertyList(sample))
-                .Where(
+                .Count(
                     sampleProperties =>
-                        HasTraceContextAssociated(sampleProperties))
-                .ToList();
-            samplesWithTraceContext.Count.Should().BeLessOrEqualTo(1, "at most one sample in a batch should have trace context associated.");
+                        HasTraceContextAssociated(sampleProperties));
+            samplesWithTraceContextCount.Should().BeLessOrEqualTo(1, "at most one sample in a batch should have trace context associated.");
 
-            totalSamplesWithTraceContextCount += samplesWithTraceContext.Count;
+            totalSamplesWithTraceContextCount += samplesWithTraceContextCount;
         }
 
         totalSamplesWithTraceContextCount.Should().BeGreaterOrEqualTo(3, "there should be sample with trace context in most of the batches.");
