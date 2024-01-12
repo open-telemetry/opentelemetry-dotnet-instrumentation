@@ -30,6 +30,7 @@ public class ContinuousProfilerContextTrackingTests : TestHelper
         var batchSeparator = $"{Environment.NewLine}{Environment.NewLine}";
 
         var totalSamplesWithTraceContextCount = 0;
+        var managedThreadsWithTraceContext = new HashSet<int>();
 
         var exportedSampleBatches = standardOutput.TrimEnd().Split(batchSeparator);
 
@@ -37,20 +38,26 @@ public class ContinuousProfilerContextTrackingTests : TestHelper
         {
             var batch = JsonDocument.Parse(sampleBatch.TrimStart());
 
-            var samplesWithTraceContextCount = batch
+            var samplesWithTraceContext = batch
                 .RootElement
                 .EnumerateArray()
                 .Select(
                     sample =>
                         ConvertToPropertyList(sample))
-                .Count(
+                .Where(
                     sampleProperties =>
-                        HasTraceContextAssociated(sampleProperties));
-            samplesWithTraceContextCount.Should().BeLessOrEqualTo(1, "at most one sample in a batch should have trace context associated.");
+                        HasTraceContextAssociated(sampleProperties))
+                .ToList();
+            samplesWithTraceContext.Count.Should().BeLessOrEqualTo(1, "at most one sample in a batch should have trace context associated.");
 
-            totalSamplesWithTraceContextCount += samplesWithTraceContextCount;
+            totalSamplesWithTraceContextCount += samplesWithTraceContext.Count;
+            if (samplesWithTraceContext.FirstOrDefault() is { } sampleWithTraceContext)
+            {
+                managedThreadsWithTraceContext.Add(GetPropertyValue("ManagedId", sampleWithTraceContext).GetInt32());
+            }
         }
 
+        managedThreadsWithTraceContext.Should().HaveCountGreaterThan(1, "at least 2 distinct threads should have trace context associated.");
         totalSamplesWithTraceContextCount.Should().BeGreaterOrEqualTo(3, "there should be sample with trace context in most of the batches.");
     }
 
