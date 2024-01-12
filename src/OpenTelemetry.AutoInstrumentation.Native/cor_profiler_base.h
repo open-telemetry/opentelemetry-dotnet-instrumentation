@@ -20,6 +20,7 @@ private:
 
 protected:
     ICorProfilerInfo7* info_;
+    ICorProfilerInfo12* info12_;
 
 public:
     CorProfilerBase();

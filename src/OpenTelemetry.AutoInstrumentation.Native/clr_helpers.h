@@ -629,6 +629,28 @@ HRESULT GetCorLibAssemblyRef(const ComPtr<IMetaDataAssemblyEmit>& assembly_emit,
 
 bool FindTypeDefByName(const trace::WSTRING instrumentationTargetMethodTypeName, const trace::WSTRING assemblyName,
                        const ComPtr<IMetaDataImport2>& metadata_import, mdTypeDef& typeDef);
+
+// FunctionMethodSignature
+bool ParseByte(PCCOR_SIGNATURE& pbCur, PCCOR_SIGNATURE pbEnd, unsigned char* pbOut);
+bool ParseNumber(PCCOR_SIGNATURE& pbCur, PCCOR_SIGNATURE pbEnd, unsigned* pOut);
+bool ParseTypeDefOrRefEncoded(PCCOR_SIGNATURE& pbCur, PCCOR_SIGNATURE pbEnd, unsigned char* pIndexTypeOut,
+                              unsigned* pIndexOut);
+
+/*  we don't support
+    PTR CustomMod* VOID
+    PTR CustomMod* Type
+    FNPTR MethodDefSig
+    FNPTR MethodRefSig
+    ARRAY Type ArrayShape
+    SZARRAY CustomMod+ Type (but we do support SZARRAY Type)
+ */
+bool ParseType(PCCOR_SIGNATURE& pbCur, PCCOR_SIGNATURE pbEnd);
+// Param ::= CustomMod* ( TYPEDBYREF | [BYREF] Type )
+// CustomMod* TYPEDBYREF we don't support
+bool ParseParamOrLocal(PCCOR_SIGNATURE& pbCur, PCCOR_SIGNATURE pbEnd);
+// RetType ::= CustomMod* ( VOID | TYPEDBYREF | [BYREF] Type )
+// CustomMod* TYPEDBYREF we don't support
+bool ParseRetType(PCCOR_SIGNATURE& pbCur, PCCOR_SIGNATURE pbEnd);
 } // namespace trace
 
 #endif // OTEL_CLR_PROFILER_CLR_HELPERS_H_

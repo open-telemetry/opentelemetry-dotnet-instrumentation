@@ -53,9 +53,9 @@ jobs:
       - uses: actions/setup-dotnet@v4.0.0
         with:
           dotnet-version: | 
-            6.0.417
-            7.0.404
-            8.0.100
+            6.0.418
+            7.0.405
+            8.0.101
       - name: Check for NuGet packages cache
         uses: actions/cache@v3.3.1
         id: nuget-cache
@@ -63,7 +63,7 @@ jobs:
           key: ${{ hashFiles('**/Directory.packages.props', './build/LibraryVersions.g.cs', '**/packages.config' ) }}
           path: ${{ env.NUGET_PACKAGES }}
       - name: Download Artifacts from build job
-        uses: actions/download-artifact@v4.1.0
+        uses: actions/download-artifact@v4.1.1
         with:
           name: bin-${{ matrix.machine }}
           path: bin/tracer-home
@@ -99,9 +99,9 @@ jobs:
       - uses: actions/setup-dotnet@v4.0.0
         with:
           dotnet-version: | 
-            6.0.417
-            7.0.404
-            8.0.100
+            6.0.418
+            7.0.405
+            8.0.101
       - name: Check for NuGet packages cache
         uses: actions/cache@v3.3.1
         id: nuget-cache
@@ -109,7 +109,7 @@ jobs:
           key: ${{ hashFiles('**/Directory.packages.props', './build/LibraryVersions.g.cs', '**/packages.config' ) }}
           path: ${{ env.NUGET_PACKAGES }}
       - name: Download Artifacts from build job
-        uses: actions/download-artifact@v4.1.0
+        uses: actions/download-artifact@v4.1.1
         with:
           name: bin-${{ matrix.machine }}
           path: bin/tracer-home
@@ -131,9 +131,9 @@ jobs:
       - uses: actions/setup-dotnet@v4.0.0
         with:
           dotnet-version: | 
-            6.0.417
-            7.0.404
-            8.0.100
+            6.0.418
+            7.0.405
+            8.0.101
       - name: Check for NuGet packages cache
         uses: actions/cache@v3.3.1
         id: nuget-cache
@@ -141,7 +141,7 @@ jobs:
           key: ${{ hashFiles('**/Directory.packages.props', './build/LibraryVersions.g.cs', '**/packages.config' ) }}
           path: ${{ env.NUGET_PACKAGES }}
       - name: Download Artifacts from build job
-        uses: actions/download-artifact@v4.1.0
+        uses: actions/download-artifact@v4.1.1
         with:
           name: bin-${{ matrix.machine }}
           path: bin/tracer-home
@@ -178,7 +178,7 @@ jobs:
       with:
         fetch-depth: 0 # fetching all, needed to correctly calculate version
     - name: Download Artifacts from build job
-      uses: actions/download-artifact@v4.1.0
+      uses: actions/download-artifact@v4.1.1
       with:
         name: bin-${{ matrix.build-source }}
         path: bin/tracer-home
@@ -206,9 +206,9 @@ jobs:
       - uses: actions/setup-dotnet@v4.0.0
         with:
           dotnet-version: | 
-            6.0.417
-            7.0.404
-            8.0.100
+            6.0.418
+            7.0.405
+            8.0.101
       - name: Check for NuGet packages cache
         uses: actions/cache@v3.3.1
         id: nuget-cache
@@ -217,7 +217,7 @@ jobs:
           path: ${{ env.NUGET_PACKAGES }}
 
       - name: Download NuGet Artifacts from build-nuget-packages job
-        uses: actions/download-artifact@v4.1.0
+        uses: actions/download-artifact@v4.1.1
         with:
           name: bin-nuget-packages
           path: bin/nuget-artifacts/

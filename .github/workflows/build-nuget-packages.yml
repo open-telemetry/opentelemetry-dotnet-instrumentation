@@ -29,9 +29,9 @@ jobs:
       - uses: actions/setup-dotnet@v4.0.0
         with:
           dotnet-version: | 
-            6.0.417
-            7.0.404
-            8.0.100
+            6.0.418
+            7.0.405
+            8.0.101
 
       - name: Check for NuGet packages cache
         uses: actions/cache@v3.3.1
@@ -41,25 +41,25 @@ jobs:
           path: ${{ env.NUGET_PACKAGES }}
 
       - name: Download Windows Artifacts from build job
-        uses: actions/download-artifact@v4.1.0
+        uses: actions/download-artifact@v4.1.1
         with:
           name: bin-windows-2022
           path: bin/ci-artifacts/bin-windows-2022
 
       - name: Download Ubuntu Artifacts from build job
-        uses: actions/download-artifact@v4.1.0
+        uses: actions/download-artifact@v4.1.1
         with:
           name: bin-ubuntu-20.04
           path: bin/ci-artifacts/bin-ubuntu-20.04
 
       - name: Download Alpine Artifacts from build job
-        uses: actions/download-artifact@v4.1.0
+        uses: actions/download-artifact@v4.1.1
         with:
           name: bin-alpine
           path: bin/ci-artifacts/bin-alpine
 
       - name: Download Mac-OS Artifacts from build job
-        uses: actions/download-artifact@v4.1.0
+        uses: actions/download-artifact@v4.1.1
         with:
           name: bin-macos-11
           path: bin/ci-artifacts/bin-macos-11

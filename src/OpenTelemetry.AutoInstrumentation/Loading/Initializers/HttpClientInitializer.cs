@@ -31,7 +31,7 @@ internal class HttpClientInitializer
             return;
         }
 
-        var options = new OpenTelemetry.Instrumentation.Http.HttpClientInstrumentationOptions();
+        var options = new OpenTelemetry.Instrumentation.Http.HttpClientTraceInstrumentationOptions();
         _pluginManager.ConfigureTracesOptions(options);
 
 #if NETFRAMEWORK

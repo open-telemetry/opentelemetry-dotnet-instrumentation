@@ -24,4 +24,8 @@
     <ProjectReference Include="..\dependency-libs\TestApplication.ContinuousProfiler.Vb\TestApplication.ContinuousProfiler.Vb.vbproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <PackageReference Include="System.Diagnostics.DiagnosticSource" />
+  </ItemGroup>
+
 </Project>
