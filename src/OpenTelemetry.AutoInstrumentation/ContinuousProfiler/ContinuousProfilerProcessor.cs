@@ -5,6 +5,7 @@
 
 using System.Diagnostics;
 using System.Globalization;
+using System.Reflection;
 using OpenTelemetry.AutoInstrumentation.Logging;
 
 namespace OpenTelemetry.AutoInstrumentation.ContinuousProfiler;
@@ -47,10 +48,14 @@ internal static class ContinuousProfilerProcessor
         }
 
         _supportingActivityAsyncLocal = new AsyncLocal<Activity?>(ActivityChanged);
+
+        var threadSamplesMethod = exportThreadSamplesMethod.CreateDelegate<Action<byte[], int>>(continuousProfilerExporter);
+        var allocationSamplesMethod = exportAllocationSamplesMethod.CreateDelegate<Action<byte[], int>>(continuousProfilerExporter);
+
         // TODO Graceful shutdown and Task.Delay https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/issues/3216
         var thread = new Thread(() =>
         {
-            SampleReadingThread(new BufferProcessor(threadSamplingEnabled, allocationSamplingEnabled, continuousProfilerExporter, exportThreadSamplesMethod, exportAllocationSamplesMethod), exportInterval);
+            SampleReadingThread(new BufferProcessor(threadSamplingEnabled, allocationSamplingEnabled, threadSamplesMethod, allocationSamplesMethod), exportInterval);
         })
         {
             Name = BackgroundThreadName,
