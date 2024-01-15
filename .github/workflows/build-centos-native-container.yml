@@ -25,7 +25,7 @@ jobs:
           /bin/sh -c 'git config --global --add safe.directory /project && ./build.sh BuildNativeWorkflow'
 
     - name: Publish native library Linux build
-      uses: actions/upload-artifact@v4.0.0
+      uses: actions/upload-artifact@v4.1.0
       with:
         name: bin-centos-native
         path: bin/tracer-home
