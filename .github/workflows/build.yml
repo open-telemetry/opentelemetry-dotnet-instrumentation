@@ -91,13 +91,13 @@ jobs:
           if (-not $?) { throw "dotnet help returned exit code: $LASTEXITCODE" }
           if (Test-Path $log_path) { throw "Log file exists. Instrumentation unregister failed." }
       - name: Upload binaries
-        uses: actions/upload-artifact@v4.0.0
+        uses: actions/upload-artifact@v4.1.0
         if: always()
         with:
           name: bin-${{ matrix.machine }}
           path: bin/tracer-home
       - name: Upload installation scripts
-        uses: actions/upload-artifact@v4.0.0
+        uses: actions/upload-artifact@v4.1.0
         if: always()
         with:
           name: installation-scripts-${{ matrix.machine }}
