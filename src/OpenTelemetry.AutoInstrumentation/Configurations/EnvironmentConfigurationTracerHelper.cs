@@ -168,9 +168,15 @@ internal static class EnvironmentConfigurationTracerHelper
         public static TracerProviderBuilder AddAspNetCoreInstrumentation(TracerProviderBuilder builder, PluginManager pluginManager, LazyInstrumentationLoader lazyInstrumentationLoader)
         {
             DelayedInitialization.Traces.AddAspNetCore(lazyInstrumentationLoader, pluginManager);
-            return builder
-                .AddSource("OpenTelemetry.Instrumentation.AspNetCore")
-                .AddLegacySource("Microsoft.AspNetCore.Hosting.HttpRequestIn");
+
+            if (Environment.Version.Major == 6)
+            {
+                return builder
+                    .AddSource("OpenTelemetry.Instrumentation.AspNetCore")
+                    .AddLegacySource("Microsoft.AspNetCore.Hosting.HttpRequestIn");
+            }
+
+            return builder.AddSource("Microsoft.AspNetCore");
         }
 
         public static TracerProviderBuilder AddGraphQLInstrumentation(TracerProviderBuilder builder, PluginManager pluginManager, LazyInstrumentationLoader lazyInstrumentationLoader, TracerSettings tracerSettings)
