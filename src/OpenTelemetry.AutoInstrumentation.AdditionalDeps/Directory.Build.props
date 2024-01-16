@@ -3,5 +3,6 @@
     <PackageReference Include="System.Diagnostics.DiagnosticSource" />
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" />
     <PackageReference Include="Microsoft.Extensions.Logging.Configuration" />
+    <PackageReference Include="OpenTelemetry.Instrumentation.AspNetCore" />
   </ItemGroup>
 </Project>

@@ -59,7 +59,7 @@ internal static class DepsJsonExtensions
         var dependencies = depsJson.GetDependencies();
         var runtimeLibraries = depsJson["libraries"].AsObject();
         var keysToRemove = dependencies
-            .Where(x => x.Key.StartsWith("OpenTelemetry"))
+            .Where(x => x.Key.StartsWith("OpenTelemetry.AutoInstrumentation.AdditionalDeps"))
             .Select(x => x.Key)
             .ToList();
 
