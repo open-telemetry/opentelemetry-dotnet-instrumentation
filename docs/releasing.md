@@ -55,4 +55,4 @@
    - [`examples/demo/Dockerfile`](../examples/demo/Dockerfile)
    - [OpenTelemetry Operator](https://github.com/open-telemetry/opentelemetry-operator/blob/main/autoinstrumentation/dotnet/version.txt)
 
-1. For a stable release, update documentation under [opentelemetry.io](https://github.com/open-telemetry/opentelemetry.io/tree/main/content/en/docs/instrumentation/net/automatic).
+1. For a stable release, update documentation under [opentelemetry.io](https://github.com/open-telemetry/opentelemetry.io/tree/main/content/en/docs/languages/net/automatic).
