@@ -1,0 +1,27 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <OutputType>Exe</OutputType>
+      <TargetFrameworks>net7.0;net6.0</TargetFrameworks>
+      <TargetFrameworks Condition=" '$(IsCentos)' == '' ">net8.0;$(TargetFrameworks)</TargetFrameworks>
+      <ImplicitUsings>enable</ImplicitUsings>
+      <Nullable>enable</Nullable>
+    </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="System.Diagnostics.DiagnosticSource" />
+  </ItemGroup>
+
+    <ItemGroup>
+      <Compile Include="..\TestApplication.ContinuousProfiler\Exporter\AllocationSample.cs">
+        <Link>Exporter\AllocationSample.cs</Link>
+      </Compile>
+      <Compile Include="..\TestApplication.ContinuousProfiler\Exporter\SampleNativeFormatParser.cs">
+        <Link>Exporter\SampleNativeFormatParser.cs</Link>
+      </Compile>
+      <Compile Include="..\TestApplication.ContinuousProfiler\Exporter\ThreadSample.cs">
+        <Link>Exporter\ThreadSample.cs</Link>
+      </Compile>
+    </ItemGroup>
+
+</Project>
