@@ -71,6 +71,8 @@ for `ILOGGER` for versions older than `8.0.0`.
 ### Fixed
 
 - Set `service.name` resource attribute before invoking the plugin.
+- Fix ASP.NET Core traces instrumentation for .NET7. It is now using native
+  support by `Microsoft.AspNetCore` instead of `OpenTelemetry.Instrumentation.AspNetCore`.
 
 ## [1.2.0](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/tag/v1.2.0)
 
