@@ -3,6 +3,7 @@
 
 #if NET6_0_OR_GREATER
 
+using System.Diagnostics;
 using System.Globalization;
 using System.Reflection;
 using OpenTelemetry.AutoInstrumentation.Logging;
@@ -14,26 +15,16 @@ internal static class ContinuousProfilerProcessor
     public const string BackgroundThreadName = "OpenTelemetry Continuous Profiler Thread";
 
     private static readonly IOtelLogger Logger = OtelLogging.GetLogger();
+    // Additional async local required to get full set of notifications,
+    // see https://github.com/dotnet/runtime/issues/67276#issuecomment-1089877762
+    private static AsyncLocal<Activity?>? _supportingActivityAsyncLocal;
 
-    public static void Activity_CurrentChanged(object? sender, System.Diagnostics.ActivityChangedEventArgs e)
+    public static void Activity_CurrentChanged(object? sender, ActivityChangedEventArgs e)
     {
-        var currentActivity = e.Current;
-        var managedThreadId = Environment.CurrentManagedThreadId;
-
-        if (currentActivity != null)
+        if (_supportingActivityAsyncLocal != null)
         {
-            var hexTraceId = currentActivity.TraceId.ToHexString();
-
-            if (ulong.TryParse(hexTraceId.AsSpan(0, 16), NumberStyles.HexNumber, CultureInfo.InvariantCulture, out var traceIdHigh) &&
-                ulong.TryParse(hexTraceId.AsSpan(16), NumberStyles.HexNumber, CultureInfo.InvariantCulture, out var traceIdLow) &&
-                ulong.TryParse(currentActivity.SpanId.ToHexString(), NumberStyles.HexNumber, CultureInfo.InvariantCulture, out var spanId))
-            {
-                NativeMethods.ContinuousProfilerSetNativeContext(traceIdHigh, traceIdLow, spanId, managedThreadId);
-                return;
-            }
+            _supportingActivityAsyncLocal.Value = e.Current;
         }
-
-        NativeMethods.ContinuousProfilerSetNativeContext(0, 0, 0, managedThreadId);
     }
 
     public static void Initialize(bool threadSamplingEnabled, bool allocationSamplingEnabled, TimeSpan exportInterval, object continuousProfilerExporter)
@@ -56,6 +47,8 @@ internal static class ContinuousProfilerProcessor
             return;
         }
 
+        _supportingActivityAsyncLocal = new AsyncLocal<Activity?>(ActivityChanged);
+
         var threadSamplesMethod = exportThreadSamplesMethod.CreateDelegate<Action<byte[], int>>(continuousProfilerExporter);
         var allocationSamplesMethod = exportAllocationSamplesMethod.CreateDelegate<Action<byte[], int>>(continuousProfilerExporter);
 
@@ -71,6 +64,27 @@ internal static class ContinuousProfilerProcessor
         thread.Start();
 
         Logger.Information("Continuous Profiler export thread initialized.");
+    }
+
+    private static void ActivityChanged(AsyncLocalValueChangedArgs<Activity?> sender)
+    {
+        var currentActivity = sender.CurrentValue;
+        var managedThreadId = Environment.CurrentManagedThreadId;
+
+        if (currentActivity != null)
+        {
+            var hexTraceId = currentActivity.TraceId.ToHexString();
+
+            if (ulong.TryParse(hexTraceId.AsSpan(0, 16), NumberStyles.HexNumber, CultureInfo.InvariantCulture, out var traceIdHigh) &&
+                ulong.TryParse(hexTraceId.AsSpan(16), NumberStyles.HexNumber, CultureInfo.InvariantCulture, out var traceIdLow) &&
+                ulong.TryParse(currentActivity.SpanId.ToHexString(), NumberStyles.HexNumber, CultureInfo.InvariantCulture, out var spanId))
+            {
+                NativeMethods.ContinuousProfilerSetNativeContext(traceIdHigh, traceIdLow, spanId, managedThreadId);
+                return;
+            }
+        }
+
+        NativeMethods.ContinuousProfilerSetNativeContext(0, 0, 0, managedThreadId);
     }
 
     private static void SampleReadingThread(BufferProcessor sampleExporter, TimeSpan exportInterval)
