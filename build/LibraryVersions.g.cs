@@ -80,7 +80,7 @@ public static class LibraryVersion
                 new("2.1.5"),
                 new("3.1.2"),
                 new("4.1.1"),
-                new("5.1.2"),
+                new("5.1.4"),
             }
         },
         {

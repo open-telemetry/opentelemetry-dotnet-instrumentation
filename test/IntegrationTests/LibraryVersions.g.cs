@@ -86,7 +86,7 @@ public static class LibraryVersion
         new object[] { "2.1.5" },
         new object[] { "3.1.2" },
         new object[] { "4.1.1" },
-        new object[] { "5.1.2" },
+        new object[] { "5.1.4" },
 #endif
     };
     public static readonly IReadOnlyCollection<object[]> SqlClientSystem = new List<object[]>
