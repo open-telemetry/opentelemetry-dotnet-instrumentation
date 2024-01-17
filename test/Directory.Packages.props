@@ -41,7 +41,7 @@
     <PackageVersion Include="Quartz" Version="3.8.0" />
     <PackageVersion Include="Quartz.Extensions.DependencyInjection" Version="3.8.0" />
     <PackageVersion Include="Quartz.Extensions.Hosting" Version="3.8.0" />
-    <PackageVersion Include="StackExchange.Redis" Version="2.7.10" />
+    <PackageVersion Include="StackExchange.Redis" Version="2.7.17" />
     <PackageVersion Include="StrongNamer" Version="0.2.5" />
     <PackageVersion Include="System.Collections.Immutable" Version="8.0.0" />
     <PackageVersion Include="System.Data.SqlClient" Version="4.8.6" />
