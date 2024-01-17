@@ -87,7 +87,7 @@ public static class LibraryVersion
             "TestApplication.SqlClient.System",
             new List<PackageBuildInfo>
             {
-                new("4.8.5"),
+                new("4.8.6"),
             }
         },
         {
