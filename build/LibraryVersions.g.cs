@@ -76,10 +76,9 @@ public static class LibraryVersion
             "TestApplication.SqlClient.Microsoft",
             new List<PackageBuildInfo>
             {
-                new("1.1.4"),
-                new("2.1.5"),
-                new("3.1.2"),
-                new("4.1.1"),
+                new("2.1.7"),
+                new("3.1.5"),
+                new("4.0.5"),
                 new("5.1.4"),
             }
         },
