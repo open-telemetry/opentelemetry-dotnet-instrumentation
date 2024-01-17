@@ -94,10 +94,10 @@ internal static class PackageVersionDefinitions
             TestApplicationName = "TestApplication.SqlClient.Microsoft",
             Versions = new List<PackageVersion>
             {
-                new("1.1.4"),
-                new("2.1.5"),
-                new("3.1.2"),
-                new("4.1.1"),
+                // new("1.1.4"), - high vulnerability https://github.com/dotnet/announcements/issues/292, test should be skipped
+                new("2.1.7"),
+                new("3.1.5"),
+                new("4.0.5"),
                 new("*")
             }
         },
@@ -108,7 +108,7 @@ internal static class PackageVersionDefinitions
             TestApplicationName = "TestApplication.SqlClient.System",
             Versions = new List<PackageVersion>
             {
-                new("4.8.5"),
+                new("4.8.6"),
                 new("*")
             }
         },
@@ -119,8 +119,8 @@ internal static class PackageVersionDefinitions
             TestApplicationName = "TestApplication.MongoDB",
             Versions = new List<PackageVersion>
             {
-                // new("2.13.3"), - high vulnarability https://github.com/advisories/GHSA-7j9m-j397-g4wx, <= 2.18.0 test should be skipped
-                // new("2.15.0"), - high vulnarability https://github.com/advisories/GHSA-7j9m-j397-g4wx, <= 2.18.0 test should be skipped
+                // new("2.13.3"), - high vulnerability https://github.com/advisories/GHSA-7j9m-j397-g4wx, <= 2.18.0 test should be skipped
+                // new("2.15.0"), - high vulnerability https://github.com/advisories/GHSA-7j9m-j397-g4wx, <= 2.18.0 test should be skipped
                 new("2.19.0"),
                 new("*")
             }

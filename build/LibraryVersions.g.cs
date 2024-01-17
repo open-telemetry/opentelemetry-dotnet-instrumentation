@@ -76,18 +76,17 @@ public static class LibraryVersion
             "TestApplication.SqlClient.Microsoft",
             new List<PackageBuildInfo>
             {
-                new("1.1.4"),
-                new("2.1.5"),
-                new("3.1.2"),
-                new("4.1.1"),
-                new("5.1.2"),
+                new("2.1.7"),
+                new("3.1.5"),
+                new("4.0.5"),
+                new("5.1.4"),
             }
         },
         {
             "TestApplication.SqlClient.System",
             new List<PackageBuildInfo>
             {
-                new("4.8.5"),
+                new("4.8.6"),
             }
         },
         {
@@ -103,7 +102,7 @@ public static class LibraryVersion
             new List<PackageBuildInfo>
             {
                 new("2.0.0"),
-                new("2.3.3"),
+                new("2.3.4"),
             }
         },
         {
@@ -111,7 +110,7 @@ public static class LibraryVersion
             new List<PackageBuildInfo>
             {
                 new("8.1.0"),
-                new("8.2.0"),
+                new("8.3.0"),
             }
         },
         {
@@ -146,7 +145,7 @@ public static class LibraryVersion
                 new("2.1.50"),
                 new("2.5.61"),
                 new("2.6.66"),
-                new("2.7.10"),
+                new("2.7.17"),
             }
         },
         {

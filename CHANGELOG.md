@@ -43,7 +43,7 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
   - `OpenTelemetry.Shims.OpenTracing` from `1.6.0-beta.1` to `1.7.0-beta.1`,
   - `OpenTelemetry.ResourceDetectors.Azure` from `1.0.0-beta.3` to `1.0.0-beta.4`,
   - `OpenTelemetry.ResourceDetectors.Container` from `1.0.0-beta.4` to `1.0.0-beta.5`,
-  - `OpenTelemetry.ResourceDetectors.ProcessRuntime` from `0.1.0-alpha.1` to `0.1.0-alpha.2`,
+  - `OpenTelemetry.ResourceDetectors.ProcessRuntime` from `0.1.0-alpha.1` to `0.1.0-alpha.2`.
 - .NET only, following packages updated
   - `Google.Protobuf` updated from `3.19.4` to `3.22.5`.
   - `Microsoft.Extensions.Configuration` from `3.1.0` to `8.0.0`,
@@ -56,10 +56,14 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
   - `Microsoft.Extensions.Options.ConfigurationExtensions` from `3.1.0` to `8.0.0`,
   - `Microsoft.Extensions.Primitives` from `3.1.0` to `8.0.0`,
   - `OpenTelemetry.Instrumentation.AspNetCore` from `1.6.0-beta.3` to `1.7.0`,
-  - `OpenTelemetry.Instrumentation.EntityFrameworkCore` from `1.0.0-beta.8` to `1.0.0-beta.9`,
+  - `OpenTelemetry.Instrumentation.EntityFrameworkCore` from `1.0.0-beta.8` to `1.0.0-beta.9`.
 - .NET Framework only, following packages updated
-  - `Grpc.Core.Api` from `2.59.0` to `2.60.0`
+  - `Google.Protobuf` updated from `3.25.1` to `3.25.2`,
+  - `Grpc.Core.Api` from `2.59.0` to `2.60.0`,
+  - `Microsoft.Extensions.Configuration.Binder` from `8.0.0` to `8.0.1`,
+  - `Microsoft.Extensions.Options` from `8.0.0` to `8.0.1`,
   - `OpenTelemetry.Instrumentation.AspNet` from `1.6.0-beta.2` to `1.7.0-beta.1`,
+  - `System.Text.Json` from `8.0.0` to `8.0.1`.
 
 ### Deprecated
 
