@@ -88,7 +88,7 @@ jobs:
           }
         
       - name: Upload Nuget Artifacts
-        uses: actions/upload-artifact@v4.0.0
+        uses: actions/upload-artifact@v4.1.0
         with:
           name: bin-nuget-packages
           path: bin/nuget-artifacts/

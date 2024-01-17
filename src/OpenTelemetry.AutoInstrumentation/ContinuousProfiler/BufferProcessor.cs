@@ -3,8 +3,6 @@
 
 #if NET6_0_OR_GREATER
 
-using System.Reflection;
-
 namespace OpenTelemetry.AutoInstrumentation.ContinuousProfiler;
 
 internal class BufferProcessor
@@ -14,18 +12,16 @@ internal class BufferProcessor
 
     private readonly bool _threadSamplingEnabled;
     private readonly bool _allocationSamplingEnabled;
-    private readonly object _continuousProfilerExporter;
-    private readonly MethodInfo _exportThreadSamplesMethod;
-    private readonly MethodInfo _exportAllocationSamplesMethod;
+    private readonly Action<byte[], int> _exportThreadSamplesMethod;
+    private readonly Action<byte[], int> _exportAllocationSamplesMethod;
     private readonly byte[] _buffer = new byte[BufferSize];
 
-    public BufferProcessor(bool threadSamplingEnabled, bool allocationSamplingEnabled, object continuousProfilerExporter, MethodInfo exportThreadSamplesMethod, MethodInfo exportAllocationSamplesMethod)
+    public BufferProcessor(bool threadSamplingEnabled, bool allocationSamplingEnabled, Action<byte[], int> threadSamplesMethod, Action<byte[], int> allocationSamplesMethod)
     {
         _threadSamplingEnabled = threadSamplingEnabled;
         _allocationSamplingEnabled = allocationSamplingEnabled;
-        _continuousProfilerExporter = continuousProfilerExporter;
-        _exportThreadSamplesMethod = exportThreadSamplesMethod;
-        _exportAllocationSamplesMethod = exportAllocationSamplesMethod;
+        _exportThreadSamplesMethod = threadSamplesMethod;
+        _exportAllocationSamplesMethod = allocationSamplesMethod;
     }
 
     public void Process()
@@ -49,7 +45,7 @@ internal class BufferProcessor
             return;
         }
 
-        _exportThreadSamplesMethod.Invoke(_continuousProfilerExporter, new object[] { _buffer, read });
+        _exportThreadSamplesMethod(_buffer, read);
     }
 
     private void ProcessAllocationSamples()
@@ -60,7 +56,7 @@ internal class BufferProcessor
             return;
         }
 
-        _exportAllocationSamplesMethod.Invoke(_continuousProfilerExporter, new object[] { _buffer, read });
+        _exportAllocationSamplesMethod(_buffer, read);
     }
 }
 #endif

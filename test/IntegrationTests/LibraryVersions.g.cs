@@ -82,11 +82,10 @@ public static class LibraryVersion
 #if DEFAULT_TEST_PACKAGE_VERSIONS
         new object[] { string.Empty }
 #else
-        new object[] { "1.1.4" },
-        new object[] { "2.1.5" },
-        new object[] { "3.1.2" },
-        new object[] { "4.1.1" },
-        new object[] { "5.1.2" },
+        new object[] { "2.1.7" },
+        new object[] { "3.1.5" },
+        new object[] { "4.0.5" },
+        new object[] { "5.1.4" },
 #endif
     };
     public static readonly IReadOnlyCollection<object[]> SqlClientSystem = new List<object[]>
@@ -94,7 +93,7 @@ public static class LibraryVersion
 #if DEFAULT_TEST_PACKAGE_VERSIONS
         new object[] { string.Empty }
 #else
-        new object[] { "4.8.5" },
+        new object[] { "4.8.6" },
 #endif
     };
     public static readonly IReadOnlyCollection<object[]> MongoDB = new List<object[]>
@@ -112,7 +111,7 @@ public static class LibraryVersion
         new object[] { string.Empty }
 #else
         new object[] { "2.0.0" },
-        new object[] { "2.3.3" },
+        new object[] { "2.3.4" },
 #endif
     };
     public static readonly IReadOnlyCollection<object[]> MySqlData = new List<object[]>
@@ -121,7 +120,7 @@ public static class LibraryVersion
         new object[] { string.Empty }
 #else
         new object[] { "8.1.0" },
-        new object[] { "8.2.0" },
+        new object[] { "8.3.0" },
 #endif
     };
     public static readonly IReadOnlyCollection<object[]> Npgsql = new List<object[]>
@@ -160,7 +159,7 @@ public static class LibraryVersion
         new object[] { "2.1.50" },
         new object[] { "2.5.61" },
         new object[] { "2.6.66" },
-        new object[] { "2.7.10" },
+        new object[] { "2.7.17" },
 #endif
     };
     public static readonly IReadOnlyCollection<object[]> WCFCoreClient = new List<object[]>

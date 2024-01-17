@@ -74,7 +74,7 @@ jobs:
           install: localdb
       - run: ./build.cmd --skip NativeTests --target TestWorkflow --test-target-framework ${{ matrix.test-tfm }} --containers ${{ matrix.containers }}
       - name: Upload test logs
-        uses: actions/upload-artifact@v4.0.0
+        uses: actions/upload-artifact@v4.1.0
         if: always()
         with:
           name: test-logs-${{ matrix.machine }}-${{ matrix.test-tfm }}-containers-${{ matrix.containers }}
@@ -150,7 +150,7 @@ jobs:
       - name: Run the integration tests
         run: ./build.cmd --target RunManagedIntegrationTests --containers ${{ matrix.containers }}
       - name: Upload test logs
-        uses: actions/upload-artifact@v4.0.0
+        uses: actions/upload-artifact@v4.1.0
         if: always()
         with:
           name: test-logs-${{ matrix.machine }}-containers-${{ matrix.containers }}
