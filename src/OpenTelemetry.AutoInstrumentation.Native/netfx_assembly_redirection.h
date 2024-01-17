@@ -30,7 +30,7 @@ void CorProfiler::InitNetFxAssemblyRedirectsMap()
         { L"Microsoft.Extensions.Logging", {8, 0, 0, 0} },
         { L"Microsoft.Extensions.Logging.Abstractions", {8, 0, 0, 0} },
         { L"Microsoft.Extensions.Logging.Configuration", {8, 0, 0, 0} },
-        { L"Microsoft.Extensions.Options", {8, 0, 0, 0} },
+        { L"Microsoft.Extensions.Options", {8, 0, 0, 1} },
         { L"Microsoft.Extensions.Options.ConfigurationExtensions", {8, 0, 0, 0} },
         { L"Microsoft.Extensions.Primitives", {8, 0, 0, 0} },
         { L"Microsoft.Win32.Primitives", {4, 0, 3, 0} },
