@@ -62,7 +62,8 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
   - `Grpc.Core.Api` from `2.59.0` to `2.60.0`,
   - `Microsoft.Extensions.Configuration.Binder` from `8.0.0` to `8.0.1`,
   - `Microsoft.Extensions.Options` from `8.0.0` to `8.0.1`,
-  - `OpenTelemetry.Instrumentation.AspNet` from `1.6.0-beta.2` to `1.7.0-beta.1`.
+  - `OpenTelemetry.Instrumentation.AspNet` from `1.6.0-beta.2` to `1.7.0-beta.1`,
+  - `System.Text.Json` from `8.0.0` to `8.0.1`.
 
 ### Deprecated
 
