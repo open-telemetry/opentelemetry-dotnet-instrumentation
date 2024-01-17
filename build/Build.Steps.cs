@@ -586,6 +586,7 @@ partial class Build
                     }
                     else if (folderRuntimeName == TargetFramework.NET7_0 || folderRuntimeName == TargetFramework.NET8_0)
                     {
+                        depsJson.RollFrameworkForward(TargetFramework.NET6_0, TargetFramework.NET8_0, architectureStores);
                         depsJson.RollFrameworkForward(TargetFramework.NET7_0, TargetFramework.NET8_0, architectureStores);
                     }
 
