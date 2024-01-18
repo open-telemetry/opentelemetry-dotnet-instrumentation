@@ -20,8 +20,8 @@ public class SqlClientMicrosoftTests : TestHelper
     public static IEnumerable<object[]> GetData()
     {
 #if NETFRAMEWORK
-        // 3.1.2 is not supported on .NET Framework. For details check: https://github.com/open-telemetry/opentelemetry-dotnet/issues/4243
-        return LibraryVersion.SqlClientMicrosoft.Where(x => x.First().ToString() != "3.1.2");
+        // 3.1.* is not supported on .NET Framework. For details check: https://github.com/open-telemetry/opentelemetry-dotnet/issues/4243
+        return LibraryVersion.SqlClientMicrosoft.Where(x => !x.First().ToString().StartsWith("3.1."));
 #else
         return LibraryVersion.SqlClientMicrosoft;
 #endif
