@@ -42,7 +42,7 @@ jobs:
         run: ./build.cmd Restore
       - if: ${{ steps.nuget-cache.outputs.cache-hit != 'true' }}
         name: Cache NuGet packages
-        uses: actions/cache/save@v4
+        uses: actions/cache/save@v4.0.0
         with:
           key: ${{ hashFiles('**/Directory.packages.props', './build/LibraryVersions.g.cs', '**/packages.config' ) }}
           path: ${{ env.NUGET_PACKAGES }}
