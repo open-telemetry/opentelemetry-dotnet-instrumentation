@@ -31,7 +31,7 @@ jobs:
             7.0.405
             8.0.101
       - name: Check for NuGet packages cache
-        uses: actions/cache@v3.3.1
+        uses: actions/cache@v4
         id: nuget-cache
         with:
           key: ${{ hashFiles('**/Directory.packages.props', './build/LibraryVersions.g.cs', '**/packages.config' ) }}
@@ -42,7 +42,7 @@ jobs:
         run: ./build.cmd Restore
       - if: ${{ steps.nuget-cache.outputs.cache-hit != 'true' }}
         name: Cache NuGet packages
-        uses: actions/cache/save@v3
+        uses: actions/cache/save@v4
         with:
           key: ${{ hashFiles('**/Directory.packages.props', './build/LibraryVersions.g.cs', '**/packages.config' ) }}
           path: ${{ env.NUGET_PACKAGES }}
