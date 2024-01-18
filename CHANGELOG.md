@@ -31,7 +31,7 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 - Support for `OpenTelemetry.Instrumentation.AspNet.AspNetMetricsInstrumentationOptions`
   for plugins.
 - Support for [Confluent.Kafka](https://www.nuget.org/packages/Confluent.Kafka)
-   traces instrumentation from 1.4.0 to 3.0.0 (excluding).
+  traces instrumentation from 1.4.0 to 3.0.0 (excluding).
 
 ### Changed
 
