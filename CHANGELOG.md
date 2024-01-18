@@ -30,6 +30,7 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 - Support for Host, Process, and Process Runtime resource detectors.
 - Support for `OpenTelemetry.Instrumentation.AspNet.AspNetMetricsInstrumentationOptions`
   for plugins.
+- Support for `KAFKA` traces instrumentation.
 
 ### Changed
 
@@ -100,7 +101,6 @@ for `ILOGGER` for versions older than `8.0.0`.
 - Added support for [System.Data.SqlClient](https://www.nuget.org/packages/System.Data.SqlClient/)
   (NuGet package) traces instrumentation from `4.8.5`.
 - Ability to update installation via PS module (`OpenTelemetry.DotNet.Auto.psm1`).
-- Added support for `KAFKA` traces instrumentation.
 
 ### Changed
 
