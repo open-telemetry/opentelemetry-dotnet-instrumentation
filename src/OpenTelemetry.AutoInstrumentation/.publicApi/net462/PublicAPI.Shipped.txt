@@ -10,18 +10,26 @@ OpenTelemetry.AutoInstrumentation.CallTarget.CallTargetState
 OpenTelemetry.AutoInstrumentation.CallTarget.CallTargetState.Activity.get -> System.Diagnostics.Activity?
 OpenTelemetry.AutoInstrumentation.CallTarget.CallTargetState.CallTargetState() -> void
 OpenTelemetry.AutoInstrumentation.CallTarget.CallTargetState.CallTargetState(System.Diagnostics.Activity! activity) -> void
-OpenTelemetry.AutoInstrumentation.CallTarget.CallTargetState.CallTargetState(System.Diagnostics.Activity! activity, object! state, System.DateTimeOffset? startTime) -> void
-OpenTelemetry.AutoInstrumentation.CallTarget.CallTargetState.CallTargetState(System.Diagnostics.Activity? activity, object! state) -> void
+OpenTelemetry.AutoInstrumentation.CallTarget.CallTargetState.CallTargetState(System.Diagnostics.Activity? activity, object? state) -> void
+OpenTelemetry.AutoInstrumentation.CallTarget.CallTargetState.CallTargetState(System.Diagnostics.Activity? activity, object? state, System.DateTimeOffset? startTime) -> void
+OpenTelemetry.AutoInstrumentation.CallTarget.CallTargetState.StartTime.get -> System.DateTimeOffset?
 OpenTelemetry.AutoInstrumentation.CallTarget.CallTargetState.State.get -> object?
 OpenTelemetry.AutoInstrumentation.DuckTyping.IDuckType
 OpenTelemetry.AutoInstrumentation.DuckTyping.IDuckType.Instance.get -> object!
 OpenTelemetry.AutoInstrumentation.DuckTyping.IDuckType.ToString() -> string!
 OpenTelemetry.AutoInstrumentation.DuckTyping.IDuckType.Type.get -> System.Type!
 OpenTelemetry.AutoInstrumentation.Instrumentations.AspNet.HttpModuleIntegration
+OpenTelemetry.AutoInstrumentation.Instrumentations.Kafka.Integrations.ConsumerCloseIntegration
+OpenTelemetry.AutoInstrumentation.Instrumentations.Kafka.Integrations.ConsumerConstructorIntegration
+OpenTelemetry.AutoInstrumentation.Instrumentations.Kafka.Integrations.ConsumerConsumeSyncIntegration
+OpenTelemetry.AutoInstrumentation.Instrumentations.Kafka.Integrations.ConsumerDisposeIntegration
+OpenTelemetry.AutoInstrumentation.Instrumentations.Kafka.Integrations.ProducerDeliveryHandlerActionIntegration
+OpenTelemetry.AutoInstrumentation.Instrumentations.Kafka.Integrations.ProducerProduceAsyncIntegration
+OpenTelemetry.AutoInstrumentation.Instrumentations.Kafka.Integrations.ProducerProduceSyncIntegration
 OpenTelemetry.AutoInstrumentation.Instrumentations.MongoDB.MongoClientIntegration
 OpenTelemetry.AutoInstrumentation.Instrumentations.NServiceBus.EndpointConfigurationIntegration
-OpenTelemetry.AutoInstrumentation.Instrumentations.Wcf.Service.ServiceHostIntegration
 OpenTelemetry.AutoInstrumentation.Instrumentations.Wcf.Client.WcfClientIntegration
+OpenTelemetry.AutoInstrumentation.Instrumentations.Wcf.Service.ServiceHostIntegration
 override OpenTelemetry.AutoInstrumentation.CallTarget.CallTargetReturn<T>.ToString() -> string!
 override OpenTelemetry.AutoInstrumentation.CallTarget.CallTargetState.ToString() -> string!
 static OpenTelemetry.AutoInstrumentation.CallTarget.CallTargetInvoker.BeginMethod<TIntegration, TTarget, TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, TArg7, TArg8>(TTarget instance, ref TArg1 arg1, ref TArg2 arg2, ref TArg3 arg3, ref TArg4 arg4, ref TArg5 arg5, ref TArg6 arg6, ref TArg7 arg7, ref TArg8 arg8) -> OpenTelemetry.AutoInstrumentation.CallTarget.CallTargetState
