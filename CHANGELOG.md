@@ -5,7 +5,21 @@ All notable changes to this component are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/compare/v1.2.0..HEAD)
+## [Unreleased](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/compare/v1.3.0..HEAD)
+
+### Added
+
+### Changed
+
+#### Dependency updates
+
+### Deprecated
+
+### Removed
+
+### Fixed
+
+## [1.3.0](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/tag/v1.3.0)
 
 - [Core components](https://github.com/open-telemetry/opentelemetry-dotnet/blob/main/VERSIONING.md#core-components):
   [`1.7.0`](https://github.com/open-telemetry/opentelemetry-dotnet/releases/tag/core-1.7.0)
@@ -16,6 +30,8 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 - Support for Host, Process, and Process Runtime resource detectors.
 - Support for `OpenTelemetry.Instrumentation.AspNet.AspNetMetricsInstrumentationOptions`
   for plugins.
+- Support for [Confluent.Kafka](https://www.nuget.org/packages/Confluent.Kafka)
+  traces instrumentation from 1.4.0 to 3.0.0 (excluding).
 
 ### Changed
 
@@ -65,8 +81,6 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
   - `OpenTelemetry.Instrumentation.AspNet` from `1.6.0-beta.2` to `1.7.0-beta.1`,
   - `System.Text.Json` from `8.0.0` to `8.0.1`.
 
-### Deprecated
-
 ### Removed
 
 Removed support for `Microsoft.Extensions.Logging`
@@ -88,7 +102,6 @@ for `ILOGGER` for versions older than `8.0.0`.
 - Added support for [System.Data.SqlClient](https://www.nuget.org/packages/System.Data.SqlClient/)
   (NuGet package) traces instrumentation from `4.8.5`.
 - Ability to update installation via PS module (`OpenTelemetry.DotNet.Auto.psm1`).
-- Added support for `KAFKA` traces instrumentation.
 
 ### Changed
 
