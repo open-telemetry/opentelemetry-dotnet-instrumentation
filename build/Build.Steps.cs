@@ -80,7 +80,7 @@ partial class Build
             {
                 DotNetRestoreSettings Restore(DotNetRestoreSettings s) =>
                     s.SetProjectFile(project)
-                        .SetVerbosity(DotNetVerbosity.Normal)
+                        .SetVerbosity(DotNetVerbosity.normal)
                         .SetProperty("configuration", BuildConfiguration.ToString())
                         .SetPlatform(Platform)
                         .When(!string.IsNullOrEmpty(NuGetPackagesDirectory), o => o.SetPackageDirectory(NuGetPackagesDirectory));
