@@ -19,6 +19,9 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 
 ### Fixed
 
+- Fix ASP.NET Core traces instrumentation for .NET7. It is now using native
+  support by `Microsoft.AspNetCore` instead of `OpenTelemetry.Instrumentation.AspNetCore`.
+
 ## [1.3.0](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/tag/v1.3.0)
 
 - [Core components](https://github.com/open-telemetry/opentelemetry-dotnet/blob/main/VERSIONING.md#core-components):
