@@ -225,7 +225,7 @@ store.
 
 Sample Diagnostic Output:
 
-```
+```plaintext
 [Warning] Rule Engine: Application references lower version of runtime store assembly C:\path\to\assembly.dll - 6.0.0.0.
 [Debug] Rule Engine: Runtime store assembly C:\path\to\assembly.dll validated successfully.
 ```
@@ -234,4 +234,4 @@ Sample Diagnostic Output:
 
 For resolving runtime store assembly version conflicts, follow the same solution
 as outlined for [Assembly version conflicts](#assembly-version-conflicts) in
-this document. 
+this document.
