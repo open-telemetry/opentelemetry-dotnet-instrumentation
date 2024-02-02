@@ -117,7 +117,6 @@ or calling it in a separate terminal session.
 See the [Get started](./README.md#get-started)
 section for more information.
 
-<a name="assembly-version-conflicts"></a>
 ### Assembly version conflicts
 
 #### Symptoms
