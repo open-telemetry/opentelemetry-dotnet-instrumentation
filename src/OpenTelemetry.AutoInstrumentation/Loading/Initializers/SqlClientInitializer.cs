@@ -37,7 +37,7 @@ internal class SqlClientInitializer
 
         var options = new OpenTelemetry.Instrumentation.SqlClient.SqlClientInstrumentationOptions
         {
-            SetDbStatementForText = _tracerSettings.InstrumentationOptions.SqlClientSetDbStatementForTest
+            SetDbStatementForText = _tracerSettings.InstrumentationOptions.SqlClientSetDbStatementForText
         };
         _pluginManager.ConfigureTracesOptions(options);
 

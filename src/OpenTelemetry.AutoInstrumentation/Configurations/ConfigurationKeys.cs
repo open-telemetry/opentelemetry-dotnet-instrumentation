@@ -126,13 +126,13 @@ internal partial class ConfigurationKeys
             /// <summary>
             /// Configuration key for SQL Client instrumentation to enable passing text query as a db.statement attribute.
             /// </summary>
-            public const string SqlClientSetDbStatementForTest = "OTEL_DOTNET_AUTO_SQLCLIENT_SET_DBSTATEMENT_FOR_TEXT";
+            public const string SqlClientSetDbStatementForText = "OTEL_DOTNET_AUTO_SQLCLIENT_SET_DBSTATEMENT_FOR_TEXT";
 
 #if NET6_0_OR_GREATER
             /// <summary>
             /// Configuration key for Entity Framework Core instrumentation to enable passing text query as a db.statement attribute.
             /// </summary>
-            public const string EntityFrameworkCoreLSetDbStatementForTest = "OTEL_DOTNET_AUTO_ENTITYFRAMEWORKCORE_SET_DBSTATEMENT_FOR_TEXT";
+            public const string EntityFrameworkCoreSetDbStatementForText = "OTEL_DOTNET_AUTO_ENTITYFRAMEWORKCORE_SET_DBSTATEMENT_FOR_TEXT";
 #endif
         }
     }

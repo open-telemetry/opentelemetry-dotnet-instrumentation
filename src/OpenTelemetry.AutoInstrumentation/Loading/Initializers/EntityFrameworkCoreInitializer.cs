@@ -25,7 +25,7 @@ internal class EntityFrameworkCoreInitializer : InstrumentationInitializer
 
         var options = new OpenTelemetry.Instrumentation.EntityFrameworkCore.EntityFrameworkInstrumentationOptions
         {
-            SetDbStatementForText = _tracerSettings.InstrumentationOptions.EntityFrameworkCoreLSetDbStatementForTest
+            SetDbStatementForText = _tracerSettings.InstrumentationOptions.EntityFrameworkCoreSetDbStatementForText
         };
 
         _pluginManager.ConfigureTracesOptions(options);
