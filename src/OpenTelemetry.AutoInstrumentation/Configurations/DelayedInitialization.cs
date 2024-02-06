@@ -41,17 +41,17 @@ internal static class DelayedInitialization
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]
-        public static void AddSqlClient(LazyInstrumentationLoader lazyInstrumentationLoader, PluginManager pluginManager)
+        public static void AddSqlClient(LazyInstrumentationLoader lazyInstrumentationLoader, PluginManager pluginManager, TracerSettings tracerSettings)
         {
-            new SqlClientInitializer(lazyInstrumentationLoader, pluginManager);
+            new SqlClientInitializer(lazyInstrumentationLoader, pluginManager, tracerSettings);
         }
 
 #if NET6_0_OR_GREATER
 
         [MethodImpl(MethodImplOptions.NoInlining)]
-        public static void AddEntityFrameworkCore(LazyInstrumentationLoader lazyInstrumentationLoader, PluginManager pluginManager)
+        public static void AddEntityFrameworkCore(LazyInstrumentationLoader lazyInstrumentationLoader, PluginManager pluginManager, TracerSettings tracerSettings)
         {
-            lazyInstrumentationLoader.Add(new EntityFrameworkCoreInitializer(pluginManager));
+            lazyInstrumentationLoader.Add(new EntityFrameworkCoreInitializer(pluginManager, tracerSettings));
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]

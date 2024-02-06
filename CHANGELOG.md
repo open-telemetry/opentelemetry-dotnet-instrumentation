@@ -9,6 +9,13 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 
 ### Added
 
+- Support for `OTEL_DOTNET_AUTO_SQLCLIENT_SET_DBSTATEMENT_FOR_TEXT`
+  and `OTEL_DOTNET_AUTO_ENTITYFRAMEWORKCORE_SET_DBSTATEMENT_FOR_TEXT`
+  environment variables which controls whether the `db.statement`
+  attribute is set for SQL statements for SQL Client and Entity Framework Core
+  instrumentations. The default value for both environment variables is `false`
+  due to the risk of leaking sensitive information in the collected database queries.
+
 ### Changed
 
 #### Dependency updates

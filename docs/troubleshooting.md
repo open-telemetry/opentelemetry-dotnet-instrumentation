@@ -212,3 +212,26 @@ An assembly specified in the application dependencies manifest (OpenTelemetry.Au
 
 If you encounter an issue not listed on this page, see [General steps](#general-steps)
 to collect additional diagnostic information. This might help facilitate troubleshooting.
+
+### Runtime Store Assembly Version Conflicts
+
+#### Symptoms
+
+Applications may crash or behave unexpectedly due to version mismatches between
+the application's assemblies and those in the .NET runtime store. The
+RuntimeStoreDiagnosticRule in RuleEngine helps identify these mismatches by
+logging a warning if the application references a lower version than the runtime
+store.
+
+Sample Diagnostic Output:
+
+```plaintext
+[Warning] Rule Engine: Application references lower version of runtime store assembly C:\path\to\assembly.dll - 6.0.0.0.
+[Debug] Rule Engine: Runtime store assembly C:\path\to\assembly.dll validated successfully.
+```
+
+#### Solution
+
+For resolving runtime store assembly version conflicts, follow the same solution
+as outlined for [Assembly version conflicts](#assembly-version-conflicts) in
+this document.
