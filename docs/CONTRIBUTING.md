@@ -9,7 +9,7 @@ shows the current work in progress.
 
 Please join our weekly [SIG meeting](https://github.com/open-telemetry/community#special-interest-groups).
 Meeting notes are available as a public [Google
-doc](https://docs.google.com/document/d/1XedN2D8_PH4YLej-maT8sp4RKogfuhFpccRi3QpUcoI/edit?usp=sharing).
+doc](https://docs.google.com/document/d/1dYdwRQVE3zu0vlp_lqGctNm0dCQUkDo2LfScUJzpuT8/edit?usp=sharing).
 
 Get in touch on [Slack](https://cloud-native.slack.com/archives/C01NR1YLSE7).
 If you are new, you can create a CNCF Slack account [here](http://slack.cncf.io/).
