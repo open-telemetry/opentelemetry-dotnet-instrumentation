@@ -8,6 +8,7 @@ Codespaces
 coreutils
 corhlpr
 Couchbase
+DBSTATEMENT
 distro
 Dockerfiles
 ducktype

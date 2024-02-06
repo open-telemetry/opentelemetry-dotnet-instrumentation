@@ -58,6 +58,10 @@ public class SettingsTests : IDisposable
 
             // Instrumentation options tests
             settings.InstrumentationOptions.GraphQLSetDocument.Should().BeFalse();
+            settings.InstrumentationOptions.SqlClientSetDbStatementForTest.Should().BeFalse();
+#if NET6_0_OR_GREATER
+            settings.InstrumentationOptions.EntityFrameworkCoreLSetDbStatementForTest.Should().BeFalse();
+#endif
         }
     }
 

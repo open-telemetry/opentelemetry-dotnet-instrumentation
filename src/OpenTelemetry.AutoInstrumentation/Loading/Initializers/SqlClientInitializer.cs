@@ -1,6 +1,7 @@
 // Copyright The OpenTelemetry Authors
 // SPDX-License-Identifier: Apache-2.0
 
+using OpenTelemetry.AutoInstrumentation.Configurations;
 using OpenTelemetry.AutoInstrumentation.Plugins;
 
 namespace OpenTelemetry.AutoInstrumentation.Loading.Initializers;
@@ -8,12 +9,14 @@ namespace OpenTelemetry.AutoInstrumentation.Loading.Initializers;
 internal class SqlClientInitializer
 {
     private readonly PluginManager _pluginManager;
+    private readonly TracerSettings _tracerSettings;
 
     private int _initialized;
 
-    public SqlClientInitializer(LazyInstrumentationLoader lazyInstrumentationLoader, PluginManager pluginManager)
+    public SqlClientInitializer(LazyInstrumentationLoader lazyInstrumentationLoader, PluginManager pluginManager, TracerSettings tracerSettings)
     {
         _pluginManager = pluginManager;
+        _tracerSettings = tracerSettings;
         lazyInstrumentationLoader.Add(new GenericInitializer("System.Data.SqlClient", InitializeOnFirstCall));
         lazyInstrumentationLoader.Add(new GenericInitializer("Microsoft.Data.SqlClient", InitializeOnFirstCall));
 
@@ -32,7 +35,10 @@ internal class SqlClientInitializer
 
         var instrumentationType = Type.GetType("OpenTelemetry.Instrumentation.SqlClient.SqlClientInstrumentation, OpenTelemetry.Instrumentation.SqlClient")!;
 
-        var options = new OpenTelemetry.Instrumentation.SqlClient.SqlClientInstrumentationOptions();
+        var options = new OpenTelemetry.Instrumentation.SqlClient.SqlClientInstrumentationOptions
+        {
+            SetDbStatementForText = _tracerSettings.InstrumentationOptions.SqlClientSetDbStatementForTest
+        };
         _pluginManager.ConfigureTracesOptions(options);
 
         var instrumentation = Activator.CreateInstance(instrumentationType, options)!;
