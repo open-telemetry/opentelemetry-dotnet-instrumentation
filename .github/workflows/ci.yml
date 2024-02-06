@@ -63,7 +63,7 @@ jobs:
           key: ${{ hashFiles('**/Directory.packages.props', './build/LibraryVersions.g.cs', '**/packages.config' ) }}
           path: ${{ env.NUGET_PACKAGES }}
       - name: Download Artifacts from build job
-        uses: actions/download-artifact@v4.1.1
+        uses: actions/download-artifact@v4.1.2
         with:
           name: bin-${{ matrix.machine }}
           path: bin/tracer-home
@@ -109,7 +109,7 @@ jobs:
           key: ${{ hashFiles('**/Directory.packages.props', './build/LibraryVersions.g.cs', '**/packages.config' ) }}
           path: ${{ env.NUGET_PACKAGES }}
       - name: Download Artifacts from build job
-        uses: actions/download-artifact@v4.1.1
+        uses: actions/download-artifact@v4.1.2
         with:
           name: bin-${{ matrix.machine }}
           path: bin/tracer-home
@@ -141,7 +141,7 @@ jobs:
           key: ${{ hashFiles('**/Directory.packages.props', './build/LibraryVersions.g.cs', '**/packages.config' ) }}
           path: ${{ env.NUGET_PACKAGES }}
       - name: Download Artifacts from build job
-        uses: actions/download-artifact@v4.1.1
+        uses: actions/download-artifact@v4.1.2
         with:
           name: bin-${{ matrix.machine }}
           path: bin/tracer-home
@@ -178,7 +178,7 @@ jobs:
       with:
         fetch-depth: 0 # fetching all, needed to correctly calculate version
     - name: Download Artifacts from build job
-      uses: actions/download-artifact@v4.1.1
+      uses: actions/download-artifact@v4.1.2
       with:
         name: bin-${{ matrix.build-source }}
         path: bin/tracer-home
@@ -217,7 +217,7 @@ jobs:
           path: ${{ env.NUGET_PACKAGES }}
 
       - name: Download NuGet Artifacts from build-nuget-packages job
-        uses: actions/download-artifact@v4.1.1
+        uses: actions/download-artifact@v4.1.2
         with:
           name: bin-nuget-packages
           path: bin/nuget-artifacts/
