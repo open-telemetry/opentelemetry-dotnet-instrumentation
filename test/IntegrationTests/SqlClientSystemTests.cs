@@ -36,7 +36,15 @@ public class SqlClientSystemTests : TestHelper
         SetEnvironmentVariable("OTEL_DOTNET_AUTO_SQLCLIENT_SET_DBSTATEMENT_FOR_TEXT", dbStatementForText.ToString());
         using var collector = new MockSpansCollector(Output);
         SetExporter(collector);
-        collector.Expect("OpenTelemetry.Instrumentation.SqlClient", span => Expect(span, dbStatementForText));
+
+        if (dbStatementForText)
+        {
+            collector.Expect("OpenTelemetry.Instrumentation.SqlClient", span => span.Attributes.Any(attr => attr.Key == "db.statement" && !string.IsNullOrWhiteSpace(attr.Value?.StringValue)));
+        }
+        else
+        {
+            collector.Expect("OpenTelemetry.Instrumentation.SqlClient", span => span.Attributes.All(attr => attr.Key != "db.statement"));
+        }
 
         RunTestApplication(new()
         {
@@ -45,20 +53,5 @@ public class SqlClientSystemTests : TestHelper
         });
 
         collector.AssertExpectations();
-    }
-
-    private static bool Expect(Span span, bool dbStatementForText)
-    {
-        if (dbStatementForText && !span.Attributes.Any(attr => attr.Key == "db.statement" && !string.IsNullOrWhiteSpace(attr.Value?.StringValue)))
-        {
-            return false;
-        }
-
-        if (!dbStatementForText && span.Attributes.Any(attr => attr.Key == "db.statement"))
-        {
-            return false;
-        }
-
-        return true;
     }
 }

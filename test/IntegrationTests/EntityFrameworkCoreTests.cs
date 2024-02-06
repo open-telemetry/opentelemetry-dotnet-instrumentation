@@ -4,7 +4,6 @@
 #if NET6_0_OR_GREATER
 
 using IntegrationTests.Helpers;
-using OpenTelemetry.Proto.Trace.V1;
 using Xunit.Abstractions;
 
 namespace IntegrationTests;
@@ -33,26 +32,19 @@ public class EntityFrameworkCoreTests : TestHelper
         SetEnvironmentVariable("OTEL_DOTNET_AUTO_ENTITYFRAMEWORKCORE_SET_DBSTATEMENT_FOR_TEXT", dbStatementForText.ToString());
         using var collector = new MockSpansCollector(Output);
         SetExporter(collector);
-        collector.Expect("OpenTelemetry.Instrumentation.EntityFrameworkCore", span => Expect(span, dbStatementForText));
+
+        if (dbStatementForText)
+        {
+            collector.Expect("OpenTelemetry.Instrumentation.EntityFrameworkCore", span => span.Attributes.Any(attr => attr.Key == "db.statement" && !string.IsNullOrWhiteSpace(attr.Value?.StringValue)));
+        }
+        else
+        {
+            collector.Expect("OpenTelemetry.Instrumentation.EntityFrameworkCore", span => span.Attributes.All(attr => attr.Key != "db.statement"));
+        }
 
         RunTestApplication(new TestSettings { PackageVersion = packageVersion });
 
         collector.AssertExpectations();
-    }
-
-    private static bool Expect(Span span, bool dbStatementForText)
-    {
-        if (dbStatementForText && !span.Attributes.Any(attr => attr.Key == "db.statement" && !string.IsNullOrWhiteSpace(attr.Value?.StringValue)))
-        {
-            return false;
-        }
-
-        if (!dbStatementForText && span.Attributes.Any(attr => attr.Key == "db.statement"))
-        {
-            return false;
-        }
-
-        return true;
     }
 }
 #endif
