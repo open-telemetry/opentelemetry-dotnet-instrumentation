@@ -342,7 +342,9 @@ public class SettingsTests : IDisposable
     }
 
     [Theory]
+#if NET6_0_OR_GREATER
     [InlineData("CONTAINER", ResourceDetector.Container)]
+#endif
     [InlineData("AZUREAPPSERVICE", ResourceDetector.AzureAppService)]
     [InlineData("PROCESSRUNTIME", ResourceDetector.ProcessRuntime)]
     [InlineData("PROCESS", ResourceDetector.Process)]
