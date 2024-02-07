@@ -3,7 +3,9 @@
 
 using System.Runtime.CompilerServices;
 using OpenTelemetry.ResourceDetectors.Azure;
+#if NET6_0_OR_GREATER
 using OpenTelemetry.ResourceDetectors.Container;
+#endif
 using OpenTelemetry.ResourceDetectors.Host;
 using OpenTelemetry.ResourceDetectors.Process;
 using OpenTelemetry.ResourceDetectors.ProcessRuntime;
@@ -31,7 +33,9 @@ internal static class ResourceConfigurator
         {
             resourceBuilder = enabledResourceDetector switch
             {
+#if NET6_0_OR_GREATER
                 ResourceDetector.Container => Wrappers.AddContainerResourceDetector(resourceBuilder),
+#endif
                 ResourceDetector.AzureAppService => Wrappers.AddAzureAppServiceResourceDetector(resourceBuilder),
                 ResourceDetector.ProcessRuntime => Wrappers.AddProcessRuntimeResourceDetector(resourceBuilder),
                 ResourceDetector.Process => Wrappers.AddProcessResourceDetector(resourceBuilder),
@@ -58,11 +62,13 @@ internal static class ResourceConfigurator
 
     private static class Wrappers
     {
+#if NET6_0_OR_GREATER
         [MethodImpl(MethodImplOptions.NoInlining)]
         public static ResourceBuilder AddContainerResourceDetector(ResourceBuilder resourceBuilder)
         {
             return resourceBuilder.AddDetector(new ContainerResourceDetector());
         }
+#endif
 
         [MethodImpl(MethodImplOptions.NoInlining)]
         public static ResourceBuilder AddAzureAppServiceResourceDetector(ResourceBuilder resourceBuilder)
