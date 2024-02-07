@@ -22,10 +22,13 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 
 - Following packages updated
   - `OpenTelemetry.ResourceDetectors.Azure` from `1.0.0-beta.4` to `1.0.0-beta.5`,
-
+  - `OpenTelemetry.ResourceDetectors.Container` from `1.0.0-beta.5` to `1.0.0-beta.6`.
 ### Deprecated
 
 ### Removed
+
+- Container resource detector will be not executed on .NET Framework.
+  It was not giving any results before changes.
 
 ### Fixed
 
