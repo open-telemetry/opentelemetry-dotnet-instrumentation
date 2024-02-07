@@ -20,6 +20,9 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 
 #### Dependency updates
 
+- Following packages updated
+  - `OpenTelemetry.ResourceDetectors.Azure` from `1.0.0-beta.4` to `1.0.0-beta.5`,
+
 ### Deprecated
 
 ### Removed
