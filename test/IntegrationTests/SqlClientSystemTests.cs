@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 using IntegrationTests.Helpers;
+using OpenTelemetry.Proto.Trace.V1;
 using Xunit.Abstractions;
 
 namespace IntegrationTests;
@@ -19,18 +20,31 @@ public class SqlClientSystemTests : TestHelper
 
     public static IEnumerable<object[]> GetData()
     {
-        return LibraryVersion.SqlClientSystem;
+        foreach (var version in LibraryVersion.SqlClientSystem)
+        {
+            yield return new[] { version[0], true };
+            yield return new[] { version[0], false };
+        }
     }
 
     [Theory]
     [Trait("Category", "EndToEnd")]
     [Trait("Containers", "Linux")]
     [MemberData(nameof(GetData))]
-    public void SubmitTraces(string packageVersion)
+    public void SubmitTraces(string packageVersion, bool dbStatementForText)
     {
+        SetEnvironmentVariable("OTEL_DOTNET_AUTO_SQLCLIENT_SET_DBSTATEMENT_FOR_TEXT", dbStatementForText.ToString());
         using var collector = new MockSpansCollector(Output);
         SetExporter(collector);
-        collector.Expect("OpenTelemetry.Instrumentation.SqlClient");
+
+        if (dbStatementForText)
+        {
+            collector.Expect("OpenTelemetry.Instrumentation.SqlClient", span => span.Attributes.Any(attr => attr.Key == "db.statement" && !string.IsNullOrWhiteSpace(attr.Value?.StringValue)));
+        }
+        else
+        {
+            collector.Expect("OpenTelemetry.Instrumentation.SqlClient", span => span.Attributes.All(attr => attr.Key != "db.statement"));
+        }
 
         RunTestApplication(new()
         {

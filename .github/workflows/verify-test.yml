@@ -35,7 +35,7 @@ jobs:
             8.0.101
       - run: ./build.cmd BuildTracer ManagedTests --containers ${{ matrix.containers }} --test-project "${{ github.event.inputs.testProject }}" --test-name '"${{ github.event.inputs.testName }}"' --test-count ${{ github.event.inputs.count }}
       - name: Upload logs
-        uses: actions/upload-artifact@v4.3.0
+        uses: actions/upload-artifact@v4.3.1
         if: always()
         with:
           name: logs-${{ matrix.machine }}
