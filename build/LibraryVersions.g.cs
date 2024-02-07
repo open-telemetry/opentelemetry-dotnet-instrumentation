@@ -53,7 +53,7 @@ public static class LibraryVersion
             new List<PackageBuildInfo>
             {
                 new("7.5.0", new() {{"GraphQLMicrosoftDI","7.5.0"},{"GraphQLServerTransportsAspNetCore","7.5.0"},{"GraphQLServerUIPlayground","7.5.0"}}),
-                new("7.7.2", new() {{"GraphQLMicrosoftDI","7.7.2"},{"GraphQLServerTransportsAspNetCore","7.6.0"},{"GraphQLServerUIPlayground","7.6.0"}}),
+                new("7.8.0", new() {{"GraphQLMicrosoftDI","7.8.0"},{"GraphQLServerTransportsAspNetCore","7.7.0"},{"GraphQLServerUIPlayground","7.7.0"}}),
             }
         },
         {
