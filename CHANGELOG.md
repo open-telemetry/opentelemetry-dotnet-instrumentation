@@ -23,6 +23,9 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 - Following packages updated
   - `OpenTelemetry.ResourceDetectors.Azure` from `1.0.0-beta.4` to `1.0.0-beta.5`,
   - `OpenTelemetry.ResourceDetectors.Container` from `1.0.0-beta.5` to `1.0.0-beta.6`.
+- .NET only, following packages updated
+  - `OpenTelemetry.Instrumentation.EntityFrameworkCore` from `1.0.0-beta.9` to `1.0.0-beta.10`.
+
 ### Deprecated
 
 ### Removed
