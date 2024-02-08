@@ -29,7 +29,7 @@ public static class LibraryVersion
             {
                 new("8.0.0"),
                 new("8.10.0"),
-                new("8.11.0"),
+                new("8.12.0"),
             }
         },
         {
@@ -53,7 +53,7 @@ public static class LibraryVersion
             new List<PackageBuildInfo>
             {
                 new("7.5.0", new() {{"GraphQLMicrosoftDI","7.5.0"},{"GraphQLServerTransportsAspNetCore","7.5.0"},{"GraphQLServerUIPlayground","7.5.0"}}),
-                new("7.7.2", new() {{"GraphQLMicrosoftDI","7.7.2"},{"GraphQLServerTransportsAspNetCore","7.6.0"},{"GraphQLServerUIPlayground","7.6.0"}}),
+                new("7.8.0", new() {{"GraphQLMicrosoftDI","7.8.0"},{"GraphQLServerTransportsAspNetCore","7.7.0"},{"GraphQLServerUIPlayground","7.7.0"}}),
             }
         },
         {
@@ -79,7 +79,7 @@ public static class LibraryVersion
                 new("2.1.7"),
                 new("3.1.5"),
                 new("4.0.5"),
-                new("5.1.4"),
+                new("5.1.5"),
             }
         },
         {
@@ -102,7 +102,7 @@ public static class LibraryVersion
             new List<PackageBuildInfo>
             {
                 new("2.0.0"),
-                new("2.3.4"),
+                new("2.3.5"),
             }
         },
         {

@@ -83,7 +83,6 @@
   \netfx\OpenTelemetry.Instrumentation.SqlClient.dll,
   \netfx\OpenTelemetry.Instrumentation.Wcf.dll,
   \netfx\OpenTelemetry.ResourceDetectors.Azure.dll,
-  \netfx\OpenTelemetry.ResourceDetectors.Container.dll,
   \netfx\OpenTelemetry.ResourceDetectors.Host.dll,
   \netfx\OpenTelemetry.ResourceDetectors.Process.dll,
   \netfx\OpenTelemetry.ResourceDetectors.ProcessRuntime.dll,

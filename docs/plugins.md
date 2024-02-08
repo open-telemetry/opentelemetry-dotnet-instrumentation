@@ -111,15 +111,15 @@ public class MyPlugin
 | OpenTelemetry.Exporter.ConsoleExporterOptions                                             | OpenTelemetry.Exporter.Console                    | 1.7.0         |
 | OpenTelemetry.Exporter.ZipkinExporterOptions                                              | OpenTelemetry.Exporter.Zipkin                     | 1.7.0         |
 | OpenTelemetry.Exporter.OtlpExporterOptions                                                | OpenTelemetry.Exporter.OpenTelemetryProtocol      | 1.7.0         |
-| OpenTelemetry.Instrumentation.AspNet.AspNetInstrumentationOptions                         | OpenTelemetry.Instrumentation.AspNet              | 1.7.0-beta.1  |
+| OpenTelemetry.Instrumentation.AspNet.AspNetInstrumentationOptions                         | OpenTelemetry.Instrumentation.AspNet              | 1.7.0-beta.2  |
 | OpenTelemetry.Instrumentation.AspNetCore.AspNetCoreTraceInstrumentationOptions            | OpenTelemetry.Instrumentation.AspNetCore          | 1.7.0         |
-| OpenTelemetry.Instrumentation.EntityFrameworkCore.EntityFrameworkInstrumentationOptions   | OpenTelemetry.Instrumentation.EntityFrameworkCore | 1.0.0-beta.9  |
+| OpenTelemetry.Instrumentation.EntityFrameworkCore.EntityFrameworkInstrumentationOptions   | OpenTelemetry.Instrumentation.EntityFrameworkCore | 1.0.0-beta.10 |
 | OpenTelemetry.Instrumentation.GrpcNetClient.GrpcClientInstrumentationOptions              | OpenTelemetry.Instrumentation.GrpcNetClient       | 1.6.0-beta.3  |
 | OpenTelemetry.Instrumentation.Http.HttpClientTraceInstrumentationOptions                  | OpenTelemetry.Instrumentation.Http                | 1.7.0         |
 | OpenTelemetry.Instrumentation.Quartz.QuartzInstrumentationOptions                         | OpenTelemetry.Instrumentation.Quartz              | 1.0.0-beta.1  |
 | OpenTelemetry.Instrumentation.SqlClient.SqlClientInstrumentationOptions                   | OpenTelemetry.Instrumentation.SqlClient           | 1.6.0-beta.3  |
 | OpenTelemetry.Instrumentation.StackExchangeRedis.StackExchangeRedisInstrumentationOptions | OpenTelemetry.Instrumentation.StackExchangeRedis  | 1.0.0-rc9.13  |
-| OpenTelemetry.Instrumentation.Wcf.WcfInstrumentationOptions                               | OpenTelemetry.Instrumentation.Wcf                 | 1.0.0-rc.14   |
+| OpenTelemetry.Instrumentation.Wcf.WcfInstrumentationOptions                               | OpenTelemetry.Instrumentation.Wcf                 | 1.0.0-rc.15   |
 
 ### Metrics
 

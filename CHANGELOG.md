@@ -20,9 +20,21 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 
 #### Dependency updates
 
+- Following packages updated
+  - `OpenTelemetry.ResourceDetectors.Azure` from `1.0.0-beta.4` to `1.0.0-beta.5`,
+  - `OpenTelemetry.ResourceDetectors.Container` from `1.0.0-beta.5` to `1.0.0-beta.6`.
+  - `OpenTelemetry.Instrumentation.Wcf` from `1.0.0-rc.14` to `1.0.0-rc.15`,
+- .NET only, following packages updated
+  - `OpenTelemetry.Instrumentation.EntityFrameworkCore` from `1.0.0-beta.9` to `1.0.0-beta.10`.
+- .NET Framework only, following packages updated
+    - `OpenTelemetry.Instrumentation.AspNet` from `1.7.0-beta.1` to `1.7.0-beta.2`.
+
 ### Deprecated
 
 ### Removed
+
+- Container resource detector will be not executed on .NET Framework.
+  It was not giving any results before changes.
 
 ### Fixed
 
