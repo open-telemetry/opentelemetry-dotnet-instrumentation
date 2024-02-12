@@ -37,7 +37,11 @@ public class HttpTests : TestHelper
             return true;
         });
         Span? serverSpan = null;
+#if NET7_0_OR_GREATER
+        collector.Expect("Microsoft.AspNetCore", span =>
+#else
         collector.Expect("OpenTelemetry.Instrumentation.AspNetCore", span =>
+#endif
         {
             serverSpan = span;
             return true;
