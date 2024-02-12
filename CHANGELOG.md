@@ -19,6 +19,8 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 ### Changed
 
 - Changed supported method parameters for plugins
+  - from `OpenTelemetry.Instrumentation.GrpcNetClient.GrpcClientInstrumentationOptions`
+    to `OpenTelemetry.Instrumentation.GrpcNetClient.GrpcClientTraceInstrumentationOptions`,
   - from `OpenTelemetry.Instrumentation.SqlClient.SqlClientInstrumentationOptions`
     to `OpenTelemetry.Instrumentation.SqlClient.SqlClientTraceInstrumentationOptions`.
 
@@ -32,7 +34,8 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
   - `OpenTelemetry.Instrumentation.Wcf` from `1.0.0-rc.14` to `1.0.0-rc.15`,
 - .NET only, following packages updated
   - `OpenTelemetry.Instrumentation.AspNetCore` from `1.7.0` to `1.7.1`,
-  - `OpenTelemetry.Instrumentation.EntityFrameworkCore` from `1.0.0-beta.9` to `1.0.0-beta.10`.
+  - `OpenTelemetry.Instrumentation.EntityFrameworkCore` from `1.0.0-beta.9` to `1.0.0-beta.10`,
+  - `OpenTelemetry.Instrumentation.GrpcNetClient` from `1.6.0-beta.3` to `1.7.0-beta.1`.
 - .NET Framework only, following packages updated
   - `OpenTelemetry.Instrumentation.AspNet` from `1.7.0-beta.1` to `1.7.0-beta.2`.
 
