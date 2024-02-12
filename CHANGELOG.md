@@ -25,9 +25,10 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
   - `OpenTelemetry.ResourceDetectors.Container` from `1.0.0-beta.5` to `1.0.0-beta.6`.
   - `OpenTelemetry.Instrumentation.Wcf` from `1.0.0-rc.14` to `1.0.0-rc.15`,
 - .NET only, following packages updated
+  - `OpenTelemetry.Instrumentation.AspNetCore` from `1.7.0` to `1.7.1`,
   - `OpenTelemetry.Instrumentation.EntityFrameworkCore` from `1.0.0-beta.9` to `1.0.0-beta.10`.
 - .NET Framework only, following packages updated
-    - `OpenTelemetry.Instrumentation.AspNet` from `1.7.0-beta.1` to `1.7.0-beta.2`.
+  - `OpenTelemetry.Instrumentation.AspNet` from `1.7.0-beta.1` to `1.7.0-beta.2`.
 
 ### Deprecated
 
@@ -37,6 +38,9 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
   It was not giving any results before changes.
 
 ### Fixed
+
+- Fix ASP.NET Core traces instrumentation for .NET7. It is now using native
+  support by `Microsoft.AspNetCore` instead of `OpenTelemetry.Instrumentation.AspNetCore`.
 
 ## [1.3.0](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/tag/v1.3.0)
 
