@@ -23,6 +23,7 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 - Following packages updated
   - `OpenTelemetry.ResourceDetectors.Azure` from `1.0.0-beta.4` to `1.0.0-beta.5`,
   - `OpenTelemetry.ResourceDetectors.Container` from `1.0.0-beta.5` to `1.0.0-beta.6`.
+  - `OpenTelemetry.Instrumentation.Http` from `1.7.0` to `1.7.1`,
   - `OpenTelemetry.Instrumentation.Wcf` from `1.0.0-rc.14` to `1.0.0-rc.15`,
 - .NET only, following packages updated
   - `OpenTelemetry.Instrumentation.AspNetCore` from `1.7.0` to `1.7.1`,
