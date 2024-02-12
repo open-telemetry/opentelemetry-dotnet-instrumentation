@@ -35,7 +35,7 @@ internal class SqlClientInitializer
 
         var instrumentationType = Type.GetType("OpenTelemetry.Instrumentation.SqlClient.SqlClientInstrumentation, OpenTelemetry.Instrumentation.SqlClient")!;
 
-        var options = new OpenTelemetry.Instrumentation.SqlClient.SqlClientInstrumentationOptions
+        var options = new OpenTelemetry.Instrumentation.SqlClient.SqlClientTraceInstrumentationOptions
         {
             SetDbStatementForText = _tracerSettings.InstrumentationOptions.SqlClientSetDbStatementForText
         };

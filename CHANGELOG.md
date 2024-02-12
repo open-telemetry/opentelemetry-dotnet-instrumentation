@@ -18,12 +18,17 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 
 ### Changed
 
+- Changed supported method parameters for plugins
+  - from `OpenTelemetry.Instrumentation.SqlClient.SqlClientInstrumentationOptions`
+    to `OpenTelemetry.Instrumentation.SqlClient.SqlClientTraceInstrumentationOptions`.
+
 #### Dependency updates
 
 - Following packages updated
   - `OpenTelemetry.ResourceDetectors.Azure` from `1.0.0-beta.4` to `1.0.0-beta.5`,
   - `OpenTelemetry.ResourceDetectors.Container` from `1.0.0-beta.5` to `1.0.0-beta.6`.
   - `OpenTelemetry.Instrumentation.Http` from `1.7.0` to `1.7.1`,
+  - `OpenTelemetry.Instrumentation.SqlClient` from `1.6.0-beta.3` to `1.7.0-beta.1`,
   - `OpenTelemetry.Instrumentation.Wcf` from `1.0.0-rc.14` to `1.0.0-rc.15`,
 - .NET only, following packages updated
   - `OpenTelemetry.Instrumentation.AspNetCore` from `1.7.0` to `1.7.1`,
