@@ -13,6 +13,10 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 
 #### Dependency updates
 
+- .NET Framework only, following packages updated
+  - `Microsoft.Extensions.Options` from `8.0.1` to `8.0.2`,
+  - `System.Text.Json` from `8.0.1` to `8.0.2`.
+
 ### Deprecated
 
 ### Removed
