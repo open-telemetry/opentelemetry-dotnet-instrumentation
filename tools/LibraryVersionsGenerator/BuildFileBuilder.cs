@@ -38,15 +38,15 @@ internal sealed class BuildFileBuilder : CSharpFileBuilder
         return this;
     }
 
-    public override CSharpFileBuilder AddVersion(string version)
+    public override CSharpFileBuilder AddVersion(string version, string[] supportedFrameworks)
     {
-        Builder.AppendLine($"                new(\"{version}\"),");
+        Builder.AppendLine($"                new(\"{version}\", {SerializeArray(supportedFrameworks)}),");
         return this;
     }
 
-    public override CSharpFileBuilder AddVersionWithDependencies(string version, Dictionary<string, string> dependencies)
+    public override CSharpFileBuilder AddVersionWithDependencies(string version, Dictionary<string, string> dependencies, string[] supportedFrameworks)
     {
-        Builder.AppendLine($"                new(\"{version}\", {SerializeDictionary(dependencies)}),");
+        Builder.AppendLine($"                new(\"{version}\", {SerializeArray(supportedFrameworks)}, {SerializeDictionary(dependencies)}),");
         return this;
     }
 
@@ -77,5 +77,30 @@ internal sealed class BuildFileBuilder : CSharpFileBuilder
         dictionarySb.Append("}");
 
         return dictionarySb.ToString();
+    }
+
+    private static string SerializeArray(string[] array)
+    {
+        if (array.Length == 0)
+        {
+            return "Array.Empty<string>()";
+        }
+
+        var arraySb = new StringBuilder();
+        arraySb.Append("new string[] {");
+
+        for (var i = 0; i < array.Length; i++)
+        {
+            arraySb.Append($"\"{array[i]}\"");
+
+            if (i != array.Length - 1)
+            {
+                arraySb.Append(',');
+            }
+        }
+
+        arraySb.Append("}");
+
+        return arraySb.ToString();
     }
 }

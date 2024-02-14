@@ -46,13 +46,13 @@ public class Program
                 {
                     if (version.GetType() == typeof(PackageVersion))
                     {
-                        xUnitFileStringBuilder.AddVersion(calculatedVersion);
-                        buildFileStringBuilder.AddVersion(calculatedVersion);
+                        xUnitFileStringBuilder.AddVersion(calculatedVersion, version.SupportedFrameworks);
+                        buildFileStringBuilder.AddVersion(calculatedVersion, version.SupportedFrameworks);
                     }
                     else
                     {
-                        xUnitFileStringBuilder.AddVersionWithDependencies(calculatedVersion, GetDependencies(version));
-                        buildFileStringBuilder.AddVersionWithDependencies(calculatedVersion, GetDependencies(version));
+                        xUnitFileStringBuilder.AddVersionWithDependencies(calculatedVersion, GetDependencies(version), version.SupportedFrameworks);
+                        buildFileStringBuilder.AddVersionWithDependencies(calculatedVersion, GetDependencies(version), version.SupportedFrameworks);
                     }
                 }
             }

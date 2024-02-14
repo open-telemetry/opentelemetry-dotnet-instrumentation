@@ -6,7 +6,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Pomelo.EntityFrameworkCore.MySql" VersionOverride="$(LibraryVersion)" />
+    <PackageReference Include="Pomelo.EntityFrameworkCore.MySql" VersionOverride="$(LibraryVersion)" Condition=" '$(LibraryVersion)' != '' or '$(TargetFramework)' == 'net8.0' "/>
+    <PackageReference Include="Pomelo.EntityFrameworkCore.MySql" VersionOverride="7.0.0" Condition=" '$(LibraryVersion)' == '' and '$(TargetFramework)' != 'net8.0' "/>
 
     <!-- Microsoft.Extensions.Configuration.Abstractions, Microsoft.Extensions.Logging.Abstractions,
     Microsoft.Extensions.Options, and Microsoft.Extensions.DependencyInjection

@@ -2,19 +2,22 @@ namespace Models;
 
 public class PackageBuildInfo
 {
-    public PackageBuildInfo(string libraryVersion)
+    public PackageBuildInfo(string libraryVersion, string[] supportedFrameworks)
     {
         LibraryVersion = libraryVersion;
+        SupportedFrameworks = supportedFrameworks;
         AdditionalMetaData = new Dictionary<string, string>();
     }
 
-    public PackageBuildInfo(string libraryVersion, Dictionary<string, string> additionalMetaData)
-        : this(libraryVersion)
+    public PackageBuildInfo(string libraryVersion, string[] supportedFrameworks, Dictionary<string, string> additionalMetaData)
+        : this(libraryVersion, supportedFrameworks)
     {
         AdditionalMetaData = additionalMetaData;
     }
 
-    public string LibraryVersion { get; private set; }
+    public string LibraryVersion { get; }
 
-    public Dictionary<string, string> AdditionalMetaData { get; private set; }
+    public string[] SupportedFrameworks { get; }
+
+    public Dictionary<string, string> AdditionalMetaData { get; }
 }

@@ -21,7 +21,7 @@
     <PackageVersion Include="Microsoft.Build" Version="15.9.20" />
     <PackageVersion Include="Microsoft.Build.Utilities.Core" Version="15.9.20" />
     <PackageVersion Include="Microsoft.Data.SqlClient" Version="5.1.5" />
-    <PackageVersion Include="Microsoft.EntityFrameworkCore.Sqlite" Version="7.0.13" />
+    <PackageVersion Include="Microsoft.EntityFrameworkCore.Sqlite" Version="8.0.2" />
     <PackageVersion Include="Microsoft.Extensions.Configuration.Abstractions" Version="8.0.0" />
     <PackageVersion Include="Microsoft.Extensions.DependencyInjection" Version="8.0.0" />
     <PackageVersion Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="8.0.0" />
@@ -37,7 +37,7 @@
     <PackageVersion Include="Npgsql" Version="8.0.2" />
     <PackageVersion Include="NuGet.Versioning" Version="6.5.0" />
     <PackageVersion Include="OpenTracing" Version="0.12.1" />
-    <PackageVersion Include="Pomelo.EntityFrameworkCore.MySql" Version="7.0.0" />
+    <PackageVersion Include="Pomelo.EntityFrameworkCore.MySql" Version="8.0.0" />
     <PackageVersion Include="Quartz" Version="3.8.0" />
     <PackageVersion Include="Quartz.Extensions.DependencyInjection" Version="3.8.0" />
     <PackageVersion Include="Quartz.Extensions.Hosting" Version="3.8.0" />
