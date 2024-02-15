@@ -8,7 +8,7 @@
     <OutputType>Exe</OutputType>
     <Platforms>x64;x86</Platforms>
     <PlatformTarget>$(Platform)</PlatformTarget>
-    <LangVersion>10.0</LangVersion>
+    <LangVersion>11.0</LangVersion>
 
     <BaseIntermediateOutputPath Condition="'$(LibraryVersion)'!=''">..\obj\$(MSBuildProjectName)\$(LibraryVersion)\</BaseIntermediateOutputPath>
     <BaseIntermediateOutputPath Condition="'$(LibraryVersion)'==''">..\obj\$(MSBuildProjectName)\</BaseIntermediateOutputPath>
