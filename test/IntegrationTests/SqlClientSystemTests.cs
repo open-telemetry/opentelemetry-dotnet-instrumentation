@@ -22,7 +22,9 @@ public class SqlClientSystemTests : TestHelper
     {
         foreach (var version in LibraryVersion.SqlClientSystem)
         {
+#if NET6_0_OR_GREATER
             yield return new[] { version[0], true };
+#endif
             yield return new[] { version[0], false };
         }
     }

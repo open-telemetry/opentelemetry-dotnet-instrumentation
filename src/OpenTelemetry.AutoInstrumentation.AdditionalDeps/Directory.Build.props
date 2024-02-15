@@ -1,7 +1,6 @@
 <Project>
   <ItemGroup>
     <PackageReference Include="System.Diagnostics.DiagnosticSource" />
-    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" />
     <PackageReference Include="Microsoft.Extensions.Logging.Configuration" />
   </ItemGroup>
 </Project>
