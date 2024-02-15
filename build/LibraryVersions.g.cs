@@ -19,25 +19,25 @@ public static class LibraryVersion
             "TestApplication.Azure",
             new List<PackageBuildInfo>
             {
-                new("12.13.0", Array.Empty<string>()),
-                new("12.19.1", Array.Empty<string>()),
+                new("12.13.0"),
+                new("12.19.1"),
             }
         },
         {
             "TestApplication.Elasticsearch",
             new List<PackageBuildInfo>
             {
-                new("8.0.0", Array.Empty<string>()),
-                new("8.10.0", Array.Empty<string>()),
-                new("8.12.0", Array.Empty<string>()),
+                new("8.0.0"),
+                new("8.10.0"),
+                new("8.12.0"),
             }
         },
         {
             "TestApplication.EntityFrameworkCore",
             new List<PackageBuildInfo>
             {
-                new("6.0.27", Array.Empty<string>()),
-                new("7.0.16", Array.Empty<string>()),
+                new("6.0.27"),
+                new("7.0.16"),
                 new("8.0.2", new string[] {"net8.0"}),
             }
         },
@@ -45,8 +45,8 @@ public static class LibraryVersion
             "TestApplication.EntityFrameworkCore.Pomelo.MySql",
             new List<PackageBuildInfo>
             {
-                new("6.0.2", Array.Empty<string>()),
-                new("7.0.0", Array.Empty<string>()),
+                new("6.0.2"),
+                new("7.0.0"),
                 new("8.0.0", new string[] {"net8.0"}),
             }
         },
@@ -62,108 +62,108 @@ public static class LibraryVersion
             "TestApplication.GrpcNetClient",
             new List<PackageBuildInfo>
             {
-                new("2.52.0", Array.Empty<string>()),
-                new("2.60.0", Array.Empty<string>()),
+                new("2.52.0"),
+                new("2.60.0"),
             }
         },
         {
             "TestApplication.MassTransit",
             new List<PackageBuildInfo>
             {
-                new("8.0.0", Array.Empty<string>()),
-                new("8.1.3", Array.Empty<string>()),
+                new("8.0.0"),
+                new("8.1.3"),
             }
         },
         {
             "TestApplication.SqlClient.Microsoft",
             new List<PackageBuildInfo>
             {
-                new("2.1.7", Array.Empty<string>()),
-                new("3.1.5", Array.Empty<string>()),
-                new("4.0.5", Array.Empty<string>()),
-                new("5.1.5", Array.Empty<string>()),
+                new("2.1.7"),
+                new("3.1.5"),
+                new("4.0.5"),
+                new("5.1.5"),
             }
         },
         {
             "TestApplication.SqlClient.System",
             new List<PackageBuildInfo>
             {
-                new("4.8.6", Array.Empty<string>()),
+                new("4.8.6"),
             }
         },
         {
             "TestApplication.MongoDB",
             new List<PackageBuildInfo>
             {
-                new("2.19.0", Array.Empty<string>()),
-                new("2.23.1", Array.Empty<string>()),
+                new("2.19.0"),
+                new("2.23.1"),
             }
         },
         {
             "TestApplication.MySqlConnector",
             new List<PackageBuildInfo>
             {
-                new("2.0.0", Array.Empty<string>()),
-                new("2.3.5", Array.Empty<string>()),
+                new("2.0.0"),
+                new("2.3.5"),
             }
         },
         {
             "TestApplication.MySqlData",
             new List<PackageBuildInfo>
             {
-                new("8.1.0", Array.Empty<string>()),
-                new("8.3.0", Array.Empty<string>()),
+                new("8.1.0"),
+                new("8.3.0"),
             }
         },
         {
             "TestApplication.Npgsql",
             new List<PackageBuildInfo>
             {
-                new("6.0.0", Array.Empty<string>()),
-                new("8.0.2", Array.Empty<string>()),
+                new("6.0.0"),
+                new("8.0.2"),
             }
         },
         {
             "TestApplication.NServiceBus",
             new List<PackageBuildInfo>
             {
-                new("8.0.0", Array.Empty<string>()),
-                new("8.1.6", Array.Empty<string>()),
+                new("8.0.0"),
+                new("8.1.6"),
             }
         },
         {
             "TestApplication.Quartz",
             new List<PackageBuildInfo>
             {
-                new("3.4.0", Array.Empty<string>()),
-                new("3.8.0", Array.Empty<string>()),
+                new("3.4.0"),
+                new("3.8.0"),
             }
         },
         {
             "TestApplication.StackExchangeRedis",
             new List<PackageBuildInfo>
             {
-                new("2.0.495", Array.Empty<string>()),
-                new("2.1.50", Array.Empty<string>()),
-                new("2.5.61", Array.Empty<string>()),
-                new("2.6.66", Array.Empty<string>()),
-                new("2.7.17", Array.Empty<string>()),
+                new("2.0.495"),
+                new("2.1.50"),
+                new("2.5.61"),
+                new("2.6.66"),
+                new("2.7.17"),
             }
         },
         {
             "TestApplication.Wcf.Client.DotNet",
             new List<PackageBuildInfo>
             {
-                new("4.10.2", Array.Empty<string>()),
-                new("6.2.0", Array.Empty<string>()),
+                new("4.10.2"),
+                new("6.2.0"),
             }
         },
         {
             "TestApplication.Kafka",
             new List<PackageBuildInfo>
             {
-                new("1.4.0", Array.Empty<string>()),
-                new("2.3.0", Array.Empty<string>()),
+                new("1.4.0"),
+                new("2.3.0"),
             }
         },
     };

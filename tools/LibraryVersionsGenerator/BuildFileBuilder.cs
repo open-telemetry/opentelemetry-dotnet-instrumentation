@@ -40,7 +40,15 @@ internal sealed class BuildFileBuilder : CSharpFileBuilder
 
     public override CSharpFileBuilder AddVersion(string version, string[] supportedFrameworks)
     {
-        Builder.AppendLine($"                new(\"{version}\", {SerializeArray(supportedFrameworks)}),");
+        if (supportedFrameworks.Length > 0)
+        {
+            Builder.AppendLine($"                new(\"{version}\", {SerializeArray(supportedFrameworks)}),");
+        }
+        else
+        {
+            Builder.AppendLine($"                new(\"{version}\"),");
+        }
+
         return this;
     }
 

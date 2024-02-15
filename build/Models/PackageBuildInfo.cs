@@ -2,16 +2,18 @@ namespace Models;
 
 public class PackageBuildInfo
 {
-    public PackageBuildInfo(string libraryVersion, string[] supportedFrameworks)
+    public PackageBuildInfo(string libraryVersion) : this(libraryVersion, Array.Empty<string>())
     {
-        LibraryVersion = libraryVersion;
-        SupportedFrameworks = supportedFrameworks;
-        AdditionalMetaData = new Dictionary<string, string>();
+    }
+
+    public PackageBuildInfo(string libraryVersion, string[] supportedFrameworks) : this(libraryVersion, supportedFrameworks, new Dictionary<string, string>())
+    {
     }
 
     public PackageBuildInfo(string libraryVersion, string[] supportedFrameworks, Dictionary<string, string> additionalMetaData)
-        : this(libraryVersion, supportedFrameworks)
     {
+        LibraryVersion = libraryVersion;
+        SupportedFrameworks = supportedFrameworks;
         AdditionalMetaData = additionalMetaData;
     }
 
