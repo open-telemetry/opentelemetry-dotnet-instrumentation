@@ -64,9 +64,9 @@ internal abstract class CSharpFileBuilder
 
     public abstract CSharpFileBuilder BeginTestPackage(string testApplicationName, string integrationName);
 
-    public abstract CSharpFileBuilder AddVersion(string version);
+    public abstract CSharpFileBuilder AddVersion(string version, string[] supportedFrameworks);
 
-    public abstract CSharpFileBuilder AddVersionWithDependencies(string version, Dictionary<string, string> dependencies);
+    public abstract CSharpFileBuilder AddVersionWithDependencies(string version, Dictionary<string, string> dependencies, string[] supportedFrameworks);
 
     public abstract CSharpFileBuilder EndTestPackage();
 

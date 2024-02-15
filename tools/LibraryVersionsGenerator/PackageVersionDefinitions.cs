@@ -39,8 +39,10 @@ internal static class PackageVersionDefinitions
             TestApplicationName = "TestApplication.EntityFrameworkCore",
             Versions = new List<PackageVersion>
             {
-                new("6.0.12"),
-                new("*")
+                new("6.0.27"),
+                new("7.0.16"),
+                new("8.0.2", "net8.0"),
+                new("*", "net8.0")
             }
         },
         new()
@@ -51,7 +53,9 @@ internal static class PackageVersionDefinitions
             Versions = new List<PackageVersion>
             {
                 new("6.0.2"),
-                new("*")
+                new("7.0.0"),
+                new("8.0.0", "net8.0"),
+                new("*", "net8.0")
             }
         },
         new()

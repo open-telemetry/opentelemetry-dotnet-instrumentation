@@ -36,8 +36,9 @@ public static class LibraryVersion
             "TestApplication.EntityFrameworkCore",
             new List<PackageBuildInfo>
             {
-                new("6.0.12"),
-                new("7.0.13"),
+                new("6.0.27"),
+                new("7.0.16"),
+                new("8.0.2", new string[] {"net8.0"}),
             }
         },
         {
@@ -46,14 +47,15 @@ public static class LibraryVersion
             {
                 new("6.0.2"),
                 new("7.0.0"),
+                new("8.0.0", new string[] {"net8.0"}),
             }
         },
         {
             "TestApplication.GraphQL",
             new List<PackageBuildInfo>
             {
-                new("7.5.0", new() {{"GraphQLMicrosoftDI","7.5.0"},{"GraphQLServerTransportsAspNetCore","7.5.0"},{"GraphQLServerUIPlayground","7.5.0"}}),
-                new("7.8.0", new() {{"GraphQLMicrosoftDI","7.8.0"},{"GraphQLServerTransportsAspNetCore","7.7.0"},{"GraphQLServerUIPlayground","7.7.0"}}),
+                new("7.5.0", Array.Empty<string>(), new() {{"GraphQLMicrosoftDI","7.5.0"},{"GraphQLServerTransportsAspNetCore","7.5.0"},{"GraphQLServerUIPlayground","7.5.0"}}),
+                new("7.8.0", Array.Empty<string>(), new() {{"GraphQLMicrosoftDI","7.8.0"},{"GraphQLServerTransportsAspNetCore","7.7.0"},{"GraphQLServerUIPlayground","7.7.0"}}),
             }
         },
         {
