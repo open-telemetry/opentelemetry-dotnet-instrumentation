@@ -140,6 +140,8 @@ elseif (ISX86)
     add_compile_options(-DBX86 -DHOST_X86)
 elseif (ISARM64)
     add_compile_options(-DARM64)
+    # See https://github.com/dotnet/runtime/issues/78286
+    add_compile_definitions(HOST_ARM64)
 elseif (ISARM)
     add_compile_options(-DARM)
 endif()

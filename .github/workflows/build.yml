@@ -19,6 +19,8 @@ jobs:
             log-dir: "/var/log/opentelemetry/dotnet"
           - machine: macos-11
             log-dir: "/var/log/opentelemetry/dotnet"
+          - machine: actuated-arm64
+            log-dir: "/var/log/opentelemetry/dotnet"
     runs-on: ${{ matrix.machine }}
     steps:
       - uses: actions/checkout@v4.1.1

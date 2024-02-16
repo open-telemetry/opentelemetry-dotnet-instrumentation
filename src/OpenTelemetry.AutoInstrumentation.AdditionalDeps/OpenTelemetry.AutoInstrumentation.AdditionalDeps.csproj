@@ -21,6 +21,10 @@
         <Platform>x64</Platform>
         <StorePath>$(StoreOutputBasePath)</StorePath>
       </StoreRuntime>
+      <StoreRuntime Include="arm64" Condition="'$([MSBuild]::IsOSPlatform('Linux'))'">
+        <Platform>arm64</Platform>
+        <StorePath>$(StoreOutputBasePath)</StorePath>
+      </StoreRuntime>
     </ItemGroup>
     
     <Message Text="Calling ComposeStore for TargetFramework='$(TargetFramework)'" Importance="high" />
