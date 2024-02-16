@@ -21,7 +21,7 @@
         <Platform>x64</Platform>
         <StorePath>$(StoreOutputBasePath)</StorePath>
       </StoreRuntime>
-      <StoreRuntime Include="arm64" Condition="'$([MSBuild]::IsOSPlatform('Linux'))'">
+      <StoreRuntime Include="arm64" Condition="$([MSBuild]::IsOSPlatform('Linux'))">
         <Platform>arm64</Platform>
         <StorePath>$(StoreOutputBasePath)</StorePath>
       </StoreRuntime>
