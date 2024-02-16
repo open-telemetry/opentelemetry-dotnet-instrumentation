@@ -28,7 +28,7 @@ jobs:
         with:
           fetch-depth: 0 # fetching all, needed to correctly calculate version
 
-      - name: Setup Conditional ENVs
+      - name: Setup ARM64 Environment Variables
         if: ${{ matrix.machine == 'actuated-arm64' }}
         run: |
           echo "DOTNET_INSTALL_DIR=~/.dotnet" >> $GITHUB_ENV
@@ -48,19 +48,27 @@ jobs:
           key: ${{ hashFiles('**/Directory.packages.props', './build/LibraryVersions.g.cs', '**/packages.config' ) }}
           path: ${{ env.NUGET_PACKAGES }}
 
-      - if: ${{ steps.nuget-cache.outputs.cache-hit != 'true' }}
-        name: Restore NuGet packages
+      - name: Restore NuGet packages
+        if: ${{ steps.nuget-cache.outputs.cache-hit != 'true' }}
         continue-on-error: false
         run: ./build.cmd Restore
 
-      - if: ${{ steps.nuget-cache.outputs.cache-hit != 'true' }}
-        name: Cache NuGet packages
+      - name: Cache NuGet packages
+        if: ${{ steps.nuget-cache.outputs.cache-hit != 'true' }}
         uses: actions/cache/save@v4.0.0
         with:
           key: ${{ hashFiles('**/Directory.packages.props', './build/LibraryVersions.g.cs', '**/packages.config' ) }}
           path: ${{ env.NUGET_PACKAGES }}
 
-      - run: ./build.cmd BuildWorkflow --no-restore ${{ steps.nuget-cache.outputs.cache-hit != 'true' }}
+      - name: Setup ARM64 Machine
+        if: ${{ matrix.machine == 'actuated-arm64' }}
+        run: |
+          cat /etc/os-release
+          lsb_release -a
+          hostnamectl
+      
+      - name: Run BuildWorkflow
+        run: ./build.cmd BuildWorkflow --no-restore ${{ steps.nuget-cache.outputs.cache-hit != 'true' }}
 
       - name: Download native CentOS Artifacts from build job
         if: ${{ matrix.machine == 'ubuntu-20.04' }}
@@ -70,17 +78,18 @@ jobs:
           path: bin/ci-artifacts/bin-centos-native
 
       - name: Replace Ubuntu native code by Centos artifacts
+        if: ${{ matrix.machine == 'ubuntu-20.04' }}
         run: |
           rm ./bin/tracer-home/linux-x64/OpenTelemetry.AutoInstrumentation.Native.so
           cp ./bin/ci-artifacts/bin-centos-native/linux-x64/OpenTelemetry.AutoInstrumentation.Native.so ./bin/tracer-home/linux-x64/OpenTelemetry.AutoInstrumentation.Native.so
-        if: ${{ matrix.machine == 'ubuntu-20.04' }}
 
-      - run: brew install coreutils
+      - name: Install MacOS CoreUtils
         if: ${{ runner.os == 'macOS' }}
+        run: brew install coreutils
 
-      - name: Create test directory
-        run: sudo mkdir -p ${{ matrix.log-dir }} && sudo chmod a+rwx ${{ matrix.log-dir }}  # the instrumented process has no permissions to create log dir
+      - name: Create Windows test directory
         if: ${{ runner.os != 'Windows' }}
+        run: sudo mkdir -p ${{ matrix.log-dir }} && sudo chmod a+rwx ${{ matrix.log-dir }}  # the instrumented process has no permissions to create log dir
 
       - name: Test the Shell scripts from README.md
         shell: bash
@@ -92,7 +101,7 @@ jobs:
           ./test/test-applications/integrations/bin/TestApplication.Smoke/Release/net8.0/publish/TestApplication.Smoke
             test "$(ls -A '${{ matrix.log-dir }}' )"
 
-      - name: Test the PowerShell module instructions from README.md
+      - name: Test the Windows PowerShell module instructions from README.md
         if: ${{ runner.os == 'Windows' }}
         shell: powershell
         run: |
@@ -110,15 +119,15 @@ jobs:
           if (Test-Path $log_path) { throw "Log file exists. Instrumentation unregister failed." }
 
       - name: Upload binaries
-        uses: actions/upload-artifact@v4.3.1
         if: always()
+        uses: actions/upload-artifact@v4.3.1
         with:
           name: bin-${{ matrix.machine }}
           path: bin/tracer-home
 
       - name: Upload installation scripts
-        uses: actions/upload-artifact@v4.3.1
         if: always()
+        uses: actions/upload-artifact@v4.3.1
         with:
           name: installation-scripts-${{ matrix.machine }}
           path: bin/installation-scripts
