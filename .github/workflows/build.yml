@@ -23,6 +23,10 @@ jobs:
             log-dir: "/var/log/opentelemetry/dotnet"
     runs-on: ${{ matrix.machine }}
     steps:
+      - name: ARM64 Runner Info
+        if: ${{ matrix.machine == 'actuated-arm64' }}
+        run: cat /etc/os-release
+
       - name: Checkout
         uses: actions/checkout@v4.1.1
         with:
@@ -63,9 +67,11 @@ jobs:
       - name: Setup ARM64 Machine
         if: ${{ matrix.machine == 'actuated-arm64' }}
         run: |
-          cat /etc/os-release
-          lsb_release -a
-          hostnamectl
+          apt-get update && \
+          apt-get install -y \
+              cmake \
+              clang \
+              make
       
       - name: Run BuildWorkflow
         run: ./build.cmd BuildWorkflow --no-restore ${{ steps.nuget-cache.outputs.cache-hit != 'true' }}
