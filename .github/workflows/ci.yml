@@ -87,6 +87,15 @@ jobs:
         uses: potatoqualitee/mssqlsuite@v1.7
         with: 
           install: localdb
+      
+      - name: Setup ARM64 Machine
+        if: ${{ matrix.machine == 'actuated-arm64' }}
+        run: |
+          sudo apt-get update && \
+          sudo apt-get install -y \
+              cmake \
+              clang \
+              make
 
       - name: Run TestWorkflow
         run: ./build.cmd --skip NativeTests --target TestWorkflow --test-target-framework ${{ matrix.test-tfm }} --containers ${{ matrix.containers }}
