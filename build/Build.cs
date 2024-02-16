@@ -11,7 +11,7 @@ partial class Build : NukeBuild
     [Parameter("Configuration to build. Default is 'Release'")]
     readonly Configuration BuildConfiguration = Configuration.Release;
 
-    [Parameter("Platform to build - x86 or x64. Default is 'x64'")]
+    [Parameter("Platform to build - x86, x64, arm. Default is 'x64'")]
     readonly MSBuildTargetPlatform Platform = MSBuildTargetPlatform.x64;
 
     [Parameter($"Docker containers type to be used in tests. One of '{ContainersNone}', '{ContainersLinux}', '{ContainersWindows}', '{ContainersWindowsOnly}'. Default is '{ContainersLinux}'")]

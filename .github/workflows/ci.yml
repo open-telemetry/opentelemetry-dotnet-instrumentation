@@ -43,12 +43,16 @@ jobs:
         include:
           - machine: windows-2022
             containers: none
+            platform: x64
           - machine: ubuntu-20.04
             containers: linux
+            platform: x64
           - machine: macos-11
             containers: none
+            platform: x64
           - machine: actuated-arm64
             containers: linux
+            platform: arm
     runs-on: ${{ matrix.machine }}
     steps:
       - name: Checkout
@@ -98,7 +102,7 @@ jobs:
               make
 
       - name: Run TestWorkflow
-        run: ./build.cmd --skip NativeTests --target TestWorkflow --test-target-framework ${{ matrix.test-tfm }} --containers ${{ matrix.containers }}
+        run: ./build.cmd --skip NativeTests --target TestWorkflow --platform ${{ matrix.platform }} --test-target-framework ${{ matrix.test-tfm }} --containers ${{ matrix.containers }}
 
       - name: Upload test logs
         if: always()
