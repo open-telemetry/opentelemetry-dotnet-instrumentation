@@ -32,12 +32,14 @@ jobs:
       fail-fast: false
       matrix:
         test-tfm: [ net8.0, net7.0, net6.0, net462 ]
-        machine: [ windows-2022, ubuntu-20.04, macos-11 ]
+        machine: [ windows-2022, ubuntu-20.04, macos-11, actuated-arm64 ]
         exclude:
           - test-tfm: net462
             machine: macos-11
           - test-tfm: net462
             machine: ubuntu-20.04
+          - test-tfm: net462
+            machine: actuated-arm64
         include:
           - machine: windows-2022
             containers: none
@@ -45,6 +47,8 @@ jobs:
             containers: linux
           - machine: macos-11
             containers: none
+          - machine: actuated-arm64
+            containers: linux
     runs-on: ${{ matrix.machine }}
     steps:
       - uses: actions/checkout@v4.1.1

@@ -93,7 +93,7 @@ jobs:
         if: ${{ runner.os == 'macOS' }}
         run: brew install coreutils
 
-      - name: Create Windows test directory
+      - name: Create test directory
         if: ${{ runner.os != 'Windows' }}
         run: sudo mkdir -p ${{ matrix.log-dir }} && sudo chmod a+rwx ${{ matrix.log-dir }}  # the instrumented process has no permissions to create log dir
 
