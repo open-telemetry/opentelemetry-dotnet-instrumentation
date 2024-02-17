@@ -61,8 +61,8 @@ partial class Build
             var source = NativeProfilerProject.Directory / "build" / "bin" / $"{NativeProfilerProject.Name}.so";
             string clrProfilerDirectoryName = Environment.GetEnvironmentVariable("OS_TYPE") switch
             {
-                "linux-musl" => "linux-musl-x64",
-                _ => "linux-x64"
+                "linux-musl" => $"linux-musl-{Platform}",
+                _ => $"linux-{Platform}"
             };
 
             var dest = TracerHomeDirectory / clrProfilerDirectoryName;
