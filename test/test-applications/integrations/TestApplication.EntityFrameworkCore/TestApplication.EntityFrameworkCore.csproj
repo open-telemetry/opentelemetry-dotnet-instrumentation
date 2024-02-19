@@ -1,8 +1,10 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFrameworks>net7.0;net6.0</TargetFrameworks>
     <TargetFrameworks Condition=" '$(IsCentos)' == '' ">net8.0;$(TargetFrameworks)</TargetFrameworks>
+    
+    <RuntimeIdentifier Condition=" '$(IsAlpine)' == 'true' ">alpine-x64, alpine-arm64</RuntimeIdentifier>
   </PropertyGroup>
 
   <ItemGroup>
