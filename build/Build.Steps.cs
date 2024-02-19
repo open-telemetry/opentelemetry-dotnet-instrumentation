@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using System.Runtime.InteropServices;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using Extensions;
@@ -551,6 +552,7 @@ partial class Build
                 .SetProject(Solution.GetProjectByName(Projects.AutoInstrumentationAdditionalDeps))
                 .SetConfiguration(BuildConfiguration)
                 .SetTargetPlatformAnyCPU()
+                .SetProperty("NukePlatform", Platform)
                 .SetProperty("TracerHomePath", TracerHomeDirectory)
                 .EnableNoBuild()
                 .SetNoRestore(NoRestore)
@@ -559,7 +561,7 @@ partial class Build
                 // Additional-deps probes the directory using SemVer format.
                 // Example: For netcoreapp3.1 framework, additional-deps uses 3.1.0 or 3.1.1 and so on.
                 // Major and Minor version are extracted from framework and default value of 0 is appended for patch.
-                .SetOutput(AdditionalDepsDirectory / "shared" / "Microsoft.NETCore.App" / framework.ToString().Substring(framework.ToString().Length - 3) + ".0")));
+                .SetOutput(AdditionalDepsDirectory / "shared" / "Microsoft.NETCore.App" / framework.ToString().Substring(framework.ToString().Length - 3) + ".0"))); ;
 
             AdditionalDepsDirectory.GlobFiles("**/*deps.json")
                 .ForEach(file =>
@@ -569,8 +571,9 @@ partial class Build
 
                     var folderRuntimeName = depsJson.GetFolderRuntimeName();
                     var architectureStores = new List<AbsolutePath>()
-                        .AddIf(StoreDirectory / "x64" / folderRuntimeName, true) // All OS'es support x64 runtime
+                        .AddIf(StoreDirectory / "x64" / folderRuntimeName, RuntimeInformation.OSArchitecture == Architecture.X64)
                         .AddIf(StoreDirectory / "x86" / folderRuntimeName, IsWin) // Only Windows supports x86 runtime
+                        .AddIf(StoreDirectory / "arm64" / folderRuntimeName, IsArm64)
                         .AsReadOnly();
 
                     depsJson.CopyNativeDependenciesToStore(file, architectureStores);

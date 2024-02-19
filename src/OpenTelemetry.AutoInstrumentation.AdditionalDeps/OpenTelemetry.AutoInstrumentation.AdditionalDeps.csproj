@@ -10,6 +10,7 @@
       <StoreOutputBasePath>$(OutputDir)\store\</StoreOutputBasePath>
       <AdditionalDepsPath Condition="'$(TracerHomePath)' != ''">$(TracerHomePath)\AdditionalDeps</AdditionalDepsPath>
       <StoreOutputBasePath Condition="'$(TracerHomePath)' != ''">$(TracerHomePath)\store</StoreOutputBasePath>
+      <NukePlatform Condition="'$(NukePlatform)' == ''">x64</NukePlatform>
     </PropertyGroup>
 
     <ItemGroup>
@@ -17,17 +18,17 @@
         <Platform>x86</Platform>
         <StorePath>$(StoreOutputBasePath)</StorePath>
       </StoreRuntime>
-      <StoreRuntime Include="x64" Condition="'$(Platform)' == 'x64'">
+      <StoreRuntime Include="x64" Condition="'$(NukePlatform)' == 'x64'">
         <Platform>x64</Platform>
         <StorePath>$(StoreOutputBasePath)</StorePath>
       </StoreRuntime>
-      <StoreRuntime Include="arm64" Condition="$([MSBuild]::IsOSPlatform('Linux')) And '$(Platform)' == 'arm64'">
+      <StoreRuntime Include="arm64" Condition="$([MSBuild]::IsOSPlatform('Linux')) And '$(NukePlatform)' == 'arm64'">
         <Platform>arm64</Platform>
         <StorePath>$(StoreOutputBasePath)</StorePath>
       </StoreRuntime>
     </ItemGroup>
     
-    <Message Text="Calling ComposeStore for TargetFramework='$(TargetFramework)'" Importance="high" />
+    <Message Text="Calling ComposeStore for TargetFramework='$(TargetFramework)' and NukePlatform='$(NukePlatform)'" Importance="high" />
     
     <ItemGroup>
       <ProjectsToBuild Include="Package.xml">
