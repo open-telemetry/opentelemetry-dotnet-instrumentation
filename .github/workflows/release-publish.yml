@@ -13,7 +13,7 @@ jobs:
           dotnet-version: | 
             6.0.419
             7.0.406
-            8.0.200
+            8.0.201
       - name: Test the PowerShell module instructions from README.md
         shell: powershell
         run: |
@@ -58,7 +58,7 @@ jobs:
           dotnet-version: | 
             6.0.419
             7.0.406
-            8.0.200
+            8.0.201
       - run: brew install coreutils
         if: ${{ runner.os == 'macOS' }}
       - name: Create test directory
