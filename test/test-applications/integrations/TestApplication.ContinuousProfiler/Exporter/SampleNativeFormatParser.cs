@@ -75,16 +75,14 @@ internal static class SampleNativeFormatParser
                         continue;
                     }
 
-                    var threadSample = new ThreadSample
-                    {
-                        Timestamp = new ThreadSample.Time(sampleStartMillis),
-                        TraceIdHigh = traceIdHigh,
-                        TraceIdLow = traceIdLow,
-                        SpanId = spanId,
-                        ManagedId = managedId,
-                        ThreadName = threadName,
-                        ThreadIndex = threadIndex
-                    };
+                    var threadSample = new ThreadSample(
+                        new ThreadSample.Time(sampleStartMillis),
+                        traceIdHigh,
+                        traceIdLow,
+                        spanId,
+                        managedId,
+                        threadName,
+                        threadIndex);
 
                     ReadStackFrames(code, threadSample, codeDictionary, buffer, ref position);
 
@@ -162,15 +160,13 @@ internal static class SampleNativeFormatParser
                     var traceIdLow = ReadInt64(buffer, ref position);
                     var spanId = ReadInt64(buffer, ref position);
 
-                    var threadSample = new ThreadSample
-                    {
-                        Timestamp = new ThreadSample.Time(timestampMillis),
-                        TraceIdHigh = traceIdHigh,
-                        TraceIdLow = traceIdLow,
-                        SpanId = spanId,
-                        ManagedId = managedId,
-                        ThreadName = threadName
-                    };
+                    var threadSample = new ThreadSample(
+                        new ThreadSample.Time(timestampMillis),
+                        traceIdHigh,
+                        traceIdLow,
+                        spanId,
+                        managedId,
+                        threadName);
 
                     var code = ReadShort(buffer, ref position);
 
