@@ -13,10 +13,6 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <StoreRuntime Include="x86" Condition="'$(OS)' == 'Windows_NT'">
-        <Platform>x86</Platform>
-        <StorePath>$(StoreOutputBasePath)</StorePath>
-      </StoreRuntime>
       <StoreRuntime Include="x64">
         <Platform>x64</Platform>
         <StorePath>$(StoreOutputBasePath)</StorePath>
