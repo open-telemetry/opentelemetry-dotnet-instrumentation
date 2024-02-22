@@ -29,9 +29,9 @@ internal partial class FrameworkDescription
             {
                 // RuntimeInformation.FrameworkDescription returns a string like ".NET Framework 4.7.2" or ".NET Core 2.1",
                 // we want to return everything before the last space
-                frameworkVersion = RuntimeInformation.FrameworkDescription;
-                var index = frameworkVersion.LastIndexOf(' ');
-                frameworkName = frameworkVersion.Substring(0, index).Trim();
+                var frameworkDescription = RuntimeInformation.FrameworkDescription;
+                var index = frameworkDescription.LastIndexOf(' ');
+                frameworkName = frameworkDescription.Substring(0, index).Trim();
             }
             catch (Exception e)
             {
