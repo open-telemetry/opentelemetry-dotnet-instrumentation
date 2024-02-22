@@ -23,5 +23,5 @@ partial class Build
         return MSBuildTargetPlatform.x64;
     }
 
-    private static MSBuildTargetPlatform Arm64TargetPlatform = (MSBuildTargetPlatform)"arm64";
+    private static MSBuildTargetPlatform Arm64TargetPlatform = (MSBuildTargetPlatform)"ARM64";
 }

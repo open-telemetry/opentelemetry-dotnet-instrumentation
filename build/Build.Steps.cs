@@ -211,7 +211,7 @@ partial class Build
                 }
             }
 
-            foreach (var project in Solution.GetManagedTestProjects())
+            foreach (var project in Solution.GetManagedUnitTestProjects())
             {
                 if (TestTargetFramework != TargetFramework.NOT_SPECIFIED &&
                     !project.GetTargetFrameworks().Contains(TestTargetFramework))
@@ -228,6 +228,14 @@ partial class Build
                     .When(TestTargetFramework != TargetFramework.NOT_SPECIFIED,
                         s => s.SetFramework(TestTargetFramework)));
             }
+
+            DotNetBuild(x => x
+                .SetProjectFile(Solution.GetManagedIntegrationTestProject())
+                .SetConfiguration(BuildConfiguration)
+                .SetNoRestore(NoRestore)
+                .SetPlatform(Platform)
+                .When(TestTargetFramework != TargetFramework.NOT_SPECIFIED,
+                    s => s.SetFramework(TestTargetFramework)));
         });
 
     Target CompileNativeDependenciesForManagedTests => _ => _
@@ -520,6 +528,7 @@ partial class Build
             {
                 DotNetMSBuild(config => config
                     .SetConfiguration(BuildConfiguration)
+                    .SetPlatform(Platform)
                     .SetFilter(AndFilter(TestNameFilter(), ContainersFilter()))
                     .SetBlameHangTimeout("5m")
                     .EnableTrxLogOutput(GetResultsDirectory(project))
