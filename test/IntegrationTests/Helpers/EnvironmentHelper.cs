@@ -125,7 +125,7 @@ public class EnvironmentHelper
 
         string fileName = $"OpenTelemetry.AutoInstrumentation.Native.{extension}";
         string nukeOutput = GetNukeBuildOutput();
-        string profilerPath = Path.Combine(nukeOutput, $"{EnvironmentTools.GetClrProfilerDirectoryName()}-{EnvironmentTools.GetPlatform().ToLower()}", fileName);
+        string profilerPath = Path.Combine(nukeOutput, EnvironmentTools.GetClrProfilerDirectoryName(), fileName);
 
         if (File.Exists(profilerPath))
         {
@@ -210,7 +210,7 @@ public class EnvironmentHelper
         return Path.Combine(
             baseBinDirectory,
             packageVersion,
-            EnvironmentTools.GetPlatform().ToLowerInvariant(),
+            EnvironmentTools.GetPlatformDir(),
             EnvironmentTools.GetBuildConfiguration(),
             targetFramework);
     }

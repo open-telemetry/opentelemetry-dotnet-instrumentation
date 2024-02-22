@@ -92,6 +92,17 @@ public static class EnvironmentTools
         return RuntimeInformation.ProcessArchitecture.ToString();
     }
 
+    public static string GetPlatformDir()
+    {
+        return RuntimeInformation.ProcessArchitecture switch
+        {
+            Architecture.X86 => "x86",
+            Architecture.X64 => "x64",
+            Architecture.Arm64 => "ARM64",
+            _ => throw new PlatformNotSupportedException()
+        };
+    }
+
     public static string GetBuildConfiguration()
     {
 #if DEBUG
@@ -101,7 +112,12 @@ public static class EnvironmentTools
 #endif
     }
 
-    public static string? GetClrProfilerDirectoryName()
+    public static string GetClrProfilerDirectoryName()
+    {
+        return $"{GetClrProfilerOSDirectoryName()}-{GetPlatformDir().ToLowerInvariant()}";
+    }
+
+    private static string? GetClrProfilerOSDirectoryName()
     {
         string? clrProfilerDirectoryName = Environment.GetEnvironmentVariable("OS_TYPE") switch
         {
@@ -115,7 +131,7 @@ public static class EnvironmentTools
         // If OS_TYPE is null, then fallback to default value.
         if (clrProfilerDirectoryName == null)
         {
-            clrProfilerDirectoryName = EnvironmentTools.GetOS() switch
+            clrProfilerDirectoryName = GetOS() switch
             {
                 "win" => "win",
                 "linux" => "linux",
