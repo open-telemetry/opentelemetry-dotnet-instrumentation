@@ -14,9 +14,11 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-
     steps:
-    - uses: actions/checkout@v4.1.1
+
+    - name: Checkout
+      uses: actions/checkout@v4.1.1
+
     - name: Test demo
       run: make test
       working-directory: examples/demo

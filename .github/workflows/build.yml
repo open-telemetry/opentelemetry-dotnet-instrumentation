@@ -23,6 +23,7 @@ jobs:
             log-dir: "/var/log/opentelemetry/dotnet"
     runs-on: ${{ matrix.machine }}
     steps:
+
       - name: ARM64 Runner Info
         if: ${{ matrix.machine == 'actuated-arm64' }}
         run: cat /etc/os-release
@@ -44,6 +45,7 @@ jobs:
             6.0.419
             7.0.406
             8.0.201
+
       - name: Check for NuGet packages cache
         uses: actions/cache@v4.0.0
         id: nuget-cache

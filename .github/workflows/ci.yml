@@ -51,6 +51,7 @@ jobs:
             containers: linux
     runs-on: ${{ matrix.machine }}
     steps:
+
       - name: Checkout
         uses: actions/checkout@v4.1.1
         with:
@@ -68,6 +69,7 @@ jobs:
             6.0.419
             7.0.406
             8.0.201
+
       - name: Check for NuGet packages cache
         uses: actions/cache@v4.0.0
         id: nuget-cache
@@ -119,6 +121,7 @@ jobs:
         machine: [ windows-2022 ]
     runs-on: ${{ matrix.machine }}
     steps:
+
       - name: Checkout
         uses: actions/checkout@v4.1.1
         with:
@@ -131,6 +134,7 @@ jobs:
             6.0.419
             7.0.406
             8.0.201
+
       - name: Check for NuGet packages cache
         uses: actions/cache@v4.0.0
         id: nuget-cache
@@ -157,6 +161,7 @@ jobs:
             containers: windows-only
     runs-on: ${{ matrix.machine }}
     steps:
+
       - name: Checkout
         uses: actions/checkout@v4.1.1
         with:
@@ -169,6 +174,7 @@ jobs:
             6.0.419
             7.0.406
             8.0.201
+
       - name: Check for NuGet packages cache
         uses: actions/cache@v4.0.0
         id: nuget-cache
@@ -213,6 +219,7 @@ jobs:
     runs-on: ubuntu-20.04
     timeout-minutes: 60
     steps:
+
     - name: Checkout
       uses: actions/checkout@v4.1.1
       with:
@@ -242,6 +249,7 @@ jobs:
           - machine: windows-2022
     runs-on: ${{ matrix.machine }}
     steps:
+      
       - name: Checkout
         uses: actions/checkout@v4.1.1
         with:
@@ -254,6 +262,7 @@ jobs:
             6.0.419
             7.0.406
             8.0.201
+
       - name: Check for NuGet packages cache
         uses: actions/cache@v4.0.0
         id: nuget-cache
