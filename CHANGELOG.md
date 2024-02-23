@@ -9,6 +9,9 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 
 ### Added
 
+- .NET only, warning in logs about End of Support date
+  and upcoming End of Support date for .NET version.
+
 ### Changed
 
 #### Dependency updates
