@@ -254,6 +254,7 @@ jobs:
           - machine: ubuntu-20.04
           - machine: macos-11
           - machine: windows-2022
+          - machine: actuated-arm64
     runs-on: ${{ matrix.machine }}
     steps:
       
@@ -261,6 +262,11 @@ jobs:
         uses: actions/checkout@v4.1.1
         with:
           fetch-depth: 0 # fetching all, needed to correctly calculate version
+
+      - name: Setup ARM64 Environment Variables
+        if: ${{ matrix.machine == 'actuated-arm64' }}
+        run: |
+          echo "DOTNET_INSTALL_DIR=~/.dotnet" >> $GITHUB_ENV
 
       - name: Setup .NET
         uses: actions/setup-dotnet@v4.0.0
