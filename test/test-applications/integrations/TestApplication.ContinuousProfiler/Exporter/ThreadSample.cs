@@ -5,13 +5,12 @@ namespace TestApplication.ContinuousProfiler;
 
 internal class ThreadSample
 {
-    public ThreadSample(Time timestamp, long traceIdHigh, long traceIdLow, long spanId, int managedId, string? threadName, uint threadIndex = default)
+    public ThreadSample(Time timestamp, long traceIdHigh, long traceIdLow, long spanId, string? threadName, uint threadIndex = default)
     {
         Timestamp = timestamp;
         TraceIdHigh = traceIdHigh;
         TraceIdLow = traceIdLow;
         SpanId = spanId;
-        ManagedId = managedId;
         ThreadName = threadName;
         ThreadIndex = threadIndex;
     }
@@ -23,8 +22,6 @@ internal class ThreadSample
     public long TraceIdHigh { get; }
 
     public long TraceIdLow { get; }
-
-    public int ManagedId { get; }
 
     public string? ThreadName { get; }
 

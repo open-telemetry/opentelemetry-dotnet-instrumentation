@@ -69,7 +69,6 @@ internal static class ContinuousProfilerProcessor
     private static void ActivityChanged(AsyncLocalValueChangedArgs<Activity?> sender)
     {
         var currentActivity = sender.CurrentValue;
-        var managedThreadId = Environment.CurrentManagedThreadId;
 
         if (currentActivity != null)
         {
@@ -79,12 +78,12 @@ internal static class ContinuousProfilerProcessor
                 ulong.TryParse(hexTraceId.AsSpan(16), NumberStyles.HexNumber, CultureInfo.InvariantCulture, out var traceIdLow) &&
                 ulong.TryParse(currentActivity.SpanId.ToHexString(), NumberStyles.HexNumber, CultureInfo.InvariantCulture, out var spanId))
             {
-                NativeMethods.ContinuousProfilerSetNativeContext(traceIdHigh, traceIdLow, spanId, managedThreadId);
+                NativeMethods.ContinuousProfilerSetNativeContext(traceIdHigh, traceIdLow, spanId);
                 return;
             }
         }
 
-        NativeMethods.ContinuousProfilerSetNativeContext(0, 0, 0, managedThreadId);
+        NativeMethods.ContinuousProfilerSetNativeContext(0, 0, 0);
     }
 
     private static void SampleReadingThread(BufferProcessor sampleExporter, TimeSpan exportInterval)
