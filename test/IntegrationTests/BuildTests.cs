@@ -58,10 +58,10 @@ public class BuildTests
         {
             if (Environment.GetEnvironmentVariable("IsAlpine") == "true")
             {
-                return "alpine-linux";
+                return $"alpine-linux-{GetPlatform()}";
             }
 
-            return $"linux_{GetPlatform()}";
+            return $"linux-{GetPlatform()}";
         }
 
         if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
