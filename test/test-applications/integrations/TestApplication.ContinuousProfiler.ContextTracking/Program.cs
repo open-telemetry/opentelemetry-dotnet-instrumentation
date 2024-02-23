@@ -11,6 +11,7 @@ internal class Program
 
     public static async Task Main(string[] args)
     {
+        Thread.CurrentThread.Name = "TestName";
         // Start an activity that remains active until async operation completes,
         // and verify that trace context flows properly between threads that carry out parts of the async operation.
         using var activity = Source.StartActivity();
