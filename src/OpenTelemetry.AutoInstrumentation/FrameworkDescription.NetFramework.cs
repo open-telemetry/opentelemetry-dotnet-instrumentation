@@ -2,15 +2,19 @@
 // SPDX-License-Identifier: Apache-2.0
 
 #if NETFRAMEWORK
+using System.Reflection;
 using Microsoft.Win32;
 
 namespace OpenTelemetry.AutoInstrumentation;
 
 internal partial class FrameworkDescription
 {
+    private static readonly Assembly RootAssembly = typeof(object).Assembly;
+
     private static readonly Tuple<int, string>[] DotNetFrameworkVersionMapping =
     {
         // known min value for each framework version
+        Tuple.Create(533320, "4.8.1"),
         Tuple.Create(528040, "4.8"),
         Tuple.Create(461808, "4.7.2"),
         Tuple.Create(461308, "4.7.1"),
@@ -92,6 +96,40 @@ internal partial class FrameworkDescription
         {
             // at this point, everything else has failed (this is probably the same as [AssemblyFileVersion] above)
             productVersion = Environment.Version.ToString();
+        }
+
+        return productVersion;
+    }
+
+    private static string? GetVersionFromAssemblyAttributes()
+    {
+        string? productVersion = null;
+
+        try
+        {
+            // if we fail to extract version from assembly path, fall back to the [AssemblyInformationalVersion],
+            var informationalVersionAttribute = RootAssembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>();
+
+            // split remove the commit hash from pre-release versions
+            productVersion = informationalVersionAttribute?.InformationalVersion?.Split('+')[0];
+        }
+        catch (Exception e)
+        {
+            Log.Error(e, "Error getting framework version from [AssemblyInformationalVersion]");
+        }
+
+        if (productVersion == null)
+        {
+            try
+            {
+                // and if that fails, try [AssemblyFileVersion]
+                var fileVersionAttribute = RootAssembly.GetCustomAttribute<AssemblyFileVersionAttribute>();
+                productVersion = fileVersionAttribute?.Version;
+            }
+            catch (Exception e)
+            {
+                Log.Error(e, "Error getting framework version from [AssemblyFileVersion]");
+            }
         }
 
         return productVersion;
