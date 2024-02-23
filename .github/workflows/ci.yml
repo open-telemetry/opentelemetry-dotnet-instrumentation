@@ -207,16 +207,27 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - base-image: alpine
-            build-source: alpine
+          - machine: ubuntu-20.04
+            base-image: alpine
+            build-source: alpine-x64
             os-type: linux-musl
-          - base-image: centos
+          - machine: ubuntu-20.04
+            base-image: centos
             build-source: ubuntu-20.04
             os-type: linux-glibc
-          - base-image: debian
+          - machine: ubuntu-20.04
+            base-image: debian
             build-source: ubuntu-20.04
             os-type: linux-glibc
-    runs-on: ubuntu-20.04
+          - machine: actuated-arm64
+            base-image: alpine
+            build-source: alpine-arm64
+            os-type: linux-musl
+          - machine: actuated-arm64
+            base-image: debian
+            build-source: actuated-arm64
+            os-type: linux-glibc
+    runs-on: ${{ matrix.machine }}
     timeout-minutes: 60
     steps:
 
