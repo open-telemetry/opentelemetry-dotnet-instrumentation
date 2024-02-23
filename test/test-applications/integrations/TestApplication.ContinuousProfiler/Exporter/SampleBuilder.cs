@@ -29,6 +29,12 @@ internal class SampleBuilder
         return this;
     }
 
+    public SampleBuilder SetLink(ulong linkId)
+    {
+        _sample.Link = linkId;
+        return this;
+    }
+
     public Sample Build()
     {
         _sample.LocationIndex.AddRange(_locationIds);

@@ -113,8 +113,7 @@ public class OtlpOverHttpExporter
 
         if (threadSample.SpanId != 0 || threadSample.TraceIdHigh != 0 || threadSample.TraceIdLow != 0)
         {
-            extendedPprofBuilder.AddLabel(sampleBuilder, "span_id", threadSample.SpanId.ToString("x16"));
-            extendedPprofBuilder.AddLabel(sampleBuilder, "trace_id", $"{threadSample.TraceIdHigh:x16}{threadSample.TraceIdLow:x16}");
+            extendedPprofBuilder.AddLink(sampleBuilder, threadSample.SpanId, threadSample.TraceIdHigh, threadSample.TraceIdLow);
         }
 
         for (var index = 0; index < threadSample.Frames.Count; index++)

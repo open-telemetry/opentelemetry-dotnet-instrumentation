@@ -1,6 +1,7 @@
 // Copyright The OpenTelemetry Authors
 // SPDX-License-Identifier: Apache-2.0
 
+using Google.Protobuf;
 using OpenTelemetry.Proto.Profiles.V1.Alternatives.PprofExtended;
 
 namespace TestApplication.ContinuousProfiler;
@@ -9,6 +10,7 @@ internal class ExtendedPprofBuilder
 {
     private readonly StringTable _stringTable;
     private readonly LocationTable _locationTable;
+    private readonly LinkTable _linkTable;
 
     public ExtendedPprofBuilder()
     {
@@ -16,6 +18,7 @@ internal class ExtendedPprofBuilder
         _stringTable = new StringTable(Profile);
         var functionTable = new FunctionTable(Profile, _stringTable);
         _locationTable = new LocationTable(Profile, functionTable);
+        _linkTable = new LinkTable(Profile);
     }
 
     public Profile Profile { get; }
@@ -23,6 +26,12 @@ internal class ExtendedPprofBuilder
     public long GetStringId(string str) => _stringTable.Get(str);
 
     public ulong GetLocationId(string function) => _locationTable.Get(function);
+
+    public void AddLink(SampleBuilder sampleBuilder, long spanId, long traceIdHigh, long traceIdLow)
+    {
+        var linkId = _linkTable.Get(spanId, traceIdHigh, traceIdLow);
+        sampleBuilder.SetLink(linkId);
+    }
 
     public void AddLabel(SampleBuilder sample, string name, string value)
     {
@@ -114,6 +123,33 @@ internal class ExtendedPprofBuilder
             location.Line.Add(new Line { FunctionIndex = _functionTable.Get(functionKey), Line_ = 0, Column = 0 }); // for now, we don't support line nor column number
 
             _profile.Location.Add(location);
+            return _index++;
+        }
+    }
+
+    private class LinkTable
+    {
+        private readonly Profile _profile;
+        private ulong _index = 1; // 0 is reserved
+
+        public LinkTable(Profile profile)
+        {
+            _profile = profile;
+        }
+
+        public ulong Get(long spanId, long traceIdHigh, long traceIdLow)
+        {
+            var traceIdHighBytes = BitConverter.GetBytes(traceIdHigh);
+            var traceIdLowBytes = BitConverter.GetBytes(traceIdLow);
+
+            var link = new Link
+            {
+                SpanId = UnsafeByteOperations.UnsafeWrap(BitConverter.GetBytes(spanId)),
+                TraceId = UnsafeByteOperations.UnsafeWrap(traceIdHighBytes.Concat(traceIdLowBytes).ToArray())
+            };
+
+            _profile.LinkTable.Add(link);
+
             return _index++;
         }
     }
