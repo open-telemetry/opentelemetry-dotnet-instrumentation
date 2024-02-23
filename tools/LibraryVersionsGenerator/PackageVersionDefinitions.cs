@@ -216,7 +216,8 @@ internal static class PackageVersionDefinitions
             TestApplicationName = "TestApplication.Kafka",
             Versions = new List<PackageVersion>
             {
-                new("1.4.0"),
+                // TODO: Temporarily disable version 1.4.0, Doesn't support ARM64
+                // new("1.4.0"),
                 new("*")
             }
         }
