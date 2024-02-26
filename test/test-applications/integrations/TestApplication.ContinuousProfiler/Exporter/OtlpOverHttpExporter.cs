@@ -44,9 +44,12 @@ public class OtlpOverHttpExporter
                 extendedPprofBuilder.Profile.Sample.Add(sampleBuilder.Build());
             }
 
-            var profileContainer = CreateProfileContainer(extendedPprofBuilder.Profile, "cpu");
+            var timestampNanoseconds = threadSamples[0].TimestampNanoseconds; // all items in the batch have same timestamp
 
-            var scopeProfiles = CreateScopeProfiles(profileContainer);
+            var profileContainer = CreateProfileContainer(extendedPprofBuilder.Profile, "cpu", timestampNanoseconds);
+
+            var scopeProfiles = CreateScopeProfiles();
+            scopeProfiles.Profiles.Add(profileContainer);
 
             var resourceProfiles = CreateResourceProfiles(scopeProfiles);
 
@@ -76,19 +79,29 @@ public class OtlpOverHttpExporter
 
         try
         {
+            var scopeProfiles = CreateScopeProfiles();
+
+            var lastTimestamp = allocationSamples[0].ThreadSample.TimestampNanoseconds;
             var extendedPprofBuilder = new ExtendedPprofBuilder();
-            for (var index = 0; index < allocationSamples.Count; index++)
+            var profileContainer = CreateProfileContainer(extendedPprofBuilder.Profile, "allocation", lastTimestamp);
+            scopeProfiles.Profiles.Add(profileContainer);
+
+            for (var i = 0; i < allocationSamples.Count; i++)
             {
-                var allocationSample = allocationSamples[index];
+                var allocationSample = allocationSamples[i];
+                if (allocationSample.ThreadSample.TimestampNanoseconds != lastTimestamp)
+                {
+                    extendedPprofBuilder = new ExtendedPprofBuilder();
+                    lastTimestamp = allocationSample.ThreadSample.TimestampNanoseconds;
+                    profileContainer = CreateProfileContainer(extendedPprofBuilder.Profile, "allocation", lastTimestamp);
+                    scopeProfiles.Profiles.Add(profileContainer);
+                }
+
                 var sampleBuilder = CreateSampleBuilder(allocationSample.ThreadSample, extendedPprofBuilder);
 
                 sampleBuilder.SetValue(allocationSample.AllocationSizeBytes);
                 extendedPprofBuilder.Profile.Sample.Add(sampleBuilder.Build());
             }
-
-            var profileContainer = CreateProfileContainer(extendedPprofBuilder.Profile, "allocation");
-
-            var scopeProfiles = CreateScopeProfiles(profileContainer);
 
             var resourceProfiles = CreateResourceProfiles(scopeProfiles);
 
@@ -128,7 +141,6 @@ public class OtlpOverHttpExporter
             extendedPprofBuilder.AddAttribute(sampleBuilder, "thread.name", threadSample.ThreadName);
         }
 
-        extendedPprofBuilder.AddAttribute(sampleBuilder, "source.event.time", threadSample.Timestamp.Milliseconds);
         return sampleBuilder;
     }
 
@@ -161,16 +173,14 @@ public class OtlpOverHttpExporter
         return resourceProfiles;
     }
 
-    private static ScopeProfiles CreateScopeProfiles(ProfileContainer profileContainer)
+    private static ScopeProfiles CreateScopeProfiles()
     {
         var scopeProfiles = new ScopeProfiles();
-
-        scopeProfiles.Profiles.Add(profileContainer);
 
         return scopeProfiles;
     }
 
-    private ProfileContainer CreateProfileContainer(Profile profile, string profilingDataType)
+    private ProfileContainer CreateProfileContainer(Profile profile, string profilingDataType, ulong timestampNanoseconds)
     {
         var profileByteId = new byte[16];
         ActivityTraceId.CreateRandom().CopyTo(profileByteId);
@@ -178,7 +188,9 @@ public class OtlpOverHttpExporter
         var profileContainer = new ProfileContainer
         {
             Profile = profile,
-            ProfileId = UnsafeByteOperations.UnsafeWrap(profileByteId) // ProfileId should be same as TraceId - 16 bytes
+            ProfileId = UnsafeByteOperations.UnsafeWrap(profileByteId), // ProfileId should be same as TraceId - 16 bytes
+            StartTimeUnixNano = timestampNanoseconds,
+            EndTimeUnixNano = timestampNanoseconds
         };
 
         profileContainer.Attributes.Add(new KeyValue { Key = "todo.profiling.data.type", Value = new AnyValue { StringValue = profilingDataType } });
