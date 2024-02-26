@@ -1,6 +1,7 @@
 // Copyright The OpenTelemetry Authors
 // SPDX-License-Identifier: Apache-2.0
 
+using System.Diagnostics;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
@@ -169,11 +170,15 @@ public class OtlpOverHttpExporter
         return scopeProfiles;
     }
 
-    private static ProfileContainer CreateProfileContainer(Profile profile, string profilingDataType)
+    private ProfileContainer CreateProfileContainer(Profile profile, string profilingDataType)
     {
+        var profileByteId = new byte[16];
+        ActivityTraceId.CreateRandom().CopyTo(profileByteId);
+
         var profileContainer = new ProfileContainer
         {
-            Profile = profile
+            Profile = profile,
+            ProfileId = UnsafeByteOperations.UnsafeWrap(profileByteId) // ProfileId should be same as TraceId - 16 bytes
         };
 
         profileContainer.Attributes.Add(new KeyValue { Key = "todo.profiling.data.type", Value = new AnyValue { StringValue = profilingDataType } });
