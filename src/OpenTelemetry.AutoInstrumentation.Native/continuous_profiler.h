@@ -16,8 +16,6 @@
 #include <unordered_map>
 #include <random>
 
-constexpr auto unknown_managed_thread_id = -1;
-
 #ifdef _WIN32
 #define EXPORTTHIS __declspec(dllexport)
 #else
@@ -29,7 +27,7 @@ extern "C"
     EXPORTTHIS int32_t ContinuousProfilerReadThreadSamples(int32_t len, unsigned char* buf);
     EXPORTTHIS int32_t ContinuousProfilerReadAllocationSamples(int32_t len, unsigned char* buf);
     // ReSharper disable CppInconsistentNaming
-    EXPORTTHIS void ContinuousProfilerSetNativeContext(uint64_t traceIdHigh, uint64_t traceIdLow, uint64_t spanId, int32_t managedThreadId);
+    EXPORTTHIS void ContinuousProfilerSetNativeContext(uint64_t traceIdHigh, uint64_t traceIdLow, uint64_t spanId);
     // ReSharper restore CppInconsistentNaming
 }
 
@@ -59,17 +57,16 @@ public:
     uint64_t trace_id_high_;
     uint64_t trace_id_low_;
     uint64_t span_id_;
-    int32_t managed_thread_id_;
 
-    thread_span_context() : trace_id_high_(0), trace_id_low_(0), span_id_(0), managed_thread_id_(unknown_managed_thread_id)
+    thread_span_context() : trace_id_high_(0), trace_id_low_(0), span_id_(0)
     {
     }
-    thread_span_context(uint64_t _traceIdHigh, uint64_t _traceIdLow, uint64_t _spanId, int32_t managedThreadId) :
-        trace_id_high_(_traceIdHigh), trace_id_low_(_traceIdLow), span_id_(_spanId), managed_thread_id_(managedThreadId)
+    thread_span_context(uint64_t _traceIdHigh, uint64_t _traceIdLow, uint64_t _spanId) :
+        trace_id_high_(_traceIdHigh), trace_id_low_(_traceIdLow), span_id_(_spanId)
     {
     }
     thread_span_context(thread_span_context const& other) :
-        trace_id_high_(other.trace_id_high_), trace_id_low_(other.trace_id_low_), span_id_(other.span_id_), managed_thread_id_(other.managed_thread_id_)
+        trace_id_high_(other.trace_id_high_), trace_id_low_(other.trace_id_low_), span_id_(other.span_id_)
     {
     }
 };
