@@ -66,15 +66,15 @@ internal static class NativeMethods
         return IsWindows ? Windows.ContinuousProfilerReadAllocationSamples(len, buf) : NonWindows.ContinuousProfilerReadAllocationSamples(len, buf);
     }
 
-    public static void ContinuousProfilerSetNativeContext(ulong traceIdHigh, ulong traceIdLow, ulong spanId, int managedThreadId)
+    public static void ContinuousProfilerSetNativeContext(ulong traceIdHigh, ulong traceIdLow, ulong spanId)
     {
         if (IsWindows)
         {
-            Windows.ContinuousProfilerSetNativeContext(traceIdHigh, traceIdLow, spanId, managedThreadId);
+            Windows.ContinuousProfilerSetNativeContext(traceIdHigh, traceIdLow, spanId);
         }
         else
         {
-            NonWindows.ContinuousProfilerSetNativeContext(traceIdHigh, traceIdLow, spanId, managedThreadId);
+            NonWindows.ContinuousProfilerSetNativeContext(traceIdHigh, traceIdLow, spanId);
         }
     }
 #endif
@@ -101,7 +101,7 @@ internal static class NativeMethods
         public static extern int ContinuousProfilerReadAllocationSamples(int len, byte[] buf);
 
         [DllImport("OpenTelemetry.AutoInstrumentation.Native.dll")]
-        public static extern void ContinuousProfilerSetNativeContext(ulong traceIdHigh, ulong traceIdLow, ulong spanId, int managedThreadId);
+        public static extern void ContinuousProfilerSetNativeContext(ulong traceIdHigh, ulong traceIdLow, ulong spanId);
 #endif
     }
 
@@ -125,7 +125,7 @@ internal static class NativeMethods
         public static extern int ContinuousProfilerReadAllocationSamples(int len, byte[] buf);
 
         [DllImport("OpenTelemetry.AutoInstrumentation.Native")]
-        public static extern void ContinuousProfilerSetNativeContext(ulong traceIdHigh, ulong traceIdLow, ulong spanId, int managedThreadId);
+        public static extern void ContinuousProfilerSetNativeContext(ulong traceIdHigh, ulong traceIdLow, ulong spanId);
 #endif
     }
 }

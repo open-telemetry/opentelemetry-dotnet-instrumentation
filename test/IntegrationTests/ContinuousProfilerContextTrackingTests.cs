@@ -30,7 +30,7 @@ public class ContinuousProfilerContextTrackingTests : TestHelper
         var batchSeparator = $"{Environment.NewLine}{Environment.NewLine}";
 
         var totalSamplesWithTraceContextCount = 0;
-        var managedThreadsWithTraceContext = new HashSet<int>();
+        var managedThreadsWithTraceContext = new HashSet<string>();
 
         var exportedSampleBatches = standardOutput.TrimEnd().Split(batchSeparator);
 
@@ -53,7 +53,7 @@ public class ContinuousProfilerContextTrackingTests : TestHelper
             totalSamplesWithTraceContextCount += samplesWithTraceContext.Count;
             if (samplesWithTraceContext.FirstOrDefault() is { } sampleWithTraceContext)
             {
-                managedThreadsWithTraceContext.Add(GetPropertyValue("ManagedId", sampleWithTraceContext).GetInt32());
+                managedThreadsWithTraceContext.Add(GetPropertyValue("ThreadName", sampleWithTraceContext).GetString()!);
             }
         }
 
@@ -64,12 +64,11 @@ public class ContinuousProfilerContextTrackingTests : TestHelper
     private static bool HasTraceContextAssociated(List<JsonProperty> sample)
     {
         const int defaultTraceContextValue = 0;
-        const int defaultManagedThreadIdValue = -1;
 
         return GetPropertyValue("SpanId", sample).GetInt64() != defaultTraceContextValue &&
                GetPropertyValue("TraceIdHigh", sample).GetInt64() != defaultTraceContextValue &&
                GetPropertyValue("TraceIdLow", sample).GetInt64() != defaultTraceContextValue &&
-               GetPropertyValue("ManagedId", sample).GetInt32() != defaultManagedThreadIdValue;
+               !string.IsNullOrWhiteSpace(GetPropertyValue("ThreadName", sample).GetString());
     }
 
     private static JsonElement GetPropertyValue(string propertyName, List<JsonProperty> jsonProperties)
