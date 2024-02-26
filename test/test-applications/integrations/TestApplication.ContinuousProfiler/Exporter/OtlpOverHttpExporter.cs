@@ -124,10 +124,10 @@ public class OtlpOverHttpExporter
 
         if (!string.IsNullOrEmpty(threadSample.ThreadName))
         {
-            extendedPprofBuilder.AddLabel(sampleBuilder, "thread.name", threadSample.ThreadName);
+            extendedPprofBuilder.AddAttribute(sampleBuilder, "thread.name", threadSample.ThreadName);
         }
 
-        extendedPprofBuilder.AddLabel(sampleBuilder, "source.event.time", threadSample.Timestamp.Milliseconds);
+        extendedPprofBuilder.AddAttribute(sampleBuilder, "source.event.time", threadSample.Timestamp.Milliseconds);
         return sampleBuilder;
     }
 

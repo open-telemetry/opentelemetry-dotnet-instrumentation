@@ -2,28 +2,28 @@
 // SPDX-License-Identifier: Apache-2.0
 
 using Google.Protobuf;
+using OpenTelemetry.Proto.Common.V1;
 using OpenTelemetry.Proto.Profiles.V1.Alternatives.PprofExtended;
 
 namespace TestApplication.ContinuousProfiler;
 
 internal class ExtendedPprofBuilder
 {
-    private readonly StringTable _stringTable;
     private readonly LocationTable _locationTable;
     private readonly LinkTable _linkTable;
+    private readonly AttributeTable _attributeTable;
 
     public ExtendedPprofBuilder()
     {
         Profile = new Profile();
-        _stringTable = new StringTable(Profile);
-        var functionTable = new FunctionTable(Profile, _stringTable);
+        var stringTable = new StringTable(Profile);
+        var functionTable = new FunctionTable(Profile, stringTable);
         _locationTable = new LocationTable(Profile, functionTable);
         _linkTable = new LinkTable(Profile);
+        _attributeTable = new AttributeTable(Profile);
     }
 
     public Profile Profile { get; }
-
-    public long GetStringId(string str) => _stringTable.Get(str);
 
     public ulong GetLocationId(string function) => _locationTable.Get(function);
 
@@ -33,21 +33,21 @@ internal class ExtendedPprofBuilder
         sampleBuilder.SetLink(linkId);
     }
 
-    public void AddLabel(SampleBuilder sample, string name, string value)
+    public void AddAttribute(SampleBuilder sample, string name, string value)
     {
-        AddLabel(sample, name, label => label.Str = _stringTable.Get(value));
+        AddAttribute(sample, name, anyValue => anyValue.StringValue = value);
     }
 
-    public void AddLabel(SampleBuilder sampleBuilder, string name, long value)
+    public void AddAttribute(SampleBuilder sampleBuilder, string name, long value)
     {
-        AddLabel(sampleBuilder, name, label => label.Num = value);
+        AddAttribute(sampleBuilder, name, anyValue => anyValue.IntValue = value);
     }
 
-    private void AddLabel(SampleBuilder sampleBuilder, string name, Action<Label> setLabel)
+    private void AddAttribute(SampleBuilder sampleBuilder, string name, Action<AnyValue> setValue)
     {
-        var label = new Label { Key = _stringTable.Get(name) };
-        setLabel(label);
-        sampleBuilder.AddLabel(label);
+        var attributeId = _attributeTable.Get(name, setValue);
+
+        sampleBuilder.AddAttribute(attributeId);
     }
 
     private class StringTable
@@ -149,6 +149,40 @@ internal class ExtendedPprofBuilder
             };
 
             _profile.LinkTable.Add(link);
+
+            return _index++;
+        }
+    }
+
+    private class AttributeTable
+    {
+        private readonly Profile _profile;
+        private readonly Dictionary<KeyValue, ulong> _table = new();
+        private ulong _index = 1; // 0 is reserved
+
+        public AttributeTable(Profile profile)
+        {
+            _profile = profile;
+        }
+
+        public ulong Get(string name, Action<AnyValue> setValue)
+        {
+            var keyValue = new KeyValue
+            {
+                Key = name,
+                Value = new AnyValue()
+            };
+
+            setValue(keyValue.Value);
+
+            if (_table.TryGetValue(keyValue, out var index))
+            {
+                return index;
+            }
+
+            _table[keyValue] = _index;
+
+            _profile.AttributeTable.Add(keyValue);
 
             return _index++;
         }

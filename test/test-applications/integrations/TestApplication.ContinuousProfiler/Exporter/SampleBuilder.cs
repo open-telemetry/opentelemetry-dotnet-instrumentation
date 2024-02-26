@@ -11,9 +11,9 @@ internal class SampleBuilder
     private readonly IList<ulong> _locationIds = new List<ulong>();
     private long? _value;
 
-    public SampleBuilder AddLabel(Label label)
+    public SampleBuilder AddAttribute(ulong attributeId)
     {
-        _sample.Label.Add(label);
+        _sample.Attributes.Add(attributeId);
         return this;
     }
 
