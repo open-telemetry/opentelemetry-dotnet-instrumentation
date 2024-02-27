@@ -136,7 +136,7 @@ public static class LibraryVersion
             new List<PackageBuildInfo>
             {
                 new("3.4.0"),
-                new("3.8.0"),
+                new("3.8.1"),
             }
         },
         {
