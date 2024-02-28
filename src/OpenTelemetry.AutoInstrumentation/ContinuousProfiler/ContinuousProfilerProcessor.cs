@@ -5,29 +5,23 @@
 
 using System.Diagnostics;
 using System.Globalization;
-using System.Reflection;
 using OpenTelemetry.AutoInstrumentation.Logging;
 
 namespace OpenTelemetry.AutoInstrumentation.ContinuousProfiler;
 
-internal static class ContinuousProfilerProcessor
+internal class ContinuousProfilerProcessor : IDisposable
 {
-    public const string BackgroundThreadName = "OpenTelemetry Continuous Profiler Thread";
+    private const string BackgroundThreadName = "OpenTelemetry Continuous Profiler Thread";
 
     private static readonly IOtelLogger Logger = OtelLogging.GetLogger();
+
     // Additional async local required to get full set of notifications,
     // see https://github.com/dotnet/runtime/issues/67276#issuecomment-1089877762
-    private static AsyncLocal<Activity?>? _supportingActivityAsyncLocal;
+    private readonly AsyncLocal<Activity?>? _supportingActivityAsyncLocal;
+    private readonly Thread? _thread;
+    private readonly ManualResetEventSlim _shutdownTrigger = new(false);
 
-    public static void Activity_CurrentChanged(object? sender, ActivityChangedEventArgs e)
-    {
-        if (_supportingActivityAsyncLocal != null)
-        {
-            _supportingActivityAsyncLocal.Value = e.Current;
-        }
-    }
-
-    public static void Initialize(bool threadSamplingEnabled, bool allocationSamplingEnabled, TimeSpan exportInterval, object continuousProfilerExporter)
+    public ContinuousProfilerProcessor(bool threadSamplingEnabled, bool allocationSamplingEnabled, TimeSpan exportInterval, object continuousProfilerExporter)
     {
         Logger.Debug("Initializing Continuous Profiler export thread.");
 
@@ -52,8 +46,7 @@ internal static class ContinuousProfilerProcessor
         var threadSamplesMethod = exportThreadSamplesMethod.CreateDelegate<Action<byte[], int>>(continuousProfilerExporter);
         var allocationSamplesMethod = exportAllocationSamplesMethod.CreateDelegate<Action<byte[], int>>(continuousProfilerExporter);
 
-        // TODO Graceful shutdown and Task.Delay https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/issues/3216
-        var thread = new Thread(() =>
+        _thread = new Thread(() =>
         {
             SampleReadingThread(new BufferProcessor(threadSamplingEnabled, allocationSamplingEnabled, threadSamplesMethod, allocationSamplesMethod), exportInterval);
         })
@@ -61,9 +54,24 @@ internal static class ContinuousProfilerProcessor
             Name = BackgroundThreadName,
             IsBackground = true
         };
-        thread.Start();
+        _thread.Start();
 
         Logger.Information("Continuous Profiler export thread initialized.");
+    }
+
+    public void Activity_CurrentChanged(object? sender, ActivityChangedEventArgs e)
+    {
+        if (_supportingActivityAsyncLocal != null)
+        {
+            _supportingActivityAsyncLocal.Value = e.Current;
+        }
+    }
+
+    public void Dispose()
+    {
+        _shutdownTrigger.Set();
+        _thread?.Join();
+        _shutdownTrigger.Dispose();
     }
 
     private static void ActivityChanged(AsyncLocalValueChangedArgs<Activity?> sender)
@@ -86,13 +94,20 @@ internal static class ContinuousProfilerProcessor
         NativeMethods.ContinuousProfilerSetNativeContext(0, 0, 0);
     }
 
-    private static void SampleReadingThread(BufferProcessor sampleExporter, TimeSpan exportInterval)
+    private void SampleReadingThread(BufferProcessor sampleExporter, TimeSpan exportInterval)
     {
         while (true)
         {
-            // TODO Graceful shutdown and Task.Delay https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/issues/3216
-            Thread.Sleep(exportInterval);
+            // TODO Task.Delay https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/issues/3216
+            var shutdownRequested = _shutdownTrigger.Wait(exportInterval);
+
             sampleExporter.Process();
+
+            if (shutdownRequested)
+            {
+                Logger.Debug("Shutdown requested, exiting continuous profiler's exporter thread.");
+                return;
+            }
         }
     }
 }
