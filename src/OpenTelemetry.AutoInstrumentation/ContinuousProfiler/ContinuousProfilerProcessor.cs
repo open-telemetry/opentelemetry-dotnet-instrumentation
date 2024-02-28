@@ -20,6 +20,7 @@ internal class ContinuousProfilerProcessor : IDisposable
     private readonly AsyncLocal<Activity?>? _supportingActivityAsyncLocal;
     private readonly Thread? _thread;
     private readonly ManualResetEventSlim _shutdownTrigger = new(false);
+    private readonly TimeSpan _exportInterval;
 
     public ContinuousProfilerProcessor(bool threadSamplingEnabled, bool allocationSamplingEnabled, TimeSpan exportInterval, object continuousProfilerExporter)
     {
@@ -41,6 +42,7 @@ internal class ContinuousProfilerProcessor : IDisposable
             return;
         }
 
+        _exportInterval = exportInterval;
         _supportingActivityAsyncLocal = new AsyncLocal<Activity?>(ActivityChanged);
 
         var threadSamplesMethod = exportThreadSamplesMethod.CreateDelegate<Action<byte[], int>>(continuousProfilerExporter);
@@ -48,7 +50,7 @@ internal class ContinuousProfilerProcessor : IDisposable
 
         _thread = new Thread(() =>
         {
-            SampleReadingThread(new BufferProcessor(threadSamplingEnabled, allocationSamplingEnabled, threadSamplesMethod, allocationSamplesMethod), exportInterval);
+            SampleReadingThread(new BufferProcessor(threadSamplingEnabled, allocationSamplingEnabled, threadSamplesMethod, allocationSamplesMethod));
         })
         {
             Name = BackgroundThreadName,
@@ -70,7 +72,11 @@ internal class ContinuousProfilerProcessor : IDisposable
     public void Dispose()
     {
         _shutdownTrigger.Set();
-        _thread?.Join();
+        if (_thread != null && !_thread.Join(_exportInterval))
+        {
+            Logger.Warning("Continuous profiler's exporter thread failed to terminate in required time.");
+        }
+
         _shutdownTrigger.Dispose();
     }
 
@@ -94,12 +100,12 @@ internal class ContinuousProfilerProcessor : IDisposable
         NativeMethods.ContinuousProfilerSetNativeContext(0, 0, 0);
     }
 
-    private void SampleReadingThread(BufferProcessor sampleExporter, TimeSpan exportInterval)
+    private void SampleReadingThread(BufferProcessor sampleExporter)
     {
         while (true)
         {
             // TODO Task.Delay https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/issues/3216
-            var shutdownRequested = _shutdownTrigger.Wait(exportInterval);
+            var shutdownRequested = _shutdownTrigger.Wait(_exportInterval);
 
             sampleExporter.Process();
 
