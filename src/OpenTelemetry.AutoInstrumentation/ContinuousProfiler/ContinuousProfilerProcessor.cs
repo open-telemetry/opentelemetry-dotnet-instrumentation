@@ -17,36 +17,17 @@ internal class ContinuousProfilerProcessor : IDisposable
 
     // Additional async local required to get full set of notifications,
     // see https://github.com/dotnet/runtime/issues/67276#issuecomment-1089877762
-    private readonly AsyncLocal<Activity?>? _supportingActivityAsyncLocal;
-    private readonly Thread? _thread;
+    private readonly AsyncLocal<Activity?> _supportingActivityAsyncLocal;
+    private readonly Thread _thread;
     private readonly ManualResetEventSlim _shutdownTrigger = new(false);
     private readonly TimeSpan _exportInterval;
 
-    public ContinuousProfilerProcessor(bool threadSamplingEnabled, bool allocationSamplingEnabled, TimeSpan exportInterval, object continuousProfilerExporter)
+    public ContinuousProfilerProcessor(bool threadSamplingEnabled, bool allocationSamplingEnabled, Action<byte[], int> threadSamplesMethod, Action<byte[], int> allocationSamplesMethod, TimeSpan exportInterval)
     {
         Logger.Debug("Initializing Continuous Profiler export thread.");
 
-        var continuousProfilerExporterType = continuousProfilerExporter.GetType();
-        var exportThreadSamplesMethod = continuousProfilerExporterType.GetMethod("ExportThreadSamples");
-
-        if (exportThreadSamplesMethod == null)
-        {
-            Logger.Warning("Exporter does not have ExportThreadSamples method. Continuous Profiler initialization failed.");
-            return;
-        }
-
-        var exportAllocationSamplesMethod = continuousProfilerExporterType.GetMethod("ExportAllocationSamples");
-        if (exportAllocationSamplesMethod == null)
-        {
-            Logger.Warning("Exporter does not have ExportAllocationSamples method. Continuous Profiler initialization failed.");
-            return;
-        }
-
         _exportInterval = exportInterval;
         _supportingActivityAsyncLocal = new AsyncLocal<Activity?>(ActivityChanged);
-
-        var threadSamplesMethod = exportThreadSamplesMethod.CreateDelegate<Action<byte[], int>>(continuousProfilerExporter);
-        var allocationSamplesMethod = exportAllocationSamplesMethod.CreateDelegate<Action<byte[], int>>(continuousProfilerExporter);
 
         _thread = new Thread(() =>
         {
@@ -63,16 +44,13 @@ internal class ContinuousProfilerProcessor : IDisposable
 
     public void Activity_CurrentChanged(object? sender, ActivityChangedEventArgs e)
     {
-        if (_supportingActivityAsyncLocal != null)
-        {
-            _supportingActivityAsyncLocal.Value = e.Current;
-        }
+        _supportingActivityAsyncLocal.Value = e.Current;
     }
 
     public void Dispose()
     {
         _shutdownTrigger.Set();
-        if (_thread != null && !_thread.Join(_exportInterval))
+        if (!_thread.Join(_exportInterval))
         {
             Logger.Warning("Continuous profiler's exporter thread failed to terminate in required time.");
         }

@@ -99,10 +99,7 @@ internal static class Instrumentation
 
                 if (threadSamplingEnabled || allocationSamplingEnabled)
                 {
-                    NativeMethods.ConfigureNativeContinuousProfiler(threadSamplingEnabled, threadSamplingInterval, allocationSamplingEnabled, maxMemorySamplesPerMinute);
-
-                    _profilerProcessor = new ContinuousProfilerProcessor(threadSamplingEnabled, allocationSamplingEnabled, exportInterval, continuousProfilerExporter);
-                    Activity.CurrentChanged += _profilerProcessor.Activity_CurrentChanged;
+                    InitializeContinuousProfiling(continuousProfilerExporter, threadSamplingEnabled, allocationSamplingEnabled, threadSamplingInterval, maxMemorySamplesPerMinute, exportInterval);
                 }
             }
             else
@@ -219,6 +216,34 @@ internal static class Instrumentation
             OpenTracingHelper.EnableOpenTracing(_tracerProvider);
         }
     }
+
+#if NET6_0_OR_GREATER
+    private static void InitializeContinuousProfiling(object continuousProfilerExporter, bool threadSamplingEnabled, bool allocationSamplingEnabled, uint threadSamplingInterval, uint maxMemorySamplesPerMinute, TimeSpan exportInterval)
+    {
+        var continuousProfilerExporterType = continuousProfilerExporter.GetType();
+        var exportThreadSamplesMethod = continuousProfilerExporterType.GetMethod("ExportThreadSamples");
+
+        if (exportThreadSamplesMethod == null)
+        {
+            Logger.Warning("Exporter does not have ExportThreadSamples method. Continuous Profiler initialization failed.");
+            return;
+        }
+
+        var exportAllocationSamplesMethod = continuousProfilerExporterType.GetMethod("ExportAllocationSamples");
+        if (exportAllocationSamplesMethod == null)
+        {
+            Logger.Warning("Exporter does not have ExportAllocationSamples method. Continuous Profiler initialization failed.");
+            return;
+        }
+
+        NativeMethods.ConfigureNativeContinuousProfiler(threadSamplingEnabled, threadSamplingInterval, allocationSamplingEnabled, maxMemorySamplesPerMinute);
+        var threadSamplesMethod = exportThreadSamplesMethod.CreateDelegate<Action<byte[], int>>(continuousProfilerExporter);
+        var allocationSamplesMethod = exportAllocationSamplesMethod.CreateDelegate<Action<byte[], int>>(continuousProfilerExporter);
+
+        _profilerProcessor = new ContinuousProfilerProcessor(threadSamplingEnabled, allocationSamplingEnabled, threadSamplesMethod, allocationSamplesMethod, exportInterval);
+        Activity.CurrentChanged += _profilerProcessor.Activity_CurrentChanged;
+    }
+#endif
 
     private static void RegisterBytecodeInstrumentations(InstrumentationDefinitions.Payload payload)
     {
