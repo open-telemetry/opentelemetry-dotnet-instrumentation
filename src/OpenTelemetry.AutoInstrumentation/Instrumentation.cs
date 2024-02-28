@@ -380,7 +380,12 @@ internal static class Instrumentation
         {
 #if NET6_0_OR_GREATER
             LazyInstrumentationLoader?.Dispose();
-            _profilerProcessor?.Dispose();
+            if (_profilerProcessor != null)
+            {
+                Activity.CurrentChanged -= _profilerProcessor.Activity_CurrentChanged;
+                _profilerProcessor.Dispose();
+            }
+
 #endif
             _tracerProvider?.Dispose();
             _meterProvider?.Dispose();

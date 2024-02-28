@@ -105,15 +105,13 @@ internal class ContinuousProfilerProcessor : IDisposable
         while (true)
         {
             // TODO Task.Delay https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/issues/3216
-            var shutdownRequested = _shutdownTrigger.Wait(_exportInterval);
-
-            sampleExporter.Process();
-
-            if (shutdownRequested)
+            if (_shutdownTrigger.Wait(_exportInterval))
             {
                 Logger.Debug("Shutdown requested, exiting continuous profiler's exporter thread.");
                 return;
             }
+
+            sampleExporter.Process();
         }
     }
 }
