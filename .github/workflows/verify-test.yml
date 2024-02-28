@@ -32,7 +32,7 @@ jobs:
           dotnet-version: | 
             6.0.419
             7.0.406
-            8.0.200
+            8.0.201
       - run: ./build.cmd BuildTracer ManagedTests --containers ${{ matrix.containers }} --test-project "${{ github.event.inputs.testProject }}" --test-name '"${{ github.event.inputs.testName }}"' --test-count ${{ github.event.inputs.count }}
       - name: Upload logs
         uses: actions/upload-artifact@v4.3.1

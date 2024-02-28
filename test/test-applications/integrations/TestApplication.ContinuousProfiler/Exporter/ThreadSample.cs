@@ -5,19 +5,27 @@ namespace TestApplication.ContinuousProfiler;
 
 internal class ThreadSample
 {
-    public Time? Timestamp { get; set; }
+    public ThreadSample(Time timestamp, long traceIdHigh, long traceIdLow, long spanId, string? threadName, uint threadIndex = default)
+    {
+        Timestamp = timestamp;
+        TraceIdHigh = traceIdHigh;
+        TraceIdLow = traceIdLow;
+        SpanId = spanId;
+        ThreadName = threadName;
+        ThreadIndex = threadIndex;
+    }
 
-    public long SpanId { get; set; }
+    public Time Timestamp { get; }
 
-    public long TraceIdHigh { get; set; }
+    public long SpanId { get; }
 
-    public long TraceIdLow { get; set; }
+    public long TraceIdHigh { get; }
 
-    public int ManagedId { get; set; }
+    public long TraceIdLow { get; }
 
-    public string? ThreadName { get; set; }
+    public string? ThreadName { get; }
 
-    public uint ThreadIndex { get; set; }
+    public uint ThreadIndex { get; }
 
     public IList<string> Frames { get; } = new List<string>();
 

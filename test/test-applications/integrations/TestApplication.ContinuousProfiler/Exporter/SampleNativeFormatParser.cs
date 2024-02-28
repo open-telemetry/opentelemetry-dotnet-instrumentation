@@ -60,7 +60,6 @@ internal static class SampleNativeFormatParser
                 }
                 else if (operationCode == OpCodes.StartSample)
                 {
-                    var managedId = ReadInt(buffer, ref position);
                     var threadName = ReadString(buffer, ref position);
                     var traceIdHigh = ReadInt64(buffer, ref position);
                     var traceIdLow = ReadInt64(buffer, ref position);
@@ -75,16 +74,13 @@ internal static class SampleNativeFormatParser
                         continue;
                     }
 
-                    var threadSample = new ThreadSample
-                    {
-                        Timestamp = new ThreadSample.Time(sampleStartMillis),
-                        TraceIdHigh = traceIdHigh,
-                        TraceIdLow = traceIdLow,
-                        SpanId = spanId,
-                        ManagedId = managedId,
-                        ThreadName = threadName,
-                        ThreadIndex = threadIndex
-                    };
+                    var threadSample = new ThreadSample(
+                        new ThreadSample.Time(sampleStartMillis),
+                        traceIdHigh,
+                        traceIdLow,
+                        spanId,
+                        threadName,
+                        threadIndex);
 
                     ReadStackFrames(code, threadSample, codeDictionary, buffer, ref position);
 
@@ -156,21 +152,17 @@ internal static class SampleNativeFormatParser
                     var timestampMillis = ReadInt64(buffer, ref position);
                     var allocatedSize = ReadInt64(buffer, ref position); // Technically uint64 but whatever
                     var typeName = ReadString(buffer, ref position);
-                    var managedId = ReadInt(buffer, ref position);
                     var threadName = ReadString(buffer, ref position);
                     var traceIdHigh = ReadInt64(buffer, ref position);
                     var traceIdLow = ReadInt64(buffer, ref position);
                     var spanId = ReadInt64(buffer, ref position);
 
-                    var threadSample = new ThreadSample
-                    {
-                        Timestamp = new ThreadSample.Time(timestampMillis),
-                        TraceIdHigh = traceIdHigh,
-                        TraceIdLow = traceIdLow,
-                        SpanId = spanId,
-                        ManagedId = managedId,
-                        ThreadName = threadName
-                    };
+                    var threadSample = new ThreadSample(
+                        new ThreadSample.Time(timestampMillis),
+                        traceIdHigh,
+                        traceIdLow,
+                        spanId,
+                        threadName);
 
                     var code = ReadShort(buffer, ref position);
 

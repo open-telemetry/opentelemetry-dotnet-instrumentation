@@ -256,7 +256,6 @@ void ThreadSamplesBuffer::StartSample(ThreadID                   id,
 {
     CHECK_SAMPLES_BUFFER_LENGTH()
     WriteByte(kThreadSamplesStartSample);
-    WriteInt(span_context.managed_thread_id_);
     WriteString(state->thread_name_);
     WriteUInt64(span_context.trace_id_high_);
     WriteUInt64(span_context.trace_id_low_);
@@ -277,7 +276,6 @@ void ThreadSamplesBuffer::AllocationSample(uint64_t                   allocSize,
     WriteCurrentTimeMillis();
     WriteUInt64(allocSize);
     WriteString(allocType, allocTypeCharLen);
-    WriteInt(span_context.managed_thread_id_);
     WriteString(state->thread_name_);
     WriteUInt64(span_context.trace_id_high_);
     WriteUInt64(span_context.trace_id_low_);
@@ -1055,10 +1053,7 @@ EXPORTTHIS int32_t ContinuousProfilerReadAllocationSamples(int32_t len, unsigned
 {
     return AllocationSamplingConsumeAndReplaceBuffer(len, buf);
 }
-EXPORTTHIS void ContinuousProfilerSetNativeContext(uint64_t traceIdHigh,
-                                                   uint64_t traceIdLow,
-                                                   uint64_t spanId,
-                                                   int32_t  managedThreadId)
+EXPORTTHIS void ContinuousProfilerSetNativeContext(uint64_t traceIdHigh, uint64_t traceIdLow, uint64_t spanId)
 {
     ThreadID      threadId;
     const HRESULT hr = profiler_info->GetCurrentThreadID(&threadId);
@@ -1070,7 +1065,6 @@ EXPORTTHIS void ContinuousProfilerSetNativeContext(uint64_t traceIdHigh,
 
     std::lock_guard<std::mutex> guard(thread_span_context_lock);
 
-    thread_span_context_map[threadId] =
-        continuous_profiler::thread_span_context(traceIdHigh, traceIdLow, spanId, managedThreadId);
+    thread_span_context_map[threadId] = continuous_profiler::thread_span_context(traceIdHigh, traceIdLow, spanId);
 }
 }

@@ -37,8 +37,11 @@ public static class LibraryVersion
 #if DEFAULT_TEST_PACKAGE_VERSIONS
         new object[] { string.Empty }
 #else
-        new object[] { "6.0.12" },
-        new object[] { "7.0.13" },
+        new object[] { "6.0.27" },
+        new object[] { "7.0.16" },
+#if NET8_0
+        new object[] { "8.0.2" },
+#endif
 #endif
     };
     public static readonly IReadOnlyCollection<object[]> EntityFrameworkCorePomeloMySql = new List<object[]>
@@ -48,6 +51,9 @@ public static class LibraryVersion
 #else
         new object[] { "6.0.2" },
         new object[] { "7.0.0" },
+#if NET8_0
+        new object[] { "8.0.0" },
+#endif
 #endif
     };
     public static readonly IReadOnlyCollection<object[]> GraphQL = new List<object[]>
@@ -65,7 +71,7 @@ public static class LibraryVersion
         new object[] { string.Empty }
 #else
         new object[] { "2.52.0" },
-        new object[] { "2.60.0" },
+        new object[] { "2.61.0" },
 #endif
     };
     public static readonly IReadOnlyCollection<object[]> MassTransit = new List<object[]>
@@ -147,7 +153,7 @@ public static class LibraryVersion
         new object[] { string.Empty }
 #else
         new object[] { "3.4.0" },
-        new object[] { "3.8.0" },
+        new object[] { "3.8.1" },
 #endif
     };
     public static readonly IReadOnlyCollection<object[]> StackExchangeRedis = new List<object[]>
@@ -159,7 +165,7 @@ public static class LibraryVersion
         new object[] { "2.1.50" },
         new object[] { "2.5.61" },
         new object[] { "2.6.66" },
-        new object[] { "2.7.17" },
+        new object[] { "2.7.23" },
 #endif
     };
     public static readonly IReadOnlyCollection<object[]> WCFCoreClient = new List<object[]>
