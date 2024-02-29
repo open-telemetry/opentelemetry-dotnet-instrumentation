@@ -223,6 +223,10 @@ jobs:
             base-image: alpine
             build-source: alpine-arm64
             os-type: linux-musl
+          - machine: actuated-arm64
+            base-image: debian-arm64
+            build-source: actuated-arm64
+            os-type: linux-glibc
     runs-on: ${{ matrix.machine }}
     timeout-minutes: 60
     steps:
