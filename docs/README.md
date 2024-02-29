@@ -3,6 +3,12 @@
 [![Slack](https://img.shields.io/badge/slack-@cncf/otel--dotnet--auto--instr-brightgreen.svg?logo=slack)](https://cloud-native.slack.com/archives/C01NR1YLSE7)
 [![NuGet](https://img.shields.io/nuget/v/OpenTelemetry.AutoInstrumentation.svg)](https://www.nuget.org/packages/OpenTelemetry.AutoInstrumentation)
 [![NuGet](https://img.shields.io/nuget/dt/OpenTelemetry.AutoInstrumentation.svg)](https://www.nuget.org/packages/OpenTelemetry.AutoInstrumentation)
+<a href="https://actuated.dev/">
+  <img
+    alt="Arm CI sponsored by Actuated"
+    src="https://docs.actuated.dev/images/actuated-badge.png" width="120px">
+  </img>
+</a>
 
 This project adds [OpenTelemetry instrumentation](https://opentelemetry.io/docs/concepts/instrumenting/#automatic-instrumentation)
 to .NET applications without having to modify their source code.
@@ -87,19 +93,23 @@ Supported processor architectures are:
 
 - x86
 - AMD64 (x86-64)
+- ARM64
 
 > [!NOTE]
-> ARM architectures are not supported yet,
-> see [#2181](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/issues/2181).
+> ARM64 build does not support CentOS based images.
 
 CI tests run against the following operating systems:
 
-- [Alpine](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/blob/main/docker/alpine.dockerfile)
-- [CentOS 7](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/blob/main/docker/centos-build.dockerfile)
+- [Alpine x64](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/blob/main/docker/alpine.dockerfile)
+- [Alpine ARM64](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/blob/main/docker/alpine.dockerfile)
+- [Debian x64](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/blob/main/docker/debian.dockerfile)
+- [Debian ARM64](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/blob/main/docker/debian-arm64.dockerfile)
+- [CentOS 7 x64](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/blob/main/docker/centos-build.dockerfile)
   (.NET 8 is not supported)
-- [macOS Big Sur 11](https://github.com/actions/runner-images/blob/main/images/macos/macos-11-Readme.md)
-- [Microsoft Windows Server 2022](https://github.com/actions/runner-images/blob/main/images/windows/Windows2022-Readme.md)
-- [Ubuntu 20.04 LTS](https://github.com/actions/runner-images/blob/main/images/ubuntu/Ubuntu2004-Readme.md)
+- [macOS Big Sur 11 x64](https://github.com/actions/runner-images/blob/main/images/macos/macos-11-Readme.md)
+- [Microsoft Windows Server 2022 x64](https://github.com/actions/runner-images/blob/main/images/windows/Windows2022-Readme.md)
+- [Ubuntu 20.04 LTS x64](https://github.com/actions/runner-images/blob/main/images/ubuntu/Ubuntu2004-Readme.md)
+- Ubuntu 22.04 LTS ARM64
 
 ### Instrumented libraries and frameworks
 

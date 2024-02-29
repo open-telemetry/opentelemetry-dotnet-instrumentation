@@ -12,3 +12,8 @@ MD024:
   allow_different_nesting: true
   # Only check sibling headings
   siblings_only: true
+
+# MD033/no-inline-html : Inline HTML : https://github.com/DavidAnson/markdownlint/blob/v0.33.0/doc/md033.md
+MD033:
+  # Allowed elements
+  allowed_elements: ['a', 'img']

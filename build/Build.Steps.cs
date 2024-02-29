@@ -570,7 +570,7 @@ partial class Build
                 // Additional-deps probes the directory using SemVer format.
                 // Example: For netcoreapp3.1 framework, additional-deps uses 3.1.0 or 3.1.1 and so on.
                 // Major and Minor version are extracted from framework and default value of 0 is appended for patch.
-                .SetOutput(AdditionalDepsDirectory / "shared" / "Microsoft.NETCore.App" / framework.ToString().Substring(framework.ToString().Length - 3) + ".0"))); ;
+                .SetOutput(AdditionalDepsDirectory / "shared" / "Microsoft.NETCore.App" / framework.ToString().Substring(framework.ToString().Length - 3) + ".0")));
 
             AdditionalDepsDirectory.GlobFiles("**/*deps.json")
                 .ForEach(file =>
