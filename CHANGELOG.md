@@ -16,7 +16,10 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 
 #### Dependency updates
 
+- Following packages updated
+  - `MongoDB.Driver.Core.Extensions.DiagnosticSources` from `1.3.0` to `1.4.0`.
 - .NET Framework only, following packages updated
+  - `Grpc.Core.Api` from `2.60.0` to `2.61.0`,
   - `Microsoft.Extensions.Options` from `8.0.1` to `8.0.2`,
   - `System.Text.Json` from `8.0.1` to `8.0.2`.
 
