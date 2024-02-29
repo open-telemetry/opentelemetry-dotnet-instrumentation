@@ -47,7 +47,8 @@ internal class ContinuousProfilerProcessor : IDisposable
     public void Dispose()
     {
         _shutdownTrigger.Set();
-        if (!_thread.Join(_exportInterval))
+        // Wait 5s for exporter thread to terminate, similarly to https://github.com/open-telemetry/opentelemetry-dotnet/blob/77ef12327f720ca3defd0c9590c0197cceb5952e/src/OpenTelemetry/Trace/TracerProviderSdk.cs#L383
+        if (!_thread.Join(TimeSpan.FromSeconds(5)))
         {
             Logger.Warning("Continuous profiler's exporter thread failed to terminate in required time.");
         }
