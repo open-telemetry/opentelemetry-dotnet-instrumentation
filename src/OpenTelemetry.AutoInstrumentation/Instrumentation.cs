@@ -240,7 +240,8 @@ internal static class Instrumentation
         var threadSamplesMethod = exportThreadSamplesMethod.CreateDelegate<Action<byte[], int>>(continuousProfilerExporter);
         var allocationSamplesMethod = exportAllocationSamplesMethod.CreateDelegate<Action<byte[], int>>(continuousProfilerExporter);
 
-        _profilerProcessor = new ContinuousProfilerProcessor(threadSamplingEnabled, allocationSamplingEnabled, threadSamplesMethod, allocationSamplesMethod, exportInterval);
+        var bufferProcessor = new BufferProcessor(threadSamplingEnabled, allocationSamplingEnabled, threadSamplesMethod, allocationSamplesMethod);
+        _profilerProcessor = new ContinuousProfilerProcessor(bufferProcessor, exportInterval);
         Activity.CurrentChanged += _profilerProcessor.Activity_CurrentChanged;
     }
 #endif

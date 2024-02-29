@@ -21,25 +21,22 @@ internal class ContinuousProfilerProcessor : IDisposable
     private readonly Thread _thread;
     private readonly ManualResetEventSlim _shutdownTrigger = new(false);
     private readonly TimeSpan _exportInterval;
+    private readonly BufferProcessor _bufferProcessor;
 
-    public ContinuousProfilerProcessor(bool threadSamplingEnabled, bool allocationSamplingEnabled, Action<byte[], int> threadSamplesMethod, Action<byte[], int> allocationSamplesMethod, TimeSpan exportInterval)
+    public ContinuousProfilerProcessor(BufferProcessor bufferProcessor, TimeSpan exportInterval)
     {
         Logger.Debug("Initializing Continuous Profiler export thread.");
 
         _exportInterval = exportInterval;
+        _bufferProcessor = bufferProcessor;
         _supportingActivityAsyncLocal = new AsyncLocal<Activity?>(ActivityChanged);
 
-        _thread = new Thread(() =>
-        {
-            SampleReadingThread(new BufferProcessor(threadSamplingEnabled, allocationSamplingEnabled, threadSamplesMethod, allocationSamplesMethod));
-        })
+        _thread = new Thread(SampleReadingThread)
         {
             Name = BackgroundThreadName,
             IsBackground = true
         };
         _thread.Start();
-
-        Logger.Information("Continuous Profiler export thread initialized.");
     }
 
     public void Activity_CurrentChanged(object? sender, ActivityChangedEventArgs e)
@@ -78,8 +75,10 @@ internal class ContinuousProfilerProcessor : IDisposable
         NativeMethods.ContinuousProfilerSetNativeContext(0, 0, 0);
     }
 
-    private void SampleReadingThread(BufferProcessor sampleExporter)
+    private void SampleReadingThread()
     {
+        Logger.Information("Continuous Profiler export thread initialized.");
+
         while (true)
         {
             // TODO Task.Delay https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/issues/3216
@@ -89,7 +88,7 @@ internal class ContinuousProfilerProcessor : IDisposable
                 return;
             }
 
-            sampleExporter.Process();
+            _bufferProcessor.Process();
         }
     }
 }
