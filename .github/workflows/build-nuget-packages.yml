@@ -34,7 +34,7 @@ jobs:
             8.0.201
 
       - name: Check for NuGet packages cache
-        uses: actions/cache@v4.0.0
+        uses: actions/cache@v4.0.1
         id: nuget-cache
         with:
           key: ${{ hashFiles('**/Directory.packages.props', './build/LibraryVersions.g.cs', '**/packages.config' ) }}
