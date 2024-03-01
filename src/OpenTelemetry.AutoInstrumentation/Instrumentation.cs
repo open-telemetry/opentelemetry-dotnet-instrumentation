@@ -33,6 +33,10 @@ internal static class Instrumentation
     private static MeterProvider? _meterProvider;
     private static PluginManager? _pluginManager;
 
+#if NET6_0_OR_GREATER
+    private static ContinuousProfilerProcessor? _profilerProcessor;
+#endif
+
     internal static PluginManager? PluginManager => _pluginManager;
 
     internal static ILifespanManager LifespanManager => LazyInstrumentationLoader.LifespanManager;
@@ -87,20 +91,15 @@ internal static class Instrumentation
 
 #if NET6_0_OR_GREATER
             var profilerEnabled = GeneralSettings.Value.ProfilerEnabled;
-            var threadSamplingEnabled = false;
-            var allocationSamplingEnabled = false;
-            TimeSpan exportInterval = default;
-            object? continuousProfilerExporter = null;
 
             if (profilerEnabled)
             {
-                (threadSamplingEnabled, var threadSamplingInterval, allocationSamplingEnabled, var maxMemorySamplesPerMinute, exportInterval, continuousProfilerExporter) = _pluginManager.GetFirstContinuousConfiguration();
+                var (threadSamplingEnabled, threadSamplingInterval, allocationSamplingEnabled, maxMemorySamplesPerMinute, exportInterval, continuousProfilerExporter) = _pluginManager.GetFirstContinuousConfiguration();
                 Logger.Debug($"Continuous profiling configuration: Thread sampling enabled: {threadSamplingEnabled}, thread sampling interval: {threadSamplingInterval}, allocation sampling enabled: {allocationSamplingEnabled}, max memory samples per minute: {maxMemorySamplesPerMinute}, export interval: {exportInterval}, continuous profiler exporter: {continuousProfilerExporter.GetType()}");
 
                 if (threadSamplingEnabled || allocationSamplingEnabled)
                 {
-                    NativeMethods.ConfigureNativeContinuousProfiler(threadSamplingEnabled, threadSamplingInterval, allocationSamplingEnabled, maxMemorySamplesPerMinute);
-                    Activity.CurrentChanged += ContinuousProfilerProcessor.Activity_CurrentChanged;
+                    InitializeContinuousProfiling(continuousProfilerExporter, threadSamplingEnabled, allocationSamplingEnabled, threadSamplingInterval, maxMemorySamplesPerMinute, exportInterval);
                 }
             }
             else
@@ -167,12 +166,6 @@ internal static class Instrumentation
                     Logger.Information("Initialized lazily-loaded metric instrumentations without initializing sdk.");
                 }
             }
-#if NET6_0_OR_GREATER
-            if (profilerEnabled && (threadSamplingEnabled || allocationSamplingEnabled))
-            {
-                ContinuousProfilerProcessor.Initialize(threadSamplingEnabled, allocationSamplingEnabled, exportInterval, continuousProfilerExporter!);
-            }
-#endif
         }
         catch (Exception ex)
         {
@@ -223,6 +216,35 @@ internal static class Instrumentation
             OpenTracingHelper.EnableOpenTracing(_tracerProvider);
         }
     }
+
+#if NET6_0_OR_GREATER
+    private static void InitializeContinuousProfiling(object continuousProfilerExporter, bool threadSamplingEnabled, bool allocationSamplingEnabled, uint threadSamplingInterval, uint maxMemorySamplesPerMinute, TimeSpan exportInterval)
+    {
+        var continuousProfilerExporterType = continuousProfilerExporter.GetType();
+        var exportThreadSamplesMethod = continuousProfilerExporterType.GetMethod("ExportThreadSamples");
+
+        if (exportThreadSamplesMethod == null)
+        {
+            Logger.Warning("Exporter does not have ExportThreadSamples method. Continuous Profiler initialization failed.");
+            return;
+        }
+
+        var exportAllocationSamplesMethod = continuousProfilerExporterType.GetMethod("ExportAllocationSamples");
+        if (exportAllocationSamplesMethod == null)
+        {
+            Logger.Warning("Exporter does not have ExportAllocationSamples method. Continuous Profiler initialization failed.");
+            return;
+        }
+
+        NativeMethods.ConfigureNativeContinuousProfiler(threadSamplingEnabled, threadSamplingInterval, allocationSamplingEnabled, maxMemorySamplesPerMinute);
+        var threadSamplesMethod = exportThreadSamplesMethod.CreateDelegate<Action<byte[], int>>(continuousProfilerExporter);
+        var allocationSamplesMethod = exportAllocationSamplesMethod.CreateDelegate<Action<byte[], int>>(continuousProfilerExporter);
+
+        var bufferProcessor = new BufferProcessor(threadSamplingEnabled, allocationSamplingEnabled, threadSamplesMethod, allocationSamplesMethod);
+        _profilerProcessor = new ContinuousProfilerProcessor(bufferProcessor, exportInterval);
+        Activity.CurrentChanged += _profilerProcessor.Activity_CurrentChanged;
+    }
+#endif
 
     private static void RegisterBytecodeInstrumentations(InstrumentationDefinitions.Payload payload)
     {
@@ -384,6 +406,12 @@ internal static class Instrumentation
         {
 #if NET6_0_OR_GREATER
             LazyInstrumentationLoader?.Dispose();
+            if (_profilerProcessor != null)
+            {
+                Activity.CurrentChanged -= _profilerProcessor.Activity_CurrentChanged;
+                _profilerProcessor.Dispose();
+            }
+
 #endif
             _tracerProvider?.Dispose();
             _meterProvider?.Dispose();
