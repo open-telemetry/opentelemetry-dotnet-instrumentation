@@ -169,6 +169,7 @@ public class OtlpOverHttpExporter
         resourceProfiles.ScopeProfiles.Add(scopeProfiles);
         resourceProfiles.Resource = new Resource();
         resourceProfiles.Resource.Attributes.Add(new KeyValue { Key = "todo.resource.detector.key", Value = new AnyValue { StringValue = "todo.resource.detector.value" } });
+        // TODO handle schema Url resourceProfiles.SchemaUrl
 
         return resourceProfiles;
     }
@@ -176,6 +177,7 @@ public class OtlpOverHttpExporter
     private static ScopeProfiles CreateScopeProfiles()
     {
         var scopeProfiles = new ScopeProfiles();
+        // TODO handle schema Url scopeProfiles.SchemaUrl
 
         return scopeProfiles;
     }
