@@ -55,8 +55,8 @@ jobs:
       - name: Download Ubuntu arm64 Artifacts from build job
         uses: actions/download-artifact@v4.1.3
         with:
-          name: bin-actuated-arm64
-          path: bin/ci-artifacts/bin-actuated-arm64
+          name: bin-actuated-arm64-4cpu-8gb
+          path: bin/ci-artifacts/bin-actuated-arm64-4cpu-8gb
 
       - name: Download Alpine x64 Artifacts from build job
         uses: actions/download-artifact@v4.1.3

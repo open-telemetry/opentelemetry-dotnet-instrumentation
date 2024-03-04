@@ -17,7 +17,7 @@ jobs:
             base-image: alpine
             os-type: linux-musl
             architecture: x64
-          - machine: actuated-arm64
+          - machine: actuated-arm64-4cpu-8gb
             base-image: alpine
             os-type: linux-musl
             architecture: arm64

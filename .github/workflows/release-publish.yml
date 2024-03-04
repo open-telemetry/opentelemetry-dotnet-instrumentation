@@ -54,13 +54,13 @@ jobs:
             log-dir: "/var/log/opentelemetry/dotnet"
           - machine: macos-11
             log-dir: "/var/log/opentelemetry/dotnet"
-          - machine: actuated-arm64
+          - machine: actuated-arm64-4cpu-8gb
             log-dir: "/var/log/opentelemetry/dotnet"
     runs-on: ${{ matrix.machine }}
     steps:
         
       - name: Setup ARM64 Environment Variables
-        if: ${{ matrix.machine == 'actuated-arm64' }}
+        if: ${{ matrix.machine == 'actuated-arm64-4cpu-8gb' }}
         run: |
           echo "DOTNET_INSTALL_DIR=~/.dotnet" >> $GITHUB_ENV
 
