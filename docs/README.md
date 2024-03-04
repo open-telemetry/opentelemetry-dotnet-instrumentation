@@ -93,7 +93,7 @@ Supported processor architectures are:
 
 - x86
 - AMD64 (x86-64)
-- ARM64
+- ARM64 ([Experimental](https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/versioning-and-stability.md))
 
 > [!NOTE]
 > ARM64 build does not support CentOS based images.

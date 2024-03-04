@@ -11,8 +11,8 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 
 - .NET only, warning in logs about End of Support date
   and upcoming End of Support date for .NET version.
-- ARM64 support for Ubuntu, Alpine and Debian based images.
-- ARM64 support for the `OpenTelemetry.AutoInstrumentation` NuGet package.
+- Experimental support for ARM64 on Ubuntu, Alpine and Debian based images.
+- Experimental ARM64 support for the `OpenTelemetry.AutoInstrumentation` NuGet package.
 
 ### Changed
 
