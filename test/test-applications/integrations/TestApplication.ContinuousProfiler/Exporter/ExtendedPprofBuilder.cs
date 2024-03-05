@@ -9,7 +9,7 @@ namespace TestApplication.ContinuousProfiler;
 
 internal class ExtendedPprofBuilder
 {
-    private readonly LocationTable _locationTable;
+    private readonly LocationCache _locationCache;
     private readonly LinkCache _linkCache;
     private readonly AttributeCache _attributeCache;
 
@@ -18,14 +18,14 @@ internal class ExtendedPprofBuilder
         Profile = new Profile();
         var stringCache = new StringCache(Profile);
         var functionCache = new FunctionCache(Profile, stringCache);
-        _locationTable = new LocationTable(Profile, functionCache);
+        _locationCache = new LocationCache(Profile, functionCache);
         _linkCache = new LinkCache(Profile);
         _attributeCache = new AttributeCache(Profile);
     }
 
     public Profile Profile { get; }
 
-    public ulong GetLocationId(string function) => _locationTable.Get(function);
+    public ulong GetLocationId(string function) => _locationCache.Get(function);
 
     public void AddLink(SampleBuilder sampleBuilder, long spanId, long traceIdHigh, long traceIdLow)
     {
@@ -103,13 +103,14 @@ internal class ExtendedPprofBuilder
         }
     }
 
-    private class LocationTable
+    private class LocationCache
     {
         private readonly Profile _profile;
         private readonly FunctionCache _functionCache;
+        private readonly Dictionary<string, ulong> _table = new();
         private ulong _index = 1; // 0 is reserved
 
-        public LocationTable(Profile profile, FunctionCache functionCache)
+        public LocationCache(Profile profile, FunctionCache functionCache)
         {
             _profile = profile;
             _functionCache = functionCache;
@@ -117,12 +118,17 @@ internal class ExtendedPprofBuilder
 
         public ulong Get(string function)
         {
-            var functionKey = function;
+            if (_table.TryGetValue(function, out var value))
+            {
+                return value;
+            }
 
             var location = new Location { Id = _index };
-            location.Line.Add(new Line { FunctionIndex = _functionCache.GetOrAdd(functionKey), Line_ = 0, Column = 0 }); // for now, we don't support line nor column number
+            location.Line.Add(new Line { FunctionIndex = _functionCache.GetOrAdd(function), Line_ = 0, Column = 0 }); // for now, we don't support line nor column number
 
             _profile.Location.Add(location);
+            _table[function] = _index;
+
             return _index++;
         }
     }
