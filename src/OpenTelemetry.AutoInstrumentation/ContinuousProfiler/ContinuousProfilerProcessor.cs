@@ -5,65 +5,55 @@
 
 using System.Diagnostics;
 using System.Globalization;
-using System.Reflection;
 using OpenTelemetry.AutoInstrumentation.Logging;
 
 namespace OpenTelemetry.AutoInstrumentation.ContinuousProfiler;
 
-internal static class ContinuousProfilerProcessor
+internal class ContinuousProfilerProcessor : IDisposable
 {
-    public const string BackgroundThreadName = "OpenTelemetry Continuous Profiler Thread";
+    private const string BackgroundThreadName = "OpenTelemetry Continuous Profiler Thread";
 
     private static readonly IOtelLogger Logger = OtelLogging.GetLogger();
+
     // Additional async local required to get full set of notifications,
     // see https://github.com/dotnet/runtime/issues/67276#issuecomment-1089877762
-    private static AsyncLocal<Activity?>? _supportingActivityAsyncLocal;
+    private readonly AsyncLocal<Activity?> _supportingActivityAsyncLocal;
+    private readonly Thread _thread;
+    private readonly ManualResetEventSlim _shutdownTrigger = new(false);
+    private readonly TimeSpan _exportInterval;
+    private readonly BufferProcessor _bufferProcessor;
 
-    public static void Activity_CurrentChanged(object? sender, ActivityChangedEventArgs e)
-    {
-        if (_supportingActivityAsyncLocal != null)
-        {
-            _supportingActivityAsyncLocal.Value = e.Current;
-        }
-    }
-
-    public static void Initialize(bool threadSamplingEnabled, bool allocationSamplingEnabled, TimeSpan exportInterval, object continuousProfilerExporter)
+    public ContinuousProfilerProcessor(BufferProcessor bufferProcessor, TimeSpan exportInterval)
     {
         Logger.Debug("Initializing Continuous Profiler export thread.");
 
-        var continuousProfilerExporterType = continuousProfilerExporter.GetType();
-        var exportThreadSamplesMethod = continuousProfilerExporterType.GetMethod("ExportThreadSamples");
-
-        if (exportThreadSamplesMethod == null)
-        {
-            Logger.Warning("Exporter does not have ExportThreadSamples method. Continuous Profiler initialization failed.");
-            return;
-        }
-
-        var exportAllocationSamplesMethod = continuousProfilerExporterType.GetMethod("ExportAllocationSamples");
-        if (exportAllocationSamplesMethod == null)
-        {
-            Logger.Warning("Exporter does not have ExportAllocationSamples method. Continuous Profiler initialization failed.");
-            return;
-        }
-
+        _exportInterval = exportInterval;
+        _bufferProcessor = bufferProcessor;
         _supportingActivityAsyncLocal = new AsyncLocal<Activity?>(ActivityChanged);
 
-        var threadSamplesMethod = exportThreadSamplesMethod.CreateDelegate<Action<byte[], int>>(continuousProfilerExporter);
-        var allocationSamplesMethod = exportAllocationSamplesMethod.CreateDelegate<Action<byte[], int>>(continuousProfilerExporter);
-
-        // TODO Graceful shutdown and Task.Delay https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/issues/3216
-        var thread = new Thread(() =>
-        {
-            SampleReadingThread(new BufferProcessor(threadSamplingEnabled, allocationSamplingEnabled, threadSamplesMethod, allocationSamplesMethod), exportInterval);
-        })
+        _thread = new Thread(SampleReadingThread)
         {
             Name = BackgroundThreadName,
             IsBackground = true
         };
-        thread.Start();
+        _thread.Start();
+    }
 
-        Logger.Information("Continuous Profiler export thread initialized.");
+    public void Activity_CurrentChanged(object? sender, ActivityChangedEventArgs e)
+    {
+        _supportingActivityAsyncLocal.Value = e.Current;
+    }
+
+    public void Dispose()
+    {
+        _shutdownTrigger.Set();
+        // Wait 5s for exporter thread to terminate, similarly to https://github.com/open-telemetry/opentelemetry-dotnet/blob/77ef12327f720ca3defd0c9590c0197cceb5952e/src/OpenTelemetry/Trace/TracerProviderSdk.cs#L383
+        if (!_thread.Join(TimeSpan.FromSeconds(5)))
+        {
+            Logger.Warning("Continuous profiler's exporter thread failed to terminate in required time.");
+        }
+
+        _shutdownTrigger.Dispose();
     }
 
     private static void ActivityChanged(AsyncLocalValueChangedArgs<Activity?> sender)
@@ -86,13 +76,20 @@ internal static class ContinuousProfilerProcessor
         NativeMethods.ContinuousProfilerSetNativeContext(0, 0, 0);
     }
 
-    private static void SampleReadingThread(BufferProcessor sampleExporter, TimeSpan exportInterval)
+    private void SampleReadingThread()
     {
+        Logger.Information("Continuous Profiler export thread initialized.");
+
         while (true)
         {
-            // TODO Graceful shutdown and Task.Delay https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/issues/3216
-            Thread.Sleep(exportInterval);
-            sampleExporter.Process();
+            // TODO Task.Delay https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/issues/3216
+            if (_shutdownTrigger.Wait(_exportInterval))
+            {
+                Logger.Debug("Shutdown requested, exiting continuous profiler's exporter thread.");
+                return;
+            }
+
+            _bufferProcessor.Process();
         }
     }
 }
