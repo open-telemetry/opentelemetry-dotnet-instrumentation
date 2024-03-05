@@ -10,7 +10,7 @@ namespace TestApplication.ContinuousProfiler;
 internal class ExtendedPprofBuilder
 {
     private readonly LocationTable _locationTable;
-    private readonly LinkTable _linkTable;
+    private readonly LinkCache _linkCache;
     private readonly AttributeCache _attributeCache;
 
     public ExtendedPprofBuilder()
@@ -19,7 +19,7 @@ internal class ExtendedPprofBuilder
         var stringCache = new StringCache(Profile);
         var functionCache = new FunctionCache(Profile, stringCache);
         _locationTable = new LocationTable(Profile, functionCache);
-        _linkTable = new LinkTable(Profile);
+        _linkCache = new LinkCache(Profile);
         _attributeCache = new AttributeCache(Profile);
     }
 
@@ -29,7 +29,7 @@ internal class ExtendedPprofBuilder
 
     public void AddLink(SampleBuilder sampleBuilder, long spanId, long traceIdHigh, long traceIdLow)
     {
-        var linkId = _linkTable.Get(spanId, traceIdHigh, traceIdLow);
+        var linkId = _linkCache.GetOrAdd(spanId, traceIdHigh, traceIdLow);
         sampleBuilder.SetLink(linkId);
     }
 
@@ -127,18 +127,26 @@ internal class ExtendedPprofBuilder
         }
     }
 
-    private class LinkTable
+    private class LinkCache
     {
         private readonly Profile _profile;
+        private readonly Dictionary<Tuple<long, long, long>, ulong> _table = new();
         private ulong _index = 1; // 0 is reserved
 
-        public LinkTable(Profile profile)
+        public LinkCache(Profile profile)
         {
             _profile = profile;
         }
 
-        public ulong Get(long spanId, long traceIdHigh, long traceIdLow)
+        public ulong GetOrAdd(long spanId, long traceIdHigh, long traceIdLow)
         {
+            var key = Tuple.Create(spanId, traceIdHigh, traceIdLow);
+
+            if (_table.TryGetValue(key, out var value))
+            {
+                return value;
+            }
+
             var traceIdHighBytes = BitConverter.GetBytes(traceIdHigh);
             var traceIdLowBytes = BitConverter.GetBytes(traceIdLow);
 
@@ -149,6 +157,7 @@ internal class ExtendedPprofBuilder
             };
 
             _profile.LinkTable.Add(link);
+            _table[key] = _index;
 
             return _index++;
         }
