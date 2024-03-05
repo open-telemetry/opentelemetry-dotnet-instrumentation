@@ -156,10 +156,15 @@ internal class ExtendedPprofBuilder
             var traceIdHighBytes = BitConverter.GetBytes(traceIdHigh);
             var traceIdLowBytes = BitConverter.GetBytes(traceIdLow);
 
+            var traceIdBytes = new byte[traceIdHighBytes.Length + traceIdLowBytes.Length];
+
+            traceIdHighBytes.CopyTo(traceIdBytes, 0);
+            traceIdLowBytes.CopyTo(traceIdBytes, traceIdHighBytes.Length);
+
             var link = new Link
             {
                 SpanId = UnsafeByteOperations.UnsafeWrap(BitConverter.GetBytes(spanId)),
-                TraceId = UnsafeByteOperations.UnsafeWrap(traceIdHighBytes.Concat(traceIdLowBytes).ToArray())
+                TraceId = UnsafeByteOperations.UnsafeWrap(traceIdBytes)
             };
 
             _profile.LinkTable.Add(link);
