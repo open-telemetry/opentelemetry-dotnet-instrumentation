@@ -91,6 +91,7 @@ public class OtlpOverHttpExporter
                 var allocationSample = allocationSamples[i];
                 if (allocationSample.ThreadSample.TimestampNanoseconds != lastTimestamp)
                 {
+                    // TODO consider either putting each sample in separate profile or in one profile with min and max timestamp
                     extendedPprofBuilder = new ExtendedPprofBuilder();
                     lastTimestamp = allocationSample.ThreadSample.TimestampNanoseconds;
                     profileContainer = CreateProfileContainer(extendedPprofBuilder.Profile, "allocation", lastTimestamp);
