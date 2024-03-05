@@ -11,16 +11,16 @@ internal class ExtendedPprofBuilder
 {
     private readonly LocationTable _locationTable;
     private readonly LinkTable _linkTable;
-    private readonly AttributeTable _attributeTable;
+    private readonly AttributeCache _attributeCache;
 
     public ExtendedPprofBuilder()
     {
         Profile = new Profile();
-        var stringTable = new StringTable(Profile);
-        var functionTable = new FunctionTable(Profile, stringTable);
-        _locationTable = new LocationTable(Profile, functionTable);
+        var stringCache = new StringCache(Profile);
+        var functionCache = new FunctionCache(Profile, stringCache);
+        _locationTable = new LocationTable(Profile, functionCache);
         _linkTable = new LinkTable(Profile);
-        _attributeTable = new AttributeTable(Profile);
+        _attributeCache = new AttributeCache(Profile);
     }
 
     public Profile Profile { get; }
@@ -45,24 +45,24 @@ internal class ExtendedPprofBuilder
 
     private void AddAttribute(SampleBuilder sampleBuilder, string name, Action<AnyValue> setValue)
     {
-        var attributeId = _attributeTable.Get(name, setValue);
+        var attributeId = _attributeCache.GetOrAdd(name, setValue);
 
         sampleBuilder.AddAttribute(attributeId);
     }
 
-    private class StringTable
+    private class StringCache
     {
         private readonly Profile _profile;
         private readonly Dictionary<string, long> _table = new();
         private long _index;
 
-        public StringTable(Profile profile)
+        public StringCache(Profile profile)
         {
             _profile = profile;
-            Get(string.Empty); // 0 is reserved for the empty string
+            GetOrAdd(string.Empty); // 0 is reserved for the empty string
         }
 
-        public long Get(string str)
+        public long GetOrAdd(string str)
         {
             if (_table.TryGetValue(str, out var value))
             {
@@ -75,27 +75,27 @@ internal class ExtendedPprofBuilder
         }
     }
 
-    private class FunctionTable
+    private class FunctionCache
     {
         private readonly Profile _profile;
-        private readonly StringTable _stringTable;
+        private readonly StringCache _stringCache;
         private readonly Dictionary<string, ulong> _table = new();
         private ulong _index = 1; // 0 is reserved
 
-        public FunctionTable(Profile profile, StringTable stringTable)
+        public FunctionCache(Profile profile, StringCache stringCache)
         {
             _profile = profile;
-            _stringTable = stringTable;
+            _stringCache = stringCache;
         }
 
-        public ulong Get(string functionName)
+        public ulong GetOrAdd(string functionName)
         {
             if (_table.TryGetValue(functionName, out var value))
             {
                 return value;
             }
 
-            var function = new Function { Id = _index, Filename = _stringTable.Get("unknown"), Name = _stringTable.Get(functionName) }; // for now, we don't support file name
+            var function = new Function { Id = _index, Filename = _stringCache.GetOrAdd("unknown"), Name = _stringCache.GetOrAdd(functionName) }; // for now, we don't support file name
 
             _profile.Function.Add(function);
             _table[functionName] = _index;
@@ -106,13 +106,13 @@ internal class ExtendedPprofBuilder
     private class LocationTable
     {
         private readonly Profile _profile;
-        private readonly FunctionTable _functionTable;
+        private readonly FunctionCache _functionCache;
         private ulong _index = 1; // 0 is reserved
 
-        public LocationTable(Profile profile, FunctionTable functionTable)
+        public LocationTable(Profile profile, FunctionCache functionCache)
         {
             _profile = profile;
-            _functionTable = functionTable;
+            _functionCache = functionCache;
         }
 
         public ulong Get(string function)
@@ -120,7 +120,7 @@ internal class ExtendedPprofBuilder
             var functionKey = function;
 
             var location = new Location { Id = _index };
-            location.Line.Add(new Line { FunctionIndex = _functionTable.Get(functionKey), Line_ = 0, Column = 0 }); // for now, we don't support line nor column number
+            location.Line.Add(new Line { FunctionIndex = _functionCache.GetOrAdd(functionKey), Line_ = 0, Column = 0 }); // for now, we don't support line nor column number
 
             _profile.Location.Add(location);
             return _index++;
@@ -154,18 +154,18 @@ internal class ExtendedPprofBuilder
         }
     }
 
-    private class AttributeTable
+    private class AttributeCache
     {
         private readonly Profile _profile;
         private readonly Dictionary<KeyValue, ulong> _table = new();
         private ulong _index = 1; // 0 is reserved
 
-        public AttributeTable(Profile profile)
+        public AttributeCache(Profile profile)
         {
             _profile = profile;
         }
 
-        public ulong Get(string name, Action<AnyValue> setValue)
+        public ulong GetOrAdd(string name, Action<AnyValue> setValue)
         {
             var keyValue = new KeyValue
             {
