@@ -232,6 +232,7 @@ jobs:
       - test-build-native
       - test-build-container
       - test-nuget-packages
+      - test-build-windows-container-tests
     steps:
       - name: Test if test jobs passed
         run: |
