@@ -232,6 +232,7 @@ jobs:
       - test-build-native
       - test-build-container
       - test-nuget-packages
+      - test-build-windows-container-tests
     steps:
       - name: Test if test jobs passed
         run: |
@@ -243,3 +244,5 @@ jobs:
           test ${{ needs.test-build-container.result }} == "success"
           echo ${{ needs.test-nuget-packages.result }}
           test ${{ needs.test-nuget-packages.result }} == "success"
+          echo ${{ needs.test-build-windows-container-tests.result }}
+          test ${{ needs.test-build-windows-container-tests.result }} == "success"
