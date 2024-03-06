@@ -58,10 +58,10 @@ public class BuildTests
         {
             if (Environment.GetEnvironmentVariable("IsAlpine") == "true")
             {
-                return "alpine-linux";
+                return $"alpine-linux-{GetPlatform()}";
             }
 
-            return "linux";
+            return $"linux-{GetPlatform()}";
         }
 
         if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
@@ -70,5 +70,15 @@ public class BuildTests
         }
 
         return "unknown";
+    }
+
+    private static string GetPlatform()
+    {
+        return RuntimeInformation.ProcessArchitecture switch
+        {
+            Architecture.X64 => "x64",
+            Architecture.Arm64 => "arm64",
+            _ => throw new PlatformNotSupportedException()
+        };
     }
 }

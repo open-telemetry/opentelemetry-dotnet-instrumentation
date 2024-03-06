@@ -32,19 +32,28 @@ jobs:
       contents: write
     timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v4.1.1
-      - uses: actions/download-artifact@v4.1.4
+
+      - name: Checkout
+        uses: actions/checkout@v4.1.1
+
+      - name: Download artifacts
+        uses: actions/download-artifact@v4.1.4
         with:
           path: .
+
       - name: Install zip
         uses: montudor/action-zip@v1.0.0
-      - run: cd bin-alpine ; zip -qq -r ../opentelemetry-dotnet-instrumentation-linux-musl.zip . * ; cd ..
-      - run: cd bin-ubuntu-20.04 ; zip -qq -r ../opentelemetry-dotnet-instrumentation-linux-glibc.zip . * ; cd ..
+
+      - run: cd bin-alpine-x64 ; zip -qq -r ../opentelemetry-dotnet-instrumentation-linux-musl-x64.zip . * ; cd ..
+      - run: cd bin-alpine-arm64 ; zip -qq -r ../opentelemetry-dotnet-instrumentation-linux-musl-arm64.zip . * ; cd ..
+      - run: cd bin-ubuntu-20.04 ; zip -qq -r ../opentelemetry-dotnet-instrumentation-linux-glibc-x64.zip . * ; cd ..
+      - run: cd bin-actuated-arm64-4cpu-8gb ; zip -qq -r ../opentelemetry-dotnet-instrumentation-linux-glibc-arm64.zip . * ; cd ..
       - run: cd bin-windows-2022 ; zip -qq -r ../opentelemetry-dotnet-instrumentation-windows.zip . * ; cd ..
       - run: cd bin-macos-11 ; zip -qq -r ../opentelemetry-dotnet-instrumentation-macos.zip . * ; cd ..
       - run: cd bin-nuget-packages ; zip -qq -r ../opentelemetry-dotnet-instrumentation-nuget-packages.zip . * ; cd ..
       - run: cp installation-scripts-windows-2022/otel-dotnet-auto-install.sh ./otel-dotnet-auto-install.sh
       - run: cp installation-scripts-windows-2022/OpenTelemetry.DotNet.Auto.psm1 ./OpenTelemetry.DotNet.Auto.psm1
+
       - name: Create Release
         run: gh release create ${{ github.ref_name }} --title ${{ github.ref_name }} --verify-tag --draft ./*.zip ./otel-dotnet-auto-install.sh ./OpenTelemetry.DotNet.Auto.psm1
         env:

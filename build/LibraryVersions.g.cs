@@ -162,7 +162,6 @@ public static class LibraryVersion
             "TestApplication.Kafka",
             new List<PackageBuildInfo>
             {
-                new("1.4.0"),
                 new("2.3.0"),
             }
         },

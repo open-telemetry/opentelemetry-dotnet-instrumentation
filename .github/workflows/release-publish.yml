@@ -8,12 +8,15 @@ jobs:
   powershell-script:
     runs-on: windows-2022
     steps:
-      - uses: actions/setup-dotnet@v4.0.0
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4.0.0
         with:
           dotnet-version: | 
             6.0.419
             7.0.406
             8.0.201
+            
       - name: Test the PowerShell module instructions from README.md
         shell: powershell
         run: |
@@ -51,19 +54,32 @@ jobs:
             log-dir: "/var/log/opentelemetry/dotnet"
           - machine: macos-11
             log-dir: "/var/log/opentelemetry/dotnet"
+          - machine: actuated-arm64-4cpu-8gb
+            log-dir: "/var/log/opentelemetry/dotnet"
     runs-on: ${{ matrix.machine }}
     steps:
-      - uses: actions/setup-dotnet@v4.0.0
+        
+      - name: Setup ARM64 Environment Variables
+        if: ${{ matrix.machine == 'actuated-arm64-4cpu-8gb' }}
+        run: |
+          echo "DOTNET_INSTALL_DIR=~/.dotnet" >> $GITHUB_ENV
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4.0.0
         with:
           dotnet-version: | 
             6.0.419
             7.0.406
             8.0.201
-      - run: brew install coreutils
+
+      - name: Install MacOS CoreUtils
         if: ${{ runner.os == 'macOS' }}
+        run: brew install coreutils
+
       - name: Create test directory
-        run: sudo mkdir -p ${{ matrix.log-dir }} && sudo chmod a+rwx ${{ matrix.log-dir }}  # the instrumented process has no permissions to create log dir
         if: ${{ runner.os != 'Windows' }}
+        run: sudo mkdir -p ${{ matrix.log-dir }} && sudo chmod a+rwx ${{ matrix.log-dir }}  # the instrumented process has no permissions to create log dir
+
       - name: Test the Shell scripts from README.md
         shell: bash
         run: |
@@ -91,7 +107,10 @@ jobs:
             net-version: net7.0
     runs-on: ubuntu-20.04
     steps:
-      - uses: actions/checkout@v4.1.1
+
+      - name: Checkout
+        uses: actions/checkout@v4.1.1
+
       - name: Test the Shell scripts from README.md in Docker container
         run: |
           set -e

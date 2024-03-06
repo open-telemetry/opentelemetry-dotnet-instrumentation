@@ -182,7 +182,6 @@ public static class LibraryVersion
 #if DEFAULT_TEST_PACKAGE_VERSIONS
         new object[] { string.Empty }
 #else
-        new object[] { "1.4.0" },
         new object[] { "2.3.0" },
 #endif
     };
