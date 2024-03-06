@@ -3,12 +3,7 @@
 [![Slack](https://img.shields.io/badge/slack-@cncf/otel--dotnet--auto--instr-brightgreen.svg?logo=slack)](https://cloud-native.slack.com/archives/C01NR1YLSE7)
 [![NuGet](https://img.shields.io/nuget/v/OpenTelemetry.AutoInstrumentation.svg)](https://www.nuget.org/packages/OpenTelemetry.AutoInstrumentation)
 [![NuGet](https://img.shields.io/nuget/dt/OpenTelemetry.AutoInstrumentation.svg)](https://www.nuget.org/packages/OpenTelemetry.AutoInstrumentation)
-<a href="https://actuated.dev/">
-  <img
-    alt="Arm CI sponsored by Actuated"
-    src="https://docs.actuated.dev/images/actuated-badge.png" width="120px">
-  </img>
-</a>
+[![Arm CI sponsored by Actuated](https://img.shields.io/badge/SA_actuated.dev-004BDD)](https://actuated.dev/)
 
 This project adds [OpenTelemetry instrumentation](https://opentelemetry.io/docs/concepts/instrumenting/#automatic-instrumentation)
 to .NET applications without having to modify their source code.
