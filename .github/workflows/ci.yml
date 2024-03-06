@@ -241,5 +241,5 @@ jobs:
           test ${{ needs.test-build-native.result }} == "success"
           echo ${{ needs.test-build-container.result }}
           test ${{ needs.test-build-container.result }} == "success"
-          echo ${{ needs.test-build-nuget.result }}
-          test ${{ needs.test-build-nuget.result }} == "success"
+          echo ${{ needs.test-nuget-packages.result }}
+          test ${{ needs.test-nuget-packages.result }} == "success"
