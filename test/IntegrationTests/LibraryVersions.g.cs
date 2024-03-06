@@ -91,7 +91,7 @@ public static class LibraryVersion
         new object[] { "2.1.7" },
         new object[] { "3.1.5" },
         new object[] { "4.0.5" },
-        new object[] { "5.1.5" },
+        new object[] { "5.2.0" },
 #endif
     };
     public static readonly IReadOnlyCollection<object[]> SqlClientSystem = new List<object[]>
@@ -108,7 +108,7 @@ public static class LibraryVersion
         new object[] { string.Empty }
 #else
         new object[] { "2.19.0" },
-        new object[] { "2.23.1" },
+        new object[] { "2.24.0" },
 #endif
     };
     public static readonly IReadOnlyCollection<object[]> MySqlConnector = new List<object[]>
