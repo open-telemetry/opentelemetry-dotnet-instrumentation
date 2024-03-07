@@ -101,11 +101,16 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - base-image: alpine
+          - machine: ubuntu-20.04
+            base-image: alpine
             net-version: net8.0
-          - base-image: centos
+          - machine: ubuntu-20.04
+            base-image: centos
             net-version: net7.0
-    runs-on: ubuntu-20.04
+          - machine: actuated-arm64-4cpu-8gb
+            base-image: alpine
+            net-version: net8.0
+    runs-on: ${{ matrix.machine }}
     steps:
 
       - name: Checkout
