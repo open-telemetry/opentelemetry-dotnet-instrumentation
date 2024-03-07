@@ -191,6 +191,7 @@ uses environment variables as parameters:
 |-------------------------|------------------------------------------------------------------|----------|---------------------------|
 | `OTEL_DOTNET_AUTO_HOME` | Location where binaries are to be installed                      | No       | `$HOME/.otel-dotnet-auto` |
 | `OS_TYPE`               | Possible values: `linux-glibc`, `linux-musl`, `macos`, `windows` | No       | *Calculated*              |
+| `ARCHITECTURE`          | Possible values for Linux: `x64`, `arm64`                        | No       | *Calculated*              |
 | `TMPDIR`                | Temporary directory used when downloading the files              | No       | `$(mktemp -d)`            |
 | `VERSION`               | Version to download                                              | No       | `1.4.0`                   |
 
@@ -202,6 +203,7 @@ uses environment variables as parameters:
 | `ENABLE_PROFILING`      | Whether to set the .NET CLR Profiler, possible values: `true`, `false` | No       | `true`                    |
 | `OTEL_DOTNET_AUTO_HOME` | Location where binaries are to be installed                            | No       | `$HOME/.otel-dotnet-auto` |
 | `OS_TYPE`               | Possible values: `linux-glibc`, `linux-musl`, `macos`, `windows`       | No       | *Calculated*              |
+| `ARCHITECTURE`          | Possible values for Linux: `x64`, `arm64`                              | No       | *Calculated*              |
 
 ### PowerShell module (Windows)
 
