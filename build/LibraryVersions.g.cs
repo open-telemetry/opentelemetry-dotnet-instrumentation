@@ -81,7 +81,7 @@ public static class LibraryVersion
                 new("2.1.7"),
                 new("3.1.5"),
                 new("4.0.5"),
-                new("5.1.5"),
+                new("5.2.0"),
             }
         },
         {
@@ -96,7 +96,7 @@ public static class LibraryVersion
             new List<PackageBuildInfo>
             {
                 new("2.19.0"),
-                new("2.23.1"),
+                new("2.24.0"),
             }
         },
         {
@@ -162,7 +162,6 @@ public static class LibraryVersion
             "TestApplication.Kafka",
             new List<PackageBuildInfo>
             {
-                new("1.4.0"),
                 new("2.3.0"),
             }
         },

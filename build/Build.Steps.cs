@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using System.Runtime.InteropServices;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using Extensions;
@@ -210,7 +211,7 @@ partial class Build
                 }
             }
 
-            foreach (var project in Solution.GetManagedTestProjects())
+            foreach (var project in Solution.GetManagedUnitTestProjects())
             {
                 if (TestTargetFramework != TargetFramework.NOT_SPECIFIED &&
                     !project.GetTargetFrameworks().Contains(TestTargetFramework))
@@ -227,6 +228,14 @@ partial class Build
                     .When(TestTargetFramework != TargetFramework.NOT_SPECIFIED,
                         s => s.SetFramework(TestTargetFramework)));
             }
+
+            DotNetBuild(x => x
+                .SetProjectFile(Solution.GetManagedIntegrationTestProject())
+                .SetConfiguration(BuildConfiguration)
+                .SetNoRestore(NoRestore)
+                .SetPlatform(Platform)
+                .When(TestTargetFramework != TargetFramework.NOT_SPECIFIED,
+                    s => s.SetFramework(TestTargetFramework)));
         });
 
     Target CompileNativeDependenciesForManagedTests => _ => _
@@ -519,6 +528,7 @@ partial class Build
             {
                 DotNetMSBuild(config => config
                     .SetConfiguration(BuildConfiguration)
+                    .SetPlatform(Platform)
                     .SetFilter(AndFilter(TestNameFilter(), ContainersFilter()))
                     .SetBlameHangTimeout("5m")
                     .EnableTrxLogOutput(GetResultsDirectory(project))
@@ -551,6 +561,7 @@ partial class Build
                 .SetProject(Solution.GetProjectByName(Projects.AutoInstrumentationAdditionalDeps))
                 .SetConfiguration(BuildConfiguration)
                 .SetTargetPlatformAnyCPU()
+                .SetProperty("NukePlatform", Platform)
                 .SetProperty("TracerHomePath", TracerHomeDirectory)
                 .EnableNoBuild()
                 .SetNoRestore(NoRestore)
@@ -569,8 +580,9 @@ partial class Build
 
                     var folderRuntimeName = depsJson.GetFolderRuntimeName();
                     var architectureStores = new List<AbsolutePath>()
-                        .AddIf(StoreDirectory / "x64" / folderRuntimeName, true) // All OS'es support x64 runtime
+                        .AddIf(StoreDirectory / "x64" / folderRuntimeName, RuntimeInformation.OSArchitecture == Architecture.X64)
                         .AddIf(StoreDirectory / "x86" / folderRuntimeName, IsWin) // Only Windows supports x86 runtime
+                        .AddIf(StoreDirectory / "arm64" / folderRuntimeName, IsArm64)
                         .AsReadOnly();
 
                     depsJson.CopyNativeDependenciesToStore(file, architectureStores);

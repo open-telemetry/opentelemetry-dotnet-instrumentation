@@ -32,12 +32,14 @@ jobs:
       fail-fast: false
       matrix:
         test-tfm: [ net8.0, net7.0, net6.0, net462 ]
-        machine: [ windows-2022, ubuntu-20.04, macos-11 ]
+        machine: [ windows-2022, ubuntu-20.04, macos-11, actuated-arm64-4cpu-8gb ]
         exclude:
           - test-tfm: net462
             machine: macos-11
           - test-tfm: net462
             machine: ubuntu-20.04
+          - test-tfm: net462
+            machine: actuated-arm64-4cpu-8gb
         include:
           - machine: windows-2022
             containers: none
@@ -45,45 +47,71 @@ jobs:
             containers: linux
           - machine: macos-11
             containers: none
+          - machine: actuated-arm64-4cpu-8gb
+            containers: linux
     runs-on: ${{ matrix.machine }}
     steps:
-      - uses: actions/checkout@v4.1.1
+
+      - name: Checkout
+        uses: actions/checkout@v4.1.1
         with:
           fetch-depth: 0 # fetching all, needed to correctly calculate version
-      - uses: actions/setup-dotnet@v4.0.0
+
+      - name: Setup ARM64 Environment Variables
+        if: ${{ matrix.machine == 'actuated-arm64-4cpu-8gb' }}
+        run: |
+          echo "DOTNET_INSTALL_DIR=~/.dotnet" >> $GITHUB_ENV
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4.0.0
         with:
           dotnet-version: | 
             6.0.419
             7.0.406
             8.0.201
+
       - name: Check for NuGet packages cache
         uses: actions/cache@v4.0.1
         id: nuget-cache
         with:
           key: ${{ hashFiles('**/Directory.packages.props', './build/LibraryVersions.g.cs', '**/packages.config' ) }}
           path: ${{ env.NUGET_PACKAGES }}
+
       - name: Download Artifacts from build job
         uses: actions/download-artifact@v4.1.4
         with:
           name: bin-${{ matrix.machine }}
           path: bin/tracer-home
+
       - name: Install SQL Server (localdb)
-        uses: potatoqualitee/mssqlsuite@v1.7
         if: ${{ runner.os == 'Windows' }}
+        uses: potatoqualitee/mssqlsuite@v1.7
         with: 
           install: localdb
-      - run: ./build.cmd --skip NativeTests --target TestWorkflow --test-target-framework ${{ matrix.test-tfm }} --containers ${{ matrix.containers }}
+      
+      - name: Setup ARM64 Machine
+        if: ${{ matrix.machine == 'actuated-arm64-4cpu-8gb' }}
+        run: |
+          sudo apt-get update && \
+          sudo apt-get install -y \
+              cmake \
+              clang \
+              make
+
+      - name: Run TestWorkflow
+        run: ./build.cmd --skip NativeTests --target TestWorkflow --test-target-framework ${{ matrix.test-tfm }} --containers ${{ matrix.containers }}
+
       - name: Upload test logs
-        uses: actions/upload-artifact@v4.3.1
         if: always()
+        uses: actions/upload-artifact@v4.3.1
         with:
           name: test-logs-${{ matrix.machine }}-${{ matrix.test-tfm }}-containers-${{ matrix.containers }}
           path: test-artifacts/
+
       - name: Delete SQL Server MSI
         if: ${{ runner.os == 'Windows' }}
         shell: bash
-        run: |
-          rm SqlLocalDB.msi
+        run: rm SqlLocalDB.msi
 
   test-build-native:
     needs: build
@@ -93,27 +121,35 @@ jobs:
         machine: [ windows-2022 ]
     runs-on: ${{ matrix.machine }}
     steps:
-      - uses: actions/checkout@v4.1.1
+
+      - name: Checkout
+        uses: actions/checkout@v4.1.1
         with:
           fetch-depth: 0 # fetching all, needed to correctly calculate version
-      - uses: actions/setup-dotnet@v4.0.0
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4.0.0
         with:
           dotnet-version: | 
             6.0.419
             7.0.406
             8.0.201
+
       - name: Check for NuGet packages cache
         uses: actions/cache@v4.0.1
         id: nuget-cache
         with:
           key: ${{ hashFiles('**/Directory.packages.props', './build/LibraryVersions.g.cs', '**/packages.config' ) }}
           path: ${{ env.NUGET_PACKAGES }}
+
       - name: Download Artifacts from build job
         uses: actions/download-artifact@v4.1.4
         with:
           name: bin-${{ matrix.machine }}
           path: bin/tracer-home
-      - run: ./build.cmd NativeTests
+
+      - name: Run NativeTests
+        run: ./build.cmd NativeTests
 
   test-build-windows-container-tests:
     needs: build
@@ -125,33 +161,42 @@ jobs:
             containers: windows-only
     runs-on: ${{ matrix.machine }}
     steps:
-      - uses: actions/checkout@v4.1.1
+
+      - name: Checkout
+        uses: actions/checkout@v4.1.1
         with:
           fetch-depth: 0 # fetching all, needed to correctly calculate version
-      - uses: actions/setup-dotnet@v4.0.0
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4.0.0
         with:
           dotnet-version: | 
             6.0.419
             7.0.406
             8.0.201
+
       - name: Check for NuGet packages cache
         uses: actions/cache@v4.0.1
         id: nuget-cache
         with:
           key: ${{ hashFiles('**/Directory.packages.props', './build/LibraryVersions.g.cs', '**/packages.config' ) }}
           path: ${{ env.NUGET_PACKAGES }}
+
       - name: Download Artifacts from build job
         uses: actions/download-artifact@v4.1.4
         with:
           name: bin-${{ matrix.machine }}
           path: bin/tracer-home
+
       - name: Build artifacts required for the test (no native tests)
         run: ./build.cmd --skip RunManagedTests --target ManagedTests --containers ${{ matrix.containers }}
+
       - name: Run the integration tests
         run: ./build.cmd --target RunManagedIntegrationTests --containers ${{ matrix.containers }}
+
       - name: Upload test logs
-        uses: actions/upload-artifact@v4.3.1
         if: always()
+        uses: actions/upload-artifact@v4.3.1
         with:
           name: test-logs-${{ matrix.machine }}-containers-${{ matrix.containers }}
           path: test-artifacts/
@@ -162,26 +207,41 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - base-image: alpine
-            build-source: alpine
+          - machine: ubuntu-20.04
+            base-image: alpine
+            build-source: alpine-x64
             os-type: linux-musl
-          - base-image: centos
+          - machine: ubuntu-20.04
+            base-image: centos
             build-source: ubuntu-20.04
             os-type: linux-glibc
-          - base-image: debian
+          - machine: ubuntu-20.04
+            base-image: debian
             build-source: ubuntu-20.04
             os-type: linux-glibc
-    runs-on: ubuntu-20.04
+          - machine: actuated-arm64-4cpu-8gb
+            base-image: alpine
+            build-source: alpine-arm64
+            os-type: linux-musl
+          - machine: actuated-arm64-4cpu-8gb
+            base-image: debian-arm64
+            build-source: actuated-arm64-4cpu-8gb
+            os-type: linux-glibc
+    runs-on: ${{ matrix.machine }}
     timeout-minutes: 60
     steps:
-    - uses: actions/checkout@v4.1.1
+
+    - name: Checkout
+      uses: actions/checkout@v4.1.1
       with:
         fetch-depth: 0 # fetching all, needed to correctly calculate version
+
     - name: Download Artifacts from build job
       uses: actions/download-artifact@v4.1.4
       with:
         name: bin-${{ matrix.build-source }}
         path: bin/tracer-home
+
     - name: Build in Docker container
       run: |
         set -e
@@ -198,17 +258,28 @@ jobs:
           - machine: ubuntu-20.04
           - machine: macos-11
           - machine: windows-2022
+          - machine: actuated-arm64-4cpu-8gb
     runs-on: ${{ matrix.machine }}
     steps:
-      - uses: actions/checkout@v4.1.1
+      
+      - name: Checkout
+        uses: actions/checkout@v4.1.1
         with:
           fetch-depth: 0 # fetching all, needed to correctly calculate version
-      - uses: actions/setup-dotnet@v4.0.0
+
+      - name: Setup ARM64 Environment Variables
+        if: ${{ matrix.machine == 'actuated-arm64-4cpu-8gb' }}
+        run: |
+          echo "DOTNET_INSTALL_DIR=~/.dotnet" >> $GITHUB_ENV
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4.0.0
         with:
           dotnet-version: | 
             6.0.419
             7.0.406
             8.0.201
+
       - name: Check for NuGet packages cache
         uses: actions/cache@v4.0.1
         id: nuget-cache
@@ -224,3 +295,25 @@ jobs:
 
       - name: Test NuGet Packages
         run: ./build.cmd TestNuGetPackages
+
+  test-jobs:
+    runs-on: ubuntu-20.04
+    needs:
+      - test-build-managed
+      - test-build-native
+      - test-build-container
+      - test-nuget-packages
+      - test-build-windows-container-tests
+    steps:
+      - name: Test if test jobs passed
+        run: |
+          echo ${{ needs.test-build-managed.result }}
+          test ${{ needs.test-build-managed.result }} == "success"
+          echo ${{ needs.test-build-native.result }}
+          test ${{ needs.test-build-native.result }} == "success"
+          echo ${{ needs.test-build-container.result }}
+          test ${{ needs.test-build-container.result }} == "success"
+          echo ${{ needs.test-nuget-packages.result }}
+          test ${{ needs.test-nuget-packages.result }} == "success"
+          echo ${{ needs.test-build-windows-container-tests.result }}
+          test ${{ needs.test-build-windows-container-tests.result }} == "success"

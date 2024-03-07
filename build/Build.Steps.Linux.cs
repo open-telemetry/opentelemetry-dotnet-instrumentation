@@ -59,10 +59,11 @@ partial class Build
         {
             // Copy Native file
             var source = NativeProfilerProject.Directory / "build" / "bin" / $"{NativeProfilerProject.Name}.so";
+            var platform = Platform.ToString().ToLowerInvariant();
             string clrProfilerDirectoryName = Environment.GetEnvironmentVariable("OS_TYPE") switch
             {
-                "linux-musl" => "linux-musl-x64",
-                _ => "linux-x64"
+                "linux-musl" => $"linux-musl-{platform}",
+                _ => $"linux-{platform}"
             };
 
             var dest = TracerHomeDirectory / clrProfilerDirectoryName;

@@ -13,20 +13,30 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - base-image: alpine
+          - machine: ubuntu-20.04
+            base-image: alpine
             os-type: linux-musl
-    runs-on: ubuntu-20.04
+            architecture: x64
+          - machine: actuated-arm64-4cpu-8gb
+            base-image: alpine
+            os-type: linux-musl
+            architecture: arm64
+    runs-on: ${{ matrix.machine }}
     timeout-minutes: 60
     steps:
-    - uses: actions/checkout@v4.1.1
+
+    - name: Checkout
+      uses: actions/checkout@v4.1.1
       with:
         fetch-depth: 0 # fetching all, needed to correctly calculate version
+
     - name: Build in Docker container
       run: |
         set -e
         docker build -t mybuildimage -f "./docker/${{ matrix.base-image }}.dockerfile" ./docker
         docker run -e OS_TYPE=${{ matrix.os-type }} --rm --mount type=bind,source="${GITHUB_WORKSPACE}",target=/project mybuildimage \
           /bin/sh -c 'git config --global --add safe.directory /project && ./build.sh BuildWorkflow'
+
     - name: Test the Shell scripts from README.md in Docker container
       run: |
         set -e
@@ -39,10 +49,11 @@ jobs:
           ./test/test-applications/integrations/bin/TestApplication.Smoke/Release/net8.0/publish/TestApplication.Smoke
             test "$(ls -A /var/log/opentelemetry/dotnet )"
         '
+
     - name: Publish Linux build
+      if: (${{ job.status }} != 'cancelled')
       uses: actions/upload-artifact@v4.3.1
       with:
-        name: bin-${{ matrix.base-image }}
+        name: bin-${{ matrix.base-image }}-${{ matrix.architecture }}
         path: bin/tracer-home
-      if: (${{ job.status }} != 'cancelled')
       continue-on-error: true

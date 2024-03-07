@@ -1,6 +1,9 @@
 // Copyright The OpenTelemetry Authors
 // SPDX-License-Identifier: Apache-2.0
 
+// SQL Server is supported on only AMD64
+#if _X64
+
 using IntegrationTests.Helpers;
 using Xunit.Abstractions;
 
@@ -46,3 +49,5 @@ public class SqlClientMicrosoftTests : TestHelper
         collector.AssertExpectations();
     }
 }
+
+#endif

@@ -11,6 +11,8 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 
 - .NET only, warning in logs about End of Support date
   and upcoming End of Support date for .NET version.
+- Experimental support for ARM64 on Ubuntu, Alpine and Debian based images.
+- Experimental ARM64 support for the `OpenTelemetry.AutoInstrumentation` NuGet package.
 
 ### Changed
 
@@ -19,6 +21,7 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 - Following packages updated
   - `MongoDB.Driver.Core.Extensions.DiagnosticSources` from `1.3.0` to `1.4.0`.
 - .NET Framework only, following packages updated
+  - `Google.Protobuf` updated from `3.25.2` to `3.25.3`,
   - `Grpc.Core.Api` from `2.60.0` to `2.61.0`,
   - `Microsoft.Extensions.Options` from `8.0.1` to `8.0.2`,
   - `System.Text.Json` from `8.0.1` to `8.0.2`.

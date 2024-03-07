@@ -20,7 +20,7 @@ internal class WcfServerTestHelper : TestHelper
     {
         var baseBinDirectory = EnvironmentHelper.GetTestApplicationBaseBinDirectory();
         var exeFileName = $"{EnvironmentHelper.FullTestApplicationName}.exe";
-        var testApplicationPath = Path.Combine(baseBinDirectory, EnvironmentTools.GetPlatform().ToLowerInvariant(), EnvironmentTools.GetBuildConfiguration(), "net462", exeFileName);
+        var testApplicationPath = Path.Combine(baseBinDirectory, EnvironmentTools.GetPlatformDir(), EnvironmentTools.GetBuildConfiguration(), "net462", exeFileName);
 
         if (!File.Exists(testApplicationPath))
         {

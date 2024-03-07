@@ -5,7 +5,7 @@
     <PackageVersion Include="Elastic.Clients.Elasticsearch" Version="8.12.0" />
     <PackageVersion Include="Confluent.Kafka" Version="2.3.0" />
     <PackageVersion Include="FluentAssertions" Version="6.12.0" />
-    <PackageVersion Include="Google.Protobuf" Version="3.25.2" />
+    <PackageVersion Include="Google.Protobuf" Version="3.25.3" />
     <PackageVersion Include="GraphQL" Version="7.8.0" />
     <PackageVersion Include="GraphQL.MicrosoftDI" Version="7.8.0" />
     <PackageVersion Include="GraphQL.Server.Transports.AspNetCore" Version="7.7.1" />
@@ -20,7 +20,7 @@
     <PackageVersion Include="Microsoft.AspNetCore.SignalR.Client" Version="8.0.1" />
     <PackageVersion Include="Microsoft.Build" Version="15.9.20" />
     <PackageVersion Include="Microsoft.Build.Utilities.Core" Version="15.9.20" />
-    <PackageVersion Include="Microsoft.Data.SqlClient" Version="5.1.5" />
+    <PackageVersion Include="Microsoft.Data.SqlClient" Version="5.2.0" />
     <PackageVersion Include="Microsoft.EntityFrameworkCore.Sqlite" Version="8.0.2" />
     <PackageVersion Include="Microsoft.Extensions.Configuration.Abstractions" Version="8.0.0" />
     <PackageVersion Include="Microsoft.Extensions.DependencyInjection" Version="8.0.0" />
@@ -28,7 +28,7 @@
     <PackageVersion Include="Microsoft.Extensions.Hosting" Version="8.0.0" />
     <PackageVersion Include="Microsoft.Extensions.Logging" Version="8.0.0" />
     <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="17.9.0" />
-    <PackageVersion Include="MongoDB.Driver" Version="2.23.1" />
+    <PackageVersion Include="MongoDB.Driver" Version="2.24.0" />
     <PackageVersion Include="NSubstitute" Version="5.1.0" />
     <PackageVersion Include="MySqlConnector" Version="2.3.5" />
     <PackageVersion Include="MySql.Data" Version="8.3.0" />
