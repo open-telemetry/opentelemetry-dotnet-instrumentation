@@ -17,16 +17,18 @@ jobs:
   build-nuget-packages:
     # In principle this job "needs: [ build, build-container ]", however, that would cause the build and build-container
     # jobs to run twice, which is not what we want. Instead, we let the "caller" job handle the dependencies.
-
     outputs:
       nuget-version-suffix: ${{ steps.set-nuget-version-suffix.outputs.suffix }}
-
     runs-on: windows-2022
     steps:
-      - uses: actions/checkout@v4.1.1
+
+      - name: Checkout
+        uses: actions/checkout@v4.1.1
         with:
           fetch-depth: 0 # fetching all, needed to correctly calculate version
-      - uses: actions/setup-dotnet@v4.0.0
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4.0.0
         with:
           dotnet-version: | 
             6.0.419
