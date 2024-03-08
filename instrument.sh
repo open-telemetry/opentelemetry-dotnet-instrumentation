@@ -20,13 +20,31 @@ if [ -z "$OS_TYPE" ]; then
   esac
 fi
 
+# guess OS architecture if not provided
+if [ -z "$ARCHITECTURE" ]; then
+  case $(uname -m) in
+    x86_64)  ARCHITECTURE="x64" ;;
+    aarch64) ARCHITECTURE="arm64" ;;
+  esac
+fi
+
+# validate architecture
+case "$ARCHITECTURE" in
+  "x64"|"arm64")
+    ;;
+  *)
+    echo "Set the architecture type using the ARCHITECTURE environment variable. Supported values: x64, arm64." >&2
+    return 2
+    ;;
+esac
+
 # validate input
 case "$OS_TYPE" in
   "linux-glibc")
-    DOTNET_RUNTIME_ID="linux-x64"
+    DOTNET_RUNTIME_ID="linux-$ARCHITECTURE"
     ;;
   "linux-musl")
-    DOTNET_RUNTIME_ID="linux-musl-x64"
+    DOTNET_RUNTIME_ID="linux-musl-$ARCHITECTURE"
     ;;
   "macos")
     DOTNET_RUNTIME_ID="osx-x64"
