@@ -13,9 +13,9 @@ jobs:
     permissions:
       contents: read
       packages: write
-
     steps:
-      - name: Checkout repository
+
+      - name: Checkout
         uses: actions/checkout@v4.1.1
 
       - name: Log in to the Container registry
@@ -26,8 +26,8 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Extract metadata (tags, labels) for Docker
-        id: meta
         uses: docker/metadata-action@v5.5.1
+        id: meta
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
 

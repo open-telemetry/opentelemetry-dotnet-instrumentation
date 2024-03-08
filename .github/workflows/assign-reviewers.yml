@@ -14,7 +14,9 @@ jobs:
     runs-on: ubuntu-latest
     name: Assign Reviewers
     steps:
-      - uses: dyladan/component-owners@main
+        
+      - name: Assign reviewers
+        uses: dyladan/component-owners@main
         with:
           assign-owners: "false"
           request-owner-reviews: "true"
