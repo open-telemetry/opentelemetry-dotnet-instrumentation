@@ -25,15 +25,25 @@ public class SqlServerFixture : IAsyncLifetime
 
     public SqlServerFixture()
     {
-        Port = TcpPortProvider.GetOpenPort();
+        if (IsCurrentArchitectureSupported)
+        {
+            Port = TcpPortProvider.GetOpenPort();
+        }
     }
 
     public string Password { get; } = $"@{Guid.NewGuid().ToString("N")}";
 
     public int Port { get; }
 
+    public bool IsCurrentArchitectureSupported { get; } = EnvironmentTools.IsX64();
+
     public async Task InitializeAsync()
     {
+        if (!IsCurrentArchitectureSupported)
+        {
+            return;
+        }
+
         _container = await LaunchSqlServerContainerAsync();
     }
 
@@ -42,6 +52,14 @@ public class SqlServerFixture : IAsyncLifetime
         if (_container != null)
         {
             await ShutdownSqlServerContainerAsync(_container);
+        }
+    }
+
+    public void SkipIfUnsupportedPlatform()
+    {
+        if (!IsCurrentArchitectureSupported)
+        {
+            throw new SkipException("SQL Server is supported only on AMD64.");
         }
     }
 

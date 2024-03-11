@@ -1,9 +1,6 @@
 // Copyright The OpenTelemetry Authors
 // SPDX-License-Identifier: Apache-2.0
 
-// SQL Server is supported on only AMD64
-#if _X64
-
 using IntegrationTests.Helpers;
 using Xunit.Abstractions;
 
@@ -31,12 +28,15 @@ public class SqlClientSystemTests : TestHelper
         }
     }
 
-    [Theory]
+    [SkippableTheory]
     [Trait("Category", "EndToEnd")]
     [Trait("Containers", "Linux")]
     [MemberData(nameof(GetData))]
     public void SubmitTraces(string packageVersion, bool dbStatementForText)
     {
+        // Skip the test if fixture does not support current platform
+        _sqlServerFixture.SkipIfUnsupportedPlatform();
+
         SetEnvironmentVariable("OTEL_DOTNET_AUTO_SQLCLIENT_SET_DBSTATEMENT_FOR_TEXT", dbStatementForText.ToString());
         using var collector = new MockSpansCollector(Output);
         SetExporter(collector);
@@ -59,5 +59,3 @@ public class SqlClientSystemTests : TestHelper
         collector.AssertExpectations();
     }
 }
-
-#endif
