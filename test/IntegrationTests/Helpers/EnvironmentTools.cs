@@ -92,6 +92,11 @@ public static class EnvironmentTools
         return RuntimeInformation.ProcessArchitecture.ToString();
     }
 
+    public static bool IsX64()
+    {
+        return RuntimeInformation.ProcessArchitecture == Architecture.X64;
+    }
+
     public static string GetPlatformDir()
     {
         return RuntimeInformation.ProcessArchitecture switch
