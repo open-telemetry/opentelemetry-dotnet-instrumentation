@@ -56,16 +56,16 @@ public class KafkaTests : TestHelper
         collector.Expect(KafkaInstrumentationScopeName, span => span.Kind == Span.Types.SpanKind.Producer && ValidateProduceExceptionSpan(span, topicName), "Failed Produce attempt without delivery handler set.");
         collector.Expect(KafkaInstrumentationScopeName, span => span.Kind == Span.Types.SpanKind.Producer && ValidateResultProcessingProduceExceptionSpan(span, topicName), "Failed ProduceAsync attempt.");
 
-        if (packageVersion == string.Empty || Version.Parse(packageVersion) >= new Version(2, 3, 0))
-        {
-            // Failed consume attempt.
-            collector.Expect(KafkaInstrumentationScopeName, span => span.Kind == Span.Types.SpanKind.Consumer && ValidateConsumeExceptionSpan(span, topicName), "Failed Consume attempt.");
-        }
-        else
+        if (packageVersion != string.Empty && Version.Parse(packageVersion) == new Version(1, 4, 0))
         {
             // For 1.4.0 null is returned when attempting to read from non-existent topic,
             // and no exception is thrown.
             collector.Expect(KafkaInstrumentationScopeName, span => span.Kind == Span.Types.SpanKind.Consumer && ValidateEmptyReadConsumerSpan(span, topicName), "Successful Consume attempt that returned no message.");
+        }
+        else
+        {
+            // Failed consume attempt.
+            collector.Expect(KafkaInstrumentationScopeName, span => span.Kind == Span.Types.SpanKind.Consumer && ValidateConsumeExceptionSpan(span, topicName), "Failed Consume attempt.");
         }
 
         // Successful produce attempts after topic was created with admin client.
