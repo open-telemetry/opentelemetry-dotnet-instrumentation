@@ -182,6 +182,15 @@ public static class LibraryVersion
 #if DEFAULT_TEST_PACKAGE_VERSIONS
         new object[] { string.Empty }
 #else
+        new object[] { "1.4.0" },
+        new object[] { "1.5.0" },
+        new object[] { "1.6.2" },
+        new object[] { "1.7.0" },
+        new object[] { "1.8.0" },
+        new object[] { "1.9.0" },
+        new object[] { "2.0.2" },
+        new object[] { "2.1.0" },
+        new object[] { "2.2.0" },
         new object[] { "2.3.0" },
 #endif
     };
