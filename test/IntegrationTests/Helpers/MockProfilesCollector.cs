@@ -157,7 +157,7 @@ public class MockProfilesCollector : IDisposable
 
     private void WriteOutput(string msg)
     {
-        const string name = nameof(MockMetricsCollector);
+        const string name = nameof(MockProfilesCollector);
         _output.WriteLine($"[{name}]: {msg}");
     }
 
