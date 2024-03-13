@@ -1,4 +1,4 @@
-FROM mcr.microsoft.com/dotnet/sdk:8.0.201-bookworm-slim
+FROM mcr.microsoft.com/dotnet/sdk:8.0.202-bookworm-slim
 
 RUN apt-get update && \
     apt-get install -y \
