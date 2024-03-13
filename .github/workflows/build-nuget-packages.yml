@@ -23,7 +23,7 @@ jobs:
     steps:
 
       - name: Checkout
-        uses: actions/checkout@v4.1.1
+        uses: actions/checkout@v4.1.2
         with:
           fetch-depth: 0 # fetching all, needed to correctly calculate version
 
@@ -31,9 +31,9 @@ jobs:
         uses: actions/setup-dotnet@v4.0.0
         with:
           dotnet-version: | 
-            6.0.419
-            7.0.406
-            8.0.201
+            6.0.420
+            7.0.407
+            8.0.202
 
       - name: Check for NuGet packages cache
         uses: actions/cache@v4.0.1
