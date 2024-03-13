@@ -16,7 +16,12 @@ internal sealed class XUnitFileBuilder : CSharpFileBuilder
         return this;
     }
 
-    public override CSharpFileBuilder AddVersion(string version, string[] supportedFrameworks)
+    public CSharpFileBuilder AddVersion(string version, string[] supportedFrameworks)
+    {
+        return AddVersion(version, supportedFrameworks, Array.Empty<string>());
+    }
+
+    public override CSharpFileBuilder AddVersion(string version, string[] supportedFrameworks, string[] supportedPlatforms)
     {
         var conditionalCompilation = supportedFrameworks.Length > 0;
         if (conditionalCompilation)
@@ -35,10 +40,10 @@ internal sealed class XUnitFileBuilder : CSharpFileBuilder
         return this;
     }
 
-    public override CSharpFileBuilder AddVersionWithDependencies(string version, Dictionary<string, string> dependencies, string[] supportedFrameworks)
+    public override CSharpFileBuilder AddVersionWithDependencies(string version, Dictionary<string, string> dependencies, string[] supportedFrameworks, string[] supportedPlatforms)
     {
         // Dependencies info is currently not usable here. Build is located based on main package version string.
-        return AddVersion(version, supportedFrameworks);
+        return AddVersion(version, supportedFrameworks, supportedPlatforms);
     }
 
     public override CSharpFileBuilder EndTestPackage()
@@ -47,5 +52,27 @@ internal sealed class XUnitFileBuilder : CSharpFileBuilder
     };");
 
         return this;
+    }
+
+    internal void BuildLookupMap(IReadOnlyCollection<PackageVersionDefinitions.PackageVersionDefinition> definitions, List<string> additionalPlatforms)
+    {
+        Builder.AppendLine(
+            @$"    public static readonly IReadOnlyDictionary<string, IReadOnlyCollection<object[]>> LookupMap = new Dictionary<string, IReadOnlyCollection<object[]>>
+    {{");
+
+        foreach (var item in definitions)
+        {
+            Builder.AppendLine($"       {{ \"{item.IntegrationName}\", {item.IntegrationName} }},");
+
+            if (additionalPlatforms.Any(x => x.StartsWith(item.IntegrationName)))
+            {
+                foreach (var platform in additionalPlatforms.Where(x => x.StartsWith(item.IntegrationName)))
+                {
+                    Builder.AppendLine($"       {{ \"{platform}\", {platform} }},");
+                }
+            }
+        }
+
+        Builder.AppendLine("    };");
     }
 }

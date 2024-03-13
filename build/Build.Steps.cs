@@ -86,11 +86,11 @@ partial class Build
                         .SetPlatform(Platform)
                         .When(!string.IsNullOrEmpty(NuGetPackagesDirectory), o => o.SetPackageDirectory(NuGetPackagesDirectory));
 
-                if (LibraryVersion.Versions.TryGetValue(project.Name, out var libraryVersions))
+                if (LibraryVersion.TryGetVersions(project.Name, Platform, out var libraryVersions))
                 {
                     DotNetRestore(s =>
                          Restore(s)
-                         .CombineWithBuildInfos(libraryVersions));
+                            .CombineWithBuildInfos(libraryVersions));
                 }
                 else
                 {

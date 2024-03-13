@@ -38,23 +38,18 @@ internal sealed class BuildFileBuilder : CSharpFileBuilder
         return this;
     }
 
-    public override CSharpFileBuilder AddVersion(string version, string[] supportedFrameworks)
+    public override CSharpFileBuilder AddVersion(string version, string[] supportedFrameworks, string[] supportedPlatforms)
     {
-        if (supportedFrameworks.Length > 0)
-        {
-            Builder.AppendLine($"                new(\"{version}\", {SerializeArray(supportedFrameworks)}),");
-        }
-        else
-        {
-            Builder.AppendLine($"                new(\"{version}\"),");
-        }
+        AddVersion(version, supportedFrameworks, supportedPlatforms, appendEnd: true);
 
         return this;
     }
 
-    public override CSharpFileBuilder AddVersionWithDependencies(string version, Dictionary<string, string> dependencies, string[] supportedFrameworks)
+    public override CSharpFileBuilder AddVersionWithDependencies(string version, Dictionary<string, string> dependencies, string[] supportedFrameworks, string[] supportedPlatforms)
     {
-        Builder.AppendLine($"                new(\"{version}\", {SerializeArray(supportedFrameworks)}, {SerializeDictionary(dependencies)}),");
+        AddVersion(version, supportedFrameworks, supportedPlatforms, appendEnd: false);
+
+        Builder.AppendLine($", additionalMetaData: {SerializeDictionary(dependencies)}),");
         return this;
     }
 
@@ -110,5 +105,27 @@ internal sealed class BuildFileBuilder : CSharpFileBuilder
         arraySb.Append("}");
 
         return arraySb.ToString();
+    }
+
+    private CSharpFileBuilder AddVersion(string version, string[] supportedFrameworks, string[] supportedPlatforms, bool appendEnd)
+    {
+        Builder.Append($"                new(\"{version}\"");
+
+        if (supportedFrameworks.Length > 0)
+        {
+            Builder.Append($", supportedFrameworks: {SerializeArray(supportedFrameworks)}");
+        }
+
+        if (supportedPlatforms.Length > 0)
+        {
+            Builder.Append($", supportedPlatforms: {SerializeArray(supportedPlatforms)}");
+        }
+
+        if (appendEnd)
+        {
+            Builder.AppendLine($"),");
+        }
+
+        return this;
     }
 }
