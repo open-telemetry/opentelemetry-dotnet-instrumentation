@@ -94,13 +94,13 @@ API key, ensure to use it. If you are running in a test environment and prefer
 not to use authentication, you can start dotnet-monitor with the `--no-auth`
 switch:
 
-```
+```bash
 dotnet-monitor collect --no-auth --configuration-file-path path/to/settings.json
 ```
 
 Or, if you have set up an API key:
 
-```
+```bash
 dotnet-monitor collect --configuration-file-path path/to/settings.json
 ```
 
@@ -115,13 +115,13 @@ metrics is [http://localhost:52325/metrics](http://localhost:52325/metrics). If
 you are using authentication, include the API key in your request header. For
 example, using curl with an API key:
 
-```
+```bash
 curl -H "Authorization: Bearer <Your-API-Key>" http://localhost:52325/metrics
 ```
 
 Without authentication (in test environments):
 
-```
+```bash
 curl http://localhost:52325/metrics
 ```
 
