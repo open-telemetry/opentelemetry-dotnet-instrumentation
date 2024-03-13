@@ -30,7 +30,7 @@ jobs:
     steps:
       
       - name: Checkout
-        uses: actions/checkout@v4.1.1
+        uses: actions/checkout@v4.1.2
 
       - name: Setup ARM64 Environment Variables
         if: ${{ matrix.machine == 'actuated-arm64-4cpu-8gb' }}
