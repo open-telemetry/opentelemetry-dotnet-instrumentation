@@ -20,7 +20,7 @@ public class MockProfilesCollector : IDisposable
     private readonly List<Expectation> _expectations = new();
     private readonly BlockingCollection<Collected> _profilesSnapshots = new(10); // bounded to avoid memory leak; contains protobuf type
 
-    public MockProfilesCollector(ITestOutputHelper output, string host = "localhost")
+    public MockProfilesCollector(ITestOutputHelper output)
     {
         _output = output;
         _listener = new(output, new PathHandler(HandleHttpRequests, "/v1/profiles"));
