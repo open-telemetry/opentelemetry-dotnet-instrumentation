@@ -3,8 +3,9 @@
 
 #if NET6_0_OR_GREATER
 
-using FluentAssertions;
 using IntegrationTests.Helpers;
+using OpenTelemetry.Proto.Profiles.V1;
+using OpenTelemetry.Proto.Profiles.V1.Alternatives.PprofExtended;
 using Xunit.Abstractions;
 
 namespace IntegrationTests;
@@ -21,11 +22,17 @@ public class ContinuousProfilerTests : TestHelper
     public void ExportAllocationSamples()
     {
         EnableBytecodeInstrumentation();
+        using var collector = new MockProfilesCollector(Output);
+        SetExporter(collector);
         SetEnvironmentVariable("OTEL_DOTNET_AUTO_PLUGINS", "TestApplication.ContinuousProfiler.AllocationPlugin, TestApplication.ContinuousProfiler, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null");
         SetEnvironmentVariable("OTEL_DOTNET_AUTO_TRACES_ADDITIONAL_SOURCES", "TestApplication.ContinuousProfiler");
-        var (standardOutput, _, _) = RunTestApplication();
+        RunTestApplication();
 
-        standardOutput.Should().Contain(@"ExportAllocationSamples[");
+        collector.Expect(profileData => profileData.ResourceProfiles.Any(resourceProfiles => resourceProfiles.ScopeProfiles.Any(scopeProfile => scopeProfile.Profiles.Any(profileContainer => ContainAttributes(profileContainer, "allocation") && profileContainer.Profile.Sample[0].Value[0] != 0.0))));
+        collector.ResourceExpector.Expect("todo.resource.detector.key", "todo.resource.detector.value");
+
+        collector.AssertExpectations();
+        collector.ResourceExpector.AssertExpectations();
     }
 
     [Fact]
@@ -33,13 +40,24 @@ public class ContinuousProfilerTests : TestHelper
     public void ExportThreadSamples()
     {
         EnableBytecodeInstrumentation();
+        using var collector = new MockProfilesCollector(Output);
+        SetExporter(collector);
         SetEnvironmentVariable("OTEL_DOTNET_AUTO_PLUGINS", "TestApplication.ContinuousProfiler.ThreadPlugin, TestApplication.ContinuousProfiler, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null");
         SetEnvironmentVariable("OTEL_DOTNET_AUTO_TRACES_ADDITIONAL_SOURCES", "TestApplication.ContinuousProfiler");
-        var (standardOutput, _, _) = RunTestApplication();
+        RunTestApplication();
 
-        var expectedStackTrace = string.Join(Environment.NewLine, CreateExpectedStackTrace());
+        var expectedStackTrace = string.Join("\n", CreateExpectedStackTrace());
 
-        standardOutput.Should().Contain(expectedStackTrace);
+        collector.Expect(profileData => profileData.ResourceProfiles.Any(resourceProfiles => resourceProfiles.ScopeProfiles.Any(scopeProfile => scopeProfile.Profiles.Any(profileContainer => ContainStackTraceForClassHierarchy(profileContainer.Profile, expectedStackTrace) && ContainAttributes(profileContainer, "cpu")))));
+        collector.ResourceExpector.Expect("todo.resource.detector.key", "todo.resource.detector.value");
+
+        collector.AssertExpectations();
+        collector.ResourceExpector.AssertExpectations();
+    }
+
+    private static bool ContainAttributes(ProfileContainer profileContainer, string profilingDataType)
+    {
+        return profileContainer.Attributes.Any(x => x.Key == "todo.profiling.data.type" && x.Value.StringValue == profilingDataType);
     }
 
     private static List<string> CreateExpectedStackTrace()
@@ -75,6 +93,19 @@ public class ContinuousProfilerTests : TestHelper
         stackTrace.Add("My.Custom.Test.Namespace.ClassA.MethodA()");
 
         return stackTrace;
+    }
+
+    private bool ContainStackTraceForClassHierarchy(Profile profile, string expectedStackTrace)
+    {
+        var frames = profile.Location
+            .SelectMany(location => location.Line)
+            .Select(line => line.FunctionIndex)
+            .Select(functionId => profile.Function[(int)functionId - 1])
+            .Select(function => profile.StringTable[(int)function.Name]);
+
+        var stackTrace = string.Join("\n", frames);
+
+        return stackTrace.Contains(expectedStackTrace);
     }
 }
 #endif
