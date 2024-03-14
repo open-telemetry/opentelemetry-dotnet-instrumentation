@@ -218,7 +218,7 @@ internal static class PackageVersionDefinitions
             {
                 new("1.4.0", supportedPlatforms: new[] { "x64" }),
                 new("1.6.2"),
-                new("1.8.1"),
+                new("1.8.2"),
                 new("*")
             }
         }

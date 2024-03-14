@@ -183,7 +183,7 @@ public static partial class LibraryVersion
         new object[] { string.Empty }
 #else
         new object[] { "1.6.2" },
-        new object[] { "1.8.1" },
+        new object[] { "1.8.2" },
         new object[] { "2.3.0" },
 #endif
     };
