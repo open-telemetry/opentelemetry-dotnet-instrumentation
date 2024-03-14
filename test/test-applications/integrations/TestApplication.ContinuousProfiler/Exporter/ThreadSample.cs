@@ -5,9 +5,9 @@ namespace TestApplication.ContinuousProfiler;
 
 internal class ThreadSample
 {
-    public ThreadSample(Time timestamp, long traceIdHigh, long traceIdLow, long spanId, string? threadName, uint threadIndex = default)
+    public ThreadSample(long timestampMilliseconds, long traceIdHigh, long traceIdLow, long spanId, string? threadName, uint threadIndex = default)
     {
-        Timestamp = timestamp;
+        TimestampNanoseconds = (ulong)timestampMilliseconds * 1_000_000u;
         TraceIdHigh = traceIdHigh;
         TraceIdLow = traceIdLow;
         SpanId = spanId;
@@ -15,7 +15,7 @@ internal class ThreadSample
         ThreadIndex = threadIndex;
     }
 
-    public Time Timestamp { get; }
+    public ulong TimestampNanoseconds { get; }
 
     public long SpanId { get; }
 
@@ -28,17 +28,4 @@ internal class ThreadSample
     public uint ThreadIndex { get; }
 
     public IList<string> Frames { get; } = new List<string>();
-
-    internal class Time
-    {
-        public Time(long milliseconds)
-        {
-            Milliseconds = milliseconds;
-            Nanoseconds = (ulong)milliseconds * 1_000_000u;
-        }
-
-        public ulong Nanoseconds { get; }
-
-        public long Milliseconds { get; }
-    }
 }
