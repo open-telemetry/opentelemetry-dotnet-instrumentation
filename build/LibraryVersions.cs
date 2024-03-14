@@ -9,7 +9,7 @@ public static partial class LibraryVersion
         if (result)
         {
             libraryVersions = libraryVersions
-                .Where(x => 
+                .Where(x =>
                     x.SupportedPlatforms.Contains(platform.ToString(), StringComparer.OrdinalIgnoreCase))
                 .ToList();
         }

@@ -217,8 +217,8 @@ internal static class PackageVersionDefinitions
             Versions = new List<PackageVersion>
             {
                 new("1.4.0", supportedPlatforms: new[] { "x64" }),
-                new("1.6.2"),
-                new("1.8.2"),
+                new("1.6.2"), // First version that supports both arm64 and x64
+                new("1.8.2"), // 1.8.0-1.8.1 are known to have issues with arm64
                 new("*")
             }
         }
