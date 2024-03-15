@@ -33,7 +33,9 @@ internal class ApplicationInExcludeListRule : Rule
             return false;
         }
 
-        Logger.Debug($"Rule Engine: {processModuleName} is not in the exclusion list. ApplicationInExcludeListRule evaluation success.");
+        Logger.Debug(
+            "Rule Engine: {0} is not in the exclusion list. ApplicationInExcludeListRule evaluation success.",
+            processModuleName);
         return true;
     }
 

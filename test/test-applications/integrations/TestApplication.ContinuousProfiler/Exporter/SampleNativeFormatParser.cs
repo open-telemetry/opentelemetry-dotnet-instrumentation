@@ -75,7 +75,7 @@ internal static class SampleNativeFormatParser
                     }
 
                     var threadSample = new ThreadSample(
-                        new ThreadSample.Time(sampleStartMillis),
+                        sampleStartMillis,
                         traceIdHigh,
                         traceIdLow,
                         spanId,
@@ -158,7 +158,7 @@ internal static class SampleNativeFormatParser
                     var spanId = ReadInt64(buffer, ref position);
 
                     var threadSample = new ThreadSample(
-                        new ThreadSample.Time(timestampMillis),
+                        timestampMillis,
                         traceIdHigh,
                         traceIdLow,
                         spanId,

@@ -61,7 +61,10 @@ internal class RuntimeStoreDiagnosticRule : Rule
                 {
                     // Special case to handle runtime store version 3.1.x.x package references in app.
                     // Skip rule evaluation for assemblies with version 3.1.x.x.
-                    Logger.Debug($"Rule Engine: Skipping rule evaluation for runtime store assembly {appInstrumentationFileVersionInfo.FileName} with version {appInstrumentationFileVersion}.");
+                    Logger.Debug(
+                        "Rule Engine: Skipping rule evaluation for runtime store assembly {0} with version {1}.",
+                        appInstrumentationFileVersionInfo.FileName,
+                        appInstrumentationFileVersion);
                     continue;
                 }
 
@@ -74,7 +77,9 @@ internal class RuntimeStoreDiagnosticRule : Rule
                 }
                 else
                 {
-                    Logger.Debug($"Rule Engine: Runtime store assembly {runTimeStoreFileVersionInfo.FileName} is validated successfully.");
+                    Logger.Debug(
+                        "Rule Engine: Runtime store assembly {0} is validated successfully.",
+                        runTimeStoreFileVersionInfo.FileName);
                 }
             }
         }
@@ -103,7 +108,9 @@ internal class RuntimeStoreDiagnosticRule : Rule
             // Check if the store directory exists
             if (!Directory.Exists(storeDirectory))
             {
-                Logger.Debug($"Rule Engine: Runtime store directory not found at {storeDirectory}. Skipping rule evaluation.");
+                Logger.Debug(
+                    "Rule Engine: Runtime store directory not found at {0}. Skipping rule evaluation.",
+                    storeDirectory);
                 return null;
             }
 
