@@ -221,9 +221,9 @@ Project("{778DAE3C-4631-46EA-AA77-85C1314464D9}") = "TestApplication.ContinuousP
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestApplication.ContinuousProfiler.ContextTracking", "test\test-applications\integrations\TestApplication.ContinuousProfiler.ContextTracking\TestApplication.ContinuousProfiler.ContextTracking.csproj", "{B74CB036-10F5-449D-8CBA-44F77E68D042}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "NextGen.AutoInstrumentation", "NextGen.AutoInstrumentation", "{3F051815-8E0D-4356-BC36-55CA642DDF18}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "next-gen", "next-gen", "{3F051815-8E0D-4356-BC36-55CA642DDF18}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "getting-started-dotnet-monitor-metrics", "NextGen.AutoInstrumentation\docs\getting-started-dotnet-monitor-metrics\getting-started-dotnet-monitor-metrics.csproj", "{022A03CE-DD7A-4326-847E-3B750E660845}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "getting-started-dotnet-monitor-metrics", "next-gen\docs\getting-started-dotnet-monitor-metrics\getting-started-dotnet-monitor-metrics.csproj", "{022A03CE-DD7A-4326-847E-3B750E660845}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
