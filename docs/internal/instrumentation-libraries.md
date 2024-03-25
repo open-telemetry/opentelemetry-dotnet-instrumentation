@@ -93,7 +93,7 @@ instrumentation libraries to support.
 
 TODO: Determine appropriate resource detectors and Azure SDK related
 instrumentation libraries to support. This should also include support
-for frameworks like [Azure Service Fabric](https://azure.microsoft.com/services/service-fabric/).
+for frameworks like [Azure Service Fabric](https://azure.microsoft.com/en-gb/products/service-fabric/).
 
 ### [GCP](https://cloud.google.com/)
 
