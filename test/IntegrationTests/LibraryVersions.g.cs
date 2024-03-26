@@ -11,7 +11,7 @@
 
 namespace IntegrationTests;
 
-public static class LibraryVersion
+public static partial class LibraryVersion
 {
     public static readonly IReadOnlyCollection<object[]> Azure = new List<object[]>
     {
@@ -182,7 +182,39 @@ public static class LibraryVersion
 #if DEFAULT_TEST_PACKAGE_VERSIONS
         new object[] { string.Empty }
 #else
+        new object[] { "1.6.2" },
+        new object[] { "1.8.2" },
         new object[] { "2.3.0" },
 #endif
+    };
+    public static readonly IReadOnlyCollection<object[]> Kafka_x64 = new List<object[]>
+    {
+#if DEFAULT_TEST_PACKAGE_VERSIONS
+        new object[] { string.Empty }
+#else
+        new object[] { "1.4.0" },
+#endif
+    };
+    public static readonly IReadOnlyDictionary<string, IReadOnlyCollection<object[]>> LookupMap = new Dictionary<string, IReadOnlyCollection<object[]>>
+    {
+       { "Azure", Azure },
+       { "Elasticsearch", Elasticsearch },
+       { "EntityFrameworkCore", EntityFrameworkCore },
+       { "EntityFrameworkCorePomeloMySql", EntityFrameworkCorePomeloMySql },
+       { "GraphQL", GraphQL },
+       { "GrpcNetClient", GrpcNetClient },
+       { "MassTransit", MassTransit },
+       { "SqlClientMicrosoft", SqlClientMicrosoft },
+       { "SqlClientSystem", SqlClientSystem },
+       { "MongoDB", MongoDB },
+       { "MySqlConnector", MySqlConnector },
+       { "MySqlData", MySqlData },
+       { "Npgsql", Npgsql },
+       { "NServiceBus", NServiceBus },
+       { "Quartz", Quartz },
+       { "StackExchangeRedis", StackExchangeRedis },
+       { "WCFCoreClient", WCFCoreClient },
+       { "Kafka", Kafka },
+       { "Kafka_x64", Kafka_x64 },
     };
 }

@@ -41,8 +41,8 @@ internal static class PackageVersionDefinitions
             {
                 new("6.0.27"),
                 new("7.0.16"),
-                new("8.0.2", "net8.0"),
-                new("*", "net8.0")
+                new("8.0.2", supportedFrameworks: new[] { "net8.0" }),
+                new("*", supportedFrameworks: new[] { "net8.0" })
             }
         },
         new()
@@ -54,8 +54,8 @@ internal static class PackageVersionDefinitions
             {
                 new("6.0.2"),
                 new("7.0.0"),
-                new("8.0.0", "net8.0"),
-                new("*", "net8.0")
+                new("8.0.0", supportedFrameworks: new[] { "net8.0" }),
+                new("*", supportedFrameworks: new[] { "net8.0" })
             }
         },
         new()
@@ -216,8 +216,9 @@ internal static class PackageVersionDefinitions
             TestApplicationName = "TestApplication.Kafka",
             Versions = new List<PackageVersion>
             {
-                // TODO: Temporarily disable version 1.4.0, Doesn't support ARM64
-                // new("1.4.0"),
+                new("1.4.0", supportedPlatforms: new[] { "x64" }),
+                new("1.6.2"), // First version that supports both arm64 and x64
+                new("1.8.2"), // 1.8.0-1.8.1 are known to have issues with arm64
                 new("*")
             }
         }

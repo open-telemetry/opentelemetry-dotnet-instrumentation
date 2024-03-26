@@ -49,7 +49,7 @@ internal abstract class CSharpFileBuilder
             Builder.AppendLine();
         }
 
-        Builder.AppendLine(@"public static class LibraryVersion
+        Builder.AppendLine(@"public static partial class LibraryVersion
 {");
 
         return this;
@@ -64,9 +64,9 @@ internal abstract class CSharpFileBuilder
 
     public abstract CSharpFileBuilder BeginTestPackage(string testApplicationName, string integrationName);
 
-    public abstract CSharpFileBuilder AddVersion(string version, string[] supportedFrameworks);
+    public abstract CSharpFileBuilder AddVersion(string version, string[] supportedFrameworks, string[] supportedPlatforms);
 
-    public abstract CSharpFileBuilder AddVersionWithDependencies(string version, Dictionary<string, string> dependencies, string[] supportedFrameworks);
+    public abstract CSharpFileBuilder AddVersionWithDependencies(string version, Dictionary<string, string> dependencies, string[] supportedFrameworks, string[] supportedPlatforms);
 
     public abstract CSharpFileBuilder EndTestPackage();
 

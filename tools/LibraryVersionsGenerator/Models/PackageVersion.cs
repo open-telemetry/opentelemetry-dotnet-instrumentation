@@ -5,13 +5,16 @@ namespace LibraryVersionsGenerator.Models;
 
 internal class PackageVersion
 {
-    public PackageVersion(string version, params string[] supportedFrameworks)
+    public PackageVersion(string version, string[]? supportedFrameworks = null, string[]? supportedPlatforms = null)
     {
         Version = version;
-        SupportedFrameworks = supportedFrameworks;
+        SupportedFrameworks = supportedFrameworks ?? Array.Empty<string>();
+        SupportedPlatforms = supportedPlatforms ?? Array.Empty<string>();
     }
 
     public string Version { get; init; }
 
-    public string[] SupportedFrameworks { get; set; }
+    public string[] SupportedFrameworks { get; init; }
+
+    public string[] SupportedPlatforms { get; init; }
 }

@@ -19,6 +19,7 @@ public class Program
         var solutionFolder = Path.Combine(thisFilePath, "..", "..", "..");
         var packagePropsFile = Path.Combine(solutionFolder, "test", "Directory.Packages.props");
         var project = Project.FromFile(packagePropsFile, new ProjectOptions());
+        var additionalPlatforms = new List<string>();
 
         _packageVersions = project.GetItems("PackageVersion").ToDictionary(x => x.EvaluatedInclude, x => x.DirectMetadata.Single().EvaluatedValue);
 
@@ -36,7 +37,8 @@ public class Program
             xUnitFileStringBuilder.BeginTestPackage(packageVersionDefinition.TestApplicationName, packageVersionDefinition.IntegrationName);
             buildFileStringBuilder.BeginTestPackage(packageVersionDefinition.TestApplicationName, packageVersionDefinition.IntegrationName);
 
-            HashSet<string> uniqueVersions = new(packageVersionDefinition.Versions.Count);
+            var uniqueVersions = new HashSet<string>(packageVersionDefinition.Versions.Count);
+            var platformVersions = new Dictionary<string, List<string>>();
 
             foreach (var version in packageVersionDefinition.Versions)
             {
@@ -44,22 +46,72 @@ public class Program
 
                 if (uniqueVersions.Add(calculatedVersion))
                 {
+                    var isPlatformSpecific = false;
+
+                    // Collects versions with platform specific flag
+                    if (version.SupportedPlatforms.Any())
+                    {
+                        isPlatformSpecific = true;
+
+                        foreach (var platform in version.SupportedPlatforms)
+                        {
+                            if (!platformVersions.ContainsKey(platform))
+                            {
+                                platformVersions.Add(platform, new List<string>());
+                            }
+
+                            platformVersions[platform].Add(calculatedVersion);
+                        }
+                    }
+
                     if (version.GetType() == typeof(PackageVersion))
                     {
-                        xUnitFileStringBuilder.AddVersion(calculatedVersion, version.SupportedFrameworks);
-                        buildFileStringBuilder.AddVersion(calculatedVersion, version.SupportedFrameworks);
+                        // Filter platform specific version
+                        if (!isPlatformSpecific)
+                        {
+                            xUnitFileStringBuilder.AddVersion(calculatedVersion, version.SupportedFrameworks);
+                        }
+
+                        buildFileStringBuilder.AddVersion(calculatedVersion, version.SupportedFrameworks, version.SupportedPlatforms);
                     }
                     else
                     {
-                        xUnitFileStringBuilder.AddVersionWithDependencies(calculatedVersion, GetDependencies(version), version.SupportedFrameworks);
-                        buildFileStringBuilder.AddVersionWithDependencies(calculatedVersion, GetDependencies(version), version.SupportedFrameworks);
+                        // Filter platform specific version
+                        if (!isPlatformSpecific)
+                        {
+                            xUnitFileStringBuilder.AddVersionWithDependencies(calculatedVersion, GetDependencies(version), version.SupportedFrameworks, version.SupportedPlatforms);
+                        }
+
+                        buildFileStringBuilder.AddVersionWithDependencies(calculatedVersion, GetDependencies(version), version.SupportedFrameworks, version.SupportedPlatforms);
                     }
                 }
             }
 
             xUnitFileStringBuilder.EndTestPackage();
             buildFileStringBuilder.EndTestPackage();
+
+            // Generates platform specific entry
+            if (platformVersions.Any())
+            {
+                foreach (var platform in platformVersions)
+                {
+                    var platformIntegrationKey = $"{packageVersionDefinition.IntegrationName}_{platform.Key}";
+                    additionalPlatforms.Add(platformIntegrationKey);
+
+                    xUnitFileStringBuilder.BeginTestPackage(packageVersionDefinition.TestApplicationName, platformIntegrationKey);
+
+                    foreach (var version in platform.Value)
+                    {
+                        xUnitFileStringBuilder.AddVersion(version, Array.Empty<string>());
+                    }
+
+                    xUnitFileStringBuilder.EndTestPackage();
+                }
+            }
         }
+
+        // Generate map for all properties
+        xUnitFileStringBuilder.BuildLookupMap(PackageVersionDefinitions.Definitions, additionalPlatforms);
 
         xUnitFileStringBuilder.EndClass();
         buildFileStringBuilder.EndClass();

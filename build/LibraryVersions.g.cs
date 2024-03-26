@@ -11,7 +11,7 @@
 
 using Models;
 
-public static class LibraryVersion
+public static partial class LibraryVersion
 {
     public static IReadOnlyDictionary<string, IReadOnlyCollection<PackageBuildInfo>> Versions = new Dictionary<string, IReadOnlyCollection<PackageBuildInfo>>
     {
@@ -38,7 +38,7 @@ public static class LibraryVersion
             {
                 new("6.0.27"),
                 new("7.0.16"),
-                new("8.0.2", new string[] {"net8.0"}),
+                new("8.0.2", supportedFrameworks: new string[] {"net8.0"}),
             }
         },
         {
@@ -47,15 +47,15 @@ public static class LibraryVersion
             {
                 new("6.0.2"),
                 new("7.0.0"),
-                new("8.0.0", new string[] {"net8.0"}),
+                new("8.0.0", supportedFrameworks: new string[] {"net8.0"}),
             }
         },
         {
             "TestApplication.GraphQL",
             new List<PackageBuildInfo>
             {
-                new("7.5.0", Array.Empty<string>(), new() {{"GraphQLMicrosoftDI","7.5.0"},{"GraphQLServerTransportsAspNetCore","7.5.0"},{"GraphQLServerUIPlayground","7.5.0"}}),
-                new("7.8.0", Array.Empty<string>(), new() {{"GraphQLMicrosoftDI","7.8.0"},{"GraphQLServerTransportsAspNetCore","7.7.1"},{"GraphQLServerUIPlayground","7.7.1"}}),
+                new("7.5.0", additionalMetaData: new() {{"GraphQLMicrosoftDI","7.5.0"},{"GraphQLServerTransportsAspNetCore","7.5.0"},{"GraphQLServerUIPlayground","7.5.0"}}),
+                new("7.8.0", additionalMetaData: new() {{"GraphQLMicrosoftDI","7.8.0"},{"GraphQLServerTransportsAspNetCore","7.7.1"},{"GraphQLServerUIPlayground","7.7.1"}}),
             }
         },
         {
@@ -162,6 +162,9 @@ public static class LibraryVersion
             "TestApplication.Kafka",
             new List<PackageBuildInfo>
             {
+                new("1.4.0", supportedPlatforms: new string[] {"x64"}),
+                new("1.6.2"),
+                new("1.8.2"),
                 new("2.3.0"),
             }
         },
