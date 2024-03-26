@@ -160,7 +160,7 @@ due to lack of stable semantic convention.
 \[4\]: `Elastic.Clients.Elasticsearch` version ≥8.0.0 and <8.10.0.
         Version ≥8.10.0 is supported by `Elastic.Transport` instrumentation.
 
-\[5\]: `Confluent.Kafka` is supported from version ≥1.6.2 on ARM64.
+\[5\]: `Confluent.Kafka` is supported from version ≥1.8.2 on ARM64.
 
 \[6\]: `Microsoft.Data.SqlClient` v3.* is not supported on .NET Framework,
         due to [issue](https://github.com/open-telemetry/opentelemetry-dotnet/issues/4243).
