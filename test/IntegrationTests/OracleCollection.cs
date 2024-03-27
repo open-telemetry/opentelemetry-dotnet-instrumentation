@@ -28,7 +28,7 @@ public class OracleFixture : IAsyncLifetime
 
     public int Port { get; }
 
-    public string Password { get; } =  $"@{Guid.NewGuid():N}";
+    public string Password { get; } = $"@{Guid.NewGuid():N}";
 
     public async Task InitializeAsync()
     {
