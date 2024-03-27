@@ -15,7 +15,8 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 - Experimental ARM64 support for the `OpenTelemetry.AutoInstrumentation` NuGet package.
 - Support for [Oracle.ManagedDataAccess.Core](https://www.nuget.org/packages/Oracle.ManagedDataAccess.Core)
   and [Oracle.ManagedDataAccess](https://www.nuget.org/packages/Oracle.ManagedDataAccess)
-  traces instrumentation from 23.3.2-dev.
+  traces instrumentation from 23.3.2-dev together with support for
+  `OTEL_DOTNET_AUTO_ORACLEMDA_SET_DBSTATEMENT_FOR_TEXT` environment variable.
 
 ### Changed
 

@@ -40,11 +40,7 @@ internal static class EnvironmentConfigurationTracerHelper
                 TracerInstrumentation.MySqlConnector => builder.AddSource("MySqlConnector"),
                 TracerInstrumentation.Azure => Wrappers.AddAzureInstrumentation(builder),
                 TracerInstrumentation.WcfClient => AddWcfIfNeeded(builder, pluginManager, lazyInstrumentationLoader, ref wcfInstrumentationAdded),
-#if NETFRAMEWORK
-                TracerInstrumentation.OracleMda => builder.AddSource("Oracle.ManagedDataAccess"),
-#else
-                TracerInstrumentation.OracleMda => builder.AddSource("Oracle.ManagedDataAccess.Core"),
-#endif
+                TracerInstrumentation.OracleMda => Wrappers.AddOracleMdaInstrumentation(builder, lazyInstrumentationLoader, settings),
 #if NET6_0_OR_GREATER
                 TracerInstrumentation.AspNetCore => Wrappers.AddAspNetCoreInstrumentation(builder, pluginManager, lazyInstrumentationLoader),
                 TracerInstrumentation.MassTransit => builder.AddSource("MassTransit"),
@@ -205,6 +201,18 @@ internal static class EnvironmentConfigurationTracerHelper
             DelayedInitialization.Traces.AddSqlClient(lazyInstrumentationLoader, pluginManager, tracerSettings);
 
             return builder.AddSource("OpenTelemetry.Instrumentation.SqlClient");
+        }
+
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        public static TracerProviderBuilder AddOracleMdaInstrumentation(TracerProviderBuilder builder, LazyInstrumentationLoader lazyInstrumentationLoader, TracerSettings tracerSettings)
+        {
+            DelayedInitialization.Traces.AddOracleMda(lazyInstrumentationLoader, tracerSettings);
+
+#if NETFRAMEWORK
+            return builder.AddSource("Oracle.ManagedDataAccess");
+#else
+            return builder.AddSource("Oracle.ManagedDataAccess.Core");
+#endif
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]

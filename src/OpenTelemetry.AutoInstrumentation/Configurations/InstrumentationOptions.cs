@@ -11,6 +11,7 @@ internal class InstrumentationOptions
     internal InstrumentationOptions(Configuration configuration)
     {
         GraphQLSetDocument = configuration.GetBool(ConfigurationKeys.Traces.InstrumentationOptions.GraphQLSetDocument) ?? false;
+        OracleMdaSetDbStatementForText = configuration.GetBool(ConfigurationKeys.Traces.InstrumentationOptions.OracleMdaSetDbStatementForText) ?? false;
         SqlClientSetDbStatementForText = configuration.GetBool(ConfigurationKeys.Traces.InstrumentationOptions.SqlClientSetDbStatementForText) ?? false;
 #if NET6_0_OR_GREATER
         EntityFrameworkCoreSetDbStatementForText = configuration.GetBool(ConfigurationKeys.Traces.InstrumentationOptions.EntityFrameworkCoreSetDbStatementForText) ?? false;
@@ -21,6 +22,11 @@ internal class InstrumentationOptions
     /// Gets a value indicating whether GraphQL query can be passed as a Document tag.
     /// </summary>
     public bool GraphQLSetDocument { get; }
+
+    /// <summary>
+    /// Gets a value indicating whether text query in Oracle Client can be passed as a db.statement tag.
+    /// </summary>
+    public bool OracleMdaSetDbStatementForText { get; }
 
     /// <summary>
     /// Gets a value indicating whether text query in SQL Client can be passed as a db.statement tag.

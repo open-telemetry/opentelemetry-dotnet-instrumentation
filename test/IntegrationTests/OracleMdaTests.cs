@@ -17,23 +17,44 @@ public class OracleMdaTests : TestHelper
         _oracle = oracle;
     }
 
+    public static IEnumerable<object[]> GetData()
+    {
+#if NETFRAMEWORK
+        foreach (var version in LibraryVersion.OracleMda)
+#else
+        foreach (var version in LibraryVersion.OracleMdaCore)
+#endif
+        {
+            yield return new[] { version[0], true };
+            yield return new[] { version[0], false };
+        }
+    }
+
     [Theory]
     [Trait("Category", "EndToEnd")]
     [Trait("Containers", "Linux")]
-#if NET6_0_OR_GREATER
-    [MemberData(nameof(LibraryVersion.OracleMdaCore), MemberType = typeof(LibraryVersion))]
-#else
-    [MemberData(nameof(LibraryVersion.OracleMda), MemberType = typeof(LibraryVersion))]
-#endif
-    public void SubmitsTraces(string packageVersion)
+    [MemberData(nameof(GetData))]
+    public void SubmitTraces(string packageVersion, bool dbStatementForText)
     {
+        SetEnvironmentVariable("OTEL_DOTNET_AUTO_ORACLEMDA_SET_DBSTATEMENT_FOR_TEXT", dbStatementForText.ToString());
+
         using var collector = new MockSpansCollector(Output);
         SetExporter(collector);
-#if NET6_0_OR_GREATER
-        collector.Expect("Oracle.ManagedDataAccess.Core");
+
+#if  NETFRAMEWORK
+        const string instrumentationScopeName = "Oracle.ManagedDataAccess";
 #else
-        collector.Expect("Oracle.ManagedDataAccess");
+        const string instrumentationScopeName = "Oracle.ManagedDataAccess.Core";
 #endif
+
+        if (dbStatementForText)
+        {
+            collector.Expect(instrumentationScopeName, span => span.Attributes.Any(attr => attr.Key == "db.statement" && !string.IsNullOrWhiteSpace(attr.Value?.StringValue)));
+        }
+        else
+        {
+            collector.Expect(instrumentationScopeName, span => span.Attributes.All(attr => attr.Key != "db.statement"));
+        }
 
         RunTestApplication(new()
         {
