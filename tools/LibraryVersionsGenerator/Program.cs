@@ -69,20 +69,20 @@ public class Program
                         // Filter platform specific version
                         if (!isPlatformSpecific)
                         {
-                            xUnitFileStringBuilder.AddVersion(calculatedVersion, version.SupportedFrameworks);
+                            xUnitFileStringBuilder.AddVersion(calculatedVersion, version.SupportedExecutionFrameworks);
                         }
 
-                        buildFileStringBuilder.AddVersion(calculatedVersion, version.SupportedFrameworks, version.SupportedPlatforms);
+                        buildFileStringBuilder.AddVersion(calculatedVersion, version.SupportedTargetFrameworks, version.SupportedPlatforms);
                     }
                     else
                     {
                         // Filter platform specific version
                         if (!isPlatformSpecific)
                         {
-                            xUnitFileStringBuilder.AddVersionWithDependencies(calculatedVersion, GetDependencies(version), version.SupportedFrameworks, version.SupportedPlatforms);
+                            xUnitFileStringBuilder.AddVersionWithDependencies(calculatedVersion, GetDependencies(version), version.SupportedExecutionFrameworks, version.SupportedPlatforms);
                         }
 
-                        buildFileStringBuilder.AddVersionWithDependencies(calculatedVersion, GetDependencies(version), version.SupportedFrameworks, version.SupportedPlatforms);
+                        buildFileStringBuilder.AddVersionWithDependencies(calculatedVersion, GetDependencies(version), version.SupportedTargetFrameworks, version.SupportedPlatforms);
                     }
                 }
             }

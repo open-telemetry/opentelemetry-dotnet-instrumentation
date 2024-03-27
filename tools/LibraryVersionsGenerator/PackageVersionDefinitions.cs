@@ -41,8 +41,8 @@ internal static class PackageVersionDefinitions
             {
                 new("6.0.27"),
                 new("7.0.16"),
-                new("8.0.2", supportedFrameworks: new[] { "net8.0" }),
-                new("*", supportedFrameworks: new[] { "net8.0" })
+                new("8.0.2", supportedTargetFrameworks: new[] { "net8.0" }, supportedExecutionFrameworks: new[] { "net8.0" }),
+                new("*", supportedTargetFrameworks: new[] { "net8.0" }, supportedExecutionFrameworks: new[] { "net8.0" })
             }
         },
         new()
@@ -54,8 +54,8 @@ internal static class PackageVersionDefinitions
             {
                 new("6.0.2"),
                 new("7.0.0"),
-                new("8.0.0", supportedFrameworks: new[] { "net8.0" }),
-                new("*", supportedFrameworks: new[] { "net8.0" })
+                new("8.0.0", supportedTargetFrameworks: new[] { "net8.0" }, supportedExecutionFrameworks: new[] { "net8.0" }),
+                new("*", supportedTargetFrameworks: new[] { "net8.0" }, supportedExecutionFrameworks: new[] { "net8.0" })
             }
         },
         new()
@@ -177,10 +177,10 @@ internal static class PackageVersionDefinitions
         {
             IntegrationName = "OracleMda",
             NugetPackageName = "Oracle.ManagedDataAccess",
-            TestApplicationName = "TestApplication.OracleMda",
+            TestApplicationName = "TestApplication.OracleMda.NetFramework",
             Versions = new List<PackageVersion>
             {
-                new("23.3.2-dev", supportedFrameworks: new[] { "net472" }),
+                new("23.3.2-dev", supportedTargetFrameworks: new[] { "net472" }, supportedExecutionFrameworks: new[] { "net462" }),
                 new("*")
             }
         },
@@ -188,10 +188,10 @@ internal static class PackageVersionDefinitions
         {
             IntegrationName = "OracleMdaCore",
             NugetPackageName = "Oracle.ManagedDataAccess.Core",
-            TestApplicationName = "TestApplication.OracleMda",
+            TestApplicationName = "TestApplication.OracleMda.Core",
             Versions = new List<PackageVersion>
             {
-                new("23.3.2-dev", supportedFrameworks: new[] { "net8.0", "net7.0", "net6.0" }),
+                new("23.3.2-dev"),
                 new("*")
             }
         },

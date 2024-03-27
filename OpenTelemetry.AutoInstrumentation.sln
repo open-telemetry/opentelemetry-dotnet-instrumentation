@@ -221,11 +221,13 @@ Project("{778DAE3C-4631-46EA-AA77-85C1314464D9}") = "TestApplication.ContinuousP
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestApplication.ContinuousProfiler.ContextTracking", "test\test-applications\integrations\TestApplication.ContinuousProfiler.ContextTracking\TestApplication.ContinuousProfiler.ContextTracking.csproj", "{B74CB036-10F5-449D-8CBA-44F77E68D042}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestApplication.OracleMda", "test\test-applications\integrations\TestApplication.OracleMda\TestApplication.OracleMda.csproj", "{283DBDE1-F643-48CD-BBC8-ACC65D2014F2}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestApplication.OracleMda.NetFramework", "test\test-applications\integrations\TestApplication.OracleMda.NetFramework\TestApplication.OracleMda.NetFramework.csproj", "{283DBDE1-F643-48CD-BBC8-ACC65D2014F2}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "next-gen", "next-gen", "{3F051815-8E0D-4356-BC36-55CA642DDF18}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "getting-started-dotnet-monitor-metrics", "next-gen\docs\getting-started-dotnet-monitor-metrics\getting-started-dotnet-monitor-metrics.csproj", "{022A03CE-DD7A-4326-847E-3B750E660845}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestApplication.OracleMda.Core", "test\test-applications\integrations\TestApplication.OracleMda.Core\TestApplication.OracleMda.Core.csproj", "{21A915DF-8B9E-4CE8-84DA-1057CDCE117E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -1415,6 +1417,22 @@ Global
 		{022A03CE-DD7A-4326-847E-3B750E660845}.Release|x64.Build.0 = Release|Any CPU
 		{022A03CE-DD7A-4326-847E-3B750E660845}.Release|x86.ActiveCfg = Release|Any CPU
 		{022A03CE-DD7A-4326-847E-3B750E660845}.Release|x86.Build.0 = Release|Any CPU
+		{21A915DF-8B9E-4CE8-84DA-1057CDCE117E}.Debug|Any CPU.ActiveCfg = Debug|x64
+		{21A915DF-8B9E-4CE8-84DA-1057CDCE117E}.Debug|Any CPU.Build.0 = Debug|x64
+		{21A915DF-8B9E-4CE8-84DA-1057CDCE117E}.Debug|ARM64.ActiveCfg = Debug|x64
+		{21A915DF-8B9E-4CE8-84DA-1057CDCE117E}.Debug|ARM64.Build.0 = Debug|x64
+		{21A915DF-8B9E-4CE8-84DA-1057CDCE117E}.Debug|x64.ActiveCfg = Debug|x64
+		{21A915DF-8B9E-4CE8-84DA-1057CDCE117E}.Debug|x64.Build.0 = Debug|x64
+		{21A915DF-8B9E-4CE8-84DA-1057CDCE117E}.Debug|x86.ActiveCfg = Debug|x86
+		{21A915DF-8B9E-4CE8-84DA-1057CDCE117E}.Debug|x86.Build.0 = Debug|x86
+		{21A915DF-8B9E-4CE8-84DA-1057CDCE117E}.Release|Any CPU.ActiveCfg = Release|x64
+		{21A915DF-8B9E-4CE8-84DA-1057CDCE117E}.Release|Any CPU.Build.0 = Release|x64
+		{21A915DF-8B9E-4CE8-84DA-1057CDCE117E}.Release|ARM64.ActiveCfg = Release|x64
+		{21A915DF-8B9E-4CE8-84DA-1057CDCE117E}.Release|ARM64.Build.0 = Release|x64
+		{21A915DF-8B9E-4CE8-84DA-1057CDCE117E}.Release|x64.ActiveCfg = Release|x64
+		{21A915DF-8B9E-4CE8-84DA-1057CDCE117E}.Release|x64.Build.0 = Release|x64
+		{21A915DF-8B9E-4CE8-84DA-1057CDCE117E}.Release|x86.ActiveCfg = Release|x86
+		{21A915DF-8B9E-4CE8-84DA-1057CDCE117E}.Release|x86.Build.0 = Release|x86
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -1499,6 +1517,7 @@ Global
 		{B74CB036-10F5-449D-8CBA-44F77E68D042} = {E409ADD3-9574-465C-AB09-4324D205CC7C}
 		{283DBDE1-F643-48CD-BBC8-ACC65D2014F2} = {E409ADD3-9574-465C-AB09-4324D205CC7C}
 		{022A03CE-DD7A-4326-847E-3B750E660845} = {3F051815-8E0D-4356-BC36-55CA642DDF18}
+		{21A915DF-8B9E-4CE8-84DA-1057CDCE117E} = {E409ADD3-9574-465C-AB09-4324D205CC7C}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {160A1D00-1F5B-40F8-A155-621B4459D78F}

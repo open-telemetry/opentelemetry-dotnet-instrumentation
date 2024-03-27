@@ -132,17 +132,17 @@ public static partial class LibraryVersion
             }
         },
         {
-            "TestApplication.OracleMda",
+            "TestApplication.OracleMda.NetFramework",
             new List<PackageBuildInfo>
             {
                 new("23.3.2-dev", supportedFrameworks: new string[] {"net472"}),
             }
         },
         {
-            "TestApplication.OracleMda",
+            "TestApplication.OracleMda.Core",
             new List<PackageBuildInfo>
             {
-                new("23.3.2-dev", supportedFrameworks: new string[] {"net8.0","net7.0","net6.0"}),
+                new("23.3.2-dev"),
             }
         },
         {

@@ -12,7 +12,11 @@ public class OracleMdaTests : TestHelper
     private readonly OracleFixture _oracle;
 
     public OracleMdaTests(ITestOutputHelper output, OracleFixture oracle)
-        : base("OracleMda", output)
+#if NETFRAMEWORK
+        : base("OracleMda.NetFramework", output)
+#else
+        : base("OracleMda.Core", output)
+#endif
     {
         _oracle = oracle;
     }
