@@ -13,6 +13,9 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
   and upcoming End of Support date for .NET version.
 - Experimental support for ARM64 on Ubuntu, Alpine and Debian based images.
 - Experimental ARM64 support for the `OpenTelemetry.AutoInstrumentation` NuGet package.
+- Support for [Oracle.ManagedDataAccess.Core](https://www.nuget.org/packages/Oracle.ManagedDataAccess.Core)
+  and [Oracle.ManagedDataAccess](https://www.nuget.org/packages/Oracle.ManagedDataAccess)
+  traces instrumentation from 23.3.2-dev.
 
 ### Changed
 
