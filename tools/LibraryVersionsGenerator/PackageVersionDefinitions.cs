@@ -175,6 +175,28 @@ internal static class PackageVersionDefinitions
         },
         new()
         {
+            IntegrationName = "OracleMda",
+            NugetPackageName = "Oracle.ManagedDataAccess",
+            TestApplicationName = "TestApplication.OracleMda",
+            Versions = new List<PackageVersion>
+            {
+                new("23.3.2-dev", supportedFrameworks: new[] { "net472" }),
+                new("*")
+            }
+        },
+        new()
+        {
+            IntegrationName = "OracleMdaCore",
+            NugetPackageName = "Oracle.ManagedDataAccess.Core",
+            TestApplicationName = "TestApplication.OracleMda",
+            Versions = new List<PackageVersion>
+            {
+                new("23.3.2-dev", supportedFrameworks: new[] { "net8.0", "net7.0", "net6.0" }),
+                new("*")
+            }
+        },
+        new()
+        {
             IntegrationName = "Quartz",
             NugetPackageName = "Quartz",
             TestApplicationName = "TestApplication.Quartz",

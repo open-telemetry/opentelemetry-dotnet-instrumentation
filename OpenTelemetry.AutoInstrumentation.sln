@@ -221,6 +221,8 @@ Project("{778DAE3C-4631-46EA-AA77-85C1314464D9}") = "TestApplication.ContinuousP
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestApplication.ContinuousProfiler.ContextTracking", "test\test-applications\integrations\TestApplication.ContinuousProfiler.ContextTracking\TestApplication.ContinuousProfiler.ContextTracking.csproj", "{B74CB036-10F5-449D-8CBA-44F77E68D042}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestApplication.OracleMda", "test\test-applications\integrations\TestApplication.OracleMda\TestApplication.OracleMda.csproj", "{283DBDE1-F643-48CD-BBC8-ACC65D2014F2}"
+EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "next-gen", "next-gen", "{3F051815-8E0D-4356-BC36-55CA642DDF18}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "getting-started-dotnet-monitor-metrics", "next-gen\docs\getting-started-dotnet-monitor-metrics\getting-started-dotnet-monitor-metrics.csproj", "{022A03CE-DD7A-4326-847E-3B750E660845}"
@@ -1381,6 +1383,22 @@ Global
 		{B74CB036-10F5-449D-8CBA-44F77E68D042}.Release|x64.Build.0 = Release|x64
 		{B74CB036-10F5-449D-8CBA-44F77E68D042}.Release|x86.ActiveCfg = Release|x86
 		{B74CB036-10F5-449D-8CBA-44F77E68D042}.Release|x86.Build.0 = Release|x86
+		{283DBDE1-F643-48CD-BBC8-ACC65D2014F2}.Debug|Any CPU.ActiveCfg = Debug|x64
+		{283DBDE1-F643-48CD-BBC8-ACC65D2014F2}.Debug|Any CPU.Build.0 = Debug|x64
+		{283DBDE1-F643-48CD-BBC8-ACC65D2014F2}.Debug|ARM64.ActiveCfg = Debug|x64
+		{283DBDE1-F643-48CD-BBC8-ACC65D2014F2}.Debug|ARM64.Build.0 = Debug|x64
+		{283DBDE1-F643-48CD-BBC8-ACC65D2014F2}.Debug|x64.ActiveCfg = Debug|x64
+		{283DBDE1-F643-48CD-BBC8-ACC65D2014F2}.Debug|x64.Build.0 = Debug|x64
+		{283DBDE1-F643-48CD-BBC8-ACC65D2014F2}.Debug|x86.ActiveCfg = Debug|x86
+		{283DBDE1-F643-48CD-BBC8-ACC65D2014F2}.Debug|x86.Build.0 = Debug|x86
+		{283DBDE1-F643-48CD-BBC8-ACC65D2014F2}.Release|Any CPU.ActiveCfg = Release|x64
+		{283DBDE1-F643-48CD-BBC8-ACC65D2014F2}.Release|Any CPU.Build.0 = Release|x64
+		{283DBDE1-F643-48CD-BBC8-ACC65D2014F2}.Release|ARM64.ActiveCfg = Release|x64
+		{283DBDE1-F643-48CD-BBC8-ACC65D2014F2}.Release|ARM64.Build.0 = Release|x64
+		{283DBDE1-F643-48CD-BBC8-ACC65D2014F2}.Release|x64.ActiveCfg = Release|x64
+		{283DBDE1-F643-48CD-BBC8-ACC65D2014F2}.Release|x64.Build.0 = Release|x64
+		{283DBDE1-F643-48CD-BBC8-ACC65D2014F2}.Release|x86.ActiveCfg = Release|x86
+		{283DBDE1-F643-48CD-BBC8-ACC65D2014F2}.Release|x86.Build.0 = Release|x86
 		{022A03CE-DD7A-4326-847E-3B750E660845}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{022A03CE-DD7A-4326-847E-3B750E660845}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{022A03CE-DD7A-4326-847E-3B750E660845}.Debug|ARM64.ActiveCfg = Debug|Any CPU
@@ -1479,6 +1497,7 @@ Global
 		{6D35660B-8EFD-4DB6-BE13-46F98BFB626E} = {82A3CE96-0935-45E5-A9AA-A93A5B63500B}
 		{F10D863B-397D-410E-96AF-D9A749876616} = {82A3CE96-0935-45E5-A9AA-A93A5B63500B}
 		{B74CB036-10F5-449D-8CBA-44F77E68D042} = {E409ADD3-9574-465C-AB09-4324D205CC7C}
+		{283DBDE1-F643-48CD-BBC8-ACC65D2014F2} = {E409ADD3-9574-465C-AB09-4324D205CC7C}
 		{022A03CE-DD7A-4326-847E-3B750E660845} = {3F051815-8E0D-4356-BC36-55CA642DDF18}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution

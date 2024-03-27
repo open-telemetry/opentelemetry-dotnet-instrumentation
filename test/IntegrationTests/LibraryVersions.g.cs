@@ -147,6 +147,26 @@ public static partial class LibraryVersion
         new object[] { "8.1.6" },
 #endif
     };
+    public static readonly IReadOnlyCollection<object[]> OracleMda = new List<object[]>
+    {
+#if DEFAULT_TEST_PACKAGE_VERSIONS
+        new object[] { string.Empty }
+#else
+#if NET472
+        new object[] { "23.3.2-dev" },
+#endif
+#endif
+    };
+    public static readonly IReadOnlyCollection<object[]> OracleMdaCore = new List<object[]>
+    {
+#if DEFAULT_TEST_PACKAGE_VERSIONS
+        new object[] { string.Empty }
+#else
+#if NET8_0 || NET7_0 || NET6_0
+        new object[] { "23.3.2-dev" },
+#endif
+#endif
+    };
     public static readonly IReadOnlyCollection<object[]> Quartz = new List<object[]>
     {
 #if DEFAULT_TEST_PACKAGE_VERSIONS
@@ -211,6 +231,8 @@ public static partial class LibraryVersion
        { "MySqlData", MySqlData },
        { "Npgsql", Npgsql },
        { "NServiceBus", NServiceBus },
+       { "OracleMda", OracleMda },
+       { "OracleMdaCore", OracleMdaCore },
        { "Quartz", Quartz },
        { "StackExchangeRedis", StackExchangeRedis },
        { "WCFCoreClient", WCFCoreClient },
