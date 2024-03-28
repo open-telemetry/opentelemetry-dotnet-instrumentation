@@ -19,19 +19,34 @@ internal class ContinuousProfilerProcessor : IDisposable
     // see https://github.com/dotnet/runtime/issues/67276#issuecomment-1089877762
     private readonly AsyncLocal<Activity?> _supportingActivityAsyncLocal;
     private readonly Thread _thread;
-    private readonly ManualResetEventSlim _shutdownTrigger = new(false);
     private readonly TimeSpan _exportInterval;
+    private readonly TimeSpan _exportTimeout;
     private readonly BufferProcessor _bufferProcessor;
+    private readonly CancellationTokenSource _cts;
+    private readonly ManualResetEventSlim _shutdownTrigger = new(false);
 
-    public ContinuousProfilerProcessor(BufferProcessor bufferProcessor, TimeSpan exportInterval)
+    public ContinuousProfilerProcessor(BufferProcessor bufferProcessor, TimeSpan exportInterval, TimeSpan exportTimeout)
     {
         Logger.Debug("Initializing Continuous Profiler export thread.");
 
+        if (exportInterval <= TimeSpan.Zero)
+        {
+            throw new ArgumentOutOfRangeException(nameof(exportInterval));
+        }
+
         _exportInterval = exportInterval;
+        if (exportTimeout <= TimeSpan.Zero)
+        {
+            throw new ArgumentOutOfRangeException(nameof(exportTimeout));
+        }
+
+        _exportTimeout = exportTimeout;
+
         _bufferProcessor = bufferProcessor;
+        _cts = new CancellationTokenSource();
         _supportingActivityAsyncLocal = new AsyncLocal<Activity?>(ActivityChanged);
 
-        _thread = new Thread(SampleReadingThread)
+        _thread = new Thread(() => SampleReadingThread(_cts.Token))
         {
             Name = BackgroundThreadName,
             IsBackground = true
@@ -46,13 +61,16 @@ internal class ContinuousProfilerProcessor : IDisposable
 
     public void Dispose()
     {
+        var configuredGracePeriod = 2 * _exportTimeout;
+        var finalGracePeriod = (int)Math.Min(configuredGracePeriod.TotalMilliseconds, 60000);
         _shutdownTrigger.Set();
-        // Wait 5s for exporter thread to terminate, similarly to https://github.com/open-telemetry/opentelemetry-dotnet/blob/77ef12327f720ca3defd0c9590c0197cceb5952e/src/OpenTelemetry/Trace/TracerProviderSdk.cs#L383
-        if (!_thread.Join(TimeSpan.FromSeconds(5)))
+        _cts.CancelAfter(finalGracePeriod);
+        if (!_thread.Join(finalGracePeriod))
         {
             Logger.Warning("Continuous profiler's exporter thread failed to terminate in required time.");
         }
 
+        _cts.Dispose();
         _shutdownTrigger.Dispose();
     }
 
@@ -76,20 +94,25 @@ internal class ContinuousProfilerProcessor : IDisposable
         NativeMethods.ContinuousProfilerSetNativeContext(0, 0, 0);
     }
 
-    private void SampleReadingThread()
+    private void SampleReadingThread(CancellationToken cancellationToken)
     {
         Logger.Information("Continuous Profiler export thread initialized.");
 
+        var sw = new Stopwatch();
+        var exportIntervalMilliseconds = _exportInterval.TotalMilliseconds;
+
         while (true)
         {
-            // TODO Task.Delay https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/issues/3216
-            if (_shutdownTrigger.Wait(_exportInterval))
+            var elapsed = sw.ElapsedMilliseconds;
+            var remainingWaitTime = elapsed >= exportIntervalMilliseconds ? 0 : exportIntervalMilliseconds - elapsed;
+            if (_shutdownTrigger.Wait((int)remainingWaitTime, cancellationToken))
             {
                 Logger.Debug("Shutdown requested, exiting continuous profiler's exporter thread.");
                 return;
             }
 
-            _bufferProcessor.Process();
+            sw.Restart();
+            _bufferProcessor.Process(cancellationToken);
         }
     }
 }
