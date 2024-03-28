@@ -262,4 +262,4 @@ the plugin. The plugin has to implement (copy) our version of the parser.
 It should be changed when the OTel Proposal will be merged, and we can start implementing
 real OTLP exporter.
 
-Implementation can be found in [`SampleNativeFormatParser`](../../test/test-applications/integrations/TestApplication.ContinuousProfiler/Exporter/SampleNativeFormatParser.cs) class in this repository.
+Implementation can be found in [`SampleNativeFormatParser`](../../test/test-applications/integrations/TestApplication.ContinuousProfiler/Exporter/SampleNativeFormatParser.cs).
