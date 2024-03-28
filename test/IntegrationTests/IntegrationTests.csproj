@@ -38,6 +38,7 @@
     <Content Include="docker\azure.Dockerfile" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="docker\mongodb.Dockerfile" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="docker\mysql.Dockerfile" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="docker\oracle.Dockerfile" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="docker\postgres.Dockerfile" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="docker\redis.Dockerfile" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="docker\sql-server.Dockerfile" CopyToOutputDirectory="PreserveNewest" />

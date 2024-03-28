@@ -64,7 +64,7 @@ internal sealed class XUnitFileBuilder : CSharpFileBuilder
         {
             Builder.AppendLine($"       {{ \"{item.IntegrationName}\", {item.IntegrationName} }},");
 
-            if (additionalPlatforms.Any(x => x.StartsWith(item.IntegrationName)))
+            if (additionalPlatforms.Any(x => x.StartsWith(item.IntegrationName + "_")))
             {
                 foreach (var platform in additionalPlatforms.Where(x => x.StartsWith(item.IntegrationName)))
                 {

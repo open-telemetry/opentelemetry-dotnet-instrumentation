@@ -1,0 +1,1 @@
+﻿FROM gvenzl/oracle-free:23.3-slim-faststart

@@ -72,6 +72,12 @@ internal static class DelayedInitialization
         {
             lazyInstrumentationLoader.Add(new QuartzInitializer(pluginManager));
         }
+
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        public static void AddOracleMda(LazyInstrumentationLoader lazyInstrumentationLoader, TracerSettings tracerSettings)
+        {
+            lazyInstrumentationLoader.Add(new OracleMdaInitializer(tracerSettings));
+        }
     }
 
     internal static class Metrics
