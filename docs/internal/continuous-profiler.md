@@ -222,16 +222,17 @@ and convention.
 /// <summary>
 /// Configure Continuous Profiler.
 /// </summary>
-/// <returns>(threadSamplingEnabled, threadSamplingInterval, allocationSamplingEnabled, maxMemorySamplesPerMinute, exportInterval, continuousProfilerExporter)</returns>
-public Tuple<bool, uint, bool, uint, TimeSpan, object> GetContinuousProfilerConfiguration()
+/// <returns>(threadSamplingEnabled, threadSamplingInterval, allocationSamplingEnabled, maxMemorySamplesPerMinute, exportInterval, exportTimeout, continuousProfilerExporter)</returns>
+public Tuple<bool, uint, bool, uint, TimeSpan, TimeSpan, object> GetContinuousProfilerConfiguration()
 {
     var threadSamplingEnabled = true; // enables thread sampling
     var threadSamplingInterval = 10000u; // interval to stop CLR runtime and fetch stacks. 10 000ms is Splunk default. 1000ms is the lowest supported value by Splunk. The code does not contains any limitations this. Plugins is responsible for checks.
     var allocationSamplingEnabled = true; // enables allocation sampling
     var maxMemorySamplesPerMinute = 200u; // max number of samples in minutes. 200 is tested default value by Splunk.
     var exportInterval = TimeSpan.FromMilliseconds(500); // Pause time before next execution of exporting/reading buffer  process
+    var exportTimeout = TimeSpan.FromMilliseconds(500); // Export timeout
     object continuousProfilerExporter = new ConsoleExporter();
-    return Tuple.Create(threadSamplingEnabled, threadSamplingInterval, allocationSamplingEnabled, maxMemorySamplesPerMinute, exportInterval, continuousProfilerExporter);
+    return Tuple.Create(threadSamplingEnabled, threadSamplingInterval, allocationSamplingEnabled, maxMemorySamplesPerMinute, exportInterval, exportTimeout, continuousProfilerExporter);
 }
 ```
 
@@ -243,14 +244,15 @@ the first one will be used. Other will be ignored.
 Two methods has to be implemented by Exporter
 
 ```csharp
-public void ExportThreadSamples(byte[] buffer, int read);
-public void ExportAllocationSamples(byte[] buffer, int read);
+public void ExportThreadSamples(byte[] buffer, int read, CancellationToken cancellationToken);
+public void ExportAllocationSamples(byte[] buffer, int read, CancellationToken cancellationToken);
 ```
 
-Both accept buffer produced by the native code together with the length of filled
-data. The Exporter is responsible both for parsing this buffer and exporting it.
+Both accept buffer produced by the native code, the length of filled
+data, and cancellation token.
+The Exporter is responsible both for parsing this buffer and exporting it.
 
-Example: ConsoleExporter in this PR.
+Example: [`OtlpOverHttpExporter`](../../test/test-applications/integrations/TestApplication.ContinuousProfiler/Exporter/OtlpOverHttpExporter.cs).
 
 ### Native parser
 
@@ -260,4 +262,4 @@ the plugin. The plugin has to implement (copy) our version of the parser.
 It should be changed when the OTel Proposal will be merged, and we can start implementing
 real OTLP exporter.
 
-Implementation can be found in `SampleNativeFormatParser` class in this repository.
+Implementation can be found in [`SampleNativeFormatParser`](../../test/test-applications/integrations/TestApplication.ContinuousProfiler/Exporter/SampleNativeFormatParser.cs).
