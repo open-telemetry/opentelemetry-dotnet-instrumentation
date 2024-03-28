@@ -22,7 +22,6 @@ internal class ContinuousProfilerProcessor : IDisposable
     private readonly TimeSpan _exportInterval;
     private readonly TimeSpan _exportTimeout;
     private readonly BufferProcessor _bufferProcessor;
-    private readonly CancellationTokenSource _cts;
     private readonly ManualResetEventSlim _shutdownTrigger = new(false);
 
     public ContinuousProfilerProcessor(BufferProcessor bufferProcessor, TimeSpan exportInterval, TimeSpan exportTimeout)
@@ -43,10 +42,9 @@ internal class ContinuousProfilerProcessor : IDisposable
         _exportTimeout = exportTimeout;
 
         _bufferProcessor = bufferProcessor;
-        _cts = new CancellationTokenSource();
         _supportingActivityAsyncLocal = new AsyncLocal<Activity?>(ActivityChanged);
 
-        _thread = new Thread(() => SampleReadingThread(_cts.Token))
+        _thread = new Thread(SampleReadingThread)
         {
             Name = BackgroundThreadName,
             IsBackground = true
@@ -64,13 +62,11 @@ internal class ContinuousProfilerProcessor : IDisposable
         var configuredGracePeriod = 2 * _exportTimeout;
         var finalGracePeriod = (int)Math.Min(configuredGracePeriod.TotalMilliseconds, 60000);
         _shutdownTrigger.Set();
-        _cts.CancelAfter(finalGracePeriod);
         if (!_thread.Join(finalGracePeriod))
         {
             Logger.Warning("Continuous profiler's exporter thread failed to terminate in required time.");
         }
 
-        _cts.Dispose();
         _shutdownTrigger.Dispose();
     }
 
@@ -94,7 +90,7 @@ internal class ContinuousProfilerProcessor : IDisposable
         NativeMethods.ContinuousProfilerSetNativeContext(0, 0, 0);
     }
 
-    private void SampleReadingThread(CancellationToken cancellationToken)
+    private void SampleReadingThread()
     {
         Logger.Information("Continuous Profiler export thread initialized.");
 
@@ -105,14 +101,14 @@ internal class ContinuousProfilerProcessor : IDisposable
         {
             var elapsed = sw.ElapsedMilliseconds;
             var remainingWaitTime = elapsed >= exportIntervalMilliseconds ? 0 : exportIntervalMilliseconds - elapsed;
-            if (_shutdownTrigger.Wait((int)remainingWaitTime, cancellationToken))
+            if (_shutdownTrigger.Wait((int)remainingWaitTime))
             {
                 Logger.Debug("Shutdown requested, exiting continuous profiler's exporter thread.");
                 return;
             }
 
             sw.Restart();
-            _bufferProcessor.Process(cancellationToken);
+            _bufferProcessor.Process();
         }
     }
 }

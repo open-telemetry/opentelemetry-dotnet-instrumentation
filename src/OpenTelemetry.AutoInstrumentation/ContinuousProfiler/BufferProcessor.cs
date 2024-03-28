@@ -18,30 +18,42 @@ internal class BufferProcessor
     private readonly bool _allocationSamplingEnabled;
     private readonly Action<byte[], int, CancellationToken> _exportThreadSamplesMethod;
     private readonly Action<byte[], int, CancellationToken> _exportAllocationSamplesMethod;
+    private readonly TimeSpan _exportTimeout;
     private readonly byte[] _buffer = new byte[BufferSize];
 
-    public BufferProcessor(bool threadSamplingEnabled, bool allocationSamplingEnabled, Action<byte[], int, CancellationToken> threadSamplesMethod, Action<byte[], int, CancellationToken> allocationSamplesMethod)
+    public BufferProcessor(
+        bool threadSamplingEnabled,
+        bool allocationSamplingEnabled,
+        Action<byte[], int, CancellationToken> threadSamplesMethod,
+        Action<byte[], int, CancellationToken> allocationSamplesMethod,
+        TimeSpan exportTimeout)
     {
         _threadSamplingEnabled = threadSamplingEnabled;
         _allocationSamplingEnabled = allocationSamplingEnabled;
         _exportThreadSamplesMethod = threadSamplesMethod;
         _exportAllocationSamplesMethod = allocationSamplesMethod;
+        if (exportTimeout <= TimeSpan.Zero)
+        {
+            throw new ArgumentOutOfRangeException(nameof(exportTimeout));
+        }
+
+        _exportTimeout = exportTimeout;
     }
 
-    public void Process(CancellationToken cancellationToken)
+    public void Process()
     {
         if (_threadSamplingEnabled)
         {
-            ProcessThreadSamples(cancellationToken);
+            ProcessThreadSamples();
         }
 
         if (_allocationSamplingEnabled)
         {
-            ProcessAllocationSamples(cancellationToken);
+            ProcessAllocationSamples();
         }
     }
 
-    private void ProcessThreadSamples(CancellationToken cancellationToken)
+    private void ProcessThreadSamples()
     {
         try
         {
@@ -51,7 +63,8 @@ internal class BufferProcessor
                 return;
             }
 
-            _exportThreadSamplesMethod(_buffer, read, cancellationToken);
+            using var cts = new CancellationTokenSource(_exportTimeout);
+            _exportThreadSamplesMethod(_buffer, read, cts.Token);
         }
         catch (Exception e)
         {
@@ -59,7 +72,7 @@ internal class BufferProcessor
         }
     }
 
-    private void ProcessAllocationSamples(CancellationToken cancellationToken)
+    private void ProcessAllocationSamples()
     {
         try
         {
@@ -69,7 +82,8 @@ internal class BufferProcessor
                 return;
             }
 
-            _exportAllocationSamplesMethod(_buffer, read, cancellationToken);
+            using var cts = new CancellationTokenSource(_exportTimeout);
+            _exportAllocationSamplesMethod(_buffer, read, cts.Token);
         }
         catch (Exception e)
         {
