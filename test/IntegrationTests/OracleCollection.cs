@@ -23,8 +23,13 @@ public class OracleFixture : IAsyncLifetime
 
     public OracleFixture()
     {
-        Port = TcpPortProvider.GetOpenPort();
+        if (IsCurrentArchitectureSupported)
+        {
+            Port = TcpPortProvider.GetOpenPort();
+        }
     }
+
+    public bool IsCurrentArchitectureSupported { get; } = EnvironmentTools.IsX64();
 
     public int Port { get; }
 
@@ -32,6 +37,11 @@ public class OracleFixture : IAsyncLifetime
 
     public async Task InitializeAsync()
     {
+        if (!IsCurrentArchitectureSupported)
+        {
+            return;
+        }
+
         _container = await LaunchOracleContainerAsync(Port);
     }
 
@@ -40,6 +50,14 @@ public class OracleFixture : IAsyncLifetime
         if (_container != null)
         {
             await ShutdownOracleContainerAsync(_container);
+        }
+    }
+
+    public void SkipIfUnsupportedPlatform()
+    {
+        if (!IsCurrentArchitectureSupported)
+        {
+            throw new SkipException("Oracle is supported only on AMD64.");
         }
     }
 

@@ -26,7 +26,7 @@ public class OracleMdaTests : TestHelper
 #if NETFRAMEWORK
         foreach (var version in LibraryVersion.OracleMda)
 #else
-        foreach (var version in LibraryVersion.OracleMdaCore)
+        foreach (var version in LibraryVersion.GetPlatformVersions(nameof(LibraryVersion.OracleMdaCore)))
 #endif
         {
             yield return new[] { version[0], true };
@@ -34,12 +34,15 @@ public class OracleMdaTests : TestHelper
         }
     }
 
-    [Theory]
+    [SkippableTheory]
     [Trait("Category", "EndToEnd")]
     [Trait("Containers", "Linux")]
     [MemberData(nameof(GetData))]
     public void SubmitTraces(string packageVersion, bool dbStatementForText)
     {
+        // Skip the test if fixture does not support current platform
+        _oracle.SkipIfUnsupportedPlatform();
+
         SetEnvironmentVariable("OTEL_DOTNET_AUTO_ORACLEMDA_SET_DBSTATEMENT_FOR_TEXT", dbStatementForText.ToString());
 
         using var collector = new MockSpansCollector(Output);
