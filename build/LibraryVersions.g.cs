@@ -29,7 +29,7 @@ public static partial class LibraryVersion
             {
                 new("8.0.0"),
                 new("8.10.0"),
-                new("8.12.0"),
+                new("8.12.1"),
             }
         },
         {
@@ -39,6 +39,7 @@ public static partial class LibraryVersion
                 new("6.0.27"),
                 new("7.0.16"),
                 new("8.0.2", supportedFrameworks: new string[] {"net8.0"}),
+                new("8.0.3", supportedFrameworks: new string[] {"net8.0"}),
             }
         },
         {
@@ -48,6 +49,7 @@ public static partial class LibraryVersion
                 new("6.0.2"),
                 new("7.0.0"),
                 new("8.0.0", supportedFrameworks: new string[] {"net8.0"}),
+                new("8.0.2", supportedFrameworks: new string[] {"net8.0"}),
             }
         },
         {
@@ -71,7 +73,7 @@ public static partial class LibraryVersion
             new List<PackageBuildInfo>
             {
                 new("8.0.0"),
-                new("8.1.3"),
+                new("8.2.0"),
             }
         },
         {
@@ -104,7 +106,7 @@ public static partial class LibraryVersion
             new List<PackageBuildInfo>
             {
                 new("2.0.0"),
-                new("2.3.5"),
+                new("2.3.6"),
             }
         },
         {
@@ -147,7 +149,7 @@ public static partial class LibraryVersion
                 new("2.1.50"),
                 new("2.5.61"),
                 new("2.6.66"),
-                new("2.7.23"),
+                new("2.7.33"),
             }
         },
         {
