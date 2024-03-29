@@ -22,7 +22,7 @@ public class OtlpOverHttpExporter
     private readonly string _endpoint = Environment.GetEnvironmentVariable("OTEL_EXPORTER_OTLP_ENDPOINT") + "/v1/profiles";
     private readonly HttpClient _httpClient = new();
 
-    public void ExportThreadSamples(byte[] buffer, int read)
+    public void ExportThreadSamples(byte[] buffer, int read, CancellationToken cancellationToken)
     {
         var threadSamples = SampleNativeFormatParser.ParseThreadSamples(buffer, read);
 
@@ -59,7 +59,7 @@ public class OtlpOverHttpExporter
 
             using var httpRequest = CreateHttpRequest(request);
 
-            using var httpResponse = SendHttpRequest(httpRequest, CancellationToken.None);
+            using var httpResponse = SendHttpRequest(httpRequest, cancellationToken);
 
             httpResponse.EnsureSuccessStatusCode();
         }
@@ -69,7 +69,7 @@ public class OtlpOverHttpExporter
         }
     }
 
-    public void ExportAllocationSamples(byte[] buffer, int read)
+    public void ExportAllocationSamples(byte[] buffer, int read, CancellationToken cancellationToken)
     {
         var allocationSamples = SampleNativeFormatParser.ParseAllocationSamples(buffer, read);
         if (allocationSamples.Count == 0)
@@ -112,7 +112,7 @@ public class OtlpOverHttpExporter
 
             using var httpRequest = CreateHttpRequest(request);
 
-            using var httpResponse = SendHttpRequest(httpRequest, CancellationToken.None);
+            using var httpResponse = SendHttpRequest(httpRequest, cancellationToken);
 
             httpResponse.EnsureSuccessStatusCode();
         }
