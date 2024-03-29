@@ -168,7 +168,7 @@ public static partial class LibraryVersion
         new object[] { "2.1.50" },
         new object[] { "2.5.61" },
         new object[] { "2.6.66" },
-        new object[] { "2.7.23" },
+        new object[] { "2.7.33" },
 #endif
     };
     public static readonly IReadOnlyCollection<object[]> WCFCoreClient = new List<object[]>
