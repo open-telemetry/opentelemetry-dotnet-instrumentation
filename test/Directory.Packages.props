@@ -37,7 +37,7 @@
     <PackageVersion Include="Npgsql" Version="8.0.2" />
     <PackageVersion Include="NuGet.Versioning" Version="6.5.0" />
     <PackageVersion Include="OpenTracing" Version="0.12.1" />
-    <PackageVersion Include="Pomelo.EntityFrameworkCore.MySql" Version="8.0.0" />
+    <PackageVersion Include="Pomelo.EntityFrameworkCore.MySql" Version="8.0.2" />
     <PackageVersion Include="Quartz" Version="3.8.1" />
     <PackageVersion Include="Quartz.Extensions.DependencyInjection" Version="3.8.1" />
     <PackageVersion Include="Quartz.Extensions.Hosting" Version="3.8.1" />

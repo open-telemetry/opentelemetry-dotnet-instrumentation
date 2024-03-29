@@ -49,6 +49,7 @@ public static partial class LibraryVersion
                 new("6.0.2"),
                 new("7.0.0"),
                 new("8.0.0", supportedFrameworks: new string[] {"net8.0"}),
+                new("8.0.2", supportedFrameworks: new string[] {"net8.0"}),
             }
         },
         {

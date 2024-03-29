@@ -57,6 +57,9 @@ public static partial class LibraryVersion
 #if NET8_0
         new object[] { "8.0.0" },
 #endif
+#if NET8_0
+        new object[] { "8.0.2" },
+#endif
 #endif
     };
     public static readonly IReadOnlyCollection<object[]> GraphQL = new List<object[]>
