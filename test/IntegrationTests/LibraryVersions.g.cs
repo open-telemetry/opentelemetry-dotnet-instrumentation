@@ -123,7 +123,7 @@ public static partial class LibraryVersion
         new object[] { string.Empty }
 #else
         new object[] { "2.0.0" },
-        new object[] { "2.3.5" },
+        new object[] { "2.3.6" },
 #endif
     };
     public static readonly IReadOnlyCollection<object[]> MySqlData = new List<object[]>
