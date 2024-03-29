@@ -42,6 +42,9 @@ public static partial class LibraryVersion
 #if NET8_0
         new object[] { "8.0.2" },
 #endif
+#if NET8_0
+        new object[] { "8.0.3" },
+#endif
 #endif
     };
     public static readonly IReadOnlyCollection<object[]> EntityFrameworkCorePomeloMySql = new List<object[]>
