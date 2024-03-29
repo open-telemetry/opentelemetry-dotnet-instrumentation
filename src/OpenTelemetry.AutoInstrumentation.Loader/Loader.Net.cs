@@ -3,6 +3,7 @@
 
 #if NETCOREAPP
 using System.Reflection;
+using System.Runtime.InteropServices;
 
 namespace OpenTelemetry.AutoInstrumentation.Loader;
 
@@ -33,7 +34,13 @@ internal partial class Loader
                 return null;
             }
 
-            var architecture = Environment.Is64BitProcess ? "x64" : "x86";
+            var architecture = RuntimeInformation.ProcessArchitecture switch
+            {
+                Architecture.X86 => "x86",
+                Architecture.Arm64 => "arm64",
+                _ => "x64" // Default to x64 for architectures not explicitly handled
+            };
+
             var targetFramework = $"net{Environment.Version.Major}.{Environment.Version.Minor}";
             var finalPath = Path.Combine(storeDirectory, architecture, targetFramework);
 
