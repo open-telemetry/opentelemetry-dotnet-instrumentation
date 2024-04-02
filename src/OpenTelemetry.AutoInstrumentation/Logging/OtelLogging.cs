@@ -27,7 +27,8 @@ internal static class OtelLogging
     /// <returns>Logger</returns>
     public static IOtelLogger GetLogger()
     {
-        return GetLogger(string.Empty);
+        // Default to managed logs
+        return GetLogger("Managed");
     }
 
     /// <summary>
@@ -126,11 +127,11 @@ internal static class OtelLogging
         try
         {
             using var process = Process.GetCurrentProcess();
-            var appDomainName = AppDomain.CurrentDomain.FriendlyName;
+            var appDomainName = GetEncodedAppDomainName();
 
             return string.IsNullOrEmpty(suffix)
-                ? $"otel-dotnet-auto-{appDomainName}-{process.Id}-.log"
-                : $"otel-dotnet-auto-{appDomainName}-{process.Id}-{suffix}-.log";
+                ? $"otel-dotnet-auto-{process.Id}-{appDomainName}-.log"
+                : $"otel-dotnet-auto-{process.Id}-{appDomainName}-{suffix}-.log";
         }
         catch
         {
@@ -139,6 +140,15 @@ internal static class OtelLogging
                 ? $"otel-dotnet-auto-{Guid.NewGuid()}-.log"
                 : $"otel-dotnet-auto-{Guid.NewGuid()}-{suffix}-.log";
         }
+    }
+
+    private static string GetEncodedAppDomainName()
+    {
+        var name = AppDomain.CurrentDomain.FriendlyName;
+        return name
+            .Replace(Path.DirectorySeparatorChar, '-')
+            .Replace(Path.AltDirectorySeparatorChar, '-')
+            .Trim('-');
     }
 
     private static string? GetLogDirectory()
