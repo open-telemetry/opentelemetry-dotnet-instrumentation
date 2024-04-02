@@ -29,7 +29,7 @@ public static partial class LibraryVersion
 #else
         new object[] { "8.0.0" },
         new object[] { "8.10.0" },
-        new object[] { "8.12.0" },
+        new object[] { "8.12.1" },
 #endif
     };
     public static readonly IReadOnlyCollection<object[]> EntityFrameworkCore = new List<object[]>
@@ -42,6 +42,9 @@ public static partial class LibraryVersion
 #if NET8_0
         new object[] { "8.0.2" },
 #endif
+#if NET8_0
+        new object[] { "8.0.3" },
+#endif
 #endif
     };
     public static readonly IReadOnlyCollection<object[]> EntityFrameworkCorePomeloMySql = new List<object[]>
@@ -53,6 +56,9 @@ public static partial class LibraryVersion
         new object[] { "7.0.0" },
 #if NET8_0
         new object[] { "8.0.0" },
+#endif
+#if NET8_0
+        new object[] { "8.0.2" },
 #endif
 #endif
     };
@@ -80,7 +86,7 @@ public static partial class LibraryVersion
         new object[] { string.Empty }
 #else
         new object[] { "8.0.0" },
-        new object[] { "8.1.3" },
+        new object[] { "8.2.0" },
 #endif
     };
     public static readonly IReadOnlyCollection<object[]> SqlClientMicrosoft = new List<object[]>
@@ -117,7 +123,7 @@ public static partial class LibraryVersion
         new object[] { string.Empty }
 #else
         new object[] { "2.0.0" },
-        new object[] { "2.3.5" },
+        new object[] { "2.3.6" },
 #endif
     };
     public static readonly IReadOnlyCollection<object[]> MySqlData = new List<object[]>
@@ -183,7 +189,7 @@ public static partial class LibraryVersion
         new object[] { "2.1.50" },
         new object[] { "2.5.61" },
         new object[] { "2.6.66" },
-        new object[] { "2.7.23" },
+        new object[] { "2.7.33" },
 #endif
     };
     public static readonly IReadOnlyCollection<object[]> WCFCoreClient = new List<object[]>

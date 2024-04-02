@@ -13,7 +13,7 @@ public class TestExporter
         Console.OutputEncoding = Encoding.Default;
     }
 
-    public void ExportThreadSamples(byte[] buffer, int read)
+    public void ExportThreadSamples(byte[] buffer, int read, CancellationToken cancellationToken)
     {
         var threadSamples = SampleNativeFormatParser.ParseThreadSamples(buffer, read);
 
@@ -25,7 +25,7 @@ public class TestExporter
         Console.WriteLine();
     }
 
-    public void ExportAllocationSamples(byte[] buffer, int read)
+    public void ExportAllocationSamples(byte[] buffer, int read, CancellationToken cancellationToken)
     {
     }
 }

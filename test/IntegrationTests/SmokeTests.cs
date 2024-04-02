@@ -432,7 +432,7 @@ public class SmokeTests : TestHelper
         {
             RunTestApplication();
 
-            var nativeLog = tempLogsDirectory.GetFiles("otel-dotnet-auto-native-*").Single();
+            var nativeLog = tempLogsDirectory.GetFiles("otel-dotnet-auto-*-Native.log").Single();
             var nativeLogContent = File.ReadAllText(nativeLog.FullName);
             nativeLogContent.Should().NotBeNullOrWhiteSpace();
 
