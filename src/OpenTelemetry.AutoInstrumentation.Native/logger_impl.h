@@ -137,7 +137,7 @@ LoggerImpl<TLoggerPolicy>::LoggerImpl()
         current_process_name.substr(0, current_process_name.find_last_of("."));
 
     static auto file_name_suffix =
-        "-" + current_process_without_extension + "-" + std::to_string(current_process_id);
+        std::to_string(current_process_id) + "-" + current_process_without_extension + "-Native";
 
     // by default, use the same size as on managed side: 10MiB
     static auto file_size        = GetConfiguredSize(environment::max_log_file_size, 10485760);
