@@ -34,6 +34,14 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 
 ### Fixed
 
+- Resolved a crash issue caused by `System.IO.FileLoadException` for
+  `Microsoft.Extensions*.dll` libraries. This issue was due to a conflict with
+  runtime store libraries, impacting applications with mismatched dependency
+  versions. This fix enhances stability by addressing the underlying
+  compatibility concerns. For details see:
+  ([#3075](https://github.com/open-telemetry/opentelemetry-dotnet/pull/3075),
+  [#3075](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/issues/3168))
+
 ## [1.4.0](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/tag/v1.4.0)
 
 ### Added
