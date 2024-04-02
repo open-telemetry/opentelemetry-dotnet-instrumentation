@@ -3,6 +3,7 @@
 
 #if NETCOREAPP
 using System.Reflection;
+using System.Runtime.InteropServices;
 
 namespace OpenTelemetry.AutoInstrumentation.Loader;
 
@@ -13,12 +14,43 @@ internal partial class Loader
 {
     internal static System.Runtime.Loader.AssemblyLoadContext DependencyLoadContext { get; } = new ManagedProfilerAssemblyLoadContext();
 
+    internal static string[]? StoreFiles { get; } = GetStoreFiles();
+
     private static string ResolveManagedProfilerDirectory()
     {
         string tracerFrameworkDirectory = "net";
         string tracerHomeDirectory = ReadEnvironmentVariable("OTEL_DOTNET_AUTO_HOME") ?? string.Empty;
 
         return Path.Combine(tracerHomeDirectory, tracerFrameworkDirectory);
+    }
+
+    private static string[]? GetStoreFiles()
+    {
+        try
+        {
+            var storeDirectory = Environment.GetEnvironmentVariable("DOTNET_SHARED_STORE");
+            if (storeDirectory == null || !Directory.Exists(storeDirectory))
+            {
+                return null;
+            }
+
+            var architecture = RuntimeInformation.ProcessArchitecture switch
+            {
+                Architecture.X86 => "x86",
+                Architecture.Arm64 => "arm64",
+                _ => "x64" // Default to x64 for architectures not explicitly handled
+            };
+
+            var targetFramework = $"net{Environment.Version.Major}.{Environment.Version.Minor}";
+            var finalPath = Path.Combine(storeDirectory, architecture, targetFramework);
+
+            var storeFiles = Directory.GetFiles(finalPath, "Microsoft.Extensions*.dll", SearchOption.AllDirectories);
+            return storeFiles;
+        }
+        catch
+        {
+            return null;
+        }
     }
 
     private static Assembly? AssemblyResolve_ManagedProfilerDependencies(object? sender, ResolveEventArgs args)
@@ -56,8 +88,16 @@ internal partial class Loader
             Logger.Debug("Loading {0} with DependencyLoadContext.LoadFromAssemblyPath", path);
             return DependencyLoadContext.LoadFromAssemblyPath(path); // Load unresolved framework and third-party dependencies into a custom Assembly Load Context
         }
+        else
+        {
+            var entry = StoreFiles?.FirstOrDefault(e => e.EndsWith($"{assemblyName.Name}.dll"));
+            if (entry != null)
+            {
+                return DependencyLoadContext.LoadFromAssemblyPath(entry);
+            }
 
-        return null;
+            return null;
+        }
     }
 }
 #endif
