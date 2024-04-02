@@ -22,7 +22,7 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
   - `MongoDB.Driver.Core.Extensions.DiagnosticSources` from `1.3.0` to `1.4.0`.
 - .NET Framework only, following packages updated
   - `Google.Protobuf` updated from `3.25.2` to `3.26.1`,
-  - `Grpc.Core.Api` from `2.60.0` to `2.61.0`,
+  - `Grpc.Core.Api` from `2.60.0` to `2.62.0`,
   - `Microsoft.Extensions.DependencyInjection.Abstractions` from `8.0.0` to `8.0.1`,
   - `Microsoft.Extensions.Options` from `8.0.1` to `8.0.2`,
   - `Microsoft.Extensions.Logging.Abstractions` from `8.0.0` to `8.0.1`,
