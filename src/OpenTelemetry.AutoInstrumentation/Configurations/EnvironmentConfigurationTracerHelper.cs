@@ -58,7 +58,6 @@ internal static class EnvironmentConfigurationTracerHelper
         }
 
         builder
-            .SetSampler(settings)
             // Exporters can cause dependency loads.
             // Should be called later if dependency listeners are already setup.
             .SetExporter(settings, pluginManager)
@@ -87,23 +86,6 @@ internal static class EnvironmentConfigurationTracerHelper
         wcfInstrumentationAdded = true;
 
         return tracerProviderBuilder;
-    }
-
-    private static TracerProviderBuilder SetSampler(this TracerProviderBuilder builder, TracerSettings settings)
-    {
-        if (settings.TracesSampler == null)
-        {
-            return builder;
-        }
-
-        var sampler = TracerSamplerHelper.GetSampler(settings.TracesSampler, settings.TracesSamplerArguments);
-
-        if (sampler == null)
-        {
-            return builder;
-        }
-
-        return builder.SetSampler(sampler);
     }
 
     private static TracerProviderBuilder SetExporter(this TracerProviderBuilder builder, TracerSettings settings, PluginManager pluginManager)
