@@ -77,7 +77,7 @@ public static partial class LibraryVersion
         new object[] { string.Empty }
 #else
         new object[] { "2.52.0" },
-        new object[] { "2.61.0" },
+        new object[] { "2.62.0" },
 #endif
     };
     public static readonly IReadOnlyCollection<object[]> MassTransit = new List<object[]>
