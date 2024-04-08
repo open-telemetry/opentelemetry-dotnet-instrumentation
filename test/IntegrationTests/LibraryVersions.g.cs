@@ -29,7 +29,7 @@ public static partial class LibraryVersion
 #else
         new object[] { "8.0.0" },
         new object[] { "8.10.0" },
-        new object[] { "8.12.1" },
+        new object[] { "8.13.3" },
 #endif
     };
     public static readonly IReadOnlyCollection<object[]> EntityFrameworkCore = new List<object[]>
