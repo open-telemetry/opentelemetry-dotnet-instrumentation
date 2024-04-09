@@ -23,7 +23,12 @@ var client = new ElasticsearchClient(settings);
 try
 {
     await client.SearchAsync<TestObject>(s =>
+#if ELASTICSEARCH_CLIENT_8_13_OR_GREATER
+        s.Index("test-index").From(0).Size(10).Query(q => q.Term(t => t.Field(to => to.Id))));
+
+#else
         s.Index("test-index").From(0).Size(10).Query(q => q.Term(t => t.Id, 1)));
+#endif
 }
 catch (UnexpectedTransportException)
 {

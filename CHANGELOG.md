@@ -5,7 +5,25 @@ All notable changes to this component are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/compare/v1.4.0..HEAD)
+## [Unreleased](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/compare/v1.5.0..HEAD)
+
+### Added
+
+### Changed
+
+#### Dependency updates
+
+### Deprecated
+
+### Removed
+
+### Fixed
+
+## [1.5.0](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/tag/v1.5.0)
+
+- [Core components](https://github.com/open-telemetry/opentelemetry-dotnet/blob/main/VERSIONING.md#core-components):
+  [`1.8.0`](https://github.com/open-telemetry/opentelemetry-dotnet/releases/tag/core-1.8.0)
+- `System.Diagnostics.DiagnosticSource`: [`8.0.0`](https://www.nuget.org/packages/System.Diagnostics.DiagnosticSource/8.0.0)
 
 ### Added
 
@@ -21,21 +39,40 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 
 ### Changed
 
+- Changed supported method parameters for plugins
+  - from `OpenTelemetry.Instrumentation.AspNet.AspNetInstrumentationOptions`
+    to `OpenTelemetry.Instrumentation.AspNet.AspNetTraceInstrumentationOptions`.
+
 #### Dependency updates
 
+- Updated [Core components](https://github.com/open-telemetry/opentelemetry-dotnet/blob/main/VERSIONING.md#core-components):
+  [`1.8.0`](https://github.com/open-telemetry/opentelemetry-dotnet/releases/tag/core-1.8.0).
 - Following packages updated
   - `MongoDB.Driver.Core.Extensions.DiagnosticSources` from `1.3.0` to `1.4.0`.
+  - `OpenTelemetry.Exporter.Prometheus.HttpListener` from `1.7.0-rc.1` to `1.8.0-rc.1`,
+  - `OpenTelemetry.Instrumentation.Http` from `1.7.1` to `1.8.0`,
+  - `OpenTelemetry.Instrumentation.Process` from `0.5.0-beta.4` to `0.5.0-beta.5`,
+  - `OpenTelemetry.Instrumentation.Quartz` from `1.0.0-beta.1` to `1.0.0-beta.2`,
+  - `OpenTelemetry.Instrumentation.Runtime` from `1.7.0` to `1.8.0`,
+  - `OpenTelemetry.Instrumentation.SqlClient` from `1.7.0-beta.1` to `1.8.0-beta.1`,
+  - `OpenTelemetry.Instrumentation.StackExchangeRedis` from `1.0.0-rc9.13` to `1.0.0-rc9.14`,
+  - `OpenTelemetry.Instrumentation.Wcf` from `1.0.0-rc.15` to `1.0.0-rc.16`,
+  - `OpenTelemetry.ResourceDetectors.Azure` from `1.0.0-beta.5` to `1.0.0-beta.6`,
+  - `OpenTelemetry.ResourceDetectors.Host` from `0.1.0-alpha.2` to `0.1.0-alpha.3`.
+  - `OpenTelemetry.ResourceDetectors.Process` from `0.1.0-alpha.2` to `0.1.0-alpha.3`.
+  - `OpenTelemetry.ResourceDetectors.ProcessRuntime` from `0.1.0-alpha.2` to `0.1.0-alpha.3`.
+- .NET only, following packages updated
+  - `OpenTelemetry.Instrumentation.AspNetCore` from `1.7.1` to `1.8.0`,
+  - `OpenTelemetry.Instrumentation.EntityFrameworkCore` from `1.0.0-beta.10` to `1.0.0-beta.11`,
+  - `OpenTelemetry.ResourceDetectors.Container` from `1.0.0-beta.6` to `1.0.0-beta.7`.
 - .NET Framework only, following packages updated
   - `Google.Protobuf` updated from `3.25.2` to `3.26.1`,
   - `Grpc.Core.Api` from `2.60.0` to `2.62.0`,
   - `Microsoft.Extensions.DependencyInjection.Abstractions` from `8.0.0` to `8.0.1`,
   - `Microsoft.Extensions.Options` from `8.0.1` to `8.0.2`,
   - `Microsoft.Extensions.Logging.Abstractions` from `8.0.0` to `8.0.1`,
+  - `OpenTelemetry.Instrumentation.AspNet` from `1.7.0-beta.2` to `1.8.0-beta.1`,
   - `System.Text.Json` from `8.0.1` to `8.0.3`.
-
-### Deprecated
-
-### Removed
 
 ### Fixed
 

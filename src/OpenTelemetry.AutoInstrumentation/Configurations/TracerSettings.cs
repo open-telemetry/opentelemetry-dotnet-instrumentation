@@ -52,16 +52,6 @@ internal class TracerSettings : Settings
     /// </summary>
     public InstrumentationOptions InstrumentationOptions { get; private set; } = new(new Configuration(failFast: false));
 
-    /// <summary>
-    /// Gets sampler to be used for traces.
-    /// </summary>
-    public string? TracesSampler { get; private set; }
-
-    /// <summary>
-    /// Gets a value to be used as the sampler argument.
-    /// </summary>
-    public string? TracesSamplerArguments { get; private set; }
-
     protected override void OnLoad(Configuration configuration)
     {
         TracesExporter = ParseTracesExporter(configuration);
@@ -97,9 +87,6 @@ internal class TracerSettings : Settings
         OpenTracingEnabled = configuration.GetBool(ConfigurationKeys.Traces.OpenTracingEnabled) ?? false;
 
         InstrumentationOptions = new InstrumentationOptions(configuration);
-
-        TracesSampler = configuration.GetString(ConfigurationKeys.Traces.TracesSampler);
-        TracesSamplerArguments = configuration.GetString(ConfigurationKeys.Traces.TracesSamplerArguments);
     }
 
     private static TracesExporter ParseTracesExporter(Configuration configuration)
