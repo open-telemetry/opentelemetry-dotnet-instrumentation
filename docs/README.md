@@ -169,7 +169,7 @@ Example usage:
 
 ```sh
 # Download the bash script
-curl -sSfL https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/download/v1.4.0/otel-dotnet-auto-install.sh -O
+curl -sSfL https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/download/v1.5.0/otel-dotnet-auto-install.sh -O
 
 # Install core files
 sh ./otel-dotnet-auto-install.sh
@@ -193,7 +193,7 @@ uses environment variables as parameters:
 | `OS_TYPE`               | Possible values: `linux-glibc`, `linux-musl`, `macos`, `windows` | No       | *Calculated*              |
 | `ARCHITECTURE`          | Possible values for Linux: `x64`, `arm64`                        | No       | *Calculated*              |
 | `TMPDIR`                | Temporary directory used when downloading the files              | No       | `$(mktemp -d)`            |
-| `VERSION`               | Version to download                                              | No       | `1.4.0`                   |
+| `VERSION`               | Version to download                                              | No       | `1.5.0`                   |
 
 [instrument.sh](../instrument.sh) script
 uses environment variables as parameters:
@@ -213,7 +213,7 @@ Example usage (run as administrator):
 
 ```powershell
 # Download the module
-$module_url = "https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/download/v1.4.0/OpenTelemetry.DotNet.Auto.psm1"
+$module_url = "https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/download/v1.5.0/OpenTelemetry.DotNet.Auto.psm1"
 $download_path = Join-Path $env:temp "OpenTelemetry.DotNet.Auto.psm1"
 Invoke-WebRequest -Uri $module_url -OutFile $download_path -UseBasicParsing
 
