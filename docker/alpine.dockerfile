@@ -21,8 +21,8 @@ RUN curl -sSL https://dot.net/v1/dotnet-install.sh --output dotnet-install.sh \
     && echo "SHA256: $(sha256sum dotnet-install.sh)" \
     && echo "170a3ec239a351f8d7c14bec424b286bd9468f4d928bdb7600f6424ea7f13927  dotnet-install.sh" | sha256sum -c \
     && chmod +x ./dotnet-install.sh \
-    && ./dotnet-install.sh -v 6.0.420 --install-dir /usr/share/dotnet --no-path \
-    && ./dotnet-install.sh -v 7.0.407 --install-dir /usr/share/dotnet --no-path \
+    && ./dotnet-install.sh -v 6.0.421 --install-dir /usr/share/dotnet --no-path \
+    && ./dotnet-install.sh -v 7.0.408 --install-dir /usr/share/dotnet --no-path \
     && rm dotnet-install.sh
 
 WORKDIR /project
