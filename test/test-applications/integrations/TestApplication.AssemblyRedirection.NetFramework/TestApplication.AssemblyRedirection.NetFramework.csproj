@@ -7,6 +7,6 @@
 
   <ItemGroup>
     <!-- WARNING: Keep this version of System.Diagnostics.DiagnosticSource to ensure the test is validating the actual scenario. -->
-    <PackageReference Include="System.Diagnostics.DiagnosticSource" Version="6.0.0" />
+    <PackageReference Include="System.Diagnostics.DiagnosticSource" Version="8.0.1" />
   </ItemGroup>
 </Project>
