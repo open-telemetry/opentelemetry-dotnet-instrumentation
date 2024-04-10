@@ -46,13 +46,16 @@ public static class ConsumerConsumeSyncIntegration
             consumeResult = response == null ? null : response.DuckAs<IConsumeResult>();
         }
 
-        var activity = KafkaInstrumentation.StartConsumerActivity(consumeResult, (DateTimeOffset)state.StartTime!, instance!);
-        if (exception is not null)
+        if (consumeResult is not null)
         {
-            activity.SetException(exception);
-        }
+            var activity = KafkaInstrumentation.StartConsumerActivity(consumeResult, (DateTimeOffset)state.StartTime!, instance!);
+            if (exception is not null)
+            {
+                activity.SetException(exception);
+            }
 
-        activity?.Stop();
+            activity?.Stop();
+        }
 
         return new CallTargetReturn<TResponse>(response);
     }
