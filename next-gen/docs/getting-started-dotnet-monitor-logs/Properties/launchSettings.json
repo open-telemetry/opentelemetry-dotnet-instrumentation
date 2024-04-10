@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "getting-started-dotnet-monitor-logs": {
+      "commandName": "Project",
+      "environmentVariables": {
+        "DOTNET_DiagnosticPorts": "/diag/port.sock,,suspend"
+      }
+    }
+  }
+}
