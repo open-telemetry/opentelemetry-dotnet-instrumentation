@@ -69,50 +69,50 @@ to download the dotnet-monitor.
    directory or Azure Blob Storage. Here's a configuration for file system
    egress:
 
-```json
-{
-  "$schema": "https://aka.ms/dotnet-monitor-schema",
-  "CollectionRuleDefaults": {
-    "Actions": {
-      "Egress": "artifacts"
-    }
-  },
-  "Egress": {
-    "FileSystem": {
-      "artifacts": {
-        "DirectoryPath": "path/to/artifacts",
-        "IntermediateDirectoryPath": "path/to/intermediateArtifacts",
-        "CopyBufferSize": 500
+   ```json
+   {
+     "$schema": "https://aka.ms/dotnet-monitor-schema",
+     "CollectionRuleDefaults": {
+      "Actions": {
+        "Egress": "artifacts"
       }
-    },
-    "console": {
-      "type": "console"
-    }
-  },
-  "CollectionRules": {
-    "AssemblyLoadTraceOnStartup": {
-      "Trigger": {
-        "Type": "Startup"
+     },
+     "Egress": {
+      "FileSystem": {
+        "artifacts": {
+         "DirectoryPath": "path/to/artifacts",
+         "IntermediateDirectoryPath": "path/to/intermediateArtifacts",
+         "CopyBufferSize": 500
+        }
       },
-      "Actions": [
-        {
-          "Type": "CollectLogs",
-          "Settings": {
+      "console": {
+        "type": "console"
+      }
+     },
+     "CollectionRules": {
+      "AssemblyLoadTraceOnStartup": {
+        "Trigger": {
+         "Type": "Startup"
+        },
+        "Actions": [
+         {
+           "Type": "CollectLogs",
+           "Settings": {
             "Egress": "artifacts",
             "DefaultLevel": "Warning",
             "UseAppFilters": false,
             "Duration": "00:00:30",
             "Format": "JsonSequence"
-          }
-        }
-      ]
-    }
-  }
-}
-```
+           }
+         }
+        ]
+      }
+     }
+   }
+   ```
 
-When starting dotnet-monitor, specify the path to this settings.json file using
-the `--configuration-file-path` switch.
+   When starting dotnet-monitor, specify the path to this settings.json file using
+   the `--configuration-file-path` switch.
 
 3. **Diagnostic Port Configuration**: dotnet monitor communicates with .NET
    processes through their diagnostic port (--diagnostic-port). By default, .NET
@@ -158,5 +158,5 @@ validate the log collection.
 
 ## Learn more
 
-* [Dotnet Monitor Collection
+- [Dotnet Monitor Collection
   Rules](https://horovits.medium.com/prometheus-now-supports-opentelemetry-metrics-83f85878e46a)
