@@ -169,4 +169,4 @@ if [ "$ENABLE_PROFILING" = "true" ]; then
   fi
 fi
 
-$@
+exec "$@"
