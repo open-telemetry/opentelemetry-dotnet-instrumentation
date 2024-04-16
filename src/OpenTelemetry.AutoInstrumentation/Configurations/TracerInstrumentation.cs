@@ -122,5 +122,10 @@ internal enum TracerInstrumentation
     /// <summary>
     /// Kafka client instrumentation
     /// </summary>
-    Kafka = 20
+    Kafka = 20,
+
+    /// <summary>
+    /// RabbitMQ client instrumentation
+    /// </summary>
+    RabbitMq = 21
 }

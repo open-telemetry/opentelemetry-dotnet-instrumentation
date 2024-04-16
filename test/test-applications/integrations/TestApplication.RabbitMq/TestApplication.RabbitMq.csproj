@@ -1,0 +1,7 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <PackageReference Include="RabbitMQ.Client" VersionOverride="$(LibraryVersion)" />
+  </ItemGroup>
+
+</Project>

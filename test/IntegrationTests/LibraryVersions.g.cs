@@ -162,6 +162,14 @@ public static partial class LibraryVersion
         new object[] { "3.8.1" },
 #endif
     };
+    public static readonly IReadOnlyCollection<object[]> RabbitMq = new List<object[]>
+    {
+#if DEFAULT_TEST_PACKAGE_VERSIONS
+        new object[] { string.Empty }
+#else
+        new object[] { "7.0.0-alpha.4" },
+#endif
+    };
     public static readonly IReadOnlyCollection<object[]> StackExchangeRedis = new List<object[]>
     {
 #if DEFAULT_TEST_PACKAGE_VERSIONS
@@ -218,6 +226,7 @@ public static partial class LibraryVersion
        { "Npgsql", Npgsql },
        { "NServiceBus", NServiceBus },
        { "Quartz", Quartz },
+       { "RabbitMq", RabbitMq },
        { "StackExchangeRedis", StackExchangeRedis },
        { "WCFCoreClient", WCFCoreClient },
        { "Kafka", Kafka },

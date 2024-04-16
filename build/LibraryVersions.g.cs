@@ -142,6 +142,13 @@ public static partial class LibraryVersion
             }
         },
         {
+            "TestApplication.RabbitMq",
+            new List<PackageBuildInfo>
+            {
+                new("7.0.0-alpha.4"),
+            }
+        },
+        {
             "TestApplication.StackExchangeRedis",
             new List<PackageBuildInfo>
             {

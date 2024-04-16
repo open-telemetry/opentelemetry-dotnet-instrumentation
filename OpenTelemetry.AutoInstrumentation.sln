@@ -225,7 +225,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "next-gen", "next-gen", "{3F
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "getting-started-dotnet-monitor-metrics", "next-gen\docs\getting-started-dotnet-monitor-metrics\getting-started-dotnet-monitor-metrics.csproj", "{022A03CE-DD7A-4326-847E-3B750E660845}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "getting-started-dotnet-monitor-logs", "next-gen\docs\getting-started-dotnet-monitor-logs\getting-started-dotnet-monitor-logs.csproj", "{959764E7-5A0C-4511-8004-48DE6B10F499}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "getting-started-dotnet-monitor-logs", "next-gen\docs\getting-started-dotnet-monitor-logs\getting-started-dotnet-monitor-logs.csproj", "{959764E7-5A0C-4511-8004-48DE6B10F499}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestApplication.RabbitMq", "test\test-applications\integrations\TestApplication.RabbitMq\TestApplication.RabbitMq.csproj", "{3316448A-4803-45BD-9EA9-2606243A49B4}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -1415,6 +1417,22 @@ Global
 		{959764E7-5A0C-4511-8004-48DE6B10F499}.Release|x64.Build.0 = Release|Any CPU
 		{959764E7-5A0C-4511-8004-48DE6B10F499}.Release|x86.ActiveCfg = Release|Any CPU
 		{959764E7-5A0C-4511-8004-48DE6B10F499}.Release|x86.Build.0 = Release|Any CPU
+		{3316448A-4803-45BD-9EA9-2606243A49B4}.Debug|Any CPU.ActiveCfg = Debug|x64
+		{3316448A-4803-45BD-9EA9-2606243A49B4}.Debug|Any CPU.Build.0 = Debug|x64
+		{3316448A-4803-45BD-9EA9-2606243A49B4}.Debug|ARM64.ActiveCfg = Debug|x64
+		{3316448A-4803-45BD-9EA9-2606243A49B4}.Debug|ARM64.Build.0 = Debug|x64
+		{3316448A-4803-45BD-9EA9-2606243A49B4}.Debug|x64.ActiveCfg = Debug|x64
+		{3316448A-4803-45BD-9EA9-2606243A49B4}.Debug|x64.Build.0 = Debug|x64
+		{3316448A-4803-45BD-9EA9-2606243A49B4}.Debug|x86.ActiveCfg = Debug|x86
+		{3316448A-4803-45BD-9EA9-2606243A49B4}.Debug|x86.Build.0 = Debug|x86
+		{3316448A-4803-45BD-9EA9-2606243A49B4}.Release|Any CPU.ActiveCfg = Release|x64
+		{3316448A-4803-45BD-9EA9-2606243A49B4}.Release|Any CPU.Build.0 = Release|x64
+		{3316448A-4803-45BD-9EA9-2606243A49B4}.Release|ARM64.ActiveCfg = Release|x64
+		{3316448A-4803-45BD-9EA9-2606243A49B4}.Release|ARM64.Build.0 = Release|x64
+		{3316448A-4803-45BD-9EA9-2606243A49B4}.Release|x64.ActiveCfg = Release|x64
+		{3316448A-4803-45BD-9EA9-2606243A49B4}.Release|x64.Build.0 = Release|x64
+		{3316448A-4803-45BD-9EA9-2606243A49B4}.Release|x86.ActiveCfg = Release|x86
+		{3316448A-4803-45BD-9EA9-2606243A49B4}.Release|x86.Build.0 = Release|x86
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -1499,6 +1517,7 @@ Global
 		{B74CB036-10F5-449D-8CBA-44F77E68D042} = {E409ADD3-9574-465C-AB09-4324D205CC7C}
 		{022A03CE-DD7A-4326-847E-3B750E660845} = {3F051815-8E0D-4356-BC36-55CA642DDF18}
 		{959764E7-5A0C-4511-8004-48DE6B10F499} = {3F051815-8E0D-4356-BC36-55CA642DDF18}
+		{3316448A-4803-45BD-9EA9-2606243A49B4} = {E409ADD3-9574-465C-AB09-4324D205CC7C}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {160A1D00-1F5B-40F8-A155-621B4459D78F}

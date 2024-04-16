@@ -9,6 +9,9 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 
 ### Added
 
+- Support for [[RabbitMQ.Client](https://www.nuget.org/packages/RabbitMQ.Client)
+  traces instrumentation from 7.0.0-alpha.4.
+
 ### Changed
 
 #### Dependency updates
