@@ -17,4 +17,4 @@ jobs:
         run: sudo apt update && sudo apt install --assume-yes shellcheck
 
       - name: Run shellcheck
-        run: find . -name \*.sh | xargs shellcheck --severity=warning
+        run: find . -name \*.sh -o -name \*.sh.template  | xargs shellcheck --severity=warning
