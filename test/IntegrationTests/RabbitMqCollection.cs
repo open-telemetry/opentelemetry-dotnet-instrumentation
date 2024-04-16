@@ -23,13 +23,23 @@ public class RabbitMqFixture : IAsyncLifetime
 
     public RabbitMqFixture()
     {
-        Port = TcpPortProvider.GetOpenPort();
+        if (IsCurrentArchitectureSupported)
+        {
+            Port = TcpPortProvider.GetOpenPort();
+        }
     }
+
+    public bool IsCurrentArchitectureSupported { get; } = EnvironmentTools.IsX64();
 
     public int Port { get; }
 
     public async Task InitializeAsync()
     {
+        if (!IsCurrentArchitectureSupported)
+        {
+            return;
+        }
+
         _container = await LaunchMySqlContainerAsync(Port);
     }
 
@@ -38,6 +48,14 @@ public class RabbitMqFixture : IAsyncLifetime
         if (_container != null)
         {
             await ShutdownRabbitMqContainerAsync(_container);
+        }
+    }
+
+    public void SkipIfUnsupportedPlatform()
+    {
+        if (!IsCurrentArchitectureSupported)
+        {
+            throw new SkipException("RabbitMQ is supported only on AMD64.");
         }
     }
 
