@@ -98,7 +98,7 @@ public static partial class LibraryVersion
             new List<PackageBuildInfo>
             {
                 new("2.19.0"),
-                new("2.24.0"),
+                new("2.25.0"),
             }
         },
         {
