@@ -43,7 +43,7 @@ public static partial class LibraryVersion
         new object[] { "8.0.2" },
 #endif
 #if NET8_0
-        new object[] { "8.0.3" },
+        new object[] { "8.0.4" },
 #endif
 #endif
     };
