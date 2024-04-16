@@ -13,6 +13,11 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 
 #### Dependency updates
 
+- Following packages updated
+  - `OpenTelemetry.Instrumentation.Http` from `1.8.0` to `1.8.1`.
+- .NET only, following packages updated
+  - `OpenTelemetry.Instrumentation.AspNetCore` from `1.8.0` to `1.8.1`.
+
 ### Deprecated
 
 ### Removed
