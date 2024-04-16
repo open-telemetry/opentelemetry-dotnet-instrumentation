@@ -130,7 +130,7 @@ public static partial class LibraryVersion
             new List<PackageBuildInfo>
             {
                 new("8.0.0"),
-                new("8.1.6"),
+                new("8.2.0"),
             }
         },
         {

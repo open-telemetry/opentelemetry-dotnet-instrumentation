@@ -150,7 +150,7 @@ public static partial class LibraryVersion
         new object[] { string.Empty }
 #else
         new object[] { "8.0.0" },
-        new object[] { "8.1.6" },
+        new object[] { "8.2.0" },
 #endif
     };
     public static readonly IReadOnlyCollection<object[]> Quartz = new List<object[]>
