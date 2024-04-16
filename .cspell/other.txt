@@ -45,6 +45,7 @@ PROCESSRUNTIME
 proto
 protobuf
 protos
+RABBITMQ
 Serilog
 spdlog
 SQLCLIENT
