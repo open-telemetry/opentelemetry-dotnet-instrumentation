@@ -124,7 +124,7 @@ internal static class KafkaInstrumentation
         object? key,
         INamedClient? client)
     {
-        activity.SetTag(MessagingAttributes.Keys.MessagingOperation, operationName);
+        activity.SetTag(MessagingAttributes.Keys.MessagingOperationType, operationName);
         activity.SetTag(MessagingAttributes.Keys.MessagingSystem, MessagingAttributes.Values.KafkaMessagingSystemName);
         if (!string.IsNullOrEmpty(topic))
         {

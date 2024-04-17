@@ -9,7 +9,7 @@ internal static class MessagingAttributes
     internal static class Keys
     {
         public const string MessagingSystem = "messaging.system";
-        public const string MessagingOperation = "messaging.operation";
+        public const string MessagingOperationType = "messaging.operation.type";
         public const string DestinationName = "messaging.destination.name";
         public const string ClientId = "messaging.client_id";
 
