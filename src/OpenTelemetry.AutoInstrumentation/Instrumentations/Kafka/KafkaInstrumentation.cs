@@ -3,9 +3,11 @@
 
 using System.Diagnostics;
 using System.Text;
+using OpenTelemetry.AutoInstrumentation.CallTarget;
 using OpenTelemetry.AutoInstrumentation.DuckTyping;
 using OpenTelemetry.AutoInstrumentation.Instrumentations.Kafka.DuckTypes;
 using OpenTelemetry.AutoInstrumentation.Instrumentations.Kafka.Integrations;
+using OpenTelemetry.AutoInstrumentation.Util;
 using OpenTelemetry.Context.Propagation;
 
 namespace OpenTelemetry.AutoInstrumentation.Instrumentations.Kafka;
@@ -14,58 +16,28 @@ internal static class KafkaInstrumentation
 {
     private static ActivitySource Source { get; } = new("OpenTelemetry.AutoInstrumentation.Kafka");
 
-    public static Activity? StartConsumerActivity(IConsumeResult consumeResult, DateTimeOffset startTime, object consumer)
+    public static void ProcessResult<TTarget, TResponse>(TTarget instance, TResponse response, Exception? exception, CallTargetState state)
     {
-        PropagationContext? propagatedContext = Propagators.DefaultTextMapPropagator.Extract(default, consumeResult, MessageHeaderValueGetter);
-
-        string? spanName = null;
-        if (!string.IsNullOrEmpty(consumeResult.Topic))
+        IConsumeResult? consumeResult;
+        if (exception is not null && exception.TryDuckCast<IConsumeException>(out var consumeException))
         {
-            spanName = $"{consumeResult.Topic} {MessagingAttributes.Values.ReceiveOperationName}";
+            consumeResult = consumeException.ConsumerRecord;
+        }
+        else
+        {
+            consumeResult = response == null ? null : response.DuckAs<IConsumeResult>();
         }
 
-        spanName ??= MessagingAttributes.Values.ReceiveOperationName;
-
-        var activityLinks = propagatedContext.Value.ActivityContext.IsValid()
-            ? new[] { new ActivityLink(propagatedContext.Value.ActivityContext) }
-            : Array.Empty<ActivityLink>();
-
-        // https://github.com/open-telemetry/oteps/blob/5531cb2cb61df5ff9660d1078613e6c09cb396a8/text/trace/0220-messaging-semantic-conventions-span-structure.md?plain=1#L200
-        // If consumer span would be a root span of a new trace,
-        // use message's creation context as a parent,
-        // in addition to linking to it.
-        var parentContext =
-            Activity.Current is null ?
-            propagatedContext?.ActivityContext ?? default :
-            default;
-
-        var activity = Source.StartActivity(
-            spanName,
-            kind: ActivityKind.Consumer,
-            links: activityLinks,
-            startTime: startTime,
-            parentContext: parentContext,
-            tags: null);
-
-        if (activity is { IsAllDataRequested: true })
+        if (consumeResult is not null)
         {
-            SetCommonAttributes(
-                activity,
-                MessagingAttributes.Values.ReceiveOperationName,
-                consumeResult.Topic,
-                consumeResult.Partition,
-                consumeResult.Message?.Key,
-                consumer.DuckCast<INamedClient>());
-
-            activity.SetTag(MessagingAttributes.Keys.Kafka.PartitionOffset, consumeResult.Offset.Value);
-
-            if (ConsumerCache.TryGet(consumer, out var groupId))
+            var activity = StartConsumerActivity(consumeResult, (DateTimeOffset)state.StartTime!, instance!);
+            if (exception is not null)
             {
-                activity.SetTag(MessagingAttributes.Keys.Kafka.ConsumerGroupId, groupId);
+                activity?.SetException(exception);
             }
-        }
 
-        return activity;
+            activity?.Stop();
+        }
     }
 
     public static Activity? StartProducerActivity(
@@ -114,6 +86,60 @@ internal static class KafkaInstrumentation
         activity.SetTag(
             MessagingAttributes.Keys.Kafka.PartitionOffset,
             deliveryResult.Offset.Value);
+    }
+
+    private static Activity? StartConsumerActivity(IConsumeResult consumeResult, DateTimeOffset startTime, object consumer)
+    {
+        PropagationContext? propagatedContext = Propagators.DefaultTextMapPropagator.Extract(default, consumeResult, MessageHeaderValueGetter);
+
+        string? spanName = null;
+        if (!string.IsNullOrEmpty(consumeResult.Topic))
+        {
+            spanName = $"{consumeResult.Topic} {MessagingAttributes.Values.ReceiveOperationName}";
+        }
+
+        spanName ??= MessagingAttributes.Values.ReceiveOperationName;
+
+        var activityLinks = propagatedContext.Value.ActivityContext.IsValid()
+            ? new[] { new ActivityLink(propagatedContext.Value.ActivityContext) }
+            : Array.Empty<ActivityLink>();
+
+        // https://github.com/open-telemetry/oteps/blob/5531cb2cb61df5ff9660d1078613e6c09cb396a8/text/trace/0220-messaging-semantic-conventions-span-structure.md?plain=1#L200
+        // If consumer span would be a root span of a new trace,
+        // use message's creation context as a parent,
+        // in addition to linking to it.
+        var parentContext =
+            Activity.Current is null ?
+                propagatedContext?.ActivityContext ?? default :
+                default;
+
+        var activity = Source.StartActivity(
+            spanName,
+            kind: ActivityKind.Consumer,
+            links: activityLinks,
+            startTime: startTime,
+            parentContext: parentContext,
+            tags: null);
+
+        if (activity is { IsAllDataRequested: true })
+        {
+            SetCommonAttributes(
+                activity,
+                MessagingAttributes.Values.ReceiveOperationName,
+                consumeResult.Topic,
+                consumeResult.Partition,
+                consumeResult.Message?.Key,
+                consumer.DuckCast<INamedClient>());
+
+            activity.SetTag(MessagingAttributes.Keys.Kafka.PartitionOffset, consumeResult.Offset.Value);
+
+            if (ConsumerCache.TryGet(consumer, out var groupId))
+            {
+                activity.SetTag(MessagingAttributes.Keys.Kafka.ConsumerGroupId, groupId);
+            }
+        }
+
+        return activity;
     }
 
     private static void SetCommonAttributes(

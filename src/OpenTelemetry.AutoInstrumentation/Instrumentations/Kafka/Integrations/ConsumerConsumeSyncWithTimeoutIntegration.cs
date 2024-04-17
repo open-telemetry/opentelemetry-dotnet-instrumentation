@@ -16,14 +16,14 @@ namespace OpenTelemetry.AutoInstrumentation.Instrumentations.Kafka.Integrations;
     typeName: IntegrationConstants.ConsumerTypeName,
     methodName: IntegrationConstants.ConsumeSyncMethodName,
     returnTypeName: IntegrationConstants.ConsumeResultTypeName,
-    parameterTypeNames: new[] { ClrNames.Int32 },
+    parameterTypeNames: new[] { "System.TimeSpan" },
     minimumVersion: IntegrationConstants.MinVersion,
     maximumVersion: IntegrationConstants.MaxVersion,
     integrationName: IntegrationConstants.IntegrationName,
     type: InstrumentationType.Trace)]
-public static class ConsumerConsumeSyncIntegration
+public static class ConsumerConsumeSyncWithTimeoutIntegration
 {
-    internal static CallTargetState OnMethodBegin<TTarget>(TTarget instance, int timeout)
+    internal static CallTargetState OnMethodBegin<TTarget>(TTarget instance, TimeSpan timeout)
     {
         // Preferably, activity would be started here,
         // and link to propagated context later;
@@ -36,26 +36,7 @@ public static class ConsumerConsumeSyncIntegration
 
     internal static CallTargetReturn<TResponse> OnMethodEnd<TTarget, TResponse>(TTarget instance, TResponse response, Exception? exception, in CallTargetState state)
     {
-        IConsumeResult? consumeResult;
-        if (exception is not null && exception.TryDuckCast<IConsumeException>(out var consumeException))
-        {
-            consumeResult = consumeException.ConsumerRecord;
-        }
-        else
-        {
-            consumeResult = response == null ? null : response.DuckAs<IConsumeResult>();
-        }
-
-        if (consumeResult is not null)
-        {
-            var activity = KafkaInstrumentation.StartConsumerActivity(consumeResult, (DateTimeOffset)state.StartTime!, instance!);
-            if (exception is not null)
-            {
-                activity.SetException(exception);
-            }
-
-            activity?.Stop();
-        }
+        KafkaInstrumentation.ProcessResult(instance, response, exception, state);
 
         return new CallTargetReturn<TResponse>(response);
     }
