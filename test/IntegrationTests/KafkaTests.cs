@@ -14,7 +14,7 @@ public class KafkaTests : TestHelper
     private const string MessagingPublishOperationAttributeValue = "publish";
     private const string MessagingReceiveOperationAttributeValue = "receive";
     private const string MessagingSystemAttributeName = "messaging.system";
-    private const string MessagingOperationAttributeName = "messaging.operation";
+    private const string MessagingOperationTypeAttributeName = "messaging.operation.type";
     private const string MessagingDestinationAttributeName = "messaging.destination.name";
     private const string MessagingClientIdAttributeName = "messaging.client_id";
 
@@ -155,7 +155,7 @@ public class KafkaTests : TestHelper
     private static bool ValidateBasicSpanAttributes(IReadOnlyCollection<KeyValue> attributes, string clientId, string operationName)
     {
         var messagingSystem = attributes.Single(kv => kv.Key == MessagingSystemAttributeName).Value.StringValue;
-        var messagingOperation = attributes.Single(kv => kv.Key == MessagingOperationAttributeName).Value.StringValue;
+        var messagingOperation = attributes.Single(kv => kv.Key == MessagingOperationTypeAttributeName).Value.StringValue;
         var messagingClientId = attributes.Single(kv => kv.Key == MessagingClientIdAttributeName).Value.StringValue;
 
         return messagingSystem == KafkaMessageSystemAttributeValue &&
