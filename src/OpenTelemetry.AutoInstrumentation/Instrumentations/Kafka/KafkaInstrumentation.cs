@@ -122,7 +122,7 @@ internal static class KafkaInstrumentation
         return key switch
         {
             string s => s,
-            int or long or float or double => Convert.ToString(key, CultureInfo.InvariantCulture),
+            int or uint or long or ulong or float or double or decimal => Convert.ToString(key, CultureInfo.InvariantCulture),
             _ => null
         };
     }
