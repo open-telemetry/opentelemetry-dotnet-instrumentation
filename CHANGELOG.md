@@ -7,6 +7,10 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 
 ## [Unreleased](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/compare/v1.5.0..HEAD)
 
+- [Core components](https://github.com/open-telemetry/opentelemetry-dotnet/blob/main/VERSIONING.md#core-components):
+  [`1.8.1`](https://github.com/open-telemetry/opentelemetry-dotnet/releases/tag/core-1.8.1)
+- `System.Diagnostics.DiagnosticSource`: [`8.0.0`](https://www.nuget.org/packages/System.Diagnostics.DiagnosticSource/8.0.0)
+
 ### Added
 
 ### Changed
@@ -16,7 +20,10 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 - Following packages updated
   - `OpenTelemetry.Instrumentation.Http` from `1.8.0` to `1.8.1`.
 - .NET only, following packages updated
+  - `Microsoft.Extensions.Configuration.Binder` from `8.0.0` to `8.0.1`,
   - `OpenTelemetry.Instrumentation.AspNetCore` from `1.8.0` to `1.8.1`.
+- .NET Framework only, following packages updated
+  - `OpenTelemetry.Instrumentation.AspNet` from `1.8.0` to `1.8.0-beta.2`.
 
 ### Deprecated
 
@@ -28,6 +35,8 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 
 ## [1.5.0](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/tag/v1.5.0)
 
+- Updated [Core components](https://github.com/open-telemetry/opentelemetry-dotnet/blob/main/VERSIONING.md#core-components):
+  [`1.8.1`](https://github.com/open-telemetry/opentelemetry-dotnet/releases/tag/core-1.8.1).
 - [Core components](https://github.com/open-telemetry/opentelemetry-dotnet/blob/main/VERSIONING.md#core-components):
   [`1.8.0`](https://github.com/open-telemetry/opentelemetry-dotnet/releases/tag/core-1.8.0)
 - `System.Diagnostics.DiagnosticSource`: [`8.0.0`](https://www.nuget.org/packages/System.Diagnostics.DiagnosticSource/8.0.0)
