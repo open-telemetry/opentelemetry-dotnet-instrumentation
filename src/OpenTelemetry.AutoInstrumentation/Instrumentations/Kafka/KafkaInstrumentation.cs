@@ -116,6 +116,16 @@ internal static class KafkaInstrumentation
             deliveryResult.Offset.Value);
     }
 
+    internal static string? ExtractMessageKeyValue(object key)
+    {
+        return key switch
+        {
+            string s => s,
+            int or long or float or double => key.ToString(),
+            _ => null
+        };
+    }
+
     private static void SetCommonAttributes(
         Activity activity,
         string operationName,
@@ -138,7 +148,11 @@ internal static class KafkaInstrumentation
 
         if (key is not null)
         {
-            activity.SetTag(MessagingAttributes.Keys.Kafka.MessageKey, key);
+            var keyValue = ExtractMessageKeyValue(key);
+            if (keyValue is not null)
+            {
+                activity.SetTag(MessagingAttributes.Keys.Kafka.MessageKey, keyValue);
+            }
         }
 
         if (partition is not null)
