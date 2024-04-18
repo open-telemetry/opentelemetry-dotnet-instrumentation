@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 using System.Diagnostics;
+using System.Globalization;
 using System.Text;
 using OpenTelemetry.AutoInstrumentation.DuckTyping;
 using OpenTelemetry.AutoInstrumentation.Instrumentations.Kafka.DuckTypes;
@@ -121,7 +122,7 @@ internal static class KafkaInstrumentation
         return key switch
         {
             string s => s,
-            int or long or float or double => key.ToString(),
+            int or long or float or double => Convert.ToString(key, CultureInfo.InvariantCulture),
             _ => null
         };
     }
