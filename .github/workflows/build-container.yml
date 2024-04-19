@@ -52,7 +52,7 @@ jobs:
 
     - name: Publish Linux build
       if: (${{ job.status }} != 'cancelled')
-      uses: actions/upload-artifact@v4.3.1
+      uses: actions/upload-artifact@v4.3.2
       with:
         name: bin-${{ matrix.base-image }}-${{ matrix.architecture }}
         path: bin/tracer-home
