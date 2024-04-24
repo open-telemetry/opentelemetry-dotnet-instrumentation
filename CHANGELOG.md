@@ -16,13 +16,13 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 ### Changed
 
 - To prevent sensitive information from leaking through query strings, the
-following instrumentations redact by default any value detected in query string
-components when building the `url.query` or the `url.full` attributes:
-`OpenTelemetry.Instrumentation.Http`, `OpenTelemetry.Instrumentation.AspNetCore`,
-`OpenTelemetry.Instrumentation.AspNet`. For example, `?key1=value1&key2=value2`
-becomes `?key1=Redacted&key2=Redacted`. You can customize this behavior through
-the environment variables. See the
-[instrumentation options](./docs/config.md#instrumentation-options) table for details.
+  following instrumentations redact by default any value detected in query string
+  components when building the `url.query` or the `url.full` attributes:
+  `OpenTelemetry.Instrumentation.Http`, `OpenTelemetry.Instrumentation.AspNetCore`,
+  `OpenTelemetry.Instrumentation.AspNet`. For example, `?key1=value1&key2=value2`
+  becomes `?key1=Redacted&key2=Redacted`. You can customize this behavior through
+  the environment variables. See the
+  [instrumentation options](./docs/config.md#instrumentation-options) table for details.
 
 #### Dependency updates
 
