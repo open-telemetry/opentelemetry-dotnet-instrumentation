@@ -25,8 +25,6 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
   [`1.8.1`](https://github.com/open-telemetry/opentelemetry-dotnet/releases/tag/core-1.8.1)
 - `System.Diagnostics.DiagnosticSource`: [`8.0.0`](https://www.nuget.org/packages/System.Diagnostics.DiagnosticSource/8.0.0)
 
-### Added
-
 ### Changed
 
 - To prevent sensitive information from leaking through query strings, the
@@ -47,10 +45,6 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
   - `OpenTelemetry.Instrumentation.AspNetCore` from `1.8.0` to `1.8.1`.
 - .NET Framework only, following packages updated
   - `OpenTelemetry.Instrumentation.AspNet` from `1.8.0-beta.1` to `1.8.0-beta.2`.
-
-### Deprecated
-
-### Removed
 
 ### Fixed
 
