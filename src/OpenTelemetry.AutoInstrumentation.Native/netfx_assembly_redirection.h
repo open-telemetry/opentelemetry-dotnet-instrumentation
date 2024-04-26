@@ -18,6 +18,9 @@ void CorProfiler::InitNetFxAssemblyRedirectsMap()
     const USHORT auto_major = atoi(AUTO_MAJOR);
 
     assembly_version_redirect_map_.insert({
+        { L"AWSSDK.Core", {3, 3, 0, 0} },
+        { L"AWSSDK.SimpleNotificationService", {3, 3, 0, 0} },
+        { L"AWSSDK.SQS", {3, 3, 0, 0} },
         { L"Google.Protobuf", {3, 26, 1, 0} },
         { L"Grpc.Core", {2, 0, 0, 0} },
         { L"Grpc.Core.Api", {2, 0, 0, 0} },
@@ -44,9 +47,11 @@ void CorProfiler::InitNetFxAssemblyRedirectsMap()
         { L"OpenTelemetry.Exporter.OpenTelemetryProtocol", {1, 0, 0, 0} },
         { L"OpenTelemetry.Exporter.Prometheus.HttpListener", {1, 0, 0, 0} },
         { L"OpenTelemetry.Exporter.Zipkin", {1, 0, 0, 0} },
+        { L"OpenTelemetry.Extensions.AWS", {1, 3, 0, 1} },
         { L"OpenTelemetry.Extensions.Propagators", {1, 0, 0, 0} },
         { L"OpenTelemetry.Instrumentation.AspNet", {1, 8, 0, 2} },
         { L"OpenTelemetry.Instrumentation.AspNet.TelemetryHttpModule", {1, 8, 0, 2} },
+        { L"OpenTelemetry.Instrumentation.AWS", {1, 1, 0, 4} },
         { L"OpenTelemetry.Instrumentation.GrpcNetClient", {1, 0, 0, 0} },
         { L"OpenTelemetry.Instrumentation.Http", {1, 0, 0, 0} },
         { L"OpenTelemetry.Instrumentation.Process", {0, 5, 0, 5} },

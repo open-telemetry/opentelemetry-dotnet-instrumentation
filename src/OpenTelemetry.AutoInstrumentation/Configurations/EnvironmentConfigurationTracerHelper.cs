@@ -39,6 +39,7 @@ internal static class EnvironmentConfigurationTracerHelper
                 TracerInstrumentation.MongoDB => builder.AddSource("MongoDB.Driver.Core.Extensions.DiagnosticSources"),
                 TracerInstrumentation.MySqlConnector => builder.AddSource("MySqlConnector"),
                 TracerInstrumentation.Azure => Wrappers.AddAzureInstrumentation(builder),
+                TracerInstrumentation.AWS => Wrappers.AddAWSInstrumentation(builder, pluginManager, lazyInstrumentationLoader),
                 TracerInstrumentation.WcfClient => AddWcfIfNeeded(builder, pluginManager, lazyInstrumentationLoader, ref wcfInstrumentationAdded),
                 TracerInstrumentation.OracleMda => Wrappers.AddOracleMdaInstrumentation(builder, lazyInstrumentationLoader, settings),
 #if NET6_0_OR_GREATER
@@ -175,6 +176,13 @@ internal static class EnvironmentConfigurationTracerHelper
         {
             AppContext.SetSwitch("Azure.Experimental.EnableActivitySource", true);
             return builder.AddSource("Azure.*");
+        }
+
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        public static TracerProviderBuilder AddAWSInstrumentation(TracerProviderBuilder builder, PluginManager pluginManager, LazyInstrumentationLoader lazyInstrumentationLoader)
+        {
+            DelayedInitialization.Traces.AddAWS(lazyInstrumentationLoader, pluginManager);
+            return builder.AddSource("Amazon.AWS.AWSClientInstrumentation");
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]

@@ -2,6 +2,7 @@
   <Import Project="..\Directory.Packages.props" />
   <ItemGroup>
     <PackageVersion Include="Azure.Storage.Blobs" Version="12.19.1" />
+    <PackageVersion Include="AWSSDK.DynamoDBv2" Version="3.7.302" />
     <PackageVersion Include="Elastic.Clients.Elasticsearch" Version="8.13.5" />
     <PackageVersion Include="Confluent.Kafka" Version="2.3.0" />
     <PackageVersion Include="FluentAssertions" Version="6.12.0" />

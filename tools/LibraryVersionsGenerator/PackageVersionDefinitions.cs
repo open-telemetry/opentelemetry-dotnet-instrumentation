@@ -11,6 +11,17 @@ internal static class PackageVersionDefinitions
     {
         new()
         {
+            IntegrationName = "AWS",
+            NugetPackageName = "AWSSDK.DynamoDBv2",
+            TestApplicationName = "TestApplication.AWS",
+            Versions = new List<PackageVersion>
+            {
+                new("3.7.302"),
+                new("*")
+            }
+        },
+        new()
+        {
             IntegrationName = "Azure",
             NugetPackageName = "Azure.Storage.Blobs",
             TestApplicationName = "TestApplication.Azure",

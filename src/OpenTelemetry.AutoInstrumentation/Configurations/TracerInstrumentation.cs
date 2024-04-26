@@ -125,7 +125,12 @@ internal enum TracerInstrumentation
     Kafka = 20,
 
     /// <summary>
+    /// AWS SDK client instrumentation
+    /// </summary>
+    AWS = 21,
+
+    /// <summary>
     /// Oracle Managed Data Access (Core) instrumentation
     /// </summary>
-    OracleMda = 21
+    OracleMda = 22
 }

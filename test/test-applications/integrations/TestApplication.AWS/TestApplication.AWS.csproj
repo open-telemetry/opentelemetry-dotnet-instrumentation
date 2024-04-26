@@ -1,0 +1,6 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <PackageReference Include="AWSSDK.DynamoDBv2" VersionOverride="$(LibraryVersion)" />
+  </ItemGroup>
+</Project>

@@ -78,6 +78,12 @@ internal static class DelayedInitialization
         {
             lazyInstrumentationLoader.Add(new OracleMdaInitializer(tracerSettings));
         }
+
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        public static void AddAWS(LazyInstrumentationLoader lazyInstrumentationLoader, PluginManager pluginManager)
+        {
+            lazyInstrumentationLoader.Add(new AWSInitializer(pluginManager));
+        }
     }
 
     internal static class Metrics

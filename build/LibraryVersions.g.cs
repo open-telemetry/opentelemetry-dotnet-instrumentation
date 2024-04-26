@@ -16,6 +16,13 @@ public static partial class LibraryVersion
     public static IReadOnlyDictionary<string, IReadOnlyCollection<PackageBuildInfo>> Versions = new Dictionary<string, IReadOnlyCollection<PackageBuildInfo>>
     {
         {
+            "TestApplication.AWS",
+            new List<PackageBuildInfo>
+            {
+                new("3.7.302"),
+            }
+        },
+        {
             "TestApplication.Azure",
             new List<PackageBuildInfo>
             {

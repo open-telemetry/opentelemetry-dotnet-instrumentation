@@ -44,6 +44,7 @@
     <Content Include="docker\sql-server.Dockerfile" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="docker\kafka.Dockerfile" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="docker\zookeeper.Dockerfile" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="docker\aws.Dockerfile" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="xunit.runner.json" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 

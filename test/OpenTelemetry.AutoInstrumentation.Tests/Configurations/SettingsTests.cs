@@ -242,6 +242,7 @@ public class SettingsTests : IDisposable
     [InlineData("ELASTICTRANSPORT", TracerInstrumentation.ElasticTransport)]
     [InlineData("KAFKA", TracerInstrumentation.Kafka)]
     [InlineData("ORACLEMDA", TracerInstrumentation.OracleMda)]
+    [InlineData("AWS", TracerInstrumentation.AWS)]
     internal void TracerSettings_Instrumentations_SupportedValues(string tracerInstrumentation, TracerInstrumentation expectedTracerInstrumentation)
     {
         Environment.SetEnvironmentVariable(ConfigurationKeys.Traces.TracesInstrumentationEnabled, "false");
