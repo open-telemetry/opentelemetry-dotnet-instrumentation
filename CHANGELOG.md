@@ -5,13 +5,25 @@ All notable changes to this component are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/compare/v1.5.0..HEAD)
+## [Unreleased](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/compare/v1.6.0..HEAD)
+
+### Added
+
+### Changed
+
+#### Dependency updates
+
+### Deprecated
+
+### Removed
+
+### Fixed
+
+## [1.6.0](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/tag/v1.6.0)
 
 - [Core components](https://github.com/open-telemetry/opentelemetry-dotnet/blob/main/VERSIONING.md#core-components):
   [`1.8.1`](https://github.com/open-telemetry/opentelemetry-dotnet/releases/tag/core-1.8.1)
 - `System.Diagnostics.DiagnosticSource`: [`8.0.0`](https://www.nuget.org/packages/System.Diagnostics.DiagnosticSource/8.0.0)
-
-### Added
 
 ### Changed
 
@@ -32,15 +44,12 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
   - `Microsoft.Extensions.Configuration.Binder` from `8.0.0` to `8.0.1`,
   - `OpenTelemetry.Instrumentation.AspNetCore` from `1.8.0` to `1.8.1`.
 - .NET Framework only, following packages updated
-  - `OpenTelemetry.Instrumentation.AspNet` from `1.8.0` to `1.8.0-beta.2`.
-
-### Deprecated
-
-### Removed
+  - `OpenTelemetry.Instrumentation.AspNet` from `1.8.0-beta.1` to `1.8.0-beta.2`.
 
 ### Fixed
 
 - Stop creating `receive` consumer spans for consume attempts that returned no message.
+  For details, see [#3367](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/issues/3367)
 
 ## [1.5.0](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/tag/v1.5.0)
 
@@ -101,8 +110,8 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
   runtime store libraries, impacting applications with mismatched dependency
   versions. This fix enhances stability by addressing the underlying
   compatibility concerns. For details see:
-  ([#3075](https://github.com/open-telemetry/opentelemetry-dotnet/pull/3075),
-  [#3075](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/issues/3168))
+  ([#3075](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/issues/3075),
+  [#3168](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/issues/3168))
 
 ## [1.4.0](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/tag/v1.4.0)
 
