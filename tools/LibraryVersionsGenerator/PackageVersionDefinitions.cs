@@ -180,7 +180,7 @@ internal static class PackageVersionDefinitions
             TestApplicationName = "TestApplication.OracleMda.NetFramework",
             Versions = new List<PackageVersion>
             {
-                new("23.3.2-dev", supportedTargetFrameworks: new[] { "net472" }, supportedExecutionFrameworks: new[] { "net462" }),
+                new("23.4.0", supportedTargetFrameworks: new[] { "net472" }, supportedExecutionFrameworks: new[] { "net462" }),
                 new("*")
             }
         },
@@ -191,7 +191,7 @@ internal static class PackageVersionDefinitions
             TestApplicationName = "TestApplication.OracleMda.Core",
             Versions = new List<PackageVersion>
             {
-                new("23.3.2-dev"),
+                new("23.4.0"),
                 new("*")
             }
         },

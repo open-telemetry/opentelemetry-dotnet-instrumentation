@@ -159,7 +159,7 @@ public static partial class LibraryVersion
         new object[] { string.Empty }
 #else
 #if NET462
-        new object[] { "23.3.2-dev" },
+        new object[] { "23.4.0" },
 #endif
 #endif
     };
@@ -168,7 +168,7 @@ public static partial class LibraryVersion
 #if DEFAULT_TEST_PACKAGE_VERSIONS
         new object[] { string.Empty }
 #else
-        new object[] { "23.3.2-dev" },
+        new object[] { "23.4.0" },
 #endif
     };
     public static readonly IReadOnlyCollection<object[]> Quartz = new List<object[]>

@@ -11,7 +11,7 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 
 - Support for [Oracle.ManagedDataAccess.Core](https://www.nuget.org/packages/Oracle.ManagedDataAccess.Core)
   and [Oracle.ManagedDataAccess](https://www.nuget.org/packages/Oracle.ManagedDataAccess)
-  traces instrumentation from 23.3.2-dev together with support for
+  traces instrumentation from 23.4.0 together with support for
   `OTEL_DOTNET_AUTO_ORACLEMDA_SET_DBSTATEMENT_FOR_TEXT` environment variable.
   ARM64 platform is not supported.
 
