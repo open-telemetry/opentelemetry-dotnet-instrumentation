@@ -134,6 +134,20 @@ public static partial class LibraryVersion
             }
         },
         {
+            "TestApplication.OracleMda.NetFramework",
+            new List<PackageBuildInfo>
+            {
+                new("23.4.0", supportedFrameworks: new string[] {"net472"}),
+            }
+        },
+        {
+            "TestApplication.OracleMda.Core",
+            new List<PackageBuildInfo>
+            {
+                new("23.4.0"),
+            }
+        },
+        {
             "TestApplication.Quartz",
             new List<PackageBuildInfo>
             {
