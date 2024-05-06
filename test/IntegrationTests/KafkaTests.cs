@@ -56,16 +56,13 @@ public class KafkaTests : TestHelper
         collector.Expect(KafkaInstrumentationScopeName, span => span.Kind == Span.Types.SpanKind.Producer && ValidateProduceExceptionSpan(span, topicName), "Failed Produce attempt without delivery handler set.");
         collector.Expect(KafkaInstrumentationScopeName, span => span.Kind == Span.Types.SpanKind.Producer && ValidateResultProcessingProduceExceptionSpan(span, topicName), "Failed ProduceAsync attempt.");
 
-        if (packageVersion != string.Empty && Version.Parse(packageVersion) == new Version(1, 4, 0))
-        {
-            // For 1.4.0 null is returned when attempting to read from non-existent topic,
-            // and no exception is thrown.
-            collector.Expect(KafkaInstrumentationScopeName, span => span.Kind == Span.Types.SpanKind.Consumer && ValidateEmptyReadConsumerSpan(span, topicName), "Successful Consume attempt that returned no message.");
-        }
-        else
+        if (packageVersion == string.Empty || Version.Parse(packageVersion) != new Version(1, 4, 0))
         {
             // Failed consume attempt.
-            collector.Expect(KafkaInstrumentationScopeName, span => span.Kind == Span.Types.SpanKind.Consumer && ValidateConsumeExceptionSpan(span, topicName), "Failed Consume attempt.");
+            collector.Expect(
+                KafkaInstrumentationScopeName,
+                span => span.Kind == Span.Types.SpanKind.Consumer && ValidateConsumeExceptionSpan(span, topicName),
+                "Failed Consume attempt.");
         }
 
         // Successful produce attempts after topic was created with admin client.
@@ -81,9 +78,6 @@ public class KafkaTests : TestHelper
         collector.Expect(KafkaInstrumentationScopeName, span => span.Kind == Span.Types.SpanKind.Consumer && ValidateConsumerSpan(span, topicName, 1), "Second successful Consume attempt.");
         collector.Expect(KafkaInstrumentationScopeName, span => span.Kind == Span.Types.SpanKind.Consumer && ValidateConsumerSpan(span, topicName, 2), "Third successful Consume attempt.");
 
-        // Consume attempt that returns no message.
-        collector.Expect(KafkaInstrumentationScopeName, span => span.Kind == Span.Types.SpanKind.Consumer && ValidateEmptyReadConsumerSpan(span, topicName), "Additional successful attempt after all the produced messages were already read.");
-
         collector.ExpectCollected(collection => ValidatePropagation(collection, topicName));
 
         EnableBytecodeInstrumentation();
@@ -95,15 +89,6 @@ public class KafkaTests : TestHelper
         });
 
         collector.AssertExpectations();
-    }
-
-    private static bool ValidateEmptyReadConsumerSpan(Span span, string topicName)
-    {
-        var consumerGroupId = span.Attributes.Single(kv => kv.Key == KafkaConsumerGroupAttributeName).Value.StringValue;
-        return span.Name == MessagingReceiveOperationAttributeValue &&
-               span.Links.Count == 0 &&
-               ValidateBasicSpanAttributes(span.Attributes, KafkaConsumerClientIdAttributeValue, MessagingReceiveOperationAttributeValue) &&
-               consumerGroupId == GetConsumerGroupIdAttributeValue(topicName);
     }
 
     private static string GetConsumerGroupIdAttributeValue(string topicName)

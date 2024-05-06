@@ -79,7 +79,7 @@ jobs:
 
       - name: Download native CentOS Artifacts from build job
         if: ${{ matrix.machine == 'ubuntu-20.04' }}
-        uses: actions/download-artifact@v4.1.4
+        uses: actions/download-artifact@v4.1.7
         with:
           name: bin-centos-native
           path: bin/ci-artifacts/bin-centos-native
@@ -127,14 +127,14 @@ jobs:
 
       - name: Upload binaries
         if: always()
-        uses: actions/upload-artifact@v4.3.1
+        uses: actions/upload-artifact@v4.3.3
         with:
           name: bin-${{ matrix.machine }}
           path: bin/tracer-home
 
       - name: Upload installation scripts
         if: always()
-        uses: actions/upload-artifact@v4.3.1
+        uses: actions/upload-artifact@v4.3.3
         with:
           name: installation-scripts-${{ matrix.machine }}
           path: bin/installation-scripts

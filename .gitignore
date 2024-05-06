@@ -301,6 +301,12 @@ src/OpenTelemetry.AutoInstrumentation.Native/Makefile
 src/OpenTelemetry.AutoInstrumentation.Native/CMakeCache.txt
 src/OpenTelemetry.AutoInstrumentation.Native/cmake_install.cmake
 
+# test native dep build files
+test/test-applications/integrations/dependency-libs/TestApplication.ContinuousProfiler.NativeDep/CMakeCache.txt
+test/test-applications/integrations/dependency-libs/TestApplication.ContinuousProfiler.NativeDep/CMakeFiles/
+test/test-applications/integrations/dependency-libs/TestApplication.ContinuousProfiler.NativeDep/Makefile
+test/test-applications/integrations/dependency-libs/TestApplication.ContinuousProfiler.NativeDep/cmake_install.cmake
+
 # exception for native profiler dependencies
 !src/OpenTelemetry.AutoInstrumentation.Native/lib/**
 

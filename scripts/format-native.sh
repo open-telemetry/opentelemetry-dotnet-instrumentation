@@ -1,4 +1,5 @@
-#!/bin/sh
+#!/bin/bash
+set -e
 
 SCRIPT_DIR=$(cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd)
 cd $SCRIPT_DIR/..
@@ -31,7 +32,7 @@ else
 fi
 
 # files to format
-NATIVE_FILES=$(find . -iname *.cpp -o -iname *.hpp -iname *.h -iname *.inc | grep -v ./packages | grep -v ./src/OpenTelemetry.AutoInstrumentation.Native/lib)
+NATIVE_FILES=$(find . -iname "*.cpp" -o -iname "*.hpp" -iname "*.h" -iname "*.inc" | grep -v ./packages | grep -v ./src/OpenTelemetry.AutoInstrumentation.Native/lib)
 
 # clang-format
 echo "$NATIVE_FILES" | xargs "./bin/artifacts/clang-format$EXT" -style=file -i

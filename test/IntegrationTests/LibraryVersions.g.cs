@@ -29,7 +29,7 @@ public static partial class LibraryVersion
 #else
         new object[] { "8.0.0" },
         new object[] { "8.10.0" },
-        new object[] { "8.13.3" },
+        new object[] { "8.13.5" },
 #endif
     };
     public static readonly IReadOnlyCollection<object[]> EntityFrameworkCore = new List<object[]>
@@ -43,7 +43,7 @@ public static partial class LibraryVersion
         new object[] { "8.0.2" },
 #endif
 #if NET8_0
-        new object[] { "8.0.3" },
+        new object[] { "8.0.4" },
 #endif
 #endif
     };
@@ -86,7 +86,7 @@ public static partial class LibraryVersion
         new object[] { string.Empty }
 #else
         new object[] { "8.0.0" },
-        new object[] { "8.2.0" },
+        new object[] { "8.2.1" },
 #endif
     };
     public static readonly IReadOnlyCollection<object[]> SqlClientMicrosoft = new List<object[]>
@@ -114,7 +114,7 @@ public static partial class LibraryVersion
         new object[] { string.Empty }
 #else
         new object[] { "2.19.0" },
-        new object[] { "2.24.0" },
+        new object[] { "2.25.0" },
 #endif
     };
     public static readonly IReadOnlyCollection<object[]> MySqlConnector = new List<object[]>
@@ -150,7 +150,7 @@ public static partial class LibraryVersion
         new object[] { string.Empty }
 #else
         new object[] { "8.0.0" },
-        new object[] { "8.1.6" },
+        new object[] { "8.2.0" },
 #endif
     };
     public static readonly IReadOnlyCollection<object[]> OracleMda = new List<object[]>

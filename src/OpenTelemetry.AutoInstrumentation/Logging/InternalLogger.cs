@@ -201,7 +201,8 @@ internal class InternalLogger : IOtelLogger
     {
         try
         {
-            var rawMessage = string.Format(messageTemplate, args);
+            // Use template if no arguments provided, otherwise format the template with provided arguments.
+            var rawMessage = args == NoPropertyValues ? messageTemplate : string.Format(messageTemplate, args);
             if (exception != null)
             {
                 rawMessage += $"{Environment.NewLine}Exception: {exception.Message}{Environment.NewLine}{exception}";
