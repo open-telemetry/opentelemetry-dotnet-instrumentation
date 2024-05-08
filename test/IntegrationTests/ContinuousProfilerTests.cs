@@ -4,8 +4,7 @@
 #if NET6_0_OR_GREATER
 
 using IntegrationTests.Helpers;
-using OpenTelemetry.Proto.Profiles.V1;
-using OpenTelemetry.Proto.Profiles.V1.Alternatives.PprofExtended;
+using OpenTelemetry.Proto.Profiles.V1Experimental;
 using Xunit.Abstractions;
 
 namespace IntegrationTests;

@@ -7,10 +7,9 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Runtime.CompilerServices;
 using Google.Protobuf;
-using OpenTelemetry.Proto.Collector.Profiles.V1;
+using OpenTelemetry.Proto.Collector.Profiles.V1Experimental;
 using OpenTelemetry.Proto.Common.V1;
-using OpenTelemetry.Proto.Profiles.V1;
-using OpenTelemetry.Proto.Profiles.V1.Alternatives.PprofExtended;
+using OpenTelemetry.Proto.Profiles.V1Experimental;
 using OpenTelemetry.Proto.Resource.V1;
 
 namespace TestApplication.ContinuousProfiler;
@@ -149,7 +148,7 @@ public class OtlpOverHttpExporter
     {
         var request = new ExportProfilesServiceRequest();
 
-        request.ProfilesData.Add(profilesData);
+        request.ResourceProfiles.Add(profilesData.ResourceProfiles);
 
         return request;
     }

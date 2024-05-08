@@ -6,8 +6,8 @@
 using System.Collections.Concurrent;
 using System.Text;
 using Microsoft.AspNetCore.Http;
-using OpenTelemetry.Proto.Collector.Profiles.V1;
-using OpenTelemetry.Proto.Profiles.V1;
+using OpenTelemetry.Proto.Collector.Profiles.V1Experimental;
+using OpenTelemetry.Proto.Profiles.V1Experimental;
 using Xunit.Abstractions;
 
 namespace IntegrationTests.Helpers;
@@ -41,7 +41,7 @@ public class MockProfilesCollector : IDisposable
         _listener.Dispose();
     }
 
-    public void Expect(Func<ProfilesData, bool>? predicate = null, string? description = null)
+    public void Expect(Func<ExportProfilesServiceRequest, bool>? predicate = null, string? description = null)
     {
         predicate ??= x => true;
 
@@ -70,7 +70,7 @@ public class MockProfilesCollector : IDisposable
                 var found = false;
                 for (var i = missingExpectations.Count - 1; i >= 0; i--)
                 {
-                    if (!missingExpectations[i].Predicate(collectedProfilesDataSnapshot.ProfilesData))
+                    if (!missingExpectations[i].Predicate(collectedProfilesDataSnapshot.ExportProfilesServiceRequest))
                     {
                         continue;
                     }
@@ -142,17 +142,14 @@ public class MockProfilesCollector : IDisposable
         await ctx.GenerateEmptyProtobufResponseAsync<ExportProfilesServiceResponse>();
     }
 
-    private void HandleProfilesMessage(ExportProfilesServiceRequest metricsMessage)
+    private void HandleProfilesMessage(ExportProfilesServiceRequest profileMessage)
     {
-        foreach (var profilesData in metricsMessage.ProfilesData ?? Enumerable.Empty<ProfilesData>())
+        foreach (var resourceProfile in profileMessage.ResourceProfiles ?? Enumerable.Empty<ResourceProfiles>())
         {
-            foreach (var resourceProfile in profilesData.ResourceProfiles)
-            {
-                ResourceExpector.Collect(resourceProfile.Resource);
-            }
-
-            _profilesSnapshots.Add(new Collected(profilesData));
+            ResourceExpector.Collect(resourceProfile.Resource);
         }
+
+        _profilesSnapshots.Add(new Collected(profileMessage));
     }
 
     private void WriteOutput(string msg)
@@ -163,28 +160,28 @@ public class MockProfilesCollector : IDisposable
 
     public class Collected
     {
-        public Collected(ProfilesData profilesData)
+        public Collected(ExportProfilesServiceRequest exportProfilesServiceRequest)
         {
-            ProfilesData = profilesData;
+            ExportProfilesServiceRequest = exportProfilesServiceRequest;
         }
 
-        public ProfilesData ProfilesData { get; } // protobuf type
+        public ExportProfilesServiceRequest ExportProfilesServiceRequest { get; } // protobuf type
 
         public override string ToString()
         {
-            return $"ProfilesData = {ProfilesData}";
+            return $"ExportProfilesServiceRequest = {ExportProfilesServiceRequest}";
         }
     }
 
     private class Expectation
     {
-        public Expectation(Func<ProfilesData, bool> predicate, string? description)
+        public Expectation(Func<ExportProfilesServiceRequest, bool> predicate, string? description)
         {
             Predicate = predicate;
             Description = description;
         }
 
-        public Func<ProfilesData, bool> Predicate { get; }
+        public Func<ExportProfilesServiceRequest, bool> Predicate { get; }
 
         public string? Description { get; }
     }
