@@ -1,17 +1,30 @@
+// Copyright 2023, OpenTelemetry Authors
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 syntax = "proto3";
 
-package opentelemetry.proto.profiles.v1;
+package opentelemetry.proto.profiles.v1experimental;
 
 import "opentelemetry/proto/common/v1/common.proto";
 import "opentelemetry/proto/resource/v1/resource.proto";
+import "opentelemetry/proto/profiles/v1experimental/pprofextended.proto";
 
-import "opentelemetry/proto/profiles/v1/alternatives/pprofextended/pprofextended.proto";
-
-option csharp_namespace = "OpenTelemetry.Proto.Profiles.V1";
+option csharp_namespace = "OpenTelemetry.Proto.Profiles.V1Experimental";
 option java_multiple_files = true;
-option java_package = "io.opentelemetry.proto.profiles.v1";
+option java_package = "io.opentelemetry.proto.profiles.v1experimental";
 option java_outer_classname = "ProfilesProto";
-option go_package = "go.opentelemetry.io/proto/otlp/profiles/v1";
+option go_package = "go.opentelemetry.io/proto/otlp/profiles/v1experimental";
 
 //                Relationships Diagram
 //
@@ -87,6 +100,7 @@ message ProfilesData {
   repeated ResourceProfiles resource_profiles = 1;
 }
 
+
 // A collection of ScopeProfiles from a Resource.
 message ResourceProfiles {
   reserved 1000;
@@ -98,12 +112,15 @@ message ResourceProfiles {
   // A list of ScopeProfiles that originate from a resource.
   repeated ScopeProfiles scope_profiles = 2;
 
+  // The Schema URL, if known. This is the identifier of the Schema that the resource data
+  // is recorded in. To learn more about Schema URL see
+  // https://opentelemetry.io/docs/specs/otel/schemas/#schema-url
   // This schema_url applies to the data in the "resource" field. It does not apply
   // to the data in the "scope_profiles" field which have their own schema_url field.
   string schema_url = 3;
 }
 
-// A collection of Profiles produced by an InstrumentationScope.
+// A collection of ProfileContainers produced by an InstrumentationScope.
 message ScopeProfiles {
   // The instrumentation scope information for the profiles in this message.
   // Semantically when InstrumentationScope isn't set, it is equivalent with
@@ -113,7 +130,10 @@ message ScopeProfiles {
   // A list of ProfileContainers that originate from an instrumentation scope.
   repeated ProfileContainer profiles = 2;
 
-  // This schema_url applies to all profiles and profile events in the "profiles" field.
+  // The Schema URL, if known. This is the identifier of the Schema that the metric data
+  // is recorded in. To learn more about Schema URL see
+  // https://opentelemetry.io/docs/specs/otel/schemas/#schema-url
+  // This schema_url applies to all profiles in the "profiles" field.
   string schema_url = 3;
 }
 
@@ -167,5 +187,5 @@ message ProfileContainer {
   bytes original_payload = 7;
 
   // This is a reference to a pprof profile. Required, even when original_payload is present.
-  opentelemetry.proto.profiles.v1.alternatives.pprofextended.Profile profile = 8;
+  opentelemetry.proto.profiles.v1experimental.Profile profile = 8;
 }
