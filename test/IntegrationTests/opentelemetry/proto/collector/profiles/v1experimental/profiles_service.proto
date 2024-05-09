@@ -1,4 +1,4 @@
-// Copyright 2019, OpenTelemetry Authors
+// Copyright 2023, OpenTelemetry Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -14,19 +14,18 @@
 
 syntax = "proto3";
 
-package opentelemetry.proto.collector.profiles.v1;
+package opentelemetry.proto.collector.profiles.v1experimental;
 
-import "opentelemetry/proto/profiles/v1/profiles.proto";
+import "opentelemetry/proto/profiles/v1experimental/profiles.proto";
 
-option csharp_namespace = "OpenTelemetry.Proto.Collector.Profiles.V1";
+option csharp_namespace = "OpenTelemetry.Proto.Collector.Profiles.V1Experimental";
 option java_multiple_files = true;
-option java_package = "io.opentelemetry.proto.collector.profiles.v1";
+option java_package = "io.opentelemetry.proto.collector.profiles.v1experimental";
 option java_outer_classname = "ProfilesServiceProto";
-option go_package = "go.opentelemetry.io/proto/otlp/collector/profiles/v1";
+option go_package = "go.opentelemetry.io/proto/otlp/collector/profiles/v1experimental";
 
-// Service that can be used to push profiles data between one Application instrumented with
-// OpenTelemetry and a collector, or between a collector and a central collector (in this
-// case profiles data are sent/received to/from multiple Applications).
+// Service that can be used to push profiles between one Application instrumented with
+// OpenTelemetry and a collector, or between a collector and a central collector.
 service ProfilesService {
   // For performance reasons, it is recommended to keep this RPC
   // alive for the entire life of the application.
@@ -34,12 +33,12 @@ service ProfilesService {
 }
 
 message ExportProfilesServiceRequest {
-  // An array of ProfilesData.
+  // An array of ResourceProfiles.
   // For data coming from a single resource this array will typically contain one
   // element. Intermediary nodes (such as OpenTelemetry Collector) that receive
   // data from multiple origins typically batch the data before forwarding further and
   // in that case this array will contain multiple elements.
-  repeated opentelemetry.proto.profiles.v1.ProfilesData profiles_data = 1;
+  repeated opentelemetry.proto.profiles.v1experimental.ResourceProfiles resource_profiles = 1;
 }
 
 message ExportProfilesServiceResponse {
@@ -62,11 +61,11 @@ message ExportProfilesServiceResponse {
 }
 
 message ExportProfilesPartialSuccess {
-  // The number of rejected spans.
+  // The number of rejected profiles.
   //
   // A `rejected_<signal>` field holding a `0` value indicates that the
   // request was fully accepted.
-  int64 rejected_spans = 1;
+  int64 rejected_profiles = 1;
 
   // A developer-facing human-readable message in English. It should be used
   // either to explain why the server rejected parts of the data during a partial
