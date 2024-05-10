@@ -158,7 +158,8 @@ internal static class PackageVersionDefinitions
             TestApplicationName = "TestApplication.Npgsql",
             Versions = new List<PackageVersion>
             {
-                new("6.0.0"),
+                // new("6.0.0"), - high vulnerability https://github.com/advisories/GHSA-x9vc-6hfv-hg8c, <= 8.0.2 test should be skipped
+                new("8.0.3"),
                 new("*")
             }
         },
