@@ -114,6 +114,11 @@ internal partial class ConfigurationKeys
             public const string GraphQLSetDocument = "OTEL_DOTNET_AUTO_GRAPHQL_SET_DOCUMENT";
 
             /// <summary>
+            /// Configuration key for Oracle Client instrumentation to enable passing text query as a db.statement attribute.
+            /// </summary>
+            public const string OracleMdaSetDbStatementForText = "OTEL_DOTNET_AUTO_ORACLEMDA_SET_DBSTATEMENT_FOR_TEXT";
+
+            /// <summary>
             /// Configuration key for SQL Client instrumentation to enable passing text query as a db.statement attribute.
             /// </summary>
             public const string SqlClientSetDbStatementForText = "OTEL_DOTNET_AUTO_SQLCLIENT_SET_DBSTATEMENT_FOR_TEXT";

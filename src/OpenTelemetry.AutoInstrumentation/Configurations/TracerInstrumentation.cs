@@ -125,7 +125,12 @@ internal enum TracerInstrumentation
     Kafka = 20,
 
     /// <summary>
+    /// Oracle Managed Data Access (Core) instrumentation
+    /// </summary>
+    OracleMda = 21,
+
+    /// <summary>
     /// RabbitMQ client instrumentation
     /// </summary>
-    RabbitMq = 21
+    RabbitMq = 22
 }

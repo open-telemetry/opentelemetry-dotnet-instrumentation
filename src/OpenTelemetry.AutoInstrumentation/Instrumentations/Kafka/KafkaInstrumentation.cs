@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 using System.Diagnostics;
+using System.Globalization;
 using System.Text;
 using OpenTelemetry.AutoInstrumentation.DuckTyping;
 using OpenTelemetry.AutoInstrumentation.Instrumentations.Kafka.DuckTypes;
@@ -12,7 +13,7 @@ namespace OpenTelemetry.AutoInstrumentation.Instrumentations.Kafka;
 
 internal static class KafkaInstrumentation
 {
-    private static ActivitySource Source { get; } = new("OpenTelemetry.AutoInstrumentation.Kafka");
+    private static readonly ActivitySource Source = new("OpenTelemetry.AutoInstrumentation.Kafka");
 
     public static Activity? StartConsumerActivity(IConsumeResult consumeResult, DateTimeOffset startTime, object consumer)
     {
@@ -116,6 +117,16 @@ internal static class KafkaInstrumentation
             deliveryResult.Offset.Value);
     }
 
+    internal static string? ExtractMessageKeyValue(object key)
+    {
+        return key switch
+        {
+            string s => s,
+            int or uint or long or ulong or float or double or decimal => Convert.ToString(key, CultureInfo.InvariantCulture),
+            _ => null
+        };
+    }
+
     private static void SetCommonAttributes(
         Activity activity,
         string operationName,
@@ -138,7 +149,11 @@ internal static class KafkaInstrumentation
 
         if (key is not null)
         {
-            activity.SetTag(MessagingAttributes.Keys.Kafka.MessageKey, key);
+            var keyValue = ExtractMessageKeyValue(key);
+            if (keyValue is not null)
+            {
+                activity.SetTag(MessagingAttributes.Keys.Kafka.MessageKey, keyValue);
+            }
         }
 
         if (partition is not null)

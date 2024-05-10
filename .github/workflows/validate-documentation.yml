@@ -30,7 +30,7 @@ jobs:
 
     - name: Run markdown links chceks
       if: ${{ !contains(github.event.pull_request.labels.*.name, 'release PR') }}
-      uses: lycheeverse/lychee-action@v1.9.3
+      uses: lycheeverse/lychee-action@v1.10.0
       with:
         fail: true
       env:

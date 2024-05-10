@@ -375,6 +375,8 @@ internal static class Instrumentation
                     break;
                 case TracerInstrumentation.Kafka:
                     break;
+                case TracerInstrumentation.OracleMda:
+                    break;
                 case TracerInstrumentation.RabbitMq:
                     break;
                 default:

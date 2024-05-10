@@ -1,3 +1,33 @@
+// Copyright 2023, OpenTelemetry Authors
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+// This file includes work covered by the following copyright and permission notices:
+//
+// Copyright 2016 Google Inc. All Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 // Profile is a common stacktrace profile format.
 //
 // Measurements represented with this format should follow the
@@ -24,12 +54,12 @@
 
 syntax = "proto3";
 
-package opentelemetry.proto.profiles.v1.alternatives.pprofextended;
+package opentelemetry.proto.profiles.v1experimental;
 
 import "opentelemetry/proto/common/v1/common.proto";
 
-option csharp_namespace = "OpenTelemetry.Proto.Profiles.V1.Alternatives.PprofExtended";
-option go_package = "go.opentelemetry.io/proto/otlp/profiles/v1/alternatives/pprofextended";
+option csharp_namespace = "OpenTelemetry.Proto.Profiles.V1Experimental";
+option go_package = "go.opentelemetry.io/proto/otlp/profiles/v1experimental";
 
 // Represents a complete profile, including sample types, samples,
 // mappings to binaries, locations, functions, string table, and additional metadata.
@@ -227,9 +257,9 @@ message Sample {
   // Reference to link in Profile.link_table. [optional]
   uint64 link = 12;
 
-  // Timestamps associated with Sample represented in ms. These timestamps are expected
+  // Timestamps associated with Sample represented in nanoseconds. These timestamps are expected
   // to fall within the Profile's time range. [optional]
-  repeated uint64 timestamps = 13;
+  repeated uint64 timestamps_unix_nano = 13;
 }
 
 // Provides additional context for a sample,

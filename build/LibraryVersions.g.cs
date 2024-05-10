@@ -121,8 +121,7 @@ public static partial class LibraryVersion
             "TestApplication.Npgsql",
             new List<PackageBuildInfo>
             {
-                new("6.0.0"),
-                new("8.0.2"),
+                new("8.0.3"),
             }
         },
         {
@@ -131,6 +130,20 @@ public static partial class LibraryVersion
             {
                 new("8.0.0"),
                 new("8.2.0"),
+            }
+        },
+        {
+            "TestApplication.OracleMda.NetFramework",
+            new List<PackageBuildInfo>
+            {
+                new("23.4.0", supportedFrameworks: new string[] {"net472"}),
+            }
+        },
+        {
+            "TestApplication.OracleMda.Core",
+            new List<PackageBuildInfo>
+            {
+                new("23.4.0"),
             }
         },
         {

@@ -5,10 +5,15 @@ All notable changes to this component are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/compare/v1.5.0..HEAD)
+## [Unreleased](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/compare/v1.6.0..HEAD)
 
 ### Added
 
+- Support for [Oracle.ManagedDataAccess.Core](https://www.nuget.org/packages/Oracle.ManagedDataAccess.Core)
+  and [Oracle.ManagedDataAccess](https://www.nuget.org/packages/Oracle.ManagedDataAccess)
+  traces instrumentation from 23.4.0 together with support for
+  `OTEL_DOTNET_AUTO_ORACLEMDA_SET_DBSTATEMENT_FOR_TEXT` environment variable.
+  ARM64 platform is not supported.
 - Support for [RabbitMQ.Client](https://www.nuget.org/packages/RabbitMQ.Client)
   traces instrumentation from 7.0.0-alpha.4. ARM64 platform is not supported.
 
@@ -16,21 +21,48 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 
 #### Dependency updates
 
-- Following packages updated
-  - `OpenTelemetry.Instrumentation.Http` from `1.8.0` to `1.8.1`.
-- .NET only, following packages updated
-  - `OpenTelemetry.Instrumentation.AspNetCore` from `1.8.0` to `1.8.1`.
-
 ### Deprecated
 
 ### Removed
 
 ### Fixed
 
+## [1.6.0](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/tag/v1.6.0)
+
+- [Core components](https://github.com/open-telemetry/opentelemetry-dotnet/blob/main/VERSIONING.md#core-components):
+  [`1.8.1`](https://github.com/open-telemetry/opentelemetry-dotnet/releases/tag/core-1.8.1)
+- `System.Diagnostics.DiagnosticSource`: [`8.0.0`](https://www.nuget.org/packages/System.Diagnostics.DiagnosticSource/8.0.0)
+
+### Changed
+
+- To prevent sensitive information from leaking through query strings, the
+  following instrumentations redact by default any value detected in query string
+  components when building the `url.query` or the `url.full` attributes:
+  `OpenTelemetry.Instrumentation.Http`, `OpenTelemetry.Instrumentation.AspNetCore`,
+  `OpenTelemetry.Instrumentation.AspNet`. For example, `?key1=value1&key2=value2`
+  becomes `?key1=Redacted&key2=Redacted`. You can customize this behavior through
+  the environment variables. See the
+  [instrumentation options](./docs/config.md#instrumentation-options) table for details.
+
+#### Dependency updates
+
+- Following packages updated
+  - `OpenTelemetry.Instrumentation.Http` from `1.8.0` to `1.8.1`.
+- .NET only, following packages updated
+  - `Microsoft.Extensions.Configuration.Binder` from `8.0.0` to `8.0.1`,
+  - `OpenTelemetry.Instrumentation.AspNetCore` from `1.8.0` to `1.8.1`.
+- .NET Framework only, following packages updated
+  - `OpenTelemetry.Instrumentation.AspNet` from `1.8.0-beta.1` to `1.8.0-beta.2`.
+
+### Fixed
+
 - Stop creating `receive` consumer spans for consume attempts that returned no message.
+  For details, see [#3367](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/issues/3367)
 
 ## [1.5.0](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/tag/v1.5.0)
 
+- Updated [Core components](https://github.com/open-telemetry/opentelemetry-dotnet/blob/main/VERSIONING.md#core-components):
+  [`1.8.1`](https://github.com/open-telemetry/opentelemetry-dotnet/releases/tag/core-1.8.1).
 - [Core components](https://github.com/open-telemetry/opentelemetry-dotnet/blob/main/VERSIONING.md#core-components):
   [`1.8.0`](https://github.com/open-telemetry/opentelemetry-dotnet/releases/tag/core-1.8.0)
 - `System.Diagnostics.DiagnosticSource`: [`8.0.0`](https://www.nuget.org/packages/System.Diagnostics.DiagnosticSource/8.0.0)
@@ -86,8 +118,8 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
   runtime store libraries, impacting applications with mismatched dependency
   versions. This fix enhances stability by addressing the underlying
   compatibility concerns. For details see:
-  ([#3075](https://github.com/open-telemetry/opentelemetry-dotnet/pull/3075),
-  [#3075](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/issues/3168))
+  ([#3075](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/issues/3075),
+  [#3168](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/issues/3168))
 
 ## [1.4.0](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/tag/v1.4.0)
 
