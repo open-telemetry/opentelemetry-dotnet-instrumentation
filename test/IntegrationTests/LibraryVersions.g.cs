@@ -140,6 +140,7 @@ public static partial class LibraryVersion
 #if DEFAULT_TEST_PACKAGE_VERSIONS
         new object[] { string.Empty }
 #else
+        new object[] { "6.0.11" },
         new object[] { "8.0.3" },
 #endif
     };
