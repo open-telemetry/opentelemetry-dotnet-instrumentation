@@ -181,7 +181,7 @@ public static partial class LibraryVersion
                 new("1.4.0", supportedPlatforms: new string[] {"x64"}),
                 new("1.6.2"),
                 new("1.8.2"),
-                new("2.3.0"),
+                new("2.4.0"),
             }
         },
     };

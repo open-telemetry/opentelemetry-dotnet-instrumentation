@@ -208,7 +208,7 @@ public static partial class LibraryVersion
 #else
         new object[] { "1.6.2" },
         new object[] { "1.8.2" },
-        new object[] { "2.3.0" },
+        new object[] { "2.4.0" },
 #endif
     };
     public static readonly IReadOnlyCollection<object[]> Kafka_x64 = new List<object[]>
