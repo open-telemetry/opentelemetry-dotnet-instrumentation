@@ -19,7 +19,7 @@ public static partial class LibraryVersion
         new object[] { string.Empty }
 #else
         new object[] { "12.13.0" },
-        new object[] { "12.19.1" },
+        new object[] { "12.20.0" },
 #endif
     };
     public static readonly IReadOnlyCollection<object[]> Elasticsearch = new List<object[]>
