@@ -132,7 +132,7 @@ public static partial class LibraryVersion
         new object[] { string.Empty }
 #else
         new object[] { "8.1.0" },
-        new object[] { "8.3.0" },
+        new object[] { "8.4.0" },
 #endif
     };
     public static readonly IReadOnlyCollection<object[]> Npgsql = new List<object[]>
