@@ -20,7 +20,7 @@ public static partial class LibraryVersion
             new List<PackageBuildInfo>
             {
                 new("12.13.0"),
-                new("12.19.1"),
+                new("12.20.0"),
             }
         },
         {
@@ -29,7 +29,7 @@ public static partial class LibraryVersion
             {
                 new("8.0.0"),
                 new("8.10.0"),
-                new("8.13.5"),
+                new("8.13.12"),
             }
         },
         {
@@ -73,7 +73,7 @@ public static partial class LibraryVersion
             new List<PackageBuildInfo>
             {
                 new("8.0.0"),
-                new("8.2.1"),
+                new("8.2.2"),
             }
         },
         {
@@ -106,7 +106,7 @@ public static partial class LibraryVersion
             new List<PackageBuildInfo>
             {
                 new("2.0.0"),
-                new("2.3.6"),
+                new("2.3.7"),
             }
         },
         {
@@ -114,7 +114,7 @@ public static partial class LibraryVersion
             new List<PackageBuildInfo>
             {
                 new("8.1.0"),
-                new("8.3.0"),
+                new("8.4.0"),
             }
         },
         {
@@ -152,7 +152,7 @@ public static partial class LibraryVersion
             new List<PackageBuildInfo>
             {
                 new("3.4.0"),
-                new("3.8.1"),
+                new("3.9.0"),
             }
         },
         {
@@ -181,7 +181,7 @@ public static partial class LibraryVersion
                 new("1.4.0", supportedPlatforms: new string[] {"x64"}),
                 new("1.6.2"),
                 new("1.8.2"),
-                new("2.3.0"),
+                new("2.4.0"),
             }
         },
     };
