@@ -19,7 +19,7 @@ public static partial class LibraryVersion
         new object[] { string.Empty }
 #else
         new object[] { "12.13.0" },
-        new object[] { "12.19.1" },
+        new object[] { "12.20.0" },
 #endif
     };
     public static readonly IReadOnlyCollection<object[]> Elasticsearch = new List<object[]>
@@ -29,7 +29,7 @@ public static partial class LibraryVersion
 #else
         new object[] { "8.0.0" },
         new object[] { "8.10.0" },
-        new object[] { "8.13.5" },
+        new object[] { "8.13.12" },
 #endif
     };
     public static readonly IReadOnlyCollection<object[]> EntityFrameworkCore = new List<object[]>
@@ -86,7 +86,7 @@ public static partial class LibraryVersion
         new object[] { string.Empty }
 #else
         new object[] { "8.0.0" },
-        new object[] { "8.2.1" },
+        new object[] { "8.2.2" },
 #endif
     };
     public static readonly IReadOnlyCollection<object[]> SqlClientMicrosoft = new List<object[]>
@@ -123,7 +123,7 @@ public static partial class LibraryVersion
         new object[] { string.Empty }
 #else
         new object[] { "2.0.0" },
-        new object[] { "2.3.6" },
+        new object[] { "2.3.7" },
 #endif
     };
     public static readonly IReadOnlyCollection<object[]> MySqlData = new List<object[]>
@@ -132,7 +132,7 @@ public static partial class LibraryVersion
         new object[] { string.Empty }
 #else
         new object[] { "8.1.0" },
-        new object[] { "8.3.0" },
+        new object[] { "8.4.0" },
 #endif
     };
     public static readonly IReadOnlyCollection<object[]> Npgsql = new List<object[]>
@@ -177,7 +177,7 @@ public static partial class LibraryVersion
         new object[] { string.Empty }
 #else
         new object[] { "3.4.0" },
-        new object[] { "3.8.1" },
+        new object[] { "3.9.0" },
 #endif
     };
     public static readonly IReadOnlyCollection<object[]> StackExchangeRedis = new List<object[]>
@@ -208,7 +208,7 @@ public static partial class LibraryVersion
 #else
         new object[] { "1.6.2" },
         new object[] { "1.8.2" },
-        new object[] { "2.3.0" },
+        new object[] { "2.4.0" },
 #endif
     };
     public static readonly IReadOnlyCollection<object[]> Kafka_x64 = new List<object[]>
