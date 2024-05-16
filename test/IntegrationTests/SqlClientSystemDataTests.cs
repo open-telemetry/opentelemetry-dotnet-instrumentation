@@ -15,6 +15,7 @@ public class SqlClientSystemDataTests : TestHelper
     {
     }
 
+    [Fact]
     [Trait("Category", "EndToEnd")]
     public void SubmitTraces()
     {
