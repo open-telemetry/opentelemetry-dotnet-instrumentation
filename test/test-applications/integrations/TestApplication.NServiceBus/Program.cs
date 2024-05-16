@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 using System.Diagnostics;
+using NServiceBus;
 using TestApplication.NServiceBus;
 using TestApplication.Shared;
 
@@ -11,6 +12,7 @@ var endpointConfiguration = new EndpointConfiguration("TestApplication.NServiceB
 
 var learningTransport = new LearningTransport { StorageDirectory = Path.GetTempPath() };
 endpointConfiguration.UseTransport(learningTransport);
+endpointConfiguration.UseSerialization<XmlSerializer>();
 
 using var cancellation = new CancellationTokenSource();
 var endpointInstance = await Endpoint.Start(endpointConfiguration, cancellation.Token);

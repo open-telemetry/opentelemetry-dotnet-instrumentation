@@ -150,7 +150,9 @@ public static partial class LibraryVersion
         new object[] { string.Empty }
 #else
         new object[] { "8.0.0" },
-        new object[] { "8.2.0" },
+#if NET8_0
+        new object[] { "9.0.0" },
+#endif
 #endif
     };
     public static readonly IReadOnlyCollection<object[]> OracleMda = new List<object[]>
