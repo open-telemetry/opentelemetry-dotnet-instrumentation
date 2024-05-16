@@ -15,7 +15,7 @@ public class SqlClientSystemDataTests : TestHelper
     {
     }
 
-    [IgnoreRunningOnNet481Fact]
+    [Fact]
     [Trait("Category", "EndToEnd")]
     public void SubmitTraces()
     {
@@ -26,19 +26,6 @@ public class SqlClientSystemDataTests : TestHelper
         RunTestApplication();
 
         collector.AssertExpectations();
-    }
-}
-
-public sealed class IgnoreRunningOnNet481Fact : FactAttribute
-{
-    public IgnoreRunningOnNet481Fact()
-    {
-        var netVersion = RuntimeHelper.GetRuntimeVersion();
-        if (netVersion == "4.8.1+")
-        {
-            // https://github.com/open-telemetry/opentelemetry-dotnet/issues/3901
-            Skip = "NET Framework 4.8.1 is skipped due bug.";
-        }
     }
 }
 #endif
