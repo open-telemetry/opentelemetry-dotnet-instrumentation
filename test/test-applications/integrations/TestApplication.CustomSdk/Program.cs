@@ -54,6 +54,7 @@ public static class Program
         }
 
         var endpointConfiguration = new EndpointConfiguration("TestApplication.NServiceBus");
+        endpointConfiguration.UseSerialization<XmlSerializer>();
 
         var learningTransport = new LearningTransport { StorageDirectory = Path.GetTempPath() };
         endpointConfiguration.UseTransport(learningTransport);
