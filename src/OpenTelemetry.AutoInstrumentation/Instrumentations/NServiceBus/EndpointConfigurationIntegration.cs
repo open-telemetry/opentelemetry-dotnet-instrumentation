@@ -15,7 +15,11 @@ methodName: ".ctor",
 returnTypeName: ClrNames.Void,
 parameterTypeNames: new[] { ClrNames.String },
 minimumVersion: "8.0.0",
+#if NETFRAMEWORK
 maximumVersion: "8.65535.65535",
+#else
+maximumVersion: "9.65535.65535",
+#endif
 integrationName: "NServiceBus",
 type: InstrumentationType.Trace)]
 [InstrumentMethod(
@@ -25,7 +29,11 @@ methodName: ".ctor",
 returnTypeName: ClrNames.Void,
 parameterTypeNames: new[] { ClrNames.String },
 minimumVersion: "8.0.0",
+#if NETFRAMEWORK
 maximumVersion: "8.65535.65535",
+#else
+maximumVersion: "9.65535.65535",
+#endif
 integrationName: "NServiceBus",
 type: InstrumentationType.Metric)]
 public static class EndpointConfigurationIntegration

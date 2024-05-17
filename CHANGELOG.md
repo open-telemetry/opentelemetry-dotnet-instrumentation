@@ -14,6 +14,7 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
   traces instrumentation from 23.4.0 together with support for
   `OTEL_DOTNET_AUTO_ORACLEMDA_SET_DBSTATEMENT_FOR_TEXT` environment variable.
   ARM64 platform is not supported.
+- Add support for NServiceBus 9.x metrics and traces instrumentations.
 
 ### Changed
 
