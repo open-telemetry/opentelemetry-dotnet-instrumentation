@@ -18,10 +18,18 @@ public class GraphQLTests : TestHelper
     {
     }
 
-    public static IEnumerable<object[]> GetData()
-        => from packageVersionArray in LibraryVersion.GraphQL
-           from setDocument in new[] { true, false }
-           select new[] { packageVersionArray[0], setDocument };
+    public static TheoryData<string, bool> GetData()
+    {
+        var theoryData = new TheoryData<string, bool>();
+
+        foreach (var version in LibraryVersion.GraphQL)
+        {
+            theoryData.Add((string)version[0], true);
+            theoryData.Add((string)version[0], false);
+        }
+
+        return theoryData;
+    }
 
     [Theory]
     [Trait("Category", "EndToEnd")]

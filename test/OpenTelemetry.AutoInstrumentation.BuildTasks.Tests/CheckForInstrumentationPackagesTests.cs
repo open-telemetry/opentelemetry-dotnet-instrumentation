@@ -10,12 +10,16 @@ namespace OpenTelemetry.AutoInstrumentation.BuildTasks.Tests;
 
 public class CheckForInstrumentationPackagesTests
 {
-    public static IEnumerable<object?[]> LogicallyEmptyITaskItemArray =>
-        new object?[][]
+    public static TheoryData<ITaskItem[]?> LogicallyEmptyITaskItemArray()
+    {
+        var theoryData = new TheoryData<ITaskItem[]?>
         {
-            new object?[] { null },
-            new object?[] { Array.Empty<ITaskItem[]>() }
+            null,
+            Array.Empty<ITaskItem>()
         };
+
+        return theoryData;
+    }
 
     [Theory]
     [MemberData(nameof(LogicallyEmptyITaskItemArray))]

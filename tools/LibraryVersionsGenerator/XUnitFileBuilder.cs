@@ -8,10 +8,13 @@ internal sealed class XUnitFileBuilder : CSharpFileBuilder
     public override CSharpFileBuilder BeginTestPackage(string testApplicationName, string integrationName)
     {
         Builder.AppendLine(
-            @$"    public static readonly IReadOnlyCollection<object[]> {integrationName} = new List<object[]>
+            @$"    public static TheoryData<string> {integrationName}
     {{
+        get
+        {{
+            var theoryData = new TheoryData<string>();
 #if DEFAULT_TEST_PACKAGE_VERSIONS
-        new object[] {{ string.Empty }}
+            theoryData.Add(string.Empty);
 #else");
         return this;
     }
@@ -30,7 +33,7 @@ internal sealed class XUnitFileBuilder : CSharpFileBuilder
             Builder.AppendLine();
         }
 
-        Builder.AppendLine($"        new object[] {{ \"{version}\" }},");
+        Builder.AppendLine($"            theoryData.Add(\"{version}\");");
 
         if (conditionalCompilation)
         {
@@ -49,7 +52,9 @@ internal sealed class XUnitFileBuilder : CSharpFileBuilder
     public override CSharpFileBuilder EndTestPackage()
     {
         Builder.AppendLine(@"#endif
-    };");
+            return theoryData;
+        }
+    }");
 
         return this;
     }
@@ -57,7 +62,7 @@ internal sealed class XUnitFileBuilder : CSharpFileBuilder
     internal void BuildLookupMap(IReadOnlyCollection<PackageVersionDefinitions.PackageVersionDefinition> definitions, List<string> additionalPlatforms)
     {
         Builder.AppendLine(
-            @$"    public static readonly IReadOnlyDictionary<string, IReadOnlyCollection<object[]>> LookupMap = new Dictionary<string, IReadOnlyCollection<object[]>>
+            @$"    public static readonly IReadOnlyDictionary<string, TheoryData<string>> LookupMap = new Dictionary<string, TheoryData<string>>
     {{");
 
         foreach (var item in definitions)
