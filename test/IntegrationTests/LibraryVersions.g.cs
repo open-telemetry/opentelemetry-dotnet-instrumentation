@@ -13,215 +13,320 @@ namespace IntegrationTests;
 
 public static partial class LibraryVersion
 {
-    public static readonly IReadOnlyCollection<object[]> Azure = new List<object[]>
+    public static TheoryData<string> Azure
     {
+        get
+        {
+            var theoryData = new TheoryData<string>();
 #if DEFAULT_TEST_PACKAGE_VERSIONS
-        new object[] { string.Empty }
+            theoryData.Add(string.Empty);
 #else
-        new object[] { "12.13.0" },
-        new object[] { "12.20.0" },
+            theoryData.Add("12.13.0");
+            theoryData.Add("12.20.0");
 #endif
-    };
-    public static readonly IReadOnlyCollection<object[]> Elasticsearch = new List<object[]>
+            return theoryData;
+        }
+    }
+    public static TheoryData<string> Elasticsearch
     {
+        get
+        {
+            var theoryData = new TheoryData<string>();
 #if DEFAULT_TEST_PACKAGE_VERSIONS
-        new object[] { string.Empty }
+            theoryData.Add(string.Empty);
 #else
-        new object[] { "8.0.0" },
-        new object[] { "8.10.0" },
-        new object[] { "8.13.12" },
+            theoryData.Add("8.0.0");
+            theoryData.Add("8.10.0");
+            theoryData.Add("8.13.12");
 #endif
-    };
-    public static readonly IReadOnlyCollection<object[]> EntityFrameworkCore = new List<object[]>
+            return theoryData;
+        }
+    }
+    public static TheoryData<string> EntityFrameworkCore
     {
+        get
+        {
+            var theoryData = new TheoryData<string>();
 #if DEFAULT_TEST_PACKAGE_VERSIONS
-        new object[] { string.Empty }
+            theoryData.Add(string.Empty);
 #else
-        new object[] { "6.0.27" },
-        new object[] { "7.0.16" },
+            theoryData.Add("6.0.27");
+            theoryData.Add("7.0.16");
 #if NET8_0
-        new object[] { "8.0.2" },
-#endif
-#if NET8_0
-        new object[] { "8.0.4" },
-#endif
-#endif
-    };
-    public static readonly IReadOnlyCollection<object[]> EntityFrameworkCorePomeloMySql = new List<object[]>
-    {
-#if DEFAULT_TEST_PACKAGE_VERSIONS
-        new object[] { string.Empty }
-#else
-        new object[] { "6.0.2" },
-        new object[] { "7.0.0" },
-#if NET8_0
-        new object[] { "8.0.0" },
+            theoryData.Add("8.0.2");
 #endif
 #if NET8_0
-        new object[] { "8.0.2" },
+            theoryData.Add("8.0.4");
 #endif
 #endif
-    };
-    public static readonly IReadOnlyCollection<object[]> GraphQL = new List<object[]>
+            return theoryData;
+        }
+    }
+    public static TheoryData<string> EntityFrameworkCorePomeloMySql
     {
+        get
+        {
+            var theoryData = new TheoryData<string>();
 #if DEFAULT_TEST_PACKAGE_VERSIONS
-        new object[] { string.Empty }
+            theoryData.Add(string.Empty);
 #else
-        new object[] { "7.5.0" },
-        new object[] { "7.8.0" },
-#endif
-    };
-    public static readonly IReadOnlyCollection<object[]> GrpcNetClient = new List<object[]>
-    {
-#if DEFAULT_TEST_PACKAGE_VERSIONS
-        new object[] { string.Empty }
-#else
-        new object[] { "2.52.0" },
-        new object[] { "2.62.0" },
-#endif
-    };
-    public static readonly IReadOnlyCollection<object[]> MassTransit = new List<object[]>
-    {
-#if DEFAULT_TEST_PACKAGE_VERSIONS
-        new object[] { string.Empty }
-#else
-        new object[] { "8.0.0" },
-        new object[] { "8.2.2" },
-#endif
-    };
-    public static readonly IReadOnlyCollection<object[]> SqlClientMicrosoft = new List<object[]>
-    {
-#if DEFAULT_TEST_PACKAGE_VERSIONS
-        new object[] { string.Empty }
-#else
-        new object[] { "2.1.7" },
-        new object[] { "3.1.5" },
-        new object[] { "4.0.5" },
-        new object[] { "5.2.0" },
-#endif
-    };
-    public static readonly IReadOnlyCollection<object[]> SqlClientSystem = new List<object[]>
-    {
-#if DEFAULT_TEST_PACKAGE_VERSIONS
-        new object[] { string.Empty }
-#else
-        new object[] { "4.8.6" },
-#endif
-    };
-    public static readonly IReadOnlyCollection<object[]> MongoDB = new List<object[]>
-    {
-#if DEFAULT_TEST_PACKAGE_VERSIONS
-        new object[] { string.Empty }
-#else
-        new object[] { "2.19.0" },
-        new object[] { "2.25.0" },
-#endif
-    };
-    public static readonly IReadOnlyCollection<object[]> MySqlConnector = new List<object[]>
-    {
-#if DEFAULT_TEST_PACKAGE_VERSIONS
-        new object[] { string.Empty }
-#else
-        new object[] { "2.0.0" },
-        new object[] { "2.3.7" },
-#endif
-    };
-    public static readonly IReadOnlyCollection<object[]> MySqlData = new List<object[]>
-    {
-#if DEFAULT_TEST_PACKAGE_VERSIONS
-        new object[] { string.Empty }
-#else
-        new object[] { "8.1.0" },
-        new object[] { "8.4.0" },
-#endif
-    };
-    public static readonly IReadOnlyCollection<object[]> Npgsql = new List<object[]>
-    {
-#if DEFAULT_TEST_PACKAGE_VERSIONS
-        new object[] { string.Empty }
-#else
-        new object[] { "6.0.11" },
-        new object[] { "8.0.3" },
-#endif
-    };
-    public static readonly IReadOnlyCollection<object[]> NServiceBus = new List<object[]>
-    {
-#if DEFAULT_TEST_PACKAGE_VERSIONS
-        new object[] { string.Empty }
-#else
-        new object[] { "8.0.0" },
+            theoryData.Add("6.0.2");
+            theoryData.Add("7.0.0");
 #if NET8_0
-        new object[] { "9.0.0" },
+            theoryData.Add("8.0.0");
+#endif
+#if NET8_0
+            theoryData.Add("8.0.2");
 #endif
 #endif
-    };
-    public static readonly IReadOnlyCollection<object[]> OracleMda = new List<object[]>
+            return theoryData;
+        }
+    }
+    public static TheoryData<string> GraphQL
     {
+        get
+        {
+            var theoryData = new TheoryData<string>();
 #if DEFAULT_TEST_PACKAGE_VERSIONS
-        new object[] { string.Empty }
+            theoryData.Add(string.Empty);
+#else
+            theoryData.Add("7.5.0");
+            theoryData.Add("7.8.0");
+#endif
+            return theoryData;
+        }
+    }
+    public static TheoryData<string> GrpcNetClient
+    {
+        get
+        {
+            var theoryData = new TheoryData<string>();
+#if DEFAULT_TEST_PACKAGE_VERSIONS
+            theoryData.Add(string.Empty);
+#else
+            theoryData.Add("2.52.0");
+            theoryData.Add("2.62.0");
+#endif
+            return theoryData;
+        }
+    }
+    public static TheoryData<string> MassTransit
+    {
+        get
+        {
+            var theoryData = new TheoryData<string>();
+#if DEFAULT_TEST_PACKAGE_VERSIONS
+            theoryData.Add(string.Empty);
+#else
+            theoryData.Add("8.0.0");
+            theoryData.Add("8.2.2");
+#endif
+            return theoryData;
+        }
+    }
+    public static TheoryData<string> SqlClientMicrosoft
+    {
+        get
+        {
+            var theoryData = new TheoryData<string>();
+#if DEFAULT_TEST_PACKAGE_VERSIONS
+            theoryData.Add(string.Empty);
+#else
+            theoryData.Add("2.1.7");
+            theoryData.Add("3.1.5");
+            theoryData.Add("4.0.5");
+            theoryData.Add("5.2.0");
+#endif
+            return theoryData;
+        }
+    }
+    public static TheoryData<string> SqlClientSystem
+    {
+        get
+        {
+            var theoryData = new TheoryData<string>();
+#if DEFAULT_TEST_PACKAGE_VERSIONS
+            theoryData.Add(string.Empty);
+#else
+            theoryData.Add("4.8.6");
+#endif
+            return theoryData;
+        }
+    }
+    public static TheoryData<string> MongoDB
+    {
+        get
+        {
+            var theoryData = new TheoryData<string>();
+#if DEFAULT_TEST_PACKAGE_VERSIONS
+            theoryData.Add(string.Empty);
+#else
+            theoryData.Add("2.19.0");
+            theoryData.Add("2.25.0");
+#endif
+            return theoryData;
+        }
+    }
+    public static TheoryData<string> MySqlConnector
+    {
+        get
+        {
+            var theoryData = new TheoryData<string>();
+#if DEFAULT_TEST_PACKAGE_VERSIONS
+            theoryData.Add(string.Empty);
+#else
+            theoryData.Add("2.0.0");
+            theoryData.Add("2.3.7");
+#endif
+            return theoryData;
+        }
+    }
+    public static TheoryData<string> MySqlData
+    {
+        get
+        {
+            var theoryData = new TheoryData<string>();
+#if DEFAULT_TEST_PACKAGE_VERSIONS
+            theoryData.Add(string.Empty);
+#else
+            theoryData.Add("8.1.0");
+            theoryData.Add("8.4.0");
+#endif
+            return theoryData;
+        }
+    }
+    public static TheoryData<string> Npgsql
+    {
+        get
+        {
+            var theoryData = new TheoryData<string>();
+#if DEFAULT_TEST_PACKAGE_VERSIONS
+            theoryData.Add(string.Empty);
+#else
+            theoryData.Add("6.0.11");
+            theoryData.Add("8.0.3");
+#endif
+            return theoryData;
+        }
+    }
+    public static TheoryData<string> NServiceBus
+    {
+        get
+        {
+            var theoryData = new TheoryData<string>();
+#if DEFAULT_TEST_PACKAGE_VERSIONS
+            theoryData.Add(string.Empty);
+#else
+            theoryData.Add("8.0.0");
+#if NET8_0
+            theoryData.Add("9.0.0");
+#endif
+#endif
+            return theoryData;
+        }
+    }
+    public static TheoryData<string> OracleMda
+    {
+        get
+        {
+            var theoryData = new TheoryData<string>();
+#if DEFAULT_TEST_PACKAGE_VERSIONS
+            theoryData.Add(string.Empty);
 #else
 #if NET462
-        new object[] { "23.4.0" },
+            theoryData.Add("23.4.0");
 #endif
 #endif
-    };
-    public static readonly IReadOnlyCollection<object[]> OracleMdaCore = new List<object[]>
+            return theoryData;
+        }
+    }
+    public static TheoryData<string> OracleMdaCore
     {
+        get
+        {
+            var theoryData = new TheoryData<string>();
 #if DEFAULT_TEST_PACKAGE_VERSIONS
-        new object[] { string.Empty }
+            theoryData.Add(string.Empty);
 #else
-        new object[] { "23.4.0" },
+            theoryData.Add("23.4.0");
 #endif
-    };
-    public static readonly IReadOnlyCollection<object[]> Quartz = new List<object[]>
+            return theoryData;
+        }
+    }
+    public static TheoryData<string> Quartz
     {
+        get
+        {
+            var theoryData = new TheoryData<string>();
 #if DEFAULT_TEST_PACKAGE_VERSIONS
-        new object[] { string.Empty }
+            theoryData.Add(string.Empty);
 #else
-        new object[] { "3.4.0" },
-        new object[] { "3.9.0" },
+            theoryData.Add("3.4.0");
+            theoryData.Add("3.9.0");
 #endif
-    };
-    public static readonly IReadOnlyCollection<object[]> StackExchangeRedis = new List<object[]>
+            return theoryData;
+        }
+    }
+    public static TheoryData<string> StackExchangeRedis
     {
+        get
+        {
+            var theoryData = new TheoryData<string>();
 #if DEFAULT_TEST_PACKAGE_VERSIONS
-        new object[] { string.Empty }
+            theoryData.Add(string.Empty);
 #else
-        new object[] { "2.0.495" },
-        new object[] { "2.1.50" },
-        new object[] { "2.5.61" },
-        new object[] { "2.6.66" },
-        new object[] { "2.7.33" },
+            theoryData.Add("2.0.495");
+            theoryData.Add("2.1.50");
+            theoryData.Add("2.5.61");
+            theoryData.Add("2.6.66");
+            theoryData.Add("2.7.33");
 #endif
-    };
-    public static readonly IReadOnlyCollection<object[]> WCFCoreClient = new List<object[]>
+            return theoryData;
+        }
+    }
+    public static TheoryData<string> WCFCoreClient
     {
+        get
+        {
+            var theoryData = new TheoryData<string>();
 #if DEFAULT_TEST_PACKAGE_VERSIONS
-        new object[] { string.Empty }
+            theoryData.Add(string.Empty);
 #else
-        new object[] { "4.10.2" },
-        new object[] { "6.2.0" },
+            theoryData.Add("4.10.2");
+            theoryData.Add("6.2.0");
 #endif
-    };
-    public static readonly IReadOnlyCollection<object[]> Kafka = new List<object[]>
+            return theoryData;
+        }
+    }
+    public static TheoryData<string> Kafka
     {
+        get
+        {
+            var theoryData = new TheoryData<string>();
 #if DEFAULT_TEST_PACKAGE_VERSIONS
-        new object[] { string.Empty }
+            theoryData.Add(string.Empty);
 #else
-        new object[] { "1.6.2" },
-        new object[] { "1.8.2" },
-        new object[] { "2.4.0" },
+            theoryData.Add("1.6.2");
+            theoryData.Add("1.8.2");
+            theoryData.Add("2.4.0");
 #endif
-    };
-    public static readonly IReadOnlyCollection<object[]> Kafka_x64 = new List<object[]>
+            return theoryData;
+        }
+    }
+    public static TheoryData<string> Kafka_x64
     {
+        get
+        {
+            var theoryData = new TheoryData<string>();
 #if DEFAULT_TEST_PACKAGE_VERSIONS
-        new object[] { string.Empty }
+            theoryData.Add(string.Empty);
 #else
-        new object[] { "1.4.0" },
+            theoryData.Add("1.4.0");
 #endif
-    };
-    public static readonly IReadOnlyDictionary<string, IReadOnlyCollection<object[]>> LookupMap = new Dictionary<string, IReadOnlyCollection<object[]>>
+            return theoryData;
+        }
+    }
+    public static readonly IReadOnlyDictionary<string, TheoryData<string>> LookupMap = new Dictionary<string, TheoryData<string>>
     {
        { "Azure", Azure },
        { "Elasticsearch", Elasticsearch },

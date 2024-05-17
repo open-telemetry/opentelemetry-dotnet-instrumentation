@@ -17,15 +17,19 @@ public class SqlClientSystemTests : TestHelper
         _sqlServerFixture = sqlServerFixture;
     }
 
-    public static IEnumerable<object[]> GetData()
+    public static TheoryData<string, bool> GetData()
     {
+        var theoryData = new TheoryData<string, bool>();
+
         foreach (var version in LibraryVersion.SqlClientSystem)
         {
 #if NET6_0_OR_GREATER
-            yield return new[] { version[0], true };
+            theoryData.Add((string)version[0], true);
 #endif
-            yield return new[] { version[0], false };
+            theoryData.Add((string)version[0], false);
         }
+
+        return theoryData;
     }
 
     [SkippableTheory]

@@ -15,13 +15,17 @@ public class EntityFrameworkCoreTests : TestHelper
     {
     }
 
-    public static IEnumerable<object[]> GetData()
+    public static TheoryData<string, bool> GetData()
     {
+        var theoryData = new TheoryData<string, bool>();
+
         foreach (var version in LibraryVersion.EntityFrameworkCore)
         {
-            yield return new[] { version[0], true };
-            yield return new[] { version[0], false };
+            theoryData.Add((string)version[0], true);
+            theoryData.Add((string)version[0], false);
         }
+
+        return theoryData;
     }
 
     [Theory]

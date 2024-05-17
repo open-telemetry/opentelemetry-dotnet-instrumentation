@@ -21,17 +21,21 @@ public class OracleMdaTests : TestHelper
         _oracle = oracle;
     }
 
-    public static IEnumerable<object[]> GetData()
+    public static TheoryData<string, bool> GetData()
     {
+        var theoryData = new TheoryData<string, bool>();
+
 #if NETFRAMEWORK
         foreach (var version in LibraryVersion.OracleMda)
 #else
         foreach (var version in LibraryVersion.GetPlatformVersions(nameof(LibraryVersion.OracleMdaCore)))
 #endif
         {
-            yield return new[] { version[0], true };
-            yield return new[] { version[0], false };
+            theoryData.Add((string)version[0], true);
+            theoryData.Add((string)version[0], false);
         }
+
+        return theoryData;
     }
 
     [SkippableTheory]

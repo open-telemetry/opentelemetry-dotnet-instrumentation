@@ -10,14 +10,14 @@ namespace IntegrationTests;
 /// </summary>
 public static partial class LibraryVersion
 {
-    public static IEnumerable<object[]> GetPlatformVersions(string integrationName)
+    public static TheoryData<string> GetPlatformVersions(string integrationName)
     {
         var anyPlatformVersions = LookupMap[integrationName];
         var platformKey = $"{integrationName}_{EnvironmentTools.GetPlatform()}";
 
         if (LookupMap.TryGetValue(platformKey, out var platformVersions))
         {
-            return anyPlatformVersions.Concat(platformVersions);
+            anyPlatformVersions.AddRange(platformVersions.Select(theory => (string)theory[0]).ToArray());
         }
 
         return anyPlatformVersions;
