@@ -174,6 +174,11 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NuGetPackagesTests", "test\NuGetPackagesTests\NuGetPackagesTests.csproj", "{AFD7582B-E9CD-4DF4-93B4-D5BBD7F539D0}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "nuget-packages", "nuget-packages", "{2EF2F7CE-E56F-4B81-A5A5-277693529D43}"
+	ProjectSection(SolutionItems) = preProject
+		test\test-applications\nuget-packages\Directory.Build.props = test\test-applications\nuget-packages\Directory.Build.props
+		test\test-applications\nuget-packages\Directory.Build.targets = test\test-applications\nuget-packages\Directory.Build.targets
+		test\test-applications\nuget-packages\Directory.Packages.props = test\test-applications\nuget-packages\Directory.Packages.props
+	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestApplication.SelfContained", "test\test-applications\nuget-packages\TestApplication.SelfContained\TestApplication.SelfContained.csproj", "{25ED93D0-A70C-4A07-84D9-EF94115259C9}"
 EndProject
@@ -221,15 +226,15 @@ Project("{778DAE3C-4631-46EA-AA77-85C1314464D9}") = "TestApplication.ContinuousP
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestApplication.ContinuousProfiler.ContextTracking", "test\test-applications\integrations\TestApplication.ContinuousProfiler.ContextTracking\TestApplication.ContinuousProfiler.ContextTracking.csproj", "{B74CB036-10F5-449D-8CBA-44F77E68D042}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestApplication.OracleMda.NetFramework", "test\test-applications\integrations\TestApplication.OracleMda.NetFramework\TestApplication.OracleMda.NetFramework.csproj", "{283DBDE1-F643-48CD-BBC8-ACC65D2014F2}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestApplication.OracleMda.NetFramework", "test\test-applications\integrations\TestApplication.OracleMda.NetFramework\TestApplication.OracleMda.NetFramework.csproj", "{283DBDE1-F643-48CD-BBC8-ACC65D2014F2}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "next-gen", "next-gen", "{3F051815-8E0D-4356-BC36-55CA642DDF18}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "getting-started-dotnet-monitor-metrics", "next-gen\docs\getting-started-dotnet-monitor-metrics\getting-started-dotnet-monitor-metrics.csproj", "{022A03CE-DD7A-4326-847E-3B750E660845}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestApplication.OracleMda.Core", "test\test-applications\integrations\TestApplication.OracleMda.Core\TestApplication.OracleMda.Core.csproj", "{21A915DF-8B9E-4CE8-84DA-1057CDCE117E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestApplication.OracleMda.Core", "test\test-applications\integrations\TestApplication.OracleMda.Core\TestApplication.OracleMda.Core.csproj", "{21A915DF-8B9E-4CE8-84DA-1057CDCE117E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "getting-started-dotnet-monitor-logs", "next-gen\docs\getting-started-dotnet-monitor-logs\getting-started-dotnet-monitor-logs.csproj", "{959764E7-5A0C-4511-8004-48DE6B10F499}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "getting-started-dotnet-monitor-logs", "next-gen\docs\getting-started-dotnet-monitor-logs\getting-started-dotnet-monitor-logs.csproj", "{959764E7-5A0C-4511-8004-48DE6B10F499}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

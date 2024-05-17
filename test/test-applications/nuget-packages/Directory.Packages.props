@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-
   <!-- The NuGet package test applications shouldn't use the common build settings -->
 
+  <ItemGroup>
+    <!-- This version is here to avoid compilation warnings. During the build is overriden by nuke tasks. -->
+    <PackageVersion Include="OpenTelemetry.AutoInstrumentation" Version="1.6.0" />
+  </ItemGroup>
 </Project>
