@@ -43,7 +43,7 @@
     <PackageVersion Include="DnsClient" Version="1.4.0" />
     <PackageVersion Include="Microsoft.Bcl.AsyncInterfaces" Version="8.0.0" />
     <PackageVersion Include="Microsoft.Win32.SystemEvents" Version="4.7.0" />
-    <PackageVersion Include="MongoDB.Bson" Version="2.13.3" />
+    <PackageVersion Include="MongoDB.Bson" Version="2.25.0" />
     <PackageVersion Include="MongoDB.Driver.Core" Version="2.13.3" />
     <PackageVersion Include="MongoDB.Libmongocrypt" Version="1.2.2" />
     <PackageVersion Include="Pipelines.Sockets.Unofficial" Version="2.1.16" />
