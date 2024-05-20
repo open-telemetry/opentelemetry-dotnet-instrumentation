@@ -47,7 +47,7 @@
     <PackageVersion Include="MongoDB.Driver.Core" Version="2.13.3" />
     <PackageVersion Include="MongoDB.Libmongocrypt" Version="1.2.2" />
     <PackageVersion Include="Pipelines.Sockets.Unofficial" Version="2.1.16" />
-    <PackageVersion Include="SharpCompress" Version="0.23.0" />
+    <PackageVersion Include="SharpCompress" Version="0.37.2" />
     <PackageVersion Include="StackExchange.Redis" Version="2.1.58" />
     <PackageVersion Include="System.Configuration.ConfigurationManager" Version="4.7.0" />
     <PackageVersion Include="System.Diagnostics.PerformanceCounter" Version="4.7.0" />
