@@ -7,7 +7,7 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" VersionOverride="$(LibraryVersion)" Condition=" '$(LibraryVersion)' != '' or '$(TargetFramework)' == 'net8.0' "/>
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" VersionOverride="7.0.16" Condition=" '$(LibraryVersion)' == '' and '$(TargetFramework)' != 'net8.0' "/>
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" VersionOverride="7.0.19" Condition=" '$(LibraryVersion)' == '' and '$(TargetFramework)' != 'net8.0' "/>
 
     <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" />
     <PackageReference Include="Microsoft.Extensions.Logging" />
