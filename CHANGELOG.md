@@ -20,6 +20,11 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 
 #### Dependency updates
 
+- Following packages updated
+  - `OpenTelemetry.Instrumentation.Runtime` from `1.8.0` to `1.8.1`,
+- .NET Framework only, following packages updated
+  - `OpenTelemetry.Instrumentation.AspNet` from `1.8.0-beta.2` to `1.8.0-beta.3`.
+
 ### Deprecated
 
 ### Removed
