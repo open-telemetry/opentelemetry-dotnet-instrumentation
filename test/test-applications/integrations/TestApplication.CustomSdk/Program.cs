@@ -74,7 +74,7 @@ public static class Program
 
                 using var client = new HttpClient();
                 client.Timeout = TimeSpan.FromSeconds(5);
-                await client.GetStringAsync("https://www.bing.com", cancellation.Token);
+                await client.GetStringAsync("https://httpbin.org/get", cancellation.Token);
             }
 
             // The "LONG_RUNNING" environment variable is used by tests that access/receive
