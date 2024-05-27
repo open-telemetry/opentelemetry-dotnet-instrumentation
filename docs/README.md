@@ -14,7 +14,7 @@ to .NET applications without having to modify their source code.
 > The following documentation refers to the in-development version
 of OpenTelemetry .NET Automatic Instrumentation. Docs for the latest version
 ([1.6.0](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/latest))
-can be found in [opentelemetry.io](https://github.com/open-telemetry/opentelemetry.io/tree/main/content/en/docs/languages/net/automatic)
+can be found in [opentelemetry.io](https://opentelemetry.io/docs/zero-code/net/)
 or [here](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/blob/v1.6.0/docs/README.md).
 
 ---
