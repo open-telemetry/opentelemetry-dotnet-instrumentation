@@ -17,12 +17,6 @@ updates:
     schedule:
       interval: "daily"
 
-  # Maintain dependencies for workflows checking the markdown files
-  - package-ecosystem: npm
-    directory: /
-    schedule:
-      interval: "daily"
-
   - package-ecosystem: nuget
     directory: /
     schedule:
