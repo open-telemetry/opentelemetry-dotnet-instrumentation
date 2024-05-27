@@ -6,16 +6,12 @@ on:
     paths:
     - '.github/workflows/validate-documentation.yml'
     - '**.md'
-    - 'package-lock.json'
-    - 'package.json'
     - '.lycheeignore'
   pull_request:
     branches: [ main ]
     paths:
     - '.github/workflows/validate-documentation.yml'
     - '**.md'
-    - 'package-lock.json'
-    - 'package.json'
     - '.lycheeignore'
   merge_group:
   workflow_dispatch:
@@ -26,18 +22,19 @@ jobs:
     steps:
 
     - name: Checkout
-      uses: actions/checkout@v4.1.2
+      uses: actions/checkout@v4.1.5
 
     - name: Run markdown links chceks
       if: ${{ !contains(github.event.pull_request.labels.*.name, 'release PR') }}
       uses: lycheeverse/lychee-action@v1.10.0
       with:
         fail: true
-      env:
-        GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
-      
-    - name: Install NPM packages
-      run: npm install
+        args: "--threads 1 --max-concurrency 1 --verbose --no-progress './**/*.md' './**/*.html'"
 
-    - name: Run markdownlint and cspell
-      run: npm run markdownlint && npm run cspell
+    - name: Run markdownlint
+      uses: streetsidesoftware/cspell-action@v6.3.0
+      with:
+        files: '**/*.md'
+
+    - name: Run cspell
+      uses: DavidAnson/markdownlint-cli2-action@v16.0.0
