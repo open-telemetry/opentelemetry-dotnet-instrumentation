@@ -56,6 +56,7 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
   - `Microsoft.Extensions.Configuration.Binder` from `8.0.0` to `8.0.1`,
   - `OpenTelemetry.Instrumentation.AspNetCore` from `1.8.0` to `1.8.1`.
 - .NET Framework only, following packages updated
+  - `Grpc.Core.Api` from `2.62.0` to `2.63.0`,
   - `OpenTelemetry.Instrumentation.AspNet` from `1.8.0-beta.1` to `1.8.0-beta.2`.
 
 ### Fixed
