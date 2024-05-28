@@ -19,7 +19,8 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 ### Changed
 
 - Do not use message creation context as a parent for consumer spans for `Confluent.Kafka`
-  client instrumentation. See the [issue](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/issues/3434) for details.
+  client instrumentation. See the [issue](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/issues/3434)
+  for details.
 
 #### Dependency updates
 
