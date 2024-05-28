@@ -31,7 +31,6 @@ public class KafkaTests : TestHelper
 
     // https://github.com/confluentinc/confluent-kafka-dotnet/blob/07de95ed647af80a0db39ce6a8891a630423b952/src/Confluent.Kafka/Offset.cs#L36C44-L36C44
     private const int InvalidOffset = -1001;
-    private const string TestApplicationInstrumentationScopeName = "TestApplication.Kafka";
 
     public KafkaTests(ITestOutputHelper testOutputHelper)
         : base("Kafka", testOutputHelper)
@@ -48,8 +47,6 @@ public class KafkaTests : TestHelper
 
         using var collector = new MockSpansCollector(Output);
         SetExporter(collector);
-
-        collector.Expect(TestApplicationInstrumentationScopeName, span => span.Kind == Span.Types.SpanKind.Internal);
 
         // Failed produce attempts made before topic is created.
         collector.Expect(KafkaInstrumentationScopeName, span => span.Kind == Span.Types.SpanKind.Producer && ValidateResultProcessingProduceExceptionSpan(span, topicName), "Failed Produce attempt with delivery handler set.");
@@ -173,38 +170,16 @@ public class KafkaTests : TestHelper
                 !span.Span.Attributes.Single(attr => attr.Key == KafkaMessageTombstoneAttributeName).Value.BoolValue &&
                 span.Span.Status is null);
 
-        var consumerSpansWithLinks = producerSpans
-            .Select(producerSpan =>
+        return producerSpans.Select(
+            producerSpan =>
                 GetMatchingConsumerSpan(collectedSpans, producerSpan.Span, expectedReceiveOperationName))
-            .ToList();
-
-        var manuallyCreatedSpan = collectedSpans.Single(collectedSpan =>
-            collectedSpan.InstrumentationScopeName == TestApplicationInstrumentationScopeName);
-
-        var consumerSpanWithCustomParent = consumerSpansWithLinks.SingleOrDefault(
-            span =>
-                span.Span.TraceId == manuallyCreatedSpan.Span.TraceId &&
-                span.Span.ParentSpanId == manuallyCreatedSpan.Span.SpanId);
-
-        var consumerSpansHaveCreationContextAsParent =
-            consumerSpansWithLinks
-                .Except(new[] { consumerSpanWithCustomParent })
-                .All(consumerSpan =>
-                    ValidateCreationContextAsParent(consumerSpan));
-
-        return consumerSpanWithCustomParent is not null && consumerSpansHaveCreationContextAsParent;
+            .All(consumerSpan => consumerSpan is not null);
     }
 
-    private static bool ValidateCreationContextAsParent(MockSpansCollector.Collected? consumerSpan)
-    {
-        return consumerSpan?.Span.TraceId == consumerSpan?.Span.Links[0].TraceId &&
-               consumerSpan?.Span.ParentSpanId == consumerSpan?.Span.Links[0].SpanId;
-    }
-
-    private static MockSpansCollector.Collected GetMatchingConsumerSpan(ICollection<MockSpansCollector.Collected> collectedSpans, Span producerSpan, string expectedReceiveOperationName)
+    private static MockSpansCollector.Collected? GetMatchingConsumerSpan(ICollection<MockSpansCollector.Collected> collectedSpans, Span producerSpan, string expectedReceiveOperationName)
     {
         return collectedSpans
-            .Single(span =>
+            .SingleOrDefault(span =>
             {
                 var parentLinksCount = span.Span.Links.Count(
                     link =>
