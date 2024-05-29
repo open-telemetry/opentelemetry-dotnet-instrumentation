@@ -40,7 +40,7 @@ internal static class PackageVersionDefinitions
             Versions = new List<PackageVersion>
             {
                 new("6.0.27"),
-                new("7.0.19"),
+                new("7.0.20"),
                 new("8.0.2", supportedTargetFrameworks: new[] { "net8.0" }, supportedExecutionFrameworks: new[] { "net8.0" }),
                 new("*", supportedTargetFrameworks: new[] { "net8.0" }, supportedExecutionFrameworks: new[] { "net8.0" })
             }
