@@ -108,10 +108,59 @@ internal partial class ConfigurationKeys
         /// </summary>
         public static class InstrumentationOptions
         {
+#if NETFRAMEWORK
+            /// <summary>
+            /// Configuration key for ASP.NET instrumentation to enable capturing HTTP request headers as span tags.
+            /// </summary>
+            public const string AspNetInstrumentationCaptureRequestHeaders = "OTEL_DOTNET_AUTO_TRACES_ASPNET_INSTRUMENTATION_CAPTURE_REQUEST_HEADERS";
+
+            /// <summary>
+            /// Configuration key for ASP.NET instrumentation to enable capturing HTTP response headers as span tags.
+            /// </summary>
+            public const string AspNetInstrumentationCaptureResponseHeaders = "OTEL_DOTNET_AUTO_TRACES_ASPNET_INSTRUMENTATION_CAPTURE_RESPONSE_HEADERS";
+#endif
+
+#if NET6_0_OR_GREATER
+            /// <summary>
+            /// Configuration key for ASP.NET Core instrumentation to enable capturing HTTP request headers as span tags.
+            /// </summary>
+            public const string AspNetCoreInstrumentationCaptureRequestHeaders = "OTEL_DOTNET_AUTO_TRACES_ASPNETCORE_INSTRUMENTATION_CAPTURE_REQUEST_HEADERS";
+
+            /// <summary>
+            /// Configuration key for ASP.NET Core instrumentation to enable capturing HTTP response headers as span tags.
+            /// </summary>
+            public const string AspNetCoreInstrumentationCaptureResponseHeaders = "OTEL_DOTNET_AUTO_TRACES_ASPNETCORE_INSTRUMENTATION_CAPTURE_RESPONSE_HEADERS";
+
+            /// <summary>
+            /// Configuration key for Entity Framework Core instrumentation to enable passing text query as a db.statement attribute.
+            /// </summary>
+            public const string EntityFrameworkCoreSetDbStatementForText = "OTEL_DOTNET_AUTO_ENTITYFRAMEWORKCORE_SET_DBSTATEMENT_FOR_TEXT";
+#endif
+
             /// <summary>
             /// Configuration key for GraphQL instrumentation to enable passing query as a document attribute.
             /// </summary>
             public const string GraphQLSetDocument = "OTEL_DOTNET_AUTO_GRAPHQL_SET_DOCUMENT";
+
+            /// <summary>
+            /// Configuration key for GrpcNetClient instrumentation to enable capturing request metadata as span tags.
+            /// </summary>
+            public const string GrpcNetClientInstrumentationCaptureRequestMetadata = "OTEL_DOTNET_AUTO_TRACES_GRPCNETCLIENT_INSTRUMENTATION_CAPTURE_REQUEST_METADATA";
+
+            /// <summary>
+            /// Configuration key for GrpcNetClient instrumentation to enable capturing response metadata as span tags.
+            /// </summary>
+            public const string GrpcNetClientInstrumentationCaptureResponseMetadata = "OTEL_DOTNET_AUTO_TRACES_GRPCNETCLIENT_INSTRUMENTATION_CAPTURE_RESPONSE_METADATA";
+
+            /// <summary>
+            /// Configuration key for HTTP instrumentation to enable capturing HTTP request headers as span tags.
+            /// </summary>
+            public const string HttpInstrumentationCaptureRequestHeaders = "OTEL_DOTNET_AUTO_TRACES_HTTP_INSTRUMENTATION_CAPTURE_REQUEST_HEADERS";
+
+            /// <summary>
+            /// Configuration key for HTTP instrumentation to enable capturing HTTP response headers as span tags.
+            /// </summary>
+            public const string HttpInstrumentationCaptureResponseHeaders = "OTEL_DOTNET_AUTO_TRACES_HTTP_INSTRUMENTATION_CAPTURE_RESPONSE_HEADERS";
 
             /// <summary>
             /// Configuration key for Oracle Client instrumentation to enable passing text query as a db.statement attribute.
@@ -122,13 +171,6 @@ internal partial class ConfigurationKeys
             /// Configuration key for SQL Client instrumentation to enable passing text query as a db.statement attribute.
             /// </summary>
             public const string SqlClientSetDbStatementForText = "OTEL_DOTNET_AUTO_SQLCLIENT_SET_DBSTATEMENT_FOR_TEXT";
-
-#if NET6_0_OR_GREATER
-            /// <summary>
-            /// Configuration key for Entity Framework Core instrumentation to enable passing text query as a db.statement attribute.
-            /// </summary>
-            public const string EntityFrameworkCoreSetDbStatementForText = "OTEL_DOTNET_AUTO_ENTITYFRAMEWORKCORE_SET_DBSTATEMENT_FOR_TEXT";
-#endif
         }
     }
 

@@ -36,6 +36,7 @@ public class HttpTests : TestHelper
             clientSpan = span;
             return true;
         });
+
         Span? serverSpan = null;
 #if NET7_0_OR_GREATER
         collector.Expect("Microsoft.AspNetCore", span =>
@@ -46,6 +47,7 @@ public class HttpTests : TestHelper
             serverSpan = span;
             return true;
         });
+
         Span? manualSpan = null;
         collector.Expect("TestApplication.Http", span =>
         {
@@ -65,6 +67,50 @@ public class HttpTests : TestHelper
             serverSpan!.ParentSpanId.Should().Equal(clientSpan.SpanId);
             manualSpan!.ParentSpanId.Should().Equal(serverSpan.SpanId);
         }
+    }
+
+    [Fact]
+    public void SubmitTracesCapturesHttpHeaders()
+    {
+        using var collector = new MockSpansCollector(Output);
+        SetExporter(collector);
+
+#if NET7_0_OR_GREATER
+        collector.Expect("System.Net.Http", span =>
+#else
+        collector.Expect("OpenTelemetry.Instrumentation.Http.HttpClient", span =>
+#endif
+        {
+            return span.Attributes.Any(x => x.Key == "http.request.header.custom-request-test-header1" && x.Value.StringValue == "Test-Value1")
+                   && span.Attributes.Any(x => x.Key == "http.request.header.custom-request-test-header3" && x.Value.StringValue == "Test-Value3")
+                   && span.Attributes.All(x => x.Key != "http.request.header.custom-request-test-header2")
+                   && span.Attributes.Any(x => x.Key == "http.response.header.custom-response-test-header2" && x.Value.StringValue == "Test-Value2")
+                   && span.Attributes.All(x => x.Key != "http.response.header.custom-response-test-header1")
+                   && span.Attributes.All(x => x.Key != "http.response.header.custom-response-test-header3");
+        });
+
+#if NET7_0_OR_GREATER
+        collector.Expect("Microsoft.AspNetCore", span =>
+#else
+        collector.Expect("OpenTelemetry.Instrumentation.AspNetCore", span =>
+#endif
+        {
+            return span.Attributes.Any(x => x.Key == "http.request.header.custom-request-test-header2" && x.Value.StringValue == "Test-Value2")
+                   && span.Attributes.All(x => x.Key != "http.request.header.custom-request-test-header1")
+                   && span.Attributes.All(x => x.Key != "http.request.header.custom-request-test-header3")
+                   && span.Attributes.Any(x => x.Key == "http.response.header.custom-response-test-header1" && x.Value.StringValue == "Test-Value1")
+                   && span.Attributes.Any(x => x.Key == "http.response.header.custom-response-test-header3" && x.Value.StringValue == "Test-Value3")
+                   && span.Attributes.All(x => x.Key != "http.response.header.custom-response-test-header2");
+        });
+
+        SetEnvironmentVariable("OTEL_DOTNET_AUTO_TRACES_HTTP_INSTRUMENTATION_CAPTURE_REQUEST_HEADERS", "Custom-Request-Test-Header1,Custom-Request-Test-Header3");
+        SetEnvironmentVariable("OTEL_DOTNET_AUTO_TRACES_HTTP_INSTRUMENTATION_CAPTURE_RESPONSE_HEADERS", "Custom-Response-Test-Header2");
+        SetEnvironmentVariable("OTEL_DOTNET_AUTO_TRACES_ASPNETCORE_INSTRUMENTATION_CAPTURE_REQUEST_HEADERS", "Custom-Request-Test-Header2");
+        SetEnvironmentVariable("OTEL_DOTNET_AUTO_TRACES_ASPNETCORE_INSTRUMENTATION_CAPTURE_RESPONSE_HEADERS", "Custom-Response-Test-Header1,Custom-Response-Test-Header3");
+
+        RunTestApplication();
+
+        collector.AssertExpectations();
     }
 
     [Fact]

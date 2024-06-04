@@ -32,6 +32,9 @@ public class Program
         var address = addressFeature?.Addresses.First();
         var dnsAddress = address?.Replace("127.0.0.1", "localhost"); // needed to force DNS resolution to test metrics
         using var httpClient = new HttpClient();
+        httpClient.DefaultRequestHeaders.Add("Custom-Request-Test-Header1", "Test-Value1");
+        httpClient.DefaultRequestHeaders.Add("Custom-Request-Test-Header2", "Test-Value2");
+        httpClient.DefaultRequestHeaders.Add("Custom-Request-Test-Header3", "Test-Value3");
         httpClient.GetAsync($"{dnsAddress}/test").Wait();
         httpClient.GetAsync($"{dnsAddress}/exception").Wait();
 #if NET8_0_OR_GREATER

@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 using System.Net;
+using System.Runtime.Remoting.Contexts;
 using System.Text;
 using TestApplication.Http.NetFramework.Helpers;
 
@@ -12,13 +13,13 @@ public class TestServer : IDisposable
     private readonly HttpListener _listener;
     private readonly Thread _listenerThread;
 
-    public TestServer(string sufix)
+    public TestServer(string suffix)
     {
         Port = TcpPortProvider.GetOpenPort();
 
         _listener = new HttpListener();
         _listener.Start();
-        var prefix = new UriBuilder("http", "localhost", Port, sufix).ToString();
+        var prefix = new UriBuilder("http", "localhost", Port, suffix).ToString();
         _listener.Prefixes.Add(prefix);
         Console.WriteLine($"[LISTENER] Listening on '{prefix}'");
 
@@ -53,6 +54,9 @@ public class TestServer : IDisposable
 
                 // NOTE: HttpStreamRequest doesn't support Transfer-Encoding: Chunked
                 // (Setting content-length avoids that)
+                ctx.Response.Headers.Add("Custom-Response-Test-Header1", "Test-Value1");
+                ctx.Response.Headers.Add("Custom-Response-Test-Header2", "Test-Value2");
+                ctx.Response.Headers.Add("Custom-Response-Test-Header3", "Test-Value3");
                 ctx.Response.ContentType = "text/plain";
                 var buffer = Encoding.UTF8.GetBytes("Pong");
                 ctx.Response.ContentLength64 = buffer.LongLength;
@@ -79,7 +83,7 @@ public class TestServer : IDisposable
             }
             catch (Exception ex)
             {
-                // somethig unexpected happened
+                // something unexpected happened
                 // log instead of crashing the thread
                 Console.WriteLine("[EXCEPTION]: {0}", ex.Message);
                 Console.WriteLine(ex);

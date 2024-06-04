@@ -12,6 +12,18 @@ internal static class Constants
         public const string TelemetryDistroVersionAttributeName = "telemetry.distro.version";
     }
 
+    public static class GrpcSpanAttributes
+    {
+        public const string AttributeGrpcRequestMetadataPrefix = "rpc.grpc.request.metadata";
+        public const string AttributeGrpcResponseMetadataPrefix = "rpc.grpc.response.metadata";
+    }
+
+    public static class HttpSpanAttributes
+    {
+        public const string AttributeHttpRequestHeaderPrefix = "http.request.header";
+        public const string AttributeHttpResponseHeaderPrefix = "http.response.header";
+    }
+
     public static class ConfigurationValues
     {
         public const string None = "none";

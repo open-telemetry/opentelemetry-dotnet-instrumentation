@@ -25,4 +25,16 @@ internal static class ConfigurationExtensions
 
         return enabledConfigurations;
     }
+
+    public static IReadOnlyList<string> ParseList(this Configuration source, string key, char valueSeparator)
+    {
+        var values = source.GetString(key);
+
+        if (string.IsNullOrWhiteSpace(values))
+        {
+            return Array.Empty<string>();
+        }
+
+        return values!.Split(new[] { valueSeparator }, StringSplitOptions.RemoveEmptyEntries);
+    }
 }

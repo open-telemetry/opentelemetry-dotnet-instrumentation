@@ -24,7 +24,10 @@ public class ValuesController : ApiController
     // GET api/values
     public IEnumerable<string> Get()
     {
-        return new string[] { "value1", "value2" };
+        this.ActionContext.Response.Headers.Add("Custom-Response-Test-Header1", "Test-Value1");
+        this.ActionContext.Response.Headers.Add("Custom-Response-Test-Header2", "Test-Value2");
+        this.ActionContext.Response.Headers.Add("Custom-Response-Test-Header3", "Test-Value3");
+        return new [] { "value1", "value2" };
     }
 
     // GET api/values/5

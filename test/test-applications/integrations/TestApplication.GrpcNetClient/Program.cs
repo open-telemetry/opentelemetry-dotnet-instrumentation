@@ -1,43 +1,78 @@
 // Copyright The OpenTelemetry Authors
 // SPDX-License-Identifier: Apache-2.0
 
-#if NETFRAMEWORK
+using System.Net;
 using System.Net.Http;
-#endif
 using Greet;
 using Grpc.Core;
 using Grpc.Net.Client;
+using IntegrationTests.Helpers;
+#if !NETFRAMEWORK
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Server.Kestrel.Core;
+using Microsoft.Extensions.DependencyInjection;
+#endif
+using TestApplication.GrpcNetClient;
 #if NETFRAMEWORK
 using Grpc.Net.Client.Web;
 #endif
 using TestApplication.Shared;
 
-namespace TestApplication.GrpcNetClient;
+ConsoleHelper.WriteSplashScreen(args);
 
-public static class Program
+var port = TcpPortProvider.GetOpenPort();
+
+#if !NETFRAMEWORK
+var builder = WebApplication.CreateBuilder(args);
+
+builder.WebHost.ConfigureKestrel(serverOptions =>
 {
-    public static async Task Main(string[] args)
+    serverOptions.ConfigureEndpointDefaults(listenOptions =>
     {
-        ConsoleHelper.WriteSplashScreen(args);
+        listenOptions.Protocols = HttpProtocols.Http2;
+    });
+    serverOptions.Listen(IPAddress.Loopback, port);
+});
 
-        const string uri = "http://dummyAdress";
-#if NETFRAMEWORK
-        var channel = GrpcChannel.ForAddress(uri, new GrpcChannelOptions
-        {
-            HttpHandler = new GrpcWebHandler(new HttpClientHandler())
-        });
-#else
-        var channel = GrpcChannel.ForAddress(uri);
+// Add services to the container.
+builder.Services.AddGrpc();
+
+var app = builder.Build();
+
+// Configure the HTTP request pipeline.
+app.MapGrpcService<GreeterService>();
+
+await app.StartAsync();
 #endif
 
-        try
-        {
-            var greeterClient = new Greeter.GreeterClient(channel);
-            await greeterClient.SayHelloAsync(new HelloRequest());
-        }
-        catch (RpcException e)
-        {
-            Console.WriteLine(e);
-        }
-    }
+var uri = $"http://localhost:{port}";
+#if NETFRAMEWORK
+var channel = GrpcChannel.ForAddress(uri, new GrpcChannelOptions
+{
+    HttpHandler = new GrpcWebHandler(new HttpClientHandler())
+});
+#else
+var channel = GrpcChannel.ForAddress(uri);
+#endif
+
+var headers = new Metadata
+{
+    { "Custom-Request-Test-Header1", "Test-Value1" },
+    { "Custom-Request-Test-Header2", "Test-Value2" },
+    { "Custom-Request-Test-Header3", "Test-Value3" }
+};
+
+try
+{
+    var greeterClient = new Greeter.GreeterClient(channel);
+    await greeterClient.SayHelloAsync(new HelloRequest { Name = "Test user" }, headers);
 }
+catch (RpcException e)
+{
+    Console.WriteLine(e);
+}
+
+#if !NETFRAMEWORK
+app.Lifetime.StopApplication();
+#endif

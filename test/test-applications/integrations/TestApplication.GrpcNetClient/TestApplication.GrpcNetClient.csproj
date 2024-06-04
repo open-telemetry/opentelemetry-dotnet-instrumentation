@@ -8,10 +8,11 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Google.Protobuf" VersionOverride="3.22.5" />
+    <PackageReference Include="Google.Protobuf" Condition="'$(TargetFramework)' == 'net462' or ( '$(LibraryVersion)' != '' and '$(LibraryVersion)' &lt;= '2.54.0' )" />
+    <PackageReference Include="Grpc.AspNetCore" Condition="'$(TargetFramework)' != 'net462'" VersionOverride="$(LibraryVersion)" />
     <PackageReference Include="Grpc.Net.Client" VersionOverride="$(LibraryVersion)" />
     <PackageReference Include="Grpc.Net.Client.Web" Condition="'$(TargetFramework)' == 'net462'" VersionOverride="$(LibraryVersion)" />
-    <PackageReference Include="Grpc.Tools" VersionOverride="2.44.0" />
+    <PackageReference Include="Grpc.Tools" Condition="'$(TargetFramework)' == 'net462'" />
     <!-- Workaround! Microsoft.Extensions.Logging.Abstractions v.8.0.0 is minimal version supported by auto instrumentation.
     Grpc.Net.Client references older version. It prevents to load required version from Additional Dependencies store-->
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" VersionOverride="8.0.0" />
@@ -19,7 +20,12 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Protobuf Include="Proto\greet.proto" GrpcServices="Client" />
+    <Protobuf Include="Proto\greet.proto" GrpcServices="Client,Server" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Compile Include="..\..\..\IntegrationTests\Helpers\TcpPortProvider.cs">
+      <Link>TcpPortProvider.cs</Link>
+    </Compile>
+  </ItemGroup>
 </Project>
