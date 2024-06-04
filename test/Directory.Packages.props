@@ -35,7 +35,7 @@
     <PackageVersion Include="NServiceBus" Version="9.0.0" />
     <PackageVersion Include="Newtonsoft.Json" Version="13.0.3" />
     <PackageVersion Include="Npgsql" Version="8.0.3" />
-    <PackageVersion Include="NuGet.Versioning" Version="6.5.0" />
+    <PackageVersion Include="NuGet.Versioning" Version="6.10.0" />
     <PackageVersion Include="OpenTracing" Version="0.12.1" />
     <PackageVersion Include="Oracle.ManagedDataAccess" Version="23.4.0" />
     <PackageVersion Include="Oracle.ManagedDataAccess.Core" Version="23.4.0" />
