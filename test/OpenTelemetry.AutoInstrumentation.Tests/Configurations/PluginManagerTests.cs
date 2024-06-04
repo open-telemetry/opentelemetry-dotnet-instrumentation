@@ -115,8 +115,8 @@ public class PluginManagerTests
             traceAfterAction.Should().NotThrow();
             meterAfterAction.Should().NotThrow();
 
-            tracerProviderBuilderMock.Received(1).AddSource(Arg.Is<string>(x => x == "My.Custom.Before.Key"));
-            tracerProviderBuilderMock.Received(1).AddSource(Arg.Is<string>(x => x == "My.Custom.After.Key"));
+            tracerProviderBuilderMock.Received(1).AddSource(Arg.Is<string>(x => x == "My.Custom.Before.Source"));
+            tracerProviderBuilderMock.Received(1).AddSource(Arg.Is<string>(x => x == "My.Custom.After.Source"));
             meterProviderBuilderMock.Received(1).AddMeter(Arg.Is<string>(x => x == "My.Custom.Before.Meter"));
             meterProviderBuilderMock.Received(1).AddMeter(Arg.Is<string>(x => x == "My.Custom.After.Meter"));
         }
@@ -246,7 +246,7 @@ public class PluginManagerTests
 
         public TracerProviderBuilder BeforeConfigureTracerProvider(TracerProviderBuilder builder)
         {
-            builder.AddSource("My.Custom.Before.Key");
+            builder.AddSource("My.Custom.Before.Source");
 
             return builder;
         }
@@ -260,7 +260,7 @@ public class PluginManagerTests
 
         public TracerProviderBuilder AfterConfigureTracerProvider(TracerProviderBuilder builder)
         {
-            builder.AddSource("My.Custom.After.Key");
+            builder.AddSource("My.Custom.After.Source");
 
             return builder;
         }
