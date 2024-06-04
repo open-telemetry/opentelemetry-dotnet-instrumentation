@@ -56,9 +56,21 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 
 - Following packages updated
   - `OpenTelemetry.Instrumentation.Http` from `1.8.0` to `1.8.1`.
+- Following packages replaced
+  - `OpenTelemetry.ResourceDetectors.Azure` version `1.0.0-beta.6`
+    by `OpenTelemetry.Resources.Azure` version `1.0.0-beta.7`,
+  - `OpenTelemetry.ResourceDetectors.Host` version `0.1.0-alpha.3`
+    by `OpenTelemetry.Resources.Host` version `0.1.0-beta.1`,
+  - `OpenTelemetry.ResourceDetectors.Process` version `0.1.0-alpha.3`
+    by `OpenTelemetry.Resources.Process` version `0.1.0-beta.1`,
+  - `OpenTelemetry.ResourceDetectors.ProcessRuntime` version `0.1.0-alpha.3`
+    by `OpenTelemetry.Resources.ProcessRuntime` version `0.1.0-beta.1`.
 - .NET only, following packages updated
   - `Microsoft.Extensions.Configuration.Binder` from `8.0.0` to `8.0.1`,
   - `OpenTelemetry.Instrumentation.AspNetCore` from `1.8.0` to `1.8.1`.
+- .NET only, Following packages replaced:
+  - `OpenTelemetry.ResourceDetectors.Container` version `1.0.0-beta.7`
+    by `OpenTelemetry.Resources.Container` version `1.0.0-beta.8`.
 - .NET Framework only, following packages updated
   - `Grpc.Core.Api` from `2.62.0` to `2.63.0`,
   - `OpenTelemetry.Instrumentation.AspNet` from `1.8.0-beta.1` to `1.8.0-beta.2`.

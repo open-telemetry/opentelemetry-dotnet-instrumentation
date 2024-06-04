@@ -2,13 +2,6 @@
 // SPDX-License-Identifier: Apache-2.0
 
 using System.Runtime.CompilerServices;
-using OpenTelemetry.ResourceDetectors.Azure;
-#if NET6_0_OR_GREATER
-using OpenTelemetry.ResourceDetectors.Container;
-#endif
-using OpenTelemetry.ResourceDetectors.Host;
-using OpenTelemetry.ResourceDetectors.Process;
-using OpenTelemetry.ResourceDetectors.ProcessRuntime;
 using OpenTelemetry.Resources;
 
 namespace OpenTelemetry.AutoInstrumentation.Configurations;
@@ -66,32 +59,32 @@ internal static class ResourceConfigurator
         [MethodImpl(MethodImplOptions.NoInlining)]
         public static ResourceBuilder AddContainerResourceDetector(ResourceBuilder resourceBuilder)
         {
-            return resourceBuilder.AddDetector(new ContainerResourceDetector());
+            return resourceBuilder.AddContainerDetector();
         }
 #endif
 
         [MethodImpl(MethodImplOptions.NoInlining)]
         public static ResourceBuilder AddAzureAppServiceResourceDetector(ResourceBuilder resourceBuilder)
         {
-            return resourceBuilder.AddDetector(new AppServiceResourceDetector());
+            return resourceBuilder.AddAppServiceDetector();
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]
         public static ResourceBuilder AddProcessRuntimeResourceDetector(ResourceBuilder resourceBuilder)
         {
-            return resourceBuilder.AddDetector(new ProcessRuntimeDetector());
+            return resourceBuilder.AddProcessRuntimeDetector();
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]
         public static ResourceBuilder AddProcessResourceDetector(ResourceBuilder resourceBuilder)
         {
-            return resourceBuilder.AddDetector(new ProcessDetector());
+            return resourceBuilder.AddProcessDetector();
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]
         public static ResourceBuilder AddHostResourceDetector(ResourceBuilder resourceBuilder)
         {
-            return resourceBuilder.AddDetector(new HostDetector());
+            return resourceBuilder.AddHostDetector();
         }
     }
 }
