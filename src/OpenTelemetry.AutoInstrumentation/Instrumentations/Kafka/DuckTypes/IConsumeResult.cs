@@ -13,4 +13,7 @@ internal interface IConsumeResult
     public Offset Offset { get; set; }
 
     public Partition Partition { get; set; }
+
+    // ReSharper disable once InconsistentNaming
+    public bool IsPartitionEOF { get; set; }
 }
