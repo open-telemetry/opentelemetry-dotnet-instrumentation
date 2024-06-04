@@ -68,7 +68,7 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 - .NET only, following packages updated
   - `Microsoft.Extensions.Configuration.Binder` from `8.0.0` to `8.0.1`,
   - `OpenTelemetry.Instrumentation.AspNetCore` from `1.8.0` to `1.8.1`.
-- .NET only, Following packages replaced:
+- .NET only, following packages replaced:
   - `OpenTelemetry.ResourceDetectors.Container` version `1.0.0-beta.7`
     by `OpenTelemetry.Resources.Container` version `1.0.0-beta.8`.
 - .NET Framework only, following packages updated
