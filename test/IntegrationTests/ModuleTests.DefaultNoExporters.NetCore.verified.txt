@@ -8,9 +8,9 @@
   OpenTelemetry.Exporter.OpenTelemetryProtocol,
   OpenTelemetry.Instrumentation.Process,
   OpenTelemetry.Instrumentation.Runtime,
-  OpenTelemetry.ResourceDetectors.Azure,
-  OpenTelemetry.ResourceDetectors.Container,
-  OpenTelemetry.ResourceDetectors.Host,
-  OpenTelemetry.ResourceDetectors.Process,
-  OpenTelemetry.ResourceDetectors.ProcessRuntime
+  OpenTelemetry.Resources.Azure,
+  OpenTelemetry.Resources.Container,
+  OpenTelemetry.Resources.Host,
+  OpenTelemetry.Resources.Process,
+  OpenTelemetry.Resources.ProcessRuntime
 ]
