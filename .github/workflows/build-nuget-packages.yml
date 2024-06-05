@@ -31,9 +31,9 @@ jobs:
         uses: actions/setup-dotnet@v4.0.0
         with:
           dotnet-version: | 
-            6.0.422
-            7.0.409
-            8.0.300
+            6.0.423
+            7.0.410
+            8.0.301
 
       - name: Check for NuGet packages cache
         uses: actions/cache@v4.0.2
