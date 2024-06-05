@@ -14,7 +14,9 @@
 // limitations under the License.
 // </copyright>
 
-using System.Collections.Generic;
+using System.Net.Http;
+using System.Net;
+using System.Text;
 using System.Web.Http;
 
 namespace TestApplication.AspNet.NetFramework.Controllers;
@@ -22,12 +24,13 @@ namespace TestApplication.AspNet.NetFramework.Controllers;
 public class ValuesController : ApiController
 {
     // GET api/values
-    public IEnumerable<string> Get()
+    public HttpResponseMessage Get()
     {
-        this.ActionContext.Response.Headers.Add("Custom-Response-Test-Header1", "Test-Value1");
-        this.ActionContext.Response.Headers.Add("Custom-Response-Test-Header2", "Test-Value2");
-        this.ActionContext.Response.Headers.Add("Custom-Response-Test-Header3", "Test-Value3");
-        return new [] { "value1", "value2" };
+        var response = Request.CreateResponse(HttpStatusCode.OK, new[] { "value1", "value2" });
+        response.Headers.Add("Custom-Response-Test-Header1", "Test-Value1");
+        response.Headers.Add("Custom-Response-Test-Header2", "Test-Value2");
+        response.Headers.Add("Custom-Response-Test-Header3", "Test-Value3");
+        return response;
     }
 
     // GET api/values/5

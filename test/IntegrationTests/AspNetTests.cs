@@ -68,29 +68,48 @@ public class AspNetTests
         using var fwPort = FirewallHelper.OpenWinPort(collector.Port, Output);
         collector.Expect("OpenTelemetry.Instrumentation.AspNet.Telemetry", span => // Expect Mvc span
         {
+            if (appPoolMode == "Classic")
+            {
+                return span.Attributes.Any(x => x.Key == "http.request.header.custom-request-test-header2" && x.Value.StringValue == "Test-Value2")
+                       && span.Attributes.All(x => x.Key != "http.request.header.custom-request-test-header1")
+                       && span.Attributes.All(x => x.Key != "http.request.header.custom-request-test-header3")
+                       && span.Attributes.Any(x => x.Key != "http.response.header.custom-response-test-header1")
+                       && span.Attributes.Any(x => x.Key != "http.response.header.custom-response-test-header3")
+                       && span.Attributes.All(x => x.Key != "http.response.header.custom-response-test-header2");
+            }
+
             return span.Attributes.Any(x => x.Key == "http.request.header.custom-request-test-header2" && x.Value.StringValue == "Test-Value2")
                    && span.Attributes.All(x => x.Key != "http.request.header.custom-request-test-header1")
                    && span.Attributes.All(x => x.Key != "http.request.header.custom-request-test-header3")
-                   && span.Attributes.Any(x => x.Key == "http.response.header.custom-response-test-header1" && x.Value.StringValue == "Test-Value1")
-                   && span.Attributes.Any(x => x.Key == "http.response.header.custom-response-test-header3" && x.Value.StringValue == "Test-Value3")
-                   && span.Attributes.All(x => x.Key != "http.response.header.custom-response-test-header2");
-        });
-        collector.Expect("OpenTelemetry.Instrumentation.AspNet.Telemetry", span => // Expect WebApi span
-        {
-            return span.Attributes.Any(x => x.Key == "http.request.header.custom-request-test-header2" && x.Value.StringValue == "Test-Value2")
-                   && span.Attributes.All(x => x.Key != "http.request.header.custom-request-test-header1")
-                   && span.Attributes.All(x => x.Key != "http.request.header.custom-request-test-header3")
-                   && span.Attributes.Any(x => x.Key == "http.response.header.custom-response-test-header1" && x.Value.StringValue == "Test-Value1")
-                   && span.Attributes.Any(x => x.Key == "http.response.header.custom-response-test-header3" && x.Value.StringValue == "Test-Value3")
+                   && span.Attributes.Any(x => x.Key == "http.response.header.custom-response-test-header1" && x.Value.StringValue == "Test-Value4")
+                   && span.Attributes.Any(x => x.Key == "http.response.header.custom-response-test-header3" && x.Value.StringValue == "Test-Value6")
                    && span.Attributes.All(x => x.Key != "http.response.header.custom-response-test-header2");
         });
 
-        collector.Expect("OpenTelemetry.Instrumentation.AspNet.Telemetry");
+        collector.Expect("OpenTelemetry.Instrumentation.AspNet.Telemetry", span => // Expect WebApi span
+        {
+            if (appPoolMode == "Classic")
+            {
+                return span.Attributes.Any(x => x.Key == "http.request.header.custom-request-test-header2" && x.Value.StringValue == "Test-Value2")
+                       && span.Attributes.All(x => x.Key != "http.request.header.custom-request-test-header1")
+                       && span.Attributes.All(x => x.Key != "http.request.header.custom-request-test-header3")
+                       && span.Attributes.Any(x => x.Key != "http.response.header.custom-response-test-header1")
+                       && span.Attributes.Any(x => x.Key != "http.response.header.custom-response-test-header3")
+                       && span.Attributes.All(x => x.Key != "http.response.header.custom-response-test-header2");
+            }
+
+            return span.Attributes.Any(x => x.Key == "http.request.header.custom-request-test-header2" && x.Value.StringValue == "Test-Value2")
+                   && span.Attributes.All(x => x.Key != "http.request.header.custom-request-test-header1")
+                   && span.Attributes.All(x => x.Key != "http.request.header.custom-request-test-header3")
+                   && span.Attributes.Any(x => x.Key == "http.response.header.custom-response-test-header1" && x.Value.StringValue == "Test-Value1")
+                   && span.Attributes.Any(x => x.Key == "http.response.header.custom-response-test-header3" && x.Value.StringValue == "Test-Value3")
+                   && span.Attributes.All(x => x.Key != "http.response.header.custom-response-test-header2");
+        });
 
         var collectorUrl = $"http://{DockerNetworkHelper.IntegrationTestsGateway}:{collector.Port}";
         _environmentVariables["OTEL_EXPORTER_OTLP_ENDPOINT"] = collectorUrl;
-        _environmentVariables["OTEL_DOTNET_AUTO_TRACES_ASPNETCORE_INSTRUMENTATION_CAPTURE_REQUEST_HEADERS"] = "Custom-Request-Test-Header2";
-        _environmentVariables["OTEL_DOTNET_AUTO_TRACES_ASPNETCORE_INSTRUMENTATION_CAPTURE_RESPONSE_HEADERS"] = "Custom-Response-Test-Header1,Custom-Response-Test-Header3";
+        _environmentVariables["OTEL_DOTNET_AUTO_TRACES_ASPNET_INSTRUMENTATION_CAPTURE_REQUEST_HEADERS"] = "Custom-Request-Test-Header2";
+        _environmentVariables["OTEL_DOTNET_AUTO_TRACES_ASPNET_INSTRUMENTATION_CAPTURE_RESPONSE_HEADERS"] = "Custom-Response-Test-Header1,Custom-Response-Test-Header3";
         var webPort = TcpPortProvider.GetOpenPort();
         await using var container = await StartContainerAsync(webPort, appPoolMode);
         await CallTestApplicationEndpoint(webPort);

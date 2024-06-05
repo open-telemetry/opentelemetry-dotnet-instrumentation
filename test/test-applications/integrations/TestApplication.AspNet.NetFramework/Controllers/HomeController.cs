@@ -14,6 +14,7 @@
 // limitations under the License.
 // </copyright>
 
+using System;
 using System.Linq;
 using System.Web.Mvc;
 using TestApplication.AspNet.NetFramework.Helpers;
@@ -31,6 +32,19 @@ public class HomeController : Controller
         ViewBag.HasEnvVars = envVars.Any();
         ViewBag.TracerAssemblies = AssembliesHelper.GetLoadedTracesAssemblies();
         ViewBag.AllAssemblies = AssembliesHelper.GetLoadedAssemblies();
+
+        try
+        {
+            var headers = HttpContext.Response.Headers;
+
+            headers.Add("Custom-Response-Test-Header1", "Test-Value4");
+            headers.Add("Custom-Response-Test-Header2", "Test-Value5");
+            headers.Add("Custom-Response-Test-Header3", "Test-Value6");
+        }
+        catch (PlatformNotSupportedException)
+        {
+            // do nothing, it can be raised on classic mode
+        }
 
         return View();
     }
