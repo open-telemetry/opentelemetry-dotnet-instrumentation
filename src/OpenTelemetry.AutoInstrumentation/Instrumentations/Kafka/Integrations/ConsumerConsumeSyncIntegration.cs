@@ -46,7 +46,7 @@ public static class ConsumerConsumeSyncIntegration
             consumeResult = response == null ? null : response.DuckAs<IConsumeResult>();
         }
 
-        if (consumeResult is not null)
+        if (consumeResult is not null && !consumeResult.IsPartitionEOF)
         {
             var activity = KafkaInstrumentation.StartConsumerActivity(consumeResult, (DateTimeOffset)state.StartTime!, instance!);
             if (exception is not null)

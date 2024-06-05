@@ -3,7 +3,7 @@
   "profiles": {
     "instrumented": {
       "commandName": "Project",
-      "commandLineArgs": "test-topic",
+      "commandLineArgs": "--topic-name test-topic",
       "environmentVariables": {
         "COR_ENABLE_PROFILING": "1",
         "COR_PROFILER": "{918728DD-259F-4A6A-AC2B-B85E1B658318}",
