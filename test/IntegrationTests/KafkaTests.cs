@@ -76,16 +76,38 @@ public class KafkaTests : TestHelper
         collector.Expect(KafkaInstrumentationScopeName, span => span.Kind == Span.Types.SpanKind.Consumer && ValidateConsumerSpan(span, topicName, 2), "Third successful Consume attempt.");
 
         collector.ExpectCollected(collection => ValidatePropagation(collection, topicName));
+        EnableBytecodeInstrumentation();
+
+        RunTestApplication(new TestSettings
+        {
+            PackageVersion = packageVersion,
+            Arguments = $"--topic-name {topicName}"
+        });
+
+        collector.AssertExpectations();
+    }
+
+    [Theory]
+    [Trait("Category", "EndToEnd")]
+    [Trait("Containers", "Linux")]
+    [MemberData(nameof(LibraryVersion.GetPlatformVersions), nameof(LibraryVersion.Kafka), MemberType = typeof(LibraryVersion))]
+    // ReSharper disable once InconsistentNaming
+    public void NoSpansForPartitionEOF(string packageVersion)
+    {
+        var topicName = $"test-topic2-{packageVersion}";
+
+        using var collector = new MockSpansCollector(Output);
+        SetExporter(collector);
 
         EnableBytecodeInstrumentation();
 
         RunTestApplication(new TestSettings
         {
             PackageVersion = packageVersion,
-            Arguments = topicName
+            Arguments = $"--topic-name {topicName} --consume-only"
         });
 
-        collector.AssertExpectations();
+        collector.AssertEmpty(TimeSpan.FromSeconds(10));
     }
 
     private static string GetConsumerGroupIdAttributeValue(string topicName)

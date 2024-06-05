@@ -13,8 +13,47 @@ internal static class Program
 
     public static async Task<int> Main(string[] args)
     {
-        var topicName = args[0];
+        if (args.Length < 2)
+        {
+            throw new ArgumentException("Required parameters not provided.");
+        }
 
+        var topicName = args[1];
+
+        if (args.Length == 3 && args[2] == "--consume-only")
+        {
+            return await ConsumeOnly(topicName);
+        }
+
+        if (args.Length == 2)
+        {
+            return await ProduceAndConsume(topicName);
+        }
+
+        throw new ArgumentException("Invalid parameters.");
+    }
+
+    private static async Task<int> ConsumeOnly(string topicName)
+    {
+        await CreateTopic(BootstrapServers, topicName);
+
+        using var consumer = BuildConsumer(topicName, BootstrapServers);
+        consumer.Subscribe(topicName);
+
+        using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(10));
+
+        var consumeResult = consumer.Consume(cts.Token);
+        if (consumeResult.IsPartitionEOF)
+        {
+            return 0;
+        }
+
+        Console.WriteLine("Unexpected Consume result.");
+        return 1;
+    }
+
+    private static async Task<int> ProduceAndConsume(string topicName)
+    {
         using var waitEvent = new ManualResetEventSlim();
 
         using var producer = BuildProducer(BootstrapServers);
@@ -142,6 +181,7 @@ internal static class Program
             // https://github.com/confluentinc/confluent-kafka-dotnet/tree/07de95ed647af80a0db39ce6a8891a630423b952#basic-consumer-example
             AutoOffsetReset = AutoOffsetReset.Earliest,
             CancellationDelayMaxMs = 5000,
+            EnablePartitionEof = true,
             EnableAutoCommit = true
         };
 
