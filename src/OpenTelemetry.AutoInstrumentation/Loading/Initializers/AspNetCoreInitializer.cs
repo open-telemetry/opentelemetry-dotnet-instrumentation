@@ -49,12 +49,12 @@ internal class AspNetCoreInitializer : InstrumentationInitializer
 
     private void EnrichWithHttpRequest(Activity activity, HttpRequest httpRequest)
     {
-        HeaderEnrichment.CaptureHeaders(activity, _tracerSettings.InstrumentationOptions.AspNetCoreInstrumentationCaptureRequestHeaders, httpRequest.Headers);
+        activity.AddHeadersAsTags(_tracerSettings.InstrumentationOptions.AspNetCoreInstrumentationCaptureRequestHeaders, httpRequest.Headers);
     }
 
     private void EnrichWithHttpResponse(Activity activity, HttpResponse httpResponse)
     {
-        HeaderEnrichment.CaptureHeaders(activity, _tracerSettings.InstrumentationOptions.AspNetCoreInstrumentationCaptureResponseHeaders, httpResponse.Headers);
+        activity.AddHeadersAsTags(_tracerSettings.InstrumentationOptions.AspNetCoreInstrumentationCaptureResponseHeaders, httpResponse.Headers);
     }
 }
 #endif

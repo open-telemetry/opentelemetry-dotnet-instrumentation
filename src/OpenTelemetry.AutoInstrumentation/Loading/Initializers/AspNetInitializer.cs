@@ -57,12 +57,12 @@ internal class AspNetInitializer
 
     private void EnrichWithHttpRequest(Activity activity, HttpRequest httpRequest)
     {
-        HeaderEnrichment.CaptureHeaders(activity, _tracerSettings.InstrumentationOptions.AspNetInstrumentationCaptureRequestHeaders, httpRequest.Headers);
+        activity.AddHeadersAsTags(_tracerSettings.InstrumentationOptions.AspNetInstrumentationCaptureRequestHeaders, httpRequest.Headers);
     }
 
     private void EnrichWithHttpResponse(Activity activity, HttpResponse httpResponse)
     {
-        HeaderEnrichment.CaptureHeaders(activity, _tracerSettings.InstrumentationOptions.AspNetInstrumentationCaptureResponseHeaders, httpResponse.Headers);
+        activity.AddHeadersAsTags(_tracerSettings.InstrumentationOptions.AspNetInstrumentationCaptureResponseHeaders, httpResponse.Headers);
     }
 }
 #endif

@@ -70,21 +70,21 @@ internal class HttpClientInitializer
 
     private void EnrichWithHttpRequestMessage(Activity activity, HttpRequestMessage httpRequestMessage)
     {
-        HeaderEnrichment.CaptureHeaders(activity, _tracerSettings.InstrumentationOptions.HttpInstrumentationCaptureRequestHeaders, httpRequestMessage.Headers);
+        activity.AddHeadersAsTags(_tracerSettings.InstrumentationOptions.HttpInstrumentationCaptureRequestHeaders, httpRequestMessage.Headers);
     }
 
     private void EnrichWithHttpWebRequest(Activity activity, HttpWebRequest httpWebRequest)
     {
-        HeaderEnrichment.CaptureHeaders(activity, _tracerSettings.InstrumentationOptions.HttpInstrumentationCaptureRequestHeaders, httpWebRequest.Headers);
+        activity.AddHeadersAsTags(_tracerSettings.InstrumentationOptions.HttpInstrumentationCaptureRequestHeaders, httpWebRequest.Headers);
     }
 
     private void EnrichWithHttpResponseMessage(Activity activity, HttpResponseMessage httpResponseMessage)
     {
-        HeaderEnrichment.CaptureHeaders(activity, _tracerSettings.InstrumentationOptions.HttpInstrumentationCaptureResponseHeaders, httpResponseMessage.Headers);
+        activity.AddHeadersAsTags(_tracerSettings.InstrumentationOptions.HttpInstrumentationCaptureResponseHeaders, httpResponseMessage.Headers);
     }
 
     private void EnrichWithHttpWebResponse(Activity activity, HttpWebResponse httpWebResponse)
     {
-        HeaderEnrichment.CaptureHeaders(activity, _tracerSettings.InstrumentationOptions.HttpInstrumentationCaptureResponseHeaders, httpWebResponse.Headers);
+        activity.AddHeadersAsTags(_tracerSettings.InstrumentationOptions.HttpInstrumentationCaptureResponseHeaders, httpWebResponse.Headers);
     }
 }

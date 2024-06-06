@@ -10,9 +10,9 @@ using Microsoft.AspNetCore.Http;
 
 namespace OpenTelemetry.AutoInstrumentation.HeadersCapture;
 
-internal static class HeaderEnrichment
+internal static class ActivityExtensions
 {
-    public static void CaptureHeaders(Activity activity, IReadOnlyList<AdditionalTag> additionalTags, NameValueCollection headers)
+    public static void AddHeadersAsTags(this Activity activity, IReadOnlyList<AdditionalTag> additionalTags, NameValueCollection headers)
     {
         if (!activity.IsAllDataRequested)
         {
@@ -41,7 +41,7 @@ internal static class HeaderEnrichment
     }
 
 #if NET6_0_OR_GREATER
-    public static void CaptureHeaders(Activity activity, IReadOnlyList<AdditionalTag> additionalTags, IHeaderDictionary headers)
+    public static void AddHeadersAsTags(this Activity activity, IReadOnlyList<AdditionalTag> additionalTags, IHeaderDictionary headers)
     {
         if (!activity.IsAllDataRequested)
         {
@@ -69,7 +69,7 @@ internal static class HeaderEnrichment
     }
 #endif
 
-    public static void CaptureHeaders(Activity activity, IReadOnlyList<AdditionalTag> additionalTags, HttpHeaders headers)
+    public static void AddHeadersAsTags(this Activity activity, IReadOnlyList<AdditionalTag> additionalTags, HttpHeaders headers)
     {
         if (!activity.IsAllDataRequested)
         {

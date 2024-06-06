@@ -49,11 +49,11 @@ internal class GrpcClientInitializer : InstrumentationInitializer
 
     private void EnrichWithHttpRequestMessage(Activity activity, HttpRequestMessage httpRequestMessage)
     {
-        HeaderEnrichment.CaptureHeaders(activity, _tracerSettings.InstrumentationOptions.GrpcNetClientInstrumentationCaptureRequestMetadata, httpRequestMessage.Headers);
+        activity.AddHeadersAsTags(_tracerSettings.InstrumentationOptions.GrpcNetClientInstrumentationCaptureRequestMetadata, httpRequestMessage.Headers);
     }
 
     private void EnrichWithHttpResponseMessage(Activity activity, HttpResponseMessage httpResponseMessage)
     {
-        HeaderEnrichment.CaptureHeaders(activity, _tracerSettings.InstrumentationOptions.GrpcNetClientInstrumentationCaptureResponseMetadata, httpResponseMessage.Headers);
+        activity.AddHeadersAsTags(_tracerSettings.InstrumentationOptions.GrpcNetClientInstrumentationCaptureResponseMetadata, httpResponseMessage.Headers);
     }
 }
