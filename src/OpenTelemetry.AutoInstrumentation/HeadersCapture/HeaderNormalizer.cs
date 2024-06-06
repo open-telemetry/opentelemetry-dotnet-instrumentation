@@ -5,7 +5,7 @@ namespace OpenTelemetry.AutoInstrumentation.HeadersCapture;
 
 internal static class HeaderNormalizer
 {
-    public static string NormalizeHeader(string httpHeaderName)
+    public static string Normalize(string httpHeaderName)
     {
         return httpHeaderName.ToLowerInvariant();
     }

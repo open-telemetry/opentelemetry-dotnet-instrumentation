@@ -8,7 +8,7 @@ internal class AdditionalTag
     private AdditionalTag(string key, string spanTagPrefix)
     {
         Key = key;
-        TagName = $"{spanTagPrefix}.{HeaderNormalizer.NormalizeHeader(key)}";
+        TagName = $"{spanTagPrefix}.{HeaderNormalizer.Normalize(key)}";
     }
 
     public string Key { get; }
