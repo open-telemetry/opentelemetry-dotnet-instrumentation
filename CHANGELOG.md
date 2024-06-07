@@ -37,6 +37,17 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
   for details.
 - Do not create consumer spans related to `PartitionEOF` events
   for `Confluent.Kafka` client instrumentation.
+- Following properties can be set before calling plugins:
+  - `OpenTelemetry.Instrumentation.AspNetCore.AspNetCoreTraceInstrumentationOptions.EnrichWithHttpRequest`,
+  - `OpenTelemetry.Instrumentation.AspNetCore.AspNetCoreTraceInstrumentationOptions.EnrichWithHttpResponse`,
+  - `OpenTelemetry.Instrumentation.AspNet.AspNetTraceInstrumentationOptions.EnrichWithHttpRequest`,
+  - `OpenTelemetry.Instrumentation.AspNet.AspNetTraceInstrumentationOptions.EnrichWithHttpResponse`,
+  - `OpenTelemetry.Instrumentation.GrpcNetClient.GrpcClientTraceInstrumentationOptions.EnrichWithHttpRequestMessage`,
+  - `OpenTelemetry.Instrumentation.GrpcNetClient.GrpcClientTraceInstrumentationOptions.EnrichWithHttpResponseMessage`,
+  - `OpenTelemetry.Instrumentation.Http.HttpClientTraceInstrumentationOptions.EnrichWithHttpRequestMessage`,
+  - `OpenTelemetry.Instrumentation.Http.HttpClientTraceInstrumentationOptions.EnrichWithHttpWebRequest`,
+  - `OpenTelemetry.Instrumentation.Http.HttpClientTraceInstrumentationOptions.EnrichWithHttpResponseMessage`,
+  - `OpenTelemetry.Instrumentation.Http.HttpClientTraceInstrumentationOptions.EnrichWithHttpWebResponse`.
 
 #### Dependency updates
 
