@@ -33,24 +33,24 @@ internal class InstrumentationOptions
 
 #if NETFRAMEWORK
     /// <summary>
-    /// Gets the list of HTTP request headers to be captured as the span tags.
+    /// Gets the list of HTTP request headers to be captured as the span tags by ASP.NET instrumentation.
     /// </summary>
     public IReadOnlyList<AdditionalTag> AspNetInstrumentationCaptureRequestHeaders { get; }
 
     /// <summary>
-    /// Gets the list of HTTP request headers to be captured as the span tags.
+    /// Gets the list of HTTP response headers to be captured as the span tags by ASP.NET instrumentation.
     /// </summary>
     public IReadOnlyList<AdditionalTag> AspNetInstrumentationCaptureResponseHeaders { get; }
 #endif
 
 #if NET6_0_OR_GREATER
     /// <summary>
-    /// Gets the list of HTTP request headers to be captured as the span tags.
+    /// Gets the list of HTTP request headers to be captured as the span tags by ASP.NET Core instrumentation.
     /// </summary>
     public IReadOnlyList<AdditionalTag> AspNetCoreInstrumentationCaptureRequestHeaders { get; }
 
     /// <summary>
-    /// Gets the list of HTTP request headers to be captured as the span tags.
+    /// Gets the list of HTTP response headers to be captured as the span tags by ASP.NET Core instrumentation.
     /// </summary>
     public IReadOnlyList<AdditionalTag> AspNetCoreInstrumentationCaptureResponseHeaders { get; }
 
@@ -66,22 +66,22 @@ internal class InstrumentationOptions
     public bool GraphQLSetDocument { get; }
 
     /// <summary>
-    /// Gets the list of HTTP request headers to be captured as the span tags.
+    /// Gets the list of request metadata to be captured as the span tags by Grpc.Net.Client instrumentation.
     /// </summary>
     public IReadOnlyList<AdditionalTag> GrpcNetClientInstrumentationCaptureRequestMetadata { get; }
 
     /// <summary>
-    /// Gets the list of HTTP request headers to be captured as the span tags.
+    /// Gets the list of response metadata to be captured as the span tags by Grpc.Net.Client instrumentation.
     /// </summary>
     public IReadOnlyList<AdditionalTag> GrpcNetClientInstrumentationCaptureResponseMetadata { get; }
 
     /// <summary>
-    /// Gets the list of HTTP request headers to be captured as the span tags.
+    /// Gets the list of HTTP request headers to be captured as the span tags by HTTP instrumentation.
     /// </summary>
     public IReadOnlyList<AdditionalTag> HttpInstrumentationCaptureRequestHeaders { get; }
 
     /// <summary>
-    /// Gets the list of HTTP request headers to be captured as the span tags.
+    /// Gets the list of HTTP response headers to be captured as the span tags by HTTP instrumentation.
     /// </summary>
     public IReadOnlyList<AdditionalTag> HttpInstrumentationCaptureResponseHeaders { get; }
 
