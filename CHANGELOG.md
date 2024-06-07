@@ -126,7 +126,7 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
   - `OpenTelemetry.Instrumentation.EntityFrameworkCore` from `1.0.0-beta.10` to `1.0.0-beta.11`,
   - `OpenTelemetry.ResourceDetectors.Container` from `1.0.0-beta.6` to `1.0.0-beta.7`.
 - .NET Framework only, following packages updated
-  - `Google.Protobuf` updated from `3.25.2` to `3.26.1`,
+  - `Google.Protobuf` updated from `3.25.2` to `3.27.1`,
   - `Grpc.Core.Api` from `2.60.0` to `2.62.0`,
   - `Microsoft.Extensions.DependencyInjection.Abstractions` from `8.0.0` to `8.0.1`,
   - `Microsoft.Extensions.Options` from `8.0.1` to `8.0.2`,
