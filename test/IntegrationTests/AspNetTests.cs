@@ -73,8 +73,8 @@ public class AspNetTests
                 return span.Attributes.Any(x => x.Key == "http.request.header.custom-request-test-header2" && x.Value.StringValue == "Test-Value2")
                        && span.Attributes.All(x => x.Key != "http.request.header.custom-request-test-header1")
                        && span.Attributes.All(x => x.Key != "http.request.header.custom-request-test-header3")
-                       && span.Attributes.Any(x => x.Key != "http.response.header.custom-response-test-header1")
-                       && span.Attributes.Any(x => x.Key != "http.response.header.custom-response-test-header3")
+                       && span.Attributes.All(x => x.Key != "http.response.header.custom-response-test-header1")
+                       && span.Attributes.All(x => x.Key != "http.response.header.custom-response-test-header3")
                        && span.Attributes.All(x => x.Key != "http.response.header.custom-response-test-header2");
             }
 
@@ -93,8 +93,8 @@ public class AspNetTests
                 return span.Attributes.Any(x => x.Key == "http.request.header.custom-request-test-header2" && x.Value.StringValue == "Test-Value2")
                        && span.Attributes.All(x => x.Key != "http.request.header.custom-request-test-header1")
                        && span.Attributes.All(x => x.Key != "http.request.header.custom-request-test-header3")
-                       && span.Attributes.Any(x => x.Key != "http.response.header.custom-response-test-header1")
-                       && span.Attributes.Any(x => x.Key != "http.response.header.custom-response-test-header3")
+                       && span.Attributes.All(x => x.Key != "http.response.header.custom-response-test-header1")
+                       && span.Attributes.All(x => x.Key != "http.response.header.custom-response-test-header3")
                        && span.Attributes.All(x => x.Key != "http.response.header.custom-response-test-header2");
             }
 
