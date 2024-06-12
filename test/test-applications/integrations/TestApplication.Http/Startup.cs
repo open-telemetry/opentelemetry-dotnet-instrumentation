@@ -40,6 +40,10 @@ public class Startup
                         activity?.SetTag("test_tag", "test_value");
                     }
 
+                    context.Response.Headers.Append("Custom-Response-Test-Header1", "Test-Value1");
+                    context.Response.Headers.Append("Custom-Response-Test-Header2", "Test-Value2");
+                    context.Response.Headers.Append("Custom-Response-Test-Header3", "Test-Value3");
+
                     await context.Response.WriteAsync("Pong");
                 }))
             .Map(

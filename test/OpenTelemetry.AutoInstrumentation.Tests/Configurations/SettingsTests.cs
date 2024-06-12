@@ -55,12 +55,22 @@ public class SettingsTests : IDisposable
             settings.AdditionalLegacySources.Should().BeEmpty();
 
             // Instrumentation options tests
-            settings.InstrumentationOptions.GraphQLSetDocument.Should().BeFalse();
-            settings.InstrumentationOptions.OracleMdaSetDbStatementForText.Should().BeFalse();
-            settings.InstrumentationOptions.SqlClientSetDbStatementForText.Should().BeFalse();
+#if NETFRAMEWORK
+            settings.InstrumentationOptions.AspNetInstrumentationCaptureRequestHeaders.Should().BeEmpty();
+            settings.InstrumentationOptions.AspNetInstrumentationCaptureResponseHeaders.Should().BeEmpty();
+#endif
 #if NET6_0_OR_GREATER
+            settings.InstrumentationOptions.AspNetCoreInstrumentationCaptureRequestHeaders.Should().BeEmpty();
+            settings.InstrumentationOptions.AspNetCoreInstrumentationCaptureResponseHeaders.Should().BeEmpty();
             settings.InstrumentationOptions.EntityFrameworkCoreSetDbStatementForText.Should().BeFalse();
 #endif
+            settings.InstrumentationOptions.GraphQLSetDocument.Should().BeFalse();
+            settings.InstrumentationOptions.GrpcNetClientInstrumentationCaptureRequestMetadata.Should().BeEmpty();
+            settings.InstrumentationOptions.GrpcNetClientInstrumentationCaptureResponseMetadata.Should().BeEmpty();
+            settings.InstrumentationOptions.HttpInstrumentationCaptureRequestHeaders.Should().BeEmpty();
+            settings.InstrumentationOptions.HttpInstrumentationCaptureResponseHeaders.Should().BeEmpty();
+            settings.InstrumentationOptions.OracleMdaSetDbStatementForText.Should().BeFalse();
+            settings.InstrumentationOptions.SqlClientSetDbStatementForText.Should().BeFalse();
         }
     }
 
@@ -369,7 +379,6 @@ public class SettingsTests : IDisposable
         }
 
         Environment.SetEnvironmentVariable(ConfigurationKeys.Traces.Exporter, null);
-        Environment.SetEnvironmentVariable(ConfigurationKeys.Traces.InstrumentationOptions.GraphQLSetDocument, null);
         Environment.SetEnvironmentVariable(ConfigurationKeys.ExporterOtlpProtocol, null);
         Environment.SetEnvironmentVariable(ConfigurationKeys.FlushOnUnhandledException, null);
         Environment.SetEnvironmentVariable(ConfigurationKeys.ResourceDetectorEnabled, null);
@@ -381,5 +390,22 @@ public class SettingsTests : IDisposable
         }
 
         Environment.SetEnvironmentVariable(ConfigurationKeys.Sdk.Propagators, null);
+
+#if NETFRAMEWORK
+        Environment.SetEnvironmentVariable(ConfigurationKeys.Traces.InstrumentationOptions.AspNetInstrumentationCaptureRequestHeaders, null);
+        Environment.SetEnvironmentVariable(ConfigurationKeys.Traces.InstrumentationOptions.AspNetInstrumentationCaptureResponseHeaders, null);
+#endif
+
+#if NET6_0_OR_GREATER
+        Environment.SetEnvironmentVariable(ConfigurationKeys.Traces.InstrumentationOptions.AspNetCoreInstrumentationCaptureRequestHeaders, null);
+        Environment.SetEnvironmentVariable(ConfigurationKeys.Traces.InstrumentationOptions.AspNetCoreInstrumentationCaptureResponseHeaders, null);
+        Environment.SetEnvironmentVariable(ConfigurationKeys.Traces.InstrumentationOptions.GraphQLSetDocument, null);
+#endif
+        Environment.SetEnvironmentVariable(ConfigurationKeys.Traces.InstrumentationOptions.GrpcNetClientInstrumentationCaptureRequestMetadata, null);
+        Environment.SetEnvironmentVariable(ConfigurationKeys.Traces.InstrumentationOptions.GrpcNetClientInstrumentationCaptureResponseMetadata, null);
+        Environment.SetEnvironmentVariable(ConfigurationKeys.Traces.InstrumentationOptions.HttpInstrumentationCaptureRequestHeaders, null);
+        Environment.SetEnvironmentVariable(ConfigurationKeys.Traces.InstrumentationOptions.HttpInstrumentationCaptureResponseHeaders, null);
+        Environment.SetEnvironmentVariable(ConfigurationKeys.Traces.InstrumentationOptions.OracleMdaSetDbStatementForText, null);
+        Environment.SetEnvironmentVariable(ConfigurationKeys.Traces.InstrumentationOptions.SqlClientSetDbStatementForText, null);
     }
 }

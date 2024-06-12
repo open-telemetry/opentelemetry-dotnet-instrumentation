@@ -14,30 +14,30 @@ internal static class DelayedInitialization
     {
 #if NETFRAMEWORK
         [MethodImpl(MethodImplOptions.NoInlining)]
-        public static void AddAspNet(LazyInstrumentationLoader lazyInstrumentationLoader, PluginManager pluginManager)
+        public static void AddAspNet(LazyInstrumentationLoader lazyInstrumentationLoader, PluginManager pluginManager, TracerSettings tracerSettings)
         {
-            new AspNetInitializer(lazyInstrumentationLoader, pluginManager);
+            new AspNetInitializer(lazyInstrumentationLoader, pluginManager, tracerSettings);
         }
 #endif
 
 #if NET6_0_OR_GREATER
         [MethodImpl(MethodImplOptions.NoInlining)]
-        public static void AddAspNetCore(LazyInstrumentationLoader lazyInstrumentationLoader, PluginManager pluginManager)
+        public static void AddAspNetCore(LazyInstrumentationLoader lazyInstrumentationLoader, PluginManager pluginManager, TracerSettings tracerSettings)
         {
-            lazyInstrumentationLoader.Add(new AspNetCoreInitializer(pluginManager));
+            lazyInstrumentationLoader.Add(new AspNetCoreInitializer(pluginManager, tracerSettings));
         }
 #endif
 
         [MethodImpl(MethodImplOptions.NoInlining)]
-        public static void AddHttpClient(LazyInstrumentationLoader lazyInstrumentationLoader, PluginManager pluginManager)
+        public static void AddHttpClient(LazyInstrumentationLoader lazyInstrumentationLoader, PluginManager pluginManager, TracerSettings tracerSettings)
         {
-            new HttpClientInitializer(lazyInstrumentationLoader, pluginManager);
+            new HttpClientInitializer(lazyInstrumentationLoader, pluginManager, tracerSettings);
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]
-        public static void AddGrpcClient(LazyInstrumentationLoader lazyInstrumentationLoader, PluginManager pluginManager)
+        public static void AddGrpcClient(LazyInstrumentationLoader lazyInstrumentationLoader, PluginManager pluginManager, TracerSettings tracerSettings)
         {
-            lazyInstrumentationLoader.Add(new GrpcClientInitializer(pluginManager));
+            lazyInstrumentationLoader.Add(new GrpcClientInitializer(pluginManager, tracerSettings));
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]

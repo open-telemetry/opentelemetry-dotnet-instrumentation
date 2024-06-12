@@ -16,8 +16,11 @@ public class Program
         var request = (HttpWebRequest)WebRequest.Create($"{address}/test");
         request.Method = "POST";
         request.ContentType = "text/plain";
+        request.Headers.Add("Custom-Request-Test-Header1", "Test-Value1");
+        request.Headers.Add("Custom-Request-Test-Header2", "Test-Value2");
+        request.Headers.Add("Custom-Request-Test-Header3", "Test-Value3");
 
-        using (Stream requestStream = request.GetRequestStream())
+        using (var requestStream = request.GetRequestStream())
         {
             var content = Encoding.UTF8.GetBytes("Ping");
 

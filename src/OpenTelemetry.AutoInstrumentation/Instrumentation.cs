@@ -321,17 +321,17 @@ internal static class Instrumentation
             {
 #if NETFRAMEWORK
                 case TracerInstrumentation.AspNet:
-                    DelayedInitialization.Traces.AddAspNet(lazyInstrumentationLoader, pluginManager);
+                    DelayedInitialization.Traces.AddAspNet(lazyInstrumentationLoader, pluginManager, tracerSettings);
                     break;
                 case TracerInstrumentation.WcfService:
                     AddWcfIfNeeded(lazyInstrumentationLoader, pluginManager, ref wcfInstrumentationAdded);
                     break;
 #endif
                 case TracerInstrumentation.HttpClient:
-                    DelayedInitialization.Traces.AddHttpClient(lazyInstrumentationLoader, pluginManager);
+                    DelayedInitialization.Traces.AddHttpClient(lazyInstrumentationLoader, pluginManager, tracerSettings);
                     break;
                 case TracerInstrumentation.GrpcNetClient:
-                    DelayedInitialization.Traces.AddGrpcClient(lazyInstrumentationLoader, pluginManager);
+                    DelayedInitialization.Traces.AddGrpcClient(lazyInstrumentationLoader, pluginManager, tracerSettings);
                     break;
                 case TracerInstrumentation.SqlClient:
                     DelayedInitialization.Traces.AddSqlClient(lazyInstrumentationLoader, pluginManager, tracerSettings);
@@ -344,7 +344,7 @@ internal static class Instrumentation
                     break;
 #if NET6_0_OR_GREATER
                 case TracerInstrumentation.AspNetCore:
-                    DelayedInitialization.Traces.AddAspNetCore(lazyInstrumentationLoader, pluginManager);
+                    DelayedInitialization.Traces.AddAspNetCore(lazyInstrumentationLoader, pluginManager, tracerSettings);
                     break;
                 case TracerInstrumentation.MySqlData:
                     break;

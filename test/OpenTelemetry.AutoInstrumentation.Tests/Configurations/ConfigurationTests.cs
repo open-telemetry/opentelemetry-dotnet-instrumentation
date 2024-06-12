@@ -105,7 +105,7 @@ public class ConfigurationTests
     }
 
     [Fact]
-    public void ParseEmptyAsNull_CompositeConfigurationSource()
+    public void ParseEnabledEnumList_ParseEmptyAsNull_CompositeConfigurationSource()
     {
         var mockSource = Substitute.For<IConfigurationSource>();
         mockSource.GetString(Arg.Is<string>(key => key == "TEST_NULL_VALUE")).Returns(_ => null);
@@ -117,5 +117,54 @@ public class ConfigurationTests
             compositeSource.GetString("TEST_NULL_VALUE").Should().BeNull();
             compositeSource.GetString("TEST_EMPTY_VALUE").Should().BeNull();
         }
+    }
+
+    [Fact]
+    public void ParseList_ParseSingleElement()
+    {
+        var source = new Configuration(false, new NameValueConfigurationSource(false, new NameValueCollection
+        {
+            { "TEST_LIST", "Value1" },
+        }));
+
+        var list = source.ParseList("TEST_LIST", ',');
+
+        list.Should().Equal("Value1");
+    }
+
+    [Fact]
+    public void ParseList_ParseMultipleList()
+    {
+        var source = new Configuration(false, new NameValueConfigurationSource(false, new NameValueCollection
+        {
+            { "TEST_LIST", "Value1,Value2" },
+        }));
+
+        var list = source.ParseList("TEST_LIST", ',');
+
+        list.Should().Equal("Value1", "Value2");
+    }
+
+    [Fact]
+    public void ParseList_ParseEmptyEntry()
+    {
+        var source = new Configuration(false, new NameValueConfigurationSource(false, new NameValueCollection
+        {
+            { "TEST_LIST", "Value1,,Value2" },
+        }));
+
+        var list = source.ParseList("TEST_LIST", ',');
+
+        list.Should().Equal("Value1", "Value2");
+    }
+
+    [Fact]
+    public void ParseList_ParseNullAsEmpty()
+    {
+        var source = new Configuration(false, new NameValueConfigurationSource(false, new NameValueCollection()));
+
+        var list = source.ParseList("TEST_LIST", ',');
+
+        list.Should().BeEmpty();
     }
 }

@@ -5,6 +5,7 @@ bitness
 bytecode
 cmake
 Codespaces
+Contoso
 coreutils
 corhlpr
 Couchbase
@@ -28,8 +29,10 @@ MASSTRANSIT
 metricsexporter
 mkdir
 mktemp
+monocytogenes
 MSMQ
 myapp
+mycompanymyproductmylibrary
 MYSQLCONNECTOR
 MYSQLDATA
 NETRUNTIME

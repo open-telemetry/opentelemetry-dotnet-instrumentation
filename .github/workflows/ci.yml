@@ -57,6 +57,9 @@ jobs:
         with:
           fetch-depth: 0 # fetching all, needed to correctly calculate version
 
+      - name: Set the GITHUB_RUNNER_SYSTEM environment variable
+        run: echo "GITHUB_RUNNER_SYSTEM=${{  matrix.machine  }}" >> $GITHUB_ENV
+
       - name: Setup ARM64 Environment Variables
         if: ${{ matrix.machine == 'actuated-arm64-4cpu-8gb' }}
         run: |
