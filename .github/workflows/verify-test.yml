@@ -43,7 +43,7 @@ jobs:
           dotnet-version: | 
             6.0.423
             7.0.410
-            8.0.301
+            8.0.302
 
       - name: Run BuildTracer and ManagedTests
         run: ./build.cmd BuildTracer ManagedTests --containers ${{ matrix.containers }} --test-project "${{ github.event.inputs.testProject }}" --test-name '"${{ github.event.inputs.testName }}"' --test-count ${{ github.event.inputs.count }}

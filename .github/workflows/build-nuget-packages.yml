@@ -33,7 +33,7 @@ jobs:
           dotnet-version: | 
             6.0.423
             7.0.410
-            8.0.301
+            8.0.302
 
       - name: Check for NuGet packages cache
         uses: actions/cache@v4.0.2
