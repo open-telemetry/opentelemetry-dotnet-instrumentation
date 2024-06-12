@@ -35,7 +35,7 @@
   <!-- Versions from SourceGenerators.csproj -->
   <ItemGroup>
     <PackageVersion Include="Microsoft.CodeAnalysis.Analyzers" Version="3.3.4" />
-    <PackageVersion Include="Microsoft.CodeAnalysis.CSharp" Version="4.7.0" />
+    <PackageVersion Include="Microsoft.CodeAnalysis.CSharp" Version="4.10.0" />
   </ItemGroup>
   <!-- Versions from CommonExcludedAssets.props -->
   <ItemGroup>
