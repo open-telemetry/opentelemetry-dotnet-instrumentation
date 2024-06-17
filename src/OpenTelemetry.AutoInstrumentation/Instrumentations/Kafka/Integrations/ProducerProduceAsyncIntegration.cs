@@ -17,7 +17,7 @@ namespace OpenTelemetry.AutoInstrumentation.Instrumentations.Kafka.Integrations;
 assemblyName: IntegrationConstants.ConfluentKafkaAssemblyName,
 typeName: IntegrationConstants.ProducerTypeName,
 methodName: IntegrationConstants.ProduceAsyncMethodName,
-returnTypeName: ClrNames.GenericTask,
+returnTypeName: IntegrationConstants.TaskOfDeliveryReportTypeName,
 parameterTypeNames: new[] { IntegrationConstants.TopicPartitionTypeName, IntegrationConstants.MessageTypeName, ClrNames.CancellationToken },
 minimumVersion: IntegrationConstants.MinVersion,
 maximumVersion: IntegrationConstants.MaxVersion,
