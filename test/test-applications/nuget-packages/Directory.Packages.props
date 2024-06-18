@@ -4,6 +4,6 @@
 
   <ItemGroup>
     <!-- This version is here to avoid compilation warnings. During the build is overriden by nuke tasks. -->
-    <PackageVersion Include="OpenTelemetry.AutoInstrumentation" Version="1.6.0" />
+    <PackageVersion Include="OpenTelemetry.AutoInstrumentation" Version="1.7.0" />
   </ItemGroup>
 </Project>
