@@ -7,6 +7,10 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 
 ## [Unreleased](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/compare/v1.6.0..HEAD)
 
+- [Core components](https://github.com/open-telemetry/opentelemetry-dotnet/blob/main/VERSIONING.md#core-components):
+  [`1.9.0`](https://github.com/open-telemetry/opentelemetry-dotnet/releases/tag/core-1.9.0)
+- `System.Diagnostics.DiagnosticSource`: [`8.0.0`](https://www.nuget.org/packages/System.Diagnostics.DiagnosticSource/8.0.0)
+
 ### Added
 
 - Support for capturing HTTP headers for following traces instrumentations:
@@ -52,10 +56,29 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 
 #### Dependency updates
 
+- Updated [Core components](https://github.com/open-telemetry/opentelemetry-dotnet/blob/main/VERSIONING.md#core-components):
+  [`1.9.0`](https://github.com/open-telemetry/opentelemetry-dotnet/releases/tag/core-1.9.0).
 - Following packages updated
-  - `OpenTelemetry.Instrumentation.Runtime` from `1.8.0` to `1.8.1`,
+  - `OpenTelemetry.Exporter.Prometheus.HttpListener` from `1.8.0-rc.1` to `1.9.0-beta.1`,
+  - `OpenTelemetry.Instrumentation.GrpcNetClient` from `1.8.0-beta.1` to `1.9.0-beta.1`,
+  - `OpenTelemetry.Instrumentation.Http` from `1.8.1` to `1.9.0`,
+  - `OpenTelemetry.Instrumentation.Process` from `0.5.0-beta.5` to `0.5.0-beta.6`,
+  - `OpenTelemetry.Instrumentation.Quartz` from `1.0.0-beta.2` to `1.0.0-beta.3`,
+  - `OpenTelemetry.Instrumentation.Runtime` from `1.7.0` to `1.8.0`,
+  - `OpenTelemetry.Instrumentation.SqlClient` from `1.8.0-beta.1` to `1.9.0-beta.1`,
+  - `OpenTelemetry.Instrumentation.StackExchangeRedis` from `1.0.0-rc9.14` to `1.0.0-rc9.15`,
+  - `OpenTelemetry.Instrumentation.Wcf` from `1.0.0-rc.16` to `1.0.0-rc.17`,
+  - `OpenTelemetry.Shims.OpenTracing` from `1.7.0-beta.1` to `1.9.0-beta.1`,
+  - `OpenTelemetry.Resources.Azure` from `1.0.0-beta.7` to `1.0.0-beta.8`,
+  - `OpenTelemetry.Resources.Host` from `0.1.0-beta.1` to `0.1.0-beta.2`.
+  - `OpenTelemetry.Resources.Process` from `0.1.0-beta.1` to `0.1.0-beta.2`.
+  - `OpenTelemetry.Resources.ProcessRuntime` from `0.1.0-beta.1` to `0.1.0-beta.2`.
+- .NET only, following packages updated
+  - `OpenTelemetry.Instrumentation.AspNetCore` from `1.8.1` to `1.9.0`,
+  - `OpenTelemetry.Instrumentation.EntityFrameworkCore` from `1.0.0-beta.11` to `1.0.0-beta.12`,
+  - `OpenTelemetry.Resources.Container` from `1.0.0-beta.7` to `1.0.0-beta.8`.
 - .NET Framework only, following packages updated
-  - `OpenTelemetry.Instrumentation.AspNet` from `1.8.0-beta.2` to `1.8.0-beta.3`.
+  - `OpenTelemetry.Instrumentation.AspNet` from `1.8.0-beta.2` to `1.9.0-beta.1`.
 
 ### Deprecated
 

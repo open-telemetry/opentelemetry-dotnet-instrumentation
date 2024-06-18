@@ -13,24 +13,24 @@
   <!-- Versions from OpenTelemetry.AutoInstrumentation.csproj -->
   <ItemGroup>
     <PackageVersion Include="MongoDB.Driver.Core.Extensions.DiagnosticSources" Version="1.4.0" />
-    <PackageVersion Include="OpenTelemetry.Exporter.Prometheus.HttpListener" Version="1.8.0-rc.1" />
-    <PackageVersion Include="OpenTelemetry.Exporter.Zipkin" Version="1.8.1" />
-    <PackageVersion Include="OpenTelemetry.Extensions.Propagators" Version="1.8.1" />
-    <PackageVersion Include="OpenTelemetry.Instrumentation.AspNet" Version="1.8.0-beta.3" />
-    <PackageVersion Include="OpenTelemetry.Instrumentation.AspNetCore" Version="1.8.1" />
-    <PackageVersion Include="OpenTelemetry.Instrumentation.EntityFrameworkCore" Version="1.0.0-beta.11" />
-    <PackageVersion Include="OpenTelemetry.Instrumentation.GrpcNetClient" Version="1.8.0-beta.1" />
-    <PackageVersion Include="OpenTelemetry.Instrumentation.Process" Version="0.5.0-beta.5" />
-    <PackageVersion Include="OpenTelemetry.Instrumentation.Quartz" Version="1.0.0-beta.2" />
-    <PackageVersion Include="OpenTelemetry.Instrumentation.Runtime" Version="1.8.1" />
-    <PackageVersion Include="OpenTelemetry.Instrumentation.SqlClient" Version="1.8.0-beta.1" />
-    <PackageVersion Include="OpenTelemetry.Instrumentation.StackExchangeRedis" Version="1.0.0-rc9.14" />
-    <PackageVersion Include="OpenTelemetry.Shims.OpenTracing" Version="1.7.0-beta.1" />
-    <PackageVersion Include="OpenTelemetry.Resources.Azure" Version="1.0.0-beta.7" />
-    <PackageVersion Include="OpenTelemetry.Resources.Container" Version="1.0.0-beta.8" />
-    <PackageVersion Include="OpenTelemetry.Resources.Host" Version="0.1.0-beta.1" />
-    <PackageVersion Include="OpenTelemetry.Resources.Process" Version="0.1.0-beta.1" />
-    <PackageVersion Include="OpenTelemetry.Resources.ProcessRuntime" Version="0.1.0-beta.1" />
+    <PackageVersion Include="OpenTelemetry.Exporter.Prometheus.HttpListener" Version="1.9.0-beta.1" />
+    <PackageVersion Include="OpenTelemetry.Exporter.Zipkin" Version="1.9.0" />
+    <PackageVersion Include="OpenTelemetry.Extensions.Propagators" Version="1.9.0" />
+    <PackageVersion Include="OpenTelemetry.Instrumentation.AspNet" Version="1.9.0-beta.1" />
+    <PackageVersion Include="OpenTelemetry.Instrumentation.AspNetCore" Version="1.9.0" />
+    <PackageVersion Include="OpenTelemetry.Instrumentation.EntityFrameworkCore" Version="1.0.0-beta.12" />
+    <PackageVersion Include="OpenTelemetry.Instrumentation.GrpcNetClient" Version="1.9.0-beta.1" />
+    <PackageVersion Include="OpenTelemetry.Instrumentation.Process" Version="0.5.0-beta.6" />
+    <PackageVersion Include="OpenTelemetry.Instrumentation.Quartz" Version="1.0.0-beta.3" />
+    <PackageVersion Include="OpenTelemetry.Instrumentation.Runtime" Version="1.9.0" />
+    <PackageVersion Include="OpenTelemetry.Instrumentation.SqlClient" Version="1.9.0-beta.1" />
+    <PackageVersion Include="OpenTelemetry.Instrumentation.StackExchangeRedis" Version="1.0.0-rc9.15" />
+    <PackageVersion Include="OpenTelemetry.Shims.OpenTracing" Version="1.9.0-beta.1" />
+    <PackageVersion Include="OpenTelemetry.Resources.Azure" Version="1.0.0-beta.8" />
+    <PackageVersion Include="OpenTelemetry.Resources.Container" Version="1.0.0-beta.9" />
+    <PackageVersion Include="OpenTelemetry.Resources.Host" Version="0.1.0-beta.2" />
+    <PackageVersion Include="OpenTelemetry.Resources.Process" Version="0.1.0-beta.2" />
+    <PackageVersion Include="OpenTelemetry.Resources.ProcessRuntime" Version="0.1.0-beta.2" />
   </ItemGroup>
   <!-- Versions from SourceGenerators.csproj -->
   <ItemGroup>

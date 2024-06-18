@@ -66,7 +66,7 @@ internal static class ResourceConfigurator
         [MethodImpl(MethodImplOptions.NoInlining)]
         public static ResourceBuilder AddAzureAppServiceResourceDetector(ResourceBuilder resourceBuilder)
         {
-            return resourceBuilder.AddAppServiceDetector();
+            return resourceBuilder.AddAzureAppServiceDetector();
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]
