@@ -29,7 +29,7 @@ public static partial class LibraryVersion
             {
                 new("8.0.0"),
                 new("8.10.0"),
-                new("8.14.0"),
+                new("8.14.2"),
             }
         },
         {
@@ -73,7 +73,7 @@ public static partial class LibraryVersion
             new List<PackageBuildInfo>
             {
                 new("8.0.0"),
-                new("8.2.2"),
+                new("8.2.3"),
             }
         },
         {
@@ -130,7 +130,7 @@ public static partial class LibraryVersion
             new List<PackageBuildInfo>
             {
                 new("8.0.0"),
-                new("9.0.1", supportedFrameworks: new string[] {"net8.0"}),
+                new("9.0.2", supportedFrameworks: new string[] {"net8.0"}),
             }
         },
         {
