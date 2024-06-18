@@ -64,7 +64,7 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
   - `OpenTelemetry.Instrumentation.Http` from `1.8.1` to `1.9.0`,
   - `OpenTelemetry.Instrumentation.Process` from `0.5.0-beta.5` to `0.5.0-beta.6`,
   - `OpenTelemetry.Instrumentation.Quartz` from `1.0.0-beta.2` to `1.0.0-beta.3`,
-  - `OpenTelemetry.Instrumentation.Runtime` from `1.7.0` to `1.8.0`,
+  - `OpenTelemetry.Instrumentation.Runtime` from `1.8.0` to `1.9.0`,
   - `OpenTelemetry.Instrumentation.SqlClient` from `1.8.0-beta.1` to `1.9.0-beta.1`,
   - `OpenTelemetry.Instrumentation.StackExchangeRedis` from `1.0.0-rc9.14` to `1.0.0-rc9.15`,
   - `OpenTelemetry.Instrumentation.Wcf` from `1.0.0-rc.16` to `1.0.0-rc.17`,
