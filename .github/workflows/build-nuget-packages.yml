@@ -75,8 +75,8 @@ jobs:
       - name: Download Mac-OS Artifacts from build job
         uses: actions/download-artifact@v4.1.7
         with:
-          name: bin-macos-11
-          path: bin/ci-artifacts/bin-macos-11
+          name: bin-macos-12
+          path: bin/ci-artifacts/bin-macos-12
 
       - name: Build NuGet packages
         run: ./build.cmd BuildNuGetPackages
