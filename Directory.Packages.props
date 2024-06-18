@@ -8,11 +8,11 @@
     <!-- Referencing Microsoft.SourceLink.GitHub directly is the workaround for lack of release DotNet.ReproducibleBuilds with 8.0.0 deoendencies. Ref: https://github.com/dotnet/reproducible-builds/pull/35 -->
     <PackageVersion Include="Microsoft.SourceLink.GitHub" Version="8.0.0" />
     <PackageVersion Include="MinVer" Version="5.0.0" />
-    <PackageVersion Include="OpenTelemetry" Version="1.8.1" />
-    <PackageVersion Include="OpenTelemetry.Api" Version="1.8.1" />
-    <PackageVersion Include="OpenTelemetry.Exporter.Console" Version="1.8.1" />
-    <PackageVersion Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" Version="1.8.1" />
-    <PackageVersion Include="OpenTelemetry.Instrumentation.Http" Version="1.8.1" />
-    <PackageVersion Include="OpenTelemetry.Instrumentation.Wcf" Version="1.0.0-rc.16" />
+    <PackageVersion Include="OpenTelemetry" Version="1.9.0" />
+    <PackageVersion Include="OpenTelemetry.Api" Version="1.9.0" />
+    <PackageVersion Include="OpenTelemetry.Exporter.Console" Version="1.9.0" />
+    <PackageVersion Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" Version="1.9.0" />
+    <PackageVersion Include="OpenTelemetry.Instrumentation.Http" Version="1.9.0" />
+    <PackageVersion Include="OpenTelemetry.Instrumentation.Wcf" Version="1.0.0-rc.17" />
   </ItemGroup>
 </Project>
