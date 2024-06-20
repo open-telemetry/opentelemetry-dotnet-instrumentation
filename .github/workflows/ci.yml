@@ -32,10 +32,10 @@ jobs:
       fail-fast: false
       matrix:
         test-tfm: [ net8.0, net7.0, net6.0, net462 ]
-        machine: [ windows-2022, ubuntu-20.04, macos-11, actuated-arm64-4cpu-8gb ]
+        machine: [ windows-2022, ubuntu-20.04, macos-12, actuated-arm64-4cpu-8gb ]
         exclude:
           - test-tfm: net462
-            machine: macos-11
+            machine: macos-12
           - test-tfm: net462
             machine: ubuntu-20.04
           - test-tfm: net462
@@ -45,7 +45,7 @@ jobs:
             containers: none
           - machine: ubuntu-20.04
             containers: linux
-          - machine: macos-11
+          - machine: macos-12
             containers: none
           - machine: actuated-arm64-4cpu-8gb
             containers: linux
@@ -56,9 +56,6 @@ jobs:
         uses: actions/checkout@v4.1.2
         with:
           fetch-depth: 0 # fetching all, needed to correctly calculate version
-
-      - name: Set the GITHUB_RUNNER_SYSTEM environment variable
-        run: echo "GITHUB_RUNNER_SYSTEM=${{  matrix.machine  }}" >> $GITHUB_ENV
 
       - name: Setup ARM64 Environment Variables
         if: ${{ matrix.machine == 'actuated-arm64-4cpu-8gb' }}
@@ -259,7 +256,7 @@ jobs:
       matrix:
         include:
           - machine: ubuntu-20.04
-          - machine: macos-11
+          - machine: macos-12
           - machine: windows-2022
           - machine: actuated-arm64-4cpu-8gb
     runs-on: ${{ matrix.machine }}

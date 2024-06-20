@@ -195,9 +195,27 @@ public class SmokeTests : TestHelper
         SetEnvironmentVariable("OTEL_TRACES_EXPORTER", "zipkin");
         SetEnvironmentVariable("OTEL_EXPORTER_ZIPKIN_ENDPOINT", $"http://localhost:{collector.Port}/api/v2/spans");
         SetEnvironmentVariable("OTEL_DOTNET_AUTO_TRACES_ADDITIONAL_SOURCES", "MyCompany.MyProduct.MyLibrary");
-        RunTestApplication();
+        SetEnvironmentVariable("LONG_RUNNING", "true");
 
-        collector.AssertExpectations();
+        using var process = StartTestApplication();
+        using var helper = new ProcessHelper(process);
+
+        try
+        {
+            collector.AssertExpectations();
+        }
+        finally
+        {
+            if (helper?.Process != null && !helper.Process.HasExited)
+            {
+                helper.Process.Kill();
+                helper.Process.WaitForExit();
+
+                Output.WriteLine("ProcessId: " + helper.Process.Id);
+                Output.WriteLine("Exit Code: " + helper.Process.ExitCode);
+                Output.WriteResult(helper);
+            }
+        }
     }
 
 #if NETFRAMEWORK // The test is flaky on Linux and macOS, because of https://github.com/dotnet/runtime/issues/28658#issuecomment-462062760
