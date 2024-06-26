@@ -2,10 +2,10 @@
   <Import Project="..\Directory.Packages.props" />
   <ItemGroup>
     <PackageVersion Include="Azure.Storage.Blobs" Version="12.20.0" />
-    <PackageVersion Include="Elastic.Clients.Elasticsearch" Version="8.14.2" />
+    <PackageVersion Include="Elastic.Clients.Elasticsearch" Version="8.14.3" />
     <PackageVersion Include="Confluent.Kafka" Version="2.4.0" />
     <PackageVersion Include="FluentAssertions" Version="6.12.0" />
-    <PackageVersion Include="Google.Protobuf" Version="3.27.1" />
+    <PackageVersion Include="Google.Protobuf" Version="3.27.2" />
     <PackageVersion Include="GraphQL" Version="7.8.0" />
     <PackageVersion Include="GraphQL.MicrosoftDI" Version="7.8.0" />
     <PackageVersion Include="GraphQL.Server.Transports.AspNetCore" Version="7.7.1" />
@@ -29,7 +29,7 @@
     <PackageVersion Include="Microsoft.Extensions.Hosting" Version="8.0.0" />
     <PackageVersion Include="Microsoft.Extensions.Logging" Version="8.0.0" />
     <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="17.10.0" />
-    <PackageVersion Include="MongoDB.Driver" Version="2.25.0" />
+    <PackageVersion Include="MongoDB.Driver" Version="2.26.0" />
     <PackageVersion Include="NSubstitute" Version="5.1.0" />
     <PackageVersion Include="MySqlConnector" Version="2.3.7" />
     <PackageVersion Include="MySql.Data" Version="8.4.0" />
@@ -41,10 +41,10 @@
     <PackageVersion Include="Oracle.ManagedDataAccess" Version="23.4.0" />
     <PackageVersion Include="Oracle.ManagedDataAccess.Core" Version="23.4.0" />
     <PackageVersion Include="Pomelo.EntityFrameworkCore.MySql" Version="8.0.2" />
-    <PackageVersion Include="Quartz" Version="3.9.0" />
-    <PackageVersion Include="Quartz.Extensions.DependencyInjection" Version="3.9.0" />
-    <PackageVersion Include="Quartz.Extensions.Hosting" Version="3.9.0" />
-    <PackageVersion Include="StackExchange.Redis" Version="2.7.33" />
+    <PackageVersion Include="Quartz" Version="3.10.0" />
+    <PackageVersion Include="Quartz.Extensions.DependencyInjection" Version="3.10.0" />
+    <PackageVersion Include="Quartz.Extensions.Hosting" Version="3.10.0" />
+    <PackageVersion Include="StackExchange.Redis" Version="2.8.0" />
     <PackageVersion Include="StrongNamer" Version="0.2.5" />
     <PackageVersion Include="System.Collections.Immutable" Version="8.0.0" />
     <PackageVersion Include="System.Data.SqlClient" Version="4.8.6" />

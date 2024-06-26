@@ -37,7 +37,7 @@ public static partial class LibraryVersion
 #else
             theoryData.Add("8.0.0");
             theoryData.Add("8.10.0");
-            theoryData.Add("8.14.2");
+            theoryData.Add("8.14.3");
 #endif
             return theoryData;
         }
@@ -162,7 +162,7 @@ public static partial class LibraryVersion
             theoryData.Add(string.Empty);
 #else
             theoryData.Add("2.19.0");
-            theoryData.Add("2.25.0");
+            theoryData.Add("2.26.0");
 #endif
             return theoryData;
         }
@@ -262,7 +262,7 @@ public static partial class LibraryVersion
             theoryData.Add(string.Empty);
 #else
             theoryData.Add("3.4.0");
-            theoryData.Add("3.9.0");
+            theoryData.Add("3.10.0");
 #endif
             return theoryData;
         }
@@ -279,7 +279,7 @@ public static partial class LibraryVersion
             theoryData.Add("2.1.50");
             theoryData.Add("2.5.61");
             theoryData.Add("2.6.66");
-            theoryData.Add("2.7.33");
+            theoryData.Add("2.8.0");
 #endif
             return theoryData;
         }

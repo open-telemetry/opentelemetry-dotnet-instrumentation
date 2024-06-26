@@ -13,6 +13,12 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 
 #### Dependency updates
 
+- Following packages updated
+  - `OpenTelemetry.Exporter.Prometheus.HttpListener` from `1.9.0-beta.1` to `1.9.0-beta.2`,
+  - `OpenTelemetry.Shims.OpenTracing` from `1.9.0-beta.1` to `1.9.0-beta.2`.
+- .NET Framework only, following packages updated
+  - `Google.Protobuf` updated from `3.27.1` to `3.27.2`.
+
 ### Deprecated
 
 ### Removed
