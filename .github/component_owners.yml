@@ -4,6 +4,8 @@
 # Please add the entries in alphabetically sorted order
 components:
   CHANGELOG.md:
+    - pauljwil
     - theletterf
   docs/:
+    - pauljwil
     - theletterf
