@@ -4,7 +4,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageVersion Include="DotNet.ReproducibleBuilds" Version="1.1.1" />
+    <PackageVersion Include="DotNet.ReproducibleBuilds" Version="1.2.4" />
     <!-- Referencing Microsoft.SourceLink.GitHub directly is the workaround for lack of release DotNet.ReproducibleBuilds with 8.0.0 deoendencies. Ref: https://github.com/dotnet/reproducible-builds/pull/35 -->
     <PackageVersion Include="Microsoft.SourceLink.GitHub" Version="8.0.0" />
     <PackageVersion Include="MinVer" Version="5.0.0" />
