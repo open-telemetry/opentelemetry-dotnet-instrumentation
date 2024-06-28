@@ -12,7 +12,7 @@
     <NoWarn>$(NoWarn);NU5128</NoWarn>
 
     <!-- The version of certain packages is needed to copy dependencies when creating the NuGet package -->
-    <NuGetVersioningVersion>6.5.0</NuGetVersioningVersion>
+    <NuGetVersioningVersion>6.10.1</NuGetVersioningVersion>
   </PropertyGroup>
 
   <!-- ItemGroup with build files -->
