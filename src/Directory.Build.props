@@ -9,6 +9,8 @@
     <DebugType>portable</DebugType>
     <IncludeSymbols>true</IncludeSymbols>
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+    <SignAssembly>true</SignAssembly>
+    <AssemblyOriginatorKeyFile>$(MSBuildThisFileDirectory)keypair.snk</AssemblyOriginatorKeyFile>
 
     <!-- NuGet packages -->
     <IsPackable>true</IsPackable>
