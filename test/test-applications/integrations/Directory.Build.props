@@ -2,7 +2,6 @@
   <Import Project="$(MSBuildThisFileDirectory)..\..\..\Common.props" />
 
   <Import Project="$(MSBuildThisFileDirectory)Integrations.props" />
-  <Import Project="$(MSBuildThisFileDirectory)..\..\AddTestStrongNameAssemblyKeyOnNetFramework.props" />
 
   <ItemGroup>
     <Compile Include="$(MSBuildThisFileDirectory)\dependency-libs\TestApplication.Shared\ConsoleHelper.cs" Link="Shared\ConsoleHelper.cs" />

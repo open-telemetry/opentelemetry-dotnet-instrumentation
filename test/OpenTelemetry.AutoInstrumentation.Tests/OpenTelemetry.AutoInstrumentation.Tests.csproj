@@ -1,9 +1,5 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <AddTestStrongNameAssemblyKeyOnNetFramework>true</AddTestStrongNameAssemblyKeyOnNetFramework>
-  </PropertyGroup>
-
   <ItemGroup>
     <PackageReference Include="Xunit.SkippableFact" />
   </ItemGroup>

@@ -26,7 +26,7 @@ public class StrongNamedTests : TestHelper
 
         EnableBytecodeInstrumentation();
         SetEnvironmentVariable("OTEL_DOTNET_AUTO_TRACES_ADDITIONAL_SOURCES", "ByteCode.Plugin.StrongNamedValidation");
-        SetEnvironmentVariable("OTEL_DOTNET_AUTO_PLUGINS", "TestLibrary.InstrumentationTarget.Plugin, TestLibrary.InstrumentationTarget, Version=1.0.0.0, Culture=neutral, PublicKeyToken=0223b52cbfd4bd5b");
+        SetEnvironmentVariable("OTEL_DOTNET_AUTO_PLUGINS", "TestLibrary.InstrumentationTarget.Plugin, TestLibrary.InstrumentationTarget, Version=1.0.0.0, Culture=neutral, PublicKeyToken=c0db600a13f60b51");
         RunTestApplication();
 
         // TODO: When native logs are moved to an EventSource implementation check for the log
@@ -44,7 +44,7 @@ public class StrongNamedTests : TestHelper
 
         var assembly = Assembly.ReflectionOnlyLoadFrom(testApplicationPath);
 
-        BitConverter.ToString(assembly.GetName().GetPublicKeyToken()).Replace("-", string.Empty).ToLowerInvariant().Should().Be("0223b52cbfd4bd5b");
+        BitConverter.ToString(assembly.GetName().GetPublicKeyToken()).Replace("-", string.Empty).ToLowerInvariant().Should().Be("c0db600a13f60b51");
     }
 #endif
 
