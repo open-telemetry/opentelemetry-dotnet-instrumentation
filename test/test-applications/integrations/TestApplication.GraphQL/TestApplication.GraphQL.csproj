@@ -11,7 +11,6 @@
     <PackageReference Include="GraphQL.MicrosoftDI" VersionOverride="$(GraphQLMicrosoftDI)" />
     <PackageReference Include="GraphQL.Server.Transports.AspNetCore" VersionOverride="$(GraphQLServerTransportsAspNetCore)" />
     <PackageReference Include="GraphQL.Server.Ui.Playground" VersionOverride="$(GraphQLServerUIPlayground)" />
-    <PackageReference Include="Microsoft.AspNetCore" />
     <PackageReference Include="System.Diagnostics.DiagnosticSource" />
     <PackageReference Include="System.Reactive" />
   </ItemGroup>
