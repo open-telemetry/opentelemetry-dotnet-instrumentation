@@ -8,7 +8,7 @@ namespace OpenTelemetry.AutoInstrumentation.Loader.Tests;
 
 public class LoaderTests
 {
-    private ITestOutputHelper _testOutput;
+    private readonly ITestOutputHelper _testOutput;
 
     public LoaderTests(ITestOutputHelper testOutput)
     {

@@ -84,6 +84,9 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OpenTelemetry.AutoInstrumentation.Loader.Tests", "test\OpenTelemetry.AutoInstrumentation.Loader.Tests\OpenTelemetry.AutoInstrumentation.Loader.Tests.csproj", "{735434B9-6555-4DEE-97FC-786C763CA1F1}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "mocks", "mocks", "{E3ABDF7D-4592-4923-907C-D351DDF1CBE9}"
+	ProjectSection(SolutionItems) = preProject
+		test\test-applications\mocks\Directory.Build.props = test\test-applications\mocks\Directory.Build.props
+	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OpenTelemetry.AutoInstrumentation.Mock", "test\test-applications\mocks\OpenTelemetry.AutoInstrumentation.Mock\OpenTelemetry.AutoInstrumentation.Mock.csproj", "{CF5EFBA1-A852-4D11-968D-CE6A9A46B299}"
 EndProject
