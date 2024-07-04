@@ -157,6 +157,9 @@ When running your application, make sure to:
 > [!NOTE]
 > Some settings can be omitted on .NET. For more information, see [config.md](config.md#net-clr-profiler).
 
+> [!IMPORTANT]
+> Starting in .NET 8, the environment variable `DOTNET_EnableDiagnostics=0` disables all diagnostics, including the CLR Profiler facility which is needed to launch the instrumentation, if not using .NET Startup hooks. Ensure that `DOTNET_EnableDiagnostics=1`, or if you'd like to limit diagnostics only to the CLR Profiler, you may set both `DOTNET_EnableDiagnostics=1` and `DOTNET_EnableDiagnostics_Profiler=1` while setting other diagnostics features to 0. See this [issue](https://github.com/dotnet/runtime/issues/96227#issuecomment-1865326080) for more guidance.
+
 ### Shell scripts
 
 You can install OpenTelemetry .NET Automatic Instrumentation
