@@ -50,7 +50,7 @@ jobs:
 
       - name: Upload logs
         if: always()
-        uses: actions/upload-artifact@v4.3.3
+        uses: actions/upload-artifact@v4.3.4
         with:
           name: logs-${{ matrix.machine }}
           path: test-artifacts/

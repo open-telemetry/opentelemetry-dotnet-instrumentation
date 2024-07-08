@@ -127,14 +127,14 @@ jobs:
 
       - name: Upload binaries
         if: always()
-        uses: actions/upload-artifact@v4.3.3
+        uses: actions/upload-artifact@v4.3.4
         with:
           name: bin-${{ matrix.machine }}
           path: bin/tracer-home
 
       - name: Upload installation scripts
         if: always()
-        uses: actions/upload-artifact@v4.3.3
+        uses: actions/upload-artifact@v4.3.4
         with:
           name: installation-scripts-${{ matrix.machine }}
           path: bin/installation-scripts
