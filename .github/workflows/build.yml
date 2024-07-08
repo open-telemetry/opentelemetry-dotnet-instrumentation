@@ -79,7 +79,7 @@ jobs:
 
       - name: Download native CentOS Artifacts from build job
         if: ${{ matrix.machine == 'ubuntu-20.04' }}
-        uses: actions/download-artifact@v4.1.7
+        uses: actions/download-artifact@v4.1.8
         with:
           name: bin-centos-native
           path: bin/ci-artifacts/bin-centos-native
