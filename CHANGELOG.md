@@ -24,7 +24,7 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 
 ### Removed
 
-- Support for [macOS Big Sur 11 x64](https://github.com/actions/runner-images/blob/main/images/macos/macos-11-Readme.md).
+- Support for macOS Big Sur 11 x64.
   macOs libraries are built and tested against [macOS Monterey 12 x64](https://github.com/actions/runner-images/blob/main/images/macos/macos-12-Readme.md).
 
 ### Fixed
@@ -106,7 +106,7 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 
 ### Deprecated
 
-- Support for [macOS Big Sur 11 x64](https://github.com/actions/runner-images/blob/main/images/macos/macos-11-Readme.md).
+- Support for macOS Big Sur 11 x64.
   All further releases will be supporting [macOS Monterey 12 x64](https://github.com/actions/runner-images/blob/main/images/macos/macos-12-Readme.md)
   and newer.
 
