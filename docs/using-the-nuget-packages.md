@@ -2,7 +2,9 @@
 
 ## When to use the NuGet packages
 
-Use the NuGet packages in the following scenarios:
+The NuGet packages are the recommended way to deploy automatic instrumentation,
+but they can't be used in all cases. Use the NuGet packages in the following
+scenarios:
 
 1. Simplify deployment. For example, a container running a single application.
 1. Support instrumentation of [`self-contained`](https://learn.microsoft.com/en-us/dotnet/core/deploying/#publish-self-contained)
@@ -14,7 +16,7 @@ Use the NuGet packages in the following scenarios:
 
 ## Limitations
 
-While NuGet packages are a convenient way to deploy automatic
+While NuGet packages are the recommended way to deploy automatic
 instrumentation, they can't be used in all cases. The most common
 reasons for not using NuGet packages include the following:
 

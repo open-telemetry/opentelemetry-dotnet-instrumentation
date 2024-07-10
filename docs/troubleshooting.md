@@ -149,8 +149,9 @@ to use the same versions as OpenTelemetry .NET Automatic Instrumentation.
 A simple way to ensure that no such conflicts happen is to add the
 `OpenTelemetry.AutoInstrumentation` package to your application.
 For instructions about how to add it to your application, see
-[Using the OpenTelemetry.AutoInstrumentation NuGet packages](./using-the-nuget-packages.md#using-the-opentelemetryautoinstrumentation-nuget-packages)
-.
+[Using the OpenTelemetry.AutoInstrumentation NuGet packages](./using-the-nuget-packages.md#using-the-opentelemetryautoinstrumentation-nuget-packages). 
+This is the recommended way to deploy automatic instrumentation, but it can't
+be used in all scenarios.
 
 Alternatively add only the conflicting packages to your project.
 The following dependencies are used by OpenTelemetry .NET Automatic Instrumentation:
