@@ -17,13 +17,14 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
   - `OpenTelemetry.Exporter.Prometheus.HttpListener` from `1.9.0-beta.1` to `1.9.0-beta.2`,
   - `OpenTelemetry.Shims.OpenTracing` from `1.9.0-beta.1` to `1.9.0-beta.2`.
 - .NET Framework only, following packages updated
-  - `Google.Protobuf` updated from `3.27.1` to `3.27.2`.
+  - `Google.Protobuf` updated from `3.27.1` to `3.27.2`,
+  - `System.Text.Json` from `8.0.3` to `8.0.4`.
 
 ### Deprecated
 
 ### Removed
 
-- Support for [macOS Big Sur 11 x64](https://github.com/actions/runner-images/blob/main/images/macos/macos-11-Readme.md).
+- Support for macOS Big Sur 11 x64.
   macOs libraries are built and tested against [macOS Monterey 12 x64](https://github.com/actions/runner-images/blob/main/images/macos/macos-12-Readme.md).
 
 ### Fixed
@@ -105,7 +106,7 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 
 ### Deprecated
 
-- Support for [macOS Big Sur 11 x64](https://github.com/actions/runner-images/blob/main/images/macos/macos-11-Readme.md).
+- Support for macOS Big Sur 11 x64.
   All further releases will be supporting [macOS Monterey 12 x64](https://github.com/actions/runner-images/blob/main/images/macos/macos-12-Readme.md)
   and newer.
 
