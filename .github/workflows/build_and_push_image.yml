@@ -16,23 +16,23 @@ jobs:
     steps:
 
       - name: Checkout
-        uses: actions/checkout@v4.1.2
+        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # tag: v4.1.7
 
       - name: Log in to the Container registry
-        uses: docker/login-action@v3.2.0
+        uses: docker/login-action@0d4c9c5ea7693da7b068278f7b52bda2a190a446 # tag: v3.2.0
         with:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Extract metadata (tags, labels) for Docker
-        uses: docker/metadata-action@v5.5.1
+        uses: docker/metadata-action@8e5442c4ef9f78752691e2d8f8d19755c6f78e81 # tag: v5.5.1
         id: meta
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
 
       - name: Build and push Docker image
-        uses: docker/build-push-action@v6.3.0
+        uses: docker/build-push-action@1a162644f9a7e87d8f4b053101d1d9a712edc18c #tag: v6.3.0
         with:
           file: ./docker/centos-build.dockerfile
           push: true
