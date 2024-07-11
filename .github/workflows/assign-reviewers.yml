@@ -16,7 +16,7 @@ jobs:
     steps:
         
       - name: Assign reviewers
-        uses: dyladan/component-owners@main
+        uses: dyladan/component-owners@cdaadffde64c918909ee081e3fe044b8910f56c2 # tag: main
         with:
           assign-owners: "false"
           request-owner-reviews: "true"
