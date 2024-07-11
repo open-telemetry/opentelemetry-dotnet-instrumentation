@@ -23,12 +23,12 @@ jobs:
     steps:
 
       - name: Checkout
-        uses: actions/checkout@v4.1.2
+        uses: actions/checkout@9bb56186c3b09b4f86b1c65136769dd318469633 # tag: v4.1.2
         with:
           fetch-depth: 0 # fetching all, needed to correctly calculate version
 
       - name: Setup .NET
-        uses: actions/setup-dotnet@v4.0.0
+        uses: actions/setup-dotnet@4d6c8fcf3c8f7a60068d26b594648e99df24cee3 # tag: v4.0.0
         with:
           dotnet-version: | 
             6.0.423
@@ -36,44 +36,44 @@ jobs:
             8.0.302
 
       - name: Check for NuGet packages cache
-        uses: actions/cache@v4.0.2
+        uses: actions/cache@0c45773b623bea8c8e75f6c82b208c3cf94ea4f9 # tag: v4.0.2
         id: nuget-cache
         with:
           key: ${{ hashFiles('**/Directory.packages.props', './build/LibraryVersions.g.cs', '**/packages.config' ) }}
           path: ${{ env.NUGET_PACKAGES }}
 
       - name: Download Windows Artifacts from build job
-        uses: actions/download-artifact@v4.1.8
+        uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d16 # tag: v4.1.8
         with:
           name: bin-windows-2022
           path: bin/ci-artifacts/bin-windows-2022
 
       - name: Download Ubuntu x64 Artifacts from build job
-        uses: actions/download-artifact@v4.1.8
+        uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d16 # tag: v4.1.8
         with:
           name: bin-ubuntu-20.04
           path: bin/ci-artifacts/bin-ubuntu-20.04
 
       - name: Download Ubuntu arm64 Artifacts from build job
-        uses: actions/download-artifact@v4.1.8
+        uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d16 # tag: v4.1.8
         with:
           name: bin-actuated-arm64-4cpu-8gb
           path: bin/ci-artifacts/bin-actuated-arm64-4cpu-8gb
 
       - name: Download Alpine x64 Artifacts from build job
-        uses: actions/download-artifact@v4.1.8
+        uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d16 # tag: v4.1.8
         with:
           name: bin-alpine-x64
           path: bin/ci-artifacts/bin-alpine-x64
 
       - name: Download Alpine arm64 Artifacts from build job
-        uses: actions/download-artifact@v4.1.8
+        uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d16 # tag: v4.1.8
         with:
           name: bin-alpine-arm64
           path: bin/ci-artifacts/bin-alpine-arm64
 
       - name: Download Mac-OS Artifacts from build job
-        uses: actions/download-artifact@v4.1.8
+        uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d16 # tag: v4.1.8
         with:
           name: bin-macos-12
           path: bin/ci-artifacts/bin-macos-12
@@ -102,7 +102,7 @@ jobs:
           }
         
       - name: Upload Nuget Artifacts
-        uses: actions/upload-artifact@v4.3.4
+        uses: actions/upload-artifact@0b2256b8c012f0828dc542b3febcab082c67f72b # tag: v4.3.4
         with:
           name: bin-nuget-packages
           path: bin/nuget-artifacts/
