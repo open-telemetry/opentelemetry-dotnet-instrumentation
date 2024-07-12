@@ -514,6 +514,21 @@ public class SmokeTests : TestHelper
 #else
         resourceExpector.Expect("process.runtime.name", ".NET");
 #endif
+        var platform = Environment.OSVersion.Platform;
+        if (platform == PlatformID.Win32NT)
+        {
+            resourceExpector.Expect("os.type", "windows");
+        }
+
+        if (platform == PlatformID.MacOSX)
+        {
+            resourceExpector.Expect("os.type", "darwin");
+        }
+
+        if (platform == PlatformID.Unix)
+        {
+            resourceExpector.Expect("os.type", "linux");
+        }
     }
 
     private void VerifyTestApplicationInstrumented(TestAppStartupMode startupMode = TestAppStartupMode.Auto)
