@@ -31,7 +31,12 @@ internal enum ResourceDetector
     Process = 3,
 
     /// <summary>
+    /// Operating System resource detector.
+    /// </summary>
+    OperatingSystem = 4,
+
+    /// <summary>
     /// Host resource detector.
     /// </summary>
-    Host = 4
+    Host = 5
 }
