@@ -1,0 +1,56 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project Sdk="Microsoft.NET.Sdk">
+  <Import Project="..\CommonExcludedAssets.props" />
+  <PropertyGroup>
+    <PackageId>OpenTelemetry.AutoInstrumentation.Runtime.Managed</PackageId>
+    <Description>Managed components used by the OpenTelemetry.AutoInstrumentation project.</Description>
+    <EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
+    <GeneratedFolder>Generated</GeneratedFolder>
+    <CompilerGeneratedFilesOutputPath>$(GeneratedFolder)\$(TargetFramework)</CompilerGeneratedFilesOutputPath>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\SourceGenerators\SourceGenerators.csproj" ReferenceOutputAssembly="false" OutputItemType="Analyzer" />
+    <Compile Remove="$(GeneratedFolder)/*/**/*.cs" />
+  </ItemGroup>
+  <!-- Separate dependencies are to be shipped in the distribution but not on the NuGet package -->
+  <ItemGroup Condition="$(_IsPacking) != true">
+    <!-- Dependencies below are shipped on the distribution folder, but not included in the NuGet package. -->
+    <!-- If necessary these packages are flagged by custom build tasks and manually added to the targeted  -->
+    <!-- projects that are using the NuGet package. -->
+    <PackageReference Include="MongoDB.Driver.Core.Extensions.DiagnosticSources" />
+    <PackageReference Include="OpenTelemetry.Instrumentation.StackExchangeRedis" Condition=" '$(TargetFramework)' == 'net6.0' " />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="OpenTelemetry" />
+    <PackageReference Include="OpenTelemetry.Api" />
+    <PackageReference Include="OpenTelemetry.Exporter.Console" />
+    <PackageReference Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" />
+    <PackageReference Include="OpenTelemetry.Exporter.Prometheus.HttpListener" />
+    <PackageReference Include="OpenTelemetry.Exporter.Zipkin" />
+    <PackageReference Include="OpenTelemetry.Extensions.Propagators" />
+    <PackageReference Include="OpenTelemetry.Instrumentation.GrpcNetClient" />
+    <PackageReference Include="OpenTelemetry.Instrumentation.Http" />
+    <PackageReference Include="OpenTelemetry.Instrumentation.Quartz" />
+    <PackageReference Include="OpenTelemetry.Instrumentation.Runtime" />
+    <PackageReference Include="OpenTelemetry.Instrumentation.Process" />
+    <PackageReference Include="OpenTelemetry.Instrumentation.SqlClient" />
+    <PackageReference Include="OpenTelemetry.Resources.Azure" />
+    <PackageReference Include="OpenTelemetry.Resources.Host" />
+    <PackageReference Include="OpenTelemetry.Resources.OperatingSystem" />
+    <PackageReference Include="OpenTelemetry.Resources.Process" />
+    <PackageReference Include="OpenTelemetry.Resources.ProcessRuntime" />
+    <PackageReference Include="OpenTelemetry.Shims.OpenTracing" />
+    <PackageReference Include="OpenTelemetry.Instrumentation.Wcf" />
+  </ItemGroup>
+  <ItemGroup Condition=" '$(TargetFramework)' == 'net462' ">
+    <Reference Include="System.ServiceModel" ExcludeAssets="all" />
+    <Reference Include="System.Configuration" />
+    <Reference Include="System.Web" />
+    <PackageReference Include="OpenTelemetry.Instrumentation.AspNet" />
+  </ItemGroup>
+  <ItemGroup Condition=" '$(TargetFramework)' == 'net6.0' ">
+    <PackageReference Include="OpenTelemetry.Instrumentation.AspNetCore" />
+    <PackageReference Include="OpenTelemetry.Instrumentation.EntityFrameworkCore" />
+    <PackageReference Include="OpenTelemetry.Resources.Container" />
+  </ItemGroup>
+</Project>
