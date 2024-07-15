@@ -514,20 +514,25 @@ public class SmokeTests : TestHelper
 #else
         resourceExpector.Expect("process.runtime.name", ".NET");
 #endif
-        var platform = Environment.OSVersion.Platform;
-        if (platform == PlatformID.Win32NT)
-        {
-            resourceExpector.Expect("os.type", "windows");
-        }
 
-        if (platform == PlatformID.MacOSX)
-        {
-            resourceExpector.Expect("os.type", "darwin");
-        }
+        var platform = EnvironmentTools.GetOS();
 
-        if (platform == PlatformID.Unix)
+        switch (platform)
         {
-            resourceExpector.Expect("os.type", "linux");
+            case "win":
+                resourceExpector.Expect("os.type", "windows");
+                break;
+
+            case "osx":
+                resourceExpector.Expect("os.type", "darwin");
+                break;
+
+            case "linux":
+                resourceExpector.Expect("os.type", "linux");
+                break;
+
+            default:
+                throw new PlatformNotSupportedException($"Unknown platform: {platform}");
         }
     }
 
