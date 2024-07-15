@@ -4,6 +4,6 @@
     <PackageVersion Include="McMaster.Extensions.CommandLineUtils" Version="4.1.1" />
     <PackageVersion Include="Microsoft.Build" Version="17.6.3" />
     <PackageVersion Include="NuGet.ProjectModel" Version="6.10.1" />
-    <PackageVersion Include="System.IO.Abstractions" Version="21.0.22" />
+    <PackageVersion Include="System.IO.Abstractions" Version="21.0.26" />
   </ItemGroup>
 </Project>
