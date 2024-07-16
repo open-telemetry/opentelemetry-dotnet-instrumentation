@@ -1,1 +1,1 @@
-FROM mongo:5.0.28
+FROM mongo:5.0.28@sha256:fd08cf3c5aae3268a032a7064c60a4bc0fb468ee9a7b6b1b45b9b2335e4fda3e

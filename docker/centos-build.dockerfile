@@ -1,4 +1,4 @@
-FROM centos:centos7.9.2009
+FROM centos:centos7.9.2009@sha256:be65f488b7764ad3638f236b7b515b3678369a5124c47b8d32916d6487418ea4
 
 RUN yum update -y \
     && yum -y install centos-release-scl-2-3.el7.centos \
