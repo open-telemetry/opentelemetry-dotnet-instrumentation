@@ -10,7 +10,7 @@ jobs:
     steps:
 
       - name: Setup .NET
-        uses: actions/setup-dotnet@v4.0.0
+        uses: actions/setup-dotnet@6bd8b7f7774af54e05809fcc5431931b3eb1ddee # tag: v4.0.1
         with:
           dotnet-version: | 
             6.0.423
@@ -65,7 +65,7 @@ jobs:
           echo "DOTNET_INSTALL_DIR=~/.dotnet" >> $GITHUB_ENV
 
       - name: Setup .NET
-        uses: actions/setup-dotnet@v4.0.0
+        uses: actions/setup-dotnet@6bd8b7f7774af54e05809fcc5431931b3eb1ddee # tag: v4.0.1
         with:
           dotnet-version: | 
             6.0.423
@@ -114,7 +114,7 @@ jobs:
     steps:
 
       - name: Checkout
-        uses: actions/checkout@v4.1.2
+        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # tag: v4.1.7
 
       - name: Test the Shell scripts from README.md in Docker container
         run: |
