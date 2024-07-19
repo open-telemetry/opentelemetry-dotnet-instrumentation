@@ -47,7 +47,7 @@ public class SettingsTests : IDisposable
         using (new AssertionScope())
         {
             settings.TracesEnabled.Should().BeTrue();
-            settings.TracesExporter.Should().Be(TracesExporter.Otlp);
+            settings.TracesExporters.Should().Equal(TracesExporter.Otlp);
             settings.OtlpExportProtocol.Should().Be(OtlpExportProtocol.HttpProtobuf);
             settings.ConsoleExporterEnabled.Should().BeFalse();
             settings.EnabledInstrumentations.Should().NotBeEmpty();
@@ -82,7 +82,7 @@ public class SettingsTests : IDisposable
         using (new AssertionScope())
         {
             settings.MetricsEnabled.Should().BeTrue();
-            settings.MetricExporter.Should().Be(MetricsExporter.Otlp);
+            settings.MetricExporters.Should().Equal(MetricsExporter.Otlp);
             settings.OtlpExportProtocol.Should().Be(OtlpExportProtocol.HttpProtobuf);
             settings.ConsoleExporterEnabled.Should().BeFalse();
             settings.EnabledInstrumentations.Should().NotBeEmpty();
@@ -98,7 +98,7 @@ public class SettingsTests : IDisposable
         using (new AssertionScope())
         {
             settings.LogsEnabled.Should().BeTrue();
-            settings.LogExporter.Should().Be(LogExporter.Otlp);
+            settings.LogExporters.Should().Equal(LogExporter.Otlp);
             settings.OtlpExportProtocol.Should().Be(OtlpExportProtocol.HttpProtobuf);
             settings.ConsoleExporterEnabled.Should().BeFalse();
             settings.EnabledInstrumentations.Should().NotBeEmpty();
@@ -118,17 +118,27 @@ public class SettingsTests : IDisposable
     }
 
     [Theory]
-    [InlineData("none", TracesExporter.None)]
-    [InlineData("non-supported", TracesExporter.Otlp)]
-    [InlineData("otlp", TracesExporter.Otlp)]
-    [InlineData("zipkin", TracesExporter.Zipkin)]
-    internal void TracesExporter_SupportedValues(string tracesExporter, TracesExporter expectedTracesExporter)
+    [InlineData("", new[] { TracesExporter.Otlp })]
+    [InlineData("none", new[] { TracesExporter.None })]
+    [InlineData("non-supported", new[] { TracesExporter.Otlp })]
+    [InlineData("otlp", new[] { TracesExporter.Otlp })]
+    [InlineData("zipkin", new[] { TracesExporter.Zipkin })]
+    [InlineData(",otlp,", new[] { TracesExporter.Otlp })]
+    [InlineData("ziPKin", new[] { TracesExporter.Zipkin })]
+    [InlineData("zipkinnm", new[] { TracesExporter.Otlp })]
+    [InlineData("otlp, zipkin", new[] { TracesExporter.Otlp, TracesExporter.Zipkin })]
+    [InlineData("zipkin,otlp", new[] { TracesExporter.Zipkin, TracesExporter.Otlp })]
+    [InlineData("otlp, otlp", new[] { TracesExporter.Otlp })]
+    [InlineData("otlp, none", new[] { TracesExporter.Otlp })]
+    [InlineData(",none, zipkin", new[] { TracesExporter.Zipkin })]
+    [InlineData("otlp, zipkin, zipkin,,, none", new[] { TracesExporter.Otlp, TracesExporter.Zipkin })]
+    internal void TracesExporter_SupportedValues(string tracesExporter, TracesExporter[] expectedTracesExporter)
     {
         Environment.SetEnvironmentVariable(ConfigurationKeys.Traces.Exporter, tracesExporter);
 
         var settings = Settings.FromDefaultSources<TracerSettings>(false);
 
-        settings.TracesExporter.Should().Be(expectedTracesExporter);
+        settings.TracesExporters.Should().Equal(expectedTracesExporter);
     }
 
     [Fact]
@@ -142,17 +152,26 @@ public class SettingsTests : IDisposable
     }
 
     [Theory]
-    [InlineData("none", MetricsExporter.None)]
-    [InlineData("non-supported", MetricsExporter.Otlp)]
-    [InlineData("otlp", MetricsExporter.Otlp)]
-    [InlineData("prometheus", MetricsExporter.Prometheus)]
-    internal void MetricExporter_SupportedValues(string metricExporter, MetricsExporter expectedMetricsExporter)
+    [InlineData("", new[] { MetricsExporter.Otlp })]
+    [InlineData("none", new[] { MetricsExporter.None })]
+    [InlineData("non-supported", new[] { MetricsExporter.Otlp })]
+    [InlineData("otlp", new[] { MetricsExporter.Otlp })]
+    [InlineData("prometheus", new[] { MetricsExporter.Prometheus })]
+    [InlineData(",otlp,", new[] { MetricsExporter.Otlp })]
+    [InlineData("promeTHeus", new[] { MetricsExporter.Prometheus })]
+    [InlineData("prometheusss", new[] { MetricsExporter.Otlp })]
+    [InlineData("otlp, prometheus", new[] { MetricsExporter.Otlp, MetricsExporter.Prometheus })]
+    [InlineData("prometheus,otlp", new[] { MetricsExporter.Prometheus, MetricsExporter.Otlp })]
+    [InlineData("prometheus, none", new[] { MetricsExporter.Prometheus })]
+    [InlineData("prometheus, prometheus", new[] { MetricsExporter.Prometheus })]
+    [InlineData("prometheus, otlp, otlp,,, none", new[] { MetricsExporter.Prometheus, MetricsExporter.Otlp })]
+    internal void MetricExporter_SupportedValues(string metricExporter, MetricsExporter[] expectedMetricsExporters)
     {
         Environment.SetEnvironmentVariable(ConfigurationKeys.Metrics.Exporter, metricExporter);
 
         var settings = Settings.FromDefaultSources<MetricSettings>(false);
 
-        settings.MetricExporter.Should().Be(expectedMetricsExporter);
+        settings.MetricExporters.Should().Equal(expectedMetricsExporters);
     }
 
     [Fact]
@@ -166,16 +185,22 @@ public class SettingsTests : IDisposable
     }
 
     [Theory]
-    [InlineData("none", LogExporter.None)]
-    [InlineData("non-supported", LogExporter.Otlp)]
-    [InlineData("otlp", LogExporter.Otlp)]
-    internal void LogExporter_SupportedValues(string logExporter, LogExporter expectedLogExporter)
+    [InlineData("", new[] { LogExporter.Otlp })]
+    [InlineData("none", new[] { LogExporter.None })]
+    [InlineData("non-supported", new[] { LogExporter.Otlp })]
+    [InlineData("otlp", new[] { LogExporter.Otlp })]
+    [InlineData("otlp, none", new[] { LogExporter.Otlp })]
+    [InlineData("none, otlp", new[] { LogExporter.Otlp })]
+    [InlineData(",otlp,", new[] { LogExporter.Otlp })]
+    [InlineData(",otlppp,", new[] { LogExporter.Otlp })]
+    [InlineData(",OTlp, NoNe", new[] { LogExporter.Otlp })]
+    internal void LogExporter_SupportedValues(string logExporter, LogExporter[] expectedLogExporter)
     {
         Environment.SetEnvironmentVariable(ConfigurationKeys.Logs.Exporter, logExporter);
 
         var settings = Settings.FromDefaultSources<LogSettings>(false);
 
-        settings.LogExporter.Should().Be(expectedLogExporter);
+        settings.LogExporters.Should().Equal(expectedLogExporter);
     }
 
     [Fact]
