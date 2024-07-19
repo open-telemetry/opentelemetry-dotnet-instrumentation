@@ -18,9 +18,9 @@ internal class LogSettings : Settings
     public bool LogsEnabled { get; private set; }
 
     /// <summary>
-    /// Gets the logs exporter.
+    /// Gets the list of enabled logs exporters.
     /// </summary>
-    public LogExporter LogExporter { get; private set; }
+    public IReadOnlyList<LogExporter> LogExporters { get; private set; } = new List<LogExporter>();
 
     /// <summary>
     /// Gets a value indicating whether the IncludeFormattedMessage is enabled.
@@ -40,7 +40,7 @@ internal class LogSettings : Settings
     protected override void OnLoad(Configuration configuration)
     {
         LogsEnabled = configuration.GetBool(ConfigurationKeys.Logs.LogsEnabled) ?? true;
-        LogExporter = ParseLogExporter(configuration);
+        LogExporters = ParseLogExporter(configuration);
         ConsoleExporterEnabled = configuration.GetBool(ConfigurationKeys.Logs.ConsoleExporterEnabled) ?? false;
         IncludeFormattedMessage = configuration.GetBool(ConfigurationKeys.Logs.IncludeFormattedMessage) ?? false;
 
@@ -53,30 +53,60 @@ internal class LogSettings : Settings
             enabledConfigurationTemplate: ConfigurationKeys.Logs.EnabledLogsInstrumentationTemplate);
     }
 
-    private static LogExporter ParseLogExporter(Configuration configuration)
+    private static IReadOnlyList<LogExporter> ParseLogExporter(Configuration configuration)
     {
-        var logExporterEnvVar = configuration.GetString(ConfigurationKeys.Logs.Exporter)
-            ?? Constants.ConfigurationValues.Exporters.Otlp;
+        var logExporterEnvVar = configuration.GetString(ConfigurationKeys.Logs.Exporter);
 
-        switch (logExporterEnvVar)
+        if (string.IsNullOrWhiteSpace(logExporterEnvVar))
         {
-            case null:
-            case "":
-            case Constants.ConfigurationValues.Exporters.Otlp:
-                return LogExporter.Otlp;
-            case Constants.ConfigurationValues.None:
-                return LogExporter.None;
-            default:
-                if (configuration.FailFast)
-                {
-                    var message = $"Log exporter '{logExporterEnvVar}' is not supported.'.";
-                    Logger.Error(message);
-                    throw new NotSupportedException(message);
-                }
-
-                Logger.Error($"Log exporter '{logExporterEnvVar}' is not supported. Defaulting to '{Constants.ConfigurationValues.Exporters.Otlp}'.");
-
-                return LogExporter.Otlp;
+            logExporterEnvVar = Constants.ConfigurationValues.Exporters.Otlp;
         }
+
+        var exporters = new HashSet<LogExporter>();
+
+        var exporterNames = logExporterEnvVar?.ToLower()
+                                              .Split(',')
+                                              .Select(e => e.Trim())
+                                              .Where(e => !string.IsNullOrEmpty(e))
+                                              .ToList();
+
+        if (exporterNames != null)
+        {
+            var hasExporter = exporterNames.Count > 1;
+
+            foreach (var exporterName in exporterNames)
+            {
+                switch (exporterName)
+                {
+                    case Constants.ConfigurationValues.Exporters.Otlp:
+                        exporters.Add(LogExporter.Otlp);
+                        break;
+                    case Constants.ConfigurationValues.None:
+                        if (!hasExporter)
+                        {
+                            exporters.Add(LogExporter.None);
+                        }
+
+                        break;
+                    default:
+                        if (configuration.FailFast)
+                        {
+                            var message = $"Log exporter '{exporterName}' is not supported.";
+                            Logger.Error(message);
+                            throw new NotSupportedException(message);
+                        }
+
+                        Logger.Error($"Log exporter '{exporterName}' is not supported. Defaulting to '{Constants.ConfigurationValues.Exporters.Otlp}'.");
+                        exporters.Add(LogExporter.Otlp);
+                        break;
+                }
+            }
+        }
+        else
+        {
+            exporters.Add(LogExporter.Otlp);
+        }
+
+        return exporters.ToList().AsReadOnly();
     }
 }

@@ -80,23 +80,26 @@ internal static class LogBuilderExtensions
                     }
                 }
 
-                switch (settings.LogExporter)
+                foreach (var logExporter in settings.LogExporters)
                 {
-                    case LogExporter.Otlp:
-                        options.AddOtlpExporter(otlpOptions =>
-                        {
-                            if (settings.OtlpExportProtocol.HasValue)
+                    switch (logExporter)
+                    {
+                        case LogExporter.Otlp:
+                            options.AddOtlpExporter(otlpOptions =>
                             {
-                                otlpOptions.Protocol = settings.OtlpExportProtocol.Value;
-                            }
+                                if (settings.OtlpExportProtocol.HasValue)
+                                {
+                                    otlpOptions.Protocol = settings.OtlpExportProtocol.Value;
+                                }
 
-                            pluginManager?.ConfigureLogsOptions(otlpOptions);
-                        });
-                        break;
-                    case LogExporter.None:
-                        break;
-                    default:
-                        throw new ArgumentOutOfRangeException($"Logs exporter '{settings.LogExporter}' is incorrect");
+                                pluginManager?.ConfigureLogsOptions(otlpOptions);
+                            });
+                            break;
+                        case LogExporter.None:
+                            break;
+                        default:
+                            throw new ArgumentOutOfRangeException($"Logs exporter '{logExporter}' is incorrect");
+                    }
                 }
             });
 
