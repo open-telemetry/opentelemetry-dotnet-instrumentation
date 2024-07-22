@@ -15,14 +15,14 @@ internal class OtlpSettings
     {
         Protocol = GetExporterOtlpProtocol(signalType, configuration);
 
-        var (priority, def) = OtlpSpecConfigDefinitions.GetHeadersEnvVars(signalType);
-        Headers = configuration.GetString(priority, def);
+        var priorityVar = OtlpSpecConfigDefinitions.GetHeadersEnvVar(signalType);
+        Headers = configuration.GetString(priorityVar);
 
-        (priority, def) = OtlpSpecConfigDefinitions.GetTimeoutEnvVars(signalType);
-        TimeoutMilliseconds = configuration.GetInt32(priority, def);
+        priorityVar = OtlpSpecConfigDefinitions.GetTimeoutEnvVar(signalType);
+        TimeoutMilliseconds = configuration.GetInt32(priorityVar);
 
-        (priority, def) = OtlpSpecConfigDefinitions.GetEndpointEnvVars(signalType);
-        Endpoint = configuration.GetUri(priority, def);
+        priorityVar = OtlpSpecConfigDefinitions.GetEndpointEnvVar(signalType);
+        Endpoint = configuration.GetUri(priorityVar);
     }
 
     /// <summary>
@@ -72,8 +72,9 @@ internal class OtlpSettings
     private static OtlpExportProtocol? GetExporterOtlpProtocol(OtlpSignalType signalType, Configuration configuration)
     {
         // the default in SDK is grpc. http/protobuf should be default for our purposes
-        var (priority, def) = OtlpSpecConfigDefinitions.GetProtocolEnvVars(signalType);
-        var exporterOtlpProtocol = configuration.GetString(priority, def);
+        var priorityVar = OtlpSpecConfigDefinitions.GetProtocolEnvVar(signalType);
+        var exporterOtlpProtocol = configuration.GetString(priorityVar) ??
+            configuration.GetString(OtlpSpecConfigDefinitions.DefaultProtocolEnvVarName);
 
         if (string.IsNullOrEmpty(exporterOtlpProtocol))
         {

@@ -31,55 +31,47 @@ internal static class OtlpSpecConfigDefinitions
     public const string TracesTimeoutEnvVarName = "OTEL_EXPORTER_OTLP_TRACES_TIMEOUT";
     public const string TracesProtocolEnvVarName = "OTEL_EXPORTER_OTLP_TRACES_PROTOCOL";
 
-    public static (string PriorityVar, string DefaultVar) GetProtocolEnvVars(OtlpSignalType signal)
+    public static string GetProtocolEnvVar(OtlpSignalType signal)
     {
-        var special = signal switch
+        return signal switch
         {
             OtlpSignalType.Traces => TracesProtocolEnvVarName,
             OtlpSignalType.Metrics => MetricsProtocolEnvVarName,
             OtlpSignalType.Logs => LogsProtocolEnvVarName,
             _ => throw new NotSupportedException()
         };
-
-        return (special, DefaultProtocolEnvVarName);
     }
 
-    public static (string PriorityVar, string DefaultVar) GetHeadersEnvVars(OtlpSignalType signal)
+    public static string GetHeadersEnvVar(OtlpSignalType signal)
     {
-        var special = signal switch
+        return signal switch
         {
             OtlpSignalType.Traces => TracesHeadersEnvVarName,
             OtlpSignalType.Metrics => MetricsHeadersEnvVarName,
             OtlpSignalType.Logs => LogsHeadersEnvVarName,
             _ => throw new NotSupportedException()
         };
-
-        return (special, DefaultHeadersEnvVarName);
     }
 
-    public static (string PriorityVar, string DefaultVar) GetEndpointEnvVars(OtlpSignalType signal)
+    public static string GetEndpointEnvVar(OtlpSignalType signal)
     {
-        var special = signal switch
+        return signal switch
         {
             OtlpSignalType.Traces => TracesEndpointEnvVarName,
             OtlpSignalType.Metrics => MetricsEndpointEnvVarName,
             OtlpSignalType.Logs => LogsEndpointEnvVarName,
             _ => throw new NotSupportedException()
         };
-
-        return (special, DefaultEndpointEnvVarName);
     }
 
-    public static (string PriorityVar, string DefaultVar) GetTimeoutEnvVars(OtlpSignalType signal)
+    public static string GetTimeoutEnvVar(OtlpSignalType signal)
     {
-        var special = signal switch
+        return signal switch
         {
             OtlpSignalType.Traces => TracesTimeoutEnvVarName,
             OtlpSignalType.Metrics => MetricsTimeoutEnvVarName,
             OtlpSignalType.Logs => LogsTimeoutEnvVarName,
             _ => throw new NotSupportedException()
         };
-
-        return (special, DefaultTimeoutEnvVarName);
     }
 }

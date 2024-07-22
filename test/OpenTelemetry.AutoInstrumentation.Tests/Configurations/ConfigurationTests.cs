@@ -167,35 +167,4 @@ public class ConfigurationTests
 
         list.Should().BeEmpty();
     }
-
-    [Fact]
-    public void GetString_Priority_Exists()
-    {
-        var source = new Configuration(false, new NameValueConfigurationSource(false, new NameValueCollection
-        {
-            { "PRIORITY_KEY", "priority-value" },
-            { "DEFAULT_KEY", "default-value" }
-        }));
-
-        source.GetString("PRIORITY_KEY", "DEFAULT_KEY").Should().Be("priority-value");
-    }
-
-    [Fact]
-    public void GetString_Priority_NotExists()
-    {
-        var source = new Configuration(false, new NameValueConfigurationSource(false, new NameValueCollection
-        {
-            { "DEFAULT_KEY", "default-value" }
-        }));
-
-        source.GetString("PRIORITY_KEY", "DEFAULT_KEY").Should().Be("default-value");
-    }
-
-    [Fact]
-    public void GetString_Priority_Empty()
-    {
-        var source = new Configuration(false, new NameValueConfigurationSource(false, new NameValueCollection()));
-
-        source.GetString("PRIORITY_KEY", "DEFAULT_KEY").Should().BeNull();
-    }
 }
