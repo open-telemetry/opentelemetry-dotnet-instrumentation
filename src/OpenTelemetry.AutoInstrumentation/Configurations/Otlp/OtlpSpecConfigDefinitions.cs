@@ -25,7 +25,6 @@ internal static class OtlpSpecConfigDefinitions
     public const string MetricsHeadersEnvVarName = "OTEL_EXPORTER_OTLP_METRICS_HEADERS";
     public const string MetricsTimeoutEnvVarName = "OTEL_EXPORTER_OTLP_METRICS_TIMEOUT";
     public const string MetricsProtocolEnvVarName = "OTEL_EXPORTER_OTLP_METRICS_PROTOCOL";
-    public const string MetricsTemporalityPreferenceEnvVarName = "OTEL_EXPORTER_OTLP_METRICS_TEMPORALITY_PREFERENCE";
 
     public const string TracesEndpointEnvVarName = "OTEL_EXPORTER_OTLP_TRACES_ENDPOINT";
     public const string TracesHeadersEnvVarName = "OTEL_EXPORTER_OTLP_TRACES_HEADERS";
