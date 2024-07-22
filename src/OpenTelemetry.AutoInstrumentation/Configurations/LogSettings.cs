@@ -57,14 +57,14 @@ internal class LogSettings : Settings
     {
         var logExporterEnvVar = configuration.GetString(ConfigurationKeys.Logs.Exporter);
 
-        if (string.IsNullOrWhiteSpace(logExporterEnvVar) || logExporterEnvVar == null)
+        if (string.IsNullOrWhiteSpace(logExporterEnvVar))
         {
             return new List<LogExporter> { LogExporter.Otlp }.AsReadOnly();
         }
 
         var exporters = new HashSet<LogExporter>();
 
-        var exporterNames = logExporterEnvVar.Split(',')
+        var exporterNames = logExporterEnvVar!.Split(',')
                                              .Select(e => e.Trim())
                                              .Where(e => !string.IsNullOrEmpty(e))
                                              .ToList();

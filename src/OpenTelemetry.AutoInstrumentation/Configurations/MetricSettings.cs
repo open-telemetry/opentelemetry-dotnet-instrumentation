@@ -66,14 +66,14 @@ internal class MetricSettings : Settings
     {
         var metricsExporterEnvVar = configuration.GetString(ConfigurationKeys.Metrics.Exporter);
 
-        if (string.IsNullOrWhiteSpace(metricsExporterEnvVar) || metricsExporterEnvVar == null)
+        if (string.IsNullOrWhiteSpace(metricsExporterEnvVar))
         {
             return new List<MetricsExporter> { MetricsExporter.Otlp }.AsReadOnly();
         }
 
         var exporters = new HashSet<MetricsExporter>();
 
-        var exporterNames = metricsExporterEnvVar.Split(',')
+        var exporterNames = metricsExporterEnvVar!.Split(',')
                                                  .Select(e => e.Trim())
                                                  .Where(e => !string.IsNullOrEmpty(e))
                                                  .ToList();

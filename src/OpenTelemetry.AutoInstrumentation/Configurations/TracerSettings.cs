@@ -93,14 +93,14 @@ internal class TracerSettings : Settings
     {
         var tracesExporterEnvVar = configuration.GetString(ConfigurationKeys.Traces.Exporter);
 
-        if (string.IsNullOrWhiteSpace(tracesExporterEnvVar) || tracesExporterEnvVar == null)
+        if (string.IsNullOrWhiteSpace(tracesExporterEnvVar))
         {
             return new List<TracesExporter> { TracesExporter.Otlp }.AsReadOnly();
         }
 
         var exporters = new HashSet<TracesExporter>();
 
-        var exporterNames = tracesExporterEnvVar.Split(',')
+        var exporterNames = tracesExporterEnvVar!.Split(',')
                                                  .Select(e => e.Trim())
                                                  .Where(e => !string.IsNullOrEmpty(e))
                                                  .ToList();
