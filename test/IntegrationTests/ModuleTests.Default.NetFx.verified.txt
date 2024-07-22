@@ -10,6 +10,7 @@
   OpenTelemetry.Instrumentation.Runtime,
   OpenTelemetry.Resources.Azure,
   OpenTelemetry.Resources.Host,
+  OpenTelemetry.Resources.OperatingSystem,
   OpenTelemetry.Resources.Process,
   OpenTelemetry.Resources.ProcessRuntime
 ]
