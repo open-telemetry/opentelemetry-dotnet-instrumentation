@@ -32,6 +32,17 @@ internal class Configuration
     }
 
     /// <summary>
+    /// Gets the <see cref="string"/> value based on priority.
+    /// </summary>
+    /// <param name="priorityKey">The priority key that is fetched first.</param>
+    /// <param name="defaultKey">The default key performed as a fallback.</param>
+    /// <returns>The value of the setting, or <c>null</c> if not found.</returns>
+    public string? GetString(string priorityKey, string defaultKey)
+    {
+        return GetString(priorityKey) ?? GetString(defaultKey);
+    }
+
+    /// <summary>
     /// Gets the <see cref="int"/> value of the first setting found with
     /// the specified key from the current list of configuration sources.
     /// Sources are queried in the order in which they were added.
@@ -42,6 +53,17 @@ internal class Configuration
     {
         return _sources.Select(source => source.GetInt32(key))
             .FirstOrDefault(value => value.HasValue);
+    }
+
+    /// <summary>
+    /// Gets the <see cref="int"/> value based on priority.
+    /// </summary>
+    /// <param name="priorityKey">The priority key that is fetched first.</param>
+    /// <param name="defaultKey">The default key performed as a fallback.</param>
+    /// <returns>The value of the setting, or <c>null</c> if not found.</returns>
+    public int? GetInt32(string priorityKey, string defaultKey)
+    {
+        return GetInt32(priorityKey) ?? GetInt32(defaultKey);
     }
 
     /// <summary>
@@ -68,5 +90,35 @@ internal class Configuration
     {
         return _sources.Select(source => source.GetBool(key))
             .FirstOrDefault(value => value.HasValue);
+    }
+
+    /// <summary>
+    /// Gets the <see cref="Uri"/> value of the first setting found with
+    /// the specified key from the current list of configuration sources.
+    /// Sources are queried in the order in which they were added.
+    /// </summary>
+    /// <param name="key">The key that identifies the setting.</param>
+    /// <returns>The value of the setting, or <c>null</c> if not found.</returns>
+    public Uri? GetUri(string key)
+    {
+        var value = GetString(key);
+
+        if (Uri.TryCreate(value, UriKind.Absolute, out var uri))
+        {
+            return uri;
+        }
+
+        return null;
+    }
+
+    /// <summary>
+    /// Gets the <see cref="Uri"/> value based on priority.
+    /// </summary>
+    /// <param name="priorityKey">The priority key that is fetched first.</param>
+    /// <param name="defaultKey">The default key performed as a fallback.</param>
+    /// <returns>The value of the setting, or <c>null</c> if not found.</returns>
+    public Uri? GetUri(string priorityKey, string defaultKey)
+    {
+        return GetUri(priorityKey) ?? GetUri(defaultKey);
     }
 }

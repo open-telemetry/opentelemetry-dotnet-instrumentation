@@ -247,10 +247,7 @@ internal static class EnvironmentConfigurationTracerHelper
         {
             return builder.AddOtlpExporter(options =>
             {
-                if (settings.OtlpExportProtocol.HasValue)
-                {
-                    options.Protocol = settings.OtlpExportProtocol.Value;
-                }
+                settings.OtlpSettings?.CopySettingsTo(options);
 
                 pluginManager.ConfigureTracesOptions(options);
             });
