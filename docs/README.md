@@ -22,12 +22,18 @@ or [here](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation
 ## Quick start
 
 If you'd like to try the instrumentation on an existing application before
-learning more about the configuration options and the project, follow the
-instructions at [Using the OpenTelemetry.AutoInstrumentation NuGet packages](./using-the-nuget-packages.md#using-the-opentelemetryautoinstrumentation-nuget-packages)
+learning more about the configuration options and the project, use the
+recommended installation method described at
+[Using the OpenTelemetry.AutoInstrumentation NuGet packages](./using-the-nuget-packages.md#using-the-opentelemetryautoinstrumentation-nuget-packages)
 or use the appropriate install script:
 
 - On Linux and macOS, use the [shell scripts](#shell-scripts).
 - On Windows, use the [PowerShell module](#powershell-module-windows).
+
+> [!NOTE]
+> The NuGet packages are the recommended way to deploy automatic instrumentation,
+> but they can't be used in all cases. See [Limitations](./using-the-nuget-packages.md#limitations)
+> for details.
 
 To see the telemetry from your application directly on the standard output, set
 the following environment variables to `true` before launching your application:
@@ -121,13 +127,20 @@ automatically generated in .NET 7+ whenever the `dotnet publish` or `dotnet buil
 command is used with a Runtime Identifier (RID) parameter, for example when `-r`
 or `--runtime` is used when running the command.
 
-### Install
+### Install using NuGet packages
 
-Download and extract the appropriate binaries from
+The NuGet packages are the recommended way to deploy automatic instrumentation,
+but they can't be used in all cases. To install using the NuGet packages,
+see [Using the OpenTelemetry.AutoInstrumentation NuGet packages](./using-the-nuget-packages.md).
+See [Limitations](./using-the-nuget-packages.md#limitations) for incompatible scenarios.
+
+### Install manually
+
+To install the automatic instrumentation manually, download and extract the appropriate binaries from
 [the latest release](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/latest).
 
 > [!NOTE]
-> The path where you put the binaries is referenced as `$INSTALL_DIR`
+> The path where you put the binaries is referenced as `$INSTALL_DIR`.
 
 ### Instrument a .NET application
 

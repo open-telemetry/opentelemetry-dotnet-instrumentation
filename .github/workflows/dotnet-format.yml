@@ -25,7 +25,7 @@ jobs:
     - name: Setup .NET 8
       uses: actions/setup-dotnet@6bd8b7f7774af54e05809fcc5431931b3eb1ddee # tag: v4.0.1
       with:
-        dotnet-version: 8.0.302
+        dotnet-version: 8.0.303
 
     - name: dotnet format
       run: dotnet format .\OpenTelemetry.AutoInstrumentation.sln --no-restore --verify-no-changes
