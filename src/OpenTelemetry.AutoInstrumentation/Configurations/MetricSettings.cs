@@ -66,58 +66,49 @@ internal class MetricSettings : Settings
     {
         var metricsExporterEnvVar = configuration.GetString(ConfigurationKeys.Metrics.Exporter);
 
-        if (string.IsNullOrWhiteSpace(metricsExporterEnvVar))
+        if (string.IsNullOrWhiteSpace(metricsExporterEnvVar) || metricsExporterEnvVar == null)
         {
-            metricsExporterEnvVar = Constants.ConfigurationValues.Exporters.Otlp;
+            return new List<MetricsExporter> { MetricsExporter.Otlp }.AsReadOnly();
         }
 
         var exporters = new HashSet<MetricsExporter>();
 
-        var exporterNames = metricsExporterEnvVar?.ToLower()
-                                                 .Split(',')
+        var exporterNames = metricsExporterEnvVar.Split(',')
                                                  .Select(e => e.Trim())
                                                  .Where(e => !string.IsNullOrEmpty(e))
                                                  .ToList();
 
-        if (exporterNames != null)
-        {
-            var hasExporter = exporterNames.Count > 1;
+        var hasExporter = exporterNames.Count > 1;
 
-            foreach (var exporterName in exporterNames)
+        foreach (var exporterName in exporterNames)
+        {
+            switch (exporterName)
             {
-                switch (exporterName)
-                {
-                    case Constants.ConfigurationValues.Exporters.Otlp:
-                        exporters.Add(MetricsExporter.Otlp);
-                        break;
-                    case Constants.ConfigurationValues.Exporters.Prometheus:
-                        exporters.Add(MetricsExporter.Prometheus);
-                        break;
-                    case Constants.ConfigurationValues.None:
-                        if (!hasExporter)
-                        {
-                            exporters.Add(MetricsExporter.None);
-                        }
+                case Constants.ConfigurationValues.Exporters.Otlp:
+                    exporters.Add(MetricsExporter.Otlp);
+                    break;
+                case Constants.ConfigurationValues.Exporters.Prometheus:
+                    exporters.Add(MetricsExporter.Prometheus);
+                    break;
+                case Constants.ConfigurationValues.None:
+                    if (!hasExporter)
+                    {
+                        exporters.Add(MetricsExporter.None);
+                    }
 
-                        break;
-                    default:
-                        if (configuration.FailFast)
-                        {
-                            var message = $"Metric exporter '{exporterName}' is not supported.";
-                            Logger.Error(message);
-                            throw new NotSupportedException(message);
-                        }
+                    break;
+                default:
+                    if (configuration.FailFast)
+                    {
+                        var message = $"Metric exporter '{exporterName}' is not supported.";
+                        Logger.Error(message);
+                        throw new NotSupportedException(message);
+                    }
 
-                        Logger.Error($"Metric exporter '{exporterName}' is not supported. Defaulting to '{Constants.ConfigurationValues.Exporters.Otlp}'.");
-                        exporters.Add(MetricsExporter.Otlp);
-                        hasExporter = true;
-                        break;
-                }
+                    Logger.Error($"Metric exporter '{exporterName}' is not supported. Defaulting to '{Constants.ConfigurationValues.Exporters.Otlp}'.");
+                    exporters.Add(MetricsExporter.Otlp);
+                    break;
             }
-        }
-        else
-        {
-            exporters.Add(MetricsExporter.Otlp);
         }
 
         return exporters.ToList().AsReadOnly();

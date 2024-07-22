@@ -57,54 +57,46 @@ internal class LogSettings : Settings
     {
         var logExporterEnvVar = configuration.GetString(ConfigurationKeys.Logs.Exporter);
 
-        if (string.IsNullOrWhiteSpace(logExporterEnvVar))
+        if (string.IsNullOrWhiteSpace(logExporterEnvVar) || logExporterEnvVar == null)
         {
-            logExporterEnvVar = Constants.ConfigurationValues.Exporters.Otlp;
+            return new List<LogExporter> { LogExporter.Otlp }.AsReadOnly();
         }
 
         var exporters = new HashSet<LogExporter>();
 
-        var exporterNames = logExporterEnvVar?.ToLower()
-                                              .Split(',')
-                                              .Select(e => e.Trim())
-                                              .Where(e => !string.IsNullOrEmpty(e))
-                                              .ToList();
+        var exporterNames = logExporterEnvVar.Split(',')
+                                             .Select(e => e.Trim())
+                                             .Where(e => !string.IsNullOrEmpty(e))
+                                             .ToList();
 
-        if (exporterNames != null)
+        var hasExporter = exporterNames.Count > 1;
+
+        foreach (var exporterName in exporterNames)
         {
-            var hasExporter = exporterNames.Count > 1;
-
-            foreach (var exporterName in exporterNames)
+            switch (exporterName)
             {
-                switch (exporterName)
-                {
-                    case Constants.ConfigurationValues.Exporters.Otlp:
-                        exporters.Add(LogExporter.Otlp);
-                        break;
-                    case Constants.ConfigurationValues.None:
-                        if (!hasExporter)
-                        {
-                            exporters.Add(LogExporter.None);
-                        }
+                case Constants.ConfigurationValues.Exporters.Otlp:
+                    exporters.Add(LogExporter.Otlp);
+                    break;
+                case Constants.ConfigurationValues.None:
+                    if (!hasExporter)
+                    {
+                        exporters.Add(LogExporter.None);
+                    }
 
-                        break;
-                    default:
-                        if (configuration.FailFast)
-                        {
-                            var message = $"Log exporter '{exporterName}' is not supported.";
-                            Logger.Error(message);
-                            throw new NotSupportedException(message);
-                        }
+                    break;
+                default:
+                    if (configuration.FailFast)
+                    {
+                        var message = $"Log exporter '{exporterName}' is not supported.";
+                        Logger.Error(message);
+                        throw new NotSupportedException(message);
+                    }
 
-                        Logger.Error($"Log exporter '{exporterName}' is not supported. Defaulting to '{Constants.ConfigurationValues.Exporters.Otlp}'.");
-                        exporters.Add(LogExporter.Otlp);
-                        break;
-                }
+                    Logger.Error($"Log exporter '{exporterName}' is not supported. Defaulting to '{Constants.ConfigurationValues.Exporters.Otlp}'.");
+                    exporters.Add(LogExporter.Otlp);
+                    break;
             }
-        }
-        else
-        {
-            exporters.Add(LogExporter.Otlp);
         }
 
         return exporters.ToList().AsReadOnly();

@@ -124,7 +124,6 @@ public class SettingsTests : IDisposable
     [InlineData("otlp", new[] { TracesExporter.Otlp })]
     [InlineData("zipkin", new[] { TracesExporter.Zipkin })]
     [InlineData(",otlp,", new[] { TracesExporter.Otlp })]
-    [InlineData("ziPKin", new[] { TracesExporter.Zipkin })]
     [InlineData("zipkinnm", new[] { TracesExporter.Otlp })]
     [InlineData("otlp, zipkin", new[] { TracesExporter.Otlp, TracesExporter.Zipkin })]
     [InlineData("zipkin,otlp", new[] { TracesExporter.Zipkin, TracesExporter.Otlp })]
@@ -158,7 +157,6 @@ public class SettingsTests : IDisposable
     [InlineData("otlp", new[] { MetricsExporter.Otlp })]
     [InlineData("prometheus", new[] { MetricsExporter.Prometheus })]
     [InlineData(",otlp,", new[] { MetricsExporter.Otlp })]
-    [InlineData("promeTHeus", new[] { MetricsExporter.Prometheus })]
     [InlineData("prometheusss", new[] { MetricsExporter.Otlp })]
     [InlineData("otlp, prometheus", new[] { MetricsExporter.Otlp, MetricsExporter.Prometheus })]
     [InlineData("prometheus,otlp", new[] { MetricsExporter.Prometheus, MetricsExporter.Otlp })]
@@ -193,7 +191,6 @@ public class SettingsTests : IDisposable
     [InlineData("none, otlp", new[] { LogExporter.Otlp })]
     [InlineData(",otlp,", new[] { LogExporter.Otlp })]
     [InlineData(",otlppp,", new[] { LogExporter.Otlp })]
-    [InlineData(",OTlp, NoNe", new[] { LogExporter.Otlp })]
     internal void LogExporter_SupportedValues(string logExporter, LogExporter[] expectedLogExporter)
     {
         Environment.SetEnvironmentVariable(ConfigurationKeys.Logs.Exporter, logExporter);

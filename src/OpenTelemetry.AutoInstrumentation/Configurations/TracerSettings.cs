@@ -93,58 +93,50 @@ internal class TracerSettings : Settings
     {
         var tracesExporterEnvVar = configuration.GetString(ConfigurationKeys.Traces.Exporter);
 
-        if (string.IsNullOrWhiteSpace(tracesExporterEnvVar))
+        if (string.IsNullOrWhiteSpace(tracesExporterEnvVar) || tracesExporterEnvVar == null)
         {
-            tracesExporterEnvVar = Constants.ConfigurationValues.Exporters.Otlp;
+            return new List<TracesExporter> { TracesExporter.Otlp }.AsReadOnly();
         }
 
         var exporters = new HashSet<TracesExporter>();
 
-        var exporterNames = tracesExporterEnvVar?.ToLower()
-                                                 .Split(',')
+        var exporterNames = tracesExporterEnvVar.Split(',')
                                                  .Select(e => e.Trim())
                                                  .Where(e => !string.IsNullOrEmpty(e))
                                                  .ToList();
 
-        if (exporterNames != null)
-        {
-            var hasExporter = exporterNames.Count > 1;
+        var hasExporter = exporterNames.Count > 1;
 
-            foreach (var exporterName in exporterNames)
+        foreach (var exporterName in exporterNames)
+        {
+            switch (exporterName)
             {
-                switch (exporterName)
-                {
-                    case Constants.ConfigurationValues.Exporters.Otlp:
-                        exporters.Add(TracesExporter.Otlp);
-                        break;
-                    case Constants.ConfigurationValues.Exporters.Zipkin:
-                        exporters.Add(TracesExporter.Zipkin);
-                        break;
-                    case Constants.ConfigurationValues.None:
-                        if (!hasExporter)
-                        {
-                            exporters.Add(TracesExporter.None);
-                        }
+                case Constants.ConfigurationValues.Exporters.Otlp:
+                    exporters.Add(TracesExporter.Otlp);
+                    break;
+                case Constants.ConfigurationValues.Exporters.Zipkin:
+                    exporters.Add(TracesExporter.Zipkin);
+                    break;
+                case Constants.ConfigurationValues.None:
+                    if (!hasExporter)
+                    {
+                        exporters.Add(TracesExporter.None);
+                    }
 
-                        break;
-                    default:
-                        if (configuration.FailFast)
-                        {
-                            var message = $"Traces exporter '{exporterName}' is not supported.";
-                            Logger.Error(message);
-                            throw new NotSupportedException(message);
-                        }
+                    break;
+                default:
+                    if (configuration.FailFast)
+                    {
+                        var message = $"Traces exporter '{exporterName}' is not supported.";
+                        Logger.Error(message);
+                        throw new NotSupportedException(message);
+                    }
 
-                        Logger.Error($"Traces exporter '{exporterName}' is not supported. Defaulting to '{Constants.ConfigurationValues.Exporters.Otlp}'.");
-                        exporters.Add(TracesExporter.Otlp);
-                        hasExporter = true;
-                        break;
-                }
+                    Logger.Error($"Traces exporter '{exporterName}' is not supported. Defaulting to '{Constants.ConfigurationValues.Exporters.Otlp}'.");
+                    exporters.Add(TracesExporter.Otlp);
+                    hasExporter = true;
+                    break;
             }
-        }
-        else
-        {
-            exporters.Add(TracesExporter.Otlp);
         }
 
         return exporters.ToList().AsReadOnly();
