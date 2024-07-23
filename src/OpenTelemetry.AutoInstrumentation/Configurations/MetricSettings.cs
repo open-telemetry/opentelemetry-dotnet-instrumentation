@@ -23,11 +23,6 @@ internal class MetricSettings : Settings
     public IReadOnlyList<MetricsExporter> MetricExporters { get; private set; } = new List<MetricsExporter>();
 
     /// <summary>
-    /// Gets a value indicating whether the console exporter is enabled.
-    /// </summary>
-    public bool ConsoleExporterEnabled { get; private set; }
-
-    /// <summary>
     /// Gets the list of enabled meters.
     /// </summary>
     public IReadOnlyList<MetricInstrumentation> EnabledInstrumentations { get; private set; } = new List<MetricInstrumentation>();
@@ -36,6 +31,11 @@ internal class MetricSettings : Settings
     /// Gets the list of meters to be added to the MeterProvider at the startup.
     /// </summary>
     public IList<string> Meters { get; } = new List<string>();
+
+    /// <summary>
+    /// Gets or sets a value indicating whether the console exporter is enabled.
+    /// </summary>
+    private bool ConsoleExporterEnabled { get; set; }
 
     protected override void OnLoad(Configuration configuration)
     {
@@ -62,7 +62,7 @@ internal class MetricSettings : Settings
         MetricsEnabled = configuration.GetBool(ConfigurationKeys.Metrics.MetricsEnabled) ?? true;
     }
 
-    private static IReadOnlyList<MetricsExporter> ParseMetricExporter(Configuration configuration)
+    private IReadOnlyList<MetricsExporter> ParseMetricExporter(Configuration configuration)
     {
         var metricsExporterEnvVar = configuration.GetString(ConfigurationKeys.Metrics.Exporter);
 
@@ -84,9 +84,11 @@ internal class MetricSettings : Settings
                 case Constants.ConfigurationValues.Exporters.Prometheus:
                     exporters.Add(MetricsExporter.Prometheus);
                     break;
+                case Constants.ConfigurationValues.Exporters.Console:
+                    exporters.Add(MetricsExporter.Console);
+                    break;
                 case Constants.ConfigurationValues.None:
                     break;
-
                 default:
                     if (configuration.FailFast)
                     {
@@ -98,6 +100,16 @@ internal class MetricSettings : Settings
                     Logger.Error($"Metric exporter '{exporterName}' is not supported.");
                     break;
             }
+        }
+
+        if (ConsoleExporterEnabled)
+        {
+            Logger.Warning($"The '{ConfigurationKeys.Metrics.ConsoleExporterEnabled}' environment variable is deprecated and " +
+                "will be removed in the next minor release. " +
+                "Please update your configuration to use the new method. " +
+                "Refer to the updated documentation for details.");
+
+            exporters.Add(MetricsExporter.Console);
         }
 
         return exporters;

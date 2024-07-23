@@ -45,6 +45,7 @@ internal static class Constants
             public const string Otlp = "otlp";
             public const string Prometheus = "prometheus";
             public const string Zipkin = "zipkin";
+            public const string Console = "console";
         }
 
         public static class Propagators

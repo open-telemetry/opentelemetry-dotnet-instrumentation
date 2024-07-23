@@ -12,4 +12,9 @@ internal enum LogExporter
     /// OTLP exporter.
     /// </summary>
     Otlp,
+
+    /// <summary>
+    /// Console exporter.
+    /// </summary>
+    Console,
 }

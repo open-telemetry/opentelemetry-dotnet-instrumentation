@@ -28,11 +28,6 @@ internal class TracerSettings : Settings
     public IReadOnlyList<TracesExporter> TracesExporters { get; private set; } = new List<TracesExporter>();
 
     /// <summary>
-    /// Gets a value indicating whether the console exporter is enabled.
-    /// </summary>
-    public bool ConsoleExporterEnabled { get; private set; }
-
-    /// <summary>
     /// Gets the list of enabled instrumentations.
     /// </summary>
     public IReadOnlyList<TracerInstrumentation> EnabledInstrumentations { get; private set; } = new List<TracerInstrumentation>();
@@ -52,10 +47,15 @@ internal class TracerSettings : Settings
     /// </summary>
     public InstrumentationOptions InstrumentationOptions { get; private set; } = new(new Configuration(failFast: false));
 
+    /// <summary>
+    /// Gets or sets a value indicating whether the console exporter is enabled.
+    /// </summary>
+    private bool ConsoleExporterEnabled { get; set; }
+
     protected override void OnLoad(Configuration configuration)
     {
-        TracesExporters = ParseTracesExporter(configuration);
         ConsoleExporterEnabled = configuration.GetBool(ConfigurationKeys.Traces.ConsoleExporterEnabled) ?? false;
+        TracesExporters = ParseTracesExporter(configuration);
 
         var instrumentationEnabledByDefault =
             configuration.GetBool(ConfigurationKeys.Traces.TracesInstrumentationEnabled) ??
@@ -89,7 +89,7 @@ internal class TracerSettings : Settings
         InstrumentationOptions = new InstrumentationOptions(configuration);
     }
 
-    private static IReadOnlyList<TracesExporter> ParseTracesExporter(Configuration configuration)
+    private IReadOnlyList<TracesExporter> ParseTracesExporter(Configuration configuration)
     {
         var tracesExporterEnvVar = configuration.GetString(ConfigurationKeys.Traces.Exporter);
 
@@ -114,6 +114,9 @@ internal class TracerSettings : Settings
                     break;
                 case Constants.ConfigurationValues.None:
                     break;
+                case Constants.ConfigurationValues.Exporters.Console:
+                    exporters.Add(TracesExporter.Console);
+                    break;
                 default:
                     if (configuration.FailFast)
                     {
@@ -125,6 +128,16 @@ internal class TracerSettings : Settings
                     Logger.Error($"Traces exporter '{exporterName}' is not supported.");
                     break;
             }
+        }
+
+        if (ConsoleExporterEnabled)
+        {
+            Logger.Warning($"The '{ConfigurationKeys.Traces.ConsoleExporterEnabled}' environment variable is deprecated and " +
+                "will be removed in the next minor release. " +
+                "Please update your configuration to use the new method. " +
+                "Refer to the updated documentation for details.");
+
+            exporters.Add(TracesExporter.Console);
         }
 
         return exporters;
