@@ -7,7 +7,7 @@ namespace OpenTelemetry.AutoInstrumentation.Configurations.Otlp;
 
 /// <summary>
 /// Overrides SDK logic and sets separate values for every signal
-/// based on priorities of environment variables.
+/// when more detailed environment variable is set.
 /// </summary>
 internal class OtlpSettings
 {
@@ -46,7 +46,7 @@ internal class OtlpSettings
     /// </summary>
     public Uri? Endpoint { get; private set; }
 
-    internal void CopySettingsTo(OtlpExporterOptions options)
+    public void CopyTo(OtlpExporterOptions options)
     {
         if (Protocol.HasValue)
         {
@@ -60,6 +60,7 @@ internal class OtlpSettings
 
         if (Endpoint is not null)
         {
+            // NOTE! This must be always full path. Endpoint setter is disabling further path handling in SDK side.
             options.Endpoint = Endpoint;
         }
 

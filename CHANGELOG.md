@@ -10,6 +10,8 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 ### Added
 
 - Support for Operating System resource detector.
+- Support signal specific OTLP exporter variables. See list of supported variables
+  [here](https://opentelemetry.io/docs/languages/sdk-configuration/otlp-exporter/).
 
 ### Changed
 

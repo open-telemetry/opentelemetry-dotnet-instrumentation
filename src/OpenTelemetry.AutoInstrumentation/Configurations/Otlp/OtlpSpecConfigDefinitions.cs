@@ -31,47 +31,35 @@ internal static class OtlpSpecConfigDefinitions
     public const string TracesTimeoutEnvVarName = "OTEL_EXPORTER_OTLP_TRACES_TIMEOUT";
     public const string TracesProtocolEnvVarName = "OTEL_EXPORTER_OTLP_TRACES_PROTOCOL";
 
-    public static string GetProtocolEnvVar(OtlpSignalType signal)
+    public static string GetProtocolEnvVar(OtlpSignalType signal) => signal switch
     {
-        return signal switch
-        {
-            OtlpSignalType.Traces => TracesProtocolEnvVarName,
-            OtlpSignalType.Metrics => MetricsProtocolEnvVarName,
-            OtlpSignalType.Logs => LogsProtocolEnvVarName,
-            _ => throw new NotSupportedException()
-        };
-    }
+        OtlpSignalType.Traces => TracesProtocolEnvVarName,
+        OtlpSignalType.Metrics => MetricsProtocolEnvVarName,
+        OtlpSignalType.Logs => LogsProtocolEnvVarName,
+        _ => throw new NotSupportedException()
+    };
 
-    public static string GetHeadersEnvVar(OtlpSignalType signal)
+    public static string GetHeadersEnvVar(OtlpSignalType signal) => signal switch
     {
-        return signal switch
-        {
-            OtlpSignalType.Traces => TracesHeadersEnvVarName,
-            OtlpSignalType.Metrics => MetricsHeadersEnvVarName,
-            OtlpSignalType.Logs => LogsHeadersEnvVarName,
-            _ => throw new NotSupportedException()
-        };
-    }
+        OtlpSignalType.Traces => TracesHeadersEnvVarName,
+        OtlpSignalType.Metrics => MetricsHeadersEnvVarName,
+        OtlpSignalType.Logs => LogsHeadersEnvVarName,
+        _ => throw new NotSupportedException()
+    };
 
-    public static string GetEndpointEnvVar(OtlpSignalType signal)
+    public static string GetEndpointEnvVar(OtlpSignalType signal) => signal switch
     {
-        return signal switch
-        {
-            OtlpSignalType.Traces => TracesEndpointEnvVarName,
-            OtlpSignalType.Metrics => MetricsEndpointEnvVarName,
-            OtlpSignalType.Logs => LogsEndpointEnvVarName,
-            _ => throw new NotSupportedException()
-        };
-    }
+        OtlpSignalType.Traces => TracesEndpointEnvVarName,
+        OtlpSignalType.Metrics => MetricsEndpointEnvVarName,
+        OtlpSignalType.Logs => LogsEndpointEnvVarName,
+        _ => throw new NotSupportedException()
+    };
 
-    public static string GetTimeoutEnvVar(OtlpSignalType signal)
+    public static string GetTimeoutEnvVar(OtlpSignalType signal) => signal switch
     {
-        return signal switch
-        {
-            OtlpSignalType.Traces => TracesTimeoutEnvVarName,
-            OtlpSignalType.Metrics => MetricsTimeoutEnvVarName,
-            OtlpSignalType.Logs => LogsTimeoutEnvVarName,
-            _ => throw new NotSupportedException()
-        };
-    }
+        OtlpSignalType.Traces => TracesTimeoutEnvVarName,
+        OtlpSignalType.Metrics => MetricsTimeoutEnvVarName,
+        OtlpSignalType.Logs => LogsTimeoutEnvVarName,
+        _ => throw new NotSupportedException()
+    };
 }

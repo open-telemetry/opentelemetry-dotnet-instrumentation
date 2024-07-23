@@ -247,7 +247,8 @@ internal static class EnvironmentConfigurationTracerHelper
         {
             return builder.AddOtlpExporter(options =>
             {
-                settings.OtlpSettings?.CopySettingsTo(options);
+                // Copy Auto settings to SDK settings
+                settings.OtlpSettings?.CopyTo(options);
 
                 pluginManager.ConfigureTracesOptions(options);
             });
