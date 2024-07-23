@@ -10,8 +10,19 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 ### Added
 
 - Support for Operating System resource detector.
-- Support signal specific OTLP exporter variables. See list of supported variables
-  [here](https://opentelemetry.io/docs/languages/sdk-configuration/otlp-exporter/).
+- Support signal specific OTLP exporter variables (See [docs](/docs/config.md#otlp)):
+  - `OTEL_EXPORTER_OTLP_TRACES_ENDPOINT`
+  - `OTEL_EXPORTER_OTLP_TRACES_HEADERS`
+  - `OTEL_EXPORTER_OTLP_TRACES_TIMEOUT`
+  - `OTEL_EXPORTER_OTLP_TRACES_PROTOCOL`
+  - `OTEL_EXPORTER_OTLP_METRICS_ENDPOINT`
+  - `OTEL_EXPORTER_OTLP_METRICS_HEADERS`
+  - `OTEL_EXPORTER_OTLP_METRICS_TIMEOUT`
+  - `OTEL_EXPORTER_OTLP_METRICS_PROTOCOL`
+  - `OTEL_EXPORTER_OTLP_LOGS_ENDPOINT`
+  - `OTEL_EXPORTER_OTLP_LOGS_HEADERS`
+  - `OTEL_EXPORTER_OTLP_LOGS_TIMEOUT`
+  - `OTEL_EXPORTER_OTLP_LOGS_PROTOCOL`
 
 ### Changed
 
