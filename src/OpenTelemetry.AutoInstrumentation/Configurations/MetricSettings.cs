@@ -77,7 +77,6 @@ internal class MetricSettings : Settings
                                                   .Where(e => !string.IsNullOrEmpty(e))
                                                   .ToList();
 
-        var hasNone = true;
         exporters.Add(MetricsExporter.None);
 
         foreach (var exporterName in exporterNames)
@@ -85,23 +84,14 @@ internal class MetricSettings : Settings
             switch (exporterName)
             {
                 case Constants.ConfigurationValues.Exporters.Otlp:
-                    if (hasNone)
-                    {
-                        exporters.Clear();
-                        hasNone = false;
-                    }
-
                     exporters.Add(MetricsExporter.Otlp);
                     break;
                 case Constants.ConfigurationValues.Exporters.Prometheus:
-                    if (hasNone)
-                    {
-                        exporters.Clear();
-                        hasNone = false;
-                    }
-
                     exporters.Add(MetricsExporter.Prometheus);
                     break;
+                case Constants.ConfigurationValues.None:
+                    break;
+
                 default:
                     if (configuration.FailFast)
                     {
@@ -113,6 +103,11 @@ internal class MetricSettings : Settings
                     Logger.Error($"Metric exporter '{exporterName}' is not supported.");
                     break;
             }
+        }
+
+        if (exporters.Count == 0)
+        {
+            exporters.Add(MetricsExporter.None);
         }
 
         return exporters.ToList().AsReadOnly();

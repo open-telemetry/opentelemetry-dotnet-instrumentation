@@ -105,30 +105,17 @@ internal class TracerSettings : Settings
                                                  .Where(e => !string.IsNullOrEmpty(e))
                                                  .ToList();
 
-        var hasNone = true;
-        exporters.Add(TracesExporter.None);
-
         foreach (var exporterName in exporterNames)
         {
             switch (exporterName)
             {
                 case Constants.ConfigurationValues.Exporters.Otlp:
-                    if (hasNone)
-                    {
-                        exporters.Clear();
-                        hasNone = false;
-                    }
-
                     exporters.Add(TracesExporter.Otlp);
                     break;
                 case Constants.ConfigurationValues.Exporters.Zipkin:
-                    if (hasNone)
-                    {
-                        exporters.Clear();
-                        hasNone = false;
-                    }
-
                     exporters.Add(TracesExporter.Zipkin);
+                    break;
+                case Constants.ConfigurationValues.None:
                     break;
                 default:
                     if (configuration.FailFast)
@@ -141,6 +128,11 @@ internal class TracerSettings : Settings
                     Logger.Error($"Traces exporter '{exporterName}' is not supported.");
                     break;
             }
+        }
+
+        if (exporters.Count == 0)
+        {
+            exporters.Add(TracesExporter.None);
         }
 
         return exporters.ToList().AsReadOnly();

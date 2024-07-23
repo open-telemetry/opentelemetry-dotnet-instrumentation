@@ -68,21 +68,14 @@ internal class LogSettings : Settings
                                               .Where(e => !string.IsNullOrEmpty(e))
                                               .ToList();
 
-        var hasNone = true;
-        exporters.Add(LogExporter.None);
-
         foreach (var exporterName in exporterNames)
         {
             switch (exporterName)
             {
                 case Constants.ConfigurationValues.Exporters.Otlp:
-                    if (hasNone)
-                    {
-                        exporters.Clear();
-                        hasNone = false;
-                    }
-
                     exporters.Add(LogExporter.Otlp);
+                    break;
+                case Constants.ConfigurationValues.None:
                     break;
                 default:
                     if (configuration.FailFast)
@@ -95,6 +88,11 @@ internal class LogSettings : Settings
                     Logger.Error($"Log exporter '{exporterName}' is not supported.");
                     break;
             }
+        }
+
+        if (exporters.Count == 0)
+        {
+            exporters.Add(LogExporter.None);
         }
 
         return exporters.ToList().AsReadOnly();
