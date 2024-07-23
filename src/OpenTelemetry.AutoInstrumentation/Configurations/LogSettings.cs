@@ -63,27 +63,26 @@ internal class LogSettings : Settings
         }
 
         var exporters = new HashSet<LogExporter>();
-
         var exporterNames = logExporterEnvVar!.Split(',')
-                                             .Select(e => e.Trim())
-                                             .Where(e => !string.IsNullOrEmpty(e))
-                                             .ToList();
+                                              .Select(e => e.Trim())
+                                              .Where(e => !string.IsNullOrEmpty(e))
+                                              .ToList();
 
-        var hasExporter = exporterNames.Count > 1;
+        var hasNone = true;
+        exporters.Add(LogExporter.None);
 
         foreach (var exporterName in exporterNames)
         {
             switch (exporterName)
             {
                 case Constants.ConfigurationValues.Exporters.Otlp:
-                    exporters.Add(LogExporter.Otlp);
-                    break;
-                case Constants.ConfigurationValues.None:
-                    if (!hasExporter)
+                    if (hasNone)
                     {
-                        exporters.Add(LogExporter.None);
+                        exporters.Clear();
+                        hasNone = false;
                     }
 
+                    exporters.Add(LogExporter.Otlp);
                     break;
                 default:
                     if (configuration.FailFast)
@@ -93,8 +92,7 @@ internal class LogSettings : Settings
                         throw new NotSupportedException(message);
                     }
 
-                    Logger.Error($"Log exporter '{exporterName}' is not supported. Defaulting to '{Constants.ConfigurationValues.Exporters.Otlp}'.");
-                    exporters.Add(LogExporter.Otlp);
+                    Logger.Error($"Log exporter '{exporterName}' is not supported.");
                     break;
             }
         }
