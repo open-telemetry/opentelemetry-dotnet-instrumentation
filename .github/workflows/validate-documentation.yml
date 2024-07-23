@@ -32,7 +32,7 @@ jobs:
         args: "--threads 1 --max-concurrency 1 --verbose --no-progress './**/*.md' './**/*.html'"
 
     - name: Run markdownlint
-      uses: streetsidesoftware/cspell-action@245201e3f58019204d99920deeb78aade6724230 # tag: v6.6.0
+      uses: streetsidesoftware/cspell-action@09c93825106ce5ca39a618d67b137cd61fddfd65 # tag: v6.7.0
       with:
         files: '**/*.md'
 
