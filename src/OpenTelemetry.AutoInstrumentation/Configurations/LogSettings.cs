@@ -90,11 +90,6 @@ internal class LogSettings : Settings
             }
         }
 
-        if (exporters.Count == 0)
-        {
-            exporters.Add(LogExporter.None);
-        }
-
         return exporters.ToList().AsReadOnly();
     }
 }

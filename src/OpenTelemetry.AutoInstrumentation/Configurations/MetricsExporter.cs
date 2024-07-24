@@ -9,11 +9,6 @@ namespace OpenTelemetry.AutoInstrumentation.Configurations;
 internal enum MetricsExporter
 {
     /// <summary>
-    /// None exporter.
-    /// </summary>
-    None,
-
-    /// <summary>
     /// OTLP exporter.
     /// </summary>
     Otlp,

@@ -130,11 +130,6 @@ internal class TracerSettings : Settings
             }
         }
 
-        if (exporters.Count == 0)
-        {
-            exporters.Add(TracesExporter.None);
-        }
-
         return exporters.ToList().AsReadOnly();
     }
 }

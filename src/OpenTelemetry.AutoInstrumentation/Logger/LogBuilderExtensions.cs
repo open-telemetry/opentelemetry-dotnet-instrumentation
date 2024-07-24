@@ -80,6 +80,11 @@ internal static class LogBuilderExtensions
                     }
                 }
 
+                if (settings.LogExporters.Count == 0)
+                {
+                    return;
+                }
+
                 foreach (var logExporter in settings.LogExporters)
                 {
                     switch (logExporter)
@@ -94,8 +99,6 @@ internal static class LogBuilderExtensions
 
                                 pluginManager?.ConfigureLogsOptions(otlpOptions);
                             });
-                            break;
-                        case LogExporter.None:
                             break;
                         default:
                             throw new ArgumentOutOfRangeException($"Logs exporter '{logExporter}' is incorrect");

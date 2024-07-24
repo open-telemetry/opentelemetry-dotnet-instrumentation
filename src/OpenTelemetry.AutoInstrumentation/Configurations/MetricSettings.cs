@@ -77,8 +77,6 @@ internal class MetricSettings : Settings
                                                   .Where(e => !string.IsNullOrEmpty(e))
                                                   .ToList();
 
-        exporters.Add(MetricsExporter.None);
-
         foreach (var exporterName in exporterNames)
         {
             switch (exporterName)
@@ -103,11 +101,6 @@ internal class MetricSettings : Settings
                     Logger.Error($"Metric exporter '{exporterName}' is not supported.");
                     break;
             }
-        }
-
-        if (exporters.Count == 0)
-        {
-            exporters.Add(MetricsExporter.None);
         }
 
         return exporters.ToList().AsReadOnly();
