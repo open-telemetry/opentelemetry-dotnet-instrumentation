@@ -53,11 +53,6 @@ internal static class EnvironmentConfigurationMetricHelper
             Wrappers.AddConsoleExporter(builder, pluginManager);
         }
 
-        if (settings.MetricExporters.Count == 0)
-        {
-            return builder;
-        }
-
         foreach (var metricExporter in settings.MetricExporters)
         {
             builder = metricExporter switch

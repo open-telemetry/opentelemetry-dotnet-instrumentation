@@ -96,11 +96,6 @@ internal static class EnvironmentConfigurationTracerHelper
             Wrappers.AddConsoleExporter(builder, pluginManager);
         }
 
-        if (settings.TracesExporters.Count == 0)
-        {
-            return builder;
-        }
-
         foreach (var traceExporter in settings.TracesExporters)
         {
             builder = traceExporter switch

@@ -80,11 +80,6 @@ internal static class LogBuilderExtensions
                     }
                 }
 
-                if (settings.LogExporters.Count == 0)
-                {
-                    return;
-                }
-
                 foreach (var logExporter in settings.LogExporters)
                 {
                     switch (logExporter)
