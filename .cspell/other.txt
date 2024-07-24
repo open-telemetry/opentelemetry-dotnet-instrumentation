@@ -64,3 +64,4 @@ unregistration
 vcpkg
 WCFCLIENT
 WCFSERVICE
+RABBITMQ
