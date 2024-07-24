@@ -96,13 +96,17 @@ internal static class EnvironmentConfigurationTracerHelper
             Wrappers.AddConsoleExporter(builder, pluginManager);
         }
 
-        return settings.TracesExporter switch
+        foreach (var traceExporter in settings.TracesExporters)
         {
-            TracesExporter.Zipkin => Wrappers.AddZipkinExporter(builder, pluginManager),
-            TracesExporter.Otlp => Wrappers.AddOtlpExporter(builder, settings, pluginManager),
-            TracesExporter.None => builder,
-            _ => throw new ArgumentOutOfRangeException($"Traces exporter '{settings.TracesExporter}' is incorrect")
-        };
+            builder = traceExporter switch
+            {
+                TracesExporter.Zipkin => Wrappers.AddZipkinExporter(builder, pluginManager),
+                TracesExporter.Otlp => Wrappers.AddOtlpExporter(builder, settings, pluginManager),
+                _ => throw new ArgumentOutOfRangeException($"Traces exporter '{traceExporter}' is incorrect")
+            };
+        }
+
+        return builder;
     }
 
     /// <summary>

@@ -24,9 +24,9 @@ internal class TracerSettings : Settings
     public bool OpenTracingEnabled { get; private set; }
 
     /// <summary>
-    /// Gets the traces exporter.
+    /// Gets the list of enabled traces exporters.
     /// </summary>
-    public TracesExporter TracesExporter { get; private set; }
+    public IReadOnlyList<TracesExporter> TracesExporters { get; private set; } = new List<TracesExporter>();
 
     /// <summary>
     /// Gets a value indicating whether the console exporter is enabled.
@@ -60,8 +60,8 @@ internal class TracerSettings : Settings
 
     protected override void OnLoad(Configuration configuration)
     {
-        TracesExporter = ParseTracesExporter(configuration);
-        if (TracesExporter == TracesExporter.Otlp)
+        TracesExporters = ParseTracesExporter(configuration);
+        if (TracesExporters.Contains(TracesExporter.Otlp))
         {
             OtlpSettings = new OtlpSettings(OtlpSignalType.Traces, configuration);
         }
@@ -100,32 +100,44 @@ internal class TracerSettings : Settings
         InstrumentationOptions = new InstrumentationOptions(configuration);
     }
 
-    private static TracesExporter ParseTracesExporter(Configuration configuration)
+    private static IReadOnlyList<TracesExporter> ParseTracesExporter(Configuration configuration)
     {
-        var tracesExporterEnvVar = configuration.GetString(ConfigurationKeys.Traces.Exporter)
-            ?? Constants.ConfigurationValues.Exporters.Otlp;
+        var tracesExporterEnvVar = configuration.GetString(ConfigurationKeys.Traces.Exporter);
 
-        switch (tracesExporterEnvVar)
+        if (string.IsNullOrEmpty(tracesExporterEnvVar))
         {
-            case null:
-            case "":
-            case Constants.ConfigurationValues.Exporters.Otlp:
-                return TracesExporter.Otlp;
-            case Constants.ConfigurationValues.Exporters.Zipkin:
-                return TracesExporter.Zipkin;
-            case Constants.ConfigurationValues.None:
-                return TracesExporter.None;
-            default:
-                if (configuration.FailFast)
-                {
-                    var message = $"Traces exporter '{tracesExporterEnvVar}' is not supported.";
-                    Logger.Error(message);
-                    throw new NotSupportedException(message);
-                }
-
-                Logger.Error($"Traces exporter '{tracesExporterEnvVar}' is not supported. Defaulting to '{Constants.ConfigurationValues.Exporters.Otlp}'.");
-
-                return TracesExporter.Otlp;
+            return new List<TracesExporter> { TracesExporter.Otlp };
         }
+
+        var exporters = new List<TracesExporter>();
+
+        var exporterNames = tracesExporterEnvVar!.Split(Constants.ConfigurationValues.Separator);
+
+        foreach (var exporterName in exporterNames)
+        {
+            switch (exporterName)
+            {
+                case Constants.ConfigurationValues.Exporters.Otlp:
+                    exporters.Add(TracesExporter.Otlp);
+                    break;
+                case Constants.ConfigurationValues.Exporters.Zipkin:
+                    exporters.Add(TracesExporter.Zipkin);
+                    break;
+                case Constants.ConfigurationValues.None:
+                    break;
+                default:
+                    if (configuration.FailFast)
+                    {
+                        var message = $"Traces exporter '{exporterName}' is not supported.";
+                        Logger.Error(message);
+                        throw new NotSupportedException(message);
+                    }
+
+                    Logger.Error($"Traces exporter '{exporterName}' is not supported.");
+                    break;
+            }
+        }
+
+        return exporters;
     }
 }

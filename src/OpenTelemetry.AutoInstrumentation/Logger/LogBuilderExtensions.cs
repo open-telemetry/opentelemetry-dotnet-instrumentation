@@ -80,21 +80,22 @@ internal static class LogBuilderExtensions
                     }
                 }
 
-                switch (settings.LogExporter)
+                foreach (var logExporter in settings.LogExporters)
                 {
-                    case LogExporter.Otlp:
-                        options.AddOtlpExporter(otlpOptions =>
-                        {
-                            // Copy Auto settings to SDK settings
-                            settings.OtlpSettings?.CopyTo(otlpOptions);
+                    switch (logExporter)
+                    {
+                        case LogExporter.Otlp:
+                            options.AddOtlpExporter(otlpOptions =>
+                            {
+                                // Copy Auto settings to SDK settings
+                                settings.OtlpSettings?.CopyTo(otlpOptions);
 
-                            pluginManager?.ConfigureLogsOptions(otlpOptions);
-                        });
-                        break;
-                    case LogExporter.None:
-                        break;
-                    default:
-                        throw new ArgumentOutOfRangeException($"Logs exporter '{settings.LogExporter}' is incorrect");
+                                pluginManager?.ConfigureLogsOptions(otlpOptions);
+                            });
+                            break;
+                        default:
+                            throw new ArgumentOutOfRangeException($"Logs exporter '{logExporter}' is incorrect");
+                    }
                 }
             });
 

@@ -263,9 +263,9 @@ Exporters output the telemetry.
 
 | Environment variable    | Description                                                                                       | Default value | Status                                                                                                                      |
 |-------------------------|---------------------------------------------------------------------------------------------------|---------------|-----------------------------------------------------------------------------------------------------------------------------|
-| `OTEL_TRACES_EXPORTER`  | Traces exporter to be used. The value can be one of the following: `zipkin`, `otlp`, `none`.      | `otlp`        | [Stable](https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/versioning-and-stability.md) |
-| `OTEL_METRICS_EXPORTER` | Metrics exporter to be used. The value can be one of the following: `otlp`, `prometheus`, `none`. | `otlp`        | [Stable](https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/versioning-and-stability.md) |
-| `OTEL_LOGS_EXPORTER`    | Logs exporter to be used. The value can be one of the following: `otlp`, `none`.                  | `otlp`        | [Stable](https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/versioning-and-stability.md) |
+| `OTEL_TRACES_EXPORTER`  | Comma-separated list of propagators. Supported options: `otlp`, `zipkin`, `none`. See [the OpenTelemetry specification](https://github.com/open-telemetry/opentelemetry-specification/blob/v1.35.0/specification/configuration/sdk-environment-variables.md#exporter-selection) for more details.| `otlp`        | [Stable](https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/versioning-and-stability.md) |
+| `OTEL_METRICS_EXPORTER`  | Comma-separated list of propagators. Supported options: `otlp`, `prometheus`, `none`. See [the OpenTelemetry specification](https://github.com/open-telemetry/opentelemetry-specification/blob/v1.35.0/specification/configuration/sdk-environment-variables.md#exporter-selection) for more details. | `otlp`        | [Stable](https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/versioning-and-stability.md) |
+| `OTEL_LOGS_EXPORTER`     | Comma-separated list of propagators. Supported options: `otlp`, `none`. See [the OpenTelemetry specification](https://github.com/open-telemetry/opentelemetry-specification/blob/v1.35.0/specification/configuration/sdk-environment-variables.md#exporter-selection) for more details.| `otlp`        | [Stable](https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/versioning-and-stability.md) |
 
 ### Traces exporter
 
@@ -333,7 +333,7 @@ Important environment variables include:
   which differs from the OpenTelemetry .NET SDK default value of `grpc`.
 - On .NET 6 and higher, the application must reference [`Grpc.Net.Client`](https://www.nuget.org/packages/Grpc.Net.Client/)
   to use the `grpc` OTLP exporter protocol. For example, by adding
-  `<PackageReference Include="Grpc.Net.Client" Version="2.63.0" />` to the
+  `<PackageReference Include="Grpc.Net.Client" Version="2.64.0" />` to the
   `.csproj` file.
 - On .NET Framework, the `grpc` OTLP exporter protocol is not supported.
 
