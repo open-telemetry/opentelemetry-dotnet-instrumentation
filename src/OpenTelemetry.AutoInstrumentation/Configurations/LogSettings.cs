@@ -57,16 +57,13 @@ internal class LogSettings : Settings
     {
         var logExporterEnvVar = configuration.GetString(ConfigurationKeys.Logs.Exporter);
 
-        if (string.IsNullOrWhiteSpace(logExporterEnvVar))
+        if (string.IsNullOrEmpty(logExporterEnvVar))
         {
-            return new List<LogExporter> { LogExporter.Otlp }.AsReadOnly();
+            return new List<LogExporter> { LogExporter.Otlp };
         }
 
-        var exporters = new HashSet<LogExporter>();
-        var exporterNames = logExporterEnvVar!.Split(',')
-                                              .Select(e => e.Trim())
-                                              .Where(e => !string.IsNullOrEmpty(e))
-                                              .ToList();
+        var exporters = new List<LogExporter>();
+        var exporterNames = logExporterEnvVar!.Split(Constants.ConfigurationValues.Separator);
 
         foreach (var exporterName in exporterNames)
         {
@@ -90,6 +87,6 @@ internal class LogSettings : Settings
             }
         }
 
-        return exporters.ToList().AsReadOnly();
+        return exporters;
     }
 }

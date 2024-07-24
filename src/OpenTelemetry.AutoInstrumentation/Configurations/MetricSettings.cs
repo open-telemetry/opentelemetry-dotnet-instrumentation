@@ -66,16 +66,13 @@ internal class MetricSettings : Settings
     {
         var metricsExporterEnvVar = configuration.GetString(ConfigurationKeys.Metrics.Exporter);
 
-        if (string.IsNullOrWhiteSpace(metricsExporterEnvVar))
+        if (string.IsNullOrEmpty(metricsExporterEnvVar))
         {
-            return new List<MetricsExporter> { MetricsExporter.Otlp }.AsReadOnly();
+            return new List<MetricsExporter> { MetricsExporter.Otlp };
         }
 
-        var exporters = new HashSet<MetricsExporter>();
-        var exporterNames = metricsExporterEnvVar!.Split(',')
-                                                  .Select(e => e.Trim())
-                                                  .Where(e => !string.IsNullOrEmpty(e))
-                                                  .ToList();
+        var exporters = new List<MetricsExporter>();
+        var exporterNames = metricsExporterEnvVar!.Split(Constants.ConfigurationValues.Separator);
 
         foreach (var exporterName in exporterNames)
         {
@@ -103,6 +100,6 @@ internal class MetricSettings : Settings
             }
         }
 
-        return exporters.ToList().AsReadOnly();
+        return exporters;
     }
 }

@@ -123,16 +123,11 @@ public class SettingsTests : IDisposable
     [InlineData("non-supported", new TracesExporter[0])]
     [InlineData("otlp", new[] { TracesExporter.Otlp })]
     [InlineData("zipkin", new[] { TracesExporter.Zipkin })]
-    [InlineData(",otlp,", new[] { TracesExporter.Otlp })]
-    [InlineData("zipkinnm", new TracesExporter[0])]
-    [InlineData("otlp, zipkin", new[] { TracesExporter.Otlp, TracesExporter.Zipkin })]
-    [InlineData("zipkin,otlp", new[] { TracesExporter.Zipkin, TracesExporter.Otlp })]
-    [InlineData("otlp, otlp", new[] { TracesExporter.Otlp })]
-    [InlineData("otlp, none", new[] { TracesExporter.Otlp })]
-    [InlineData("non-supported, none", new TracesExporter[0])]
-    [InlineData("zipkin, non-supported, none", new[] { TracesExporter.Zipkin })]
-    [InlineData(",none, zipkin", new[] { TracesExporter.Zipkin })]
-    [InlineData("otlp, zipkin, zipkin,,, none", new[] { TracesExporter.Otlp, TracesExporter.Zipkin })]
+    [InlineData("otlp,zipkin", new[] { TracesExporter.Otlp, TracesExporter.Zipkin })]
+    [InlineData("none,zipkin", new[] { TracesExporter.Zipkin })]
+    [InlineData("otlp,none", new[] { TracesExporter.Otlp })]
+    [InlineData("non-supported,none", new TracesExporter[0])]
+    [InlineData("zipkin,non-supported,none", new[] { TracesExporter.Zipkin })]
     internal void TracesExporter_SupportedValues(string tracesExporter, TracesExporter[] expectedTracesExporter)
     {
         Environment.SetEnvironmentVariable(ConfigurationKeys.Traces.Exporter, tracesExporter);
@@ -158,16 +153,11 @@ public class SettingsTests : IDisposable
     [InlineData("non-supported", new MetricsExporter[0])]
     [InlineData("otlp", new[] { MetricsExporter.Otlp })]
     [InlineData("prometheus", new[] { MetricsExporter.Prometheus })]
-    [InlineData(",otlp,", new[] { MetricsExporter.Otlp })]
-    [InlineData("prometheusss", new MetricsExporter[0])]
-    [InlineData("otlp, prometheus", new[] { MetricsExporter.Otlp, MetricsExporter.Prometheus })]
-    [InlineData("prometheus,otlp", new[] { MetricsExporter.Prometheus, MetricsExporter.Otlp })]
-    [InlineData("prometheus, none", new[] { MetricsExporter.Prometheus })]
-    [InlineData("prometheus, prometheus", new[] { MetricsExporter.Prometheus })]
-    [InlineData("prometheus, otlp, otlp,,, none", new[] { MetricsExporter.Prometheus, MetricsExporter.Otlp })]
-    [InlineData("prometheus, non-supported, none", new[] { MetricsExporter.Prometheus })]
-    [InlineData("non-supported, none", new MetricsExporter[0])]
-    [InlineData("otlp, non-supported, none", new[] { MetricsExporter.Otlp })]
+    [InlineData("otlp,prometheus", new[] { MetricsExporter.Otlp, MetricsExporter.Prometheus })]
+    [InlineData("prometheus,none", new[] { MetricsExporter.Prometheus })]
+    [InlineData("prometheus,non-supported,none", new[] { MetricsExporter.Prometheus })]
+    [InlineData("non-supported,none", new MetricsExporter[0])]
+    [InlineData("otlp,non-supported,none", new[] { MetricsExporter.Otlp })]
     internal void MetricExporter_SupportedValues(string metricExporter, MetricsExporter[] expectedMetricsExporters)
     {
         Environment.SetEnvironmentVariable(ConfigurationKeys.Metrics.Exporter, metricExporter);
@@ -192,10 +182,10 @@ public class SettingsTests : IDisposable
     [InlineData("none", new LogExporter[0])]
     [InlineData("non-supported", new LogExporter[0])]
     [InlineData("otlp", new[] { LogExporter.Otlp })]
-    [InlineData("otlp, none", new[] { LogExporter.Otlp })]
-    [InlineData("none, otlp", new[] { LogExporter.Otlp })]
-    [InlineData(",otlp,", new[] { LogExporter.Otlp })]
-    [InlineData(",non-supported ,", new LogExporter[0])]
+    [InlineData("otlp,none", new[] { LogExporter.Otlp })]
+    [InlineData("none,otlp", new[] { LogExporter.Otlp })]
+    [InlineData("non-supported,none", new LogExporter[0])]
+    [InlineData("non-supported,none,otlp", new[] { LogExporter.Otlp })]
     internal void LogExporter_SupportedValues(string logExporter, LogExporter[] expectedLogExporter)
     {
         Environment.SetEnvironmentVariable(ConfigurationKeys.Logs.Exporter, logExporter);

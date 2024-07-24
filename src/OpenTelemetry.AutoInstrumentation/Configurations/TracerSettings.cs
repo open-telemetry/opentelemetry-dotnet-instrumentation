@@ -93,17 +93,14 @@ internal class TracerSettings : Settings
     {
         var tracesExporterEnvVar = configuration.GetString(ConfigurationKeys.Traces.Exporter);
 
-        if (string.IsNullOrWhiteSpace(tracesExporterEnvVar))
+        if (string.IsNullOrEmpty(tracesExporterEnvVar))
         {
-            return new List<TracesExporter> { TracesExporter.Otlp }.AsReadOnly();
+            return new List<TracesExporter> { TracesExporter.Otlp };
         }
 
-        var exporters = new HashSet<TracesExporter>();
+        var exporters = new List<TracesExporter>();
 
-        var exporterNames = tracesExporterEnvVar!.Split(',')
-                                                 .Select(e => e.Trim())
-                                                 .Where(e => !string.IsNullOrEmpty(e))
-                                                 .ToList();
+        var exporterNames = tracesExporterEnvVar!.Split(Constants.ConfigurationValues.Separator);
 
         foreach (var exporterName in exporterNames)
         {
@@ -130,6 +127,6 @@ internal class TracerSettings : Settings
             }
         }
 
-        return exporters.ToList().AsReadOnly();
+        return exporters;
     }
 }
