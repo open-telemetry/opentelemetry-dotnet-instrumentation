@@ -232,7 +232,7 @@ public class SmokeTests : TestHelper
         EnableOnlyHttpClientTraceInstrumentation();
 
         SetEnvironmentVariable("OTEL_DOTNET_AUTO_TRACES_ADDITIONAL_SOURCES", "MyCompany.MyProduct.MyLibrary");
-        SetEnvironmentVariable("OTEL_TRACES_EXPORTER", "otlp, zipkin");
+        SetEnvironmentVariable("OTEL_TRACES_EXPORTER", "otlp,zipkin");
         SetEnvironmentVariable("OTEL_EXPORTER_ZIPKIN_ENDPOINT", $"http://localhost:{zipkinCollector.Port}/api/v2/spans");
         SetEnvironmentVariable("LONG_RUNNING", "true");
 
@@ -318,7 +318,7 @@ public class SmokeTests : TestHelper
 
         EnableOnlyHttpClientTraceInstrumentation();
         SetEnvironmentVariable("LONG_RUNNING", "true");
-        SetEnvironmentVariable("OTEL_METRICS_EXPORTER", "otlp, prometheus");
+        SetEnvironmentVariable("OTEL_METRICS_EXPORTER", "otlp,prometheus");
         SetEnvironmentVariable("OTEL_DOTNET_AUTO_METRICS_ADDITIONAL_SOURCES", "MyCompany.MyProduct.MyLibrary");
         const string defaultPrometheusMetricsEndpoint = "http://localhost:9464/metrics";
 
