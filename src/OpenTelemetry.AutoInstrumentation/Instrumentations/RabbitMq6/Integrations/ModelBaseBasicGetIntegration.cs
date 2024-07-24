@@ -19,8 +19,8 @@ namespace OpenTelemetry.AutoInstrumentation.Instrumentations.RabbitMq6.Integrati
     methodName: IntegrationConstants.BasicGetMethodName,
     returnTypeName: IntegrationConstants.BasicGetResultTypeName,
     parameterTypeNames: new[] { ClrNames.String, ClrNames.Bool },
-    minimumVersion: "6.0.0",
-    maximumVersion: "6.*.*",
+    minimumVersion: IntegrationConstants.MinSupportedVersion,
+    maximumVersion: IntegrationConstants.MaxSupportedVersion,
     integrationName: IntegrationConstants.RabbitMqByteCodeIntegrationName,
     type: InstrumentationType.Trace)]
 public static class ModelBaseBasicGetIntegration

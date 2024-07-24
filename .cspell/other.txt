@@ -50,6 +50,7 @@ PROCESSRUNTIME
 proto
 protobuf
 protos
+RABBITMQ
 Serilog
 spdlog
 SQLCLIENT
@@ -64,4 +65,3 @@ unregistration
 vcpkg
 WCFCLIENT
 WCFSERVICE
-RABBITMQ

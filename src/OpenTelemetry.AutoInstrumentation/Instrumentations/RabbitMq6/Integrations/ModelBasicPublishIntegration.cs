@@ -18,8 +18,8 @@ typeName: IntegrationConstants.ModelGeneratedTypeName,
 methodName: IntegrationConstants.BasicPublishMethodName,
 returnTypeName: ClrNames.Void,
 parameterTypeNames: new[] { ClrNames.String, ClrNames.String, ClrNames.Bool, IntegrationConstants.BasicPropertiesInterfaceTypeName, $"System.ReadOnlyMemory`1[{ClrNames.Byte}]" },
-minimumVersion: "6.0.0",
-maximumVersion: "6.*.*",
+minimumVersion: IntegrationConstants.MinSupportedVersion,
+maximumVersion: IntegrationConstants.MaxSupportedVersion,
 integrationName: IntegrationConstants.RabbitMqByteCodeIntegrationName,
 type: InstrumentationType.Trace)]
 public static class ModelBasicPublishIntegration

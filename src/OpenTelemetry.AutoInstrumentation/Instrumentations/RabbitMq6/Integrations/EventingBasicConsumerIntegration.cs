@@ -18,8 +18,8 @@ namespace OpenTelemetry.AutoInstrumentation.Instrumentations.RabbitMq6.Integrati
     methodName: IntegrationConstants.HandleBasicDeliverMethodName,
     returnTypeName: ClrNames.Void,
     parameterTypeNames: new[] { ClrNames.String, ClrNames.UInt64, ClrNames.Bool, ClrNames.String, ClrNames.String, IntegrationConstants.BasicPropertiesInterfaceTypeName, $"System.ReadOnlyMemory`1[{ClrNames.Byte}]" },
-    minimumVersion: "6.0.0",
-    maximumVersion: "6.*.*",
+    minimumVersion: IntegrationConstants.MinSupportedVersion,
+    maximumVersion: IntegrationConstants.MaxSupportedVersion,
     integrationName: IntegrationConstants.RabbitMqByteCodeIntegrationName,
     type: InstrumentationType.Trace)]
 public static class EventingBasicConsumerIntegration

@@ -16,4 +16,6 @@ internal static class IntegrationConstants
     public const string BasicGetMethodName = "BasicGet";
     public const string HandleBasicDeliverMethodName = "HandleBasicDeliver";
     public const string BasicPublishMethodName = "_Private_BasicPublish";
+    public const string MinSupportedVersion = "6.0.0";
+    public const string MaxSupportedVersion = "6.*.*";
 }
