@@ -41,6 +41,7 @@
     <PackageVersion Include="Quartz" Version="3.10.0" />
     <PackageVersion Include="Quartz.Extensions.DependencyInjection" Version="3.10.0" />
     <PackageVersion Include="Quartz.Extensions.Hosting" Version="3.10.0" />
+    <PackageVersion Include="RabbitMQ.Client" Version="6.8.1" />
     <PackageVersion Include="StackExchange.Redis" Version="2.8.0" />
     <PackageVersion Include="StrongNamer" Version="0.2.5" />
     <PackageVersion Include="System.Collections.Immutable" Version="8.0.0" />

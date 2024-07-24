@@ -127,5 +127,10 @@ internal enum TracerInstrumentation
     /// <summary>
     /// Oracle Managed Data Access (Core) instrumentation
     /// </summary>
-    OracleMda = 21
+    OracleMda = 21,
+
+    /// <summary>
+    /// RabbitMQ 6 instrumentation
+    /// </summary>
+    RabbitMq6 = 22
 }
