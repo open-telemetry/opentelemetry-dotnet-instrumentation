@@ -607,6 +607,15 @@ public class SmokeTests : TestHelper
 #else
         resourceExpector.Expect("process.runtime.name", ".NET");
 #endif
+
+        var expectedPlatform = EnvironmentTools.GetOS() switch
+        {
+            "win" => "windows",
+            "osx" => "darwin",
+            "linux" => "linux",
+            _ => throw new PlatformNotSupportedException($"Unknown platform")
+        };
+        resourceExpector.Expect("os.type", expectedPlatform);
     }
 
     private void VerifyTestApplicationInstrumented(TestAppStartupMode startupMode = TestAppStartupMode.Auto)

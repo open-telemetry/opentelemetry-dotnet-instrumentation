@@ -360,6 +360,7 @@ public class SettingsTests : IDisposable
     [InlineData("AZUREAPPSERVICE", ResourceDetector.AzureAppService)]
     [InlineData("PROCESSRUNTIME", ResourceDetector.ProcessRuntime)]
     [InlineData("PROCESS", ResourceDetector.Process)]
+    [InlineData("OPERATINGSYSTEM", ResourceDetector.OperatingSystem)]
     [InlineData("HOST", ResourceDetector.Host)]
     internal void GeneralSettings_Instrumentations_SupportedValues(string resourceDetector, ResourceDetector expectedResourceDetector)
     {

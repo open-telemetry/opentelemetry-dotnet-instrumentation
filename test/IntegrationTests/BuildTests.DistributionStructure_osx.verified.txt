@@ -38,6 +38,7 @@
   /net/OpenTelemetry.Resources.Azure.dll,
   /net/OpenTelemetry.Resources.Container.dll,
   /net/OpenTelemetry.Resources.Host.dll,
+  /net/OpenTelemetry.Resources.OperatingSystem.dll,
   /net/OpenTelemetry.Resources.Process.dll,
   /net/OpenTelemetry.Resources.ProcessRuntime.dll,
   /net/OpenTelemetry.Shims.OpenTracing.dll,
