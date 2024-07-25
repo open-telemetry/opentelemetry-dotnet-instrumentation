@@ -33,5 +33,10 @@ internal enum ResourceDetector
     /// <summary>
     /// Host resource detector.
     /// </summary>
-    Host = 4
+    Host = 4,
+
+    /// <summary>
+    /// Operating System resource detector.
+    /// </summary>
+    OperatingSystem = 5,
 }

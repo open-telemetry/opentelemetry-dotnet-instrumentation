@@ -11,6 +11,7 @@
   OpenTelemetry.Resources.Azure,
   OpenTelemetry.Resources.Container,
   OpenTelemetry.Resources.Host,
+  OpenTelemetry.Resources.OperatingSystem,
   OpenTelemetry.Resources.Process,
   OpenTelemetry.Resources.ProcessRuntime
 ]

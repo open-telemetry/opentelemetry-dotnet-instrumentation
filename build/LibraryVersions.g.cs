@@ -29,7 +29,7 @@ public static partial class LibraryVersion
             {
                 new("8.0.0"),
                 new("8.10.0"),
-                new("8.14.3"),
+                new("8.14.4"),
             }
         },
         {
@@ -65,7 +65,7 @@ public static partial class LibraryVersion
             new List<PackageBuildInfo>
             {
                 new("2.52.0"),
-                new("2.63.0"),
+                new("2.64.0"),
             }
         },
         {
@@ -98,7 +98,7 @@ public static partial class LibraryVersion
             new List<PackageBuildInfo>
             {
                 new("2.19.0"),
-                new("2.26.0"),
+                new("2.27.0"),
             }
         },
         {
@@ -114,7 +114,7 @@ public static partial class LibraryVersion
             new List<PackageBuildInfo>
             {
                 new("8.1.0"),
-                new("8.4.0"),
+                new("9.0.0"),
             }
         },
         {

@@ -30,7 +30,7 @@ jobs:
     steps:
       
       - name: Checkout
-        uses: actions/checkout@v4.1.2
+        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # tag: v4.1.7
 
       - name: Setup ARM64 Environment Variables
         if: ${{ matrix.machine == 'actuated-arm64-4cpu-8gb' }}
@@ -38,19 +38,19 @@ jobs:
           echo "DOTNET_INSTALL_DIR=~/.dotnet" >> $GITHUB_ENV
 
       - name: Setup .NET
-        uses: actions/setup-dotnet@v4.0.0
+        uses: actions/setup-dotnet@6bd8b7f7774af54e05809fcc5431931b3eb1ddee # tag: v4.0.1
         with:
           dotnet-version: | 
-            6.0.423
+            6.0.424
             7.0.410
-            8.0.302
+            8.0.303
 
       - name: Run BuildTracer and ManagedTests
         run: ./build.cmd BuildTracer ManagedTests --containers ${{ matrix.containers }} --test-project "${{ github.event.inputs.testProject }}" --test-name '"${{ github.event.inputs.testName }}"' --test-count ${{ github.event.inputs.count }}
 
       - name: Upload logs
         if: always()
-        uses: actions/upload-artifact@v4.3.3
+        uses: actions/upload-artifact@0b2256b8c012f0828dc542b3febcab082c67f72b # tag: v4.3.4
         with:
           name: logs-${{ matrix.machine }}
           path: test-artifacts/

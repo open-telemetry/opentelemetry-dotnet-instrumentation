@@ -251,6 +251,7 @@ Libraries
 - OpenTelemetry.ResourceDetectors.Azure.dll,
 - OpenTelemetry.ResourceDetectors.Container.dll,
 - OpenTelemetry.ResourceDetectors.Host.dll,
+- OpenTelemetry.ResourceDetectors.OperatingSystem.dll,
 - OpenTelemetry.ResourceDetectors.Process.dll,
 - OpenTelemetry.ResourceDetectors.ProcessRuntime.dll,
 are under the following copyright:

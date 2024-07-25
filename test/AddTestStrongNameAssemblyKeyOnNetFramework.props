@@ -1,6 +1,0 @@
-<Project>
-  <!-- Strong name conditional to limit it only to required projects -->
-  <ItemGroup Condition="$(TargetFramework.StartsWith('net4')) and '$(AddTestStrongNameAssemblyKeyOnNetFramework)' == 'true'">
-    <Compile Include="$(MSBuildThisFileDirectory)AssemblyInfo.cs" Link="AssemblyInfo.StrongName.cs" />
-  </ItemGroup>
-</Project>

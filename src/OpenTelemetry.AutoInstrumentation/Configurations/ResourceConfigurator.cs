@@ -33,6 +33,7 @@ internal static class ResourceConfigurator
                 ResourceDetector.ProcessRuntime => Wrappers.AddProcessRuntimeResourceDetector(resourceBuilder),
                 ResourceDetector.Process => Wrappers.AddProcessResourceDetector(resourceBuilder),
                 ResourceDetector.Host => Wrappers.AddHostResourceDetector(resourceBuilder),
+                ResourceDetector.OperatingSystem => Wrappers.AddOperatingSystemResourceDetector(resourceBuilder),
                 _ => resourceBuilder
             };
         }
@@ -79,6 +80,12 @@ internal static class ResourceConfigurator
         public static ResourceBuilder AddProcessResourceDetector(ResourceBuilder resourceBuilder)
         {
             return resourceBuilder.AddProcessDetector();
+        }
+
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        public static ResourceBuilder AddOperatingSystemResourceDetector(ResourceBuilder resourceBuilder)
+        {
+            return resourceBuilder.AddOperatingSystemDetector();
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]
