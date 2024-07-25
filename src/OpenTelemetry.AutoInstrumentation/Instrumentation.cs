@@ -53,6 +53,10 @@ internal static class Instrumentation
 
     internal static Lazy<SdkSettings> SdkSettings { get; } = new(() => Settings.FromDefaultSources<SdkSettings>(FailFastSettings.Value.FailFast));
 
+#if NET6_0_OR_GREATER
+    internal static Lazy<ContinuousProfilerSettings> ContinuousProfilerSettings { get; } = new(() => Settings.FromDefaultSources<ContinuousProfilerSettings>(FailFastSettings.Value.FailFast));
+#endif
+
     /// <summary>
     /// Initialize the OpenTelemetry SDK with a pre-defined set of exporters, shims, and
     /// instrumentations.
@@ -94,12 +98,21 @@ internal static class Instrumentation
 
             if (profilerEnabled)
             {
-                var (threadSamplingEnabled, threadSamplingInterval, allocationSamplingEnabled, maxMemorySamplesPerMinute, exportInterval, exportTimeout, continuousProfilerExporter) = _pluginManager.GetFirstContinuousConfiguration();
-                Logger.Debug($"Continuous profiling configuration: Thread sampling enabled: {threadSamplingEnabled}, thread sampling interval: {threadSamplingInterval}, allocation sampling enabled: {allocationSamplingEnabled}, max memory samples per minute: {maxMemorySamplesPerMinute}, export interval: {exportInterval}, export timeout: {exportTimeout}, continuous profiler exporter: {continuousProfilerExporter.GetType()}");
-
-                if (threadSamplingEnabled || allocationSamplingEnabled)
+                var continuousProfilerSettings = ContinuousProfilerSettings.Value;
+                if (continuousProfilerSettings.AllocationSamplingEnabled || continuousProfilerSettings.ThreadSamplingEnabled)
                 {
-                    InitializeContinuousProfiling(continuousProfilerExporter, threadSamplingEnabled, allocationSamplingEnabled, threadSamplingInterval, maxMemorySamplesPerMinute, exportInterval, exportTimeout);
+                    var continuousProfilerExporter = new OtlpOverHttpExporter();
+                    InitializeContinuousProfiling(continuousProfilerExporter, continuousProfilerSettings.ThreadSamplingEnabled, continuousProfilerSettings.AllocationSamplingEnabled, continuousProfilerSettings.ThreadSamplingInterval, continuousProfilerSettings.MaxMemorySamplesPerMinute, continuousProfilerSettings.ExportInterval, continuousProfilerSettings.ExportTimeout);
+                }
+                else
+                {
+                    var (threadSamplingEnabled, threadSamplingInterval, allocationSamplingEnabled, maxMemorySamplesPerMinute, exportInterval, exportTimeout, continuousProfilerExporter) = _pluginManager.GetFirstContinuousConfiguration();
+                    Logger.Debug($"Continuous profiling configuration: Thread sampling enabled: {threadSamplingEnabled}, thread sampling interval: {threadSamplingInterval}, allocation sampling enabled: {allocationSamplingEnabled}, max memory samples per minute: {maxMemorySamplesPerMinute}, export interval: {exportInterval}, export timeout: {exportTimeout}, continuous profiler exporter: {continuousProfilerExporter.GetType()}");
+
+                    if (threadSamplingEnabled || allocationSamplingEnabled)
+                    {
+                        InitializeContinuousProfiling(continuousProfilerExporter, threadSamplingEnabled, allocationSamplingEnabled, threadSamplingInterval, maxMemorySamplesPerMinute, exportInterval, exportTimeout);
+                    }
                 }
             }
             else

@@ -13,13 +13,13 @@
   </ItemGroup>
 
     <ItemGroup>
-      <Compile Include="..\TestApplication.ContinuousProfiler\Exporter\AllocationSample.cs">
+      <Compile Include="..\..\..\..\src\OpenTelemetry.AutoInstrumentation\ContinuousProfiler\AllocationSample.cs">
         <Link>Exporter\AllocationSample.cs</Link>
       </Compile>
-      <Compile Include="..\TestApplication.ContinuousProfiler\Exporter\SampleNativeFormatParser.cs">
+      <Compile Include="..\..\..\..\src\OpenTelemetry.AutoInstrumentation\ContinuousProfiler\SampleNativeFormatParser.cs">
         <Link>Exporter\SampleNativeFormatParser.cs</Link>
       </Compile>
-      <Compile Include="..\TestApplication.ContinuousProfiler\Exporter\ThreadSample.cs">
+      <Compile Include="..\..\..\..\src\OpenTelemetry.AutoInstrumentation\ContinuousProfiler\ThreadSample.cs">
         <Link>Exporter\ThreadSample.cs</Link>
       </Compile>
     </ItemGroup>

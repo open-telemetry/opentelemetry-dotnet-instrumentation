@@ -1,7 +1,9 @@
 // Copyright The OpenTelemetry Authors
 // SPDX-License-Identifier: Apache-2.0
 
-namespace TestApplication.ContinuousProfiler;
+#if NET6_0_OR_GREATER
+
+namespace OpenTelemetry.AutoInstrumentation.ContinuousProfiler;
 
 internal class ThreadSample
 {
@@ -29,3 +31,4 @@ internal class ThreadSample
 
     public IList<string> Frames { get; } = new List<string>();
 }
+#endif

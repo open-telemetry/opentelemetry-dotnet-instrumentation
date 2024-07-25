@@ -1,9 +1,11 @@
 // Copyright The OpenTelemetry Authors
 // SPDX-License-Identifier: Apache-2.0
 
+#if NET6_0_OR_GREATER
+
 using OpenTelemetry.Proto.Profiles.V1Experimental;
 
-namespace TestApplication.ContinuousProfiler;
+namespace OpenTelemetry.AutoInstrumentation.ContinuousProfiler;
 
 internal class SampleBuilder
 {
@@ -47,3 +49,4 @@ internal class SampleBuilder
         return _sample;
     }
 }
+#endif

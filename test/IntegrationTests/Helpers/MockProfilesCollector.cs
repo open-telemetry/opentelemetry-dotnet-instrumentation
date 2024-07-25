@@ -23,7 +23,7 @@ public class MockProfilesCollector : IDisposable
     public MockProfilesCollector(ITestOutputHelper output)
     {
         _output = output;
-        _listener = new(output, new PathHandler(HandleHttpRequests, "/v1/profiles"));
+        _listener = new(output, new PathHandler(HandleHttpRequests, "/v1experimental/profiles"));
     }
 
     /// <summary>

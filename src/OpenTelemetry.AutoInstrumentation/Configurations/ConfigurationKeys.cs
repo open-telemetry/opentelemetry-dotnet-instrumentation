@@ -260,4 +260,22 @@ internal partial class ConfigurationKeys
         /// </summary>
         public const string Propagators = "OTEL_PROPAGATORS";
     }
+
+#if NET6_0_OR_GREATER
+    /// <summary>
+    /// Configuration keys for continuous profiler.
+    /// </summary>
+    public static class ContinuousProfiler
+    {
+        /// <summary>
+        /// Configuration key for enabling thread sampling.
+        /// </summary>
+        public const string ThreadSamplingEnabled = "OTLP_DOTNET_AUTO_CONTINUOUS_PROFILER_THREAD_SAMPLING_ENABLED";
+
+        /// <summary>
+        /// Configuration key for enabling allocation sampling.
+        /// </summary>
+        public const string AllocationSamplingEnabled = "OTLP_DOTNET_AUTO_CONTINUOUS_PROFILER_ALLOCATION_SAMPLING_ENABLED";
+    }
+#endif
 }
