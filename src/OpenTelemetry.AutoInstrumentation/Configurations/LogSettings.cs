@@ -94,7 +94,7 @@ internal class LogSettings : Settings
         {
             Logger.Warning($"The '{ConfigurationKeys.Logs.ConsoleExporterEnabled}' environment variable is deprecated and " +
                 "will be removed in the next minor release. " +
-                "Please update your configuration to use the new method. " +
+                "Please set the console exporter using OTEL_LOGS_EXPORTER environmental variable. " +
                 "Refer to the updated documentation for details.");
 
             exporters.Add(LogExporter.Console);
