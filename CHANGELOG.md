@@ -12,12 +12,12 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 - Support for Operating System resource detector.
 - Added support for OTEL_TRACES_EXPORTER, OTEL_METRICS_EXPORTER, OTEL_LOGS_EXPORTER
   to handle comma-separated list.
-- The environment variables OTEL_TRACES_EXPORTER, OTEL_METRICS_EXPORTER,
- and OTEL_LOGS_EXPORTER now support configuring console exporters for traces,
- metrics, and logs, respectively.
-- Environment variables OTEL_DOTNET_AUTO_TRACES_CONSOLE_EXPORTER_ENABLED,
- OTEL_DOTNET_AUTO_METRICS_CONSOLE_EXPORTER_ENABLED and
- OTEL_DOTNET_AUTO_LOGS_CONSOLE_EXPORTER_ENABLED are now marked as deprecated.
+- The environment variables `OTEL_TRACES_EXPORTER`, `OTEL_METRICS_EXPORTER`,
+  and `OTEL_LOGS_EXPORTER` now support configuring console exporters for traces,
+  metrics, and logs, respectively.
+- Environment variables `OTEL_DOTNET_AUTO_TRACES_CONSOLE_EXPORTER_ENABLED`,
+  `OTEL_DOTNET_AUTO_METRICS_CONSOLE_EXPORTER_ENABLED`, and
+  `OTEL_DOTNET_AUTO_LOGS_CONSOLE_EXPORTER_ENABLED` are now marked as deprecated.
 
 ### Changed
 
