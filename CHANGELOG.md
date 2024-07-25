@@ -15,6 +15,8 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 
 ### Changed
 
+- Referencing `OpenTelemetry.AutoInstrumentation` manually no longer visibly injects instrumentation scripts into projects in an editor's solution window.
+
 #### Dependency updates
 
 - Following packages updated
