@@ -23,6 +23,8 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 - Following packages updated
   - `OpenTelemetry.Exporter.Prometheus.HttpListener` from `1.9.0-beta.1` to `1.9.0-beta.2`,
   - `OpenTelemetry.Shims.OpenTracing` from `1.9.0-beta.1` to `1.9.0-beta.2`.
+- .NET only, following packages updated
+  - `OpenTelemetry.Instrumentation.StackExchangeRedis` from `1.0.0-rc9.15` to `1.9.0-beta.1`.
 - .NET Framework only, following packages updated
   - `Google.Protobuf` updated from `3.27.1` to `3.27.2`,
   - `Grpc.Core.Api` from `2.63.0` to `2.64.0`,
@@ -35,6 +37,7 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 
 - Support for macOS Big Sur 11 x64.
   macOs libraries are built and tested against [macOS Monterey 12 x64](https://github.com/actions/runner-images/blob/main/images/macos/macos-12-Readme.md).
+- Support for StackExchange.Redis < 2.6.122.
 
 ### Fixed
 

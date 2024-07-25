@@ -26,7 +26,7 @@ public class StackExchangeRedisTests : TestHelper
     {
         using var collector = new MockSpansCollector(Output);
         SetExporter(collector);
-        var spanCount = packageVersion == string.Empty || Version.Parse(packageVersion) >= new Version(2, 1, 50) ? 8 : 4;
+        const int spanCount = 8;
         for (var i = 0; i < spanCount; i++)
         {
             collector.Expect("OpenTelemetry.Instrumentation.StackExchangeRedis");
