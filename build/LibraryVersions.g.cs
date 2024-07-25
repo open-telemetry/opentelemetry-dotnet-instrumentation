@@ -159,10 +159,7 @@ public static partial class LibraryVersion
             "TestApplication.StackExchangeRedis",
             new List<PackageBuildInfo>
             {
-                new("2.0.495"),
-                new("2.1.50"),
-                new("2.5.61"),
-                new("2.6.66"),
+                new("2.6.122"),
                 new("2.8.0"),
             }
         },

@@ -5,20 +5,12 @@
     <PackageReference Include="StackExchange.Redis" ExcludeAssets="all" />
     <!-- Pipelines.Sockets.Unofficial is tranistive dependency required by OpenTelemetry.Instrumentation.StackExchangeRedis. -->
     <PackageReference Include="Pipelines.Sockets.Unofficial" ExcludeAssets="all" />
-    <!-- System.Diagnostics.PerformanceCounter is tranistive dependency required by OpenTelemetry.Instrumentation.StackExchangeRedis. -->
-    <PackageReference Include="System.Diagnostics.PerformanceCounter" ExcludeAssets="all" />
-    <!-- System.Configuration.ConfigurationManager is tranistive dependency required by OpenTelemetry.Instrumentation.StackExchangeRedis. -->
-    <PackageReference Include="System.Configuration.ConfigurationManager" ExcludeAssets="all" />
-    <!-- System.Security.Cryptography.ProtectedData is tranistive dependency required by OpenTelemetry.Instrumentation.StackExchangeRedis. -->
-    <PackageReference Include="System.Security.Cryptography.ProtectedData" ExcludeAssets="all" />
-    <!-- System.Drawing.Common is tranistive dependency required by OpenTelemetry.Instrumentation.StackExchangeRedis. -->
+    <!-- System.Drawing.Common is tranistive dependency required by OpenTelemetry.Instrumentation.Wcf. -->
     <PackageReference Include="System.Drawing.Common" ExcludeAssets="all" />
-    <!-- System.Windows.Extensions is tranistive dependency required by OpenTelemetry.Instrumentation.StackExchangeRedis. -->
+    <!-- System.Windows.Extensions is tranistive dependency required by OpenTelemetry.Instrumentation.Wcf. -->
     <PackageReference Include="System.Windows.Extensions" ExcludeAssets="all" />
-    <!-- Microsoft.Win32.SystemEvents is tranistive dependency required by OpenTelemetry.Instrumentation.StackExchangeRedis. -->
+    <!-- Microsoft.Win32.SystemEvents is tranistive dependency required by OpenTelemetry.Instrumentation.Wcf. -->
     <PackageReference Include="Microsoft.Win32.SystemEvents" ExcludeAssets="all" />
-    <!-- Microsoft.Bcl.AsyncInterfaces is required by StackExchange.Redis. -->
-    <PackageReference Include="Microsoft.Bcl.AsyncInterfaces" ExcludeAssets="all" />
   </ItemGroup>
 
   <ItemGroup>
