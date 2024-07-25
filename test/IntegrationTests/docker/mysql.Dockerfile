@@ -1,1 +1,1 @@
-FROM mysql:9.0.0
+FROM mysql:9.0.1
