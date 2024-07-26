@@ -32,16 +32,11 @@ internal class LogSettings : Settings
     /// </summary>
     public IReadOnlyList<LogInstrumentation> EnabledInstrumentations { get; private set; } = new List<LogInstrumentation>();
 
-    /// <summary>
-    /// Gets or sets a value indicating whether the console exporter is enabled.
-    /// </summary>
-    private bool ConsoleExporterEnabled { get; set; }
-
     protected override void OnLoad(Configuration configuration)
     {
         LogsEnabled = configuration.GetBool(ConfigurationKeys.Logs.LogsEnabled) ?? true;
-        ConsoleExporterEnabled = configuration.GetBool(ConfigurationKeys.Logs.ConsoleExporterEnabled) ?? false;
-        LogExporters = ParseLogExporter(configuration);
+        var consoleExporterEnabled = configuration.GetBool(ConfigurationKeys.Logs.ConsoleExporterEnabled) ?? false;
+        LogExporters = ParseLogExporter(configuration, consoleExporterEnabled);
         IncludeFormattedMessage = configuration.GetBool(ConfigurationKeys.Logs.IncludeFormattedMessage) ?? false;
 
         var instrumentationEnabledByDefault =
@@ -53,16 +48,27 @@ internal class LogSettings : Settings
             enabledConfigurationTemplate: ConfigurationKeys.Logs.EnabledLogsInstrumentationTemplate);
     }
 
-    private IReadOnlyList<LogExporter> ParseLogExporter(Configuration configuration)
+    private static IReadOnlyList<LogExporter> ParseLogExporter(Configuration configuration, bool consoleExporterEnabled)
     {
         var logExporterEnvVar = configuration.GetString(ConfigurationKeys.Logs.Exporter);
+        var exporters = new List<LogExporter>();
+
+        if (consoleExporterEnabled)
+        {
+            Logger.Warning($"The '{ConfigurationKeys.Logs.ConsoleExporterEnabled}' environment variable is deprecated and " +
+                "will be removed in the next minor release. " +
+                "Please set the console exporter using OTEL_LOGS_EXPORTER environmental variable. " +
+                "Refer to the updated documentation for details.");
+
+            exporters.Add(LogExporter.Console);
+        }
 
         if (string.IsNullOrEmpty(logExporterEnvVar))
         {
-            return new List<LogExporter> { LogExporter.Otlp };
+            exporters.Add(LogExporter.Otlp);
+            return exporters;
         }
 
-        var exporters = new List<LogExporter>();
         var exporterNames = logExporterEnvVar!.Split(Constants.ConfigurationValues.Separator);
 
         foreach (var exporterName in exporterNames)
@@ -88,16 +94,6 @@ internal class LogSettings : Settings
                     Logger.Error($"Log exporter '{exporterName}' is not supported.");
                     break;
             }
-        }
-
-        if (ConsoleExporterEnabled)
-        {
-            Logger.Warning($"The '{ConfigurationKeys.Logs.ConsoleExporterEnabled}' environment variable is deprecated and " +
-                "will be removed in the next minor release. " +
-                "Please set the console exporter using OTEL_LOGS_EXPORTER environmental variable. " +
-                "Refer to the updated documentation for details.");
-
-            exporters.Add(LogExporter.Console);
         }
 
         return exporters;
