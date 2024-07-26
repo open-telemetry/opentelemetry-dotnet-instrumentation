@@ -12,9 +12,9 @@
       <InstrumentationTarget
         Include="StackExchange.Redis"
         Condition="!$(SkippedInstrumentations.Contains('StackExchange.Redis')) AND !$(TargetFramework.StartsWith('net4'))"
-        TargetNuGetPackageVersionRange="[2.1.58, 3.0.0)"
+        TargetNuGetPackageVersionRange="[2.6.122, 3.0.0)"
         InstrumentationNuGetPackageId="OpenTelemetry.Instrumentation.StackExchangeRedis"
-        InstrumentationNuGetPackageVersion="1.0.0-rc9.15" />
+        InstrumentationNuGetPackageVersion="1.9.0-beta.1" />
 
     </ItemGroup>
 
