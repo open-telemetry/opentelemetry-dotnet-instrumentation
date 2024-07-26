@@ -32,15 +32,10 @@ internal class MetricSettings : Settings
     /// </summary>
     public IList<string> Meters { get; } = new List<string>();
 
-    /// <summary>
-    /// Gets or sets a value indicating whether the console exporter is enabled.
-    /// </summary>
-    private bool ConsoleExporterEnabled { get; set; }
-
     protected override void OnLoad(Configuration configuration)
     {
-        MetricExporters = ParseMetricExporter(configuration);
-        ConsoleExporterEnabled = configuration.GetBool(ConfigurationKeys.Metrics.ConsoleExporterEnabled) ?? false;
+        var consoleExporterEnabled = configuration.GetBool(ConfigurationKeys.Metrics.ConsoleExporterEnabled) ?? false;
+        MetricExporters = ParseMetricExporter(configuration, consoleExporterEnabled);
 
         var instrumentationEnabledByDefault =
             configuration.GetBool(ConfigurationKeys.Metrics.MetricsInstrumentationEnabled) ??
@@ -62,16 +57,27 @@ internal class MetricSettings : Settings
         MetricsEnabled = configuration.GetBool(ConfigurationKeys.Metrics.MetricsEnabled) ?? true;
     }
 
-    private IReadOnlyList<MetricsExporter> ParseMetricExporter(Configuration configuration)
+    private static IReadOnlyList<MetricsExporter> ParseMetricExporter(Configuration configuration, bool consoleExporterEnabled)
     {
         var metricsExporterEnvVar = configuration.GetString(ConfigurationKeys.Metrics.Exporter);
+        var exporters = new List<MetricsExporter>();
+
+        if (consoleExporterEnabled)
+        {
+            Logger.Warning($"The '{ConfigurationKeys.Metrics.ConsoleExporterEnabled}' environment variable is deprecated and " +
+                "will be removed in the next minor release. " +
+                "Please set the console exporter using OTEL_METRICS_EXPORTER environmental variable. " +
+                "Refer to the updated documentation for details.");
+
+            exporters.Add(MetricsExporter.Console);
+        }
 
         if (string.IsNullOrEmpty(metricsExporterEnvVar))
         {
-            return new List<MetricsExporter> { MetricsExporter.Otlp };
+            exporters.Add(MetricsExporter.Otlp);
+            return exporters;
         }
 
-        var exporters = new List<MetricsExporter>();
         var exporterNames = metricsExporterEnvVar!.Split(Constants.ConfigurationValues.Separator);
 
         foreach (var exporterName in exporterNames)
@@ -100,16 +106,6 @@ internal class MetricSettings : Settings
                     Logger.Error($"Metric exporter '{exporterName}' is not supported.");
                     break;
             }
-        }
-
-        if (ConsoleExporterEnabled)
-        {
-            Logger.Warning($"The '{ConfigurationKeys.Metrics.ConsoleExporterEnabled}' environment variable is deprecated and " +
-                "will be removed in the next minor release. " +
-                "Please set the console exporter using OTEL_METRICS_EXPORTER environmental variable. " +
-                "Refer to the updated documentation for details.");
-
-            exporters.Add(MetricsExporter.Console);
         }
 
         return exporters;
