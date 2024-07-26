@@ -314,6 +314,7 @@ Important environment variables include:
 | `OTEL_SPAN_LINK_COUNT_LIMIT`             | Maximum allowed span link count.                                                                                                                                                                           | 128                                                                                                       | [Stable](https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/versioning-and-stability.md) |
 | `OTEL_EVENT_ATTRIBUTE_COUNT_LIMIT`       | Maximum allowed attribute per span event count.                                                                                                                                                            | 128                                                                                                       | [Stable](https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/versioning-and-stability.md) |
 | `OTEL_LINK_ATTRIBUTE_COUNT_LIMIT`        | Maximum allowed attribute per span link count.                                                                                                                                                             | 128                                                                                                       | [Stable](https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/versioning-and-stability.md) |
+| `OTEL_EXPORTER_OTLP_METRICS_TEMPORALITY_PREFERENCE`        | The aggregation temporality to use on the basis of instrument kind.                                                                                                                                                             | `cumulative`                                                                                                       | [Stable](https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/versioning-and-stability.md) |
 
 **[1]**: Considerations on the `OTEL_EXPORTER_OTLP_PROTOCOL`:
 
@@ -324,6 +325,15 @@ Important environment variables include:
   `<PackageReference Include="Grpc.Net.Client" Version="2.64.0" />` to the
   `.csproj` file.
 - On .NET Framework, the `grpc` OTLP exporter protocol is not supported.
+
+**[2]**: The recognized (case-insensitive) values for `OTEL_EXPORTER_OTLP_METRICS_TEMPORALITY_PREFERENCE` are:
+
+- `Cumulative`: Choose cumulative aggregation temporality for all instrument kinds.
+- `Delta`: Choose Delta aggregation temporality for Counter, Asynchronous Counter and Histogram instrument kinds, choose Cumulative aggregation for UpDownCounter and Asynchronous UpDownCounter instrument kinds.
+> [!CAUTION] 
+> **Currently is not working**
+> 
+> `LowMemory`: This configuration uses Delta aggregation temporality for Synchronous Counter and Histogram and uses Cumulative aggregation temporality for Synchronous UpDownCounter, Asynchronous Counter, and Asynchronous UpDownCounter instrument kinds.
 
 ### Prometheus
 
