@@ -17,4 +17,9 @@ internal enum TracesExporter
     /// Zipkin exporter.
     /// </summary>
     Zipkin,
+
+    /// <summary>
+    /// Console exporter.
+    /// </summary>
+    Console,
 }

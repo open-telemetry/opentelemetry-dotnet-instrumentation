@@ -28,20 +28,20 @@ internal class LogSettings : Settings
     public bool IncludeFormattedMessage { get; private set; }
 
     /// <summary>
-    /// Gets a value indicating whether the console exporter is enabled.
-    /// </summary>
-    public bool ConsoleExporterEnabled { get; private set; }
-
-    /// <summary>
     /// Gets the list of enabled instrumentations.
     /// </summary>
     public IReadOnlyList<LogInstrumentation> EnabledInstrumentations { get; private set; } = new List<LogInstrumentation>();
 
+    /// <summary>
+    /// Gets or sets a value indicating whether the console exporter is enabled.
+    /// </summary>
+    private bool ConsoleExporterEnabled { get; set; }
+
     protected override void OnLoad(Configuration configuration)
     {
         LogsEnabled = configuration.GetBool(ConfigurationKeys.Logs.LogsEnabled) ?? true;
-        LogExporters = ParseLogExporter(configuration);
         ConsoleExporterEnabled = configuration.GetBool(ConfigurationKeys.Logs.ConsoleExporterEnabled) ?? false;
+        LogExporters = ParseLogExporter(configuration);
         IncludeFormattedMessage = configuration.GetBool(ConfigurationKeys.Logs.IncludeFormattedMessage) ?? false;
 
         var instrumentationEnabledByDefault =
@@ -53,7 +53,7 @@ internal class LogSettings : Settings
             enabledConfigurationTemplate: ConfigurationKeys.Logs.EnabledLogsInstrumentationTemplate);
     }
 
-    private static IReadOnlyList<LogExporter> ParseLogExporter(Configuration configuration)
+    private IReadOnlyList<LogExporter> ParseLogExporter(Configuration configuration)
     {
         var logExporterEnvVar = configuration.GetString(ConfigurationKeys.Logs.Exporter);
 
@@ -72,6 +72,9 @@ internal class LogSettings : Settings
                 case Constants.ConfigurationValues.Exporters.Otlp:
                     exporters.Add(LogExporter.Otlp);
                     break;
+                case Constants.ConfigurationValues.Exporters.Console:
+                    exporters.Add(LogExporter.Console);
+                    break;
                 case Constants.ConfigurationValues.None:
                     break;
                 default:
@@ -85,6 +88,16 @@ internal class LogSettings : Settings
                     Logger.Error($"Log exporter '{exporterName}' is not supported.");
                     break;
             }
+        }
+
+        if (ConsoleExporterEnabled)
+        {
+            Logger.Warning($"The '{ConfigurationKeys.Logs.ConsoleExporterEnabled}' environment variable is deprecated and " +
+                "will be removed in the next minor release. " +
+                "Please set the console exporter using OTEL_LOGS_EXPORTER environmental variable. " +
+                "Refer to the updated documentation for details.");
+
+            exporters.Add(LogExporter.Console);
         }
 
         return exporters;
