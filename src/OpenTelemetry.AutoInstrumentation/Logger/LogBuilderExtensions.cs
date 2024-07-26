@@ -72,14 +72,6 @@ internal static class LogBuilderExtensions
 
                 pluginManager?.ConfigureLogsOptions(options);
 
-                if (settings.ConsoleExporterEnabled)
-                {
-                    if (pluginManager != null)
-                    {
-                        options.AddConsoleExporter(pluginManager.ConfigureLogsOptions);
-                    }
-                }
-
                 foreach (var logExporter in settings.LogExporters)
                 {
                     switch (logExporter)
@@ -92,6 +84,13 @@ internal static class LogBuilderExtensions
 
                                 pluginManager?.ConfigureLogsOptions(otlpOptions);
                             });
+                            break;
+                        case LogExporter.Console:
+                            if (pluginManager != null)
+                            {
+                                options.AddConsoleExporter(pluginManager.ConfigureLogsOptions);
+                            }
+
                             break;
                         default:
                             throw new ArgumentOutOfRangeException($"Logs exporter '{logExporter}' is incorrect");

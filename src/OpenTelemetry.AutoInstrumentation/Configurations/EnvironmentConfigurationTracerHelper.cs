@@ -91,17 +91,13 @@ internal static class EnvironmentConfigurationTracerHelper
 
     private static TracerProviderBuilder SetExporter(this TracerProviderBuilder builder, TracerSettings settings, PluginManager pluginManager)
     {
-        if (settings.ConsoleExporterEnabled)
-        {
-            Wrappers.AddConsoleExporter(builder, pluginManager);
-        }
-
         foreach (var traceExporter in settings.TracesExporters)
         {
             builder = traceExporter switch
             {
                 TracesExporter.Zipkin => Wrappers.AddZipkinExporter(builder, pluginManager),
                 TracesExporter.Otlp => Wrappers.AddOtlpExporter(builder, settings, pluginManager),
+                TracesExporter.Console => Wrappers.AddConsoleExporter(builder, pluginManager),
                 _ => throw new ArgumentOutOfRangeException($"Traces exporter '{traceExporter}' is incorrect")
             };
         }

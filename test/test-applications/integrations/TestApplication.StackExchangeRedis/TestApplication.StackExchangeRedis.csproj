@@ -1,11 +1,5 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <OutputType>Exe</OutputType>
-    <DefineConstants Condition="'$(LibraryVersion)'=='' or '$(LibraryVersion)'>='2.1.50'">$(DefineConstants);REDIS_2_1_50_OR_GREATER</DefineConstants>
-
-  </PropertyGroup>
-
   <ItemGroup>
     <PackageReference Include="StackExchange.Redis" VersionOverride="$(LibraryVersion)" />
     <!-- Workaround! Microsoft.Extensions.Logging.Abstractions v.8.0.0 is minimal version supported by auto instrumentation.

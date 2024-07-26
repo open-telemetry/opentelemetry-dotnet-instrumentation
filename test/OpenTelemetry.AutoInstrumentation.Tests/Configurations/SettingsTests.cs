@@ -49,7 +49,6 @@ public class SettingsTests : IDisposable
         {
             settings.TracesEnabled.Should().BeTrue();
             settings.TracesExporters.Should().Equal(TracesExporter.Otlp);
-            settings.ConsoleExporterEnabled.Should().BeFalse();
             settings.EnabledInstrumentations.Should().NotBeEmpty();
             settings.ActivitySources.Should().BeEquivalentTo(new List<string> { "OpenTelemetry.AutoInstrumentation.*" });
             settings.AdditionalLegacySources.Should().BeEmpty();
@@ -89,7 +88,6 @@ public class SettingsTests : IDisposable
         {
             settings.MetricsEnabled.Should().BeTrue();
             settings.MetricExporters.Should().Equal(MetricsExporter.Otlp);
-            settings.ConsoleExporterEnabled.Should().BeFalse();
             settings.EnabledInstrumentations.Should().NotBeEmpty();
             settings.Meters.Should().BeEmpty();
 
@@ -110,7 +108,6 @@ public class SettingsTests : IDisposable
         {
             settings.LogsEnabled.Should().BeTrue();
             settings.LogExporters.Should().Equal(LogExporter.Otlp);
-            settings.ConsoleExporterEnabled.Should().BeFalse();
             settings.EnabledInstrumentations.Should().NotBeEmpty();
             settings.IncludeFormattedMessage.Should().BeFalse();
 
@@ -138,8 +135,9 @@ public class SettingsTests : IDisposable
     [InlineData("none", new TracesExporter[0])]
     [InlineData("non-supported", new TracesExporter[0])]
     [InlineData("otlp", new[] { TracesExporter.Otlp })]
+    [InlineData("console", new[] { TracesExporter.Console })]
     [InlineData("zipkin", new[] { TracesExporter.Zipkin })]
-    [InlineData("otlp,zipkin", new[] { TracesExporter.Otlp, TracesExporter.Zipkin })]
+    [InlineData("otlp,zipkin,console", new[] { TracesExporter.Otlp, TracesExporter.Zipkin, TracesExporter.Console })]
     [InlineData("none,zipkin", new[] { TracesExporter.Zipkin })]
     [InlineData("otlp,none", new[] { TracesExporter.Otlp })]
     [InlineData("non-supported,none", new TracesExporter[0])]
@@ -169,7 +167,8 @@ public class SettingsTests : IDisposable
     [InlineData("non-supported", new MetricsExporter[0])]
     [InlineData("otlp", new[] { MetricsExporter.Otlp })]
     [InlineData("prometheus", new[] { MetricsExporter.Prometheus })]
-    [InlineData("otlp,prometheus", new[] { MetricsExporter.Otlp, MetricsExporter.Prometheus })]
+    [InlineData("console", new[] { MetricsExporter.Console })]
+    [InlineData("otlp,prometheus,console", new[] { MetricsExporter.Otlp, MetricsExporter.Prometheus, MetricsExporter.Console })]
     [InlineData("prometheus,none", new[] { MetricsExporter.Prometheus })]
     [InlineData("prometheus,non-supported,none", new[] { MetricsExporter.Prometheus })]
     [InlineData("non-supported,none", new MetricsExporter[0])]
@@ -198,7 +197,9 @@ public class SettingsTests : IDisposable
     [InlineData("none", new LogExporter[0])]
     [InlineData("non-supported", new LogExporter[0])]
     [InlineData("otlp", new[] { LogExporter.Otlp })]
+    [InlineData("console", new[] { LogExporter.Console })]
     [InlineData("otlp,none", new[] { LogExporter.Otlp })]
+    [InlineData("otlp,console", new[] { LogExporter.Otlp, LogExporter.Console })]
     [InlineData("none,otlp", new[] { LogExporter.Otlp })]
     [InlineData("non-supported,none", new LogExporter[0])]
     [InlineData("non-supported,none,otlp", new[] { LogExporter.Otlp })]

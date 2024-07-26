@@ -48,17 +48,13 @@ internal static class EnvironmentConfigurationMetricHelper
 
     private static MeterProviderBuilder SetExporter(this MeterProviderBuilder builder, MetricSettings settings, PluginManager pluginManager)
     {
-        if (settings.ConsoleExporterEnabled)
-        {
-            Wrappers.AddConsoleExporter(builder, pluginManager);
-        }
-
         foreach (var metricExporter in settings.MetricExporters)
         {
             builder = metricExporter switch
             {
                 MetricsExporter.Prometheus => Wrappers.AddPrometheusHttpListener(builder, pluginManager),
                 MetricsExporter.Otlp => Wrappers.AddOtlpExporter(builder, settings, pluginManager),
+                MetricsExporter.Console => Wrappers.AddConsoleExporter(builder, pluginManager),
                 _ => throw new ArgumentOutOfRangeException($"Metrics exporter '{metricExporter}' is incorrect")
             };
         }
