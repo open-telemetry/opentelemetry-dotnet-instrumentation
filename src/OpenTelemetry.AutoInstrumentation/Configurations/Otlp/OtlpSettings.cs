@@ -26,7 +26,7 @@ internal class OtlpSettings
     }
 
     /// <summary>
-    /// Gets the the OTLP transport protocol. Supported values: Grpc and HttpProtobuf.
+    /// Gets the OTLP transport protocol. Supported values: Grpc and HttpProtobuf.
     /// </summary>
     public OtlpExportProtocol? Protocol { get; private set; }
 
