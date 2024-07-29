@@ -200,7 +200,7 @@ chmod +x $HOME/.otel-dotnet-auto/instrument.sh
 OTEL_SERVICE_NAME=myapp OTEL_RESOURCE_ATTRIBUTES=deployment.environment=staging,service.version=1.0.0 ./MyNetApp
 ```
 
-NOTE: for air-gapped environments you can provide either to installation archive directly with:
+NOTE: for air-gapped environments you can provide either the installation archive directly with:
 
 ```sh
 LOCAL_PATH=<PATH_TO_ARCHIVE> sh ./otel-dotnet-auto-install.sh
