@@ -53,20 +53,14 @@ internal class TracerSettings : Settings
     /// </summary>
     public OtlpSettings? OtlpSettings { get; private set; }
 
-    /// <summary>
-    /// Gets or sets a value indicating whether the console exporter is enabled.
-    /// </summary>
-    private bool ConsoleExporterEnabled { get; set; }
-
     protected override void OnLoad(Configuration configuration)
     {
-        TracesExporters = ParseTracesExporter(configuration);
+        var consoleExporterEnabled = configuration.GetBool(ConfigurationKeys.Traces.ConsoleExporterEnabled) ?? false;
+        TracesExporters = ParseTracesExporter(configuration, consoleExporterEnabled);
         if (TracesExporters.Contains(TracesExporter.Otlp))
         {
             OtlpSettings = new OtlpSettings(OtlpSignalType.Traces, configuration);
         }
-
-        ConsoleExporterEnabled = configuration.GetBool(ConfigurationKeys.Traces.ConsoleExporterEnabled) ?? false;
 
         var instrumentationEnabledByDefault =
             configuration.GetBool(ConfigurationKeys.Traces.TracesInstrumentationEnabled) ??
@@ -100,16 +94,26 @@ internal class TracerSettings : Settings
         InstrumentationOptions = new InstrumentationOptions(configuration);
     }
 
-    private IReadOnlyList<TracesExporter> ParseTracesExporter(Configuration configuration)
+    private static IReadOnlyList<TracesExporter> ParseTracesExporter(Configuration configuration, bool consoleExporterEnabled)
     {
         var tracesExporterEnvVar = configuration.GetString(ConfigurationKeys.Traces.Exporter);
+        var exporters = new List<TracesExporter>();
+
+        if (consoleExporterEnabled)
+        {
+            Logger.Warning($"The '{ConfigurationKeys.Traces.ConsoleExporterEnabled}' environment variable is deprecated and " +
+                "will be removed in the next minor release. " +
+                "Please set the console exporter using OTEL_TRACES_EXPORTER environmental variable. " +
+                "Refer to the updated documentation for details.");
+
+            exporters.Add(TracesExporter.Console);
+        }
 
         if (string.IsNullOrEmpty(tracesExporterEnvVar))
         {
-            return new List<TracesExporter> { TracesExporter.Otlp };
+            exporters.Add(TracesExporter.Otlp);
+            return exporters;
         }
-
-        var exporters = new List<TracesExporter>();
 
         var exporterNames = tracesExporterEnvVar!.Split(Constants.ConfigurationValues.Separator);
 
@@ -139,16 +143,6 @@ internal class TracerSettings : Settings
                     Logger.Error($"Traces exporter '{exporterName}' is not supported.");
                     break;
             }
-        }
-
-        if (ConsoleExporterEnabled)
-        {
-            Logger.Warning($"The '{ConfigurationKeys.Traces.ConsoleExporterEnabled}' environment variable is deprecated and " +
-                "will be removed in the next minor release. " +
-                "Please set the console exporter using OTEL_TRACES_EXPORTER environmental variable. " +
-                "Refer to the updated documentation for details.");
-
-            exporters.Add(TracesExporter.Console);
         }
 
         return exporters;
