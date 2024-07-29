@@ -1,6 +1,7 @@
 // Copyright The OpenTelemetry Authors
 // SPDX-License-Identifier: Apache-2.0
 
+using OpenTelemetry.AutoInstrumentation.Configurations.Otlp;
 using OpenTelemetry.AutoInstrumentation.Logging;
 
 namespace OpenTelemetry.AutoInstrumentation.Configurations;
@@ -32,11 +33,21 @@ internal class LogSettings : Settings
     /// </summary>
     public IReadOnlyList<LogInstrumentation> EnabledInstrumentations { get; private set; } = new List<LogInstrumentation>();
 
+    /// <summary>
+    /// Gets logs OTLP Settings.
+    /// </summary>
+    public OtlpSettings? OtlpSettings { get; private set; }
+
     protected override void OnLoad(Configuration configuration)
     {
         LogsEnabled = configuration.GetBool(ConfigurationKeys.Logs.LogsEnabled) ?? true;
         var consoleExporterEnabled = configuration.GetBool(ConfigurationKeys.Logs.ConsoleExporterEnabled) ?? false;
         LogExporters = ParseLogExporter(configuration, consoleExporterEnabled);
+        if (LogExporters.Contains(LogExporter.Otlp))
+        {
+            OtlpSettings = new OtlpSettings(OtlpSignalType.Logs, configuration);
+        }
+
         IncludeFormattedMessage = configuration.GetBool(ConfigurationKeys.Logs.IncludeFormattedMessage) ?? false;
 
         var instrumentationEnabledByDefault =

@@ -22,12 +22,6 @@ internal partial class ConfigurationKeys
 #endif
 
     /// <summary>
-    /// Configuration key for the OTLP protocol to be used.
-    /// Default is <c>"http/protobuf"</c>.
-    /// </summary>
-    public const string ExporterOtlpProtocol = "OTEL_EXPORTER_OTLP_PROTOCOL";
-
-    /// <summary>
     /// Configuration key for enabling the flushing of telemetry data when an unhandled exception occurs.
     /// </summary>
     public const string FlushOnUnhandledException = "OTEL_DOTNET_AUTO_FLUSH_ON_UNHANDLEDEXCEPTION";

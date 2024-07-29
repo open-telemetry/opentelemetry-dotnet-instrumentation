@@ -1,6 +1,7 @@
 // Copyright The OpenTelemetry Authors
 // SPDX-License-Identifier: Apache-2.0
 
+using OpenTelemetry.AutoInstrumentation.Configurations.Otlp;
 using OpenTelemetry.AutoInstrumentation.Logging;
 
 namespace OpenTelemetry.AutoInstrumentation.Configurations;
@@ -32,10 +33,19 @@ internal class MetricSettings : Settings
     /// </summary>
     public IList<string> Meters { get; } = new List<string>();
 
+    /// <summary>
+    /// Gets metrics OTLP Settings.
+    /// </summary>
+    public OtlpSettings? OtlpSettings { get; private set; }
+
     protected override void OnLoad(Configuration configuration)
     {
         var consoleExporterEnabled = configuration.GetBool(ConfigurationKeys.Metrics.ConsoleExporterEnabled) ?? false;
         MetricExporters = ParseMetricExporter(configuration, consoleExporterEnabled);
+        if (MetricExporters.Contains(MetricsExporter.Otlp))
+        {
+            OtlpSettings = new OtlpSettings(OtlpSignalType.Metrics, configuration);
+        }
 
         var instrumentationEnabledByDefault =
             configuration.GetBool(ConfigurationKeys.Metrics.MetricsInstrumentationEnabled) ??
