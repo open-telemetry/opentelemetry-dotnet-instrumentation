@@ -47,8 +47,9 @@ case "$ARCHITECTURE" in
 esac
 
 test -z "$OTEL_DOTNET_AUTO_HOME" && OTEL_DOTNET_AUTO_HOME="$HOME/.otel-dotnet-auto"
-test -z "$DOWNLOAD_DIR" && DOWNLOAD_DIR="$(mktemp -d)"
 test -z "$VERSION" && VERSION="v{{VERSION}}"
+
+DOWNLOAD_DIR="${DOWNLOAD_DIR:=${TMPDIR:=$(mktemp -d)}}"
 
 RELEASES_URL="https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases"
 ARCHIVE="opentelemetry-dotnet-instrumentation-$OS_TYPE.zip"

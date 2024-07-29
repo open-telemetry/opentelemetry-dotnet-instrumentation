@@ -216,13 +216,15 @@ DOWNLOAD_DIR=<PATH_TO_FOLDER_WITH_ARCHIVES> sh ./otel-dotnet-auto-install.sh
 `otel-dotnet-auto-install.sh` script
 uses environment variables as parameters:
 
-| Parameter               | Description                                                      | Required | Default value             |
-|-------------------------|------------------------------------------------------------------|----------|---------------------------|
-| `OTEL_DOTNET_AUTO_HOME` | Location where binaries are to be installed                      | No       | `$HOME/.otel-dotnet-auto` |
-| `OS_TYPE`               | Possible values: `linux-glibc`, `linux-musl`, `macos`, `windows` | No       | *Calculated*              |
-| `ARCHITECTURE`          | Possible values for Linux: `x64`, `arm64`                        | No       | *Calculated*              |
-| `TMPDIR`                | Temporary directory used when downloading the files              | No       | `$(mktemp -d)`            |
-| `VERSION`               | Version to download                                              | No       | `1.6.0`                   |
+| Parameter               | Description                                                                     | Required | Default value               |
+|-------------------------|---------------------------------------------------------------------------------|----------|-----------------------------|
+| `OTEL_DOTNET_AUTO_HOME` | Location where binaries are to be installed                                     | No       | `$HOME/.otel-dotnet-auto`   |
+| `OS_TYPE`               | Possible values: `linux-glibc`, `linux-musl`, `macos`, `windows`                | No       | *Calculated*                |
+| `ARCHITECTURE`          | Possible values for Linux: `x64`, `arm64`                                       | No       | *Calculated*                |
+| `TMPDIR`                | (deprecated) prefer `DOWNLOAD_DIR`                                              | No       | `$(mktemp -d)`              |
+| `DOWNLOAD_DIR`          | Folder to download the archive to. Will use local archive if it already exists  | No       | `$TMPDIR` or `$(mktemp -d)` |
+| `LOCAL_PATH`            | Full path the archive to use for installation. (ideal for air-gapped scenarios) | No       | *Calculated*                |
+| `VERSION`               | Version to download                                                             | No       | `1.6.0`                     |
 
 [instrument.sh](../instrument.sh) script
 uses environment variables as parameters:
