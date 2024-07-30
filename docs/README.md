@@ -200,16 +200,31 @@ chmod +x $HOME/.otel-dotnet-auto/instrument.sh
 OTEL_SERVICE_NAME=myapp OTEL_RESOURCE_ATTRIBUTES=deployment.environment=staging,service.version=1.0.0 ./MyNetApp
 ```
 
+NOTE: for air-gapped environments you can provide either the installation archive directly with:
+
+```sh
+LOCAL_PATH=<PATH_TO_ARCHIVE> sh ./otel-dotnet-auto-install.sh
+```
+or the folder with the archives, this has the added benefit that the install script will determine
+the correct archive to choose.
+
+```sh
+DOWNLOAD_DIR=<PATH_TO_FOLDER_WITH_ARCHIVES> sh ./otel-dotnet-auto-install.sh
+```
+
+
 `otel-dotnet-auto-install.sh` script
 uses environment variables as parameters:
 
-| Parameter               | Description                                                      | Required | Default value             |
-|-------------------------|------------------------------------------------------------------|----------|---------------------------|
-| `OTEL_DOTNET_AUTO_HOME` | Location where binaries are to be installed                      | No       | `$HOME/.otel-dotnet-auto` |
-| `OS_TYPE`               | Possible values: `linux-glibc`, `linux-musl`, `macos`, `windows` | No       | *Calculated*              |
-| `ARCHITECTURE`          | Possible values for Linux: `x64`, `arm64`                        | No       | *Calculated*              |
-| `TMPDIR`                | Temporary directory used when downloading the files              | No       | `$(mktemp -d)`            |
-| `VERSION`               | Version to download                                              | No       | `1.6.0`                   |
+| Parameter               | Description                                                                     | Required | Default value               |
+|-------------------------|---------------------------------------------------------------------------------|----------|-----------------------------|
+| `OTEL_DOTNET_AUTO_HOME` | Location where binaries are to be installed                                     | No       | `$HOME/.otel-dotnet-auto`   |
+| `OS_TYPE`               | Possible values: `linux-glibc`, `linux-musl`, `macos`, `windows`                | No       | *Calculated*                |
+| `ARCHITECTURE`          | Possible values for Linux: `x64`, `arm64`                                       | No       | *Calculated*                |
+| `TMPDIR`                | (deprecated) prefer `DOWNLOAD_DIR`                                              | No       | `$(mktemp -d)`              |
+| `DOWNLOAD_DIR`          | Folder to download the archive to. Will use local archive if it already exists  | No       | `$TMPDIR` or `$(mktemp -d)` |
+| `LOCAL_PATH`            | Full path the archive to use for installation. (ideal for air-gapped scenarios) | No       | *Calculated*                |
+| `VERSION`               | Version to download                                                             | No       | `1.6.0`                     |
 
 [instrument.sh](../instrument.sh) script
 uses environment variables as parameters:
