@@ -60,7 +60,7 @@ if echo "$OS_TYPE" | grep -q "linux"; then
 fi
 
 LOCAL_PATH="${LOCAL_PATH:=$DOWNLOAD_DIR/$ARCHIVE}"
-if ! test -f "${LOCAL_PATH}"; then
+if [ ! -f "${LOCAL_PATH}" ]; then
   (
     cd "$DOWNLOAD_DIR"
     echo "Downloading $VERSION for $OS_TYPE ($LOCAL_PATH)..."
