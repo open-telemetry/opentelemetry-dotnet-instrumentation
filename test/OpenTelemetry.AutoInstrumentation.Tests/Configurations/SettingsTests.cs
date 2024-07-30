@@ -7,6 +7,8 @@ using OpenTelemetry.AutoInstrumentation.Configurations;
 using OpenTelemetry.Exporter;
 using Xunit;
 
+using AutoOtlpDefinitions = OpenTelemetry.AutoInstrumentation.Configurations.Otlp.OtlpSpecConfigDefinitions;
+
 namespace OpenTelemetry.AutoInstrumentation.Tests.Configurations;
 
 // use collection to indicate that tests should not be run
@@ -35,7 +37,6 @@ public class SettingsTests : IDisposable
             settings.Plugins.Should().BeEmpty();
             settings.EnabledResourceDetectors.Should().NotBeEmpty();
             settings.FlushOnUnhandledException.Should().BeFalse();
-            settings.OtlpExportProtocol.Should().Be(OtlpExportProtocol.HttpProtobuf);
         }
     }
 
@@ -48,7 +49,6 @@ public class SettingsTests : IDisposable
         {
             settings.TracesEnabled.Should().BeTrue();
             settings.TracesExporters.Should().Equal(TracesExporter.Otlp);
-            settings.OtlpExportProtocol.Should().Be(OtlpExportProtocol.HttpProtobuf);
             settings.EnabledInstrumentations.Should().NotBeEmpty();
             settings.ActivitySources.Should().BeEquivalentTo(new List<string> { "OpenTelemetry.AutoInstrumentation.*" });
             settings.AdditionalLegacySources.Should().BeEmpty();
@@ -70,6 +70,12 @@ public class SettingsTests : IDisposable
             settings.InstrumentationOptions.HttpInstrumentationCaptureResponseHeaders.Should().BeEmpty();
             settings.InstrumentationOptions.OracleMdaSetDbStatementForText.Should().BeFalse();
             settings.InstrumentationOptions.SqlClientSetDbStatementForText.Should().BeFalse();
+
+            settings.OtlpSettings.Should().NotBeNull();
+            settings.OtlpSettings!.Protocol.Should().Be(OtlpExportProtocol.HttpProtobuf);
+            settings.OtlpSettings.Endpoint.Should().BeNull();
+            settings.OtlpSettings.Headers.Should().BeNull();
+            settings.OtlpSettings.TimeoutMilliseconds.Should().BeNull();
         }
     }
 
@@ -82,9 +88,14 @@ public class SettingsTests : IDisposable
         {
             settings.MetricsEnabled.Should().BeTrue();
             settings.MetricExporters.Should().Equal(MetricsExporter.Otlp);
-            settings.OtlpExportProtocol.Should().Be(OtlpExportProtocol.HttpProtobuf);
             settings.EnabledInstrumentations.Should().NotBeEmpty();
             settings.Meters.Should().BeEmpty();
+
+            settings.OtlpSettings.Should().NotBeNull();
+            settings.OtlpSettings!.Protocol.Should().Be(OtlpExportProtocol.HttpProtobuf);
+            settings.OtlpSettings.Endpoint.Should().BeNull();
+            settings.OtlpSettings.Headers.Should().BeNull();
+            settings.OtlpSettings.TimeoutMilliseconds.Should().BeNull();
         }
     }
 
@@ -97,9 +108,14 @@ public class SettingsTests : IDisposable
         {
             settings.LogsEnabled.Should().BeTrue();
             settings.LogExporters.Should().Equal(LogExporter.Otlp);
-            settings.OtlpExportProtocol.Should().Be(OtlpExportProtocol.HttpProtobuf);
             settings.EnabledInstrumentations.Should().NotBeEmpty();
             settings.IncludeFormattedMessage.Should().BeFalse();
+
+            settings.OtlpSettings.Should().NotBeNull();
+            settings.OtlpSettings!.Protocol.Should().Be(OtlpExportProtocol.HttpProtobuf);
+            settings.OtlpSettings.Endpoint.Should().BeNull();
+            settings.OtlpSettings.Headers.Should().BeNull();
+            settings.OtlpSettings.TimeoutMilliseconds.Should().BeNull();
         }
     }
 
@@ -333,12 +349,13 @@ public class SettingsTests : IDisposable
     [InlineData("nonExistingProtocol", null)]
     internal void OtlpExportProtocol_DependsOnCorrespondingEnvVariable(string? otlpProtocol, OtlpExportProtocol? expectedOtlpExportProtocol)
     {
-        Environment.SetEnvironmentVariable(ConfigurationKeys.ExporterOtlpProtocol, otlpProtocol);
+        Environment.SetEnvironmentVariable(AutoOtlpDefinitions.DefaultProtocolEnvVarName, otlpProtocol);
 
         var settings = Settings.FromDefaultSources<TracerSettings>(false);
 
         // null values for expected data will be handled by OTel .NET SDK
-        settings.OtlpExportProtocol.Should().Be(expectedOtlpExportProtocol);
+        settings.OtlpSettings.Should().NotBeNull();
+        settings.OtlpSettings!.Protocol.Should().Be(expectedOtlpExportProtocol);
     }
 
     [Theory]
@@ -398,7 +415,7 @@ public class SettingsTests : IDisposable
         }
 
         Environment.SetEnvironmentVariable(ConfigurationKeys.Traces.Exporter, null);
-        Environment.SetEnvironmentVariable(ConfigurationKeys.ExporterOtlpProtocol, null);
+        Environment.SetEnvironmentVariable(AutoOtlpDefinitions.DefaultProtocolEnvVarName, null);
         Environment.SetEnvironmentVariable(ConfigurationKeys.FlushOnUnhandledException, null);
         Environment.SetEnvironmentVariable(ConfigurationKeys.ResourceDetectorEnabled, null);
 

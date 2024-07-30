@@ -153,10 +153,8 @@ internal static class EnvironmentConfigurationMetricHelper
         {
             return builder.AddOtlpExporter((options, metricReaderOptions) =>
             {
-                if (settings.OtlpExportProtocol.HasValue)
-                {
-                    options.Protocol = settings.OtlpExportProtocol.Value;
-                }
+                // Copy Auto settings to SDK settings
+                settings.OtlpSettings?.CopyTo(options);
 
                 pluginManager.ConfigureMetricsOptions(options);
                 pluginManager.ConfigureMetricsOptions(metricReaderOptions);
