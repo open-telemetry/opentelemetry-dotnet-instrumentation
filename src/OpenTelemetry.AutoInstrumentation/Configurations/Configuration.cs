@@ -69,4 +69,23 @@ internal class Configuration
         return _sources.Select(source => source.GetBool(key))
             .FirstOrDefault(value => value.HasValue);
     }
+
+    /// <summary>
+    /// Gets the <see cref="Uri"/> value of the first setting found with
+    /// the specified key from the current list of configuration sources.
+    /// Sources are queried in the order in which they were added.
+    /// </summary>
+    /// <param name="key">The key that identifies the setting.</param>
+    /// <returns>The value of the setting, or <c>null</c> if not found.</returns>
+    public Uri? GetUri(string key)
+    {
+        var value = GetString(key);
+
+        if (Uri.TryCreate(value, UriKind.Absolute, out var uri))
+        {
+            return uri;
+        }
+
+        return null;
+    }
 }

@@ -17,6 +17,19 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 - The environment variables `OTEL_TRACES_EXPORTER`, `OTEL_METRICS_EXPORTER`,
   and `OTEL_LOGS_EXPORTER` now support configuring console exporters for traces,
   metrics, and logs, respectively.
+- Support signal specific OTLP exporter variables (See [docs](/docs/config.md#otlp)):
+  - `OTEL_EXPORTER_OTLP_TRACES_ENDPOINT`,
+  - `OTEL_EXPORTER_OTLP_TRACES_HEADERS`,
+  - `OTEL_EXPORTER_OTLP_TRACES_TIMEOUT`,
+  - `OTEL_EXPORTER_OTLP_TRACES_PROTOCOL`,
+  - `OTEL_EXPORTER_OTLP_METRICS_ENDPOINT`,
+  - `OTEL_EXPORTER_OTLP_METRICS_HEADERS`,
+  - `OTEL_EXPORTER_OTLP_METRICS_TIMEOUT`,
+  - `OTEL_EXPORTER_OTLP_METRICS_PROTOCOL`,
+  - `OTEL_EXPORTER_OTLP_LOGS_ENDPOINT`,
+  - `OTEL_EXPORTER_OTLP_LOGS_HEADERS`,
+  - `OTEL_EXPORTER_OTLP_LOGS_TIMEOUT`,
+  - `OTEL_EXPORTER_OTLP_LOGS_PROTOCOL`.
 
 ### Changed
 
@@ -32,7 +45,7 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
   - `OpenTelemetry.Instrumentation.StackExchangeRedis` from `1.0.0-rc9.15` to `1.9.0-beta.1`.
 - .NET Framework only, following packages updated
   - `Google.Protobuf` updated from `3.27.1` to `3.27.2`,
-  - `Grpc.Core.Api` from `2.63.0` to `2.64.0`,
+  - `Grpc.Core.Api` from `2.63.0` to `2.65.0`,
   - `Microsoft.Extensions.Configuration.Binder` from `8.0.1` to `8.0.2`,
   - `System.Text.Json` from `8.0.3` to `8.0.4`.
 

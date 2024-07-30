@@ -79,10 +79,8 @@ internal static class LogBuilderExtensions
                         case LogExporter.Otlp:
                             options.AddOtlpExporter(otlpOptions =>
                             {
-                                if (settings.OtlpExportProtocol.HasValue)
-                                {
-                                    otlpOptions.Protocol = settings.OtlpExportProtocol.Value;
-                                }
+                                // Copy Auto settings to SDK settings
+                                settings.OtlpSettings?.CopyTo(otlpOptions);
 
                                 pluginManager?.ConfigureLogsOptions(otlpOptions);
                             });
