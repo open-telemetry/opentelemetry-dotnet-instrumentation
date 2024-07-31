@@ -378,7 +378,7 @@ partial class Build
         .After(CreateRequiredDirectories)
         .Executes(() =>
         {
-            var source = RootDirectory / "instrument.sh";
+            var source = RootDirectory / "nuget" / "contentFiles" / "any" / "any" / "instrument.sh";
             var dest = TracerHomeDirectory;
             CopyFileToDirectory(source, dest, FileExistsPolicy.Overwrite);
         });

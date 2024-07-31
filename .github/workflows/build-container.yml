@@ -45,7 +45,7 @@ jobs:
           set -e
           dotnet publish -f net8.0 -c Release ./test/test-applications/integrations/TestApplication.Smoke
           export OTEL_DOTNET_AUTO_HOME="${PWD}/bin/tracer-home"
-          . ./instrument.sh
+          . ./nuget/OpenTelemetry.AutoInstrumentation/contentFiles/any/any/instrument.sh
           ./test/test-applications/integrations/bin/TestApplication.Smoke/Release/net8.0/publish/TestApplication.Smoke
             test "$(ls -A /var/log/opentelemetry/dotnet )"
         '
