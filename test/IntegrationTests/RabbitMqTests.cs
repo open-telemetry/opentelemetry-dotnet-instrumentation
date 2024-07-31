@@ -28,7 +28,7 @@ public class RabbitMqTests : TestHelper
     [SkippableTheory]
     [Trait("Category", "EndToEnd")]
     [Trait("Containers", "Linux")]
-    [MemberData(nameof(LibraryVersion.RabbitMq6), MemberType = typeof(LibraryVersion))]
+    [MemberData(nameof(LibraryVersion.RabbitMq), MemberType = typeof(LibraryVersion))]
     public void SubmitsTraces(string packageVersion)
     {
         // Skip the test if fixture does not support current platform
