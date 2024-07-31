@@ -145,6 +145,8 @@ else
   export DOTNET_STARTUP_HOOKS="${startup_hooks_dir}/OpenTelemetry.AutoInstrumentation.StartupHook.dll${SEPARATOR}${DOTNET_STARTUP_HOOKS}"
 fi
 
+export ASPNETCORE_HOSTINGSTARTUPASSEMBLIES=OpenTelemetry.AutoInstrumentation.AspNetCoreBootstrapper
+
 # Configure .NET CLR Profiler
 if [ "$ENABLE_PROFILING" = "true" ]; then
 
