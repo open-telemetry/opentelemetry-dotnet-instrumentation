@@ -378,7 +378,7 @@ partial class Build
         .After(CreateRequiredDirectories)
         .Executes(() =>
         {
-            var source = 
+            var source =
                 RootDirectory
                 / "nuget" / "OpenTelemetry.AutoInstrumentation" / "contentFiles"
                 / "any" / "any" / "instrument.sh";

@@ -34,7 +34,7 @@ case "$ARCHITECTURE" in
     ;;
   *)
     echo "Set the architecture type using the ARCHITECTURE environment variable. Supported values: x64, arm64." >&2
-    return 2
+    exit 2
     ;;
 esac
 
@@ -57,7 +57,7 @@ case "$OS_TYPE" in
     ;;
   *)
     echo "Set the operating system type using the OS_TYPE environment variable. Supported values: linux-glibc, linux-musl, macos, windows." >&2
-    return 2
+    exit 2
     ;;
 esac
 
@@ -67,7 +67,7 @@ case "$ENABLE_PROFILING" in
     ;;
   *)
     echo "Invalid ENABLE_PROFILING. Supported values: true, false." >&2
-    return 2
+    exit 2
     ;;
 esac
 
@@ -84,29 +84,38 @@ fi
 
 OTEL_DOTNET_AUTO_HOME="${OTEL_DOTNET_AUTO_HOME:=${default_location}}"
 
+# when running from global installation ensure we set absolute paths
+# this is already the case if running from nuget installation
+if [ "$nuget_deployment" = false ]; then
+  # get absolute path
+  if [ "$OS_TYPE" = "macos" ]; then
+    OTEL_DOTNET_AUTO_HOME=$(greadlink -fn "$OTEL_DOTNET_AUTO_HOME")
+  else
+    OTEL_DOTNET_AUTO_HOME=$(readlink -fn "$OTEL_DOTNET_AUTO_HOME")
+  fi
+  if [ -z "$OTEL_DOTNET_AUTO_HOME" ]; then
+    echo "Failed to get OTEL_DOTNET_AUTO_HOME absolute path."
+    exit 1
+  fi
+  
+  # on Windows change to Windows path format
+  if [ "$OS_TYPE" = "windows" ]; then
+    OTEL_DOTNET_AUTO_HOME=$(cygpath -w "$OTEL_DOTNET_AUTO_HOME")
+  fi
+  if [ -z "$OTEL_DOTNET_AUTO_HOME" ]; then
+    echo "Failed to get OTEL_DOTNET_AUTO_HOME absolute Windows path."
+    exit 1
+  fi
+fi
+
 # check $OTEL_DOTNET_AUTO_HOME is a folder with actual files
 if [ -z "$(ls -A "$OTEL_DOTNET_AUTO_HOME")" ]; then
   echo "There are no files under the location specified via OTEL_DOTNET_AUTO_HOME."
-  return 1
+  exit 1
 fi
-# get absolute path
-if [ "$OS_TYPE" = "macos" ]; then
-  OTEL_DOTNET_AUTO_HOME=$(greadlink -fn "$OTEL_DOTNET_AUTO_HOME")
-else
-  OTEL_DOTNET_AUTO_HOME=$(readlink -fn "$OTEL_DOTNET_AUTO_HOME")
-fi
-if [ -z "$OTEL_DOTNET_AUTO_HOME" ]; then
-  echo "Failed to get OTEL_DOTNET_AUTO_HOME absolute path."
-  return 1
-fi
-# on Windows change to Windows path format
-if [ "$OS_TYPE" = "windows" ]; then
-  OTEL_DOTNET_AUTO_HOME=$(cygpath -w "$OTEL_DOTNET_AUTO_HOME")
-fi
-if [ -z "$OTEL_DOTNET_AUTO_HOME" ]; then
-  echo "Failed to get OTEL_DOTNET_AUTO_HOME absolute Windows path."
-  return 1
-fi
+
+# Configure OpenTelemetry .NET Automatic Instrumentation
+export OTEL_DOTNET_AUTO_HOME
 
 # set the platform-specific path separator (; on Windows and : on others)
 if [ "$OS_TYPE" = "windows" ]; then
@@ -114,9 +123,6 @@ if [ "$OS_TYPE" = "windows" ]; then
 else
   SEPARATOR=":"
 fi
-
-# Configure OpenTelemetry .NET Automatic Instrumentation
-export OTEL_DOTNET_AUTO_HOME
 
 # Configure .NET Core Runtime
 if [ -d "${OTEL_DOTNET_AUTO_HOME}/AdditionalDeps" ]; then
