@@ -47,8 +47,9 @@ case "$ARCHITECTURE" in
 esac
 
 test -z "$OTEL_DOTNET_AUTO_HOME" && OTEL_DOTNET_AUTO_HOME="$HOME/.otel-dotnet-auto"
-test -z "$TMPDIR" && TMPDIR="$(mktemp -d)"
 test -z "$VERSION" && VERSION="v{{VERSION}}"
+
+DOWNLOAD_DIR="${DOWNLOAD_DIR:=${TMPDIR:=$(mktemp -d)}}"
 
 RELEASES_URL="https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases"
 ARCHIVE="opentelemetry-dotnet-instrumentation-$OS_TYPE.zip"
@@ -58,11 +59,16 @@ if echo "$OS_TYPE" | grep -q "linux"; then
   ARCHIVE="opentelemetry-dotnet-instrumentation-$OS_TYPE-$ARCHITECTURE.zip"
 fi
 
-TMPFILE="$TMPDIR/$ARCHIVE"
-(
-  cd "$TMPDIR"
-  echo "Downloading $VERSION for $OS_TYPE..."
-  curl -sSfLo "$TMPFILE" "$RELEASES_URL/download/$VERSION/$ARCHIVE"
-)
+LOCAL_PATH="${LOCAL_PATH:=$DOWNLOAD_DIR/$ARCHIVE}"
+if [ ! -f "${LOCAL_PATH}" ]; then
+  (
+    cd "$DOWNLOAD_DIR"
+    echo "Downloading $VERSION for $OS_TYPE ($LOCAL_PATH)..."
+    curl -sSfLo "$LOCAL_PATH" "$RELEASES_URL/download/$VERSION/$ARCHIVE"
+  )
+else
+  echo "Using local installation archive: $LOCAL_PATH"
+fi
+
 rm -rf "$OTEL_DOTNET_AUTO_HOME"
-unzip -q "$TMPFILE" -d "$OTEL_DOTNET_AUTO_HOME" 
+unzip -q "$LOCAL_PATH" -d "$OTEL_DOTNET_AUTO_HOME" 
