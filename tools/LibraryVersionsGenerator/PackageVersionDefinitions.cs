@@ -244,7 +244,7 @@ internal static class PackageVersionDefinitions
         },
         new()
         {
-            IntegrationName = "RabbitMq6",
+            IntegrationName = "RabbitMq",
             NugetPackageName = "RabbitMQ.Client",
             TestApplicationName = "TestApplication.RabbitMq",
             Versions = new List<PackageVersion>

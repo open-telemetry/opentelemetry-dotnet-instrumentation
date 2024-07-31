@@ -5,7 +5,7 @@ namespace OpenTelemetry.AutoInstrumentation.Instrumentations.RabbitMq6;
 
 internal static class IntegrationConstants
 {
-    public const string RabbitMqByteCodeIntegrationName = "RabbitMq6";
+    public const string RabbitMqByteCodeIntegrationName = "RabbitMq";
     public const string RabbitMqAssemblyName = "RabbitMQ.Client";
     public const string ModelBaseTypeName = "RabbitMQ.Client.Impl.ModelBase";
     public const string EventingBasicConsumerTypeName = "RabbitMQ.Client.Events.EventingBasicConsumer";

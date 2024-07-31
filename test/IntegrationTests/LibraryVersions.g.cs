@@ -323,7 +323,7 @@ public static partial class LibraryVersion
             return theoryData;
         }
     }
-    public static TheoryData<string> RabbitMq6
+    public static TheoryData<string> RabbitMq
     {
         get
         {
@@ -360,6 +360,6 @@ public static partial class LibraryVersion
        { "WCFCoreClient", WCFCoreClient },
        { "Kafka", Kafka },
        { "Kafka_x64", Kafka_x64 },
-       { "RabbitMq6", RabbitMq6 },
+       { "RabbitMq", RabbitMq },
     };
 }
