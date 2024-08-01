@@ -80,6 +80,7 @@ if [ -f "${script_path}/OpenTelemetry.AutoInstrumentation.StartupHook.dll" ] && 
    [ -n "$(ls -A "${script_path}"/OpenTelemetry.AutoInstrumentation.Native.*)" ]; then
   default_location="${script_path}" 
   nuget_deployment=true
+  export OTEL_DOTNET_AUTO_RULE_ENGINE_ENABLED=false
 fi
 
 OTEL_DOTNET_AUTO_HOME="${OTEL_DOTNET_AUTO_HOME:=${default_location}}"
