@@ -27,6 +27,13 @@ std::vector<WSTRING> Split(const WSTRING& s, wchar_t delim);
 // Trim removes space from the beginning and end of a string.
 WSTRING Trim(const WSTRING& str);
 
+// IsRunningInContainer returns true if application is running in a containerized environment by
+// checking if DOTNET_RUNNING_IN_CONTAINER environment variable is defined.
+bool IsRunningInContainer();
+
+// IsEnvironmentVariableDefined returns if environment variable is defined.
+bool IsEnvironmentVariableDefined(const WSTRING& name);
+
 // GetEnvironmentValue returns the environment variable value for the given
 // name. Space is trimmed.
 WSTRING GetEnvironmentValue(const WSTRING& name);

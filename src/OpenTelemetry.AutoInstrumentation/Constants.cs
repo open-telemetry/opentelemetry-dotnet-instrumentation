@@ -63,6 +63,12 @@ internal static class Constants
             public const string Information = "info";
             public const string Debug = "debug";
         }
+
+        public static class Loggers
+        {
+            public const string File = "file";
+            public const string Console = "console";
+        }
     }
 
     public static class EnvironmentVariables

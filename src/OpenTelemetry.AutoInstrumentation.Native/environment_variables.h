@@ -14,6 +14,9 @@ namespace environment {
 // Sets logging level used by autoinstrumentation loggers
 const WSTRING log_level = WStr("OTEL_LOG_LEVEL");
 
+// Sets logger used by autoinstrumentation
+const WSTRING log_sink = WStr("OTEL_DOTNET_AUTO_LOGGER");
+
 // Sets max size of a single log file
 const WSTRING max_log_file_size = WStr("OTEL_DOTNET_AUTO_LOG_FILE_SIZE");
 
@@ -71,6 +74,10 @@ const WSTRING fail_fast_enabled = WStr("OTEL_DOTNET_AUTO_FAIL_FAST_ENABLED");
 // See https://github.com/dotnet/runtime/blob/main/docs/design/features/host-startup-hook.md
 // for more information about this environment variable.
 const WSTRING dotnet_startup_hooks = WStr("DOTNET_STARTUP_HOOKS");
+
+// Determines if application runs in a container.
+// See https://learn.microsoft.com/en-us/dotnet/core/tools/dotnet-environment-variables#dotnet_running_in_container-and-dotnet_running_in_containers
+const WSTRING dotnet_running_in_container = WStr("DOTNET_RUNNING_IN_CONTAINER");
 
 const WSTRING prefix_cor = WStr("COR_");
 const WSTRING prefix_coreclr = WStr("CORECLR_");

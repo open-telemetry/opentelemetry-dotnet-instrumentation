@@ -14,6 +14,8 @@ internal static class OtelLogging
     private const string OtelDotnetAutoLogDirectory = "OTEL_DOTNET_AUTO_LOG_DIRECTORY";
     private const string OtelLogLevel = "OTEL_LOG_LEVEL";
     private const string OtelDotnetAutoLogFileSize = "OTEL_DOTNET_AUTO_LOG_FILE_SIZE";
+    private const string OtelDotnetAutoLogger = "OTEL_DOTNET_AUTO_LOGGER";
+    private const string DotnetRunningInContainer = "DOTNET_RUNNING_IN_CONTAINER";
     private const string NixDefaultDirectory = "/var/log/opentelemetry/dotnet";
 
     private static readonly long FileSizeLimitBytes = GetConfiguredFileSizeLimitBytes();
@@ -66,6 +68,42 @@ internal static class OtelLogging
         return logLevel;
     }
 
+    internal static LogSink GetConfiguredLogSink()
+    {
+        bool isRunningInContainer;
+
+        try
+        {
+            isRunningInContainer = Environment.GetEnvironmentVariable(DotnetRunningInContainer) is not null;
+        }
+        catch (Exception)
+        {
+            // theoretically, can happen when process has no privileges to check env
+            isRunningInContainer = false;
+        }
+
+        var logSink = isRunningInContainer ? LogSink.Console : LogSink.File;
+
+        try
+        {
+            var configuredValue = Environment.GetEnvironmentVariable(OtelDotnetAutoLogger) ?? string.Empty;
+
+            logSink = configuredValue switch
+            {
+                Constants.ConfigurationValues.Loggers.File => LogSink.File,
+                Constants.ConfigurationValues.Loggers.Console => LogSink.Console,
+                Constants.ConfigurationValues.None => LogSink.NoOp,
+                _ => logSink
+            };
+        }
+        catch (Exception)
+        {
+            // theoretically, can happen when process has no privileges to check env
+        }
+
+        return logSink;
+    }
+
     internal static long GetConfiguredFileSizeLimitBytes()
     {
         const long defaultFileSizeLimitBytes = 10 * 1024 * 1024;
@@ -89,37 +127,55 @@ internal static class OtelLogging
 
     private static IOtelLogger CreateLogger(string suffix)
     {
-        ISink? sink = null;
-
         if (!ConfiguredLogLevel.HasValue)
         {
             return NoopLogger.Instance;
         }
 
-        try
-        {
-            var logDirectory = GetLogDirectory();
-            if (logDirectory != null)
-            {
-                var fileName = GetLogFileName(suffix);
-                var logPath = Path.Combine(logDirectory, fileName);
-                sink = new RollingFileSink(
-                    path: logPath,
-                    fileSizeLimitBytes: FileSizeLimitBytes,
-                    retainedFileCountLimit: 10,
-                    rollingInterval: RollingInterval.Day,
-                    rollOnFileSizeLimit: true,
-                    retainedFileTimeLimit: null);
-            }
-        }
-        catch (Exception)
-        {
-            // unable to configure logging to a file
-        }
-
-        sink ??= new NoopSink();
+        var sink = CreateSink(suffix);
 
         return new InternalLogger(sink, ConfiguredLogLevel.Value);
+    }
+
+    private static ISink CreateSink(string suffix)
+    {
+        var sinkConfiguration = GetConfiguredLogSink();
+
+        if (sinkConfiguration == LogSink.NoOp)
+        {
+            return new NoopSink();
+        }
+        else if (sinkConfiguration == LogSink.File)
+        {
+            try
+            {
+                var logDirectory = GetLogDirectory();
+                if (logDirectory != null)
+                {
+                    var fileName = GetLogFileName(suffix);
+                    var logPath = Path.Combine(logDirectory, fileName);
+
+                    return new RollingFileSink(
+                        path: logPath,
+                        fileSizeLimitBytes: FileSizeLimitBytes,
+                        retainedFileCountLimit: 10,
+                        rollingInterval: RollingInterval.Day,
+                        rollOnFileSizeLimit: true,
+                        retainedFileTimeLimit: null);
+                }
+            }
+            catch (Exception)
+            {
+                // unable to configure logging to a file
+            }
+        }
+        else if (sinkConfiguration == LogSink.Console)
+        {
+            return new ConsoleSink(suffix);
+        }
+
+        // Default to NoopSink
+        return new NoopSink();
     }
 
     private static string GetLogFileName(string suffix)

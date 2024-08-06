@@ -12,6 +12,7 @@
 
 #include "spdlog/sinks/null_sink.h"
 #include "spdlog/sinks/rotating_file_sink.h"
+#include "spdlog/sinks/stdout_sinks.h"
 
 #ifndef _WIN32
 typedef struct stat Stat;
@@ -43,9 +44,15 @@ private:
     static inline const WSTRING log_level_info  = WStr("info");
     static inline const WSTRING log_level_debug = WStr("debug");
 
+    static inline const WSTRING log_sink_none    = WStr("none");
+    static inline const WSTRING log_sink_file    = WStr("file");
+    static inline const WSTRING log_sink_console = WStr("console");
+
     static inline const std::string logger_name = "Logger";
 
     bool ShouldLog(spdlog::level::level_enum log_level);
+
+    WSTRING GetLogSinkConfiguration();
 
 public:
     template <typename... Args>
@@ -97,11 +104,11 @@ template <typename TLoggerPolicy>
 LoggerImpl<TLoggerPolicy>::LoggerImpl()
 {
     spdlog::set_error_handler([](const std::string& msg) {
-        // By writing into the stderr was changing the behavior in a CI scenario.
-        // There's not a good way to report errors when trying to create the log file.
-        // But we never should be changing the normal behavior of an app.
-        // std::cerr << "LoggerImpl Handler: " << msg << std::endl;
-    });
+            // By writing into the stderr was changing the behavior in a CI scenario.
+            // There's not a good way to report errors when trying to create the log file.
+            // But we never should be changing the normal behavior of an app.
+            // std::cerr << "LoggerImpl Handler: " << msg << std::endl;
+        });
 
     static auto configured_log_level = GetEnvironmentValue(environment::log_level);
 
@@ -131,28 +138,41 @@ LoggerImpl<TLoggerPolicy>::LoggerImpl()
 
     spdlog::flush_every(std::chrono::seconds(3));
 
-    static auto current_process_name = ToString(GetCurrentProcessName());
-    static auto current_process_id   = GetPID();
-    static auto current_process_without_extension =
-        current_process_name.substr(0, current_process_name.find_last_of("."));
+    static auto configured_log_sink = GetLogSinkConfiguration();
 
-    static auto file_name_suffix =
-        std::to_string(current_process_id) + "-" + current_process_without_extension + "-Native";
-
-    // by default, use the same size as on managed side: 10MiB
-    static auto file_size        = GetConfiguredSize(environment::max_log_file_size, 10485760);
-
-    try
+    if (configured_log_sink == log_sink_none)
     {
-        m_fileout = spdlog::rotating_logger_mt(logger_name, GetLogPath(file_name_suffix), file_size, 10);
-    }
-    catch (...)
-    {
-        // By writing into the stderr was changing the behavior in a CI scenario.
-        // There's not a good way to report errors when trying to create the log file.
-        // But we never should be changing the normal behavior of an app.
-        // std::cerr << "LoggerImpl Handler: Error creating native log file." << std::endl;
         m_fileout = spdlog::null_logger_mt(logger_name);
+    }
+    else if (configured_log_sink == log_sink_file)
+    {
+        static auto current_process_name = ToString(GetCurrentProcessName());
+        static auto current_process_id   = GetPID();
+        static auto current_process_without_extension =
+            current_process_name.substr(0, current_process_name.find_last_of("."));
+
+        static auto file_name_suffix =
+            std::to_string(current_process_id) + "-" + current_process_without_extension + "-Native";
+
+        // by default, use the same size as on managed side: 10MiB
+        static auto file_size = GetConfiguredSize(environment::max_log_file_size, 10485760);
+
+        try
+        {
+            m_fileout = spdlog::rotating_logger_mt(logger_name, GetLogPath(file_name_suffix), file_size, 10);
+        }
+        catch (...)
+        {
+            // By writing into the stderr was changing the behavior in a CI scenario.
+            // There's not a good way to report errors when trying to create the log file.
+            // But we never should be changing the normal behavior of an app.
+            // std::cerr << "LoggerImpl Handler: Error creating native log file." << std::endl;
+            m_fileout = spdlog::null_logger_mt(logger_name);
+        }
+    }
+    else if (configured_log_sink == log_sink_console)
+    {
+        m_fileout = spdlog::stdout_logger_mt(logger_name);
     }
 
     m_fileout->set_level(log_level);
@@ -237,7 +257,7 @@ void LoggerImpl<TLoggerPolicy>::Error(const Args&... args)
 }
 
 template <typename TLoggerPolicy>
-template< typename... Args>
+template <typename... Args>
 void LoggerImpl<TLoggerPolicy>::Critical(const Args&... args)
 {
     // to avoid possibly unnecessary LogToString conversion, check log level before calling underlying logger
@@ -259,13 +279,28 @@ void LoggerImpl<TLoggerPolicy>::Flush()
     m_fileout->flush();
 }
 
-
 template <typename TLoggerPolicy>
 bool LoggerImpl<TLoggerPolicy>::IsDebugEnabled() const
 {
     return m_fileout->level() == spdlog::level::debug;
 }
 
-} // namespace shared
+template <typename TLoggerPolicy>
+WSTRING LoggerImpl<TLoggerPolicy>::GetLogSinkConfiguration()
+{
+    static auto configured_log_sink = GetEnvironmentValue(environment::log_sink);
+
+    if (configured_log_sink == EmptyWStr)
+    {
+        static auto is_containerized = IsRunningInContainer();
+
+        // default to console if is containerized app otherwise file.
+        return is_containerized ? log_sink_console : log_sink_file;
+    }
+
+    return configured_log_sink;
+}
+
+} // namespace trace
 
 #endif // OTEL_CLR_PROFILER_LOGGER_IMPL_H_
