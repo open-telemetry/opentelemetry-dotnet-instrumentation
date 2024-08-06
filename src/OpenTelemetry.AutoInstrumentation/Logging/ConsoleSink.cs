@@ -9,7 +9,7 @@ internal class ConsoleSink : ISink
 
     public ConsoleSink(string source)
     {
-            _source = source;
+        _source = source;
     }
 
     public void Write(string message)

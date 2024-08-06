@@ -79,20 +79,11 @@ bool IsEnvironmentVariableDefined(const WSTRING& name)
     WSTRING      buf(max_buf_size, 0);
     auto         len = GetEnvironmentVariable(name.data(), buf.data(), (DWORD)(buf.size()));
 
-    if (len > 0)
-    {
-        return true;
-    }
-    
-    return false;
+    return len > 0;
 #else
     auto cstr = std::getenv(ToString(name).c_str());
-    if (cstr == nullptr)
-    {
-        return false;
-    }
 
-    return true;
+    return cstr != nullptr;
 #endif
 }
 
