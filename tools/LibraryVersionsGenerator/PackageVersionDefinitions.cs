@@ -241,6 +241,18 @@ internal static class PackageVersionDefinitions
                 new("1.8.2"), // 1.8.0-1.8.1 are known to have issues with arm64
                 new("*")
             }
+        },
+        new()
+        {
+            IntegrationName = "RabbitMq",
+            NugetPackageName = "RabbitMQ.Client",
+            TestApplicationName = "TestApplication.RabbitMq",
+            Versions = new List<PackageVersion>
+            {
+                new("6.0.0"),
+                new("6.8.1"),
+                new("*")
+            }
         }
     };
 
