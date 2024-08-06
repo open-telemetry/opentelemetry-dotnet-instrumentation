@@ -181,5 +181,13 @@ public static partial class LibraryVersion
                 new("2.4.0"),
             }
         },
+        {
+            "TestApplication.RabbitMq",
+            new List<PackageBuildInfo>
+            {
+                new("6.0.0"),
+                new("6.8.1"),
+            }
+        },
     };
 }

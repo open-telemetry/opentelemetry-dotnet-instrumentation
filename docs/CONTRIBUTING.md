@@ -39,7 +39,7 @@ project, then create an issue and describe your proposal.
 
 ## How to contribute
 
-Please read the [contribution guide](https://github.com/open-telemetry/community/blob/main/CONTRIBUTING.md)
+Please read the [OpenTelemetry New Contributor Guide](https://github.com/open-telemetry/community/tree/main/guides/contributor)
 and the [code of conduct](https://github.com/open-telemetry/community/blob/main/code-of-conduct.md).
 for general practices of the OpenTelemetry project.
 
