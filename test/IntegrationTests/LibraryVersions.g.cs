@@ -323,6 +323,20 @@ public static partial class LibraryVersion
             return theoryData;
         }
     }
+    public static TheoryData<string> RabbitMq
+    {
+        get
+        {
+            var theoryData = new TheoryData<string>();
+#if DEFAULT_TEST_PACKAGE_VERSIONS
+            theoryData.Add(string.Empty);
+#else
+            theoryData.Add("6.0.0");
+            theoryData.Add("6.8.1");
+#endif
+            return theoryData;
+        }
+    }
     public static readonly IReadOnlyDictionary<string, TheoryData<string>> LookupMap = new Dictionary<string, TheoryData<string>>
     {
        { "Azure", Azure },
@@ -346,5 +360,6 @@ public static partial class LibraryVersion
        { "WCFCoreClient", WCFCoreClient },
        { "Kafka", Kafka },
        { "Kafka_x64", Kafka_x64 },
+       { "RabbitMq", RabbitMq },
     };
 }

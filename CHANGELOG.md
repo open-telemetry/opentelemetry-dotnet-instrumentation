@@ -10,14 +10,13 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 ### Added
 
 - Support for Operating System resource detector.
+- Support for [RabbitMQ.Client](https://www.nuget.org/packages/RabbitMQ.Client/)
+  traces instrumentation for versions `6.0.0`-`6.*.*`
 - Added support for OTEL_TRACES_EXPORTER, OTEL_METRICS_EXPORTER, OTEL_LOGS_EXPORTER
   to handle comma-separated list.
 - The environment variables `OTEL_TRACES_EXPORTER`, `OTEL_METRICS_EXPORTER`,
   and `OTEL_LOGS_EXPORTER` now support configuring console exporters for traces,
   metrics, and logs, respectively.
-- Environment variables `OTEL_DOTNET_AUTO_TRACES_CONSOLE_EXPORTER_ENABLED`,
-  `OTEL_DOTNET_AUTO_METRICS_CONSOLE_EXPORTER_ENABLED`, and
-  `OTEL_DOTNET_AUTO_LOGS_CONSOLE_EXPORTER_ENABLED` are now marked as deprecated.
 - Support signal specific OTLP exporter variables (See [docs](/docs/config.md#otlp)):
   - `OTEL_EXPORTER_OTLP_TRACES_ENDPOINT`,
   - `OTEL_EXPORTER_OTLP_TRACES_HEADERS`,
@@ -53,6 +52,10 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
   - `System.Text.Json` from `8.0.3` to `8.0.4`.
 
 ### Deprecated
+
+- Environment variables `OTEL_DOTNET_AUTO_TRACES_CONSOLE_EXPORTER_ENABLED`,
+  `OTEL_DOTNET_AUTO_METRICS_CONSOLE_EXPORTER_ENABLED`, and
+  `OTEL_DOTNET_AUTO_LOGS_CONSOLE_EXPORTER_ENABLED` are now marked as deprecated.
 
 ### Removed
 
