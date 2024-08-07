@@ -152,12 +152,27 @@ public class SettingsTests : IDisposable
     }
 
     [Theory]
+    [InlineData("non-supported", new TracesExporter[0])]
+    [InlineData("otlp,otlp", new[] { TracesExporter.Otlp })]
+    [InlineData("otlp, ,console", new[] { TracesExporter.Otlp, TracesExporter.Console })]
+    [InlineData("otlp, , console", new[] { TracesExporter.Otlp })]
+    [InlineData("otlp,,,", new[] { TracesExporter.Otlp })]
+    internal void TracesExporter_FailFastOff(string tracesExporters, TracesExporter[] expectedTracesExporters)
+    {
+        Environment.SetEnvironmentVariable(ConfigurationKeys.Traces.Exporter, tracesExporters);
+
+        var settings = Settings.FromDefaultSources<TracerSettings>(false);
+
+        settings.TracesExporters.Should().Equal(expectedTracesExporters);
+    }
+
+    [Theory]
     [InlineData("non-supported")]
     [InlineData("otlp,otlp")]
     [InlineData("otlp, ,console")]
     [InlineData("otlp, console")]
     [InlineData("otlp,,,")]
-    internal void TracesExporter_FailFast(string tracesExporters)
+    internal void TracesExporter_FailFastOn(string tracesExporters)
     {
         Environment.SetEnvironmentVariable(ConfigurationKeys.Traces.Exporter, tracesExporters);
 
@@ -188,12 +203,27 @@ public class SettingsTests : IDisposable
     }
 
     [Theory]
+    [InlineData("non-supported", new MetricsExporter[0])]
+    [InlineData("otlp,otlp", new[] { MetricsExporter.Otlp })]
+    [InlineData("otlp, ,console", new[] { MetricsExporter.Otlp, MetricsExporter.Console })]
+    [InlineData("otlp, , console", new[] { MetricsExporter.Otlp })]
+    [InlineData("otlp,,,", new[] { MetricsExporter.Otlp })]
+    internal void MetricExporter_FailFastOff(string metricExporters, MetricsExporter[] expectedMetricsExporters)
+    {
+        Environment.SetEnvironmentVariable(ConfigurationKeys.Metrics.Exporter, metricExporters);
+
+        var settings = Settings.FromDefaultSources<MetricSettings>(false);
+
+        settings.MetricExporters.Should().Equal(expectedMetricsExporters);
+    }
+
+    [Theory]
     [InlineData("non-supported")]
     [InlineData("otlp,otlp")]
     [InlineData("otlp, ,console")]
     [InlineData("otlp, console")]
     [InlineData("otlp,,,")]
-    internal void MetricExporter_FailFast(string metricExporters)
+    internal void MetricExporter_FailFastOn(string metricExporters)
     {
         Environment.SetEnvironmentVariable(ConfigurationKeys.Metrics.Exporter, metricExporters);
 
@@ -223,12 +253,27 @@ public class SettingsTests : IDisposable
     }
 
     [Theory]
+    [InlineData("non-supported", new LogExporter[0])]
+    [InlineData("otlp,otlp", new[] { LogExporter.Otlp })]
+    [InlineData("otlp, ,console", new[] { LogExporter.Otlp, LogExporter.Console })]
+    [InlineData("otlp, console", new[] { LogExporter.Otlp })]
+    [InlineData("otlp,,,", new[] { LogExporter.Otlp })]
+    internal void LogExporter_FailFastOff(string logExporters, LogExporter[] expectedLogExporters)
+    {
+        Environment.SetEnvironmentVariable(ConfigurationKeys.Logs.Exporter, logExporters);
+
+        var settings = Settings.FromDefaultSources<LogSettings>(false);
+
+        settings.LogExporters.Should().Equal(expectedLogExporters);
+    }
+
+    [Theory]
     [InlineData("non-supported")]
     [InlineData("otlp,otlp")]
     [InlineData("otlp, ,console")]
     [InlineData("otlp, console")]
     [InlineData("otlp,,,")]
-    internal void LogExporter_FailFast(string logExporters)
+    internal void LogExporter_FailFastOn(string logExporters)
     {
         Environment.SetEnvironmentVariable(ConfigurationKeys.Logs.Exporter, logExporters);
 
@@ -239,6 +284,7 @@ public class SettingsTests : IDisposable
 
     [Theory]
     [InlineData(null, new Propagator[0])]
+    [InlineData("", new Propagator[0])]
     [InlineData("not-supported", new Propagator[0])]
     [InlineData("not-supported1,not-supported2", new Propagator[0])]
     [InlineData("tracecontext", new[] { Propagator.W3CTraceContext })]
@@ -257,12 +303,27 @@ public class SettingsTests : IDisposable
     }
 
     [Theory]
+    [InlineData("not-supported", new Propagator[0])]
+    [InlineData("tracecontext,tracecontext", new[] { Propagator.W3CTraceContext })]
+    [InlineData("tracecontext, ,b3multi", new[] { Propagator.W3CTraceContext, Propagator.B3Multi })]
+    [InlineData("tracecontext, b3multi", new[] { Propagator.W3CTraceContext })]
+    [InlineData("tracecontext,,,", new[] { Propagator.W3CTraceContext })]
+    internal void Propagators_FailFastOff(string? propagators, Propagator[] expectedPropagators)
+    {
+        Environment.SetEnvironmentVariable(ConfigurationKeys.Sdk.Propagators, propagators);
+
+        var settings = Settings.FromDefaultSources<SdkSettings>(false);
+
+        settings.Propagators.Should().BeEquivalentTo(expectedPropagators);
+    }
+
+    [Theory]
     [InlineData("not-supported")]
     [InlineData("tracecontext,tracecontext")]
     [InlineData("tracecontext, ,b3multi")]
     [InlineData("tracecontext, baggage")]
     [InlineData("tracecontext,,,")]
-    internal void Propagators_FailFast(string propagators)
+    internal void Propagators_FailFastOn(string propagators)
     {
         Environment.SetEnvironmentVariable(ConfigurationKeys.Sdk.Propagators, propagators);
 
