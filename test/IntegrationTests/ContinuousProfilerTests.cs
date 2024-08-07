@@ -23,7 +23,7 @@ public class ContinuousProfilerTests : TestHelper
         EnableBytecodeInstrumentation();
         using var collector = new MockProfilesCollector(Output);
         SetExporter(collector);
-        SetEnvironmentVariable("OTEL_DOTNET_AUTO_PLUGINS", "TestApplication.ContinuousProfiler.AllocationPlugin, TestApplication.ContinuousProfiler, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null");
+        SetEnvironmentVariable("OTLP_DOTNET_AUTO_CONTINUOUS_PROFILER_ALLOCATION_SAMPLING_ENABLED", "true");
         SetEnvironmentVariable("OTEL_DOTNET_AUTO_TRACES_ADDITIONAL_SOURCES", "TestApplication.ContinuousProfiler");
         RunTestApplication();
 
@@ -41,7 +41,7 @@ public class ContinuousProfilerTests : TestHelper
         EnableBytecodeInstrumentation();
         using var collector = new MockProfilesCollector(Output);
         SetExporter(collector);
-        SetEnvironmentVariable("OTEL_DOTNET_AUTO_PLUGINS", "TestApplication.ContinuousProfiler.ThreadPlugin, TestApplication.ContinuousProfiler, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null");
+        SetEnvironmentVariable("OTLP_DOTNET_AUTO_CONTINUOUS_PROFILER_THREAD_SAMPLING_ENABLED", "true");
         SetEnvironmentVariable("OTEL_DOTNET_AUTO_TRACES_ADDITIONAL_SOURCES", "TestApplication.ContinuousProfiler");
         RunTestApplication();
 

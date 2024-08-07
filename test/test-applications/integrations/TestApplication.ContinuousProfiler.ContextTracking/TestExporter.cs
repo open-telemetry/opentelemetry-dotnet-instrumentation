@@ -3,6 +3,7 @@
 
 using System.Text;
 using System.Text.Json;
+using OpenTelemetry.AutoInstrumentation.ContinuousProfiler;
 
 namespace TestApplication.ContinuousProfiler.ContextTracking;
 

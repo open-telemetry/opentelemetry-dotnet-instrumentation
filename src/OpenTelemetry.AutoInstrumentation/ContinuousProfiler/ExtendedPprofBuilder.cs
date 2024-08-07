@@ -1,11 +1,13 @@
 // Copyright The OpenTelemetry Authors
 // SPDX-License-Identifier: Apache-2.0
 
+#if NET6_0_OR_GREATER
+
 using Google.Protobuf;
 using OpenTelemetry.Proto.Common.V1;
 using OpenTelemetry.Proto.Profiles.V1Experimental;
 
-namespace TestApplication.ContinuousProfiler;
+namespace OpenTelemetry.AutoInstrumentation.ContinuousProfiler;
 
 internal class ExtendedPprofBuilder
 {
@@ -208,3 +210,4 @@ internal class ExtendedPprofBuilder
         }
     }
 }
+#endif
