@@ -63,6 +63,7 @@ internal class LogSettings : Settings
     {
         var logExporterEnvVar = configuration.GetString(ConfigurationKeys.Logs.Exporter);
         var exporters = new List<LogExporter>();
+        var seenExporters = new HashSet<string>();
 
         if (consoleExporterEnabled)
         {
@@ -84,6 +85,21 @@ internal class LogSettings : Settings
 
         foreach (var exporterName in exporterNames)
         {
+            if (seenExporters.Contains(exporterName))
+            {
+                var message = $"Duplicate log exporter '{exporterName}' found.";
+                Logger.Error(message);
+
+                if (configuration.FailFast)
+                {
+                    throw new NotSupportedException(message);
+                }
+
+                continue;
+            }
+
+            seenExporters.Add(exporterName);
+
             switch (exporterName)
             {
                 case Constants.ConfigurationValues.Exporters.Otlp:
@@ -95,14 +111,14 @@ internal class LogSettings : Settings
                 case Constants.ConfigurationValues.None:
                     break;
                 default:
+                    var unsupportedMessage = $"Log exporter '{exporterName}' is not supported.";
+                    Logger.Error(unsupportedMessage);
+
                     if (configuration.FailFast)
                     {
-                        var message = $"Log exporter '{exporterName}' is not supported.";
-                        Logger.Error(message);
-                        throw new NotSupportedException(message);
+                        throw new NotSupportedException(unsupportedMessage);
                     }
 
-                    Logger.Error($"Log exporter '{exporterName}' is not supported.");
                     break;
             }
         }
