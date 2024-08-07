@@ -88,13 +88,13 @@ internal class LogSettings : Settings
             if (seenExporters.Contains(exporterName))
             {
                 var message = $"Duplicate log exporter '{exporterName}' found.";
-                Logger.Error(message);
-
                 if (configuration.FailFast)
                 {
+                    Logger.Error(message);
                     throw new NotSupportedException(message);
                 }
 
+                Logger.Warning(message);
                 continue;
             }
 

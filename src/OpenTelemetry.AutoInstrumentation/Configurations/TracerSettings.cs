@@ -123,13 +123,13 @@ internal class TracerSettings : Settings
             if (seenExporters.Contains(exporterName))
             {
                 var message = $"Duplicate traces exporter '{exporterName}' found.";
-                Logger.Error(message);
-
                 if (configuration.FailFast)
                 {
+                    Logger.Error(message);
                     throw new NotSupportedException(message);
                 }
 
+                Logger.Warning(message);
                 continue;
             }
 

@@ -41,13 +41,13 @@ internal class SdkSettings : Settings
             if (seenPropagators.Contains(propagatorName))
             {
                 var message = $"Duplicate propagator '{propagatorName}' found.";
-                Logger.Error(message);
-
                 if (configuration.FailFast)
                 {
+                    Logger.Error(message);
                     throw new NotSupportedException(message);
                 }
 
+                Logger.Warning(message);
                 continue;
             }
 
