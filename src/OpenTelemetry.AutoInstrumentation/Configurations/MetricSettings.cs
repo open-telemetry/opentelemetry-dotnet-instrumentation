@@ -71,6 +71,7 @@ internal class MetricSettings : Settings
     {
         var metricsExporterEnvVar = configuration.GetString(ConfigurationKeys.Metrics.Exporter);
         var exporters = new List<MetricsExporter>();
+        var seenExporters = new HashSet<string>();
 
         if (consoleExporterEnabled)
         {
@@ -92,6 +93,21 @@ internal class MetricSettings : Settings
 
         foreach (var exporterName in exporterNames)
         {
+            if (seenExporters.Contains(exporterName))
+            {
+                var message = $"Duplicate metric exporter '{exporterName}' found.";
+                if (configuration.FailFast)
+                {
+                    Logger.Error(message);
+                    throw new NotSupportedException(message);
+                }
+
+                Logger.Warning(message);
+                continue;
+            }
+
+            seenExporters.Add(exporterName);
+
             switch (exporterName)
             {
                 case Constants.ConfigurationValues.Exporters.Otlp:
@@ -106,14 +122,14 @@ internal class MetricSettings : Settings
                 case Constants.ConfigurationValues.None:
                     break;
                 default:
+                    var unsupportedMessage = $"Metric exporter '{exporterName}' is not supported.";
+                    Logger.Error(unsupportedMessage);
+
                     if (configuration.FailFast)
                     {
-                        var message = $"Metric exporter '{exporterName}' is not supported.";
-                        Logger.Error(message);
-                        throw new NotSupportedException(message);
+                        throw new NotSupportedException(unsupportedMessage);
                     }
 
-                    Logger.Error($"Metric exporter '{exporterName}' is not supported.");
                     break;
             }
         }
