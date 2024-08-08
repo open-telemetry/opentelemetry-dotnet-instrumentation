@@ -5,6 +5,8 @@ namespace OpenTelemetry.AutoInstrumentation;
 
 internal static partial class InstrumentationDefinitions
 {
+    private static readonly string AssemblyFullName = typeof(InstrumentationDefinitions).Assembly.FullName!;
+
     internal static Payload GetAllDefinitions()
     {
         return new Payload
@@ -28,12 +30,6 @@ internal static partial class InstrumentationDefinitions
             Definitions = GetDerivedDefinitionsArray(),
         };
     }
-
-    // TODO: Generate this list using source generators
-    private static NativeCallTargetDefinition[] GetDerivedDefinitionsArray()
-        => new NativeCallTargetDefinition[]
-        {
-        };
 
     internal struct Payload
     {

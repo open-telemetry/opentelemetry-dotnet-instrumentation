@@ -10,7 +10,7 @@ namespace OpenTelemetry.AutoInstrumentation.Instrumentations;
 [AttributeUsage(AttributeTargets.Class | AttributeTargets.Assembly, AllowMultiple = true, Inherited = false)]
 internal class InstrumentMethodAttribute : Attribute
 {
-    public InstrumentMethodAttribute(string assemblyName, string typeName, string methodName, string returnTypeName, string[] parameterTypeNames, string minimumVersion, string maximumVersion, string integrationName, InstrumentationType type)
+    public InstrumentMethodAttribute(string assemblyName, string typeName, string methodName, string returnTypeName, string[] parameterTypeNames, string minimumVersion, string maximumVersion, string integrationName, InstrumentationType type, IntegrationKind integrationKind = IntegrationKind.Direct)
     {
         AssemblyName = assemblyName;
         TypeName = typeName;
@@ -24,6 +24,7 @@ internal class InstrumentMethodAttribute : Attribute
         };
         IntegrationName = integrationName;
         Type = type;
+        Kind = integrationKind;
     }
 
     /// <summary>
@@ -83,4 +84,9 @@ internal class InstrumentMethodAttribute : Attribute
     /// Gets or sets the integration type.
     /// </summary>
     public InstrumentationType Type { get; set; }
+
+    /// <summary>
+    /// Gets or sets the integration kind.
+    /// </summary>
+    public IntegrationKind Kind { get; set; }
 }

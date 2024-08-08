@@ -10,19 +10,20 @@ using OpenTelemetry.AutoInstrumentation.Util;
 namespace OpenTelemetry.AutoInstrumentation.Instrumentations.RabbitMq6.Integrations;
 
 /// <summary>
-/// RabbitMq AsyncEventingBasicConsumer.HandleBasicDeliver integration.
+/// RabbitMq AsyncDefaultBasicConsumer.HandleBasicDeliver integration.
 /// </summary>
 [InstrumentMethod(
     assemblyName: IntegrationConstants.RabbitMqAssemblyName,
-    typeName: IntegrationConstants.AsyncEventingBasicConsumerTypeName,
+    typeName: IntegrationConstants.AsyncDefaultBasicConsumerTypeName,
     methodName: IntegrationConstants.HandleBasicDeliverMethodName,
     returnTypeName: ClrNames.Task,
     parameterTypeNames: new[] { ClrNames.String, ClrNames.UInt64, ClrNames.Bool, ClrNames.String, ClrNames.String, IntegrationConstants.BasicPropertiesInterfaceTypeName, $"System.ReadOnlyMemory`1[{ClrNames.Byte}]" },
     minimumVersion: IntegrationConstants.MinSupportedVersion,
     maximumVersion: IntegrationConstants.MaxSupportedVersion,
     integrationName: IntegrationConstants.RabbitMqByteCodeIntegrationName,
-    type: InstrumentationType.Trace)]
-public static class AsyncEventingBasicConsumerIntegration
+    type: InstrumentationType.Trace,
+    integrationKind: IntegrationKind.Derived)]
+public static class AsyncDefaultBasicConsumerIntegration
 {
     internal static CallTargetState OnMethodBegin<TTarget, TBasicProperties, TBody>(TTarget instance, string? consumerTag, ulong deliveryTag, bool redelivered, string? exchange, string? routingKey, TBasicProperties properties, TBody body)
         where TBasicProperties : IBasicProperties

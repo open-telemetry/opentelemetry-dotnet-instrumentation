@@ -15,11 +15,9 @@ namespace OpenTelemetry.AutoInstrumentation;
 
 internal static partial class InstrumentationDefinitions
 {
-    private static readonly string AssemblyFullName = typeof(InstrumentationDefinitions).Assembly.FullName!;
-
     private static NativeCallTargetDefinition[] GetDefinitionsArray()
     {
-        var nativeCallTargetDefinitions = new List<NativeCallTargetDefinition>(20);
+        var nativeCallTargetDefinitions = new List<NativeCallTargetDefinition>(18);
         // Traces
         var tracerSettings = Instrumentation.TracerSettings.Value;
         if (tracerSettings.TracesEnabled)
@@ -57,8 +55,6 @@ internal static partial class InstrumentationDefinitions
             // RabbitMq
             if (tracerSettings.EnabledInstrumentations.Contains(TracerInstrumentation.RabbitMq))
             {
-                nativeCallTargetDefinitions.Add(new("RabbitMQ.Client", "RabbitMQ.Client.Events.AsyncEventingBasicConsumer", "HandleBasicDeliver", new[] {"System.Threading.Tasks.Task", "System.String", "System.UInt64", "System.Boolean", "System.String", "System.String", "RabbitMQ.Client.IBasicProperties", "System.ReadOnlyMemory`1[System.Byte]"}, 6, 0, 0, 6, 65535, 65535, AssemblyFullName, "OpenTelemetry.AutoInstrumentation.Instrumentations.RabbitMq6.Integrations.AsyncEventingBasicConsumerIntegration"));
-                nativeCallTargetDefinitions.Add(new("RabbitMQ.Client", "RabbitMQ.Client.Events.EventingBasicConsumer", "HandleBasicDeliver", new[] {"System.Void", "System.String", "System.UInt64", "System.Boolean", "System.String", "System.String", "RabbitMQ.Client.IBasicProperties", "System.ReadOnlyMemory`1[System.Byte]"}, 6, 0, 0, 6, 65535, 65535, AssemblyFullName, "OpenTelemetry.AutoInstrumentation.Instrumentations.RabbitMq6.Integrations.EventingBasicConsumerIntegration"));
                 nativeCallTargetDefinitions.Add(new("RabbitMQ.Client", "RabbitMQ.Client.Impl.ModelBase", "BasicGet", new[] {"RabbitMQ.Client.BasicGetResult", "System.String", "System.Boolean"}, 6, 0, 0, 6, 65535, 65535, AssemblyFullName, "OpenTelemetry.AutoInstrumentation.Instrumentations.RabbitMq6.Integrations.ModelBaseBasicGetIntegration"));
                 nativeCallTargetDefinitions.Add(new("RabbitMQ.Client", "RabbitMQ.Client.Framing.Impl.Model", "_Private_BasicPublish", new[] {"System.Void", "System.String", "System.String", "System.Boolean", "RabbitMQ.Client.IBasicProperties", "System.ReadOnlyMemory`1[System.Byte]"}, 6, 0, 0, 6, 65535, 65535, AssemblyFullName, "OpenTelemetry.AutoInstrumentation.Instrumentations.RabbitMq6.Integrations.ModelBasicPublishIntegration"));
             }

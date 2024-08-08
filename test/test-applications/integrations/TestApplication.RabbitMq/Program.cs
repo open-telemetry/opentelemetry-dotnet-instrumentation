@@ -55,12 +55,13 @@ internal static class Program
 
         Publish(syncConsumersModel, GetTestMessage(), syncConsumersModel.CreateBasicProperties());
 
-        var consumer = new EventingBasicConsumer(syncConsumersModel);
+        var consumer = new TestSyncConsumer(syncConsumersModel);
 
         using var mre = new ManualResetEventSlim(false);
 
         consumer.Received += (_, ea) =>
         {
+            Console.WriteLine("[x] Handling BasicDeliver in TestSyncConsumer.");
             ProcessReceivedMessage(ea.Body);
             mre.Set();
         };
@@ -88,12 +89,13 @@ internal static class Program
         using var asyncConsumersModel = asyncConsumersConnection.CreateModel();
 
         Publish(asyncConsumersModel, GetTestMessage(), asyncConsumersModel.CreateBasicProperties());
-        var asyncConsumer = new AsyncEventingBasicConsumer(asyncConsumersModel);
+        var asyncConsumer = new TestAsyncConsumer(asyncConsumersModel);
 
         using var mre = new ManualResetEventSlim(false);
 
         asyncConsumer.Received += async (_, ea) =>
         {
+            Console.WriteLine("[x] Handling BasicDeliver in TestAsyncConsumer.");
             ProcessReceivedMessage(ea.Body);
             await Task.Yield();
             mre.Set();
@@ -141,5 +143,61 @@ internal static class Program
     private static string GetTestMessage()
     {
         return $"Hello World!{_messageNumber++}";
+    }
+
+    // Custom consumer classes, with implementation (simplified) based on EventingBasicConsumer/AsyncEventingBasicConsumer
+    // from the library.
+    private class TestAsyncConsumer : AsyncDefaultBasicConsumer
+    {
+        public TestAsyncConsumer(IModel model)
+            : base(model)
+        {
+        }
+
+        public event AsyncEventHandler<BasicDeliverEventArgs>? Received;
+
+        public override Task? HandleBasicDeliver(
+            string consumerTag,
+            ulong deliveryTag,
+            bool redelivered,
+            string exchange,
+            string routingKey,
+            IBasicProperties properties,
+            ReadOnlyMemory<byte> body)
+        {
+            return Received?.Invoke(
+                this,
+                new BasicDeliverEventArgs(
+                    consumerTag,
+                    deliveryTag,
+                    redelivered,
+                    exchange,
+                    routingKey,
+                    properties,
+                    body));
+        }
+    }
+
+    private class TestSyncConsumer : DefaultBasicConsumer
+    {
+        public TestSyncConsumer(IModel model)
+            : base(model)
+        {
+        }
+
+        public event EventHandler<BasicDeliverEventArgs>? Received;
+
+        public override void HandleBasicDeliver(
+            string consumerTag,
+            ulong deliveryTag,
+            bool redelivered,
+            string exchange,
+            string routingKey,
+            IBasicProperties properties,
+            ReadOnlyMemory<byte> body)
+        {
+            base.HandleBasicDeliver(consumerTag, deliveryTag, redelivered, exchange, routingKey, properties, body);
+            Received?.Invoke(this, new BasicDeliverEventArgs(consumerTag, deliveryTag, redelivered, exchange, routingKey, properties, body));
+        }
     }
 }
