@@ -3,6 +3,7 @@
 
 using FluentAssertions;
 using OpenTelemetry.AutoInstrumentation.Logging;
+using OpenTelemetry.AutoInstrumentation.Tests.Util;
 using Xunit;
 
 namespace OpenTelemetry.AutoInstrumentation.Tests;
@@ -104,6 +105,71 @@ public class OtelLoggingTests : IDisposable
         Environment.SetEnvironmentVariable("OTEL_DOTNET_AUTO_LOGGER", "none");
 
         OtelLogging.GetConfiguredLogSink().Should().Be(LogSink.NoOp);
+    }
+
+    [Fact]
+    public void WhenFileSinkIsUsed_Then_FileContentIsDetected()
+    {
+        Environment.SetEnvironmentVariable("OTEL_LOG_LEVEL", "debug");
+        Environment.SetEnvironmentVariable("OTEL_DOTNET_AUTO_LOGGER", "file");
+
+        var tempLogsDirectory = DirectoryHelpers.CreateTempDirectory();
+        Environment.SetEnvironmentVariable("OTEL_DOTNET_AUTO_LOG_DIRECTORY", tempLogsDirectory.FullName);
+
+        try
+        {
+            var logger = OtelLogging.GetLogger("UnitTests");
+            var logLine = "== Test Log Here ==";
+
+            logger.Debug(logLine, false);
+            logger.Dispose(); // Dispose the logger to release the file
+
+            var files = tempLogsDirectory.GetFiles();
+
+            files.Length.Should().Be(1);
+
+            var content = File.ReadAllText(files[0].FullName);
+
+            content.Should().Contain(logLine);
+        }
+        finally
+        {
+            tempLogsDirectory.Delete(true);
+        }
+    }
+
+    [Fact]
+    public void WhenConsoleSinkIsUsed_Then_ConsoleContentIsDetected()
+    {
+        Environment.SetEnvironmentVariable("OTEL_LOG_LEVEL", "debug");
+        Environment.SetEnvironmentVariable("OTEL_DOTNET_AUTO_LOGGER", "console");
+
+        var currentWritter = Console.Out;
+
+        using var ms = new MemoryStream();
+        using var tw = new StreamWriter(ms);
+
+        Console.SetOut(tw);
+
+        try
+        {
+            var logger = OtelLogging.GetLogger("UnitTests");
+            var logLine = "== Test Log Here ==";
+
+            logger.Debug(logLine, false);
+            tw.Flush(); // Forces rows to be written
+
+            using TextReader reader = new StreamReader(ms);
+
+            ms.Position = 0; // reset reading position
+            var content = reader.ReadToEnd();
+
+            content.Should().Contain(logLine);
+        }
+        finally
+        {
+            Console.SetOut(currentWritter);
+        }
     }
 
     private static void UnsetLoggingEnvVars()
