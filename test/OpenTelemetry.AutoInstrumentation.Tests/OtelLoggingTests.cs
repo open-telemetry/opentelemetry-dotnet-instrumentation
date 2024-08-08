@@ -11,12 +11,12 @@ public class OtelLoggingTests : IDisposable
 {
     public OtelLoggingTests()
     {
-        UnsetLogLevelEnvVar();
+        UnsetLoggingEnvVars();
     }
 
     public void Dispose()
     {
-        UnsetLogLevelEnvVar();
+        UnsetLoggingEnvVars();
     }
 
     [Fact]
@@ -74,9 +74,42 @@ public class OtelLoggingTests : IDisposable
         OtelLogging.GetConfiguredLogLevel().Should().BeNull();
     }
 
-    private static void UnsetLogLevelEnvVar()
+    [Fact]
+    public void WhenLogSinkIsNotConfigured_Then_DefaultIsUsed()
+    {
+        Environment.SetEnvironmentVariable("OTEL_DOTNET_AUTO_LOGGER", null);
+
+        OtelLogging.GetConfiguredLogSink().Should().Be(LogSink.File);
+    }
+
+    [Fact]
+    public void WhenInvalidLogSinkIsConfigured_Then_DefaultIsUsed()
+    {
+        Environment.SetEnvironmentVariable("OTEL_DOTNET_AUTO_LOGGER", "invalid");
+
+        OtelLogging.GetConfiguredLogSink().Should().Be(LogSink.File);
+    }
+
+    [Fact]
+    public void WhenValidLogSinkIsConfigured_Then_ItIsUsed()
+    {
+        Environment.SetEnvironmentVariable("OTEL_DOTNET_AUTO_LOGGER", "console");
+
+        OtelLogging.GetConfiguredLogSink().Should().Be(LogSink.Console);
+    }
+
+    [Fact]
+    public void WhenNoLogSinkIsConfigured_Then_NoOpSinkIsUsed()
+    {
+        Environment.SetEnvironmentVariable("OTEL_DOTNET_AUTO_LOGGER", "none");
+
+        OtelLogging.GetConfiguredLogSink().Should().Be(LogSink.NoOp);
+    }
+
+    private static void UnsetLoggingEnvVars()
     {
         Environment.SetEnvironmentVariable("OTEL_LOG_LEVEL", null);
         Environment.SetEnvironmentVariable("OTEL_DOTNET_AUTO_LOG_FILE_SIZE", null);
+        Environment.SetEnvironmentVariable("OTEL_DOTNET_AUTO_LOGGER", null);
     }
 }
