@@ -292,10 +292,8 @@ WSTRING LoggerImpl<TLoggerPolicy>::GetLogSinkConfiguration()
 
     if (configured_log_sink == EmptyWStr)
     {
-        static auto is_containerized = IsRunningInContainer();
-
-        // default to console if is containerized app otherwise file.
-        return is_containerized ? log_sink_console : log_sink_file;
+        // default to file sink
+        return log_sink_file;
     }
 
     return configured_log_sink;

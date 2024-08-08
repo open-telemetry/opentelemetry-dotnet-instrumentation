@@ -15,7 +15,6 @@ internal static class OtelLogging
     private const string OtelLogLevel = "OTEL_LOG_LEVEL";
     private const string OtelDotnetAutoLogFileSize = "OTEL_DOTNET_AUTO_LOG_FILE_SIZE";
     private const string OtelDotnetAutoLogger = "OTEL_DOTNET_AUTO_LOGGER";
-    private const string DotnetRunningInContainer = "DOTNET_RUNNING_IN_CONTAINER";
     private const string NixDefaultDirectory = "/var/log/opentelemetry/dotnet";
 
     private static readonly long FileSizeLimitBytes = GetConfiguredFileSizeLimitBytes();
@@ -70,19 +69,8 @@ internal static class OtelLogging
 
     internal static LogSink GetConfiguredLogSink()
     {
-        bool isRunningInContainer;
-
-        try
-        {
-            isRunningInContainer = Environment.GetEnvironmentVariable(DotnetRunningInContainer) is not null;
-        }
-        catch (Exception)
-        {
-            // theoretically, can happen when process has no privileges to check env
-            isRunningInContainer = false;
-        }
-
-        var logSink = isRunningInContainer ? LogSink.Console : LogSink.File;
+        // Use File as a default sink
+        var logSink = LogSink.File;
 
         try
         {

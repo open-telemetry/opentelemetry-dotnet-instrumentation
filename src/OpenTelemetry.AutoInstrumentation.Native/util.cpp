@@ -67,26 +67,6 @@ WSTRING Trim(const WSTRING& str)
     return trimmed;
 }
 
-bool IsRunningInContainer()
-{
-    return IsEnvironmentVariableDefined(environment::dotnet_running_in_container);
-}
-
-bool IsEnvironmentVariableDefined(const WSTRING& name)
-{
-#ifdef _WIN32
-    const size_t max_buf_size = 4096;
-    WSTRING      buf(max_buf_size, 0);
-    auto         len = GetEnvironmentVariable(name.data(), buf.data(), (DWORD)(buf.size()));
-
-    return len > 0;
-#else
-    auto cstr = std::getenv(ToString(name).c_str());
-
-    return cstr != nullptr;
-#endif
-}
-
 WSTRING GetEnvironmentValue(const WSTRING& name)
 {
 #ifdef _WIN32

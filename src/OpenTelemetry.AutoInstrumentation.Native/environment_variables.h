@@ -75,10 +75,6 @@ const WSTRING fail_fast_enabled = WStr("OTEL_DOTNET_AUTO_FAIL_FAST_ENABLED");
 // for more information about this environment variable.
 const WSTRING dotnet_startup_hooks = WStr("DOTNET_STARTUP_HOOKS");
 
-// Determines if application runs in a container.
-// See https://learn.microsoft.com/en-us/dotnet/core/tools/dotnet-environment-variables#dotnet_running_in_container-and-dotnet_running_in_containers
-const WSTRING dotnet_running_in_container = WStr("DOTNET_RUNNING_IN_CONTAINER");
-
 const WSTRING prefix_cor = WStr("COR_");
 const WSTRING prefix_coreclr = WStr("CORECLR_");
 const WSTRING prefix_dotnet = WStr("DOTNET_");
