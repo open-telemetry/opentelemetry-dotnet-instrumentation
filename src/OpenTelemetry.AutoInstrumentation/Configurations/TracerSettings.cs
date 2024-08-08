@@ -98,6 +98,7 @@ internal class TracerSettings : Settings
     {
         var tracesExporterEnvVar = configuration.GetString(ConfigurationKeys.Traces.Exporter);
         var exporters = new List<TracesExporter>();
+        var seenExporters = new HashSet<string>();
 
         if (consoleExporterEnabled)
         {
@@ -119,6 +120,21 @@ internal class TracerSettings : Settings
 
         foreach (var exporterName in exporterNames)
         {
+            if (seenExporters.Contains(exporterName))
+            {
+                var message = $"Duplicate traces exporter '{exporterName}' found.";
+                if (configuration.FailFast)
+                {
+                    Logger.Error(message);
+                    throw new NotSupportedException(message);
+                }
+
+                Logger.Warning(message);
+                continue;
+            }
+
+            seenExporters.Add(exporterName);
+
             switch (exporterName)
             {
                 case Constants.ConfigurationValues.Exporters.Otlp:
@@ -133,14 +149,14 @@ internal class TracerSettings : Settings
                     exporters.Add(TracesExporter.Console);
                     break;
                 default:
+                    var unsupportedMessage = $"Traces exporter '{exporterName}' is not supported.";
+                    Logger.Error(unsupportedMessage);
+
                     if (configuration.FailFast)
                     {
-                        var message = $"Traces exporter '{exporterName}' is not supported.";
-                        Logger.Error(message);
-                        throw new NotSupportedException(message);
+                        throw new NotSupportedException(unsupportedMessage);
                     }
 
-                    Logger.Error($"Traces exporter '{exporterName}' is not supported.");
                     break;
             }
         }
