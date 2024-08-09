@@ -18,9 +18,10 @@ internal static class OtelLogging
     private const string NixDefaultDirectory = "/var/log/opentelemetry/dotnet";
 
     private static readonly long FileSizeLimitBytes = GetConfiguredFileSizeLimitBytes();
-    private static readonly LogLevel? ConfiguredLogLevel = GetConfiguredLogLevel();
-
     private static readonly ConcurrentDictionary<string, IOtelLogger> OtelLoggers = new();
+
+    private static LogLevel? _configuredLogLevel = GetConfiguredLogLevel();
+    private static LogSink _configuredLogSink = GetConfiguredLogSink();
 
     /// <summary>
     /// Returns Logger implementation.
@@ -40,6 +41,13 @@ internal static class OtelLogging
     public static IOtelLogger GetLogger(string suffix)
     {
         return OtelLoggers.GetOrAdd(suffix, CreateLogger);
+    }
+
+    // Helper method for testing
+    internal static void Reset()
+    {
+        _configuredLogLevel = GetConfiguredLogLevel();
+        _configuredLogSink = GetConfiguredLogSink();
     }
 
     internal static LogLevel? GetConfiguredLogLevel()
@@ -115,25 +123,23 @@ internal static class OtelLogging
 
     private static IOtelLogger CreateLogger(string suffix)
     {
-        if (!ConfiguredLogLevel.HasValue)
+        if (!_configuredLogLevel.HasValue)
         {
             return NoopLogger.Instance;
         }
 
         var sink = CreateSink(suffix);
 
-        return new InternalLogger(sink, ConfiguredLogLevel.Value);
+        return new InternalLogger(sink, _configuredLogLevel.Value);
     }
 
     private static ISink CreateSink(string suffix)
     {
-        var sinkConfiguration = GetConfiguredLogSink();
-
-        if (sinkConfiguration == LogSink.NoOp)
+        if (_configuredLogSink == LogSink.NoOp)
         {
             return new NoopSink();
         }
-        else if (sinkConfiguration == LogSink.File)
+        else if (_configuredLogSink == LogSink.File)
         {
             try
             {
@@ -157,7 +163,7 @@ internal static class OtelLogging
                 // unable to configure logging to a file
             }
         }
-        else if (sinkConfiguration == LogSink.Console)
+        else if (_configuredLogSink == LogSink.Console)
         {
             return new ConsoleSink(suffix);
         }

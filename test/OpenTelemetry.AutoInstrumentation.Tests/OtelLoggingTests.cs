@@ -8,6 +8,7 @@ using Xunit;
 
 namespace OpenTelemetry.AutoInstrumentation.Tests;
 
+[Collection("Non-Parallel Collection")]
 public class OtelLoggingTests : IDisposable
 {
     public OtelLoggingTests()
@@ -118,7 +119,10 @@ public class OtelLoggingTests : IDisposable
 
         try
         {
-            var logger = OtelLogging.GetLogger("UnitTests");
+            // Reset internal state
+            OtelLogging.Reset();
+
+            var logger = OtelLogging.GetLogger("FileUnitTests");
             var logLine = "== Test Log Here ==";
 
             logger.Debug(logLine, false);
@@ -153,7 +157,10 @@ public class OtelLoggingTests : IDisposable
 
         try
         {
-            var logger = OtelLogging.GetLogger("UnitTests");
+            // Reset internal state
+            OtelLogging.Reset();
+
+            var logger = OtelLogging.GetLogger("ConsoleUnitTests");
             var logLine = "== Test Log Here ==";
 
             logger.Debug(logLine, false);
