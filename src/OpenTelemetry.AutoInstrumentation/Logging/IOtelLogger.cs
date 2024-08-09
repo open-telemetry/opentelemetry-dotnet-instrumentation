@@ -3,7 +3,7 @@
 
 namespace OpenTelemetry.AutoInstrumentation.Logging;
 
-internal interface IOtelLogger
+internal interface IOtelLogger : IDisposable
 {
     LogLevel Level { get; }
 

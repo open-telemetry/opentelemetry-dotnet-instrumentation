@@ -142,6 +142,14 @@ internal class InternalLogger : IOtelLogger
     public void Error(Exception exception, string messageTemplate, object[] args, bool writeToEventLog)
         => Write(LogLevel.Error, exception, messageTemplate, args, writeToEventLog);
 
+    public void Dispose()
+    {
+        if (_sink is IDisposable disposableSink)
+        {
+            disposableSink.Dispose();
+        }
+    }
+
     private static void WriteEventSourceLog(LogLevel level, string message)
     {
         switch (level)

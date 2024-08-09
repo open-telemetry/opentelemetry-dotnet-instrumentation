@@ -15,7 +15,7 @@ namespace OpenTelemetry.AutoInstrumentation.Tests.Diagnostics;
 // use collection to indicate that tests should not be run
 // in parallel
 // see https://xunit.net/docs/running-tests-in-parallel
-[Collection("EventEmittingTests")]
+[Collection("Non-Parallel Collection")]
 public class SdkSelfDiagnosticsEventListenerTests
 {
     [Fact]

@@ -14,12 +14,14 @@ internal static class OtelLogging
     private const string OtelDotnetAutoLogDirectory = "OTEL_DOTNET_AUTO_LOG_DIRECTORY";
     private const string OtelLogLevel = "OTEL_LOG_LEVEL";
     private const string OtelDotnetAutoLogFileSize = "OTEL_DOTNET_AUTO_LOG_FILE_SIZE";
+    private const string OtelDotnetAutoLogger = "OTEL_DOTNET_AUTO_LOGGER";
     private const string NixDefaultDirectory = "/var/log/opentelemetry/dotnet";
 
     private static readonly long FileSizeLimitBytes = GetConfiguredFileSizeLimitBytes();
-    private static readonly LogLevel? ConfiguredLogLevel = GetConfiguredLogLevel();
-
     private static readonly ConcurrentDictionary<string, IOtelLogger> OtelLoggers = new();
+
+    private static LogLevel? _configuredLogLevel = GetConfiguredLogLevel();
+    private static LogSink _configuredLogSink = GetConfiguredLogSink();
 
     /// <summary>
     /// Returns Logger implementation.
@@ -39,6 +41,13 @@ internal static class OtelLogging
     public static IOtelLogger GetLogger(string suffix)
     {
         return OtelLoggers.GetOrAdd(suffix, CreateLogger);
+    }
+
+    // Helper method for testing
+    internal static void Reset()
+    {
+        _configuredLogLevel = GetConfiguredLogLevel();
+        _configuredLogSink = GetConfiguredLogSink();
     }
 
     internal static LogLevel? GetConfiguredLogLevel()
@@ -66,6 +75,31 @@ internal static class OtelLogging
         return logLevel;
     }
 
+    internal static LogSink GetConfiguredLogSink()
+    {
+        // Use File as a default sink
+        var logSink = LogSink.File;
+
+        try
+        {
+            var configuredValue = Environment.GetEnvironmentVariable(OtelDotnetAutoLogger) ?? string.Empty;
+
+            logSink = configuredValue switch
+            {
+                Constants.ConfigurationValues.Loggers.File => LogSink.File,
+                Constants.ConfigurationValues.Loggers.Console => LogSink.Console,
+                Constants.ConfigurationValues.None => LogSink.NoOp,
+                _ => logSink
+            };
+        }
+        catch (Exception)
+        {
+            // theoretically, can happen when process has no privileges to check env
+        }
+
+        return logSink;
+    }
+
     internal static long GetConfiguredFileSizeLimitBytes()
     {
         const long defaultFileSizeLimitBytes = 10 * 1024 * 1024;
@@ -89,37 +123,53 @@ internal static class OtelLogging
 
     private static IOtelLogger CreateLogger(string suffix)
     {
-        ISink? sink = null;
-
-        if (!ConfiguredLogLevel.HasValue)
+        if (!_configuredLogLevel.HasValue)
         {
             return NoopLogger.Instance;
         }
 
-        try
+        var sink = CreateSink(suffix);
+
+        return new InternalLogger(sink, _configuredLogLevel.Value);
+    }
+
+    private static ISink CreateSink(string suffix)
+    {
+        if (_configuredLogSink == LogSink.NoOp)
         {
-            var logDirectory = GetLogDirectory();
-            if (logDirectory != null)
+            return new NoopSink();
+        }
+        else if (_configuredLogSink == LogSink.File)
+        {
+            try
             {
-                var fileName = GetLogFileName(suffix);
-                var logPath = Path.Combine(logDirectory, fileName);
-                sink = new RollingFileSink(
-                    path: logPath,
-                    fileSizeLimitBytes: FileSizeLimitBytes,
-                    retainedFileCountLimit: 10,
-                    rollingInterval: RollingInterval.Day,
-                    rollOnFileSizeLimit: true,
-                    retainedFileTimeLimit: null);
+                var logDirectory = GetLogDirectory();
+                if (logDirectory != null)
+                {
+                    var fileName = GetLogFileName(suffix);
+                    var logPath = Path.Combine(logDirectory, fileName);
+
+                    return new RollingFileSink(
+                        path: logPath,
+                        fileSizeLimitBytes: FileSizeLimitBytes,
+                        retainedFileCountLimit: 10,
+                        rollingInterval: RollingInterval.Day,
+                        rollOnFileSizeLimit: true,
+                        retainedFileTimeLimit: null);
+                }
+            }
+            catch (Exception)
+            {
+                // unable to configure logging to a file
             }
         }
-        catch (Exception)
+        else if (_configuredLogSink == LogSink.Console)
         {
-            // unable to configure logging to a file
+            return new ConsoleSink(suffix);
         }
 
-        sink ??= new NoopSink();
-
-        return new InternalLogger(sink, ConfiguredLogLevel.Value);
+        // Default to NoopSink
+        return new NoopSink();
     }
 
     private static string GetLogFileName(string suffix)

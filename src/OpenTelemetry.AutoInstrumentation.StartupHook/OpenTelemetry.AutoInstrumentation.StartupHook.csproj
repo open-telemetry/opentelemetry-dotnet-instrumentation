@@ -16,6 +16,9 @@
     <Compile Include="..\OpenTelemetry.AutoInstrumentation\Logging\NoopLogger.cs">
       <Link>Logging\NoopLogger.cs</Link>
     </Compile>
+    <Compile Include="..\OpenTelemetry.AutoInstrumentation\Logging\ConsoleSink.cs">
+      <Link>Logging\ConsoleSink.cs</Link>
+    </Compile>
     <Compile Include="..\OpenTelemetry.AutoInstrumentation\Logging\FileSink.cs">
       <Link>Logging\FileSink.cs</Link>
     </Compile>
@@ -42,6 +45,9 @@
     </Compile>
     <Compile Include="..\OpenTelemetry.AutoInstrumentation\Logging\LogLevel.cs">
       <Link>Logging\LogLevel.cs</Link>
+    </Compile>
+    <Compile Include="..\OpenTelemetry.AutoInstrumentation\Logging\LogSink.cs">
+      <Link>Logging\LogSink.cs</Link>
     </Compile>
     <Compile Include="..\OpenTelemetry.AutoInstrumentation\Logging\NoopSink.cs">
       <Link>Logging\NoopSink.cs</Link>

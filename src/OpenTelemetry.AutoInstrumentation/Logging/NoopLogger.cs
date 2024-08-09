@@ -180,4 +180,8 @@ internal class NoopLogger : IOtelLogger
     public void Error(Exception exception, string messageTemplate, object[] args, bool writeToEventLog = true)
     {
     }
+
+    public void Dispose()
+    {
+    }
 }

@@ -181,6 +181,10 @@ internal class TestLogger : IOtelLogger
     {
     }
 
+    public void Dispose()
+    {
+    }
+
     internal class LogRecord
     {
         public LogRecord(LogLevel logLevel, string message, Exception? exception = null)
