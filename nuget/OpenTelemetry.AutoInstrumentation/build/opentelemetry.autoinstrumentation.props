@@ -5,8 +5,8 @@
 <ItemGroup>
   <Content Update="@(Content)">
     <Visible Condition="'%(NuGetItemType)' == 'Content' and '%(NuGetPackageId)' == 'opentelemetry.autoinstrumentation'">False</Visible>
-    <CopyToOutputDirectory Condition="'%(NuGetItemType)' == 'Content' and '%(NuGetPackageId)' == 'opentelemetry.autoinstrumentation'">Always</CopyToOutputDirectory>
-    <CopyToPublishDirectory Condition="'%(NuGetItemType)' == 'Content' and '%(NuGetPackageId)' == 'opentelemetry.autoinstrumentation'">Always</CopyToPublishDirectory>
+    <CopyToOutputDirectory Condition="'%(NuGetItemType)' == 'Content' and '%(NuGetPackageId)' == 'opentelemetry.autoinstrumentation'">PreserveNewest</CopyToOutputDirectory>
+    <CopyToPublishDirectory Condition="'%(NuGetItemType)' == 'Content' and '%(NuGetPackageId)' == 'opentelemetry.autoinstrumentation'">PreserveNewest</CopyToPublishDirectory>
   </Content>
 </ItemGroup>
 </Project>
