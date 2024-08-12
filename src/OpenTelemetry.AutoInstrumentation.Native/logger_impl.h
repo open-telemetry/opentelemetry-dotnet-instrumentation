@@ -35,6 +35,7 @@ class LoggerImpl : public Singleton<LoggerImpl<TLoggerPolicy>>
 private:
     std::shared_ptr<spdlog::logger> m_fileout;
     static std::string GetLogPath(const std::string& file_name_suffix);
+    static std::shared_ptr<spdlog::logger> CreateFileSink(std::string logger_name);
     LoggerImpl();
     ~LoggerImpl();
 
@@ -101,6 +102,38 @@ std::string LoggerImpl<TLoggerPolicy>::GetLogPath(const std::string& file_name_s
 }
 
 template <typename TLoggerPolicy>
+std::shared_ptr<spdlog::logger> LoggerImpl<TLoggerPolicy>::CreateFileSink(std::string logger_name)
+{
+    static auto current_process_name = ToString(GetCurrentProcessName());
+    static auto current_process_id   = GetPID();
+    static auto current_process_without_extension =
+        current_process_name.substr(0, current_process_name.find_last_of("."));
+
+    static auto file_name_suffix =
+        std::to_string(current_process_id) + "-" + current_process_without_extension + "-Native";
+
+    // by default, use the same size as on managed side: 10MiB
+    static auto file_size = GetConfiguredSize(environment::max_log_file_size, 10485760);
+
+    static std::shared_ptr<spdlog::logger> fileout;
+
+    try
+    {
+        fileout = spdlog::rotating_logger_mt(logger_name, GetLogPath(file_name_suffix), file_size, 10);
+    }
+    catch (...)
+    {
+        // By writing into the stderr was changing the behavior in a CI scenario.
+        // There's not a good way to report errors when trying to create the log file.
+        // But we never should be changing the normal behavior of an app.
+        // std::cerr << "LoggerImpl Handler: Error creating native log file." << std::endl;
+        fileout = spdlog::null_logger_mt(logger_name);
+    }
+
+    return fileout;
+}
+
+template <typename TLoggerPolicy>
 LoggerImpl<TLoggerPolicy>::LoggerImpl()
 {
     spdlog::set_error_handler([](const std::string& msg) {
@@ -146,29 +179,8 @@ LoggerImpl<TLoggerPolicy>::LoggerImpl()
     }
     else if (configured_log_sink == log_sink_file)
     {
-        static auto current_process_name = ToString(GetCurrentProcessName());
-        static auto current_process_id   = GetPID();
-        static auto current_process_without_extension =
-            current_process_name.substr(0, current_process_name.find_last_of("."));
-
-        static auto file_name_suffix =
-            std::to_string(current_process_id) + "-" + current_process_without_extension + "-Native";
-
-        // by default, use the same size as on managed side: 10MiB
-        static auto file_size = GetConfiguredSize(environment::max_log_file_size, 10485760);
-
-        try
-        {
-            m_fileout = spdlog::rotating_logger_mt(logger_name, GetLogPath(file_name_suffix), file_size, 10);
-        }
-        catch (...)
-        {
-            // By writing into the stderr was changing the behavior in a CI scenario.
-            // There's not a good way to report errors when trying to create the log file.
-            // But we never should be changing the normal behavior of an app.
-            // std::cerr << "LoggerImpl Handler: Error creating native log file." << std::endl;
-            m_fileout = spdlog::null_logger_mt(logger_name);
-        }
+        // Creates file sink, if file sink fails fallbacks to NoOp sink.
+        m_fileout = CreateFileSink(logger_name);
     }
     else if (configured_log_sink == log_sink_console)
     {
