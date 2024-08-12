@@ -135,41 +135,47 @@ internal static class OtelLogging
 
     private static ISink CreateSink(string suffix)
     {
-        if (_configuredLogSink == LogSink.NoOp)
+        // Uses ISink? here, sink creation can fail so we specify default fallback at the end.
+        var sink = _configuredLogSink switch
         {
-            return new NoopSink();
-        }
-        else if (_configuredLogSink == LogSink.File)
-        {
-            try
-            {
-                var logDirectory = GetLogDirectory();
-                if (logDirectory != null)
-                {
-                    var fileName = GetLogFileName(suffix);
-                    var logPath = Path.Combine(logDirectory, fileName);
+            LogSink.NoOp => new NoopSink(),
+            LogSink.Console => new ConsoleSink(suffix),
+            LogSink.File => CreateFileSink(suffix),
+            // default to null, then default value is specified only at the end.
+            _ => null,
+        };
 
-                    return new RollingFileSink(
-                        path: logPath,
-                        fileSizeLimitBytes: FileSizeLimitBytes,
-                        retainedFileCountLimit: 10,
-                        rollingInterval: RollingInterval.Day,
-                        rollOnFileSizeLimit: true,
-                        retainedFileTimeLimit: null);
-                }
-            }
-            catch (Exception)
+        return sink ??
+            // Default to NoopSink
+            new NoopSink();
+    }
+
+    private static ISink? CreateFileSink(string suffix)
+    {
+        try
+        {
+            var logDirectory = GetLogDirectory();
+            if (logDirectory != null)
             {
-                // unable to configure logging to a file
+                var fileName = GetLogFileName(suffix);
+                var logPath = Path.Combine(logDirectory, fileName);
+
+                return new RollingFileSink(
+                    path: logPath,
+                    fileSizeLimitBytes: FileSizeLimitBytes,
+                    retainedFileCountLimit: 10,
+                    rollingInterval: RollingInterval.Day,
+                    rollOnFileSizeLimit: true,
+                    retainedFileTimeLimit: null);
             }
         }
-        else if (_configuredLogSink == LogSink.Console)
+        catch (Exception)
         {
-            return new ConsoleSink(suffix);
+            // unable to configure logging to a file
         }
 
-        // Default to NoopSink
-        return new NoopSink();
+        // Could not create file sink
+        return null;
     }
 
     private static string GetLogFileName(string suffix)
