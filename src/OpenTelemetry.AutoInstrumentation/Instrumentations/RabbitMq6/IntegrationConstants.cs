@@ -8,8 +8,8 @@ internal static class IntegrationConstants
     public const string RabbitMqByteCodeIntegrationName = "RabbitMq";
     public const string RabbitMqAssemblyName = "RabbitMQ.Client";
     public const string ModelBaseTypeName = "RabbitMQ.Client.Impl.ModelBase";
-    public const string EventingBasicConsumerTypeName = "RabbitMQ.Client.Events.EventingBasicConsumer";
-    public const string AsyncEventingBasicConsumerTypeName = "RabbitMQ.Client.Events.AsyncEventingBasicConsumer";
+    public const string DefaultBasicConsumerTypeName = "RabbitMQ.Client.DefaultBasicConsumer";
+    public const string AsyncDefaultBasicConsumerTypeName = "RabbitMQ.Client.AsyncDefaultBasicConsumer";
     public const string ModelGeneratedTypeName = "RabbitMQ.Client.Framing.Impl.Model";
     public const string BasicGetResultTypeName = "RabbitMQ.Client.BasicGetResult";
     public const string BasicPropertiesInterfaceTypeName = "RabbitMQ.Client.IBasicProperties";
