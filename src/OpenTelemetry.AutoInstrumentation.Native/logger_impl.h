@@ -53,8 +53,6 @@ private:
 
     bool ShouldLog(spdlog::level::level_enum log_level);
 
-    WSTRING GetLogSinkConfiguration();
-
 public:
     template <typename... Args>
     void Debug(const Args&... args);
@@ -171,20 +169,22 @@ LoggerImpl<TLoggerPolicy>::LoggerImpl()
 
     spdlog::flush_every(std::chrono::seconds(3));
 
-    static auto configured_log_sink = GetLogSinkConfiguration();
+    static auto configured_log_sink = GetEnvironmentValue(environment::log_sink);
 
     if (configured_log_sink == log_sink_none)
     {
         m_fileout = spdlog::null_logger_mt(logger_name);
-    }
-    else if (configured_log_sink == log_sink_file)
-    {
-        // Creates file sink, if file sink fails fallbacks to NoOp sink.
-        m_fileout = CreateFileSink(logger_name);
+        return;
     }
     else if (configured_log_sink == log_sink_console)
     {
         m_fileout = spdlog::stdout_logger_mt(logger_name);
+    }
+    // Default to file sink
+    else
+    {
+        // Creates file sink, if file sink creation fails fallbacks to NoOp sink.
+        m_fileout = CreateFileSink(logger_name);
     }
 
     m_fileout->set_level(log_level);
@@ -295,20 +295,6 @@ template <typename TLoggerPolicy>
 bool LoggerImpl<TLoggerPolicy>::IsDebugEnabled() const
 {
     return m_fileout->level() == spdlog::level::debug;
-}
-
-template <typename TLoggerPolicy>
-WSTRING LoggerImpl<TLoggerPolicy>::GetLogSinkConfiguration()
-{
-    static auto configured_log_sink = GetEnvironmentValue(environment::log_sink);
-
-    if (configured_log_sink == EmptyWStr)
-    {
-        // default to file sink
-        return log_sink_file;
-    }
-
-    return configured_log_sink;
 }
 
 } // namespace trace
