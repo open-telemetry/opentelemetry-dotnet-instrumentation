@@ -32,6 +32,8 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
   - `OTEL_EXPORTER_OTLP_LOGS_PROTOCOL`.
 - Support for air-gapped installations through `DOWNLOAD_DIR` or `LOCAL_PATH`
   arguments to `otel-dotnet-auto-install.sh`.
+- Added `OTEL_DOTNET_AUTO_LOGGER` to select preferred sink for AutoInstrumentation
+  diagnostic logs.
 
 ### Changed
 
