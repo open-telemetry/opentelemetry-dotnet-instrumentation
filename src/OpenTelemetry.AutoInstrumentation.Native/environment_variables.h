@@ -14,6 +14,9 @@ namespace environment {
 // Sets logging level used by autoinstrumentation loggers
 const WSTRING log_level = WStr("OTEL_LOG_LEVEL");
 
+// Sets logger used by autoinstrumentation
+const WSTRING log_sink = WStr("OTEL_DOTNET_AUTO_LOGGER");
+
 // Sets max size of a single log file
 const WSTRING max_log_file_size = WStr("OTEL_DOTNET_AUTO_LOG_FILE_SIZE");
 
