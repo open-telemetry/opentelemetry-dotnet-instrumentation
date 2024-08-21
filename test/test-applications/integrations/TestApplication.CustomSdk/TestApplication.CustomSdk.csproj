@@ -6,13 +6,14 @@
     <TargetFrameworks Condition=" '$(IsCentos)' == '' ">net8.0;$(TargetFrameworks)</TargetFrameworks>
   </PropertyGroup>
   <ItemGroup>
+    <PackageReference Include="Grpc.Net.Client" />
     <PackageReference Include="OpenTelemetry" />
     <PackageReference Include="OpenTelemetry.Api" />
     <PackageReference Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" />
     <PackageReference Include="OpenTelemetry.Exporter.Console" />
     <PackageReference Include="StackExchange.Redis" />
-    <PackageReference Include="NServiceBus" Condition=" '$(TargetFramework)' == 'net8.0' "/>
-    <PackageReference Include="NServiceBus" VersionOverride="8.2.0" Condition=" '$(TargetFramework)' != 'net8.0' "/>
+    <PackageReference Include="NServiceBus" Condition=" '$(TargetFramework)' == 'net8.0' " />
+    <PackageReference Include="NServiceBus" VersionOverride="8.2.0" Condition=" '$(TargetFramework)' != 'net8.0' " />
   </ItemGroup>
 
   <ItemGroup>

@@ -2,6 +2,7 @@
   <Import Project="..\Directory.Packages.props" />
   <!-- Versions from Directory.Build.props in the same folder -->
   <ItemGroup>
+    <PackageVersion Include="Grpc.Net.Client" Version="2.65.0" />
     <PackageVersion Include="Microsoft.CodeAnalysis.PublicApiAnalyzers" Version="3.3.4" />
     <PackageVersion Include="Microsoft.NETFramework.ReferenceAssemblies" Version="1.0.3" />
   </ItemGroup>

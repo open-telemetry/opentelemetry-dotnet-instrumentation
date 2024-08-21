@@ -19,6 +19,7 @@
     <!-- Dependencies below are shipped on the distribution folder, but not included in the NuGet package. -->
     <!-- If necessary these packages are flagged by custom build tasks and manually added to the targeted  -->
     <!-- projects that are using the NuGet package. -->
+    <PackageReference Include="Grpc.Net.Client" />
     <PackageReference Include="MongoDB.Driver.Core.Extensions.DiagnosticSources" />
     <PackageReference Include="OpenTelemetry.Instrumentation.StackExchangeRedis" Condition=" '$(TargetFramework)' == 'net6.0' " />
   </ItemGroup>
