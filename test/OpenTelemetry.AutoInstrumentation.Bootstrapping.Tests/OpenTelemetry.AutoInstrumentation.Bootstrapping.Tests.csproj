@@ -4,4 +4,8 @@
     <ProjectReference Include="..\..\src\OpenTelemetry.AutoInstrumentation\OpenTelemetry.AutoInstrumentation.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <PackageReference Include="Newtonsoft.Json" />
+  </ItemGroup>
+
 </Project>
