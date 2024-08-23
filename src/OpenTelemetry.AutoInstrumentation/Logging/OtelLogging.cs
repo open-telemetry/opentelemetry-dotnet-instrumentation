@@ -14,12 +14,14 @@ internal static class OtelLogging
     private const string OtelDotnetAutoLogDirectory = "OTEL_DOTNET_AUTO_LOG_DIRECTORY";
     private const string OtelLogLevel = "OTEL_LOG_LEVEL";
     private const string OtelDotnetAutoLogFileSize = "OTEL_DOTNET_AUTO_LOG_FILE_SIZE";
+    private const string OtelDotnetAutoLogger = "OTEL_DOTNET_AUTO_LOGGER";
     private const string NixDefaultDirectory = "/var/log/opentelemetry/dotnet";
 
     private static readonly long FileSizeLimitBytes = GetConfiguredFileSizeLimitBytes();
-    private static readonly LogLevel? ConfiguredLogLevel = GetConfiguredLogLevel();
-
     private static readonly ConcurrentDictionary<string, IOtelLogger> OtelLoggers = new();
+
+    private static LogLevel? _configuredLogLevel = GetConfiguredLogLevel();
+    private static LogSink _configuredLogSink = GetConfiguredLogSink();
 
     /// <summary>
     /// Returns Logger implementation.
@@ -39,6 +41,13 @@ internal static class OtelLogging
     public static IOtelLogger GetLogger(string suffix)
     {
         return OtelLoggers.GetOrAdd(suffix, CreateLogger);
+    }
+
+    // Helper method for testing
+    internal static void Reset()
+    {
+        _configuredLogLevel = GetConfiguredLogLevel();
+        _configuredLogSink = GetConfiguredLogSink();
     }
 
     internal static LogLevel? GetConfiguredLogLevel()
@@ -66,6 +75,31 @@ internal static class OtelLogging
         return logLevel;
     }
 
+    internal static LogSink GetConfiguredLogSink()
+    {
+        // Use File as a default sink
+        var logSink = LogSink.File;
+
+        try
+        {
+            var configuredValue = Environment.GetEnvironmentVariable(OtelDotnetAutoLogger) ?? string.Empty;
+
+            logSink = configuredValue switch
+            {
+                Constants.ConfigurationValues.Loggers.File => LogSink.File,
+                Constants.ConfigurationValues.Loggers.Console => LogSink.Console,
+                Constants.ConfigurationValues.None => LogSink.NoOp,
+                _ => logSink
+            };
+        }
+        catch (Exception)
+        {
+            // theoretically, can happen when process has no privileges to check env
+        }
+
+        return logSink;
+    }
+
     internal static long GetConfiguredFileSizeLimitBytes()
     {
         const long defaultFileSizeLimitBytes = 10 * 1024 * 1024;
@@ -89,13 +123,35 @@ internal static class OtelLogging
 
     private static IOtelLogger CreateLogger(string suffix)
     {
-        ISink? sink = null;
-
-        if (!ConfiguredLogLevel.HasValue)
+        if (!_configuredLogLevel.HasValue)
         {
             return NoopLogger.Instance;
         }
 
+        var sink = CreateSink(suffix);
+
+        return new InternalLogger(sink, _configuredLogLevel.Value);
+    }
+
+    private static ISink CreateSink(string suffix)
+    {
+        // Uses ISink? here, sink creation can fail so we specify default fallback at the end.
+        var sink = _configuredLogSink switch
+        {
+            LogSink.NoOp => new NoopSink(),
+            LogSink.Console => new ConsoleSink(suffix),
+            LogSink.File => CreateFileSink(suffix),
+            // default to null, then default value is specified only at the end.
+            _ => null,
+        };
+
+        return sink ??
+            // Default to NoopSink
+            new NoopSink();
+    }
+
+    private static ISink? CreateFileSink(string suffix)
+    {
         try
         {
             var logDirectory = GetLogDirectory();
@@ -103,7 +159,8 @@ internal static class OtelLogging
             {
                 var fileName = GetLogFileName(suffix);
                 var logPath = Path.Combine(logDirectory, fileName);
-                sink = new RollingFileSink(
+
+                return new RollingFileSink(
                     path: logPath,
                     fileSizeLimitBytes: FileSizeLimitBytes,
                     retainedFileCountLimit: 10,
@@ -117,9 +174,8 @@ internal static class OtelLogging
             // unable to configure logging to a file
         }
 
-        sink ??= new NoopSink();
-
-        return new InternalLogger(sink, ConfiguredLogLevel.Value);
+        // Could not create file sink
+        return null;
     }
 
     private static string GetLogFileName(string suffix)

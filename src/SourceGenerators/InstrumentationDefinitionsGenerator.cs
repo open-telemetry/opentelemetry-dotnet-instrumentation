@@ -17,6 +17,8 @@ namespace SourceGenerators;
 public class InstrumentationDefinitionsGenerator : IIncrementalGenerator
 {
     private const string InstrumentMethodAttributeName = "OpenTelemetry.AutoInstrumentation.Instrumentations.InstrumentMethodAttribute";
+    private const int IntegrationKindDirect = 0;
+    private const int IntegrationKindDerived = 1;
 
     /// <inheritdoc />
     public void Initialize(IncrementalGeneratorInitializationContext context)
@@ -41,8 +43,11 @@ public class InstrumentationDefinitionsGenerator : IIncrementalGenerator
             return;
         }
 
-        var result = GenerateInstrumentationDefinitionsPartialClass(instrumentationClasses);
-        context.AddSource("InstrumentationDefinitions.g.cs", SourceText.From(result, Encoding.UTF8));
+        var directIntegrations = GenerateInstrumentationDefinitionsPartialClass(instrumentationClasses, IntegrationKindDirect);
+        context.AddSource("InstrumentationDefinitions.g.cs", SourceText.From(directIntegrations, Encoding.UTF8));
+
+        var derivedIntegrations = GenerateInstrumentationDefinitionsPartialClass(instrumentationClasses, IntegrationKindDerived);
+        context.AddSource("InstrumentationDefinitions.Derived.g.cs", SourceText.From(derivedIntegrations, Encoding.UTF8));
     }
 
     private static TargetToGenerate CreateTargetToGenerate(AttributeData attribute)
@@ -60,6 +65,7 @@ public class InstrumentationDefinitionsGenerator : IIncrementalGenerator
         }
 
         var signalType = int.Parse(attribute.ConstructorArguments[8].Value!.ToString());
+        var integrationKind = int.Parse(attribute.ConstructorArguments[9].Value!.ToString());
         var integrationName = attribute.ConstructorArguments[7].Value!.ToString();
         var targetAssembly = attribute.ConstructorArguments[0].Value!.ToString();
         var targetType = attribute.ConstructorArguments[1].Value!.ToString();
@@ -76,10 +82,11 @@ public class InstrumentationDefinitionsGenerator : IIncrementalGenerator
         var targetMaximumMinor = maxVersion.Length > 1 && maxVersion[1] != "*" ? int.Parse(maxVersion[1]) : ushort.MaxValue;
         var targetMaximumPatch = maxVersion.Length > 2 && maxVersion[2] != "*" ? int.Parse(maxVersion[2]) : ushort.MaxValue;
 
-        return new TargetToGenerate(signalType, integrationName, targetAssembly, targetType, targetMethod, targetMinimumMajor, targetMinimumMinor, targetMinimumPatch, targetMaximumMajor, targetMaximumMinor, targetMaximumPatch, targetSignatureTypesBuilder.ToString());
+        return new TargetToGenerate(signalType, integrationName, targetAssembly, targetType, targetMethod, targetMinimumMajor, targetMinimumMinor, targetMinimumPatch, targetMaximumMajor, targetMaximumMinor, targetMaximumPatch, targetSignatureTypesBuilder.ToString(), integrationKind);
     }
 
-    private static string GenerateInstrumentationDefinitionsPartialClass(ImmutableArray<IntegrationToGenerate?> integrationClasses)
+    private static string GenerateInstrumentationDefinitionsPartialClass(
+        ImmutableArray<IntegrationToGenerate?> integrationClasses, int integrationKind)
     {
         var tracesByIntegrationName = new Dictionary<string, List<(string IntegrationType, TargetToGenerate Target)>>();
         var logsByIntegrationName = new Dictionary<string, List<(string IntegrationType, TargetToGenerate Target)>>();
@@ -89,7 +96,7 @@ public class InstrumentationDefinitionsGenerator : IIncrementalGenerator
 
         foreach (var integrationToGenerate in integrationClasses)
         {
-            foreach (var targetToGenerate in integrationToGenerate!.Value.Targets)
+            foreach (var targetToGenerate in integrationToGenerate!.Value.Targets.Where(t => t.IntegrationKind == integrationKind))
             {
                 Dictionary<string, List<(string IntegrationType, TargetToGenerate Target)>> byName;
                 switch (targetToGenerate.SignalType)
@@ -125,6 +132,8 @@ public class InstrumentationDefinitionsGenerator : IIncrementalGenerator
             }
         }
 
+        var generatedMethodName = integrationKind == IntegrationKindDirect ? "GetDefinitionsArray" : "GetDerivedDefinitionsArray";
+
         var sb = new StringBuilder()
             .AppendFormat(
                 @"//------------------------------------------------------------------------------
@@ -144,11 +153,10 @@ namespace OpenTelemetry.AutoInstrumentation;
 
 internal static partial class InstrumentationDefinitions
 {{
-    private static readonly string AssemblyFullName = typeof(InstrumentationDefinitions).Assembly.FullName!;
-
-    private static NativeCallTargetDefinition[] GetDefinitionsArray()
+    private static NativeCallTargetDefinition[] {0}()
     {{
-        var nativeCallTargetDefinitions = new List<NativeCallTargetDefinition>({0});",
+        var nativeCallTargetDefinitions = new List<NativeCallTargetDefinition>({1});",
+                generatedMethodName,
                 instrumentationCount)
             .AppendLine();
 
