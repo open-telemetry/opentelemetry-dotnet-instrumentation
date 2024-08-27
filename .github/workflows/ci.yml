@@ -32,14 +32,14 @@ jobs:
       fail-fast: false
       matrix:
         test-tfm: [ net8.0, net7.0, net6.0, net462 ]
-        machine: [ windows-2022, ubuntu-20.04, macos-12, actuated-arm64-4cpu-8gb ]
+        machine: [ windows-2022, ubuntu-20.04, macos-12, otel-linux-arm64 ]
         exclude:
           - test-tfm: net462
             machine: macos-12
           - test-tfm: net462
             machine: ubuntu-20.04
           - test-tfm: net462
-            machine: actuated-arm64-4cpu-8gb
+            machine: otel-linux-arm64
         include:
           - machine: windows-2022
             containers: none
@@ -47,7 +47,7 @@ jobs:
             containers: linux
           - machine: macos-12
             containers: none
-          - machine: actuated-arm64-4cpu-8gb
+          - machine: otel-linux-arm64
             containers: linux
     runs-on: ${{ matrix.machine }}
     steps:
@@ -58,7 +58,7 @@ jobs:
           fetch-depth: 0 # fetching all, needed to correctly calculate version
 
       - name: Setup ARM64 Environment Variables
-        if: ${{ matrix.machine == 'actuated-arm64-4cpu-8gb' }}
+        if: ${{ matrix.machine == 'otel-linux-arm64' }}
         run: |
           echo "DOTNET_INSTALL_DIR=~/.dotnet" >> $GITHUB_ENV
 
@@ -90,7 +90,7 @@ jobs:
           install: localdb
       
       - name: Setup ARM64 Machine
-        if: ${{ matrix.machine == 'actuated-arm64-4cpu-8gb' }}
+        if: ${{ matrix.machine == 'otel-linux-arm64' }}
         run: |
           sudo apt-get update && \
           sudo apt-get install -y \
@@ -219,13 +219,13 @@ jobs:
             base-image: debian
             build-source: ubuntu-20.04
             os-type: linux-glibc
-          - machine: actuated-arm64-4cpu-8gb
+          - machine: otel-linux-arm64
             base-image: alpine
             build-source: alpine-arm64
             os-type: linux-musl
-          - machine: actuated-arm64-4cpu-8gb
+          - machine: otel-linux-arm64
             base-image: debian-arm64
-            build-source: actuated-arm64-4cpu-8gb
+            build-source: otel-linux-arm64
             os-type: linux-glibc
     runs-on: ${{ matrix.machine }}
     timeout-minutes: 60
@@ -258,7 +258,7 @@ jobs:
           - machine: ubuntu-20.04
           - machine: macos-12
           - machine: windows-2022
-          - machine: actuated-arm64-4cpu-8gb
+          - machine: otel-linux-arm64
     runs-on: ${{ matrix.machine }}
     steps:
       
@@ -268,7 +268,7 @@ jobs:
           fetch-depth: 0 # fetching all, needed to correctly calculate version
 
       - name: Setup ARM64 Environment Variables
-        if: ${{ matrix.machine == 'actuated-arm64-4cpu-8gb' }}
+        if: ${{ matrix.machine == 'otel-linux-arm64' }}
         run: |
           echo "DOTNET_INSTALL_DIR=~/.dotnet" >> $GITHUB_ENV
 
