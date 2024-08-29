@@ -173,6 +173,14 @@ partial class Build
                     .SetProjectFile(packagesTestApplicationProject)
                     .SetProperty("NuGetPackageVersion", VersionHelper.GetVersion())
                     .SetRuntime(MapToNet8RuntimeIdentifiers(RuntimeInformation.RuntimeIdentifier))
+                    .SetSelfContained(true)
+                    .SetConfiguration(BuildConfiguration)
+                    .SetPlatform(Platform));
+
+                // Build framework-dependent without specifying runtime identifier
+                DotNetBuild(s => s
+                    .SetProjectFile(packagesTestApplicationProject)
+                    .SetProperty("NuGetPackageVersion", VersionHelper.GetVersion())
                     .SetConfiguration(BuildConfiguration)
                     .SetPlatform(Platform));
             }
