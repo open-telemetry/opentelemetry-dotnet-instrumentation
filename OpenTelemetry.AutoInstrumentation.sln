@@ -183,7 +183,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "nuget-packages", "nuget-pac
 		test\test-applications\nuget-packages\Directory.Packages.props = test\test-applications\nuget-packages\Directory.Packages.props
 	EndProjectSection
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestApplication.SelfContained", "test\test-applications\nuget-packages\TestApplication.SelfContained\TestApplication.SelfContained.csproj", "{25ED93D0-A70C-4A07-84D9-EF94115259C9}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestApplication.NugetSample", "test\test-applications\nuget-packages\TestApplication.NugetSample\TestApplication.NugetSample.csproj", "{25ED93D0-A70C-4A07-84D9-EF94115259C9}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestApplication.EntityFrameworkCore.Pomelo.MySql", "test\test-applications\integrations\TestApplication.EntityFrameworkCore.Pomelo.MySql\TestApplication.EntityFrameworkCore.Pomelo.MySql.csproj", "{1D7E11AA-27B6-4863-B5EC-1F0ECC6979B2}"
 EndProject
