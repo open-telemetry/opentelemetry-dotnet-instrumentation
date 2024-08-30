@@ -1,9 +1,11 @@
 // Copyright The OpenTelemetry Authors
 // SPDX-License-Identifier: Apache-2.0
 
+#if NET6_0_OR_GREATER
+
 using System.Text;
 
-namespace TestApplication.ContinuousProfiler;
+namespace OpenTelemetry.AutoInstrumentation.ContinuousProfiler;
 
 /// <summary>
 /// Parser the native code's pause-time-optimized format.
@@ -304,3 +306,4 @@ internal static class SampleNativeFormatParser
         public const byte AllocationSample = 0x08;
     }
 }
+#endif
