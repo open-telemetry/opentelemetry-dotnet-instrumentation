@@ -56,7 +56,7 @@ void CorProfiler::InitNetFxAssemblyRedirectsMap()
         { L"OpenTelemetry.Instrumentation.Wcf", {1, 0, 0, 47} },
         { L"OpenTelemetry.Resources.Azure", {1, 0, 0, 52} },
         { L"OpenTelemetry.Resources.Host", {0, 1, 0, 53} },
-        { L"OpenTelemetry.Resources.OperatingSystem", {0, 1, 0, 95} },
+        { L"OpenTelemetry.Resources.OperatingSystem", {0, 1, 0, 140} },
         { L"OpenTelemetry.Resources.Process", {0, 1, 0, 55} },
         { L"OpenTelemetry.Resources.ProcessRuntime", {0, 1, 0, 56} },
         { L"OpenTelemetry.Shims.OpenTracing", {1, 0, 0, 0} },
