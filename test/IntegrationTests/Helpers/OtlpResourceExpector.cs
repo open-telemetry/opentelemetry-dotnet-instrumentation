@@ -31,6 +31,20 @@ public class OtlpResourceExpector : IDisposable
         }
     }
 
+    public void Exist(string key)
+    {
+        if (_resourceAttributes == null)
+        {
+            throw new InvalidOperationException("No resource attributes have been collected.");
+        }
+
+        var keyExists = _resourceAttributes.Any(attr => attr.Key == key);
+        if (!keyExists)
+        {
+            throw new KeyNotFoundException($"Key \"{key}\" was not found in the collected resource attributes.");
+        }
+    }
+
     public void Expect(string key, string value)
     {
         _resourceExpectations.Add(new ResourceExpectation(key, value));
