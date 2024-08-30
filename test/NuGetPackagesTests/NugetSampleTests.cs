@@ -64,7 +64,16 @@ public sealed class NugetSampleTests : TestHelper
 
         if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
         {
-            return "linux-x64";
+            var processArchitecture = RuntimeInformation.ProcessArchitecture;
+            switch (processArchitecture)
+            {
+                case Architecture.X64:
+                    return "linux-x64";
+                case Architecture.Arm64:
+                    return "linux-arm64";
+                default:
+                    throw new NotSupportedException($"{processArchitecture} is not supported.");
+            }
         }
 
         if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
