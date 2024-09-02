@@ -12,6 +12,7 @@ namespace IntegrationTests.Helpers;
 public class OtlpResourceExpector : IDisposable
 {
     private readonly List<ResourceExpectation> _resourceExpectations = new();
+    private readonly List<string> _existenceChecks = new();
 
     private readonly ManualResetEvent _resourceAttributesEvent = new(false); // synchronizes access to _resourceAttributes
     private RepeatedField<KeyValue>? _resourceAttributes; // protobuf type
@@ -33,16 +34,7 @@ public class OtlpResourceExpector : IDisposable
 
     public void Exist(string key)
     {
-        if (_resourceAttributes == null)
-        {
-            throw new InvalidOperationException("No resource attributes have been collected.");
-        }
-
-        var keyExists = _resourceAttributes.Any(attr => attr.Key == key);
-        if (!keyExists)
-        {
-            throw new KeyNotFoundException($"Key \"{key}\" was not found in the collected resource attributes.");
-        }
+        _existenceChecks.Add(key);
     }
 
     public void Expect(string key, string value)
@@ -57,7 +49,7 @@ public class OtlpResourceExpector : IDisposable
 
     public void AssertExpectations(TimeSpan? timeout = null)
     {
-        if (_resourceExpectations.Count == 0)
+        if (_resourceExpectations.Count == 0 && _existenceChecks.Count == 0)
         {
             throw new InvalidOperationException("Expectations were not set");
         }
@@ -72,12 +64,37 @@ public class OtlpResourceExpector : IDisposable
                 return;
             }
 
+            CheckExistence(_existenceChecks, _resourceAttributes);
             AssertResource(_resourceExpectations, _resourceAttributes);
         }
         catch (ArgumentOutOfRangeException)
         {
             // WaitOne called with non-positive value
             FailResource(_resourceExpectations, null);
+        }
+    }
+
+    private static void CheckExistence(List<string> existenceChecks, RepeatedField<KeyValue>? actualResourceAttributes)
+    {
+        var message = new StringBuilder();
+
+        if (actualResourceAttributes == null)
+        {
+            Assert.Fail("No resource attributes have been collected");
+        }
+
+        foreach (var key in existenceChecks)
+        {
+            var keyExists = actualResourceAttributes.Any(attr => attr.Key == key);
+            if (!keyExists)
+            {
+                message.AppendLine($"Resource attribute \"{key}\" was not found");
+            }
+        }
+
+        if (message.Length > 0)
+        {
+            Assert.Fail(message.ToString());
         }
     }
 

@@ -602,6 +602,7 @@ public class SmokeTests : TestHelper
 
         resourceExpector.Expect("process.pid", processId);
         resourceExpector.Expect("host.name", Environment.MachineName);
+
 #if NETFRAMEWORK
         resourceExpector.Expect("process.runtime.name", ".NET Framework");
 #else
