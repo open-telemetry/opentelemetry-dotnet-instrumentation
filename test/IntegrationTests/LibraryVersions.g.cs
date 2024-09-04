@@ -119,7 +119,7 @@ public static partial class LibraryVersion
             theoryData.Add(string.Empty);
 #else
             theoryData.Add("8.0.0");
-            theoryData.Add("8.2.3");
+            theoryData.Add("8.2.5");
 #endif
             return theoryData;
         }
