@@ -22,7 +22,7 @@ public static partial class LibraryVersion
             theoryData.Add(string.Empty);
 #else
             theoryData.Add("12.13.0");
-            theoryData.Add("12.20.0");
+            theoryData.Add("12.21.2");
 #endif
             return theoryData;
         }
@@ -37,7 +37,7 @@ public static partial class LibraryVersion
 #else
             theoryData.Add("8.0.0");
             theoryData.Add("8.10.0");
-            theoryData.Add("8.14.4");
+            theoryData.Add("8.15.5");
 #endif
             return theoryData;
         }
@@ -50,13 +50,13 @@ public static partial class LibraryVersion
 #if DEFAULT_TEST_PACKAGE_VERSIONS
             theoryData.Add(string.Empty);
 #else
-            theoryData.Add("6.0.27");
+            theoryData.Add("6.0.33");
             theoryData.Add("7.0.20");
 #if NET8_0
             theoryData.Add("8.0.2");
 #endif
 #if NET8_0
-            theoryData.Add("8.0.6");
+            theoryData.Add("8.0.8");
 #endif
 #endif
             return theoryData;
@@ -119,7 +119,7 @@ public static partial class LibraryVersion
             theoryData.Add(string.Empty);
 #else
             theoryData.Add("8.0.0");
-            theoryData.Add("8.2.3");
+            theoryData.Add("8.2.5");
 #endif
             return theoryData;
         }
@@ -135,7 +135,7 @@ public static partial class LibraryVersion
             theoryData.Add("2.1.7");
             theoryData.Add("3.1.5");
             theoryData.Add("4.0.5");
-            theoryData.Add("5.2.1");
+            theoryData.Add("5.2.2");
 #endif
             return theoryData;
         }
@@ -262,7 +262,7 @@ public static partial class LibraryVersion
             theoryData.Add(string.Empty);
 #else
             theoryData.Add("3.4.0");
-            theoryData.Add("3.10.0");
+            theoryData.Add("3.13.0");
 #endif
             return theoryData;
         }
@@ -276,7 +276,7 @@ public static partial class LibraryVersion
             theoryData.Add(string.Empty);
 #else
             theoryData.Add("2.6.122");
-            theoryData.Add("2.8.0");
+            theoryData.Add("2.8.12");
 #endif
             return theoryData;
         }
@@ -305,7 +305,7 @@ public static partial class LibraryVersion
 #else
             theoryData.Add("1.6.2");
             theoryData.Add("1.8.2");
-            theoryData.Add("2.4.0");
+            theoryData.Add("2.5.3");
 #endif
             return theoryData;
         }
