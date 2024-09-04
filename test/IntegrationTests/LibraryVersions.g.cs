@@ -161,8 +161,7 @@ public static partial class LibraryVersion
 #if DEFAULT_TEST_PACKAGE_VERSIONS
             theoryData.Add(string.Empty);
 #else
-            theoryData.Add("2.19.0");
-            theoryData.Add("2.27.0");
+            theoryData.Add("2.28.0");
 #endif
             return theoryData;
         }

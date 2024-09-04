@@ -17,7 +17,7 @@ namespace OpenTelemetry.AutoInstrumentation.Instrumentations.MongoDB;
     methodName: ".ctor",
     returnTypeName: ClrNames.Void,
     parameterTypeNames: new[] { "MongoDB.Driver.MongoClientSettings" },
-    minimumVersion: "2.13.3",
+    minimumVersion: "2.28.0",
     maximumVersion: "2.65535.65535",
     integrationName: "MongoDB",
     type: InstrumentationType.Trace)]
