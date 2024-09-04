@@ -14,7 +14,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <!-- DnsClient is required by MongoDB.Driver.Core.Extensions.DiagnosticSources. -->
+    <!-- MongoDB.Driver.Core is required by MongoDB.Driver.Core.Extensions.DiagnosticSources. -->
     <PackageReference Include="MongoDB.Driver.Core" ExcludeAssets="all" />
     <!-- DnsClient is tranistive dependency required by MongoDB.Driver.Core.Extensions.DiagnosticSources. -->
     <PackageReference Include="DnsClient" ExcludeAssets="all" />
