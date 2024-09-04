@@ -3,7 +3,7 @@
   <ItemGroup>
     <PackageVersion Include="Azure.Storage.Blobs" Version="12.21.2" />
     <PackageVersion Include="Elastic.Clients.Elasticsearch" Version="8.14.4" />
-    <PackageVersion Include="Confluent.Kafka" Version="2.4.0" />
+    <PackageVersion Include="Confluent.Kafka" Version="2.5.3" />
     <PackageVersion Include="FluentAssertions" Version="6.12.0" />
     <PackageVersion Include="Google.Protobuf" Version="3.27.2" />
     <PackageVersion Include="GraphQL" Version="7.8.0" />

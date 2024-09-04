@@ -305,7 +305,7 @@ public static partial class LibraryVersion
 #else
             theoryData.Add("1.6.2");
             theoryData.Add("1.8.2");
-            theoryData.Add("2.4.0");
+            theoryData.Add("2.5.3");
 #endif
             return theoryData;
         }
