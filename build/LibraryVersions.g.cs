@@ -83,7 +83,7 @@ public static partial class LibraryVersion
                 new("2.1.7"),
                 new("3.1.5"),
                 new("4.0.5"),
-                new("5.2.1"),
+                new("5.2.2"),
             }
         },
         {
