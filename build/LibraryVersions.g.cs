@@ -20,7 +20,7 @@ public static partial class LibraryVersion
             new List<PackageBuildInfo>
             {
                 new("12.13.0"),
-                new("12.20.0"),
+                new("12.21.2"),
             }
         },
         {
@@ -29,17 +29,17 @@ public static partial class LibraryVersion
             {
                 new("8.0.0"),
                 new("8.10.0"),
-                new("8.14.4"),
+                new("8.15.5"),
             }
         },
         {
             "TestApplication.EntityFrameworkCore",
             new List<PackageBuildInfo>
             {
-                new("6.0.27"),
+                new("6.0.33"),
                 new("7.0.20"),
                 new("8.0.2", supportedFrameworks: new string[] {"net8.0"}),
-                new("8.0.6", supportedFrameworks: new string[] {"net8.0"}),
+                new("8.0.8", supportedFrameworks: new string[] {"net8.0"}),
             }
         },
         {
@@ -73,7 +73,7 @@ public static partial class LibraryVersion
             new List<PackageBuildInfo>
             {
                 new("8.0.0"),
-                new("8.2.3"),
+                new("8.2.5"),
             }
         },
         {
@@ -83,7 +83,7 @@ public static partial class LibraryVersion
                 new("2.1.7"),
                 new("3.1.5"),
                 new("4.0.5"),
-                new("5.2.1"),
+                new("5.2.2"),
             }
         },
         {
@@ -152,7 +152,7 @@ public static partial class LibraryVersion
             new List<PackageBuildInfo>
             {
                 new("3.4.0"),
-                new("3.10.0"),
+                new("3.13.0"),
             }
         },
         {
@@ -160,7 +160,7 @@ public static partial class LibraryVersion
             new List<PackageBuildInfo>
             {
                 new("2.6.122"),
-                new("2.8.0"),
+                new("2.8.12"),
             }
         },
         {
@@ -178,7 +178,7 @@ public static partial class LibraryVersion
                 new("1.4.0", supportedPlatforms: new string[] {"x64"}),
                 new("1.6.2"),
                 new("1.8.2"),
-                new("2.4.0"),
+                new("2.5.3"),
             }
         },
         {
