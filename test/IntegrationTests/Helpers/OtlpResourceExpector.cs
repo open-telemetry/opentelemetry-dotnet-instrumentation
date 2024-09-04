@@ -64,37 +64,33 @@ public class OtlpResourceExpector : IDisposable
                 return;
             }
 
-            CheckExistence(_existenceChecks, _resourceAttributes);
+            if (_resourceAttributes == null)
+            {
+                Assert.Fail("No resource attributes have been collected");
+            }
+
+            var message = new StringBuilder();
+
+            foreach (var key in _existenceChecks)
+            {
+                var keyExists = _resourceAttributes.Any(attr => attr.Key == key);
+                if (!keyExists)
+                {
+                    message.AppendLine($"Resource attribute \"{key}\" was not found");
+                }
+            }
+
+            if (message.Length > 0)
+            {
+                Assert.Fail(message.ToString());
+            }
+
             AssertResource(_resourceExpectations, _resourceAttributes);
         }
         catch (ArgumentOutOfRangeException)
         {
             // WaitOne called with non-positive value
             FailResource(_resourceExpectations, null);
-        }
-    }
-
-    private static void CheckExistence(List<string> existenceChecks, RepeatedField<KeyValue>? actualResourceAttributes)
-    {
-        var message = new StringBuilder();
-
-        if (actualResourceAttributes == null)
-        {
-            Assert.Fail("No resource attributes have been collected");
-        }
-
-        foreach (var key in existenceChecks)
-        {
-            var keyExists = actualResourceAttributes.Any(attr => attr.Key == key);
-            if (!keyExists)
-            {
-                message.AppendLine($"Resource attribute \"{key}\" was not found");
-            }
-        }
-
-        if (message.Length > 0)
-        {
-            Assert.Fail(message.ToString());
         }
     }
 
