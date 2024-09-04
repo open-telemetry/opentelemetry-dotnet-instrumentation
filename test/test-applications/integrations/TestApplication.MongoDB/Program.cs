@@ -3,8 +3,6 @@
 
 using MongoDB.Bson;
 using MongoDB.Driver;
-using MongoDB.Driver.Core.Clusters;
-using MongoDB.Driver.Core.Servers;
 using TestApplication.Shared;
 
 namespace TestApplication.MongoDB;
@@ -38,10 +36,6 @@ public static class Program
 
         Run(collection, newDocument);
         RunAsync(collection, newDocument).Wait();
-
-#if !MONGODB_2_15_OR_GREATER
-        WireProtocolExecuteIntegrationTest(client);
-#endif
     }
 
     public static void Run(IMongoCollection<BsonDocument> collection, BsonDocument newDocument)
@@ -61,14 +55,7 @@ public static class Program
 
         // Run an explain query to invoke problematic MongoDB.Driver.Core.Operations.FindOpCodeOperation<TDocument>
         // https://stackoverflow.com/questions/49506857/how-do-i-run-an-explain-query-with-the-2-4-c-sharp-mongo-driver
-        var options = new FindOptions
-        {
-#if !MONGODB_2_15_OR_GREATER
-#pragma warning disable 0618 // 'FindOptionsBase.Modifiers' is obsolete: 'Use individual properties instead.'
-            Modifiers = new BsonDocument("$explain", true)
-#pragma warning restore 0618
-#endif
-        };
+        var options = new FindOptions();
         // Without properly unboxing generic arguments whose instantiations
         // are valuetypes, the following line will fail with
         // System.EntryPointNotFoundException: Entry point was not found.
@@ -95,19 +82,6 @@ public static class Program
         Console.WriteLine(allDocuments.FirstOrDefault());
     }
 
-#if !MONGODB_2_15_OR_GREATER
-    public static void WireProtocolExecuteIntegrationTest(MongoClient client)
-    {
-        var server = client.Cluster.SelectServer(new ServerSelector(), CancellationToken.None);
-        var channel = server.GetChannel(CancellationToken.None);
-        channel.KillCursors(new long[] { 0, 1, 2 }, new global::MongoDB.Driver.Core.WireProtocol.Messages.Encoders.MessageEncoderSettings(), CancellationToken.None);
-
-        server = client.Cluster.SelectServer(new ServerSelector(), CancellationToken.None);
-        channel = server.GetChannel(CancellationToken.None);
-        channel.KillCursorsAsync(new long[] { 0, 1, 2 }, new global::MongoDB.Driver.Core.WireProtocol.Messages.Encoders.MessageEncoderSettings(), CancellationToken.None).Wait();
-    }
-#endif
-
     private static string Host()
     {
         return Environment.GetEnvironmentVariable("MONGO_HOST") ?? "localhost";
@@ -123,15 +97,3 @@ public static class Program
         return "27017";
     }
 }
-
-#if !MONGODB_2_15_OR_GREATER
-#pragma warning disable SA1402 // File may only contain a single type
-internal class ServerSelector : global::MongoDB.Driver.Core.Clusters.ServerSelectors.IServerSelector
-{
-    public IEnumerable<ServerDescription> SelectServers(ClusterDescription cluster, IEnumerable<ServerDescription> servers)
-    {
-        return servers;
-    }
-}
-#pragma warning restore SA1402 // File may only contain a single type
-#endif

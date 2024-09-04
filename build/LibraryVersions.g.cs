@@ -97,8 +97,7 @@ public static partial class LibraryVersion
             "TestApplication.MongoDB",
             new List<PackageBuildInfo>
             {
-                new("2.19.0"),
-                new("2.27.0"),
+                new("2.28.0"),
             }
         },
         {
