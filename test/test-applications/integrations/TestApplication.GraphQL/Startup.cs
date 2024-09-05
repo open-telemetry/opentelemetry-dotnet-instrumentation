@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 using GraphQL;
+using GraphQL.SystemTextJson;
 using GraphQL.Types;
 using StarWars;
 
@@ -12,6 +13,7 @@ public class Startup
     public void ConfigureServices(IServiceCollection services)
     {
         services.AddSingleton<StarWarsData>();
+        services.AddSingleton<StarWarsSchema>();
         services.AddGraphQL(b => b
             .AddSystemTextJson()
             .AddErrorInfoProvider(opt => opt.ExposeExceptionDetails = true)
