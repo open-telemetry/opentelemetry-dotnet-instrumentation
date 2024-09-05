@@ -34,6 +34,8 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
   arguments to `otel-dotnet-auto-install.sh`.
 - Added `OTEL_DOTNET_AUTO_LOGGER` to select preferred sink for AutoInstrumentation
   diagnostic logs.
+- Issue a warning before publish if auto-instrumentation NuGet
+  package is referenced and runtime identifier is not specified.
 
 ### Changed
 
