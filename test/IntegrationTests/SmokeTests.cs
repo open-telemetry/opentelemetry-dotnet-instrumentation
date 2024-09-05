@@ -602,6 +602,7 @@ public class SmokeTests : TestHelper
 
         resourceExpector.Expect("process.pid", processId);
         resourceExpector.Expect("host.name", Environment.MachineName);
+
 #if NETFRAMEWORK
         resourceExpector.Expect("process.runtime.name", ".NET Framework");
 #else
@@ -616,6 +617,9 @@ public class SmokeTests : TestHelper
             _ => throw new PlatformNotSupportedException($"Unknown platform")
         };
         resourceExpector.Expect("os.type", expectedPlatform);
+        resourceExpector.Exist("os.description");
+        resourceExpector.Exist("os.name");
+        resourceExpector.Exist("os.version");
     }
 
     private void VerifyTestApplicationInstrumented(TestAppStartupMode startupMode = TestAppStartupMode.Auto)
