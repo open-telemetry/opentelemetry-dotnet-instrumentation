@@ -12,6 +12,7 @@ namespace IntegrationTests.Helpers;
 public class OtlpResourceExpector : IDisposable
 {
     private readonly List<ResourceExpectation> _resourceExpectations = new();
+    private readonly List<string> _existenceChecks = new();
 
     private readonly ManualResetEvent _resourceAttributesEvent = new(false); // synchronizes access to _resourceAttributes
     private RepeatedField<KeyValue>? _resourceAttributes; // protobuf type
@@ -31,6 +32,11 @@ public class OtlpResourceExpector : IDisposable
         }
     }
 
+    public void Exist(string key)
+    {
+        _existenceChecks.Add(key);
+    }
+
     public void Expect(string key, string value)
     {
         _resourceExpectations.Add(new ResourceExpectation(key, value));
@@ -43,7 +49,7 @@ public class OtlpResourceExpector : IDisposable
 
     public void AssertExpectations(TimeSpan? timeout = null)
     {
-        if (_resourceExpectations.Count == 0)
+        if (_resourceExpectations.Count == 0 && _existenceChecks.Count == 0)
         {
             throw new InvalidOperationException("Expectations were not set");
         }
@@ -56,6 +62,27 @@ public class OtlpResourceExpector : IDisposable
             {
                 FailResource(_resourceExpectations, null);
                 return;
+            }
+
+            if (_resourceAttributes == null)
+            {
+                Assert.Fail("No resource attributes have been collected");
+            }
+
+            var message = new StringBuilder();
+
+            foreach (var key in _existenceChecks)
+            {
+                var keyExists = _resourceAttributes.Any(attr => attr.Key == key);
+                if (!keyExists)
+                {
+                    message.AppendLine($"Resource attribute \"{key}\" was not found");
+                }
+            }
+
+            if (message.Length > 0)
+            {
+                Assert.Fail(message.ToString());
             }
 
             AssertResource(_resourceExpectations, _resourceAttributes);
