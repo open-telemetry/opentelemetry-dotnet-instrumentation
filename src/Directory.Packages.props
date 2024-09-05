@@ -58,7 +58,7 @@
     <PackageVersion Include="System.Security.Cryptography.Encoding" Version="4.3.0" />
     <PackageVersion Include="System.Security.Cryptography.Primitives" Version="4.3.0" />
     <PackageVersion Include="System.Security.Cryptography.X509Certificates" Version="4.3.0" />
-    <PackageVersion Include="System.Text.Encoding.CodePages" Version="5.0.0" />
+    <PackageVersion Include="System.Text.Encoding.CodePages" Version="8.0.0" />
     <PackageVersion Include="System.Windows.Extensions" Version="4.7.0" />
     <PackageVersion Include="ZstdSharp.Port" Version="0.7.3" />
   </ItemGroup>
