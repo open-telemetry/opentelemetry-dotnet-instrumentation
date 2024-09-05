@@ -39,7 +39,7 @@ internal static class PackageVersionDefinitions
             TestApplicationName = "TestApplication.EntityFrameworkCore",
             Versions = new List<PackageVersion>
             {
-                new("6.0.27"),
+                new("6.0.33"),
                 new("7.0.20"),
                 new("8.0.2", supportedTargetFrameworks: new[] { "net8.0" }, supportedExecutionFrameworks: new[] { "net8.0" }),
                 new("*", supportedTargetFrameworks: new[] { "net8.0" }, supportedExecutionFrameworks: new[] { "net8.0" })
@@ -123,9 +123,7 @@ internal static class PackageVersionDefinitions
             TestApplicationName = "TestApplication.MongoDB",
             Versions = new List<PackageVersion>
             {
-                // new("2.13.3"), - high vulnerability https://github.com/advisories/GHSA-7j9m-j397-g4wx, <= 2.18.0 test should be skipped
-                // new("2.15.0"), - high vulnerability https://github.com/advisories/GHSA-7j9m-j397-g4wx, <= 2.18.0 test should be skipped
-                new("2.19.0"),
+                new("2.28.0"),
                 new("*")
             }
         },
