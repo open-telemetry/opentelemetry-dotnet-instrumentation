@@ -5,9 +5,9 @@
       <InstrumentationTarget
         Include="MongoDB.Driver.Core"
         Condition="!$(SkippedInstrumentations.Contains('MongoDB.Driver.Core'))"
-        TargetNuGetPackageVersionRange="[2.13.3, 3.0.0)"
+        TargetNuGetPackageVersionRange="[2.28.0, 3.0.0)"
         InstrumentationNuGetPackageId="MongoDB.Driver.Core.Extensions.DiagnosticSources"
-        InstrumentationNuGetPackageVersion="1.4.0" />
+        InstrumentationNuGetPackageVersion="1.5.0" />
 
       <InstrumentationTarget
         Include="StackExchange.Redis"
