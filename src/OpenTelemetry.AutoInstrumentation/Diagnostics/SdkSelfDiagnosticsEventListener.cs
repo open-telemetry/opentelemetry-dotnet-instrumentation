@@ -76,35 +76,38 @@ internal class SdkSelfDiagnosticsEventListener : EventListener
     /// <param name="eventData">Data of the EventSource event.</param>
     protected override void OnEventWritten(EventWrittenEventArgs eventData)
     {
-        object[] payloadArray;
-        if (eventData.Payload != null)
+        if (eventData.EventSource.Name.StartsWith(EventSourceNamePrefix, StringComparison.OrdinalIgnoreCase))
         {
-            payloadArray = new object[eventData.Payload.Count];
-            eventData.Payload.CopyTo(payloadArray, 0);
-        }
-        else
-        {
-            payloadArray = Array.Empty<object>();
-        }
+            object[] payloadArray;
+            if (eventData.Payload != null)
+            {
+                payloadArray = new object[eventData.Payload.Count];
+                eventData.Payload.CopyTo(payloadArray, 0);
+            }
+            else
+            {
+                payloadArray = Array.Empty<object>();
+            }
 
-        var message = eventData.Message != null ? string.Format(eventData.Message ?? string.Empty, payloadArray) : string.Empty;
+            var message = eventData.Message != null ? string.Format(eventData.Message ?? string.Empty, payloadArray) : string.Empty;
 
-        switch (eventData.Level)
-        {
-            case EventLevel.Critical:
-            case EventLevel.Error:
-                log.Error("EventSource={0}, Message={1}", eventData.EventSource.Name, message, false);
-                break;
-            case EventLevel.Warning:
-                log.Warning("EventSource={0}, Message={1}", eventData.EventSource.Name, message, false);
-                break;
-            case EventLevel.LogAlways:
-            case EventLevel.Informational:
-                log.Information("EventSource={0}, Message={1}", eventData.EventSource.Name, message, false);
-                break;
-            case EventLevel.Verbose:
-                log.Debug("EventSource={0}, Message={1}", eventData.EventSource.Name, message, false);
-                break;
+            switch (eventData.Level)
+            {
+                case EventLevel.Critical:
+                case EventLevel.Error:
+                    log.Error("EventSource={0}, Message={1}", eventData.EventSource.Name, message, false);
+                    break;
+                case EventLevel.Warning:
+                    log.Warning("EventSource={0}, Message={1}", eventData.EventSource.Name, message, false);
+                    break;
+                case EventLevel.LogAlways:
+                case EventLevel.Informational:
+                    log.Information("EventSource={0}, Message={1}", eventData.EventSource.Name, message, false);
+                    break;
+                case EventLevel.Verbose:
+                    log.Debug("EventSource={0}, Message={1}", eventData.EventSource.Name, message, false);
+                    break;
+            }
         }
     }
 
