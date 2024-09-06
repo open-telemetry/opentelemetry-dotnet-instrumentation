@@ -10,7 +10,9 @@ IF EXIST %COR_PROFILER_PATH% (
     set CORECLR_PROFILER_PATH=!COR_PROFILER_PATH!
 ) ELSE (
     set "COR_PROFILER_PATH="
-    echo RuntimeIdentifier was not specified when building the project. Attempting to use the fallback location.
+
+    echo Unable to locate the native profiler inside current directory, possibly due to runtime identifier not being specified when building/publishing. ^
+Attempting to use the native profiler from runtimes\win-x64\native and runtimes\win-x86\native subdirectories.
 
     set COR_PROFILER_PATH_64=%BASE_PATH%runtimes\win-x64\native\OpenTelemetry.AutoInstrumentation.Native.dll
     set COR_PROFILER_PATH_32=%BASE_PATH%runtimes\win-x86\native\OpenTelemetry.AutoInstrumentation.Native.dll
