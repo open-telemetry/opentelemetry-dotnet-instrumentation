@@ -12,6 +12,7 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 - Support for Operating System resource detector.
 - Support for [RabbitMQ.Client](https://www.nuget.org/packages/RabbitMQ.Client/)
   traces instrumentation for versions `6.0.0`-`6.*.*`
+- Support for NServiceBus 9.1+ metrics instrumentations.
 - Added support for OTEL_TRACES_EXPORTER, OTEL_METRICS_EXPORTER, OTEL_LOGS_EXPORTER
   to handle comma-separated list.
 - The environment variables `OTEL_TRACES_EXPORTER`, `OTEL_METRICS_EXPORTER`,
