@@ -14,8 +14,8 @@
 // limitations under the License.
 // </copyright>
 
-using System.Net.Http;
 using System.Net;
+using System.Net.Http;
 using System.Text;
 using System.Web.Http;
 
