@@ -76,6 +76,11 @@ internal class SdkSelfDiagnosticsEventListener : EventListener
     /// <param name="eventData">Data of the EventSource event.</param>
     protected override void OnEventWritten(EventWrittenEventArgs eventData)
     {
+        if (!eventData.EventSource.Name.StartsWith(EventSourceNamePrefix, StringComparison.OrdinalIgnoreCase))
+        {
+            return;
+        }
+
         object[] payloadArray;
         if (eventData.Payload != null)
         {
