@@ -43,7 +43,19 @@ public class NServiceBusTests : TestHelper
     {
         using var collector = new MockMetricsCollector(Output);
         SetExporter(collector);
+
+#if NET8_0_OR_GREATER
+        if (string.IsNullOrEmpty(packageVersion) || Version.Parse(packageVersion) >= new Version(9, 1))
+        {
+            collector.Expect("NServiceBus.Core.Pipeline.Incoming");
+        }
+        else
+        {
+            collector.Expect("NServiceBus.Core");
+        }
+#else
         collector.Expect("NServiceBus.Core");
+#endif
 
         SetEnvironmentVariable("LONG_RUNNING", "true");
         SetEnvironmentVariable("OTEL_METRIC_EXPORT_INTERVAL", "100");

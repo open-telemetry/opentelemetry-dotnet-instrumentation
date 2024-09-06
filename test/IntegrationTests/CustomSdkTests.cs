@@ -66,7 +66,11 @@ public class CustomSdkTests : TestHelper
         collector.ResourceExpector.Expect("test_attr", "added_manually");
 
         collector.Expect("OpenTelemetry.Instrumentation.Http");
+#if NET8_0_OR_GREATER
+        collector.Expect("NServiceBus.Core.Pipeline.Incoming");
+#else
         collector.Expect("NServiceBus.Core");
+#endif
         collector.Expect("TestApplication.CustomSdk");
 
         EnableBytecodeInstrumentation();
