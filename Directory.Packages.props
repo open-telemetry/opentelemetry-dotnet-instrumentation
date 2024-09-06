@@ -5,7 +5,7 @@
 
   <ItemGroup>
     <PackageVersion Include="DotNet.ReproducibleBuilds" Version="1.2.4" />
-    <PackageVersion Include="MinVer" Version="5.0.0" />
+    <PackageVersion Include="MinVer" Version="6.0.0" />
     <PackageVersion Include="OpenTelemetry" Version="1.9.0" />
     <PackageVersion Include="OpenTelemetry.Api" Version="1.9.0" />
     <PackageVersion Include="OpenTelemetry.Exporter.Console" Version="1.9.0" />
