@@ -50,6 +50,10 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 
 - Following packages updated
   - `MongoDB.Driver.Core.Extensions.DiagnosticSources` from `1.4.0` to `1.5.0`,
+  - `GraphQL` from `7.8.0` to `8.0.2`,
+  - `GraphQL.MicrosoftDI` from `7.8.0` to `8.0.2`,
+  - `GraphQL.Server.Transports.AspNetCore` from `7.7.1` to `8.0.2`,
+  - `GraphQL.Server.Ui.Playground` from `7.7.1` to `8.0.2`,
   - `OpenTelemetry.Exporter.Prometheus.HttpListener` from `1.9.0-beta.1` to `1.9.0-beta.2`,
   - `OpenTelemetry.Shims.OpenTracing` from `1.9.0-beta.1` to `1.9.0-beta.2`,
   - `OpenTelemetry.Resources.Host` from `0.1.0-beta.2` to `0.1.0-beta.3`.
