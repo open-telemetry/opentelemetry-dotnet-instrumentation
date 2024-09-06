@@ -28,9 +28,10 @@ public static class ModelBasicPublishIntegration
         TTarget instance, string? exchange, string? routingKey, bool mandatory, TBasicProperties basicProperties, TBody body)
     where TBasicProperties : IBasicProperties
     where TBody : IBody
+    where TTarget : IModelBase
     {
         var messageBodyLength = body.Instance == null ? 0 : body.Length;
-        var activity = RabbitMqInstrumentation.StartPublish(basicProperties, exchange, routingKey, messageBodyLength);
+        var activity = RabbitMqInstrumentation.StartPublish(basicProperties, exchange, routingKey, messageBodyLength, instance);
         if (activity is not null)
         {
             return new CallTargetState(activity);

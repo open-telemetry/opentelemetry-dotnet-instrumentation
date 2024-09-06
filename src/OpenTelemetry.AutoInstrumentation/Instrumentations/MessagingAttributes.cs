@@ -38,7 +38,7 @@ internal static class MessagingAttributes
         public const string KafkaMessagingSystemName = "kafka";
         public const string PublishOperationName = "publish";
         public const string ReceiveOperationName = "receive";
-        public const string ProcessOperationName = "process";
+        public const string DeliverOperationName = "deliver";
 
         internal static class RabbitMq
         {

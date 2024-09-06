@@ -12,11 +12,29 @@ namespace IntegrationTests;
 [Collection(RabbitMqCollection.Name)]
 public class RabbitMqTests : TestHelper
 {
+    // https://github.com/open-telemetry/semantic-conventions/blob/d515887174e20a3546e89df5cb5a306231e1424b/docs/messaging/rabbitmq.md
+
+    // Required messaging attributes set by the instrumentation
     private const string MessagingSystemAttributeName = "messaging.system";
     private const string MessagingOperationAttributeName = "messaging.operation";
     private const string MessagingDestinationAttributeName = "messaging.destination.name";
+
+    // Required RabbitMQ attributes set by the instrumentation
     private const string RabbitMqRoutingKeyAttributeName = "messaging.rabbitmq.destination.routing_key";
+    private const string RabbitMqDeliveryTagAttributeName = "messaging.rabbitmq.delivery_tag";
+
+    // Recommended messaging attributes set by the instrumentation
     private const string MessagingBodySizeAttributeName = "messaging.message.body.size";
+
+    // Required network attributes set by the instrumentation
+    private const string ServerAddressAttributeName = "server.address";
+    private const string ServerPortAttributeName = "server.port";
+
+    // Recommended network attributes set by the instrumentation
+    private const string NetworkTypeAttributeName = "network.type";
+    private const string NetworkPeerAddressAttributeName = "network.peer.address";
+    private const string NetworkPeerPortAttributeName = "network.peer.port";
+
     private readonly RabbitMqFixture _rabbitMq;
 
     public RabbitMqTests(ITestOutputHelper output, RabbitMqFixture rabbitMq)
@@ -41,8 +59,8 @@ public class RabbitMqTests : TestHelper
         collector.Expect("OpenTelemetry.AutoInstrumentation.RabbitMq", span => ValidateProducerSpan(span));
         collector.Expect("OpenTelemetry.AutoInstrumentation.RabbitMq", span => ValidateProducerSpan(span));
         collector.Expect("OpenTelemetry.AutoInstrumentation.RabbitMq", span => ValidateConsumerSpan(span, "receive"));
-        collector.Expect("OpenTelemetry.AutoInstrumentation.RabbitMq", span => ValidateConsumerSpan(span, "process"));
-        collector.Expect("OpenTelemetry.AutoInstrumentation.RabbitMq", span => ValidateConsumerSpan(span, "process"));
+        collector.Expect("OpenTelemetry.AutoInstrumentation.RabbitMq", span => ValidateConsumerSpan(span, "deliver"));
+        collector.Expect("OpenTelemetry.AutoInstrumentation.RabbitMq", span => ValidateConsumerSpan(span, "deliver"));
 
         collector.ExpectCollected(collected => ValidatePropagation(collected));
 
@@ -54,16 +72,6 @@ public class RabbitMqTests : TestHelper
         });
 
         collector.AssertExpectations();
-    }
-
-    private static bool ValidateConsumerSpan(Span span, string operationName)
-    {
-        return span.Kind == Span.Types.SpanKind.Consumer && span.Links.Count == 1 && ValidateBasicSpanAttributes(span.Attributes, operationName);
-    }
-
-    private static bool ValidateProducerSpan(Span span)
-    {
-        return span.Kind == Span.Types.SpanKind.Producer && ValidateBasicSpanAttributes(span.Attributes, "publish");
     }
 
     private static bool ValidatePropagation(ICollection<MockSpansCollector.Collected> collected)
@@ -96,5 +104,35 @@ public class RabbitMqTests : TestHelper
                destinationName == "amq.default" &&
                routingKey == "hello" &&
                bodySize == 13;
+    }
+
+    private bool ValidateConsumerSpan(Span span, string operationName)
+    {
+        var deliveryTag = span.Attributes.SingleOrDefault(kv => kv.Key == RabbitMqDeliveryTagAttributeName)?.Value.StringValue;
+        return span.Kind == Span.Types.SpanKind.Consumer &&
+               span.Links.Count == 1 &&
+               ValidateBasicSpanAttributes(span.Attributes, operationName) &&
+               (operationName != "receive" || ValidateNetworkAttributes(span.Attributes)) &&
+               !string.IsNullOrEmpty(deliveryTag);
+    }
+
+    private bool ValidateProducerSpan(Span span)
+    {
+        return span.Kind == Span.Types.SpanKind.Producer && ValidateBasicSpanAttributes(span.Attributes, "publish") && ValidateNetworkAttributes(span.Attributes);
+    }
+
+    private bool ValidateNetworkAttributes(IReadOnlyCollection<KeyValue> spanAttributes)
+    {
+        var serverAddress = spanAttributes.Single(kv => kv.Key == ServerAddressAttributeName).Value.StringValue;
+        var serverPort = spanAttributes.Single(kv => kv.Key == ServerPortAttributeName).Value.IntValue;
+        var networkType = spanAttributes.Single(kv => kv.Key == NetworkTypeAttributeName).Value.StringValue;
+        var networkPeerAddress = spanAttributes.Single(kv => kv.Key == NetworkPeerAddressAttributeName).Value.StringValue;
+        var networkPeerPort = spanAttributes.Single(kv => kv.Key == NetworkPeerPortAttributeName).Value.IntValue;
+
+        return serverAddress == "localhost" &&
+               serverPort == _rabbitMq.Port &&
+               networkPeerAddress is "127.0.0.1" or "::1" &&
+               networkPeerPort == _rabbitMq.Port &&
+               networkType is "ipv4" or "ipv6";
     }
 }
