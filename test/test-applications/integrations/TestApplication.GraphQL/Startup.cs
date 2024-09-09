@@ -2,6 +2,8 @@
 // SPDX-License-Identifier: Apache-2.0
 
 using GraphQL;
+using GraphQL.SystemTextJson;
+using GraphQL.Transport;
 using GraphQL.Types;
 using StarWars;
 
@@ -21,6 +23,7 @@ public class Startup
 
     public void Configure(IApplicationBuilder app)
     {
+        app.UseMiddleware<CsrfMiddleware>();
         app.UseDeveloperExceptionPage();
         app.UseWebSockets();
         app.UseGraphQL<ISchema>();

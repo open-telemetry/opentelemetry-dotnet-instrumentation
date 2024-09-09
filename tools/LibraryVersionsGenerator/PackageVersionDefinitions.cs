@@ -66,6 +66,7 @@ internal static class PackageVersionDefinitions
             Versions = new List<GraphQLVersion>
             {
                 new("7.5.0") { MicrosoftDIVersion = "7.5.0", ServerTransportsAspNetCoreVersion = "7.5.0", ServerUIPlayground = "7.5.0" },
+                new("8.0.2") { MicrosoftDIVersion = "8.0.2", ServerTransportsAspNetCoreVersion = "8.0.2", ServerUIPlayground = "8.0.2" },
                 new("*") { MicrosoftDIVersion = "*", ServerTransportsAspNetCoreVersion = "*", ServerUIPlayground = "*" },
             }
         },
