@@ -2,11 +2,12 @@
 
 BASE_PATH="$(cd "$(dirname "$0")" && pwd)"
 
-CORECLR_PROFILER_PATH="$(ls "${BASE_PATH}"/OpenTelemetry.AutoInstrumentation.Native.* 2>/dev/null)"
+CORECLR_PROFILER_PATH="$(ls ${BASE_PATH}/OpenTelemetry.AutoInstrumentation.Native.* 2>/dev/null)"
 
 status=$?
 if [ $status -ne 0 ]; then
-  echo "RuntimeIdentifier was not specified when building the project. Attempting to use the fallback location."
+  echo "Unable to locate the native profiler inside current directory, possibly due to runtime identifier not being specified when building/publishing.
+Attempting to detect the runtime and use the native profiler from corresponding subdirectory of runtimes directory."
 
   case "$(uname -s | tr '[:upper:]' '[:lower:]')" in
     linux*)
@@ -45,7 +46,7 @@ if [ $status -ne 0 ]; then
       exit 1
       ;;
   esac
-  CORECLR_PROFILER_PATH="${BASE_PATH}"/runtimes/"${OS_TYPE}"-"${ARCHITECTURE}"/native/OpenTelemetry.AutoInstrumentation.Native"${FILE_EXTENSION}"
+  CORECLR_PROFILER_PATH="${BASE_PATH}/runtimes/${OS_TYPE}-${ARCHITECTURE}/native/OpenTelemetry.AutoInstrumentation.Native${FILE_EXTENSION}"
   if [ ! -f "${CORECLR_PROFILER_PATH}" ]; then
     echo "Unable to locate the native profiler." >&2
     exit 1
