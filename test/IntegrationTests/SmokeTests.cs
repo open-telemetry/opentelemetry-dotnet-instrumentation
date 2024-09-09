@@ -617,6 +617,7 @@ public class SmokeTests : TestHelper
             _ => throw new PlatformNotSupportedException($"Unknown platform")
         };
         resourceExpector.Expect("os.type", expectedPlatform);
+        resourceExpector.Exist("os.build_id");
         resourceExpector.Exist("os.description");
         resourceExpector.Exist("os.name");
         resourceExpector.Exist("os.version");
