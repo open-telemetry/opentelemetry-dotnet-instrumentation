@@ -20,7 +20,7 @@ internal static class RabbitMqInstrumentation
         where TBasicResult : IBasicGetResult
         where TModelBase : IModelBase
     {
-        var connection = instance.Session.Connection;
+        var connection = instance.Session?.Connection;
         return StartConsume(
             result.BasicProperties?.Headers,
             MessagingAttributes.Values.ReceiveOperationName,
@@ -30,9 +30,9 @@ internal static class RabbitMqInstrumentation
             result.Body.Length,
             result.BasicProperties?.MessageId,
             result.BasicProperties?.CorrelationId,
-            connection.Endpoint.HostName,
-            connection.Endpoint.Port,
-            connection.RemoteEndPoint,
+            connection?.Endpoint?.HostName,
+            connection?.Endpoint?.Port,
+            connection?.RemoteEndPoint,
             startTime);
     }
 
@@ -77,16 +77,16 @@ internal static class RabbitMqInstrumentation
 
         if (activity is { IsAllDataRequested: true })
         {
-            var connection = instance.Session.Connection;
+            var connection = instance.Session?.Connection;
             SetCommonTags(
                 activity,
                 exchange,
                 routingKey,
                 bodyLength,
                 MessagingAttributes.Values.PublishOperationName,
-                connection.Endpoint.HostName,
-                connection.Endpoint.Port,
-                connection.RemoteEndPoint);
+                connection?.Endpoint?.HostName,
+                connection?.Endpoint?.Port,
+                connection?.RemoteEndPoint);
         }
 
         return activity;
