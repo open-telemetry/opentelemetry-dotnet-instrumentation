@@ -32,11 +32,12 @@ public static class ModelBaseBasicGetIntegration
 
     internal static CallTargetReturn<TResponse> OnMethodEnd<TTarget, TResponse>(TTarget instance, TResponse response, Exception? exception, in CallTargetState state)
     where TResponse : IBasicGetResult
+    where TTarget : IModelBase
     {
         // ReSharper disable once ConditionIsAlwaysTrueOrFalseAccordingToNullableAPIContract
         if (response.Instance is not null)
         {
-            using var activity = RabbitMqInstrumentation.StartReceive(response, state.StartTime!.Value);
+            using var activity = RabbitMqInstrumentation.StartReceive(response, state.StartTime!.Value, instance);
             if (exception is not null)
             {
                 activity.SetException(exception);
