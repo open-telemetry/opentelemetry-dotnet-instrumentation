@@ -1,7 +1,6 @@
 using System.ComponentModel;
 using System.Globalization;
 using System.Reflection;
-using Nuke.Common;
 using Nuke.Common.Tooling;
 using Serilog;
 
