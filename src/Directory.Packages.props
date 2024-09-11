@@ -40,7 +40,7 @@
   </ItemGroup>
   <!-- Versions from CommonExcludedAssets.props -->
   <ItemGroup>
-    <PackageVersion Include="AWSSDK.Core" Version="3.7.100.14" />
+    <PackageVersion Include="AWSSDK.Core" Version="3.7.400.18" />
     <PackageVersion Include="AWSSDK.SecurityToken" Version="3.7.100.14" />
     <PackageVersion Include="DnsClient" Version="1.6.1" />
     <PackageVersion Include="Microsoft.Win32.SystemEvents" Version="4.7.0" />
