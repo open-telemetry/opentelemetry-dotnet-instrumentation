@@ -106,7 +106,7 @@ partial class Build
 
                 Log.Information($"Copying '{source}' to '{dest}'");
 
-                CopyFileToDirectory(source, dest, FileExistsPolicy.Overwrite);
+                source.CopyToDirectory(dest, ExistsPolicy.FileOverwrite);
             }
         });
 
@@ -160,7 +160,7 @@ partial class Build
 
         try
         {
-            CopyFileToDirectory(sourceModulePath, localBinDirectory);
+            sourceModulePath.CopyToDirectory(localTracerZip);
             TracerHomeDirectory.ZipTo(localTracerZip);
 
             PerformLegacyRestoreIfNeeded(project);

@@ -15,7 +15,7 @@ partial class Build
             foreach (var templateFile in templateFiles)
             {
                 var scriptFile = InstallationScriptsDirectory / templateFile.Name.Replace(".template", "");
-                FileSystemTasks.CopyFile(templateFile, scriptFile, FileExistsPolicy.Overwrite);
+                templateFile.Copy(scriptFile, ExistsPolicy.FileOverwrite);
                 scriptFile.UpdateText(x =>
                     x.Replace("{{VERSION}}", VersionHelper.GetVersion()));
             }

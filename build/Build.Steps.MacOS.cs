@@ -50,6 +50,6 @@ partial class Build
             var dest = TracerHomeDirectory / "osx-x64";
             Log.Information($"Copying '{source}' to '{dest}'");
 
-            CopyFileToDirectory(source, dest, FileExistsPolicy.Overwrite);
+            source.CopyToDirectory(dest, ExistsPolicy.FileOverwrite);
         });
 }

@@ -69,7 +69,7 @@ partial class Build
             var dest = TracerHomeDirectory / clrProfilerDirectoryName;
             Log.Information($"Copying '{source}' to '{dest}'");
 
-            CopyFileToDirectory(source, dest, FileExistsPolicy.Overwrite);
+            source.CopyToDirectory(dest, ExistsPolicy.FileOverwrite);
         });
 
     Target RunNativeTestsLinux => _ => _

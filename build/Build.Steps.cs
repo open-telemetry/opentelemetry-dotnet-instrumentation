@@ -380,7 +380,7 @@ partial class Build
         {
             var source = RootDirectory / "instrument.sh";
             var dest = TracerHomeDirectory;
-            CopyFileToDirectory(source, dest, FileExistsPolicy.Overwrite);
+            source.CopyToDirectory(dest, ExistsPolicy.FileOverwrite);
         });
 
     Target CopyLegalFiles => _ => _
@@ -391,7 +391,7 @@ partial class Build
         {
             var source = RootDirectory / "LICENSE";
             var dest = TracerHomeDirectory;
-            CopyFileToDirectory(source, dest, FileExistsPolicy.Overwrite);
+            source.CopyToDirectory(dest, ExistsPolicy.FileOverwrite);
         });
 
     Target RunNativeTests => _ => _

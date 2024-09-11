@@ -114,7 +114,7 @@ internal static class DepsJsonExtensions
                 {
                     var destDir = assemblyVersionDirectory / "lib" / rollForwardRuntime;
 
-                    CopyDirectoryRecursively(sourceDir, destDir);
+                    sourceDir.CopyToDirectory(destDir);
 
                     // Since the json was also rolled forward the original tfm folder can be deleted.
                     sourceDir.DeleteDirectory();
