@@ -19,7 +19,7 @@ partial class Build
                 arguments: $". -DOTEL_AUTO_VERSION={VersionHelper.GetVersionWithoutSuffixes()} -DOTEL_AUTO_VERSION_MAJOR={major} -DOTEL_AUTO_VERSION_MINOR={minor} -DOTEL_AUTO_VERSION_PATCH={patch}",
                 workingDirectory: nativeProjectDirectory);
             Make.Value(
-                arguments: $"",
+                arguments: $" ",
                 workingDirectory: nativeProjectDirectory);
         });
 
@@ -34,7 +34,7 @@ partial class Build
                 arguments: "-S .",
                 workingDirectory: buildDirectory);
             Make.Value(
-                arguments: $"",
+                arguments: $" ",
                 workingDirectory: buildDirectory);
         });
 
