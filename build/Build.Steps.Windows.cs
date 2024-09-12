@@ -159,7 +159,7 @@ partial class Build
 
         try
         {
-            sourceModulePath.CopyToDirectory(localTracerZip);
+            sourceModulePath.CopyToDirectory(localBinDirectory);
             TracerHomeDirectory.ZipTo(localTracerZip);
 
             PerformLegacyRestoreIfNeeded(project);
