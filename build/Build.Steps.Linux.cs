@@ -20,7 +20,7 @@ partial class Build
                 arguments: $"../ -DCMAKE_BUILD_TYPE=Release -DOTEL_AUTO_VERSION={VersionHelper.GetVersionWithoutSuffixes()} -DOTEL_AUTO_VERSION_MAJOR={major} -DOTEL_AUTO_VERSION_MINOR={minor} -DOTEL_AUTO_VERSION_PATCH={patch}",
                 workingDirectory: buildDirectory);
             Make.Value(
-                arguments: $" ",
+                arguments: $" ", //space is needed - see https://github.com/nuke-build/nuke/issues/1417
                 workingDirectory: buildDirectory);
         });
 
@@ -35,7 +35,7 @@ partial class Build
                 arguments: "-S .",
                 workingDirectory: buildDirectory);
             Make.Value(
-                arguments: $" ",
+                arguments: $" ", //space is needed - see https://github.com/nuke-build/nuke/issues/1417
                 workingDirectory: buildDirectory);
         });
 
