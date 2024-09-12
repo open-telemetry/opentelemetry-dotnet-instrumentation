@@ -7,7 +7,7 @@
   <ItemGroup>
     <PackageReference Include="MySql.Data" VersionOverride="$(LibraryVersion)" />
     <PackageReference Include="System.Diagnostics.DiagnosticSource" Condition="'$(LibraryVersion)' != '' and '$(LibraryVersion)'&lt;'9.0.0'"/>
-    <PackageReference Include="Google.Protobuf" VersionOverride="3.22.5" Condition="'$(LibraryVersion)' != '' and '$(LibraryVersion)'&lt;'8.3.0'"/>
+    <PackageReference Include="Google.Protobuf" VersionOverride="3.28.1" Condition="'$(LibraryVersion)' != '' and '$(LibraryVersion)'&lt;'8.3.0'"/>
   </ItemGroup>
 
 </Project>
