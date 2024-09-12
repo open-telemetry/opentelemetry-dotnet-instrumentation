@@ -66,7 +66,7 @@ partial class Build
                 var destinationPath = baseRuntimeNativePath / "runtimes" / platformAndArchitecture / "native";
                 destinationPath.DeleteDirectory();
 
-                sourcePath.CopyToDirectory(destinationPath);
+                sourcePath.Copy(destinationPath);
             }
         });
 
