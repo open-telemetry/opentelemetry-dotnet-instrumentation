@@ -2,7 +2,6 @@ using System.Collections.ObjectModel;
 using System.Text.Json.Nodes;
 using Nuke.Common.IO;
 using Nuke.Common.Utilities.Collections;
-using static Nuke.Common.IO.FileSystemTasks;
 
 namespace Extensions;
 
@@ -114,7 +113,7 @@ internal static class DepsJsonExtensions
                 {
                     var destDir = assemblyVersionDirectory / "lib" / rollForwardRuntime;
 
-                    CopyDirectoryRecursively(sourceDir, destDir);
+                    sourceDir.Copy(destDir);
 
                     // Since the json was also rolled forward the original tfm folder can be deleted.
                     sourceDir.DeleteDirectory();
