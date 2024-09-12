@@ -5,7 +5,6 @@ using Nuke.Common.IO;
 using Nuke.Common.Tools.DotNet;
 using Nuke.Common.Tools.NuGet;
 using Nuke.Common.Utilities.Collections;
-using static Nuke.Common.IO.FileSystemTasks;
 using static Nuke.Common.Tools.DotNet.DotNetTasks;
 
 partial class Build
@@ -67,7 +66,7 @@ partial class Build
                 var destinationPath = baseRuntimeNativePath / "runtimes" / platformAndArchitecture / "native";
                 destinationPath.DeleteDirectory();
 
-                CopyDirectoryRecursively(sourcePath, destinationPath);
+                sourcePath.Copy(destinationPath);
             }
         });
 
