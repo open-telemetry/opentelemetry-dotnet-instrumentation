@@ -37,7 +37,7 @@ public class OwinIISTests
             ["OTEL_EXPORTER_OTLP_ENDPOINT"] = $"http://{DockerNetworkHelper.IntegrationTestsGateway}:{collector.Port}"
         };
         var webPort = TcpPortProvider.GetOpenPort();
-        await using var container = await IISContainerTestHelper.StartContainerAsync("testapplication-owin-iis", webPort, environmentVariables, Output);
+        await using var container = await IISContainerTestHelper.StartContainerAsync("testapplication-owin-iis-netframework", webPort, environmentVariables, Output);
 
         await CallWebEndpoint(webPort);
 
