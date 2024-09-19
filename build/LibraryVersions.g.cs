@@ -139,6 +139,7 @@ public static partial class LibraryVersion
             new List<PackageBuildInfo>
             {
                 new("23.4.0", supportedFrameworks: new string[] {"net472"}),
+                new("23.5.1", supportedFrameworks: new string[] {"net472"}),
             }
         },
         {
@@ -146,6 +147,7 @@ public static partial class LibraryVersion
             new List<PackageBuildInfo>
             {
                 new("23.4.0"),
+                new("23.5.1"),
             }
         },
         {

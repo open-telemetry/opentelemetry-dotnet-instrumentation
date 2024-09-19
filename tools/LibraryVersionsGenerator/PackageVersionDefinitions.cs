@@ -182,7 +182,7 @@ internal static class PackageVersionDefinitions
             Versions = new List<PackageVersion>
             {
                 new("23.4.0", supportedTargetFrameworks: new[] { "net472" }, supportedExecutionFrameworks: new[] { "net462" }),
-                new("*")
+                new("*", supportedTargetFrameworks: new[] { "net472" }, supportedExecutionFrameworks: new[] { "net462" })
             }
         },
         new()
