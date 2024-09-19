@@ -77,6 +77,8 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 
 ### Fixed
 
+- Initialize WCF instrumentation only when necessary ([#3650](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/pull/3650))
+
 ## [1.7.0](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/tag/v1.7.0)
 
 - [Core components](https://github.com/open-telemetry/opentelemetry-dotnet/blob/main/VERSIONING.md#core-components):
