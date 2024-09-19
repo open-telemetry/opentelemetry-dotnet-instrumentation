@@ -102,7 +102,8 @@ partial class Build
                 // Projects using `packages.config` can't be restored via "dotnet restore", use a NuGet Task to restore these projects.
                 var legacyRestoreProjects = Solution.GetNativeProjects()
                     .Concat(Solution.GetProjectByName(Projects.Tests.Applications.AspNet))
-                    .Concat(Solution.GetProjectByName(Projects.Tests.Applications.WcfIis));
+                    .Concat(Solution.GetProjectByName(Projects.Tests.Applications.WcfIis))
+                    .Concat(Solution.GetProjectByName(Projects.Tests.Applications.Owin));
 
                 RestoreLegacyNuGetPackagesConfig(legacyRestoreProjects);
             }
