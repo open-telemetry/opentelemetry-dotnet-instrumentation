@@ -148,6 +148,9 @@ partial class Build
 
             var wcfProject = Solution.GetProjectByName(Projects.Tests.Applications.WcfIis);
             BuildDockerImage(wcfProject);
+
+            var owinProject = Solution.GetProjectByName(Projects.Tests.Applications.Owin);
+            BuildDockerImage(owinProject);
         });
 
     void BuildDockerImage(Project project)

@@ -25,6 +25,8 @@ public static class HttpModuleIntegration
 {
     private static int _initialized;
 
+    internal static bool IsInitialized => Interlocked.CompareExchange(ref _initialized, 0, 0) != default;
+
     /// <summary>
     /// OnMethodBegin callback
     /// </summary>
