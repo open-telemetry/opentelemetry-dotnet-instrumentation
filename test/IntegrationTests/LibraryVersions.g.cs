@@ -22,7 +22,7 @@ public static partial class LibraryVersion
             theoryData.Add(string.Empty);
 #else
             theoryData.Add("12.13.0");
-            theoryData.Add("12.21.2");
+            theoryData.Add("12.22.0");
 #endif
             return theoryData;
         }
