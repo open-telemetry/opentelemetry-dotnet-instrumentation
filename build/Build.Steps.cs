@@ -103,7 +103,7 @@ partial class Build
                 var legacyRestoreProjects = Solution.GetNativeProjects()
                     .Concat(Solution.GetProjectByName(Projects.Tests.Applications.AspNet))
                     .Concat(Solution.GetProjectByName(Projects.Tests.Applications.WcfIis))
-                    .Concat(Solution.GetProjectByName(Projects.Tests.Applications.Owin));
+                    .Concat(Solution.GetProjectByName(Projects.Tests.Applications.OwinIis));
 
                 RestoreLegacyNuGetPackagesConfig(legacyRestoreProjects);
             }
