@@ -62,12 +62,6 @@ internal static class DelayedInitialization
 #endif
 
         [MethodImpl(MethodImplOptions.NoInlining)]
-        public static void AddWcf(LazyInstrumentationLoader lazyInstrumentationLoader, PluginManager pluginManager)
-        {
-            lazyInstrumentationLoader.Add(new WcfInitializer(pluginManager));
-        }
-
-        [MethodImpl(MethodImplOptions.NoInlining)]
         public static void AddQuartz(LazyInstrumentationLoader lazyInstrumentationLoader, PluginManager pluginManager)
         {
             lazyInstrumentationLoader.Add(new QuartzInitializer(pluginManager));

@@ -311,10 +311,6 @@ internal static class Instrumentation
 
     private static void AddLazilyLoadedTraceInstrumentations(LazyInstrumentationLoader lazyInstrumentationLoader, PluginManager pluginManager, TracerSettings tracerSettings)
     {
-        // ensure WcfInitializer is added only once,
-        // it is needed when either WcfClient or WcfService instrumentations are enabled
-        // to initialize WcfInstrumentationOptions
-        var wcfInstrumentationAdded = false;
         foreach (var instrumentation in tracerSettings.EnabledInstrumentations)
         {
             switch (instrumentation)
@@ -324,7 +320,6 @@ internal static class Instrumentation
                     DelayedInitialization.Traces.AddAspNet(lazyInstrumentationLoader, pluginManager, tracerSettings);
                     break;
                 case TracerInstrumentation.WcfService:
-                    AddWcfIfNeeded(lazyInstrumentationLoader, pluginManager, ref wcfInstrumentationAdded);
                     break;
 #endif
                 case TracerInstrumentation.HttpClient:
@@ -340,7 +335,6 @@ internal static class Instrumentation
                     DelayedInitialization.Traces.AddQuartz(lazyInstrumentationLoader, pluginManager);
                     break;
                 case TracerInstrumentation.WcfClient:
-                    AddWcfIfNeeded(lazyInstrumentationLoader, pluginManager, ref wcfInstrumentationAdded);
                     break;
 #if NET6_0_OR_GREATER
                 case TracerInstrumentation.AspNetCore:
@@ -389,20 +383,6 @@ internal static class Instrumentation
                     break;
             }
         }
-    }
-
-    private static void AddWcfIfNeeded(
-        LazyInstrumentationLoader lazyInstrumentationLoader,
-        PluginManager pluginManager,
-        ref bool wcfInstrumentationAdded)
-    {
-        if (wcfInstrumentationAdded)
-        {
-            return;
-        }
-
-        DelayedInitialization.Traces.AddWcf(lazyInstrumentationLoader, pluginManager);
-        wcfInstrumentationAdded = true;
     }
 
     private static void OnExit(object? sender, EventArgs e)

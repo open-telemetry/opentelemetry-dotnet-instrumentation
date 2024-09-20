@@ -19,6 +19,9 @@ internal static class WcfServiceInitializer
 
     public static void Initialize(IServiceHostBase serviceHost)
     {
+        WcfInstrumentationInitializer.TryInitializeOptions();
+        WcfInstrumentationInitializer.TryInitializeParentSpanCorrector();
+
         var behaviors = serviceHost.Description.Behaviors;
         if (!behaviors.Contains(typeof(TelemetryServiceBehavior)))
         {

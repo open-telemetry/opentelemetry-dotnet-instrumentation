@@ -19,6 +19,8 @@ internal static class WcfClientInitializer
 
     public static void Initialize(IChannelFactory channelFactory)
     {
+        WcfInstrumentationInitializer.TryInitializeOptions();
+
         var behaviors = channelFactory.Endpoint.Behaviors;
         if (!behaviors.Contains(typeof(TelemetryEndpointBehavior)))
         {

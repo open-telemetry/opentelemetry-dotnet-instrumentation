@@ -15,8 +15,6 @@ public class AspNetTests
 {
     private const string ServiceName = "TestApplication.AspNet.NetFramework";
 
-    private readonly Dictionary<string, string> _environmentVariables = new();
-
     public AspNetTests(ITestOutputHelper output)
     {
         Output = output;
@@ -43,9 +41,13 @@ public class AspNetTests
         collector.Expect("OpenTelemetry.Instrumentation.AspNet.Telemetry"); // Expect WebApi span
 
         var collectorUrl = $"http://{DockerNetworkHelper.IntegrationTestsGateway}:{collector.Port}";
-        _environmentVariables["OTEL_EXPORTER_OTLP_ENDPOINT"] = collectorUrl;
+        Dictionary<string, string> environmentVariables = new()
+        {
+            ["OTEL_EXPORTER_OTLP_ENDPOINT"] = collectorUrl
+        };
         var webPort = TcpPortProvider.GetOpenPort();
-        await using var container = await StartContainerAsync(webPort, appPoolMode);
+        var imageName = GetTestImageName(appPoolMode);
+        await using var container = await IISContainerTestHelper.StartContainerAsync(imageName, webPort, environmentVariables, Output);
         await CallTestApplicationEndpoint(webPort);
 
         collector.AssertExpectations();
@@ -107,11 +109,15 @@ public class AspNetTests
         });
 
         var collectorUrl = $"http://{DockerNetworkHelper.IntegrationTestsGateway}:{collector.Port}";
-        _environmentVariables["OTEL_EXPORTER_OTLP_ENDPOINT"] = collectorUrl;
-        _environmentVariables["OTEL_DOTNET_AUTO_TRACES_ASPNET_INSTRUMENTATION_CAPTURE_REQUEST_HEADERS"] = "Custom-Request-Test-Header2";
-        _environmentVariables["OTEL_DOTNET_AUTO_TRACES_ASPNET_INSTRUMENTATION_CAPTURE_RESPONSE_HEADERS"] = "Custom-Response-Test-Header1,Custom-Response-Test-Header3";
+        Dictionary<string, string> environmentVariables = new()
+        {
+            ["OTEL_EXPORTER_OTLP_ENDPOINT"] = collectorUrl,
+            ["OTEL_DOTNET_AUTO_TRACES_ASPNET_INSTRUMENTATION_CAPTURE_REQUEST_HEADERS"] = "Custom-Request-Test-Header2",
+            ["OTEL_DOTNET_AUTO_TRACES_ASPNET_INSTRUMENTATION_CAPTURE_RESPONSE_HEADERS"] = "Custom-Response-Test-Header1,Custom-Response-Test-Header3"
+        };
         var webPort = TcpPortProvider.GetOpenPort();
-        await using var container = await StartContainerAsync(webPort, appPoolMode);
+        var imageName = GetTestImageName(appPoolMode);
+        await using var container = await IISContainerTestHelper.StartContainerAsync(imageName, webPort, environmentVariables, Output);
         await CallTestApplicationEndpoint(webPort);
 
         collector.AssertExpectations();
@@ -124,8 +130,6 @@ public class AspNetTests
     {
         Assert.True(EnvironmentTools.IsWindowsAdministrator(), "This test requires Windows Administrator privileges.");
 
-        _environmentVariables["OTEL_SERVICE_NAME"] = ServiceName;
-
         // Using "*" as host requires Administrator. This is needed to make the mock collector endpoint
         // accessible to the Windows docker container where the test application is executed by binding
         // the endpoint to all network interfaces. In order to do that it is necessary to open the port
@@ -136,10 +140,16 @@ public class AspNetTests
         collector.ResourceExpector.Expect("deployment.environment", "test"); // this is set via Wep.config
 
         var collectorUrl = $"http://{DockerNetworkHelper.IntegrationTestsGateway}:{collector.Port}";
-        _environmentVariables["OTEL_TRACES_EXPORTER"] = "otlp";
-        _environmentVariables["OTEL_EXPORTER_OTLP_ENDPOINT"] = collectorUrl;
+
+        Dictionary<string, string> environmentVariables = new()
+        {
+            ["OTEL_SERVICE_NAME"] = ServiceName,
+            ["OTEL_TRACES_EXPORTER"] = "otlp",
+            ["OTEL_EXPORTER_OTLP_ENDPOINT"] = collectorUrl
+        };
+
         var webPort = TcpPortProvider.GetOpenPort();
-        await using var container = await StartContainerAsync(webPort);
+        await using var container = await IISContainerTestHelper.StartContainerAsync("testapplication-aspnet-netframework", webPort, environmentVariables, Output);
         await CallTestApplicationEndpoint(webPort);
 
         collector.ResourceExpector.AssertExpectations();
@@ -161,61 +171,22 @@ public class AspNetTests
         collector.Expect("OpenTelemetry.Instrumentation.AspNet");
 
         var collectorUrl = $"http://{DockerNetworkHelper.IntegrationTestsGateway}:{collector.Port}";
-        _environmentVariables["OTEL_METRICS_EXPORTER"] = "otlp";
-        _environmentVariables["OTEL_EXPORTER_OTLP_ENDPOINT"] = collectorUrl;
-        _environmentVariables["OTEL_METRIC_EXPORT_INTERVAL"] = "1000";
-        _environmentVariables["OTEL_DOTNET_AUTO_METRICS_INSTRUMENTATION_ENABLED"] = "false"; // Helps to reduce noise by enabling only AspNet metrics.
-        _environmentVariables["OTEL_DOTNET_AUTO_METRICS_ASPNET_INSTRUMENTATION_ENABLED"] = "true"; // Helps to reduce noise by enabling only AspNet metrics.
+        Dictionary<string, string> environmentVariables = new()
+        {
+            ["OTEL_METRICS_EXPORTER"] = "otlp", ["OTEL_EXPORTER_OTLP_ENDPOINT"] = collectorUrl, ["OTEL_METRIC_EXPORT_INTERVAL"] = "1000",
+            ["OTEL_DOTNET_AUTO_METRICS_INSTRUMENTATION_ENABLED"] = "false", // Helps to reduce noise by enabling only AspNet metrics.
+            ["OTEL_DOTNET_AUTO_METRICS_ASPNET_INSTRUMENTATION_ENABLED"] = "true" // Helps to reduce noise by enabling only AspNet metrics.
+        };
         var webPort = TcpPortProvider.GetOpenPort();
-        await using var container = await StartContainerAsync(webPort);
+        await using var container = await IISContainerTestHelper.StartContainerAsync("testapplication-aspnet-netframework", webPort, environmentVariables, Output);
         await CallTestApplicationEndpoint(webPort);
 
         collector.AssertExpectations();
     }
 
-    private async Task<IContainer> StartContainerAsync(int webPort, string? appPoolMode = null)
+    private static string GetTestImageName(string appPoolMode)
     {
-        // get path to test application that the profiler will attach to
-        var imageName = appPoolMode == "Classic" ? "testapplication-aspnet-netframework-classic" : "testapplication-aspnet-netframework";
-
-        var networkName = await DockerNetworkHelper.SetupIntegrationTestsNetworkAsync();
-
-        var logPath = EnvironmentHelper.IsRunningOnCI()
-            ? Path.Combine(Environment.GetEnvironmentVariable("GITHUB_WORKSPACE"), "test-artifacts", "profiler-logs")
-            : Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), @"OpenTelemetry .NET AutoInstrumentation", "logs");
-        Directory.CreateDirectory(logPath);
-        Output.WriteLine("Collecting docker logs to: " + logPath);
-
-        var builder = new ContainerBuilder()
-            .WithImage(imageName)
-            .WithCleanUp(cleanUp: true)
-            .WithName($"{imageName}-{webPort}")
-            .WithNetwork(networkName)
-            .WithPortBinding(webPort, 80)
-            .WithBindMount(logPath, "c:/inetpub/wwwroot/logs");
-
-        foreach (var env in _environmentVariables)
-        {
-            builder = builder.WithEnvironment(env.Key, env.Value);
-        }
-
-        var container = builder.Build();
-        try
-        {
-            var wasStarted = container.StartAsync().Wait(TimeSpan.FromMinutes(5));
-            wasStarted.Should().BeTrue($"Container based on {imageName} has to be operational for the test.");
-            Output.WriteLine($"Container was started successfully.");
-
-            await HealthzHelper.TestAsync($"http://localhost:{webPort}/healthz", Output);
-            Output.WriteLine($"IIS WebApp was started successfully.");
-        }
-        catch
-        {
-            await container.DisposeAsync();
-            throw;
-        }
-
-        return container;
+        return appPoolMode == "Classic" ? "testapplication-aspnet-netframework-classic" : "testapplication-aspnet-netframework";
     }
 
     private async Task CallTestApplicationEndpoint(int webPort)
