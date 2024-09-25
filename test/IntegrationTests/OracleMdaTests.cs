@@ -31,8 +31,8 @@ public class OracleMdaTests : TestHelper
         foreach (var version in LibraryVersion.GetPlatformVersions(nameof(LibraryVersion.OracleMdaCore)))
 #endif
         {
-            theoryData.Add((string)version[0], true);
-            theoryData.Add((string)version[0], false);
+            theoryData.Add(version, true);
+            theoryData.Add(version, false);
         }
 
         return theoryData;

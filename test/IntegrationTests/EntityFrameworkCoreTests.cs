@@ -21,8 +21,8 @@ public class EntityFrameworkCoreTests : TestHelper
 
         foreach (var version in LibraryVersion.EntityFrameworkCore)
         {
-            theoryData.Add((string)version[0], true);
-            theoryData.Add((string)version[0], false);
+            theoryData.Add(version, true);
+            theoryData.Add(version, false);
         }
 
         return theoryData;

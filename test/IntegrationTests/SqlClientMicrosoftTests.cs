@@ -17,20 +17,10 @@ public class SqlClientMicrosoftTests : TestHelper
         _sqlServerFixture = sqlServerFixture;
     }
 
-    public static TheoryData<string> GetData()
-    {
-#if NETFRAMEWORK
-        // 3.1.* is not supported on .NET Framework. For details check: https://github.com/open-telemetry/opentelemetry-dotnet/issues/4243
-        return new TheoryData<string>(LibraryVersion.SqlClientMicrosoft.Where(x => !x.First().ToString().StartsWith("3.1.")).Select(x => (string)x[0]));
-#else
-        return LibraryVersion.SqlClientMicrosoft;
-#endif
-    }
-
     [SkippableTheory]
     [Trait("Category", "EndToEnd")]
     [Trait("Containers", "Linux")]
-    [MemberData(nameof(GetData))]
+    [MemberData(nameof(LibraryVersion.SqlClientMicrosoft), MemberType = typeof(LibraryVersion))]
     public void SubmitTraces(string packageVersion)
     {
         // Skip the test if fixture does not support current platform
