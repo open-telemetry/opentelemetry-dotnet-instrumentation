@@ -5,7 +5,7 @@
     <PackageVersion Include="Elastic.Clients.Elasticsearch" Version="8.15.6" />
     <PackageVersion Include="Confluent.Kafka" Version="2.5.3" />
     <PackageVersion Include="FluentAssertions" Version="6.12.1" />
-    <PackageVersion Include="Google.Protobuf" Version="3.28.1" />
+    <PackageVersion Include="Google.Protobuf" Version="3.28.2" />
     <PackageVersion Include="GraphQL" Version="8.0.2" />
     <PackageVersion Include="GraphQL.MicrosoftDI" Version="8.0.2" />
     <PackageVersion Include="GraphQL.Server.Transports.AspNetCore" Version="8.0.2" />
