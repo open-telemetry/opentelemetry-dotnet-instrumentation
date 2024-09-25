@@ -60,7 +60,7 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 - .NET only, following packages updated
   - `OpenTelemetry.Instrumentation.StackExchangeRedis` from `1.0.0-rc9.15` to `1.9.0-beta.1`.
 - .NET Framework only, following packages updated
-  - `Google.Protobuf` updated from `3.27.1` to `3.28.1`,
+  - `Google.Protobuf` updated from `3.27.1` to `3.28.2`,
   - `Grpc.Core.Api` from `2.63.0` to `2.65.0`,
   - `Microsoft.Extensions.Configuration.Binder` from `8.0.1` to `8.0.2`,
   - `System.Text.Json` from `8.0.3` to `8.0.4`.
