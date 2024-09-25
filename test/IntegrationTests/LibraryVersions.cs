@@ -17,7 +17,10 @@ public static partial class LibraryVersion
 
         if (LookupMap.TryGetValue(platformKey, out var platformVersions))
         {
-            anyPlatformVersions.AddRange(platformVersions.Select(theory => (string)theory[0]).ToArray());
+            foreach (var platformVersion in platformVersions)
+            {
+                anyPlatformVersions.Add(platformVersion);
+            }
         }
 
         return anyPlatformVersions;

@@ -101,7 +101,7 @@ internal static class PackageVersionDefinitions
             {
                 // new("1.1.4"), - high vulnerability https://github.com/dotnet/announcements/issues/292, test should be skipped
                 new("2.1.7"),
-                new("3.1.5"),
+                new("3.1.5", supportedTargetFrameworks: new[] { "net8.0", "net7.0", "net6.0" }, supportedExecutionFrameworks: new[] { "net8.0", "net7.0", "net6.0" }), // 3.1.* is not supported on .NET Framework. For details check: https://github.com/open-telemetry/opentelemetry-dotnet/issues/4243
                 new("4.0.5"),
                 new("*")
             }
