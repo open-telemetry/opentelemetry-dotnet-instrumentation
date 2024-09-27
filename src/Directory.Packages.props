@@ -12,7 +12,7 @@
   </ItemGroup>
   <!-- Versions from OpenTelemetry.AutoInstrumentation.csproj -->
   <ItemGroup>
-    <PackageVersion Include="MongoDB.Driver.Core.Extensions.DiagnosticSources" Version="1.4.0" />
+    <PackageVersion Include="MongoDB.Driver.Core.Extensions.DiagnosticSources" Version="1.5.0" />
     <PackageVersion Include="OpenTelemetry.Exporter.Prometheus.HttpListener" Version="1.9.0-beta.2" />
     <PackageVersion Include="OpenTelemetry.Exporter.Zipkin" Version="1.9.0" />
     <PackageVersion Include="OpenTelemetry.Extensions.Propagators" Version="1.9.0" />
@@ -20,17 +20,17 @@
     <PackageVersion Include="OpenTelemetry.Instrumentation.AspNetCore" Version="1.9.0" />
     <PackageVersion Include="OpenTelemetry.Instrumentation.EntityFrameworkCore" Version="1.0.0-beta.12" />
     <PackageVersion Include="OpenTelemetry.Instrumentation.GrpcNetClient" Version="1.9.0-beta.1" />
-    <PackageVersion Include="OpenTelemetry.Instrumentation.Process" Version="0.5.0-beta.6" />
+    <PackageVersion Include="OpenTelemetry.Instrumentation.Process" Version="0.5.0-beta.7" />
     <PackageVersion Include="OpenTelemetry.Instrumentation.Quartz" Version="1.0.0-beta.3" />
     <PackageVersion Include="OpenTelemetry.Instrumentation.Runtime" Version="1.9.0" />
     <PackageVersion Include="OpenTelemetry.Instrumentation.SqlClient" Version="1.9.0-beta.1" />
-    <PackageVersion Include="OpenTelemetry.Instrumentation.StackExchangeRedis" Version="1.0.0-rc9.15" />
+    <PackageVersion Include="OpenTelemetry.Instrumentation.StackExchangeRedis" Version="1.9.0-beta.1" />
     <PackageVersion Include="OpenTelemetry.Shims.OpenTracing" Version="1.9.0-beta.2" />
-    <PackageVersion Include="OpenTelemetry.Resources.Azure" Version="1.0.0-beta.8" />
+    <PackageVersion Include="OpenTelemetry.Resources.Azure" Version="1.0.0-beta.9" />
     <PackageVersion Include="OpenTelemetry.Resources.Container" Version="1.0.0-beta.9" />
-    <PackageVersion Include="OpenTelemetry.Resources.Host" Version="0.1.0-beta.2" />
-    <PackageVersion Include="OpenTelemetry.Resources.OperatingSystem" Version="0.1.0-alpha.2" />
-    <PackageVersion Include="OpenTelemetry.Resources.Process" Version="0.1.0-beta.2" />
+    <PackageVersion Include="OpenTelemetry.Resources.Host" Version="0.1.0-beta.3" />
+    <PackageVersion Include="OpenTelemetry.Resources.OperatingSystem" Version="0.1.0-alpha.4" />
+    <PackageVersion Include="OpenTelemetry.Resources.Process" Version="0.1.0-beta.3" />
     <PackageVersion Include="OpenTelemetry.Resources.ProcessRuntime" Version="0.1.0-beta.2" />
   </ItemGroup>
   <!-- Versions from SourceGenerators.csproj -->
@@ -40,33 +40,34 @@
   </ItemGroup>
   <!-- Versions from CommonExcludedAssets.props -->
   <ItemGroup>
-    <!-- Microsoft.Bcl.AsyncInterfaces is also referenced by the .NET Framework4.6.2. In this case is not excluded -->
-    <PackageVersion Include="DnsClient" Version="1.4.0" />
-    <PackageVersion Include="Microsoft.Bcl.AsyncInterfaces" Version="8.0.0" />
+    <PackageVersion Include="AWSSDK.Core" Version="3.7.100.14" />
+    <PackageVersion Include="AWSSDK.SecurityToken" Version="3.7.100.14" />
+    <PackageVersion Include="DnsClient" Version="1.6.1" />
     <PackageVersion Include="Microsoft.Win32.SystemEvents" Version="4.7.0" />
-    <PackageVersion Include="MongoDB.Bson" Version="2.13.3" />
-    <PackageVersion Include="MongoDB.Driver.Core" Version="2.13.3" />
-    <PackageVersion Include="MongoDB.Libmongocrypt" Version="1.2.2" />
-    <PackageVersion Include="Pipelines.Sockets.Unofficial" Version="2.1.16" />
-    <PackageVersion Include="SharpCompress" Version="0.23.0" />
-    <PackageVersion Include="StackExchange.Redis" Version="2.1.58" />
-    <PackageVersion Include="System.Configuration.ConfigurationManager" Version="4.7.0" />
-    <PackageVersion Include="System.Diagnostics.PerformanceCounter" Version="4.7.0" />
+    <PackageVersion Include="MongoDB.Bson" Version="2.28.0" />
+    <PackageVersion Include="MongoDB.Driver.Core" Version="2.28.0" />
+    <PackageVersion Include="MongoDB.Libmongocrypt" Version="1.11.0" />
+    <PackageVersion Include="Pipelines.Sockets.Unofficial" Version="2.2.8" />
+    <PackageVersion Include="SharpCompress" Version="0.30.1" />
+    <PackageVersion Include="Snappier" Version="1.0.0" />
+    <PackageVersion Include="StackExchange.Redis" Version="2.6.122" />
     <PackageVersion Include="System.Drawing.Common" Version="4.7.0" />
     <PackageVersion Include="System.Net.Http" Version="4.3.4" />
     <PackageVersion Include="System.Runtime.InteropServices.RuntimeInformation" Version="4.3.0" />
     <PackageVersion Include="System.Security.Cryptography.Algorithms" Version="4.3.0" />
     <PackageVersion Include="System.Security.Cryptography.Encoding" Version="4.3.0" />
     <PackageVersion Include="System.Security.Cryptography.Primitives" Version="4.3.0" />
-    <PackageVersion Include="System.Security.Cryptography.ProtectedData" Version="4.7.0" />
     <PackageVersion Include="System.Security.Cryptography.X509Certificates" Version="4.3.0" />
+    <PackageVersion Include="System.Text.Encoding.CodePages" Version="5.0.0" />
     <PackageVersion Include="System.Windows.Extensions" Version="4.7.0" />
+    <PackageVersion Include="ZstdSharp.Port" Version="0.7.3" />
   </ItemGroup>
   <ItemGroup Label="Transient dependencies auto-generated by GenerateNetFxTransientDependencies">
-    <PackageVersion Include="Google.Protobuf" Version="3.27.1" />
+    <PackageVersion Include="Google.Protobuf" Version="3.28.2" />
     <PackageVersion Include="Grpc" Version="2.46.6" />
     <PackageVersion Include="Grpc.Core" Version="2.46.6" />
-    <PackageVersion Include="Grpc.Core.Api" Version="2.64.0" />
+    <PackageVersion Include="Grpc.Core.Api" Version="2.66.0" />
+    <PackageVersion Include="Microsoft.Bcl.AsyncInterfaces" Version="8.0.0" />
     <PackageVersion Include="Microsoft.Extensions.Configuration" Version="8.0.0" />
     <PackageVersion Include="Microsoft.Extensions.Configuration.Abstractions" Version="8.0.0" />
     <PackageVersion Include="Microsoft.Extensions.Configuration.Binder" Version="8.0.2" />

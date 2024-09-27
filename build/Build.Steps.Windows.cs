@@ -9,7 +9,6 @@ using Nuke.Common.Tools.DotNet;
 using Nuke.Common.Tools.MSBuild;
 using Serilog;
 using static Nuke.Common.EnvironmentInfo;
-using static Nuke.Common.IO.FileSystemTasks;
 using static Nuke.Common.Tools.Docker.DockerTasks;
 using static Nuke.Common.Tools.DotNet.DotNetTasks;
 using static Nuke.Common.Tools.MSBuild.MSBuildTasks;
@@ -106,7 +105,7 @@ partial class Build
 
                 Log.Information($"Copying '{source}' to '{dest}'");
 
-                CopyFileToDirectory(source, dest, FileExistsPolicy.Overwrite);
+                source.CopyToDirectory(dest, ExistsPolicy.FileOverwrite);
             }
         });
 
@@ -149,6 +148,9 @@ partial class Build
 
             var wcfProject = Solution.GetProjectByName(Projects.Tests.Applications.WcfIis);
             BuildDockerImage(wcfProject);
+
+            var owinProject = Solution.GetProjectByName(Projects.Tests.Applications.OwinIis);
+            BuildDockerImage(owinProject);
         });
 
     void BuildDockerImage(Project project)
@@ -160,7 +162,7 @@ partial class Build
 
         try
         {
-            CopyFileToDirectory(sourceModulePath, localBinDirectory);
+            sourceModulePath.CopyToDirectory(localBinDirectory);
             TracerHomeDirectory.ZipTo(localTracerZip);
 
             PerformLegacyRestoreIfNeeded(project);

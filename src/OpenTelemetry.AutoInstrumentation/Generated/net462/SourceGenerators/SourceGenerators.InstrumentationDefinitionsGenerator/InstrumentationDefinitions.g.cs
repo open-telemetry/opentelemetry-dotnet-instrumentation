@@ -15,11 +15,9 @@ namespace OpenTelemetry.AutoInstrumentation;
 
 internal static partial class InstrumentationDefinitions
 {
-    private static readonly string AssemblyFullName = typeof(InstrumentationDefinitions).Assembly.FullName!;
-
     private static NativeCallTargetDefinition[] GetDefinitionsArray()
     {
-        var nativeCallTargetDefinitions = new List<NativeCallTargetDefinition>(16);
+        var nativeCallTargetDefinitions = new List<NativeCallTargetDefinition>(18);
         // Traces
         var tracerSettings = Instrumentation.TracerSettings.Value;
         if (tracerSettings.TracesEnabled)
@@ -45,13 +43,20 @@ internal static partial class InstrumentationDefinitions
             // MongoDB
             if (tracerSettings.EnabledInstrumentations.Contains(TracerInstrumentation.MongoDB))
             {
-                nativeCallTargetDefinitions.Add(new("MongoDB.Driver", "MongoDB.Driver.MongoClient", ".ctor", new[] {"System.Void", "MongoDB.Driver.MongoClientSettings"}, 2, 13, 3, 2, 65535, 65535, AssemblyFullName, "OpenTelemetry.AutoInstrumentation.Instrumentations.MongoDB.MongoClientIntegration"));
+                nativeCallTargetDefinitions.Add(new("MongoDB.Driver", "MongoDB.Driver.MongoClient", ".ctor", new[] {"System.Void", "MongoDB.Driver.MongoClientSettings"}, 2, 28, 0, 2, 65535, 65535, AssemblyFullName, "OpenTelemetry.AutoInstrumentation.Instrumentations.MongoDB.MongoClientIntegration"));
             }
 
             // NServiceBus
             if (tracerSettings.EnabledInstrumentations.Contains(TracerInstrumentation.NServiceBus))
             {
                 nativeCallTargetDefinitions.Add(new("NServiceBus.Core", "NServiceBus.EndpointConfiguration", ".ctor", new[] {"System.Void", "System.String"}, 8, 0, 0, 8, 65535, 65535, AssemblyFullName, "OpenTelemetry.AutoInstrumentation.Instrumentations.NServiceBus.EndpointConfigurationIntegration"));
+            }
+
+            // RabbitMq
+            if (tracerSettings.EnabledInstrumentations.Contains(TracerInstrumentation.RabbitMq))
+            {
+                nativeCallTargetDefinitions.Add(new("RabbitMQ.Client", "RabbitMQ.Client.Impl.ModelBase", "BasicGet", new[] {"RabbitMQ.Client.BasicGetResult", "System.String", "System.Boolean"}, 6, 0, 0, 6, 65535, 65535, AssemblyFullName, "OpenTelemetry.AutoInstrumentation.Instrumentations.RabbitMq6.Integrations.ModelBaseBasicGetIntegration"));
+                nativeCallTargetDefinitions.Add(new("RabbitMQ.Client", "RabbitMQ.Client.Framing.Impl.Model", "_Private_BasicPublish", new[] {"System.Void", "System.String", "System.String", "System.Boolean", "RabbitMQ.Client.IBasicProperties", "System.ReadOnlyMemory`1[System.Byte]"}, 6, 0, 0, 6, 65535, 65535, AssemblyFullName, "OpenTelemetry.AutoInstrumentation.Instrumentations.RabbitMq6.Integrations.ModelBasicPublishIntegration"));
             }
 
             // WcfClient

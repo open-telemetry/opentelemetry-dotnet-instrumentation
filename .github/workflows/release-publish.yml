@@ -13,9 +13,9 @@ jobs:
         uses: actions/setup-dotnet@6bd8b7f7774af54e05809fcc5431931b3eb1ddee # tag: v4.0.1
         with:
           dotnet-version: | 
-            6.0.424
+            6.0.425
             7.0.410
-            8.0.303
+            8.0.402
             
       - name: Test the PowerShell module instructions from README.md
         shell: powershell
@@ -54,13 +54,13 @@ jobs:
             log-dir: "/var/log/opentelemetry/dotnet"
           - machine: macos-15-large
             log-dir: "/var/log/opentelemetry/dotnet"
-          - machine: actuated-arm64-4cpu-8gb
+          - machine: otel-linux-arm64
             log-dir: "/var/log/opentelemetry/dotnet"
     runs-on: ${{ matrix.machine }}
     steps:
         
       - name: Setup ARM64 Environment Variables
-        if: ${{ matrix.machine == 'actuated-arm64-4cpu-8gb' }}
+        if: ${{ matrix.machine == 'otel-linux-arm64' }}
         run: |
           echo "DOTNET_INSTALL_DIR=~/.dotnet" >> $GITHUB_ENV
 
@@ -68,9 +68,9 @@ jobs:
         uses: actions/setup-dotnet@6bd8b7f7774af54e05809fcc5431931b3eb1ddee # tag: v4.0.1
         with:
           dotnet-version: | 
-            6.0.424
+            6.0.425
             7.0.410
-            8.0.303
+            8.0.402
 
       - name: Install MacOS CoreUtils
         if: ${{ runner.os == 'macOS' }}
@@ -107,14 +107,14 @@ jobs:
           - machine: ubuntu-20.04
             base-image: centos
             net-version: net7.0
-          - machine: actuated-arm64-4cpu-8gb
+          - machine: otel-linux-arm64
             base-image: alpine
             net-version: net8.0
     runs-on: ${{ matrix.machine }}
     steps:
 
       - name: Checkout
-        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # tag: v4.1.7
+        uses: actions/checkout@d632683dd7b4114ad314bca15554477dd762a938 # tag: v4.2.0
 
       - name: Test the Shell scripts from README.md in Docker container
         run: |

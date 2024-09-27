@@ -5,7 +5,6 @@ using Nuke.Common.IO;
 using Nuke.Common.Tools.DotNet;
 using Nuke.Common.Tools.NuGet;
 using Nuke.Common.Utilities.Collections;
-using static Nuke.Common.IO.FileSystemTasks;
 using static Nuke.Common.Tools.DotNet.DotNetTasks;
 
 partial class Build
@@ -53,8 +52,10 @@ partial class Build
                 "bin-alpine-x64/linux-musl-x64",
                 "bin-alpine-arm64/linux-musl-arm64",
                 "bin-ubuntu-20.04/linux-x64",
-                "bin-actuated-arm64-4cpu-8gb/linux-arm64",
+                "bin-otel-linux-arm64/linux-arm64",
                 "bin-macos-15-large/osx-x64",
+                "bin-otel-linux-arm64/linux-arm64",
+                "bin-macos-12/osx-x64",
                 "bin-windows-2022/win-x64",
                 "bin-windows-2022/win-x86"
             };
@@ -67,7 +68,7 @@ partial class Build
                 var destinationPath = baseRuntimeNativePath / "runtimes" / platformAndArchitecture / "native";
                 destinationPath.DeleteDirectory();
 
-                CopyDirectoryRecursively(sourcePath, destinationPath);
+                sourcePath.Copy(destinationPath);
             }
         });
 
@@ -173,6 +174,14 @@ partial class Build
                     .SetProjectFile(packagesTestApplicationProject)
                     .SetProperty("NuGetPackageVersion", VersionHelper.GetVersion())
                     .SetRuntime(MapToNet8RuntimeIdentifiers(RuntimeInformation.RuntimeIdentifier))
+                    .SetSelfContained(true)
+                    .SetConfiguration(BuildConfiguration)
+                    .SetPlatform(Platform));
+
+                // Build framework-dependent without specifying runtime identifier
+                DotNetBuild(s => s
+                    .SetProjectFile(packagesTestApplicationProject)
+                    .SetProperty("NuGetPackageVersion", VersionHelper.GetVersion())
                     .SetConfiguration(BuildConfiguration)
                     .SetPlatform(Platform));
             }

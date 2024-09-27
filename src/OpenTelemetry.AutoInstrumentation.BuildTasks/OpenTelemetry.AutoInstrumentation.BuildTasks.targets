@@ -5,16 +5,16 @@
       <InstrumentationTarget
         Include="MongoDB.Driver.Core"
         Condition="!$(SkippedInstrumentations.Contains('MongoDB.Driver.Core'))"
-        TargetNuGetPackageVersionRange="[2.13.3, 3.0.0)"
+        TargetNuGetPackageVersionRange="[2.28.0, 3.0.0)"
         InstrumentationNuGetPackageId="MongoDB.Driver.Core.Extensions.DiagnosticSources"
-        InstrumentationNuGetPackageVersion="1.4.0" />
+        InstrumentationNuGetPackageVersion="1.5.0" />
 
       <InstrumentationTarget
         Include="StackExchange.Redis"
         Condition="!$(SkippedInstrumentations.Contains('StackExchange.Redis')) AND !$(TargetFramework.StartsWith('net4'))"
-        TargetNuGetPackageVersionRange="[2.1.58, 3.0.0)"
+        TargetNuGetPackageVersionRange="[2.6.122, 3.0.0)"
         InstrumentationNuGetPackageId="OpenTelemetry.Instrumentation.StackExchangeRedis"
-        InstrumentationNuGetPackageVersion="1.0.0-rc9.15" />
+        InstrumentationNuGetPackageVersion="1.9.0-beta.1" />
 
     </ItemGroup>
 
@@ -30,7 +30,16 @@
       InstrumentationTargetItems="@(InstrumentationTarget)"
       RuntimeCopyLocalItems="@(RuntimeCopyLocalItems)"
       UseVerboseLog="$(UseVerboseLog)" />
-
   </Target>
+
+ <Target Name="VerifyIfRuntimeIdSpecified" BeforeTargets="Publish" Condition="'$(RuntimeIdentifier)' == '' AND $(DisableAutoInstrumentationCheckForRuntimeIdentifier) != 'true'">
+   <ItemGroup>
+    <Lines Include="RuntimeIdentifier (RID) is not set. Consider setting it to avoid copying native libraries for all of the platforms supported by the OpenTelemetry.AutoInstrumentation package." />
+    <Lines Include="See the docs at https://opentelemetry.io/docs/zero-code/net/nuget-packages/#using-the-nuget-packages for details." />
+    <Lines Include="In order to suppress this warning, set DisableAutoInstrumentationCheckForRuntimeIdentifier property to true." />
+   </ItemGroup>
+   <Warning Text="@(Lines, ' ')">
+   </Warning>
+ </Target>
 
 </Project>

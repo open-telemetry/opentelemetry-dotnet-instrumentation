@@ -1,6 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <ItemGroup>
+    <PackageReference Include="Newtonsoft.Json" />
     <PackageReference Include="Xunit.SkippableFact" />
   </ItemGroup>
 

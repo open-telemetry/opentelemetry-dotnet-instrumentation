@@ -39,7 +39,7 @@ internal static class PackageVersionDefinitions
             TestApplicationName = "TestApplication.EntityFrameworkCore",
             Versions = new List<PackageVersion>
             {
-                new("6.0.27"),
+                new("6.0.33"),
                 new("7.0.20"),
                 new("8.0.2", supportedTargetFrameworks: new[] { "net8.0" }, supportedExecutionFrameworks: new[] { "net8.0" }),
                 new("*", supportedTargetFrameworks: new[] { "net8.0" }, supportedExecutionFrameworks: new[] { "net8.0" })
@@ -66,6 +66,7 @@ internal static class PackageVersionDefinitions
             Versions = new List<GraphQLVersion>
             {
                 new("7.5.0") { MicrosoftDIVersion = "7.5.0", ServerTransportsAspNetCoreVersion = "7.5.0", ServerUIPlayground = "7.5.0" },
+                new("8.0.2") { MicrosoftDIVersion = "8.0.2", ServerTransportsAspNetCoreVersion = "8.0.2", ServerUIPlayground = "8.0.2" },
                 new("*") { MicrosoftDIVersion = "*", ServerTransportsAspNetCoreVersion = "*", ServerUIPlayground = "*" },
             }
         },
@@ -100,7 +101,7 @@ internal static class PackageVersionDefinitions
             {
                 // new("1.1.4"), - high vulnerability https://github.com/dotnet/announcements/issues/292, test should be skipped
                 new("2.1.7"),
-                new("3.1.5"),
+                new("3.1.5", supportedTargetFrameworks: new[] { "net8.0", "net7.0", "net6.0" }, supportedExecutionFrameworks: new[] { "net8.0", "net7.0", "net6.0" }), // 3.1.* is not supported on .NET Framework. For details check: https://github.com/open-telemetry/opentelemetry-dotnet/issues/4243
                 new("4.0.5"),
                 new("*")
             }
@@ -123,9 +124,7 @@ internal static class PackageVersionDefinitions
             TestApplicationName = "TestApplication.MongoDB",
             Versions = new List<PackageVersion>
             {
-                // new("2.13.3"), - high vulnerability https://github.com/advisories/GHSA-7j9m-j397-g4wx, <= 2.18.0 test should be skipped
-                // new("2.15.0"), - high vulnerability https://github.com/advisories/GHSA-7j9m-j397-g4wx, <= 2.18.0 test should be skipped
-                new("2.19.0"),
+                new("2.28.0"),
                 new("*")
             }
         },
@@ -171,6 +170,7 @@ internal static class PackageVersionDefinitions
             Versions = new List<PackageVersion>
             {
                 new("8.0.0"),
+                new("9.1.0", supportedTargetFrameworks: new[] { "net8.0" }, supportedExecutionFrameworks: new[] { "net8.0" }), // breaking change, new Meter name
                 new("*", supportedTargetFrameworks: new[] { "net8.0" }, supportedExecutionFrameworks: new[] { "net8.0" })
             }
         },
@@ -182,7 +182,7 @@ internal static class PackageVersionDefinitions
             Versions = new List<PackageVersion>
             {
                 new("23.4.0", supportedTargetFrameworks: new[] { "net472" }, supportedExecutionFrameworks: new[] { "net462" }),
-                new("*")
+                new("*", supportedTargetFrameworks: new[] { "net472" }, supportedExecutionFrameworks: new[] { "net462" })
             }
         },
         new()
@@ -214,10 +214,7 @@ internal static class PackageVersionDefinitions
             TestApplicationName = "TestApplication.StackExchangeRedis",
             Versions = new List<PackageVersion>
             {
-                new("2.0.495"),
-                new("2.1.50"),
-                new("2.5.61"),
-                new("2.6.66"),
+                new("2.6.122"),
                 new("*")
             }
         },
@@ -242,6 +239,18 @@ internal static class PackageVersionDefinitions
                 new("1.4.0", supportedPlatforms: new[] { "x64" }),
                 new("1.6.2"), // First version that supports both arm64 and x64
                 new("1.8.2"), // 1.8.0-1.8.1 are known to have issues with arm64
+                new("*")
+            }
+        },
+        new()
+        {
+            IntegrationName = "RabbitMq",
+            NugetPackageName = "RabbitMQ.Client",
+            TestApplicationName = "TestApplication.RabbitMq",
+            Versions = new List<PackageVersion>
+            {
+                new("6.0.0"),
+                new("6.8.1"),
                 new("*")
             }
         }

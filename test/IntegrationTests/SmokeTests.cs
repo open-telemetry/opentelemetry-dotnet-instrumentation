@@ -218,6 +218,47 @@ public class SmokeTests : TestHelper
         }
     }
 
+    [Fact]
+    [Trait("Category", "EndToEnd")]
+    public void ZipkinAndOtlpTracesExporter()
+    {
+        using var otlpCollector = new MockSpansCollector(Output);
+        SetExporter(otlpCollector);
+        otlpCollector.Expect("MyCompany.MyProduct.MyLibrary", span => span.Name == "SayHello");
+
+        using var zipkinCollector = new MockZipkinCollector(Output);
+        zipkinCollector.Expect(span => span.Name == "SayHello" && span.Tags?.GetValueOrDefault("otel.library.name") == "MyCompany.MyProduct.MyLibrary");
+
+        EnableOnlyHttpClientTraceInstrumentation();
+
+        SetEnvironmentVariable("OTEL_DOTNET_AUTO_TRACES_ADDITIONAL_SOURCES", "MyCompany.MyProduct.MyLibrary");
+        SetEnvironmentVariable("OTEL_TRACES_EXPORTER", "otlp,zipkin");
+        SetEnvironmentVariable("OTEL_EXPORTER_ZIPKIN_ENDPOINT", $"http://localhost:{zipkinCollector.Port}/api/v2/spans");
+        SetEnvironmentVariable("LONG_RUNNING", "true");
+
+        using var process = StartTestApplication();
+        using var helper = new ProcessHelper(process);
+
+        try
+        {
+            otlpCollector.AssertExpectations();
+
+            zipkinCollector.AssertExpectations();
+        }
+        finally
+        {
+            if (helper?.Process != null && !helper.Process.HasExited)
+            {
+                helper.Process.Kill();
+                helper.Process.WaitForExit();
+
+                Output.WriteLine("ProcessId: " + helper.Process.Id);
+                Output.WriteLine("Exit Code: " + helper.Process.ExitCode);
+                Output.WriteResult(helper);
+            }
+        }
+    }
+
 #if NETFRAMEWORK // The test is flaky on Linux and macOS, because of https://github.com/dotnet/runtime/issues/28658#issuecomment-462062760
     [Fact]
     [Trait("Category", "EndToEnd")]
@@ -226,6 +267,58 @@ public class SmokeTests : TestHelper
         EnableOnlyHttpClientTraceInstrumentation();
         SetEnvironmentVariable("LONG_RUNNING", "true");
         SetEnvironmentVariable("OTEL_METRICS_EXPORTER", "prometheus");
+        SetEnvironmentVariable("OTEL_DOTNET_AUTO_METRICS_ADDITIONAL_SOURCES", "MyCompany.MyProduct.MyLibrary");
+        const string defaultPrometheusMetricsEndpoint = "http://localhost:9464/metrics";
+
+        using var process = StartTestApplication();
+        using var helper = new ProcessHelper(process);
+
+        try
+        {
+            var assert = async () =>
+            {
+                var httpClient = new HttpClient
+                {
+                    Timeout = 5.Seconds()
+                };
+                var response = await httpClient.GetAsync(defaultPrometheusMetricsEndpoint);
+                response.StatusCode.Should().Be(HttpStatusCode.OK);
+
+                var content = await response.Content.ReadAsStringAsync();
+                Output.WriteLine("Raw metrics from Prometheus:");
+                Output.WriteLine(content);
+                content.Should().Contain("TYPE ", "should export any metric");
+            };
+            assert.Should().NotThrowAfterAsync(
+                waitTime: 1.Minutes(),
+                pollInterval: 1.Seconds());
+        }
+        finally
+        {
+            if (helper?.Process != null && !helper.Process.HasExited)
+            {
+                helper.Process.Kill();
+                helper.Process.WaitForExit();
+
+                Output.WriteLine("ProcessId: " + helper.Process.Id);
+                Output.WriteLine("Exit Code: " + helper.Process.ExitCode);
+                Output.WriteResult(helper);
+            }
+        }
+    }
+#endif
+
+#if NETFRAMEWORK
+    [Fact]
+    [Trait("Category", "EndToEnd")]
+    public void PrometheusAndOtlpMetricsExporter()
+    {
+        using var otlpCollector = new MockMetricsCollector(Output);
+        SetExporter(otlpCollector);
+
+        EnableOnlyHttpClientTraceInstrumentation();
+        SetEnvironmentVariable("LONG_RUNNING", "true");
+        SetEnvironmentVariable("OTEL_METRICS_EXPORTER", "otlp,prometheus");
         SetEnvironmentVariable("OTEL_DOTNET_AUTO_METRICS_ADDITIONAL_SOURCES", "MyCompany.MyProduct.MyLibrary");
         const string defaultPrometheusMetricsEndpoint = "http://localhost:9464/metrics";
 
@@ -509,6 +602,7 @@ public class SmokeTests : TestHelper
 
         resourceExpector.Expect("process.pid", processId);
         resourceExpector.Expect("host.name", Environment.MachineName);
+
 #if NETFRAMEWORK
         resourceExpector.Expect("process.runtime.name", ".NET Framework");
 #else
@@ -523,6 +617,10 @@ public class SmokeTests : TestHelper
             _ => throw new PlatformNotSupportedException($"Unknown platform")
         };
         resourceExpector.Expect("os.type", expectedPlatform);
+        resourceExpector.Exist("os.build_id");
+        resourceExpector.Exist("os.description");
+        resourceExpector.Exist("os.name");
+        resourceExpector.Exist("os.version");
     }
 
     private void VerifyTestApplicationInstrumented(TestAppStartupMode startupMode = TestAppStartupMode.Auto)

@@ -9,11 +9,6 @@ namespace OpenTelemetry.AutoInstrumentation.Configurations;
 internal enum MetricsExporter
 {
     /// <summary>
-    /// None exporter.
-    /// </summary>
-    None,
-
-    /// <summary>
     /// OTLP exporter.
     /// </summary>
     Otlp,
@@ -22,4 +17,9 @@ internal enum MetricsExporter
     /// Prometheus exporter.
     /// </summary>
     Prometheus,
+
+    /// <summary>
+    /// Console exporter.
+    /// </summary>
+    Console,
 }

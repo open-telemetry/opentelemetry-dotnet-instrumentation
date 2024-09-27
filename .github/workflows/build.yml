@@ -19,22 +19,22 @@ jobs:
             log-dir: "/var/log/opentelemetry/dotnet"
           - machine: macos-15-large
             log-dir: "/var/log/opentelemetry/dotnet"
-          - machine: actuated-arm64-4cpu-8gb
+          - machine: otel-linux-arm64
             log-dir: "/var/log/opentelemetry/dotnet"
     runs-on: ${{ matrix.machine }}
     steps:
 
       - name: ARM64 Runner Info
-        if: ${{ matrix.machine == 'actuated-arm64-4cpu-8gb' }}
+        if: ${{ matrix.machine == 'otel-linux-arm64' }}
         run: cat /etc/os-release
 
       - name: Checkout
-        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # tag: v4.1.7
+        uses: actions/checkout@d632683dd7b4114ad314bca15554477dd762a938 # tag: v4.2.0
         with:
           fetch-depth: 0 # fetching all, needed to correctly calculate version
 
       - name: Setup ARM64 Environment Variables
-        if: ${{ matrix.machine == 'actuated-arm64-4cpu-8gb' }}
+        if: ${{ matrix.machine == 'otel-linux-arm64' }}
         run: |
           echo "DOTNET_INSTALL_DIR=~/.dotnet" >> $GITHUB_ENV
 
@@ -42,9 +42,9 @@ jobs:
         uses: actions/setup-dotnet@6bd8b7f7774af54e05809fcc5431931b3eb1ddee # tag: v4.0.1
         with:
           dotnet-version: | 
-            6.0.424
+            6.0.425
             7.0.410
-            8.0.303
+            8.0.402
 
       - name: Check for NuGet packages cache
         uses: actions/cache@0c45773b623bea8c8e75f6c82b208c3cf94ea4f9 # tag: v4.0.2
@@ -66,7 +66,7 @@ jobs:
           path: ${{ env.NUGET_PACKAGES }}
 
       - name: Setup ARM64 Machine
-        if: ${{ matrix.machine == 'actuated-arm64-4cpu-8gb' }}
+        if: ${{ matrix.machine == 'otel-linux-arm64' }}
         run: |
           sudo apt-get update && \
           sudo apt-get install -y \
@@ -127,14 +127,14 @@ jobs:
 
       - name: Upload binaries
         if: always()
-        uses: actions/upload-artifact@0b2256b8c012f0828dc542b3febcab082c67f72b # tag: v4.3.4
+        uses: actions/upload-artifact@50769540e7f4bd5e21e526ee35c689e35e0d6874 # tag: v4.4.0
         with:
           name: bin-${{ matrix.machine }}
           path: bin/tracer-home
 
       - name: Upload installation scripts
         if: always()
-        uses: actions/upload-artifact@0b2256b8c012f0828dc542b3febcab082c67f72b # tag: v4.3.4
+        uses: actions/upload-artifact@50769540e7f4bd5e21e526ee35c689e35e0d6874 # tag: v4.4.0
         with:
           name: installation-scripts-${{ matrix.machine }}
           path: bin/installation-scripts

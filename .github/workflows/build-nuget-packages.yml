@@ -23,7 +23,7 @@ jobs:
     steps:
 
       - name: Checkout
-        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # tag: v4.1.7
+        uses: actions/checkout@d632683dd7b4114ad314bca15554477dd762a938 # tag: v4.2.0
         with:
           fetch-depth: 0 # fetching all, needed to correctly calculate version
 
@@ -31,9 +31,9 @@ jobs:
         uses: actions/setup-dotnet@6bd8b7f7774af54e05809fcc5431931b3eb1ddee # tag: v4.0.1
         with:
           dotnet-version: | 
-            6.0.424
+            6.0.425
             7.0.410
-            8.0.303
+            8.0.402
 
       - name: Check for NuGet packages cache
         uses: actions/cache@0c45773b623bea8c8e75f6c82b208c3cf94ea4f9 # tag: v4.0.2
@@ -57,8 +57,8 @@ jobs:
       - name: Download Ubuntu arm64 Artifacts from build job
         uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d16 # tag: v4.1.8
         with:
-          name: bin-actuated-arm64-4cpu-8gb
-          path: bin/ci-artifacts/bin-actuated-arm64-4cpu-8gb
+          name: bin-otel-linux-arm64
+          path: bin/ci-artifacts/bin-otel-linux-arm64
 
       - name: Download Alpine x64 Artifacts from build job
         uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d16 # tag: v4.1.8
@@ -102,7 +102,7 @@ jobs:
           }
         
       - name: Upload Nuget Artifacts
-        uses: actions/upload-artifact@0b2256b8c012f0828dc542b3febcab082c67f72b # tag: v4.3.4
+        uses: actions/upload-artifact@50769540e7f4bd5e21e526ee35c689e35e0d6874 # tag: v4.4.0
         with:
           name: bin-nuget-packages
           path: bin/nuget-artifacts/

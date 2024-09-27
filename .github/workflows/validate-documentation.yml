@@ -22,7 +22,7 @@ jobs:
     steps:
 
     - name: Checkout
-      uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # tag: v4.1.7
+      uses: actions/checkout@d632683dd7b4114ad314bca15554477dd762a938 # tag: v4.2.0
 
     - name: Run markdown links chceks
       if: ${{ !contains(github.event.pull_request.labels.*.name, 'release PR') }}
@@ -32,9 +32,9 @@ jobs:
         args: "--threads 1 --max-concurrency 1 --verbose --no-progress './**/*.md' './**/*.html'"
 
     - name: Run markdownlint
-      uses: streetsidesoftware/cspell-action@09c93825106ce5ca39a618d67b137cd61fddfd65 # tag: v6.7.0
+      uses: streetsidesoftware/cspell-action@934c74da3775ac844ec89503f666f67efb427fed # tag: v6.8.1
       with:
         files: '**/*.md'
 
     - name: Run cspell
-      uses: DavidAnson/markdownlint-cli2-action@b4c9feab76d8025d1e83c653fa3990936df0e6c8 # tag: v16.0.0
+      uses: DavidAnson/markdownlint-cli2-action@db43aef879112c3119a410d69f66701e0d530809 # tag: v17.0.0

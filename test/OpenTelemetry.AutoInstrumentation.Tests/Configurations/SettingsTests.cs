@@ -7,12 +7,14 @@ using OpenTelemetry.AutoInstrumentation.Configurations;
 using OpenTelemetry.Exporter;
 using Xunit;
 
+using AutoOtlpDefinitions = OpenTelemetry.AutoInstrumentation.Configurations.Otlp.OtlpSpecConfigDefinitions;
+
 namespace OpenTelemetry.AutoInstrumentation.Tests.Configurations;
 
 // use collection to indicate that tests should not be run
 // in parallel
 // see https://xunit.net/docs/running-tests-in-parallel
-[Collection("EventEmittingTests")]
+[Collection("Non-Parallel Collection")]
 public class SettingsTests : IDisposable
 {
     public SettingsTests()
@@ -35,7 +37,6 @@ public class SettingsTests : IDisposable
             settings.Plugins.Should().BeEmpty();
             settings.EnabledResourceDetectors.Should().NotBeEmpty();
             settings.FlushOnUnhandledException.Should().BeFalse();
-            settings.OtlpExportProtocol.Should().Be(OtlpExportProtocol.HttpProtobuf);
         }
     }
 
@@ -47,9 +48,7 @@ public class SettingsTests : IDisposable
         using (new AssertionScope())
         {
             settings.TracesEnabled.Should().BeTrue();
-            settings.TracesExporter.Should().Be(TracesExporter.Otlp);
-            settings.OtlpExportProtocol.Should().Be(OtlpExportProtocol.HttpProtobuf);
-            settings.ConsoleExporterEnabled.Should().BeFalse();
+            settings.TracesExporters.Should().Equal(TracesExporter.Otlp);
             settings.EnabledInstrumentations.Should().NotBeEmpty();
             settings.ActivitySources.Should().BeEquivalentTo(new List<string> { "OpenTelemetry.AutoInstrumentation.*" });
             settings.AdditionalLegacySources.Should().BeEmpty();
@@ -71,6 +70,12 @@ public class SettingsTests : IDisposable
             settings.InstrumentationOptions.HttpInstrumentationCaptureResponseHeaders.Should().BeEmpty();
             settings.InstrumentationOptions.OracleMdaSetDbStatementForText.Should().BeFalse();
             settings.InstrumentationOptions.SqlClientSetDbStatementForText.Should().BeFalse();
+
+            settings.OtlpSettings.Should().NotBeNull();
+            settings.OtlpSettings!.Protocol.Should().Be(OtlpExportProtocol.HttpProtobuf);
+            settings.OtlpSettings.Endpoint.Should().BeNull();
+            settings.OtlpSettings.Headers.Should().BeNull();
+            settings.OtlpSettings.TimeoutMilliseconds.Should().BeNull();
         }
     }
 
@@ -82,11 +87,15 @@ public class SettingsTests : IDisposable
         using (new AssertionScope())
         {
             settings.MetricsEnabled.Should().BeTrue();
-            settings.MetricExporter.Should().Be(MetricsExporter.Otlp);
-            settings.OtlpExportProtocol.Should().Be(OtlpExportProtocol.HttpProtobuf);
-            settings.ConsoleExporterEnabled.Should().BeFalse();
+            settings.MetricExporters.Should().Equal(MetricsExporter.Otlp);
             settings.EnabledInstrumentations.Should().NotBeEmpty();
             settings.Meters.Should().BeEmpty();
+
+            settings.OtlpSettings.Should().NotBeNull();
+            settings.OtlpSettings!.Protocol.Should().Be(OtlpExportProtocol.HttpProtobuf);
+            settings.OtlpSettings.Endpoint.Should().BeNull();
+            settings.OtlpSettings.Headers.Should().BeNull();
+            settings.OtlpSettings.TimeoutMilliseconds.Should().BeNull();
         }
     }
 
@@ -98,11 +107,15 @@ public class SettingsTests : IDisposable
         using (new AssertionScope())
         {
             settings.LogsEnabled.Should().BeTrue();
-            settings.LogExporter.Should().Be(LogExporter.Otlp);
-            settings.OtlpExportProtocol.Should().Be(OtlpExportProtocol.HttpProtobuf);
-            settings.ConsoleExporterEnabled.Should().BeFalse();
+            settings.LogExporters.Should().Equal(LogExporter.Otlp);
             settings.EnabledInstrumentations.Should().NotBeEmpty();
             settings.IncludeFormattedMessage.Should().BeFalse();
+
+            settings.OtlpSettings.Should().NotBeNull();
+            settings.OtlpSettings!.Protocol.Should().Be(OtlpExportProtocol.HttpProtobuf);
+            settings.OtlpSettings.Endpoint.Should().BeNull();
+            settings.OtlpSettings.Headers.Should().BeNull();
+            settings.OtlpSettings.TimeoutMilliseconds.Should().BeNull();
         }
     }
 
@@ -118,23 +131,39 @@ public class SettingsTests : IDisposable
     }
 
     [Theory]
-    [InlineData("none", TracesExporter.None)]
-    [InlineData("non-supported", TracesExporter.Otlp)]
-    [InlineData("otlp", TracesExporter.Otlp)]
-    [InlineData("zipkin", TracesExporter.Zipkin)]
-    internal void TracesExporter_SupportedValues(string tracesExporter, TracesExporter expectedTracesExporter)
+    [InlineData("", new[] { TracesExporter.Otlp })]
+    [InlineData("none", new TracesExporter[0])]
+    [InlineData("otlp", new[] { TracesExporter.Otlp })]
+    [InlineData("console", new[] { TracesExporter.Console })]
+    [InlineData("zipkin", new[] { TracesExporter.Zipkin })]
+    [InlineData("otlp,zipkin,console", new[] { TracesExporter.Otlp, TracesExporter.Zipkin, TracesExporter.Console })]
+    [InlineData("none,zipkin", new[] { TracesExporter.Zipkin })]
+    [InlineData("otlp,none", new[] { TracesExporter.Otlp })]
+    [InlineData("non-supported", new TracesExporter[0])]
+    [InlineData("non-supported,none", new TracesExporter[0])]
+    [InlineData("zipkin,non-supported,none", new[] { TracesExporter.Zipkin })]
+    [InlineData("otlp,otlp", new[] { TracesExporter.Otlp })]
+    [InlineData("otlp, ,console", new[] { TracesExporter.Otlp, TracesExporter.Console })]
+    [InlineData("otlp, , console", new[] { TracesExporter.Otlp })]
+    [InlineData("otlp,,,", new[] { TracesExporter.Otlp })]
+    internal void TracesExporters(string tracesExporters, TracesExporter[] expectedTracesExporters)
     {
-        Environment.SetEnvironmentVariable(ConfigurationKeys.Traces.Exporter, tracesExporter);
+        Environment.SetEnvironmentVariable(ConfigurationKeys.Traces.Exporter, tracesExporters);
 
         var settings = Settings.FromDefaultSources<TracerSettings>(false);
 
-        settings.TracesExporter.Should().Be(expectedTracesExporter);
+        settings.TracesExporters.Should().Equal(expectedTracesExporters);
     }
 
-    [Fact]
-    internal void TracesExporter_FailFast()
+    [Theory]
+    [InlineData("non-supported")]
+    [InlineData("otlp,otlp")]
+    [InlineData("otlp, ,console")]
+    [InlineData("otlp, console")]
+    [InlineData("otlp,,,")]
+    internal void TracesExporters_FailFast(string tracesExporters)
     {
-        Environment.SetEnvironmentVariable(ConfigurationKeys.Traces.Exporter, "not-supported");
+        Environment.SetEnvironmentVariable(ConfigurationKeys.Traces.Exporter, tracesExporters);
 
         var action = () => Settings.FromDefaultSources<TracerSettings>(true);
 
@@ -142,23 +171,39 @@ public class SettingsTests : IDisposable
     }
 
     [Theory]
-    [InlineData("none", MetricsExporter.None)]
-    [InlineData("non-supported", MetricsExporter.Otlp)]
-    [InlineData("otlp", MetricsExporter.Otlp)]
-    [InlineData("prometheus", MetricsExporter.Prometheus)]
-    internal void MetricExporter_SupportedValues(string metricExporter, MetricsExporter expectedMetricsExporter)
+    [InlineData("", new[] { MetricsExporter.Otlp })]
+    [InlineData("none", new MetricsExporter[0])]
+    [InlineData("otlp", new[] { MetricsExporter.Otlp })]
+    [InlineData("prometheus", new[] { MetricsExporter.Prometheus })]
+    [InlineData("console", new[] { MetricsExporter.Console })]
+    [InlineData("otlp,prometheus,console", new[] { MetricsExporter.Otlp, MetricsExporter.Prometheus, MetricsExporter.Console })]
+    [InlineData("prometheus,none", new[] { MetricsExporter.Prometheus })]
+    [InlineData("non-supported", new MetricsExporter[0])]
+    [InlineData("non-supported,none", new MetricsExporter[0])]
+    [InlineData("prometheus,non-supported,none", new[] { MetricsExporter.Prometheus })]
+    [InlineData("otlp,non-supported,none", new[] { MetricsExporter.Otlp })]
+    [InlineData("otlp,otlp", new[] { MetricsExporter.Otlp })]
+    [InlineData("otlp, ,console", new[] { MetricsExporter.Otlp, MetricsExporter.Console })]
+    [InlineData("otlp, , console", new[] { MetricsExporter.Otlp })]
+    [InlineData("otlp,,,", new[] { MetricsExporter.Otlp })]
+    internal void MetricExporters(string metricExporters, MetricsExporter[] expectedMetricsExporters)
     {
-        Environment.SetEnvironmentVariable(ConfigurationKeys.Metrics.Exporter, metricExporter);
+        Environment.SetEnvironmentVariable(ConfigurationKeys.Metrics.Exporter, metricExporters);
 
         var settings = Settings.FromDefaultSources<MetricSettings>(false);
 
-        settings.MetricExporter.Should().Be(expectedMetricsExporter);
+        settings.MetricExporters.Should().Equal(expectedMetricsExporters);
     }
 
-    [Fact]
-    internal void MetricExporter_FailFast()
+    [Theory]
+    [InlineData("non-supported")]
+    [InlineData("otlp,otlp")]
+    [InlineData("otlp, ,console")]
+    [InlineData("otlp, console")]
+    [InlineData("otlp,,,")]
+    internal void MetricExporters_FailFast(string metricExporters)
     {
-        Environment.SetEnvironmentVariable(ConfigurationKeys.Metrics.Exporter, "not-supported");
+        Environment.SetEnvironmentVariable(ConfigurationKeys.Metrics.Exporter, metricExporters);
 
         var action = () => Settings.FromDefaultSources<MetricSettings>(true);
 
@@ -166,22 +211,38 @@ public class SettingsTests : IDisposable
     }
 
     [Theory]
-    [InlineData("none", LogExporter.None)]
-    [InlineData("non-supported", LogExporter.Otlp)]
-    [InlineData("otlp", LogExporter.Otlp)]
-    internal void LogExporter_SupportedValues(string logExporter, LogExporter expectedLogExporter)
+    [InlineData("", new[] { LogExporter.Otlp })]
+    [InlineData("none", new LogExporter[0])]
+    [InlineData("otlp", new[] { LogExporter.Otlp })]
+    [InlineData("console", new[] { LogExporter.Console })]
+    [InlineData("otlp,none", new[] { LogExporter.Otlp })]
+    [InlineData("otlp,console", new[] { LogExporter.Otlp, LogExporter.Console })]
+    [InlineData("none,otlp", new[] { LogExporter.Otlp })]
+    [InlineData("non-supported", new LogExporter[0])]
+    [InlineData("non-supported,none", new LogExporter[0])]
+    [InlineData("non-supported,none,otlp", new[] { LogExporter.Otlp })]
+    [InlineData("otlp,otlp", new[] { LogExporter.Otlp })]
+    [InlineData("otlp, ,console", new[] { LogExporter.Otlp, LogExporter.Console })]
+    [InlineData("otlp, console", new[] { LogExporter.Otlp })]
+    [InlineData("otlp,,,", new[] { LogExporter.Otlp })]
+    internal void LogExporters(string logExporters, LogExporter[] expectedLogExporters)
     {
-        Environment.SetEnvironmentVariable(ConfigurationKeys.Logs.Exporter, logExporter);
+        Environment.SetEnvironmentVariable(ConfigurationKeys.Logs.Exporter, logExporters);
 
         var settings = Settings.FromDefaultSources<LogSettings>(false);
 
-        settings.LogExporter.Should().Be(expectedLogExporter);
+        settings.LogExporters.Should().Equal(expectedLogExporters);
     }
 
-    [Fact]
-    internal void LogExporter_FailFast()
+    [Theory]
+    [InlineData("non-supported")]
+    [InlineData("otlp,otlp")]
+    [InlineData("otlp, ,console")]
+    [InlineData("otlp, console")]
+    [InlineData("otlp,,,")]
+    internal void LogExporters_FailFast(string logExporters)
     {
-        Environment.SetEnvironmentVariable(ConfigurationKeys.Logs.Exporter, "not-supported");
+        Environment.SetEnvironmentVariable(ConfigurationKeys.Logs.Exporter, logExporters);
 
         var action = () => Settings.FromDefaultSources<LogSettings>(true);
 
@@ -189,16 +250,21 @@ public class SettingsTests : IDisposable
     }
 
     [Theory]
-    [InlineData(null, new Propagator[] { })]
-    [InlineData("not-supported", new Propagator[] { })]
-    [InlineData("not-supported1,not-supported2", new Propagator[] { })]
+    [InlineData(null, new Propagator[0])]
+    [InlineData("", new Propagator[0])]
     [InlineData("tracecontext", new[] { Propagator.W3CTraceContext })]
     [InlineData("baggage", new[] { Propagator.W3CBaggage })]
     [InlineData("b3multi", new[] { Propagator.B3Multi })]
     [InlineData("b3", new[] { Propagator.B3Single })]
-    [InlineData("not-supported,b3", new Propagator[] { Propagator.B3Single })]
     [InlineData("tracecontext,baggage,b3multi,b3", new[] { Propagator.W3CTraceContext, Propagator.W3CBaggage, Propagator.B3Multi, Propagator.B3Single })]
-    internal void Propagators_SupportedValues(string? propagators, Propagator[] expectedPropagators)
+    [InlineData("not-supported", new Propagator[0])]
+    [InlineData("not-supported1,not-supported2", new Propagator[0])]
+    [InlineData("not-supported,b3", new[] { Propagator.B3Single })]
+    [InlineData("tracecontext,tracecontext", new[] { Propagator.W3CTraceContext })]
+    [InlineData("tracecontext, ,b3multi", new[] { Propagator.W3CTraceContext, Propagator.B3Multi })]
+    [InlineData("tracecontext, b3multi", new[] { Propagator.W3CTraceContext })]
+    [InlineData("tracecontext,,,", new[] { Propagator.W3CTraceContext })]
+    internal void Propagators(string? propagators, Propagator[] expectedPropagators)
     {
         Environment.SetEnvironmentVariable(ConfigurationKeys.Sdk.Propagators, propagators);
 
@@ -207,10 +273,15 @@ public class SettingsTests : IDisposable
         settings.Propagators.Should().BeEquivalentTo(expectedPropagators);
     }
 
-    [Fact]
-    internal void Propagators_FailFast()
+    [Theory]
+    [InlineData("not-supported")]
+    [InlineData("tracecontext,tracecontext")]
+    [InlineData("tracecontext, ,b3multi")]
+    [InlineData("tracecontext, baggage")]
+    [InlineData("tracecontext,,,")]
+    internal void Propagators_FailFast(string propagators)
     {
-        Environment.SetEnvironmentVariable(ConfigurationKeys.Sdk.Propagators, "not-supported");
+        Environment.SetEnvironmentVariable(ConfigurationKeys.Sdk.Propagators, propagators);
 
         var action = () => Settings.FromDefaultSources<SdkSettings>(true);
 
@@ -252,6 +323,7 @@ public class SettingsTests : IDisposable
     [InlineData("ELASTICTRANSPORT", TracerInstrumentation.ElasticTransport)]
     [InlineData("KAFKA", TracerInstrumentation.Kafka)]
     [InlineData("ORACLEMDA", TracerInstrumentation.OracleMda)]
+    [InlineData("RABBITMQ", TracerInstrumentation.RabbitMq)]
     internal void TracerSettings_Instrumentations_SupportedValues(string tracerInstrumentation, TracerInstrumentation expectedTracerInstrumentation)
     {
         Environment.SetEnvironmentVariable(ConfigurationKeys.Traces.TracesInstrumentationEnabled, "false");
@@ -315,12 +387,13 @@ public class SettingsTests : IDisposable
     [InlineData("nonExistingProtocol", null)]
     internal void OtlpExportProtocol_DependsOnCorrespondingEnvVariable(string? otlpProtocol, OtlpExportProtocol? expectedOtlpExportProtocol)
     {
-        Environment.SetEnvironmentVariable(ConfigurationKeys.ExporterOtlpProtocol, otlpProtocol);
+        Environment.SetEnvironmentVariable(AutoOtlpDefinitions.DefaultProtocolEnvVarName, otlpProtocol);
 
         var settings = Settings.FromDefaultSources<TracerSettings>(false);
 
         // null values for expected data will be handled by OTel .NET SDK
-        settings.OtlpExportProtocol.Should().Be(expectedOtlpExportProtocol);
+        settings.OtlpSettings.Should().NotBeNull();
+        settings.OtlpSettings!.Protocol.Should().Be(expectedOtlpExportProtocol);
     }
 
     [Theory]
@@ -380,7 +453,7 @@ public class SettingsTests : IDisposable
         }
 
         Environment.SetEnvironmentVariable(ConfigurationKeys.Traces.Exporter, null);
-        Environment.SetEnvironmentVariable(ConfigurationKeys.ExporterOtlpProtocol, null);
+        Environment.SetEnvironmentVariable(AutoOtlpDefinitions.DefaultProtocolEnvVarName, null);
         Environment.SetEnvironmentVariable(ConfigurationKeys.FlushOnUnhandledException, null);
         Environment.SetEnvironmentVariable(ConfigurationKeys.ResourceDetectorEnabled, null);
 

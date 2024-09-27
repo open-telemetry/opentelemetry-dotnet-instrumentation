@@ -32,14 +32,14 @@ jobs:
       fail-fast: false
       matrix:
         test-tfm: [ net8.0, net7.0, net6.0, net462 ]
-        machine: [ windows-2022, ubuntu-20.04, macos-15-large, actuated-arm64-4cpu-8gb ]
+        machine: [ windows-2022, ubuntu-20.04, macos-15-large, otel-linux-arm64 ]
         exclude:
           - test-tfm: net462
             machine: macos-15-large
           - test-tfm: net462
             machine: ubuntu-20.04
           - test-tfm: net462
-            machine: actuated-arm64-4cpu-8gb
+            machine: otel-linux-arm64
         include:
           - machine: windows-2022
             containers: none
@@ -47,18 +47,18 @@ jobs:
             containers: linux
           - machine: macos-15-large
             containers: none
-          - machine: actuated-arm64-4cpu-8gb
+          - machine: otel-linux-arm64
             containers: linux
     runs-on: ${{ matrix.machine }}
     steps:
 
       - name: Checkout
-        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # tag: v4.1.7
+        uses: actions/checkout@d632683dd7b4114ad314bca15554477dd762a938 # tag: v4.2.0
         with:
           fetch-depth: 0 # fetching all, needed to correctly calculate version
 
       - name: Setup ARM64 Environment Variables
-        if: ${{ matrix.machine == 'actuated-arm64-4cpu-8gb' }}
+        if: ${{ matrix.machine == 'otel-linux-arm64' }}
         run: |
           echo "DOTNET_INSTALL_DIR=~/.dotnet" >> $GITHUB_ENV
 
@@ -66,9 +66,9 @@ jobs:
         uses: actions/setup-dotnet@6bd8b7f7774af54e05809fcc5431931b3eb1ddee # tag: v4.0.1
         with:
           dotnet-version: | 
-            6.0.424
+            6.0.425
             7.0.410
-            8.0.303
+            8.0.402
 
       - name: Check for NuGet packages cache
         uses: actions/cache@0c45773b623bea8c8e75f6c82b208c3cf94ea4f9 # tag: v4.0.2
@@ -90,7 +90,7 @@ jobs:
           install: localdb
       
       - name: Setup ARM64 Machine
-        if: ${{ matrix.machine == 'actuated-arm64-4cpu-8gb' }}
+        if: ${{ matrix.machine == 'otel-linux-arm64' }}
         run: |
           sudo apt-get update && \
           sudo apt-get install -y \
@@ -103,7 +103,7 @@ jobs:
 
       - name: Upload test logs
         if: always()
-        uses: actions/upload-artifact@0b2256b8c012f0828dc542b3febcab082c67f72b # tag: v4.3.4
+        uses: actions/upload-artifact@50769540e7f4bd5e21e526ee35c689e35e0d6874 # tag: v4.4.0
         with:
           name: test-logs-${{ matrix.machine }}-${{ matrix.test-tfm }}-containers-${{ matrix.containers }}
           path: test-artifacts/
@@ -123,7 +123,7 @@ jobs:
     steps:
 
       - name: Checkout
-        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # tag: v4.1.7
+        uses: actions/checkout@d632683dd7b4114ad314bca15554477dd762a938 # tag: v4.2.0
         with:
           fetch-depth: 0 # fetching all, needed to correctly calculate version
 
@@ -131,9 +131,9 @@ jobs:
         uses: actions/setup-dotnet@6bd8b7f7774af54e05809fcc5431931b3eb1ddee # tag: v4.0.1
         with:
           dotnet-version: | 
-            6.0.424
+            6.0.425
             7.0.410
-            8.0.303
+            8.0.402
 
       - name: Check for NuGet packages cache
         uses: actions/cache@0c45773b623bea8c8e75f6c82b208c3cf94ea4f9 # tag: v4.0.2
@@ -163,7 +163,7 @@ jobs:
     steps:
 
       - name: Checkout
-        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # tag: v4.1.7
+        uses: actions/checkout@d632683dd7b4114ad314bca15554477dd762a938 # tag: v4.2.0
         with:
           fetch-depth: 0 # fetching all, needed to correctly calculate version
 
@@ -171,9 +171,9 @@ jobs:
         uses: actions/setup-dotnet@6bd8b7f7774af54e05809fcc5431931b3eb1ddee # tag: v4.0.1
         with:
           dotnet-version: | 
-            6.0.424
+            6.0.425
             7.0.410
-            8.0.303
+            8.0.402
 
       - name: Check for NuGet packages cache
         uses: actions/cache@0c45773b623bea8c8e75f6c82b208c3cf94ea4f9 # tag: v4.0.2
@@ -196,7 +196,7 @@ jobs:
 
       - name: Upload test logs
         if: always()
-        uses: actions/upload-artifact@0b2256b8c012f0828dc542b3febcab082c67f72b # tag: v4.3.4
+        uses: actions/upload-artifact@50769540e7f4bd5e21e526ee35c689e35e0d6874 # tag: v4.4.0
         with:
           name: test-logs-${{ matrix.machine }}-containers-${{ matrix.containers }}
           path: test-artifacts/
@@ -219,20 +219,20 @@ jobs:
             base-image: debian
             build-source: ubuntu-20.04
             os-type: linux-glibc
-          - machine: actuated-arm64-4cpu-8gb
+          - machine: otel-linux-arm64
             base-image: alpine
             build-source: alpine-arm64
             os-type: linux-musl
-          - machine: actuated-arm64-4cpu-8gb
+          - machine: otel-linux-arm64
             base-image: debian-arm64
-            build-source: actuated-arm64-4cpu-8gb
+            build-source: otel-linux-arm64
             os-type: linux-glibc
     runs-on: ${{ matrix.machine }}
     timeout-minutes: 60
     steps:
 
     - name: Checkout
-      uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # tag: v4.1.7
+      uses: actions/checkout@d632683dd7b4114ad314bca15554477dd762a938 # tag: v4.2.0
       with:
         fetch-depth: 0 # fetching all, needed to correctly calculate version
 
@@ -258,17 +258,17 @@ jobs:
           - machine: ubuntu-20.04
           - machine: macos-15-large
           - machine: windows-2022
-          - machine: actuated-arm64-4cpu-8gb
+          - machine: otel-linux-arm64
     runs-on: ${{ matrix.machine }}
     steps:
       
       - name: Checkout
-        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # tag: v4.1.7
+        uses: actions/checkout@d632683dd7b4114ad314bca15554477dd762a938 # tag: v4.2.0
         with:
           fetch-depth: 0 # fetching all, needed to correctly calculate version
 
       - name: Setup ARM64 Environment Variables
-        if: ${{ matrix.machine == 'actuated-arm64-4cpu-8gb' }}
+        if: ${{ matrix.machine == 'otel-linux-arm64' }}
         run: |
           echo "DOTNET_INSTALL_DIR=~/.dotnet" >> $GITHUB_ENV
 
@@ -276,9 +276,9 @@ jobs:
         uses: actions/setup-dotnet@6bd8b7f7774af54e05809fcc5431931b3eb1ddee # tag: v4.0.1
         with:
           dotnet-version: | 
-            6.0.424
+            6.0.425
             7.0.410
-            8.0.303
+            8.0.402
 
       - name: Check for NuGet packages cache
         uses: actions/cache@0c45773b623bea8c8e75f6c82b208c3cf94ea4f9 # tag: v4.0.2

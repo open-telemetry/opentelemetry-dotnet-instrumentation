@@ -1,47 +1,48 @@
 <Project>
   <Import Project="..\Directory.Packages.props" />
   <ItemGroup>
-    <PackageVersion Include="Azure.Storage.Blobs" Version="12.20.0" />
-    <PackageVersion Include="Elastic.Clients.Elasticsearch" Version="8.14.4" />
-    <PackageVersion Include="Confluent.Kafka" Version="2.4.0" />
-    <PackageVersion Include="FluentAssertions" Version="6.12.0" />
-    <PackageVersion Include="Google.Protobuf" Version="3.27.2" />
-    <PackageVersion Include="GraphQL" Version="7.8.0" />
-    <PackageVersion Include="GraphQL.MicrosoftDI" Version="7.8.0" />
-    <PackageVersion Include="GraphQL.Server.Transports.AspNetCore" Version="7.7.1" />
-    <PackageVersion Include="GraphQL.Server.Ui.Playground" Version="7.7.1" />
-    <PackageVersion Include="Grpc.AspNetCore" Version="2.63.0" />
-    <PackageVersion Include="Grpc.Net.Client" Version="2.63.0" />
-    <PackageVersion Include="Grpc.Net.Client.Web" Version="2.63.0" />
-    <PackageVersion Include="Grpc.Tools" Version="2.65.0" />
-    <PackageVersion Include="MassTransit" Version="8.2.3" />
-    <PackageVersion Include="Microsoft.AspNetCore.SignalR.Client" Version="8.0.6" />
+    <PackageVersion Include="Azure.Storage.Blobs" Version="12.22.0" />
+    <PackageVersion Include="Elastic.Clients.Elasticsearch" Version="8.15.6" />
+    <PackageVersion Include="Confluent.Kafka" Version="2.5.3" />
+    <PackageVersion Include="FluentAssertions" Version="6.12.1" />
+    <PackageVersion Include="Google.Protobuf" Version="3.28.2" />
+    <PackageVersion Include="GraphQL" Version="8.0.2" />
+    <PackageVersion Include="GraphQL.MicrosoftDI" Version="8.0.2" />
+    <PackageVersion Include="GraphQL.Server.Transports.AspNetCore" Version="8.0.2" />
+    <PackageVersion Include="GraphQL.Server.Ui.Playground" Version="8.0.2" />
+    <PackageVersion Include="Grpc.AspNetCore" Version="2.65.0" />
+    <PackageVersion Include="Grpc.Net.Client" Version="2.66.0" />
+    <PackageVersion Include="Grpc.Net.Client.Web" Version="2.65.0" />
+    <PackageVersion Include="Grpc.Tools" Version="2.66.0" />
+    <PackageVersion Include="MassTransit" Version="8.2.5" />
+    <PackageVersion Include="Microsoft.AspNetCore.SignalR.Client" Version="8.0.8" />
     <PackageVersion Include="Microsoft.Build" Version="15.9.20" />
     <PackageVersion Include="Microsoft.Build.Utilities.Core" Version="15.9.20" />
-    <PackageVersion Include="Microsoft.Data.SqlClient" Version="5.2.1" />
-    <PackageVersion Include="Microsoft.EntityFrameworkCore.Sqlite" Version="8.0.6" />
+    <PackageVersion Include="Microsoft.Data.SqlClient" Version="5.2.2" />
+    <PackageVersion Include="Microsoft.EntityFrameworkCore.Sqlite" Version="8.0.8" />
     <PackageVersion Include="Microsoft.Extensions.Configuration.Abstractions" Version="8.0.0" />
     <PackageVersion Include="Microsoft.Extensions.DependencyInjection" Version="8.0.0" />
     <PackageVersion Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="8.0.1" />
     <PackageVersion Include="Microsoft.Extensions.Hosting" Version="8.0.0" />
     <PackageVersion Include="Microsoft.Extensions.Logging" Version="8.0.0" />
-    <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="17.10.0" />
-    <PackageVersion Include="MongoDB.Driver" Version="2.27.0" />
+    <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="17.11.1" />
+    <PackageVersion Include="MongoDB.Driver" Version="2.29.0" />
     <PackageVersion Include="NSubstitute" Version="5.1.0" />
     <PackageVersion Include="MySqlConnector" Version="2.3.7" />
     <PackageVersion Include="MySql.Data" Version="9.0.0" />
-    <PackageVersion Include="NServiceBus" Version="9.0.2" />
+    <PackageVersion Include="NServiceBus" Version="9.2.2" />
     <PackageVersion Include="Newtonsoft.Json" Version="13.0.3" />
-    <PackageVersion Include="Npgsql" Version="8.0.3" />
+    <PackageVersion Include="Npgsql" Version="8.0.4" />
     <PackageVersion Include="NuGet.Versioning" Version="6.5.0" />
     <PackageVersion Include="OpenTracing" Version="0.12.1" />
-    <PackageVersion Include="Oracle.ManagedDataAccess" Version="23.4.0" />
-    <PackageVersion Include="Oracle.ManagedDataAccess.Core" Version="23.4.0" />
+    <PackageVersion Include="Oracle.ManagedDataAccess" Version="23.5.1" />
+    <PackageVersion Include="Oracle.ManagedDataAccess.Core" Version="23.5.1" />
     <PackageVersion Include="Pomelo.EntityFrameworkCore.MySql" Version="8.0.2" />
-    <PackageVersion Include="Quartz" Version="3.10.0" />
-    <PackageVersion Include="Quartz.Extensions.DependencyInjection" Version="3.10.0" />
-    <PackageVersion Include="Quartz.Extensions.Hosting" Version="3.10.0" />
-    <PackageVersion Include="StackExchange.Redis" Version="2.8.0" />
+    <PackageVersion Include="Quartz" Version="3.13.0" />
+    <PackageVersion Include="Quartz.Extensions.DependencyInjection" Version="3.13.0" />
+    <PackageVersion Include="Quartz.Extensions.Hosting" Version="3.13.0" />
+    <PackageVersion Include="RabbitMQ.Client" Version="6.8.1" />
+    <PackageVersion Include="StackExchange.Redis" Version="2.8.12" />
     <PackageVersion Include="StrongNamer" Version="0.2.5" />
     <PackageVersion Include="System.Collections.Immutable" Version="8.0.0" />
     <PackageVersion Include="System.Data.SqlClient" Version="4.8.6" />
@@ -52,9 +53,9 @@
     <PackageVersion Include="System.ServiceModel.Http" Version="6.2.0" />
     <PackageVersion Include="System.ServiceModel.NetTcp" Version="6.2.0" />
     <PackageVersion Include="System.ValueTuple" Version="4.5.0" />
-    <PackageVersion Include="Testcontainers" Version="3.9.0" />
+    <PackageVersion Include="Testcontainers" Version="3.10.0" />
     <PackageVersion Include="Verify.Xunit" Version="20.8.2" />
-    <PackageVersion Include="xunit" Version="2.9.0" />
+    <PackageVersion Include="xunit" Version="2.9.1" />
     <PackageVersion Include="xunit.abstractions" Version="2.0.3" />
     <PackageVersion Include="xunit.runner.visualstudio" Version="2.8.2" />
     <PackageVersion Include="Xunit.SkippableFact" Version="1.4.13" />

@@ -20,7 +20,7 @@ public static partial class LibraryVersion
             new List<PackageBuildInfo>
             {
                 new("12.13.0"),
-                new("12.20.0"),
+                new("12.22.0"),
             }
         },
         {
@@ -29,17 +29,17 @@ public static partial class LibraryVersion
             {
                 new("8.0.0"),
                 new("8.10.0"),
-                new("8.14.4"),
+                new("8.15.6"),
             }
         },
         {
             "TestApplication.EntityFrameworkCore",
             new List<PackageBuildInfo>
             {
-                new("6.0.27"),
+                new("6.0.33"),
                 new("7.0.20"),
                 new("8.0.2", supportedFrameworks: new string[] {"net8.0"}),
-                new("8.0.6", supportedFrameworks: new string[] {"net8.0"}),
+                new("8.0.8", supportedFrameworks: new string[] {"net8.0"}),
             }
         },
         {
@@ -57,7 +57,7 @@ public static partial class LibraryVersion
             new List<PackageBuildInfo>
             {
                 new("7.5.0", additionalMetaData: new() {{"GraphQLMicrosoftDI","7.5.0"},{"GraphQLServerTransportsAspNetCore","7.5.0"},{"GraphQLServerUIPlayground","7.5.0"}}),
-                new("7.8.0", additionalMetaData: new() {{"GraphQLMicrosoftDI","7.8.0"},{"GraphQLServerTransportsAspNetCore","7.7.1"},{"GraphQLServerUIPlayground","7.7.1"}}),
+                new("8.0.2", additionalMetaData: new() {{"GraphQLMicrosoftDI","8.0.2"},{"GraphQLServerTransportsAspNetCore","8.0.2"},{"GraphQLServerUIPlayground","8.0.2"}}),
             }
         },
         {
@@ -65,7 +65,7 @@ public static partial class LibraryVersion
             new List<PackageBuildInfo>
             {
                 new("2.52.0"),
-                new("2.63.0"),
+                new("2.66.0"),
             }
         },
         {
@@ -73,7 +73,7 @@ public static partial class LibraryVersion
             new List<PackageBuildInfo>
             {
                 new("8.0.0"),
-                new("8.2.3"),
+                new("8.2.5"),
             }
         },
         {
@@ -81,9 +81,9 @@ public static partial class LibraryVersion
             new List<PackageBuildInfo>
             {
                 new("2.1.7"),
-                new("3.1.5"),
+                new("3.1.5", supportedFrameworks: new string[] {"net8.0","net7.0","net6.0"}),
                 new("4.0.5"),
-                new("5.2.1"),
+                new("5.2.2"),
             }
         },
         {
@@ -97,8 +97,8 @@ public static partial class LibraryVersion
             "TestApplication.MongoDB",
             new List<PackageBuildInfo>
             {
-                new("2.19.0"),
-                new("2.27.0"),
+                new("2.28.0"),
+                new("2.29.0"),
             }
         },
         {
@@ -122,7 +122,7 @@ public static partial class LibraryVersion
             new List<PackageBuildInfo>
             {
                 new("6.0.11"),
-                new("8.0.3"),
+                new("8.0.4"),
             }
         },
         {
@@ -130,7 +130,8 @@ public static partial class LibraryVersion
             new List<PackageBuildInfo>
             {
                 new("8.0.0"),
-                new("9.0.2", supportedFrameworks: new string[] {"net8.0"}),
+                new("9.1.0", supportedFrameworks: new string[] {"net8.0"}),
+                new("9.2.2", supportedFrameworks: new string[] {"net8.0"}),
             }
         },
         {
@@ -138,6 +139,7 @@ public static partial class LibraryVersion
             new List<PackageBuildInfo>
             {
                 new("23.4.0", supportedFrameworks: new string[] {"net472"}),
+                new("23.5.1", supportedFrameworks: new string[] {"net472"}),
             }
         },
         {
@@ -145,6 +147,7 @@ public static partial class LibraryVersion
             new List<PackageBuildInfo>
             {
                 new("23.4.0"),
+                new("23.5.1"),
             }
         },
         {
@@ -152,18 +155,15 @@ public static partial class LibraryVersion
             new List<PackageBuildInfo>
             {
                 new("3.4.0"),
-                new("3.10.0"),
+                new("3.13.0"),
             }
         },
         {
             "TestApplication.StackExchangeRedis",
             new List<PackageBuildInfo>
             {
-                new("2.0.495"),
-                new("2.1.50"),
-                new("2.5.61"),
-                new("2.6.66"),
-                new("2.8.0"),
+                new("2.6.122"),
+                new("2.8.12"),
             }
         },
         {
@@ -181,7 +181,15 @@ public static partial class LibraryVersion
                 new("1.4.0", supportedPlatforms: new string[] {"x64"}),
                 new("1.6.2"),
                 new("1.8.2"),
-                new("2.4.0"),
+                new("2.5.3"),
+            }
+        },
+        {
+            "TestApplication.RabbitMq",
+            new List<PackageBuildInfo>
+            {
+                new("6.0.0"),
+                new("6.8.1"),
             }
         },
     };

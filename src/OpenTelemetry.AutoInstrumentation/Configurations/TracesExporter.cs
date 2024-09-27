@@ -9,11 +9,6 @@ namespace OpenTelemetry.AutoInstrumentation.Configurations;
 internal enum TracesExporter
 {
     /// <summary>
-    /// None exporter.
-    /// </summary>
-    None,
-
-    /// <summary>
     /// OTLP exporter.
     /// </summary>
     Otlp,
@@ -22,4 +17,9 @@ internal enum TracesExporter
     /// Zipkin exporter.
     /// </summary>
     Zipkin,
+
+    /// <summary>
+    /// Console exporter.
+    /// </summary>
+    Console,
 }

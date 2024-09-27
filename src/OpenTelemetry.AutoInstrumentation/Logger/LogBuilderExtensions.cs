@@ -72,31 +72,29 @@ internal static class LogBuilderExtensions
 
                 pluginManager?.ConfigureLogsOptions(options);
 
-                if (settings.ConsoleExporterEnabled)
+                foreach (var logExporter in settings.LogExporters)
                 {
-                    if (pluginManager != null)
+                    switch (logExporter)
                     {
-                        options.AddConsoleExporter(pluginManager.ConfigureLogsOptions);
-                    }
-                }
-
-                switch (settings.LogExporter)
-                {
-                    case LogExporter.Otlp:
-                        options.AddOtlpExporter(otlpOptions =>
-                        {
-                            if (settings.OtlpExportProtocol.HasValue)
+                        case LogExporter.Otlp:
+                            options.AddOtlpExporter(otlpOptions =>
                             {
-                                otlpOptions.Protocol = settings.OtlpExportProtocol.Value;
+                                // Copy Auto settings to SDK settings
+                                settings.OtlpSettings?.CopyTo(otlpOptions);
+
+                                pluginManager?.ConfigureLogsOptions(otlpOptions);
+                            });
+                            break;
+                        case LogExporter.Console:
+                            if (pluginManager != null)
+                            {
+                                options.AddConsoleExporter(pluginManager.ConfigureLogsOptions);
                             }
 
-                            pluginManager?.ConfigureLogsOptions(otlpOptions);
-                        });
-                        break;
-                    case LogExporter.None:
-                        break;
-                    default:
-                        throw new ArgumentOutOfRangeException($"Logs exporter '{settings.LogExporter}' is incorrect");
+                            break;
+                        default:
+                            throw new ArgumentOutOfRangeException($"Logs exporter '{logExporter}' is incorrect");
+                    }
                 }
             });
 

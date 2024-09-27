@@ -1,6 +1,7 @@
 // Copyright The OpenTelemetry Authors
 // SPDX-License-Identifier: Apache-2.0
 
+using OpenTelemetry.AutoInstrumentation.Configurations.Otlp;
 using OpenTelemetry.AutoInstrumentation.Logging;
 
 namespace OpenTelemetry.AutoInstrumentation.Configurations;
@@ -23,14 +24,9 @@ internal class TracerSettings : Settings
     public bool OpenTracingEnabled { get; private set; }
 
     /// <summary>
-    /// Gets the traces exporter.
+    /// Gets the list of enabled traces exporters.
     /// </summary>
-    public TracesExporter TracesExporter { get; private set; }
-
-    /// <summary>
-    /// Gets a value indicating whether the console exporter is enabled.
-    /// </summary>
-    public bool ConsoleExporterEnabled { get; private set; }
+    public IReadOnlyList<TracesExporter> TracesExporters { get; private set; } = new List<TracesExporter>();
 
     /// <summary>
     /// Gets the list of enabled instrumentations.
@@ -52,10 +48,19 @@ internal class TracerSettings : Settings
     /// </summary>
     public InstrumentationOptions InstrumentationOptions { get; private set; } = new(new Configuration(failFast: false));
 
+    /// <summary>
+    /// Gets tracing OTLP Settings.
+    /// </summary>
+    public OtlpSettings? OtlpSettings { get; private set; }
+
     protected override void OnLoad(Configuration configuration)
     {
-        TracesExporter = ParseTracesExporter(configuration);
-        ConsoleExporterEnabled = configuration.GetBool(ConfigurationKeys.Traces.ConsoleExporterEnabled) ?? false;
+        var consoleExporterEnabled = configuration.GetBool(ConfigurationKeys.Traces.ConsoleExporterEnabled) ?? false;
+        TracesExporters = ParseTracesExporter(configuration, consoleExporterEnabled);
+        if (TracesExporters.Contains(TracesExporter.Otlp))
+        {
+            OtlpSettings = new OtlpSettings(OtlpSignalType.Traces, configuration);
+        }
 
         var instrumentationEnabledByDefault =
             configuration.GetBool(ConfigurationKeys.Traces.TracesInstrumentationEnabled) ??
@@ -89,32 +94,73 @@ internal class TracerSettings : Settings
         InstrumentationOptions = new InstrumentationOptions(configuration);
     }
 
-    private static TracesExporter ParseTracesExporter(Configuration configuration)
+    private static IReadOnlyList<TracesExporter> ParseTracesExporter(Configuration configuration, bool consoleExporterEnabled)
     {
-        var tracesExporterEnvVar = configuration.GetString(ConfigurationKeys.Traces.Exporter)
-            ?? Constants.ConfigurationValues.Exporters.Otlp;
+        var tracesExporterEnvVar = configuration.GetString(ConfigurationKeys.Traces.Exporter);
+        var exporters = new List<TracesExporter>();
+        var seenExporters = new HashSet<string>();
 
-        switch (tracesExporterEnvVar)
+        if (consoleExporterEnabled)
         {
-            case null:
-            case "":
-            case Constants.ConfigurationValues.Exporters.Otlp:
-                return TracesExporter.Otlp;
-            case Constants.ConfigurationValues.Exporters.Zipkin:
-                return TracesExporter.Zipkin;
-            case Constants.ConfigurationValues.None:
-                return TracesExporter.None;
-            default:
+            Logger.Warning($"The '{ConfigurationKeys.Traces.ConsoleExporterEnabled}' environment variable is deprecated and " +
+                "will be removed in the next minor release. " +
+                "Please set the console exporter using OTEL_TRACES_EXPORTER environmental variable. " +
+                "Refer to the updated documentation for details.");
+
+            exporters.Add(TracesExporter.Console);
+        }
+
+        if (string.IsNullOrEmpty(tracesExporterEnvVar))
+        {
+            exporters.Add(TracesExporter.Otlp);
+            return exporters;
+        }
+
+        var exporterNames = tracesExporterEnvVar!.Split(Constants.ConfigurationValues.Separator);
+
+        foreach (var exporterName in exporterNames)
+        {
+            if (seenExporters.Contains(exporterName))
+            {
+                var message = $"Duplicate traces exporter '{exporterName}' found.";
                 if (configuration.FailFast)
                 {
-                    var message = $"Traces exporter '{tracesExporterEnvVar}' is not supported.";
                     Logger.Error(message);
                     throw new NotSupportedException(message);
                 }
 
-                Logger.Error($"Traces exporter '{tracesExporterEnvVar}' is not supported. Defaulting to '{Constants.ConfigurationValues.Exporters.Otlp}'.");
+                Logger.Warning(message);
+                continue;
+            }
 
-                return TracesExporter.Otlp;
+            seenExporters.Add(exporterName);
+
+            switch (exporterName)
+            {
+                case Constants.ConfigurationValues.Exporters.Otlp:
+                    exporters.Add(TracesExporter.Otlp);
+                    break;
+                case Constants.ConfigurationValues.Exporters.Zipkin:
+                    exporters.Add(TracesExporter.Zipkin);
+                    break;
+                case Constants.ConfigurationValues.None:
+                    break;
+                case Constants.ConfigurationValues.Exporters.Console:
+                    exporters.Add(TracesExporter.Console);
+                    break;
+                default:
+                    var unsupportedMessage = $"Traces exporter '{exporterName}' is not supported.";
+                    Logger.Error(unsupportedMessage);
+
+                    if (configuration.FailFast)
+                    {
+                        throw new NotSupportedException(unsupportedMessage);
+                    }
+
+                    break;
+            }
         }
+
+        return exporters;
     }
 }

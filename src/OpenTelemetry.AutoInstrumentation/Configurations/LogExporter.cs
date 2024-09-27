@@ -9,12 +9,12 @@ namespace OpenTelemetry.AutoInstrumentation.Configurations;
 internal enum LogExporter
 {
     /// <summary>
-    /// None exporter.
-    /// </summary>
-    None,
-
-    /// <summary>
     /// OTLP exporter.
     /// </summary>
     Otlp,
+
+    /// <summary>
+    /// Console exporter.
+    /// </summary>
+    Console,
 }

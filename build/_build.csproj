@@ -11,6 +11,7 @@
     <NukeTelemetryVersion>1</NukeTelemetryVersion>
     <ImplicitUsings>enable</ImplicitUsings>
     <LangVersion>11.0</LangVersion>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
   </PropertyGroup>
 
   <ItemGroup>

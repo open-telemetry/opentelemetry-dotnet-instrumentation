@@ -3,7 +3,6 @@
 [![Slack](https://img.shields.io/badge/slack-@cncf/otel--dotnet--auto--instr-brightgreen.svg?logo=slack)](https://cloud-native.slack.com/archives/C01NR1YLSE7)
 [![NuGet](https://img.shields.io/nuget/v/OpenTelemetry.AutoInstrumentation.svg)](https://www.nuget.org/packages/OpenTelemetry.AutoInstrumentation)
 [![NuGet](https://img.shields.io/nuget/dt/OpenTelemetry.AutoInstrumentation.svg)](https://www.nuget.org/packages/OpenTelemetry.AutoInstrumentation)
-[![Arm CI sponsored by Actuated](https://img.shields.io/badge/SA_actuated.dev-004BDD)](https://actuated.dev/)
 
 This project adds [OpenTelemetry instrumentation](https://opentelemetry.io/docs/concepts/instrumenting/#automatic-instrumentation)
 to .NET applications without having to modify their source code.
@@ -200,16 +199,31 @@ chmod +x $HOME/.otel-dotnet-auto/instrument.sh
 OTEL_SERVICE_NAME=myapp OTEL_RESOURCE_ATTRIBUTES=deployment.environment=staging,service.version=1.0.0 ./MyNetApp
 ```
 
+NOTE: for air-gapped environments you can provide either the installation archive directly with:
+
+```sh
+LOCAL_PATH=<PATH_TO_ARCHIVE> sh ./otel-dotnet-auto-install.sh
+```
+or the folder with the archives, this has the added benefit that the install script will determine
+the correct archive to choose.
+
+```sh
+DOWNLOAD_DIR=<PATH_TO_FOLDER_WITH_ARCHIVES> sh ./otel-dotnet-auto-install.sh
+```
+
+
 `otel-dotnet-auto-install.sh` script
 uses environment variables as parameters:
 
-| Parameter               | Description                                                      | Required | Default value             |
-|-------------------------|------------------------------------------------------------------|----------|---------------------------|
-| `OTEL_DOTNET_AUTO_HOME` | Location where binaries are to be installed                      | No       | `$HOME/.otel-dotnet-auto` |
-| `OS_TYPE`               | Possible values: `linux-glibc`, `linux-musl`, `macos`, `windows` | No       | *Calculated*              |
-| `ARCHITECTURE`          | Possible values for Linux: `x64`, `arm64`                        | No       | *Calculated*              |
-| `TMPDIR`                | Temporary directory used when downloading the files              | No       | `$(mktemp -d)`            |
-| `VERSION`               | Version to download                                              | No       | `1.6.0`                   |
+| Parameter               | Description                                                                     | Required | Default value               |
+|-------------------------|---------------------------------------------------------------------------------|----------|-----------------------------|
+| `OTEL_DOTNET_AUTO_HOME` | Location where binaries are to be installed                                     | No       | `$HOME/.otel-dotnet-auto`   |
+| `OS_TYPE`               | Possible values: `linux-glibc`, `linux-musl`, `macos`, `windows`                | No       | *Calculated*                |
+| `ARCHITECTURE`          | Possible values for Linux: `x64`, `arm64`                                       | No       | *Calculated*                |
+| `TMPDIR`                | (deprecated) prefer `DOWNLOAD_DIR`                                              | No       | `$(mktemp -d)`              |
+| `DOWNLOAD_DIR`          | Folder to download the archive to. Will use local archive if it already exists  | No       | `$TMPDIR` or `$(mktemp -d)` |
+| `LOCAL_PATH`            | Full path the archive to use for installation. (ideal for air-gapped scenarios) | No       | *Calculated*                |
+| `VERSION`               | Version to download                                                             | No       | `1.6.0`                     |
 
 [instrument.sh](../instrument.sh) script
 uses environment variables as parameters:
@@ -319,7 +333,7 @@ See [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## Community Roles
 
-[Maintainers](https://github.com/open-telemetry/community/blob/main/community-membership.md#maintainer)
+[Maintainers](https://github.com/open-telemetry/community/blob/main/guides/contributor/membership.md#membership-levels)
 ([@open-telemetry/dotnet-instrumentation-maintainers](https://github.com/orgs/open-telemetry/teams/dotnet-instrumentation-maintainers)):
 
 - [Chris Ventura](https://github.com/nrcventura), New Relic
@@ -329,14 +343,14 @@ See [CONTRIBUTING.md](CONTRIBUTING.md).
 - [Robert Paj&#x105;k](https://github.com/pellared), Splunk
 - [Zach Montoya](https://github.com/zacharycmontoya), Datadog
 
-[Approvers](https://github.com/open-telemetry/community/blob/main/community-membership.md#approver)
+[Approvers](https://github.com/open-telemetry/community/blob/main/guides/contributor/membership.md#membership-levels)
 ([@open-telemetry/dotnet-instrumentation-approvers](https://github.com/orgs/open-telemetry/teams/dotnet-instrumentation-approvers)):
 
 - [Mateusz &#x141;ach](https://github.com/lachmatt), Splunk
 - [Rasmus Kuusmann](https://github.com/RassK), Splunk
 
 [Emeritus
-Maintainer/Approver/Triager](https://github.com/open-telemetry/community/blob/main/community-membership.md#emeritus-maintainerapprovertriager):
+Maintainer/Approver/Triager](https://github.com/open-telemetry/community/blob/main/guides/contributor/membership.md#membership-levels):
 
 - [Colin Higgins](https://github.com/colin-higgins)
 - [Greg Paperin](https://github.com/macrogreg)
@@ -345,4 +359,4 @@ Maintainer/Approver/Triager](https://github.com/open-telemetry/community/blob/ma
 - [Mike Goldsmith](https://github.com/MikeGoldsmith)
 - [Tony Redondo](https://github.com/tonyredondo)
 
-Learn more about roles in the [community repository](https://github.com/open-telemetry/community/blob/main/community-membership.md).
+Learn more about roles in the [community repository](https://github.com/open-telemetry/community/blob/main/guides/contributor/membership.md).

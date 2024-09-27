@@ -34,7 +34,7 @@ jobs:
     steps:
 
       - name: Checkout
-        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # tag: v4.1.7
+        uses: actions/checkout@d632683dd7b4114ad314bca15554477dd762a938 # tag: v4.2.0
 
       - name: Download artifacts
         uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d16 # tag: v4.1.8
@@ -47,7 +47,7 @@ jobs:
       - run: cd bin-alpine-x64 ; zip -qq -r ../opentelemetry-dotnet-instrumentation-linux-musl-x64.zip . * ; cd ..
       - run: cd bin-alpine-arm64 ; zip -qq -r ../opentelemetry-dotnet-instrumentation-linux-musl-arm64.zip . * ; cd ..
       - run: cd bin-ubuntu-20.04 ; zip -qq -r ../opentelemetry-dotnet-instrumentation-linux-glibc-x64.zip . * ; cd ..
-      - run: cd bin-actuated-arm64-4cpu-8gb ; zip -qq -r ../opentelemetry-dotnet-instrumentation-linux-glibc-arm64.zip . * ; cd ..
+      - run: cd bin-otel-linux-arm64 ; zip -qq -r ../opentelemetry-dotnet-instrumentation-linux-glibc-arm64.zip . * ; cd ..
       - run: cd bin-windows-2022 ; zip -qq -r ../opentelemetry-dotnet-instrumentation-windows.zip . * ; cd ..
       - run: cd bin-macos-15-large ; zip -qq -r ../opentelemetry-dotnet-instrumentation-macos.zip . * ; cd ..
       - run: cd bin-nuget-packages ; zip -qq -r ../opentelemetry-dotnet-instrumentation-nuget-packages.zip . * ; cd ..

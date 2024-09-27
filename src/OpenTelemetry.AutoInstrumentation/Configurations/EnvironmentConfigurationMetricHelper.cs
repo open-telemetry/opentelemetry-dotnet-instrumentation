@@ -29,7 +29,12 @@ internal static class EnvironmentConfigurationMetricHelper
                 MetricInstrumentation.HttpClient => Wrappers.AddHttpClientInstrumentation(builder, lazyInstrumentationLoader),
                 MetricInstrumentation.NetRuntime => Wrappers.AddRuntimeInstrumentation(builder, pluginManager),
                 MetricInstrumentation.Process => Wrappers.AddProcessInstrumentation(builder),
-                MetricInstrumentation.NServiceBus => builder.AddMeter("NServiceBus.Core"),
+                MetricInstrumentation.NServiceBus => builder
+#if NET6_0_OR_GREATER
+                    .AddMeter("NServiceBus.Core.Pipeline.Incoming") // NServiceBus 9.1.0+
+#endif
+                    .AddMeter("NServiceBus.Core"), // NServiceBus [8,0.0, 9.1.0)
+
 #if NET6_0_OR_GREATER
                 MetricInstrumentation.AspNetCore => Wrappers.AddAspNetCoreInstrumentation(builder, lazyInstrumentationLoader),
 #endif
@@ -48,18 +53,18 @@ internal static class EnvironmentConfigurationMetricHelper
 
     private static MeterProviderBuilder SetExporter(this MeterProviderBuilder builder, MetricSettings settings, PluginManager pluginManager)
     {
-        if (settings.ConsoleExporterEnabled)
+        foreach (var metricExporter in settings.MetricExporters)
         {
-            Wrappers.AddConsoleExporter(builder, pluginManager);
+            builder = metricExporter switch
+            {
+                MetricsExporter.Prometheus => Wrappers.AddPrometheusHttpListener(builder, pluginManager),
+                MetricsExporter.Otlp => Wrappers.AddOtlpExporter(builder, settings, pluginManager),
+                MetricsExporter.Console => Wrappers.AddConsoleExporter(builder, pluginManager),
+                _ => throw new ArgumentOutOfRangeException($"Metrics exporter '{metricExporter}' is incorrect")
+            };
         }
 
-        return settings.MetricExporter switch
-        {
-            MetricsExporter.Prometheus => Wrappers.AddPrometheusHttpListener(builder, pluginManager),
-            MetricsExporter.Otlp => Wrappers.AddOtlpExporter(builder, settings, pluginManager),
-            MetricsExporter.None => builder,
-            _ => throw new ArgumentOutOfRangeException($"Metrics exporter '{settings.MetricExporter}' is incorrect")
-        };
+        return builder;
     }
 
     /// <summary>
@@ -153,10 +158,8 @@ internal static class EnvironmentConfigurationMetricHelper
         {
             return builder.AddOtlpExporter((options, metricReaderOptions) =>
             {
-                if (settings.OtlpExportProtocol.HasValue)
-                {
-                    options.Protocol = settings.OtlpExportProtocol.Value;
-                }
+                // Copy Auto settings to SDK settings
+                settings.OtlpSettings?.CopyTo(options);
 
                 pluginManager.ConfigureMetricsOptions(options);
                 pluginManager.ConfigureMetricsOptions(metricReaderOptions);

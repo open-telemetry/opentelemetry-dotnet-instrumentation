@@ -1,4 +1,4 @@
-﻿#
+#
 # Copyright The OpenTelemetry Authors
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -130,11 +130,17 @@ function Get-Environment-Variables-Table([string]$InstallDir, [string]$OTelServi
 
 function Setup-Windows-Service([string]$InstallDir, [string]$WindowsServiceName, [string]$OTelServiceName) {  
     $varsTable = Get-Environment-Variables-Table -InstallDir $InstallDir -OTelServiceName $OTelServiceName
-    [string []] $varsList = ($varsTable.Keys | foreach-object { "$_=$($varsTable[$_])" }) # [string []] definition is required for WS2016
     $regPath = "HKLM:SYSTEM\CurrentControlSet\Services\"
     $regKey = Join-Path $regPath $WindowsServiceName
    
     if (Test-Path $regKey) {
+        # Cleanup existing variables
+        Cleanup-Environment-Variables -WindowsServiceName $WindowsServiceName
+
+        # Migrate remaining external variables to install variables
+        [string []] $varsList = Migrate-Environment-Variables -ServiceRegistryKey $regKey -InstallVars $varsTable
+
+        # Set install variables
         Set-ItemProperty $regKey -Name Environment -Value $varsList
     }
     else {
@@ -142,7 +148,7 @@ function Setup-Windows-Service([string]$InstallDir, [string]$WindowsServiceName,
     }
 }
 
-function Remove-Windows-Service([string]$WindowsServiceName) {
+function Cleanup-Environment-Variables([string]$WindowsServiceName) {
     [string[]] $filters = @(
         # .NET Framework
         "COR_ENABLE_PROFILING",
@@ -168,9 +174,14 @@ function Remove-Windows-Service([string]$WindowsServiceName) {
     $regKey = Join-Path $regPath $WindowsServiceName
    
     if (Test-Path $regKey) {
-        $values = Get-ItemPropertyValue $regKey -Name Environment
-        $vars = Filter-Env-List -EnvValues $values -Filters $filters
-        
+        $property = Get-ItemProperty $regKey
+        if (-not $property.Environment) {
+            # Nothing to clean
+            return
+        }
+
+        $vars = Filter-Env-List -EnvValues $property.Environment -Filters $filters
+
         Set-ItemProperty $regKey -Name Environment -Value $vars
     }
     else {
@@ -181,6 +192,26 @@ function Remove-Windows-Service([string]$WindowsServiceName) {
     if (-not $remaining) {
         Remove-ItemProperty $regKey -Name Environment
     }
+}
+
+function Migrate-Environment-Variables([string]$ServiceRegistryKey, [hashtable]$InstallVars) {
+    $prop = Get-ItemProperty $ServiceRegistryKey
+
+    if ($prop.Environment){
+        foreach ($var in $prop.Environment) {
+            # Split the string on the first '=' to get the key and value
+            $splitVar = $var.Split('=', 2)
+            $key = $splitVar[0]
+            $value = $splitVar[1]
+
+            # Reinstall external variable
+            $InstallVars[$key] = $value
+        }
+    }
+
+    [string []] $varsList = $InstallVars.GetEnumerator() | ForEach-Object { "$($_.Key)=$($_.Value)" } # [string []] definition is required for WS2016
+
+    return $varsList
 }
 
 function Filter-Env-List([string[]]$EnvValues, [string[]]$Filters) {
@@ -533,8 +564,8 @@ function Unregister-OpenTelemetryForIIS() {
         [bool]$NoReset = $false
     )
 
-    Remove-Windows-Service -WindowsServiceName "W3SVC"
-    Remove-Windows-Service -WindowsServiceName "WAS"
+    Cleanup-Environment-Variables -WindowsServiceName "W3SVC"
+    Cleanup-Environment-Variables -WindowsServiceName "WAS"
 
     if (-not $NoReset) {
         Reset-IIS
@@ -554,7 +585,7 @@ function Unregister-OpenTelemetryForWindowsService() {
         [string]$WindowsServiceName
     )  
 
-    Remove-Windows-Service -WindowsServiceName $WindowsServiceName
+    Cleanup-Environment-Variables -WindowsServiceName $WindowsServiceName
     Restart-Service -Name $WindowsServiceName -Force
 }
 

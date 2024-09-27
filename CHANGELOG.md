@@ -10,28 +10,77 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 ### Added
 
 - Support for Operating System resource detector.
+- Support for [RabbitMQ.Client](https://www.nuget.org/packages/RabbitMQ.Client/)
+  traces instrumentation for versions `6.0.0`-`6.*.*`
+- Support for NServiceBus 9.1+ metrics instrumentations.
+- Added support for OTEL_TRACES_EXPORTER, OTEL_METRICS_EXPORTER, OTEL_LOGS_EXPORTER
+  to handle comma-separated list.
+- The environment variables `OTEL_TRACES_EXPORTER`, `OTEL_METRICS_EXPORTER`,
+  and `OTEL_LOGS_EXPORTER` now support configuring console exporters for traces,
+  metrics, and logs, respectively.
+- Support signal specific OTLP exporter variables (See [docs](/docs/config.md#otlp)):
+  - `OTEL_EXPORTER_OTLP_TRACES_ENDPOINT`,
+  - `OTEL_EXPORTER_OTLP_TRACES_HEADERS`,
+  - `OTEL_EXPORTER_OTLP_TRACES_TIMEOUT`,
+  - `OTEL_EXPORTER_OTLP_TRACES_PROTOCOL`,
+  - `OTEL_EXPORTER_OTLP_METRICS_ENDPOINT`,
+  - `OTEL_EXPORTER_OTLP_METRICS_HEADERS`,
+  - `OTEL_EXPORTER_OTLP_METRICS_TIMEOUT`,
+  - `OTEL_EXPORTER_OTLP_METRICS_PROTOCOL`,
+  - `OTEL_EXPORTER_OTLP_LOGS_ENDPOINT`,
+  - `OTEL_EXPORTER_OTLP_LOGS_HEADERS`,
+  - `OTEL_EXPORTER_OTLP_LOGS_TIMEOUT`,
+  - `OTEL_EXPORTER_OTLP_LOGS_PROTOCOL`.
+- Support for air-gapped installations through `DOWNLOAD_DIR` or `LOCAL_PATH`
+  arguments to `otel-dotnet-auto-install.sh`.
+- Added `OTEL_DOTNET_AUTO_LOGGER` to select preferred sink for AutoInstrumentation
+  diagnostic logs.
+- Issue a warning before publish if auto-instrumentation NuGet
+  package is referenced and runtime identifier is not specified.
 
 ### Changed
+
+- More restrictive handling of invalid values in comma-separated lists.
+  When invalid value is recognized (unsupported option, supported option
+  with leading or trailing whitespaces, empty value, duplicate)
+  warning is logged, and if `FailFast` is enabled, exception is thrown.
+- Referencing `OpenTelemetry.AutoInstrumentation` manually no longer visibly injects
+  instrumentation scripts into projects in an editor's solution window.
 
 #### Dependency updates
 
 - Following packages updated
+  - `MongoDB.Driver.Core.Extensions.DiagnosticSources` from `1.4.0` to `1.5.0`,
   - `OpenTelemetry.Exporter.Prometheus.HttpListener` from `1.9.0-beta.1` to `1.9.0-beta.2`,
+  - `OpenTelemetry.Instrumentation.Process` from `0.5.0-beta.6` to `0.5.0-beta.7`,
+  - `OpenTelemetry.Resources.Azure` from `1.0.0-beta.8` to `1.0.0-beta.9`,
+  - `OpenTelemetry.Resources.Host` from `0.1.0-beta.2` to `0.1.0-beta.3`,
+  - `OpenTelemetry.Resources.Process` from `0.1.0-beta.2` to `0.1.0-beta.3`,
   - `OpenTelemetry.Shims.OpenTracing` from `1.9.0-beta.1` to `1.9.0-beta.2`.
+- .NET only, following packages updated
+  - `OpenTelemetry.Instrumentation.StackExchangeRedis` from `1.0.0-rc9.15` to `1.9.0-beta.1`.
 - .NET Framework only, following packages updated
-  - `Google.Protobuf` updated from `3.27.1` to `3.27.2`,
-  - `Grpc.Core.Api` from `2.63.0` to `2.64.0`,
+  - `Google.Protobuf` updated from `3.27.1` to `3.28.2`,
+  - `Grpc.Core.Api` from `2.63.0` to `2.66.0`,
   - `Microsoft.Extensions.Configuration.Binder` from `8.0.1` to `8.0.2`,
   - `System.Text.Json` from `8.0.3` to `8.0.4`.
 
 ### Deprecated
 
+- Environment variables `OTEL_DOTNET_AUTO_TRACES_CONSOLE_EXPORTER_ENABLED`,
+  `OTEL_DOTNET_AUTO_METRICS_CONSOLE_EXPORTER_ENABLED`, and
+  `OTEL_DOTNET_AUTO_LOGS_CONSOLE_EXPORTER_ENABLED` are now marked as deprecated.
+
 ### Removed
 
 - Support for macOS Big Sur 11 x64.
   macOs libraries are built and tested against [macOS Monterey 12 x64](https://github.com/actions/runner-images/blob/main/images/macos/macos-12-Readme.md).
+- Support for `MongoDB.Driver.Core` < 2.28.0.
+- Support for `StackExchange.Redis` < 2.6.122.
 
 ### Fixed
+
+- Initialize WCF instrumentation only when necessary ([#3650](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/pull/3650))
 
 ## [1.7.0](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/tag/v1.7.0)
 

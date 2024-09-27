@@ -5,31 +5,29 @@
     <PackageReference Include="StackExchange.Redis" ExcludeAssets="all" />
     <!-- Pipelines.Sockets.Unofficial is tranistive dependency required by OpenTelemetry.Instrumentation.StackExchangeRedis. -->
     <PackageReference Include="Pipelines.Sockets.Unofficial" ExcludeAssets="all" />
-    <!-- System.Diagnostics.PerformanceCounter is tranistive dependency required by OpenTelemetry.Instrumentation.StackExchangeRedis. -->
-    <PackageReference Include="System.Diagnostics.PerformanceCounter" ExcludeAssets="all" />
-    <!-- System.Configuration.ConfigurationManager is tranistive dependency required by OpenTelemetry.Instrumentation.StackExchangeRedis. -->
-    <PackageReference Include="System.Configuration.ConfigurationManager" ExcludeAssets="all" />
-    <!-- System.Security.Cryptography.ProtectedData is tranistive dependency required by OpenTelemetry.Instrumentation.StackExchangeRedis. -->
-    <PackageReference Include="System.Security.Cryptography.ProtectedData" ExcludeAssets="all" />
-    <!-- System.Drawing.Common is tranistive dependency required by OpenTelemetry.Instrumentation.StackExchangeRedis. -->
+    <!-- System.Drawing.Common is tranistive dependency required by OpenTelemetry.Instrumentation.Wcf. -->
     <PackageReference Include="System.Drawing.Common" ExcludeAssets="all" />
-    <!-- System.Windows.Extensions is tranistive dependency required by OpenTelemetry.Instrumentation.StackExchangeRedis. -->
+    <!-- System.Windows.Extensions is tranistive dependency required by OpenTelemetry.Instrumentation.Wcf. -->
     <PackageReference Include="System.Windows.Extensions" ExcludeAssets="all" />
-    <!-- Microsoft.Win32.SystemEvents is tranistive dependency required by OpenTelemetry.Instrumentation.StackExchangeRedis. -->
+    <!-- Microsoft.Win32.SystemEvents is tranistive dependency required by OpenTelemetry.Instrumentation.Wcf. -->
     <PackageReference Include="Microsoft.Win32.SystemEvents" ExcludeAssets="all" />
-    <!-- Microsoft.Bcl.AsyncInterfaces is required by StackExchange.Redis. -->
-    <PackageReference Include="Microsoft.Bcl.AsyncInterfaces" ExcludeAssets="all" />
   </ItemGroup>
 
   <ItemGroup>
-    <!-- DnsClient is required by MongoDB.Driver.Core.Extensions.DiagnosticSources. -->
+    <!-- MongoDB.Driver.Core is required by MongoDB.Driver.Core.Extensions.DiagnosticSources. -->
     <PackageReference Include="MongoDB.Driver.Core" ExcludeAssets="all" />
+    <!-- AWSSDK.Core is tranistive dependency required by MongoDB.Driver.Core.Extensions.DiagnosticSources. -->
+    <PackageReference Include="AWSSDK.Core" ExcludeAssets="all" />
+    <!-- "AWSSDK.SecurityToken is tranistive dependency required by MongoDB.Driver.Core.Extensions.DiagnosticSources. -->
+    <PackageReference Include="AWSSDK.SecurityToken" ExcludeAssets="all" />
     <!-- DnsClient is tranistive dependency required by MongoDB.Driver.Core.Extensions.DiagnosticSources. -->
     <PackageReference Include="DnsClient" ExcludeAssets="all" />
     <!-- MongoDB.Bson is tranistive dependency required by MongoDB.Driver.Core.Extensions.DiagnosticSources. -->
     <PackageReference Include="MongoDB.Bson" ExcludeAssets="all" />
     <!-- MongoDB.Libmongocrypt is tranistive dependency required by MongoDB.Driver.Core.Extensions.DiagnosticSources. -->
     <PackageReference Include="MongoDB.Libmongocrypt" ExcludeAssets="all" />
+    <!-- Snappier is tranistive dependency required by MongoDB.Driver.Core.Extensions.DiagnosticSources. -->
+    <PackageReference Include="Snappier" ExcludeAssets="all" />
     <!-- System.Net.Http is tranistive dependency required by MongoDB.Driver.Core.Extensions.DiagnosticSources. -->
     <PackageReference Include="System.Net.Http" ExcludeAssets="all" />
     <!-- System.Runtime.InteropServices.RuntimeInformation is tranistive dependency required by MongoDB.Driver.Core.Extensions.DiagnosticSources. -->
@@ -42,7 +40,11 @@
     <PackageReference Include="System.Security.Cryptography.Primitives" ExcludeAssets="all" />
     <!-- System.Security.Cryptography.X509Certificates is tranistive dependency required by MongoDB.Driver.Core.Extensions.DiagnosticSources. -->
     <PackageReference Include="System.Security.Cryptography.X509Certificates" ExcludeAssets="all" />
+    <!-- System.Text.Encoding.CodePages is tranistive dependency required by MongoDB.Driver.Core.Extensions.DiagnosticSources. -->
+    <PackageReference Include="System.Text.Encoding.CodePages" ExcludeAssets="all" />
     <!-- SharpCompress is tranistive dependency required by MongoDB.Driver.Core.Extensions.DiagnosticSources. -->
     <PackageReference Include="SharpCompress" ExcludeAssets="all" />
+    <!-- ZstdSharp.Port is tranistive dependency required by MongoDB.Driver.Core.Extensions.DiagnosticSources. -->
+    <PackageReference Include="ZstdSharp.Port" ExcludeAssets="all" />
   </ItemGroup>
 </Project>
