@@ -52,7 +52,7 @@ jobs:
             log-dir: "/c/ProgramData/OpenTelemetry .NET AutoInstrumentation/logs"
           - machine: ubuntu-20.04
             log-dir: "/var/log/opentelemetry/dotnet"
-          - machine: macos-12
+          - machine: macos-15-large
             log-dir: "/var/log/opentelemetry/dotnet"
           - machine: actuated-arm64-4cpu-8gb
             log-dir: "/var/log/opentelemetry/dotnet"

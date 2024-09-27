@@ -32,10 +32,10 @@ jobs:
       fail-fast: false
       matrix:
         test-tfm: [ net8.0, net7.0, net6.0, net462 ]
-        machine: [ windows-2022, ubuntu-20.04, macos-12, actuated-arm64-4cpu-8gb ]
+        machine: [ windows-2022, ubuntu-20.04, macos-15-large, actuated-arm64-4cpu-8gb ]
         exclude:
           - test-tfm: net462
-            machine: macos-12
+            machine: macos-15-large
           - test-tfm: net462
             machine: ubuntu-20.04
           - test-tfm: net462
@@ -45,7 +45,7 @@ jobs:
             containers: none
           - machine: ubuntu-20.04
             containers: linux
-          - machine: macos-12
+          - machine: macos-15-large
             containers: none
           - machine: actuated-arm64-4cpu-8gb
             containers: linux
@@ -256,7 +256,7 @@ jobs:
       matrix:
         include:
           - machine: ubuntu-20.04
-          - machine: macos-12
+          - machine: macos-15-large
           - machine: windows-2022
           - machine: actuated-arm64-4cpu-8gb
     runs-on: ${{ matrix.machine }}

@@ -22,7 +22,7 @@ jobs:
             containers: windows
           - machine: ubuntu-20.04
             containers: linux
-          - machine: macos-12
+          - machine: macos-15-large
             containers: none
           - machine: actuated-arm64-4cpu-8gb
             containers: linux
