@@ -1,1 +1,1 @@
-FROM mcr.microsoft.com/mssql/server:2019-CU17-ubuntu-20.04
+FROM mcr.microsoft.com/mssql/server:2019-CU28-ubuntu-20.04
