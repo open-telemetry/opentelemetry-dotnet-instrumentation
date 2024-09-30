@@ -17,6 +17,11 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 
 ### Removed
 
+Support for following environment variables:
+`OTEL_DOTNET_AUTO_TRACES_CONSOLE_EXPORTER_ENABLED`,
+`OTEL_DOTNET_AUTO_METRICS_CONSOLE_EXPORTER_ENABLED`, and
+`OTEL_DOTNET_AUTO_LOGS_CONSOLE_EXPORTER_ENABLED`.
+
 ### Fixed
 
 ## [1.8.0](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/tag/v1.8.0)

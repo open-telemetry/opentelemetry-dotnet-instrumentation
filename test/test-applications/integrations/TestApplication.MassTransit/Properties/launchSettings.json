@@ -16,7 +16,6 @@
         "OTEL_TRACES_EXPORTER": "zipkin",
         "OTEL_EXPORTER_ZIPKIN_ENDPOINT": "http://127.0.0.1:9411/api/v2/spans",
         "OTEL_LOG_LEVEL": "debug",
-        "OTEL_DOTNET_AUTO_TRACES_CONSOLE_EXPORTER_ENABLED": "true",
         "OTEL_DOTNET_AUTO_HOME": "$(SolutionDir)bin\\tracer-home\\"
       }
     }
