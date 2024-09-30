@@ -41,8 +41,7 @@ internal class LogSettings : Settings
     protected override void OnLoad(Configuration configuration)
     {
         LogsEnabled = configuration.GetBool(ConfigurationKeys.Logs.LogsEnabled) ?? true;
-        var consoleExporterEnabled = configuration.GetBool(ConfigurationKeys.Logs.ConsoleExporterEnabled) ?? false;
-        LogExporters = ParseLogExporter(configuration, consoleExporterEnabled);
+        LogExporters = ParseLogExporter(configuration);
         if (LogExporters.Contains(LogExporter.Otlp))
         {
             OtlpSettings = new OtlpSettings(OtlpSignalType.Logs, configuration);
@@ -59,21 +58,11 @@ internal class LogSettings : Settings
             enabledConfigurationTemplate: ConfigurationKeys.Logs.EnabledLogsInstrumentationTemplate);
     }
 
-    private static IReadOnlyList<LogExporter> ParseLogExporter(Configuration configuration, bool consoleExporterEnabled)
+    private static IReadOnlyList<LogExporter> ParseLogExporter(Configuration configuration)
     {
         var logExporterEnvVar = configuration.GetString(ConfigurationKeys.Logs.Exporter);
         var exporters = new List<LogExporter>();
         var seenExporters = new HashSet<string>();
-
-        if (consoleExporterEnabled)
-        {
-            Logger.Warning($"The '{ConfigurationKeys.Logs.ConsoleExporterEnabled}' environment variable is deprecated and " +
-                "will be removed in the next minor release. " +
-                "Please set the console exporter using OTEL_LOGS_EXPORTER environmental variable. " +
-                "Refer to the updated documentation for details.");
-
-            exporters.Add(LogExporter.Console);
-        }
 
         if (string.IsNullOrEmpty(logExporterEnvVar))
         {

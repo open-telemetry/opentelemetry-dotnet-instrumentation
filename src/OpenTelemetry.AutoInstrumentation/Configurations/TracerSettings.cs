@@ -55,8 +55,7 @@ internal class TracerSettings : Settings
 
     protected override void OnLoad(Configuration configuration)
     {
-        var consoleExporterEnabled = configuration.GetBool(ConfigurationKeys.Traces.ConsoleExporterEnabled) ?? false;
-        TracesExporters = ParseTracesExporter(configuration, consoleExporterEnabled);
+        TracesExporters = ParseTracesExporter(configuration);
         if (TracesExporters.Contains(TracesExporter.Otlp))
         {
             OtlpSettings = new OtlpSettings(OtlpSignalType.Traces, configuration);
@@ -94,21 +93,11 @@ internal class TracerSettings : Settings
         InstrumentationOptions = new InstrumentationOptions(configuration);
     }
 
-    private static IReadOnlyList<TracesExporter> ParseTracesExporter(Configuration configuration, bool consoleExporterEnabled)
+    private static IReadOnlyList<TracesExporter> ParseTracesExporter(Configuration configuration)
     {
         var tracesExporterEnvVar = configuration.GetString(ConfigurationKeys.Traces.Exporter);
         var exporters = new List<TracesExporter>();
         var seenExporters = new HashSet<string>();
-
-        if (consoleExporterEnabled)
-        {
-            Logger.Warning($"The '{ConfigurationKeys.Traces.ConsoleExporterEnabled}' environment variable is deprecated and " +
-                "will be removed in the next minor release. " +
-                "Please set the console exporter using OTEL_TRACES_EXPORTER environmental variable. " +
-                "Refer to the updated documentation for details.");
-
-            exporters.Add(TracesExporter.Console);
-        }
 
         if (string.IsNullOrEmpty(tracesExporterEnvVar))
         {

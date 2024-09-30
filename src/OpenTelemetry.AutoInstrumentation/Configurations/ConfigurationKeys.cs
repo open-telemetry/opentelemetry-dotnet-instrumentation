@@ -73,11 +73,6 @@ internal partial class ConfigurationKeys
         public const string Exporter = "OTEL_TRACES_EXPORTER";
 
         /// <summary>
-        /// Configuration key for whether the trace console exporter is enabled.
-        /// </summary>
-        public const string ConsoleExporterEnabled = "OTEL_DOTNET_AUTO_TRACES_CONSOLE_EXPORTER_ENABLED";
-
-        /// <summary>
         /// Configuration key for disabling all trace instrumentations.
         /// </summary>
         public const string TracesInstrumentationEnabled = "OTEL_DOTNET_AUTO_TRACES_INSTRUMENTATION_ENABLED";
@@ -185,11 +180,6 @@ internal partial class ConfigurationKeys
         public const string Exporter = "OTEL_METRICS_EXPORTER";
 
         /// <summary>
-        /// Configuration key for whether the metrics console exporter is enabled.
-        /// </summary>
-        public const string ConsoleExporterEnabled = "OTEL_DOTNET_AUTO_METRICS_CONSOLE_EXPORTER_ENABLED";
-
-        /// <summary>
         /// Configuration key for disabling all metrics instrumentations.
         /// </summary>
         public const string MetricsInstrumentationEnabled = "OTEL_DOTNET_AUTO_METRICS_INSTRUMENTATION_ENABLED";
@@ -220,11 +210,6 @@ internal partial class ConfigurationKeys
         /// Default is <c>"otlp"</c>.
         /// </summary>
         public const string Exporter = "OTEL_LOGS_EXPORTER";
-
-        /// <summary>
-        /// Configuration key for whether the logs console exporter is enabled.
-        /// </summary>
-        public const string ConsoleExporterEnabled = "OTEL_DOTNET_AUTO_LOGS_CONSOLE_EXPORTER_ENABLED";
 
         /// <summary>
         /// Configuration key for whether or not formatted log message
