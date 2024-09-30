@@ -34,6 +34,13 @@ or use the appropriate install script:
 > but they can't be used in all cases. See [Limitations](./using-the-nuget-packages.md#limitations)
 > for details.
 
+To see the telemetry from your application directly on the standard output, set
+the following environment variables to `console` before launching your application:
+
+- `OTEL_TRACES_EXPORTER`
+- `OTEL_METRICS_EXPORTER`
+- `OTEL_LOGS_EXPORTER`
+
 For a demo using `docker compose`, clone this repository and
 follow the [examples/demo/README.md](../examples/demo/README.md).
 

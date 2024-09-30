@@ -17,6 +17,7 @@
         "OTEL_DOTNET_AUTO_HOME": "$(SolutionDir)bin\\tracer-home",
         "OTEL_SERVICE_NAME": "TestApplication.Kafka",
         "OTEL_LOG_LEVEL": "debug",
+        "OTEL_TRACES_EXPORTER": "console"
       }
     }
   }
