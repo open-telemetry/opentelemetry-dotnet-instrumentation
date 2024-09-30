@@ -53,7 +53,7 @@ jobs:
     steps:
 
       - name: Checkout
-        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # tag: v4.1.7
+        uses: actions/checkout@d632683dd7b4114ad314bca15554477dd762a938 # tag: v4.2.0
         with:
           fetch-depth: 0 # fetching all, needed to correctly calculate version
 
@@ -68,7 +68,7 @@ jobs:
           dotnet-version: | 
             6.0.425
             7.0.410
-            8.0.401
+            8.0.402
 
       - name: Check for NuGet packages cache
         uses: actions/cache@0c45773b623bea8c8e75f6c82b208c3cf94ea4f9 # tag: v4.0.2
@@ -123,7 +123,7 @@ jobs:
     steps:
 
       - name: Checkout
-        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # tag: v4.1.7
+        uses: actions/checkout@d632683dd7b4114ad314bca15554477dd762a938 # tag: v4.2.0
         with:
           fetch-depth: 0 # fetching all, needed to correctly calculate version
 
@@ -133,7 +133,7 @@ jobs:
           dotnet-version: | 
             6.0.425
             7.0.410
-            8.0.401
+            8.0.402
 
       - name: Check for NuGet packages cache
         uses: actions/cache@0c45773b623bea8c8e75f6c82b208c3cf94ea4f9 # tag: v4.0.2
@@ -163,7 +163,7 @@ jobs:
     steps:
 
       - name: Checkout
-        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # tag: v4.1.7
+        uses: actions/checkout@d632683dd7b4114ad314bca15554477dd762a938 # tag: v4.2.0
         with:
           fetch-depth: 0 # fetching all, needed to correctly calculate version
 
@@ -173,7 +173,7 @@ jobs:
           dotnet-version: | 
             6.0.425
             7.0.410
-            8.0.401
+            8.0.402
 
       - name: Check for NuGet packages cache
         uses: actions/cache@0c45773b623bea8c8e75f6c82b208c3cf94ea4f9 # tag: v4.0.2
@@ -232,7 +232,7 @@ jobs:
     steps:
 
     - name: Checkout
-      uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # tag: v4.1.7
+      uses: actions/checkout@d632683dd7b4114ad314bca15554477dd762a938 # tag: v4.2.0
       with:
         fetch-depth: 0 # fetching all, needed to correctly calculate version
 
@@ -263,7 +263,7 @@ jobs:
     steps:
       
       - name: Checkout
-        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # tag: v4.1.7
+        uses: actions/checkout@d632683dd7b4114ad314bca15554477dd762a938 # tag: v4.2.0
         with:
           fetch-depth: 0 # fetching all, needed to correctly calculate version
 
@@ -278,7 +278,7 @@ jobs:
           dotnet-version: | 
             6.0.425
             7.0.410
-            8.0.401
+            8.0.402
 
       - name: Check for NuGet packages cache
         uses: actions/cache@0c45773b623bea8c8e75f6c82b208c3cf94ea4f9 # tag: v4.0.2

@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: Apache-2.0
 
 using OpenTelemetry.AutoInstrumentation.CallTarget;
-using OpenTelemetry.AutoInstrumentation.DuckTyping;
 using OpenTelemetry.AutoInstrumentation.Instrumentations.RabbitMq6.DuckTypes;
 using OpenTelemetry.AutoInstrumentation.Util;
 // ReSharper disable ConditionIsAlwaysTrueOrFalseAccordingToNullableAPIContract

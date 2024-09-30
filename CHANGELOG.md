@@ -5,7 +5,21 @@ All notable changes to this component are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/compare/v1.7.0..HEAD)
+## [Unreleased](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/compare/v1.8.0..HEAD)
+
+### Added
+
+### Changed
+
+#### Dependency updates
+
+### Deprecated
+
+### Removed
+
+### Fixed
+
+## [1.8.0](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/tag/v1.8.0)
 
 ### Added
 
@@ -52,13 +66,16 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 - Following packages updated
   - `MongoDB.Driver.Core.Extensions.DiagnosticSources` from `1.4.0` to `1.5.0`,
   - `OpenTelemetry.Exporter.Prometheus.HttpListener` from `1.9.0-beta.1` to `1.9.0-beta.2`,
-  - `OpenTelemetry.Shims.OpenTracing` from `1.9.0-beta.1` to `1.9.0-beta.2`,
-  - `OpenTelemetry.Resources.Host` from `0.1.0-beta.2` to `0.1.0-beta.3`.
+  - `OpenTelemetry.Instrumentation.Process` from `0.5.0-beta.6` to `0.5.0-beta.7`,
+  - `OpenTelemetry.Resources.Azure` from `1.0.0-beta.8` to `1.0.0-beta.9`,
+  - `OpenTelemetry.Resources.Host` from `0.1.0-beta.2` to `0.1.0-beta.3`,
+  - `OpenTelemetry.Resources.Process` from `0.1.0-beta.2` to `0.1.0-beta.3`,
+  - `OpenTelemetry.Shims.OpenTracing` from `1.9.0-beta.1` to `1.9.0-beta.2`.
 - .NET only, following packages updated
   - `OpenTelemetry.Instrumentation.StackExchangeRedis` from `1.0.0-rc9.15` to `1.9.0-beta.1`.
 - .NET Framework only, following packages updated
-  - `Google.Protobuf` updated from `3.27.1` to `3.27.2`,
-  - `Grpc.Core.Api` from `2.63.0` to `2.65.0`,
+  - `Google.Protobuf` updated from `3.27.1` to `3.28.2`,
+  - `Grpc.Core.Api` from `2.63.0` to `2.66.0`,
   - `Microsoft.Extensions.Configuration.Binder` from `8.0.1` to `8.0.2`,
   - `System.Text.Json` from `8.0.3` to `8.0.4`.
 
@@ -76,6 +93,8 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 - Support for `StackExchange.Redis` < 2.6.122.
 
 ### Fixed
+
+- Initialize WCF instrumentation only when necessary ([#3650](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/pull/3650))
 
 ## [1.7.0](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/tag/v1.7.0)
 

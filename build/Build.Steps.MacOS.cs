@@ -2,7 +2,6 @@ using Nuke.Common;
 using Nuke.Common.IO;
 using Serilog;
 using static Nuke.Common.EnvironmentInfo;
-using static Nuke.Common.IO.FileSystemTasks;
 
 partial class Build
 {
@@ -20,7 +19,7 @@ partial class Build
                 arguments: $". -DOTEL_AUTO_VERSION={VersionHelper.GetVersionWithoutSuffixes()} -DOTEL_AUTO_VERSION_MAJOR={major} -DOTEL_AUTO_VERSION_MINOR={minor} -DOTEL_AUTO_VERSION_PATCH={patch}",
                 workingDirectory: nativeProjectDirectory);
             Make.Value(
-                arguments: $"",
+                arguments: $" ", //space is needed - see https://github.com/nuke-build/nuke/issues/1417
                 workingDirectory: nativeProjectDirectory);
         });
 
@@ -35,7 +34,7 @@ partial class Build
                 arguments: "-S .",
                 workingDirectory: buildDirectory);
             Make.Value(
-                arguments: $"",
+                arguments: $" ", //space is needed - see https://github.com/nuke-build/nuke/issues/1417
                 workingDirectory: buildDirectory);
         });
 
@@ -50,6 +49,6 @@ partial class Build
             var dest = TracerHomeDirectory / "osx-x64";
             Log.Information($"Copying '{source}' to '{dest}'");
 
-            CopyFileToDirectory(source, dest, FileExistsPolicy.Overwrite);
+            source.CopyToDirectory(dest, ExistsPolicy.FileOverwrite);
         });
 }

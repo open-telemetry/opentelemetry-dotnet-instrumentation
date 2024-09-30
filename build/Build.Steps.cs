@@ -14,7 +14,6 @@ using Nuke.Common.Tools.NuGet;
 using Nuke.Common.Utilities.Collections;
 using Serilog;
 using static Nuke.Common.EnvironmentInfo;
-using static Nuke.Common.IO.FileSystemTasks;
 using static Nuke.Common.Tools.DotNet.DotNetTasks;
 
 partial class Build
@@ -103,7 +102,8 @@ partial class Build
                 // Projects using `packages.config` can't be restored via "dotnet restore", use a NuGet Task to restore these projects.
                 var legacyRestoreProjects = Solution.GetNativeProjects()
                     .Concat(Solution.GetProjectByName(Projects.Tests.Applications.AspNet))
-                    .Concat(Solution.GetProjectByName(Projects.Tests.Applications.WcfIis));
+                    .Concat(Solution.GetProjectByName(Projects.Tests.Applications.WcfIis))
+                    .Concat(Solution.GetProjectByName(Projects.Tests.Applications.OwinIis));
 
                 RestoreLegacyNuGetPackagesConfig(legacyRestoreProjects);
             }
@@ -380,7 +380,7 @@ partial class Build
         {
             var source = RootDirectory / "instrument.sh";
             var dest = TracerHomeDirectory;
-            CopyFileToDirectory(source, dest, FileExistsPolicy.Overwrite);
+            source.CopyToDirectory(dest, ExistsPolicy.FileOverwrite);
         });
 
     Target CopyLegalFiles => _ => _
@@ -391,7 +391,7 @@ partial class Build
         {
             var source = RootDirectory / "LICENSE";
             var dest = TracerHomeDirectory;
-            CopyFileToDirectory(source, dest, FileExistsPolicy.Overwrite);
+            source.CopyToDirectory(dest, ExistsPolicy.FileOverwrite);
         });
 
     Target RunNativeTests => _ => _

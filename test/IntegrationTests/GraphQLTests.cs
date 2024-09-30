@@ -24,8 +24,8 @@ public class GraphQLTests : TestHelper
 
         foreach (var version in LibraryVersion.GraphQL)
         {
-            theoryData.Add((string)version[0], true);
-            theoryData.Add((string)version[0], false);
+            theoryData.Add(version, true);
+            theoryData.Add(version, false);
         }
 
         return theoryData;

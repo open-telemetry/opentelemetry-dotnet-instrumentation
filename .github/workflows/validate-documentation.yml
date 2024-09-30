@@ -22,7 +22,7 @@ jobs:
     steps:
 
     - name: Checkout
-      uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # tag: v4.1.7
+      uses: actions/checkout@d632683dd7b4114ad314bca15554477dd762a938 # tag: v4.2.0
 
     - name: Run markdown links chceks
       if: ${{ !contains(github.event.pull_request.labels.*.name, 'release PR') }}
@@ -37,4 +37,4 @@ jobs:
         files: '**/*.md'
 
     - name: Run cspell
-      uses: DavidAnson/markdownlint-cli2-action@b4c9feab76d8025d1e83c653fa3990936df0e6c8 # tag: v16.0.0
+      uses: DavidAnson/markdownlint-cli2-action@db43aef879112c3119a410d69f66701e0d530809 # tag: v17.0.0

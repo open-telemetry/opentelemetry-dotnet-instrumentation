@@ -16,9 +16,8 @@ internal static class EnvironmentConfigurationTracerHelper
         TracerSettings settings,
         PluginManager pluginManager)
     {
-        // ensure WcfInitializer is added only once,
+        // ensure WCF instrumentation activity source is added only once,
         // it is needed when either WcfClient or WcfService instrumentations are enabled
-        // to initialize WcfInstrumentationOptions
         var wcfInstrumentationAdded = false;
         foreach (var enabledInstrumentation in settings.EnabledInstrumentations)
         {
@@ -26,7 +25,7 @@ internal static class EnvironmentConfigurationTracerHelper
             {
 #if NETFRAMEWORK
                 TracerInstrumentation.AspNet => Wrappers.AddAspNetInstrumentation(builder, pluginManager, lazyInstrumentationLoader, settings),
-                TracerInstrumentation.WcfService => AddWcfIfNeeded(builder, pluginManager, lazyInstrumentationLoader, ref wcfInstrumentationAdded),
+                TracerInstrumentation.WcfService => AddWcfIfNeeded(builder, ref wcfInstrumentationAdded),
 #endif
                 TracerInstrumentation.GrpcNetClient => Wrappers.AddGrpcClientInstrumentation(builder, pluginManager, lazyInstrumentationLoader, settings),
                 TracerInstrumentation.HttpClient => Wrappers.AddHttpClientInstrumentation(builder, pluginManager, lazyInstrumentationLoader, settings),
@@ -39,7 +38,7 @@ internal static class EnvironmentConfigurationTracerHelper
                 TracerInstrumentation.MongoDB => builder.AddSource("MongoDB.Driver.Core.Extensions.DiagnosticSources"),
                 TracerInstrumentation.MySqlConnector => builder.AddSource("MySqlConnector"),
                 TracerInstrumentation.Azure => Wrappers.AddAzureInstrumentation(builder),
-                TracerInstrumentation.WcfClient => AddWcfIfNeeded(builder, pluginManager, lazyInstrumentationLoader, ref wcfInstrumentationAdded),
+                TracerInstrumentation.WcfClient => AddWcfIfNeeded(builder, ref wcfInstrumentationAdded),
                 TracerInstrumentation.OracleMda => Wrappers.AddOracleMdaInstrumentation(builder, lazyInstrumentationLoader, settings),
 #if NET6_0_OR_GREATER
                 TracerInstrumentation.AspNetCore => Wrappers.AddAspNetCoreInstrumentation(builder, pluginManager, lazyInstrumentationLoader, settings),
@@ -74,8 +73,6 @@ internal static class EnvironmentConfigurationTracerHelper
 
     private static TracerProviderBuilder AddWcfIfNeeded(
         TracerProviderBuilder tracerProviderBuilder,
-        PluginManager pluginManager,
-        LazyInstrumentationLoader lazyInstrumentationLoader,
         ref bool wcfInstrumentationAdded)
     {
         if (wcfInstrumentationAdded)
@@ -83,7 +80,7 @@ internal static class EnvironmentConfigurationTracerHelper
             return tracerProviderBuilder;
         }
 
-        Wrappers.AddWcfInstrumentation(tracerProviderBuilder, pluginManager, lazyInstrumentationLoader);
+        tracerProviderBuilder.AddSource("OpenTelemetry.Instrumentation.Wcf");
         wcfInstrumentationAdded = true;
 
         return tracerProviderBuilder;
@@ -112,14 +109,6 @@ internal static class EnvironmentConfigurationTracerHelper
     private static class Wrappers
     {
         // Instrumentations
-
-        [MethodImpl(MethodImplOptions.NoInlining)]
-        public static TracerProviderBuilder AddWcfInstrumentation(TracerProviderBuilder builder, PluginManager pluginManager, LazyInstrumentationLoader lazyInstrumentationLoader)
-        {
-            DelayedInitialization.Traces.AddWcf(lazyInstrumentationLoader, pluginManager);
-
-            return builder.AddSource("OpenTelemetry.Instrumentation.Wcf");
-        }
 
         [MethodImpl(MethodImplOptions.NoInlining)]
         public static TracerProviderBuilder AddHttpClientInstrumentation(TracerProviderBuilder builder, PluginManager pluginManager, LazyInstrumentationLoader lazyInstrumentationLoader, TracerSettings tracerSettings)

@@ -30,7 +30,7 @@ jobs:
     steps:
       
       - name: Checkout
-        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # tag: v4.1.7
+        uses: actions/checkout@d632683dd7b4114ad314bca15554477dd762a938 # tag: v4.2.0
 
       - name: Setup ARM64 Environment Variables
         if: ${{ matrix.machine == 'otel-linux-arm64' }}
@@ -43,7 +43,7 @@ jobs:
           dotnet-version: | 
             6.0.425
             7.0.410
-            8.0.401
+            8.0.402
 
       - name: Run BuildTracer and ManagedTests
         run: ./build.cmd BuildTracer ManagedTests --containers ${{ matrix.containers }} --test-project "${{ github.event.inputs.testProject }}" --test-name '"${{ github.event.inputs.testName }}"' --test-count ${{ github.event.inputs.count }}
