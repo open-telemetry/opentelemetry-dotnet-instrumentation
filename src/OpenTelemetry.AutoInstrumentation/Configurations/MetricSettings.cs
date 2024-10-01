@@ -40,8 +40,7 @@ internal class MetricSettings : Settings
 
     protected override void OnLoad(Configuration configuration)
     {
-        var consoleExporterEnabled = configuration.GetBool(ConfigurationKeys.Metrics.ConsoleExporterEnabled) ?? false;
-        MetricExporters = ParseMetricExporter(configuration, consoleExporterEnabled);
+        MetricExporters = ParseMetricExporter(configuration);
         if (MetricExporters.Contains(MetricsExporter.Otlp))
         {
             OtlpSettings = new OtlpSettings(OtlpSignalType.Metrics, configuration);
@@ -67,21 +66,11 @@ internal class MetricSettings : Settings
         MetricsEnabled = configuration.GetBool(ConfigurationKeys.Metrics.MetricsEnabled) ?? true;
     }
 
-    private static IReadOnlyList<MetricsExporter> ParseMetricExporter(Configuration configuration, bool consoleExporterEnabled)
+    private static IReadOnlyList<MetricsExporter> ParseMetricExporter(Configuration configuration)
     {
         var metricsExporterEnvVar = configuration.GetString(ConfigurationKeys.Metrics.Exporter);
         var exporters = new List<MetricsExporter>();
         var seenExporters = new HashSet<string>();
-
-        if (consoleExporterEnabled)
-        {
-            Logger.Warning($"The '{ConfigurationKeys.Metrics.ConsoleExporterEnabled}' environment variable is deprecated and " +
-                "will be removed in the next minor release. " +
-                "Please set the console exporter using OTEL_METRICS_EXPORTER environmental variable. " +
-                "Refer to the updated documentation for details.");
-
-            exporters.Add(MetricsExporter.Console);
-        }
 
         if (string.IsNullOrEmpty(metricsExporterEnvVar))
         {

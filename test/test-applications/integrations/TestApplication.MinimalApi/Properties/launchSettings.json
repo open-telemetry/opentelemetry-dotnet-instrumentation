@@ -39,7 +39,7 @@
         "DOTNET_SHARED_STORE": "$(SolutionDir)bin\\tracer-home\\store",
         "DOTNET_STARTUP_HOOKS": "$(SolutionDir)bin\\tracer-home\\net\\OpenTelemetry.AutoInstrumentation.StartupHook.dll",
         "OTEL_DOTNET_AUTO_HOME": "$(SolutionDir)bin\\tracer-home",
-        "OTEL_DOTNET_AUTO_LOGS_CONSOLE_EXPORTER_ENABLED": "true"
+        "OTEL_LOGS_EXPORTER": "otlp,console"
       },
       "use64Bit": true,
       "nativeDebugging": true,

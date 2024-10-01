@@ -126,7 +126,7 @@ public class SmokeTests : TestHelper
         SetExporter(collector);
 
         EnableOnlyHttpClientTraceInstrumentation();
-        SetEnvironmentVariable("OTEL_DOTNET_AUTO_TRACES_CONSOLE_EXPORTER_ENABLED", "true");
+        SetEnvironmentVariable("OTEL_TRACES_EXPORTER", "otlp,console");
         SetEnvironmentVariable("OTEL_DOTNET_AUTO_TRACES_ADDITIONAL_SOURCES", "MyCompany.MyProduct.MyLibrary");
         var (_, _, processId) = RunTestApplication();
 

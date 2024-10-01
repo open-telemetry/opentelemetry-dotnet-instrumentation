@@ -12,17 +12,14 @@
         "DOTNET_STARTUP_HOOKS": "$(SolutionDir)bin\\tracer-home\\net\\OpenTelemetry.AutoInstrumentation.StartupHook.dll",
         "DOTNET_SHARED_STORE": "$(SolutionDir)bin\\tracer-home\\store",
         "DOTNET_ADDITIONAL_DEPS": "$(SolutionDir)bin\\tracer-home\\AdditionalDeps",
-        "OTEL_TRACES_EXPORTER": "zipkin",
+        "OTEL_TRACES_EXPORTER": "zipkin,console",
         "OTEL_EXPORTER_ZIPKIN_ENDPOINT": "http://127.0.0.1:9411/api/v2/spans",
         "OTEL_LOG_LEVEL": "debug",
-        "OTEL_DOTNET_AUTO_TRACES_CONSOLE_EXPORTER_ENABLED": "true",
         "OTEL_DOTNET_AUTO_HOME": "$(SolutionDir)bin\\tracer-home\\",
         "OTEL_DOTNET_AUTO_TRACES_ADDITIONAL_SOURCES": "TestApplication.*",
         "OTEL_LOGS_EXPORTER": "none",
-        "OTEL_LOG_LEVEL": "debug",
         "OTEL_METRICS_EXPORTER": "otlp",
-        "OTEL_METRIC_EXPORT_INTERVAL": "100",
-        "OTEL_TRACES_EXPORTER": "none"
+        "OTEL_METRIC_EXPORT_INTERVAL": "100"
       }
     }
   }

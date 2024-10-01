@@ -35,11 +35,11 @@ or use the appropriate install script:
 > for details.
 
 To see the telemetry from your application directly on the standard output, set
-the following environment variables to `true` before launching your application:
+the following environment variables to `console` before launching your application:
 
-- `OTEL_DOTNET_AUTO_LOGS_CONSOLE_EXPORTER_ENABLED`
-- `OTEL_DOTNET_AUTO_METRICS_CONSOLE_EXPORTER_ENABLED`
-- `OTEL_DOTNET_AUTO_TRACES_CONSOLE_EXPORTER_ENABLED`
+- `OTEL_TRACES_EXPORTER`
+- `OTEL_METRICS_EXPORTER`
+- `OTEL_LOGS_EXPORTER`
 
 For a demo using `docker compose`, clone this repository and
 follow the [examples/demo/README.md](../examples/demo/README.md).
