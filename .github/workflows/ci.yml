@@ -219,6 +219,9 @@ jobs:
             base-image: debian
             build-source: ubuntu-20.04
             os-type: linux-glibc
+          - machine: ubuntu-20.04
+            base-image: centos-stream9
+            build-source: ubuntu-20.4
           - machine: otel-linux-arm64
             base-image: alpine
             build-source: alpine-arm64
