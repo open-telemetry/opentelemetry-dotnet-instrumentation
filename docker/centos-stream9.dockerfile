@@ -7,7 +7,7 @@ RUN dnf install -y \
     dotnet-sdk-6.0
 
 # https://github.com/dotnet/runtime/issues/65874
-RUN update-crypto-pololicies --set LEGACY
+RUN update-crypto-policies --set LEGACY
 
 # Install dependencies
 RUN dnf install -y \
