@@ -1,7 +1,7 @@
 FROM quay.io/centos/centos:stream9
 
 # Install dotnet sdk
-RUN dnf install \
+RUN dnf install -y \
     dotnet-sdk-8.0 \
     dotnet-sdk-7.0 \
     dotnet-sdk-6.0
@@ -10,7 +10,8 @@ RUN dnf install \
 RUN update-crypto-pololicies --set LEGACY
 
 # Install dependencies
-RUN dnf install cmake-3.26.5-2.el9 \
+RUN dnf install -y \
+    cmake-3.26.5-2.el9 \
     clang-18.1.8-3.el9
 
 WORKDIR /project
