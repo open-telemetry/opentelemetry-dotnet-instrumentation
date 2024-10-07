@@ -1,7 +1,6 @@
 using System.Collections.ObjectModel;
 using System.Text.Json.Nodes;
 using Nuke.Common.IO;
-using Nuke.Common.Utilities.Collections;
 
 namespace Extensions;
 
@@ -89,7 +88,7 @@ internal static class DepsJsonExtensions
                     var newKey = libKey.Replace($"lib/{runtime}", $"lib/{rollForwardRuntime}");
 
                     runtimeObject.Remove(libKey);
-                    runtimeObject.AddPair(newKey, libNode);
+                    runtimeObject.Add(newKey, libNode);
                 }
             }
         }
