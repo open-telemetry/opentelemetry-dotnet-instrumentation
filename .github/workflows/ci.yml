@@ -53,7 +53,7 @@ jobs:
     steps:
 
       - name: Checkout
-        uses: actions/checkout@d632683dd7b4114ad314bca15554477dd762a938 # tag: v4.2.0
+        uses: actions/checkout@eef61447b9ff4aafe5dcd4e0bbf5d482be7e7871 # tag: v4.2.1
         with:
           fetch-depth: 0 # fetching all, needed to correctly calculate version
 
@@ -123,7 +123,7 @@ jobs:
     steps:
 
       - name: Checkout
-        uses: actions/checkout@d632683dd7b4114ad314bca15554477dd762a938 # tag: v4.2.0
+        uses: actions/checkout@eef61447b9ff4aafe5dcd4e0bbf5d482be7e7871 # tag: v4.2.1
         with:
           fetch-depth: 0 # fetching all, needed to correctly calculate version
 
@@ -163,7 +163,7 @@ jobs:
     steps:
 
       - name: Checkout
-        uses: actions/checkout@d632683dd7b4114ad314bca15554477dd762a938 # tag: v4.2.0
+        uses: actions/checkout@eef61447b9ff4aafe5dcd4e0bbf5d482be7e7871 # tag: v4.2.1
         with:
           fetch-depth: 0 # fetching all, needed to correctly calculate version
 
@@ -232,7 +232,7 @@ jobs:
     steps:
 
     - name: Checkout
-      uses: actions/checkout@d632683dd7b4114ad314bca15554477dd762a938 # tag: v4.2.0
+      uses: actions/checkout@eef61447b9ff4aafe5dcd4e0bbf5d482be7e7871 # tag: v4.2.1
       with:
         fetch-depth: 0 # fetching all, needed to correctly calculate version
 
@@ -263,7 +263,7 @@ jobs:
     steps:
       
       - name: Checkout
-        uses: actions/checkout@d632683dd7b4114ad314bca15554477dd762a938 # tag: v4.2.0
+        uses: actions/checkout@eef61447b9ff4aafe5dcd4e0bbf5d482be7e7871 # tag: v4.2.1
         with:
           fetch-depth: 0 # fetching all, needed to correctly calculate version
 
