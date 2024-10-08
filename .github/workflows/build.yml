@@ -29,7 +29,7 @@ jobs:
         run: cat /etc/os-release
 
       - name: Checkout
-        uses: actions/checkout@d632683dd7b4114ad314bca15554477dd762a938 # tag: v4.2.0
+        uses: actions/checkout@eef61447b9ff4aafe5dcd4e0bbf5d482be7e7871 # tag: v4.2.1
         with:
           fetch-depth: 0 # fetching all, needed to correctly calculate version
 
@@ -127,14 +127,14 @@ jobs:
 
       - name: Upload binaries
         if: always()
-        uses: actions/upload-artifact@50769540e7f4bd5e21e526ee35c689e35e0d6874 # tag: v4.4.0
+        uses: actions/upload-artifact@604373da6381bf24206979c74d06a550515601b9 # tag: v4.4.1
         with:
           name: bin-${{ matrix.machine }}
           path: bin/tracer-home
 
       - name: Upload installation scripts
         if: always()
-        uses: actions/upload-artifact@50769540e7f4bd5e21e526ee35c689e35e0d6874 # tag: v4.4.0
+        uses: actions/upload-artifact@604373da6381bf24206979c74d06a550515601b9 # tag: v4.4.1
         with:
           name: installation-scripts-${{ matrix.machine }}
           path: bin/installation-scripts
