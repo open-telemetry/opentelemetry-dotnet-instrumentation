@@ -13,6 +13,9 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 
 #### Dependency updates
 
+- .NET Framework only, following packages updated
+  - `System.Text.Json` from `8.0.4` to `8.0.5`.
+
 ### Deprecated
 
 ### Removed
