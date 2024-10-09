@@ -52,7 +52,7 @@ jobs:
 
     - name: Publish Linux build
       if: (${{ job.status }} != 'cancelled')
-      uses: actions/upload-artifact@604373da6381bf24206979c74d06a550515601b9 # tag: v4.4.1
+      uses: actions/upload-artifact@84480863f228bb9747b473957fcc9e309aa96097 # tag: v4.4.2
       with:
         name: bin-${{ matrix.base-image }}-${{ matrix.architecture }}
         path: bin/tracer-home
