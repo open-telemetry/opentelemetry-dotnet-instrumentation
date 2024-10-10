@@ -2,15 +2,15 @@ FROM mcr.microsoft.com/dotnet/sdk:8.0.403-alpine3.20
 RUN apk update \
     && apk upgrade \
     && apk add --no-cache --update \
-        clang=17.0.5-r0 \
-        cmake=3.27.8-r0 \
+        clang=17.0.6-r1 \
+        cmake=3.29.3-r0 \
         make=4.4.1-r2 \
-        bash=5.2.21-r0 \
+        bash=5.2.26-r0 \
         alpine-sdk=1.0-r1 \
-        protobuf=24.4-r0 \
-        protobuf-dev=24.4-r0 \
-        grpc=1.59.3-r0 \
-        grpc-plugins=1.59.3-r0
+        protobuf=24.4-r1 \
+        protobuf-dev=24.4-r1 \
+        grpc=1.62.1-r0 \
+        grpc-plugins=1.62.1-r0
 
 ENV IsAlpine=true
 ENV PROTOBUF_PROTOC=/usr/bin/protoc
