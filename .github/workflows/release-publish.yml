@@ -13,9 +13,9 @@ jobs:
         uses: actions/setup-dotnet@6bd8b7f7774af54e05809fcc5431931b3eb1ddee # tag: v4.0.1
         with:
           dotnet-version: | 
-            6.0.425
+            6.0.427
             7.0.410
-            8.0.402
+            8.0.403
             
       - name: Test the PowerShell module instructions from README.md
         shell: powershell
@@ -68,9 +68,9 @@ jobs:
         uses: actions/setup-dotnet@6bd8b7f7774af54e05809fcc5431931b3eb1ddee # tag: v4.0.1
         with:
           dotnet-version: | 
-            6.0.425
+            6.0.427
             7.0.410
-            8.0.402
+            8.0.403
 
       - name: Install MacOS CoreUtils
         if: ${{ runner.os == 'macOS' }}

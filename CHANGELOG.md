@@ -11,6 +11,8 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 
 ### Changed
 
+- Musl-based (Alpine) libraries are compiled on Alpine v3.20.
+
 #### Dependency updates
 
 - .NET Framework only, following packages updated

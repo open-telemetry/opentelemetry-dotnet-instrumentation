@@ -66,9 +66,9 @@ jobs:
         uses: actions/setup-dotnet@6bd8b7f7774af54e05809fcc5431931b3eb1ddee # tag: v4.0.1
         with:
           dotnet-version: | 
-            6.0.425
+            6.0.427
             7.0.410
-            8.0.402
+            8.0.403
 
       - name: Check for NuGet packages cache
         uses: actions/cache@3624ceb22c1c5a301c8db4169662070a689d9ea8 # tag: v4.1.1
@@ -131,9 +131,9 @@ jobs:
         uses: actions/setup-dotnet@6bd8b7f7774af54e05809fcc5431931b3eb1ddee # tag: v4.0.1
         with:
           dotnet-version: | 
-            6.0.425
+            6.0.427
             7.0.410
-            8.0.402
+            8.0.403
 
       - name: Check for NuGet packages cache
         uses: actions/cache@3624ceb22c1c5a301c8db4169662070a689d9ea8 # tag: v4.1.1
@@ -171,9 +171,9 @@ jobs:
         uses: actions/setup-dotnet@6bd8b7f7774af54e05809fcc5431931b3eb1ddee # tag: v4.0.1
         with:
           dotnet-version: | 
-            6.0.425
+            6.0.427
             7.0.410
-            8.0.402
+            8.0.403
 
       - name: Check for NuGet packages cache
         uses: actions/cache@3624ceb22c1c5a301c8db4169662070a689d9ea8 # tag: v4.1.1
@@ -280,9 +280,9 @@ jobs:
         uses: actions/setup-dotnet@6bd8b7f7774af54e05809fcc5431931b3eb1ddee # tag: v4.0.1
         with:
           dotnet-version: | 
-            6.0.425
+            6.0.427
             7.0.410
-            8.0.402
+            8.0.403
 
       - name: Check for NuGet packages cache
         uses: actions/cache@3624ceb22c1c5a301c8db4169662070a689d9ea8 # tag: v4.1.1
