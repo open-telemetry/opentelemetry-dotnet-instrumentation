@@ -14,6 +14,8 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 #### Dependency updates
 
 - .NET Framework only, following packages updated
+  - `Microsoft.Extensions.DependencyInjection` from `8.0.0` to `8.0.1`,
+  - `Microsoft.Extensions.DependencyInjection.Abstractions` from `8.0.1` to `8.0.2`,
   - `System.Text.Json` from `8.0.4` to `8.0.5`.
 
 ### Deprecated
