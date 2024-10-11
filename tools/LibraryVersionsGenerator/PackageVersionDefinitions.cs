@@ -16,7 +16,8 @@ internal static class PackageVersionDefinitions
             TestApplicationName = "TestApplication.Azure",
             Versions = new List<PackageVersion>
             {
-                new("12.13.0"),
+                // new("12.13.0"), // all lower versions than 12.22.2 contains references impacted by https://github.com/advisories/GHSA-8g4q-xg66-9fp4
+                new("12.22.2"),
                 new("*")
             }
         },
