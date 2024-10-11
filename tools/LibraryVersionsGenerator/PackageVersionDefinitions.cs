@@ -40,9 +40,9 @@ internal static class PackageVersionDefinitions
             TestApplicationName = "TestApplication.EntityFrameworkCore",
             Versions = new List<PackageVersion>
             {
-                new("6.0.33"),
-                new("7.0.20"),
-                new("8.0.2", supportedTargetFrameworks: new[] { "net8.0" }, supportedExecutionFrameworks: new[] { "net8.0" }),
+                new("6.0.35"),
+                // new("7.0.20"), all versions contains references to vulnerable packages https://github.com/advisories/GHSA-hh2w-p6rv-4g7w
+                new("8.0.10", supportedTargetFrameworks: new[] { "net8.0" }, supportedExecutionFrameworks: new[] { "net8.0" }),
                 new("*", supportedTargetFrameworks: new[] { "net8.0" }, supportedExecutionFrameworks: new[] { "net8.0" })
             }
         },

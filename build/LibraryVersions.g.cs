@@ -35,10 +35,8 @@ public static partial class LibraryVersion
             "TestApplication.EntityFrameworkCore",
             new List<PackageBuildInfo>
             {
-                new("6.0.33"),
-                new("7.0.20"),
-                new("8.0.2", supportedFrameworks: new string[] {"net8.0"}),
-                new("8.0.8", supportedFrameworks: new string[] {"net8.0"}),
+                new("6.0.35"),
+                new("8.0.10", supportedFrameworks: new string[] {"net8.0"}),
             }
         },
         {
