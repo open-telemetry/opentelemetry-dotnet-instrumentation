@@ -118,8 +118,7 @@ public static partial class LibraryVersion
             "TestApplication.Npgsql",
             new List<PackageBuildInfo>
             {
-                new("6.0.11"),
-                new("8.0.4"),
+                new("8.0.5"),
             }
         },
         {

@@ -159,7 +159,8 @@ internal static class PackageVersionDefinitions
             Versions = new List<PackageVersion>
             {
                 // new("6.0.0"), - high vulnerability https://github.com/advisories/GHSA-x9vc-6hfv-hg8c, <= 6.0.10, <= 7.0.6, and <= 8.0.2 test should be skipped
-                new("6.0.11"),
+                // new("6.0.11"), - transitive vulnerabilities https://github.com/advisories/GHSA-8g4q-xg66-9fp4 <= 6.0.12, <=7.0.8, <=8.0.4 test should be skipped
+                new("8.0.5"),
                 new("*")
             }
         },
