@@ -16,7 +16,8 @@ internal static class PackageVersionDefinitions
             TestApplicationName = "TestApplication.Azure",
             Versions = new List<PackageVersion>
             {
-                new("12.13.0"),
+                // new("12.13.0"), // all lower versions than 12.22.2 contains references impacted by https://github.com/advisories/GHSA-8g4q-xg66-9fp4
+                new("12.22.2"),
                 new("*")
             }
         },
@@ -39,9 +40,9 @@ internal static class PackageVersionDefinitions
             TestApplicationName = "TestApplication.EntityFrameworkCore",
             Versions = new List<PackageVersion>
             {
-                new("6.0.33"),
-                new("7.0.20"),
-                new("8.0.2", supportedTargetFrameworks: new[] { "net8.0" }, supportedExecutionFrameworks: new[] { "net8.0" }),
+                new("6.0.35"),
+                // new("7.0.20"), all versions contains references to vulnerable packages https://github.com/advisories/GHSA-hh2w-p6rv-4g7w
+                new("8.0.10", supportedTargetFrameworks: new[] { "net8.0" }, supportedExecutionFrameworks: new[] { "net8.0" }),
                 new("*", supportedTargetFrameworks: new[] { "net8.0" }, supportedExecutionFrameworks: new[] { "net8.0" })
             }
         },
@@ -158,7 +159,8 @@ internal static class PackageVersionDefinitions
             Versions = new List<PackageVersion>
             {
                 // new("6.0.0"), - high vulnerability https://github.com/advisories/GHSA-x9vc-6hfv-hg8c, <= 6.0.10, <= 7.0.6, and <= 8.0.2 test should be skipped
-                new("6.0.11"),
+                // new("6.0.11"), - transitive vulnerabilities https://github.com/advisories/GHSA-8g4q-xg66-9fp4 <= 6.0.12, <=7.0.8, <=8.0.4 test should be skipped
+                new("8.0.5"),
                 new("*")
             }
         },
