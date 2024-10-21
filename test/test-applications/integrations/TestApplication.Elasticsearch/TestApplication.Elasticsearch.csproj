@@ -1,9 +1,5 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <DefineConstants Condition="'$(LibraryVersion)' == '' or '$(LibraryVersion)'>='8.13.0'">$(DefineConstants);ELASTICSEARCH_CLIENT_8_13_OR_GREATER</DefineConstants>
-  </PropertyGroup>
-
   <ItemGroup>
     <PackageReference Include="Elastic.Clients.Elasticsearch" VersionOverride="$(LibraryVersion)" />
     <PackageReference Include="System.Diagnostics.DiagnosticSource" />
