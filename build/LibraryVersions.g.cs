@@ -26,9 +26,7 @@ public static partial class LibraryVersion
             "TestApplication.Elasticsearch",
             new List<PackageBuildInfo>
             {
-                new("8.0.0"),
-                new("8.10.0"),
-                new("8.15.6"),
+                new("8.15.10"),
             }
         },
         {
