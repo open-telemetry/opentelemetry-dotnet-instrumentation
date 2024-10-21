@@ -185,10 +185,7 @@ internal static class PackageVersionDefinitions
             TestApplicationName = "TestApplication.OracleMda.NetFramework",
             Versions = new List<PackageVersion>
             {
-                // new("23.4.0", supportedTargetFrameworks: new[] { "net472" }, supportedExecutionFrameworks: new[] { "net462" }),
-                // all lower versions than 23.5.1 contains references impacted by
-                // https://github.com/advisories/GHSA-447r-wph3-92pm
-                new("23.6.0", supportedTargetFrameworks: new[] { "net472" }, supportedExecutionFrameworks: new[] { "net462" }),
+                new("23.4.0", supportedTargetFrameworks: new[] { "net472" }, supportedExecutionFrameworks: new[] { "net462" }),
                 new("*", supportedTargetFrameworks: new[] { "net472" }, supportedExecutionFrameworks: new[] { "net462" })
             }
         },
@@ -199,9 +196,7 @@ internal static class PackageVersionDefinitions
             TestApplicationName = "TestApplication.OracleMda.Core",
             Versions = new List<PackageVersion>
             {
-                // new("23.4.0"), // all lower versions than 23.5.1 contains references impacted by
-                // https://github.com/advisories/GHSA-447r-wph3-92pm
-                new("23.6.0"),
+                new("23.4.0"),
                 new("*")
             }
         },
