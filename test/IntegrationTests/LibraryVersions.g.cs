@@ -232,10 +232,7 @@ public static partial class LibraryVersion
             theoryData.Add(string.Empty);
 #else
 #if NET462
-            theoryData.Add("23.4.0");
-#endif
-#if NET462
-            theoryData.Add("23.5.1");
+            theoryData.Add("23.6.0");
 #endif
 #endif
             return theoryData;
@@ -249,8 +246,7 @@ public static partial class LibraryVersion
 #if DEFAULT_TEST_PACKAGE_VERSIONS
             theoryData.Add(string.Empty);
 #else
-            theoryData.Add("23.4.0");
-            theoryData.Add("23.5.1");
+            theoryData.Add("23.6.0");
 #endif
             return theoryData;
         }
