@@ -69,8 +69,7 @@ public static partial class LibraryVersion
             "TestApplication.MassTransit",
             new List<PackageBuildInfo>
             {
-                new("8.0.0"),
-                new("8.2.5"),
+                new("8.3.0"),
             }
         },
         {

@@ -89,7 +89,9 @@ internal static class PackageVersionDefinitions
             TestApplicationName = "TestApplication.MassTransit",
             Versions = new List<PackageVersion>
             {
-                new("8.0.0"),
+                // new("8.0.0"), // all lower versions than 8.3.0 contains references impacted by
+                // https://github.com/advisories/GHSA-8g4q-xg66-9fp4
+                new("8.3.0"),
                 new("*")
             }
         },

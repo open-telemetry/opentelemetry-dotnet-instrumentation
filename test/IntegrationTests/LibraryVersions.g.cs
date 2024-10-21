@@ -113,8 +113,7 @@ public static partial class LibraryVersion
 #if DEFAULT_TEST_PACKAGE_VERSIONS
             theoryData.Add(string.Empty);
 #else
-            theoryData.Add("8.0.0");
-            theoryData.Add("8.2.5");
+            theoryData.Add("8.3.0");
 #endif
             return theoryData;
         }
