@@ -165,6 +165,7 @@ public static partial class LibraryVersion
             {
                 new("4.10.2"),
                 new("6.2.0"),
+                new("8.0.0", supportedFrameworks: new string[] {"net8.0"}),
             }
         },
         {
