@@ -8,6 +8,7 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.Build" />
+    <PackageReference Include="System.Text.Json" />
   </ItemGroup>
 
 </Project>
