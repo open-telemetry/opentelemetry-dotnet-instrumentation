@@ -3,7 +3,9 @@
   <ItemGroup>
     <PackageVersion Include="McMaster.Extensions.CommandLineUtils" Version="4.1.1" />
     <PackageVersion Include="Microsoft.Build" Version="17.6.3" />
-    <PackageVersion Include="NuGet.ProjectModel" Version="6.11.0" />
+    <PackageVersion Include="NuGet.ProjectModel" Version="6.11.1" />
+    <!-- NuGet.ProjectModel - Indirect vulnerable depenendecy https://github.com/advisories/GHSA-447r-wph3-92pm from NuGet.ProjectModel -->
+    <PackageVersion Include="System.Formats.Asn1" Version="8.0.1" />
     <PackageVersion Include="System.IO.Abstractions" Version="21.0.29" />
   </ItemGroup>
 </Project>
