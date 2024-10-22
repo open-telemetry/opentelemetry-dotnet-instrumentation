@@ -22,7 +22,7 @@ jobs:
             containers: windows
           - machine: ubuntu-20.04
             containers: linux
-          - machine: macos-15
+          - machine: macos-13
             containers: none
           - machine: otel-linux-arm64
             containers: linux

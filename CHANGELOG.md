@@ -33,7 +33,7 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
   `OTEL_METRICS_EXPORTER`
   `OTEL_LOGS_EXPORTER`.
 - Support for macOS Monterey 12 x64.
-  macOs libraries are built and tested against [macOS Sequoia 15 x64](https://github.com/actions/runner-images/blob/main/images/macos/macos-15-Readme.md).
+  macOs libraries are built and tested against [macOS Ventura 13 x64](https://github.com/actions/runner-images/blob/main/images/macos/macos-13-Readme.md).
 
 ### Fixed
 
