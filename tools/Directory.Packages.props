@@ -2,7 +2,9 @@
   <Import Project="..\Directory.Packages.props" />
   <ItemGroup>
     <PackageVersion Include="McMaster.Extensions.CommandLineUtils" Version="4.1.1" />
-    <PackageVersion Include="Microsoft.Build" Version="17.6.3" />
+    <PackageVersion Include="Microsoft.Build" Version="17.7.2" />
+    <!-- System.Text.Json - Indirect vulnerable depenendecy https://github.com/advisories/GHSA-hh2w-p6rv-4g7w from Microsoft.Build -->
+    <PackageVersion Include="System.Text.Json" Version="8.0.5" />
     <PackageVersion Include="NuGet.ProjectModel" Version="6.11.1" />
     <!-- NuGet.ProjectModel - Indirect vulnerable depenendecy https://github.com/advisories/GHSA-447r-wph3-92pm from NuGet.ProjectModel -->
     <PackageVersion Include="System.Formats.Asn1" Version="8.0.1" />
