@@ -11,7 +11,7 @@ internal static class WcfCommonConstants
 
     public const string ServiceModelPrimitivesAssemblyName = "System.ServiceModel.Primitives";
     public const string Min6Version = "6.0.0";
-    public const string Max6Version = "6.*.*";
+    public const string Max8Version = "8.*.*";
 #endif
     public const string Min4Version = "4.0.0";
     public const string Max4Version = "4.*.*";
