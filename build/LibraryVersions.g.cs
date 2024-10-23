@@ -104,8 +104,8 @@ public static partial class LibraryVersion
             "TestApplication.MySqlData",
             new List<PackageBuildInfo>
             {
-                new("8.1.0"),
                 new("9.0.0"),
+                new("9.1.0"),
             }
         },
         {

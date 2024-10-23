@@ -155,7 +155,8 @@ internal static class PackageVersionDefinitions
             TestApplicationName = "TestApplication.MySqlData",
             Versions = new List<PackageVersion>
             {
-                new("8.1.0"),
+                // new("8.1.0"), transitive vulnerability, https://github.com/advisories/GHSA-rxg9-xrhp-64gj, <9.0.0
+                new("9.0.0"),
                 new("*")
             }
         },
