@@ -190,7 +190,8 @@ internal static class PackageVersionDefinitions
             TestApplicationName = "TestApplication.OracleMda.NetFramework",
             Versions = new List<PackageVersion>
             {
-                new("23.4.0", supportedTargetFrameworks: new[] { "net472" }, supportedExecutionFrameworks: new[] { "net462" }),
+                // new("23.4.0", supportedTargetFrameworks: new[] { "net472" }, supportedExecutionFrameworks: new[] { "net462" }), transitive vulnerability https://github.com/advisories/GHSA-447r-wph3-92pm, <= 23.5.0
+                new("23.5.1", supportedTargetFrameworks: new[] { "net472" }, supportedExecutionFrameworks: new[] { "net462" }),
                 new("*", supportedTargetFrameworks: new[] { "net472" }, supportedExecutionFrameworks: new[] { "net462" })
             }
         },

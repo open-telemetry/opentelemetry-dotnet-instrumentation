@@ -131,8 +131,8 @@ public static partial class LibraryVersion
             "TestApplication.OracleMda.NetFramework",
             new List<PackageBuildInfo>
             {
-                new("23.4.0", supportedFrameworks: new string[] {"net472"}),
                 new("23.5.1", supportedFrameworks: new string[] {"net472"}),
+                new("23.6.0", supportedFrameworks: new string[] {"net472"}),
             }
         },
         {

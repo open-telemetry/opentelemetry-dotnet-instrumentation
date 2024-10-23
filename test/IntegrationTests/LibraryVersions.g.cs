@@ -230,10 +230,10 @@ public static partial class LibraryVersion
             theoryData.Add(string.Empty);
 #else
 #if NET462
-            theoryData.Add("23.4.0");
+            theoryData.Add("23.5.1");
 #endif
 #if NET462
-            theoryData.Add("23.5.1");
+            theoryData.Add("23.6.0");
 #endif
 #endif
             return theoryData;

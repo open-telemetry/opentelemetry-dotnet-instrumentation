@@ -35,7 +35,7 @@
     <PackageVersion Include="Npgsql" Version="8.0.5" />
     <PackageVersion Include="NuGet.Versioning" Version="6.5.0" />
     <PackageVersion Include="OpenTracing" Version="0.12.1" />
-    <PackageVersion Include="Oracle.ManagedDataAccess" Version="23.5.1" />
+    <PackageVersion Include="Oracle.ManagedDataAccess" Version="23.6.0" />
     <PackageVersion Include="Oracle.ManagedDataAccess.Core" Version="23.6.0" />
     <PackageVersion Include="Pomelo.EntityFrameworkCore.MySql" Version="8.0.2" />
     <PackageVersion Include="Quartz" Version="3.13.0" />
@@ -55,6 +55,7 @@
     <PackageVersion Include="System.Security.Cryptography.Pkcs" Version="8.0.1" />
     <PackageVersion Include="System.ServiceModel.Http" Version="8.0.0" />
     <PackageVersion Include="System.ServiceModel.NetTcp" Version="8.0.0" />
+    <PackageVersion Include="System.Text.Json" Version="8.0.5" />
     <PackageVersion Include="System.ValueTuple" Version="4.5.0" />
     <PackageVersion Include="Testcontainers" Version="3.10.0" />
     <PackageVersion Include="Verify.Xunit" Version="20.8.2" />
