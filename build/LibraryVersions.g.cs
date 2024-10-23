@@ -74,9 +74,6 @@ public static partial class LibraryVersion
             "TestApplication.SqlClient.Microsoft",
             new List<PackageBuildInfo>
             {
-                new("2.1.7"),
-                new("3.1.5", supportedFrameworks: new string[] {"net8.0","net7.0","net6.0"}),
-                new("4.0.5"),
                 new("5.2.2"),
             }
         },

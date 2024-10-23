@@ -108,9 +108,10 @@ internal static class PackageVersionDefinitions
             Versions = new List<PackageVersion>
             {
                 // new("1.1.4"), - high vulnerability https://github.com/dotnet/announcements/issues/292, test should be skipped
-                new("2.1.7"),
-                new("3.1.5", supportedTargetFrameworks: new[] { "net8.0", "net7.0", "net6.0" }, supportedExecutionFrameworks: new[] { "net8.0", "net7.0", "net6.0" }), // 3.1.* is not supported on .NET Framework. For details check: https://github.com/open-telemetry/opentelemetry-dotnet/issues/4243
-                new("4.0.5"),
+                // new("2.1.7"), transitive vulnerabilities https://github.com/advisories/GHSA-rxg9-xrhp-64gj
+                // new("3.1.7", supportedTargetFrameworks: new[] { "net8.0", "net7.0", "net6.0" }, supportedExecutionFrameworks: new[] { "net8.0", "net7.0", "net6.0" }), // 3.1.* is not supported on .NET Framework. For details check: https://github.com/open-telemetry/opentelemetry-dotnet/issues/4243, transitive vulnerabilities https://github.com/advisories/GHSA-rxg9-xrhp-64gj
+                // new("4.0.6"), transitive vulnerabilities https://github.com/advisories/GHSA-rxg9-xrhp-64gj
+                new("5.2.2"),
                 new("*")
             }
         },

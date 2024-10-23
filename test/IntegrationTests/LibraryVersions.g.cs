@@ -124,11 +124,6 @@ public static partial class LibraryVersion
 #if DEFAULT_TEST_PACKAGE_VERSIONS
             theoryData.Add(string.Empty);
 #else
-            theoryData.Add("2.1.7");
-#if NET8_0 || NET7_0 || NET6_0
-            theoryData.Add("3.1.5");
-#endif
-            theoryData.Add("4.0.5");
             theoryData.Add("5.2.2");
 #endif
             return theoryData;
