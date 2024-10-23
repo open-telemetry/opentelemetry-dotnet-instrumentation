@@ -139,8 +139,8 @@ public static partial class LibraryVersion
             "TestApplication.OracleMda.Core",
             new List<PackageBuildInfo>
             {
-                new("23.4.0"),
                 new("23.5.1"),
+                new("23.6.0"),
             }
         },
         {

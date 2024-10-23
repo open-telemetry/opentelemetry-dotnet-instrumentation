@@ -201,7 +201,8 @@ internal static class PackageVersionDefinitions
             TestApplicationName = "TestApplication.OracleMda.Core",
             Versions = new List<PackageVersion>
             {
-                new("23.4.0"),
+                // new("23.4.0"), transitive vulnerability https://github.com/advisories/GHSA-447r-wph3-92pm, <= 23.5.0
+                new("23.5.1"),
                 new("*")
             }
         },
