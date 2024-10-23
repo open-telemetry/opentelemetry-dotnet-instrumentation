@@ -53,7 +53,7 @@ partial class Build
                 "bin-alpine-arm64/linux-musl-arm64",
                 "bin-ubuntu-20.04/linux-x64",
                 "bin-otel-linux-arm64/linux-arm64",
-                "bin-macos-12/osx-x64",
+                "bin-macos-13/osx-x64",
                 "bin-windows-2022/win-x64",
                 "bin-windows-2022/win-x86"
             };
