@@ -147,7 +147,7 @@ public static partial class LibraryVersion
             "TestApplication.Quartz",
             new List<PackageBuildInfo>
             {
-                new("3.4.0"),
+                new("3.6.0"),
                 new("3.13.0"),
             }
         },

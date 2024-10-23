@@ -212,7 +212,8 @@ internal static class PackageVersionDefinitions
             TestApplicationName = "TestApplication.Quartz",
             Versions = new List<PackageVersion>
             {
-                new("3.4.0"),
+                // new("3.4.0"), - transitive vulnerability https://github.com/advisories/GHSA-rxg9-xrhp-64gj, <= 3.5.0
+                new("3.6.0"),
                 new("*")
             }
         },
