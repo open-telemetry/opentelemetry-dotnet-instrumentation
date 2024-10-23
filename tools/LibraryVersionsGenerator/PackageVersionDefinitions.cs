@@ -58,7 +58,7 @@ internal static class PackageVersionDefinitions
             TestApplicationName = "TestApplication.EntityFrameworkCore.Pomelo.MySql",
             Versions = new List<PackageVersion>
             {
-                new("6.0.2"),
+                new("6.0.3"),
                 new("7.0.0"),
                 new("8.0.0", supportedTargetFrameworks: new[] { "net8.0" }, supportedExecutionFrameworks: new[] { "net8.0" }),
                 new("*", supportedTargetFrameworks: new[] { "net8.0" }, supportedExecutionFrameworks: new[] { "net8.0" })
@@ -108,9 +108,10 @@ internal static class PackageVersionDefinitions
             Versions = new List<PackageVersion>
             {
                 // new("1.1.4"), - high vulnerability https://github.com/dotnet/announcements/issues/292, test should be skipped
-                new("2.1.7"),
-                new("3.1.5", supportedTargetFrameworks: new[] { "net8.0", "net7.0", "net6.0" }, supportedExecutionFrameworks: new[] { "net8.0", "net7.0", "net6.0" }), // 3.1.* is not supported on .NET Framework. For details check: https://github.com/open-telemetry/opentelemetry-dotnet/issues/4243
-                new("4.0.5"),
+                // new("2.1.7"), transitive vulnerabilities https://github.com/advisories/GHSA-rxg9-xrhp-64gj
+                // new("3.1.7", supportedTargetFrameworks: new[] { "net8.0", "net7.0", "net6.0" }, supportedExecutionFrameworks: new[] { "net8.0", "net7.0", "net6.0" }), // 3.1.* is not supported on .NET Framework. For details check: https://github.com/open-telemetry/opentelemetry-dotnet/issues/4243, transitive vulnerabilities https://github.com/advisories/GHSA-rxg9-xrhp-64gj
+                // new("4.0.6"), transitive vulnerabilities https://github.com/advisories/GHSA-rxg9-xrhp-64gj
+                new("5.2.2"),
                 new("*")
             }
         },
@@ -154,7 +155,8 @@ internal static class PackageVersionDefinitions
             TestApplicationName = "TestApplication.MySqlData",
             Versions = new List<PackageVersion>
             {
-                new("8.1.0"),
+                // new("8.1.0"), transitive vulnerability, https://github.com/advisories/GHSA-rxg9-xrhp-64gj, <9.0.0
+                new("9.0.0"),
                 new("*")
             }
         },
@@ -190,7 +192,8 @@ internal static class PackageVersionDefinitions
             TestApplicationName = "TestApplication.OracleMda.NetFramework",
             Versions = new List<PackageVersion>
             {
-                new("23.4.0", supportedTargetFrameworks: new[] { "net472" }, supportedExecutionFrameworks: new[] { "net462" }),
+                // new("23.4.0", supportedTargetFrameworks: new[] { "net472" }, supportedExecutionFrameworks: new[] { "net462" }), transitive vulnerability https://github.com/advisories/GHSA-447r-wph3-92pm, <= 23.5.0
+                new("23.5.1", supportedTargetFrameworks: new[] { "net472" }, supportedExecutionFrameworks: new[] { "net462" }),
                 new("*", supportedTargetFrameworks: new[] { "net472" }, supportedExecutionFrameworks: new[] { "net462" })
             }
         },
@@ -201,7 +204,8 @@ internal static class PackageVersionDefinitions
             TestApplicationName = "TestApplication.OracleMda.Core",
             Versions = new List<PackageVersion>
             {
-                new("23.4.0"),
+                // new("23.4.0"), transitive vulnerability https://github.com/advisories/GHSA-447r-wph3-92pm, <= 23.5.0
+                new("23.5.1"),
                 new("*")
             }
         },
@@ -212,7 +216,8 @@ internal static class PackageVersionDefinitions
             TestApplicationName = "TestApplication.Quartz",
             Versions = new List<PackageVersion>
             {
-                new("3.4.0"),
+                // new("3.4.0"), - transitive vulnerability https://github.com/advisories/GHSA-rxg9-xrhp-64gj, <= 3.5.0
+                new("3.6.0"),
                 new("*")
             }
         },

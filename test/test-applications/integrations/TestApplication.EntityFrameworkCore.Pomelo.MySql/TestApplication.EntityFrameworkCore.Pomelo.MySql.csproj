@@ -9,14 +9,16 @@
     <PackageReference Include="Pomelo.EntityFrameworkCore.MySql" VersionOverride="$(LibraryVersion)" Condition=" '$(LibraryVersion)' != '' or '$(TargetFramework)' == 'net8.0' "/>
     <PackageReference Include="Pomelo.EntityFrameworkCore.MySql" VersionOverride="7.0.0" Condition=" '$(LibraryVersion)' == '' and '$(TargetFramework)' != 'net8.0' "/>
 
-    <!-- Microsoft.Extensions.Configuration.Abstractions, Microsoft.Extensions.Logging.Abstractions,
+    <!-- Microsoft.Extensions.Configuration.Abstractions,
     Microsoft.Extensions.Options, and Microsoft.Extensions.DependencyInjection
     are needed to bump reference to 8.0.0
     some versions of Pomelo.EntityFrameworkCore.MySql brings to old references -->
     <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" />
-    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" VersionOverride="8.0.1" />
     <PackageReference Include="Microsoft.Extensions.Options" VersionOverride="8.0.2" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" VersionOverride="8.0.1" />
+
+    <!-- Microsoft.Extensions.Caching.Memory is indirect reference. Bumping it to mitigate https://github.com/advisories/GHSA-qj66-m88j-hmgj -->
+    <PackageReference Include="Microsoft.Extensions.Caching.Memory" />
   </ItemGroup>
 
 </Project>

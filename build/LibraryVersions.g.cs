@@ -41,7 +41,7 @@ public static partial class LibraryVersion
             "TestApplication.EntityFrameworkCore.Pomelo.MySql",
             new List<PackageBuildInfo>
             {
-                new("6.0.2"),
+                new("6.0.3"),
                 new("7.0.0"),
                 new("8.0.0", supportedFrameworks: new string[] {"net8.0"}),
                 new("8.0.2", supportedFrameworks: new string[] {"net8.0"}),
@@ -74,9 +74,6 @@ public static partial class LibraryVersion
             "TestApplication.SqlClient.Microsoft",
             new List<PackageBuildInfo>
             {
-                new("2.1.7"),
-                new("3.1.5", supportedFrameworks: new string[] {"net8.0","net7.0","net6.0"}),
-                new("4.0.5"),
                 new("5.2.2"),
             }
         },
@@ -107,8 +104,8 @@ public static partial class LibraryVersion
             "TestApplication.MySqlData",
             new List<PackageBuildInfo>
             {
-                new("8.1.0"),
                 new("9.0.0"),
+                new("9.1.0"),
             }
         },
         {
@@ -131,23 +128,23 @@ public static partial class LibraryVersion
             "TestApplication.OracleMda.NetFramework",
             new List<PackageBuildInfo>
             {
-                new("23.4.0", supportedFrameworks: new string[] {"net472"}),
                 new("23.5.1", supportedFrameworks: new string[] {"net472"}),
+                new("23.6.0", supportedFrameworks: new string[] {"net472"}),
             }
         },
         {
             "TestApplication.OracleMda.Core",
             new List<PackageBuildInfo>
             {
-                new("23.4.0"),
                 new("23.5.1"),
+                new("23.6.0"),
             }
         },
         {
             "TestApplication.Quartz",
             new List<PackageBuildInfo>
             {
-                new("3.4.0"),
+                new("3.6.0"),
                 new("3.13.0"),
             }
         },
