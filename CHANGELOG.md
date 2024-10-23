@@ -22,6 +22,10 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 
 ### Deprecated
 
+- Support for macOS Monterey 12 x64.
+  All further releases will be supporting [macOS Ventura 13 x64](https://github.com/actions/runner-images/blob/main/images/macos/macos-13-Readme.md)
+  and newer.
+
 ### Removed
 
 - Drop support for following environment variables:
