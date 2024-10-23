@@ -58,7 +58,7 @@ internal static class PackageVersionDefinitions
             TestApplicationName = "TestApplication.EntityFrameworkCore.Pomelo.MySql",
             Versions = new List<PackageVersion>
             {
-                new("6.0.2"),
+                new("6.0.3"),
                 new("7.0.0"),
                 new("8.0.0", supportedTargetFrameworks: new[] { "net8.0" }, supportedExecutionFrameworks: new[] { "net8.0" }),
                 new("*", supportedTargetFrameworks: new[] { "net8.0" }, supportedExecutionFrameworks: new[] { "net8.0" })

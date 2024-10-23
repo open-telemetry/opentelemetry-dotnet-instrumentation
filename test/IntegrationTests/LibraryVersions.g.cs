@@ -63,7 +63,7 @@ public static partial class LibraryVersion
 #if DEFAULT_TEST_PACKAGE_VERSIONS
             theoryData.Add(string.Empty);
 #else
-            theoryData.Add("6.0.2");
+            theoryData.Add("6.0.3");
             theoryData.Add("7.0.0");
 #if NET8_0
             theoryData.Add("8.0.0");

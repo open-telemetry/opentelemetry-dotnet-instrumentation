@@ -41,7 +41,7 @@ public static partial class LibraryVersion
             "TestApplication.EntityFrameworkCore.Pomelo.MySql",
             new List<PackageBuildInfo>
             {
-                new("6.0.2"),
+                new("6.0.3"),
                 new("7.0.0"),
                 new("8.0.0", supportedFrameworks: new string[] {"net8.0"}),
                 new("8.0.2", supportedFrameworks: new string[] {"net8.0"}),
