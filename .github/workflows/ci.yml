@@ -63,7 +63,7 @@ jobs:
           echo "DOTNET_INSTALL_DIR=~/.dotnet" >> $GITHUB_ENV
 
       - name: Setup .NET
-        uses: actions/setup-dotnet@6bd8b7f7774af54e05809fcc5431931b3eb1ddee # tag: v4.0.1
+        uses: actions/setup-dotnet@3e891b0cb619bf60e2c25674b222b8940e2c1c25 # tag: v4.1.0
         with:
           dotnet-version: | 
             6.0.427
@@ -128,7 +128,7 @@ jobs:
           fetch-depth: 0 # fetching all, needed to correctly calculate version
 
       - name: Setup .NET
-        uses: actions/setup-dotnet@6bd8b7f7774af54e05809fcc5431931b3eb1ddee # tag: v4.0.1
+        uses: actions/setup-dotnet@3e891b0cb619bf60e2c25674b222b8940e2c1c25 # tag: v4.1.0
         with:
           dotnet-version: | 
             6.0.427
@@ -168,7 +168,7 @@ jobs:
           fetch-depth: 0 # fetching all, needed to correctly calculate version
 
       - name: Setup .NET
-        uses: actions/setup-dotnet@6bd8b7f7774af54e05809fcc5431931b3eb1ddee # tag: v4.0.1
+        uses: actions/setup-dotnet@3e891b0cb619bf60e2c25674b222b8940e2c1c25 # tag: v4.1.0
         with:
           dotnet-version: | 
             6.0.427
@@ -277,7 +277,7 @@ jobs:
           echo "DOTNET_INSTALL_DIR=~/.dotnet" >> $GITHUB_ENV
 
       - name: Setup .NET
-        uses: actions/setup-dotnet@6bd8b7f7774af54e05809fcc5431931b3eb1ddee # tag: v4.0.1
+        uses: actions/setup-dotnet@3e891b0cb619bf60e2c25674b222b8940e2c1c25 # tag: v4.1.0
         with:
           dotnet-version: | 
             6.0.427
