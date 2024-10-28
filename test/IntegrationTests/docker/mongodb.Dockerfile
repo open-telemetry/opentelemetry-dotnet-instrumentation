@@ -1,1 +1,1 @@
-FROM mongo:8.0.1
+FROM mongo:8.0.3
