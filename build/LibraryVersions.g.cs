@@ -19,34 +19,29 @@ public static partial class LibraryVersion
             "TestApplication.Azure",
             new List<PackageBuildInfo>
             {
-                new("12.13.0"),
-                new("12.22.0"),
+                new("12.22.2"),
             }
         },
         {
             "TestApplication.Elasticsearch",
             new List<PackageBuildInfo>
             {
-                new("8.0.0"),
-                new("8.10.0"),
-                new("8.15.6"),
+                new("8.15.10"),
             }
         },
         {
             "TestApplication.EntityFrameworkCore",
             new List<PackageBuildInfo>
             {
-                new("6.0.33"),
-                new("7.0.20"),
-                new("8.0.2", supportedFrameworks: new string[] {"net8.0"}),
-                new("8.0.8", supportedFrameworks: new string[] {"net8.0"}),
+                new("6.0.35"),
+                new("8.0.10", supportedFrameworks: new string[] {"net8.0"}),
             }
         },
         {
             "TestApplication.EntityFrameworkCore.Pomelo.MySql",
             new List<PackageBuildInfo>
             {
-                new("6.0.2"),
+                new("6.0.3"),
                 new("7.0.0"),
                 new("8.0.0", supportedFrameworks: new string[] {"net8.0"}),
                 new("8.0.2", supportedFrameworks: new string[] {"net8.0"}),
@@ -72,17 +67,13 @@ public static partial class LibraryVersion
             "TestApplication.MassTransit",
             new List<PackageBuildInfo>
             {
-                new("8.0.0"),
-                new("8.2.5"),
+                new("8.3.0"),
             }
         },
         {
             "TestApplication.SqlClient.Microsoft",
             new List<PackageBuildInfo>
             {
-                new("2.1.7"),
-                new("3.1.5", supportedFrameworks: new string[] {"net8.0","net7.0","net6.0"}),
-                new("4.0.5"),
                 new("5.2.2"),
             }
         },
@@ -98,7 +89,7 @@ public static partial class LibraryVersion
             new List<PackageBuildInfo>
             {
                 new("2.28.0"),
-                new("2.29.0"),
+                new("2.30.0"),
             }
         },
         {
@@ -113,16 +104,15 @@ public static partial class LibraryVersion
             "TestApplication.MySqlData",
             new List<PackageBuildInfo>
             {
-                new("8.1.0"),
                 new("9.0.0"),
+                new("9.1.0"),
             }
         },
         {
             "TestApplication.Npgsql",
             new List<PackageBuildInfo>
             {
-                new("6.0.11"),
-                new("8.0.4"),
+                new("8.0.5"),
             }
         },
         {
@@ -138,23 +128,23 @@ public static partial class LibraryVersion
             "TestApplication.OracleMda.NetFramework",
             new List<PackageBuildInfo>
             {
-                new("23.4.0", supportedFrameworks: new string[] {"net472"}),
                 new("23.5.1", supportedFrameworks: new string[] {"net472"}),
+                new("23.6.0", supportedFrameworks: new string[] {"net472"}),
             }
         },
         {
             "TestApplication.OracleMda.Core",
             new List<PackageBuildInfo>
             {
-                new("23.4.0"),
                 new("23.5.1"),
+                new("23.6.0"),
             }
         },
         {
             "TestApplication.Quartz",
             new List<PackageBuildInfo>
             {
-                new("3.4.0"),
+                new("3.6.0"),
                 new("3.13.0"),
             }
         },
@@ -172,6 +162,7 @@ public static partial class LibraryVersion
             {
                 new("4.10.2"),
                 new("6.2.0"),
+                new("8.0.0", supportedFrameworks: new string[] {"net8.0"}),
             }
         },
         {

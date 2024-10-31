@@ -5,7 +5,12 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="System.ValueTuple" Condition="'$(TargetFramework)' == 'net462'"/>
-    <PackageReference Include="System.Diagnostics.DiagnosticSource" Condition="'$(TargetFramework)' == 'net6.0'"/>
+    <PackageReference Include="System.ValueTuple" Condition="'$(TargetFramework)' == 'net462'" />
+    <PackageReference Include="System.Diagnostics.DiagnosticSource" Condition="'$(TargetFramework)' == 'net6.0'" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- System.Private.Uri is indirect reference. Bumping it to mitigate https://github.com/advisories/GHSA-xhfc-gr8f-ffwc -->
+    <PackageReference Include="System.Private.Uri" />
   </ItemGroup>
 </Project>

@@ -15,12 +15,19 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 
 #### Dependency updates
 
+- Following packages updated
+  - `OpenTelemetry.Instrumentation.Wcf` from `1.0.0-rc.17` to `1.0.0-rc.18`,
 - .NET Framework only, following packages updated
+  - `Google.Protobuf` updated from `3.28.2` to `3.28.3`,
   - `Microsoft.Extensions.DependencyInjection` from `8.0.0` to `8.0.1`,
   - `Microsoft.Extensions.DependencyInjection.Abstractions` from `8.0.1` to `8.0.2`,
   - `System.Text.Json` from `8.0.4` to `8.0.5`.
 
 ### Deprecated
+
+- Support for macOS Monterey 12 x64.
+  All further releases will be supporting [macOS Ventura 13 x64](https://github.com/actions/runner-images/blob/main/images/macos/macos-13-Readme.md)
+  and newer.
 
 ### Removed
 

@@ -16,7 +16,8 @@ internal static class PackageVersionDefinitions
             TestApplicationName = "TestApplication.Azure",
             Versions = new List<PackageVersion>
             {
-                new("12.13.0"),
+                // new("12.13.0"), // all lower versions than 12.22.2 contains references impacted by https://github.com/advisories/GHSA-8g4q-xg66-9fp4
+                new("12.22.2"),
                 new("*")
             }
         },
@@ -27,8 +28,13 @@ internal static class PackageVersionDefinitions
             TestApplicationName = "TestApplication.Elasticsearch",
             Versions = new List<PackageVersion>
             {
+                /*
                 new("8.0.0"),
-                new("8.10.0"), // 8.10.0 introduces breaking change for ActivitySource name
+                new("8.10.0"),
+                all lower versions than 8.15.10 contains references impacted by
+                https://github.com/advisories/GHSA-8g4q-xg66-9fp4
+                */
+                new("8.15.10"),
                 new("*")
             }
         },
@@ -39,9 +45,9 @@ internal static class PackageVersionDefinitions
             TestApplicationName = "TestApplication.EntityFrameworkCore",
             Versions = new List<PackageVersion>
             {
-                new("6.0.33"),
-                new("7.0.20"),
-                new("8.0.2", supportedTargetFrameworks: new[] { "net8.0" }, supportedExecutionFrameworks: new[] { "net8.0" }),
+                new("6.0.35"),
+                // new("7.0.20"), all versions contains references to vulnerable packages https://github.com/advisories/GHSA-hh2w-p6rv-4g7w
+                new("8.0.10", supportedTargetFrameworks: new[] { "net8.0" }, supportedExecutionFrameworks: new[] { "net8.0" }),
                 new("*", supportedTargetFrameworks: new[] { "net8.0" }, supportedExecutionFrameworks: new[] { "net8.0" })
             }
         },
@@ -52,7 +58,7 @@ internal static class PackageVersionDefinitions
             TestApplicationName = "TestApplication.EntityFrameworkCore.Pomelo.MySql",
             Versions = new List<PackageVersion>
             {
-                new("6.0.2"),
+                new("6.0.3"),
                 new("7.0.0"),
                 new("8.0.0", supportedTargetFrameworks: new[] { "net8.0" }, supportedExecutionFrameworks: new[] { "net8.0" }),
                 new("*", supportedTargetFrameworks: new[] { "net8.0" }, supportedExecutionFrameworks: new[] { "net8.0" })
@@ -88,7 +94,9 @@ internal static class PackageVersionDefinitions
             TestApplicationName = "TestApplication.MassTransit",
             Versions = new List<PackageVersion>
             {
-                new("8.0.0"),
+                // new("8.0.0"), // all lower versions than 8.3.0 contains references impacted by
+                // https://github.com/advisories/GHSA-8g4q-xg66-9fp4
+                new("8.3.0"),
                 new("*")
             }
         },
@@ -100,9 +108,10 @@ internal static class PackageVersionDefinitions
             Versions = new List<PackageVersion>
             {
                 // new("1.1.4"), - high vulnerability https://github.com/dotnet/announcements/issues/292, test should be skipped
-                new("2.1.7"),
-                new("3.1.5", supportedTargetFrameworks: new[] { "net8.0", "net7.0", "net6.0" }, supportedExecutionFrameworks: new[] { "net8.0", "net7.0", "net6.0" }), // 3.1.* is not supported on .NET Framework. For details check: https://github.com/open-telemetry/opentelemetry-dotnet/issues/4243
-                new("4.0.5"),
+                // new("2.1.7"), transitive vulnerabilities https://github.com/advisories/GHSA-rxg9-xrhp-64gj
+                // new("3.1.7", supportedTargetFrameworks: new[] { "net8.0", "net7.0", "net6.0" }, supportedExecutionFrameworks: new[] { "net8.0", "net7.0", "net6.0" }), // 3.1.* is not supported on .NET Framework. For details check: https://github.com/open-telemetry/opentelemetry-dotnet/issues/4243, transitive vulnerabilities https://github.com/advisories/GHSA-rxg9-xrhp-64gj
+                // new("4.0.6"), transitive vulnerabilities https://github.com/advisories/GHSA-rxg9-xrhp-64gj
+                new("5.2.2"),
                 new("*")
             }
         },
@@ -146,7 +155,8 @@ internal static class PackageVersionDefinitions
             TestApplicationName = "TestApplication.MySqlData",
             Versions = new List<PackageVersion>
             {
-                new("8.1.0"),
+                // new("8.1.0"), transitive vulnerability, https://github.com/advisories/GHSA-rxg9-xrhp-64gj, <9.0.0
+                new("9.0.0"),
                 new("*")
             }
         },
@@ -158,7 +168,8 @@ internal static class PackageVersionDefinitions
             Versions = new List<PackageVersion>
             {
                 // new("6.0.0"), - high vulnerability https://github.com/advisories/GHSA-x9vc-6hfv-hg8c, <= 6.0.10, <= 7.0.6, and <= 8.0.2 test should be skipped
-                new("6.0.11"),
+                // new("6.0.11"), - transitive vulnerabilities https://github.com/advisories/GHSA-8g4q-xg66-9fp4 <= 6.0.12, <=7.0.8, <=8.0.4 test should be skipped
+                new("8.0.5"),
                 new("*")
             }
         },
@@ -181,7 +192,8 @@ internal static class PackageVersionDefinitions
             TestApplicationName = "TestApplication.OracleMda.NetFramework",
             Versions = new List<PackageVersion>
             {
-                new("23.4.0", supportedTargetFrameworks: new[] { "net472" }, supportedExecutionFrameworks: new[] { "net462" }),
+                // new("23.4.0", supportedTargetFrameworks: new[] { "net472" }, supportedExecutionFrameworks: new[] { "net462" }), transitive vulnerability https://github.com/advisories/GHSA-447r-wph3-92pm, <= 23.5.0
+                new("23.5.1", supportedTargetFrameworks: new[] { "net472" }, supportedExecutionFrameworks: new[] { "net462" }),
                 new("*", supportedTargetFrameworks: new[] { "net472" }, supportedExecutionFrameworks: new[] { "net462" })
             }
         },
@@ -192,7 +204,8 @@ internal static class PackageVersionDefinitions
             TestApplicationName = "TestApplication.OracleMda.Core",
             Versions = new List<PackageVersion>
             {
-                new("23.4.0"),
+                // new("23.4.0"), transitive vulnerability https://github.com/advisories/GHSA-447r-wph3-92pm, <= 23.5.0
+                new("23.5.1"),
                 new("*")
             }
         },
@@ -203,7 +216,8 @@ internal static class PackageVersionDefinitions
             TestApplicationName = "TestApplication.Quartz",
             Versions = new List<PackageVersion>
             {
-                new("3.4.0"),
+                // new("3.4.0"), - transitive vulnerability https://github.com/advisories/GHSA-rxg9-xrhp-64gj, <= 3.5.0
+                new("3.6.0"),
                 new("*")
             }
         },
@@ -226,7 +240,8 @@ internal static class PackageVersionDefinitions
             Versions = new List<PackageVersion>
             {
                 new("4.10.2"),
-                new("*")
+                new("6.2.0"),
+                new("*", supportedTargetFrameworks: new[] { "net8.0" }, supportedExecutionFrameworks: new[] { "net8.0" })
             }
         },
         new()

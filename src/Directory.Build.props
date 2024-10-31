@@ -28,12 +28,6 @@
     <Authors>OpenTelemetry Authors</Authors>
     <!-- No warning on empty NuGet version suffix even if using pre-release dependencies -->
     <NoWarn>$(NoWarn);NU5104</NoWarn>
-    <!--
-       No warn to mitigate following warnings for transitive dependencies:
-       error NU1902: Warning As Error: Package 'SharpCompress' 0.23.0 has a known moderate severity vulnerability, https://github.com/advisories/GHSA-jp7f-grcv-6mjf
-       error NU1904: Warning As Error: Package 'System.Drawing.Common' 4.7.0 has a known critical severity vulnerability, https://github.com/advisories/GHSA-rxg9-xrhp-64gj
-    -->
-    <NoWarn>$(NoWarn);NU1902;NU1904</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>

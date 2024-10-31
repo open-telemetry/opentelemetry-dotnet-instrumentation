@@ -53,7 +53,7 @@ jobs:
     steps:
 
       - name: Checkout
-        uses: actions/checkout@eef61447b9ff4aafe5dcd4e0bbf5d482be7e7871 # tag: v4.2.1
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # tag: v4.2.2
         with:
           fetch-depth: 0 # fetching all, needed to correctly calculate version
 
@@ -63,7 +63,7 @@ jobs:
           echo "DOTNET_INSTALL_DIR=~/.dotnet" >> $GITHUB_ENV
 
       - name: Setup .NET
-        uses: actions/setup-dotnet@6bd8b7f7774af54e05809fcc5431931b3eb1ddee # tag: v4.0.1
+        uses: actions/setup-dotnet@3e891b0cb619bf60e2c25674b222b8940e2c1c25 # tag: v4.1.0
         with:
           dotnet-version: | 
             6.0.427
@@ -71,7 +71,7 @@ jobs:
             8.0.403
 
       - name: Check for NuGet packages cache
-        uses: actions/cache@3624ceb22c1c5a301c8db4169662070a689d9ea8 # tag: v4.1.1
+        uses: actions/cache@6849a6489940f00c2f30c0fb92c6274307ccb58a # tag: v4.1.2
         id: nuget-cache
         with:
           key: ${{ hashFiles('**/Directory.packages.props', './build/LibraryVersions.g.cs', '**/packages.config' ) }}
@@ -123,12 +123,12 @@ jobs:
     steps:
 
       - name: Checkout
-        uses: actions/checkout@eef61447b9ff4aafe5dcd4e0bbf5d482be7e7871 # tag: v4.2.1
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # tag: v4.2.2
         with:
           fetch-depth: 0 # fetching all, needed to correctly calculate version
 
       - name: Setup .NET
-        uses: actions/setup-dotnet@6bd8b7f7774af54e05809fcc5431931b3eb1ddee # tag: v4.0.1
+        uses: actions/setup-dotnet@3e891b0cb619bf60e2c25674b222b8940e2c1c25 # tag: v4.1.0
         with:
           dotnet-version: | 
             6.0.427
@@ -136,7 +136,7 @@ jobs:
             8.0.403
 
       - name: Check for NuGet packages cache
-        uses: actions/cache@3624ceb22c1c5a301c8db4169662070a689d9ea8 # tag: v4.1.1
+        uses: actions/cache@6849a6489940f00c2f30c0fb92c6274307ccb58a # tag: v4.1.2
         id: nuget-cache
         with:
           key: ${{ hashFiles('**/Directory.packages.props', './build/LibraryVersions.g.cs', '**/packages.config' ) }}
@@ -163,12 +163,12 @@ jobs:
     steps:
 
       - name: Checkout
-        uses: actions/checkout@eef61447b9ff4aafe5dcd4e0bbf5d482be7e7871 # tag: v4.2.1
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # tag: v4.2.2
         with:
           fetch-depth: 0 # fetching all, needed to correctly calculate version
 
       - name: Setup .NET
-        uses: actions/setup-dotnet@6bd8b7f7774af54e05809fcc5431931b3eb1ddee # tag: v4.0.1
+        uses: actions/setup-dotnet@3e891b0cb619bf60e2c25674b222b8940e2c1c25 # tag: v4.1.0
         with:
           dotnet-version: | 
             6.0.427
@@ -176,7 +176,7 @@ jobs:
             8.0.403
 
       - name: Check for NuGet packages cache
-        uses: actions/cache@3624ceb22c1c5a301c8db4169662070a689d9ea8 # tag: v4.1.1
+        uses: actions/cache@6849a6489940f00c2f30c0fb92c6274307ccb58a # tag: v4.1.2
         id: nuget-cache
         with:
           key: ${{ hashFiles('**/Directory.packages.props', './build/LibraryVersions.g.cs', '**/packages.config' ) }}
@@ -236,7 +236,7 @@ jobs:
     steps:
 
     - name: Checkout
-      uses: actions/checkout@eef61447b9ff4aafe5dcd4e0bbf5d482be7e7871 # tag: v4.2.1
+      uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # tag: v4.2.2
       with:
         fetch-depth: 0 # fetching all, needed to correctly calculate version
 
@@ -267,7 +267,7 @@ jobs:
     steps:
       
       - name: Checkout
-        uses: actions/checkout@eef61447b9ff4aafe5dcd4e0bbf5d482be7e7871 # tag: v4.2.1
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # tag: v4.2.2
         with:
           fetch-depth: 0 # fetching all, needed to correctly calculate version
 
@@ -277,7 +277,7 @@ jobs:
           echo "DOTNET_INSTALL_DIR=~/.dotnet" >> $GITHUB_ENV
 
       - name: Setup .NET
-        uses: actions/setup-dotnet@6bd8b7f7774af54e05809fcc5431931b3eb1ddee # tag: v4.0.1
+        uses: actions/setup-dotnet@3e891b0cb619bf60e2c25674b222b8940e2c1c25 # tag: v4.1.0
         with:
           dotnet-version: | 
             6.0.427
@@ -285,7 +285,7 @@ jobs:
             8.0.403
 
       - name: Check for NuGet packages cache
-        uses: actions/cache@3624ceb22c1c5a301c8db4169662070a689d9ea8 # tag: v4.1.1
+        uses: actions/cache@6849a6489940f00c2f30c0fb92c6274307ccb58a # tag: v4.1.2
         id: nuget-cache
         with:
           key: ${{ hashFiles('**/Directory.packages.props', './build/LibraryVersions.g.cs', '**/packages.config' ) }}

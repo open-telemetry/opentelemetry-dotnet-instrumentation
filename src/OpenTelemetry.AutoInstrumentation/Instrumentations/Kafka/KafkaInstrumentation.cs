@@ -58,10 +58,13 @@ internal static class KafkaInstrumentation
         return activity;
     }
 
-    public static Activity? StartProducerActivity(
-        ITopicPartition partition,
-        IKafkaMessage message,
-        INamedClient producer)
+    public static Activity? StartProducerActivity<TTopicPartition, TMessage, TClient>(
+        TTopicPartition partition,
+        TMessage message,
+        TClient producer)
+    where TTopicPartition : ITopicPartition
+    where TMessage : IKafkaMessage
+    where TClient : INamedClient
     {
         string? spanName = null;
         if (!string.IsNullOrEmpty(partition.Topic))
@@ -87,7 +90,8 @@ internal static class KafkaInstrumentation
         return activity;
     }
 
-    public static void InjectContext<TTopicPartition>(IKafkaMessage message, Activity activity)
+    public static void InjectContext<TTopicPartition, TMessage>(TMessage message, Activity activity)
+    where TMessage : IKafkaMessage
     {
         message.Headers ??= MessageHeadersHelper<TTopicPartition>.Create();
         Propagators.DefaultTextMapPropagator.Inject(
@@ -161,7 +165,8 @@ internal static class KafkaInstrumentation
         return Enumerable.Empty<string>();
     }
 
-    private static void MessageHeaderValueSetter(IKafkaMessage msg, string key, string val)
+    private static void MessageHeaderValueSetter<TMessage>(TMessage msg, string key, string val)
+    where TMessage : IKafkaMessage
     {
         msg.Headers?.Remove(key);
         msg.Headers?.Add(key, Encoding.UTF8.GetBytes(val));

@@ -6,6 +6,8 @@
 
   <ItemGroup>
     <PackageReference Include="Oracle.ManagedDataAccess" VersionOverride="$(LibraryVersion)" />
+    <!-- System.Text.Json is indirect reference. Bumping it to mitigate https://github.com/advisories/GHSA-8g4q-xg66-9fp4 -->
+    <PackageReference Include="System.Text.Json" />
   </ItemGroup>
   
 </Project>

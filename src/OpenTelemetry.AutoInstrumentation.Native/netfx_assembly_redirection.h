@@ -18,7 +18,7 @@ void CorProfiler::InitNetFxAssemblyRedirectsMap()
     const USHORT auto_major = atoi(AUTO_MAJOR);
 
     assembly_version_redirect_map_.insert({
-        { L"Google.Protobuf", {3, 28, 2, 0} },
+        { L"Google.Protobuf", {3, 28, 3, 0} },
         { L"Grpc.Core", {2, 0, 0, 0} },
         { L"Grpc.Core.Api", {2, 0, 0, 0} },
         { L"Microsoft.Bcl.AsyncInterfaces", {8, 0, 0, 0} },
@@ -53,7 +53,7 @@ void CorProfiler::InitNetFxAssemblyRedirectsMap()
         { L"OpenTelemetry.Instrumentation.Quartz", {1, 0, 0, 50} },
         { L"OpenTelemetry.Instrumentation.Runtime", {1, 9, 0, 57} },
         { L"OpenTelemetry.Instrumentation.SqlClient", {1, 9, 0, 43} },
-        { L"OpenTelemetry.Instrumentation.Wcf", {1, 0, 0, 47} },
+        { L"OpenTelemetry.Instrumentation.Wcf", {1, 0, 0, 214} },
         { L"OpenTelemetry.Resources.Azure", {1, 0, 0, 172} },
         { L"OpenTelemetry.Resources.Host", {0, 1, 0, 139} },
         { L"OpenTelemetry.Resources.OperatingSystem", {0, 1, 0, 152} },

@@ -12,6 +12,7 @@
   <ItemGroup>
     <PackageReference Include="McMaster.Extensions.CommandLineUtils" />
     <PackageReference Include="NuGet.ProjectModel" />
+    <PackageReference Include="System.Formats.Asn1" />
     <PackageReference Include="System.IO.Abstractions" />
   </ItemGroup>
 
