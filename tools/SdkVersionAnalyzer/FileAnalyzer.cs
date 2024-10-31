@@ -1,9 +1,9 @@
 // Copyright The OpenTelemetry Authors
 // SPDX-License-Identifier: Apache-2.0
 
-namespace SdkVersionVerifier;
+namespace SdkVersionAnalyzer;
 
-internal static class FileVerifier
+internal static class FileAnalyzer
 {
     public static bool VerifyMultiple(
         IEnumerable<string> filePaths,
@@ -25,5 +25,19 @@ internal static class FileVerifier
         }
 
         return true;
+    }
+
+    public static void ModifyMultiple(
+        IEnumerable<string> filePaths,
+        Func<string, DotnetSdkVersion, string> modifier,
+        DotnetSdkVersion dotnetSdkVersion)
+    {
+        foreach (var filePath in filePaths)
+        {
+            Console.WriteLine($"Modifying SDK versions in {filePath}");
+            var content = File.ReadAllText(filePath);
+            var modifiedContent = modifier(content, dotnetSdkVersion);
+            File.WriteAllText(filePath, modifiedContent);
+        }
     }
 }

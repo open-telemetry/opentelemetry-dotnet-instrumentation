@@ -1,7 +1,7 @@
 // Copyright The OpenTelemetry Authors
 // SPDX-License-Identifier: Apache-2.0
 
-namespace SdkVersionVerifier;
+namespace SdkVersionAnalyzer;
 
 internal static class VersionComparer
 {
@@ -19,6 +19,21 @@ internal static class VersionComparer
         return CompareVersion(expectedDotnetSdkVersion.Net6SdkVersion!, net6SdkVersion) &&
                CompareVersion(expectedDotnetSdkVersion.Net7SdkVersion!, net7SdkVersion) &&
                CompareVersion(expectedDotnetSdkVersion.Net8SdkVersion!, net8SdkVersion);
+    }
+
+    public static bool IsNet6Version(string versionString)
+    {
+        return versionString.StartsWith('6');
+    }
+
+    public static bool IsNet7Version(string versionString)
+    {
+        return versionString.StartsWith('7');
+    }
+
+    public static bool IsNet8Version(string versionString)
+    {
+        return versionString.StartsWith('8');
     }
 
     private static bool CompareVersion(string expectedVersion, string? extractedVersion)
