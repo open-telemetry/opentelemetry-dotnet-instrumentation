@@ -243,7 +243,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestApplication.RabbitMq", 
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestApplication.Owin.IIS.NetFramework", "test\test-applications\integrations\TestApplication.Owin.IIS.NetFramework\TestApplication.Owin.IIS.NetFramework.csproj", "{AA3E0C5C-A4E2-46AB-BD18-2D30D3ABF692}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SdkVersionVerifier", "tools\SdkVersionVerifier\SdkVersionVerifier.csproj", "{C75FA076-D460-414B-97F7-6F8D0E85AE74}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SdkVersionAnalyzer", "tools\SdkVersionAnalyzer\SdkVersionAnalyzer.csproj", "{C75FA076-D460-414B-97F7-6F8D0E85AE74}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

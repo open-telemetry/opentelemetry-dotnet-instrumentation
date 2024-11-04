@@ -365,11 +365,11 @@ partial class Build
     Target VerifySdkVersions => _ => _
         .Executes(() =>
         {
-            var verifier = Solution.GetProjectByName(Projects.Tools.SdkVersionVerifierTool);
+            var verifier = Solution.GetProjectByName(Projects.Tools.SdkVersionAnalyzerTool);
 
             DotNetRun(s => s
                 .SetProjectFile(verifier)
-                .SetApplicationArguments(RootDirectory));
+                .SetApplicationArguments($"--verify {RootDirectory}"));
         });
 
     Target GenerateLibraryVersionFiles => _ => _
