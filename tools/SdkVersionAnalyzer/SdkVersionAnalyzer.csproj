@@ -8,7 +8,7 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <PackageReference Include="Dockerfile" />
+      <PackageReference Include="Valleysoft.DockerfileModel" />
       <PackageReference Include="YamlDotNet" />
     </ItemGroup>
 
