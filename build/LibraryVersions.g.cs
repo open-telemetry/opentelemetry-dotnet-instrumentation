@@ -119,9 +119,9 @@ public static partial class LibraryVersion
             "TestApplication.NServiceBus",
             new List<PackageBuildInfo>
             {
-                new("8.0.0"),
+                new("8.2.4"),
                 new("9.1.0", supportedFrameworks: new string[] {"net8.0"}),
-                new("9.2.2", supportedFrameworks: new string[] {"net8.0"}),
+                new("9.2.3", supportedFrameworks: new string[] {"net8.0"}),
             }
         },
         {

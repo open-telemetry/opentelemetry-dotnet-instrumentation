@@ -180,7 +180,8 @@ internal static class PackageVersionDefinitions
             TestApplicationName = "TestApplication.NServiceBus",
             Versions = new List<PackageVersion>
             {
-                new("8.0.0"),
+                // new("8.0.0"), - transitive vulnerabilities https://github.com/advisories/GHSA-8g4q-xg66-9fp4, <=8.2.3
+                new("8.2.4"),
                 new("9.1.0", supportedTargetFrameworks: new[] { "net8.0" }, supportedExecutionFrameworks: new[] { "net8.0" }), // breaking change, new Meter name
                 new("*", supportedTargetFrameworks: new[] { "net8.0" }, supportedExecutionFrameworks: new[] { "net8.0" })
             }
