@@ -6,20 +6,20 @@ using System.Reflection;
 using System.Text.RegularExpressions;
 using OpenTelemetry.AutoInstrumentation.CallTarget;
 
-namespace OpenTelemetry.AutoInstrumentation.Instrumentations.MongoDB;
+namespace OpenTelemetry.AutoInstrumentation.Instrumentations.MongoDB.Integrations;
 
 /// <summary>
 /// MongoDB.Driver.MongoClient calltarget instrumentation
 /// </summary>
 [InstrumentMethod(
-    assemblyName: "MongoDB.Driver",
-    typeName: "MongoDB.Driver.MongoClient",
+    assemblyName: MongoDBConstants.AssemblyName,
+    typeName: MongoDBConstants.TypeName,
     methodName: ".ctor",
     returnTypeName: ClrNames.Void,
     parameterTypeNames: new[] { "MongoDB.Driver.MongoClientSettings" },
-    minimumVersion: "2.28.0",
-    maximumVersion: "2.65535.65535",
-    integrationName: "MongoDB",
+    minimumVersion: MongoDBConstants.MinimumVersion,
+    maximumVersion: MongoDBConstants.MaximumVersion,
+    integrationName: MongoDBConstants.IntegrationName,
     type: InstrumentationType.Trace)]
 public static class MongoClientIntegration
 {
@@ -50,7 +50,7 @@ public static class MongoClientIntegration
 
     private static object GetInstrumentationOptions()
     {
-        Type optionsType = Type.GetType("MongoDB.Driver.Core.Extensions.DiagnosticSources.InstrumentationOptions, MongoDB.Driver.Core.Extensions.DiagnosticSources")!;
+        var optionsType = Type.GetType("MongoDB.Driver.Core.Extensions.DiagnosticSources.InstrumentationOptions, MongoDB.Driver.Core.Extensions.DiagnosticSources")!;
 
         var options = Activator.CreateInstance(optionsType)!;
         var publicProperty = BindingFlags.Public | BindingFlags.Instance;
@@ -64,10 +64,10 @@ public static class MongoClientIntegration
 
     private static LambdaExpression GetShouldStartActivityExpression()
     {
-        Expression<Func<string, bool>> shouldStartActivity = (string cmdName) => !Regex.IsMatch(cmdName, "isMaster|buildInfo|explain|killCursors", RegexOptions.Compiled);
+        Expression<Func<string, bool>> shouldStartActivity = (cmdName) => !Regex.IsMatch(cmdName, "isMaster|buildInfo|explain|killCursors", RegexOptions.Compiled);
 
-        Type eventType = Type.GetType("MongoDB.Driver.Core.Events.CommandStartedEvent, MongoDB.Driver.Core")!;
-        Type lambdaType = typeof(Func<,>).MakeGenericType(eventType, typeof(bool));
+        var eventType = Type.GetType("MongoDB.Driver.Core.Events.CommandStartedEvent, MongoDB.Driver.Core")!;
+        var lambdaType = typeof(Func<,>).MakeGenericType(eventType, typeof(bool));
 
         var commandStartedEventParam = Expression.Parameter(eventType);
         var commandNameProperty = eventType.GetProperty("CommandName")!;
@@ -79,9 +79,9 @@ public static class MongoClientIntegration
 
     private static LambdaExpression GetClusterConfiguratorExpression()
     {
-        Type eventSubscriberInterface = Type.GetType("MongoDB.Driver.Core.Events.IEventSubscriber, MongoDB.Driver.Core")!;
-        Type clusterBuilderType = Type.GetType("MongoDB.Driver.Core.Configuration.ClusterBuilder, MongoDB.Driver.Core")!;
-        Type listenerType = Type.GetType("MongoDB.Driver.Core.Extensions.DiagnosticSources.DiagnosticsActivityEventSubscriber, MongoDB.Driver.Core.Extensions.DiagnosticSources")!;
+        var eventSubscriberInterface = Type.GetType("MongoDB.Driver.Core.Events.IEventSubscriber, MongoDB.Driver.Core")!;
+        var clusterBuilderType = Type.GetType("MongoDB.Driver.Core.Configuration.ClusterBuilder, MongoDB.Driver.Core")!;
+        var listenerType = Type.GetType("MongoDB.Driver.Core.Extensions.DiagnosticSources.DiagnosticsActivityEventSubscriber, MongoDB.Driver.Core.Extensions.DiagnosticSources")!;
 
         var options = GetInstrumentationOptions();
         var listener = Activator.CreateInstance(listenerType, options);
