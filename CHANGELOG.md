@@ -9,6 +9,9 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 
 ### Added
 
+- Support for [RabbitMQ.Client](https://www.nuget.org/packages/RabbitMQ.Client/)
+  traces instrumentation for versions `7.0.0`+.
+
 ### Changed
 
 #### Dependency updates
@@ -20,8 +23,6 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 ### Fixed
 
 ## [1.9.0](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/tag/v1.9.0)
-
-### Added
 
 ### Changed
 
@@ -54,8 +55,6 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
   `OTEL_TRACES_EXPORTER`
   `OTEL_METRICS_EXPORTER`
   `OTEL_LOGS_EXPORTER`.
-
-### Fixed
 
 ## [1.8.0](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/tag/v1.8.0)
 

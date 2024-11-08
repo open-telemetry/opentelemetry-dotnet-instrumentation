@@ -52,26 +52,14 @@ public class RabbitMqTests : TestHelper
         // Skip the test if fixture does not support current platform
         _rabbitMq.SkipIfUnsupportedPlatform();
 
-        using var collector = new MockSpansCollector(Output);
-        SetExporter(collector);
-
-        collector.Expect("OpenTelemetry.AutoInstrumentation.RabbitMq", span => ValidateProducerSpan(span));
-        collector.Expect("OpenTelemetry.AutoInstrumentation.RabbitMq", span => ValidateProducerSpan(span));
-        collector.Expect("OpenTelemetry.AutoInstrumentation.RabbitMq", span => ValidateProducerSpan(span));
-        collector.Expect("OpenTelemetry.AutoInstrumentation.RabbitMq", span => ValidateConsumerSpan(span, "receive"));
-        collector.Expect("OpenTelemetry.AutoInstrumentation.RabbitMq", span => ValidateConsumerSpan(span, "deliver"));
-        collector.Expect("OpenTelemetry.AutoInstrumentation.RabbitMq", span => ValidateConsumerSpan(span, "deliver"));
-
-        collector.ExpectCollected(collected => ValidatePropagation(collected));
-
-        EnableBytecodeInstrumentation();
-        RunTestApplication(new()
+        if (string.IsNullOrEmpty(packageVersion) || Version.Parse(packageVersion) >= new Version(7, 0, 0))
         {
-            Arguments = $"--rabbitmq {_rabbitMq.Port}",
-            PackageVersion = packageVersion
-        });
-
-        collector.AssertExpectations();
+            TestRabbitMq7Plus(packageVersion);
+        }
+        else
+        {
+            TestRabbitMq6(packageVersion);
+        }
     }
 
     private static bool ValidatePropagation(ICollection<MockSpansCollector.Collected> collected)
@@ -104,6 +92,46 @@ public class RabbitMqTests : TestHelper
                destinationName == "amq.default" &&
                routingKey == "hello" &&
                bodySize == 13;
+    }
+
+    private void TestRabbitMq7Plus(string packageVersion)
+    {
+        using var collector = new MockSpansCollector(Output);
+        SetExporter(collector);
+        collector.Expect("RabbitMQ.Client.Publisher");
+        collector.Expect("RabbitMQ.Client.Subscriber");
+
+        RunTestApplication(new()
+        {
+            Arguments = $"--rabbitmq {_rabbitMq.Port}",
+            PackageVersion = packageVersion
+        });
+
+        collector.AssertExpectations();
+    }
+
+    private void TestRabbitMq6(string packageVersion)
+    {
+        using var collector = new MockSpansCollector(Output);
+        SetExporter(collector);
+
+        collector.Expect("OpenTelemetry.AutoInstrumentation.RabbitMq", span => ValidateProducerSpan(span));
+        collector.Expect("OpenTelemetry.AutoInstrumentation.RabbitMq", span => ValidateProducerSpan(span));
+        collector.Expect("OpenTelemetry.AutoInstrumentation.RabbitMq", span => ValidateProducerSpan(span));
+        collector.Expect("OpenTelemetry.AutoInstrumentation.RabbitMq", span => ValidateConsumerSpan(span, "receive"));
+        collector.Expect("OpenTelemetry.AutoInstrumentation.RabbitMq", span => ValidateConsumerSpan(span, "deliver"));
+        collector.Expect("OpenTelemetry.AutoInstrumentation.RabbitMq", span => ValidateConsumerSpan(span, "deliver"));
+
+        collector.ExpectCollected(collected => ValidatePropagation(collected));
+
+        EnableBytecodeInstrumentation();
+        RunTestApplication(new()
+        {
+            Arguments = $"--rabbitmq {_rabbitMq.Port}",
+            PackageVersion = packageVersion
+        });
+
+        collector.AssertExpectations();
     }
 
     private bool ValidateConsumerSpan(Span span, string operationName)
