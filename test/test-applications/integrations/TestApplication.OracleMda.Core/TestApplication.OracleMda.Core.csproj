@@ -6,7 +6,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Oracle.ManagedDataAccess.Core" VersionOverride="$(LibraryVersion)"  />
+    <PackageReference Include="Oracle.ManagedDataAccess.Core" VersionOverride="$(LibraryVersion)" />
   </ItemGroup>
   
   <ItemGroup>

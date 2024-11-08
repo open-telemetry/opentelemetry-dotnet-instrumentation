@@ -130,7 +130,7 @@ internal enum TracerInstrumentation
     OracleMda = 21,
 
     /// <summary>
-    /// RabbitMQ instrumentation
+    /// RabbitMQ client instrumentation
     /// </summary>
     RabbitMq = 22
 }

@@ -362,6 +362,16 @@ partial class Build
         .DependsOn(PublishNativeProfilerLinux)
         .DependsOn(PublishNativeProfilerMacOs);
 
+    Target VerifySdkVersions => _ => _
+        .Executes(() =>
+        {
+            var verifier = Solution.GetProjectByName(Projects.Tools.SdkVersionAnalyzerTool);
+
+            DotNetRun(s => s
+                .SetProjectFile(verifier)
+                .SetApplicationArguments($"--verify {RootDirectory}"));
+        });
+
     Target GenerateLibraryVersionFiles => _ => _
         .After(PublishManagedProfiler)
         .Executes(() =>

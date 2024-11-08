@@ -35,5 +35,6 @@ public static class Projects
     {
         public const string LibraryVersionsGenerator = "LibraryVersionsGenerator";
         public const string GacInstallTool = "GacInstallTool";
+        public const string SdkVersionAnalyzerTool = "SdkVersionAnalyzer";
     }
 }
