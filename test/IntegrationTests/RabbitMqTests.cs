@@ -16,7 +16,8 @@ public class RabbitMqTests : TestHelper
 
     // Required messaging attributes set by the instrumentation
     private const string MessagingSystemAttributeName = "messaging.system";
-    private const string MessagingOperationAttributeName = "messaging.operation";
+    private const string MessagingOperationNameAttributeName = "messaging.operation.name";
+    private const string MessagingOperationTypeAttributeName = "messaging.operation.type";
     private const string MessagingDestinationAttributeName = "messaging.destination.name";
 
     // Required RabbitMQ attributes set by the instrumentation
@@ -58,9 +59,9 @@ public class RabbitMqTests : TestHelper
         collector.Expect("OpenTelemetry.AutoInstrumentation.RabbitMq", span => ValidateProducerSpan(span));
         collector.Expect("OpenTelemetry.AutoInstrumentation.RabbitMq", span => ValidateProducerSpan(span));
         collector.Expect("OpenTelemetry.AutoInstrumentation.RabbitMq", span => ValidateProducerSpan(span));
-        collector.Expect("OpenTelemetry.AutoInstrumentation.RabbitMq", span => ValidateConsumerSpan(span, "receive"));
-        collector.Expect("OpenTelemetry.AutoInstrumentation.RabbitMq", span => ValidateConsumerSpan(span, "deliver"));
-        collector.Expect("OpenTelemetry.AutoInstrumentation.RabbitMq", span => ValidateConsumerSpan(span, "deliver"));
+        collector.Expect("OpenTelemetry.AutoInstrumentation.RabbitMq", span => ValidateConsumerSpan(span, "receive", "receive"));
+        collector.Expect("OpenTelemetry.AutoInstrumentation.RabbitMq", span => ValidateConsumerSpan(span, "process", "consume"));
+        collector.Expect("OpenTelemetry.AutoInstrumentation.RabbitMq", span => ValidateConsumerSpan(span, "process", "consume"));
 
         collector.ExpectCollected(collected => ValidatePropagation(collected));
 
@@ -91,34 +92,36 @@ public class RabbitMqTests : TestHelper
         }
     }
 
-    private static bool ValidateBasicSpanAttributes(IReadOnlyCollection<KeyValue> attributes, string operationName)
+    private static bool ValidateBasicSpanAttributes(IReadOnlyCollection<KeyValue> attributes, string operationName, string operationType)
     {
         var messagingSystem = attributes.Single(kv => kv.Key == MessagingSystemAttributeName).Value.StringValue;
-        var messagingOperation = attributes.Single(kv => kv.Key == MessagingOperationAttributeName).Value.StringValue;
+        var messagingOperationName = attributes.Single(kv => kv.Key == MessagingOperationNameAttributeName).Value.StringValue;
+        var messagingOperationType = attributes.Single(kv => kv.Key == MessagingOperationTypeAttributeName).Value.StringValue;
         var destinationName = attributes.Single(kv => kv.Key == MessagingDestinationAttributeName).Value.StringValue;
         var routingKey = attributes.Single(kv => kv.Key == RabbitMqRoutingKeyAttributeName).Value.StringValue;
         var bodySize = attributes.Single(kv => kv.Key == MessagingBodySizeAttributeName).Value.IntValue;
 
         return messagingSystem == "rabbitmq" &&
-               messagingOperation == operationName &&
+               messagingOperationName == operationName &&
+               messagingOperationType == operationType &&
                destinationName == "amq.default" &&
                routingKey == "hello" &&
                bodySize == 13;
     }
 
-    private bool ValidateConsumerSpan(Span span, string operationName)
+    private bool ValidateConsumerSpan(Span span, string operationName, string operationType)
     {
         var deliveryTag = span.Attributes.SingleOrDefault(kv => kv.Key == RabbitMqDeliveryTagAttributeName)?.Value.StringValue;
         return span.Kind == Span.Types.SpanKind.Consumer &&
                span.Links.Count == 1 &&
-               ValidateBasicSpanAttributes(span.Attributes, operationName) &&
+               ValidateBasicSpanAttributes(span.Attributes, operationName, operationType) &&
                (operationName != "receive" || ValidateNetworkAttributes(span.Attributes)) &&
                !string.IsNullOrEmpty(deliveryTag);
     }
 
     private bool ValidateProducerSpan(Span span)
     {
-        return span.Kind == Span.Types.SpanKind.Producer && ValidateBasicSpanAttributes(span.Attributes, "publish") && ValidateNetworkAttributes(span.Attributes);
+        return span.Kind == Span.Types.SpanKind.Producer && ValidateBasicSpanAttributes(span.Attributes, "send", "send") && ValidateNetworkAttributes(span.Attributes);
     }
 
     private bool ValidateNetworkAttributes(IReadOnlyCollection<KeyValue> spanAttributes)

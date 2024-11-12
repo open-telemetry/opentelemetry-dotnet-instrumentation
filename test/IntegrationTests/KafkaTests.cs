@@ -11,15 +11,17 @@ namespace IntegrationTests;
 [Collection(KafkaCollection.Name)]
 public class KafkaTests : TestHelper
 {
-    private const string MessagingPublishOperationAttributeValue = "publish";
+    private const string MessagingPublishOperationAttributeValue = "send";
     private const string MessagingReceiveOperationAttributeValue = "receive";
+    private const string MessagingPollOperationAttributeValue = "poll";
     private const string MessagingSystemAttributeName = "messaging.system";
-    private const string MessagingOperationAttributeName = "messaging.operation";
+    private const string MessagingOperationNameAttributeName = "messaging.operation.name";
+    private const string MessagingOperationTypeAttributeName = "messaging.operation.type";
     private const string MessagingDestinationAttributeName = "messaging.destination.name";
     private const string MessagingClientIdAttributeName = "messaging.client_id";
+    private const string MessagingConsumerGroupNameAttributeName = "messaging.consumer.group.name";
 
     private const string KafkaMessageSystemAttributeValue = "kafka";
-    private const string KafkaConsumerGroupAttributeName = "messaging.kafka.consumer.group";
     private const string KafkaMessageKeyAttributeName = "messaging.kafka.message.key";
     private const string KafkaMessageKeyAttributeValue = "testkey";
     private const string KafkaDestinationPartitionAttributeName = "messaging.kafka.destination.partition";
@@ -124,15 +126,15 @@ public class KafkaTests : TestHelper
     private static bool ValidateConsumerSpan(Span span, string topicName, int messageOffset, string? expectedMessageKey = KafkaMessageKeyAttributeValue)
     {
         var kafkaMessageOffset = span.Attributes.SingleOrDefault(kv => kv.Key == KafkaMessageOffsetAttributeName)?.Value.IntValue;
-        var consumerGroupId = span.Attributes.Single(kv => kv.Key == KafkaConsumerGroupAttributeName).Value.StringValue;
-        return ValidateCommonAttributes(span.Attributes, topicName, KafkaConsumerClientIdAttributeValue, MessagingReceiveOperationAttributeValue, 0, expectedMessageKey) &&
+        var consumerGroupId = span.Attributes.Single(kv => kv.Key == MessagingConsumerGroupNameAttributeName).Value.StringValue;
+        return ValidateCommonAttributes(span.Attributes, topicName, KafkaConsumerClientIdAttributeValue, MessagingReceiveOperationAttributeValue, MessagingPollOperationAttributeValue, 0, expectedMessageKey) &&
                kafkaMessageOffset == messageOffset &&
                consumerGroupId == GetConsumerGroupIdAttributeValue(topicName);
     }
 
     private static bool ValidateBasicProduceExceptionSpan(Span span, string topicName)
     {
-        return ValidateCommonAttributes(span.Attributes, topicName, KafkaProducerClientIdAttributeValue, MessagingPublishOperationAttributeValue, -1, KafkaMessageKeyAttributeValue) &&
+        return ValidateCommonAttributes(span.Attributes, topicName, KafkaProducerClientIdAttributeValue, MessagingPublishOperationAttributeValue, MessagingPublishOperationAttributeValue, -1, KafkaMessageKeyAttributeValue) &&
                span.Status.Code == Status.Types.StatusCode.Error;
     }
 
@@ -154,38 +156,40 @@ public class KafkaTests : TestHelper
     {
         var isTombstone = span.Attributes.Single(kv => kv.Key == KafkaMessageTombstoneAttributeName).Value.BoolValue;
 
-        return ValidateCommonAttributes(span.Attributes, topicName, KafkaProducerClientIdAttributeValue, MessagingPublishOperationAttributeValue, partition, KafkaMessageKeyAttributeValue) &&
+        return ValidateCommonAttributes(span.Attributes, topicName, KafkaProducerClientIdAttributeValue, MessagingPublishOperationAttributeValue, MessagingPublishOperationAttributeValue, partition, KafkaMessageKeyAttributeValue) &&
                isTombstone == tombstoneExpected &&
                span.Status is null;
     }
 
-    private static bool ValidateCommonAttributes(IReadOnlyCollection<KeyValue> attributes, string topicName, string clientId, string operationName, int partition, string? expectedMessageKey)
+    private static bool ValidateCommonAttributes(IReadOnlyCollection<KeyValue> attributes, string topicName, string clientId, string operationName, string operationType, int partition, string? expectedMessageKey)
     {
         var messagingDestinationName = attributes.SingleOrDefault(kv => kv.Key == MessagingDestinationAttributeName)?.Value.StringValue;
         var kafkaMessageKey = attributes.SingleOrDefault(kv => kv.Key == KafkaMessageKeyAttributeName)?.Value.StringValue;
         var kafkaPartition = attributes.SingleOrDefault(kv => kv.Key == KafkaDestinationPartitionAttributeName)?.Value.IntValue;
 
-        return ValidateBasicSpanAttributes(attributes, clientId, operationName) &&
+        return ValidateBasicSpanAttributes(attributes, clientId, operationName, operationType) &&
                messagingDestinationName == topicName &&
                kafkaMessageKey == expectedMessageKey &&
                kafkaPartition == partition;
     }
 
-    private static bool ValidateBasicSpanAttributes(IReadOnlyCollection<KeyValue> attributes, string clientId, string operationName)
+    private static bool ValidateBasicSpanAttributes(IReadOnlyCollection<KeyValue> attributes, string clientId, string operationName, string operationType)
     {
         var messagingSystem = attributes.Single(kv => kv.Key == MessagingSystemAttributeName).Value.StringValue;
-        var messagingOperation = attributes.Single(kv => kv.Key == MessagingOperationAttributeName).Value.StringValue;
+        var messagingOperationName = attributes.Single(kv => kv.Key == MessagingOperationNameAttributeName).Value.StringValue;
+        var messagingOperationType = attributes.Single(kv => kv.Key == MessagingOperationTypeAttributeName).Value.StringValue;
         var messagingClientId = attributes.Single(kv => kv.Key == MessagingClientIdAttributeName).Value.StringValue;
 
         return messagingSystem == KafkaMessageSystemAttributeValue &&
-               messagingOperation == operationName &&
+               messagingOperationName == operationName &&
+               messagingOperationType == operationType &&
                messagingClientId == clientId;
     }
 
     private static bool ValidatePropagation(ICollection<MockSpansCollector.Collected> collectedSpans, string topicName)
     {
-        var expectedReceiveOperationName = $"{topicName} {MessagingReceiveOperationAttributeValue}";
-        var expectedPublishOperationName = $"{topicName} {MessagingPublishOperationAttributeValue}";
+        var expectedReceiveOperationName = $"{MessagingPollOperationAttributeValue} {topicName}";
+        var expectedPublishOperationName = $"{MessagingPublishOperationAttributeValue} {topicName}";
         var producerSpans = collectedSpans
             .Where(span =>
                 span.Span.Name == expectedPublishOperationName &&
