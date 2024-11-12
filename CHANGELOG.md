@@ -11,6 +11,8 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 
 ### Changed
 
+- Update messaging attributes from [v1.23.0](https://github.com/open-telemetry/semantic-conventions/blob/v1.23.0/docs/messaging/messaging-spans.md) to [v1.28.0](https://github.com/open-telemetry/semantic-conventions/blob/v1.28.0/docs/messaging/messaging-spans.md)
+
 #### Dependency updates
 
 ### Deprecated
