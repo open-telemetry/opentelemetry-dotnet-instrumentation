@@ -22,10 +22,10 @@ internal static class KafkaInstrumentation
         string? spanName = null;
         if (!string.IsNullOrEmpty(consumeResult.Topic))
         {
-            spanName = $"{consumeResult.Topic} {MessagingAttributes.Values.ReceiveOperationName}";
+            spanName = $"{MessagingAttributes.Values.Kafka.PollOperationName} {consumeResult.Topic}";
         }
 
-        spanName ??= MessagingAttributes.Values.ReceiveOperationName;
+        spanName ??= MessagingAttributes.Values.Kafka.PollOperationName;
 
         var activityLinks = propagatedContext.Value.ActivityContext.IsValid()
             ? new[] { new ActivityLink(propagatedContext.Value.ActivityContext) }
@@ -41,7 +41,8 @@ internal static class KafkaInstrumentation
         {
             SetCommonAttributes(
                 activity,
-                MessagingAttributes.Values.ReceiveOperationName,
+                MessagingAttributes.Values.ReceiveOperation,
+                MessagingAttributes.Values.Kafka.PollOperationName,
                 consumeResult.Topic,
                 consumeResult.Partition,
                 consumeResult.Message?.Key,
@@ -51,7 +52,7 @@ internal static class KafkaInstrumentation
 
             if (ConsumerCache.TryGet(consumer, out var groupId))
             {
-                activity.SetTag(MessagingAttributes.Keys.Kafka.ConsumerGroupId, groupId);
+                activity.SetTag(MessagingAttributes.Keys.MessagingConsumerGroupName, groupId);
             }
         }
 
@@ -69,16 +70,17 @@ internal static class KafkaInstrumentation
         string? spanName = null;
         if (!string.IsNullOrEmpty(partition.Topic))
         {
-            spanName = $"{partition.Topic} {MessagingAttributes.Values.PublishOperationName}";
+            spanName = $"{MessagingAttributes.Values.SendOperation} {partition.Topic}";
         }
 
-        spanName ??= MessagingAttributes.Values.PublishOperationName;
+        spanName ??= MessagingAttributes.Values.SendOperation;
         var activity = Source.StartActivity(name: spanName, ActivityKind.Producer);
         if (activity is not null && activity.IsAllDataRequested)
         {
             SetCommonAttributes(
                 activity,
-                MessagingAttributes.Values.PublishOperationName,
+                MessagingAttributes.Values.SendOperation,
+                MessagingAttributes.Values.SendOperation,
                 partition.Topic,
                 partition.Partition,
                 message.Key,
@@ -103,7 +105,7 @@ internal static class KafkaInstrumentation
     public static void SetDeliveryResults(Activity activity, IDeliveryResult deliveryResult)
     {
         // Set the final partition message was delivered to.
-        activity.SetTag(MessagingAttributes.Keys.Kafka.Partition, deliveryResult.Partition.Value);
+        activity.SetTag(MessagingAttributes.Keys.Partition, deliveryResult.Partition.Value);
 
         activity.SetTag(
             MessagingAttributes.Keys.Kafka.PartitionOffset,
@@ -123,13 +125,15 @@ internal static class KafkaInstrumentation
     private static void SetCommonAttributes(
         Activity activity,
         string operationName,
+        string operationType,
         string? topic,
         Partition? partition,
         object? key,
         INamedClient? client)
     {
-        activity.SetTag(MessagingAttributes.Keys.MessagingOperation, operationName);
-        activity.SetTag(MessagingAttributes.Keys.MessagingSystem, MessagingAttributes.Values.KafkaMessagingSystemName);
+        activity.SetTag(MessagingAttributes.Keys.MessagingOperationName, operationName);
+        activity.SetTag(MessagingAttributes.Keys.MessagingOperationType, operationType);
+        activity.SetTag(MessagingAttributes.Keys.MessagingSystem, MessagingAttributes.Values.Kafka.MessagingSystemName);
         if (!string.IsNullOrEmpty(topic))
         {
             activity.SetTag(MessagingAttributes.Keys.DestinationName, topic);
@@ -151,7 +155,7 @@ internal static class KafkaInstrumentation
 
         if (partition is not null)
         {
-            activity.SetTag(MessagingAttributes.Keys.Kafka.Partition, partition.Value.Value);
+            activity.SetTag(MessagingAttributes.Keys.Partition, partition.Value.Value);
         }
     }
 

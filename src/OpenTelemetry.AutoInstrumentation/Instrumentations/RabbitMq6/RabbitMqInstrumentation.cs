@@ -23,7 +23,8 @@ internal static class RabbitMqInstrumentation
         var connection = instance.Session?.Connection;
         return StartConsume(
             result.BasicProperties?.Headers,
-            MessagingAttributes.Values.ReceiveOperationName,
+            MessagingAttributes.Values.ReceiveOperation,
+            MessagingAttributes.Values.ReceiveOperation,
             result.Exchange,
             result.RoutingKey,
             result.DeliveryTag,
@@ -54,7 +55,8 @@ internal static class RabbitMqInstrumentation
 
         return StartConsume(
             headers,
-            MessagingAttributes.Values.DeliverOperationName,
+            MessagingAttributes.Values.RabbitMq.ConsumeOperationName,
+            MessagingAttributes.Values.ProcessOperation,
             exchange,
             routingKey,
             deliveryTag,
@@ -67,7 +69,7 @@ internal static class RabbitMqInstrumentation
     where TBasicProperties : IBasicProperties
     where TModel : IModelBase
     {
-        var name = GetActivityName(routingKey, MessagingAttributes.Values.PublishOperationName);
+        var name = GetActivityName(MessagingAttributes.Values.SendOperation, routingKey);
         var activity = Source.StartActivity(name, ActivityKind.Producer);
         if (activity is not null && basicProperties.Instance is not null)
         {
@@ -83,7 +85,8 @@ internal static class RabbitMqInstrumentation
                 exchange,
                 routingKey,
                 bodyLength,
-                MessagingAttributes.Values.PublishOperationName,
+                MessagingAttributes.Values.SendOperation,
+                MessagingAttributes.Values.SendOperation,
                 connection?.Endpoint?.HostName,
                 connection?.Endpoint?.Port,
                 connection?.RemoteEndPoint);
@@ -92,14 +95,15 @@ internal static class RabbitMqInstrumentation
         return activity;
     }
 
-    private static string GetActivityName(string? routingKey, string operationType)
+    private static string GetActivityName(string operationName, string? routingKey)
     {
-        return string.IsNullOrEmpty(routingKey) ? operationType : $"{routingKey} {operationType}";
+        return string.IsNullOrEmpty(routingKey) ? operationName : $"{operationName} {routingKey}";
     }
 
     private static Activity? StartConsume(
         IDictionary<string, object>? headers,
         string consumeOperationName,
+        string consumeOperationType,
         string? exchange,
         string? routingKey,
         ulong deliveryTag,
@@ -117,7 +121,7 @@ internal static class RabbitMqInstrumentation
             ? new[] { new ActivityLink(propagatedContext.ActivityContext) }
             : Array.Empty<ActivityLink>();
 
-        var name = GetActivityName(routingKey, consumeOperationName);
+        var name = GetActivityName(consumeOperationName, routingKey);
         var activity = Source.StartActivity(
             name: name,
             kind: ActivityKind.Consumer,
@@ -130,6 +134,7 @@ internal static class RabbitMqInstrumentation
                 exchange,
                 routingKey,
                 consumeOperationName,
+                consumeOperationType,
                 deliveryTag,
                 bodyLength,
                 messageId,
@@ -148,6 +153,7 @@ internal static class RabbitMqInstrumentation
         string? routingKey,
         int bodyLength,
         string operationName,
+        string operationType,
         string? hostName,
         int? port,
         EndPoint? remoteEndpoint)
@@ -156,7 +162,8 @@ internal static class RabbitMqInstrumentation
 
         activity
             .SetTag(MessagingAttributes.Keys.MessagingSystem, MessagingAttributes.Values.RabbitMq.MessagingSystemName)
-            .SetTag(MessagingAttributes.Keys.MessagingOperation, operationName)
+            .SetTag(MessagingAttributes.Keys.MessagingOperationName, operationName)
+            .SetTag(MessagingAttributes.Keys.MessagingOperationType, operationType)
             .SetTag(MessagingAttributes.Keys.DestinationName, exchange)
             .SetTag(MessagingAttributes.Keys.MessageBodySize, bodyLength);
 
@@ -204,6 +211,7 @@ internal static class RabbitMqInstrumentation
         string? exchange,
         string? routingKey,
         string operationName,
+        string operationType,
         ulong deliveryTag,
         int bodyLength,
         string? basicPropertiesMessageId,
@@ -212,7 +220,7 @@ internal static class RabbitMqInstrumentation
         int? port,
         EndPoint? remoteEndpoint)
     {
-        SetCommonTags(activity, exchange, routingKey, bodyLength, operationName, hostName, port, remoteEndpoint);
+        SetCommonTags(activity, exchange, routingKey, bodyLength, operationName, operationType, hostName, port, remoteEndpoint);
         if (!string.IsNullOrEmpty(basicPropertiesMessageId))
         {
             activity.SetTag(MessagingAttributes.Keys.MessageId, basicPropertiesMessageId);
