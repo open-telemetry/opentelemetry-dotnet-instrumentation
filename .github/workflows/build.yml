@@ -77,18 +77,18 @@ jobs:
       - name: Run BuildWorkflow
         run: ./build.cmd BuildWorkflow --no-restore ${{ steps.nuget-cache.outputs.cache-hit != 'true' }}
 
-      - name: Download native CentOS Artifacts from build job
+      - name: Download native Ubuntu 16.04 Artifacts from build job
         if: ${{ matrix.machine == 'ubuntu-20.04' }}
         uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d16 # tag: v4.1.8
         with:
-          name: bin-centos-native
-          path: bin/ci-artifacts/bin-centos-native
+          name: bin-ubuntu1604-native
+          path: bin/ci-artifacts/bin-ubuntu1604-native
 
-      - name: Replace Ubuntu native code by Centos artifacts
+      - name: Replace Ubuntu native code by Ubuntu 16.04 artifacts
         if: ${{ matrix.machine == 'ubuntu-20.04' }}
         run: |
           rm ./bin/tracer-home/linux-x64/OpenTelemetry.AutoInstrumentation.Native.so
-          cp ./bin/ci-artifacts/bin-centos-native/linux-x64/OpenTelemetry.AutoInstrumentation.Native.so ./bin/tracer-home/linux-x64/OpenTelemetry.AutoInstrumentation.Native.so
+          cp ./bin/ci-artifacts/bin-ubuntu1604-native/linux-x64/OpenTelemetry.AutoInstrumentation.Native.so ./bin/tracer-home/linux-x64/OpenTelemetry.AutoInstrumentation.Native.so
 
       - name: Install MacOS CoreUtils
         if: ${{ runner.os == 'macOS' }}
