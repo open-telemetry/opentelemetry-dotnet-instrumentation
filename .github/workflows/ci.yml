@@ -212,10 +212,6 @@ jobs:
             build-source: alpine-x64
             os-type: linux-musl
           - machine: ubuntu-20.04
-            base-image: centos
-            build-source: ubuntu-20.04
-            os-type: linux-glibc
-          - machine: ubuntu-20.04
             base-image: debian
             build-source: ubuntu-20.04
             os-type: linux-glibc
