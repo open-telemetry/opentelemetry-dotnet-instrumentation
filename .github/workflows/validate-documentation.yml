@@ -26,15 +26,15 @@ jobs:
 
     - name: Run markdown links chceks
       if: ${{ !contains(github.event.pull_request.labels.*.name, 'release PR') }}
-      uses: lycheeverse/lychee-action@7cd0af4c74a61395d455af97419279d86aafaede # tag: v2.0.2
+      uses: lycheeverse/lychee-action@f81112d0d2814ded911bd23e3beaa9dda9093915 # tag: v2.1.0
       with:
         fail: true
         args: "--threads 1 --max-concurrency 1 --verbose --no-progress './**/*.md' './**/*.html'"
 
     - name: Run markdownlint
-      uses: streetsidesoftware/cspell-action@934c74da3775ac844ec89503f666f67efb427fed # tag: v6.8.1
+      uses: streetsidesoftware/cspell-action@9759be9ad475fe8145f8d2a1bf29a1c4d1c6f18d # tag: v6.9.0
       with:
         files: '**/*.md'
 
     - name: Run cspell
-      uses: DavidAnson/markdownlint-cli2-action@db43aef879112c3119a410d69f66701e0d530809 # tag: v17.0.0
+      uses: DavidAnson/markdownlint-cli2-action@eb5ca3ab411449c66620fe7f1b3c9e10547144b0 # tag: v18.0.0

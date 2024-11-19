@@ -150,6 +150,15 @@ public static partial class LibraryVersion
             }
         },
         {
+            "TestApplication.RabbitMq",
+            new List<PackageBuildInfo>
+            {
+                new("6.0.0"),
+                new("6.8.1"),
+                new("7.0.0"),
+            }
+        },
+        {
             "TestApplication.StackExchangeRedis",
             new List<PackageBuildInfo>
             {
@@ -174,14 +183,6 @@ public static partial class LibraryVersion
                 new("1.6.2"),
                 new("1.8.2"),
                 new("2.5.3"),
-            }
-        },
-        {
-            "TestApplication.RabbitMq",
-            new List<PackageBuildInfo>
-            {
-                new("6.0.0"),
-                new("6.8.1"),
             }
         },
     };

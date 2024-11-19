@@ -12,9 +12,9 @@ to .NET applications without having to modify their source code.
 > [!WARNING]
 > The following documentation refers to the in-development version
 of OpenTelemetry .NET Automatic Instrumentation. Docs for the latest version
-([1.8.0](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/latest))
+([1.9.0](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/latest))
 can be found in [opentelemetry.io](https://opentelemetry.io/docs/zero-code/net/)
-or [here](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/blob/v1.8.0/docs/README.md).
+or [here](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/blob/v1.9.0/docs/README.md).
 
 ---
 
@@ -107,7 +107,7 @@ CI tests run against the following operating systems:
 - [CentOS 7 x64](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/blob/main/docker/centos-build.dockerfile)
   (.NET 8 is not supported)
 - [CentOS Stream 9 x64](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/blob/main/docker/centos-stream9.dockerfile)
-- [macOS Monterey 12 x64](https://github.com/actions/runner-images/blob/main/images/macos/macos-12-Readme.md)
+- [macOS Ventura 13 x64](https://github.com/actions/runner-images/blob/main/images/macos/macos-13-Readme.md)
 - [Microsoft Windows Server 2022 x64](https://github.com/actions/runner-images/blob/main/images/windows/Windows2022-Readme.md)
 - [Ubuntu 20.04 LTS x64](https://github.com/actions/runner-images/blob/main/images/ubuntu/Ubuntu2004-Readme.md)
 - Ubuntu 22.04 LTS ARM64
@@ -185,7 +185,7 @@ Example usage:
 
 ```sh
 # Download the bash script
-curl -sSfL https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/download/v1.8.0/otel-dotnet-auto-install.sh -O
+curl -sSfL https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/download/v1.9.0/otel-dotnet-auto-install.sh -O
 
 # Install core files
 sh ./otel-dotnet-auto-install.sh
@@ -224,7 +224,7 @@ uses environment variables as parameters:
 | `TMPDIR`                | (deprecated) prefer `DOWNLOAD_DIR`                                              | No       | `$(mktemp -d)`              |
 | `DOWNLOAD_DIR`          | Folder to download the archive to. Will use local archive if it already exists  | No       | `$TMPDIR` or `$(mktemp -d)` |
 | `LOCAL_PATH`            | Full path the archive to use for installation. (ideal for air-gapped scenarios) | No       | *Calculated*                |
-| `VERSION`               | Version to download                                                             | No       | `1.8.0`                     |
+| `VERSION`               | Version to download                                                             | No       | `1.9.0`                     |
 
 [instrument.sh](../instrument.sh) script
 uses environment variables as parameters:
@@ -244,7 +244,7 @@ Example usage (run as administrator):
 
 ```powershell
 # Download the module
-$module_url = "https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/download/v1.8.0/OpenTelemetry.DotNet.Auto.psm1"
+$module_url = "https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/download/v1.9.0/OpenTelemetry.DotNet.Auto.psm1"
 $download_path = Join-Path $env:temp "OpenTelemetry.DotNet.Auto.psm1"
 Invoke-WebRequest -Uri $module_url -OutFile $download_path -UseBasicParsing
 
