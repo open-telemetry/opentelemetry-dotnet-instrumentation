@@ -134,6 +134,8 @@ internal static class PackageVersionDefinitions
             Versions = new List<PackageVersion>
             {
                 new("2.28.0"),
+                new("2.30.0"),
+                new("3.0.0"),
                 new("*")
             }
         },

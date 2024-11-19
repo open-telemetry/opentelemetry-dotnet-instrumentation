@@ -90,6 +90,7 @@ public static partial class LibraryVersion
             {
                 new("2.28.0"),
                 new("2.30.0"),
+                new("3.0.0"),
             }
         },
         {
