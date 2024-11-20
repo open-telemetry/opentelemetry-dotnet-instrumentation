@@ -84,7 +84,7 @@ internal static class ActionWorkflowAnalyzer
         // Use ctor with default values, apart from ScalarStyle.
         // Use ScalarStyle.Literal to get dotnet-version with value similar to below:
         //  dotnet-version: |
-        //    8.0.403
+        //    8.0.404
         //    9.0.100
 
         return new Scalar(AnchorName.Empty, TagName.Empty, val, ScalarStyle.Literal, true, true, Mark.Empty, Mark.Empty);

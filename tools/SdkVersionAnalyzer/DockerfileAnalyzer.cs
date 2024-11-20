@@ -55,7 +55,7 @@ internal static partial class DockerfileAnalyzer
         // && echo "SHA256: $(sha256sum dotnet-install.sh)" \
         //     && echo "de4957e41252191427a8ba0866f640b9f19c98fad62305919de41bd332e9c820  dotnet-install.sh" | sha256sum -c \
         //     && chmod +x ./dotnet-install.sh \
-        //     && ./dotnet-install.sh -v 8.0.403 --install-dir /usr/share/dotnet --no-path \
+        //     && ./dotnet-install.sh -v 8.0.404 --install-dir /usr/share/dotnet --no-path \
         //     && ./dotnet-install.sh -v 9.0.100 --install-dir /usr/share/dotnet --no-path \
         //     && rm dotnet-install.sh
 
