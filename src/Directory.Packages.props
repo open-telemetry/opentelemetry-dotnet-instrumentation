@@ -51,7 +51,7 @@
     <PackageVersion Include="SharpCompress" Version="0.30.1" />
     <PackageVersion Include="Snappier" Version="1.0.0" />
     <PackageVersion Include="StackExchange.Redis" Version="2.6.122" />
-    <PackageVersion Include="System.Drawing.Common" Version="4.7.2" />
+    <PackageVersion Include="System.Drawing.Common" Version="9.0.0" />
     <PackageVersion Include="System.Net.Http" Version="4.3.4" />
     <PackageVersion Include="System.Runtime.InteropServices.RuntimeInformation" Version="4.3.0" />
     <PackageVersion Include="System.Security.Cryptography.Algorithms" Version="4.3.0" />
