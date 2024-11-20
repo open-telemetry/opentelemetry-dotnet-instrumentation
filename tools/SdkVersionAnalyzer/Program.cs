@@ -9,7 +9,6 @@ internal static class Program
 {
     public static int Main(string[] args)
     {
-        Debugger.Launch();
         if (args.Length < 2)
         {
             Console.WriteLine("At least 2 arguments required - operation mode and directory root.");
