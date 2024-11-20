@@ -70,7 +70,7 @@ internal static class Instrumentation
         {
             // On .NET Framework only, initialize env vars from app.config/web.config
             // this does not override settings which where already set via env vars.
-            // We are doing so as the OTel .NET SDK only supports the env vars and we want to be
+            // We are doing so as the OTel .NET SDK only supports the env vars and we want to
             // be able to set them via app.config/web.config.
             EnvironmentInitializer.Initialize(System.Configuration.ConfigurationManager.AppSettings);
         }
