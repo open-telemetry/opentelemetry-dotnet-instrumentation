@@ -104,9 +104,6 @@ jobs:
           - machine: ubuntu-20.04
             base-image: alpine
             net-version: net8.0
-          - machine: ubuntu-20.04
-            base-image: centos
-            net-version: net7.0
           - machine: otel-linux-arm64
             base-image: alpine
             net-version: net8.0
