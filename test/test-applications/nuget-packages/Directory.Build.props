@@ -13,7 +13,7 @@
 
     <IsPackable>false</IsPackable>
     <GenerateDocumentationFile>false</GenerateDocumentationFile>
-    <LangVersion>11.0</LangVersion>
+    <LangVersion>13.0</LangVersion>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
 
     <!-- Keep the same base output path to simplify re-use of test helpers -->

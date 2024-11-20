@@ -9,7 +9,7 @@
     <NukeScriptDirectory>..\</NukeScriptDirectory>
     <NukeTelemetryVersion>1</NukeTelemetryVersion>
     <ImplicitUsings>enable</ImplicitUsings>
-    <LangVersion>11.0</LangVersion>
+    <LangVersion>13.0</LangVersion>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
   </PropertyGroup>
 
