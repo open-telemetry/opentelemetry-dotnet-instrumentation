@@ -23,7 +23,7 @@ public class SqlClientSystemTests : TestHelper
 
         foreach (var version in LibraryVersion.SqlClientSystem)
         {
-#if NET6_0_OR_GREATER
+#if NET8_0_OR_GREATER
             theoryData.Add(version, true);
 #endif
             theoryData.Add(version, false);

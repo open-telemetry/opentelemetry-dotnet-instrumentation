@@ -10,8 +10,7 @@
     <PackageReference Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" />
     <PackageReference Include="OpenTelemetry.Exporter.Console" />
     <PackageReference Include="StackExchange.Redis" />
-    <PackageReference Include="NServiceBus" Condition=" '$(TargetFramework)' == 'net8.0' "/>
-    <PackageReference Include="NServiceBus" VersionOverride="8.2.4" Condition=" '$(TargetFramework)' != 'net8.0' "/>
+    <PackageReference Include="NServiceBus" />
   </ItemGroup>
 
   <ItemGroup>

@@ -1,7 +1,7 @@
 // Copyright The OpenTelemetry Authors
 // SPDX-License-Identifier: Apache-2.0
 
-#if NET6_0_OR_GREATER
+#if NET8_0_OR_GREATER
 using Google.Protobuf;
 using IntegrationTests.Helpers;
 using OpenTelemetry.Proto.Trace.V1;
@@ -32,11 +32,7 @@ public class CustomSdkTests : TestHelper
         collector.ResourceExpector.Expect("test_attr", "added_manually");
         collector.Expect("OpenTelemetry.Instrumentation.StackExchangeRedis", span => !IsTopLevel(span));
 
-#if NET7_0_OR_GREATER
         collector.Expect("System.Net.Http", span => !IsTopLevel(span));
-#else
-        collector.Expect("OpenTelemetry.Instrumentation.Http.HttpClient", span => !IsTopLevel(span));
-#endif
         collector.Expect("TestApplication.CustomSdk", span => IsTopLevel(span));
 
         collector.Expect("NServiceBus.Core", span => IsTopLevel(span));
@@ -66,11 +62,7 @@ public class CustomSdkTests : TestHelper
         collector.ResourceExpector.Expect("test_attr", "added_manually");
 
         collector.Expect("OpenTelemetry.Instrumentation.Http");
-#if NET8_0_OR_GREATER
         collector.Expect("NServiceBus.Core.Pipeline.Incoming");
-#else
-        collector.Expect("NServiceBus.Core");
-#endif
         collector.Expect("TestApplication.CustomSdk");
 
         EnableBytecodeInstrumentation();

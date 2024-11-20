@@ -30,12 +30,12 @@ internal static class EnvironmentConfigurationMetricHelper
                 MetricInstrumentation.NetRuntime => Wrappers.AddRuntimeInstrumentation(builder, pluginManager),
                 MetricInstrumentation.Process => Wrappers.AddProcessInstrumentation(builder),
                 MetricInstrumentation.NServiceBus => builder
-#if NET6_0_OR_GREATER
+#if NET8_0_OR_GREATER
                     .AddMeter("NServiceBus.Core.Pipeline.Incoming") // NServiceBus 9.1.0+
 #endif
                     .AddMeter("NServiceBus.Core"), // NServiceBus [8,0.0, 9.1.0)
 
-#if NET6_0_OR_GREATER
+#if NET8_0_OR_GREATER
                 MetricInstrumentation.AspNetCore => Wrappers.AddAspNetCoreInstrumentation(builder, lazyInstrumentationLoader),
 #endif
                 _ => null,
@@ -83,7 +83,7 @@ internal static class EnvironmentConfigurationMetricHelper
         }
 #endif
 
-#if NET6_0_OR_GREATER
+#if NET8_0_OR_GREATER
         [MethodImpl(MethodImplOptions.NoInlining)]
         public static MeterProviderBuilder AddAspNetCoreInstrumentation(MeterProviderBuilder builder, LazyInstrumentationLoader lazyInstrumentationLoader)
         {
@@ -107,18 +107,15 @@ internal static class EnvironmentConfigurationMetricHelper
         [MethodImpl(MethodImplOptions.NoInlining)]
         public static MeterProviderBuilder AddHttpClientInstrumentation(MeterProviderBuilder builder, LazyInstrumentationLoader lazyInstrumentationLoader)
         {
-#if NET6_0_OR_GREATER
-            if (Environment.Version.Major >= 8)
-            {
-                // HTTP has build in support for metrics in .NET8. Executing OpenTelemetry.Instrumentation.Http in this case leads to duplicated metrics.
-                return builder
-                    .AddMeter("System.Net.Http")
-                    .AddMeter("System.Net.NameResolution");
-            }
-#endif
-
+#if NET8_0_OR_GREATER
+            // HTTP has build in support for metrics in .NET8. Executing OpenTelemetry.Instrumentation.Http in this case leads to duplicated metrics.
+            return builder
+                .AddMeter("System.Net.Http")
+                .AddMeter("System.Net.NameResolution");
+#else
             DelayedInitialization.Metrics.AddHttpClient(lazyInstrumentationLoader);
             return builder.AddMeter("OpenTelemetry.Instrumentation.Http");
+#endif
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]

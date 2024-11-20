@@ -5,7 +5,7 @@ using IntegrationTests.Helpers;
 using OpenTelemetry.Proto.Logs.V1;
 using Xunit.Abstractions;
 
-#if NET6_0_OR_GREATER
+#if NET8_0_OR_GREATER
 
 namespace IntegrationTests;
 

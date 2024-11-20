@@ -1,11 +1,11 @@
 // Copyright The OpenTelemetry Authors
 // SPDX-License-Identifier: Apache-2.0
 
-#if NET6_0_OR_GREATER
+#if NET8_0_OR_GREATER
 using System.Diagnostics;
 #endif
 using OpenTelemetry.AutoInstrumentation.Configurations;
-#if NET6_0_OR_GREATER
+#if NET8_0_OR_GREATER
 using OpenTelemetry.AutoInstrumentation.ContinuousProfiler;
 #endif
 using OpenTelemetry.AutoInstrumentation.Diagnostics;
@@ -33,7 +33,7 @@ internal static class Instrumentation
     private static MeterProvider? _meterProvider;
     private static PluginManager? _pluginManager;
 
-#if NET6_0_OR_GREATER
+#if NET8_0_OR_GREATER
     private static ContinuousProfilerProcessor? _profilerProcessor;
 #endif
 
@@ -89,7 +89,7 @@ internal static class Instrumentation
             _pluginManager = new PluginManager(GeneralSettings.Value);
             _pluginManager.Initializing();
 
-#if NET6_0_OR_GREATER
+#if NET8_0_OR_GREATER
             var profilerEnabled = GeneralSettings.Value.ProfilerEnabled;
 
             if (profilerEnabled)
@@ -217,7 +217,7 @@ internal static class Instrumentation
         }
     }
 
-#if NET6_0_OR_GREATER
+#if NET8_0_OR_GREATER
     private static void InitializeContinuousProfiling(
         object continuousProfilerExporter,
         bool threadSamplingEnabled,
@@ -283,7 +283,7 @@ internal static class Instrumentation
                     DelayedInitialization.Metrics.AddAspNet(lazyInstrumentationLoader, pluginManager);
                     break;
 #endif
-#if NET6_0_OR_GREATER
+#if NET8_0_OR_GREATER
                 case MetricInstrumentation.AspNetCore:
                     DelayedInitialization.Metrics.AddAspNetCore(lazyInstrumentationLoader);
                     break;
@@ -336,7 +336,7 @@ internal static class Instrumentation
                     break;
                 case TracerInstrumentation.WcfClient:
                     break;
-#if NET6_0_OR_GREATER
+#if NET8_0_OR_GREATER
                 case TracerInstrumentation.AspNetCore:
                     DelayedInitialization.Traces.AddAspNetCore(lazyInstrumentationLoader, pluginManager, tracerSettings);
                     break;
@@ -395,7 +395,7 @@ internal static class Instrumentation
 
         try
         {
-#if NET6_0_OR_GREATER
+#if NET8_0_OR_GREATER
             LazyInstrumentationLoader?.Dispose();
             if (_profilerProcessor != null)
             {

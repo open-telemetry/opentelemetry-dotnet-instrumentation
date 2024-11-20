@@ -151,7 +151,7 @@ public class SmokeTests : TestHelper
         collector.ResourceExpector.AssertExpectations();
     }
 
-#if NET6_0_OR_GREATER // The feature is not supported on .NET Framework
+#if NET8_0_OR_GREATER // The feature is not supported on .NET Framework
     [Fact]
     [Trait("Category", "EndToEnd")]
     public void LogsResource()
@@ -360,7 +360,7 @@ public class SmokeTests : TestHelper
     }
 #endif
 
-#if NET6_0_OR_GREATER // The feature is not supported on .NET Framework
+#if NET8_0_OR_GREATER // The feature is not supported on .NET Framework
     [Fact]
     [Trait("Category", "EndToEnd")]
     public void SubmitLogs()
@@ -630,10 +630,8 @@ public class SmokeTests : TestHelper
         collector.Expect("MyCompany.MyProduct.MyLibrary");
 #if NETFRAMEWORK
         collector.Expect("OpenTelemetry.Instrumentation.Http.HttpWebRequest");
-#elif NET7_0_OR_GREATER
-        collector.Expect("System.Net.Http");
 #else
-        collector.Expect("OpenTelemetry.Instrumentation.Http.HttpClient");
+        collector.Expect("System.Net.Http");
 #endif
 
         EnableOnlyHttpClientTraceInstrumentation();
