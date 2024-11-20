@@ -48,9 +48,7 @@ public static partial class LibraryVersion
             theoryData.Add(string.Empty);
 #else
             theoryData.Add("6.0.35");
-#if NET8_0
             theoryData.Add("8.0.10");
-#endif
 #endif
             return theoryData;
         }
@@ -65,12 +63,8 @@ public static partial class LibraryVersion
 #else
             theoryData.Add("6.0.3");
             theoryData.Add("7.0.0");
-#if NET8_0
             theoryData.Add("8.0.0");
-#endif
-#if NET8_0
             theoryData.Add("8.0.2");
-#endif
 #endif
             return theoryData;
         }
@@ -206,10 +200,10 @@ public static partial class LibraryVersion
             theoryData.Add(string.Empty);
 #else
             theoryData.Add("8.2.4");
-#if NET8_0
+#if NET9_0 || NET8_0
             theoryData.Add("9.1.0");
 #endif
-#if NET8_0
+#if NET9_0 || NET8_0
             theoryData.Add("9.2.3");
 #endif
 #endif
@@ -301,7 +295,7 @@ public static partial class LibraryVersion
 #else
             theoryData.Add("4.10.2");
             theoryData.Add("6.2.0");
-#if NET8_0
+#if NET9_0 || NET8_0
             theoryData.Add("8.0.0");
 #endif
 #endif
