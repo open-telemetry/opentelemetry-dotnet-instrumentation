@@ -328,7 +328,11 @@ internal static partial class DuckType
             // If the proxy type definition is an interface we create an struct proxy
             // If the proxy type definition is an struct then we use that struct to copy the values from the target type
             parentType = typeof(ValueType);
-            typeAttributes = TypeAttributes.Public | TypeAttributes.AnsiClass | TypeAttributes.BeforeFieldInit | TypeAttributes.SequentialLayout | TypeAttributes.Sealed | TypeAttributes.Serializable;
+            typeAttributes = TypeAttributes.Public | TypeAttributes.AnsiClass | TypeAttributes.BeforeFieldInit | TypeAttributes.SequentialLayout | TypeAttributes.Sealed
+#pragma warning disable SYSLIB0050
+                             // TODO double check how to handle TypeAttributes.Serializable which is obsolete
+                             | TypeAttributes.Serializable;
+#pragma warning restore SYSLIB0050
             if (typeToDeriveFrom.IsInterface)
             {
                 interfaceTypes = new[] { typeToDeriveFrom, typeof(IDuckType) };

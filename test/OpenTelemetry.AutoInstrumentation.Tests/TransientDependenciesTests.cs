@@ -3,7 +3,7 @@
 
 // This test is defined in NET8.0 because the tool is written in .NET 8.0
 // The actual test is testing .NET 462 context.
-#if NET8_0_OR_GREATER
+#if NET9_0_OR_GREATER
 
 using System.Reflection;
 using System.Runtime.InteropServices;

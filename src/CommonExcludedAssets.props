@@ -1,6 +1,6 @@
 <Project>
   <!-- ExcludeAssets="all" prevents copying libraries to the output -->
-  <ItemGroup Condition=" '$(TargetFramework)' == 'net6.0' ">
+  <ItemGroup Condition=" '$(TargetFramework)' == 'net8.0' ">
     <!-- StackExchange.Redis is required by OpenTelemetry.Instrumentation.StackExchangeRedis. -->
     <PackageReference Include="StackExchange.Redis" ExcludeAssets="all" />
     <!-- Pipelines.Sockets.Unofficial is tranistive dependency required by OpenTelemetry.Instrumentation.StackExchangeRedis. -->
