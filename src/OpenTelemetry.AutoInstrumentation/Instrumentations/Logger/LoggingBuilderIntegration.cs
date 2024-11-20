@@ -16,7 +16,7 @@ namespace OpenTelemetry.AutoInstrumentation.Instrumentations.Logger;
     returnTypeName: ClrNames.Void,
     parameterTypeNames: new[] { "Microsoft.Extensions.DependencyInjection.IServiceCollection" },
     minimumVersion: "8.0.0",
-    maximumVersion: "8.*.*",
+    maximumVersion: "9.*.*",
     integrationName: "ILogger",
     type: InstrumentationType.Log)]
 public static class LoggingBuilderIntegration
@@ -35,7 +35,7 @@ public static class LoggingBuilderIntegration
         {
             var logBuilderExtensionsType = Type.GetType("OpenTelemetry.AutoInstrumentation.Logger.LogBuilderExtensions, OpenTelemetry.AutoInstrumentation");
             var methodInfo = logBuilderExtensionsType?.GetMethod("AddOpenTelemetryLogsFromIntegration");
-            methodInfo?.Invoke(null, new[] { (object)instance });
+            methodInfo?.Invoke(null, [instance]);
         }
 
         return CallTargetReturn.GetDefault();
