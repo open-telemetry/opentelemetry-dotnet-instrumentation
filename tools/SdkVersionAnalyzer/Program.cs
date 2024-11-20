@@ -1,12 +1,15 @@
 // Copyright The OpenTelemetry Authors
 // SPDX-License-Identifier: Apache-2.0
 
+using System.Diagnostics;
+
 namespace SdkVersionAnalyzer;
 
 internal static class Program
 {
     public static int Main(string[] args)
     {
+        Debugger.Launch();
         if (args.Length < 2)
         {
             Console.WriteLine("At least 2 arguments required - operation mode and directory root.");
@@ -22,9 +25,9 @@ internal static class Program
                     return VerifyDotnetSdkVersions(directoryRoot);
                 }
 
-            case "--modify" when args.Length == 5:
+            case "--modify" when args.Length == 4:
                 {
-                    var requestedSdkVersions = new DotnetSdkVersion(args[2], args[3], args[4]);
+                    var requestedSdkVersions = new DotnetSdkVersion(args[2], args[3]);
                     ModifyDotnetSdkVersions(directoryRoot, requestedSdkVersions);
                     return 0;
                 }

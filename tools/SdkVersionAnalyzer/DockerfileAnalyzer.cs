@@ -44,9 +44,8 @@ internal static partial class DockerfileAnalyzer
 
     private static bool VerifySdkVersions(string content, DotnetSdkVersion expectedDotnetSdkVersion)
     {
-        string? net6SdkVersion = null;
-        string? net7SdkVersion = null;
         string? net8SdkVersion = null;
+        string? net9SdkVersion = null;
 
         var dockerfile = Dockerfile.Parse(content);
         var instruction = GetDotnetInstallingInstruction(dockerfile);
@@ -56,8 +55,8 @@ internal static partial class DockerfileAnalyzer
         // && echo "SHA256: $(sha256sum dotnet-install.sh)" \
         //     && echo "de4957e41252191427a8ba0866f640b9f19c98fad62305919de41bd332e9c820  dotnet-install.sh" | sha256sum -c \
         //     && chmod +x ./dotnet-install.sh \
-        //     && ./dotnet-install.sh -v 6.0.427 --install-dir /usr/share/dotnet --no-path \
-        //     && ./dotnet-install.sh -v 7.0.410 --install-dir /usr/share/dotnet --no-path \
+        //     && ./dotnet-install.sh -v 8.0.403 --install-dir /usr/share/dotnet --no-path \
+        //     && ./dotnet-install.sh -v 9.0.100 --install-dir /usr/share/dotnet --no-path \
         //     && rm dotnet-install.sh
 
         if (instruction is not null)
@@ -66,13 +65,13 @@ internal static partial class DockerfileAnalyzer
             foreach (Match match in matchCollection)
             {
                 var extractedSdkVersion = match.Groups[1].Value;
-                if (VersionComparer.IsNet6Version(extractedSdkVersion))
+                if (VersionComparer.IsNet8Version(extractedSdkVersion))
                 {
-                    net6SdkVersion = extractedSdkVersion;
+                    net8SdkVersion = extractedSdkVersion;
                 }
-                else if (VersionComparer.IsNet7Version(extractedSdkVersion))
+                else if (VersionComparer.IsNet9Version(extractedSdkVersion))
                 {
-                    net7SdkVersion = extractedSdkVersion;
+                    net9SdkVersion = extractedSdkVersion;
                 }
             }
         }
@@ -87,10 +86,10 @@ internal static partial class DockerfileAnalyzer
         if (IsDotnetSdkImage(imageName))
         {
             var (sdkVersion, _) = GetSdkVersionAndSuffix(imageName);
-            net8SdkVersion = sdkVersion;
+            net9SdkVersion = sdkVersion;
         }
 
-        return VersionComparer.CompareVersions(expectedDotnetSdkVersion, net6SdkVersion, net7SdkVersion, net8SdkVersion);
+        return VersionComparer.CompareVersions(expectedDotnetSdkVersion, net8SdkVersion, net9SdkVersion);
     }
 
     private static string GetModifiedImageName(DotnetSdkVersion requestedDotnetSdkVersion, ImageName imageName)
@@ -129,14 +128,14 @@ internal static partial class DockerfileAnalyzer
 
     private static string GetNewVersion(string oldVersion, DotnetSdkVersion requestedDotnetSdkVersion)
     {
-        if (VersionComparer.IsNet6Version(oldVersion))
+        if (VersionComparer.IsNet8Version(oldVersion))
         {
-            return requestedDotnetSdkVersion.Net6SdkVersion!;
+            return requestedDotnetSdkVersion.Net8SdkVersion!;
         }
 
-        if (VersionComparer.IsNet7Version(oldVersion))
+        if (VersionComparer.IsNet9Version(oldVersion))
         {
-            return requestedDotnetSdkVersion.Net7SdkVersion!;
+            return requestedDotnetSdkVersion.Net9SdkVersion!;
         }
 
         return oldVersion;

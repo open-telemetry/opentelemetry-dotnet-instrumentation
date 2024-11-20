@@ -79,14 +79,13 @@ internal static class ActionWorkflowAnalyzer
     private static Scalar GetNewDotnetVersionScalar(DotnetSdkVersion newDotnetSdkVersion)
     {
         const char separator = '\n';
-        var val = $"{newDotnetSdkVersion.Net6SdkVersion!}{separator}{newDotnetSdkVersion.Net7SdkVersion!}{separator}{newDotnetSdkVersion.Net8SdkVersion!}{separator}";
+        var val = $"{newDotnetSdkVersion.Net8SdkVersion!}{separator}{newDotnetSdkVersion.Net9SdkVersion!}{separator}";
 
         // Use ctor with default values, apart from ScalarStyle.
         // Use ScalarStyle.Literal to get dotnet-version with value similar to below:
         //  dotnet-version: |
-        //    6.0.437
-        //    7.0.420
-        //    8.0.413
+        //    8.0.403
+        //    9.0.100
 
         return new Scalar(AnchorName.Empty, TagName.Empty, val, ScalarStyle.Literal, true, true, Mark.Empty, Mark.Empty);
     }
@@ -151,35 +150,28 @@ internal static class ActionWorkflowAnalyzer
     {
         // Extract versions from the node value e.g.:
         // dotnet-version: |
-        //   6.0.427
-        //   7.0.410
-        //   8.0.403
+        //   8.0.404
+        //   9.0.100
 
-        string? sdk6Version = null;
-        string? sdk7Version = null;
         string? sdk8Version = null;
+        string? sdk9Version = null;
 
         foreach (var version in dotnetVersionNode.ToString().Split())
         {
-            if (VersionComparer.IsNet6Version(version))
-            {
-                sdk6Version = version;
-            }
-
-            if (VersionComparer.IsNet7Version(version))
-            {
-                sdk7Version = version;
-            }
-
             if (VersionComparer.IsNet8Version(version))
             {
                 sdk8Version = version;
             }
+
+            if (VersionComparer.IsNet9Version(version))
+            {
+                sdk9Version = version;
+            }
         }
 
-        if (sdk6Version is not null || sdk7Version is not null || sdk8Version is not null)
+        if (sdk8Version is not null || sdk9Version is not null)
         {
-            return new DotnetSdkVersion(sdk6Version, sdk7Version, sdk8Version);
+            return new DotnetSdkVersion(sdk8Version, sdk9Version);
         }
 
         return null;
