@@ -1,8 +1,8 @@
 // Copyright The OpenTelemetry Authors
 // SPDX-License-Identifier: Apache-2.0
 
-// This test is defined in NET8.0 because the tool is written in .NET 8.0
-// The actual test is testing .NET 462 context.
+// This test is defined in NET 9.0 because the tool is written in .NET 9.0
+// The actual test is testing .NET Framework 4.6.2 context.
 #if NET9_0_OR_GREATER
 
 using System.Reflection;
