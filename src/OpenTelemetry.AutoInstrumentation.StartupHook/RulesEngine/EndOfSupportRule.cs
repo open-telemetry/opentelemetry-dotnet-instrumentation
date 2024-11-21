@@ -23,17 +23,14 @@ internal class EndOfSupportRule : Rule
         DateTime eosDate;
         switch (netVersion)
         {
-            case 6:
-                eosDate = new DateTime(2024, 11, 12);
-                break;
-            case 7:
-                eosDate = new DateTime(2024, 5, 14);
-                break;
             case 8:
                 eosDate = new DateTime(2026, 11, 10);
                 break;
+            case 9:
+                eosDate = new DateTime(2026, 05, 12);
+                break;
             default:
-                return true; // just return, not abe to verify anything here
+                return true; // just return, not able to verify anything here
         }
 
         var now = DateTime.UtcNow;

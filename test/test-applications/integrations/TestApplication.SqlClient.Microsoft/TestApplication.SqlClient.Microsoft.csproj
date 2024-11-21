@@ -6,7 +6,6 @@
 
   <ItemGroup>
     <PackageReference Include="System.ValueTuple" Condition="'$(TargetFramework)' == 'net462'" />
-    <PackageReference Include="System.Diagnostics.DiagnosticSource" Condition="'$(TargetFramework)' == 'net6.0'" />
   </ItemGroup>
 
   <ItemGroup>

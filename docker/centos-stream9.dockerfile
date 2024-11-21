@@ -2,9 +2,8 @@ FROM quay.io/centos/centos:stream9
 
 # Install dotnet sdk
 RUN dnf install -y \
-    dotnet-sdk-8.0 \
-    dotnet-sdk-7.0 \
-    dotnet-sdk-6.0
+    dotnet-sdk-9.0 \
+    dotnet-sdk-8.0
 
 # https://github.com/dotnet/runtime/issues/65874
 RUN update-crypto-policies --set LEGACY

@@ -22,9 +22,9 @@ internal static class Program
                     return VerifyDotnetSdkVersions(directoryRoot);
                 }
 
-            case "--modify" when args.Length == 5:
+            case "--modify" when args.Length == 4:
                 {
-                    var requestedSdkVersions = new DotnetSdkVersion(args[2], args[3], args[4]);
+                    var requestedSdkVersions = new DotnetSdkVersion(args[2], args[3]);
                     ModifyDotnetSdkVersions(directoryRoot, requestedSdkVersions);
                     return 0;
                 }

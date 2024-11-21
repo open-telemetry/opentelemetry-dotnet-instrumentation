@@ -39,7 +39,7 @@ internal static class EndMethodHandler<TIntegration, TTarget, TReturn>
                 // The type is a Task<>
                 _continuationGenerator = (ContinuationGenerator<TTarget, TReturn>?)Activator.CreateInstance(typeof(TaskContinuationGenerator<,,,>).MakeGenericType(typeof(TIntegration), typeof(TTarget), returnType, ContinuationsHelper.GetResultType(returnType)));
             }
-#if NET6_0_OR_GREATER
+#if NET8_0_OR_GREATER
             else if (genericReturnType == typeof(ValueTask<>))
             {
                 // The type is a ValueTask<>
@@ -54,7 +54,7 @@ internal static class EndMethodHandler<TIntegration, TTarget, TReturn>
                 // The type is a Task
                 _continuationGenerator = new TaskContinuationGenerator<TIntegration, TTarget, TReturn>();
             }
-#if NET6_0_OR_GREATER
+#if NET8_0_OR_GREATER
             else if (returnType == typeof(ValueTask))
             {
                 // The type is a ValueTask

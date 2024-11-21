@@ -38,7 +38,7 @@ namespace OpenTelemetry.AutoInstrumentation.Instrumentations.Wcf.Client;
     maximumVersion: WcfCommonConstants.Max4Version,
     integrationName: WcfClientConstants.IntegrationName,
     type: InstrumentationType.Trace)]
-#if NET6_0_OR_GREATER
+#if NET8_0_OR_GREATER
 [InstrumentMethod(
     assemblyName: WcfCommonConstants.ServiceModelPrimitivesAssemblyName,
     typeName: WcfClientConstants.ChannelFactoryTypeName,

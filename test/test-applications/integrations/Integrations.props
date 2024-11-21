@@ -1,13 +1,13 @@
 <Project>
   <PropertyGroup>
     <!-- only run .NET Framework tests on Windows -->
-    <TargetFrameworks>net8.0;net7.0;net6.0</TargetFrameworks>
+    <TargetFrameworks>net9.0;net8.0</TargetFrameworks>
     <TargetFrameworks Condition="'$(OS)' == 'Windows_NT'">$(TargetFrameworks);net462</TargetFrameworks>
 
     <OutputType>Exe</OutputType>
     <Platforms>x64;x86</Platforms>
     <PlatformTarget>$(Platform)</PlatformTarget>
-    <LangVersion>11.0</LangVersion>
+    <LangVersion>13.0</LangVersion>
 
     <BaseIntermediateOutputPath Condition="'$(LibraryVersion)'!=''">..\obj\$(MSBuildProjectName)\$(LibraryVersion)\</BaseIntermediateOutputPath>
     <BaseIntermediateOutputPath Condition="'$(LibraryVersion)'==''">..\obj\$(MSBuildProjectName)\</BaseIntermediateOutputPath>

@@ -109,11 +109,7 @@ Console.WriteLine(response.StatusCode);
         var collector = new MockSpansCollector(Output);
         SetExporter(collector);
 
-#if NET7_0_OR_GREATER
         collector.Expect("System.Net.Http");
-#else
-        collector.Expect("OpenTelemetry.Instrumentation.Http.HttpClient");
-#endif
 
         RunDotNetCli(arguments);
 
