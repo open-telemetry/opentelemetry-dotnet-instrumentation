@@ -330,7 +330,9 @@ internal static partial class DuckType
             parentType = typeof(ValueType);
             typeAttributes = TypeAttributes.Public | TypeAttributes.AnsiClass | TypeAttributes.BeforeFieldInit | TypeAttributes.SequentialLayout | TypeAttributes.Sealed
 #pragma warning disable SYSLIB0050
-                             // TODO double check how to handle TypeAttributes.Serializable which is obsolete
+                             // TODO verify how to handle TypeAttributes.Serializable which is obsolete.
+                             // It was working fine with binaries compiled against .NET6 executed in .NET8 runtime.
+                             // https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/issues/3799
                              | TypeAttributes.Serializable;
 #pragma warning restore SYSLIB0050
             if (typeToDeriveFrom.IsInterface)
