@@ -10,10 +10,7 @@ internal static class DatabaseAttributes
         public const string DbSystem = "db.system";
         public const string DbCollectionName = "db.collection.name";
         public const string DbNamespace = "db.namespace";
-        public const string DbQueryText = "db.query.text";
         public const string DbOperationName = "db.operation.name";
-        public const string DbResponseStatusCode = "db.response.status_code";
-        public const string DbOperationBatchSize = "db.operation.batch.size";
     }
 
     internal static class Values

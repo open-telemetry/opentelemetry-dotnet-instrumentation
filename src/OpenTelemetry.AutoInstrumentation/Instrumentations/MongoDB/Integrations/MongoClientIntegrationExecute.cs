@@ -5,7 +5,8 @@ using System.Linq.Expressions;
 using System.Reflection;
 using System.Text.RegularExpressions;
 using OpenTelemetry.AutoInstrumentation.CallTarget;
-using OpenTelemetry.AutoInstrumentation.Instrumentations.RabbitMq6.DuckTypes;
+using OpenTelemetry.AutoInstrumentation.Instrumentations.MongoDB.DuckTypes;
+using OpenTelemetry.AutoInstrumentation.Util;
 
 namespace OpenTelemetry.AutoInstrumentation.Instrumentations.MongoDB.Integrations;
 
@@ -13,10 +14,120 @@ namespace OpenTelemetry.AutoInstrumentation.Instrumentations.MongoDB.Integration
 /// MongoDB.Driver.MongoClient calltarget instrumentation
 /// </summary>
 [InstrumentMethod(
-    assemblyName: MongoDBConstants.AssemblyName,
-    typeName: MongoDBConstants.TypeName,
+    assemblyName: MongoDBConstants.AssemblyName3,
+    typeName: "MongoDB.Driver.Core.WireProtocol.CommandUsingQueryMessageWireProtocol`1",
     methodName: "Execute",
-    returnTypeName: ClrNames.Void,
+    returnTypeName: "!0",
+    parameterTypeNames: new[] { "MongoDB.Driver.Core.Connections.IConnection", ClrNames.CancellationToken },
+    minimumVersion: MongoDBConstants.MinimumVersion3,
+    maximumVersion: MongoDBConstants.MaximumVersion3,
+    integrationName: MongoDBConstants.IntegrationName,
+    type: InstrumentationType.Trace)]
+[InstrumentMethod(
+    assemblyName: MongoDBConstants.AssemblyName3,
+    typeName: "MongoDB.Driver.Core.WireProtocol.CommandUsingCommandMessageWireProtocol`1",
+    methodName: "Execute",
+    returnTypeName: "!0",
+    parameterTypeNames: new[] { "MongoDB.Driver.Core.Connections.IConnection", ClrNames.CancellationToken },
+    minimumVersion: MongoDBConstants.MinimumVersion3,
+    maximumVersion: MongoDBConstants.MaximumVersion3,
+    integrationName: MongoDBConstants.IntegrationName,
+    type: InstrumentationType.Trace)]
+[InstrumentMethod(
+    assemblyName: MongoDBConstants.AssemblyName3,
+    typeName: "MongoDB.Driver.Core.WireProtocol.CommandWireProtocol`1",
+    methodName: "Execute",
+    returnTypeName: "!0",
+    parameterTypeNames: new[] { "MongoDB.Driver.Core.Connections.IConnection", ClrNames.CancellationToken },
+    minimumVersion: MongoDBConstants.MinimumVersion3,
+    maximumVersion: MongoDBConstants.MaximumVersion3,
+    integrationName: MongoDBConstants.IntegrationName,
+    type: InstrumentationType.Trace)]
+[InstrumentMethod(
+    assemblyName: MongoDBConstants.AssemblyName3,
+    typeName: "MongoDB.Driver.Core.WireProtocol.GetMoreWireProtocol`1",
+    methodName: "Execute",
+    returnTypeName: "!0",
+    parameterTypeNames: new[] { "MongoDB.Driver.Core.Connections.IConnection", ClrNames.CancellationToken },
+    minimumVersion: MongoDBConstants.MinimumVersion3,
+    maximumVersion: MongoDBConstants.MaximumVersion3,
+    integrationName: MongoDBConstants.IntegrationName,
+    type: InstrumentationType.Trace)]
+[InstrumentMethod(
+    assemblyName: MongoDBConstants.AssemblyName3,
+    typeName: "MongoDB.Driver.Core.WireProtocol.QueryWireProtocol`1",
+    methodName: "Execute",
+    returnTypeName: "!0",
+    parameterTypeNames: new[] { "MongoDB.Driver.Core.Connections.IConnection", ClrNames.CancellationToken },
+    minimumVersion: MongoDBConstants.MinimumVersion3,
+    maximumVersion: MongoDBConstants.MaximumVersion3,
+    integrationName: MongoDBConstants.IntegrationName,
+    type: InstrumentationType.Trace)]
+[InstrumentMethod(
+    assemblyName: MongoDBConstants.AssemblyName3,
+    typeName: "MongoDB.Driver.Core.WireProtocol.WriteWireProtocolBase`1",
+    methodName: "Execute",
+    returnTypeName: "!0",
+    parameterTypeNames: new[] { "MongoDB.Driver.Core.Connections.IConnection", ClrNames.CancellationToken },
+    minimumVersion: MongoDBConstants.MinimumVersion3,
+    maximumVersion: MongoDBConstants.MaximumVersion3,
+    integrationName: MongoDBConstants.IntegrationName,
+    type: InstrumentationType.Trace)]
+[InstrumentMethod(
+    assemblyName: MongoDBConstants.AssemblyName,
+    typeName: "MongoDB.Driver.Core.WireProtocol.CommandUsingQueryMessageWireProtocol`1",
+    methodName: "Execute",
+    returnTypeName: "!0",
+    parameterTypeNames: new[] { "MongoDB.Driver.Core.Connections.IConnection", ClrNames.CancellationToken },
+    minimumVersion: MongoDBConstants.MinimumVersion,
+    maximumVersion: MongoDBConstants.MaximumVersion,
+    integrationName: MongoDBConstants.IntegrationName,
+    type: InstrumentationType.Trace)]
+[InstrumentMethod(
+    assemblyName: MongoDBConstants.AssemblyName,
+    typeName: "MongoDB.Driver.Core.WireProtocol.CommandUsingCommandMessageWireProtocol`1",
+    methodName: "Execute",
+    returnTypeName: "!0",
+    parameterTypeNames: new[] { "MongoDB.Driver.Core.Connections.IConnection", ClrNames.CancellationToken },
+    minimumVersion: MongoDBConstants.MinimumVersion,
+    maximumVersion: MongoDBConstants.MaximumVersion,
+    integrationName: MongoDBConstants.IntegrationName,
+    type: InstrumentationType.Trace)]
+[InstrumentMethod(
+    assemblyName: MongoDBConstants.AssemblyName,
+    typeName: "MongoDB.Driver.Core.WireProtocol.CommandWireProtocol`1",
+    methodName: "Execute",
+    returnTypeName: "!0",
+    parameterTypeNames: new[] { "MongoDB.Driver.Core.Connections.IConnection", ClrNames.CancellationToken },
+    minimumVersion: MongoDBConstants.MinimumVersion,
+    maximumVersion: MongoDBConstants.MaximumVersion,
+    integrationName: MongoDBConstants.IntegrationName,
+    type: InstrumentationType.Trace)]
+[InstrumentMethod(
+    assemblyName: MongoDBConstants.AssemblyName,
+    typeName: "MongoDB.Driver.Core.WireProtocol.GetMoreWireProtocol`1",
+    methodName: "Execute",
+    returnTypeName: "!0",
+    parameterTypeNames: new[] { "MongoDB.Driver.Core.Connections.IConnection", ClrNames.CancellationToken },
+    minimumVersion: MongoDBConstants.MinimumVersion,
+    maximumVersion: MongoDBConstants.MaximumVersion,
+    integrationName: MongoDBConstants.IntegrationName,
+    type: InstrumentationType.Trace)]
+[InstrumentMethod(
+    assemblyName: MongoDBConstants.AssemblyName,
+    typeName: "MongoDB.Driver.Core.WireProtocol.QueryWireProtocol`1",
+    methodName: "Execute",
+    returnTypeName: "!0",
+    parameterTypeNames: new[] { "MongoDB.Driver.Core.Connections.IConnection", ClrNames.CancellationToken },
+    minimumVersion: MongoDBConstants.MinimumVersion,
+    maximumVersion: MongoDBConstants.MaximumVersion,
+    integrationName: MongoDBConstants.IntegrationName,
+    type: InstrumentationType.Trace)]
+[InstrumentMethod(
+    assemblyName: MongoDBConstants.AssemblyName,
+    typeName: "MongoDB.Driver.Core.WireProtocol.WriteWireProtocolBase`1",
+    methodName: "Execute",
+    returnTypeName: "!0",
     parameterTypeNames: new[] { "MongoDB.Driver.Core.Connections.IConnection", ClrNames.CancellationToken },
     minimumVersion: MongoDBConstants.MinimumVersion,
     maximumVersion: MongoDBConstants.MaximumVersion,
@@ -27,18 +138,25 @@ public static class MongoClientIntegrationExecute
     internal static CallTargetState OnMethodBegin<TTarget, TConnection>(TTarget instance, TConnection connection, CancellationToken cancellationToken)
         where TConnection : IConnection
     {
-        var scope = MongoDBInstrumentation.StartDatabaseActivity(instance, connection.Endpoint!.HostName, connection.Endpoint!.Port);
+        var activity = MongoDBInstrumentation.StartDatabaseActivity(instance, connection);
 
-        if (scope == null)
-        {
-            return CallTargetState.GetDefault();
-        }
-
-        return new CallTargetState(scope);
+        return new CallTargetState(activity, null);
     }
 
-    internal static CallTargetReturn OnMethodEnd<TTarget>(TTarget instance, Exception exception, in CallTargetState state)
+    internal static CallTargetReturn<TReturn> OnMethodEnd<TTarget, TReturn>(TTarget instance, TReturn returnValue, Exception exception, in CallTargetState state)
     {
-        return CallTargetReturn.GetDefault();
+        var activity = state.Activity;
+        if (activity is null)
+        {
+            return new CallTargetReturn<TReturn>(returnValue);
+        }
+
+        if (exception is not null)
+        {
+            activity.SetException(exception);
+        }
+
+        activity.Stop();
+        return new CallTargetReturn<TReturn>(returnValue);
     }
 }

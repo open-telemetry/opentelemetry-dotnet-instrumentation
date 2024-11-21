@@ -11,7 +11,13 @@ using OpenTelemetry.AutoInstrumentation.DuckTyping;
 
 namespace OpenTelemetry.AutoInstrumentation.Instrumentations.MongoDB.DuckTypes;
 
-internal interface IConnection
+/// <summary>
+/// MongoDB.Driver.Core.IConnection interface for duck-typing
+/// </summary>
+internal interface IConnection : IDuckType
 {
-    EndPoint EndPoint { get; }
+    /// <summary>
+    /// Gets the command object passed into the wire protocol
+    /// </summary>
+    EndPoint? EndPoint { get; }
 }

@@ -133,10 +133,10 @@ internal static class PackageVersionDefinitions
             TestApplicationName = "TestApplication.MongoDB",
             Versions = new List<PackageVersion>
             {
-                new("2.28.0"),
+                new("2.19.0"),
                 new("2.30.0"),
-                new("3.0.0"),
-                new("*")
+                new("3.0.0", supportedTargetFrameworks: new[] { "net8.0" }, supportedExecutionFrameworks: new[] { "net8.0" }),
+                new("*", supportedTargetFrameworks: new[] { "net8.0" }, supportedExecutionFrameworks: new[] { "net8.0" })
             }
         },
         new()

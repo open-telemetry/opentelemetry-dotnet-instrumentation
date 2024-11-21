@@ -2,6 +2,7 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
+    <TargetFrameworks Condition=" '$(IsCentos)' == '' ">net8.0;$(TargetFrameworks)</TargetFrameworks>
   </PropertyGroup>
 
   <PropertyGroup>
@@ -10,8 +11,17 @@
     <GenerateTargetFrameworkAttribute>false</GenerateTargetFrameworkAttribute>
   </PropertyGroup>
 
-  <ItemGroup>
+
+
+  <ItemGroup Condition=" '$(LibraryVersion)' != '' or '$(TargetFramework)' == 'net8.0' " >
     <PackageReference Include="MongoDB.Driver" VersionOverride="$(LibraryVersion)" />
+  </ItemGroup>
+
+  <ItemGroup Condition=" '$(LibraryVersion)' == '' and '$(TargetFramework)' != 'net8.0' " >
+    <PackageReference Include="MongoDB.Driver" VersionOverride="2.19.0" />
+  </ItemGroup>
+
+  <ItemGroup>
     <!-- Workaround! Microsoft.Extensions.Logging.Abstractions v8.0.0 is minimal version supported by auto instrumentation.
     MongoDB.Driver 2.18+ references older version. It prevents to load required version from Additional Dependencies store-->
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" VersionOverride="8.0.0" />

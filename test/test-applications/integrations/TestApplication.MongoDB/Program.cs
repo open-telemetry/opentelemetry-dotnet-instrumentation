@@ -14,6 +14,8 @@ public static class Program
         ConsoleHelper.WriteSplashScreen(args);
 
         var mongoPort = GetMongoPort(args);
+        var mongoDatabase = GetMongoDbName(args);
+        var mongoCollection = GetMongoCollectionName(args);
         var newDocument = new BsonDocument
         {
             { "name", "MongoDB" },
@@ -31,8 +33,8 @@ public static class Program
         var connectionString = $"mongodb://{Host()}:{mongoPort}";
 
         var client = new MongoClient(connectionString);
-        var database = client.GetDatabase("test-db");
-        var collection = database.GetCollection<BsonDocument>("employees");
+        var database = client.GetDatabase(mongoDatabase);
+        var collection = database.GetCollection<BsonDocument>(mongoCollection);
 
         Run(collection, newDocument);
         RunAsync(collection, newDocument).Wait();
@@ -95,5 +97,25 @@ public static class Program
         }
 
         return "27017";
+    }
+
+    private static string GetMongoDbName(string[] args)
+    {
+        if (args.Length > 2)
+        {
+            return args[2];
+        }
+
+        return "test-db";
+    }
+
+    private static string GetMongoCollectionName(string[] args)
+    {
+        if (args.Length > 3)
+        {
+            return args[3];
+        }
+
+        return "employees";
     }
 }

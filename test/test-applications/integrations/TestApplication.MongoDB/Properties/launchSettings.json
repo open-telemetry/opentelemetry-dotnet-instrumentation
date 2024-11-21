@@ -2,7 +2,7 @@
   "profiles": {
     "TestApplication.MongoDB": {
       "commandName": "Project",
-      "commandLineArgs": "--mongodb 27017",
+      "commandLineArgs": "--mongodb 27017 test-db employees",
       "environmentVariables": {
         "CORECLR_ENABLE_PROFILING": "1",
         "CORECLR_PROFILER": "{918728DD-259F-4A6A-AC2B-B85E1B658318}",
