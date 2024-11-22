@@ -7,9 +7,9 @@
   <ItemGroup>
     <PackageReference Include="MySqlConnector" VersionOverride="$(LibraryVersion)" />
     <PackageReference Include="System.Diagnostics.DiagnosticSource" />
-    <!-- Workaround! Microsoft.Extensions.Logging.Abstractions v.8.0.0 is minimal version supported by auto instrumentation.
+    <!-- Workaround! Microsoft.Extensions.Logging.Abstractions v.9.0.0 is minimal version supported by auto instrumentation.
     MySqlConnector references older version. It prevents to load required version from Additional Dependencies store-->
-    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" VersionOverride="8.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" VersionOverride="9.0.0" />
   </ItemGroup>
 
 </Project>

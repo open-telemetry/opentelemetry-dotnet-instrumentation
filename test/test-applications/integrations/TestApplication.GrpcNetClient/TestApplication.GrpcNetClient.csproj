@@ -5,9 +5,9 @@
     <PackageReference Include="Grpc.Net.Client" VersionOverride="$(LibraryVersion)" />
     <PackageReference Include="Grpc.Net.Client.Web" Condition="'$(TargetFramework)' == 'net462'" VersionOverride="$(LibraryVersion)" />
     <PackageReference Include="Grpc.Tools" Condition="'$(TargetFramework)' == 'net462'" />
-    <!-- Workaround! Microsoft.Extensions.Logging.Abstractions v.8.0.0 is minimal version supported by auto instrumentation.
+    <!-- Workaround! Microsoft.Extensions.Logging.Abstractions v.9.0.0 is minimal version supported by auto instrumentation.
     Grpc.Net.Client references older version. It prevents to load required version from Additional Dependencies store-->
-    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" VersionOverride="8.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" VersionOverride="9.0.0" />
     <PackageReference Include="System.Diagnostics.DiagnosticSource" />
   </ItemGroup>
 
