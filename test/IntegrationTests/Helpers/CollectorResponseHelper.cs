@@ -7,7 +7,7 @@ using System.Text;
 #endif
 using Google.Protobuf;
 
-#if NET6_0_OR_GREATER
+#if NET8_0_OR_GREATER
 using Microsoft.AspNetCore.Http;
 #endif
 
@@ -41,7 +41,7 @@ internal static class CollectorResponseHelper
     }
 #endif
 
-#if NET6_0_OR_GREATER
+#if NET8_0_OR_GREATER
     public static async Task GenerateEmptyProtobufResponseAsync<T>(this HttpContext ctx)
         where T : IMessage, new()
     {

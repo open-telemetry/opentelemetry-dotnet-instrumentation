@@ -23,7 +23,7 @@
         <dependency id="OpenTelemetry.AutoInstrumentation.Runtime.Managed" version="$NuGetPackageVersion$" />
         <dependency id="OpenTelemetry.AutoInstrumentation.Runtime.Native" version="$NuGetPackageVersion$" />
       </group>
-      <group targetFramework="net6.0">
+      <group targetFramework="net8.0">
         <dependency id="OpenTelemetry.AutoInstrumentation.BuildTasks" include="build" version="$NuGetPackageVersion$" />
         <dependency id="OpenTelemetry.AutoInstrumentation.Runtime.Managed" version="$NuGetPackageVersion$" />
         <dependency id="OpenTelemetry.AutoInstrumentation.Runtime.Native" version="$NuGetPackageVersion$" />

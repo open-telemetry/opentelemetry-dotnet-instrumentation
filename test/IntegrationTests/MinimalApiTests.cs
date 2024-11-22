@@ -1,7 +1,7 @@
 // Copyright The OpenTelemetry Authors
 // SPDX-License-Identifier: Apache-2.0
 
-#if NET6_0_OR_GREATER
+#if NET8_0_OR_GREATER
 
 using IntegrationTests.Helpers;
 using OpenTelemetry.Proto.Logs.V1;
@@ -23,10 +23,6 @@ public class MinimalApiTests : TestHelper
     [Trait("Category", "EndToEnd")]
     public async Task SubmitsLogsWithoutDuplicates(bool enableByteCodeInstrumentation, bool enableHostingStartupAssembly)
     {
-#if NET6_0
-        Skip.If(EnvironmentTools.IsMacOS(), "Known issue on MacOS.");
-#endif
-
         using var collector = new MockLogsCollector(Output);
         SetExporter(collector);
 

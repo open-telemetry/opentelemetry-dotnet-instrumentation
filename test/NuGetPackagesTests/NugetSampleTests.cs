@@ -148,10 +148,8 @@ public sealed class NugetSampleTests : TestHelper
 
 #if NETFRAMEWORK
         collector.Expect("OpenTelemetry.Instrumentation.Http.HttpWebRequest");
-#elif NET7_0_OR_GREATER
+#elif NET8_0_OR_GREATER
         collector.Expect("System.Net.Http");
-#else
-        collector.Expect("OpenTelemetry.Instrumentation.Http.HttpClient");
 #endif
 
         appLauncherAction();

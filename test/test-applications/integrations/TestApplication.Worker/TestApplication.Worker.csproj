@@ -1,8 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk.Worker">
 
     <PropertyGroup>
-      <TargetFrameworks>net7.0;net6.0</TargetFrameworks>
-      <TargetFrameworks Condition=" '$(IsCentos)' == '' ">net8.0;$(TargetFrameworks)</TargetFrameworks>
+    <TargetFrameworks>net9.0;net8.0</TargetFrameworks>
     </PropertyGroup>
 
     <ItemGroup>

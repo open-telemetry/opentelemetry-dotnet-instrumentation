@@ -41,7 +41,7 @@ internal static class EnvironmentConfigurationTracerHelper
                 TracerInstrumentation.WcfClient => AddWcfIfNeeded(builder, ref wcfInstrumentationAdded),
                 TracerInstrumentation.OracleMda => Wrappers.AddOracleMdaInstrumentation(builder, lazyInstrumentationLoader, settings),
                 TracerInstrumentation.RabbitMq => builder.AddSource("RabbitMQ.Client.Publisher").AddSource("RabbitMQ.Client.Subscriber"),
-#if NET6_0_OR_GREATER
+#if NET8_0_OR_GREATER
                 TracerInstrumentation.AspNetCore => Wrappers.AddAspNetCoreInstrumentation(builder, pluginManager, lazyInstrumentationLoader, settings),
                 TracerInstrumentation.MassTransit => builder.AddSource("MassTransit"),
                 TracerInstrumentation.MySqlData => builder.AddSource("connector-net"),
@@ -136,19 +136,11 @@ internal static class EnvironmentConfigurationTracerHelper
         }
 #endif
 
-#if NET6_0_OR_GREATER
+#if NET8_0_OR_GREATER
         [MethodImpl(MethodImplOptions.NoInlining)]
         public static TracerProviderBuilder AddAspNetCoreInstrumentation(TracerProviderBuilder builder, PluginManager pluginManager, LazyInstrumentationLoader lazyInstrumentationLoader, TracerSettings tracerSettings)
         {
             DelayedInitialization.Traces.AddAspNetCore(lazyInstrumentationLoader, pluginManager, tracerSettings);
-
-            if (Environment.Version.Major == 6)
-            {
-                return builder
-                    .AddSource("OpenTelemetry.Instrumentation.AspNetCore")
-                    .AddLegacySource("Microsoft.AspNetCore.Hosting.HttpRequestIn");
-            }
-
             return builder.AddSource("Microsoft.AspNetCore");
         }
 
@@ -208,7 +200,7 @@ internal static class EnvironmentConfigurationTracerHelper
                 .AddLegacySource("Quartz.Job.Veto");
         }
 
-#if NET6_0_OR_GREATER
+#if NET8_0_OR_GREATER
         [MethodImpl(MethodImplOptions.NoInlining)]
         public static TracerProviderBuilder AddEntityFrameworkCoreInstrumentation(TracerProviderBuilder builder, PluginManager pluginManager, LazyInstrumentationLoader lazyInstrumentationLoader, TracerSettings tracerSettings)
         {

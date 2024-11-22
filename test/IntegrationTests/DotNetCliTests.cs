@@ -44,7 +44,7 @@ public sealed class DotNetCliTests : TestHelper, IDisposable
 
         // Stop all build servers to ensure user like experience.
         // Currently there is an issue trying to launch VBCSCompiler background server.
-        RunDotNetCli("build-server shutdown", successMessage: "MSBuild server shut down successfully.");
+        RunDotNetCli("build-server shutdown");
 
         var tfm = $"net{Environment.Version.Major}.0";
         RunDotNetCli($"new console --framework {tfm}");
@@ -74,7 +74,7 @@ Console.WriteLine(response.StatusCode);
         File.WriteAllText("Program.cs", ProgramContent);
     }
 
-    private void RunDotNetCli(string arguments, string successMessage = "")
+    private void RunDotNetCli(string arguments)
     {
         Output.WriteLine($"Running: {DotNetCli} {arguments}");
 
@@ -83,7 +83,7 @@ Console.WriteLine(response.StatusCode);
 
         process.Should().NotBeNull();
 
-        bool processTimeout = !process!.WaitForExit((int)TestTimeout.ProcessExit.TotalMilliseconds);
+        var processTimeout = !process!.WaitForExit((int)TestTimeout.ProcessExit.TotalMilliseconds);
         if (processTimeout)
         {
             process.Kill();
@@ -94,14 +94,7 @@ Console.WriteLine(response.StatusCode);
         Output.WriteResult(helper);
 
         processTimeout.Should().BeFalse("Test application timed out");
-        if (!string.IsNullOrEmpty(successMessage))
-        {
-            helper.StandardOutput.Should().Contain(successMessage, "Test application did not output expected message");
-        }
-        else
-        {
-            process.ExitCode.Should().Be(0, "Test application exited with non-zero exit code");
-        }
+        process.ExitCode.Should().Be(0, "Test application exited with non-zero exit code");
     }
 
     private void RunAppWithDotNetCliAndAssertHttpSpans(string arguments)
@@ -109,11 +102,7 @@ Console.WriteLine(response.StatusCode);
         var collector = new MockSpansCollector(Output);
         SetExporter(collector);
 
-#if NET7_0_OR_GREATER
         collector.Expect("System.Net.Http");
-#else
-        collector.Expect("OpenTelemetry.Instrumentation.Http.HttpClient");
-#endif
 
         RunDotNetCli(arguments);
 

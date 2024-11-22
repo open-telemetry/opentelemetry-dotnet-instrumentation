@@ -44,15 +44,11 @@ partial class Build
     private static readonly IEnumerable<TargetFramework> TargetFrameworks = new[]
     {
         TargetFramework.NET462,
-        TargetFramework.NET6_0
+        TargetFramework.NET8_0
     };
 
     private static readonly IEnumerable<TargetFramework> TestFrameworks = TargetFrameworks
-        .Concat(TargetFramework.NET7_0
-#if  NET8_0_OR_GREATER
-            , TargetFramework.NET8_0
-#endif
-            );
+        .Concat(TargetFramework.NET9_0);
 
     Target CreateRequiredDirectories => _ => _
         .Unlisted()
@@ -291,15 +287,15 @@ partial class Build
                 .SetFramework(TargetFramework.NETCore3_1)
                 .SetOutput(TracerHomeDirectory / MapToFolderOutput(TargetFramework.NETCore3_1)));
 
-            // AutoInstrumentationLoader publish is needed only for .NET 6.0 to support load from AutoInstrumentationStartupHook.
+            // AutoInstrumentationLoader publish is needed only for .NET 8.0 to support load from AutoInstrumentationStartupHook.
             DotNetPublish(s => s
                 .SetProject(Solution.GetProjectByName(Projects.AutoInstrumentationLoader))
                 .SetConfiguration(BuildConfiguration)
                 .SetTargetPlatformAnyCPU()
                 .EnableNoBuild()
                 .SetNoRestore(NoRestore)
-                .SetFramework(TargetFramework.NET6_0)
-                .SetOutput(TracerHomeDirectory / MapToFolderOutput(TargetFramework.NET6_0)));
+                .SetFramework(TargetFramework.NET8_0)
+                .SetOutput(TracerHomeDirectory / MapToFolderOutput(TargetFramework.NET8_0)));
 
             DotNetPublish(s => s
                 .SetProject(Solution.GetProjectByName(Projects.AutoInstrumentationAspNetCoreBootstrapper))
@@ -307,8 +303,8 @@ partial class Build
                 .SetTargetPlatformAnyCPU()
                 .EnableNoBuild()
                 .SetNoRestore(NoRestore)
-                .SetFramework(TargetFramework.NET6_0)
-                .SetOutput(TracerHomeDirectory / MapToFolderOutput(TargetFramework.NET6_0)));
+                .SetFramework(TargetFramework.NET8_0)
+                .SetOutput(TracerHomeDirectory / MapToFolderOutput(TargetFramework.NET8_0)));
 
             RemoveFilesInNetFolderAvailableInAdditionalStore();
 
@@ -593,14 +589,9 @@ partial class Build
                     // To allow roll forward for applications, like Roslyn, that target one tfm
                     // but have a later runtime move the libraries under the original tfm folder
                     // to the latest one.
-                    if (folderRuntimeName == TargetFramework.NET6_0)
+                    if (folderRuntimeName == TargetFramework.NET8_0 || folderRuntimeName == TargetFramework.NET9_0)
                     {
-                        depsJson.RollFrameworkForward(TargetFramework.NET6_0, TargetFramework.NET8_0, architectureStores);
-                    }
-                    else if (folderRuntimeName == TargetFramework.NET7_0 || folderRuntimeName == TargetFramework.NET8_0)
-                    {
-                        depsJson.RollFrameworkForward(TargetFramework.NET6_0, TargetFramework.NET8_0, architectureStores);
-                        depsJson.RollFrameworkForward(TargetFramework.NET7_0, TargetFramework.NET8_0, architectureStores);
+                        depsJson.RollFrameworkForward(TargetFramework.NET8_0, TargetFramework.NET9_0, architectureStores);
                     }
 
                     // Write the updated deps.json file.

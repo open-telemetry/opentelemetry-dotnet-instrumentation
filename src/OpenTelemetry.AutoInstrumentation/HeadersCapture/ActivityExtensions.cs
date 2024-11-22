@@ -4,7 +4,7 @@
 using System.Collections.Specialized;
 using System.Diagnostics;
 using System.Net.Http.Headers;
-#if NET6_0_OR_GREATER
+#if NET8_0_OR_GREATER
 using Microsoft.AspNetCore.Http;
 #endif
 
@@ -40,7 +40,7 @@ internal static class ActivityExtensions
         }
     }
 
-#if NET6_0_OR_GREATER
+#if NET8_0_OR_GREATER
     public static void AddHeadersAsTags(this Activity activity, IReadOnlyList<AdditionalTag> additionalTags, IHeaderDictionary headers)
     {
         if (!activity.IsAllDataRequested)

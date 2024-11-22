@@ -34,7 +34,7 @@ public static partial class LibraryVersion
             new List<PackageBuildInfo>
             {
                 new("6.0.35"),
-                new("8.0.10", supportedFrameworks: new string[] {"net8.0"}),
+                new("8.0.10"),
             }
         },
         {
@@ -43,8 +43,8 @@ public static partial class LibraryVersion
             {
                 new("6.0.3"),
                 new("7.0.0"),
-                new("8.0.0", supportedFrameworks: new string[] {"net8.0"}),
-                new("8.0.2", supportedFrameworks: new string[] {"net8.0"}),
+                new("8.0.0"),
+                new("8.0.2"),
             }
         },
         {
@@ -121,8 +121,8 @@ public static partial class LibraryVersion
             new List<PackageBuildInfo>
             {
                 new("8.2.4"),
-                new("9.1.0", supportedFrameworks: new string[] {"net8.0"}),
-                new("9.2.3", supportedFrameworks: new string[] {"net8.0"}),
+                new("9.1.0", supportedFrameworks: new string[] {"net9.0","net8.0"}),
+                new("9.2.3", supportedFrameworks: new string[] {"net9.0","net8.0"}),
             }
         },
         {
@@ -172,7 +172,7 @@ public static partial class LibraryVersion
             {
                 new("4.10.2"),
                 new("6.2.0"),
-                new("8.0.0", supportedFrameworks: new string[] {"net8.0"}),
+                new("8.0.0", supportedFrameworks: new string[] {"net9.0","net8.0"}),
             }
         },
         {
