@@ -5,8 +5,7 @@ RUN wget https://packages.microsoft.com/config/debian/12/packages-microsoft-prod
     rm packages-microsoft-prod.deb && \
     apt-get update && \
     apt-get install -y \
-        dotnet-sdk-6.0 \
-        dotnet-sdk-7.0 \
+        dotnet-sdk-8.0 \
         cmake \
         clang \
         make

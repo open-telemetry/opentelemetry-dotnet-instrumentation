@@ -8,7 +8,7 @@ namespace OpenTelemetry.AutoInstrumentation.Configurations;
 /// </summary>
 internal enum ResourceDetector
 {
-#if NET6_0_OR_GREATER
+#if NET8_0_OR_GREATER
     /// <summary>
     /// Container resource detector.
     /// </summary>

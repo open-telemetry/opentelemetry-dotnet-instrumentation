@@ -20,7 +20,7 @@ internal static class DelayedInitialization
         }
 #endif
 
-#if NET6_0_OR_GREATER
+#if NET8_0_OR_GREATER
         [MethodImpl(MethodImplOptions.NoInlining)]
         public static void AddAspNetCore(LazyInstrumentationLoader lazyInstrumentationLoader, PluginManager pluginManager, TracerSettings tracerSettings)
         {
@@ -46,7 +46,7 @@ internal static class DelayedInitialization
             new SqlClientInitializer(lazyInstrumentationLoader, pluginManager, tracerSettings);
         }
 
-#if NET6_0_OR_GREATER
+#if NET8_0_OR_GREATER
 
         [MethodImpl(MethodImplOptions.NoInlining)]
         public static void AddEntityFrameworkCore(LazyInstrumentationLoader lazyInstrumentationLoader, PluginManager pluginManager, TracerSettings tracerSettings)
@@ -84,7 +84,7 @@ internal static class DelayedInitialization
         }
 #endif
 
-#if NET6_0_OR_GREATER
+#if NET8_0_OR_GREATER
         [MethodImpl(MethodImplOptions.NoInlining)]
         public static void AddAspNetCore(LazyInstrumentationLoader lazyInstrumentationLoader)
         {

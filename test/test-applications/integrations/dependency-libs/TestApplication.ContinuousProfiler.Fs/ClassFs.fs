@@ -9,5 +9,5 @@ open System.Threading;
 module ClassFs =
     let methodFs testParam =
         Console.WriteLine("Thread.Sleep - starting " + testParam)
-        Thread.Sleep(TimeSpan.FromSeconds(5)) // Give a chance for the continuous profiler to collect a profile.
+        Thread.Sleep(TimeSpan.FromSeconds(5.0)) // Give a chance for the continuous profiler to collect a profile.
         Console.WriteLine("Thread.Sleep - finished")

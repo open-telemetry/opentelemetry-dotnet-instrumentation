@@ -337,7 +337,7 @@ Important environment variables include:
 
 - The OpenTelemetry .NET Automatic Instrumentation defaults to `http/protobuf`,
   which differs from the OpenTelemetry .NET SDK default value of `grpc`.
-- On .NET 6 and higher, the application must reference [`Grpc.Net.Client`](https://www.nuget.org/packages/Grpc.Net.Client/)
+- On .NET 8 and higher, the application must reference [`Grpc.Net.Client`](https://www.nuget.org/packages/Grpc.Net.Client/)
   to use the `grpc` OTLP exporter protocol. For example, by adding
   `<PackageReference Include="Grpc.Net.Client" Version="2.65.0" />` to the
   `.csproj` file.
@@ -414,7 +414,7 @@ Important environment variables include:
 RuleEngine is a feature that validates OpenTelemetry API, SDK,
 Instrumentation, and Exporter assemblies for unsupported scenarios,
 ensuring that OpenTelemetry automatic instrumentation is more
-stable by backing of instead of crashing. It works on .NET 6 and higher.
+stable by backing of instead of crashing. It works on .NET 8 and higher.
 
 Enable RuleEngine only during the first run of the application,
 or when the deployment changes or the Automatic Instrumentation

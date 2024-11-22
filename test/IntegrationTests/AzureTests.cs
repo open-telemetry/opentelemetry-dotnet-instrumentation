@@ -29,10 +29,8 @@ public class AzureTests : TestHelper
         collector.Expect("Azure.Core.Http");
         collector.Expect("Azure.Storage.Blobs.BlobContainerClient");
 
-#if NET7_0_OR_GREATER
+#if NET8_0_OR_GREATER
         collector.Expect("System.Net.Http");
-#elif NET6_0_OR_GREATER
-        collector.Expect("OpenTelemetry.Instrumentation.Http.HttpClient");
 #elif NETFRAMEWORK
         // On .NET Framework the "OpenTelemetry.Instrumentation.Http.HttpWebRequest"
         // ends up being suppressed by the addition of headers via the Azure instrumentation

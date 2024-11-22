@@ -148,7 +148,7 @@ public sealed class InstrumentationTargetTests : TestHelper
 
         // Always create the app targeting a fixed framework version to simplify
         // text replacement in the project file.
-        RunDotNetCli($"new console --framework net6.0").Should().Be(0);
+        RunDotNetCli($"new console --framework net8.0").Should().Be(0);
 
         ChangeProjectDefaultsAndTargetFramework(tfm);
 
@@ -191,7 +191,7 @@ public sealed class InstrumentationTargetTests : TestHelper
     {
         var projectFile = $"{TargetAppName}.csproj";
         var projectText = File.ReadAllText(projectFile);
-        projectText = projectText.Replace("<TargetFramework>net6.0</TargetFramework>", $"<TargetFramework>{tfm}</TargetFramework>");
+        projectText = projectText.Replace("<TargetFramework>net8.0</TargetFramework>", $"<TargetFramework>{tfm}</TargetFramework>");
         projectText = projectText.Replace("<ImplicitUsings>enable</ImplicitUsings>", $"<ImplicitUsings>disable</ImplicitUsings>");
         projectText = projectText.Replace("<Nullable>enable</Nullable>", $"<Nullable>disable</Nullable>");
         File.WriteAllText(projectFile, projectText);

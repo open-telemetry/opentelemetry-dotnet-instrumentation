@@ -25,12 +25,10 @@ public class Startup
     public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
     {
         app
-#if NET8_0_OR_GREATER
             .UseRouting() // enables metrics for Microsoft.AspNetCore.Routing in .NET8+
             .UseExceptionHandler(new ExceptionHandlerOptions { ExceptionHandler = _ => Task.CompletedTask }) // together with call to /exception enables metrics for Microsoft.AspNetCore.Diagnostics for .NET8+
             .UseRateLimiter() // enables metrics for Microsoft.AspNetCore.RateLimiting in .NET8+
             .UseEndpoints(x => x.MapHub<TestHub>("/signalr")) // together with connection to SignalR Hub enables metrics for Microsoft.AspNetCore.Http.Connections for .NET8
-#endif
             .Map(
                 "/test",
                 configuration => configuration.Run(async context =>

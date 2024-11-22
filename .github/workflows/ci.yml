@@ -31,7 +31,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        test-tfm: [ net8.0, net7.0, net6.0, net462 ]
+        test-tfm: [ net9.0, net8.0, net462 ]
         machine: [ windows-2022, ubuntu-20.04, macos-13, otel-linux-arm64 ]
         exclude:
           - test-tfm: net462
@@ -66,9 +66,8 @@ jobs:
         uses: actions/setup-dotnet@3e891b0cb619bf60e2c25674b222b8940e2c1c25 # tag: v4.1.0
         with:
           dotnet-version: | 
-            6.0.427
-            7.0.410
-            8.0.403
+            8.0.404
+            9.0.100
 
       - name: Check for NuGet packages cache
         uses: actions/cache@6849a6489940f00c2f30c0fb92c6274307ccb58a # tag: v4.1.2
@@ -131,9 +130,8 @@ jobs:
         uses: actions/setup-dotnet@3e891b0cb619bf60e2c25674b222b8940e2c1c25 # tag: v4.1.0
         with:
           dotnet-version: | 
-            6.0.427
-            7.0.410
-            8.0.403
+            8.0.404
+            9.0.100
 
       - name: Check for NuGet packages cache
         uses: actions/cache@6849a6489940f00c2f30c0fb92c6274307ccb58a # tag: v4.1.2
@@ -171,9 +169,8 @@ jobs:
         uses: actions/setup-dotnet@3e891b0cb619bf60e2c25674b222b8940e2c1c25 # tag: v4.1.0
         with:
           dotnet-version: | 
-            6.0.427
-            7.0.410
-            8.0.403
+            8.0.404
+            9.0.100
 
       - name: Check for NuGet packages cache
         uses: actions/cache@6849a6489940f00c2f30c0fb92c6274307ccb58a # tag: v4.1.2
@@ -276,9 +273,8 @@ jobs:
         uses: actions/setup-dotnet@3e891b0cb619bf60e2c25674b222b8940e2c1c25 # tag: v4.1.0
         with:
           dotnet-version: | 
-            6.0.427
-            7.0.410
-            8.0.403
+            8.0.404
+            9.0.100
 
       - name: Check for NuGet packages cache
         uses: actions/cache@6849a6489940f00c2f30c0fb92c6274307ccb58a # tag: v4.1.2
