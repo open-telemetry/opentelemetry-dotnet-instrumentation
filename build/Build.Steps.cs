@@ -365,7 +365,7 @@ partial class Build
 
             DotNetRun(s => s
                 .SetProjectFile(verifier)
-                .SetApplicationArguments($"--verify {RootDirectory}"));
+                .SetApplicationArguments("--verify", RootDirectory));
         });
 
     Target GenerateLibraryVersionFiles => _ => _
