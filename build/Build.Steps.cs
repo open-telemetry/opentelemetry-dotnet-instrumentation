@@ -79,7 +79,7 @@ partial class Build
                         .SetVerbosity(DotNetVerbosity.normal)
                         .SetProperty("configuration", BuildConfiguration.ToString())
                         .SetPlatform(Platform)
-                        .When(!string.IsNullOrEmpty(NuGetPackagesDirectory), o => o.SetPackageDirectory(NuGetPackagesDirectory));
+                        .When(_ => !string.IsNullOrEmpty(NuGetPackagesDirectory), o => o.SetPackageDirectory(NuGetPackagesDirectory));
 
                 if (LibraryVersion.TryGetVersions(project.Name, Platform, out var libraryVersions))
                 {
@@ -162,7 +162,7 @@ partial class Build
                         .SetNoRestore(true)  // project w/ packages.config can't do the restore via dotnet CLI
                         .SetPlatform(Platform)
                         .SetConfiguration(BuildConfiguration)
-                        .When(TestTargetFramework != TargetFramework.NOT_SPECIFIED,
+                        .When(_ => TestTargetFramework != TargetFramework.NOT_SPECIFIED,
                             x => x.SetFramework(TestTargetFramework)));
 
                     continue;
@@ -192,7 +192,7 @@ partial class Build
                         .SetConfiguration(BuildConfiguration)
                         .SetPlatform(Platform)
                         .SetNoRestore(NoRestore)
-                        .When(TestTargetFramework != TargetFramework.NOT_SPECIFIED,
+                        .When(_ =>TestTargetFramework != TargetFramework.NOT_SPECIFIED,
                             s => s.SetFramework(actualTestTfm));
 
                 if (LibraryVersion.Versions.TryGetValue(app.Name, out var libraryVersions))
@@ -221,7 +221,7 @@ partial class Build
                     .SetProjectFile(project)
                     .SetConfiguration(BuildConfiguration)
                     .SetNoRestore(NoRestore)
-                    .When(TestTargetFramework != TargetFramework.NOT_SPECIFIED,
+                    .When(_ => TestTargetFramework != TargetFramework.NOT_SPECIFIED,
                         s => s.SetFramework(TestTargetFramework)));
             }
         });
@@ -455,7 +455,7 @@ partial class Build
                 .SetProjectFile(Solution.GetProjectByName(Projects.Mocks.AutoInstrumentationMock))
                 .SetConfiguration(BuildConfiguration)
                 .SetNoRestore(NoRestore)
-                .When(TestTargetFramework != TargetFramework.NOT_SPECIFIED,
+                .When(_ => TestTargetFramework != TargetFramework.NOT_SPECIFIED,
                     s => s.SetFramework(TestTargetFramework))
             );
         });
@@ -502,7 +502,7 @@ partial class Build
                     .SetNoRestore(NoRestore)
                     .SetProcessEnvironmentVariable("OTEL_DOTNET_AUTO_LOG_DIRECTORY", ProfilerTestLogs)
                     .EnableNoBuild()
-                    .When(TestTargetFramework != TargetFramework.NOT_SPECIFIED,
+                    .When(_ => TestTargetFramework != TargetFramework.NOT_SPECIFIED,
                         x => x.SetFramework(TestTargetFramework))
                     .CombineWith(unitTestProjects, (s, project) => s
                         .EnableTrxLogOutput(GetResultsDirectory(project))
@@ -531,7 +531,7 @@ partial class Build
                     .EnableTrxLogOutput(GetResultsDirectory(project))
                     .SetTargetPath(project)
                     .SetRestore(!NoRestore)
-                    .When(TestTargetFramework != TargetFramework.NOT_SPECIFIED,
+                    .When(_ => TestTargetFramework != TargetFramework.NOT_SPECIFIED,
                         s => s.SetProperty("TargetFramework", TestTargetFramework.ToString()))
                     .RunTests()
                 );
@@ -713,7 +713,7 @@ partial class Build
                     .EnableTrxLogOutput(GetResultsDirectory(project))
                     .SetProjectFile(project)
                     .SetFilter(AndFilter(TestNameFilter(), testName))
-                    .When(TestTargetFramework != TargetFramework.NOT_SPECIFIED, s => s.SetFramework(TestTargetFramework))
+                    .When(_ => TestTargetFramework != TargetFramework.NOT_SPECIFIED, s => s.SetFramework(TestTargetFramework))
                     .SetProcessEnvironmentVariable("OTEL_DOTNET_AUTO_LOG_DIRECTORY", ProfilerTestLogs)
                     .SetProcessEnvironmentVariable("BOOSTRAPPING_TESTS", "true"));
             }
@@ -734,7 +734,7 @@ partial class Build
                 .SetTargetPath(project)
                 .SetSolutionDirectory(Solution.Directory)
                 .SetVerbosity(NuGetVerbosity.Normal)
-                .When(!string.IsNullOrEmpty(NuGetPackagesDirectory), o =>
+                .When(_ => !string.IsNullOrEmpty(NuGetPackagesDirectory), o =>
                     o.SetPackagesDirectory(NuGetPackagesDirectory)));
         }
     }
