@@ -39,6 +39,7 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
   - `OpenTelemetry.Instrumentation.Wcf` from `1.0.0-rc.17` to `1.0.0-rc.18`,
 - .NET Framework only, following packages updated
   - `Google.Protobuf` updated from `3.28.2` to `3.28.3`,
+  - `Grpc.Core.Api` from `2.66.0` to `2.67.0`,
   - `Microsoft.Extensions.DependencyInjection` from `8.0.0` to `8.0.1`,
   - `Microsoft.Extensions.DependencyInjection.Abstractions` from `8.0.1` to `8.0.2`,
   - `System.Diagnostics.DiagnosticSource` from `8.0.0` to `8.0.1`,
