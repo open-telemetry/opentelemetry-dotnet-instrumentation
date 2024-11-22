@@ -11,7 +11,7 @@
 
   <ItemGroup Condition=" '$(LibraryVersion)' == '' and '$(TargetFramework)' != 'net8.0' " >
     <PackageReference Include="System.ServiceModel.Http" VersionOverride="6.2.0" />
-    <PackageReference Include="System.ServiceModel.NetTcp" VersionOverride="6.2.0" />
+    <PackageReference Include="System.ServiceModel.NetTcp" VersionOverride="8.1.0" />
   </ItemGroup>
 
   <ItemGroup>
