@@ -29,9 +29,10 @@ internal class StartupHook
             LoaderAssemblyLocation = GetLoaderAssemblyLocation();
 
             var ruleEngine = new RuleEngine();
-            if (!ruleEngine.ValidateRules())
+            
+            if (!ruleEngine.ValidateRules(out var failedRuleMessage))
             {
-                throw new Exception("Rule Engine Failure: One or more rules failed validation. Automatic Instrumentation won't be loaded.");
+                throw new Exception($"Rule Engine Failure: {failedRuleMessage}. Automatic Instrumentation won't be loaded.");
             }
 
             Logger.Information("Initialization.");

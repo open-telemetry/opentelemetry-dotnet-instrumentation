@@ -31,13 +31,14 @@ internal class RuleEngine
 
     internal bool ValidateRules()
     {
-        var result = true;
+        failedRuleMessage = string.Empty;
 
-        // Single rule failure will stop the execution.
+        // Valida regras obrigatórias.
         foreach (var rule in _mandatoryRules)
         {
             if (!EvaluateRule(rule))
             {
+                failedRuleMessage = $"Mandatory rule failed: {rule.GetType().Name}";
                 return false;
             }
         }
@@ -45,19 +46,19 @@ internal class RuleEngine
         if (bool.TryParse(Environment.GetEnvironmentVariable("OTEL_DOTNET_AUTO_RULE_ENGINE_ENABLED"), out var shouldTrack) && !shouldTrack)
         {
             Logger.Information($"OTEL_DOTNET_AUTO_RULE_ENGINE_ENABLED is set to false, skipping rule engine validation.");
-            return result;
+            return true;
         }
 
-        // All the rules are validated here.
+        // Valida regras opcionais.
         foreach (var rule in _optionalRules.Value)
         {
             if (!EvaluateRule(rule))
             {
-                result = false;
+                Logger.Warning($"Optional rule failed: {rule.GetType().Name}");
             }
         }
 
-        return result;
+        return true;
     }
 
     private static bool EvaluateRule(Rule rule)
