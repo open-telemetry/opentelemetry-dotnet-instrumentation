@@ -15,6 +15,9 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 
 ### Changed
 
+- Kafka and RabbitMQ 6 tags `otel.status_code` and `otel.status_description` are
+  replaced by native fields `Status` and `StatusDescription`.
+
 #### Dependency updates
 
 ### Deprecated
