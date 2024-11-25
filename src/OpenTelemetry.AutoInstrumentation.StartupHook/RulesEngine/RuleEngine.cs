@@ -33,7 +33,7 @@ internal class RuleEngine
     {
         failedRuleMessage = string.Empty;
 
-        // Valida regras obrigatórias.
+        // Single rule failure will stop the execution.
         foreach (var rule in _mandatoryRules)
         {
             if (!EvaluateRule(rule))
@@ -49,7 +49,7 @@ internal class RuleEngine
             return true;
         }
 
-        // Valida regras opcionais.
+        // All the rules are validated here.
         foreach (var rule in _optionalRules.Value)
         {
             if (!EvaluateRule(rule))
