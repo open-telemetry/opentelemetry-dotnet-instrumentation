@@ -43,6 +43,9 @@ public class TransientDependenciesTests
             .Select(x => x.Name)
             .ToList();
 
+        // TODO automate detecting new transitive dependencies https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/issues/3817
+        generatedDeps.Add("System.IO.Pipelines");
+
         File.Delete(projectGenPath);
 
         using (new AssertionScope())
