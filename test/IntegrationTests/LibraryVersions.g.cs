@@ -105,7 +105,7 @@ public static partial class LibraryVersion
 #if DEFAULT_TEST_PACKAGE_VERSIONS
             theoryData.Add(string.Empty);
 #else
-            theoryData.Add("2.0.10");
+            theoryData.Add("2.0.13");
             theoryData.Add("3.0.3");
 #endif
             return theoryData;

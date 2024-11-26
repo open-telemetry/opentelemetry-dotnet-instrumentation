@@ -189,16 +189,23 @@ internal static class OpenTelemetryLogHelpers
         var exceptionParam = Expression.Parameter(typeof(Exception), "exception");
         var propertiesParam = Expression.Parameter(typeof(IDictionary), "properties");
 
+        var logRecordDataVar = Expression.Variable(logRecordDataType, "logRecordData");
+        var logRecordAttributesVar = Expression.Variable(logRecordAttributesListType, "logRecordAttributes");
+
         var instanceCasted = Expression.Convert(instance, loggerType);
 
         var methodInfo = loggerType.GetMethod("EmitLog", BindingFlags.Instance | BindingFlags.Public, null, new[] { logRecordDataType.MakeByRefType(), logRecordAttributesListType.MakeByRefType() }, null);
 
-        var logRecordAttributes = BuildLogRecordAttributes(logRecordAttributesListType, exceptionParam, propertiesParam);
         var logRecord = BuildLogRecord(logRecordDataType, typeof(LoggerProvider).Assembly.GetType("OpenTelemetry.Logs.LogRecordSeverity")!, bodyParam, timestampParam, severityTextParam, severityLevelParam);
+        var logRecordAttributes = BuildLogRecordAttributes(logRecordAttributesListType, exceptionParam, propertiesParam);
 
-        var emitLog = Expression.Call(instanceCasted, methodInfo!, logRecord, logRecordAttributes);
+        var block = Expression.Block(
+            new[] { logRecordDataVar, logRecordAttributesVar },
+            Expression.Assign(logRecordDataVar, logRecord),
+            Expression.Assign(logRecordAttributesVar, logRecordAttributes),
+            Expression.Call(instanceCasted, methodInfo!, logRecordDataVar, logRecordAttributesVar));
 
-        var expr = Expression.Lambda<EmitLog>(emitLog, instance, bodyParam, timestampParam, severityTextParam, severityLevelParam, exceptionParam, propertiesParam);
+        var expr = Expression.Lambda<EmitLog>(block, instance, bodyParam, timestampParam, severityTextParam, severityLevelParam, exceptionParam, propertiesParam);
 
         return expr.Compile();
     }
