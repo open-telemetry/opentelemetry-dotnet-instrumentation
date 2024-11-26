@@ -163,17 +163,17 @@ internal static partial class InstrumentationDefinitions
         const string tracesHeader = @"        // Traces
         var tracerSettings = Instrumentation.TracerSettings.Value;
         if (tracerSettings.TracesEnabled)";
-        GenerateInstrumentationForSignal(tracesByIntegrationName, sb, tracesHeader, "tracerSettings.EnabledInstrumentations.Contains(TracerInstrumentation");
+        GenerateInstrumentationForSignal(tracesByIntegrationName, sb, tracesHeader, _ => "tracerSettings.EnabledInstrumentations.Contains(TracerInstrumentation");
 
         const string logsHeader = @"        // Logs
         var logSettings = Instrumentation.LogSettings.Value;
         if (logSettings.LogsEnabled)";
-        GenerateInstrumentationForSignal(logsByIntegrationName, sb, logsHeader, "logSettings.EnabledInstrumentations.Contains(LogInstrumentation");
+        GenerateInstrumentationForSignal(logsByIntegrationName, sb, logsHeader, (integrationName) => GetConditionForLogIntegration(integrationName));
 
         const string metricsHeader = @"        // Metrics
         var metricSettings = Instrumentation.MetricSettings.Value;
         if (metricSettings.MetricsEnabled)";
-        GenerateInstrumentationForSignal(metricsByIntegrationName, sb, metricsHeader, "metricSettings.EnabledInstrumentations.Contains(MetricInstrumentation");
+        GenerateInstrumentationForSignal(metricsByIntegrationName, sb, metricsHeader, _ => "metricSettings.EnabledInstrumentations.Contains(MetricInstrumentation");
 
         sb.AppendLine(@"        return nativeCallTargetDefinitions.ToArray();
     }
@@ -182,7 +182,19 @@ internal static partial class InstrumentationDefinitions
         return sb.ToString();
     }
 
-    private static void GenerateInstrumentationForSignal(Dictionary<string, List<(string IntegrationType, TargetToGenerate Target)>> integrations, StringBuilder sb, string signalHeader, string conditionPrefix)
+    private static string GetConditionForLogIntegration(string integrationName)
+    {
+        // Ensure either ILogger, or logging library specific integration is enabled, but not both at the same time.
+        var baseCondition = "logSettings.EnabledInstrumentations.Contains(LogInstrumentation";
+        if (integrationName == "ILogger")
+        {
+            return baseCondition;
+        }
+
+        return "!logSettings.EnabledInstrumentations.Contains(LogInstrumentation.ILogger) && " + baseCondition;
+    }
+
+    private static void GenerateInstrumentationForSignal(Dictionary<string, List<(string IntegrationType, TargetToGenerate Target)>> integrations, StringBuilder sb, string signalHeader, Func<string, string> conditionPrefix)
     {
         if (integrations.Count > 0)
         {
@@ -195,7 +207,7 @@ internal static partial class InstrumentationDefinitions
         }
     }
 
-    private static void GenerateIntegrations(Dictionary<string, List<(string IntegrationType, TargetToGenerate Target)>> integrationsByName, StringBuilder sb, string conditionPrefix)
+    private static void GenerateIntegrations(Dictionary<string, List<(string IntegrationType, TargetToGenerate Target)>> integrationsByName, StringBuilder sb, Func<string, string> conditionPrefix)
     {
         bool firstLine = true;
         foreach (var group in integrationsByName)
@@ -214,7 +226,7 @@ internal static partial class InstrumentationDefinitions
             sb.AppendFormat(
                 @"            if ({0}.{1}))
             {{",
-                conditionPrefix,
+                conditionPrefix(group.Key),
                 group.Key);
             sb.AppendLine();
 

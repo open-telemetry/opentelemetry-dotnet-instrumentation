@@ -4,6 +4,7 @@
 #if NET8_0_OR_GREATER
 using System.Diagnostics;
 #endif
+using System.Reflection;
 using OpenTelemetry.AutoInstrumentation.Configurations;
 #if NET8_0_OR_GREATER
 using OpenTelemetry.AutoInstrumentation.ContinuousProfiler;
@@ -12,7 +13,9 @@ using OpenTelemetry.AutoInstrumentation.Diagnostics;
 using OpenTelemetry.AutoInstrumentation.Loading;
 using OpenTelemetry.AutoInstrumentation.Logging;
 using OpenTelemetry.AutoInstrumentation.Plugins;
+using OpenTelemetry.Logs;
 using OpenTelemetry.Metrics;
+using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
 
 namespace OpenTelemetry.AutoInstrumentation;
@@ -31,11 +34,14 @@ internal static class Instrumentation
 
     private static TracerProvider? _tracerProvider;
     private static MeterProvider? _meterProvider;
+
     private static PluginManager? _pluginManager;
 
 #if NET8_0_OR_GREATER
     private static ContinuousProfilerProcessor? _profilerProcessor;
 #endif
+
+    internal static LoggerProvider? LogProvider { get; private set; }
 
     internal static PluginManager? PluginManager => _pluginManager;
 
@@ -165,6 +171,22 @@ internal static class Instrumentation
 
                     Logger.Information("Initialized lazily-loaded metric instrumentations without initializing sdk.");
                 }
+            }
+
+            // ILogger bridge is initialized using ILogger-specific extension methods in LogBuilderExtensions class.
+            // That extension methods sets up its own LogProvider.
+            if (LogSettings.Value.LogsEnabled && !LogSettings.Value.EnabledInstrumentations.Contains(LogInstrumentation.ILogger) && LogSettings.Value.EnabledInstrumentations.Contains(LogInstrumentation.Log4Net))
+            {
+                // Sdk.CreateLoggerProviderBuilder()
+                var createLoggerProviderBuilderMethod = typeof(Sdk).GetMethod("CreateLoggerProviderBuilder", BindingFlags.Static | BindingFlags.NonPublic)!;
+                var loggerProviderBuilder = createLoggerProviderBuilderMethod.Invoke(null, null) as LoggerProviderBuilder;
+
+                // TODO: plugins support
+                LogProvider = loggerProviderBuilder!
+                    .SetResourceBuilder(ResourceConfigurator.CreateResourceBuilder(GeneralSettings.Value.EnabledResourceDetectors))
+                    .UseEnvironmentVariables(LazyInstrumentationLoader, LogSettings.Value, _pluginManager)
+                    .Build();
+                Logger.Information("OpenTelemetry log provider initialized.");
             }
         }
         catch (Exception ex)
@@ -406,6 +428,8 @@ internal static class Instrumentation
 #endif
             _tracerProvider?.Dispose();
             _meterProvider?.Dispose();
+            LogProvider?.Dispose();
+
             _sdkEventListener?.Dispose();
 
             Logger.Information("OpenTelemetry Automatic Instrumentation exit.");

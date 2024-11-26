@@ -11,5 +11,10 @@ internal enum LogInstrumentation
     /// <summary>
     /// ILogger instrumentation.
     /// </summary>
-    ILogger
+    ILogger,
+
+    /// <summary>
+    /// Log4Net instrumentation.
+    /// </summary>
+    Log4Net,
 }

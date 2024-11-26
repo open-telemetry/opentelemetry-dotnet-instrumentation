@@ -2,9 +2,9 @@
   <PropertyGroup>
     <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
   </PropertyGroup>
-
   <ItemGroup>
     <PackageVersion Include="DotNet.ReproducibleBuilds" Version="1.2.4" />
+    <PackageVersion Include="log4net" Version="3.0.3" />
     <PackageVersion Include="MinVer" Version="6.0.0" />
     <PackageVersion Include="OpenTelemetry" Version="1.9.0" />
     <PackageVersion Include="OpenTelemetry.Api" Version="1.9.0" />

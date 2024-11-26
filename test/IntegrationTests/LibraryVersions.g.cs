@@ -97,6 +97,20 @@ public static partial class LibraryVersion
             return theoryData;
         }
     }
+    public static TheoryData<string> log4net
+    {
+        get
+        {
+            var theoryData = new TheoryData<string>();
+#if DEFAULT_TEST_PACKAGE_VERSIONS
+            theoryData.Add(string.Empty);
+#else
+            theoryData.Add("2.0.10");
+            theoryData.Add("3.0.3");
+#endif
+            return theoryData;
+        }
+    }
     public static TheoryData<string> MassTransit
     {
         get
@@ -339,6 +353,7 @@ public static partial class LibraryVersion
        { "EntityFrameworkCorePomeloMySql", EntityFrameworkCorePomeloMySql },
        { "GraphQL", GraphQL },
        { "GrpcNetClient", GrpcNetClient },
+       { "log4net", log4net },
        { "MassTransit", MassTransit },
        { "SqlClientMicrosoft", SqlClientMicrosoft },
        { "SqlClientSystem", SqlClientSystem },
