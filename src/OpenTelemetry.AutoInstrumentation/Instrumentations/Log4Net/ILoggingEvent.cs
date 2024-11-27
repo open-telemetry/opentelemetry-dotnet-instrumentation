@@ -20,7 +20,7 @@ internal interface ILoggingEvent
 
     public DateTime TimeStampUtc { get; }
 
-    public IDictionary GetProperties();
+    public IDictionary? GetProperties();
 }
 
 // Wraps https://github.com/apache/logging-log4net/blob/2d68abc25dd77a69926b16234510377c9b63acad/src/log4net/Core/Level.cs#L86

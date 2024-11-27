@@ -1,6 +1,8 @@
 // Copyright The OpenTelemetry Authors
 // SPDX-License-Identifier: Apache-2.0
 
+using System.Collections;
+using System.Diagnostics;
 using System.Reflection;
 using OpenTelemetry.AutoInstrumentation.DuckTyping;
 using OpenTelemetry.Logs;
@@ -35,12 +37,28 @@ internal class OpenTelemetryLog4NetAppender
             loggingEvent.Level.Name,
             mappedLogLevel,
             loggingEvent.ExceptionObject,
-            loggingEvent.GetProperties());
+            GetProperties(loggingEvent),
+            Activity.Current);
     }
 
     [DuckReverseMethod]
     public void Close()
     {
+    }
+
+    private static IDictionary? GetProperties(ILoggingEvent loggingEvent)
+    {
+        // Due to known issues, attempt to retrieve properties
+        // might throw on operating systems other than Windows.
+        // This seems to be fixed for versions 2.0.13 and above.
+        try
+        {
+            return loggingEvent.GetProperties();
+        }
+        catch (Exception)
+        {
+            return null;
+        }
     }
 
     private static object GetLogger(LoggerProvider loggerProvider)
