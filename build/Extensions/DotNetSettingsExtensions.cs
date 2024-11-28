@@ -74,12 +74,7 @@ internal static class DotNetSettingsExtensions
     public static DotNetBuildSettings[] CombineWithBuildInfos(this DotNetBuildSettings settings, IReadOnlyCollection<PackageBuildInfo> buildInfos, TargetFramework targetFramework)
     {
         // NOTE: SetProperty creates internally a new instance!
-#if NET7_0
-        // workaround for building on Centos. It should be removed when we drop support for .NET6/.NET7. ETA November 2024
-        return settings.CombineWith(buildInfos.Where(buildInfo => (targetFramework == TargetFramework.NOT_SPECIFIED || buildInfo.SupportedFrameworks.Length == 0 || buildInfo.SupportedFrameworks.Contains(targetFramework)) && !buildInfo.SupportedFrameworks.Contains(TargetFramework.NET8_0)), (p, buildInfo) =>
-#else
         return settings.CombineWith(buildInfos.Where(buildInfo => targetFramework == TargetFramework.NOT_SPECIFIED || buildInfo.SupportedFrameworks.Length == 0 || buildInfo.SupportedFrameworks.Contains(targetFramework)), (p, buildInfo) =>
-#endif
         {
             p = p.SetProperty("LibraryVersion", buildInfo.LibraryVersion);
 
@@ -100,12 +95,7 @@ internal static class DotNetSettingsExtensions
     public static DotNetRestoreSettings[] CombineWithBuildInfos(this DotNetRestoreSettings settings, IReadOnlyCollection<PackageBuildInfo> buildInfos)
     {
         // NOTE: SetProperty creates internally a new instance!
-#if NET7_0
-        // workaround for building on Centos. It should be removed when we drop support for .NET6/.NET7. ETA November 2024
-        return settings.CombineWith(buildInfos.Where(buildInfo => !buildInfo.SupportedFrameworks.Contains(TargetFramework.NET8_0)), (p, buildInfo) =>
-#else
         return settings.CombineWith(buildInfos, (p, buildInfo) =>
-#endif
         {
             p = p.SetProperty("LibraryVersion", buildInfo.LibraryVersion);
 

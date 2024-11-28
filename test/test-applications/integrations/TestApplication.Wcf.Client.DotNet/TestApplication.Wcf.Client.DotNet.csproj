@@ -1,21 +1,12 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net7.0;net6.0</TargetFrameworks>
-    <TargetFrameworks Condition=" '$(IsCentos)' == '' ">net8.0;$(TargetFrameworks)</TargetFrameworks>
+    <TargetFrameworks>net9.0;net8.0</TargetFrameworks>
   </PropertyGroup>
 
-  <ItemGroup Condition=" '$(LibraryVersion)' != '' or '$(TargetFramework)' == 'net8.0' " >
+  <ItemGroup>
     <PackageReference Include="System.ServiceModel.Http" VersionOverride="$(LibraryVersion)" />
     <PackageReference Include="System.ServiceModel.NetTcp" VersionOverride="$(LibraryVersion)" />
-  </ItemGroup>
-
-  <ItemGroup Condition=" '$(LibraryVersion)' == '' and '$(TargetFramework)' != 'net8.0' " >
-    <PackageReference Include="System.ServiceModel.Http" VersionOverride="6.2.0" />
-    <PackageReference Include="System.ServiceModel.NetTcp" VersionOverride="6.2.0" />
-  </ItemGroup>
-
-  <ItemGroup>
     <PackageReference Include="System.Security.Cryptography.Pkcs" />
     <PackageReference Include="System.Formats.Asn1" />
   </ItemGroup>

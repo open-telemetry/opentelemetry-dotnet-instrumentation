@@ -13,11 +13,11 @@ jobs:
   build-container:
     uses: ./.github/workflows/build-container.yml
 
-  build-centos-native:
-    uses: ./.github/workflows/build-centos-native-container.yml
+  build-ubuntu1604-native:
+    uses: ./.github/workflows/build-ubuntu1604-native-container.yml
 
   build:
-    needs: build-centos-native
+    needs: build-ubuntu1604-native
     uses: ./.github/workflows/build.yml
 
   build-nuget-packages:

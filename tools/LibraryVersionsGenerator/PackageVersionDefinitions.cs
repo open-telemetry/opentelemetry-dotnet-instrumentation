@@ -47,8 +47,8 @@ internal static class PackageVersionDefinitions
             {
                 new("6.0.35"),
                 // new("7.0.20"), all versions contains references to vulnerable packages https://github.com/advisories/GHSA-hh2w-p6rv-4g7w
-                new("8.0.10", supportedTargetFrameworks: new[] { "net8.0" }, supportedExecutionFrameworks: new[] { "net8.0" }),
-                new("*", supportedTargetFrameworks: new[] { "net8.0" }, supportedExecutionFrameworks: new[] { "net8.0" })
+                new("8.0.10"),
+                new("*")
             }
         },
         new()
@@ -60,8 +60,8 @@ internal static class PackageVersionDefinitions
             {
                 new("6.0.3"),
                 new("7.0.0"),
-                new("8.0.0", supportedTargetFrameworks: new[] { "net8.0" }, supportedExecutionFrameworks: new[] { "net8.0" }),
-                new("*", supportedTargetFrameworks: new[] { "net8.0" }, supportedExecutionFrameworks: new[] { "net8.0" })
+                new("8.0.0"),
+                new("*")
             }
         },
         new()
@@ -109,7 +109,7 @@ internal static class PackageVersionDefinitions
             {
                 // new("1.1.4"), - high vulnerability https://github.com/dotnet/announcements/issues/292, test should be skipped
                 // new("2.1.7"), transitive vulnerabilities https://github.com/advisories/GHSA-rxg9-xrhp-64gj
-                // new("3.1.7", supportedTargetFrameworks: new[] { "net8.0", "net7.0", "net6.0" }, supportedExecutionFrameworks: new[] { "net8.0", "net7.0", "net6.0" }), // 3.1.* is not supported on .NET Framework. For details check: https://github.com/open-telemetry/opentelemetry-dotnet/issues/4243, transitive vulnerabilities https://github.com/advisories/GHSA-rxg9-xrhp-64gj
+                // new("3.1.7", supportedTargetFrameworks: new[] { "net8.0" }, supportedExecutionFrameworks: new[] { "net8.0" }), // 3.1.* is not supported on .NET Framework. For details check: https://github.com/open-telemetry/opentelemetry-dotnet/issues/4243, transitive vulnerabilities https://github.com/advisories/GHSA-rxg9-xrhp-64gj
                 // new("4.0.6"), transitive vulnerabilities https://github.com/advisories/GHSA-rxg9-xrhp-64gj
                 new("5.2.2"),
                 new("*")
@@ -184,8 +184,10 @@ internal static class PackageVersionDefinitions
             {
                 // new("8.0.0"), - transitive vulnerabilities https://github.com/advisories/GHSA-8g4q-xg66-9fp4, <=8.2.3
                 new("8.2.4"),
-                new("9.1.0", supportedTargetFrameworks: new[] { "net8.0" }, supportedExecutionFrameworks: new[] { "net8.0" }), // breaking change, new Meter name
-                new("*", supportedTargetFrameworks: new[] { "net8.0" }, supportedExecutionFrameworks: new[] { "net8.0" })
+                new("9.1.0", supportedTargetFrameworks: ["net9.0", "net8.0"], supportedExecutionFrameworks: ["net9.0", "net8.0"
+                ]), // breaking change, new Meter name
+                new("*", supportedTargetFrameworks: ["net9.0", "net8.0"], supportedExecutionFrameworks: ["net9.0", "net8.0"
+                ])
             }
         },
         new()
@@ -196,8 +198,8 @@ internal static class PackageVersionDefinitions
             Versions = new List<PackageVersion>
             {
                 // new("23.4.0", supportedTargetFrameworks: new[] { "net472" }, supportedExecutionFrameworks: new[] { "net462" }), transitive vulnerability https://github.com/advisories/GHSA-447r-wph3-92pm, <= 23.5.0
-                new("23.5.1", supportedTargetFrameworks: new[] { "net472" }, supportedExecutionFrameworks: new[] { "net462" }),
-                new("*", supportedTargetFrameworks: new[] { "net472" }, supportedExecutionFrameworks: new[] { "net462" })
+                new("23.5.1", supportedTargetFrameworks: ["net472"], supportedExecutionFrameworks: ["net462"]),
+                new("*", supportedTargetFrameworks: ["net472"], supportedExecutionFrameworks: ["net462"])
             }
         },
         new()
@@ -257,7 +259,8 @@ internal static class PackageVersionDefinitions
             {
                 new("4.10.2"),
                 new("6.2.0"),
-                new("*", supportedTargetFrameworks: new[] { "net8.0" }, supportedExecutionFrameworks: new[] { "net8.0" })
+                new("*", supportedTargetFrameworks: ["net9.0", "net8.0"], supportedExecutionFrameworks: ["net9.0", "net8.0"
+                ])
             }
         },
         new()
@@ -267,7 +270,7 @@ internal static class PackageVersionDefinitions
             TestApplicationName = "TestApplication.Kafka",
             Versions = new List<PackageVersion>
             {
-                new("1.4.0", supportedPlatforms: new[] { "x64" }),
+                new("1.4.0", supportedPlatforms: ["x64"]),
                 new("1.6.2"), // First version that supports both arm64 and x64
                 new("1.8.2"), // 1.8.0-1.8.1 are known to have issues with arm64
                 new("*")

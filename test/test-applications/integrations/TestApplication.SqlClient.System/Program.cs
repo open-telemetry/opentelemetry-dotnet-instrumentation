@@ -5,6 +5,7 @@ using System.Data.SqlClient;
 using TestApplication.Shared;
 
 namespace TestApplication.SqlClient.System;
+#pragma warning disable CS0618 // Type or member is obsolete, System.Data.SqlClient classes are deprecated in 4.9.0+
 
 /// <summary>
 /// This test application uses SqlConnection from System.Data.SqlClient (NuGet package).
@@ -135,3 +136,4 @@ public class Program
         return (DatabasePassword: args[0], Port: args[1]);
     }
 }
+#pragma warning restore CS0618 // Type or member is obsolete

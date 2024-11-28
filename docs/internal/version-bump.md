@@ -13,7 +13,6 @@ This section describes dependencies that require a periodical version bump.
 | .NET SDK     | `(CI templates)`           | Manual     | Search for `actions/setup-dotnet` or `dotnetSdkVersion:` |
 | GitHub CI OS | `./github/workflows/*.yml` | Manual     | Search for `runs-on:`                                    |
 | APK          | `alpine.dockerfile`        | Manual     | Search for `apk add`                                     |
-| YUM          | `centos*.dockerfile`       | Manual     | Search for `yum -y install`                              |
 
 ## Tracked by checksum
 

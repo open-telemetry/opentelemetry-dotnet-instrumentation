@@ -1,13 +1,11 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net7.0;net6.0</TargetFrameworks>
-    <TargetFrameworks Condition=" '$(IsCentos)' == '' ">net8.0;$(TargetFrameworks)</TargetFrameworks>
+    <TargetFrameworks>net9.0;net8.0</TargetFrameworks>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Pomelo.EntityFrameworkCore.MySql" VersionOverride="$(LibraryVersion)" Condition=" '$(LibraryVersion)' != '' or '$(TargetFramework)' == 'net8.0' "/>
-    <PackageReference Include="Pomelo.EntityFrameworkCore.MySql" VersionOverride="7.0.0" Condition=" '$(LibraryVersion)' == '' and '$(TargetFramework)' != 'net8.0' "/>
+    <PackageReference Include="Pomelo.EntityFrameworkCore.MySql" VersionOverride="$(LibraryVersion)" />
 
     <!-- Microsoft.Extensions.Configuration.Abstractions,
     Microsoft.Extensions.Options, and Microsoft.Extensions.DependencyInjection

@@ -72,7 +72,7 @@ public abstract class TestHelper
         SetEnvironmentVariable("OTEL_EXPORTER_OTLP_ENDPOINT", $"http://localhost:{collector.Port}");
     }
 
-#if NET6_0_OR_GREATER
+#if NET8_0_OR_GREATER
     public void SetExporter(MockProfilesCollector collector)
     {
         SetEnvironmentVariable("OTEL_EXPORTER_OTLP_ENDPOINT", $"http://localhost:{collector.Port}");

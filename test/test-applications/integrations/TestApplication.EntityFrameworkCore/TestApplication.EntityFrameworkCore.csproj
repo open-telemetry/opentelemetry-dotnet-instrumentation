@@ -1,15 +1,11 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net7.0;net6.0</TargetFrameworks>
-    <TargetFrameworks Condition=" '$(IsCentos)' == '' ">net8.0;$(TargetFrameworks)</TargetFrameworks>
+    <TargetFrameworks>net9.0;net8.0</TargetFrameworks>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" VersionOverride="$(LibraryVersion)" Condition=" '$(LibraryVersion)' != '' or '$(TargetFramework)' == 'net8.0' "/>
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" VersionOverride="6.0.35" Condition=" '$(LibraryVersion)' == '' and '$(TargetFramework)' != 'net8.0' "/>
-
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" VersionOverride="$(LibraryVersion)" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" />
-    <PackageReference Include="Microsoft.Extensions.Logging" Condition=" '$(TargetFramework)' != 'net8.0' " />
   </ItemGroup>
 </Project>

@@ -7,33 +7,26 @@ internal static class VersionComparer
 {
     public static bool CompareVersions(DotnetSdkVersion expectedDotnetSdkVersion, DotnetSdkVersion version)
     {
-        return CompareVersions(expectedDotnetSdkVersion, version.Net6SdkVersion, version.Net7SdkVersion, version.Net8SdkVersion);
+        return CompareVersions(expectedDotnetSdkVersion, version.Net8SdkVersion, version.Net9SdkVersion);
     }
 
     public static bool CompareVersions(
         DotnetSdkVersion expectedDotnetSdkVersion,
-        string? net6SdkVersion,
-        string? net7SdkVersion,
-        string? net8SdkVersion)
+        string? net8SdkVersion,
+        string? net9SdkVersion)
     {
-        return CompareVersion(expectedDotnetSdkVersion.Net6SdkVersion!, net6SdkVersion) &&
-               CompareVersion(expectedDotnetSdkVersion.Net7SdkVersion!, net7SdkVersion) &&
-               CompareVersion(expectedDotnetSdkVersion.Net8SdkVersion!, net8SdkVersion);
-    }
-
-    public static bool IsNet6Version(string versionString)
-    {
-        return versionString.StartsWith('6');
-    }
-
-    public static bool IsNet7Version(string versionString)
-    {
-        return versionString.StartsWith('7');
+        return CompareVersion(expectedDotnetSdkVersion.Net8SdkVersion!, net8SdkVersion) &&
+               CompareVersion(expectedDotnetSdkVersion.Net9SdkVersion!, net9SdkVersion);
     }
 
     public static bool IsNet8Version(string versionString)
     {
         return versionString.StartsWith('8');
+    }
+
+    public static bool IsNet9Version(string versionString)
+    {
+        return versionString.StartsWith('9');
     }
 
     private static bool CompareVersion(string expectedVersion, string? extractedVersion)

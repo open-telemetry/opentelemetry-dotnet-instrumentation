@@ -169,7 +169,9 @@ due to lack of stable semantic convention.
 \[6\]: `RabbitMq.Client` needs bytecode instrumentation only for 6.*.* versions
        7.0.0+ uses only source instrumentation.
 
-\[7\]: `Microsoft.Data.SqlClient` v3.* is not supported on .NET Framework,
+\[7\]: `System.Data.SqlClient` is [deprecated](https://www.nuget.org/packages/System.Data.SqlClient/4.9.0#readme-body-tab).
+
+\[8\]: `Microsoft.Data.SqlClient` v3.* is not supported on .NET Framework,
         due to [issue](https://github.com/open-telemetry/opentelemetry-dotnet/issues/4243).
        `System.Data.SqlClient` is supported from version 4.8.5.
 
@@ -337,7 +339,7 @@ Important environment variables include:
 
 - The OpenTelemetry .NET Automatic Instrumentation defaults to `http/protobuf`,
   which differs from the OpenTelemetry .NET SDK default value of `grpc`.
-- On .NET 6 and higher, the application must reference [`Grpc.Net.Client`](https://www.nuget.org/packages/Grpc.Net.Client/)
+- On .NET 8 and higher, the application must reference [`Grpc.Net.Client`](https://www.nuget.org/packages/Grpc.Net.Client/)
   to use the `grpc` OTLP exporter protocol. For example, by adding
   `<PackageReference Include="Grpc.Net.Client" Version="2.65.0" />` to the
   `.csproj` file.
@@ -414,7 +416,7 @@ Important environment variables include:
 RuleEngine is a feature that validates OpenTelemetry API, SDK,
 Instrumentation, and Exporter assemblies for unsupported scenarios,
 ensuring that OpenTelemetry automatic instrumentation is more
-stable by backing of instead of crashing. It works on .NET 6 and higher.
+stable by backing of instead of crashing. It works on .NET 8 and higher.
 
 Enable RuleEngine only during the first run of the application,
 or when the deployment changes or the Automatic Instrumentation
@@ -487,8 +489,8 @@ If the default log directories can't be created,
 the instrumentation uses the path of the current user's [temporary folder](https://docs.microsoft.com/en-us/dotnet/api/System.IO.Path.GetTempPath?view=net-6.0)
 instead.
 
-| Environment variable                                | Description                                                             | Default value                            | Status                                                                                                                            |
-|-----------------------------------------------------|-------------------------------------------------------------------------|------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------|
-| `OTEL_DOTNET_AUTO_LOG_DIRECTORY`                    | Directory of the .NET Tracer logs.                                      | *See the previous note on default paths* | [Experimental](https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/versioning-and-stability.md) |
-| `OTEL_LOG_LEVEL`                                    | SDK log level. (supported values: `none`,`error`,`warn`,`info`,`debug`) | `info`                                   | [Stable](https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/versioning-and-stability.md)       |
-| `OTEL_DOTNET_AUTO_LOGS_INCLUDE_FORMATTED_MESSAGE`   | Whether the log state should be formatted.                              | `false`                                  | [Experimental](https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/versioning-and-stability.md) |
+| Environment variable                              | Description                                                             | Default value                            | Status                                                                                                                            |
+|---------------------------------------------------|-------------------------------------------------------------------------|------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------|
+| `OTEL_DOTNET_AUTO_LOG_DIRECTORY`                  | Directory of the .NET Tracer logs.                                      | *See the previous note on default paths* | [Experimental](https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/versioning-and-stability.md) |
+| `OTEL_LOG_LEVEL`                                  | SDK log level. (supported values: `none`,`error`,`warn`,`info`,`debug`) | `info`                                   | [Stable](https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/versioning-and-stability.md)       |
+| `OTEL_DOTNET_AUTO_LOGS_INCLUDE_FORMATTED_MESSAGE` | Whether the log state should be formatted.                              | `false`                                  | [Experimental](https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/versioning-and-stability.md) |
