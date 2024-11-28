@@ -2,6 +2,9 @@
 // SPDX-License-Identifier: Apache-2.0
 
 using OpenTelemetry.AutoInstrumentation.CallTarget;
+#if !NETFRAMEWORK
+using OpenTelemetry.AutoInstrumentation.Logger;
+#endif
 
 namespace OpenTelemetry.AutoInstrumentation.Instrumentations.Log4Net.Integrations;
 
@@ -22,7 +25,13 @@ public static class AppenderCollectionIntegration
 {
     internal static CallTargetReturn<TReturn> OnMethodEnd<TTarget, TReturn>(TTarget instance, TReturn returnValue, Exception exception, in CallTargetState state)
     {
-        if (returnValue is Array responseArray)
+        if (
+            #if !NETFRAMEWORK
+#pragma warning disable SA1003
+            !LoggerInitializer.IsInitialized &&
+#pragma warning restore SA1003
+#endif
+            returnValue is Array responseArray)
         {
             var finalArray = OpenTelemetryAppenderInitializer<TReturn>.Initialize(responseArray, OpenTelemetryLog4NetAppender.Instance);
             return new CallTargetReturn<TReturn>(finalArray);

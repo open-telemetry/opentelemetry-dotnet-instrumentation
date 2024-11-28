@@ -10,9 +10,12 @@ using OpenTelemetry.Logs;
 
 namespace OpenTelemetry.AutoInstrumentation.Logger;
 
-internal static class LogBuilderExtensions
+internal static class LoggerInitializer
 {
+    private static volatile bool _initialized;
     private static Type? _loggingProviderSdkType;
+
+    public static bool IsInitialized => _initialized;
 
     // this method is only called from LoggingBuilderIntegration
     public static void AddOpenTelemetryLogsFromIntegration(ILoggingBuilder builder)
@@ -85,6 +88,7 @@ internal static class LogBuilderExtensions
                     }
                 }
             });
+            _initialized = true;
 
             AutoInstrumentationEventSource.Log.Information($"Logs: Loaded AddOpenTelemetry from LoggingBuilder.");
         }

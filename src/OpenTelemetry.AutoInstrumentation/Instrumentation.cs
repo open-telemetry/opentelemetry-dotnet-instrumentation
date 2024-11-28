@@ -173,9 +173,9 @@ internal static class Instrumentation
                 }
             }
 
-            // ILogger bridge is initialized using ILogger-specific extension methods in LogBuilderExtensions class.
+            // ILogger bridge is initialized using ILogger-specific extension methods in LoggerInitializer class.
             // That extension methods sets up its own LogProvider.
-            if (LogSettings.Value.LogsEnabled && !LogSettings.Value.EnabledInstrumentations.Contains(LogInstrumentation.ILogger) && LogSettings.Value.EnabledInstrumentations.Contains(LogInstrumentation.Log4Net))
+            if (LogSettings.Value.LogsEnabled && LogSettings.Value.EnabledInstrumentations.Contains(LogInstrumentation.Log4Net))
             {
                 // Sdk.CreateLoggerProviderBuilder()
                 var createLoggerProviderBuilderMethod = typeof(Sdk).GetMethod("CreateLoggerProviderBuilder", BindingFlags.Static | BindingFlags.NonPublic)!;

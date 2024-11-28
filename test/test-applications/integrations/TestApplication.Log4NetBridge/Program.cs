@@ -14,23 +14,8 @@ internal static class Program
 
     private static void Main(string[] args)
     {
-        try
-        {
-            using (Source.StartActivity("ManuallyStarted"))
-            {
-                Log.InfoFormat("Hello, {0}!", "world");
-            }
-
-            Throw();
-        }
-        catch (Exception e)
-        {
-            Log.Error("Exception occured", e);
-        }
-    }
-
-    private static void Throw()
-    {
-        throw new NotImplementedException();
+        using var activity = Source.StartActivity("ManuallyStarted");
+        Log.InfoFormat("Hello, {0}!", "world");
+        Log.Error("Exception occured", new Exception());
     }
 }

@@ -77,7 +77,7 @@ internal static partial class InstrumentationDefinitions
         if (logSettings.LogsEnabled)
         {
             // Log4Net
-            if (!logSettings.EnabledInstrumentations.Contains(LogInstrumentation.ILogger) && logSettings.EnabledInstrumentations.Contains(LogInstrumentation.Log4Net))
+            if (logSettings.EnabledInstrumentations.Contains(LogInstrumentation.Log4Net))
             {
                 nativeCallTargetDefinitions.Add(new("log4net", "log4net.Appender.AppenderCollection", "ToArray", new[] {"log4net.Appender.IAppender[]"}, 2, 0, 0, 3, 65535, 65535, AssemblyFullName, "OpenTelemetry.AutoInstrumentation.Instrumentations.Log4Net.Integrations.AppenderCollectionIntegration"));
             }

@@ -41,7 +41,6 @@ public class Log4NetBridgeTests : TestHelper
             logRecord.Attributes.Count(value => value.Key == "exception.type") == 1);
 
         EnableBytecodeInstrumentation();
-        SetEnvironmentVariable("OTEL_DOTNET_AUTO_LOGS_ILOGGER_INSTRUMENTATION_ENABLED", "false");
 
         var (standardOutput, _, _) = RunTestApplication(new()
         {
