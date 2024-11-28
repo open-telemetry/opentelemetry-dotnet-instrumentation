@@ -13,11 +13,11 @@
 
 
 
-  <ItemGroup Condition=" '$(LibraryVersion)' != '' or '$(TargetFramework)' == 'net8.0' " >
+  <ItemGroup Condition=" '$(LibraryVersion)' != '' or '$(TargetFramework)' == 'net8.0'" >
     <PackageReference Include="MongoDB.Driver" VersionOverride="$(LibraryVersion)" />
   </ItemGroup>
 
-  <ItemGroup Condition=" '$(LibraryVersion)' == '' and '$(TargetFramework)' != 'net8.0' " >
+  <ItemGroup Condition=" '$(LibraryVersion)' == '' and '$(TargetFramework)' != 'net8.0'" >
     <PackageReference Include="MongoDB.Driver" VersionOverride="2.19.0" />
   </ItemGroup>
 
