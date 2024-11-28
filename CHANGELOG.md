@@ -17,8 +17,34 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 
 - Kafka and RabbitMQ 6 tags `otel.status_code` and `otel.status_description` are
   replaced by native fields `Status` and `StatusDescription`.
+- Changed minimal supported version of `Microsoft.Extensions.Logging`
+  for `ILOGGER` instrumentation from `8.0.0` to `9.0.0`.
+- Glibc native libraries are compiled on Ubuntu v16.04.
 
 #### Dependency updates
+
+- Updated [Core components](https://github.com/open-telemetry/opentelemetry-dotnet/blob/main/VERSIONING.md#core-components):
+  [`1.10.0`](https://github.com/open-telemetry/opentelemetry-dotnet/releases/tag/core-1.10.0).
+- Following packages updated
+  - `OpenTelemetry.Exporter.Prometheus.HttpListener` from `1.9.0-beta.2` to `1.10.0-beta.1`,
+  - `Microsoft.Extensions.Configuration.Binder` from `8.0.2` to `9.0.0`,
+  - `MMicrosoft.Extensions.Logging.Configuration` from `8.0.0` to `9.0.0`.
+- .NET only, following packages updated
+  - `System.Diagnostics.DiagnosticSource` from `8.0.0` to `9.0.0`.
+- .NET Framework only, following packages updated
+  - `Microsoft.Bcl.AsyncInterfaces` from `8.0.0` to `9.0.0`,
+  - `Microsoft.Extensions.Configuration` from `9.0.0` to `9.0.0`,
+  - `Microsoft.Extensions.Configuration.Abstractions` from `8.0.0` to `9.0.0`,
+  - `Microsoft.Extensions.DependencyInjection` from `8.0.1` to `9.0.0`,
+  - `Microsoft.Extensions.DependencyInjection.Abstractions` from `8.0.2` to `9.0.0`,
+  - `Microsoft.Extensions.Logging` from `8.0.0` to `9.0.0`,
+  - `Microsoft.Extensions.Logging.Abstractions` from `8.0.1` to `9.0.0`,
+  - `Microsoft.Extensions.Options` from `8.0.2` to `9.0.0`,
+  - `Microsoft.Extensions.Options.ConfigurationExtensions` from `8.0.0` to `9.0.0`,
+  - `Microsoft.Extensions.Primitives` from `8.0.0` to `9.0.0`,
+  - `System.Diagnostics.DiagnosticSource` from `8.0.1` to `9.0.0`,
+  - `System.Text.Encodings.Web` from `8.0.0` to `9.0.0`,
+  - `System.Text.Json` from `8.0.5` to `9.0.0`.
 
 ### Deprecated
 
