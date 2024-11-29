@@ -296,9 +296,7 @@ public static partial class LibraryVersion
 #else
             theoryData.Add("4.10.2");
             theoryData.Add("6.2.0");
-#if NET9_0 || NET8_0
             theoryData.Add("8.0.0");
-#endif
 #endif
             return theoryData;
         }

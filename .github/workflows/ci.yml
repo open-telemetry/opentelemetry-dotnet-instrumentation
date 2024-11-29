@@ -189,7 +189,7 @@ jobs:
         run: ./build.cmd --skip RunManagedTests --target ManagedTests --containers ${{ matrix.containers }}
 
       - name: Run the integration tests
-        run: ./build.cmd --target RunManagedIntegrationTests --containers ${{ matrix.containers }}
+        run: ./build.cmd --target RunManagedIntegrationTests --containers ${{ matrix.containers }} --test-target-framework net462
 
       - name: Upload test logs
         if: always()
