@@ -62,7 +62,7 @@ void CorProfiler::InitNetFxAssemblyRedirectsMap()
         { L"OpenTelemetry.Shims.OpenTracing", {1, 0, 0, 0} },
         { L"OpenTracing", {0, 12, 1, 0} },
         { L"System.AppContext", {4, 1, 2, 0} },
-        { L"System.Buffers", {4, 0, 3, 0} },
+        { L"System.Buffers", {4, 0, 4, 0} },
         { L"System.Collections", {4, 0, 11, 0} },
         { L"System.Collections.Concurrent", {4, 0, 11, 0} },
         { L"System.Collections.NonGeneric", {4, 0, 3, 0} },
