@@ -47,8 +47,8 @@ public class ActivityHelperTests
 
         using (new AssertionScope())
         {
-            activity.Tags.First(x => x.Key == "otel.status_code").Value.Should().Be("ERROR");
-            activity.Tags.First(x => x.Key == "otel.status_description").Value.Should().Be(exceptionMessage);
+            activity.Status.Should().Be(ActivityStatusCode.Error);
+            activity.StatusDescription.Should().Be(exceptionMessage);
             activity.Events.Should().HaveCount(1);
         }
     }
