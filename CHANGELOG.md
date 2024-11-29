@@ -47,6 +47,7 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
   - `System.Memory` from `4.5.5` to `4.6.0`,
   - `System.Numerics.Vectors` from `4.5.0` to `4.6.0`,
   - `System.Diagnostics.DiagnosticSource` from `8.0.1` to `9.0.0`,
+  - `System.Runtime.CompilerServices.Unsafe` from `6.0.0` to `6.1.0`,
   - `System.Text.Encodings.Web` from `8.0.0` to `9.0.0`,
   - `System.Text.Json` from `8.0.5` to `9.0.0`.
 

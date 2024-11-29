@@ -125,7 +125,7 @@ void CorProfiler::InitNetFxAssemblyRedirectsMap()
         { L"System.Resources.ResourceManager", {4, 0, 1, 0} },
         { L"System.Resources.Writer", {4, 0, 2, 0} },
         { L"System.Runtime", {4, 1, 2, 0} },
-        { L"System.Runtime.CompilerServices.Unsafe", {6, 0, 0, 0} },
+        { L"System.Runtime.CompilerServices.Unsafe", {6, 0, 1, 0} },
         { L"System.Runtime.CompilerServices.VisualC", {4, 0, 2, 0} },
         { L"System.Runtime.Extensions", {4, 1, 2, 0} },
         { L"System.Runtime.Handles", {4, 0, 1, 0} },
