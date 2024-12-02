@@ -1,12 +1,7 @@
 // Copyright The OpenTelemetry Authors
 // SPDX-License-Identifier: Apache-2.0
 
-using System.Linq.Expressions;
-using System.Reflection;
-using System.Text.RegularExpressions;
-using OpenTelemetry.AutoInstrumentation;
 using OpenTelemetry.AutoInstrumentation.CallTarget;
-using OpenTelemetry.AutoInstrumentation.Instrumentations;
 using OpenTelemetry.AutoInstrumentation.Instrumentations.MongoDB.DuckTypes;
 using OpenTelemetry.AutoInstrumentation.Util;
 
@@ -28,26 +23,6 @@ namespace OpenTelemetry.AutoInstrumentation.Instrumentations.MongoDB.Integration
 [InstrumentMethod(
     assemblyName: MongoDBConstants.AssemblyName3,
     typeName: "MongoDB.Driver.Core.WireProtocol.CommandUsingCommandMessageWireProtocol`1",
-    methodName: "ExecuteAsync",
-    returnTypeName: ClrNames.GenericTaskWithGenericClassParameter,
-    parameterTypeNames: new[] { "MongoDB.Driver.Core.Connections.IConnection", ClrNames.CancellationToken },
-    minimumVersion: MongoDBConstants.MinimumVersion3,
-    maximumVersion: MongoDBConstants.MaximumVersion3,
-    integrationName: MongoDBConstants.IntegrationName,
-    type: InstrumentationType.Trace)]
-[InstrumentMethod(
-    assemblyName: MongoDBConstants.AssemblyName3,
-    typeName: "MongoDB.Driver.Core.WireProtocol.CommandWireProtocol`1",
-    methodName: "ExecuteAsync",
-    returnTypeName: ClrNames.GenericTaskWithGenericClassParameter,
-    parameterTypeNames: new[] { "MongoDB.Driver.Core.Connections.IConnection", ClrNames.CancellationToken },
-    minimumVersion: MongoDBConstants.MinimumVersion3,
-    maximumVersion: MongoDBConstants.MaximumVersion3,
-    integrationName: MongoDBConstants.IntegrationName,
-    type: InstrumentationType.Trace)]
-[InstrumentMethod(
-    assemblyName: MongoDBConstants.AssemblyName3,
-    typeName: "MongoDB.Driver.Core.WireProtocol.GetMoreWireProtocol`1",
     methodName: "ExecuteAsync",
     returnTypeName: ClrNames.GenericTaskWithGenericClassParameter,
     parameterTypeNames: new[] { "MongoDB.Driver.Core.Connections.IConnection", ClrNames.CancellationToken },
@@ -88,26 +63,6 @@ namespace OpenTelemetry.AutoInstrumentation.Instrumentations.MongoDB.Integration
 [InstrumentMethod(
     assemblyName: MongoDBConstants.AssemblyName,
     typeName: "MongoDB.Driver.Core.WireProtocol.CommandUsingCommandMessageWireProtocol`1",
-    methodName: "ExecuteAsync",
-    returnTypeName: ClrNames.GenericTaskWithGenericClassParameter,
-    parameterTypeNames: new[] { "MongoDB.Driver.Core.Connections.IConnection", ClrNames.CancellationToken },
-    minimumVersion: MongoDBConstants.MinimumVersion,
-    maximumVersion: MongoDBConstants.MaximumVersion,
-    integrationName: MongoDBConstants.IntegrationName,
-    type: InstrumentationType.Trace)]
-[InstrumentMethod(
-    assemblyName: MongoDBConstants.AssemblyName,
-    typeName: "MongoDB.Driver.Core.WireProtocol.CommandWireProtocol`1",
-    methodName: "ExecuteAsync",
-    returnTypeName: ClrNames.GenericTaskWithGenericClassParameter,
-    parameterTypeNames: new[] { "MongoDB.Driver.Core.Connections.IConnection", ClrNames.CancellationToken },
-    minimumVersion: MongoDBConstants.MinimumVersion,
-    maximumVersion: MongoDBConstants.MaximumVersion,
-    integrationName: MongoDBConstants.IntegrationName,
-    type: InstrumentationType.Trace)]
-[InstrumentMethod(
-    assemblyName: MongoDBConstants.AssemblyName,
-    typeName: "MongoDB.Driver.Core.WireProtocol.GetMoreWireProtocol`1",
     methodName: "ExecuteAsync",
     returnTypeName: ClrNames.GenericTaskWithGenericClassParameter,
     parameterTypeNames: new[] { "MongoDB.Driver.Core.Connections.IConnection", ClrNames.CancellationToken },
