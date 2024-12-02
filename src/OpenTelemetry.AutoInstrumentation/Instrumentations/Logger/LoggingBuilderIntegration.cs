@@ -15,7 +15,7 @@ namespace OpenTelemetry.AutoInstrumentation.Instrumentations.Logger;
     methodName: ".ctor",
     returnTypeName: ClrNames.Void,
     parameterTypeNames: new[] { "Microsoft.Extensions.DependencyInjection.IServiceCollection" },
-    minimumVersion: "8.0.0",
+    minimumVersion: "9.0.0",
     maximumVersion: "9.*.*",
     integrationName: "ILogger",
     type: InstrumentationType.Log)]
