@@ -10,11 +10,13 @@
         "DOTNET_STARTUP_HOOKS": "$(SolutionDir)bin\\tracer-home\\net\\OpenTelemetry.AutoInstrumentation.StartupHook.dll",
         "DOTNET_SHARED_STORE": "$(SolutionDir)bin\\tracer-home\\store",
         "DOTNET_ADDITIONAL_DEPS": "$(SolutionDir)bin\\tracer-home\\AdditionalDeps",
-        "OTEL_TRACES_EXPORTER": "zipkin,console",
-        "OTEL_EXPORTER_ZIPKIN_ENDPOINT": "http://127.0.0.1:9411/api/v2/spans",
+        "OTEL_TRACES_EXPORTER": "console,zipkin,otlp",
+        "OTEL_EXPORTER_ZIPKIN_ENDPOINT": "http://zipkin:9411/api/v2/spans",
         "OTEL_LOG_LEVEL": "debug",
         "OTEL_DOTNET_AUTO_TRACES_ADDITIONAL_SOURCES": "TestApplication.MongoDB",
-        "OTEL_DOTNET_AUTO_HOME": "$(SolutionDir)bin\\tracer-home\\"
+        "OTEL_DOTNET_AUTO_HOME": "$(SolutionDir)bin\\tracer-home\\",
+        "OTEL_RESOURCE_ATTRIBUTES": "deployment.environment=yevheniiX",
+        "OTEL_SERVICE_NAME": "test-mongodb"
       }
     }
   }
