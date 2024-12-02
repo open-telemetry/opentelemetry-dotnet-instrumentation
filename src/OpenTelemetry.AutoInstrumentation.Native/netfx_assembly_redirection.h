@@ -48,7 +48,7 @@ void CorProfiler::InitNetFxAssemblyRedirectsMap()
         { L"OpenTelemetry.Instrumentation.AspNet", {1, 9, 0, 46} },
         { L"OpenTelemetry.Instrumentation.AspNet.TelemetryHttpModule", {1, 9, 0, 46} },
         { L"OpenTelemetry.Instrumentation.GrpcNetClient", {1, 9, 0, 44} },
-        { L"OpenTelemetry.Instrumentation.Http", {1, 9, 0, 41} },
+        { L"OpenTelemetry.Instrumentation.Http", {1, 10, 0, 248} },
         { L"OpenTelemetry.Instrumentation.Process", {0, 5, 0, 176} },
         { L"OpenTelemetry.Instrumentation.Quartz", {1, 0, 0, 50} },
         { L"OpenTelemetry.Instrumentation.Runtime", {1, 9, 0, 57} },

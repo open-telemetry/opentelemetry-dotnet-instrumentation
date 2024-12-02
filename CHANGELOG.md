@@ -26,9 +26,10 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 - Updated [Core components](https://github.com/open-telemetry/opentelemetry-dotnet/blob/main/VERSIONING.md#core-components):
   [`1.10.0`](https://github.com/open-telemetry/opentelemetry-dotnet/releases/tag/core-1.10.0).
 - Following packages updated
-  - `OpenTelemetry.Exporter.Prometheus.HttpListener` from `1.9.0-beta.2` to `1.10.0-beta.1`,
   - `Microsoft.Extensions.Configuration.Binder` from `8.0.2` to `9.0.0`,
-  - `MMicrosoft.Extensions.Logging.Configuration` from `8.0.0` to `9.0.0`.
+  - `Microsoft.Extensions.Logging.Configuration` from `8.0.0` to `9.0.0`,
+  - `OpenTelemetry.Exporter.Prometheus.HttpListener` from `1.9.0-beta.2` to `1.10.0-beta.1`,
+  - `OpenTelemetry.Instrumentation.Http` from `1.9.0` to `1.10.0`.
 - .NET only, following packages updated
   - `System.Diagnostics.DiagnosticSource` from `8.0.0` to `9.0.0`.
 - .NET Framework only, following packages updated
