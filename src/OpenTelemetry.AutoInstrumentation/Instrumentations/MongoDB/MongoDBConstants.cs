@@ -12,8 +12,8 @@ internal static class MongoDBConstants
     public const string MinimumVersion3 = "3.0.0";
     public const string MaximumVersion3 = "3.*.*";
 
-    // 2.0.0+
+    // 2.7.0+
     public const string AssemblyName = "MongoDB.Driver.Core";
-    public const string MinimumVersion = "2.0.0";
+    public const string MinimumVersion = "2.7.0";
     public const string MaximumVersion = "2.*.*";
 }
