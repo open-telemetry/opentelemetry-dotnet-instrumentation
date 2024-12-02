@@ -16,8 +16,5 @@
 
     <IsPackable>false</IsPackable>
     <GenerateDocumentationFile>false</GenerateDocumentationFile>
-
-    <!-- Hide warnings for EOL .NET Core targets (e.g. netcoreapp3.0) -->
-    <CheckEolTargetFramework>false</CheckEolTargetFramework>
   </PropertyGroup>
 </Project>
