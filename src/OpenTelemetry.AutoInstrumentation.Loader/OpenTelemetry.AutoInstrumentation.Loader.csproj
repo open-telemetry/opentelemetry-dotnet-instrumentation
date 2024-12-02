@@ -5,9 +5,6 @@
     <TargetFrameworks Condition="'$(OS)' == 'Windows_NT'">$(TargetFrameworks);net462</TargetFrameworks>
     <Description>Loader used by the OpenTelemetry.AutoInstrumentation project.</Description>
     <OutputPath>..\bin\ProfilerResources\</OutputPath>
-
-    <!-- Hide warnings for EOL .NET Core targets (e.g. netcoreapp2.0) -->
-    <CheckEolTargetFramework>false</CheckEolTargetFramework>
   </PropertyGroup>
 <ItemGroup>
   <Compile Include="..\OpenTelemetry.AutoInstrumentation\Logging\InternalLogger.cs">
