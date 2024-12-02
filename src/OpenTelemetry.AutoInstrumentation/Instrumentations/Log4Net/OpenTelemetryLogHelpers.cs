@@ -11,7 +11,7 @@ namespace OpenTelemetry.AutoInstrumentation.Instrumentations.Log4Net;
 
 internal delegate void EmitLog(object loggerInstance, string? body, DateTime timestamp, string? severityText, int severityLevel, Exception? exception, IDictionary? properties, Activity? current);
 
-// TODO: remove once SDK makes LogsApi public in non-rc builds.
+// TODO: Remove whole class when Logs Api is made public in non-rc builds.
 internal static class OpenTelemetryLogHelpers
 {
     static OpenTelemetryLogHelpers()

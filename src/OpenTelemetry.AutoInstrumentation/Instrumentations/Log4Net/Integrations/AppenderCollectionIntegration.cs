@@ -28,12 +28,12 @@ public static class AppenderCollectionIntegration
         if (
             #if !NETFRAMEWORK
 #pragma warning disable SA1003
-            !LoggerInitializer.IsInitialized &&
+            !LoggerInitializer.IsInitializedAtLeastOnce &&
 #pragma warning restore SA1003
 #endif
             returnValue is Array responseArray)
         {
-            var finalArray = OpenTelemetryAppenderInitializer<TReturn>.Initialize(responseArray, OpenTelemetryLog4NetAppender.Instance);
+            var finalArray = OpenTelemetryAppenderInitializer<TReturn>.Initialize(responseArray);
             return new CallTargetReturn<TReturn>(finalArray);
         }
 

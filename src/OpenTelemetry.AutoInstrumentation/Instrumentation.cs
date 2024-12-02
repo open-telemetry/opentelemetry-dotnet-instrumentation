@@ -15,7 +15,6 @@ using OpenTelemetry.AutoInstrumentation.Logging;
 using OpenTelemetry.AutoInstrumentation.Plugins;
 using OpenTelemetry.Logs;
 using OpenTelemetry.Metrics;
-using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
 
 namespace OpenTelemetry.AutoInstrumentation;
@@ -27,6 +26,8 @@ internal static class Instrumentation
 {
     private static readonly IOtelLogger Logger = OtelLogging.GetLogger();
     private static readonly LazyInstrumentationLoader LazyInstrumentationLoader = new();
+
+    private static readonly Lazy<LoggerProvider?> LoggerProviderFactory = new(InitializeLoggerProvider, true);
 
     private static int _initialized;
     private static int _isExiting;
@@ -41,7 +42,10 @@ internal static class Instrumentation
     private static ContinuousProfilerProcessor? _profilerProcessor;
 #endif
 
-    internal static LoggerProvider? LogProvider { get; private set; }
+    internal static LoggerProvider? LoggerProvider
+    {
+        get => LoggerProviderFactory.Value;
+    }
 
     internal static PluginManager? PluginManager => _pluginManager;
 
@@ -172,22 +176,6 @@ internal static class Instrumentation
                     Logger.Information("Initialized lazily-loaded metric instrumentations without initializing sdk.");
                 }
             }
-
-            // ILogger bridge is initialized using ILogger-specific extension methods in LoggerInitializer class.
-            // That extension methods sets up its own LogProvider.
-            if (LogSettings.Value.LogsEnabled && LogSettings.Value.EnabledInstrumentations.Contains(LogInstrumentation.Log4Net))
-            {
-                // Sdk.CreateLoggerProviderBuilder()
-                var createLoggerProviderBuilderMethod = typeof(Sdk).GetMethod("CreateLoggerProviderBuilder", BindingFlags.Static | BindingFlags.NonPublic)!;
-                var loggerProviderBuilder = createLoggerProviderBuilderMethod.Invoke(null, null) as LoggerProviderBuilder;
-
-                // TODO: plugins support
-                LogProvider = loggerProviderBuilder!
-                    .SetResourceBuilder(ResourceConfigurator.CreateResourceBuilder(GeneralSettings.Value.EnabledResourceDetectors))
-                    .UseEnvironmentVariables(LazyInstrumentationLoader, LogSettings.Value, _pluginManager)
-                    .Build();
-                Logger.Information("OpenTelemetry log provider initialized.");
-            }
         }
         catch (Exception ex)
         {
@@ -237,6 +225,29 @@ internal static class Instrumentation
         {
             OpenTracingHelper.EnableOpenTracing(_tracerProvider);
         }
+    }
+
+    private static LoggerProvider? InitializeLoggerProvider()
+    {
+        // ILogger bridge is initialized using ILogger-specific extension methods in LoggerInitializer class.
+        // That extension methods sets up its own LogProvider.
+        if (LogSettings.Value.LogsEnabled && LogSettings.Value.EnabledInstrumentations.Contains(LogInstrumentation.Log4Net))
+        {
+            // TODO: Replace reflection usage when Logs Api is made public in non-rc builds.
+            // Sdk.CreateLoggerProviderBuilder()
+            var createLoggerProviderBuilderMethod = typeof(Sdk).GetMethod("CreateLoggerProviderBuilder", BindingFlags.Static | BindingFlags.NonPublic)!;
+            var loggerProviderBuilder = createLoggerProviderBuilderMethod.Invoke(null, null) as LoggerProviderBuilder;
+
+            // TODO: plugins support
+            var loggerProvider = loggerProviderBuilder!
+                .SetResourceBuilder(ResourceConfigurator.CreateResourceBuilder(GeneralSettings.Value.EnabledResourceDetectors))
+                .UseEnvironmentVariables(LazyInstrumentationLoader, LogSettings.Value, _pluginManager!)
+                .Build();
+            Logger.Information("OpenTelemetry logger provider initialized.");
+            return loggerProvider;
+        }
+
+        return null;
     }
 
 #if NET8_0_OR_GREATER
@@ -428,7 +439,10 @@ internal static class Instrumentation
 #endif
             _tracerProvider?.Dispose();
             _meterProvider?.Dispose();
-            LogProvider?.Dispose();
+            if (LoggerProviderFactory.IsValueCreated)
+            {
+                LoggerProvider?.Dispose();
+            }
 
             _sdkEventListener?.Dispose();
 

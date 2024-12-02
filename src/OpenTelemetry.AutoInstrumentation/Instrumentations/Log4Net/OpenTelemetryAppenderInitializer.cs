@@ -17,11 +17,11 @@ internal static class OpenTelemetryAppenderInitializer<TAppenderArray>
         AppenderType = typeof(TAppenderArray).GetElementType()!;
     }
 
-    public static TAppenderArray Initialize(Array initial, OpenTelemetryLog4NetAppender openTelemetryLog4NetAppender)
+    public static TAppenderArray Initialize(Array initial)
     {
         var newArray = Array.CreateInstance(AppenderType, initial.Length + 1);
         Array.Copy(initial, newArray, initial.Length);
-        _otelAppender ??= openTelemetryLog4NetAppender.DuckImplement(AppenderType);
+        _otelAppender ??= OpenTelemetryLog4NetAppender.Instance.DuckImplement(AppenderType);
 
         newArray.SetValue(_otelAppender, newArray.Length - 1);
         return (TAppenderArray)(object)newArray;

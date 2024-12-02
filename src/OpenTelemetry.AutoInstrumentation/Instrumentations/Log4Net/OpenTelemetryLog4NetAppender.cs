@@ -11,7 +11,7 @@ namespace OpenTelemetry.AutoInstrumentation.Instrumentations.Log4Net;
 
 internal class OpenTelemetryLog4NetAppender
 {
-    private static readonly Lazy<OpenTelemetryLog4NetAppender> InstanceField = new(ValueFactory);
+    private static readonly Lazy<OpenTelemetryLog4NetAppender> InstanceField = new(InitializeAppender, true);
 
     private readonly object? _logger;
 
@@ -28,7 +28,8 @@ internal class OpenTelemetryLog4NetAppender
     [DuckReverseMethod(ParameterTypeNames = new[] { "log4net.Core.LoggingEvent" })]
     public void DoAppend(ILoggingEvent loggingEvent)
     {
-        var mappedLogLevel = MapLogLevel(loggingEvent.Level);
+        LoggingLevel level = loggingEvent.Level;
+        var mappedLogLevel = MapLogLevel(level.Value);
 
         OpenTelemetryLogHelpers.LogEmitter(
             _logger!,
@@ -66,40 +67,41 @@ internal class OpenTelemetryLog4NetAppender
         return typeof(LoggerProvider).GetMethod("GetLogger", BindingFlags.NonPublic | BindingFlags.Instance, null, Type.EmptyTypes, null)!.Invoke(loggerProvider, null)!;
     }
 
-    private static OpenTelemetryLog4NetAppender ValueFactory()
+    private static OpenTelemetryLog4NetAppender InitializeAppender()
     {
-        return new OpenTelemetryLog4NetAppender(Instrumentation.LogProvider!);
+        return new OpenTelemetryLog4NetAppender(Instrumentation.LoggerProvider!);
     }
 
-    private static int MapLogLevel(LoggingLevel level)
+#pragma warning disable SA1202
+    internal static int MapLogLevel(int levelValue)
+#pragma warning restore SA1202
     {
-        return level.Value switch
+        return levelValue switch
         {
             // EMERGENCY -> FATAL2
-            120_000 => 22,
+            >= 120_000 => 22,
             // FATAL -> FATAL
-            110_000 => 21,
+            >= 110_000 => 21,
             // ALERT -> ERROR4
-            100_000 => 20,
+            >= 100_000 => 20,
             // CRITICAL -> ERROR3
-            90_000 => 19,
+            >= 90_000 => 19,
             // SEVERE -> ERROR2
-            80_000 => 18,
+            >= 80_000 => 18,
             // ERROR -> ERROR
-            70_000 => 17,
+            >= 70_000 => 17,
             // WARN -> WARN
-            60_000 => 13,
+            >= 60_000 => 13,
             // NOTICE -> INFO2
-            50_000 => 10,
+            >= 50_000 => 10,
             // INFO -> INFO
-            40_000 => 9,
+            >= 40_000 => 9,
             // FINE / DEBUG -> DEBUG
-            30_000 => 5,
+            >= 30_000 => 5,
             // FINER / TRACE -> TRACE2
-            20_000 => 2,
+            >= 20_000 => 2,
             // FINEST / VERBOSE -> TRACE
-            10_000 => 1,
-            // _ -> UNSPECIFIED
+            >= 10_000 => 1,
             _ => 0
         };
     }

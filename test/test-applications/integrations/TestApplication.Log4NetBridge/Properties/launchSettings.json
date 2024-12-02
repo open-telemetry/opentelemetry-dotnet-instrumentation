@@ -2,6 +2,7 @@
   "$schema": "http://json.schemastore.org/launchsettings.json",
   "profiles": {
     "TestApplication.Log4NetBridge": {
+      "commandLineArgs": "--api log4net",
       "commandName": "Project",
       "environmentVariables": {
         "COR_ENABLE_PROFILING": "1",
@@ -16,10 +17,9 @@
         "OTEL_DOTNET_AUTO_HOME": "$(SolutionDir)bin\\tracer-home",
         "OTEL_SERVICE_NAME": "TestApplication.Log4NetBridge",
         "OTEL_LOG_LEVEL": "debug",
-        "OTEL_LOGS_EXPORTER": "console",
-        "OTEL_TRACES_EXPORTER": "console",
-        "OTEL_DOTNET_AUTO_TRACES_ADDITIONAL_SOURCES": "TestApplication.Log4NetBridge",
-        "OTEL_DOTNET_AUTO_LOGS_ILogger_INSTRUMENTATION_ENABLED": "false"
+        "OTEL_LOGS_EXPORTER": "otlp,console",
+        "OTEL_TRACES_EXPORTER": "none",
+        "OTEL_DOTNET_AUTO_TRACES_ADDITIONAL_SOURCES": "TestApplication.Log4NetBridge"
       }
     }
   }
