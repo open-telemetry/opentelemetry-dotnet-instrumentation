@@ -20,6 +20,7 @@ public static partial class LibraryVersion
             new List<PackageBuildInfo>
             {
                 new("12.22.2"),
+                new("12.23.0"),
             }
         },
         {
@@ -27,6 +28,7 @@ public static partial class LibraryVersion
             new List<PackageBuildInfo>
             {
                 new("8.15.10"),
+                new("8.16.3"),
             }
         },
         {
@@ -35,6 +37,7 @@ public static partial class LibraryVersion
             {
                 new("6.0.35"),
                 new("8.0.10"),
+                new("9.0.0"),
             }
         },
         {
@@ -53,6 +56,7 @@ public static partial class LibraryVersion
             {
                 new("7.5.0", additionalMetaData: new() {{"GraphQLMicrosoftDI","7.5.0"},{"GraphQLServerTransportsAspNetCore","7.5.0"},{"GraphQLServerUIPlayground","7.5.0"}}),
                 new("8.0.2", additionalMetaData: new() {{"GraphQLMicrosoftDI","8.0.2"},{"GraphQLServerTransportsAspNetCore","8.0.2"},{"GraphQLServerUIPlayground","8.0.2"}}),
+                new("8.2.1", additionalMetaData: new() {{"GraphQLMicrosoftDI","8.2.1"},{"GraphQLServerTransportsAspNetCore","8.1.0"},{"GraphQLServerUIPlayground","8.1.0"}}),
             }
         },
         {
@@ -60,7 +64,7 @@ public static partial class LibraryVersion
             new List<PackageBuildInfo>
             {
                 new("2.52.0"),
-                new("2.66.0"),
+                new("2.67.0"),
             }
         },
         {
@@ -76,6 +80,7 @@ public static partial class LibraryVersion
             new List<PackageBuildInfo>
             {
                 new("8.3.0"),
+                new("8.3.2"),
             }
         },
         {
@@ -106,7 +111,7 @@ public static partial class LibraryVersion
             new List<PackageBuildInfo>
             {
                 new("2.0.0"),
-                new("2.3.7"),
+                new("2.4.0"),
             }
         },
         {
@@ -138,7 +143,7 @@ public static partial class LibraryVersion
             new List<PackageBuildInfo>
             {
                 new("23.5.1", supportedFrameworks: new string[] {"net472"}),
-                new("23.6.0", supportedFrameworks: new string[] {"net472"}),
+                new("23.6.1", supportedFrameworks: new string[] {"net472"}),
             }
         },
         {
@@ -146,7 +151,7 @@ public static partial class LibraryVersion
             new List<PackageBuildInfo>
             {
                 new("23.5.1"),
-                new("23.6.0"),
+                new("23.6.1"),
             }
         },
         {
@@ -154,7 +159,7 @@ public static partial class LibraryVersion
             new List<PackageBuildInfo>
             {
                 new("3.6.0"),
-                new("3.13.0"),
+                new("3.13.1"),
             }
         },
         {
@@ -171,7 +176,7 @@ public static partial class LibraryVersion
             new List<PackageBuildInfo>
             {
                 new("2.6.122"),
-                new("2.8.12"),
+                new("2.8.22"),
             }
         },
         {
@@ -180,7 +185,7 @@ public static partial class LibraryVersion
             {
                 new("4.10.2"),
                 new("6.2.0"),
-                new("8.0.0", supportedFrameworks: new string[] {"net9.0","net8.0"}),
+                new("8.1.0"),
             }
         },
         {
@@ -190,7 +195,7 @@ public static partial class LibraryVersion
                 new("1.4.0", supportedPlatforms: new string[] {"x64"}),
                 new("1.6.2"),
                 new("1.8.2"),
-                new("2.5.3"),
+                new("2.6.1"),
             }
         },
     };

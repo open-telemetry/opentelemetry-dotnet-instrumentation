@@ -269,8 +269,7 @@ internal static class PackageVersionDefinitions
             {
                 new("4.10.2"),
                 new("6.2.0"),
-                new("*", supportedTargetFrameworks: ["net9.0", "net8.0"], supportedExecutionFrameworks: ["net9.0", "net8.0"
-                ])
+                new("*")
             }
         },
         new()
