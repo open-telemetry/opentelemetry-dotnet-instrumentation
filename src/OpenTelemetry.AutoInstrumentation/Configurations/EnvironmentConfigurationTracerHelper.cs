@@ -35,7 +35,6 @@ internal static class EnvironmentConfigurationTracerHelper
                 TracerInstrumentation.Elasticsearch => builder.AddSource("Elastic.Clients.Elasticsearch.ElasticsearchClient"),
                 TracerInstrumentation.ElasticTransport => builder.AddSource("Elastic.Transport"),
                 TracerInstrumentation.Quartz => Wrappers.AddQuartzInstrumentation(builder, pluginManager, lazyInstrumentationLoader),
-                TracerInstrumentation.MongoDB => builder.AddSource("MongoDB.Driver.Core.Extensions.DiagnosticSources"),
                 TracerInstrumentation.MySqlConnector => builder.AddSource("MySqlConnector"),
                 TracerInstrumentation.Azure => Wrappers.AddAzureInstrumentation(builder),
                 TracerInstrumentation.WcfClient => AddWcfIfNeeded(builder, ref wcfInstrumentationAdded),

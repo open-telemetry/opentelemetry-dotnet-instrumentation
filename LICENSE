@@ -291,11 +291,6 @@ are under the following copyright:
 Copyright (c) .NET Foundation and Contributors under the MIT License (MIT)
 (<https://github.com/dotnet/wcf/blob/main/LICENSE.TXT>).
 
-Library MongoDB.Driver.Core.Extensions.DiagnosticSources is under the following copyright:
-Copyright MongoDB.Driver.Core.Extensions.DiagnosticSources Authors under Apache
-License Version 2.0
-(<https://github.com/jbogard/MongoDB.Driver.Core.Extensions.DiagnosticSources/blob/master/LICENSE>).
-
 Component Serilog compiled into OpenTelemetry.AutoInstrumentation, OpenTelemetry.AutoInstrumentation.Loader, OpenTelemetry.AutoInstrumentation.StartupHook
 is under the following copyright:
 Copyright 2013-2017 Serilog Contributors under Apache License Version 2.0
