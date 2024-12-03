@@ -16,7 +16,6 @@
   <ItemGroup>
     <PackageReference Include="Mono.Cecil" />
     <PackageReference Include="Nuke.Common" />
-    <PackageReference Include="System.Runtime.Serialization.Formatters" />
     <PackageReference Include="Nuget.CommandLine" ExcludeAssets="all" />
   </ItemGroup>
   <ItemGroup>
