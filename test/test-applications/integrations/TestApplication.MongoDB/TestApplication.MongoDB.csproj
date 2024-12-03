@@ -3,7 +3,8 @@
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFrameworks>net9.0;net8.0</TargetFrameworks>
-    <TargetFrameworks Condition="'$(OS)' == 'Windows_NT'">$(TargetFrameworks);net462</TargetFrameworks>
+    <TargetFrameworks Condition="'$(OS)' == 'Windows_NT' and ('$(LibraryVersion)' == '' or '$(LibraryVersion)' &gt;= '3.0.0')">$(TargetFrameworks);net472</TargetFrameworks>
+    <TargetFrameworks Condition="'$(OS)' == 'Windows_NT' and '$(LibraryVersion)' != '' and '$(LibraryVersion)' &lt; '3.0.0'">$(TargetFrameworks);net462</TargetFrameworks>
   </PropertyGroup>
 
   <PropertyGroup>
@@ -13,8 +14,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="MongoDB.Driver" VersionOverride="$(LibraryVersion)" Condition=" '$(LibraryVersion)' != '' or '$(TargetFramework)' != 'net462' "/>
-    <PackageReference Include="MongoDB.Driver" VersionOverride="2.30.0" Condition=" '$(LibraryVersion)' == '' and '$(TargetFramework)' == 'net462' "/>
+    <PackageReference Include="MongoDB.Driver" VersionOverride="$(LibraryVersion)" />
     <!-- Workaround! Microsoft.Extensions.Logging.Abstractions v9.0.0 is minimal version supported by auto instrumentation.
     MongoDB.Driver 2.18+ references older version. It prevents to load required version from Additional Dependencies store-->
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" VersionOverride="9.0.0" />

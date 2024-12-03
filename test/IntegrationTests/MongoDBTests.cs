@@ -54,6 +54,9 @@ public class MongoDBTests : TestHelper
         EnableBytecodeInstrumentation();
         RunTestApplication(new()
         {
+#if NET462
+            Framework = string.IsNullOrEmpty(packageVersion) || new Version(packageVersion) >= new Version(3, 0, 0) ? "net472" : "net462",
+#endif
             Arguments = $"--mongo-db {_mongoDB.Port} {MongoDbNamespace} {MongoDbCollectionName}",
             PackageVersion = packageVersion
         });
