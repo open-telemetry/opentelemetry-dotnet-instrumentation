@@ -27,11 +27,8 @@ public class Log4NetTests
             { Level.Warn.Value, GetOpenTelemetrySeverityValue("Warn") },
             { Level.Notice.Value, GetOpenTelemetrySeverityValue("Info2") },
             { Level.Info.Value, GetOpenTelemetrySeverityValue("Info") },
-            { Level.Fine.Value, GetOpenTelemetrySeverityValue("Debug") },
             { Level.Debug.Value, GetOpenTelemetrySeverityValue("Debug") },
-            { Level.Finer.Value, GetOpenTelemetrySeverityValue("Trace2") },
             { Level.Trace.Value, GetOpenTelemetrySeverityValue("Trace2") },
-            { Level.Finest.Value, GetOpenTelemetrySeverityValue("Trace") },
             { Level.Verbose.Value, GetOpenTelemetrySeverityValue("Trace") }
         };
 
@@ -50,7 +47,7 @@ public class Log4NetTests
     [InlineData(60010, 13)]
     // LogLevel.Info(40000) + 10, LogRecordSeverity.Info (9)
     [InlineData(40010, 9)]
-    // Everything below Finer(20000) threshold is mapped to LogRecordSeverity.Trace
+    // Everything below Trace(20000) threshold is mapped to LogRecordSeverity.Trace
     [InlineData(19900, 1)]
     public void Log4NetLevelValuesWithoutADirectMatch_AreMappedToALessSevereValue(int log4NetLevelValue, int expectedOpenTelemetrySeverity)
     {
