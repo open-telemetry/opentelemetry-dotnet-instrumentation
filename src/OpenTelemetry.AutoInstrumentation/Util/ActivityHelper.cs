@@ -4,7 +4,6 @@
 using System.Diagnostics;
 using OpenTelemetry.AutoInstrumentation.Logging;
 using OpenTelemetry.AutoInstrumentation.Tagging;
-using OpenTelemetry.Trace;
 
 namespace OpenTelemetry.AutoInstrumentation.Util;
 
@@ -30,8 +29,8 @@ internal static class ActivityHelper
             return;
         }
 
-        activity.SetStatus(Status.Error.WithDescription(exception.Message));
-        activity.RecordException(exception);
+        activity.SetStatus(ActivityStatusCode.Error, exception.Message);
+        activity.AddException(exception);
     }
 
     public static Activity? StartActivityWithTags(this ActivitySource? activitySource, string operationName, ActivityKind kind, ITags tags)

@@ -16,7 +16,42 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 
 ### Changed
 
+- Kafka and RabbitMQ 6 tags `otel.status_code` and `otel.status_description` are
+  replaced by native fields `Status` and `StatusDescription`.
+- Changed minimal supported version of `Microsoft.Extensions.Logging`
+  for `ILOGGER` instrumentation from `8.0.0` to `9.0.0`.
+- Glibc native libraries are compiled on Ubuntu v16.04.
+
 #### Dependency updates
+
+- Updated [Core components](https://github.com/open-telemetry/opentelemetry-dotnet/blob/main/VERSIONING.md#core-components):
+  [`1.10.0`](https://github.com/open-telemetry/opentelemetry-dotnet/releases/tag/core-1.10.0).
+- Following packages updated
+  - `Microsoft.Extensions.Configuration.Binder` from `8.0.2` to `9.0.0`,
+  - `Microsoft.Extensions.Logging.Configuration` from `8.0.0` to `9.0.0`,
+  - `OpenTelemetry.Exporter.Prometheus.HttpListener` from `1.9.0-beta.2` to `1.10.0-beta.1`,
+  - `OpenTelemetry.Instrumentation.Http` from `1.9.0` to `1.10.0`.
+- .NET only, following packages updated
+  - `System.Diagnostics.DiagnosticSource` from `8.0.0` to `9.0.0`.
+- .NET Framework only, following packages updated
+  - `Google.Protobuf` updated from `3.28.3` to `3.29.0`,
+  - `Microsoft.Bcl.AsyncInterfaces` from `8.0.0` to `9.0.0`,
+  - `Microsoft.Extensions.Configuration` from `9.0.0` to `9.0.0`,
+  - `Microsoft.Extensions.Configuration.Abstractions` from `8.0.0` to `9.0.0`,
+  - `Microsoft.Extensions.DependencyInjection` from `8.0.1` to `9.0.0`,
+  - `Microsoft.Extensions.DependencyInjection.Abstractions` from `8.0.2` to `9.0.0`,
+  - `Microsoft.Extensions.Logging` from `8.0.0` to `9.0.0`,
+  - `Microsoft.Extensions.Logging.Abstractions` from `8.0.1` to `9.0.0`,
+  - `Microsoft.Extensions.Options` from `8.0.2` to `9.0.0`,
+  - `Microsoft.Extensions.Options.ConfigurationExtensions` from `8.0.0` to `9.0.0`,
+  - `Microsoft.Extensions.Primitives` from `8.0.0` to `9.0.0`,
+  - `System.Buffers` from `4.5.5` to `4.6.0`,
+  - `System.Memory` from `4.5.5` to `4.6.0`,
+  - `System.Numerics.Vectors` from `4.5.0` to `4.6.0`,
+  - `System.Diagnostics.DiagnosticSource` from `8.0.1` to `9.0.0`,
+  - `System.Runtime.CompilerServices.Unsafe` from `6.0.0` to `6.1.0`,
+  - `System.Text.Encodings.Web` from `8.0.0` to `9.0.0`,
+  - `System.Text.Json` from `8.0.5` to `9.0.0`.
 
 ### Deprecated
 
