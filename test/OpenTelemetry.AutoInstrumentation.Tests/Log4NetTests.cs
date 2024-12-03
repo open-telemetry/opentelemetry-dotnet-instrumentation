@@ -50,8 +50,8 @@ public class Log4NetTests
     [InlineData(60010, 13)]
     // LogLevel.Info(40000) + 10, LogRecordSeverity.Info (9)
     [InlineData(40010, 9)]
-    // Everything below Finest(10000) threshold is mapped to LogRecordSeverity.Trace
-    [InlineData(9900, 1)]
+    // Everything below Finer(20000) threshold is mapped to LogRecordSeverity.Trace
+    [InlineData(19900, 1)]
     public void Log4NetLevelValuesWithoutADirectMatch_AreMappedToALessSevereValue(int log4NetLevelValue, int expectedOpenTelemetrySeverity)
     {
         OpenTelemetryLog4NetAppender.MapLogLevel(log4NetLevelValue).Should().Be(expectedOpenTelemetrySeverity);

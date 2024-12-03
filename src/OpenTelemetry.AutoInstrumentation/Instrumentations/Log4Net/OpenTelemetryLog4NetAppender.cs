@@ -100,7 +100,7 @@ internal class OpenTelemetryLog4NetAppender
             >= 30_000 => 5,
             // FINER / TRACE -> TRACE2
             >= 20_000 => 2,
-            // FINEST / VERBOSE -> TRACE
+            // Map values below FINER to TRACE
             _ => 1
         };
     }
