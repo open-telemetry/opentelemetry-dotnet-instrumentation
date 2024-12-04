@@ -55,7 +55,7 @@
     <PackageVersion Include="System.Security.Cryptography.Pkcs" Version="8.0.1" />
     <PackageVersion Include="System.ServiceModel.Http" Version="8.1.0" />
     <PackageVersion Include="System.ServiceModel.NetTcp" Version="8.1.0" />
-    <PackageVersion Include="System.Text.Json" Version="8.0.5" />
+    <PackageVersion Include="System.Text.Json" Version="9.0.0" />
     <PackageVersion Include="System.ValueTuple" Version="4.5.0" />
     <PackageVersion Include="Testcontainers" Version="4.0.0" />
     <PackageVersion Include="Verify.Xunit" Version="20.8.2" />
