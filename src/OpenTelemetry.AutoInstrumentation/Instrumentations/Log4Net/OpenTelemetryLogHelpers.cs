@@ -5,6 +5,7 @@ using System.Collections;
 using System.Diagnostics;
 using System.Linq.Expressions;
 using System.Reflection;
+using OpenTelemetry.AutoInstrumentation.Logging;
 using OpenTelemetry.Logs;
 
 namespace OpenTelemetry.AutoInstrumentation.Instrumentations.Log4Net;
@@ -14,18 +15,27 @@ internal delegate void EmitLog(object loggerInstance, string? body, DateTime tim
 // TODO: Remove whole class when Logs Api is made public in non-rc builds.
 internal static class OpenTelemetryLogHelpers
 {
+    private static readonly IOtelLogger Logger = OtelLogging.GetLogger();
+
     static OpenTelemetryLogHelpers()
     {
-        var loggerProviderType = typeof(LoggerProvider);
-        var apiAssembly = loggerProviderType.Assembly;
-        var loggerType = typeof(Sdk).Assembly.GetType("OpenTelemetry.Logs.LoggerSdk");
-        var logRecordDataType = apiAssembly.GetType("OpenTelemetry.Logs.LogRecordData")!;
-        var logRecordAttributesListType = apiAssembly.GetType("OpenTelemetry.Logs.LogRecordAttributeList")!;
+        try
+        {
+            var loggerProviderType = typeof(LoggerProvider);
+            var apiAssembly = loggerProviderType.Assembly;
+            var loggerType = typeof(Sdk).Assembly.GetType("OpenTelemetry.Logs.LoggerSdk");
+            var logRecordDataType = apiAssembly.GetType("OpenTelemetry.Logs.LogRecordData")!;
+            var logRecordAttributesListType = apiAssembly.GetType("OpenTelemetry.Logs.LogRecordAttributeList")!;
 
-        LogEmitter = BuildEmitLog(logRecordDataType, logRecordAttributesListType, loggerType!);
+            LogEmitter = BuildEmitLog(logRecordDataType, logRecordAttributesListType, loggerType!);
+        }
+        catch (Exception e)
+        {
+            Logger.Error(e, "Failed to initialize LogEmitter delegate.");
+        }
     }
 
-    public static EmitLog LogEmitter { get; }
+    public static EmitLog? LogEmitter { get; }
 
     private static BlockExpression BuildLogRecord(
         Type logRecordDataType,
