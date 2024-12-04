@@ -152,7 +152,7 @@ void CorProfiler::InitNetFxAssemblyRedirectsMap()
         { L"System.Threading", {4, 0, 11, 0} },
         { L"System.Threading.Overlapped", {4, 1, 0, 0} },
         { L"System.Threading.Tasks", {4, 0, 11, 0} },
-        { L"System.Threading.Tasks.Extensions", {4, 2, 0, 1} },
+        { L"System.Threading.Tasks.Extensions", {4, 2, 1, 0} },
         { L"System.Threading.Tasks.Parallel", {4, 0, 1, 0} },
         { L"System.Threading.Thread", {4, 0, 2, 0} },
         { L"System.Threading.ThreadPool", {4, 0, 12, 0} },
