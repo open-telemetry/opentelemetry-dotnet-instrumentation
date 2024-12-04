@@ -14,7 +14,7 @@ jobs:
         with:
           dotnet-version: | 
             8.0.404
-            9.0.100
+            9.0.101
             
       - name: Test the PowerShell module instructions from README.md
         shell: powershell
@@ -68,7 +68,7 @@ jobs:
         with:
           dotnet-version: | 
             8.0.404
-            9.0.100
+            9.0.101
 
       - name: Install MacOS CoreUtils
         if: ${{ runner.os == 'macOS' }}
