@@ -14,9 +14,7 @@
         "OTEL_EXPORTER_ZIPKIN_ENDPOINT": "http://localhost:9411/api/v2/spans",
         "OTEL_LOG_LEVEL": "debug",
         "OTEL_DOTNET_AUTO_TRACES_ADDITIONAL_SOURCES": "TestApplication.MongoDB",
-        "OTEL_DOTNET_AUTO_HOME": "$(SolutionDir)bin\\tracer-home\\",
-        "OTEL_RESOURCE_ATTRIBUTES": "deployment.environment=o11y-instrumentals-dotnet",
-        "OTEL_SERVICE_NAME": "test-mongodb"
+        "OTEL_DOTNET_AUTO_HOME": "$(SolutionDir)bin\\tracer-home\\"
       }
     }
   }
