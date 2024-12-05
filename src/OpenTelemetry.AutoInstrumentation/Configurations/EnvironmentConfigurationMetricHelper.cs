@@ -36,7 +36,13 @@ internal static class EnvironmentConfigurationMetricHelper
                     .AddMeter("NServiceBus.Core"), // NServiceBus [8,0.0, 9.1.0)
 
 #if NET8_0_OR_GREATER
-                MetricInstrumentation.AspNetCore => Wrappers.AddAspNetCoreInstrumentation(builder, lazyInstrumentationLoader),
+                MetricInstrumentation.AspNetCore => builder
+                    .AddMeter("Microsoft.AspNetCore.Hosting")
+                    .AddMeter("Microsoft.AspNetCore.Server.Kestrel")
+                    .AddMeter("Microsoft.AspNetCore.Http.Connections")
+                    .AddMeter("Microsoft.AspNetCore.Routing")
+                    .AddMeter("Microsoft.AspNetCore.Diagnostics")
+                    .AddMeter("Microsoft.AspNetCore.RateLimiting"),
 #endif
                 _ => null,
             };
@@ -80,27 +86,6 @@ internal static class EnvironmentConfigurationMetricHelper
         {
             DelayedInitialization.Metrics.AddAspNet(lazyInstrumentationLoader, pluginManager);
             return builder.AddMeter("OpenTelemetry.Instrumentation.AspNet");
-        }
-#endif
-
-#if NET8_0_OR_GREATER
-        [MethodImpl(MethodImplOptions.NoInlining)]
-        public static MeterProviderBuilder AddAspNetCoreInstrumentation(MeterProviderBuilder builder, LazyInstrumentationLoader lazyInstrumentationLoader)
-        {
-            if (Environment.Version.Major >= 8)
-            {
-                // AspNetCore has build in support for metrics in .NET8. Executing OpenTelemetry.Instrumentation.AspNetCore in this case leads to duplicated metrics.
-                return builder
-                    .AddMeter("Microsoft.AspNetCore.Hosting")
-                    .AddMeter("Microsoft.AspNetCore.Server.Kestrel")
-                    .AddMeter("Microsoft.AspNetCore.Http.Connections")
-                    .AddMeter("Microsoft.AspNetCore.Routing")
-                    .AddMeter("Microsoft.AspNetCore.Diagnostics")
-                    .AddMeter("Microsoft.AspNetCore.RateLimiting");
-            }
-
-            DelayedInitialization.Metrics.AddAspNetCore(lazyInstrumentationLoader);
-            return builder.AddMeter("OpenTelemetry.Instrumentation.AspNetCore");
         }
 #endif
 

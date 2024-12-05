@@ -316,9 +316,8 @@ internal static class Instrumentation
                     DelayedInitialization.Metrics.AddAspNet(lazyInstrumentationLoader, pluginManager);
                     break;
 #endif
-#if NET8_0_OR_GREATER
+#if NET
                 case MetricInstrumentation.AspNetCore:
-                    DelayedInitialization.Metrics.AddAspNetCore(lazyInstrumentationLoader);
                     break;
 #endif
                 case MetricInstrumentation.HttpClient:
