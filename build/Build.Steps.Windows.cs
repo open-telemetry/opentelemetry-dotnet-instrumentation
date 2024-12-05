@@ -285,7 +285,7 @@ partial class Build
         DotNetRun(s => s
             .SetProjectFile(installTool)
             .SetConfiguration(BuildConfiguration)
-            .SetApplicationArguments($"{operation} {netFxAssembliesFolder}"));
+            .SetApplicationArguments(operation, netFxAssembliesFolder));
 
         static bool IsWindowsAdministrator()
         {
