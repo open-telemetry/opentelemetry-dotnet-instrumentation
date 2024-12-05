@@ -20,13 +20,16 @@ internal static class Program
             using var activity = Source.StartActivity("ManuallyStarted");
 
             var logApiName = args[1];
-            if (logApiName == "log4net")
+            switch (logApiName)
             {
-                LogUsingLog4NetDirectly();
-            }
-            else if (logApiName == "ILogger")
-            {
-                LogUsingILogger();
+                case "log4net":
+                    LogUsingLog4NetDirectly();
+                    break;
+                case "ILogger":
+                    LogUsingILogger();
+                    break;
+                default:
+                    throw new NotSupportedException($"{logApiName} is not supported.");
             }
         }
         else

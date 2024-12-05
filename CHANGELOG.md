@@ -12,6 +12,8 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 - Support for .NET9.
 - Support for [RabbitMQ.Client](https://www.nuget.org/packages/RabbitMQ.Client/)
   traces instrumentation for versions `7.0.0`+.
+- [log4net](https://www.nuget.org/packages/log4net/) [OpenTelemetry appender](https://opentelemetry.io/docs/concepts/signals/logs/#log-appender--bridge)
+  for versions >= `2.0.0` && < `4.0.0`
 
 ### Changed
 
