@@ -12,8 +12,6 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 - Support for .NET9.
 - Support for [RabbitMQ.Client](https://www.nuget.org/packages/RabbitMQ.Client/)
   traces instrumentation for versions `7.0.0`+.
-- Added bytecode instrumentation for `MongoDB` traces. The implementation targets
-  `MongoDB.Driver` and `MongoDB.Driver.Core` versions from 2.7.0 to 3.0.0.
 
 ### Changed
 
@@ -22,6 +20,8 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 - Changed minimal supported version of `Microsoft.Extensions.Logging`
   for `ILOGGER` instrumentation from `8.0.0` to `9.0.0`.
 - Glibc native libraries are compiled on Ubuntu v16.04.
+- Changed `MongoDB` traces instrumentation to the bytecode version. It supports
+  `MongoDB.Driver.Core` from `2.7.0` and `MongoDB.Driver` from `3.0.0`.
 
 #### Dependency updates
 
