@@ -20,7 +20,7 @@ internal static class DelayedInitialization
         }
 #endif
 
-#if NET8_0_OR_GREATER
+#if NET
         [MethodImpl(MethodImplOptions.NoInlining)]
         public static void AddAspNetCore(LazyInstrumentationLoader lazyInstrumentationLoader, PluginManager pluginManager, TracerSettings tracerSettings)
         {
@@ -81,14 +81,6 @@ internal static class DelayedInitialization
         public static void AddAspNet(LazyInstrumentationLoader lazyInstrumentationLoader, PluginManager pluginManager)
         {
             new AspNetMetricsInitializer(lazyInstrumentationLoader, pluginManager);
-        }
-#endif
-
-#if NET8_0_OR_GREATER
-        [MethodImpl(MethodImplOptions.NoInlining)]
-        public static void AddAspNetCore(LazyInstrumentationLoader lazyInstrumentationLoader)
-        {
-            lazyInstrumentationLoader.Add(new AspNetCoreMetricsInitializer());
         }
 #endif
 
