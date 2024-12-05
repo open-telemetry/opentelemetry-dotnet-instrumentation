@@ -33,7 +33,7 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 - .NET only, following packages updated
   - `System.Diagnostics.DiagnosticSource` from `8.0.0` to `9.0.0`.
 - .NET Framework only, following packages updated
-  - `Google.Protobuf` updated from `3.28.3` to `3.29.0`,
+  - `Google.Protobuf` updated from `3.28.3` to `3.29.1`,
   - `Microsoft.Bcl.AsyncInterfaces` from `8.0.0` to `9.0.0`,
   - `Microsoft.Extensions.Configuration` from `9.0.0` to `9.0.0`,
   - `Microsoft.Extensions.Configuration.Abstractions` from `8.0.0` to `9.0.0`,
