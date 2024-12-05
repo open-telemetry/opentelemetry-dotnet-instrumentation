@@ -1,17 +1,18 @@
 name: dotnet format
 
 on:
-  push:
-    branches: [ main ]
-    paths:
-    - '**.cs'
-    - '.editorconfig'
-  pull_request:
-    branches: [ main ]
-    paths:
-    - '**.cs'
-    - '.editorconfig'
-  merge_group:
+# Uncomment after fix for https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/issues/3841 is available
+#  push:
+#    branches: [ main ]
+#    paths:
+#    - '**.cs'
+#    - '.editorconfig'
+#  pull_request:
+#    branches: [ main ]
+#    paths:
+#    - '**.cs'
+#    - '.editorconfig'
+#  merge_group:
   workflow_dispatch:
 
 jobs:
@@ -25,7 +26,7 @@ jobs:
     - name: Setup .NET
       uses: actions/setup-dotnet@3e891b0cb619bf60e2c25674b222b8940e2c1c25 # tag: v4.1.0
       with:
-        dotnet-version: 9.0.100
+        dotnet-version: 9.0.101
 
     - name: dotnet format
       run: dotnet format .\OpenTelemetry.AutoInstrumentation.sln --no-restore --verify-no-changes
