@@ -1,1 +1,1 @@
-FROM confluentinc/cp-zookeeper:7.8.0@sha256:769f5e459674829eaa8cf71ded26ea82ec5e5abdd71b1cecefe2a3dc685f7eb1
+FROM confluentinc/cp-zookeeper:7.8.0@sha256:3abfc3079b0882381e5723f74132246bfd17eb7ff04e8cf7313321425ff65426
