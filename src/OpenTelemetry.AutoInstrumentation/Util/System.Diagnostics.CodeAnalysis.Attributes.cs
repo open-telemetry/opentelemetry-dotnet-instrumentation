@@ -17,7 +17,7 @@
 // ReSharper disable once CheckNamespace
 namespace System.Diagnostics.CodeAnalysis;
 
-#if !NETCOREAPP3_0_OR_GREATER
+#if NETFRAMEWORK
 /// <summary>Specifies that null is allowed as an input even if the corresponding type disallows it.</summary>
 [AttributeUsage(AttributeTargets.Field | AttributeTargets.Parameter | AttributeTargets.Property)]
 internal sealed class AllowNullAttribute : Attribute
@@ -124,8 +124,6 @@ internal sealed class MemberNotNullAttribute : Attribute
     /// <summary>Gets field or property member names.</summary>
     public string[] Members { get; }
 }
-#endif
-#if !NET5_0_OR_GREATER
 
 /// <summary>Specifies that the method or property will ensure that the listed field and property members have not-null values when returning with the specified return value condition.</summary>
 [AttributeUsage(AttributeTargets.Method | AttributeTargets.Property, Inherited = false, AllowMultiple = true)]

@@ -7,7 +7,7 @@ internal static class DirectoryHelpers
 {
     public static DirectoryInfo CreateTempDirectory()
     {
-#if NET8_0_OR_GREATER
+#if NET
         return Directory.CreateTempSubdirectory("native_logs");
 #else
         var tempDir = Path.Combine(Path.GetTempPath(), "native_logs_" + Path.GetRandomFileName());

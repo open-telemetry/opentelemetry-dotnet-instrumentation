@@ -20,7 +20,7 @@ public sealed class InstrumentationTargetTests : TestHelper
     {
     }
 
-#if !NETFRAMEWORK
+#if NET
     [Fact]
     public void PublishApplication()
     {
@@ -120,7 +120,7 @@ public sealed class InstrumentationTargetTests : TestHelper
         }
     }
 
-#if !NETFRAMEWORK
+#if NET
     private void RunDotnetPublish(string arguments, bool expectWarning)
     {
         const string warningMessage = "RuntimeIdentifier (RID) is not set." +

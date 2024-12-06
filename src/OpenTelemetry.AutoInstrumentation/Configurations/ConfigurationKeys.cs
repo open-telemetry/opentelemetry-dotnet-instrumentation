@@ -109,7 +109,7 @@ internal partial class ConfigurationKeys
             public const string AspNetInstrumentationCaptureResponseHeaders = "OTEL_DOTNET_AUTO_TRACES_ASPNET_INSTRUMENTATION_CAPTURE_RESPONSE_HEADERS";
 #endif
 
-#if NET8_0_OR_GREATER
+#if NET
             /// <summary>
             /// Configuration key for ASP.NET Core instrumentation to enable capturing HTTP request headers as span tags.
             /// </summary>

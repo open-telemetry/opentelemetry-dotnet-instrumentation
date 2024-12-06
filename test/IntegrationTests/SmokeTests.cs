@@ -151,7 +151,7 @@ public class SmokeTests : TestHelper
         collector.ResourceExpector.AssertExpectations();
     }
 
-#if NET8_0_OR_GREATER // The feature is not supported on .NET Framework
+#if NET // The feature is not supported on .NET Framework
     [Fact]
     [Trait("Category", "EndToEnd")]
     public void LogsResource()
@@ -360,7 +360,7 @@ public class SmokeTests : TestHelper
     }
 #endif
 
-#if NET8_0_OR_GREATER // The feature is not supported on .NET Framework
+#if NET // The feature is not supported on .NET Framework
     [Fact]
     [Trait("Category", "EndToEnd")]
     public void SubmitLogs()
