@@ -19,7 +19,6 @@
     <!-- Dependencies below are shipped on the distribution folder, but not included in the NuGet package. -->
     <!-- If necessary these packages are flagged by custom build tasks and manually added to the targeted  -->
     <!-- projects that are using the NuGet package. -->
-    <PackageReference Include="MongoDB.Driver.Core.Extensions.DiagnosticSources" />
     <PackageReference Include="OpenTelemetry.Instrumentation.StackExchangeRedis" Condition=" '$(TargetFramework)' == 'net8.0' " />
   </ItemGroup>
 
@@ -84,6 +83,7 @@
     <PackageReference Include="System.Memory" />
     <PackageReference Include="System.Numerics.Vectors" />
     <PackageReference Include="System.Runtime.CompilerServices.Unsafe" />
+    <PackageReference Include="System.Runtime.InteropServices.RuntimeInformation" />
     <PackageReference Include="System.Text.Encodings.Web" />
     <PackageReference Include="System.Text.Json" />
     <PackageReference Include="System.Threading.Tasks.Extensions" />
