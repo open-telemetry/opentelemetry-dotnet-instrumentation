@@ -3,6 +3,7 @@
   <ItemGroup>
     <PackageReference Include="Newtonsoft.Json" />
     <PackageReference Include="Xunit.SkippableFact" />
+    <PackageReference Include="log4net" />
   </ItemGroup>
 
   <ItemGroup>
