@@ -134,8 +134,8 @@ internal static class PackageVersionDefinitions
             Versions = new List<PackageVersion>
             {
                 // new("2.7.0"), - high vulnerability https://github.com/advisories/GHSA-7j9m-j397-g4wx, < 2.19.0
-                new("2.19.0"),
-                new("2.30.0"),
+                new("2.19.0", supportedTargetFrameworks: ["net9.0", "net8.0", "net462"], supportedExecutionFrameworks: ["net9.0", "net8.0", "net462"]),
+                new("2.30.0", supportedTargetFrameworks: ["net9.0", "net8.0", "net462"], supportedExecutionFrameworks: ["net9.0", "net8.0", "net462"]),
                 new("3.0.0", supportedTargetFrameworks: ["net9.0", "net8.0", "net472"], supportedExecutionFrameworks: ["net9.0", "net8.0", "net462"]),
                 new("*", supportedTargetFrameworks: ["net9.0", "net8.0", "net472"], supportedExecutionFrameworks: ["net9.0", "net8.0", "net462"])
             }

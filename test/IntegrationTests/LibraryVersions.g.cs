@@ -150,8 +150,12 @@ public static partial class LibraryVersion
 #if DEFAULT_TEST_PACKAGE_VERSIONS
             theoryData.Add(string.Empty);
 #else
+#if NET9_0 || NET8_0 || NET462
             theoryData.Add("2.19.0");
+#endif
+#if NET9_0 || NET8_0 || NET462
             theoryData.Add("2.30.0");
+#endif
 #if NET9_0 || NET8_0 || NET462
             theoryData.Add("3.0.0");
 #endif
