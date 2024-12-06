@@ -1,7 +1,7 @@
 // Copyright The OpenTelemetry Authors
 // SPDX-License-Identifier: Apache-2.0
 
-#if NETCOREAPP
+#if NET
 using System.Reflection;
 using System.Runtime.Loader;
 

@@ -1,11 +1,11 @@
 // Copyright The OpenTelemetry Authors
 // SPDX-License-Identifier: Apache-2.0
 
+#if NET
+
 using IntegrationTests.Helpers;
 using OpenTelemetry.Proto.Logs.V1;
 using Xunit.Abstractions;
-
-#if NET8_0_OR_GREATER
 
 namespace IntegrationTests;
 

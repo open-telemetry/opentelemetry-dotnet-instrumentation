@@ -46,7 +46,7 @@ internal static class DelayedInitialization
             new SqlClientInitializer(lazyInstrumentationLoader, pluginManager, tracerSettings);
         }
 
-#if NET8_0_OR_GREATER
+#if NET
 
         [MethodImpl(MethodImplOptions.NoInlining)]
         public static void AddEntityFrameworkCore(LazyInstrumentationLoader lazyInstrumentationLoader, PluginManager pluginManager, TracerSettings tracerSettings)

@@ -5,7 +5,7 @@
 
 namespace OpenTelemetry.AutoInstrumentation.CallTarget.Handlers.Continuations;
 
-#if NET8_0_OR_GREATER
+#if NET
 internal class ValueTaskContinuationGenerator<TIntegration, TTarget, TReturn, TResult> : ContinuationGenerator<TTarget, TReturn>
 {
     private static readonly ContinuationMethodDelegate? _continuation;

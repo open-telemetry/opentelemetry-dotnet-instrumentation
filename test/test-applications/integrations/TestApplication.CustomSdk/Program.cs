@@ -121,7 +121,7 @@ public static class Program
             // lazily-loaded metric instrumentation
             .AddMeter("OpenTelemetry.Instrumentation.*")
             // bytecode metric instrumentation
-#if NET8_0_OR_GREATER
+#if NET
             .AddMeter("NServiceBus.Core.Pipeline.Incoming")
 #else
             .AddMeter("NServiceBus.Core")

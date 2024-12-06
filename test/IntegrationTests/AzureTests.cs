@@ -29,7 +29,7 @@ public class AzureTests : TestHelper
         collector.Expect("Azure.Core.Http");
         collector.Expect("Azure.Storage.Blobs.BlobContainerClient");
 
-#if NET8_0_OR_GREATER
+#if NET
         collector.Expect("System.Net.Http");
 #elif NETFRAMEWORK
         // On .NET Framework the "OpenTelemetry.Instrumentation.Http.HttpWebRequest"
