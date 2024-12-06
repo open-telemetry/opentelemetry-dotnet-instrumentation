@@ -7,7 +7,7 @@ using Greet;
 using Grpc.Core;
 using Grpc.Net.Client;
 using IntegrationTests.Helpers;
-#if !NETFRAMEWORK
+#if NET
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
@@ -23,7 +23,7 @@ ConsoleHelper.WriteSplashScreen(args);
 
 var port = TcpPortProvider.GetOpenPort();
 
-#if !NETFRAMEWORK
+#if NET
 var builder = WebApplication.CreateBuilder(args);
 
 builder.WebHost.ConfigureKestrel(serverOptions =>
@@ -73,6 +73,6 @@ catch (RpcException e)
     Console.WriteLine(e);
 }
 
-#if !NETFRAMEWORK
+#if NET
 app.Lifetime.StopApplication();
 #endif

@@ -31,7 +31,7 @@ public class BuildTests
             .DisableDiff();
     }
 
-#if NET8_0_OR_GREATER
+#if NET
     [Fact]
     public void NetFolderDoesNotContainAnyLibraryFromAdditionalStore()
     {

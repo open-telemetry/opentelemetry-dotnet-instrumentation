@@ -35,7 +35,7 @@ internal enum MetricInstrumentation
     /// </summary>
     NServiceBus = 5,
 
-#if NET8_0_OR_GREATER
+#if NET
     /// <summary>
     /// ASP.NET Core instrumentation.
     /// </summary>
