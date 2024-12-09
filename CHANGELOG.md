@@ -12,6 +12,7 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 - Support for .NET9.
 - Support for [RabbitMQ.Client](https://www.nuget.org/packages/RabbitMQ.Client/)
   traces instrumentation for versions `7.0.0`+.
+- Support for SqlClient metrics.
 
 ### Changed
 

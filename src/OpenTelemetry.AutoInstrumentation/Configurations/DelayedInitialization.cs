@@ -43,7 +43,7 @@ internal static class DelayedInitialization
         [MethodImpl(MethodImplOptions.NoInlining)]
         public static void AddSqlClient(LazyInstrumentationLoader lazyInstrumentationLoader, PluginManager pluginManager, TracerSettings tracerSettings)
         {
-            new SqlClientInitializer(lazyInstrumentationLoader, pluginManager, tracerSettings);
+            new SqlClientTracerInitializer(lazyInstrumentationLoader, pluginManager, tracerSettings);
         }
 
 #if NET
@@ -88,6 +88,12 @@ internal static class DelayedInitialization
         public static void AddHttpClient(LazyInstrumentationLoader lazyInstrumentationLoader)
         {
             new HttpClientMetricsInitializer(lazyInstrumentationLoader);
+        }
+
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        public static void AddSqlClient(LazyInstrumentationLoader lazyInstrumentationLoader, PluginManager pluginManager)
+        {
+            new SqlClientMetricsInitializer(lazyInstrumentationLoader, pluginManager);
         }
     }
 }

@@ -296,6 +296,9 @@ internal static class Instrumentation
                     break;
                 case MetricInstrumentation.NServiceBus:
                     break;
+                case MetricInstrumentation.SqlClient:
+                    DelayedInitialization.Metrics.AddSqlClient(lazyInstrumentationLoader, pluginManager);
+                    break;
                 default:
                     Logger.Warning($"Configured metric instrumentation type is not supported: {instrumentation}");
                     if (FailFastSettings.Value.FailFast)
