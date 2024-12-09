@@ -29,7 +29,8 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
   - `Microsoft.Extensions.Configuration.Binder` from `8.0.2` to `9.0.0`,
   - `Microsoft.Extensions.Logging.Configuration` from `8.0.0` to `9.0.0`,
   - `OpenTelemetry.Exporter.Prometheus.HttpListener` from `1.9.0-beta.2` to `1.10.0-beta.1`,
-  - `OpenTelemetry.Instrumentation.Http` from `1.9.0` to `1.10.0`.
+  - `OpenTelemetry.Instrumentation.Http` from `1.9.0` to `1.10.0`,
+  - `OpenTelemetry.Instrumentation.Runtime` from `1.9.0` to `1.10.0`.
 - .NET only, following packages updated
   - `System.Diagnostics.DiagnosticSource` from `8.0.0` to `9.0.0`.
 - .NET Framework only, following packages updated
