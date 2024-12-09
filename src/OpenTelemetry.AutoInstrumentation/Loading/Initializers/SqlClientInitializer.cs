@@ -1,6 +1,7 @@
 // Copyright The OpenTelemetry Authors
 // SPDX-License-Identifier: Apache-2.0
 
+using System.Reflection;
 using OpenTelemetry.AutoInstrumentation.Configurations;
 using OpenTelemetry.AutoInstrumentation.Plugins;
 
@@ -41,8 +42,14 @@ internal class SqlClientInitializer
         };
         _pluginManager.ConfigureTracesOptions(options);
 
-        var instrumentation = Activator.CreateInstance(instrumentationType, options)!;
+        var propertyInfo = instrumentationType.GetProperty("TracingOptions", BindingFlags.Static | BindingFlags.Public);
+        propertyInfo?.SetValue(null, options);
 
-        lifespanManager.Track(instrumentation);
+        var instrumentation = instrumentationType.InvokeMember("AddTracingHandle", BindingFlags.InvokeMethod | BindingFlags.Public | BindingFlags.Static, Type.DefaultBinder, null, []);
+
+        if (instrumentation != null)
+        {
+            lifespanManager.Track(instrumentation);
+        }
     }
 }
