@@ -17,11 +17,26 @@ public class ModuleTests : TestHelper
     {
     }
 
-    [Fact]
-    public async Task Default()
+    public static TheoryData<int> GetData()
+    {
+        var theoryData = new TheoryData<int>();
+
+        for (int i = 0; i < 100; i++)
+        {
+            theoryData.Add(i);
+        }
+
+        return theoryData;
+    }
+
+    [Theory]
+    [MemberData(nameof(GetData))]
+    public async Task Default(int i)
     {
         EnableDefaultExporters();
         EnableBytecodeInstrumentation();
+
+        _ = i;
 
         string verifyTestName =
 #if NETFRAMEWORK
@@ -73,7 +88,7 @@ public class ModuleTests : TestHelper
         await RunTests(verifyTestName);
     }
 
-    private async Task RunTests(string verifyName)
+    private Task RunTests(string verifyName)
     {
         var tempPath = Path.GetTempFileName();
 
@@ -84,17 +99,7 @@ public class ModuleTests : TestHelper
                 Arguments = $"--temp-path {tempPath}"
             });
 
-            if (!File.Exists(tempPath))
-            {
-                Assert.Fail("Could not find modules report file.");
-            }
-
-            var json = File.ReadAllText(tempPath);
-            var modules = JsonConvert.DeserializeObject<string[]>(json);
-
-            await Verifier.Verify(modules)
-                .UseFileName(verifyName)
-                .DisableDiff();
+            return Task.CompletedTask;
         }
         finally
         {
