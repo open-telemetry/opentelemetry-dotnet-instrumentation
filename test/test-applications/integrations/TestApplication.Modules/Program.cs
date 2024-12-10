@@ -38,5 +38,6 @@ public class Program
         var ex = (Exception)args.ExceptionObject;
         Console.WriteLine("UnhandledExceptionEventHandler caught : " + ex.Message);
         Console.WriteLine("Runtime terminating: {0}", args.IsTerminating);
+        Environment.Exit(1);
     }
 }
