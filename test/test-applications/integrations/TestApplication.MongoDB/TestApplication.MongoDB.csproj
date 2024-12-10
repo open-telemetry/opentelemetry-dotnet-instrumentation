@@ -1,7 +1,10 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
+    <TargetFrameworks>net9.0;net8.0</TargetFrameworks>
+    <TargetFrameworks Condition="'$(OS)' == 'Windows_NT' and ('$(LibraryVersion)' == '' or '$(LibraryVersion)' &gt;= '3.0.0')">$(TargetFrameworks);net472</TargetFrameworks>
+    <TargetFrameworks Condition="'$(OS)' == 'Windows_NT' and '$(LibraryVersion)' != '' and '$(LibraryVersion)' &lt; '3.0.0'">$(TargetFrameworks);net462</TargetFrameworks>
   </PropertyGroup>
 
   <PropertyGroup>

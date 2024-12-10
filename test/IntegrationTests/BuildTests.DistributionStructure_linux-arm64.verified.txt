@@ -9,7 +9,6 @@
   /net/Grpc.Net.Client.dll,
   /net/Grpc.Net.Common.dll,
   /net/Microsoft.Extensions.Diagnostics.Abstractions.dll,
-  /net/MongoDB.Driver.Core.Extensions.DiagnosticSources.dll,
   /net/OpenTelemetry.Api.ProviderBuilderExtensions.dll,
   /net/OpenTelemetry.Api.dll,
   /net/OpenTelemetry.AutoInstrumentation.AspNetCoreBootstrapper.dll,

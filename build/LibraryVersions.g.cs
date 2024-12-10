@@ -94,8 +94,9 @@ public static partial class LibraryVersion
             "TestApplication.MongoDB",
             new List<PackageBuildInfo>
             {
-                new("2.28.0"),
-                new("2.30.0"),
+                new("2.19.0", supportedFrameworks: new string[] {"net9.0","net8.0","net462"}),
+                new("2.30.0", supportedFrameworks: new string[] {"net9.0","net8.0","net462"}),
+                new("3.0.0", supportedFrameworks: new string[] {"net9.0","net8.0","net472"}),
             }
         },
         {
