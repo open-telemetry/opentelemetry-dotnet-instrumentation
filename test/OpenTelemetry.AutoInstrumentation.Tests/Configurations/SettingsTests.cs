@@ -58,7 +58,7 @@ public class SettingsTests : IDisposable
             settings.InstrumentationOptions.AspNetInstrumentationCaptureRequestHeaders.Should().BeEmpty();
             settings.InstrumentationOptions.AspNetInstrumentationCaptureResponseHeaders.Should().BeEmpty();
 #endif
-#if NET8_0_OR_GREATER
+#if NET
             settings.InstrumentationOptions.AspNetCoreInstrumentationCaptureRequestHeaders.Should().BeEmpty();
             settings.InstrumentationOptions.AspNetCoreInstrumentationCaptureResponseHeaders.Should().BeEmpty();
             settings.InstrumentationOptions.EntityFrameworkCoreSetDbStatementForText.Should().BeFalse();
@@ -292,12 +292,12 @@ public class SettingsTests : IDisposable
 #if NETFRAMEWORK
     [InlineData("ASPNET", TracerInstrumentation.AspNet)]
 #endif
-#if NET8_0_OR_GREATER
+#if NET
     [InlineData("GRAPHQL", TracerInstrumentation.GraphQL)]
 #endif
     [InlineData("HTTPCLIENT", TracerInstrumentation.HttpClient)]
     [InlineData("MONGODB", TracerInstrumentation.MongoDB)]
-#if NET8_0_OR_GREATER
+#if NET
     [InlineData("MYSQLDATA", TracerInstrumentation.MySqlData)]
     [InlineData("STACKEXCHANGEREDIS", TracerInstrumentation.StackExchangeRedis)]
 #endif
@@ -307,13 +307,13 @@ public class SettingsTests : IDisposable
 #if NETFRAMEWORK
     [InlineData("WCFSERVICE", TracerInstrumentation.WcfService)]
 #endif
-#if NET8_0_OR_GREATER
+#if NET
     [InlineData("MASSTRANSIT", TracerInstrumentation.MassTransit)]
 #endif
     [InlineData("NSERVICEBUS", TracerInstrumentation.NServiceBus)]
     [InlineData("ELASTICSEARCH", TracerInstrumentation.Elasticsearch)]
     [InlineData("QUARTZ", TracerInstrumentation.Quartz)]
-#if NET8_0_OR_GREATER
+#if NET
     [InlineData("ENTITYFRAMEWORKCORE", TracerInstrumentation.EntityFrameworkCore)]
     [InlineData("ASPNETCORE", TracerInstrumentation.AspNetCore)]
 #endif
@@ -342,9 +342,10 @@ public class SettingsTests : IDisposable
     [InlineData("HTTPCLIENT", MetricInstrumentation.HttpClient)]
     [InlineData("PROCESS", MetricInstrumentation.Process)]
     [InlineData("NSERVICEBUS", MetricInstrumentation.NServiceBus)]
-#if NET8_0_OR_GREATER
+#if NET
     [InlineData("ASPNETCORE", MetricInstrumentation.AspNetCore)]
 #endif
+    [InlineData("SQLCLIENT", MetricInstrumentation.SqlClient)]
     internal void MeterSettings_Instrumentations_SupportedValues(string meterInstrumentation, MetricInstrumentation expectedMetricInstrumentation)
     {
         Environment.SetEnvironmentVariable(ConfigurationKeys.Metrics.MetricsInstrumentationEnabled, "false");
@@ -410,7 +411,7 @@ public class SettingsTests : IDisposable
     }
 
     [Theory]
-#if NET8_0_OR_GREATER
+#if NET
     [InlineData("CONTAINER", ResourceDetector.Container)]
 #endif
     [InlineData("AZUREAPPSERVICE", ResourceDetector.AzureAppService)]
@@ -470,7 +471,7 @@ public class SettingsTests : IDisposable
         Environment.SetEnvironmentVariable(ConfigurationKeys.Traces.InstrumentationOptions.AspNetInstrumentationCaptureResponseHeaders, null);
 #endif
 
-#if NET8_0_OR_GREATER
+#if NET
         Environment.SetEnvironmentVariable(ConfigurationKeys.Traces.InstrumentationOptions.AspNetCoreInstrumentationCaptureRequestHeaders, null);
         Environment.SetEnvironmentVariable(ConfigurationKeys.Traces.InstrumentationOptions.AspNetCoreInstrumentationCaptureResponseHeaders, null);
         Environment.SetEnvironmentVariable(ConfigurationKeys.Traces.InstrumentationOptions.GraphQLSetDocument, null);

@@ -26,7 +26,7 @@ internal static class ResourceConfigurator
         {
             resourceBuilder = enabledResourceDetector switch
             {
-#if NET8_0_OR_GREATER
+#if NET
                 ResourceDetector.Container => Wrappers.AddContainerResourceDetector(resourceBuilder),
 #endif
                 ResourceDetector.AzureAppService => Wrappers.AddAzureAppServiceResourceDetector(resourceBuilder),
@@ -56,7 +56,7 @@ internal static class ResourceConfigurator
 
     private static class Wrappers
     {
-#if NET8_0_OR_GREATER
+#if NET
         [MethodImpl(MethodImplOptions.NoInlining)]
         public static ResourceBuilder AddContainerResourceDetector(ResourceBuilder resourceBuilder)
         {

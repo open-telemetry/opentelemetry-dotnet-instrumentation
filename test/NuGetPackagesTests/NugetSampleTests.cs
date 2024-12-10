@@ -35,7 +35,7 @@ public sealed class NugetSampleTests : TestHelper
         InstrumentExecutable(_ridSpecificAppDir);
     }
 
-#if !NETFRAMEWORK
+#if NET
     [Fact]
     public void InstrumentExecutableFromBaseDir()
     {
@@ -90,7 +90,7 @@ public sealed class NugetSampleTests : TestHelper
 #endif
     }
 
-#if !NETFRAMEWORK
+#if NET
     private void InstrumentDll(string appDir)
     {
         RunAndAssertHttpSpans(() =>
@@ -148,7 +148,7 @@ public sealed class NugetSampleTests : TestHelper
 
 #if NETFRAMEWORK
         collector.Expect("OpenTelemetry.Instrumentation.Http.HttpWebRequest");
-#elif NET8_0_OR_GREATER
+#elif NET
         collector.Expect("System.Net.Http");
 #endif
 

@@ -1,7 +1,7 @@
 // Copyright The OpenTelemetry Authors
 // SPDX-License-Identifier: Apache-2.0
 
-#if NET8_0_OR_GREATER
+#if NET
 using FluentAssertions;
 using FluentAssertions.Execution;
 using IntegrationTests.Helpers;
@@ -111,7 +111,7 @@ public class HttpTests : TestHelper
         collector.Expect("Microsoft.AspNetCore.Routing");
         collector.Expect("Microsoft.AspNetCore.Diagnostics");
         collector.Expect("Microsoft.AspNetCore.RateLimiting");
-        collector.ExpectAdditionalEntries(x => x.All(m => m.InstrumentationScopeName != "OpenTelemetry.Instrumentation.AspNetCore" && m.InstrumentationScopeName != "OpenTelemetry.Instrumentation.Http"));
+        collector.ExpectAdditionalEntries(x => x.All(m => m.InstrumentationScopeName != "OpenTelemetry.Instrumentation.Http"));
 
         RunTestApplication();
 

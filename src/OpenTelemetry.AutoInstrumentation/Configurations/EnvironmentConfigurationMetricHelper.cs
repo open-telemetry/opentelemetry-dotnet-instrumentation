@@ -30,14 +30,21 @@ internal static class EnvironmentConfigurationMetricHelper
                 MetricInstrumentation.NetRuntime => Wrappers.AddRuntimeInstrumentation(builder, pluginManager),
                 MetricInstrumentation.Process => Wrappers.AddProcessInstrumentation(builder),
                 MetricInstrumentation.NServiceBus => builder
-#if NET8_0_OR_GREATER
+#if NET
                     .AddMeter("NServiceBus.Core.Pipeline.Incoming") // NServiceBus 9.1.0+
 #endif
                     .AddMeter("NServiceBus.Core"), // NServiceBus [8,0.0, 9.1.0)
 
-#if NET8_0_OR_GREATER
-                MetricInstrumentation.AspNetCore => Wrappers.AddAspNetCoreInstrumentation(builder, lazyInstrumentationLoader),
+#if NET
+                MetricInstrumentation.AspNetCore => builder
+                    .AddMeter("Microsoft.AspNetCore.Hosting")
+                    .AddMeter("Microsoft.AspNetCore.Server.Kestrel")
+                    .AddMeter("Microsoft.AspNetCore.Http.Connections")
+                    .AddMeter("Microsoft.AspNetCore.Routing")
+                    .AddMeter("Microsoft.AspNetCore.Diagnostics")
+                    .AddMeter("Microsoft.AspNetCore.RateLimiting"),
 #endif
+                MetricInstrumentation.SqlClient => Wrappers.AddSqlClientInstrumentation(builder, lazyInstrumentationLoader, pluginManager),
                 _ => null,
             };
         }
@@ -83,31 +90,10 @@ internal static class EnvironmentConfigurationMetricHelper
         }
 #endif
 
-#if NET8_0_OR_GREATER
-        [MethodImpl(MethodImplOptions.NoInlining)]
-        public static MeterProviderBuilder AddAspNetCoreInstrumentation(MeterProviderBuilder builder, LazyInstrumentationLoader lazyInstrumentationLoader)
-        {
-            if (Environment.Version.Major >= 8)
-            {
-                // AspNetCore has build in support for metrics in .NET8. Executing OpenTelemetry.Instrumentation.AspNetCore in this case leads to duplicated metrics.
-                return builder
-                    .AddMeter("Microsoft.AspNetCore.Hosting")
-                    .AddMeter("Microsoft.AspNetCore.Server.Kestrel")
-                    .AddMeter("Microsoft.AspNetCore.Http.Connections")
-                    .AddMeter("Microsoft.AspNetCore.Routing")
-                    .AddMeter("Microsoft.AspNetCore.Diagnostics")
-                    .AddMeter("Microsoft.AspNetCore.RateLimiting");
-            }
-
-            DelayedInitialization.Metrics.AddAspNetCore(lazyInstrumentationLoader);
-            return builder.AddMeter("OpenTelemetry.Instrumentation.AspNetCore");
-        }
-#endif
-
         [MethodImpl(MethodImplOptions.NoInlining)]
         public static MeterProviderBuilder AddHttpClientInstrumentation(MeterProviderBuilder builder, LazyInstrumentationLoader lazyInstrumentationLoader)
         {
-#if NET8_0_OR_GREATER
+#if NET
             // HTTP has build in support for metrics in .NET8. Executing OpenTelemetry.Instrumentation.Http in this case leads to duplicated metrics.
             return builder
                 .AddMeter("System.Net.Http")
@@ -128,6 +114,13 @@ internal static class EnvironmentConfigurationMetricHelper
         public static MeterProviderBuilder AddProcessInstrumentation(MeterProviderBuilder builder)
         {
             return builder.AddProcessInstrumentation();
+        }
+
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        public static MeterProviderBuilder AddSqlClientInstrumentation(MeterProviderBuilder builder, LazyInstrumentationLoader lazyInstrumentationLoader, PluginManager pluginManager)
+        {
+            DelayedInitialization.Metrics.AddSqlClient(lazyInstrumentationLoader, pluginManager);
+            return builder.AddMeter("OpenTelemetry.Instrumentation.SqlClient");
         }
 
         // Exporters
