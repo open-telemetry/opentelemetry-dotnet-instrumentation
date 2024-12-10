@@ -40,7 +40,7 @@ internal static class EnvironmentConfigurationTracerHelper
                 TracerInstrumentation.WcfClient => AddWcfIfNeeded(builder, ref wcfInstrumentationAdded),
                 TracerInstrumentation.OracleMda => Wrappers.AddOracleMdaInstrumentation(builder, lazyInstrumentationLoader, settings),
                 TracerInstrumentation.RabbitMq => builder.AddSource("RabbitMQ.Client.Publisher").AddSource("RabbitMQ.Client.Subscriber"),
-#if NET8_0_OR_GREATER
+#if NET
                 TracerInstrumentation.AspNetCore => Wrappers.AddAspNetCoreInstrumentation(builder, pluginManager, lazyInstrumentationLoader, settings),
                 TracerInstrumentation.MassTransit => builder.AddSource("MassTransit"),
                 TracerInstrumentation.MySqlData => builder.AddSource("connector-net"),
@@ -135,7 +135,7 @@ internal static class EnvironmentConfigurationTracerHelper
         }
 #endif
 
-#if NET8_0_OR_GREATER
+#if NET
         [MethodImpl(MethodImplOptions.NoInlining)]
         public static TracerProviderBuilder AddAspNetCoreInstrumentation(TracerProviderBuilder builder, PluginManager pluginManager, LazyInstrumentationLoader lazyInstrumentationLoader, TracerSettings tracerSettings)
         {
@@ -199,7 +199,7 @@ internal static class EnvironmentConfigurationTracerHelper
                 .AddLegacySource("Quartz.Job.Veto");
         }
 
-#if NET8_0_OR_GREATER
+#if NET
         [MethodImpl(MethodImplOptions.NoInlining)]
         public static TracerProviderBuilder AddEntityFrameworkCoreInstrumentation(TracerProviderBuilder builder, PluginManager pluginManager, LazyInstrumentationLoader lazyInstrumentationLoader, TracerSettings tracerSettings)
         {

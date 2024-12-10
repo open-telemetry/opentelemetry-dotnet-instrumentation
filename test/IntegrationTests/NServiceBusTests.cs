@@ -44,7 +44,7 @@ public class NServiceBusTests : TestHelper
         using var collector = new MockMetricsCollector(Output);
         SetExporter(collector);
 
-#if NET8_0_OR_GREATER
+#if NET
         if (string.IsNullOrEmpty(packageVersion) || Version.Parse(packageVersion) >= new Version(9, 1))
         {
             collector.Expect("NServiceBus.Core.Pipeline.Incoming");

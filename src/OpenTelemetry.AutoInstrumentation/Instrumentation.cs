@@ -1,11 +1,11 @@
 // Copyright The OpenTelemetry Authors
 // SPDX-License-Identifier: Apache-2.0
 
-#if NET8_0_OR_GREATER
+#if NET
 using System.Diagnostics;
 #endif
 using OpenTelemetry.AutoInstrumentation.Configurations;
-#if NET8_0_OR_GREATER
+#if NET
 using OpenTelemetry.AutoInstrumentation.ContinuousProfiler;
 #endif
 using OpenTelemetry.AutoInstrumentation.Diagnostics;
@@ -33,7 +33,7 @@ internal static class Instrumentation
     private static MeterProvider? _meterProvider;
     private static PluginManager? _pluginManager;
 
-#if NET8_0_OR_GREATER
+#if NET
     private static ContinuousProfilerProcessor? _profilerProcessor;
 #endif
 
@@ -89,7 +89,7 @@ internal static class Instrumentation
             _pluginManager = new PluginManager(GeneralSettings.Value);
             _pluginManager.Initializing();
 
-#if NET8_0_OR_GREATER
+#if NET
             var profilerEnabled = GeneralSettings.Value.ProfilerEnabled;
 
             if (profilerEnabled)
@@ -217,7 +217,7 @@ internal static class Instrumentation
         }
     }
 
-#if NET8_0_OR_GREATER
+#if NET
     private static void InitializeContinuousProfiling(
         object continuousProfilerExporter,
         bool threadSamplingEnabled,
@@ -296,6 +296,9 @@ internal static class Instrumentation
                     break;
                 case MetricInstrumentation.NServiceBus:
                     break;
+                case MetricInstrumentation.SqlClient:
+                    DelayedInitialization.Metrics.AddSqlClient(lazyInstrumentationLoader, pluginManager);
+                    break;
                 default:
                     Logger.Warning($"Configured metric instrumentation type is not supported: {instrumentation}");
                     if (FailFastSettings.Value.FailFast)
@@ -335,7 +338,7 @@ internal static class Instrumentation
                     break;
                 case TracerInstrumentation.WcfClient:
                     break;
-#if NET8_0_OR_GREATER
+#if NET
                 case TracerInstrumentation.AspNetCore:
                     DelayedInitialization.Traces.AddAspNetCore(lazyInstrumentationLoader, pluginManager, tracerSettings);
                     break;
@@ -394,7 +397,7 @@ internal static class Instrumentation
 
         try
         {
-#if NET8_0_OR_GREATER
+#if NET
             LazyInstrumentationLoader?.Dispose();
             if (_profilerProcessor != null)
             {

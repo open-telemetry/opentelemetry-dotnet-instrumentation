@@ -12,6 +12,7 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 - Support for .NET9.
 - Support for [RabbitMQ.Client](https://www.nuget.org/packages/RabbitMQ.Client/)
   traces instrumentation for versions `7.0.0`+.
+- Support for SqlClient metrics.
 
 ### Changed
 
@@ -31,8 +32,23 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
   - `Microsoft.Extensions.Configuration.Binder` from `8.0.2` to `9.0.0`,
   - `Microsoft.Extensions.Logging.Configuration` from `8.0.0` to `9.0.0`,
   - `OpenTelemetry.Exporter.Prometheus.HttpListener` from `1.9.0-beta.2` to `1.10.0-beta.1`,
-  - `OpenTelemetry.Instrumentation.Http` from `1.9.0` to `1.10.0`.
+  - `OpenTelemetry.Instrumentation.GrpcNetClient` from `1.9.0-beta.1` to `1.10.0-beta.1`
+  - `OpenTelemetry.Instrumentation.Http` from `1.9.0` to `1.10.0`,
+  - `OpenTelemetry.Instrumentation.Process` from `0.5.0-beta.7` to `1.10.0-beta.1`,
+  - `OpenTelemetry.Instrumentation.Quartz` from `1.0.0-beta.3` to `1.10.0-beta.1`,
+  - `OpenTelemetry.Instrumentation.Runtime` from `1.9.0` to `1.10.0`,
+  - `OpenTelemetry.Instrumentation.SqlClient` from `1.9.0-beta.1` to `1.10.0-beta.1`,
+  - `OpenTelemetry.Instrumentation.Wcf` from `1.0.0-rc.18` to `1.10.0-beta.1`,
+  - `OpenTelemetry.Resources.Azure` from `1.0.0-beta.9` to `1.10.0-beta.1`,
+  - `OpenTelemetry.Resources.Container` from `1.0.0-beta.9` to `1.10.0-beta.1`,
+  - `OpenTelemetry.Resources.Host` from `0.1.0-beta.3` to `1.10.0-beta.1`,
+  - `OpenTelemetry.Resources.OperatingSystem` from `0.1.0-alpha.4` to `1.10.0-beta.1`,
+  - `OpenTelemetry.Resources.Process` from `0.1.0-beta.3` to `1.10.0-beta.1`,
+  - `OpenTelemetry.Resources.ProcessRuntime` from `0.1.0-beta.2` to `1.10.0-beta.1`.
 - .NET only, following packages updated
+  - `OpenTelemetry.Instrumentation.AspNetCore` from `1.9.0` to `1.10.0`,
+  - `OpenTelemetry.Instrumentation.EntityFrameworkCore` from `1.0.0-beta.12` to `1.10.0-beta.1`,
+  - `OpenTelemetry.Instrumentation.StackExchangeRedis` from `1.9.0-beta.1` to `1.10.0-beta.1`,
   - `System.Diagnostics.DiagnosticSource` from `8.0.0` to `9.0.0`.
 - .NET Framework only, following packages updated
   - `Google.Protobuf` updated from `3.28.3` to `3.29.1`,
@@ -46,6 +62,7 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
   - `Microsoft.Extensions.Options` from `8.0.2` to `9.0.0`,
   - `Microsoft.Extensions.Options.ConfigurationExtensions` from `8.0.0` to `9.0.0`,
   - `Microsoft.Extensions.Primitives` from `8.0.0` to `9.0.0`,
+  - `OpenTelemetry.Instrumentation.AspNet` from `1.9.0-beta.1` to `1.10.0-beta.1`,
   - `System.Buffers` from `4.5.5` to `4.6.0`,
   - `System.Memory` from `4.5.5` to `4.6.0`,
   - `System.Numerics.Vectors` from `4.5.0` to `4.6.0`,

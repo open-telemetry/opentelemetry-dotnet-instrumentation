@@ -21,7 +21,11 @@ public class RuntimeTests : TestHelper
     {
         using var collector = new MockMetricsCollector(Output);
         SetExporter(collector);
+#if NET9_0_OR_GREATER
+        collector.Expect("System.Runtime");
+#else
         collector.Expect("OpenTelemetry.Instrumentation.Runtime");
+#endif
 
         using var process = StartTestApplication();
         try
