@@ -21,6 +21,8 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 - Changed minimal supported version of `Microsoft.Extensions.Logging`
   for `ILOGGER` instrumentation from `8.0.0` to `9.0.0`.
 - Glibc native libraries are compiled on Ubuntu v16.04.
+- Changed `MongoDB` traces instrumentation to the bytecode version. It supports
+  `MongoDB.Driver.Core` from `2.7.0` and `MongoDB.Driver` from `3.0.0`.
 
 #### Dependency updates
 
@@ -76,6 +78,7 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 - Support for .NET 6 and .NET 7. Both framework reached end of support.
 - Support for macOS Monterey 12 x64.
   macOs libraries are built and tested against [macOS Ventura 13 x64](https://github.com/actions/runner-images/blob/main/images/macos/macos-13-Readme.md).
+- `MongoDB.Driver.Core.Extensions.DiagnosticSources` dependency is removed.
 
 ### Fixed
 
