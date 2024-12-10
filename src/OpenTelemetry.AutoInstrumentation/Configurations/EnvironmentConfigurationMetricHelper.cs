@@ -44,6 +44,7 @@ internal static class EnvironmentConfigurationMetricHelper
                     .AddMeter("Microsoft.AspNetCore.Diagnostics")
                     .AddMeter("Microsoft.AspNetCore.RateLimiting"),
 #endif
+                MetricInstrumentation.SqlClient => Wrappers.AddSqlClientInstrumentation(builder, lazyInstrumentationLoader, pluginManager),
                 _ => null,
             };
         }
@@ -113,6 +114,13 @@ internal static class EnvironmentConfigurationMetricHelper
         public static MeterProviderBuilder AddProcessInstrumentation(MeterProviderBuilder builder)
         {
             return builder.AddProcessInstrumentation();
+        }
+
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        public static MeterProviderBuilder AddSqlClientInstrumentation(MeterProviderBuilder builder, LazyInstrumentationLoader lazyInstrumentationLoader, PluginManager pluginManager)
+        {
+            DelayedInitialization.Metrics.AddSqlClient(lazyInstrumentationLoader, pluginManager);
+            return builder.AddMeter("OpenTelemetry.Instrumentation.SqlClient");
         }
 
         // Exporters

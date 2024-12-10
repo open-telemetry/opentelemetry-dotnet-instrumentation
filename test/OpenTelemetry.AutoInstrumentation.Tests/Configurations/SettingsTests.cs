@@ -345,6 +345,7 @@ public class SettingsTests : IDisposable
 #if NET
     [InlineData("ASPNETCORE", MetricInstrumentation.AspNetCore)]
 #endif
+    [InlineData("SQLCLIENT", MetricInstrumentation.SqlClient)]
     internal void MeterSettings_Instrumentations_SupportedValues(string meterInstrumentation, MetricInstrumentation expectedMetricInstrumentation)
     {
         Environment.SetEnvironmentVariable(ConfigurationKeys.Metrics.MetricsInstrumentationEnabled, "false");

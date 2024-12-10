@@ -39,6 +39,11 @@ internal enum MetricInstrumentation
     /// <summary>
     /// ASP.NET Core instrumentation.
     /// </summary>
-    AspNetCore = 6
+    AspNetCore = 6,
 #endif
+
+    /// <summary>
+    /// SqlClient instrumentation.
+    /// </summary>
+    SqlClient = 7
 }
