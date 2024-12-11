@@ -292,6 +292,13 @@ jobs:
       - name: Test NuGet Packages
         run: ./build.cmd TestNuGetPackages
 
+      - name: Upload test logs
+        if: always()
+        uses: actions/upload-artifact@b4b15b8c7c6ac21ea08fcf65892d2ee8f75cf882 # tag: v4.4.3
+        with:
+          name: test-logs-nuget-packages-${{ matrix.machine }}
+          path: test-artifacts/
+
   test-jobs:
     runs-on: ubuntu-20.04
     needs:
