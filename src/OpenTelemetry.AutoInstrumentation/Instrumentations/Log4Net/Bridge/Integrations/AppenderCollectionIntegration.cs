@@ -2,11 +2,11 @@
 // SPDX-License-Identifier: Apache-2.0
 
 using OpenTelemetry.AutoInstrumentation.CallTarget;
-#if !NETFRAMEWORK
+#if NET
 using OpenTelemetry.AutoInstrumentation.Logger;
 #endif
 
-namespace OpenTelemetry.AutoInstrumentation.Instrumentations.Log4Net.Integrations;
+namespace OpenTelemetry.AutoInstrumentation.Instrumentations.Log4Net.Bridge.Integrations;
 
 /// <summary>
 /// Log4Net AppenderCollection integration.
@@ -26,7 +26,8 @@ public static class AppenderCollectionIntegration
     internal static CallTargetReturn<TReturn> OnMethodEnd<TTarget, TReturn>(TTarget instance, TReturn returnValue, Exception exception, in CallTargetState state)
     {
         if (
-            #if !NETFRAMEWORK
+            Instrumentation.LogSettings.Value.EnableLog4NetBridge &&
+            #if NET
 #pragma warning disable SA1003
             !LoggerInitializer.IsInitializedAtLeastOnce &&
 #pragma warning restore SA1003

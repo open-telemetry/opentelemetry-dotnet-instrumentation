@@ -3,7 +3,7 @@
 
 using OpenTelemetry.AutoInstrumentation.DuckTyping;
 
-namespace OpenTelemetry.AutoInstrumentation.Instrumentations.Log4Net;
+namespace OpenTelemetry.AutoInstrumentation.Instrumentations.Log4Net.Bridge;
 
 internal static class OpenTelemetryAppenderInitializer<TAppenderArray>
 {

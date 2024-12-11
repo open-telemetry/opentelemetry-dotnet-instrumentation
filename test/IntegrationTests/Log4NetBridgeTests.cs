@@ -1,6 +1,7 @@
 // Copyright The OpenTelemetry Authors
 // SPDX-License-Identifier: Apache-2.0
 
+using System.Text.RegularExpressions;
 using FluentAssertions;
 using Google.Protobuf;
 using IntegrationTests.Helpers;
@@ -25,21 +26,28 @@ public class Log4NetBridgeTests : TestHelper
         SetExporter(collector);
 
         // Logged in scope of an activity
-        collector.Expect(logRecord =>
-            VerifyBody(logRecord, "Hello, world!") &&
+        collector.Expect(
+            logRecord =>
+            VerifyBody(logRecord, "{0}, {1} at {2:t}!") &&
             VerifyTraceContext(logRecord) &&
             logRecord is { SeverityText: "INFO", SeverityNumber: SeverityNumber.Info } &&
-            logRecord.Attributes.Count == 0);
+            // 0 : "Hello"
+            // 1 : "world"
+            // 2 : timestamp
+            logRecord.Attributes.Count == 3,
+            "Expected Info record.");
 
         // Logged with exception
-        collector.Expect(logRecord =>
+        collector.Expect(
+            logRecord =>
             VerifyBody(logRecord, "Exception occured") &&
-            VerifyTraceContext(logRecord) &&
             logRecord is { SeverityText: "ERROR", SeverityNumber: SeverityNumber.Error } &&
             VerifyExceptionAttributes(logRecord) &&
-            logRecord.Attributes.Count == 3);
+            logRecord.Attributes.Count == 3,
+            "Expected Error record.");
 
         EnableBytecodeInstrumentation();
+        SetEnvironmentVariable("OTEL_DOTNET_AUTO_LOGS_ENABLE_LOG4NET_BRIDGE", "true");
 
         var (standardOutput, _, _) = RunTestApplication(new()
         {
@@ -52,7 +60,7 @@ public class Log4NetBridgeTests : TestHelper
         collector.AssertExpectations();
     }
 
-#if !NETFRAMEWORK
+#if NET
     [Theory]
     [Trait("Category", "EndToEnd")]
     [MemberData(nameof(LibraryVersion.log4net), MemberType = typeof(LibraryVersion))]
@@ -62,23 +70,29 @@ public class Log4NetBridgeTests : TestHelper
         SetExporter(collector);
 
         // Logged in scope of an activity
-        collector.Expect(logRecord =>
-            VerifyBody(logRecord, "Hello, {0}!") &&
+        collector.Expect(
+            logRecord =>
+            VerifyBody(logRecord, "{0}, {1} at {2:t}!") &&
             VerifyTraceContext(logRecord) &&
             logRecord is { SeverityText: "Information", SeverityNumber: SeverityNumber.Info } &&
-            // ILogger bridge adds original format when using structured logging.
-            logRecord.Attributes.Count == 1);
+            // 0 : "Hello"
+            // 1 : "world"
+            // 2 : timestamp
+            logRecord.Attributes.Count == 3,
+            "Expected Info record.");
 
         // Logged with exception
-        collector.Expect(logRecord =>
+        collector.Expect(
+            logRecord =>
             VerifyBody(logRecord, "Exception occured") &&
-            VerifyTraceContext(logRecord) &&
             // OtlpLogExporter adds exception related attributes (ConsoleExporter doesn't show them)
             logRecord is { SeverityText: "Error", SeverityNumber: SeverityNumber.Error } &&
             VerifyExceptionAttributes(logRecord) &&
-            logRecord.Attributes.Count == 3);
+            logRecord.Attributes.Count == 3,
+            "Expected Error record.");
 
         EnableBytecodeInstrumentation();
+        SetEnvironmentVariable("OTEL_DOTNET_AUTO_LOGS_ENABLE_LOG4NET_BRIDGE", "true");
 
         var (standardOutput, _, _) = RunTestApplication(new()
         {
@@ -102,6 +116,7 @@ public class Log4NetBridgeTests : TestHelper
         collector.ExpectCollected(records => records.Count == 2, "App logs should be exported once.");
 
         EnableBytecodeInstrumentation();
+        SetEnvironmentVariable("OTEL_DOTNET_AUTO_LOGS_ENABLE_LOG4NET_BRIDGE", "true");
 
         var (standardOutput, _, _) = RunTestApplication(new()
         {
@@ -119,6 +134,26 @@ public class Log4NetBridgeTests : TestHelper
 
 #endif
 
+    [Theory]
+    [Trait("Category", "EndToEnd")]
+    [MemberData(nameof(LibraryVersion.log4net), MemberType = typeof(LibraryVersion))]
+    public void TraceContext_IsInjectedIntoCurrentLog4NetLogsDestination(string packageVersion)
+    {
+        EnableBytecodeInstrumentation();
+        SetEnvironmentVariable("OTEL_DOTNET_AUTO_LOGS_ENABLE_LOG4NET_BRIDGE", "false");
+
+        var (standardOutput, _, _) = RunTestApplication(new()
+        {
+            PackageVersion = packageVersion,
+            Arguments = "--api log4net"
+        });
+
+        var regex = new Regex(@"INFO  TestApplication\.Log4NetBridge\.Program - Hello, world at \d{2}\:\d{2}\! span_id=[a-f0-9]{16} trace_id=[a-f0-9]{32} trace_flags=1");
+        var output = standardOutput;
+        regex.IsMatch(output).Should().BeTrue();
+        output.Should().Contain("ERROR TestApplication.Log4NetBridge.Program - Exception occured span_id=(null) trace_id=(null) trace_flags=(null)");
+    }
+
     private static bool VerifyTraceContext(LogRecord logRecord)
     {
         return logRecord.TraceId != ByteString.Empty &&
@@ -128,7 +163,7 @@ public class Log4NetBridgeTests : TestHelper
 
     private static void AssertStandardOutputExpectations(string standardOutput)
     {
-        standardOutput.Should().Contain("INFO  TestApplication.Log4NetBridge.Program - Hello, world!");
+        standardOutput.Should().Contain("INFO  TestApplication.Log4NetBridge.Program - Hello, world at");
         standardOutput.Should().Contain("ERROR TestApplication.Log4NetBridge.Program - Exception occured");
     }
 

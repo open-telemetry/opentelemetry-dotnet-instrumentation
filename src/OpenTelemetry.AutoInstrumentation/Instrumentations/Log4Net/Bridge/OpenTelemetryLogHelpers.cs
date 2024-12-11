@@ -5,12 +5,13 @@ using System.Collections;
 using System.Diagnostics;
 using System.Linq.Expressions;
 using System.Reflection;
+using OpenTelemetry.AutoInstrumentation.Instrumentations.Log4Net.TraceContextInjection;
 using OpenTelemetry.AutoInstrumentation.Logging;
 using OpenTelemetry.Logs;
 
-namespace OpenTelemetry.AutoInstrumentation.Instrumentations.Log4Net;
+namespace OpenTelemetry.AutoInstrumentation.Instrumentations.Log4Net.Bridge;
 
-internal delegate void EmitLog(object loggerInstance, string? body, DateTime timestamp, string? severityText, int severityLevel, Exception? exception, IDictionary? properties, Activity? current);
+internal delegate void EmitLog(object loggerInstance, string? body, DateTime timestamp, string? severityText, int severityLevel, Exception? exception, IDictionary? properties, Activity? current, object?[]? args, string? renderedMessage);
 
 // TODO: Remove whole class when Logs Api is made public in non-rc builds.
 internal static class OpenTelemetryLogHelpers
@@ -88,13 +89,25 @@ internal static class OpenTelemetryLogHelpers
             instanceVar);
     }
 
-    private static BlockExpression BuildLogRecordAttributes(Type logRecordAttributesListType, ParameterExpression exception, ParameterExpression properties)
+    private static BlockExpression BuildLogRecordAttributes(
+        Type logRecordAttributesListType,
+        ParameterExpression exception,
+        ParameterExpression properties,
+        ParameterExpression argsParam,
+        ParameterExpression renderedMessageParam)
     {
         // Creates expression:
         // .Block(OpenTelemetry.Logs.LogRecordAttributeList $instance) {
         //     $instance = .New OpenTelemetry.Logs.LogRecordAttributeList();
         //     .If ($exception != null) {
         //         .Call $instance.RecordException($exception)
+        //     } .Else {
+        //         .Default(System.Void)
+        //     };
+        //     .If ($renderedMessage != null) {
+        //         .Call $instance.Add(
+        //             "log4net.rendered_message",
+        //             $renderedMessage)
         //     } .Else {
         //         .Default(System.Void)
         //     };
@@ -109,7 +122,9 @@ internal static class OpenTelemetryLogHelpers
         //                             System.String $key) {
         //                             $loopVar = (System.Collections.IDictionaryEnumerator)$enumerator;
         //                             $key = (System.String)$loopVar.Key;
-        //                             .If (.Call $key.StartsWith("log4net:") != True) {
+        //                             .If (
+        //                                 .Call $key.StartsWith("log4net:") != True & $key != "span_id" & $key != "trace_id" & $key != "trace_flags"
+        //                             ) {
         //                                 .Call $instance.Add(
         //                                     $key,
         //                                     $loopVar.Value)
@@ -136,6 +151,28 @@ internal static class OpenTelemetryLogHelpers
         //     } .Else {
         //         .Default(System.Void)
         //     };
+        //     .If ($args != null) {
+        //         .Loop  {
+        //             .Block(
+        //                 System.Int32 $index,
+        //                 System.Object $value) {
+        //                 .If ($index < $args.Length) {
+        //                     .Block() {
+        //                         $value = $args[$index];
+        //                         .Call $instance.Add(
+        //                             .Call $index.ToString(),
+        //                             $value);
+        //                         $index++
+        //                     }
+        //                 } .Else {
+        //                     .Break #Label2 { }
+        //                 }
+        //             }
+        //         }
+        //         .LabelTarget #Label2:
+        //     } .Else {
+        //         .Default(System.Void)
+        //     };
         //     $instance
         // }
 
@@ -151,6 +188,7 @@ internal static class OpenTelemetryLogHelpers
         var disposeMethod = disposableInterface.GetMethod("Dispose")!;
         var moveNextMethod = enumeratorInterface.GetMethod("MoveNext")!;
         var getEnumeratorMethod = typeof(IDictionary).GetMethod("GetEnumerator")!;
+        var toStringMethod = typeof(object).GetMethod("ToString")!;
 
         var exitLabel = Expression.Label();
 
@@ -162,6 +200,7 @@ internal static class OpenTelemetryLogHelpers
 
         var assignInstanceVar = Expression.Assign(instanceVar, Expression.New(logRecordAttributesListType));
         var recordExceptionIfNotNull = Expression.IfThen(Expression.NotEqual(exception, Expression.Constant(null)), Expression.Call(instanceVar, exceptionRecordMethod, exception));
+        var setRenderedMessageIfNotNull = Expression.IfThen(Expression.NotEqual(renderedMessageParam, Expression.Constant(null)), Expression.Call(instanceVar, addAttributeMethod, Expression.Constant("log4net.rendered_message"), renderedMessageParam));
 
         var getPropertiesEnumerator = Expression.Call(properties, getEnumeratorMethod);
         var enumeratorAssign = Expression.Assign(enumeratorVar, getPropertiesEnumerator);
@@ -170,6 +209,22 @@ internal static class OpenTelemetryLogHelpers
         var moveNext = Expression.Call(enumeratorVar, moveNextMethod);
 
         var getKeyProperty = Expression.Convert(Expression.Property(loopVar, "Key"), stringType);
+        var startsWithMethodInfo = stringType.GetMethod("StartsWith", BindingFlags.Instance | BindingFlags.Public, null, new[] { stringType }, null)!;
+
+        // Filter out built-in log4net properties, starting with 'log4net:' prefix, and properties added by trace context injection
+        var propertyNameFilter = Expression.And(
+            Expression.NotEqual(Expression.Call(keyVar, startsWithMethodInfo, Expression.Constant("log4net:")), Expression.Constant(true)),
+            Expression.And(
+                Expression.NotEqual(
+                    keyVar,
+                    Expression.Constant(LogsTraceContextInjectionConstants.SpanIdPropertyName)),
+                Expression.And(
+                    Expression.NotEqual(
+                        keyVar,
+                        Expression.Constant(LogsTraceContextInjectionConstants.TraceIdPropertyName)),
+                    Expression.NotEqual(
+                        keyVar,
+                        Expression.Constant(LogsTraceContextInjectionConstants.TraceFlagsPropertyName)))));
         var loopAndAddProperties = Expression.Loop(
             Expression.IfThenElse(
                 Expression.Equal(moveNext, Expression.Constant(true)),
@@ -178,8 +233,8 @@ internal static class OpenTelemetryLogHelpers
                     Expression.Assign(loopVar, Expression.Convert(enumeratorVar, dictionaryEnumerator)),
                     Expression.Assign(keyVar, getKeyProperty),
                     Expression.IfThen(
-                        Expression.NotEqual(Expression.Call(keyVar, stringType.GetMethod("StartsWith", BindingFlags.Instance | BindingFlags.Public, null, new[] { stringType }, null)!, Expression.Constant("log4net:")), Expression.Constant(true)),
-                        Expression.Call(instanceVar, addAttributeMethod, keyVar, Expression.Property(loopVar, "Value")))),
+                            propertyNameFilter,
+                            Expression.Call(instanceVar, addAttributeMethod, keyVar, Expression.Property(loopVar, "Value")))),
                 Expression.Break(exitLabel)),
             exitLabel);
 
@@ -194,15 +249,36 @@ internal static class OpenTelemetryLogHelpers
                         Expression.Assign(disposable, Expression.TypeAs(enumeratorVar, disposableInterface)),
                         Expression.IfThen(Expression.NotEqual(disposable, Expression.Constant(null)), enumeratorDispose))));
 
+        var exitLabel2 = Expression.Label();
+
+        var argsIndexVar = Expression.Variable(typeof(int), "index");
+        var argsValueVar = Expression.Variable(typeof(object), "value");
+
+        var loopAndAddArgs = Expression.Loop(
+                Expression.Block(
+                    new[] { argsIndexVar, argsValueVar },
+                    Expression.IfThenElse(
+                        Expression.LessThan(argsIndexVar, Expression.Property(argsParam, "Length")),
+                        Expression.Block(
+                            Expression.Assign(argsValueVar, Expression.ArrayIndex(argsParam, argsIndexVar)),
+                            Expression.Call(instanceVar, addAttributeMethod, Expression.Call(argsIndexVar, toStringMethod), argsValueVar),
+                            Expression.PostIncrementAssign(argsIndexVar)),
+                        Expression.Break(exitLabel2))),
+                exitLabel2);
+
+        var addPropertiesIfNotNull = Expression.IfThen(Expression.NotEqual(properties, Expression.Constant(null)), addPropertiesWithForeach);
+        var addArgsIfNotNull = Expression.IfThen(Expression.NotEqual(argsParam, Expression.Constant(null)), loopAndAddArgs);
         return Expression.Block(
             new[] { instanceVar },
             assignInstanceVar,
             recordExceptionIfNotNull,
-            Expression.IfThen(Expression.NotEqual(properties, Expression.Constant(null)), addPropertiesWithForeach),
+            setRenderedMessageIfNotNull,
+            addPropertiesIfNotNull,
+            addArgsIfNotNull,
             instanceVar);
     }
 
-    private static EmitLog BuildEmitLog(Type logRecordDataType, Type logRecordAttributesListType, Type loggerType)
+    private static EmitLog? BuildEmitLog(Type logRecordDataType, Type logRecordAttributesListType, Type loggerType)
     {
         // Creates expression:
         // .Lambda #Lambda1<OpenTelemetry.AutoInstrumentation.Instrumentations.Log4Net.EmitLog>(
@@ -213,7 +289,9 @@ internal static class OpenTelemetryLogHelpers
         //     System.Int32 $severityLevel,
         //     System.Exception $exception,
         //     System.Collections.IDictionary $properties,
-        //     System.Diagnostics.Activity $activity) {
+        //     System.Diagnostics.Activity $activity,
+        //     System.Object[] $args
+        //     System.String $renderedMessage) {
         //     .Block(
         //         OpenTelemetry.Logs.LogRecordData $logRecordData,
         //         OpenTelemetry.Logs.LogRecordAttributeList $logRecordAttributes) {
@@ -233,6 +311,8 @@ internal static class OpenTelemetryLogHelpers
         var severityTextParam = Expression.Parameter(stringType, "severityText");
         var severityLevelParam = Expression.Parameter(typeof(int), "severityLevel");
         var activityParam = Expression.Parameter(typeof(Activity), "activity");
+        var argsParam = Expression.Parameter(typeof(object[]), "args");
+        var renderedMessageParam = Expression.Parameter(typeof(string), "renderedMessage");
 
         var exceptionParam = Expression.Parameter(typeof(Exception), "exception");
         var propertiesParam = Expression.Parameter(typeof(IDictionary), "properties");
@@ -245,7 +325,7 @@ internal static class OpenTelemetryLogHelpers
         var methodInfo = loggerType.GetMethod("EmitLog", BindingFlags.Instance | BindingFlags.Public, null, new[] { logRecordDataType.MakeByRefType(), logRecordAttributesListType.MakeByRefType() }, null);
 
         var logRecord = BuildLogRecord(logRecordDataType, typeof(LoggerProvider).Assembly.GetType("OpenTelemetry.Logs.LogRecordSeverity")!, bodyParam, timestampParam, severityTextParam, severityLevelParam, activityParam);
-        var logRecordAttributes = BuildLogRecordAttributes(logRecordAttributesListType, exceptionParam, propertiesParam);
+        var logRecordAttributes = BuildLogRecordAttributes(logRecordAttributesListType, exceptionParam, propertiesParam, argsParam, renderedMessageParam);
 
         var block = Expression.Block(
             new[] { logRecordDataVar, logRecordAttributesVar },
@@ -253,7 +333,7 @@ internal static class OpenTelemetryLogHelpers
             Expression.Assign(logRecordAttributesVar, logRecordAttributes),
             Expression.Call(instanceCasted, methodInfo!, logRecordDataVar, logRecordAttributesVar));
 
-        var expr = Expression.Lambda<EmitLog>(block, instance, bodyParam, timestampParam, severityTextParam, severityLevelParam, exceptionParam, propertiesParam, activityParam);
+        var expr = Expression.Lambda<EmitLog?>(block, instance, bodyParam, timestampParam, severityTextParam, severityLevelParam, exceptionParam, propertiesParam, activityParam, argsParam, renderedMessageParam);
 
         return expr.Compile();
     }

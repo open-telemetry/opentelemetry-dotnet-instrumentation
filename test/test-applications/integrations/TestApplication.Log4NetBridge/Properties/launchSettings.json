@@ -19,6 +19,8 @@
         "OTEL_LOG_LEVEL": "debug",
         "OTEL_LOGS_EXPORTER": "otlp,console",
         "OTEL_TRACES_EXPORTER": "none",
+        "OTEL_DOTNET_AUTO_LOGS_ENABLE_LOG4NET_BRIDGE": "true",
+        "OTEL_DOTNET_AUTO_LOGS_INCLUDE_FORMATTED_MESSAGE": "true",
         "OTEL_DOTNET_AUTO_TRACES_ADDITIONAL_SOURCES": "TestApplication.Log4NetBridge"
       }
     }

@@ -4,6 +4,7 @@
 using FluentAssertions;
 using log4net.Core;
 using OpenTelemetry.AutoInstrumentation.Instrumentations.Log4Net;
+using OpenTelemetry.AutoInstrumentation.Instrumentations.Log4Net.Bridge;
 using OpenTelemetry.Trace;
 using Xunit;
 
@@ -18,17 +19,17 @@ public class Log4NetTests
     {
         var theoryData = new TheoryData<int, int>
         {
-            { Level.Emergency.Value, GetOpenTelemetrySeverityValue("Fatal2") },
+            { Level.Emergency.Value, GetOpenTelemetrySeverityValue("Fatal") },
             { Level.Fatal.Value, GetOpenTelemetrySeverityValue("Fatal") },
-            { Level.Alert.Value, GetOpenTelemetrySeverityValue("Error4") },
-            { Level.Critical.Value, GetOpenTelemetrySeverityValue("Error3") },
-            { Level.Severe.Value, GetOpenTelemetrySeverityValue("Error2") },
+            { Level.Alert.Value, GetOpenTelemetrySeverityValue("Error") },
+            { Level.Critical.Value, GetOpenTelemetrySeverityValue("Error") },
+            { Level.Severe.Value, GetOpenTelemetrySeverityValue("Error") },
             { Level.Error.Value, GetOpenTelemetrySeverityValue("Error") },
             { Level.Warn.Value, GetOpenTelemetrySeverityValue("Warn") },
-            { Level.Notice.Value, GetOpenTelemetrySeverityValue("Info2") },
+            { Level.Notice.Value, GetOpenTelemetrySeverityValue("Info") },
             { Level.Info.Value, GetOpenTelemetrySeverityValue("Info") },
             { Level.Debug.Value, GetOpenTelemetrySeverityValue("Debug") },
-            { Level.Trace.Value, GetOpenTelemetrySeverityValue("Trace2") },
+            { Level.Trace.Value, GetOpenTelemetrySeverityValue("Trace") },
             { Level.Verbose.Value, GetOpenTelemetrySeverityValue("Trace") }
         };
 
@@ -47,8 +48,8 @@ public class Log4NetTests
     [InlineData(60010, 13)]
     // LogLevel.Info(40000) + 10, LogRecordSeverity.Info (9)
     [InlineData(40010, 9)]
-    // Everything below Trace(20000) threshold is mapped to LogRecordSeverity.Trace
-    [InlineData(19900, 1)]
+    // Everything below Debug(30000) threshold is mapped to LogRecordSeverity.Trace
+    [InlineData(29900, 1)]
     public void Log4NetLevelValuesWithoutADirectMatch_AreMappedToALessSevereValue(int log4NetLevelValue, int expectedOpenTelemetrySeverity)
     {
         OpenTelemetryLog4NetAppender.MapLogLevel(log4NetLevelValue).Should().Be(expectedOpenTelemetrySeverity);

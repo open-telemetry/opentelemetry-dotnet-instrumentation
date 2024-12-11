@@ -17,8 +17,6 @@ internal static class Program
     {
         if (args.Length == 2)
         {
-            using var activity = Source.StartActivity("ManuallyStarted");
-
             var logApiName = args[1];
             switch (logApiName)
             {
@@ -46,26 +44,25 @@ internal static class Program
         });
         var logger = loggerFactory.CreateLogger(typeof(Program));
 
-        var (format, arg) = GetInfo();
-        logger.LogInformation(format, arg);
+        LogInsideActiveScope(() => logger.LogInformation("{0}, {1} at {2:t}!", "Hello", "world", DateTime.Now));
 
         var (message, ex) = GetException();
         logger.LogError(ex, message);
     }
 
+    private static void LogInsideActiveScope(Action action)
+    {
+        using var activity = Source.StartActivity("ManuallyStarted");
+        action();
+    }
+
     private static void LogUsingLog4NetDirectly()
     {
         var log = log4net.LogManager.GetLogger(typeof(Program));
-        var (format, arg) = GetInfo();
-        log.InfoFormat(format, arg);
+        LogInsideActiveScope(() => log.InfoFormat("{0}, {1} at {2:t}!", "Hello", "world", DateTime.Now));
 
         var (message, ex) = GetException();
         log.Error(message, ex);
-    }
-
-    private static (string Format, string Message) GetInfo()
-    {
-        return ("Hello, {0}!", "world");
     }
 
     private static (string Message, Exception Exception) GetException()
