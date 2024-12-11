@@ -16,7 +16,7 @@ internal class InstrumentationOptions
         AspNetInstrumentationCaptureRequestHeaders = configuration.ParseHeaders(ConfigurationKeys.Traces.InstrumentationOptions.AspNetInstrumentationCaptureRequestHeaders, AdditionalTag.CreateHttpRequestCache);
         AspNetInstrumentationCaptureResponseHeaders = configuration.ParseHeaders(ConfigurationKeys.Traces.InstrumentationOptions.AspNetInstrumentationCaptureResponseHeaders, AdditionalTag.CreateHttpResponseCache);
 #endif
-#if NET8_0_OR_GREATER
+#if NET
         AspNetCoreInstrumentationCaptureRequestHeaders = configuration.ParseHeaders(ConfigurationKeys.Traces.InstrumentationOptions.AspNetCoreInstrumentationCaptureRequestHeaders, AdditionalTag.CreateHttpRequestCache);
         AspNetCoreInstrumentationCaptureResponseHeaders = configuration.ParseHeaders(ConfigurationKeys.Traces.InstrumentationOptions.AspNetCoreInstrumentationCaptureResponseHeaders, AdditionalTag.CreateHttpResponseCache);
         EntityFrameworkCoreSetDbStatementForText = configuration.GetBool(ConfigurationKeys.Traces.InstrumentationOptions.EntityFrameworkCoreSetDbStatementForText) ?? false;
@@ -43,7 +43,7 @@ internal class InstrumentationOptions
     public IReadOnlyList<AdditionalTag> AspNetInstrumentationCaptureResponseHeaders { get; }
 #endif
 
-#if NET8_0_OR_GREATER
+#if NET
     /// <summary>
     /// Gets the list of HTTP request headers to be captured as the span tags by ASP.NET Core instrumentation.
     /// </summary>

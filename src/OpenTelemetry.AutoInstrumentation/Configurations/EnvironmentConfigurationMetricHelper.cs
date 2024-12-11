@@ -30,12 +30,12 @@ internal static class EnvironmentConfigurationMetricHelper
                 MetricInstrumentation.NetRuntime => Wrappers.AddRuntimeInstrumentation(builder, pluginManager),
                 MetricInstrumentation.Process => Wrappers.AddProcessInstrumentation(builder),
                 MetricInstrumentation.NServiceBus => builder
-#if NET8_0_OR_GREATER
+#if NET
                     .AddMeter("NServiceBus.Core.Pipeline.Incoming") // NServiceBus 9.1.0+
 #endif
                     .AddMeter("NServiceBus.Core"), // NServiceBus [8,0.0, 9.1.0)
 
-#if NET8_0_OR_GREATER
+#if NET
                 MetricInstrumentation.AspNetCore => builder
                     .AddMeter("Microsoft.AspNetCore.Hosting")
                     .AddMeter("Microsoft.AspNetCore.Server.Kestrel")
@@ -44,6 +44,7 @@ internal static class EnvironmentConfigurationMetricHelper
                     .AddMeter("Microsoft.AspNetCore.Diagnostics")
                     .AddMeter("Microsoft.AspNetCore.RateLimiting"),
 #endif
+                MetricInstrumentation.SqlClient => Wrappers.AddSqlClientInstrumentation(builder, lazyInstrumentationLoader, pluginManager),
                 _ => null,
             };
         }
@@ -92,7 +93,7 @@ internal static class EnvironmentConfigurationMetricHelper
         [MethodImpl(MethodImplOptions.NoInlining)]
         public static MeterProviderBuilder AddHttpClientInstrumentation(MeterProviderBuilder builder, LazyInstrumentationLoader lazyInstrumentationLoader)
         {
-#if NET8_0_OR_GREATER
+#if NET
             // HTTP has build in support for metrics in .NET8. Executing OpenTelemetry.Instrumentation.Http in this case leads to duplicated metrics.
             return builder
                 .AddMeter("System.Net.Http")
@@ -113,6 +114,13 @@ internal static class EnvironmentConfigurationMetricHelper
         public static MeterProviderBuilder AddProcessInstrumentation(MeterProviderBuilder builder)
         {
             return builder.AddProcessInstrumentation();
+        }
+
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        public static MeterProviderBuilder AddSqlClientInstrumentation(MeterProviderBuilder builder, LazyInstrumentationLoader lazyInstrumentationLoader, PluginManager pluginManager)
+        {
+            DelayedInitialization.Metrics.AddSqlClient(lazyInstrumentationLoader, pluginManager);
+            return builder.AddMeter("OpenTelemetry.Instrumentation.SqlClient");
         }
 
         // Exporters

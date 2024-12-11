@@ -187,23 +187,27 @@ partial class Build
                     }
                 }
 
-                DotNetBuildSettings BuildTestApplication(DotNetBuildSettings x) =>
+                DotNetBuildSettings BuildTestApplication(DotNetBuildSettings x, string targetFramework) =>
                     x.SetProjectFile(app)
                         .SetConfiguration(BuildConfiguration)
                         .SetPlatform(Platform)
                         .SetNoRestore(NoRestore)
-                        .When(_ =>TestTargetFramework != TargetFramework.NOT_SPECIFIED,
-                            s => s.SetFramework(actualTestTfm));
+                        .When(_ => TestTargetFramework != TargetFramework.NOT_SPECIFIED,
+                        s => s.SetFramework(targetFramework));
 
                 if (LibraryVersion.Versions.TryGetValue(app.Name, out var libraryVersions))
                 {
-                    DotNetBuild(x =>
-                         BuildTestApplication(x)
-                         .CombineWithBuildInfos(libraryVersions, TestTargetFramework));
+                    foreach (var packageBuildInfo in libraryVersions)
+                    {
+                        var targetFramework = packageBuildInfo.SupportedFrameworks.Length == 0 || packageBuildInfo.SupportedFrameworks.Contains(actualTestTfm) ? actualTestTfm : TestTargetFramework;
+                        DotNetBuild(x =>
+                            BuildTestApplication(x, targetFramework)
+                                .CombineWithBuildInfos([packageBuildInfo], TestTargetFramework));
+                    }
                 }
                 else
                 {
-                    DotNetBuild(BuildTestApplication);
+                    DotNetBuild(x => BuildTestApplication(x, actualTestTfm));
                 }
             }
 
