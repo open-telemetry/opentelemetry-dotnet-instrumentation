@@ -95,7 +95,7 @@ internal static class PackageVersionDefinitions
             Versions = new List<PackageVersion>
             {
                 // versions 2.0.* below 2.0.10 all have critical vulnerabilities
-                new("2.0.10"),
+                new("2.0.13"),
                 new("*")
             }
         },
