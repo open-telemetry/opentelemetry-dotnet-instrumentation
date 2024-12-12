@@ -5,6 +5,7 @@ using System.Collections;
 using System.Diagnostics;
 using System.Reflection;
 using OpenTelemetry.AutoInstrumentation.DuckTyping;
+using OpenTelemetry.AutoInstrumentation.Instrumentations.Log4Net.TraceContextInjection;
 using OpenTelemetry.AutoInstrumentation.Logging;
 using OpenTelemetry.Logs;
 using Exception = System.Exception;
@@ -19,6 +20,7 @@ internal class OpenTelemetryLog4NetAppender
     private const int WarningThreshold = 60_000;
     private const int InfoThreshold = 40_000;
     private const int DebugThreshold = 30_000;
+    private const string SystemStringFormatTypeName = "log4net.Util.SystemStringFormat";
 
     private static readonly IOtelLogger Logger = OtelLogging.GetLogger();
     private static readonly Lazy<OpenTelemetryLog4NetAppender> InstanceField = new(InitializeAppender, true);
@@ -45,7 +47,7 @@ internal class OpenTelemetryLog4NetAppender
 
         object? logger = null;
 
-        if (_getLoggerFactory != null)
+        if (_getLoggerFactory is not null)
         {
             logger = _getLoggerFactory(loggingEvent.LoggerName);
         }
@@ -66,13 +68,13 @@ internal class OpenTelemetryLog4NetAppender
         var messageObject = loggingEvent.MessageObject;
 
         // Try to extract message format and args used
-        // when *Format overloads are used for logging, e.g. InfoFormat
-        if (messageObject.TryDuckCast<IStringFormatNew>(out var stringFormat))
+        // when *Format methods are used for logging, e.g. InfoFormat
+        if (messageObject.TryDuckCast<IStringFormatNew>(out var stringFormat) && stringFormat.Type is { FullName: SystemStringFormatTypeName })
         {
             format = stringFormat.Format;
             args = stringFormat.Args;
         }
-        else if (messageObject.TryDuckCast<IStringFormatOld>(out var stringFormatOld))
+        else if (messageObject.TryDuckCast<IStringFormatOld>(out var stringFormatOld) && stringFormatOld.Type is { FullName: SystemStringFormatTypeName })
         {
             format = stringFormatOld.Format;
             args = stringFormatOld.Args;
@@ -103,18 +105,40 @@ internal class OpenTelemetryLog4NetAppender
     {
     }
 
-    private static IDictionary? GetProperties(ILoggingEvent loggingEvent)
+    private static IEnumerable<KeyValuePair<string, object?>>? GetProperties(ILoggingEvent loggingEvent)
     {
         // Due to known issues, attempt to retrieve properties
         // might throw on operating systems other than Windows.
         // This seems to be fixed for versions 2.0.13 and above.
         try
         {
-            return loggingEvent.GetProperties();
+            var properties = loggingEvent.GetProperties();
+            return properties == null ? null : GetFilteredProperties(properties);
         }
         catch (Exception)
         {
             return null;
+        }
+    }
+
+    private static IEnumerable<KeyValuePair<string, object?>> GetFilteredProperties(IDictionary properties)
+    {
+        foreach (var propertyKey in properties.Keys)
+        {
+            if (propertyKey is not string key)
+            {
+                continue;
+            }
+
+            if (key.StartsWith("log4net:") ||
+                key == LogsTraceContextInjectionConstants.SpanIdPropertyName ||
+                key == LogsTraceContextInjectionConstants.TraceIdPropertyName ||
+                key == LogsTraceContextInjectionConstants.TraceFlagsPropertyName)
+            {
+                continue;
+            }
+
+            yield return new KeyValuePair<string, object?>(key, properties[key]);
         }
     }
 

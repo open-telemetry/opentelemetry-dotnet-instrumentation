@@ -231,7 +231,7 @@ internal static class Instrumentation
     {
         // ILogger bridge is initialized using ILogger-specific extension methods in LoggerInitializer class.
         // That extension methods sets up its own LogProvider.
-        if (LogSettings.Value.LogsEnabled && LogSettings.Value.EnabledInstrumentations.Contains(LogInstrumentation.Log4Net))
+        if (LogSettings.Value.EnableLog4NetBridge && LogSettings.Value.LogsEnabled && LogSettings.Value.EnabledInstrumentations.Contains(LogInstrumentation.Log4Net))
         {
             // TODO: Replace reflection usage when Logs Api is made public in non-rc builds.
             // Sdk.CreateLoggerProviderBuilder()

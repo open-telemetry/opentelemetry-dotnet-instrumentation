@@ -17,6 +17,7 @@ internal static class Program
     {
         if (args.Length == 2)
         {
+            log4net.GlobalContext.Properties["test_key"] = "test_value";
             var logApiName = args[1];
             switch (logApiName)
             {

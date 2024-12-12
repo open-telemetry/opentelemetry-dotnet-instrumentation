@@ -31,10 +31,8 @@ public class Log4NetBridgeTests : TestHelper
             VerifyBody(logRecord, "{0}, {1} at {2:t}!") &&
             VerifyTraceContext(logRecord) &&
             logRecord is { SeverityText: "INFO", SeverityNumber: SeverityNumber.Info } &&
-            // 0 : "Hello"
-            // 1 : "world"
-            // 2 : timestamp
-            logRecord.Attributes.Count == 3,
+            VerifyAttributes(logRecord) &&
+            logRecord.Attributes.Count == 4,
             "Expected Info record.");
 
         // Logged with exception
@@ -43,7 +41,7 @@ public class Log4NetBridgeTests : TestHelper
             VerifyBody(logRecord, "Exception occured") &&
             logRecord is { SeverityText: "ERROR", SeverityNumber: SeverityNumber.Error } &&
             VerifyExceptionAttributes(logRecord) &&
-            logRecord.Attributes.Count == 3,
+            logRecord.Attributes.Count == 4,
             "Expected Error record.");
 
         EnableBytecodeInstrumentation();
@@ -152,6 +150,17 @@ public class Log4NetBridgeTests : TestHelper
         var output = standardOutput;
         regex.IsMatch(output).Should().BeTrue();
         output.Should().Contain("ERROR TestApplication.Log4NetBridge.Program - Exception occured span_id=(null) trace_id=(null) trace_flags=(null)");
+    }
+
+    private static bool VerifyAttributes(LogRecord logRecord)
+    {
+        var firstArgAttribute = logRecord.Attributes.SingleOrDefault(value => value.Key == "0");
+        var secondArgAttribute = logRecord.Attributes.SingleOrDefault(value => value.Key == "1");
+        var customAttribute = logRecord.Attributes.SingleOrDefault(value => value.Key == "test_key");
+        return firstArgAttribute?.Value.StringValue == "Hello" &&
+               secondArgAttribute?.Value.StringValue == "world" &&
+               logRecord.Attributes.Count(value => value.Key == "2") == 1 &&
+               customAttribute?.Value.StringValue == "test_value";
     }
 
     private static bool VerifyTraceContext(LogRecord logRecord)

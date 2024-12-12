@@ -94,8 +94,8 @@ internal static partial class InstrumentationDefinitions
             // Log4Net
             if (logSettings.EnabledInstrumentations.Contains(LogInstrumentation.Log4Net))
             {
-                nativeCallTargetDefinitions.Add(new("log4net", "log4net.Appender.AppenderCollection", "ToArray", new[] {"log4net.Appender.IAppender[]"}, 2, 0, 0, 3, 65535, 65535, AssemblyFullName, "OpenTelemetry.AutoInstrumentation.Instrumentations.Log4Net.Bridge.Integrations.AppenderCollectionIntegration"));
-                nativeCallTargetDefinitions.Add(new("log4net", "log4net.Util.AppenderAttachedImpl", "AppendLoopOnAppenders", new[] {"System.Int32", "log4net.Core.LoggingEvent"}, 2, 0, 0, 3, 65535, 65535, AssemblyFullName, "OpenTelemetry.AutoInstrumentation.Instrumentations.Log4Net.TraceContextInjection.Integrations.AppenderAttachedImplIntegration"));
+                nativeCallTargetDefinitions.Add(new("log4net", "log4net.Appender.AppenderCollection", "ToArray", new[] {"log4net.Appender.IAppender[]"}, 2, 0, 13, 3, 65535, 65535, AssemblyFullName, "OpenTelemetry.AutoInstrumentation.Instrumentations.Log4Net.Bridge.Integrations.AppenderCollectionIntegration"));
+                nativeCallTargetDefinitions.Add(new("log4net", "log4net.Util.AppenderAttachedImpl", "AppendLoopOnAppenders", new[] {"System.Int32", "log4net.Core.LoggingEvent"}, 2, 0, 13, 3, 65535, 65535, AssemblyFullName, "OpenTelemetry.AutoInstrumentation.Instrumentations.Log4Net.TraceContextInjection.Integrations.AppenderAttachedImplIntegration"));
             }
 
             // ILogger

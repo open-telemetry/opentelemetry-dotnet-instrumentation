@@ -94,7 +94,8 @@ internal static class PackageVersionDefinitions
             TestApplicationName = "TestApplication.Log4NetBridge",
             Versions = new List<PackageVersion>
             {
-                // versions 2.0.* below 2.0.10 all have critical vulnerabilities
+                // versions below 2.0.10 have critical vulnerabilities
+                // versions below 2.0.13 have known bugs e.g. https://issues.apache.org/jira/browse/LOG4NET-652
                 new("2.0.13"),
                 new("*")
             }

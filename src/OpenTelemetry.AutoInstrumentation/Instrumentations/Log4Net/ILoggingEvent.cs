@@ -29,14 +29,14 @@ internal interface ILoggingEvent
     public IDictionary? GetProperties();
 }
 
-internal interface IStringFormatNew
+internal interface IStringFormatNew : IDuckType
 {
     public string Format { get; set; }
 
     public object?[]? Args { get; set; }
 }
 
-internal interface IStringFormatOld
+internal interface IStringFormatOld : IDuckType
 {
     [DuckField(Name = "m_args")]
     public object[] Args { get; }

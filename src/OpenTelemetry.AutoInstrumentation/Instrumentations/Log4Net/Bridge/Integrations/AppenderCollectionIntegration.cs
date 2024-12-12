@@ -17,7 +17,7 @@ typeName: "log4net.Appender.AppenderCollection",
 methodName: "ToArray",
 returnTypeName: "log4net.Appender.IAppender[]",
 parameterTypeNames: new string[0],
-minimumVersion: "2.0.0",
+minimumVersion: "2.0.13",
 maximumVersion: "3.*.*",
 integrationName: "Log4Net",
 type: InstrumentationType.Log)]
