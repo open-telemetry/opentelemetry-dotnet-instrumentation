@@ -36,8 +36,6 @@
 #include <mach-o/getsect.h>
 #endif
 
-using namespace std::chrono_literals;
-
 #ifdef _WIN32
 #include "netfx_assembly_redirection.h"
 #endif
@@ -52,6 +50,8 @@ using namespace std::chrono_literals;
     {                                                                                                                  \
         return E_FAIL;                                                                                                 \
     }
+
+using namespace std::chrono_literals;
 
 namespace trace
 {
@@ -788,10 +788,10 @@ HRESULT STDMETHODCALLTYPE CorProfiler::ModuleLoadFinished(ModuleID module_id, HR
         // We call the function to analyze the module and request the ReJIT of integrations defined in this module.
         if (tracer_integration_preprocessor != nullptr && !integration_definitions_.empty())
         {
-            std::promise<ULONG> promise;
-            std::future<ULONG>  future = promise.get_future();
+            auto               promise = std::make_shared<std::promise<ULONG>>();
+            std::future<ULONG> future  = promise->get_future();
             tracer_integration_preprocessor->EnqueueRequestRejitForLoadedModules(std::vector<ModuleID>{module_id},
-                                                                                 integration_definitions_, &promise);
+                                                                                 integration_definitions_, promise);
 
             // wait and get the value from the future<ULONG>
             const auto status = future.wait_for(100ms);
@@ -1109,14 +1109,24 @@ void CorProfiler::InternalAddInstrumentation(WCHAR* id, CallTargetDefinition* it
         {
             if (rejit_handler != nullptr)
             {
-                std::promise<ULONG> promise;
-                std::future<ULONG>  future = promise.get_future();
+                auto               promise = std::make_shared<std::promise<ULONG>>();
+                std::future<ULONG> future  = promise->get_future();
                 tracer_integration_preprocessor->EnqueueRequestRejitForLoadedModules(module_ids_,
-                                                                                     integrationDefinitions, &promise);
+                                                                                     integrationDefinitions, promise);
 
-                // wait and get the value from the future<int>
-                const auto& numReJITs = future.get();
-                Logger::Debug("Total number of ReJIT Requested: ", numReJITs);
+                // wait and get the value from the future<ULONG>
+                const auto status = future.wait_for(100ms);
+
+                if (status != std::future_status::timeout)
+                {
+                    const auto& numReJITs = future.get();
+                    Logger::Debug("Total number of ReJIT Requested: ", numReJITs);
+                }
+                else
+                {
+                    Logger::Warn("Timeout while waiting for the rejit requests to be processed. Rejit will continue "
+                                 "asynchronously, but some initial calls may not be instrumented");
+                }
             }
 
             integration_definitions_.reserve(integration_definitions_.size() + integrationDefinitions.size());

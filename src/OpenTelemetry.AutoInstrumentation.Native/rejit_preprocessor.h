@@ -53,7 +53,7 @@ public:
 
     void EnqueueRequestRejitForLoadedModules(const std::vector<ModuleID>& modulesVector,
                                              const std::vector<RejitRequestDefinition>& requests,
-                                             std::promise<ULONG>* promise);
+                                             std::shared_ptr<std::promise<ULONG>> promise);
 };
 
 /// <summary>
