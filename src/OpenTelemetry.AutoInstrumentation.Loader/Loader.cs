@@ -23,6 +23,11 @@ internal partial class Loader
     {
         ManagedProfilerDirectory = ResolveManagedProfilerDirectory();
 
+#if NET
+        var mainModulePath = Path.Combine(ManagedProfilerDirectory, "OpenTelemetry.AutoInstrumentation.dll");
+        OTelLoadContext = new OTelLoadContext(mainModulePath);
+#endif
+
         try
         {
             AppDomain.CurrentDomain.AssemblyResolve += AssemblyResolve_ManagedProfilerDependencies;
@@ -41,7 +46,7 @@ internal partial class Loader
 
         try
         {
-            var assembly = Assembly.Load("OpenTelemetry.AutoInstrumentation");
+            var assembly = LoadMainAssembly("OpenTelemetry.AutoInstrumentation");
             if (assembly == null)
             {
                 throw new FileNotFoundException("The assembly OpenTelemetry.AutoInstrumentation could not be loaded");

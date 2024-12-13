@@ -318,11 +318,12 @@ partial class Build
     void RemoveNonLibraryFilesFromOutput()
     {
         TracerHomeDirectory.GlobFiles("**/*.xml").ForEach(file => file.DeleteFile());
-        (TracerHomeDirectory / "net").GlobFiles("*.json").ForEach(file => file.DeleteFile());
-        if (IsWin)
-        {
-            (TracerHomeDirectory / "netfx").GlobFiles("*.json").ForEach(file => file.DeleteFile());
-        }
+        // TODO: Remove or optimize ??
+        // (TracerHomeDirectory / "net").GlobFiles("*.json").ForEach(file => file.DeleteFile());
+        // if (IsWin)
+        // {
+        //     (TracerHomeDirectory / "netfx").GlobFiles("*.json").ForEach(file => file.DeleteFile());
+        // }
     }
 
     void RemoveFilesInNetFolderAvailableInAdditionalStore()

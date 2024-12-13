@@ -4,6 +4,7 @@
 #if NET
 using System.Reflection;
 using System.Runtime.InteropServices;
+using System.Runtime.Loader;
 
 namespace OpenTelemetry.AutoInstrumentation.Loader;
 
@@ -12,7 +13,7 @@ namespace OpenTelemetry.AutoInstrumentation.Loader;
 /// </summary>
 internal partial class Loader
 {
-    internal static System.Runtime.Loader.AssemblyLoadContext DependencyLoadContext { get; } = new ManagedProfilerAssemblyLoadContext();
+    internal static AssemblyLoadContext OTelLoadContext { get; }
 
     internal static string[]? StoreFiles { get; } = GetStoreFiles();
 
@@ -22,6 +23,11 @@ internal partial class Loader
         string tracerHomeDirectory = ReadEnvironmentVariable("OTEL_DOTNET_AUTO_HOME") ?? string.Empty;
 
         return Path.Combine(tracerHomeDirectory, tracerFrameworkDirectory);
+    }
+
+    private static Assembly LoadMainAssembly(string assemblyName)
+    {
+        return OTelLoadContext.LoadFromAssemblyName(new AssemblyName(assemblyName));
     }
 
     private static string[]? GetStoreFiles()
@@ -78,26 +84,27 @@ internal partial class Loader
         // 2) The AssemblyVersion is lower than the version used by OpenTelemetry.AutoInstrumentation, the assembly will fail to load
         //    and invoke this resolve event. It must be loaded in a separate AssemblyLoadContext since the application will only
         //    load the originally referenced version
-        if (assemblyName.Name != null && assemblyName.Name.StartsWith("OpenTelemetry.AutoInstrumentation", StringComparison.OrdinalIgnoreCase) && File.Exists(path))
-        {
-            Logger.Debug("Loading {0} with Assembly.LoadFrom", path);
-            return Assembly.LoadFrom(path);
-        }
-        else if (File.Exists(path))
-        {
-            Logger.Debug("Loading {0} with DependencyLoadContext.LoadFromAssemblyPath", path);
-            return DependencyLoadContext.LoadFromAssemblyPath(path); // Load unresolved framework and third-party dependencies into a custom Assembly Load Context
-        }
-        else
-        {
-            var entry = StoreFiles?.FirstOrDefault(e => e.EndsWith($"{assemblyName.Name}.dll"));
-            if (entry != null)
-            {
-                return DependencyLoadContext.LoadFromAssemblyPath(entry);
-            }
 
-            return null;
-        }
+        // TODO: Remove??
+        // if (assemblyName.Name != null && assemblyName.Name.StartsWith("OpenTelemetry.AutoInstrumentation", StringComparison.OrdinalIgnoreCase) && File.Exists(path))
+        // {
+        //     Logger.Debug("Loading {0} with Assembly.LoadFrom", path);
+        //     return Assembly.LoadFrom(path);
+        // }
+        // else if (File.Exists(path))
+        // {
+        //     Logger.Debug("Loading {0} with DependencyLoadContext.LoadFromAssemblyPath", path);
+        //     return DependencyLoadContext.LoadFromAssemblyPath(path); // Load unresolved framework and third-party dependencies into a custom Assembly Load Context
+        // }
+        // else
+        // {
+        //     var entry = StoreFiles?.FirstOrDefault(e => e.EndsWith($"{assemblyName.Name}.dll"));
+        //     if (entry != null)
+        //     {
+        //         return DependencyLoadContext.LoadFromAssemblyPath(entry);
+        //     }
+        return null;
+        // }
     }
 }
 #endif
