@@ -6,7 +6,7 @@
 
 Both bridge and trace context injection are supported for `log4net` in versions >= 2.0.13 && < 4.0.0
 
-## `log4net` [logs bridge](https://opentelemetry.io/docs/concepts/signals/logs/#log-appender--bridge)
+## `log4net` [logs bridge](https://opentelemetry.io/docs/specs/otel/glossary/#log-appender--bridge)
 
 The `log4net` logs bridge is disabled by default. In order to enable it, set `OTEL_DOTNET_AUTO_LOGS_ENABLE_LOG4NET_BRIDGE` to `true`.
 When `log4net` logs bridge is enabled, and `log4net` is configured with at least 1 appender, application logs are exported in OTLP 
@@ -23,7 +23,7 @@ format by default to the local instance of OpenTelemetry Collector, in addition 
 - If formatted strings were used for logging, format arguments are added as attributes, with indexes as their names
 - If formatted strings were used for logging, and `OTEL_DOTNET_AUTO_LOGS_INCLUDE_FORMATTED_MESSAGE` is set, rendered message
 is added as `log4net.rendered_message` attribute
-- `LoggerName` is set as an `InstrumentationScope`
+- `LoggerName` is set as an `InstrumentationScope.Name`
 - `Properties`, apart from builtin properties prefixed with `log4net:`, are added as attributes
 - `Exception` is used to populate the following properties: `exception.type`,`exception.message`,`exception.stacktrace`
 - `Level.Value` is mapped to `SeverityNumber` as outlined in the next section
@@ -33,6 +33,7 @@ is added as `log4net.rendered_message` attribute
 `log4net` levels are mapped to OpenTelemetry severity types according to the following rules based on their numerical values.
 
 Levels with numerical values of:
+
 - Equal to `Level.Fatal` or higher are mapped to `LogRecordSeverity.Fatal`
 - Higher than or equal to `Level.Error` but lower than `Level.Fatal` are mapped to `LogRecordSeverity.Error`
 - Higher than or equal to `Level.Warn` but lower than `Level.Error` are mapped to `LogRecordSeverity.Warn`
@@ -43,6 +44,7 @@ Levels with numerical values of:
 ## `log4net` trace context injection
 
 Following properties are added by default to the collection of logging event's properties:
+
 - `trace_id`
 - `span_id`
 - `trace_flags`
