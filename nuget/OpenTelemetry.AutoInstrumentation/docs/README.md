@@ -42,7 +42,7 @@ you to either add the missing instrumentation package or to skip the
 instrumentation of the corresponding package:
 
 ```terminal
-~packages/opentelemetry.autoinstrumentation.buildtasks/1.1.0/build/OpenTelemetry.AutoInstrumentation.BuildTasks.targets(29,5): error : OpenTelemetry.AutoInstrumentation: add a reference to the instrumentation package 'MongoDB.Driver.Core.Extensions.DiagnosticSources' version 1.3.0 or add 'MongoDB.Driver.Core' to the property 'SkippedInstrumentations' to suppress this error.
+~packages/opentelemetry.autoinstrumentation.buildtasks/1.9.0/build/OpenTelemetry.AutoInstrumentation.BuildTasks.targets(29,5): error : OpenTelemetry.AutoInstrumentation: add a reference to the instrumentation package 'OpenTelemetry.Instrumentation.StackExchangeRedis' version 1.9.0-beta.1 or add 'StackExchange.Redis' to the property 'SkippedInstrumentations' to suppress this error.
 ```
 
 To resolve the error either add the recommended instrumentation package or skip
@@ -51,7 +51,7 @@ property. For example:
 
 ```csproj
   <PropertyGroup>
-    <SkippedInstrumentations>MongoDB.Driver.Core;StackExchange.Redis</SkippedInstrumentations>
+    <SkippedInstrumentations>StackExchange.Redis</SkippedInstrumentations>
   </PropertyGroup>
 ```
 
@@ -59,7 +59,7 @@ The same property can be also specified directly using the terminal.
 Notice that the `;` separator needs to be properly escaped as '%3B':
 
 ```powershell
-  dotnet build -p:SkippedInstrumentations=StackExchange.Redis%3BMongoDB.Driver.Core
+  dotnet build -p:SkippedInstrumentations=StackExchange.Redis
 ```
 
 To distribute the appropriate native runtime components with your .NET application,

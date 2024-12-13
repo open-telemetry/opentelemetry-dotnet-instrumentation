@@ -1,0 +1,2 @@
+OpenTelemetry.AutoInstrumentation.Instrumentations.MongoDB.Integrations.MongoClientIntegrationExecute
+OpenTelemetry.AutoInstrumentation.Instrumentations.MongoDB.Integrations.MongoClientIntegrationExecuteAsync
