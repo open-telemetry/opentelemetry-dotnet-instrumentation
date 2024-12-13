@@ -218,6 +218,12 @@ internal partial class ConfigurationKeys
         public const string IncludeFormattedMessage = "OTEL_DOTNET_AUTO_LOGS_INCLUDE_FORMATTED_MESSAGE";
 
         /// <summary>
+        /// Configuration key for whether or not experimental log4net bridge
+        /// should be enabled.
+        /// </summary>
+        public const string EnableLog4NetBridge = "OTEL_DOTNET_AUTO_LOGS_ENABLE_LOG4NET_BRIDGE";
+
+        /// <summary>
         /// Configuration key for disabling all log instrumentations.
         /// </summary>
         public const string LogsInstrumentationEnabled = "OTEL_DOTNET_AUTO_LOGS_INSTRUMENTATION_ENABLED";

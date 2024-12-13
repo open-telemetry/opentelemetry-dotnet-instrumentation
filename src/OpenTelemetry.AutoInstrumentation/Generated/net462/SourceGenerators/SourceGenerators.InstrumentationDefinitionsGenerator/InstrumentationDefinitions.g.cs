@@ -17,7 +17,7 @@ internal static partial class InstrumentationDefinitions
 {
     private static NativeCallTargetDefinition[] GetDefinitionsArray()
     {
-        var nativeCallTargetDefinitions = new List<NativeCallTargetDefinition>(33);
+        var nativeCallTargetDefinitions = new List<NativeCallTargetDefinition>(35);
         // Traces
         var tracerSettings = Instrumentation.TracerSettings.Value;
         if (tracerSettings.TracesEnabled)
@@ -87,6 +87,18 @@ internal static partial class InstrumentationDefinitions
             if (tracerSettings.EnabledInstrumentations.Contains(TracerInstrumentation.WcfService))
             {
                 nativeCallTargetDefinitions.Add(new("System.ServiceModel", "System.ServiceModel.ServiceHostBase", "InitializeDescription", new[] {"System.Void", "System.ServiceModel.UriSchemeKeyedCollection"}, 4, 0, 0, 4, 65535, 65535, AssemblyFullName, "OpenTelemetry.AutoInstrumentation.Instrumentations.Wcf.Service.ServiceHostIntegration"));
+            }
+        }
+
+        // Logs
+        var logSettings = Instrumentation.LogSettings.Value;
+        if (logSettings.LogsEnabled)
+        {
+            // Log4Net
+            if (logSettings.EnabledInstrumentations.Contains(LogInstrumentation.Log4Net))
+            {
+                nativeCallTargetDefinitions.Add(new("log4net", "log4net.Appender.AppenderCollection", "ToArray", new[] {"log4net.Appender.IAppender[]"}, 2, 0, 13, 3, 65535, 65535, AssemblyFullName, "OpenTelemetry.AutoInstrumentation.Instrumentations.Log4Net.Bridge.Integrations.AppenderCollectionIntegration"));
+                nativeCallTargetDefinitions.Add(new("log4net", "log4net.Util.AppenderAttachedImpl", "AppendLoopOnAppenders", new[] {"System.Int32", "log4net.Core.LoggingEvent"}, 2, 0, 13, 3, 65535, 65535, AssemblyFullName, "OpenTelemetry.AutoInstrumentation.Instrumentations.Log4Net.TraceContextInjection.Integrations.AppenderAttachedImplIntegration"));
             }
         }
 

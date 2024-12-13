@@ -1,9 +1,11 @@
+appender
+appenders
 CNCF
 opentelemetry
 OTEL
 OTLP
+parentbased
 tracecontext
+traceidratio
 triager
 Zipkin
-parentbased
-traceidratio

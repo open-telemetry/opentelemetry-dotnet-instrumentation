@@ -89,6 +89,19 @@ internal static class PackageVersionDefinitions
         },
         new()
         {
+            IntegrationName = "log4net",
+            NugetPackageName = "log4net",
+            TestApplicationName = "TestApplication.Log4NetBridge",
+            Versions = new List<PackageVersion>
+            {
+                // versions below 2.0.10 have critical vulnerabilities
+                // versions below 2.0.13 have known bugs e.g. https://issues.apache.org/jira/browse/LOG4NET-652
+                new("2.0.13"),
+                new("*")
+            }
+        },
+        new()
+        {
             IntegrationName = "MassTransit",
             NugetPackageName = "MassTransit",
             TestApplicationName = "TestApplication.MassTransit",

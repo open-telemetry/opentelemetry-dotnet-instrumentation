@@ -4,6 +4,7 @@
 #if NET
 using System.Diagnostics;
 #endif
+using System.Reflection;
 using OpenTelemetry.AutoInstrumentation.Configurations;
 #if NET
 using OpenTelemetry.AutoInstrumentation.ContinuousProfiler;
@@ -12,6 +13,7 @@ using OpenTelemetry.AutoInstrumentation.Diagnostics;
 using OpenTelemetry.AutoInstrumentation.Loading;
 using OpenTelemetry.AutoInstrumentation.Logging;
 using OpenTelemetry.AutoInstrumentation.Plugins;
+using OpenTelemetry.Logs;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Trace;
 
@@ -25,17 +27,25 @@ internal static class Instrumentation
     private static readonly IOtelLogger Logger = OtelLogging.GetLogger();
     private static readonly LazyInstrumentationLoader LazyInstrumentationLoader = new();
 
+    private static readonly Lazy<LoggerProvider?> LoggerProviderFactory = new(InitializeLoggerProvider, true);
+
     private static int _initialized;
     private static int _isExiting;
     private static SdkSelfDiagnosticsEventListener? _sdkEventListener;
 
     private static TracerProvider? _tracerProvider;
     private static MeterProvider? _meterProvider;
+
     private static PluginManager? _pluginManager;
 
 #if NET
     private static ContinuousProfilerProcessor? _profilerProcessor;
 #endif
+
+    internal static LoggerProvider? LoggerProvider
+    {
+        get => LoggerProviderFactory.Value;
+    }
 
     internal static PluginManager? PluginManager => _pluginManager;
 
@@ -215,6 +225,29 @@ internal static class Instrumentation
         {
             OpenTracingHelper.EnableOpenTracing(_tracerProvider);
         }
+    }
+
+    private static LoggerProvider? InitializeLoggerProvider()
+    {
+        // ILogger bridge is initialized using ILogger-specific extension methods in LoggerInitializer class.
+        // That extension methods sets up its own LogProvider.
+        if (LogSettings.Value.EnableLog4NetBridge && LogSettings.Value.LogsEnabled && LogSettings.Value.EnabledInstrumentations.Contains(LogInstrumentation.Log4Net))
+        {
+            // TODO: Replace reflection usage when Logs Api is made public in non-rc builds.
+            // Sdk.CreateLoggerProviderBuilder()
+            var createLoggerProviderBuilderMethod = typeof(Sdk).GetMethod("CreateLoggerProviderBuilder", BindingFlags.Static | BindingFlags.NonPublic)!;
+            var loggerProviderBuilder = createLoggerProviderBuilderMethod.Invoke(null, null) as LoggerProviderBuilder;
+
+            // TODO: plugins support
+            var loggerProvider = loggerProviderBuilder!
+                .SetResourceBuilder(ResourceConfigurator.CreateResourceBuilder(GeneralSettings.Value.EnabledResourceDetectors))
+                .UseEnvironmentVariables(LazyInstrumentationLoader, LogSettings.Value, _pluginManager!)
+                .Build();
+            Logger.Information("OpenTelemetry logger provider initialized.");
+            return loggerProvider;
+        }
+
+        return null;
     }
 
 #if NET
@@ -408,6 +441,11 @@ internal static class Instrumentation
 #endif
             _tracerProvider?.Dispose();
             _meterProvider?.Dispose();
+            if (LoggerProviderFactory.IsValueCreated)
+            {
+                LoggerProvider?.Dispose();
+            }
+
             _sdkEventListener?.Dispose();
 
             Logger.Information("OpenTelemetry Automatic Instrumentation exit.");
