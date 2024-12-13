@@ -54,6 +54,6 @@
 
    - [`examples/demo/Dockerfile`](../examples/demo/Dockerfile)
    - [OpenTelemetry Operator](https://github.com/open-telemetry/opentelemetry-operator/blob/main/autoinstrumentation/dotnet/version.txt)
-   - [OpenTelemetry Demo](https://github.com/open-telemetry/opentelemetry-demo/blob/main/src/accountingservice/AccountingService.csproj#L20)
+   - [OpenTelemetry Demo](https://github.com/open-telemetry/opentelemetry-demo/blob/main/src/accounting/Accounting.csproj#L20)
 
 1. For a stable release, update documentation under [opentelemetry.io](https://github.com/open-telemetry/opentelemetry.io/tree/main/content/en/docs/zero-code/net).

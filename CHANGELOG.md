@@ -48,7 +48,7 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
   - `OpenTelemetry.Resources.Process` from `0.1.0-beta.3` to `1.10.0-beta.1`,
   - `OpenTelemetry.Resources.ProcessRuntime` from `0.1.0-beta.2` to `1.10.0-beta.1`.
 - .NET only, following packages updated
-  - `OpenTelemetry.Instrumentation.AspNetCore` from `1.9.0` to `1.10.0`,
+  - `OpenTelemetry.Instrumentation.AspNetCore` from `1.9.0` to `1.10.1`,
   - `OpenTelemetry.Instrumentation.EntityFrameworkCore` from `1.0.0-beta.12` to `1.10.0-beta.1`,
   - `OpenTelemetry.Instrumentation.StackExchangeRedis` from `1.9.0-beta.1` to `1.10.0-beta.1`,
   - `System.Diagnostics.DiagnosticSource` from `8.0.0` to `9.0.0`.

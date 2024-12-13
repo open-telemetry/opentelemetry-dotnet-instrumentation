@@ -395,7 +395,7 @@ template <class RejitRequestDefinition>
 void RejitPreprocessor<RejitRequestDefinition>::EnqueueRequestRejitForLoadedModules(
     const std::vector<ModuleID>&               modulesVector,
     const std::vector<RejitRequestDefinition>& definitions,
-    std::promise<ULONG>*                       promise)
+    std::shared_ptr<std::promise<ULONG>>       promise)
 {
     if (m_rejit_handler->IsShutdownRequested())
     {
