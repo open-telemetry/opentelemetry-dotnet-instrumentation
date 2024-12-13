@@ -5,7 +5,21 @@ All notable changes to this component are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/compare/v1.9.0..HEAD)
+## [Unreleased](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/compare/v1.10.0-beta.1..HEAD)
+
+### Added
+
+### Changed
+
+#### Dependency updates
+
+### Deprecated
+
+### Removed
+
+### Fixed
+
+## [1.10.0-beta.1](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/tag/v1.10.0-beta.1)
 
 ### Added
 
@@ -73,16 +87,12 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
   - `System.Text.Encodings.Web` from `8.0.0` to `9.0.0`,
   - `System.Text.Json` from `8.0.5` to `9.0.0`.
 
-### Deprecated
-
 ### Removed
 
 - Support for .NET 6 and .NET 7. Both framework reached end of support.
 - Support for macOS Monterey 12 x64.
   macOs libraries are built and tested against [macOS Ventura 13 x64](https://github.com/actions/runner-images/blob/main/images/macos/macos-13-Readme.md).
 - `MongoDB.Driver.Core.Extensions.DiagnosticSources` dependency is removed.
-
-### Fixed
 
 ## [1.9.0](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/tag/v1.9.0)
 
