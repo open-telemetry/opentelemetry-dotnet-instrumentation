@@ -24,14 +24,15 @@ public static class AppenderAttachedImplIntegration
     internal static CallTargetState OnMethodBegin<TTarget, TLoggingEvent>(TTarget instance, TLoggingEvent loggingEvent)
     where TLoggingEvent : ILoggingEvent
     {
-        if (Activity.Current == null || loggingEvent.Properties == null)
+        var current = Activity.Current;
+        if (current == null || loggingEvent.Properties == null)
         {
             return CallTargetState.GetDefault();
         }
 
-        loggingEvent.Properties[LogsTraceContextInjectionConstants.SpanIdPropertyName] = Activity.Current.SpanId.ToHexString();
-        loggingEvent.Properties[LogsTraceContextInjectionConstants.TraceIdPropertyName] = Activity.Current.TraceId.ToHexString();
-        loggingEvent.Properties[LogsTraceContextInjectionConstants.TraceFlagsPropertyName] = (int)Activity.Current.ActivityTraceFlags;
+        loggingEvent.Properties[LogsTraceContextInjectionConstants.SpanIdPropertyName] = current.SpanId.ToHexString();
+        loggingEvent.Properties[LogsTraceContextInjectionConstants.TraceIdPropertyName] = current.TraceId.ToHexString();
+        loggingEvent.Properties[LogsTraceContextInjectionConstants.TraceFlagsPropertyName] = (current.Context.TraceFlags & ActivityTraceFlags.Recorded) != 0 ? "01" : "00";
         return CallTargetState.GetDefault();
     }
 }

@@ -20,6 +20,7 @@ internal class OpenTelemetryLog4NetAppender
     private const int WarningThreshold = 60_000;
     private const int InfoThreshold = 40_000;
     private const int DebugThreshold = 30_000;
+    private const int LevelOffValue = int.MaxValue;
     private const string SystemStringFormatTypeName = "log4net.Util.SystemStringFormat";
 
     private static readonly IOtelLogger Logger = OtelLogging.GetLogger();
@@ -40,7 +41,7 @@ internal class OpenTelemetryLog4NetAppender
     [DuckReverseMethod(ParameterTypeNames = new[] { "log4net.Core.LoggingEvent, log4net" })]
     public void DoAppend(ILoggingEvent loggingEvent)
     {
-        if (Sdk.SuppressInstrumentation)
+        if (Sdk.SuppressInstrumentation || loggingEvent.Level.Value == LevelOffValue)
         {
             return;
         }
