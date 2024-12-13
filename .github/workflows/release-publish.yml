@@ -101,10 +101,10 @@ jobs:
         include:
           - machine: ubuntu-20.04
             base-image: alpine
-            net-version: net8.0
+            net-version: net9.0
           - machine: otel-linux-arm64
             base-image: alpine
-            net-version: net8.0
+            net-version: net9.0
     runs-on: ${{ matrix.machine }}
     steps:
 
