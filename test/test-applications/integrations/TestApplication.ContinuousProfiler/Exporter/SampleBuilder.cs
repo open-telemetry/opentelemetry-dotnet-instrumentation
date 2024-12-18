@@ -1,7 +1,7 @@
 // Copyright The OpenTelemetry Authors
 // SPDX-License-Identifier: Apache-2.0
 
-using OpenTelemetry.Proto.Profiles.V1Experimental;
+using OpenTelemetry.Proto.Profiles.V1Development;
 
 namespace TestApplication.ContinuousProfiler;
 

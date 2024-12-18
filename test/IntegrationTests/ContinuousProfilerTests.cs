@@ -4,7 +4,7 @@
 #if NET
 
 using IntegrationTests.Helpers;
-using OpenTelemetry.Proto.Profiles.V1Experimental;
+using OpenTelemetry.Proto.Profiles.V1Development;
 using Xunit.Abstractions;
 
 namespace IntegrationTests;

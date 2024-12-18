@@ -3,7 +3,7 @@
 
 using Google.Protobuf;
 using OpenTelemetry.Proto.Common.V1;
-using OpenTelemetry.Proto.Profiles.V1Experimental;
+using OpenTelemetry.Proto.Profiles.V1Development;
 
 namespace TestApplication.ContinuousProfiler;
 

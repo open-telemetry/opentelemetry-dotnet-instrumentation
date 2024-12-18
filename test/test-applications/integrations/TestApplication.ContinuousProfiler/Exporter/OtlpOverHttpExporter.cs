@@ -7,9 +7,9 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Runtime.CompilerServices;
 using Google.Protobuf;
-using OpenTelemetry.Proto.Collector.Profiles.V1Experimental;
+using OpenTelemetry.Proto.Collector.Profiles.V1Development;
 using OpenTelemetry.Proto.Common.V1;
-using OpenTelemetry.Proto.Profiles.V1Experimental;
+using OpenTelemetry.Proto.Profiles.V1Development;
 using OpenTelemetry.Proto.Resource.V1;
 
 namespace TestApplication.ContinuousProfiler;
