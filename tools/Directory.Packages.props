@@ -6,6 +6,6 @@
     <PackageVersion Include="NuGet.ProjectModel" Version="6.12.1" />
     <PackageVersion Include="System.IO.Abstractions" Version="21.1.7" />
     <PackageVersion Include="Valleysoft.DockerfileModel" Version="1.2.0" />
-    <PackageVersion Include="YamlDotNet" Version="16.2.1" />
+    <PackageVersion Include="YamlDotNet" Version="16.3.0" />
   </ItemGroup>
 </Project>
