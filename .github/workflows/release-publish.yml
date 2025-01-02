@@ -10,7 +10,7 @@ jobs:
     steps:
 
       - name: Setup .NET
-        uses: actions/setup-dotnet@3e891b0cb619bf60e2c25674b222b8940e2c1c25 # tag: v4.1.0
+        uses: actions/setup-dotnet@87b7050bc53ea08284295505d98d2aa94301e852 # tag: v4.2.0
         with:
           dotnet-version: | 
             8.0.404
@@ -64,7 +64,7 @@ jobs:
           echo "DOTNET_INSTALL_DIR=~/.dotnet" >> $GITHUB_ENV
 
       - name: Setup .NET
-        uses: actions/setup-dotnet@3e891b0cb619bf60e2c25674b222b8940e2c1c25 # tag: v4.1.0
+        uses: actions/setup-dotnet@87b7050bc53ea08284295505d98d2aa94301e852 # tag: v4.2.0
         with:
           dotnet-version: | 
             8.0.404
