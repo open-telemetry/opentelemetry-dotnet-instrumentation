@@ -35,8 +35,7 @@
   <ItemGroup>
     <Protobuf Include="..\..\..\IntegrationTests\opentelemetry\proto\common\v1\common.proto" Link="opentelemetry\proto\common\v1\common.proto" ProtoRoot="..\..\..\IntegrationTests" Access="internal" />
     <Protobuf Include="..\..\..\IntegrationTests\opentelemetry\proto\resource\v1\resource.proto" Link="opentelemetry\proto\resource\v1\resource.proto" ProtoRoot="..\..\..\IntegrationTests" Access="internal" />
-    <Protobuf Include="..\..\..\IntegrationTests\opentelemetry\proto\profiles\v1experimental\pprofextended.proto" Link="opentelemetry\proto\profiles\v1experimental\pprofextended.proto" ProtoRoot="..\..\..\IntegrationTests" Access="internal" />
-    <Protobuf Include="..\..\..\IntegrationTests\opentelemetry\proto\profiles\v1experimental\profiles.proto" Link="opentelemetry\proto\profiles\v1experimental\profiles.proto" ProtoRoot="..\..\..\IntegrationTests" Access="internal" />
-    <Protobuf Include="..\..\..\IntegrationTests\opentelemetry\proto\collector\profiles\v1experimental\profiles_service.proto" Link="opentelemetry\proto\collector\profiles\v1\profiles_service.proto" ProtoRoot="..\..\..\IntegrationTests" Access="internal" />
+    <Protobuf Include="..\..\..\IntegrationTests\opentelemetry\proto\profiles\v1development\profiles.proto" Link="opentelemetry\proto\profiles\v1development\profiles.proto" ProtoRoot="..\..\..\IntegrationTests" Access="internal" />
+    <Protobuf Include="..\..\..\IntegrationTests\opentelemetry\proto\collector\profiles\v1development\profiles_service.proto" Link="opentelemetry\proto\collector\profiles\v1development\profiles_service.proto" ProtoRoot="..\..\..\IntegrationTests" Access="internal" />
   </ItemGroup>
 </Project>

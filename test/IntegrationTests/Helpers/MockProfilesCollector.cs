@@ -6,8 +6,8 @@
 using System.Collections.Concurrent;
 using System.Text;
 using Microsoft.AspNetCore.Http;
-using OpenTelemetry.Proto.Collector.Profiles.V1Experimental;
-using OpenTelemetry.Proto.Profiles.V1Experimental;
+using OpenTelemetry.Proto.Collector.Profiles.V1Development;
+using OpenTelemetry.Proto.Profiles.V1Development;
 using Xunit.Abstractions;
 
 namespace IntegrationTests.Helpers;

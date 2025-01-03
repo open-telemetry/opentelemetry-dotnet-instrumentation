@@ -7,7 +7,7 @@ internal class ThreadSample
 {
     public ThreadSample(long timestampMilliseconds, long traceIdHigh, long traceIdLow, long spanId, string? threadName, uint threadIndex = default)
     {
-        TimestampNanoseconds = (ulong)timestampMilliseconds * 1_000_000u;
+        TimestampNanoseconds = timestampMilliseconds * 1_000_000;
         TraceIdHigh = traceIdHigh;
         TraceIdLow = traceIdLow;
         SpanId = spanId;
@@ -15,7 +15,7 @@ internal class ThreadSample
         ThreadIndex = threadIndex;
     }
 
-    public ulong TimestampNanoseconds { get; }
+    public long TimestampNanoseconds { get; }
 
     public long SpanId { get; }
 

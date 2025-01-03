@@ -4,7 +4,7 @@
 #if NET
 
 using IntegrationTests.Helpers;
-using OpenTelemetry.Proto.Profiles.V1Experimental;
+using OpenTelemetry.Proto.Profiles.V1Development;
 using Xunit.Abstractions;
 
 namespace IntegrationTests;
@@ -27,7 +27,7 @@ public class ContinuousProfilerTests : TestHelper
         SetEnvironmentVariable("OTEL_DOTNET_AUTO_TRACES_ADDITIONAL_SOURCES", "TestApplication.ContinuousProfiler");
         RunTestApplication();
 
-        collector.Expect(profileData => profileData.ResourceProfiles.Any(resourceProfiles => resourceProfiles.ScopeProfiles.Any(scopeProfile => scopeProfile.Profiles.Any(profileContainer => ContainAttributes(profileContainer, "allocation") && profileContainer.Profile.Sample[0].Value[0] != 0.0))));
+        collector.Expect(profileData => profileData.ResourceProfiles.Any(resourceProfiles => resourceProfiles.ScopeProfiles.Any(scopeProfile => scopeProfile.Profiles.Any(profile => ContainAttributes(profile, "allocation") && profile.Sample[0].Value[0] != 0.0))));
         collector.ResourceExpector.Expect("todo.resource.detector.key", "todo.resource.detector.value");
 
         collector.AssertExpectations();
@@ -47,16 +47,16 @@ public class ContinuousProfilerTests : TestHelper
 
         var expectedStackTrace = string.Join("\n", CreateExpectedStackTrace());
 
-        collector.Expect(profileData => profileData.ResourceProfiles.Any(resourceProfiles => resourceProfiles.ScopeProfiles.Any(scopeProfile => scopeProfile.Profiles.Any(profileContainer => ContainStackTraceForClassHierarchy(profileContainer.Profile, expectedStackTrace) && ContainAttributes(profileContainer, "cpu")))));
+        collector.Expect(profileData => profileData.ResourceProfiles.Any(resourceProfiles => resourceProfiles.ScopeProfiles.Any(scopeProfile => scopeProfile.Profiles.Any(profile => ContainStackTraceForClassHierarchy(profile, expectedStackTrace) && ContainAttributes(profile, "cpu")))));
         collector.ResourceExpector.Expect("todo.resource.detector.key", "todo.resource.detector.value");
 
         collector.AssertExpectations();
         collector.ResourceExpector.AssertExpectations();
     }
 
-    private static bool ContainAttributes(ProfileContainer profileContainer, string profilingDataType)
+    private static bool ContainAttributes(Profile profileContainer, string profilingDataType)
     {
-        return profileContainer.Attributes.Any(x => x.Key == "todo.profiling.data.type" && x.Value.StringValue == profilingDataType);
+        return profileContainer.AttributeTable.Any(x => x.Key == "todo.profiling.data.type" && x.Value.StringValue == profilingDataType);
     }
 
     private static List<string> CreateExpectedStackTrace()
@@ -96,11 +96,11 @@ public class ContinuousProfilerTests : TestHelper
 
     private bool ContainStackTraceForClassHierarchy(Profile profile, string expectedStackTrace)
     {
-        var frames = profile.Location
+        var frames = profile.LocationTable
             .SelectMany(location => location.Line)
             .Select(line => line.FunctionIndex)
-            .Select(functionId => profile.Function[(int)functionId - 1])
-            .Select(function => profile.StringTable[(int)function.Name]);
+            .Select(functionId => profile.FunctionTable[functionId - 1])
+            .Select(function => profile.StringTable[function.NameStrindex]);
 
         var stackTrace = string.Join("\n", frames);
 

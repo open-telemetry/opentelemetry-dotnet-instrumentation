@@ -7,9 +7,9 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Runtime.CompilerServices;
 using Google.Protobuf;
-using OpenTelemetry.Proto.Collector.Profiles.V1Experimental;
+using OpenTelemetry.Proto.Collector.Profiles.V1Development;
 using OpenTelemetry.Proto.Common.V1;
-using OpenTelemetry.Proto.Profiles.V1Experimental;
+using OpenTelemetry.Proto.Profiles.V1Development;
 using OpenTelemetry.Proto.Resource.V1;
 
 namespace TestApplication.ContinuousProfiler;
@@ -32,7 +32,8 @@ public class OtlpOverHttpExporter
 
         try
         {
-            var extendedPprofBuilder = new ExtendedPprofBuilder();
+            var timestampNanoseconds = threadSamples[0].TimestampNanoseconds; // all items in the batch have same timestamp
+            var extendedPprofBuilder = new ExtendedPprofBuilder("cpu", timestampNanoseconds);
 
             for (var i = 0; i < threadSamples.Count; i++)
             {
@@ -43,12 +44,8 @@ public class OtlpOverHttpExporter
                 extendedPprofBuilder.Profile.Sample.Add(sampleBuilder.Build());
             }
 
-            var timestampNanoseconds = threadSamples[0].TimestampNanoseconds; // all items in the batch have same timestamp
-
-            var profileContainer = CreateProfileContainer(extendedPprofBuilder.Profile, "cpu", timestampNanoseconds);
-
             var scopeProfiles = CreateScopeProfiles();
-            scopeProfiles.Profiles.Add(profileContainer);
+            scopeProfiles.Profiles.Add(extendedPprofBuilder.Profile);
 
             var resourceProfiles = CreateResourceProfiles(scopeProfiles);
 
@@ -81,9 +78,8 @@ public class OtlpOverHttpExporter
             var scopeProfiles = CreateScopeProfiles();
 
             var lastTimestamp = allocationSamples[0].ThreadSample.TimestampNanoseconds;
-            var extendedPprofBuilder = new ExtendedPprofBuilder();
-            var profileContainer = CreateProfileContainer(extendedPprofBuilder.Profile, "allocation", lastTimestamp);
-            scopeProfiles.Profiles.Add(profileContainer);
+            var extendedPprofBuilder = new ExtendedPprofBuilder("allocation", lastTimestamp);
+            scopeProfiles.Profiles.Add(extendedPprofBuilder.Profile);
 
             for (var i = 0; i < allocationSamples.Count; i++)
             {
@@ -91,10 +87,9 @@ public class OtlpOverHttpExporter
                 if (allocationSample.ThreadSample.TimestampNanoseconds != lastTimestamp)
                 {
                     // TODO consider either putting each sample in separate profile or in one profile with min and max timestamp
-                    extendedPprofBuilder = new ExtendedPprofBuilder();
                     lastTimestamp = allocationSample.ThreadSample.TimestampNanoseconds;
-                    profileContainer = CreateProfileContainer(extendedPprofBuilder.Profile, "allocation", lastTimestamp);
-                    scopeProfiles.Profiles.Add(profileContainer);
+                    extendedPprofBuilder = new ExtendedPprofBuilder("allocation", lastTimestamp);
+                    scopeProfiles.Profiles.Add(extendedPprofBuilder.Profile);
                 }
 
                 var sampleBuilder = CreateSampleBuilder(allocationSample.ThreadSample, extendedPprofBuilder);
@@ -133,7 +128,12 @@ public class OtlpOverHttpExporter
         for (var index = 0; index < threadSample.Frames.Count; index++)
         {
             var methodName = threadSample.Frames[index];
-            sampleBuilder.AddLocationId(extendedPprofBuilder.GetLocationId(methodName));
+            var locationId = extendedPprofBuilder.AddLocationId(methodName);
+
+            if (index == 0)
+            {
+                sampleBuilder.SetLocationRange(locationId, threadSample.Frames.Count);
+            }
         }
 
         if (!string.IsNullOrEmpty(threadSample.ThreadName))
@@ -180,24 +180,6 @@ public class OtlpOverHttpExporter
         // TODO handle schema Url scopeProfiles.SchemaUrl
 
         return scopeProfiles;
-    }
-
-    private ProfileContainer CreateProfileContainer(Profile profile, string profilingDataType, ulong timestampNanoseconds)
-    {
-        var profileByteId = new byte[16];
-        ActivityTraceId.CreateRandom().CopyTo(profileByteId);
-
-        var profileContainer = new ProfileContainer
-        {
-            Profile = profile,
-            ProfileId = UnsafeByteOperations.UnsafeWrap(profileByteId), // ProfileId should be same as TraceId - 16 bytes
-            StartTimeUnixNano = timestampNanoseconds,
-            EndTimeUnixNano = timestampNanoseconds
-        };
-
-        profileContainer.Attributes.Add(new KeyValue { Key = "todo.profiling.data.type", Value = new AnyValue { StringValue = profilingDataType } });
-
-        return profileContainer;
     }
 
     private HttpResponseMessage SendHttpRequest(HttpRequestMessage request, CancellationToken cancellationToken)
