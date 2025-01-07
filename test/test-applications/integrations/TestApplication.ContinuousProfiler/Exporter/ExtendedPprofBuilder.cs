@@ -1,9 +1,10 @@
 // Copyright The OpenTelemetry Authors
 // SPDX-License-Identifier: Apache-2.0
 
+using System.Diagnostics;
 using Google.Protobuf;
 using OpenTelemetry.Proto.Common.V1;
-using OpenTelemetry.Proto.Profiles.V1Experimental;
+using OpenTelemetry.Proto.Profiles.V1Development;
 
 namespace TestApplication.ContinuousProfiler;
 
@@ -13,19 +14,28 @@ internal class ExtendedPprofBuilder
     private readonly LinkCache _linkCache;
     private readonly AttributeCache _attributeCache;
 
-    public ExtendedPprofBuilder()
+    public ExtendedPprofBuilder(string profilingDataType, long timestampNanoseconds)
     {
-        Profile = new Profile();
+        var profileByteId = new byte[16];
+        ActivityTraceId.CreateRandom().CopyTo(profileByteId);
+        Profile = new Profile
+        {
+            ProfileId = ByteString.CopyFrom(profileByteId),
+            TimeNanos = timestampNanoseconds,
+        };
         var stringCache = new StringCache(Profile);
         var functionCache = new FunctionCache(Profile, stringCache);
         _locationCache = new LocationCache(Profile, functionCache);
         _linkCache = new LinkCache(Profile);
         _attributeCache = new AttributeCache(Profile);
+
+        var profilingDataTypeAttributeId = _attributeCache.GetOrAdd("todo.profiling.data.type", value => value.StringValue = profilingDataType);
+        Profile.AttributeIndices.Add(profilingDataTypeAttributeId);
     }
 
     public Profile Profile { get; }
 
-    public ulong GetLocationId(string function) => _locationCache.Get(function);
+    public int AddLocationId(string function) => _locationCache.Add(function);
 
     public void AddLink(SampleBuilder sampleBuilder, long spanId, long traceIdHigh, long traceIdLow)
     {
@@ -53,8 +63,8 @@ internal class ExtendedPprofBuilder
     private class StringCache
     {
         private readonly Profile _profile;
-        private readonly Dictionary<string, long> _table = new();
-        private long _index;
+        private readonly Dictionary<string, int> _table = new();
+        private int _index;
 
         public StringCache(Profile profile)
         {
@@ -62,7 +72,7 @@ internal class ExtendedPprofBuilder
             GetOrAdd(string.Empty); // 0 is reserved for the empty string
         }
 
-        public long GetOrAdd(string str)
+        public int GetOrAdd(string str)
         {
             if (_table.TryGetValue(str, out var value))
             {
@@ -79,8 +89,8 @@ internal class ExtendedPprofBuilder
     {
         private readonly Profile _profile;
         private readonly StringCache _stringCache;
-        private readonly Dictionary<string, ulong> _table = new();
-        private ulong _index = 1; // 0 is reserved
+        private readonly Dictionary<string, int> _table = new();
+        private int _index = 1; // 0 is reserved
 
         public FunctionCache(Profile profile, StringCache stringCache)
         {
@@ -88,16 +98,18 @@ internal class ExtendedPprofBuilder
             _stringCache = stringCache;
         }
 
-        public ulong GetOrAdd(string functionName)
+        public int GetOrAdd(string functionName)
         {
             if (_table.TryGetValue(functionName, out var value))
             {
                 return value;
             }
 
-            var function = new Function { Id = _index, Filename = _stringCache.GetOrAdd("unknown"), Name = _stringCache.GetOrAdd(functionName) }; // for now, we don't support file name
+            // TODO How to handle SystemName in .NET
+            // TODO handle line number
+            var function = new Function { SystemNameStrindex = _stringCache.GetOrAdd("TODO How to handle SystemName in .NET?"), FilenameStrindex = _stringCache.GetOrAdd("unknown"), NameStrindex = _stringCache.GetOrAdd(functionName), }; // for now, we don't support file name
 
-            _profile.Function.Add(function);
+            _profile.FunctionTable.Add(function);
             _table[functionName] = _index;
             return _index++;
         }
@@ -107,8 +119,7 @@ internal class ExtendedPprofBuilder
     {
         private readonly Profile _profile;
         private readonly FunctionCache _functionCache;
-        private readonly Dictionary<string, ulong> _table = new();
-        private ulong _index = 1; // 0 is reserved
+        private int _index = 1; // 0 is reserved
 
         public LocationCache(Profile profile, FunctionCache functionCache)
         {
@@ -116,18 +127,12 @@ internal class ExtendedPprofBuilder
             _functionCache = functionCache;
         }
 
-        public ulong Get(string function)
+        public int Add(string function)
         {
-            if (_table.TryGetValue(function, out var value))
-            {
-                return value;
-            }
-
-            var location = new Location { Id = _index };
+            var location = new Location();
             location.Line.Add(new Line { FunctionIndex = _functionCache.GetOrAdd(function), Line_ = 0, Column = 0 }); // for now, we don't support line nor column number
 
-            _profile.Location.Add(location);
-            _table[function] = _index;
+            _profile.LocationTable.Add(location);
 
             return _index++;
         }
@@ -136,15 +141,15 @@ internal class ExtendedPprofBuilder
     private class LinkCache
     {
         private readonly Profile _profile;
-        private readonly Dictionary<Tuple<long, long, long>, ulong> _table = new();
-        private ulong _index = 1; // 0 is reserved
+        private readonly Dictionary<Tuple<long, long, long>, int> _table = new();
+        private int _index = 1; // 0 is reserved
 
         public LinkCache(Profile profile)
         {
             _profile = profile;
         }
 
-        public ulong GetOrAdd(long spanId, long traceIdHigh, long traceIdLow)
+        public int GetOrAdd(long spanId, long traceIdHigh, long traceIdLow)
         {
             var key = Tuple.Create(spanId, traceIdHigh, traceIdLow);
 
@@ -177,15 +182,15 @@ internal class ExtendedPprofBuilder
     private class AttributeCache
     {
         private readonly Profile _profile;
-        private readonly Dictionary<KeyValue, ulong> _table = new();
-        private ulong _index = 1; // 0 is reserved
+        private readonly Dictionary<KeyValue, int> _table = new();
+        private int _index = 1; // 0 is reserved
 
         public AttributeCache(Profile profile)
         {
             _profile = profile;
         }
 
-        public ulong GetOrAdd(string name, Action<AnyValue> setValue)
+        public int GetOrAdd(string name, Action<AnyValue> setValue)
         {
             var keyValue = new KeyValue
             {

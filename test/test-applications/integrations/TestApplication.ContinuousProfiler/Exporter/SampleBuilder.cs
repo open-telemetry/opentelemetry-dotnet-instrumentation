@@ -1,19 +1,18 @@
 // Copyright The OpenTelemetry Authors
 // SPDX-License-Identifier: Apache-2.0
 
-using OpenTelemetry.Proto.Profiles.V1Experimental;
+using OpenTelemetry.Proto.Profiles.V1Development;
 
 namespace TestApplication.ContinuousProfiler;
 
 internal class SampleBuilder
 {
     private readonly Sample _sample = new();
-    private readonly IList<ulong> _locationIds = new List<ulong>();
     private long? _value;
 
-    public SampleBuilder AddAttribute(ulong attributeId)
+    public SampleBuilder AddAttribute(int attributeId)
     {
-        _sample.Attributes.Add(attributeId);
+        _sample.AttributeIndices.Add(attributeId);
         return this;
     }
 
@@ -23,22 +22,21 @@ internal class SampleBuilder
         return this;
     }
 
-    public SampleBuilder AddLocationId(ulong locationId)
+    public SampleBuilder SetLocationRange(int locationsStartIndex, int locationsLength)
     {
-        _locationIds.Add(locationId);
+        _sample.LocationsStartIndex = locationsStartIndex;
+        _sample.LocationsLength = locationsLength;
         return this;
     }
 
-    public SampleBuilder SetLink(ulong linkId)
+    public SampleBuilder SetLink(int linkId)
     {
-        _sample.Link = linkId;
+        _sample.LinkIndex = linkId;
         return this;
     }
 
     public Sample Build()
     {
-        _sample.LocationIndex.AddRange(_locationIds);
-
         if (_value.HasValue)
         {
             _sample.Value.Add(_value.Value);

@@ -4,9 +4,7 @@
 using System.Reflection;
 using FluentAssertions;
 using IntegrationTests.Helpers;
-using OpenTelemetry.Logs;
 using Xunit.Abstractions;
-using LogRecord = OpenTelemetry.Proto.Logs.V1.LogRecord;
 
 #if NETFRAMEWORK
 using System.Net;
