@@ -19,6 +19,7 @@ public class MockProfilesCollector : IDisposable
 
     private readonly List<Expectation> _expectations = new();
     private readonly BlockingCollection<Collected> _profilesSnapshots = new(10); // bounded to avoid memory leak; contains protobuf type
+    private CollectedExpectation? _collectedExpectation;
 
     public MockProfilesCollector(ITestOutputHelper output)
     {
@@ -46,6 +47,26 @@ public class MockProfilesCollector : IDisposable
         predicate ??= x => true;
 
         _expectations.Add(new Expectation(predicate, description));
+    }
+
+    public void ExpectCollected(Func<ICollection<ExportProfilesServiceRequest>, bool> collectedExpectation, string description)
+    {
+        _collectedExpectation = new(collectedExpectation, description);
+    }
+
+    public void AssertCollected()
+    {
+        if (_collectedExpectation == null)
+        {
+            throw new InvalidOperationException("Expectation for collected profiling snapshot was not set");
+        }
+
+        var collected = _profilesSnapshots.Select(collected => collected.ExportProfilesServiceRequest).ToArray();
+
+        if (!_collectedExpectation.Predicate(collected))
+        {
+            FailCollectedExpectation(_collectedExpectation.Description, collected);
+        }
     }
 
     public void AssertExpectations(TimeSpan? timeout = null)
@@ -133,6 +154,19 @@ public class MockProfilesCollector : IDisposable
         Assert.Fail(message.ToString());
     }
 
+    private static void FailCollectedExpectation(string? collectedExpectationDescription, ExportProfilesServiceRequest[] collectedExportProfilesServiceRequests)
+    {
+        var message = new StringBuilder();
+        message.AppendLine($"Collected logs expectation failed: {collectedExpectationDescription}");
+        message.AppendLine("Collected logs:");
+        foreach (var logRecord in collectedExportProfilesServiceRequests)
+        {
+            message.AppendLine($"    \"{logRecord}\"");
+        }
+
+        Assert.Fail(message.ToString());
+    }
+
     private async Task HandleHttpRequests(HttpContext ctx)
     {
         using var bodyStream = await ctx.ReadBodyToMemoryAsync();
@@ -182,6 +216,19 @@ public class MockProfilesCollector : IDisposable
         }
 
         public Func<ExportProfilesServiceRequest, bool> Predicate { get; }
+
+        public string? Description { get; }
+    }
+
+    private class CollectedExpectation
+    {
+        public CollectedExpectation(Func<ICollection<ExportProfilesServiceRequest>, bool> predicate, string? description)
+        {
+            Predicate = predicate;
+            Description = description;
+        }
+
+        public Func<ICollection<ExportProfilesServiceRequest>, bool> Predicate { get; }
 
         public string? Description { get; }
     }
