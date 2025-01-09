@@ -23,7 +23,9 @@ internal class Program
     {
         // timeout aligned with thread sampling interval
         var timeout = TimeSpan.FromSeconds(1);
-        Thread.Sleep(timeout);
+
+        // extended first time sleep to ensure that stack will be fetched from the main thread
+        Thread.Sleep(TimeSpan.FromSeconds(5));
         // continue on thread pool thread
         await Task.Yield();
         Thread.Sleep(timeout);

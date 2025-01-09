@@ -3,9 +3,10 @@
 
 #if NET
 
-using System.Text.Json;
 using FluentAssertions;
 using IntegrationTests.Helpers;
+using OpenTelemetry.Proto.Collector.Profiles.V1Development;
+using OpenTelemetry.Proto.Profiles.V1Development;
 using Xunit.Abstractions;
 
 namespace IntegrationTests;
@@ -22,69 +23,43 @@ public class ContinuousProfilerContextTrackingTests : TestHelper
     public void TraceContextIsCorrectlyAssociatedWithThreadSamples()
     {
         EnableBytecodeInstrumentation();
+        using var collector = new MockProfilesCollector(Output);
+        SetExporter(collector);
         SetEnvironmentVariable("OTEL_DOTNET_AUTO_PLUGINS", "TestApplication.ContinuousProfiler.ContextTracking.TestPlugin, TestApplication.ContinuousProfiler.ContextTracking, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null");
         SetEnvironmentVariable("OTEL_DOTNET_AUTO_TRACES_ADDITIONAL_SOURCES", "TestApplication.ContinuousProfiler.ContextTracking");
 
-        var (standardOutput, _, _) = RunTestApplication();
+        collector.ExpectCollected(AssertAllProfiles, $"{nameof(AssertAllProfiles)} failed");
 
-        var batchSeparator = $"{Environment.NewLine}{Environment.NewLine}";
+        RunTestApplication();
 
+        collector.AssertCollected();
+    }
+
+    private bool AssertAllProfiles(ICollection<ExportProfilesServiceRequest> profilesServiceRequests)
+    {
         var totalSamplesWithTraceContextCount = 0;
         var managedThreadsWithTraceContext = new HashSet<string>();
 
-        var exportedSampleBatches = standardOutput.TrimEnd().Split(batchSeparator);
-
-        foreach (var sampleBatch in exportedSampleBatches)
+        foreach (var batch in profilesServiceRequests)
         {
-            var batch = JsonDocument.Parse(sampleBatch.TrimStart());
+            var profile = batch.ResourceProfiles.Single().ScopeProfiles.Single().Profiles.Single();
 
-            var samplesWithTraceContext = batch
-                .RootElement
-                .EnumerateArray()
-                .Select(
-                    sample =>
-                        ConvertToPropertyList(sample))
-                .Where(
-                    sampleProperties =>
-                        HasTraceContextAssociated(sampleProperties))
-                .ToList();
+            var samplesInBatch = profile.Sample;
+
+            var samplesWithTraceContext = samplesInBatch.Where(s => s.HasLinkIndex).ToList();
+
             samplesWithTraceContext.Count.Should().BeLessOrEqualTo(1, "at most one sample in a batch should have trace context associated.");
 
             totalSamplesWithTraceContextCount += samplesWithTraceContext.Count;
             if (samplesWithTraceContext.FirstOrDefault() is { } sampleWithTraceContext)
             {
-                managedThreadsWithTraceContext.Add(GetPropertyValue("ThreadName", sampleWithTraceContext).GetString()!);
+                managedThreadsWithTraceContext.Add(profile.AttributeTable[sampleWithTraceContext.AttributeIndices.Single()].Value.StringValue);
             }
         }
 
         managedThreadsWithTraceContext.Should().HaveCountGreaterThan(1, "at least 2 distinct threads should have trace context associated.");
         totalSamplesWithTraceContextCount.Should().BeGreaterOrEqualTo(3, "there should be sample with trace context in most of the batches.");
-    }
-
-    private static bool HasTraceContextAssociated(List<JsonProperty> sample)
-    {
-        const int defaultTraceContextValue = 0;
-
-        return GetPropertyValue("SpanId", sample).GetInt64() != defaultTraceContextValue &&
-               GetPropertyValue("TraceIdHigh", sample).GetInt64() != defaultTraceContextValue &&
-               GetPropertyValue("TraceIdLow", sample).GetInt64() != defaultTraceContextValue &&
-               !string.IsNullOrWhiteSpace(GetPropertyValue("ThreadName", sample).GetString());
-    }
-
-    private static JsonElement GetPropertyValue(string propertyName, List<JsonProperty> jsonProperties)
-    {
-        return jsonProperties
-            .Single(
-                property =>
-                    property.Name == propertyName)
-            .Value;
-    }
-
-    private static List<JsonProperty> ConvertToPropertyList(JsonElement threadSampleDocument)
-    {
-        return threadSampleDocument
-            .EnumerateObject()
-            .ToList();
+        return true;
     }
 }
 #endif
