@@ -38,15 +38,13 @@ public class ContinuousProfilerContextTrackingTests : TestHelper
     private bool AssertAllProfiles(ICollection<ExportProfilesServiceRequest> profilesServiceRequests)
     {
         var totalSamplesWithTraceContextCount = 0;
-        var managedThreadsWithTraceContext = new HashSet<int>();
+        var managedThreadsWithTraceContext = new HashSet<string>();
 
         foreach (var batch in profilesServiceRequests)
         {
-            IEnumerable<Sample> samplesInBatch = batch
-                                .ResourceProfiles
-                                .SelectMany(rp => rp.ScopeProfiles)
-                                .SelectMany(sp => sp.Profiles)
-                                .SelectMany(p => p.Sample);
+            var profile = batch.ResourceProfiles.Single().ScopeProfiles.Single().Profiles.Single();
+
+            var samplesInBatch = profile.Sample;
 
             var samplesWithTraceContext = samplesInBatch.Where(s => s.HasLinkIndex).ToList();
 
@@ -55,7 +53,7 @@ public class ContinuousProfilerContextTrackingTests : TestHelper
             totalSamplesWithTraceContextCount += samplesWithTraceContext.Count;
             if (samplesWithTraceContext.FirstOrDefault() is { } sampleWithTraceContext)
             {
-                managedThreadsWithTraceContext.Add(sampleWithTraceContext.AttributeIndices.Single());
+                managedThreadsWithTraceContext.Add(profile.AttributeTable[sampleWithTraceContext.AttributeIndices.Single()].Value.StringValue);
             }
         }
 
