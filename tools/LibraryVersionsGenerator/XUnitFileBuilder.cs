@@ -12,9 +12,10 @@ internal sealed class XUnitFileBuilder : CSharpFileBuilder
     {{
         get
         {{
-            var theoryData = new TheoryData<string>();
+            TheoryData<string> theoryData =
+            [
 #if DEFAULT_TEST_PACKAGE_VERSIONS
-            theoryData.Add(string.Empty);
+                string.Empty,
 #else");
         return this;
     }
@@ -33,7 +34,7 @@ internal sealed class XUnitFileBuilder : CSharpFileBuilder
             Builder.AppendLine();
         }
 
-        Builder.AppendLine($"            theoryData.Add(\"{version}\");");
+        Builder.AppendLine($"                \"{version}\",");
 
         if (conditionalCompilation)
         {
@@ -52,6 +53,7 @@ internal sealed class XUnitFileBuilder : CSharpFileBuilder
     public override CSharpFileBuilder EndTestPackage()
     {
         Builder.AppendLine(@"#endif
+            ];
             return theoryData;
         }
     }");
