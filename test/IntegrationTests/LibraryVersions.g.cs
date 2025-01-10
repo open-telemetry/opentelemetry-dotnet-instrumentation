@@ -17,13 +17,15 @@ public static partial class LibraryVersion
     {
         get
         {
-            var theoryData = new TheoryData<string>();
+            TheoryData<string> theoryData =
+            [
 #if DEFAULT_TEST_PACKAGE_VERSIONS
-            theoryData.Add(string.Empty);
+                string.Empty,
 #else
-            theoryData.Add("12.22.2");
-            theoryData.Add("12.23.0");
+                "12.22.2",
+                "12.23.0",
 #endif
+            ];
             return theoryData;
         }
     }
@@ -31,13 +33,15 @@ public static partial class LibraryVersion
     {
         get
         {
-            var theoryData = new TheoryData<string>();
+            TheoryData<string> theoryData =
+            [
 #if DEFAULT_TEST_PACKAGE_VERSIONS
-            theoryData.Add(string.Empty);
+                string.Empty,
 #else
-            theoryData.Add("8.15.10");
-            theoryData.Add("8.16.3");
+                "8.15.10",
+                "8.16.3",
 #endif
+            ];
             return theoryData;
         }
     }
@@ -45,14 +49,16 @@ public static partial class LibraryVersion
     {
         get
         {
-            var theoryData = new TheoryData<string>();
+            TheoryData<string> theoryData =
+            [
 #if DEFAULT_TEST_PACKAGE_VERSIONS
-            theoryData.Add(string.Empty);
+                string.Empty,
 #else
-            theoryData.Add("6.0.35");
-            theoryData.Add("8.0.10");
-            theoryData.Add("9.0.0");
+                "6.0.35",
+                "8.0.10",
+                "9.0.0",
 #endif
+            ];
             return theoryData;
         }
     }
@@ -60,15 +66,17 @@ public static partial class LibraryVersion
     {
         get
         {
-            var theoryData = new TheoryData<string>();
+            TheoryData<string> theoryData =
+            [
 #if DEFAULT_TEST_PACKAGE_VERSIONS
-            theoryData.Add(string.Empty);
+                string.Empty,
 #else
-            theoryData.Add("6.0.3");
-            theoryData.Add("7.0.0");
-            theoryData.Add("8.0.0");
-            theoryData.Add("8.0.2");
+                "6.0.3",
+                "7.0.0",
+                "8.0.0",
+                "8.0.2",
 #endif
+            ];
             return theoryData;
         }
     }
@@ -76,14 +84,16 @@ public static partial class LibraryVersion
     {
         get
         {
-            var theoryData = new TheoryData<string>();
+            TheoryData<string> theoryData =
+            [
 #if DEFAULT_TEST_PACKAGE_VERSIONS
-            theoryData.Add(string.Empty);
+                string.Empty,
 #else
-            theoryData.Add("7.5.0");
-            theoryData.Add("8.0.2");
-            theoryData.Add("8.2.1");
+                "7.5.0",
+                "8.0.2",
+                "8.2.1",
 #endif
+            ];
             return theoryData;
         }
     }
@@ -91,13 +101,15 @@ public static partial class LibraryVersion
     {
         get
         {
-            var theoryData = new TheoryData<string>();
+            TheoryData<string> theoryData =
+            [
 #if DEFAULT_TEST_PACKAGE_VERSIONS
-            theoryData.Add(string.Empty);
+                string.Empty,
 #else
-            theoryData.Add("2.52.0");
-            theoryData.Add("2.67.0");
+                "2.52.0",
+                "2.67.0",
 #endif
+            ];
             return theoryData;
         }
     }
@@ -105,13 +117,15 @@ public static partial class LibraryVersion
     {
         get
         {
-            var theoryData = new TheoryData<string>();
+            TheoryData<string> theoryData =
+            [
 #if DEFAULT_TEST_PACKAGE_VERSIONS
-            theoryData.Add(string.Empty);
+                string.Empty,
 #else
-            theoryData.Add("2.0.13");
-            theoryData.Add("3.0.3");
+                "2.0.13",
+                "3.0.3",
 #endif
+            ];
             return theoryData;
         }
     }
@@ -119,13 +133,15 @@ public static partial class LibraryVersion
     {
         get
         {
-            var theoryData = new TheoryData<string>();
+            TheoryData<string> theoryData =
+            [
 #if DEFAULT_TEST_PACKAGE_VERSIONS
-            theoryData.Add(string.Empty);
+                string.Empty,
 #else
-            theoryData.Add("8.3.0");
-            theoryData.Add("8.3.2");
+                "8.3.0",
+                "8.3.2",
 #endif
+            ];
             return theoryData;
         }
     }
@@ -133,12 +149,14 @@ public static partial class LibraryVersion
     {
         get
         {
-            var theoryData = new TheoryData<string>();
+            TheoryData<string> theoryData =
+            [
 #if DEFAULT_TEST_PACKAGE_VERSIONS
-            theoryData.Add(string.Empty);
+                string.Empty,
 #else
-            theoryData.Add("5.2.2");
+                "5.2.2",
 #endif
+            ];
             return theoryData;
         }
     }
@@ -146,13 +164,15 @@ public static partial class LibraryVersion
     {
         get
         {
-            var theoryData = new TheoryData<string>();
+            TheoryData<string> theoryData =
+            [
 #if DEFAULT_TEST_PACKAGE_VERSIONS
-            theoryData.Add(string.Empty);
+                string.Empty,
 #else
-            theoryData.Add("4.8.6");
-            theoryData.Add("4.9.0");
+                "4.8.6",
+                "4.9.0",
 #endif
+            ];
             return theoryData;
         }
     }
@@ -160,20 +180,22 @@ public static partial class LibraryVersion
     {
         get
         {
-            var theoryData = new TheoryData<string>();
+            TheoryData<string> theoryData =
+            [
 #if DEFAULT_TEST_PACKAGE_VERSIONS
-            theoryData.Add(string.Empty);
+                string.Empty,
 #else
 #if NET9_0 || NET8_0 || NET462
-            theoryData.Add("2.19.0");
+                "2.19.0",
 #endif
 #if NET9_0 || NET8_0 || NET462
-            theoryData.Add("2.30.0");
+                "2.30.0",
 #endif
 #if NET9_0 || NET8_0 || NET462
-            theoryData.Add("3.0.0");
+                "3.0.0",
 #endif
 #endif
+            ];
             return theoryData;
         }
     }
@@ -181,13 +203,15 @@ public static partial class LibraryVersion
     {
         get
         {
-            var theoryData = new TheoryData<string>();
+            TheoryData<string> theoryData =
+            [
 #if DEFAULT_TEST_PACKAGE_VERSIONS
-            theoryData.Add(string.Empty);
+                string.Empty,
 #else
-            theoryData.Add("2.0.0");
-            theoryData.Add("2.4.0");
+                "2.0.0",
+                "2.4.0",
 #endif
+            ];
             return theoryData;
         }
     }
@@ -195,13 +219,15 @@ public static partial class LibraryVersion
     {
         get
         {
-            var theoryData = new TheoryData<string>();
+            TheoryData<string> theoryData =
+            [
 #if DEFAULT_TEST_PACKAGE_VERSIONS
-            theoryData.Add(string.Empty);
+                string.Empty,
 #else
-            theoryData.Add("9.0.0");
-            theoryData.Add("9.1.0");
+                "9.0.0",
+                "9.1.0",
 #endif
+            ];
             return theoryData;
         }
     }
@@ -209,12 +235,14 @@ public static partial class LibraryVersion
     {
         get
         {
-            var theoryData = new TheoryData<string>();
+            TheoryData<string> theoryData =
+            [
 #if DEFAULT_TEST_PACKAGE_VERSIONS
-            theoryData.Add(string.Empty);
+                string.Empty,
 #else
-            theoryData.Add("8.0.5");
+                "8.0.5",
 #endif
+            ];
             return theoryData;
         }
     }
@@ -222,18 +250,20 @@ public static partial class LibraryVersion
     {
         get
         {
-            var theoryData = new TheoryData<string>();
+            TheoryData<string> theoryData =
+            [
 #if DEFAULT_TEST_PACKAGE_VERSIONS
-            theoryData.Add(string.Empty);
+                string.Empty,
 #else
-            theoryData.Add("8.2.4");
+                "8.2.4",
 #if NET9_0 || NET8_0
-            theoryData.Add("9.1.0");
+                "9.1.0",
 #endif
 #if NET9_0 || NET8_0
-            theoryData.Add("9.2.3");
+                "9.2.3",
 #endif
 #endif
+            ];
             return theoryData;
         }
     }
@@ -241,17 +271,19 @@ public static partial class LibraryVersion
     {
         get
         {
-            var theoryData = new TheoryData<string>();
+            TheoryData<string> theoryData =
+            [
 #if DEFAULT_TEST_PACKAGE_VERSIONS
-            theoryData.Add(string.Empty);
+                string.Empty,
 #else
 #if NET462
-            theoryData.Add("23.5.1");
+                "23.5.1",
 #endif
 #if NET462
-            theoryData.Add("23.6.1");
+                "23.6.1",
 #endif
 #endif
+            ];
             return theoryData;
         }
     }
@@ -259,13 +291,15 @@ public static partial class LibraryVersion
     {
         get
         {
-            var theoryData = new TheoryData<string>();
+            TheoryData<string> theoryData =
+            [
 #if DEFAULT_TEST_PACKAGE_VERSIONS
-            theoryData.Add(string.Empty);
+                string.Empty,
 #else
-            theoryData.Add("23.5.1");
-            theoryData.Add("23.6.1");
+                "23.5.1",
+                "23.6.1",
 #endif
+            ];
             return theoryData;
         }
     }
@@ -273,13 +307,15 @@ public static partial class LibraryVersion
     {
         get
         {
-            var theoryData = new TheoryData<string>();
+            TheoryData<string> theoryData =
+            [
 #if DEFAULT_TEST_PACKAGE_VERSIONS
-            theoryData.Add(string.Empty);
+                string.Empty,
 #else
-            theoryData.Add("3.6.0");
-            theoryData.Add("3.13.1");
+                "3.6.0",
+                "3.13.1",
 #endif
+            ];
             return theoryData;
         }
     }
@@ -287,14 +323,16 @@ public static partial class LibraryVersion
     {
         get
         {
-            var theoryData = new TheoryData<string>();
+            TheoryData<string> theoryData =
+            [
 #if DEFAULT_TEST_PACKAGE_VERSIONS
-            theoryData.Add(string.Empty);
+                string.Empty,
 #else
-            theoryData.Add("6.0.0");
-            theoryData.Add("6.8.1");
-            theoryData.Add("7.0.0");
+                "6.0.0",
+                "6.8.1",
+                "7.0.0",
 #endif
+            ];
             return theoryData;
         }
     }
@@ -302,13 +340,15 @@ public static partial class LibraryVersion
     {
         get
         {
-            var theoryData = new TheoryData<string>();
+            TheoryData<string> theoryData =
+            [
 #if DEFAULT_TEST_PACKAGE_VERSIONS
-            theoryData.Add(string.Empty);
+                string.Empty,
 #else
-            theoryData.Add("2.6.122");
-            theoryData.Add("2.8.22");
+                "2.6.122",
+                "2.8.22",
 #endif
+            ];
             return theoryData;
         }
     }
@@ -316,14 +356,16 @@ public static partial class LibraryVersion
     {
         get
         {
-            var theoryData = new TheoryData<string>();
+            TheoryData<string> theoryData =
+            [
 #if DEFAULT_TEST_PACKAGE_VERSIONS
-            theoryData.Add(string.Empty);
+                string.Empty,
 #else
-            theoryData.Add("4.10.2");
-            theoryData.Add("6.2.0");
-            theoryData.Add("8.1.0");
+                "4.10.2",
+                "6.2.0",
+                "8.1.0",
 #endif
+            ];
             return theoryData;
         }
     }
@@ -331,14 +373,16 @@ public static partial class LibraryVersion
     {
         get
         {
-            var theoryData = new TheoryData<string>();
+            TheoryData<string> theoryData =
+            [
 #if DEFAULT_TEST_PACKAGE_VERSIONS
-            theoryData.Add(string.Empty);
+                string.Empty,
 #else
-            theoryData.Add("1.6.2");
-            theoryData.Add("1.8.2");
-            theoryData.Add("2.6.1");
+                "1.6.2",
+                "1.8.2",
+                "2.6.1",
 #endif
+            ];
             return theoryData;
         }
     }
@@ -346,12 +390,14 @@ public static partial class LibraryVersion
     {
         get
         {
-            var theoryData = new TheoryData<string>();
+            TheoryData<string> theoryData =
+            [
 #if DEFAULT_TEST_PACKAGE_VERSIONS
-            theoryData.Add(string.Empty);
+                string.Empty,
 #else
-            theoryData.Add("1.4.0");
+                "1.4.0",
 #endif
+            ];
             return theoryData;
         }
     }

@@ -17,187 +17,165 @@ public static partial class LibraryVersion
     {
         {
             "TestApplication.Azure",
-            new List<PackageBuildInfo>
-            {
+            [
                 new("12.22.2"),
                 new("12.23.0"),
-            }
+            ]
         },
         {
             "TestApplication.Elasticsearch",
-            new List<PackageBuildInfo>
-            {
+            [
                 new("8.15.10"),
                 new("8.16.3"),
-            }
+            ]
         },
         {
             "TestApplication.EntityFrameworkCore",
-            new List<PackageBuildInfo>
-            {
+            [
                 new("6.0.35"),
                 new("8.0.10"),
                 new("9.0.0"),
-            }
+            ]
         },
         {
             "TestApplication.EntityFrameworkCore.Pomelo.MySql",
-            new List<PackageBuildInfo>
-            {
+            [
                 new("6.0.3"),
                 new("7.0.0"),
                 new("8.0.0"),
                 new("8.0.2"),
-            }
+            ]
         },
         {
             "TestApplication.GraphQL",
-            new List<PackageBuildInfo>
-            {
-                new("7.5.0", additionalMetaData: new() {{"GraphQLMicrosoftDI","7.5.0"},{"GraphQLServerTransportsAspNetCore","7.5.0"},{"GraphQLServerUIPlayground","7.5.0"}}),
-                new("8.0.2", additionalMetaData: new() {{"GraphQLMicrosoftDI","8.0.2"},{"GraphQLServerTransportsAspNetCore","8.0.2"},{"GraphQLServerUIPlayground","8.0.2"}}),
-                new("8.2.1", additionalMetaData: new() {{"GraphQLMicrosoftDI","8.2.1"},{"GraphQLServerTransportsAspNetCore","8.1.0"},{"GraphQLServerUIPlayground","8.1.0"}}),
-            }
+            [
+                new("7.5.0", additionalMetaData: new() { { "GraphQLMicrosoftDI", "7.5.0" }, { "GraphQLServerTransportsAspNetCore", "7.5.0" }, { "GraphQLServerUIPlayground", "7.5.0" } }),
+                new("8.0.2", additionalMetaData: new() { { "GraphQLMicrosoftDI", "8.0.2" }, { "GraphQLServerTransportsAspNetCore", "8.0.2" }, { "GraphQLServerUIPlayground", "8.0.2" } }),
+                new("8.2.1", additionalMetaData: new() { { "GraphQLMicrosoftDI", "8.2.1" }, { "GraphQLServerTransportsAspNetCore", "8.1.0" }, { "GraphQLServerUIPlayground", "8.1.0" } }),
+            ]
         },
         {
             "TestApplication.GrpcNetClient",
-            new List<PackageBuildInfo>
-            {
+            [
                 new("2.52.0"),
                 new("2.67.0"),
-            }
+            ]
         },
         {
             "TestApplication.Log4NetBridge",
-            new List<PackageBuildInfo>
-            {
+            [
                 new("2.0.13"),
                 new("3.0.3"),
-            }
+            ]
         },
         {
             "TestApplication.MassTransit",
-            new List<PackageBuildInfo>
-            {
+            [
                 new("8.3.0"),
                 new("8.3.2"),
-            }
+            ]
         },
         {
             "TestApplication.SqlClient.Microsoft",
-            new List<PackageBuildInfo>
-            {
+            [
                 new("5.2.2"),
-            }
+            ]
         },
         {
             "TestApplication.SqlClient.System",
-            new List<PackageBuildInfo>
-            {
+            [
                 new("4.8.6"),
                 new("4.9.0"),
-            }
+            ]
         },
         {
             "TestApplication.MongoDB",
-            new List<PackageBuildInfo>
-            {
-                new("2.19.0", supportedFrameworks: new string[] {"net9.0","net8.0","net462"}),
-                new("2.30.0", supportedFrameworks: new string[] {"net9.0","net8.0","net462"}),
-                new("3.0.0", supportedFrameworks: new string[] {"net9.0","net8.0","net472"}),
-            }
+            [
+                new("2.19.0", supportedFrameworks: [ "net9.0", "net8.0", "net462" ]),
+                new("2.30.0", supportedFrameworks: [ "net9.0", "net8.0", "net462" ]),
+                new("3.0.0", supportedFrameworks: [ "net9.0", "net8.0", "net472" ]),
+            ]
         },
         {
             "TestApplication.MySqlConnector",
-            new List<PackageBuildInfo>
-            {
+            [
                 new("2.0.0"),
                 new("2.4.0"),
-            }
+            ]
         },
         {
             "TestApplication.MySqlData",
-            new List<PackageBuildInfo>
-            {
+            [
                 new("9.0.0"),
                 new("9.1.0"),
-            }
+            ]
         },
         {
             "TestApplication.Npgsql",
-            new List<PackageBuildInfo>
-            {
+            [
                 new("8.0.5"),
-            }
+            ]
         },
         {
             "TestApplication.NServiceBus",
-            new List<PackageBuildInfo>
-            {
+            [
                 new("8.2.4"),
-                new("9.1.0", supportedFrameworks: new string[] {"net9.0","net8.0"}),
-                new("9.2.3", supportedFrameworks: new string[] {"net9.0","net8.0"}),
-            }
+                new("9.1.0", supportedFrameworks: [ "net9.0", "net8.0" ]),
+                new("9.2.3", supportedFrameworks: [ "net9.0", "net8.0" ]),
+            ]
         },
         {
             "TestApplication.OracleMda.NetFramework",
-            new List<PackageBuildInfo>
-            {
-                new("23.5.1", supportedFrameworks: new string[] {"net472"}),
-                new("23.6.1", supportedFrameworks: new string[] {"net472"}),
-            }
+            [
+                new("23.5.1", supportedFrameworks: [ "net472" ]),
+                new("23.6.1", supportedFrameworks: [ "net472" ]),
+            ]
         },
         {
             "TestApplication.OracleMda.Core",
-            new List<PackageBuildInfo>
-            {
+            [
                 new("23.5.1"),
                 new("23.6.1"),
-            }
+            ]
         },
         {
             "TestApplication.Quartz",
-            new List<PackageBuildInfo>
-            {
+            [
                 new("3.6.0"),
                 new("3.13.1"),
-            }
+            ]
         },
         {
             "TestApplication.RabbitMq",
-            new List<PackageBuildInfo>
-            {
+            [
                 new("6.0.0"),
                 new("6.8.1"),
                 new("7.0.0"),
-            }
+            ]
         },
         {
             "TestApplication.StackExchangeRedis",
-            new List<PackageBuildInfo>
-            {
+            [
                 new("2.6.122"),
                 new("2.8.22"),
-            }
+            ]
         },
         {
             "TestApplication.Wcf.Client.DotNet",
-            new List<PackageBuildInfo>
-            {
+            [
                 new("4.10.2"),
                 new("6.2.0"),
                 new("8.1.0"),
-            }
+            ]
         },
         {
             "TestApplication.Kafka",
-            new List<PackageBuildInfo>
-            {
-                new("1.4.0", supportedPlatforms: new string[] {"x64"}),
+            [
+                new("1.4.0", supportedPlatforms: [ "x64" ]),
                 new("1.6.2"),
                 new("1.8.2"),
                 new("2.6.1"),
-            }
+            ]
         },
     };
 }
