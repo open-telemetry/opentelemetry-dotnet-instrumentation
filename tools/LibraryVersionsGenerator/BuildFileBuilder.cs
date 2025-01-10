@@ -32,8 +32,7 @@ internal sealed class BuildFileBuilder : CSharpFileBuilder
         Builder.AppendLine(
             @$"        {{
             ""{testApplicationName}"",
-            new List<PackageBuildInfo>
-            {{");
+            [");
 
         return this;
     }
@@ -55,7 +54,7 @@ internal sealed class BuildFileBuilder : CSharpFileBuilder
 
     public override CSharpFileBuilder EndTestPackage()
     {
-        Builder.AppendLine(@"            }
+        Builder.AppendLine(@"            ]
         },");
         return this;
     }
@@ -63,21 +62,21 @@ internal sealed class BuildFileBuilder : CSharpFileBuilder
     private static string SerializeDictionary(Dictionary<string, string> dictionary)
     {
         var dictionarySb = new StringBuilder();
-        dictionarySb.Append("new() {");
+        dictionarySb.Append("new() { ");
 
         for (var i = 0; i < dictionary.Count; i++)
         {
             var dependency = dictionary.ElementAt(i);
 
-            dictionarySb.Append($"{{\"{dependency.Key}\",\"{dependency.Value}\"}}");
+            dictionarySb.Append($"{{ \"{dependency.Key}\", \"{dependency.Value}\" }}");
 
             if (i != dictionary.Count - 1)
             {
-                dictionarySb.Append(',');
+                dictionarySb.Append(", ");
             }
         }
 
-        dictionarySb.Append("}");
+        dictionarySb.Append(" }");
 
         return dictionarySb.ToString();
     }
@@ -86,11 +85,11 @@ internal sealed class BuildFileBuilder : CSharpFileBuilder
     {
         if (array.Length == 0)
         {
-            return "Array.Empty<string>()";
+            return "[]";
         }
 
         var arraySb = new StringBuilder();
-        arraySb.Append("new string[] {");
+        arraySb.Append("[ ");
 
         for (var i = 0; i < array.Length; i++)
         {
@@ -98,11 +97,11 @@ internal sealed class BuildFileBuilder : CSharpFileBuilder
 
             if (i != array.Length - 1)
             {
-                arraySb.Append(',');
+                arraySb.Append(", ");
             }
         }
 
-        arraySb.Append("}");
+        arraySb.Append(" ]");
 
         return arraySb.ToString();
     }
