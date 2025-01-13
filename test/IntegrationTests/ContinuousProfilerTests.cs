@@ -68,7 +68,7 @@ public class ContinuousProfilerTests : TestHelper
             var attributeTable = profile.AttributeTable;
 
             var attributeIndices = profiles.SelectMany(p => p.LocationTable).Select(l => l.AttributeIndices.Single());
-            if (!attributeIndices.All(index => attributeTable[index - 1] is { Key: "profile.frame.type" }))
+            if (!attributeIndices.All(index => attributeTable[index] is { Key: "profile.frame.type" }))
             {
                 return false;
             }
@@ -122,7 +122,7 @@ public class ContinuousProfilerTests : TestHelper
         var frames = profile.LocationTable
             .SelectMany(location => location.Line)
             .Select(line => line.FunctionIndex)
-            .Select(functionId => profile.FunctionTable[functionId - 1])
+            .Select(functionId => profile.FunctionTable[functionId])
             .Select(function => profile.StringTable[function.NameStrindex]);
 
         var stackTrace = string.Join("\n", frames);

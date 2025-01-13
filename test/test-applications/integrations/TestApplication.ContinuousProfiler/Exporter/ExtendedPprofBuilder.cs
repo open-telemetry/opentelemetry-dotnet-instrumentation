@@ -92,7 +92,7 @@ internal class ExtendedPprofBuilder
         private readonly Profile _profile;
         private readonly StringCache _stringCache;
         private readonly Dictionary<string, int> _table = new();
-        private int _index = 1; // 0 is reserved
+        private int _index;
 
         public FunctionCache(Profile profile, StringCache stringCache)
         {
@@ -122,7 +122,7 @@ internal class ExtendedPprofBuilder
         private readonly Profile _profile;
         private readonly FunctionCache _functionCache;
         private readonly int _profileFrameTypeAttributeId;
-        private int _index = 1; // 0 is reserved
+        private int _index;
 
         public LocationCache(Profile profile, FunctionCache functionCache, int profileFrameTypeAttributeId)
         {
@@ -147,7 +147,7 @@ internal class ExtendedPprofBuilder
     {
         private readonly Profile _profile;
         private readonly Dictionary<Tuple<long, long, long>, int> _table = new();
-        private int _index = 1; // 0 is reserved
+        private int _index;
 
         public LinkCache(Profile profile)
         {
@@ -188,7 +188,7 @@ internal class ExtendedPprofBuilder
     {
         private readonly Profile _profile;
         private readonly Dictionary<KeyValue, int> _table = new();
-        private int _index = 1; // 0 is reserved
+        private int _index;
 
         public AttributeCache(Profile profile)
         {
