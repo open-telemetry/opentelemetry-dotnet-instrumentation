@@ -25,9 +25,11 @@ internal class ExtendedPprofBuilder
         };
         var stringCache = new StringCache(Profile);
         var functionCache = new FunctionCache(Profile, stringCache);
-        _locationCache = new LocationCache(Profile, functionCache);
         _linkCache = new LinkCache(Profile);
         _attributeCache = new AttributeCache(Profile);
+        var profileFrameTypeAttributeId = _attributeCache.GetOrAdd("profile.frame.type", value => value.StringValue = "dotnet");
+
+        _locationCache = new LocationCache(Profile, functionCache, profileFrameTypeAttributeId);
 
         var profilingDataTypeAttributeId = _attributeCache.GetOrAdd("todo.profiling.data.type", value => value.StringValue = profilingDataType);
         Profile.AttributeIndices.Add(profilingDataTypeAttributeId);
@@ -119,17 +121,20 @@ internal class ExtendedPprofBuilder
     {
         private readonly Profile _profile;
         private readonly FunctionCache _functionCache;
+        private readonly int _profileFrameTypeAttributeId;
         private int _index;
 
-        public LocationCache(Profile profile, FunctionCache functionCache)
+        public LocationCache(Profile profile, FunctionCache functionCache, int profileFrameTypeAttributeId)
         {
             _profile = profile;
             _functionCache = functionCache;
+            _profileFrameTypeAttributeId = profileFrameTypeAttributeId;
         }
 
         public int Add(string function)
         {
             var location = new Location();
+            location.AttributeIndices.Add(_profileFrameTypeAttributeId);
             location.Line.Add(new Line { FunctionIndex = _functionCache.GetOrAdd(function), Line_ = 0, Column = 0 }); // for now, we don't support line nor column number
 
             _profile.LocationTable.Add(location);

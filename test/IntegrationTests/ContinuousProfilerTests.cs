@@ -4,6 +4,7 @@
 #if NET
 
 using IntegrationTests.Helpers;
+using OpenTelemetry.Proto.Collector.Profiles.V1Development;
 using OpenTelemetry.Proto.Profiles.V1Development;
 using Xunit.Abstractions;
 
@@ -43,15 +44,37 @@ public class ContinuousProfilerTests : TestHelper
         SetExporter(collector);
         SetEnvironmentVariable("OTEL_DOTNET_AUTO_PLUGINS", "TestApplication.ContinuousProfiler.ThreadPlugin, TestApplication.ContinuousProfiler, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null");
         SetEnvironmentVariable("OTEL_DOTNET_AUTO_TRACES_ADDITIONAL_SOURCES", "TestApplication.ContinuousProfiler");
-        RunTestApplication();
-
         var expectedStackTrace = string.Join("\n", CreateExpectedStackTrace());
 
+        collector.ExpectCollected(AllLocationReferencesProfileFrameTypeAttribute, "All location should contain reference to profile.frame.type attribute");
         collector.Expect(profileData => profileData.ResourceProfiles.Any(resourceProfiles => resourceProfiles.ScopeProfiles.Any(scopeProfile => scopeProfile.Profiles.Any(profile => ContainStackTraceForClassHierarchy(profile, expectedStackTrace) && ContainAttributes(profile, "cpu")))));
         collector.ResourceExpector.Expect("todo.resource.detector.key", "todo.resource.detector.value");
 
+        RunTestApplication();
+
+        collector.AssertCollected();
         collector.AssertExpectations();
         collector.ResourceExpector.AssertExpectations();
+    }
+
+    private static bool AllLocationReferencesProfileFrameTypeAttribute(ICollection<ExportProfilesServiceRequest> c)
+    {
+        var profiles = c.SelectMany(r => r.ResourceProfiles)
+            .SelectMany(rp => rp.ScopeProfiles)
+            .SelectMany(sp => sp.Profiles).ToList();
+
+        foreach (var profile in profiles)
+        {
+            var attributeTable = profile.AttributeTable;
+
+            var attributeIndices = profiles.SelectMany(p => p.LocationTable).Select(l => l.AttributeIndices.Single());
+            if (!attributeIndices.All(index => attributeTable[index] is { Key: "profile.frame.type" }))
+            {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     private static bool ContainAttributes(Profile profileContainer, string profilingDataType)

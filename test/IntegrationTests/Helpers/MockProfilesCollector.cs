@@ -157,8 +157,8 @@ public class MockProfilesCollector : IDisposable
     private static void FailCollectedExpectation(string? collectedExpectationDescription, ExportProfilesServiceRequest[] collectedExportProfilesServiceRequests)
     {
         var message = new StringBuilder();
-        message.AppendLine($"Collected logs expectation failed: {collectedExpectationDescription}");
-        message.AppendLine("Collected logs:");
+        message.AppendLine($"Collected profiles expectation failed: {collectedExpectationDescription}");
+        message.AppendLine("Collected profiles:");
         foreach (var logRecord in collectedExportProfilesServiceRequests)
         {
             message.AppendLine($"    \"{logRecord}\"");
