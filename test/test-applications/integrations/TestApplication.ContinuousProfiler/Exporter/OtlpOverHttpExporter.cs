@@ -177,6 +177,12 @@ public class OtlpOverHttpExporter
     private static ScopeProfiles CreateScopeProfiles()
     {
         var scopeProfiles = new ScopeProfiles();
+        scopeProfiles.Scope = new InstrumentationScope
+        {
+            Name = "OpenTelemetry.AutoInstrumentation",
+            // TODO consider setting Version here
+        };
+
         // TODO handle schema Url scopeProfiles.SchemaUrl
 
         return scopeProfiles;

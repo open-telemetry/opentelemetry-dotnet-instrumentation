@@ -3,6 +3,7 @@
 
 #if NET
 
+using FluentAssertions;
 using IntegrationTests.Helpers;
 using OpenTelemetry.Proto.Collector.Profiles.V1Development;
 using OpenTelemetry.Proto.Profiles.V1Development;
@@ -46,7 +47,7 @@ public class ContinuousProfilerTests : TestHelper
         SetEnvironmentVariable("OTEL_DOTNET_AUTO_TRACES_ADDITIONAL_SOURCES", "TestApplication.ContinuousProfiler");
         var expectedStackTrace = string.Join("\n", CreateExpectedStackTrace());
 
-        collector.ExpectCollected(AllLocationReferencesProfileFrameTypeAttribute, "All location should contain reference to profile.frame.type attribute");
+        collector.ExpectCollected(ExpectCollected, "Expect Collected failed");
         collector.Expect(profileData => profileData.ResourceProfiles.Any(resourceProfiles => resourceProfiles.ScopeProfiles.Any(scopeProfile => scopeProfile.Profiles.Any(profile => ContainStackTraceForClassHierarchy(profile, expectedStackTrace) && ContainAttributes(profile, "cpu")))));
         collector.ResourceExpector.Expect("todo.resource.detector.key", "todo.resource.detector.value");
 
@@ -57,11 +58,14 @@ public class ContinuousProfilerTests : TestHelper
         collector.ResourceExpector.AssertExpectations();
     }
 
-    private static bool AllLocationReferencesProfileFrameTypeAttribute(ICollection<ExportProfilesServiceRequest> c)
+    private static bool ExpectCollected(ICollection<ExportProfilesServiceRequest> c)
     {
-        var profiles = c.SelectMany(r => r.ResourceProfiles)
-            .SelectMany(rp => rp.ScopeProfiles)
-            .SelectMany(sp => sp.Profiles).ToList();
+        var scopeProfiles = c.SelectMany(r => r.ResourceProfiles)
+            .SelectMany(rp => rp.ScopeProfiles).ToList();
+
+        scopeProfiles.Should().AllSatisfy(sp => sp.Scope.Name.Should().Be("OpenTelemetry.AutoInstrumentation"));
+
+        var profiles = scopeProfiles.SelectMany(sp => sp.Profiles).ToList();
 
         foreach (var profile in profiles)
         {
