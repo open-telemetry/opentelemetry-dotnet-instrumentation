@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 using System.Collections;
+using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Reflection;
 using OpenTelemetry.AutoInstrumentation.DuckTyping;
@@ -27,6 +28,7 @@ internal class OpenTelemetryLog4NetAppender
     private static readonly Lazy<OpenTelemetryLog4NetAppender> InstanceField = new(InitializeAppender, true);
 
     private readonly Func<string?, object?>? _getLoggerFactory;
+    private readonly ConcurrentDictionary<string, object> _loggers = new();
 
     private OpenTelemetryLog4NetAppender(LoggerProvider loggerProvider)
     {
@@ -46,12 +48,7 @@ internal class OpenTelemetryLog4NetAppender
             return;
         }
 
-        object? logger = null;
-
-        if (_getLoggerFactory is not null)
-        {
-            logger = _getLoggerFactory(loggingEvent.LoggerName);
-        }
+        var logger = GetLogger(loggingEvent.LoggerName);
 
         var logEmitter = OpenTelemetryLogHelpers.LogEmitter;
 
@@ -161,6 +158,17 @@ internal class OpenTelemetryLog4NetAppender
     private static OpenTelemetryLog4NetAppender InitializeAppender()
     {
         return new OpenTelemetryLog4NetAppender(Instrumentation.LoggerProvider!);
+    }
+
+    private object? GetLogger(string? loggerName)
+    {
+        if (_getLoggerFactory is null)
+        {
+            return null;
+        }
+
+        var name = loggerName ?? string.Empty;
+        return _loggers.GetOrAdd(name, _getLoggerFactory!);
     }
 
 #pragma warning disable SA1202

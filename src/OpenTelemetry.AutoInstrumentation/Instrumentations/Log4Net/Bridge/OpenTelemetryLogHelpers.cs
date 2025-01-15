@@ -96,7 +96,10 @@ internal static class OpenTelemetryLogHelpers
         ParameterExpression renderedMessageParam)
     {
         // Creates expression:
-        // .Block(OpenTelemetry.Logs.LogRecordAttributeList $instance) {
+        // .Block(
+        //     OpenTelemetry.Logs.LogRecordAttributeList $instance,
+        //     System.Int32 $index,
+        //     System.Object $value) {
         //     $instance = .New OpenTelemetry.Logs.LogRecordAttributeList();
         //     .If ($exception != null) {
         //         .Call $instance.RecordException($exception)
@@ -145,22 +148,20 @@ internal static class OpenTelemetryLogHelpers
         //     } .Else {
         //         .Default(System.Void)
         //     };
+        //     $index = 0;
+        //     $value = null;
         //     .If ($args != null) {
         //         .Loop  {
-        //             .Block(
-        //                 System.Int32 $index,
-        //                 System.Object $value) {
-        //                 .If ($index < $args.Length) {
-        //                     .Block() {
-        //                         $value = $args[$index];
-        //                         .Call $instance.Add(
-        //                             .Call $index.ToString(),
-        //                             $value);
-        //                         $index++
-        //                     }
-        //                 } .Else {
-        //                     .Break #Label2 { }
+        //             .If ($index < $args.Length) {
+        //                 .Block() {
+        //                     $value = $args[$index];
+        //                     .Call $instance.Add(
+        //                         .Call $index.ToString(),
+        //                         $value);
+        //                     $index++
         //                 }
+        //             } .Else {
+        //                 .Break #Label2 { }
         //             }
         //         }
         //         .LabelTarget #Label2:
@@ -232,25 +233,25 @@ internal static class OpenTelemetryLogHelpers
         var argsValueVar = Expression.Variable(typeof(object), "value");
 
         var loopAndAddArgs = Expression.Loop(
-                Expression.Block(
-                    new[] { argsIndexVar, argsValueVar },
-                    Expression.IfThenElse(
+                Expression.IfThenElse(
                         Expression.LessThan(argsIndexVar, Expression.Property(argsParam, nameof(Array.Length))),
                         Expression.Block(
                             Expression.Assign(argsValueVar, Expression.ArrayIndex(argsParam, argsIndexVar)),
                             Expression.Call(instanceVar, addAttributeMethod, Expression.Call(argsIndexVar, toStringMethod), argsValueVar),
                             Expression.PostIncrementAssign(argsIndexVar)),
-                        Expression.Break(exitLabel2))),
+                        Expression.Break(exitLabel2)),
                 exitLabel2);
 
         var addPropertiesIfNotNull = Expression.IfThen(Expression.NotEqual(properties, Expression.Constant(null)), addPropertiesWithForeach);
         var addArgsIfNotNull = Expression.IfThen(Expression.NotEqual(argsParam, Expression.Constant(null)), loopAndAddArgs);
         return Expression.Block(
-            new[] { instanceVar },
+            new[] { instanceVar, argsIndexVar, argsValueVar },
             assignInstanceVar,
             recordExceptionIfNotNull,
             setRenderedMessageIfNotNull,
             addPropertiesIfNotNull,
+            Expression.Assign(argsIndexVar, Expression.Constant(0)),
+            Expression.Assign(argsValueVar, Expression.Constant(null)),
             addArgsIfNotNull,
             instanceVar);
     }
