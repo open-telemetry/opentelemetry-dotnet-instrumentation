@@ -84,7 +84,7 @@ jobs:
 
       - name: Install SQL Server (localdb)
         if: ${{ runner.os == 'Windows' }}
-        uses: potatoqualitee/mssqlsuite@9a0136e208df60b8ecb62909f076bc34854fa55a # tag: v1.7
+        uses: potatoqualitee/mssqlsuite@605af2310e2e22978ebf2c74d5995ba102094b8a # tag: v1.8
         with: 
           install: localdb
       
