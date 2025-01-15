@@ -39,7 +39,7 @@
   </ItemGroup>
   <!-- Versions from CommonExcludedAssets.props -->
   <ItemGroup>
-    <PackageVersion Include="Microsoft.Win32.SystemEvents" Version="4.7.0" />
+    <PackageVersion Include="Microsoft.Win32.SystemEvents" Version="9.0.1" />
     <PackageVersion Include="Pipelines.Sockets.Unofficial" Version="2.2.8" />
     <PackageVersion Include="StackExchange.Redis" Version="2.6.122" />
     <PackageVersion Include="System.Drawing.Common" Version="4.7.2" />
