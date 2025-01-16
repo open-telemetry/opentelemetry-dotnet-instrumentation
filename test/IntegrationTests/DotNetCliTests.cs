@@ -3,7 +3,6 @@
 
 #if NET
 
-using FluentAssertions;
 using IntegrationTests.Helpers;
 using Xunit.Abstractions;
 
@@ -81,7 +80,7 @@ Console.WriteLine(response.StatusCode);
         using var process = InstrumentedProcessHelper.Start(DotNetCli, arguments, EnvironmentHelper);
         using var helper = new ProcessHelper(process);
 
-        process.Should().NotBeNull();
+        Assert.NotNull(process);
 
         var processTimeout = !process!.WaitForExit((int)TestTimeout.ProcessExit.TotalMilliseconds);
         if (processTimeout)
@@ -93,8 +92,8 @@ Console.WriteLine(response.StatusCode);
         Output.WriteLine("Exit Code: " + process.ExitCode);
         Output.WriteResult(helper);
 
-        processTimeout.Should().BeFalse("Test application timed out");
-        process.ExitCode.Should().Be(0, "Test application exited with non-zero exit code");
+        Assert.False(processTimeout, "Test application timed out");
+        Assert.Equal(0, process.ExitCode);
     }
 
     private void RunAppWithDotNetCliAndAssertHttpSpans(string arguments)

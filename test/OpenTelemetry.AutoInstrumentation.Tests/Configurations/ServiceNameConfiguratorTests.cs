@@ -1,9 +1,7 @@
 // Copyright The OpenTelemetry Authors
 // SPDX-License-Identifier: Apache-2.0
 
-using FluentAssertions;
 using OpenTelemetry.AutoInstrumentation.Configurations;
-using OpenTelemetry.Resources;
 using Xunit;
 
 namespace OpenTelemetry.AutoInstrumentation.Tests.Configurations;
@@ -20,7 +18,7 @@ public class ServiceNameConfiguratorTests
         var resource = resourceBuilder.Build();
 
         var serviceName = resource.Attributes.FirstOrDefault(a => a.Key == ServiceName).Value as string;
-        serviceName?.Should().Be("testhost");
+        Assert.Equal("testhost", serviceName);
     }
 
     [Fact]
@@ -36,7 +34,7 @@ public class ServiceNameConfiguratorTests
 
             var serviceName = resource.Attributes.FirstOrDefault(a => a.Key == ServiceName).Value as string;
 
-            serviceName?.Should().Be(setServiceName);
+            Assert.Equal(setServiceName, serviceName);
         }
         finally
         {

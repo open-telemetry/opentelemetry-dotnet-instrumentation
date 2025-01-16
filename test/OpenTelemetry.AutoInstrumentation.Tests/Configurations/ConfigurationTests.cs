@@ -2,8 +2,6 @@
 // SPDX-License-Identifier: Apache-2.0
 
 using System.Collections.Specialized;
-using FluentAssertions;
-using FluentAssertions.Execution;
 using NSubstitute;
 using OpenTelemetry.AutoInstrumentation.Configurations;
 using Xunit;
@@ -28,7 +26,7 @@ public class ConfigurationTests
             enabledByDefault: true,
             enabledConfigurationTemplate: "TEST_CONFIGURATION_{0}_ENABLED");
 
-        list.Should().Equal(TestEnum.Test1, TestEnum.Test2, TestEnum.Test3);
+        Assert.Equal([TestEnum.Test1, TestEnum.Test2, TestEnum.Test3], list);
     }
 
     [Fact]
@@ -40,7 +38,7 @@ public class ConfigurationTests
             enabledByDefault: false,
             enabledConfigurationTemplate: "TEST_CONFIGURATION_{0}_ENABLED");
 
-        list.Should().BeEmpty();
+        Assert.Empty(list);
     }
 
     [Fact]
@@ -56,7 +54,7 @@ public class ConfigurationTests
             enabledByDefault: false,
             enabledConfigurationTemplate: "TEST_CONFIGURATION_{0}_ENABLED");
 
-        list.Should().Equal(TestEnum.Test1, TestEnum.Test3);
+        Assert.Equal([TestEnum.Test1, TestEnum.Test3], list);
     }
 
     [Fact]
@@ -71,7 +69,7 @@ public class ConfigurationTests
             enabledByDefault: true,
             enabledConfigurationTemplate: "TEST_CONFIGURATION_{0}_ENABLED");
 
-        list.Should().Equal(TestEnum.Test1, TestEnum.Test3);
+        Assert.Equal([TestEnum.Test1, TestEnum.Test3], list);
     }
 
     [Fact]
@@ -86,7 +84,7 @@ public class ConfigurationTests
             enabledByDefault: true,
             enabledConfigurationTemplate: "TEST_CONFIGURATION_{0}_ENABLED");
 
-        list.Should().Equal(TestEnum.Test1, TestEnum.Test2, TestEnum.Test3);
+        Assert.Equal([TestEnum.Test1, TestEnum.Test2, TestEnum.Test3], list);
     }
 
     [Fact]
@@ -97,11 +95,9 @@ public class ConfigurationTests
             { "TEST_CONFIGURATION_TEST2_ENABLED", "WrongValue" },
         }));
 
-        var parse = () => source.ParseEnabledEnumList<TestEnum>(
+        Assert.Throws<FormatException>(() => source.ParseEnabledEnumList<TestEnum>(
             enabledByDefault: true,
-            enabledConfigurationTemplate: "TEST_CONFIGURATION_{0}_ENABLED");
-
-        parse.Should().Throw<FormatException>();
+            enabledConfigurationTemplate: "TEST_CONFIGURATION_{0}_ENABLED"));
     }
 
     [Fact]
@@ -112,11 +108,8 @@ public class ConfigurationTests
         mockSource.GetString(Arg.Is<string>(key => key == "TEST_EMPTY_VALUE"))!.Returns<string>(_ => string.Empty);
         var compositeSource = new Configuration(true, mockSource);
 
-        using (new AssertionScope())
-        {
-            compositeSource.GetString("TEST_NULL_VALUE").Should().BeNull();
-            compositeSource.GetString("TEST_EMPTY_VALUE").Should().BeNull();
-        }
+        Assert.Null(compositeSource.GetString("TEST_NULL_VALUE"));
+        Assert.Null(compositeSource.GetString("TEST_EMPTY_VALUE"));
     }
 
     [Fact]
@@ -129,7 +122,7 @@ public class ConfigurationTests
 
         var list = source.ParseList("TEST_LIST", ',');
 
-        list.Should().Equal("Value1");
+        Assert.Equal(["Value1"], list);
     }
 
     [Fact]
@@ -142,7 +135,7 @@ public class ConfigurationTests
 
         var list = source.ParseList("TEST_LIST", ',');
 
-        list.Should().Equal("Value1", "Value2");
+        Assert.Equal(["Value1", "Value2"], list);
     }
 
     [Fact]
@@ -155,7 +148,7 @@ public class ConfigurationTests
 
         var list = source.ParseList("TEST_LIST", ',');
 
-        list.Should().Equal("Value1", "Value2");
+        Assert.Equal(["Value1", "Value2"], list);
     }
 
     [Fact]
@@ -165,6 +158,6 @@ public class ConfigurationTests
 
         var list = source.ParseList("TEST_LIST", ',');
 
-        list.Should().BeEmpty();
+        Assert.Empty(list);
     }
 }

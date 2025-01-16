@@ -3,8 +3,6 @@
 
 using System.Reflection;
 using System.Reflection.Emit;
-using FluentAssertions;
-using FluentAssertions.Execution;
 using OpenTelemetry.AutoInstrumentation.Loading;
 using Xunit;
 
@@ -26,14 +24,11 @@ public class LazyInstrumentationLoaderTests
             loader.Add(initializer2); // After loading the assembly
         }
 
-        using (new AssertionScope())
-        {
-            initializer1.Initialized.Should().BeTrue();
-            initializer1.Disposed.Should().BeTrue();
+        Assert.True(initializer1.Initialized);
+        Assert.True(initializer1.Disposed);
 
-            initializer2.Initialized.Should().BeTrue();
-            initializer2.Disposed.Should().BeTrue();
-        }
+        Assert.True(initializer2.Initialized);
+        Assert.True(initializer2.Disposed);
     }
 
     private static void CreateDummyAssembly()

@@ -1,7 +1,6 @@
 // Copyright The OpenTelemetry Authors
 // SPDX-License-Identifier: Apache-2.0
 
-using FluentAssertions;
 using OpenTelemetry.AutoInstrumentation.Logging;
 using Xunit;
 
@@ -20,7 +19,7 @@ public class InternalLoggerTests
         // should be ignored, because LogLevel.Debug > LogLevel.Information
         logger.Debug("debug message", false);
 
-        sink.Messages.Count.Should().Be(1);
-        sink.Messages[0].Should().Contain("[Information] info message");
+        var messages = Assert.Single(sink.Messages);
+        Assert.Contains("[Information] info message", messages);
     }
 }

@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: Apache-2.0
 
 #if NETFRAMEWORK
-using FluentAssertions;
 using IntegrationTests.Helpers;
 using Xunit.Abstractions;
 
@@ -19,7 +18,7 @@ public class DomainNeutralTests : TestHelper
     [Trait("Category", "EndToEnd")]
     public void SubmitsTraces()
     {
-        EnvironmentTools.IsWindowsAdministrator().Should().BeTrue();
+        Assert.True(EnvironmentTools.IsWindowsAdministrator());
 
         using var collector = new MockSpansCollector(Output);
         SetExporter(collector);
@@ -32,7 +31,7 @@ public class DomainNeutralTests : TestHelper
             "tracer-home",
             "netfx",
             "OpenTelemetry.AutoInstrumentation.dll");
-        File.Exists(instrumentationAssembly).Should().BeTrue();
+        Assert.True(File.Exists(instrumentationAssembly));
         using var gacEntry = new GacEntry(instrumentationAssembly);
 
         // Domain-neutral depends on strong named assemblies to work, leverage some assets from

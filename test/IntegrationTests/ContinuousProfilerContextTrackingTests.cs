@@ -3,10 +3,8 @@
 
 #if NET
 
-using FluentAssertions;
 using IntegrationTests.Helpers;
 using OpenTelemetry.Proto.Collector.Profiles.V1Development;
-using OpenTelemetry.Proto.Profiles.V1Development;
 using Xunit.Abstractions;
 
 namespace IntegrationTests;
@@ -48,7 +46,7 @@ public class ContinuousProfilerContextTrackingTests : TestHelper
 
             var samplesWithTraceContext = samplesInBatch.Where(s => s.HasLinkIndex).ToList();
 
-            samplesWithTraceContext.Count.Should().BeLessOrEqualTo(1, "at most one sample in a batch should have trace context associated.");
+            Assert.True(samplesWithTraceContext.Count <= 1, "at most one sample in a batch should have trace context associated.");
 
             totalSamplesWithTraceContextCount += samplesWithTraceContext.Count;
             if (samplesWithTraceContext.FirstOrDefault() is { } sampleWithTraceContext)
@@ -57,8 +55,8 @@ public class ContinuousProfilerContextTrackingTests : TestHelper
             }
         }
 
-        managedThreadsWithTraceContext.Should().HaveCountGreaterThan(1, "at least 2 distinct threads should have trace context associated.");
-        totalSamplesWithTraceContextCount.Should().BeGreaterOrEqualTo(3, "there should be sample with trace context in most of the batches.");
+        Assert.True(managedThreadsWithTraceContext.Count > 1, "at least 2 distinct threads should have trace context associated.");
+        Assert.True(totalSamplesWithTraceContextCount >= 3, "there should be sample with trace context in most of the batches.");
         return true;
     }
 }

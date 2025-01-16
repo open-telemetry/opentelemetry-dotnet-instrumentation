@@ -3,7 +3,6 @@
 #if NET
 using System.Collections.Concurrent;
 using System.Diagnostics;
-using FluentAssertions;
 using Microsoft.AspNetCore.Http;
 using OpenTelemetry.Proto.Collector.Logs.V1;
 using OpenTelemetry.Proto.Collector.Trace.V1;
@@ -61,9 +60,9 @@ public class MockCorrelationCollector : IDisposable
         var expectedLogRecord = _logs.GetConsumingEnumerable(cts.Token).First(_logRecordFilter);
         var expectedSpan = _spans.GetConsumingEnumerable(cts.Token).First(_spanFilter);
 
-        expectedLogRecord.SpanId.Should().Equal(expectedSpan.Span.SpanId);
-        expectedLogRecord.TraceId.Should().Equal(expectedSpan.Span.TraceId);
-        expectedLogRecord.Flags.Should().Be((uint)ActivityTraceFlags.Recorded);
+        Assert.Equal(expectedSpan.Span.SpanId, expectedLogRecord.SpanId);
+        Assert.Equal(expectedSpan.Span.TraceId, expectedLogRecord.TraceId);
+        Assert.Equal((uint)ActivityTraceFlags.Recorded, expectedLogRecord.Flags);
     }
 
     private async Task HandleLogHttpRequests(HttpContext ctx)

@@ -1,7 +1,6 @@
 // Copyright The OpenTelemetry Authors
 // SPDX-License-Identifier: Apache-2.0
 
-using FluentAssertions;
 using IntegrationTests.Helpers;
 using Microsoft.Build.Evaluation;
 using NuGet.Versioning;
@@ -67,9 +66,9 @@ public sealed class InstrumentationTargetTests : TestHelper
                 // Add instrumentation target to the app.
                 var instrTargetVersionRange = VersionRange.Parse(
                     instrTarget.Metadata.Single(x => x.Name == "TargetNuGetPackageVersionRange").EvaluatedValue);
-                RunDotNetCli(
-                        $"add package {instrTarget.EvaluatedInclude} --version {instrTargetVersionRange.MinVersion}")
-                    .Should().Be(0);
+                var exitCode = RunDotNetCli(
+                    $"add package {instrTarget.EvaluatedInclude} --version {instrTargetVersionRange.MinVersion}");
+                Assert.Equal(0, exitCode);
 
                 // Build should fail because the target is not yet instrumented.
                 var instrPackageId = instrTarget.Metadata.Single(x => x.Name == "InstrumentationNuGetPackageId")
@@ -80,14 +79,14 @@ public sealed class InstrumentationTargetTests : TestHelper
                     $"OpenTelemetry.AutoInstrumentation: add a reference to the instrumentation package '{instrPackageId}' version " +
                     $"{instrPackageVersion} or add '{instrTarget.EvaluatedInclude}' to the property 'SkippedInstrumentations' to suppress this error.";
 
-                RunDotNetCli("build", expectedErrorMessage).Should().NotBe(0);
+                Assert.NotEqual(0, RunDotNetCli("build", expectedErrorMessage));
 
                 // Explicitly disable the instrumentation target.
-                RunDotNetCli($"build -p:SkippedInstrumentations={instrTarget.EvaluatedInclude}").Should().Be(0);
+                Assert.Equal(0, RunDotNetCli($"build -p:SkippedInstrumentations={instrTarget.EvaluatedInclude}"));
 
                 // Add the instrumentation package, build should succeed.
-                RunDotNetCli($"add package {instrPackageId} --version {instrPackageVersion}").Should().Be(0);
-                RunDotNetCli("build").Should().Be(0);
+                Assert.Equal(0, RunDotNetCli($"add package {instrPackageId} --version {instrPackageVersion}"));
+                Assert.Equal(0, RunDotNetCli("build"));
             }
         });
     }
@@ -129,14 +128,14 @@ public sealed class InstrumentationTargetTests : TestHelper
                                       " In order to suppress this warning, set DisableAutoInstrumentationCheckForRuntimeIdentifier property to true.";
 
         var (exitCode, standardOutput) = RunDotnetCliAndWaitForCompletion($"publish {arguments}");
-        exitCode.Should().Be(0);
+        Assert.Equal(0, exitCode);
         if (expectWarning)
         {
-            standardOutput.Should().Contain(warningMessage);
+            Assert.Contains(warningMessage, standardOutput);
         }
         else
         {
-            standardOutput.Should().NotContain(warningMessage);
+            Assert.DoesNotContain(warningMessage, standardOutput);
         }
     }
 #endif
@@ -148,26 +147,26 @@ public sealed class InstrumentationTargetTests : TestHelper
 
         // Always create the app targeting a fixed framework version to simplify
         // text replacement in the project file.
-        RunDotNetCli($"new console --framework net8.0").Should().Be(0);
+        Assert.Equal(0, RunDotNetCli($"new console --framework net8.0"));
 
         ChangeProjectDefaultsAndTargetFramework(tfm);
 
         ChangeDefaultProgramToHelloWorld();
 
-        RunDotNetCli("build").Should().Be(0);
+        Assert.Equal(0, RunDotNetCli("build"));
 
         // Add the automatic instrumentation NuGet package to the app. Because the package has dependencies to other
         // packages that may not be present yet, `dotnet add package OpenTelemetry.AutoInstrumentation --source <src>`
         // may fail (the command doesn't support multiple sources). Workaround the issue by creating a nuget.config
         // file and adding the proper source.
-        RunDotNetCli("new nugetconfig").Should().Be(0);
+        Assert.Equal(0, RunDotNetCli("new nugetconfig"));
         var nugetArtifactsDir = Path.Combine(GetTestAssemblyPath(), "../../../../../bin/nuget-artifacts/");
-        RunDotNetCli(
-            $"nuget add source \"{nugetArtifactsDir}\" --name nuget-artifacts --configfile nuget.config").Should().Be(0);
-        RunDotNetCli(
-            $"add package OpenTelemetry.AutoInstrumentation --prerelease").Should().Be(0);
+        Assert.Equal(0, RunDotNetCli(
+            $"nuget add source \"{nugetArtifactsDir}\" --name nuget-artifacts --configfile nuget.config"));
+        Assert.Equal(0, RunDotNetCli(
+            $"add package OpenTelemetry.AutoInstrumentation --prerelease"));
 
-        RunDotNetCli("build").Should().Be(0);
+        Assert.Equal(0, RunDotNetCli("build"));
     }
 
     private void ChangeDefaultProgramToHelloWorld()
@@ -202,7 +201,7 @@ public sealed class InstrumentationTargetTests : TestHelper
         var (exitCode, standardOutput) = RunDotnetCliAndWaitForCompletion(arguments);
         if (expectedOutputFragment is not null)
         {
-            standardOutput.Should().Contain(expectedOutputFragment);
+            Assert.Contains(expectedOutputFragment, standardOutput);
         }
 
         return exitCode;
@@ -215,7 +214,7 @@ public sealed class InstrumentationTargetTests : TestHelper
         using var process = InstrumentedProcessHelper.Start(DotNetCli, arguments, EnvironmentHelper);
         using var helper = new ProcessHelper(process);
 
-        process.Should().NotBeNull();
+        Assert.NotNull(process);
 
         bool processTimeout = !process!.WaitForExit((int)TestTimeout.ProcessExit.TotalMilliseconds);
         if (processTimeout)
@@ -227,7 +226,7 @@ public sealed class InstrumentationTargetTests : TestHelper
         Output.WriteLine("Exit Code: " + process.ExitCode);
         Output.WriteResult(helper);
 
-        processTimeout.Should().BeFalse("Test application timed out");
+        Assert.False(processTimeout, "Test application timed out");
         return (process.ExitCode, helper.StandardOutput);
     }
 }

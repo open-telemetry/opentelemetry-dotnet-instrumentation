@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: Apache-2.0
 
 using System.Runtime.InteropServices;
-using FluentAssertions;
 using IntegrationTests.Helpers;
 using Xunit.Abstractions;
 
@@ -24,7 +23,7 @@ public sealed class NugetSampleTests : TestHelper
         // with a RID like "win-x64", "linux-x64", etc.
         var childrenDirs = Directory.GetDirectories(_baseAppDir, GetPlatformSpecificDirName());
 
-        childrenDirs.Should().HaveCount(1);
+        Assert.Single(childrenDirs);
 
         _ridSpecificAppDir = childrenDirs[0];
     }
@@ -125,7 +124,7 @@ public sealed class NugetSampleTests : TestHelper
         using var process = InstrumentedProcessHelper.Start(instrumentationScriptPath, instrumentationTarget, EnvironmentHelper);
         using var helper = new ProcessHelper(process);
 
-        process.Should().NotBeNull();
+        Assert.NotNull(process);
 
         bool processTimeout = !process!.WaitForExit((int)TestTimeout.ProcessExit.TotalMilliseconds);
         if (processTimeout)
@@ -137,8 +136,8 @@ public sealed class NugetSampleTests : TestHelper
         Output.WriteLine("Exit Code: " + process.ExitCode);
         Output.WriteResult(helper);
 
-        processTimeout.Should().BeFalse("Test application timed out");
-        process.ExitCode.Should().Be(0, "Test application exited with non-zero exit code");
+        Assert.False(processTimeout, "Test application timed out");
+        Assert.Equal(0, process.ExitCode);
     }
 
     private void RunAndAssertHttpSpans(Action appLauncherAction)

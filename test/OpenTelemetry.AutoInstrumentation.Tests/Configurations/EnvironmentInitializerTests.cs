@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: Apache-2.0
 
 using System.Collections.Specialized;
-using FluentAssertions;
 using OpenTelemetry.AutoInstrumentation.Configurations;
 using Xunit;
 
@@ -21,13 +20,13 @@ public class EnvironmentInitializerTests
         {
             Environment.SetEnvironmentVariable(OtelVariableName, null);
 
-            EnvironmentInitializer.Initialize(new NameValueCollection()
+            EnvironmentInitializer.Initialize(new NameValueCollection
             {
                 { OtelVariableName, SomeValue }
             });
             var actual = Environment.GetEnvironmentVariable(OtelVariableName);
 
-            actual.Should().Be(SomeValue);
+            Assert.Equal(SomeValue, actual);
         }
         finally
         {
@@ -42,13 +41,13 @@ public class EnvironmentInitializerTests
         {
             Environment.SetEnvironmentVariable(OtelVariableName, SomeValue);
 
-            EnvironmentInitializer.Initialize(new NameValueCollection()
+            EnvironmentInitializer.Initialize(new NameValueCollection
             {
                 { OtelVariableName, "different" }
             });
             var actual = Environment.GetEnvironmentVariable(OtelVariableName);
 
-            actual.Should().Be(SomeValue);
+            Assert.Equal(SomeValue, actual);
         }
         finally
         {
@@ -69,7 +68,7 @@ public class EnvironmentInitializerTests
             });
             var actual = Environment.GetEnvironmentVariable(NonOtelVariableName);
 
-            actual.Should().BeNullOrEmpty();
+            Assert.True(string.IsNullOrEmpty(actual));
         }
         finally
         {

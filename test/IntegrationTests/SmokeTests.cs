@@ -2,14 +2,12 @@
 // SPDX-License-Identifier: Apache-2.0
 
 using System.Reflection;
-using FluentAssertions;
 using IntegrationTests.Helpers;
 using Xunit.Abstractions;
 
 #if NETFRAMEWORK
 using System.Net;
 using System.Net.Http;
-using FluentAssertions.Extensions;
 using IntegrationTests.Helpers.Compatibility;
 #endif
 
@@ -260,7 +258,7 @@ public class SmokeTests : TestHelper
 #if NETFRAMEWORK // The test is flaky on Linux and macOS, because of https://github.com/dotnet/runtime/issues/28658#issuecomment-462062760
     [Fact]
     [Trait("Category", "EndToEnd")]
-    public void PrometheusExporter()
+    public async Task PrometheusExporter()
     {
         EnableOnlyHttpClientTraceInstrumentation();
         SetEnvironmentVariable("LONG_RUNNING", "true");
@@ -275,21 +273,22 @@ public class SmokeTests : TestHelper
         {
             var assert = async () =>
             {
-                var httpClient = new HttpClient
+                for (var i = 0; i < 50; i++)
                 {
-                    Timeout = 5.Seconds()
-                };
-                var response = await httpClient.GetAsync(defaultPrometheusMetricsEndpoint);
-                response.StatusCode.Should().Be(HttpStatusCode.OK);
+                    var httpClient = new HttpClient { Timeout = TimeSpan.FromSeconds(5) };
+                    var response = await httpClient.GetAsync(defaultPrometheusMetricsEndpoint);
+                    Assert.Equal(HttpStatusCode.OK, response.StatusCode);
 
-                var content = await response.Content.ReadAsStringAsync();
-                Output.WriteLine("Raw metrics from Prometheus:");
-                Output.WriteLine(content);
-                content.Should().Contain("TYPE ", "should export any metric");
+                    var content = await response.Content.ReadAsStringAsync();
+                    Output.WriteLine("Raw metrics from Prometheus:");
+                    Output.WriteLine(content);
+                    Assert.Contains("TYPE ", content); // should export any metric
+                    await Task.Delay(TimeSpan.FromSeconds(1));
+                }
             };
-            assert.Should().NotThrowAfterAsync(
-                waitTime: 1.Minutes(),
-                pollInterval: 1.Seconds());
+
+            var exception = await Record.ExceptionAsync(() => assert());
+            Assert.Null(exception);
         }
         finally
         {
@@ -309,7 +308,7 @@ public class SmokeTests : TestHelper
 #if NETFRAMEWORK
     [Fact]
     [Trait("Category", "EndToEnd")]
-    public void PrometheusAndOtlpMetricsExporter()
+    public async Task PrometheusAndOtlpMetricsExporter()
     {
         using var otlpCollector = new MockMetricsCollector(Output);
         SetExporter(otlpCollector);
@@ -327,21 +326,22 @@ public class SmokeTests : TestHelper
         {
             var assert = async () =>
             {
-                var httpClient = new HttpClient
+                for (var i = 0; i < 50; i++)
                 {
-                    Timeout = 5.Seconds()
-                };
-                var response = await httpClient.GetAsync(defaultPrometheusMetricsEndpoint);
-                response.StatusCode.Should().Be(HttpStatusCode.OK);
+                    var httpClient = new HttpClient { Timeout = TimeSpan.FromSeconds(5) };
+                    var response = await httpClient.GetAsync(defaultPrometheusMetricsEndpoint);
+                    Assert.Equal(HttpStatusCode.OK, response.StatusCode);
 
-                var content = await response.Content.ReadAsStringAsync();
-                Output.WriteLine("Raw metrics from Prometheus:");
-                Output.WriteLine(content);
-                content.Should().Contain("TYPE ", "should export any metric");
+                    var content = await response.Content.ReadAsStringAsync();
+                    Output.WriteLine("Raw metrics from Prometheus:");
+                    Output.WriteLine(content);
+                    Assert.Contains("TYPE ", content); // should export any metric
+                    await Task.Delay(TimeSpan.FromSeconds(1));
+                }
             };
-            assert.Should().NotThrowAfterAsync(
-                waitTime: 1.Minutes(),
-                pollInterval: 1.Seconds());
+
+            var exception = await Record.ExceptionAsync(() => assert());
+            Assert.Null(exception);
         }
         finally
         {
@@ -504,7 +504,7 @@ public class SmokeTests : TestHelper
 
         using var process = StartTestApplication();
         using var helper = new ProcessHelper(process);
-        process.Should().NotBeNull();
+        Assert.NotNull(process);
         var processTimeout = !process!.WaitForExit((int)TestTimeout.ProcessExit.TotalMilliseconds);
         if (processTimeout)
         {
@@ -512,9 +512,9 @@ public class SmokeTests : TestHelper
         }
 
         Output.WriteResult(helper);
-        processTimeout.Should().BeFalse();
+        Assert.False(processTimeout);
 
-        process!.ExitCode.Should().NotBe(0);
+        Assert.NotEqual(0, process.ExitCode);
     }
 
     [Fact]
@@ -543,17 +543,17 @@ public class SmokeTests : TestHelper
 
             var nativeLog = tempLogsDirectory.GetFiles("otel-dotnet-auto-*-Native.log").Single();
             var nativeLogContent = File.ReadAllText(nativeLog.FullName);
-            nativeLogContent.Should().NotBeNullOrWhiteSpace();
+            Assert.False(string.IsNullOrWhiteSpace(nativeLogContent));
 
             var environmentVariables = ParseEnvironmentVariablesLog(nativeLogContent);
-            environmentVariables.Should().NotBeEmpty();
+            Assert.NotEmpty(environmentVariables);
 
             var secretVariables = environmentVariables
                 .Where(item => secretIdentificators.Any(i => item.Key.Contains(i)))
                 .ToList();
 
-            secretVariables.Should().NotBeEmpty();
-            secretVariables.Should().AllSatisfy(secret => secret.Value.Should().Be("<hidden>"));
+            Assert.NotEmpty(secretVariables);
+            Assert.All(secretVariables, secret => Assert.Equal("<hidden>", secret.Value));
         }
         finally
         {

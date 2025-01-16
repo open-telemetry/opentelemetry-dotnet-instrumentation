@@ -1,9 +1,7 @@
 // Copyright The OpenTelemetry Authors
 // SPDX-License-Identifier: Apache-2.0
 
-using FluentAssertions;
 using log4net.Core;
-using OpenTelemetry.AutoInstrumentation.Instrumentations.Log4Net;
 using OpenTelemetry.AutoInstrumentation.Instrumentations.Log4Net.Bridge;
 using OpenTelemetry.Trace;
 using Xunit;
@@ -40,7 +38,7 @@ public class Log4NetTests
     [MemberData(nameof(GetData))]
     public void BuiltinLog4NetLevelValues_AreMapped(int log4NetLevelValue, int expectedOpenTelemetrySeverity)
     {
-        OpenTelemetryLog4NetAppender.MapLogLevel(log4NetLevelValue).Should().Be(expectedOpenTelemetrySeverity);
+        Assert.Equal(expectedOpenTelemetrySeverity, OpenTelemetryLog4NetAppender.MapLogLevel(log4NetLevelValue));
     }
 
     [Theory]
@@ -52,7 +50,7 @@ public class Log4NetTests
     [InlineData(29900, 1)]
     public void Log4NetLevelValuesWithoutADirectMatch_AreMappedToALessSevereValue(int log4NetLevelValue, int expectedOpenTelemetrySeverity)
     {
-        OpenTelemetryLog4NetAppender.MapLogLevel(log4NetLevelValue).Should().Be(expectedOpenTelemetrySeverity);
+        Assert.Equal(expectedOpenTelemetrySeverity, OpenTelemetryLog4NetAppender.MapLogLevel(log4NetLevelValue));
     }
 
     private static int GetOpenTelemetrySeverityValue(string val)

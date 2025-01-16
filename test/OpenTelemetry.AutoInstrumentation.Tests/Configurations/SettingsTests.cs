@@ -1,8 +1,6 @@
 // Copyright The OpenTelemetry Authors
 // SPDX-License-Identifier: Apache-2.0
 
-using FluentAssertions;
-using FluentAssertions.Execution;
 using OpenTelemetry.AutoInstrumentation.Configurations;
 using OpenTelemetry.Exporter;
 using Xunit;
@@ -32,12 +30,9 @@ public class SettingsTests : IDisposable
     {
         var settings = Settings.FromDefaultSources<GeneralSettings>(false);
 
-        using (new AssertionScope())
-        {
-            settings.Plugins.Should().BeEmpty();
-            settings.EnabledResourceDetectors.Should().NotBeEmpty();
-            settings.FlushOnUnhandledException.Should().BeFalse();
-        }
+        Assert.Empty(settings.Plugins);
+        Assert.NotEmpty(settings.EnabledResourceDetectors);
+        Assert.False(settings.FlushOnUnhandledException);
     }
 
     [Fact]
@@ -45,38 +40,36 @@ public class SettingsTests : IDisposable
     {
         var settings = Settings.FromDefaultSources<TracerSettings>(false);
 
-        using (new AssertionScope())
-        {
-            settings.TracesEnabled.Should().BeTrue();
-            settings.TracesExporters.Should().Equal(TracesExporter.Otlp);
-            settings.EnabledInstrumentations.Should().NotBeEmpty();
-            settings.ActivitySources.Should().BeEquivalentTo(new List<string> { "OpenTelemetry.AutoInstrumentation.*" });
-            settings.AdditionalLegacySources.Should().BeEmpty();
+        Assert.True(settings.TracesEnabled);
+        var tracesExporter = Assert.Single(settings.TracesExporters);
+        Assert.Equal(TracesExporter.Otlp, tracesExporter);
+        Assert.NotEmpty(settings.EnabledInstrumentations);
+        Assert.Equal(new List<string> { "OpenTelemetry.AutoInstrumentation.*" }, settings.ActivitySources);
+        Assert.Empty(settings.AdditionalLegacySources);
 
-            // Instrumentation options tests
+        // Instrumentation options tests
 #if NETFRAMEWORK
-            settings.InstrumentationOptions.AspNetInstrumentationCaptureRequestHeaders.Should().BeEmpty();
-            settings.InstrumentationOptions.AspNetInstrumentationCaptureResponseHeaders.Should().BeEmpty();
+        Assert.Empty(settings.InstrumentationOptions.AspNetInstrumentationCaptureRequestHeaders);
+        Assert.Empty(settings.InstrumentationOptions.AspNetInstrumentationCaptureResponseHeaders);
 #endif
 #if NET
-            settings.InstrumentationOptions.AspNetCoreInstrumentationCaptureRequestHeaders.Should().BeEmpty();
-            settings.InstrumentationOptions.AspNetCoreInstrumentationCaptureResponseHeaders.Should().BeEmpty();
-            settings.InstrumentationOptions.EntityFrameworkCoreSetDbStatementForText.Should().BeFalse();
+        Assert.Empty(settings.InstrumentationOptions.AspNetCoreInstrumentationCaptureRequestHeaders);
+        Assert.Empty(settings.InstrumentationOptions.AspNetCoreInstrumentationCaptureResponseHeaders);
+        Assert.False(settings.InstrumentationOptions.EntityFrameworkCoreSetDbStatementForText);
 #endif
-            settings.InstrumentationOptions.GraphQLSetDocument.Should().BeFalse();
-            settings.InstrumentationOptions.GrpcNetClientInstrumentationCaptureRequestMetadata.Should().BeEmpty();
-            settings.InstrumentationOptions.GrpcNetClientInstrumentationCaptureResponseMetadata.Should().BeEmpty();
-            settings.InstrumentationOptions.HttpInstrumentationCaptureRequestHeaders.Should().BeEmpty();
-            settings.InstrumentationOptions.HttpInstrumentationCaptureResponseHeaders.Should().BeEmpty();
-            settings.InstrumentationOptions.OracleMdaSetDbStatementForText.Should().BeFalse();
-            settings.InstrumentationOptions.SqlClientSetDbStatementForText.Should().BeFalse();
+        Assert.False(settings.InstrumentationOptions.GraphQLSetDocument);
+        Assert.Empty(settings.InstrumentationOptions.GrpcNetClientInstrumentationCaptureRequestMetadata);
+        Assert.Empty(settings.InstrumentationOptions.GrpcNetClientInstrumentationCaptureResponseMetadata);
+        Assert.Empty(settings.InstrumentationOptions.HttpInstrumentationCaptureRequestHeaders);
+        Assert.Empty(settings.InstrumentationOptions.HttpInstrumentationCaptureResponseHeaders);
+        Assert.False(settings.InstrumentationOptions.OracleMdaSetDbStatementForText);
+        Assert.False(settings.InstrumentationOptions.SqlClientSetDbStatementForText);
 
-            settings.OtlpSettings.Should().NotBeNull();
-            settings.OtlpSettings!.Protocol.Should().Be(OtlpExportProtocol.HttpProtobuf);
-            settings.OtlpSettings.Endpoint.Should().BeNull();
-            settings.OtlpSettings.Headers.Should().BeNull();
-            settings.OtlpSettings.TimeoutMilliseconds.Should().BeNull();
-        }
+        Assert.NotNull(settings.OtlpSettings);
+        Assert.Equal(OtlpExportProtocol.HttpProtobuf, settings.OtlpSettings.Protocol);
+        Assert.Null(settings.OtlpSettings.Endpoint);
+        Assert.Null(settings.OtlpSettings.Headers);
+        Assert.Null(settings.OtlpSettings.TimeoutMilliseconds);
     }
 
     [Fact]
@@ -84,19 +77,17 @@ public class SettingsTests : IDisposable
     {
         var settings = Settings.FromDefaultSources<MetricSettings>(false);
 
-        using (new AssertionScope())
-        {
-            settings.MetricsEnabled.Should().BeTrue();
-            settings.MetricExporters.Should().Equal(MetricsExporter.Otlp);
-            settings.EnabledInstrumentations.Should().NotBeEmpty();
-            settings.Meters.Should().BeEmpty();
+        Assert.True(settings.MetricsEnabled);
+        var metricsExporter = Assert.Single(settings.MetricExporters);
+        Assert.Equal(MetricsExporter.Otlp, metricsExporter);
+        Assert.NotEmpty(settings.EnabledInstrumentations);
+        Assert.Empty(settings.Meters);
 
-            settings.OtlpSettings.Should().NotBeNull();
-            settings.OtlpSettings!.Protocol.Should().Be(OtlpExportProtocol.HttpProtobuf);
-            settings.OtlpSettings.Endpoint.Should().BeNull();
-            settings.OtlpSettings.Headers.Should().BeNull();
-            settings.OtlpSettings.TimeoutMilliseconds.Should().BeNull();
-        }
+        Assert.NotNull(settings.OtlpSettings);
+        Assert.Equal(OtlpExportProtocol.HttpProtobuf, settings.OtlpSettings.Protocol);
+        Assert.Null(settings.OtlpSettings.Endpoint);
+        Assert.Null(settings.OtlpSettings.Headers);
+        Assert.Null(settings.OtlpSettings.TimeoutMilliseconds);
     }
 
     [Fact]
@@ -104,19 +95,17 @@ public class SettingsTests : IDisposable
     {
         var settings = Settings.FromDefaultSources<LogSettings>(false);
 
-        using (new AssertionScope())
-        {
-            settings.LogsEnabled.Should().BeTrue();
-            settings.LogExporters.Should().Equal(LogExporter.Otlp);
-            settings.EnabledInstrumentations.Should().NotBeEmpty();
-            settings.IncludeFormattedMessage.Should().BeFalse();
+        Assert.True(settings.LogsEnabled);
+        var logExporter = Assert.Single(settings.LogExporters);
+        Assert.Equal(LogExporter.Otlp, logExporter);
+        Assert.NotEmpty(settings.EnabledInstrumentations);
+        Assert.False(settings.IncludeFormattedMessage);
 
-            settings.OtlpSettings.Should().NotBeNull();
-            settings.OtlpSettings!.Protocol.Should().Be(OtlpExportProtocol.HttpProtobuf);
-            settings.OtlpSettings.Endpoint.Should().BeNull();
-            settings.OtlpSettings.Headers.Should().BeNull();
-            settings.OtlpSettings.TimeoutMilliseconds.Should().BeNull();
-        }
+        Assert.NotNull(settings.OtlpSettings);
+        Assert.Equal(OtlpExportProtocol.HttpProtobuf, settings.OtlpSettings.Protocol);
+        Assert.Null(settings.OtlpSettings.Endpoint);
+        Assert.Null(settings.OtlpSettings.Headers);
+        Assert.Null(settings.OtlpSettings.TimeoutMilliseconds);
     }
 
     [Fact]
@@ -124,10 +113,7 @@ public class SettingsTests : IDisposable
     {
         var settings = Settings.FromDefaultSources<SdkSettings>(false);
 
-        using (new AssertionScope())
-        {
-            settings.Propagators.Should().BeEmpty();
-        }
+        Assert.Empty(settings.Propagators);
     }
 
     [Theory]
@@ -152,7 +138,7 @@ public class SettingsTests : IDisposable
 
         var settings = Settings.FromDefaultSources<TracerSettings>(false);
 
-        settings.TracesExporters.Should().Equal(expectedTracesExporters);
+        Assert.Equal(expectedTracesExporters, settings.TracesExporters);
     }
 
     [Theory]
@@ -165,9 +151,7 @@ public class SettingsTests : IDisposable
     {
         Environment.SetEnvironmentVariable(ConfigurationKeys.Traces.Exporter, tracesExporters);
 
-        var action = () => Settings.FromDefaultSources<TracerSettings>(true);
-
-        action.Should().Throw<NotSupportedException>();
+        Assert.Throws<NotSupportedException>(() => Settings.FromDefaultSources<TracerSettings>(true));
     }
 
     [Theory]
@@ -192,7 +176,7 @@ public class SettingsTests : IDisposable
 
         var settings = Settings.FromDefaultSources<MetricSettings>(false);
 
-        settings.MetricExporters.Should().Equal(expectedMetricsExporters);
+        Assert.Equal(expectedMetricsExporters, settings.MetricExporters);
     }
 
     [Theory]
@@ -205,9 +189,7 @@ public class SettingsTests : IDisposable
     {
         Environment.SetEnvironmentVariable(ConfigurationKeys.Metrics.Exporter, metricExporters);
 
-        var action = () => Settings.FromDefaultSources<MetricSettings>(true);
-
-        action.Should().Throw<NotSupportedException>();
+        Assert.Throws<NotSupportedException>(() => Settings.FromDefaultSources<MetricSettings>(true));
     }
 
     [Theory]
@@ -231,7 +213,7 @@ public class SettingsTests : IDisposable
 
         var settings = Settings.FromDefaultSources<LogSettings>(false);
 
-        settings.LogExporters.Should().Equal(expectedLogExporters);
+        Assert.Equal(expectedLogExporters, settings.LogExporters);
     }
 
     [Theory]
@@ -244,9 +226,7 @@ public class SettingsTests : IDisposable
     {
         Environment.SetEnvironmentVariable(ConfigurationKeys.Logs.Exporter, logExporters);
 
-        var action = () => Settings.FromDefaultSources<LogSettings>(true);
-
-        action.Should().Throw<NotSupportedException>();
+        Assert.Throws<NotSupportedException>(() => Settings.FromDefaultSources<LogSettings>(true));
     }
 
     [Theory]
@@ -270,7 +250,7 @@ public class SettingsTests : IDisposable
 
         var settings = Settings.FromDefaultSources<SdkSettings>(false);
 
-        settings.Propagators.Should().BeEquivalentTo(expectedPropagators);
+        Assert.Equal(expectedPropagators, settings.Propagators);
     }
 
     [Theory]
@@ -283,9 +263,7 @@ public class SettingsTests : IDisposable
     {
         Environment.SetEnvironmentVariable(ConfigurationKeys.Sdk.Propagators, propagators);
 
-        var action = () => Settings.FromDefaultSources<SdkSettings>(true);
-
-        action.Should().Throw<NotSupportedException>();
+        Assert.Throws<NotSupportedException>(() => Settings.FromDefaultSources<SdkSettings>(true));
     }
 
     [Theory]
@@ -331,7 +309,7 @@ public class SettingsTests : IDisposable
 
         var settings = Settings.FromDefaultSources<TracerSettings>(false);
 
-        settings.EnabledInstrumentations.Should().BeEquivalentTo(new List<TracerInstrumentation> { expectedTracerInstrumentation });
+        Assert.Equal(new List<TracerInstrumentation> { expectedTracerInstrumentation }, settings.EnabledInstrumentations);
     }
 
     [Theory]
@@ -353,7 +331,7 @@ public class SettingsTests : IDisposable
 
         var settings = Settings.FromDefaultSources<MetricSettings>(false);
 
-        settings.EnabledInstrumentations.Should().BeEquivalentTo(new List<MetricInstrumentation> { expectedMetricInstrumentation });
+        Assert.Equal(new List<MetricInstrumentation> { expectedMetricInstrumentation }, settings.EnabledInstrumentations);
     }
 
     [Theory]
@@ -366,7 +344,7 @@ public class SettingsTests : IDisposable
 
         var settings = Settings.FromDefaultSources<LogSettings>(false);
 
-        settings.EnabledInstrumentations.Should().BeEquivalentTo(new List<LogInstrumentation> { expectedLogInstrumentation });
+        Assert.Equal(new List<LogInstrumentation> { expectedLogInstrumentation }, settings.EnabledInstrumentations);
     }
 
     [Theory]
@@ -378,7 +356,7 @@ public class SettingsTests : IDisposable
 
         var settings = Settings.FromDefaultSources<LogSettings>(false);
 
-        settings.IncludeFormattedMessage.Should().Be(expectedValue);
+        Assert.Equal(expectedValue, settings.IncludeFormattedMessage);
     }
 
     [Theory]
@@ -394,8 +372,8 @@ public class SettingsTests : IDisposable
         var settings = Settings.FromDefaultSources<TracerSettings>(false);
 
         // null values for expected data will be handled by OTel .NET SDK
-        settings.OtlpSettings.Should().NotBeNull();
-        settings.OtlpSettings!.Protocol.Should().Be(expectedOtlpExportProtocol);
+        Assert.NotNull(settings.OtlpSettings);
+        Assert.Equal(expectedOtlpExportProtocol, settings.OtlpSettings.Protocol);
     }
 
     [Theory]
@@ -408,7 +386,7 @@ public class SettingsTests : IDisposable
 
         var settings = Settings.FromDefaultSources<GeneralSettings>(false);
 
-        settings.FlushOnUnhandledException.Should().Be(expectedValue);
+        Assert.Equal(expectedValue, settings.FlushOnUnhandledException);
     }
 
     [Theory]
@@ -427,7 +405,7 @@ public class SettingsTests : IDisposable
 
         var settings = Settings.FromDefaultSources<GeneralSettings>(false);
 
-        settings.EnabledResourceDetectors.Should().BeEquivalentTo(new List<ResourceDetector> { expectedResourceDetector });
+        Assert.Equal(new List<ResourceDetector> { expectedResourceDetector }, settings.EnabledResourceDetectors);
     }
 
     private static void ClearEnvVars()
