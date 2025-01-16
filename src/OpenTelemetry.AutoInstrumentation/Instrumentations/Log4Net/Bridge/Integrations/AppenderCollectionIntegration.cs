@@ -27,7 +27,7 @@ public static class AppenderCollectionIntegration
     {
         if (
             Instrumentation.LogSettings.Value.EnableLog4NetBridge &&
-            #if NET
+#if NET
 #pragma warning disable SA1003
             !LoggerInitializer.IsInitializedAtLeastOnce &&
 #pragma warning restore SA1003
