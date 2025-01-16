@@ -1,18 +1,17 @@
 name: dotnet format
 
 on:
-# Uncomment after fix for https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/issues/3841 is available
-#  push:
-#    branches: [ main ]
-#    paths:
-#    - '**.cs'
-#    - '.editorconfig'
-#  pull_request:
-#    branches: [ main ]
-#    paths:
-#    - '**.cs'
-#    - '.editorconfig'
-#  merge_group:
+  push:
+    branches: [ main ]
+    paths:
+    - '**.cs'
+    - '.editorconfig'
+  pull_request:
+    branches: [ main ]
+    paths:
+    - '**.cs'
+    - '.editorconfig'
+  merge_group:
   workflow_dispatch:
 
 jobs:
