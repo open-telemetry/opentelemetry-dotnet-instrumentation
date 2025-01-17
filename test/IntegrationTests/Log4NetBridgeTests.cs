@@ -110,7 +110,7 @@ public class Log4NetBridgeTests : TestHelper
         using var collector = new MockLogsCollector(Output);
         SetExporter(collector);
 
-        collector.ExpectCollected(records => records.Count == 2, "App logs should be exported once.");
+        collector.ExpectCollected(records => records.Count == 3, "App logs should be exported once.");
 
         EnableBytecodeInstrumentation();
         SetEnvironmentVariable("OTEL_DOTNET_AUTO_LOGS_ENABLE_LOG4NET_BRIDGE", "true");

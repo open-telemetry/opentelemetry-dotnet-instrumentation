@@ -24,7 +24,7 @@ internal class Log4NetLogger : ILogger
                 _log.Info(formatter(state, exception));
                 break;
             case LogLevel.Error:
-                _log.Error(formatter(state, exception));
+                _log.Error(formatter(state, exception), exception);
                 break;
             default:
                 throw new ArgumentOutOfRangeException(nameof(logLevel), logLevel, null);

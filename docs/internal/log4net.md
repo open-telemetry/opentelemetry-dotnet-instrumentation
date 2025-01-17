@@ -8,6 +8,9 @@ Both bridge and trace context injection are supported for `log4net` in versions 
 
 ## `log4net` [logs bridge](https://opentelemetry.io/docs/specs/otel/glossary/#log-appender--bridge)
 
+If `log4net` is used as a [logging provider](https://learn.microsoft.com/en-us/dotnet/core/extensions/logging-providers), `log4net` bridge should not be enabled, in order
+to reduce possibility of duplicated logs export.
+
 The `log4net` logs bridge is disabled by default. In order to enable it, set `OTEL_DOTNET_AUTO_LOGS_ENABLE_LOG4NET_BRIDGE` to `true`.
 When `log4net` logs bridge is enabled, and `log4net` is configured with at least 1 appender, application logs are exported in OTLP 
 format by default to the local instance of OpenTelemetry Collector, in addition to being written into their currently configured destination (e.g. a file).
