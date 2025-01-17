@@ -4,8 +4,6 @@
 // Source originated from https://github.com/open-telemetry/opentelemetry-dotnet/blob/23609730ddd73c860553de847e67c9b2226cff94/test/OpenTelemetry.Tests/Internal/SelfDiagnosticsEventListenerTest.cs
 
 using System.Diagnostics.Tracing;
-using FluentAssertions;
-using FluentAssertions.Execution;
 using OpenTelemetry.AutoInstrumentation.Diagnostics;
 using OpenTelemetry.AutoInstrumentation.Logging;
 using Xunit;
@@ -33,11 +31,8 @@ public class SdkSelfDiagnosticsEventListenerTests
         OpenTelemetrySdkEventSourceForTests.Log.Error();
         OpenTelemetrySdkEventSourceForTests.Log.Critical();
 
-        using (new AssertionScope())
-        {
-            testSink.Messages.Count.Should().Be(2);
-            testSink.Messages.Should().OnlyContain(msg => msg.Contains("Error"));
-        }
+        Assert.Equal(2, testSink.Messages.Count);
+        Assert.All(testSink.Messages, message => Assert.Contains("Error", message));
     }
 
     [Fact]
@@ -52,14 +47,11 @@ public class SdkSelfDiagnosticsEventListenerTests
         OpenTelemetrySdkEventSourceForTests.Log.Verbose();
         OpenTelemetrySdkEventSourceForTests.Log.Error();
 
-        using (new AssertionScope())
-        {
-            testSink.Messages.Count.Should().Be(4);
-            testSink.Messages.Should().Contain(msg => msg.Contains("Error"));
-            testSink.Messages.Should().Contain(msg => msg.Contains("Warning"));
-            testSink.Messages.Should().Contain(msg => msg.Contains("Information"));
-            testSink.Messages.Should().Contain(msg => msg.Contains("Debug"));
-        }
+        Assert.Equal(4, testSink.Messages.Count);
+        Assert.Contains(testSink.Messages, msg => msg.Contains("Error"));
+        Assert.Contains(testSink.Messages, msg => msg.Contains("Warning"));
+        Assert.Contains(testSink.Messages, msg => msg.Contains("Information"));
+        Assert.Contains(testSink.Messages, msg => msg.Contains("Debug"));
     }
 
     [EventSource(Name = "OpenTelemetry-Instrumentation-AspNet-Telemetry-For-Tests")]

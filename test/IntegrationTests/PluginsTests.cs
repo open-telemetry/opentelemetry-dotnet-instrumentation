@@ -1,7 +1,6 @@
 // Copyright The OpenTelemetry Authors
 // SPDX-License-Identifier: Apache-2.0
 
-using FluentAssertions;
 using IntegrationTests.Helpers;
 using Xunit.Abstractions;
 
@@ -22,7 +21,7 @@ public class PluginsTests : TestHelper
 
         var (standardOutput, _, _) = RunTestApplication();
 
-        standardOutput.Should().Contain("Plugin.Initializing() invoked.");
+        Assert.Contains("Plugin.Initializing() invoked.", standardOutput);
     }
 
     [Fact]
@@ -42,7 +41,7 @@ public class PluginsTests : TestHelper
         var (standardOutput, _, _) = RunTestApplication();
 
         collector.AssertExpectations();
-        standardOutput.Should().Contain("Plugin.ConfigureTracesOptions(OtlpExporterOptions options) invoked.");
+        Assert.Contains("Plugin.ConfigureTracesOptions(OtlpExporterOptions options) invoked.", standardOutput);
     }
 
     [Fact]
@@ -58,6 +57,6 @@ public class PluginsTests : TestHelper
         var (standardOutput, _, _) = RunTestApplication();
 
         collector.AssertExpectations();
-        standardOutput.Should().Contain("Plugin.ConfigureMetricsOptions(OtlpExporterOptions options) invoked.");
+        Assert.Contains("Plugin.ConfigureMetricsOptions(OtlpExporterOptions options) invoked.", standardOutput);
     }
 }

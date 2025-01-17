@@ -1,7 +1,6 @@
 // Copyright The OpenTelemetry Authors
 // SPDX-License-Identifier: Apache-2.0
 
-using FluentAssertions;
 using OpenTelemetry.AutoInstrumentation.Configurations;
 using Xunit;
 
@@ -14,9 +13,7 @@ public class StringConfigurationSourceTests
     {
         var stringConfigurationSource = new StringConfigurationSourceImplementation(true, "non-bool");
 
-        var action = () => stringConfigurationSource.GetBool("anyKey");
-
-        action.Should().Throw<FormatException>();
+        Assert.Throws<FormatException>(() => stringConfigurationSource.GetBool("anyKey"));
     }
 
     [Fact]
@@ -24,9 +21,7 @@ public class StringConfigurationSourceTests
     {
         var stringConfigurationSource = new StringConfigurationSourceImplementation(true, "non-double");
 
-        var action = () => stringConfigurationSource.GetDouble("anyKey");
-
-        action.Should().Throw<FormatException>();
+        Assert.Throws<FormatException>(() => stringConfigurationSource.GetDouble("anyKey"));
     }
 
     [Fact]
@@ -34,9 +29,7 @@ public class StringConfigurationSourceTests
     {
         var stringConfigurationSource = new StringConfigurationSourceImplementation(true, "non-int");
 
-        var action = () => stringConfigurationSource.GetInt32("anyKey");
-
-        action.Should().Throw<FormatException>();
+        Assert.Throws<FormatException>(() => stringConfigurationSource.GetInt32("anyKey"));
     }
 
     private class StringConfigurationSourceImplementation : StringConfigurationSource

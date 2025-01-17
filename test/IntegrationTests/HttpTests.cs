@@ -2,8 +2,6 @@
 // SPDX-License-Identifier: Apache-2.0
 
 #if NET
-using FluentAssertions;
-using FluentAssertions.Execution;
 using IntegrationTests.Helpers;
 using OpenTelemetry.Proto.Trace.V1;
 using Xunit.Abstractions;
@@ -52,13 +50,11 @@ public class HttpTests : TestHelper
         RunTestApplication();
 
         collector.AssertExpectations();
-        using (new AssertionScope())
-        {
-            // testing context propagation via trace hierarchy
-            clientSpan!.ParentSpanId.IsEmpty.Should().BeTrue();
-            serverSpan!.ParentSpanId.Should().Equal(clientSpan.SpanId);
-            manualSpan!.ParentSpanId.Should().Equal(serverSpan.SpanId);
-        }
+
+        // testing context propagation via trace hierarchy
+        Assert.True(clientSpan!.ParentSpanId.IsEmpty, "parent of client span should be empty");
+        Assert.Equal(clientSpan.SpanId, serverSpan!.ParentSpanId);
+        Assert.Equal(serverSpan.SpanId, manualSpan!.ParentSpanId);
     }
 
     [Fact]

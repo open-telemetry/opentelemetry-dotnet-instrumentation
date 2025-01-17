@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: Apache-2.0
 
 using System.Text.RegularExpressions;
-using FluentAssertions;
 using Google.Protobuf;
 using IntegrationTests.Helpers;
 using OpenTelemetry.Proto.Logs.V1;
@@ -148,8 +147,8 @@ public class Log4NetBridgeTests : TestHelper
 
         var regex = new Regex(@"INFO  TestApplication\.Log4NetBridge\.Program - Hello, world at \d{2}\:\d{2}\! span_id=[a-f0-9]{16} trace_id=[a-f0-9]{32} trace_flags=01");
         var output = standardOutput;
-        regex.IsMatch(output).Should().BeTrue();
-        output.Should().Contain("ERROR TestApplication.Log4NetBridge.Program - Exception occured span_id=(null) trace_id=(null) trace_flags=(null)");
+        Assert.Matches(regex, output);
+        Assert.Contains("ERROR TestApplication.Log4NetBridge.Program - Exception occured span_id=(null) trace_id=(null) trace_flags=(null)", output);
     }
 
     private static bool VerifyAttributes(LogRecord logRecord)
@@ -172,8 +171,8 @@ public class Log4NetBridgeTests : TestHelper
 
     private static void AssertStandardOutputExpectations(string standardOutput)
     {
-        standardOutput.Should().Contain("INFO  TestApplication.Log4NetBridge.Program - Hello, world at");
-        standardOutput.Should().Contain("ERROR TestApplication.Log4NetBridge.Program - Exception occured");
+        Assert.Contains("INFO  TestApplication.Log4NetBridge.Program - Hello, world at", standardOutput);
+        Assert.Contains("ERROR TestApplication.Log4NetBridge.Program - Exception occured", standardOutput);
     }
 
     private static bool VerifyBody(LogRecord logRecord, string expectedBody)

@@ -1,7 +1,6 @@
 // Copyright The OpenTelemetry Authors
 // SPDX-License-Identifier: Apache-2.0
 
-using FluentAssertions;
 using IntegrationTests.Helpers;
 using OpenTelemetry.Proto.Common.V1;
 using OpenTelemetry.Proto.Trace.V1;
@@ -66,7 +65,7 @@ public class RabbitMqTests : TestHelper
     {
         var producerSpans = collected.Where(span => span.Span.Kind == Span.Types.SpanKind.Producer).ToList();
 
-        producerSpans.Count.Should().Be(3);
+        Assert.Equal(3, producerSpans.Count);
 
         return producerSpans.All(span => VerifySingleMatchingConsumerSpan(span));
 

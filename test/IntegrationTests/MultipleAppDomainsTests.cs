@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: Apache-2.0
 
 #if NETFRAMEWORK
-using FluentAssertions;
 using IntegrationTests.Helpers;
 using Xunit.Abstractions;
 
@@ -34,7 +33,7 @@ public class MultipleAppDomainsTests : TestHelper
         var (_, standardErrorOutput, _) = RunTestApplication();
 
         // Nothing regarding log should have been logged to the console.
-        standardErrorOutput.Should().NotContain("Log:");
+        Assert.DoesNotContain("Log:", standardErrorOutput);
 
         collector.AssertExpectations();
     }

@@ -3,8 +3,6 @@
 
 using System.Reflection;
 using System.Reflection.Emit;
-using FluentAssertions;
-using FluentAssertions.Execution;
 using OpenTelemetry.AutoInstrumentation.Loading;
 using Xunit;
 
@@ -26,14 +24,11 @@ public class LazyInstrumentationLoaderTests
             loader.Add(initializer2); // After loading the assembly
         }
 
-        using (new AssertionScope())
-        {
-            initializer1.Initialized.Should().BeTrue();
-            initializer1.Disposed.Should().BeTrue();
+        Assert.True(initializer1.Initialized, "First initializer should be called");
+        Assert.True(initializer1.Disposed, "First initializer should be disposed");
 
-            initializer2.Initialized.Should().BeTrue();
-            initializer2.Disposed.Should().BeTrue();
-        }
+        Assert.True(initializer2.Initialized, "Second initializer should be called");
+        Assert.True(initializer2.Disposed, "Second initializer should be disposed");
     }
 
     private static void CreateDummyAssembly()

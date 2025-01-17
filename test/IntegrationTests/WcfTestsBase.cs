@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: Apache-2.0
 
 using System.Net.Sockets;
-using FluentAssertions;
 using IntegrationTests.Helpers;
 using Xunit.Abstractions;
 using static OpenTelemetry.Proto.Trace.V1.Span.Types;
@@ -43,7 +42,7 @@ public abstract class WcfTestsBase : TestHelper, IDisposable
 
     protected async Task SubmitsTracesInternal(string clientPackageVersion)
     {
-        EnvironmentTools.IsWindowsAdministrator().Should().BeTrue(); // WCF Server needs admin
+        Assert.True(EnvironmentTools.IsWindowsAdministrator(), "This test requires Windows Administrator privileges.");
 
         var collector = new MockSpansCollector(Output);
         SetExporter(collector);

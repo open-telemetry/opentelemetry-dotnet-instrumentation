@@ -2,8 +2,6 @@
 // SPDX-License-Identifier: Apache-2.0
 
 using System.Diagnostics;
-using FluentAssertions;
-using FluentAssertions.Execution;
 using NSubstitute;
 using OpenTelemetry.AutoInstrumentation.Tagging;
 using OpenTelemetry.AutoInstrumentation.Util;
@@ -20,7 +18,7 @@ public class ActivityHelperTests
 
         var action = () => activity.SetException(new Exception());
 
-        action.Should().NotThrow();
+        Assert.Null(Record.Exception(() => action()));
     }
 
     [Fact]
@@ -34,7 +32,7 @@ public class ActivityHelperTests
             activity.Dispose();
         };
 
-        action.Should().NotThrow();
+        Assert.Null(Record.Exception(() => action()));
     }
 
     [Fact]
@@ -45,12 +43,9 @@ public class ActivityHelperTests
         var exceptionMessage = "test-message";
         activity.SetException(new Exception(exceptionMessage));
 
-        using (new AssertionScope())
-        {
-            activity.Status.Should().Be(ActivityStatusCode.Error);
-            activity.StatusDescription.Should().Be(exceptionMessage);
-            activity.Events.Should().HaveCount(1);
-        }
+        Assert.Equal(ActivityStatusCode.Error, activity.Status);
+        Assert.Equal(exceptionMessage, activity.StatusDescription);
+        Assert.Single(activity.Events);
     }
 
     [Fact]
@@ -60,7 +55,7 @@ public class ActivityHelperTests
 
         using var activity = activitySource.StartActivityWithTags("test-operation", ActivityKind.Internal, Substitute.For<ITags>());
 
-        activity.Should().BeNull();
+        Assert.Null(activity);
     }
 
     [Fact]
@@ -70,11 +65,8 @@ public class ActivityHelperTests
 
         using var activity = activitySource.StartActivityWithTags("test-operation", ActivityKind.Internal, Substitute.For<ITags>());
 
-        using (new AssertionScope())
-        {
-            activitySource.HasListeners().Should().BeFalse();
-            activity.Should().BeNull();
-        }
+        Assert.False(activitySource.HasListeners());
+        Assert.Null(activity);
     }
 
     [Theory]
@@ -94,12 +86,9 @@ public class ActivityHelperTests
 
         using var activity = activitySource.StartActivityWithTags("test-operation", kind, tagsMock);
 
-        using (new AssertionScope())
-        {
-            activitySource.HasListeners().Should().BeTrue();
-            activity.Should().NotBeNull();
-            activity?.Kind.Should().Be(kind);
-        }
+        Assert.True(activitySource.HasListeners());
+        Assert.NotNull(activity);
+        Assert.Equal(kind, activity.Kind);
     }
 
     [Fact]
@@ -122,12 +111,9 @@ public class ActivityHelperTests
 
         tagsMock.GetAllTags().Returns(tags);
 
-        using (new AssertionScope())
-        {
-            activitySource.HasListeners().Should().BeTrue();
-            activity.Should().NotBeNull();
-            activity?.Tags.Should().BeEquivalentTo(tags);
-        }
+        Assert.True(activitySource.HasListeners());
+        Assert.NotNull(activity);
+        Assert.Equal(tags.Cast<KeyValuePair<string, string?>>(), activity.Tags);
     }
 
     private static ActivityListener CreateActivityListener(ActivitySource activitySource)

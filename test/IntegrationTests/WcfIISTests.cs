@@ -4,7 +4,6 @@
 #if NETFRAMEWORK
 using DotNet.Testcontainers.Builders;
 using DotNet.Testcontainers.Containers;
-using FluentAssertions;
 using Google.Protobuf;
 using IntegrationTests.Helpers;
 using OpenTelemetry.Proto.Trace.V1;

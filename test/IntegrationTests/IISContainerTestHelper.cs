@@ -4,7 +4,6 @@
 #if NETFRAMEWORK
 using DotNet.Testcontainers.Builders;
 using DotNet.Testcontainers.Containers;
-using FluentAssertions;
 using IntegrationTests.Helpers;
 using Xunit.Abstractions;
 
@@ -43,7 +42,7 @@ internal class IISContainerTestHelper
         try
         {
             var wasStarted = container.StartAsync().Wait(TimeSpan.FromMinutes(5));
-            wasStarted.Should().BeTrue($"Container based on {imageName} has to be operational for the test.");
+            Assert.True(wasStarted, $"Container based on {imageName} has to be operational for the test.");
             testOutputHelper.WriteLine($"Container was started successfully.");
 
             await HealthzHelper.TestAsync($"http://localhost:{webPort}/healthz", testOutputHelper);

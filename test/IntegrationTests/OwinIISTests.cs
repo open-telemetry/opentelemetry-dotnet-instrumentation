@@ -3,7 +3,6 @@
 
 #if NETFRAMEWORK
 using System.Net.Http;
-using FluentAssertions;
 using IntegrationTests.Helpers;
 using Xunit.Abstractions;
 
@@ -49,7 +48,7 @@ public class OwinIISTests
     {
         var client = new HttpClient();
         var response = await client.GetAsync($"http://localhost:{webPort}/test/");
-        response.StatusCode.Should().Be(System.Net.HttpStatusCode.OK);
+        Assert.Equal(System.Net.HttpStatusCode.OK, response.StatusCode);
         var content = await response.Content.ReadAsStringAsync();
         Output.WriteLine("Response:");
         Output.WriteLine(content);

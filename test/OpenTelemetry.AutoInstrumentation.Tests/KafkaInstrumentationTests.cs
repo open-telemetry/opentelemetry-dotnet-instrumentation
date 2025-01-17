@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: Apache-2.0
 
 using System.Globalization;
-using FluentAssertions;
 using OpenTelemetry.AutoInstrumentation.Instrumentations.Kafka;
 using Xunit;
 
@@ -20,20 +19,20 @@ public class KafkaInstrumentationTests
     [InlineData(double.MaxValue)]
     public void MessageKeyValueIsExtractedForBasicType(object value)
     {
-        KafkaInstrumentation.ExtractMessageKeyValue(value).Should().Be(Convert.ToString(value, CultureInfo.InvariantCulture));
+        Assert.Equal(Convert.ToString(value, CultureInfo.InvariantCulture), KafkaInstrumentation.ExtractMessageKeyValue(value));
     }
 
     [Fact]
     public void MessageKeyValueIsExtractedForDecimal()
     {
         decimal input = decimal.MaxValue;
-        KafkaInstrumentation.ExtractMessageKeyValue(input).Should().Be(Convert.ToString(input, CultureInfo.InvariantCulture));
+        Assert.Equal(Convert.ToString(input, CultureInfo.InvariantCulture), KafkaInstrumentation.ExtractMessageKeyValue(input));
     }
 
     [Fact]
     public void MessageKeyValueIsNotExtractedForUnrecognizedType()
     {
         var value = new byte[] { 1, 2, 3 };
-        KafkaInstrumentation.ExtractMessageKeyValue(value).Should().BeNull();
+        Assert.Null(KafkaInstrumentation.ExtractMessageKeyValue(value));
     }
 }
