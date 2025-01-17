@@ -1,6 +1,7 @@
 // Copyright The OpenTelemetry Authors
 // SPDX-License-Identifier: Apache-2.0
 
+using System.Diagnostics;
 using System.Reflection;
 using IntegrationTests.Helpers;
 using Xunit.Abstractions;
@@ -273,20 +274,17 @@ public class SmokeTests : TestHelper
         {
             var assert = async () =>
             {
-                for (var i = 0; i < 50; i++)
-                {
-                    var httpClient = new HttpClient { Timeout = TimeSpan.FromSeconds(5) };
-                    var response = await httpClient.GetAsync(defaultPrometheusMetricsEndpoint);
-                    Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+                var httpClient = new HttpClient { Timeout = TimeSpan.FromSeconds(5) };
+                var response = await httpClient.GetAsync(defaultPrometheusMetricsEndpoint);
+                Assert.Equal(HttpStatusCode.OK, response.StatusCode);
 
-                    var content = await response.Content.ReadAsStringAsync();
-                    Output.WriteLine("Raw metrics from Prometheus:");
-                    Output.WriteLine(content);
-                    Assert.Contains("TYPE ", content); // should export any metric
-                    await Task.Delay(TimeSpan.FromSeconds(1));
-                }
+                var content = await response.Content.ReadAsStringAsync();
+                Output.WriteLine("Raw metrics from Prometheus:");
+                Output.WriteLine(content);
+                Assert.Contains("TYPE ", content); // should export any metric
             };
 
+            await AssertRepeatingExecutionDoesNotThrow(assert, TimeSpan.FromSeconds(1), TimeSpan.FromMinutes(1));
             var exception = await Record.ExceptionAsync(() => assert());
             Assert.Null(exception);
         }
@@ -326,22 +324,18 @@ public class SmokeTests : TestHelper
         {
             var assert = async () =>
             {
-                for (var i = 0; i < 50; i++)
-                {
-                    var httpClient = new HttpClient { Timeout = TimeSpan.FromSeconds(5) };
-                    var response = await httpClient.GetAsync(defaultPrometheusMetricsEndpoint);
-                    Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+                var httpClient = new HttpClient { Timeout = TimeSpan.FromSeconds(5) };
+                var response = await httpClient.GetAsync(defaultPrometheusMetricsEndpoint);
+                Assert.Equal(HttpStatusCode.OK, response.StatusCode);
 
-                    var content = await response.Content.ReadAsStringAsync();
-                    Output.WriteLine("Raw metrics from Prometheus:");
-                    Output.WriteLine(content);
-                    Assert.Contains("TYPE ", content); // should export any metric
-                    await Task.Delay(TimeSpan.FromSeconds(1));
-                }
+                var content = await response.Content.ReadAsStringAsync();
+                Output.WriteLine("Raw metrics from Prometheus:");
+                Output.WriteLine(content);
+                Assert.Contains("TYPE ", content); // should export any metric
+                await Task.Delay(TimeSpan.FromSeconds(1));
             };
 
-            var exception = await Record.ExceptionAsync(() => assert());
-            Assert.Null(exception);
+            await AssertRepeatingExecutionDoesNotThrow(assert, TimeSpan.FromSeconds(1), TimeSpan.FromMinutes(1));
         }
         finally
         {
@@ -620,6 +614,20 @@ public class SmokeTests : TestHelper
         resourceExpector.Exist("os.name");
         resourceExpector.Exist("os.version");
     }
+
+#if NETFRAMEWORK
+    private static async Task AssertRepeatingExecutionDoesNotThrow(Func<Task> assert, TimeSpan waitInterval, TimeSpan pollInterval)
+    {
+        var stopwatch = Stopwatch.StartNew();
+
+        while (stopwatch.Elapsed < pollInterval)
+        {
+            var exception = await Record.ExceptionAsync(() => assert());
+            Assert.Null(exception);
+            await Task.Delay(waitInterval);
+        }
+    }
+#endif
 
     private void VerifyTestApplicationInstrumented(TestAppStartupMode startupMode = TestAppStartupMode.Auto)
     {
