@@ -9,7 +9,7 @@
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" />
     <PackageReference Include="NServiceBus" VersionOverride="$(LibraryVersion)" Condition=" '$(LibraryVersion)' != '' or '$(TargetFramework)' != 'net472' "/>
-    <PackageReference Include="NServiceBus" VersionOverride="8.2.4" Condition=" '$(LibraryVersion)' == '' and '$(TargetFramework)' == 'net472' "/>
+    <PackageReference Include="NServiceBus" VersionOverride="9.0.0" Condition=" '$(LibraryVersion)' == '' and '$(TargetFramework)' == 'net472' "/>
     <PackageReference Include="System.Diagnostics.DiagnosticSource" />
   </ItemGroup>
 
