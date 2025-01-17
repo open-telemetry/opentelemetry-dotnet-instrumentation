@@ -24,11 +24,11 @@ public class LazyInstrumentationLoaderTests
             loader.Add(initializer2); // After loading the assembly
         }
 
-        Assert.True(initializer1.Initialized);
-        Assert.True(initializer1.Disposed);
+        Assert.True(initializer1.Initialized, "First initializer should be called");
+        Assert.True(initializer1.Disposed, "First initializer should be disposed");
 
-        Assert.True(initializer2.Initialized);
-        Assert.True(initializer2.Disposed);
+        Assert.True(initializer2.Initialized, "Second initializer should be called");
+        Assert.True(initializer2.Disposed, "Second initializer should be disposed");
     }
 
     private static void CreateDummyAssembly()

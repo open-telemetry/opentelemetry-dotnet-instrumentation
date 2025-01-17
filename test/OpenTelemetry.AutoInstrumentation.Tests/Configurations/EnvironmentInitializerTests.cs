@@ -62,13 +62,13 @@ public class EnvironmentInitializerTests
         {
             Environment.SetEnvironmentVariable(NonOtelVariableName, null);
 
-            EnvironmentInitializer.Initialize(new NameValueCollection()
+            EnvironmentInitializer.Initialize(new NameValueCollection
             {
                 { NonOtelVariableName, SomeValue }
             });
             var actual = Environment.GetEnvironmentVariable(NonOtelVariableName);
 
-            Assert.True(string.IsNullOrEmpty(actual));
+            Assert.True(string.IsNullOrEmpty(actual), "initializer should ignore variables non starting from OTEL_");
         }
         finally
         {

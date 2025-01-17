@@ -42,7 +42,7 @@ public abstract class WcfTestsBase : TestHelper, IDisposable
 
     protected async Task SubmitsTracesInternal(string clientPackageVersion)
     {
-        Assert.True(EnvironmentTools.IsWindowsAdministrator()); // WCF Server needs admin
+        Assert.True(EnvironmentTools.IsWindowsAdministrator(), "This test requires Windows Administrator privileges.");
 
         var collector = new MockSpansCollector(Output);
         SetExporter(collector);

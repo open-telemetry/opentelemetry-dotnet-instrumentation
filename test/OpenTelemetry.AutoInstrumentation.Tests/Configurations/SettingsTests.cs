@@ -44,7 +44,7 @@ public class SettingsTests : IDisposable
         var tracesExporter = Assert.Single(settings.TracesExporters);
         Assert.Equal(TracesExporter.Otlp, tracesExporter);
         Assert.NotEmpty(settings.EnabledInstrumentations);
-        Assert.Equal(new List<string> { "OpenTelemetry.AutoInstrumentation.*" }, settings.ActivitySources);
+        Assert.Equal(["OpenTelemetry.AutoInstrumentation.*"], settings.ActivitySources);
         Assert.Empty(settings.AdditionalLegacySources);
 
         // Instrumentation options tests
@@ -309,7 +309,7 @@ public class SettingsTests : IDisposable
 
         var settings = Settings.FromDefaultSources<TracerSettings>(false);
 
-        Assert.Equal(new List<TracerInstrumentation> { expectedTracerInstrumentation }, settings.EnabledInstrumentations);
+        Assert.Equal([expectedTracerInstrumentation], settings.EnabledInstrumentations);
     }
 
     [Theory]
@@ -331,7 +331,7 @@ public class SettingsTests : IDisposable
 
         var settings = Settings.FromDefaultSources<MetricSettings>(false);
 
-        Assert.Equal(new List<MetricInstrumentation> { expectedMetricInstrumentation }, settings.EnabledInstrumentations);
+        Assert.Equal([expectedMetricInstrumentation], settings.EnabledInstrumentations);
     }
 
     [Theory]
@@ -344,7 +344,7 @@ public class SettingsTests : IDisposable
 
         var settings = Settings.FromDefaultSources<LogSettings>(false);
 
-        Assert.Equal(new List<LogInstrumentation> { expectedLogInstrumentation }, settings.EnabledInstrumentations);
+        Assert.Equal([expectedLogInstrumentation], settings.EnabledInstrumentations);
     }
 
     [Theory]
@@ -405,7 +405,7 @@ public class SettingsTests : IDisposable
 
         var settings = Settings.FromDefaultSources<GeneralSettings>(false);
 
-        Assert.Equal(new List<ResourceDetector> { expectedResourceDetector }, settings.EnabledResourceDetectors);
+        Assert.Equal([expectedResourceDetector], settings.EnabledResourceDetectors);
     }
 
     private static void ClearEnvVars()

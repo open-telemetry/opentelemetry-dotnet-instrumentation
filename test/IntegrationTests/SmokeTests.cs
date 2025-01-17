@@ -512,7 +512,7 @@ public class SmokeTests : TestHelper
         }
 
         Output.WriteResult(helper);
-        Assert.False(processTimeout);
+        Assert.False(processTimeout, "Test application timed out");
 
         Assert.NotEqual(0, process.ExitCode);
     }
@@ -543,7 +543,7 @@ public class SmokeTests : TestHelper
 
             var nativeLog = tempLogsDirectory.GetFiles("otel-dotnet-auto-*-Native.log").Single();
             var nativeLogContent = File.ReadAllText(nativeLog.FullName);
-            Assert.False(string.IsNullOrWhiteSpace(nativeLogContent));
+            Assert.False(string.IsNullOrWhiteSpace(nativeLogContent), "native log should not be empty");
 
             var environmentVariables = ParseEnvironmentVariablesLog(nativeLogContent);
             Assert.NotEmpty(environmentVariables);

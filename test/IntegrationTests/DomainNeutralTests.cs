@@ -18,7 +18,7 @@ public class DomainNeutralTests : TestHelper
     [Trait("Category", "EndToEnd")]
     public void SubmitsTraces()
     {
-        Assert.True(EnvironmentTools.IsWindowsAdministrator());
+        Assert.True(EnvironmentTools.IsWindowsAdministrator(), "This test requires Windows Administrator privileges.");
 
         using var collector = new MockSpansCollector(Output);
         SetExporter(collector);
@@ -31,7 +31,7 @@ public class DomainNeutralTests : TestHelper
             "tracer-home",
             "netfx",
             "OpenTelemetry.AutoInstrumentation.dll");
-        Assert.True(File.Exists(instrumentationAssembly));
+        Assert.True(File.Exists(instrumentationAssembly), $"instrumentation assembly is not available {instrumentationAssembly}");
         using var gacEntry = new GacEntry(instrumentationAssembly);
 
         // Domain-neutral depends on strong named assemblies to work, leverage some assets from

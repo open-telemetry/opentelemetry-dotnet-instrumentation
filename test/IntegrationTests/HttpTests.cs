@@ -52,7 +52,7 @@ public class HttpTests : TestHelper
         collector.AssertExpectations();
 
         // testing context propagation via trace hierarchy
-        Assert.True(clientSpan!.ParentSpanId.IsEmpty);
+        Assert.True(clientSpan!.ParentSpanId.IsEmpty, "parent of client span should be empty");
         Assert.Equal(clientSpan.SpanId, serverSpan!.ParentSpanId);
         Assert.Equal(serverSpan.SpanId, manualSpan!.ParentSpanId);
     }
