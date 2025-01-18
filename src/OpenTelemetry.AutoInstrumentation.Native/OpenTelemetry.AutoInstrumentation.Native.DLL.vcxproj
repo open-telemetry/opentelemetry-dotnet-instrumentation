@@ -118,7 +118,7 @@
       <ModuleDefinitionFile>.\OpenTelemetry.AutoInstrumentation.Native.def</ModuleDefinitionFile>
     </Link>
     <PreBuildEvent>
-      <Command>IF EXIST $(SolutionDir)\pre-build-events-cpp.bat CALL $(SolutionDir)\pre-build-events-cpp.bat  "$(TargetPath)"  "$(TargetFileName)"  "$(TargetDir)"  "$(TargetName)"</Command>
+      <Command>IF EXIST "$(SolutionDir)pre-build-events-cpp.bat" CALL "$(SolutionDir)pre-build-events-cpp.bat"  "$(TargetPath)"  "$(TargetFileName)"  "$(TargetDir)"  "$(TargetName)"</Command>
     </PreBuildEvent>
     <PreBuildEvent>
       <Message>Remove potentially locked outputs (dll/pdb/xml)</Message>
@@ -141,7 +141,7 @@
       <ModuleDefinitionFile>.\OpenTelemetry.AutoInstrumentation.Native.def</ModuleDefinitionFile>
     </Link>
     <PreBuildEvent>
-      <Command>IF EXIST $(SolutionDir)\pre-build-events-cpp.bat CALL $(SolutionDir)\pre-build-events-cpp.bat  "$(TargetPath)"  "$(TargetFileName)"  "$(TargetDir)"  "$(TargetName)"</Command>
+      <Command>IF EXIST "$(SolutionDir)pre-build-events-cpp.bat" CALL "$(SolutionDir)pre-build-events-cpp.bat"  "$(TargetPath)"  "$(TargetFileName)"  "$(TargetDir)"  "$(TargetName)"</Command>
       <Message>Remove potentially locked outputs (dll/pdb/xml)</Message>
     </PreBuildEvent>
   </ItemDefinitionGroup>
@@ -168,7 +168,7 @@
       <ModuleDefinitionFile>.\OpenTelemetry.AutoInstrumentation.Native.def</ModuleDefinitionFile>
     </Link>
     <PreBuildEvent>
-      <Command>IF EXIST $(SolutionDir)\pre-build-events-cpp.bat CALL $(SolutionDir)\pre-build-events-cpp.bat  "$(TargetPath)"  "$(TargetFileName)"  "$(TargetDir)"  "$(TargetName)"</Command>
+      <Command>IF EXIST "$(SolutionDir)pre-build-events-cpp.bat" CALL "$(SolutionDir)pre-build-events-cpp.bat"  "$(TargetPath)"  "$(TargetFileName)"  "$(TargetDir)"  "$(TargetName)"</Command>
       <Message>Remove potentially locked outputs (dll/pdb/xml)</Message>
     </PreBuildEvent>
   </ItemDefinitionGroup>
@@ -195,7 +195,7 @@
       <ModuleDefinitionFile>.\OpenTelemetry.AutoInstrumentation.Native.def</ModuleDefinitionFile>
     </Link>
     <PreBuildEvent>
-      <Command>IF EXIST $(SolutionDir)\pre-build-events-cpp.bat CALL $(SolutionDir)\pre-build-events-cpp.bat  "$(TargetPath)"  "$(TargetFileName)"  "$(TargetDir)"  "$(TargetName)"</Command>
+      <Command>IF EXIST "$(SolutionDir)pre-build-events-cpp.bat" CALL "$(SolutionDir)pre-build-events-cpp.bat"  "$(TargetPath)"  "$(TargetFileName)"  "$(TargetDir)"  "$(TargetName)"</Command>
       <Message>Remove potentially locked outputs (dll/pdb/xml)</Message>
     </PreBuildEvent>
   </ItemDefinitionGroup>
