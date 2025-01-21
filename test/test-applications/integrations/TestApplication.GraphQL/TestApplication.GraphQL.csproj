@@ -9,7 +9,7 @@
     <PackageReference Include="GraphQL" VersionOverride="$(LibraryVersion)" />
     <PackageReference Include="GraphQL.MicrosoftDI" VersionOverride="$(GraphQLMicrosoftDI)" />
     <PackageReference Include="GraphQL.Server.Transports.AspNetCore" VersionOverride="$(GraphQLServerTransportsAspNetCore)" />
-    <PackageReference Include="GraphQL.Server.Ui.Playground" VersionOverride="$(GraphQLServerUIPlayground)" />
+    <PackageReference Include="GraphQL.Server.Ui.GraphiQL" VersionOverride="$(GraphQLServerUIGraphiQL)" />
     <PackageReference Include="System.Diagnostics.DiagnosticSource" />
     <PackageReference Include="System.Reactive" />
   </ItemGroup>

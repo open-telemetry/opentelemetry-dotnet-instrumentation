@@ -1,7 +1,8 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <ItemGroup>
-    <PackageReference Include="Npgsql" VersionOverride="$(LibraryVersion)" />
+    <PackageReference Include="Npgsql" VersionOverride="$(LibraryVersion)" Condition=" '$(LibraryVersion)' != '' or '$(TargetFramework)' != 'net462' " />
+    <PackageReference Include="Npgsql" VersionOverride="8.0.5" Condition=" '$(LibraryVersion)' == '' and '$(TargetFramework)' == 'net462' " />
   </ItemGroup>
 
 </Project>

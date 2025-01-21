@@ -37,7 +37,6 @@
     <PackageReference Include="System.Runtime.InteropServices.RuntimeInformation" />
     <PackageReference Include="Testcontainers" />
     <PackageReference Include="Verify.Xunit" />
-    <PackageReference Include="xunit.abstractions" />
   </ItemGroup>
 
   <ItemGroup>
