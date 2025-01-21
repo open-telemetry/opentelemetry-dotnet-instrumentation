@@ -2,8 +2,6 @@
 // SPDX-License-Identifier: Apache-2.0
 
 using GraphQL;
-using GraphQL.SystemTextJson;
-using GraphQL.Transport;
 using GraphQL.Types;
 using StarWars;
 
@@ -27,7 +25,7 @@ public class Startup
         app.UseDeveloperExceptionPage();
         app.UseWebSockets();
         app.UseGraphQL<ISchema>();
-        app.UseGraphQLPlayground();
+        app.UseGraphQLGraphiQL();
         app.UseWelcomePage("/alive-check");
     }
 }

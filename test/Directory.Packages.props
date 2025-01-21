@@ -2,39 +2,40 @@
   <Import Project="..\Directory.Packages.props" />
   <ItemGroup>
     <PackageVersion Include="Azure.Storage.Blobs" Version="12.23.0" />
-    <PackageVersion Include="Confluent.Kafka" Version="2.6.1" />
-    <PackageVersion Include="Elastic.Clients.Elasticsearch" Version="8.16.3" />
+    <PackageVersion Include="Confluent.Kafka" Version="2.8.0" />
+    <PackageVersion Include="Elastic.Clients.Elasticsearch" Version="8.17.1" />
     <PackageVersion Include="Google.Protobuf" Version="3.29.3" />
-    <PackageVersion Include="GraphQL" Version="8.2.1" />
-    <PackageVersion Include="GraphQL.MicrosoftDI" Version="8.2.1" />
-    <PackageVersion Include="GraphQL.Server.Transports.AspNetCore" Version="8.1.0" />
-    <PackageVersion Include="GraphQL.Server.Ui.Playground" Version="8.1.0" />
+    <PackageVersion Include="GraphQL" Version="8.3.0" />
+    <PackageVersion Include="GraphQL.MicrosoftDI" Version="8.3.0" />
+    <PackageVersion Include="GraphQL.Server.Transports.AspNetCore" Version="8.2.0" />
+    <PackageVersion Include="GraphQL.Server.Ui.GraphiQL" Version="8.2.0" />
     <PackageVersion Include="Grpc.AspNetCore" Version="2.67.0" />
     <PackageVersion Include="Grpc.Net.Client" Version="2.67.0" />
     <PackageVersion Include="Grpc.Net.Client.Web" Version="2.67.0" />
     <PackageVersion Include="Grpc.Tools" Version="2.68.1" />
-    <PackageVersion Include="MassTransit" Version="8.3.2" />
-    <PackageVersion Include="Microsoft.AspNetCore.SignalR.Client" Version="9.0.0" />
+    <PackageVersion Include="MassTransit" Version="8.3.4" />
+    <PackageVersion Include="Microsoft.AspNetCore.SignalR.Client" Version="9.0.1" />
     <PackageVersion Include="Microsoft.Build" Version="15.9.20" />
     <PackageVersion Include="Microsoft.Build.Utilities.Core" Version="15.9.20" />
     <PackageVersion Include="Microsoft.Data.SqlClient" Version="5.2.2" />
-    <PackageVersion Include="Microsoft.EntityFrameworkCore.Sqlite" Version="9.0.0" />
-    <PackageVersion Include="Microsoft.Extensions.Caching.Memory" Version="9.0.0" />
-    <PackageVersion Include="Microsoft.Extensions.Configuration.Abstractions" Version="9.0.0" />
-    <PackageVersion Include="Microsoft.Extensions.DependencyInjection" Version="9.0.0" />
-    <PackageVersion Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="9.0.0" />
-    <PackageVersion Include="Microsoft.Extensions.Hosting" Version="9.0.0" />
-    <PackageVersion Include="Microsoft.Extensions.Logging" Version="9.0.0" />
-    <PackageVersion Include="Microsoft.Extensions.Logging.Abstractions" Version="9.0.0" />
+    <PackageVersion Include="Microsoft.EntityFrameworkCore.Sqlite" Version="9.0.1" />
+    <PackageVersion Include="Microsoft.Extensions.Caching.Memory" Version="9.0.1" />
+    <PackageVersion Include="Microsoft.Extensions.Configuration.Abstractions" Version="9.0.1" />
+    <PackageVersion Include="Microsoft.Extensions.DependencyInjection" Version="9.0.1" />
+    <PackageVersion Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="9.0.1" />
+    <PackageVersion Include="Microsoft.Extensions.Hosting" Version="9.0.1" />
+    <PackageVersion Include="Microsoft.Extensions.Logging" Version="9.0.1" />
+    <PackageVersion Include="Microsoft.Extensions.Logging.Abstractions" Version="9.0.1" />
+    <PackageVersion Include="Microsoft.Extensions.Options" Version="9.0.1" />
     <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="17.12.0" />
-    <PackageVersion Include="MongoDB.Driver" Version="3.0.0" />
+    <PackageVersion Include="MongoDB.Driver" Version="3.1.0" />
     <PackageVersion Include="NSubstitute" Version="5.3.0" />
     <PackageVersion Include="MySqlConnector" Version="2.4.0" />
     <PackageVersion Include="MySql.Data" Version="9.1.0" />
     <PackageVersion Include="NServiceBus" Version="9.2.3" />
     <PackageVersion Include="Newtonsoft.Json" Version="13.0.3" />
-    <PackageVersion Include="Npgsql" Version="8.0.5" />
-    <PackageVersion Include="NuGet.Versioning" Version="6.5.0" />
+    <PackageVersion Include="Npgsql" Version="9.0.2" />
+    <PackageVersion Include="NuGet.Versioning" Version="6.12.1" />
     <PackageVersion Include="OpenTracing" Version="0.12.1" />
     <PackageVersion Include="Oracle.ManagedDataAccess" Version="23.6.1" />
     <PackageVersion Include="Oracle.ManagedDataAccess.Core" Version="23.6.1" />
@@ -47,7 +48,7 @@
     <PackageVersion Include="StrongNamer" Version="0.2.5" />
     <PackageVersion Include="System.Collections.Immutable" Version="9.0.0" />
     <PackageVersion Include="System.Data.SqlClient" Version="4.9.0" />
-    <PackageVersion Include="System.Diagnostics.DiagnosticSource" Version="9.0.0" />
+    <PackageVersion Include="System.Diagnostics.DiagnosticSource" Version="9.0.1" />
     <PackageVersion Include="System.Private.Uri" Version="4.3.2" />
     <PackageVersion Include="System.Reactive" Version="6.0.1" />
     <PackageVersion Include="System.Runtime.InteropServices" Version="4.3.0" />
@@ -60,7 +61,6 @@
     <PackageVersion Include="Testcontainers" Version="4.1.0" />
     <PackageVersion Include="Verify.Xunit" Version="20.8.2" />
     <PackageVersion Include="xunit" Version="2.9.3" />
-    <PackageVersion Include="xunit.abstractions" Version="2.0.3" />
     <PackageVersion Include="xunit.runner.visualstudio" Version="2.8.2" />
     <PackageVersion Include="Xunit.SkippableFact" Version="1.5.23" />
   </ItemGroup>
