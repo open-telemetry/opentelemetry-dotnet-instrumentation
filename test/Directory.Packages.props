@@ -46,7 +46,7 @@
     <PackageVersion Include="RabbitMQ.Client" Version="7.0.0" />
     <PackageVersion Include="StackExchange.Redis" Version="2.8.22" />
     <PackageVersion Include="StrongNamer" Version="0.2.5" />
-    <PackageVersion Include="System.Collections.Immutable" Version="9.0.0" />
+    <PackageVersion Include="System.Collections.Immutable" Version="9.0.1" />
     <PackageVersion Include="System.Data.SqlClient" Version="4.9.0" />
     <PackageVersion Include="System.Diagnostics.DiagnosticSource" Version="9.0.1" />
     <PackageVersion Include="System.Private.Uri" Version="4.3.2" />
