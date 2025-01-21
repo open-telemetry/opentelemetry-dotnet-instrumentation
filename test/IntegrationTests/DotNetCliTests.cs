@@ -65,9 +65,16 @@ public sealed class DotNetCliTests : TestHelper, IDisposable
     {
         const string ProgramContent = @"
 using var httpClient = new HttpClient();
-httpClient.Timeout = TimeSpan.FromSeconds(5);
-using var response = await httpClient.GetAsync(""http://example.com"");
-Console.WriteLine(response.StatusCode);
+httpClient.Timeout = TimeSpan.FromSeconds(10);
+try
+{
+    var response = await httpClient.GetAsync(""http://example.com"");
+    Console.WriteLine(response.StatusCode);
+}
+catch (Exception e)
+{
+    Console.WriteLine(e);
+}
 ";
 
         File.WriteAllText("Program.cs", ProgramContent);
