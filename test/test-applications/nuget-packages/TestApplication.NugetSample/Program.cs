@@ -18,7 +18,14 @@
 using System.Net.Http;
 #endif
 
-var httpClient = new HttpClient();
-httpClient.Timeout = TimeSpan.FromSeconds(5);
-var response = await httpClient.GetAsync("http://example.com");
-Console.WriteLine(response.StatusCode);
+using var httpClient = new HttpClient();
+httpClient.Timeout = TimeSpan.FromSeconds(10);
+try
+{
+    var response = await httpClient.GetAsync("http://example.com");
+    Console.WriteLine(response.StatusCode);
+}
+catch (Exception e)
+{
+    Console.WriteLine(e);
+}
