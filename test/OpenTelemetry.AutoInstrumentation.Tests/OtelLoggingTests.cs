@@ -1,7 +1,6 @@
 // Copyright The OpenTelemetry Authors
 // SPDX-License-Identifier: Apache-2.0
 
-using FluentAssertions;
 using OpenTelemetry.AutoInstrumentation.Logging;
 using OpenTelemetry.AutoInstrumentation.Tests.Util;
 using Xunit;
@@ -25,7 +24,7 @@ public class OtelLoggingTests : IDisposable
     public void WhenNoFileSizeIsConfigured_Then_DefaultIsUsed()
     {
         var defaultSize = OtelLogging.GetConfiguredFileSizeLimitBytes();
-        defaultSize.Should().Be(10 * 1024 * 1024);
+        Assert.Equal(10 * 1024 * 1024, defaultSize);
     }
 
     [Fact]
@@ -33,7 +32,7 @@ public class OtelLoggingTests : IDisposable
     {
         Environment.SetEnvironmentVariable("OTEL_DOTNET_AUTO_LOG_FILE_SIZE", "1024");
 
-        OtelLogging.GetConfiguredFileSizeLimitBytes().Should().Be(1024);
+        Assert.Equal(1024, OtelLogging.GetConfiguredFileSizeLimitBytes());
     }
 
     [Fact]
@@ -41,7 +40,7 @@ public class OtelLoggingTests : IDisposable
     {
         Environment.SetEnvironmentVariable("OTEL_DOTNET_AUTO_LOG_FILE_SIZE", "-1");
 
-        OtelLogging.GetConfiguredFileSizeLimitBytes().Should().Be(10 * 1024 * 1024);
+        Assert.Equal(10 * 1024 * 1024, OtelLogging.GetConfiguredFileSizeLimitBytes());
     }
 
     [Fact]
@@ -49,7 +48,7 @@ public class OtelLoggingTests : IDisposable
     {
         Environment.SetEnvironmentVariable("OTEL_LOG_LEVEL", null);
 
-        OtelLogging.GetConfiguredLogLevel().Should().Be(LogLevel.Information);
+        Assert.Equal(LogLevel.Information, OtelLogging.GetConfiguredLogLevel());
     }
 
     [Fact]
@@ -57,7 +56,7 @@ public class OtelLoggingTests : IDisposable
     {
         Environment.SetEnvironmentVariable("OTEL_LOG_LEVEL", "invalid");
 
-        OtelLogging.GetConfiguredLogLevel().Should().Be(LogLevel.Information);
+        Assert.Equal(LogLevel.Information, OtelLogging.GetConfiguredLogLevel());
     }
 
     [Fact]
@@ -65,7 +64,7 @@ public class OtelLoggingTests : IDisposable
     {
         Environment.SetEnvironmentVariable("OTEL_LOG_LEVEL", "warn");
 
-        OtelLogging.GetConfiguredLogLevel().Should().Be(LogLevel.Warning);
+        Assert.Equal(LogLevel.Warning, OtelLogging.GetConfiguredLogLevel());
     }
 
     [Fact]
@@ -73,7 +72,7 @@ public class OtelLoggingTests : IDisposable
     {
         Environment.SetEnvironmentVariable("OTEL_LOG_LEVEL", "none");
 
-        OtelLogging.GetConfiguredLogLevel().Should().BeNull();
+        Assert.Null(OtelLogging.GetConfiguredLogLevel());
     }
 
     [Fact]
@@ -81,7 +80,7 @@ public class OtelLoggingTests : IDisposable
     {
         Environment.SetEnvironmentVariable("OTEL_DOTNET_AUTO_LOGGER", null);
 
-        OtelLogging.GetConfiguredLogSink().Should().Be(LogSink.File);
+        Assert.Equal(LogSink.File, OtelLogging.GetConfiguredLogSink());
     }
 
     [Fact]
@@ -89,7 +88,7 @@ public class OtelLoggingTests : IDisposable
     {
         Environment.SetEnvironmentVariable("OTEL_DOTNET_AUTO_LOGGER", "invalid");
 
-        OtelLogging.GetConfiguredLogSink().Should().Be(LogSink.File);
+        Assert.Equal(LogSink.File, OtelLogging.GetConfiguredLogSink());
     }
 
     [Fact]
@@ -97,7 +96,7 @@ public class OtelLoggingTests : IDisposable
     {
         Environment.SetEnvironmentVariable("OTEL_DOTNET_AUTO_LOGGER", "console");
 
-        OtelLogging.GetConfiguredLogSink().Should().Be(LogSink.Console);
+        Assert.Equal(LogSink.Console, OtelLogging.GetConfiguredLogSink());
     }
 
     [Fact]
@@ -105,7 +104,7 @@ public class OtelLoggingTests : IDisposable
     {
         Environment.SetEnvironmentVariable("OTEL_DOTNET_AUTO_LOGGER", "none");
 
-        OtelLogging.GetConfiguredLogSink().Should().Be(LogSink.NoOp);
+        Assert.Equal(LogSink.NoOp, OtelLogging.GetConfiguredLogSink());
     }
 
     [Fact]
@@ -130,11 +129,11 @@ public class OtelLoggingTests : IDisposable
 
             var files = tempLogsDirectory.GetFiles();
 
-            files.Length.Should().Be(1);
+            var file = Assert.Single(files);
 
-            var content = File.ReadAllText(files[0].FullName);
+            var content = File.ReadAllText(file.FullName);
 
-            content.Should().Contain(logLine);
+            Assert.Contains(logLine, content);
         }
         finally
         {
@@ -171,7 +170,7 @@ public class OtelLoggingTests : IDisposable
             ms.Position = 0; // reset reading position
             var content = reader.ReadToEnd();
 
-            content.Should().Contain(logLine);
+            Assert.Contains(logLine, content);
         }
         finally
         {

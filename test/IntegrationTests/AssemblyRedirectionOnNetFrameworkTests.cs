@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: Apache-2.0
 
 #if NETFRAMEWORK
-using FluentAssertions;
 using IntegrationTests.Helpers;
 using Xunit.Abstractions;
 

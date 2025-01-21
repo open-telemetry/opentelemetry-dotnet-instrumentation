@@ -9,8 +9,6 @@ using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Xml.Linq;
 using DependencyListGenerator;
-using FluentAssertions;
-using FluentAssertions.Execution;
 using Xunit;
 
 namespace OpenTelemetry.AutoInstrumentation.Tests;
@@ -45,11 +43,8 @@ public class TransientDependenciesTests
 
         File.Delete(projectGenPath);
 
-        using (new AssertionScope())
-        {
-            deps.Count.Should().Be(generatedDeps.Count);
-            deps.Should().BeEquivalentTo(generatedDeps);
-        }
+        Assert.Equal(generatedDeps.Count, deps.Count);
+        Assert.Equivalent(generatedDeps, deps);
     }
 
     private static XElement? GetTransientDepsGroup(XElement projXml)

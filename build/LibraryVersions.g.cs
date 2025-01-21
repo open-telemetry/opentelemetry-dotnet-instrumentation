@@ -26,7 +26,7 @@ public static partial class LibraryVersion
             "TestApplication.Elasticsearch",
             [
                 new("8.15.10"),
-                new("8.16.3"),
+                new("8.17.1"),
             ]
         },
         {
@@ -34,7 +34,7 @@ public static partial class LibraryVersion
             [
                 new("6.0.35"),
                 new("8.0.10"),
-                new("9.0.0"),
+                new("9.0.1"),
             ]
         },
         {
@@ -49,9 +49,9 @@ public static partial class LibraryVersion
         {
             "TestApplication.GraphQL",
             [
-                new("7.5.0", additionalMetaData: new() { { "GraphQLMicrosoftDI", "7.5.0" }, { "GraphQLServerTransportsAspNetCore", "7.5.0" }, { "GraphQLServerUIPlayground", "7.5.0" } }),
-                new("8.0.2", additionalMetaData: new() { { "GraphQLMicrosoftDI", "8.0.2" }, { "GraphQLServerTransportsAspNetCore", "8.0.2" }, { "GraphQLServerUIPlayground", "8.0.2" } }),
-                new("8.2.1", additionalMetaData: new() { { "GraphQLMicrosoftDI", "8.2.1" }, { "GraphQLServerTransportsAspNetCore", "8.1.0" }, { "GraphQLServerUIPlayground", "8.1.0" } }),
+                new("7.5.0", additionalMetaData: new() { { "GraphQLMicrosoftDI", "7.5.0" }, { "GraphQLServerTransportsAspNetCore", "7.5.0" }, { "GraphQLServerUIPGraphiQL", "7.5.0" } }),
+                new("8.0.2", additionalMetaData: new() { { "GraphQLMicrosoftDI", "8.0.2" }, { "GraphQLServerTransportsAspNetCore", "8.0.2" }, { "GraphQLServerUIPGraphiQL", "8.0.2" } }),
+                new("8.3.0", additionalMetaData: new() { { "GraphQLMicrosoftDI", "8.3.0" }, { "GraphQLServerTransportsAspNetCore", "8.2.0" }, { "GraphQLServerUIPGraphiQL", "8.2.0" } }),
             ]
         },
         {
@@ -72,7 +72,7 @@ public static partial class LibraryVersion
             "TestApplication.MassTransit",
             [
                 new("8.3.0"),
-                new("8.3.2"),
+                new("8.3.4"),
             ]
         },
         {
@@ -94,6 +94,7 @@ public static partial class LibraryVersion
                 new("2.19.0", supportedFrameworks: [ "net9.0", "net8.0", "net462" ]),
                 new("2.30.0", supportedFrameworks: [ "net9.0", "net8.0", "net462" ]),
                 new("3.0.0", supportedFrameworks: [ "net9.0", "net8.0", "net472" ]),
+                new("3.1.0", supportedFrameworks: [ "net9.0", "net8.0", "net472" ]),
             ]
         },
         {
@@ -114,6 +115,7 @@ public static partial class LibraryVersion
             "TestApplication.Npgsql",
             [
                 new("8.0.5"),
+                new("9.0.2", supportedFrameworks: [ "net9.0", "net8.0" ]),
             ]
         },
         {
@@ -174,7 +176,7 @@ public static partial class LibraryVersion
                 new("1.4.0", supportedPlatforms: [ "x64" ]),
                 new("1.6.2"),
                 new("1.8.2"),
-                new("2.6.1"),
+                new("2.8.0"),
             ]
         },
     };

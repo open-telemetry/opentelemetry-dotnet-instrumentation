@@ -3,7 +3,6 @@
 
 #if NET
 
-using FluentAssertions;
 using IntegrationTests.Helpers;
 using OpenTelemetry.Proto.Collector.Profiles.V1Development;
 using OpenTelemetry.Proto.Profiles.V1Development;
@@ -63,7 +62,7 @@ public class ContinuousProfilerTests : TestHelper
         var scopeProfiles = c.SelectMany(r => r.ResourceProfiles)
             .SelectMany(rp => rp.ScopeProfiles).ToList();
 
-        scopeProfiles.Should().AllSatisfy(sp => sp.Scope.Name.Should().Be("OpenTelemetry.AutoInstrumentation"));
+        Assert.All(scopeProfiles, sp => Assert.Equal("OpenTelemetry.AutoInstrumentation", sp.Scope.Name));
 
         var profiles = scopeProfiles.SelectMany(sp => sp.Profiles).ToList();
 

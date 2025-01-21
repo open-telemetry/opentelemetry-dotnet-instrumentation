@@ -1,7 +1,6 @@
 // Copyright The OpenTelemetry Authors
 // SPDX-License-Identifier: Apache-2.0
 
-using FluentAssertions;
 using Microsoft.Build.Framework;
 using NSubstitute;
 using Xunit;
@@ -28,12 +27,11 @@ public class CheckForInstrumentationPackagesTests
         var sut = new TaskWithMockBuildEngine();
 
         sut.Task.RuntimeCopyLocalItems = runtimeCopyLocalItems;
-        sut.Task.Execute().Should().BeTrue();
+        Assert.True(sut.Task.Execute());
 
         var messageEventArgsList = sut.MessageEventArgsList;
-        messageEventArgsList.Should().HaveCount(1);
-        messageEventArgsList[0].Message.Should().Be(
-            "OpenTelemetry.AutoInstrumentation: empty RuntimeCopyLocalItems, skipping check for instrumentation packages.");
+        var buildMessageEventArgs = Assert.Single(messageEventArgsList);
+        Assert.Equal("OpenTelemetry.AutoInstrumentation: empty RuntimeCopyLocalItems, skipping check for instrumentation packages.", buildMessageEventArgs.Message);
     }
 
     [Fact]
@@ -48,9 +46,9 @@ public class CheckForInstrumentationPackagesTests
             ("Test.Package.A", "1.2.0")
         });
 
-        sut.Task.Execute().Should().BeTrue();
+        Assert.True(sut.Task.Execute());
 
-        sut.MessageEventArgsList.Should().BeEmpty();
+        Assert.Empty(sut.MessageEventArgsList);
     }
 
     [Fact]
@@ -76,7 +74,7 @@ public class CheckForInstrumentationPackagesTests
                 ("Test.Package.C", "[1.0.0, 2.0.0)", "Test.Package.C.Instrumentation", "1.0.0")
             });
 
-        sut.Task.Execute().Should().BeTrue();
+        Assert.True(sut.Task.Execute());
 
         var expectedMessages = new string[]
         {
@@ -88,8 +86,8 @@ public class CheckForInstrumentationPackagesTests
                 "no need for the instrumentation package 'Test.Package.C.Instrumentation' version 1.0.0."
         };
         var messageEventArgsList = sut.MessageEventArgsList;
-        messageEventArgsList.Should().HaveCount(expectedMessages.Length);
-        messageEventArgsList.Select((eventArgs, i) => eventArgs.Message.Should().Be(expectedMessages[i])).ToList();
+        Assert.Equal(expectedMessages.Length, messageEventArgsList.Count);
+        Assert.All(messageEventArgsList, (eventArgs, i) => Assert.Equal(expectedMessages[i], eventArgs.Message));
     }
 
     [Fact]
@@ -108,14 +106,17 @@ public class CheckForInstrumentationPackagesTests
                 ("Test.Package.A", "[1.1.0, 2.0.0)", "Test.Package.A.Instrumentation", "1.1.0")
             });
 
-        sut.Task.Execute().Should().BeFalse();
+        Assert.False(sut.Task.Execute());
 
-        sut.MessageEventArgsList.Should().BeEmpty();
+        Assert.Empty(sut.MessageEventArgsList);
 
-        sut.ErrorEventArgsList.Should().HaveCount(1);
-        sut.ErrorEventArgsList[0].Message.Should().Be(
+        var errorEventArgs = Assert.Single(sut.ErrorEventArgsList);
+
+        var expectedMessage =
             "OpenTelemetry.AutoInstrumentation: add a reference to the instrumentation package 'Test.Package.A.Instrumentation' " +
-            "version 1.1.0 or add 'Test.Package.A' to the property 'SkippedInstrumentations' to suppress this error.");
+            "version 1.1.0 or add 'Test.Package.A' to the property 'SkippedInstrumentations' to suppress this error.";
+
+        Assert.Equal(expectedMessage, errorEventArgs.Message);
     }
 
     private static ITaskItem[] BuildMockRuntimeCopyLocalItems((string NuGetPackageId, string NuGetPackageVersion)[] source)

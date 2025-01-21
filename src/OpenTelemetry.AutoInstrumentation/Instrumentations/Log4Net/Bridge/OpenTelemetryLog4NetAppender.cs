@@ -188,7 +188,17 @@ internal class OpenTelemetryLog4NetAppender
         }
 
         var name = loggerName ?? string.Empty;
-        return _loggers.GetOrAdd(name, _getLoggerFactory!);
+        if (_loggers.TryGetValue(name, out var logger))
+        {
+            return logger;
+        }
+
+        if (_loggers.Count < 100)
+        {
+            return _loggers.GetOrAdd(name, _getLoggerFactory!);
+        }
+
+        return _getLoggerFactory(name);
     }
 
 #pragma warning disable SA1202

@@ -102,7 +102,7 @@ internal static class ClassA
         Action(3);
         return;
 
-        static void Action(int s) => InternalClassB<string, int>.DoubleInternalClassB.TripleInternalClassB<int>.MethodB(s, new[] { 3 }, TimeSpan.Zero, 0, new List<string> { "a" }, new List<string>(0));
+        static void Action(int s) => InternalClassB<string, int>.DoubleInternalClassB.TripleInternalClassB<int>.MethodB(s, [3], TimeSpan.Zero, 0, ["a"], []);
     }
 
     [DllImport("TestApplication.ContinuousProfiler.NativeDep")]

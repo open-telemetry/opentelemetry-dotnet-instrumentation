@@ -3,9 +3,6 @@
 
 #if NETFRAMEWORK
 using System.Net.Http;
-using DotNet.Testcontainers.Builders;
-using DotNet.Testcontainers.Containers;
-using FluentAssertions;
 using IntegrationTests.Helpers;
 using Xunit.Abstractions;
 

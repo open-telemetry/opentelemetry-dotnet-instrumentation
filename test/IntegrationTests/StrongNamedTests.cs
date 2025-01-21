@@ -3,7 +3,6 @@
 
 #if NETFRAMEWORK
 using System.Reflection;
-using FluentAssertions;
 #endif
 using IntegrationTests.Helpers;
 using Xunit.Abstractions;
@@ -44,7 +43,7 @@ public class StrongNamedTests : TestHelper
 
         var assembly = Assembly.ReflectionOnlyLoadFrom(testApplicationPath);
 
-        BitConverter.ToString(assembly.GetName().GetPublicKeyToken()).Replace("-", string.Empty).ToLowerInvariant().Should().Be("c0db600a13f60b51");
+        Assert.Equal("c0db600a13f60b51", BitConverter.ToString(assembly.GetName().GetPublicKeyToken()).Replace("-", string.Empty).ToLowerInvariant());
     }
 #endif
 

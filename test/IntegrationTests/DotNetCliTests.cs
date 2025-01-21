@@ -3,7 +3,6 @@
 
 #if NET
 
-using FluentAssertions;
 using IntegrationTests.Helpers;
 using Xunit.Abstractions;
 
@@ -66,9 +65,16 @@ public sealed class DotNetCliTests : TestHelper, IDisposable
     {
         const string ProgramContent = @"
 using var httpClient = new HttpClient();
-httpClient.Timeout = TimeSpan.FromSeconds(5);
-using var response = await httpClient.GetAsync(""http://example.com"");
-Console.WriteLine(response.StatusCode);
+httpClient.Timeout = TimeSpan.FromSeconds(10);
+try
+{
+    var response = await httpClient.GetAsync(""http://example.com"");
+    Console.WriteLine(response.StatusCode);
+}
+catch (Exception e)
+{
+    Console.WriteLine(e);
+}
 ";
 
         File.WriteAllText("Program.cs", ProgramContent);
@@ -81,7 +87,7 @@ Console.WriteLine(response.StatusCode);
         using var process = InstrumentedProcessHelper.Start(DotNetCli, arguments, EnvironmentHelper);
         using var helper = new ProcessHelper(process);
 
-        process.Should().NotBeNull();
+        Assert.NotNull(process);
 
         var processTimeout = !process!.WaitForExit((int)TestTimeout.ProcessExit.TotalMilliseconds);
         if (processTimeout)
@@ -93,8 +99,8 @@ Console.WriteLine(response.StatusCode);
         Output.WriteLine("Exit Code: " + process.ExitCode);
         Output.WriteResult(helper);
 
-        processTimeout.Should().BeFalse("Test application timed out");
-        process.ExitCode.Should().Be(0, "Test application exited with non-zero exit code");
+        Assert.False(processTimeout, "Test application timed out");
+        Assert.Equal(0, process.ExitCode);
     }
 
     private void RunAppWithDotNetCliAndAssertHttpSpans(string arguments)

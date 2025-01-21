@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: Apache-2.0
 
 using System.Runtime.InteropServices;
-using FluentAssertions;
 using IntegrationTests.Helpers;
 
 namespace IntegrationTests;
@@ -43,7 +42,7 @@ public class BuildTests
         var netFileNames = netFilePaths.Select(Path.GetFileNameWithoutExtension).ToArray();
         var additionalStoreFileNames = additionalStoreFilePaths.Select(Path.GetFileNameWithoutExtension).Distinct().ToArray();
 
-        netFileNames.Should().NotContain(additionalStoreFileNames);
+        Assert.All(additionalStoreFileNames, additionalNetFileName => Assert.DoesNotContain(additionalNetFileName, netFileNames));
     }
 #endif
 

@@ -21,10 +21,11 @@ if [ -z "$OS_TYPE" ]; then
 fi
 
 # guess OS architecture if not provided
+ARCHITECTURE=${ARCHITECTURE:-}
 if [ -z "$ARCHITECTURE" ]; then
   case $(uname -m) in
-    x86_64)  ARCHITECTURE="x64" ;;
-    aarch64) ARCHITECTURE="arm64" ;;
+    x86_64)        ARCHITECTURE="x64" ;;
+    aarch64|arm64) ARCHITECTURE="arm64" ;;
   esac
 fi
 
@@ -47,7 +48,7 @@ case "$OS_TYPE" in
     DOTNET_RUNTIME_ID="linux-musl-$ARCHITECTURE"
     ;;
   "macos")
-    DOTNET_RUNTIME_ID="osx-x64"
+    DOTNET_RUNTIME_ID="osx-$ARCHITECTURE"
     ;;
   "windows")
     ;;

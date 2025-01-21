@@ -16,6 +16,6 @@ internal class GraphQLVersion : PackageVersion
     [PackageDependency("GraphQL.Server.Transports.AspNetCore", "GraphQLServerTransportsAspNetCore")]
     public required string ServerTransportsAspNetCoreVersion { get; set; }
 
-    [PackageDependency("GraphQL.Server.Ui.Playground", "GraphQLServerUIPlayground")]
-    public required string ServerUIPlayground { get; set; }
+    [PackageDependency("GraphQL.Server.Ui.GraphiQL", "GraphQLServerUIPGraphiQL")]
+    public required string ServerUIGraphiQL { get; set; }
 }

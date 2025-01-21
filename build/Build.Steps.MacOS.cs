@@ -46,7 +46,8 @@ partial class Build
         {
             // Create home directory
             var source = NativeProfilerProject.Directory / "bin" / $"{NativeProfilerProject.Name}.dylib";
-            var dest = TracerHomeDirectory / "osx-x64";
+            var platform = Platform.ToString().ToLowerInvariant();
+            var dest = TracerHomeDirectory / $"osx-{platform}";
             Log.Information($"Copying '{source}' to '{dest}'");
 
             source.CopyToDirectory(dest, ExistsPolicy.FileOverwrite);
