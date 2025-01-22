@@ -53,7 +53,7 @@
     <PackageVersion Include="System.Reactive" Version="6.0.1" />
     <PackageVersion Include="System.Runtime.InteropServices" Version="4.3.0" />
     <PackageVersion Include="System.Runtime.InteropServices.RuntimeInformation" Version="4.3.0" />
-    <PackageVersion Include="System.Security.Cryptography.Pkcs" Version="8.0.1" />
+    <PackageVersion Include="System.Security.Cryptography.Pkcs" Version="9.0.1" />
     <PackageVersion Include="System.ServiceModel.Http" Version="8.1.0" />
     <PackageVersion Include="System.ServiceModel.NetTcp" Version="8.1.0" />
     <PackageVersion Include="System.Text.Json" Version="8.0.5" />
