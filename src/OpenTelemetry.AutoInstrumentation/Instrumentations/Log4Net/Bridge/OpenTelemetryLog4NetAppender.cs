@@ -7,6 +7,9 @@ using System.Diagnostics;
 using System.Reflection;
 using OpenTelemetry.AutoInstrumentation.DuckTyping;
 using OpenTelemetry.AutoInstrumentation.Instrumentations.Log4Net.TraceContextInjection;
+#if NET
+using OpenTelemetry.AutoInstrumentation.Logger;
+#endif
 using OpenTelemetry.AutoInstrumentation.Logging;
 using OpenTelemetry.Logs;
 using Exception = System.Exception;
@@ -28,7 +31,11 @@ internal class OpenTelemetryLog4NetAppender
     private static readonly Lazy<OpenTelemetryLog4NetAppender> InstanceField = new(InitializeAppender, true);
 
     private readonly Func<string?, object?>? _getLoggerFactory;
-    private readonly ConcurrentDictionary<string, object> _loggers = new();
+    private readonly ConcurrentDictionary<string, object> _loggers = new(StringComparer.Ordinal);
+
+#if NET
+    private int _warningLogged;
+#endif
 
     private OpenTelemetryLog4NetAppender(LoggerProvider loggerProvider)
     {
@@ -47,6 +54,19 @@ internal class OpenTelemetryLog4NetAppender
         {
             return;
         }
+
+#if NET
+        if (LoggerInitializer.IsInitializedAtLeastOnce)
+        {
+            if (Interlocked.Exchange(ref _warningLogged, 1) != default)
+            {
+                return;
+            }
+
+            Logger.Warning("Disabling log4net bridge due to ILogger bridge initialization.");
+            return;
+        }
+#endif
 
         var logger = GetLogger(loggingEvent.LoggerName);
 
