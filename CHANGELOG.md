@@ -22,7 +22,9 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
     updated from `9.0.0` to `9.0.1`,
   - `Microsoft.Extensions.Options` updated from `9.0.0` to `9.0.1`,
   - `Microsoft.Extensions.Primitives` updated from `9.0.0` to `9.0.1`,
-  - `System.IO.Pipelines` updated from `9.0.0` to `9.0.1`.
+  - `System.IO.Pipelines` updated from `9.0.0` to `9.0.1`,
+  - `System.Text.Encodings.Web` update from `9.0.0` to `9.0.1`,
+  - `System.Text.Json` update from `9.0.0` to `9.0.1`.
 
 ### Deprecated
 
