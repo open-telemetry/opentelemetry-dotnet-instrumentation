@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 using System.Diagnostics;
+using log4net;
 using log4net.Config;
 using Microsoft.Extensions.Logging;
 
@@ -39,6 +40,8 @@ internal static class Program
 
     private static void LogUsingILogger()
     {
+        var l = LogManager.GetLogger("TestApplication.Log4NetBridge");
+        l.Warn("Before logger factory is built.");
         using var loggerFactory = LoggerFactory.Create(builder =>
         {
             builder.AddProvider(new Log4NetLoggerProvider());

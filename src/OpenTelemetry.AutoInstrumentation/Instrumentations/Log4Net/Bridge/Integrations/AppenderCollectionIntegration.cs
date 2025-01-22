@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 using OpenTelemetry.AutoInstrumentation.CallTarget;
+using OpenTelemetry.AutoInstrumentation.Logging;
 #if NET
 using OpenTelemetry.AutoInstrumentation.Logger;
 #endif
@@ -23,16 +24,26 @@ integrationName: "Log4Net",
 type: InstrumentationType.Log)]
 public static class AppenderCollectionIntegration
 {
+    private static readonly IOtelLogger Logger = OtelLogging.GetLogger();
+#if NET
+    private static int _warningLogged;
+#endif
+
     internal static CallTargetReturn<TReturn> OnMethodEnd<TTarget, TReturn>(TTarget instance, TReturn returnValue, Exception exception, in CallTargetState state)
     {
-        if (
-            Instrumentation.LogSettings.Value.EnableLog4NetBridge &&
 #if NET
-#pragma warning disable SA1003
-            !LoggerInitializer.IsInitializedAtLeastOnce &&
-#pragma warning restore SA1003
+        if (LoggerInitializer.IsInitializedAtLeastOnce)
+        {
+            if (Interlocked.Exchange(ref _warningLogged, 1) != default)
+            {
+                return new CallTargetReturn<TReturn>(returnValue);
+            }
+
+            Logger.Warning("Disabling addition of log4net bridge due to ILogger bridge initialization.");
+            return new CallTargetReturn<TReturn>(returnValue);
+        }
 #endif
-            returnValue is Array responseArray)
+        if (Instrumentation.LogSettings.Value.EnableLog4NetBridge && returnValue is Array responseArray)
         {
             var finalArray = OpenTelemetryAppenderInitializer<TReturn>.Initialize(responseArray);
             return new CallTargetReturn<TReturn>(finalArray);
