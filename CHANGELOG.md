@@ -14,7 +14,8 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 #### Dependency updates
 
 - .NET Framework only, following packages updated
-  - `Google.Protobuf` updated from `3.29.1` to `3.29.3`.
+  - `Google.Protobuf` updated from `3.29.1` to `3.29.3`,
+  - `System.IO.Pipelines` updated from `9.0.0` to `9.0.1`.
 
 ### Deprecated
 
