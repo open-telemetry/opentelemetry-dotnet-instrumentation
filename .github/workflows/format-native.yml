@@ -37,7 +37,7 @@ jobs:
       - name: Setup Go
         uses: actions/setup-go@f111f3307d8850f501ac008e886eec1fd1932a34 # tag: v5.3.0
         with:
-          go-version: '1.20.1'
+          go-version: '1.23.5'
           
       - name: Verify all native files have license headers
         shell: bash
