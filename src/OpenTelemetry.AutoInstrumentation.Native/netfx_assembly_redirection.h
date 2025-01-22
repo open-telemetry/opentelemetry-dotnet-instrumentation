@@ -96,7 +96,7 @@ void CorProfiler::InitNetFxAssemblyRedirectsMap()
         { L"System.IO.FileSystem.Watcher", {4, 0, 2, 0} },
         { L"System.IO.IsolatedStorage", {4, 0, 2, 0} },
         { L"System.IO.MemoryMappedFiles", {4, 0, 2, 0} },
-        { L"System.IO.Pipelines", {9, 0, 0, 0} },
+        { L"System.IO.Pipelines", {9, 0, 0, 1} },
         { L"System.IO.Pipes", {4, 0, 2, 0} },
         { L"System.IO.UnmanagedMemoryStream", {4, 0, 3, 0} },
         { L"System.Linq", {4, 1, 2, 0} },
