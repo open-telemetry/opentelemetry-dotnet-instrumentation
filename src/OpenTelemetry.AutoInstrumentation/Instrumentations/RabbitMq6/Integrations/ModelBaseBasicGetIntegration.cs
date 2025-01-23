@@ -26,24 +26,41 @@ namespace OpenTelemetry.AutoInstrumentation.Instrumentations.RabbitMq6.Integrati
 public static class ModelBaseBasicGetIntegration
 {
     internal static CallTargetState OnMethodBegin<TTarget>(TTarget instance, string queue, bool autoAck)
+    where TTarget : IModelBase
     {
-        return new CallTargetState(null, null, DateTimeOffset.UtcNow);
+        var activity = RabbitMqInstrumentation.StartReceive(instance);
+        return new CallTargetState(activity, null);
     }
 
     internal static CallTargetReturn<TResponse> OnMethodEnd<TTarget, TResponse>(TTarget instance, TResponse response, Exception? exception, in CallTargetState state)
     where TResponse : IBasicGetResult
-    where TTarget : IModelBase
     {
-        // ReSharper disable once ConditionIsAlwaysTrueOrFalseAccordingToNullableAPIContract
-        if (response.Instance is not null)
+        /*        // ReSharper disable once ConditionIsAlwaysTrueOrFalseAccordingToNullableAPIContract
+                if (response.Instance is not null)
+                {
+                    using var activity = RabbitMqInstrumentation.StartReceive(response, state.StartTime!.Value, instance);
+                    if (exception is not null)
+                    {
+                        activity.SetException(exception);
+                    }
+                }
+
+                return new CallTargetReturn<TResponse>(response);*/
+
+        var activity = state.Activity;
+        if (activity is null)
         {
-            using var activity = RabbitMqInstrumentation.StartReceive(response, state.StartTime!.Value, instance);
-            if (exception is not null)
-            {
-                activity.SetException(exception);
-            }
+            return new CallTargetReturn<TResponse>(response);
         }
 
+        RabbitMqInstrumentation.EndReceive(activity, response);
+
+        if (exception is not null)
+        {
+            activity.SetException(exception);
+        }
+
+        activity.Stop();
         return new CallTargetReturn<TResponse>(response);
     }
 }
