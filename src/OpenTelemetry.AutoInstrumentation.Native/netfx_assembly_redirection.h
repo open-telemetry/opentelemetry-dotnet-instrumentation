@@ -22,7 +22,7 @@ void CorProfiler::InitNetFxAssemblyRedirectsMap()
         { L"Grpc.Core", {2, 0, 0, 0} },
         { L"Grpc.Core.Api", {2, 0, 0, 0} },
         { L"Microsoft.Bcl.AsyncInterfaces", {9, 0, 0, 0} },
-        { L"Microsoft.Extensions.Configuration", {9, 0, 0, 0} },
+        { L"Microsoft.Extensions.Configuration", {9, 0, 0, 1} },
         { L"Microsoft.Extensions.Configuration.Abstractions", {9, 0, 0, 1} },
         { L"Microsoft.Extensions.Configuration.Binder", {9, 0, 0, 0} },
         { L"Microsoft.Extensions.DependencyInjection", {9, 0, 0, 0} },
