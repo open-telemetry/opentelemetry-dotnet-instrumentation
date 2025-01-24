@@ -207,19 +207,6 @@ OpenTelemetry .NET Automatic Instrumentation components
 OpenTelemetry .NET Automatic Instrumentation project contains components with
 separate copyright notices and license terms:
 
-Library Google.Protobuf is under the following copyright:
-Copyright 2008 Google Inc. All rights reserved under BSD-3-Clause license
-(<https://github.com/protocolbuffers/protobuf/blob/main/LICENSE>).
-
-Libraries
-
-- Google.Protobuf,
-- Grpc.Net.Client
-- Grpc.Net.Common,
-are under the following copyright:
-Copyright 2019 The gRPC Authors under Apache License Version 2.0
-(<https://github.com/grpc/grpc-dotnet/blob/master/LICENSE>).
-
 Libraries
 
 - OpenTelemetry
