@@ -35,18 +35,6 @@ public static class ModelBaseBasicGetIntegration
     internal static CallTargetReturn<TResponse> OnMethodEnd<TTarget, TResponse>(TTarget instance, TResponse response, Exception? exception, in CallTargetState state)
     where TResponse : IBasicGetResult
     {
-        /*        // ReSharper disable once ConditionIsAlwaysTrueOrFalseAccordingToNullableAPIContract
-                if (response.Instance is not null)
-                {
-                    using var activity = RabbitMqInstrumentation.StartReceive(response, state.StartTime!.Value, instance);
-                    if (exception is not null)
-                    {
-                        activity.SetException(exception);
-                    }
-                }
-
-                return new CallTargetReturn<TResponse>(response);*/
-
         var activity = state.Activity;
         if (activity is null)
         {

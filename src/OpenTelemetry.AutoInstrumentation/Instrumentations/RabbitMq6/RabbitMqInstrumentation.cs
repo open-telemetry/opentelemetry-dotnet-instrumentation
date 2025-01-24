@@ -7,7 +7,6 @@ using System.Net.Sockets;
 using System.Text;
 using OpenTelemetry.AutoInstrumentation.Instrumentations.RabbitMq6.DuckTypes;
 using OpenTelemetry.Context.Propagation;
-// ReSharper disable ConditionIsAlwaysTrueOrFalseAccordingToNullableAPIContract
 
 namespace OpenTelemetry.AutoInstrumentation.Instrumentations.RabbitMq6;
 
