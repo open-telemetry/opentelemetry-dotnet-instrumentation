@@ -18,6 +18,7 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
   - `Microsoft.Bcl.AsyncInterfaces` updated from `9.0.0` to `9.0.1`,
   - `Microsoft.Extensions.Configuration` updated from `9.0.0` to `9.0.1`,
   - `Microsoft.Extensions.Configuration.Abstractions` updated from `9.0.0` to `9.0.1`,
+  - `Microsoft.Extensions.DependencyInjection` updated from `9.0.0` to `9.0.1`,
   - `Microsoft.Extensions.DependencyInjection.Abstractions`
     updated from `9.0.0` to `9.0.1`,
   - `Microsoft.Extensions.Options` updated from `9.0.0` to `9.0.1`,
