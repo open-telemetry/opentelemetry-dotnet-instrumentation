@@ -11,6 +11,9 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 
 ### Changed
 
+- Kafka and RabbitMQ instrumentation now use the new S.D.DS v9 API for adding
+  activity links after creation, removing the need for manual start time adjustments
+
 #### Dependency updates
 
 - .NET Framework only, following packages updated
