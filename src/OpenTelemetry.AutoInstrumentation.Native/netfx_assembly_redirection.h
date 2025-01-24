@@ -25,7 +25,7 @@ void CorProfiler::InitNetFxAssemblyRedirectsMap()
         { L"Microsoft.Extensions.Configuration", {9, 0, 0, 1} },
         { L"Microsoft.Extensions.Configuration.Abstractions", {9, 0, 0, 1} },
         { L"Microsoft.Extensions.Configuration.Binder", {9, 0, 0, 0} },
-        { L"Microsoft.Extensions.DependencyInjection", {9, 0, 0, 0} },
+        { L"Microsoft.Extensions.DependencyInjection", {9, 0, 0, 1} },
         { L"Microsoft.Extensions.DependencyInjection.Abstractions", {9, 0, 0, 1} },
         { L"Microsoft.Extensions.Diagnostics.Abstractions", {9, 0, 0, 0} },
         { L"Microsoft.Extensions.Logging", {9, 0, 0, 0} },
