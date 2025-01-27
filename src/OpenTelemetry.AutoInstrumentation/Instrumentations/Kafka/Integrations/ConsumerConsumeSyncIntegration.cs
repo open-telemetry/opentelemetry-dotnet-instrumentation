@@ -1,6 +1,7 @@
 // Copyright The OpenTelemetry Authors
 // SPDX-License-Identifier: Apache-2.0
 
+using System.Diagnostics;
 using OpenTelemetry.AutoInstrumentation.CallTarget;
 using OpenTelemetry.AutoInstrumentation.DuckTyping;
 using OpenTelemetry.AutoInstrumentation.Instrumentations.Kafka.DuckTypes;
@@ -54,9 +55,13 @@ public static class ConsumerConsumeSyncIntegration
             {
                 activity.SetException(exception);
             }
-
-            activity?.Stop();
         }
+        else
+        {
+            activity.ActivityTraceFlags = ActivityTraceFlags.None;
+        }
+
+        activity.Stop();
 
         return new CallTargetReturn<TResponse>(response);
     }
