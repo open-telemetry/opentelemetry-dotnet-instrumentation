@@ -1,7 +1,7 @@
 // Copyright The OpenTelemetry Authors
 // SPDX-License-Identifier: Apache-2.0
 
-using System.Diagnostics;
+using System.Globalization;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
@@ -168,7 +168,62 @@ public class OtlpOverHttpExporter
 
         resourceProfiles.ScopeProfiles.Add(scopeProfiles);
         resourceProfiles.Resource = new Resource();
-        resourceProfiles.Resource.Attributes.Add(new KeyValue { Key = "todo.resource.detector.key", Value = new AnyValue { StringValue = "todo.resource.detector.value" } });
+
+        foreach (var resourceAttribute in ResourcesProvider.Resource.Attributes)
+        {
+            var value = new AnyValue();
+            // TODO better serialization for resources
+            switch (resourceAttribute.Value)
+            {
+                case char c:
+                    value.StringValue = c.ToString();
+                    break;
+                case string s:
+                    value.StringValue = s;
+                    break;
+                case bool b:
+                    value.BoolValue = b;
+                    break;
+                case byte:
+                case sbyte:
+                case short:
+                case ushort:
+                case int:
+                case uint:
+                case long:
+                    value.IntValue = (long)resourceAttribute.Value;
+                    break;
+                case float:
+                case double:
+                    value.DoubleValue = (double)resourceAttribute.Value;
+                    break;
+                case Array:
+                    // TODO handle arrays before going to production
+                    throw new NotImplementedException("Arrays as resources are not implemented.");
+
+                // All other types are converted to strings
+                default:
+                    try
+                    {
+                        var stringValue = Convert.ToString(resourceAttribute.Value, CultureInfo.InvariantCulture);
+                        value.StringValue = stringValue;
+                    }
+                    catch
+                    {
+                        // If ToString throws an exception then the tag is ignored.
+                        throw new NotSupportedException("Not supported type for " + resourceAttribute.Value);
+                    }
+
+                    break;
+            }
+
+            resourceProfiles.Resource.Attributes.Add(new KeyValue
+            {
+                Key = resourceAttribute.Key,
+                Value = value
+            });
+        }
+
         // TODO handle schema Url resourceProfiles.SchemaUrl
 
         return resourceProfiles;

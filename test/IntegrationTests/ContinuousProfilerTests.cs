@@ -26,10 +26,10 @@ public class ContinuousProfilerTests : TestHelper
         SetExporter(collector);
         SetEnvironmentVariable("OTEL_DOTNET_AUTO_PLUGINS", "TestApplication.ContinuousProfiler.AllocationPlugin, TestApplication.ContinuousProfiler, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null");
         SetEnvironmentVariable("OTEL_DOTNET_AUTO_TRACES_ADDITIONAL_SOURCES", "TestApplication.ContinuousProfiler");
-        RunTestApplication();
+        var (_, _, processId) = RunTestApplication();
 
         collector.Expect(profileData => profileData.ResourceProfiles.Any(resourceProfiles => resourceProfiles.ScopeProfiles.Any(scopeProfile => scopeProfile.Profiles.Any(profile => ContainAttributes(profile, "allocation") && profile.Sample[0].Value[0] != 0.0))));
-        collector.ResourceExpector.Expect("todo.resource.detector.key", "todo.resource.detector.value");
+        collector.ResourceExpector.ExpectStandardResources(processId, "TestApplication.ContinuousProfiler");
 
         collector.AssertExpectations();
         collector.ResourceExpector.AssertExpectations();
@@ -48,9 +48,10 @@ public class ContinuousProfilerTests : TestHelper
 
         collector.ExpectCollected(ExpectCollected, "Expect Collected failed");
         collector.Expect(profileData => profileData.ResourceProfiles.Any(resourceProfiles => resourceProfiles.ScopeProfiles.Any(scopeProfile => scopeProfile.Profiles.Any(profile => ContainStackTraceForClassHierarchy(profile, expectedStackTrace) && ContainAttributes(profile, "cpu")))));
-        collector.ResourceExpector.Expect("todo.resource.detector.key", "todo.resource.detector.value");
 
-        RunTestApplication();
+        var (_, _, processId) = RunTestApplication();
+
+        collector.ResourceExpector.ExpectStandardResources(processId, "TestApplication.ContinuousProfiler");
 
         collector.AssertCollected();
         collector.AssertExpectations();
