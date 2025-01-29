@@ -241,7 +241,7 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 ### Removed
 
 - Support for macOS Big Sur 11 x64.
-  macOs libraries are built and tested against [macOS Monterey 12 x64](https://github.com/actions/runner-images/blob/main/images/macos/macos-12-Readme.md).
+  macOs libraries are built and tested against macOS Monterey 12 x64.
 - Support for `MongoDB.Driver.Core` < 2.28.0.
 - Support for `StackExchange.Redis` < 2.6.122.
 
@@ -327,7 +327,7 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 ### Deprecated
 
 - Support for macOS Big Sur 11 x64.
-  All further releases will be supporting [macOS Monterey 12 x64](https://github.com/actions/runner-images/blob/main/images/macos/macos-12-Readme.md)
+  All further releases will be supporting macOS Monterey 12 x64
   and newer.
 
 ## [1.6.0](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/tag/v1.6.0)
