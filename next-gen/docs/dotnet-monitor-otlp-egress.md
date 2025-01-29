@@ -10,6 +10,8 @@ using dotnet-monitor and send off OTLP data.
 
 ## Design overview
 
+![Out-of-proc Instrumentation](https://github.com/user-attachments/assets/7f0b2870-f95a-4d73-9c6e-101a58d3e828)
+
 Event sources:
 
 * Tracing:
