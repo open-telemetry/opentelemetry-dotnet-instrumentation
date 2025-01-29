@@ -1,7 +1,6 @@
 // Copyright The OpenTelemetry Authors
 // SPDX-License-Identifier: Apache-2.0
 
-using System.Diagnostics;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
@@ -20,6 +19,12 @@ public class OtlpOverHttpExporter
 
     private readonly string _endpoint = Environment.GetEnvironmentVariable("OTEL_EXPORTER_OTLP_ENDPOINT") + "/v1/profiles";
     private readonly HttpClient _httpClient = new();
+    private readonly long cpuPeriod;
+
+    public OtlpOverHttpExporter(TimeSpan cpuPeriod)
+    {
+        this.cpuPeriod = (long)cpuPeriod.TotalNanoseconds;
+    }
 
     public void ExportThreadSamples(byte[] buffer, int read, CancellationToken cancellationToken)
     {
@@ -33,7 +38,7 @@ public class OtlpOverHttpExporter
         try
         {
             var timestampNanoseconds = threadSamples[0].TimestampNanoseconds; // all items in the batch have same timestamp
-            var extendedPprofBuilder = new ExtendedPprofBuilder("cpu", timestampNanoseconds);
+            var extendedPprofBuilder = new ExtendedPprofBuilder("samples", "count", "cpu", "nanoseconds", cpuPeriod, timestampNanoseconds);
 
             for (var i = 0; i < threadSamples.Count; i++)
             {
@@ -78,7 +83,7 @@ public class OtlpOverHttpExporter
             var scopeProfiles = CreateScopeProfiles();
 
             var lastTimestamp = allocationSamples[0].ThreadSample.TimestampNanoseconds;
-            var extendedPprofBuilder = new ExtendedPprofBuilder("allocation", lastTimestamp);
+            var extendedPprofBuilder = new ExtendedPprofBuilder("allocations", "bytes", null, null, null, lastTimestamp);
             scopeProfiles.Profiles.Add(extendedPprofBuilder.Profile);
 
             for (var i = 0; i < allocationSamples.Count; i++)
@@ -88,7 +93,7 @@ public class OtlpOverHttpExporter
                 {
                     // TODO consider either putting each sample in separate profile or in one profile with min and max timestamp
                     lastTimestamp = allocationSample.ThreadSample.TimestampNanoseconds;
-                    extendedPprofBuilder = new ExtendedPprofBuilder("allocation", lastTimestamp);
+                    extendedPprofBuilder = new ExtendedPprofBuilder("allocations", "bytes", null, null, null, lastTimestamp);
                     scopeProfiles.Profiles.Add(extendedPprofBuilder.Profile);
                 }
 
