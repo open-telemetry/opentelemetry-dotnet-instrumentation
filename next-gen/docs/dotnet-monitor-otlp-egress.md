@@ -157,7 +157,7 @@ A proof of concept was built.
 
 * https://github.com/dotnet/runtime/pull/104134
 
-  Before this change if a listener subcribes to the tracing EventSource it is
+  Before this change if a listener subscribes to the tracing EventSource it is
   basically in "AlwaysOn" mode meaning every Activity is created. We added a
   sampler mode which is more or less "ParentBased(TraceIdRatioBased)" to give
   users more control.
@@ -178,7 +178,7 @@ Work to move the dotnet/diagnostics changes from the PoC into the actual code:
 
 * https://github.com/dotnet/runtime/issues/109388
 
-  The current metrics EventSource doesn't expsoe a proper histogram. It only
+  The current metrics EventSource doesn't expose a proper histogram. It only
   exposes what would be called a Summary histogram in OTel world.
 
 * https://github.com/dotnet/runtime/issues/102924
