@@ -47,6 +47,54 @@ There are three different repos in play in the design:
   mini-SDK, give it an `IConfigurationSection` from its settings file to map
   onto options, and feed it data read from the target process.
 
+## Supported scenarios
+
+The out-of-proc model doesn't use any bytecode manipulation whatsoever. Users
+are able to listen to telemetry (created via ActivitySource, Meter, and/or
+ILogger) emitted by runtime, their own code, or in any libraries they use. That
+instrumentation needs to be present when the application is deployed.
+
+### Native runtime instrumentation
+
+* HttpClient as of .NET 9 supports tracing & metrics.
+
+* AspNetCore as of .NET 9 supports metrics. Limited tracing (spans are created
+  but not populated).
+
+* Runtime metrics are available as of .NET 9.
+
+### Propagation
+
+There is no ability currently for dotnet-monitor to configure propagation.
+Propagation in the target process will be owned by
+[DistributedContextPropagator](https://learn.microsoft.com/dotnet/api/system.diagnostics.distributedcontextpropagator).
+Default style is W3C.
+
+### Trace sampling
+
+There is limited ability for dotnet-monitor to configure sampling. When
+listening to the tracing EventSource subscribers may pass a string which
+controls what the EventSource `ActivityListener` will do.
+[Sampling](https://github.com/dotnet/runtime/blob/87e9f1d94f94f7e9b38da74fd93ea856b0ca6d92/src/libraries/System.Diagnostics.DiagnosticSource/src/System/Diagnostics/DiagnosticSourceEventSource.cs#L60)
+style is an option there. dotnet-monitor may configure the sampler but it can't
+bring custom samplers, it can only choose from one of the samplers available in
+runtime.
+
+### Metric aggregation and cardinality limits
+
+When there is a listener to the metrics EventSource runtime has its own sort of
+mini-OTel SDK which does aggregation. Aggregated data is periodically written to
+the EventSource. dotnet-monitor can configure the [cardinality
+limit](https://github.com/dotnet/runtime/blob/87e9f1d94f94f7e9b38da74fd93ea856b0ca6d92/src/libraries/System.Diagnostics.DiagnosticSource/src/System/Diagnostics/Metrics/MetricsEventSource.cs#L37)
+(more or less).
+
+### Log filtering
+
+The logging EventSource supports the same type of ILogger configuration which
+may be done via `IConfiguration` in the target app. dotnet-monitor can listen to
+[different categories (with prefix support) and log
+levels](https://github.com/dotnet/runtime/blob/87e9f1d94f94f7e9b38da74fd93ea856b0ca6d92/src/libraries/Microsoft.Extensions.Logging.EventSource/src/LoggingEventSource.cs#L36).
+
 ## Proof-of-concept
 
 A proof of concept was built.
@@ -135,3 +183,7 @@ Work to move the dotnet/diagnostics changes from the PoC into the actual code:
 
   There is no way to listen to Activity Links or Events using the existing
   tracing EventSource.
+
+* https://github.com/dotnet/aspnetcore/issues/52439
+
+  AspNetCore doesn't populate spans with data.
