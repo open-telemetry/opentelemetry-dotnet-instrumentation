@@ -47,7 +47,7 @@ public class ContinuousProfilerTests : TestHelper
         var expectedStackTrace = string.Join("\n", CreateExpectedStackTrace());
 
         collector.ExpectCollected(ExpectCollected, "Expect Collected failed");
-        collector.Expect(profileData => profileData.ResourceProfiles.Any(resourceProfiles => resourceProfiles.ScopeProfiles.Any(scopeProfile => scopeProfile.Profiles.Any(profile => ContainStackTraceForClassHierarchy(profile, expectedStackTrace) && ContainSampleType(profile, "samples", "count") && ContainPeriod(profile, "cpu", "nanoseconds", 1_000_000_000)))));
+        collector.Expect(profileData => profileData.ResourceProfiles.Any(resourceProfiles => resourceProfiles.ScopeProfiles.Any(scopeProfile => scopeProfile.Profiles.Any(profile => ContainStackTraceForClassHierarchy(profile, expectedStackTrace) && ContainSampleType(profile, "samples", "count") && ContainPeriod(profile, "cpu", "nanoseconds", 1_000_000_000) && profile.Sample[0].Value[0] == 1))));
         collector.ResourceExpector.Expect("todo.resource.detector.key", "todo.resource.detector.value");
 
         RunTestApplication();

@@ -45,6 +45,7 @@ public class OtlpOverHttpExporter
                 var threadSample = threadSamples[i];
 
                 var sampleBuilder = CreateSampleBuilder(threadSample, extendedPprofBuilder);
+                sampleBuilder.SetValue(1);
 
                 extendedPprofBuilder.Profile.Sample.Add(sampleBuilder.Build());
             }
