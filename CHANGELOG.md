@@ -16,13 +16,52 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 
 #### Dependency updates
 
+- Updated [Core components](https://github.com/open-telemetry/opentelemetry-dotnet/blob/main/VERSIONING.md#core-components):
+  [`1.11.1`](https://github.com/open-telemetry/opentelemetry-dotnet/releases/tag/core-1.11.1).
+- Following packages updated
+  - `OpenTelemetry.Instrumentation.GrpcNetClient` from `1.10.0-beta.1` to `1.11.0-beta.1`
+  - `OpenTelemetry.Instrumentation.Http` from `1.10.0` to `1.11.0`,
+  - `OpenTelemetry.Instrumentation.Process` from `1.10.0-beta.1` to `1.11.0-beta.1`,
+  - `OpenTelemetry.Instrumentation.Quartz` from `1.10.0-beta.1` to `1.11.0-beta.1`,
+  - `OpenTelemetry.Instrumentation.Runtime` from `1.10.0` to `1.11.0`,
+  - `OpenTelemetry.Instrumentation.SqlClient` from `1.10.0-beta.1` to `1.11.0-beta.1`,
+  - `OpenTelemetry.Instrumentation.Wcf` from `1.10.0-beta.1` to `1.11.0-beta.1`,
+  - `OpenTelemetry.Resources.Azure` from `1.10.0-beta.1` to `1.11.0-beta.1`,
+  - `OpenTelemetry.Resources.Container` from `1.10.0-beta.1` to `1.11.0-beta.1`,
+  - `OpenTelemetry.Resources.Host` from `1.10.0-beta.1` to `1.11.0-beta.1`,
+  - `OpenTelemetry.Resources.OperatingSystem` from `1.10.0-beta.1` to `1.11.0-beta.1`,
+  - `OpenTelemetry.Resources.Process` from `1.10.0-beta.1` to `1.11.0-beta.1`,
+  - `OpenTelemetry.Resources.ProcessRuntime` from `1.10.0-beta.1` to `1.11.0-beta.1`.
+- .NET only, following packages updated
+  - `OpenTelemetry.Instrumentation.AspNetCore` from `1.10.1` to `1.11.0`,
+  - `OpenTelemetry.Instrumentation.EntityFrameworkCore` from `1.10.0-beta.1` to `1.11.0-beta.1`,
+  - `OpenTelemetry.Instrumentation.StackExchangeRedis` from `1.10.0-beta.1` to `1.11.0-beta.1`.
 - .NET Framework only, following packages updated
-  - `Google.Protobuf` updated from `3.29.1` to `3.29.3`,
-  - `System.IO.Pipelines` updated from `9.0.0` to `9.0.1`.
+  - `Microsoft.Bcl.AsyncInterfaces` updated from `9.0.0` to `9.0.1`,
+  - `Microsoft.Extensions.Configuration` updated from `9.0.0` to `9.0.1`,
+  - `Microsoft.Extensions.Configuration.Abstractions` updated from `9.0.0` to `9.0.1`,
+  - `Microsoft.Extensions.DependencyInjection.Abstractions`
+    updated from `9.0.0` to `9.0.1`,
+  - `Microsoft.Extensions.Options` updated from `9.0.0` to `9.0.1`,
+  - `Microsoft.Extensions.Primitives` updated from `9.0.0` to `9.0.1`,
+  - `OpenTelemetry.Instrumentation.AspNet` from `1.10.0-beta.1` to `1.11.0-beta.1`,
+  - `System.IO.Pipelines` updated from `9.0.0` to `9.0.1`,
+  - `System.Diagnostics.DiagnosticSource` updated from `9.0.0` to `9.0.1`,
+  - `System.Text.Encodings.Web` update from `9.0.0` to `9.0.1`,
+  - `System.Text.Json` update from `9.0.0` to `9.0.1`.
 
 ### Deprecated
 
 ### Removed
+
+#### Dependency removals
+
+- Following packages removed
+  - `Google.Protobuf`.
+- .NET only, following packages removed
+  - `Grpc.Core.Api`.
+  - `Grpc.Net.Client`.
+  - `Grpc.Net.Common.dll`.
 
 ### Fixed
 
@@ -205,7 +244,7 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 ### Removed
 
 - Support for macOS Big Sur 11 x64.
-  macOs libraries are built and tested against [macOS Monterey 12 x64](https://github.com/actions/runner-images/blob/main/images/macos/macos-12-Readme.md).
+  macOs libraries are built and tested against macOS Monterey 12 x64.
 - Support for `MongoDB.Driver.Core` < 2.28.0.
 - Support for `StackExchange.Redis` < 2.6.122.
 
@@ -291,7 +330,7 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 ### Deprecated
 
 - Support for macOS Big Sur 11 x64.
-  All further releases will be supporting [macOS Monterey 12 x64](https://github.com/actions/runner-images/blob/main/images/macos/macos-12-Readme.md)
+  All further releases will be supporting macOS Monterey 12 x64
   and newer.
 
 ## [1.6.0](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/tag/v1.6.0)
