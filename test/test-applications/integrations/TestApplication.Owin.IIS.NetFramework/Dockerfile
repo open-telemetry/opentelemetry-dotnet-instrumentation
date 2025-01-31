@@ -9,6 +9,7 @@ COPY bin/tracer.zip .
 COPY bin/OpenTelemetry.DotNet.Auto.psm1 .
 ENV OTEL_DOTNET_AUTO_INSTALL_DIR=C:\opentelemetry
 SHELL ["powershell", "-Command", "$ErrorActionPreference = 'Stop'; $ProgressPreference = 'SilentlyContinue';"]
+RUN Set-ItemProperty -Path "HKLM:\\SOFTWARE\\Microsoft\\.NETFramework" -Name "LoaderOptimization" -Value 1
 RUN Import-Module .\OpenTelemetry.DotNet.Auto.psm1 -Verbose; `
     Install-OpenTelemetryCore -LocalPath .\tracer.zip; `
     Register-OpenTelemetryForIIS;
