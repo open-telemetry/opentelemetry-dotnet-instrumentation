@@ -28,7 +28,7 @@ public class ContinuousProfilerTests : TestHelper
         SetEnvironmentVariable("OTEL_DOTNET_AUTO_TRACES_ADDITIONAL_SOURCES", "TestApplication.ContinuousProfiler");
         RunTestApplication();
 
-        collector.Expect(profileData => profileData.ResourceProfiles.Any(resourceProfiles => resourceProfiles.ScopeProfiles.Any(scopeProfile => scopeProfile.Profiles.Any(profile => ContainAttributes(profile, "allocation") && profile.Sample[0].Value[0] != 0.0))));
+        collector.Expect(profileData => profileData.ResourceProfiles.Any(resourceProfiles => resourceProfiles.ScopeProfiles.Any(scopeProfile => scopeProfile.Profiles.Any(profile => ContainSampleType(profile, "allocations", "bytes") && profile.Sample[0].Value[0] != 0.0))));
         collector.ResourceExpector.Expect("todo.resource.detector.key", "todo.resource.detector.value");
 
         collector.AssertExpectations();
@@ -47,7 +47,7 @@ public class ContinuousProfilerTests : TestHelper
         var expectedStackTrace = string.Join("\n", CreateExpectedStackTrace());
 
         collector.ExpectCollected(ExpectCollected, "Expect Collected failed");
-        collector.Expect(profileData => profileData.ResourceProfiles.Any(resourceProfiles => resourceProfiles.ScopeProfiles.Any(scopeProfile => scopeProfile.Profiles.Any(profile => ContainStackTraceForClassHierarchy(profile, expectedStackTrace) && ContainAttributes(profile, "cpu")))));
+        collector.Expect(profileData => profileData.ResourceProfiles.Any(resourceProfiles => resourceProfiles.ScopeProfiles.Any(scopeProfile => scopeProfile.Profiles.Any(profile => ContainStackTraceForClassHierarchy(profile, expectedStackTrace) && ContainSampleType(profile, "samples", "count") && ContainPeriod(profile, "cpu", "nanoseconds", 1_000_000_000) && profile.Sample[0].Value[0] == 1))));
         collector.ResourceExpector.Expect("todo.resource.detector.key", "todo.resource.detector.value");
 
         RunTestApplication();
@@ -80,9 +80,18 @@ public class ContinuousProfilerTests : TestHelper
         return true;
     }
 
-    private static bool ContainAttributes(Profile profileContainer, string profilingDataType)
+    private static bool ContainSampleType(Profile profile, string profilingSampleType, string profilingSampleUnit)
     {
-        return profileContainer.AttributeTable.Any(x => x.Key == "todo.profiling.data.type" && x.Value.StringValue == profilingDataType);
+        return profile.SampleType.Any(vt =>
+            profile.StringTable[vt.TypeStrindex] == profilingSampleType &&
+            profile.StringTable[vt.UnitStrindex] == profilingSampleUnit);
+    }
+
+    private static bool ContainPeriod(Profile profile, string profilingSampleType, string profilingSampleUnit, long period)
+    {
+        return profile.StringTable[profile.PeriodType.TypeStrindex] == profilingSampleType &&
+            profile.StringTable[profile.PeriodType.UnitStrindex] == profilingSampleUnit &&
+            profile.Period == period;
     }
 
     private static List<string> CreateExpectedStackTrace()
