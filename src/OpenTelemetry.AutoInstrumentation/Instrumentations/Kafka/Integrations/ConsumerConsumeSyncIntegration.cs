@@ -1,6 +1,7 @@
 // Copyright The OpenTelemetry Authors
 // SPDX-License-Identifier: Apache-2.0
 
+using System.Diagnostics;
 using OpenTelemetry.AutoInstrumentation.CallTarget;
 using OpenTelemetry.AutoInstrumentation.DuckTyping;
 using OpenTelemetry.AutoInstrumentation.Instrumentations.Kafka.DuckTypes;
@@ -25,17 +26,18 @@ public static class ConsumerConsumeSyncIntegration
 {
     internal static CallTargetState OnMethodBegin<TTarget>(TTarget instance, int timeout)
     {
-        // Preferably, activity would be started here,
-        // and link to propagated context later;
-        // this is currently not possible, so capture start time
-        // to use it when starting activity to get approximate
-        // activity duration.
-        // TODO: accurate on .NET, but not .NET Fx
-        return new CallTargetState(null, null, DateTime.UtcNow);
+        var activity = KafkaInstrumentation.StartConsumerActivity(instance!);
+        return new CallTargetState(activity, null);
     }
 
     internal static CallTargetReturn<TResponse> OnMethodEnd<TTarget, TResponse>(TTarget instance, TResponse response, Exception? exception, in CallTargetState state)
     {
+        var activity = state.Activity;
+        if (activity is null)
+        {
+            return new CallTargetReturn<TResponse>(response);
+        }
+
         IConsumeResult? consumeResult;
         if (exception is not null && exception.TryDuckCast<IConsumeException>(out var consumeException))
         {
@@ -43,19 +45,23 @@ public static class ConsumerConsumeSyncIntegration
         }
         else
         {
-            consumeResult = response == null ? null : response.DuckAs<IConsumeResult>();
+            consumeResult = response?.DuckAs<IConsumeResult>();
         }
 
         if (consumeResult is not null && !consumeResult.IsPartitionEOF)
         {
-            var activity = KafkaInstrumentation.StartConsumerActivity(consumeResult, (DateTimeOffset)state.StartTime!, instance!);
+            KafkaInstrumentation.EndConsumerActivity(activity, consumeResult);
             if (exception is not null)
             {
                 activity.SetException(exception);
             }
-
-            activity?.Stop();
         }
+        else
+        {
+            activity.ActivityTraceFlags = ActivityTraceFlags.None;
+        }
+
+        activity.Stop();
 
         return new CallTargetReturn<TResponse>(response);
     }
