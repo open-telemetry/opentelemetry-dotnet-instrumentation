@@ -5,6 +5,7 @@ using System.Diagnostics;
 using Google.Protobuf;
 using OpenTelemetry.Proto.Common.V1;
 using OpenTelemetry.Proto.Profiles.V1Development;
+using ValueType = OpenTelemetry.Proto.Profiles.V1Development.ValueType;
 
 namespace TestApplication.ContinuousProfiler;
 
@@ -14,7 +15,7 @@ internal class ExtendedPprofBuilder
     private readonly LinkCache _linkCache;
     private readonly AttributeCache _attributeCache;
 
-    public ExtendedPprofBuilder(string profilingDataType, long timestampNanoseconds)
+    public ExtendedPprofBuilder(string sampleType, string sampleUnit, string? periodType, string? periodUnit, long? period, long timestampNanoseconds)
     {
         var profileByteId = new byte[16];
         ActivityTraceId.CreateRandom().CopyTo(profileByteId);
@@ -23,16 +24,35 @@ internal class ExtendedPprofBuilder
             ProfileId = ByteString.CopyFrom(profileByteId),
             TimeNanos = timestampNanoseconds,
         };
+
         var stringCache = new StringCache(Profile);
+
+        Profile.SampleType.Add(new ValueType
+        {
+            TypeStrindex = stringCache.GetOrAdd(sampleType),
+            UnitStrindex = stringCache.GetOrAdd(sampleUnit)
+        });
+
+        if (periodType != null && periodUnit != null)
+        {
+            Profile.PeriodType = new ValueType
+            {
+                TypeStrindex = stringCache.GetOrAdd(periodType),
+                UnitStrindex = stringCache.GetOrAdd(periodUnit)
+            };
+        }
+
+        if (period.HasValue)
+        {
+            Profile.Period = period.Value;
+        }
+
         var functionCache = new FunctionCache(Profile, stringCache);
         _linkCache = new LinkCache(Profile);
         _attributeCache = new AttributeCache(Profile);
         var profileFrameTypeAttributeId = _attributeCache.GetOrAdd("profile.frame.type", value => value.StringValue = "dotnet");
 
         _locationCache = new LocationCache(Profile, functionCache, profileFrameTypeAttributeId);
-
-        var profilingDataTypeAttributeId = _attributeCache.GetOrAdd("todo.profiling.data.type", value => value.StringValue = profilingDataType);
-        Profile.AttributeIndices.Add(profilingDataTypeAttributeId);
     }
 
     public Profile Profile { get; }
