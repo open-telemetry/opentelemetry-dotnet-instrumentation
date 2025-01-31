@@ -127,7 +127,7 @@ public class SmokeTests : TestHelper
         SetEnvironmentVariable("OTEL_DOTNET_AUTO_TRACES_ADDITIONAL_SOURCES", "MyCompany.MyProduct.MyLibrary");
         var (_, _, processId) = RunTestApplication();
 
-        ExpectResources(collector.ResourceExpector, processId);
+        collector.ResourceExpector.ExpectStandardResources(processId, ServiceName);
 
         collector.ResourceExpector.AssertExpectations();
     }
@@ -143,7 +143,7 @@ public class SmokeTests : TestHelper
         SetEnvironmentVariable("OTEL_DOTNET_AUTO_METRICS_ADDITIONAL_SOURCES", "MyCompany.MyProduct.MyLibrary");
         var (_, _, processId) = RunTestApplication();
 
-        ExpectResources(collector.ResourceExpector, processId);
+        collector.ResourceExpector.ExpectStandardResources(processId, ServiceName);
 
         collector.ResourceExpector.AssertExpectations();
     }
@@ -160,7 +160,7 @@ public class SmokeTests : TestHelper
         EnableBytecodeInstrumentation();
         var (_, _, processId) = RunTestApplication();
 
-        ExpectResources(collector.ResourceExpector, processId);
+        collector.ResourceExpector.ExpectStandardResources(processId, ServiceName);
 
         collector.ResourceExpector.AssertExpectations();
     }
@@ -578,41 +578,6 @@ public class SmokeTests : TestHelper
         var startIndex = entry.IndexOf("[debug]") + startMarker.Length;
 
         return entry.AsSpan().Slice(startIndex).Trim().ToString();
-    }
-
-    private static void ExpectResources(OtlpResourceExpector resourceExpector, int processId)
-    {
-        resourceExpector.Expect("service.name", ServiceName); // this is set via env var and App.config, but env var has precedence
-#if NETFRAMEWORK
-        resourceExpector.Expect("deployment.environment", "test"); // this is set via App.config
-#endif
-        resourceExpector.Expect("telemetry.sdk.name", "opentelemetry");
-        resourceExpector.Expect("telemetry.sdk.language", "dotnet");
-        resourceExpector.Expect("telemetry.sdk.version", typeof(OpenTelemetry.Resources.Resource).Assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>()!.InformationalVersion.Split('+')[0]);
-        resourceExpector.Expect("telemetry.distro.name", "opentelemetry-dotnet-instrumentation");
-        resourceExpector.Expect("telemetry.distro.version", typeof(OpenTelemetry.AutoInstrumentation.Constants).Assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>()!.InformationalVersion.Split('+')[0]);
-
-        resourceExpector.Expect("process.pid", processId);
-        resourceExpector.Expect("host.name", Environment.MachineName);
-
-#if NETFRAMEWORK
-        resourceExpector.Expect("process.runtime.name", ".NET Framework");
-#else
-        resourceExpector.Expect("process.runtime.name", ".NET");
-#endif
-
-        var expectedPlatform = EnvironmentTools.GetOS() switch
-        {
-            "win" => "windows",
-            "osx" => "darwin",
-            "linux" => "linux",
-            _ => throw new PlatformNotSupportedException($"Unknown platform")
-        };
-        resourceExpector.Expect("os.type", expectedPlatform);
-        resourceExpector.Exist("os.build_id");
-        resourceExpector.Exist("os.description");
-        resourceExpector.Exist("os.name");
-        resourceExpector.Exist("os.version");
     }
 
 #if NETFRAMEWORK

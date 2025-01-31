@@ -10,13 +10,14 @@
     </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="System.Diagnostics.DiagnosticSource" />
     <PackageReference Include="Grpc.Net.Client" />
     <PackageReference Include="Google.Protobuf" />
     <PackageReference Include="Grpc.Tools" PrivateAssets="all" />
+    <PackageReference Include="OpenTelemetry" />
+    <PackageReference Include="System.Diagnostics.DiagnosticSource" />
   </ItemGroup>
 
-    <ItemGroup>
+  <ItemGroup>
       <Compile Include="..\TestApplication.ContinuousProfiler\Exporter\AllocationSample.cs">
         <Link>Exporter\AllocationSample.cs</Link>
       </Compile>
@@ -25,6 +26,9 @@
       </Compile>
       <Compile Include="..\TestApplication.ContinuousProfiler\Exporter\OtlpOverHttpExporter.cs">
         <Link>Exporter\OtlpOverHttpExporter.cs</Link>
+      </Compile>
+      <Compile Include="..\TestApplication.ContinuousProfiler\Exporter\ResourcesProvider.cs">
+        <Link>Exporter\ResourcesProvider.cs</Link>
       </Compile>
       <Compile Include="..\TestApplication.ContinuousProfiler\Exporter\SampleBuilder.cs">
         <Link>Exporter\SampleBuilder.cs</Link>
