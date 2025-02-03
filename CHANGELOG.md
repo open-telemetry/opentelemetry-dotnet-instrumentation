@@ -37,15 +37,24 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
   - `Microsoft.Bcl.AsyncInterfaces` updated from `9.0.0` to `9.0.1`,
   - `Microsoft.Extensions.Configuration` updated from `9.0.0` to `9.0.1`,
   - `Microsoft.Extensions.Configuration.Abstractions` updated from `9.0.0` to `9.0.1`,
+  - `Microsoft.Extensions.Configuration.Binder` updated from `9.0.0` to `9.0.1`,
+  - `Microsoft.Extensions.DependencyInjection` updated from `9.0.0` to `9.0.1`,
   - `Microsoft.Extensions.DependencyInjection.Abstractions`
     updated from `9.0.0` to `9.0.1`,
+  - `Microsoft.Extensions.Diagnostics.Abstractions` updated from `9.0.0` to `9.0.1`,
+  - `Microsoft.Extensions.Logging` updated from `9.0.0` to `9.0.1`,
+  - `Microsoft.Extensions.Logging.Abstractions` updated from `9.0.0` to `9.0.1`,
+  - `Microsoft.Extensions.Logging.Configuration` updated from `9.0.0` to `9.0.1`,
   - `Microsoft.Extensions.Options` updated from `9.0.0` to `9.0.1`,
+  - `Microsoft.Extensions.Options.ConfigurationExtensions`
+    updated from `9.0.0` to `9.0.1`,
   - `Microsoft.Extensions.Primitives` updated from `9.0.0` to `9.0.1`,
   - `OpenTelemetry.Instrumentation.AspNet` from `1.10.0-beta.1` to `1.11.0-beta.1`,
   - `System.IO.Pipelines` updated from `9.0.0` to `9.0.1`,
   - `System.Diagnostics.DiagnosticSource` updated from `9.0.0` to `9.0.1`,
   - `System.Text.Encodings.Web` update from `9.0.0` to `9.0.1`,
-  - `System.Text.Json` update from `9.0.0` to `9.0.1`.
+  - `System.Text.Json` update from `9.0.0` to `9.0.1`,
+  - `System.Threading.Tasks.Extensions"` update from `4.5.4` to `4.6.0`.
 
 ### Deprecated
 
