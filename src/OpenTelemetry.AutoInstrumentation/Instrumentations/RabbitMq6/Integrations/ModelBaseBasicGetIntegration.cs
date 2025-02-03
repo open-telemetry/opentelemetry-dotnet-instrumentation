@@ -5,6 +5,7 @@ using System.Diagnostics;
 using System.Resources;
 using OpenTelemetry.AutoInstrumentation.CallTarget;
 using OpenTelemetry.AutoInstrumentation.DuckTyping;
+using OpenTelemetry.AutoInstrumentation.Instrumentations.Kafka.DuckTypes;
 using OpenTelemetry.AutoInstrumentation.Instrumentations.RabbitMq6.DuckTypes;
 using OpenTelemetry.AutoInstrumentation.Util;
 
@@ -33,7 +34,7 @@ public static class ModelBaseBasicGetIntegration
     }
 
     internal static CallTargetReturn<TResponse> OnMethodEnd<TTarget, TResponse>(TTarget instance, TResponse response, Exception? exception, in CallTargetState state)
-    where TResponse : IBasicGetResult
+        where TResponse : IBasicGetResult
     {
         var activity = state.Activity;
         if (activity is null)
@@ -41,14 +42,28 @@ public static class ModelBaseBasicGetIntegration
             return new CallTargetReturn<TResponse>(response);
         }
 
-        RabbitMqInstrumentation.EndReceive(activity, response);
-
-        if (exception is not null)
+        string? routingKey = null;
+        try
         {
-            activity.SetException(exception);
+            routingKey = response.RoutingKey;
+        }
+        catch { }
+
+        if (!string.IsNullOrEmpty(routingKey))
+        {
+            RabbitMqInstrumentation.EndReceive(activity, response);
+            if (exception is not null)
+            {
+                activity.SetException(exception);
+            }
+        }
+        else
+        {
+            activity.ActivityTraceFlags = ActivityTraceFlags.None;
         }
 
         activity.Stop();
+
         return new CallTargetReturn<TResponse>(response);
     }
 }
