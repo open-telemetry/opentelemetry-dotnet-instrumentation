@@ -127,9 +127,15 @@ internal class ExtendedPprofBuilder
                 return value;
             }
 
-            // TODO How to handle SystemName in .NET
-            // TODO handle line number
-            var function = new Function { SystemNameStrindex = _stringCache.GetOrAdd("TODO How to handle SystemName in .NET?"), FilenameStrindex = _stringCache.GetOrAdd("unknown"), NameStrindex = _stringCache.GetOrAdd(functionName), }; // for now, we don't support file name
+            // TODO There is a plan to make SystemName, FileName and StartLine number optional, as all of them are not always available.
+            // TODO keeping a note here to double-check before going to production
+            var function = new Function
+            {
+                // SystemNameStrindex = _stringCache.GetOrAdd("TODO How to handle SystemName in .NET?"),
+                // FilenameStrindex = _stringCache.GetOrAdd("unknown"),
+                // StartLine = 0,
+                NameStrindex = _stringCache.GetOrAdd(functionName),
+            }; // for now, we don't support file name
 
             _profile.FunctionTable.Add(function);
             _table[functionName] = _index;
