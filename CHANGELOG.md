@@ -12,7 +12,7 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 ### Changed
 
 - Enhanced Kafka and RabbitMQ instrumentation now create spans at the start instead
-  of manual start time adjustments. For RabbitMQ, spans will now be created for 
+  of manual start time adjustments. For RabbitMQ, spans will now be created for
   empty reads, just as they are in native RabbitMQ instrumentation.
 
 #### Dependency updates
