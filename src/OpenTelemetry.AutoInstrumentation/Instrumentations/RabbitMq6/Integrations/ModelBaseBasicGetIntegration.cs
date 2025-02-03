@@ -42,14 +42,7 @@ public static class ModelBaseBasicGetIntegration
             return new CallTargetReturn<TResponse>(response);
         }
 
-        string? routingKey = null;
-        try
-        {
-            routingKey = response.RoutingKey;
-        }
-        catch { }
-
-        if (!string.IsNullOrEmpty(routingKey))
+        if (response.Instance is not null)
         {
             RabbitMqInstrumentation.EndReceive(activity, response);
             if (exception is not null)
