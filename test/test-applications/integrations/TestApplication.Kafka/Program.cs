@@ -1,6 +1,7 @@
 // Copyright The OpenTelemetry Authors
 // SPDX-License-Identifier: Apache-2.0
 
+using System.Diagnostics;
 using Confluent.Kafka;
 using Confluent.Kafka.Admin;
 
@@ -9,23 +10,26 @@ namespace TestApplication.Kafka;
 internal static class Program
 {
     private const string MessageKey = "testkey";
-    private const string BootstrapServers = "localhost:9092";
+    private static string _bootstrapServers = "localhost:9092";
 
     public static async Task<int> Main(string[] args)
     {
-        if (args.Length < 2)
+        if (args.Length < 4)
         {
             throw new ArgumentException("Required parameters not provided.");
         }
 
-        var topicName = args[1];
+        var port = args[1];
+        _bootstrapServers = $"localhost:{port}";
 
-        if (args.Length == 3 && args[2] == "--consume-only")
+        var topicName = args[3];
+
+        if (args.Length == 5 && args[4] == "--consume-only")
         {
             return await ConsumeOnly(topicName);
         }
 
-        if (args.Length == 2)
+        if (args.Length == 4)
         {
             return await ProduceAndConsume(topicName);
         }
@@ -35,9 +39,9 @@ internal static class Program
 
     private static async Task<int> ConsumeOnly(string topicName)
     {
-        await CreateTopic(BootstrapServers, topicName);
+        await CreateTopic(_bootstrapServers, topicName);
 
-        using var consumer = BuildConsumer(topicName, BootstrapServers);
+        using var consumer = BuildConsumer(topicName, _bootstrapServers);
         consumer.Subscribe(topicName);
 
         using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(10));
@@ -56,7 +60,7 @@ internal static class Program
     {
         using var waitEvent = new ManualResetEventSlim();
 
-        using var producer = BuildProducer(BootstrapServers);
+        using var producer = BuildProducer(_bootstrapServers);
 
         // Attempts are made to produce messages to non-existent topic.
         // Intention is to verify exception handling logic
@@ -73,7 +77,7 @@ internal static class Program
         await TryProduceAsync(producer, topicName);
         TryProduceSync(producer, topicName);
 
-        using var consumer = BuildConsumer(topicName, BootstrapServers);
+        using var consumer = BuildConsumer(topicName, _bootstrapServers);
         consumer.Subscribe(topicName);
 
         TryConsumeMessage(consumer);
@@ -87,7 +91,7 @@ internal static class Program
 
         Console.WriteLine("Delivery handler completed.");
 
-        await CreateTopic(BootstrapServers, topicName);
+        await CreateTopic(_bootstrapServers, topicName);
         Console.WriteLine("Topic creation completed.");
 
         using var cts = new CancellationTokenSource(TimeSpan.FromMinutes(1));
