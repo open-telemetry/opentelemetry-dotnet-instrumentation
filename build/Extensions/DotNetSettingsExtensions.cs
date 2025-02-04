@@ -44,33 +44,6 @@ internal static class DotNetSettingsExtensions
             .SetResultsDirectory(resultsDirectory);
     }
 
-    public static DotNetMSBuildSettings EnableTrxLogOutput(this DotNetMSBuildSettings settings, string resultsDirectory)
-    {
-        return settings
-            .SetProperty("VSTestLogger", "trx")
-            .SetProperty("VSTestResultsDirectory", resultsDirectory);
-    }
-
-    public static DotNetMSBuildSettings SetBlameHangTimeout(this DotNetMSBuildSettings settings, string timeout)
-    {
-        return settings
-            .SetProperty("VSTestBlameHang", true)
-            .SetProperty("VSTestBlameHangTimeout", timeout);
-    }
-
-    public static DotNetMSBuildSettings RunTests(this DotNetMSBuildSettings settings)
-    {
-        return settings
-            .SetTargets("VSTest")
-            .SetProperty("VSTestNoBuild", true);
-    }
-
-    public static DotNetMSBuildSettings SetFilter(this DotNetMSBuildSettings settings, string filter)
-    {
-        return settings
-            .SetProperty("VSTestTestCaseFilter", filter);
-    }
-
     public static DotNetBuildSettings[] CombineWithBuildInfos(this DotNetBuildSettings settings, IReadOnlyCollection<PackageBuildInfo> buildInfos, TargetFramework targetFramework)
     {
         // NOTE: SetProperty creates internally a new instance!
