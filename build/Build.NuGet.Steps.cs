@@ -180,14 +180,13 @@ partial class Build
 
             for (var i = 0; i < TestCount; i++)
             {
-                DotNetMSBuild(config => config
+                DotNetTest(config => config
                     .SetConfiguration(BuildConfiguration)
                     .SetFilter(AndFilter(TestNameFilter(), ContainersFilter()))
                     .SetBlameHangTimeout("5m")
                     .EnableTrxLogOutput(GetResultsDirectory(nugetPackagesTestProject))
-                    .SetTargetPath(nugetPackagesTestProject)
-                    .SetRestore(!NoRestore)
-                    .RunTests()
+                    .SetProjectFile(nugetPackagesTestProject)
+                    .SetNoRestore(NoRestore)
                 );
             }
         });
