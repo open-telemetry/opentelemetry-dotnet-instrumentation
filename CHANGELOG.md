@@ -5,7 +5,7 @@ All notable changes to this component are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/compare/v1.10.0-beta.1..HEAD)
+## [Unreleased](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/compare/v1.10.0..HEAD)
 
 ### Added
 
@@ -13,6 +13,21 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 
 - Enhanced Kafka and RabbitMQ instrumentation now create spans at the start instead
   of manual start time adjustments.
+
+#### Dependency updates
+
+### Deprecated
+
+### Removed
+
+### Fixed
+
+## [1.10.0](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/tag/v1.10.0)
+
+This release include all changes from [1.10.0-beta.1](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/tag/v1.10.0-beta.1)
+release.
+
+### Changed
 
 #### Dependency updates
 
@@ -58,8 +73,6 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
   - `System.Text.Encodings.Web` update from `9.0.0` to `9.0.1`,
   - `System.Text.Json` update from `9.0.0` to `9.0.1`,
   - `System.Threading.Tasks.Extensions"` update from `4.5.4` to `4.6.0`.
-
-### Deprecated
 
 ### Removed
 
