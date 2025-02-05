@@ -32,9 +32,12 @@ public class KafkaTests : TestHelper
     // https://github.com/confluentinc/confluent-kafka-dotnet/blob/07de95ed647af80a0db39ce6a8891a630423b952/src/Confluent.Kafka/Offset.cs#L36C44-L36C44
     private const int InvalidOffset = -1001;
 
-    public KafkaTests(ITestOutputHelper testOutputHelper)
+    private readonly KafkaFixture _kafka;
+
+    public KafkaTests(ITestOutputHelper testOutputHelper, KafkaFixture kafka)
         : base("Kafka", testOutputHelper)
     {
+        _kafka = kafka;
     }
 
     [Theory]
@@ -81,7 +84,7 @@ public class KafkaTests : TestHelper
         RunTestApplication(new TestSettings
         {
             PackageVersion = packageVersion,
-            Arguments = $"--topic-name {topicName}"
+            Arguments = $"--kafka {_kafka.Port} --topic-name {topicName}"
         });
 
         collector.AssertExpectations();
@@ -104,7 +107,7 @@ public class KafkaTests : TestHelper
         RunTestApplication(new TestSettings
         {
             PackageVersion = packageVersion,
-            Arguments = $"--topic-name {topicName} --consume-only"
+            Arguments = $"--kafka {_kafka.Port} --topic-name {topicName} --consume-only"
         });
 
         collector.AssertEmpty(TimeSpan.FromSeconds(10));
