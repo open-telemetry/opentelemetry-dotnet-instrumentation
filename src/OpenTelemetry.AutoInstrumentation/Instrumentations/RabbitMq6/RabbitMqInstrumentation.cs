@@ -5,10 +5,8 @@ using System.Diagnostics;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
-using OpenTelemetry.AutoInstrumentation.DuckTyping;
 using OpenTelemetry.AutoInstrumentation.Instrumentations.RabbitMq6.DuckTypes;
 using OpenTelemetry.Context.Propagation;
-// ReSharper disable ConditionIsAlwaysTrueOrFalseAccordingToNullableAPIContract
 
 namespace OpenTelemetry.AutoInstrumentation.Instrumentations.RabbitMq6;
 
@@ -16,24 +14,36 @@ internal static class RabbitMqInstrumentation
 {
     private static readonly ActivitySource Source = new("OpenTelemetry.AutoInstrumentation.RabbitMq");
 
-    public static Activity? StartReceive<TBasicResult, TModelBase>(TBasicResult result, DateTimeOffset startTime, TModelBase instance)
-        where TBasicResult : IBasicGetResult
+    public static Activity? StartReceive<TModelBase>(TModelBase instance)
         where TModelBase : IModelBase
     {
         var connection = instance.Session?.Connection;
-        return StartConsume(
-            result.BasicProperties?.Headers,
-            MessagingAttributes.Values.ReceiveOperationName,
-            result.Exchange,
-            result.RoutingKey,
-            result.DeliveryTag,
-            result.Body.Length,
-            result.BasicProperties?.MessageId,
-            result.BasicProperties?.CorrelationId,
+        var activity = Source.StartActivity(name: string.Empty, kind: ActivityKind.Consumer);
+
+        SetNetworkTags(
+            activity!,
             connection?.Endpoint?.HostName,
             connection?.Endpoint?.Port,
-            connection?.RemoteEndPoint,
-            startTime);
+            connection?.RemoteEndPoint);
+
+        return activity;
+    }
+
+    public static void EndReceive<TBasicResult>(Activity activity, TBasicResult result)
+        where TBasicResult : IBasicGetResult
+    {
+        activity.DisplayName = GetActivityName(result.RoutingKey, MessagingAttributes.Values.ReceiveOperationName);
+
+        var activityLinks = GetActivityLinks(result.BasicProperties?.Headers);
+
+        foreach (var link in activityLinks)
+        {
+            activity.AddLink(link);
+        }
+
+        activity.SetCommonTags(result.Exchange, result.RoutingKey, result.Body.Length, MessagingAttributes.Values.ReceiveOperationName);
+
+        activity.SetMessagingTags(result.BasicProperties?.MessageId, result.BasicProperties?.CorrelationId, result.DeliveryTag);
     }
 
     public static Activity? StartProcess<TBasicProperties, TBody>(TBasicProperties properties, string? exchange, string? routingKey, TBody body, ulong deliveryTag)
@@ -52,15 +62,22 @@ internal static class RabbitMqInstrumentation
             correlationId = properties.CorrelationId;
         }
 
-        return StartConsume(
-            headers,
-            MessagingAttributes.Values.DeliverOperationName,
-            exchange,
-            routingKey,
-            deliveryTag,
-            messageBodyLength,
-            messageId,
-            correlationId);
+        var activityLinks = GetActivityLinks(headers);
+        var name = GetActivityName(routingKey, MessagingAttributes.Values.DeliverOperationName);
+
+        var activity = Source.StartActivity(
+            name: name,
+            kind: ActivityKind.Consumer,
+            links: activityLinks);
+
+        if (activity is { IsAllDataRequested: true })
+        {
+            activity.SetCommonTags(exchange, routingKey, messageBodyLength, MessagingAttributes.Values.DeliverOperationName);
+
+            activity.SetMessagingTags(messageId, correlationId, deliveryTag);
+        }
+
+        return activity;
     }
 
     public static Activity? StartPublish<TBasicProperties, TModel>(TBasicProperties basicProperties, string? exchange, string? routingKey, int bodyLength, TModel instance)
@@ -78,15 +95,19 @@ internal static class RabbitMqInstrumentation
         if (activity is { IsAllDataRequested: true })
         {
             var connection = instance.Session?.Connection;
+
+            SetNetworkTags(
+                activity,
+                connection?.Endpoint?.HostName,
+                connection?.Endpoint?.Port,
+                connection?.RemoteEndPoint);
+
             SetCommonTags(
                 activity,
                 exchange,
                 routingKey,
                 bodyLength,
-                MessagingAttributes.Values.PublishOperationName,
-                connection?.Endpoint?.HostName,
-                connection?.Endpoint?.Port,
-                connection?.RemoteEndPoint);
+                MessagingAttributes.Values.PublishOperationName);
         }
 
         return activity;
@@ -97,74 +118,33 @@ internal static class RabbitMqInstrumentation
         return string.IsNullOrEmpty(routingKey) ? operationType : $"{routingKey} {operationType}";
     }
 
-    private static Activity? StartConsume(
-        IDictionary<string, object>? headers,
-        string consumeOperationName,
-        string? exchange,
-        string? routingKey,
-        ulong deliveryTag,
-        int bodyLength,
-        string? messageId,
-        string? correlationId,
-        string? hostname = null,
-        int? port = null,
-        EndPoint? remoteEndpoint = null,
-        DateTimeOffset startTime = default)
+    private static ActivityLink[] GetActivityLinks(IDictionary<string, object>? headers)
     {
         var propagatedContext = Propagators.DefaultTextMapPropagator.Extract(default, headers, MessageHeaderValueGetter);
 
-        var activityLinks = propagatedContext.ActivityContext.IsValid()
-            ? new[] { new ActivityLink(propagatedContext.ActivityContext) }
-            : Array.Empty<ActivityLink>();
-
-        var name = GetActivityName(routingKey, consumeOperationName);
-        var activity = Source.StartActivity(
-            name: name,
-            kind: ActivityKind.Consumer,
-            links: activityLinks,
-            startTime: startTime);
-        if (activity is { IsAllDataRequested: true })
-        {
-            SetConsumeTags(
-                activity,
-                exchange,
-                routingKey,
-                consumeOperationName,
-                deliveryTag,
-                bodyLength,
-                messageId,
-                correlationId,
-                hostname,
-                port,
-                remoteEndpoint);
-        }
-
-        return activity;
+        return propagatedContext.ActivityContext.IsValid() ? [new ActivityLink(propagatedContext.ActivityContext)] : [];
     }
 
-    private static void SetCommonTags(
-        Activity activity,
-        string? resultExchange,
-        string? routingKey,
-        int bodyLength,
-        string operationName,
-        string? hostName,
-        int? port,
-        EndPoint? remoteEndpoint)
+    private static void SetMessagingTags(this Activity activity, string? basicPropertiesMessageId, string? basicPropertiesCorrelationId, ulong deliveryTag)
     {
-        var exchange = string.IsNullOrEmpty(resultExchange) ? MessagingAttributes.Values.RabbitMq.DefaultExchangeName : resultExchange;
-
-        activity
-            .SetTag(MessagingAttributes.Keys.MessagingSystem, MessagingAttributes.Values.RabbitMq.MessagingSystemName)
-            .SetTag(MessagingAttributes.Keys.MessagingOperation, operationName)
-            .SetTag(MessagingAttributes.Keys.DestinationName, exchange)
-            .SetTag(MessagingAttributes.Keys.MessageBodySize, bodyLength);
-
-        if (!string.IsNullOrEmpty(routingKey))
+        if (!string.IsNullOrEmpty(basicPropertiesMessageId))
         {
-            activity.SetTag(MessagingAttributes.Keys.RabbitMq.RoutingKey, routingKey);
+            activity.SetTag(MessagingAttributes.Keys.MessageId, basicPropertiesMessageId);
         }
 
+        if (!string.IsNullOrEmpty(basicPropertiesCorrelationId))
+        {
+            activity.SetTag(MessagingAttributes.Keys.ConversationId, basicPropertiesCorrelationId);
+        }
+
+        if (deliveryTag > 0)
+        {
+            activity.SetTag(MessagingAttributes.Keys.RabbitMq.DeliveryTag, deliveryTag);
+        }
+    }
+
+    private static void SetNetworkTags(this Activity activity, string? hostName, int? port, EndPoint? remoteEndpoint)
+    {
         var hostNameAndPortExist = !string.IsNullOrEmpty(hostName) && port != null;
         if (hostNameAndPortExist)
         {
@@ -199,33 +179,24 @@ internal static class RabbitMqInstrumentation
         }
     }
 
-    private static void SetConsumeTags(
-        Activity activity,
-        string? exchange,
+    private static void SetCommonTags(
+        this Activity activity,
+        string? resultExchange,
         string? routingKey,
-        string operationName,
-        ulong deliveryTag,
         int bodyLength,
-        string? basicPropertiesMessageId,
-        string? basicPropertiesCorrelationId,
-        string? hostName,
-        int? port,
-        EndPoint? remoteEndpoint)
+        string operationName)
     {
-        SetCommonTags(activity, exchange, routingKey, bodyLength, operationName, hostName, port, remoteEndpoint);
-        if (!string.IsNullOrEmpty(basicPropertiesMessageId))
-        {
-            activity.SetTag(MessagingAttributes.Keys.MessageId, basicPropertiesMessageId);
-        }
+        var exchange = string.IsNullOrEmpty(resultExchange) ? MessagingAttributes.Values.RabbitMq.DefaultExchangeName : resultExchange;
 
-        if (!string.IsNullOrEmpty(basicPropertiesCorrelationId))
-        {
-            activity.SetTag(MessagingAttributes.Keys.ConversationId, basicPropertiesCorrelationId);
-        }
+        activity
+            .SetTag(MessagingAttributes.Keys.MessagingSystem, MessagingAttributes.Values.RabbitMq.MessagingSystemName)
+            .SetTag(MessagingAttributes.Keys.MessagingOperation, operationName)
+            .SetTag(MessagingAttributes.Keys.DestinationName, exchange)
+            .SetTag(MessagingAttributes.Keys.MessageBodySize, bodyLength);
 
-        if (deliveryTag > 0)
+        if (!string.IsNullOrEmpty(routingKey))
         {
-            activity.SetTag(MessagingAttributes.Keys.RabbitMq.DeliveryTag, deliveryTag);
+            activity.SetTag(MessagingAttributes.Keys.RabbitMq.RoutingKey, routingKey);
         }
     }
 
@@ -235,10 +206,10 @@ internal static class RabbitMqInstrumentation
     {
         if (headers is not null && headers.TryGetValue(key, out var value) && value is byte[] bytes)
         {
-            return new[] { Encoding.UTF8.GetString(bytes) };
+            return [Encoding.UTF8.GetString(bytes)];
         }
 
-        return Enumerable.Empty<string>();
+        return [];
     }
 
     private static void MessageHeaderValueSetter(IDictionary<string, object> headers, string key, string val)
