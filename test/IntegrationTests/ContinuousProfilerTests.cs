@@ -26,10 +26,10 @@ public class ContinuousProfilerTests : TestHelper
         SetExporter(collector);
         SetEnvironmentVariable("OTEL_DOTNET_AUTO_PLUGINS", "TestApplication.ContinuousProfiler.AllocationPlugin, TestApplication.ContinuousProfiler, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null");
         SetEnvironmentVariable("OTEL_DOTNET_AUTO_TRACES_ADDITIONAL_SOURCES", "TestApplication.ContinuousProfiler");
-        RunTestApplication();
+        var (_, _, processId) = RunTestApplication();
 
-        collector.Expect(profileData => profileData.ResourceProfiles.Any(resourceProfiles => resourceProfiles.ScopeProfiles.Any(scopeProfile => scopeProfile.Profiles.Any(profile => ContainAttributes(profile, "allocation") && profile.Sample[0].Value[0] != 0.0))));
-        collector.ResourceExpector.Expect("todo.resource.detector.key", "todo.resource.detector.value");
+        collector.Expect(profileData => profileData.ResourceProfiles.Any(resourceProfiles => resourceProfiles.ScopeProfiles.Any(scopeProfile => scopeProfile.Profiles.Any(profile => ContainSampleType(profile, "allocations", "bytes") && profile.Sample[0].Value[0] != 0.0))));
+        collector.ResourceExpector.ExpectStandardResources(processId, "TestApplication.ContinuousProfiler");
 
         collector.AssertExpectations();
         collector.ResourceExpector.AssertExpectations();
@@ -47,10 +47,11 @@ public class ContinuousProfilerTests : TestHelper
         var expectedStackTrace = string.Join("\n", CreateExpectedStackTrace());
 
         collector.ExpectCollected(ExpectCollected, "Expect Collected failed");
-        collector.Expect(profileData => profileData.ResourceProfiles.Any(resourceProfiles => resourceProfiles.ScopeProfiles.Any(scopeProfile => scopeProfile.Profiles.Any(profile => ContainStackTraceForClassHierarchy(profile, expectedStackTrace) && ContainAttributes(profile, "cpu")))));
-        collector.ResourceExpector.Expect("todo.resource.detector.key", "todo.resource.detector.value");
+        collector.Expect(profileData => profileData.ResourceProfiles.Any(resourceProfiles => resourceProfiles.ScopeProfiles.Any(scopeProfile => scopeProfile.Profiles.Any(profile => ContainStackTraceForClassHierarchy(profile, expectedStackTrace) && ContainSampleType(profile, "samples", "count") && ContainPeriod(profile, "cpu", "nanoseconds", 1_000_000_000) && profile.Sample[0].Value[0] == 1))));
 
-        RunTestApplication();
+        var (_, _, processId) = RunTestApplication();
+
+        collector.ResourceExpector.ExpectStandardResources(processId, "TestApplication.ContinuousProfiler");
 
         collector.AssertCollected();
         collector.AssertExpectations();
@@ -80,9 +81,18 @@ public class ContinuousProfilerTests : TestHelper
         return true;
     }
 
-    private static bool ContainAttributes(Profile profileContainer, string profilingDataType)
+    private static bool ContainSampleType(Profile profile, string profilingSampleType, string profilingSampleUnit)
     {
-        return profileContainer.AttributeTable.Any(x => x.Key == "todo.profiling.data.type" && x.Value.StringValue == profilingDataType);
+        return profile.SampleType.Any(vt =>
+            profile.StringTable[vt.TypeStrindex] == profilingSampleType &&
+            profile.StringTable[vt.UnitStrindex] == profilingSampleUnit);
+    }
+
+    private static bool ContainPeriod(Profile profile, string profilingSampleType, string profilingSampleUnit, long period)
+    {
+        return profile.StringTable[profile.PeriodType.TypeStrindex] == profilingSampleType &&
+            profile.StringTable[profile.PeriodType.UnitStrindex] == profilingSampleUnit &&
+            profile.Period == period;
     }
 
     private static List<string> CreateExpectedStackTrace()

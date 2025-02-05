@@ -528,16 +528,15 @@ partial class Build
 
             for (int i = 0; i < TestCount; i++)
             {
-                DotNetMSBuild(config => config
+                DotNetTest(config => config
                     .SetConfiguration(BuildConfiguration)
                     .SetFilter(AndFilter(TestNameFilter(), ContainersFilter()))
                     .SetBlameHangTimeout("5m")
                     .EnableTrxLogOutput(GetResultsDirectory(project))
-                    .SetTargetPath(project)
-                    .SetRestore(!NoRestore)
+                    .SetProjectFile(project)
+                    .SetNoRestore(NoRestore)
                     .When(_ => TestTargetFramework != TargetFramework.NOT_SPECIFIED,
-                        s => s.SetProperty("TargetFramework", TestTargetFramework.ToString()))
-                    .RunTests()
+                        s => s.SetFramework(TestTargetFramework))
                 );
             }
         });

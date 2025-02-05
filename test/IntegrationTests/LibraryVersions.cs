@@ -12,7 +12,7 @@ public static partial class LibraryVersion
 {
     public static TheoryData<string> GetPlatformVersions(string integrationName)
     {
-        var anyPlatformVersions = LookupMap[integrationName];
+        var anyPlatformVersions = new TheoryData<string>(LookupMap[integrationName]);
         var platformKey = $"{integrationName}_{EnvironmentTools.GetPlatform()}";
 
         if (LookupMap.TryGetValue(platformKey, out var platformVersions))
