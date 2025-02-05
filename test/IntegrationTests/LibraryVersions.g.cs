@@ -155,6 +155,7 @@ public static partial class LibraryVersion
                 string.Empty,
 #else
                 "5.2.2",
+                "6.0.1",
 #endif
             ];
             return theoryData;
