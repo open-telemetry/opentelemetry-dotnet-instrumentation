@@ -11,6 +11,9 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 
 ### Changed
 
+- Enhanced Kafka and RabbitMQ instrumentation now create spans at the start instead
+  of manual start time adjustments.
+
 #### Dependency updates
 
 ### Deprecated

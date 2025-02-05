@@ -5,6 +5,7 @@ using System.Diagnostics;
 using System.Resources;
 using OpenTelemetry.AutoInstrumentation.CallTarget;
 using OpenTelemetry.AutoInstrumentation.DuckTyping;
+using OpenTelemetry.AutoInstrumentation.Instrumentations.Kafka.DuckTypes;
 using OpenTelemetry.AutoInstrumentation.Instrumentations.RabbitMq6.DuckTypes;
 using OpenTelemetry.AutoInstrumentation.Util;
 
@@ -26,23 +27,35 @@ namespace OpenTelemetry.AutoInstrumentation.Instrumentations.RabbitMq6.Integrati
 public static class ModelBaseBasicGetIntegration
 {
     internal static CallTargetState OnMethodBegin<TTarget>(TTarget instance, string queue, bool autoAck)
+    where TTarget : IModelBase
     {
-        return new CallTargetState(null, null, DateTimeOffset.UtcNow);
+        var activity = RabbitMqInstrumentation.StartReceive(instance);
+        return new CallTargetState(activity, null);
     }
 
     internal static CallTargetReturn<TResponse> OnMethodEnd<TTarget, TResponse>(TTarget instance, TResponse response, Exception? exception, in CallTargetState state)
-    where TResponse : IBasicGetResult
-    where TTarget : IModelBase
+        where TResponse : IBasicGetResult
     {
-        // ReSharper disable once ConditionIsAlwaysTrueOrFalseAccordingToNullableAPIContract
+        var activity = state.Activity;
+        if (activity is null)
+        {
+            return new CallTargetReturn<TResponse>(response);
+        }
+
         if (response.Instance is not null)
         {
-            using var activity = RabbitMqInstrumentation.StartReceive(response, state.StartTime!.Value, instance);
+            RabbitMqInstrumentation.EndReceive(activity, response);
             if (exception is not null)
             {
                 activity.SetException(exception);
             }
         }
+        else
+        {
+            activity.ActivityTraceFlags = ActivityTraceFlags.None;
+        }
+
+        activity.Stop();
 
         return new CallTargetReturn<TResponse>(response);
     }
