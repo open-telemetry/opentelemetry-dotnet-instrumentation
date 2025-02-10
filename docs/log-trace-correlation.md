@@ -41,7 +41,7 @@ Further reading:
 
 ### `log4net`
 
-See [`log4net-bridge`](./internal/log4net-bridge.md).
+See [`log4net-bridge`](./log4net-bridge.md).
 
 ## `log4net` trace context injection
 
