@@ -1,21 +1,19 @@
-# `log4net` instrumentation
+# `log4net` [logs bridge](https://opentelemetry.io/docs/specs/otel/glossary/#log-appender--bridge)
 
 > [!IMPORTANT]
-> log4net bridge and trace context injection are experimental features.
-> Both instrumentations can be disabled by setting `OTEL_DOTNET_AUTO_LOGS_LOG4NET_INSTRUMENTATION_ENABLED` to `false`.
+> log4net bridge is an experimental feature.
 
-Both bridge and trace context injection are supported for `log4net` in versions >= 2.0.13 && < 4.0.0
+The `log4net` logs bridge is disabled by default. In order to enable it, set `OTEL_DOTNET_AUTO_LOGS_ENABLE_LOG4NET_BRIDGE` to `true`.
 
-## `log4net` [logs bridge](https://opentelemetry.io/docs/specs/otel/glossary/#log-appender--bridge)
+Bridge is supported for `log4net` in versions >= 2.0.13 && < 4.0.0
 
 If `log4net` is used as a [logging provider](https://learn.microsoft.com/en-us/dotnet/core/extensions/logging-providers), `log4net` bridge should not be enabled, in order
 to reduce possibility of duplicated logs export.
 
-The `log4net` logs bridge is disabled by default. In order to enable it, set `OTEL_DOTNET_AUTO_LOGS_ENABLE_LOG4NET_BRIDGE` to `true`.
 When `log4net` logs bridge is enabled, and `log4net` is configured with at least 1 appender, application logs are exported in OTLP 
 format by default to the local instance of OpenTelemetry Collector, in addition to being written into their currently configured destination (e.g. a file).
 
-### `log4net` logging events conversion
+## `log4net` logging events conversion
 
 `log4net`'s `LoggingEvent`s are converted to OpenTelemetry log records in a following way:
 
@@ -31,7 +29,7 @@ is added as `log4net.rendered_message` attribute
 - `Exception` is used to populate the following properties: `exception.type`,`exception.message`,`exception.stacktrace`
 - `Level.Value` is mapped to `SeverityNumber` as outlined in the next section
 
-#### `log4net` level severity mapping
+### `log4net` level severity mapping
 
 `log4net` levels are mapped to OpenTelemetry severity types according to the following rules based on their numerical values.
 
@@ -43,17 +41,6 @@ Levels with numerical values of:
 - Higher than or equal to `Level.Info` but lower than `Level.Warn` are mapped to `LogRecordSeverity.Info`
 - Higher than or equal to `Level.Debug` but lower than `Level.Info` are mapped to `LogRecordSeverity.Debug`
 - Lower than `Level.Debug` are mapped to `LogRecordSeverity.Trace`
-
-## `log4net` trace context injection
-
-Following properties are added by default to the collection of logging event's properties:
-
-- `trace_id`
-- `span_id`
-- `trace_flags`
-
-This allows for trace context to be logged into currently configured log destination, e.g. a file.
-In order to use them, pattern needs to be updated.
 
 ## Known limitations of `log4net` bridge
 
