@@ -96,7 +96,8 @@ release.
   traces instrumentation for versions `7.0.0`+.
 - [log4net](https://www.nuget.org/packages/log4net/) [OpenTelemetry appender](https://opentelemetry.io/docs/concepts/signals/logs/#log-appender--bridge)
   for versions >= `2.0.13` && < `4.0.0`
-- [log4net](https://www.nuget.org/packages/log4net/) trace context injection for versions >= `2.0.13` && < `4.0.0`
+- [log4net](https://www.nuget.org/packages/log4net/) trace context injection
+ for versions >= `2.0.13` && < `4.0.0`.
 - Support for SqlClient metrics.
 
 ### Changed
