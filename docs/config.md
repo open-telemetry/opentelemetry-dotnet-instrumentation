@@ -215,7 +215,7 @@ the `ASPNETCORE_HOSTINGSTARTUPASSEMBLIES` environment variable to
 `OpenTelemetry.AutoInstrumentation.AspNetCoreBootstrapper`.
 
 \[2\]: Instrumentation provides both [trace context injection](./log-trace-correlation.md#log4net-trace-context-injection)
-and [logs bridge](./internal/log4net-bridge.md).
+and [logs bridge](./log4net-bridge.md).
 
 ### Instrumentation options
 
