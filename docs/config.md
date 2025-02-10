@@ -214,7 +214,7 @@ can be enabled without using the .NET CLR Profiler by setting
 the `ASPNETCORE_HOSTINGSTARTUPASSEMBLIES` environment variable to
 `OpenTelemetry.AutoInstrumentation.AspNetCoreBootstrapper`.
 
-\[2\]: Instrumentation provides both [trace context injection](./log4net-context-injection.md)
+\[2\]: Instrumentation provides both [trace context injection](./log-trace-correlation.md#log-to-trace-correlation)
 and [logs bridge](./internal/log4net-bridge.md).
 
 ### Instrumentation options
