@@ -7,7 +7,7 @@ The `log4net` trace context injection is enabled by default. It can be disabled 
 
 Context injection is supported for `log4net` in versions >= 2.0.13 && < 4.0.0
 
-Following properties are added by default to the collection of logging event's properties:
+Following properties are set by default on the collection of logging event's properties:
 
 - `trace_id`
 - `span_id`
