@@ -50,8 +50,8 @@ jobs:
       - name: Download Ubuntu x64 Artifacts from build job
         uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d16 # tag: v4.1.8
         with:
-          name: bin-ubuntu-20.04
-          path: bin/ci-artifacts/bin-ubuntu-20.04
+          name: bin-ubuntu-22.04
+          path: bin/ci-artifacts/bin-ubuntu-22.04
 
       - name: Download Ubuntu arm64 Artifacts from build job
         uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d16 # tag: v4.1.8

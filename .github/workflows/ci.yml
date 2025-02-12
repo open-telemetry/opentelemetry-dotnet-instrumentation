@@ -32,18 +32,18 @@ jobs:
       fail-fast: false
       matrix:
         test-tfm: [ net9.0, net8.0, net462 ]
-        machine: [ windows-2022, ubuntu-20.04, macos-13, otel-linux-arm64 ]
+        machine: [ windows-2022, ubuntu-22.04, macos-13, otel-linux-arm64 ]
         exclude:
           - test-tfm: net462
             machine: macos-13
           - test-tfm: net462
-            machine: ubuntu-20.04
+            machine: ubuntu-22.04
           - test-tfm: net462
             machine: otel-linux-arm64
         include:
           - machine: windows-2022
             containers: none
-          - machine: ubuntu-20.04
+          - machine: ubuntu-22.04
             containers: linux
           - machine: macos-13
             containers: none
@@ -204,17 +204,17 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - machine: ubuntu-20.04
+          - machine: ubuntu-22.04
             base-image: alpine
             build-source: alpine-x64
             os-type: linux-musl
-          - machine: ubuntu-20.04
+          - machine: ubuntu-22.04
             base-image: debian
-            build-source: ubuntu-20.04
+            build-source: ubuntu-22.04
             os-type: linux-glibc
-          - machine: ubuntu-20.04
+          - machine: ubuntu-22.04
             base-image: centos-stream9
-            build-source: ubuntu-20.04
+            build-source: ubuntu-22.04
             os-type: linux-glibc
           - machine: otel-linux-arm64
             base-image: alpine
@@ -252,7 +252,7 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - machine: ubuntu-20.04
+          - machine: ubuntu-22.04
           - machine: macos-13
           - machine: windows-2022
           - machine: otel-linux-arm64
@@ -300,7 +300,7 @@ jobs:
           path: test-artifacts/
 
   test-jobs:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     needs:
       - test-build-managed
       - test-build-native
