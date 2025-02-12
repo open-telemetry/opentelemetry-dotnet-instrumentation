@@ -24,18 +24,13 @@ jobs:
             containers: linux
           - machine: macos-13
             containers: none
-          - machine: otel-linux-arm64
+          - machine: ubuntu-22.04-arm
             containers: linux
     runs-on: ${{ matrix.machine }}
     steps:
       
       - name: Checkout
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # tag: v4.2.2
-
-      - name: Setup ARM64 Environment Variables
-        if: ${{ matrix.machine == 'otel-linux-arm64' }}
-        run: |
-          echo "DOTNET_INSTALL_DIR=~/.dotnet" >> $GITHUB_ENV
 
       - name: Setup .NET
         uses: actions/setup-dotnet@3951f0dfe7a07e2313ec93c75700083e2005cbab # tag: v4.3.0

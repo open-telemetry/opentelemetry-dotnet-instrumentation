@@ -53,15 +53,10 @@ jobs:
             log-dir: "/var/log/opentelemetry/dotnet"
           - machine: macos-13
             log-dir: "/var/log/opentelemetry/dotnet"
-          - machine: otel-linux-arm64
+          - machine: ubuntu-22.04-arm
             log-dir: "/var/log/opentelemetry/dotnet"
     runs-on: ${{ matrix.machine }}
     steps:
-        
-      - name: Setup ARM64 Environment Variables
-        if: ${{ matrix.machine == 'otel-linux-arm64' }}
-        run: |
-          echo "DOTNET_INSTALL_DIR=~/.dotnet" >> $GITHUB_ENV
 
       - name: Setup .NET
         uses: actions/setup-dotnet@3951f0dfe7a07e2313ec93c75700083e2005cbab # tag: v4.3.0
@@ -102,7 +97,7 @@ jobs:
           - machine: ubuntu-22.04
             base-image: alpine
             net-version: net9.0
-          - machine: otel-linux-arm64
+          - machine: ubuntu-22.04-arm
             base-image: alpine
             net-version: net9.0
     runs-on: ${{ matrix.machine }}

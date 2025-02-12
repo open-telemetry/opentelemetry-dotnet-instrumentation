@@ -56,8 +56,8 @@ jobs:
       - name: Download Ubuntu arm64 Artifacts from build job
         uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d16 # tag: v4.1.8
         with:
-          name: bin-otel-linux-arm64
-          path: bin/ci-artifacts/bin-otel-linux-arm64
+          name: bin-ubuntu-22.04-arm
+          path: bin/ci-artifacts/bin-ubuntu-22.04-arm
 
       - name: Download Alpine x64 Artifacts from build job
         uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d16 # tag: v4.1.8
