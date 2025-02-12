@@ -26,7 +26,7 @@ jobs:
 
   create-release:
     name: Create GH release
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     needs: [ build, build-container, build-nuget-packages ]
     permissions:
       contents: write
@@ -46,7 +46,7 @@ jobs:
 
       - run: cd bin-alpine-x64 ; zip -qq -r ../opentelemetry-dotnet-instrumentation-linux-musl-x64.zip . * ; cd ..
       - run: cd bin-alpine-arm64 ; zip -qq -r ../opentelemetry-dotnet-instrumentation-linux-musl-arm64.zip . * ; cd ..
-      - run: cd bin-ubuntu-20.04 ; zip -qq -r ../opentelemetry-dotnet-instrumentation-linux-glibc-x64.zip . * ; cd ..
+      - run: cd bin-ubuntu-22.04 ; zip -qq -r ../opentelemetry-dotnet-instrumentation-linux-glibc-x64.zip . * ; cd ..
       - run: cd bin-otel-linux-arm64 ; zip -qq -r ../opentelemetry-dotnet-instrumentation-linux-glibc-arm64.zip . * ; cd ..
       - run: cd bin-windows-2022 ; zip -qq -r ../opentelemetry-dotnet-instrumentation-windows.zip . * ; cd ..
       - run: cd bin-macos-13 ; zip -qq -r ../opentelemetry-dotnet-instrumentation-macos.zip . * ; cd ..

@@ -13,7 +13,7 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - machine: ubuntu-20.04
+          - machine: ubuntu-22.04
             base-image: alpine
             os-type: linux-musl
             architecture: x64

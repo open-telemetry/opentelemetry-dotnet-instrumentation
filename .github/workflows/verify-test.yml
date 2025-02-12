@@ -20,7 +20,7 @@ jobs:
         include:
           - machine: windows-2022
             containers: windows
-          - machine: ubuntu-20.04
+          - machine: ubuntu-22.04
             containers: linux
           - machine: macos-13
             containers: none

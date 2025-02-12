@@ -34,7 +34,7 @@ services:
       - otel-collector
 
   sqlserver:
-    image: mcr.microsoft.com/mssql/server:2019-CU17-ubuntu-20.04
+    image: mcr.microsoft.com/mssql/server:2022-CU17-ubuntu-22.04
     environment:
       - ACCEPT_EULA=Y
       - SA_PASSWORD=yourStrong(!)Password
