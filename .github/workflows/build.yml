@@ -19,24 +19,15 @@ jobs:
             log-dir: "/var/log/opentelemetry/dotnet"
           - machine: macos-13
             log-dir: "/var/log/opentelemetry/dotnet"
-          - machine: otel-linux-arm64
+          - machine: ubuntu-22.04-arm
             log-dir: "/var/log/opentelemetry/dotnet"
     runs-on: ${{ matrix.machine }}
     steps:
-
-      - name: ARM64 Runner Info
-        if: ${{ matrix.machine == 'otel-linux-arm64' }}
-        run: cat /etc/os-release
 
       - name: Checkout
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # tag: v4.2.2
         with:
           fetch-depth: 0 # fetching all, needed to correctly calculate version
-
-      - name: Setup ARM64 Environment Variables
-        if: ${{ matrix.machine == 'otel-linux-arm64' }}
-        run: |
-          echo "DOTNET_INSTALL_DIR=~/.dotnet" >> $GITHUB_ENV
 
       - name: Setup .NET
         uses: actions/setup-dotnet@3951f0dfe7a07e2313ec93c75700083e2005cbab # tag: v4.3.0
@@ -64,15 +55,6 @@ jobs:
           key: ${{ hashFiles('**/Directory.packages.props', './build/LibraryVersions.g.cs', '**/packages.config' ) }}
           path: ${{ env.NUGET_PACKAGES }}
 
-      - name: Setup ARM64 Machine
-        if: ${{ matrix.machine == 'otel-linux-arm64' }}
-        run: |
-          sudo apt-get update && \
-          sudo apt-get install -y \
-              cmake \
-              clang \
-              make
-      
       - name: Run BuildWorkflow
         run: ./build.cmd BuildWorkflow --no-restore ${{ steps.nuget-cache.outputs.cache-hit != 'true' }}
 

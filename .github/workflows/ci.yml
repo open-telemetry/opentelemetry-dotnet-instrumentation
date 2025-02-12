@@ -32,14 +32,14 @@ jobs:
       fail-fast: false
       matrix:
         test-tfm: [ net9.0, net8.0, net462 ]
-        machine: [ windows-2022, ubuntu-22.04, macos-13, otel-linux-arm64 ]
+        machine: [ windows-2022, ubuntu-22.04, macos-13, ubuntu-22.04-arm ]
         exclude:
           - test-tfm: net462
             machine: macos-13
           - test-tfm: net462
             machine: ubuntu-22.04
           - test-tfm: net462
-            machine: otel-linux-arm64
+            machine: ubuntu-22.04-arm
         include:
           - machine: windows-2022
             containers: none
@@ -47,7 +47,7 @@ jobs:
             containers: linux
           - machine: macos-13
             containers: none
-          - machine: otel-linux-arm64
+          - machine: ubuntu-22.04-arm
             containers: linux
     runs-on: ${{ matrix.machine }}
     steps:
@@ -56,11 +56,6 @@ jobs:
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # tag: v4.2.2
         with:
           fetch-depth: 0 # fetching all, needed to correctly calculate version
-
-      - name: Setup ARM64 Environment Variables
-        if: ${{ matrix.machine == 'otel-linux-arm64' }}
-        run: |
-          echo "DOTNET_INSTALL_DIR=~/.dotnet" >> $GITHUB_ENV
 
       - name: Setup .NET
         uses: actions/setup-dotnet@3951f0dfe7a07e2313ec93c75700083e2005cbab # tag: v4.3.0
@@ -87,15 +82,6 @@ jobs:
         uses: potatoqualitee/mssqlsuite@605af2310e2e22978ebf2c74d5995ba102094b8a # tag: v1.8
         with: 
           install: localdb
-      
-      - name: Setup ARM64 Machine
-        if: ${{ matrix.machine == 'otel-linux-arm64' }}
-        run: |
-          sudo apt-get update && \
-          sudo apt-get install -y \
-              cmake \
-              clang \
-              make
 
       - name: Run TestWorkflow
         run: ./build.cmd --skip NativeTests --target TestWorkflow --test-target-framework ${{ matrix.test-tfm }} --containers ${{ matrix.containers }}
@@ -216,13 +202,13 @@ jobs:
             base-image: centos-stream9
             build-source: ubuntu-22.04
             os-type: linux-glibc
-          - machine: otel-linux-arm64
+          - machine: ubuntu-22.04-arm
             base-image: alpine
             build-source: alpine-arm64
             os-type: linux-musl
-          - machine: otel-linux-arm64
+          - machine: ubuntu-22.04-arm
             base-image: debian-arm64
-            build-source: otel-linux-arm64
+            build-source: ubuntu-22.04-arm
             os-type: linux-glibc
     runs-on: ${{ matrix.machine }}
     timeout-minutes: 60
@@ -255,7 +241,7 @@ jobs:
           - machine: ubuntu-22.04
           - machine: macos-13
           - machine: windows-2022
-          - machine: otel-linux-arm64
+          - machine: ubuntu-22.04-arm
     runs-on: ${{ matrix.machine }}
     steps:
       
@@ -263,11 +249,6 @@ jobs:
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # tag: v4.2.2
         with:
           fetch-depth: 0 # fetching all, needed to correctly calculate version
-
-      - name: Setup ARM64 Environment Variables
-        if: ${{ matrix.machine == 'otel-linux-arm64' }}
-        run: |
-          echo "DOTNET_INSTALL_DIR=~/.dotnet" >> $GITHUB_ENV
 
       - name: Setup .NET
         uses: actions/setup-dotnet@3951f0dfe7a07e2313ec93c75700083e2005cbab # tag: v4.3.0
