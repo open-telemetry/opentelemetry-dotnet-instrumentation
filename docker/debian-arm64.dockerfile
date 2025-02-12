@@ -1,4 +1,4 @@
-FROM mcr.microsoft.com/dotnet/sdk:9.0.102-bookworm-slim@sha256:6894a71619e08b47ef9df7ff1f436b21d21db160e5d864e180c294a53d7a12f2
+FROM mcr.microsoft.com/dotnet/sdk:9.0.200-bookworm-slim@sha256:7f8e8b1514a2eeccb025f1e9dd554e191b21afa7f43f8321b7bd2009cdd59a1d
 
 RUN apt-get update && \
     apt-get install -y \
@@ -11,7 +11,7 @@ RUN curl -sSL https://dot.net/v1/dotnet-install.sh --output dotnet-install.sh \
     && echo "SHA256: $(sha256sum dotnet-install.sh)" \
     && echo "19b0a7890c371201b944bf0f8cdbb6460d053d63ddbea18cfed3e4199769ce17  dotnet-install.sh" | sha256sum -c \
     && chmod +x ./dotnet-install.sh \
-    && ./dotnet-install.sh -v 8.0.405 --install-dir /usr/share/dotnet --no-path \
+    && ./dotnet-install.sh -v 8.0.406 --install-dir /usr/share/dotnet --no-path \
     && rm dotnet-install.sh
 
 WORKDIR /project

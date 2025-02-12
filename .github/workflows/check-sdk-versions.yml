@@ -18,7 +18,7 @@ jobs:
       - name: Setup .NET
         uses: actions/setup-dotnet@3951f0dfe7a07e2313ec93c75700083e2005cbab # tag: v4.3.0
         with:
-          dotnet-version: 9.0.102
+          dotnet-version: 9.0.200
 
       - name: Run VerifySdkVersions
         run: ./build.cmd VerifySdkVersions
