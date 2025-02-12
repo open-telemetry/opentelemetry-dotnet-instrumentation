@@ -11,7 +11,7 @@ jobs:
   build-ubuntu1604-native-container:
     strategy:
       fail-fast: false
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     timeout-minutes: 60
     steps:
 
