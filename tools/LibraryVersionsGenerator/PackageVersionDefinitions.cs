@@ -197,7 +197,7 @@ internal static class PackageVersionDefinitions
             Versions = new List<PackageVersion>
             {
                 // new("8.0.0"), - transitive vulnerabilities https://github.com/advisories/GHSA-8g4q-xg66-9fp4, <=8.2.3
-                new("8.2.4"),
+                new("8.2.5"),
                 new("9.1.0", supportedTargetFrameworks: ["net9.0", "net8.0"], supportedExecutionFrameworks: ["net9.0", "net8.0"
                 ]), // breaking change, new Meter name
                 new("*", supportedTargetFrameworks: ["net9.0", "net8.0"], supportedExecutionFrameworks: ["net9.0", "net8.0"
