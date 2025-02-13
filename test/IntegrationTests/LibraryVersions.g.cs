@@ -262,12 +262,12 @@ public static partial class LibraryVersion
 #if DEFAULT_TEST_PACKAGE_VERSIONS
                 string.Empty,
 #else
-                "8.2.4",
+                "8.2.5",
 #if NET9_0 || NET8_0
                 "9.1.0",
 #endif
 #if NET9_0 || NET8_0
-                "9.2.3",
+                "9.2.6",
 #endif
 #endif
             ];
