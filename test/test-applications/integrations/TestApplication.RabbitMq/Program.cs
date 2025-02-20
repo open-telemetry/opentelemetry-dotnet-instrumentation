@@ -14,11 +14,10 @@ internal static class Program
     public static async Task Main(string[] args)
     {
         ConsoleHelper.WriteSplashScreen(args);
-        ConsoleHelper.WriteSplashScreen(args);
 
         var factory = new ConnectionFactory { HostName = "localhost", Port = int.Parse(GetRabbitMqPort(args)) };
-        using var connection = await factory.CreateConnectionAsync();
-        using var channel = await connection.CreateChannelAsync();
+        await using var connection = await factory.CreateConnectionAsync();
+        await using var channel = await connection.CreateChannelAsync();
 
         Console.WriteLine(channel.GetType().FullName);
 
