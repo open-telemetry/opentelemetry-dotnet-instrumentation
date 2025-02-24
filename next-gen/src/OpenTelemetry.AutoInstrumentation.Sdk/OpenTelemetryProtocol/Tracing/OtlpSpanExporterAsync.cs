@@ -19,10 +19,7 @@ namespace OpenTelemetry.OpenTelemetryProtocol.Tracing;
 /// </summary>
 internal sealed class OtlpSpanExporterAsync : OtlpExporterAsync<OtlpCollectorTrace.ExportTraceServiceRequest, SpanBatchWriter>, ISpanExporterAsync
 {
-    [ThreadStatic]
-    private static OtlpSpanWriter? s_Writer;
-
-    private readonly ILogger<OtlpSpanExporterAsync> _Logger;
+    private readonly OtlpSpanWriter _Writer = new();
 
     /// <summary>
     /// Initializes a new instance of the <see cref="OtlpSpanExporterAsync"/> class.
@@ -34,7 +31,6 @@ internal sealed class OtlpSpanExporterAsync : OtlpExporterAsync<OtlpCollectorTra
         OtlpExporterOptions options)
         : base(logger, options)
     {
-        _Logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
 
     /// <inheritdoc/>
@@ -42,7 +38,7 @@ internal sealed class OtlpSpanExporterAsync : OtlpExporterAsync<OtlpCollectorTra
         in TBatch batch,
         CancellationToken cancellationToken)
     {
-        var writer = s_Writer ??= new();
+        var writer = _Writer;
 
         try
         {

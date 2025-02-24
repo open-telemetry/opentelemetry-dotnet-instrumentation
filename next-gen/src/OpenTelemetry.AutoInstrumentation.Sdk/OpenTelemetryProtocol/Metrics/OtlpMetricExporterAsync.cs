@@ -18,10 +18,7 @@ namespace OpenTelemetry.OpenTelemetryProtocol.Metrics;
 /// </summary>
 internal sealed class OtlpMetricExporterAsync : OtlpExporterAsync<OtlpCollectorMetrics.ExportMetricsServiceRequest, MetricBatchWriter>, IMetricExporterAsync
 {
-    [ThreadStatic]
-    private static OtlpMetricWriter? s_Writer;
-
-    private readonly ILogger<OtlpMetricExporterAsync> _Logger;
+    private readonly OtlpMetricWriter _Writer = new();
 
     /// <summary>
     /// Initializes a new instance of the <see cref="OtlpMetricExporterAsync"/> class.
@@ -33,7 +30,6 @@ internal sealed class OtlpMetricExporterAsync : OtlpExporterAsync<OtlpCollectorM
         OtlpExporterOptions options)
         : base(logger, options)
     {
-        _Logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
 
     /// <inheritdoc/>
@@ -44,7 +40,7 @@ internal sealed class OtlpMetricExporterAsync : OtlpExporterAsync<OtlpCollectorM
         in TBatch batch,
         CancellationToken cancellationToken)
     {
-        var writer = s_Writer ??= new();
+        var writer = _Writer;
 
         try
         {

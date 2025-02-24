@@ -19,10 +19,7 @@ namespace OpenTelemetry.OpenTelemetryProtocol.Logging;
 /// </summary>
 internal sealed class OtlpLogRecordExporterAsync : OtlpExporterAsync<OtlpCollectorLogs.ExportLogsServiceRequest, LogRecordBatchWriter>, ILogRecordExporterAsync
 {
-    [ThreadStatic]
-    private static OtlpLogRecordWriter? s_Writer;
-
-    private readonly ILogger<OtlpLogRecordExporterAsync> _Logger;
+    private readonly OtlpLogRecordWriter _Writer = new();
 
     /// <summary>
     /// Initializes a new instance of the <see cref="OtlpLogRecordExporterAsync"/> class.
@@ -34,7 +31,6 @@ internal sealed class OtlpLogRecordExporterAsync : OtlpExporterAsync<OtlpCollect
         OtlpExporterOptions options)
         : base(logger, options)
     {
-        _Logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
 
     /// <inheritdoc/>
@@ -42,7 +38,7 @@ internal sealed class OtlpLogRecordExporterAsync : OtlpExporterAsync<OtlpCollect
         in TBatch batch,
         CancellationToken cancellationToken)
     {
-        var writer = s_Writer ??= new();
+        var writer = _Writer;
 
         try
         {
