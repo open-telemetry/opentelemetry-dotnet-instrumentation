@@ -1,2 +1,78 @@
 <Project>
+
+  <PropertyGroup>
+    <RepoRoot>$([System.IO.Directory]::GetParent($(MSBuildThisFileDirectory)).FullName)</RepoRoot>
+    <SignAssembly>true</SignAssembly>
+    <AssemblyOriginatorKeyFile>$(RepoRoot)\KeyPair.snk</AssemblyOriginatorKeyFile>
+
+    <Authors>OpenTelemetry Authors</Authors>
+    <Copyright>Copyright © $([System.DateTime]::Now.ToString(yyyy))</Copyright>
+    <RepositoryType>git</RepositoryType>
+    <RepositoryUrl>https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation</RepositoryUrl>
+    <PublishRepositoryUrl>true</PublishRepositoryUrl>
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+    <PackageTags>Observability;OpenTelemetry;Monitoring;Telemetry;Tracing;Metrics;Logging</PackageTags>
+    <PackageIcon>opentelemetry-icon-color.png</PackageIcon>
+    <PackageProjectUrl>https://opentelemetry.io</PackageProjectUrl>
+
+    <TargetFrameworks>net9.0</TargetFrameworks>
+    <TestTargetFrameworks>net9.0</TestTargetFrameworks>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+
+    <NuGetAudit>true</NuGetAudit>
+    <NuGetAuditMode>all</NuGetAuditMode>
+    <NuGetAuditLevel>low</NuGetAuditLevel>
+
+    <LangVersion>preview</LangVersion>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+
+    <AnalysisLevel>latest-all</AnalysisLevel>
+    <CodeAnalysisRuleSet>$(MSBuildThisFileDirectory)CodeAnalysis.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)' == 'Release'">
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.CodeAnalysis.PublicApiAnalyzers" PrivateAssets="All" />
+    <PackageReference Include="MinVer" PrivateAssets="All" />
+    <PackageReference Include="StyleCop.Analyzers" PrivateAssets="all" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Using Include="System.Diagnostics" />
+    <Using Include="System.Diagnostics.CodeAnalysis" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="$(MSBuildThisFileDirectory)opentelemetry-icon-color.png" Pack="true" PackagePath="\" />
+
+    <!-- Note: This includes all the PublicApiAnalyzers files in projects to make editing easier in the IDE -->
+    <None Include=".publicApi\**\PublicAPI.*.txt" />
+
+    <AdditionalFiles Include=".publicApi\PublicAPI.*.txt" />
+    <AdditionalFiles Include="$(MSBuildThisFileDirectory)stylecop.json" Link="stylecop.json" Visible="false" />
+  </ItemGroup>
+
+  <Target Name="AssemblyVersionTarget" AfterTargets="MinVer" Condition="'$(MinVerVersion)' != '' AND '$(BuildNumber)' != ''">
+    <!-- Note: $(BuildNumber) is typically only set for builds initiated by the
+    publish workflow. The goal here is to set the assembly FileVersion based on
+    the version MinVer resolved from the git tag -->
+    <PropertyGroup>
+      <FileVersion>$(MinVerMajor).$(MinVerMinor).$(MinVerPatch).$(BuildNumber)</FileVersion>
+    </PropertyGroup>
+
+    <!-- Note: The '$(TargetFramework)' != '' check here is to reduce log spam
+    in builds like dotnet pack which fire MinVer but don't resolve the actual
+    TargetFramework -->
+    <Message
+      Condition="'$(TargetFramework)' != ''"
+      Importance="high"
+      Text="**AssemblyVersionDebug** TargetFramework: $(TargetFramework), MinVerVersion: $(MinVerVersion), BuildNumber: $(BuildNumber), FileVersion: $(FileVersion)" />
+  </Target>
+
 </Project>
