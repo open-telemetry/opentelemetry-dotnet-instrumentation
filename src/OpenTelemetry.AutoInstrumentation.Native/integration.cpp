@@ -18,7 +18,7 @@
 namespace trace
 {
 
-std::mutex m_assemblyReferenceCacheMutex;
+std::mutex                                                      m_assemblyReferenceCacheMutex;
 std::unordered_map<WSTRING, std::unique_ptr<AssemblyReference>> m_assemblyReferenceCache;
 
 AssemblyReference::AssemblyReference(const WSTRING& str)

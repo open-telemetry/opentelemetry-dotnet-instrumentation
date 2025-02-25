@@ -13,9 +13,7 @@ namespace trace
 // RejitWorkItem
 //
 
-RejitWorkItem::RejitWorkItem() : terminating(true), func(nullptr)
-{
-}
+RejitWorkItem::RejitWorkItem() : terminating(true), func(nullptr) {}
 
 RejitWorkItem::RejitWorkItem(std::function<void()>&& func)
     : terminating(false), func(std::forward<std::function<void()>>(func))
