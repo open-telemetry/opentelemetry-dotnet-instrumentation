@@ -7,9 +7,7 @@
 namespace trace
 {
 
-CorProfilerBase::CorProfilerBase() : ref_count_(0), info_(nullptr)
-{
-}
+CorProfilerBase::CorProfilerBase() : ref_count_(0), info_(nullptr) {}
 
 CorProfilerBase::~CorProfilerBase()
 {

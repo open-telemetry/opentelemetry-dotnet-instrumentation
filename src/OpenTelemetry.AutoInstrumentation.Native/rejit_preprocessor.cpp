@@ -38,9 +38,8 @@ void RejitPreprocessor<RejitRequestDefinition>::ProcessTypeDefForRejit(const Rej
 
     // Now we enumerate all methods with the same target method name. (All overloads of the method)
     auto enumMethods = Enumerator<mdMethodDef>(
-        [&metadataImport, target_method, typeDef](HCORENUM* ptr, mdMethodDef arr[], ULONG max, ULONG* cnt) -> HRESULT {
-            return metadataImport->EnumMethodsWithName(ptr, typeDef, target_method.method_name.c_str(), arr, max, cnt);
-        },
+        [&metadataImport, target_method, typeDef](HCORENUM* ptr, mdMethodDef arr[], ULONG max, ULONG* cnt) -> HRESULT
+        { return metadataImport->EnumMethodsWithName(ptr, typeDef, target_method.method_name.c_str(), arr, max, cnt); },
         [&metadataImport](HCORENUM ptr) -> void { metadataImport->CloseEnum(ptr); });
 
     auto corProfilerInfo      = m_rejit_handler->GetCorProfilerInfo();
@@ -125,11 +124,8 @@ void RejitPreprocessor<RejitRequestDefinition>::ProcessTypeDefForRejit(const Rej
         }
 
         RejitHandlerModuleMethodCreatorFunc creator =
-            [ =, request = definition, functionInfo = functionInfo ](const mdMethodDef method,
-                                                                     RejitHandlerModule* module)
-        {
-            return CreateMethod(method, module, functionInfo, request);
-        };
+            [=, request = definition, functionInfo = functionInfo](const mdMethodDef method, RejitHandlerModule* module)
+        { return CreateMethod(method, module, functionInfo, request); };
 
         moduleHandler->CreateMethodIfNotExists(methodDef, creator);
 
@@ -138,9 +134,9 @@ void RejitPreprocessor<RejitRequestDefinition>::ProcessTypeDefForRejit(const Rej
         vtMethodDefs.push_back(methodDef);
 
         Logger::Debug("    * Enqueue for ReJIT [ModuleId=", moduleInfo.id, ", MethodDef=", TokenStr(&methodDef),
-                      ", AppDomainId=", moduleHandler->GetModuleMetadata()->app_domain_id, ", Assembly=",
-                      moduleHandler->GetModuleMetadata()->assemblyName, ", Type=", caller.type.name, ", Method=",
-                      caller.name, "(", numOfArgs, " params), Signature=", caller.signature.str(), "]");
+                      ", AppDomainId=", moduleHandler->GetModuleMetadata()->app_domain_id,
+                      ", Assembly=", moduleHandler->GetModuleMetadata()->assemblyName, ", Type=", caller.type.name,
+                      ", Method=", caller.name, "(", numOfArgs, " params), Signature=", caller.signature.str(), "]");
     }
 }
 
@@ -420,7 +416,7 @@ void RejitPreprocessor<RejitRequestDefinition>::EnqueueRequestRejitForLoadedModu
     Logger::Debug("RejitHandler::EnqueueRequestRejitForLoadedModules");
 
     std::function<void()> action =
-        [ =, modules = std::move(modulesVector), definitions = std::move(definitions), promise = promise ]() mutable
+        [=, modules = std::move(modulesVector), definitions = std::move(definitions), promise = promise]() mutable
     {
         // Process modules for rejit
         const auto rejitCount = RequestRejitForLoadedModules(modules, definitions, true);

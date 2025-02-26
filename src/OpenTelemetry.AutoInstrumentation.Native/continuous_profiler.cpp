@@ -80,7 +80,7 @@ static std::vector<unsigned char>* cpu_buffer_b;
 static std::mutex                  allocation_buffer_lock = std::mutex();
 static std::vector<unsigned char>* allocation_buffer      = new std::vector<unsigned char>();
 
-static std::mutex thread_span_context_lock;
+static std::mutex                                                             thread_span_context_lock;
 static std::unordered_map<ThreadID, continuous_profiler::thread_span_context> thread_span_context_map;
 
 static std::mutex name_cache_lock = std::mutex();
@@ -190,32 +190,32 @@ namespace continuous_profiler
 {
 
 /*
-* The thread samples buffer format is optimized for single-pass and efficient writing by the native sampling thread
-* (which
-* has paused the CLR)
-*
-* It uses a simple byte-opcode format with fairly standard binary encoding of values.  It is entirely positional but is
-* at least versioned
-* so that mismatched components (native writer and managed reader) will not emit nonsense.
-*
-* ints, shorts, and 64-bit longs are written in big-endian format; strings are written as 2-byte-length-prefixed
-* standard windows utf-16 strings
-*
-* I would write out the "spec" for this format here, but it essentially maps to the code
-* (e.g., 0x01 is StartBatch, which is followed by an int versionNumber and a long captureStartTimeInMillis)
-*
-* The bulk of the data is an (unknown length) array of frame strings, which are represented as coded strings in each
-* buffer.
-* Each used string is given a code (starting at 1) - using an old old inline trick, codes are introduced by writing the
-* code as a
-* negative number followed by the definition of the string (length-prefixed) that maps to that code.  Later uses of the
-* code
-* simply use the 2-byte (positive) code, meaning frequently used strings will take only 2 bytes apiece.  0 is reserved
-* for "end of list"
-* since the number of frames is not known up-front.
-*
-* Each buffer can be parsed/decoded independently; the codes and the LRU NameCache are not related.
-*/
+ * The thread samples buffer format is optimized for single-pass and efficient writing by the native sampling thread
+ * (which
+ * has paused the CLR)
+ *
+ * It uses a simple byte-opcode format with fairly standard binary encoding of values.  It is entirely positional but is
+ * at least versioned
+ * so that mismatched components (native writer and managed reader) will not emit nonsense.
+ *
+ * ints, shorts, and 64-bit longs are written in big-endian format; strings are written as 2-byte-length-prefixed
+ * standard windows utf-16 strings
+ *
+ * I would write out the "spec" for this format here, but it essentially maps to the code
+ * (e.g., 0x01 is StartBatch, which is followed by an int versionNumber and a long captureStartTimeInMillis)
+ *
+ * The bulk of the data is an (unknown length) array of frame strings, which are represented as coded strings in each
+ * buffer.
+ * Each used string is given a code (starting at 1) - using an old old inline trick, codes are introduced by writing the
+ * code as a
+ * negative number followed by the definition of the string (length-prefixed) that maps to that code.  Later uses of the
+ * code
+ * simply use the 2-byte (positive) code, meaning frequently used strings will take only 2 bytes apiece.  0 is reserved
+ * for "end of list"
+ * since the number of frames is not known up-front.
+ *
+ * Each buffer can be parsed/decoded independently; the codes and the LRU NameCache are not related.
+ */
 
 // defined op codes
 constexpr auto kThreadSamplesStartBatch  = 0x01;
@@ -226,9 +226,7 @@ constexpr auto kAllocationSample         = 0x08;
 
 constexpr auto kCurrentThreadSamplesBufferVersion = 1;
 
-continuous_profiler::ThreadSamplesBuffer::ThreadSamplesBuffer(std::vector<unsigned char>* buf) : buffer_(buf)
-{
-}
+continuous_profiler::ThreadSamplesBuffer::ThreadSamplesBuffer(std::vector<unsigned char>* buf) : buffer_(buf) {}
 ThreadSamplesBuffer::~ThreadSamplesBuffer()
 {
     buffer_ = nullptr; // specifically don't delete as this is done by RecordProduced/ConsumeOneThreadSample
@@ -596,17 +594,15 @@ struct DoStackSnapshotParams
 {
     ContinuousProfiler*  prof;
     ThreadSamplesBuffer* buffer;
-    DoStackSnapshotParams(ContinuousProfiler* p, ThreadSamplesBuffer* b) : prof(p), buffer(b)
-    {
-    }
+    DoStackSnapshotParams(ContinuousProfiler* p, ThreadSamplesBuffer* b) : prof(p), buffer(b) {}
 };
 
-HRESULT __stdcall FrameCallback(_In_ FunctionID func_id,
-                                _In_ UINT_PTR ip,
+HRESULT __stdcall FrameCallback(_In_ FunctionID         func_id,
+                                _In_ UINT_PTR           ip,
                                 _In_ COR_PRF_FRAME_INFO frame_info,
-                                _In_ ULONG32 context_size,
-                                _In_ BYTE  context[],
-                                _In_ void* client_data)
+                                _In_ ULONG32            context_size,
+                                _In_ BYTE               context[],
+                                _In_ void*              client_data)
 {
     const auto params = static_cast<DoStackSnapshotParams*>(client_data);
     params->prof->stats_.total_frames++;
@@ -936,7 +932,7 @@ void ContinuousProfiler::StartAllocationSampling(const unsigned int maxMemorySam
                                                           0x1, // CLR_GC_KEYWORD
                                                           // documentation says AllocationTick is at info but it lies
                                                           COR_PRF_EVENTPIPE_VERBOSE, nullptr}};
-    HRESULT hr = this->info12->EventPipeStartSession(1, sessionConfig, false, &session);
+    HRESULT                           hr = this->info12->EventPipeStartSession(1, sessionConfig, false, &session);
     if (FAILED(hr))
     {
         trace::Logger::Error("Could not enable allocation sampling: session pipe error", hr);
@@ -1044,27 +1040,29 @@ void NameCache<TKey, TValue>::Clear()
 
 } // namespace continuous_profiler
 
-extern "C" {
-EXPORTTHIS int32_t ContinuousProfilerReadThreadSamples(int32_t len, unsigned char* buf)
+extern "C"
 {
-    return ThreadSamplingConsumeOneThreadSample(len, buf);
-}
-EXPORTTHIS int32_t ContinuousProfilerReadAllocationSamples(int32_t len, unsigned char* buf)
-{
-    return AllocationSamplingConsumeAndReplaceBuffer(len, buf);
-}
-EXPORTTHIS void ContinuousProfilerSetNativeContext(uint64_t traceIdHigh, uint64_t traceIdLow, uint64_t spanId)
-{
-    ThreadID      threadId;
-    const HRESULT hr = profiler_info->GetCurrentThreadID(&threadId);
-    if (FAILED(hr))
+    EXPORTTHIS int32_t ContinuousProfilerReadThreadSamples(int32_t len, unsigned char* buf)
     {
-        trace::Logger::Debug("GetCurrentThreadID failed. HRESULT=0x", std::setfill('0'), std::setw(8), std::hex, hr);
-        return;
+        return ThreadSamplingConsumeOneThreadSample(len, buf);
     }
+    EXPORTTHIS int32_t ContinuousProfilerReadAllocationSamples(int32_t len, unsigned char* buf)
+    {
+        return AllocationSamplingConsumeAndReplaceBuffer(len, buf);
+    }
+    EXPORTTHIS void ContinuousProfilerSetNativeContext(uint64_t traceIdHigh, uint64_t traceIdLow, uint64_t spanId)
+    {
+        ThreadID      threadId;
+        const HRESULT hr = profiler_info->GetCurrentThreadID(&threadId);
+        if (FAILED(hr))
+        {
+            trace::Logger::Debug("GetCurrentThreadID failed. HRESULT=0x", std::setfill('0'), std::setw(8), std::hex,
+                                 hr);
+            return;
+        }
 
-    std::lock_guard<std::mutex> guard(thread_span_context_lock);
+        std::lock_guard<std::mutex> guard(thread_span_context_lock);
 
-    thread_span_context_map[threadId] = continuous_profiler::thread_span_context(traceIdHigh, traceIdLow, spanId);
-}
+        thread_span_context_map[threadId] = continuous_profiler::thread_span_context(traceIdHigh, traceIdLow, spanId);
+    }
 }
