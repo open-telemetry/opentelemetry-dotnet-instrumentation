@@ -71,7 +71,10 @@ void ILRewriterWrapper::LoadInt32(const INT32 value) const
 ILInstr* ILRewriterWrapper::LoadArgument(const UINT16 index) const
 {
     static const std::vector<OPCODE> opcodes = {
-        CEE_LDARG_0, CEE_LDARG_1, CEE_LDARG_2, CEE_LDARG_3,
+        CEE_LDARG_0,
+        CEE_LDARG_1,
+        CEE_LDARG_2,
+        CEE_LDARG_3,
     };
 
     ILInstr* pNewInstr = m_ILRewriter->NewILInstr();
@@ -231,7 +234,10 @@ ILInstr* ILRewriterWrapper::LoadObj(mdToken token) const
 ILInstr* ILRewriterWrapper::StLocal(unsigned index) const
 {
     static const std::vector<OPCODE> opcodes = {
-        CEE_STLOC_0, CEE_STLOC_1, CEE_STLOC_2, CEE_STLOC_3,
+        CEE_STLOC_0,
+        CEE_STLOC_1,
+        CEE_STLOC_2,
+        CEE_STLOC_3,
     };
 
     ILInstr* pNewInstr = m_ILRewriter->NewILInstr();
@@ -256,7 +262,10 @@ ILInstr* ILRewriterWrapper::StLocal(unsigned index) const
 ILInstr* ILRewriterWrapper::LoadLocal(unsigned index) const
 {
     static const std::vector<OPCODE> opcodes = {
-        CEE_LDLOC_0, CEE_LDLOC_1, CEE_LDLOC_2, CEE_LDLOC_3,
+        CEE_LDLOC_0,
+        CEE_LDLOC_1,
+        CEE_LDLOC_2,
+        CEE_LDLOC_3,
     };
 
     ILInstr* pNewInstr = m_ILRewriter->NewILInstr();

@@ -7,13 +7,9 @@
 #include "logger.h"
 #include "version.h"
 
-ClassFactory::ClassFactory() : refCount(0)
-{
-}
+ClassFactory::ClassFactory() : refCount(0) {}
 
-ClassFactory::~ClassFactory()
-{
-}
+ClassFactory::~ClassFactory() {}
 
 HRESULT STDMETHODCALLTYPE ClassFactory::QueryInterface(REFIID riid, void** ppvObject)
 {
@@ -73,10 +69,9 @@ HRESULT STDMETHODCALLTYPE ClassFactory::CreateInstance(IUnknown* pUnkOuter, REFI
                         ,
                         " (arm64)"
 #elif ARM
-                        ,
-                        " (arm)"
+                        , " (arm)"
 #endif
-                        );
+    );
     trace::Logger::Debug("ClassFactory::CreateInstance");
 
     auto profiler = new trace::CorProfiler();

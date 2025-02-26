@@ -82,8 +82,8 @@ bool RejitHandlerModuleMethod::RequestRejitForInlinersInModule(ModuleID moduleId
             std::vector<mdMethodDef> methods;
             while (methodEnum->Next(1, &method, NULL) == S_OK)
             {
-                Logger::Debug("NGEN:: Asking rewrite for inliner [ModuleId=", method.moduleId, ",MethodDef=",
-                              method.methodId, "]");
+                Logger::Debug("NGEN:: Asking rewrite for inliner [ModuleId=", method.moduleId,
+                              ",MethodDef=", method.methodId, "]");
                 modules.push_back(method.moduleId);
                 methods.push_back(method.methodId);
                 total++;
@@ -93,8 +93,8 @@ bool RejitHandlerModuleMethod::RequestRejitForInlinersInModule(ModuleID moduleId
             if (total > 0)
             {
                 handler->EnqueueForRejit(modules, methods);
-                Logger::Info("NGEN:: Processed with ", total, " inliners [ModuleId=", currentModuleId, ",MethodDef=",
-                             currentMethodDef, "]");
+                Logger::Info("NGEN:: Processed with ", total, " inliners [ModuleId=", currentModuleId,
+                             ",MethodDef=", currentMethodDef, "]");
             }
 
             if (incompleteData)
@@ -105,8 +105,8 @@ bool RejitHandlerModuleMethod::RequestRejitForInlinersInModule(ModuleID moduleId
         }
         else if (hr == E_INVALIDARG)
         {
-            Logger::Info("NGEN:: Error Invalid arguments in [ModuleId=", currentModuleId, ",MethodDef=",
-                         currentMethodDef, ", HR=", hexValue.str(), "]");
+            Logger::Info("NGEN:: Error Invalid arguments in [ModuleId=", currentModuleId,
+                         ",MethodDef=", currentMethodDef, ", HR=", hexValue.str(), "]");
         }
         else if (hr == CORPROF_E_DATAINCOMPLETE)
         {
@@ -117,13 +117,13 @@ bool RejitHandlerModuleMethod::RequestRejitForInlinersInModule(ModuleID moduleId
         }
         else if (hr == CORPROF_E_UNSUPPORTED_CALL_SEQUENCE)
         {
-            Logger::Info("NGEN:: Unsupported call sequence error in [ModuleId=", currentModuleId, ",MethodDef=",
-                         currentMethodDef, ", HR=", hexValue.str(), "]");
+            Logger::Info("NGEN:: Unsupported call sequence error in [ModuleId=", currentModuleId,
+                         ",MethodDef=", currentMethodDef, ", HR=", hexValue.str(), "]");
         }
         else
         {
-            Logger::Info("NGEN:: Error in [ModuleId=", currentModuleId, ",MethodDef=", currentMethodDef, ", HR=",
-                         hexValue.str(), "]");
+            Logger::Info("NGEN:: Error in [ModuleId=", currentModuleId, ",MethodDef=", currentMethodDef,
+                         ", HR=", hexValue.str(), "]");
         }
 
         return true;
@@ -421,7 +421,7 @@ void RejitHandler::EnqueueForRejit(std::vector<ModuleID>& modulesVector, std::ve
     Logger::Debug("RejitHandler::EnqueueForRejit");
 
     std::function<void()> action =
-        [ =, modules = std::move(modulesVector), methods = std::move(modulesMethodDef) ]() mutable
+        [=, modules = std::move(modulesVector), methods = std::move(modulesMethodDef)]() mutable
     {
         // Request ReJIT
         RequestRejit(modules, methods);

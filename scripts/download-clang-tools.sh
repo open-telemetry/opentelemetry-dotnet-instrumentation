@@ -32,13 +32,13 @@ function DownloadClangTool {
 
     case "$OS_TYPE" in
         "linux-glibc")
-            TOOLS_URL=https://clrjit.blob.core.windows.net/clang-tools/ubuntu.18.04-x64/$FILENAME
+            TOOLS_URL=https://clrjit2.blob.core.windows.net/clang-tools/17.0.6/linux-x64/$FILENAME
             ;;
         "macos")
-            TOOLS_URL=https://clrjit.blob.core.windows.net/clang-tools/osx.10.15-x64/$FILENAME
+            TOOLS_URL=https://clrjit2.blob.core.windows.net/clang-tools/17.0.6/osx-arm64/$FILENAME
             ;;
         "windows")
-            TOOLS_URL=https://clrjit.blob.core.windows.net/clang-tools/windows/$FILENAME
+            TOOLS_URL=https://clrjit2.blob.core.windows.net/clang-tools/17.0.6/windows-x64/$FILENAME
             ;;
         *)
             echo "Set the operating system type using the OS_TYPE environment variable. Supported values: linux-glibc, macos, windows." >&2
