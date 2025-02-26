@@ -42,37 +42,37 @@ jobs:
           path: ${{ env.NUGET_PACKAGES }}
 
       - name: Download Windows Artifacts from build job
-        uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d16 # tag: v4.1.8
+        uses: actions/download-artifact@cc203385981b70ca67e1cc392babf9cc229d5806 # tag: v4.1.9
         with:
           name: bin-windows-2022
           path: bin/ci-artifacts/bin-windows-2022
 
       - name: Download Ubuntu x64 Artifacts from build job
-        uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d16 # tag: v4.1.8
+        uses: actions/download-artifact@cc203385981b70ca67e1cc392babf9cc229d5806 # tag: v4.1.9
         with:
           name: bin-ubuntu-22.04
           path: bin/ci-artifacts/bin-ubuntu-22.04
 
       - name: Download Ubuntu arm64 Artifacts from build job
-        uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d16 # tag: v4.1.8
+        uses: actions/download-artifact@cc203385981b70ca67e1cc392babf9cc229d5806 # tag: v4.1.9
         with:
           name: bin-ubuntu-22.04-arm
           path: bin/ci-artifacts/bin-ubuntu-22.04-arm
 
       - name: Download Alpine x64 Artifacts from build job
-        uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d16 # tag: v4.1.8
+        uses: actions/download-artifact@cc203385981b70ca67e1cc392babf9cc229d5806 # tag: v4.1.9
         with:
           name: bin-alpine-x64
           path: bin/ci-artifacts/bin-alpine-x64
 
       - name: Download Alpine arm64 Artifacts from build job
-        uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d16 # tag: v4.1.8
+        uses: actions/download-artifact@cc203385981b70ca67e1cc392babf9cc229d5806 # tag: v4.1.9
         with:
           name: bin-alpine-arm64
           path: bin/ci-artifacts/bin-alpine-arm64
 
       - name: Download Mac-OS Artifacts from build job
-        uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d16 # tag: v4.1.8
+        uses: actions/download-artifact@cc203385981b70ca67e1cc392babf9cc229d5806 # tag: v4.1.9
         with:
           name: bin-macos-13
           path: bin/ci-artifacts/bin-macos-13
