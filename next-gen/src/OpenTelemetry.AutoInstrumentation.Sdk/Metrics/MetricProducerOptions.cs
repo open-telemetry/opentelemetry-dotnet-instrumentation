@@ -12,7 +12,7 @@ public sealed class MetricProducerOptions
     /// Initializes a new instance of the <see cref="MetricProducerOptions"/> class.
     /// </summary>
     /// <param name="aggregationTemporality"><see cref="Metrics.AggregationTemporality"/>.</param>
-    public MetricProducerOptions(
+    internal MetricProducerOptions(
         AggregationTemporality aggregationTemporality)
     {
         AggregationTemporality = aggregationTemporality;

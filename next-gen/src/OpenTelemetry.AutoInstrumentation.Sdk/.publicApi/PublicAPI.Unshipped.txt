@@ -160,7 +160,6 @@ OpenTelemetry.Metrics.MetricProducer
 OpenTelemetry.Metrics.MetricProducer.MetricProducer() -> void
 OpenTelemetry.Metrics.MetricProducerOptions
 OpenTelemetry.Metrics.MetricProducerOptions.AggregationTemporality.get -> OpenTelemetry.Metrics.AggregationTemporality
-OpenTelemetry.Metrics.MetricProducerOptions.MetricProducerOptions(OpenTelemetry.Metrics.AggregationTemporality aggregationTemporality) -> void
 OpenTelemetry.Metrics.MetricReaderFactory
 OpenTelemetry.Metrics.MetricReaderOptions
 OpenTelemetry.Metrics.MetricReaderOptions.ExportTimeoutMilliseconds.get -> int
