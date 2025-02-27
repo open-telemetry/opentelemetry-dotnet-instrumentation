@@ -11,35 +11,36 @@ const IID IID_IClassFactory = {0x00000001, 0x0000, 0x0000, {0xC0, 0x00, 0x00, 0x
 
 HINSTANCE DllHandle;
 
-extern "C" {
-BOOL STDMETHODCALLTYPE DllMain(HMODULE hModule, DWORD ul_reason_for_call, LPVOID lpReserved)
+extern "C"
 {
-    DllHandle = hModule;
-    return TRUE;
-}
-
-HRESULT STDMETHODCALLTYPE DllGetClassObject(REFCLSID rclsid, REFIID riid, LPVOID* ppv)
-{
-    // {918728DD-259F-4A6A-AC2B-B85E1B658318}
-    const GUID CLSID_CorProfiler = {0x918728dd, 0x259f, 0x4a6a, {0xac, 0x2b, 0xb8, 0x5e, 0x1b, 0x65, 0x83, 0x18}};
-
-    if (ppv == NULL || rclsid != CLSID_CorProfiler)
+    BOOL STDMETHODCALLTYPE DllMain(HMODULE hModule, DWORD ul_reason_for_call, LPVOID lpReserved)
     {
-        return E_FAIL;
+        DllHandle = hModule;
+        return TRUE;
     }
 
-    auto factory = new ClassFactory;
-
-    if (factory == NULL)
+    HRESULT STDMETHODCALLTYPE DllGetClassObject(REFCLSID rclsid, REFIID riid, LPVOID* ppv)
     {
-        return E_FAIL;
+        // {918728DD-259F-4A6A-AC2B-B85E1B658318}
+        const GUID CLSID_CorProfiler = {0x918728dd, 0x259f, 0x4a6a, {0xac, 0x2b, 0xb8, 0x5e, 0x1b, 0x65, 0x83, 0x18}};
+
+        if (ppv == NULL || rclsid != CLSID_CorProfiler)
+        {
+            return E_FAIL;
+        }
+
+        auto factory = new ClassFactory;
+
+        if (factory == NULL)
+        {
+            return E_FAIL;
+        }
+
+        return factory->QueryInterface(riid, ppv);
     }
 
-    return factory->QueryInterface(riid, ppv);
-}
-
-HRESULT STDMETHODCALLTYPE DllCanUnloadNow()
-{
-    return S_OK;
-}
+    HRESULT STDMETHODCALLTYPE DllCanUnloadNow()
+    {
+        return S_OK;
+    }
 }

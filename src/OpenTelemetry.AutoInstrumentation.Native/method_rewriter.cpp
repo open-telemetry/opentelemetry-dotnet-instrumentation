@@ -100,8 +100,8 @@ HRESULT TracerMethodRewriter::Rewrite(RejitHandlerModule* moduleHandler, RejitHa
     mdToken                function_token         = caller->id;
     TypeSignature          retFuncArg             = caller->method_signature.GetReturnValue();
     IntegrationDefinition* integration_definition = tracerMethodHandler->GetIntegrationDefinition();
-    const auto[retFuncElementType, retTypeFlags] = retFuncArg.GetElementTypeAndFlags();
-    bool        isVoid          = (retTypeFlags & TypeFlagVoid) > 0;
+    const auto [retFuncElementType, retTypeFlags] = retFuncArg.GetElementTypeAndFlags();
+    bool        isVoid                            = (retTypeFlags & TypeFlagVoid) > 0;
     bool        isStatic        = !(caller->method_signature.CallingConvention() & IMAGE_CEE_CS_CALLCONV_HASTHIS);
     const auto& methodArguments = caller->method_signature.GetMethodArguments();
     int         numArgs         = caller->method_signature.NumberOfArguments();
@@ -119,9 +119,10 @@ HRESULT TracerMethodRewriter::Rewrite(RejitHandlerModule* moduleHandler, RejitHa
 
     if (Logger::IsDebugEnabled())
     {
-        Logger::Debug("*** CallTarget_RewriterCallback() Start: ", caller->type.name, ".", caller->name, "() [IsVoid=",
-                      isVoid, ", IsStatic=", isStatic, ", IntegrationType=",
-                      integration_definition->integration_type.name, ", Arguments=", numArgs, "]");
+        Logger::Debug("*** CallTarget_RewriterCallback() Start: ", caller->type.name, ".", caller->name,
+                      "() [IsVoid=", isVoid, ", IsStatic=", isStatic,
+                      ", IntegrationType=", integration_definition->integration_type.name, ", Arguments=", numArgs,
+                      "]");
     }
 
     // First we check if the managed profiler has not been loaded yet
@@ -226,7 +227,7 @@ HRESULT TracerMethodRewriter::Rewrite(RejitHandlerModule* moduleHandler, RejitHa
         // Load the arguments directly (FastPath)
         for (int i = 0; i < numArgs; i++)
         {
-            const auto[elementType, argTypeFlags] = methodArguments[i].GetElementTypeAndFlags();
+            const auto [elementType, argTypeFlags] = methodArguments[i].GetElementTypeAndFlags();
             if (corProfiler->enable_by_ref_instrumentation)
             {
                 if (argTypeFlags & TypeFlagByRef)
@@ -258,7 +259,7 @@ HRESULT TracerMethodRewriter::Rewrite(RejitHandlerModule* moduleHandler, RejitHa
         {
             reWriterWrapper.BeginLoadValueIntoArray(i);
             reWriterWrapper.LoadArgument(i + (isStatic ? 0 : 1));
-            const auto[elementType, argTypeFlags] = methodArguments[i].GetElementTypeAndFlags();
+            const auto [elementType, argTypeFlags] = methodArguments[i].GetElementTypeAndFlags();
             if (argTypeFlags & TypeFlagByRef)
             {
                 Logger::Warn("*** CallTarget_RewriterCallback(): Methods with ref parameters "
@@ -559,9 +560,9 @@ HRESULT TracerMethodRewriter::Rewrite(RejitHandlerModule* moduleHandler, RejitHa
         return S_FALSE;
     }
 
-    Logger::Info("*** CallTarget_RewriterCallback() Finished: ", caller->type.name, ".", caller->name, "() [IsVoid=",
-                 isVoid, ", IsStatic=", isStatic, ", IntegrationType=", integration_definition->integration_type.name,
-                 ", Arguments=", numArgs, "]");
+    Logger::Info("*** CallTarget_RewriterCallback() Finished: ", caller->type.name, ".", caller->name,
+                 "() [IsVoid=", isVoid, ", IsStatic=", isStatic,
+                 ", IntegrationType=", integration_definition->integration_type.name, ", Arguments=", numArgs, "]");
     return S_OK;
 }
 

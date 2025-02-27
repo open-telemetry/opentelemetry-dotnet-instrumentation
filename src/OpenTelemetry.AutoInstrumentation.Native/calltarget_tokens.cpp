@@ -407,7 +407,7 @@ HRESULT CallTargetTokens::ModifyLocalSig(ILRewriter*    reWriter,
     unsigned        callTargetReturnBuffer;
     ULONG           callTargetReturnSize;
     ULONG           callTargetReturnSizeForNewSignature = 0;
-    const auto[retTypeElementType, retTypeFlags] = methodReturnValue->GetElementTypeAndFlags();
+    const auto [retTypeElementType, retTypeFlags]       = methodReturnValue->GetElementTypeAndFlags();
 
     if (retTypeFlags != TypeFlagVoid)
     {
@@ -726,9 +726,7 @@ mdToken CallTargetTokens::GetCurrentTypeRef(const TypeInfo* currentType, bool& i
     }
 }
 
-CallTargetTokens::CallTargetTokens(ModuleMetadata* moduleMetadataPtr) : module_metadata_ptr(moduleMetadataPtr)
-{
-}
+CallTargetTokens::CallTargetTokens(ModuleMetadata* moduleMetadataPtr) : module_metadata_ptr(moduleMetadataPtr) {}
 /**
  * PUBLIC
  **/

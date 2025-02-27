@@ -253,7 +253,7 @@ HRESULT TracerTokens::WriteBeginMethod(void*                             rewrite
     ULONG           argumentsSignatureSize[FASTPATH_COUNT];
     for (auto i = 0; i < numArguments; i++)
     {
-        const auto[elementType, argTypeFlags] = methodArguments[i].GetElementTypeAndFlags();
+        const auto [elementType, argTypeFlags] = methodArguments[i].GetElementTypeAndFlags();
 
         if (enable_by_ref_instrumentation && (argTypeFlags & TypeFlagByRef))
         {
