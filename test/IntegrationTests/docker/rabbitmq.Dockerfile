@@ -1,1 +1,1 @@
-FROM rabbitmq:4.0.6
+FROM rabbitmq:4.0.7
