@@ -42,26 +42,16 @@ internal sealed class OtlpMetricExporterAsync : OtlpExporterAsync<OtlpCollectorM
     {
         var writer = _Writer;
 
-        try
-        {
-            if (!batch.WriteTo(writer))
-            {
-                return Task.FromResult(false);
-            }
-
-            var sendTask = SendAsync(writer.Request, cancellationToken);
-
-            Debug.Assert(sendTask.IsCompleted);
-
-            return sendTask;
-        }
-        finally
+        if (!batch.WriteTo(writer))
         {
             writer.Reset();
+            return Task.FromResult(false);
         }
+
+        return SendAsync(writer, cancellationToken);
     }
 
-    private sealed class OtlpMetricWriter : MetricBatchWriter
+    private sealed class OtlpMetricWriter : MetricBatchWriter, IOtlpBatchWriter<OtlpCollectorMetrics.ExportMetricsServiceRequest>
     {
         private OtlpMetrics.ResourceMetrics? _OtlpResourceMetrics;
         private OtlpMetrics.ScopeMetrics? _OtlpScopeMetrics;

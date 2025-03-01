@@ -40,26 +40,16 @@ internal sealed class OtlpLogRecordExporterAsync : OtlpExporterAsync<OtlpCollect
     {
         var writer = _Writer;
 
-        try
-        {
-            if (!batch.WriteTo(writer))
-            {
-                return Task.FromResult(false);
-            }
-
-            var sendTask = SendAsync(writer.Request, cancellationToken);
-
-            Debug.Assert(sendTask.IsCompleted);
-
-            return sendTask;
-        }
-        finally
+        if (!batch.WriteTo(writer))
         {
             writer.Reset();
+            return Task.FromResult(false);
         }
+
+        return SendAsync(writer, cancellationToken);
     }
 
-    private sealed class OtlpLogRecordWriter : LogRecordBatchWriter
+    private sealed class OtlpLogRecordWriter : LogRecordBatchWriter, IOtlpBatchWriter<OtlpCollectorLogs.ExportLogsServiceRequest>
     {
         private OtlpLogs.ResourceLogs? _ResourceLogs;
         private OtlpLogs.ScopeLogs? _ScopeLogs;

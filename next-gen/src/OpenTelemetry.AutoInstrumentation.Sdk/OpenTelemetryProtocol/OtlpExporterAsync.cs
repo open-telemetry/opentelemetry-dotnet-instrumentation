@@ -62,16 +62,16 @@ internal abstract class OtlpExporterAsync<TRequest, TBatchWriter> : IExporterAsy
     /// <summary>
     /// Send an OTLP export request.
     /// </summary>
-    /// <param name="request">Request.</param>
+    /// <param name="writer">Request.</param>
     /// <param name="cancellationToken"><see cref="CancellationToken"/>.</param>
     /// <returns><see langword="true"/> if the send was successful.</returns>
-    protected async Task<bool> SendAsync(TRequest request, CancellationToken cancellationToken)
+    protected async Task<bool> SendAsync(IOtlpBatchWriter<TRequest> writer, CancellationToken cancellationToken)
     {
         try
         {
             using var requestMessage = new HttpRequestMessage(HttpMethod.Post, _RequestUri);
 
-            requestMessage.Content = new OtlpExporterHttpContent<TRequest>(request);
+            requestMessage.Content = new OtlpExporterHttpContent<TRequest>(writer.Request);
 
             if (_HeaderOptions != null)
             {
@@ -97,6 +97,10 @@ internal abstract class OtlpExporterAsync<TRequest, TBatchWriter> : IExporterAsy
         {
             _Logger.OtlpTelemetryExportException(ex, _RequestUri);
             return false;
+        }
+        finally
+        {
+            writer.Reset();
         }
     }
 

@@ -40,26 +40,16 @@ internal sealed class OtlpSpanExporterAsync : OtlpExporterAsync<OtlpCollectorTra
     {
         var writer = _Writer;
 
-        try
-        {
-            if (!batch.WriteTo(writer))
-            {
-                return Task.FromResult(false);
-            }
-
-            var sendTask = SendAsync(writer.Request, cancellationToken);
-
-            Debug.Assert(sendTask.IsCompleted);
-
-            return sendTask;
-        }
-        finally
+        if (!batch.WriteTo(writer))
         {
             writer.Reset();
+            return Task.FromResult(false);
         }
+
+        return SendAsync(writer, cancellationToken);
     }
 
-    private sealed class OtlpSpanWriter : SpanBatchWriter
+    private sealed class OtlpSpanWriter : SpanBatchWriter, IOtlpBatchWriter<OtlpCollectorTrace.ExportTraceServiceRequest>
     {
         private static void AddSpanLink(OtlpTrace.Span otlpSpan, in SpanLink spanLink)
         {
