@@ -32,7 +32,7 @@ internal static class EnvironmentConfigurationTracerHelper
                 TracerInstrumentation.Npgsql => builder.AddSource("Npgsql"),
                 TracerInstrumentation.SqlClient => Wrappers.AddSqlClientInstrumentation(builder, pluginManager, lazyInstrumentationLoader, settings),
                 TracerInstrumentation.NServiceBus => builder.AddSource("NServiceBus.Core"),
-                TracerInstrumentation.Axal => builder.AddSource("Examples.AspNetCoreMvc"),
+                TracerInstrumentation.Axal => builder.AddSource("Axal"),
                 TracerInstrumentation.Elasticsearch => builder.AddSource("Elastic.Clients.Elasticsearch.ElasticsearchClient"),
                 TracerInstrumentation.ElasticTransport => builder.AddSource("Elastic.Transport"),
                 TracerInstrumentation.Quartz => Wrappers.AddQuartzInstrumentation(builder, pluginManager, lazyInstrumentationLoader),
