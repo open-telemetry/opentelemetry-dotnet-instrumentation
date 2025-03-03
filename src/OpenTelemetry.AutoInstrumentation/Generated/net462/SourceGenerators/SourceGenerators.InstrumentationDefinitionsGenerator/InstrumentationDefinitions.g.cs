@@ -67,6 +67,12 @@ internal static partial class InstrumentationDefinitions
                 nativeCallTargetDefinitions.Add(new("NServiceBus.Core", "NServiceBus.EndpointConfiguration", ".ctor", ["System.Void", "System.String"], 8, 0, 0, 8, 65535, 65535, AssemblyFullName, "OpenTelemetry.AutoInstrumentation.Instrumentations.NServiceBus.EndpointConfigurationIntegration"));
             }
 
+            // Axal
+            if (tracerSettings.EnabledInstrumentations.Contains(TracerInstrumentation.Axal))
+            {
+                nativeCallTargetDefinitions.Add(new("Examples.AspNetCoreMvc", "Examples.AspNetCoreMvc.Logic.BusinessLogic", "ProcessBusinessOperation", ["System.String", "System.String"], 1, 0, 0, 65535, 65535, 65535, AssemblyFullName, "OpenTelemetry.AutoInstrumentation.Instrumentations.Axal.AxalIntegration"));
+            }
+
             // RabbitMq
             if (tracerSettings.EnabledInstrumentations.Contains(TracerInstrumentation.RabbitMq))
             {

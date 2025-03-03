@@ -396,6 +396,8 @@ internal static class Instrumentation
                     break;
                 case TracerInstrumentation.NServiceBus:
                     break;
+                case TracerInstrumentation.Axal:
+                    break;
                 case TracerInstrumentation.Elasticsearch:
                     break;
                 case TracerInstrumentation.ElasticTransport:

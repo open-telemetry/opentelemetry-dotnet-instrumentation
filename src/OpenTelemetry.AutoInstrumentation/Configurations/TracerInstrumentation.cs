@@ -132,5 +132,10 @@ internal enum TracerInstrumentation
     /// <summary>
     /// RabbitMQ client instrumentation
     /// </summary>
-    RabbitMq = 22
+    RabbitMq = 22,
+
+    /// <summary>
+    /// Axal instrumentation.
+    /// </summary>
+    Axal = 23
 }

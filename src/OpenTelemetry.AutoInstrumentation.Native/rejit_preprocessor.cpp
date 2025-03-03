@@ -7,6 +7,7 @@
 #include "stats.h"
 #include "logger.h"
 #include "rejit_handler.h"
+#include <iostream>
 
 namespace trace
 {
@@ -35,6 +36,11 @@ void RejitPreprocessor<RejitRequestDefinition>::ProcessTypeDefForRejit(const Rej
 
     Logger::Debug("  Looking for '", target_method.type.name, ".", target_method.method_name, "(",
                   (target_method.signature_types.size() - 1), " params)' method implementation.");
+    
+    std::string type_name_str(target_method.type.name.begin(), target_method.type.name.end());
+    std::string method_name_str(target_method.method_name.begin(), target_method.method_name.end());
+    std::cout << "IMPORTANT: Looking for '" << type_name_str << "." << method_name_str << "("
+              << (target_method.signature_types.size() - 1) << " params)' method implementation." << std::endl;
 
     // Now we enumerate all methods with the same target method name. (All overloads of the method)
     auto enumMethods = Enumerator<mdMethodDef>(

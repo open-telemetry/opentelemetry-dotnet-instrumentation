@@ -17,11 +17,17 @@ internal static partial class InstrumentationDefinitions
 {
     private static NativeCallTargetDefinition[] GetDefinitionsArray()
     {
-        var nativeCallTargetDefinitions = new List<NativeCallTargetDefinition>(38);
+        var nativeCallTargetDefinitions = new List<NativeCallTargetDefinition>(39);
         // Traces
         var tracerSettings = Instrumentation.TracerSettings.Value;
         if (tracerSettings.TracesEnabled)
         {
+            // Axal
+            if (tracerSettings.EnabledInstrumentations.Contains(TracerInstrumentation.Axal))
+            {
+                nativeCallTargetDefinitions.Add(new("Examples.AspNetCoreMvc", "Examples.AspNetCoreMvc.Logic.BusinessLogic", "ProcessBusinessOperation", ["System.String", "System.String"], 1, 0, 0, 65535, 65535, 65535, AssemblyFullName, "OpenTelemetry.AutoInstrumentation.Instrumentations.Axal.AxalIntegration"));
+            }
+
             // Kafka
             if (tracerSettings.EnabledInstrumentations.Contains(TracerInstrumentation.Kafka))
             {

@@ -6,6 +6,8 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="NServiceBus" />
+    <PackageReference Include="NServiceBus.Extensions.Hosting" />
   </ItemGroup>
 
 </Project>
