@@ -35,6 +35,12 @@ void RejitPreprocessor<RejitRequestDefinition>::ProcessTypeDefForRejit(const Rej
 {
     auto target_method = GetTargetMethod(definition);
 
+    bool is_wildcard = target_method.method_name.size() > 0 && target_method.method_name[0] == L'?';
+
+    if (is_wildcard) {
+        std::cout << "WILDCARD METHOD" << std::endl;
+    }
+
     Logger::Debug("  Looking for '", target_method.type.name, ".", target_method.method_name, "(",
                   (target_method.signature_types.size() - 1), " params)' method implementation.");
     // Now we enumerate all methods with the same target method name. (All overloads of the method)
@@ -359,10 +365,7 @@ ULONG RejitPreprocessor<RejitRequestDefinition>::RequestRejitForLoadedModules(
 
                 if (target_method.type.name.size() > 0 && target_method.type.name[0] == L'?') {
                     // Process all types in the module when wildcard is specified
-                    Logger::Debug("  Processing all types in module: ", moduleInfo.assembly.name);
-
-                    std::cout << "PROCESSING WITH PREFIX" << std::endl;
-                    
+                    Logger::Debug("  Processing all types in module: ", moduleInfo.assembly.name);                    
                     // Extract the prefix from the wildcard pattern (everything after the '?')
                     std::string typePrefix = ToString(target_method.type.name.substr(1));
                     
