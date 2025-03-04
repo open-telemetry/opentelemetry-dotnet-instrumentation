@@ -37,11 +37,10 @@ public static class AxalIntegration
     internal static CallTargetState OnMethodBegin<TTarget, TArg1>(TTarget instance, TArg1 arg1)
     {
         var typeName = typeof(TTarget).FullName ?? "Unknown";
-        var activity = Source.StartActivity($"Axal.{typeName}", ActivityKind.Internal);
+        var activity = Source.StartActivity(typeName, ActivityKind.Internal);
         if (activity is { IsAllDataRequested: true })
         {
             var argTypes = new List<string> { typeof(TArg1).FullName ?? "Unknown" };
-            activity.SetTag("axal.class.name", typeName);
             activity.SetTag("axal.argument.type.names", string.Join(",", argTypes));
         }
 
