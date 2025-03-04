@@ -314,8 +314,13 @@ ULONG RejitPreprocessor<RejitRequestDefinition>::RequestRejitForLoadedModules(
             else
             {
                 // If the integration is not for the current assembly we skip.
-                if (target_method.type.assembly.name != moduleInfo.assembly.name)
-                {
+                if (target_method.type.assembly.name.size() > 0 && target_method.type.assembly.name[0] == L'?'){
+                    std::string assemblyPrefix = ToString(target_method.type.assembly.name.substr(1));
+                    std::string currentAssembly = ToString(moduleInfo.assembly.name);
+                    if (currentAssembly.rfind(assemblyPrefix, 0) != 0) {
+                        continue;
+                    } 
+                } else if (target_method.type.assembly.name != moduleInfo.assembly.name) {
                     continue;
                 }
 
@@ -359,7 +364,7 @@ ULONG RejitPreprocessor<RejitRequestDefinition>::RequestRejitForLoadedModules(
                     std::cout << "PROCESSING WITH PREFIX" << std::endl;
                     
                     // Extract the prefix from the wildcard pattern (everything after the '?')
-                    std::string prefix = ToString(target_method.type.name.substr(1));
+                    std::string typePrefix = ToString(target_method.type.name.substr(1));
                     
                     // Enumerate all type definitions in the module
                     auto enumTypeDefs = EnumTypeDefs(metadataImport);
@@ -385,7 +390,7 @@ ULONG RejitPreprocessor<RejitRequestDefinition>::RequestRejitForLoadedModules(
                         if (SUCCEEDED(hr)) {
                             std::string typeName(szTypeDef, szTypeDef + cchTypeDef - 1);
 
-                            if (typeName.rfind(prefix, 0) == 0) {
+                            if (typeName.rfind(typePrefix, 0) == 0) {
                                 std::cout << "MATCHED " << typeName << std::endl;
                                  ProcessTypeDefForRejit(definition, metadataImport, metadataEmit, assemblyImport, assemblyEmit,
                                               moduleInfo, typeDef, vtModules, vtMethodDefs);

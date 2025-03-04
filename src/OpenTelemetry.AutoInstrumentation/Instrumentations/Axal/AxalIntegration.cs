@@ -10,9 +10,9 @@ namespace OpenTelemetry.AutoInstrumentation.Instrumentations.Axal;
 /// BusinessLogic instrumentation for ProcessBusinessOperation method
 /// </summary>
 [InstrumentMethod(
-assemblyName: "Examples.AspNetCoreMvc",
-typeName: "?Examples",
-methodName: "ProcessBusinessOperation",
+assemblyName: "?Examples",
+typeName: "?Examples.AspNetCoreMvc.Logic",
+methodName: "?",
 returnTypeName: "System.String",
 parameterTypeNames: new[] { "System.String" },
 minimumVersion: "1.0.0",
