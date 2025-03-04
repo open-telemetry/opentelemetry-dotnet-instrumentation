@@ -35,19 +35,22 @@ void RejitPreprocessor<RejitRequestDefinition>::ProcessTypeDefForRejit(const Rej
 {
     auto target_method = GetTargetMethod(definition);
 
-    bool is_wildcard = target_method.method_name.size() > 0 && target_method.method_name[0] == L'?';
-
-    if (is_wildcard) {
-        std::cout << "WILDCARD METHOD" << std::endl;
-    }
-
     Logger::Debug("  Looking for '", target_method.type.name, ".", target_method.method_name, "(",
                   (target_method.signature_types.size() - 1), " params)' method implementation.");
-    // Now we enumerate all methods with the same target method name. (All overloads of the method)
-    auto enumMethods = Enumerator<mdMethodDef>(
-        [&metadataImport, target_method, typeDef](HCORENUM* ptr, mdMethodDef arr[], ULONG max, ULONG* cnt) -> HRESULT
-        { return metadataImport->EnumMethodsWithName(ptr, typeDef, target_method.method_name.c_str(), arr, max, cnt); },
-        [&metadataImport](HCORENUM ptr) -> void { metadataImport->CloseEnum(ptr); });
+
+    bool is_wildcard = target_method.method_name.size() > 0 && target_method.method_name[0] == L'?';
+    Enumerator<mdMethodDef> enumMethods(
+        [&metadataImport, &typeDef, &target_method, is_wildcard](HCORENUM* ptr, mdMethodDef arr[], ULONG max, ULONG* cnt) -> HRESULT {
+            if (is_wildcard) {
+                return metadataImport->EnumMethods(ptr, typeDef, arr, max, cnt);
+            } else {
+                return metadataImport->EnumMethodsWithName(ptr, typeDef, target_method.method_name.c_str(), arr, max, cnt);
+            }
+        },
+        [&metadataImport](HCORENUM ptr) -> void { 
+            metadataImport->CloseEnum(ptr); 
+        }
+    );
 
     auto corProfilerInfo      = m_rejit_handler->GetCorProfilerInfo();
     auto pCorAssemblyProperty = m_rejit_handler->GetCorAssemblyProperty();
@@ -75,37 +78,40 @@ void RejitPreprocessor<RejitRequestDefinition>::ProcessTypeDefForRejit(const Rej
             continue;
         }
 
-        // Compare if the current mdMethodDef contains the same number of arguments as the
-        // instrumentation target
         const auto numOfArgs = functionInfo.method_signature.NumberOfArguments();
-        if (numOfArgs != target_method.signature_types.size() - 1)
-        {
-            Logger::Debug("    * The caller for the methoddef: ", caller.name,
-                          " doesn't have the right number of arguments (", numOfArgs, " arguments).");
-            continue;
-        }
 
-        // Compare each mdMethodDef argument type to the instrumentation target
-        bool        argumentsMismatch = false;
-        const auto& methodArguments   = functionInfo.method_signature.GetMethodArguments();
-
-        Logger::Debug("    * Comparing signature for method: ", caller.type.name, ".", caller.name);
-        for (unsigned int i = 0; i < numOfArgs; i++)
-        {
-            const auto argumentTypeName            = methodArguments[i].GetTypeTokName(metadataImport);
-            const auto integrationArgumentTypeName = target_method.signature_types[i + 1];
-            Logger::Debug("        -> ", argumentTypeName, " = ", integrationArgumentTypeName);
-            if (argumentTypeName != integrationArgumentTypeName && integrationArgumentTypeName != WStr("_"))
+        if (!is_wildcard) {
+            // Compare if the current mdMethodDef contains the same number of arguments as the
+            // instrumentation target
+            if (numOfArgs != target_method.signature_types.size() - 1)
             {
-                argumentsMismatch = true;
-                break;
+                Logger::Debug("    * The caller for the methoddef: ", caller.name,
+                            " doesn't have the right number of arguments (", numOfArgs, " arguments).");
+                continue;
             }
-        }
-        if (argumentsMismatch)
-        {
-            Logger::Debug("    * The caller for the methoddef: ", target_method.method_name,
-                          " doesn't have the right type of arguments.");
-            continue;
+
+            // Compare each mdMethodDef argument type to the instrumentation target
+            bool        argumentsMismatch = false;
+            const auto& methodArguments   = functionInfo.method_signature.GetMethodArguments();
+
+            Logger::Debug("    * Comparing signature for method: ", caller.type.name, ".", caller.name);
+            for (unsigned int i = 0; i < numOfArgs; i++)
+            {
+                const auto argumentTypeName            = methodArguments[i].GetTypeTokName(metadataImport);
+                const auto integrationArgumentTypeName = target_method.signature_types[i + 1];
+                Logger::Debug("        -> ", argumentTypeName, " = ", integrationArgumentTypeName);
+                if (argumentTypeName != integrationArgumentTypeName && integrationArgumentTypeName != WStr("_"))
+                {
+                    argumentsMismatch = true;
+                    break;
+                }
+            }
+            if (argumentsMismatch)
+            {
+                Logger::Debug("    * The caller for the methoddef: ", target_method.method_name,
+                            " doesn't have the right type of arguments.");
+                continue;
+            }
         }
 
         // As we are in the right method, we gather all information we need and stored it in to the
@@ -139,7 +145,6 @@ void RejitPreprocessor<RejitRequestDefinition>::ProcessTypeDefForRejit(const Rej
         // Store module_id and methodDef to request the ReJIT after analyzing all integrations.
         vtModules.push_back(moduleInfo.id);
         vtMethodDefs.push_back(methodDef);
-
         Logger::Debug("    * Enqueue for ReJIT [ModuleId=", moduleInfo.id, ", MethodDef=", TokenStr(&methodDef),
                       ", AppDomainId=", moduleHandler->GetModuleMetadata()->app_domain_id,
                       ", Assembly=", moduleHandler->GetModuleMetadata()->assemblyName, ", Type=", caller.type.name,
@@ -394,12 +399,9 @@ ULONG RejitPreprocessor<RejitRequestDefinition>::RequestRejitForLoadedModules(
                             std::string typeName(szTypeDef, szTypeDef + cchTypeDef - 1);
 
                             if (typeName.rfind(typePrefix, 0) == 0) {
-                                std::cout << "MATCHED " << typeName << std::endl;
-                                 ProcessTypeDefForRejit(definition, metadataImport, metadataEmit, assemblyImport, assemblyEmit,
+                                ProcessTypeDefForRejit(definition, metadataImport, metadataEmit, assemblyImport, assemblyEmit,
                                               moduleInfo, typeDef, vtModules, vtMethodDefs);
                             }
-                            
-                           
                         }
                         
                        
