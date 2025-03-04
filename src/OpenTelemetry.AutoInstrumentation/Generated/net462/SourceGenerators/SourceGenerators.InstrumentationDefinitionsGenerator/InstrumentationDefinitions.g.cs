@@ -70,7 +70,7 @@ internal static partial class InstrumentationDefinitions
             // Axal
             if (tracerSettings.EnabledInstrumentations.Contains(TracerInstrumentation.Axal))
             {
-                nativeCallTargetDefinitions.Add(new("Examples.AspNetCoreMvc", "Examples.AspNetCoreMvc.Logic.BusinessLogic", "ProcessBusinessOperation", ["System.String", "System.String"], 1, 0, 0, 65535, 65535, 65535, AssemblyFullName, "OpenTelemetry.AutoInstrumentation.Instrumentations.Axal.AxalIntegration"));
+                nativeCallTargetDefinitions.Add(new("Examples.AspNetCoreMvc", "?Examples", "ProcessBusinessOperation", ["System.String", "System.String"], 1, 0, 0, 65535, 65535, 65535, AssemblyFullName, "OpenTelemetry.AutoInstrumentation.Instrumentations.Axal.AxalIntegration"));
             }
 
             // RabbitMq

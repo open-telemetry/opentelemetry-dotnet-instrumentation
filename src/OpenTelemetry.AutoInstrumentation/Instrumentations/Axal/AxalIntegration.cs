@@ -11,7 +11,7 @@ namespace OpenTelemetry.AutoInstrumentation.Instrumentations.Axal;
 /// </summary>
 [InstrumentMethod(
 assemblyName: "Examples.AspNetCoreMvc",
-typeName: "Examples.AspNetCoreMvc.Logic.BusinessLogic",
+typeName: "?Examples",
 methodName: "ProcessBusinessOperation",
 returnTypeName: "System.String",
 parameterTypeNames: new[] { "System.String" },

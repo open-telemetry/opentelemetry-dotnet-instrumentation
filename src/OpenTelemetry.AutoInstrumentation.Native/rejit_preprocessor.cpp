@@ -36,12 +36,6 @@ void RejitPreprocessor<RejitRequestDefinition>::ProcessTypeDefForRejit(const Rej
 
     Logger::Debug("  Looking for '", target_method.type.name, ".", target_method.method_name, "(",
                   (target_method.signature_types.size() - 1), " params)' method implementation.");
-    
-    std::string type_name_str(target_method.type.name.begin(), target_method.type.name.end());
-    std::string method_name_str(target_method.method_name.begin(), target_method.method_name.end());
-    std::cout << "IMPORTANT: Looking for '" << type_name_str << "." << method_name_str << "("
-              << (target_method.signature_types.size() - 1) << " params)' method implementation." << std::endl;
-
     // Now we enumerate all methods with the same target method name. (All overloads of the method)
     auto enumMethods = Enumerator<mdMethodDef>(
         [&metadataImport, target_method, typeDef](HCORENUM* ptr, mdMethodDef arr[], ULONG max, ULONG* cnt) -> HRESULT
@@ -357,20 +351,56 @@ ULONG RejitPreprocessor<RejitRequestDefinition>::RequestRejitForLoadedModules(
                     continue;
                 }
 
-                // We are in the right module, so we try to load the mdTypeDef from the integration target type name.
-                mdTypeDef typeDef = mdTypeDefNil;
-                auto      foundType =
-                    FindTypeDefByName(target_method.type.name, moduleInfo.assembly.name, metadataImport, typeDef);
-                if (!foundType)
-                {
-                    continue;
-                }
+                if (target_method.type.name == WStr("*")) {
+                    // Process all types in the module when wildcard is specified
+                    Logger::Debug("  Processing all types in module: ", moduleInfo.assembly.name);
 
-                //
-                // Looking for the method to rewrite
-                //
-                ProcessTypeDefForRejit(definition, metadataImport, metadataEmit, assemblyImport, assemblyEmit,
-                                       moduleInfo, typeDef, vtModules, vtMethodDefs);
+                    std::cout << "PROCESSING ALL TYPES" << std::endl;
+                    
+                    // Enumerate all type definitions in the module
+                    auto enumTypeDefs = EnumTypeDefs(metadataImport);
+                    
+                    std::vector<mdTypeDef> typeDefsToProcess;
+                    
+                    // Collect all type definitions
+                    for (auto typeDefIter = enumTypeDefs.begin(); typeDefIter != enumTypeDefs.end(); ++typeDefIter)
+                    {
+                        mdTypeDef typeDef = *typeDefIter;
+                        typeDefsToProcess.push_back(typeDef);
+                    }
+                    
+                    // Process each type definition for rejit
+                    for (const auto& typeDef : typeDefsToProcess)
+                    {
+                        // Get the type name for logging
+                        WCHAR szTypeDef[256];
+                        ULONG cchTypeDef;
+                        DWORD typeDefFlags;
+                        mdToken tkExtends;
+                        HRESULT hr = metadataImport->GetTypeDefProps(typeDef, szTypeDef, 256, &cchTypeDef, &typeDefFlags, &tkExtends);
+                        if (SUCCEEDED(hr)) {
+                            std::cout << "Processing type: " << std::string(szTypeDef, szTypeDef + cchTypeDef - 1) << std::endl;
+                        }
+                        
+                        ProcessTypeDefForRejit(definition, metadataImport, metadataEmit, assemblyImport, assemblyEmit,
+                                              moduleInfo, typeDef, vtModules, vtMethodDefs);
+                    }
+                } else {
+                    // We are in the right module, so we try to load the mdTypeDef from the integration target type name.
+                    mdTypeDef typeDef = mdTypeDefNil;
+                    auto      foundType =
+                        FindTypeDefByName(target_method.type.name, moduleInfo.assembly.name, metadataImport, typeDef);
+                    if (!foundType)
+                    {
+                        continue;
+                    }
+
+                    //
+                    // Looking for the method to rewrite
+                    //
+                    ProcessTypeDefForRejit(definition, metadataImport, metadataEmit, assemblyImport, assemblyEmit,
+                                        moduleInfo, typeDef, vtModules, vtMethodDefs);
+                }
             }
         }
     }
