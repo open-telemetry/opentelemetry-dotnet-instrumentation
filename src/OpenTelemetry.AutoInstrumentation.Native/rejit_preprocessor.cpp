@@ -7,6 +7,7 @@
 #include "stats.h"
 #include "logger.h"
 #include "rejit_handler.h"
+#include "string.h"
 #include <iostream>
 
 namespace trace
@@ -351,11 +352,14 @@ ULONG RejitPreprocessor<RejitRequestDefinition>::RequestRejitForLoadedModules(
                     continue;
                 }
 
-                if (target_method.type.name == WStr("*")) {
+                if (target_method.type.name.size() > 0 && target_method.type.name[0] == L'?') {
                     // Process all types in the module when wildcard is specified
                     Logger::Debug("  Processing all types in module: ", moduleInfo.assembly.name);
 
-                    std::cout << "PROCESSING ALL TYPES" << std::endl;
+                    std::cout << "PROCESSING WITH PREFIX" << std::endl;
+                    
+                    // Extract the prefix from the wildcard pattern (everything after the '?')
+                    std::string prefix = ToString(target_method.type.name.substr(1));
                     
                     // Enumerate all type definitions in the module
                     auto enumTypeDefs = EnumTypeDefs(metadataImport);
@@ -379,11 +383,18 @@ ULONG RejitPreprocessor<RejitRequestDefinition>::RequestRejitForLoadedModules(
                         mdToken tkExtends;
                         HRESULT hr = metadataImport->GetTypeDefProps(typeDef, szTypeDef, 256, &cchTypeDef, &typeDefFlags, &tkExtends);
                         if (SUCCEEDED(hr)) {
-                            std::cout << "Processing type: " << std::string(szTypeDef, szTypeDef + cchTypeDef - 1) << std::endl;
+                            std::string typeName(szTypeDef, szTypeDef + cchTypeDef - 1);
+
+                            if (typeName.rfind(prefix, 0) == 0) {
+                                std::cout << "MATCHED " << typeName << std::endl;
+                                 ProcessTypeDefForRejit(definition, metadataImport, metadataEmit, assemblyImport, assemblyEmit,
+                                              moduleInfo, typeDef, vtModules, vtMethodDefs);
+                            }
+                            
+                           
                         }
                         
-                        ProcessTypeDefForRejit(definition, metadataImport, metadataEmit, assemblyImport, assemblyEmit,
-                                              moduleInfo, typeDef, vtModules, vtMethodDefs);
+                       
                     }
                 } else {
                     // We are in the right module, so we try to load the mdTypeDef from the integration target type name.
