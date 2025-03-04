@@ -64,7 +64,7 @@ public static class AxalIntegration
         var activity = state.Activity;
         if (activity != null)
         {
-            activity.SetTag("return.type.name", typeof(TReturn).FullName ?? "Unknown");
+            activity.SetTag("axal.return.type.name", typeof(TReturn).FullName ?? "Unknown");
             if (exception != null)
             {
                 activity.SetException(exception);
