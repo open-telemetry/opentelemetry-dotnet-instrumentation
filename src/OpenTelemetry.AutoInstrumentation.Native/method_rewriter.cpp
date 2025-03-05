@@ -279,9 +279,8 @@ HRESULT TracerMethodRewriter::Rewrite(RejitHandlerModule* moduleHandler, RejitHa
         }
     }
 
-    const WSTRING methodName(caller->name.c_str());
-
-    std::string methodNameStr(methodName.begin(), methodName.end());
+    std::string methodNameStr;
+    methodNameStr.assign(caller->name.begin(), caller->name.end());
 
     // *** Emit BeginMethod call
     if (Logger::IsDebugEnabled())
