@@ -279,6 +279,10 @@ HRESULT TracerMethodRewriter::Rewrite(RejitHandlerModule* moduleHandler, RejitHa
         }
     }
 
+    const WSTRING methodName(caller->name.c_str());
+
+    std::string methodNameStr(methodName.begin(), methodName.end());
+
     // *** Emit BeginMethod call
     if (Logger::IsDebugEnabled())
     {
@@ -315,8 +319,8 @@ HRESULT TracerMethodRewriter::Rewrite(RejitHandlerModule* moduleHandler, RejitHa
     }
 
     ILInstr* beginCallInstruction;
-    hr = tracerTokens->WriteBeginMethod(&reWriterWrapper, integration_type_ref, &caller->type, methodArguments,
-                                        &beginCallInstruction);
+    hr = tracerTokens->WriteBeginMethod(&reWriterWrapper, integration_type_ref, &caller->type, methodNameStr, methodArguments, 
+                                       &beginCallInstruction);
     if (FAILED(hr))
     {
         // Error message is written to the log in WriteBeginMethod.

@@ -165,6 +165,7 @@ TracerTokens::TracerTokens(ModuleMetadata* module_metadata_ptr) : CallTargetToke
 HRESULT TracerTokens::WriteBeginMethod(void*                             rewriterWrapperPtr,
                                        mdTypeRef                         integrationTypeRef,
                                        const TypeInfo*                   currentType,
+                                       const std::string                     currentName,
                                        const std::vector<TypeSignature>& methodArguments,
                                        ILInstr**                         instruction)
 {
