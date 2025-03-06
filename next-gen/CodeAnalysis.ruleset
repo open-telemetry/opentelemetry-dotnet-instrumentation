@@ -1,6 +1,7 @@
 ﻿<RuleSet Name="Microsoft.Analyzers.ManagedCodeAnalysis" ToolsVersion="14.0">
   <Rules AnalyzerId="Microsoft.CodeAnalysis.CSharp" RuleNamespace="Microsoft.CodeAnalysis.CSharp">
     <Rule Id="CA1031" Action="None" /> <!-- Do not catch general exception types -->
+    <Rule Id="CA1303" Action="None" /> <!-- Do not pass literals as localized parameters -->
   </Rules>
   <Rules AnalyzerId="StyleCop.Analyzers" RuleNamespace="StyleCop.Analyzers">
     <Rule Id="SA1101" Action="None" /> <!-- Prefix local calls with this -->

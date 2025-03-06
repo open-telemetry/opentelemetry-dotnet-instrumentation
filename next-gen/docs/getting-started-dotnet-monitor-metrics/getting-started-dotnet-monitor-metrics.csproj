@@ -2,6 +2,7 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
+    <RootNamespace>OpenTelemetry</RootNamespace>
     <TargetFramework>net8.0</TargetFramework>
     <RootNamespace>getting_started_dotnet_monitor_metrics</RootNamespace>
     <ImplicitUsings>enable</ImplicitUsings>
