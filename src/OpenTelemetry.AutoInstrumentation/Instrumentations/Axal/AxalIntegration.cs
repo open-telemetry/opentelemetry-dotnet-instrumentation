@@ -14,7 +14,7 @@ namespace OpenTelemetry.AutoInstrumentation.Instrumentations.Axal;
 /// </summary>
 [InstrumentMethod(
     assemblyName: "?Examples",
-    typeName: "?Examples.AspNetCoreMvc.Logic",
+    typeName: "?Examples",
     methodName: "?",
     returnTypeName: ClrNames.Void,
     parameterTypeNames: new string[] { },

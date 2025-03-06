@@ -19,7 +19,7 @@ public class BusinessLogic
     }
 
     // 1 argument - primitive
-    public string ProcessBusinessOperation(Span<char> operationName)
+    public string ProcessBusinessOperation(string operationName)
     {
         return new string(operationName);
     }

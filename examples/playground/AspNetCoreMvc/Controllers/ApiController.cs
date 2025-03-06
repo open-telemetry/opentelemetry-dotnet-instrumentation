@@ -53,8 +53,8 @@ public class ApiController : ControllerBase
     public ActionResult BusinessProcess()
     {
         var results = new System.Collections.Generic.List<string>();
-        // results.Add(_businessLogic.ProcessBusinessOperation());
-        var operationName = "Sample Operation".ToCharArray().AsSpan();
+        results.Add(_businessLogic.ProcessBusinessOperation());
+        var operationName = "Sample operation";
         results.Add(_businessLogic.ProcessBusinessOperation(operationName));
         // results.Add(_businessLogic.ProcessBusinessOperation(42, DateTime.Now));
         // results.Add(_businessLogic.ProcessBusinessOperation("API Call", new Uri("https://example.com"), DayOfWeek.Monday));

@@ -25,7 +25,7 @@ internal static partial class InstrumentationDefinitions
             // Axal
             if (tracerSettings.EnabledInstrumentations.Contains(TracerInstrumentation.Axal))
             {
-                nativeCallTargetDefinitions.Add(new("?Examples", "?Examples.AspNetCoreMvc.Logic", "?", ["System.Void"], 1, 0, 0, 65535, 65535, 65535, AssemblyFullName, "OpenTelemetry.AutoInstrumentation.Instrumentations.Axal.AxalIntegration"));
+                nativeCallTargetDefinitions.Add(new("?Examples", "?Examples", "?", ["System.Void"], 1, 0, 0, 65535, 65535, 65535, AssemblyFullName, "OpenTelemetry.AutoInstrumentation.Instrumentations.Axal.AxalIntegration"));
             }
 
             // Kafka
