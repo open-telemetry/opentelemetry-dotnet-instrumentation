@@ -25,7 +25,7 @@ public static class ConsumerConstructorIntegration
 {
     private const string ConsumerGroupIdConfigKey = "group.id";
 
-    internal static CallTargetState OnMethodBegin<TTarget, TConsumerBuilder>(TTarget instance, string methodName, TConsumerBuilder consumerBuilder)
+    internal static CallTargetState OnMethodBegin<TTarget, TConsumerBuilder>(TTarget instance, TConsumerBuilder consumerBuilder)
     where TConsumerBuilder : IConsumerBuilder, IDuckType
     {
         // duck type created for consumer builder is a struct

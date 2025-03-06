@@ -37,7 +37,7 @@ public static class HttpModuleIntegration
     /// <param name="methods">The methods to be invoked</param>
     /// <param name="setHostingEnvironmentCultures">The function to set the environment culture</param>
     /// <returns>Calltarget state value</returns>
-    internal static CallTargetState OnMethodBegin<TTarget, TCollection, TFunc>(TTarget instance, string methodName, TCollection methods, TFunc setHostingEnvironmentCultures)
+    internal static CallTargetState OnMethodBegin<TTarget, TCollection, TFunc>(TTarget instance, TCollection methods, TFunc setHostingEnvironmentCultures)
     {
         if (Interlocked.Exchange(ref _initialized, 1) != default)
         {

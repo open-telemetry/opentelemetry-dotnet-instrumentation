@@ -21,7 +21,7 @@ namespace OpenTelemetry.AutoInstrumentation.Instrumentations.Log4Net.TraceContex
     type: InstrumentationType.Log)]
 public static class AppenderAttachedImplIntegration
 {
-    internal static CallTargetState OnMethodBegin<TTarget, TLoggingEvent>(TTarget instance, string methodName, TLoggingEvent loggingEvent)
+    internal static CallTargetState OnMethodBegin<TTarget, TLoggingEvent>(TTarget instance, TLoggingEvent loggingEvent)
     where TLoggingEvent : ILoggingEvent
     {
         var current = Activity.Current;

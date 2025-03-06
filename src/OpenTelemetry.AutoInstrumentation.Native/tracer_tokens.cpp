@@ -93,7 +93,7 @@ HRESULT TracerTokens::WriteBeginMethodWithArgumentsArray(void*           rewrite
     unsigned currentTypeBuffer;
     ULONG    currentTypeSize = CorSigCompressToken(currentTypeRef, &currentTypeBuffer);
 
-    auto          signatureLength = 4 + integrationTypeSize + currentTypeSize + 1;
+    auto          signatureLength = 4 + integrationTypeSize + currentTypeSize;
     COR_SIGNATURE signature[signatureBufferSize];
     unsigned      offset = 0;
     signature[offset++]  = IMAGE_CEE_CS_CALLCONV_GENERICINST;
@@ -102,8 +102,6 @@ HRESULT TracerTokens::WriteBeginMethodWithArgumentsArray(void*           rewrite
     signature[offset++] = ELEMENT_TYPE_CLASS;
     memcpy(&signature[offset], &integrationTypeBuffer, integrationTypeSize);
     offset += integrationTypeSize;
-
-    signature[offset++] = ELEMENT_TYPE_STRING;
 
     if (isValueType)
     {
@@ -167,6 +165,7 @@ TracerTokens::TracerTokens(ModuleMetadata* module_metadata_ptr) : CallTargetToke
 HRESULT TracerTokens::WriteBeginMethod(void*                             rewriterWrapperPtr,
                                        mdTypeRef                         integrationTypeRef,
                                        const TypeInfo*                   currentType,
+                                       const std::string                     currentName,
                                        const std::vector<TypeSignature>& methodArguments,
                                        ILInstr**                         instruction)
 {
@@ -249,7 +248,7 @@ HRESULT TracerTokens::WriteBeginMethod(void*                             rewrite
     unsigned currentTypeBuffer;
     ULONG    currentTypeSize = CorSigCompressToken(currentTypeRef, &currentTypeBuffer);
 
-    auto signatureLength = 4 + integrationTypeSize + currentTypeSize + 1;
+    auto signatureLength = 4 + integrationTypeSize + currentTypeSize;
 
     PCCOR_SIGNATURE argumentsSignatureBuffer[FASTPATH_COUNT];
     ULONG           argumentsSignatureSize[FASTPATH_COUNT];
@@ -286,13 +285,11 @@ HRESULT TracerTokens::WriteBeginMethod(void*                             rewrite
     unsigned      offset = 0;
 
     signature[offset++] = IMAGE_CEE_CS_CALLCONV_GENERICINST;
-    signature[offset++] = 0x03 + numArguments;
+    signature[offset++] = 0x02 + numArguments;
 
     signature[offset++] = ELEMENT_TYPE_CLASS;
     memcpy(&signature[offset], &integrationTypeBuffer, integrationTypeSize);
     offset += integrationTypeSize;
-
-    signature[offset++] = ELEMENT_TYPE_STRING;
 
     if (isValueType)
     {

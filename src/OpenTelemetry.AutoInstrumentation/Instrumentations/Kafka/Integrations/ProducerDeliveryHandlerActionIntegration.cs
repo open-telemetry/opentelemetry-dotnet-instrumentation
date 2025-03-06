@@ -27,7 +27,6 @@ public static class ProducerDeliveryHandlerActionIntegration
 {
     internal static CallTargetState OnMethodBegin<TTarget, TKey, TValue, TActionOfDeliveryReport>(
         TTarget instance,
-        string methodName,
         string topic,
         TKey key,
         TValue value,

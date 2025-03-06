@@ -32,10 +32,9 @@ public static class AxalIntegration
     /// <typeparam name="TTarget">Type of the target</typeparam>
     /// <typeparam name="TArg1">Type of the first argument</typeparam>
     /// <param name="instance">Instance value, aka `this` of the instrumented method.</param>
-    /// <param name="methodName">Method name</param>
     /// <param name="arg1">First argument</param>
     /// <returns>Calltarget state value</returns>
-    internal static CallTargetState OnMethodBegin<TTarget, TArg1>(TTarget instance, string methodName, TArg1 arg1)
+    internal static CallTargetState OnMethodBegin<TTarget, TArg1>(TTarget instance, TArg1 arg1)
     {
         var typeName = typeof(TTarget).FullName ?? "Unknown";
         var activity = Source.StartActivity(typeName, ActivityKind.Internal);

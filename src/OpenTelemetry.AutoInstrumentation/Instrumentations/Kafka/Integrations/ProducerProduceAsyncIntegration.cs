@@ -26,7 +26,7 @@ type: InstrumentationType.Trace)]
 public static class ProducerProduceAsyncIntegration
 {
     internal static CallTargetState OnMethodBegin<TTarget, TTopicPartition, TMessage>(
-        TTarget instance, string methodName, TTopicPartition topicPartition, TMessage message, CancellationToken cancellationToken)
+        TTarget instance, TTopicPartition topicPartition, TMessage message, CancellationToken cancellationToken)
         where TMessage : IKafkaMessage, IDuckType
     {
         // Duck type created for message is a struct.

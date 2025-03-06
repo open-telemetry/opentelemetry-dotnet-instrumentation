@@ -25,7 +25,7 @@ namespace OpenTelemetry.AutoInstrumentation.Instrumentations.RabbitMq6.Integrati
     integrationKind: IntegrationKind.Derived)]
 public static class DefaultBasicConsumerIntegration
 {
-    internal static CallTargetState OnMethodBegin<TTarget, TBasicProperties, TBody>(TTarget instance, string methodName, string? consumerTag, ulong deliveryTag, bool redelivered, string? exchange, string? routingKey, TBasicProperties properties, TBody body)
+    internal static CallTargetState OnMethodBegin<TTarget, TBasicProperties, TBody>(TTarget instance, string? consumerTag, ulong deliveryTag, bool redelivered, string? exchange, string? routingKey, TBasicProperties properties, TBody body)
         where TBasicProperties : IBasicProperties
         where TBody : IBody
     {
