@@ -38,44 +38,109 @@ internal class IntegrationMapper
             "Creating BeginMethod Dynamic Method for '{0}' integration. [Target={1}]",
             integrationType.FullName,
             targetType.FullName);
-        MethodInfo? onMethodBeginMethodInfo = integrationType.GetMethod(BeginMethodName, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static);
-        if (onMethodBeginMethodInfo is null)
-        {
-            Log.Debug(
-                "'{0}' method was not found in integration type: '{1}'.",
-                BeginMethodName,
-                integrationType.FullName);
-            return null;
-        }
 
-        if (onMethodBeginMethodInfo.ReturnType != typeof(CallTargetState))
-        {
-            ThrowHelper.ThrowArgumentException($"The return type of the method: {BeginMethodName} in type: {integrationType.FullName} is not {nameof(CallTargetState)}");
-        }
+        MethodInfo? onMethodBeginMethodInfo = null;
+        ParameterInfo[] onMethodBeginParameters = Array.Empty<ParameterInfo>();
+        Type[] genericArgumentsTypes = Array.Empty<Type>();
+        bool mustLoadInstance = false;
 
-        Type[] genericArgumentsTypes = onMethodBeginMethodInfo.GetGenericArguments();
-        if (genericArgumentsTypes.Length < 1)
+        // Special handling for AxalIntegration
+        if (integrationType.FullName == "OpenTelemetry.AutoInstrumentation.Instrumentations.Axal.AxalIntegration")
         {
-            ThrowHelper.ThrowArgumentException($"The method: {BeginMethodName} in type: {integrationType.FullName} doesn't have the generic type for the instance type.");
-        }
+            // Get all methods with the BeginMethodName
+            MethodInfo[] onMethodBeginMethodInfoList = integrationType.GetMethods(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static)
+                .Where(m => m.Name == BeginMethodName)
+                .ToArray();
 
-        ParameterInfo[] onMethodBeginParameters = onMethodBeginMethodInfo.GetParameters();
-        if (onMethodBeginParameters.Length < argumentsTypes.Length)
-        {
-            ThrowHelper.ThrowArgumentException($"The method: {BeginMethodName} with {onMethodBeginParameters.Length} parameters in type: {integrationType.FullName} has less parameters than required.");
+            // Find the method with the correct number of parameters based on argumentsTypes
+            bool hasInstanceParameter = false;
+
+            // First try to find a method with parameters matching argumentsTypes.Length + 1 (for instance)
+            onMethodBeginMethodInfo = onMethodBeginMethodInfoList
+                .FirstOrDefault(m => m.GetParameters().Length == argumentsTypes.Length + 1);
+
+            if (onMethodBeginMethodInfo != null)
+            {
+                hasInstanceParameter = true;
+            }
+            else
+            {
+                // If not found, try to find a method with parameters matching argumentsTypes.Length exactly
+                onMethodBeginMethodInfo = onMethodBeginMethodInfoList
+                    .FirstOrDefault(m => m.GetParameters().Length == argumentsTypes.Length);
+            }
+
+            if (onMethodBeginMethodInfo is null)
+            {
+                Log.Debug(
+                    "'{0}' method was not found in integration type: '{1}'.",
+                    BeginMethodName,
+                    integrationType.FullName);
+                return null;
+            }
+
+            if (onMethodBeginMethodInfo.ReturnType != typeof(CallTargetState))
+            {
+                ThrowHelper.ThrowArgumentException($"The return type of the method: {BeginMethodName} in type: {integrationType.FullName} is not {nameof(CallTargetState)}");
+            }
+
+            genericArgumentsTypes = onMethodBeginMethodInfo.GetGenericArguments();
+            if (genericArgumentsTypes.Length < 1)
+            {
+                ThrowHelper.ThrowArgumentException($"The method: {BeginMethodName} in type: {integrationType.FullName} doesn't have the generic type for the instance type.");
+            }
+
+            onMethodBeginParameters = onMethodBeginMethodInfo.GetParameters();
+            mustLoadInstance = hasInstanceParameter;
+
+            if (hasInstanceParameter && onMethodBeginParameters[0].ParameterType != genericArgumentsTypes[0])
+            {
+                ThrowHelper.ThrowArgumentException($"The first generic argument for method: {BeginMethodName} in type: {integrationType.FullName} must be the same as the first parameter for the instance value.");
+            }
         }
-        else if (onMethodBeginParameters.Length > argumentsTypes.Length + 1)
+        else
         {
-            ThrowHelper.ThrowArgumentException($"The method: {BeginMethodName} with {onMethodBeginParameters.Length} parameters in type: {integrationType.FullName} has more parameters than required.");
-        }
-        else if (onMethodBeginParameters.Length != argumentsTypes.Length && onMethodBeginParameters[0].ParameterType != genericArgumentsTypes[0])
-        {
-            ThrowHelper.ThrowArgumentException($"The first generic argument for method: {BeginMethodName} in type: {integrationType.FullName} must be the same as the first parameter for the instance value.");
+            // Original implementation for other integration types
+            onMethodBeginMethodInfo = integrationType.GetMethod(BeginMethodName, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static);
+            if (onMethodBeginMethodInfo is null)
+            {
+                Log.Debug(
+                    "'{0}' method was not found in integration type: '{1}'.",
+                    BeginMethodName,
+                    integrationType.FullName);
+                return null;
+            }
+
+            if (onMethodBeginMethodInfo.ReturnType != typeof(CallTargetState))
+            {
+                ThrowHelper.ThrowArgumentException($"The return type of the method: {BeginMethodName} in type: {integrationType.FullName} is not {nameof(CallTargetState)}");
+            }
+
+            genericArgumentsTypes = onMethodBeginMethodInfo.GetGenericArguments();
+            if (genericArgumentsTypes.Length < 1)
+            {
+                ThrowHelper.ThrowArgumentException($"The method: {BeginMethodName} in type: {integrationType.FullName} doesn't have the generic type for the instance type.");
+            }
+
+            onMethodBeginParameters = onMethodBeginMethodInfo.GetParameters();
+            if (onMethodBeginParameters.Length < argumentsTypes.Length)
+            {
+                ThrowHelper.ThrowArgumentException($"The method: {BeginMethodName} with {onMethodBeginParameters.Length} parameters in type: {integrationType.FullName} has less parameters than required.");
+            }
+            else if (onMethodBeginParameters.Length > argumentsTypes.Length + 1)
+            {
+                ThrowHelper.ThrowArgumentException($"The method: {BeginMethodName} with {onMethodBeginParameters.Length} parameters in type: {integrationType.FullName} has more parameters than required.");
+            }
+            else if (onMethodBeginParameters.Length != argumentsTypes.Length && onMethodBeginParameters[0].ParameterType != genericArgumentsTypes[0])
+            {
+                ThrowHelper.ThrowArgumentException($"The first generic argument for method: {BeginMethodName} in type: {integrationType.FullName} must be the same as the first parameter for the instance value.");
+            }
+
+            mustLoadInstance = onMethodBeginParameters.Length != argumentsTypes.Length;
         }
 
         List<Type> callGenericTypes = new List<Type>();
 
-        bool mustLoadInstance = onMethodBeginParameters.Length != argumentsTypes.Length;
         Type instanceGenericType = genericArgumentsTypes[0];
         Type? instanceGenericConstraint = instanceGenericType.GetGenericParameterConstraints().FirstOrDefault();
         Type? instanceProxyType = null;
