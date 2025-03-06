@@ -34,7 +34,7 @@ public static partial class LibraryVersion
             [
                 new("6.0.35"),
                 new("8.0.10"),
-                new("9.0.1"),
+                new("9.0.2"),
             ]
         },
         {
@@ -43,7 +43,7 @@ public static partial class LibraryVersion
                 new("6.0.3"),
                 new("7.0.0"),
                 new("8.0.0"),
-                new("8.0.2"),
+                new("8.0.3"),
             ]
         },
         {
@@ -51,7 +51,7 @@ public static partial class LibraryVersion
             [
                 new("7.5.0", additionalMetaData: new() { { "GraphQLMicrosoftDI", "7.5.0" }, { "GraphQLServerTransportsAspNetCore", "7.5.0" }, { "GraphQLServerUIPGraphiQL", "7.5.0" } }),
                 new("8.0.2", additionalMetaData: new() { { "GraphQLMicrosoftDI", "8.0.2" }, { "GraphQLServerTransportsAspNetCore", "8.0.2" }, { "GraphQLServerUIPGraphiQL", "8.0.2" } }),
-                new("8.3.0", additionalMetaData: new() { { "GraphQLMicrosoftDI", "8.3.0" }, { "GraphQLServerTransportsAspNetCore", "8.2.0" }, { "GraphQLServerUIPGraphiQL", "8.2.0" } }),
+                new("8.4.1", additionalMetaData: new() { { "GraphQLMicrosoftDI", "8.4.1" }, { "GraphQLServerTransportsAspNetCore", "8.2.0" }, { "GraphQLServerUIPGraphiQL", "8.2.0" } }),
             ]
         },
         {
@@ -65,14 +65,14 @@ public static partial class LibraryVersion
             "TestApplication.Log4NetBridge",
             [
                 new("2.0.13"),
-                new("3.0.3"),
+                new("3.0.4"),
             ]
         },
         {
             "TestApplication.MassTransit",
             [
                 new("8.3.0"),
-                new("8.3.4"),
+                new("8.3.7"),
             ]
         },
         {
@@ -95,7 +95,7 @@ public static partial class LibraryVersion
                 new("2.19.0", supportedFrameworks: [ "net9.0", "net8.0", "net462" ]),
                 new("2.30.0", supportedFrameworks: [ "net9.0", "net8.0", "net462" ]),
                 new("3.0.0", supportedFrameworks: [ "net9.0", "net8.0", "net472" ]),
-                new("3.1.0", supportedFrameworks: [ "net9.0", "net8.0", "net472" ]),
+                new("3.2.1", supportedFrameworks: [ "net9.0", "net8.0", "net472" ]),
             ]
         },
         {
@@ -109,14 +109,14 @@ public static partial class LibraryVersion
             "TestApplication.MySqlData",
             [
                 new("9.0.0"),
-                new("9.1.0"),
+                new("9.2.0"),
             ]
         },
         {
             "TestApplication.Npgsql",
             [
                 new("8.0.5"),
-                new("9.0.2", supportedFrameworks: [ "net9.0", "net8.0" ]),
+                new("9.0.3", supportedFrameworks: [ "net9.0", "net8.0" ]),
             ]
         },
         {
@@ -131,14 +131,14 @@ public static partial class LibraryVersion
             "TestApplication.OracleMda.NetFramework",
             [
                 new("23.5.1", supportedFrameworks: [ "net472" ]),
-                new("23.6.1", supportedFrameworks: [ "net472" ]),
+                new("23.7.0", supportedFrameworks: [ "net472" ]),
             ]
         },
         {
             "TestApplication.OracleMda.Core",
             [
                 new("23.5.1"),
-                new("23.6.1"),
+                new("23.7.0"),
             ]
         },
         {
@@ -154,13 +154,14 @@ public static partial class LibraryVersion
                 new("6.0.0"),
                 new("6.8.1"),
                 new("7.0.0"),
+                new("7.1.1"),
             ]
         },
         {
             "TestApplication.StackExchangeRedis",
             [
                 new("2.6.122"),
-                new("2.8.22"),
+                new("2.8.24"),
             ]
         },
         {
@@ -168,7 +169,7 @@ public static partial class LibraryVersion
             [
                 new("4.10.2"),
                 new("6.2.0"),
-                new("8.1.0"),
+                new("8.1.2"),
             ]
         },
         {
