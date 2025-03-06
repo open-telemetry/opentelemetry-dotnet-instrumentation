@@ -46,6 +46,15 @@ case "$ARCHITECTURE" in
     ;;
 esac
 
+if command -v curl > /dev/null 2>&1; then
+  DOWNLOADER="curl -sSfLo"
+elif command -v wget > /dev/null 2>&1; then
+  DOWNLOADER="wget -qO"
+else
+  echo "Error: Neither curl nor wget is available." >&2
+  exit 1
+fi
+
 test -z "$OTEL_DOTNET_AUTO_HOME" && OTEL_DOTNET_AUTO_HOME="$HOME/.otel-dotnet-auto"
 test -z "$VERSION" && VERSION="v{{VERSION}}"
 
@@ -64,7 +73,7 @@ if [ ! -f "${LOCAL_PATH}" ]; then
   (
     cd "$DOWNLOAD_DIR"
     echo "Downloading $VERSION for $OS_TYPE ($LOCAL_PATH)..."
-    curl -sSfLo "$LOCAL_PATH" "$RELEASES_URL/download/$VERSION/$ARCHIVE"
+    ${DOWNLOADER} "$LOCAL_PATH" "$RELEASES_URL/download/$VERSION/$ARCHIVE"
   )
 else
   echo "Using local installation archive: $LOCAL_PATH"
