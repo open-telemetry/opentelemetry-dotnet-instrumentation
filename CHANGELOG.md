@@ -16,11 +16,55 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 
 #### Dependency updates
 
+- Updated [Core components](https://github.com/open-telemetry/opentelemetry-dotnet/blob/main/VERSIONING.md#core-components):
+  [`1.11.2`](https://github.com/open-telemetry/opentelemetry-dotnet/releases/tag/core-1.11.2).
+- Following packages updated
+  - `OpenTelemetry.Instrumentation.GrpcNetClient` from `1.11.0-beta.1` to `1.11.0-beta.2`
+  - `OpenTelemetry.Instrumentation.Http` from `1.11.0` to `1.11.1`,
+  - `OpenTelemetry.Instrumentation.Process` from `1.11.0-beta.1` to `1.11.0-beta.2`,
+  - `OpenTelemetry.Instrumentation.Quartz` from `1.11.0-beta.1` to `1.11.0-beta.2`,
+  - `OpenTelemetry.Instrumentation.Runtime` from `1.11.0` to `1.11.1`,
+  - `OpenTelemetry.Instrumentation.SqlClient` from `1.11.0-beta.1` to `1.11.0-beta.2`,
+  - `OpenTelemetry.Instrumentation.Wcf` from `1.11.0-beta.1` to `1.11.0-beta.2`,
+  - `OpenTelemetry.Resources.Azure` from `1.11.0-beta.1` to `1.11.0-beta.2`,
+  - `OpenTelemetry.Resources.Container` from `1.11.0-beta.1` to `1.11.0-beta.2`,
+  - `OpenTelemetry.Resources.Host` from `1.11.0-beta.1` to `1.11.0-beta.2`,
+  - `OpenTelemetry.Resources.OperatingSystem` from `1.11.0-beta.1` to `1.11.0-beta.2`,
+  - `OpenTelemetry.Resources.Process` from `1.11.0-beta.1` to `1.11.0-beta.2`,
+  - `OpenTelemetry.Resources.ProcessRuntime` from `1.11.0-beta.1` to `1.11.0-beta.2`.
+- .NET only, following packages updated
+  - `OpenTelemetry.Instrumentation.AspNetCore` from `1.11.0` to `1.11.1`,
+  - `OpenTelemetry.Instrumentation.EntityFrameworkCore` from `1.11.0-beta.1` to `1.11.0-beta.2`,
+  - `OpenTelemetry.Instrumentation.StackExchangeRedis` from `1.11.0-beta.1` to `1.11.0-beta.2`.
+- .NET Framework only, following packages updated
+  - `Microsoft.Bcl.AsyncInterfaces` updated from `9.0.1` to `9.0.2`,
+  - `Microsoft.Extensions.Configuration` updated from `9.0.1` to `9.0.2`,
+  - `Microsoft.Extensions.Configuration.Abstractions` updated from `9.0.1` to `9.0.2`,
+  - `Microsoft.Extensions.Configuration.Binder` updated from `9.0.1` to `9.0.2`,
+  - `Microsoft.Extensions.DependencyInjection` updated from `9.0.1` to `9.0.2`,
+  - `Microsoft.Extensions.DependencyInjection.Abstractions`
+    updated from `9.0.1` to `9.0.2`,
+  - `Microsoft.Extensions.Diagnostics.Abstractions` updated from `9.0.1` to `9.0.2`,
+  - `Microsoft.Extensions.Logging` updated from `9.0.1` to `9.0.2`,
+  - `Microsoft.Extensions.Logging.Abstractions` updated from `9.0.1` to `9.0.2`,
+  - `Microsoft.Extensions.Logging.Configuration` updated from `9.0.1` to `9.0.2`,
+  - `Microsoft.Extensions.Options` updated from `9.0.1` to `9.0.2`,
+  - `Microsoft.Extensions.Options.ConfigurationExtensions`
+    updated from `9.0.1` to `9.0.2`,
+  - `Microsoft.Extensions.Primitives` updated from `9.0.1` to `9.0.2`,
+  - `OpenTelemetry.Instrumentation.AspNet` from `1.11.0-beta.1` to `1.11.0-beta.2`,
+  - `System.Diagnostics.DiagnosticSource` updated from `9.0.1` to `9.0.2`,
+  - `System.IO.Pipelines` updated from `9.0.1` to `9.0.2`,
+  - `System.Text.Encodings.Web` update from `9.0.1` to `9.0.2`,
+  - `System.Text.Json` update from `9.0.1` to `9.0.2`.
+
 ### Deprecated
 
 ### Removed
 
 ### Fixed
+
+- Fixed [DoS Vulnerability in TraceContextPropagator.Extract](https://github.com/open-telemetry/opentelemetry-dotnet/security/advisories/GHSA-8785-wc3w-h8q6).
 
 ## [1.10.0](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/tag/v1.10.0)
 
