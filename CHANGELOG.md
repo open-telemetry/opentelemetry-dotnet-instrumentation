@@ -11,6 +11,8 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 
 ### Changed
 
+- otel-dotnet-auto-install.sh can optionally use wget instead of curl, useful on
+  mcr.microsoft.com/dotnet/runtime alpine images.
 - Enhanced Kafka and RabbitMQ instrumentation now create spans at the start instead
   of manual start time adjustments.
 
