@@ -25,7 +25,7 @@ type: InstrumentationType.Trace)]
 public static class ModelBasicPublishIntegration
 {
     internal static CallTargetState OnMethodBegin<TTarget, TBasicProperties, TBody>(
-        TTarget instance, string? exchange, string? routingKey, bool mandatory, TBasicProperties basicProperties, TBody body)
+        TTarget instance, string methodName, string? exchange, string? routingKey, bool mandatory, TBasicProperties basicProperties, TBody body)
     where TBasicProperties : IBasicProperties
     where TBody : IBody
     where TTarget : IModelBase

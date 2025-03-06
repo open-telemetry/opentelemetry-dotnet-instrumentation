@@ -27,7 +27,7 @@ namespace OpenTelemetry.AutoInstrumentation.Instrumentations.Kafka.Integrations;
 public static class ProducerProduceSyncIntegration
 {
     internal static CallTargetState OnMethodBegin<TTarget, TTopicPartition, TMessage, TDeliveryHandler>(
-        TTarget instance, TTopicPartition topicPartition, TMessage message, TDeliveryHandler deliveryHandler)
+        TTarget instance, string methodName, TTopicPartition topicPartition, TMessage message, TDeliveryHandler deliveryHandler)
         where TMessage : IKafkaMessage, IDuckType
     {
         // Duck type created for message is a struct.

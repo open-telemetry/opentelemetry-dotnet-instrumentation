@@ -30,7 +30,7 @@ public static class ConsumerConsumeSyncIntegration
         return new CallTargetState(activity, null);
     }
 
-    internal static CallTargetReturn<TResponse> OnMethodEnd<TTarget, TResponse>(TTarget instance, TResponse response, Exception? exception, in CallTargetState state)
+    internal static CallTargetReturn<TResponse> OnMethodEnd<TTarget, TResponse>(TTarget instance, string methodName, TResponse response, Exception? exception, in CallTargetState state)
     {
         var activity = state.Activity;
         if (activity is null)

@@ -26,7 +26,7 @@ namespace OpenTelemetry.AutoInstrumentation.Instrumentations.RabbitMq6.Integrati
     type: InstrumentationType.Trace)]
 public static class ModelBaseBasicGetIntegration
 {
-    internal static CallTargetState OnMethodBegin<TTarget>(TTarget instance, string queue, bool autoAck)
+    internal static CallTargetState OnMethodBegin<TTarget>(TTarget instance, string methodName, string queue, bool autoAck)
     where TTarget : IModelBase
     {
         var activity = RabbitMqInstrumentation.StartReceive(instance);
