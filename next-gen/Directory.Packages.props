@@ -1,0 +1,27 @@
+<Project>
+
+  <PropertyGroup>
+    <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
+  </PropertyGroup>
+
+  <ItemGroup Label="DirectDependencies">
+    <PackageVersion Include="Google.Protobuf" Version="[3.22.5,4.0)" />
+    <PackageVersion Include="Grpc.Net.Client" Version="[2.52.0,3.0)" />
+    <PackageVersion Include="Microsoft.Extensions.Logging.Abstractions" Version="[8.0.0,)" />
+  </ItemGroup>
+
+  <ItemGroup Label="BuildDependencies">
+    <PackageVersion Include="Grpc.Tools" Version="[2.67.0,3.0)" />
+    <PackageVersion Include="Microsoft.CodeAnalysis.PublicApiAnalyzers" Version="[3.11.0-beta1.24629.2,4.0)" />
+    <PackageVersion Include="MinVer" Version="[5.0.0,6.0)" />
+    <PackageVersion Include="StyleCop.Analyzers" Version="[1.2.0-beta.556,2.0)" />
+  </ItemGroup>
+
+  <ItemGroup Label="TestDependencies">
+    <PackageVersion Include="Microsoft.Extensions.Hosting" Version="[8.0.1,)" />
+    <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="[17.11.1,18.0.0)" />
+    <PackageVersion Include="xunit" Version="[2.9.2,3.0)" />
+    <PackageVersion Include="xunit.runner.visualstudio" Version="[2.8.2,3.0)" />
+  </ItemGroup>
+
+</Project>

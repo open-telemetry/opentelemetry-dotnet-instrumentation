@@ -1,0 +1,22 @@
+﻿<RuleSet Name="Microsoft.Analyzers.ManagedCodeAnalysis" ToolsVersion="14.0">
+  <Rules AnalyzerId="Microsoft.CodeAnalysis.CSharp" RuleNamespace="Microsoft.CodeAnalysis.CSharp">
+    <Rule Id="CA1031" Action="None" /> <!-- Do not catch general exception types -->
+    <Rule Id="CA1303" Action="None" /> <!-- Do not pass literals as localized parameters -->
+  </Rules>
+  <Rules AnalyzerId="StyleCop.Analyzers" RuleNamespace="StyleCop.Analyzers">
+    <Rule Id="SA1101" Action="None" /> <!-- Prefix local calls with this -->
+
+    <Rule Id="SA1306" Action="None" /> <!-- Field should begin with lower-case letter -->
+    <Rule Id="SA1308" Action="None" /> <!-- Field should not begin with the prefix 's_' -->
+    <Rule Id="SA1309" Action="None" /> <!-- Field names should not begin with underscore -->
+    <Rule Id="SA1311" Action="None" /> <!-- Static readonly fields should begin with upper-case letter -->
+
+    <Rule Id="SA1401" Action="None" /> <!-- Field should be private -->
+    <Rule Id="SA1405" Action="None" /> <!-- Debug.Assert should provide message text -->
+    <Rule Id="SA1413" Action="None" /> <!-- Use trailing comma in multi-line initializers -->
+
+    <Rule Id="SA1600" Action="None" /> <!-- Elements should be documented -->
+    <Rule Id="SA1601" Action="None" /> <!-- Partial elements should be documented -->
+    <Rule Id="SA1602" Action="None" /> <!-- Enumeration items should be documented -->
+  </Rules>
+</RuleSet>

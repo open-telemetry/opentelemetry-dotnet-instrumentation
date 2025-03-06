@@ -2,6 +2,7 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
+    <RootNamespace>OpenTelemetry</RootNamespace>
     <TargetFramework>net8.0</TargetFramework>
     <RootNamespace>getting_started_dotnet_monitor_logs</RootNamespace>
     <ImplicitUsings>enable</ImplicitUsings>
@@ -11,6 +12,6 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.Extensions.Hosting" VersionOverride="9.0.1" />
     <PackageReference Include="Microsoft.Extensions.Logging" VersionOverride="9.0.1" />
-  </ItemGroup>  
+  </ItemGroup>
 
 </Project>
