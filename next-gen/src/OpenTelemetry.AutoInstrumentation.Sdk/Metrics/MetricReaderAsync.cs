@@ -42,11 +42,11 @@ internal class MetricReaderAsync : IMetricReader
         _Resource = resource;
         _Exporter = exporter;
 
-        var aggregationTemporality = options.TemporalityPreference == AggregationTemporality.Delta
+        var aggregationTemporality = options.AggregationTemporalityPreference == AggregationTemporality.Delta
             ? exporter.SupportsDeltaAggregationTemporality
                 ? AggregationTemporality.Delta
                 : AggregationTemporality.Cumulative
-            : options.TemporalityPreference;
+            : options.AggregationTemporalityPreference;
 
         Debug.Assert(aggregationTemporality != AggregationTemporality.Unspecified);
 
