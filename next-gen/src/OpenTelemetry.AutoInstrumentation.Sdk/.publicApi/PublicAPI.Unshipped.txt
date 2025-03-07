@@ -162,10 +162,9 @@ OpenTelemetry.Metrics.MetricProducerOptions
 OpenTelemetry.Metrics.MetricProducerOptions.AggregationTemporality.get -> OpenTelemetry.Metrics.AggregationTemporality
 OpenTelemetry.Metrics.MetricReaderFactory
 OpenTelemetry.Metrics.MetricReaderOptions
+OpenTelemetry.Metrics.MetricReaderOptions.AggregationTemporalityPreference.get -> OpenTelemetry.Metrics.AggregationTemporality
 OpenTelemetry.Metrics.MetricReaderOptions.ExportTimeoutMilliseconds.get -> int
-OpenTelemetry.Metrics.MetricReaderOptions.MetricReaderOptions(int exportTimeoutMilliseconds = 30000) -> void
-OpenTelemetry.Metrics.MetricReaderOptions.TemporalityPreference.get -> OpenTelemetry.Metrics.AggregationTemporality
-OpenTelemetry.Metrics.MetricReaderOptions.TemporalityPreference.set -> void
+OpenTelemetry.Metrics.MetricReaderOptions.MetricReaderOptions(OpenTelemetry.Metrics.AggregationTemporality aggregationTemporalityPreference = OpenTelemetry.Metrics.AggregationTemporality.Unspecified, int exportTimeoutMilliseconds = 30000) -> void
 OpenTelemetry.Metrics.MetricType
 OpenTelemetry.Metrics.MetricType.DoubleGauge = 45 -> OpenTelemetry.Metrics.MetricType
 OpenTelemetry.Metrics.MetricType.DoubleSum = 29 -> OpenTelemetry.Metrics.MetricType
@@ -189,7 +188,7 @@ OpenTelemetry.Metrics.NumberMetricPoint.ValueAsDouble.get -> double
 OpenTelemetry.Metrics.NumberMetricPoint.ValueAsLong.get -> long
 OpenTelemetry.Metrics.PeriodicExportingMetricReaderOptions
 OpenTelemetry.Metrics.PeriodicExportingMetricReaderOptions.ExportIntervalMilliseconds.get -> int
-OpenTelemetry.Metrics.PeriodicExportingMetricReaderOptions.PeriodicExportingMetricReaderOptions(int exportIntervalMilliseconds = 5000, int exportTimeoutMilliseconds = 30000) -> void
+OpenTelemetry.Metrics.PeriodicExportingMetricReaderOptions.PeriodicExportingMetricReaderOptions(OpenTelemetry.Metrics.AggregationTemporality aggregationTemporalityPreference = OpenTelemetry.Metrics.AggregationTemporality.Unspecified, int exportIntervalMilliseconds = 5000, int exportTimeoutMilliseconds = 30000) -> void
 OpenTelemetry.Metrics.SummaryMetricPoint
 OpenTelemetry.Metrics.SummaryMetricPoint.Count.get -> int
 OpenTelemetry.Metrics.SummaryMetricPoint.EndTimeUtc.get -> System.DateTime
