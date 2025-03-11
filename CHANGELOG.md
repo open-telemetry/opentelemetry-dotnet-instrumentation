@@ -11,6 +11,9 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 
 ### Changed
 
+- `otel-dotnet-auto-install.sh` now optionally uses `wget` instead of `curl`,
+  improving compatibility with `mcr.microsoft.com/dotnet/runtime` Alpine images.
+
 #### Dependency updates
 
 ### Deprecated
