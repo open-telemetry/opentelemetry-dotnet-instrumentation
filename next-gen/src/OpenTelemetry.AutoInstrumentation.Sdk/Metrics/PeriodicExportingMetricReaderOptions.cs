@@ -13,12 +13,14 @@ public sealed class PeriodicExportingMetricReaderOptions : MetricReaderOptions
     /// <summary>
     /// Initializes a new instance of the <see cref="PeriodicExportingMetricReaderOptions"/> class.
     /// </summary>
+    /// <param name="aggregationTemporalityPreference"><see cref="AggregationTemporality"/>.</param>
     /// <param name="exportIntervalMilliseconds">Export interval in milliseconds. Default value: 5000.</param>
     /// <param name="exportTimeoutMilliseconds">Export timeout in milliseconds. Default value: 30000.</param>
     public PeriodicExportingMetricReaderOptions(
+        AggregationTemporality aggregationTemporalityPreference = AggregationTemporality.Unspecified,
         int exportIntervalMilliseconds = DefaultExportIntervalMilliseconds,
         int exportTimeoutMilliseconds = DefaultExportTimeoutMilliseconds)
-    : base(exportTimeoutMilliseconds)
+        : base(aggregationTemporalityPreference, exportTimeoutMilliseconds)
     {
         ArgumentOutOfRangeException.ThrowIfLessThan(exportIntervalMilliseconds, 1);
 
