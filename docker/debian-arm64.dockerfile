@@ -1,4 +1,4 @@
-FROM mcr.microsoft.com/dotnet/sdk:9.0.201-bookworm-slim@sha256:4845ef954a33b55c1a1f5db1ac24ba6cedb1dafb7f0b6a64ebce2fabe611f0c0
+FROM mcr.microsoft.com/dotnet/sdk:9.0.202-bookworm-slim@sha256:d7f4691d11f610d9b94bb75517c9e78ac5799447b5b3e82af9e4625d8c8d1d53
 
 RUN apt-get update && \
     apt-get install -y \
