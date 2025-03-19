@@ -190,7 +190,7 @@ internal static class Program
             null,
             [typeof(ushort), typeof(string), typeof(bool)],
             null);
-        var task = (Task)closeMethod?.Invoke(delegateFieldValue, [Constants.ReplySuccess, "Goodbye", true])!;
+        var task = (Task)closeMethod?.Invoke(delegateFieldValue, [200, "Goodbye", true])!;
         return task.Wait(DefaultWaitTimeout);
     }
 
