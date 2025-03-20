@@ -30,7 +30,7 @@ public class MockMetricsCollector : IDisposable
 #if NETFRAMEWORK
         _listener = new(output, HandleHttpRequests, host, "/v1/metrics/");
 #else
-        _listener = new(output, new PathHandler(HandleHttpRequests, "/v1/metrics"));
+        _listener = new(output, nameof(MockMetricsCollector), new PathHandler(HandleHttpRequests, "/v1/metrics"));
 #endif
     }
 

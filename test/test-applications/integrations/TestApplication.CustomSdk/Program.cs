@@ -24,6 +24,11 @@ public static class Program
 
     public static async Task Main(string[] args)
     {
+        if (args.Length != 4)
+        {
+            throw new InvalidOperationException("Usage: TestApplication.CustomSdk.exe --redis-port <redis-port> --test-server-port <test-server-port>");
+        }
+
         ConsoleHelper.WriteSplashScreen(args);
 
         // When export of NServiceBus metrics is tested, which are updated on receive side,
@@ -74,7 +79,8 @@ public static class Program
 
                 using var client = new HttpClient();
                 client.Timeout = TimeSpan.FromSeconds(5);
-                await client.GetStringAsync("https://httpbin.org/get", cancellation.Token);
+                var port = int.Parse(args[3]);
+                await client.GetStringAsync($"http://localhost:{port}/test", cancellation.Token);
             }
 
             // The "LONG_RUNNING" environment variable is used by tests that access/receive
@@ -136,9 +142,9 @@ public static class Program
 
     private static async Task PingRedis(string[] args)
     {
-        var redisPort = GetRedisPort(args);
+        var redisPort = int.Parse(GetRedisPort(args));
 
-        var connectionString = $@"127.0.0.1:{redisPort}";
+        var connectionString = $"127.0.0.1:{redisPort}";
 
         using var connection = await ConnectionMultiplexer.ConnectAsync(connectionString);
         var db = connection.GetDatabase();

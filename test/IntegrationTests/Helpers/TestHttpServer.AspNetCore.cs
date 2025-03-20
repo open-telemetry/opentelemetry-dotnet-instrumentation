@@ -7,6 +7,7 @@ using System.Net;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Hosting.Server.Features;
+using Microsoft.AspNetCore.Http;
 using Xunit.Abstractions;
 
 namespace IntegrationTests.Helpers;
@@ -14,11 +15,13 @@ namespace IntegrationTests.Helpers;
 public class TestHttpServer : IDisposable
 {
     private readonly ITestOutputHelper _output;
+    private readonly string _name;
     private readonly IWebHost _listener;
 
-    public TestHttpServer(ITestOutputHelper output, params PathHandler[] pathHandlers)
+    public TestHttpServer(ITestOutputHelper output, string name, params PathHandler[] pathHandlers)
     {
         _output = output;
+        _name = name;
 
         _listener = new WebHostBuilder()
             .UseKestrel(options =>
@@ -56,10 +59,22 @@ public class TestHttpServer : IDisposable
         _listener.Dispose();
     }
 
+#pragma warning disable SA1204
+    public static TestHttpServer CreateDefaultTestServer(ITestOutputHelper output)
+#pragma warning restore SA1204
+    {
+        return new TestHttpServer(output, "TestDefault", new PathHandler(HandleTestRequest, "/test"));
+    }
+
+    private static Task HandleTestRequest(HttpContext ctx)
+    {
+        ctx.Response.StatusCode = 200;
+        return Task.CompletedTask;
+    }
+
     private void WriteOutput(string msg)
     {
-        const string name = nameof(TestHttpServer);
-        _output.WriteLine($"[{name}]: {msg}");
+        _output.WriteLine($"[{_name}-{nameof(TestHttpServer)}]: {msg}");
     }
 }
 
