@@ -89,7 +89,14 @@ it assumes that the code is run from the root of the repository and the CI
 artifacts we added to `~/Downloads/`:
 
 ```PowerShell
-$artifacts = @("bin-alpine", "bin-centos", "bin-macos-13", "bin-windows-2022")
+$artifacts = @(
+    "bin-alpine-x64",
+    "bin-alpine-arm64",
+    "bin-ubuntu-22.04",
+    "bin-ubuntu-22.04-arm",
+    "bin-macos-13",
+    "bin-windows-2022"
+)
 $destFolder = "./bin/ci-artifacts/"
 $zipFilesFolder = "~/Downloads/"
 
