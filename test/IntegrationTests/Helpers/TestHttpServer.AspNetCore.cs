@@ -53,17 +53,15 @@ public class TestHttpServer : IDisposable
     /// </summary>
     public int Port { get; }
 
+    public static TestHttpServer CreateDefaultTestServer(ITestOutputHelper output)
+    {
+        return new TestHttpServer(output, "TestDefault", new PathHandler(HandleTestRequest, "/test"));
+    }
+
     public void Dispose()
     {
         WriteOutput($"Shutting down");
         _listener.Dispose();
-    }
-
-#pragma warning disable SA1204
-    public static TestHttpServer CreateDefaultTestServer(ITestOutputHelper output)
-#pragma warning restore SA1204
-    {
-        return new TestHttpServer(output, "TestDefault", new PathHandler(HandleTestRequest, "/test"));
     }
 
     private static Task HandleTestRequest(HttpContext ctx)

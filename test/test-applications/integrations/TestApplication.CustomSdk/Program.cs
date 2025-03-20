@@ -3,6 +3,7 @@
 
 using System.Diagnostics;
 using System.Diagnostics.Metrics;
+using System.Globalization;
 using System.Net.Http;
 using OpenTelemetry;
 using OpenTelemetry.Metrics;
@@ -79,7 +80,7 @@ public static class Program
 
                 using var client = new HttpClient();
                 client.Timeout = TimeSpan.FromSeconds(5);
-                var port = int.Parse(args[3]);
+                var port = int.Parse(args[3], CultureInfo.InvariantCulture);
                 await client.GetStringAsync($"http://localhost:{port}/test", cancellation.Token);
             }
 
@@ -142,7 +143,7 @@ public static class Program
 
     private static async Task PingRedis(string[] args)
     {
-        var redisPort = int.Parse(GetRedisPort(args));
+        var redisPort = int.Parse(GetRedisPort(args), CultureInfo.InvariantCulture);
 
         var connectionString = $"127.0.0.1:{redisPort}";
 
