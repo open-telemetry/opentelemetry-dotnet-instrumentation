@@ -101,7 +101,7 @@ levels](https://github.com/dotnet/runtime/blob/87e9f1d94f94f7e9b38da74fd93ea856b
 
 A proof of concept was built.
 
-* https://github.com/CodeBlanch/diagnostics/tree/distributed-traces-pipeline
+* https://github.com/CodeBlanch/diagnostics/tree/traces-pipeline
 
   Contains the changes to the dotnet-diagnostics repo. Adds more data in the
   metrics pipeline to support more of the OTLP data model. Adds a new logging
