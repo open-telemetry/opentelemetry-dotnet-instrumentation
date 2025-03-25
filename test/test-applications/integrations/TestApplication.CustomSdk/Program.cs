@@ -27,7 +27,7 @@ public static class Program
     {
         if (args.Length != 4)
         {
-            throw new InvalidOperationException("Usage: TestApplication.CustomSdk.exe --redis-port <redis-port> --test-server-port <test-server-port>");
+            throw new InvalidOperationException("Missing arguments. Provide redis port with --redis-port <redis-port> and test server port with --test-server-port <test-server-port>.");
         }
 
         ConsoleHelper.WriteSplashScreen(args);

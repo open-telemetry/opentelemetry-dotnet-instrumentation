@@ -94,11 +94,12 @@ public sealed class NugetSampleTests : TestHelper
     {
         RunAndAssertHttpSpans(() =>
         {
+            using var testServer = TestHttpServer.CreateDefaultTestServer(Output);
             var dllName = EnvironmentHelper.FullTestApplicationName.EndsWith(".exe")
                 ? EnvironmentHelper.FullTestApplicationName.Replace(".exe", ".dll")
                 : EnvironmentHelper.FullTestApplicationName + ".dll";
             var dllPath = Path.Combine(appDir, dllName);
-            RunInstrumentationTarget($"dotnet {dllPath}", appDir);
+            RunInstrumentationTarget($"dotnet {dllPath} --test-server-port {testServer.Port}", appDir);
         });
     }
 #endif
@@ -107,9 +108,10 @@ public sealed class NugetSampleTests : TestHelper
     {
         RunAndAssertHttpSpans(() =>
         {
+            using var testServer = TestHttpServer.CreateDefaultTestServer(Output);
             var instrumentationTarget = Path.Combine(appDir, EnvironmentHelper.FullTestApplicationName);
             instrumentationTarget = EnvironmentTools.IsWindows() ? instrumentationTarget + ".exe" : instrumentationTarget;
-            RunInstrumentationTarget(instrumentationTarget, appDir);
+            RunInstrumentationTarget($"{instrumentationTarget} --test-server-port {testServer.Port}", appDir);
         });
     }
 
@@ -142,7 +144,7 @@ public sealed class NugetSampleTests : TestHelper
 
     private void RunAndAssertHttpSpans(Action appLauncherAction)
     {
-        var collector = new MockSpansCollector(Output);
+        using var collector = new MockSpansCollector(Output);
         SetExporter(collector);
 
 #if NETFRAMEWORK
