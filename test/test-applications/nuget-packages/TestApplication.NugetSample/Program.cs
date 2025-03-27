@@ -14,15 +14,22 @@
 // limitations under the License.
 // </copyright>
 
+
+using System.Globalization;
 #if NETFRAMEWORK
 using System.Net.Http;
 #endif
 
 using var httpClient = new HttpClient();
 httpClient.Timeout = TimeSpan.FromSeconds(10);
+if (args.Length != 2)
+{
+    throw new InvalidOperationException("Missing arguments. Provide test server port with --test-server-port <test-server-port>");
+}
 try
 {
-    var response = await httpClient.GetAsync("http://example.com");
+    var testServerPort = int.Parse(args[1], CultureInfo.InvariantCulture);
+    var response = await httpClient.GetAsync($"http://localhost:{testServerPort}/test/");
     Console.WriteLine(response.StatusCode);
 }
 catch (Exception e)

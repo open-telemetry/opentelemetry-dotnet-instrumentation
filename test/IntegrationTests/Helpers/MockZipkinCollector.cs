@@ -32,7 +32,7 @@ public class MockZipkinCollector : IDisposable
 #if NETFRAMEWORK
         _listener = new TestHttpServer(output, HandleHttpRequests, host, "/api/v2/spans/");
 #else
-        _listener = new TestHttpServer(output, new PathHandler(HandleHttpRequests, "/api/v2/spans"));
+        _listener = new TestHttpServer(output, nameof(MockZipkinCollector), new PathHandler(HandleHttpRequests, "/api/v2/spans"));
 #endif
     }
 

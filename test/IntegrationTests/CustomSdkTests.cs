@@ -25,6 +25,7 @@ public class CustomSdkTests : TestHelper
     [Trait("Containers", "Linux")]
     public void SubmitsTraces()
     {
+        using var testServer = TestHttpServer.CreateDefaultTestServer(Output);
         using var collector = new MockSpansCollector(Output);
         SetExporter(collector);
 
@@ -43,7 +44,7 @@ public class CustomSdkTests : TestHelper
 
         RunTestApplication(new()
         {
-            Arguments = $"--redis {_redis.Port}"
+            Arguments = $"--redis-port {_redis.Port} --test-server-port {testServer.Port}"
         });
 
         collector.AssertExpectations();
@@ -55,6 +56,7 @@ public class CustomSdkTests : TestHelper
     [Trait("Containers", "Linux")]
     public void SubmitsMetrics()
     {
+        using var testServer = TestHttpServer.CreateDefaultTestServer(Output);
         using var collector = new MockMetricsCollector(Output);
         SetExporter(collector);
 
@@ -73,7 +75,7 @@ public class CustomSdkTests : TestHelper
 
         var process = StartTestApplication(new()
         {
-            Arguments = $"--redis {_redis.Port}"
+            Arguments = $"--redis-port {_redis.Port} --test-server-port {testServer.Port}"
         });
 
         try
