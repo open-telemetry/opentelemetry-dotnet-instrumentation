@@ -1,8 +1,6 @@
 # escape=`
 
-ARG windowscontainer_version=ltsc2022
-ARG image_digest=sha256:84079c734ab5aec702409ef7967ec47af9468c56ff4046882239cabacda78097
-FROM mcr.microsoft.com/dotnet/framework/aspnet:4.8-windowsservercore-${windowscontainer_version}@${image_digest}
+FROM mcr.microsoft.com/dotnet/framework/aspnet:4.8-windowsservercore-ltsc2022@sha256:84079c734ab5aec702409ef7967ec47af9468c56ff4046882239cabacda78097
 ARG configuration=Debug
 ARG platform=x64
 WORKDIR /opentelemetry
