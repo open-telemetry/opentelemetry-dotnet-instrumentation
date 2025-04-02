@@ -178,7 +178,7 @@ partial class Build
 
             DockerBuild(x => x
                 .SetPath(".")
-                .SetBuildArg($"configuration={BuildConfiguration}", $"windowscontainer_version={WindowsContainerVersion}")
+                .SetBuildArg($"configuration={BuildConfiguration}")
                 .EnableRm()
                 .SetTag(Path.GetFileNameWithoutExtension(project).Replace(".", "-").ToLowerInvariant())
                 .SetProcessWorkingDirectory(project.Directory)
