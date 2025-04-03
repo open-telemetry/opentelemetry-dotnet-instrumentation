@@ -8,6 +8,8 @@ on:
         description: "The NuGet version suffix to build the packages"
         value: ${{ jobs.build-nuget-packages.outputs.nuget-version-suffix }}
 
+permissions:
+  contents: read
 
 env:
   NUGET_PACKAGES: ${{ github.workspace }}/packages

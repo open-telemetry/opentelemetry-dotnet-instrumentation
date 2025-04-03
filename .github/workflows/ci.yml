@@ -11,6 +11,9 @@ env:
   NUGET_PACKAGES: ${{ github.workspace }}/packages
   DOTNET_CLI_TELEMETRY_OPTOUT: 1
 
+permissions:
+  contents: read
+
 jobs:
   build-container:
     uses: ./.github/workflows/build-container.yml
