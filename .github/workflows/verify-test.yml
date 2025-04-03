@@ -12,6 +12,9 @@ on:
         description: 'Test execution count'
         default: '20'
 
+permissions:
+  contents: read
+
 jobs:
   verify-test:
     strategy:

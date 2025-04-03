@@ -5,6 +5,9 @@ on:
     tags: [ v* ]
   workflow_dispatch:
 
+permissions:
+  contents: read
+
 env:
   NUGET_PACKAGES: ${{ github.workspace }}/packages
   DOTNET_CLI_TELEMETRY_OPTOUT: 1
