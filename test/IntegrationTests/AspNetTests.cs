@@ -146,7 +146,7 @@ public class AspNetTests
         };
 
         var webPort = TcpPortProvider.GetOpenPort();
-        await using var container = await IISContainerTestHelper.StartContainerAsync("testapplication-aspnet-netframework", webPort, environmentVariables, Output);
+        await using var container = await IISContainerTestHelper.StartContainerAsync("testapplication-aspnet-netframework-integrated", webPort, environmentVariables, Output);
         await CallTestApplicationEndpoint(webPort);
 
         collector.ResourceExpector.AssertExpectations();
@@ -175,7 +175,7 @@ public class AspNetTests
             ["OTEL_DOTNET_AUTO_METRICS_ASPNET_INSTRUMENTATION_ENABLED"] = "true" // Helps to reduce noise by enabling only AspNet metrics.
         };
         var webPort = TcpPortProvider.GetOpenPort();
-        await using var container = await IISContainerTestHelper.StartContainerAsync("testapplication-aspnet-netframework", webPort, environmentVariables, Output);
+        await using var container = await IISContainerTestHelper.StartContainerAsync("testapplication-aspnet-netframework-integrated", webPort, environmentVariables, Output);
         await CallTestApplicationEndpoint(webPort);
 
         collector.AssertExpectations();
@@ -183,7 +183,7 @@ public class AspNetTests
 
     private static string GetTestImageName(string appPoolMode)
     {
-        return appPoolMode == "Classic" ? "testapplication-aspnet-netframework-classic" : "testapplication-aspnet-netframework";
+        return appPoolMode == "Classic" ? "testapplication-aspnet-netframework-classic" : "testapplication-aspnet-netframework-integrated";
     }
 
     private async Task CallTestApplicationEndpoint(int webPort)

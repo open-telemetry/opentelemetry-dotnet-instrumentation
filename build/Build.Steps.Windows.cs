@@ -136,15 +136,7 @@ partial class Build
         .Executes(() =>
         {
             var aspNetProject = Solution.GetProjectByName(Projects.Tests.Applications.AspNet);
-            BuildDockerImage(aspNetProject);
-
-            DockerBuild(x => x
-                .SetPath(".")
-                .SetFile(aspNetProject.Directory / "Classic.Dockerfile")
-                .EnableRm()
-                .SetTag(($"{Path.GetFileNameWithoutExtension(aspNetProject).Replace(".", "-")}-classic").ToLowerInvariant())
-                .SetProcessWorkingDirectory(aspNetProject.Directory)
-            );
+            BuildDockerImage(aspNetProject, "integrated", "classic");
 
             var wcfProject = Solution.GetProjectByName(Projects.Tests.Applications.WcfIis);
             BuildDockerImage(wcfProject);
@@ -153,7 +145,7 @@ partial class Build
             BuildDockerImage(owinProject);
         });
 
-    void BuildDockerImage(Project project)
+    void BuildDockerImage(Project project, params string[] targets)
     {
         const string moduleName = "OpenTelemetry.DotNet.Auto.psm1";
         var sourceModulePath = InstallationScriptsDirectory / moduleName;
@@ -176,13 +168,31 @@ partial class Build
                     project.Directory / "Properties" / "PublishProfiles" / $"FolderProfile.{BuildConfiguration}.pubxml")
                 .SetTargetPath(project));
 
-            DockerBuild(x => x
-                .SetPath(".")
-                .SetBuildArg($"configuration={BuildConfiguration}")
-                .EnableRm()
-                .SetTag(Path.GetFileNameWithoutExtension(project).Replace(".", "-").ToLowerInvariant())
-                .SetProcessWorkingDirectory(project.Directory)
-            );
+            if (targets.Length > 0)
+            {
+                foreach (var target in targets)
+                {
+                    DockerBuild(x => x
+                        .SetPath(".")
+                        .SetBuildArg($"configuration={BuildConfiguration}")
+                        .EnableRm()
+                        .SetProcessWorkingDirectory(project.Directory)
+                        .SetTag($"{Path.GetFileNameWithoutExtension(project).Replace(".", "-")}-{target}".ToLowerInvariant())
+                        .SetTarget(target)
+                    );
+
+                }
+            }
+            else
+            {
+                DockerBuild(x => x
+                    .SetPath(".")
+                    .SetBuildArg($"configuration={BuildConfiguration}")
+                    .EnableRm()
+                    .SetProcessWorkingDirectory(project.Directory)
+                    .SetTag(Path.GetFileNameWithoutExtension(project).Replace(".", "-").ToLowerInvariant())
+                );
+            }
         }
         finally
         {
