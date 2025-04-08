@@ -17,6 +17,11 @@ jobs:
   analyze:
     name: Analyze
     runs-on: windows-latest
+    permissions:
+      # Needed for Code scanning upload
+      security-events: write
+      # Needed for GitHub OIDC token to publish results
+      id-token: write
 
     strategy:
       fail-fast: false
