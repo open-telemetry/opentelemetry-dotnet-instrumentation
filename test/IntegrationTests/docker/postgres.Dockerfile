@@ -1,1 +1,1 @@
-FROM postgres:17.4@sha256:6e57135d237944dddf7588b249edcdf78745a7c318e5444ae0375855b64ec6cf
+FROM postgres:17.4@sha256:fe3f571d128e8efadcd8b2fde0e2b73ebab6dbec33f6bfe69d98c682c7d8f7bd
