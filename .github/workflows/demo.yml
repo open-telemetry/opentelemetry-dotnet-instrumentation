@@ -16,7 +16,12 @@ permissions:
 
 jobs:
   build:
-    runs-on: [ ubuntu-latest, macos-latest ] # macos-latest runs is arm64 architecture
+    strategy:
+      matrix:
+        os:
+          - ubuntu-latest
+          - macos-latest # macos-latest runs is arm64 architecture
+    runs-on: ${{ matrix.os }}
     steps:
 
     - name: Checkout
