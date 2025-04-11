@@ -4,9 +4,7 @@ services:
     build:
       context: ./Client
       dockerfile: ../Dockerfile # installs OpenTelemetry .NET Automatic Instrumentation
-    entrypoint: "./out/Examples.Client http://service:5000"
-    env_file:
-      - otel-dotnet.env # enables OpenTelemetry .NET Automatic Instrumentation
+    entrypoint: "/otel-dotnet-auto/instrument.sh ./out/Examples.Client http://service:5000"
     environment:
       # OpenTelemetry environmental variables:
       OTEL_SERVICE_NAME: "client"
@@ -19,9 +17,7 @@ services:
     build:
       context: ./Service
       dockerfile: ../Dockerfile # installs OpenTelemetry .NET Automatic Instrumentation
-    entrypoint: "./out/Examples.Service --urls http://*:5000"
-    env_file:
-      - otel-dotnet.env # enable OpenTelemetry .NET Automatic Instrumentation
+    entrypoint: "/otel-dotnet-auto/instrument.sh ./out/Examples.Service --urls http://*:5000"
     environment:
       DB_CONNECTION: "Server=sqlserver,1433;User=sa;Password=yourStrong(!)Password;TrustServerCertificate=True;"
       # OpenTelemetry environmental variables:
@@ -35,6 +31,8 @@ services:
 
   sqlserver:
     image: mcr.microsoft.com/mssql/server:2022-CU17-ubuntu-22.04
+    # This image is not available for ARM64 architecture
+    platform: linux/amd64
     environment:
       - ACCEPT_EULA=Y
       - SA_PASSWORD=yourStrong(!)Password
