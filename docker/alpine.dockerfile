@@ -1,4 +1,4 @@
-FROM mcr.microsoft.com/dotnet/sdk:9.0.200-alpine3.20@sha256:53b1a50ed48f3f8a465c26d26b152ea27a90e37a5756b1da85da9fdd20c32216
+FROM mcr.microsoft.com/dotnet/sdk:9.0.203-alpine3.20@sha256:823a26bb53762a51795dbcdcf67659360d6f62823f5a83dc380cbef226d4ded3
 RUN apk update \
     && apk upgrade \
     && apk add --no-cache --update \
@@ -21,7 +21,7 @@ RUN curl -sSL https://dot.net/v1/dotnet-install.sh --output dotnet-install.sh \
     && echo "SHA256: $(sha256sum dotnet-install.sh)" \
     && echo "19b0a7890c371201b944bf0f8cdbb6460d053d63ddbea18cfed3e4199769ce17  dotnet-install.sh" | sha256sum -c \
     && chmod +x ./dotnet-install.sh \
-    && ./dotnet-install.sh -v 8.0.406 --install-dir /usr/share/dotnet --no-path \
+    && ./dotnet-install.sh -v 8.0.408 --install-dir /usr/share/dotnet --no-path \
     && rm dotnet-install.sh
 
 WORKDIR /project

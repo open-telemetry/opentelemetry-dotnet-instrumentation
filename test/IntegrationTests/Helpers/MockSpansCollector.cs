@@ -31,7 +31,7 @@ public class MockSpansCollector : IDisposable
 #if NETFRAMEWORK
         _listener = new TestHttpServer(output, HandleHttpRequests, host, "/v1/traces/");
 #else
-        _listener = new TestHttpServer(output, new PathHandler(HandleHttpRequests, "/v1/traces"));
+        _listener = new TestHttpServer(output, nameof(MockSpansCollector), new PathHandler(HandleHttpRequests, "/v1/traces"));
 #endif
     }
 

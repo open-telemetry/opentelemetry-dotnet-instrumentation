@@ -11,6 +11,9 @@ env:
   NUGET_PACKAGES: ${{ github.workspace }}/packages
   DOTNET_CLI_TELEMETRY_OPTOUT: 1
 
+permissions:
+  contents: read
+
 jobs:
   build-container:
     uses: ./.github/workflows/build-container.yml
@@ -58,21 +61,21 @@ jobs:
           fetch-depth: 0 # fetching all, needed to correctly calculate version
 
       - name: Setup .NET
-        uses: actions/setup-dotnet@3951f0dfe7a07e2313ec93c75700083e2005cbab # tag: v4.3.0
+        uses: actions/setup-dotnet@67a3573c9a986a3f9c594539f4ab511d57bb3ce9 # tag: v4.3.1
         with:
           dotnet-version: | 
-            8.0.406
-            9.0.200
+            8.0.408
+            9.0.203
 
       - name: Check for NuGet packages cache
-        uses: actions/cache@d4323d4df104b026a6aa633fdb11d772146be0bf # tag: v4.2.2
+        uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684 # tag: v4.2.3
         id: nuget-cache
         with:
           key: ${{ hashFiles('**/Directory.packages.props', './build/LibraryVersions.g.cs', '**/packages.config' ) }}
           path: ${{ env.NUGET_PACKAGES }}
 
       - name: Download Artifacts from build job
-        uses: actions/download-artifact@cc203385981b70ca67e1cc392babf9cc229d5806 # tag: v4.1.9
+        uses: actions/download-artifact@95815c38cf2ff2164869cbab79da8d1f422bc89e # tag: v4.2.1
         with:
           name: bin-${{ matrix.machine }}
           path: bin/tracer-home
@@ -88,7 +91,7 @@ jobs:
 
       - name: Upload test logs
         if: always()
-        uses: actions/upload-artifact@4cec3d8aa04e39d1a68397de0c4cd6fb9dce8ec1 # tag: v4.6.1
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # tag: v4.6.2
         with:
           name: test-logs-${{ matrix.machine }}-${{ matrix.test-tfm }}-containers-${{ matrix.containers }}
           path: test-artifacts/
@@ -113,21 +116,21 @@ jobs:
           fetch-depth: 0 # fetching all, needed to correctly calculate version
 
       - name: Setup .NET
-        uses: actions/setup-dotnet@3951f0dfe7a07e2313ec93c75700083e2005cbab # tag: v4.3.0
+        uses: actions/setup-dotnet@67a3573c9a986a3f9c594539f4ab511d57bb3ce9 # tag: v4.3.1
         with:
           dotnet-version: | 
-            8.0.406
-            9.0.200
+            8.0.408
+            9.0.203
 
       - name: Check for NuGet packages cache
-        uses: actions/cache@d4323d4df104b026a6aa633fdb11d772146be0bf # tag: v4.2.2
+        uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684 # tag: v4.2.3
         id: nuget-cache
         with:
           key: ${{ hashFiles('**/Directory.packages.props', './build/LibraryVersions.g.cs', '**/packages.config' ) }}
           path: ${{ env.NUGET_PACKAGES }}
 
       - name: Download Artifacts from build job
-        uses: actions/download-artifact@cc203385981b70ca67e1cc392babf9cc229d5806 # tag: v4.1.9
+        uses: actions/download-artifact@95815c38cf2ff2164869cbab79da8d1f422bc89e # tag: v4.2.1
         with:
           name: bin-${{ matrix.machine }}
           path: bin/tracer-home
@@ -152,21 +155,21 @@ jobs:
           fetch-depth: 0 # fetching all, needed to correctly calculate version
 
       - name: Setup .NET
-        uses: actions/setup-dotnet@3951f0dfe7a07e2313ec93c75700083e2005cbab # tag: v4.3.0
+        uses: actions/setup-dotnet@67a3573c9a986a3f9c594539f4ab511d57bb3ce9 # tag: v4.3.1
         with:
           dotnet-version: | 
-            8.0.406
-            9.0.200
+            8.0.408
+            9.0.203
 
       - name: Check for NuGet packages cache
-        uses: actions/cache@d4323d4df104b026a6aa633fdb11d772146be0bf # tag: v4.2.2
+        uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684 # tag: v4.2.3
         id: nuget-cache
         with:
           key: ${{ hashFiles('**/Directory.packages.props', './build/LibraryVersions.g.cs', '**/packages.config' ) }}
           path: ${{ env.NUGET_PACKAGES }}
 
       - name: Download Artifacts from build job
-        uses: actions/download-artifact@cc203385981b70ca67e1cc392babf9cc229d5806 # tag: v4.1.9
+        uses: actions/download-artifact@95815c38cf2ff2164869cbab79da8d1f422bc89e # tag: v4.2.1
         with:
           name: bin-${{ matrix.machine }}
           path: bin/tracer-home
@@ -179,7 +182,7 @@ jobs:
 
       - name: Upload test logs
         if: always()
-        uses: actions/upload-artifact@4cec3d8aa04e39d1a68397de0c4cd6fb9dce8ec1 # tag: v4.6.1
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # tag: v4.6.2
         with:
           name: test-logs-${{ matrix.machine }}-containers-${{ matrix.containers }}
           path: test-artifacts/
@@ -220,7 +223,7 @@ jobs:
         fetch-depth: 0 # fetching all, needed to correctly calculate version
 
     - name: Download Artifacts from build job
-      uses: actions/download-artifact@cc203385981b70ca67e1cc392babf9cc229d5806 # tag: v4.1.9
+      uses: actions/download-artifact@95815c38cf2ff2164869cbab79da8d1f422bc89e # tag: v4.2.1
       with:
         name: bin-${{ matrix.build-source }}
         path: bin/tracer-home
@@ -251,21 +254,21 @@ jobs:
           fetch-depth: 0 # fetching all, needed to correctly calculate version
 
       - name: Setup .NET
-        uses: actions/setup-dotnet@3951f0dfe7a07e2313ec93c75700083e2005cbab # tag: v4.3.0
+        uses: actions/setup-dotnet@67a3573c9a986a3f9c594539f4ab511d57bb3ce9 # tag: v4.3.1
         with:
           dotnet-version: | 
-            8.0.406
-            9.0.200
+            8.0.408
+            9.0.203
 
       - name: Check for NuGet packages cache
-        uses: actions/cache@d4323d4df104b026a6aa633fdb11d772146be0bf # tag: v4.2.2
+        uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684 # tag: v4.2.3
         id: nuget-cache
         with:
           key: ${{ hashFiles('**/Directory.packages.props', './build/LibraryVersions.g.cs', '**/packages.config' ) }}
           path: ${{ env.NUGET_PACKAGES }}
 
       - name: Download NuGet Artifacts from build-nuget-packages job
-        uses: actions/download-artifact@cc203385981b70ca67e1cc392babf9cc229d5806 # tag: v4.1.9
+        uses: actions/download-artifact@95815c38cf2ff2164869cbab79da8d1f422bc89e # tag: v4.2.1
         with:
           name: bin-nuget-packages
           path: bin/nuget-artifacts/
@@ -275,7 +278,7 @@ jobs:
 
       - name: Upload test logs
         if: always()
-        uses: actions/upload-artifact@4cec3d8aa04e39d1a68397de0c4cd6fb9dce8ec1 # tag: v4.6.1
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # tag: v4.6.2
         with:
           name: test-logs-nuget-packages-${{ matrix.machine }}
           path: test-artifacts/

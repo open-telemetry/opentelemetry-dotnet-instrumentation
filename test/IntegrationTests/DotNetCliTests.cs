@@ -38,6 +38,7 @@ public sealed class DotNetCliTests : TestHelper, IDisposable
     [Fact]
     public void WorkFlow()
     {
+        using var testServer = TestHttpServer.CreateDefaultTestServer(Output);
         // Ensure no MS telemetry spans.
         SetEnvironmentVariable("DOTNET_CLI_TELEMETRY_OPTOUT", "1");
 
@@ -48,7 +49,7 @@ public sealed class DotNetCliTests : TestHelper, IDisposable
         var tfm = $"net{Environment.Version.Major}.0";
         RunDotNetCli($"new console --framework {tfm}");
 
-        ChangeDefaultProgramToHttpClient();
+        ChangeDefaultProgramToHttpClient(testServer.Port);
 
         RunDotNetCli("build");
 
@@ -61,23 +62,24 @@ public sealed class DotNetCliTests : TestHelper, IDisposable
         RunAppWithDotNetCliAndAssertHttpSpans("run -c Release");
     }
 
-    private static void ChangeDefaultProgramToHttpClient()
+    private static void ChangeDefaultProgramToHttpClient(int testServerPort)
     {
-        const string ProgramContent = @"
-using var httpClient = new HttpClient();
-httpClient.Timeout = TimeSpan.FromSeconds(10);
-try
-{
-    var response = await httpClient.GetAsync(""http://example.com"");
-    Console.WriteLine(response.StatusCode);
-}
-catch (Exception e)
-{
-    Console.WriteLine(e);
-}
-";
+        var testServerAddress = $"http://localhost:{testServerPort}/test";
+        var programContent = $$"""
+                               using var httpClient = new HttpClient();
+                               httpClient.Timeout = TimeSpan.FromSeconds(10);
+                               try
+                               {
+                                   var response = await httpClient.GetAsync("{{testServerAddress}}");
+                                   Console.WriteLine(response.StatusCode);
+                               }
+                               catch (Exception e)
+                               {
+                                   Console.WriteLine(e);
+                               }
+                               """;
 
-        File.WriteAllText("Program.cs", ProgramContent);
+        File.WriteAllText("Program.cs", programContent);
     }
 
     private void RunDotNetCli(string arguments)
@@ -105,7 +107,7 @@ catch (Exception e)
 
     private void RunAppWithDotNetCliAndAssertHttpSpans(string arguments)
     {
-        var collector = new MockSpansCollector(Output);
+        using var collector = new MockSpansCollector(Output);
         SetExporter(collector);
 
         collector.Expect("System.Net.Http");

@@ -5,6 +5,9 @@ on:
     tags: [ v* ]
   workflow_dispatch:
 
+permissions:
+  contents: read
+
 env:
   NUGET_PACKAGES: ${{ github.workspace }}/packages
   DOTNET_CLI_TELEMETRY_OPTOUT: 1
@@ -37,7 +40,7 @@ jobs:
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # tag: v4.2.2
 
       - name: Download artifacts
-        uses: actions/download-artifact@cc203385981b70ca67e1cc392babf9cc229d5806 # tag: v4.1.9
+        uses: actions/download-artifact@95815c38cf2ff2164869cbab79da8d1f422bc89e # tag: v4.2.1
         with:
           path: .
 

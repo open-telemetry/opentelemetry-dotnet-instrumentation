@@ -25,6 +25,7 @@ public class MockCorrelationCollector : IDisposable
     {
         _listener = new(
             helper,
+            nameof(MockCorrelationCollector),
             new PathHandler(HandleLogHttpRequests, "/v1/logs"),
             new PathHandler(HandleSpanHttpRequests, "/v1/traces"));
     }

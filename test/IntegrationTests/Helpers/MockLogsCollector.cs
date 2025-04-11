@@ -31,7 +31,7 @@ public class MockLogsCollector : IDisposable
 #if NETFRAMEWORK
         _listener = new(output, HandleHttpRequests, host, "/v1/logs/");
 #else
-        _listener = new(output, new PathHandler(HandleHttpRequests, "/v1/logs"));
+        _listener = new(output, nameof(MockLogsCollector), new PathHandler(HandleHttpRequests, "/v1/logs"));
 #endif
     }
 

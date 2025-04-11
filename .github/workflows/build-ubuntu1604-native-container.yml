@@ -3,6 +3,9 @@ name: Build on Ubuntu 16.04 Native Container
 on:
   workflow_call:
 
+permissions:
+  contents: read
+
 env:
   NUGET_PACKAGES: ${{ github.workspace }}/packages
   DOTNET_CLI_TELEMETRY_OPTOUT: 1
@@ -29,7 +32,7 @@ jobs:
 
     - name: Publish native library Linux build
       if: (${{ job.status }} != 'cancelled')
-      uses: actions/upload-artifact@4cec3d8aa04e39d1a68397de0c4cd6fb9dce8ec1 # tag: v4.6.1
+      uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # tag: v4.6.2
       with:
         name: bin-ubuntu1604-native
         path: bin/tracer-home

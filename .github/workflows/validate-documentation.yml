@@ -16,6 +16,9 @@ on:
   merge_group:
   workflow_dispatch:
 
+permissions:
+  contents: read
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -26,13 +29,13 @@ jobs:
 
     - name: Run markdown links chceks
       if: ${{ !contains(github.event.pull_request.labels.*.name, 'release PR') }}
-      uses: lycheeverse/lychee-action@f613c4a64e50d792e0b31ec34bbcbba12263c6a6 # tag: v2.3.0
+      uses: lycheeverse/lychee-action@1d97d84f0bc547f7b25f4c2170d87d810dc2fb2c # tag: v2.4.0
       with:
         fail: true
         args: "--threads 1 --max-concurrency 1 --verbose --no-progress './**/*.md' './**/*.html'"
 
     - name: Run markdownlint
-      uses: streetsidesoftware/cspell-action@ef95dc49d631fc2a9e9ea089ae2b2127b7c4588e # tag: v6.10.0
+      uses: streetsidesoftware/cspell-action@8485bb4b688c68384c2f6db7ad931f5e3e63f21c # tag: v6.10.1
       with:
         files: '**/*.md'
 
