@@ -68,8 +68,8 @@ public sealed class OtlpExporterFactory
     {
         ArgumentNullException.ThrowIfNull(options);
 
-        return new OtlpSpanExporterAsync(
-            _LoggerFactory.CreateLogger<OtlpSpanExporterAsync>(),
+        return new ProtobufOtlpSpanExporterAsync(
+            _LoggerFactory.CreateLogger<ProtobufOtlpSpanExporterAsync>(),
             options);
     }
 }
