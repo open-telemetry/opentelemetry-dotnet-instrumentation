@@ -16,7 +16,7 @@ permissions:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: [ ubuntu-latest, macos-latest ] # macos-latest runs is arm64 architecture
     steps:
 
     - name: Checkout
