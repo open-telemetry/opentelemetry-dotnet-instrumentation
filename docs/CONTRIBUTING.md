@@ -4,7 +4,7 @@
 
 We'd love your help!
 
-[The project board](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/projects/1)
+[The project board](https://github.com/orgs/open-telemetry/projects/39)
 shows the current work in progress.
 
 Please join our weekly [SIG meeting](https://github.com/open-telemetry/community#special-interest-groups).
