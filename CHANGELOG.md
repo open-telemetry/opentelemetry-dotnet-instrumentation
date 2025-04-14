@@ -9,6 +9,8 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 
 ### Added
 
+- Support for `Npgsql` metrics.
+
 ### Changed
 
 - `otel-dotnet-auto-install.sh` now optionally uses `wget` instead of `curl`,
