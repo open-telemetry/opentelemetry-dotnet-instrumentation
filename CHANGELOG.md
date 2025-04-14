@@ -9,7 +9,7 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 
 ### Added
 
-- Support for `Npgsql`(https://www.nuget.org/packages/Npgsql/)
+- Support for [`Npgsql`](https://www.nuget.org/packages/Npgsql/)
   metrics instrumentation for versions `6.0.0`+.
 
 ### Changed
