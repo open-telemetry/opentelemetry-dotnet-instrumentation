@@ -327,6 +327,8 @@ internal static class Instrumentation
                     break;
                 case MetricInstrumentation.Process:
                     break;
+                case MetricInstrumentation.Npgsql:
+                    break;
                 case MetricInstrumentation.NServiceBus:
                     break;
                 case MetricInstrumentation.SqlClient:
