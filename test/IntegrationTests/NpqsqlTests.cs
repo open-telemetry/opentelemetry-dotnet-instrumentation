@@ -21,9 +21,28 @@ public class NpqsqlTests : TestHelper
     [Trait("Category", "EndToEnd")]
     [Trait("Containers", "Linux")]
     [MemberData(nameof(LibraryVersion.Npgsql), MemberType = typeof(LibraryVersion))]
-    public void SubmitsTraces(string packageVersion)
+    public void SubmitTraces(string packageVersion)
     {
         using var collector = new MockSpansCollector(Output);
+        SetExporter(collector);
+        collector.Expect("Npgsql");
+
+        RunTestApplication(new()
+        {
+            Arguments = $"--postgres {_postgres.Port}",
+            PackageVersion = packageVersion
+        });
+
+        collector.AssertExpectations();
+    }
+
+    [Theory]
+    [Trait("Category", "EndToEnd")]
+    [Trait("Containers", "Linux")]
+    [MemberData(nameof(LibraryVersion.Npgsql), MemberType = typeof(LibraryVersion))]
+    public void SubmitMetrics(string packageVersion)
+    {
+        using var collector = new MockMetricsCollector(Output);
         SetExporter(collector);
         collector.Expect("Npgsql");
 
