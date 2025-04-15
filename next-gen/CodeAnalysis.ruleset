@@ -6,6 +6,8 @@
   <Rules AnalyzerId="StyleCop.Analyzers" RuleNamespace="StyleCop.Analyzers">
     <Rule Id="SA1101" Action="None" /> <!-- Prefix local calls with this -->
 
+    <Rule Id="SA1204" Action="None" /> <!-- Static Elements Must Appear Before Instance Elements -->
+
     <Rule Id="SA1306" Action="None" /> <!-- Field should begin with lower-case letter -->
     <Rule Id="SA1308" Action="None" /> <!-- Field should not begin with the prefix 's_' -->
     <Rule Id="SA1309" Action="None" /> <!-- Field names should not begin with underscore -->
@@ -18,5 +20,6 @@
     <Rule Id="SA1600" Action="None" /> <!-- Elements should be documented -->
     <Rule Id="SA1601" Action="None" /> <!-- Partial elements should be documented -->
     <Rule Id="SA1602" Action="None" /> <!-- Enumeration items should be documented -->
+    <Rule Id="SA1652" Action="None" /> <!-- Enable Xml Documentation Output -->
   </Rules>
 </RuleSet>

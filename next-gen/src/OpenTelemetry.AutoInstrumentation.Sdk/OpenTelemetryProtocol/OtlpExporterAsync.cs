@@ -12,7 +12,6 @@ namespace OpenTelemetry.OpenTelemetryProtocol;
 /// <typeparam name="TRequest">Request type.</typeparam>
 /// <typeparam name="TBatchWriter"><see cref="IBatchWriter"/> type.</typeparam>
 internal abstract class OtlpExporterAsync<TRequest, TBatchWriter> : IExporterAsync<TBatchWriter>
-    where TRequest : IMessage
     where TBatchWriter : IBatchWriter
 {
     private readonly ILogger _Logger;
@@ -71,7 +70,16 @@ internal abstract class OtlpExporterAsync<TRequest, TBatchWriter> : IExporterAsy
         {
             using var requestMessage = new HttpRequestMessage(HttpMethod.Post, _RequestUri);
 
-            requestMessage.Content = new OtlpExporterHttpContent<TRequest>(writer.Request);
+            if (writer.Request is IMessage message)
+            {
+                requestMessage.Content = new OtlpExporterHttpContent<IMessage>(message);
+            }
+            else if (writer.Request is OtlpBufferState request)
+            {
+                requestMessage.Content = new ByteArrayContent(request.Buffer, 0, request.WritePosition);
+                requestMessage.Version = new(2, 0);
+                requestMessage.Content.Headers.ContentType = new("application/x-protobuf");
+            }
 
             if (_HeaderOptions != null)
             {

@@ -84,9 +84,5 @@ dotnet_naming_style.pascal_case_underscore_style.capitalization = pascal_case
 # Remove unnecessary expression value
 dotnet_diagnostic.IDE0058.severity = none
 
-[*Tests.cs]
-# Suppress 'static readonly' fields over constant array warnings
-dotnet_diagnostic.CA1861.severity = none
-
 [**/obj/**.cs]
 generated_code = true

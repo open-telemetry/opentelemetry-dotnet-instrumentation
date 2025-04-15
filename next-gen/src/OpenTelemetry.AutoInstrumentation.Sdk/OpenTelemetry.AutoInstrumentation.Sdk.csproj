@@ -21,4 +21,8 @@
     <Protobuf Include="**/*.proto" Access="internal" ProtoRoot="OpenTelemetryProtocol" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Compile Remove="C:\repo\opentelemetry-dotnet-instrumentation\next-gen\GlobalSuppressions.cs" />
+  </ItemGroup>
+
 </Project>

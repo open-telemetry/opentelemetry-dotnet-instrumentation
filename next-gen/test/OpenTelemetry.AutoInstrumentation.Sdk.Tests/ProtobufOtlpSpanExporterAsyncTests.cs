@@ -271,12 +271,13 @@ public sealed class ProtobufOtlpSpanExporterAsyncTests : IDisposable
 
     private static OtlpTrace.Span? ToOtlpSpan(Activity activity)
     {
-        ProtobufOtlpSpanExporterAsync.OtlpSpanWriter spanWriter = new ProtobufOtlpSpanExporterAsync.OtlpSpanWriter();
+        OtlpSpanExporterAsync.OtlpSpanWriter spanWriter = new OtlpSpanExporterAsync.OtlpSpanWriter();
         UseActivityAsSpan(activity, span =>
         {
             spanWriter.WriteSpan(in span);
         });
-        using var stream = new MemoryStream(spanWriter.Buffer, 0, spanWriter.WritePosition);
+
+        using var stream = new MemoryStream(spanWriter.Request.Buffer, 0, spanWriter.Request.WritePosition);
         var scopeSpans = OtlpTrace.ScopeSpans.Parser.ParseFrom(stream);
         return scopeSpans.Spans.FirstOrDefault();
     }

@@ -1,0 +1,3 @@
+[*Tests.cs]
+# Suppress 'static readonly' fields over constant array warnings
+dotnet_diagnostic.CA1861.severity = none
