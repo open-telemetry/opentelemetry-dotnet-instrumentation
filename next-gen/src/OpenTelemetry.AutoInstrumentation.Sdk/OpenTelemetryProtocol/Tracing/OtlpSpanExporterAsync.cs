@@ -49,6 +49,8 @@ internal sealed class OtlpSpanExporterAsync : OtlpExporterAsync<OtlpBufferState,
         private const int TraceIdSize = 16;
         private const int SpanIdSize = 8;
         private readonly OtlpBufferState _BufferState;
+        private int _TracesDataResourceSpansLengthPosition;
+        private int _ResourceSpansScopeSpansLengthPosition;
 
         public OtlpSpanWriter()
         {
@@ -57,13 +59,18 @@ internal sealed class OtlpSpanExporterAsync : OtlpExporterAsync<OtlpBufferState,
 
         public OtlpBufferState Request => _BufferState;
 
-        public void Reset() => _BufferState.Reset();
+        public void Reset()
+        {
+            _TracesDataResourceSpansLengthPosition = 0;
+            _ResourceSpansScopeSpansLengthPosition = 0;
+            _BufferState.Reset();
+        }
 
         public override void BeginBatch(Resource resource)
         {
             Debug.Assert(resource != null);
             _BufferState.WritePosition = ProtobufSerializer.WriteTag(Request.Buffer, 0, ProtobufOtlpTraceFieldNumberConstants.TracesData_Resource_Spans, ProtobufWireType.LEN);
-            _BufferState.TracesDataResourceSpansLengthPosition = _BufferState.WritePosition;
+            _TracesDataResourceSpansLengthPosition = _BufferState.WritePosition;
             _BufferState.WritePosition += OtlpBufferState.ReserveSizeForLength;
 
             var otlpTagWriterState = new ProtobufOtlpTagWriter.OtlpTagWriterState
@@ -87,14 +94,14 @@ internal sealed class OtlpSpanExporterAsync : OtlpExporterAsync<OtlpBufferState,
             _BufferState.WritePosition = otlpTagWriterState.WritePosition;
         }
 
-        public override void EndBatch() => ProtobufSerializer.WriteReservedLength(Request.Buffer, _BufferState.TracesDataResourceSpansLengthPosition, _BufferState.WritePosition - (_BufferState.TracesDataResourceSpansLengthPosition + OtlpBufferState.ReserveSizeForLength));
+        public override void EndBatch() => ProtobufSerializer.WriteReservedLength(Request.Buffer, _TracesDataResourceSpansLengthPosition, _BufferState.WritePosition - (_TracesDataResourceSpansLengthPosition + OtlpBufferState.ReserveSizeForLength));
 
         public override void BeginInstrumentationScope(InstrumentationScope instrumentationScope)
         {
             Debug.Assert(instrumentationScope != null);
 
             _BufferState.WritePosition = ProtobufSerializer.WriteTag(Request.Buffer, _BufferState.WritePosition, ProtobufOtlpTraceFieldNumberConstants.ResourceSpans_Scope_Spans, ProtobufWireType.LEN);
-            _BufferState.ResourceSpansScopeSpansLengthPosition = _BufferState.WritePosition;
+            _ResourceSpansScopeSpansLengthPosition = _BufferState.WritePosition;
             _BufferState.WritePosition += OtlpBufferState.ReserveSizeForLength;
 
             _BufferState.WritePosition = ProtobufSerializer.WriteTag(Request.Buffer, _BufferState.WritePosition, ProtobufOtlpTraceFieldNumberConstants.ScopeSpans_Scope, ProtobufWireType.LEN);
@@ -135,7 +142,7 @@ internal sealed class OtlpSpanExporterAsync : OtlpExporterAsync<OtlpBufferState,
             ProtobufSerializer.WriteReservedLength(Request.Buffer, instrumentationScopeLengthPosition, _BufferState.WritePosition - (instrumentationScopeLengthPosition + OtlpBufferState.ReserveSizeForLength));
         }
 
-        public override void EndInstrumentationScope() => ProtobufSerializer.WriteReservedLength(Request.Buffer, _BufferState.ResourceSpansScopeSpansLengthPosition, _BufferState.WritePosition - (_BufferState.ResourceSpansScopeSpansLengthPosition + OtlpBufferState.ReserveSizeForLength));
+        public override void EndInstrumentationScope() => ProtobufSerializer.WriteReservedLength(Request.Buffer, _ResourceSpansScopeSpansLengthPosition, _BufferState.WritePosition - (_ResourceSpansScopeSpansLengthPosition + OtlpBufferState.ReserveSizeForLength));
 
         public override void WriteSpan(in Span span)
         {

@@ -59,7 +59,6 @@
 
     <AdditionalFiles Include=".publicApi\PublicAPI.*.txt" />
     <AdditionalFiles Include="$(MSBuildThisFileDirectory)stylecop.json" Link="stylecop.json" Visible="false" />
-    <Compile Include="$(MSBuildThisFileDirectory)GlobalSuppressions.cs" Link="GlobalSuppressions.solution.cs" />
   </ItemGroup>
 
   <Target Name="AssemblyVersionTarget" AfterTargets="MinVer" Condition="'$(MinVerVersion)' != '' AND '$(BuildNumber)' != ''">
