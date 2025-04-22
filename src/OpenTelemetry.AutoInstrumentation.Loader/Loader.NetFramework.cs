@@ -60,6 +60,33 @@ internal partial class Loader
         var path = Path.Combine(ManagedProfilerDirectory, $"{assemblyName}.dll");
         if (File.Exists(path))
         {
+            if (!AppDomain.CurrentDomain.IsDefaultAppDomain())
+            {
+                // If assembly with same name already loaded, use it instead of trying to load another version
+                // That probably should be done even in primary app domain
+                var loadedAssembly = AppDomain.CurrentDomain.GetAssemblies()
+                    .FirstOrDefault(assembly => assembly.GetName().Name == assemblyName);
+                if (loadedAssembly != null)
+                {
+                    Logger.Debug($"Resolve {args.Name} to {loadedAssembly.FullName} already loaded assembly (non-default domain)");
+                    return loadedAssembly;
+                }
+
+                // OpenTelemetry.AutoInstrumentation assembly should be loaded by resolver
+                // registered in AppDomain.Setup. If it is not found yet, it is still too early
+                // to resolve any other assemblies - we may not fixed versions for them yet, as they are not yet loaded
+                // only check if they can be resolved
+                // If OpenTelemetry.AutoInstrumentation loaded from GAC, we can't load any other assemblies here,
+                // as it is too late for it.
+                var otelAssembly = AppDomain.CurrentDomain.GetAssemblies()
+                    .FirstOrDefault(assembly => assembly.GetName().Name == "OpenTelemetry.AutoInstrumentation");
+                if (otelAssembly == null || otelAssembly.GlobalAssemblyCache)
+                {
+                    Logger.Debug($"Do not resolve {assemblyName} when OpenTelemetry.AutoInstrumentation assembly loaded from GAC in non-default domain");
+                    return null;
+                }
+            }
+
             try
             {
                 var loadedAssembly = Assembly.LoadFrom(path);

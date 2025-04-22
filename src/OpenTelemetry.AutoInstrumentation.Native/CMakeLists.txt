@@ -180,6 +180,7 @@ add_library("OpenTelemetry.AutoInstrumentation.Native.static" STATIC
         metadata_builder.cpp
         miniutf.cpp
         string.cpp
+        signature_builder.cpp
         util.cpp
         calltarget_tokens.cpp
         rejit_handler.cpp

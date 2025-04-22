@@ -25,6 +25,7 @@
 #include "otel_profiler_constants.h"
 #include "pal.h"
 #include "resource.h"
+#include "signature_builder.h"
 #include "startup_hook.h"
 #include "stats.h"
 #include "util.h"
@@ -665,6 +666,11 @@ HRESULT STDMETHODCALLTYPE CorProfiler::ModuleLoadFinished(ModuleID module_id, HR
             rejit_handler->SetCorAssemblyProfiler(&corAssemblyProperty);
         }
 
+        if (runtime_information_.is_desktop())
+        {
+            GenerateAppDomainAssemblyLoaderMethod(module_id);
+        }
+
         return S_OK;
     }
 
@@ -1291,7 +1297,7 @@ HRESULT STDMETHODCALLTYPE CorProfiler::GetAssemblyReferences(const WCHAR*       
     }
 
     Logger::Debug("GetAssemblyReferences extending assembly closure for ", assembly_name, " to include ",
-                  asmRefInfo.szName, ". Path=", wszAssemblyPath);
+                  WSTRING(asmRefInfo.szName), ". Path=", WSTRING(wszAssemblyPath));
 
     return S_OK;
 }
@@ -1769,6 +1775,475 @@ HRESULT CorProfiler::RunAutoInstrumentationLoader(const ComPtr<IMetaDataEmit2>& 
 
     return S_OK;
 }
+
+HRESULT CorProfiler::GenerateAppDomainAssemblyLoaderMethod(const ModuleID module_id)
+{
+    const auto home_path = GetEnvironmentValue(environment::profiler_home_path);
+    const auto otel_assembly_path =
+        std::filesystem::absolute(std::filesystem::path(home_path) / "netfx" / "OpenTelemetry.AutoInstrumentation.dll");
+    if (!std::filesystem::exists(otel_assembly_path))
+    {
+        Logger::Debug("GenerateAppDomainAssemblyLoaderMethod: OpenTelemetry.AutoInstrumentation not found at ",
+                      otel_assembly_path, ", skipping resolver installation");
+        return S_OK;
+    }
+
+    ComPtr<IUnknown> metadata_interfaces;
+    auto             hr = this->info_->GetModuleMetaData(module_id, ofRead | ofWrite, IID_IMetaDataImport2,
+                                                         metadata_interfaces.GetAddressOf());
+    if (FAILED(hr))
+    {
+        Logger::Warn("GenerateAppDomainAssemblyLoaderMethod: failed to get metadata interface for ", module_id);
+        return hr;
+    }
+
+    const auto& metadata_emit   = metadata_interfaces.As<IMetaDataEmit2>(IID_IMetaDataEmit);
+    const auto& metadata_import = metadata_interfaces.As<IMetaDataImport2>(IID_IMetaDataImport);
+
+    mdTypeDef assembly_def;
+    {
+        hr = metadata_import->FindTypeDefByName(L"System.Reflection.Assembly", mdTokenNil, &assembly_def);
+        if (FAILED(hr))
+        {
+            Logger::Warn("GenerateAppDomainAssemblyLoaderMethod: Failed to resolve System.Reflection.Assembly");
+            return hr;
+        }
+    }
+
+    mdMethodDef assembly_load_from_def;
+    {
+        SignatureBuilder appdomain_load_from_signature =
+            SignatureBuilder{IMAGE_CEE_CS_CALLCONV_DEFAULT, 1, ELEMENT_TYPE_CLASS}
+                .PushToken(assembly_def)
+                .PushRawByte(ELEMENT_TYPE_STRING);
+        hr = metadata_import->FindMethod(assembly_def, L"LoadFrom", appdomain_load_from_signature.Head(),
+                                         appdomain_load_from_signature.Size(), &assembly_load_from_def);
+        if (FAILED(hr))
+        {
+            Logger::Warn("GenerateAppDomainAssemblyLoaderMethod: Failed to resolve System.Reflection.Assembly::LoadFrom(string)");
+            return hr;
+        }
+    }
+
+    mdTypeDef resolve_event_args_def;
+    {
+        hr = metadata_import->FindTypeDefByName(L"System.ResolveEventArgs", mdTokenNil, &resolve_event_args_def);
+        if (FAILED(hr))
+        {
+            Logger::Warn("GenerateAppDomainAssemblyLoaderMethod: Failed to resolve System.ResolveEventArgs");
+            return hr;
+        }
+    }
+
+    mdMethodDef resolve_event_args_get_name_def;
+    {
+        COR_SIGNATURE resolve_event_args_get_name_signature[] = {IMAGE_CEE_CS_CALLCONV_HASTHIS, 0, ELEMENT_TYPE_STRING};
+        hr = metadata_import->FindMethod(resolve_event_args_def, L"get_Name", resolve_event_args_get_name_signature,
+                                         sizeof(resolve_event_args_get_name_signature),
+                                         &resolve_event_args_get_name_def);
+        if (FAILED(hr))
+        {
+            Logger::Warn("GenerateAppDomainAssemblyLoaderMethod: Failed to resolve System.ResolveEventArgs::get_Name");
+            return hr;
+        }
+    }
+
+    mdTypeDef string_def;
+    {
+        hr = metadata_import->FindTypeDefByName(L"System.String", mdTokenNil, &string_def);
+        if (FAILED(hr))
+        {
+            Logger::Warn("GenerateAppDomainAssemblyLoaderMethod: Failed to resolve System.String");
+            return hr;
+        }
+    }
+
+    mdMethodDef string_op_equality_def;
+    {
+        COR_SIGNATURE string_op_equality_signature[] = {IMAGE_CEE_CS_CALLCONV_DEFAULT, 2, ELEMENT_TYPE_BOOLEAN,
+                                                        ELEMENT_TYPE_STRING, ELEMENT_TYPE_STRING};
+        hr = metadata_import->FindMethod(string_def, L"op_Equality", string_op_equality_signature,
+                                         sizeof(string_op_equality_signature), &string_op_equality_def);
+        if (FAILED(hr))
+        {
+            Logger::Warn("GenerateAppDomainAssemblyLoaderMethod: Failed to resolve System.String::op_Equality");
+            return hr;
+        }
+    }
+
+    mdTypeDef file_def;
+    {
+        hr = metadata_import->FindTypeDefByName(L"System.IO.File", mdTokenNil, &file_def);
+        if (FAILED(hr))
+        {
+            Logger::Warn("GenerateAppDomainAssemblyLoaderMethod: Failed to resolve System.IO.File");
+            return hr;
+        }
+    }
+
+    mdMethodDef file_exists_def;
+    {
+        COR_SIGNATURE file_exists_signature[] = {IMAGE_CEE_CS_CALLCONV_DEFAULT, 1, ELEMENT_TYPE_BOOLEAN,
+                                                 ELEMENT_TYPE_STRING};
+        hr = metadata_import->FindMethod(file_def, L"Exists", file_exists_signature, sizeof(file_exists_signature),
+                                         &file_exists_def);
+        if (FAILED(hr))
+        {
+            Logger::Warn("GenerateAppDomainAssemblyLoaderMethod: Failed to resolve System.IO.File::Exists");
+            return hr;
+        }
+    }
+
+    mdTypeDef exception_def;
+    {
+        hr = metadata_import->FindTypeDefByName(L"System.Exception", mdTokenNil, &exception_def);
+        if (FAILED(hr))
+        {
+            Logger::Warn("GenerateAppDomainAssemblyLoaderMethod: Failed to resolve System.Exception");
+            return hr;
+        }
+    }
+
+    mdTypeDef app_domain_def;
+    {
+        hr = metadata_import->FindTypeDefByName(L"System.AppDomain", mdTokenNil, &app_domain_def);
+        if (FAILED(hr))
+        {
+            Logger::Warn("GenerateAppDomainAssemblyLoaderMethod: Failed to resolve System.AppDomain");
+            return hr;
+        }
+    }
+
+    mdTypeDef assembly_resolver_def;
+    {
+        SignatureBuilder assembly_resolver_signature =
+            SignatureBuilder{IMAGE_CEE_CS_CALLCONV_DEFAULT, 2, ELEMENT_TYPE_CLASS}
+                .PushToken(assembly_def)
+                .PushRawBytes({ELEMENT_TYPE_OBJECT, ELEMENT_TYPE_CLASS})
+                .PushToken(resolve_event_args_def);
+
+        hr = metadata_emit->DefineMethod(app_domain_def, WStr("__otel_assembly_resolver"), mdStatic,
+                                         assembly_resolver_signature.Head(), assembly_resolver_signature.Size(), 0, 0,
+                                         &assembly_resolver_def);
+        if (FAILED(hr))
+        {
+            Logger::Warn("GenerateAppDomainAssemblyLoaderMethod: Failed to define assembly resolver method");
+            return hr;
+        }
+    }
+
+    mdString auto_instrumentation_assembly_name;
+    {
+        hr = metadata_emit->DefineUserString(managed_profiler_full_assembly_version_strong_name.c_str(),
+                                             (ULONG)managed_profiler_full_assembly_version_strong_name.length(),
+                                             &auto_instrumentation_assembly_name);
+
+        if (FAILED(hr))
+        {
+            Logger::Warn("GenerateAppDomainAssemblyLoaderMethod: Failed to define assembly name string");
+            return hr;
+        }
+    }
+
+    mdString auto_instrumentation_assembly_path;
+    {
+        LPCWSTR auto_instrumentation_assembly_path_str = otel_assembly_path.native().c_str();
+        auto auto_instrumentation_assembly_path_str_size = wcslen(auto_instrumentation_assembly_path_str);
+
+        hr = metadata_emit->DefineUserString(auto_instrumentation_assembly_path_str,
+                                             (ULONG)auto_instrumentation_assembly_path_str_size,
+                                             &auto_instrumentation_assembly_path);
+
+        if (FAILED(hr))
+        {
+            Logger::Warn("GenerateAppDomainAssemblyLoaderMethod: Failed to define assembly path string");
+            return hr;
+        }
+    }
+
+    {
+        // Generate a locals signature defined in the following way:
+        //   [0] class System.Reflection.Assembly
+        mdSignature      assembly_resolver_locals_signature_token;
+        SignatureBuilder assembly_resolver_local_signature =
+            SignatureBuilder{IMAGE_CEE_CS_CALLCONV_LOCAL_SIG, 1, ELEMENT_TYPE_CLASS}
+                .PushToken(assembly_def);
+
+        hr = metadata_emit->GetTokenFromSig(assembly_resolver_local_signature.Head(), assembly_resolver_local_signature.Size(),
+                                            &assembly_resolver_locals_signature_token);
+        if (FAILED(hr))
+        {
+            Logger::Warn("GenerateAppDomainAssemblyLoaderMethod: Unable to generate locals signature. ModuleID=", module_id);
+            return hr;
+        }
+
+        ILRewriter rewriter_assembly_resolver(this->info_, nullptr, module_id, assembly_resolver_def);
+        rewriter_assembly_resolver.InitializeTiny();
+        rewriter_assembly_resolver.SetTkLocalVarSig(assembly_resolver_locals_signature_token);
+
+        ILInstr* pLastInstr = rewriter_assembly_resolver.GetILList()->m_pNext;
+        ILInstr* pNewInstr   = nullptr;
+
+        std::vector<ILInstr*> branches;
+        EHClause              eh_clause{};
+        eh_clause.m_Flags = COR_ILEXCEPTION_CLAUSE_NONE;
+        eh_clause.m_ClassToken = exception_def;
+
+        pNewInstr           = rewriter_assembly_resolver.NewILInstr();
+        pNewInstr->m_opcode = CEE_LDNULL;
+        rewriter_assembly_resolver.InsertBefore(pLastInstr, pNewInstr);
+
+        pNewInstr           = rewriter_assembly_resolver.NewILInstr();
+        pNewInstr->m_opcode = CEE_STLOC_0;
+        rewriter_assembly_resolver.InsertBefore(pLastInstr, pNewInstr);
+
+        pNewInstr           = rewriter_assembly_resolver.NewILInstr();
+        pNewInstr->m_opcode  = CEE_LDARG_1;
+        rewriter_assembly_resolver.InsertBefore(pLastInstr, pNewInstr);
+
+        pNewInstr           = rewriter_assembly_resolver.NewILInstr();
+        pNewInstr->m_opcode = CEE_CALLVIRT;
+        pNewInstr->m_Arg32  = resolve_event_args_get_name_def;
+        rewriter_assembly_resolver.InsertBefore(pLastInstr, pNewInstr);
+
+        pNewInstr           = rewriter_assembly_resolver.NewILInstr();
+        pNewInstr->m_opcode = CEE_LDSTR;
+        pNewInstr->m_Arg32  = auto_instrumentation_assembly_name;
+        rewriter_assembly_resolver.InsertBefore(pLastInstr, pNewInstr);
+
+        pNewInstr           = rewriter_assembly_resolver.NewILInstr();
+        pNewInstr->m_opcode = CEE_CALL;
+        pNewInstr->m_Arg32  = string_op_equality_def;
+        rewriter_assembly_resolver.InsertBefore(pLastInstr, pNewInstr);
+
+        pNewInstr           = rewriter_assembly_resolver.NewILInstr();
+        pNewInstr->m_opcode = CEE_BRFALSE_S;
+        rewriter_assembly_resolver.InsertBefore(pLastInstr, pNewInstr);
+        branches.push_back(pNewInstr);
+
+        pNewInstr           = rewriter_assembly_resolver.NewILInstr();
+        pNewInstr->m_opcode = CEE_LDSTR;
+        pNewInstr->m_Arg32  = auto_instrumentation_assembly_path;
+        rewriter_assembly_resolver.InsertBefore(pLastInstr, pNewInstr);
+
+        pNewInstr           = rewriter_assembly_resolver.NewILInstr();
+        pNewInstr->m_opcode = CEE_CALL;
+        pNewInstr->m_Arg32  = file_exists_def;
+        rewriter_assembly_resolver.InsertBefore(pLastInstr, pNewInstr);
+
+        pNewInstr           = rewriter_assembly_resolver.NewILInstr();
+        pNewInstr->m_opcode = CEE_BRFALSE_S;
+        rewriter_assembly_resolver.InsertBefore(pLastInstr, pNewInstr);
+        branches.push_back(pNewInstr);
+
+        pNewInstr           = rewriter_assembly_resolver.NewILInstr();
+        pNewInstr->m_opcode = CEE_LDSTR;
+        pNewInstr->m_Arg32  = auto_instrumentation_assembly_path;
+        rewriter_assembly_resolver.InsertBefore(pLastInstr, pNewInstr);
+        eh_clause.m_pTryBegin = pNewInstr;
+
+        pNewInstr           = rewriter_assembly_resolver.NewILInstr();
+        pNewInstr->m_opcode = CEE_CALL;
+        pNewInstr->m_Arg32  = assembly_load_from_def;
+        rewriter_assembly_resolver.InsertBefore(pLastInstr, pNewInstr);
+
+        pNewInstr           = rewriter_assembly_resolver.NewILInstr();
+        pNewInstr->m_opcode = CEE_STLOC_0;
+        rewriter_assembly_resolver.InsertBefore(pLastInstr, pNewInstr);
+
+        /*pNewInstr           = rewriter_assembly_resolver.NewILInstr();
+        pNewInstr->m_opcode = CEE_LEAVE_S;
+        rewriter_assembly_resolver.InsertBefore(pLastInstr, pNewInstr);
+        branches.push_back(pNewInstr);
+
+        pNewInstr           = rewriter_assembly_resolver.NewILInstr();
+        pNewInstr->m_opcode = CEE_POP;
+        rewriter_assembly_resolver.InsertBefore(pLastInstr, pNewInstr);
+        eh_clause.m_pTryEnd = eh_clause.m_pHandlerBegin = pNewInstr;
+
+        pNewInstr           = rewriter_assembly_resolver.NewILInstr();
+        pNewInstr->m_opcode = CEE_LEAVE_S;
+        rewriter_assembly_resolver.InsertBefore(pLastInstr, pNewInstr);
+        branches.push_back(pNewInstr);
+        eh_clause.m_pHandlerEnd = pNewInstr;*/
+
+        pNewInstr           = rewriter_assembly_resolver.NewILInstr();
+        pNewInstr->m_opcode = CEE_LDLOC_0;
+        rewriter_assembly_resolver.InsertBefore(pLastInstr, pNewInstr);
+        for (ILInstr* branch_instruction : branches)
+        {
+            branch_instruction->m_pTarget = pNewInstr;
+        }
+
+        pNewInstr           = rewriter_assembly_resolver.NewILInstr();
+        pNewInstr->m_opcode = CEE_RET;
+        rewriter_assembly_resolver.InsertBefore(pLastInstr, pNewInstr);
+
+        //rewriter_assembly_resolver.SetEHClause(&eh_clause, 1);
+
+
+        /*pNewInstr           = rewriter_assembly_resolver.NewILInstr();
+        pNewInstr->m_opcode = CEE_LDNULL;
+        rewriter_assembly_resolver.InsertBefore(pLastInstr, pNewInstr);
+
+        pNewInstr           = rewriter_assembly_resolver.NewILInstr();
+        pNewInstr->m_opcode = CEE_RET;
+        rewriter_assembly_resolver.InsertBefore(pLastInstr, pNewInstr);*/
+
+        if (IsDumpILRewriteEnabled())
+        {
+            mdToken      token = 0;
+            TypeInfo     typeInfo{};
+            WSTRING      methodName = WStr("__otel_assembly_resolver");
+            FunctionInfo caller(token, methodName, typeInfo, MethodSignature(), FunctionMethodSignature());
+            Logger::Info(GetILCodes("*** GenerateAppDomainAssemblyLoaderMethod(): Modified Code: ", &rewriter_assembly_resolver, caller,
+                                    metadata_import));
+        }
+
+        hr = rewriter_assembly_resolver.Export();
+
+        if (FAILED(hr))
+        {
+            Logger::Warn("GenerateAppDomainAssemblyLoaderMethod: Failed to create assembly resolver");
+            return hr;
+        }
+    }
+
+    mdMethodDef app_domain_get_current_domain_def;
+    {
+        SignatureBuilder app_domain_get_current_domain_signature =
+            SignatureBuilder{IMAGE_CEE_CS_CALLCONV_DEFAULT, 0, ELEMENT_TYPE_CLASS}
+                .PushToken(app_domain_def);
+
+        hr = metadata_import->FindMethod(app_domain_def, L"get_CurrentDomain",
+                                         app_domain_get_current_domain_signature.Head(),
+                                         app_domain_get_current_domain_signature.Size(),
+                                         &app_domain_get_current_domain_def);
+        if (FAILED(hr))
+        {
+            Logger::Warn("GenerateAppDomainAssemblyLoaderMethod: Failed to resolve System.AppDomain::get_CurrentDomain");
+            return hr;
+        }
+    }
+
+    mdTypeDef resolve_event_handler_def;
+    {
+        hr = metadata_import->FindTypeDefByName(L"System.ResolveEventHandler", mdTokenNil, &resolve_event_handler_def);
+        if (FAILED(hr))
+        {
+            Logger::Warn("GenerateAppDomainAssemblyLoaderMethod: Failed to resolve System.ResolveEventHandler");
+            return hr;
+        }
+    }
+
+    mdMethodDef app_domain_add_assembly_resolve_def;
+    {
+        SignatureBuilder app_domain_add_assembly_resolve_signature =
+            SignatureBuilder{IMAGE_CEE_CS_CALLCONV_HASTHIS, 1, ELEMENT_TYPE_VOID, ELEMENT_TYPE_CLASS}.PushToken(
+                resolve_event_handler_def);
+
+        hr = metadata_import->FindMethod(app_domain_def, L"add_AssemblyResolve",
+                                         app_domain_add_assembly_resolve_signature.Head(),
+                                         app_domain_add_assembly_resolve_signature.Size(),
+                                         &app_domain_add_assembly_resolve_def);
+        if (FAILED(hr))
+        {
+            Logger::Warn(
+                "GenerateAppDomainAssemblyLoaderMethod: Failed to resolve System.AppDomain::add_AssemblyResolve");
+            return hr;
+        }
+    }
+
+
+    mdMethodDef resolve_event_handler_ctor_def;
+    {
+        COR_SIGNATURE resolve_event_handler_ctor_signature[] = {IMAGE_CEE_CS_CALLCONV_HASTHIS, 2, ELEMENT_TYPE_VOID,
+                                                                ELEMENT_TYPE_OBJECT, ELEMENT_TYPE_I};
+
+        hr = metadata_import->FindMethod(resolve_event_handler_def, L".ctor", resolve_event_handler_ctor_signature,
+                                         sizeof(resolve_event_handler_ctor_signature), &resolve_event_handler_ctor_def);
+        if (FAILED(hr))
+        {
+            Logger::Warn(
+                "GenerateAppDomainAssemblyLoaderMethod: Failed to resolve System.ResolveEventHandler::.ctor");
+            return hr;
+        }
+    }
+
+    mdTypeDef app_domain_setup_def;
+    {
+        COR_SIGNATURE appdomain_setup_signature[] = {IMAGE_CEE_CS_CALLCONV_DEFAULT, 1, ELEMENT_TYPE_OBJECT,
+                                                     ELEMENT_TYPE_OBJECT};
+        hr = metadata_import->FindMethod(app_domain_def, L"Setup", appdomain_setup_signature, sizeof(file_exists_def),
+                                         &app_domain_setup_def);
+
+        if (FAILED(hr))
+        {
+            Logger::Warn("GenerateAppDomainAssemblyLoaderMethod: Failed to resolve System.AppDomain::Setup");
+            return hr;
+        }
+    }
+
+    {
+        ILRewriter rewriter_app_domain_setup(this->info_, nullptr, module_id, app_domain_setup_def);
+        rewriter_app_domain_setup.Import();
+
+        if (FAILED(hr))
+        {
+            Logger::Warn("GenerateAppDomainAssemblyLoaderMethod: Failed to import System.AppDomain::Setup");
+            return hr;
+        }
+
+
+        ILInstr* pFirstInstr = rewriter_app_domain_setup.GetILList()->m_pNext;
+        ILInstr* pNewInstr  = nullptr;
+
+        pNewInstr           = rewriter_app_domain_setup.NewILInstr();
+        pNewInstr->m_opcode = CEE_CALL;
+        pNewInstr->m_Arg32  = app_domain_get_current_domain_def;
+        rewriter_app_domain_setup.InsertBefore(pFirstInstr, pNewInstr);
+
+        pNewInstr           = rewriter_app_domain_setup.NewILInstr();
+        pNewInstr->m_opcode = CEE_LDNULL;
+        rewriter_app_domain_setup.InsertBefore(pFirstInstr, pNewInstr);
+
+        pNewInstr           = rewriter_app_domain_setup.NewILInstr();
+        pNewInstr->m_opcode = CEE_LDFTN;
+        pNewInstr->m_Arg32  = assembly_resolver_def;
+        rewriter_app_domain_setup.InsertBefore(pFirstInstr, pNewInstr);
+
+        pNewInstr           = rewriter_app_domain_setup.NewILInstr();
+        pNewInstr->m_opcode = CEE_NEWOBJ;
+        pNewInstr->m_Arg32  = resolve_event_handler_ctor_def;
+        rewriter_app_domain_setup.InsertBefore(pFirstInstr, pNewInstr);
+
+        pNewInstr           = rewriter_app_domain_setup.NewILInstr();
+        pNewInstr->m_opcode = CEE_CALLVIRT;
+        pNewInstr->m_Arg32  = app_domain_add_assembly_resolve_def;
+        rewriter_app_domain_setup.InsertBefore(pFirstInstr, pNewInstr);
+
+        if (IsDumpILRewriteEnabled())
+        {
+            mdToken      token = 0;
+            TypeInfo     typeInfo{};
+            WSTRING      methodName = WStr("AppDomain::Setup");
+            FunctionInfo caller(token, methodName, typeInfo, MethodSignature(), FunctionMethodSignature());
+            Logger::Info(GetILCodes("*** GenerateAppDomainAssemblyLoaderMethod(): Modified Code: ",
+                                    &rewriter_app_domain_setup, caller, metadata_import));
+        }
+
+        hr = rewriter_app_domain_setup.Export();
+        if (FAILED(hr))
+        {
+            Logger::Warn("GenerateAppDomainAssemblyLoaderMethod: Failed to export System.AppDomain::Setup");
+            return hr;
+        }
+    }
+
+    Logger::Debug("GenerateAppDomainAssemblyLoaderMethod: Assembly resolver injected");
+    return S_OK;
+}
+
 
 HRESULT CorProfiler::GenerateLoaderMethod(const ModuleID module_id, mdMethodDef* ret_method_token)
 {

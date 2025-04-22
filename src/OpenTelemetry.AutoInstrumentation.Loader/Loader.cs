@@ -37,11 +37,15 @@ internal partial class Loader
 
     private static void TryLoadManagedAssembly()
     {
-        Logger.Information("Managed Loader TryLoadManagedAssembly()");
-
         try
         {
-            var assembly = Assembly.Load("OpenTelemetry.AutoInstrumentation");
+            var currentAssemblyName = typeof(Loader).Assembly.GetName();
+            var otelAutoInstrumentationAssemblyName =
+                currentAssemblyName.FullName.Replace(
+                    currentAssemblyName.Name ??
+                    throw new InvalidOperationException("Current assembly name not resolved"),
+                    "OpenTelemetry.AutoInstrumentation");
+            var assembly = Assembly.Load(otelAutoInstrumentationAssemblyName);
             if (assembly == null)
             {
                 throw new FileNotFoundException("The assembly OpenTelemetry.AutoInstrumentation could not be loaded");

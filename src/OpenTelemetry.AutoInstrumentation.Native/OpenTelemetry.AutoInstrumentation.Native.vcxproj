@@ -211,6 +211,7 @@
     <ClInclude Include="rejit_handler.h" />
     <ClInclude Include="rejit_preprocessor.h" />
     <ClInclude Include="rejit_work_offloader.h" />
+    <ClInclude Include="signature_builder.h" />
     <ClInclude Include="startup_hook.h" />
     <ClInclude Include="stats.h" />
     <ClInclude Include="string.h" />
@@ -236,6 +237,7 @@
     <ClCompile Include="rejit_handler.cpp" />
     <ClCompile Include="rejit_preprocessor.cpp" />
     <ClCompile Include="rejit_work_offloader.cpp" />
+    <ClCompile Include="signature_builder.cpp" />
     <ClCompile Include="string.cpp" />
     <ClCompile Include="tracer_tokens.cpp" />
     <ClCompile Include="util.cpp" />
