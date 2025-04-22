@@ -5,10 +5,7 @@
 
 namespace trace
 {
-SignatureBuilder::SignatureBuilder(std::initializer_list<COR_SIGNATURE> bytes)
-    : blob_(bytes)
-{
-}
+SignatureBuilder::SignatureBuilder(std::initializer_list<COR_SIGNATURE> bytes) : blob_(bytes) {}
 
 SignatureBuilder& SignatureBuilder::PushRawByte(COR_SIGNATURE byte)
 {
@@ -37,7 +34,7 @@ SignatureBuilder& SignatureBuilder::PushCompressedData(ULONG data)
         PushRawByte(compressed[i]);
     }
     return *this;
-} 
+}
 
 SignatureBuilder& SignatureBuilder::PushToken(mdToken token)
 {

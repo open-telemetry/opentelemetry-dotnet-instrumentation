@@ -1822,7 +1822,8 @@ HRESULT CorProfiler::GenerateAppDomainAssemblyLoaderMethod(const ModuleID module
                                          appdomain_load_from_signature.Size(), &assembly_load_from_def);
         if (FAILED(hr))
         {
-            Logger::Warn("GenerateAppDomainAssemblyLoaderMethod: Failed to resolve System.Reflection.Assembly::LoadFrom(string)");
+            Logger::Warn("GenerateAppDomainAssemblyLoaderMethod: Failed to resolve "
+                         "System.Reflection.Assembly::LoadFrom(string)");
             return hr;
         }
     }
@@ -1949,8 +1950,8 @@ HRESULT CorProfiler::GenerateAppDomainAssemblyLoaderMethod(const ModuleID module
 
     mdString auto_instrumentation_assembly_path;
     {
-        LPCWSTR auto_instrumentation_assembly_path_str = otel_assembly_path.native().c_str();
-        auto auto_instrumentation_assembly_path_str_size = wcslen(auto_instrumentation_assembly_path_str);
+        LPCWSTR auto_instrumentation_assembly_path_str      = otel_assembly_path.native().c_str();
+        auto    auto_instrumentation_assembly_path_str_size = wcslen(auto_instrumentation_assembly_path_str);
 
         hr = metadata_emit->DefineUserString(auto_instrumentation_assembly_path_str,
                                              (ULONG)auto_instrumentation_assembly_path_str_size,
@@ -1968,14 +1969,15 @@ HRESULT CorProfiler::GenerateAppDomainAssemblyLoaderMethod(const ModuleID module
         //   [0] class System.Reflection.Assembly
         mdSignature      assembly_resolver_locals_signature_token;
         SignatureBuilder assembly_resolver_local_signature =
-            SignatureBuilder{IMAGE_CEE_CS_CALLCONV_LOCAL_SIG, 1, ELEMENT_TYPE_CLASS}
-                .PushToken(assembly_def);
+            SignatureBuilder{IMAGE_CEE_CS_CALLCONV_LOCAL_SIG, 1, ELEMENT_TYPE_CLASS}.PushToken(assembly_def);
 
-        hr = metadata_emit->GetTokenFromSig(assembly_resolver_local_signature.Head(), assembly_resolver_local_signature.Size(),
+        hr = metadata_emit->GetTokenFromSig(assembly_resolver_local_signature.Head(),
+                                            assembly_resolver_local_signature.Size(),
                                             &assembly_resolver_locals_signature_token);
         if (FAILED(hr))
         {
-            Logger::Warn("GenerateAppDomainAssemblyLoaderMethod: Unable to generate locals signature. ModuleID=", module_id);
+            Logger::Warn("GenerateAppDomainAssemblyLoaderMethod: Unable to generate locals signature. ModuleID=",
+                         module_id);
             return hr;
         }
 
@@ -1984,11 +1986,11 @@ HRESULT CorProfiler::GenerateAppDomainAssemblyLoaderMethod(const ModuleID module
         rewriter_assembly_resolver.SetTkLocalVarSig(assembly_resolver_locals_signature_token);
 
         ILInstr* pLastInstr = rewriter_assembly_resolver.GetILList()->m_pNext;
-        ILInstr* pNewInstr   = nullptr;
+        ILInstr* pNewInstr  = nullptr;
 
         std::vector<ILInstr*> branches;
         EHClause              eh_clause{};
-        eh_clause.m_Flags = COR_ILEXCEPTION_CLAUSE_NONE;
+        eh_clause.m_Flags      = COR_ILEXCEPTION_CLAUSE_NONE;
         eh_clause.m_ClassToken = exception_def;
 
         pNewInstr           = rewriter_assembly_resolver.NewILInstr();
@@ -2000,7 +2002,7 @@ HRESULT CorProfiler::GenerateAppDomainAssemblyLoaderMethod(const ModuleID module
         rewriter_assembly_resolver.InsertBefore(pLastInstr, pNewInstr);
 
         pNewInstr           = rewriter_assembly_resolver.NewILInstr();
-        pNewInstr->m_opcode  = CEE_LDARG_1;
+        pNewInstr->m_opcode = CEE_LDARG_1;
         rewriter_assembly_resolver.InsertBefore(pLastInstr, pNewInstr);
 
         pNewInstr           = rewriter_assembly_resolver.NewILInstr();
@@ -2081,8 +2083,7 @@ HRESULT CorProfiler::GenerateAppDomainAssemblyLoaderMethod(const ModuleID module
         pNewInstr->m_opcode = CEE_RET;
         rewriter_assembly_resolver.InsertBefore(pLastInstr, pNewInstr);
 
-        //rewriter_assembly_resolver.SetEHClause(&eh_clause, 1);
-
+        // rewriter_assembly_resolver.SetEHClause(&eh_clause, 1);
 
         /*pNewInstr           = rewriter_assembly_resolver.NewILInstr();
         pNewInstr->m_opcode = CEE_LDNULL;
@@ -2098,8 +2099,8 @@ HRESULT CorProfiler::GenerateAppDomainAssemblyLoaderMethod(const ModuleID module
             TypeInfo     typeInfo{};
             WSTRING      methodName = WStr("__otel_assembly_resolver");
             FunctionInfo caller(token, methodName, typeInfo, MethodSignature(), FunctionMethodSignature());
-            Logger::Info(GetILCodes("*** GenerateAppDomainAssemblyLoaderMethod(): Modified Code: ", &rewriter_assembly_resolver, caller,
-                                    metadata_import));
+            Logger::Info(GetILCodes("*** GenerateAppDomainAssemblyLoaderMethod(): Modified Code: ",
+                                    &rewriter_assembly_resolver, caller, metadata_import));
         }
 
         hr = rewriter_assembly_resolver.Export();
@@ -2114,8 +2115,7 @@ HRESULT CorProfiler::GenerateAppDomainAssemblyLoaderMethod(const ModuleID module
     mdMethodDef app_domain_get_current_domain_def;
     {
         SignatureBuilder app_domain_get_current_domain_signature =
-            SignatureBuilder{IMAGE_CEE_CS_CALLCONV_DEFAULT, 0, ELEMENT_TYPE_CLASS}
-                .PushToken(app_domain_def);
+            SignatureBuilder{IMAGE_CEE_CS_CALLCONV_DEFAULT, 0, ELEMENT_TYPE_CLASS}.PushToken(app_domain_def);
 
         hr = metadata_import->FindMethod(app_domain_def, L"get_CurrentDomain",
                                          app_domain_get_current_domain_signature.Head(),
@@ -2123,7 +2123,8 @@ HRESULT CorProfiler::GenerateAppDomainAssemblyLoaderMethod(const ModuleID module
                                          &app_domain_get_current_domain_def);
         if (FAILED(hr))
         {
-            Logger::Warn("GenerateAppDomainAssemblyLoaderMethod: Failed to resolve System.AppDomain::get_CurrentDomain");
+            Logger::Warn(
+                "GenerateAppDomainAssemblyLoaderMethod: Failed to resolve System.AppDomain::get_CurrentDomain");
             return hr;
         }
     }
@@ -2156,7 +2157,6 @@ HRESULT CorProfiler::GenerateAppDomainAssemblyLoaderMethod(const ModuleID module
         }
     }
 
-
     mdMethodDef resolve_event_handler_ctor_def;
     {
         COR_SIGNATURE resolve_event_handler_ctor_signature[] = {IMAGE_CEE_CS_CALLCONV_HASTHIS, 2, ELEMENT_TYPE_VOID,
@@ -2166,8 +2166,7 @@ HRESULT CorProfiler::GenerateAppDomainAssemblyLoaderMethod(const ModuleID module
                                          sizeof(resolve_event_handler_ctor_signature), &resolve_event_handler_ctor_def);
         if (FAILED(hr))
         {
-            Logger::Warn(
-                "GenerateAppDomainAssemblyLoaderMethod: Failed to resolve System.ResolveEventHandler::.ctor");
+            Logger::Warn("GenerateAppDomainAssemblyLoaderMethod: Failed to resolve System.ResolveEventHandler::.ctor");
             return hr;
         }
     }
@@ -2196,9 +2195,8 @@ HRESULT CorProfiler::GenerateAppDomainAssemblyLoaderMethod(const ModuleID module
             return hr;
         }
 
-
         ILInstr* pFirstInstr = rewriter_app_domain_setup.GetILList()->m_pNext;
-        ILInstr* pNewInstr  = nullptr;
+        ILInstr* pNewInstr   = nullptr;
 
         pNewInstr           = rewriter_app_domain_setup.NewILInstr();
         pNewInstr->m_opcode = CEE_CALL;
@@ -2245,7 +2243,6 @@ HRESULT CorProfiler::GenerateAppDomainAssemblyLoaderMethod(const ModuleID module
     Logger::Debug("GenerateAppDomainAssemblyLoaderMethod: Assembly resolver injected");
     return S_OK;
 }
-
 
 HRESULT CorProfiler::GenerateLoaderMethod(const ModuleID module_id, mdMethodDef* ret_method_token)
 {
