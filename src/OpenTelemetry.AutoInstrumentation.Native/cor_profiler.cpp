@@ -666,10 +666,12 @@ HRESULT STDMETHODCALLTYPE CorProfiler::ModuleLoadFinished(ModuleID module_id, HR
             rejit_handler->SetCorAssemblyProfiler(&corAssemblyProperty);
         }
 
+#ifdef _WIN32
         if (runtime_information_.is_desktop())
         {
             GenerateAppDomainAssemblyLoaderMethod(module_id);
         }
+#endif
 
         return S_OK;
     }
