@@ -35,9 +35,6 @@ partial class Build : NukeBuild
     [Parameter("Number of times each dotnet test is run. Default is '1'")]
     readonly int TestCount = 1;
 
-    [Parameter("Windows Server Core container version. Use it if your Windows does not support the default value. Default is 'ltsc2022'")]
-    readonly string WindowsContainerVersion = "ltsc2022";
-
     [Parameter("The location to create the tracer home directory. Default is './bin/tracer-home'")]
     readonly AbsolutePath TracerHome;
 

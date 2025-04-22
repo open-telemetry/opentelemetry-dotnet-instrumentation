@@ -9,6 +9,9 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 
 ### Added
 
+- Support for [`Npgsql`](https://www.nuget.org/packages/Npgsql/)
+  metrics instrumentation for versions `6.0.0`+.
+
 ### Changed
 
 - `otel-dotnet-auto-install.sh` now optionally uses `wget` instead of `curl`,
@@ -75,7 +78,7 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 
 ### Fixed
 
-- Fixed [DoS Vulnerability in TraceContextPropagator.Extract](https://github.com/open-telemetry/opentelemetry-dotnet/security/advisories/GHSA-8785-wc3w-h8q6).
+- Fixed [DoS Vulnerability in TraceContextPropagator.Extract](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/security/advisories/GHSA-vc29-vg52-6643).
 
 ## [1.10.0](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/tag/v1.10.0)
 

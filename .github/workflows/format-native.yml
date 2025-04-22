@@ -7,6 +7,9 @@ on:
   merge_group:
   workflow_dispatch:
 
+permissions:
+  contents: read
+
 jobs:
   check-native-format:
     strategy:
@@ -38,7 +41,8 @@ jobs:
         uses: actions/setup-go@0aaccfd150d50ccaeb58ebd88d36e91967a5f35b # tag: v5.4.0
         with:
           go-version: '1.23.5'
-          
+          cache: false # Suppress a warning given that there are no go.sum files in the repo
+
       - name: Verify all native files have license headers
         shell: bash
         run: |
