@@ -1782,6 +1782,7 @@ HRESULT CorProfiler::RunAutoInstrumentationLoader(const ComPtr<IMetaDataEmit2>& 
 HRESULT CorProfiler::GenerateAppDomainAssemblyLoaderMethod(const ModuleID module_id)
 {
     // We will create new method:
+    // clang-format off
     // private static System.Assembly? System.AppDomain::__otel_assembly_resolver__(object sender, System.ResolveEventArgs args)
     // {
     //    Assembly ? assembly = null;
@@ -1807,6 +1808,8 @@ HRESULT CorProfiler::GenerateAppDomainAssemblyLoaderMethod(const ModuleID module
     //   System.AppDomain.CurrentDomain.AssemblyResolve += new System.ResolveEventHandler(__otel_assembly_resolver__);
     //   ...
     // }
+    // clang-format on
+
     const auto home_path = GetEnvironmentValue(environment::profiler_home_path);
     const auto otel_assembly_path =
         std::filesystem::absolute(std::filesystem::path(home_path) / "netfx" / "OpenTelemetry.AutoInstrumentation.dll");
@@ -2054,8 +2057,8 @@ HRESULT CorProfiler::GenerateAppDomainAssemblyLoaderMethod(const ModuleID module
         std::vector<ILInstr*> branches;
         auto                  newEHClauses = new EHClause[1];
         EHClause&             eh_clause    = newEHClauses[0];
-        eh_clause.m_Flags      = COR_ILEXCEPTION_CLAUSE_NONE;
-        eh_clause.m_ClassToken = exception_def;
+        eh_clause.m_Flags                  = COR_ILEXCEPTION_CLAUSE_NONE;
+        eh_clause.m_ClassToken             = exception_def;
 
         pNewInstr           = rewriter_assembly_resolver.NewILInstr();
         pNewInstr->m_opcode = CEE_LDNULL;
@@ -2251,11 +2254,13 @@ HRESULT CorProfiler::GenerateAppDomainAssemblyLoaderMethod(const ModuleID module
 
     {
         // We generate next IL:
+        // clang-format off
         // call     class System.AppDomain System.AppDomain::get_CurrentDomain()
         // ldnull
         // ldftn    class System.Reflection.Assembly System.AppDomain::__otel_assembly_resolver__(object, class System.ResolveEventArgs)
         // newobj   instance void System.ResolveEventHandler::.ctor(object, native int)
         // callvirt instance void System.AppDomain::add_AssemblyResolve(class System.ResolveEventHandler)
+        // clang-format on
 
         ILRewriter rewriter_app_domain_setup(this->info_, nullptr, module_id, app_domain_setup_def);
         rewriter_app_domain_setup.Import();
