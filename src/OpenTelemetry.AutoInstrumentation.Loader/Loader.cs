@@ -21,8 +21,8 @@ internal partial class Loader
     /// </summary>
     static Loader()
     {
+        Init();
         ManagedProfilerDirectory = ResolveManagedProfilerDirectory();
-
         try
         {
             AppDomain.CurrentDomain.AssemblyResolve += AssemblyResolve_ManagedProfilerDependencies;
@@ -34,6 +34,8 @@ internal partial class Loader
 
         TryLoadManagedAssembly();
     }
+
+    static partial void Init();
 
     private static void TryLoadManagedAssembly()
     {

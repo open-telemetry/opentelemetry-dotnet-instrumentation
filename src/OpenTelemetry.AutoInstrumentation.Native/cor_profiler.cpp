@@ -628,6 +628,7 @@ HRESULT STDMETHODCALLTYPE CorProfiler::ModuleLoadFinished(ModuleID module_id, HR
 
     AppDomainID app_domain_id = module_info.assembly.app_domain_id;
 
+
     // Identify the AppDomain ID of mscorlib which will be the Shared Domain
     // because mscorlib is always a domain-neutral assembly
     if (!corlib_module_loaded && (module_info.assembly.name == mscorlib_assemblyName ||
@@ -1780,6 +1781,32 @@ HRESULT CorProfiler::RunAutoInstrumentationLoader(const ComPtr<IMetaDataEmit2>& 
 
 HRESULT CorProfiler::GenerateAppDomainAssemblyLoaderMethod(const ModuleID module_id)
 {
+    // We will create new method:
+    // private static System.Assembly? System.AppDomain::__otel_assembly_resolver__(object sender, System.ResolveEventArgs args)
+    // {
+    //    Assembly ? assembly = null;
+    //    if (args.Name == "OpenTelemetry.AutoInstrumentation, Version=..., Culture=neutral, PublicKeyToken=...")
+    //    {
+    //        if (File.Exists("<pre-calcululated-assembly-path>"))
+    //        {
+    //            try
+    //            {
+    //                assembly = Assembly.LoadFrom("<pre-calcululated-assembly-path>");
+    //            }
+    //            catch (Exception)
+    //            {
+    //            }
+    //        }
+    //    }
+    //    return assembly;
+    // }
+    //
+    // We will subscribe to AssemblyResolve in next modification
+    // private static object System.AppDomain::Setup(object)
+    // {
+    //   System.AppDomain.CurrentDomain.AssemblyResolve += new System.ResolveEventHandler(__otel_assembly_resolver__);
+    //   ...
+    // }
     const auto home_path = GetEnvironmentValue(environment::profiler_home_path);
     const auto otel_assembly_path =
         std::filesystem::absolute(std::filesystem::path(home_path) / "netfx" / "OpenTelemetry.AutoInstrumentation.dll");
@@ -1925,7 +1952,7 @@ HRESULT CorProfiler::GenerateAppDomainAssemblyLoaderMethod(const ModuleID module
                 .PushRawBytes({ELEMENT_TYPE_OBJECT, ELEMENT_TYPE_CLASS})
                 .PushToken(resolve_event_args_def);
 
-        hr = metadata_emit->DefineMethod(app_domain_def, WStr("__otel_assembly_resolver"), mdStatic,
+        hr = metadata_emit->DefineMethod(app_domain_def, WStr("__otel_assembly_resolver__"), mdStatic,
                                          assembly_resolver_signature.Head(), assembly_resolver_signature.Size(), 0, 0,
                                          &assembly_resolver_def);
         if (FAILED(hr))
@@ -1981,6 +2008,42 @@ HRESULT CorProfiler::GenerateAppDomainAssemblyLoaderMethod(const ModuleID module
             return hr;
         }
 
+        // We generate next IL:
+        // .locals init (
+        //   [0] class System.Reflection.Assembly 'assembly'
+        // )
+        // 
+        // IL_0000: ldnull
+        // IL_0001: stloc.0      // 'assembly'
+        // 
+        // IL_0002: ldarg.1      // args
+        // IL_0003: callvirt     instance string System.ResolveEventArgs::get_Name()
+        // IL_0008: ldstr        "OpenTelemetry.AutoInstrumentation, Version=..., Culture=neutral, PublicKeyToken=..."
+        // IL_000d: call         bool System.String::op_Equality(string, string)
+        // IL_0012: brfalse.s    IL_0030
+        // 
+        // IL_0014: ldstr        "<pre-calcululated-assembly-path>"
+        // IL_0019: call         bool System.IO.File::Exists(string)
+        // IL_001e: brfalse.s    IL_0030
+        // .try
+        // {
+        // 
+        //   IL_0020: ldstr        "<pre-calcululated-assembly-path>"
+        //   IL_0025: call         class System.Reflection.Assembly System.Reflection.Assembly::LoadFrom(string)
+        //   IL_002a: stloc.0      // 'assembly'
+        // 
+        //   IL_002b: leave.s      IL_0030
+        // } // end of .try
+        // catch [mscorlib]System.Exception
+        // {
+        //   IL_002d: pop
+        //   IL_002e: leave.s      IL_0030
+        // } // end of catch
+        // 
+        // IL_0030: ldloc.0      // 'assembly'
+        // IL_0031: ret
+
+
         ILRewriter rewriter_assembly_resolver(this->info_, nullptr, module_id, assembly_resolver_def);
         rewriter_assembly_resolver.InitializeTiny();
         rewriter_assembly_resolver.SetTkLocalVarSig(assembly_resolver_locals_signature_token);
@@ -1989,7 +2052,8 @@ HRESULT CorProfiler::GenerateAppDomainAssemblyLoaderMethod(const ModuleID module
         ILInstr* pNewInstr  = nullptr;
 
         std::vector<ILInstr*> branches;
-        EHClause              eh_clause{};
+        auto                  newEHClauses = new EHClause[1];
+        EHClause&             eh_clause    = newEHClauses[0];
         eh_clause.m_Flags      = COR_ILEXCEPTION_CLAUSE_NONE;
         eh_clause.m_ClassToken = exception_def;
 
@@ -2055,7 +2119,7 @@ HRESULT CorProfiler::GenerateAppDomainAssemblyLoaderMethod(const ModuleID module
         pNewInstr->m_opcode = CEE_STLOC_0;
         rewriter_assembly_resolver.InsertBefore(pLastInstr, pNewInstr);
 
-        /*pNewInstr           = rewriter_assembly_resolver.NewILInstr();
+        pNewInstr           = rewriter_assembly_resolver.NewILInstr();
         pNewInstr->m_opcode = CEE_LEAVE_S;
         rewriter_assembly_resolver.InsertBefore(pLastInstr, pNewInstr);
         branches.push_back(pNewInstr);
@@ -2069,7 +2133,7 @@ HRESULT CorProfiler::GenerateAppDomainAssemblyLoaderMethod(const ModuleID module
         pNewInstr->m_opcode = CEE_LEAVE_S;
         rewriter_assembly_resolver.InsertBefore(pLastInstr, pNewInstr);
         branches.push_back(pNewInstr);
-        eh_clause.m_pHandlerEnd = pNewInstr;*/
+        eh_clause.m_pHandlerEnd = pNewInstr;
 
         pNewInstr           = rewriter_assembly_resolver.NewILInstr();
         pNewInstr->m_opcode = CEE_LDLOC_0;
@@ -2083,15 +2147,15 @@ HRESULT CorProfiler::GenerateAppDomainAssemblyLoaderMethod(const ModuleID module
         pNewInstr->m_opcode = CEE_RET;
         rewriter_assembly_resolver.InsertBefore(pLastInstr, pNewInstr);
 
-        // rewriter_assembly_resolver.SetEHClause(&eh_clause, 1);
+        rewriter_assembly_resolver.SetEHClause(newEHClauses, 1);
 
-        /*pNewInstr           = rewriter_assembly_resolver.NewILInstr();
+        pNewInstr           = rewriter_assembly_resolver.NewILInstr();
         pNewInstr->m_opcode = CEE_LDNULL;
         rewriter_assembly_resolver.InsertBefore(pLastInstr, pNewInstr);
 
         pNewInstr           = rewriter_assembly_resolver.NewILInstr();
         pNewInstr->m_opcode = CEE_RET;
-        rewriter_assembly_resolver.InsertBefore(pLastInstr, pNewInstr);*/
+        rewriter_assembly_resolver.InsertBefore(pLastInstr, pNewInstr);
 
         if (IsDumpILRewriteEnabled())
         {
@@ -2186,6 +2250,13 @@ HRESULT CorProfiler::GenerateAppDomainAssemblyLoaderMethod(const ModuleID module
     }
 
     {
+        // We generate next IL:
+        // call     class System.AppDomain System.AppDomain::get_CurrentDomain()
+        // ldnull
+        // ldftn    class System.Reflection.Assembly System.AppDomain::__otel_assembly_resolver__(object, class System.ResolveEventArgs)
+        // newobj   instance void System.ResolveEventHandler::.ctor(object, native int)
+        // callvirt instance void System.AppDomain::add_AssemblyResolve(class System.ResolveEventHandler)
+
         ILRewriter rewriter_app_domain_setup(this->info_, nullptr, module_id, app_domain_setup_def);
         rewriter_app_domain_setup.Import();
 

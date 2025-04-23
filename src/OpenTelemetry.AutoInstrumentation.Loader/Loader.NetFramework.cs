@@ -12,6 +12,17 @@ namespace OpenTelemetry.AutoInstrumentation.Loader;
 /// </summary>
 internal partial class Loader
 {
+    private static bool _isEarlyResolverInstalled;
+
+    static partial void Init()
+    {
+        // Validate if early assembly resolver was not installed.
+        // Mostly it will be in case of tests.
+        // But it means, that test behaviour and real execution will be different.
+        _isEarlyResolverInstalled =
+            typeof(AppDomain).GetMethod("__otel_assembly_resolver__", BindingFlags.NonPublic | BindingFlags.Static) != null;
+    }
+
     private static string ResolveManagedProfilerDirectory()
     {
         var tracerHomeDirectory = ReadEnvironmentVariable("OTEL_DOTNET_AUTO_HOME") ?? string.Empty;
@@ -60,7 +71,7 @@ internal partial class Loader
         var path = Path.Combine(ManagedProfilerDirectory, $"{assemblyName}.dll");
         if (File.Exists(path))
         {
-            if (!AppDomain.CurrentDomain.IsDefaultAppDomain())
+            if (!AppDomain.CurrentDomain.IsDefaultAppDomain() && _isEarlyResolverInstalled)
             {
                 // If assembly with same name already loaded, use it instead of trying to load another version
                 // That probably should be done even in primary app domain
