@@ -628,7 +628,6 @@ HRESULT STDMETHODCALLTYPE CorProfiler::ModuleLoadFinished(ModuleID module_id, HR
 
     AppDomainID app_domain_id = module_info.assembly.app_domain_id;
 
-
     // Identify the AppDomain ID of mscorlib which will be the Shared Domain
     // because mscorlib is always a domain-neutral assembly
     if (!corlib_module_loaded && (module_info.assembly.name == mscorlib_assemblyName ||
@@ -2015,26 +2014,26 @@ HRESULT CorProfiler::GenerateAppDomainAssemblyLoaderMethod(const ModuleID module
         // .locals init (
         //   [0] class System.Reflection.Assembly 'assembly'
         // )
-        // 
+        //
         // IL_0000: ldnull
         // IL_0001: stloc.0      // 'assembly'
-        // 
+        //
         // IL_0002: ldarg.1      // args
         // IL_0003: callvirt     instance string System.ResolveEventArgs::get_Name()
         // IL_0008: ldstr        "OpenTelemetry.AutoInstrumentation, Version=..., Culture=neutral, PublicKeyToken=..."
         // IL_000d: call         bool System.String::op_Equality(string, string)
         // IL_0012: brfalse.s    IL_0030
-        // 
+        //
         // IL_0014: ldstr        "<pre-calcululated-assembly-path>"
         // IL_0019: call         bool System.IO.File::Exists(string)
         // IL_001e: brfalse.s    IL_0030
         // .try
         // {
-        // 
+        //
         //   IL_0020: ldstr        "<pre-calcululated-assembly-path>"
         //   IL_0025: call         class System.Reflection.Assembly System.Reflection.Assembly::LoadFrom(string)
         //   IL_002a: stloc.0      // 'assembly'
-        // 
+        //
         //   IL_002b: leave.s      IL_0030
         // } // end of .try
         // catch [mscorlib]System.Exception
@@ -2042,7 +2041,7 @@ HRESULT CorProfiler::GenerateAppDomainAssemblyLoaderMethod(const ModuleID module
         //   IL_002d: pop
         //   IL_002e: leave.s      IL_0030
         // } // end of catch
-        // 
+        //
         // IL_0030: ldloc.0      // 'assembly'
         // IL_0031: ret
 
