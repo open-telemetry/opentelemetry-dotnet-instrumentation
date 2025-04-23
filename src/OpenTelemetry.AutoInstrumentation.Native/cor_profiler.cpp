@@ -2045,7 +2045,6 @@ HRESULT CorProfiler::GenerateAppDomainAssemblyLoaderMethod(const ModuleID module
         // IL_0030: ldloc.0      // 'assembly'
         // IL_0031: ret
 
-
         ILRewriter rewriter_assembly_resolver(this->info_, nullptr, module_id, assembly_resolver_def);
         rewriter_assembly_resolver.InitializeTiny();
         rewriter_assembly_resolver.SetTkLocalVarSig(assembly_resolver_locals_signature_token);
