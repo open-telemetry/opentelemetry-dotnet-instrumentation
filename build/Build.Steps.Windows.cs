@@ -136,7 +136,7 @@ partial class Build
         .Executes(() =>
         {
             var aspNetProject = Solution.GetProjectByName(Projects.Tests.Applications.AspNet);
-            BuildDockerImage(aspNetProject, "integrated", "classic");
+            BuildDockerImage(aspNetProject, "integrated-nogac", "classic-nogac", "integrated", "classic");
 
             var wcfProject = Solution.GetProjectByName(Projects.Tests.Applications.WcfIis);
             BuildDockerImage(wcfProject);

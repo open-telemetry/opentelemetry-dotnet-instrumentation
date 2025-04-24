@@ -17,14 +17,29 @@ public class AspNetTests
         Output = output;
     }
 
+    public enum Gac
+    {
+        /// <summary>
+        /// Use image with OTEL assemblies registered in GAC
+        /// </summary>
+        UseGac,
+
+        /// <summary>
+        /// Use image with OTEL assemblies not registered in GAC
+        /// </summary>
+        UseLocal
+    }
+
     private ITestOutputHelper Output { get; }
 
     [Theory]
     [Trait("Category", "EndToEnd")]
     [Trait("Containers", "Windows")]
-    [InlineData("Classic")]
-    [InlineData("Integrated")]
-    public async Task SubmitsTraces(string appPoolMode)
+    [InlineData("Classic", Gac.UseGac)]
+    [InlineData("Classic", Gac.UseLocal)]
+    [InlineData("Integrated", Gac.UseGac)]
+    [InlineData("Integrated", Gac.UseLocal)]
+    public async Task SubmitsTraces(string appPoolMode, Gac useGac)
     {
         Assert.True(EnvironmentTools.IsWindowsAdministrator(), "This test requires Windows Administrator privileges.");
 
@@ -43,7 +58,7 @@ public class AspNetTests
             ["OTEL_EXPORTER_OTLP_ENDPOINT"] = collectorUrl
         };
         var webPort = TcpPortProvider.GetOpenPort();
-        var imageName = GetTestImageName(appPoolMode);
+        var imageName = GetTestImageName(appPoolMode, useGac);
         await using var container = await IISContainerTestHelper.StartContainerAsync(imageName, webPort, environmentVariables, Output);
         await CallTestApplicationEndpoint(webPort);
 
@@ -53,9 +68,11 @@ public class AspNetTests
     [Theory]
     [Trait("Category", "EndToEnd")]
     [Trait("Containers", "Windows")]
-    [InlineData("Classic")]
-    [InlineData("Integrated")]
-    public async Task SubmitTracesCapturesHttpHeaders(string appPoolMode)
+    [InlineData("Classic", Gac.UseGac)]
+    [InlineData("Classic", Gac.UseLocal)]
+    [InlineData("Integrated", Gac.UseGac)]
+    [InlineData("Integrated", Gac.UseLocal)]
+    public async Task SubmitTracesCapturesHttpHeaders(string appPoolMode, Gac useGac)
     {
         Assert.True(EnvironmentTools.IsWindowsAdministrator(), "This test requires Windows Administrator privileges.");
 
@@ -113,7 +130,7 @@ public class AspNetTests
             ["OTEL_DOTNET_AUTO_TRACES_ASPNET_INSTRUMENTATION_CAPTURE_RESPONSE_HEADERS"] = "Custom-Response-Test-Header1,Custom-Response-Test-Header3"
         };
         var webPort = TcpPortProvider.GetOpenPort();
-        var imageName = GetTestImageName(appPoolMode);
+        var imageName = GetTestImageName(appPoolMode, useGac);
         await using var container = await IISContainerTestHelper.StartContainerAsync(imageName, webPort, environmentVariables, Output);
         await CallTestApplicationEndpoint(webPort);
 
@@ -181,9 +198,16 @@ public class AspNetTests
         collector.AssertExpectations();
     }
 
-    private static string GetTestImageName(string appPoolMode)
+    private static string GetTestImageName(string appPoolMode, Gac useGac)
     {
-        return appPoolMode == "Classic" ? "testapplication-aspnet-netframework-classic" : "testapplication-aspnet-netframework-integrated";
+        return (appPoolMode, useGac) switch
+        {
+            ("Classic", Gac.UseGac) => "testapplication-aspnet-netframework-classic",
+            ("Classic", Gac.UseLocal) => "testapplication-aspnet-netframework-classic-nogac",
+            ("Integrated", Gac.UseGac) => "testapplication-aspnet-netframework-integrated",
+            ("Integrated", Gac.UseLocal) => "testapplication-aspnet-netframework-integrated-nogac",
+            _ => throw new ArgumentOutOfRangeException()
+        };
     }
 
     private async Task CallTestApplicationEndpoint(int webPort)
