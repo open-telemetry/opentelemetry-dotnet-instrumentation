@@ -42,7 +42,7 @@ internal class MetricReaderAsync : IMetricReader
         _Resource = resource;
         _Exporter = exporter;
 
-        var aggregationTemporality = options.AggregationTemporalityPreference == AggregationTemporality.Delta
+        AggregationTemporality aggregationTemporality = options.AggregationTemporalityPreference == AggregationTemporality.Delta
             ? exporter.SupportsDeltaAggregationTemporality
                 ? AggregationTemporality.Delta
                 : AggregationTemporality.Cumulative
@@ -87,7 +87,7 @@ internal class MetricReaderAsync : IMetricReader
         {
             if (_ExportCts == null || !_ExportCts.TryReset())
             {
-                var oldCts = _ExportCts;
+                CancellationTokenSource? oldCts = _ExportCts;
                 _ExportCts = new CancellationTokenSource(_ExportTimeoutMilliseconds);
                 oldCts?.Dispose();
             }
@@ -130,7 +130,7 @@ internal class MetricReaderAsync : IMetricReader
         {
             if (disposing)
             {
-                foreach (var metricProducer in _MetricProducers)
+                foreach (MetricProducer metricProducer in _MetricProducers)
                 {
                     if (metricProducer is IDisposable disposable)
                     {

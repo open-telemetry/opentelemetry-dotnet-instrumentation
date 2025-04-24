@@ -33,7 +33,7 @@ internal sealed class OtlpLogRecordExporterAsync : OtlpExporterAsync<OtlpBufferS
         in TBatch batch,
         CancellationToken cancellationToken)
     {
-        var writer = _Writer;
+        OtlpLogRecordWriter writer = _Writer;
 
         if (!batch.WriteTo(writer))
         {
@@ -44,7 +44,7 @@ internal sealed class OtlpLogRecordExporterAsync : OtlpExporterAsync<OtlpBufferS
         return SendAsync(writer, cancellationToken);
     }
 
-    private sealed class OtlpLogRecordWriter : LogRecordBatchWriter, IOtlpBatchWriter<OtlpBufferState>
+    internal sealed class OtlpLogRecordWriter : LogRecordBatchWriter, IOtlpBatchWriter<OtlpBufferState>
     {
         private const int TraceIdSize = 16;
         private const int SpanIdSize = 8;
@@ -77,14 +77,14 @@ internal sealed class OtlpLogRecordExporterAsync : OtlpExporterAsync<OtlpBufferS
             var otlpTagWriterState = new ProtobufOtlpTagWriter.OtlpTagWriterState
             {
                 Buffer = _BufferState.Buffer,
-                WritePosition = this._BufferState.WritePosition,
+                WritePosition = _BufferState.WritePosition,
             };
 
             otlpTagWriterState.WritePosition = ProtobufSerializer.WriteTag(otlpTagWriterState.Buffer, otlpTagWriterState.WritePosition, ProtobufOtlpTraceFieldNumberConstants.ResourceSpans_Resource, ProtobufWireType.LEN);
             int resourceLengthPosition = otlpTagWriterState.WritePosition;
             otlpTagWriterState.WritePosition += OtlpBufferState.ReserveSizeForLength;
 
-            foreach (var attribute in resource.Attributes)
+            foreach (KeyValuePair<string, object> attribute in resource.Attributes)
             {
                 ProcessResourceAttribute(ref otlpTagWriterState, attribute);
             }
@@ -133,7 +133,7 @@ internal sealed class OtlpLogRecordExporterAsync : OtlpExporterAsync<OtlpBufferS
 
                     ProtobufOtlpTagWriter.Instance.TryWriteTag(ref otlpTagWriterState, instrumentationScope.Attributes[i].Key, instrumentationScope.Attributes[i].Value);
 
-                    var instrumentationScopeAttributesLength = otlpTagWriterState.WritePosition - (instrumentationScopeAttributesLengthPosition + OtlpBufferState.ReserveSizeForLength);
+                    int instrumentationScopeAttributesLength = otlpTagWriterState.WritePosition - (instrumentationScopeAttributesLengthPosition + OtlpBufferState.ReserveSizeForLength);
                     ProtobufSerializer.WriteReservedLength(otlpTagWriterState.Buffer, instrumentationScopeAttributesLengthPosition, instrumentationScopeAttributesLength);
                 }
 
@@ -151,7 +151,7 @@ internal sealed class OtlpLogRecordExporterAsync : OtlpExporterAsync<OtlpBufferS
             int logRecordLengthPosition = _BufferState.WritePosition;
             _BufferState.WritePosition += OtlpBufferState.ReserveSizeForLength;
 
-            var timestamp = logRecord.Info.TimestampUtc.ToUnixTimeNanoseconds();
+            ulong timestamp = logRecord.Info.TimestampUtc.ToUnixTimeNanoseconds();
             _BufferState.WritePosition = ProtobufSerializer.WriteFixed64WithTag(_BufferState.Buffer, _BufferState.WritePosition, ProtobufOtlpLogFieldNumberConstants.LogRecord_Time_Unix_Nano, timestamp);
             _BufferState.WritePosition = ProtobufSerializer.WriteFixed64WithTag(_BufferState.Buffer, _BufferState.WritePosition, ProtobufOtlpLogFieldNumberConstants.LogRecord_Observed_Time_Unix_Nano, timestamp);
             _BufferState.WritePosition = ProtobufSerializer.WriteEnumWithTag(_BufferState.Buffer, _BufferState.WritePosition, ProtobufOtlpLogFieldNumberConstants.LogRecord_Severity_Number, (int)logRecord.Info.Severity);
@@ -161,7 +161,7 @@ internal sealed class OtlpLogRecordExporterAsync : OtlpExporterAsync<OtlpBufferS
                 _BufferState.WritePosition = ProtobufSerializer.WriteStringWithTag(_BufferState.Buffer, _BufferState.WritePosition, ProtobufOtlpLogFieldNumberConstants.LogRecord_Severity_Text, logRecord.Info.SeverityText);
             }
 
-            ref readonly var spanContext = ref logRecord.SpanContext;
+            ref readonly ActivityContext spanContext = ref logRecord.SpanContext;
 
             if (spanContext.TraceId != default && spanContext.SpanId != default)
             {
@@ -183,8 +183,8 @@ internal sealed class OtlpLogRecordExporterAsync : OtlpExporterAsync<OtlpBufferS
 
         private static int WriteLogRecordBody(byte[] buffer, int writePosition, ReadOnlySpan<char> value)
         {
-            var numberOfUtf8CharsInString = ProtobufSerializer.GetNumberOfUtf8CharsInString(value);
-            var serializedLengthSize = ProtobufSerializer.ComputeVarInt64Size((ulong)numberOfUtf8CharsInString);
+            int numberOfUtf8CharsInString = ProtobufSerializer.GetNumberOfUtf8CharsInString(value);
+            int serializedLengthSize = ProtobufSerializer.ComputeVarInt64Size((ulong)numberOfUtf8CharsInString);
 
             // length = numberOfUtf8CharsInString + tagSize + length field size.
             writePosition = ProtobufSerializer.WriteTagAndLength(buffer, writePosition, numberOfUtf8CharsInString + 1 + serializedLengthSize, ProtobufOtlpLogFieldNumberConstants.LogRecord_Body, ProtobufWireType.LEN);
@@ -214,7 +214,7 @@ internal sealed class OtlpLogRecordExporterAsync : OtlpExporterAsync<OtlpBufferS
                 DroppedTagCount = 0,
             };
 
-            foreach (ref readonly var tag in tags)
+            foreach (ref readonly KeyValuePair<string, object?> tag in tags)
             {
                 otlpTagWriterState.WritePosition = ProtobufSerializer.WriteTag(otlpTagWriterState.Buffer, otlpTagWriterState.WritePosition, ProtobufOtlpLogFieldNumberConstants.LogRecord_Attributes, ProtobufWireType.LEN);
                 int logAttributesLengthPosition = otlpTagWriterState.WritePosition;

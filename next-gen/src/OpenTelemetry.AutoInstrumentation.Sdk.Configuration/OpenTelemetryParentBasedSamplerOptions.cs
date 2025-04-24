@@ -14,7 +14,7 @@ public sealed class OpenTelemetryParentBasedSamplerOptions
     {
         Debug.Assert(config != null);
 
-        var rootSampler = config.GetSection("RootSampler");
+        IConfigurationSection rootSampler = config.GetSection("RootSampler");
 
         return new(OpenTelemetrySamplerOptions.ParseFromConfig(rootSampler));
     }
