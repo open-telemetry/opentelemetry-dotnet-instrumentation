@@ -14,26 +14,26 @@ public sealed class OtlpArrayTagWriterTests : IDisposable
         Activity.ForceDefaultIdFormat = true;
     }
 
-    private readonly ProtobufOtlpTagWriter.OtlpArrayTagWriter arrayTagWriter;
-    private readonly ActivityListener activityListener;
+    private readonly ProtobufOtlpTagWriter.OtlpArrayTagWriter _ArrayTagWriter;
+    private readonly ActivityListener _ActivityListener;
 
     public OtlpArrayTagWriterTests()
     {
-        this.arrayTagWriter = new ProtobufOtlpTagWriter.OtlpArrayTagWriter();
-        this.activityListener = new ActivityListener
+        _ArrayTagWriter = new ProtobufOtlpTagWriter.OtlpArrayTagWriter();
+        _ActivityListener = new ActivityListener
         {
             ShouldListenTo = _ => true,
             Sample = (ref ActivityCreationOptions<ActivityContext> options) => ActivitySamplingResult.AllDataAndRecorded,
         };
 
-        ActivitySource.AddActivityListener(this.activityListener);
+        ActivitySource.AddActivityListener(_ActivityListener);
     }
 
     [Fact]
     public void BeginWriteArray_InitializesArrayState()
     {
         // Act
-        var arrayState = this.arrayTagWriter.BeginWriteArray();
+        var arrayState = _ArrayTagWriter.BeginWriteArray();
 
         // Assert
         Assert.NotNull(arrayState.Buffer);
@@ -45,10 +45,10 @@ public sealed class OtlpArrayTagWriterTests : IDisposable
     public void WriteNullValue_AddsNullValueToBuffer()
     {
         // Arrange
-        var arrayState = this.arrayTagWriter.BeginWriteArray();
+        var arrayState = _ArrayTagWriter.BeginWriteArray();
 
         // Act
-        this.arrayTagWriter.WriteNullValue(ref arrayState);
+        _ArrayTagWriter.WriteNullValue(ref arrayState);
 
         // Assert
         // Check that the buffer contains the correct tag and length for a null value
@@ -62,10 +62,10 @@ public sealed class OtlpArrayTagWriterTests : IDisposable
     public void WriteIntegralValue_WritesIntegralValueToBuffer(long value)
     {
         // Arrange
-        var arrayState = this.arrayTagWriter.BeginWriteArray();
+        var arrayState = _ArrayTagWriter.BeginWriteArray();
 
         // Act
-        this.arrayTagWriter.WriteIntegralValue(ref arrayState, value);
+        _ArrayTagWriter.WriteIntegralValue(ref arrayState, value);
 
         // Assert
         Assert.True(arrayState.WritePosition > 0);
@@ -78,10 +78,10 @@ public sealed class OtlpArrayTagWriterTests : IDisposable
     public void WriteFloatingPointValue_WritesFloatingPointValueToBuffer(double value)
     {
         // Arrange
-        var arrayState = this.arrayTagWriter.BeginWriteArray();
+        var arrayState = _ArrayTagWriter.BeginWriteArray();
 
         // Act
-        this.arrayTagWriter.WriteFloatingPointValue(ref arrayState, value);
+        _ArrayTagWriter.WriteFloatingPointValue(ref arrayState, value);
 
         // Assert
         Assert.True(arrayState.WritePosition > 0);
@@ -93,10 +93,10 @@ public sealed class OtlpArrayTagWriterTests : IDisposable
     public void WriteBooleanValue_WritesBooleanValueToBuffer(bool value)
     {
         // Arrange
-        var arrayState = this.arrayTagWriter.BeginWriteArray();
+        var arrayState = _ArrayTagWriter.BeginWriteArray();
 
         // Act
-        this.arrayTagWriter.WriteBooleanValue(ref arrayState, value);
+        _ArrayTagWriter.WriteBooleanValue(ref arrayState, value);
 
         // Assert
         Assert.True(arrayState.WritePosition > 0);
@@ -108,10 +108,10 @@ public sealed class OtlpArrayTagWriterTests : IDisposable
     public void WriteStringValue_WritesStringValueToBuffer(string value)
     {
         // Arrange
-        var arrayState = this.arrayTagWriter.BeginWriteArray();
+        var arrayState = _ArrayTagWriter.BeginWriteArray();
 
         // Act
-        this.arrayTagWriter.WriteStringValue(ref arrayState, value.AsSpan());
+        _ArrayTagWriter.WriteStringValue(ref arrayState, value.AsSpan());
 
         // Assert
         Assert.True(arrayState.WritePosition > 0);
@@ -121,8 +121,8 @@ public sealed class OtlpArrayTagWriterTests : IDisposable
     public void TryResize_SucceedsInitially()
     {
         // Act
-        this.arrayTagWriter.BeginWriteArray();
-        bool result = this.arrayTagWriter.TryResize();
+        _ArrayTagWriter.BeginWriteArray();
+        bool result = _ArrayTagWriter.TryResize();
 
         // Assert
         Assert.True(result);
@@ -132,13 +132,13 @@ public sealed class OtlpArrayTagWriterTests : IDisposable
     public void TryResize_RepeatedResizingStopsAtMaxBufferSize()
     {
         // Arrange
-        var arrayState = this.arrayTagWriter.BeginWriteArray();
+        var arrayState = _ArrayTagWriter.BeginWriteArray();
         bool resizeResult = true;
 
         // Act: Repeatedly attempt to resize until reaching maximum buffer size
         while (resizeResult)
         {
-            resizeResult = this.arrayTagWriter.TryResize();
+            resizeResult = _ArrayTagWriter.TryResize();
         }
 
         // Assert
@@ -148,7 +148,7 @@ public sealed class OtlpArrayTagWriterTests : IDisposable
     public void Dispose()
     {
         // Clean up the thread buffer after each test
-        ProtobufOtlpTagWriter.OtlpArrayTagWriter.ThreadBuffer = null;
-        this.activityListener.Dispose();
+        ProtobufOtlpTagWriter.OtlpArrayTagWriter.s_ThreadBuffer = null;
+        _ActivityListener.Dispose();
     }
 }
