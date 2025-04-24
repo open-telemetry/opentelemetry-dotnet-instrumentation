@@ -2,7 +2,6 @@
 
   <PropertyGroup>
     <TargetFrameworks>$(TestTargetFrameworks)</TargetFrameworks>
-    <NoWarn>$(NoWarn);IDE1006;CS1591;CA1707</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>
@@ -13,13 +12,10 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
-    <PackageReference Include="Grpc.Net.Client" />
-    <PackageReference Include="Google.Protobuf" />
-    <PackageReference Include="Grpc.Tools" PrivateAssets="All" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\OpenTelemetry.AutoInstrumentation.Sdk\OpenTelemetry.AutoInstrumentation.Sdk.csproj" />
+    <ProjectReference Include="$(RepoRoot)\src\OpenTelemetry.AutoInstrumentation.Sdk\OpenTelemetry.AutoInstrumentation.Sdk.csproj" />
   </ItemGroup>
 
 </Project>
