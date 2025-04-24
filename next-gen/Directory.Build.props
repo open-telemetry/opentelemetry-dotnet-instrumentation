@@ -2,6 +2,8 @@
 
   <PropertyGroup>
     <RepoRoot>$([System.IO.Directory]::GetParent($(MSBuildThisFileDirectory)).FullName)</RepoRoot>
+    <IsTestProject>$(MSBuildProjectName.Contains('.Test'))</IsTestProject>
+
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>$(RepoRoot)\KeyPair.snk</AssemblyOriginatorKeyFile>
 
@@ -18,7 +20,7 @@
 
     <TargetFrameworks>net9.0</TargetFrameworks>
     <TestTargetFrameworks>net9.0</TestTargetFrameworks>
-    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <GenerateDocumentationFile Condition="'$(IsTestProject)' != 'true'">true</GenerateDocumentationFile>
 
     <NuGetAudit>true</NuGetAudit>
     <NuGetAuditMode>all</NuGetAuditMode>
@@ -36,8 +38,8 @@
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
   </PropertyGroup>
-  
-  <ItemGroup Condition="'$(MSBuildProjectDirectory)' == '$(SolutionDir)src' Or $(MSBuildProjectDirectory.StartsWith('$(SolutionDir)src\'))">
+
+  <ItemGroup Condition="'$(IsTestProject)' != 'true'">
     <PackageReference Include="Microsoft.CodeAnalysis.PublicApiAnalyzers" PrivateAssets="All" />
   </ItemGroup>
 
@@ -59,7 +61,6 @@
 
     <AdditionalFiles Include=".publicApi\PublicAPI.*.txt" />
     <AdditionalFiles Include="$(MSBuildThisFileDirectory)stylecop.json" Link="stylecop.json" Visible="false" />
-    <Compile Include="$(MSBuildThisFileDirectory)GlobalSuppressions.cs" Link="GlobalSuppressions.solution.cs" />
   </ItemGroup>
 
   <Target Name="AssemblyVersionTarget" AfterTargets="MinVer" Condition="'$(MinVerVersion)' != '' AND '$(BuildNumber)' != ''">

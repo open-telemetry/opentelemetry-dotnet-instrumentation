@@ -12,17 +12,17 @@ namespace OpenTelemetry.AutoInstrumentation.Sdk.Tests;
 
 public sealed class ProtobufOtlpSpanExporterAsyncTests : IDisposable
 {
-    private readonly ActivityListener activityListener;
-
     static ProtobufOtlpSpanExporterAsyncTests()
     {
         Activity.DefaultIdFormat = ActivityIdFormat.W3C;
         Activity.ForceDefaultIdFormat = true;
     }
 
+    private readonly ActivityListener _ActivityListener;
+
     public ProtobufOtlpSpanExporterAsyncTests()
     {
-        this.activityListener = new ActivityListener
+        _ActivityListener = new ActivityListener
         {
             ShouldListenTo = _ => true,
             Sample = (ref ActivityCreationOptions<ActivityContext> options) => options.Parent.TraceFlags.HasFlag(ActivityTraceFlags.Recorded)
@@ -30,12 +30,12 @@ public sealed class ProtobufOtlpSpanExporterAsyncTests : IDisposable
                 : ActivitySamplingResult.AllData,
         };
 
-        ActivitySource.AddActivityListener(this.activityListener);
+        ActivitySource.AddActivityListener(_ActivityListener);
     }
 
     public void Dispose()
     {
-        this.activityListener.Dispose();
+        _ActivityListener.Dispose();
     }
 
     [Fact]

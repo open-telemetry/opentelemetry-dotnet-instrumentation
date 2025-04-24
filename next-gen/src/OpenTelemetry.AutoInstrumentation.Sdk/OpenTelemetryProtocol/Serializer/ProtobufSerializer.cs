@@ -308,7 +308,7 @@ internal static class ProtobufSerializer
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal static int WriteStringWithTag(byte[] buffer, int writePosition, int fieldNumber, ReadOnlySpan<char> value)
     {
-        var numberOfUtf8CharsInString = GetNumberOfUtf8CharsInString(value);
+        int numberOfUtf8CharsInString = GetNumberOfUtf8CharsInString(value);
         return WriteStringWithTag(buffer, writePosition, fieldNumber, numberOfUtf8CharsInString, value);
     }
 
@@ -338,7 +338,7 @@ internal static class ProtobufSerializer
             }
         }
 #else
-        var bytesWritten = s_Utf8Encoding.GetBytes(value, buffer.AsSpan().Slice(writePosition));
+        int bytesWritten = s_Utf8Encoding.GetBytes(value, buffer.AsSpan().Slice(writePosition));
         Debug.Assert(bytesWritten == numberOfUtf8CharsInString, "bytesWritten did not match numberOfUtf8CharsInString");
 #endif
 
