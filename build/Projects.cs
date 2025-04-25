@@ -11,7 +11,7 @@ public static class Projects
     {
         public const string AutoInstrumentationMock = "OpenTelemetry.AutoInstrumentation.Mock";
     }
-    
+
     public static class Tests
     {
         public const string AutoInstrumentationNativeTests = "OpenTelemetry.AutoInstrumentation.Native.Tests";
@@ -20,7 +20,6 @@ public static class Projects
         public const string AutoInstrumentationTests = "OpenTelemetry.AutoInstrumentation.Tests";
         public const string AutoInstrumentationStartupHookTests = "OpenTelemetry.AutoInstrumentation.StartupHook.Tests";
         public const string IntegrationTests = "IntegrationTests";
-        public const string AutoInstrumentationSdkTests = "OpenTelemetry.AutoInstrumentation.Sdk.Tests";
 
         public static class Applications
         {
