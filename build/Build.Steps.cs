@@ -19,7 +19,6 @@ using static Nuke.Common.Tools.DotNet.DotNetTasks;
 partial class Build
 {
     [Solution("OpenTelemetry.AutoInstrumentation.sln")] readonly Solution Solution;
-    [Solution("next-gen/next-gen.sln")] readonly Solution NextGenSolution;
 
     AbsolutePath OutputDirectory => RootDirectory / "bin";
     AbsolutePath SourceDirectory => RootDirectory / "src";
@@ -471,19 +470,12 @@ partial class Build
         {
             RunBootstrappingTests();
 
-            // Get test projects from main solution
-            var mainSolutionProjects = new List<Project>
+            var unitTestProjects = new[]
             {
                 Solution.GetProjectByName(Projects.Tests.AutoInstrumentationLoaderTests),
                 Solution.GetProjectByName(Projects.Tests.AutoInstrumentationStartupHookTests),
                 Solution.GetProjectByName(Projects.Tests.AutoInstrumentationTests)
             };
-
-            // Get test projects from next-gen solution
-            var sdkTestProject = NextGenSolution.GetProjectByName(Projects.Tests.AutoInstrumentationSdkTests);
-            mainSolutionProjects.Add(sdkTestProject);
-
-            var unitTestProjects = mainSolutionProjects.ToArray();
 
             if (!string.IsNullOrWhiteSpace(TestProject))
             {
