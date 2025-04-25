@@ -36,7 +36,7 @@ public static class OpenTelemetryFactory
         var unresolvedAttributeList = new List<OpenTelemetryResourceAttributeOptions>();
         var resourceAttributes = new Dictionary<string, object>();
 
-        foreach (var resourceAttribute in resourceOptions.AttributeOptions)
+        foreach (OpenTelemetryResourceAttributeOptions resourceAttribute in resourceOptions.AttributeOptions)
         {
             if (resourceAttribute.ValueOrExpression.StartsWith("$env:", StringComparison.OrdinalIgnoreCase))
             {
@@ -100,7 +100,7 @@ public static class OpenTelemetryFactory
 
         var factory = new OtlpExporterFactory(loggerFactory);
 
-        var otlpExporterOptions = exporterOptions.OpenTelemetryProtocolExporterOptions.ResolveOtlpExporterOptions(
+        OtlpExporterOptions otlpExporterOptions = exporterOptions.OpenTelemetryProtocolExporterOptions.ResolveOtlpExporterOptions(
             new Uri("http://localhost:4318/v1/logs"),
             exporterOptions.OpenTelemetryProtocolExporterOptions.LoggingOptions);
 
@@ -138,7 +138,7 @@ public static class OpenTelemetryFactory
 
         var factory = new OtlpExporterFactory(loggerFactory);
 
-        var otlpExporterOptions = exporterOptions.OpenTelemetryProtocolExporterOptions.ResolveOtlpExporterOptions(
+        OtlpExporterOptions otlpExporterOptions = exporterOptions.OpenTelemetryProtocolExporterOptions.ResolveOtlpExporterOptions(
             new Uri("http://localhost:4318/v1/traces"),
             exporterOptions.OpenTelemetryProtocolExporterOptions.TracingOptions);
 
@@ -179,7 +179,7 @@ public static class OpenTelemetryFactory
 
         var factory = new OtlpExporterFactory(loggerFactory);
 
-        var otlpExporterOptions = exporterOptions.OpenTelemetryProtocolExporterOptions.ResolveOtlpExporterOptions(
+        OtlpExporterOptions otlpExporterOptions = exporterOptions.OpenTelemetryProtocolExporterOptions.ResolveOtlpExporterOptions(
             new Uri("http://localhost:4318/v1/metrics"),
             exporterOptions.OpenTelemetryProtocolExporterOptions.MetricsOptions);
 

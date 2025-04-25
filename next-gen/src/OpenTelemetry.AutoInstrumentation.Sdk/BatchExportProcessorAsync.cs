@@ -74,7 +74,7 @@ internal abstract class BatchExportProcessorAsync<TBufferedTelemetry, TBatchWrit
         }
 
         var tcs = new TaskCompletionSource();
-        var rwh = ThreadPool.RegisterWaitForSingleObject(
+        RegisteredWaitHandle rwh = ThreadPool.RegisterWaitForSingleObject(
             waitObject: _DataExportedTrigger,
             callBack: (state, timedOut) =>
             {
@@ -184,7 +184,7 @@ internal abstract class BatchExportProcessorAsync<TBufferedTelemetry, TBatchWrit
             {
                 while (_CircularBuffer.RemovedCount < targetCount)
                 {
-                    var item = _CircularBuffer.Read();
+                    TBufferedTelemetry item = _CircularBuffer.Read();
 
                     _BufferedBatch.Add(item);
                 }
@@ -247,7 +247,7 @@ internal abstract class BatchExportProcessorAsync<TBufferedTelemetry, TBatchWrit
         {
             if (_ExportCts == null || !_ExportCts.TryReset())
             {
-                var oldCts = _ExportCts;
+                CancellationTokenSource? oldCts = _ExportCts;
                 _ExportCts = new CancellationTokenSource(_ExportTimeoutMilliseconds);
                 oldCts?.Dispose();
             }
@@ -255,7 +255,7 @@ internal abstract class BatchExportProcessorAsync<TBufferedTelemetry, TBatchWrit
             token = _ExportCts.Token;
         }
 
-        CreateBatch(_BufferedBatch, out var batch);
+        CreateBatch(_BufferedBatch, out TBufferedBatch? batch);
 
         Task<bool> exportAsyncTask;
         try

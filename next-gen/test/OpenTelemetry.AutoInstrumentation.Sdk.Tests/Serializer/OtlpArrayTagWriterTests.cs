@@ -33,7 +33,7 @@ public sealed class OtlpArrayTagWriterTests : IDisposable
     public void BeginWriteArray_InitializesArrayState()
     {
         // Act
-        var arrayState = _ArrayTagWriter.BeginWriteArray();
+        ProtobufOtlpTagWriter.OtlpTagWriterArrayState arrayState = _ArrayTagWriter.BeginWriteArray();
 
         // Assert
         Assert.NotNull(arrayState.Buffer);
@@ -45,7 +45,7 @@ public sealed class OtlpArrayTagWriterTests : IDisposable
     public void WriteNullValue_AddsNullValueToBuffer()
     {
         // Arrange
-        var arrayState = _ArrayTagWriter.BeginWriteArray();
+        ProtobufOtlpTagWriter.OtlpTagWriterArrayState arrayState = _ArrayTagWriter.BeginWriteArray();
 
         // Act
         _ArrayTagWriter.WriteNullValue(ref arrayState);
@@ -62,7 +62,7 @@ public sealed class OtlpArrayTagWriterTests : IDisposable
     public void WriteIntegralValue_WritesIntegralValueToBuffer(long value)
     {
         // Arrange
-        var arrayState = _ArrayTagWriter.BeginWriteArray();
+        ProtobufOtlpTagWriter.OtlpTagWriterArrayState arrayState = _ArrayTagWriter.BeginWriteArray();
 
         // Act
         _ArrayTagWriter.WriteIntegralValue(ref arrayState, value);
@@ -78,7 +78,7 @@ public sealed class OtlpArrayTagWriterTests : IDisposable
     public void WriteFloatingPointValue_WritesFloatingPointValueToBuffer(double value)
     {
         // Arrange
-        var arrayState = _ArrayTagWriter.BeginWriteArray();
+        ProtobufOtlpTagWriter.OtlpTagWriterArrayState arrayState = _ArrayTagWriter.BeginWriteArray();
 
         // Act
         _ArrayTagWriter.WriteFloatingPointValue(ref arrayState, value);
@@ -93,7 +93,7 @@ public sealed class OtlpArrayTagWriterTests : IDisposable
     public void WriteBooleanValue_WritesBooleanValueToBuffer(bool value)
     {
         // Arrange
-        var arrayState = _ArrayTagWriter.BeginWriteArray();
+        ProtobufOtlpTagWriter.OtlpTagWriterArrayState arrayState = _ArrayTagWriter.BeginWriteArray();
 
         // Act
         _ArrayTagWriter.WriteBooleanValue(ref arrayState, value);
@@ -108,7 +108,7 @@ public sealed class OtlpArrayTagWriterTests : IDisposable
     public void WriteStringValue_WritesStringValueToBuffer(string value)
     {
         // Arrange
-        var arrayState = _ArrayTagWriter.BeginWriteArray();
+        ProtobufOtlpTagWriter.OtlpTagWriterArrayState arrayState = _ArrayTagWriter.BeginWriteArray();
 
         // Act
         _ArrayTagWriter.WriteStringValue(ref arrayState, value.AsSpan());
@@ -132,7 +132,7 @@ public sealed class OtlpArrayTagWriterTests : IDisposable
     public void TryResize_RepeatedResizingStopsAtMaxBufferSize()
     {
         // Arrange
-        var arrayState = _ArrayTagWriter.BeginWriteArray();
+        ProtobufOtlpTagWriter.OtlpTagWriterArrayState arrayState = _ArrayTagWriter.BeginWriteArray();
         bool resizeResult = true;
 
         // Act: Repeatedly attempt to resize until reaching maximum buffer size

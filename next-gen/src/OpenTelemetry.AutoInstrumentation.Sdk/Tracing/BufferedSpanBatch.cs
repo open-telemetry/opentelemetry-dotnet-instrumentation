@@ -9,7 +9,7 @@ internal readonly ref struct BufferedSpanBatch : IBatch<SpanBatchWriter>
         SpanBatchWriter writer,
         BufferedSpan bufferedSpan)
     {
-        bufferedSpan.ToSpan(out var span);
+        bufferedSpan.ToSpan(out Span span);
 
         writer.WriteSpan(in span);
     }

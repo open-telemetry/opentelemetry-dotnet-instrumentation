@@ -45,7 +45,7 @@ internal static class OtlpMetricsExtensions
             otlpExemplar.AsDouble = exemplar.ValueAsDouble;
         }
 
-        ref readonly var filteredAttributes = ref SdkMetrics.Exemplar.GetFilteredAttributesReference(in exemplar);
+        ref readonly TagList filteredAttributes = ref SdkMetrics.Exemplar.GetFilteredAttributesReference(in exemplar);
 
         otlpExemplar.FilteredAttributes.AddRange(in filteredAttributes);
 

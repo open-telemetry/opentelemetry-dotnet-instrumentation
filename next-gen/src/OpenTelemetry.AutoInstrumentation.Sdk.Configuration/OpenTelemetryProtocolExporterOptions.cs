@@ -96,9 +96,9 @@ public sealed class OpenTelemetryProtocolExporterOptions
         Uri defaultUri,
         OpenTelemetryProtocolExporterSignalOptions signalOptions)
     {
-        var requestUri = ResolveUrl(signalOptions, DefaultOptions, defaultUri);
-        var protocol = signalOptions.ProtocolType ?? DefaultOptions.ProtocolType ?? OpenTelemetryProtocolExporterProtocolType.HttpProtobuf;
-        var headers = signalOptions.HeaderOptions ?? DefaultOptions.HeaderOptions;
+        Uri requestUri = ResolveUrl(signalOptions, DefaultOptions, defaultUri);
+        OpenTelemetryProtocolExporterProtocolType protocol = signalOptions.ProtocolType ?? DefaultOptions.ProtocolType ?? OpenTelemetryProtocolExporterProtocolType.HttpProtobuf;
+        IReadOnlyCollection<OpenTelemetryProtocolExporterHeaderOptions>? headers = signalOptions.HeaderOptions ?? DefaultOptions.HeaderOptions;
 
         return new OtlpExporterOptions(
             (OtlpExporterProtocolType)(int)protocol,

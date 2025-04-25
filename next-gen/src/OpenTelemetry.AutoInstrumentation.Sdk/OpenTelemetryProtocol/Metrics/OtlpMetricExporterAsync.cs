@@ -40,7 +40,7 @@ internal sealed class OtlpMetricExporterAsync : OtlpExporterAsync<OtlpCollectorM
         in TBatch batch,
         CancellationToken cancellationToken)
     {
-        var writer = _Writer;
+        OtlpMetricWriter writer = _Writer;
 
         if (!batch.WriteTo(writer))
         {
@@ -83,7 +83,7 @@ internal sealed class OtlpMetricExporterAsync : OtlpExporterAsync<OtlpCollectorM
 
             _OtlpResourceMetrics.Resource = new();
 
-            foreach (var resourceAttribute in resource.Attributes)
+            foreach (KeyValuePair<string, object> resourceAttribute in resource.Attributes)
             {
                 _OtlpResourceMetrics.Resource.Attributes.Add(
                     new OtlpCommon.KeyValue
@@ -235,7 +235,7 @@ internal sealed class OtlpMetricExporterAsync : OtlpExporterAsync<OtlpCollectorM
 
             OtlpCommon.OtlpCommonExtensions.AddRange(dataPoint.Attributes, attributes);
 
-            foreach (ref readonly var exemplar in exemplars)
+            foreach (ref readonly Exemplar exemplar in exemplars)
             {
                 OtlpMetrics.OtlpMetricsExtensions.AddExemplar(
                     dataPoint.Exemplars,
@@ -285,7 +285,7 @@ internal sealed class OtlpMetricExporterAsync : OtlpExporterAsync<OtlpCollectorM
 
             if (histogramMetricPoint.Features.HasFlag(HistogramMetricPointFeatures.BucketsRecorded))
             {
-                foreach (ref readonly var bucket in buckets)
+                foreach (ref readonly HistogramMetricPointBucket bucket in buckets)
                 {
                     dataPoint.BucketCounts.Add((ulong)bucket.Count);
                     if (bucket.Value != double.PositiveInfinity)
@@ -295,7 +295,7 @@ internal sealed class OtlpMetricExporterAsync : OtlpExporterAsync<OtlpCollectorM
                 }
             }
 
-            foreach (ref readonly var exemplar in exemplars)
+            foreach (ref readonly Exemplar exemplar in exemplars)
             {
                 OtlpMetrics.OtlpMetricsExtensions.AddExemplar(
                     dataPoint.Exemplars,
@@ -355,7 +355,7 @@ internal sealed class OtlpMetricExporterAsync : OtlpExporterAsync<OtlpCollectorM
                 dataPoint.Negative.BucketCounts.Add((ulong)count);
             }
 
-            foreach (ref readonly var exemplar in exemplars)
+            foreach (ref readonly Exemplar exemplar in exemplars)
             {
                 OtlpMetrics.OtlpMetricsExtensions.AddExemplar(
                     dataPoint.Exemplars,
@@ -384,7 +384,7 @@ internal sealed class OtlpMetricExporterAsync : OtlpExporterAsync<OtlpCollectorM
             dataPoint.Count = (ulong)summaryMetricPoint.Count;
             dataPoint.Sum = summaryMetricPoint.Sum;
 
-            foreach (ref readonly var quantile in quantiles)
+            foreach (ref readonly SummaryMetricPointQuantile quantile in quantiles)
             {
                 dataPoint.QuantileValues.Add(
                     new OtlpMetrics.SummaryDataPoint.Types.ValueAtQuantile()

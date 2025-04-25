@@ -18,7 +18,7 @@ public sealed class OpenTelemetryTracingOptions
 
         List<string> sources = new();
 
-        foreach (var source in config.GetSection("Sources").GetChildren())
+        foreach (IConfigurationSection source in config.GetSection("Sources").GetChildren())
         {
             if (string.IsNullOrEmpty(source.Value))
             {
@@ -30,7 +30,7 @@ public sealed class OpenTelemetryTracingOptions
 
         OpenTelemetrySamplerOptions? sampler;
 
-        var samplerConfig = config.GetSection("Sampler");
+        IConfigurationSection samplerConfig = config.GetSection("Sampler");
         if (samplerConfig.Value != null && double.TryParse(samplerConfig.Value, out double samplerDoubleValue))
         {
             sampler = new OpenTelemetrySamplerOptions(

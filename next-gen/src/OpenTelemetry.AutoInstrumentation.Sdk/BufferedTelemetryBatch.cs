@@ -23,7 +23,7 @@ internal sealed class BufferedTelemetryBatch<T>
     {
         Debug.Assert(item != null);
 
-        ref var linkedList = ref CollectionsMarshal.GetValueRefOrAddDefault(
+        ref LinkedList? linkedList = ref CollectionsMarshal.GetValueRefOrAddDefault(
             _Items, item.Scope.Name, out bool exists);
 
         if (!exists)
@@ -31,7 +31,7 @@ internal sealed class BufferedTelemetryBatch<T>
             linkedList = new();
         }
 
-        var tail = linkedList!.Tail;
+        T? tail = linkedList!.Tail;
 
         if (tail == null)
         {
@@ -52,11 +52,11 @@ internal sealed class BufferedTelemetryBatch<T>
 
         writer.BeginBatch(_Resource);
 
-        foreach (var scope in _Items)
+        foreach (KeyValuePair<string, LinkedList> scope in _Items)
         {
-            var linkedList = scope.Value;
+            LinkedList linkedList = scope.Value;
 
-            var item = linkedList.Head;
+            T? item = linkedList.Head;
             if (item == null)
             {
                 continue;
@@ -80,9 +80,9 @@ internal sealed class BufferedTelemetryBatch<T>
 
     public void Reset()
     {
-        foreach (var scope in _Items)
+        foreach (KeyValuePair<string, LinkedList> scope in _Items)
         {
-            var linkedList = scope.Value;
+            LinkedList linkedList = scope.Value;
 
             if (linkedList.Head != null)
             {
