@@ -20,7 +20,7 @@
 
     <TargetFrameworks>net9.0</TargetFrameworks>
     <TestTargetFrameworks>net9.0</TestTargetFrameworks>
-    <GenerateDocumentationFile Condition="'$(IsTestProject)' != 'true'">true</GenerateDocumentationFile>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
 
     <NuGetAudit>true</NuGetAudit>
     <NuGetAuditMode>all</NuGetAuditMode>

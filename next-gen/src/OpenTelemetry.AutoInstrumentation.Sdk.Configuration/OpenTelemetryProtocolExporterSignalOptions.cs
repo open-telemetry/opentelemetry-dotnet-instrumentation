@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 using Microsoft.Extensions.Configuration;
+using OpenTelemetry.OpenTelemetryProtocol;
 
 namespace OpenTelemetry.Configuration;
 
@@ -14,12 +15,12 @@ public sealed class OpenTelemetryProtocolExporterSignalOptions
     {
         Debug.Assert(config != null);
 
-        OpenTelemetryProtocolExporterProtocolType? protocol = null;
+        OtlpExporterProtocolType? protocol = null;
         Uri? url = null;
 
         string? protocolValue = config["Protocol"];
         if (!string.IsNullOrEmpty(protocolValue)
-            && Enum.TryParse(protocolValue, ignoreCase: true, out OpenTelemetryProtocolExporterProtocolType tempProtocol))
+            && Enum.TryParse(protocolValue, ignoreCase: true, out OtlpExporterProtocolType tempProtocol))
         {
             protocol = tempProtocol;
         }
@@ -53,7 +54,7 @@ public sealed class OpenTelemetryProtocolExporterSignalOptions
     }
 
     internal OpenTelemetryProtocolExporterSignalOptions(
-        OpenTelemetryProtocolExporterProtocolType? protocolType,
+        OtlpExporterProtocolType? protocolType,
         Uri? url,
         IReadOnlyCollection<OpenTelemetryProtocolExporterHeaderOptions>? headerOptions)
     {
@@ -65,7 +66,7 @@ public sealed class OpenTelemetryProtocolExporterSignalOptions
     /// <summary>
     /// Gets the exporter protocol type.
     /// </summary>
-    public OpenTelemetryProtocolExporterProtocolType? ProtocolType { get; }
+    public OtlpExporterProtocolType? ProtocolType { get; }
 
     /// <summary>
     /// Gets the exporter url.
