@@ -36,8 +36,6 @@ public static class OpenTelemetryServiceCollectionExtensions
     {
         ArgumentException.ThrowIfNullOrEmpty(configurationSectionName);
 
-        services.AddOptions();
-
         services.TryAddSingleton<IOptionsFactory<OpenTelemetryOptions>>(sp =>
         {
             IConfiguration config = sp.GetRequiredService<IConfiguration>();
@@ -49,7 +47,7 @@ public static class OpenTelemetryServiceCollectionExtensions
                 sp.GetServices<IValidateOptions<OpenTelemetryOptions>>());
         });
 
-        services.TryAddSingleton<IValidateOptions<OpenTelemetryOptions>, DataAnnotationValidateOptions<OpenTelemetryOptions>>();
+        services.AddOptions<OpenTelemetryOptions>().ValidateDataAnnotations();
 
         return services;
     }
