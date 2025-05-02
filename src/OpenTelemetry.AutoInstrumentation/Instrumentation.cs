@@ -185,13 +185,13 @@ internal static class Instrumentation
 
         if (GeneralSettings.Value.ProfilerEnabled)
         {
-            RegisterBytecodeInstrumentations(InstrumentationDefinitions.GetAllDefinitions());
+            RegisterDirectBytecodeInstrumentations(InstrumentationDefinitions.GetAllDefinitions());
 
             try
             {
                 foreach (var payload in _pluginManager.GetAllDefinitionsPayloads())
                 {
-                    RegisterBytecodeInstrumentations(payload);
+                    RegisterDirectBytecodeInstrumentations(payload);
                 }
             }
             catch (Exception ex)
@@ -199,22 +199,7 @@ internal static class Instrumentation
                 Logger.Error(ex, "Exception occurred while registering instrumentations from plugins.");
             }
 
-            try
-            {
-                Logger.Debug("Sending CallTarget derived integration definitions to native library.");
-                var payload = InstrumentationDefinitions.GetDerivedDefinitions();
-                NativeMethods.AddDerivedInstrumentations(payload.DefinitionsId, payload.Definitions);
-                foreach (var def in payload.Definitions)
-                {
-                    def.Dispose();
-                }
-
-                Logger.Information("The profiler has been initialized with {0} derived definitions.", payload.Definitions.Length);
-            }
-            catch (Exception ex)
-            {
-                Logger.Error(ex, ex.Message);
-            }
+            RegisterBytecodeDerivedInstrumentations(InstrumentationDefinitions.GetDerivedDefinitions());
         }
         else
         {
@@ -286,18 +271,28 @@ internal static class Instrumentation
     }
 #endif
 
-    private static void RegisterBytecodeInstrumentations(InstrumentationDefinitions.Payload payload)
+    private static void RegisterDirectBytecodeInstrumentations(InstrumentationDefinitions.Payload payload)
+    {
+        RegisterBytecodeInstrumentations(payload, "direct", NativeMethods.AddInstrumentations);
+    }
+
+    private static void RegisterBytecodeDerivedInstrumentations(InstrumentationDefinitions.Payload payload)
+    {
+        RegisterBytecodeInstrumentations(payload, "derived", NativeMethods.AddDerivedInstrumentations);
+    }
+
+    private static void RegisterBytecodeInstrumentations(InstrumentationDefinitions.Payload payload, string type, Action<string, NativeCallTargetDefinition[]> register)
     {
         try
         {
-            Logger.Debug("Sending CallTarget integration definitions to native library for {0}.", payload.DefinitionsId);
-            NativeMethods.AddInstrumentations(payload.DefinitionsId, payload.Definitions);
+            Logger.Debug($"Sending CallTarget {type} integration definitions to native library.");
+            register(payload.DefinitionsId, payload.Definitions);
             foreach (var def in payload.Definitions)
             {
                 def.Dispose();
             }
 
-            Logger.Information("The profiler has been initialized with {0} definitions for {1}.", payload.Definitions.Length, payload.DefinitionsId);
+            Logger.Information("The profiler has been initialized with {0} {1} definitions for {2}.", payload.Definitions.Length, type, payload.DefinitionsId);
         }
         catch (Exception ex)
         {
