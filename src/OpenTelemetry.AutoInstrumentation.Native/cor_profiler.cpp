@@ -629,7 +629,6 @@ HRESULT STDMETHODCALLTYPE CorProfiler::ModuleLoadFinished(ModuleID module_id, HR
 
     AppDomainID app_domain_id = module_info.assembly.app_domain_id;
 
-
     // Identify the AppDomain ID of mscorlib which will be the Shared Domain
     // because mscorlib is always a domain-neutral assembly
     if (!corlib_module_loaded && (module_info.assembly.name == mscorlib_assemblyName ||
@@ -689,7 +688,6 @@ HRESULT STDMETHODCALLTYPE CorProfiler::ModuleLoadFinished(ModuleID module_id, HR
                     Logger::Warn("Failed to patch AppDomain creation, module id ", module_id, ", result ", hr);
                 }
             }
-
         }
 #endif
 
@@ -1868,7 +1866,8 @@ HRESULT CorProfiler::ModifyAppDomainCreate(const ModuleID module_id, mdMethodDef
 
         hr = metadata_import->FindMethod(system_app_domain_token, WStr("CreateDomain"),
                                          system_app_domain_create_domain_signature.Head(),
-                                         system_app_domain_create_domain_signature.Size(), &system_app_domain_create_domain_token);
+                                         system_app_domain_create_domain_signature.Size(),
+                                         &system_app_domain_create_domain_token);
         if (FAILED(hr))
         {
             Logger::Warn("ModifyAppDomainCreate: FindMethod System.AppDomain::CreateDomain failed");
@@ -1889,12 +1888,12 @@ HRESULT CorProfiler::ModifyAppDomainCreate(const ModuleID module_id, mdMethodDef
 
         pNewInstr           = rewriter.NewILInstr();
         pNewInstr->m_opcode = CEE_LDARGA_S;
-        pNewInstr->m_Arg8  = 2;
+        pNewInstr->m_Arg8   = 2;
         rewriter.InsertBefore(pFirstInstr, pNewInstr);
 
         pNewInstr           = rewriter.NewILInstr();
         pNewInstr->m_opcode = CEE_CALL;
-        pNewInstr->m_Arg32   = patch_app_domain_setup_method;
+        pNewInstr->m_Arg32  = patch_app_domain_setup_method;
         rewriter.InsertBefore(pFirstInstr, pNewInstr);
 
         hr = rewriter.Export();
@@ -1911,8 +1910,7 @@ HRESULT CorProfiler::ModifyAppDomainCreate(const ModuleID module_id, mdMethodDef
             TypeInfo     typeInfo{};
             WSTRING      methodName = WStr("CreateDomain");
             FunctionInfo caller(token, methodName, typeInfo, MethodSignature(), FunctionMethodSignature());
-            Logger::Info(
-                GetILCodes("*** ModifyAppDomainCreate: Modified Code: ", &rewriter, caller, metadata_import));
+            Logger::Info(GetILCodes("*** ModifyAppDomainCreate: Modified Code: ", &rewriter, caller, metadata_import));
         }
     }
 
@@ -2092,8 +2090,7 @@ HRESULT CorProfiler::GenerateLoaderType(const ModuleID module_id,
     //        extends[mscorlib] System.Object
     {
         hr = metadata_emit->DefineTypeDef(WStr("__DDVoidMethodType__"), tdAbstract | tdSealed | tdPublic,
-                                          system_object_token, NULL,
-                                          loader_type);
+                                          system_object_token, NULL, loader_type);
         if (FAILED(hr))
         {
             Logger::Warn("GenerateLoaderType: DefineTypeDef __DDVoidMethodType__ failed");
@@ -2185,7 +2182,7 @@ HRESULT CorProfiler::GenerateLoaderType(const ModuleID module_id,
         }
     }
 
-    // .method private hidebysig specialname rtspecialname static 
+    // .method private hidebysig specialname rtspecialname static
     //         void .cctor() cil managed
     mdMethodDef cctor_token;
     {
@@ -2196,8 +2193,7 @@ HRESULT CorProfiler::GenerateLoaderType(const ModuleID module_id,
         };
         hr = metadata_emit->DefineMethod(*loader_type, WStr(".cctor"),
                                          mdPrivate | mdHideBySig | mdSpecialName | mdRTSpecialName | mdStatic,
-                                         cctor_signature,
-                                         sizeof(cctor_signature), 0, 0, &cctor_token);
+                                         cctor_signature, sizeof(cctor_signature), 0, 0, &cctor_token);
         if (FAILED(hr))
         {
             Logger::Warn("GenerateLoaderType: DefineMethod .cctor failed");
@@ -2231,8 +2227,7 @@ HRESULT CorProfiler::GenerateLoaderType(const ModuleID module_id,
             ELEMENT_TYPE_VOID,             // Return type
         };
         hr = metadata_emit->DefineMethod(*loader_type, WStr("__DDVoidMethodCall__"), mdPublic | mdHideBySig | mdStatic,
-                                         initialize_signature,
-                                         sizeof(initialize_signature), 0, 0, init_method);
+                                         initialize_signature, sizeof(initialize_signature), 0, 0, init_method);
         if (FAILED(hr))
         {
             Logger::Warn("GenerateLoaderType: DefineMethod __DDVoidMethodCall__ failed");
@@ -2240,12 +2235,13 @@ HRESULT CorProfiler::GenerateLoaderType(const ModuleID module_id,
         }
     }
 
-    // .method public hidebysig static void  __DDPatchAppDomainSetup__(class [mscorlib]System.AppDomainSetup& setup) cil managed
+    // .method public hidebysig static void  __DDPatchAppDomainSetup__(class [mscorlib]System.AppDomainSetup& setup) cil
+    // managed
     {
         SignatureBuilder app_domain_setup_fixer_method_signature =
-            SignatureBuilder{IMAGE_CEE_CS_CALLCONV_DEFAULT, 1, ELEMENT_TYPE_VOID, ELEMENT_TYPE_BYREF, ELEMENT_TYPE_CLASS}
-                .PushToken(
-                system_app_domain_setup_token);
+            SignatureBuilder{IMAGE_CEE_CS_CALLCONV_DEFAULT, 1, ELEMENT_TYPE_VOID, ELEMENT_TYPE_BYREF,
+                             ELEMENT_TYPE_CLASS}
+                .PushToken(system_app_domain_setup_token);
 
         hr = metadata_emit->DefineMethod(*loader_type, WStr("__DDPatchAppDomainSetup__"),
                                          mdPublic | mdHideBySig | mdStatic,
@@ -2286,7 +2282,7 @@ HRESULT CorProfiler::GenerateLoaderType(const ModuleID module_id,
     // C#: static extern void GetAssemblyAndSymbolsBytes(out IntPtr assemblyPtr, out int assemblySize, out
     // IntPtr symbolsPtr, out int symbolsSize)
     //
-    // .method private hidebysig static pinvokeimpl("OpenTelemetry.AutoInstrumentation.Native.dll" winapi) 
+    // .method private hidebysig static pinvokeimpl("OpenTelemetry.AutoInstrumentation.Native.dll" winapi)
     //    void GetAssemblyAndSymbolsBytes([out] native int& assemblyPtr,
     //                                    [out] int32& assemblySize,
     //                                    [out] native int& symbolsPtr,
@@ -2308,8 +2304,9 @@ HRESULT CorProfiler::GenerateLoaderType(const ModuleID module_id,
             ELEMENT_TYPE_I4,
         };
         hr = metadata_emit->DefineMethod(*loader_type, WStr("GetAssemblyAndSymbolsBytes"),
-                                         mdPrivate | mdHideBySig | mdStatic | mdPinvokeImpl, get_assembly_bytes_signature,
-                                         sizeof(get_assembly_bytes_signature), 0, 0, &pinvoke_method_def);
+                                         mdPrivate | mdHideBySig | mdStatic | mdPinvokeImpl,
+                                         get_assembly_bytes_signature, sizeof(get_assembly_bytes_signature), 0, 0,
+                                         &pinvoke_method_def);
         if (FAILED(hr))
         {
             Logger::Warn("GenerateLoaderType: DefineMethod GetAssemblyAndSymbolsBytes failed");
@@ -2324,8 +2321,7 @@ HRESULT CorProfiler::GenerateLoaderType(const ModuleID module_id,
         }
 
         WSTRING native_profiler_file = GetCurrentModuleFileName();
-        Logger::Debug("GenerateLoaderType: Setting the PInvoke native profiler library path to ",
-                      native_profiler_file);
+        Logger::Debug("GenerateLoaderType: Setting the PInvoke native profiler library path to ", native_profiler_file);
 
         mdModuleRef profiler_ref;
         hr = metadata_emit->DefineModuleRef(native_profiler_file.c_str(), &profiler_ref);
@@ -2382,7 +2378,8 @@ HRESULT CorProfiler::GenerateLoaderType(const ModuleID module_id,
                                             sizeof(marshal_copy_signature), &marshal_copy_member_ref);
             if (FAILED(hr))
             {
-                Logger::Warn("GenerateLoaderType: GetMemberRefOrDef System.Runtime.InteropServices.Marshal::Copy failed");
+                Logger::Warn(
+                    "GenerateLoaderType: GetMemberRefOrDef System.Runtime.InteropServices.Marshal::Copy failed");
                 return hr;
             }
         }
@@ -2395,8 +2392,9 @@ HRESULT CorProfiler::GenerateLoaderType(const ModuleID module_id,
                 SignatureBuilder{IMAGE_CEE_CS_CALLCONV_DEFAULT, 2, ELEMENT_TYPE_CLASS}
                     .PushToken(system_reflection_assembly_token)
                     .PushRawBytes({ELEMENT_TYPE_SZARRAY, ELEMENT_TYPE_U1, ELEMENT_TYPE_SZARRAY, ELEMENT_TYPE_U1});
- 
-            hr = resolver.GetMemberRefOrDef(system_reflection_assembly_token, WStr("Load"), appdomain_load_signature.Head(), appdomain_load_signature.Size(),
+
+            hr = resolver.GetMemberRefOrDef(system_reflection_assembly_token, WStr("Load"),
+                                            appdomain_load_signature.Head(), appdomain_load_signature.Size(),
                                             &appdomain_load_member_ref);
             if (FAILED(hr))
             {
@@ -2439,7 +2437,8 @@ HRESULT CorProfiler::GenerateLoaderType(const ModuleID module_id,
         // TypeRef/TypeDef for System.Reflection.MethodInfo
         mdToken system_reflection_method_info_token;
         {
-            hr = resolver.GetTypeRefOrDefByName(corlib_ref, WStr("System.Reflection.MethodInfo"), &system_reflection_method_info_token);
+            hr = resolver.GetTypeRefOrDefByName(corlib_ref, WStr("System.Reflection.MethodInfo"),
+                                                &system_reflection_method_info_token);
             if (FAILED(hr))
             {
                 Logger::Warn("GenerateLoaderType: GetTypeRefOrDefByName System.Reflection.MethodInfo failed");
@@ -2458,8 +2457,7 @@ HRESULT CorProfiler::GenerateLoaderType(const ModuleID module_id,
 
             hr = resolver.GetMemberRefOrDef(system_type_token, WStr("GetMethod"),
                                             system_type_get_method_signature.Head(),
-                                            system_type_get_method_signature.Size(),
-                                            &system_type_get_method_token);
+                                            system_type_get_method_signature.Size(), &system_type_get_method_token);
             if (FAILED(hr))
             {
                 Logger::Warn("GenerateLoaderType: GetMemberRefOrDef System.Type::GetMethod(string) failed");
@@ -2480,7 +2478,8 @@ HRESULT CorProfiler::GenerateLoaderType(const ModuleID module_id,
         }
 
         // MethodRef/MethodDef for
-        // class [mscorlib]System.Type [mscorlib]System.Type::GetTypeFromHandle(valuetype [mscorlib]System.RuntimeTypeHandle)
+        // class [mscorlib]System.Type [mscorlib]System.Type::GetTypeFromHandle(
+        //   valuetype [mscorlib]System.RuntimeTypeHandle)
         mdMemberRef system_type_get_type_from_handle_token;
         {
             SignatureBuilder system_type_get_type_from_handle_signature =
@@ -2512,7 +2511,8 @@ HRESULT CorProfiler::GenerateLoaderType(const ModuleID module_id,
         }
 
         // MethodRef/MethodDef for
-        // instance class [mscorlib]System.Delegate [mscorlib]System.Reflection.MethodInfo::CreateDelegate(class [mscorlib]System.Type)
+        // instance class [mscorlib]System.Delegate [mscorlib]System.Reflection.MethodInfo::CreateDelegate(
+        //   class [mscorlib]System.Type)
         mdMemberRef system_reflection_method_info_create_delegate_token;
         {
             SignatureBuilder system_reflection_method_info_create_delegate_signature =
@@ -2527,7 +2527,8 @@ HRESULT CorProfiler::GenerateLoaderType(const ModuleID module_id,
                                             &system_reflection_method_info_create_delegate_token);
             if (FAILED(hr))
             {
-                Logger::Warn("GenerateLoaderType: GetMemberRefOrDef System.Reflection.MethodInfo::CreateDelegate failed");
+                Logger::Warn(
+                    "GenerateLoaderType: GetMemberRefOrDef System.Reflection.MethodInfo::CreateDelegate failed");
                 return hr;
             }
         }
@@ -2535,7 +2536,7 @@ HRESULT CorProfiler::GenerateLoaderType(const ModuleID module_id,
         // Create a string representing "OpenTelemetry.AutoInstrumentation.Loader.AppConfigUpdater"
         mdString config_updater_class_name_token;
         {
-            LPCWSTR config_updater_class_name_str = L"OpenTelemetry.AutoInstrumentation.Loader.AppConfigUpdater";
+            LPCWSTR config_updater_class_name_str      = L"OpenTelemetry.AutoInstrumentation.Loader.AppConfigUpdater";
             auto    config_updater_class_name_str_size = wcslen(config_updater_class_name_str);
 
             hr = metadata_emit->DefineUserString(config_updater_class_name_str,
@@ -2543,7 +2544,8 @@ HRESULT CorProfiler::GenerateLoaderType(const ModuleID module_id,
                                                  &config_updater_class_name_token);
             if (FAILED(hr))
             {
-                Logger::Warn("GenerateLoaderType: DefineUserString OpenTelemetry.AutoInstrumentation.Loader.AppConfigUpdater failed");
+                Logger::Warn("GenerateLoaderType: DefineUserString "
+                             "OpenTelemetry.AutoInstrumentation.Loader.AppConfigUpdater failed");
                 return hr;
             }
         }
@@ -2551,10 +2553,11 @@ HRESULT CorProfiler::GenerateLoaderType(const ModuleID module_id,
         // Create a string representing "ModifyConfig"
         mdString config_updater_method_name_token;
         {
-            LPCWSTR config_updater_method_name_str = L"ModifyConfig";
+            LPCWSTR config_updater_method_name_str      = L"ModifyConfig";
             auto    config_updater_method_name_str_size = wcslen(config_updater_method_name_str);
 
-            hr = metadata_emit->DefineUserString(config_updater_method_name_str, (ULONG)config_updater_method_name_str_size,
+            hr = metadata_emit->DefineUserString(config_updater_method_name_str,
+                                                 (ULONG)config_updater_method_name_str_size,
                                                  &config_updater_method_name_token);
             if (FAILED(hr))
             {
@@ -2620,7 +2623,7 @@ HRESULT CorProfiler::GenerateLoaderType(const ModuleID module_id,
         // clang-format on
         ILRewriter rewriter_void(this->info_, nullptr, module_id, cctor_token);
         rewriter_void.InitializeTiny();
-        mdSignature   locals_signature_token;
+        mdSignature locals_signature_token;
         {
             COR_SIGNATURE locals_signature[] = {IMAGE_CEE_CS_CALLCONV_LOCAL_SIG, // Calling convention
                                                 6,                               // Number of variables
@@ -2834,7 +2837,6 @@ HRESULT CorProfiler::GenerateLoaderType(const ModuleID module_id,
         }
     }
 
-
     // Add IL instructions into the IsAlreadyLoaded method
     {
         // MethodRef/MethodDef for
@@ -2938,8 +2940,7 @@ HRESULT CorProfiler::GenerateLoaderType(const ModuleID module_id,
         // instance object [mscorlib]System.Reflection.Assembly::CreateInstance(string)
         mdToken assembly_create_instance_member_ref;
         {
-            COR_SIGNATURE assembly_create_instance_signature[] = {IMAGE_CEE_CS_CALLCONV_HASTHIS, 1,
-                                                                  ELEMENT_TYPE_OBJECT,
+            COR_SIGNATURE assembly_create_instance_signature[] = {IMAGE_CEE_CS_CALLCONV_HASTHIS, 1, ELEMENT_TYPE_OBJECT,
                                                                   ELEMENT_TYPE_STRING};
 
             hr = resolver.GetMemberRefOrDef(system_reflection_assembly_token, WStr("CreateInstance"),
@@ -3002,7 +3003,7 @@ HRESULT CorProfiler::GenerateLoaderType(const ModuleID module_id,
 
         pNewInstr           = rewriter_void.NewILInstr();
         pNewInstr->m_opcode = CEE_LDSFLD;
-        pNewInstr->m_Arg32   = assembly_field_token;
+        pNewInstr->m_Arg32  = assembly_field_token;
         rewriter_void.InsertBefore(pFirstInstr, pNewInstr);
         pBranchFalseInstr->m_pTarget = pNewInstr;
 
@@ -3042,7 +3043,6 @@ HRESULT CorProfiler::GenerateLoaderType(const ModuleID module_id,
         }
     }
 
-
     // Add IL instructions into __DDPatchAppDomainSetup__
     {
         // MethodRef/MethodDef for
@@ -3059,7 +3059,8 @@ HRESULT CorProfiler::GenerateLoaderType(const ModuleID module_id,
                                             &system_action_of_system_app_domain_setup_invoke_token);
             if (FAILED(hr))
             {
-                Logger::Warn("GenerateLoaderType: GetMemberRefOrDef System.Action<System.AppDomainSetup>::Invoke failed");
+                Logger::Warn(
+                    "GenerateLoaderType: GetMemberRefOrDef System.Action<System.AppDomainSetup>::Invoke failed");
                 return hr;
             }
         }
@@ -3077,8 +3078,7 @@ HRESULT CorProfiler::GenerateLoaderType(const ModuleID module_id,
                                             &system_app_domain_setup_ctor_token);
             if (FAILED(hr))
             {
-                Logger::Warn(
-                    "GenerateLoaderType: GetMemberRefOrDef System.AppDomainSetup::.ctor failed");
+                Logger::Warn("GenerateLoaderType: GetMemberRefOrDef System.AppDomainSetup::.ctor failed");
                 return hr;
             }
         }
@@ -3105,8 +3105,8 @@ HRESULT CorProfiler::GenerateLoaderType(const ModuleID module_id,
         ILInstr* pFirstInstr = rewriter_void.GetILList()->m_pNext;
         ILInstr* pNewInstr   = NULL;
 
-        pNewInstr            = rewriter_void.NewILInstr();
-        pNewInstr->m_opcode  = CEE_LDARG_0;
+        pNewInstr           = rewriter_void.NewILInstr();
+        pNewInstr->m_opcode = CEE_LDARG_0;
         rewriter_void.InsertBefore(pFirstInstr, pNewInstr);
 
         pNewInstr           = rewriter_void.NewILInstr();
@@ -3171,7 +3171,6 @@ HRESULT CorProfiler::GenerateLoaderType(const ModuleID module_id,
             return hr;
         }
     }
-
 
     return S_OK;
 }
