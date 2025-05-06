@@ -177,9 +177,11 @@ add_library("OpenTelemetry.AutoInstrumentation.Native.static" STATIC
         il_rewriter_wrapper.cpp
         il_rewriter.cpp
         integration.cpp
+        member_resolver.cpp
         metadata_builder.cpp
         miniutf.cpp
         string.cpp
+        signature_builder.cpp
         util.cpp
         calltarget_tokens.cpp
         rejit_handler.cpp

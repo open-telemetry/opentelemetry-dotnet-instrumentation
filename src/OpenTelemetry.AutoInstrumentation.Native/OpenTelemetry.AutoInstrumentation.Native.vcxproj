@@ -200,6 +200,7 @@
     <ClInclude Include="logger.h" />
     <ClInclude Include="logger_impl.h" />
     <ClInclude Include="macros.h" />
+    <ClInclude Include="member_resolver.h" />
     <ClInclude Include="metadata_builder.h" />
     <ClInclude Include="method_rewriter.h" />
     <ClInclude Include="miniutf.hpp" />
@@ -211,6 +212,7 @@
     <ClInclude Include="rejit_handler.h" />
     <ClInclude Include="rejit_preprocessor.h" />
     <ClInclude Include="rejit_work_offloader.h" />
+    <ClInclude Include="signature_builder.h" />
     <ClInclude Include="startup_hook.h" />
     <ClInclude Include="stats.h" />
     <ClInclude Include="string.h" />
@@ -230,12 +232,14 @@
     <ClCompile Include="il_rewriter.cpp" />
     <ClCompile Include="il_rewriter_wrapper.cpp" />
     <ClCompile Include="integration.cpp" />
+    <ClCompile Include="member_resolver.cpp" />
     <ClCompile Include="metadata_builder.cpp" />
     <ClCompile Include="method_rewriter.cpp" />
     <ClCompile Include="miniutf.cpp" />
     <ClCompile Include="rejit_handler.cpp" />
     <ClCompile Include="rejit_preprocessor.cpp" />
     <ClCompile Include="rejit_work_offloader.cpp" />
+    <ClCompile Include="signature_builder.cpp" />
     <ClCompile Include="string.cpp" />
     <ClCompile Include="tracer_tokens.cpp" />
     <ClCompile Include="util.cpp" />
