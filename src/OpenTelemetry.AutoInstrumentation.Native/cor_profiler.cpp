@@ -1856,13 +1856,11 @@ HRESULT CorProfiler::ModifyAppDomainCreate(const ModuleID module_id, mdMethodDef
 
     mdMethodDef system_app_domain_create_domain_token;
     {
-        SignatureBuilder system_app_domain_create_domain_signature =
-            SignatureBuilder{IMAGE_CEE_CS_CALLCONV_DEFAULT, 3, ELEMENT_TYPE_CLASS}
-                .PushToken(system_app_domain_token)
-                .PushRawBytes({ELEMENT_TYPE_STRING, ELEMENT_TYPE_CLASS})
-                .PushToken(system_security_policy_evidence_token)
-                .PushRawByte(ELEMENT_TYPE_CLASS)
-                .PushToken(system_app_domain_setup_token);
+        SignatureBuilder::StaticMethod
+            system_app_domain_create_domain_signature{SignatureBuilder::Class(system_app_domain_token),
+                                                      {SignatureBuilder::BuiltIn::String,
+                                                       SignatureBuilder::Class(system_security_policy_evidence_token),
+                                                       SignatureBuilder::Class(system_app_domain_setup_token)}};
 
         hr = metadata_import->FindMethod(system_app_domain_token, WStr("CreateDomain"),
                                          system_app_domain_create_domain_signature.Head(),
@@ -1916,13 +1914,10 @@ HRESULT CorProfiler::ModifyAppDomainCreate(const ModuleID module_id, mdMethodDef
 
     mdMethodDef system_app_domain_manager_create_domain_helper_token;
     {
-        SignatureBuilder system_app_domain_manager_create_domain_helper_signature =
-            SignatureBuilder{IMAGE_CEE_CS_CALLCONV_DEFAULT, 3, ELEMENT_TYPE_CLASS}
-                .PushToken(system_app_domain_token)
-                .PushRawBytes({ELEMENT_TYPE_STRING, ELEMENT_TYPE_CLASS})
-                .PushToken(system_security_policy_evidence_token)
-                .PushRawByte(ELEMENT_TYPE_CLASS)
-                .PushToken(system_app_domain_setup_token);
+        SignatureBuilder::StaticMethod system_app_domain_manager_create_domain_helper_signature{
+            SignatureBuilder::Class(system_app_domain_token),
+            {SignatureBuilder::BuiltIn::String, SignatureBuilder::Class(system_security_policy_evidence_token),
+             SignatureBuilder::Class(system_app_domain_setup_token)}};
 
         hr = metadata_import->FindMethod(system_app_domain_manager_token, WStr("CreateDomainHelper"),
                                          system_app_domain_manager_create_domain_helper_signature.Head(),
@@ -2113,9 +2108,7 @@ HRESULT CorProfiler::GenerateLoaderType(const ModuleID module_id,
     // .field private static class [mscorlib]System.Reflection.Assembly _assembly
     mdFieldDef assembly_field_token = mdFieldDefNil;
     {
-        SignatureBuilder assembly_field_signature =
-            SignatureBuilder{IMAGE_CEE_CS_CALLCONV_FIELD, ELEMENT_TYPE_CLASS}.PushToken(
-                system_reflection_assembly_token);
+        SignatureBuilder::Field assembly_field_signature{SignatureBuilder::Class{system_reflection_assembly_token}};
         hr = metadata_emit->DefineField(*loader_type, WStr("_assembly"), fdStatic | fdPrivate,
                                         assembly_field_signature.Head(), assembly_field_signature.Size(), 0, nullptr, 0,
                                         &assembly_field_token);
@@ -2151,12 +2144,9 @@ HRESULT CorProfiler::GenerateLoaderType(const ModuleID module_id,
     // .field private static class [mscorlib]System.Action`1<class [mscorlib]System.AppDomainSetup> _assemblyFixer
     mdFieldDef app_domain_setup_fixer_field_token = mdFieldDefNil;
     {
-        SignatureBuilder app_domain_setup_fixer_signature =
-            SignatureBuilder{IMAGE_CEE_CS_CALLCONV_FIELD, ELEMENT_TYPE_GENERICINST, ELEMENT_TYPE_CLASS}
-                .PushToken(system_action_token)
-                .PushCompressedData(1)
-                .PushRawByte(ELEMENT_TYPE_CLASS)
-                .PushToken(system_app_domain_setup_token);
+        SignatureBuilder::Field app_domain_setup_fixer_signature{
+            SignatureBuilder::GenericInstance{SignatureBuilder::Class{system_action_token},
+                                              {SignatureBuilder::Class{system_app_domain_setup_token}}}};
 
         hr =
             metadata_emit->DefineField(*loader_type, WStr("_assemblyFixer"), fdStatic | fdPrivate,
@@ -2238,10 +2228,10 @@ HRESULT CorProfiler::GenerateLoaderType(const ModuleID module_id,
     // .method public hidebysig static void  __DDPatchAppDomainSetup__(class [mscorlib]System.AppDomainSetup& setup) cil
     // managed
     {
-        SignatureBuilder app_domain_setup_fixer_method_signature =
-            SignatureBuilder{IMAGE_CEE_CS_CALLCONV_DEFAULT, 1, ELEMENT_TYPE_VOID, ELEMENT_TYPE_BYREF,
-                             ELEMENT_TYPE_CLASS}
-                .PushToken(system_app_domain_setup_token);
+        SignatureBuilder::StaticMethod
+            app_domain_setup_fixer_method_signature{SignatureBuilder::BuiltIn::Void,
+                                                    {SignatureBuilder::ByRef{
+                                                        SignatureBuilder::Class{system_app_domain_setup_token}}}};
 
         hr = metadata_emit->DefineMethod(*loader_type, WStr("__DDPatchAppDomainSetup__"),
                                          mdPublic | mdHideBySig | mdStatic,
@@ -2258,12 +2248,10 @@ HRESULT CorProfiler::GenerateLoaderType(const ModuleID module_id,
     // TypeSpec for System.Action<System.AppDomainSetup>
     mdTypeSpec system_action_of_system_app_domain_setup_token;
     {
-        SignatureBuilder system_action_of_system_app_domain_setup_signature =
-            SignatureBuilder{ELEMENT_TYPE_GENERICINST, ELEMENT_TYPE_CLASS}
-                .PushToken(system_action_token)
-                .PushCompressedData(1)
-                .PushRawByte(ELEMENT_TYPE_CLASS)
-                .PushToken(system_app_domain_setup_token);
+        SignatureBuilder::GenericInstance
+            system_action_of_system_app_domain_setup_signature{SignatureBuilder::Class{system_action_token},
+                                                               {SignatureBuilder::Class{
+                                                                   system_app_domain_setup_token}}};
         hr = metadata_emit->GetTokenFromTypeSpec(system_action_of_system_app_domain_setup_signature.Head(),
                                                  system_action_of_system_app_domain_setup_signature.Size(),
                                                  &system_action_of_system_app_domain_setup_token);
@@ -2388,10 +2376,10 @@ HRESULT CorProfiler::GenerateLoaderType(const ModuleID module_id,
         // class [mscorlib]System.Reflection.Assembly [mscorlib]System.Reflection.Assembly::Load(uint8[], uint8[])
         mdToken appdomain_load_member_ref;
         {
-            SignatureBuilder appdomain_load_signature =
-                SignatureBuilder{IMAGE_CEE_CS_CALLCONV_DEFAULT, 2, ELEMENT_TYPE_CLASS}
-                    .PushToken(system_reflection_assembly_token)
-                    .PushRawBytes({ELEMENT_TYPE_SZARRAY, ELEMENT_TYPE_U1, ELEMENT_TYPE_SZARRAY, ELEMENT_TYPE_U1});
+            SignatureBuilder::StaticMethod
+                appdomain_load_signature{SignatureBuilder::Class{system_reflection_assembly_token},
+                                         {SignatureBuilder::Array{SignatureBuilder::BuiltIn::Byte},
+                                          SignatureBuilder::Array{SignatureBuilder::BuiltIn::Byte}}};
 
             hr = resolver.GetMemberRefOrDef(system_reflection_assembly_token, WStr("Load"),
                                             appdomain_load_signature.Head(), appdomain_load_signature.Size(),
@@ -2418,10 +2406,9 @@ HRESULT CorProfiler::GenerateLoaderType(const ModuleID module_id,
         // instance class [mscorlib]System.Type [mscorlib]System.Reflection.Assembly::GetType(string)
         mdToken system_reflection_assembly_get_type_token;
         {
-            SignatureBuilder system_reflection_assembly_get_type_signature =
-                SignatureBuilder{IMAGE_CEE_CS_CALLCONV_HASTHIS, 1, ELEMENT_TYPE_CLASS}
-                    .PushToken(system_type_token)
-                    .PushRawByte(ELEMENT_TYPE_STRING);
+            SignatureBuilder::InstanceMethod
+                system_reflection_assembly_get_type_signature{SignatureBuilder::Class{system_type_token},
+                                                              {SignatureBuilder::BuiltIn::String}};
 
             hr = resolver.GetMemberRefOrDef(system_reflection_assembly_token, WStr("GetType"),
                                             system_reflection_assembly_get_type_signature.Head(),
@@ -2450,10 +2437,8 @@ HRESULT CorProfiler::GenerateLoaderType(const ModuleID module_id,
         // instance class [mscorlib]System.Reflection.MethodInfo [mscorlib]System.Type::GetMethod(string)
         mdToken system_type_get_method_token;
         {
-            SignatureBuilder system_type_get_method_signature =
-                SignatureBuilder{IMAGE_CEE_CS_CALLCONV_HASTHIS, 1, ELEMENT_TYPE_CLASS}
-                    .PushToken(system_reflection_method_info_token)
-                    .PushRawByte(ELEMENT_TYPE_STRING);
+            SignatureBuilder::InstanceMethod system_type_get_method_signature =
+                {SignatureBuilder::Class{system_reflection_method_info_token}, {SignatureBuilder::BuiltIn::String}};
 
             hr = resolver.GetMemberRefOrDef(system_type_token, WStr("GetMethod"),
                                             system_type_get_method_signature.Head(),
@@ -2482,11 +2467,10 @@ HRESULT CorProfiler::GenerateLoaderType(const ModuleID module_id,
         //   valuetype [mscorlib]System.RuntimeTypeHandle)
         mdMemberRef system_type_get_type_from_handle_token;
         {
-            SignatureBuilder system_type_get_type_from_handle_signature =
-                SignatureBuilder{IMAGE_CEE_CS_CALLCONV_DEFAULT, 1, ELEMENT_TYPE_CLASS}
-                    .PushToken(system_type_token)
-                    .PushRawByte(ELEMENT_TYPE_VALUETYPE)
-                    .PushToken(system_runtime_type_handle_token);
+            SignatureBuilder::StaticMethod
+                system_type_get_type_from_handle_signature{SignatureBuilder::Class{system_type_token},
+                                                           {SignatureBuilder::ValueType{
+                                                               system_runtime_type_handle_token}}};
 
             hr = resolver.GetMemberRefOrDef(system_type_token, WStr("GetTypeFromHandle"),
                                             system_type_get_type_from_handle_signature.Head(),
@@ -2515,11 +2499,9 @@ HRESULT CorProfiler::GenerateLoaderType(const ModuleID module_id,
         //   class [mscorlib]System.Type)
         mdMemberRef system_reflection_method_info_create_delegate_token;
         {
-            SignatureBuilder system_reflection_method_info_create_delegate_signature =
-                SignatureBuilder{IMAGE_CEE_CS_CALLCONV_HASTHIS, 1, ELEMENT_TYPE_CLASS}
-                    .PushToken(system_delegate_token)
-                    .PushRawByte(ELEMENT_TYPE_CLASS)
-                    .PushToken(system_type_token);
+            SignatureBuilder::InstanceMethod
+                system_reflection_method_info_create_delegate_signature{SignatureBuilder::Class{system_delegate_token},
+                                                                        {SignatureBuilder::Class{system_type_token}}};
 
             hr = resolver.GetMemberRefOrDef(system_reflection_method_info_token, WStr("CreateDelegate"),
                                             system_reflection_method_info_create_delegate_signature.Head(),
