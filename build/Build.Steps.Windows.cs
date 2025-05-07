@@ -1,4 +1,3 @@
-using System.Collections.Immutable;
 using DependencyListGenerator;
 using Nuke.Common;
 using Nuke.Common.IO;
@@ -222,7 +221,7 @@ partial class Build
             {
                 packagesGroup = project.Xml.AddItemGroup();
                 packagesGroup.Label = label;
-                packagesGroup.Condition = " '$(TargetFramework)' == 'net462' ";
+                packagesGroup.Condition = " '$(TargetFramework)' == 'net462' AND $(_IsPacking) != true ";
             }
 
             var packagesProject = ProjectModelTasks.ParseProject(packages);
