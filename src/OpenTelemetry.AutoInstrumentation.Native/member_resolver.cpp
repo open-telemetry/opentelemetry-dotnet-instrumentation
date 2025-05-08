@@ -23,8 +23,6 @@ HRESULT MemberResolver::GetTypeRefOrDefByName(mdToken tkResolutionScope, LPCWSTR
         return metadaImport_->FindTypeDefByName(szName, tkResolutionScope, token);
     }
 
-    // TODO: Prior to metadaEmit_->DefineTypeRefByName it may be good to try
-    // return metadaImport_->FindTypeRef(tkResolutionScope, szName, ptr);
     return metadaEmit_->DefineTypeRefByName(tkResolutionScope, szName, token);
 }
 
@@ -37,8 +35,6 @@ HRESULT MemberResolver::GetMemberRefOrDef(
         return metadaImport_->FindMember(tkImport, szName, pvSigBlob, cbSigBlob, token);
     }
 
-    // TODO: Prior to metadaEmit_->DefineMemberRef it may be good to try
-    // return metadaImport_->FindMemberRef(tkImport, szName, pvSigBlob, cbSigBlob, token);
     return metadaEmit_->DefineMemberRef(tkImport, szName, pvSigBlob, cbSigBlob, token);
 }
 } // namespace trace

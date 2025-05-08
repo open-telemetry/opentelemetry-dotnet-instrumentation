@@ -1796,6 +1796,11 @@ HRESULT CorProfiler::RunAutoInstrumentationLoader(const ComPtr<IMetaDataEmit2>& 
     return S_OK;
 }
 
+// Add at the start of System.AppDomain::CreateDomain(string,System.Security.Policy.Evidence,System.AppDomainSetup)
+// and System.AppDomainManager::CreateDomainHelper(string,System.Security.Policy.Evidence,System.AppDomainSetup)
+// call to __DDVoidMethodType__::__DDPatchAppDomainSetup__ passing AppDomainSetup argument by ref there.
+// If AppDomainSetup is null, it will be created. Resulting AppDomainSetup will be passed to
+// OpenTelemetry.AutoInstrumentation.Loader.AppConfigUpdater::ModifyConfig(System.AppDomainSetup appDomainSetup)
 HRESULT CorProfiler::ModifyAppDomainCreate(const ModuleID module_id, mdMethodDef patch_app_domain_setup_method)
 {
     // Expects to be called on mscorlib only
