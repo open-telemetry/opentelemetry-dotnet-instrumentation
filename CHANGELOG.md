@@ -13,7 +13,7 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
   metrics instrumentation for versions `6.0.0`+.
 - In install script, Install-OpenTelemetryCore accepts optional argument RegisterAssembliesInGAC,
   which is true by default. When set to false, assemblies would not be installed in GAC.
-- In install script, new function added: Register-AssembliesInGAC. It installs OpenTelemetry assemlbies
+- In install script, new function added: Register-AssembliesInGAC. It installs OpenTelemetry assemblies
   and dependencies in GAC.
 
 ### Changed
