@@ -677,7 +677,7 @@ HRESULT STDMETHODCALLTYPE CorProfiler::ModuleLoadFinished(ModuleID module_id, HR
 
             if (FAILED(hr))
             {
-                Logger::Error("Failed to inject loadeer type in mscorlib, module id ", module_id, ", result ", hr);
+                Logger::Error("Failed to inject loader type in mscorlib, module id ", module_id, ", result ", hr);
             }
             else
             {
@@ -2347,7 +2347,7 @@ HRESULT CorProfiler::GenerateLoaderType(const ModuleID module_id,
 
         // MethodRef/MethodDef for
         // void [mscorlib]System.Runtime.InteropServices.Marshal::Copy(native int, uint8[], int32, int32)
-        mdToken marshal_copy_member_ref;
+        mdToken marshal_copy_token;
         {
             // TypeRef/TypeDef for [mscorlib]System.Runtime.InteropServices.Marshal
             mdTypeRef marshal_type_token;
@@ -2368,7 +2368,7 @@ HRESULT CorProfiler::GenerateLoaderType(const ModuleID module_id,
                                                       ELEMENT_TYPE_I4,
                                                       ELEMENT_TYPE_I4};
             hr = resolver.GetMemberRefOrDef(marshal_type_token, WStr("Copy"), marshal_copy_signature,
-                                            sizeof(marshal_copy_signature), &marshal_copy_member_ref);
+                                            sizeof(marshal_copy_signature), &marshal_copy_token);
             if (FAILED(hr))
             {
                 Logger::Warn(
@@ -2379,16 +2379,17 @@ HRESULT CorProfiler::GenerateLoaderType(const ModuleID module_id,
 
         // MethodRef/MethodDef for
         // class [mscorlib]System.Reflection.Assembly [mscorlib]System.Reflection.Assembly::Load(uint8[], uint8[])
-        mdToken appdomain_load_member_ref;
+        mdToken system_reflection_assembly_load_token;
         {
             SignatureBuilder::StaticMethod
-                appdomain_load_signature{SignatureBuilder::Class{system_reflection_assembly_token},
+                system_reflection_assembly_load_signature{SignatureBuilder::Class{system_reflection_assembly_token},
                                          {SignatureBuilder::Array{SignatureBuilder::BuiltIn::Byte},
                                           SignatureBuilder::Array{SignatureBuilder::BuiltIn::Byte}}};
 
             hr = resolver.GetMemberRefOrDef(system_reflection_assembly_token, WStr("Load"),
-                                            appdomain_load_signature.Head(), appdomain_load_signature.Size(),
-                                            &appdomain_load_member_ref);
+                                            system_reflection_assembly_load_signature.Head(),
+                                            system_reflection_assembly_load_signature.Size(),
+                                            &system_reflection_assembly_load_token);
             if (FAILED(hr))
             {
                 Logger::Warn("GenerateLoaderType: GetMemberRefOrDef System.Reflection.Assembly::Load failed");
@@ -2693,7 +2694,7 @@ HRESULT CorProfiler::GenerateLoaderType(const ModuleID module_id,
 
         pNewInstr           = rewriter_void.NewILInstr();
         pNewInstr->m_opcode = CEE_CALL;
-        pNewInstr->m_Arg32  = marshal_copy_member_ref;
+        pNewInstr->m_Arg32  = marshal_copy_token;
         rewriter_void.InsertBefore(pFirstInstr, pNewInstr);
 
         pNewInstr           = rewriter_void.NewILInstr();
@@ -2729,7 +2730,7 @@ HRESULT CorProfiler::GenerateLoaderType(const ModuleID module_id,
 
         pNewInstr           = rewriter_void.NewILInstr();
         pNewInstr->m_opcode = CEE_CALL;
-        pNewInstr->m_Arg32  = marshal_copy_member_ref;
+        pNewInstr->m_Arg32  = marshal_copy_token;
         rewriter_void.InsertBefore(pFirstInstr, pNewInstr);
 
         pNewInstr           = rewriter_void.NewILInstr();
@@ -2744,7 +2745,7 @@ HRESULT CorProfiler::GenerateLoaderType(const ModuleID module_id,
 
         pNewInstr           = rewriter_void.NewILInstr();
         pNewInstr->m_opcode = CEE_CALL;
-        pNewInstr->m_Arg32  = appdomain_load_member_ref;
+        pNewInstr->m_Arg32  = system_reflection_assembly_load_token;
         rewriter_void.InsertBefore(pFirstInstr, pNewInstr);
 
         pNewInstr           = rewriter_void.NewILInstr();

@@ -27,14 +27,14 @@ HRESULT MemberResolver::GetTypeRefOrDefByName(mdToken tkResolutionScope, LPCWSTR
 }
 
 HRESULT MemberResolver::GetMemberRefOrDef(
-    mdToken tkImport, LPCWSTR szName, PCCOR_SIGNATURE pvSigBlob, ULONG cbSigBlob, mdToken* token)
+    mdToken tkScope, LPCWSTR szName, PCCOR_SIGNATURE pvSigBlob, ULONG cbSigBlob, mdToken* token)
 
 {
-    if (TypeFromToken(tkImport) == mdtTypeDef)
+    if (TypeFromToken(tkScope) == mdtTypeDef)
     {
-        return metadaImport_->FindMember(tkImport, szName, pvSigBlob, cbSigBlob, token);
+        return metadaImport_->FindMember(tkScope, szName, pvSigBlob, cbSigBlob, token);
     }
 
-    return metadaEmit_->DefineMemberRef(tkImport, szName, pvSigBlob, cbSigBlob, token);
+    return metadaEmit_->DefineMemberRef(tkScope, szName, pvSigBlob, cbSigBlob, token);
 }
 } // namespace trace

@@ -32,10 +32,10 @@ public:
     HRESULT GetTypeRefOrDefByName(mdToken tkResolutionScope, LPCWSTR szName, mdToken* token);
 
     /// <summary>
-    /// Uses IMetaDataImport::FindTypeDefByName if tkResolutionScope is mdTokenNill, TypeDef or Assembly
-    /// Uses IMetaDataEmit::DefineTypeRefByName otherwise (if tkResolutionScope is AssemblyRef or TypeRef)
+    /// Uses IMetaDataImport::FindMember if tkScope is TypeDef
+    /// Uses IMetaDataEmit::DefineMemberRef otherwise (if tkScope is TypeRef or TypeSpec)
     /// </summary>
-    HRESULT GetMemberRefOrDef(mdToken tkImport, LPCWSTR szName, PCCOR_SIGNATURE pvSigBlob, ULONG cbSigBlob, mdToken* token);
+    HRESULT GetMemberRefOrDef(mdToken tkScope, LPCWSTR szName, PCCOR_SIGNATURE pvSigBlob, ULONG cbSigBlob, mdToken* token);
 };
 
 } // namespace trace
