@@ -2383,8 +2383,8 @@ HRESULT CorProfiler::GenerateLoaderType(const ModuleID module_id,
         {
             SignatureBuilder::StaticMethod
                 system_reflection_assembly_load_signature{SignatureBuilder::Class{system_reflection_assembly_token},
-                                         {SignatureBuilder::Array{SignatureBuilder::BuiltIn::Byte},
-                                          SignatureBuilder::Array{SignatureBuilder::BuiltIn::Byte}}};
+                                                          {SignatureBuilder::Array{SignatureBuilder::BuiltIn::Byte},
+                                                           SignatureBuilder::Array{SignatureBuilder::BuiltIn::Byte}}};
 
             hr = resolver.GetMemberRefOrDef(system_reflection_assembly_token, WStr("Load"),
                                             system_reflection_assembly_load_signature.Head(),
