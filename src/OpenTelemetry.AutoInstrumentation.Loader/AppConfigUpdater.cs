@@ -7,7 +7,7 @@ namespace OpenTelemetry.AutoInstrumentation.Loader;
 /// <summary>
 /// Handles update of config files for non-default AppDomain
 /// </summary>
-public static class AppConfigUpdater
+internal static class AppConfigUpdater
 {
     /// <summary>
     /// Modify assembly bindings in appDomainSetup.

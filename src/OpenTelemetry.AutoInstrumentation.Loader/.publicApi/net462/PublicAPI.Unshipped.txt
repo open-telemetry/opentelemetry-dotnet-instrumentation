@@ -1,3 +1,0 @@
-#nullable enable
-OpenTelemetry.AutoInstrumentation.Loader.AppConfigUpdater
-static OpenTelemetry.AutoInstrumentation.Loader.AppConfigUpdater.ModifyConfig(System.AppDomainSetup! appDomainSetup) -> void
