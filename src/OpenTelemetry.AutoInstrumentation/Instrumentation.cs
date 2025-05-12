@@ -10,6 +10,7 @@ using OpenTelemetry.AutoInstrumentation.Configurations;
 using OpenTelemetry.AutoInstrumentation.ContinuousProfiler;
 #endif
 using OpenTelemetry.AutoInstrumentation.Diagnostics;
+using OpenTelemetry.AutoInstrumentation.Instrumentations.NoCode;
 using OpenTelemetry.AutoInstrumentation.Loading;
 using OpenTelemetry.AutoInstrumentation.Logging;
 using OpenTelemetry.AutoInstrumentation.Plugins;
@@ -183,6 +184,7 @@ internal static class Instrumentation
         if (GeneralSettings.Value.ProfilerEnabled)
         {
             RegisterDirectBytecodeInstrumentations(InstrumentationDefinitions.GetAllDefinitions());
+            RegisterBytecodeInstrumentations(NoCodeBytecodeIntegrationBuilder.GetNoCodeDefinitions(), "direct, no-code", NativeMethods.AddInstrumentations);
 
             try
             {
