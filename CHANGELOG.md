@@ -11,11 +11,16 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 
 - Support for [`Npgsql`](https://www.nuget.org/packages/Npgsql/)
   metrics instrumentation for versions `6.0.0`+.
+- In install script, Install-OpenTelemetryCore accepts optional argument RegisterAssembliesInGAC,
+  which is true by default. When set to false, assemblies would not be installed in GAC.
+- In install script, new function added: Register-AssembliesInGAC. It installs OpenTelemetry assemblies
+  and dependencies in GAC.
 
 ### Changed
 
 - `otel-dotnet-auto-install.sh` now optionally uses `wget` instead of `curl`,
   improving compatibility with `mcr.microsoft.com/dotnet/runtime` Alpine images.
+- Non-default application domains will be forced to load with LoaderOptimization.SingleDomain
 
 #### Dependency updates
 
