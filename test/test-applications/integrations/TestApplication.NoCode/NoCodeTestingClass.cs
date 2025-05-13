@@ -8,6 +8,12 @@ namespace TestApplication.NoCode;
 internal class NoCodeTestingClass
 {
     [MethodImpl(MethodImplOptions.NoInlining)]
+    public static void TestMethodStatic()
+    {
+        // This method is intentionally left empty.
+    }
+
+    [MethodImpl(MethodImplOptions.NoInlining)]
     public void TestMethod()
     {
         // This method is intentionally left empty.
