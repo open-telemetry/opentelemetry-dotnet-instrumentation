@@ -14,6 +14,7 @@ internal static class NoCodeBytecodeIntegrationBuilder
     [
         new("TestApplication.NoCode", "TestApplication.NoCode.NoCodeTestingClass", "TestMethod", ["System.Void"], "Span-TestMethod0"),
         new("TestApplication.NoCode", "TestApplication.NoCode.NoCodeTestingClass", "TestMethodA", ["System.Void"], "Span-TestMethodA"),
+        new("TestApplication.NoCode", "TestApplication.NoCode.NoCodeTestingClass", "TestMethodStatic", ["System.Void"], "Span-TestMethodStatic"),
         new("TestApplication.NoCode", "TestApplication.NoCode.NoCodeTestingClass", "TestMethod", ["System.Void", "System.String"], "Span-TestMethod1String"),
         new("TestApplication.NoCode", "TestApplication.NoCode.NoCodeTestingClass", "TestMethod", ["System.Void", "System.Int32"], "Span-TestMethod1Int"),
         new("TestApplication.NoCode", "TestApplication.NoCode.NoCodeTestingClass", "TestMethod", ["System.Void", "System.String", "System.String"], "Span-TestMethod2"),
