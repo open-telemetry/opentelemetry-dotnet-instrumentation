@@ -72,11 +72,6 @@ public:
     void Flush();
 
     bool IsDebugEnabled() const;
-
-    static void Shutdown()
-    {
-        spdlog::shutdown();
-    }
 };
 
 template <typename TLoggerPolicy>

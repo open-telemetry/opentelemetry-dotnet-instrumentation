@@ -69,11 +69,6 @@ public:
         return LoggerImpl<TracerLoggerPolicy>::Instance()->IsDebugEnabled();
     }
 
-    static void Shutdown()
-    {
-        LoggerImpl<TracerLoggerPolicy>::Shutdown();
-    }
-
     static void Flush()
     {
         LoggerImpl<TracerLoggerPolicy>::Instance()->Flush();
