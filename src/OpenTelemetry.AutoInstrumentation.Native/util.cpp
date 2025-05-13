@@ -12,7 +12,7 @@
 
 #include "environment_variables_parser.h"
 #include "pal.h"
-#include "string.h"
+#include "string_utils.h"
 
 #ifdef MACOS
 extern char** environ;

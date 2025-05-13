@@ -8,7 +8,7 @@
 
 #include "environment_variables.h"
 #include "environment_variables_parser.h"
-#include "string.h"
+#include "string_utils.h"
 #include "util.h"
 
 #define CheckIfTrue(EXPR)                                  \

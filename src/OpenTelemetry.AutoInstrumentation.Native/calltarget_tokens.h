@@ -16,7 +16,7 @@
 #include "com_ptr.h"
 #include "il_rewriter.h"
 #include "integration.h"
-#include "string.h" // NOLINT
+#include "string_utils.h" // NOLINT
 
 namespace trace
 {

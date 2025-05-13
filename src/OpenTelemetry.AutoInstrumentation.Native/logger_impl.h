@@ -7,7 +7,7 @@
 #define OTEL_CLR_PROFILER_LOGGER_IMPL_H_
 #include "util.h"
 #include "environment_variables.h"
-#include "string.h"
+#include "string_utils.h"
 #include "pal.h"
 
 #include "spdlog/sinks/null_sink.h"

@@ -6,7 +6,7 @@
 #pragma once
 
 #include "environment_variables.h"
-#include "string.h"
+#include "string_utils.h"
 #include "logger_impl.h"
 
 #include <string>
