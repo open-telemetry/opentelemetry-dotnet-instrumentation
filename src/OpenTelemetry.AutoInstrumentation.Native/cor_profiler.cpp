@@ -850,22 +850,6 @@ HRESULT STDMETHODCALLTYPE CorProfiler::ModuleUnloadStarted(ModuleID module_id)
     {
         return S_OK;
     }
-
-    if (Logger::IsDebugEnabled())
-    {
-        const auto module_info = GetModuleInfo(this->info_, module_id);
-
-        if (module_info.IsValid())
-        {
-            Logger::Debug("ModuleUnloadStarted: ", module_id, " ", module_info.assembly.name, " AppDomain ",
-                          module_info.assembly.app_domain_id, " [", module_info.assembly.app_domain_name, "]");
-        }
-        else
-        {
-            Logger::Debug("ModuleUnloadStarted: ", module_id);
-        }
-    }
-
     // take this lock so we block until the
     // module metadata is not longer being used
     std::lock_guard<std::mutex> guard(module_ids_lock_);
@@ -876,24 +860,25 @@ HRESULT STDMETHODCALLTYPE CorProfiler::ModuleUnloadStarted(ModuleID module_id)
         return S_OK;
     }
 
-    const auto& moduleInfo = GetModuleInfo(this->info_, module_id);
-
-    if (moduleInfo.IsValid())
+    if (rejit_handler != nullptr)
     {
-        if (Logger::IsDebugEnabled())
-        {
-            Logger::Debug("ModuleUnloadStarted: ", module_id, " ", moduleInfo.assembly.name, " AppDomain ",
-                          moduleInfo.assembly.app_domain_id, " ", moduleInfo.assembly.app_domain_name);
-        }
+        rejit_handler->RemoveModule(module_id);
     }
-    else
+
+    const auto& moduleInfo = GetModuleInfo(this->info_, module_id);
+    if (!moduleInfo.IsValid())
     {
         Logger::Debug("ModuleUnloadStarted: ", module_id);
         return S_OK;
     }
 
-    const auto is_instrumentation_assembly = moduleInfo.assembly.name == managed_profiler_name;
+    if (Logger::IsDebugEnabled())
+    {
+        Logger::Debug("ModuleUnloadStarted: ", module_id, " ", moduleInfo.assembly.name, " AppDomain ",
+                      moduleInfo.assembly.app_domain_id, " ", moduleInfo.assembly.app_domain_name);
+    }
 
+    const auto is_instrumentation_assembly = moduleInfo.assembly.name == managed_profiler_name;
     if (is_instrumentation_assembly)
     {
         const auto appDomainId = moduleInfo.assembly.app_domain_id;
@@ -903,11 +888,6 @@ HRESULT STDMETHODCALLTYPE CorProfiler::ModuleUnloadStarted(ModuleID module_id)
         {
             managed_profiler_loaded_app_domains.erase(appDomainId);
         }
-    }
-
-    if (rejit_handler != nullptr)
-    {
-        rejit_handler->RemoveModule(module_id);
     }
 
     return S_OK;
