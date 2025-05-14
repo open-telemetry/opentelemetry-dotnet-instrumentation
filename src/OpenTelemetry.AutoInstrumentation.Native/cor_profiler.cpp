@@ -19,6 +19,7 @@
 #include "environment_variables_util.h"
 #include "il_rewriter.h"
 #include "il_rewriter_wrapper.h"
+#include "integration.h"
 #include "logger.h"
 #include "metadata_builder.h"
 #include "module_metadata.h"
@@ -1115,7 +1116,7 @@ void CorProfiler::InternalAddInstrumentation(WCHAR* id, CallTargetDefinition* it
             const auto& integration =
                 IntegrationDefinition(MethodReference(targetAssembly, targetType, targetMethod, minVersion, maxVersion,
                                                       signatureTypes),
-                                      TypeReference(integrationAssembly, integrationType, {}, {}), isDerived);
+                                      TypeReference(integrationAssembly, integrationType, {}, {}), isDerived, true);
 
             if (Logger::IsDebugEnabled())
             {
@@ -1214,6 +1215,56 @@ void CorProfiler::ConfigureContinuousProfiler(bool         threadSamplingEnabled
     if (allocationSamplingEnabled)
     {
         this->continuousProfiler->StartAllocationSampling(maxMemorySamplesPerMinute);
+    }
+}
+
+void CorProfiler::InitializeTraceMethods(WCHAR* id,
+                                         WCHAR* integration_assembly_name_ptr,
+                                         WCHAR* integration_type_name_ptr,
+                                         WCHAR* configuration_string_ptr)
+{
+    WSTRING              definitionsId = WSTRING(id);
+    std::scoped_lock<std::mutex> definitionsLock(definitions_ids_lock_);
+
+    if (definitions_ids_.find(definitionsId) != definitions_ids_.end())
+    {
+        Logger::Info("InitializeTraceMethods: Id already processed.");
+        return;
+    }
+
+    // TODO we do a handful of string splits here. We could probably do this with indexOf operations instead, but I'm
+    // gonna first make sure this works
+    if (rejit_handler != nullptr)
+    {
+        WSTRING integration_assembly_name = WSTRING(integration_assembly_name_ptr);
+        WSTRING integration_type_name     = WSTRING(integration_type_name_ptr);
+        WSTRING configuration_string      = WSTRING(configuration_string_ptr);
+
+        std::vector<IntegrationDefinition> integrationDefinitions =
+            GetIntegrationsFromTraceMethodsConfiguration(integration_assembly_name, integration_type_name,
+                                                         configuration_string);
+        std::scoped_lock<std::mutex> moduleLock(module_ids_lock_);
+
+        Logger::Info("InitializeTraceMethods: Total number of modules to analyze: ", module_ids_.size());
+        if (rejit_handler != nullptr)
+        {
+            auto promise = std::make_shared<std::promise<ULONG>>();
+            std::future<ULONG> future  = promise->get_future();
+            tracer_integration_preprocessor->EnqueueRequestRejitForLoadedModules(module_ids_, integrationDefinitions,
+                                                                                 promise);
+
+            // wait and get the value from the future<int>
+            const auto& numReJITs = future.get();
+            Logger::Debug("Total number of ReJIT Requested: ", numReJITs);
+        }
+
+        integration_definitions_.reserve(integration_definitions_.size() + integrationDefinitions.size());
+        for (const auto& integration : integrationDefinitions)
+        {
+            integration_definitions_.push_back(integration);
+        }
+
+        Logger::Info("InitializeTraceMethods: Total integrations in profiler: ", integration_definitions_.size());
     }
 }
 

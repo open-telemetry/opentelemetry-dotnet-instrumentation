@@ -87,6 +87,8 @@ protected:
 public:
     mdTypeRef GetObjectTypeRef();
     mdTypeRef GetExceptionTypeRef();
+    mdTypeRef GetRuntimeTypeHandleTypeRef();
+    mdTypeRef GetRuntimeMethodHandleTypeRef();
     mdAssemblyRef GetCorLibAssemblyRef();
 
     HRESULT ModifyLocalSigAndInitialize(void* rewriterWrapperPtr, FunctionInfo* functionInfo,
