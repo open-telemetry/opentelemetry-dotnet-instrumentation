@@ -368,9 +368,8 @@ void RejitHandler::RemoveModule(ModuleID moduleId)
 
     // Removes the moduleID from the inliners vector
     std::lock_guard<std::mutex> inlinersGuard(m_ngenInlinersModules_lock);
-    m_ngenInlinersModules.erase(
-            std::remove(m_ngenInlinersModules.begin(), m_ngenInlinersModules.end(), moduleId),
-            m_ngenInlinersModules.end());
+    m_ngenInlinersModules.erase(std::remove(m_ngenInlinersModules.begin(), m_ngenInlinersModules.end(), moduleId),
+                                m_ngenInlinersModules.end());
 }
 
 void RejitHandler::AddNGenInlinerModule(ModuleID moduleId)
@@ -392,7 +391,7 @@ void RejitHandler::AddNGenInlinerModule(ModuleID moduleId)
     std::lock_guard<std::mutex> modulesGuard(m_modules_lock);
     std::lock_guard<std::mutex> inlinersGuard(m_ngenInlinersModules_lock);
 
-    bool                        alreadyAdded = false;
+    bool alreadyAdded = false;
     for (const auto& moduleInliner : m_ngenInlinersModules)
     {
         if (moduleInliner == moduleId)

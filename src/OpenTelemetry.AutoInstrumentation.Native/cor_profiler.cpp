@@ -1203,7 +1203,7 @@ void CorProfiler::InitializeTraceMethods(WCHAR* id,
                                          WCHAR* integration_type_name_ptr,
                                          WCHAR* configuration_string_ptr)
 {
-    WSTRING              definitionsId = WSTRING(id);
+    WSTRING                      definitionsId = WSTRING(id);
     std::scoped_lock<std::mutex> definitionsLock(definitions_ids_lock_);
 
     if (definitions_ids_.find(definitionsId) != definitions_ids_.end())
@@ -1228,7 +1228,7 @@ void CorProfiler::InitializeTraceMethods(WCHAR* id,
         Logger::Info("InitializeTraceMethods: Total number of modules to analyze: ", module_ids_.size());
         if (rejit_handler != nullptr)
         {
-            auto promise = std::make_shared<std::promise<ULONG>>();
+            auto               promise = std::make_shared<std::promise<ULONG>>();
             std::future<ULONG> future  = promise->get_future();
             tracer_integration_preprocessor->EnqueueRequestRejitForLoadedModules(module_ids_, integrationDefinitions,
                                                                                  promise);

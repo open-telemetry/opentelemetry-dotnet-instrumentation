@@ -101,11 +101,12 @@ HRESULT TracerMethodRewriter::Rewrite(RejitHandlerModule* moduleHandler, RejitHa
     mdToken                function_token         = caller->id;
     TypeSignature          retFuncArg             = caller->method_signature.GetReturnValue();
     IntegrationDefinition* integration_definition = tracerMethodHandler->GetIntegrationDefinition();
-    bool                   is_integration_method = integration_definition->target_method.type.assembly.name != tracemethodintegration_assemblyname;
+    bool                   is_integration_method =
+        integration_definition->target_method.type.assembly.name != tracemethodintegration_assemblyname;
     bool ignoreByRefInstrumentation               = !is_integration_method;
     const auto [retFuncElementType, retTypeFlags] = retFuncArg.GetElementTypeAndFlags();
-    bool        isVoid                            = (retTypeFlags & TypeFlagVoid) > 0;
-    bool        isStatic        = !(caller->method_signature.CallingConvention() & IMAGE_CEE_CS_CALLCONV_HASTHIS);
+    bool isVoid                                   = (retTypeFlags & TypeFlagVoid) > 0;
+    bool isStatic = !(caller->method_signature.CallingConvention() & IMAGE_CEE_CS_CALLCONV_HASTHIS);
     std::vector<trace::TypeSignature> methodArguments = caller->method_signature.GetMethodArguments();
     std::vector<trace::TypeSignature> traceAnnotationArguments;
     COR_SIGNATURE                     runtimeMethodHandleBuffer[10];

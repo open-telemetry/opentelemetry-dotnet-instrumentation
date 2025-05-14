@@ -68,7 +68,7 @@ void RejitPreprocessor<RejitRequestDefinition>::ProcessTypeDefForRejit(const Rej
             continue;
         }
 
-        const auto numOfArgs = functionInfo.method_signature.NumberOfArguments();
+        const auto numOfArgs                = functionInfo.method_signature.NumberOfArguments();
         auto       is_exact_signature_match = GetIsExactSignatureMatch(definition);
 
         if (is_exact_signature_match)
