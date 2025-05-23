@@ -16,7 +16,7 @@
 #include "com_ptr.h"
 #include "il_rewriter.h"
 #include "integration.h"
-#include "string.h" // NOLINT
+#include "string_utils.h" // NOLINT
 
 namespace trace
 {
@@ -87,6 +87,8 @@ protected:
 public:
     mdTypeRef GetObjectTypeRef();
     mdTypeRef GetExceptionTypeRef();
+    mdTypeRef GetRuntimeTypeHandleTypeRef();
+    mdTypeRef GetRuntimeMethodHandleTypeRef();
     mdAssemblyRef GetCorLibAssemblyRef();
 
     HRESULT ModifyLocalSigAndInitialize(void* rewriterWrapperPtr, FunctionInfo* functionInfo,

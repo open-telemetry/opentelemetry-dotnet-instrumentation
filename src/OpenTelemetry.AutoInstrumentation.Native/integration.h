@@ -11,7 +11,7 @@
 #include <sstream>
 #include <vector>
 
-#include "string.h"
+#include "string_utils.h"
 
 #undef major
 #undef minor
@@ -20,6 +20,7 @@ namespace trace
 {
 
 const size_t kPublicKeySize = 8;
+const WSTRING tracemethodintegration_assemblyname = WStr("#TraceMethodFeature");
 
 // PublicKey represents an Assembly Public Key token, which is an 8 byte binary
 // RSA key.
@@ -308,20 +309,25 @@ struct IntegrationDefinition
     const MethodReference target_method;
     const TypeReference integration_type;
     const bool is_derived = false;
+    const bool is_exact_signature_match = true;
 
     IntegrationDefinition()
     {
     }
 
-    IntegrationDefinition(MethodReference target_method, TypeReference integration_type, bool isDerived) :
-        target_method(target_method), integration_type(integration_type), is_derived(isDerived)
+    IntegrationDefinition(MethodReference target_method, TypeReference integration_type, bool isDerived,
+                          bool is_exact_signature_match) :
+        target_method(target_method),
+        integration_type(integration_type),
+        is_derived(isDerived),
+        is_exact_signature_match(is_exact_signature_match)
     {
     }
 
     inline bool operator==(const IntegrationDefinition& other) const
     {
         return target_method == other.target_method && integration_type == other.integration_type &&
-               is_derived == other.is_derived;
+               is_derived == other.is_derived && is_exact_signature_match == other.is_exact_signature_match;
     }
 };
 
@@ -351,6 +357,11 @@ namespace
     PublicKey GetPublicKeyFromAssemblyReferenceString(const WSTRING& wstr);
 
 } // namespace
+
+    std::vector<IntegrationDefinition> GetIntegrationsFromTraceMethodsConfiguration(
+    const WSTRING& integration_assembly_name,
+    const WSTRING& integration_type_name,
+    const WSTRING& configuration_string);
 
 } // namespace trace
 
