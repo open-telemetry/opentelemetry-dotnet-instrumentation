@@ -1,0 +1,82 @@
+﻿// Copyright The OpenTelemetry Authors
+// SPDX-License-Identifier: Apache-2.0
+
+using System.Diagnostics;
+using System.Reflection;
+
+namespace TestApplication.SelectiveSampler;
+
+internal static class Program
+{
+    private static Action? _startSamplingDelegate;
+    private static Action? _stopSamplingDelegate;
+    private static AsyncLocal<Activity?>? _supportingActivityAsyncLocal;
+
+    public static async Task Main(string[] args)
+    {
+        Init();
+        Thread.CurrentThread.Name = "Main";
+        ActivitySource activitySource = new("TestApplication.SelectiveSampler", "1.0.0");
+
+        using var activity = activitySource.StartActivity();
+        await MethodA();
+    }
+
+    // TODO: requires profiler to be attached.
+    private static void Init()
+    {
+        var nativeMethodsType = Type.GetType("OpenTelemetry.AutoInstrumentation.NativeMethods, OpenTelemetry.AutoInstrumentation");
+        if (nativeMethodsType == null)
+        {
+            throw new Exception("OpenTelemetry.AutoInstrumentation.NativeMethods could not be found.");
+        }
+
+        var startMethod = nativeMethodsType.GetMethod("SelectiveSamplingStart", BindingFlags.Static | BindingFlags.Public, null, [], null);
+        var stopMethod = nativeMethodsType!.GetMethod("SelectiveSamplingStop", BindingFlags.Static | BindingFlags.Public, null, [], null);
+
+        _startSamplingDelegate = (Action)Delegate.CreateDelegate(typeof(Action), startMethod!);
+        _stopSamplingDelegate = (Action)Delegate.CreateDelegate(typeof(Action), stopMethod!);
+
+        _supportingActivityAsyncLocal = new AsyncLocal<Activity?>(ActivityChanged);
+
+        Activity.CurrentChanged += ActivityCurrentChanged;
+    }
+
+    private static void ActivityChanged(AsyncLocalValueChangedArgs<Activity?> sender)
+    {
+        var currentActivity = sender.CurrentValue;
+        if (currentActivity != null)
+        {
+            _startSamplingDelegate?.Invoke();
+        }
+        else
+        {
+            _stopSamplingDelegate?.Invoke();
+        }
+    }
+
+    private static void ActivityCurrentChanged(object? sender, ActivityChangedEventArgs e)
+    {
+        if (_supportingActivityAsyncLocal != null)
+        {
+            _supportingActivityAsyncLocal.Value = e.Current;
+        }
+    }
+
+    private static async Task MethodA()
+    {
+        await MethodB();
+    }
+
+    private static async Task MethodB()
+    {
+        await MethodC();
+    }
+
+    private static async Task MethodC()
+    {
+        Thread.Sleep(200);
+        await Task.Yield();
+        Thread.Sleep(300);
+    }
+}

@@ -74,6 +74,7 @@ internal static class SampleNativeFormatParser
                         continue;
                     }
 
+                    // TODO: revisit
                     var threadSample = new ThreadSample(
                         sampleStartMillis,
                         traceIdHigh,
@@ -197,6 +198,68 @@ internal static class SampleNativeFormatParser
         return allocationSamples;
     }
 
+    internal static List<ThreadSample> ParseSelectiveSamplerSamples(byte[] buffer, int read)
+    {
+        var selectiveSamplerSamples = new List<ThreadSample>();
+        var position = 0;
+
+        uint threadIndex = 0;
+
+        try
+        {
+            while (position < read)
+            {
+                var operationCode = buffer[position++];
+
+                if (operationCode == OpCodes.SelectiveSample)
+                {
+                    var timestampMillis = ReadInt64(buffer, ref position);
+                    var threadName = ReadString(buffer, ref position);
+                    var traceIdHigh = ReadInt64(buffer, ref position);
+                    var traceIdLow = ReadInt64(buffer, ref position);
+                    var spanId = ReadInt64(buffer, ref position);
+
+                    var threadSample = new ThreadSample(
+                        timestampMillis,
+                        traceIdHigh,
+                        traceIdLow,
+                        spanId,
+                        threadName,
+                        threadIndex++);
+
+                    var code = ReadShort(buffer, ref position);
+
+                    // each selective sample has independently coded strings
+                    var codeDictionary = new Dictionary<int, string>();
+
+                    ReadStackFrames(code, threadSample, codeDictionary, buffer, ref position);
+                    if (threadName == BackgroundThreadName)
+                    {
+                        // TODO: add configuration option to include the sampler thread. By default remove it.
+                        continue;
+                    }
+
+                    selectiveSamplerSamples.Add(threadSample);
+                }
+                else
+                {
+                    position = read + 1;
+
+                    /* if (IsLogLevelDebugEnabled)
+                    {
+                        Log.Debug("Not expected operation code while parsing allocation sample: '{0}'. Operation will be ignored.", operationCode);
+                    } */
+                }
+            }
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e + "Unexpected error while parsing allocation samples.");
+        }
+
+        return selectiveSamplerSamples;
+    }
+
     private static string ReadString(byte[] buffer, ref int position)
     {
         var length = ReadShort(buffer, ref position);
@@ -302,5 +365,10 @@ internal static class SampleNativeFormatParser
         /// Marks the start of an allocation sample, see THREAD_SAMPLES_ALLOCATION_SAMPLE on native code.
         /// </summary>
         public const byte AllocationSample = 0x08;
+
+        /// <summary>
+        /// Marks the start of a selective thread sample, see kSelectiveSample on native code.
+        /// </summary>
+        public const byte SelectiveSample = 0x09;
     }
 }

@@ -50,6 +50,11 @@ EXTERN_C VOID STDAPICALLTYPE ConfigureContinuousProfiler(bool         threadSamp
                                                         allocationSamplingEnabled, maxMemorySamplesPerMinute);
 }
 
+EXTERN_C VOID STDAPICALLTYPE ConfigureSamplingSelectedThreads(unsigned int threadSamplingInterval)
+{
+    return trace::profiler->ConfigureSamplingSelectedThreads(threadSamplingInterval);
+}
+
 #ifndef _WIN32
 EXTERN_C void* dddlopen(const char* __file, int __mode)
 {

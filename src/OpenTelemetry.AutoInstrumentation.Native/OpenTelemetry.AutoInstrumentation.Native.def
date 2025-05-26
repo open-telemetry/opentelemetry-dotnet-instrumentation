@@ -10,4 +10,8 @@ EXPORTS
     ConfigureContinuousProfiler
     ContinuousProfilerReadThreadSamples
     ContinuousProfilerReadAllocationSamples
+    SelectiveSamplerReadThreadSamples
     ContinuousProfilerSetNativeContext
+    ConfigureSamplingSelectedThreads
+    SelectiveSamplingStart
+    SelectiveSamplingStop

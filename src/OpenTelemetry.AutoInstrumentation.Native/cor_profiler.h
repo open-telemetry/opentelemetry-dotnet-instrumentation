@@ -128,6 +128,7 @@ private:
     // Initialization methods
     //
     void InternalAddInstrumentation(WCHAR* id, CallTargetDefinition* items, int size, bool isDerived);
+    bool InitThreadSampler();
 
 public:
     CorProfiler() = default;
@@ -218,6 +219,11 @@ public:
     // Continuous Profiler methods
     //
     void ConfigureContinuousProfiler(bool threadSamplingEnabled, unsigned int threadSamplingInterval, bool allocationSamplingEnabled, unsigned int maxMemorySamplesPerMinute);
+
+    //
+    // Selective sampler methods
+    //
+    void ConfigureSamplingSelectedThreads(unsigned int thread_sampling_interval);
 
     friend class TracerMethodRewriter;
 };

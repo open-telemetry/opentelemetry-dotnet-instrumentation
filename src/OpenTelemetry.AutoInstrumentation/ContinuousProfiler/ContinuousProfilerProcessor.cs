@@ -15,14 +15,14 @@ internal class ContinuousProfilerProcessor : IDisposable
 
     private static readonly IOtelLogger Logger = OtelLogging.GetLogger();
 
-    // Additional async local required to get full set of notifications,
-    // see https://github.com/dotnet/runtime/issues/67276#issuecomment-1089877762
-    private readonly AsyncLocal<Activity?> _supportingActivityAsyncLocal;
-    private readonly Thread _thread;
     private readonly TimeSpan _exportInterval;
     private readonly TimeSpan _exportTimeout;
     private readonly BufferProcessor _bufferProcessor;
     private readonly ManualResetEventSlim _shutdownTrigger = new(false);
+    // Additional async local required to get full set of notifications,
+    // see https://github.com/dotnet/runtime/issues/67276#issuecomment-1089877762
+    private AsyncLocal<Activity?>? _supportingActivityAsyncLocal;
+    private Thread? _thread;
 
     public ContinuousProfilerProcessor(BufferProcessor bufferProcessor, TimeSpan exportInterval, TimeSpan exportTimeout)
     {
@@ -42,8 +42,11 @@ internal class ContinuousProfilerProcessor : IDisposable
         _exportTimeout = exportTimeout;
 
         _bufferProcessor = bufferProcessor;
-        _supportingActivityAsyncLocal = new AsyncLocal<Activity?>(ActivityChanged);
+    }
 
+    public void Start()
+    {
+        _supportingActivityAsyncLocal = new AsyncLocal<Activity?>(ActivityChanged);
         _thread = new Thread(SampleReadingThread)
         {
             Name = BackgroundThreadName,
@@ -52,9 +55,17 @@ internal class ContinuousProfilerProcessor : IDisposable
         _thread.Start();
     }
 
+    public void AddHandler(SampleType type, Action<byte[], int, CancellationToken> handler, TimeSpan exportTimeout)
+    {
+        _bufferProcessor.AddHandler(type, handler, exportTimeout);
+    }
+
     public void Activity_CurrentChanged(object? sender, ActivityChangedEventArgs e)
     {
-        _supportingActivityAsyncLocal.Value = e.Current;
+        if (_supportingActivityAsyncLocal != null)
+        {
+            _supportingActivityAsyncLocal.Value = e.Current;
+        }
     }
 
     public void Dispose()
@@ -62,7 +73,7 @@ internal class ContinuousProfilerProcessor : IDisposable
         var configuredGracePeriod = 2 * _exportTimeout;
         var finalGracePeriod = (int)Math.Min(configuredGracePeriod.TotalMilliseconds, 60000);
         _shutdownTrigger.Set();
-        if (!_thread.Join(finalGracePeriod))
+        if (_thread != null && !_thread.Join(finalGracePeriod))
         {
             Logger.Warning("Continuous profiler's exporter thread failed to terminate in required time.");
         }

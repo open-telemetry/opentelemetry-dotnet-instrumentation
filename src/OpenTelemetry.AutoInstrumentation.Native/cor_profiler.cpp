@@ -1169,6 +1169,32 @@ void CorProfiler::InternalAddInstrumentation(WCHAR* id, CallTargetDefinition* it
     }
 }
 
+bool CorProfiler::InitThreadSampler()
+{
+    DWORD pdvEventsLow;
+    DWORD pdvEventsHigh;
+    auto  hr = this->info12_->GetEventMask2(&pdvEventsLow, &pdvEventsHigh);
+    if (FAILED(hr))
+    {
+        Logger::Warn("ConfigureContinuousProfiler: Failed to take event masks for continuous profiler.");
+        return false;
+    }
+
+    pdvEventsLow |= COR_PRF_MONITOR_THREADS | COR_PRF_ENABLE_STACK_SNAPSHOT;
+
+    hr = this->info12_->SetEventMask2(pdvEventsLow, pdvEventsHigh);
+    if (FAILED(hr))
+    {
+        Logger::Warn("ConfigureContinuousProfiler: Failed to set event masks for continuous profiler.");
+        return false;
+    }
+
+    this->continuousProfiler = new continuous_profiler::ContinuousProfiler();
+    this->continuousProfiler->SetGlobalInfo12(this->info12_);
+    Logger::Info("ConfigureContinuousProfiler: Events masks configured for continuous profiler");
+    return true;
+}
+
 void CorProfiler::ConfigureContinuousProfiler(bool         threadSamplingEnabled,
                                               unsigned int threadSamplingInterval,
                                               bool         allocationSamplingEnabled,
@@ -1185,37 +1211,39 @@ void CorProfiler::ConfigureContinuousProfiler(bool         threadSamplingEnabled
         return;
     }
 
-    DWORD pdvEventsLow;
-    DWORD pdvEventsHigh;
-    auto  hr = this->info12_->GetEventMask2(&pdvEventsLow, &pdvEventsHigh);
-    if (FAILED(hr))
+    if (!InitThreadSampler())
     {
-        Logger::Warn("ConfigureContinuousProfiler: Failed to take event masks for continuous profiler.");
+        Logger::Warn("ContinuousProfiler: unable to init sampler.");
         return;
     }
-
-    pdvEventsLow |= COR_PRF_MONITOR_THREADS | COR_PRF_ENABLE_STACK_SNAPSHOT;
-
-    hr = this->info12_->SetEventMask2(pdvEventsLow, pdvEventsHigh);
-    if (FAILED(hr))
-    {
-        Logger::Warn("ConfigureContinuousProfiler: Failed to set event masks for continuous profiler.");
-        return;
-    }
-
-    this->continuousProfiler = new continuous_profiler::ContinuousProfiler();
-    this->continuousProfiler->SetGlobalInfo12(this->info12_);
-    Logger::Info("ConfigureContinuousProfiler: Events masks configured for continuous profiler");
 
     if (threadSamplingEnabled)
     {
-        this->continuousProfiler->StartThreadSampling(threadSamplingInterval);
+        this->continuousProfiler->threadSamplingInterval = threadSamplingInterval;
+        Logger::Info("ContinuousProfiler::StartThreadSampling");
+        this->continuousProfiler->StartThreadSampling();
     }
 
     if (allocationSamplingEnabled)
     {
         this->continuousProfiler->StartAllocationSampling(maxMemorySamplesPerMinute);
     }
+}
+
+void CorProfiler::ConfigureSamplingSelectedThreads(unsigned int threadSamplingInterval)
+{
+    // If ContinuousProfiling is not enabled, initialize thread sampler.
+    if (this->continuousProfiler == nullptr)
+    {
+        if (!InitThreadSampler())
+        {
+            Logger::Warn("SelectiveProfiler: unable to init sampler.");
+            return;
+        }
+        this->continuousProfiler->StartThreadSampling();
+    }
+    this->continuousProfiler->selectedThreadsSamplingInterval = threadSamplingInterval;
+    Logger::Info("SelectiveProfiler::StartThreadSampling");
 }
 
 //

@@ -104,13 +104,7 @@ internal static class Instrumentation
 
             if (profilerEnabled)
             {
-                var (threadSamplingEnabled, threadSamplingInterval, allocationSamplingEnabled, maxMemorySamplesPerMinute, exportInterval, exportTimeout, continuousProfilerExporter) = _pluginManager.GetFirstContinuousConfiguration();
-                Logger.Debug($"Continuous profiling configuration: Thread sampling enabled: {threadSamplingEnabled}, thread sampling interval: {threadSamplingInterval}, allocation sampling enabled: {allocationSamplingEnabled}, max memory samples per minute: {maxMemorySamplesPerMinute}, export interval: {exportInterval}, export timeout: {exportTimeout}, continuous profiler exporter: {continuousProfilerExporter.GetType()}");
-
-                if (threadSamplingEnabled || allocationSamplingEnabled)
-                {
-                    InitializeContinuousProfiling(continuousProfilerExporter, threadSamplingEnabled, allocationSamplingEnabled, threadSamplingInterval, maxMemorySamplesPerMinute, exportInterval, exportTimeout);
-                }
+                InitializeSampling();
             }
             else
             {
@@ -212,28 +206,55 @@ internal static class Instrumentation
         }
     }
 
-    private static LoggerProvider? InitializeLoggerProvider()
+#if NET
+    private static void InitializeSampling()
     {
-        // ILogger bridge is initialized using ILogger-specific extension methods in LoggerInitializer class.
-        // That extension methods sets up its own LogProvider.
-        if (LogSettings.Value.EnableLog4NetBridge && LogSettings.Value.LogsEnabled && LogSettings.Value.EnabledInstrumentations.Contains(LogInstrumentation.Log4Net))
-        {
-            // TODO: Replace reflection usage when Logs Api is made public in non-rc builds.
-            // Sdk.CreateLoggerProviderBuilder()
-            var createLoggerProviderBuilderMethod = typeof(Sdk).GetMethod("CreateLoggerProviderBuilder", BindingFlags.Static | BindingFlags.NonPublic)!;
-            var loggerProviderBuilder = createLoggerProviderBuilderMethod.Invoke(null, null) as LoggerProviderBuilder;
+        var (threadSamplingEnabled, threadSamplingInterval, allocationSamplingEnabled, maxMemorySamplesPerMinute, exportInterval, exportTimeout, continuousProfilerExporter) = _pluginManager!.GetFirstContinuousConfiguration();
+        Logger.Debug($"Continuous profiling configuration: Thread sampling enabled: {threadSamplingEnabled}, thread sampling interval: {threadSamplingInterval}, allocation sampling enabled: {allocationSamplingEnabled}, max memory samples per minute: {maxMemorySamplesPerMinute}, export interval: {exportInterval}, export timeout: {exportTimeout}, continuous profiler exporter: {continuousProfilerExporter.GetType()}");
 
-            // TODO: plugins support
-            var loggerProvider = loggerProviderBuilder!
-                .SetResourceBuilder(ResourceConfigurator.CreateResourceBuilder(GeneralSettings.Value.EnabledResourceDetectors))
-                .UseEnvironmentVariables(LazyInstrumentationLoader, LogSettings.Value, _pluginManager!)
-                .Build();
-            Logger.Information("OpenTelemetry logger provider initialized.");
-            return loggerProvider;
+        if (threadSamplingEnabled || allocationSamplingEnabled)
+        {
+            InitializeContinuousProfiling(continuousProfilerExporter, threadSamplingEnabled, allocationSamplingEnabled, threadSamplingInterval, maxMemorySamplesPerMinute, exportInterval, exportTimeout);
         }
 
-        return null;
+        var (samplingInterval, configuredExportInterval, configuredExportTimeout, exporter) = _pluginManager.GetFirstSelectiveSamplingConfiguration();
+        // TODO: Add logging
+        if (samplingInterval.HasValue)
+        {
+            // TODO: add validation
+            InitializeSamplingSelectedThreads(exporter, samplingInterval.Value, configuredExportInterval!.Value, configuredExportTimeout!.Value);
+        }
+
+        _profilerProcessor?.Start();
     }
+
+    private static void InitializeSamplingSelectedThreads(
+        object? exporter,
+        uint samplingInterval,
+        TimeSpan exportInterval,
+        TimeSpan exportTimeout)
+    {
+        NativeMethods.ConfigureSamplingSelectedThreads(samplingInterval);
+
+        // TODO: rename a method
+        var selectiveSampleExportMethod = exporter!.GetType().GetMethod("Export");
+
+        if (selectiveSampleExportMethod == null)
+        {
+            Logger.Warning("Exporter does not have Export method. Selective sampler initialization failed.");
+            return;
+        }
+
+        // Continuous profiling not configured
+        if (_profilerProcessor == null)
+        {
+            InitializeBufferProcessing(exportInterval, exportTimeout);
+        }
+
+        var handler = selectiveSampleExportMethod.CreateDelegate<Action<byte[], int, CancellationToken>>(exporter!);
+        _profilerProcessor!.AddHandler(SampleType.SelectedThreads, handler, exportTimeout);
+    }
+#endif
 
 #if NET
     private static void InitializeContinuousProfiling(
@@ -265,11 +286,49 @@ internal static class Instrumentation
         var threadSamplesMethod = exportThreadSamplesMethod.CreateDelegate<Action<byte[], int, CancellationToken>>(continuousProfilerExporter);
         var allocationSamplesMethod = exportAllocationSamplesMethod.CreateDelegate<Action<byte[], int, CancellationToken>>(continuousProfilerExporter);
 
-        var bufferProcessor = new BufferProcessor(threadSamplingEnabled, allocationSamplingEnabled, threadSamplesMethod, allocationSamplesMethod, exportTimeout);
+        InitializeBufferProcessing(exportInterval, exportTimeout);
+
+        if (threadSamplingEnabled)
+        {
+            _profilerProcessor!.AddHandler(SampleType.Continuous, threadSamplesMethod, exportTimeout);
+        }
+
+        if (allocationSamplingEnabled)
+        {
+            _profilerProcessor!.AddHandler(SampleType.Allocation, allocationSamplesMethod, exportTimeout);
+        }
+    }
+
+    private static void InitializeBufferProcessing(TimeSpan exportInterval, TimeSpan exportTimeout)
+    {
+        var bufferProcessor = new BufferProcessor();
         _profilerProcessor = new ContinuousProfilerProcessor(bufferProcessor, exportInterval, exportTimeout);
         Activity.CurrentChanged += _profilerProcessor.Activity_CurrentChanged;
     }
 #endif
+
+    private static LoggerProvider? InitializeLoggerProvider()
+    {
+        // ILogger bridge is initialized using ILogger-specific extension methods in LoggerInitializer class.
+        // That extension methods sets up its own LogProvider.
+        if (LogSettings.Value.EnableLog4NetBridge && LogSettings.Value.LogsEnabled && LogSettings.Value.EnabledInstrumentations.Contains(LogInstrumentation.Log4Net))
+        {
+            // TODO: Replace reflection usage when Logs Api is made public in non-rc builds.
+            // Sdk.CreateLoggerProviderBuilder()
+            var createLoggerProviderBuilderMethod = typeof(Sdk).GetMethod("CreateLoggerProviderBuilder", BindingFlags.Static | BindingFlags.NonPublic)!;
+            var loggerProviderBuilder = createLoggerProviderBuilderMethod.Invoke(null, null) as LoggerProviderBuilder;
+
+            // TODO: plugins support
+            var loggerProvider = loggerProviderBuilder!
+                .SetResourceBuilder(ResourceConfigurator.CreateResourceBuilder(GeneralSettings.Value.EnabledResourceDetectors))
+                .UseEnvironmentVariables(LazyInstrumentationLoader, LogSettings.Value, _pluginManager!)
+                .Build();
+            Logger.Information("OpenTelemetry logger provider initialized.");
+            return loggerProvider;
+        }
+
+        return null;
+    }
 
     private static void RegisterDirectBytecodeInstrumentations(InstrumentationDefinitions.Payload payload)
     {

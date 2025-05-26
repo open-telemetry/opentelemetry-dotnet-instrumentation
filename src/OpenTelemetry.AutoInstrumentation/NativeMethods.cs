@@ -56,6 +56,18 @@ internal static class NativeMethods
         }
     }
 
+    public static void ConfigureSamplingSelectedThreads(uint threadSamplingInterval)
+    {
+        if (IsWindows)
+        {
+            Windows.ConfigureSamplingSelectedThreads(threadSamplingInterval);
+        }
+        else
+        {
+            NonWindows.ConfigureSamplingSelectedThreads(threadSamplingInterval);
+        }
+    }
+
     public static int ContinuousProfilerReadThreadSamples(int len, byte[] buf)
     {
         return IsWindows ? Windows.ContinuousProfilerReadThreadSamples(len, buf) : NonWindows.ContinuousProfilerReadThreadSamples(len, buf);
@@ -64,6 +76,11 @@ internal static class NativeMethods
     public static int ContinuousProfilerReadAllocationSamples(int len, byte[] buf)
     {
         return IsWindows ? Windows.ContinuousProfilerReadAllocationSamples(len, buf) : NonWindows.ContinuousProfilerReadAllocationSamples(len, buf);
+    }
+
+    public static int SelectiveSamplerReadThreadSamples(int len, byte[] buf)
+    {
+        return IsWindows ? Windows.SelectiveSamplerReadThreadSamples(len, buf) : NonWindows.SelectiveSamplerReadThreadSamples(len, buf);
     }
 
     public static void ContinuousProfilerSetNativeContext(ulong traceIdHigh, ulong traceIdLow, ulong spanId)
@@ -75,6 +92,30 @@ internal static class NativeMethods
         else
         {
             NonWindows.ContinuousProfilerSetNativeContext(traceIdHigh, traceIdLow, spanId);
+        }
+    }
+
+    public static void SelectiveSamplingStart()
+    {
+        if (IsWindows)
+        {
+            Windows.SelectiveSamplingStart();
+        }
+        else
+        {
+            NonWindows.SelectiveSamplingStart();
+        }
+    }
+
+    public static void SelectiveSamplingStop()
+    {
+        if (IsWindows)
+        {
+            Windows.SelectiveSamplingStop();
+        }
+        else
+        {
+            NonWindows.SelectiveSamplingStop();
         }
     }
 #endif
@@ -92,6 +133,9 @@ internal static class NativeMethods
         [DllImport("OpenTelemetry.AutoInstrumentation.Native.dll")]
         public static extern void ConfigureContinuousProfiler(bool threadSamplingEnabled, uint threadSamplingInterval, bool allocationSamplingEnabled, uint maxMemorySamplesPerMinute);
 
+        [DllImport("OpenTelemetry.AutoInstrumentation.Native.dll")]
+        public static extern void ConfigureSamplingSelectedThreads(uint threadSamplingInterval);
+
 #if NET
 
         [DllImport("OpenTelemetry.AutoInstrumentation.Native.dll")]
@@ -101,8 +145,18 @@ internal static class NativeMethods
         public static extern int ContinuousProfilerReadAllocationSamples(int len, byte[] buf);
 
         [DllImport("OpenTelemetry.AutoInstrumentation.Native.dll")]
+        public static extern int SelectiveSamplerReadThreadSamples(int len, byte[] buf);
+
+        [DllImport("OpenTelemetry.AutoInstrumentation.Native.dll")]
         public static extern void ContinuousProfilerSetNativeContext(ulong traceIdHigh, ulong traceIdLow, ulong spanId);
+
+        [DllImport("OpenTelemetry.AutoInstrumentation.Native.dll")]
+        public static extern void SelectiveSamplingStart();
+
+        [DllImport("OpenTelemetry.AutoInstrumentation.Native.dll")]
+        public static extern void SelectiveSamplingStop();
 #endif
+
     }
 
     // assume .NET Core if not running on Windows
@@ -117,6 +171,9 @@ internal static class NativeMethods
         [DllImport("OpenTelemetry.AutoInstrumentation.Native")]
         public static extern void ConfigureContinuousProfiler(bool threadSamplingEnabled, uint threadSamplingInterval, bool allocationSamplingEnabled, uint maxMemorySamplesPerMinute);
 
+        [DllImport("OpenTelemetry.AutoInstrumentation.Native")]
+        public static extern void ConfigureSamplingSelectedThreads(uint threadSamplingInterval);
+
 #if NET
         [DllImport("OpenTelemetry.AutoInstrumentation.Native")]
         public static extern int ContinuousProfilerReadThreadSamples(int len, byte[] buf);
@@ -125,7 +182,16 @@ internal static class NativeMethods
         public static extern int ContinuousProfilerReadAllocationSamples(int len, byte[] buf);
 
         [DllImport("OpenTelemetry.AutoInstrumentation.Native")]
+        public static extern int SelectiveSamplerReadThreadSamples(int len, byte[] buf);
+
+        [DllImport("OpenTelemetry.AutoInstrumentation.Native")]
         public static extern void ContinuousProfilerSetNativeContext(ulong traceIdHigh, ulong traceIdLow, ulong spanId);
+
+        [DllImport("OpenTelemetry.AutoInstrumentation.Native")]
+        public static extern void SelectiveSamplingStart();
+
+        [DllImport("OpenTelemetry.AutoInstrumentation.Native")]
+        public static extern void SelectiveSamplingStop();
 #endif
     }
 }
