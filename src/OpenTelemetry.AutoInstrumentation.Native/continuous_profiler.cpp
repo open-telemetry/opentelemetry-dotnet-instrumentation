@@ -267,12 +267,14 @@ namespace continuous_profiler
  */
 
 // defined op codes
-constexpr auto kThreadSamplesStartBatch  = 0x01;
-constexpr auto kThreadSamplesStartSample = 0x02;
-constexpr auto kThreadSamplesEndBatch    = 0x06;
-constexpr auto kThreadSamplesFinalStats  = 0x07;
-constexpr auto kAllocationSample         = 0x08;
-constexpr auto kSelectedThreadSample     = 0x09;
+constexpr auto kThreadSamplesStartBatch         = 0x01;
+constexpr auto kThreadSamplesStartSample        = 0x02;
+constexpr auto kThreadSamplesEndBatch           = 0x06;
+constexpr auto kThreadSamplesFinalStats         = 0x07;
+constexpr auto kAllocationSample                = 0x08;
+constexpr auto kSelectedThreadSample            = 0x09;
+constexpr auto kSelectedThreadsStartBatch       = 0x0A;
+constexpr auto kSelectedThreadsEndBatch         = 0x0B;
 
 constexpr auto kCurrentThreadSamplesBufferVersion = 1;
 
@@ -296,6 +298,18 @@ void ThreadSamplesBuffer::StartBatch() const
     WriteByte(kThreadSamplesStartBatch);
     WriteInt(kCurrentThreadSamplesBufferVersion);
     WriteCurrentTimeMillis();
+}
+
+void ThreadSamplesBuffer::StartSelectedThreadsBatch() const
+{
+    CHECK_SAMPLES_BUFFER_LENGTH()
+    WriteByte(kSelectedThreadsStartBatch);
+}
+
+void ThreadSamplesBuffer::EndSelectedThreadsBatch() const
+{
+    CHECK_SAMPLES_BUFFER_LENGTH()
+    WriteByte(kSelectedThreadsEndBatch);
 }
 
 void ThreadSamplesBuffer::StartSample(ThreadID                   id,
@@ -757,10 +771,11 @@ void CaptureThreadSamplesForSelectedThreads(ContinuousProfiler* prof, ICorProfil
 
     std::vector<unsigned char> localBytes;
     localBytes.reserve(kSamplesBufferDefaultSize);
-    ThreadSamplesBuffer localBuf = ThreadSamplesBuffer(&localBytes);
+    auto localBuf = ThreadSamplesBuffer(&localBytes);
 
-    DoStackSnapshotParams dssp = DoStackSnapshotParams(prof, &localBuf);
+    auto dssp = DoStackSnapshotParams(prof, &localBuf);
 
+    localBuf.StartSelectedThreadsBatch();
     for (auto thread_id : selected_sampling_threads_set)
     {
         prof->stats_.num_threads++;
@@ -786,6 +801,7 @@ void CaptureThreadSamplesForSelectedThreads(ContinuousProfiler* prof, ICorProfil
         }
         localBuf.EndSample();
     }
+    localBuf.EndSelectedThreadsBatch();
     // TODO: write out stats
     AppendToSelectedThreadsSampleBuffer(static_cast<int32_t>(localBytes.size()), localBytes.data());
 }

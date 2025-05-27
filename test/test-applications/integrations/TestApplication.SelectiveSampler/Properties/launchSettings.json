@@ -12,8 +12,8 @@
         "DOTNET_SHARED_STORE": "$(SolutionDir)bin\\tracer-home\\store",
         "DOTNET_STARTUP_HOOKS": "$(SolutionDir)bin\\tracer-home\\net\\OpenTelemetry.AutoInstrumentation.StartupHook.dll",
         "OTEL_DOTNET_AUTO_HOME": "$(SolutionDir)bin\\tracer-home",
-        "OTEL_DOTNET_AUTO_PLUGINS": "TestApplication.SelectiveProfiler.Plugins.SelectiveSamplerPlugin, TestApplication.SelectiveProfiler, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null",
-        "OTEL_DOTNET_AUTO_TRACES_ADDITIONAL_SOURCES": "TestApplication.SelectiveProfiler",
+        "OTEL_DOTNET_AUTO_PLUGINS": "TestApplication.SelectiveSampler.Plugins.SelectiveSamplerPlugin, TestApplication.SelectiveSampler, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null",
+        "OTEL_DOTNET_AUTO_TRACES_ADDITIONAL_SOURCES": "TestApplication.SelectiveSampler",
         "OTEL_EXPORTER_OTLP_ENDPOINT": "http://localhost:4318"
       }
     }

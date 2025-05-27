@@ -34,17 +34,16 @@ internal class BufferProcessor
                 return;
             }
 
-            if (_sampleHandlers.TryGetValue(sampleType, out var handlerConfig))
+            var handlerConfig = _sampleHandlers[sampleType];
+
+            using var cts = new CancellationTokenSource(handlerConfig.ExportTimeout);
+            try
             {
-                using var cts = new CancellationTokenSource(handlerConfig.ExportTimeout);
-                try
-                {
-                    handlerConfig.Handler(_buffer, read, cts.Token);
-                }
-                catch (Exception e)
-                {
-                    Logger.Warning(e, $"Failed to process {sampleType} samples.");
-                }
+                handlerConfig.Handler(_buffer, read, cts.Token);
+            }
+            catch (Exception e)
+            {
+                Logger.Warning(e, $"Failed to process {sampleType} samples.");
             }
         }
     }

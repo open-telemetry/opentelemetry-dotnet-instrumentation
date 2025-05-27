@@ -96,6 +96,8 @@ public:
     explicit ThreadSamplesBuffer(std::vector<unsigned char>* buf);
     ~ThreadSamplesBuffer();
     void StartBatch() const;
+    void StartSelectedThreadsBatch() const;
+    void EndSelectedThreadsBatch() const;
     void StartSample(ThreadID id, const ThreadState* state, const thread_span_context& span_context) const;
     void StartSampleForSelectedThread(const ThreadState* state, const thread_span_context& span_context) const;
     void RecordFrame(FunctionID fid, const trace::WSTRING& frame);

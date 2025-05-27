@@ -214,7 +214,7 @@ internal static class Instrumentation
 
         if (threadSamplingEnabled || allocationSamplingEnabled)
         {
-            InitializeContinuousProfiling(continuousProfilerExporter, threadSamplingEnabled, allocationSamplingEnabled, threadSamplingInterval, maxMemorySamplesPerMinute, exportInterval, exportTimeout);
+            InitializeContinuousProfiling(continuousProfilerExporter, threadSamplingEnabled, allocationSamplingEnabled, exportInterval, exportTimeout);
         }
 
         var (samplingInterval, configuredExportInterval, configuredExportTimeout, exporter) = _pluginManager.GetFirstSelectiveSamplingConfiguration();
@@ -222,7 +222,12 @@ internal static class Instrumentation
         if (samplingInterval.HasValue)
         {
             // TODO: add validation
-            InitializeSamplingSelectedThreads(exporter, samplingInterval.Value, configuredExportInterval!.Value, configuredExportTimeout!.Value);
+            InitializeSamplingSelectedThreads(exporter, configuredExportInterval!.Value, configuredExportTimeout!.Value);
+        }
+
+        if (threadSamplingEnabled || allocationSamplingEnabled || samplingInterval.HasValue)
+        {
+            NativeMethods.ConfigureNativeContinuousProfiler(threadSamplingEnabled, threadSamplingInterval, allocationSamplingEnabled, maxMemorySamplesPerMinute, samplingInterval ?? 0);
         }
 
         _profilerProcessor?.Start();
@@ -230,12 +235,9 @@ internal static class Instrumentation
 
     private static void InitializeSamplingSelectedThreads(
         object? exporter,
-        uint samplingInterval,
         TimeSpan exportInterval,
         TimeSpan exportTimeout)
     {
-        NativeMethods.ConfigureSamplingSelectedThreads(samplingInterval);
-
         // TODO: rename a method
         var selectiveSampleExportMethod = exporter!.GetType().GetMethod("Export");
 
@@ -261,8 +263,6 @@ internal static class Instrumentation
         object continuousProfilerExporter,
         bool threadSamplingEnabled,
         bool allocationSamplingEnabled,
-        uint threadSamplingInterval,
-        uint maxMemorySamplesPerMinute,
         TimeSpan exportInterval,
         TimeSpan exportTimeout)
     {
@@ -282,7 +282,6 @@ internal static class Instrumentation
             return;
         }
 
-        NativeMethods.ConfigureNativeContinuousProfiler(threadSamplingEnabled, threadSamplingInterval, allocationSamplingEnabled, maxMemorySamplesPerMinute);
         var threadSamplesMethod = exportThreadSamplesMethod.CreateDelegate<Action<byte[], int, CancellationToken>>(continuousProfilerExporter);
         var allocationSamplesMethod = exportAllocationSamplesMethod.CreateDelegate<Action<byte[], int, CancellationToken>>(continuousProfilerExporter);
 

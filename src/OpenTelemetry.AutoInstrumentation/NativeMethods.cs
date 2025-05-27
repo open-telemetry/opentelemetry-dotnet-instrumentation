@@ -44,27 +44,15 @@ internal static class NativeMethods
     }
 
 #if NET
-    public static void ConfigureNativeContinuousProfiler(bool threadSamplingEnabled, uint threadSamplingInterval, bool allocationSamplingEnabled, uint maxMemorySamplesPerMinute)
+    public static void ConfigureNativeContinuousProfiler(bool threadSamplingEnabled, uint threadSamplingInterval, bool allocationSamplingEnabled, uint maxMemorySamplesPerMinute, uint selectedThreadSamplingInterval)
     {
         if (IsWindows)
         {
-            Windows.ConfigureContinuousProfiler(threadSamplingEnabled, threadSamplingInterval, allocationSamplingEnabled, maxMemorySamplesPerMinute);
+            Windows.ConfigureContinuousProfiler(threadSamplingEnabled, threadSamplingInterval, allocationSamplingEnabled, maxMemorySamplesPerMinute, selectedThreadSamplingInterval);
         }
         else
         {
-            NonWindows.ConfigureContinuousProfiler(threadSamplingEnabled, threadSamplingInterval, allocationSamplingEnabled, maxMemorySamplesPerMinute);
-        }
-    }
-
-    public static void ConfigureSamplingSelectedThreads(uint threadSamplingInterval)
-    {
-        if (IsWindows)
-        {
-            Windows.ConfigureSamplingSelectedThreads(threadSamplingInterval);
-        }
-        else
-        {
-            NonWindows.ConfigureSamplingSelectedThreads(threadSamplingInterval);
+            NonWindows.ConfigureContinuousProfiler(threadSamplingEnabled, threadSamplingInterval, allocationSamplingEnabled, maxMemorySamplesPerMinute, selectedThreadSamplingInterval);
         }
     }
 
@@ -131,10 +119,7 @@ internal static class NativeMethods
         public static extern void AddDerivedInstrumentations([MarshalAs(UnmanagedType.LPWStr)] string id, [In] NativeCallTargetDefinition[] methodArrays, int size);
 
         [DllImport("OpenTelemetry.AutoInstrumentation.Native.dll")]
-        public static extern void ConfigureContinuousProfiler(bool threadSamplingEnabled, uint threadSamplingInterval, bool allocationSamplingEnabled, uint maxMemorySamplesPerMinute);
-
-        [DllImport("OpenTelemetry.AutoInstrumentation.Native.dll")]
-        public static extern void ConfigureSamplingSelectedThreads(uint threadSamplingInterval);
+        public static extern void ConfigureContinuousProfiler(bool threadSamplingEnabled, uint threadSamplingInterval, bool allocationSamplingEnabled, uint maxMemorySamplesPerMinute, uint selectedThreadSamplingInterval);
 
 #if NET
 
@@ -169,10 +154,7 @@ internal static class NativeMethods
         public static extern void AddDerivedInstrumentations([MarshalAs(UnmanagedType.LPWStr)] string id, [In] NativeCallTargetDefinition[] methodArrays, int size);
 
         [DllImport("OpenTelemetry.AutoInstrumentation.Native")]
-        public static extern void ConfigureContinuousProfiler(bool threadSamplingEnabled, uint threadSamplingInterval, bool allocationSamplingEnabled, uint maxMemorySamplesPerMinute);
-
-        [DllImport("OpenTelemetry.AutoInstrumentation.Native")]
-        public static extern void ConfigureSamplingSelectedThreads(uint threadSamplingInterval);
+        public static extern void ConfigureContinuousProfiler(bool threadSamplingEnabled, uint threadSamplingInterval, bool allocationSamplingEnabled, uint maxMemorySamplesPerMinute, uint selectedThreadSamplingInterval);
 
 #if NET
         [DllImport("OpenTelemetry.AutoInstrumentation.Native")]

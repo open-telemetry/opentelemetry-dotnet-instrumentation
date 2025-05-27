@@ -205,13 +205,20 @@ internal static class SampleNativeFormatParser
 
         uint threadIndex = 0;
 
+        var codeDictionary = new Dictionary<int, string>();
+
         try
         {
             while (position < read)
             {
                 var operationCode = buffer[position++];
 
-                if (operationCode == OpCodes.SelectiveSample)
+                if (operationCode == OpCodes.SelectiveSampleBatchStart)
+                {
+                    // each batch has independently coded strings
+                    codeDictionary.Clear();
+                }
+                else if (operationCode == OpCodes.SelectiveSample)
                 {
                     var timestampMillis = ReadInt64(buffer, ref position);
                     var threadName = ReadString(buffer, ref position);
@@ -229,32 +236,21 @@ internal static class SampleNativeFormatParser
 
                     var code = ReadShort(buffer, ref position);
 
-                    // each selective sample has independently coded strings
-                    var codeDictionary = new Dictionary<int, string>();
-
                     ReadStackFrames(code, threadSample, codeDictionary, buffer, ref position);
-                    if (threadName == BackgroundThreadName)
-                    {
-                        // TODO: add configuration option to include the sampler thread. By default remove it.
-                        continue;
-                    }
-
                     selectiveSamplerSamples.Add(threadSample);
+                }
+                else if (operationCode == OpCodes.SelectiveSampleBatchEnd)
+                {
                 }
                 else
                 {
                     position = read + 1;
-
-                    /* if (IsLogLevelDebugEnabled)
-                    {
-                        Log.Debug("Not expected operation code while parsing allocation sample: '{0}'. Operation will be ignored.", operationCode);
-                    } */
                 }
             }
         }
         catch (Exception e)
         {
-            Console.WriteLine(e + "Unexpected error while parsing allocation samples.");
+            Console.WriteLine(e + "Unexpected error while parsing selected threads samples.");
         }
 
         return selectiveSamplerSamples;
@@ -370,5 +366,15 @@ internal static class SampleNativeFormatParser
         /// Marks the start of a selective thread sample, see kSelectiveSample on native code.
         /// </summary>
         public const byte SelectiveSample = 0x09;
+
+        /// <summary>
+        /// Marks the start of a selective thread samples batch, see kSelectedThreadsStartBatch on native code.
+        /// </summary>
+        public const byte SelectiveSampleBatchStart = 0x0A;
+
+        /// <summary>
+        /// Marks the end of a selective thread samples batch, see kSelectedThreadsEndBatch on native code.
+        /// </summary>
+        public const byte SelectiveSampleBatchEnd = 0x0B;
     }
 }

@@ -218,12 +218,7 @@ public:
     //
     // Continuous Profiler methods
     //
-    void ConfigureContinuousProfiler(bool threadSamplingEnabled, unsigned int threadSamplingInterval, bool allocationSamplingEnabled, unsigned int maxMemorySamplesPerMinute);
-
-    //
-    // Selective sampler methods
-    //
-    void ConfigureSamplingSelectedThreads(unsigned int thread_sampling_interval);
+    void ConfigureContinuousProfiler(bool threadSamplingEnabled, unsigned int threadSamplingInterval, bool allocationSamplingEnabled, unsigned int maxMemorySamplesPerMinute, unsigned int selectedThreadsSamplingInterval);
 
     friend class TracerMethodRewriter;
 };

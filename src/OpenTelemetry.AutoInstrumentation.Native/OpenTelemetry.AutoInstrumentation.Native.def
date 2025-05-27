@@ -12,6 +12,5 @@ EXPORTS
     ContinuousProfilerReadAllocationSamples
     SelectiveSamplerReadThreadSamples
     ContinuousProfilerSetNativeContext
-    ConfigureSamplingSelectedThreads
     SelectiveSamplingStart
     SelectiveSamplingStop
