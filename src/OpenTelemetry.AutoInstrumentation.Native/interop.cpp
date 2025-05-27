@@ -47,12 +47,9 @@ EXTERN_C VOID STDAPICALLTYPE ConfigureContinuousProfiler(bool         threadSamp
                                                          unsigned int maxMemorySamplesPerMinute,
                                                          unsigned int selectedThreadSamplingInterval)
 {
-    return trace::profiler->ConfigureContinuousProfiler(
-        threadSamplingEnabled,
-        threadSamplingInterval,
-        allocationSamplingEnabled,
-        maxMemorySamplesPerMinute,
-        selectedThreadSamplingInterval);
+    return trace::profiler->ConfigureContinuousProfiler(threadSamplingEnabled, threadSamplingInterval,
+                                                        allocationSamplingEnabled, maxMemorySamplesPerMinute,
+                                                        selectedThreadSamplingInterval);
 }
 
 #ifndef _WIN32

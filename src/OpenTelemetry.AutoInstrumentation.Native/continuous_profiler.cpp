@@ -267,14 +267,14 @@ namespace continuous_profiler
  */
 
 // defined op codes
-constexpr auto kThreadSamplesStartBatch         = 0x01;
-constexpr auto kThreadSamplesStartSample        = 0x02;
-constexpr auto kThreadSamplesEndBatch           = 0x06;
-constexpr auto kThreadSamplesFinalStats         = 0x07;
-constexpr auto kAllocationSample                = 0x08;
-constexpr auto kSelectedThreadSample            = 0x09;
-constexpr auto kSelectedThreadsStartBatch       = 0x0A;
-constexpr auto kSelectedThreadsEndBatch         = 0x0B;
+constexpr auto kThreadSamplesStartBatch   = 0x01;
+constexpr auto kThreadSamplesStartSample  = 0x02;
+constexpr auto kThreadSamplesEndBatch     = 0x06;
+constexpr auto kThreadSamplesFinalStats   = 0x07;
+constexpr auto kAllocationSample          = 0x08;
+constexpr auto kSelectedThreadSample      = 0x09;
+constexpr auto kSelectedThreadsStartBatch = 0x0A;
+constexpr auto kSelectedThreadsEndBatch   = 0x0B;
 
 constexpr auto kCurrentThreadSamplesBufferVersion = 1;
 
