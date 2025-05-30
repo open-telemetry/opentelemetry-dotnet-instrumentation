@@ -1,1 +1,1 @@
-FROM redis:8.0.1@sha256:b3ad79880c88e302deb5e0fed6cee3e90c0031eb90cd936b01ef2f83ff5b3ff2
+FROM redis:8.0.2@sha256:dbf3e4b6ad3ece9c733282ff3f16942ed754fdc4ea12332154f30a9a9b88c3af
