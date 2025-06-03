@@ -1,4 +1,4 @@
-FROM mcr.microsoft.com/dotnet/sdk:9.0.300-bookworm-slim@sha256:90872f8e7f1fd2b93989b81fb7f152c3bef4fe817470a3227abaa18c873dba60
+FROM mcr.microsoft.com/dotnet/sdk:9.0.300-bookworm-slim@sha256:c5b188baf837b0180a14f988815b9cc7a55b836dd6cbe1b6e6523cf3098faaa8
 
 RUN apt-get update && \
     apt-get install -y \
@@ -7,7 +7,7 @@ RUN apt-get update && \
         make
 
 # Install older sdks using the install script as there are no arm64 SDK packages.
-RUN curl -sSL https://dot.net/v1/dotnet-install.sh --output dotnet-install.sh \
+RUN curl -sSL --retry 5 https://dot.net/v1/dotnet-install.sh --output dotnet-install.sh \
     && echo "SHA256: $(sha256sum dotnet-install.sh)" \
     && echo "19b0a7890c371201b944bf0f8cdbb6460d053d63ddbea18cfed3e4199769ce17  dotnet-install.sh" | sha256sum -c \
     && chmod +x ./dotnet-install.sh \

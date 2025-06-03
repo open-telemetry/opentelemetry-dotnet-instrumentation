@@ -1,10 +1,10 @@
-FROM quay.io/centos/centos:stream9@sha256:a4c1969e2563bb58ef1ace327b72f8cc3f1a7e760a0724ba02820420b66cbb46
+FROM quay.io/centos/centos:stream9@sha256:33c9c17ac9f78e6569e44aa09f04db043da27dd9cfc119fe075b1804a30b34df
 
 # Install dotnet sdk
 RUN dnf install -y \
     libicu-devel
 
-RUN curl -sSL https://dot.net/v1/dotnet-install.sh --output dotnet-install.sh \
+RUN curl -sSL --retry 5 https://dot.net/v1/dotnet-install.sh --output dotnet-install.sh \
     && echo "SHA256: $(sha256sum dotnet-install.sh)" \
     && echo "19b0a7890c371201b944bf0f8cdbb6460d053d63ddbea18cfed3e4199769ce17  dotnet-install.sh" | sha256sum -c \
     && chmod +x ./dotnet-install.sh \
