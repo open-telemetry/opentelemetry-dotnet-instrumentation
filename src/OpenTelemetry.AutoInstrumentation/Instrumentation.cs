@@ -39,7 +39,8 @@ internal static class Instrumentation
     private static PluginManager? _pluginManager;
 
 #if NET
-    private static ContinuousProfilerProcessor? _profilerProcessor;
+    private static SampleExporter? _sampleExporter;
+    private static SampleExporterBuilder? _sampleExporterBuilder;
 #endif
 
     internal static LoggerProvider? LoggerProvider
@@ -214,52 +215,85 @@ internal static class Instrumentation
 
         if (threadSamplingEnabled || allocationSamplingEnabled)
         {
-            InitializeContinuousProfiling(continuousProfilerExporter, threadSamplingEnabled, allocationSamplingEnabled, exportInterval, exportTimeout);
+            if (!TryInitializeContinuousSamplingExport(continuousProfilerExporter, threadSamplingEnabled, allocationSamplingEnabled, exportInterval, exportTimeout))
+            {
+                return;
+            }
         }
 
-        var (samplingInterval, configuredExportInterval, configuredExportTimeout, exporter) = _pluginManager.GetFirstSelectiveSamplingConfiguration();
-        // TODO: Add logging
-        if (samplingInterval.HasValue)
+        uint selectiveSamplingInterval = 0;
+        var selectiveSamplingConfig = _pluginManager.GetFirstSelectiveSamplingConfiguration();
+        if (selectiveSamplingConfig.HasValue)
         {
-            // TODO: add validation
-            InitializeSamplingSelectedThreads(exporter, configuredExportInterval!.Value, configuredExportTimeout!.Value);
+            var (configuredSamplingInterval, configuredExportInterval, configuredExportTimeout, exporter) = selectiveSamplingConfig.Value;
+            if (configuredSamplingInterval == 0 || configuredExportInterval <= TimeSpan.Zero || configuredExportTimeout <= TimeSpan.Zero || exporter == null)
+            {
+                Logger.Warning("Invalid selective sampling configuration. Feature will not be enabled.");
+            }
+            else
+            {
+                Logger.Debug(
+                    $"Selective sampling configuration: sampling interval: {configuredSamplingInterval}, export interval: {configuredExportInterval}, export timeout: {configuredExportTimeout}, max memory samples per minute: {maxMemorySamplesPerMinute}, export interval: {exportInterval}, export timeout: {exportTimeout}, samples exporter: {exporter.GetType()}");
+                selectiveSamplingInterval = configuredSamplingInterval;
+                if (!TryInitializeSelectedThreadSamplingExport(exporter, configuredExportInterval, configuredExportTimeout))
+                {
+                    return;
+                }
+            }
         }
 
-        if (threadSamplingEnabled || allocationSamplingEnabled || samplingInterval.HasValue)
+        if (!threadSamplingEnabled && !allocationSamplingEnabled && !selectiveSamplingConfig.HasValue)
         {
-            NativeMethods.ConfigureNativeContinuousProfiler(threadSamplingEnabled, threadSamplingInterval, allocationSamplingEnabled, maxMemorySamplesPerMinute, samplingInterval ?? 0);
+            // No sampling requested.
+            return;
         }
 
-        _profilerProcessor?.Start();
+        if (threadSamplingInterval < selectiveSamplingInterval)
+        {
+            Logger.Warning($"Invalid sampling configuration frequency. Selective sampling interval: {selectiveSamplingInterval}, continuous sampling interval: {threadSamplingInterval}");
+            return;
+        }
+
+        var selectiveSamplingEnabled = selectiveSamplingInterval != 0;
+        if (threadSamplingEnabled && selectiveSamplingEnabled)
+        {
+            // Round thread sampling interval, which is expected to be greater,
+            // to the nearest, greater multiple of selective sampling interval.
+            threadSamplingInterval = RoundedToTheNearestGreaterMultiple(threadSamplingInterval, selectiveSamplingInterval);
+        }
+
+        NativeMethods.ConfigureNativeContinuousProfiler(threadSamplingEnabled, threadSamplingInterval, allocationSamplingEnabled, maxMemorySamplesPerMinute, selectiveSamplingInterval);
+        _sampleExporter = _sampleExporterBuilder?.Build();
     }
 
-    private static void InitializeSamplingSelectedThreads(
+    private static uint RoundedToTheNearestGreaterMultiple(uint threadSamplingInterval, uint selectiveSamplingInterval)
+    {
+        return ((threadSamplingInterval + selectiveSamplingInterval - 1) / selectiveSamplingInterval) * selectiveSamplingInterval;
+    }
+
+    private static bool TryInitializeSelectedThreadSamplingExport(
         object? exporter,
         TimeSpan exportInterval,
         TimeSpan exportTimeout)
     {
-        // TODO: rename a method
-        var selectiveSampleExportMethod = exporter!.GetType().GetMethod("Export");
+        var selectiveSampleExportMethod = exporter?.GetType().GetMethod("ExportSelectedThreadSamples");
 
         if (selectiveSampleExportMethod == null)
         {
-            Logger.Warning("Exporter does not have Export method. Selective sampler initialization failed.");
-            return;
+            Logger.Warning("Exporter does not have ExportSelectedThreadSamples method. Selective sampler initialization failed.");
+            return false;
         }
 
-        // Continuous profiling not configured
-        if (_profilerProcessor == null)
-        {
-            InitializeBufferProcessing(exportInterval, exportTimeout);
-        }
+        InitializeBufferProcessing(exportInterval, exportTimeout);
 
         var handler = selectiveSampleExportMethod.CreateDelegate<Action<byte[], int, CancellationToken>>(exporter!);
-        _profilerProcessor!.AddHandler(SampleType.SelectedThreads, handler, exportTimeout);
+        _sampleExporterBuilder?.AddHandler(SampleType.SelectedThreads, handler, exportTimeout);
+        return true;
     }
 #endif
 
 #if NET
-    private static void InitializeContinuousProfiling(
+    private static bool TryInitializeContinuousSamplingExport(
         object continuousProfilerExporter,
         bool threadSamplingEnabled,
         bool allocationSamplingEnabled,
@@ -272,14 +306,14 @@ internal static class Instrumentation
         if (exportThreadSamplesMethod == null)
         {
             Logger.Warning("Exporter does not have ExportThreadSamples method. Continuous Profiler initialization failed.");
-            return;
+            return false;
         }
 
         var exportAllocationSamplesMethod = continuousProfilerExporterType.GetMethod("ExportAllocationSamples");
         if (exportAllocationSamplesMethod == null)
         {
             Logger.Warning("Exporter does not have ExportAllocationSamples method. Continuous Profiler initialization failed.");
-            return;
+            return false;
         }
 
         var threadSamplesMethod = exportThreadSamplesMethod.CreateDelegate<Action<byte[], int, CancellationToken>>(continuousProfilerExporter);
@@ -289,20 +323,24 @@ internal static class Instrumentation
 
         if (threadSamplingEnabled)
         {
-            _profilerProcessor!.AddHandler(SampleType.Continuous, threadSamplesMethod, exportTimeout);
+            _sampleExporterBuilder?.AddHandler(SampleType.Continuous, threadSamplesMethod, exportTimeout);
         }
 
         if (allocationSamplingEnabled)
         {
-            _profilerProcessor!.AddHandler(SampleType.Allocation, allocationSamplesMethod, exportTimeout);
+            _sampleExporterBuilder?.AddHandler(SampleType.Allocation, allocationSamplesMethod, exportTimeout);
         }
+
+        return true;
     }
 
     private static void InitializeBufferProcessing(TimeSpan exportInterval, TimeSpan exportTimeout)
     {
-        var bufferProcessor = new BufferProcessor();
-        _profilerProcessor = new ContinuousProfilerProcessor(bufferProcessor, exportInterval, exportTimeout);
-        Activity.CurrentChanged += _profilerProcessor.Activity_CurrentChanged;
+        _sampleExporterBuilder ??= new SampleExporterBuilder();
+
+        _sampleExporterBuilder
+            .SetExportInterval(exportInterval)
+            .SetExportTimeout(exportTimeout);
     }
 #endif
 
@@ -487,11 +525,7 @@ internal static class Instrumentation
         {
 #if NET
             LazyInstrumentationLoader?.Dispose();
-            if (_profilerProcessor != null)
-            {
-                Activity.CurrentChanged -= _profilerProcessor.Activity_CurrentChanged;
-                _profilerProcessor.Dispose();
-            }
+            _sampleExporter?.Dispose();
 
 #endif
             _tracerProvider?.Dispose();

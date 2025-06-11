@@ -8,6 +8,7 @@ namespace TestApplication.SelectiveSampler;
 
 internal static class Program
 {
+    private static readonly ActivitySource ActivitySource = new("TestApplication.SelectiveSampler", "1.0.0");
     private static Action? _startSamplingDelegate;
     private static Action? _stopSamplingDelegate;
     private static AsyncLocal<Activity?>? _supportingActivityAsyncLocal;
@@ -16,10 +17,11 @@ internal static class Program
     {
         Init();
         Thread.CurrentThread.Name = "Main";
-        ActivitySource activitySource = new("TestApplication.SelectiveSampler", "1.0.0");
 
-        using var activity = activitySource.StartActivity();
-        await MethodA();
+        using (ActivitySource.StartActivity())
+        {
+            await SimpleAsyncCase();
+        }
     }
 
     // TODO: requires profiler to be attached.
@@ -63,20 +65,20 @@ internal static class Program
         }
     }
 
-    private static async Task MethodA()
+    private static async Task SimpleAsyncCase()
     {
-        await MethodB();
+        WaitShortSync();
+        await Task.Yield();
+        WaitLongSync();
     }
 
-    private static async Task MethodB()
-    {
-        await MethodC();
-    }
-
-    private static async Task MethodC()
+    private static void WaitShortSync()
     {
         Thread.Sleep(200);
-        await Task.Yield();
+    }
+
+    private static void WaitLongSync()
+    {
         Thread.Sleep(300);
     }
 }

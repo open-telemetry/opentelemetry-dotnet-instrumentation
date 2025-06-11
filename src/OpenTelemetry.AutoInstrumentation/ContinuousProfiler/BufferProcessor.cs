@@ -7,7 +7,6 @@ using OpenTelemetry.AutoInstrumentation.Logging;
 
 namespace OpenTelemetry.AutoInstrumentation.ContinuousProfiler;
 
-// TODO: dedup
 internal class BufferProcessor
 {
     // If you change any of these constants, check with continuous_profiler.cpp first
@@ -17,11 +16,11 @@ internal class BufferProcessor
 
     private readonly byte[] _buffer = new byte[BufferSize];
 
-    private readonly Dictionary<SampleType, (Action<byte[], int, CancellationToken> Handler, TimeSpan ExportTimeout)> _sampleHandlers = new();
+    private readonly Dictionary<SampleType, (Action<byte[], int, CancellationToken> Handler, TimeSpan ExportTimeout)> _sampleHandlers;
 
-    public void AddHandler(SampleType type, Action<byte[], int, CancellationToken> handler, TimeSpan exportTimeout)
+    public BufferProcessor(Dictionary<SampleType, (Action<byte[], int, CancellationToken> Handler, TimeSpan ExportTimeout)> sampleHandlers)
     {
-        _sampleHandlers.Add(type, (handler, exportTimeout));
+        _sampleHandlers = sampleHandlers ?? throw new ArgumentNullException(nameof(sampleHandlers));
     }
 
     public void Process()
@@ -34,12 +33,12 @@ internal class BufferProcessor
                 return;
             }
 
-            var handlerConfig = _sampleHandlers[sampleType];
+            var (handler, timeout) = _sampleHandlers[sampleType];
 
-            using var cts = new CancellationTokenSource(handlerConfig.ExportTimeout);
+            using var cts = new CancellationTokenSource(timeout);
             try
             {
-                handlerConfig.Handler(_buffer, read, cts.Token);
+                handler(_buffer, read, cts.Token);
             }
             catch (Exception e)
             {

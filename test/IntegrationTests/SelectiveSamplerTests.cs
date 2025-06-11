@@ -3,6 +3,7 @@
 
 #if NET
 
+using System.Runtime.InteropServices;
 using System.Text.Json;
 using IntegrationTests.Helpers;
 using Xunit.Abstractions;
@@ -16,10 +17,13 @@ public class SelectiveSamplerTests : TestHelper
     {
     }
 
-    [Fact]
+    [SkippableFact]
     [Trait("Category", "EndToEnd")]
     public void ExportThreadSamples()
     {
+        // TODO: Huge variance in delay between samples on MacOS on CI
+        Skip.If(RuntimeInformation.IsOSPlatform(OSPlatform.OSX));
+
         EnableBytecodeInstrumentation();
         SetEnvironmentVariable("OTEL_DOTNET_AUTO_PLUGINS", "TestApplication.SelectiveSampler.Plugins.SelectiveSamplerPlugin, TestApplication.SelectiveSampler, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null");
         SetEnvironmentVariable("OTEL_DOTNET_AUTO_TRACES_ADDITIONAL_SOURCES", "TestApplication.SelectiveSampler");
@@ -50,8 +54,10 @@ public class SelectiveSamplerTests : TestHelper
         // Test app sleeps for 0.5s, sampling interval set to 0.05s
         Output.WriteLine($"Count: {threadSamples.Count}");
         Assert.InRange(threadSamples.Count, 7, 10);
-        // TODO: verify expectation: first few stack samples should come from the Main thread,
-        // rest of them - from a thread pool thread.
+
+        var threadNames = threadSamples.Select(sample => sample.ThreadName).Distinct(StringComparer.InvariantCultureIgnoreCase);
+
+        Assert.Equal(2, threadNames.Count());
     }
 
     private static DateTime ToDateTime(long timestampNanoseconds)
