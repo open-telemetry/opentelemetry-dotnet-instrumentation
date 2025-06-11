@@ -808,7 +808,7 @@ void CaptureThreadSamplesForSelectedThreads(ContinuousProfiler* prof, ICorProfil
 
 void ResetIteration(ContinuousProfiler* prof)
 {
-    if (prof->selectedThreadsSamplingInterval.has_value())
+    if (prof->selectedThreadsSamplingInterval.has_value() && prof->threadSamplingInterval.has_value())
     {
         prof->iteration = 0;
     }
@@ -914,7 +914,7 @@ unsigned int GetSleepTime(const ContinuousProfiler* const prof)
 
 void IncrementIteration(ContinuousProfiler* const prof)
 {
-    if (prof->selectedThreadsSamplingInterval.has_value())
+    if (prof->selectedThreadsSamplingInterval.has_value() && prof->threadSamplingInterval.has_value())
     {
         // Advance cycle
         // Every nth iteration is a sampling of all the threads.

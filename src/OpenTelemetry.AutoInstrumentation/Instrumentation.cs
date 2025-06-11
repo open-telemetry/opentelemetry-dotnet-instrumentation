@@ -248,7 +248,7 @@ internal static class Instrumentation
             return;
         }
 
-        if (threadSamplingInterval < selectiveSamplingInterval)
+        if (threadSamplingEnabled && threadSamplingInterval < selectiveSamplingInterval)
         {
             Logger.Warning($"Invalid sampling configuration frequency. Selective sampling interval: {selectiveSamplingInterval}, continuous sampling interval: {threadSamplingInterval}");
             return;
