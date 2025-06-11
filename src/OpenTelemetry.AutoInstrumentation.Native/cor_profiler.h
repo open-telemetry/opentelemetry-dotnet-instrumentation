@@ -214,7 +214,10 @@ public:
     //
     void AddInstrumentations(WCHAR* id, CallTargetDefinition* items, int size);
     void AddDerivedInstrumentations(WCHAR* id, CallTargetDefinition* items, int size);
-
+    void InitializeTraceMethods(WCHAR* id,
+                                WCHAR* integration_assembly_name_ptr,
+                                WCHAR* integration_type_name_ptr,
+                                WCHAR* configuration_string_ptr);
     //
     // Continuous Profiler methods
     //

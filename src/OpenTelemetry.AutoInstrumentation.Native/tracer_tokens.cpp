@@ -166,6 +166,7 @@ HRESULT TracerTokens::WriteBeginMethod(void*                             rewrite
                                        mdTypeRef                         integrationTypeRef,
                                        const TypeInfo*                   currentType,
                                        const std::vector<TypeSignature>& methodArguments,
+                                       const bool                        ignoreByRefInstrumentation,
                                        ILInstr**                         instruction)
 {
     auto hr = EnsureBaseCalltargetTokens();
@@ -187,7 +188,8 @@ HRESULT TracerTokens::WriteBeginMethod(void*                             rewrite
     // FastPath
     //
 
-    if (beginMethodFastPathRefs[numArguments] == mdMemberRefNil)
+    mdMemberRef beginMethodFastPathRef;
+    if (ignoreByRefInstrumentation || beginMethodFastPathRefs[numArguments] == mdMemberRefNil)
     {
         unsigned callTargetStateBuffer;
         auto     callTargetStateSize = CorSigCompressToken(callTargetStateTypeRef, &callTargetStateBuffer);
@@ -217,7 +219,7 @@ HRESULT TracerTokens::WriteBeginMethod(void*                             rewrite
 
         for (auto i = 0; i < numArguments; i++)
         {
-            if (enable_by_ref_instrumentation)
+            if (!ignoreByRefInstrumentation && enable_by_ref_instrumentation)
             {
                 signature[offset++] = ELEMENT_TYPE_BYREF;
             }
@@ -227,13 +229,21 @@ HRESULT TracerTokens::WriteBeginMethod(void*                             rewrite
 
         auto hr = module_metadata->metadata_emit->DefineMemberRef(callTargetTypeRef,
                                                                   managed_profiler_calltarget_beginmethod_name.data(),
-                                                                  signature, signatureLength,
-                                                                  &beginMethodFastPathRefs[numArguments]);
+                                                                  signature, signatureLength, &beginMethodFastPathRef);
         if (FAILED(hr))
         {
             Logger::Warn("Wrapper beginMethod for ", numArguments, " arguments could not be defined.");
             return hr;
         }
+
+        if (!ignoreByRefInstrumentation)
+        {
+            beginMethodFastPathRefs[numArguments] = beginMethodFastPathRef;
+        }
+    }
+    else
+    {
+        beginMethodFastPathRef = beginMethodFastPathRefs[numArguments];
     }
 
     mdMethodSpec beginMethodSpec = mdMethodSpecNil;
@@ -307,8 +317,8 @@ HRESULT TracerTokens::WriteBeginMethod(void*                             rewrite
         offset += argumentsSignatureSize[i];
     }
 
-    hr = module_metadata->metadata_emit->DefineMethodSpec(beginMethodFastPathRefs[numArguments], signature,
-                                                          signatureLength, &beginMethodSpec);
+    hr = module_metadata->metadata_emit->DefineMethodSpec(beginMethodFastPathRef, signature, signatureLength,
+                                                          &beginMethodSpec);
     if (FAILED(hr))
     {
         Logger::Warn("Error creating begin method spec.");

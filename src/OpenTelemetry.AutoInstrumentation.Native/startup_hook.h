@@ -6,7 +6,7 @@
 #ifndef OTEL_CLR_PROFILER_STARTUP_HOOK_H_
 #define OTEL_CLR_PROFILER_STARTUP_HOOK_H_
 
-#include "string.h"  // NOLINT
+#include "string_utils.h"  // NOLINT
 #include "pal.h"
 
 namespace trace

@@ -4,15 +4,15 @@ on:
   push:
     branches: [ main ]
     paths:
-    - '.github/workflows/validate-documentation.yml'
-    - '**.md'
-    - '.lycheeignore'
+      - '.github/workflows/validate-documentation.yml'
+      - '**.md'
+      - '.lycheeignore'
   pull_request:
     branches: [ main ]
     paths:
-    - '.github/workflows/validate-documentation.yml'
-    - '**.md'
-    - '.lycheeignore'
+      - '.github/workflows/validate-documentation.yml'
+      - '**.md'
+      - '.lycheeignore'
   merge_group:
   workflow_dispatch:
 
@@ -27,15 +27,15 @@ jobs:
     - name: Checkout
       uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # tag: v4.2.2
 
-    - name: Run markdown links chceks
+    - name: Run markdown links checks
       if: ${{ !contains(github.event.pull_request.labels.*.name, 'release PR') }}
       uses: lycheeverse/lychee-action@82202e5e9c2f4ef1a55a3d02563e1cb6041e5332 # tag: v2.4.1
       with:
         fail: true
-        args: "--threads 1 --max-concurrency 1 --verbose --no-progress './**/*.md' './**/*.html'"
+        args: "--threads 1 --max-concurrency 1 --verbose --retry-wait-time 5 --max-retries 3 --timeout 60 --no-progress './**/*.md' './**/*.html'"
 
     - name: Run markdownlint
-      uses: streetsidesoftware/cspell-action@eb29b6a67d122d2e6af385ff16bdb200d93b2e54 # tag: v7.0.0
+      uses: streetsidesoftware/cspell-action@69543c3f9f14d4fcc6004c7bee03c4d366f11d64 # tag: v7.0.1
       with:
         files: '**/*.md'
 
