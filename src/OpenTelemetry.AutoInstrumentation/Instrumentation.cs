@@ -256,7 +256,7 @@ internal static class Instrumentation
                 return;
             }
 
-            if (threadSamplingInterval % selectiveSamplingInterval != 0)
+            if (selectiveSamplingInterval != 0 && threadSamplingInterval % selectiveSamplingInterval != 0)
             {
                 Logger.Warning($"Continuous sampling interval must be a multiple of selective sampling interval. Selective sampling interval: {selectiveSamplingInterval}, continuous sampling interval: {threadSamplingInterval}");
                 return;
