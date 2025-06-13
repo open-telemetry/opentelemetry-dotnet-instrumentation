@@ -28,6 +28,9 @@ public class MinimalApiTests : TestHelper
 
         SetEnvironmentVariable("OTEL_DOTNET_AUTO_LOGS_INCLUDE_FORMATTED_MESSAGE", "true");
 
+        // Bind to a random port.
+        SetEnvironmentVariable("ASPNETCORE_URLS", "http://127.0.0.1:0");
+
         if (enableByteCodeInstrumentation)
         {
             EnableBytecodeInstrumentation();
