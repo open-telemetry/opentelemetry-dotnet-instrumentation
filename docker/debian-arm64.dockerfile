@@ -11,7 +11,7 @@ RUN curl -sSL --retry 5 https://dot.net/v1/dotnet-install.sh --output dotnet-ins
     && echo "SHA256: $(sha256sum dotnet-install.sh)" \
     && echo "19b0a7890c371201b944bf0f8cdbb6460d053d63ddbea18cfed3e4199769ce17  dotnet-install.sh" | sha256sum -c \
     && chmod +x ./dotnet-install.sh \
-    && ./dotnet-install.sh -v 8.0.409 --install-dir /usr/share/dotnet --no-path \
+    && ./dotnet-install.sh -v 8.0.411 --install-dir /usr/share/dotnet --no-path \
     && rm dotnet-install.sh
 
 WORKDIR /project
