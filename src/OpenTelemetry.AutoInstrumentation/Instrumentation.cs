@@ -248,27 +248,23 @@ internal static class Instrumentation
             return;
         }
 
-        if (threadSamplingEnabled && threadSamplingInterval < selectiveSamplingInterval)
+        if (threadSamplingEnabled)
         {
-            Logger.Warning($"Invalid sampling configuration frequency. Selective sampling interval: {selectiveSamplingInterval}, continuous sampling interval: {threadSamplingInterval}");
-            return;
-        }
+            if (threadSamplingInterval <= selectiveSamplingInterval)
+            {
+                Logger.Warning($"Continuous sampling interval must be higher than selective sampling interval. Selective sampling interval: {selectiveSamplingInterval}, continuous sampling interval: {threadSamplingInterval}");
+                return;
+            }
 
-        var selectiveSamplingEnabled = selectiveSamplingInterval != 0;
-        if (threadSamplingEnabled && selectiveSamplingEnabled)
-        {
-            // Round thread sampling interval, which is expected to be greater,
-            // to the nearest, greater multiple of selective sampling interval.
-            threadSamplingInterval = RoundedToTheNearestGreaterMultiple(threadSamplingInterval, selectiveSamplingInterval);
+            if (threadSamplingInterval % selectiveSamplingInterval != 0)
+            {
+                Logger.Warning($"Continuous sampling interval must be a multiple of selective sampling interval. Selective sampling interval: {selectiveSamplingInterval}, continuous sampling interval: {threadSamplingInterval}");
+                return;
+            }
         }
 
         NativeMethods.ConfigureNativeContinuousProfiler(threadSamplingEnabled, threadSamplingInterval, allocationSamplingEnabled, maxMemorySamplesPerMinute, selectiveSamplingInterval);
         _sampleExporter = _sampleExporterBuilder?.Build();
-    }
-
-    private static uint RoundedToTheNearestGreaterMultiple(uint threadSamplingInterval, uint selectiveSamplingInterval)
-    {
-        return ((threadSamplingInterval + selectiveSamplingInterval - 1) / selectiveSamplingInterval) * selectiveSamplingInterval;
     }
 
     private static bool TryInitializeSelectedThreadSamplingExport(
