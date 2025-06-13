@@ -1274,6 +1274,11 @@ extern "C"
     }
     EXPORTTHIS void SelectiveSamplingStart()
     {
+        if (profiler_info == nullptr)
+        {
+            return;
+        }
+
         ThreadID      threadId;
         const HRESULT hr = profiler_info->GetCurrentThreadID(&threadId);
         if (FAILED(hr))
@@ -1289,6 +1294,11 @@ extern "C"
 
     EXPORTTHIS void SelectiveSamplingStop()
     {
+        if (profiler_info == nullptr)
+        {
+            return;
+        }
+
         ThreadID      threadId;
         const HRESULT hr = profiler_info->GetCurrentThreadID(&threadId);
         if (FAILED(hr))
