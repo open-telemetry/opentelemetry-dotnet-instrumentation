@@ -12,6 +12,7 @@
 #include <cinttypes>
 #include <vector>
 #include <list>
+#include <optional>
 #include <utility>
 #include <unordered_map>
 #include <random>
@@ -26,8 +27,11 @@ extern "C"
 {
     EXPORTTHIS int32_t ContinuousProfilerReadThreadSamples(int32_t len, unsigned char* buf);
     EXPORTTHIS int32_t ContinuousProfilerReadAllocationSamples(int32_t len, unsigned char* buf);
+    EXPORTTHIS int32_t SelectiveSamplerReadThreadSamples(int32_t len, unsigned char* buf);
     // ReSharper disable CppInconsistentNaming
     EXPORTTHIS void ContinuousProfilerSetNativeContext(uint64_t traceIdHigh, uint64_t traceIdLow, uint64_t spanId);
+    EXPORTTHIS void SelectiveSamplingStart();
+    EXPORTTHIS void SelectiveSamplingStop();
     // ReSharper restore CppInconsistentNaming
 }
 
@@ -92,7 +96,10 @@ public:
     explicit ThreadSamplesBuffer(std::vector<unsigned char>* buf);
     ~ThreadSamplesBuffer();
     void StartBatch() const;
+    void StartSelectedThreadsBatch() const;
+    void EndSelectedThreadsBatch() const;
     void StartSample(ThreadID id, const ThreadState* state, const thread_span_context& span_context) const;
+    void StartSampleForSelectedThread(const ThreadState* state, const thread_span_context& span_context) const;
     void RecordFrame(FunctionID fid, const trace::WSTRING& frame);
     void EndSample() const;
     void EndBatch() const;
@@ -201,18 +208,23 @@ private:
     std::default_random_engine rand;
 };
 
+enum class SamplingType : int32_t { Continuous = 1, SelectedThreads = 2 };
+
 class ContinuousProfiler
 {
 public:
-    unsigned int threadSamplingInterval;
-    void StartThreadSampling(unsigned int threadSamplingInterval);
-    unsigned int maxMemorySamplesPerMinute;
-    void StartAllocationSampling(unsigned int maxMemorySamplesPerMinute);
-    void AllocationTick(ULONG dataLen, LPCBYTE data);
-    ICorProfilerInfo12* info12;
-    static void ThreadCreated(ThreadID thread_id);
-    void ThreadDestroyed(ThreadID thread_id);
-    void ThreadNameChanged(ThreadID thread_id, ULONG cch_name, WCHAR name[]);
+    std::optional<unsigned int> threadSamplingInterval;
+    std::optional<unsigned int> selectedThreadsSamplingInterval;
+    unsigned int                iteration;
+    void                        StartThreadSampling();
+    SamplingType                GetNextSamplingType() const;
+    unsigned int                maxMemorySamplesPerMinute;
+    void                        StartAllocationSampling(unsigned int maxMemorySamplesPerMinute);
+    void                        AllocationTick(ULONG dataLen, LPCBYTE data);
+    ICorProfilerInfo12*         info12;
+    static void                 ThreadCreated(ThreadID thread_id);
+    void                        ThreadDestroyed(ThreadID thread_id);
+    void                        ThreadNameChanged(ThreadID thread_id, ULONG cch_name, WCHAR name[]);
 
     void SetGlobalInfo12(ICorProfilerInfo12* info12);
     ThreadState* GetCurrentThreadState(ThreadID tid);
