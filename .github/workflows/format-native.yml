@@ -15,7 +15,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        machine: [ windows-2022, ubuntu-22.04, macos-13-xlarge ]
+        machine: [ windows-2025, ubuntu-22.04, macos-13-xlarge ]
     runs-on: ${{ matrix.machine }}
     steps:
 
