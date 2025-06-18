@@ -8,8 +8,8 @@ RUN apt-get update && \
 
 # Install older sdks using the install script as there are no arm64 SDK packages.
 RUN curl -sSL --retry 5 https://dot.net/v1/dotnet-install.sh --output dotnet-install.sh \
-    && echo "SHA256: $(sha256sum dotnet-install.sh)" \
-    && echo "19b0a7890c371201b944bf0f8cdbb6460d053d63ddbea18cfed3e4199769ce17  dotnet-install.sh" | sha256sum -c \
+    && echo "SHA512: $(sha512sum dotnet-install.sh)" \
+    && echo "f8c59166ed912d6861e93c3efc2840be31ec32897679678a72f781423ebf061348d3b92b16c9541f5b312a34160f452826bb3021efb1414d76bd7e237e4c0e9a  dotnet-install.sh" | sha512sum -c \
     && chmod +x ./dotnet-install.sh \
     && ./dotnet-install.sh -v 8.0.411 --install-dir /usr/share/dotnet --no-path \
     && rm dotnet-install.sh
