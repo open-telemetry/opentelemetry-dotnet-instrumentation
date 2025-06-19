@@ -52,10 +52,13 @@ jobs:
       - run: cd bin-ubuntu-22.04 ; zip -qq -r ../opentelemetry-dotnet-instrumentation-linux-glibc-x64.zip . * ; cd ..
       - run: cd bin-ubuntu-22.04-arm ; zip -qq -r ../opentelemetry-dotnet-instrumentation-linux-glibc-arm64.zip . * ; cd ..
       - run: cd bin-windows-2022 ; zip -qq -r ../opentelemetry-dotnet-instrumentation-windows.zip . * ; cd ..
+      - run: cd bin-windows-2025 ; zip -qq -r ../opentelemetry-dotnet-instrumentation-windows.zip . * ; cd ..
       - run: cd bin-macos-13 ; zip -qq -r ../opentelemetry-dotnet-instrumentation-macos.zip . * ; cd ..
       - run: cd bin-nuget-packages ; zip -qq -r ../opentelemetry-dotnet-instrumentation-nuget-packages.zip . * ; cd ..
       - run: cp installation-scripts-windows-2022/otel-dotnet-auto-install.sh ./otel-dotnet-auto-install.sh
       - run: cp installation-scripts-windows-2022/OpenTelemetry.DotNet.Auto.psm1 ./OpenTelemetry.DotNet.Auto.psm1
+      - run: cp installation-scripts-windows-2025/otel-dotnet-auto-install.sh ./otel-dotnet-auto-install.sh
+      - run: cp installation-scripts-windows-2025/OpenTelemetry.DotNet.Auto.psm1 ./OpenTelemetry.DotNet.Auto.psm1
 
       - name: Create Release
         run: gh release create ${{ github.ref_name }} --title ${{ github.ref_name }} --verify-tag --draft ./*.zip ./otel-dotnet-auto-install.sh ./OpenTelemetry.DotNet.Auto.psm1

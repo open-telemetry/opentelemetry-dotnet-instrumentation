@@ -95,7 +95,8 @@ $artifacts = @(
     "bin-ubuntu-22.04",
     "bin-ubuntu-22.04-arm",
     "bin-macos-13",
-    "bin-windows-2022"
+    "bin-windows-2022",
+    "bin-windows-2025"
 )
 $destFolder = "./bin/ci-artifacts/"
 $zipFilesFolder = "~/Downloads/"

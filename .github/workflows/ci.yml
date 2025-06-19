@@ -35,7 +35,7 @@ jobs:
       fail-fast: false
       matrix:
         test-tfm: [ net9.0, net8.0, net462 ]
-        machine: [ windows-2022, ubuntu-22.04, macos-13, ubuntu-22.04-arm ]
+        machine: [ windows-2022, windows-2025, ubuntu-22.04, macos-13, ubuntu-22.04-arm ]
         exclude:
           - test-tfm: net462
             machine: macos-13
@@ -45,6 +45,8 @@ jobs:
             machine: ubuntu-22.04-arm
         include:
           - machine: windows-2022
+            containers: none
+          - machine: windows-2025
             containers: none
           - machine: ubuntu-22.04
             containers: linux
@@ -106,7 +108,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        machine: [ windows-2022 ]
+        machine: [ windows-2022, windows-2025 ]
     runs-on: ${{ matrix.machine }}
     steps:
 
@@ -145,6 +147,8 @@ jobs:
       matrix:
         include:
           - machine: windows-2022
+            containers: windows-only
+          - machine: windows-2025
             containers: windows-only
     runs-on: ${{ matrix.machine }}
     steps:
@@ -244,6 +248,7 @@ jobs:
           - machine: ubuntu-22.04
           - machine: macos-13
           - machine: windows-2022
+          - machine: windows-2025
           - machine: ubuntu-22.04-arm
     runs-on: ${{ matrix.machine }}
     steps:
