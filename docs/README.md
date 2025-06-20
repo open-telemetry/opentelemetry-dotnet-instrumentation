@@ -240,9 +240,17 @@ uses environment variables as parameters:
 
 On Windows, you should install OpenTelemetry .NET Automatic Instrumentation
 and instrument your .NET application using the provided PowerShell module.
+
+> [!WARNING]
+> The PowerShell module works only on PowerShell 5.1
+which is the one installed by default on Windows.
+
 Example usage (run as administrator):
 
 ```powershell
+# PowerShell 5.1 is required
+#Requires -PSEdition Desktop
+
 # Download the module
 $module_url = "https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/download/v1.11.0/OpenTelemetry.DotNet.Auto.psm1"
 $download_path = Join-Path $env:temp "OpenTelemetry.DotNet.Auto.psm1"
@@ -287,10 +295,6 @@ Unregister-OpenTelemetryForWindowsService -WindowsServiceName MyServiceName
 Update-OpenTelemetryCore
 Register-OpenTelemetryForWindowsService -WindowsServiceName MyServiceName -OTelServiceName MyOtelServiceName
 ```
-
-> [!WARNING]
-> The PowerShell module works only on PowerShell 5.1
-which is the one installed by default on Windows.
 
 ## Instrument a container
 
