@@ -12,11 +12,20 @@ permissions:
 
 jobs:
   check-native-format:
+    name: ${{ matrix.os-name }}
+    runs-on: ${{ matrix.runner }}
+
     strategy:
       fail-fast: false
       matrix:
-        machine: [ windows-2022, ubuntu-22.04, macos-13-xlarge ]
-    runs-on: ${{ matrix.machine }}
+        include:
+          - os-name: macos
+            runner: macos-15-xlarge
+          - os-name: linux
+            runner: ubuntu-24.04
+          - os-name: windows
+            runner: windows-2025
+
     steps:
 
     - name: Checkout
