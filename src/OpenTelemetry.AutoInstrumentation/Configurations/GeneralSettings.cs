@@ -1,6 +1,8 @@
 // Copyright The OpenTelemetry Authors
 // SPDX-License-Identifier: Apache-2.0
 
+using OpenTelemetry.AutoInstrumentation.Configurations.FileBasedConfiguration;
+
 namespace OpenTelemetry.AutoInstrumentation.Configurations;
 
 internal class GeneralSettings : Settings
@@ -32,7 +34,7 @@ internal class GeneralSettings : Settings
     /// </summary>
     public bool ProfilerEnabled { get; private set; }
 
-    protected override void OnLoad(Configuration configuration)
+    protected override void OnLoadEnvVar(Configuration configuration)
     {
         var providerPlugins = configuration.GetString(ConfigurationKeys.ProviderPlugins);
         if (providerPlugins != null)
@@ -53,5 +55,48 @@ internal class GeneralSettings : Settings
         SetupSdk = configuration.GetBool(ConfigurationKeys.SetupSdk) ?? true;
 
         ProfilerEnabled = configuration.GetString(ConfigurationKeys.ProfilingEnabled) == "1";
+    }
+
+    protected override void OnLoadFile(Conf configuration)
+    {
+        var detectors = configuration.Resource?.DetectionDevelopment?.Detectors;
+        if (detectors != null)
+        {
+            var enabledDetectors = new List<ResourceDetector>();
+#if NET
+            if (detectors.Container != null)
+            {
+                enabledDetectors.Add(ResourceDetector.Container);
+            }
+#endif
+            if (detectors.Process != null)
+            {
+                enabledDetectors.Add(ResourceDetector.Process);
+            }
+
+            if (detectors.AzureAppService != null)
+            {
+                enabledDetectors.Add(ResourceDetector.AzureAppService);
+            }
+
+            if (detectors.ProcessRuntime != null)
+            {
+                enabledDetectors.Add(ResourceDetector.ProcessRuntime);
+            }
+
+            if (detectors.OperatingSystem != null)
+            {
+                enabledDetectors.Add(ResourceDetector.OperatingSystem);
+            }
+
+            if (detectors.Host != null)
+            {
+                enabledDetectors.Add(ResourceDetector.Host);
+            }
+
+            EnabledResourceDetectors = enabledDetectors;
+        }
+
+        SetupSdk = configuration.Disabled;
     }
 }

@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 using System.Diagnostics.CodeAnalysis;
+using OpenTelemetry.AutoInstrumentation.Configurations.FileBasedConfiguration;
 using OpenTelemetry.AutoInstrumentation.Logging;
 
 namespace OpenTelemetry.AutoInstrumentation.Configurations;
@@ -16,14 +17,88 @@ internal class SdkSettings : Settings
     /// <summary>
     /// Gets the list of propagators to be used.
     /// </summary>
-    public IList<Propagator> Propagators { get; private set; } = new List<Propagator>();
+    public IList<Propagator> Propagators { get; private set; } = [];
 
-    protected override void OnLoad(Configuration configuration)
+    /// <summary>
+    /// Gets the attribute limits.
+    /// </summary>
+    public AttributeLimits AttributeLimits { get; private set; } = new();
+
+    protected override void OnLoadEnvVar(Configuration configuration)
     {
+        AttributeLimits = new AttributeLimits(
+            attributeCountLimit: configuration.GetInt32(ConfigurationKeys.Sdk.AttributeCountLimit),
+            attributeValueLengthLimit: configuration.GetInt32(ConfigurationKeys.Sdk.AttributeValueLengthLimit));
+
         Propagators = ParsePropagator(configuration);
     }
 
-    private static IList<Propagator> ParsePropagator(Configuration configuration)
+    protected override void OnLoadFile(Conf configuration)
+    {
+        AttributeLimits = configuration.AttributeLimits;
+
+        if (configuration.Propagator == null)
+        {
+            return;
+        }
+
+        var seenPropagators = new HashSet<string>();
+        var resolvedPropagators = new List<string>();
+
+        if (configuration.Propagator.Composite is Dictionary<string, object> compositeDict)
+        {
+            foreach (var key in compositeDict.Keys)
+            {
+                if (seenPropagators.Add(key))
+                {
+                    resolvedPropagators.Add(key);
+                }
+            }
+        }
+
+        if (string.IsNullOrEmpty(configuration.Propagator.CompositeList))
+        {
+            var list = configuration.Propagator.CompositeList!.Split(Constants.ConfigurationValues.Separator);
+            foreach (var item in list)
+            {
+                if (seenPropagators.Add(item))
+                {
+                    resolvedPropagators.Add(item);
+                }
+            }
+        }
+
+        foreach (var propagatorName in resolvedPropagators)
+        {
+            switch (propagatorName.ToLowerInvariant())
+            {
+                case Constants.ConfigurationValues.Propagators.W3CTraceContext:
+                    Propagators.Add(Propagator.W3CTraceContext);
+                    break;
+                case Constants.ConfigurationValues.Propagators.W3CBaggage:
+                    Propagators.Add(Propagator.W3CBaggage);
+                    break;
+                case Constants.ConfigurationValues.Propagators.B3Multi:
+                    Propagators.Add(Propagator.B3Multi);
+                    break;
+                case Constants.ConfigurationValues.Propagators.B3Single:
+                    Propagators.Add(Propagator.B3Single);
+                    break;
+                default:
+                    var unsupportedMessage = $"Propagator '{propagatorName}' is not supported.";
+                    Logger.Error(unsupportedMessage);
+
+                    if (string.Equals(configuration.LogLevel, "fail_fast", StringComparison.OrdinalIgnoreCase))
+                    {
+                        throw new NotSupportedException(unsupportedMessage);
+                    }
+
+                    break;
+            }
+        }
+    }
+
+    private static List<Propagator> ParsePropagator(Configuration configuration)
     {
         var propagatorEnvVar = configuration.GetString(ConfigurationKeys.Sdk.Propagators);
         var propagators = new List<Propagator>();
