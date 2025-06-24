@@ -1,8 +1,10 @@
 // Copyright The OpenTelemetry Authors
 // SPDX-License-Identifier: Apache-2.0
 
+using OpenTelemetry.AutoInstrumentation.Configurations.FileBasedConfiguration;
 using OpenTelemetry.AutoInstrumentation.Configurations.Otlp;
 using OpenTelemetry.AutoInstrumentation.Logging;
+using YamlDotNet.Core.Tokens;
 
 namespace OpenTelemetry.AutoInstrumentation.Configurations;
 
@@ -43,7 +45,7 @@ internal class LogSettings : Settings
     /// </summary>
     public OtlpSettings? OtlpSettings { get; private set; }
 
-    protected override void OnLoad(Configuration configuration)
+    protected override void OnLoadEnvVar(Configuration configuration)
     {
         LogsEnabled = configuration.GetBool(ConfigurationKeys.Logs.LogsEnabled) ?? true;
         LogExporters = ParseLogExporter(configuration);
@@ -62,6 +64,50 @@ internal class LogSettings : Settings
         EnabledInstrumentations = configuration.ParseEnabledEnumList<LogInstrumentation>(
             enabledByDefault: instrumentationEnabledByDefault,
             enabledConfigurationTemplate: ConfigurationKeys.Logs.EnabledLogsInstrumentationTemplate);
+    }
+
+    protected override void OnLoadFile(Conf configuration)
+    {
+        if (configuration.LoggerProvider != null &&
+            configuration.LoggerProvider.Processors != null &&
+            configuration.LoggerProvider.Processors.TryGetValue("batch", out var batchProcessorConfig))
+        {
+            LogsEnabled = true;
+            var logExporters = new List<LogExporter>();
+            var exporters = batchProcessorConfig.Exporter;
+            if (exporters != null)
+            {
+                if (exporters.OtlpGrpc != null)
+                {
+                    logExporters.Add(LogExporter.Otlp);
+                    OtlpSettings = new OtlpSettings(OtlpSignalType.Logs, exporters.OtlpGrpc);
+                }
+
+                if (exporters.OtlpHttp != null)
+                {
+                    logExporters.Add(LogExporter.Otlp);
+                    OtlpSettings = new OtlpSettings(OtlpSignalType.Logs, exporters.OtlpHttp);
+                }
+
+                if (exporters.Console != null)
+                {
+                    logExporters.Add(LogExporter.Console);
+                }
+
+                LogExporters = logExporters;
+            }
+        }
+        else
+        {
+            LogsEnabled = false;
+        }
+
+        var logsInstrumentations = configuration.InstrumentationDevelopment?.DotNet?.Logs;
+
+        if (logsInstrumentations != null)
+        {
+            EnabledInstrumentations = logsInstrumentations.GetEnabledInstrumentations();
+        }
     }
 
     private static IReadOnlyList<LogExporter> ParseLogExporter(Configuration configuration)
