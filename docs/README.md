@@ -386,5 +386,3 @@ For more information about the approver role, see the [community repository](htt
 - [Tony Redondo](https://github.com/tonyredondo)
 
 For more information about the emeritus role, see the [community repository](https://github.com/open-telemetry/community/blob/main/guides/contributor/membership.md#emeritus-maintainerapprovertriager).
-
-Learn more about roles in the [community repository](https://github.com/open-telemetry/community/blob/main/guides/contributor/membership.md).
