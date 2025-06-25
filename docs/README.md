@@ -296,6 +296,23 @@ Update-OpenTelemetryCore
 Register-OpenTelemetryForWindowsService -WindowsServiceName MyServiceName -OTelServiceName MyOtelServiceName
 ```
 
+Uninstalling OpenTelemetry:
+
+```powershell
+# Import the previously downloaded module. After installation or an update the module is found in the default install directory.
+# Note: It's best to use the same version of the module for installation and uninstallation to ensure proper removal.
+Import-Module "C:\Program Files\OpenTelemetry .NET AutoInstrumentation\OpenTelemetry.DotNet.Auto.psm1"
+
+# If IIS was previously registered, unregister it.
+Unregister-OpenTelemetryForIIS
+
+# If Windows services were previously registered, unregister them.
+Unregister-OpenTelemetryForWindowsService -WindowsServiceName MyServiceName
+
+# Finally, uninstall OpenTelemetry instrumentation
+Uninstall-OpenTelemetryCore
+```
+
 ## Instrument a container
 
 You can find our demonstrative example
