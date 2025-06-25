@@ -358,8 +358,7 @@ See [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## Community Roles
 
-[Maintainers](https://github.com/open-telemetry/community/blob/main/guides/contributor/membership.md#membership-levels)
-([@open-telemetry/dotnet-instrumentation-maintainers](https://github.com/orgs/open-telemetry/teams/dotnet-instrumentation-maintainers)):
+### Maintainers
 
 - [Chris Ventura](https://github.com/nrcventura), New Relic
 - [Paulo Janotti](https://github.com/pjanotti), Splunk
@@ -368,14 +367,16 @@ See [CONTRIBUTING.md](CONTRIBUTING.md).
 - [Robert Paj&#x105;k](https://github.com/pellared), Splunk
 - [Zach Montoya](https://github.com/zacharycmontoya), Datadog
 
-[Approvers](https://github.com/open-telemetry/community/blob/main/guides/contributor/membership.md#membership-levels)
-([@open-telemetry/dotnet-instrumentation-approvers](https://github.com/orgs/open-telemetry/teams/dotnet-instrumentation-approvers)):
+For more information about the maintainer role, see the [community repository](https://github.com/open-telemetry/community/blob/main/community-membership.md#maintainer).
+
+### Approvers
 
 - [Mateusz &#x141;ach](https://github.com/lachmatt), Splunk
 - [Rasmus Kuusmann](https://github.com/RassK), Splunk
 
-[Emeritus
-Maintainer/Approver/Triager](https://github.com/open-telemetry/community/blob/main/guides/contributor/membership.md#membership-levels):
+For more information about the approver role, see the [community repository](https://github.com/open-telemetry/community/blob/main/community-membership.md#approver).
+
+### Emeritus Maintainer/Approver/Triager
 
 - [Colin Higgins](https://github.com/colin-higgins)
 - [Greg Paperin](https://github.com/macrogreg)
@@ -383,5 +384,7 @@ Maintainer/Approver/Triager](https://github.com/open-telemetry/community/blob/ma
 - [Lucas Pimentel-Ordyna](https://github.com/lucaspimentel)
 - [Mike Goldsmith](https://github.com/MikeGoldsmith)
 - [Tony Redondo](https://github.com/tonyredondo)
+
+For more information about the emeritus role, see the [community repository](https://github.com/open-telemetry/community/blob/main/guides/contributor/membership.md#emeritus-maintainerapprovertriager).
 
 Learn more about roles in the [community repository](https://github.com/open-telemetry/community/blob/main/guides/contributor/membership.md).
