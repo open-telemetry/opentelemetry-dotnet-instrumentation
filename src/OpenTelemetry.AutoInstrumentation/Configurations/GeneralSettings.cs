@@ -62,39 +62,7 @@ internal class GeneralSettings : Settings
         var detectors = configuration.Resource?.DetectionDevelopment?.Detectors;
         if (detectors != null)
         {
-            var enabledDetectors = new List<ResourceDetector>();
-#if NET
-            if (detectors.Container != null)
-            {
-                enabledDetectors.Add(ResourceDetector.Container);
-            }
-#endif
-            if (detectors.Process != null)
-            {
-                enabledDetectors.Add(ResourceDetector.Process);
-            }
-
-            if (detectors.AzureAppService != null)
-            {
-                enabledDetectors.Add(ResourceDetector.AzureAppService);
-            }
-
-            if (detectors.ProcessRuntime != null)
-            {
-                enabledDetectors.Add(ResourceDetector.ProcessRuntime);
-            }
-
-            if (detectors.OperatingSystem != null)
-            {
-                enabledDetectors.Add(ResourceDetector.OperatingSystem);
-            }
-
-            if (detectors.Host != null)
-            {
-                enabledDetectors.Add(ResourceDetector.Host);
-            }
-
-            EnabledResourceDetectors = enabledDetectors;
+            EnabledResourceDetectors = detectors.GetEnabledResourceDetector();
         }
 
         SetupSdk = configuration.Disabled;
