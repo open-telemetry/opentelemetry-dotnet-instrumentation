@@ -225,6 +225,16 @@ internal partial class ConfigurationKeys
         /// Configuration key for additional <see cref="Meter"/> names to be added to the meter at the startup.
         /// </summary>
         public const string AdditionalSources = "OTEL_DOTNET_AUTO_METRICS_ADDITIONAL_SOURCES";
+
+        /// <summary>
+        /// Configuration key for metric reader export interval.
+        /// </summary>
+        public const string ExportInterval = "OTEL_METRIC_EXPORT_INTERVAL";
+
+        /// <summary>
+        /// Configuration key for metric reader export timeout.
+        /// </summary>
+        public const string ExportTimeout = "OTEL_METRIC_EXPORT_TIMEOUT";
     }
 
     /// <summary>

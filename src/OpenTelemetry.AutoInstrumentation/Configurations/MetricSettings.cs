@@ -40,8 +40,17 @@ internal class MetricSettings : Settings
     /// </summary>
     public OtlpSettings? OtlpSettings { get; private set; }
 
+    /// <summary>
+    /// Gets Reader configuration.
+    /// </summary>
+    public ReaderConfiguration ReaderConfiguration { get; private set; } = new();
+
     protected override void OnLoadEnvVar(Configuration configuration)
     {
+        ReaderConfiguration = new ReaderConfiguration(
+            interval: configuration.GetInt32(ConfigurationKeys.Metrics.ExportInterval),
+            timeout: configuration.GetInt32(ConfigurationKeys.Metrics.ExportTimeout));
+
         MetricExporters = ParseMetricExporter(configuration);
         if (MetricExporters.Contains(MetricsExporter.Otlp))
         {
@@ -77,6 +86,7 @@ internal class MetricSettings : Settings
             configuration.MeterProvider.Readers.TryGetValue("periodic", out var periodicReader) &&
             periodicReader != null)
         {
+            ReaderConfiguration = periodicReader;
             var exporters = periodicReader.Exporter;
             if (exporters != null)
             {
