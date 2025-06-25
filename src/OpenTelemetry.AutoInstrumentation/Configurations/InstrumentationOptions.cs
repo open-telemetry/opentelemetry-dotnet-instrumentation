@@ -21,9 +21,8 @@ internal class InstrumentationOptions
         AspNetCoreInstrumentationCaptureRequestHeaders = configuration.ParseHeaders(ConfigurationKeys.Traces.InstrumentationOptions.AspNetCoreInstrumentationCaptureRequestHeaders, AdditionalTag.CreateHttpRequestCache);
         AspNetCoreInstrumentationCaptureResponseHeaders = configuration.ParseHeaders(ConfigurationKeys.Traces.InstrumentationOptions.AspNetCoreInstrumentationCaptureResponseHeaders, AdditionalTag.CreateHttpResponseCache);
         EntityFrameworkCoreSetDbStatementForText = configuration.GetBool(ConfigurationKeys.Traces.InstrumentationOptions.EntityFrameworkCoreSetDbStatementForText) ?? false;
-#endif
-
         GraphQLSetDocument = configuration.GetBool(ConfigurationKeys.Traces.InstrumentationOptions.GraphQLSetDocument) ?? false;
+#endif
         GrpcNetClientInstrumentationCaptureRequestMetadata = configuration.ParseHeaders(ConfigurationKeys.Traces.InstrumentationOptions.GrpcNetClientInstrumentationCaptureRequestMetadata, AdditionalTag.CreateGrpcRequestCache);
         GrpcNetClientInstrumentationCaptureResponseMetadata = configuration.ParseHeaders(ConfigurationKeys.Traces.InstrumentationOptions.GrpcNetClientInstrumentationCaptureResponseMetadata, AdditionalTag.CreateGrpcResponseCache);
         HttpInstrumentationCaptureRequestHeaders = configuration.ParseHeaders(ConfigurationKeys.Traces.InstrumentationOptions.HttpInstrumentationCaptureRequestHeaders, AdditionalTag.CreateHttpRequestCache);
@@ -54,11 +53,12 @@ internal class InstrumentationOptions
             {
                 EntityFrameworkCoreSetDbStatementForText = instrumentationConfiguration.EntityFrameworkCore.SetDbStatementForText;
             }
-#endif
+
             if (instrumentationConfiguration.GraphQL != null)
             {
                 GraphQLSetDocument = instrumentationConfiguration.GraphQL.SetDocument;
             }
+#endif
 
             if (instrumentationConfiguration.GrpcNetClient != null)
             {
@@ -111,12 +111,12 @@ internal class InstrumentationOptions
     /// Gets a value indicating whether text query in Entity Framework Core can be passed as a db.statement tag.
     /// </summary>
     public bool EntityFrameworkCoreSetDbStatementForText { get; }
-#endif
 
     /// <summary>
     /// Gets a value indicating whether GraphQL query can be passed as a Document tag.
     /// </summary>
     public bool GraphQLSetDocument { get; }
+#endif
 
     /// <summary>
     /// Gets the list of request metadata to be captured as the span tags by Grpc.Net.Client instrumentation.
