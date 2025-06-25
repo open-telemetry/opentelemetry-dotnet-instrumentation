@@ -127,7 +127,7 @@ internal class OtlpSettings
                 {
                     headerDict[header!.Name!] = header!.Value!;
                 }
-           }
+            }
         }
 
         return headerDict.Count == 0
