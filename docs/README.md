@@ -299,6 +299,9 @@ Register-OpenTelemetryForWindowsService -WindowsServiceName MyServiceName -OTelS
 Uninstalling OpenTelemetry:
 
 ```powershell
+# PowerShell 5.1 is required
+#Requires -PSEdition Desktop
+
 # Import the previously downloaded module. After installation or an update the module is found in the default install directory.
 # Note: It's best to use the same version of the module for installation and uninstallation to ensure proper removal.
 Import-Module "C:\Program Files\OpenTelemetry .NET AutoInstrumentation\OpenTelemetry.DotNet.Auto.psm1"
