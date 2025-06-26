@@ -43,6 +43,21 @@ internal static class OtelLogging
         return OtelLoggers.GetOrAdd(suffix, CreateLogger);
     }
 
+    public static void ShutdownLogger(string suffix)
+    {
+        try
+        {
+            if (OtelLoggers.TryRemove(suffix, out var logger))
+            {
+                logger?.Dispose();
+            }
+        }
+        catch (Exception)
+        {
+            // intentionally empty
+        }
+    }
+
     // Helper method for testing
     internal static void Reset()
     {
@@ -160,13 +175,14 @@ internal static class OtelLogging
                 var fileName = GetLogFileName(suffix);
                 var logPath = Path.Combine(logDirectory, fileName);
 
-                return new RollingFileSink(
+                var rollingFileSink = new RollingFileSink(
                     path: logPath,
                     fileSizeLimitBytes: FileSizeLimitBytes,
                     retainedFileCountLimit: 10,
                     rollingInterval: RollingInterval.Day,
                     rollOnFileSizeLimit: true,
                     retainedFileTimeLimit: null);
+                return new PeriodicFlushToDiskSink(rollingFileSink, TimeSpan.FromSeconds(5));
             }
         }
         catch (Exception)

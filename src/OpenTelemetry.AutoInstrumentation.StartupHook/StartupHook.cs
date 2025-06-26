@@ -11,7 +11,8 @@ using OpenTelemetry.AutoInstrumentation.RulesEngine;
 /// </summary>
 internal class StartupHook
 {
-    private static readonly IOtelLogger Logger = OtelLogging.GetLogger("StartupHook");
+    private const string StartuphookLoggerSuffix = "StartupHook";
+    private static readonly IOtelLogger Logger = OtelLogging.GetLogger(StartuphookLoggerSuffix);
 
     // This property must be initialized before any rule is evaluated since it may be used during rule evaluation.
     internal static string? LoaderAssemblyLocation { get; set; }
@@ -31,7 +32,8 @@ internal class StartupHook
             var ruleEngine = new RuleEngine();
             if (!ruleEngine.ValidateRules())
             {
-                throw new Exception("Rule Engine Failure: One or more rules failed validation. Automatic Instrumentation won't be loaded.");
+                throw new Exception(
+                    "Rule Engine Failure: One or more rules failed validation. Automatic Instrumentation won't be loaded.");
             }
 
             Logger.Information("Initialization.");
@@ -60,6 +62,10 @@ internal class StartupHook
             {
                 throw;
             }
+        }
+        finally
+        {
+            OtelLogging.ShutdownLogger(StartuphookLoggerSuffix);
         }
     }
 
