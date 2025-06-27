@@ -8,6 +8,12 @@ namespace OpenTelemetry.AutoInstrumentation.Logging;
 /// </summary>
 internal class NoopSink : ISink
 {
+    public static readonly NoopSink Instance = new();
+
+    private NoopSink()
+    {
+    }
+
     public void Write(string message)
     {
     }

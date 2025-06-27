@@ -63,7 +63,7 @@ internal class BootstrapperHostingStartup : IHostingStartup
         }
         finally
         {
-            OtelLogging.ShutdownLogger(BootstrapperLoggerSuffix);
+            OtelLogging.CloseLogger(BootstrapperLoggerSuffix, Logger);
         }
     }
 

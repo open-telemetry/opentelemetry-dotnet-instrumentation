@@ -45,7 +45,7 @@ internal partial class Loader
         }
         else
         {
-            OtelLogging.ShutdownLogger(LoaderLoggerSuffix);
+            OtelLogging.CloseLogger(LoaderLoggerSuffix, Logger);
         }
     }
 
@@ -57,7 +57,7 @@ internal partial class Loader
             return;
         }
 
-        OtelLogging.ShutdownLogger(LoaderLoggerSuffix);
+        OtelLogging.CloseLogger(LoaderLoggerSuffix, Logger);
     }
 
     private static void TryLoadManagedAssembly()

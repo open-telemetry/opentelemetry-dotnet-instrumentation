@@ -43,13 +43,15 @@ internal static class OtelLogging
         return OtelLoggers.GetOrAdd(suffix, CreateLogger);
     }
 
-    public static void ShutdownLogger(string suffix)
+    public static void CloseLogger(string suffix, IOtelLogger otelLogger)
     {
         try
         {
-            if (OtelLoggers.TryRemove(suffix, out var logger))
+            // Update logger associated with the key, so that future calls to GetLogger
+            // return NoopLogger.
+            if (OtelLoggers.TryUpdate(suffix, NoopLogger.Instance, otelLogger))
             {
-                logger?.Dispose();
+                otelLogger.Close();
             }
         }
         catch (Exception)
@@ -153,7 +155,7 @@ internal static class OtelLogging
         // Uses ISink? here, sink creation can fail so we specify default fallback at the end.
         var sink = _configuredLogSink switch
         {
-            LogSink.NoOp => new NoopSink(),
+            LogSink.NoOp => NoopSink.Instance,
             LogSink.Console => new ConsoleSink(suffix),
             LogSink.File => CreateFileSink(suffix),
             // default to null, then default value is specified only at the end.
@@ -162,7 +164,7 @@ internal static class OtelLogging
 
         return sink ??
             // Default to NoopSink
-            new NoopSink();
+            NoopSink.Instance;
     }
 
     private static ISink? CreateFileSink(string suffix)

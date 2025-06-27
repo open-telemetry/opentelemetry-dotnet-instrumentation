@@ -461,7 +461,7 @@ internal static class Instrumentation
         }
         finally
         {
-            OtelLogging.ShutdownLogger("Managed");
+            OtelLogging.CloseLogger("Managed", Logger);
         }
     }
 

@@ -65,7 +65,7 @@ internal class StartupHook
         }
         finally
         {
-            OtelLogging.ShutdownLogger(StartuphookLoggerSuffix);
+            OtelLogging.CloseLogger(StartuphookLoggerSuffix, Logger);
         }
     }
 

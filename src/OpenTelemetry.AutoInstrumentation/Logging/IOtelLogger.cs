@@ -3,7 +3,7 @@
 
 namespace OpenTelemetry.AutoInstrumentation.Logging;
 
-internal interface IOtelLogger : IDisposable
+internal interface IOtelLogger
 {
     LogLevel Level { get; }
 
@@ -88,4 +88,6 @@ internal interface IOtelLogger : IDisposable
     void Error<T0, T1, T2>(Exception exception, string messageTemplate, T0 property0, T1 property1, T2 property2, bool writeToEventLog = true);
 
     void Error(Exception exception, string messageTemplate, object[] args, bool writeToEventLog = true);
+
+    void Close();
 }

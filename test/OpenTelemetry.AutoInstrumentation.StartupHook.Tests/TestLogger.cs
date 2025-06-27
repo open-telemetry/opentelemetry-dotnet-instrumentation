@@ -181,7 +181,7 @@ internal class TestLogger : IOtelLogger
     {
     }
 
-    public void Dispose()
+    public void Shutdown()
     {
     }
 
