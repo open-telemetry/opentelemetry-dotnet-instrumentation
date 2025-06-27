@@ -65,6 +65,7 @@ internal static class OtelLogging
     {
         _configuredLogLevel = GetConfiguredLogLevel();
         _configuredLogSink = GetConfiguredLogSink();
+        OtelLoggers.Clear();
     }
 
     internal static LogLevel? GetConfiguredLogLevel()
