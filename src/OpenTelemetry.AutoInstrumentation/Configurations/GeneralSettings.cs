@@ -18,6 +18,11 @@ internal class GeneralSettings : Settings
     public IReadOnlyList<ResourceDetector> EnabledResourceDetectors { get; private set; } = new List<ResourceDetector>();
 
     /// <summary>
+    /// Gets the list of enabled resources.
+    /// </summary>
+    public IReadOnlyList<KeyValuePair<string, object>> Resources { get; private set; } = new List<KeyValuePair<string, object>>();
+
+    /// <summary>
     /// Gets a value indicating whether the <see cref="AppDomain.UnhandledException"/> event should trigger
     /// the flushing of telemetry data.
     /// Default is <c>false</c>.
@@ -45,6 +50,35 @@ internal class GeneralSettings : Settings
             }
         }
 
+        var baseResources = new List<KeyValuePair<string, object>>
+        {
+            new(Constants.DistributionAttributes.TelemetryDistroNameAttributeName, Constants.DistributionAttributes.TelemetryDistroNameAttributeValue),
+            new(Constants.DistributionAttributes.TelemetryDistroVersionAttributeName, AutoInstrumentationVersion.Version)
+        };
+
+        var serviceName = configuration.GetString(ConfigurationKeys.ServiceName);
+
+        if (!string.IsNullOrEmpty(serviceName))
+        {
+            baseResources.Add(new KeyValuePair<string, object>(Constants.ResourceAttributes.AttributeServiceName, serviceName!));
+        }
+
+        var resourceAttributes = ParseResourceAttributes(configuration.GetString(ConfigurationKeys.ResourceAttributes));
+        if (resourceAttributes != null && resourceAttributes.Count > 0)
+        {
+            foreach (var attr in resourceAttributes)
+            {
+                if (attr.Key == Constants.ResourceAttributes.AttributeServiceName && !string.IsNullOrEmpty(serviceName))
+                {
+                    continue; // OTEL_SERVICE_NAME takes precedence
+                }
+
+                baseResources.Add(attr);
+            }
+        }
+
+        Resources = baseResources;
+
         var resourceDetectorsEnabledByDefault = configuration.GetBool(ConfigurationKeys.ResourceDetectorEnabled) ?? true;
 
         EnabledResourceDetectors = configuration.ParseEnabledEnumList<ResourceDetector>(
@@ -65,6 +99,69 @@ internal class GeneralSettings : Settings
             EnabledResourceDetectors = detectors.GetEnabledResourceDetector();
         }
 
+        var baseResources = new List<KeyValuePair<string, object>>
+        {
+            new(Constants.DistributionAttributes.TelemetryDistroNameAttributeName, Constants.DistributionAttributes.TelemetryDistroNameAttributeValue),
+            new(Constants.DistributionAttributes.TelemetryDistroVersionAttributeName, AutoInstrumentationVersion.Version)
+        };
+
+        var resourceAttributesWithPriority = configuration.Resource?.ParseAttributes() ?? [];
+
+        var resourceAttributes = ParseResourceAttributes(configuration.Resource?.AttributesList);
+
+        var merged = new Dictionary<string, object>();
+        foreach (var kv in baseResources)
+        {
+            merged[kv.Key] = kv.Value;
+        }
+
+        foreach (var kv in resourceAttributesWithPriority)
+        {
+            if (!merged.ContainsKey(kv.Key))
+            {
+                merged[kv.Key] = kv.Value;
+            }
+        }
+
+        if (resourceAttributes != null)
+        {
+            foreach (var kv in resourceAttributes)
+            {
+                if (!merged.ContainsKey(kv.Key))
+                {
+                    merged[kv.Key] = kv.Value;
+                }
+            }
+        }
+
+        Resources = merged.ToList();
+
         SetupSdk = configuration.Disabled;
+    }
+
+    private static List<KeyValuePair<string, object>> ParseResourceAttributes(string? resourceAttributes)
+    {
+        if (string.IsNullOrEmpty(resourceAttributes))
+        {
+            return [];
+        }
+
+        var attributeListSplitter = ',';
+        var attributeKeyValueSplitter = '=';
+        var attributes = new List<KeyValuePair<string, object>>();
+
+        var rawAttributes = resourceAttributes!.Split(attributeListSplitter);
+        foreach (var rawKeyValuePair in rawAttributes)
+        {
+            var keyValuePair = rawKeyValuePair.Split(attributeKeyValueSplitter);
+            if (keyValuePair.Length != 2)
+            {
+                continue;
+            }
+
+            attributes.Add(new KeyValuePair<string, object>(keyValuePair[0].Trim(), keyValuePair[1].Trim()));
+        }
+
+        return attributes;
     }
 }
