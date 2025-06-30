@@ -52,6 +52,16 @@ internal partial class ConfigurationKeys
     public const string EnabledResourceDetectorTemplate = "OTEL_DOTNET_AUTO_{0}_RESOURCE_DETECTOR_ENABLED";
 
     /// <summary>
+    /// Configuration key template for resource attributes.
+    /// </summary>
+    public const string ResourceAttributes = "OTEL_RESOURCE_ATTRIBUTES";
+
+    /// <summary>
+    /// Configuration key for setting the service name.
+    /// </summary>
+    public const string ServiceName = "OTEL_SERVICE_NAME";
+
+    /// <summary>
     /// Configuration keys for traces.
     /// </summary>
     public static class Traces

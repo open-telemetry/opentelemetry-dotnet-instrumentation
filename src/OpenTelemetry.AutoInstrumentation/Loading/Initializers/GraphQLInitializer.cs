@@ -29,10 +29,10 @@ internal class GraphQLInitializer : InstrumentationInitializer
 
         var optionsType = Type.GetType("GraphQL.Telemetry.GraphQLTelemetryOptions, GraphQL")!;
         var optionsInstance = Activator.CreateInstance(optionsType)!;
-
+#if NET
         optionsType?.GetProperty("RecordDocument")?
             .SetValue(optionsInstance, _tracerSettings.InstrumentationOptions.GraphQLSetDocument);
-
+#endif
         _pluginManager.ConfigureTracesOptions(optionsInstance);
 
         initializerType.GetMethod("EnableAutoInstrumentation", BindingFlags.Public | BindingFlags.Static)!

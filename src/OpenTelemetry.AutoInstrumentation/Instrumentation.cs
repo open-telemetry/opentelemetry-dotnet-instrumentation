@@ -139,7 +139,7 @@ internal static class Instrumentation
                     var builder = Sdk
                         .CreateTracerProviderBuilder()
                         .InvokePluginsBefore(_pluginManager)
-                        .SetResourceBuilder(ResourceConfigurator.CreateResourceBuilder(GeneralSettings.Value.EnabledResourceDetectors))
+                        .SetResourceBuilder(ResourceConfigurator.CreateResourceBuilder(GeneralSettings.Value.EnabledResourceDetectors, GeneralSettings.Value.Resources))
                         .UseEnvironmentVariables(LazyInstrumentationLoader, TracerSettings.Value, _pluginManager)
                         .InvokePluginsAfter(_pluginManager);
 
@@ -161,7 +161,7 @@ internal static class Instrumentation
                     var builder = Sdk
                         .CreateMeterProviderBuilder()
                         .InvokePluginsBefore(_pluginManager)
-                        .SetResourceBuilder(ResourceConfigurator.CreateResourceBuilder(GeneralSettings.Value.EnabledResourceDetectors))
+                        .SetResourceBuilder(ResourceConfigurator.CreateResourceBuilder(GeneralSettings.Value.EnabledResourceDetectors, GeneralSettings.Value.Resources))
                         .UseEnvironmentVariables(LazyInstrumentationLoader, MetricSettings.Value, _pluginManager)
                         .InvokePluginsAfter(_pluginManager);
 
@@ -225,7 +225,7 @@ internal static class Instrumentation
 
             // TODO: plugins support
             var loggerProvider = loggerProviderBuilder!
-                .SetResourceBuilder(ResourceConfigurator.CreateResourceBuilder(GeneralSettings.Value.EnabledResourceDetectors))
+                .SetResourceBuilder(ResourceConfigurator.CreateResourceBuilder(GeneralSettings.Value.EnabledResourceDetectors, GeneralSettings.Value.Resources))
                 .UseEnvironmentVariables(LazyInstrumentationLoader, LogSettings.Value, _pluginManager!)
                 .Build();
             Logger.Information("OpenTelemetry logger provider initialized.");

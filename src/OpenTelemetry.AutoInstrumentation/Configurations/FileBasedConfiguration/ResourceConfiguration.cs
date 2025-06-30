@@ -24,4 +24,20 @@ internal class ResourceConfiguration
     /// </summary>
     [YamlMember(Alias = "detection/development")]
     public DetectionDevelopment? DetectionDevelopment { get; set; }
+
+    public List<KeyValuePair<string, object>> ParseAttributes()
+    {
+        var result = new List<KeyValuePair<string, object>>();
+        if (Attributes == null)
+        {
+            return result;
+        }
+
+        foreach (var attr in Attributes)
+        {
+            result.Add(new KeyValuePair<string, object>(attr.Name, attr.Value));
+        }
+
+        return result;
+    }
 }
