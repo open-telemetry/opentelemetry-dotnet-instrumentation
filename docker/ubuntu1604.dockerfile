@@ -31,11 +31,18 @@ RUN wget -O - https://apt.kitware.com/keys/kitware-archive-latest.asc 2>/dev/nul
     apt-get update && \
     apt-get install -y --allow-unauthenticated cmake
 
+# Import the GPG key to verify the .NET installation script
+# See https://learn.microsoft.com/dotnet/core/tools/dotnet-install-script#signature-validation-of-dotnet-installsh
+RUN curl -sSL --retry 5 https://dot.net/v1/dotnet-install.asc --output dotnet-install.asc && \
+    gpg --import dotnet-install.asc && \
+    rm dotnet-install.asc
+
 RUN curl -sSL --retry 5 https://dot.net/v1/dotnet-install.sh --output dotnet-install.sh \
-    && echo "SHA512: $(sha512sum dotnet-install.sh)" \
-    && echo "f8c59166ed912d6861e93c3efc2840be31ec32897679678a72f781423ebf061348d3b92b16c9541f5b312a34160f452826bb3021efb1414d76bd7e237e4c0e9a  dotnet-install.sh" | sha512sum -c \
+    && curl -sSL --retry 5 https://dot.net/v1/dotnet-install.sig --output dotnet-install.sig \
+    && gpg --verify dotnet-install.sig dotnet-install.sh \
     && chmod +x ./dotnet-install.sh \
     && ./dotnet-install.sh -v 9.0.301 --install-dir /usr/share/dotnet --no-path \
-    && rm dotnet-install.sh
+    && rm dotnet-install.sh \
+    && rm dotnet-install.sig
 
 WORKDIR /project

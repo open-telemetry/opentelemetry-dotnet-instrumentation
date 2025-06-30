@@ -10,18 +10,27 @@ RUN apk update \
         protobuf=24.4-r4 \
         protobuf-dev=24.4-r4 \
         grpc=1.62.1-r2 \
-        grpc-plugins=1.62.1-r2
+        grpc-plugins=1.62.1-r2 \
+        gpg=2.4.7-r0 \
+        gpg-agent=2.4.7-r0
 
 ENV IsAlpine=true
 ENV PROTOBUF_PROTOC=/usr/bin/protoc
 ENV gRPC_PluginFullPath=/usr/bin/grpc_csharp_plugin
 
-# Install older sdks using the install script
+# Import the GPG key to verify the .NET installation script
+# See https://learn.microsoft.com/dotnet/core/tools/dotnet-install-script#signature-validation-of-dotnet-installsh
+RUN curl -sSL --retry 5 https://dot.net/v1/dotnet-install.asc --output dotnet-install.asc && \
+    gpg --import dotnet-install.asc && \
+    rm dotnet-install.asc
+
+# Install older SDKs using the install script
 RUN curl -sSL --retry 5 https://dot.net/v1/dotnet-install.sh --output dotnet-install.sh \
-    && echo "SHA512: $(sha512sum dotnet-install.sh)" \
-    && echo "f8c59166ed912d6861e93c3efc2840be31ec32897679678a72f781423ebf061348d3b92b16c9541f5b312a34160f452826bb3021efb1414d76bd7e237e4c0e9a  dotnet-install.sh" | sha512sum -c \
+    && curl -sSL --retry 5 https://dot.net/v1/dotnet-install.sig --output dotnet-install.sig \
+    && gpg --verify dotnet-install.sig dotnet-install.sh \
     && chmod +x ./dotnet-install.sh \
     && ./dotnet-install.sh -v 8.0.411 --install-dir /usr/share/dotnet --no-path \
-    && rm dotnet-install.sh
+    && rm dotnet-install.sh \
+    && rm dotnet-install.sig
 
 WORKDIR /project
