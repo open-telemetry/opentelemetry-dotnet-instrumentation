@@ -240,9 +240,17 @@ uses environment variables as parameters:
 
 On Windows, you should install OpenTelemetry .NET Automatic Instrumentation
 and instrument your .NET application using the provided PowerShell module.
+
+> [!WARNING]
+> The PowerShell module works only on PowerShell 5.1
+which is the one installed by default on Windows.
+
 Example usage (run as administrator):
 
 ```powershell
+# PowerShell 5.1 is required
+#Requires -PSEdition Desktop
+
 # Download the module
 $module_url = "https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/download/v1.11.0/OpenTelemetry.DotNet.Auto.psm1"
 $download_path = Join-Path $env:temp "OpenTelemetry.DotNet.Auto.psm1"
@@ -288,9 +296,25 @@ Update-OpenTelemetryCore
 Register-OpenTelemetryForWindowsService -WindowsServiceName MyServiceName -OTelServiceName MyOtelServiceName
 ```
 
-> [!WARNING]
-> The PowerShell module works only on PowerShell 5.1
-which is the one installed by default on Windows.
+Uninstalling OpenTelemetry:
+
+```powershell
+# PowerShell 5.1 is required
+#Requires -PSEdition Desktop
+
+# Import the previously downloaded module. After installation or an update the module is found in the default install directory.
+# Note: It's best to use the same version of the module for installation and uninstallation to ensure proper removal.
+Import-Module "C:\Program Files\OpenTelemetry .NET AutoInstrumentation\OpenTelemetry.DotNet.Auto.psm1"
+
+# If IIS was previously registered, unregister it.
+Unregister-OpenTelemetryForIIS
+
+# If Windows services were previously registered, unregister them.
+Unregister-OpenTelemetryForWindowsService -WindowsServiceName MyServiceName
+
+# Finally, uninstall OpenTelemetry instrumentation
+Uninstall-OpenTelemetryCore
+```
 
 ## Instrument a container
 
@@ -334,8 +358,7 @@ See [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## Community Roles
 
-[Maintainers](https://github.com/open-telemetry/community/blob/main/guides/contributor/membership.md#membership-levels)
-([@open-telemetry/dotnet-instrumentation-maintainers](https://github.com/orgs/open-telemetry/teams/dotnet-instrumentation-maintainers)):
+### Maintainers
 
 - [Chris Ventura](https://github.com/nrcventura), New Relic
 - [Paulo Janotti](https://github.com/pjanotti), Splunk
@@ -344,14 +367,16 @@ See [CONTRIBUTING.md](CONTRIBUTING.md).
 - [Robert Paj&#x105;k](https://github.com/pellared), Splunk
 - [Zach Montoya](https://github.com/zacharycmontoya), Datadog
 
-[Approvers](https://github.com/open-telemetry/community/blob/main/guides/contributor/membership.md#membership-levels)
-([@open-telemetry/dotnet-instrumentation-approvers](https://github.com/orgs/open-telemetry/teams/dotnet-instrumentation-approvers)):
+For more information about the maintainer role, see the [community repository](https://github.com/open-telemetry/community/blob/main/community-membership.md#maintainer).
+
+### Approvers
 
 - [Mateusz &#x141;ach](https://github.com/lachmatt), Splunk
 - [Rasmus Kuusmann](https://github.com/RassK), Splunk
 
-[Emeritus
-Maintainer/Approver/Triager](https://github.com/open-telemetry/community/blob/main/guides/contributor/membership.md#membership-levels):
+For more information about the approver role, see the [community repository](https://github.com/open-telemetry/community/blob/main/community-membership.md#approver).
+
+### Emeritus Maintainer/Approver/Triager
 
 - [Colin Higgins](https://github.com/colin-higgins)
 - [Greg Paperin](https://github.com/macrogreg)
@@ -360,4 +385,4 @@ Maintainer/Approver/Triager](https://github.com/open-telemetry/community/blob/ma
 - [Mike Goldsmith](https://github.com/MikeGoldsmith)
 - [Tony Redondo](https://github.com/tonyredondo)
 
-Learn more about roles in the [community repository](https://github.com/open-telemetry/community/blob/main/guides/contributor/membership.md).
+For more information about the emeritus role, see the [community repository](https://github.com/open-telemetry/community/blob/main/guides/contributor/membership.md#emeritus-maintainerapprovertriager).
