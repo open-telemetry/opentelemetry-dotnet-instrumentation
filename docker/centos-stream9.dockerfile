@@ -2,23 +2,14 @@ FROM quay.io/centos/centos:stream9@sha256:45650b7974762418b66987d67c063aee0d2fab
 
 # Install dotnet sdk
 RUN dnf install -y \
-    gpg \
     libicu-devel
 
-# Import the GPG key to verify the .NET installation script
-# See https://learn.microsoft.com/dotnet/core/tools/dotnet-install-script#signature-validation-of-dotnet-installsh
-RUN curl -sSL --retry 5 https://dot.net/v1/dotnet-install.asc --output dotnet-install.asc && \
-    gpg --import dotnet-install.asc && \
-    rm dotnet-install.asc
+COPY ./scripts/dotnet-install.sh ./dotnet-install.sh
 
-RUN curl -sSL --retry 5 https://dot.net/v1/dotnet-install.sh --output dotnet-install.sh \
-    && curl -sSL --retry 5 https://dot.net/v1/dotnet-install.sig --output dotnet-install.sig \
-    && gpg --verify dotnet-install.sig dotnet-install.sh \
-    && chmod +x ./dotnet-install.sh \
+RUN chmod +x ./dotnet-install.sh \
     && ./dotnet-install.sh -v 9.0.301 --install-dir /usr/share/dotnet --no-path \
     && ./dotnet-install.sh -v 8.0.411 --install-dir /usr/share/dotnet --no-path \
-    && rm dotnet-install.sh \
-    && rm dotnet-install.sig
+    && rm dotnet-install.sh
 
 ENV PATH="$PATH:/usr/share/dotnet"
 

@@ -31,18 +31,10 @@ RUN wget -O - https://apt.kitware.com/keys/kitware-archive-latest.asc 2>/dev/nul
     apt-get update && \
     apt-get install -y --allow-unauthenticated cmake
 
-# Import the GPG key to verify the .NET installation script
-# See https://learn.microsoft.com/dotnet/core/tools/dotnet-install-script#signature-validation-of-dotnet-installsh
-RUN curl -sSL --retry 5 https://dot.net/v1/dotnet-install.asc --output dotnet-install.asc && \
-    gpg --import dotnet-install.asc && \
-    rm dotnet-install.asc
+COPY ./scripts/dotnet-install.sh ./dotnet-install.sh
 
-RUN curl -sSL --retry 5 https://dot.net/v1/dotnet-install.sh --output dotnet-install.sh \
-    && curl -sSL --retry 5 https://dot.net/v1/dotnet-install.sig --output dotnet-install.sig \
-    && gpg --verify dotnet-install.sig dotnet-install.sh \
-    && chmod +x ./dotnet-install.sh \
+RUN chmod +x ./dotnet-install.sh \
     && ./dotnet-install.sh -v 9.0.301 --install-dir /usr/share/dotnet --no-path \
-    && rm dotnet-install.sh \
-    && rm dotnet-install.sig
+    && rm dotnet-install.sh
 
 WORKDIR /project
