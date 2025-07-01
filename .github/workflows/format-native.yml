@@ -12,19 +12,19 @@ permissions:
 
 jobs:
   check-native-format:
-    name: ${{ matrix.os-name }}
+    name: ${{ matrix.step-name }}
     runs-on: ${{ matrix.runner }}
 
     strategy:
       fail-fast: false
       matrix:
         include:
-          - os-name: macos
-            runner: macos-15-xlarge
-          - os-name: linux
-            runner: ubuntu-24.04
-          - os-name: windows
-            runner: windows-2025
+          - step-name: native-format-macos
+            runner: macos-13-xlarge
+          - step-name: native-format-linux
+            runner: ubuntu-22.04
+          - step-name: native-format-windows
+            runner: windows-2022
 
     steps:
 
