@@ -9,7 +9,7 @@ permissions:
 
 jobs:
   powershell-script:
-    runs-on: windows-2025
+    runs-on: windows-2022
     steps:
 
       - name: Setup .NET
