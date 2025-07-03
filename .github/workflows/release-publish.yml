@@ -112,7 +112,7 @@ jobs:
       - name: Test the Shell scripts from README.md in Docker container
         run: |
           set -e
-          docker build -t mybuildimage -f "./docker/${{ matrix.base-image }}.dockerfile" ./docker
+          docker build -t mybuildimage -f "./docker/${{ matrix.base-image }}.dockerfile" .
           docker run --rm mybuildimage /bin/sh -c '
             set -e
             mkdir testapp
