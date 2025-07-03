@@ -48,6 +48,7 @@ jobs:
             containers: none
           - machine: windows-2025
             containers: none
+            artifact-name: windows-2022
           - machine: ubuntu-22.04
             containers: linux
           - machine: macos-13
@@ -79,7 +80,7 @@ jobs:
       - name: Download Artifacts from build job
         uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # tag: v4.3.0
         with:
-          name: bin-${{ matrix.machine }}
+          name: bin-${{ matrix.artifact-name || matrix.machine }}
           path: bin/tracer-home
 
       - name: Install SQL Server (localdb)
