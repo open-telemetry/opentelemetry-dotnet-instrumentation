@@ -1,1 +1,1 @@
-FROM rabbitmq:4.1.1@sha256:5c80b130f2b243a819b0f30dd25edd2a3360ebe91653b659dc7c4c14381a0dcc
+FROM rabbitmq:4.1.1@sha256:9454deb7f444e12a64ee08e4a19db2d3fea7c7e3eea44fe56ad90509af2b7c12
