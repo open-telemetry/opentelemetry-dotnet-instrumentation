@@ -9,6 +9,7 @@
    - [`docs/README.md`](./README.md)
 
 1. Update the [CHANGELOG.md](../CHANGELOG.md) with the new release.
+   Remove empty sections for the version being released.
 
 1. Stable release only! Update `PublicAPI.Shipped.txt` based on corresponding `PublicAPI.Unshipped.txt`.
 
