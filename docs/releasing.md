@@ -14,6 +14,15 @@
 
 1. Create a pull request with `release PR` label on GitHub
    with the changes described in the changelog.
+1. Add tests section in description displaying current status of testing:
+
+     ```markdown
+    ## Tests
+
+    - [ ] CI
+    - [ ] MacOS with Linux Containers
+    - [ ] Windows with Linux Containers
+     ```
 
 1. Run the integration tests with Linux containers on Windows and macOS
    (not covered by CI):
@@ -39,15 +48,6 @@
 
    - Use draft created by `release` GitHub workflow.
    - Use the [CHANGELOG.md](../CHANGELOG.md) content in the description.
-   - Add tests section in description displaying current status of testing:
-
-    ```markdown
-   ## Tests
-
-   - [ ] CI
-   - [ ] MacOS with Linux Containers
-   - [ ] Windows with Linux Containers
-    ```
 
    After you've publish the release, a `release-publish` GitHub workflow starts.
 
