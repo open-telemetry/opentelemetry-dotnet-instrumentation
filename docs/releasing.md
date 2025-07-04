@@ -39,6 +39,15 @@
 
    - Use draft created by `release` GitHub workflow.
    - Use the [CHANGELOG.md](../CHANGELOG.md) content in the description.
+   - Add tests section in description displaying current status of testing:
+
+    ```markdown
+   ## Tests
+
+   - [ ] CI
+   - [ ] MacOS with Linux Containers
+   - [ ] Windows with Linux Containers
+    ```
 
    After you've publish the release, a `release-publish` GitHub workflow starts.
 
