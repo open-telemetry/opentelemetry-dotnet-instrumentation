@@ -10,7 +10,7 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 ### Added
 
 - Support for [`Npgsql`](https://www.nuget.org/packages/Npgsql/)
-  metrics instrumentation for versions `6.0.0`+.
+  metrics instrumentation for versions `6.0.0`+ on .NET.
 - In install script, Install-OpenTelemetryCore accepts optional argument RegisterAssembliesInGAC,
   which is true by default. When set to false, assemblies would not be installed
   in GAC.
