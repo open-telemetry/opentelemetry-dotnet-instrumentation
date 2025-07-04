@@ -322,8 +322,10 @@ internal static class Instrumentation
                     break;
                 case MetricInstrumentation.Process:
                     break;
+#if NET
                 case MetricInstrumentation.Npgsql:
                     break;
+#endif
                 case MetricInstrumentation.NServiceBus:
                     break;
                 case MetricInstrumentation.SqlClient:
