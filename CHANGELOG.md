@@ -85,12 +85,6 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
   - `System.Text.Json` update from `9.0.2` to `9.0.6`.
   - `System.ValueTuple` from `4.5.0` to `4.6.1`.
 
-### Deprecated
-
-### Removed
-
-### Fixed
-
 ## [1.11.0](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/tag/v1.11.0)
 
 ### Changed
