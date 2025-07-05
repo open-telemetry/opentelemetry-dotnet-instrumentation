@@ -9,25 +9,23 @@ using OpenTelemetry.AutoInstrumentation.Logging;
 
 namespace OpenTelemetry.AutoInstrumentation.ContinuousProfiler;
 
-internal class ContinuousProfilerProcessor : IDisposable
+internal class SampleExporter : IDisposable
 {
     private const string BackgroundThreadName = "OpenTelemetry Continuous Profiler Thread";
 
     private static readonly IOtelLogger Logger = OtelLogging.GetLogger();
 
-    // Additional async local required to get full set of notifications,
-    // see https://github.com/dotnet/runtime/issues/67276#issuecomment-1089877762
-    private readonly AsyncLocal<Activity?> _supportingActivityAsyncLocal;
-    private readonly Thread _thread;
     private readonly TimeSpan _exportInterval;
     private readonly TimeSpan _exportTimeout;
     private readonly BufferProcessor _bufferProcessor;
     private readonly ManualResetEventSlim _shutdownTrigger = new(false);
+    // Additional async local required to get full set of notifications,
+    // see https://github.com/dotnet/runtime/issues/67276#issuecomment-1089877762
+    private readonly AsyncLocal<Activity?>? _supportingActivityAsyncLocal;
+    private readonly Thread? _thread;
 
-    public ContinuousProfilerProcessor(BufferProcessor bufferProcessor, TimeSpan exportInterval, TimeSpan exportTimeout)
+    public SampleExporter(BufferProcessor bufferProcessor, TimeSpan exportInterval, TimeSpan exportTimeout)
     {
-        Logger.Debug("Initializing Continuous Profiler export thread.");
-
         if (exportInterval <= TimeSpan.Zero)
         {
             throw new ArgumentOutOfRangeException(nameof(exportInterval));
@@ -40,9 +38,12 @@ internal class ContinuousProfilerProcessor : IDisposable
         }
 
         _exportTimeout = exportTimeout;
-
         _bufferProcessor = bufferProcessor;
+
         _supportingActivityAsyncLocal = new AsyncLocal<Activity?>(ActivityChanged);
+        Activity.CurrentChanged += Activity_CurrentChanged;
+
+        Logger.Debug("Initializing Continuous Profiler export thread.");
 
         _thread = new Thread(SampleReadingThread)
         {
@@ -52,17 +53,14 @@ internal class ContinuousProfilerProcessor : IDisposable
         _thread.Start();
     }
 
-    public void Activity_CurrentChanged(object? sender, ActivityChangedEventArgs e)
-    {
-        _supportingActivityAsyncLocal.Value = e.Current;
-    }
-
     public void Dispose()
     {
+        Activity.CurrentChanged -= Activity_CurrentChanged;
+
         var configuredGracePeriod = 2 * _exportTimeout;
         var finalGracePeriod = (int)Math.Min(configuredGracePeriod.TotalMilliseconds, 60000);
         _shutdownTrigger.Set();
-        if (!_thread.Join(finalGracePeriod))
+        if (_thread != null && !_thread.Join(finalGracePeriod))
         {
             Logger.Warning("Continuous profiler's exporter thread failed to terminate in required time.");
         }
@@ -88,6 +86,14 @@ internal class ContinuousProfilerProcessor : IDisposable
         }
 
         NativeMethods.ContinuousProfilerSetNativeContext(0, 0, 0);
+    }
+
+    private void Activity_CurrentChanged(object? sender, ActivityChangedEventArgs e)
+    {
+        if (_supportingActivityAsyncLocal != null)
+        {
+            _supportingActivityAsyncLocal.Value = e.Current;
+        }
     }
 
     private void SampleReadingThread()
