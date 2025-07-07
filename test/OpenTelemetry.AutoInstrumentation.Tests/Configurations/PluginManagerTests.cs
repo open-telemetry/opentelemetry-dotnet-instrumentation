@@ -119,17 +119,20 @@ public class PluginManagerTests
         var settings = GetSettings(pluginAssemblyQualifiedName);
         var pluginManager = new PluginManager(settings);
 
-        var logsAction = () => LoggerFactory.Create(builder =>
+        var logsAction = () =>
         {
-            builder.AddOpenTelemetry(options =>
+            using var loggerFactory = LoggerFactory.Create(builder =>
             {
-                options.IncludeFormattedMessage = false;
-                pluginManager.ConfigureLogsOptions(options);
+                builder.AddOpenTelemetry(options =>
+                {
+                    options.IncludeFormattedMessage = false;
+                    pluginManager.ConfigureLogsOptions(options);
 
-                // Verify that plugin changes the state
-                Assert.True(options.IncludeFormattedMessage);
+                    // Verify that plugin changes the state
+                    Assert.True(options.IncludeFormattedMessage);
+                });
             });
-        });
+        };
 
         Assert.Null(Record.Exception(() => logsAction()));
     }

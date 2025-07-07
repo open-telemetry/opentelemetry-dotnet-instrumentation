@@ -7,7 +7,7 @@ internal class InternalLogger : IOtelLogger
 {
     private static readonly object[] NoPropertyValues = Array.Empty<object>();
 
-    private readonly ISink _sink;
+    private ISink _sink;
 
     internal InternalLogger(ISink sink, LogLevel logLevel)
     {
@@ -142,9 +142,13 @@ internal class InternalLogger : IOtelLogger
     public void Error(Exception exception, string messageTemplate, object[] args, bool writeToEventLog)
         => Write(LogLevel.Error, exception, messageTemplate, args, writeToEventLog);
 
-    public void Dispose()
+    public void Close()
     {
-        if (_sink is IDisposable disposableSink)
+        // Replace with Noop sink, so that attempts to write after logger is closed
+        // don't try to write to disposed sink.
+
+        var oldSink = Interlocked.Exchange(ref _sink, NoopSink.Instance);
+        if (oldSink is IDisposable disposableSink)
         {
             disposableSink.Dispose();
         }

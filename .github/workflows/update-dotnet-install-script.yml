@@ -1,0 +1,115 @@
+name: update-dotnet-install-script
+
+on:
+  schedule:
+    - cron:  '0 4 1 * *'
+  workflow_dispatch:
+
+permissions: {}
+
+jobs:
+  update-dotnet-install-script:
+    runs-on: ubuntu-latest
+    if: github.event.repository.fork == false
+
+    env:
+      DOTNET_INSTALL_SCRIPT_URL: 'https://dot.net/v1/dotnet-install.sh'
+      DOTNET_INSTALL_SCRIPT_GPG_KEY_URL: 'https://dot.net/v1/dotnet-install.asc'
+      DOTNET_INSTALL_SCRIPT_SIGNATURE_URL: 'https://dot.net/v1/dotnet-install.sig'
+      GIT_COMMIT_USER_EMAIL: '197425009+otelbot[bot]@users.noreply.github.com'
+      GIT_COMMIT_USER_NAME: 'otelbot[bot]'
+      UPDATE_BRANCH_NAME: 'update-dotnet-install-script'
+
+    steps:
+
+    - name: Generate GitHub application token
+      id: generate-app-token
+      uses: actions/create-github-app-token@df432ceedc7162793a195dd1713ff69aefc7379e # v2.0.6
+      with:
+        app-id: ${{ vars.OTELBOT_APP_ID }}
+        permission-contents: write
+        permission-pull-requests: write
+        private-key: ${{ secrets.OTELBOT_PRIVATE_KEY }}
+
+    - name: Checkout code
+      uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      with:
+        filter: 'tree:0'
+        show-progress: false
+        token: ${{ steps.generate-app-token.outputs.token }}
+
+    - name: Update .NET installation script
+      id: update-script
+      shell: pwsh
+      run: |
+        $ErrorActionPreference = "Stop"
+        $ProgressPreference = "SilentlyContinue"
+
+        # Download the latest .NET installation shell script
+        $InstallScriptUrl = ${env:DOTNET_INSTALL_SCRIPT_URL}
+        $InstallScriptFileName = (Join-Path "." "scripts" "dotnet-install.sh")
+
+        Invoke-WebRequest -Uri $InstallScriptUrl -MaximumRetryCount 5 -OutFile $InstallScriptFileName | Out-Null
+
+        $GitStatus = (git status --porcelain)
+
+        if ([string]::IsNullOrEmpty($GitStatus)) {
+          Write-Output "No changes to commit."
+          exit 0
+        }
+
+        # Verify the GPG signature of the installation script
+        # See https://learn.microsoft.com/dotnet/core/tools/dotnet-install-script#signature-validation-of-dotnet-installsh
+        $KeyFileName = (Join-Path ${env:RUNNER_TEMP} "dotnet-install.asc")
+        $SignatureFileName = (Join-Path ${env:RUNNER_TEMP} "dotnet-install.sig")
+
+        Invoke-WebRequest -Uri ${env:DOTNET_INSTALL_SCRIPT_GPG_KEY_URL} -MaximumRetryCount 5 -OutFile $KeyFileName | Out-Null
+        Invoke-WebRequest -Uri ${env:DOTNET_INSTALL_SCRIPT_SIGNATURE_URL} -MaximumRetryCount 5 -OutFile $SignatureFileName | Out-Null
+
+        gpg --import $KeyFileName || throw "Failed to import GPG key."
+        gpg --verify $SignatureFileName $InstallScriptFileName || throw "Failed to verify GPG signature."
+
+        # Configure Git and check whether the branch already exists
+        $BranchName = ${env:UPDATE_BRANCH_NAME}
+
+        git config user.email "${env:GIT_COMMIT_USER_EMAIL}" | Out-Null
+        git config user.name "${env:GIT_COMMIT_USER_NAME}" | Out-Null
+        git fetch origin --no-tags | Out-Null
+        git rev-parse --verify --quiet "remotes/origin/${BranchName}" | Out-Null
+
+        if ($LASTEXITCODE -eq 0) {
+          Write-Output "Branch ${BranchName} already exists."
+          exit 0
+        }
+
+        # Create a new branch and commit the changes
+        git checkout -b $BranchName
+        git add $InstallScriptFileName
+        git commit -m "Update .NET Installation Script`n`nUpdate .NET installation script from ${InstallScriptUrl}." -s
+        git push -u origin $BranchName
+
+        "updated-script=true" >> ${env:GITHUB_OUTPUT}
+
+    - name: Create pull request
+      if: steps.update-script.outputs.updated-script == 'true'
+      uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea # v7.0.1
+      env:
+        DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
+      with:
+        github-token: ${{ steps.generate-app-token.outputs.token }}
+        script: |
+          const { repo, owner } = context.repo;
+          const workflowUrl = `${process.env.GITHUB_SERVER_URL}/${owner}/${repo}/actions/runs/${process.env.GITHUB_RUN_ID}`;
+          const { data: pr } = await github.rest.pulls.create({
+            title: 'Update .NET Installation Script',
+            owner,
+            repo,
+            head: process.env.UPDATE_BRANCH_NAME,
+            base: process.env.DEFAULT_BRANCH,
+            body: [
+              `Update .NET installation script from [dot.net](${process.env.DOTNET_INSTALL_SCRIPT_URL}).`,
+              '',
+              `This pull request was generated from [GitHub Actions](${workflowUrl}).`
+            ].join('\n')
+          });
+          core.notice(`Created pull request ${owner}/${repo}#${pr.number}: ${pr.html_url}`);

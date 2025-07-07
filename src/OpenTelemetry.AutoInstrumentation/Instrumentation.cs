@@ -100,6 +100,10 @@ internal static class Instrumentation
             _pluginManager = new PluginManager(GeneralSettings.Value);
             _pluginManager.Initializing();
 
+            // Register to shutdown events
+            AppDomain.CurrentDomain.ProcessExit += OnExit;
+            AppDomain.CurrentDomain.DomainUnload += OnExit;
+
 #if NET
             var profilerEnabled = GeneralSettings.Value.ProfilerEnabled;
 
@@ -121,10 +125,6 @@ internal static class Instrumentation
 
             if (TracerSettings.Value.TracesEnabled || MetricSettings.Value.MetricsEnabled)
             {
-                // Register to shutdown events
-                AppDomain.CurrentDomain.ProcessExit += OnExit;
-                AppDomain.CurrentDomain.DomainUnload += OnExit;
-
                 if (GeneralSettings.Value.FlushOnUnhandledException)
                 {
                     AppDomain.CurrentDomain.UnhandledException += OnUnhandledException;
@@ -324,8 +324,10 @@ internal static class Instrumentation
                     break;
                 case MetricInstrumentation.Process:
                     break;
+#if NET
                 case MetricInstrumentation.Npgsql:
                     break;
+#endif
                 case MetricInstrumentation.NServiceBus:
                     break;
                 case MetricInstrumentation.SqlClient:
@@ -461,6 +463,10 @@ internal static class Instrumentation
                 // with the exception.
             }
         }
+        finally
+        {
+            OtelLogging.CloseLogger("Managed", Logger);
+        }
     }
 
     private static void OnUnhandledException(object sender, UnhandledExceptionEventArgs args)
@@ -473,17 +479,9 @@ internal static class Instrumentation
                 OnExit(sender, args);
             }
         }
-        catch (Exception ex)
+        catch (Exception)
         {
-            try
-            {
-                Logger.Error(ex, "An exception occurred while processing an unhandled exception.");
-            }
-            catch
-            {
-                // If we encounter an error while logging there is nothing else we can do
-                // with the exception.
-            }
+            // Logger was already shutdown.
         }
     }
 }
