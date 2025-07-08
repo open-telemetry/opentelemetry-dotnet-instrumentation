@@ -43,7 +43,7 @@ jobs:
         args: "--cache --max-cache-age 1d --threads 1 --max-concurrency 1 --verbose --retry-wait-time 5 --max-retries 3 --timeout 60 --no-progress './**/*.md' './**/*.html'"
 
     - name: Run markdownlint
-      uses: streetsidesoftware/cspell-action@ad35d5e5f85f4690dadb33f568e4b963d6a358f0 # tag: v7.1.0
+      uses: streetsidesoftware/cspell-action@157048954070986ce4315d0813573a2d8faee361 # tag: v7.1.1
       with:
         files: '**/*.md'
 
