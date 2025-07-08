@@ -1198,13 +1198,19 @@ downloadcurl() {
     local curl_options="--retry 20 --retry-delay 2 --connect-timeout 15 -sSL -f --create-dirs "
     local curl_exit_code=0;
     if [ -z "$out_path" ]; then
-        curl $curl_options "$remote_path_with_credential" 2>&1
+        curl_output=$(curl $curl_options "$remote_path_with_credential" 2>&1)
         curl_exit_code=$?
+        echo "$curl_output"
     else
-        curl $curl_options -o "$out_path" "$remote_path_with_credential" 2>&1
+        curl_output=$(curl $curl_options -o "$out_path" "$remote_path_with_credential" 2>&1)
         curl_exit_code=$?
     fi
-    
+
+    # Regression in curl causes curl with --retry to return a 0 exit code even when it fails to download a file - https://github.com/curl/curl/issues/17554
+    if [ $curl_exit_code -eq 0 ] && echo "$curl_output" | grep -q "^curl: ([0-9]*) "; then
+        curl_exit_code=$(echo "$curl_output" | sed 's/curl: (\([0-9]*\)).*/\1/')
+    fi
+
     if [ $curl_exit_code -gt 0 ]; then
         download_error_msg="Unable to download $remote_path."
         # Check for curl timeout codes
