@@ -1,0 +1,102 @@
+file_format: "0.4"
+disabled: ${OTEL_SDK_DISABLED}
+log_level: ${OTEL_LOG_LEVEL}
+resource:
+  attributes:
+    - name: service.name
+      value: ${OTEL_SERVICE_NAME}
+  attributes_list: ${OTEL_RESOURCE_ATTRIBUTES}
+  detection/development:
+    detectors:
+      azureappservice:
+      container:
+      host:
+      operatingsystem:
+      process:
+      processruntime:
+
+attribute_limits:
+  attribute_value_length_limit: ${OTEL_ATTRIBUTE_VALUE_LENGTH_LIMIT}
+  attribute_count_limit: ${OTEL_ATTRIBUTE_COUNT_LIMIT}
+propagator:
+  composite_list: ${OTEL_PROPAGATORS}
+tracer_provider:
+  processors:
+      batch:
+        schedule_delay: ${OTEL_BSP_SCHEDULE_DELAY}
+        export_timeout: ${OTEL_BSP_EXPORT_TIMEOUT}
+        max_queue_size: ${OTEL_BSP_MAX_QUEUE_SIZE}
+        max_export_batch_size: ${OTEL_BSP_MAX_EXPORT_BATCH_SIZE}
+        exporter:
+          otlp_http:
+            endpoint: ${OTEL_EXPORTER_OTLP_TRACES_ENDPOINT}
+            timeout: ${OTEL_EXPORTER_OTLP_TRACES_TIMEOUT}
+            headers_list: ${OTEL_EXPORTER_OTLP_TRACES_HEADERS}
+  # limits:
+  #   attribute_value_length_limit: ${OTEL_SPAN_ATTRIBUTE_VALUE_LENGTH_LIMIT}
+  #   attribute_count_limit: ${OTEL_SPAN_ATTRIBUTE_COUNT_LIMIT:-128}
+  #   event_count_limit: ${OTEL_SPAN_EVENT_COUNT_LIMIT:-128}
+  #   link_count_limit: ${OTEL_SPAN_LINK_COUNT_LIMIT:-128}
+  #   event_attribute_count_limit: ${OTEL_EVENT_ATTRIBUTE_COUNT_LIMIT:-128}
+  #   link_attribute_count_limit: ${OTEL_LINK_ATTRIBUTE_COUNT_LIMIT:-128}
+
+meter_provider:
+  readers:
+      periodic:
+        interval: ${OTEL_METRIC_EXPORT_INTERVAL}
+        timeout: ${OTEL_METRIC_EXPORT_TIMEOUT}
+        exporter:
+          otlp_http:
+            endpoint: ${OTEL_EXPORTER_OTLP_METRICS_ENDPOINT}
+            timeout: ${OTEL_EXPORTER_OTLP_METRICS_TIMEOUT}
+            headers_list: ${OTEL_EXPORTER_OTLP_METRICS_HEADERS}
+
+logger_provider:
+  processors:
+      batch:
+        schedule_delay: ${OTEL_BLRP_SCHEDULE_DELAY}
+        export_timeout: ${OTEL_BLRP_EXPORT_TIMEOUT}
+        max_queue_size: ${OTEL_BLRP_MAX_QUEUE_SIZE}
+        max_export_batch_size: ${OTEL_BLRP_MAX_EXPORT_BATCH_SIZE}
+        exporter:
+          otlp_http:
+            endpoint: ${OTEL_EXPORTER_OTLP_LOGS_ENDPOINT}
+            timeout: ${OTEL_EXPORTER_OTLP_LOGS_TIMEOUT}
+            headers_list: ${OTEL_EXPORTER_OTLP_LOGS_HEADERS}
+
+instrumentation/development:
+  dotnet:
+    traces:
+#      aspnet:
+      aspnetcore:
+      azure:
+      elasticsearch:
+      elastictransport:
+      entityframeworkcore:
+      graphql:
+      grpcnetclient:
+      httpclient:
+      kafka:
+      masstransit:
+      mongodb:
+      mysqlconnector:
+      mysqldata:
+      npgsql:
+      nservicebus:
+      oraclemda:
+      rabbitmq:
+      quartz:
+      sqlclient:
+      stackexchangeredis:
+      wcfclient:
+#     wcfservice:
+    metrics:
+      aspnetcore:
+      httpclient:
+      netruntime:
+      nservicebus:
+      process:
+      sqlclient:
+    logs:
+      ilogger:
+      log4net:

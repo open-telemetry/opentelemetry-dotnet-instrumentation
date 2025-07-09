@@ -56,7 +56,7 @@ internal class SdkSettings : Settings
             }
         }
 
-        if (string.IsNullOrEmpty(configuration.Propagator.CompositeList))
+        if (!string.IsNullOrEmpty(configuration.Propagator.CompositeList))
         {
             var list = configuration.Propagator.CompositeList!.Split(Constants.ConfigurationValues.Separator);
             foreach (var item in list)

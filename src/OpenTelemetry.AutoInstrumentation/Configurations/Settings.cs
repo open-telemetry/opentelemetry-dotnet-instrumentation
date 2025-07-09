@@ -14,7 +14,7 @@ internal abstract class Settings
     public static T FromDefaultSources<T>(bool failFast)
         where T : Settings, new()
     {
-        var isConfigFileEnabled = Environment.GetEnvironmentVariable("OTEL_EXPERIMENTAL_CONFIG_FILE_ENABLED") == "true";
+        var isConfigFileEnabled = Environment.GetEnvironmentVariable("OTEL_EXPERIMENTAL_FILE_BASED_CONFIGURATION_ENABLED") == "true";
 
         if (isConfigFileEnabled)
         {
