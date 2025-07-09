@@ -32,7 +32,7 @@ internal class EnvVarTypeConverter : IYamlTypeConverter
     {
         if (parser.Current is not Scalar scalar)
         {
-            throw new InvalidOperationException("Expected a scalar value in YAML but found null or a different node type.");
+            return rootDeserializer(type);
         }
 
         var rawValue = scalar.Value ?? throw new InvalidOperationException("Scalar value is null.");
@@ -42,6 +42,14 @@ internal class EnvVarTypeConverter : IYamlTypeConverter
 
         try
         {
+            if (string.IsNullOrWhiteSpace(replacedValue))
+            {
+                if (Nullable.GetUnderlyingType(type) != null)
+                {
+                    return null;
+                }
+            }
+
             return type switch
             {
                 Type t when t == typeof(string) => replacedValue,

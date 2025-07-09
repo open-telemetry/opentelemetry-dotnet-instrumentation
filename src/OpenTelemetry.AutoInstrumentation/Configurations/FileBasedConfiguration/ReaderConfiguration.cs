@@ -45,7 +45,7 @@ internal class ReaderConfiguration
     /// Gets or sets the exporter configuration for the reader.
     /// </summary>
     [YamlMember(Alias = "exporter")]
-    public ExporterConfig Exporter { get; set; } = new();
+    public ExporterConfig? Exporter { get; set; } = new();
 
     public PeriodicExportingMetricReaderOptions ToPeriodicExportingMetricReaderOptions()
     {

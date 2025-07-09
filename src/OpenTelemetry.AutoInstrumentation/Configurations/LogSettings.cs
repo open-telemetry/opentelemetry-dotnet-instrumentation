@@ -45,6 +45,11 @@ internal class LogSettings : Settings
     /// </summary>
     public OtlpSettings? OtlpSettings { get; private set; }
 
+    /// <summary>
+    /// Gets tracing Batch Processor Configuration.
+    /// </summary>
+    public BatchProcessorConfig BatchProcessorConfig { get; private set; } = new();
+
     protected override void OnLoadEnvVar(Configuration configuration)
     {
         LogsEnabled = configuration.GetBool(ConfigurationKeys.Logs.LogsEnabled) ?? true;
@@ -53,6 +58,12 @@ internal class LogSettings : Settings
         {
             OtlpSettings = new OtlpSettings(OtlpSignalType.Logs, configuration);
         }
+
+        BatchProcessorConfig = new BatchProcessorConfig(
+            scheduleDelay: configuration.GetInt32(ConfigurationKeys.Traces.BatchSpanProcessorConfig.ScheduleDelay),
+            exportTimeout: configuration.GetInt32(ConfigurationKeys.Traces.BatchSpanProcessorConfig.ExportTimeout),
+            maxQueueSize: configuration.GetInt32(ConfigurationKeys.Traces.BatchSpanProcessorConfig.MaxQueueSize),
+            maxExportBatchSize: configuration.GetInt32(ConfigurationKeys.Traces.BatchSpanProcessorConfig.MaxExportBatchSize));
 
         IncludeFormattedMessage = configuration.GetBool(ConfigurationKeys.Logs.IncludeFormattedMessage) ?? false;
         EnableLog4NetBridge = configuration.GetBool(ConfigurationKeys.Logs.EnableLog4NetBridge) ?? false;
@@ -72,6 +83,7 @@ internal class LogSettings : Settings
             configuration.LoggerProvider.Processors != null &&
             configuration.LoggerProvider.Processors.TryGetValue("batch", out var batchProcessorConfig))
         {
+            BatchProcessorConfig = batchProcessorConfig;
             LogsEnabled = true;
             var logExporters = new List<LogExporter>();
             var exporters = batchProcessorConfig.Exporter;
