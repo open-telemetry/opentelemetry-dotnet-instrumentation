@@ -283,9 +283,9 @@ internal static class PackageVersionDefinitions
             TestApplicationName = "TestApplication.Kafka",
             Versions = new List<PackageVersion>
             {
-                new("1.4.0", supportedPlatforms: ["x64"]),
-                new("1.6.2"), // First version that supports both arm64 and x64
-                new("1.8.2"), // 1.8.0-1.8.1 are known to have issues with arm64
+                // new("1.4.0", supportedPlatforms: ["x64"]), 1.8.0 and lower versions have transitive vulnerabilities https://github.com/confluentinc/confluent-kafka-dotnet/blob/fa0f92a4593e5a19b5a052b633ddf47fee47588c/CHANGELOG.md#security
+                // new("1.6.2"), // First version that supports both arm64 and x64, 1.8.0 and lower versions have transitive vulnerabilities https://github.com/confluentinc/confluent-kafka-dotnet/blob/fa0f92a4593e5a19b5a052b633ddf47fee47588c/CHANGELOG.md#security
+                new("1.8.2"), // 1.8.0-1.8.1 are known to have issues with arm64, 1.8.0 and lower versions have transitive vulnerabilities https://github.com/confluentinc/confluent-kafka-dotnet/blob/fa0f92a4593e5a19b5a052b633ddf47fee47588c/CHANGELOG.md#security
                 new("*")
             }
         }
