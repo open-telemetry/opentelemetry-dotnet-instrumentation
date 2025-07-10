@@ -43,11 +43,29 @@ internal static class OtelLogging
         return OtelLoggers.GetOrAdd(suffix, CreateLogger);
     }
 
+    public static void CloseLogger(string suffix, IOtelLogger otelLogger)
+    {
+        try
+        {
+            // Update logger associated with the key, so that future calls to GetLogger
+            // return NoopLogger.
+            if (OtelLoggers.TryUpdate(suffix, NoopLogger.Instance, otelLogger))
+            {
+                otelLogger.Close();
+            }
+        }
+        catch (Exception)
+        {
+            // intentionally empty
+        }
+    }
+
     // Helper method for testing
     internal static void Reset()
     {
         _configuredLogLevel = GetConfiguredLogLevel();
         _configuredLogSink = GetConfiguredLogSink();
+        OtelLoggers.Clear();
     }
 
     internal static LogLevel? GetConfiguredLogLevel()
@@ -138,7 +156,7 @@ internal static class OtelLogging
         // Uses ISink? here, sink creation can fail so we specify default fallback at the end.
         var sink = _configuredLogSink switch
         {
-            LogSink.NoOp => new NoopSink(),
+            LogSink.NoOp => NoopSink.Instance,
             LogSink.Console => new ConsoleSink(suffix),
             LogSink.File => CreateFileSink(suffix),
             // default to null, then default value is specified only at the end.
@@ -147,7 +165,7 @@ internal static class OtelLogging
 
         return sink ??
             // Default to NoopSink
-            new NoopSink();
+            NoopSink.Instance;
     }
 
     private static ISink? CreateFileSink(string suffix)
@@ -160,13 +178,14 @@ internal static class OtelLogging
                 var fileName = GetLogFileName(suffix);
                 var logPath = Path.Combine(logDirectory, fileName);
 
-                return new RollingFileSink(
+                var rollingFileSink = new RollingFileSink(
                     path: logPath,
                     fileSizeLimitBytes: FileSizeLimitBytes,
                     retainedFileCountLimit: 10,
                     rollingInterval: RollingInterval.Day,
                     rollOnFileSizeLimit: true,
                     retainedFileTimeLimit: null);
+                return new PeriodicFlushToDiskSink(rollingFileSink, TimeSpan.FromSeconds(5));
             }
         }
         catch (Exception)

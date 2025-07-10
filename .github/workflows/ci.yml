@@ -35,7 +35,7 @@ jobs:
       fail-fast: false
       matrix:
         test-tfm: [ net9.0, net8.0, net462 ]
-        machine: [ windows-2022, ubuntu-22.04, macos-13, ubuntu-22.04-arm ]
+        machine: [ windows-2022, windows-2025, ubuntu-22.04, macos-13, ubuntu-22.04-arm ]
         exclude:
           - test-tfm: net462
             machine: macos-13
@@ -46,12 +46,19 @@ jobs:
         include:
           - machine: windows-2022
             containers: none
+            artifact-name: windows-2022
+          - machine: windows-2025
+            containers: none
+            artifact-name: windows-2022
           - machine: ubuntu-22.04
             containers: linux
+            artifact-name: ubuntu-22.04
           - machine: macos-13
             containers: none
+            artifact-name: macos-13
           - machine: ubuntu-22.04-arm
             containers: linux
+            artifact-name: ubuntu-22.04-arm
     runs-on: ${{ matrix.machine }}
     steps:
 
@@ -64,8 +71,8 @@ jobs:
         uses: actions/setup-dotnet@67a3573c9a986a3f9c594539f4ab511d57bb3ce9 # tag: v4.3.1
         with:
           dotnet-version: | 
-            8.0.409
-            9.0.300
+            8.0.412
+            9.0.302
 
       - name: Check for NuGet packages cache
         uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684 # tag: v4.2.3
@@ -77,7 +84,7 @@ jobs:
       - name: Download Artifacts from build job
         uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # tag: v4.3.0
         with:
-          name: bin-${{ matrix.machine }}
+          name: bin-${{ matrix.artifact-name }}
           path: bin/tracer-home
 
       - name: Install SQL Server (localdb)
@@ -106,7 +113,11 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        machine: [ windows-2022 ]
+        include:
+          - machine: windows-2022
+            artifact-name: windows-2022
+          - machine: windows-2025
+            artifact-name: windows-2022
     runs-on: ${{ matrix.machine }}
     steps:
 
@@ -119,8 +130,8 @@ jobs:
         uses: actions/setup-dotnet@67a3573c9a986a3f9c594539f4ab511d57bb3ce9 # tag: v4.3.1
         with:
           dotnet-version: | 
-            8.0.409
-            9.0.300
+            8.0.412
+            9.0.302
 
       - name: Check for NuGet packages cache
         uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684 # tag: v4.2.3
@@ -132,7 +143,7 @@ jobs:
       - name: Download Artifacts from build job
         uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # tag: v4.3.0
         with:
-          name: bin-${{ matrix.machine }}
+          name: bin-${{ matrix.artifact-name }}
           path: bin/tracer-home
 
       - name: Run NativeTests
@@ -146,6 +157,10 @@ jobs:
         include:
           - machine: windows-2022
             containers: windows-only
+            artifact-name: windows-2022
+          - machine: windows-2025
+            containers: windows-only
+            artifact-name: windows-2022
     runs-on: ${{ matrix.machine }}
     steps:
 
@@ -158,8 +173,8 @@ jobs:
         uses: actions/setup-dotnet@67a3573c9a986a3f9c594539f4ab511d57bb3ce9 # tag: v4.3.1
         with:
           dotnet-version: | 
-            8.0.409
-            9.0.300
+            8.0.412
+            9.0.302
 
       - name: Check for NuGet packages cache
         uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684 # tag: v4.2.3
@@ -171,7 +186,7 @@ jobs:
       - name: Download Artifacts from build job
         uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # tag: v4.3.0
         with:
-          name: bin-${{ matrix.machine }}
+          name: bin-${{ matrix.artifact-name }}
           path: bin/tracer-home
 
       - name: Build artifacts required for the test (no native tests)
@@ -231,7 +246,7 @@ jobs:
     - name: Build in Docker container
       run: |
         set -e
-        docker build -t mybuildimage -f "./docker/${{ matrix.base-image }}.dockerfile" ./docker
+        docker build -t mybuildimage -f "./docker/${{ matrix.base-image }}.dockerfile" .
         docker run -e OS_TYPE=${{ matrix.os-type }} --rm --mount type=bind,source="${GITHUB_WORKSPACE}",target=/project mybuildimage \
           /bin/sh -c 'git config --global --add safe.directory /project && ./build.sh TestWorkflow --containers none'
 
@@ -244,6 +259,7 @@ jobs:
           - machine: ubuntu-22.04
           - machine: macos-13
           - machine: windows-2022
+          - machine: windows-2025
           - machine: ubuntu-22.04-arm
     runs-on: ${{ matrix.machine }}
     steps:
@@ -257,8 +273,8 @@ jobs:
         uses: actions/setup-dotnet@67a3573c9a986a3f9c594539f4ab511d57bb3ce9 # tag: v4.3.1
         with:
           dotnet-version: | 
-            8.0.409
-            9.0.300
+            8.0.412
+            9.0.302
 
       - name: Check for NuGet packages cache
         uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684 # tag: v4.2.3

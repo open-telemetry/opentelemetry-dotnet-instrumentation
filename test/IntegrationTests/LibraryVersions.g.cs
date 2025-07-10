@@ -23,7 +23,7 @@ public static partial class LibraryVersion
                 string.Empty,
 #else
                 "12.22.2",
-                "12.24.0",
+                "12.24.1",
 #endif
             ];
             return theoryData;
@@ -39,7 +39,7 @@ public static partial class LibraryVersion
                 string.Empty,
 #else
                 "8.15.10",
-                "8.17.4",
+                "9.0.7",
 #endif
             ];
             return theoryData;
@@ -56,7 +56,7 @@ public static partial class LibraryVersion
 #else
                 "6.0.35",
                 "8.0.10",
-                "9.0.4",
+                "9.0.6",
 #endif
             ];
             return theoryData;
@@ -123,7 +123,7 @@ public static partial class LibraryVersion
                 string.Empty,
 #else
                 "2.0.13",
-                "3.0.4",
+                "3.1.0",
 #endif
             ];
             return theoryData;
@@ -139,7 +139,7 @@ public static partial class LibraryVersion
                 string.Empty,
 #else
                 "8.3.0",
-                "8.4.0",
+                "8.5.0",
 #endif
             ];
             return theoryData;
@@ -196,7 +196,7 @@ public static partial class LibraryVersion
                 "3.0.0",
 #endif
 #if NET9_0 || NET8_0 || NET462
-                "3.3.0",
+                "3.4.0",
 #endif
 #endif
             ];
@@ -354,7 +354,7 @@ public static partial class LibraryVersion
                 string.Empty,
 #else
                 "2.6.122",
-                "2.8.31",
+                "2.8.41",
 #endif
             ];
             return theoryData;
@@ -386,24 +386,8 @@ public static partial class LibraryVersion
 #if DEFAULT_TEST_PACKAGE_VERSIONS
                 string.Empty,
 #else
-                "1.6.2",
                 "1.8.2",
-                "2.10.0",
-#endif
-            ];
-            return theoryData;
-        }
-    }
-    public static TheoryData<string> Kafka_x64
-    {
-        get
-        {
-            TheoryData<string> theoryData =
-            [
-#if DEFAULT_TEST_PACKAGE_VERSIONS
-                string.Empty,
-#else
-                "1.4.0",
+                "2.10.1",
 #endif
             ];
             return theoryData;
@@ -433,6 +417,5 @@ public static partial class LibraryVersion
        { "StackExchangeRedis", StackExchangeRedis },
        { "WCFCoreClient", WCFCoreClient },
        { "Kafka", Kafka },
-       { "Kafka_x64", Kafka_x64 },
     };
 }

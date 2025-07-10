@@ -1,7 +1,6 @@
 // Copyright The OpenTelemetry Authors
 // SPDX-License-Identifier: Apache-2.0
 
-using System;
 using Elastic.Clients.Elasticsearch;
 using Elastic.Transport;
 using TestApplication.Shared;
@@ -23,7 +22,7 @@ var client = new ElasticsearchClient(settings);
 try
 {
     await client.SearchAsync<TestObject>(s =>
-        s.Index("test-index").From(0).Size(10).Query(q => q.Term(t => t.Field(to => to.Id))));
+        s.Indices("test-index").From(0).Size(10).Query(q => q.Term(t => t.Field(to => to.Id))));
 }
 catch (UnexpectedTransportException)
 {

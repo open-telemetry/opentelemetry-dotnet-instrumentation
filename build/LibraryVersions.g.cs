@@ -19,14 +19,14 @@ public static partial class LibraryVersion
             "TestApplication.Azure",
             [
                 new("12.22.2"),
-                new("12.24.0"),
+                new("12.24.1"),
             ]
         },
         {
             "TestApplication.Elasticsearch",
             [
                 new("8.15.10"),
-                new("8.17.4"),
+                new("9.0.7"),
             ]
         },
         {
@@ -34,7 +34,7 @@ public static partial class LibraryVersion
             [
                 new("6.0.35"),
                 new("8.0.10"),
-                new("9.0.4"),
+                new("9.0.6"),
             ]
         },
         {
@@ -65,14 +65,14 @@ public static partial class LibraryVersion
             "TestApplication.Log4NetBridge",
             [
                 new("2.0.13"),
-                new("3.0.4"),
+                new("3.1.0"),
             ]
         },
         {
             "TestApplication.MassTransit",
             [
                 new("8.3.0"),
-                new("8.4.0"),
+                new("8.5.0"),
             ]
         },
         {
@@ -95,7 +95,7 @@ public static partial class LibraryVersion
                 new("2.19.0", supportedFrameworks: [ "net9.0", "net8.0", "net462" ]),
                 new("2.30.0", supportedFrameworks: [ "net9.0", "net8.0", "net462" ]),
                 new("3.0.0", supportedFrameworks: [ "net9.0", "net8.0", "net472" ]),
-                new("3.3.0", supportedFrameworks: [ "net9.0", "net8.0", "net472" ]),
+                new("3.4.0", supportedFrameworks: [ "net9.0", "net8.0", "net472" ]),
             ]
         },
         {
@@ -161,7 +161,7 @@ public static partial class LibraryVersion
             "TestApplication.StackExchangeRedis",
             [
                 new("2.6.122"),
-                new("2.8.31"),
+                new("2.8.41"),
             ]
         },
         {
@@ -175,10 +175,8 @@ public static partial class LibraryVersion
         {
             "TestApplication.Kafka",
             [
-                new("1.4.0", supportedPlatforms: [ "x64" ]),
-                new("1.6.2"),
                 new("1.8.2"),
-                new("2.10.0"),
+                new("2.10.1"),
             ]
         },
     };

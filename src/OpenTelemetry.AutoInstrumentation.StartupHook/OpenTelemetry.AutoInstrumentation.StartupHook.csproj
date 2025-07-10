@@ -25,6 +25,9 @@
     <Compile Include="..\OpenTelemetry.AutoInstrumentation\Logging\RollingFileSink.cs">
       <Link>Logging\RollingFileSink.cs</Link>
     </Compile>
+    <Compile Include="..\OpenTelemetry.AutoInstrumentation\Logging\PeriodicFlushToDiskSink.cs">
+      <Link>Logging\PeriodicFlushToDiskSink.cs</Link>
+    </Compile>
     <Compile Include="..\OpenTelemetry.AutoInstrumentation\Logging\RollingInterval.cs">
       <Link>Logging\RollingInterval.cs</Link>
     </Compile>

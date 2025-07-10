@@ -1,4 +1,4 @@
-FROM mcr.microsoft.com/dotnet/sdk:9.0.300-alpine3.21@sha256:2244f80ac7179b0feaf83ffca8fe82d31fbced5b7e353755bf9515a420eba711
+FROM mcr.microsoft.com/dotnet/sdk:9.0.302-alpine3.21@sha256:60bd1997ac6a5d3c838a45256fbf1d7da538f2508eabdccc81f24682be968972
 RUN apk update \
     && apk upgrade \
     && apk add --no-cache --update \
@@ -16,12 +16,11 @@ ENV IsAlpine=true
 ENV PROTOBUF_PROTOC=/usr/bin/protoc
 ENV gRPC_PluginFullPath=/usr/bin/grpc_csharp_plugin
 
-# Install older sdks using the install script
-RUN curl -sSL --retry 5 https://dot.net/v1/dotnet-install.sh --output dotnet-install.sh \
-    && echo "SHA256: $(sha256sum dotnet-install.sh)" \
-    && echo "19b0a7890c371201b944bf0f8cdbb6460d053d63ddbea18cfed3e4199769ce17  dotnet-install.sh" | sha256sum -c \
-    && chmod +x ./dotnet-install.sh \
-    && ./dotnet-install.sh -v 8.0.409 --install-dir /usr/share/dotnet --no-path \
+COPY ./scripts/dotnet-install.sh ./dotnet-install.sh
+
+# Install older SDKs using the install script
+RUN chmod +x ./dotnet-install.sh \
+    && ./dotnet-install.sh -v 8.0.412 --install-dir /usr/share/dotnet --no-path \
     && rm dotnet-install.sh
 
 WORKDIR /project

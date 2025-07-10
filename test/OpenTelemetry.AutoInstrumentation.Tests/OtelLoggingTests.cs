@@ -125,7 +125,7 @@ public class OtelLoggingTests : IDisposable
             var logLine = "== Test Log Here ==";
 
             logger.Debug(logLine, false);
-            logger.Dispose(); // Dispose the logger to release the file
+            logger.Close(); // Shutdown the logger to release the file
 
             var files = tempLogsDirectory.GetFiles();
 
@@ -176,6 +176,109 @@ public class OtelLoggingTests : IDisposable
         {
             Console.SetOut(currentWritter);
         }
+    }
+
+    [Fact]
+    public void AfterLoggerIsClosed_ConsecutiveLogCallsWithTheSameLoggerAreNotWrittenToConfiguredSink()
+    {
+        Environment.SetEnvironmentVariable("OTEL_LOG_LEVEL", "debug");
+        Environment.SetEnvironmentVariable("OTEL_DOTNET_AUTO_LOGGER", "console");
+
+        var currentWritter = Console.Out;
+
+        using var ms = new MemoryStream();
+        using var tw = new StreamWriter(ms);
+
+        Console.SetOut(tw);
+
+        try
+        {
+            // Reset internal state
+            OtelLogging.Reset();
+
+            var loggerSuffix = "ConsoleUnitTests";
+            var logger = OtelLogging.GetLogger(loggerSuffix);
+
+            var expectedLogContent = "== Test Log Here ==";
+            LogAndFlush(logger, expectedLogContent, tw);
+
+            using var streamReader = new StreamReader(ms);
+
+            var content = ReadWrittenContent(ms, streamReader);
+            Assert.Contains(expectedLogContent, content);
+
+            // Reset
+            ms.SetLength(0);
+
+            OtelLogging.CloseLogger(loggerSuffix, logger);
+
+            LogAndFlush(logger, expectedLogContent, tw);
+
+            content = ReadWrittenContent(ms, streamReader);
+            Assert.Empty(content);
+        }
+        finally
+        {
+            Console.SetOut(currentWritter);
+        }
+    }
+
+    [Fact]
+    public void AfterLoggerIsClosed_ConsecutiveCallsToGetLoggerReturnNoopLogger()
+    {
+        Environment.SetEnvironmentVariable("OTEL_LOG_LEVEL", "debug");
+        Environment.SetEnvironmentVariable("OTEL_DOTNET_AUTO_LOGGER", "console");
+
+        var currentWritter = Console.Out;
+
+        using var ms = new MemoryStream();
+        using var tw = new StreamWriter(ms);
+
+        Console.SetOut(tw);
+
+        try
+        {
+            // Reset internal state
+            OtelLogging.Reset();
+
+            var loggerSuffix = "ConsoleUnitTests";
+            var logger = OtelLogging.GetLogger(loggerSuffix);
+
+            var expectedLogContent = "== Test Log Here ==";
+            LogAndFlush(logger, expectedLogContent, tw);
+
+            using var streamReader = new StreamReader(ms);
+
+            var content = ReadWrittenContent(ms, streamReader);
+            Assert.Contains(expectedLogContent, content);
+
+            // Reset
+            ms.SetLength(0);
+
+            OtelLogging.CloseLogger(loggerSuffix, logger);
+
+            logger = OtelLogging.GetLogger(loggerSuffix);
+            LogAndFlush(logger, expectedLogContent, tw);
+
+            content = ReadWrittenContent(ms, streamReader);
+            Assert.Empty(content);
+        }
+        finally
+        {
+            Console.SetOut(currentWritter);
+        }
+    }
+
+    private static void LogAndFlush(IOtelLogger logger, string logLine, StreamWriter? tw)
+    {
+        logger.Debug(logLine, false);
+        tw?.Flush(); // Forces rows to be written
+    }
+
+    private static string ReadWrittenContent(MemoryStream ms, StreamReader streamReader)
+    {
+        ms.Position = 0; // reset reading position
+        return streamReader.ReadToEnd();
     }
 
     private static void UnsetLoggingEnvVars()
