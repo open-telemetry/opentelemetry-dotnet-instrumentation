@@ -8,19 +8,13 @@ namespace OpenTelemetry.AutoInstrumentation.Configurations;
 
 internal static class ResourceConfigurator
 {
-    internal const string ServiceNameAttribute = "service.name";
-
-    public static ResourceBuilder CreateResourceBuilder(IReadOnlyList<ResourceDetector> enabledResourceDetectors)
+    public static ResourceBuilder CreateResourceBuilder(IReadOnlyList<ResourceDetector> enabledResourceDetectors, IReadOnlyList<KeyValuePair<string, object>> resources)
     {
         var resourceBuilder = ResourceBuilder
             .CreateEmpty() // Don't use CreateDefault because it puts service name unknown by default.
             .AddEnvironmentVariableDetector()
             .AddTelemetrySdk()
-            .AddAttributes(new KeyValuePair<string, object>[]
-            {
-                new(Constants.DistributionAttributes.TelemetryDistroNameAttributeName, Constants.DistributionAttributes.TelemetryDistroNameAttributeValue),
-                new(Constants.DistributionAttributes.TelemetryDistroVersionAttributeName, AutoInstrumentationVersion.Version)
-            });
+            .AddAttributes(resources);
 
         foreach (var enabledResourceDetector in enabledResourceDetectors)
         {
@@ -39,10 +33,10 @@ internal static class ResourceConfigurator
         }
 
         var resource = resourceBuilder.Build();
-        if (!resource.Attributes.Any(kvp => kvp.Key == ServiceNameAttribute))
+        if (!resource.Attributes.Any(kvp => kvp.Key == Constants.ResourceAttributes.AttributeServiceName))
         {
             // service.name was not configured yet use the fallback.
-            resourceBuilder.AddAttributes(new KeyValuePair<string, object>[] { new(ServiceNameAttribute, ServiceNameConfigurator.GetFallbackServiceName()) });
+            resourceBuilder.AddAttributes([new(Constants.ResourceAttributes.AttributeServiceName, ServiceNameConfigurator.GetFallbackServiceName())]);
         }
 
         var pluginManager = Instrumentation.PluginManager;
