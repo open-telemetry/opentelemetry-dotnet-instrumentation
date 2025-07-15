@@ -30,7 +30,7 @@ internal class BufferProcessor
             var read = ReadBuffer(sampleType);
             if (read <= 0)
             {
-                return;
+                continue;
             }
 
             var (handler, timeout) = _sampleHandlers[sampleType];
