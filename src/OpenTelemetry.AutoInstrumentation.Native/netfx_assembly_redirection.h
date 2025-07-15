@@ -48,7 +48,7 @@ void CorProfiler::InitNetFxAssemblyRedirectsMap()
         { L"OpenTelemetry.Instrumentation.Process", {1, 12, 0, 494} },
         { L"OpenTelemetry.Instrumentation.Quartz", {1, 12, 0, 495} },
         { L"OpenTelemetry.Instrumentation.Runtime", {1, 12, 0, 496} },
-        { L"OpenTelemetry.Instrumentation.SqlClient", {1, 12, 0, 507} },
+        { L"OpenTelemetry.Instrumentation.SqlClient", {1, 12, 0, 582} },
         { L"OpenTelemetry.Instrumentation.Wcf", {1, 12, 0, 500} },
         { L"OpenTelemetry.Resources.Azure", {1, 12, 0, 501} },
         { L"OpenTelemetry.Resources.Host", {1, 12, 0, 503} },
