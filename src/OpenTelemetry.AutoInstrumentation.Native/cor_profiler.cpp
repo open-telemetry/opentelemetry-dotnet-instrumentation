@@ -1149,29 +1149,15 @@ void CorProfiler::InternalAddInstrumentation(WCHAR* id, CallTargetDefinition* it
     }
 }
 
-void CorProfiler::ConfigureContinuousProfiler(bool         threadSamplingEnabled,
-                                              unsigned int threadSamplingInterval,
-                                              bool         allocationSamplingEnabled,
-                                              unsigned int maxMemorySamplesPerMinute)
+bool CorProfiler::InitThreadSampler()
 {
-    Logger::Info("ConfigureContinuousProfiler: thread sampling enabled: ", threadSamplingEnabled,
-                 ", thread sampling interval: ", threadSamplingInterval,
-                 ", allocationSamplingEnabled: ", allocationSamplingEnabled,
-                 ", max memory samples per minute: ", maxMemorySamplesPerMinute);
-
-    if (!threadSamplingEnabled && !allocationSamplingEnabled)
-    {
-        Logger::Debug("ConfigureContinuousProfiler: Thread sampling and allocations sampling disabled.");
-        return;
-    }
-
     DWORD pdvEventsLow;
     DWORD pdvEventsHigh;
     auto  hr = this->info12_->GetEventMask2(&pdvEventsLow, &pdvEventsHigh);
     if (FAILED(hr))
     {
         Logger::Warn("ConfigureContinuousProfiler: Failed to take event masks for continuous profiler.");
-        return;
+        return false;
     }
 
     pdvEventsLow |= COR_PRF_MONITOR_THREADS | COR_PRF_ENABLE_STACK_SNAPSHOT;
@@ -1180,16 +1166,54 @@ void CorProfiler::ConfigureContinuousProfiler(bool         threadSamplingEnabled
     if (FAILED(hr))
     {
         Logger::Warn("ConfigureContinuousProfiler: Failed to set event masks for continuous profiler.");
-        return;
+        return false;
     }
 
     this->continuousProfiler = new continuous_profiler::ContinuousProfiler();
     this->continuousProfiler->SetGlobalInfo12(this->info12_);
     Logger::Info("ConfigureContinuousProfiler: Events masks configured for continuous profiler");
+    return true;
+}
+
+void CorProfiler::ConfigureContinuousProfiler(bool         threadSamplingEnabled,
+                                              unsigned int threadSamplingInterval,
+                                              bool         allocationSamplingEnabled,
+                                              unsigned int maxMemorySamplesPerMinute,
+                                              unsigned int selectedThreadsSamplingInterval)
+{
+    Logger::Info("ConfigureContinuousProfiler: thread sampling enabled: ", threadSamplingEnabled,
+                 ", thread sampling interval: ", threadSamplingInterval,
+                 ", allocationSamplingEnabled: ", allocationSamplingEnabled,
+                 ", max memory samples per minute: ", maxMemorySamplesPerMinute,
+                 ", selected threads sampling interval: ", selectedThreadsSamplingInterval);
+
+    const bool selectiveSamplingConfigured = selectedThreadsSamplingInterval != 0;
+
+    if (!threadSamplingEnabled && !allocationSamplingEnabled && !selectiveSamplingConfigured)
+    {
+        Logger::Debug("ConfigureContinuousProfiler: no sampling type configured.");
+        return;
+    }
+
+    if (!InitThreadSampler())
+    {
+        Logger::Warn("ContinuousProfiler: unable to init sampler.");
+        return;
+    }
 
     if (threadSamplingEnabled)
     {
-        this->continuousProfiler->StartThreadSampling(threadSamplingInterval);
+        this->continuousProfiler->threadSamplingInterval = threadSamplingInterval;
+    }
+    if (selectiveSamplingConfigured)
+    {
+        this->continuousProfiler->selectedThreadsSamplingInterval = selectedThreadsSamplingInterval;
+    }
+
+    if (threadSamplingEnabled || selectiveSamplingConfigured)
+    {
+        Logger::Info("ContinuousProfiler::StartThreadSampling");
+        this->continuousProfiler->StartThreadSampling();
     }
 
     if (allocationSamplingEnabled)

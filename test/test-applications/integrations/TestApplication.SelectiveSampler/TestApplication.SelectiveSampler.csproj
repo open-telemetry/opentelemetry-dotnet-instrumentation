@@ -1,0 +1,25 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFrameworks>net9.0;net8.0</TargetFrameworks>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="OpenTelemetry" />
+    <PackageReference Include="System.Diagnostics.DiagnosticSource" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="..\TestApplication.ContinuousProfiler\Exporter\AllocationSample.cs">
+      <Link>AllocationSample.cs</Link>
+    </Compile>
+    <Compile Include="..\TestApplication.ContinuousProfiler\Exporter\ResourcesProvider.cs">
+      <Link>ResourcesProvider.cs</Link>
+    </Compile>
+    <Compile Include="..\TestApplication.ContinuousProfiler\Exporter\SampleNativeFormatParser.cs">
+      <Link>SampleNativeFormatParser.cs</Link>
+    </Compile>
+    <Compile Include="..\TestApplication.ContinuousProfiler\Exporter\ThreadSample.cs">
+      <Link>ThreadSample.cs</Link>
+    </Compile>
+  </ItemGroup>
+</Project>
