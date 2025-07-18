@@ -1,4 +1,4 @@
-FROM mcr.microsoft.com/dotnet/sdk:9.0.302-bookworm-slim@sha256:3da7c4198dc77b50aeaf76f262ed0ac2ed324f87fba4b5b0f0bc0b4fbbf2ad93
+FROM mcr.microsoft.com/dotnet/sdk:9.0.303-bookworm-slim@sha256:670ef9e8eca44c8baa0bd1c229ccde9537064260ef14d54738b7a87916609312
 
 RUN wget https://packages.microsoft.com/config/debian/12/packages-microsoft-prod.deb -O packages-microsoft-prod.deb && \
     dpkg -i packages-microsoft-prod.deb && \
