@@ -151,6 +151,7 @@ internal static class EnvironmentConfigurationMetricHelper
         {
             return builder.AddOtlpExporter((options, metricReaderOptions) =>
             {
+                metricReaderOptions.PeriodicExportingMetricReaderOptions = settings.ReaderConfiguration.ToPeriodicExportingMetricReaderOptions();
                 // Copy Auto settings to SDK settings
                 settings.OtlpSettings?.CopyTo(options);
 

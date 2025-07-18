@@ -52,6 +52,16 @@ internal partial class ConfigurationKeys
     public const string EnabledResourceDetectorTemplate = "OTEL_DOTNET_AUTO_{0}_RESOURCE_DETECTOR_ENABLED";
 
     /// <summary>
+    /// Configuration key template for resource attributes.
+    /// </summary>
+    public const string ResourceAttributes = "OTEL_RESOURCE_ATTRIBUTES";
+
+    /// <summary>
+    /// Configuration key for setting the service name.
+    /// </summary>
+    public const string ServiceName = "OTEL_SERVICE_NAME";
+
+    /// <summary>
     /// Configuration keys for traces.
     /// </summary>
     public static class Traces
@@ -91,6 +101,38 @@ internal partial class ConfigurationKeys
         /// Configuration key for additional legacy source names to be added to the tracer at the startup.
         /// </summary>
         public const string AdditionalLegacySources = "OTEL_DOTNET_AUTO_TRACES_ADDITIONAL_LEGACY_SOURCES";
+
+        /// <summary>
+        /// Configuration key for ZipkinEndpoint.
+        /// </summary>
+        public const string ZipkinEndpoint = "OTEL_EXPORTER_ZIPKIN_ENDPOINT";
+
+        /// <summary>
+        /// Configuration keys for Batch Span Processor options.
+        /// </summary>
+        public static class BatchSpanProcessorConfig
+        {
+            /// <summary>
+            /// Configuration key for configuring the delay interval (in milliseconds) between two consecutive exports.
+            /// </summary>
+            public const string ScheduleDelay = "OTEL_BSP_SCHEDULE_DELAY";
+
+            /// <summary>
+            /// Configuration key for configuring the maximum allowed time (in milliseconds) to export data.
+            /// </summary>
+            public const string ExportTimeout = "OTEL_BSP_EXPORT_TIMEOUT";
+
+            /// <summary>
+            /// Configuration key for configuring the maximum queue size.
+            /// </summary>
+            public const string MaxQueueSize = "OTEL_BSP_MAX_QUEUE_SIZE";
+
+            /// <summary>
+            /// Configuration key for configuring the maximum batch size.
+            /// Must be less than or equal to OTEL_BSP_MAX_QUEUE_SIZE.
+            /// </summary>
+            public const string MaxExportBatchSize = "OTEL_BSP_MAX_EXPORT_BATCH_SIZE";
+        }
 
         /// <summary>
         /// Configuration keys for instrumentation options.
@@ -193,6 +235,16 @@ internal partial class ConfigurationKeys
         /// Configuration key for additional <see cref="Meter"/> names to be added to the meter at the startup.
         /// </summary>
         public const string AdditionalSources = "OTEL_DOTNET_AUTO_METRICS_ADDITIONAL_SOURCES";
+
+        /// <summary>
+        /// Configuration key for metric reader export interval.
+        /// </summary>
+        public const string ExportInterval = "OTEL_METRIC_EXPORT_INTERVAL";
+
+        /// <summary>
+        /// Configuration key for metric reader export timeout.
+        /// </summary>
+        public const string ExportTimeout = "OTEL_METRIC_EXPORT_TIMEOUT";
     }
 
     /// <summary>
@@ -244,5 +296,17 @@ internal partial class ConfigurationKeys
         /// Default is <c>"tracecontext,baggage"</c>.
         /// </summary>
         public const string Propagators = "OTEL_PROPAGATORS";
+
+        /// <summary>
+        /// Configuration key for the maximum allowed length of attribute values.
+        /// Default is no limit. Valid values are non-negative integers.
+        /// </summary>
+        public const string AttributeValueLengthLimit = "OTEL_ATTRIBUTE_VALUE_LENGTH_LIMIT";
+
+        /// <summary>
+        /// Configuration key for the maximum allowed number of attributes per resource, span, or event.
+        /// Default is <c>128</c>. Valid values are non-negative integers.
+        /// </summary>
+        public const string AttributeCountLimit = "OTEL_ATTRIBUTE_COUNT_LIMIT";
     }
 }
