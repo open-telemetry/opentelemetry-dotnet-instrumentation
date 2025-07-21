@@ -72,7 +72,7 @@ jobs:
         with:
           dotnet-version: | 
             8.0.412
-            9.0.302
+            9.0.303
 
       - name: Check for NuGet packages cache
         uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684 # tag: v4.2.3
@@ -131,7 +131,7 @@ jobs:
         with:
           dotnet-version: | 
             8.0.412
-            9.0.302
+            9.0.303
 
       - name: Check for NuGet packages cache
         uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684 # tag: v4.2.3
@@ -174,7 +174,7 @@ jobs:
         with:
           dotnet-version: | 
             8.0.412
-            9.0.302
+            9.0.303
 
       - name: Check for NuGet packages cache
         uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684 # tag: v4.2.3
@@ -274,7 +274,7 @@ jobs:
         with:
           dotnet-version: | 
             8.0.412
-            9.0.302
+            9.0.303
 
       - name: Check for NuGet packages cache
         uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684 # tag: v4.2.3
