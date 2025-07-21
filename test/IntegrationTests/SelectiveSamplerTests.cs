@@ -30,15 +30,7 @@ public class SelectiveSamplerTests : TestHelper
 
         var (output, _, processId) = RunTestApplication();
 
-        var batchSeparator = $"{Environment.NewLine}{Environment.NewLine}";
-        var lines = output.Split(batchSeparator);
-        var deserializedSampleBatches = lines[..^1].Select(sample => JsonSerializer.Deserialize<List<ThreadSample>>(sample)).ToList();
-
-        var threadSamples = new List<ThreadSample>();
-        foreach (var batch in deserializedSampleBatches)
-        {
-            threadSamples.AddRange(batch!);
-        }
+        var threadSamples = ExtractSamples(output);
 
         var currentStartTime = ToDateTime(threadSamples[0].TimestampNanoseconds);
 
@@ -58,6 +50,70 @@ public class SelectiveSamplerTests : TestHelper
         var threadNames = threadSamples.Select(sample => sample.ThreadName).Distinct(StringComparer.InvariantCultureIgnoreCase);
 
         Assert.Equal(2, threadNames.Count());
+    }
+
+    [SkippableFact]
+    [Trait("Category", "EndToEnd")]
+    public void ExportThreadSamplesInMixedMode()
+    {
+        EnableBytecodeInstrumentation();
+        SetEnvironmentVariable("OTEL_DOTNET_AUTO_PLUGINS", "TestApplication.SelectiveSampler.Plugins.MixedModeSamplingPlugin, TestApplication.SelectiveSampler, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null");
+        SetEnvironmentVariable("OTEL_DOTNET_AUTO_TRACES_ADDITIONAL_SOURCES", "TestApplication.SelectiveSampler");
+
+        var (output, _, processId) = RunTestApplication();
+
+        var threadSamples = ExtractSamples(output);
+
+        var groupedByTimestampAscending = threadSamples.GroupBy(sample => sample.TimestampNanoseconds).OrderBy(samples => samples.Key);
+
+        // Based on the test app, samples for all the threads should be collected at least 2 times.
+        Assert.True(groupedByTimestampAscending.Count(samples => !IndicatesSelectiveSampling(samples)) > 1);
+
+        var counter = 0;
+
+        // Sampling starts early, at the start of instrumentation init.
+        var groupingStartingWithAllThreadSamples = groupedByTimestampAscending.SkipWhile(IndicatesSelectiveSampling);
+        foreach (var group in groupingStartingWithAllThreadSamples)
+        {
+            // Based on plugin configuration, the expectation is for every 4th
+            // batch to contain multiple samples as a result of continuous profiling.
+            if (counter % 4 == 0)
+            {
+                Assert.NotEqual(1, group.Count());
+
+                // Sample for thread selected for frequent sampling when collecting samples of all threads
+                // should be marked with SelectedForFrequentSampling flag.
+                Assert.Single(group, sample => sample.SelectedForFrequentSampling);
+            }
+            else
+            {
+                Assert.Single(group);
+            }
+
+            Assert.Single(group, sample => sample.TraceIdHigh != 0 && sample.TraceIdLow != 0 && sample.SpanId != 0);
+
+            counter++;
+        }
+
+        bool IndicatesSelectiveSampling(IGrouping<long, ThreadSample> samples)
+        {
+            return samples.Count() == 1;
+        }
+    }
+
+    private static List<ThreadSample> ExtractSamples(string output)
+    {
+        var batchSeparator = $"{Environment.NewLine}{Environment.NewLine}";
+        var lines = output.Split(batchSeparator);
+        var deserializedSampleBatches = lines[..^1].Select(sample => JsonSerializer.Deserialize<List<ThreadSample>>(sample)).ToList();
+
+        var threadSamples = new List<ThreadSample>();
+        foreach (var batch in deserializedSampleBatches)
+        {
+            threadSamples.AddRange(batch!);
+        }
+
+        return threadSamples;
     }
 
     private static DateTime ToDateTime(long timestampNanoseconds)
@@ -80,8 +136,9 @@ public class SelectiveSamplerTests : TestHelper
 
         public uint ThreadIndex { get; set; }
 
+        public bool SelectedForFrequentSampling { get; set; }
+
         public IList<string> Frames { get; set; } = new List<string>();
     }
 }
 #endif
-
