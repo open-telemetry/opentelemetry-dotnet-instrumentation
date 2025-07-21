@@ -2,20 +2,20 @@
 // SPDX-License-Identifier: Apache-2.0
 
 using OpenTelemetry.AutoInstrumentation.CallTarget;
-using OpenTelemetry.AutoInstrumentation.Instrumentations.RabbitMq6.DuckTypes;
+using OpenTelemetry.AutoInstrumentation.Instrumentations.RabbitMqLegacy.DuckTypes;
 using OpenTelemetry.AutoInstrumentation.Util;
 // ReSharper disable ConditionIsAlwaysTrueOrFalseAccordingToNullableAPIContract
 
-namespace OpenTelemetry.AutoInstrumentation.Instrumentations.RabbitMq6.Integrations;
+namespace OpenTelemetry.AutoInstrumentation.Instrumentations.RabbitMqLegacy.Integrations;
 
 /// <summary>
-/// RabbitMq AsyncDefaultBasicConsumer.HandleBasicDeliver integration.
+/// RabbitMq DefaultBasicConsumer.HandleBasicDeliver integration.
 /// </summary>
 [InstrumentMethod(
     assemblyName: IntegrationConstants.RabbitMqAssemblyName,
-    typeName: IntegrationConstants.AsyncDefaultBasicConsumerTypeName,
+    typeName: IntegrationConstants.DefaultBasicConsumerTypeName,
     methodName: IntegrationConstants.HandleBasicDeliverMethodName,
-    returnTypeName: ClrNames.Task,
+    returnTypeName: ClrNames.Void,
     parameterTypeNames: new[] { ClrNames.String, ClrNames.UInt64, ClrNames.Bool, ClrNames.String, ClrNames.String, IntegrationConstants.BasicPropertiesInterfaceTypeName, $"{ClrNames.Byte}[]" },
     minimumVersion: IntegrationConstants.Min5SupportedVersion,
     maximumVersion: IntegrationConstants.Max5SupportedVersion,
@@ -24,16 +24,16 @@ namespace OpenTelemetry.AutoInstrumentation.Instrumentations.RabbitMq6.Integrati
     integrationKind: IntegrationKind.Derived)]
 [InstrumentMethod(
     assemblyName: IntegrationConstants.RabbitMqAssemblyName,
-    typeName: IntegrationConstants.AsyncDefaultBasicConsumerTypeName,
+    typeName: IntegrationConstants.DefaultBasicConsumerTypeName,
     methodName: IntegrationConstants.HandleBasicDeliverMethodName,
-    returnTypeName: ClrNames.Task,
+    returnTypeName: ClrNames.Void,
     parameterTypeNames: new[] { ClrNames.String, ClrNames.UInt64, ClrNames.Bool, ClrNames.String, ClrNames.String, IntegrationConstants.BasicPropertiesInterfaceTypeName, $"System.ReadOnlyMemory`1[{ClrNames.Byte}]" },
     minimumVersion: IntegrationConstants.Min6SupportedVersion,
     maximumVersion: IntegrationConstants.Max6SupportedVersion,
     integrationName: IntegrationConstants.RabbitMqByteCodeIntegrationName,
     type: InstrumentationType.Trace,
     integrationKind: IntegrationKind.Derived)]
-public static class AsyncDefaultBasicConsumerIntegration
+public static class DefaultBasicConsumerIntegration
 {
     internal static CallTargetState OnMethodBegin<TTarget, TBasicProperties, TBody>(TTarget instance, string? consumerTag, ulong deliveryTag, bool redelivered, string? exchange, string? routingKey, TBasicProperties properties, TBody body)
         where TBasicProperties : IBasicProperties
@@ -43,12 +43,12 @@ public static class AsyncDefaultBasicConsumerIntegration
         return new CallTargetState(activity, null);
     }
 
-    internal static TReturn OnAsyncMethodEnd<TTarget, TReturn>(TTarget instance, TReturn returnValue, Exception? exception, in CallTargetState state)
+    internal static CallTargetReturn OnMethodEnd<TTarget>(TTarget instance, Exception? exception, in CallTargetState state)
     {
         var activity = state.Activity;
         if (activity is null)
         {
-            return returnValue;
+            return CallTargetReturn.GetDefault();
         }
 
         if (exception is not null)
@@ -58,6 +58,6 @@ public static class AsyncDefaultBasicConsumerIntegration
 
         activity.Stop();
 
-        return returnValue;
+        return CallTargetReturn.GetDefault();
     }
 }

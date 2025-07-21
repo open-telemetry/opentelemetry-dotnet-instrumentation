@@ -3,10 +3,10 @@
 
 using System.Diagnostics;
 using OpenTelemetry.AutoInstrumentation.CallTarget;
-using OpenTelemetry.AutoInstrumentation.Instrumentations.RabbitMq6.DuckTypes;
+using OpenTelemetry.AutoInstrumentation.Instrumentations.RabbitMqLegacy.DuckTypes;
 using OpenTelemetry.AutoInstrumentation.Util;
 
-namespace OpenTelemetry.AutoInstrumentation.Instrumentations.RabbitMq6.Integrations;
+namespace OpenTelemetry.AutoInstrumentation.Instrumentations.RabbitMqLegacy.Integrations;
 
 /// <summary>
 /// RabbitMq ModelBase.BasicGet integration.
