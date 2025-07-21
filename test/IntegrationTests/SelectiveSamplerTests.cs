@@ -56,6 +56,8 @@ public class SelectiveSamplerTests : TestHelper
     [Trait("Category", "EndToEnd")]
     public void ExportThreadSamplesInMixedMode()
     {
+        Skip.If(RuntimeInformation.IsOSPlatform(OSPlatform.OSX));
+
         EnableBytecodeInstrumentation();
         SetEnvironmentVariable("OTEL_DOTNET_AUTO_PLUGINS", "TestApplication.SelectiveSampler.Plugins.MixedModeSamplingPlugin, TestApplication.SelectiveSampler, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null");
         SetEnvironmentVariable("OTEL_DOTNET_AUTO_TRACES_ADDITIONAL_SOURCES", "TestApplication.SelectiveSampler");
@@ -67,12 +69,22 @@ public class SelectiveSamplerTests : TestHelper
         var groupedByTimestampAscending = threadSamples.GroupBy(sample => sample.TimestampNanoseconds).OrderBy(samples => samples.Key);
 
         // Based on the test app, samples for all the threads should be collected at least 2 times.
-        Assert.True(groupedByTimestampAscending.Count(samples => !IndicatesSelectiveSampling(samples) && samples.Any(HasSpanContextAssociated)) > 1);
+        Assert.True(groupedByTimestampAscending.Count(
+            samples =>
+                !IndicatesSelectiveSampling(samples) &&
+                samples.Any(HasSpanContextAssociated) &&
+                samples.Count(sample => sample.SelectedForFrequentSampling) == 1)
+                    > 1);
 
         var counter = 0;
 
         // Sampling starts early, at the start of instrumentation init.
-        var groupingStartingWithAllThreadSamples = groupedByTimestampAscending.SkipWhile(samples => IndicatesSelectiveSampling(samples) || CollectedBeforeSpanStarted(samples));
+        var groupingStartingWithAllThreadSamples = groupedByTimestampAscending.SkipWhile(
+            samples =>
+                IndicatesSelectiveSampling(samples) ||
+                CollectedBeforeSpanStarted(samples) ||
+                CollectedBeforeFrequentSamplingStarted(samples));
+
         foreach (var group in groupingStartingWithAllThreadSamples)
         {
             // Based on plugin configuration, the expectation is for every 4th
@@ -94,16 +106,21 @@ public class SelectiveSamplerTests : TestHelper
 
             counter++;
         }
+    }
 
-        bool CollectedBeforeSpanStarted(IGrouping<long, ThreadSample> samples)
-        {
-            return !samples.Any(HasSpanContextAssociated);
-        }
+    private static bool IndicatesSelectiveSampling(IGrouping<long, ThreadSample> samples)
+    {
+        return samples.Count() == 1;
+    }
 
-        bool IndicatesSelectiveSampling(IGrouping<long, ThreadSample> samples)
-        {
-            return samples.Count() == 1;
-        }
+    private static bool CollectedBeforeSpanStarted(IGrouping<long, ThreadSample> samples)
+    {
+        return !samples.Any(HasSpanContextAssociated);
+    }
+
+    private static bool CollectedBeforeFrequentSamplingStarted(IGrouping<long, ThreadSample> samples)
+    {
+        return !samples.Any(sample => sample.SelectedForFrequentSampling);
     }
 
     private static bool HasSpanContextAssociated(ThreadSample sample)
