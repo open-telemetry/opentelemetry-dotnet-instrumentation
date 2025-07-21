@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: Apache-2.0
 
 using OpenTelemetry.AutoInstrumentation.CallTarget;
-using OpenTelemetry.AutoInstrumentation.DuckTyping;
 using OpenTelemetry.AutoInstrumentation.Instrumentations.RabbitMq6.DuckTypes;
 using OpenTelemetry.AutoInstrumentation.Util;
 // ReSharper disable ConditionIsAlwaysTrueOrFalseAccordingToNullableAPIContract
@@ -17,9 +16,20 @@ namespace OpenTelemetry.AutoInstrumentation.Instrumentations.RabbitMq6.Integrati
     typeName: IntegrationConstants.DefaultBasicConsumerTypeName,
     methodName: IntegrationConstants.HandleBasicDeliverMethodName,
     returnTypeName: ClrNames.Void,
+    parameterTypeNames: new[] { ClrNames.String, ClrNames.UInt64, ClrNames.Bool, ClrNames.String, ClrNames.String, IntegrationConstants.BasicPropertiesInterfaceTypeName, $"{ClrNames.Byte}[]" },
+    minimumVersion: IntegrationConstants.Min5SupportedVersion,
+    maximumVersion: IntegrationConstants.Max5SupportedVersion,
+    integrationName: IntegrationConstants.RabbitMqByteCodeIntegrationName,
+    type: InstrumentationType.Trace,
+    integrationKind: IntegrationKind.Derived)]
+[InstrumentMethod(
+    assemblyName: IntegrationConstants.RabbitMqAssemblyName,
+    typeName: IntegrationConstants.DefaultBasicConsumerTypeName,
+    methodName: IntegrationConstants.HandleBasicDeliverMethodName,
+    returnTypeName: ClrNames.Void,
     parameterTypeNames: new[] { ClrNames.String, ClrNames.UInt64, ClrNames.Bool, ClrNames.String, ClrNames.String, IntegrationConstants.BasicPropertiesInterfaceTypeName, $"System.ReadOnlyMemory`1[{ClrNames.Byte}]" },
-    minimumVersion: IntegrationConstants.MinSupportedVersion,
-    maximumVersion: IntegrationConstants.MaxSupportedVersion,
+    minimumVersion: IntegrationConstants.Min6SupportedVersion,
+    maximumVersion: IntegrationConstants.Max6SupportedVersion,
     integrationName: IntegrationConstants.RabbitMqByteCodeIntegrationName,
     type: InstrumentationType.Trace,
     integrationKind: IntegrationKind.Derived)]

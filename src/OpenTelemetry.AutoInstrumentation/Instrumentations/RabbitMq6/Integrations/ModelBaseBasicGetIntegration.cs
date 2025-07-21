@@ -2,10 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 using System.Diagnostics;
-using System.Resources;
 using OpenTelemetry.AutoInstrumentation.CallTarget;
-using OpenTelemetry.AutoInstrumentation.DuckTyping;
-using OpenTelemetry.AutoInstrumentation.Instrumentations.Kafka.DuckTypes;
 using OpenTelemetry.AutoInstrumentation.Instrumentations.RabbitMq6.DuckTypes;
 using OpenTelemetry.AutoInstrumentation.Util;
 
@@ -20,8 +17,8 @@ namespace OpenTelemetry.AutoInstrumentation.Instrumentations.RabbitMq6.Integrati
     methodName: IntegrationConstants.BasicGetMethodName,
     returnTypeName: IntegrationConstants.BasicGetResultTypeName,
     parameterTypeNames: new[] { ClrNames.String, ClrNames.Bool },
-    minimumVersion: IntegrationConstants.MinSupportedVersion,
-    maximumVersion: IntegrationConstants.MaxSupportedVersion,
+    minimumVersion: IntegrationConstants.Min5SupportedVersion,
+    maximumVersion: IntegrationConstants.Max6SupportedVersion,
     integrationName: IntegrationConstants.RabbitMqByteCodeIntegrationName,
     type: InstrumentationType.Trace)]
 public static class ModelBaseBasicGetIntegration
