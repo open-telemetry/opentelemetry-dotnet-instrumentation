@@ -67,12 +67,12 @@ public class SelectiveSamplerTests : TestHelper
         var groupedByTimestampAscending = threadSamples.GroupBy(sample => sample.TimestampNanoseconds).OrderBy(samples => samples.Key);
 
         // Based on the test app, samples for all the threads should be collected at least 2 times.
-        Assert.True(groupedByTimestampAscending.Count(samples => !IndicatesSelectiveSampling(samples)) > 1);
+        Assert.True(groupedByTimestampAscending.Count(samples => !IndicatesSelectiveSampling(samples) && samples.Any(HasSpanContextAssociated)) > 1);
 
         var counter = 0;
 
         // Sampling starts early, at the start of instrumentation init.
-        var groupingStartingWithAllThreadSamples = groupedByTimestampAscending.SkipWhile(IndicatesSelectiveSampling);
+        var groupingStartingWithAllThreadSamples = groupedByTimestampAscending.SkipWhile(samples => IndicatesSelectiveSampling(samples) || CollectedBeforeSpanStarted(samples));
         foreach (var group in groupingStartingWithAllThreadSamples)
         {
             // Based on plugin configuration, the expectation is for every 4th
@@ -90,15 +90,25 @@ public class SelectiveSamplerTests : TestHelper
                 Assert.Single(group);
             }
 
-            Assert.Single(group, sample => sample.TraceIdHigh != 0 && sample.TraceIdLow != 0 && sample.SpanId != 0);
+            Assert.Single(group, HasSpanContextAssociated);
 
             counter++;
+        }
+
+        bool CollectedBeforeSpanStarted(IGrouping<long, ThreadSample> samples)
+        {
+            return !samples.Any(HasSpanContextAssociated);
         }
 
         bool IndicatesSelectiveSampling(IGrouping<long, ThreadSample> samples)
         {
             return samples.Count() == 1;
         }
+    }
+
+    private static bool HasSpanContextAssociated(ThreadSample sample)
+    {
+        return sample.TraceIdHigh != 0 && sample.TraceIdLow != 0 && sample.SpanId != 0;
     }
 
     private static List<ThreadSample> ExtractSamples(string output)
