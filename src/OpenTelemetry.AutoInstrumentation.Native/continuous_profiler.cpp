@@ -81,8 +81,8 @@ static std::vector<unsigned char>* cpu_buffer_b;
 static std::mutex                  allocation_buffer_lock = std::mutex();
 static std::vector<unsigned char>* allocation_buffer      = new std::vector<unsigned char>();
 
-static std::mutex                  selective_sampling_buffer_lock = std::mutex();
-static std::vector<unsigned char>  selective_sampling_buffer;
+static std::mutex                 selective_sampling_buffer_lock = std::mutex();
+static std::vector<unsigned char> selective_sampling_buffer;
 
 static std::mutex                                                             thread_span_context_lock;
 static std::unordered_map<ThreadID, continuous_profiler::thread_span_context> thread_span_context_map;
@@ -750,7 +750,8 @@ void CaptureAllThreadSamples(ContinuousProfiler* prof, ICorProfilerInfo12* info1
 
         if (prof->selectedThreadsSamplingInterval.has_value())
         {
-            const auto threadSelectedForFrequentSampling = selected_sampling_threads_set.find(thread_id) != selected_sampling_threads_set.end();
+            const auto threadSelectedForFrequentSampling =
+                selected_sampling_threads_set.find(thread_id) != selected_sampling_threads_set.end();
             prof->cur_cpu_writer_->MarkSelectedForFrequentSampling(threadSelectedForFrequentSampling);
         }
 
