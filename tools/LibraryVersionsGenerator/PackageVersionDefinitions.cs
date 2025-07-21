@@ -248,8 +248,6 @@ internal static class PackageVersionDefinitions
             Versions = new List<PackageVersion>
             {
                 new("5.1.2"),
-                new("5.2.0"),
-                new("6.0.0"),
                 new("6.8.1"),
                 new("7.0.0"),
                 new("*")

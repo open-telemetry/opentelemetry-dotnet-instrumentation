@@ -336,8 +336,6 @@ public static partial class LibraryVersion
                 string.Empty,
 #else
                 "5.1.2",
-                "5.2.0",
-                "6.0.0",
                 "6.8.1",
                 "7.0.0",
                 "7.1.2",
