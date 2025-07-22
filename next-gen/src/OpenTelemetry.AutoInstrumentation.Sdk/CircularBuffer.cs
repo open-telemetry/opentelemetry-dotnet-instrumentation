@@ -149,7 +149,7 @@ internal sealed class CircularBuffer<T>
         int index = (int)(tail % Capacity);
         while (true)
         {
-            var previous = Interlocked.Exchange(ref _Trait[index], null);
+            T? previous = Interlocked.Exchange(ref _Trait[index], null);
             if (previous == null)
             {
                 // If we got here it means a writer isn't done.

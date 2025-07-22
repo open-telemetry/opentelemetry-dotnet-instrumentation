@@ -42,7 +42,7 @@ public sealed class ProtobufOtlpSpanExporterAsyncTests : IDisposable
     public void WriteSpanTest()
     {
         using var activitySource = new ActivitySource(nameof(this.WriteSpanTest));
-        using var rootActivity = activitySource.StartActivity("root", ActivityKind.Producer);
+        using Activity? rootActivity = activitySource.StartActivity("root", ActivityKind.Producer);
         var attributes = new List<KeyValuePair<string, object?>>
         {
             new("bool", true),
@@ -59,7 +59,7 @@ public sealed class ProtobufOtlpSpanExporterAsyncTests : IDisposable
         };
 
         Assert.NotNull(rootActivity);
-        foreach (var kvp in attributes)
+        foreach (KeyValuePair<string, object?> kvp in attributes)
         {
             rootActivity.SetTag(kvp.Key, kvp.Value);
         }
@@ -69,7 +69,7 @@ public sealed class ProtobufOtlpSpanExporterAsyncTests : IDisposable
         DateTimeOffset dateTimeOffset;
         dateTimeOffset = DateTimeOffset.FromUnixTimeMilliseconds(0);
 
-        var expectedUnixTimeTicks = (ulong)(startTime.Ticks - dateTimeOffset.Ticks);
+        ulong expectedUnixTimeTicks = (ulong)(startTime.Ticks - dateTimeOffset.Ticks);
         var duration = TimeSpan.FromMilliseconds(1555);
 
         rootActivity.SetStartTime(startTime);
@@ -77,9 +77,9 @@ public sealed class ProtobufOtlpSpanExporterAsyncTests : IDisposable
 
         Span<byte> traceIdSpan = stackalloc byte[16];
         rootActivity.TraceId.CopyTo(traceIdSpan);
-        var traceId = traceIdSpan.ToArray();
+        byte[] traceId = traceIdSpan.ToArray();
 
-        var otlpSpan = ToOtlpSpan(rootActivity);
+        OtlpTrace.Span? otlpSpan = ToOtlpSpan(rootActivity);
 
         Assert.NotNull(otlpSpan);
         Assert.Equal("root", otlpSpan.Name);
@@ -91,13 +91,13 @@ public sealed class ProtobufOtlpSpanExporterAsyncTests : IDisposable
         Assert.Empty(otlpSpan.Links);
         OtlpTestHelpers.AssertOtlpAttributes(attributes, otlpSpan.Attributes);
 
-        var expectedStartTimeUnixNano = 100 * expectedUnixTimeTicks;
+        ulong expectedStartTimeUnixNano = 100 * expectedUnixTimeTicks;
         Assert.Equal(expectedStartTimeUnixNano, otlpSpan.StartTimeUnixNano);
-        var expectedEndTimeUnixNano = expectedStartTimeUnixNano + (duration.TotalMilliseconds * 1_000_000);
+        double expectedEndTimeUnixNano = expectedStartTimeUnixNano + (duration.TotalMilliseconds * 1_000_000);
         Assert.Equal(expectedEndTimeUnixNano, otlpSpan.EndTimeUnixNano);
 
         var childLinks = new List<ActivityLink> { new(rootActivity.Context, new ActivityTagsCollection(attributes)) };
-        var childActivity = activitySource.StartActivity(
+        Activity? childActivity = activitySource.StartActivity(
             "child",
             ActivityKind.Client,
             rootActivity.Context,
@@ -113,7 +113,7 @@ public sealed class ProtobufOtlpSpanExporterAsyncTests : IDisposable
 
         Span<byte> parentIdSpan = stackalloc byte[8];
         rootActivity.Context.SpanId.CopyTo(parentIdSpan);
-        var parentId = parentIdSpan.ToArray();
+        byte[] parentId = parentIdSpan.ToArray();
 
         otlpSpan = ToOtlpSpan(childActivity);
 
@@ -130,7 +130,7 @@ public sealed class ProtobufOtlpSpanExporterAsyncTests : IDisposable
         Assert.Empty(otlpSpan.Attributes);
 
         Assert.Equal(childEvents.Count, otlpSpan.Events.Count);
-        for (var i = 0; i < childEvents.Count; i++)
+        for (int i = 0; i < childEvents.Count; i++)
         {
             Assert.Equal(childEvents[i].Name, otlpSpan.Events[i].Name);
             OtlpTestHelpers.AssertOtlpAttributes(childEvents[i].Tags.ToList(), otlpSpan.Events[i].Attributes);
@@ -138,9 +138,9 @@ public sealed class ProtobufOtlpSpanExporterAsyncTests : IDisposable
 
         childLinks.Reverse();
         Assert.Equal(childLinks.Count, otlpSpan.Links.Count);
-        for (var i = 0; i < childLinks.Count; i++)
+        for (int i = 0; i < childLinks.Count; i++)
         {
-            var tags = childLinks[i].Tags;
+            IEnumerable<KeyValuePair<string, object?>>? tags = childLinks[i].Tags;
             Assert.NotNull(tags);
             OtlpTestHelpers.AssertOtlpAttributes(tags, otlpSpan.Links[i].Attributes);
         }
@@ -155,17 +155,17 @@ public sealed class ProtobufOtlpSpanExporterAsyncTests : IDisposable
     {
         using var activitySource = new ActivitySource(nameof(this.ToOtlpSpanActivitiesWithNullArrayTest));
 
-        using var rootActivity = activitySource.StartActivity("root", ActivityKind.Client);
+        using Activity? rootActivity = activitySource.StartActivity("root", ActivityKind.Client);
         Assert.NotNull(rootActivity);
 
-        var stringArr = new string?[] { "test", string.Empty, null };
+        string?[] stringArr = new string?[] { "test", string.Empty, null };
         rootActivity.SetTag("stringArray", stringArr);
 
-        var otlpSpan = ToOtlpSpan(rootActivity);
+        OtlpTrace.Span? otlpSpan = ToOtlpSpan(rootActivity);
 
         Assert.NotNull(otlpSpan);
 
-        var stringArray = otlpSpan.Attributes.FirstOrDefault(kvp => kvp.Key == "stringArray");
+        OtlpCommon.KeyValue? stringArray = otlpSpan.Attributes.FirstOrDefault(kvp => kvp.Key == "stringArray");
 
         Assert.NotNull(stringArray);
         Assert.Equal("test", stringArray.Value.ArrayValue.Values[0].StringValue);
@@ -181,11 +181,11 @@ public sealed class ProtobufOtlpSpanExporterAsyncTests : IDisposable
     public void ToOtlpSpanNativeActivityStatusTest(ActivityStatusCode expectedStatusCode, string statusDescription)
     {
         using var activitySource = new ActivitySource(nameof(this.ToOtlpSpanNativeActivityStatusTest));
-        using var activity = activitySource.StartActivity("Name");
+        using Activity? activity = activitySource.StartActivity("Name");
         Assert.NotNull(activity);
         activity.SetStatus(expectedStatusCode, statusDescription);
 
-        var otlpSpan = ToOtlpSpan(activity);
+        OtlpTrace.Span? otlpSpan = ToOtlpSpan(activity);
         Assert.NotNull(otlpSpan);
         if (expectedStatusCode == ActivityStatusCode.Unset)
         {
@@ -213,7 +213,7 @@ public sealed class ProtobufOtlpSpanExporterAsyncTests : IDisposable
     public void ToOtlpSpanTraceStateTest(bool traceStateWasSet)
     {
         using var activitySource = new ActivitySource(nameof(this.ToOtlpSpanTraceStateTest));
-        using var activity = activitySource.StartActivity("Name");
+        using Activity? activity = activitySource.StartActivity("Name");
         Assert.NotNull(activity);
         string tracestate = "a=b;c=d";
         if (traceStateWasSet)
@@ -221,7 +221,7 @@ public sealed class ProtobufOtlpSpanExporterAsyncTests : IDisposable
             activity.TraceStateString = tracestate;
         }
 
-        var otlpSpan = ToOtlpSpan(activity);
+        OtlpTrace.Span? otlpSpan = ToOtlpSpan(activity);
         Assert.NotNull(otlpSpan);
 
         if (traceStateWasSet)
@@ -247,10 +247,10 @@ public sealed class ProtobufOtlpSpanExporterAsyncTests : IDisposable
             ActivitySpanId.CreateRandom(),
             isRecorded ? ActivityTraceFlags.Recorded : ActivityTraceFlags.None);
 
-        using var rootActivity = activitySource.StartActivity("root", ActivityKind.Server, ctx);
+        using Activity? rootActivity = activitySource.StartActivity("root", ActivityKind.Server, ctx);
         Assert.NotNull(rootActivity);
 
-        var otlpSpan = ToOtlpSpan(rootActivity);
+        OtlpTrace.Span? otlpSpan = ToOtlpSpan(rootActivity);
 
         Assert.NotNull(otlpSpan);
         var flags = (OtlpTrace.SpanFlags)otlpSpan.Flags;
@@ -278,7 +278,7 @@ public sealed class ProtobufOtlpSpanExporterAsyncTests : IDisposable
         });
 
         using var stream = new MemoryStream(spanWriter.Request.Buffer, 0, spanWriter.Request.WritePosition);
-        var scopeSpans = OtlpTrace.ScopeSpans.Parser.ParseFrom(stream);
+        OtlpTrace.ScopeSpans scopeSpans = OtlpTrace.ScopeSpans.Parser.ParseFrom(stream);
         return scopeSpans.Spans.FirstOrDefault();
     }
 
@@ -305,8 +305,8 @@ public sealed class ProtobufOtlpSpanExporterAsyncTests : IDisposable
             StatusDescription = activity.StatusDescription
         };
 
-        var spanEvents = activity.Events.Select(e => new SpanEvent(e.Name, e.Timestamp.UtcDateTime, e.Tags.ToArray())).ToArray();
-        var spanLinks = activity.Links
+        SpanEvent[] spanEvents = activity.Events.Select(e => new SpanEvent(e.Name, e.Timestamp.UtcDateTime, e.Tags.ToArray())).ToArray();
+        SpanLink[] spanLinks = activity.Links
             .Select(l => new SpanLink(l.Context, l.Tags?.ToArray() ?? Array.Empty<KeyValuePair<string, object?>>()))
             .ToArray();
 

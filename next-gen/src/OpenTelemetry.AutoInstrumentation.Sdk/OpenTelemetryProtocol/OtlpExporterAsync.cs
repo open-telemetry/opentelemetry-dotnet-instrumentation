@@ -83,13 +83,13 @@ internal abstract class OtlpExporterAsync<TRequest, TBatchWriter> : IExporterAsy
 
             if (_HeaderOptions != null)
             {
-                foreach (var header in _HeaderOptions)
+                foreach (KeyValuePair<string, string> header in _HeaderOptions)
                 {
                     requestMessage.Headers.Add(header.Key, header.Value);
                 }
             }
 
-            using var responseMessage =
+            using HttpResponseMessage responseMessage =
                 await _HttpClient.SendAsync(requestMessage, cancellationToken).ConfigureAwait(false);
 
             if (!responseMessage.IsSuccessStatusCode)

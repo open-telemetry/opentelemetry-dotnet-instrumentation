@@ -33,7 +33,7 @@ internal readonly ref struct MetricBatch : IBatch<MetricBatchWriter>
 
         writer.BeginBatch(_Resource);
 
-        foreach (var producer in _Producers)
+        foreach (MetricProducer producer in _Producers)
         {
             try
             {

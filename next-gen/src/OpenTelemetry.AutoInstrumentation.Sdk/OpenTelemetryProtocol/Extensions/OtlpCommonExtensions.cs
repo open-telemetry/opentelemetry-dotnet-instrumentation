@@ -13,7 +13,7 @@ internal static class OtlpCommonExtensions
         this RepeatedField<KeyValue> otlpAttributes,
         ReadOnlySpan<KeyValuePair<string, object?>> attributes)
     {
-        foreach (var attribute in attributes)
+        foreach (KeyValuePair<string, object?> attribute in attributes)
         {
             otlpAttributes.Add(
                 new KeyValue()
@@ -33,7 +33,7 @@ internal static class OtlpCommonExtensions
     {
         for (int i = 0; i < tagList.Count; i++)
         {
-            var attribute = tagList[i];
+            KeyValuePair<string, object?> attribute = tagList[i];
 
             otlpAttributes.Add(
                 new KeyValue()

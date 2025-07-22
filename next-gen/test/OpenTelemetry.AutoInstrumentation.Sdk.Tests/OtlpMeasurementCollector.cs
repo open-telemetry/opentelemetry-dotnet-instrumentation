@@ -13,7 +13,7 @@ using OtlpMetric = OpenTelemetry.Proto.Metrics.V1;
 
 namespace OpenTelemetry.AutoInstrumentation.Sdk.Tests;
 
-internal class OtlpMeasurementCollector : IDisposable
+internal sealed class OtlpMeasurementCollector : IDisposable
 {
     private readonly MeterListener _MeterListener;
     private readonly Resource _Resource;

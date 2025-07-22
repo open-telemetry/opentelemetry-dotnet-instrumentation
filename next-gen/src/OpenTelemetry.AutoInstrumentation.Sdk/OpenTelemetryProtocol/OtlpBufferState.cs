@@ -34,22 +34,10 @@ internal sealed class OtlpBufferState
     public int WritePosition { get; set; }
 
     /// <summary>
-    /// Gets or sets the position of the traces data resource spans length field.
-    /// </summary>
-    public int TracesDataResourceSpansLengthPosition { get; set; }
-
-    /// <summary>
-    /// Gets or sets the position of the resource spans scope spans length field.
-    /// </summary>
-    public int ResourceSpansScopeSpansLengthPosition { get; set; }
-
-    /// <summary>
     /// Resets the buffer state.
     /// </summary>
     public void Reset()
     {
         WritePosition = 0;
-        ResourceSpansScopeSpansLengthPosition = 0;
-        TracesDataResourceSpansLengthPosition = 0;
     }
 }

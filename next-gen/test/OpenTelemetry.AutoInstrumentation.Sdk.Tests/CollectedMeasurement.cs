@@ -5,7 +5,7 @@ using OtlpCollector = OpenTelemetry.Proto.Collector.Metrics.V1;
 
 namespace OpenTelemetry.AutoInstrumentation.Sdk.Tests;
 
-internal class CollectedMeasurement
+internal sealed class CollectedMeasurement
 {
     public string InstrumentName { get; set; } = string.Empty;
 

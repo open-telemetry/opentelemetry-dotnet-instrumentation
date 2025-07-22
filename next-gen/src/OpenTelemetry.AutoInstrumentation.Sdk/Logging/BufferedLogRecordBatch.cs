@@ -9,7 +9,7 @@ internal readonly ref struct BufferedLogRecordBatch : IBatch<LogRecordBatchWrite
         LogRecordBatchWriter writer,
         BufferedLogRecord bufferedLogRecord)
     {
-        bufferedLogRecord.ToLogRecord(out var logRecord);
+        bufferedLogRecord.ToLogRecord(out LogRecord logRecord);
 
         writer.WriteLogRecord(in logRecord);
     }

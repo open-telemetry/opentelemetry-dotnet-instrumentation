@@ -20,7 +20,7 @@ internal static class OtlpTestHelpers
         int expectedSize = 0;
         for (int i = 0; i < expectedAttributes.Count; i++)
         {
-            var current = expectedAttributes[i].Value;
+            object? current = expectedAttributes[i].Value;
             Assert.Equal(expectedAttributes[i].Key, actual[i].Key);
             Assert.NotNull(current);
 
@@ -30,7 +30,7 @@ internal static class OtlpTestHelpers
                 if (current is bool[] boolArray)
                 {
                     Assert.Equal(boolArray.Length, actual[i].Value.ArrayValue.Values.Count);
-                    for (var j = 0; j < boolArray.Length; ++j)
+                    for (int j = 0; j < boolArray.Length; ++j)
                     {
                         AssertOtlpAttributeValue(boolArray[j], actual[i].Value.ArrayValue.Values[j]);
                     }
@@ -40,7 +40,7 @@ internal static class OtlpTestHelpers
                 else if (current is int[] intArray)
                 {
                     Assert.Equal(intArray.Length, actual[i].Value.ArrayValue.Values.Count);
-                    for (var j = 0; j < intArray.Length; ++j)
+                    for (int j = 0; j < intArray.Length; ++j)
                     {
                         AssertOtlpAttributeValue(intArray[j], actual[i].Value.ArrayValue.Values[j]);
                     }
@@ -50,7 +50,7 @@ internal static class OtlpTestHelpers
                 else if (current is double[] doubleArray)
                 {
                     Assert.Equal(doubleArray.Length, actual[i].Value.ArrayValue.Values.Count);
-                    for (var j = 0; j < doubleArray.Length; ++j)
+                    for (int j = 0; j < doubleArray.Length; ++j)
                     {
                         AssertOtlpAttributeValue(doubleArray[j], actual[i].Value.ArrayValue.Values[j]);
                     }
@@ -60,7 +60,7 @@ internal static class OtlpTestHelpers
                 else if (current is string[] stringArray)
                 {
                     Assert.Equal(stringArray.Length, actual[i].Value.ArrayValue.Values.Count);
-                    for (var j = 0; j < stringArray.Length; ++j)
+                    for (int j = 0; j < stringArray.Length; ++j)
                     {
                         AssertOtlpAttributeValue(stringArray[j], actual[i].Value.ArrayValue.Values[j]);
                     }
@@ -75,7 +75,7 @@ internal static class OtlpTestHelpers
 
                     for (int j = 0; j < source.Length; j++)
                     {
-                        var item = source.GetValue(j);
+                        object? item = source.GetValue(j);
 
                         AssertOtlpAttributeValue(item, actual[i].Value.ArrayValue.Values[j]);
                     }

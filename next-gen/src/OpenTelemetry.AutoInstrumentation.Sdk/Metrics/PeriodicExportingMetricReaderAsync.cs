@@ -52,7 +52,7 @@ internal sealed class PeriodicExportingMetricReaderAsync : MetricReaderAsync
         }
 
         var tcs = new TaskCompletionSource();
-        var rwh = ThreadPool.RegisterWaitForSingleObject(
+        RegisteredWaitHandle rwh = ThreadPool.RegisterWaitForSingleObject(
             waitObject: _DataExportedTrigger,
             callBack: (state, timedOut) =>
             {

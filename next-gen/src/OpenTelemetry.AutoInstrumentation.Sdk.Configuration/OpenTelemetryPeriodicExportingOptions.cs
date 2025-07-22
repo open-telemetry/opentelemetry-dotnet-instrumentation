@@ -20,7 +20,7 @@ public sealed class OpenTelemetryPeriodicExportingOptions
         AggregationTemporality aggregationTemporalityPreference = AggregationTemporality.Cumulative;
         string? tempAggregationTemporality = config[nameof(AggregationTemporalityPreference)];
         if (!string.IsNullOrEmpty(tempAggregationTemporality)
-            && Enum.TryParse<AggregationTemporality>(tempAggregationTemporality, ignoreCase: true, out var parsedAggregationTemporality))
+            && Enum.TryParse<AggregationTemporality>(tempAggregationTemporality, ignoreCase: true, out AggregationTemporality parsedAggregationTemporality))
         {
             aggregationTemporalityPreference = parsedAggregationTemporality;
         }
