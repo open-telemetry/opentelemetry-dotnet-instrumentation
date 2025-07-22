@@ -1,8 +1,12 @@
 appcmd
 AWSSDK
 AZUREAPPSERVICE
+bazel
+bazelized
+bazelversion
 bitness
 bytecode
+Bzlmod
 cmake
 Codespaces
 Contoso
@@ -31,6 +35,7 @@ mkdir
 mktemp
 monocytogenes
 MSMQ
+MSYS
 myapp
 mycompanymyproductmylibrary
 MYSQLCONNECTOR
@@ -53,6 +58,7 @@ protos
 RABBITMQ
 Serilog
 spdlog
+srcs
 SQLCLIENT
 sqlserver
 STACKEXCHANGEREDIS
