@@ -780,7 +780,6 @@ void CaptureThreadSamplesForSelectedThreads(ContinuousProfiler* prof, ICorProfil
     prof->helper.volatile_function_name_cache_.Clear();
 
     std::vector<unsigned char> localBytes;
-    localBytes.reserve(kSamplesBufferDefaultSize);
     auto localBuf = ThreadSamplesBuffer(&localBytes);
 
     auto dssp = DoStackSnapshotParams(prof, &localBuf);
