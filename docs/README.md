@@ -16,9 +16,9 @@ to .NET applications without having to modify their source code.
 > [!WARNING]
 > The following documentation refers to the in-development version
 of OpenTelemetry .NET Automatic Instrumentation. Docs for the latest version
-([1.11.0](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/latest))
+([1.12.0](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/latest))
 can be found in [opentelemetry.io](https://opentelemetry.io/docs/zero-code/net/)
-or [here](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/blob/v1.11.0/docs/README.md).
+or [here](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/blob/v1.12.0/docs/README.md).
 
 ---
 
@@ -54,7 +54,7 @@ OpenTelemetry .NET Automatic Instrumentation is built on top of
 [OpenTelemetry .NET](https://github.com/open-telemetry/opentelemetry-dotnet):
 
 - [Core components](https://github.com/open-telemetry/opentelemetry-dotnet/blob/main/VERSIONING.md#core-components):
-[`1.11.2`](https://github.com/open-telemetry/opentelemetry-dotnet/releases/tag/core-1.11.2)
+[`1.12.0`](https://github.com/open-telemetry/opentelemetry-dotnet/releases/tag/core-1.12.0)
 - `System.Diagnostics.DiagnosticSource`: [`9.0.0`](https://www.nuget.org/packages/System.Diagnostics.DiagnosticSource/9.0.0)
   referencing `System.Runtime.CompilerServices.Unsafe`: [`6.0.0`](https://www.nuget.org/packages/System.Runtime.CompilerServices.Unsafe/6.0.0)
 
@@ -108,6 +108,7 @@ CI tests run against the following operating systems:
 - [CentOS Stream 9 x64](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/blob/main/docker/centos-stream9.dockerfile)
 - [macOS Ventura 13 x64](https://github.com/actions/runner-images/blob/main/images/macos/macos-13-Readme.md)
 - [Microsoft Windows Server 2022 x64](https://github.com/actions/runner-images/blob/main/images/windows/Windows2022-Readme.md)
+- [Microsoft Windows Server 2025 x64](https://github.com/actions/runner-images/blob/main/images/windows/Windows2025-Readme.md)
 - [Ubuntu 22.04 LTS x64](https://github.com/actions/runner-images/blob/main/images/ubuntu/Ubuntu2204-Readme.md)
 - [Ubuntu 22.04 LTS ARM64](https://github.com/actions/partner-runner-images/blob/main/images/arm-ubuntu-22-image.md)
 
@@ -184,7 +185,7 @@ Example usage:
 
 ```sh
 # Download the bash script
-curl -sSfL https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/download/v1.11.0/otel-dotnet-auto-install.sh -O
+curl -sSfL https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/download/v1.12.0/otel-dotnet-auto-install.sh -O
 
 # Install core files
 sh ./otel-dotnet-auto-install.sh
@@ -224,7 +225,7 @@ uses environment variables as parameters:
 | `TMPDIR`                | (deprecated) prefer `DOWNLOAD_DIR`                                              | No       | `$(mktemp -d)`              |
 | `DOWNLOAD_DIR`          | Folder to download the archive to. Will use local archive if it already exists  | No       | `$TMPDIR` or `$(mktemp -d)` |
 | `LOCAL_PATH`            | Full path the archive to use for installation. (ideal for air-gapped scenarios) | No       | *Calculated*                |
-| `VERSION`               | Version to download                                                             | No       | `1.11.0`                    |
+| `VERSION`               | Version to download                                                             | No       | `1.12.0`                    |
 
 [instrument.sh](../instrument.sh) script
 uses environment variables as parameters:
@@ -240,11 +241,19 @@ uses environment variables as parameters:
 
 On Windows, you should install OpenTelemetry .NET Automatic Instrumentation
 and instrument your .NET application using the provided PowerShell module.
+
+> [!WARNING]
+> The PowerShell module works only on PowerShell 5.1
+which is the one installed by default on Windows.
+
 Example usage (run as administrator):
 
 ```powershell
+# PowerShell 5.1 is required
+#Requires -PSEdition Desktop
+
 # Download the module
-$module_url = "https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/download/v1.11.0/OpenTelemetry.DotNet.Auto.psm1"
+$module_url = "https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/download/v1.12.0/OpenTelemetry.DotNet.Auto.psm1"
 $download_path = Join-Path $env:temp "OpenTelemetry.DotNet.Auto.psm1"
 Invoke-WebRequest -Uri $module_url -OutFile $download_path -UseBasicParsing
 
@@ -288,9 +297,25 @@ Update-OpenTelemetryCore
 Register-OpenTelemetryForWindowsService -WindowsServiceName MyServiceName -OTelServiceName MyOtelServiceName
 ```
 
-> [!WARNING]
-> The PowerShell module works only on PowerShell 5.1
-which is the one installed by default on Windows.
+Uninstalling OpenTelemetry:
+
+```powershell
+# PowerShell 5.1 is required
+#Requires -PSEdition Desktop
+
+# Import the previously downloaded module. After installation or an update the module is found in the default install directory.
+# Note: It's best to use the same version of the module for installation and uninstallation to ensure proper removal.
+Import-Module "C:\Program Files\OpenTelemetry .NET AutoInstrumentation\OpenTelemetry.DotNet.Auto.psm1"
+
+# If IIS was previously registered, unregister it.
+Unregister-OpenTelemetryForIIS
+
+# If Windows services were previously registered, unregister them.
+Unregister-OpenTelemetryForWindowsService -WindowsServiceName MyServiceName
+
+# Finally, uninstall OpenTelemetry instrumentation
+Uninstall-OpenTelemetryCore
+```
 
 ## Instrument a container
 
@@ -334,8 +359,7 @@ See [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## Community Roles
 
-[Maintainers](https://github.com/open-telemetry/community/blob/main/guides/contributor/membership.md#membership-levels)
-([@open-telemetry/dotnet-instrumentation-maintainers](https://github.com/orgs/open-telemetry/teams/dotnet-instrumentation-maintainers)):
+### Maintainers
 
 - [Chris Ventura](https://github.com/nrcventura), New Relic
 - [Paulo Janotti](https://github.com/pjanotti), Splunk
@@ -344,14 +368,16 @@ See [CONTRIBUTING.md](CONTRIBUTING.md).
 - [Robert Paj&#x105;k](https://github.com/pellared), Splunk
 - [Zach Montoya](https://github.com/zacharycmontoya), Datadog
 
-[Approvers](https://github.com/open-telemetry/community/blob/main/guides/contributor/membership.md#membership-levels)
-([@open-telemetry/dotnet-instrumentation-approvers](https://github.com/orgs/open-telemetry/teams/dotnet-instrumentation-approvers)):
+For more information about the maintainer role, see the [community repository](https://github.com/open-telemetry/community/blob/main/community-membership.md#maintainer).
+
+### Approvers
 
 - [Mateusz &#x141;ach](https://github.com/lachmatt), Splunk
 - [Rasmus Kuusmann](https://github.com/RassK), Splunk
 
-[Emeritus
-Maintainer/Approver/Triager](https://github.com/open-telemetry/community/blob/main/guides/contributor/membership.md#membership-levels):
+For more information about the approver role, see the [community repository](https://github.com/open-telemetry/community/blob/main/community-membership.md#approver).
+
+### Emeritus Maintainer/Approver/Triager
 
 - [Colin Higgins](https://github.com/colin-higgins)
 - [Greg Paperin](https://github.com/macrogreg)
@@ -360,4 +386,4 @@ Maintainer/Approver/Triager](https://github.com/open-telemetry/community/blob/ma
 - [Mike Goldsmith](https://github.com/MikeGoldsmith)
 - [Tony Redondo](https://github.com/tonyredondo)
 
-Learn more about roles in the [community repository](https://github.com/open-telemetry/community/blob/main/guides/contributor/membership.md).
+For more information about the emeritus role, see the [community repository](https://github.com/open-telemetry/community/blob/main/guides/contributor/membership.md#emeritus-maintainerapprovertriager).

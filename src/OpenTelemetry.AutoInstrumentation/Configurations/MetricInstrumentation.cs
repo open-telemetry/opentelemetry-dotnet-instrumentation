@@ -45,5 +45,12 @@ internal enum MetricInstrumentation
     /// <summary>
     /// SqlClient instrumentation.
     /// </summary>
-    SqlClient = 7
+    SqlClient = 7,
+
+#if NET
+    /// <summary>
+    /// Npgsql instrumentation.
+    /// </summary>
+    Npgsql = 8
+#endif
 }

@@ -332,7 +332,7 @@ internal class IntegrationMapper
             "Creating EndMethod Dynamic Method for '{0}' integration. [Target={1}]",
             integrationType.FullName,
             targetType.FullName);
-        MethodInfo? onMethodEndMethodInfo = integrationType.GetMethod(EndMethodName, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static);
+        MethodInfo? onMethodEndMethodInfo = GetOnMethodEndMethodInfo(integrationType, "CallTargetReturn");
         if (onMethodEndMethodInfo is null)
         {
             return null;
@@ -451,7 +451,7 @@ internal class IntegrationMapper
             integrationType.FullName,
             targetType.FullName,
             returnType.FullName);
-        MethodInfo? onMethodEndMethodInfo = integrationType.GetMethod(EndMethodName, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static);
+        MethodInfo? onMethodEndMethodInfo = GetOnMethodEndMethodInfo(integrationType, "CallTargetReturn`1");
         if (onMethodEndMethodInfo is null)
         {
             return null;
@@ -755,6 +755,31 @@ internal class IntegrationMapper
             targetType.FullName,
             returnType.FullName);
         return new CreateAsyncEndMethodResult(callMethod, preserveContext);
+    }
+
+    private static MethodInfo? GetOnMethodEndMethodInfo(Type integrationType, string returnTypeName)
+    {
+        try
+        {
+            return integrationType.GetMethod(EndMethodName, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static);
+        }
+        catch (AmbiguousMatchException)
+        {
+            // If the type defines multiple OnMethodEnd methods to work with both void return types and non-void return types,
+            // iterate over the methods to disambiguate
+            var possibleMethods = integrationType.GetMethods(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static);
+            for (int i = 0; i < possibleMethods.Length; i++)
+            {
+                var possibleMethod = possibleMethods[i];
+
+                if (possibleMethod.Name == EndMethodName && possibleMethod.ReturnType.Name == returnTypeName)
+                {
+                    return possibleMethod;
+                }
+            }
+        }
+
+        return null;
     }
 
     private static void WriteCreateNewProxyInstance(ILGenerator ilWriter, Type proxyType, Type targetType)

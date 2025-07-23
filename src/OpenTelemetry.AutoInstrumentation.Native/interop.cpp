@@ -44,10 +44,21 @@ EXTERN_C VOID STDAPICALLTYPE AddDerivedInstrumentations(WCHAR* id, trace::CallTa
 EXTERN_C VOID STDAPICALLTYPE ConfigureContinuousProfiler(bool         threadSamplingEnabled,
                                                          unsigned int threadSamplingInterval,
                                                          bool         allocationSamplingEnabled,
-                                                         unsigned int maxMemorySamplesPerMinute)
+                                                         unsigned int maxMemorySamplesPerMinute,
+                                                         unsigned int selectedThreadSamplingInterval)
 {
     return trace::profiler->ConfigureContinuousProfiler(threadSamplingEnabled, threadSamplingInterval,
-                                                        allocationSamplingEnabled, maxMemorySamplesPerMinute);
+                                                        allocationSamplingEnabled, maxMemorySamplesPerMinute,
+                                                        selectedThreadSamplingInterval);
+}
+
+EXTERN_C VOID STDAPICALLTYPE InitializeTraceMethods(WCHAR* id,
+                                                    WCHAR* integration_assembly_name_ptr,
+                                                    WCHAR* integration_type_name_ptr,
+                                                    WCHAR* configuration_string_ptr)
+{
+    return trace::profiler->InitializeTraceMethods(id, integration_assembly_name_ptr, integration_type_name_ptr,
+                                                   configuration_string_ptr);
 }
 
 #ifndef _WIN32

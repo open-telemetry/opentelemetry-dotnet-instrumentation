@@ -297,6 +297,36 @@ function Is-Greater-Version($v1, $v2) {
 
 <#
     .SYNOPSIS
+    Installs OpenTelemetry .NET Assemblies in GAC.
+    .PARAMETER InstallDir
+    Default: <auto> - the default path is Program Files dir.
+    Install path of the OpenTelemetry .NET Automatic Instrumentation
+    Possible values: <auto>, (Custom path)
+#>
+function Register-AssembliesInGAC() {
+    $installDir = Get-Current-InstallDir
+
+    # Register .NET Framework dlls in GAC
+    [System.Reflection.Assembly]::Load("System.EnterpriseServices, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a") | Out-Null
+    $publish = New-Object System.EnterpriseServices.Internal.Publish 
+    $dlls = Get-ChildItem -Path $installDir\netfx\ -Filter *.dll -File
+    for ($i = 0; $i -lt $dlls.Count; $i++) {
+        $percentageComplete = $i / $dlls.Count * 100
+        Write-Progress -Activity "Registering .NET Framework dlls in GAC" `
+            -Status "Module $($i+1) out of $($dlls.Count). Installing $($dlls[$i].Name):" `
+            -PercentComplete $percentageComplete
+
+        if (Test-AssemblyNotForGAC $dlls[$i].Name) {
+            continue
+        }
+
+        $publish.GacInstall($dlls[$i].FullName)
+    }
+    Write-Progress -Activity "Registering .NET Framework dlls in GAC" -Status "Ready" -Completed
+}
+
+<#
+    .SYNOPSIS
     Installs OpenTelemetry .NET Automatic Instrumentation.
     .PARAMETER InstallDir
     Default: <auto> - the default path is Program Files dir.
@@ -308,7 +338,9 @@ function Install-OpenTelemetryCore() {
         [Parameter(Mandatory = $false)]
         [string]$InstallDir = "<auto>",
         [Parameter(Mandatory = $false)]
-        [string]$LocalPath
+        [string]$LocalPath,
+        [Parameter(Mandatory = $false)]
+        [bool]$RegisterAssembliesInGAC = $true
     )
 
     $version = "v{{VERSION}}"
@@ -332,23 +364,9 @@ function Install-OpenTelemetryCore() {
         # OpenTelemetry service locator
         [System.Environment]::SetEnvironmentVariable($ServiceLocatorVariable, $installDir, [System.EnvironmentVariableTarget]::Machine)
 
-        # Register .NET Framework dlls in GAC
-        [System.Reflection.Assembly]::Load("System.EnterpriseServices, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a") | Out-Null
-        $publish = New-Object System.EnterpriseServices.Internal.Publish 
-        $dlls = Get-ChildItem -Path $installDir\netfx\ -Filter *.dll -File
-        for ($i = 0; $i -lt $dlls.Count; $i++) {
-            $percentageComplete = $i / $dlls.Count * 100
-            Write-Progress -Activity "Registering .NET Framework dlls in GAC" `
-                -Status "Module $($i+1) out of $($dlls.Count). Installing $($dlls[$i].Name):" `
-                -PercentComplete $percentageComplete
-
-            if (Test-AssemblyNotForGAC $dlls[$i].Name) {
-                continue
-            }
-
-            $publish.GacInstall($dlls[$i].FullName)
+        if ($RegisterAssembliesInGAC){
+            Register-AssembliesInGAC $installDir
         }
-        Write-Progress -Activity "Registering .NET Framework dlls in GAC" -Status "Ready" -Completed
     } 
     catch {
         $message = $_
@@ -406,7 +424,9 @@ function Uninstall-OpenTelemetryCore() {
 function Update-OpenTelemetryCore() {
     param(
         [Parameter(Mandatory = $false)]
-        [bool]$RegisterIIS = $false
+        [bool]$RegisterIIS = $false,
+        [Parameter(Mandatory = $false)]
+        [bool]$RegisterAssembliesInGAC = $true
     )
 
     $currentInstallVersion = Get-OpenTelemetryInstallVersion
@@ -436,7 +456,7 @@ function Update-OpenTelemetryCore() {
     Remove-Module OpenTelemetry.Dotnet.Auto
     Import-Module $modulePath
 
-    Install-OpenTelemetryCore -InstallDir $installDir
+    Install-OpenTelemetryCore -InstallDir $installDir -RegisterAssembliesInGAC $$RegisterAssembliesInGAC
     if ($RegisterIIS) {
         Register-OpenTelemetryForIIS
     }
@@ -660,3 +680,4 @@ Export-ModuleMember -Function Get-OpenTelemetryInstallDirectory
 Export-ModuleMember -Function Get-OpenTelemetryInstallVersion
 Export-ModuleMember -Function Enable-OpenTelemetryForIISAppPool
 Export-ModuleMember -Function Disable-OpenTelemetryForIISAppPool
+Export-ModuleMember -Function Register-AssembliesInGAC

@@ -24,8 +24,8 @@ integrationName: "Log4Net",
 type: InstrumentationType.Log)]
 public static class AppenderCollectionIntegration
 {
-    private static readonly IOtelLogger Logger = OtelLogging.GetLogger();
 #if NET
+    private static readonly IOtelLogger Logger = OtelLogging.GetLogger();
     private static int _warningLogged;
 #endif
 

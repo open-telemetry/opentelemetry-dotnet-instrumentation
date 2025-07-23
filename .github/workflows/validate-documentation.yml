@@ -4,15 +4,15 @@ on:
   push:
     branches: [ main ]
     paths:
-    - '.github/workflows/validate-documentation.yml'
-    - '**.md'
-    - '.lycheeignore'
+      - '.github/workflows/validate-documentation.yml'
+      - '**.md'
+      - '.lycheeignore'
   pull_request:
     branches: [ main ]
     paths:
-    - '.github/workflows/validate-documentation.yml'
-    - '**.md'
-    - '.lycheeignore'
+      - '.github/workflows/validate-documentation.yml'
+      - '**.md'
+      - '.lycheeignore'
   merge_group:
   workflow_dispatch:
 
@@ -27,17 +27,32 @@ jobs:
     - name: Checkout
       uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # tag: v4.2.2
 
-    - name: Run markdown links chceks
+    - name: Restore lychee cache
+      uses: actions/cache/restore@5a3ec84eff668545956fd18022155c47e93e2684 # v4.2.3
+      id: cache-restore
+      with:
+        path: .lycheecache
+        key: cache-lychee-${{ github.sha }}
+        restore-keys: cache-lychee-
+
+    - name: Run markdown links checks
       if: ${{ !contains(github.event.pull_request.labels.*.name, 'release PR') }}
-      uses: lycheeverse/lychee-action@1d97d84f0bc547f7b25f4c2170d87d810dc2fb2c # tag: v2.4.0
+      uses: lycheeverse/lychee-action@82202e5e9c2f4ef1a55a3d02563e1cb6041e5332 # tag: v2.4.1
       with:
         fail: true
-        args: "--threads 1 --max-concurrency 1 --verbose --no-progress './**/*.md' './**/*.html'"
+        args: "--cache --max-cache-age 1d --threads 1 --max-concurrency 1 --verbose --retry-wait-time 5 --max-retries 3 --timeout 60 --no-progress './**/*.md' './**/*.html'"
 
     - name: Run markdownlint
-      uses: streetsidesoftware/cspell-action@8485bb4b688c68384c2f6db7ad931f5e3e63f21c # tag: v6.10.1
+      uses: streetsidesoftware/cspell-action@6f05386161564ebe24dcfa1513cde203230d1edc # tag: v7.1.2
       with:
         files: '**/*.md'
 
     - name: Run cspell
-      uses: DavidAnson/markdownlint-cli2-action@05f32210e84442804257b2a6f20b273450ec8265 # tag: v19.1.0
+      uses: DavidAnson/markdownlint-cli2-action@992badcdf24e3b8eb7e87ff9287fe931bcb00c6e # tag: v20.0.0
+
+    - name: Save lychee cache
+      if: always()
+      uses: actions/cache/save@5a3ec84eff668545956fd18022155c47e93e2684 # v4.2.3
+      with:
+        path: .lycheecache
+        key: ${{ steps.cache-restore.outputs.cache-primary-key }}

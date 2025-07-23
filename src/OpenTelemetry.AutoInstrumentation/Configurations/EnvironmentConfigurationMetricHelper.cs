@@ -29,6 +29,9 @@ internal static class EnvironmentConfigurationMetricHelper
                 MetricInstrumentation.HttpClient => Wrappers.AddHttpClientInstrumentation(builder, lazyInstrumentationLoader),
                 MetricInstrumentation.NetRuntime => Wrappers.AddRuntimeInstrumentation(builder, pluginManager),
                 MetricInstrumentation.Process => Wrappers.AddProcessInstrumentation(builder),
+#if NET
+                MetricInstrumentation.Npgsql => builder.AddMeter("Npgsql"),
+#endif
                 MetricInstrumentation.NServiceBus => builder
 #if NET
                     .AddMeter("NServiceBus.Core.Pipeline.Incoming") // NServiceBus 9.1.0+
