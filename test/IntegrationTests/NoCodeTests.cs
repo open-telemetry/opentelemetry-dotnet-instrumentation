@@ -67,6 +67,9 @@ public class NoCodeTests : TestHelper
         collector.Expect("OpenTelemetry.AutoInstrumentation.NoCode", x => x.Name == "Span-IntValueTaskTestMethodAsync");
 #endif
 
+        collector.Expect("OpenTelemetry.AutoInstrumentation.NoCode", x => x.Name == "Span-GenericTestMethod");
+        collector.Expect("OpenTelemetry.AutoInstrumentation.NoCode", x => x.Name == "Span-GenericTestMethodAsync");
+
         RunTestApplication();
 
         collector.AssertExpectations();
