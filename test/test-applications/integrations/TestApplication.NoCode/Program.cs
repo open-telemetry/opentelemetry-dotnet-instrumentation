@@ -1,14 +1,13 @@
 // Copyright The OpenTelemetry Authors
 // SPDX-License-Identifier: Apache-2.0
 
-using System.Diagnostics;
 using TestApplication.Shared;
 
 namespace TestApplication.NoCode;
 
 public class Program
 {
-    public static void Main(string[] args)
+    public static async Task Main(string[] args)
     {
         ConsoleHelper.WriteSplashScreen(args);
 
@@ -42,5 +41,26 @@ public class Program
         _ = noCodeTestingClass.ReturningTestMethod(string.Empty, string.Empty, string.Empty, string.Empty, string.Empty, string.Empty, string.Empty, string.Empty, string.Empty);
 
         _ = NoCodeTestingClass.ReturningTestMethodStatic();
+
+        await noCodeTestingClass.TestMethodAsync();
+        await noCodeTestingClass.TestMethodAAsync();
+        await noCodeTestingClass.TestMethodAsync(string.Empty);
+        await noCodeTestingClass.TestMethodAsync(int.MinValue);
+        await noCodeTestingClass.TestMethodAsync(string.Empty, string.Empty);
+        await noCodeTestingClass.TestMethodAsync(string.Empty, string.Empty, string.Empty);
+        await noCodeTestingClass.TestMethodAsync(string.Empty, string.Empty, string.Empty, string.Empty);
+        await noCodeTestingClass.TestMethodAsync(string.Empty, string.Empty, string.Empty, string.Empty, string.Empty);
+        await noCodeTestingClass.TestMethodAsync(string.Empty, string.Empty, string.Empty, string.Empty, string.Empty, string.Empty);
+        await noCodeTestingClass.TestMethodAsync(string.Empty, string.Empty, string.Empty, string.Empty, string.Empty, string.Empty, string.Empty);
+        await noCodeTestingClass.TestMethodAsync(string.Empty, string.Empty, string.Empty, string.Empty, string.Empty, string.Empty, string.Empty, string.Empty);
+        await noCodeTestingClass.TestMethodAsync(string.Empty, string.Empty, string.Empty, string.Empty, string.Empty, string.Empty, string.Empty, string.Empty, string.Empty);
+
+        await NoCodeTestingClass.TestMethodStaticAsync();
+
+        _ = await noCodeTestingClass.IntTaskTestMethodAsync();
+#if NET
+        await noCodeTestingClass.ValueTaskTestMethodAsync();
+        _ = await noCodeTestingClass.IntValueTaskTestMethodAsync();
+#endif
     }
 }

@@ -38,6 +38,26 @@ internal static class NoCodeBytecodeIntegrationBuilder
         new("TestApplication.NoCode", "TestApplication.NoCode.NoCodeTestingClass", "ReturningTestMethod", ["System.Int32", "System.String", "System.String", "System.String", "System.String", "System.String", "System.String", "System.String"], "Span-ReturningTestMethod7"),
         new("TestApplication.NoCode", "TestApplication.NoCode.NoCodeTestingClass", "ReturningTestMethod", ["System.Int32", "System.String", "System.String", "System.String", "System.String", "System.String", "System.String", "System.String", "System.String"], "Span-ReturningTestMethod8"),
         new("TestApplication.NoCode", "TestApplication.NoCode.NoCodeTestingClass", "ReturningTestMethod", ["System.Int32", "System.String", "System.String", "System.String", "System.String", "System.String", "System.String", "System.String", "System.String", "System.String"], "Span-ReturningTestMethod9"),
+
+        new("TestApplication.NoCode", "TestApplication.NoCode.NoCodeTestingClass", "TestMethodAsync", ["System.Threading.Tasks.Task"], "Span-TestMethod0Async"),
+        new("TestApplication.NoCode", "TestApplication.NoCode.NoCodeTestingClass", "TestMethodAAsync", ["System.Threading.Tasks.Task"], "Span-TestMethodAAsync"),
+        new("TestApplication.NoCode", "TestApplication.NoCode.NoCodeTestingClass", "TestMethodStaticAsync", ["System.Threading.Tasks.Task"], "Span-TestMethodStaticAsync"),
+        new("TestApplication.NoCode", "TestApplication.NoCode.NoCodeTestingClass", "TestMethodAsync", ["System.Threading.Tasks.Task", "System.String"], "Span-TestMethod1StringAsync"),
+        new("TestApplication.NoCode", "TestApplication.NoCode.NoCodeTestingClass", "TestMethodAsync", ["System.Threading.Tasks.Task", "System.Int32"], "Span-TestMethod1IntAsync"),
+        new("TestApplication.NoCode", "TestApplication.NoCode.NoCodeTestingClass", "TestMethodAsync", ["System.Threading.Tasks.Task", "System.String", "System.String"], "Span-TestMethod2Async"),
+        new("TestApplication.NoCode", "TestApplication.NoCode.NoCodeTestingClass", "TestMethodAsync", ["System.Threading.Tasks.Task", "System.String", "System.String", "System.String"], "Span-TestMethod3Async"),
+        new("TestApplication.NoCode", "TestApplication.NoCode.NoCodeTestingClass", "TestMethodAsync", ["System.Threading.Tasks.Task", "System.String", "System.String", "System.String", "System.String"], "Span-TestMethod4Async"),
+        new("TestApplication.NoCode", "TestApplication.NoCode.NoCodeTestingClass", "TestMethodAsync", ["System.Threading.Tasks.Task", "System.String", "System.String", "System.String", "System.String", "System.String"], "Span-TestMethod5Async"),
+        new("TestApplication.NoCode", "TestApplication.NoCode.NoCodeTestingClass", "TestMethodAsync", ["System.Threading.Tasks.Task", "System.String", "System.String", "System.String", "System.String", "System.String", "System.String"], "Span-TestMethod6Async"),
+        new("TestApplication.NoCode", "TestApplication.NoCode.NoCodeTestingClass", "TestMethodAsync", ["System.Threading.Tasks.Task", "System.String", "System.String", "System.String", "System.String", "System.String", "System.String", "System.String"], "Span-TestMethod7Async"),
+        new("TestApplication.NoCode", "TestApplication.NoCode.NoCodeTestingClass", "TestMethodAsync", ["System.Threading.Tasks.Task", "System.String", "System.String", "System.String", "System.String", "System.String", "System.String", "System.String", "System.String"], "Span-TestMethod8Async"),
+        new("TestApplication.NoCode", "TestApplication.NoCode.NoCodeTestingClass", "TestMethodAsync", ["System.Threading.Tasks.Task", "System.String", "System.String", "System.String", "System.String", "System.String", "System.String", "System.String", "System.String", "System.String"], "Span-TestMethod9Async"),
+
+        new("TestApplication.NoCode", "TestApplication.NoCode.NoCodeTestingClass", "IntTaskTestMethodAsync", ["System.Threading.Tasks.Task`1[System.Int32]"], "Span-IntTaskTestMethodAsync"),
+#if NET
+        new("TestApplication.NoCode", "TestApplication.NoCode.NoCodeTestingClass", "ValueTaskTestMethodAsync", ["System.Threading.Tasks.ValueTask"], "Span-ValueTaskTestMethodAsync"),
+        new("TestApplication.NoCode", "TestApplication.NoCode.NoCodeTestingClass", "IntValueTaskTestMethodAsync", ["System.Threading.Tasks.ValueTask`1[System.Int32]"], "Span-IntValueTaskTestMethodAsync"),
+#endif
     ];
 
     internal static Payload GetNoCodeDefinitions()
