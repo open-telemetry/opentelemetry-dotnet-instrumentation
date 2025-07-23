@@ -41,9 +41,7 @@ public sealed class ProtobufOtlpMetricExporterAsyncTests
 
         // All assertions are now local to the test
         Assert.NotNull(collectedData);
-        Assert.Single(collectedData.Request.ResourceMetrics);
-
-        var resourceMetric = collectedData.Request.ResourceMetrics[0];
+        var resourceMetric = Assert.Single(collectedData.Request.ResourceMetrics);
         var otlpResource = resourceMetric.Resource;
 
         // Resource assertions
@@ -51,8 +49,7 @@ public sealed class ProtobufOtlpMetricExporterAsyncTests
         Assert.Contains(otlpResource.Attributes, kvp => kvp.Key == "service.namespace" && kvp.Value.StringValue == "ns1");
 
         // Scope assertions
-        Assert.Single(resourceMetric.ScopeMetrics);
-        var instrumentationLibraryMetrics = resourceMetric.ScopeMetrics[0];
+        var instrumentationLibraryMetrics = Assert.Single(resourceMetric.ScopeMetrics);
         Assert.Equal(string.Empty, instrumentationLibraryMetrics.SchemaUrl);
         Assert.Equal("ToOtlpResourceMetricsTest", instrumentationLibraryMetrics.Scope.Name);
         Assert.Equal("0.0.1", instrumentationLibraryMetrics.Scope.Version);
@@ -63,8 +60,7 @@ public sealed class ProtobufOtlpMetricExporterAsyncTests
         Assert.Contains(instrumentationLibraryMetrics.Scope.Attributes, kvp => kvp.Key == "key2" && kvp.Value.StringValue == "value2");
 
         // Metric assertions
-        Assert.Single(instrumentationLibraryMetrics.Metrics);
-        var metric = instrumentationLibraryMetrics.Metrics[0];
+        var metric = Assert.Single(instrumentationLibraryMetrics.Metrics);
         Assert.Equal("counter", metric.Name);
         Assert.Equal(100, metric.Sum.DataPoints[0].AsInt);
     }
@@ -166,15 +162,12 @@ public sealed class ProtobufOtlpMetricExporterAsyncTests
 
         Assert.Equal(10, firstMeasurement.GetIntValue());
 
-        var resourceMetric = firstMeasurement.Request.ResourceMetrics[0];
-        Assert.Single(resourceMetric.ScopeMetrics);
-
-        var scopeMetric = resourceMetric.ScopeMetrics[0];
+        var resourceMetric = Assert.Single(firstMeasurement.Request.ResourceMetrics);
+        var scopeMetric = Assert.Single(resourceMetric.ScopeMetrics);
         Assert.Equal("UpDownCounterTest", scopeMetric.Scope.Name);
         Assert.Equal("1.0.0", scopeMetric.Scope.Version);
 
-        Assert.Single(scopeMetric.Metrics);
-        var metric = scopeMetric.Metrics[0];
+        var metric = Assert.Single(scopeMetric.Metrics);
         Assert.Equal("requests_active", metric.Name);
     }
 
@@ -214,13 +207,11 @@ public sealed class ProtobufOtlpMetricExporterAsyncTests
         // Verify OTLP structure
         var firstMeasurement = measurements[0];
         Assert.NotNull(firstMeasurement.Request);
-        Assert.Single(firstMeasurement.Request.ResourceMetrics);
-
-        var resourceMetric = firstMeasurement.Request.ResourceMetrics[0];
-        var scopeMetric = resourceMetric.ScopeMetrics[0];
+        var resourceMetric = Assert.Single(firstMeasurement.Request.ResourceMetrics);
+        var scopeMetric = Assert.Single(resourceMetric.ScopeMetrics);
         Assert.Equal("HistogramTest", scopeMetric.Scope.Name);
 
-        var metric = scopeMetric.Metrics[0];
+        var metric = Assert.Single(scopeMetric.Metrics);
         Assert.Equal("request_duration", metric.Name);
     }
 
@@ -247,11 +238,11 @@ public sealed class ProtobufOtlpMetricExporterAsyncTests
         Assert.NotNull(firstMeasurement);
         Assert.Equal(1048576L, firstMeasurement.GetLongValue());
 
-        var resourceMetric = firstMeasurement.Request.ResourceMetrics[0];
-        var scopeMetric = resourceMetric.ScopeMetrics[0];
+        var resourceMetric = Assert.Single(firstMeasurement.Request.ResourceMetrics);
+        var scopeMetric = Assert.Single(resourceMetric.ScopeMetrics);
         Assert.Equal("LongUpDownCounterTest", scopeMetric.Scope.Name);
 
-        var metric = scopeMetric.Metrics[0];
+        var metric = Assert.Single(scopeMetric.Metrics);
         Assert.Equal("memory_usage_bytes", metric.Name);
     }
 
@@ -295,11 +286,11 @@ public sealed class ProtobufOtlpMetricExporterAsyncTests
 
         // Verify OTLP structure
         var firstMeasurement = measurements[0];
-        var resourceMetric = firstMeasurement.Request.ResourceMetrics[0];
-        var scopeMetric = resourceMetric.ScopeMetrics[0];
+        var resourceMetric = Assert.Single(firstMeasurement.Request.ResourceMetrics);
+        var scopeMetric = Assert.Single(resourceMetric.ScopeMetrics);
         Assert.Equal("IntHistogramTest", scopeMetric.Scope.Name);
 
-        var metric = scopeMetric.Metrics[0];
+        var metric = Assert.Single(scopeMetric.Metrics);
         Assert.Equal("response_size_bytes", metric.Name);
     }
 
@@ -342,11 +333,11 @@ public sealed class ProtobufOtlpMetricExporterAsyncTests
 
         // Verify OTLP structure
         var firstMeasurement = measurements[0];
-        var resourceMetric = firstMeasurement.Request.ResourceMetrics[0];
-        var scopeMetric = resourceMetric.ScopeMetrics[0];
+        var resourceMetric = Assert.Single(firstMeasurement.Request.ResourceMetrics);
+        var scopeMetric = Assert.Single(resourceMetric.ScopeMetrics);
         Assert.Equal("FloatGaugeTest", scopeMetric.Scope.Name);
 
-        var metric = scopeMetric.Metrics[0];
+        var metric = Assert.Single(scopeMetric.Metrics);
         Assert.Equal("cpu_usage_percent", metric.Name);
     }
 
@@ -399,10 +390,8 @@ public sealed class ProtobufOtlpMetricExporterAsyncTests
         foreach (var measurement in collectedData)
         {
             Assert.NotNull(measurement.Request);
-            Assert.Single(measurement.Request.ResourceMetrics);
-
-            var resourceMetric = measurement.Request.ResourceMetrics[0];
-            var scopeMetric = resourceMetric.ScopeMetrics[0];
+            var resourceMetric = Assert.Single(measurement.Request.ResourceMetrics);
+            var scopeMetric = Assert.Single(resourceMetric.ScopeMetrics);
             Assert.Equal("MixedInstrumentsTest", scopeMetric.Scope.Name);
         }
     }
@@ -449,7 +438,7 @@ public sealed class ProtobufOtlpMetricExporterAsyncTests
 
         // Verify resource attributes
         var firstMeasurement = collectedData[0];
-        var resourceMetric = firstMeasurement.Request.ResourceMetrics[0];
+        var resourceMetric = Assert.Single(firstMeasurement.Request.ResourceMetrics);
         var resourceAttributes = resourceMetric.Resource.Attributes;
 
         Assert.Contains(resourceAttributes, attr => attr.Key == "service.name" && attr.Value.StringValue == "tags-attributes-service");
