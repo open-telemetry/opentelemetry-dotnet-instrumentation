@@ -34,6 +34,19 @@ public class NoCodeTests : TestHelper
         collector.Expect("OpenTelemetry.AutoInstrumentation.NoCode", x => x.Name == "Span-TestMethod8");
         collector.Expect("OpenTelemetry.AutoInstrumentation.NoCode", x => x.Name == "Span-TestMethod9");
 
+        collector.Expect("OpenTelemetry.AutoInstrumentation.NoCode", x => x.Name == "Span-ReturningTestMethod0");
+        collector.Expect("OpenTelemetry.AutoInstrumentation.NoCode", x => x.Name == "Span-ReturningTestMethodStatic");
+        collector.Expect("OpenTelemetry.AutoInstrumentation.NoCode", x => x.Name == "Span-ReturningTestMethod1String");
+        collector.Expect("OpenTelemetry.AutoInstrumentation.NoCode", x => x.Name == "Span-ReturningTestMethod1Int");
+        collector.Expect("OpenTelemetry.AutoInstrumentation.NoCode", x => x.Name == "Span-ReturningTestMethod2");
+        collector.Expect("OpenTelemetry.AutoInstrumentation.NoCode", x => x.Name == "Span-ReturningTestMethod3");
+        collector.Expect("OpenTelemetry.AutoInstrumentation.NoCode", x => x.Name == "Span-ReturningTestMethod4");
+        collector.Expect("OpenTelemetry.AutoInstrumentation.NoCode", x => x.Name == "Span-ReturningTestMethod5");
+        collector.Expect("OpenTelemetry.AutoInstrumentation.NoCode", x => x.Name == "Span-ReturningTestMethod6");
+        collector.Expect("OpenTelemetry.AutoInstrumentation.NoCode", x => x.Name == "Span-ReturningTestMethod7");
+        collector.Expect("OpenTelemetry.AutoInstrumentation.NoCode", x => x.Name == "Span-ReturningTestMethod8");
+        collector.Expect("OpenTelemetry.AutoInstrumentation.NoCode", x => x.Name == "Span-ReturningTestMethod9");
+
         RunTestApplication();
 
         collector.AssertExpectations();

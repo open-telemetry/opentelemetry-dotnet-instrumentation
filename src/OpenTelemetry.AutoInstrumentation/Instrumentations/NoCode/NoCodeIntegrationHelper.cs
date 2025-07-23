@@ -33,6 +33,19 @@ internal static class NoCodeIntegrationHelper
         return new CallTargetState(activity, null);
     }
 
+    internal static CallTargetReturn<TReturn> OnMethodEnd<TReturn>(TReturn returnValue, Exception? exception, in CallTargetState state)
+    {
+        var activity = state.Activity;
+        if (activity is null)
+        {
+            return new CallTargetReturn<TReturn>(returnValue);
+        }
+
+        HandleActivity(exception, activity);
+
+        return new CallTargetReturn<TReturn>(returnValue);
+    }
+
     internal static CallTargetReturn OnMethodEnd(Exception? exception, in CallTargetState state)
     {
         var activity = state.Activity;
@@ -41,13 +54,19 @@ internal static class NoCodeIntegrationHelper
             return CallTargetReturn.GetDefault();
         }
 
+        HandleActivity(exception, activity);
+
+        return CallTargetReturn.GetDefault();
+    }
+
+    private static void HandleActivity(Exception? exception, Activity activity)
+    {
         if (exception is not null)
         {
             activity.SetException(exception);
         }
 
         activity.Stop();
-        return CallTargetReturn.GetDefault();
     }
 
     private static bool CheckParameters(string[] targetSignatureTypes, ParameterInfo[] parameters)
