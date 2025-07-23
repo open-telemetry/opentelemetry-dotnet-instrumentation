@@ -8,6 +8,7 @@ using Xunit;
 
 namespace OpenTelemetry.AutoInstrumentation.Sdk.Tests;
 
+// Note: Metric aggregation is not tested here because it is handled by the .NET runtime before emitting the metrics out-of-process.
 public sealed class ProtobufOtlpMetricExporterAsyncTests
 {
     [Fact]
@@ -42,7 +43,7 @@ public sealed class ProtobufOtlpMetricExporterAsyncTests
         Assert.NotNull(collectedData);
         Assert.Single(collectedData.Request.ResourceMetrics);
 
-        var resourceMetric = collectedData.Request.ResourceMetrics.First();
+        var resourceMetric = collectedData.Request.ResourceMetrics[0];
         var otlpResource = resourceMetric.Resource;
 
         // Resource assertions
@@ -51,7 +52,7 @@ public sealed class ProtobufOtlpMetricExporterAsyncTests
 
         // Scope assertions
         Assert.Single(resourceMetric.ScopeMetrics);
-        var instrumentationLibraryMetrics = resourceMetric.ScopeMetrics.First();
+        var instrumentationLibraryMetrics = resourceMetric.ScopeMetrics[0];
         Assert.Equal(string.Empty, instrumentationLibraryMetrics.SchemaUrl);
         Assert.Equal("ToOtlpResourceMetricsTest", instrumentationLibraryMetrics.Scope.Name);
         Assert.Equal("0.0.1", instrumentationLibraryMetrics.Scope.Version);
@@ -63,9 +64,9 @@ public sealed class ProtobufOtlpMetricExporterAsyncTests
 
         // Metric assertions
         Assert.Single(instrumentationLibraryMetrics.Metrics);
-        var metric = instrumentationLibraryMetrics.Metrics.First();
+        var metric = instrumentationLibraryMetrics.Metrics[0];
         Assert.Equal("counter", metric.Name);
-        Assert.Equal(100, metric.Sum.DataPoints.First().AsInt);
+        Assert.Equal(100, metric.Sum.DataPoints[0].AsInt);
     }
 
     [Fact]
@@ -138,5 +139,370 @@ public sealed class ProtobufOtlpMetricExporterAsyncTests
         Assert.Equal(42, intData.GetIntValue());
         Assert.Equal(1000000L, longData.GetLongValue());
         Assert.Equal(3.14159, doubleData.GetDoubleValue(), precision: 5);
+    }
+
+    [Fact]
+    public async Task ToOtlpResourceMetricsWithUpDownCounterTest()
+    {
+        var resource = new Resource(new Dictionary<string, object>
+        {
+            { "service.name", "updown-counter-service" },
+        });
+
+        using var collector = new OtlpMeasurementCollector(resource);
+
+        using var meter = new Meter(name: "UpDownCounterTest", version: "1.0.0");
+        var upDownCounter = meter.CreateUpDownCounter<int>("requests_active");
+
+        upDownCounter.Add(10);
+
+        var collectedData = await collector.WaitForMeasurementsAsync(1, TimeSpan.FromSeconds(5));
+
+        Assert.Single(collectedData);
+
+        // Verify OTLP structure - UpDownCounter should use non-monotonic sum
+        var firstMeasurement = collectedData.FirstOrDefault(d => d.InstrumentName == "requests_active");
+        Assert.NotNull(firstMeasurement);
+
+        Assert.Equal(10, firstMeasurement.GetIntValue());
+
+        var resourceMetric = firstMeasurement.Request.ResourceMetrics[0];
+        Assert.Single(resourceMetric.ScopeMetrics);
+
+        var scopeMetric = resourceMetric.ScopeMetrics[0];
+        Assert.Equal("UpDownCounterTest", scopeMetric.Scope.Name);
+        Assert.Equal("1.0.0", scopeMetric.Scope.Version);
+
+        Assert.Single(scopeMetric.Metrics);
+        var metric = scopeMetric.Metrics[0];
+        Assert.Equal("requests_active", metric.Name);
+    }
+
+    [Fact]
+    public async Task ToOtlpResourceMetricsWithHistogramTest()
+    {
+        var resource = new Resource(new Dictionary<string, object>
+        {
+            { "service.name", "histogram-service" },
+        });
+
+        using var collector = new OtlpMeasurementCollector(resource);
+
+        using var meter = new Meter(name: "HistogramTest", version: "1.0.0");
+        var histogram = meter.CreateHistogram<double>("request_duration");
+
+        // Record several measurements with different values
+        histogram.Record(0.1, new("method", "GET"), new("status", "200"));
+        histogram.Record(0.25, new("method", "POST"), new("status", "200"));
+        histogram.Record(1.5, new("method", "GET"), new("status", "500"));
+
+        // Wait for all measurements
+        var collectedData = await collector.WaitForMeasurementsAsync(3, TimeSpan.FromSeconds(5));
+
+        Assert.Equal(3, collectedData.Count);
+
+        // Verify measurements
+        var measurements = collectedData.OrderBy(d => d.Timestamp).ToList();
+        var expectedValues = new[] { 0.1, 0.25, 1.5 };
+
+        for (int i = 0; i < measurements.Count; i++)
+        {
+            Assert.Equal("request_duration", measurements[i].InstrumentName);
+            Assert.Equal(expectedValues[i], measurements[i].GetDoubleValue(), precision: 6);
+        }
+
+        // Verify OTLP structure
+        var firstMeasurement = measurements[0];
+        Assert.NotNull(firstMeasurement.Request);
+        Assert.Single(firstMeasurement.Request.ResourceMetrics);
+
+        var resourceMetric = firstMeasurement.Request.ResourceMetrics[0];
+        var scopeMetric = resourceMetric.ScopeMetrics[0];
+        Assert.Equal("HistogramTest", scopeMetric.Scope.Name);
+
+        var metric = scopeMetric.Metrics[0];
+        Assert.Equal("request_duration", metric.Name);
+    }
+
+    [Fact]
+    public async Task ToOtlpResourceMetricsWithLongUpDownCounterTest()
+    {
+        var resource = new Resource(new Dictionary<string, object>
+        {
+            { "service.name", "long-updown-counter-service" },
+        });
+
+        using var collector = new OtlpMeasurementCollector(resource);
+
+        using var meter = new Meter(name: "LongUpDownCounterTest", version: "1.0.0");
+        var upDownCounter = meter.CreateUpDownCounter<long>("memory_usage_bytes");
+
+        upDownCounter.Add(1048576L);  // Allocate 1MB
+
+        var collectedData = await collector.WaitForMeasurementsAsync(1, TimeSpan.FromSeconds(5));
+
+        Assert.Single(collectedData);
+
+        var firstMeasurement = collectedData.FirstOrDefault(d => d.InstrumentName == "memory_usage_bytes");
+        Assert.NotNull(firstMeasurement);
+        Assert.Equal(1048576L, firstMeasurement.GetLongValue());
+
+        var resourceMetric = firstMeasurement.Request.ResourceMetrics[0];
+        var scopeMetric = resourceMetric.ScopeMetrics[0];
+        Assert.Equal("LongUpDownCounterTest", scopeMetric.Scope.Name);
+
+        var metric = scopeMetric.Metrics[0];
+        Assert.Equal("memory_usage_bytes", metric.Name);
+    }
+
+    [Fact]
+    public async Task ToOtlpResourceMetricsWithIntHistogramTest()
+    {
+        var resource = new Resource(new Dictionary<string, object>
+        {
+            { "service.name", "int-histogram-service" },
+        });
+
+        using var collector = new OtlpMeasurementCollector(resource);
+
+        using var meter = new Meter(name: "IntHistogramTest", version: "1.0.0");
+        var histogram = meter.CreateHistogram<int>("response_size_bytes");
+
+        // Record different response sizes
+        histogram.Record(1024, new KeyValuePair<string, object?>("endpoint", "/api/users"));
+        histogram.Record(2048, new KeyValuePair<string, object?>("endpoint", "/api/orders"));
+        histogram.Record(512, new KeyValuePair<string, object?>("endpoint", "/api/health"));
+        histogram.Record(4096, new KeyValuePair<string, object?>("endpoint", "/api/data"));
+
+        // Wait for all measurements
+        var collectedData = await collector.WaitForMeasurementsAsync(4, TimeSpan.FromSeconds(5));
+
+        Assert.Equal(4, collectedData.Count);
+
+        // Verify measurements
+        var measurements = collectedData.OrderBy(d => d.Timestamp).ToList();
+        var expectedValues = new[] { 1024, 2048, 512, 4096 };
+
+        for (int i = 0; i < measurements.Count; i++)
+        {
+            Assert.Equal("response_size_bytes", measurements[i].InstrumentName);
+            Assert.Equal(expectedValues[i], measurements[i].GetIntValue());
+
+            // Verify tags are preserved
+            Assert.Single(measurements[i].Tags);
+            Assert.Equal("endpoint", measurements[i].Tags[0].Key);
+        }
+
+        // Verify OTLP structure
+        var firstMeasurement = measurements[0];
+        var resourceMetric = firstMeasurement.Request.ResourceMetrics[0];
+        var scopeMetric = resourceMetric.ScopeMetrics[0];
+        Assert.Equal("IntHistogramTest", scopeMetric.Scope.Name);
+
+        var metric = scopeMetric.Metrics[0];
+        Assert.Equal("response_size_bytes", metric.Name);
+    }
+
+    [Fact]
+    public async Task ToOtlpResourceMetricsWithFloatGaugeTest()
+    {
+        var resource = new Resource(new Dictionary<string, object>
+        {
+            { "service.name", "float-gauge-service" },
+        });
+
+        using var collector = new OtlpMeasurementCollector(resource);
+
+        using var meter = new Meter(name: "FloatGaugeTest", version: "1.0.0");
+        var gauge = meter.CreateGauge<float>("cpu_usage_percent");
+
+        // Record CPU usage values
+        gauge.Record(45.2f, new KeyValuePair<string, object?>("core", "0"));
+        gauge.Record(52.8f, new KeyValuePair<string, object?>("core", "1"));
+        gauge.Record(38.1f, new KeyValuePair<string, object?>("core", "2"));
+
+        // Wait for all measurements
+        var collectedData = await collector.WaitForMeasurementsAsync(3, TimeSpan.FromSeconds(5));
+
+        Assert.Equal(3, collectedData.Count);
+
+        // Verify measurements
+        var measurements = collectedData.OrderBy(d => d.Timestamp).ToList();
+        var expectedValues = new[] { 45.2f, 52.8f, 38.1f };
+
+        for (int i = 0; i < measurements.Count; i++)
+        {
+            Assert.Equal("cpu_usage_percent", measurements[i].InstrumentName);
+            Assert.Equal(expectedValues[i], measurements[i].GetFloatValue(), precision: 6);
+
+            // Verify core tags
+            Assert.Single(measurements[i].Tags);
+            Assert.Equal("core", measurements[i].Tags[0].Key);
+        }
+
+        // Verify OTLP structure
+        var firstMeasurement = measurements[0];
+        var resourceMetric = firstMeasurement.Request.ResourceMetrics[0];
+        var scopeMetric = resourceMetric.ScopeMetrics[0];
+        Assert.Equal("FloatGaugeTest", scopeMetric.Scope.Name);
+
+        var metric = scopeMetric.Metrics[0];
+        Assert.Equal("cpu_usage_percent", metric.Name);
+    }
+
+    [Fact]
+    public async Task ToOtlpResourceMetricsWithMixedInstrumentTypesTest()
+    {
+        var resource = new Resource(new Dictionary<string, object>
+        {
+            { "service.name", "mixed-instruments-service" },
+        });
+
+        using var collector = new OtlpMeasurementCollector(resource);
+
+        using var meter = new Meter(name: "MixedInstrumentsTest", version: "1.0.0");
+
+        // Create different types of instruments
+        var counter = meter.CreateCounter<long>("total_requests");
+        var upDownCounter = meter.CreateUpDownCounter<int>("active_requests");
+        var histogram = meter.CreateHistogram<double>("request_duration_ms");
+        var gauge = meter.CreateGauge<float>("cpu_usage");
+
+        // Record measurements
+        counter.Add(100);
+        upDownCounter.Add(5);
+        histogram.Record(156.7);
+        gauge.Record(45.2f);
+
+        // Wait for all measurements
+        var collectedData = await collector.WaitForMeasurementsAsync(4, TimeSpan.FromSeconds(5));
+
+        Assert.Equal(4, collectedData.Count);
+
+        // Group by instrument name
+        var measurementsByInstrument = collectedData.GroupBy(d => d.InstrumentName).ToDictionary(g => g.Key, g => g.First());
+
+        // Verify each instrument type
+        Assert.True(measurementsByInstrument.ContainsKey("total_requests"));
+        Assert.Equal(100L, measurementsByInstrument["total_requests"].GetLongValue());
+
+        Assert.True(measurementsByInstrument.ContainsKey("active_requests"));
+        Assert.Equal(5, measurementsByInstrument["active_requests"].GetIntValue());
+
+        Assert.True(measurementsByInstrument.ContainsKey("request_duration_ms"));
+        Assert.Equal(156.7, measurementsByInstrument["request_duration_ms"].GetDoubleValue(), precision: 6);
+
+        Assert.True(measurementsByInstrument.ContainsKey("cpu_usage"));
+        Assert.Equal(45.2f, measurementsByInstrument["cpu_usage"].GetFloatValue(), precision: 6);
+
+        // Verify all measurements have proper OTLP structure
+        foreach (var measurement in collectedData)
+        {
+            Assert.NotNull(measurement.Request);
+            Assert.Single(measurement.Request.ResourceMetrics);
+
+            var resourceMetric = measurement.Request.ResourceMetrics[0];
+            var scopeMetric = resourceMetric.ScopeMetrics[0];
+            Assert.Equal("MixedInstrumentsTest", scopeMetric.Scope.Name);
+        }
+    }
+
+    [Fact]
+    public async Task ToOtlpResourceMetricsWithTagsAndAttributesTest()
+    {
+        var resource = new Resource(new Dictionary<string, object>
+        {
+            { "service.name", "tags-attributes-service" },
+            { "service.version", "2.1.0" },
+        });
+
+        using var collector = new OtlpMeasurementCollector(resource);
+
+        using var meter = new Meter(name: "TagsTest", version: "1.0.0");
+        var counter = meter.CreateCounter<int>("http_requests");
+
+        // Record measurements with different tags
+        counter.Add(1, new("method", "GET"), new("status_code", "200"), new("endpoint", "/api/users"));
+        counter.Add(1, new("method", "POST"), new("status_code", "201"), new("endpoint", "/api/users"));
+        counter.Add(1, new("method", "GET"), new("status_code", "404"), new("endpoint", "/api/unknown"));
+
+        // Wait for all measurements
+        var collectedData = await collector.WaitForMeasurementsAsync(3, TimeSpan.FromSeconds(5));
+
+        Assert.Equal(3, collectedData.Count);
+
+        // Verify tags are preserved
+        foreach (var measurement in collectedData)
+        {
+            Assert.Equal("http_requests", measurement.InstrumentName);
+            Assert.Equal(1, measurement.GetIntValue());
+
+            // Each measurement should have 3 tags
+            Assert.Equal(3, measurement.Tags.Length);
+
+            // Verify tag names
+            var tagNames = measurement.Tags.Select(t => t.Key).ToHashSet();
+            Assert.Contains("method", tagNames);
+            Assert.Contains("status_code", tagNames);
+            Assert.Contains("endpoint", tagNames);
+        }
+
+        // Verify resource attributes
+        var firstMeasurement = collectedData[0];
+        var resourceMetric = firstMeasurement.Request.ResourceMetrics[0];
+        var resourceAttributes = resourceMetric.Resource.Attributes;
+
+        Assert.Contains(resourceAttributes, attr => attr.Key == "service.name" && attr.Value.StringValue == "tags-attributes-service");
+        Assert.Contains(resourceAttributes, attr => attr.Key == "service.version" && attr.Value.StringValue == "2.1.0");
+    }
+
+    [Fact]
+    public async Task ToOtlpResourceMetricsWithComplexTagsTest()
+    {
+        var resource = new Resource(new Dictionary<string, object>
+        {
+            { "service.name", "complex-tags-service" },
+        });
+
+        using var collector = new OtlpMeasurementCollector(resource);
+
+        using var meter = new Meter(name: "ComplexTagsTest", version: "1.0.0");
+        var histogram = meter.CreateHistogram<double>("database_query_duration");
+
+        // Record measurements with various tag types
+        histogram.Record(
+            23.5,
+            new("operation", "SELECT"),
+            new("table", "users"),
+            new("rows_affected", 150),
+            new("is_cached", false),
+            new("query_id", "abc123"));
+
+        histogram.Record(
+            45.2,
+            new("operation", "INSERT"),
+            new("table", "orders"),
+            new("rows_affected", 1),
+            new("is_cached", false),
+            new("query_id", "def456"));
+
+        // Wait for measurements
+        var collectedData = await collector.WaitForMeasurementsAsync(2, TimeSpan.FromSeconds(5));
+
+        Assert.Equal(2, collectedData.Count);
+
+        // Verify complex tags are preserved
+        foreach (var measurement in collectedData)
+        {
+            Assert.Equal("database_query_duration", measurement.InstrumentName);
+            Assert.Equal(5, measurement.Tags.Length);
+
+            var tagDict = measurement.Tags.ToDictionary(t => t.Key, t => t.Value);
+            Assert.Contains("operation", tagDict.Keys);
+            Assert.Contains("table", tagDict.Keys);
+            Assert.Contains("rows_affected", tagDict.Keys);
+            Assert.Contains("is_cached", tagDict.Keys);
+            Assert.Contains("query_id", tagDict.Keys);
+        }
     }
 }
