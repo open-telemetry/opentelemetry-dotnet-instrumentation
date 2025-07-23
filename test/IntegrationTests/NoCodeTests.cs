@@ -47,6 +47,26 @@ public class NoCodeTests : TestHelper
         collector.Expect("OpenTelemetry.AutoInstrumentation.NoCode", x => x.Name == "Span-ReturningTestMethod8");
         collector.Expect("OpenTelemetry.AutoInstrumentation.NoCode", x => x.Name == "Span-ReturningTestMethod9");
 
+        collector.Expect("OpenTelemetry.AutoInstrumentation.NoCode", x => x.Name == "Span-TestMethod0Async");
+        collector.Expect("OpenTelemetry.AutoInstrumentation.NoCode", x => x.Name == "Span-TestMethodAAsync");
+        collector.Expect("OpenTelemetry.AutoInstrumentation.NoCode", x => x.Name == "Span-TestMethodStaticAsync");
+        collector.Expect("OpenTelemetry.AutoInstrumentation.NoCode", x => x.Name == "Span-TestMethod1StringAsync");
+        collector.Expect("OpenTelemetry.AutoInstrumentation.NoCode", x => x.Name == "Span-TestMethod1IntAsync");
+        collector.Expect("OpenTelemetry.AutoInstrumentation.NoCode", x => x.Name == "Span-TestMethod2Async");
+        collector.Expect("OpenTelemetry.AutoInstrumentation.NoCode", x => x.Name == "Span-TestMethod3Async");
+        collector.Expect("OpenTelemetry.AutoInstrumentation.NoCode", x => x.Name == "Span-TestMethod4Async");
+        collector.Expect("OpenTelemetry.AutoInstrumentation.NoCode", x => x.Name == "Span-TestMethod5Async");
+        collector.Expect("OpenTelemetry.AutoInstrumentation.NoCode", x => x.Name == "Span-TestMethod6Async");
+        collector.Expect("OpenTelemetry.AutoInstrumentation.NoCode", x => x.Name == "Span-TestMethod7Async");
+        collector.Expect("OpenTelemetry.AutoInstrumentation.NoCode", x => x.Name == "Span-TestMethod8Async");
+        collector.Expect("OpenTelemetry.AutoInstrumentation.NoCode", x => x.Name == "Span-TestMethod9Async");
+
+        collector.Expect("OpenTelemetry.AutoInstrumentation.NoCode", x => x.Name == "Span-IntTaskTestMethodAsync");
+#if NET
+        collector.Expect("OpenTelemetry.AutoInstrumentation.NoCode", x => x.Name == "Span-ValueTaskTestMethodAsync");
+        collector.Expect("OpenTelemetry.AutoInstrumentation.NoCode", x => x.Name == "Span-IntValueTaskTestMethodAsync");
+#endif
+
         RunTestApplication();
 
         collector.AssertExpectations();
