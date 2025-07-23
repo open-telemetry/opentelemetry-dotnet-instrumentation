@@ -258,4 +258,17 @@ internal class NoCodeTestingClass
         return 0;
     }
 #endif
+
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    public T? GenericTestMethod<T>()
+    {
+        return default;
+    }
+
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    public async Task<T?> GenericTestMethodAsync<T>()
+    {
+        await Task.Yield();
+        return default;
+    }
 }

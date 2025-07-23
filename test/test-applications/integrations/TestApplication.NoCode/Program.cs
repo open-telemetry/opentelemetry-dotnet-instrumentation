@@ -62,5 +62,8 @@ public class Program
         await noCodeTestingClass.ValueTaskTestMethodAsync();
         _ = await noCodeTestingClass.IntValueTaskTestMethodAsync();
 #endif
+
+        _ = noCodeTestingClass.GenericTestMethod<int>();
+        _ = await noCodeTestingClass.GenericTestMethodAsync<int>();
     }
 }

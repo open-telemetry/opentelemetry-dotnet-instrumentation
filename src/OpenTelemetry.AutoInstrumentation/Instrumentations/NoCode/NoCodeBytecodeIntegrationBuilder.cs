@@ -58,6 +58,9 @@ internal static class NoCodeBytecodeIntegrationBuilder
         new("TestApplication.NoCode", "TestApplication.NoCode.NoCodeTestingClass", "ValueTaskTestMethodAsync", ["System.Threading.Tasks.ValueTask"], "Span-ValueTaskTestMethodAsync"),
         new("TestApplication.NoCode", "TestApplication.NoCode.NoCodeTestingClass", "IntValueTaskTestMethodAsync", ["System.Threading.Tasks.ValueTask`1[System.Int32]"], "Span-IntValueTaskTestMethodAsync"),
 #endif
+
+        new("TestApplication.NoCode", "TestApplication.NoCode.NoCodeTestingClass", "GenericTestMethod", ["System.Int32"], "Span-GenericTestMethod"),
+        new("TestApplication.NoCode", "TestApplication.NoCode.NoCodeTestingClass", "GenericTestMethodAsync", ["System.Threading.Tasks.Task`1[System.Int32]"], "Span-GenericTestMethodAsync"),
     ];
 
     internal static Payload GetNoCodeDefinitions()
