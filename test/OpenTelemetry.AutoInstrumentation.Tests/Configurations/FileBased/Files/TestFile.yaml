@@ -2,7 +2,7 @@ file_format: "0.4"
 disabled: false
 log_level: info
 attribute_limits:
-  attribute_value_length_limit: 
+  attribute_value_length_limit: 4096
   attribute_count_limit: 128
 propagator:
   composite:
@@ -26,13 +26,6 @@ tracer_provider:
             timeout: 10000
             headers: []
             headers_list:
-  # limits:
-  #   attribute_value_length_limit: 
-  #   attribute_count_limit: 128
-  #   event_count_limit: 128
-  #   link_count_limit: 128
-  #   event_attribute_count_limit: 128
-  #   link_attribute_count_limit: 128
 
 meter_provider:
   readers:
