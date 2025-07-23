@@ -25,6 +25,19 @@ internal static class NoCodeBytecodeIntegrationBuilder
         new("TestApplication.NoCode", "TestApplication.NoCode.NoCodeTestingClass", "TestMethod", ["System.Void", "System.String", "System.String", "System.String", "System.String", "System.String", "System.String", "System.String"], "Span-TestMethod7"),
         new("TestApplication.NoCode", "TestApplication.NoCode.NoCodeTestingClass", "TestMethod", ["System.Void", "System.String", "System.String", "System.String", "System.String", "System.String", "System.String", "System.String", "System.String"], "Span-TestMethod8"),
         new("TestApplication.NoCode", "TestApplication.NoCode.NoCodeTestingClass", "TestMethod", ["System.Void", "System.String", "System.String", "System.String", "System.String", "System.String", "System.String", "System.String", "System.String", "System.String"], "Span-TestMethod9"),
+
+        new("TestApplication.NoCode", "TestApplication.NoCode.NoCodeTestingClass", "ReturningTestMethod", ["System.Int32"], "Span-ReturningTestMethod0"),
+        new("TestApplication.NoCode", "TestApplication.NoCode.NoCodeTestingClass", "ReturningTestMethodStatic", ["System.Int32"], "Span-ReturningTestMethodStatic"),
+        new("TestApplication.NoCode", "TestApplication.NoCode.NoCodeTestingClass", "ReturningTestMethod", ["System.Int32", "System.String"], "Span-ReturningTestMethod1String"),
+        new("TestApplication.NoCode", "TestApplication.NoCode.NoCodeTestingClass", "ReturningTestMethod", ["System.Int32", "System.Int32"], "Span-ReturningTestMethod1Int"),
+        new("TestApplication.NoCode", "TestApplication.NoCode.NoCodeTestingClass", "ReturningTestMethod", ["System.Int32", "System.String", "System.String"], "Span-ReturningTestMethod2"),
+        new("TestApplication.NoCode", "TestApplication.NoCode.NoCodeTestingClass", "ReturningTestMethod", ["System.Int32", "System.String", "System.String", "System.String"], "Span-ReturningTestMethod3"),
+        new("TestApplication.NoCode", "TestApplication.NoCode.NoCodeTestingClass", "ReturningTestMethod", ["System.Int32", "System.String", "System.String", "System.String", "System.String"], "Span-ReturningTestMethod4"),
+        new("TestApplication.NoCode", "TestApplication.NoCode.NoCodeTestingClass", "ReturningTestMethod", ["System.Int32", "System.String", "System.String", "System.String", "System.String", "System.String"], "Span-ReturningTestMethod5"),
+        new("TestApplication.NoCode", "TestApplication.NoCode.NoCodeTestingClass", "ReturningTestMethod", ["System.Int32", "System.String", "System.String", "System.String", "System.String", "System.String", "System.String"], "Span-ReturningTestMethod6"),
+        new("TestApplication.NoCode", "TestApplication.NoCode.NoCodeTestingClass", "ReturningTestMethod", ["System.Int32", "System.String", "System.String", "System.String", "System.String", "System.String", "System.String", "System.String"], "Span-ReturningTestMethod7"),
+        new("TestApplication.NoCode", "TestApplication.NoCode.NoCodeTestingClass", "ReturningTestMethod", ["System.Int32", "System.String", "System.String", "System.String", "System.String", "System.String", "System.String", "System.String", "System.String"], "Span-ReturningTestMethod8"),
+        new("TestApplication.NoCode", "TestApplication.NoCode.NoCodeTestingClass", "ReturningTestMethod", ["System.Int32", "System.String", "System.String", "System.String", "System.String", "System.String", "System.String", "System.String", "System.String", "System.String"], "Span-ReturningTestMethod9"),
     ];
 
     internal static Payload GetNoCodeDefinitions()

@@ -28,5 +28,19 @@ public class Program
         noCodeTestingClass.TestMethod(string.Empty, string.Empty, string.Empty, string.Empty, string.Empty, string.Empty, string.Empty, string.Empty, string.Empty);
 
         NoCodeTestingClass.TestMethodStatic();
+
+        _ = noCodeTestingClass.ReturningTestMethod();
+        _ = noCodeTestingClass.ReturningTestMethod(string.Empty);
+        _ = noCodeTestingClass.ReturningTestMethod(int.MinValue);
+        _ = noCodeTestingClass.ReturningTestMethod(string.Empty, string.Empty);
+        _ = noCodeTestingClass.ReturningTestMethod(string.Empty, string.Empty, string.Empty);
+        _ = noCodeTestingClass.ReturningTestMethod(string.Empty, string.Empty, string.Empty, string.Empty);
+        _ = noCodeTestingClass.ReturningTestMethod(string.Empty, string.Empty, string.Empty, string.Empty, string.Empty);
+        _ = noCodeTestingClass.ReturningTestMethod(string.Empty, string.Empty, string.Empty, string.Empty, string.Empty, string.Empty);
+        _ = noCodeTestingClass.ReturningTestMethod(string.Empty, string.Empty, string.Empty, string.Empty, string.Empty, string.Empty, string.Empty);
+        _ = noCodeTestingClass.ReturningTestMethod(string.Empty, string.Empty, string.Empty, string.Empty, string.Empty, string.Empty, string.Empty, string.Empty);
+        _ = noCodeTestingClass.ReturningTestMethod(string.Empty, string.Empty, string.Empty, string.Empty, string.Empty, string.Empty, string.Empty, string.Empty, string.Empty);
+
+        _ = NoCodeTestingClass.ReturningTestMethodStatic();
     }
 }
