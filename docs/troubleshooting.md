@@ -232,23 +232,3 @@ Sample Diagnostic Output:
 For resolving runtime store assembly version conflicts, follow the same solution
 as outlined for [Assembly version conflicts](#assembly-version-conflicts) in
 this document.
-
-### IIS - Loading this assembly would produce a different grant set from other instances
-
-#### Symptoms
-
-.NET Framework, IIS hosted application crashes and you get an event similar to
-the following:
-
-```log
-Exception: System.IO.FileLoadException
-
-Message: Loading this assembly would produce a different grant set from other instances.
-```
-
-#### Solution
-
-Create a new `DWORD` value called `LoaderOptimization` and give it the value `1`
-under the `HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\.NETFramework`.
-It will allows to load different versions of the same application to different domains.
-It might increase CPU and memory usage.

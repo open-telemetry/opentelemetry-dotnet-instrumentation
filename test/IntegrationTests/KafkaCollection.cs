@@ -20,14 +20,10 @@ public class KafkaCollection : ICollectionFixture<KafkaFixture>
 /// </summary>
 public class KafkaFixture : IAsyncLifetime
 {
-    private const int ZookeeperClientPort = 2181;
-    private static readonly string ZooKeeperImage = ReadImageFrom("zookeeper.Dockerfile");
     private static readonly string KafkaImage = ReadImageFrom("kafka.Dockerfile");
     private readonly string _kafkaContainerName;
     private readonly string _testNetworkName;
-    private readonly string _zookeeperContainerName;
     private IContainer? _kafkaContainer;
-    private IContainer? _zooKeeperContainer;
     private INetwork? _containerNetwork;
 
     public KafkaFixture()
@@ -35,7 +31,6 @@ public class KafkaFixture : IAsyncLifetime
         Port = TcpPortProvider.GetOpenPort();
         _kafkaContainerName = "integration-test-kafka" + Port;
         _testNetworkName = $"{_kafkaContainerName}-network";
-        _zookeeperContainerName = $"{_kafkaContainerName}-zookeeper";
     }
 
     public int Port { get; }
@@ -46,8 +41,7 @@ public class KafkaFixture : IAsyncLifetime
             .WithName(_testNetworkName)
             .Build();
         await _containerNetwork.CreateAsync();
-        _zooKeeperContainer = await LaunchZookeeper(_containerNetwork);
-        _kafkaContainer = await LaunchKafkaContainer(_containerNetwork, _zooKeeperContainer);
+        _kafkaContainer = await LaunchKafkaContainer(_containerNetwork);
     }
 
     public async Task DisposeAsync()
@@ -57,48 +51,33 @@ public class KafkaFixture : IAsyncLifetime
             await _kafkaContainer.DisposeAsync();
         }
 
-        if (_zooKeeperContainer != null)
-        {
-            await _zooKeeperContainer.DisposeAsync();
-        }
-
         if (_containerNetwork != null)
         {
             await _containerNetwork.DisposeAsync();
         }
     }
 
-    private async Task<IContainer?> LaunchZookeeper(INetwork? containerNetwork)
+    private async Task<IContainer?> LaunchKafkaContainer(INetwork? containerNetwork)
     {
-        var container = new ContainerBuilder()
-            .WithImage(ZooKeeperImage)
-            .WithName(_zookeeperContainerName)
-            .WithEnvironment("ZOOKEEPER_CLIENT_PORT", ZookeeperClientPort.ToString())
-            .WithEnvironment("ZOOKEEPER_TICK_TIME", "2000")
-            .WithNetwork(containerNetwork)
-            .Build();
-        await container.StartAsync();
-
-        return container;
-    }
-
-    private async Task<IContainer?> LaunchKafkaContainer(
-        INetwork? containerNetwork,
-        IContainer? zooKeeperContainer)
-    {
-        // returned container name starts with '/'
-        var zookeeperContainerName = zooKeeperContainer?.Name.Substring(1);
         var container = new ContainerBuilder()
             .WithImage(KafkaImage)
             .WithName(_kafkaContainerName)
             .WithPortBinding(Port)
             .WithEnvironment("KAFKA_BROKER_ID", "1")
             .WithEnvironment("KAFKA_AUTO_CREATE_TOPICS_ENABLE", "false")
-            .WithEnvironment("KAFKA_ZOOKEEPER_CONNECT", $"{zookeeperContainerName}:{ZookeeperClientPort}")
+            .WithEnvironment("KAFKA_LISTENER_SECURITY_PROTOCOL_MAP", "PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT,CONTROLLER:PLAINTEXT")
             .WithEnvironment("KAFKA_ADVERTISED_LISTENERS", $"PLAINTEXT://{_kafkaContainerName}:29092,PLAINTEXT_HOST://localhost:{Port}")
-            .WithEnvironment("KAFKA_LISTENER_SECURITY_PROTOCOL_MAP", "PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT")
-            .WithEnvironment("KAFKA_INTER_BROKER_LISTENER_NAME", "PLAINTEXT")
             .WithEnvironment("KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR", "1")
+            .WithEnvironment("KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS", "0")
+            .WithEnvironment("KAFKA_TRANSACTION_STATE_LOG_MIN_ISR", "1")
+            .WithEnvironment("KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR", "1")
+            .WithEnvironment("KAFKA_PROCESS_ROLES", "broker,controller")
+            .WithEnvironment("KAFKA_NODE_ID", "1")
+            .WithEnvironment("KAFKA_CONTROLLER_QUORUM_VOTERS", $"1@{_kafkaContainerName}:29093")
+            .WithEnvironment("KAFKA_LISTENERS", $"PLAINTEXT://{_kafkaContainerName}:29092,CONTROLLER://{_kafkaContainerName}:29093,PLAINTEXT_HOST://0.0.0.0:{Port}")
+            .WithEnvironment("KAFKA_INTER_BROKER_LISTENER_NAME", "PLAINTEXT")
+            .WithEnvironment("KAFKA_CONTROLLER_LISTENER_NAMES", "CONTROLLER")
+            .WithEnvironment("CLUSTER_ID", Guid.NewGuid().ToString())
             .WithNetwork(containerNetwork)
             .Build();
 

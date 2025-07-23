@@ -5,14 +5,11 @@ All notable changes to this component are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/compare/v1.11.0..HEAD)
+## [Unreleased](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/compare/v1.12.0..HEAD)
 
 ### Added
 
 ### Changed
-
-- `otel-dotnet-auto-install.sh` now optionally uses `wget` instead of `curl`,
-  improving compatibility with `mcr.microsoft.com/dotnet/runtime` Alpine images.
 
 #### Dependency updates
 
@@ -21,6 +18,72 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 ### Removed
 
 ### Fixed
+
+## [1.12.0](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/tag/v1.12.0)
+
+### Added
+
+- Support for [`Npgsql`](https://www.nuget.org/packages/Npgsql/)
+  metrics instrumentation for versions `6.0.0`+ on .NET.
+- In install script, Install-OpenTelemetryCore accepts optional argument RegisterAssembliesInGAC,
+  which is true by default. When set to false, assemblies would not be installed
+  in GAC.
+- In install script, new function added: Register-AssembliesInGAC. It installs
+  OpenTelemetry assemblies and dependencies in GAC.
+
+### Changed
+
+- Musl-based (Alpine) libraries are compiled on Alpine v3.21.
+- `otel-dotnet-auto-install.sh` now optionally uses `wget` instead of `curl`,
+  improving compatibility with `mcr.microsoft.com/dotnet/runtime` Alpine images.
+- Non-default application domains will be forced to load with LoaderOptimization.SingleDomain
+
+#### Dependency updates
+
+- Updated [Core components](https://github.com/open-telemetry/opentelemetry-dotnet/blob/main/VERSIONING.md#core-components):
+  [`1.12.0`](https://github.com/open-telemetry/opentelemetry-dotnet/releases/tag/core-1.12.0).
+- Following packages updated
+  - `OpenTelemetry.Instrumentation.GrpcNetClient` from `1.11.0-beta.2` to `1.12.0-beta.1`
+  - `OpenTelemetry.Instrumentation.Http` from `1.11.1` to `1.12.0`,
+  - `OpenTelemetry.Instrumentation.Process` from `1.11.0-beta.2` to `1.12.0-beta.1`,
+  - `OpenTelemetry.Instrumentation.Quartz` from `1.11.0-beta.2` to `1.12.0-beta.1`,
+  - `OpenTelemetry.Instrumentation.Runtime` from `1.11.1` to `1.12.0`,
+  - `OpenTelemetry.Instrumentation.SqlClient` from `1.11.0-beta.2` to `1.12.0-beta.2`,
+  - `OpenTelemetry.Instrumentation.Wcf` from `1.11.0-beta.2` to `1.12.0-beta.1`,
+  - `OpenTelemetry.Resources.Azure` from `1.11.0-beta.2` to `1.12.0-beta.1`,
+  - `OpenTelemetry.Resources.Container` from `1.11.0-beta.2` to `1.12.0-beta.1`,
+  - `OpenTelemetry.Resources.Host` from `1.11.0-beta.2` to `1.12.0-beta.1`,
+  - `OpenTelemetry.Resources.OperatingSystem` from `1.11.0-beta.2` to `1.12.0-beta.1`,
+  - `OpenTelemetry.Resources.Process` from `1.11.0-beta.2` to `1.12.0-beta.1`,
+  - `OpenTelemetry.Resources.ProcessRuntime` from `1.11.0-beta.2` to `1.12.0-beta.1`.
+- .NET only, following packages updated
+  - `OpenTelemetry.Instrumentation.AspNetCore` from `1.11.1` to `1.12.0`,
+  - `OpenTelemetry.Instrumentation.EntityFrameworkCore` from `1.11.0-beta.2` to `1.12.0-beta.2`,
+  - `OpenTelemetry.Instrumentation.StackExchangeRedis` from `1.11.0-beta.2` to `1.12.0-beta.1`.
+- .NET Framework only, following packages updated
+  - `Microsoft.Bcl.AsyncInterfaces` from `9.0.2` to `9.0.6`,
+  - `Microsoft.Extensions.Configuration` from `9.0.2` to `9.0.6`,
+  - `Microsoft.Extensions.Configuration.Abstractions` from `9.0.2` to `9.0.6`,
+  - `Microsoft.Extensions.Configuration.Binder` from `9.0.2` to `9.0.6`,
+  - `Microsoft.Extensions.DependencyInjection` from `9.0.2` to `9.0.6`,
+  - `Microsoft.Extensions.DependencyInjection.Abstractions` from `9.0.2` to `9.0.6`,
+  - `Microsoft.Extensions.Diagnostics.Abstractions` from `9.0.2` to `9.0.6`,
+  - `Microsoft.Extensions.Logging` from `9.0.2` to `9.0.6`,
+  - `Microsoft.Extensions.Logging.Abstractions` from `9.0.2` to `9.0.6`,
+  - `Microsoft.Extensions.Logging.Configuration` from `9.0.2` to `9.0.6`,
+  - `Microsoft.Extensions.Options` from `9.0.2` to `9.0.6`,
+  - `Microsoft.Extensions.Options.ConfigurationExtensions` from `9.0.2` to `9.0.6`,
+  - `Microsoft.Extensions.Primitives` from `9.0.2` to `9.0.6`,
+  - `OpenTelemetry.Instrumentation.AspNet` from `1.11.0-beta.2` to `1.12.0-beta.1`,
+  - `System.Buffers` from `4.6.0` to `4.6.1`,
+  - `System.Diagnostics.DiagnosticSource` from `9.0.2` to `9.0.6`,
+  - `System.IO.Pipelines` from `9.0.2` to `9.0.6`,
+  - `System.Memory` from `4.6.0` to `4.6.3`,
+  - `System.Numerics.Vectors` from `4.6.0` to `4.6.1`,
+  - `System.Runtime.CompilerServices.Unsafe` from `6.1.0` to `6.1.2`,
+  - `System.Threading.Tasks.Extensions` update from `4.6.0` to `4.6.3`,
+  - `System.Text.Json` update from `9.0.2` to `9.0.6`.
+  - `System.ValueTuple` from `4.5.0` to `4.6.1`.
 
 ## [1.11.0](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/tag/v1.11.0)
 
@@ -75,7 +138,7 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 
 ### Fixed
 
-- Fixed [DoS Vulnerability in TraceContextPropagator.Extract](https://github.com/open-telemetry/opentelemetry-dotnet/security/advisories/GHSA-8785-wc3w-h8q6).
+- Fixed [DoS Vulnerability in TraceContextPropagator.Extract](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/security/advisories/GHSA-vc29-vg52-6643).
 
 ## [1.10.0](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/tag/v1.10.0)
 

@@ -319,6 +319,9 @@ public class SettingsTests : IDisposable
     [InlineData("NETRUNTIME", MetricInstrumentation.NetRuntime)]
     [InlineData("HTTPCLIENT", MetricInstrumentation.HttpClient)]
     [InlineData("PROCESS", MetricInstrumentation.Process)]
+#if NET
+    [InlineData("NPGSQL", MetricInstrumentation.Npgsql)]
+#endif
     [InlineData("NSERVICEBUS", MetricInstrumentation.NServiceBus)]
 #if NET
     [InlineData("ASPNETCORE", MetricInstrumentation.AspNetCore)]

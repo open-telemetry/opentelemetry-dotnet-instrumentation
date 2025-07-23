@@ -15,7 +15,7 @@
 #include "clr_helpers.h"
 #include "com_ptr.h"
 #include "integration.h"
-#include "string.h"
+#include "string_utils.h"
 #include "tracer_tokens.h"
 
 namespace trace

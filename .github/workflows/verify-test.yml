@@ -23,6 +23,8 @@ jobs:
         include:
           - machine: windows-2022
             containers: windows
+          - machine: windows-2025
+            containers: windows
           - machine: ubuntu-22.04
             containers: linux
           - machine: macos-13
@@ -39,8 +41,8 @@ jobs:
         uses: actions/setup-dotnet@67a3573c9a986a3f9c594539f4ab511d57bb3ce9 # tag: v4.3.1
         with:
           dotnet-version: | 
-            8.0.408
-            9.0.203
+            8.0.412
+            9.0.303
 
       - name: Run BuildTracer and ManagedTests
         run: ./build.cmd BuildTracer ManagedTests --containers ${{ matrix.containers }} --test-project "${{ github.event.inputs.testProject }}" --test-name '"${{ github.event.inputs.testName }}"' --test-count ${{ github.event.inputs.count }}

@@ -12,11 +12,20 @@ permissions:
 
 jobs:
   check-native-format:
+    name: ${{ matrix.step-name }}
+    runs-on: ${{ matrix.runner }}
+
     strategy:
       fail-fast: false
       matrix:
-        machine: [ windows-2022, ubuntu-22.04, macos-13-xlarge ]
-    runs-on: ${{ matrix.machine }}
+        include:
+          - step-name: native-format-macos
+            runner: macos-13-xlarge
+          - step-name: native-format-linux
+            runner: ubuntu-22.04
+          - step-name: native-format-windows
+            runner: windows-2022
+
     steps:
 
     - name: Checkout
@@ -38,10 +47,11 @@ jobs:
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # tag: v4.2.2
 
       - name: Setup Go
-        uses: actions/setup-go@0aaccfd150d50ccaeb58ebd88d36e91967a5f35b # tag: v5.4.0
+        uses: actions/setup-go@d35c59abb061a4a6fb18e82ac0862c26744d6ab5 # tag: v5.5.0
         with:
           go-version: '1.23.5'
-          
+          cache: false # Suppress a warning given that there are no go.sum files in the repo
+
       - name: Verify all native files have license headers
         shell: bash
         run: |
