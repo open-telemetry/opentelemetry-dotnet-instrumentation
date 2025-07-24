@@ -1,7 +1,6 @@
 // Copyright The OpenTelemetry Authors
 // SPDX-License-Identifier: Apache-2.0
 
-using Google.Protobuf;
 using Microsoft.Extensions.Logging;
 
 namespace OpenTelemetry.OpenTelemetryProtocol;
@@ -68,18 +67,15 @@ internal abstract class OtlpExporterAsync<TRequest, TBatchWriter> : IExporterAsy
     {
         try
         {
-            using var requestMessage = new HttpRequestMessage(HttpMethod.Post, _RequestUri);
+            if (writer.Request is not OtlpBufferState request)
+            {
+                throw new ArgumentException("Request must be of type OtlpBufferState", nameof(writer));
+            }
 
-            if (writer.Request is IMessage message)
-            {
-                requestMessage.Content = new OtlpExporterHttpContent<IMessage>(message);
-            }
-            else if (writer.Request is OtlpBufferState request)
-            {
-                requestMessage.Content = new ByteArrayContent(request.Buffer, 0, request.WritePosition);
-                requestMessage.Version = new(2, 0);
-                requestMessage.Content.Headers.ContentType = new("application/x-protobuf");
-            }
+            using var requestMessage = new HttpRequestMessage(HttpMethod.Post, _RequestUri);
+            requestMessage.Content = new ByteArrayContent(request.Buffer, 0, request.WritePosition);
+            requestMessage.Version = new(2, 0);
+            requestMessage.Content.Headers.ContentType = new("application/x-protobuf");
 
             if (_HeaderOptions != null)
             {
