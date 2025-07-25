@@ -88,8 +88,8 @@ static std::mutex                                                             th
 static std::unordered_map<ThreadID, continuous_profiler::thread_span_context> thread_span_context_map;
 
 // TODO: refactor
-static std::mutex                   selected_sampling_threads_lock;
-static std::unordered_set<ThreadID> selected_sampling_threads_set;
+static std::mutex                   selective_sampling_threads_lock;
+static std::unordered_set<ThreadID> selective_sampling_threads_set;
 
 static std::mutex name_cache_lock = std::mutex();
 
@@ -776,7 +776,7 @@ void CaptureThreadSamplesForSelectedThreads(ContinuousProfiler* prof, ICorProfil
     auto dssp = DoStackSnapshotParams(prof, &localBuf);
 
     localBuf.StartSelectedThreadsBatch();
-    for (auto thread_id : selected_sampling_threads_set)
+    for (auto thread_id : selective_sampling_threads_set)
     {
         prof->stats_.num_threads++;
         thread_span_context spanContext = thread_span_context_map[thread_id];
@@ -829,11 +829,11 @@ void PauseClrAndCaptureSamples(ContinuousProfiler* prof, ICorProfilerInfo12* inf
     std::lock_guard<std::mutex> name_cache_guard(name_cache_lock);
 
     // Selective sampling lock
-    std::lock_guard<std::mutex> selective_sampling_threads_guard(selected_sampling_threads_lock);
+    std::lock_guard<std::mutex> selective_sampling_threads_guard(selective_sampling_threads_lock);
 
     // Checks to avoid unnecessary suspends.
     const auto samplingType = prof->GetNextSamplingType();
-    if (samplingType == SamplingType::SelectedThreads && selected_sampling_threads_set.empty())
+    if (samplingType == SamplingType::SelectedThreads && selective_sampling_threads_set.empty())
     {
         return;
     }
@@ -1168,6 +1168,11 @@ void ContinuousProfiler::ThreadDestroyed(ThreadID thread_id)
 
         thread_span_context_map.erase(thread_id);
     }
+    {
+        std::lock_guard<std::mutex> guard(selective_sampling_threads_lock);
+
+        selective_sampling_threads_set.erase(thread_id);
+    }
 }
 void ContinuousProfiler::ThreadNameChanged(ThreadID thread_id, ULONG cch_name, WCHAR name[])
 {
@@ -1288,8 +1293,8 @@ extern "C"
             return;
         }
 
-        std::lock_guard<std::mutex> guard(selected_sampling_threads_lock);
-        selected_sampling_threads_set.insert(threadId);
+        std::lock_guard<std::mutex> guard(selective_sampling_threads_lock);
+        selective_sampling_threads_set.insert(threadId);
     }
 
     EXPORTTHIS void SelectiveSamplingStop()
@@ -1308,7 +1313,7 @@ extern "C"
             return;
         }
 
-        std::lock_guard<std::mutex> guard(selected_sampling_threads_lock);
-        selected_sampling_threads_set.erase(threadId);
+        std::lock_guard<std::mutex> guard(selective_sampling_threads_lock);
+        selective_sampling_threads_set.erase(threadId);
     }
 }
