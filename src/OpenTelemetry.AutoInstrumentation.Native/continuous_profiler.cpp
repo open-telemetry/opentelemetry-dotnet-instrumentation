@@ -218,7 +218,7 @@ static int32_t SelectiveSamplingConsumeAndClearBuffer(int32_t len, unsigned char
     }
 
     std::lock_guard<std::mutex> guard(selective_sampling_buffer_lock);
-    const size_t to_use_len = std::min(selective_sampling_buffer.size(), static_cast<size_t>(len));
+    const size_t                to_use_len = std::min(selective_sampling_buffer.size(), static_cast<size_t>(len));
 
     if (to_use_len == 0)
     {
