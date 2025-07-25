@@ -3,7 +3,7 @@
 
 using OpenTelemetry.AutoInstrumentation.DuckTyping;
 
-namespace OpenTelemetry.AutoInstrumentation.Instrumentations.RabbitMq6.DuckTypes;
+namespace OpenTelemetry.AutoInstrumentation.Instrumentations.RabbitMqLegacy.DuckTypes;
 
 internal interface IBody : IDuckType
 {

@@ -3,7 +3,7 @@
 
 using System.Net;
 
-namespace OpenTelemetry.AutoInstrumentation.Instrumentations.RabbitMq6.DuckTypes;
+namespace OpenTelemetry.AutoInstrumentation.Instrumentations.RabbitMqLegacy.DuckTypes;
 
 // wraps https://github.com/rabbitmq/rabbitmq-dotnet-client/blob/a50334f2acb09fd16dc9cbd20ad1c6dd093d1d64/projects/RabbitMQ.Client/client/impl/ModelBase.cs
 internal interface IModelBase
