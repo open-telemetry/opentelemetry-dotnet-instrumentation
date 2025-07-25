@@ -100,6 +100,7 @@ public:
     void EndSelectedThreadsBatch() const;
     void StartSample(ThreadID id, const ThreadState* state, const thread_span_context& span_context) const;
     void StartSampleForSelectedThread(const ThreadState* state, const thread_span_context& span_context) const;
+    void MarkSelectedForFrequentSampling(bool value) const;
     void RecordFrame(FunctionID fid, const trace::WSTRING& frame);
     void EndSample() const;
     void EndBatch() const;
@@ -217,7 +218,8 @@ public:
     std::optional<unsigned int> selectedThreadsSamplingInterval;
     unsigned int                iteration;
     void                        StartThreadSampling();
-    SamplingType                GetNextSamplingType() const;
+    static void                 InitSelectiveSamplingBuffer();
+    [[nodiscard]] SamplingType  GetNextSamplingType() const;
     unsigned int                maxMemorySamplesPerMinute;
     void                        StartAllocationSampling(unsigned int maxMemorySamplesPerMinute);
     void                        AllocationTick(ULONG dataLen, LPCBYTE data);

@@ -1208,6 +1208,7 @@ void CorProfiler::ConfigureContinuousProfiler(bool         threadSamplingEnabled
     if (selectiveSamplingConfigured)
     {
         this->continuousProfiler->selectedThreadsSamplingInterval = selectedThreadsSamplingInterval;
+        continuous_profiler::ContinuousProfiler::InitSelectiveSamplingBuffer();
     }
 
     if (threadSamplingEnabled || selectiveSamplingConfigured)
