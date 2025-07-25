@@ -10,16 +10,16 @@ namespace OpenTelemetry.AutoInstrumentation.Loader;
 /// <summary>
 /// A class that attempts to load the OpenTelemetry.AutoInstrumentation .NET assembly.
 /// </summary>
-internal partial class Loader
+internal partial class AssemblyResolver
 {
-    private static string ResolveManagedProfilerDirectory()
+    public static string ResolveManagedProfilerDirectory()
     {
         var tracerHomeDirectory = ReadEnvironmentVariable("OTEL_DOTNET_AUTO_HOME") ?? string.Empty;
         var tracerFrameworkDirectory = "netfx";
         return Path.Combine(tracerHomeDirectory, tracerFrameworkDirectory);
     }
 
-    private static Assembly? AssemblyResolve_ManagedProfilerDependencies(object sender, ResolveEventArgs args)
+    public static Assembly? AssemblyResolve_ManagedProfilerDependencies(object sender, ResolveEventArgs args)
     {
         var assemblyName = new AssemblyName(args.Name).Name;
 

@@ -10,50 +10,13 @@ namespace OpenTelemetry.AutoInstrumentation.Loader;
 /// <summary>
 /// A class that attempts to load the OpenTelemetry.AutoInstrumentation .NET assembly.
 /// </summary>
-internal partial class Loader
+internal partial class AssemblyResolver
 {
     internal static System.Runtime.Loader.AssemblyLoadContext DependencyLoadContext { get; } = new ManagedProfilerAssemblyLoadContext();
 
     internal static string[]? StoreFiles { get; } = GetStoreFiles();
 
-    private static string ResolveManagedProfilerDirectory()
-    {
-        string tracerFrameworkDirectory = "net";
-        string tracerHomeDirectory = ReadEnvironmentVariable("OTEL_DOTNET_AUTO_HOME") ?? string.Empty;
-
-        return Path.Combine(tracerHomeDirectory, tracerFrameworkDirectory);
-    }
-
-    private static string[]? GetStoreFiles()
-    {
-        try
-        {
-            var storeDirectory = Environment.GetEnvironmentVariable("DOTNET_SHARED_STORE");
-            if (storeDirectory == null || !Directory.Exists(storeDirectory))
-            {
-                return null;
-            }
-
-            var architecture = RuntimeInformation.ProcessArchitecture switch
-            {
-                Architecture.X86 => "x86",
-                Architecture.Arm64 => "arm64",
-                _ => "x64" // Default to x64 for architectures not explicitly handled
-            };
-
-            var targetFramework = $"net{Environment.Version.Major}.{Environment.Version.Minor}";
-            var finalPath = Path.Combine(storeDirectory, architecture, targetFramework);
-
-            var storeFiles = Directory.GetFiles(finalPath, "Microsoft.Extensions*.dll", SearchOption.AllDirectories);
-            return storeFiles;
-        }
-        catch
-        {
-            return null;
-        }
-    }
-
-    private static Assembly? AssemblyResolve_ManagedProfilerDependencies(object? sender, ResolveEventArgs args)
+    public static Assembly? AssemblyResolve_ManagedProfilerDependencies(object? sender, ResolveEventArgs args)
     {
         var assemblyName = new AssemblyName(args.Name);
 
@@ -96,6 +59,43 @@ internal partial class Loader
                 return DependencyLoadContext.LoadFromAssemblyPath(entry);
             }
 
+            return null;
+        }
+    }
+
+    private static string ResolveManagedProfilerDirectory()
+    {
+        string tracerFrameworkDirectory = "net";
+        string tracerHomeDirectory = ReadEnvironmentVariable("OTEL_DOTNET_AUTO_HOME") ?? string.Empty;
+
+        return Path.Combine(tracerHomeDirectory, tracerFrameworkDirectory);
+    }
+
+    private static string[]? GetStoreFiles()
+    {
+        try
+        {
+            var storeDirectory = Environment.GetEnvironmentVariable("DOTNET_SHARED_STORE");
+            if (storeDirectory == null || !Directory.Exists(storeDirectory))
+            {
+                return null;
+            }
+
+            var architecture = RuntimeInformation.ProcessArchitecture switch
+            {
+                Architecture.X86 => "x86",
+                Architecture.Arm64 => "arm64",
+                _ => "x64" // Default to x64 for architectures not explicitly handled
+            };
+
+            var targetFramework = $"net{Environment.Version.Major}.{Environment.Version.Minor}";
+            var finalPath = Path.Combine(storeDirectory, architecture, targetFramework);
+
+            var storeFiles = Directory.GetFiles(finalPath, "Microsoft.Extensions*.dll", SearchOption.AllDirectories);
+            return storeFiles;
+        }
+        catch
+        {
             return null;
         }
     }
