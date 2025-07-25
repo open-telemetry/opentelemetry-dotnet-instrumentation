@@ -87,7 +87,6 @@ static std::vector<unsigned char> selective_sampling_buffer;
 static std::mutex                                                             thread_span_context_lock;
 static std::unordered_map<ThreadID, continuous_profiler::thread_span_context> thread_span_context_map;
 
-// TODO: refactor
 static std::mutex                   selected_sampling_threads_lock;
 static std::unordered_set<ThreadID> selected_sampling_threads_set;
 
@@ -210,17 +209,16 @@ int32_t AllocationSamplingConsumeAndReplaceBuffer(int32_t len, unsigned char* bu
     return static_cast<int32_t>(to_use_len);
 }
 
-// TODO: deduplicate
-int32_t SelectiveSamplingConsumeAndReplaceBuffer(int32_t len, unsigned char* buf)
+static int32_t SelectiveSamplingConsumeAndClearBuffer(int32_t len, unsigned char* buf)
 {
     if (len <= 0 || buf == nullptr)
     {
-        trace::Logger::Warn("Unexpected 0/null buffer to SelectiveSamplingConsumeAndReplaceBuffer");
+        trace::Logger::Warn("Unexpected 0/null buffer to SelectiveSamplingConsumeAndClearBuffer");
         return 0;
     }
 
     std::lock_guard<std::mutex> guard(selective_sampling_buffer_lock);
-    const size_t to_use_len = static_cast<int>(std::min(selective_sampling_buffer.size(), static_cast<size_t>(len)));
+    const size_t to_use_len = std::min(selective_sampling_buffer.size(), static_cast<size_t>(len));
 
     if (to_use_len == 0)
     {
@@ -1269,7 +1267,7 @@ extern "C"
     }
     EXPORTTHIS int32_t SelectiveSamplerReadThreadSamples(int32_t len, unsigned char* buf)
     {
-        return SelectiveSamplingConsumeAndReplaceBuffer(len, buf);
+        return SelectiveSamplingConsumeAndClearBuffer(len, buf);
     }
     EXPORTTHIS void ContinuousProfilerSetNativeContext(uint64_t traceIdHigh, uint64_t traceIdLow, uint64_t spanId)
     {
