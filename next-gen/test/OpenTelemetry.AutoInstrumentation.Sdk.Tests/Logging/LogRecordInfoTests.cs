@@ -209,10 +209,12 @@ public sealed class LogRecordInfoTests
         // Arrange
         var scope = new InstrumentationScope("test.scope");
         var timestamp = new DateTime(2023, 12, 25, 10, 30, 45, DateTimeKind.Utc);
+        var observedTimestamp = new DateTime(2023, 12, 25, 10, 30, 46, DateTimeKind.Utc);
 
         var logRecordInfo1 = new LogRecordInfo(scope)
         {
             TimestampUtc = timestamp,
+            ObservedTimestampUtc = observedTimestamp,
             Severity = LogRecordSeverity.Info,
             Body = "Test message"
         };
@@ -220,12 +222,13 @@ public sealed class LogRecordInfoTests
         var logRecordInfo2 = new LogRecordInfo(scope)
         {
             TimestampUtc = timestamp,
+            ObservedTimestampUtc = observedTimestamp,
             Severity = LogRecordSeverity.Info,
             Body = "Test message"
         };
 
         // Act & Assert
-        // Assert.Equal(logRecordInfo1, logRecordInfo2);
+        Assert.Equal(logRecordInfo1, logRecordInfo2);
         Assert.True(logRecordInfo1.Equals(logRecordInfo2));
         Assert.Equal(logRecordInfo1.GetHashCode(), logRecordInfo2.GetHashCode());
     }
