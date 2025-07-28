@@ -17,12 +17,18 @@ public sealed class BufferedSpanBatchTests
         var bufferedBatch = CreateBufferedBatch(3);
 
         // Act
-        _ = new BufferedSpanBatch(bufferedBatch);
+        var spanBatch = new BufferedSpanBatch(bufferedBatch);
 
         // Assert
-        // The struct itself doesn't expose the internal batch, so we can't directly assert on it
-        // We'll verify functionality through the WriteTo method
-        Assert.True(true); // Constructor completed without exception
+        // Verify that the constructor worked by testing that WriteTo can be called
+        var writer = new TestSpanBatchWriter();
+
+        // This should not throw an exception if constructor worked correctly
+        Assert.NotNull(writer); // Ensure we have a valid writer
+        spanBatch.WriteTo(writer);
+
+        // Verify the writer received the expected number of spans
+        Assert.Equal(3, writer.WrittenSpans.Count);
     }
 
     [Fact]
