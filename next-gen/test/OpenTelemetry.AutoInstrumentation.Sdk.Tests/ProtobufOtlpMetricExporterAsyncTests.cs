@@ -28,6 +28,7 @@ public sealed class ProtobufOtlpMetricExporterAsyncTests
 
         // Create the measurement collector
         using var collector = new OtlpMeasurementCollector(resource);
+        collector.AllowMeter("ToOtlpResourceMetricsTest");
 
         // Create meter and counter
         using var meter = new Meter(name: "ToOtlpResourceMetricsTest", version: "0.0.1", tags: meterTags);
@@ -74,6 +75,7 @@ public sealed class ProtobufOtlpMetricExporterAsyncTests
         });
 
         using var collector = new OtlpMeasurementCollector(resource);
+        collector.AllowMeter("MultiCounterTest");
 
         using var meter = new Meter(name: "MultiCounterTest", version: "1.0.0");
         var counter1 = meter.CreateCounter<int>("requests");
@@ -107,6 +109,7 @@ public sealed class ProtobufOtlpMetricExporterAsyncTests
         });
 
         using var collector = new OtlpMeasurementCollector(resource);
+        collector.AllowMeter("MixedTypesTest");
 
         using var meter = new Meter(name: "MixedTypesTest", version: "1.0.0");
         var intCounter = meter.CreateCounter<int>("int_counter");
@@ -146,6 +149,7 @@ public sealed class ProtobufOtlpMetricExporterAsyncTests
         });
 
         using var collector = new OtlpMeasurementCollector(resource);
+        collector.AllowMeter("UpDownCounterTest");
 
         using var meter = new Meter(name: "UpDownCounterTest", version: "1.0.0");
         var upDownCounter = meter.CreateUpDownCounter<int>("requests_active");
@@ -180,6 +184,7 @@ public sealed class ProtobufOtlpMetricExporterAsyncTests
         });
 
         using var collector = new OtlpMeasurementCollector(resource);
+        collector.AllowMeter("HistogramTest");
 
         using var meter = new Meter(name: "HistogramTest", version: "1.0.0");
         var histogram = meter.CreateHistogram<double>("request_duration");
@@ -224,6 +229,7 @@ public sealed class ProtobufOtlpMetricExporterAsyncTests
         });
 
         using var collector = new OtlpMeasurementCollector(resource);
+        collector.AllowMeter("LongUpDownCounterTest");
 
         using var meter = new Meter(name: "LongUpDownCounterTest", version: "1.0.0");
         var upDownCounter = meter.CreateUpDownCounter<long>("memory_usage_bytes");
@@ -255,6 +261,7 @@ public sealed class ProtobufOtlpMetricExporterAsyncTests
         });
 
         using var collector = new OtlpMeasurementCollector(resource);
+        collector.AllowMeter("IntHistogramTest");
 
         using var meter = new Meter(name: "IntHistogramTest", version: "1.0.0");
         var histogram = meter.CreateHistogram<int>("response_size_bytes");
@@ -303,6 +310,7 @@ public sealed class ProtobufOtlpMetricExporterAsyncTests
         });
 
         using var collector = new OtlpMeasurementCollector(resource);
+        collector.AllowMeter("FloatGaugeTest");
 
         using var meter = new Meter(name: "FloatGaugeTest", version: "1.0.0");
         var gauge = meter.CreateGauge<float>("cpu_usage_percent");
@@ -350,6 +358,7 @@ public sealed class ProtobufOtlpMetricExporterAsyncTests
         });
 
         using var collector = new OtlpMeasurementCollector(resource);
+        collector.AllowMeter("MixedInstrumentsTest");
 
         using var meter = new Meter(name: "MixedInstrumentsTest", version: "1.0.0");
 
@@ -406,6 +415,7 @@ public sealed class ProtobufOtlpMetricExporterAsyncTests
         });
 
         using var collector = new OtlpMeasurementCollector(resource);
+        collector.AllowMeter("TagsTest");
 
         using var meter = new Meter(name: "TagsTest", version: "1.0.0");
         var counter = meter.CreateCounter<int>("http_requests");
@@ -454,6 +464,7 @@ public sealed class ProtobufOtlpMetricExporterAsyncTests
         });
 
         using var collector = new OtlpMeasurementCollector(resource);
+        collector.AllowMeter("ComplexTagsTest");
 
         using var meter = new Meter(name: "ComplexTagsTest", version: "1.0.0");
         var histogram = meter.CreateHistogram<double>("database_query_duration");

@@ -22,7 +22,8 @@ public sealed class SpanExportProcessorFactoryTests
         var options = new BatchExportProcessorOptions();
 
         // Act
-        var processor = SpanExportProcessorFactory.CreateBatchExportProcessorAsync(
+        // Act
+        using var processor = SpanExportProcessorFactory.CreateBatchExportProcessorAsync(
             loggerFactory,
             resource,
             exporter,
@@ -32,8 +33,6 @@ public sealed class SpanExportProcessorFactoryTests
         Assert.NotNull(processor);
         Assert.IsAssignableFrom<ISpanProcessor>(processor);
         Assert.IsAssignableFrom<IProcessor>(processor);
-
-        processor.Dispose();
     }
 
     [Fact]
@@ -101,7 +100,7 @@ public sealed class SpanExportProcessorFactoryTests
             exportTimeoutMilliseconds: 10000);
 
         // Act
-        var processor = SpanExportProcessorFactory.CreateBatchExportProcessorAsync(
+        using var processor = SpanExportProcessorFactory.CreateBatchExportProcessorAsync(
             loggerFactory,
             resource,
             exporter,
@@ -110,8 +109,6 @@ public sealed class SpanExportProcessorFactoryTests
         // Assert
         Assert.NotNull(processor);
         Assert.IsType<SpanBatchExportProcessorAsync>(processor);
-
-        processor.Dispose();
     }
 
     [Fact]

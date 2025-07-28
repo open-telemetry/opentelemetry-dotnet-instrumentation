@@ -118,8 +118,17 @@ public sealed class SpanTests
 
         // Assert
         Assert.Equal(2, span.Links.Length);
-        Assert.Equal(links[0], span.Links[0]);
-        Assert.Equal(links[1], span.Links[1]);
+
+        // Cannot use direct equality comparison due to InlineArray in TagList
+        ref readonly var context1 = ref SpanLink.GetSpanContextReference(in links[0]);
+        ref readonly var context2 = ref SpanLink.GetSpanContextReference(in links[1]);
+        ref readonly var spanContext1 = ref SpanLink.GetSpanContextReference(in span.Links[0]);
+        ref readonly var spanContext2 = ref SpanLink.GetSpanContextReference(in span.Links[1]);
+
+        Assert.Equal(context1.TraceId, spanContext1.TraceId);
+        Assert.Equal(context1.SpanId, spanContext1.SpanId);
+        Assert.Equal(context2.TraceId, spanContext2.TraceId);
+        Assert.Equal(context2.SpanId, spanContext2.SpanId);
     }
 
     [Fact]
@@ -151,8 +160,12 @@ public sealed class SpanTests
 
         // Assert
         Assert.Equal(2, span.Events.Length);
-        Assert.Equal(events[0], span.Events[0]);
-        Assert.Equal(events[1], span.Events[1]);
+
+        // Cannot use direct equality comparison due to InlineArray in TagList
+        Assert.Equal(events[0].Name, span.Events[0].Name);
+        Assert.Equal(events[0].TimestampUtc, span.Events[0].TimestampUtc);
+        Assert.Equal(events[1].Name, span.Events[1].Name);
+        Assert.Equal(events[1].TimestampUtc, span.Events[1].TimestampUtc);
     }
 
     [Fact]

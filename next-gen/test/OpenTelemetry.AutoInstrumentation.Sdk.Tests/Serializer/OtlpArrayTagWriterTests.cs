@@ -8,17 +8,21 @@ namespace OpenTelemetry.AutoInstrumentation.Sdk.Tests.Serializer;
 
 public sealed class OtlpArrayTagWriterTests : IDisposable
 {
-    static OtlpArrayTagWriterTests()
-    {
-        Activity.DefaultIdFormat = ActivityIdFormat.W3C;
-        Activity.ForceDefaultIdFormat = true;
-    }
-
     private readonly ProtobufOtlpTagWriter.OtlpArrayTagWriter _ArrayTagWriter;
     private readonly ActivityListener _ActivityListener;
+    private readonly ActivityIdFormat _PreviousDefaultIdFormat;
+    private readonly bool _PreviousForceDefaultIdFormat;
 
     public OtlpArrayTagWriterTests()
     {
+        // Store previous global settings
+        _PreviousDefaultIdFormat = Activity.DefaultIdFormat;
+        _PreviousForceDefaultIdFormat = Activity.ForceDefaultIdFormat;
+
+        // Set test-specific global settings
+        Activity.DefaultIdFormat = ActivityIdFormat.W3C;
+        Activity.ForceDefaultIdFormat = true;
+
         _ArrayTagWriter = new ProtobufOtlpTagWriter.OtlpArrayTagWriter();
         _ActivityListener = new ActivityListener
         {
@@ -150,5 +154,9 @@ public sealed class OtlpArrayTagWriterTests : IDisposable
         // Clean up the thread buffer after each test
         ProtobufOtlpTagWriter.OtlpArrayTagWriter.s_ThreadBuffer = null;
         _ActivityListener.Dispose();
+
+        // Restore previous global settings
+        Activity.DefaultIdFormat = _PreviousDefaultIdFormat;
+        Activity.ForceDefaultIdFormat = _PreviousForceDefaultIdFormat;
     }
 }
