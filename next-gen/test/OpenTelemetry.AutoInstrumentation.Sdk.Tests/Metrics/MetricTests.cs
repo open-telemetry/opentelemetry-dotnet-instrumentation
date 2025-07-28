@@ -70,15 +70,11 @@ public class MetricTests
     }
 
     [Fact]
-    public void Constructor_WhitespaceName_CreatesMetric()
+    public void Constructor_WhitespaceName_ThrowsArgumentException()
     {
-        // The constructor allows whitespace names (only empty and null are rejected)
-        // Act
-        var metric = new Metric(MetricType.LongSum, " ", AggregationTemporality.Cumulative);
-
-        // Assert
-        Assert.Equal(" ", metric.Name);
-        Assert.Equal(MetricType.LongSum, metric.MetricType);
+        // The constructor validates whitespace names and throws ArgumentException
+        // Act & Assert
+        Assert.Throws<ArgumentException>(() => new Metric(MetricType.LongSum, string.Empty, AggregationTemporality.Cumulative));
     }
 
     [Fact]

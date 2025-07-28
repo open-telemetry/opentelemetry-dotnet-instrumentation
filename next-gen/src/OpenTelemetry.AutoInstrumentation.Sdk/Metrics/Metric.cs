@@ -19,7 +19,7 @@ public sealed class Metric
         string name,
         AggregationTemporality aggregationTemporality)
     {
-        ArgumentException.ThrowIfNullOrEmpty(name);
+        ArgumentException.ThrowIfNullOrWhiteSpace(name);
 
         MetricType = metricType;
         Name = name;
