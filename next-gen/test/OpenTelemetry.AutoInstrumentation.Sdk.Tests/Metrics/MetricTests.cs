@@ -78,16 +78,15 @@ public class MetricTests
     }
 
     [Fact]
-    public void Constructor_NonMonotonicSumWithDelta_CreatesMetric()
+    public void Constructor_NonMonotonicSumWithDelta_ThrowsException()
     {
-        // The constructor doesn't actually throw for this combination
-        // This test verifies the current behavior
-        // Act
-        var metric = new Metric(MetricType.LongSumNonMonotonic, "test", AggregationTemporality.Delta);
+        // Non-monotonic sums with Delta aggregation should throw
+        // Act & Assert
+        Assert.Throws<NotSupportedException>(() =>
+            new Metric(MetricType.LongSumNonMonotonic, "test", AggregationTemporality.Delta));
 
-        // Assert
-        Assert.Equal(MetricType.LongSumNonMonotonic, metric.MetricType);
-        Assert.Equal(AggregationTemporality.Delta, metric.AggregationTemporality);
+        Assert.Throws<NotSupportedException>(() =>
+            new Metric(MetricType.DoubleSumNonMonotonic, "test", AggregationTemporality.Delta));
     }
 
     [Fact]
@@ -109,8 +108,8 @@ public class MetricTests
     [InlineData(MetricType.Summary, false)]
     [InlineData(MetricType.Histogram, false)]
     [InlineData(MetricType.ExponentialHistogram, false)]
-    [InlineData(MetricType.LongSumNonMonotonic, false)]
-    [InlineData(MetricType.DoubleSumNonMonotonic, false)]
+    [InlineData(MetricType.LongSumNonMonotonic, true)]
+    [InlineData(MetricType.DoubleSumNonMonotonic, true)]
     public void IsSumNonMonotonic_ReturnsCorrectValue(MetricType metricType, bool expected)
     {
         // Arrange
@@ -128,14 +127,14 @@ public class MetricTests
 
     [Theory]
     [InlineData(MetricType.LongSum, false)]
-    [InlineData(MetricType.DoubleSum, false)]
+    [InlineData(MetricType.DoubleSum, true)]
     [InlineData(MetricType.LongGauge, false)]
-    [InlineData(MetricType.DoubleGauge, false)]
+    [InlineData(MetricType.DoubleGauge, true)]
     [InlineData(MetricType.Summary, false)]
     [InlineData(MetricType.Histogram, false)]
     [InlineData(MetricType.ExponentialHistogram, false)]
     [InlineData(MetricType.LongSumNonMonotonic, false)]
-    [InlineData(MetricType.DoubleSumNonMonotonic, false)]
+    [InlineData(MetricType.DoubleSumNonMonotonic, true)]
     public void IsFloatingPoint_ReturnsCorrectValue(MetricType metricType, bool expected)
     {
         // Arrange
