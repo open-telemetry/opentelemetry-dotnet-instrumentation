@@ -62,7 +62,6 @@ jobs:
           path: ${{ env.NUGET_PACKAGES }}
 
       - name: Restore NuGet packages
-        if: ${{ steps.nuget-cache.outputs.cache-hit != 'true' }}
         run: dotnet restore next-gen.sln
 
       - name: Build solution
@@ -104,7 +103,6 @@ jobs:
           path: ${{ env.NUGET_PACKAGES }}
 
       - name: Restore NuGet packages
-        if: ${{ steps.nuget-cache.outputs.cache-hit != 'true' }}
         run: dotnet restore next-gen.sln
 
       - name: Check formatting
