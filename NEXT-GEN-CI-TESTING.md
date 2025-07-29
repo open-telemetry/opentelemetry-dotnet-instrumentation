@@ -13,6 +13,7 @@ The `next-gen-ci` workflow is designed specifically for the `out-of-process-coll
 - **Comprehensive checks**: Build, test, code quality, and security scanning
 - **Proper isolation**: All operations scoped to `next-gen` folder
 - **No conflicts**: Won't interfere with main branch CI when syncing changes
+- **Standard SDK versions**: Uses repository-standard .NET 9.0.303
 
 ## Local Testing with `act`
 

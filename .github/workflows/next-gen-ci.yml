@@ -30,13 +30,13 @@ jobs:
       matrix:
         include:
           - machine: windows-2022
-            dotnet-version: "9.0.105"
+            dotnet-version: "9.0.303"
           - machine: ubuntu-22.04
-            dotnet-version: "9.0.105"
+            dotnet-version: "9.0.303"
           - machine: macos-13
-            dotnet-version: "9.0.105"
+            dotnet-version: "9.0.303"
           - machine: ubuntu-22.04-arm
-            dotnet-version: "9.0.105"
+            dotnet-version: "9.0.303"
     runs-on: ${{ matrix.machine }}
     defaults:
       run:
@@ -93,7 +93,7 @@ jobs:
       - name: Setup .NET
         uses: actions/setup-dotnet@67a3573c9a986a3f9c594539f4ab511d57bb3ce9 # tag: v4.3.1
         with:
-          dotnet-version: "9.0.105"
+          dotnet-version: "9.0.303"
           global-json-file: next-gen/global.json
 
       - name: Check for NuGet packages cache
@@ -128,7 +128,7 @@ jobs:
       - name: Setup .NET
         uses: actions/setup-dotnet@67a3573c9a986a3f9c594539f4ab511d57bb3ce9 # tag: v4.3.1
         with:
-          dotnet-version: "9.0.105"
+          dotnet-version: "9.0.303"
           global-json-file: next-gen/global.json
 
       - name: Restore NuGet packages
