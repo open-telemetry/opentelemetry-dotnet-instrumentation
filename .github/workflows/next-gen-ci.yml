@@ -136,11 +136,19 @@ jobs:
 
       - name: Run security scan
         run: |
+          # Run the vulnerability scan and capture output
           dotnet list next-gen.sln package --vulnerable --include-transitive --format json > vulnerability-report.json || true
-          if [ -s vulnerability-report.json ] && [ "$(cat vulnerability-report.json)" != "{}" ]; then
-            echo "Vulnerabilities found:"
-            cat vulnerability-report.json
+          
+          echo "Generated vulnerability report:"
+          cat vulnerability-report.json
+          
+          # Check if there are actual vulnerabilities by looking for the vulnerabilities array with content
+          # The JSON structure includes "vulnerabilities": [...] only when actual vulnerabilities exist
+          if grep -q '"vulnerabilities":\s*\[[^]]\+\]' vulnerability-report.json; then
+            echo "Security vulnerabilities detected!"
             exit 1
+          else
+            echo "No security vulnerabilities found."
           fi
 
       - name: Upload vulnerability report
