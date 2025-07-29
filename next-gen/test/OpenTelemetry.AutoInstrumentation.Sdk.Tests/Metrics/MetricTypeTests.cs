@@ -31,31 +31,28 @@ public class MetricTypeTests
     [InlineData(MetricType.Summary, false)]
     [InlineData(MetricType.Histogram, false)]
     [InlineData(MetricType.ExponentialHistogram, false)]
-    [InlineData(MetricType.LongSumNonMonotonic, false)] // Bug in implementation: (0x8a & 0x80) == 1 is false
-    [InlineData(MetricType.DoubleSumNonMonotonic, false)] // Bug in implementation: (0x8d & 0x80) == 1 is false
+    [InlineData(MetricType.LongSumNonMonotonic, true)]
+    [InlineData(MetricType.DoubleSumNonMonotonic, true)]
     public void MetricType_NonMonotonicFlag_IsCorrect(MetricType metricType, bool expectedNonMonotonic)
     {
         // Test the bit manipulation logic used in Metric.IsSumNonMonotonic
-        // The actual implementation uses: ((byte)MetricType & 0x80) == 1
-        // But this seems wrong - it should be != 0 or == 0x80
-        // Let's test what the actual implementation returns
-        bool isNonMonotonic = ((byte)metricType & 0x80) == 1;
+        // The correct implementation uses: ((byte)MetricType & 0x80) != 0
+        bool isNonMonotonic = ((byte)metricType & 0x80) != 0;
         Assert.Equal(expectedNonMonotonic, isNonMonotonic);
     }
 
     [Theory]
     [InlineData(MetricType.LongSum, false)]
-    [InlineData(MetricType.DoubleSum, false)] // Bug in implementation: (0x1d & 0x0c) == 1 is false
+    [InlineData(MetricType.DoubleSum, true)]
     [InlineData(MetricType.LongGauge, false)]
-    [InlineData(MetricType.DoubleGauge, false)] // Bug in implementation: (0x2d & 0x0c) == 1 is false
+    [InlineData(MetricType.DoubleGauge, true)]
     [InlineData(MetricType.LongSumNonMonotonic, false)]
-    [InlineData(MetricType.DoubleSumNonMonotonic, false)] // Bug in implementation: (0x8d & 0x0c) == 1 is false
+    [InlineData(MetricType.DoubleSumNonMonotonic, true)]
     public void MetricType_FloatingPointFlag_IsCorrect(MetricType metricType, bool expectedFloatingPoint)
     {
         // Test the bit manipulation logic used in Metric.IsFloatingPoint
-        // The actual implementation uses: ((byte)MetricType & 0x0c) == 1
-        // But this seems wrong - it should check for 0x0c or 0x0d patterns
-        bool isFloatingPoint = ((byte)metricType & 0x0c) == 1;
+        // The correct implementation uses: ((byte)MetricType & 0x0c) == 0x0c
+        bool isFloatingPoint = ((byte)metricType & 0x0c) == 0x0c;
         Assert.Equal(expectedFloatingPoint, isFloatingPoint);
     }
 
