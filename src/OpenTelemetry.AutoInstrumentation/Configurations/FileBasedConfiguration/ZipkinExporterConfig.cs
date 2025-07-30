@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: Apache-2.0
 
 using YamlDotNet.Serialization;
-using static System.Net.WebRequestMethods;
 
 namespace OpenTelemetry.AutoInstrumentation.Configurations.FileBasedConfiguration;
 
