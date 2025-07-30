@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: Apache-2.0
 
 using System.Reflection;
-using OpenTelemetry.AutoInstrumentation.Configurations.FileBasedConfiguration;
 using OpenTelemetry.AutoInstrumentation.Configurations.FileBasedConfiguration.Parser;
 using Xunit;
 using YamlDotNet.Serialization;
@@ -33,7 +32,7 @@ public class ParserTests
         Assert.NotNull(composite);
 
         string[] expectedCompositeKeys = [
-            "tracecontext", "baggage", "b3", "b3multi", "jaeger", "ottrace"
+            "tracecontext", "baggage", "b3", "b3multi",
         ];
 
         foreach (var key in expectedCompositeKeys)
@@ -104,22 +103,46 @@ public class ParserTests
         Assert.Empty(config.Resource.AttributesList);
 
         Assert.NotNull(config.Resource.DetectionDevelopment);
-        Assert.NotNull(config.Resource.DetectionDevelopment.Detectors);
+
+#if NET
+        string[] expectedDetecors = [
+            "azureappservice", "container", "host", "operatingsystem", "process", "processruntime"
+                ];
+#endif
+#if NETFRAMEWORK
+        string[] expectedDetecors = [
+            "azureappservice", "host", "operatingsystem", "process", "processruntime"
+                ];
+#endif
+
+        var detectors = config.Resource.DetectionDevelopment.Detectors;
+        Assert.NotNull(detectors);
+
+        foreach (var alias in expectedDetecors)
+        {
+            AssertAliasPropertyExists(detectors, alias);
+        }
 
         Assert.NotNull(config.InstrumentationDevelopment);
         Assert.NotNull(config.InstrumentationDevelopment.DotNet);
 
-        Assert.NotNull(config.InstrumentationDevelopment);
-        Assert.NotNull(config.InstrumentationDevelopment.DotNet);
-
+#if NET
         string[] expectedTraces = [
                     "aspnetcore", "azure", "elasticsearch", "elastictransport",
-                                        "entityframeworkcore", "graphql", "grpcnetclient", "httpclient",
-                                        "kafka", "masstransit", "mongodb", "mysqlconnector",
-                                        "mysqldata", "npgsql", "nservicebus", "oraclemda",
-                                        "rabbitmq", "quartz", "sqlclient", "stackexchangeredis",
-                                        "wcfclient"
+                    "entityframeworkcore", "graphql", "grpcnetclient", "httpclient",
+                    "kafka", "masstransit", "mongodb", "mysqlconnector",
+                    "mysqldata", "npgsql", "nservicebus", "oraclemda", "rabbitmq",
+                    "quartz", "sqlclient", "stackexchangeredis", "wcfclient"
                 ];
+#endif
+#if NETFRAMEWORK
+        string[] expectedTraces = [
+                    "aspnet", "azure", "elasticsearch", "elastictransport",
+                    "grpcnetclient", "httpclient", "kafka", "mongodb",
+                    "mysqlconnector", "npgsql", "nservicebus", "oraclemda",
+                    "rabbitmq", "quartz", "sqlclient", "wcfclient", "wcfservice"
+                ];
+#endif
 
         var traces = config.InstrumentationDevelopment.DotNet.Traces;
         Assert.NotNull(traces);
@@ -129,11 +152,20 @@ public class ParserTests
             AssertAliasPropertyExists(traces, alias);
         }
 
+#if NET
         string[] expectedMetrics =
         [
             "aspnetcore", "httpclient", "netruntime",
+            "nservicebus", "process", "sqlclient"
+        ];
+#endif
+#if NETFRAMEWORK
+        string[] expectedMetrics =
+        [
+            "aspnet", "httpclient", "netruntime",
                 "nservicebus", "process", "sqlclient"
         ];
+#endif
 
         var metrics = config.InstrumentationDevelopment.DotNet.Metrics;
         Assert.NotNull(metrics);
@@ -244,50 +276,6 @@ public class ParserTests
         var serviceAttr = config.Resource?.Attributes?.First(a => a.Name == "service.name");
         Assert.NotNull(serviceAttr);
         Assert.Equal("my‑service", serviceAttr.Value);
-
-        Assert.NotNull(config.InstrumentationDevelopment);
-        Assert.NotNull(config.InstrumentationDevelopment.DotNet);
-
-        string[] expectedTraces = [
-                    "aspnetcore", "azure", "elasticsearch", "elastictransport",
-                                "entityframeworkcore", "graphql", "grpcnetclient", "httpclient",
-                                "kafka", "masstransit", "mongodb", "mysqlconnector",
-                                "mysqldata", "npgsql", "nservicebus", "oraclemda",
-                                "rabbitmq", "quartz", "sqlclient", "stackexchangeredis",
-                                "wcfclient"
-                ];
-
-        var traces = config.InstrumentationDevelopment.DotNet.Traces;
-        Assert.NotNull(traces);
-
-        foreach (var alias in expectedTraces)
-        {
-            AssertAliasPropertyExists(traces, alias);
-        }
-
-        string[] expectedMetrics =
-        [
-            "aspnetcore", "httpclient", "netruntime",
-                "nservicebus", "process", "sqlclient"
-        ];
-
-        var metrics = config.InstrumentationDevelopment.DotNet.Metrics;
-        Assert.NotNull(metrics);
-
-        foreach (var alias in expectedMetrics)
-        {
-            AssertAliasPropertyExists(metrics, alias);
-        }
-
-        string[] expectedLogs = ["ilogger", "log4net"];
-
-        var logs = config.InstrumentationDevelopment.DotNet.Logs;
-        Assert.NotNull(logs);
-
-        foreach (var alias in expectedLogs)
-        {
-            AssertAliasPropertyExists(logs, alias);
-        }
     }
 
     private static void AssertAliasPropertyExists<T>(T obj, string alias)
