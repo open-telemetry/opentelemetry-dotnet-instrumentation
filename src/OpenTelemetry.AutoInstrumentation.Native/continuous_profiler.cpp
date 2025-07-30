@@ -81,13 +81,12 @@ static std::vector<unsigned char>* cpu_buffer_b;
 static std::mutex                  allocation_buffer_lock = std::mutex();
 static std::vector<unsigned char>* allocation_buffer      = new std::vector<unsigned char>();
 
-static std::mutex                  selective_sampling_buffer_lock = std::mutex();
-static std::vector<unsigned char>* selective_sampling_buffer      = new std::vector<unsigned char>();
+static std::mutex                 selective_sampling_buffer_lock = std::mutex();
+static std::vector<unsigned char> selective_sampling_buffer;
 
 static std::mutex                                                             thread_span_context_lock;
 static std::unordered_map<ThreadID, continuous_profiler::thread_span_context> thread_span_context_map;
 
-// TODO: refactor
 static std::mutex                   selective_sampling_threads_lock;
 static std::unordered_set<ThreadID> selective_sampling_threads_set;
 
@@ -161,12 +160,12 @@ void AppendToSelectedThreadsSampleBuffer(int32_t appendLen, unsigned char* appen
     }
     std::lock_guard<std::mutex> guard(selective_sampling_buffer_lock);
 
-    if (selective_sampling_buffer->size() + appendLen >= kSamplesBufferMaximumSize)
+    if (selective_sampling_buffer.size() + appendLen >= kSamplesBufferMaximumSize)
     {
         trace::Logger::Warn("Discarding samples for selected threads. Buffer is full.");
         return;
     }
-    selective_sampling_buffer->insert(selective_sampling_buffer->end(), appendBuf, &appendBuf[appendLen]);
+    selective_sampling_buffer.insert(selective_sampling_buffer.end(), appendBuf, &appendBuf[appendLen]);
 }
 
 void AllocationSamplingAppendToBuffer(int32_t appendLen, unsigned char* appendBuf)
@@ -210,28 +209,24 @@ int32_t AllocationSamplingConsumeAndReplaceBuffer(int32_t len, unsigned char* bu
     return static_cast<int32_t>(to_use_len);
 }
 
-// TODO: deduplicate
-int32_t SelectiveSamplingConsumeAndReplaceBuffer(int32_t len, unsigned char* buf)
+static int32_t SelectiveSamplingConsumeAndClearBuffer(int32_t len, unsigned char* buf)
 {
     if (len <= 0 || buf == nullptr)
     {
-        trace::Logger::Warn("Unexpected 0/null buffer to SelectiveSamplingConsumeAndReplaceBuffer");
+        trace::Logger::Warn("Unexpected 0/null buffer to SelectiveSamplingConsumeAndClearBuffer");
         return 0;
     }
-    std::vector<unsigned char>* to_use = nullptr;
-    {
-        std::lock_guard<std::mutex> guard(selective_sampling_buffer_lock);
-        to_use                    = selective_sampling_buffer;
-        selective_sampling_buffer = new std::vector<unsigned char>();
-        selective_sampling_buffer->reserve(kSamplesBufferDefaultSize);
-    }
-    if (to_use == nullptr)
+
+    std::lock_guard<std::mutex> guard(selective_sampling_buffer_lock);
+    const size_t                to_use_len = std::min(selective_sampling_buffer.size(), static_cast<size_t>(len));
+
+    if (to_use_len == 0)
     {
         return 0;
     }
-    const size_t to_use_len = static_cast<int>(std::min(to_use->size(), static_cast<size_t>(len)));
-    memcpy(buf, to_use->data(), to_use_len);
-    delete to_use;
+    memcpy(buf, selective_sampling_buffer.data(), to_use_len);
+    selective_sampling_buffer.clear();
+
     return static_cast<int32_t>(to_use_len);
 }
 
@@ -336,6 +331,12 @@ void ThreadSamplesBuffer::StartSampleForSelectedThread(const ThreadState*       
     WriteUInt64(span_context.trace_id_high_);
     WriteUInt64(span_context.trace_id_low_);
     WriteUInt64(span_context.span_id_);
+}
+
+void ThreadSamplesBuffer::MarkSelectedForFrequentSampling(bool value) const
+{
+    CHECK_SAMPLES_BUFFER_LENGTH()
+    WriteByte(value ? 1 : 0);
 }
 
 void ThreadSamplesBuffer::AllocationSample(uint64_t                   allocSize,
@@ -689,7 +690,7 @@ HRESULT __stdcall FrameCallback(_In_ FunctionID         func_id,
     return S_OK;
 }
 
-SamplingType ContinuousProfiler::GetNextSamplingType() const
+[[nodiscard]] SamplingType ContinuousProfiler::GetNextSamplingType() const
 {
     if (!selectedThreadsSamplingInterval.has_value())
     {
@@ -745,6 +746,13 @@ void CaptureAllThreadSamples(ContinuousProfiler* prof, ICorProfilerInfo12* info1
             prof->cur_cpu_writer_->StartSample(thread_id, &unknown, spanContext);
         }
 
+        if (prof->selectedThreadsSamplingInterval.has_value())
+        {
+            const auto threadSelectedForFrequentSampling =
+                selective_sampling_threads_set.find(thread_id) != selective_sampling_threads_set.end();
+            prof->cur_cpu_writer_->MarkSelectedForFrequentSampling(threadSelectedForFrequentSampling);
+        }
+
         // Don't reuse the hr being used for the thread enum, especially since a failed snapshot isn't fatal
         HRESULT snapshotHr =
             info12->DoStackSnapshot(thread_id, &FrameCallback, COR_PRF_SNAPSHOT_DEFAULT, &dssp, nullptr, 0);
@@ -770,8 +778,7 @@ void CaptureThreadSamplesForSelectedThreads(ContinuousProfiler* prof, ICorProfil
     prof->helper.volatile_function_name_cache_.Clear();
 
     std::vector<unsigned char> localBytes;
-    localBytes.reserve(kSamplesBufferDefaultSize);
-    auto localBuf = ThreadSamplesBuffer(&localBytes);
+    auto                       localBuf = ThreadSamplesBuffer(&localBytes);
 
     auto dssp = DoStackSnapshotParams(prof, &localBuf);
 
@@ -953,6 +960,11 @@ void ContinuousProfiler::SetGlobalInfo12(ICorProfilerInfo12* cor_profiler_info12
     profiler_info        = cor_profiler_info12;
     this->info12         = cor_profiler_info12;
     this->helper.info12_ = cor_profiler_info12;
+}
+
+void ContinuousProfiler::InitSelectiveSamplingBuffer()
+{
+    selective_sampling_buffer.reserve(kSamplesBufferDefaultSize);
 }
 
 void ContinuousProfiler::StartThreadSampling()
@@ -1260,7 +1272,7 @@ extern "C"
     }
     EXPORTTHIS int32_t SelectiveSamplerReadThreadSamples(int32_t len, unsigned char* buf)
     {
-        return SelectiveSamplingConsumeAndReplaceBuffer(len, buf);
+        return SelectiveSamplingConsumeAndClearBuffer(len, buf);
     }
     EXPORTTHIS void ContinuousProfilerSetNativeContext(uint64_t traceIdHigh, uint64_t traceIdLow, uint64_t spanId)
     {
