@@ -10,48 +10,48 @@ propagator:
     baggage:
     b3:
     b3multi:
-    jaeger:
-    ottrace:
   composite_list: tracecontext,baggage
+
 tracer_provider:
   processors:
-      batch:
-        schedule_delay: 5000
-        export_timeout: 30000
-        max_queue_size: 2048
-        max_export_batch_size: 512
-        exporter:
-          otlp_http:
-            endpoint: http://localhost:4318/v1/traces
-            timeout: 10000
-            headers: []
-            headers_list:
+    batch:
+      schedule_delay: 5000
+      export_timeout: 30000
+      max_queue_size: 2048
+      max_export_batch_size: 512
+      exporter:
+        otlp_http:
+          endpoint: http://localhost:4318/v1/traces
+          timeout: 10000
+          headers: []
+          headers_list:
 
 meter_provider:
   readers:
-      periodic:
-        interval: 60000
-        timeout: 30000
-        exporter:
-          otlp_http:
-            endpoint: http://localhost:4318/v1/metrics
-            timeout: 10000
-            headers: []
-            headers_list:
+    periodic:
+      interval: 60000
+      timeout: 30000
+      exporter:
+        otlp_http:
+          endpoint: http://localhost:4318/v1/metrics
+          timeout: 10000
+          headers: []
+          headers_list:
 
 logger_provider:
   processors:
-      batch:
-        schedule_delay: 1000
-        export_timeout: 30000
-        max_queue_size: 2048
-        max_export_batch_size: 512
-        exporter:
-          otlp_http:
-            endpoint: http://localhost:4318/v1/logs
-            timeout: 10000
-            headers: []
-            headers_list:
+    batch:
+      schedule_delay: 1000
+      export_timeout: 30000
+      max_queue_size: 2048
+      max_export_batch_size: 512
+      exporter:
+        otlp_http:
+          endpoint: http://localhost:4318/v1/logs
+          timeout: 10000
+          headers: []
+          headers_list:
+
 resource:
   attributes:
     - name: service.name
@@ -70,7 +70,7 @@ resource:
 instrumentation/development:
   dotnet:
     traces:
-#     aspnet:
+      aspnet:
       aspnetcore:
       azure:
       elasticsearch:
@@ -92,8 +92,9 @@ instrumentation/development:
       sqlclient:
       stackexchangeredis:
       wcfclient:
-#     wcfservice:
+      wcfservice:
     metrics:
+      aspnet:
       aspnetcore:
       httpclient:
       netruntime:
