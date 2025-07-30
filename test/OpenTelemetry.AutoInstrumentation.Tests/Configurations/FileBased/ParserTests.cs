@@ -8,6 +8,7 @@ using YamlDotNet.Serialization;
 
 namespace OpenTelemetry.AutoInstrumentation.Tests.Configurations.FileBased;
 
+[Collection("Non-Parallel Collection")]
 public class ParserTests
 {
     [Fact]
