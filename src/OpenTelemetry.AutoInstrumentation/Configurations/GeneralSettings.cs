@@ -136,7 +136,7 @@ internal class GeneralSettings : Settings
 
         Resources = merged.ToList();
 
-        SetupSdk = configuration.Disabled;
+        SetupSdk = !configuration.Disabled;
     }
 
     private static List<KeyValuePair<string, object>> ParseResourceAttributes(string? resourceAttributes)
