@@ -6,6 +6,7 @@ using Xunit;
 
 namespace OpenTelemetry.AutoInstrumentation.Tests.Configurations;
 
+[Collection("Non-Parallel Collection")]
 public class ServiceNameConfiguratorTests
 {
     private const string ServiceName = "service.name";

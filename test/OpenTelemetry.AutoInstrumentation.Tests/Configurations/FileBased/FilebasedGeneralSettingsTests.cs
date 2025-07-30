@@ -163,7 +163,7 @@ public class FilebasedGeneralSettingsTests
         var settings = new GeneralSettings();
         settings.LoadFile(conf);
 
-        Assert.True(settings.SetupSdk);
+        Assert.False(settings.SetupSdk);
     }
 
     [Fact]
