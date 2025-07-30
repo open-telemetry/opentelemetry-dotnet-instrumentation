@@ -34,6 +34,16 @@ public class MockMetricsCollector : IDisposable
 #endif
     }
 
+    public MockMetricsCollector(ITestOutputHelper output, int port, string host = "localhost")
+    {
+        _output = output;
+#if NETFRAMEWORK
+        _listener = new(output, HandleHttpRequests, host, port, "/v1/metrics/");
+#else
+        _listener = new(output, nameof(MockMetricsCollector), port, new PathHandler(HandleHttpRequests, "/v1/metrics"));
+#endif
+    }
+
     /// <summary>
     /// Gets the TCP port that this collector is listening on.
     /// </summary>

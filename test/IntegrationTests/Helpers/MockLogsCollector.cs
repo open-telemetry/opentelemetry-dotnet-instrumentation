@@ -35,6 +35,17 @@ public class MockLogsCollector : IDisposable
 #endif
     }
 
+    public MockLogsCollector(ITestOutputHelper output, int port, string host = "localhost")
+    {
+        _output = output;
+
+#if NETFRAMEWORK
+        _listener = new(output, HandleHttpRequests, host, port, "/v1/logs/");
+#else
+        _listener = new(output, nameof(MockLogsCollector), port, new PathHandler(HandleHttpRequests, "/v1/logs"));
+#endif
+    }
+
     /// <summary>
     /// Gets the TCP port that this collector is listening on.
     /// </summary>
