@@ -4,7 +4,6 @@
 using OpenTelemetry.AutoInstrumentation.Configurations;
 using OpenTelemetry.AutoInstrumentation.Configurations.FileBasedConfiguration;
 using Xunit;
-using Xunit.Sdk;
 
 namespace OpenTelemetry.AutoInstrumentation.Tests.Configurations.FileBased;
 
@@ -103,7 +102,7 @@ public class FilebasedSdkSettingsTests
     }
 
     [Fact]
-    public void Logs_And_Skips_Unknown_Propagator()
+    public void Skips_Unknown_Propagator()
     {
         var config = new Conf
         {
@@ -115,5 +114,6 @@ public class FilebasedSdkSettingsTests
         var settings = new SdkSettings();
 
         settings.LoadFile(config);
+        Assert.Empty(settings.Propagators);
     }
 }
