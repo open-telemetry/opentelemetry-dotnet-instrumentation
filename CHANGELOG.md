@@ -16,6 +16,9 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 
 #### Dependency updates
 
+- .NET only, following packages updated
+  - `OpenTelemetry.Instrumentation.StackExchangeRedis` from `1.12.0-beta.1` to `1.12.0-beta.2`.
+
 ### Deprecated
 
 ### Removed
