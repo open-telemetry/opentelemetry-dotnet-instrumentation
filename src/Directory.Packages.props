@@ -23,7 +23,7 @@
     <PackageVersion Include="OpenTelemetry.Instrumentation.Quartz" Version="1.12.0-beta.1" />
     <PackageVersion Include="OpenTelemetry.Instrumentation.Runtime" Version="1.12.0" />
     <PackageVersion Include="OpenTelemetry.Instrumentation.SqlClient" Version="1.12.0-beta.2" />
-    <PackageVersion Include="OpenTelemetry.Instrumentation.StackExchangeRedis" Version="1.12.0-beta.1" />
+    <PackageVersion Include="OpenTelemetry.Instrumentation.StackExchangeRedis" Version="1.12.0-beta.2" />
     <PackageVersion Include="OpenTelemetry.Shims.OpenTracing" Version="1.12.0-beta.1" />
     <PackageVersion Include="OpenTelemetry.Resources.Azure" Version="1.12.0-beta.1" />
     <PackageVersion Include="OpenTelemetry.Resources.Container" Version="1.12.0-beta.1" />
