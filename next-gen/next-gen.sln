@@ -19,6 +19,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpenTelemetry.AutoInstrumen
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpenTelemetry.AutoInstrumentation.Sdk.Tests", "test\OpenTelemetry.AutoInstrumentation.Sdk.Tests\OpenTelemetry.AutoInstrumentation.Sdk.Tests.csproj", "{51A855BB-518A-A63C-FA70-9B9DD492847B}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpenTelemetry.AutoInstrumentation.Sdk.Configuration.Tests", "test\OpenTelemetry.AutoInstrumentation.Sdk.Configuration.Tests\OpenTelemetry.AutoInstrumentation.Sdk.Configuration.Tests.csproj", "{A1B2C3D4-5E6F-7890-ABCD-EF1234567890}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -37,6 +39,10 @@ Global
 		{51A855BB-518A-A63C-FA70-9B9DD492847B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{51A855BB-518A-A63C-FA70-9B9DD492847B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{51A855BB-518A-A63C-FA70-9B9DD492847B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A1B2C3D4-5E6F-7890-ABCD-EF1234567890}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A1B2C3D4-5E6F-7890-ABCD-EF1234567890}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A1B2C3D4-5E6F-7890-ABCD-EF1234567890}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A1B2C3D4-5E6F-7890-ABCD-EF1234567890}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
