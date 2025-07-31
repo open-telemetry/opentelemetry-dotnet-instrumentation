@@ -17,6 +17,7 @@ internal sealed class OtlpMeasurementCollector : IDisposable
 {
     private readonly MeterListener _MeterListener;
     private readonly Resource _Resource;
+    private readonly HashSet<string> _AllowedMeterNames = new();
     private readonly List<CollectedMeasurement> _Measurements = new();
     private readonly object _Lock = new();
     private TaskCompletionSource<CollectedMeasurement>? _SingleMeasurementTcs;
@@ -29,7 +30,11 @@ internal sealed class OtlpMeasurementCollector : IDisposable
         _MeterListener = new MeterListener();
         _MeterListener.InstrumentPublished = (instrument, listener) =>
         {
-            listener.EnableMeasurementEvents(instrument);
+            // Only enable measurements for explicitly allowed meters to avoid capturing runtime metrics
+            if (_AllowedMeterNames.Contains(instrument.Meter.Name))
+            {
+                listener.EnableMeasurementEvents(instrument);
+            }
         };
 
         // Register callbacks for different measurement types
@@ -39,6 +44,14 @@ internal sealed class OtlpMeasurementCollector : IDisposable
         _MeterListener.SetMeasurementEventCallback<float>(OnMeasurementRecorded);
         _MeterListener.SetMeasurementEventCallback<decimal>(OnMeasurementRecorded);
         _MeterListener.Start();
+    }
+
+    public void AllowMeter(string meterName)
+    {
+        lock (_Lock)
+        {
+            _AllowedMeterNames.Add(meterName);
+        }
     }
 
     public void Dispose()
@@ -146,7 +159,7 @@ internal sealed class OtlpMeasurementCollector : IDisposable
         {
             if (_Measurements.Count > 0)
             {
-                return _Measurements.Last();
+                return _Measurements[_Measurements.Count - 1];
             }
 
             _SingleMeasurementTcs = new TaskCompletionSource<CollectedMeasurement>();
