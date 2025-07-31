@@ -1,0 +1,189 @@
+name: next-gen-ci
+
+on:
+  push:
+    branches: [ out-of-process-collection ]
+    paths:
+      - 'next-gen/**'
+  pull_request:
+    branches: [ out-of-process-collection ]
+    paths:
+      - 'next-gen/**'
+  workflow_dispatch:
+    inputs:
+      force_run:
+        description: 'Force run even if no next-gen changes'
+        required: false
+        default: 'false'
+
+env:
+  NUGET_PACKAGES: ${{ github.workspace }}/packages
+  DOTNET_CLI_TELEMETRY_OPTOUT: 1
+
+permissions:
+  contents: read
+
+jobs:
+  build-and-test:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - machine: windows-2022
+            dotnet-version: "9.0.303"
+          - machine: ubuntu-22.04
+            dotnet-version: "9.0.303"
+          - machine: macos-13
+            dotnet-version: "9.0.303"
+          - machine: ubuntu-22.04-arm
+            dotnet-version: "9.0.303"
+    runs-on: ${{ matrix.machine }}
+    defaults:
+      run:
+        working-directory: next-gen
+    steps:
+
+      - name: Checkout
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # tag: v4.2.2
+        with:
+          fetch-depth: 0 # fetching all, needed to correctly calculate version
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@67a3573c9a986a3f9c594539f4ab511d57bb3ce9 # tag: v4.3.1
+        with:
+          dotnet-version: ${{ matrix.dotnet-version }}
+          global-json-file: next-gen/global.json
+
+      - name: Check for NuGet packages cache
+        uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684 # tag: v4.2.3
+        id: nuget-cache
+        with:
+          key: next-gen-${{ hashFiles('next-gen/**/Directory.packages.props', 'next-gen/**/*.csproj') }}
+          path: ${{ env.NUGET_PACKAGES }}
+
+      - name: Restore NuGet packages
+        run: dotnet restore next-gen.sln
+
+      - name: Build solution
+        run: dotnet build next-gen.sln --configuration Release --no-restore
+
+      - name: Run tests
+        run: dotnet test next-gen.sln --configuration Release --no-build --verbosity normal --logger trx --results-directory test-results
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # tag: v4.6.2
+        with:
+          name: test-results-${{ matrix.machine }}
+          path: next-gen/test-results/
+
+  code-quality:
+    runs-on: ubuntu-22.04
+    defaults:
+      run:
+        working-directory: next-gen
+    steps:
+
+      - name: Checkout
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # tag: v4.2.2
+        with:
+          fetch-depth: 0 # fetching all, needed to correctly calculate version
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@67a3573c9a986a3f9c594539f4ab511d57bb3ce9 # tag: v4.3.1
+        with:
+          dotnet-version: "9.0.303"
+          global-json-file: next-gen/global.json
+
+      - name: Check for NuGet packages cache
+        uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684 # tag: v4.2.3
+        id: nuget-cache
+        with:
+          key: next-gen-${{ hashFiles('next-gen/**/Directory.packages.props', 'next-gen/**/*.csproj') }}
+          path: ${{ env.NUGET_PACKAGES }}
+
+      - name: Restore NuGet packages
+        run: dotnet restore next-gen.sln
+
+      - name: Check formatting
+        run: dotnet format next-gen.sln --verify-no-changes --verbosity diagnostic
+
+      - name: Build solution with warnings as errors
+        run: dotnet build next-gen.sln --configuration Release --no-restore /warnaserror
+
+  security-scan:
+    runs-on: ubuntu-22.04
+    defaults:
+      run:
+        working-directory: next-gen
+    steps:
+
+      - name: Checkout
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # tag: v4.2.2
+        with:
+          fetch-depth: 0 # fetching all, needed to correctly calculate version
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@67a3573c9a986a3f9c594539f4ab511d57bb3ce9 # tag: v4.3.1
+        with:
+          dotnet-version: "9.0.303"
+          global-json-file: next-gen/global.json
+
+      - name: Restore NuGet packages
+        run: dotnet restore next-gen.sln
+
+      - name: Run security scan
+        run: |
+          # Run the vulnerability scan and capture output
+          dotnet list next-gen.sln package --vulnerable --include-transitive --format json > vulnerability-report.json || true
+          
+          echo "Generated vulnerability report:"
+          cat vulnerability-report.json
+          
+          # Check if there are actual vulnerabilities by looking for the vulnerabilities array with content
+          # The JSON structure includes "vulnerabilities": [...] only when actual vulnerabilities exist
+          if grep -q '"vulnerabilities":\s*\[[^]]\+\]' vulnerability-report.json; then
+            echo "Security vulnerabilities detected!"
+            exit 1
+          else
+            echo "No security vulnerabilities found."
+          fi
+
+      - name: Upload vulnerability report
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # tag: v4.6.2
+        with:
+          name: vulnerability-report
+          path: next-gen/vulnerability-report.json
+
+  summary:
+    runs-on: ubuntu-22.04
+    needs:
+      - build-and-test
+      - code-quality
+      - security-scan
+    if: always()
+    steps:
+      
+      - name: Check if all jobs passed
+        run: |
+          echo "Build and test result: ${{ needs.build-and-test.result }}"
+          echo "Code quality result: ${{ needs.code-quality.result }}"
+          echo "Security scan result: ${{ needs.security-scan.result }}"
+          
+          if [ "${{ needs.build-and-test.result }}" != "success" ]; then
+            echo "Build and test failed"
+            exit 1
+          fi
+          
+          if [ "${{ needs.code-quality.result }}" != "success" ]; then
+            echo "Code quality checks failed"
+            exit 1
+          fi
+          
+          if [ "${{ needs.security-scan.result }}" != "success" ]; then
+            echo "Security scan failed"
+            exit 1
+          fi
+          
+          echo "All checks passed successfully!"

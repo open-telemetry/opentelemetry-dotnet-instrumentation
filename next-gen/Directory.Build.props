@@ -5,7 +5,7 @@
     <IsTestProject>$(MSBuildProjectName.Contains('.Test'))</IsTestProject>
 
     <SignAssembly>true</SignAssembly>
-    <AssemblyOriginatorKeyFile>$(RepoRoot)\KeyPair.snk</AssemblyOriginatorKeyFile>
+    <AssemblyOriginatorKeyFile>$(MSBuildThisFileDirectory)keypair.snk</AssemblyOriginatorKeyFile>
 
     <Authors>OpenTelemetry Authors</Authors>
     <Copyright>Copyright © $([System.DateTime]::Now.ToString(yyyy))</Copyright>
