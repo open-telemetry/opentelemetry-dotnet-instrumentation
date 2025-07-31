@@ -19,7 +19,7 @@ public sealed class Metric
         string name,
         AggregationTemporality aggregationTemporality)
     {
-        ArgumentException.ThrowIfNullOrEmpty(name);
+        ArgumentException.ThrowIfNullOrWhiteSpace(name);
 
         MetricType = metricType;
         Name = name;
@@ -60,10 +60,10 @@ public sealed class Metric
     /// <summary>
     /// Gets a value indicating whether or not the metric is sum non-monotonic.
     /// </summary>
-    public bool IsSumNonMonotonic => ((byte)MetricType & 0x80) == 1;
+    public bool IsSumNonMonotonic => ((byte)MetricType & 0x80) != 0;
 
     /// <summary>
     /// Gets a value indicating whether or not the metric is a floating point value.
     /// </summary>
-    public bool IsFloatingPoint => ((byte)MetricType & 0x0c) == 1;
+    public bool IsFloatingPoint => ((byte)MetricType & 0x0c) == 0x0c;
 }
