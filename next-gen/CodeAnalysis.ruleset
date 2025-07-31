@@ -2,8 +2,6 @@
   <Rules AnalyzerId="Microsoft.CodeAnalysis.CSharp" RuleNamespace="Microsoft.CodeAnalysis.CSharp">
     <Rule Id="CA1031" Action="None" /> <!-- Do not catch general exception types -->
     <Rule Id="CA1303" Action="None" /> <!-- Do not pass literals as localized parameters -->
-    <Rule Id="CA1515" Action="None" /> <!-- Consider making public types internal -->
-    <Rule Id="CA2007" Action="None" /> <!-- Consider calling ConfigureAwait on the awaited task -->
   </Rules>
   <Rules AnalyzerId="StyleCop.Analyzers" RuleNamespace="StyleCop.Analyzers">
     <Rule Id="SA0001" Action="None" /> <!-- XML comments -->
