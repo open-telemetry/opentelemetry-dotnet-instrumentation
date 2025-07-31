@@ -249,7 +249,7 @@ public sealed partial class ProtobufOtlpLogRecordExporterAsyncTests : IDisposabl
 
             // Get trace context from Activity.Current if available
             ActivityContext spanContext = Activity.Current?.Context ?? default;
-            var logRecord = new Logging.LogRecord(spanContext, in logRecordInfo)
+            var logRecord = new LogRecord(spanContext, in logRecordInfo)
             {
                 Attributes = attributes.ToArray()
             };
