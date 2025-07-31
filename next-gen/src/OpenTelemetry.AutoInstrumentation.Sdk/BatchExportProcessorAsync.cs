@@ -35,8 +35,8 @@ internal abstract class BatchExportProcessorAsync<TBufferedTelemetry, TBatchWrit
         IExporterAsync<TBatchWriter> exporter,
         BatchExportProcessorOptions options)
     {
+        // Validate all parameters first, before initializing anything
         ArgumentNullException.ThrowIfNull(options);
-
         _Logger = logger ?? throw new ArgumentNullException(nameof(logger));
         _Exporter = exporter ?? throw new ArgumentNullException(nameof(exporter));
 
@@ -46,6 +46,7 @@ internal abstract class BatchExportProcessorAsync<TBufferedTelemetry, TBatchWrit
         _ExportIntervalMilliseconds = options.ExportIntervalMilliseconds;
         _ExportTimeoutMilliseconds = options.ExportTimeoutMilliseconds;
 
+        // Only start the thread after all validation and initialization is complete
         _ExporterThread = new Thread(ExporterProc)
         {
             IsBackground = true,
@@ -196,7 +197,14 @@ internal abstract class BatchExportProcessorAsync<TBufferedTelemetry, TBatchWrit
                     ExportAsync().ContinueWith(
                         static (t, o) =>
                         {
-                            ((EventWaitHandle)o!).Set();
+                            try
+                            {
+                                ((EventWaitHandle)o!).Set();
+                            }
+                            catch (ObjectDisposedException)
+                            {
+                                // EventWaitHandle was disposed during shutdown, nothing to signal
+                            }
                         },
                         _ExportAsyncTaskCompleteTrigger,
                         CancellationToken.None,
@@ -204,6 +212,11 @@ internal abstract class BatchExportProcessorAsync<TBufferedTelemetry, TBatchWrit
                         TaskScheduler.Default);
 
                     _ExportAsyncTaskCompleteTrigger.WaitOne();
+                }
+                catch (ObjectDisposedException)
+                {
+                    // The processor is being disposed, exit the worker thread
+                    return;
                 }
                 finally
                 {
