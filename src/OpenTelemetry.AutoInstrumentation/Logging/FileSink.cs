@@ -61,7 +61,7 @@ internal sealed class FileSink : IDisposable
                 return false;
             }
             _output.Write(message);
-            FlushToDisk();
+            _output.Flush();
             return true;
         }
     }
@@ -76,7 +76,10 @@ internal sealed class FileSink : IDisposable
 
     public void FlushToDisk()
     {
-        _output.Flush();
-        _underlyingStream.Flush(true);
+        lock (_syncRoot)
+        {
+            _output.Flush();
+            _underlyingStream.Flush(flushToDisk: true);
+        }
     }
 }

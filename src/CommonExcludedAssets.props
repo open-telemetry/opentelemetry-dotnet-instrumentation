@@ -3,13 +3,13 @@
   <ItemGroup Condition=" '$(TargetFramework)' == 'net8.0' ">
     <!-- StackExchange.Redis is required by OpenTelemetry.Instrumentation.StackExchangeRedis. -->
     <PackageReference Include="StackExchange.Redis" ExcludeAssets="all" />
-    <!-- Pipelines.Sockets.Unofficial is tranistive dependency required by OpenTelemetry.Instrumentation.StackExchangeRedis. -->
+    <!-- Pipelines.Sockets.Unofficial is transitive dependency required by OpenTelemetry.Instrumentation.StackExchangeRedis. -->
     <PackageReference Include="Pipelines.Sockets.Unofficial" ExcludeAssets="all" />
-    <!-- System.Drawing.Common is tranistive dependency required by OpenTelemetry.Instrumentation.Wcf. -->
+    <!-- System.Drawing.Common is transitive dependency required by OpenTelemetry.Instrumentation.Wcf. -->
     <PackageReference Include="System.Drawing.Common" ExcludeAssets="all" />
-    <!-- System.Windows.Extensions is tranistive dependency required by OpenTelemetry.Instrumentation.Wcf. -->
+    <!-- System.Windows.Extensions is transitive dependency required by OpenTelemetry.Instrumentation.Wcf. -->
     <PackageReference Include="System.Windows.Extensions" ExcludeAssets="all" />
-    <!-- Microsoft.Win32.SystemEvents is tranistive dependency required by OpenTelemetry.Instrumentation.Wcf. -->
+    <!-- Microsoft.Win32.SystemEvents is transitive dependency required by OpenTelemetry.Instrumentation.Wcf. -->
     <PackageReference Include="Microsoft.Win32.SystemEvents" ExcludeAssets="all" />
   </ItemGroup>
 </Project>

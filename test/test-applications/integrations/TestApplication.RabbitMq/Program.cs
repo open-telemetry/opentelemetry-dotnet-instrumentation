@@ -182,7 +182,12 @@ internal static class Program
 
     private static bool Close(IModel asyncConsumersModel)
     {
-        var delegateField = asyncConsumersModel.GetType().GetField("_delegate", BindingFlags.NonPublic | BindingFlags.Instance);
+#if RABBITMQ_6_0_0_OR_GREATER
+        const string delegateFieldName = "_delegate";
+#else
+        const string delegateFieldName = "m_delegate";
+#endif
+        var delegateField = asyncConsumersModel.GetType().GetField(delegateFieldName, BindingFlags.NonPublic | BindingFlags.Instance);
         var delegateFieldValue = delegateField?.GetValue(asyncConsumersModel);
         var closeMethod = delegateFieldValue?.GetType().GetMethod(
             "Close",
@@ -190,11 +195,22 @@ internal static class Program
             null,
             [typeof(ushort), typeof(string), typeof(bool)],
             null);
+#if RABBITMQ_6_0_0_OR_GREATER
         var task = (Task)closeMethod?.Invoke(delegateFieldValue, [(ushort)200, "Goodbye", true])!;
+#else
+        var task = Task.Run(() =>
+        {
+            closeMethod?.Invoke(delegateFieldValue, [(ushort)200, "Goodbye", true]);
+        });
+#endif
         return task.Wait(DefaultWaitTimeout);
     }
 
+#if RABBITMQ_6_0_0_OR_GREATER
     private static void ProcessReceivedMessage(ReadOnlyMemory<byte> messageBody)
+#else
+    private static void ProcessReceivedMessage(byte[] messageBody)
+#endif
     {
         var receivedMessageContent = Encoding.UTF8.GetString(messageBody.ToArray());
         Console.WriteLine($" [x] Received {receivedMessageContent}");
@@ -243,7 +259,11 @@ internal static class Program
             string exchange,
             string routingKey,
             IBasicProperties properties,
+#if RABBITMQ_6_0_0_OR_GREATER
             ReadOnlyMemory<byte> body)
+#else
+            byte[] body)
+#endif
         {
             return Received?.Invoke(
                 this,
@@ -274,7 +294,11 @@ internal static class Program
             string exchange,
             string routingKey,
             IBasicProperties properties,
+#if RABBITMQ_6_0_0_OR_GREATER
             ReadOnlyMemory<byte> body)
+#else
+            byte[] body)
+#endif
         {
             base.HandleBasicDeliver(consumerTag, deliveryTag, redelivered, exchange, routingKey, properties, body);
             Received?.Invoke(this, new BasicDeliverEventArgs(consumerTag, deliveryTag, redelivered, exchange, routingKey, properties, body));

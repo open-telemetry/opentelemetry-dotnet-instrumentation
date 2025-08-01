@@ -9,11 +9,23 @@
    - [`docs/README.md`](./README.md)
 
 1. Update the [CHANGELOG.md](../CHANGELOG.md) with the new release.
+   Remove empty sections for the version being released.
 
 1. Stable release only! Update `PublicAPI.Shipped.txt` based on corresponding `PublicAPI.Unshipped.txt`.
 
 1. Create a pull request with `release PR` label on GitHub
    with the changes described in the changelog.
+
+
+1. Add tests section in pull request description displaying current status of testing:
+
+     ```markdown
+    ## Tests
+
+    - [ ] CI
+    - [ ] MacOS with Linux Containers
+    - [ ] Windows with Linux Containers
+     ```
 
 1. Run the integration tests with Linux containers on Windows and macOS
    (not covered by CI):

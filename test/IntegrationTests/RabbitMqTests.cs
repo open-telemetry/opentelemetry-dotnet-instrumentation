@@ -57,7 +57,7 @@ public class RabbitMqTests : TestHelper
         }
         else
         {
-            TestRabbitMq6(packageVersion);
+            TestRabbitMqLegacy(packageVersion);
         }
     }
 
@@ -109,7 +109,7 @@ public class RabbitMqTests : TestHelper
         collector.AssertExpectations();
     }
 
-    private void TestRabbitMq6(string packageVersion)
+    private void TestRabbitMqLegacy(string packageVersion)
     {
         using var collector = new MockSpansCollector(Output);
         SetExporter(collector);

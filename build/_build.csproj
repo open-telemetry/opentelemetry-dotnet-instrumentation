@@ -11,11 +11,16 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <LangVersion>13.0</LangVersion>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <NuGetAudit>true</NuGetAudit>
+    <NuGetAuditMode>all</NuGetAuditMode>
+    <NuGetAuditLevel>low</NuGetAuditLevel>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="Mono.Cecil" />
     <PackageReference Include="Nuke.Common" />
+    <!-- Microsoft.Build.Tasks.Core is an indirect reference from Nuke.Common. Fixes https://github.com/advisories/GHSA-h4j7-5rxr-p4wc -->
+    <PackageReference Include="Microsoft.Build.Tasks.Core" />
     <PackageReference Include="Nuget.CommandLine" ExcludeAssets="all" />
   </ItemGroup>
   <ItemGroup>

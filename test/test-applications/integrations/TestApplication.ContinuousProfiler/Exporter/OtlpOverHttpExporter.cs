@@ -22,14 +22,17 @@ public class OtlpOverHttpExporter
     private readonly HttpClient _httpClient = new();
     private readonly long cpuPeriod;
 
-    public OtlpOverHttpExporter(TimeSpan cpuPeriod)
+    private readonly SampleNativeFormatParser _parser;
+
+    public OtlpOverHttpExporter(TimeSpan cpuPeriod, SampleNativeFormatParser parser)
     {
+        _parser = parser;
         this.cpuPeriod = (long)cpuPeriod.TotalNanoseconds;
     }
 
     public void ExportThreadSamples(byte[] buffer, int read, CancellationToken cancellationToken)
     {
-        var threadSamples = SampleNativeFormatParser.ParseThreadSamples(buffer, read);
+        var threadSamples = _parser.ParseThreadSamples(buffer, read);
 
         if (threadSamples == null || threadSamples.Count == 0)
         {
@@ -74,7 +77,7 @@ public class OtlpOverHttpExporter
 
     public void ExportAllocationSamples(byte[] buffer, int read, CancellationToken cancellationToken)
     {
-        var allocationSamples = SampleNativeFormatParser.ParseAllocationSamples(buffer, read);
+        var allocationSamples = _parser.ParseAllocationSamples(buffer, read);
         if (allocationSamples.Count == 0)
         {
             return;

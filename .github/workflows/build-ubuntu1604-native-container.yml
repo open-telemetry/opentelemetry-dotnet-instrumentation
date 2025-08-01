@@ -12,8 +12,6 @@ env:
 
 jobs:
   build-ubuntu1604-native-container:
-    strategy:
-      fail-fast: false
     runs-on: ubuntu-22.04
     timeout-minutes: 60
     steps:
@@ -26,7 +24,7 @@ jobs:
     - name: Build native library in Docker container
       run: |
         set -e
-        docker build -t mybuildimage -f "./docker/ubuntu1604.dockerfile" ./docker
+        docker build -t mybuildimage -f "./docker/ubuntu1604.dockerfile" .
         docker run -e OS_TYPE=linux-glibc --rm --mount type=bind,source="${GITHUB_WORKSPACE}",target=/project mybuildimage \
           /bin/sh -c 'export PATH="$PATH:/usr/share/dotnet" && git config --global --add safe.directory /project && ./build.sh BuildNativeWorkflow'
 

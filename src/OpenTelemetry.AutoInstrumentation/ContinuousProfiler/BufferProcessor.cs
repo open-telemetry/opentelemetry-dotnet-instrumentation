@@ -14,81 +14,49 @@ internal class BufferProcessor
 
     private static readonly IOtelLogger Logger = OtelLogging.GetLogger();
 
-    private readonly bool _threadSamplingEnabled;
-    private readonly bool _allocationSamplingEnabled;
-    private readonly Action<byte[], int, CancellationToken> _exportThreadSamplesMethod;
-    private readonly Action<byte[], int, CancellationToken> _exportAllocationSamplesMethod;
-    private readonly TimeSpan _exportTimeout;
     private readonly byte[] _buffer = new byte[BufferSize];
 
-    public BufferProcessor(
-        bool threadSamplingEnabled,
-        bool allocationSamplingEnabled,
-        Action<byte[], int, CancellationToken> threadSamplesMethod,
-        Action<byte[], int, CancellationToken> allocationSamplesMethod,
-        TimeSpan exportTimeout)
-    {
-        _threadSamplingEnabled = threadSamplingEnabled;
-        _allocationSamplingEnabled = allocationSamplingEnabled;
-        _exportThreadSamplesMethod = threadSamplesMethod;
-        _exportAllocationSamplesMethod = allocationSamplesMethod;
-        if (exportTimeout <= TimeSpan.Zero)
-        {
-            throw new ArgumentOutOfRangeException(nameof(exportTimeout));
-        }
+    private readonly Dictionary<SampleType, (Action<byte[], int, CancellationToken> Handler, TimeSpan ExportTimeout)> _sampleHandlers;
 
-        _exportTimeout = exportTimeout;
+    public BufferProcessor(Dictionary<SampleType, (Action<byte[], int, CancellationToken> Handler, TimeSpan ExportTimeout)> sampleHandlers)
+    {
+        _sampleHandlers = sampleHandlers ?? throw new ArgumentNullException(nameof(sampleHandlers));
     }
 
     public void Process()
     {
-        if (_threadSamplingEnabled)
+        foreach (var sampleType in _sampleHandlers.Keys)
         {
-            ProcessThreadSamples();
-        }
+            var read = ReadBuffer(sampleType);
+            if (read <= 0)
+            {
+                continue;
+            }
 
-        if (_allocationSamplingEnabled)
-        {
-            ProcessAllocationSamples();
+            var (handler, timeout) = _sampleHandlers[sampleType];
+
+            using var cts = new CancellationTokenSource(timeout);
+            try
+            {
+                handler(_buffer, read, cts.Token);
+            }
+            catch (Exception e)
+            {
+                Logger.Warning(e, $"Failed to process {sampleType} samples.");
+            }
         }
     }
 
-    private void ProcessThreadSamples()
+    private int ReadBuffer(SampleType sampleType)
     {
-        try
+        return sampleType switch
         {
-            var read = NativeMethods.ContinuousProfilerReadThreadSamples(_buffer.Length, _buffer);
-            if (read <= 0)
-            {
-                return;
-            }
-
-            using var cts = new CancellationTokenSource(_exportTimeout);
-            _exportThreadSamplesMethod(_buffer, read, cts.Token);
-        }
-        catch (Exception e)
-        {
-            Logger.Warning(e, "Failed to process thread samples.");
-        }
-    }
-
-    private void ProcessAllocationSamples()
-    {
-        try
-        {
-            var read = NativeMethods.ContinuousProfilerReadAllocationSamples(_buffer.Length, _buffer);
-            if (read <= 0)
-            {
-                return;
-            }
-
-            using var cts = new CancellationTokenSource(_exportTimeout);
-            _exportAllocationSamplesMethod(_buffer, read, cts.Token);
-        }
-        catch (Exception e)
-        {
-            Logger.Warning(e, "Failed to process allocation samples.");
-        }
+            SampleType.Continuous => NativeMethods.ContinuousProfilerReadThreadSamples(_buffer.Length, _buffer),
+            SampleType.SelectedThreads => NativeMethods.SelectiveSamplerReadThreadSamples(_buffer.Length, _buffer),
+            SampleType.Allocation => NativeMethods.ContinuousProfilerReadAllocationSamples(_buffer.Length, _buffer),
+            _ => throw new ArgumentOutOfRangeException(nameof(sampleType), sampleType, null)
+        };
     }
 }
+
 #endif

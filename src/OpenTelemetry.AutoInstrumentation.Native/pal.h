@@ -25,7 +25,7 @@
 #endif
 
 #include "environment_variables.h"
-#include "string.h" // NOLINT
+#include "string_utils.h" // NOLINT
 #include "util.h"
 
 #ifdef _WIN32
