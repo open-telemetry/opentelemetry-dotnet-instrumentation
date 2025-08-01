@@ -7,7 +7,11 @@ EXPORTS
     IsProfilerAttached
     AddInstrumentations
     AddDerivedInstrumentations
+    InitializeTraceMethods
     ConfigureContinuousProfiler
     ContinuousProfilerReadThreadSamples
     ContinuousProfilerReadAllocationSamples
+    SelectiveSamplerReadThreadSamples
     ContinuousProfilerSetNativeContext
+    SelectiveSamplingStart
+    SelectiveSamplingStop

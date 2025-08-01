@@ -43,7 +43,7 @@ public class KafkaTests : TestHelper
     [Theory]
     [Trait("Category", "EndToEnd")]
     [Trait("Containers", "Linux")]
-    [MemberData(nameof(LibraryVersion.GetPlatformVersions), nameof(LibraryVersion.Kafka), MemberType = typeof(LibraryVersion))]
+    [MemberData(nameof(LibraryVersion.Kafka), MemberType = typeof(LibraryVersion))]
     public void SubmitsTraces(string packageVersion)
     {
         var topicName = $"test-topic-{packageVersion}";

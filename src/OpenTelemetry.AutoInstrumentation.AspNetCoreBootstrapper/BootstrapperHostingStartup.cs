@@ -15,7 +15,8 @@ namespace OpenTelemetry.AutoInstrumentation.AspNetCoreBootstrapper;
 /// </summary>
 internal class BootstrapperHostingStartup : IHostingStartup
 {
-    private static readonly IOtelLogger Logger = OtelLogging.GetLogger("AspNetCoreBootstrapper");
+    private const string BootstrapperLoggerSuffix = "AspNetCoreBootstrapper";
+    private static readonly IOtelLogger Logger = OtelLogging.GetLogger(BootstrapperLoggerSuffix);
 
     private readonly LogSettings _logSettings;
 
@@ -33,29 +34,36 @@ internal class BootstrapperHostingStartup : IHostingStartup
     /// <param name="builder">The <see cref="IWebHostBuilder"/>.</param>
     public void Configure(IWebHostBuilder builder)
     {
-        if (!_logSettings.LogsEnabled)
-        {
-            Logger.Information("BootstrapperHostingStartup loaded, but OpenTelemetry Logs disabled. Skipping.");
-            return;
-        }
-
-        if (!_logSettings.EnabledInstrumentations.Contains(LogInstrumentation.ILogger))
-        {
-            Logger.Information($"BootstrapperHostingStartup loaded, but {nameof(LogInstrumentation.ILogger)} instrumentation is disabled. Skipping.");
-            return;
-        }
-
         try
         {
-            builder.ConfigureLogging(logging => logging.AddOpenTelemetryLogsFromStartup());
+            if (!_logSettings.LogsEnabled)
+            {
+                Logger.Information("BootstrapperHostingStartup loaded, but OpenTelemetry Logs disabled. Skipping.");
+                return;
+            }
 
-            var applicationName = GetApplicationName();
-            Logger.Information($"BootstrapperHostingStartup loaded for application with name {applicationName}.");
+            if (!_logSettings.EnabledInstrumentations.Contains(LogInstrumentation.ILogger))
+            {
+                Logger.Information($"BootstrapperHostingStartup loaded, but {nameof(LogInstrumentation.ILogger)} instrumentation is disabled. Skipping.");
+                return;
+            }
+
+            try
+            {
+                builder.ConfigureLogging(logging => logging.AddOpenTelemetryLogsFromStartup());
+
+                var applicationName = GetApplicationName();
+                Logger.Information($"BootstrapperHostingStartup loaded for application with name {applicationName}.");
+            }
+            catch (Exception ex)
+            {
+                Logger.Error($"Error in BootstrapperHostingStartup: {ex}");
+                throw;
+            }
         }
-        catch (Exception ex)
+        finally
         {
-            Logger.Error($"Error in BootstrapperHostingStartup: {ex}");
-            throw;
+            OtelLogging.CloseLogger(BootstrapperLoggerSuffix, Logger);
         }
     }
 

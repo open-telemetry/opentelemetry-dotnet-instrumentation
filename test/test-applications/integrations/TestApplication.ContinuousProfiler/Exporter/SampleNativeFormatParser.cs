@@ -8,19 +8,24 @@ namespace TestApplication.ContinuousProfiler;
 /// <summary>
 /// Parser the native code's pause-time-optimized format.
 /// </summary>
-internal static class SampleNativeFormatParser
+public class SampleNativeFormatParser
 {
     // TODO use value from ContinuousProfilerProcessor.BackgroundThreadName when it will be moved to main project
     public const string BackgroundThreadName = "OpenTelemetry Continuous Profiler Thread";
-
     private static readonly UnicodeEncoding UnicodeEncoding = new();
+    private readonly bool _frequentSamplingEnabled;
+
+    public SampleNativeFormatParser(bool frequentSamplingEnabled = false)
+    {
+        _frequentSamplingEnabled = frequentSamplingEnabled;
+    }
 
     /// <summary>
     /// Parses the thread sample batch.
     /// </summary>
     /// <param name="buffer">byte array containing native thread samples format data</param>
     /// <param name="read">how much of the buffer is actually used</param>
-    internal static List<ThreadSample>? ParseThreadSamples(byte[] buffer, int read)
+    internal List<ThreadSample>? ParseThreadSamples(byte[] buffer, int read)
     {
         uint batchThreadIndex = 0;
         var samples = new List<ThreadSample>();
@@ -65,6 +70,13 @@ internal static class SampleNativeFormatParser
                     var traceIdLow = ReadInt64(buffer, ref position);
                     var spanId = ReadInt64(buffer, ref position);
 
+                    var selectedForFrequentSampling = false;
+
+                    if (_frequentSamplingEnabled)
+                    {
+                        selectedForFrequentSampling = buffer[position++] == 1;
+                    }
+
                     var threadIndex = batchThreadIndex++;
 
                     var code = ReadShort(buffer, ref position);
@@ -74,13 +86,15 @@ internal static class SampleNativeFormatParser
                         continue;
                     }
 
+                    // TODO: revisit
                     var threadSample = new ThreadSample(
                         sampleStartMillis,
                         traceIdHigh,
                         traceIdLow,
                         spanId,
                         threadName,
-                        threadIndex);
+                        threadIndex,
+                        selectedForFrequentSampling);
 
                     ReadStackFrames(code, threadSample, codeDictionary, buffer, ref position);
 
@@ -136,7 +150,7 @@ internal static class SampleNativeFormatParser
     /// </summary>
     /// <param name="buffer">byte array containing native allocation samples format data</param>
     /// <param name="read">how much of the buffer is actually used</param>
-    internal static List<AllocationSample> ParseAllocationSamples(byte[] buffer, int read)
+    internal List<AllocationSample> ParseAllocationSamples(byte[] buffer, int read)
     {
         var allocationSamples = new List<AllocationSample>();
         var position = 0;
@@ -195,6 +209,65 @@ internal static class SampleNativeFormatParser
         }
 
         return allocationSamples;
+    }
+
+    internal List<ThreadSample> ParseSelectiveSamplerSamples(byte[] buffer, int read)
+    {
+        var selectiveSamplerSamples = new List<ThreadSample>();
+        var position = 0;
+
+        uint threadIndex = 0;
+
+        var codeDictionary = new Dictionary<int, string>();
+
+        try
+        {
+            while (position < read)
+            {
+                var operationCode = buffer[position++];
+
+                if (operationCode == OpCodes.SelectiveSampleBatchStart)
+                {
+                    // each batch has independently coded strings
+                    codeDictionary.Clear();
+                }
+                else if (operationCode == OpCodes.SelectiveSample)
+                {
+                    var timestampMillis = ReadInt64(buffer, ref position);
+                    var threadName = ReadString(buffer, ref position);
+                    var traceIdHigh = ReadInt64(buffer, ref position);
+                    var traceIdLow = ReadInt64(buffer, ref position);
+                    var spanId = ReadInt64(buffer, ref position);
+
+                    var threadSample = new ThreadSample(
+                        timestampMillis,
+                        traceIdHigh,
+                        traceIdLow,
+                        spanId,
+                        threadName,
+                        threadIndex++,
+                        true);
+
+                    var code = ReadShort(buffer, ref position);
+
+                    ReadStackFrames(code, threadSample, codeDictionary, buffer, ref position);
+                    selectiveSamplerSamples.Add(threadSample);
+                }
+                else if (operationCode == OpCodes.SelectiveSampleBatchEnd)
+                {
+                }
+                else
+                {
+                    position = read + 1;
+                }
+            }
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e + "Unexpected error while parsing selected threads samples.");
+        }
+
+        return selectiveSamplerSamples;
     }
 
     private static string ReadString(byte[] buffer, ref int position)
@@ -302,5 +375,20 @@ internal static class SampleNativeFormatParser
         /// Marks the start of an allocation sample, see THREAD_SAMPLES_ALLOCATION_SAMPLE on native code.
         /// </summary>
         public const byte AllocationSample = 0x08;
+
+        /// <summary>
+        /// Marks the start of a selective thread sample, see kSelectiveSample on native code.
+        /// </summary>
+        public const byte SelectiveSample = 0x09;
+
+        /// <summary>
+        /// Marks the start of a selective thread samples batch, see kSelectedThreadsStartBatch on native code.
+        /// </summary>
+        public const byte SelectiveSampleBatchStart = 0x0A;
+
+        /// <summary>
+        /// Marks the end of a selective thread samples batch, see kSelectedThreadsEndBatch on native code.
+        /// </summary>
+        public const byte SelectiveSampleBatchEnd = 0x0B;
     }
 }

@@ -106,6 +106,11 @@ private:
     //
     HRESULT RunAutoInstrumentationLoader(const ComPtr<IMetaDataEmit2>&, const ModuleID module_id, const mdToken function_token, const FunctionInfo& caller, const ModuleMetadata& module_metadata);
     HRESULT GenerateLoaderMethod(const ModuleID module_id, mdMethodDef* ret_method_token);
+    HRESULT GenerateLoaderType(const ModuleID module_id,
+                               mdTypeDef*     loader_type,
+                               mdMethodDef*   init_method,
+                               mdMethodDef*   patch_app_domain_setup_method);
+    HRESULT ModifyAppDomainCreate(const ModuleID module_id, mdMethodDef patch_app_domain_setup_method);
     HRESULT AddIISPreStartInitFlags(const ModuleID module_id, const mdToken function_token);
 #endif
 
@@ -123,6 +128,7 @@ private:
     // Initialization methods
     //
     void InternalAddInstrumentation(WCHAR* id, CallTargetDefinition* items, int size, bool isDerived);
+    bool InitThreadSampler();
 
 public:
     CorProfiler() = default;
@@ -208,11 +214,14 @@ public:
     //
     void AddInstrumentations(WCHAR* id, CallTargetDefinition* items, int size);
     void AddDerivedInstrumentations(WCHAR* id, CallTargetDefinition* items, int size);
-
+    void InitializeTraceMethods(WCHAR* id,
+                                WCHAR* integration_assembly_name_ptr,
+                                WCHAR* integration_type_name_ptr,
+                                WCHAR* configuration_string_ptr);
     //
     // Continuous Profiler methods
     //
-    void ConfigureContinuousProfiler(bool threadSamplingEnabled, unsigned int threadSamplingInterval, bool allocationSamplingEnabled, unsigned int maxMemorySamplesPerMinute);
+    void ConfigureContinuousProfiler(bool threadSamplingEnabled, unsigned int threadSamplingInterval, bool allocationSamplingEnabled, unsigned int maxMemorySamplesPerMinute, unsigned int selectedThreadsSamplingInterval);
 
     friend class TracerMethodRewriter;
 };

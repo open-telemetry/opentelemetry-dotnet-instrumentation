@@ -26,11 +26,7 @@
     <CORECLR_PATH>lib\coreclr</CORECLR_PATH>
     <ProjectName>OpenTelemetry.AutoInstrumentation.Native</ProjectName>
     <LIB_PATH>lib\</LIB_PATH>
-    <LIB_PLATFORM Condition="'$(Platform)'=='x64'">x64</LIB_PLATFORM>
-    <LIB_PLATFORM Condition="'$(Platform)'=='Win32' OR '$(Platform)'=='x86'">x86</LIB_PLATFORM>
-    <LIB_INCLUDES>$(CORECLR_PATH)\src\pal\prebuilt\inc;$(CORECLR_PATH)\src\inc;$(VC_IncludePath);$(WindowsSDK_IncludePath);$(LIB_PATH)fmt_$(LIB_PLATFORM)-windows-static\include;$(LIB_PATH)spdlog\include</LIB_INCLUDES>
-    <LIB_BINARIES Condition="'$(Configuration)'=='Release'">$(LIB_PATH)fmt_$(LIB_PLATFORM)-windows-static\lib\fmt.lib</LIB_BINARIES>
-    <LIB_BINARIES Condition="'$(Configuration)'=='Debug'">$(LIB_PATH)fmt_$(LIB_PLATFORM)-windows-static\debug\lib\fmtd.lib</LIB_BINARIES>
+    <LIB_INCLUDES>$(CORECLR_PATH)\src\pal\prebuilt\inc;$(CORECLR_PATH)\src\inc;$(VC_IncludePath);$(WindowsSDK_IncludePath);$(LIB_PATH)fmt\include;$(LIB_PATH)spdlog\include</LIB_INCLUDES>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
@@ -100,11 +96,9 @@
     </ClCompile>
     <Lib>
       <AdditionalLibraryDirectories>$(LIB_INCLUDES);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>$(LIB_BINARIES);%(AdditionalDependencies)</AdditionalDependencies>
     </Lib>
     <Link>
       <AdditionalLibraryDirectories>$(LIB_INCLUDES);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>$(LIB_BINARIES);%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -123,11 +117,9 @@
     <Lib>
       <TargetMachine>MachineX86</TargetMachine>
       <AdditionalLibraryDirectories>$(LIB_INCLUDES);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>$(LIB_BINARIES);%(AdditionalDependencies)</AdditionalDependencies>
     </Lib>
     <Link>
       <AdditionalLibraryDirectories>$(LIB_INCLUDES);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>$(LIB_BINARIES);%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -149,11 +141,9 @@
     </ClCompile>
     <Lib>
       <AdditionalLibraryDirectories>$(LIB_INCLUDES);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>$(LIB_BINARIES);%(AdditionalDependencies)</AdditionalDependencies>
     </Lib>
     <Link>
       <AdditionalLibraryDirectories>$(LIB_INCLUDES);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>$(LIB_BINARIES);%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -175,11 +165,9 @@
     </ClCompile>
     <Lib>
       <AdditionalLibraryDirectories>$(LIB_INCLUDES);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>$(LIB_BINARIES);%(AdditionalDependencies)</AdditionalDependencies>
     </Lib>
     <Link>
       <AdditionalLibraryDirectories>$(LIB_INCLUDES);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>$(LIB_BINARIES);%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -200,6 +188,7 @@
     <ClInclude Include="logger.h" />
     <ClInclude Include="logger_impl.h" />
     <ClInclude Include="macros.h" />
+    <ClInclude Include="member_resolver.h" />
     <ClInclude Include="metadata_builder.h" />
     <ClInclude Include="method_rewriter.h" />
     <ClInclude Include="miniutf.hpp" />
@@ -211,9 +200,10 @@
     <ClInclude Include="rejit_handler.h" />
     <ClInclude Include="rejit_preprocessor.h" />
     <ClInclude Include="rejit_work_offloader.h" />
+    <ClInclude Include="signature_builder.h" />
     <ClInclude Include="startup_hook.h" />
     <ClInclude Include="stats.h" />
-    <ClInclude Include="string.h" />
+    <ClInclude Include="string_utils.h" />
     <ClInclude Include="tracer_tokens.h" />
     <ClInclude Include="util.h" />
     <ClInclude Include="version.h" />
@@ -230,15 +220,21 @@
     <ClCompile Include="il_rewriter.cpp" />
     <ClCompile Include="il_rewriter_wrapper.cpp" />
     <ClCompile Include="integration.cpp" />
+    <ClCompile Include="member_resolver.cpp" />
     <ClCompile Include="metadata_builder.cpp" />
     <ClCompile Include="method_rewriter.cpp" />
     <ClCompile Include="miniutf.cpp" />
     <ClCompile Include="rejit_handler.cpp" />
     <ClCompile Include="rejit_preprocessor.cpp" />
     <ClCompile Include="rejit_work_offloader.cpp" />
-    <ClCompile Include="string.cpp" />
+    <ClCompile Include="string_utils.cpp" />
     <ClCompile Include="tracer_tokens.cpp" />
     <ClCompile Include="util.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <!-- Update fmt inclusions here after updating the library. -->
+    <ClCompile Include="lib\fmt\src\format.cc" />
+    <ClCompile Include="lib\fmt\src\os.cc" />
   </ItemGroup>
   <ItemGroup>
     <!-- Update spdlog inclusions here after updating the library. -->
