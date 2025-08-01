@@ -45,6 +45,34 @@ with environment variables taking precedence over `App.config` or `Web.config` f
      `SiteName\VirtualPath` ex: `MySite\MyApp`
      - If that is not the case it will use the name of the application [entry Assembly](https://learn.microsoft.com/en-us/dotnet/api/system.reflection.assembly.getentryassembly?view=net-7.0).
 
+4. File-based Configuration (Experimental)
+
+    > **Status:** [Experimental](https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/versioning-and-stability.md)
+    > For more information about the OpenTelemetry configuration specification, see:
+    > **[File-based configuration documentation](https://opentelemetry.io/docs/specs/otel/configuration/sdk/)**  
+
+    You can configure OpenTelemetry using a YAML file. This method is disabled
+    by default and must be explicitly enabled.
+
+    To enable file-based configuration, set the following environment variable:
+
+    ```bash
+    OTEL_EXPERIMENTAL_FILE_BASED_CONFIGURATION_ENABLED=true
+    ```
+
+    By default, the value is false.
+
+    You can also specify the configuration file path (default: config.yaml):
+
+    ```bash
+    OTEL_EXPERIMENTAL_CONFIG_FILE=/path/to/config.yaml
+    ```
+
+    In your config file you can use environment variables in format: ${ENVIRONMENT_VARIABLE}
+    insted of "value"
+
+    See [configuration examples](#configuration-examples)
+
 By default we recommend using environment variables for configuration.
 However, if given setting supports it, then:
 
@@ -503,3 +531,338 @@ instead.
 |----------------------------------|-------------------------------------------------------------------------|------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------|
 | `OTEL_DOTNET_AUTO_LOG_DIRECTORY` | Directory of the .NET Tracer logs.                                      | *See the previous note on default paths* | [Experimental](https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/versioning-and-stability.md) |
 | `OTEL_LOG_LEVEL`                 | SDK log level. (supported values: `none`,`error`,`warn`,`info`,`debug`) | `info`                                   | [Stable](https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/versioning-and-stability.md)       |
+
+## Configuration Examples
+
+### Global Configuration
+
+``` yaml
+# The file format version.
+# The yaml format is documented at
+# <https://github.com/open-telemetry/opentelemetry-configuration/tree/main/schema>
+file_format: "0.4"
+# Configure if the SDK is disabled or not.
+# If omitted or null, false is used
+disabled: false
+# Configure the log level of the internal logger used by the SDK.
+# If omitted, info is used.
+log_level: info
+# Configure if the Fail Fast is enabled or not.
+# If omitted or null, false is used
+fail_fast: false
+# Configure general attribute limits. See also tracer_provider.limits, logger_provider.limits.
+attribute_limits:
+  # Configure max attribute value size. 
+  # Value must be non-negative.
+  # If omitted or null, there is no limit.
+  attribute_value_length_limit: 4096
+  # Configure max attribute count. 
+  # Value must be non-negative.
+  # If omitted or null, 128 is used.
+  attribute_count_limit: 128
+```
+
+### Propagator Configuration
+
+You can configure text map context propagators directly in YAML or via the
+`OTEL_PROPAGATORS` environment variable.
+For more details and updates, see: [Propagators list and documentation](https://opentelemetry.io/docs/zero-code/dotnet/configuration/#propagators)
+
+``` yaml
+propagator:
+  # Composite propagators are evaluated together. 
+  # Entries from .composite_list are appended here (duplicates are filtered out).
+  composite:
+    tracecontext: # W3C Trace Context propagator
+    baggage:      # W3C Baggage propagator
+    b3:           # B3 single-header propagator
+    b3multi:      # Zipkin B3 multi-header propagator
+  # Alternatively, configure via a comma-separated list (same format as OTEL_PROPAGATORS).
+  composite_list: ${OTEL_PROPAGATORS}
+```
+
+### Resource Configuration
+
+You can configure text map context propagators directly in YAML or via the
+`OTEL_RESOURCE_ATTRIBUTES` environment variable.
+
+``` yaml
+resource:
+# Configure resource attributes. Entries have higher priority than entries from .resource.attributes_list.
+# Entries must contain .name and .value, and may optionally include .type. If an entry's .type omitted or null, string is used.
+# The .value's type must match the .type. Values for .type include: string, bool, int, double, string_array, bool_array, int_array, double_array.
+  attributes:
+    - name: service.name
+      value: unknown_service
+      type: string
+  # Alternatively, configure via a comma-separated list (same format as OTEL_RESOURCE_ATTRIBUTES).
+  attributes_list: ${OTEL_RESOURCE_ATTRIBUTES}
+```  
+
+### Resource Detectors Configuration
+
+For more details and updates, see: [Resource Detectors list and documentation](https://opentelemetry.io/docs/zero-code/dotnet/configuration/#resource-detectors)
+
+``` yaml
+resource:
+  detection/development:
+    detectors:
+      azureappservice: # Detects Azure App Service resource information
+      container:       # Detects container resource info (container.* attributes) [Core only]
+      host:            # Detects host resource info (host.* attributes)
+      operatingsystem: # Detects OS-level attributes (os.*)
+      process:         # Detects process-level attributes (process.*)
+      processruntime:  # Detects process runtime attributes (process.runtime.*)
+      service:         # Detects service.name and service.instance.id
+```
+
+### Tracer Provider Configuration
+
+``` yaml
+tracer_provider:
+  processors:
+    # Configure a batch span processor.      
+    batch:
+      # Configure delay interval (in milliseconds) between two consecutive exports. 
+      # Value must be non-negative.
+      # If omitted or null, 5000 is used.
+      schedule_delay: 5000
+      # Configure maximum allowed time (in milliseconds) to export data. 
+      # Value must be non-negative. A value of 0 indicates no limit (infinity).
+      # If omitted or null, 30000 is used.
+      export_timeout: 30000
+      # Configure maximum queue size. Value must be positive.
+      # If omitted or null, 2048 is used.
+      max_queue_size: 2048
+      # Configure maximum batch size. Value must be positive.
+      # If omitted or null, 512 is used.
+      max_export_batch_size: 512
+      # Configure exporters.
+      exporter:
+        # Configure the OTLP with HTTP transport exporter to enable it.
+        otlp_http:
+          # Configure endpoint, including the trace specific path.
+          # If omitted or null, http://localhost:4318/v1/traces is used
+          endpoint: http://localhost:4318/v1/traces
+          # Configure max time (in milliseconds) to wait for each export. 
+          # Value must be non-negative. A value of 0 indicates no limit (infinity).
+          # If omitted or null, 10000 is used.
+          timeout: 10000
+          # Configure headers. Entries have higher priority than entries from .headers_list.
+          # If an entry's .value is null, the entry is ignored.
+          headers:
+            - name: api-key
+            value: "1234"
+          # Configure headers. Entries have lower priority than entries from .headers.
+          # The value is a list of comma separated key-value pairs matching the format of OTEL_EXPORTER_OTLP_HEADERS. See https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/protocol/exporter.md#configuration-options for details.
+          # If omitted or null, no headers are added.
+          headers_list: ${OTEL_EXPORTER_OTLP_TRACES_HEADERS}
+        # Configure the OTLP with gRPC transport exporter to enable it.
+        otlp_grpc:
+          # Configuration otlp_grpc is the same as otlp_http.
+          # if otlp_http is used it will override otlp_grpc.
+          # On .NET Framework, the grpc OTLP exporter protocol is not supported.
+        # Configure the zipkin exporter to enable it.
+        zipkin:
+          # Configure endpoint.
+          # If omitted or null, http://localhost:9411/api/v2/spans is used.
+          endpoint: http://localhost:9411/api/v2/spans
+          # Configure max time (in milliseconds) to wait for each export. 
+          # Value must be non-negative. A value of 0 indicates indefinite.
+          # If omitted or null, 10000 is used.
+          timeout: 10000
+        # Add the console exporter to enable it.
+        console:
+```
+
+### Logger Provider Configuration
+
+``` yaml
+logger_provider:
+  processors:
+    # Configure a batch span processor.      
+    batch:
+      # Configure delay interval (in milliseconds) between two consecutive exports. 
+      # Value must be non-negative.
+      # If omitted or null, 5000 is used.
+      schedule_delay: 5000
+      # Configure maximum allowed time (in milliseconds) to export data. 
+      # Value must be non-negative. A value of 0 indicates no limit (infinity).
+      # If omitted or null, 30000 is used.
+      export_timeout: 30000
+      # Configure maximum queue size. Value must be positive.
+      # If omitted or null, 2048 is used.
+      max_queue_size: 2048
+      # Configure maximum batch size. Value must be positive.
+      # If omitted or null, 512 is used.
+      max_export_batch_size: 512
+      # Configure exporters.
+      exporter:
+        # Configure the OTLP with HTTP transport exporter to enable it.
+        otlp_http:
+          # Configure endpoint, including the trace specific path.
+          # If omitted or null, http://localhost:4318/v1/logs is used
+          endpoint: http://localhost:4318/v1/logs
+          # Configure max time (in milliseconds) to wait for each export. 
+          # Value must be non-negative. A value of 0 indicates no limit (infinity).
+          # If omitted or null, 10000 is used.
+          timeout: 10000
+          # Configure headers. Entries have higher priority than entries from .headers_list.
+          # If an entry's .value is null, the entry is ignored.
+          headers:
+            - name: api-key
+            value: "1234"
+          # Configure headers. Entries have lower priority than entries from .headers.
+          # The value is a list of comma separated key-value pairs matching the format of OTEL_EXPORTER_OTLP_HEADERS. See https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/protocol/exporter.md#configuration-options for details.
+          # If omitted or null, no headers are added.
+          headers_list: ${OTEL_EXPORTER_OTLP_LOGS_HEADERS}
+        # Configure the OTLP with gRPC transport exporter to enable it.
+        otlp_grpc:
+          # Configuration otlp_grpc is the same as otlp_http.
+          # if otlp_http is used it will override otlp_grpc.
+          # On .NET Framework, the grpc OTLP exporter protocol is not supported.
+        # Add the console exporter to enable it.
+        console:
+```
+
+### Meter Provider Configuration
+
+``` yaml
+meter_provider:
+  readers:
+    # Configure a periodic metric reader.
+    periodic:
+      # Configure delay interval (in milliseconds) between start of two consecutive exports.
+      # Value must be non-negative.
+      # If omitted or null, 60000 is used.
+      interval: 60000
+      # Configure maximum allowed time (in milliseconds) to export data.
+      # Value must be non-negative. A value of 0 indicates no limit (infinity).
+      # If omitted or null, 30000 is used.
+      timeout: 30000
+      # Configure exporters.
+      exporter:
+      # Configure the OTLP with HTTP transport exporter to enable it.
+        otlp_http:
+        # Configure endpoint, including the trace specific path.
+        # If omitted or null, http://localhost:4318/v1/metrics is used
+        endpoint: http://localhost:4318/v1/metrics
+        # Configure max time (in milliseconds) to wait for each export. 
+        # Value must be non-negative. A value of 0 indicates no limit (infinity).
+        # If omitted or null, 10000 is used.
+        timeout: 10000
+        # Configure headers. Entries have higher priority than entries from .headers_list.
+        # If an entry's .value is null, the entry is ignored.
+        headers:
+          - name: api-key
+          value: "1234"
+        # Configure headers. Entries have lower priority than entries from .headers.
+        # The value is a list of comma separated key-value pairs matching the format of OTEL_EXPORTER_OTLP_HEADERS. See https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/protocol/exporter.md#configuration-options for details.
+        # If omitted or null, no headers are added.
+        headers_list: ${OTEL_EXPORTER_OTLP_METRICS_HEADERS}
+        # Configure the OTLP with gRPC transport exporter to enable it.
+        otlp_grpc:
+          # Configuration otlp_grpc is the same as otlp_http.
+          # if otlp_http is used it will override otlp_grpc.
+          # On .NET Framework, the grpc OTLP exporter protocol is not supported.
+          # Add the console exporter to enable it.
+        console:
+        # Configure a pull based metric reader.
+    pull:
+      exporter:
+        # Add the prometheus exporter to enable it.
+        # Do NOT use in production.
+        # Prometheus exporter is intended for the inner dev loop. Production environments can use a combination of OTLP exporter with OpenTelemetry Collector having otlp receiver and prometheus exporter.
+        prometheus:       
+```
+
+### Instrumentation Configuration
+
+You can configure traces, metrics, and logs instrumentations.
+For more details and updates, see: [Instrumentation list and documentation](https://opentelemetry.io/docs/zero-code/dotnet/instrumentations/)
+
+``` yaml
+instrumentation/development:
+  dotnet:
+    traces:
+      aspnet:              # ASP.NET (.NET Framework) MVC/WebApi [Framework only]
+      aspnetcore:          # ASP.NET Core [Core only]
+      azure:               # Azure SDK [Core & Framework]
+      elasticsearch:       # Elastic.Clients.Elasticsearch [Core & Framework]
+      elastictransport:    # Elastic.Transport (>=0.4.16) [Core & Framework]
+      entityframeworkcore: # Entity Framework Core (>=6.0.12) [Core only]
+      graphql:             # GraphQL (>=7.5.0) [Core only]
+      grpcnetclient:       # Grpc.Net.Client (>=2.52.0 & <3.0.0) [Core only]
+      httpclient:          # System.Net.Http.HttpClient [Core & Framework]
+      kafka:               # Confluent.Kafka (>=1.4.0 & <3.0.0) [Core & Framework]
+      masstransit:         # MassTransit (>=8.0.0) [Core only]
+      mongodb:             # MongoDB.Driver (>=2.7.0 <4.0.0) [Core & Framework]
+      mysqlconnector:      # MySqlConnector (>=2.0.0) [Core only]
+      mysqldata:           # MySql.Data (>=8.1.0) [Core only]
+      npgsql:              # Npgsql (>=6.0.0) [Core only]
+      nservicebus:         # NServiceBus (>=8.0.0 & <10.0.0) [Core & Framework]
+      oraclemda:           # Oracle.ManagedDataAccess (>=23.4.0) [Core only]
+      rabbitmq:            # RabbitMQ.Client (>=6.0.0) [Core & Framework]
+      quartz:              # Quartz (>=3.4.0, not supported < .NET Framework 4.7.2)
+      sqlclient:           # Microsoft.Data.SqlClient & System.Data.SqlClient [Core & Framework]
+      stackexchangeredis:  # StackExchange.Redis (>=2.6.122 & <3.0.0) [Core only]
+      wcfclient:           # WCF Client [Core & Framework]
+      wcfservice:          # WCF Service [Framework only]
+    metrics:
+      aspnetcore:          # ASP.NET Core metrics [Core only]
+      httpclient:          # HttpClient metrics [Core & Framework]
+      netruntime:          # .NET Runtime metrics [Core only]
+      nservicebus:         # NServiceBus metrics [Core & Framework]
+      process:             # Process metrics [Core & Framework]
+      sqlclient:           # SQL Client metrics [Core & Framework]
+    logs:
+      ilogger:             # Microsoft.Extensions.Logging (>=9.0.0) [Core & Framework]
+      log4net:             # log4net (>=2.0.13 && <4.0.0) [Core & Framework]
+```
+
+### Instrumentation options
+
+You can configure directly in YAML or via environment variables.
+
+``` yaml
+instrumentation/development:
+  dotnet:
+    traces:
+      entityframeworkcore:
+        # Whether the Entity Framework Core instrumentation can pass SQL statements through the db.statement attribute. Queries might contain sensitive information. If set to false, db.statement is recorded only for executing stored procedures.
+        # Default is false
+        set_db_statement_for_text: false
+      graphql:
+        # Whether the GraphQL instrumentation can pass raw queries through the graphql.document attribute. Queries might contain sensitive information.
+        # Default is false
+        set_document: false
+      oraclemda: 
+        # Whether the Oracle Client instrumentation can pass SQL statements through the db.statement attribute. Queries might contain sensitive information. If set to false, db.statement is recorded only for executing stored procedures.
+        # Default is false
+        set_db_statement_for_text: false
+      sqlclient:
+        # Whether the SQL Client instrumentation can pass SQL statements through the db.statement attribute. Queries might contain sensitive information. If set to false, db.statement is recorded only for executing stored procedures. 
+        # Not supported on .NET Framework for System.Data.SqlClient.
+        # Default is false
+        set_db_statement_for_text: false
+      aspnet:
+        # A comma-separated list of HTTP header names. ASP.NET instrumentations will capture HTTP request header values for all configured header names.
+        capture_request_headers: "X-Key=Value"
+        # A comma-separated list of HTTP header names. ASP.NET instrumentations will capture HTTP response header values for all configured header names.
+        capture_response_headers: "X-Key=Value"
+      aspnetcore:
+        # A comma-separated list of HTTP header names. ASP.NET Core instrumentations will capture HTTP request header values for all configured header names.
+        capture_request_headers: "X-Key=Value"
+        # A comma-separated list of HTTP header names. ASP.NET Core instrumentations will capture HTTP response header values for all configured header names.
+        capture_response_headers: "X-Key=Value"
+      httpclient:
+        # A comma-separated list of HTTP header names. HTTP Client instrumentations will capture HTTP request header values for all configured header names.
+        capture_request_headers: "X-Key=Value"
+        # A comma-separated list of HTTP header names. HTTP Client instrumentations will capture HTTP response header values for all configured header names.
+        capture_response_headers: "X-Key=Value"
+      grpcnetclient:
+        # A comma-separated list of gRPC metadata names. Grpc.Net.Client instrumentations will capture gRPC request metadata values for all configured metadata names.
+        capture_request_metadata: "X-Key=Value"
+        # A comma-separated list of gRPC metadata names. Grpc.Net.Client instrumentations will capture gRPC response metadata values for all configured metadata names.
+        capture_response_metadata: "X-Key=Value"
+```
