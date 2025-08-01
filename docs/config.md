@@ -69,7 +69,7 @@ with environment variables taking precedence over `App.config` or `Web.config` f
     ```
 
     In your config file you can use environment variables in format: ${ENVIRONMENT_VARIABLE}
-    insted of "value"
+    instead of "value"
 
     See [configuration examples](#configuration-examples)
 
