@@ -165,7 +165,7 @@ public class ParserTests
         string[] expectedMetrics =
         [
             "aspnet", "httpclient", "netruntime",
-                "nservicebus", "process", "sqlclient"
+            "nservicebus", "process", "sqlclient"
         ];
 #endif
 
