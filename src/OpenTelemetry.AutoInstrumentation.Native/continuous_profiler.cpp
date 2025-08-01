@@ -661,7 +661,6 @@ FunctionIdentifier NamingHelper::Lookup(const FunctionID functionId, const COR_P
     return resolvedIdentifier;
 }
 
-
 // This is slightly messy since we an only pass one parameter to the FrameCallback
 // but we have some slightly different use cases (but want to use the same stack capture
 // code for allocations and paused thread samples)
@@ -725,7 +724,8 @@ static void CaptureFunctionIdentifiersForThreads(
     for (auto threadId : selectedThreads)
     {
         DoStackSnapshotParams doStackSnapshotParams(prof, &threadStacksBuffer[threadId]);
-        HRESULT               snapshotHr = info12->DoStackSnapshot(threadId, &FrameCallback, COR_PRF_SNAPSHOT_DEFAULT, &doStackSnapshotParams, nullptr, 0);
+        HRESULT               snapshotHr = info12->DoStackSnapshot(threadId, &FrameCallback, COR_PRF_SNAPSHOT_DEFAULT,
+                                                                   &doStackSnapshotParams, nullptr, 0);
         if (FAILED(snapshotHr))
         {
             trace::Logger::Debug("DoStackSnapshot failed. HRESULT=0x", std::setfill('0'), std::setw(8), std::hex,
@@ -770,8 +770,8 @@ static void ResolveFrames(ContinuousProfiler*                    prof,
 static ThreadState* GetThreadState(const std::unordered_map<ThreadID, ThreadState*>& managed_tid_to_state_,
                                    ThreadID                                          thread_id)
 {
-    static ThreadState  UnknownThreadState;
-    auto                found = managed_tid_to_state_.find(thread_id);
+    static ThreadState UnknownThreadState;
+    auto               found = managed_tid_to_state_.find(thread_id);
 
     const bool threadStateValid = found != managed_tid_to_state_.end() && found->second != nullptr;
 
@@ -812,7 +812,8 @@ static void ResolveSymbolsAndPublishBufferForAllThreads(
     prof->PublishBuffer();
 }
 
-static void ResolveSymbolsAndPublishBufferForSelectedThreads(ContinuousProfiler* prof, const std::unordered_map<ThreadID, std::vector<FunctionIdentifier>>& threadStacks)
+static void ResolveSymbolsAndPublishBufferForSelectedThreads(
+    ContinuousProfiler* prof, const std::unordered_map<ThreadID, std::vector<FunctionIdentifier>>& threadStacks)
 {
     std::vector<unsigned char> localBytes;
     ThreadSamplesBuffer        localBuf(&localBytes);
@@ -838,9 +839,9 @@ static void ResolveSymbolsAndPublishBufferForSelectedThreads(ContinuousProfiler*
     AppendToSelectedThreadsSampleBuffer(static_cast<int32_t>(localBytes.size()), localBytes.data());
 }
 
-static void PauseClrAndCaptureSamples(ContinuousProfiler* prof,
-                                      ICorProfilerInfo12* info12,
-                                      const SamplingType samplingType,
+static void PauseClrAndCaptureSamples(ContinuousProfiler*                                            prof,
+                                      ICorProfilerInfo12*                                            info12,
+                                      const SamplingType                                             samplingType,
                                       std::unordered_map<ThreadID, std::vector<FunctionIdentifier>>& threadStacksBuffer)
 {
     // before trying to suspend the runtime, acquire exclusive lock
@@ -1068,12 +1069,11 @@ constexpr auto EtwPointerSize                         = sizeof(void*);
 constexpr auto AllocationTickV4TypeNameStartByteIndex = 4 + 4 + 2 + 8 + EtwPointerSize;
 constexpr auto AllocationTickV4SizeWithoutTypeName    = 4 + 4 + 2 + 8 + EtwPointerSize + 4 + EtwPointerSize + 8;
 
-
 static void CaptureAllocationStack(ContinuousProfiler* prof, std::vector<FunctionIdentifier>& threadStack)
 {
     DoStackSnapshotParams doStackSnapshotParams(prof, &threadStack);
-    HRESULT hr = prof->info12->DoStackSnapshot((ThreadID)NULL, &FrameCallback, COR_PRF_SNAPSHOT_DEFAULT,
-                                               &doStackSnapshotParams, nullptr, 0);
+    HRESULT               hr = prof->info12->DoStackSnapshot((ThreadID)NULL, &FrameCallback, COR_PRF_SNAPSHOT_DEFAULT,
+                                                             &doStackSnapshotParams, nullptr, 0);
     if (FAILED(hr))
     {
         trace::Logger::Debug("DoStackSnapshot failed. HRESULT=0x", std::setfill('0'), std::setw(8), std::hex, hr);
