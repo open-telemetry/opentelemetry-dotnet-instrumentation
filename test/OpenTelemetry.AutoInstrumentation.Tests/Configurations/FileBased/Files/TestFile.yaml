@@ -1,6 +1,7 @@
 file_format: "0.4"
 disabled: false
 log_level: info
+fail_fast: true
 attribute_limits:
   attribute_value_length_limit: 4096
   attribute_count_limit: 128

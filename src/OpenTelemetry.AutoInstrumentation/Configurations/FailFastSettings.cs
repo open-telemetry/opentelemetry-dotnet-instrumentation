@@ -16,5 +16,6 @@ internal class FailFastSettings : Settings
 
     protected override void OnLoadFile(Conf configuration)
     {
+        FailFast = configuration.FailFast;
     }
 }
