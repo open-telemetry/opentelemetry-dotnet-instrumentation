@@ -12,6 +12,8 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 - Support for [`Npgsql`](https://www.nuget.org/packages/Npgsql/)
   metrics instrumentation for versions `6.0.0`+.
 
+- Support for [Declarative configuration](https://opentelemetry.io/docs/specs/otel/configuration/#declarative-configuration)
+
 ### Changed
 
 - `otel-dotnet-auto-install.sh` now optionally uses `wget` instead of `curl`,
