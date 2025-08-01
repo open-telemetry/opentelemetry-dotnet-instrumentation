@@ -20,7 +20,6 @@ internal abstract class Settings
         {
             var configFile = Environment.GetEnvironmentVariable("OTEL_EXPERIMENTAL_CONFIG_FILE") ?? "config.yaml";
             var config = Parser.ParseYaml(configFile);
-            Console.WriteLine("Parsed YAML configuration.");
             var settings = new T();
             settings.LoadFile(config);
             return settings;
