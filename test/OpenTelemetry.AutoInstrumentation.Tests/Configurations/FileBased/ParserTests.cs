@@ -21,6 +21,7 @@ public class ParserTests
         Assert.Equal("0.4", config.FileFormat);
         Assert.False(config.Disabled);
         Assert.Equal("info", config.LogLevel);
+        Assert.True(config.FailFast);
 
         Assert.NotNull(config.AttributeLimits);
         Assert.Equal(4096, config.AttributeLimits.AttributeValueLengthLimit);

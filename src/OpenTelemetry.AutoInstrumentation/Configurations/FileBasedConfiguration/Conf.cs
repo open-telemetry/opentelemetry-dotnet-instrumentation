@@ -30,6 +30,13 @@ internal class Conf
     public string LogLevel { get; set; } = "info";
 
     /// <summary>
+    /// Gets or sets a value indicating whether the Fail Fast is enabled.
+    /// If omitted or null, false is used.
+    /// </summary>
+    [YamlMember(Alias = "fail_fast")]
+    public bool FailFast { get; set; } = false;
+
+    /// <summary>
     /// Gets or sets the attribute limits.
     /// </summary>
     [YamlMember(Alias = "attribute_limits")]

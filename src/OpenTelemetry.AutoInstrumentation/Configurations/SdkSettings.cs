@@ -88,7 +88,7 @@ internal class SdkSettings : Settings
                     var unsupportedMessage = $"Propagator '{propagatorName}' is not supported.";
                     Logger.Error(unsupportedMessage);
 
-                    if (string.Equals(configuration.LogLevel, "fail_fast", StringComparison.OrdinalIgnoreCase))
+                    if (configuration.FailFast == true)
                     {
                         throw new NotSupportedException(unsupportedMessage);
                     }
