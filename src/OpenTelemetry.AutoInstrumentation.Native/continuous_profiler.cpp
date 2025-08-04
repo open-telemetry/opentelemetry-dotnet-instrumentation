@@ -934,7 +934,7 @@ static void PauseClrAndCaptureSamples(ContinuousProfiler*                       
         return;
     }
 
-    prof->stats_.num_threads      = static_cast<int>(size);
+    prof->stats_.num_threads = static_cast<int>(size);
 
     if (samplingType == SamplingType::Continuous)
     {
@@ -971,7 +971,8 @@ static unsigned int GetSleepTime(const ContinuousProfiler* const prof)
     return 0;
 }
 
-static void ReserveCapacity(ContinuousProfiler* const prof, std::unordered_map<ThreadID, std::vector<FunctionIdentifier>>& threadStacksBuffer)
+static void ReserveCapacity(ContinuousProfiler* const                                      prof,
+                            std::unordered_map<ThreadID, std::vector<FunctionIdentifier>>& threadStacksBuffer)
 {
     threadStacksBuffer.reserve(50);
     std::lock_guard<std::mutex> thread_state_guard(prof->thread_state_lock_);
@@ -981,7 +982,8 @@ static void ReserveCapacity(ContinuousProfiler* const prof, std::unordered_map<T
     }
 }
 
-static std::chrono::steady_clock::time_point GetNextRefreshTime(const std::chrono::time_point<std::chrono::steady_clock> now)
+static std::chrono::steady_clock::time_point GetNextRefreshTime(
+    const std::chrono::time_point<std::chrono::steady_clock> now)
 {
     return now + std::chrono::minutes(5);
 }
@@ -1003,7 +1005,7 @@ DWORD WINAPI SamplingThreadMain(_In_ LPVOID param)
     ReserveCapacity(prof, threadStacksBuffer);
 
     const auto startTime = std::chrono::steady_clock::now();
-    auto next_refresh = GetNextRefreshTime(startTime);
+    auto       next_refresh = GetNextRefreshTime(startTime);
 
     while (true)
     {
