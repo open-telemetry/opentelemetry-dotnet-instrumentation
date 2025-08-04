@@ -1004,7 +1004,7 @@ DWORD WINAPI SamplingThreadMain(_In_ LPVOID param)
     unsigned int                                                  iteration = 0;
     ReserveCapacity(prof, threadStacksBuffer);
 
-    const auto startTime = std::chrono::steady_clock::now();
+    const auto startTime    = std::chrono::steady_clock::now();
     auto       next_refresh = GetNextRefreshTime(startTime);
 
     while (true)
