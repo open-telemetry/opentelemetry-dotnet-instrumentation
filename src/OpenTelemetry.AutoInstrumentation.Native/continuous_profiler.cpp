@@ -33,8 +33,8 @@ constexpr auto kDefaultMaxAllocsPerMinute = 200;
 // FIXME make configurable (hidden)?
 // These numbers were chosen to keep total overhead under 1 MB of RAM in typical cases (name lengths being the biggest
 // variable)
-constexpr auto kMaxFunctionNameCacheSize         = 5000;
-constexpr auto kMaxVolatileFunctionNameCacheSize = 2000;
+constexpr auto kMaxFunctionNameCacheSize            = 5000;
+constexpr auto kVolatileFunctionIdentifierCacheSize = 2000;
 
 // If you squint you can make out that the original bones of this came from sample code provided by the dotnet project:
 // https://github.com/dotnet/samples/blob/2cf486af936261b04a438ea44779cdc26c613f98/core/profiling/stacksampling/src/sampler.cpp
@@ -152,7 +152,7 @@ int32_t ThreadSamplingConsumeOneThreadSample(int32_t len, unsigned char* buf)
     return static_cast<int32_t>(to_use_len);
 }
 
-void AppendToSelectedThreadsSampleBuffer(int32_t appendLen, unsigned char* appendBuf)
+static void AppendToSelectedThreadsSampleBuffer(int32_t appendLen, unsigned char* appendBuf)
 {
     if (appendLen <= 0 || appendBuf == nullptr)
     {
@@ -185,7 +185,7 @@ void AllocationSamplingAppendToBuffer(int32_t appendLen, unsigned char* appendBu
 }
 
 // Can return 0
-int32_t AllocationSamplingConsumeAndReplaceBuffer(int32_t len, unsigned char* buf)
+static int32_t AllocationSamplingConsumeAndReplaceBuffer(int32_t len, unsigned char* buf)
 {
     if (len <= 0 || buf == nullptr)
     {
@@ -273,7 +273,9 @@ constexpr auto kSelectedThreadsEndBatch   = 0x0B;
 
 constexpr auto kCurrentThreadSamplesBufferVersion = 1;
 
-continuous_profiler::ThreadSamplesBuffer::ThreadSamplesBuffer(std::vector<unsigned char>* buf) : buffer_(buf) {}
+constexpr FunctionIdentifier DefaultFunctionIdentifier = {0, 0, false};
+
+ThreadSamplesBuffer::ThreadSamplesBuffer(std::vector<unsigned char>* buf) : buffer_(buf) {}
 ThreadSamplesBuffer::~ThreadSamplesBuffer()
 {
     buffer_ = nullptr; // specifically don't delete as this is done by RecordProduced/ConsumeOneThreadSample
@@ -358,7 +360,7 @@ void ThreadSamplesBuffer::AllocationSample(uint64_t                   allocSize,
     WriteUInt64(span_context.span_id_);
 }
 
-void ThreadSamplesBuffer::RecordFrame(FunctionID fid, const trace::WSTRING& frame)
+void ThreadSamplesBuffer::RecordFrame(const FunctionIdentifier& fid, const trace::WSTRING& frame)
 {
     CHECK_SAMPLES_BUFFER_LENGTH()
     WriteCodedFrameString(fid, frame);
@@ -383,7 +385,7 @@ void ThreadSamplesBuffer::WriteFinalStats(const SamplingStatistics& stats) const
     WriteInt(stats.name_cache_misses);
 }
 
-void ThreadSamplesBuffer::WriteCodedFrameString(FunctionID fid, const trace::WSTRING& str)
+void ThreadSamplesBuffer::WriteCodedFrameString(const FunctionIdentifier& fid, const trace::WSTRING& str)
 {
     const auto found = codes_.find(fid);
     if (found != codes_.end())
@@ -455,23 +457,15 @@ void ThreadSamplesBuffer::WriteCurrentTimeMillis() const
 
 NamingHelper::NamingHelper()
     : function_name_cache_(kMaxFunctionNameCacheSize, nullptr)
-    , volatile_function_name_cache_(kMaxVolatileFunctionNameCacheSize,
-                                    std::pair<trace::WSTRING*, FunctionIdentifier>(nullptr, {}))
+    , function_identifier_cache_(kVolatileFunctionIdentifierCacheSize, DefaultFunctionIdentifier)
 {
 }
 
-bool ContinuousProfiler::AllocateBuffer()
+void ContinuousProfiler::AllocateBuffer()
 {
-    const bool should = ThreadSamplingShouldProduceThreadSample();
-    if (!should)
-    {
-        return should;
-    }
-    stats_     = SamplingStatistics();
     auto bytes = new std::vector<unsigned char>();
     bytes->reserve(kSamplesBufferDefaultSize);
     cur_cpu_writer_ = new ThreadSamplesBuffer(bytes);
-    return should;
 }
 
 void ContinuousProfiler::PublishBuffer()
@@ -480,6 +474,11 @@ void ContinuousProfiler::PublishBuffer()
     delete cur_cpu_writer_;
     cur_cpu_writer_ = nullptr;
     stats_          = SamplingStatistics();
+}
+
+void NamingHelper::ClearFunctionIdentifierCache()
+{
+    function_identifier_cache_.Clear();
 }
 
 [[nodiscard]] FunctionIdentifier NamingHelper::GetFunctionIdentifier(const FunctionID         func_id,
@@ -506,7 +505,7 @@ void ContinuousProfiler::PublishBuffer()
     return FunctionIdentifier{function_token, module_id, true};
 }
 
-void NamingHelper::GetFunctionName(FunctionIdentifier function_identifier, trace::WSTRING& result)
+void NamingHelper::GetFunctionName(FunctionIdentifier function_identifier, trace::WSTRING& result) const
 {
     constexpr auto unknown_list_of_arguments = WStr("(unknown)");
     constexpr auto unknown_function_name     = WStr("Unknown(unknown)");
@@ -632,26 +631,11 @@ void NamingHelper::GetFunctionName(FunctionIdentifier function_identifier, trace
     }
 }
 
-trace::WSTRING* NamingHelper::Lookup(FunctionID fid, COR_PRF_FRAME_INFO frame, SamplingStatistics& stats)
+trace::WSTRING* NamingHelper::Lookup(const FunctionIdentifier& function_identifier, SamplingStatistics& stats)
 {
-    // This method is using two layers of caching
-    // 1st layer depends on FunctionID which is volatile (and valid only within one thread suspension)
-    // 2nd layer depends on mdToken for function (which is stable) and ModuleId which could be volatile,
-    // but the pair should be stable enough to avoid any overlaps.
-
-    const std::pair<trace::WSTRING*, FunctionIdentifier> volatile_answer = volatile_function_name_cache_.Get(fid);
-    if (volatile_answer.first != nullptr)
-    {
-        function_name_cache_.Refresh(volatile_answer.second);
-        return volatile_answer.first;
-    }
-
-    const auto function_identifier = this->GetFunctionIdentifier(fid, frame);
-
     trace::WSTRING* answer = function_name_cache_.Get(function_identifier);
     if (answer != nullptr)
     {
-        volatile_function_name_cache_.Put(fid, std::pair(answer, function_identifier));
         return answer;
     }
     stats.name_cache_misses++;
@@ -661,8 +645,20 @@ trace::WSTRING* NamingHelper::Lookup(FunctionID fid, COR_PRF_FRAME_INFO frame, S
     const auto old_value = function_name_cache_.Put(function_identifier, answer);
     delete old_value;
 
-    volatile_function_name_cache_.Put(fid, std::pair(answer, function_identifier));
     return answer;
+}
+
+FunctionIdentifier NamingHelper::Lookup(const FunctionID functionId, const COR_PRF_FRAME_INFO frameInfo)
+{
+    const FunctionIdentifierResolveArgs cacheKey         = {functionId, frameInfo};
+    const auto                          cachedIdentifier = function_identifier_cache_.Get(cacheKey);
+    if (cachedIdentifier.is_valid)
+    {
+        return cachedIdentifier;
+    }
+    const auto resolvedIdentifier = this->GetFunctionIdentifier(cacheKey.function_id, cacheKey.frame_info);
+    function_identifier_cache_.Put(cacheKey, resolvedIdentifier);
+    return resolvedIdentifier;
 }
 
 // This is slightly messy since we an only pass one parameter to the FrameCallback
@@ -670,40 +666,46 @@ trace::WSTRING* NamingHelper::Lookup(FunctionID fid, COR_PRF_FRAME_INFO frame, S
 // code for allocations and paused thread samples)
 struct DoStackSnapshotParams
 {
-    ContinuousProfiler*  prof;
-    ThreadSamplesBuffer* buffer;
-    DoStackSnapshotParams(ContinuousProfiler* p, ThreadSamplesBuffer* b) : prof(p), buffer(b) {}
+    ContinuousProfiler*              prof;
+    std::vector<FunctionIdentifier>* buffer;
+    DoStackSnapshotParams(ContinuousProfiler* p, std::vector<FunctionIdentifier>* b) : prof(p), buffer(b) {}
 };
 
-HRESULT __stdcall FrameCallback(_In_ FunctionID         func_id,
-                                _In_ UINT_PTR           ip,
-                                _In_ COR_PRF_FRAME_INFO frame_info,
-                                _In_ ULONG32            context_size,
-                                _In_ BYTE               context[],
-                                _In_ void*              client_data)
+static HRESULT __stdcall FrameCallback(_In_ FunctionID         func_id,
+                                       _In_ UINT_PTR           ip,
+                                       _In_ COR_PRF_FRAME_INFO frame_info,
+                                       _In_ ULONG32            context_size,
+                                       _In_ BYTE               context[],
+                                       _In_ void*              client_data)
 {
+
     const auto params = static_cast<DoStackSnapshotParams*>(client_data);
     params->prof->stats_.total_frames++;
-    const trace::WSTRING* name = params->prof->helper.Lookup(func_id, frame_info, params->prof->stats_);
-    // This is where line numbers could be calculated
-    params->buffer->RecordFrame(func_id, *name);
+
+    const auto identifier = params->prof->helper.Lookup(func_id, frame_info);
+    params->buffer->push_back(identifier);
+
     return S_OK;
 }
 
-[[nodiscard]] SamplingType ContinuousProfiler::GetNextSamplingType() const
+[[nodiscard]] static SamplingType GetNextSamplingType(const ContinuousProfiler* prof, const unsigned int iteration)
 {
-    if (!selectedThreadsSamplingInterval.has_value())
+    if (!prof->selectedThreadsSamplingInterval.has_value())
     {
         return SamplingType::Continuous;
     }
 
-    if (!threadSamplingInterval.has_value())
+    if (!prof->threadSamplingInterval.has_value())
     {
         return SamplingType::SelectedThreads;
     }
 
     // If both enabled, depends on iteration.
-    const unsigned ratio = threadSamplingInterval.value() / selectedThreadsSamplingInterval.value();
+    // Every nth iteration is a sampling of all the threads.
+    // N is a ratio of standard (continuos) sampling interval and selective sampling interval.
+    // Selective sampling is expected to be much more frequent, e.g. every 20ms compared to 10s for continuous
+    // profiling.
+    const unsigned ratio = prof->threadSamplingInterval.value() / prof->selectedThreadsSamplingInterval.value();
     if (iteration != ratio)
     {
         return SamplingType::SelectedThreads;
@@ -712,116 +714,135 @@ HRESULT __stdcall FrameCallback(_In_ FunctionID         func_id,
     return SamplingType::Continuous;
 }
 
-// Factored out from the loop to a separate function for easier auditing and control of the thread state lock
-void CaptureAllThreadSamples(ContinuousProfiler* prof, ICorProfilerInfo12* info12)
+static void CaptureFunctionIdentifiersForThreads(
+    ContinuousProfiler*                                            prof,
+    ICorProfilerInfo12*                                            info12,
+    const std::unordered_set<ThreadID>&                            selectedThreads,
+    std::unordered_map<ThreadID, std::vector<FunctionIdentifier>>& threadStacksBuffer)
 {
-    const auto start = std::chrono::steady_clock::now();
+    prof->helper.ClearFunctionIdentifierCache();
+    for (auto threadId : selectedThreads)
+    {
+        DoStackSnapshotParams doStackSnapshotParams(prof, &threadStacksBuffer[threadId]);
+        HRESULT               snapshotHr = info12->DoStackSnapshot(threadId, &FrameCallback, COR_PRF_SNAPSHOT_DEFAULT,
+                                                                   &doStackSnapshotParams, nullptr, 0);
+        if (FAILED(snapshotHr))
+        {
+            trace::Logger::Debug("DoStackSnapshot failed. HRESULT=0x", std::setfill('0'), std::setw(8), std::hex,
+                                 snapshotHr);
+        }
+    }
+}
 
-    DoStackSnapshotParams dssp = DoStackSnapshotParams(prof, prof->cur_cpu_writer_);
-    prof->helper.volatile_function_name_cache_.Clear();
-    prof->cur_cpu_writer_->StartBatch();
+static std::unordered_set<ThreadID> EnumerateThreads(ICorProfilerInfo12* info12)
+{
+    std::unordered_set<ThreadID> threads;
 
     ICorProfilerThreadEnum* thread_enum = nullptr;
     HRESULT                 hr          = info12->EnumThreads(&thread_enum);
     if (FAILED(hr))
     {
         trace::Logger::Debug("Could not EnumThreads. HRESULT=0x", std::setfill('0'), std::setw(8), std::hex, hr);
-        return;
+        return threads;
     }
 
     ULONG    num_returned = 0;
     ThreadID thread_id;
     while ((hr = thread_enum->Next(1, &thread_id, &num_returned)) == S_OK)
     {
-        prof->stats_.num_threads++;
-        thread_span_context spanContext = thread_span_context_map[thread_id];
-        auto                found       = prof->managed_tid_to_state_.find(thread_id);
-        if (found != prof->managed_tid_to_state_.end() && found->second != nullptr)
+        threads.insert(thread_id);
+    }
+    return threads;
+}
+
+static void ResolveFrames(ContinuousProfiler*                    prof,
+                          const std::vector<FunctionIdentifier>& threadStack,
+                          ThreadSamplesBuffer&                   buffer)
+{
+    for (auto functionIdentifier : threadStack)
+    {
+        const trace::WSTRING* name = prof->helper.Lookup(functionIdentifier, prof->stats_);
+        // This is where line numbers could be calculated
+        buffer.RecordFrame(functionIdentifier, *name);
+    }
+}
+
+static ThreadState* GetThreadState(const std::unordered_map<ThreadID, ThreadState*>& managed_tid_to_state_,
+                                   ThreadID                                          thread_id)
+{
+    static ThreadState UnknownThreadState;
+    auto               found = managed_tid_to_state_.find(thread_id);
+
+    const bool threadStateValid = found != managed_tid_to_state_.end() && found->second != nullptr;
+
+    return threadStateValid ? found->second : &UnknownThreadState;
+}
+
+static void ResolveSymbolsAndPublishBufferForAllThreads(
+    ContinuousProfiler* prof, const std::unordered_map<ThreadID, std::vector<FunctionIdentifier>>& threadStacks)
+{
+    prof->AllocateBuffer();
+
+    prof->cur_cpu_writer_->StartBatch();
+    for (const auto& [threadId, threadStack] : threadStacks)
+    {
+        if (threadStack.empty())
         {
-            prof->cur_cpu_writer_->StartSample(thread_id, found->second, spanContext);
+            continue;
         }
-        else
-        {
-            auto unknown = ThreadState();
-            prof->cur_cpu_writer_->StartSample(thread_id, &unknown, spanContext);
-        }
+        thread_span_context spanContext = thread_span_context_map[threadId];
+        const auto          threadState = GetThreadState(prof->managed_tid_to_state_, threadId);
+
+        prof->cur_cpu_writer_->StartSample(threadId, threadState, spanContext);
 
         if (prof->selectedThreadsSamplingInterval.has_value())
         {
             const auto threadSelectedForFrequentSampling =
-                selective_sampling_threads_set.find(thread_id) != selective_sampling_threads_set.end();
+                selective_sampling_threads_set.find(threadId) != selective_sampling_threads_set.end();
             prof->cur_cpu_writer_->MarkSelectedForFrequentSampling(threadSelectedForFrequentSampling);
         }
 
-        // Don't reuse the hr being used for the thread enum, especially since a failed snapshot isn't fatal
-        HRESULT snapshotHr =
-            info12->DoStackSnapshot(thread_id, &FrameCallback, COR_PRF_SNAPSHOT_DEFAULT, &dssp, nullptr, 0);
-        if (FAILED(snapshotHr))
-        {
-            trace::Logger::Debug("DoStackSnapshot failed. HRESULT=0x", std::setfill('0'), std::setw(8), std::hex,
-                                 snapshotHr);
-        }
+        ResolveFrames(prof, threadStack, *prof->cur_cpu_writer_);
         prof->cur_cpu_writer_->EndSample();
     }
-
     prof->cur_cpu_writer_->EndBatch();
-    const auto end                = std::chrono::steady_clock::now();
-    const auto elapsed_micros     = std::chrono::duration_cast<std::chrono::microseconds>(end - start).count();
-    prof->stats_.micros_suspended = static_cast<int>(elapsed_micros);
+
     prof->cur_cpu_writer_->WriteFinalStats(prof->stats_);
+
     prof->PublishBuffer();
 }
 
-void CaptureThreadSamplesForSelectedThreads(ContinuousProfiler* prof, ICorProfilerInfo12* info12)
+static void ResolveSymbolsAndPublishBufferForSelectedThreads(
+    ContinuousProfiler* prof, const std::unordered_map<ThreadID, std::vector<FunctionIdentifier>>& threadStacks)
 {
-    prof->stats_ = SamplingStatistics();
-    prof->helper.volatile_function_name_cache_.Clear();
-
     std::vector<unsigned char> localBytes;
-    auto                       localBuf = ThreadSamplesBuffer(&localBytes);
-
-    auto dssp = DoStackSnapshotParams(prof, &localBuf);
+    ThreadSamplesBuffer        localBuf(&localBytes);
 
     localBuf.StartSelectedThreadsBatch();
-    for (auto thread_id : selective_sampling_threads_set)
+    for (const auto& [threadId, threadStack] : threadStacks)
     {
-        prof->stats_.num_threads++;
-        thread_span_context spanContext = thread_span_context_map[thread_id];
-        auto                found       = prof->managed_tid_to_state_.find(thread_id);
+        if (threadStack.empty())
+        {
+            continue;
+        }
+        const auto threadState = GetThreadState(prof->managed_tid_to_state_, threadId);
 
-        if (found != prof->managed_tid_to_state_.end() && found->second != nullptr)
-        {
-            localBuf.StartSampleForSelectedThread(found->second, spanContext);
-        }
-        else
-        {
-            auto unknown = ThreadState();
-            localBuf.StartSampleForSelectedThread(&unknown, spanContext);
-        }
+        thread_span_context spanContext = thread_span_context_map[threadId];
 
-        HRESULT snapshotHr =
-            info12->DoStackSnapshot(thread_id, &FrameCallback, COR_PRF_SNAPSHOT_DEFAULT, &dssp, nullptr, 0);
-        if (FAILED(snapshotHr))
-        {
-            trace::Logger::Debug("DoStackSnapshot failed. HRESULT=0x", std::setfill('0'), std::setw(8), std::hex,
-                                 snapshotHr);
-        }
+        localBuf.StartSampleForSelectedThread(threadState, spanContext);
+        ResolveFrames(prof, threadStack, localBuf);
         localBuf.EndSample();
     }
     localBuf.EndSelectedThreadsBatch();
+
     // TODO: write out stats
     AppendToSelectedThreadsSampleBuffer(static_cast<int32_t>(localBytes.size()), localBytes.data());
 }
 
-void ResetIteration(ContinuousProfiler* prof)
-{
-    if (prof->selectedThreadsSamplingInterval.has_value() && prof->threadSamplingInterval.has_value())
-    {
-        prof->iteration = 0;
-    }
-}
-
-void PauseClrAndCaptureSamples(ContinuousProfiler* prof, ICorProfilerInfo12* info12)
+static void PauseClrAndCaptureSamples(ContinuousProfiler*                                            prof,
+                                      ICorProfilerInfo12*                                            info12,
+                                      const SamplingType                                             samplingType,
+                                      std::unordered_map<ThreadID, std::vector<FunctionIdentifier>>& threadStacksBuffer)
 {
     // before trying to suspend the runtime, acquire exclusive lock
     // it's not safe to try to suspend the runtime after other locks are acquired
@@ -839,25 +860,27 @@ void PauseClrAndCaptureSamples(ContinuousProfiler* prof, ICorProfilerInfo12* inf
     std::lock_guard<std::mutex> selective_sampling_threads_guard(selective_sampling_threads_lock);
 
     // Checks to avoid unnecessary suspends.
-    const auto samplingType = prof->GetNextSamplingType();
     if (samplingType == SamplingType::SelectedThreads && selective_sampling_threads_set.empty())
     {
         return;
     }
     if (samplingType == SamplingType::Continuous)
     {
-        ResetIteration(prof);
-        const bool shouldSample = prof->AllocateBuffer();
+        const bool shouldSample = ThreadSamplingShouldProduceThreadSample();
         if (!shouldSample)
         {
-            // TODO: change level to Debug?
             trace::Logger::Warn(
                 "Skipping a thread sample period, buffers are full. ** THIS WILL RESULT IN LOSS OF PROFILING DATA **");
             return;
         }
     }
 
+    prof->stats_ = SamplingStatistics();
+
+    const auto start = std::chrono::steady_clock::now();
+
     HRESULT hr = info12->SuspendRuntime();
+
     if (FAILED(hr))
     {
         trace::Logger::Warn("Could not suspend runtime to sample threads. HRESULT=0x", std::setfill('0'), std::setw(8),
@@ -867,13 +890,15 @@ void PauseClrAndCaptureSamples(ContinuousProfiler* prof, ICorProfilerInfo12* inf
     {
         try
         {
+
             if (samplingType == SamplingType::Continuous)
             {
-                CaptureAllThreadSamples(prof, info12);
+                auto allThreads = EnumerateThreads(info12);
+                CaptureFunctionIdentifiersForThreads(prof, info12, allThreads, threadStacksBuffer);
             }
             else if (samplingType == SamplingType::SelectedThreads)
             {
-                CaptureThreadSamplesForSelectedThreads(prof, info12);
+                CaptureFunctionIdentifiersForThreads(prof, info12, selective_sampling_threads_set, threadStacksBuffer);
             }
         }
         catch (const std::exception& e)
@@ -888,9 +913,36 @@ void PauseClrAndCaptureSamples(ContinuousProfiler* prof, ICorProfilerInfo12* inf
     // I don't have any proof but I sure hope that if suspending fails then it's still ok to ask to resume, with no
     // ill effects
     hr = info12->ResumeRuntime();
+
+    const auto end            = std::chrono::steady_clock::now();
+    const auto elapsed_micros = std::chrono::duration_cast<std::chrono::microseconds>(end - start).count();
+
+    prof->stats_.micros_suspended = static_cast<int>(elapsed_micros);
+
     if (FAILED(hr))
     {
         trace::Logger::Error("Could not resume runtime? HRESULT=0x", std::setfill('0'), std::setw(8), std::hex, hr);
+    }
+
+    const size_t size = std::count_if(threadStacksBuffer.begin(), threadStacksBuffer.end(),
+                                      [](const std::pair<const ThreadID, std::vector<FunctionIdentifier>>& v)
+                                      { return !v.second.empty(); });
+
+    // Return early if all the buckets are empty
+    if (size == 0)
+    {
+        return;
+    }
+
+    prof->stats_.num_threads = static_cast<int>(size);
+
+    if (samplingType == SamplingType::Continuous)
+    {
+        ResolveSymbolsAndPublishBufferForAllThreads(prof, threadStacksBuffer);
+    }
+    else if (samplingType == SamplingType::SelectedThreads)
+    {
+        ResolveSymbolsAndPublishBufferForSelectedThreads(prof, threadStacksBuffer);
     }
 }
 
@@ -903,7 +955,7 @@ void SleepMillis(unsigned int millis)
 #endif
 }
 
-unsigned int GetSleepTime(const ContinuousProfiler* const prof)
+static unsigned int GetSleepTime(const ContinuousProfiler* const prof)
 {
     // Assumption is continuous profiling interval is bigger and multiple of selective sampling interval.
     // If both are enabled, we need to wake every smaller interval.
@@ -919,18 +971,26 @@ unsigned int GetSleepTime(const ContinuousProfiler* const prof)
     return 0;
 }
 
-void IncrementIteration(ContinuousProfiler* const prof)
+static void ReserveCapacity(ContinuousProfiler* const                                      prof,
+                            std::unordered_map<ThreadID, std::vector<FunctionIdentifier>>& threadStacksBuffer)
 {
-    if (prof->selectedThreadsSamplingInterval.has_value() && prof->threadSamplingInterval.has_value())
+    threadStacksBuffer.reserve(50);
+    std::lock_guard<std::mutex> thread_state_guard(prof->thread_state_lock_);
+    for (auto& [threadId, _] : prof->managed_tid_to_state_)
     {
-        // Advance cycle
-        // Every nth iteration is a sampling of all the threads.
-        // N is a ratio of standard (continuos) sampling interval and selective sampling interval.
-        // Selective sampling is expected to be much more frequent, e.g. every 20ms compared to 10s for continuous
-        // profiling.
-
-        prof->iteration++;
+        threadStacksBuffer[threadId].reserve(80);
     }
+}
+
+static std::chrono::steady_clock::time_point GetNextRefreshTime(
+    const std::chrono::time_point<std::chrono::steady_clock> now)
+{
+    return now + std::chrono::minutes(5);
+}
+
+static bool ShouldTrackIterations(const ContinuousProfiler* const prof)
+{
+    return prof->selectedThreadsSamplingInterval.has_value() && prof->threadSamplingInterval.has_value();
 }
 
 DWORD WINAPI SamplingThreadMain(_In_ LPVOID param)
@@ -940,18 +1000,53 @@ DWORD WINAPI SamplingThreadMain(_In_ LPVOID param)
 
     info12->InitializeCurrentThread();
 
+    std::unordered_map<ThreadID, std::vector<FunctionIdentifier>> threadStacksBuffer;
+    unsigned int                                                  iteration = 0;
+    ReserveCapacity(prof, threadStacksBuffer);
+
+    const auto startTime    = std::chrono::steady_clock::now();
+    auto       next_refresh = GetNextRefreshTime(startTime);
+
     while (true)
     {
-        IncrementIteration(prof);
+        if (ShouldTrackIterations(prof))
+        {
+            iteration++;
+        }
+
         const unsigned int sleepTime = GetSleepTime(prof);
         if (sleepTime == 0)
         {
             trace::Logger::Warn("Unexpected sampling interval configured, exiting sampling thread.");
-            // TODO: revisit
             return 1;
         }
         SleepMillis(sleepTime);
-        PauseClrAndCaptureSamples(prof, info12);
+
+        const auto samplingType = GetNextSamplingType(prof, iteration);
+
+        if (samplingType == SamplingType::Continuous && ShouldTrackIterations(prof))
+        {
+            iteration = 0;
+        }
+
+        PauseClrAndCaptureSamples(prof, info12, samplingType, threadStacksBuffer);
+
+        const auto now = std::chrono::steady_clock::now();
+        // In order to avoid the need to recreate the vectors each iteration,
+        // for the most of the iterations, instead of clearing the map, clear only the vectors.
+        if (now > next_refresh)
+        {
+            threadStacksBuffer.clear();
+            ReserveCapacity(prof, threadStacksBuffer);
+            next_refresh = GetNextRefreshTime(now);
+        }
+        else
+        {
+            for (auto& [_, threadBuffer] : threadStacksBuffer)
+            {
+                threadBuffer.clear();
+            }
+        }
     }
 }
 
@@ -1012,14 +1107,11 @@ constexpr auto EtwPointerSize                         = sizeof(void*);
 constexpr auto AllocationTickV4TypeNameStartByteIndex = 4 + 4 + 2 + 8 + EtwPointerSize;
 constexpr auto AllocationTickV4SizeWithoutTypeName    = 4 + 4 + 2 + 8 + EtwPointerSize + 4 + EtwPointerSize + 8;
 
-void CaptureAllocationStack(ContinuousProfiler* prof, ThreadSamplesBuffer* buffer)
+static void CaptureAllocationStack(ContinuousProfiler* prof, std::vector<FunctionIdentifier>& threadStack)
 {
-    std::lock_guard<std::mutex> guard(name_cache_lock);
-    // Read explanation of volatile clearing in NamingHelper::Lookup
-    prof->helper.volatile_function_name_cache_.Clear();
-    DoStackSnapshotParams dssp = DoStackSnapshotParams(prof, buffer);
-    HRESULT               hr =
-        prof->info12->DoStackSnapshot((ThreadID)NULL, &FrameCallback, COR_PRF_SNAPSHOT_DEFAULT, &dssp, nullptr, 0);
+    DoStackSnapshotParams doStackSnapshotParams(prof, &threadStack);
+    HRESULT               hr = prof->info12->DoStackSnapshot((ThreadID)NULL, &FrameCallback, COR_PRF_SNAPSHOT_DEFAULT,
+                                                             &doStackSnapshotParams, nullptr, 0);
     if (FAILED(hr))
     {
         trace::Logger::Debug("DoStackSnapshot failed. HRESULT=0x", std::setfill('0'), std::setw(8), std::hex, hr);
@@ -1117,6 +1209,10 @@ void ContinuousProfiler::AllocationTick(ULONG dataLen, LPCBYTE data)
         trace::Logger::Debug("GetCurrentThreadId failed, ", hr);
         return;
     }
+
+    // TODO: not used at the moment, setting for consistency
+    this->stats_ = SamplingStatistics();
+
     auto unknownThreadState = ThreadState();
     auto spanCtx            = GetCurrentSpanContext(threadId);
     auto threadState        = GetCurrentThreadState(threadId);
@@ -1133,7 +1229,17 @@ void ContinuousProfiler::AllocationTick(ULONG dataLen, LPCBYTE data)
     std::vector<unsigned char> localBytes;
     ThreadSamplesBuffer        localBuf = ThreadSamplesBuffer(&localBytes);
     localBuf.AllocationSample(allocatedSize, typeName, typeNameCharLen, threadId, threadState, spanCtx);
-    CaptureAllocationStack(this, &localBuf);
+
+    std::vector<FunctionIdentifier> threadStack;
+
+    {
+        std::lock_guard<std::mutex> guard(name_cache_lock);
+        this->helper.ClearFunctionIdentifierCache();
+
+        CaptureAllocationStack(this, threadStack);
+        ResolveFrames(this, threadStack, localBuf);
+    }
+
     localBuf.EndSample();
     AllocationSamplingAppendToBuffer(static_cast<int32_t>(localBytes.size()), localBytes.data());
 }
@@ -1218,19 +1324,6 @@ TValue NameCache<TKey, TValue>::Get(TKey key)
     // (as it is now the most-recently-used)
     list_.splice(list_.begin(), list_, found->second);
     return found->second->second;
-}
-
-template <typename TKey, typename TValue>
-void NameCache<TKey, TValue>::Refresh(TKey key)
-{
-    const auto found = map_.find(key);
-    if (found == map_.end())
-    {
-        return;
-    }
-    // This voodoo moves the single item in the iterator to the front of the list
-    // (as it is now the most-recently-used)
-    list_.splice(list_.begin(), list_, found->second);
 }
 
 template <typename TKey, typename TValue>
