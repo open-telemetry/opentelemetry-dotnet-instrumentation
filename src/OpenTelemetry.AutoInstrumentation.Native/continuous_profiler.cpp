@@ -706,7 +706,7 @@ static HRESULT __stdcall FrameCallback(_In_ FunctionID         func_id,
     // Selective sampling is expected to be much more frequent, e.g. every 20ms compared to 10s for continuous
     // profiling.
     const unsigned ratio = prof->threadSamplingInterval.value() / prof->selectedThreadsSamplingInterval.value();
-    if (iteration % ratio != 0)
+    if (iteration != ratio)
     {
         return SamplingType::SelectedThreads;
     }
@@ -913,6 +913,12 @@ static void PauseClrAndCaptureSamples(ContinuousProfiler*                       
     // I don't have any proof but I sure hope that if suspending fails then it's still ok to ask to resume, with no
     // ill effects
     hr = info12->ResumeRuntime();
+
+    const auto end            = std::chrono::steady_clock::now();
+    const auto elapsed_micros = std::chrono::duration_cast<std::chrono::microseconds>(end - start).count();
+
+    prof->stats_.micros_suspended = static_cast<int>(elapsed_micros);
+
     if (FAILED(hr))
     {
         trace::Logger::Error("Could not resume runtime? HRESULT=0x", std::setfill('0'), std::setw(8), std::hex, hr);
@@ -928,10 +934,6 @@ static void PauseClrAndCaptureSamples(ContinuousProfiler*                       
         return;
     }
 
-    const auto end            = std::chrono::steady_clock::now();
-    const auto elapsed_micros = std::chrono::duration_cast<std::chrono::microseconds>(end - start).count();
-
-    prof->stats_.micros_suspended = static_cast<int>(elapsed_micros);
     prof->stats_.num_threads      = static_cast<int>(size);
 
     if (samplingType == SamplingType::Continuous)
@@ -969,6 +971,26 @@ static unsigned int GetSleepTime(const ContinuousProfiler* const prof)
     return 0;
 }
 
+static void ReserveCapacity(ContinuousProfiler* const prof, std::unordered_map<ThreadID, std::vector<FunctionIdentifier>>& threadStacksBuffer)
+{
+    threadStacksBuffer.reserve(50);
+    std::lock_guard<std::mutex> thread_state_guard(prof->thread_state_lock_);
+    for (auto& [threadId, _] : prof->managed_tid_to_state_)
+    {
+        threadStacksBuffer[threadId].reserve(80);
+    }
+}
+
+static std::chrono::steady_clock::time_point GetNextRefreshTime(const std::chrono::time_point<std::chrono::steady_clock> now)
+{
+    return now + std::chrono::minutes(5);
+}
+
+static bool ShouldTrackIterations(const ContinuousProfiler* const prof)
+{
+    return prof->selectedThreadsSamplingInterval.has_value() && prof->threadSamplingInterval.has_value();
+}
+
 DWORD WINAPI SamplingThreadMain(_In_ LPVOID param)
 {
     const auto          prof   = static_cast<ContinuousProfiler*>(param);
@@ -978,10 +1000,17 @@ DWORD WINAPI SamplingThreadMain(_In_ LPVOID param)
 
     std::unordered_map<ThreadID, std::vector<FunctionIdentifier>> threadStacksBuffer;
     unsigned int                                                  iteration = 0;
+    ReserveCapacity(prof, threadStacksBuffer);
+
+    const auto startTime = std::chrono::steady_clock::now();
+    auto next_refresh = GetNextRefreshTime(startTime);
 
     while (true)
     {
-        iteration++;
+        if (ShouldTrackIterations(prof))
+        {
+            iteration++;
+        }
 
         const unsigned int sleepTime = GetSleepTime(prof);
         if (sleepTime == 0)
@@ -993,14 +1022,21 @@ DWORD WINAPI SamplingThreadMain(_In_ LPVOID param)
 
         const auto samplingType = GetNextSamplingType(prof, iteration);
 
+        if (samplingType == SamplingType::Continuous && ShouldTrackIterations(prof))
+        {
+            iteration = 0;
+        }
+
         PauseClrAndCaptureSamples(prof, info12, samplingType, threadStacksBuffer);
 
+        const auto now = std::chrono::steady_clock::now();
         // In order to avoid the need to recreate the vectors each iteration,
         // for the most of the iterations, instead of clearing the map, clear only the vectors.
-        if (iteration == 100)
+        if (now > next_refresh)
         {
             threadStacksBuffer.clear();
-            iteration = 0;
+            ReserveCapacity(prof, threadStacksBuffer);
+            next_refresh = GetNextRefreshTime(now);
         }
         else
         {
