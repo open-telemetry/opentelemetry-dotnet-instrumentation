@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.14.35806.103
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpenTelemetry.AutoInstrumentation.Sdk", "src\OpenTelemetry.AutoInstrumentation.Sdk\OpenTelemetry.AutoInstrumentation.Sdk.csproj", "{9EABD03E-892E-5A8F-A83C-5D80A23784B8}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpenTelemetry.OutOfProcess.Forwarder", "src\OpenTelemetry.OutOfProcess.Forwarder\OpenTelemetry.OutOfProcess.Forwarder.csproj", "{9EABD03E-892E-5A8F-A83C-5D80A23784B8}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{8EC462FD-D22E-90A8-E5CE-7E832BA40C5D}"
 	ProjectSection(SolutionItems) = preProject
@@ -15,11 +15,11 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		stylecop.json = stylecop.json
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpenTelemetry.AutoInstrumentation.Sdk.Configuration", "src\OpenTelemetry.AutoInstrumentation.Sdk.Configuration\OpenTelemetry.AutoInstrumentation.Sdk.Configuration.csproj", "{65C82359-1568-DE42-DB54-51AB48398113}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpenTelemetry.OutOfProcess.Forwarder.Configuration", "src\OpenTelemetry.OutOfProcess.Forwarder.Configuration\OpenTelemetry.OutOfProcess.Forwarder.Configuration.csproj", "{65C82359-1568-DE42-DB54-51AB48398113}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpenTelemetry.AutoInstrumentation.Sdk.Tests", "test\OpenTelemetry.AutoInstrumentation.Sdk.Tests\OpenTelemetry.AutoInstrumentation.Sdk.Tests.csproj", "{51A855BB-518A-A63C-FA70-9B9DD492847B}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpenTelemetry.OutOfProcess.Forwarder.Tests", "test\OpenTelemetry.OutOfProcess.Forwarder.Tests\OpenTelemetry.OutOfProcess.Forwarder.Tests.csproj", "{51A855BB-518A-A63C-FA70-9B9DD492847B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpenTelemetry.AutoInstrumentation.Sdk.Configuration.Tests", "test\OpenTelemetry.AutoInstrumentation.Sdk.Configuration.Tests\OpenTelemetry.AutoInstrumentation.Sdk.Configuration.Tests.csproj", "{A1B2C3D4-5E6F-7890-ABCD-EF1234567890}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpenTelemetry.OutOfProcess.Forwarder.Configuration.Tests", "test\OpenTelemetry.OutOfProcess.Forwarder.Configuration.Tests\OpenTelemetry.OutOfProcess.Forwarder.Configuration.Tests.csproj", "{A1B2C3D4-5E6F-7890-ABCD-EF1234567890}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
