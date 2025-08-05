@@ -1,6 +1,0 @@
-// Copyright The OpenTelemetry Authors
-// SPDX-License-Identifier: Apache-2.0
-
-using System.Runtime.CompilerServices;
-
-[assembly: InternalsVisibleTo("OpenTelemetry.AutoInstrumentation.Sdk.Tests, PublicKey=00240000048000009400000006020000002400005253413100040000010001008d2fe7eb45c8c65611f4d8853e950bb54ccf2a475b618f69e95cd1b9e99115e80574248a7d3013625b5aca737b8c409b190012f947b8770b7e34f025e6000216477edf22ba23db76df3a5c9c126845e9fd449593f1f3f40081f6918b820a03f4b7d410c4dd3f95bb62b31e1f4df7fead370c7cccb3015885e0464c05904e6ec2")]
