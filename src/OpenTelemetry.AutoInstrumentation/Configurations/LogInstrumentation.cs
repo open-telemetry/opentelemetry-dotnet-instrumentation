@@ -17,4 +17,9 @@ internal enum LogInstrumentation
     /// Log4Net instrumentation.
     /// </summary>
     Log4Net = 1,
+
+    /// <summary>
+    /// NLog instrumentation.
+    /// </summary>
+    NLog = 2,
 }
