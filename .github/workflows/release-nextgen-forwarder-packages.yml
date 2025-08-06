@@ -128,7 +128,7 @@ jobs:
           ### Manual Publishing Steps:
           1. Download the artifact 'opentelemetry-nextgen-forwarder-packages' from this workflow run
           2. Extract the .nupkg files
-          3. Publish manually using:
+          3. Publish manually using :
           ``````
           dotnet nuget push OpenTelemetry.OutOfProcess.Forwarder.${{ inputs.version }}.nupkg --api-key YOUR_API_KEY --source https://api.nuget.org/v3/index.json
           dotnet nuget push OpenTelemetry.OutOfProcess.Forwarder.Configuration.${{ inputs.version }}.nupkg --api-key YOUR_API_KEY --source https://api.nuget.org/v3/index.json
