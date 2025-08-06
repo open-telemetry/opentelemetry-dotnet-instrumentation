@@ -27,7 +27,7 @@ jobs:
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # tag: v4.2.2
         with:
           fetch-depth: 0
-          ref: out-of-process-collection
+          # ref: out-of-process-collection  # Temporarily commented out for testing on rajrang/publishFwdCI
 
       - name: Setup .NET
         uses: actions/setup-dotnet@67a3573c9a986a3f9c594539f4ab511d57bb3ce9 # tag: v4.3.1
@@ -128,7 +128,7 @@ jobs:
           ### Manual Publishing Steps:
           1. Download the artifact 'opentelemetry-nextgen-forwarder-packages' from this workflow run
           2. Extract the .nupkg files
-          3. Publish manually using :
+          3. Publish manually using:
           ``````
           dotnet nuget push OpenTelemetry.OutOfProcess.Forwarder.${{ inputs.version }}.nupkg --api-key YOUR_API_KEY --source https://api.nuget.org/v3/index.json
           dotnet nuget push OpenTelemetry.OutOfProcess.Forwarder.Configuration.${{ inputs.version }}.nupkg --api-key YOUR_API_KEY --source https://api.nuget.org/v3/index.json
