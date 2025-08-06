@@ -8,7 +8,7 @@ namespace DependencyListGenerator;
 
 public static class Generator
 {
-    public static IEnumerable<TransientDependency> EnumerateDependencies(string projectPath)
+    public static IEnumerable<TransientDependency> EnumerateDependencies(string projectPath, Version version)
     {
         var dotNetRunner = new DotNetRunner();
         var fileSystem = new FileSystem();
@@ -19,7 +19,7 @@ public static class Generator
             fileSystem: fileSystem);
 
         var result = analysisService.AnalyzeProject(projectPath, true, true, 1024)[0];
-        var net462 = result.TargetFrameworks.First(x => x.Name.ToString() == ".NETFramework,Version=v4.6.2");
+        var net462 = result.TargetFrameworks.First(x => x.Name.ToString() == (version.Build != 0 ? $".NETFramework,Version=v{version.Major}.{version.Minor}.{version.Build}" : $".NETFramework,Version=v{version.Major}.{version.Minor}"));
 
         foreach (var dep in net462.Dependencies.OrderBy(x => x.Name))
         {

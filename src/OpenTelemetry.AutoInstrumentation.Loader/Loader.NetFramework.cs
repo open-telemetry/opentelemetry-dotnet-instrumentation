@@ -4,6 +4,7 @@
 #if NETFRAMEWORK
 
 using System.Reflection;
+using Microsoft.Win32;
 
 namespace OpenTelemetry.AutoInstrumentation.Loader;
 
@@ -16,7 +17,45 @@ internal partial class Loader
     {
         var tracerHomeDirectory = ReadEnvironmentVariable("OTEL_DOTNET_AUTO_HOME") ?? string.Empty;
         var tracerFrameworkDirectory = "netfx";
-        return Path.Combine(tracerHomeDirectory, tracerFrameworkDirectory);
+        var frameworkVersion = GetNetFrameworkVersionFolder();
+
+        return Path.Combine(tracerHomeDirectory, tracerFrameworkDirectory, frameworkVersion);
+    }
+
+    private static string GetNetFrameworkVersionFolder()
+    {
+        try
+        {
+            // Try to get version from Windows Registry first (most reliable method)
+            using var baseKey = RegistryKey.OpenBaseKey(RegistryHive.LocalMachine, RegistryView.Default);
+            using var subKey = baseKey.OpenSubKey(@"SOFTWARE\Microsoft\NET Framework Setup\NDP\v4\Full\");
+            var releaseValue = subKey?.GetValue("Release");
+            if (releaseValue is int release)
+            {
+                // Map release number to framework version number
+                // Based on https://docs.microsoft.com/en-us/dotnet/framework/migration-guide/how-to-determine-which-versions-are-installed
+                if (release >= 461808)
+                {
+                    return "net472"; // .NET Framework 4.7.2
+                }
+
+                if (release >= 461308)
+                {
+                    return "net471"; // .NET Framework 4.7.1
+                }
+
+                if (release >= 460798)
+                {
+                    return "net47"; // .NET Framework 4.7
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Logger.Debug(ex, "Error getting .NET Framework version from Windows Registry");
+        }
+
+        return "net462";
     }
 
     private static Assembly? AssemblyResolve_ManagedProfilerDependencies(object sender, ResolveEventArgs args)
@@ -57,7 +96,33 @@ internal partial class Loader
             return null;
         }
 
-        var path = Path.Combine(ManagedProfilerDirectory, $"{assemblyName}.dll");
+        var path = Path.Combine(Path.GetDirectoryName(ManagedProfilerDirectory) ?? ManagedProfilerDirectory, $"{assemblyName}.dll");
+        if (!File.Exists(path))
+        {
+            path = Path.Combine(ManagedProfilerDirectory, $"{assemblyName}.dll");
+            if (!File.Exists(path))
+            {
+                var link = Path.Combine(ManagedProfilerDirectory, $"{assemblyName}.dll.link");
+                if (File.Exists(link))
+                {
+                    try
+                    {
+                        var linkPath = File.ReadAllText(link).Trim();
+                        path = Path.Combine(Path.GetDirectoryName(ManagedProfilerDirectory) ?? ManagedProfilerDirectory, linkPath, $"{assemblyName}.dll");
+                    }
+                    catch (Exception ex)
+                    {
+                        Logger.Debug(ex, "Error reading .link file {0}", link);
+                    }
+                }
+                else
+                {
+                    // Not found
+                    return null;
+                }
+            }
+        }
+
         if (File.Exists(path))
         {
             try
