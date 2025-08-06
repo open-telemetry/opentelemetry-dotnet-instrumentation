@@ -51,15 +51,15 @@ jobs:
         run: dotnet test --no-build --configuration Release --verbosity normal
 
       - name: Create NuGet packages directory
-        run: mkdir -p ../bin/nextgen-nuget-artifacts
-        shell: bash
+        run: New-Item -ItemType Directory -Path bin/nextgen-nuget-artifacts -Force
+        shell: pwsh
 
       - name: Pack OpenTelemetry.OutOfProcess.Forwarder
         run: |
           dotnet pack src/OpenTelemetry.OutOfProcess.Forwarder/OpenTelemetry.OutOfProcess.Forwarder.csproj `
             --no-build `
             --configuration Release `
-            --output ../bin/nextgen-nuget-artifacts `
+            --output bin/nextgen-nuget-artifacts `
             /p:PackageVersion=${{ inputs.version }} `
             /p:AssemblyVersion=${{ inputs.version }} `
             /p:FileVersion=${{ inputs.version }} `
@@ -70,7 +70,7 @@ jobs:
           dotnet pack src/OpenTelemetry.OutOfProcess.Forwarder.Configuration/OpenTelemetry.OutOfProcess.Forwarder.Configuration.csproj `
             --no-build `
             --configuration Release `
-            --output ../bin/nextgen-nuget-artifacts `
+            --output bin/nextgen-nuget-artifacts `
             /p:PackageVersion=${{ inputs.version }} `
             /p:AssemblyVersion=${{ inputs.version }} `
             /p:FileVersion=${{ inputs.version }} `
@@ -82,7 +82,7 @@ jobs:
       - name: Validate NuGet packages
         shell: pwsh
         run: |
-          foreach ($file in (Get-ChildItem ../bin/nextgen-nuget-artifacts/*.nupkg)) {
+          foreach ($file in (Get-ChildItem bin/nextgen-nuget-artifacts/*.nupkg)) {
             Write-Host "Validating package: $($file.Name)"
             dotnet validate package local $($file)
             if (-not ($LASTEXITCODE -eq 0)) {
@@ -94,7 +94,7 @@ jobs:
         shell: pwsh
         run: |
           Write-Host "Generated packages:"
-          Get-ChildItem ../bin/nextgen-nuget-artifacts/*.nupkg | ForEach-Object {
+          Get-ChildItem bin/nextgen-nuget-artifacts/*.nupkg | ForEach-Object {
             Write-Host "  - $($_.Name) ($([math]::Round($_.Length / 1KB, 2)) KB)"
           }
 
@@ -117,7 +117,7 @@ jobs:
           ### Built Packages:
           "@ 
           
-          foreach ($file in (Get-ChildItem ../bin/nextgen-nuget-artifacts/*.nupkg)) {
+          foreach ($file in (Get-ChildItem bin/nextgen-nuget-artifacts/*.nupkg)) {
             $packageName = $file.BaseName -replace '\.\d+\.\d+\.\d+.*$', ''
             $summary += "`n- [$packageName]($file.Name) - $([math]::Round($file.Length / 1KB, 2)) KB"
           }
