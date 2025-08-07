@@ -45,7 +45,7 @@ jobs:
         run: dotnet restore
 
       - name: Build projects
-        run: dotnet build --no-restore --configuration Release
+        run: dotnet build --no-restore --configuration Release /p:ContinuousIntegrationBuild=true
 
       - name: Run tests
         run: dotnet test --no-build --configuration Release --verbosity normal
@@ -63,7 +63,8 @@ jobs:
             /p:PackageVersion=${{ inputs.version }} `
             /p:AssemblyVersion=${{ inputs.version }} `
             /p:FileVersion=${{ inputs.version }} `
-            /p:Version=${{ inputs.version }}
+            /p:Version=${{ inputs.version }} `
+            /p:ContinuousIntegrationBuild=true
 
       - name: Pack OpenTelemetry.OutOfProcess.Forwarder.Configuration
         run: |
@@ -74,7 +75,8 @@ jobs:
             /p:PackageVersion=${{ inputs.version }} `
             /p:AssemblyVersion=${{ inputs.version }} `
             /p:FileVersion=${{ inputs.version }} `
-            /p:Version=${{ inputs.version }}
+            /p:Version=${{ inputs.version }} `
+            /p:ContinuousIntegrationBuild=true
 
       - name: Install dotnet-validate
         run: dotnet tool install --global dotnet-validate --version 0.0.1-preview.304
