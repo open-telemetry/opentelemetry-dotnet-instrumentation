@@ -18,7 +18,7 @@ public class ServiceNameConfiguratorTests
         var resource = resourceBuilder.Build();
 
         var serviceName = resource.Attributes.FirstOrDefault(a => a.Key == ServiceName).Value as string;
-        Assert.Equal("testhost", serviceName);
+        Assert.Matches("testhost|ReSharperTestRunner", serviceName);
     }
 
     [Fact]

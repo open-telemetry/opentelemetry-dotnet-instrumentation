@@ -2,26 +2,35 @@
 // SPDX-License-Identifier: Apache-2.0
 
 using OpenTelemetry.AutoInstrumentation.CallTarget;
-using OpenTelemetry.AutoInstrumentation.DuckTyping;
-using OpenTelemetry.AutoInstrumentation.Instrumentations.RabbitMq6.DuckTypes;
+using OpenTelemetry.AutoInstrumentation.Instrumentations.RabbitMqLegacy.DuckTypes;
 using OpenTelemetry.AutoInstrumentation.Util;
 // ReSharper disable ConditionIsAlwaysTrueOrFalseAccordingToNullableAPIContract
 
-namespace OpenTelemetry.AutoInstrumentation.Instrumentations.RabbitMq6.Integrations;
+namespace OpenTelemetry.AutoInstrumentation.Instrumentations.RabbitMqLegacy.Integrations;
 
 /// <summary>
 /// Model BasicPublish integration.
 /// </summary>
 [InstrumentMethod(
-assemblyName: IntegrationConstants.RabbitMqAssemblyName,
-typeName: IntegrationConstants.ModelGeneratedTypeName,
-methodName: IntegrationConstants.BasicPublishMethodName,
-returnTypeName: ClrNames.Void,
-parameterTypeNames: new[] { ClrNames.String, ClrNames.String, ClrNames.Bool, IntegrationConstants.BasicPropertiesInterfaceTypeName, $"System.ReadOnlyMemory`1[{ClrNames.Byte}]" },
-minimumVersion: IntegrationConstants.MinSupportedVersion,
-maximumVersion: IntegrationConstants.MaxSupportedVersion,
-integrationName: IntegrationConstants.RabbitMqByteCodeIntegrationName,
-type: InstrumentationType.Trace)]
+    assemblyName: IntegrationConstants.RabbitMqAssemblyName,
+    typeName: IntegrationConstants.ModelGeneratedTypeName,
+    methodName: IntegrationConstants.BasicPublishMethodName,
+    returnTypeName: ClrNames.Void,
+    parameterTypeNames: new[] { ClrNames.String, ClrNames.String, ClrNames.Bool, IntegrationConstants.BasicPropertiesInterfaceTypeName, $"{ClrNames.Byte}[]" },
+    minimumVersion: IntegrationConstants.Min5SupportedVersion,
+    maximumVersion: IntegrationConstants.Max5SupportedVersion,
+    integrationName: IntegrationConstants.RabbitMqByteCodeIntegrationName,
+    type: InstrumentationType.Trace)]
+[InstrumentMethod(
+    assemblyName: IntegrationConstants.RabbitMqAssemblyName,
+    typeName: IntegrationConstants.ModelGeneratedTypeName,
+    methodName: IntegrationConstants.BasicPublishMethodName,
+    returnTypeName: ClrNames.Void,
+    parameterTypeNames: new[] { ClrNames.String, ClrNames.String, ClrNames.Bool, IntegrationConstants.BasicPropertiesInterfaceTypeName, $"System.ReadOnlyMemory`1[{ClrNames.Byte}]" },
+    minimumVersion: IntegrationConstants.Min6SupportedVersion,
+    maximumVersion: IntegrationConstants.Max6SupportedVersion,
+    integrationName: IntegrationConstants.RabbitMqByteCodeIntegrationName,
+    type: InstrumentationType.Trace)]
 public static class ModelBasicPublishIntegration
 {
     internal static CallTargetState OnMethodBegin<TTarget, TBasicProperties, TBody>(

@@ -5,10 +5,10 @@ using System.Diagnostics;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
-using OpenTelemetry.AutoInstrumentation.Instrumentations.RabbitMq6.DuckTypes;
+using OpenTelemetry.AutoInstrumentation.Instrumentations.RabbitMqLegacy.DuckTypes;
 using OpenTelemetry.Context.Propagation;
 
-namespace OpenTelemetry.AutoInstrumentation.Instrumentations.RabbitMq6;
+namespace OpenTelemetry.AutoInstrumentation.Instrumentations.RabbitMqLegacy;
 
 internal static class RabbitMqInstrumentation
 {

@@ -8,19 +8,24 @@ namespace TestApplication.ContinuousProfiler;
 /// <summary>
 /// Parser the native code's pause-time-optimized format.
 /// </summary>
-internal static class SampleNativeFormatParser
+public class SampleNativeFormatParser
 {
     // TODO use value from ContinuousProfilerProcessor.BackgroundThreadName when it will be moved to main project
     public const string BackgroundThreadName = "OpenTelemetry Continuous Profiler Thread";
-
     private static readonly UnicodeEncoding UnicodeEncoding = new();
+    private readonly bool _frequentSamplingEnabled;
+
+    public SampleNativeFormatParser(bool frequentSamplingEnabled = false)
+    {
+        _frequentSamplingEnabled = frequentSamplingEnabled;
+    }
 
     /// <summary>
     /// Parses the thread sample batch.
     /// </summary>
     /// <param name="buffer">byte array containing native thread samples format data</param>
     /// <param name="read">how much of the buffer is actually used</param>
-    internal static List<ThreadSample>? ParseThreadSamples(byte[] buffer, int read)
+    internal List<ThreadSample>? ParseThreadSamples(byte[] buffer, int read)
     {
         uint batchThreadIndex = 0;
         var samples = new List<ThreadSample>();
@@ -65,6 +70,13 @@ internal static class SampleNativeFormatParser
                     var traceIdLow = ReadInt64(buffer, ref position);
                     var spanId = ReadInt64(buffer, ref position);
 
+                    var selectedForFrequentSampling = false;
+
+                    if (_frequentSamplingEnabled)
+                    {
+                        selectedForFrequentSampling = buffer[position++] == 1;
+                    }
+
                     var threadIndex = batchThreadIndex++;
 
                     var code = ReadShort(buffer, ref position);
@@ -81,7 +93,8 @@ internal static class SampleNativeFormatParser
                         traceIdLow,
                         spanId,
                         threadName,
-                        threadIndex);
+                        threadIndex,
+                        selectedForFrequentSampling);
 
                     ReadStackFrames(code, threadSample, codeDictionary, buffer, ref position);
 
@@ -137,7 +150,7 @@ internal static class SampleNativeFormatParser
     /// </summary>
     /// <param name="buffer">byte array containing native allocation samples format data</param>
     /// <param name="read">how much of the buffer is actually used</param>
-    internal static List<AllocationSample> ParseAllocationSamples(byte[] buffer, int read)
+    internal List<AllocationSample> ParseAllocationSamples(byte[] buffer, int read)
     {
         var allocationSamples = new List<AllocationSample>();
         var position = 0;
@@ -198,7 +211,7 @@ internal static class SampleNativeFormatParser
         return allocationSamples;
     }
 
-    internal static List<ThreadSample> ParseSelectiveSamplerSamples(byte[] buffer, int read)
+    internal List<ThreadSample> ParseSelectiveSamplerSamples(byte[] buffer, int read)
     {
         var selectiveSamplerSamples = new List<ThreadSample>();
         var position = 0;
@@ -232,7 +245,8 @@ internal static class SampleNativeFormatParser
                         traceIdLow,
                         spanId,
                         threadName,
-                        threadIndex++);
+                        threadIndex++,
+                        true);
 
                     var code = ReadShort(buffer, ref position);
 

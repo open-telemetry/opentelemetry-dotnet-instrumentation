@@ -15,6 +15,7 @@ public static class Projects
     public static class Tests
     {
         public const string AutoInstrumentationNativeTests = "OpenTelemetry.AutoInstrumentation.Native.Tests";
+        public const string AutoInstrumentationBuildTasksTests = "OpenTelemetry.AutoInstrumentation.BuildTasks.Tests";
         public const string AutoInstrumentationLoaderTests = "OpenTelemetry.AutoInstrumentation.Loader.Tests";
         public const string AutoInstrumentationBootstrappingTests = "OpenTelemetry.AutoInstrumentation.Bootstrapping.Tests";
         public const string AutoInstrumentationTests = "OpenTelemetry.AutoInstrumentation.Tests";

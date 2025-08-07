@@ -37,6 +37,64 @@ extern "C"
 
 namespace continuous_profiler
 {
+struct FunctionIdentifier
+{
+    mdToken  function_token;
+    ModuleID module_id;
+    bool     is_valid;
+
+    bool operator==(const FunctionIdentifier& p) const
+    {
+        return function_token == p.function_token && module_id == p.module_id && is_valid == p.is_valid;
+    }
+};
+
+struct FunctionIdentifierResolveArgs
+{
+    FunctionID  function_id;
+    COR_PRF_FRAME_INFO frame_info;
+
+    bool operator==(const FunctionIdentifierResolveArgs& p) const
+    {
+        return function_id == p.function_id && frame_info == p.frame_info;
+    }
+};
+}
+
+template <>
+struct std::hash<continuous_profiler::FunctionIdentifier>
+{
+    std::size_t operator()(const continuous_profiler::FunctionIdentifier& k) const noexcept
+    {
+        using std::hash;
+        using std::size_t;
+        using std::string;
+
+        const std::size_t h1 = std::hash<mdToken>()(k.function_token);
+        const std::size_t h2 = std::hash<ModuleID>()(k.module_id);
+
+        return h1 ^ h2;
+    }
+};
+
+template <>
+struct std::hash<continuous_profiler::FunctionIdentifierResolveArgs>
+{
+    std::size_t operator()(const continuous_profiler::FunctionIdentifierResolveArgs& k) const noexcept
+    {
+        using std::hash;
+        using std::size_t;
+        using std::string;
+
+        const std::size_t h1 = std::hash<FunctionID>()(k.function_id);
+        const std::size_t h2 = std::hash<COR_PRF_FRAME_INFO>()(k.frame_info);
+
+        return h1 ^ h2;
+    }
+};
+
+namespace continuous_profiler
+{
 struct SamplingStatistics
 {
     int micros_suspended;
@@ -90,7 +148,7 @@ public:
 class ThreadSamplesBuffer
 {
 public:
-    std::unordered_map<FunctionID, int> codes_;
+    std::unordered_map<FunctionIdentifier, int> codes_;
     std::vector<unsigned char>* buffer_;
 
     explicit ThreadSamplesBuffer(std::vector<unsigned char>* buf);
@@ -100,7 +158,8 @@ public:
     void EndSelectedThreadsBatch() const;
     void StartSample(ThreadID id, const ThreadState* state, const thread_span_context& span_context) const;
     void StartSampleForSelectedThread(const ThreadState* state, const thread_span_context& span_context) const;
-    void RecordFrame(FunctionID fid, const trace::WSTRING& frame);
+    void MarkSelectedForFrequentSampling(bool value) const;
+    void RecordFrame(const FunctionIdentifier& fid, const trace::WSTRING& frame);
     void EndSample() const;
     void EndBatch() const;
     void WriteFinalStats(const SamplingStatistics& stats) const;
@@ -108,7 +167,7 @@ public:
 
 private:
     void WriteCurrentTimeMillis() const;
-    void WriteCodedFrameString(FunctionID fid, const trace::WSTRING& str);
+    void WriteCodedFrameString(const FunctionIdentifier& fid, const trace::WSTRING& str);
     void WriteShort(int16_t val) const;
     void WriteInt(int32_t val) const;
     void WriteString(const WCHAR* s, size_t len) const;
@@ -117,34 +176,7 @@ private:
     void WriteUInt64(uint64_t val) const;
 };
 
-struct FunctionIdentifier
-{
-    mdToken function_token;
-    ModuleID module_id;
-    bool is_valid;
-
-    bool operator==(const FunctionIdentifier& p) const
-    {
-        return function_token == p.function_token && module_id == p.module_id && is_valid == p.is_valid;
-    }
-};
 } // namespace continuous_profiler
-
-template <>
-struct std::hash<continuous_profiler::FunctionIdentifier>
-{
-    std::size_t operator()(const continuous_profiler::FunctionIdentifier& k) const noexcept
-    {
-        using std::hash;
-        using std::size_t;
-        using std::string;
-
-        const std::size_t h1 = std::hash<mdToken>()(k.function_token);
-        const std::size_t h2 = std::hash<ModuleID>()(k.module_id);
-
-        return h1 ^ h2;
-    }
-};
 
 namespace continuous_profiler
 {
@@ -156,8 +188,7 @@ class NameCache
 public:
     explicit NameCache(size_t maximum_size, TValue default_value);
     TValue Get(TKey key);
-    void Refresh(TKey key);
-    // if max cache size is exceeded it return value which should be disposed
+// if max cache size is exceeded it return value which should be disposed
     TValue Put(TKey key, TValue val);
     void Clear();
 
@@ -173,16 +204,19 @@ class NamingHelper
 public:
     // These are permanent parts of the helper object
     ICorProfilerInfo12* info12_ = nullptr;
-    NameCache<FunctionIdentifier, trace::WSTRING*> function_name_cache_;
-    NameCache<FunctionID, std::pair<trace::WSTRING*, FunctionIdentifier>> volatile_function_name_cache_;
 
     NamingHelper();
-    trace::WSTRING* Lookup(FunctionID fid, COR_PRF_FRAME_INFO frame, SamplingStatistics & stats);
+    void ClearFunctionIdentifierCache();
+    trace::WSTRING* Lookup(const FunctionIdentifier& function_identifier, SamplingStatistics & stats);
+    // TODO: rename
+    FunctionIdentifier Lookup(const FunctionID functionId, const COR_PRF_FRAME_INFO frameInfo);
 
-private:
     [[nodiscard]] FunctionIdentifier GetFunctionIdentifier(const FunctionID func_id,
                                                            const COR_PRF_FRAME_INFO frame_info) const;
-    void GetFunctionName(FunctionIdentifier function_identifier, trace::WSTRING& result);
+private:
+    NameCache<FunctionIdentifier, trace::WSTRING*> function_name_cache_;
+    NameCache<FunctionIdentifierResolveArgs, FunctionIdentifier> function_identifier_cache_;
+    void GetFunctionName(FunctionIdentifier function_identifier, trace::WSTRING& result) const;
 
 };
 
@@ -215,9 +249,8 @@ class ContinuousProfiler
 public:
     std::optional<unsigned int> threadSamplingInterval;
     std::optional<unsigned int> selectedThreadsSamplingInterval;
-    unsigned int                iteration;
     void                        StartThreadSampling();
-    SamplingType                GetNextSamplingType() const;
+    static void                 InitSelectiveSamplingBuffer();
     unsigned int                maxMemorySamplesPerMinute;
     void                        StartAllocationSampling(unsigned int maxMemorySamplesPerMinute);
     void                        AllocationTick(ULONG dataLen, LPCBYTE data);
@@ -237,7 +270,7 @@ public:
     // These cycle every sample and/or are owned externally
     ThreadSamplesBuffer* cur_cpu_writer_ = nullptr;
     SamplingStatistics stats_;
-    bool AllocateBuffer();
+    void AllocateBuffer();
     void PublishBuffer();
 };
 

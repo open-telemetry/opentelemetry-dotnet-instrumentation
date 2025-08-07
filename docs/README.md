@@ -362,7 +362,6 @@ See [CONTRIBUTING.md](CONTRIBUTING.md).
 ### Maintainers
 
 - [Chris Ventura](https://github.com/nrcventura), New Relic
-- [Paulo Janotti](https://github.com/pjanotti), Splunk
 - [Piotr Kie&#x142;kowicz](https://github.com/Kielek), Splunk
 - [Rajkumar Rangaraj](https://github.com/rajkumar-rangaraj), Microsoft
 - [Robert Paj&#x105;k](https://github.com/pellared), Splunk
@@ -384,6 +383,7 @@ For more information about the approver role, see the [community repository](htt
 - [Kevin Gosse](https://github.com/kevingosse)
 - [Lucas Pimentel-Ordyna](https://github.com/lucaspimentel)
 - [Mike Goldsmith](https://github.com/MikeGoldsmith)
+- [Paulo Janotti](https://github.com/pjanotti)
 - [Tony Redondo](https://github.com/tonyredondo)
 
 For more information about the emeritus role, see the [community repository](https://github.com/open-telemetry/community/blob/main/guides/contributor/membership.md#emeritus-maintainerapprovertriager).

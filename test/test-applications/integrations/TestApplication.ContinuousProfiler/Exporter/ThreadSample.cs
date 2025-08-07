@@ -5,7 +5,14 @@ namespace TestApplication.ContinuousProfiler;
 
 internal class ThreadSample
 {
-    public ThreadSample(long timestampMilliseconds, long traceIdHigh, long traceIdLow, long spanId, string? threadName, uint threadIndex = default)
+    public ThreadSample(
+        long timestampMilliseconds,
+        long traceIdHigh,
+        long traceIdLow,
+        long spanId,
+        string? threadName,
+        uint threadIndex = 0,
+        bool selectedForFrequentSampling = false)
     {
         TimestampNanoseconds = timestampMilliseconds * 1_000_000;
         TraceIdHigh = traceIdHigh;
@@ -13,6 +20,7 @@ internal class ThreadSample
         SpanId = spanId;
         ThreadName = threadName;
         ThreadIndex = threadIndex;
+        SelectedForFrequentSampling = selectedForFrequentSampling;
     }
 
     public long TimestampNanoseconds { get; }
@@ -26,6 +34,8 @@ internal class ThreadSample
     public string? ThreadName { get; }
 
     public uint ThreadIndex { get; }
+
+    public bool SelectedForFrequentSampling { get; }
 
     public IList<string> Frames { get; } = new List<string>();
 }

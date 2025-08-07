@@ -9,9 +9,15 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 
 ### Added
 
+- Extend support for [RabbitMQ.Client](https://www.nuget.org/packages/RabbitMQ.Client/)
+  traces instrumentation for versions `5.*`.
+
 ### Changed
 
 #### Dependency updates
+
+- .NET only, following packages updated
+  - `OpenTelemetry.Instrumentation.StackExchangeRedis` from `1.12.0-beta.1` to `1.12.0-beta.2`.
 
 ### Deprecated
 

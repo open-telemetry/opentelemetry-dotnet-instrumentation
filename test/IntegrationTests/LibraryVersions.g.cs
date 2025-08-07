@@ -335,7 +335,7 @@ public static partial class LibraryVersion
 #if DEFAULT_TEST_PACKAGE_VERSIONS
                 string.Empty,
 #else
-                "6.0.0",
+                "5.1.2",
                 "6.8.1",
                 "7.0.0",
                 "7.1.2",
