@@ -35,7 +35,7 @@ jobs:
           dotnet-version: 9.0.303
 
       - name: Check for NuGet packages cache
-        uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684 # tag: v4.2.3
+        uses: actions/cache@0400d5f644dc74513175e3cd8d07132dd4860809 # tag: v4.2.4
         id: nuget-cache
         with:
           key: ${{ hashFiles('**/Directory.packages.props', '**/packages.config' ) }}
@@ -45,7 +45,7 @@ jobs:
         run: dotnet restore
 
       - name: Build projects
-        run: dotnet build --no-restore --configuration Release
+        run: dotnet build --no-restore --configuration Release /p:ContinuousIntegrationBuild=true
 
       - name: Run tests
         run: dotnet test --no-build --configuration Release --verbosity normal
@@ -63,7 +63,8 @@ jobs:
             /p:PackageVersion=${{ inputs.version }} `
             /p:AssemblyVersion=${{ inputs.version }} `
             /p:FileVersion=${{ inputs.version }} `
-            /p:Version=${{ inputs.version }}
+            /p:Version=${{ inputs.version }} `
+            /p:ContinuousIntegrationBuild=true
 
       - name: Pack OpenTelemetry.OutOfProcess.Forwarder.Configuration
         run: |
@@ -74,7 +75,8 @@ jobs:
             /p:PackageVersion=${{ inputs.version }} `
             /p:AssemblyVersion=${{ inputs.version }} `
             /p:FileVersion=${{ inputs.version }} `
-            /p:Version=${{ inputs.version }}
+            /p:Version=${{ inputs.version }} `
+            /p:ContinuousIntegrationBuild=true
 
       - name: Install dotnet-validate
         run: dotnet tool install --global dotnet-validate --version 0.0.1-preview.304
