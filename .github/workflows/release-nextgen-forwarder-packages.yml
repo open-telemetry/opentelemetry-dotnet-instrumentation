@@ -104,7 +104,9 @@ jobs:
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # tag: v4.6.2
         with:
           name: opentelemetry-nextgen-forwarder-packages
-          path: bin/nextgen-nuget-artifacts/
+          path: |
+            next-gen/bin/nextgen-nuget-artifacts/*.nupkg
+            next-gen/bin/nextgen-nuget-artifacts/*.snupkg
           retention-days: 30
 
       - name: Create GitHub Release Summary
