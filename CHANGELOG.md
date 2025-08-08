@@ -37,6 +37,8 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 - In install script, new function added: Register-AssembliesInGAC. It installs
   OpenTelemetry assemblies and dependencies in GAC.
 
+- Support for [Declarative configuration](https://opentelemetry.io/docs/specs/otel/configuration/#declarative-configuration)
+
 ### Changed
 
 - Musl-based (Alpine) libraries are compiled on Alpine v3.21.

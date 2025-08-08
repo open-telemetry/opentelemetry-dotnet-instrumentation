@@ -1,6 +1,8 @@
 // Copyright The OpenTelemetry Authors
 // SPDX-License-Identifier: Apache-2.0
 
+using System.Xml;
+using OpenTelemetry.AutoInstrumentation.Configurations.FileBasedConfiguration;
 using OpenTelemetry.AutoInstrumentation.Configurations.Otlp;
 using OpenTelemetry.AutoInstrumentation.Logging;
 
@@ -38,8 +40,17 @@ internal class MetricSettings : Settings
     /// </summary>
     public OtlpSettings? OtlpSettings { get; private set; }
 
-    protected override void OnLoad(Configuration configuration)
+    /// <summary>
+    /// Gets Reader configuration.
+    /// </summary>
+    public ReaderConfiguration ReaderConfiguration { get; private set; } = new();
+
+    protected override void OnLoadEnvVar(Configuration configuration)
     {
+        ReaderConfiguration = new ReaderConfiguration(
+            interval: configuration.GetInt32(ConfigurationKeys.Metrics.ExportInterval),
+            timeout: configuration.GetInt32(ConfigurationKeys.Metrics.ExportTimeout));
+
         MetricExporters = ParseMetricExporter(configuration);
         if (MetricExporters.Contains(MetricsExporter.Otlp))
         {
@@ -64,6 +75,68 @@ internal class MetricSettings : Settings
         }
 
         MetricsEnabled = configuration.GetBool(ConfigurationKeys.Metrics.MetricsEnabled) ?? true;
+    }
+
+    protected override void OnLoadFile(Conf configuration)
+    {
+        var metricExporters = new List<MetricsExporter>();
+
+        if (configuration.MeterProvider != null &&
+            configuration.MeterProvider.Readers != null &&
+            configuration.MeterProvider.Readers.TryGetValue("periodic", out var periodicReader) &&
+            periodicReader != null)
+        {
+            ReaderConfiguration = periodicReader;
+            var exporters = periodicReader.Exporter;
+            if (exporters != null)
+            {
+                if (exporters.OtlpGrpc != null)
+                {
+                    metricExporters.Add(MetricsExporter.Otlp);
+                    OtlpSettings = new OtlpSettings(OtlpSignalType.Metrics, exporters.OtlpGrpc);
+                }
+
+                if (exporters.OtlpHttp != null)
+                {
+                    metricExporters.Add(MetricsExporter.Otlp);
+                    OtlpSettings = new OtlpSettings(OtlpSignalType.Metrics, exporters.OtlpHttp);
+                }
+
+                if (exporters.Console != null)
+                {
+                    metricExporters.Add(MetricsExporter.Console);
+                }
+            }
+        }
+
+        if (configuration.MeterProvider != null &&
+            configuration.MeterProvider.Readers != null &&
+            configuration.MeterProvider.Readers.TryGetValue("pull", out var pullReader) &&
+            pullReader != null)
+        {
+            var exporters = pullReader.Exporter;
+            if (exporters != null)
+            {
+                if (exporters.Prometheus != null)
+                {
+                    metricExporters.Add(MetricsExporter.Prometheus);
+                }
+            }
+        }
+
+        MetricExporters = metricExporters;
+
+        MetricsEnabled = configuration.MeterProvider != null &&
+                         configuration.MeterProvider.Readers != null &&
+                         (configuration.MeterProvider.Readers.ContainsKey("periodic") ||
+                          configuration.MeterProvider.Readers.ContainsKey("pull"));
+
+        var metricsInstrumentations = configuration.InstrumentationDevelopment?.DotNet?.Metrics;
+
+        if (metricsInstrumentations != null)
+        {
+            EnabledInstrumentations = metricsInstrumentations.GetEnabledInstrumentations();
+        }
     }
 
     private static IReadOnlyList<MetricsExporter> ParseMetricExporter(Configuration configuration)
