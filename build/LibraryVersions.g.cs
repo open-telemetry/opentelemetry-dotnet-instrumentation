@@ -69,6 +69,13 @@ public static partial class LibraryVersion
             ]
         },
         {
+            "TestApplication.NLogBridge",
+            [
+                new("4.7.15"),
+                new("5.3.2"),
+            ]
+        },
+        {
             "TestApplication.MassTransit",
             [
                 new("8.3.0"),

@@ -102,6 +102,20 @@ internal static class PackageVersionDefinitions
         },
         new()
         {
+            IntegrationName = "NLog",
+            NugetPackageName = "NLog",
+            TestApplicationName = "TestApplication.NLogBridge",
+            Versions = new List<PackageVersion>
+            {
+                // NLog 4.0.0+ for modern .NET support
+                // versions below 4.7.15 may have vulnerabilities
+                new("4.7.15"),
+                new("5.3.2"),
+                new("*")
+            }
+        },
+        new()
+        {
             IntegrationName = "MassTransit",
             NugetPackageName = "MassTransit",
             TestApplicationName = "TestApplication.MassTransit",
