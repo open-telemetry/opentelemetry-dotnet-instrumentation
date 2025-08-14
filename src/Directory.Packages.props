@@ -31,7 +31,6 @@
     <PackageVersion Include="OpenTelemetry.Resources.OperatingSystem" Version="1.12.0-beta.1" />
     <PackageVersion Include="OpenTelemetry.Resources.Process" Version="1.12.0-beta.1" />
     <PackageVersion Include="OpenTelemetry.Resources.ProcessRuntime" Version="1.12.0-beta.1" />
-    <PackageVersion Include="YamlDotNet" Version="16.3.0" />
   </ItemGroup>
   <!-- Versions from SourceGenerators.csproj -->
   <ItemGroup>
