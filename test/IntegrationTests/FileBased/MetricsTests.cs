@@ -12,7 +12,6 @@ public class MetricsTests : TestHelper
      : base("Smoke", output)
     {
         SetEnvironmentVariable("LONG_RUNNING", "true");
-        SetEnvironmentVariable("OTEL_METRIC_EXPORT_INTERVAL", "100");
     }
 
     [Fact]
@@ -22,7 +21,8 @@ public class MetricsTests : TestHelper
         using var collector = new MockMetricsCollector(Output, 4318);
         SetExporter(collector);
         collector.Expect("OpenTelemetry.Instrumentation.Process");
-        SetEnvironmentVariable("OTEL_EXPERIMENTAL_FILE_BASED_CONFIGURATION_ENABLED", "true");
+        EnableFileBasedConfigWithDefaultPath();
+
         using var process = StartTestApplication();
         try
         {

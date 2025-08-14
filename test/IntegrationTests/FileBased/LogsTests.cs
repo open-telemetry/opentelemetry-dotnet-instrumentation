@@ -31,7 +31,7 @@ public class LogsTests : TestHelper
         });
 
         SetEnvironmentVariable("ASPNETCORE_HOSTINGSTARTUPASSEMBLIES", "OpenTelemetry.AutoInstrumentation.AspNetCoreBootstrapper");
-        SetEnvironmentVariable("OTEL_EXPERIMENTAL_FILE_BASED_CONFIGURATION_ENABLED", "true");
+        EnableFileBasedConfigWithDefaultPath();
 
         RunTestApplication();
 
