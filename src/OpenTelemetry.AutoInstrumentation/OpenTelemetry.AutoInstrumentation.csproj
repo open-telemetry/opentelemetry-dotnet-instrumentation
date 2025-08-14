@@ -8,6 +8,9 @@
     <EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
     <GeneratedFolder>Generated</GeneratedFolder>
     <CompilerGeneratedFilesOutputPath>$(GeneratedFolder)\$(TargetFramework)</CompilerGeneratedFilesOutputPath>
+    <NoWarn>
+      $(NoWarn);CS1591;CS1061;CS1574;CS1591;CS8600;CS8602;CS8604;CS1591;
+    </NoWarn>
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\SourceGenerators\SourceGenerators.csproj" ReferenceOutputAssembly="false" OutputItemType="Analyzer" />
@@ -43,7 +46,6 @@
     <PackageReference Include="OpenTelemetry.Resources.ProcessRuntime" />
     <PackageReference Include="OpenTelemetry.Shims.OpenTracing" />
     <PackageReference Include="OpenTelemetry.Instrumentation.Wcf" />
-    <PackageReference Include="YamlDotNet" />
   </ItemGroup>
 
   <ItemGroup Condition=" '$(TargetFramework)' == 'net462' ">
