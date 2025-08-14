@@ -8,4 +8,5 @@ tracer_provider:
 instrumentation/development:
   dotnet:
     traces:
+      aspnetcore:
       httpclient:
