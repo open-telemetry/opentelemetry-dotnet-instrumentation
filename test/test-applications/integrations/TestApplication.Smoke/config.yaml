@@ -1,0 +1,14 @@
+meter_provider:
+  readers:
+    periodic:
+      interval: 100
+      exporter:
+        otlp_http:
+          endpoint: http://localhost:4318/v1/metrics
+
+instrumentation/development:
+  dotnet:
+    metrics:
+      httpclient:
+      netruntime:
+      process:

@@ -158,7 +158,7 @@ public class PluginManagerTests
         }));
 
         var settings = new GeneralSettings();
-        settings.Load(config);
+        settings.LoadEnvVar(config);
         return settings;
     }
 
