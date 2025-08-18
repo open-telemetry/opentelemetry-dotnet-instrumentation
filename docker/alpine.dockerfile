@@ -20,7 +20,7 @@ COPY ./scripts/dotnet-install.sh ./dotnet-install.sh
 
 # Install older SDKs using the install script
 RUN chmod +x ./dotnet-install.sh \
-    && ./dotnet-install.sh -v 8.0.412 --install-dir /usr/share/dotnet --no-path \
+    && ./dotnet-install.sh -v 8.0.413 --install-dir /usr/share/dotnet --no-path \
     && rm dotnet-install.sh
 
 WORKDIR /project
