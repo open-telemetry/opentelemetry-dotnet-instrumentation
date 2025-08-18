@@ -43,7 +43,6 @@
     <PackageReference Include="OpenTelemetry.Resources.ProcessRuntime" />
     <PackageReference Include="OpenTelemetry.Shims.OpenTracing" />
     <PackageReference Include="OpenTelemetry.Instrumentation.Wcf" />
-    <PackageReference Include="YamlDotNet" />
   </ItemGroup>
 
   <ItemGroup Condition=" '$(TargetFramework)' == 'net462' ">
