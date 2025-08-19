@@ -32,7 +32,7 @@ namespace Vendors.YamlDotNet.Serialization.TypeResolvers
     /// <summary>
     /// The type returned will be the actual type of the value, if available.
     /// </summary>
-    public sealed class DynamicTypeResolver : ITypeResolver
+    internal sealed class DynamicTypeResolver : ITypeResolver
     {
         public Type Resolve(Type staticType, object? actualValue)
         {

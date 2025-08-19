@@ -31,7 +31,7 @@ using Vendors.YamlDotNet.Core;
 
 namespace Vendors.YamlDotNet.Serialization.NodeDeserializers
 {
-    public class StaticDictionaryNodeDeserializer : DictionaryDeserializer, INodeDeserializer
+    internal class StaticDictionaryNodeDeserializer : DictionaryDeserializer, INodeDeserializer
     {
         private readonly ObjectFactories.StaticObjectFactory objectFactory;
 

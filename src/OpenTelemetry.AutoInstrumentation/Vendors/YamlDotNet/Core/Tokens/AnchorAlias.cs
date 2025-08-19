@@ -31,7 +31,7 @@ namespace Vendors.YamlDotNet.Core.Tokens
     /// <summary>
     /// Represents an alias token.
     /// </summary>
-    public sealed class AnchorAlias : Token
+    internal sealed class AnchorAlias : Token
     {
         /// <summary>
         /// Gets the value of the alias.

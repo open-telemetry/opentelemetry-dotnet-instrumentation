@@ -35,7 +35,7 @@ using Vendors.YamlDotNet.Serialization.NamingConventions;
 
 namespace Vendors.YamlDotNet.Serialization.EventEmitters
 {
-    public sealed class JsonEventEmitter : ChainedEventEmitter
+    internal sealed class JsonEventEmitter : ChainedEventEmitter
     {
         private readonly YamlFormatter formatter;
         private readonly INamingConvention enumNamingConvention;

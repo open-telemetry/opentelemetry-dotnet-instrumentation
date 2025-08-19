@@ -33,7 +33,7 @@ namespace Vendors.YamlDotNet.Serialization
     /// <summary>
     /// Represents an object along with its type.
     /// </summary>
-    public interface IObjectDescriptor
+    internal interface IObjectDescriptor
     {
         /// <summary>
         /// A reference to the object.
@@ -56,7 +56,7 @@ namespace Vendors.YamlDotNet.Serialization
         ScalarStyle ScalarStyle { get; }
     }
 
-    public static class ObjectDescriptorExtensions
+    internal static class ObjectDescriptorExtensions
     {
         /// <summary>
         /// Returns the Value property of the <paramref name="objectDescriptor"/> if it is not null.

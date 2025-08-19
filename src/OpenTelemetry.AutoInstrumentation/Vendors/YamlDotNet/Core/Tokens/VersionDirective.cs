@@ -30,7 +30,7 @@ namespace Vendors.YamlDotNet.Core.Tokens
     /// <summary>
     /// Represents a version directive token.
     /// </summary>
-    public sealed class VersionDirective : Token
+    internal sealed class VersionDirective : Token
     {
         /// <summary>
         /// Gets the version.

@@ -29,7 +29,7 @@ namespace Vendors.YamlDotNet.Core.Tokens
     /// <summary>
     /// Represents a stream start token.
     /// </summary>
-    public sealed class StreamStart : Token
+    internal sealed class StreamStart : Token
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="StreamStart"/> class.

@@ -29,7 +29,7 @@ using System;
 
 namespace Vendors.YamlDotNet.Serialization
 {
-    public interface IValuePromise
+    internal interface IValuePromise
     {
         event Action<object?> ValueAvailable;
     }

@@ -53,7 +53,7 @@ namespace Vendors.YamlDotNet.Serialization
     /// to apply customizations, then call <see cref="Build" /> to create an instance of the deserializer
     /// with the desired customizations.
     /// </summary>
-    public sealed class StaticDeserializerBuilder : StaticBuilderSkeleton<StaticDeserializerBuilder>
+    internal sealed class StaticDeserializerBuilder : StaticBuilderSkeleton<StaticDeserializerBuilder>
     {
         private readonly StaticContext context;
         private readonly StaticObjectFactory factory;

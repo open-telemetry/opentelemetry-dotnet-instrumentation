@@ -32,7 +32,7 @@ using Vendors.YamlDotNet.Core;
 
 namespace Vendors.YamlDotNet.Serialization
 {
-    public sealed class EmissionPhaseObjectGraphVisitorArgs
+    internal sealed class EmissionPhaseObjectGraphVisitorArgs
     {
         /// <summary>
         /// Gets the next visitor that should be called by the current visitor.

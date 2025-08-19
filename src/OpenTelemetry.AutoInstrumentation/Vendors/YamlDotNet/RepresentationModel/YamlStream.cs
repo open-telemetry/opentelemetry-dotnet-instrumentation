@@ -34,7 +34,7 @@ namespace Vendors.YamlDotNet.RepresentationModel
     /// <summary>
     /// Represents an YAML stream.
     /// </summary>
-    public class YamlStream : IEnumerable<YamlDocument>
+    internal class YamlStream : IEnumerable<YamlDocument>
     {
         private readonly List<YamlDocument> documents = [];
 

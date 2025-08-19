@@ -31,7 +31,7 @@ using Vendors.YamlDotNet.Core;
 
 namespace Vendors.YamlDotNet.Serialization
 {
-    public interface IDeserializer
+    internal interface IDeserializer
     {
         T Deserialize<T>(string input);
         T Deserialize<T>(TextReader input);

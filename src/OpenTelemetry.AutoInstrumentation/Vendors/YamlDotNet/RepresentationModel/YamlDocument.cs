@@ -36,7 +36,7 @@ namespace Vendors.YamlDotNet.RepresentationModel
     /// <summary>
     /// Represents an YAML document.
     /// </summary>
-    public class YamlDocument
+    internal class YamlDocument
     {
         /// <summary>
         /// Gets or sets the root node.

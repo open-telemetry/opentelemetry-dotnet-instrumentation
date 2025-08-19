@@ -36,7 +36,7 @@ using Vendors.YamlDotNet.Serialization.Utilities;
 
 namespace Vendors.YamlDotNet.Serialization.NodeDeserializers
 {
-    public sealed class StaticCollectionNodeDeserializer : INodeDeserializer
+    internal sealed class StaticCollectionNodeDeserializer : INodeDeserializer
     {
         private readonly StaticObjectFactory factory;
 

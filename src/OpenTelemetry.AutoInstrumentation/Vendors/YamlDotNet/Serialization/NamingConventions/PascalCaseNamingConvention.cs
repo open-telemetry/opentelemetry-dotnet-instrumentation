@@ -36,7 +36,7 @@ namespace Vendors.YamlDotNet.Serialization.NamingConventions
     /// pascal case (ThisIsATest). Pascal case is the same as camel case, except the first letter
     /// is uppercase.
     /// </summary>
-    public sealed class PascalCaseNamingConvention : INamingConvention
+    internal sealed class PascalCaseNamingConvention : INamingConvention
     {
         [Obsolete("Use the Instance static field instead of creating new instances")]
         public PascalCaseNamingConvention() { }

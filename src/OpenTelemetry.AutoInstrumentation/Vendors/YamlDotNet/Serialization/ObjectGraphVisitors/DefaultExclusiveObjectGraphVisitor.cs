@@ -32,7 +32,7 @@ using Vendors.YamlDotNet.Core;
 namespace Vendors.YamlDotNet.Serialization.ObjectGraphVisitors
 {
 
-    public sealed class DefaultExclusiveObjectGraphVisitor : ChainedObjectGraphVisitor
+    internal sealed class DefaultExclusiveObjectGraphVisitor : ChainedObjectGraphVisitor
     {
         public DefaultExclusiveObjectGraphVisitor(IObjectGraphVisitor<IEmitter> nextVisitor)
             : base(nextVisitor)

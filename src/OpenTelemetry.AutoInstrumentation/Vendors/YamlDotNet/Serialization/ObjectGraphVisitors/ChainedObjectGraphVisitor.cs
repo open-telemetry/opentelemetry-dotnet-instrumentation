@@ -30,7 +30,7 @@ using Vendors.YamlDotNet.Core;
 
 namespace Vendors.YamlDotNet.Serialization.ObjectGraphVisitors
 {
-    public abstract class ChainedObjectGraphVisitor : IObjectGraphVisitor<IEmitter>
+    internal abstract class ChainedObjectGraphVisitor : IObjectGraphVisitor<IEmitter>
     {
         private readonly IObjectGraphVisitor<IEmitter> nextVisitor;
 

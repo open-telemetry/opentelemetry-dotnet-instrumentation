@@ -34,7 +34,7 @@ using Vendors.YamlDotNet.Serialization.Utilities;
 
 namespace Vendors.YamlDotNet.Serialization.ValueDeserializers
 {
-    public sealed class NodeValueDeserializer : IValueDeserializer
+    internal sealed class NodeValueDeserializer : IValueDeserializer
     {
         private readonly IList<INodeDeserializer> deserializers;
         private readonly IList<INodeTypeResolver> typeResolvers;

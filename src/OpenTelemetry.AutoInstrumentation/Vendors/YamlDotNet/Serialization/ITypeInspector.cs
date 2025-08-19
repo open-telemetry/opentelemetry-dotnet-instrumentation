@@ -36,7 +36,7 @@ namespace Vendors.YamlDotNet.Serialization
     /// <summary>
     /// Provides access to the properties of a type.
     /// </summary>
-    public interface ITypeInspector
+    internal interface ITypeInspector
     {
         /// <summary>
         /// Gets all properties of the specified type.

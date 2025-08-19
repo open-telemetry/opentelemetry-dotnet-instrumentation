@@ -33,7 +33,7 @@ namespace Vendors.YamlDotNet.Serialization
     /// <summary>
     /// Allows to customize how a type is serialized and deserialized.
     /// </summary>
-    public interface IYamlTypeConverter
+    internal interface IYamlTypeConverter
     {
         /// <summary>
         /// Gets a value indicating whether the current converter supports converting the specified type.

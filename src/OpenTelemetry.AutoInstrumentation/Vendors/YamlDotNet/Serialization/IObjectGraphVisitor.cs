@@ -32,7 +32,7 @@ namespace Vendors.YamlDotNet.Serialization
     /// <summary>
     /// Defined the interface of a type that can be notified during an object graph traversal.
     /// </summary>
-    public interface IObjectGraphVisitor<TContext>
+    internal interface IObjectGraphVisitor<TContext>
     {
         /// <summary>
         /// Indicates whether the specified value should be entered. This allows the visitor to

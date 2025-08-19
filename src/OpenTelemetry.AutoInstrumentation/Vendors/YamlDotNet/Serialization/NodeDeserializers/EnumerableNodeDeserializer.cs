@@ -33,7 +33,7 @@ using Vendors.YamlDotNet.Serialization.Utilities;
 
 namespace Vendors.YamlDotNet.Serialization.NodeDeserializers
 {
-    public sealed class EnumerableNodeDeserializer : INodeDeserializer
+    internal sealed class EnumerableNodeDeserializer : INodeDeserializer
     {
         public bool Deserialize(IParser parser, Type expectedType, Func<IParser, Type, object?> nestedObjectDeserializer, out object? value, ObjectDeserializer rootDeserializer)
         {

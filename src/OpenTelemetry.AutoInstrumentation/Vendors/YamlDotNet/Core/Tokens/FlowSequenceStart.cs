@@ -29,7 +29,7 @@ namespace Vendors.YamlDotNet.Core.Tokens
     /// <summary>
     /// Represents a flow sequence start token.
     /// </summary>
-    public sealed class FlowSequenceStart : Token
+    internal sealed class FlowSequenceStart : Token
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="FlowSequenceStart"/> class.

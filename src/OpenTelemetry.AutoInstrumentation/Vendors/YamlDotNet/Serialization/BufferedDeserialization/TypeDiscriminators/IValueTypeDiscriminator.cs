@@ -37,7 +37,7 @@ namespace Vendors.YamlDotNet.Serialization.BufferedDeserialization.TypeDiscrimin
     /// can inspect the yaml value, determine the desired type, and reset the yaml stream to then deserialize into
     /// that type.
     /// </summary>
-    public interface ITypeDiscriminator
+    internal interface ITypeDiscriminator
     {
         /// <summary>
         /// Gets the BaseType of the discriminator. All types that an ITypeDiscriminator may discriminate into must

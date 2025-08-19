@@ -31,7 +31,7 @@ using Vendors.YamlDotNet.Core.Events;
 
 namespace Vendors.YamlDotNet.Serialization.NodeTypeResolvers
 {
-    public class MappingNodeTypeResolver : INodeTypeResolver
+    internal class MappingNodeTypeResolver : INodeTypeResolver
     {
         private readonly IDictionary<Type, Type> mappings;
 

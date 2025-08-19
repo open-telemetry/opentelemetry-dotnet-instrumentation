@@ -33,7 +33,7 @@ namespace Vendors.YamlDotNet.Serialization
     /// <summary>
     /// Allows an object to customize how it is serialized and deserialized.
     /// </summary>
-    public interface IYamlConvertible
+    internal interface IYamlConvertible
     {
         /// <summary>
         /// Reads this object's state from a YAML parser.

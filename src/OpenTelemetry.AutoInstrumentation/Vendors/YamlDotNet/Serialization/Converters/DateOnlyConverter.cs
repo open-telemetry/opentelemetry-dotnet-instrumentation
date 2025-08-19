@@ -39,7 +39,7 @@ namespace Vendors.YamlDotNet.Serialization.Converters
     /// <summary>
     /// This represents the YAML converter entity for <see cref="DateOnly"/>.
     /// </summary>
-    public class DateOnlyConverter : IYamlTypeConverter
+    internal class DateOnlyConverter : IYamlTypeConverter
     {
         private readonly IFormatProvider provider;
         private readonly bool doubleQuotes;

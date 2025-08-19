@@ -30,7 +30,7 @@ using Vendors.YamlDotNet.Core.Events;
 
 namespace Vendors.YamlDotNet.Serialization.NodeTypeResolvers
 {
-    public sealed class YamlSerializableTypeResolver : INodeTypeResolver
+    internal sealed class YamlSerializableTypeResolver : INodeTypeResolver
     {
         public bool Resolve(NodeEvent? nodeEvent, ref Type currentType)
         {

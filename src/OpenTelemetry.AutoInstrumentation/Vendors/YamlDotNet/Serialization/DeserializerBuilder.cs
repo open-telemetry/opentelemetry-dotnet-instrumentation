@@ -56,7 +56,7 @@ namespace Vendors.YamlDotNet.Serialization
     [RequiresDynamicCode("This builder configures the deserializer to use reflection which is not compatible with ahead-of-time compilation or assembly trimming." +
         " You need to use the code generator/analyzer to generate static code and use the 'StaticDeserializerBuilder' object instead of this one.")]
 #endif
-    public sealed class DeserializerBuilder : BuilderSkeleton<DeserializerBuilder>
+    internal sealed class DeserializerBuilder : BuilderSkeleton<DeserializerBuilder>
     {
         private Lazy<IObjectFactory> objectFactory;
         private readonly LazyComponentRegistrationList<Nothing, INodeDeserializer> nodeDeserializerFactories;

@@ -33,7 +33,7 @@ namespace Vendors.YamlDotNet.Helpers
     /// <summary>
     /// Empty implementation of the fsharphelper to allow trimming of csharp applications.
     /// </summary>
-    public class NullFsharpHelper : IFsharpHelper
+    internal class NullFsharpHelper : IFsharpHelper
     {
         public object? CreateFsharpListFromArray(Type t, Type itemsType, Array arr) => null;
 

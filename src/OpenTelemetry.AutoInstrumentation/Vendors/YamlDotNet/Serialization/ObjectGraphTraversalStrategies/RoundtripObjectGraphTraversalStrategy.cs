@@ -38,7 +38,7 @@ namespace Vendors.YamlDotNet.Serialization.ObjectGraphTraversalStrategies
     /// properties that are read/write, collections and dictionaries, while ensuring that
     /// the graph can be regenerated from the resulting document.
     /// </summary>
-    public class RoundtripObjectGraphTraversalStrategy : FullObjectGraphTraversalStrategy
+    internal class RoundtripObjectGraphTraversalStrategy : FullObjectGraphTraversalStrategy
     {
         private readonly TypeConverterCache converters;
         private readonly Settings settings;

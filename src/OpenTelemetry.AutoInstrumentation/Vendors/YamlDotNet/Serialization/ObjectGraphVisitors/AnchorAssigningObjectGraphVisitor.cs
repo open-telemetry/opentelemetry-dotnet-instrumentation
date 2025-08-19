@@ -31,7 +31,7 @@ using Vendors.YamlDotNet.Core;
 
 namespace Vendors.YamlDotNet.Serialization.ObjectGraphVisitors
 {
-    public sealed class AnchorAssigningObjectGraphVisitor : ChainedObjectGraphVisitor
+    internal sealed class AnchorAssigningObjectGraphVisitor : ChainedObjectGraphVisitor
     {
         private readonly IEventEmitter eventEmitter;
         private readonly IAliasProvider aliasProvider;

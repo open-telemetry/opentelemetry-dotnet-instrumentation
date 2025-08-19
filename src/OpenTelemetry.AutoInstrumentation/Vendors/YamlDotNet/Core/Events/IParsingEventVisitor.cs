@@ -29,7 +29,7 @@ namespace Vendors.YamlDotNet.Core.Events
     /// <summary>
     /// Callback interface for external event Visitor.
     /// </summary>
-    public interface IParsingEventVisitor
+    internal interface IParsingEventVisitor
     {
         void Visit(AnchorAlias e);
         void Visit(StreamStart e);

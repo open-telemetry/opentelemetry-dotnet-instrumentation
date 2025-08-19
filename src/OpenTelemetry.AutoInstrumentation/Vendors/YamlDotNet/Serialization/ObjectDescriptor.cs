@@ -30,7 +30,7 @@ using Vendors.YamlDotNet.Core;
 
 namespace Vendors.YamlDotNet.Serialization
 {
-    public sealed class ObjectDescriptor : IObjectDescriptor
+    internal sealed class ObjectDescriptor : IObjectDescriptor
     {
         public object? Value { get; private set; }
         public Type Type { get; private set; }

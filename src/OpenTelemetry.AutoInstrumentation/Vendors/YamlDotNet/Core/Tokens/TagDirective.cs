@@ -33,7 +33,7 @@ namespace Vendors.YamlDotNet.Core.Tokens
     /// <summary>
     /// Represents a tag directive token.
     /// </summary>
-    public class TagDirective : Token
+    internal class TagDirective : Token
     {
 
         /// <summary>

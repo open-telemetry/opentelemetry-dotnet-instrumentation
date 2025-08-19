@@ -35,7 +35,7 @@ namespace Vendors.YamlDotNet.Serialization.ObjectGraphVisitors
     /// <summary>
     /// A base class that simplifies the correct implementation of <see cref="IObjectGraphVisitor{Nothing}" />.
     /// </summary>
-    public abstract class PreProcessingPhaseObjectGraphVisitorSkeleton : IObjectGraphVisitor<Nothing>
+    internal abstract class PreProcessingPhaseObjectGraphVisitorSkeleton : IObjectGraphVisitor<Nothing>
     {
         protected readonly IEnumerable<IYamlTypeConverter> typeConverters; // This is kept for backwards compatibility for subclasses. Use typeConverterCache instead.
         private readonly TypeConverterCache typeConverterCache;

@@ -32,7 +32,7 @@ using Vendors.YamlDotNet.Core.Events;
 
 namespace Vendors.YamlDotNet.Serialization
 {
-    public sealed class Serializer : ISerializer
+    internal sealed class Serializer : ISerializer
     {
         private readonly IValueSerializer valueSerializer;
         private readonly EmitterSettings emitterSettings;

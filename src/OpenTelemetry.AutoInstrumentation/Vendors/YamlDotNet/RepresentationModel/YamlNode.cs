@@ -36,7 +36,7 @@ namespace Vendors.YamlDotNet.RepresentationModel
     /// <summary>
     /// Represents a single node in the YAML document.
     /// </summary>
-    public abstract class YamlNode
+    internal abstract class YamlNode
     {
         private const int MaximumRecursionLevel = 1000;
         internal const string MaximumRecursionLevelReachedToStringValue = "WARNING! INFINITE RECURSION!";

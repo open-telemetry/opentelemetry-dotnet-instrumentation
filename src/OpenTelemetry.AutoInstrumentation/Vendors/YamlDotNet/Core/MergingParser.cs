@@ -36,7 +36,7 @@ namespace Vendors.YamlDotNet.Core
     /// <summary>
     /// Simple implementation of <see cref="IParser"/> that implements merging: http://yaml.org/type/merge.html
     /// </summary>
-    public sealed class MergingParser : IParser
+    internal sealed class MergingParser : IParser
     {
         private readonly ParsingEventCollection events;
         private readonly IParser innerParser;

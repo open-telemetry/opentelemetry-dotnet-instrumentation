@@ -29,7 +29,7 @@ namespace Vendors.YamlDotNet.Core.Events
     /// <summary>
     /// Represents a sequence start event.
     /// </summary>
-    public sealed class SequenceStart : NodeEvent
+    internal sealed class SequenceStart : NodeEvent
     {
         /// <summary>
         /// Gets a value indicating the variation of depth caused by this event.

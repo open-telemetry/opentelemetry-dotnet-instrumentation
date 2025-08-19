@@ -38,7 +38,7 @@ namespace Vendors.YamlDotNet.Serialization.Converters
     /// <remarks>
     /// Converts <see cref="System.Type" /> to a scalar containing the assembly qualified name of the type.
     /// </remarks>
-    public class SystemTypeConverter : IYamlTypeConverter
+    internal class SystemTypeConverter : IYamlTypeConverter
     {
         public bool Accepts(Type type)
         {

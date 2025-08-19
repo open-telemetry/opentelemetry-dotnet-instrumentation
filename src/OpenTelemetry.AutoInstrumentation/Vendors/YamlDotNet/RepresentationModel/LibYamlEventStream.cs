@@ -34,7 +34,7 @@ namespace Vendors.YamlDotNet.RepresentationModel
     /// <summary>
     /// Represents a LibYAML event stream.
     /// </summary>
-    public class LibYamlEventStream
+    internal class LibYamlEventStream
     {
         private readonly IParser parser;
 

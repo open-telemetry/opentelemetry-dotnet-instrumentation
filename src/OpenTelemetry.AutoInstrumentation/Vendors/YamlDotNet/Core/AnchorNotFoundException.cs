@@ -31,7 +31,7 @@ namespace Vendors.YamlDotNet.Core
     /// <summary>
     /// The exception that is thrown when an alias references an anchor that does not exist.
     /// </summary>
-    public class AnchorNotFoundException : YamlException
+    internal class AnchorNotFoundException : YamlException
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="AnchorNotFoundException"/> class.

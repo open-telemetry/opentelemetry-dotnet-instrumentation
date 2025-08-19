@@ -48,7 +48,7 @@ namespace Vendors.YamlDotNet.Serialization.BufferedDeserialization
     /// Usually you will want all default <see cref="INodeDeserializer" />s that exist in the outer
     /// <see cref="Deserializer" /> to also be used as inner deserializers.
     /// </summary>
-    public class TypeDiscriminatingNodeDeserializer : INodeDeserializer
+    internal class TypeDiscriminatingNodeDeserializer : INodeDeserializer
     {
         private readonly IList<INodeDeserializer> innerDeserializers;
         private readonly IList<ITypeDiscriminator> typeDiscriminators;

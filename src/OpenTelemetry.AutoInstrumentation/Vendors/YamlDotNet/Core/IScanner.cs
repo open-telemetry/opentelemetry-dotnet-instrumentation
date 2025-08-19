@@ -33,7 +33,7 @@ namespace Vendors.YamlDotNet.Core
     /// Defines the interface for a stand-alone YAML scanner that
     /// converts a sequence of characters into a sequence of YAML tokens.
     /// </summary>
-    public interface IScanner
+    internal interface IScanner
     {
         /// <summary>
         /// Gets the current position inside the input stream.

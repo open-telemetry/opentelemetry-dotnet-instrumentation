@@ -29,7 +29,7 @@ namespace Vendors.YamlDotNet.Core.Tokens
     /// <summary>
     /// Represents a flow mapping start token.
     /// </summary>
-    public sealed class FlowMappingStart : Token
+    internal sealed class FlowMappingStart : Token
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="FlowMappingStart"/> class.

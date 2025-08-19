@@ -29,9 +29,9 @@ using Vendors.YamlDotNet.Core;
 
 namespace Vendors.YamlDotNet.Serialization.Schemas
 {
-    public sealed class FailsafeSchema
+    internal sealed class FailsafeSchema
     {
-        public static class Tags
+        internal static class Tags
         {
             public static readonly TagName Map = new TagName("tag:yaml.org,2002:map");
             public static readonly TagName Seq = new TagName("tag:yaml.org,2002:seq");
@@ -39,9 +39,9 @@ namespace Vendors.YamlDotNet.Serialization.Schemas
         }
     }
 
-    public sealed class JsonSchema
+    internal sealed class JsonSchema
     {
-        public static class Tags
+        internal static class Tags
         {
             public static readonly TagName Null = new TagName("tag:yaml.org,2002:null");
             public static readonly TagName Bool = new TagName("tag:yaml.org,2002:bool");
@@ -52,16 +52,16 @@ namespace Vendors.YamlDotNet.Serialization.Schemas
         }
     }
 
-    public sealed class CoreSchema
+    internal sealed class CoreSchema
     {
-        public static class Tags
+        internal static class Tags
         {
         }
     }
 
-    public sealed class DefaultSchema
+    internal sealed class DefaultSchema
     {
-        public static class Tags
+        internal static class Tags
         {
             public static readonly TagName Timestamp = new TagName("tag:yaml.org,2002:timestamp");
         }

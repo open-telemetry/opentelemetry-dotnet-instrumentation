@@ -36,7 +36,7 @@ namespace Vendors.YamlDotNet.Serialization.ObjectFactories
     /// <summary>
     /// Creates objects using a Func{Type,object}"/>.
     /// </summary>
-    public sealed class LambdaObjectFactory : ObjectFactoryBase
+    internal sealed class LambdaObjectFactory : ObjectFactoryBase
     {
         private readonly Func<Type, object> factory;
 

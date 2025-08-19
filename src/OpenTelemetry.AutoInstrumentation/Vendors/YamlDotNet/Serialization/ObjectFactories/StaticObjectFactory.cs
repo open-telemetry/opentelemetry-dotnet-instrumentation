@@ -33,7 +33,7 @@ namespace Vendors.YamlDotNet.Serialization.ObjectFactories
     /// <summary>
     /// Gets information about and creates statically known, serializable, types.
     /// </summary>
-    public abstract class StaticObjectFactory : IObjectFactory
+    internal abstract class StaticObjectFactory : IObjectFactory
     {
         /// <summary>
         /// Create an object of the specified type

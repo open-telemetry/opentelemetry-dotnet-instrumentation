@@ -31,7 +31,7 @@ using Vendors.YamlDotNet.Core.Events;
 
 namespace Vendors.YamlDotNet.Serialization.NodeTypeResolvers
 {
-    public sealed class DefaultContainersNodeTypeResolver : INodeTypeResolver
+    internal sealed class DefaultContainersNodeTypeResolver : INodeTypeResolver
     {
         bool INodeTypeResolver.Resolve(NodeEvent? nodeEvent, ref Type currentType)
         {

@@ -36,7 +36,7 @@ namespace Vendors.YamlDotNet.Serialization.TypeInspectors
     /// <summary>
     /// Returns the properties of a type that are readable.
     /// </summary>
-    public class ReadablePropertiesTypeInspector : ReflectionTypeInspector
+    internal class ReadablePropertiesTypeInspector : ReflectionTypeInspector
     {
         private readonly ITypeResolver typeResolver;
         private readonly bool includeNonPublicProperties;

@@ -29,7 +29,7 @@ namespace Vendors.YamlDotNet.Core.Tokens
     /// <summary>
     /// Represents a block sequence start token.
     /// </summary>
-    public sealed class BlockSequenceStart : Token
+    internal sealed class BlockSequenceStart : Token
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="BlockSequenceStart"/> class.

@@ -51,7 +51,7 @@ namespace Vendors.YamlDotNet.Serialization
             entries.Clear();
         }
 
-        public sealed class LazyComponentRegistration
+        internal sealed class LazyComponentRegistration
         {
             public readonly Type ComponentType;
             public readonly Func<TArgument, TComponent> Factory;
@@ -63,7 +63,7 @@ namespace Vendors.YamlDotNet.Serialization
             }
         }
 
-        public sealed class TrackingLazyComponentRegistration
+        internal sealed class TrackingLazyComponentRegistration
         {
             public readonly Type ComponentType;
             public readonly Func<TComponent, TArgument, TComponent> Factory;

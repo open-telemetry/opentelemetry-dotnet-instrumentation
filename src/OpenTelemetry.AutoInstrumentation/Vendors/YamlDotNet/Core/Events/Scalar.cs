@@ -29,7 +29,7 @@ namespace Vendors.YamlDotNet.Core.Events
     /// <summary>
     /// Represents a scalar event.
     /// </summary>
-    public sealed class Scalar : NodeEvent
+    internal sealed class Scalar : NodeEvent
     {
         /// <summary>
         /// Gets the event type, which allows for simpler type comparisons.

@@ -29,7 +29,7 @@ namespace Vendors.YamlDotNet.Core.Tokens
     /// <summary>
     /// Represents a value token.
     /// </summary>
-    public sealed class Value : Token
+    internal sealed class Value : Token
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="Value"/> class.

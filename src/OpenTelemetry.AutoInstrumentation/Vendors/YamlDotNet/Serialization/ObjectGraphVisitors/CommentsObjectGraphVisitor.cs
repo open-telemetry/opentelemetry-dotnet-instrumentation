@@ -29,7 +29,7 @@ using Vendors.YamlDotNet.Core;
 
 namespace Vendors.YamlDotNet.Serialization.ObjectGraphVisitors
 {
-    public sealed class CommentsObjectGraphVisitor : ChainedObjectGraphVisitor
+    internal sealed class CommentsObjectGraphVisitor : ChainedObjectGraphVisitor
     {
         public CommentsObjectGraphVisitor(IObjectGraphVisitor<IEmitter> nextVisitor)
             : base(nextVisitor)

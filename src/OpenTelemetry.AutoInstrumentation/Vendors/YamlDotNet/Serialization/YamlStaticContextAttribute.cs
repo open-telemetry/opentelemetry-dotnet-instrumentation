@@ -30,7 +30,7 @@ using System;
 namespace Vendors.YamlDotNet.Serialization
 {
     [AttributeUsage(AttributeTargets.Class)]
-    public sealed class YamlStaticContextAttribute : Attribute
+    internal sealed class YamlStaticContextAttribute : Attribute
     {
     }
 }

@@ -29,7 +29,7 @@ namespace Vendors.YamlDotNet.Core.Events
     /// <summary>
     /// Represents a mapping start event.
     /// </summary>
-    public sealed class MappingStart : NodeEvent
+    internal sealed class MappingStart : NodeEvent
     {
         /// <summary>
         /// Gets a value indicating the variation of depth caused by this event.

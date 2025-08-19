@@ -32,7 +32,7 @@ namespace Vendors.YamlDotNet.RepresentationModel
     /// Abstract implementation of <see cref="IYamlVisitor"/> that knows how to walk a complete Yaml object model.
     /// </summary>
     [Obsolete("Use YamlVisitorBase")]
-    public abstract class YamlVisitor : IYamlVisitor
+    internal abstract class YamlVisitor : IYamlVisitor
     {
         /// <summary>
         /// Called when this object is visiting a <see cref="YamlStream"/>.

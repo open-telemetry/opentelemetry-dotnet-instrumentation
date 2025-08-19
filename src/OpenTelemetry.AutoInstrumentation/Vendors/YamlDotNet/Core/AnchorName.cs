@@ -30,7 +30,7 @@ using System.Text.RegularExpressions;
 
 namespace Vendors.YamlDotNet.Core
 {
-    public readonly struct AnchorName : IEquatable<AnchorName>
+    internal readonly struct AnchorName : IEquatable<AnchorName>
     {
         public static readonly AnchorName Empty;
 

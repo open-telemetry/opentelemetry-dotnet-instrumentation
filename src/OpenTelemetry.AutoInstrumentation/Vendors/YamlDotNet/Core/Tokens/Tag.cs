@@ -31,7 +31,7 @@ namespace Vendors.YamlDotNet.Core.Tokens
     /// <summary>
     /// Represents a tag token.
     /// </summary>
-    public sealed class Tag : Token
+    internal sealed class Tag : Token
     {
         /// <summary>
         /// Gets the handle.

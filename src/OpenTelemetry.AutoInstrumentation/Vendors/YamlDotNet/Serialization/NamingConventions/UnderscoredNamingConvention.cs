@@ -34,7 +34,7 @@ namespace Vendors.YamlDotNet.Serialization.NamingConventions
     /// <summary>
     /// Convert the string from camelcase (thisIsATest) to a underscored (this_is_a_test) string
     /// </summary>
-    public sealed class UnderscoredNamingConvention : INamingConvention
+    internal sealed class UnderscoredNamingConvention : INamingConvention
     {
         [Obsolete("Use the Instance static field instead of creating new instances")]
         public UnderscoredNamingConvention() { }

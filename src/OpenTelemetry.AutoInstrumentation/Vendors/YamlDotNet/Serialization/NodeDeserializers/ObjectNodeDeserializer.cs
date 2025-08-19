@@ -37,7 +37,7 @@ using Vendors.YamlDotNet.Serialization.Utilities;
 
 namespace Vendors.YamlDotNet.Serialization.NodeDeserializers
 {
-    public sealed class ObjectNodeDeserializer : INodeDeserializer
+    internal sealed class ObjectNodeDeserializer : INodeDeserializer
     {
         private readonly IObjectFactory objectFactory;
         private readonly ITypeInspector typeInspector;

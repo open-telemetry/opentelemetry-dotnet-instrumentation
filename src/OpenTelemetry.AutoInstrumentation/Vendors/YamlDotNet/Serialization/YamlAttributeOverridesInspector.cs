@@ -37,7 +37,7 @@ namespace Vendors.YamlDotNet.Serialization
     /// <summary>
     /// Applies the Yaml attribute overrides to another <see cref="ITypeInspector"/>.
     /// </summary>
-    public sealed class YamlAttributeOverridesInspector : ReflectionTypeInspector
+    internal sealed class YamlAttributeOverridesInspector : ReflectionTypeInspector
     {
         private readonly ITypeInspector innerTypeDescriptor;
         private readonly YamlAttributeOverrides overrides;
@@ -60,7 +60,7 @@ namespace Vendors.YamlDotNet.Serialization
             return properties;
         }
 
-        public sealed class OverridePropertyDescriptor : IPropertyDescriptor
+        internal sealed class OverridePropertyDescriptor : IPropertyDescriptor
         {
             private readonly IPropertyDescriptor baseDescriptor;
             private readonly YamlAttributeOverrides overrides;

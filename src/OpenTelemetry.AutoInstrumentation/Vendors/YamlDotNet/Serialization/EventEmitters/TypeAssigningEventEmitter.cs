@@ -37,7 +37,7 @@ using Vendors.YamlDotNet.Serialization.NamingConventions;
 
 namespace Vendors.YamlDotNet.Serialization.EventEmitters
 {
-    public sealed class TypeAssigningEventEmitter : ChainedEventEmitter
+    internal sealed class TypeAssigningEventEmitter : ChainedEventEmitter
     {
         private readonly IDictionary<Type, TagName> tagMappings;
         private readonly bool quoteNecessaryStrings;

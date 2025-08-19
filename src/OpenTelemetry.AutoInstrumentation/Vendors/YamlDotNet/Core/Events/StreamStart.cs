@@ -29,7 +29,7 @@ namespace Vendors.YamlDotNet.Core.Events
     /// <summary>
     /// Represents a stream start event.
     /// </summary>
-    public sealed class StreamStart : ParsingEvent
+    internal sealed class StreamStart : ParsingEvent
     {
         /// <summary>
         /// Gets a value indicating the variation of depth caused by this event.

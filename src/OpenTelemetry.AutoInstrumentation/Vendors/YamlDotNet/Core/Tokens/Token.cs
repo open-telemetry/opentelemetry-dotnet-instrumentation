@@ -29,7 +29,7 @@ namespace Vendors.YamlDotNet.Core.Tokens
     /// <summary>
     /// Base class for YAML tokens.
     /// </summary>
-    public abstract class Token
+    internal abstract class Token
     {
         /// <summary>
         /// Gets the start of the token in the input stream.

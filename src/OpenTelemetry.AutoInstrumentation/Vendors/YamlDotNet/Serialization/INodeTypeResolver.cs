@@ -30,7 +30,7 @@ using Vendors.YamlDotNet.Core.Events;
 
 namespace Vendors.YamlDotNet.Serialization
 {
-    public interface INodeTypeResolver
+    internal interface INodeTypeResolver
     {
         /// <summary>
         /// Determines the type of the specified node.

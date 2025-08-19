@@ -50,7 +50,7 @@ namespace Vendors.YamlDotNet.Serialization
     /// to apply customizations, then call <see cref="Build" /> to create an instance of the serializer
     /// with the desired customizations.
     /// </summary>
-    public sealed class StaticSerializerBuilder : StaticBuilderSkeleton<StaticSerializerBuilder>
+    internal sealed class StaticSerializerBuilder : StaticBuilderSkeleton<StaticSerializerBuilder>
     {
         private readonly StaticContext context;
         private readonly StaticObjectFactory factory;

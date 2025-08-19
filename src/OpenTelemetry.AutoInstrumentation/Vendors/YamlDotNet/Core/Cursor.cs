@@ -29,7 +29,7 @@ using System.Diagnostics;
 namespace Vendors.YamlDotNet.Core
 {
     [DebuggerStepThrough]
-    public sealed class Cursor
+    internal sealed class Cursor
     {
         public long Index { get; private set; }
         public long Line { get; private set; }

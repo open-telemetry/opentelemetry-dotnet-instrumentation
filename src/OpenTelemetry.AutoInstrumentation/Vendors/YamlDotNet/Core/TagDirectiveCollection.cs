@@ -33,7 +33,7 @@ namespace Vendors.YamlDotNet.Core
     /// <summary>
     /// Collection of <see cref="TagDirective"/>.
     /// </summary>
-    public sealed class TagDirectiveCollection : KeyedCollection<string, TagDirective>
+    internal sealed class TagDirectiveCollection : KeyedCollection<string, TagDirective>
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="TagDirectiveCollection"/> class.

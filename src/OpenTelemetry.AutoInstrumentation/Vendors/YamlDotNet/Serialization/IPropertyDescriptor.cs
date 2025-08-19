@@ -30,7 +30,7 @@ using Vendors.YamlDotNet.Core;
 
 namespace Vendors.YamlDotNet.Serialization
 {
-    public interface IPropertyDescriptor
+    internal interface IPropertyDescriptor
     {
         string Name { get; }
         bool AllowNulls { get; }

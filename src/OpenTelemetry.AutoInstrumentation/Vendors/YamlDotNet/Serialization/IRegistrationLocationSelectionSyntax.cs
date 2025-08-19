@@ -27,7 +27,7 @@
 
 namespace Vendors.YamlDotNet.Serialization
 {
-    public interface IRegistrationLocationSelectionSyntax<TBaseRegistrationType>
+    internal interface IRegistrationLocationSelectionSyntax<TBaseRegistrationType>
     {
         /// <summary>
         /// Registers the component in place of the already registered component of type <typeparamref name="TRegistrationType" />.
@@ -55,7 +55,7 @@ namespace Vendors.YamlDotNet.Serialization
         void OnBottom();
     }
 
-    public interface ITrackingRegistrationLocationSelectionSyntax<TBaseRegistrationType>
+    internal interface ITrackingRegistrationLocationSelectionSyntax<TBaseRegistrationType>
     {
         /// <summary>
         /// Registers the component in place of the already registered component of type <typeparamref name="TRegistrationType" />.

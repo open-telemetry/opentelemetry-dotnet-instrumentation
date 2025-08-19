@@ -35,7 +35,7 @@ namespace Vendors.YamlDotNet.Serialization.Utilities
     /// A generic container that is preserved during the entire deserialization process.
     /// Any disposable object added to this collection will be disposed when this object is disposed.
     /// </summary>
-    public sealed class SerializerState : IDisposable
+    internal sealed class SerializerState : IDisposable
     {
         private readonly Dictionary<Type, object> items = [];
 

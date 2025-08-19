@@ -35,7 +35,7 @@ using Vendors.YamlDotNet.Helpers;
 
 namespace Vendors.YamlDotNet.Serialization.TypeInspectors
 {
-    public class CachedTypeInspector : TypeInspectorSkeleton
+    internal class CachedTypeInspector : TypeInspectorSkeleton
     {
         private readonly ITypeInspector innerTypeDescriptor;
         private readonly ConcurrentDictionary<Type, List<IPropertyDescriptor>> cache = new();

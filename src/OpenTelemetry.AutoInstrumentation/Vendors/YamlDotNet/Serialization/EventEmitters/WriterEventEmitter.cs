@@ -31,7 +31,7 @@ using Vendors.YamlDotNet.Core.Events;
 
 namespace Vendors.YamlDotNet.Serialization.EventEmitters
 {
-    public sealed class WriterEventEmitter : IEventEmitter
+    internal sealed class WriterEventEmitter : IEventEmitter
     {
         void IEventEmitter.Emit(AliasEventInfo eventInfo, IEmitter emitter)
         {

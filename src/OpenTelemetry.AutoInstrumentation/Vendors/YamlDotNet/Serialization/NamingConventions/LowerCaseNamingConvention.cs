@@ -35,7 +35,7 @@ namespace Vendors.YamlDotNet.Serialization.NamingConventions
     /// Convert the string with underscores (this_is_a_test) or hyphens (this-is-a-test) to 
     /// lower case (thisisatest).
     /// </summary>
-    public sealed class LowerCaseNamingConvention : INamingConvention
+    internal sealed class LowerCaseNamingConvention : INamingConvention
     {
         private LowerCaseNamingConvention() { }
 

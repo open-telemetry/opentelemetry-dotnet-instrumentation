@@ -35,7 +35,7 @@ using System.Threading.Tasks;
 
 namespace Vendors.YamlDotNet.Serialization.TypeInspectors
 {
-    public abstract class ReflectionTypeInspector : TypeInspectorSkeleton
+    internal abstract class ReflectionTypeInspector : TypeInspectorSkeleton
     {
         public override string GetEnumName(Type enumType, string name)
         {

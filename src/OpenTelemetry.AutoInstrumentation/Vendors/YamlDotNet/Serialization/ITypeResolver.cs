@@ -32,7 +32,7 @@ namespace Vendors.YamlDotNet.Serialization
     /// <summary>
     /// Resolves the type of values.
     /// </summary>
-    public interface ITypeResolver
+    internal interface ITypeResolver
     {
         Type Resolve(Type staticType, object? actualValue);
     }

@@ -29,7 +29,7 @@ namespace Vendors.YamlDotNet.Core.Tokens
     /// <summary>
     /// Represents a document end token.
     /// </summary>
-    public sealed class DocumentEnd : Token
+    internal sealed class DocumentEnd : Token
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="DocumentEnd"/> class.

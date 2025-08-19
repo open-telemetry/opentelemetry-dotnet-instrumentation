@@ -29,7 +29,7 @@ namespace Vendors.YamlDotNet.Core.Tokens
     /// <summary>
     /// Represents a block end token.
     /// </summary>
-    public sealed class BlockEnd : Token
+    internal sealed class BlockEnd : Token
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="BlockEnd"/> class.

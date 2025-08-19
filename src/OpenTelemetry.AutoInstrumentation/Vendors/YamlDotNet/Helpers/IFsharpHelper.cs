@@ -30,7 +30,7 @@ using Vendors.YamlDotNet.Serialization;
 
 namespace Vendors.YamlDotNet.Helpers
 {
-    public interface IFsharpHelper
+    internal interface IFsharpHelper
     {
         bool IsOptionType(Type t);
         Type? GetOptionUnderlyingType(Type t);
