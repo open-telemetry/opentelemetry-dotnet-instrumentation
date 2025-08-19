@@ -29,7 +29,7 @@ namespace Vendors.YamlDotNet.Core.Events
     /// <summary>
     /// Contains the behavior that is common between node events.
     /// </summary>
-    public abstract class NodeEvent : ParsingEvent
+    internal abstract class NodeEvent : ParsingEvent
     {
         /// <summary>
         /// Gets the anchor.

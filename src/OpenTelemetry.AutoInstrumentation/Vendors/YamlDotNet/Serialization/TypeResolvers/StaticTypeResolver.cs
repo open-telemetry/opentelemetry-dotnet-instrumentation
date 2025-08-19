@@ -32,7 +32,7 @@ namespace Vendors.YamlDotNet.Serialization.TypeResolvers
     /// <summary>
     /// Except for primitive types, the type returned will always be the static type.
     /// </summary>
-    public class StaticTypeResolver : ITypeResolver
+    internal class StaticTypeResolver : ITypeResolver
     {
         public virtual Type Resolve(Type staticType, object? actualValue)
         {

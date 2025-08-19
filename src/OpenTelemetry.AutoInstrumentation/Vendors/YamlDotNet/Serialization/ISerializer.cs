@@ -31,7 +31,7 @@ using Vendors.YamlDotNet.Core;
 
 namespace Vendors.YamlDotNet.Serialization
 {
-    public interface ISerializer
+    internal interface ISerializer
     {
         /// <summary>
         /// Serializes the specified object into a string.

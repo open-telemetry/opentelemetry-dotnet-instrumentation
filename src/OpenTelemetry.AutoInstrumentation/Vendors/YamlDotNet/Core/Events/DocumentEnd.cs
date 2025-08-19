@@ -29,7 +29,7 @@ namespace Vendors.YamlDotNet.Core.Events
     /// <summary>
     /// Represents a document end event.
     /// </summary>
-    public sealed class DocumentEnd : ParsingEvent
+    internal sealed class DocumentEnd : ParsingEvent
     {
         /// <summary>
         /// Gets a value indicating the variation of depth caused by this event.

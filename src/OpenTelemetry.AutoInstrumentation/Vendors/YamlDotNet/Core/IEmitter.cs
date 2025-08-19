@@ -31,7 +31,7 @@ namespace Vendors.YamlDotNet.Core
     /// <summary>
     /// Represents a YAML stream emitter.
     /// </summary>
-    public interface IEmitter
+    internal interface IEmitter
     {
         /// <summary>
         /// Emits an event.

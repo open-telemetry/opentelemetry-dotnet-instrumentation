@@ -30,7 +30,7 @@ namespace Vendors.YamlDotNet.Serialization
     /// <summary>
     /// Defines a strategy that walks through an object graph.
     /// </summary>
-    public interface IObjectGraphTraversalStrategy
+    internal interface IObjectGraphTraversalStrategy
     {
         /// <summary>
         /// Traverses the specified object graph.

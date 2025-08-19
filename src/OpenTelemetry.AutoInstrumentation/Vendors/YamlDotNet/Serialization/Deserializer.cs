@@ -38,7 +38,7 @@ namespace Vendors.YamlDotNet.Serialization
     /// To customize the behavior of <see cref="Deserializer" />,
     /// use the <see cref="DeserializerBuilder" /> class.
     /// </summary>
-    public sealed class Deserializer : IDeserializer
+    internal sealed class Deserializer : IDeserializer
     {
         private readonly IValueDeserializer valueDeserializer;
 

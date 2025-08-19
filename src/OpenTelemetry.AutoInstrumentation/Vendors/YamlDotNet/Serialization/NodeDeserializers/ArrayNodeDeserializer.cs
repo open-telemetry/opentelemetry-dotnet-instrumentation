@@ -32,7 +32,7 @@ using Vendors.YamlDotNet.Serialization.Utilities;
 
 namespace Vendors.YamlDotNet.Serialization.NodeDeserializers
 {
-    public sealed class ArrayNodeDeserializer : INodeDeserializer
+    internal sealed class ArrayNodeDeserializer : INodeDeserializer
     {
         private readonly INamingConvention enumNamingConvention;
         private readonly ITypeInspector typeInspector;

@@ -38,7 +38,7 @@ namespace Vendors.YamlDotNet.Serialization.ObjectFactories
     /// <summary>
     /// Creates objects using Activator.CreateInstance.
     /// </summary>
-    public class DefaultObjectFactory : ObjectFactoryBase
+    internal class DefaultObjectFactory : ObjectFactoryBase
     {
         private readonly Dictionary<Type, ConcurrentDictionary<Type, MethodInfo[]>> stateMethods = new()
         {

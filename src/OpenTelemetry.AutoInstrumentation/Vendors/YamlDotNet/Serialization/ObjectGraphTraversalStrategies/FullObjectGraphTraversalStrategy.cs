@@ -39,7 +39,7 @@ namespace Vendors.YamlDotNet.Serialization.ObjectGraphTraversalStrategies
     /// An implementation of <see cref="IObjectGraphTraversalStrategy"/> that traverses
     /// readable properties, collections and dictionaries.
     /// </summary>
-    public class FullObjectGraphTraversalStrategy : IObjectGraphTraversalStrategy
+    internal class FullObjectGraphTraversalStrategy : IObjectGraphTraversalStrategy
     {
         private readonly int maxRecursion;
         private readonly ITypeInspector typeDescriptor;

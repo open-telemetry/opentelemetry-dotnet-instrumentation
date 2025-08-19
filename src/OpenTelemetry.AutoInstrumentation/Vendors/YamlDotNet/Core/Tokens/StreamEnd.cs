@@ -29,7 +29,7 @@ namespace Vendors.YamlDotNet.Core.Tokens
     /// <summary>
     /// Represents a stream end event.
     /// </summary>
-    public sealed class StreamEnd : Token
+    internal sealed class StreamEnd : Token
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="StreamEnd"/> class.

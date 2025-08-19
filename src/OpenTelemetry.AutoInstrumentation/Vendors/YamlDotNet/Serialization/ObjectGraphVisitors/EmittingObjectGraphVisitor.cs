@@ -30,7 +30,7 @@ using Vendors.YamlDotNet.Core;
 
 namespace Vendors.YamlDotNet.Serialization.ObjectGraphVisitors
 {
-    public sealed class EmittingObjectGraphVisitor : IObjectGraphVisitor<IEmitter>
+    internal sealed class EmittingObjectGraphVisitor : IObjectGraphVisitor<IEmitter>
     {
         private readonly IEventEmitter eventEmitter;
 

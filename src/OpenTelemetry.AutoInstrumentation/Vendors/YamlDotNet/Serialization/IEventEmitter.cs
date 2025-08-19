@@ -29,7 +29,7 @@ using Vendors.YamlDotNet.Core;
 
 namespace Vendors.YamlDotNet.Serialization
 {
-    public interface IEventEmitter
+    internal interface IEventEmitter
     {
         void Emit(AliasEventInfo eventInfo, IEmitter emitter);
         void Emit(ScalarEventInfo eventInfo, IEmitter emitter);

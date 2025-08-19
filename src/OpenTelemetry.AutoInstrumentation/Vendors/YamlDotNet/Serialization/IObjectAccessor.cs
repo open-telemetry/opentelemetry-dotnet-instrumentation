@@ -30,7 +30,7 @@ namespace Vendors.YamlDotNet.Serialization
     /// <summary>
     /// The interface to implement for getting/setting an objects fields and properties when using a static context
     /// </summary>
-    public interface IObjectAccessor
+    internal interface IObjectAccessor
     {
         /// <summary>
         /// Set a field/property value

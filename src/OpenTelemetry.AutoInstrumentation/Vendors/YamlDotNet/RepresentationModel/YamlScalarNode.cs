@@ -41,7 +41,7 @@ namespace Vendors.YamlDotNet.RepresentationModel
     /// Represents a scalar node in the YAML document.
     /// </summary>
     [DebuggerDisplay("{Value}")]
-    public sealed class YamlScalarNode : YamlNode, IYamlConvertible
+    internal sealed class YamlScalarNode : YamlNode, IYamlConvertible
     {
         private bool forceImplicitPlain;
         private string? value;

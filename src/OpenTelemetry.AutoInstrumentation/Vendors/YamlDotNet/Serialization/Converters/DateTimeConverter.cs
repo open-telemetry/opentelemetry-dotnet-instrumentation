@@ -37,7 +37,7 @@ namespace Vendors.YamlDotNet.Serialization.Converters
     /// <summary>
     /// This represents the YAML converter entity for <see cref="DateTime"/>.
     /// </summary>
-    public class DateTimeConverter : IYamlTypeConverter
+    internal class DateTimeConverter : IYamlTypeConverter
     {
         private readonly DateTimeKind kind;
         private readonly IFormatProvider provider;

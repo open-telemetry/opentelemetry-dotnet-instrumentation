@@ -35,7 +35,7 @@ namespace Vendors.YamlDotNet.Serialization.NamingConventions
     /// <summary>
     /// Performs no naming conversion.
     /// </summary>
-    public sealed class NullNamingConvention : INamingConvention
+    internal sealed class NullNamingConvention : INamingConvention
     {
         [Obsolete("Use the Instance static field instead of creating new instances")]
         public NullNamingConvention() { }

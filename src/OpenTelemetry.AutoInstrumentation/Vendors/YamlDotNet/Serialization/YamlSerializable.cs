@@ -34,7 +34,7 @@ namespace Vendors.YamlDotNet.Serialization
     /// the static analyzer to detect and use.
     /// </summary>
     [AttributeUsage(AttributeTargets.Class | AttributeTargets.Enum | AttributeTargets.Struct, Inherited = false, AllowMultiple = true)]
-    public sealed class YamlSerializableAttribute : Attribute
+    internal sealed class YamlSerializableAttribute : Attribute
     {
         /// <summary>
         /// Use this constructor if the attribute is placed on a serializable class.

@@ -30,7 +30,7 @@ using Vendors.YamlDotNet.Core;
 
 namespace Vendors.YamlDotNet.Serialization.NodeDeserializers
 {
-    public sealed class YamlSerializableNodeDeserializer : INodeDeserializer
+    internal sealed class YamlSerializableNodeDeserializer : INodeDeserializer
     {
         private readonly IObjectFactory objectFactory;
 

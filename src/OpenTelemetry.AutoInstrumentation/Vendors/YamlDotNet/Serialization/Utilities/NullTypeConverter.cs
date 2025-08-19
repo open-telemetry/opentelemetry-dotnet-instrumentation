@@ -29,7 +29,7 @@ using System;
 
 namespace Vendors.YamlDotNet.Serialization.Utilities
 {
-    public class NullTypeConverter : ITypeConverter
+    internal class NullTypeConverter : ITypeConverter
     {
         public object? ChangeType(object? value, Type expectedType, INamingConvention enumNamingConvention, ITypeInspector typeInspector) => value;
     }

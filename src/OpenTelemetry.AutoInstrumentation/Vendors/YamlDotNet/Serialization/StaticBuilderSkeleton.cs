@@ -37,7 +37,7 @@ namespace Vendors.YamlDotNet.Serialization
     /// <summary>
     /// Common implementation of <see cref="SerializerBuilder" /> and <see cref="DeserializerBuilder" />.
     /// </summary>
-    public abstract class StaticBuilderSkeleton<TBuilder>
+    internal abstract class StaticBuilderSkeleton<TBuilder>
         where TBuilder : StaticBuilderSkeleton<TBuilder>
     {
         internal INamingConvention namingConvention = NullNamingConvention.Instance;

@@ -30,7 +30,7 @@ using Vendors.YamlDotNet.Serialization;
 
 namespace Vendors.YamlDotNet.Helpers
 {
-    public static class FsharpHelper
+    internal static class FsharpHelper
     {
         public static IFsharpHelper? Instance { get; set; }
 

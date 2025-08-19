@@ -39,7 +39,7 @@ namespace Vendors.YamlDotNet.Serialization.BufferedDeserialization.TypeDiscrimin
     /// A TypeDiscriminator that discriminates which type to deserialize a yaml stream into by checking the existence
     /// of specific keys.
     /// </summary>
-    public class UniqueKeyTypeDiscriminator : ITypeDiscriminator
+    internal class UniqueKeyTypeDiscriminator : ITypeDiscriminator
     {
 #pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
         public Type BaseType { get; private set; }

@@ -33,7 +33,7 @@ using System.Reflection;
 
 namespace Vendors.YamlDotNet.Helpers
 {
-    public static class ExpressionExtensions
+    internal static class ExpressionExtensions
     {
         /// <summary>
         /// Returns the <see cref="PropertyInfo" /> that describes the property that

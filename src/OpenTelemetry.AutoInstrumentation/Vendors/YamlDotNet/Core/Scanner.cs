@@ -38,7 +38,7 @@ namespace Vendors.YamlDotNet.Core
     /// <summary>
     /// Converts a sequence of characters into a sequence of YAML tokens.
     /// </summary>
-    public class Scanner : IScanner
+    internal class Scanner : IScanner
     {
         private const int MaxVersionNumberLength = 9;
 

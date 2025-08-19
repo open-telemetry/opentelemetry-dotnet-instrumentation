@@ -33,7 +33,7 @@ using Vendors.YamlDotNet.Serialization.Utilities;
 
 namespace Vendors.YamlDotNet.Serialization.NodeDeserializers
 {
-    public sealed class TypeConverterNodeDeserializer : INodeDeserializer
+    internal sealed class TypeConverterNodeDeserializer : INodeDeserializer
     {
         private readonly TypeConverterCache converters;
 

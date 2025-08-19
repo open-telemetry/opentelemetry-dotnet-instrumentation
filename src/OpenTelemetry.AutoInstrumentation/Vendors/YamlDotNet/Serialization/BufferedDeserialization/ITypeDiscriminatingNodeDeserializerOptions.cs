@@ -36,7 +36,7 @@ using Vendors.YamlDotNet.Serialization.BufferedDeserialization.TypeDiscriminator
 
 namespace Vendors.YamlDotNet.Serialization.BufferedDeserialization
 {
-    public interface ITypeDiscriminatingNodeDeserializerOptions
+    internal interface ITypeDiscriminatingNodeDeserializerOptions
     {
         public void AddTypeDiscriminator(ITypeDiscriminator discriminator);
         public void AddKeyValueTypeDiscriminator<T>(string discriminatorKey, IDictionary<string, Type> valueTypeMapping);

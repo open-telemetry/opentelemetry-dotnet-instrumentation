@@ -35,7 +35,7 @@ using Vendors.YamlDotNet.Serialization.Utilities;
 
 namespace Vendors.YamlDotNet.Serialization.NodeDeserializers
 {
-    public abstract class CollectionDeserializer
+    internal abstract class CollectionDeserializer
     {
         protected static void DeserializeHelper(Type tItem, IParser parser, Func<IParser, Type, object?> nestedObjectDeserializer, IList result, bool canUpdate, IObjectFactory objectFactory)
         {

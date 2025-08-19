@@ -32,7 +32,7 @@ namespace Vendors.YamlDotNet.Core
     /// <summary>
     /// Represents a YAML stream parser.
     /// </summary>
-    public interface IParser
+    internal interface IParser
     {
         /// <summary>
         /// Gets the current event. Returns null before the first call to <see cref="MoveNext" />,

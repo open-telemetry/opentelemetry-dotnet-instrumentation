@@ -40,7 +40,7 @@ namespace Vendors.YamlDotNet.RepresentationModel
     /// Represents a sequence node in the YAML document.
     /// </summary>
     [DebuggerDisplay("Count = {children.Count}")]
-    public sealed class YamlSequenceNode : YamlNode, IEnumerable<YamlNode>, IYamlConvertible
+    internal sealed class YamlSequenceNode : YamlNode, IEnumerable<YamlNode>, IYamlConvertible
     {
         private readonly List<YamlNode> children = [];
 

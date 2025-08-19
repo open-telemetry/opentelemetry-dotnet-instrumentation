@@ -35,7 +35,7 @@ namespace Vendors.YamlDotNet.Serialization.EventEmitters
     /// Provided the base implementation for an IEventEmitter that is a
     /// decorator for another IEventEmitter.
     /// </summary>
-    public abstract class ChainedEventEmitter : IEventEmitter
+    internal abstract class ChainedEventEmitter : IEventEmitter
     {
         protected readonly IEventEmitter nextEmitter;
 

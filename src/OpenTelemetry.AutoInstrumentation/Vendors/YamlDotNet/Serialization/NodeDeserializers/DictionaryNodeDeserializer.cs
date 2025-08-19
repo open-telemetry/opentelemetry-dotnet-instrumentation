@@ -33,7 +33,7 @@ using Vendors.YamlDotNet.Helpers;
 
 namespace Vendors.YamlDotNet.Serialization.NodeDeserializers
 {
-    public class DictionaryNodeDeserializer : DictionaryDeserializer, INodeDeserializer
+    internal class DictionaryNodeDeserializer : DictionaryDeserializer, INodeDeserializer
     {
         private readonly IObjectFactory objectFactory;
 

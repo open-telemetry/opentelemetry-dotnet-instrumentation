@@ -33,7 +33,7 @@ namespace Vendors.YamlDotNet.Core
     /// <summary>
     /// Represents a location inside a file
     /// </summary>
-    public readonly struct Mark : IEquatable<Mark>, IComparable<Mark>, IComparable
+    internal readonly struct Mark : IEquatable<Mark>, IComparable<Mark>, IComparable
     {
         /// <summary>
         /// Gets a <see cref="Mark"/> with empty values.

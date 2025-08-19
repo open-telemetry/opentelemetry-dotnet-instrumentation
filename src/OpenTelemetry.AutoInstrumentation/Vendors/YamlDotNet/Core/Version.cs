@@ -32,7 +32,7 @@ namespace Vendors.YamlDotNet.Core
     /// <summary>
     /// Specifies the version of the YAML language.
     /// </summary>
-    public sealed class Version
+    internal sealed class Version
     {
         /// <summary>
         /// Gets the major version number.

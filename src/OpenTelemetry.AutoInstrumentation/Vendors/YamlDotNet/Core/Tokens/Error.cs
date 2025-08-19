@@ -29,7 +29,7 @@ namespace Vendors.YamlDotNet.Core.Tokens
     /// <summary>
     /// Error tokens.
     /// </summary>
-    public class Error : Token
+    internal class Error : Token
     {
         /// <summary>
         /// Gets the value of the error

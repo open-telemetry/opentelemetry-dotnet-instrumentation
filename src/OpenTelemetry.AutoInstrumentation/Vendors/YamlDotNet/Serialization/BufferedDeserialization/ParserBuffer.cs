@@ -36,7 +36,7 @@ namespace Vendors.YamlDotNet.Serialization.BufferedDeserialization
     /// <summary>
     /// Wraps a <see cref="IParser"/> instance and allows it to be buffered as a LinkedList in memory and replayed.
     /// </summary>
-    public class ParserBuffer : IParser
+    internal class ParserBuffer : IParser
     {
         private readonly LinkedList<ParsingEvent> buffer;
 

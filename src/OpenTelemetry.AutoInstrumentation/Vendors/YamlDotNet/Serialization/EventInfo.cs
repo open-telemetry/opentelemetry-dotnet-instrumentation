@@ -31,7 +31,7 @@ using Vendors.YamlDotNet.Core.Events;
 
 namespace Vendors.YamlDotNet.Serialization
 {
-    public abstract class EventInfo
+    internal abstract class EventInfo
     {
         public IObjectDescriptor Source { get; }
 
@@ -41,7 +41,7 @@ namespace Vendors.YamlDotNet.Serialization
         }
     }
 
-    public class AliasEventInfo : EventInfo
+    internal class AliasEventInfo : EventInfo
     {
         public AliasEventInfo(IObjectDescriptor source, AnchorName alias)
             : base(source)
@@ -57,7 +57,7 @@ namespace Vendors.YamlDotNet.Serialization
         public bool NeedsExpansion { get; set; }
     }
 
-    public class ObjectEventInfo : EventInfo
+    internal class ObjectEventInfo : EventInfo
     {
         protected ObjectEventInfo(IObjectDescriptor source)
             : base(source)
@@ -68,7 +68,7 @@ namespace Vendors.YamlDotNet.Serialization
         public TagName Tag { get; set; }
     }
 
-    public sealed class ScalarEventInfo : ObjectEventInfo
+    internal sealed class ScalarEventInfo : ObjectEventInfo
     {
         public ScalarEventInfo(IObjectDescriptor source)
             : base(source)
@@ -83,7 +83,7 @@ namespace Vendors.YamlDotNet.Serialization
         public bool IsQuotedImplicit { get; set; }
     }
 
-    public sealed class MappingStartEventInfo : ObjectEventInfo
+    internal sealed class MappingStartEventInfo : ObjectEventInfo
     {
         public MappingStartEventInfo(IObjectDescriptor source)
             : base(source)
@@ -94,7 +94,7 @@ namespace Vendors.YamlDotNet.Serialization
         public MappingStyle Style { get; set; }
     }
 
-    public sealed class MappingEndEventInfo : EventInfo
+    internal sealed class MappingEndEventInfo : EventInfo
     {
         public MappingEndEventInfo(IObjectDescriptor source)
             : base(source)
@@ -102,7 +102,7 @@ namespace Vendors.YamlDotNet.Serialization
         }
     }
 
-    public sealed class SequenceStartEventInfo : ObjectEventInfo
+    internal sealed class SequenceStartEventInfo : ObjectEventInfo
     {
         public SequenceStartEventInfo(IObjectDescriptor source)
             : base(source)
@@ -113,7 +113,7 @@ namespace Vendors.YamlDotNet.Serialization
         public SequenceStyle Style { get; set; }
     }
 
-    public sealed class SequenceEndEventInfo : EventInfo
+    internal sealed class SequenceEndEventInfo : EventInfo
     {
         public SequenceEndEventInfo(IObjectDescriptor source)
             : base(source)

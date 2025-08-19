@@ -31,7 +31,7 @@ using Vendors.YamlDotNet.Core.Events;
 
 namespace Vendors.YamlDotNet.Serialization.NodeTypeResolvers
 {
-    public class PreventUnknownTagsNodeTypeResolver : INodeTypeResolver
+    internal class PreventUnknownTagsNodeTypeResolver : INodeTypeResolver
     {
         bool INodeTypeResolver.Resolve(NodeEvent? nodeEvent, ref Type currentType)
         {

@@ -34,7 +34,7 @@ namespace Vendors.YamlDotNet.Serialization
     /// Provides special Yaml serialization instructions.
     /// </summary>
     [AttributeUsage(AttributeTargets.Property | AttributeTargets.Field, AllowMultiple = false)]
-    public sealed class YamlMemberAttribute : Attribute
+    internal sealed class YamlMemberAttribute : Attribute
     {
         /// <summary>
         /// Decription/Comment about this property.

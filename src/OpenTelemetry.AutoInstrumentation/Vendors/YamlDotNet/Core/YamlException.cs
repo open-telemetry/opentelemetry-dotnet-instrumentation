@@ -32,7 +32,7 @@ namespace Vendors.YamlDotNet.Core
     /// <summary>
     /// Base exception that is thrown when the a problem occurs in the YamlDotNet library.
     /// </summary>
-    public class YamlException : Exception
+    internal class YamlException : Exception
     {
         /// <summary>
         /// Gets the position in the input stream where the event that originated the exception starts.

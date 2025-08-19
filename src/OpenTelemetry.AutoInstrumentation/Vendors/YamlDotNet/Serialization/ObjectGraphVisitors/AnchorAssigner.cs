@@ -32,7 +32,7 @@ using Vendors.YamlDotNet.Core;
 
 namespace Vendors.YamlDotNet.Serialization.ObjectGraphVisitors
 {
-    public sealed class AnchorAssigner : PreProcessingPhaseObjectGraphVisitorSkeleton, IAliasProvider
+    internal sealed class AnchorAssigner : PreProcessingPhaseObjectGraphVisitorSkeleton, IAliasProvider
     {
         private class AnchorAssignment
         {

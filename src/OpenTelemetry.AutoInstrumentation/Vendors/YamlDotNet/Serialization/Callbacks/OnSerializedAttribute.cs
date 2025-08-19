@@ -31,7 +31,7 @@ using System;
 namespace Vendors.YamlDotNet.Serialization.Callbacks
 {
     [AttributeUsage(AttributeTargets.Method)]
-    public sealed class OnSerializedAttribute : Attribute
+    internal sealed class OnSerializedAttribute : Attribute
     {
     }
 }

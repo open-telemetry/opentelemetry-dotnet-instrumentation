@@ -33,7 +33,7 @@ using Vendors.YamlDotNet.Serialization.Utilities;
 
 namespace Vendors.YamlDotNet.Serialization.ObjectFactories
 {
-    public abstract class ObjectFactoryBase : IObjectFactory
+    internal abstract class ObjectFactoryBase : IObjectFactory
     {
         public abstract object Create(Type type);
 

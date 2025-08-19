@@ -30,7 +30,7 @@ using Vendors.YamlDotNet.Serialization.NamingConventions;
 
 namespace Vendors.YamlDotNet.Serialization.Utilities
 {
-    public class ReflectionTypeConverter : ITypeConverter
+    internal class ReflectionTypeConverter : ITypeConverter
     {
         public object? ChangeType(object? value, Type expectedType, ITypeInspector typeInspector) => ChangeType(value, expectedType, NullNamingConvention.Instance, typeInspector);
         public object? ChangeType(object? value, Type expectedType, INamingConvention enumNamingConvention, ITypeInspector typeInspector) => TypeConverter.ChangeType(value, expectedType, enumNamingConvention, typeInspector);

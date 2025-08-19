@@ -29,7 +29,7 @@ namespace Vendors.YamlDotNet.Core.Events
     /// <summary>
     /// Represents a mapping end event.
     /// </summary>
-    public class MappingEnd : ParsingEvent
+    internal class MappingEnd : ParsingEvent
     {
         /// <summary>
         /// Gets a value indicating the variation of depth caused by this event.

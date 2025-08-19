@@ -30,7 +30,7 @@ using Vendors.YamlDotNet.Core;
 
 namespace Vendors.YamlDotNet.Serialization
 {
-    public sealed class PropertyDescriptor : IPropertyDescriptor
+    internal sealed class PropertyDescriptor : IPropertyDescriptor
     {
         private readonly IPropertyDescriptor baseDescriptor;
         public PropertyDescriptor(IPropertyDescriptor baseDescriptor)

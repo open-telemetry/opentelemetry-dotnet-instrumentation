@@ -54,7 +54,7 @@ namespace Vendors.YamlDotNet.Serialization
     [RequiresDynamicCode("This builder configures the serializer to use reflection which is not compatible with ahead-of-time compilation or assembly trimming." +
         " You need to use the code generator/analyzer to generate static code and use the 'StaticSerializerBuilder' object instead of this one.")]
 #endif
-    public sealed class SerializerBuilder : BuilderSkeleton<SerializerBuilder>
+    internal sealed class SerializerBuilder : BuilderSkeleton<SerializerBuilder>
     {
 #pragma warning restore IDE0055
         private ObjectGraphTraversalStrategyFactory objectGraphTraversalStrategyFactory;

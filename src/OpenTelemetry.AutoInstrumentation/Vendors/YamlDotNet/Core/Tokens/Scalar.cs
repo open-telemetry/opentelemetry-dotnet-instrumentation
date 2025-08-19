@@ -32,7 +32,7 @@ namespace Vendors.YamlDotNet.Core.Tokens
     /// <summary>
     /// Represents a scalar token.
     /// </summary>
-    public sealed class Scalar : Token
+    internal sealed class Scalar : Token
     {
         /// <summary>
         /// Gets or sets whether this scalar is a key

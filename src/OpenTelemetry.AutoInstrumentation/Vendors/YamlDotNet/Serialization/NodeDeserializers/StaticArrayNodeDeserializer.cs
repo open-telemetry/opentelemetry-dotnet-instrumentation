@@ -32,7 +32,7 @@ using Vendors.YamlDotNet.Serialization.ObjectFactories;
 
 namespace Vendors.YamlDotNet.Serialization.NodeDeserializers
 {
-    public sealed class StaticArrayNodeDeserializer : INodeDeserializer
+    internal sealed class StaticArrayNodeDeserializer : INodeDeserializer
     {
         private readonly StaticObjectFactory factory;
 

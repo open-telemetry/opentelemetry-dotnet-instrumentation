@@ -31,7 +31,7 @@ namespace Vendors.YamlDotNet.Core.Tokens
     /// <summary>
     /// Represents an anchor token.
     /// </summary>
-    public class Anchor : Token
+    internal class Anchor : Token
     {
         /// <summary>
         /// Gets the value.

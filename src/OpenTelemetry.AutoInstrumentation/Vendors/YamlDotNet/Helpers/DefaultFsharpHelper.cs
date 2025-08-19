@@ -34,7 +34,7 @@ using Vendors.YamlDotNet.Serialization;
 
 namespace Vendors.YamlDotNet.Helpers
 {
-    public class DefaultFsharpHelper : IFsharpHelper
+    internal class DefaultFsharpHelper : IFsharpHelper
     {
         private static bool IsFsharpCore(Type t)
         {

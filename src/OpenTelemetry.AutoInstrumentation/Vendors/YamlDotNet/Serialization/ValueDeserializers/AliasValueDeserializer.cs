@@ -33,7 +33,7 @@ using Vendors.YamlDotNet.Serialization.Utilities;
 
 namespace Vendors.YamlDotNet.Serialization.ValueDeserializers
 {
-    public sealed class AliasValueDeserializer : IValueDeserializer
+    internal sealed class AliasValueDeserializer : IValueDeserializer
     {
         private readonly IValueDeserializer innerDeserializer;
 

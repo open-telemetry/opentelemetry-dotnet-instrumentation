@@ -34,7 +34,7 @@ namespace Vendors.YamlDotNet.Serialization.TypeInspectors
     /// <summary>
     /// Returns the properties of a type that are both readable and writable.
     /// </summary>
-    public class ReadableAndWritablePropertiesTypeInspector : TypeInspectorSkeleton
+    internal class ReadableAndWritablePropertiesTypeInspector : TypeInspectorSkeleton
     {
         private readonly ITypeInspector innerTypeDescriptor;
 

@@ -38,7 +38,7 @@ namespace Vendors.YamlDotNet.Serialization
     /// <summary>
     /// Define a collection of YamlAttribute Overrides for pre-defined object types.
     /// </summary>
-    public sealed partial class YamlAttributeOverrides
+    internal sealed partial class YamlAttributeOverrides
     {
         private readonly struct AttributeKey
         {
@@ -186,7 +186,7 @@ namespace Vendors.YamlDotNet.Serialization
 
 namespace Vendors.YamlDotNet.Serialization
 {
-    public partial class YamlAttributeOverrides
+    internal partial class YamlAttributeOverrides
     {
         /// <summary>
         /// Adds a Member Attribute Override

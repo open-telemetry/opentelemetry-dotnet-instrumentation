@@ -31,7 +31,7 @@ namespace Vendors.YamlDotNet.Core.Tokens
     /// <summary>
     /// Represents a comment
     /// </summary>
-    public sealed class Comment : Token
+    internal sealed class Comment : Token
     {
         /// <summary>
         /// Gets the value of the comment

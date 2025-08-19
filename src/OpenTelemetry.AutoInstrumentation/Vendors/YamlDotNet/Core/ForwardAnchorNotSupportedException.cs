@@ -32,7 +32,7 @@ namespace Vendors.YamlDotNet.Core
     /// The exception that is thrown when an alias references an anchor
     /// that has not yet been defined in a context that does not support forward references.
     /// </summary>
-    public sealed class ForwardAnchorNotSupportedException : YamlException
+    internal sealed class ForwardAnchorNotSupportedException : YamlException
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="AnchorNotFoundException"/> class.

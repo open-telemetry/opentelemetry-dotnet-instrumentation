@@ -29,7 +29,7 @@ using System;
 
 namespace Vendors.YamlDotNet.Core
 {
-    public sealed class EmitterSettings
+    internal sealed class EmitterSettings
     {
         /// <summary>
         /// The preferred indentation.

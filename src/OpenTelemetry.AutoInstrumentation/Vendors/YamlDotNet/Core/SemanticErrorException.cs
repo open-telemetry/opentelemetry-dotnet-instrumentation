@@ -31,7 +31,7 @@ namespace Vendors.YamlDotNet.Core
     /// <summary>
     /// Exception that is thrown when a semantic error is detected on a YAML stream.
     /// </summary>
-    public class SemanticErrorException : YamlException
+    internal class SemanticErrorException : YamlException
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="SemanticErrorException"/> class.

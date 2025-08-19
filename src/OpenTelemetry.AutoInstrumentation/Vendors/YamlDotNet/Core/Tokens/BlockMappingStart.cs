@@ -29,7 +29,7 @@ namespace Vendors.YamlDotNet.Core.Tokens
     /// <summary>
     /// Represents a block mapping start token.
     /// </summary>
-    public sealed class BlockMappingStart : Token
+    internal sealed class BlockMappingStart : Token
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="BlockMappingStart"/> class.

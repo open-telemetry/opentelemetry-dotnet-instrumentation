@@ -39,7 +39,7 @@ namespace Vendors.YamlDotNet.Serialization.Converters
     /// To use this converter, call WithTypeConverter(new DateTimeOffsetConverter()) on the
     /// <seealso cref="DeserializerBuilder"/> or <seealso cref="SerializerBuilder"/>.
     /// </summary>
-    public class DateTimeOffsetConverter : IYamlTypeConverter
+    internal class DateTimeOffsetConverter : IYamlTypeConverter
     {
         private readonly IFormatProvider provider;
         private readonly ScalarStyle style;

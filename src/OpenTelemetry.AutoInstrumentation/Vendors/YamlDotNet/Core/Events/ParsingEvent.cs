@@ -29,7 +29,7 @@ namespace Vendors.YamlDotNet.Core.Events
     /// <summary>
     /// Base class for parsing events.
     /// </summary>
-    public abstract class ParsingEvent
+    internal abstract class ParsingEvent
     {
         /// <summary>
         /// Gets a value indicating the variation of depth caused by this event.

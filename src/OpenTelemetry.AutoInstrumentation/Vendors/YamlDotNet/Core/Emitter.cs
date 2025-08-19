@@ -42,7 +42,7 @@ namespace Vendors.YamlDotNet.Core
     /// <summary>
     /// Emits YAML streams.
     /// </summary>
-    public class Emitter : IEmitter
+    internal class Emitter : IEmitter
     {
         private static readonly Regex UriReplacer = new Regex(@"[^0-9A-Za-z_\-;?@=$~\\\)\]/:&+,\.\*\(\[!]",
             StandardRegexOptions.Compiled | RegexOptions.Singleline);

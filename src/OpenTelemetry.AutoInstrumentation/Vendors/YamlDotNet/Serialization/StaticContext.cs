@@ -33,7 +33,7 @@ namespace Vendors.YamlDotNet.Serialization
     /// <summary>
     /// Holds the static object factory and type inspector to use when statically serializing/deserializing YAML.
     /// </summary>
-    public abstract class StaticContext
+    internal abstract class StaticContext
     {
         /// <summary>
         /// Gets whether the type is known to the context

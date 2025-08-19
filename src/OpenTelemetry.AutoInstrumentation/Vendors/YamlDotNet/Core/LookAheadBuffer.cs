@@ -39,7 +39,7 @@ namespace Vendors.YamlDotNet.Core
     /// This class implements a circular buffer with a fixed capacity.
     /// </remarks>
     [DebuggerStepThrough]
-    public sealed class LookAheadBuffer : ILookAheadBuffer
+    internal sealed class LookAheadBuffer : ILookAheadBuffer
     {
         private readonly TextReader input;
         private readonly char[] buffer;

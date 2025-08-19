@@ -34,7 +34,7 @@ using Vendors.YamlDotNet.Serialization.Utilities;
 
 namespace Vendors.YamlDotNet.Serialization.NodeDeserializers
 {
-    public sealed class FsharpListNodeDeserializer : INodeDeserializer
+    internal sealed class FsharpListNodeDeserializer : INodeDeserializer
     {
         private readonly ITypeInspector typeInspector;
         private readonly INamingConvention enumNamingConvention;

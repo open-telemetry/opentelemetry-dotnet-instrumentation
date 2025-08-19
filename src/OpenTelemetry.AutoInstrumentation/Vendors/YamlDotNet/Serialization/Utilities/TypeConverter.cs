@@ -41,7 +41,7 @@ namespace Vendors.YamlDotNet.Serialization.Utilities
     /// <summary>
     /// Performs type conversions using every standard provided by the .NET library.
     /// </summary>
-    public static partial class TypeConverter
+    internal static partial class TypeConverter
     {
         /// <summary>
         /// Converts the specified value.

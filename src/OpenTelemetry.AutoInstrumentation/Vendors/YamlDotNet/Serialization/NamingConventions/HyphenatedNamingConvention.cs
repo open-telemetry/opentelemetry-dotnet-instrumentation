@@ -34,7 +34,7 @@ namespace Vendors.YamlDotNet.Serialization.NamingConventions
     /// <summary>
     /// Convert the string from camelcase (thisIsATest) to a hyphenated (this-is-a-test) string
     /// </summary>
-    public sealed class HyphenatedNamingConvention : INamingConvention
+    internal sealed class HyphenatedNamingConvention : INamingConvention
     {
         [Obsolete("Use the Instance static field instead of creating new instances")]
         public HyphenatedNamingConvention() { }

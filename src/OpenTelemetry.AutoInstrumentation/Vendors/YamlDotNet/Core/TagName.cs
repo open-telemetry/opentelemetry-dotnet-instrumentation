@@ -29,7 +29,7 @@ using System;
 
 namespace Vendors.YamlDotNet.Core
 {
-    public readonly struct TagName : IEquatable<TagName>
+    internal readonly struct TagName : IEquatable<TagName>
     {
         public static readonly TagName Empty;
 

@@ -26,7 +26,7 @@
 
 namespace Vendors.YamlDotNet.Core.Events
 {
-    public sealed class Comment : ParsingEvent
+    internal sealed class Comment : ParsingEvent
     {
         public string Value { get; }
         public bool IsInline { get; }

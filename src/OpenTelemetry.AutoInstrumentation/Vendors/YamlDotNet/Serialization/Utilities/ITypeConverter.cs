@@ -29,7 +29,7 @@ using System;
 
 namespace Vendors.YamlDotNet.Serialization.Utilities
 {
-    public interface ITypeConverter
+    internal interface ITypeConverter
     {
         /// <summary>
         /// Convert a value to a specified type

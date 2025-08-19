@@ -29,7 +29,7 @@ namespace Vendors.YamlDotNet.Core.Events
     /// <summary>
     /// Represents a stream end event.
     /// </summary>
-    public sealed class StreamEnd : ParsingEvent
+    internal sealed class StreamEnd : ParsingEvent
     {
         /// <summary>
         /// Gets a value indicating the variation of depth caused by this event.

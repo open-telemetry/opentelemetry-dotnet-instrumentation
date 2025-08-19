@@ -38,7 +38,7 @@ namespace Vendors.YamlDotNet.Serialization
     /// Common implementation of <see cref="SerializerBuilder" /> and <see cref="DeserializerBuilder" />.
     /// </summary>
 #pragma warning disable CA1708 // Identifiers should differ by more than case
-    public abstract class BuilderSkeleton<TBuilder>
+    internal abstract class BuilderSkeleton<TBuilder>
 #pragma warning restore CA1708
         where TBuilder : BuilderSkeleton<TBuilder>
     {

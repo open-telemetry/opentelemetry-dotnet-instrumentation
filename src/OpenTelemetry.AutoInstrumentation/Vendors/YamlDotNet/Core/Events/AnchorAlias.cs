@@ -29,7 +29,7 @@ namespace Vendors.YamlDotNet.Core.Events
     /// <summary>
     /// Represents an alias event.
     /// </summary>
-    public sealed class AnchorAlias : ParsingEvent
+    internal sealed class AnchorAlias : ParsingEvent
     {
         /// <summary>
         /// Gets the event type, which allows for simpler type comparisons.

@@ -31,7 +31,7 @@ using Vendors.YamlDotNet.Serialization.Utilities;
 
 namespace Vendors.YamlDotNet.Serialization
 {
-    public interface IValueDeserializer
+    internal interface IValueDeserializer
     {
         object? DeserializeValue(IParser parser, Type expectedType, SerializerState state, IValueDeserializer nestedObjectDeserializer);
     }

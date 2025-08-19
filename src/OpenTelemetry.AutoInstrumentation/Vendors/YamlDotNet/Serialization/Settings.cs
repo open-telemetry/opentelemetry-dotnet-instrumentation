@@ -27,7 +27,7 @@
 
 namespace Vendors.YamlDotNet.Serialization
 {
-    public class Settings
+    internal class Settings
     {
         /// <summary>
         /// If true then private, parameterless constructors will be invoked if a public one is not available.

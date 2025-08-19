@@ -35,7 +35,7 @@ namespace Vendors.YamlDotNet.Serialization.Converters
     /// <summary>
     /// Converter for System.Guid.
     /// </summary>
-    public class GuidConverter : IYamlTypeConverter
+    internal class GuidConverter : IYamlTypeConverter
     {
         private readonly bool jsonCompatible;
 

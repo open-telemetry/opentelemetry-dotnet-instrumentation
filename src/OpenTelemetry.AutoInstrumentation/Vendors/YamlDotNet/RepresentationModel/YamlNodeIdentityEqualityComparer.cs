@@ -34,7 +34,7 @@ namespace Vendors.YamlDotNet.RepresentationModel
     /// <summary>
     /// Comparer that is based on identity comparisons.
     /// </summary>
-    public sealed class YamlNodeIdentityEqualityComparer : IEqualityComparer<YamlNode>
+    internal sealed class YamlNodeIdentityEqualityComparer : IEqualityComparer<YamlNode>
     {
         #region IEqualityComparer<YamlNode> Members
 

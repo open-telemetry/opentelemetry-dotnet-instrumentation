@@ -29,7 +29,7 @@ using Vendors.YamlDotNet.Core;
 
 namespace Vendors.YamlDotNet.Serialization
 {
-    public interface IAliasProvider
+    internal interface IAliasProvider
     {
         AnchorName GetAlias(object target);
     }

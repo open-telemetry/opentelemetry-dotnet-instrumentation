@@ -32,7 +32,7 @@ using Vendors.YamlDotNet.Core.Events;
 
 namespace Vendors.YamlDotNet.Serialization.NodeDeserializers
 {
-    public abstract class DictionaryDeserializer
+    internal abstract class DictionaryDeserializer
     {
         private readonly bool duplicateKeyChecking;
 

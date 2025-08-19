@@ -36,7 +36,7 @@ namespace Vendors.YamlDotNet.Serialization.Converters
     /// <summary>
     /// This represents the YAML converter entity for <see cref="DateTime"/> using the ISO-8601 standard format.
     /// </summary>
-    public class DateTime8601Converter : IYamlTypeConverter
+    internal class DateTime8601Converter : IYamlTypeConverter
     {
         private readonly ScalarStyle scalarStyle;
 

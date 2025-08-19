@@ -29,7 +29,7 @@ namespace Vendors.YamlDotNet.Core.Tokens
     /// <summary>
     /// Represents a document start token.
     /// </summary>
-    public sealed class DocumentStart : Token
+    internal sealed class DocumentStart : Token
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="DocumentStart"/> class.

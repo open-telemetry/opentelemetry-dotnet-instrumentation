@@ -37,7 +37,7 @@ namespace Vendors.YamlDotNet.Core
     /// <summary>
     /// Extension methods that provide useful abstractions over <see cref="IParser"/>.
     /// </summary>
-    public static class ParserExtensions
+    internal static class ParserExtensions
     {
         /// <summary>
         /// Ensures that the current event is of the specified type, returns it and moves to the next event.

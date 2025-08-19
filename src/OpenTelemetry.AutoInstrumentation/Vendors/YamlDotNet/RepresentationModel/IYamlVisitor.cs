@@ -29,7 +29,7 @@ namespace Vendors.YamlDotNet.RepresentationModel
     /// <summary>
     /// Defines the method needed to be able to visit Yaml elements.
     /// </summary>
-    public interface IYamlVisitor
+    internal interface IYamlVisitor
     {
         /// <summary>
         /// Visits a <see cref="YamlStream"/>.

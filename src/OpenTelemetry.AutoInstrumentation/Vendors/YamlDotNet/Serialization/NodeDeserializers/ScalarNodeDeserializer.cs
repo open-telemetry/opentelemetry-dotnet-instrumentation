@@ -37,7 +37,7 @@ using Vendors.YamlDotNet.Serialization.Utilities;
 
 namespace Vendors.YamlDotNet.Serialization.NodeDeserializers
 {
-    public sealed class ScalarNodeDeserializer : INodeDeserializer
+    internal sealed class ScalarNodeDeserializer : INodeDeserializer
     {
         private const string BooleanTruePattern = "^(true|y|yes|on)$";
         private const string BooleanFalsePattern = "^(false|n|no|off)$";

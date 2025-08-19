@@ -31,7 +31,7 @@ using Vendors.YamlDotNet.Core.Events;
 namespace Vendors.YamlDotNet.Serialization.NodeTypeResolvers
 {
     [Obsolete("The mechanism that this class uses to specify type names is non-standard. Register the tags explicitly instead of using this convention.")]
-    public sealed class TypeNameInTagNodeTypeResolver : INodeTypeResolver
+    internal sealed class TypeNameInTagNodeTypeResolver : INodeTypeResolver
     {
         bool INodeTypeResolver.Resolve(NodeEvent? nodeEvent, ref Type currentType)
         {

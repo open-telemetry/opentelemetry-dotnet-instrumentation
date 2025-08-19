@@ -36,7 +36,7 @@ using System.Runtime.Serialization;
 
 namespace Vendors.YamlDotNet.Serialization.TypeInspectors
 {
-    public abstract class TypeInspectorSkeleton : ITypeInspector
+    internal abstract class TypeInspectorSkeleton : ITypeInspector
     {
         public abstract string GetEnumName(Type enumType, string name);
 

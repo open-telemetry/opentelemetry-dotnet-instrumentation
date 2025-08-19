@@ -35,7 +35,7 @@ namespace Vendors.YamlDotNet.Serialization
     /// <summary>
     /// Applies the Yaml* attributes to another <see cref="ITypeInspector"/>.
     /// </summary>
-    public sealed class YamlAttributesTypeInspector : TypeInspectorSkeleton
+    internal sealed class YamlAttributesTypeInspector : TypeInspectorSkeleton
     {
         private readonly ITypeInspector innerTypeDescriptor;
 

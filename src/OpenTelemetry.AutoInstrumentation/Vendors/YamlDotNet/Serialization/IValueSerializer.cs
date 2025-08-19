@@ -30,7 +30,7 @@ using Vendors.YamlDotNet.Core;
 
 namespace Vendors.YamlDotNet.Serialization
 {
-    public interface IValueSerializer
+    internal interface IValueSerializer
     {
         void SerializeValue(IEmitter emitter, object? value, Type? type);
     }

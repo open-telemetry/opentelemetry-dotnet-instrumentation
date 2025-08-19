@@ -36,7 +36,7 @@ namespace Vendors.YamlDotNet.Serialization
     /// <summary>
     /// An object that contains part of a YAML stream.
     /// </summary>
-    public sealed class StreamFragment : IYamlConvertible
+    internal sealed class StreamFragment : IYamlConvertible
     {
         private readonly List<ParsingEvent> events = [];
 

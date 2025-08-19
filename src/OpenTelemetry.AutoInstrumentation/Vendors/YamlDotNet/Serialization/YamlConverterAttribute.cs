@@ -30,7 +30,7 @@ using System;
 namespace Vendors.YamlDotNet.Serialization
 {
     [AttributeUsage(AttributeTargets.Property | AttributeTargets.Field)]
-    public sealed class YamlConverterAttribute : Attribute
+    internal sealed class YamlConverterAttribute : Attribute
     {
         public Type ConverterType { get; }
 

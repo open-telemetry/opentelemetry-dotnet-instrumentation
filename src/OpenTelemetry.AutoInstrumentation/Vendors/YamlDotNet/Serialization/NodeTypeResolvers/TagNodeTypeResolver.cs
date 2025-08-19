@@ -32,7 +32,7 @@ using Vendors.YamlDotNet.Core.Events;
 
 namespace Vendors.YamlDotNet.Serialization.NodeTypeResolvers
 {
-    public sealed class TagNodeTypeResolver : INodeTypeResolver
+    internal sealed class TagNodeTypeResolver : INodeTypeResolver
     {
         private readonly IDictionary<TagName, Type> tagMappings;
 

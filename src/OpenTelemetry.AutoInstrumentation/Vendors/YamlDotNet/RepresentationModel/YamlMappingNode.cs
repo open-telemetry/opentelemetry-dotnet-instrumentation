@@ -40,7 +40,7 @@ namespace Vendors.YamlDotNet.RepresentationModel
     /// <summary>
     /// Represents a mapping node in the YAML document.
     /// </summary>
-    public sealed class YamlMappingNode : YamlNode, IEnumerable<KeyValuePair<YamlNode, YamlNode>>, IYamlConvertible
+    internal sealed class YamlMappingNode : YamlNode, IEnumerable<KeyValuePair<YamlNode, YamlNode>>, IYamlConvertible
     {
         private readonly YamlDotNet.Helpers.OrderedDictionary<YamlNode, YamlNode> children = [];
 

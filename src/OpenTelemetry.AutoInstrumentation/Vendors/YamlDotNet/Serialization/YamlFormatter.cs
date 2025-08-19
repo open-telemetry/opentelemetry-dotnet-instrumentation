@@ -30,7 +30,7 @@ using System.Globalization;
 
 namespace Vendors.YamlDotNet.Serialization
 {
-    public class YamlFormatter
+    internal class YamlFormatter
     {
         public static YamlFormatter Default { get; } = new YamlFormatter();
 

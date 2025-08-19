@@ -33,7 +33,7 @@ using Vendors.YamlDotNet.Serialization.Utilities;
 
 namespace Vendors.YamlDotNet.Serialization.ObjectGraphVisitors
 {
-    public sealed class CustomSerializationObjectGraphVisitor : ChainedObjectGraphVisitor
+    internal sealed class CustomSerializationObjectGraphVisitor : ChainedObjectGraphVisitor
     {
         private readonly TypeConverterCache typeConverters;
         private readonly ObjectSerializer nestedObjectSerializer;

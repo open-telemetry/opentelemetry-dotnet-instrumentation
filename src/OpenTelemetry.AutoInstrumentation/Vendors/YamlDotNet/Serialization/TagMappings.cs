@@ -33,7 +33,7 @@ namespace Vendors.YamlDotNet.Serialization
     /// <summary>
     /// Contains mappings between tags and types.
     /// </summary>
-    public sealed class TagMappings
+    internal sealed class TagMappings
     {
         private readonly Dictionary<string, Type> mappings;
 

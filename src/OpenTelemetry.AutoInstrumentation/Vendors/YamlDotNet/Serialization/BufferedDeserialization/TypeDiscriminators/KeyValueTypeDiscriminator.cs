@@ -39,7 +39,7 @@ namespace Vendors.YamlDotNet.Serialization.BufferedDeserialization.TypeDiscrimin
     /// A TypeDiscriminator that discriminates which type to deserialize a yaml stream into by checking the value
     /// of a known key.
     /// </summary>
-    public class KeyValueTypeDiscriminator : ITypeDiscriminator
+    internal class KeyValueTypeDiscriminator : ITypeDiscriminator
     {
         public Type BaseType { get; private set; }
         private readonly string targetKey;

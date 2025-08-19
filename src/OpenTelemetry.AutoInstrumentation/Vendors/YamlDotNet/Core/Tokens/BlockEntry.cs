@@ -29,7 +29,7 @@ namespace Vendors.YamlDotNet.Core.Tokens
     /// <summary>
     /// Represents a block entry event.
     /// </summary>
-    public sealed class BlockEntry : Token
+    internal sealed class BlockEntry : Token
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="BlockEntry"/> class.

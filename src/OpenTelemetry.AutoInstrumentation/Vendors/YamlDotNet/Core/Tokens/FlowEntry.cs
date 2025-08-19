@@ -29,7 +29,7 @@ namespace Vendors.YamlDotNet.Core.Tokens
     /// <summary>
     /// Represents a flow entry event.
     /// </summary>
-    public sealed class FlowEntry : Token
+    internal sealed class FlowEntry : Token
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="FlowEntry"/> class.
