@@ -30,18 +30,18 @@ using System.Collections.Generic;
 #if NET7_0_OR_GREATER
 using System.Diagnostics.CodeAnalysis;
 #endif
-using YamlDotNet.Core;
-using YamlDotNet.Helpers;
-using YamlDotNet.Serialization.Converters;
-using YamlDotNet.Serialization.EventEmitters;
-using YamlDotNet.Serialization.NamingConventions;
-using YamlDotNet.Serialization.ObjectFactories;
-using YamlDotNet.Serialization.ObjectGraphTraversalStrategies;
-using YamlDotNet.Serialization.ObjectGraphVisitors;
-using YamlDotNet.Serialization.TypeInspectors;
-using YamlDotNet.Serialization.TypeResolvers;
+using Vendors.YamlDotNet.Core;
+using Vendors.YamlDotNet.Helpers;
+using Vendors.YamlDotNet.Serialization.Converters;
+using Vendors.YamlDotNet.Serialization.EventEmitters;
+using Vendors.YamlDotNet.Serialization.NamingConventions;
+using Vendors.YamlDotNet.Serialization.ObjectFactories;
+using Vendors.YamlDotNet.Serialization.ObjectGraphTraversalStrategies;
+using Vendors.YamlDotNet.Serialization.ObjectGraphVisitors;
+using Vendors.YamlDotNet.Serialization.TypeInspectors;
+using Vendors.YamlDotNet.Serialization.TypeResolvers;
 
-namespace YamlDotNet.Serialization
+namespace Vendors.YamlDotNet.Serialization
 {
 #pragma warning disable IDE0055 // Fix formatting
     /// <summary>

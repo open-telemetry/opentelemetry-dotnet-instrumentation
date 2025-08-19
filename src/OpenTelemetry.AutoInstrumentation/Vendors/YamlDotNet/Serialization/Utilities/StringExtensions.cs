@@ -29,7 +29,7 @@ using System;
 using System.Globalization;
 using System.Text.RegularExpressions;
 
-namespace YamlDotNet.Serialization.Utilities
+namespace Vendors.YamlDotNet.Serialization.Utilities
 {
     /// <summary>
     /// Various string extension methods

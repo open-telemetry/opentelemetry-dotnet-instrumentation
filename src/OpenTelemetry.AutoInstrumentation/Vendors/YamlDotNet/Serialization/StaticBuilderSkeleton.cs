@@ -27,12 +27,12 @@
 
 using System;
 using System.Collections.Generic;
-using YamlDotNet.Core;
-using YamlDotNet.Serialization.Converters;
-using YamlDotNet.Serialization.NamingConventions;
-using YamlDotNet.Serialization.TypeInspectors;
+using Vendors.YamlDotNet.Core;
+using Vendors.YamlDotNet.Serialization.Converters;
+using Vendors.YamlDotNet.Serialization.NamingConventions;
+using Vendors.YamlDotNet.Serialization.TypeInspectors;
 
-namespace YamlDotNet.Serialization
+namespace Vendors.YamlDotNet.Serialization
 {
     /// <summary>
     /// Common implementation of <see cref="SerializerBuilder" /> and <see cref="DeserializerBuilder" />.

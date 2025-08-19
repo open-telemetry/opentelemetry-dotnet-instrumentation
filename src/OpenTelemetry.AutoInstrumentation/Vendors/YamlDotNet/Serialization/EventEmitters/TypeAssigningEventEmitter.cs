@@ -31,11 +31,11 @@ using System.Collections.Generic;
 using System.Runtime.InteropServices.ComTypes;
 using System.Runtime.Serialization;
 using System.Text.RegularExpressions;
-using YamlDotNet.Core;
-using YamlDotNet.Serialization.Schemas;
-using YamlDotNet.Serialization.NamingConventions;
+using Vendors.YamlDotNet.Core;
+using Vendors.YamlDotNet.Serialization.Schemas;
+using Vendors.YamlDotNet.Serialization.NamingConventions;
 
-namespace YamlDotNet.Serialization.EventEmitters
+namespace Vendors.YamlDotNet.Serialization.EventEmitters
 {
     public sealed class TypeAssigningEventEmitter : ChainedEventEmitter
     {

@@ -26,7 +26,7 @@
 
 using System.Collections.Generic;
 
-namespace YamlDotNet.Helpers
+namespace Vendors.YamlDotNet.Helpers
 {
     internal static class ReadOnlyCollectionExtensions
     {

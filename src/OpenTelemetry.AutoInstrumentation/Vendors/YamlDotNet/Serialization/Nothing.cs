@@ -26,7 +26,7 @@
 // SOFTWARE.
 
 
-namespace YamlDotNet.Serialization
+namespace Vendors.YamlDotNet.Serialization
 {
     /// <summary>
     /// An empty type for cases where a type needs to be provided but won't be used.

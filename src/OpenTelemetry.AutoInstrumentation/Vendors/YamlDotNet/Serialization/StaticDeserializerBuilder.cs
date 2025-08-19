@@ -32,20 +32,20 @@ using System.Runtime.CompilerServices;
 #if NET7_0_OR_GREATER
 using System.Diagnostics.CodeAnalysis;
 #endif
-using YamlDotNet.Core;
-using YamlDotNet.Serialization.BufferedDeserialization;
-using YamlDotNet.Serialization.NamingConventions;
-using YamlDotNet.Serialization.NodeDeserializers;
-using YamlDotNet.Serialization.NodeTypeResolvers;
-using YamlDotNet.Serialization.ObjectFactories;
-using YamlDotNet.Serialization.Schemas;
-using YamlDotNet.Serialization.TypeInspectors;
-using YamlDotNet.Serialization.TypeResolvers;
-using YamlDotNet.Serialization.Utilities;
-using YamlDotNet.Serialization.ValueDeserializers;
-using YamlDotNet.Helpers;
+using Vendors.YamlDotNet.Core;
+using Vendors.YamlDotNet.Serialization.BufferedDeserialization;
+using Vendors.YamlDotNet.Serialization.NamingConventions;
+using Vendors.YamlDotNet.Serialization.NodeDeserializers;
+using Vendors.YamlDotNet.Serialization.NodeTypeResolvers;
+using Vendors.YamlDotNet.Serialization.ObjectFactories;
+using Vendors.YamlDotNet.Serialization.Schemas;
+using Vendors.YamlDotNet.Serialization.TypeInspectors;
+using Vendors.YamlDotNet.Serialization.TypeResolvers;
+using Vendors.YamlDotNet.Serialization.Utilities;
+using Vendors.YamlDotNet.Serialization.ValueDeserializers;
+using Vendors.YamlDotNet.Helpers;
 
-namespace YamlDotNet.Serialization
+namespace Vendors.YamlDotNet.Serialization
 {
     /// <summary>
     /// Creates and configures instances of <see cref="Deserializer" />.

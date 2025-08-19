@@ -25,9 +25,9 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-using YamlDotNet.Core;
+using Vendors.YamlDotNet.Core;
 
-namespace YamlDotNet.Serialization
+namespace Vendors.YamlDotNet.Serialization
 {
     public interface IEventEmitter
     {

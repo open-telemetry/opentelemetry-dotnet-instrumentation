@@ -27,7 +27,7 @@
 
 using System;
 
-namespace YamlDotNet.Core
+namespace Vendors.YamlDotNet.Core
 {
     /// <summary>
     /// Specifies the version of the YAML language.

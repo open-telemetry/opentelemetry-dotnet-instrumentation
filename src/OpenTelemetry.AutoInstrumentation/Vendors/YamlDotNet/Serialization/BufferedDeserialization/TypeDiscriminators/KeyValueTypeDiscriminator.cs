@@ -29,11 +29,11 @@
 using System;
 using System.Linq;
 using System.Collections.Generic;
-using YamlDotNet.Core;
-using YamlDotNet.Core.Events;
-using YamlDotNet.Serialization;
+using Vendors.YamlDotNet.Core;
+using Vendors.YamlDotNet.Core.Events;
+using Vendors.YamlDotNet.Serialization;
 
-namespace YamlDotNet.Serialization.BufferedDeserialization.TypeDiscriminators
+namespace Vendors.YamlDotNet.Serialization.BufferedDeserialization.TypeDiscriminators
 {
     /// <summary>
     /// A TypeDiscriminator that discriminates which type to deserialize a yaml stream into by checking the value

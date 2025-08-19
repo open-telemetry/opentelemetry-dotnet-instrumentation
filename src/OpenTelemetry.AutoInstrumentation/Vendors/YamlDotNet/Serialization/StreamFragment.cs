@@ -28,10 +28,10 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using YamlDotNet.Core;
-using YamlDotNet.Core.Events;
+using Vendors.YamlDotNet.Core;
+using Vendors.YamlDotNet.Core.Events;
 
-namespace YamlDotNet.Serialization
+namespace Vendors.YamlDotNet.Serialization
 {
     /// <summary>
     /// An object that contains part of a YAML stream.

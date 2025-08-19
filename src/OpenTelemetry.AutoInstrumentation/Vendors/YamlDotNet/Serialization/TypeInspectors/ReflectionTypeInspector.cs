@@ -33,7 +33,7 @@ using System.Runtime.Serialization;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace YamlDotNet.Serialization.TypeInspectors
+namespace Vendors.YamlDotNet.Serialization.TypeInspectors
 {
     public abstract class ReflectionTypeInspector : TypeInspectorSkeleton
     {

@@ -29,13 +29,13 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using YamlDotNet.Core;
-using YamlDotNet.Core.Events;
-using YamlDotNet.Serialization;
-using YamlDotNet.Serialization.NodeDeserializers;
-using YamlDotNet.Serialization.BufferedDeserialization.TypeDiscriminators;
+using Vendors.YamlDotNet.Core;
+using Vendors.YamlDotNet.Core.Events;
+using Vendors.YamlDotNet.Serialization;
+using Vendors.YamlDotNet.Serialization.NodeDeserializers;
+using Vendors.YamlDotNet.Serialization.BufferedDeserialization.TypeDiscriminators;
 
-namespace YamlDotNet.Serialization.BufferedDeserialization
+namespace Vendors.YamlDotNet.Serialization.BufferedDeserialization
 {
     /// <summary>
     /// The TypeDiscriminatingNodeDeserializer acts as a psuedo <see cref="INodeDeserializer" />.

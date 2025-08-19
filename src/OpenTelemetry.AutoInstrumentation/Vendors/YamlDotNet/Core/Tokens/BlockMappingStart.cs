@@ -24,7 +24,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-namespace YamlDotNet.Core.Tokens
+namespace Vendors.YamlDotNet.Core.Tokens
 {
     /// <summary>
     /// Represents a block mapping start token.

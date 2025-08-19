@@ -29,10 +29,10 @@
 using System;
 using System.Globalization;
 using System.Linq;
-using YamlDotNet.Core;
-using YamlDotNet.Core.Events;
+using Vendors.YamlDotNet.Core;
+using Vendors.YamlDotNet.Core.Events;
 
-namespace YamlDotNet.Serialization.Converters
+namespace Vendors.YamlDotNet.Serialization.Converters
 {
     /// <summary>
     /// Converts the <seealso cref="DateTimeOffset"/> object to a string representation

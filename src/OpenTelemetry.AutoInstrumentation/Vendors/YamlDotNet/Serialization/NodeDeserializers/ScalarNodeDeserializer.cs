@@ -28,14 +28,14 @@
 using System;
 using System.Globalization;
 using System.Text.RegularExpressions;
-using YamlDotNet.Core;
-using YamlDotNet.Core.Events;
-using YamlDotNet.Core.ObjectPool;
-using YamlDotNet.Helpers;
-using YamlDotNet.Serialization.NamingConventions;
-using YamlDotNet.Serialization.Utilities;
+using Vendors.YamlDotNet.Core;
+using Vendors.YamlDotNet.Core.Events;
+using Vendors.YamlDotNet.Core.ObjectPool;
+using Vendors.YamlDotNet.Helpers;
+using Vendors.YamlDotNet.Serialization.NamingConventions;
+using Vendors.YamlDotNet.Serialization.Utilities;
 
-namespace YamlDotNet.Serialization.NodeDeserializers
+namespace Vendors.YamlDotNet.Serialization.NodeDeserializers
 {
     public sealed class ScalarNodeDeserializer : INodeDeserializer
     {

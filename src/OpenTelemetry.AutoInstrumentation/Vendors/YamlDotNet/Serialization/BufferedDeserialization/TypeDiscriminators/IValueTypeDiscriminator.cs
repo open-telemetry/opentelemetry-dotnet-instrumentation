@@ -27,9 +27,9 @@
 // SOFTWARE.
 
 using System;
-using YamlDotNet.Core;
+using Vendors.YamlDotNet.Core;
 
-namespace YamlDotNet.Serialization.BufferedDeserialization.TypeDiscriminators
+namespace Vendors.YamlDotNet.Serialization.BufferedDeserialization.TypeDiscriminators
 {
     /// <summary>
     /// An ITypeDiscriminator provides an interface for discriminating which dotnet type to deserialize a yaml

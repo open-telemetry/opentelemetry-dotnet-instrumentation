@@ -24,7 +24,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-namespace YamlDotNet.RepresentationModel
+namespace Vendors.YamlDotNet.RepresentationModel
 {
     /// <summary>
     /// Abstract implementation of <see cref="IYamlVisitor"/> that knows how to walk a complete YAML object model.

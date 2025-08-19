@@ -30,9 +30,9 @@
 using System;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
-using YamlDotNet.Core.Events;
+using Vendors.YamlDotNet.Core.Events;
 
-namespace YamlDotNet.Core
+namespace Vendors.YamlDotNet.Core
 {
     /// <summary>
     /// Extension methods that provide useful abstractions over <see cref="IParser"/>.

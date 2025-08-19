@@ -28,9 +28,9 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using YamlDotNet.Serialization.Utilities;
+using Vendors.YamlDotNet.Serialization.Utilities;
 
-namespace YamlDotNet.Serialization.ObjectGraphVisitors
+namespace Vendors.YamlDotNet.Serialization.ObjectGraphVisitors
 {
     /// <summary>
     /// A base class that simplifies the correct implementation of <see cref="IObjectGraphVisitor{Nothing}" />.

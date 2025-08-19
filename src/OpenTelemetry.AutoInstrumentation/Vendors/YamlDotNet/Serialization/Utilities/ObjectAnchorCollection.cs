@@ -29,9 +29,9 @@
 
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
-using YamlDotNet.Core;
+using Vendors.YamlDotNet.Core;
 
-namespace YamlDotNet.Serialization.Utilities
+namespace Vendors.YamlDotNet.Serialization.Utilities
 {
     internal sealed class ObjectAnchorCollection
     {

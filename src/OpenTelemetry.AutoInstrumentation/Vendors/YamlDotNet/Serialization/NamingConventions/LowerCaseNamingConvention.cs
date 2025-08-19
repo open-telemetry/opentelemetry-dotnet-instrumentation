@@ -27,9 +27,9 @@
 // SOFTWARE.
 
 using System.Globalization;
-using YamlDotNet.Serialization.Utilities;
+using Vendors.YamlDotNet.Serialization.Utilities;
 
-namespace YamlDotNet.Serialization.NamingConventions
+namespace Vendors.YamlDotNet.Serialization.NamingConventions
 {
     /// <summary>
     /// Convert the string with underscores (this_is_a_test) or hyphens (this-is-a-test) to 

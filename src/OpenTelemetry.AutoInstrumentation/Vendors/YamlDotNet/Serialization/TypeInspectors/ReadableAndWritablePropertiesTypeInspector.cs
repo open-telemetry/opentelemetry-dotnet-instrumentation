@@ -29,7 +29,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace YamlDotNet.Serialization.TypeInspectors
+namespace Vendors.YamlDotNet.Serialization.TypeInspectors
 {
     /// <summary>
     /// Returns the properties of a type that are both readable and writable.

@@ -31,7 +31,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 
-namespace YamlDotNet;
+namespace Vendors.YamlDotNet;
 
 internal static class ReflectionExtensions
 {

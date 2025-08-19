@@ -27,7 +27,7 @@
 
 using System;
 
-namespace YamlDotNet.Serialization
+namespace Vendors.YamlDotNet.Serialization
 {
     public interface IValuePromise
     {

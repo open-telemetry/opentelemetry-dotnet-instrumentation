@@ -24,9 +24,9 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-using YamlDotNet.Core.Tokens;
+using Vendors.YamlDotNet.Core.Tokens;
 
-namespace YamlDotNet.Core
+namespace Vendors.YamlDotNet.Core
 {
     /// <summary>
     /// Defines constants that relate to the YAML specification.

@@ -26,7 +26,7 @@
 // SOFTWARE.
 
 
-namespace YamlDotNet.Serialization
+namespace Vendors.YamlDotNet.Serialization
 {
     /// <summary>
     /// Translates property names according to a specific convention.

@@ -28,9 +28,9 @@
 using System;
 using System.Collections;
 using System.ComponentModel;
-using YamlDotNet.Core;
+using Vendors.YamlDotNet.Core;
 
-namespace YamlDotNet.Serialization.ObjectGraphVisitors
+namespace Vendors.YamlDotNet.Serialization.ObjectGraphVisitors
 {
     public sealed class DefaultValuesObjectGraphVisitor : ChainedObjectGraphVisitor
     {

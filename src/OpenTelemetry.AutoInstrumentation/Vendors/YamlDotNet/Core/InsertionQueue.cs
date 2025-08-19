@@ -28,9 +28,9 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
-using YamlDotNet.Helpers;
+using Vendors.YamlDotNet.Helpers;
 
-namespace YamlDotNet.Core
+namespace Vendors.YamlDotNet.Core
 {
     /// <summary>
     /// Generic queue on which items may be inserted

@@ -24,7 +24,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-namespace YamlDotNet.RepresentationModel
+namespace Vendors.YamlDotNet.RepresentationModel
 {
     /// <summary>
     /// Specifies the type of node in the representation model.

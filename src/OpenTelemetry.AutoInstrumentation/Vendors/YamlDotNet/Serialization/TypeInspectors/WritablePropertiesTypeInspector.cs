@@ -29,9 +29,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using YamlDotNet.Core;
+using Vendors.YamlDotNet.Core;
 
-namespace YamlDotNet.Serialization.TypeInspectors
+namespace Vendors.YamlDotNet.Serialization.TypeInspectors
 {
     /// <summary>
     /// Returns the properties of a type that are writable.

@@ -29,13 +29,13 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
-using YamlDotNet.Core;
-using YamlDotNet.Core.Events;
-using YamlDotNet.Serialization;
-using YamlDotNet.Serialization.Schemas;
-using static YamlDotNet.Core.HashCode;
+using Vendors.YamlDotNet.Core;
+using Vendors.YamlDotNet.Core.Events;
+using Vendors.YamlDotNet.Serialization;
+using Vendors.YamlDotNet.Serialization.Schemas;
+using static Vendors.YamlDotNet.Core.HashCode;
 
-namespace YamlDotNet.RepresentationModel
+namespace Vendors.YamlDotNet.RepresentationModel
 {
     /// <summary>
     /// Represents a scalar node in the YAML document.

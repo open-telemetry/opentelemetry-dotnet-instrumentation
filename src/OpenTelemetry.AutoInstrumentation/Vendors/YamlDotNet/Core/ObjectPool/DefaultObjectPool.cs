@@ -34,7 +34,7 @@ using System;
 using System.Collections.Concurrent;
 using System.Threading;
 
-namespace YamlDotNet.Core.ObjectPool
+namespace Vendors.YamlDotNet.Core.ObjectPool
 {
     /// <summary>
     /// Default implementation of <see cref="ObjectPool{T}"/>.

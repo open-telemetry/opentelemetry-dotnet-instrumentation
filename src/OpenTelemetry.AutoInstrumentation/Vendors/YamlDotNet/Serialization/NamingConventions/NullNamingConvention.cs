@@ -28,9 +28,9 @@
 
 
 using System;
-using YamlDotNet.Serialization.Utilities;
+using Vendors.YamlDotNet.Serialization.Utilities;
 
-namespace YamlDotNet.Serialization.NamingConventions
+namespace Vendors.YamlDotNet.Serialization.NamingConventions
 {
     /// <summary>
     /// Performs no naming conversion.

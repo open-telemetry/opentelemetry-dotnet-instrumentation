@@ -26,9 +26,9 @@
 // SOFTWARE.
 
 using System;
-using YamlDotNet.Serialization.NamingConventions;
+using Vendors.YamlDotNet.Serialization.NamingConventions;
 
-namespace YamlDotNet.Serialization.Utilities
+namespace Vendors.YamlDotNet.Serialization.Utilities
 {
     public class ReflectionTypeConverter : ITypeConverter
     {

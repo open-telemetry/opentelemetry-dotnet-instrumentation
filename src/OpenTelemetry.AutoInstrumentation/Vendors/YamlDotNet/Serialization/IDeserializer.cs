@@ -27,9 +27,9 @@
 
 using System;
 using System.IO;
-using YamlDotNet.Core;
+using Vendors.YamlDotNet.Core;
 
-namespace YamlDotNet.Serialization
+namespace Vendors.YamlDotNet.Serialization
 {
     public interface IDeserializer
     {

@@ -25,7 +25,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-namespace YamlDotNet.Core
+namespace Vendors.YamlDotNet.Core
 {
     /// <summary>
     /// Supports implementations of <see cref="object.GetHashCode"/> by providing methods to combine two hash codes.

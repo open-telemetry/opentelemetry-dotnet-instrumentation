@@ -28,10 +28,10 @@
 
 using System;
 using System.Globalization;
-using YamlDotNet.Core;
-using YamlDotNet.Core.Events;
+using Vendors.YamlDotNet.Core;
+using Vendors.YamlDotNet.Core.Events;
 
-namespace YamlDotNet.Serialization.Converters
+namespace Vendors.YamlDotNet.Serialization.Converters
 {
     /// <summary>
     /// This represents the YAML converter entity for <see cref="DateTime"/> using the ISO-8601 standard format.

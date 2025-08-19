@@ -29,7 +29,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace YamlDotNet.Serialization.TypeInspectors
+namespace Vendors.YamlDotNet.Serialization.TypeInspectors
 {
     /// <summary>
     /// Aggregates the results from multiple <see cref="ITypeInspector" /> into a single one.

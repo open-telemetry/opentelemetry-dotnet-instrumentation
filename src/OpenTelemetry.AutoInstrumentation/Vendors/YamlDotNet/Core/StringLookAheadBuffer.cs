@@ -25,9 +25,9 @@
 // SOFTWARE.
 
 using System;
-using YamlDotNet.Core.ObjectPool;
+using Vendors.YamlDotNet.Core.ObjectPool;
 
-namespace YamlDotNet.Core
+namespace Vendors.YamlDotNet.Core
 {
     internal sealed class StringLookAheadBuffer : ILookAheadBuffer, IResettable
     {

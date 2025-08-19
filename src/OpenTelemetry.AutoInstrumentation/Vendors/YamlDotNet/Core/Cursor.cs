@@ -26,7 +26,7 @@
 
 using System.Diagnostics;
 
-namespace YamlDotNet.Core
+namespace Vendors.YamlDotNet.Core
 {
     [DebuggerStepThrough]
     public sealed class Cursor

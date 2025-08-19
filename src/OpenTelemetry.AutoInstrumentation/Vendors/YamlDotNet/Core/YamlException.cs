@@ -27,7 +27,7 @@
 
 using System;
 
-namespace YamlDotNet.Core
+namespace Vendors.YamlDotNet.Core
 {
     /// <summary>
     /// Base exception that is thrown when the a problem occurs in the YamlDotNet library.

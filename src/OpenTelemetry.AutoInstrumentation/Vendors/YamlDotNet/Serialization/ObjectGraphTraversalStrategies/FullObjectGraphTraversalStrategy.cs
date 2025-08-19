@@ -29,11 +29,11 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Text;
-using YamlDotNet.Core;
-using YamlDotNet.Helpers;
-using YamlDotNet.Serialization.Utilities;
+using Vendors.YamlDotNet.Core;
+using Vendors.YamlDotNet.Helpers;
+using Vendors.YamlDotNet.Serialization.Utilities;
 
-namespace YamlDotNet.Serialization.ObjectGraphTraversalStrategies
+namespace Vendors.YamlDotNet.Serialization.ObjectGraphTraversalStrategies
 {
     /// <summary>
     /// An implementation of <see cref="IObjectGraphTraversalStrategy"/> that traverses

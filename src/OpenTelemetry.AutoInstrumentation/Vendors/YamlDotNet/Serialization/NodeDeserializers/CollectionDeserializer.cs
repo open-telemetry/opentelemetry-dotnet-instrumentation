@@ -29,11 +29,11 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Text;
-using YamlDotNet.Core;
-using YamlDotNet.Core.Events;
-using YamlDotNet.Serialization.Utilities;
+using Vendors.YamlDotNet.Core;
+using Vendors.YamlDotNet.Core.Events;
+using Vendors.YamlDotNet.Serialization.Utilities;
 
-namespace YamlDotNet.Serialization.NodeDeserializers
+namespace Vendors.YamlDotNet.Serialization.NodeDeserializers
 {
     public abstract class CollectionDeserializer
     {

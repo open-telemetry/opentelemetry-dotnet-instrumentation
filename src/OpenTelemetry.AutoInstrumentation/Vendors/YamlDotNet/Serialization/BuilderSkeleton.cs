@@ -27,11 +27,11 @@
 
 using System;
 using System.Collections.Generic;
-using YamlDotNet.Core;
-using YamlDotNet.Serialization.Converters;
-using YamlDotNet.Serialization.NamingConventions;
+using Vendors.YamlDotNet.Core;
+using Vendors.YamlDotNet.Serialization.Converters;
+using Vendors.YamlDotNet.Serialization.NamingConventions;
 
-namespace YamlDotNet.Serialization
+namespace Vendors.YamlDotNet.Serialization
 {
 #pragma warning disable IDE0055 // Fix formatting
     /// <summary>

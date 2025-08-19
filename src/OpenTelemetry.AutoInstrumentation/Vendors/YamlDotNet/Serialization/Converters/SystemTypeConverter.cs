@@ -27,10 +27,10 @@
 // SOFTWARE.
 
 using System;
-using YamlDotNet.Core;
-using YamlDotNet.Core.Events;
+using Vendors.YamlDotNet.Core;
+using Vendors.YamlDotNet.Core.Events;
 
-namespace YamlDotNet.Serialization.Converters
+namespace Vendors.YamlDotNet.Serialization.Converters
 {
     /// <summary>
     /// Converter for System.Type.

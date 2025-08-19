@@ -28,13 +28,13 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using YamlDotNet.Core;
-using YamlDotNet.Core.Events;
-using YamlDotNet.Helpers;
-using YamlDotNet.Serialization.ObjectFactories;
-using YamlDotNet.Serialization.Utilities;
+using Vendors.YamlDotNet.Core;
+using Vendors.YamlDotNet.Core.Events;
+using Vendors.YamlDotNet.Helpers;
+using Vendors.YamlDotNet.Serialization.ObjectFactories;
+using Vendors.YamlDotNet.Serialization.Utilities;
 
-namespace YamlDotNet.Serialization.NodeDeserializers
+namespace Vendors.YamlDotNet.Serialization.NodeDeserializers
 {
     public sealed class StaticCollectionNodeDeserializer : INodeDeserializer
     {

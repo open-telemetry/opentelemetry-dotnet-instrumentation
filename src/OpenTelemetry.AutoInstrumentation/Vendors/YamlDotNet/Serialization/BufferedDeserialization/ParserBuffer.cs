@@ -28,10 +28,10 @@
 
 using System;
 using System.Collections.Generic;
-using YamlDotNet.Core;
-using YamlDotNet.Core.Events;
+using Vendors.YamlDotNet.Core;
+using Vendors.YamlDotNet.Core.Events;
 
-namespace YamlDotNet.Serialization.BufferedDeserialization
+namespace Vendors.YamlDotNet.Serialization.BufferedDeserialization
 {
     /// <summary>
     /// Wraps a <see cref="IParser"/> instance and allows it to be buffered as a LinkedList in memory and replayed.

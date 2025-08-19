@@ -29,10 +29,10 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using YamlDotNet.Core;
-using YamlDotNet.Serialization.TypeInspectors;
+using Vendors.YamlDotNet.Core;
+using Vendors.YamlDotNet.Serialization.TypeInspectors;
 
-namespace YamlDotNet.Serialization
+namespace Vendors.YamlDotNet.Serialization
 {
     /// <summary>
     /// Applies the Yaml attribute overrides to another <see cref="ITypeInspector"/>.

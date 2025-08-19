@@ -26,9 +26,9 @@
 // SOFTWARE.
 
 using System;
-using YamlDotNet.Core;
+using Vendors.YamlDotNet.Core;
 
-namespace YamlDotNet.Serialization
+namespace Vendors.YamlDotNet.Serialization
 {
     /// <summary>
     /// Represents an object along with its type.

@@ -26,7 +26,7 @@
 
 using System.Collections.Generic;
 
-namespace YamlDotNet.Helpers
+namespace Vendors.YamlDotNet.Helpers
 {
     public interface IOrderedDictionary<TKey, TValue> : IDictionary<TKey, TValue>
         where TKey : notnull

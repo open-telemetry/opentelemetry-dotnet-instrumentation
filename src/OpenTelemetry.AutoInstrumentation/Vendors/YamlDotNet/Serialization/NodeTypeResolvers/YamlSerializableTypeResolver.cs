@@ -26,9 +26,9 @@
 // SOFTWARE.
 
 using System;
-using YamlDotNet.Core.Events;
+using Vendors.YamlDotNet.Core.Events;
 
-namespace YamlDotNet.Serialization.NodeTypeResolvers
+namespace Vendors.YamlDotNet.Serialization.NodeTypeResolvers
 {
     public sealed class YamlSerializableTypeResolver : INodeTypeResolver
     {

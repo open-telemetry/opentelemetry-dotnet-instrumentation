@@ -27,7 +27,7 @@
 
 using System;
 
-namespace YamlDotNet.Core
+namespace Vendors.YamlDotNet.Core
 {
     public readonly struct TagName : IEquatable<TagName>
     {

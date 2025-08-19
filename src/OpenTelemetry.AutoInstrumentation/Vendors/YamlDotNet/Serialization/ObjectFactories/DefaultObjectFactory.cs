@@ -31,9 +31,9 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using YamlDotNet.Serialization.Callbacks;
+using Vendors.YamlDotNet.Serialization.Callbacks;
 
-namespace YamlDotNet.Serialization.ObjectFactories
+namespace Vendors.YamlDotNet.Serialization.ObjectFactories
 {
     /// <summary>
     /// Creates objects using Activator.CreateInstance.

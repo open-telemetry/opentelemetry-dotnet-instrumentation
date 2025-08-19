@@ -26,9 +26,9 @@
 // SOFTWARE.
 
 using System;
-using YamlDotNet.Core;
+using Vendors.YamlDotNet.Core;
 
-namespace YamlDotNet.Serialization.ObjectGraphVisitors
+namespace Vendors.YamlDotNet.Serialization.ObjectGraphVisitors
 {
     public abstract class ChainedObjectGraphVisitor : IObjectGraphVisitor<IEmitter>
     {

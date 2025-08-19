@@ -27,7 +27,7 @@
 
 using System;
 
-namespace YamlDotNet.Serialization
+namespace Vendors.YamlDotNet.Serialization
 {
     /// <summary>
     /// Put this attribute either on serializable types or on the <see cref="StaticContext"/> that you want

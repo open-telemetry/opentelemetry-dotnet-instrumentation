@@ -31,7 +31,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Linq.Expressions;
 using System.Reflection;
 
-namespace YamlDotNet.Helpers
+namespace Vendors.YamlDotNet.Helpers
 {
     public static class ExpressionExtensions
     {

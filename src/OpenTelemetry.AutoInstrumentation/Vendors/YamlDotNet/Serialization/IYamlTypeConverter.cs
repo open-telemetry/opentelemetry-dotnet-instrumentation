@@ -26,9 +26,9 @@
 // SOFTWARE.
 
 using System;
-using YamlDotNet.Core;
+using Vendors.YamlDotNet.Core;
 
-namespace YamlDotNet.Serialization
+namespace Vendors.YamlDotNet.Serialization
 {
     /// <summary>
     /// Allows to customize how a type is serialized and deserialized.

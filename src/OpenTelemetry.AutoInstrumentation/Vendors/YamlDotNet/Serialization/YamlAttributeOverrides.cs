@@ -30,10 +30,10 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Linq.Expressions;
-using YamlDotNet.Helpers;
-using HashCode = YamlDotNet.Core.HashCode;
+using Vendors.YamlDotNet.Helpers;
+using HashCode = Vendors.YamlDotNet.Core.HashCode;
 
-namespace YamlDotNet.Serialization
+namespace Vendors.YamlDotNet.Serialization
 {
     /// <summary>
     /// Define a collection of YamlAttribute Overrides for pre-defined object types.
@@ -184,7 +184,7 @@ namespace YamlDotNet.Serialization
     }
 }
 
-namespace YamlDotNet.Serialization
+namespace Vendors.YamlDotNet.Serialization
 {
     public partial class YamlAttributeOverrides
     {

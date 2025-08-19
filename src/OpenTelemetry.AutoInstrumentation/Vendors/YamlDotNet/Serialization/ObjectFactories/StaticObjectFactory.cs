@@ -28,7 +28,7 @@
 using System;
 using System.Collections;
 
-namespace YamlDotNet.Serialization.ObjectFactories
+namespace Vendors.YamlDotNet.Serialization.ObjectFactories
 {
     /// <summary>
     /// Gets information about and creates statically known, serializable, types.
