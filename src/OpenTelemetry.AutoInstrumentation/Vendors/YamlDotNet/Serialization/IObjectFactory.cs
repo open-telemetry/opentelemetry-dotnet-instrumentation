@@ -28,7 +28,7 @@
 using System;
 using System.Collections;
 
-namespace YamlDotNet.Serialization
+namespace Vendors.YamlDotNet.Serialization
 {
     /// <summary>
     /// Creates instances of types.

@@ -26,9 +26,9 @@
 // SOFTWARE.
 
 using System;
-using YamlDotNet.Serialization.ObjectFactories;
+using Vendors.YamlDotNet.Serialization.ObjectFactories;
 
-namespace YamlDotNet.Serialization
+namespace Vendors.YamlDotNet.Serialization
 {
     /// <summary>
     /// Holds the static object factory and type inspector to use when statically serializing/deserializing YAML.

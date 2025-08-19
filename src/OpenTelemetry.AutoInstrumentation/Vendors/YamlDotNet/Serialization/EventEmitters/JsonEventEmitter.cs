@@ -29,11 +29,11 @@
 using System;
 using System.Globalization;
 using System.Text.RegularExpressions;
-using YamlDotNet.Core;
-using YamlDotNet.Core.Events;
-using YamlDotNet.Serialization.NamingConventions;
+using Vendors.YamlDotNet.Core;
+using Vendors.YamlDotNet.Core.Events;
+using Vendors.YamlDotNet.Serialization.NamingConventions;
 
-namespace YamlDotNet.Serialization.EventEmitters
+namespace Vendors.YamlDotNet.Serialization.EventEmitters
 {
     public sealed class JsonEventEmitter : ChainedEventEmitter
     {

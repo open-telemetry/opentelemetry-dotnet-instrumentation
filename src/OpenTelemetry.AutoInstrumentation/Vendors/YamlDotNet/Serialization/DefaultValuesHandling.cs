@@ -27,7 +27,7 @@
 
 using System;
 
-namespace YamlDotNet.Serialization
+namespace Vendors.YamlDotNet.Serialization
 {
     /// <summary>
     /// Specifies the strategy to handle default and null values during serialization of properties.

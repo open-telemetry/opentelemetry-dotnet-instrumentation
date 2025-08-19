@@ -27,7 +27,7 @@
 
 using System.Text.RegularExpressions;
 
-namespace YamlDotNet
+namespace Vendors.YamlDotNet
 {
     internal static class StandardRegexOptions
     {

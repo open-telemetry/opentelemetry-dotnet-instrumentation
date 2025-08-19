@@ -28,13 +28,13 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using YamlDotNet.Core;
-using YamlDotNet.Core.Events;
-using YamlDotNet.Core.ObjectPool;
-using YamlDotNet.Serialization;
-using static YamlDotNet.Core.HashCode;
+using Vendors.YamlDotNet.Core;
+using Vendors.YamlDotNet.Core.Events;
+using Vendors.YamlDotNet.Core.ObjectPool;
+using Vendors.YamlDotNet.Serialization;
+using static Vendors.YamlDotNet.Core.HashCode;
 
-namespace YamlDotNet.RepresentationModel
+namespace Vendors.YamlDotNet.RepresentationModel
 {
     /// <summary>
     /// Represents a sequence node in the YAML document.

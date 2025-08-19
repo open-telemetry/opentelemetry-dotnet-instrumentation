@@ -31,9 +31,9 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
-using YamlDotNet.Helpers;
+using Vendors.YamlDotNet.Helpers;
 
-namespace YamlDotNet.Serialization.TypeInspectors
+namespace Vendors.YamlDotNet.Serialization.TypeInspectors
 {
     public class CachedTypeInspector : TypeInspectorSkeleton
     {

@@ -26,9 +26,9 @@
 
 using System;
 using System.Diagnostics;
-using YamlDotNet.Core;
+using Vendors.YamlDotNet.Core;
 
-namespace YamlDotNet.Core.ObjectPool
+namespace Vendors.YamlDotNet.Core.ObjectPool
 {
     /// <summary>
     /// Pooling of <see cref="StringLookAheadBuffer"/> instances.

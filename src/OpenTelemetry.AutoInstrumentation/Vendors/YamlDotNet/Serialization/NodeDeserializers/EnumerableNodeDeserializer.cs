@@ -28,10 +28,10 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using YamlDotNet.Core;
-using YamlDotNet.Serialization.Utilities;
+using Vendors.YamlDotNet.Core;
+using Vendors.YamlDotNet.Serialization.Utilities;
 
-namespace YamlDotNet.Serialization.NodeDeserializers
+namespace Vendors.YamlDotNet.Serialization.NodeDeserializers
 {
     public sealed class EnumerableNodeDeserializer : INodeDeserializer
     {

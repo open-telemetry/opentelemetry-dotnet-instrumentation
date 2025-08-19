@@ -26,7 +26,7 @@
 
 using System;
 
-namespace YamlDotNet.Core.Tokens
+namespace Vendors.YamlDotNet.Core.Tokens
 {
     /// <summary>
     /// Represents an alias token.

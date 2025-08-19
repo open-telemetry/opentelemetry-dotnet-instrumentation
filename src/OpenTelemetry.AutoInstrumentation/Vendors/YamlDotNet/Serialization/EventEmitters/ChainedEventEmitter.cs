@@ -27,9 +27,9 @@
 // SOFTWARE.
 
 using System;
-using YamlDotNet.Core;
+using Vendors.YamlDotNet.Core;
 
-namespace YamlDotNet.Serialization.EventEmitters
+namespace Vendors.YamlDotNet.Serialization.EventEmitters
 {
     /// <summary>
     /// Provided the base implementation for an IEventEmitter that is a

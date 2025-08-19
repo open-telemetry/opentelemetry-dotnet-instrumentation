@@ -31,7 +31,7 @@
 
 using System.Text;
 
-namespace YamlDotNet.Core.ObjectPool
+namespace Vendors.YamlDotNet.Core.ObjectPool
 {
     /// <summary>
     /// A policy for pooling <see cref="StringBuilder"/> instances.

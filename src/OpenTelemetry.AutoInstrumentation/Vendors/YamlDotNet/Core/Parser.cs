@@ -29,12 +29,12 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using YamlDotNet.Core.Tokens;
-using MappingStyle = YamlDotNet.Core.Events.MappingStyle;
-using ParsingEvent = YamlDotNet.Core.Events.ParsingEvent;
-using SequenceStyle = YamlDotNet.Core.Events.SequenceStyle;
+using Vendors.YamlDotNet.Core.Tokens;
+using MappingStyle = Vendors.YamlDotNet.Core.Events.MappingStyle;
+using ParsingEvent = Vendors.YamlDotNet.Core.Events.ParsingEvent;
+using SequenceStyle = Vendors.YamlDotNet.Core.Events.SequenceStyle;
 
-namespace YamlDotNet.Core
+namespace Vendors.YamlDotNet.Core
 {
     /// <summary>
     /// Parses YAML streams.

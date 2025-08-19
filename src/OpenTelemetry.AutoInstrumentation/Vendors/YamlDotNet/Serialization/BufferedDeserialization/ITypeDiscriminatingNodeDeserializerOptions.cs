@@ -29,12 +29,12 @@
 using System;
 using System.Linq;
 using System.Collections.Generic;
-using YamlDotNet.Serialization;
-using YamlDotNet.Serialization.NamingConventions;
-using YamlDotNet.Serialization.NodeDeserializers;
-using YamlDotNet.Serialization.BufferedDeserialization.TypeDiscriminators;
+using Vendors.YamlDotNet.Serialization;
+using Vendors.YamlDotNet.Serialization.NamingConventions;
+using Vendors.YamlDotNet.Serialization.NodeDeserializers;
+using Vendors.YamlDotNet.Serialization.BufferedDeserialization.TypeDiscriminators;
 
-namespace YamlDotNet.Serialization.BufferedDeserialization
+namespace Vendors.YamlDotNet.Serialization.BufferedDeserialization
 {
     public interface ITypeDiscriminatingNodeDeserializerOptions
     {

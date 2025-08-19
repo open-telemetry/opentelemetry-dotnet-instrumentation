@@ -26,9 +26,9 @@
 // SOFTWARE.
 
 using System;
-using YamlDotNet.Core.Events;
+using Vendors.YamlDotNet.Core.Events;
 
-namespace YamlDotNet.Serialization
+namespace Vendors.YamlDotNet.Serialization
 {
     public interface INodeTypeResolver
     {

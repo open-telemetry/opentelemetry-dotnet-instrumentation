@@ -29,7 +29,7 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-namespace YamlDotNet.Core.ObjectPool
+namespace Vendors.YamlDotNet.Core.ObjectPool
 {
     /// <summary>
     /// Defines a method to reset an object to its initial state.

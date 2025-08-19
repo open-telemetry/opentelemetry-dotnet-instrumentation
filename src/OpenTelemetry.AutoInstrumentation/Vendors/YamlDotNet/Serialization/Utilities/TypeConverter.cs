@@ -34,9 +34,9 @@ using System.Globalization;
 using System.Linq;
 using System.Reflection;
 using System.ComponentModel;
-using YamlDotNet.Helpers;
+using Vendors.YamlDotNet.Helpers;
 
-namespace YamlDotNet.Serialization.Utilities
+namespace Vendors.YamlDotNet.Serialization.Utilities
 {
     /// <summary>
     /// Performs type conversions using every standard provided by the .NET library.

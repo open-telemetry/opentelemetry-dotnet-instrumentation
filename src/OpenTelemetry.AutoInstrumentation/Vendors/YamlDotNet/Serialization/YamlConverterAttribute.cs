@@ -27,7 +27,7 @@
 
 using System;
 
-namespace YamlDotNet.Serialization
+namespace Vendors.YamlDotNet.Serialization
 {
     [AttributeUsage(AttributeTargets.Property | AttributeTargets.Field)]
     public sealed class YamlConverterAttribute : Attribute

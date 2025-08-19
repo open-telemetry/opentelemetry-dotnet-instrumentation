@@ -27,10 +27,10 @@
 
 using System;
 using System.Collections.Generic;
-using YamlDotNet.Core;
-using YamlDotNet.Core.Events;
+using Vendors.YamlDotNet.Core;
+using Vendors.YamlDotNet.Core.Events;
 
-namespace YamlDotNet.Serialization.NodeTypeResolvers
+namespace Vendors.YamlDotNet.Serialization.NodeTypeResolvers
 {
     public sealed class TagNodeTypeResolver : INodeTypeResolver
     {

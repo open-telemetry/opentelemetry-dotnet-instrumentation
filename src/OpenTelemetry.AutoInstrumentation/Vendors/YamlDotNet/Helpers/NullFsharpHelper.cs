@@ -26,9 +26,9 @@
 // SOFTWARE.
 
 using System;
-using YamlDotNet.Serialization;
+using Vendors.YamlDotNet.Serialization;
 
-namespace YamlDotNet.Helpers
+namespace Vendors.YamlDotNet.Helpers
 {
     /// <summary>
     /// Empty implementation of the fsharphelper to allow trimming of csharp applications.

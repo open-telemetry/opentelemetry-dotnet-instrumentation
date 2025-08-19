@@ -29,7 +29,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 
-namespace YamlDotNet.Helpers
+namespace Vendors.YamlDotNet.Helpers
 {
     /// <summary>
     /// Adapts an <see cref="System.Collections.Generic.IDictionary{TKey, TValue}" /> to <see cref="IDictionary" />

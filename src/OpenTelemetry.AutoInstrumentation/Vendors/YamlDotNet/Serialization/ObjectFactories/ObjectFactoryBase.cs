@@ -28,10 +28,10 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using YamlDotNet.Helpers;
-using YamlDotNet.Serialization.Utilities;
+using Vendors.YamlDotNet.Helpers;
+using Vendors.YamlDotNet.Serialization.Utilities;
 
-namespace YamlDotNet.Serialization.ObjectFactories
+namespace Vendors.YamlDotNet.Serialization.ObjectFactories
 {
     public abstract class ObjectFactoryBase : IObjectFactory
     {

@@ -28,7 +28,7 @@
 using System;
 using System.Globalization;
 
-namespace YamlDotNet.Serialization
+namespace Vendors.YamlDotNet.Serialization
 {
     public class YamlFormatter
     {

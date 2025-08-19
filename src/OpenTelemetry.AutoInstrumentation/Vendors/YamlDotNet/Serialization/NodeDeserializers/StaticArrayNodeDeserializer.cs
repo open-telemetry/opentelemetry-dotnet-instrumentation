@@ -27,10 +27,10 @@
 
 using System;
 using System.Collections;
-using YamlDotNet.Core;
-using YamlDotNet.Serialization.ObjectFactories;
+using Vendors.YamlDotNet.Core;
+using Vendors.YamlDotNet.Serialization.ObjectFactories;
 
-namespace YamlDotNet.Serialization.NodeDeserializers
+namespace Vendors.YamlDotNet.Serialization.NodeDeserializers
 {
     public sealed class StaticArrayNodeDeserializer : INodeDeserializer
     {

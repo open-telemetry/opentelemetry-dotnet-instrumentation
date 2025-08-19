@@ -31,13 +31,13 @@ using System.Globalization;
 using System.IO;
 using System.Text;
 using System.Text.RegularExpressions;
-using YamlDotNet.Core.Events;
-using YamlDotNet.Core.ObjectPool;
-using ParsingEvent = YamlDotNet.Core.Events.ParsingEvent;
-using TagDirective = YamlDotNet.Core.Tokens.TagDirective;
-using VersionDirective = YamlDotNet.Core.Tokens.VersionDirective;
+using Vendors.YamlDotNet.Core.Events;
+using Vendors.YamlDotNet.Core.ObjectPool;
+using ParsingEvent = Vendors.YamlDotNet.Core.Events.ParsingEvent;
+using TagDirective = Vendors.YamlDotNet.Core.Tokens.TagDirective;
+using VersionDirective = Vendors.YamlDotNet.Core.Tokens.VersionDirective;
 
-namespace YamlDotNet.Core
+namespace Vendors.YamlDotNet.Core
 {
     /// <summary>
     /// Emits YAML streams.

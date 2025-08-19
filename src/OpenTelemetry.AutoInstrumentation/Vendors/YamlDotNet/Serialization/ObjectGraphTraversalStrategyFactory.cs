@@ -27,7 +27,7 @@
 
 using System.Collections.Generic;
 
-namespace YamlDotNet.Serialization
+namespace Vendors.YamlDotNet.Serialization
 {
     /// <summary>
     /// A factory method for creating <see cref="IObjectGraphTraversalStrategy"/> instances

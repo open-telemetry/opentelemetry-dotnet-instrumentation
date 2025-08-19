@@ -28,7 +28,7 @@
 using System;
 using System.Globalization;
 
-namespace YamlDotNet
+namespace Vendors.YamlDotNet
 {
     internal sealed class CultureInfoAdapter : CultureInfo
     {

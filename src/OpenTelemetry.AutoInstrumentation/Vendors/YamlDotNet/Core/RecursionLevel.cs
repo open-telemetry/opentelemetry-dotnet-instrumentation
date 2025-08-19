@@ -26,7 +26,7 @@
 
 using System;
 
-namespace YamlDotNet.Core
+namespace Vendors.YamlDotNet.Core
 {
     /// <summary>
     /// Keeps track of the <see cref="current"/> recursion level,

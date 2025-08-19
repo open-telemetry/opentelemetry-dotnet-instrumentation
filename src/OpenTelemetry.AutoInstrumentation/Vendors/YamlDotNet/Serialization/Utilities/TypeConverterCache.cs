@@ -32,9 +32,9 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
-using YamlDotNet.Helpers;
+using Vendors.YamlDotNet.Helpers;
 
-namespace YamlDotNet.Serialization.Utilities
+namespace Vendors.YamlDotNet.Serialization.Utilities
 {
     internal readonly struct TypeConverterLookupResult
     {

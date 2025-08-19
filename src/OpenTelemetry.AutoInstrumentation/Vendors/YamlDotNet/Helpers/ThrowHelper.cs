@@ -27,7 +27,7 @@
 using System;
 using System.Runtime.CompilerServices;
 
-namespace YamlDotNet.Helpers
+namespace Vendors.YamlDotNet.Helpers
 {
     internal static class ThrowHelper
     {

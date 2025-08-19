@@ -34,7 +34,7 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Runtime.Serialization;
 
-namespace YamlDotNet.Helpers
+namespace Vendors.YamlDotNet.Helpers
 {
     [Serializable]
     internal sealed class OrderedDictionary<TKey, TValue> : IOrderedDictionary<TKey, TValue>

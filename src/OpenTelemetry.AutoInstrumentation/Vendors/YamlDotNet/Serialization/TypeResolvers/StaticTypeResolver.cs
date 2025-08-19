@@ -27,7 +27,7 @@
 
 using System;
 
-namespace YamlDotNet.Serialization.TypeResolvers
+namespace Vendors.YamlDotNet.Serialization.TypeResolvers
 {
     /// <summary>
     /// Except for primitive types, the type returned will always be the static type.

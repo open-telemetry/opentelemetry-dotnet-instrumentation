@@ -27,9 +27,9 @@
 
 using System;
 using System.Collections;
-using YamlDotNet.Core;
+using Vendors.YamlDotNet.Core;
 
-namespace YamlDotNet.Serialization.NodeDeserializers
+namespace Vendors.YamlDotNet.Serialization.NodeDeserializers
 {
     public class StaticDictionaryNodeDeserializer : DictionaryDeserializer, INodeDeserializer
     {

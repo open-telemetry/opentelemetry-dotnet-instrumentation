@@ -25,7 +25,7 @@
 // SOFTWARE.
 
 #pragma warning disable IDE0130
-namespace YamlDotNet
+namespace Vendors.YamlDotNet
 #pragma warning restore IDE0130
 {
     internal static class Polyfills

@@ -27,7 +27,7 @@
 
 using System;
 
-namespace YamlDotNet.Serialization
+namespace Vendors.YamlDotNet.Serialization
 {
     /// <summary>
     /// Defined the interface of a type that can be notified during an object graph traversal.

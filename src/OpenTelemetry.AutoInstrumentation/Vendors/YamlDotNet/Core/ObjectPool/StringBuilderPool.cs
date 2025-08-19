@@ -28,7 +28,7 @@ using System;
 using System.Diagnostics;
 using System.Text;
 
-namespace YamlDotNet.Core.ObjectPool
+namespace Vendors.YamlDotNet.Core.ObjectPool
 {
     /// <summary>
     /// Pooling of StringBuilder instances.

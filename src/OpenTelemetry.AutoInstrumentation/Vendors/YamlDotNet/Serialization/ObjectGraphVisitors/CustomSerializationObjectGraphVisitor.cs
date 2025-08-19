@@ -28,10 +28,10 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using YamlDotNet.Core;
-using YamlDotNet.Serialization.Utilities;
+using Vendors.YamlDotNet.Core;
+using Vendors.YamlDotNet.Serialization.Utilities;
 
-namespace YamlDotNet.Serialization.ObjectGraphVisitors
+namespace Vendors.YamlDotNet.Serialization.ObjectGraphVisitors
 {
     public sealed class CustomSerializationObjectGraphVisitor : ChainedObjectGraphVisitor
     {

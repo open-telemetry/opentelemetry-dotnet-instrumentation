@@ -30,9 +30,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using YamlDotNet.Serialization;
+using Vendors.YamlDotNet.Serialization;
 
-namespace YamlDotNet.Helpers
+namespace Vendors.YamlDotNet.Helpers
 {
     public class DefaultFsharpHelper : IFsharpHelper
     {

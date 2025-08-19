@@ -27,7 +27,7 @@
 using System;
 using System.Collections.Concurrent;
 
-namespace YamlDotNet.Helpers
+namespace Vendors.YamlDotNet.Helpers
 {
     internal static class DictionaryExtensions
     {

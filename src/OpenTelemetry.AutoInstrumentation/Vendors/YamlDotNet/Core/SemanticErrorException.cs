@@ -26,7 +26,7 @@
 
 using System;
 
-namespace YamlDotNet.Core
+namespace Vendors.YamlDotNet.Core
 {
     /// <summary>
     /// Exception that is thrown when a semantic error is detected on a YAML stream.

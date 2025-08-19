@@ -27,7 +27,7 @@
 
 using System.Reflection;
 
-namespace YamlDotNet
+namespace Vendors.YamlDotNet
 {
     internal static class PropertyInfoExtensions
     {
