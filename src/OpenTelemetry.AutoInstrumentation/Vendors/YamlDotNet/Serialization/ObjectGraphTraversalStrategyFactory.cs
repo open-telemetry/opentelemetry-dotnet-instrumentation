@@ -37,7 +37,7 @@ namespace Vendors.YamlDotNet.Serialization
     /// <param name="typeConverters">The type converters to be used by the traversal strategy.</param>
     /// <param name="maximumRecursion">The maximum object depth to be supported by the traversal strategy.</param>
     /// <returns></returns>
-    public delegate IObjectGraphTraversalStrategy
+    internal delegate IObjectGraphTraversalStrategy
         ObjectGraphTraversalStrategyFactory(
             ITypeInspector typeInspector,
             ITypeResolver typeResolver,
