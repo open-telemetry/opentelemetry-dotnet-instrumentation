@@ -1375,7 +1375,7 @@ extern "C"
     EXPORTTHIS void ContinuousProfilerNotifySpanStopped(uint64_t traceIdHigh, uint64_t traceIdLow, uint64_t spanId)
     {
         std::lock_guard<std::mutex>                    guard(thread_span_context_lock);
-        const continuous_profiler::thread_span_context spanContext = { traceIdHigh, traceIdLow, spanId };
+        const continuous_profiler::thread_span_context spanContext = {traceIdHigh, traceIdLow, spanId};
         const auto&                                    threadIds   = span_context_thread_map[spanContext];
         for (const auto threadId : threadIds)
         {
