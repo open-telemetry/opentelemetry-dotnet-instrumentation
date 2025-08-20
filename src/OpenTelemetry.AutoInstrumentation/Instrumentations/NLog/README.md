@@ -1,42 +1,65 @@
 # NLog OpenTelemetry Auto-Instrumentation
 
-This directory contains the NLog instrumentation for OpenTelemetry .NET Auto-Instrumentation. This instrumentation automatically bridges NLog logging events to OpenTelemetry, allowing NLog applications to benefit from unified observability without code changes.
+This directory contains the NLog instrumentation for OpenTelemetry .NET Auto-Instrumentation. This instrumentation provides two approaches for bridging NLog logging events to OpenTelemetry: automatic zero-config injection and standard NLog Target configuration.
 
 ## Overview
 
-The NLog instrumentation works by:
-1. **Automatic Target Injection**: Dynamically injecting an OpenTelemetry target into NLog's target collection
-2. **Log Event Bridging**: Converting NLog log events to OpenTelemetry log records
-3. **Structured Logging Support**: Preserving message templates and parameters for structured logging
-4. **Trace Context Integration**: Automatically including trace context in log records
-5. **Custom Properties**: Forwarding custom properties while filtering internal NLog properties
+The NLog instrumentation offers flexible integration through:
+1. **Zero-Config Auto-Injection**: Automatically injects `OpenTelemetryTarget` into existing NLog configurations
+2. **Standard NLog Target**: `OpenTelemetryTarget` can be configured like any NLog target via `nlog.config` or code
+3. **Log Event Bridging**: Converting NLog log events to OpenTelemetry log records
+4. **Structured Logging Support**: Leveraging NLog's layout abilities for enrichment
+5. **Trace Context Integration**: Automatically including trace context in log records
+6. **Custom Properties**: Forwarding custom properties while filtering internal NLog properties
 
 ## Architecture
 
+### Zero-Config Path (Auto-Injection)
 ```
-NLog Logger
+NLog Logger.Log() Call
     ↓
-NLog LogEventInfo
+LoggerIntegration (CallTarget)
     ↓
-OpenTelemetryNLogTarget (injected)
+NLogAutoInjector.EnsureConfigured()
+    ↓
+OpenTelemetryTarget → NLog Configuration
+    ↓
+OpenTelemetryNLogConverter
     ↓
 OpenTelemetry LogRecord
     ↓
-OpenTelemetry Exporters
+OTLP Exporters
+```
+
+### Standard NLog Target Path
+```
+NLog Configuration (nlog.config or code)
+    ↓
+OpenTelemetryTarget (TargetWithContext)
+    ↓
+OpenTelemetryNLogConverter
+    ↓
+OpenTelemetry LogRecord
+    ↓
+OTLP Exporters
 ```
 
 ## Components
 
 ### Core Components
 
+#### Auto-Instrumentation Components
 - **`ILoggingEvent.cs`**: Duck typing interface for NLog's LogEventInfo
-- **`OpenTelemetryNLogTarget.cs`**: Main target that bridges NLog to OpenTelemetry
-- **`OpenTelemetryLogHelpers.cs`**: Helper for creating OpenTelemetry log records
-- **`OpenTelemetryTargetInitializer.cs`**: Handles dynamic injection of the target
+- **`OpenTelemetryNLogConverter.cs`**: Internal converter that transforms NLog events to OpenTelemetry log records
+- **`OpenTelemetryLogHelpers.cs`**: Helper for creating OpenTelemetry log records via expression trees
+- **`NLogAutoInjector.cs`**: Handles programmatic injection of OpenTelemetryTarget into NLog configuration
+
+#### Standard NLog Target
+- **`OpenTelemetryTarget.cs`** (in `OpenTelemetry.AutoInstrumentation.NLogTarget` project): Standard NLog target extending `TargetWithContext`
 
 ### Integration
 
-- **`TargetCollectionIntegration.cs`**: Hooks into NLog's target collection to inject the OpenTelemetry target
+- **`LoggerIntegration.cs`**: CallTarget integration that intercepts `NLog.Logger.Log` to trigger auto-injection and GDC trace context
 
 ### Trace Context
 
@@ -44,17 +67,60 @@ OpenTelemetry Exporters
 
 ## Configuration
 
-The NLog instrumentation is controlled by the following environment variables:
+### Auto-Injection (Zero-Config)
+
+The NLog auto-injection is controlled by environment variables:
 
 - `OTEL_DOTNET_AUTO_LOGS_ENABLED=true`: Enables logging instrumentation
 - `OTEL_DOTNET_AUTO_LOGS_ENABLE_NLOG_BRIDGE=true`: Enables the NLog bridge specifically
 - `OTEL_DOTNET_AUTO_LOGS_INCLUDE_FORMATTED_MESSAGE=true`: Includes formatted messages as attributes
 
+### Standard NLog Target Configuration
+
+#### Via nlog.config
+```xml
+<nlog>
+  <extensions>
+    <add assembly="OpenTelemetry.AutoInstrumentation.NLogTarget" />
+  </extensions>
+  
+  <targets>
+    <target xsi:type="OpenTelemetryTarget" 
+            name="otlp"
+            endpoint="http://localhost:4317"
+            useHttp="false"
+            includeFormattedMessage="true"
+            includeEventProperties="true">
+      <attribute name="service.name" layout="${var:ServiceName}" />
+      <attribute name="deployment.environment" layout="${var:Environment}" />
+    </target>
+  </targets>
+  
+  <rules>
+    <logger name="*" minlevel="Trace" writeTo="otlp" />
+  </rules>
+</nlog>
+```
+
+#### Via Code
+```csharp
+var config = new LoggingConfiguration();
+var otlpTarget = new OpenTelemetryTarget
+{
+    Endpoint = "http://localhost:4317",
+    UseHttp = false,
+    IncludeFormattedMessage = true
+};
+config.AddTarget("otlp", otlpTarget);
+config.AddRule(LogLevel.Trace, LogLevel.Fatal, otlpTarget);
+LogManager.Configuration = config;
+```
+
 ## Supported Versions
 
 - **NLog**: 4.0.0 - 6.*.*
 - **.NET Framework**: 4.6.2+
-- **.NET**: 6.0+
+- **.NET**: 6.0+, 8.0, 9.0
 
 ## Level Mapping
 
@@ -107,13 +173,14 @@ Tests are located in `test/OpenTelemetry.AutoInstrumentation.Tests/NLogTests.cs`
 
 ## Integration Testing
 
-A complete test application is available at `test/test-applications/integrations/TestApplication.NLog/` that demonstrates:
+A complete test application is available at `test/test-applications/integrations/TestApplication.NLogBridge/` that demonstrates:
 - Direct NLog usage
-- Microsoft.Extensions.Logging integration
+- Microsoft.Extensions.Logging integration via custom provider
 - Structured logging scenarios
 - Exception logging
 - Custom properties
 - Trace context propagation
+- Both auto-injection and manual target configuration paths
 
 ## Troubleshooting
 

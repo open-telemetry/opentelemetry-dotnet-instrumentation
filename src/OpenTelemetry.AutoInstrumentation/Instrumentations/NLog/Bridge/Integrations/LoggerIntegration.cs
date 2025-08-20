@@ -1,7 +1,10 @@
 // Copyright The OpenTelemetry Authors
 // SPDX-License-Identifier: Apache-2.0
 
+using System.Diagnostics;
+using System.Reflection;
 using OpenTelemetry.AutoInstrumentation.CallTarget;
+using OpenTelemetry.AutoInstrumentation.Instrumentations.NLog.AutoInjection;
 using OpenTelemetry.AutoInstrumentation.Logging;
 #if NET
 using OpenTelemetry.AutoInstrumentation.Logger;
@@ -61,13 +64,46 @@ public static class LoggerIntegration
 #endif
 
         // Only process the log event if the NLog bridge is enabled
-        if (Instrumentation.LogSettings.Value.EnableNLogBridge && logEvent != null)
+        if (Instrumentation.LogSettings.Value.EnableNLogBridge)
         {
-            // Forward the log event to OpenTelemetry using our target
-            OpenTelemetryNLogTarget.Instance.WriteLogEvent(logEvent);
+            // Ensure the OpenTelemetry NLog target is configured (zero-config path)
+            NLogAutoInjector.EnsureConfigured();
+
+            // Inject trace context into NLog GlobalDiagnosticsContext for current destination outputs
+            TrySetTraceContext(Activity.Current);
         }
 
         // Return default state - we don't need to track anything between begin/end
         return CallTargetState.GetDefault();
+    }
+
+    private static void TrySetTraceContext(Activity? activity)
+    {
+        try
+        {
+            var gdcType = Type.GetType("NLog.GlobalDiagnosticsContext, NLog");
+            if (gdcType is null)
+            {
+                return;
+            }
+
+            var setMethod = gdcType.GetMethod("Set", BindingFlags.Public | BindingFlags.Static, new Type[] { typeof(string), typeof(string) });
+            if (setMethod is null)
+            {
+                return;
+            }
+
+            string spanId = activity?.SpanId.ToString() ?? "(null)";
+            string traceId = activity?.TraceId.ToString() ?? "(null)";
+            string traceFlags = activity is null ? "(null)" : ((byte)activity.ActivityTraceFlags).ToString("x2");
+
+            setMethod.Invoke(null, new object[] { "span_id", spanId });
+            setMethod.Invoke(null, new object[] { "trace_id", traceId });
+            setMethod.Invoke(null, new object[] { "trace_flags", traceFlags });
+        }
+        catch
+        {
+            // best-effort only
+        }
     }
 }

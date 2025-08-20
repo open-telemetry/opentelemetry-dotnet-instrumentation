@@ -60,7 +60,7 @@ public class NLogTests
     public void StandardNLogLevels_AreMappedCorrectly(int nlogLevelOrdinal, int expectedOpenTelemetrySeverity)
     {
         // Act
-        var actualSeverity = OpenTelemetryNLogTarget.MapLogLevel(nlogLevelOrdinal);
+        var actualSeverity = OpenTelemetryNLogConverter.MapLogLevel(nlogLevelOrdinal);
 
         // Assert
         Assert.Equal(expectedOpenTelemetrySeverity, actualSeverity);
@@ -79,7 +79,7 @@ public class NLogTests
         var expectedSeverity = GetOpenTelemetrySeverityValue("Trace");
 
         // Act
-        var actualSeverity = OpenTelemetryNLogTarget.MapLogLevel(offLevelOrdinal);
+        var actualSeverity = OpenTelemetryNLogConverter.MapLogLevel(offLevelOrdinal);
 
         // Assert
         Assert.Equal(expectedSeverity, actualSeverity);
@@ -101,7 +101,7 @@ public class NLogTests
         var expectedSeverity = GetOpenTelemetrySeverityValue("Trace");
 
         // Act
-        var actualSeverity = OpenTelemetryNLogTarget.MapLogLevel(invalidOrdinal);
+        var actualSeverity = OpenTelemetryNLogConverter.MapLogLevel(invalidOrdinal);
 
         // Assert
         Assert.Equal(expectedSeverity, actualSeverity);
@@ -122,7 +122,7 @@ public class NLogTests
     public void CustomLevelsBetweenStandardLevels_AreMappedCorrectly(int nlogOrdinal, int expectedSeverity)
     {
         // Act
-        var actualSeverity = OpenTelemetryNLogTarget.MapLogLevel(nlogOrdinal);
+        var actualSeverity = OpenTelemetryNLogConverter.MapLogLevel(nlogOrdinal);
 
         // Assert
         Assert.Equal(expectedSeverity, actualSeverity);

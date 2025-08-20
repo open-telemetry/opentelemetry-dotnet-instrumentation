@@ -71,7 +71,7 @@ public class NLogBridgeTests : TestHelper
             logRecord =>
             VerifyBody(logRecord, "{0}, {1} at {2:t}!") &&
             VerifyTraceContext(logRecord) &&
-            logRecord is { SeverityText: "Information", SeverityNumber: SeverityNumber.Info } &&
+            logRecord is { SeverityText: "Info", SeverityNumber: SeverityNumber.Info } &&
             // 0 : "Hello"
             // 1 : "world"
             // 2 : timestamp

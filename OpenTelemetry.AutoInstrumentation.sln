@@ -248,6 +248,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestApplication.Log4NetBridge", "test\test-applications\integrations\TestApplication.Log4NetBridge\TestApplication.Log4NetBridge.csproj", "{926B7C03-42C2-4192-94A7-CD0B1C693279}"
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestApplication.NLogBridge", "test\test-applications\integrations\TestApplication.NLogBridge\TestApplication.NLogBridge.csproj", "{A7B8C9D0-1E2F-3A4B-5C6D-7E8F9A0B1C2D}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpenTelemetry.AutoInstrumentation.NLogTarget", "src\OpenTelemetry.AutoInstrumentation.NLogTarget\OpenTelemetry.AutoInstrumentation.NLogTarget.csproj", "{3C7A3F7B-77E5-4C55-9B2D-1A4A9E7B1D33}"
+EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestApplication.SelectiveSampler", "test\test-applications\integrations\TestApplication.SelectiveSampler\TestApplication.SelectiveSampler.csproj", "{FD1A1ABD-6A48-4E94-B5F7-2081AFCD1BBB}"
 EndProject
 Global
