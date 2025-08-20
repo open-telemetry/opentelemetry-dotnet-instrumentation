@@ -84,9 +84,10 @@ static std::vector<unsigned char>* allocation_buffer      = new std::vector<unsi
 static std::mutex                 selective_sampling_buffer_lock = std::mutex();
 static std::vector<unsigned char> selective_sampling_buffer;
 
-static std::mutex                                                                                 thread_span_context_lock;
-static std::unordered_map<ThreadID, continuous_profiler::thread_span_context>                     thread_span_context_map;
-static std::unordered_map<continuous_profiler::thread_span_context, std::unordered_set<ThreadID>> span_context_thread_map;
+static std::mutex                                                             thread_span_context_lock;
+static std::unordered_map<ThreadID, continuous_profiler::thread_span_context> thread_span_context_map;
+static std::unordered_map<continuous_profiler::thread_span_context, std::unordered_set<ThreadID>>
+    span_context_thread_map;
 
 static std::mutex                   selective_sampling_threads_lock;
 static std::unordered_set<ThreadID> selective_sampling_threads_set;
@@ -1373,9 +1374,9 @@ extern "C"
     }
     EXPORTTHIS void ContinuousProfilerNotifySpanStopped(uint64_t traceIdHigh, uint64_t traceIdLow, uint64_t spanId)
     {
-        std::lock_guard<std::mutex> guard(thread_span_context_lock);
+        std::lock_guard<std::mutex>                    guard(thread_span_context_lock);
         const continuous_profiler::thread_span_context spanContext = { traceIdHigh, traceIdLow, spanId };
-        const auto& threadIds                                      = span_context_thread_map[spanContext];
+        const auto&                                    threadIds   = span_context_thread_map[spanContext];
         for (const auto threadId : threadIds)
         {
             thread_span_context_map.erase(threadId);
@@ -1388,18 +1389,19 @@ extern "C"
         const HRESULT hr = profiler_info->GetCurrentThreadID(&threadId);
         if (FAILED(hr))
         {
-            trace::Logger::Debug("GetCurrentThreadID failed. HRESULT=0x", std::setfill('0'), std::setw(8), std::hex, hr);
+            trace::Logger::Debug("GetCurrentThreadID failed. HRESULT=0x", std::setfill('0'), std::setw(8), std::hex,
+                                 hr);
             return;
         }
         std::lock_guard<std::mutex> guard(thread_span_context_lock);
 
-        static continuous_profiler::thread_span_context defaultContext = { 0, 0, 0 };
+        static continuous_profiler::thread_span_context defaultContext = {0, 0, 0};
         auto                                            oldSpanContext = thread_span_context_map[threadId];
         if (oldSpanContext != defaultContext)
         {
             span_context_thread_map[oldSpanContext].erase(threadId);
         }
-        continuous_profiler::thread_span_context newSpanContext = { traceIdHigh, traceIdLow, spanId };
+        continuous_profiler::thread_span_context newSpanContext = {traceIdHigh, traceIdLow, spanId};
         thread_span_context_map[threadId]                       = newSpanContext;
         if (newSpanContext != defaultContext)
         {
