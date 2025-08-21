@@ -16,8 +16,8 @@ jobs:
         uses: actions/setup-dotnet@67a3573c9a986a3f9c594539f4ab511d57bb3ce9 # tag: v4.3.1
         with:
           dotnet-version: | 
-            8.0.412
-            9.0.303
+            8.0.413
+            9.0.304
             
       - name: Test the PowerShell module instructions from README.md
         shell: powershell
@@ -67,8 +67,8 @@ jobs:
         uses: actions/setup-dotnet@67a3573c9a986a3f9c594539f4ab511d57bb3ce9 # tag: v4.3.1
         with:
           dotnet-version: | 
-            8.0.412
-            9.0.303
+            8.0.413
+            9.0.304
 
       - name: Install MacOS CoreUtils
         if: ${{ runner.os == 'macOS' }}
@@ -109,7 +109,7 @@ jobs:
     steps:
 
       - name: Checkout
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # tag: v4.2.2
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # tag: v5.0.0
 
       - name: Test the Shell scripts from README.md in Docker container
         run: |
