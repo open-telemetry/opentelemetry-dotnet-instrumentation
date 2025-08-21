@@ -482,7 +482,7 @@ void ThreadSpanContextMap::Remove(ThreadID threadId)
 void ThreadSpanContextMap::Put(ThreadID threadId, const thread_span_context& currentSpanContext)
 {
     static thread_span_context defaultContext;
-    auto previousContext = thread_span_context_map[threadId];
+    auto                       previousContext = thread_span_context_map[threadId];
     if (previousContext != defaultContext)
     {
         span_context_thread_map[previousContext].erase(threadId);
