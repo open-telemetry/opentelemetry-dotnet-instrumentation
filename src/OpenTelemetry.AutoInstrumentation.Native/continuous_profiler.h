@@ -16,6 +16,7 @@
 #include <utility>
 #include <unordered_map>
 #include <random>
+#include <unordered_set>
 
 #ifdef _WIN32
 #define EXPORTTHIS __declspec(dllexport)
@@ -205,6 +206,18 @@ private:
 
 namespace continuous_profiler
 {
+class ThreadSpanContextMap
+{
+public:
+    void                  Put(ThreadID threadId, const thread_span_context& currentSpanContext);
+    thread_span_context   Get(ThreadID threadId);
+    void                  Remove(const thread_span_context& spanContext);
+    void                  Remove(ThreadID threadId);
+
+private:
+    std::unordered_map<ThreadID, thread_span_context>                     thread_span_context_map;
+    std::unordered_map<thread_span_context, std::unordered_set<ThreadID>> span_context_thread_map;
+};
 template <typename TKey, typename TValue>
 class NameCache
 {
