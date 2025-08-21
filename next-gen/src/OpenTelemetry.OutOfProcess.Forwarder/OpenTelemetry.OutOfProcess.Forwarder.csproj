@@ -4,7 +4,9 @@
     <TargetFrameworks>$(TargetFrameworks)</TargetFrameworks>
     <OutputType>Library</OutputType>
     <RootNamespace>OpenTelemetry</RootNamespace>
-    <MinVerTagPrefix>sdk-</MinVerTagPrefix>
+    <PackageId>OpenTelemetry.OutOfProcess.Forwarder</PackageId>
+    <Description>OpenTelemetry out-of-process forwarder library for collecting and forwarding telemetry data from applications to external collectors.</Description>
+    <PackageTags>$(PackageTags);OutOfProcess;Forwarder</PackageTags>
   </PropertyGroup>
 
   <ItemGroup>
