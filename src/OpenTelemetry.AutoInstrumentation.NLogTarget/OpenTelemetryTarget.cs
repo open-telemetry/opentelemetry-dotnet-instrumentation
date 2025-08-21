@@ -5,8 +5,10 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using NLog;
 using NLog.Config;
+using NLog.Layouts;
 using NLog.Targets;
 using OpenTelemetry;
 using OpenTelemetry.AutoInstrumentation;
@@ -19,36 +21,37 @@ namespace OpenTelemetry.AutoInstrumentation.NLogTarget;
 public sealed class OpenTelemetryTarget : TargetWithContext
 {
     private static readonly ConcurrentDictionary<string, object> LoggerCache = new(StringComparer.Ordinal);
+    private static readonly string EmptyTraceIdToHexString = default(ActivityTraceId).ToHexString();
+    private static readonly string EmptySpanIdToHexString = default(ActivitySpanId).ToHexString();
     private static LoggerProvider? _loggerProvider;
     private static Func<string?, object?>? _getLoggerFactory;
 
     public OpenTelemetryTarget()
     {
         Layout = "${message}";
+        TraceIdLayout = "${activity:property=TraceId}";
+        SpanIdLayout = "${activity:property=SpanId}";
     }
 
     [RequiredParameter]
-    public string? Endpoint { get; set; }
+    public Layout? Endpoint { get; set; }
 
-    public string? Headers { get; set; }
+    public Layout? Headers { get; set; }
 
     public bool UseHttp { get; set; } = true;
 
-    public string? ServiceName { get; set; }
-
-    [ArrayParameter(typeof(TargetPropertyWithContext), "attribute")]
-    public IList<TargetPropertyWithContext> Attributes { get; } = new List<TargetPropertyWithContext>();
+    public Layout? ServiceName { get; set; }
 
     [ArrayParameter(typeof(TargetPropertyWithContext), "resource")]
     public IList<TargetPropertyWithContext> Resources { get; } = new List<TargetPropertyWithContext>();
 
     public bool IncludeFormattedMessage { get; set; } = true;
 
-    public new bool IncludeEventProperties { get; set; } = true;
-
-    public new bool IncludeScopeProperties { get; set; } = true;
-
     public bool IncludeEventParameters { get; set; } = true;
+
+    public Layout? TraceIdLayout { get; set; }
+
+    public Layout? SpanIdLayout { get; set; }
 
     public int ScheduledDelayMilliseconds { get; set; } = 5000;
 
@@ -73,7 +76,7 @@ public sealed class OpenTelemetryTarget : TargetWithContext
 
         loggerProviderBuilder = loggerProviderBuilder.AddOtlpExporter(options =>
         {
-            var endpoint = Endpoint;
+            var endpoint = RenderLogEvent(Endpoint, LogEventInfo.CreateNullEvent());
             if (string.IsNullOrEmpty(endpoint))
             {
                 endpoint = Environment.GetEnvironmentVariable("OTEL_EXPORTER_OTLP_ENDPOINT");
@@ -84,9 +87,10 @@ public sealed class OpenTelemetryTarget : TargetWithContext
                 options.Endpoint = new Uri(endpoint!, UriKind.RelativeOrAbsolute);
             }
 
-            if (!string.IsNullOrEmpty(Headers))
+            var headers = RenderLogEvent(Headers, LogEventInfo.CreateNullEvent());
+            if (!string.IsNullOrEmpty(headers))
             {
-                options.Headers = Headers;
+                options.Headers = headers;
             }
 
             options.Protocol = UseHttp ? OpenTelemetry.Exporter.OtlpExportProtocol.HttpProtobuf : OpenTelemetry.Exporter.OtlpExportProtocol.Grpc;
@@ -112,37 +116,47 @@ public sealed class OpenTelemetryTarget : TargetWithContext
         }
 
         var logger = GetOrCreateLogger(logEvent.LoggerName);
-
-        // Build properties from event properties and context
-        var properties = new List<KeyValuePair<string, object?>>();
-        if (IncludeEventProperties && logEvent.HasProperties && logEvent.Properties is not null)
+        if (logger is null)
         {
-            foreach (var kvp in logEvent.Properties)
-            {
-                properties.Add(new KeyValuePair<string, object?>(Convert.ToString(kvp.Key)!, kvp.Value));
-            }
+            return;
         }
 
-        // Scope properties can be added via explicit <attribute> entries or NLog's contexts (GDC/MDLC)
-        foreach (var attribute in Attributes)
-        {
-            var value = attribute.Layout?.Render(logEvent);
-            if (!string.IsNullOrEmpty(attribute.Name))
-            {
-                properties.Add(new KeyValuePair<string, object?>(attribute.Name!, value));
-            }
-        }
+        var properties = GetLogEventProperties(logEvent);
 
-        var body = IncludeFormattedMessage ? logEvent.FormattedMessage : Convert.ToString(logEvent.Message);
+        var body = IncludeFormattedMessage ? RenderLogEvent(Layout, logEvent) : Convert.ToString(logEvent.Message);
 
         var severityText = logEvent.Level.Name;
         var severityNumber = MapLogLevelToSeverity(logEvent.Level);
 
-        var current = Activity.Current;
+        // Resolve trace context using Layout properties (works with AsyncWrapper)
+        Activity? current = null;
+        var traceIdString = RenderLogEvent(TraceIdLayout, logEvent);
+        var spanIdString = RenderLogEvent(SpanIdLayout, logEvent);
+
+        if (!string.IsNullOrEmpty(traceIdString) && !string.IsNullOrEmpty(spanIdString) &&
+            traceIdString != EmptyTraceIdToHexString && spanIdString != EmptySpanIdToHexString)
+        {
+            try
+            {
+                var traceId = ActivityTraceId.CreateFromString(traceIdString);
+                var spanId = ActivitySpanId.CreateFromString(spanIdString);
+                var activityContext = new ActivityContext(traceId, spanId, ActivityTraceFlags.Recorded);
+                current = new Activity("OpenTelemetryTarget").SetParentId(activityContext.TraceId, activityContext.SpanId, activityContext.TraceFlags);
+            }
+            catch
+            {
+                // If parsing fails, fall back to Activity.Current
+                current = Activity.Current;
+            }
+        }
+        else
+        {
+            current = Activity.Current;
+        }
 
         // Emit using internal helpers via reflection delegate
-        var renderedMessage = logEvent.FormattedMessage;
-        var args = IncludeEventParameters && logEvent.Parameters is object[] p ? p : null;
+        var renderedMessage = IncludeFormattedMessage ? RenderLogEvent(Layout, logEvent) : logEvent.Message;
+        var args = IncludeEventParameters && !logEvent.HasProperties && logEvent.Parameters is object[] p ? p : null;
 
         OpenTelemetry.AutoInstrumentation.Instrumentations.NLog.Bridge.OpenTelemetryLogHelpers.LogEmitter?.Invoke(
             logger,
@@ -186,7 +200,7 @@ public sealed class OpenTelemetryTarget : TargetWithContext
         }
     }
 
-    private object GetOrCreateLogger(string? loggerName)
+    private object? GetOrCreateLogger(string? loggerName)
     {
         var key = loggerName ?? string.Empty;
         if (LoggerCache.TryGetValue(key, out var logger))
@@ -197,7 +211,7 @@ public sealed class OpenTelemetryTarget : TargetWithContext
         var factory = _getLoggerFactory;
         if (factory is null)
         {
-            return new object();
+            return null;
         }
 
         logger = factory(loggerName);
@@ -206,6 +220,23 @@ public sealed class OpenTelemetryTarget : TargetWithContext
             LoggerCache[key] = logger;
         }
 
-        return logger ?? new object();
+        return logger;
+    }
+
+    private IEnumerable<KeyValuePair<string, object?>>? GetLogEventProperties(LogEventInfo logEvent)
+    {
+        // Check HasProperties first to avoid allocating empty dictionary
+        if (!logEvent.HasProperties && ContextProperties.Count == 0)
+        {
+            return null;
+        }
+
+        var allProperties = GetAllProperties(logEvent);
+        if (allProperties.Count == 0)
+        {
+            return null;
+        }
+
+        return allProperties.Select(kvp => new KeyValuePair<string, object?>(Convert.ToString(kvp.Key)!, kvp.Value));
     }
 }

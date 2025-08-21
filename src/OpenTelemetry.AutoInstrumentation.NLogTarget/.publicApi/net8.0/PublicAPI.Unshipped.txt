@@ -1,18 +1,13 @@
 #nullable enable
 OpenTelemetry.AutoInstrumentation.NLogTarget.OpenTelemetryTarget
-OpenTelemetry.AutoInstrumentation.NLogTarget.OpenTelemetryTarget.Attributes.get -> System.Collections.Generic.IList<NLog.Targets.TargetPropertyWithContext!>!
-OpenTelemetry.AutoInstrumentation.NLogTarget.OpenTelemetryTarget.Endpoint.get -> string?
+OpenTelemetry.AutoInstrumentation.NLogTarget.OpenTelemetryTarget.Endpoint.get -> NLog.Layouts.Layout?
 OpenTelemetry.AutoInstrumentation.NLogTarget.OpenTelemetryTarget.Endpoint.set -> void
-OpenTelemetry.AutoInstrumentation.NLogTarget.OpenTelemetryTarget.Headers.get -> string?
+OpenTelemetry.AutoInstrumentation.NLogTarget.OpenTelemetryTarget.Headers.get -> NLog.Layouts.Layout?
 OpenTelemetry.AutoInstrumentation.NLogTarget.OpenTelemetryTarget.Headers.set -> void
 OpenTelemetry.AutoInstrumentation.NLogTarget.OpenTelemetryTarget.IncludeEventParameters.get -> bool
 OpenTelemetry.AutoInstrumentation.NLogTarget.OpenTelemetryTarget.IncludeEventParameters.set -> void
-OpenTelemetry.AutoInstrumentation.NLogTarget.OpenTelemetryTarget.IncludeEventProperties.get -> bool
-OpenTelemetry.AutoInstrumentation.NLogTarget.OpenTelemetryTarget.IncludeEventProperties.set -> void
 OpenTelemetry.AutoInstrumentation.NLogTarget.OpenTelemetryTarget.IncludeFormattedMessage.get -> bool
 OpenTelemetry.AutoInstrumentation.NLogTarget.OpenTelemetryTarget.IncludeFormattedMessage.set -> void
-OpenTelemetry.AutoInstrumentation.NLogTarget.OpenTelemetryTarget.IncludeScopeProperties.get -> bool
-OpenTelemetry.AutoInstrumentation.NLogTarget.OpenTelemetryTarget.IncludeScopeProperties.set -> void
 OpenTelemetry.AutoInstrumentation.NLogTarget.OpenTelemetryTarget.MaxExportBatchSize.get -> int
 OpenTelemetry.AutoInstrumentation.NLogTarget.OpenTelemetryTarget.MaxExportBatchSize.set -> void
 OpenTelemetry.AutoInstrumentation.NLogTarget.OpenTelemetryTarget.MaxQueueSize.get -> int
@@ -21,7 +16,11 @@ OpenTelemetry.AutoInstrumentation.NLogTarget.OpenTelemetryTarget.OpenTelemetryTa
 OpenTelemetry.AutoInstrumentation.NLogTarget.OpenTelemetryTarget.Resources.get -> System.Collections.Generic.IList<NLog.Targets.TargetPropertyWithContext!>!
 OpenTelemetry.AutoInstrumentation.NLogTarget.OpenTelemetryTarget.ScheduledDelayMilliseconds.get -> int
 OpenTelemetry.AutoInstrumentation.NLogTarget.OpenTelemetryTarget.ScheduledDelayMilliseconds.set -> void
-OpenTelemetry.AutoInstrumentation.NLogTarget.OpenTelemetryTarget.ServiceName.get -> string?
+OpenTelemetry.AutoInstrumentation.NLogTarget.OpenTelemetryTarget.ServiceName.get -> NLog.Layouts.Layout?
 OpenTelemetry.AutoInstrumentation.NLogTarget.OpenTelemetryTarget.ServiceName.set -> void
+OpenTelemetry.AutoInstrumentation.NLogTarget.OpenTelemetryTarget.SpanIdLayout.get -> NLog.Layouts.Layout?
+OpenTelemetry.AutoInstrumentation.NLogTarget.OpenTelemetryTarget.SpanIdLayout.set -> void
+OpenTelemetry.AutoInstrumentation.NLogTarget.OpenTelemetryTarget.TraceIdLayout.get -> NLog.Layouts.Layout?
+OpenTelemetry.AutoInstrumentation.NLogTarget.OpenTelemetryTarget.TraceIdLayout.set -> void
 OpenTelemetry.AutoInstrumentation.NLogTarget.OpenTelemetryTarget.UseHttp.get -> bool
 OpenTelemetry.AutoInstrumentation.NLogTarget.OpenTelemetryTarget.UseHttp.set -> void
