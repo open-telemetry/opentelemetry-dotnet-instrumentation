@@ -479,7 +479,7 @@ void ThreadSpanContextMap::Remove(ThreadID threadId)
     }
     const auto spanContext        = foundByThreadId->second;
     const auto foundBySpanContext = span_context_thread_map.find(spanContext);
-    if (foundBySpanContext  != span_context_thread_map.end())
+    if (foundBySpanContext != span_context_thread_map.end())
     {
         auto& threadIds = foundBySpanContext->second;
         threadIds.erase(threadId);
