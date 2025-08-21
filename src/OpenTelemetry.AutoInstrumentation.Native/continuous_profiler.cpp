@@ -457,23 +457,31 @@ void ThreadSamplesBuffer::WriteCurrentTimeMillis() const
 
 void ThreadSpanContextMap::Remove(const thread_span_context& spanContext)
 {
-    if (span_context_thread_map.find(spanContext) != span_context_thread_map.end())
+    const auto foundBySpanContext = span_context_thread_map.find(spanContext);
+    if (foundBySpanContext == span_context_thread_map.end())
     {
-        auto& threadIds = span_context_thread_map[spanContext];
-        for (auto threadId : threadIds)
-        {
-            thread_span_context_map.erase(threadId);
-        }
-        span_context_thread_map.erase(spanContext);
+        return; // nothing to remove
     }
+    const auto& threadIds = foundBySpanContext->second;
+    for (auto threadId : threadIds)
+    {
+        thread_span_context_map.erase(threadId);
+    }
+    span_context_thread_map.erase(spanContext);
 }
 
 void ThreadSpanContextMap::Remove(ThreadID threadId)
 {
-    auto spanContext = thread_span_context_map[threadId];
-    if (span_context_thread_map.find(spanContext) != span_context_thread_map.end())
+    const auto foundByThreadId = thread_span_context_map.find(threadId);
+    if (foundByThreadId == thread_span_context_map.end())
     {
-        auto& threadIds = span_context_thread_map[spanContext];
+        return; // nothing to remove
+    }
+    const auto spanContext        = foundByThreadId->second;
+    const auto foundBySpanContext = span_context_thread_map.find(spanContext);
+    if (foundBySpanContext  != span_context_thread_map.end())
+    {
+        auto& threadIds = foundBySpanContext->second;
         threadIds.erase(threadId);
     }
     thread_span_context_map.erase(threadId);
@@ -482,10 +490,14 @@ void ThreadSpanContextMap::Remove(ThreadID threadId)
 void ThreadSpanContextMap::Put(ThreadID threadId, const thread_span_context& currentSpanContext)
 {
     static thread_span_context defaultContext;
-    auto                       previousContext = thread_span_context_map[threadId];
-    if (previousContext != defaultContext)
+    const auto                 foundByThreadId = thread_span_context_map.find(threadId);
+    if (foundByThreadId != thread_span_context_map.end())
     {
-        span_context_thread_map[previousContext].erase(threadId);
+        const auto previousContext = foundByThreadId->second;
+        if (previousContext != defaultContext)
+        {
+            span_context_thread_map[previousContext].erase(threadId);
+        }
     }
     thread_span_context_map[threadId] = currentSpanContext;
     if (currentSpanContext != defaultContext)
