@@ -1,10 +1,12 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFrameworks>$(TargetFrameworks)</TargetFrameworks>
     <OutputType>Library</OutputType>
     <RootNamespace>OpenTelemetry.Configuration</RootNamespace>
-    <MinVerTagPrefix>sdk-</MinVerTagPrefix>
+    <PackageId>OpenTelemetry.OutOfProcess.Forwarder.Configuration</PackageId>
+    <Description>Configuration support for OpenTelemetry out-of-process forwarder, providing strongly-typed configuration options and dependency injection integration.</Description>
+    <PackageTags>$(PackageTags);Configuration;OutOfProcess;Forwarder</PackageTags>
   </PropertyGroup>
 
   <ItemGroup>

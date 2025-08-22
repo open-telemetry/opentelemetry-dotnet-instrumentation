@@ -17,6 +17,11 @@
     <PackageTags>Observability;OpenTelemetry;Monitoring;Telemetry;Tracing;Metrics;Logging</PackageTags>
     <PackageIcon>opentelemetry-icon-color.png</PackageIcon>
     <PackageProjectUrl>https://opentelemetry.io</PackageProjectUrl>
+    <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
+    <MinVerTagPrefix>forwarder-</MinVerTagPrefix>
+    <IsPackable>false</IsPackable>
+    <IsPackable Condition="$(MSBuildProjectName.Contains('OpenTelemetry.OutOfProcess.Forwarder'))">true</IsPackable>
+    <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
 
     <TargetFrameworks>net9.0</TargetFrameworks>
     <TestTargetFrameworks>net9.0</TestTargetFrameworks>
