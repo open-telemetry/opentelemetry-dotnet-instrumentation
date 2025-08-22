@@ -8,6 +8,7 @@ packages.
 ## [0.1.0-beta.1]
 
 ### Added
+
 - Initial beta release of `OpenTelemetry.OutOfProcess.Forwarder` package
 - Initial beta release of `OpenTelemetry.OutOfProcess.Forwarder.Configuration`
   package
@@ -15,5 +16,6 @@ packages.
 - Configuration support for forwarder settings
 
 ### Notes
+
 - This is the first beta release
 - APIs may change in future versions
