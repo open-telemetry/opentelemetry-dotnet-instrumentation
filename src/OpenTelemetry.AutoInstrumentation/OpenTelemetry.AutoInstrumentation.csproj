@@ -8,6 +8,9 @@
     <EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
     <GeneratedFolder>Generated</GeneratedFolder>
     <CompilerGeneratedFilesOutputPath>$(GeneratedFolder)\$(TargetFramework)</CompilerGeneratedFilesOutputPath>
+    <NoWarn>
+      $(NoWarn);CS1591;CS1061;CS1574;CS1591;CS8600;CS8602;CS8604;CS1591;
+    </NoWarn>
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\SourceGenerators\SourceGenerators.csproj" ReferenceOutputAssembly="false" OutputItemType="Analyzer" />
