@@ -29,7 +29,7 @@ namespace Vendors.YamlDotNet.Core.Events
     /// <summary>
     /// Specifies the style of a sequence.
     /// </summary>
-    public enum SequenceStyle
+    internal enum SequenceStyle
     {
         /// <summary>
         /// Let the emitter choose the style.

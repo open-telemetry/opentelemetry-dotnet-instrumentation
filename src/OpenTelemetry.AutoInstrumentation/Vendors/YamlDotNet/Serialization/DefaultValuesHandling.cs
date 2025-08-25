@@ -33,7 +33,7 @@ namespace Vendors.YamlDotNet.Serialization
     /// Specifies the strategy to handle default and null values during serialization of properties.
     /// </summary>
     [Flags]
-    public enum DefaultValuesHandling
+    internal enum DefaultValuesHandling
     {
         /// <summary>
         /// Specifies that all properties are to be emitted regardless of their value. This is the default behavior.

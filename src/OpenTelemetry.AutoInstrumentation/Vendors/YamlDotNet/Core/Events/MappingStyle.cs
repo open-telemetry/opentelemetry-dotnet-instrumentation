@@ -29,7 +29,7 @@ namespace Vendors.YamlDotNet.Core.Events
     /// <summary>
     /// Specifies the style of a mapping.
     /// </summary>
-    public enum MappingStyle
+    internal enum MappingStyle
     {
         /// <summary>
         /// Let the emitter choose the style.

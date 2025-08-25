@@ -29,7 +29,7 @@ namespace Vendors.YamlDotNet.RepresentationModel
     /// <summary>
     /// Specifies the type of node in the representation model.
     /// </summary>
-    public enum YamlNodeType
+    internal enum YamlNodeType
     {
         /// <summary>
         /// The node is a <see cref="YamlAliasNode"/>.

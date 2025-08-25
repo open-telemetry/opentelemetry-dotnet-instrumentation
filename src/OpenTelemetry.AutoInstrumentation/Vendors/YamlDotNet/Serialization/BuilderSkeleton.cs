@@ -342,7 +342,7 @@ namespace Vendors.YamlDotNet.Serialization
     /// <typeparam name="TComponent">The type of the component that this factory creates.</typeparam>
     /// <param name="wrapped">The component that is to be wrapped.</param>
     /// <returns>Returns a new instance of <typeparamref name="TComponent" /> that is based on <paramref name="wrapped" />.</returns>
-    public delegate TComponent WrapperFactory<TComponentBase, TComponent>(TComponentBase wrapped) where TComponent : TComponentBase;
+    internal delegate TComponent WrapperFactory<TComponentBase, TComponent>(TComponentBase wrapped) where TComponent : TComponentBase;
 
     /// <summary>
     /// A factory that creates instances of <typeparamref name="TComponent" /> based on an existing <typeparamref name="TComponentBase" /> and an argument.
@@ -353,5 +353,5 @@ namespace Vendors.YamlDotNet.Serialization
     /// <param name="wrapped">The component that is to be wrapped.</param>
     /// <param name="argument">The argument of the factory.</param>
     /// <returns>Returns a new instance of <typeparamref name="TComponent" /> that is based on <paramref name="wrapped" /> and <paramref name="argument" />.</returns>
-    public delegate TComponent WrapperFactory<TArgument, TComponentBase, TComponent>(TComponentBase wrapped, TArgument argument) where TComponent : TComponentBase;
+    internal delegate TComponent WrapperFactory<TArgument, TComponentBase, TComponent>(TComponentBase wrapped, TArgument argument) where TComponent : TComponentBase;
 }

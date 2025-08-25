@@ -29,7 +29,7 @@ namespace Vendors.YamlDotNet.Core
     /// <summary>
     /// Specifies the style of a YAML scalar.
     /// </summary>
-    public enum ScalarStyle
+    internal enum ScalarStyle
     {
         /// <summary>
         /// Let the emitter choose the style.
