@@ -250,6 +250,13 @@ jobs:
         docker run -e OS_TYPE=${{ matrix.os-type }} --rm --mount type=bind,source="${GITHUB_WORKSPACE}",target=/project mybuildimage \
           /bin/sh -c 'git config --global --add safe.directory /project && ./build.sh TestWorkflow --containers none'
 
+    - name: Upload test logs
+      if: always()
+      uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # tag: v4.6.2
+      with:
+        name: test-logs-container-${{ matrix.machine }}-${{ matrix.base-image }}
+        path: test-artifacts/
+
   test-nuget-packages:
     needs: build-nuget-packages
     strategy:
