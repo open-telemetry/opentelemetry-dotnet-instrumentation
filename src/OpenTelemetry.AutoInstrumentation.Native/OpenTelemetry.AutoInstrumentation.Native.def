@@ -13,5 +13,6 @@ EXPORTS
     ContinuousProfilerReadAllocationSamples
     SelectiveSamplerReadThreadSamples
     ContinuousProfilerSetNativeContext
+    ContinuousProfilerNotifySpanStopped
     SelectiveSamplingStart
     SelectiveSamplingStop

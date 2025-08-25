@@ -30,7 +30,7 @@ public class SelectiveSamplerTests : TestHelper
 
         var (output, _, processId) = RunTestApplication();
 
-        var threadSamples = ExtractSamples(output);
+        var threadSamples = ConsoleProfileExporterHelpers.ExtractSamples(output);
 
         var currentStartTime = ToDateTime(threadSamples[0].TimestampNanoseconds);
 
@@ -64,7 +64,7 @@ public class SelectiveSamplerTests : TestHelper
 
         var (output, _, processId) = RunTestApplication();
 
-        var threadSamples = ExtractSamples(output);
+        var threadSamples = ConsoleProfileExporterHelpers.ExtractSamples(output);
 
         var groupedByTimestampAscending = threadSamples.GroupBy(sample => sample.TimestampNanoseconds).OrderBy(samples => samples.Key);
 
@@ -108,64 +108,30 @@ public class SelectiveSamplerTests : TestHelper
         }
     }
 
-    private static bool IndicatesSelectiveSampling(IGrouping<long, ThreadSample> samples)
+    private static bool IndicatesSelectiveSampling(IGrouping<long, ConsoleThreadSample> samples)
     {
         return samples.Count() == 1;
     }
 
-    private static bool CollectedBeforeSpanStarted(IGrouping<long, ThreadSample> samples)
+    private static bool CollectedBeforeSpanStarted(IGrouping<long, ConsoleThreadSample> samples)
     {
         return !samples.Any(HasSpanContextAssociated);
     }
 
-    private static bool CollectedBeforeFrequentSamplingStarted(IGrouping<long, ThreadSample> samples)
+    private static bool CollectedBeforeFrequentSamplingStarted(IGrouping<long, ConsoleThreadSample> samples)
     {
         return !samples.Any(sample => sample.SelectedForFrequentSampling);
     }
 
-    private static bool HasSpanContextAssociated(ThreadSample sample)
+    private static bool HasSpanContextAssociated(ConsoleThreadSample sample)
     {
         return sample.TraceIdHigh != 0 && sample.TraceIdLow != 0 && sample.SpanId != 0;
-    }
-
-    private static List<ThreadSample> ExtractSamples(string output)
-    {
-        var batchSeparator = $"{Environment.NewLine}{Environment.NewLine}";
-        var lines = output.Split(batchSeparator);
-        var deserializedSampleBatches = lines[..^1].Select(sample => JsonSerializer.Deserialize<List<ThreadSample>>(sample)).ToList();
-
-        var threadSamples = new List<ThreadSample>();
-        foreach (var batch in deserializedSampleBatches)
-        {
-            threadSamples.AddRange(batch!);
-        }
-
-        return threadSamples;
     }
 
     private static DateTime ToDateTime(long timestampNanoseconds)
     {
         const int nanosecondsInTick = 100;
         return DateTime.UnixEpoch.AddTicks(timestampNanoseconds / nanosecondsInTick);
-    }
-
-    private class ThreadSample
-    {
-        public long TimestampNanoseconds { get; set; }
-
-        public long SpanId { get; set; }
-
-        public long TraceIdHigh { get; set; }
-
-        public long TraceIdLow { get; set; }
-
-        public string? ThreadName { get; set; }
-
-        public uint ThreadIndex { get; set; }
-
-        public bool SelectedForFrequentSampling { get; set; }
-
-        public IList<string> Frames { get; set; } = new List<string>();
     }
 }
 #endif

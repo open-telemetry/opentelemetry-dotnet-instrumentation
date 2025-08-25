@@ -1,0 +1,6 @@
+@TestApplication.ContinuousProfiler.ExtendedTracking_HostAddress = http://localhost:5127
+
+GET {{TestApplication.ContinuousProfiler.ExtendedTracking_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

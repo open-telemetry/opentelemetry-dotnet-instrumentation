@@ -78,6 +78,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="startup_hook_test.cpp" />
+    <ClCompile Include="thread_span_context_test.cpp" />
     <ClCompile Include="util_test.cpp" />
     <ClCompile Include="version_struct_test.cpp" />
   </ItemGroup>

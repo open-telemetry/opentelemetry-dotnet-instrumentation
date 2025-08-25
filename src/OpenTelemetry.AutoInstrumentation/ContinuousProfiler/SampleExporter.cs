@@ -72,13 +72,19 @@ internal class SampleExporter : IDisposable
     {
         var currentActivity = sender.CurrentValue;
 
+        // Identify activity stoppage
+        // Stop() stops the activity and sets Activity.Current to parent
+        if (sender is { ThreadContextChanged: false, PreviousValue.IsStopped: true } && sender.CurrentValue == sender.PreviousValue?.Parent)
+        {
+            if (TryParseSpanContext(sender.PreviousValue!, out var traceIdHigh, out var traceIdLow, out var spanId))
+            {
+                NativeMethods.ContinuousProfilerNotifySpanStopped(traceIdHigh, traceIdLow, spanId);
+            }
+        }
+
         if (currentActivity != null)
         {
-            var hexTraceId = currentActivity.TraceId.ToHexString();
-
-            if (ulong.TryParse(hexTraceId.AsSpan(0, 16), NumberStyles.HexNumber, CultureInfo.InvariantCulture, out var traceIdHigh) &&
-                ulong.TryParse(hexTraceId.AsSpan(16), NumberStyles.HexNumber, CultureInfo.InvariantCulture, out var traceIdLow) &&
-                ulong.TryParse(currentActivity.SpanId.ToHexString(), NumberStyles.HexNumber, CultureInfo.InvariantCulture, out var spanId))
+            if (TryParseSpanContext(currentActivity, out var traceIdHigh, out var traceIdLow, out var spanId))
             {
                 NativeMethods.ContinuousProfilerSetNativeContext(traceIdHigh, traceIdLow, spanId);
                 return;
@@ -86,6 +92,18 @@ internal class SampleExporter : IDisposable
         }
 
         NativeMethods.ContinuousProfilerSetNativeContext(0, 0, 0);
+    }
+
+    private static bool TryParseSpanContext(Activity currentActivity, out ulong traceIdHigh, out ulong traceIdLow, out ulong spanId)
+    {
+        traceIdLow = 0;
+        traceIdHigh = 0;
+        spanId = 0;
+        var hexTraceId = currentActivity.TraceId.ToHexString();
+
+        return ulong.TryParse(hexTraceId.AsSpan(0, 16), NumberStyles.HexNumber, CultureInfo.InvariantCulture, out traceIdHigh) &&
+               ulong.TryParse(hexTraceId.AsSpan(16), NumberStyles.HexNumber, CultureInfo.InvariantCulture, out traceIdLow) &&
+               ulong.TryParse(currentActivity.SpanId.ToHexString(), NumberStyles.HexNumber, CultureInfo.InvariantCulture, out spanId);
     }
 
     private void Activity_CurrentChanged(object? sender, ActivityChangedEventArgs e)

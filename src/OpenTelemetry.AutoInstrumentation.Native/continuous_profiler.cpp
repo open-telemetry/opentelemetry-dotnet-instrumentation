@@ -84,8 +84,8 @@ static std::vector<unsigned char>* allocation_buffer      = new std::vector<unsi
 static std::mutex                 selective_sampling_buffer_lock = std::mutex();
 static std::vector<unsigned char> selective_sampling_buffer;
 
-static std::mutex                                                             thread_span_context_lock;
-static std::unordered_map<ThreadID, continuous_profiler::thread_span_context> thread_span_context_map;
+static std::mutex                                thread_span_context_lock;
+static continuous_profiler::ThreadSpanContextMap thread_span_context_map;
 
 static std::mutex                   selective_sampling_threads_lock;
 static std::unordered_set<ThreadID> selective_sampling_threads_set;
@@ -455,6 +455,62 @@ void ThreadSamplesBuffer::WriteCurrentTimeMillis() const
     WriteUInt64(ms.count());
 }
 
+void ThreadSpanContextMap::Remove(const thread_span_context& spanContext)
+{
+    const auto foundBySpanContext = span_context_thread_map.find(spanContext);
+    if (foundBySpanContext == span_context_thread_map.end())
+    {
+        return; // nothing to remove
+    }
+    const auto& threadIds = foundBySpanContext->second;
+    for (auto threadId : threadIds)
+    {
+        thread_span_context_map.erase(threadId);
+    }
+    span_context_thread_map.erase(spanContext);
+}
+
+void ThreadSpanContextMap::Remove(ThreadID threadId)
+{
+    const auto foundByThreadId = thread_span_context_map.find(threadId);
+    if (foundByThreadId == thread_span_context_map.end())
+    {
+        return; // nothing to remove
+    }
+    const auto spanContext        = foundByThreadId->second;
+    const auto foundBySpanContext = span_context_thread_map.find(spanContext);
+    if (foundBySpanContext != span_context_thread_map.end())
+    {
+        auto& threadIds = foundBySpanContext->second;
+        threadIds.erase(threadId);
+    }
+    thread_span_context_map.erase(threadId);
+}
+
+void ThreadSpanContextMap::Put(ThreadID threadId, const thread_span_context& currentSpanContext)
+{
+    static thread_span_context defaultContext;
+    const auto                 foundByThreadId = thread_span_context_map.find(threadId);
+    if (foundByThreadId != thread_span_context_map.end())
+    {
+        const auto previousContext = foundByThreadId->second;
+        if (previousContext != defaultContext)
+        {
+            span_context_thread_map[previousContext].erase(threadId);
+        }
+    }
+    thread_span_context_map[threadId] = currentSpanContext;
+    if (currentSpanContext != defaultContext)
+    {
+        span_context_thread_map[currentSpanContext].insert(threadId);
+    }
+}
+
+thread_span_context ThreadSpanContextMap::Get(ThreadID threadId)
+{
+    return thread_span_context_map[threadId];
+}
+
 NamingHelper::NamingHelper()
     : function_name_cache_(kMaxFunctionNameCacheSize, nullptr)
     , function_identifier_cache_(kVolatileFunctionIdentifierCacheSize, DefaultFunctionIdentifier)
@@ -790,7 +846,7 @@ static void ResolveSymbolsAndPublishBufferForAllThreads(
         {
             continue;
         }
-        thread_span_context spanContext = thread_span_context_map[threadId];
+        thread_span_context spanContext = thread_span_context_map.Get(threadId);
         const auto          threadState = GetThreadState(prof->managed_tid_to_state_, threadId);
 
         prof->cur_cpu_writer_->StartSample(threadId, threadState, spanContext);
@@ -827,7 +883,7 @@ static void ResolveSymbolsAndPublishBufferForSelectedThreads(
         }
         const auto threadState = GetThreadState(prof->managed_tid_to_state_, threadId);
 
-        thread_span_context spanContext = thread_span_context_map[threadId];
+        thread_span_context spanContext = thread_span_context_map.Get(threadId);
 
         localBuf.StartSampleForSelectedThread(threadState, spanContext);
         ResolveFrames(prof, threadStack, localBuf);
@@ -1075,7 +1131,7 @@ void ContinuousProfiler::StartThreadSampling()
 thread_span_context GetCurrentSpanContext(ThreadID tid)
 {
     std::lock_guard<std::mutex> guard(thread_span_context_lock);
-    return thread_span_context_map[tid];
+    return thread_span_context_map.Get(tid);
 }
 
 ThreadState* ContinuousProfiler::GetCurrentThreadState(ThreadID tid)
@@ -1284,7 +1340,7 @@ void ContinuousProfiler::ThreadDestroyed(ThreadID thread_id)
     {
         std::lock_guard<std::mutex> guard(thread_span_context_lock);
 
-        thread_span_context_map.erase(thread_id);
+        thread_span_context_map.Remove(thread_id);
     }
     {
         std::lock_guard<std::mutex> guard(selective_sampling_threads_lock);
@@ -1367,6 +1423,12 @@ extern "C"
     {
         return SelectiveSamplingConsumeAndClearBuffer(len, buf);
     }
+    EXPORTTHIS void ContinuousProfilerNotifySpanStopped(uint64_t traceIdHigh, uint64_t traceIdLow, uint64_t spanId)
+    {
+        std::lock_guard<std::mutex>                    guard(thread_span_context_lock);
+        const continuous_profiler::thread_span_context spanContext = {traceIdHigh, traceIdLow, spanId};
+        thread_span_context_map.Remove(spanContext);
+    }
     EXPORTTHIS void ContinuousProfilerSetNativeContext(uint64_t traceIdHigh, uint64_t traceIdLow, uint64_t spanId)
     {
         ThreadID      threadId;
@@ -1377,10 +1439,10 @@ extern "C"
                                  hr);
             return;
         }
-
         std::lock_guard<std::mutex> guard(thread_span_context_lock);
 
-        thread_span_context_map[threadId] = continuous_profiler::thread_span_context(traceIdHigh, traceIdLow, spanId);
+        continuous_profiler::thread_span_context newSpanContext = {traceIdHigh, traceIdLow, spanId};
+        thread_span_context_map.Put(threadId, newSpanContext);
     }
     EXPORTTHIS void SelectiveSamplingStart()
     {
