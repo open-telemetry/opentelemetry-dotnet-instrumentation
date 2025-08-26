@@ -10,7 +10,8 @@ To make vendored code fully internal, apply the following changes:
 1. Prefix all namespaces with `Vendors.` (e.g., change `YamlDotNet` to `Vendors.YamlDotNet`).
 2. Update all using directives to reference the vendored namespaces
    (e.g., change `using YamlDotNet` to `using Vendors.YamlDotNet`).
-3. To suppress static analysis and enable nullable reference types,
+3. Mark whole public contract as internal.
+4. To suppress static analysis and enable nullable reference types,
    add the following at the beginning
    of each vendored file:
 
@@ -22,7 +23,7 @@ To make vendored code fully internal, apply the following changes:
    //------------------------------------------------------------------------------
    ```
 
-4. Update `src\OpenTelemetry.AutoInstrumentation\Vendors\.editorconfig` to avoid
+5. Update `src\OpenTelemetry.AutoInstrumentation\Vendors\.editorconfig` to avoid
    issues caused by imported code. Vendored files should not be changed manually.
 
 ## Status
