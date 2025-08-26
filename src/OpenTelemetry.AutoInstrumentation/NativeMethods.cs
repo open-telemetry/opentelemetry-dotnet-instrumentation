@@ -83,6 +83,18 @@ internal static class NativeMethods
         }
     }
 
+    public static void ContinuousProfilerNotifySpanStopped(ulong traceIdHigh, ulong traceIdLow, ulong spanId)
+    {
+        if (IsWindows)
+        {
+            Windows.ContinuousProfilerNotifySpanStopped(traceIdHigh, traceIdLow, spanId);
+        }
+        else
+        {
+            NonWindows.ContinuousProfilerNotifySpanStopped(traceIdHigh, traceIdLow, spanId);
+        }
+    }
+
     public static void SelectiveSamplingStart()
     {
         if (IsWindows)
@@ -136,6 +148,9 @@ internal static class NativeMethods
         public static extern void ContinuousProfilerSetNativeContext(ulong traceIdHigh, ulong traceIdLow, ulong spanId);
 
         [DllImport("OpenTelemetry.AutoInstrumentation.Native.dll")]
+        public static extern void ContinuousProfilerNotifySpanStopped(ulong traceIdHigh, ulong traceIdLow, ulong spanId);
+
+        [DllImport("OpenTelemetry.AutoInstrumentation.Native.dll")]
         public static extern void SelectiveSamplingStart();
 
         [DllImport("OpenTelemetry.AutoInstrumentation.Native.dll")]
@@ -168,6 +183,9 @@ internal static class NativeMethods
 
         [DllImport("OpenTelemetry.AutoInstrumentation.Native")]
         public static extern void ContinuousProfilerSetNativeContext(ulong traceIdHigh, ulong traceIdLow, ulong spanId);
+
+        [DllImport("OpenTelemetry.AutoInstrumentation.Native")]
+        public static extern void ContinuousProfilerNotifySpanStopped(ulong traceIdHigh, ulong traceIdLow, ulong spanId);
 
         [DllImport("OpenTelemetry.AutoInstrumentation.Native")]
         public static extern void SelectiveSamplingStart();
