@@ -16,6 +16,7 @@
 #include <utility>
 #include <unordered_map>
 #include <random>
+#include <unordered_set>
 
 #ifdef _WIN32
 #define EXPORTTHIS __declspec(dllexport)
@@ -59,6 +60,34 @@ struct FunctionIdentifierResolveArgs
         return function_id == p.function_id && frame_info == p.frame_info;
     }
 };
+
+class thread_span_context
+{
+public:
+    uint64_t trace_id_high_;
+    uint64_t trace_id_low_;
+    uint64_t span_id_;
+
+    thread_span_context() : trace_id_high_(0), trace_id_low_(0), span_id_(0)
+    {
+    }
+    thread_span_context(uint64_t _traceIdHigh, uint64_t _traceIdLow, uint64_t _spanId) :
+        trace_id_high_(_traceIdHigh), trace_id_low_(_traceIdLow), span_id_(_spanId)
+    {
+    }
+    thread_span_context(thread_span_context const& other) :
+        trace_id_high_(other.trace_id_high_), trace_id_low_(other.trace_id_low_), span_id_(other.span_id_)
+    {
+    }
+    bool operator==(const thread_span_context& other) const
+    {
+        return trace_id_high_ == other.trace_id_high_ && trace_id_low_ == other.trace_id_low_ && span_id_ == other.span_id_;
+    }
+    bool operator!=(const thread_span_context& other) const
+    {
+        return !(*this == other);
+    }
+};
 }
 
 template <>
@@ -93,6 +122,23 @@ struct std::hash<continuous_profiler::FunctionIdentifierResolveArgs>
     }
 };
 
+template <>
+struct std::hash<continuous_profiler::thread_span_context>
+{
+    std::size_t operator()(const continuous_profiler::thread_span_context& k) const noexcept
+    {
+        using std::hash;
+        using std::size_t;
+        using std::string;
+
+        const std::size_t h1 = std::hash<uint64_t>()(k.span_id_);
+        const std::size_t h2 = std::hash<uint64_t>()(k.trace_id_high_);
+        const std::size_t h3 = std::hash<uint64_t>()(k.trace_id_low_);
+
+        return h1 ^ h2 ^ h3;
+    }
+};
+
 namespace continuous_profiler
 {
 struct SamplingStatistics
@@ -109,26 +155,6 @@ struct SamplingStatistics
         num_threads(other.num_threads),
         total_frames(other.total_frames),
         name_cache_misses(other.name_cache_misses)
-    {
-    }
-};
-
-class thread_span_context
-{
-public:
-    uint64_t trace_id_high_;
-    uint64_t trace_id_low_;
-    uint64_t span_id_;
-
-    thread_span_context() : trace_id_high_(0), trace_id_low_(0), span_id_(0)
-    {
-    }
-    thread_span_context(uint64_t _traceIdHigh, uint64_t _traceIdLow, uint64_t _spanId) :
-        trace_id_high_(_traceIdHigh), trace_id_low_(_traceIdLow), span_id_(_spanId)
-    {
-    }
-    thread_span_context(thread_span_context const& other) :
-        trace_id_high_(other.trace_id_high_), trace_id_low_(other.trace_id_low_), span_id_(other.span_id_)
     {
     }
 };
@@ -180,6 +206,18 @@ private:
 
 namespace continuous_profiler
 {
+class ThreadSpanContextMap
+{
+public:
+    void                  Put(ThreadID threadId, const thread_span_context& currentSpanContext);
+    thread_span_context   Get(ThreadID threadId);
+    void                  Remove(const thread_span_context& spanContext);
+    void                  Remove(ThreadID threadId);
+
+private:
+    std::unordered_map<ThreadID, thread_span_context>                     thread_span_context_map;
+    std::unordered_map<thread_span_context, std::unordered_set<ThreadID>> span_context_thread_map;
+};
 template <typename TKey, typename TValue>
 class NameCache
 {
