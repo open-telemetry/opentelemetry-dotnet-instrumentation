@@ -10,6 +10,7 @@
 
 #include <mutex>
 #include <cinttypes>
+#include <future>
 #include <vector>
 #include <list>
 #include <optional>
@@ -288,9 +289,12 @@ public:
     std::optional<unsigned int> threadSamplingInterval;
     std::optional<unsigned int> selectedThreadsSamplingInterval;
     void                        StartThreadSampling();
+    void                        Shutdown();
+    bool                        IsShutdownRequested() const;
     static void                 InitSelectiveSamplingBuffer();
     unsigned int                maxMemorySamplesPerMinute;
     void                        StartAllocationSampling(unsigned int maxMemorySamplesPerMinute);
+    void                        StopAllocationSampling();
     void                        AllocationTick(ULONG dataLen, LPCBYTE data);
     ICorProfilerInfo12*         info12;
     static void                 ThreadCreated(ThreadID thread_id);
@@ -303,13 +307,18 @@ public:
     std::unordered_map<ThreadID, ThreadState*> managed_tid_to_state_;
     std::mutex thread_state_lock_;
     NamingHelper helper;
-    AllocationSubSampler* allocationSubSampler = nullptr;
+    std::unique_ptr<AllocationSubSampler> allocationSubSampler = nullptr;
 
     // These cycle every sample and/or are owned externally
     ThreadSamplesBuffer* cur_cpu_writer_ = nullptr;
     SamplingStatistics stats_;
     void AllocateBuffer();
     void PublishBuffer();
+private:
+    std::atomic_bool             shutdown_requested_{ false };
+    std::unique_ptr<std::thread> thread_sampling_thread_;
+    EVENTPIPE_SESSION            session_ = 0;
+    std::promise<void>           shutdown_promise_;
 };
 
 } // namespace continuous_profiler
