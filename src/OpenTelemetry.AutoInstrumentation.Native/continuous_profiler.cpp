@@ -1354,8 +1354,8 @@ void ContinuousProfiler::StopAllocationSampling()
     HRESULT hr = this->info12->EventPipeStopSession(session_);
     if (FAILED(hr))
     {
-        trace::Logger::Error("Could not disable allocation sampling: session pipe error. HRESULT=0x",
-                             std::setfill('0'), std::setw(8), std::hex, hr);
+        trace::Logger::Error("Could not disable allocation sampling: session pipe error. HRESULT=0x", std::setfill('0'),
+                             std::setw(8), std::hex, hr);
     }
     session_ = 0;
 
