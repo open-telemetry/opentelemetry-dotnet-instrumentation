@@ -1,4 +1,4 @@
-// This file is part of YamlDotNet - A .NET library for YAML.
+﻿// This file is part of YamlDotNet - A .NET library for YAML.
 // Copyright (c) Antoine Aubry and contributors
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy of
@@ -18,8 +18,6 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
-
-// Modified by OpenTelemetry Authors.
 
 using System;
 using System.Collections;
@@ -180,7 +178,7 @@ namespace Vendors.YamlDotNet.Helpers
 #pragma warning disable 8767 // Nullability of reference types in type of parameter ... doesn't match implicitly implemented member
 #endif
 
-        public bool TryGetValue(TKey key, out TValue value) =>
+        public bool TryGetValue(TKey key, [MaybeNullWhen(false)] out TValue value) =>
             dictionary.TryGetValue(key, out value);
 
 #if !NET

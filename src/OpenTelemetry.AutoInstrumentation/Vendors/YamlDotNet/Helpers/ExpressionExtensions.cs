@@ -19,8 +19,6 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-// Modified by OpenTelemetry Authors.
-
 using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq.Expressions;
@@ -48,6 +46,7 @@ namespace Vendors.YamlDotNet.Helpers
             return property;
         }
 
+        [return: MaybeNull]
         private static TMemberInfo TryGetMemberExpression<TMemberInfo>(LambdaExpression lambdaExpression)
             where TMemberInfo : MemberInfo
         {

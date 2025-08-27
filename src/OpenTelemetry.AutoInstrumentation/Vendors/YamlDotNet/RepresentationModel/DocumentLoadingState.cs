@@ -1,4 +1,4 @@
-// This file is part of YamlDotNet - A .NET library for YAML.
+﻿// This file is part of YamlDotNet - A .NET library for YAML.
 // Copyright (c) Antoine Aubry and contributors
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy of
@@ -18,8 +18,6 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
-
-// Modified by OpenTelemetry Authors.
 
 using System;
 using System.Collections.Generic;
@@ -76,7 +74,7 @@ namespace Vendors.YamlDotNet.RepresentationModel
         /// <param name="anchor">The anchor.</param>
         /// <param name="node">The node that was retrieved.</param>
         /// <returns>true if the anchor was found; otherwise false.</returns>
-        public bool TryGetNode(AnchorName anchor, out YamlNode? node)
+        public bool TryGetNode(AnchorName anchor, [NotNullWhen(true)] out YamlNode? node)
         {
             return anchors.TryGetValue(anchor, out node);
         }

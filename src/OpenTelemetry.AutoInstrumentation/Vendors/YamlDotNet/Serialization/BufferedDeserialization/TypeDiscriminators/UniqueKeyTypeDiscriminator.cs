@@ -1,4 +1,4 @@
-// This file is part of YamlDotNet - A .NET library for YAML.
+﻿// This file is part of YamlDotNet - A .NET library for YAML.
 // Copyright (c) Antoine Aubry and contributors
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy of
@@ -34,9 +34,7 @@ namespace Vendors.YamlDotNet.Serialization.BufferedDeserialization.TypeDiscrimin
     /// </summary>
     internal class UniqueKeyTypeDiscriminator : ITypeDiscriminator
     {
-#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
         public Type BaseType { get; private set; }
-#pragma warning restore CS1591 // Missing XML comment for publicly visible type or member
 
         private readonly IDictionary<string, Type> typeMapping;
 
@@ -79,9 +77,7 @@ namespace Vendors.YamlDotNet.Serialization.BufferedDeserialization.TypeDiscrimin
                 out var key,
                 out var _))
             {
-#pragma warning disable CS8602 // Dereference of a possibly null reference.
                 suggestedType = this.typeMapping[key.Value];
-#pragma warning restore CS8602 // Dereference of a possibly null reference.
                 return true;
             }
 

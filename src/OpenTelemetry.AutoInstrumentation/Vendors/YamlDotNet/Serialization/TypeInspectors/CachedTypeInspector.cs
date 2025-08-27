@@ -1,4 +1,4 @@
-// This file is part of YamlDotNet - A .NET library for YAML.
+﻿// This file is part of YamlDotNet - A .NET library for YAML.
 // Copyright (c) Antoine Aubry and contributors
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy of
@@ -19,8 +19,6 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-// Modified by OpenTelemetry Authors.
-
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -29,48 +27,15 @@ using Vendors.YamlDotNet.Helpers;
 
 namespace Vendors.YamlDotNet.Serialization.TypeInspectors
 {
+    /// <summary>
+    /// Wraps another <see cref="ITypeInspector"/> and applies caching.
+    /// </summary>
     internal class CachedTypeInspector : TypeInspectorSkeleton
     {
         private readonly ITypeInspector innerTypeDescriptor;
-        private readonly ConcurrentDictionary<Type, List<IPropertyDescriptor>> cache = new();
-        private readonly ConcurrentDictionary<Type, ConcurrentDictionary<string, string>> enumNameCache = new();
-        private readonly ConcurrentDictionary<object, string> enumValueCache = new();
-
-        private readonly struct EnumNameCacheContext
-        {
-            public Type EnumType { get; }
-            public ITypeInspector TypeInspector { get; }
-
-            public EnumNameCacheContext(Type enumType, ITypeInspector typeInspector)
-            {
-                EnumType = enumType;
-                TypeInspector = typeInspector;
-            }
-        }
-
-        private readonly struct EnumValueCacheContext
-        {
-            public object EnumValue { get; }
-            public ITypeInspector TypeInspector { get; }
-
-            public EnumValueCacheContext(object enumValue, ITypeInspector typeInspector)
-            {
-                EnumValue = enumValue;
-                TypeInspector = typeInspector;
-            }
-        }
-
-        private readonly struct PropertiesCacheContext
-        {
-            public object? Container { get; }
-            public ITypeInspector TypeInspector { get; }
-
-            public PropertiesCacheContext(object? container, ITypeInspector typeInspector)
-            {
-                Container = container;
-                TypeInspector = typeInspector;
-            }
-        }
+        private readonly ConcurrentDictionary<Type, List<IPropertyDescriptor>> cache = new ConcurrentDictionary<Type, List<IPropertyDescriptor>>();
+        private readonly ConcurrentDictionary<Type, ConcurrentDictionary<string, string>> enumNameCache = new ConcurrentDictionary<Type, ConcurrentDictionary<string, string>>();
+        private readonly ConcurrentDictionary<object, string> enumValueCache = new ConcurrentDictionary<object, string>();
 
         public CachedTypeInspector(ITypeInspector innerTypeDescriptor)
         {
@@ -79,30 +44,35 @@ namespace Vendors.YamlDotNet.Serialization.TypeInspectors
 
         public override string GetEnumName(Type enumType, string name)
         {
-            var cacheForType = enumNameCache.GetOrAdd(enumType, _ => new ConcurrentDictionary<string, string>());
-            return cacheForType.GetOrAdd(name, static (n, context) =>
+            var cache = enumNameCache.GetOrAdd(enumType, _ => new ConcurrentDictionary<string, string>());
+            var result = cache.GetOrAdd(name, static (n, context) =>
             {
-                return context.TypeInspector.GetEnumName(context.EnumType, n);
+                var (et, typeDescriptor) = context;
+                return typeDescriptor.GetEnumName(et, n);
             },
-            new EnumNameCacheContext(enumType, innerTypeDescriptor));
+            (enumType, innerTypeDescriptor));
+            return result;
         }
 
         public override string GetEnumValue(object enumValue)
         {
-            return enumValueCache.GetOrAdd(enumValue, static (_, context) =>
+            var result = enumValueCache.GetOrAdd(enumValue, static (_, context) =>
             {
-                return context.TypeInspector.GetEnumValue(context.EnumValue);
+                var (ev, typeDescriptor) = context;
+                return typeDescriptor.GetEnumValue(ev);
             },
-            new EnumValueCacheContext(enumValue, innerTypeDescriptor));
+            (enumValue, innerTypeDescriptor));
+            return result;
         }
 
         public override IEnumerable<IPropertyDescriptor> GetProperties(Type type, object? container)
         {
             return cache.GetOrAdd(type, static (t, context) =>
             {
-                return context.TypeInspector.GetProperties(t, context.Container).ToList();
+                var (c, typeDescriptor) = context;
+                return typeDescriptor.GetProperties(t, c).ToList();
             },
-            new PropertiesCacheContext(container, innerTypeDescriptor));
+            (container, innerTypeDescriptor));
         }
     }
 }

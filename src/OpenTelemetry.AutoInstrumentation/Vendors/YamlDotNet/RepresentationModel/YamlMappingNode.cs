@@ -36,7 +36,7 @@ namespace Vendors.YamlDotNet.RepresentationModel
     /// </summary>
     internal sealed class YamlMappingNode : YamlNode, IEnumerable<KeyValuePair<YamlNode, YamlNode>>, IYamlConvertible
     {
-        private readonly YamlDotNet.Helpers.OrderedDictionary<YamlNode, YamlNode> children = [];
+        private readonly OrderedDictionary<YamlNode, YamlNode> children = [];
 
         /// <summary>
         /// Gets the children of the current node.

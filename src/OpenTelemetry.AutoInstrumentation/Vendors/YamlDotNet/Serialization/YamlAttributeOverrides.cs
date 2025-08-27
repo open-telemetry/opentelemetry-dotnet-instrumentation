@@ -110,7 +110,8 @@ namespace Vendors.YamlDotNet.Serialization
 
         private readonly Dictionary<AttributeKey, List<AttributeMapping>> overrides = [];
 
-        public T? GetAttribute<T>(Type type, string member) where T : Attribute
+        [return: MaybeNull]
+        public T GetAttribute<T>(Type type, string member) where T : Attribute
         {
             if (overrides.TryGetValue(new AttributeKey(typeof(T), member), out var mappings))
             {

@@ -1,4 +1,4 @@
-// This file is part of YamlDotNet - A .NET library for YAML.
+﻿// This file is part of YamlDotNet - A .NET library for YAML.
 // Copyright (c) Antoine Aubry and contributors
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy of
@@ -25,7 +25,7 @@ namespace Vendors.YamlDotNet.Serialization.Schemas
 {
     internal sealed class FailsafeSchema
     {
-        internal static class Tags
+        public static class Tags
         {
             public static readonly TagName Map = new TagName("tag:yaml.org,2002:map");
             public static readonly TagName Seq = new TagName("tag:yaml.org,2002:seq");
@@ -35,7 +35,7 @@ namespace Vendors.YamlDotNet.Serialization.Schemas
 
     internal sealed class JsonSchema
     {
-        internal static class Tags
+        public static class Tags
         {
             public static readonly TagName Null = new TagName("tag:yaml.org,2002:null");
             public static readonly TagName Bool = new TagName("tag:yaml.org,2002:bool");
@@ -48,14 +48,14 @@ namespace Vendors.YamlDotNet.Serialization.Schemas
 
     internal sealed class CoreSchema
     {
-        internal static class Tags
+        public static class Tags
         {
         }
     }
 
     internal sealed class DefaultSchema
     {
-        internal static class Tags
+        public static class Tags
         {
             public static readonly TagName Timestamp = new TagName("tag:yaml.org,2002:timestamp");
         }

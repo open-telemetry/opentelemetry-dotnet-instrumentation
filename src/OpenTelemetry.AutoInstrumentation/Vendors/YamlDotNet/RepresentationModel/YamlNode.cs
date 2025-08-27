@@ -1,4 +1,4 @@
-// This file is part of YamlDotNet - A .NET library for YAML.
+﻿// This file is part of YamlDotNet - A .NET library for YAML.
 // Copyright (c) Antoine Aubry and contributors
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy of
@@ -78,7 +78,7 @@ namespace Vendors.YamlDotNet.RepresentationModel
         /// Parses the node represented by the next event in <paramref name="parser" />.
         /// </summary>
         /// <returns>Returns the node that has been parsed.</returns>
-        internal static YamlNode? ParseNode(IParser parser, DocumentLoadingState state)
+        internal static YamlNode ParseNode(IParser parser, DocumentLoadingState state)
         {
             if (parser.Accept<Scalar>(out var _))
             {

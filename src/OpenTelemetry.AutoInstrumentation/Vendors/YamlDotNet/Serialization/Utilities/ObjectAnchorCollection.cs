@@ -1,4 +1,4 @@
-// This file is part of YamlDotNet - A .NET library for YAML.
+﻿// This file is part of YamlDotNet - A .NET library for YAML.
 // Copyright (c) Antoine Aubry and contributors
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy of
@@ -18,8 +18,6 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
-
-// Modified by OpenTelemetry Authors.
 
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
@@ -52,7 +50,7 @@ namespace Vendors.YamlDotNet.Serialization.Utilities
         /// <param name="object">The object.</param>
         /// <param name="anchor">The anchor.</param>
         /// <returns></returns>
-        public bool TryGetAnchor(object @object, out string? anchor)
+        public bool TryGetAnchor(object @object, [MaybeNullWhen(false)] out string? anchor)
         {
             return anchorsByObject.TryGetValue(@object, out anchor);
         }

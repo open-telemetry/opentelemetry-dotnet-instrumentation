@@ -1,4 +1,4 @@
-// This file is part of YamlDotNet - A .NET library for YAML.
+﻿// This file is part of YamlDotNet - A .NET library for YAML.
 // Copyright (c) Antoine Aubry and contributors
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy of
@@ -18,8 +18,6 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
-
-// Modified by OpenTelemetry Authors.
 
 using System;
 using System.Collections.Generic;
@@ -52,7 +50,7 @@ namespace Vendors.YamlDotNet.Serialization
         /// </param>
         /// <param name="caseInsensitivePropertyMatching">If true use case-insitivity when choosing the property or field.</param>
         /// <returns></returns>
-        IPropertyDescriptor GetProperty(Type type, object? container, string name, bool ignoreUnmatched, bool caseInsensitivePropertyMatching);
+        IPropertyDescriptor GetProperty(Type type, object? container, string name, [MaybeNullWhen(true)] bool ignoreUnmatched, bool caseInsensitivePropertyMatching);
 
         /// <summary>
         /// Returns the actual name from the EnumMember attribute
