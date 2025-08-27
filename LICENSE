@@ -286,5 +286,5 @@ Copyright 2013-2017 Serilog Contributors under Apache License Version 2.0
 
 Component YamlDotNet compiled into OpenTelemetry.AutoInstrumentation
 is under the following copyright:
-Copyright 2013-2017 Serilog Contributors under the MIT License (MIT)
+Copyright (c) Antoine Aubry and contributors under the MIT License (MIT)
 (<https://github.com/aaubry/YamlDotNet/blob/master/LICENSE.txt>).
