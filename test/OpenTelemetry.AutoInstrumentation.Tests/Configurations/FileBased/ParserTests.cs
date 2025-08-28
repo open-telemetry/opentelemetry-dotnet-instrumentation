@@ -3,8 +3,8 @@
 
 using System.Reflection;
 using OpenTelemetry.AutoInstrumentation.Configurations.FileBasedConfiguration.Parser;
+using Vendors.YamlDotNet.Serialization;
 using Xunit;
-using YamlDotNet.Serialization;
 
 namespace OpenTelemetry.AutoInstrumentation.Tests.Configurations.FileBased;
 

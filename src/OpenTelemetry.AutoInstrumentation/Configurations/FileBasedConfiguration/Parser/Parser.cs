@@ -1,8 +1,8 @@
 // Copyright The OpenTelemetry Authors
 // SPDX-License-Identifier: Apache-2.0
 
-using YamlDotNet.Serialization;
-using YamlDotNet.Serialization.NodeDeserializers;
+using Vendors.YamlDotNet.Serialization;
+using Vendors.YamlDotNet.Serialization.NodeDeserializers;
 
 namespace OpenTelemetry.AutoInstrumentation.Configurations.FileBasedConfiguration.Parser;
 

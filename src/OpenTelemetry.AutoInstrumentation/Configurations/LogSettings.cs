@@ -4,7 +4,7 @@
 using OpenTelemetry.AutoInstrumentation.Configurations.FileBasedConfiguration;
 using OpenTelemetry.AutoInstrumentation.Configurations.Otlp;
 using OpenTelemetry.AutoInstrumentation.Logging;
-using YamlDotNet.Core.Tokens;
+using Vendors.YamlDotNet.Core.Tokens;
 
 namespace OpenTelemetry.AutoInstrumentation.Configurations;
 
