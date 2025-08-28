@@ -11,6 +11,7 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 
 - Extend support for [RabbitMQ.Client](https://www.nuget.org/packages/RabbitMQ.Client/)
   traces instrumentation for versions `5.*`.
+- Support for [file based configuration](./docs/config.md#configuration-examples)
 
 ### Changed
 
@@ -36,8 +37,6 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
   in GAC.
 - In install script, new function added: Register-AssembliesInGAC. It installs
   OpenTelemetry assemblies and dependencies in GAC.
-
-- Support for [Declarative configuration](https://opentelemetry.io/docs/specs/otel/configuration/#declarative-configuration)
 
 ### Changed
 
