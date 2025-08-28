@@ -18,6 +18,24 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 
 - .NET only, following packages updated
   - `OpenTelemetry.Instrumentation.StackExchangeRedis` from `1.12.0-beta.1` to `1.12.0-beta.2`.
+- .NET Framework only, following packages updated
+  - `Microsoft.Bcl.AsyncInterfaces` from `9.0.6` to `9.0.8`,
+  - `Microsoft.Extensions.Configuration` from `9.0.6` to `9.0.8`,
+  - `Microsoft.Extensions.Configuration.Abstractions` `9.0.6` to `9.0.8`,
+  - `Microsoft.Extensions.Configuration.Binder` from `9.0.6` to `9.0.8`,
+  - `Microsoft.Extensions.DependencyInjection` from `9.0.6` to `9.0.8`,
+  - `Microsoft.Extensions.DependencyInjection.Abstractions` from `9.0.6` to `9.0.8`,
+  - `Microsoft.Extensions.Diagnostics.Abstractions` from `9.0.6` to `9.0.8`,
+  - `Microsoft.Extensions.Logging` from `9.0.6` to `9.0.8`,
+  - `Microsoft.Extensions.Logging.Abstractions` from `9.0.6` to `9.0.8`,
+  - `Microsoft.Extensions.Logging.Configuration` from `9.0.6` to `9.0.8`,
+  - `Microsoft.Extensions.Options` from `9.0.6` to `9.0.8`,
+  - `Microsoft.Extensions.Options.ConfigurationExtensions` from `9.0.6` to `9.0.8`,
+  - `Microsoft.Extensions.Primitives` from `9.0.6` to `9.0.8`,
+  - `System.Diagnostics.DiagnosticSource` from `9.0.6` to `9.0.8`,
+  - `System.IO.Pipelines` from `9.0.6` to `9.0.8`,
+  - `System.Text.Encodings.Web` update from `9.0.2` to `9.0.8`.
+  - `System.Text.Json` update from `9.0.2` to `9.0.8`.
 
 ### Deprecated
 

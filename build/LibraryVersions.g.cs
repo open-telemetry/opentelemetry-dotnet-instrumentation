@@ -19,14 +19,14 @@ public static partial class LibraryVersion
             "TestApplication.Azure",
             [
                 new("12.22.2"),
-                new("12.24.1"),
+                new("12.25.0"),
             ]
         },
         {
             "TestApplication.Elasticsearch",
             [
                 new("8.15.10"),
-                new("9.0.7"),
+                new("9.1.5"),
             ]
         },
         {
@@ -34,7 +34,7 @@ public static partial class LibraryVersion
             [
                 new("6.0.35"),
                 new("8.0.10"),
-                new("9.0.6"),
+                new("9.0.8"),
             ]
         },
         {
@@ -43,7 +43,7 @@ public static partial class LibraryVersion
                 new("6.0.3"),
                 new("7.0.0"),
                 new("8.0.0"),
-                new("8.0.3"),
+                new("9.0.0"),
             ]
         },
         {
@@ -51,7 +51,7 @@ public static partial class LibraryVersion
             [
                 new("7.5.0", additionalMetaData: new() { { "GraphQLMicrosoftDI", "7.5.0" }, { "GraphQLServerTransportsAspNetCore", "7.5.0" }, { "GraphQLServerUIPGraphiQL", "7.5.0" } }),
                 new("8.0.2", additionalMetaData: new() { { "GraphQLMicrosoftDI", "8.0.2" }, { "GraphQLServerTransportsAspNetCore", "8.0.2" }, { "GraphQLServerUIPGraphiQL", "8.0.2" } }),
-                new("8.5.0", additionalMetaData: new() { { "GraphQLMicrosoftDI", "8.5.0" }, { "GraphQLServerTransportsAspNetCore", "8.2.0" }, { "GraphQLServerUIPGraphiQL", "8.2.0" } }),
+                new("8.5.0", additionalMetaData: new() { { "GraphQLMicrosoftDI", "8.5.0" }, { "GraphQLServerTransportsAspNetCore", "8.3.0" }, { "GraphQLServerUIPGraphiQL", "8.3.0" } }),
             ]
         },
         {
@@ -65,21 +65,21 @@ public static partial class LibraryVersion
             "TestApplication.Log4NetBridge",
             [
                 new("2.0.13"),
-                new("3.1.0"),
+                new("3.2.0"),
             ]
         },
         {
             "TestApplication.MassTransit",
             [
                 new("8.3.0"),
-                new("8.5.0"),
+                new("8.5.2"),
             ]
         },
         {
             "TestApplication.SqlClient.Microsoft",
             [
                 new("5.2.2"),
-                new("6.0.2"),
+                new("6.1.1"),
             ]
         },
         {
@@ -95,7 +95,7 @@ public static partial class LibraryVersion
                 new("2.19.0", supportedFrameworks: [ "net9.0", "net8.0", "net462" ]),
                 new("2.30.0", supportedFrameworks: [ "net9.0", "net8.0", "net462" ]),
                 new("3.0.0", supportedFrameworks: [ "net9.0", "net8.0", "net472" ]),
-                new("3.4.0", supportedFrameworks: [ "net9.0", "net8.0", "net472" ]),
+                new("3.4.3", supportedFrameworks: [ "net9.0", "net8.0", "net472" ]),
             ]
         },
         {
@@ -109,7 +109,7 @@ public static partial class LibraryVersion
             "TestApplication.MySqlData",
             [
                 new("9.0.0"),
-                new("9.3.0"),
+                new("9.4.0"),
             ]
         },
         {
@@ -131,21 +131,21 @@ public static partial class LibraryVersion
             "TestApplication.OracleMda.NetFramework",
             [
                 new("23.5.1", supportedFrameworks: [ "net472" ]),
-                new("23.8.0", supportedFrameworks: [ "net472" ]),
+                new("23.9.1", supportedFrameworks: [ "net472" ]),
             ]
         },
         {
             "TestApplication.OracleMda.Core",
             [
                 new("23.5.1"),
-                new("23.8.0"),
+                new("23.9.1"),
             ]
         },
         {
             "TestApplication.Quartz",
             [
                 new("3.6.0"),
-                new("3.14.0"),
+                new("3.15.0"),
             ]
         },
         {
@@ -161,7 +161,7 @@ public static partial class LibraryVersion
             "TestApplication.StackExchangeRedis",
             [
                 new("2.6.122"),
-                new("2.8.41"),
+                new("2.9.11"),
             ]
         },
         {
@@ -177,7 +177,7 @@ public static partial class LibraryVersion
             [
                 new("1.8.2"),
                 new("1.9.2"),
-                new("2.10.1"),
+                new("2.11.1"),
             ]
         },
     };
