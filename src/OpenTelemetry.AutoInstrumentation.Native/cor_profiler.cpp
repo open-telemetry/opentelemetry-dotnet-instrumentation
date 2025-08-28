@@ -895,6 +895,11 @@ HRESULT STDMETHODCALLTYPE CorProfiler::ModuleUnloadStarted(ModuleID module_id)
 
 HRESULT STDMETHODCALLTYPE CorProfiler::Shutdown()
 {
+    if (continuousProfiler != nullptr)
+    {
+        continuousProfiler->Shutdown();
+    }
+
     is_attached_.store(false);
 
     CorProfilerBase::Shutdown();
@@ -908,6 +913,7 @@ HRESULT STDMETHODCALLTYPE CorProfiler::Shutdown()
         rejit_handler->Shutdown();
         rejit_handler = nullptr;
     }
+
     Logger::Info("Exiting...");
     Logger::Debug("   ModuleIds: ", module_ids_.size());
     Logger::Debug("   IntegrationDefinitions: ", integration_definitions_.size());

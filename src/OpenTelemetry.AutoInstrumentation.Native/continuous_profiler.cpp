@@ -915,6 +915,10 @@ static void PauseClrAndCaptureSamples(ContinuousProfiler*                       
     // Selective sampling lock
     std::lock_guard<std::mutex> selective_sampling_threads_guard(selective_sampling_threads_lock);
 
+    if (prof->IsShutdownRequested())
+    {
+        return;
+    }
     // Checks to avoid unnecessary suspends.
     if (samplingType == SamplingType::SelectedThreads && selective_sampling_threads_set.empty())
     {
@@ -1002,15 +1006,6 @@ static void PauseClrAndCaptureSamples(ContinuousProfiler*                       
     }
 }
 
-void SleepMillis(unsigned int millis)
-{
-#ifdef _WIN32
-    Sleep(millis);
-#else
-    usleep(millis * 1000); // micros
-#endif
-}
-
 static unsigned int GetSleepTime(const ContinuousProfiler* const prof)
 {
     // Assumption is continuous profiling interval is bigger and multiple of selective sampling interval.
@@ -1049,9 +1044,8 @@ static bool ShouldTrackIterations(const ContinuousProfiler* const prof)
     return prof->selectedThreadsSamplingInterval.has_value() && prof->threadSamplingInterval.has_value();
 }
 
-DWORD WINAPI SamplingThreadMain(_In_ LPVOID param)
+static void SamplingThreadMain(ContinuousProfiler* prof, const std::future<void>& future)
 {
-    const auto          prof   = static_cast<ContinuousProfiler*>(param);
     ICorProfilerInfo12* info12 = prof->info12;
 
     info12->InitializeCurrentThread();
@@ -1063,7 +1057,7 @@ DWORD WINAPI SamplingThreadMain(_In_ LPVOID param)
     const auto startTime    = std::chrono::steady_clock::now();
     auto       next_refresh = GetNextRefreshTime(startTime);
 
-    while (true)
+    while (!prof->IsShutdownRequested())
     {
         if (ShouldTrackIterations(prof))
         {
@@ -1074,9 +1068,13 @@ DWORD WINAPI SamplingThreadMain(_In_ LPVOID param)
         if (sleepTime == 0)
         {
             trace::Logger::Warn("Unexpected sampling interval configured, exiting sampling thread.");
-            return 1;
+            return;
         }
-        SleepMillis(sleepTime);
+
+        if (future.wait_for(std::chrono::milliseconds(sleepTime)) != std::future_status::timeout)
+        {
+            return;
+        }
 
         const auto samplingType = GetNextSamplingType(prof, iteration);
 
@@ -1086,6 +1084,11 @@ DWORD WINAPI SamplingThreadMain(_In_ LPVOID param)
         }
 
         PauseClrAndCaptureSamples(prof, info12, samplingType, threadStacksBuffer);
+
+        if (prof->IsShutdownRequested())
+        {
+            return;
+        }
 
         const auto now = std::chrono::steady_clock::now();
         // In order to avoid the need to recreate the vectors each iteration,
@@ -1120,15 +1123,33 @@ void ContinuousProfiler::InitSelectiveSamplingBuffer()
 
 void ContinuousProfiler::StartThreadSampling()
 {
-#ifdef _WIN32
-    CreateThread(nullptr, 0, &SamplingThreadMain, this, 0, nullptr);
-#else
-    pthread_t thr;
-    pthread_create(&thr, NULL, (void* (*)(void*)) & SamplingThreadMain, this);
-#endif
+    shutdown_promise_       = std::promise<void>();
+    auto future             = shutdown_promise_.get_future();
+    thread_sampling_thread_ = std::make_unique<std::thread>(SamplingThreadMain, this, std::move(future));
 }
 
-thread_span_context GetCurrentSpanContext(ThreadID tid)
+void ContinuousProfiler::Shutdown()
+{
+    shutdown_promise_.set_value();
+    {
+        std::unique_lock<std::shared_mutex> unique_lock(profiling_lock);
+        shutdown_requested_.store(true);
+        StopAllocationSampling();
+    }
+    if (thread_sampling_thread_ != nullptr && thread_sampling_thread_->joinable())
+    {
+        thread_sampling_thread_->join();
+        thread_sampling_thread_.reset();
+        trace::Logger::Info("ContinuousProfiler sampling thread stopped.");
+    }
+}
+
+bool ContinuousProfiler::IsShutdownRequested() const
+{
+    return shutdown_requested_;
+}
+
+static thread_span_context GetCurrentSpanContext(ThreadID tid)
 {
     std::lock_guard<std::mutex> guard(thread_span_context_lock);
     return thread_span_context_map.Get(tid);
@@ -1244,6 +1265,12 @@ void ContinuousProfiler::AllocationTick(ULONG dataLen, LPCBYTE data)
         trace::Logger::Debug("Possible runtime suspension in progress, can't safely process allocation tick.");
         return;
     }
+
+    if (IsShutdownRequested())
+    {
+        return;
+    }
+
     if (this->allocationSubSampler == nullptr || !this->allocationSubSampler->ShouldSample())
     {
         return;
@@ -1302,20 +1329,37 @@ void ContinuousProfiler::AllocationTick(ULONG dataLen, LPCBYTE data)
 
 void ContinuousProfiler::StartAllocationSampling(const unsigned int maxMemorySamplesPerMinute)
 {
-    this->allocationSubSampler = new AllocationSubSampler(maxMemorySamplesPerMinute, 60);
+    this->allocationSubSampler = std::make_unique<AllocationSubSampler>(maxMemorySamplesPerMinute, 60);
 
-    EVENTPIPE_SESSION                 session;
     COR_PRF_EVENTPIPE_PROVIDER_CONFIG sessionConfig[] = {{WStr("Microsoft-Windows-DotNETRuntime"),
                                                           0x1, // CLR_GC_KEYWORD
                                                           // documentation says AllocationTick is at info but it lies
                                                           COR_PRF_EVENTPIPE_VERBOSE, nullptr}};
-    HRESULT                           hr = this->info12->EventPipeStartSession(1, sessionConfig, false, &session);
+    HRESULT                           hr = this->info12->EventPipeStartSession(1, sessionConfig, false, &session_);
     if (FAILED(hr))
     {
         trace::Logger::Error("Could not enable allocation sampling: session pipe error", hr);
     }
 
     trace::Logger::Info("ContinuousProfiler::MemoryProfiling started.");
+}
+
+void ContinuousProfiler::StopAllocationSampling()
+{
+    if (session_ == 0)
+    {
+        return;
+    }
+
+    HRESULT hr = this->info12->EventPipeStopSession(session_);
+    if (FAILED(hr))
+    {
+        trace::Logger::Error("Could not disable allocation sampling: session pipe error. HRESULT=0x", std::setfill('0'),
+                             std::setw(8), std::hex, hr);
+    }
+    session_ = 0;
+
+    trace::Logger::Info("ContinuousProfiler allocation sampling session stopped.");
 }
 
 void ContinuousProfiler::ThreadCreated(ThreadID thread_id)
