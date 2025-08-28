@@ -1,0 +1,18 @@
+[*.cs]
+generated_code = true
+
+# Following suppressions are needed by YamlDotNet vendored code
+# CS1574: XML comment has cref attribute that could not be resolved
+dotnet_diagnostic.CS1574.severity = none
+
+# CS8600: Converting null literal or possible null value to non-nullable type.
+dotnet_diagnostic.CS8600.severity = none
+
+# CS8602:  Dereference of a possibly null reference.
+dotnet_diagnostic.CS8602.severity = none
+
+# CS8604: Possible null reference argument for parameter.
+dotnet_diagnostic.CS8604.severity = none
+
+# CS8669: The annotation for nullable reference types should only be used in code within a '#nullable' annotations context. Auto-generated code requires an explicit '#nullable' directive in source.
+dotnet_diagnostic.CS8669.severity = none
