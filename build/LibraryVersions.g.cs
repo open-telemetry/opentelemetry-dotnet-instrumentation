@@ -176,6 +176,7 @@ public static partial class LibraryVersion
             "TestApplication.Kafka",
             [
                 new("1.8.2"),
+                new("1.9.2"),
                 new("2.10.1"),
             ]
         },
