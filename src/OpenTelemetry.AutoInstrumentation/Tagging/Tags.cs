@@ -1,6 +1,8 @@
 // Copyright The OpenTelemetry Authors
 // SPDX-License-Identifier: Apache-2.0
 
+#if NET
+
 namespace OpenTelemetry.AutoInstrumentation.Tagging;
 
 /// <summary>
@@ -34,3 +36,4 @@ internal static class Tags
         public const string Document = "graphql.document";
     }
 }
+#endif

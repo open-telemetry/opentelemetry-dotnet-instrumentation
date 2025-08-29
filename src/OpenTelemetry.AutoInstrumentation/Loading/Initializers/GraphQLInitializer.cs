@@ -1,6 +1,8 @@
 // Copyright The OpenTelemetry Authors
 // SPDX-License-Identifier: Apache-2.0
 
+#if NET
+
 using System.Reflection;
 using OpenTelemetry.AutoInstrumentation.Configurations;
 using OpenTelemetry.AutoInstrumentation.Plugins;
@@ -29,13 +31,12 @@ internal class GraphQLInitializer : InstrumentationInitializer
 
         var optionsType = Type.GetType("GraphQL.Telemetry.GraphQLTelemetryOptions, GraphQL")!;
         var optionsInstance = Activator.CreateInstance(optionsType)!;
-#if NET
         optionsType?.GetProperty("RecordDocument")?
             .SetValue(optionsInstance, _tracerSettings.InstrumentationOptions.GraphQLSetDocument);
-#endif
         _pluginManager.ConfigureTracesOptions(optionsInstance);
 
         initializerType.GetMethod("EnableAutoInstrumentation", BindingFlags.Public | BindingFlags.Static)!
             .Invoke(null, new[] { optionsInstance });
     }
 }
+#endif
