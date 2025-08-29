@@ -516,7 +516,8 @@ void ThreadSpanContextMap::Put(ThreadID threadId, const thread_span_context& cur
 const std::unordered_set<ThreadID>* ThreadSpanContextMap::Get(const thread_span_context& spanContext)
 {
     const auto iterator = span_context_thread_map.find(spanContext);
-    if (iterator == span_context_thread_map.end()){
+    if (iterator == span_context_thread_map.end())
+    {
         return nullptr;
     }
     return &iterator->second;
@@ -525,7 +526,8 @@ const std::unordered_set<ThreadID>* ThreadSpanContextMap::Get(const thread_span_
 std::optional<thread_span_context> ThreadSpanContextMap::Get(ThreadID threadId)
 {
     const auto iterator = thread_span_context_map.find(threadId);
-    if (iterator == thread_span_context_map.end()){
+    if (iterator == thread_span_context_map.end())
+    {
         return std::nullopt;
     }
     return iterator->second;
@@ -880,7 +882,8 @@ static void ResolveSymbolsAndPublishBufferForAllThreads(
 
         if (prof->selectedThreadsSamplingInterval.has_value())
         {
-            const auto threadSelectedForFrequentSampling = selective_sampling_trace_map.find(spanContext) != selective_sampling_trace_map.end();
+            const auto threadSelectedForFrequentSampling =
+                selective_sampling_trace_map.find(spanContext) != selective_sampling_trace_map.end();
             prof->cur_cpu_writer_->MarkSelectedForFrequentSampling(threadSelectedForFrequentSampling);
         }
 
@@ -928,14 +931,15 @@ static void RemoveOutdatedEntries(std::unordered_map<thread_span_context, long l
     // Remove entries queued more than kSelectiveSamplingMaxAgeMinutes minutes ago.
     for (auto it = selectiveSamplingTraceSet.begin(); it != selectiveSamplingTraceSet.end();)
     {
-        const auto enqueuedTime = std::chrono::time_point<std::chrono::steady_clock>(
-            std::chrono::milliseconds(it->second));
+        const auto enqueuedTime =
+            std::chrono::time_point<std::chrono::steady_clock>(std::chrono::milliseconds(it->second));
         auto deadline = enqueuedTime + std::chrono::minutes(kSelectiveSamplingMaxAgeMinutes);
         if (now > deadline)
         {
             trace::Logger::Warn("SelectiveSampling: removing outdated entry for span {",
-                                "traceIdHigh: ", it->first.trace_id_high_, ", traceIdLow: ", it->first.trace_id_low_, ", spanId: ", it->first.span_id_,
-                                "} because it was enqueued more than ", kSelectiveSamplingMaxAgeMinutes, " minutes ago");
+                                "traceIdHigh: ", it->first.trace_id_high_, ", traceIdLow: ", it->first.trace_id_low_,
+                                ", spanId: ", it->first.span_id_, "} because it was enqueued more than ",
+                                kSelectiveSamplingMaxAgeMinutes, " minutes ago");
             it = selectiveSamplingTraceSet.erase(it);
         }
         else
@@ -1026,7 +1030,8 @@ static void PauseClrAndCaptureSamples(ContinuousProfiler*                       
             }
             else if (samplingType == SamplingType::SelectedThreads)
             {
-                CaptureFunctionIdentifiersForThreads(prof, info12, selective_sampling_thread_buffer, threadStacksBuffer);
+                CaptureFunctionIdentifiersForThreads(prof, info12, selective_sampling_thread_buffer,
+                                                     threadStacksBuffer);
             }
         }
         catch (const std::exception& e)
@@ -1053,8 +1058,8 @@ static void PauseClrAndCaptureSamples(ContinuousProfiler*                       
     }
 
     const size_t nonEmptyCount = std::count_if(threadStacksBuffer.begin(), threadStacksBuffer.end(),
-                                      [](const std::pair<const ThreadID, std::vector<FunctionIdentifier>>& v)
-                                      { return !v.second.empty(); });
+                                               [](const std::pair<const ThreadID, std::vector<FunctionIdentifier>>& v)
+                                               { return !v.second.empty(); });
 
     // Return early if all the buckets are empty
     if (nonEmptyCount == 0)
@@ -1573,7 +1578,9 @@ extern "C"
                                 "} because maximum number of spans is already being sampled.");
             return;
         }
-        const auto now = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now().time_since_epoch()).count();
+        const auto now =
+            std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now().time_since_epoch())
+                 .count();
         selective_sampling_trace_map[context] = now;
     }
 
