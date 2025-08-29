@@ -124,12 +124,12 @@ internal partial class ConfigurationKeys
             /// Configuration key for Entity Framework Core instrumentation to enable passing text query as a db.statement attribute.
             /// </summary>
             public const string EntityFrameworkCoreSetDbStatementForText = "OTEL_DOTNET_AUTO_ENTITYFRAMEWORKCORE_SET_DBSTATEMENT_FOR_TEXT";
-#endif
 
             /// <summary>
             /// Configuration key for GraphQL instrumentation to enable passing query as a document attribute.
             /// </summary>
             public const string GraphQLSetDocument = "OTEL_DOTNET_AUTO_GRAPHQL_SET_DOCUMENT";
+#endif
 
             /// <summary>
             /// Configuration key for GrpcNetClient instrumentation to enable capturing request metadata as span tags.
