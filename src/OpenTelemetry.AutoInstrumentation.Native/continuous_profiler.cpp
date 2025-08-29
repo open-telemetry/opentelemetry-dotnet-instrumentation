@@ -1580,7 +1580,7 @@ extern "C"
         }
         const auto now =
             std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now().time_since_epoch())
-                 .count();
+                .count();
         selective_sampling_trace_map[context] = now;
     }
 
