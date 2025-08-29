@@ -4,7 +4,6 @@
 #if NET
 
 using System.Diagnostics;
-using System.Globalization;
 using OpenTelemetry.AutoInstrumentation.Logging;
 
 namespace OpenTelemetry.AutoInstrumentation.ContinuousProfiler;
@@ -76,34 +75,16 @@ internal class SampleExporter : IDisposable
         // Stop() stops the activity and sets Activity.Current to parent
         if (sender is { ThreadContextChanged: false, PreviousValue.IsStopped: true } && sender.CurrentValue == sender.PreviousValue?.Parent)
         {
-            if (TryParseSpanContext(sender.PreviousValue!, out var traceIdHigh, out var traceIdLow, out var spanId))
-            {
-                NativeMethods.ContinuousProfilerNotifySpanStopped(traceIdHigh, traceIdLow, spanId);
-            }
+            NativeMethods.ContinuousProfilerNotifySpanStopped(sender.PreviousValue!);
         }
 
         if (currentActivity != null)
         {
-            if (TryParseSpanContext(currentActivity, out var traceIdHigh, out var traceIdLow, out var spanId))
-            {
-                NativeMethods.ContinuousProfilerSetNativeContext(traceIdHigh, traceIdLow, spanId);
-                return;
-            }
+            NativeMethods.ContinuousProfilerSetNativeContext(currentActivity);
+            return;
         }
 
-        NativeMethods.ContinuousProfilerSetNativeContext(0, 0, 0);
-    }
-
-    private static bool TryParseSpanContext(Activity currentActivity, out ulong traceIdHigh, out ulong traceIdLow, out ulong spanId)
-    {
-        traceIdLow = 0;
-        traceIdHigh = 0;
-        spanId = 0;
-        var hexTraceId = currentActivity.TraceId.ToHexString();
-
-        return ulong.TryParse(hexTraceId.AsSpan(0, 16), NumberStyles.HexNumber, CultureInfo.InvariantCulture, out traceIdHigh) &&
-               ulong.TryParse(hexTraceId.AsSpan(16), NumberStyles.HexNumber, CultureInfo.InvariantCulture, out traceIdLow) &&
-               ulong.TryParse(currentActivity.SpanId.ToHexString(), NumberStyles.HexNumber, CultureInfo.InvariantCulture, out spanId);
+        NativeMethods.ContinuousProfilerResetNativeContext();
     }
 
     private void Activity_CurrentChanged(object? sender, ActivityChangedEventArgs e)

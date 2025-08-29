@@ -1,8 +1,6 @@
 #include "pch.h"
 #include "../../src/OpenTelemetry.AutoInstrumentation.Native/continuous_profiler.h"
 
-static continuous_profiler::thread_span_context defaultContext;
-
 TEST(ThreadSpanContextMapTest, BasicGet)
 {
     continuous_profiler::ThreadSpanContextMap      threadSpanContextMap;
@@ -38,8 +36,9 @@ TEST(ThreadSpanContextMapTest, ConsistentUpdate)
     ASSERT_EQ(threadSpanContextMap.Get(1), other_context);
 
     threadSpanContextMap.Remove(context);
+
     ASSERT_EQ(threadSpanContextMap.Get(1), other_context);
-    ASSERT_EQ(threadSpanContextMap.Get(2), defaultContext);
+    ASSERT_FALSE(threadSpanContextMap.Get(2).has_value());
 }
 
 TEST(ThreadSpanContextMapTest, RemoveByThreadId)
@@ -51,7 +50,7 @@ TEST(ThreadSpanContextMapTest, RemoveByThreadId)
 
     threadSpanContextMap.Remove(1);
 
-    ASSERT_EQ(threadSpanContextMap.Get(1), defaultContext);
+    ASSERT_FALSE(threadSpanContextMap.Get(1).has_value());
 }
 
 TEST(ThreadSpanContextMapTest, RemoveBySpanContext)
@@ -65,6 +64,6 @@ TEST(ThreadSpanContextMapTest, RemoveBySpanContext)
 
     threadSpanContextMap.Remove(context);
 
-    ASSERT_EQ(threadSpanContextMap.Get(1), defaultContext);
-    ASSERT_EQ(threadSpanContextMap.Get(2), defaultContext);
+    ASSERT_FALSE(threadSpanContextMap.Get(1).has_value());
+    ASSERT_FALSE(threadSpanContextMap.Get(2).has_value());
 }

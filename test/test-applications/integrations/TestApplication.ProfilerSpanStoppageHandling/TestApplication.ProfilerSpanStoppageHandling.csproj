@@ -6,6 +6,10 @@
         <ImplicitUsings>enable</ImplicitUsings>
     </PropertyGroup>
 
+  <ItemGroup>
+    <PackageReference Include="OpenTelemetry" />
+  </ItemGroup>
+
     <ItemGroup>
       <Compile Include="..\TestApplication.ContinuousProfiler\Exporter\AllocationSample.cs">
         <Link>AllocationSample.cs</Link>
@@ -28,5 +32,9 @@
       <Compile Include="..\TestApplication.SelectiveSampler\Plugins\SelectiveSamplerPluginHelper.cs">
         <Link>Plugins\SelectiveSamplerPluginHelper.cs</Link>
       </Compile>
+      <Compile Include="..\TestApplication.SelectiveSampler\Plugins\FrequentSamplingProcessor.cs">
+        <Link>FrequentSamplingProcessor.cs</Link>
+      </Compile>
     </ItemGroup>
+
 </Project>

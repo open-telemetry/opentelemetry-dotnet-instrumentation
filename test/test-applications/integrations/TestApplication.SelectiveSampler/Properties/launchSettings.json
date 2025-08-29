@@ -1,8 +1,7 @@
-﻿{
+{
   "profiles": {
     "instrumented": {
       "commandName": "Project",
-      "dotnetRunMessages": true,
       "environmentVariables": {
         "DOTNET_ENVIRONMENT": "Development",
         "CORECLR_ENABLE_PROFILING": "1",
@@ -15,7 +14,9 @@
         "OTEL_DOTNET_AUTO_PLUGINS": "TestApplication.SelectiveSampler.Plugins.SelectiveSamplerPlugin, TestApplication.SelectiveSampler, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null",
         "OTEL_DOTNET_AUTO_TRACES_ADDITIONAL_SOURCES": "TestApplication.SelectiveSampler",
         "OTEL_EXPORTER_OTLP_ENDPOINT": "http://localhost:4318"
-      }
+      },
+      "dotnetRunMessages": true,
+      "nativeDebugging": true
     }
   }
 }
