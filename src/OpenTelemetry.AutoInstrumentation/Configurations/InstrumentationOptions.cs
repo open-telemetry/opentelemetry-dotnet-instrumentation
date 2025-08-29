@@ -58,12 +58,12 @@ internal class InstrumentationOptions
     /// Gets a value indicating whether text query in Entity Framework Core can be passed as a db.statement tag.
     /// </summary>
     public bool EntityFrameworkCoreSetDbStatementForText { get; }
-#endif
 
     /// <summary>
     /// Gets a value indicating whether GraphQL query can be passed as a Document tag.
     /// </summary>
     public bool GraphQLSetDocument { get; }
+#endif
 
     /// <summary>
     /// Gets the list of request metadata to be captured as the span tags by Grpc.Net.Client instrumentation.

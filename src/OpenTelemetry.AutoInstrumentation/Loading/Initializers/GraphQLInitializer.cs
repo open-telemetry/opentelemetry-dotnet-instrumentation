@@ -1,6 +1,8 @@
 // Copyright The OpenTelemetry Authors
 // SPDX-License-Identifier: Apache-2.0
 
+#if NET
+
 using System.Reflection;
 using OpenTelemetry.AutoInstrumentation.Configurations;
 using OpenTelemetry.AutoInstrumentation.Plugins;
@@ -39,3 +41,4 @@ internal class GraphQLInitializer : InstrumentationInitializer
             .Invoke(null, new[] { optionsInstance });
     }
 }
+#endif
