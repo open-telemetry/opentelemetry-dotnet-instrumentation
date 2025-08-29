@@ -91,19 +91,20 @@ public:
 };
 }
 
+template <typename... Args>
+std::size_t hash_combine(const Args&... args) {
+    std::size_t seed = 0;
+
+    (..., (seed ^= std::hash<Args>{}(args)+0x9e3779b9 + (seed << 6) + (seed >> 2)));
+    return seed;
+}
+
 template <>
 struct std::hash<continuous_profiler::FunctionIdentifier>
 {
     std::size_t operator()(const continuous_profiler::FunctionIdentifier& k) const noexcept
     {
-        using std::hash;
-        using std::size_t;
-        using std::string;
-
-        const std::size_t h1 = std::hash<mdToken>()(k.function_token);
-        const std::size_t h2 = std::hash<ModuleID>()(k.module_id);
-
-        return h1 ^ h2;
+        return hash_combine(k.function_token, k.module_id, k.is_valid);
     }
 };
 
@@ -112,14 +113,7 @@ struct std::hash<continuous_profiler::FunctionIdentifierResolveArgs>
 {
     std::size_t operator()(const continuous_profiler::FunctionIdentifierResolveArgs& k) const noexcept
     {
-        using std::hash;
-        using std::size_t;
-        using std::string;
-
-        const std::size_t h1 = std::hash<FunctionID>()(k.function_id);
-        const std::size_t h2 = std::hash<COR_PRF_FRAME_INFO>()(k.frame_info);
-
-        return h1 ^ h2;
+        return hash_combine(k.function_id, k.frame_info);
     }
 };
 
@@ -128,15 +122,7 @@ struct std::hash<continuous_profiler::thread_span_context>
 {
     std::size_t operator()(const continuous_profiler::thread_span_context& k) const noexcept
     {
-        using std::hash;
-        using std::size_t;
-        using std::string;
-
-        const std::size_t h1 = std::hash<uint64_t>()(k.span_id_);
-        const std::size_t h2 = std::hash<uint64_t>()(k.trace_id_high_);
-        const std::size_t h3 = std::hash<uint64_t>()(k.trace_id_low_);
-
-        return h1 ^ h2 ^ h3;
+        return hash_combine(k.trace_id_high_, k.trace_id_low_, k.span_id_);
     }
 };
 
