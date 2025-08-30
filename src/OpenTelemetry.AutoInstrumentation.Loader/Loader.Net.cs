@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 #if NET
+using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using System.Runtime.InteropServices;
 
@@ -10,7 +11,10 @@ namespace OpenTelemetry.AutoInstrumentation.Loader;
 /// <summary>
 /// A class that attempts to load the OpenTelemetry.AutoInstrumentation .NET assembly.
 /// </summary>
-internal partial class Loader
+/// [ToDo]: Change file name in the next PR. Remove suppress.
+[SuppressMessage("StyleCop.CSharp.DocumentationRules", "SA1649:FileNameMustMatchTypeName", Justification = "Make code review easy.")]
+[SuppressMessage("StyleCop.CSharp.OrderingRules", "SA1202:ElementsMustBeOrderedByAccess", Justification = "Make code review easy.")]
+internal partial class AssemblyResolver
 {
     internal static System.Runtime.Loader.AssemblyLoadContext DependencyLoadContext { get; } = new ManagedProfilerAssemblyLoadContext();
 
@@ -53,9 +57,10 @@ internal partial class Loader
         }
     }
 
-    private static Assembly? AssemblyResolve_ManagedProfilerDependencies(object? sender, ResolveEventArgs args)
+    internal static Assembly? AssemblyResolve_ManagedProfilerDependencies(object? sender, ResolveEventArgs args)
     {
         var assemblyName = new AssemblyName(args.Name);
+        Logger.Debug($"Check assembly {assemblyName}");
 
         // On .NET Framework, having a non-US locale can cause mscorlib
         // to enter the AssemblyResolve event when searching for resources
