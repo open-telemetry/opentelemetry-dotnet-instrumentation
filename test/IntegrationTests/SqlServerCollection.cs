@@ -76,7 +76,7 @@ public class SqlServerFixture : IAsyncLifetime
             .WithPortBinding(Port, DatabasePort)
             .WithEnvironment("SA_PASSWORD", Password)
             .WithEnvironment("ACCEPT_EULA", "Y")
-            .WithWaitStrategy(Wait.ForUnixContainer().UntilPortIsAvailable(DatabasePort))
+            .WithWaitStrategy(Wait.ForUnixContainer().UntilInternalTcpPortIsAvailable(DatabasePort))
             .WithWaitStrategy(Wait.ForUnixContainer().AddCustomWaitStrategy(new UntilAsyncOperationIsSucceeded(DatabaseLoginOperation, 15)));
 
         var container = databaseContainersBuilder.Build();
