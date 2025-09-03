@@ -16,9 +16,9 @@ public class EnvVarTypeConverterTests
     {
         try
         {
-            Environment.SetEnvironmentVariable("TEST_ENV", "HelloWorld");
+            Environment.SetEnvironmentVariable("YAMLPARSER_TESTS_TEST_ENV", "HelloWorld");
 
-            var parser = new YamlParser(new StringReader("${TEST_ENV}"));
+            var parser = new YamlParser(new StringReader("${YAMLPARSER_TESTS_TEST_ENV}"));
             FileBasedTestHelper.MoveParserToScalar(parser);
 
             var result = _converter.ReadYaml(parser, typeof(string), _ => null);
@@ -27,28 +27,19 @@ public class EnvVarTypeConverterTests
         }
         finally
         {
-            Environment.SetEnvironmentVariable("TEST_ENV", null);
+            Environment.SetEnvironmentVariable("YAMLPARSER_TESTS_TEST_ENV", null);
         }
     }
 
     [Fact]
     public void ReadYaml_WithFallback_UsesFallbackIfEnvNotSet()
     {
-        try
-        {
-            Environment.SetEnvironmentVariable("NOT_EXIST", null);
+        var parser = new YamlParser(new StringReader("${YAMLPARSER_TESTS_NOT_EXIST:-FallbackValue}"));
+        FileBasedTestHelper.MoveParserToScalar(parser);
 
-            var parser = new YamlParser(new StringReader("${NOT_EXIST:-FallbackValue}"));
-            FileBasedTestHelper.MoveParserToScalar(parser);
+        var result = _converter.ReadYaml(parser, typeof(string), _ => null);
 
-            var result = _converter.ReadYaml(parser, typeof(string), _ => null);
-
-            Assert.Equal("FallbackValue", result);
-        }
-        finally
-        {
-            Environment.SetEnvironmentVariable("NOT_EXIST", null);
-        }
+        Assert.Equal("FallbackValue", result);
     }
 
     [Fact]
@@ -56,9 +47,9 @@ public class EnvVarTypeConverterTests
     {
         try
         {
-            Environment.SetEnvironmentVariable("MY_ENV", "RealValue");
+            Environment.SetEnvironmentVariable("YAMLPARSER_TESTS_TEST_ENV", "RealValue");
 
-            var parser = new YamlParser(new StringReader("${MY_ENV:-FallbackValue}"));
+            var parser = new YamlParser(new StringReader("${YAMLPARSER_TESTS_TEST_ENV:-FallbackValue}"));
             FileBasedTestHelper.MoveParserToScalar(parser);
 
             var result = _converter.ReadYaml(parser, typeof(string), _ => null);
@@ -74,21 +65,12 @@ public class EnvVarTypeConverterTests
     [Fact]
     public void ReadYaml_UnknownEnvVarWithoutFallback_KeepsOriginalPattern()
     {
-        try
-        {
-            Environment.SetEnvironmentVariable("UNKNOWN_ENV", null);
+        var parser = new YamlParser(new StringReader("${YAMLPARSER_TESTS_NOT_EXIST}"));
+        FileBasedTestHelper.MoveParserToScalar(parser);
 
-            var parser = new YamlParser(new StringReader("${UNKNOWN_ENV}"));
-            FileBasedTestHelper.MoveParserToScalar(parser);
+        var result = _converter.ReadYaml(parser, typeof(string), _ => null);
 
-            var result = _converter.ReadYaml(parser, typeof(string), _ => null);
-
-            Assert.Equal("${UNKNOWN_ENV}", result);
-        }
-        finally
-        {
-            Environment.SetEnvironmentVariable("UNKNOWN_ENV", null);
-        }
+        Assert.Equal("${YAMLPARSER_TESTS_NOT_EXIST}", result);
     }
 
     [Theory]
