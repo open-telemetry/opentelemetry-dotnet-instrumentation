@@ -59,7 +59,7 @@ internal partial class AssemblyResolver
     internal static Assembly? AssemblyResolve_ManagedProfilerDependencies(object? sender, ResolveEventArgs args)
     {
         var assemblyName = new AssemblyName(args.Name);
-        Logger.Debug($"Check assembly {assemblyName}");
+        logger.Debug($"Check assembly {assemblyName}");
 
         // On .NET Framework, having a non-US locale can cause mscorlib
         // to enter the AssemblyResolve event when searching for resources
@@ -84,12 +84,12 @@ internal partial class AssemblyResolver
         //    load the originally referenced version
         if (assemblyName.Name != null && assemblyName.Name.StartsWith("OpenTelemetry.AutoInstrumentation", StringComparison.OrdinalIgnoreCase) && File.Exists(path))
         {
-            Logger.Debug("Loading {0} with Assembly.LoadFrom", path);
+            logger.Debug("Loading {0} with Assembly.LoadFrom", path);
             return Assembly.LoadFrom(path);
         }
         else if (File.Exists(path))
         {
-            Logger.Debug("Loading {0} with DependencyLoadContext.LoadFromAssemblyPath", path);
+            logger.Debug("Loading {0} with DependencyLoadContext.LoadFromAssemblyPath", path);
             return DependencyLoadContext.LoadFromAssemblyPath(path); // Load unresolved framework and third-party dependencies into a custom Assembly Load Context
         }
         else
