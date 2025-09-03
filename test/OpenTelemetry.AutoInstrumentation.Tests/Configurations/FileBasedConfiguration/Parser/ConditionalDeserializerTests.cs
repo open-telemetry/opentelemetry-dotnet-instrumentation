@@ -18,9 +18,7 @@ public class ConditionalDeserializerTests
         var sut = new ConditionalDeserializer(inner);
 
         var parser = new YamlParser(new StringReader("value"));
-        parser.MoveNext(); // StreamStart
-        parser.MoveNext(); // DocumentStart
-        parser.MoveNext(); // Scalar
+        FileBasedTestHelper.MoveParserToScalar(parser);
 
         var result = sut.Deserialize(parser, typeof(UnmarkedClass), (_, _) => null, out var value, _ => null);
 
@@ -38,10 +36,7 @@ public class ConditionalDeserializerTests
         var yaml = "\"\"";
 
         var parser = new YamlParser(new StringReader(yaml));
-
-        parser.MoveNext();
-        parser.MoveNext();
-        parser.MoveNext();
+        FileBasedTestHelper.MoveParserToScalar(parser);
 
         var result = sut.Deserialize(parser, typeof(MarkedClass), (_, _) => null, out var value, _ => null);
 
@@ -57,9 +52,7 @@ public class ConditionalDeserializerTests
         var sut = new ConditionalDeserializer(inner);
 
         var parser = new YamlParser(new StringReader("{}"));
-        parser.MoveNext();
-        parser.MoveNext();
-        parser.MoveNext();
+        FileBasedTestHelper.MoveParserToScalar(parser);
 
         var result = sut.Deserialize(parser, typeof(MarkedClass), (_, _) => null, out var value, _ => null);
 
@@ -76,9 +69,7 @@ public class ConditionalDeserializerTests
         var sut = new ConditionalDeserializer(inner);
 
         var parser = new YamlParser(new StringReader("[]"));
-        parser.MoveNext();
-        parser.MoveNext();
-        parser.MoveNext();
+        FileBasedTestHelper.MoveParserToScalar(parser);
 
         var result = sut.Deserialize(parser, typeof(MarkedClass), (_, _) => null, out var value, _ => null);
 
