@@ -47,7 +47,7 @@ public class AzureFixture : IAsyncLifetime
             .WithImage(AzureStorageImage)
             .WithName($"azure-storage-{port}")
             .WithPortBinding(port, BlobServicePort)
-            .WithWaitStrategy(Wait.ForUnixContainer().UntilPortIsAvailable(BlobServicePort));
+            .WithWaitStrategy(Wait.ForUnixContainer().UntilInternalTcpPortIsAvailable(BlobServicePort));
 
         var container = containersBuilder.Build();
         await container.StartAsync();

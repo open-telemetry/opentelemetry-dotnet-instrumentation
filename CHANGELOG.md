@@ -9,8 +9,26 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 
 ### Added
 
+### Changed
+
+#### Dependency updates
+
+### Deprecated
+
+### Removed
+
+### Fixed
+
+- Deadlock: AssemblyResolve_ManagedProfilerDependencies should be moved out
+  of Loader class.  [#4269](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/issues/4269)
+
+## [1.13.0-beta.1](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/tag/v1.13.0-beta.1)
+
+### Added
+
 - Extend support for [RabbitMQ.Client](https://www.nuget.org/packages/RabbitMQ.Client/)
   traces instrumentation for versions `5.*`.
+- Experimental support for [span-based sampling](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/issues/4227).
 
 ### Changed
 
@@ -36,15 +54,6 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
   - `System.IO.Pipelines` from `9.0.6` to `9.0.8`,
   - `System.Text.Encodings.Web` update from `9.0.2` to `9.0.8`.
   - `System.Text.Json` update from `9.0.2` to `9.0.8`.
-
-### Deprecated
-
-### Removed
-
-### Fixed
-
-- Deadlock: AssemblyResolve_ManagedProfilerDependencies should be moved out
-of Loader class.  [#4269](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/issues/4269)
 
 ## [1.12.0](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/tag/v1.12.0)
 
