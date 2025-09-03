@@ -32,8 +32,8 @@ extern "C"
     EXPORTTHIS int32_t SelectiveSamplerReadThreadSamples(int32_t len, unsigned char* buf);
     // ReSharper disable CppInconsistentNaming
     EXPORTTHIS void ContinuousProfilerSetNativeContext(uint64_t traceIdHigh, uint64_t traceIdLow, uint64_t spanId);
-    EXPORTTHIS void SelectiveSamplingStart();
-    EXPORTTHIS void SelectiveSamplingStop();
+    EXPORTTHIS void SelectiveSamplingStart(uint64_t traceIdHigh, uint64_t traceIdLow, uint64_t spanId);
+    EXPORTTHIS void SelectiveSamplingStop(uint64_t traceIdHigh, uint64_t traceIdLow, uint64_t spanId);
     // ReSharper restore CppInconsistentNaming
 }
 
@@ -88,6 +88,8 @@ public:
     {
         return !(*this == other);
     }
+
+    [[nodiscard]] bool IsDefault() const;
 };
 }
 
@@ -196,10 +198,11 @@ namespace continuous_profiler
 class ThreadSpanContextMap
 {
 public:
-    void                  Put(ThreadID threadId, const thread_span_context& currentSpanContext);
-    thread_span_context   Get(ThreadID threadId);
-    void                  Remove(const thread_span_context& spanContext);
-    void                  Remove(ThreadID threadId);
+    void                                Put(ThreadID threadId, const thread_span_context& currentSpanContext);
+    std::optional<thread_span_context>  Get(ThreadID threadId);
+    const std::unordered_set<ThreadID>* Get(const thread_span_context& spanContext);
+    void                                Remove(const thread_span_context& spanContext);
+    void                                Remove(ThreadID threadId);
 
 private:
     std::unordered_map<ThreadID, thread_span_context>                     thread_span_context_map;
