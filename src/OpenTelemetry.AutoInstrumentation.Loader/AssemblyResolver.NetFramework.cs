@@ -12,7 +12,6 @@ namespace OpenTelemetry.AutoInstrumentation.Loader;
 /// A class that attempts to load the OpenTelemetry.AutoInstrumentation .NET assembly.
 /// </summary>
 /// [ToDo]: Change file name in the next PR. Remove suppress.
-[SuppressMessage("StyleCop.CSharp.DocumentationRules", "SA1649:FileNameMustMatchTypeName", Justification = "Make code review easy.")]
 [SuppressMessage("StyleCop.CSharp.OrderingRules", "SA1202:ElementsMustBeOrderedByAccess", Justification = "Make code review easy.")]
 internal partial class AssemblyResolver
 {
