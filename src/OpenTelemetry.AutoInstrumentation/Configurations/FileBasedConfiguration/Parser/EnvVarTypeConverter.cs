@@ -9,7 +9,7 @@ using Vendors.YamlDotNet.Serialization;
 
 namespace OpenTelemetry.AutoInstrumentation.Configurations.FileBasedConfiguration.Parser;
 
-internal class EnvVarTypeConverter : IYamlTypeConverter
+internal partial class EnvVarTypeConverter : IYamlTypeConverter
 {
     private static readonly HashSet<Type> SupportedTypes =
     [
@@ -76,8 +76,7 @@ internal class EnvVarTypeConverter : IYamlTypeConverter
 
     private static string ReplaceEnvVariables(string input)
     {
-        var pattern = @"\$\{([A-Z0-9_]+)(?::-([^}]*))?\}";
-        return Regex.Replace(input, pattern, match =>
+        return GetEnvVarRegex().Replace(input, match =>
         {
             var varName = match.Groups[1].Value;
             var fallback = match.Groups[2].Success ? match.Groups[2].Value : null;
@@ -85,4 +84,17 @@ internal class EnvVarTypeConverter : IYamlTypeConverter
             return envValue ?? fallback ?? match.Value;
         });
     }
+
+#if NET
+    [GeneratedRegex(@"\$\{([A-Z0-9_]+)(?::-([^}]*))?\}", RegexOptions.Compiled)]
+    private static partial Regex GetEnvVarRegex();
+
+#else
+
+#pragma warning disable SA1201 // A field should not follow a method
+    private static readonly Regex EnvVarRegex = new(@"\$\{([A-Z0-9_]+)(?::-([^}]*))?\}", RegexOptions.Compiled);
+#pragma warning restore SA1201 // A field should not follow a method
+
+    private static Regex GetEnvVarRegex() => EnvVarRegex;
+#endif
 }
