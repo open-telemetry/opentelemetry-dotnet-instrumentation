@@ -13,8 +13,7 @@ internal partial class AssemblyResolver
 {
     private static readonly string ManagedProfilerDirectory;
 
-    [System.Diagnostics.CodeAnalysis.SuppressMessage("StyleCop.CSharp.NamingRules", "SA1306:Field names should begin with lower-case letter", Justification = "Make code review easy. Will fix in next PR")]
-    private static IOtelLogger Logger = NoopLogger.Instance;
+    private static IOtelLogger logger = NoopLogger.Instance;
 
     /// <summary>
     /// Initializes static members of the <see cref="AssemblyResolver"/> class.
@@ -28,7 +27,7 @@ internal partial class AssemblyResolver
     // called in the static constructor of Loader.
     internal static void SetLoggerNoLock(IOtelLogger otelLogger)
     {
-        Logger = otelLogger;
+        logger = otelLogger;
     }
 
     private static string? ReadEnvironmentVariable(string key)
@@ -39,7 +38,7 @@ internal partial class AssemblyResolver
         }
         catch (Exception ex)
         {
-            Logger.Error(ex, "Error while loading environment variable {0}", key);
+            logger.Error(ex, "Error while loading environment variable {0}", key);
         }
 
         return null;
