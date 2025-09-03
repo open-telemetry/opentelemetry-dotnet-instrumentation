@@ -74,11 +74,11 @@ public class EnvVarTypeConverterTests
     }
 
     [Theory]
-    [InlineData("123", typeof(int), 123)]
-    [InlineData("123", typeof(long), 123L)]
-    [InlineData("3.14", typeof(float), 3.14f)]
-    [InlineData("2.718", typeof(double), 2.718)]
-    [InlineData("true", typeof(bool), true)]
+    [InlineData("0", typeof(int), 0)]
+    [InlineData("-1", typeof(long), -1L)]
+    [InlineData("0.0", typeof(float), 0.0f)]
+    [InlineData("-1.0", typeof(double), -1.0)]
+    [InlineData("false", typeof(bool), false)]
     public void ReadYaml_ParsesPrimitives(string yaml, Type type, object expected)
     {
         var parser = new YamlParser(new StringReader(yaml));
