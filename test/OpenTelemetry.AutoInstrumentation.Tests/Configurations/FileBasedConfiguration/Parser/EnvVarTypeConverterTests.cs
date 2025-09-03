@@ -79,7 +79,8 @@ public class EnvVarTypeConverterTests
     [InlineData("0.0", typeof(float), 0.0f)]
     [InlineData("-1.0", typeof(double), -1.0)]
     [InlineData("false", typeof(bool), false)]
-    public void ReadYaml_ParsesPrimitives(string yaml, Type type, object expected)
+    [InlineData("", typeof(string), null)]
+    public void ReadYaml_ParsesPrimitives(string yaml, Type type, object? expected)
     {
         var parser = new YamlParser(new StringReader(yaml));
         FileBasedTestHelper.MoveParserToScalar(parser);
