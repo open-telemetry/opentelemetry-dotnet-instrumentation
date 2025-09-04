@@ -48,7 +48,7 @@ public class MySqlFixture : IAsyncLifetime
             .WithName($"mysql-{port}")
             .WithPortBinding(port, MySqlPort)
             .WithEnvironment("MYSQL_ALLOW_EMPTY_PASSWORD", "true")
-            .WithWaitStrategy(Wait.ForUnixContainer().UntilPortIsAvailable(MySqlPort));
+            .WithWaitStrategy(Wait.ForUnixContainer().UntilInternalTcpPortIsAvailable(MySqlPort));
 
         var container = containersBuilder.Build();
         await container.StartAsync();
