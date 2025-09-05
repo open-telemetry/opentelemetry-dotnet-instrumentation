@@ -1,4 +1,4 @@
-FROM quay.io/centos/centos:stream9@sha256:2e45f6e402a9370603b2cb5514eb0080784b4cddbfbdb34831dbb55d20cf3ae3
+FROM quay.io/centos/centos:stream9@sha256:a2ef206db47cea339ec3b6b0f3b5f4ebf2b6888a4a62746c4c5978bdfe015b32
 
 # Install dotnet sdk
 RUN dnf install -y \
