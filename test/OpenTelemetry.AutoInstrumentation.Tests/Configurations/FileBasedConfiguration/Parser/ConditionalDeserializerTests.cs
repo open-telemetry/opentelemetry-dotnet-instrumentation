@@ -84,8 +84,6 @@ public class ConditionalDeserializerTests
 
         public object? ReturnValue { get; set; }
 
-        public bool ReturnResult { get; set; } = true;
-
         public bool Deserialize(
             IParser reader,
             Type expectedType,
@@ -95,7 +93,7 @@ public class ConditionalDeserializerTests
         {
             Called = true;
             value = ReturnValue;
-            return ReturnResult;
+            return true;
         }
     }
 
