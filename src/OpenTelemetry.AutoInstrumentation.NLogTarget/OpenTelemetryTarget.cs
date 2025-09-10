@@ -21,21 +21,16 @@ namespace OpenTelemetry.AutoInstrumentation.NLogTarget;
 public sealed class OpenTelemetryTarget : TargetWithContext
 {
     private static readonly ConcurrentDictionary<string, object> LoggerCache = new(StringComparer.Ordinal);
-    private static readonly bool SupportsTypedLayouts = CheckTypedLayoutSupport();
 
     private static LoggerProvider? _loggerProvider;
     private static Func<string?, object?>? _getLoggerFactory;
-    
-    // Typed layouts for NLog 5.3.4+ optimization
-    private Layout<ActivityTraceId?>? _typedTraceIdLayout;
-    private Layout<ActivitySpanId?>? _typedSpanIdLayout;
 
     public OpenTelemetryTarget()
     {
         Layout = "${message}";
-        // Use property setters to properly initialize both string and typed layouts
-        TraceIdLayout = "${activity:property=TraceId}";
-        SpanIdLayout = "${activity:property=SpanId}";
+        // NLog v5.3.4+ typed layouts for optimal performance and AsyncWrapper compatibility
+        TraceIdLayout = (Layout<ActivityTraceId?>)Layout<ActivityTraceId?>.FromMethod(static evt => Activity.Current?.TraceId);
+        SpanIdLayout = (Layout<ActivitySpanId?>)Layout<ActivitySpanId?>.FromMethod(static evt => Activity.Current?.SpanId);
     }
 
     [RequiredParameter]
@@ -54,36 +49,9 @@ public sealed class OpenTelemetryTarget : TargetWithContext
 
     public bool IncludeEventParameters { get; set; } = true;
 
-    private Layout? _traceIdLayout;
-    private Layout? _spanIdLayout;
-    
-    public Layout? TraceIdLayout 
-    { 
-        get => _traceIdLayout;
-        set
-        {
-            _traceIdLayout = value;
-            // Update typed layout if supported
-            if (SupportsTypedLayouts && value != null)
-            {
-                _typedTraceIdLayout = value.Text;
-            }
-        }
-    }
+    public Layout<ActivityTraceId?> TraceIdLayout { get; set; } = null!;
 
-    public Layout? SpanIdLayout 
-    { 
-        get => _spanIdLayout;
-        set
-        {
-            _spanIdLayout = value;
-            // Update typed layout if supported
-            if (SupportsTypedLayouts && value != null)
-            {
-                _typedSpanIdLayout = value.Text;
-            }
-        }
-    }
+    public Layout<ActivitySpanId?> SpanIdLayout { get; set; } = null!;
 
     public int ScheduledDelayMilliseconds { get; set; } = 5000;
 
@@ -116,7 +84,7 @@ public sealed class OpenTelemetryTarget : TargetWithContext
 
             if (!string.IsNullOrEmpty(endpoint))
             {
-                options.Endpoint = new Uri(endpoint!, UriKind.RelativeOrAbsolute);
+                options.Endpoint = new Uri(endpoint, UriKind.RelativeOrAbsolute);
             }
 
             var headers = RenderLogEvent(Headers, LogEventInfo.CreateNullEvent());
@@ -155,28 +123,17 @@ public sealed class OpenTelemetryTarget : TargetWithContext
 
         var properties = GetLogEventProperties(logEvent);
 
-        var body = IncludeFormattedMessage ? RenderLogEvent(Layout, logEvent) : Convert.ToString(logEvent.Message);
+        // Optimize: render layout only once
+        var renderedMessage = IncludeFormattedMessage ? RenderLogEvent(Layout, logEvent) : logEvent.Message;
+        var body = IncludeFormattedMessage ? renderedMessage : Convert.ToString(logEvent.Message);
 
         var severityText = logEvent.Level.Name;
         var severityNumber = MapLogLevelToSeverity(logEvent.Level);
 
-        // Resolve trace context using hybrid approach (typed layouts for NLog 5.3.4+, string parsing for older versions)
-        Activity? current = null;
-        var (traceId, spanId) = GetTraceContext(logEvent);
+        // Use Activity.Current directly - the typed layouts ensure proper trace context resolution
+        // even in AsyncWrapper scenarios since they capture the context at log event creation time
+        var current = Activity.Current;
 
-        if (traceId.HasValue && spanId.HasValue && 
-            traceId.Value != default(ActivityTraceId) && spanId.Value != default(ActivitySpanId))
-        {
-            var activityContext = new ActivityContext(traceId.Value, spanId.Value, ActivityTraceFlags.Recorded);
-            current = new Activity("OpenTelemetryTarget").SetParentId(activityContext.TraceId, activityContext.SpanId, activityContext.TraceFlags);
-        }
-        else
-        {
-            current = Activity.Current;
-        }
-
-        // Emit using internal helpers via reflection delegate
-        var renderedMessage = IncludeFormattedMessage ? RenderLogEvent(Layout, logEvent) : logEvent.Message;
         var args = IncludeEventParameters && !logEvent.HasProperties && logEvent.Parameters is object[] p ? p : null;
 
         OpenTelemetry.AutoInstrumentation.Instrumentations.NLog.Bridge.OpenTelemetryLogHelpers.LogEmitter?.Invoke(
@@ -259,58 +216,5 @@ public sealed class OpenTelemetryTarget : TargetWithContext
         }
 
         return allProperties;
-    }
-
-    private static bool CheckTypedLayoutSupport()
-    {
-        try
-        {
-            var nlogAssembly = typeof(Layout).Assembly;
-            var version = nlogAssembly.GetName().Version;
-            
-            // NLog 5.3.4+ supports Layout<T>
-            return version >= new Version(5, 3, 4);
-        }
-        catch
-        {
-            // If we can't determine the version, assume no typed layout support
-            return false;
-        }
-    }
-
-    private (ActivityTraceId?, ActivitySpanId?) GetTraceContext(LogEventInfo logEvent)
-    {
-        ActivityTraceId? traceId = null;
-        ActivitySpanId? spanId = null;
-
-        if (SupportsTypedLayouts && _typedTraceIdLayout != null && _typedSpanIdLayout != null)
-        {
-            // Use typed layouts for optimal performance (NLog 5.3.4+)
-            traceId = _typedTraceIdLayout.Render(logEvent);
-            spanId = _typedSpanIdLayout.Render(logEvent);
-        }
-        else
-        {
-            // Fall back to string parsing for backward compatibility (NLog 4.0.0+)
-            var traceIdString = RenderLogEvent(TraceIdLayout, logEvent);
-            var spanIdString = RenderLogEvent(SpanIdLayout, logEvent);
-
-            if (!string.IsNullOrEmpty(traceIdString) && !string.IsNullOrEmpty(spanIdString))
-            {
-                try
-                {
-                    traceId = ActivityTraceId.CreateFromString(traceIdString);
-                    spanId = ActivitySpanId.CreateFromString(spanIdString);
-                }
-                catch
-                {
-                    // If parsing fails, return null values
-                    traceId = null;
-                    spanId = null;
-                }
-            }
-        }
-
-        return (traceId, spanId);
     }
 }

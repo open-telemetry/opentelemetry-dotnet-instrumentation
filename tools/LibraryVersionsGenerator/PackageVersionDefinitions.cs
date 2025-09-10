@@ -107,9 +107,8 @@ internal static class PackageVersionDefinitions
             TestApplicationName = "TestApplication.NLogBridge",
             Versions = new List<PackageVersion>
             {
-                // NLog 4.0.0+ for modern .NET support
-                // versions below 4.7.15 may have vulnerabilities
-                new("4.7.15"),
+                // NLog 5.0+ required for Layout<T> typed layout support and .NET build-trimming
+                new("5.0.0"),
                 new("5.3.2"),
                 new("*")
             }

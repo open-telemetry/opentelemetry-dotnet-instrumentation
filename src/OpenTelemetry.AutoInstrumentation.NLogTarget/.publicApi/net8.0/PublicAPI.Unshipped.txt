@@ -18,9 +18,9 @@ OpenTelemetry.AutoInstrumentation.NLogTarget.OpenTelemetryTarget.ScheduledDelayM
 OpenTelemetry.AutoInstrumentation.NLogTarget.OpenTelemetryTarget.ScheduledDelayMilliseconds.set -> void
 OpenTelemetry.AutoInstrumentation.NLogTarget.OpenTelemetryTarget.ServiceName.get -> NLog.Layouts.Layout?
 OpenTelemetry.AutoInstrumentation.NLogTarget.OpenTelemetryTarget.ServiceName.set -> void
-OpenTelemetry.AutoInstrumentation.NLogTarget.OpenTelemetryTarget.SpanIdLayout.get -> NLog.Layouts.Layout?
+OpenTelemetry.AutoInstrumentation.NLogTarget.OpenTelemetryTarget.SpanIdLayout.get -> NLog.Layouts.Layout<System.Diagnostics.ActivitySpanId?>!
 OpenTelemetry.AutoInstrumentation.NLogTarget.OpenTelemetryTarget.SpanIdLayout.set -> void
-OpenTelemetry.AutoInstrumentation.NLogTarget.OpenTelemetryTarget.TraceIdLayout.get -> NLog.Layouts.Layout?
+OpenTelemetry.AutoInstrumentation.NLogTarget.OpenTelemetryTarget.TraceIdLayout.get -> NLog.Layouts.Layout<System.Diagnostics.ActivityTraceId?>!
 OpenTelemetry.AutoInstrumentation.NLogTarget.OpenTelemetryTarget.TraceIdLayout.set -> void
 OpenTelemetry.AutoInstrumentation.NLogTarget.OpenTelemetryTarget.UseHttp.get -> bool
 OpenTelemetry.AutoInstrumentation.NLogTarget.OpenTelemetryTarget.UseHttp.set -> void

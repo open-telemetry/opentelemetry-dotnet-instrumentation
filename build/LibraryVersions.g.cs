@@ -71,7 +71,7 @@ public static partial class LibraryVersion
         {
             "TestApplication.NLogBridge",
             [
-                new("4.7.15"),
+                new("5.0.0"),
                 new("5.3.2"),
             ]
         },

@@ -118,7 +118,7 @@ LogManager.Configuration = config;
 
 ## Supported Versions
 
-- **NLog**: 4.0.0 - 6.*.*
+- **NLog**: 5.0.0+ (required for Layout&lt;T&gt; typed layout support and .NET build-trimming)
 - **.NET Framework**: 4.6.2+
 - **.NET**: 6.0+, 8.0, 9.0
 
