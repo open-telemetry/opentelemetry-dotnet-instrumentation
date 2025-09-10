@@ -108,18 +108,20 @@ public class NLogTests
     }
 
     /// <summary>
-    /// Tests that custom NLog levels between standard levels are mapped to the appropriate severity.
-    /// This verifies that the range-based mapping logic works correctly for custom levels.
+    /// Tests that unknown or custom NLog levels are mapped to the default Trace severity.
+    /// This verifies that the fallback logic works correctly for non-standard level ordinals.
+    /// The mapping logic uses a switch expression with a default case that returns 1 (Trace severity)
+    /// for any ordinal that doesn't match the standard NLog levels (0-5).
     /// </summary>
-    /// <param name="nlogOrdinal">The NLog ordinal value.</param>
-    /// <param name="expectedSeverity">The expected OpenTelemetry severity level.</param>
+    /// <param name="nlogOrdinal">The NLog ordinal value for an unknown/custom level.</param>
+    /// <param name="expectedSeverity">The expected OpenTelemetry severity level (should be 1 for Trace).</param>
     [Theory]
-    [InlineData(0, 1)]   // Trace (0) -> Should be Trace (1)
-    [InlineData(1, 5)]   // Debug (1) -> Should be Debug (5)
-    [InlineData(2, 9)]   // Info (2) -> Should be Info (9)
-    [InlineData(3, 13)]  // Warn (3) -> Should be Warn (13)
-    [InlineData(4, 17)]  // Error (4) -> Should be Error (17)
-    public void CustomLevelsBetweenStandardLevels_AreMappedCorrectly(int nlogOrdinal, int expectedSeverity)
+    [InlineData(7, 1)]    // Beyond standard levels (after Off=6) -> Trace
+    [InlineData(10, 1)]   // Custom level -> Trace
+    [InlineData(-1, 1)]   // Invalid negative ordinal -> Trace
+    [InlineData(100, 1)]  // High custom level -> Trace
+    [InlineData(999, 1)]  // Very high custom level -> Trace
+    public void UnknownCustomLevels_AreMappedToTraceSeverity(int nlogOrdinal, int expectedSeverity)
     {
         // Act
         var actualSeverity = OpenTelemetryNLogConverter.MapLogLevel(nlogOrdinal);
