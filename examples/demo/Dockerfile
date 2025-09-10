@@ -1,4 +1,4 @@
-FROM mcr.microsoft.com/dotnet/sdk:8.0.413-jammy@sha256:05594d347192d12cc8c7137493b45f9e5390aa12654cf2c45b028960b2808571
+FROM mcr.microsoft.com/dotnet/sdk:8.0.414-jammy@sha256:b6142e9f2ba1d33700791de1b5946dd3f75d65198ca73be99aca966ee37896f1
 
 # install OpenTelemetry .NET Automatic Instrumentation
 ARG OTEL_VERSION=1.12.0
