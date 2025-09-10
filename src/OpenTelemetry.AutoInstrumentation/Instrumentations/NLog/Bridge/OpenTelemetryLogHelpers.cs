@@ -290,8 +290,8 @@ internal static class OpenTelemetryLogHelpers
         // Build the attributes creation expression
         var attributesExpression = BuildLogRecordAttributes(logRecordAttributesListType, exception, properties, args, renderedMessage);
 
-        // Get the EmitLogRecord method from the logger
-        var emitLogRecordMethod = loggerType.GetMethod("EmitLogRecord", new[] { logRecordDataType, logRecordAttributesListType })!;
+        // Get the EmitLog method from the logger
+        var emitLogRecordMethod = loggerType.GetMethod("EmitLog", BindingFlags.Instance | BindingFlags.Public, null, new[] { logRecordDataType.MakeByRefType(), logRecordAttributesListType.MakeByRefType() }, null)!;
 
         // Build the complete expression that creates the log record, creates attributes, and emits the log
         var completeExpression = Expression.Block(
