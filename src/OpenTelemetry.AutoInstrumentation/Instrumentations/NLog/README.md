@@ -1,16 +1,18 @@
 # NLog OpenTelemetry Auto-Instrumentation
 
-This directory contains the NLog instrumentation for OpenTelemetry .NET Auto-Instrumentation. This instrumentation provides two approaches for bridging NLog logging events to OpenTelemetry: automatic zero-config injection and standard NLog Target configuration.
+This directory contains the NLog instrumentation for OpenTelemetry .NET Auto-Instrumentation. This instrumentation provides automatic zero-config injection for bridging NLog logging events to OpenTelemetry using duck typing.
 
 ## Overview
 
-The NLog instrumentation offers flexible integration through:
-1. **Zero-Config Auto-Injection**: Automatically injects `OpenTelemetryTarget` into existing NLog configurations
-2. **Standard NLog Target**: `OpenTelemetryTarget` can be configured like any NLog target via `nlog.config` or code
+The NLog instrumentation offers automatic integration through:
+1. **Zero-Config Auto-Injection**: Automatically injects duck-typed `OpenTelemetryTarget` into existing NLog configurations
+2. **Duck Typing Integration**: Uses `[DuckReverseMethod]` to avoid direct NLog assembly references
 3. **Log Event Bridging**: Converting NLog log events to OpenTelemetry log records
 4. **Structured Logging Support**: Leveraging NLog's layout abilities for enrichment
 5. **Trace Context Integration**: Automatically including trace context in log records
 6. **Custom Properties**: Forwarding custom properties while filtering internal NLog properties
+
+**Note**: XML configuration via `nlog.config` is not supported. The target works exclusively through auto-injection and relies on OpenTelemetry environment variables for configuration.
 
 ## Architecture
 
@@ -31,13 +33,15 @@ OpenTelemetry LogRecord
 OTLP Exporters
 ```
 
-### Standard NLog Target Path
+### Auto-Injection Path (Duck Typing)
 ```
-NLog Configuration (nlog.config or code)
+NLog Logger.Log() Call
     ↓
-OpenTelemetryTarget (TargetWithContext)
+LoggerIntegration (CallTarget)
     ↓
-OpenTelemetryNLogConverter
+NLogAutoInjector.EnsureConfigured()
+    ↓
+OpenTelemetryTarget (Duck-typed proxy) → NLog Configuration
     ↓
 OpenTelemetry LogRecord
     ↓
@@ -54,8 +58,8 @@ OTLP Exporters
 - **`OpenTelemetryLogHelpers.cs`**: Helper for creating OpenTelemetry log records via expression trees
 - **`NLogAutoInjector.cs`**: Handles programmatic injection of OpenTelemetryTarget into NLog configuration
 
-#### Standard NLog Target
-- **`OpenTelemetryTarget.cs`** (in `OpenTelemetry.AutoInstrumentation.NLogTarget` project): Standard NLog target extending `TargetWithContext`
+#### Duck-Typed NLog Target
+- **`OpenTelemetryTarget.cs`**: Duck-typed NLog target using `[DuckReverseMethod]` to avoid direct NLog assembly references
 
 ### Integration
 
@@ -67,54 +71,34 @@ OTLP Exporters
 
 ## Configuration
 
-### Auto-Injection (Zero-Config)
+The NLog instrumentation is configured entirely through OpenTelemetry environment variables. No programmatic configuration is supported to maintain assembly loading safety.
 
-The NLog auto-injection is controlled by environment variables:
+### Environment Variables
+
+The NLog auto-injection is controlled by:
 
 - `OTEL_DOTNET_AUTO_LOGS_ENABLED=true`: Enables logging instrumentation
 - `OTEL_DOTNET_AUTO_LOGS_ENABLE_NLOG_BRIDGE=true`: Enables the NLog bridge specifically
-- `OTEL_DOTNET_AUTO_LOGS_INCLUDE_FORMATTED_MESSAGE=true`: Includes formatted messages as attributes
 
-### Standard NLog Target Configuration
+Standard OpenTelemetry environment variables configure the OTLP exporter:
 
-#### Via nlog.config
-```xml
-<nlog>
-  <extensions>
-    <add assembly="OpenTelemetry.AutoInstrumentation.NLogTarget" />
-  </extensions>
-  
-  <targets>
-    <target xsi:type="OpenTelemetryTarget" 
-            name="otlp"
-            endpoint="http://localhost:4317"
-            useHttp="false"
-            includeFormattedMessage="true"
-            includeEventProperties="true">
-      <attribute name="service.name" layout="${var:ServiceName}" />
-      <attribute name="deployment.environment" layout="${var:Environment}" />
-    </target>
-  </targets>
-  
-  <rules>
-    <logger name="*" minlevel="Trace" writeTo="otlp" />
-  </rules>
-</nlog>
+```bash
+export OTEL_EXPORTER_OTLP_ENDPOINT="http://localhost:4317"
+export OTEL_EXPORTER_OTLP_HEADERS="x-api-key=abc123"
+export OTEL_EXPORTER_OTLP_PROTOCOL="grpc"
+export OTEL_RESOURCE_ATTRIBUTES="service.name=MyApp,service.version=1.0.0"
+export OTEL_BSP_SCHEDULE_DELAY="5000"
+export OTEL_BSP_MAX_QUEUE_SIZE="2048"
+export OTEL_BSP_MAX_EXPORT_BATCH_SIZE="512"
 ```
 
-#### Via Code
-```csharp
-var config = new LoggingConfiguration();
-var otlpTarget = new OpenTelemetryTarget
-{
-    Endpoint = "http://localhost:4317",
-    UseHttp = false,
-    IncludeFormattedMessage = true
-};
-config.AddTarget("otlp", otlpTarget);
-config.AddRule(LogLevel.Trace, LogLevel.Fatal, otlpTarget);
-LogManager.Configuration = config;
-```
+### Behavior
+
+The target automatically:
+- Uses formatted message if available, otherwise raw message
+- Includes event parameters when present
+- Captures trace context from `Activity.Current`
+- Forwards custom properties while filtering internal NLog properties
 
 ## Supported Versions
 
@@ -211,4 +195,4 @@ Enable debug logging to see:
 - Uses reflection to access internal OpenTelemetry logging APIs (until public APIs are available)
 - Builds expression trees dynamically for efficient log record creation
 - Follows the same patterns as Log4Net instrumentation for consistency
-- Designed to be thread-safe and performant in high-throughput scenarios 
+- Designed to be thread-safe and performant in high-throughput scenarios
