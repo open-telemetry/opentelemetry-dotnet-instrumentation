@@ -103,14 +103,11 @@ internal class GeneralSettings : Settings
             }
         }
 
-        if (resourceAttributes != null)
+        foreach (var kv in resourceAttributes)
         {
-            foreach (var kv in resourceAttributes)
+            if (!merged.ContainsKey(kv.Key))
             {
-                if (!merged.ContainsKey(kv.Key))
-                {
-                    merged[kv.Key] = kv.Value;
-                }
+                merged[kv.Key] = kv.Value;
             }
         }
 
