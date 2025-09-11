@@ -50,31 +50,6 @@ internal class GeneralSettings : Settings
             }
         }
 
-        var baseResources = new List<KeyValuePair<string, object>>(1);
-
-        var serviceName = configuration.GetString(ConfigurationKeys.ServiceName);
-
-        if (!string.IsNullOrEmpty(serviceName))
-        {
-            baseResources.Add(new KeyValuePair<string, object>(Constants.ResourceAttributes.AttributeServiceName, serviceName!));
-        }
-
-        var resourceAttributes = ParseResourceAttributes(configuration.GetString(ConfigurationKeys.ResourceAttributes));
-        if (resourceAttributes.Count > 0)
-        {
-            foreach (var attr in resourceAttributes)
-            {
-                if (attr.Key == Constants.ResourceAttributes.AttributeServiceName && !string.IsNullOrEmpty(serviceName))
-                {
-                    continue; // OTEL_SERVICE_NAME takes precedence
-                }
-
-                baseResources.Add(attr);
-            }
-        }
-
-        Resources = baseResources;
-
         var resourceDetectorsEnabledByDefault = configuration.GetBool(ConfigurationKeys.ResourceDetectorEnabled) ?? true;
 
         EnabledResourceDetectors = configuration.ParseEnabledEnumList<ResourceDetector>(
