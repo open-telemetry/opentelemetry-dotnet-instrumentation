@@ -32,9 +32,6 @@ public class FilebasedGeneralSettingsTests
         Assert.Equal("OverridesAttributesList", result["custom1"]);
         Assert.Equal("value2", result["custom2"]);
         Assert.Equal("value3", result["custom3"]);
-
-        Assert.True(result.ContainsKey(Constants.DistributionAttributes.TelemetryDistroNameAttributeName));
-        Assert.True(result.ContainsKey(Constants.DistributionAttributes.TelemetryDistroVersionAttributeName));
     }
 
     [Fact]

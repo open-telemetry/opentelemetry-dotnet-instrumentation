@@ -50,11 +50,7 @@ internal class GeneralSettings : Settings
             }
         }
 
-        var baseResources = new List<KeyValuePair<string, object>>
-        {
-            new(Constants.DistributionAttributes.TelemetryDistroNameAttributeName, Constants.DistributionAttributes.TelemetryDistroNameAttributeValue),
-            new(Constants.DistributionAttributes.TelemetryDistroVersionAttributeName, AutoInstrumentationVersion.Version)
-        };
+        var baseResources = new List<KeyValuePair<string, object>>(1);
 
         var serviceName = configuration.GetString(ConfigurationKeys.ServiceName);
 
@@ -93,21 +89,11 @@ internal class GeneralSettings : Settings
 
     protected override void OnLoadFile(Conf configuration)
     {
-        var baseResources = new List<KeyValuePair<string, object>>
-        {
-            new(Constants.DistributionAttributes.TelemetryDistroNameAttributeName, Constants.DistributionAttributes.TelemetryDistroNameAttributeValue),
-            new(Constants.DistributionAttributes.TelemetryDistroVersionAttributeName, AutoInstrumentationVersion.Version)
-        };
-
         var resourceAttributesWithPriority = configuration.Resource?.ParseAttributes() ?? [];
 
         var resourceAttributes = ParseResourceAttributes(configuration.Resource?.AttributesList);
 
         var merged = new Dictionary<string, object>();
-        foreach (var kv in baseResources)
-        {
-            merged[kv.Key] = kv.Value;
-        }
 
         foreach (var kv in resourceAttributesWithPriority)
         {

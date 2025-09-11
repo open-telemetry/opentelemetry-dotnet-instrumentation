@@ -14,6 +14,10 @@ internal static class ResourceConfigurator
             .CreateEmpty() // Don't use CreateDefault because it puts service name unknown by default.
             .AddEnvironmentVariableDetector()
             .AddTelemetrySdk()
+            .AddAttributes([
+                new(Constants.DistributionAttributes.TelemetryDistroNameAttributeName, Constants.DistributionAttributes.TelemetryDistroNameAttributeValue),
+                new(Constants.DistributionAttributes.TelemetryDistroVersionAttributeName, AutoInstrumentationVersion.Version)
+            ])
             .AddAttributes(resources);
 
         foreach (var enabledResourceDetector in enabledResourceDetectors)
