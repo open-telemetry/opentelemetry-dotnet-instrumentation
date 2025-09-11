@@ -7,7 +7,7 @@ internal class FailFastSettings : Settings
 {
     public bool FailFast { get; private set; }
 
-    protected override void OnLoad(Configuration configuration)
+    protected override void OnLoadEnvVar(Configuration configuration)
     {
         FailFast = configuration.GetBool(ConfigurationKeys.FailFast) ?? false;
     }
