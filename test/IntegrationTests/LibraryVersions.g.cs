@@ -129,6 +129,22 @@ public static partial class LibraryVersion
             return theoryData;
         }
     }
+    public static TheoryData<string> NLog
+    {
+        get
+        {
+            TheoryData<string> theoryData =
+            [
+#if DEFAULT_TEST_PACKAGE_VERSIONS
+                string.Empty,
+#else
+                "5.0.0",
+                "5.3.2",
+#endif
+            ];
+            return theoryData;
+        }
+    }
     public static TheoryData<string> MassTransit
     {
         get
@@ -403,6 +419,7 @@ public static partial class LibraryVersion
        { "GraphQL", GraphQL },
        { "GrpcNetClient", GrpcNetClient },
        { "log4net", log4net },
+       { "NLog", NLog },
        { "MassTransit", MassTransit },
        { "SqlClientMicrosoft", SqlClientMicrosoft },
        { "SqlClientSystem", SqlClientSystem },
