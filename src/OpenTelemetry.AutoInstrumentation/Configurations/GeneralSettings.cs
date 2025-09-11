@@ -64,7 +64,7 @@ internal class GeneralSettings : Settings
         }
 
         var resourceAttributes = ParseResourceAttributes(configuration.GetString(ConfigurationKeys.ResourceAttributes));
-        if (resourceAttributes != null && resourceAttributes.Count > 0)
+        if (resourceAttributes.Count > 0)
         {
             foreach (var attr in resourceAttributes)
             {
