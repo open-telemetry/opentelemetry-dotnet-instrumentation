@@ -62,6 +62,23 @@ internal partial class ConfigurationKeys
     public const string ServiceName = "OTEL_SERVICE_NAME";
 
     /// <summary>
+    /// Configuration keys for file based configuration.
+    /// </summary>
+    public static class FileBasedConfiguration
+    {
+        /// <summary>
+        /// Configuration key for enabling file based configuration.
+        /// </summary>
+        public const string Enabled = "OTEL_EXPERIMENTAL_FILE_BASED_CONFIGURATION_ENABLED";
+
+        /// <summary>
+        /// Configuration key for enabling file based configuration.
+        /// Default is <c>"config.yaml"</c>.
+        /// </summary>
+        public const string FileName = "OTEL_EXPERIMENTAL_CONFIG_FILE";
+    }
+
+    /// <summary>
     /// Configuration keys for traces.
     /// </summary>
     public static class Traces

@@ -14,11 +14,11 @@ internal abstract class Settings
     public static T FromDefaultSources<T>(bool failFast)
         where T : Settings, new()
     {
-        var isConfigFileEnabled = Environment.GetEnvironmentVariable("OTEL_EXPERIMENTAL_FILE_BASED_CONFIGURATION_ENABLED") == "true";
+        var isConfigFileEnabled = Environment.GetEnvironmentVariable(ConfigurationKeys.FileBasedConfiguration.Enabled) == "true";
 
         if (isConfigFileEnabled)
         {
-            var configFile = Environment.GetEnvironmentVariable("OTEL_EXPERIMENTAL_CONFIG_FILE") ?? "config.yaml";
+            var configFile = Environment.GetEnvironmentVariable(ConfigurationKeys.FileBasedConfiguration.FileName) ?? "config.yaml";
             var config = Parser.ParseYaml(configFile);
             var settings = new T();
             settings.LoadFile(config);
