@@ -29,6 +29,8 @@ internal class ResourceConfiguration
 
         foreach (var attr in Attributes)
         {
+            // TODO parse type and converting the value accordingly.
+
             result.Add(new KeyValuePair<string, object>(attr.Name, attr.Value));
         }
 
