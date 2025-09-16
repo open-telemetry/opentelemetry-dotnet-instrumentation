@@ -57,7 +57,7 @@ internal static class LoggerInitializer
 
             builder.AddOpenTelemetry(options =>
             {
-                options.SetResourceBuilder(ResourceConfigurator.CreateResourceBuilder(Instrumentation.GeneralSettings.Value.EnabledResourceDetectors, Instrumentation.GeneralSettings.Value.Resources));
+                options.SetResourceBuilder(ResourceConfigurator.CreateResourceBuilder(Instrumentation.ResourceSettings.Value));
 
                 options.IncludeFormattedMessage = settings.IncludeFormattedMessage;
 

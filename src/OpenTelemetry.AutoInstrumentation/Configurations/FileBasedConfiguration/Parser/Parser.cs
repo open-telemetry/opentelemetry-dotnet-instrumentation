@@ -8,7 +8,7 @@ namespace OpenTelemetry.AutoInstrumentation.Configurations.FileBasedConfiguratio
 
 internal static class Parser
 {
-    public static Conf ParseYaml(string filePath)
+    public static YamlConfiguration ParseYaml(string filePath)
     {
         var deserializer = new DeserializerBuilder()
             .WithNodeDeserializer(existing => new ConditionalDeserializer(existing), s => s.InsteadOf<NullNodeDeserializer>())
@@ -17,7 +17,7 @@ internal static class Parser
             .Build();
 
         var yaml = File.ReadAllText(filePath);
-        var config = deserializer.Deserialize<Conf>(yaml);
+        var config = deserializer.Deserialize<YamlConfiguration>(yaml);
         return config;
     }
 }

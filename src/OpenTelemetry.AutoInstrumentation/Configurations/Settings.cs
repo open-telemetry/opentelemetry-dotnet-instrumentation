@@ -43,7 +43,7 @@ internal abstract class Settings
         OnLoadEnvVar(configuration);
     }
 
-    public void LoadFile(Conf configuration)
+    public void LoadFile(YamlConfiguration configuration)
     {
         OnLoadFile(configuration);
     }
@@ -57,10 +57,10 @@ internal abstract class Settings
 
     /// <summary>
     /// Initializes a new instance of the <see cref="Settings"/> class
-    /// using the specified <see cref="Conf"/> to initialize values.
+    /// using the specified <see cref="YamlConfiguration"/> to initialize values.
     /// </summary>
-    /// <param name="configuration">The <see cref="Conf"/> to use when retrieving configuration values.</param>
-    protected virtual void OnLoadFile(Conf configuration)
+    /// <param name="configuration">The <see cref="YamlConfiguration"/> to use when retrieving configuration values.</param>
+    protected virtual void OnLoadFile(YamlConfiguration configuration)
     {
     }
 }

@@ -22,8 +22,8 @@ public class FilebasedGeneralSettingsTests
             ]
         };
 
-        var conf = new Conf { Resource = resource };
-        var settings = new GeneralSettings();
+        var conf = new YamlConfiguration { Resource = resource };
+        var settings = new ResourceSettings();
 
         settings.LoadFile(conf);
 
@@ -42,8 +42,8 @@ public class FilebasedGeneralSettingsTests
             AttributesList = "key1=value1,key2=value2"
         };
 
-        var conf = new Conf { Resource = resource };
-        var settings = new GeneralSettings();
+        var conf = new YamlConfiguration { Resource = resource };
+        var settings = new ResourceSettings();
 
         settings.LoadFile(conf);
 
@@ -65,8 +65,8 @@ public class FilebasedGeneralSettingsTests
             ]
         };
 
-        var conf = new Conf { Resource = resource };
-        var settings = new GeneralSettings();
+        var conf = new YamlConfiguration { Resource = resource };
+        var settings = new ResourceSettings();
 
         settings.LoadFile(conf);
 
@@ -79,8 +79,8 @@ public class FilebasedGeneralSettingsTests
     [Fact]
     public void LoadFile_BaseAttributes_AreAlwaysIncluded()
     {
-        var settings = new GeneralSettings();
-        settings.LoadFile(new Conf());
+        var settings = new ResourceSettings();
+        settings.LoadFile(new YamlConfiguration());
 
         var result = settings.Resources.ToDictionary(kv => kv.Key, kv => kv.Value);
 
@@ -100,8 +100,8 @@ public class FilebasedGeneralSettingsTests
             ]
         };
 
-        var conf = new Conf { Resource = resource };
-        var settings = new GeneralSettings();
+        var conf = new YamlConfiguration { Resource = resource };
+        var settings = new ResourceSettings();
 
         settings.LoadFile(conf);
 
@@ -119,8 +119,8 @@ public class FilebasedGeneralSettingsTests
             Attributes = null
         };
 
-        var conf = new Conf { Resource = resource };
-        var settings = new GeneralSettings();
+        var conf = new YamlConfiguration { Resource = resource };
+        var settings = new ResourceSettings();
 
         settings.LoadFile(conf);
 
@@ -138,8 +138,8 @@ public class FilebasedGeneralSettingsTests
             AttributesList = string.Empty
         };
 
-        var conf = new Conf { Resource = resource };
-        var settings = new GeneralSettings();
+        var conf = new YamlConfiguration { Resource = resource };
+        var settings = new ResourceSettings();
 
         settings.LoadFile(conf);
 

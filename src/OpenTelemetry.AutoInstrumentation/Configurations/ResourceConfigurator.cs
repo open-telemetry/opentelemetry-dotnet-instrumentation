@@ -8,19 +8,24 @@ namespace OpenTelemetry.AutoInstrumentation.Configurations;
 
 internal static class ResourceConfigurator
 {
-    public static ResourceBuilder CreateResourceBuilder(IReadOnlyList<ResourceDetector> enabledResourceDetectors, IReadOnlyList<KeyValuePair<string, object>> resources)
+    public static ResourceBuilder CreateResourceBuilder(ResourceSettings resourceSettings)
     {
         var resourceBuilder = ResourceBuilder
-            .CreateEmpty() // Don't use CreateDefault because it puts service name unknown by default.
-            .AddEnvironmentVariableDetector()
-            .AddTelemetrySdk()
+            .CreateEmpty(); // Don't use CreateDefault because it puts service name unknown by default.
+
+        if (resourceSettings.EnabledEnvironmentalVariablesDetector)
+        {
+            resourceBuilder.AddEnvironmentVariableDetector();
+        }
+
+        resourceBuilder.AddTelemetrySdk()
             .AddAttributes([
                 new(Constants.DistributionAttributes.TelemetryDistroNameAttributeName, Constants.DistributionAttributes.TelemetryDistroNameAttributeValue),
                 new(Constants.DistributionAttributes.TelemetryDistroVersionAttributeName, AutoInstrumentationVersion.Version)
             ])
-            .AddAttributes(resources);
+            .AddAttributes(resourceSettings.Resources);
 
-        foreach (var enabledResourceDetector in enabledResourceDetectors)
+        foreach (var enabledResourceDetector in resourceSettings.EnabledDetectors)
         {
             resourceBuilder = enabledResourceDetector switch
             {
@@ -37,7 +42,7 @@ internal static class ResourceConfigurator
         }
 
         var resource = resourceBuilder.Build();
-        if (!resource.Attributes.Any(kvp => kvp.Key == Constants.ResourceAttributes.AttributeServiceName))
+        if (resource.Attributes.All(kvp => kvp.Key != Constants.ResourceAttributes.AttributeServiceName))
         {
             // service.name was not configured yet use the fallback.
             resourceBuilder.AddAttributes([new(Constants.ResourceAttributes.AttributeServiceName, ServiceNameConfigurator.GetFallbackServiceName())]);

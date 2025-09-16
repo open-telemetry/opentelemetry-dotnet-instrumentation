@@ -5,7 +5,7 @@ using Vendors.YamlDotNet.Serialization;
 
 namespace OpenTelemetry.AutoInstrumentation.Configurations.FileBasedConfiguration;
 
-internal class Conf
+internal class YamlConfiguration
 {
     /// <summary>
     /// Gets or sets the file format version.
