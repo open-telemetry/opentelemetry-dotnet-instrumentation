@@ -19,7 +19,12 @@ internal abstract class Settings
         if (isConfigFileEnabled)
         {
             var configFile = Environment.GetEnvironmentVariable(ConfigurationKeys.FileBasedConfiguration.FileName) ?? "config.yaml";
+            // TODO validate file existence
+
             var config = Parser.ParseYaml(configFile);
+
+            // TODO validate file format version https://github.com/open-telemetry/opentelemetry-configuration/blob/4f185c07eaaffc18c9ad34a46085e7ad6625fca0/README.md#file-format
+
             var settings = new T();
             settings.LoadFile(config);
             return settings;
