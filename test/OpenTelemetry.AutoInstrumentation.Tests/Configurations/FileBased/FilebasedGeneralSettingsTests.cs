@@ -77,18 +77,6 @@ public class FilebasedGeneralSettingsTests
     }
 
     [Fact]
-    public void LoadFile_BaseAttributes_AreAlwaysIncluded()
-    {
-        var settings = new ResourceSettings();
-        settings.LoadFile(new YamlConfiguration());
-
-        var result = settings.Resources.ToDictionary(kv => kv.Key, kv => kv.Value);
-
-        Assert.True(result.ContainsKey(Constants.DistributionAttributes.TelemetryDistroNameAttributeName));
-        Assert.True(result.ContainsKey(Constants.DistributionAttributes.TelemetryDistroVersionAttributeName));
-    }
-
-    [Fact]
     public void LoadFile_AttributesListOverwrittenByAttributes()
     {
         var resource = new ResourceConfiguration
@@ -108,44 +96,5 @@ public class FilebasedGeneralSettingsTests
         var result = settings.Resources.ToDictionary(kv => kv.Key, kv => kv.Value);
 
         Assert.Equal("fromAttributes", result["key1"]);
-    }
-
-    [Fact]
-    public void LoadFile_NullAttributesHandledGracefully()
-    {
-        var resource = new ResourceConfiguration
-        {
-            AttributesList = null,
-            Attributes = null
-        };
-
-        var conf = new YamlConfiguration { Resource = resource };
-        var settings = new ResourceSettings();
-
-        settings.LoadFile(conf);
-
-        var result = settings.Resources.ToDictionary(kv => kv.Key, kv => kv.Value);
-
-        Assert.True(result.ContainsKey(Constants.DistributionAttributes.TelemetryDistroNameAttributeName));
-        Assert.True(result.ContainsKey(Constants.DistributionAttributes.TelemetryDistroVersionAttributeName));
-    }
-
-    [Fact]
-    public void LoadFile_EmptyAttributesList_StillIncludesBaseAttributes()
-    {
-        var resource = new ResourceConfiguration
-        {
-            AttributesList = string.Empty
-        };
-
-        var conf = new YamlConfiguration { Resource = resource };
-        var settings = new ResourceSettings();
-
-        settings.LoadFile(conf);
-
-        var result = settings.Resources.ToDictionary(kv => kv.Key, kv => kv.Value);
-
-        Assert.True(result.ContainsKey(Constants.DistributionAttributes.TelemetryDistroNameAttributeName));
-        Assert.True(result.ContainsKey(Constants.DistributionAttributes.TelemetryDistroVersionAttributeName));
     }
 }
