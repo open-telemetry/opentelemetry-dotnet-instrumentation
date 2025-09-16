@@ -11,22 +11,16 @@ namespace OpenTelemetry.AutoInstrumentation.Configurations;
 /// </summary>
 internal abstract class Settings
 {
+    private static readonly bool IsYamlConfigEnabled = Environment.GetEnvironmentVariable(ConfigurationKeys.FileBasedConfiguration.Enabled) == "true";
+    private static readonly Lazy<YamlConfiguration> YamlConfiguration = new(ReadYamlConfiguration);
+
     public static T FromDefaultSources<T>(bool failFast)
         where T : Settings, new()
     {
-        var isConfigFileEnabled = Environment.GetEnvironmentVariable(ConfigurationKeys.FileBasedConfiguration.Enabled) == "true";
-
-        if (isConfigFileEnabled)
+        if (IsYamlConfigEnabled)
         {
-            var configFile = Environment.GetEnvironmentVariable(ConfigurationKeys.FileBasedConfiguration.FileName) ?? "config.yaml";
-            // TODO validate file existence
-
-            var config = Parser.ParseYaml(configFile);
-
-            // TODO validate file format version https://github.com/open-telemetry/opentelemetry-configuration/blob/4f185c07eaaffc18c9ad34a46085e7ad6625fca0/README.md#file-format
-
             var settings = new T();
-            settings.LoadFile(config);
+            settings.LoadFile(YamlConfiguration.Value);
             return settings;
         }
         else
@@ -62,5 +56,16 @@ internal abstract class Settings
     /// <param name="configuration">The <see cref="YamlConfiguration"/> to use when retrieving configuration values.</param>
     protected virtual void OnLoadFile(YamlConfiguration configuration)
     {
+    }
+
+    private static YamlConfiguration ReadYamlConfiguration()
+    {
+        var configFile = Environment.GetEnvironmentVariable(ConfigurationKeys.FileBasedConfiguration.FileName) ?? "config.yaml";
+        // TODO validate file existence
+
+        var config = Parser.ParseYaml(configFile);
+
+        // TODO validate file format version https://github.com/open-telemetry/opentelemetry-configuration/blob/4f185c07eaaffc18c9ad34a46085e7ad6625fca0/README.md#file-format
+        return config;
     }
 }
