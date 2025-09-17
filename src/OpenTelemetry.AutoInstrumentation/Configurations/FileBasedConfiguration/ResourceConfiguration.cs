@@ -38,12 +38,12 @@ internal class ResourceConfiguration
         if (AttributesList != null)
         {
             const char attributeListSplitter = ',';
-            const char attributeKeyValueSplitter = '=';
+            char[] attributeKeyValueSplitter = ['='];
 
             var rawAttributes = AttributesList.Split(attributeListSplitter);
             foreach (var rawKeyValuePair in rawAttributes)
             {
-                var keyValuePair = rawKeyValuePair.Split(attributeKeyValueSplitter);
+                var keyValuePair = rawKeyValuePair.Split(attributeKeyValueSplitter, 2);
                 if (keyValuePair.Length != 2)
                 {
                     continue;
