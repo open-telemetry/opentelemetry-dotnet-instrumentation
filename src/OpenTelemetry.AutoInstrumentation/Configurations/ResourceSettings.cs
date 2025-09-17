@@ -35,56 +35,8 @@ internal class ResourceSettings : Settings
     {
         EnabledEnvironmentalVariablesDetector = false;
 
-        var resourceAttributesWithPriority = configuration.Resource?.ParseAttributes() ?? [];
-
-        var additionalResources = ParseResourceAttributes(configuration.Resource?.AttributesList);
-
-        var merged = new Dictionary<string, object>();
-
-        foreach (var kv in resourceAttributesWithPriority)
-        {
-            if (!merged.ContainsKey(kv.Key))
-            {
-                merged[kv.Key] = kv.Value;
-            }
-        }
-
-        foreach (var kv in additionalResources)
-        {
-            if (!merged.ContainsKey(kv.Key))
-            {
-                merged[kv.Key] = kv.Value;
-            }
-        }
-
-        Resources = merged.ToList();
+        Resources = configuration.Resource?.ParseAttributes() ?? [];
 
         // TODO initialize EnabledDetectors from file configuration
-    }
-
-    private static List<KeyValuePair<string, object>> ParseResourceAttributes(string? resourceAttributes)
-    {
-        if (string.IsNullOrEmpty(resourceAttributes))
-        {
-            return [];
-        }
-
-        const char attributeListSplitter = ',';
-        const char attributeKeyValueSplitter = '=';
-        var attributes = new List<KeyValuePair<string, object>>();
-
-        var rawAttributes = resourceAttributes!.Split(attributeListSplitter);
-        foreach (var rawKeyValuePair in rawAttributes)
-        {
-            var keyValuePair = rawKeyValuePair.Split(attributeKeyValueSplitter);
-            if (keyValuePair.Length != 2)
-            {
-                continue;
-            }
-
-            attributes.Add(new KeyValuePair<string, object>(keyValuePair[0].Trim(), keyValuePair[1].Trim()));
-        }
-
-        return attributes;
     }
 }

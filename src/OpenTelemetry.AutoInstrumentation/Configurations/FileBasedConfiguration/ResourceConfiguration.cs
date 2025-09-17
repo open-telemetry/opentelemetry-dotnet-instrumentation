@@ -21,19 +21,43 @@ internal class ResourceConfiguration
 
     public List<KeyValuePair<string, object>> ParseAttributes()
     {
-        var result = new List<KeyValuePair<string, object>>();
-        if (Attributes == null)
+        var resourceAttributesWithPriority = new Dictionary<string, object>();
+
+        if (Attributes != null)
         {
-            return result;
+            foreach (var attr in Attributes)
+            {
+                if (!resourceAttributesWithPriority.ContainsKey(attr.Name))
+                {
+                    // TODO parse type and converting the value accordingly.
+                    resourceAttributesWithPriority.Add(attr.Name, attr.Value);
+                }
+            }
         }
 
-        foreach (var attr in Attributes)
+        if (AttributesList != null)
         {
-            // TODO parse type and converting the value accordingly.
+            const char attributeListSplitter = ',';
+            const char attributeKeyValueSplitter = '=';
 
-            result.Add(new KeyValuePair<string, object>(attr.Name, attr.Value));
+            var rawAttributes = AttributesList.Split(attributeListSplitter);
+            foreach (var rawKeyValuePair in rawAttributes)
+            {
+                var keyValuePair = rawKeyValuePair.Split(attributeKeyValueSplitter);
+                if (keyValuePair.Length != 2)
+                {
+                    continue;
+                }
+
+                var key = keyValuePair[0].Trim();
+
+                if (!resourceAttributesWithPriority.ContainsKey(key))
+                {
+                    resourceAttributesWithPriority.Add(key, keyValuePair[1].Trim());
+                }
+            }
         }
 
-        return result;
+        return resourceAttributesWithPriority.ToList();
     }
 }
