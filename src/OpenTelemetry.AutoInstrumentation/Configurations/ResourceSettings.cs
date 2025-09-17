@@ -69,8 +69,8 @@ internal class ResourceSettings : Settings
             return [];
         }
 
-        var attributeListSplitter = ',';
-        var attributeKeyValueSplitter = '=';
+        const char attributeListSplitter = ',';
+        const char attributeKeyValueSplitter = '=';
         var attributes = new List<KeyValuePair<string, object>>();
 
         var rawAttributes = resourceAttributes!.Split(attributeListSplitter);
