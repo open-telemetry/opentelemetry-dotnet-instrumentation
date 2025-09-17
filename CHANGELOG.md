@@ -22,7 +22,7 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 - Fixed deadlock occurring in Assembly Resolver.
   See [#4269](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/issues/4269)
   for details.
-  of Loader class.  [#4269](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/issues/4269)
+- Fixed rule engine check for .NET 9 to reflect longer support for [STS channel](https://devblogs.microsoft.com/dotnet/dotnet-sts-releases-supported-for-24-months/).
 
 ## [1.13.0-beta.1](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/tag/v1.13.0-beta.1)
 
