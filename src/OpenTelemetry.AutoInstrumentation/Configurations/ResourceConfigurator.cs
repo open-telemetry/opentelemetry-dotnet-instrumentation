@@ -13,7 +13,7 @@ internal static class ResourceConfigurator
         var resourceBuilder = ResourceBuilder
             .CreateEmpty(); // Don't use CreateDefault because it puts service name unknown by default.
 
-        if (resourceSettings.EnabledEnvironmentalVariablesDetector)
+        if (resourceSettings.EnvironmentalVariablesDetectorEnabled)
         {
             resourceBuilder.AddEnvironmentVariableDetector();
         }

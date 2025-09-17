@@ -40,7 +40,7 @@ public class SettingsTests : IDisposable
         var settings = Settings.FromDefaultSources<ResourceSettings>(false);
 
         Assert.NotEmpty(settings.EnabledDetectors);
-        Assert.True(settings.EnabledEnvironmentalVariablesDetector);
+        Assert.True(settings.EnvironmentalVariablesDetectorEnabled);
         Assert.Empty(settings.Resources);
     }
 

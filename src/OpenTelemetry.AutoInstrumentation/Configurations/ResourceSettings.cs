@@ -20,7 +20,7 @@ internal class ResourceSettings : Settings
     /// <summary>
     /// Gets or sets a value indicating whether environmental variables resource detector is enabled.
     /// </summary>
-    public bool EnabledEnvironmentalVariablesDetector { get; set; } = true;
+    public bool EnvironmentalVariablesDetectorEnabled { get; set; } = true;
 
     protected override void OnLoadEnvVar(Configuration configuration)
     {
@@ -33,7 +33,7 @@ internal class ResourceSettings : Settings
 
     protected override void OnLoadFile(YamlConfiguration configuration)
     {
-        EnabledEnvironmentalVariablesDetector = false;
+        EnvironmentalVariablesDetectorEnabled = false;
 
         Resources = configuration.Resource?.ParseAttributes() ?? [];
 
