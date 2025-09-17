@@ -24,10 +24,8 @@ internal class EndOfSupportRule : Rule
         switch (netVersion)
         {
             case 8:
-                eosDate = new DateTime(2026, 11, 10);
-                break;
             case 9:
-                eosDate = new DateTime(2026, 05, 12);
+                eosDate = new DateTime(2026, 11, 10);
                 break;
             default:
                 return true; // just return, not able to verify anything here
