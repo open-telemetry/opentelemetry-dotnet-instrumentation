@@ -72,7 +72,7 @@ internal partial class ConfigurationKeys
         public const string Enabled = "OTEL_EXPERIMENTAL_FILE_BASED_CONFIGURATION_ENABLED";
 
         /// <summary>
-        /// Configuration key for enabling file based configuration.
+        /// Configuration key for the path to the configuration file.
         /// Default is <c>"config.yaml"</c>.
         /// </summary>
         public const string FileName = "OTEL_EXPERIMENTAL_CONFIG_FILE";
