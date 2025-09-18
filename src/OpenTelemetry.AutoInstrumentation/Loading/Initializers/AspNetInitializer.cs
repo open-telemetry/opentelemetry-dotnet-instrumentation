@@ -11,7 +11,7 @@ using OpenTelemetry.AutoInstrumentation.Plugins;
 
 namespace OpenTelemetry.AutoInstrumentation.Loading.Initializers;
 
-internal class AspNetInitializer
+internal sealed class AspNetInitializer
 {
     private readonly PluginManager _pluginManager;
     private readonly TracerSettings _tracerSettings;
@@ -28,31 +28,42 @@ internal class AspNetInitializer
 
     private void InitializeOnFirstCall(ILifespanManager lifespanManager)
     {
-        if (Interlocked.Exchange(ref _initialized, value: 1) != default)
+        if (Interlocked.Exchange(ref _initialized, value: 1) != 0)
         {
             // InitializeOnFirstCall() was already called before
             return;
         }
 
         var instrumentationType = Type.GetType("OpenTelemetry.Instrumentation.AspNet.AspNetInstrumentation, OpenTelemetry.Instrumentation.AspNet");
+        var instanceField = instrumentationType?.GetField("Instance");
+        var instance = instanceField?.GetValue(null);
+        var traceOptionsProperty = instrumentationType?.GetProperty("TraceOptions");
 
-        var options = new OpenTelemetry.Instrumentation.AspNet.AspNetTraceInstrumentationOptions();
-
-        if (_tracerSettings.InstrumentationOptions.AspNetInstrumentationCaptureRequestHeaders.Count != 0)
+        if (traceOptionsProperty?.GetValue(instance) is OpenTelemetry.Instrumentation.AspNet.AspNetTraceInstrumentationOptions options)
         {
-            options.EnrichWithHttpRequest = EnrichWithHttpRequest;
+            if (_tracerSettings.InstrumentationOptions.AspNetInstrumentationCaptureRequestHeaders.Count != 0)
+            {
+                options.EnrichWithHttpRequest = EnrichWithHttpRequest;
+            }
+
+            if (_tracerSettings.InstrumentationOptions.AspNetInstrumentationCaptureResponseHeaders.Count != 0)
+            {
+                options.EnrichWithHttpResponse = EnrichWithHttpResponse;
+            }
+
+            _pluginManager.ConfigureTracesOptions(options);
         }
 
-        if (_tracerSettings.InstrumentationOptions.AspNetInstrumentationCaptureResponseHeaders.Count != 0)
+        var handleManagerType = Type.GetType("OpenTelemetry.Instrumentation.InstrumentationHandleManager, OpenTelemetry.Instrumentation.AspNet");
+        var handleManagerField = instrumentationType?.GetField("HandleManager");
+        var handleManager = handleManagerField?.GetValue(instance);
+        var addTracingHandleMethod = handleManagerType?.GetMethod("AddTracingHandle");
+        var tracingHandle = addTracingHandleMethod?.Invoke(handleManager, []);
+
+        if (tracingHandle != null)
         {
-            options.EnrichWithHttpResponse = EnrichWithHttpResponse;
+           lifespanManager.Track(tracingHandle);
         }
-
-        _pluginManager.ConfigureTracesOptions(options);
-
-        var instrumentation = Activator.CreateInstance(instrumentationType, args: options);
-
-        lifespanManager.Track(instrumentation);
     }
 
     private void EnrichWithHttpRequest(Activity activity, HttpRequestBase httpRequest)
