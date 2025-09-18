@@ -44,7 +44,7 @@ public class WcfIISTests : TestHelper
         collector.Expect("OpenTelemetry.Instrumentation.Wcf", span => span.Kind == Span.Types.SpanKind.Server && !IndicatesHealthCheckRequest(span), "Server 2");
         collector.Expect("OpenTelemetry.Instrumentation.Wcf", span => span.Kind == Span.Types.SpanKind.Client && span.Name == "http://opentelemetry.io/StatusService/Ping", "Client 2");
 
-        collector.Expect("OpenTelemetry.Instrumentation.AspNet.Telemetry", span => span.Kind == Span.Types.SpanKind.Server && span.ParentSpanId != ByteString.Empty, "AspNet Server 1");
+        collector.Expect("OpenTelemetry.Instrumentation.AspNet", span => span.Kind == Span.Types.SpanKind.Server && span.ParentSpanId != ByteString.Empty, "AspNet Server 1");
 
         collector.Expect("TestApplication.Wcf.Client.NetFramework", span => span.Kind == Span.Types.SpanKind.Internal, "Custom parent");
         collector.Expect("TestApplication.Wcf.Client.NetFramework", span => span.Kind == Span.Types.SpanKind.Internal, "Custom sibling");
@@ -76,7 +76,7 @@ public class WcfIISTests : TestHelper
             collected.InstrumentationScopeName == "OpenTelemetry.Instrumentation.Wcf");
         var aspNetServerSpan = collectedSpans.Single(collected =>
             collected.Span.Kind == Span.Types.SpanKind.Server &&
-            collected.InstrumentationScopeName == "OpenTelemetry.Instrumentation.AspNet.Telemetry");
+            collected.InstrumentationScopeName == "OpenTelemetry.Instrumentation.AspNet");
         var aspNetParentedWcfServerSpans = wcfServerSpans.Count(sp => sp.Span.ParentSpanId == aspNetServerSpan.Span.SpanId);
         return aspNetParentedWcfServerSpans == 1 && WcfClientInstrumentation.ValidateExpectedSpanHierarchy(collectedSpans);
     }

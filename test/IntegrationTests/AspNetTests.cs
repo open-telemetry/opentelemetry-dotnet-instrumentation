@@ -62,8 +62,8 @@ public class AspNetTests
         // on the firewall.
         using var collector = new MockSpansCollector(Output, host: "*");
         using var fwPort = FirewallHelper.OpenWinPort(collector.Port, Output);
-        collector.Expect("OpenTelemetry.Instrumentation.AspNet.Telemetry"); // Expect Mvc span
-        collector.Expect("OpenTelemetry.Instrumentation.AspNet.Telemetry"); // Expect WebApi span
+        collector.Expect("OpenTelemetry.Instrumentation.AspNet"); // Expect Mvc span
+        collector.Expect("OpenTelemetry.Instrumentation.AspNet"); // Expect WebApi span
 
         var collectorUrl = $"http://{DockerNetworkHelper.IntegrationTestsGateway}:{collector.Port}";
         Dictionary<string, string> environmentVariables = new()
@@ -95,7 +95,7 @@ public class AspNetTests
         // on the firewall.
         using var collector = new MockSpansCollector(Output, host: "*");
         using var fwPort = FirewallHelper.OpenWinPort(collector.Port, Output);
-        collector.Expect("OpenTelemetry.Instrumentation.AspNet.Telemetry", span => // Expect Mvc span
+        collector.Expect("OpenTelemetry.Instrumentation.AspNet", span => // Expect Mvc span
         {
             if (appPoolMode == AppPoolMode.Classic)
             {
@@ -115,7 +115,7 @@ public class AspNetTests
                    && span.Attributes.All(x => x.Key != "http.response.header.custom-response-test-header2");
         });
 
-        collector.Expect("OpenTelemetry.Instrumentation.AspNet.Telemetry", span => // Expect WebApi span
+        collector.Expect("OpenTelemetry.Instrumentation.AspNet", span => // Expect WebApi span
         {
             if (appPoolMode == AppPoolMode.Classic)
             {

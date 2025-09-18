@@ -55,12 +55,12 @@ internal class AspNetInitializer
         lifespanManager.Track(instrumentation);
     }
 
-    private void EnrichWithHttpRequest(Activity activity, HttpRequest httpRequest)
+    private void EnrichWithHttpRequest(Activity activity, HttpRequestBase httpRequest)
     {
         activity.AddHeadersAsTags(_tracerSettings.InstrumentationOptions.AspNetInstrumentationCaptureRequestHeaders, httpRequest.Headers);
     }
 
-    private void EnrichWithHttpResponse(Activity activity, HttpResponse httpResponse)
+    private void EnrichWithHttpResponse(Activity activity, HttpResponseBase httpResponse)
     {
         activity.AddHeadersAsTags(_tracerSettings.InstrumentationOptions.AspNetInstrumentationCaptureResponseHeaders, httpResponse.Headers);
     }
