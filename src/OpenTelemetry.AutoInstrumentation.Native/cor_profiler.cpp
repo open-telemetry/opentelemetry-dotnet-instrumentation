@@ -620,11 +620,10 @@ HRESULT STDMETHODCALLTYPE CorProfiler::ModuleLoadFinished(ModuleID module_id, HR
                       std::boolalpha, " | IsNGEN = ", module_info.IsNGEN(), " | IsDynamic = ", module_info.IsDynamic(),
                       " | IsResource = ", module_info.IsResource(), std::noboolalpha);
     }
-    
+
 #ifdef _WIN32
-    if (runtime_information_.is_desktop() 
-        && module_info.assembly.name == WStr("System.Data")
-        && IsSqlClientNetFxILRewriteEnabled())
+    if (runtime_information_.is_desktop() && module_info.assembly.name == WStr("System.Data") &&
+        IsSqlClientNetFxILRewriteEnabled())
     {
         RewriteILSystemDataCommandText(module_id);
     }
@@ -3251,7 +3250,8 @@ HRESULT CorProfiler::RewriteILSystemDataCommandText(const ModuleID module_id)
     }
 
     ComPtr<IUnknown> metadata_interfaces;
-    auto hr = this->info_->GetModuleMetaData(module_id, ofRead | ofWrite, IID_IMetaDataImport2, metadata_interfaces.GetAddressOf());
+    auto             hr = this->info_->GetModuleMetaData(module_id, ofRead | ofWrite, IID_IMetaDataImport2,
+                                                         metadata_interfaces.GetAddressOf());
 
     if (FAILED(hr))
     {
@@ -3264,29 +3264,27 @@ HRESULT CorProfiler::RewriteILSystemDataCommandText(const ModuleID module_id)
 
     // Find the type definition for System.Data.SqlClient.SqlCommand
     mdTypeDef system_data_sqlclient_sqlcommand;
-    hr = metadata_import->FindTypeDefByName(WStr("System.Data.SqlClient.SqlCommand"), mdTokenNil, &system_data_sqlclient_sqlcommand);
-    
+    hr = metadata_import->FindTypeDefByName(WStr("System.Data.SqlClient.SqlCommand"), mdTokenNil,
+                                            &system_data_sqlclient_sqlcommand);
+
     if (FAILED(hr))
     {
         Logger::Warn("RewriteILSystemDataCommandText: FindTypeDefByName System.Data.SqlClient.SqlCommand failed");
         return hr;
     }
 
-    SignatureBuilder::InstanceMethod
-        write_begin_execute_event_signature{{SignatureBuilder::BuiltIn::Void}, {}};
+    SignatureBuilder::InstanceMethod write_begin_execute_event_signature{{SignatureBuilder::BuiltIn::Void}, {}};
 
     // Find the method definition for WriteBeginExecuteEvent
     mdMethodDef write_begin_execute_event_token;
-    hr = metadata_import->FindMethod(
-        system_data_sqlclient_sqlcommand,
-        WStr("WriteBeginExecuteEvent"),
-        write_begin_execute_event_signature.Head(),
-        write_begin_execute_event_signature.Size(),
-        &write_begin_execute_event_token);
+    hr = metadata_import->FindMethod(system_data_sqlclient_sqlcommand, WStr("WriteBeginExecuteEvent"),
+                                     write_begin_execute_event_signature.Head(),
+                                     write_begin_execute_event_signature.Size(), &write_begin_execute_event_token);
 
     if (FAILED(hr))
     {
-        Logger::Warn("RewriteILSystemDataCommandText: FindMethod System.Data.SqlClient.SqlCommand::WriteBeginExecuteEvent failed");
+        Logger::Warn("RewriteILSystemDataCommandText: FindMethod "
+                     "System.Data.SqlClient.SqlCommand::WriteBeginExecuteEvent failed");
         return hr;
     }
 
@@ -3301,7 +3299,7 @@ HRESULT CorProfiler::RewriteILSystemDataCommandText(const ModuleID module_id)
 
     // 1. Find the last callvirt instruction (BeginExecute)
     // callvirt instance void System.Data.SqlEventSource::BeginExecute(int32, string, string, string)
-    ILInstr* lastInstr = rewriter.GetILList()->m_pPrev;    
+    ILInstr* lastInstr      = rewriter.GetILList()->m_pPrev;
     ILInstr* targetCallvirt = nullptr;
     for (ILInstr* instr = lastInstr; instr != rewriter.GetILList(); instr = instr->m_pPrev)
     {
@@ -3319,23 +3317,22 @@ HRESULT CorProfiler::RewriteILSystemDataCommandText(const ModuleID module_id)
     }
 
     // 2. Insert pop before the callvirt (remove last argument)
-    ILInstr* popInstr = rewriter.NewILInstr();
+    ILInstr* popInstr  = rewriter.NewILInstr();
     popInstr->m_opcode = CEE_POP;
     rewriter.InsertBefore(targetCallvirt, popInstr);
 
     // 3. Insert ldarg.0 after pop (load 'this')
-    ILInstr* ldarg0Instr = rewriter.NewILInstr();
+    ILInstr* ldarg0Instr  = rewriter.NewILInstr();
     ldarg0Instr->m_opcode = CEE_LDARG_0;
     rewriter.InsertAfter(popInstr, ldarg0Instr);
 
     // 4. Insert callvirt to get_CommandText after ldarg.0
 
-    SignatureBuilder::InstanceMethod
-        get_command_text_signature{{SignatureBuilder::BuiltIn::String}, {}}; 
-    
+    SignatureBuilder::InstanceMethod get_command_text_signature{{SignatureBuilder::BuiltIn::String}, {}};
+
     mdTypeRef dbCommandTypeRef;
     hr = metadata_emit->DefineTypeRefByName(mdTokenNil, WStr("System.Data.Common.DbCommand"), &dbCommandTypeRef);
-    
+
     if (FAILED(hr))
     {
         Logger::Warn("RewriteILSystemDataCommandText: DefineTypeRefByName System.Data.Common.DbCommand failed");
@@ -3343,22 +3340,18 @@ HRESULT CorProfiler::RewriteILSystemDataCommandText(const ModuleID module_id)
     }
 
     mdMemberRef getCommandTextMemberRef;
-    hr = metadata_emit->DefineMemberRef(
-        dbCommandTypeRef,
-        WStr("get_CommandText"),
-        get_command_text_signature.Head(),
-        get_command_text_signature.Size(),
-        &getCommandTextMemberRef);
-    
+    hr = metadata_emit->DefineMemberRef(dbCommandTypeRef, WStr("get_CommandText"), get_command_text_signature.Head(),
+                                        get_command_text_signature.Size(), &getCommandTextMemberRef);
+
     if (FAILED(hr))
     {
         Logger::Warn("RewriteILSystemDataCommandText: DefineMemberRef get_CommandText failed");
         return hr;
     }
 
-    ILInstr* callvirtGetCommandTextInstr = rewriter.NewILInstr();
+    ILInstr* callvirtGetCommandTextInstr  = rewriter.NewILInstr();
     callvirtGetCommandTextInstr->m_opcode = CEE_CALLVIRT;
-    callvirtGetCommandTextInstr->m_Arg32 = getCommandTextMemberRef;
+    callvirtGetCommandTextInstr->m_Arg32  = getCommandTextMemberRef;
     rewriter.InsertAfter(ldarg0Instr, callvirtGetCommandTextInstr);
 
     if (IsDumpILRewriteEnabled())
@@ -3367,7 +3360,8 @@ HRESULT CorProfiler::RewriteILSystemDataCommandText(const ModuleID module_id)
         TypeInfo     typeInfo{};
         WSTRING      methodName = WStr("WriteBeginExecuteEvent");
         FunctionInfo caller(token, methodName, typeInfo, MethodSignature(), FunctionMethodSignature());
-        Logger::Info(GetILCodes("*** ModifyWriteBeginExecuteEvent: Modified Code: ", &rewriter, caller, metadata_import));
+        Logger::Info(
+            GetILCodes("*** ModifyWriteBeginExecuteEvent: Modified Code: ", &rewriter, caller, metadata_import));
     }
 
     hr = rewriter.Export();
