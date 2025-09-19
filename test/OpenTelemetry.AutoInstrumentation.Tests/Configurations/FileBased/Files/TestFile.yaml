@@ -5,3 +5,12 @@ resource:
     - name: service.name
       value: unknown_service
   attributes_list:
+  detection/development:
+    detectors:
+      azureappservice:
+      container:
+      host:
+      operatingsystem:
+      process:
+      processruntime:
+
