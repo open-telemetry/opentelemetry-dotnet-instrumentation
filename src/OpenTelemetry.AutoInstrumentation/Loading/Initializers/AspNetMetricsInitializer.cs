@@ -7,7 +7,7 @@ using OpenTelemetry.AutoInstrumentation.Plugins;
 
 namespace OpenTelemetry.AutoInstrumentation.Loading.Initializers;
 
-internal class AspNetMetricsInitializer
+internal sealed class AspNetMetricsInitializer
 {
     private readonly PluginManager _pluginManager;
     private int _initialized;
@@ -21,20 +21,32 @@ internal class AspNetMetricsInitializer
 
     private void InitializeOnFirstCall(ILifespanManager lifespanManager)
     {
-        if (Interlocked.Exchange(ref _initialized, value: 1) != default)
+        if (Interlocked.Exchange(ref _initialized, value: 1) != 0)
         {
             // InitializeOnFirstCall() was already called before
             return;
         }
 
-        var instrumentationType = Type.GetType("OpenTelemetry.Instrumentation.AspNet.AspNetMetrics, OpenTelemetry.Instrumentation.AspNet");
+        var instrumentationType = Type.GetType("OpenTelemetry.Instrumentation.AspNet.AspNetInstrumentation, OpenTelemetry.Instrumentation.AspNet");
+        var instanceField = instrumentationType?.GetField("Instance");
+        var instance = instanceField?.GetValue(null);
+        var metricsOptionsPropertyInfo = instrumentationType?.GetProperty("MetricOptions");
 
-        var options = new OpenTelemetry.Instrumentation.AspNet.AspNetMetricsInstrumentationOptions();
-        _pluginManager.ConfigureMetricsOptions(options);
+        if (metricsOptionsPropertyInfo?.GetValue(instance) is OpenTelemetry.Instrumentation.AspNet.AspNetMetricsInstrumentationOptions options)
+        {
+            _pluginManager.ConfigureTracesOptions(options);
+        }
 
-        var instrumentation = Activator.CreateInstance(instrumentationType, args: options);
+        var handleManagerType = Type.GetType("OpenTelemetry.Instrumentation.InstrumentationHandleManager, OpenTelemetry.Instrumentation.AspNet");
+        var handleManagerField = instrumentationType?.GetField("HandleManager");
+        var handleManager = handleManagerField?.GetValue(instance);
+        var addMetricHandleMethod = handleManagerType?.GetMethod("AddMetricHandle");
+        var metricHandle = addMetricHandleMethod?.Invoke(handleManager, []);
 
-        lifespanManager.Track(instrumentation);
+        if (metricHandle != null)
+        {
+            lifespanManager.Track(metricHandle);
+        }
     }
 }
 
