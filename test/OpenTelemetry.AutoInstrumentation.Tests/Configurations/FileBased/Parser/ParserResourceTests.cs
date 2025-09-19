@@ -7,12 +7,12 @@ using YamlParser = OpenTelemetry.AutoInstrumentation.Configurations.FileBasedCon
 namespace OpenTelemetry.AutoInstrumentation.Tests.Configurations.FileBased.Parser;
 
 [Collection("Non-Parallel Collection")]
-public class ParserTests
+public class ParserResourceTests
 {
     [Fact]
     public void Parse_FullConfigYaml_ShouldPopulateModelCorrectly()
     {
-        var config = YamlParser.ParseYaml("Configurations/FileBased/Files/TestFile.yaml");
+        var config = YamlParser.ParseYaml("Configurations/FileBased/Files/TestResourceFile.yaml");
 
         Assert.NotNull(config);
 
@@ -57,7 +57,7 @@ public class ParserTests
         Environment.SetEnvironmentVariable("OTEL_SERVICE_NAME", "my‑service");
         Environment.SetEnvironmentVariable("OTEL_RESOURCE_ATTRIBUTES", "key=value");
 
-        var config = YamlParser.ParseYaml("Configurations/FileBased/Files/TestFileEnvVars.yaml");
+        var config = YamlParser.ParseYaml("Configurations/FileBased/Files/TestResourceFileEnvVars.yaml");
 
         Assert.Equal("1.0-rc.1", config.FileFormat);
         var serviceAttr = config.Resource?.Attributes?.First(a => a.Name == "service.name");
