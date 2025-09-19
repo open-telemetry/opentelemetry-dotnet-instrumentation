@@ -539,7 +539,7 @@ instead.
 
 ### Resource Configuration
 
-You can configure text map context propagators directly in YAML or via the
+You can configure resource attributes directly in YAML or via the
 `OTEL_RESOURCE_ATTRIBUTES` environment variable.
 
 ``` yaml
