@@ -4,6 +4,4 @@
 namespace OpenTelemetry.AutoInstrumentation.Configurations.FileBasedConfiguration.Parser;
 
 [AttributeUsage(AttributeTargets.Class)]
-internal sealed class EmptyObjectOnEmptyYamlAttribute : Attribute
-{
-}
+internal sealed class EmptyObjectOnEmptyYamlAttribute : Attribute;

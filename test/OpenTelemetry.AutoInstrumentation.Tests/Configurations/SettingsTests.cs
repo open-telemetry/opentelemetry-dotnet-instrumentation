@@ -31,8 +31,17 @@ public class SettingsTests : IDisposable
         var settings = Settings.FromDefaultSources<GeneralSettings>(false);
 
         Assert.Empty(settings.Plugins);
-        Assert.NotEmpty(settings.EnabledResourceDetectors);
         Assert.False(settings.FlushOnUnhandledException);
+    }
+
+    [Fact]
+    internal void ResourceSettings_DefaultValues()
+    {
+        var settings = Settings.FromDefaultSources<ResourceSettings>(false);
+
+        Assert.NotEmpty(settings.EnabledDetectors);
+        Assert.True(settings.EnvironmentalVariablesDetectorEnabled);
+        Assert.Empty(settings.Resources);
     }
 
     [Fact]
@@ -401,14 +410,14 @@ public class SettingsTests : IDisposable
     [InlineData("PROCESS", ResourceDetector.Process)]
     [InlineData("OPERATINGSYSTEM", ResourceDetector.OperatingSystem)]
     [InlineData("HOST", ResourceDetector.Host)]
-    internal void GeneralSettings_Instrumentations_SupportedValues(string resourceDetector, ResourceDetector expectedResourceDetector)
+    internal void ResourceSettings_ResourceDetectors_SupportedValues(string resourceDetector, ResourceDetector expectedResourceDetector)
     {
         Environment.SetEnvironmentVariable(ConfigurationKeys.ResourceDetectorEnabled, "false");
         Environment.SetEnvironmentVariable(string.Format(ConfigurationKeys.EnabledResourceDetectorTemplate, resourceDetector), "true");
 
-        var settings = Settings.FromDefaultSources<GeneralSettings>(false);
+        var settings = Settings.FromDefaultSources<ResourceSettings>(false);
 
-        Assert.Equal([expectedResourceDetector], settings.EnabledResourceDetectors);
+        Assert.Equal([expectedResourceDetector], settings.EnabledDetectors);
     }
 
     private static void ClearEnvVars()
