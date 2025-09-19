@@ -34,6 +34,11 @@ internal class LogSettings : Settings
     public bool EnableLog4NetBridge { get; private set; }
 
     /// <summary>
+    /// Gets a value indicating whether the experimental NLog bridge is enabled.
+    /// </summary>
+    public bool EnableNLogBridge { get; private set; }
+
+    /// <summary>
     /// Gets the list of enabled instrumentations.
     /// </summary>
     public IReadOnlyList<LogInstrumentation> EnabledInstrumentations { get; private set; } = new List<LogInstrumentation>();
@@ -54,6 +59,7 @@ internal class LogSettings : Settings
 
         IncludeFormattedMessage = configuration.GetBool(ConfigurationKeys.Logs.IncludeFormattedMessage) ?? false;
         EnableLog4NetBridge = configuration.GetBool(ConfigurationKeys.Logs.EnableLog4NetBridge) ?? false;
+        EnableNLogBridge = configuration.GetBool(ConfigurationKeys.Logs.EnableNLogBridge) ?? false;
 
         var instrumentationEnabledByDefault =
             configuration.GetBool(ConfigurationKeys.Logs.LogsInstrumentationEnabled) ??
