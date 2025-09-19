@@ -1,18 +1,18 @@
 // Copyright The OpenTelemetry Authors
 // SPDX-License-Identifier: Apache-2.0
 
-using OpenTelemetry.AutoInstrumentation.Configurations.FileBasedConfiguration.Parser;
 using Xunit;
+using YamlParser = OpenTelemetry.AutoInstrumentation.Configurations.FileBasedConfiguration.Parser.Parser;
 
-namespace OpenTelemetry.AutoInstrumentation.Tests.Configurations.FileBased;
+namespace OpenTelemetry.AutoInstrumentation.Tests.Configurations.FileBased.Parser;
 
 [Collection("Non-Parallel Collection")]
-public class ParserTests
+public class ParserResourceTests
 {
     [Fact]
     public void Parse_FullConfigYaml_ShouldPopulateModelCorrectly()
     {
-        var config = Parser.ParseYaml("Configurations/FileBased/Files/TestFile.yaml");
+        var config = YamlParser.ParseYaml("Configurations/FileBased/Files/TestResourceFile.yaml");
 
         Assert.NotNull(config);
 
@@ -28,6 +28,26 @@ public class ParserTests
 
         Assert.NotNull(config.Resource.AttributesList);
         Assert.Empty(config.Resource.AttributesList);
+        Assert.NotNull(config.Resource.DetectionDevelopment);
+
+#if NET
+        string[] expectedDetecors = [
+            "azureappservice", "container", "host", "operatingsystem", "process", "processruntime"
+                ];
+#endif
+#if NETFRAMEWORK
+        string[] expectedDetecors = [
+            "azureappservice", "host", "operatingsystem", "process", "processruntime"
+                ];
+#endif
+
+        var detectors = config.Resource.DetectionDevelopment.Detectors;
+        Assert.NotNull(detectors);
+
+        foreach (var alias in expectedDetecors)
+        {
+            FileBasedTestHelper.AssertAliasPropertyExists(detectors, alias);
+        }
     }
 
     [Fact]
@@ -37,7 +57,7 @@ public class ParserTests
         Environment.SetEnvironmentVariable("OTEL_SERVICE_NAME", "my‑service");
         Environment.SetEnvironmentVariable("OTEL_RESOURCE_ATTRIBUTES", "key=value");
 
-        var config = Parser.ParseYaml("Configurations/FileBased/Files/TestFileEnvVars.yaml");
+        var config = YamlParser.ParseYaml("Configurations/FileBased/Files/TestResourceFileEnvVars.yaml");
 
         Assert.Equal("1.0-rc.1", config.FileFormat);
         var serviceAttr = config.Resource?.Attributes?.First(a => a.Name == "service.name");

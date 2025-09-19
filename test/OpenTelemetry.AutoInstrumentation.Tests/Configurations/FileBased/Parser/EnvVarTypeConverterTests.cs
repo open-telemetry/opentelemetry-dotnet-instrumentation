@@ -5,7 +5,7 @@ using OpenTelemetry.AutoInstrumentation.Configurations.FileBasedConfiguration.Pa
 using Xunit;
 using YamlParser = Vendors.YamlDotNet.Core.Parser;
 
-namespace OpenTelemetry.AutoInstrumentation.Tests.Configurations.FileBasedConfiguration.Parser;
+namespace OpenTelemetry.AutoInstrumentation.Tests.Configurations.FileBased.Parser;
 
 public class EnvVarTypeConverterTests
 {

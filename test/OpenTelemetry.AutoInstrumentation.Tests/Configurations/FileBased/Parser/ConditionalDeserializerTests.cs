@@ -2,12 +2,13 @@
 // SPDX-License-Identifier: Apache-2.0
 
 using OpenTelemetry.AutoInstrumentation.Configurations.FileBasedConfiguration.Parser;
+using OpenTelemetry.AutoInstrumentation.Tests.Configurations.FileBased;
 using Vendors.YamlDotNet.Core;
 using Vendors.YamlDotNet.Serialization;
 using Xunit;
 using YamlParser = Vendors.YamlDotNet.Core.Parser;
 
-namespace OpenTelemetry.AutoInstrumentation.Tests.Configurations.FileBasedConfiguration.Parser;
+namespace OpenTelemetry.AutoInstrumentation.Tests.Configurations.FileBased.Parser;
 
 public class ConditionalDeserializerTests
 {
