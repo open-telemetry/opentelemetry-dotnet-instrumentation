@@ -45,6 +45,8 @@ with environment variables taking precedence over `App.config` or `Web.config` f
      `SiteName\VirtualPath` ex: `MySite\MyApp`
      - If that is not the case it will use the name of the application [entry Assembly](https://learn.microsoft.com/en-us/dotnet/api/system.reflection.assembly.getentryassembly?view=net-7.0).
 
+4. [File-based Configuration (Experimental)](file-based-configuration.md)
+
 By default we recommend using environment variables for configuration.
 However, if given setting supports it, then:
 
