@@ -45,37 +45,6 @@ with environment variables taking precedence over `App.config` or `Web.config` f
      `SiteName\VirtualPath` ex: `MySite\MyApp`
      - If that is not the case it will use the name of the application [entry Assembly](https://learn.microsoft.com/en-us/dotnet/api/system.reflection.assembly.getentryassembly?view=net-7.0).
 
-4. File-based Configuration (Experimental)
-
-    > **Status:** [Experimental](https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/versioning-and-stability.md)
-    > For more information about the OpenTelemetry configuration specification, see:
-    > **[File-based configuration documentation](https://opentelemetry.io/docs/specs/otel/configuration/sdk/)**  
-
-    You can configure OpenTelemetry using a YAML file. This method is disabled
-    by default and must be explicitly enabled.
-
-    To enable file-based configuration, set the following environment variable:
-
-    ```bash
-    OTEL_EXPERIMENTAL_FILE_BASED_CONFIGURATION_ENABLED=true
-    ```
-
-    By default, the value is false.
-
-    You can also specify the configuration file path (default: config.yaml):
-
-    ```bash
-    OTEL_EXPERIMENTAL_CONFIG_FILE=/path/to/config.yaml
-    ```
-
-    In your config file you can use environment variables in the format `${ENVIRONMENT_VARIABLE}`
-    instead of a fixed value.
-
-    You can also use `${ENVIRONMENT_VARIABLE:-value}`, where `value` is the fallback if the
-    environment variable is empty or not set.
-
-    See [configuration examples](#configuration-examples)
-
 By default we recommend using environment variables for configuration.
 However, if given setting supports it, then:
 
@@ -534,40 +503,3 @@ instead.
 |----------------------------------|-------------------------------------------------------------------------|------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------|
 | `OTEL_DOTNET_AUTO_LOG_DIRECTORY` | Directory of the .NET Tracer logs.                                      | *See the previous note on default paths* | [Experimental](https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/versioning-and-stability.md) |
 | `OTEL_LOG_LEVEL`                 | SDK log level. (supported values: `none`,`error`,`warn`,`info`,`debug`) | `info`                                   | [Stable](https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/versioning-and-stability.md)       |
-
-## Configuration Examples
-
-### Resource Configuration
-
-You can configure resource attributes directly in YAML or via the
-`OTEL_RESOURCE_ATTRIBUTES` environment variable.
-
-``` yaml
-resource:
-# Configure resource attributes. Entries have higher priority than entries from .resource.attributes_list.
-# Entries must contain .name and .value, and may optionally include .type. If an entry's .type omitted or null, string is used.
-# The .value's type must match the .type. Values for .type include: string, bool, int, double, string_array, bool_array, int_array, double_array.
-  attributes:
-    - name: service.name
-      value: unknown_service
-      type: string
-  # Alternatively, configure via a comma-separated list (same format as OTEL_RESOURCE_ATTRIBUTES).
-  attributes_list: ${OTEL_RESOURCE_ATTRIBUTES}
-```  
-
-### Resource Detectors Configuration
-
-For more details and updates, see: [Resource Detectors list and documentation](https://opentelemetry.io/docs/zero-code/dotnet/configuration/#resource-detectors)
-
-``` yaml
-resource:
-  detection/development:
-    detectors:
-      azureappservice: # Detects Azure App Service resource information
-      container:       # Detects container resource info (container.* attributes) [Core only]
-      host:            # Detects host resource info (host.* attributes)
-      operatingsystem: # Detects OS-level attributes (os.*)
-      process:         # Detects process-level attributes (process.*)
-      processruntime:  # Detects process runtime attributes (process.runtime.*)
-      service:         # Detects service.name and service.instance.id
-```
