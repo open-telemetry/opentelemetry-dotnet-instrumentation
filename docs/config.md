@@ -68,8 +68,11 @@ with environment variables taking precedence over `App.config` or `Web.config` f
     OTEL_EXPERIMENTAL_CONFIG_FILE=/path/to/config.yaml
     ```
 
-    In your config file you can use environment variables in format: ${ENVIRONMENT_VARIABLE}
-    instead of "value"
+    In your config file you can use environment variables in the format `${ENVIRONMENT_VARIABLE}`
+    instead of a fixed value.
+
+    You can also use `${ENVIRONMENT_VARIABLE:-value}`, where `value` is the fallback if the
+    environment variable is empty or not set.
 
     See [configuration examples](#configuration-examples)
 
