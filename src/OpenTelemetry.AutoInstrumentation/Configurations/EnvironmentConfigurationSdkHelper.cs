@@ -12,7 +12,7 @@ internal static class EnvironmentConfigurationSdkHelper
         SetSdkTextMapPropagator(settings.Propagators);
     }
 
-    private static void SetSdkTextMapPropagator(IList<Propagator> settingsPropagators)
+    private static void SetSdkTextMapPropagator(IReadOnlyList<Propagator> settingsPropagators)
     {
         if (settingsPropagators.Count == 0)
         {

@@ -22,4 +22,11 @@ internal class YamlConfiguration
     /// </summary>
     [YamlMember(Alias = "resource")]
     public ResourceConfiguration? Resource { get; set; }
+
+    /// <summary>
+    /// Gets or sets the text map context propagator configuration.
+    /// If omitted, a noop propagator is used.
+    /// </summary>
+    [YamlMember(Alias = "propagator")]
+    public PropagatorConfiguration? Propagator { get; set; }
 }
