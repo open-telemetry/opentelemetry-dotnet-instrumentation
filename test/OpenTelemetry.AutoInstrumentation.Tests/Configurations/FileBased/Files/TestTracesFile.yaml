@@ -1,0 +1,15 @@
+tracer_provider:
+  processors:
+    batch:
+      schedule_delay: 5000
+      export_timeout: 30000
+      max_queue_size: 2048
+      max_export_batch_size: 512
+      exporter:
+        otlp_http:
+          endpoint: http://localhost:4318/v1/traces
+          timeout: 10000
+          headers: 
+            - name: header1234
+              value: "1234"
+    
