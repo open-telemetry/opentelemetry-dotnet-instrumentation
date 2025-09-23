@@ -1,6 +1,7 @@
 // Copyright The OpenTelemetry Authors
 // SPDX-License-Identifier: Apache-2.0
 
+using OpenTelemetry.AutoInstrumentation.Configurations.FileBasedConfiguration;
 using OpenTelemetry.AutoInstrumentation.Configurations.Otlp;
 using OpenTelemetry.AutoInstrumentation.Logging;
 
@@ -26,22 +27,22 @@ internal class TracerSettings : Settings
     /// <summary>
     /// Gets the list of enabled traces exporters.
     /// </summary>
-    public IReadOnlyList<TracesExporter> TracesExporters { get; private set; } = new List<TracesExporter>();
+    public IReadOnlyList<TracesExporter> TracesExporters { get; private set; } = [];
 
     /// <summary>
     /// Gets the list of enabled instrumentations.
     /// </summary>
-    public IReadOnlyList<TracerInstrumentation> EnabledInstrumentations { get; private set; } = new List<TracerInstrumentation>();
+    public IReadOnlyList<TracerInstrumentation> EnabledInstrumentations { get; private set; } = [];
 
     /// <summary>
     /// Gets the list of activity configurations to be added to the tracer at the startup.
     /// </summary>
-    public IList<string> ActivitySources { get; } = new List<string> { "OpenTelemetry.AutoInstrumentation.*" };
+    public IList<string> ActivitySources { get; } = ["OpenTelemetry.AutoInstrumentation.*"];
 
     /// <summary>
     /// Gets the list of legacy configurations to be added to the tracer at the startup.
     /// </summary>
-    public IList<string> AdditionalLegacySources { get; } = new List<string>();
+    public IList<string> AdditionalLegacySources { get; } = [];
 
     /// <summary>
     /// Gets the instrumentation options.
@@ -93,7 +94,51 @@ internal class TracerSettings : Settings
         InstrumentationOptions = new InstrumentationOptions(configuration);
     }
 
-    private static IReadOnlyList<TracesExporter> ParseTracesExporter(Configuration configuration)
+    protected override void OnLoadFile(YamlConfiguration configuration)
+    {
+        if (configuration.TracerProvider != null &&
+            configuration.TracerProvider.Processors != null &&
+            configuration.TracerProvider.Processors.TryGetValue("batch", out var batchProcessorConfig))
+        {
+            TracesEnabled = true;
+            // BatchProcessorConfig = batchProcessorConfig;
+            var exporters = batchProcessorConfig.Exporter;
+            var tracesExporters = new List<TracesExporter>();
+            if (exporters != null)
+            {
+                if (exporters.OtlpGrpc != null)
+                {
+                    tracesExporters.Add(TracesExporter.Otlp);
+                    OtlpSettings = new OtlpSettings(OtlpSignalType.Traces, exporters.OtlpGrpc);
+                }
+
+                if (exporters.OtlpHttp != null)
+                {
+                    tracesExporters.Add(TracesExporter.Otlp);
+                    OtlpSettings = new OtlpSettings(OtlpSignalType.Traces, exporters.OtlpHttp);
+                }
+
+                if (exporters.Zipkin != null)
+                {
+                    tracesExporters.Add(TracesExporter.Zipkin);
+                    // ZipkinSettings = exporters.Zipkin;
+                }
+
+                if (exporters.Console != null)
+                {
+                    tracesExporters.Add(TracesExporter.Console);
+                }
+
+                TracesExporters = tracesExporters;
+            }
+        }
+        else
+        {
+            TracesEnabled = false;
+        }
+    }
+
+    private static List<TracesExporter> ParseTracesExporter(Configuration configuration)
     {
         var tracesExporterEnvVar = configuration.GetString(ConfigurationKeys.Traces.Exporter);
         var exporters = new List<TracesExporter>();
