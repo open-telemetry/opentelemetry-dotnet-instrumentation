@@ -11,6 +11,8 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 
 - Extend support for [RabbitMQ.Client](https://www.nuget.org/packages/RabbitMQ.Client/)
   traces instrumentation for versions `5.*`.
+- Support for [`NLog`](https://www.nuget.org/packages/NLog/)
+  logs instrumentation for versions `5.*` and `6.*` on .NET using duck typing for zero-config auto-injection.
 
 ### Changed
 
