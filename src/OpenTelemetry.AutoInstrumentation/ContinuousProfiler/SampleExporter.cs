@@ -4,7 +4,6 @@
 #if NET
 
 using System.Diagnostics;
-using System.Globalization;
 using OpenTelemetry.AutoInstrumentation.Logging;
 
 namespace OpenTelemetry.AutoInstrumentation.ContinuousProfiler;
@@ -72,20 +71,20 @@ internal class SampleExporter : IDisposable
     {
         var currentActivity = sender.CurrentValue;
 
-        if (currentActivity != null)
+        // Identify activity stoppage
+        // Stop() stops the activity and sets Activity.Current to parent
+        if (sender is { ThreadContextChanged: false, PreviousValue.IsStopped: true } && sender.CurrentValue == sender.PreviousValue?.Parent)
         {
-            var hexTraceId = currentActivity.TraceId.ToHexString();
-
-            if (ulong.TryParse(hexTraceId.AsSpan(0, 16), NumberStyles.HexNumber, CultureInfo.InvariantCulture, out var traceIdHigh) &&
-                ulong.TryParse(hexTraceId.AsSpan(16), NumberStyles.HexNumber, CultureInfo.InvariantCulture, out var traceIdLow) &&
-                ulong.TryParse(currentActivity.SpanId.ToHexString(), NumberStyles.HexNumber, CultureInfo.InvariantCulture, out var spanId))
-            {
-                NativeMethods.ContinuousProfilerSetNativeContext(traceIdHigh, traceIdLow, spanId);
-                return;
-            }
+            NativeMethods.ContinuousProfilerNotifySpanStopped(sender.PreviousValue!);
         }
 
-        NativeMethods.ContinuousProfilerSetNativeContext(0, 0, 0);
+        if (currentActivity != null)
+        {
+            NativeMethods.ContinuousProfilerSetNativeContext(currentActivity);
+            return;
+        }
+
+        NativeMethods.ContinuousProfilerResetNativeContext();
     }
 
     private void Activity_CurrentChanged(object? sender, ActivityChangedEventArgs e)

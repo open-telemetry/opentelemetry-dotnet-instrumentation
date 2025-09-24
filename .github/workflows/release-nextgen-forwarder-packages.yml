@@ -1,0 +1,142 @@
+name: release-nextgen-forwarder-packages
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version number for the Forwarder packages (e.g., 1.0.0-alpha.1)'
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+env:
+  NUGET_PACKAGES: ${{ github.workspace }}/packages
+  DOTNET_CLI_TELEMETRY_OPTOUT: 1
+
+jobs:
+  build-nextgen-forwarder:
+    runs-on: windows-2022
+    defaults:
+      run:
+        working-directory: next-gen
+    steps:
+
+      - name: Checkout
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # tag: v5.0.0
+        with:
+          fetch-depth: 0
+          ref: out-of-process-collection
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@d4c94342e560b34958eacfc5d055d21461ed1c5d # tag: v5.0.0
+        with:
+          dotnet-version: 9.0.305
+
+      - name: Check for NuGet packages cache
+        uses: actions/cache@0400d5f644dc74513175e3cd8d07132dd4860809 # tag: v4.2.4
+        id: nuget-cache
+        with:
+          key: ${{ hashFiles('**/Directory.packages.props', '**/packages.config' ) }}
+          path: ${{ env.NUGET_PACKAGES }}
+
+      - name: Restore dependencies
+        run: dotnet restore
+
+      - name: Build projects
+        run: dotnet build --no-restore --configuration Release /p:ContinuousIntegrationBuild=true
+
+      - name: Run tests
+        run: dotnet test --no-build --configuration Release --verbosity normal
+
+      - name: Create NuGet packages directory
+        run: New-Item -ItemType Directory -Path bin/nextgen-nuget-artifacts -Force
+        shell: pwsh
+
+      - name: Pack OpenTelemetry.OutOfProcess.Forwarder
+        run: |
+          dotnet pack src/OpenTelemetry.OutOfProcess.Forwarder/OpenTelemetry.OutOfProcess.Forwarder.csproj `
+            --no-build `
+            --configuration Release `
+            --output bin/nextgen-nuget-artifacts `
+            /p:PackageVersion=${{ inputs.version }} `
+            /p:AssemblyVersion=${{ inputs.version }} `
+            /p:FileVersion=${{ inputs.version }} `
+            /p:Version=${{ inputs.version }} `
+            /p:ContinuousIntegrationBuild=true
+
+      - name: Pack OpenTelemetry.OutOfProcess.Forwarder.Configuration
+        run: |
+          dotnet pack src/OpenTelemetry.OutOfProcess.Forwarder.Configuration/OpenTelemetry.OutOfProcess.Forwarder.Configuration.csproj `
+            --no-build `
+            --configuration Release `
+            --output bin/nextgen-nuget-artifacts `
+            /p:PackageVersion=${{ inputs.version }} `
+            /p:AssemblyVersion=${{ inputs.version }} `
+            /p:FileVersion=${{ inputs.version }} `
+            /p:Version=${{ inputs.version }} `
+            /p:ContinuousIntegrationBuild=true
+
+      - name: Install dotnet-validate
+        run: dotnet tool install --global dotnet-validate --version 0.0.1-preview.304
+
+      - name: Validate NuGet packages
+        shell: pwsh
+        run: |
+          foreach ($file in (Get-ChildItem bin/nextgen-nuget-artifacts/*.nupkg)) {
+            Write-Host "Validating package: $($file.Name)"
+            dotnet validate package local $($file)
+            if (-not ($LASTEXITCODE -eq 0)) {
+              throw "dotnet validate failed for $($file)";
+            }
+          }
+
+      - name: List generated packages
+        shell: pwsh
+        run: |
+          Write-Host "Generated packages:"
+          Get-ChildItem bin/nextgen-nuget-artifacts/*.nupkg | ForEach-Object {
+            Write-Host "  - $($_.Name) ($([math]::Round($_.Length / 1KB, 2)) KB)"
+          }
+
+      - name: Upload NuGet Artifacts
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # tag: v4.6.2
+        with:
+          name: opentelemetry-nextgen-forwarder-packages
+          path: |
+            next-gen/bin/nextgen-nuget-artifacts/*.nupkg
+            next-gen/bin/nextgen-nuget-artifacts/*.snupkg
+          retention-days: 30
+
+      - name: Create GitHub Release Summary
+        shell: pwsh
+        run: |
+          $summary = @"
+          ## 📦 Next-Gen Forwarder Packages Built
+          
+          **Version:** ${{ inputs.version }}
+          **Branch:** out-of-process-collection
+          
+          ### Built Packages:
+          "@ 
+          
+          foreach ($file in (Get-ChildItem bin/nextgen-nuget-artifacts/*.nupkg)) {
+            $packageName = $file.BaseName -replace '\.\d+\.\d+\.\d+.*$', ''
+            $summary += "`n- [$packageName]($file.Name) - $([math]::Round($file.Length / 1KB, 2)) KB"
+          }
+          
+          $summary += @"
+          
+          
+          ### Manual Publishing Steps:
+          1. Download the artifact 'opentelemetry-nextgen-forwarder-packages' from this workflow run
+          2. Extract the .nupkg files
+          3. Publish manually using:
+          ``````
+          dotnet nuget push OpenTelemetry.OutOfProcess.Forwarder.${{ inputs.version }}.nupkg --api-key YOUR_API_KEY --source https://api.nuget.org/v3/index.json
+          dotnet nuget push OpenTelemetry.OutOfProcess.Forwarder.Configuration.${{ inputs.version }}.nupkg --api-key YOUR_API_KEY --source https://api.nuget.org/v3/index.json
+          ``````
+          "@
+          
+          $summary | Out-File -FilePath $env:GITHUB_STEP_SUMMARY -Encoding utf8

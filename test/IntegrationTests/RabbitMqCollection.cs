@@ -65,7 +65,7 @@ public class RabbitMqFixture : IAsyncLifetime
             .WithImage(RabbitMqImage)
             .WithName($"rabbitmq-{port}")
             .WithPortBinding(port, RabbitMqPort)
-            .WithWaitStrategy(Wait.ForUnixContainer().UntilPortIsAvailable(RabbitMqPort));
+            .WithWaitStrategy(Wait.ForUnixContainer().UntilInternalTcpPortIsAvailable(RabbitMqPort));
 
         var container = containersBuilder.Build();
         await container.StartAsync();

@@ -12,7 +12,6 @@ namespace OpenTelemetry.AutoInstrumentation.Loader;
 internal partial class Loader
 {
     private const string LoaderLoggerSuffix = "Loader";
-    private static readonly string ManagedProfilerDirectory;
     private static readonly IOtelLogger Logger = OtelLogging.GetLogger(LoaderLoggerSuffix);
 
     private static int _isExiting;
@@ -23,11 +22,10 @@ internal partial class Loader
     /// </summary>
     static Loader()
     {
-        ManagedProfilerDirectory = ResolveManagedProfilerDirectory();
-
+        AssemblyResolver.SetLoggerNoLock(Logger);
         try
         {
-            AppDomain.CurrentDomain.AssemblyResolve += AssemblyResolve_ManagedProfilerDependencies;
+            AppDomain.CurrentDomain.AssemblyResolve += AssemblyResolver.AssemblyResolve_ManagedProfilerDependencies;
         }
         catch (Exception ex)
         {
@@ -91,19 +89,5 @@ internal partial class Loader
             Logger.Error(ex, "Error when loading managed assemblies. {0}", ex.Message);
             throw;
         }
-    }
-
-    private static string? ReadEnvironmentVariable(string key)
-    {
-        try
-        {
-            return Environment.GetEnvironmentVariable(key);
-        }
-        catch (Exception ex)
-        {
-            Logger.Error(ex, "Error while loading environment variable {0}", key);
-        }
-
-        return null;
     }
 }

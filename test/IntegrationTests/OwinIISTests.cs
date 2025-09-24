@@ -30,7 +30,7 @@ public class OwinIISTests
         // on the firewall.
         using var collector = new MockSpansCollector(Output, host: "*");
         using var fwPort = FirewallHelper.OpenWinPort(collector.Port, Output);
-        collector.Expect("OpenTelemetry.Instrumentation.AspNet.Telemetry");
+        collector.Expect("OpenTelemetry.Instrumentation.AspNet");
 
         Dictionary<string, string> environmentVariables = new()
         {

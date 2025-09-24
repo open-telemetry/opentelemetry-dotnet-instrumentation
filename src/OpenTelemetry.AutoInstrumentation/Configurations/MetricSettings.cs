@@ -38,7 +38,7 @@ internal class MetricSettings : Settings
     /// </summary>
     public OtlpSettings? OtlpSettings { get; private set; }
 
-    protected override void OnLoad(Configuration configuration)
+    protected override void OnLoadEnvVar(Configuration configuration)
     {
         MetricExporters = ParseMetricExporter(configuration);
         if (MetricExporters.Contains(MetricsExporter.Otlp))

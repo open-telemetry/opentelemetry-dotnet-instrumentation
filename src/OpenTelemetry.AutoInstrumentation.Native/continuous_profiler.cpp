@@ -22,7 +22,9 @@ constexpr auto kMaxCodesPerBuffer = 10 * 1000;
 // If you change this, consider ThreadSampler.cs too
 constexpr auto kSamplesBufferMaximumSize = 200 * 1024;
 
-constexpr auto kSamplesBufferDefaultSize = 20 * 1024;
+constexpr auto kSamplesBufferDefaultSize       = 20 * 1024;
+constexpr auto kSelectiveSamplingMaxSpans      = 50;
+constexpr auto kSelectiveSamplingMaxAgeMinutes = 15;
 
 // If you change these, change ThreadSampler.cs too
 constexpr auto kDefaultSamplePeriod = 10000;
@@ -84,11 +86,13 @@ static std::vector<unsigned char>* allocation_buffer      = new std::vector<unsi
 static std::mutex                 selective_sampling_buffer_lock = std::mutex();
 static std::vector<unsigned char> selective_sampling_buffer;
 
-static std::mutex                                                             thread_span_context_lock;
-static std::unordered_map<ThreadID, continuous_profiler::thread_span_context> thread_span_context_map;
+static std::mutex                                thread_span_context_lock;
+static continuous_profiler::ThreadSpanContextMap thread_span_context_map;
 
-static std::mutex                   selective_sampling_threads_lock;
-static std::unordered_set<ThreadID> selective_sampling_threads_set;
+// Keep timestamps as values to handle stalled spans
+static std::mutex                                                              selective_sampling_lock;
+static std::unordered_map<continuous_profiler::thread_span_context, long long> selective_sampling_trace_map;
+static std::unordered_set<ThreadID>                                            selective_sampling_thread_buffer;
 
 static std::mutex name_cache_lock = std::mutex();
 
@@ -166,6 +170,11 @@ static void AppendToSelectedThreadsSampleBuffer(int32_t appendLen, unsigned char
         return;
     }
     selective_sampling_buffer.insert(selective_sampling_buffer.end(), appendBuf, &appendBuf[appendLen]);
+}
+
+bool continuous_profiler::thread_span_context::IsDefault() const
+{
+    return trace_id_high_ == 0 && trace_id_low_ == 0 && span_id_ == 0;
 }
 
 void AllocationSamplingAppendToBuffer(int32_t appendLen, unsigned char* appendBuf)
@@ -322,7 +331,6 @@ void ThreadSamplesBuffer::StartSample(ThreadID                   id,
     // Feature possibilities: (managed/native) thread priority, cpu/wait times, etc.
 }
 
-// TODO: thread_id
 void ThreadSamplesBuffer::StartSampleForSelectedThread(const ThreadState*         state,
                                                        const thread_span_context& span_context) const
 {
@@ -453,6 +461,76 @@ void ThreadSamplesBuffer::WriteCurrentTimeMillis() const
     const auto ms =
         std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch());
     WriteUInt64(ms.count());
+}
+
+void ThreadSpanContextMap::Remove(const thread_span_context& spanContext)
+{
+    const auto foundBySpanContext = span_context_thread_map.find(spanContext);
+    if (foundBySpanContext == span_context_thread_map.end())
+    {
+        return; // nothing to remove
+    }
+    const auto& threadIds = foundBySpanContext->second;
+    for (auto threadId : threadIds)
+    {
+        thread_span_context_map.erase(threadId);
+    }
+    span_context_thread_map.erase(spanContext);
+}
+
+void ThreadSpanContextMap::Remove(ThreadID threadId)
+{
+    const auto foundByThreadId = thread_span_context_map.find(threadId);
+    if (foundByThreadId == thread_span_context_map.end())
+    {
+        return; // nothing to remove
+    }
+    const auto spanContext        = foundByThreadId->second;
+    const auto foundBySpanContext = span_context_thread_map.find(spanContext);
+    if (foundBySpanContext != span_context_thread_map.end())
+    {
+        auto& threadIds = foundBySpanContext->second;
+        threadIds.erase(threadId);
+    }
+    thread_span_context_map.erase(threadId);
+}
+
+void ThreadSpanContextMap::Put(ThreadID threadId, const thread_span_context& currentSpanContext)
+{
+    const auto foundByThreadId = thread_span_context_map.find(threadId);
+    if (foundByThreadId != thread_span_context_map.end())
+    {
+        const auto previousContext = foundByThreadId->second;
+        if (!previousContext.IsDefault())
+        {
+            span_context_thread_map[previousContext].erase(threadId);
+        }
+    }
+    thread_span_context_map[threadId] = currentSpanContext;
+    if (!currentSpanContext.IsDefault())
+    {
+        span_context_thread_map[currentSpanContext].insert(threadId);
+    }
+}
+
+const std::unordered_set<ThreadID>* ThreadSpanContextMap::Get(const thread_span_context& spanContext)
+{
+    const auto iterator = span_context_thread_map.find(spanContext);
+    if (iterator == span_context_thread_map.end())
+    {
+        return nullptr;
+    }
+    return &iterator->second;
+}
+
+std::optional<thread_span_context> ThreadSpanContextMap::Get(ThreadID threadId)
+{
+    const auto iterator = thread_span_context_map.find(threadId);
+    if (iterator == thread_span_context_map.end())
+    {
+        return std::nullopt;
+    }
+    return iterator->second;
 }
 
 NamingHelper::NamingHelper()
@@ -778,19 +856,26 @@ static ThreadState* GetThreadState(const std::unordered_map<ThreadID, ThreadStat
     return threadStateValid ? found->second : &UnknownThreadState;
 }
 
+static thread_span_context GetContext(ThreadID threadId)
+{
+    auto retrievedContext = thread_span_context_map.Get(threadId);
+    return retrievedContext.has_value() ? retrievedContext.value() : thread_span_context{};
+}
+
 static void ResolveSymbolsAndPublishBufferForAllThreads(
     ContinuousProfiler* prof, const std::unordered_map<ThreadID, std::vector<FunctionIdentifier>>& threadStacks)
 {
     prof->AllocateBuffer();
-
     prof->cur_cpu_writer_->StartBatch();
+
     for (const auto& [threadId, threadStack] : threadStacks)
     {
         if (threadStack.empty())
         {
             continue;
         }
-        thread_span_context spanContext = thread_span_context_map[threadId];
+
+        thread_span_context spanContext = GetContext(threadId);
         const auto          threadState = GetThreadState(prof->managed_tid_to_state_, threadId);
 
         prof->cur_cpu_writer_->StartSample(threadId, threadState, spanContext);
@@ -798,7 +883,7 @@ static void ResolveSymbolsAndPublishBufferForAllThreads(
         if (prof->selectedThreadsSamplingInterval.has_value())
         {
             const auto threadSelectedForFrequentSampling =
-                selective_sampling_threads_set.find(threadId) != selective_sampling_threads_set.end();
+                selective_sampling_trace_map.find(spanContext) != selective_sampling_trace_map.end();
             prof->cur_cpu_writer_->MarkSelectedForFrequentSampling(threadSelectedForFrequentSampling);
         }
 
@@ -825,9 +910,9 @@ static void ResolveSymbolsAndPublishBufferForSelectedThreads(
         {
             continue;
         }
-        const auto threadState = GetThreadState(prof->managed_tid_to_state_, threadId);
 
-        thread_span_context spanContext = thread_span_context_map[threadId];
+        thread_span_context spanContext = GetContext(threadId);
+        const auto          threadState = GetThreadState(prof->managed_tid_to_state_, threadId);
 
         localBuf.StartSampleForSelectedThread(threadState, spanContext);
         ResolveFrames(prof, threadStack, localBuf);
@@ -837,6 +922,31 @@ static void ResolveSymbolsAndPublishBufferForSelectedThreads(
 
     // TODO: write out stats
     AppendToSelectedThreadsSampleBuffer(static_cast<int32_t>(localBytes.size()), localBytes.data());
+}
+
+static void RemoveOutdatedEntries(std::unordered_map<thread_span_context, long long>& selectiveSamplingTraceSet)
+{
+    const auto now = std::chrono::steady_clock::now();
+
+    // Remove entries queued more than kSelectiveSamplingMaxAgeMinutes minutes ago.
+    for (auto it = selectiveSamplingTraceSet.begin(); it != selectiveSamplingTraceSet.end();)
+    {
+        const auto enqueuedTime =
+            std::chrono::time_point<std::chrono::steady_clock>(std::chrono::milliseconds(it->second));
+        auto deadline = enqueuedTime + std::chrono::minutes(kSelectiveSamplingMaxAgeMinutes);
+        if (now > deadline)
+        {
+            trace::Logger::Warn("SelectiveSampling: removing outdated entry for span {",
+                                "traceIdHigh: ", it->first.trace_id_high_, ", traceIdLow: ", it->first.trace_id_low_,
+                                ", spanId: ", it->first.span_id_, "} because it was enqueued more than ",
+                                kSelectiveSamplingMaxAgeMinutes, " minutes ago");
+            it = selectiveSamplingTraceSet.erase(it);
+        }
+        else
+        {
+            ++it;
+        }
+    }
 }
 
 static void PauseClrAndCaptureSamples(ContinuousProfiler*                                            prof,
@@ -857,12 +967,34 @@ static void PauseClrAndCaptureSamples(ContinuousProfiler*                       
     std::lock_guard<std::mutex> name_cache_guard(name_cache_lock);
 
     // Selective sampling lock
-    std::lock_guard<std::mutex> selective_sampling_threads_guard(selective_sampling_threads_lock);
+    std::lock_guard<std::mutex> selective_sampling_guard(selective_sampling_lock);
 
-    // Checks to avoid unnecessary suspends.
-    if (samplingType == SamplingType::SelectedThreads && selective_sampling_threads_set.empty())
+    if (prof->IsShutdownRequested())
     {
         return;
+    }
+    // Checks to avoid unnecessary suspends.
+    if (samplingType == SamplingType::SelectedThreads)
+    {
+        RemoveOutdatedEntries(selective_sampling_trace_map);
+        if (selective_sampling_trace_map.empty())
+        {
+            return;
+        }
+
+        selective_sampling_thread_buffer.clear();
+        for (const auto& spanContext : selective_sampling_trace_map)
+        {
+            const auto threadsForSpanContext = thread_span_context_map.Get(spanContext.first);
+            if (threadsForSpanContext != nullptr)
+            {
+                selective_sampling_thread_buffer.insert(threadsForSpanContext->begin(), threadsForSpanContext->end());
+            }
+        }
+        if (selective_sampling_thread_buffer.empty())
+        {
+            return;
+        }
     }
     if (samplingType == SamplingType::Continuous)
     {
@@ -898,7 +1030,8 @@ static void PauseClrAndCaptureSamples(ContinuousProfiler*                       
             }
             else if (samplingType == SamplingType::SelectedThreads)
             {
-                CaptureFunctionIdentifiersForThreads(prof, info12, selective_sampling_threads_set, threadStacksBuffer);
+                CaptureFunctionIdentifiersForThreads(prof, info12, selective_sampling_thread_buffer,
+                                                     threadStacksBuffer);
             }
         }
         catch (const std::exception& e)
@@ -924,17 +1057,17 @@ static void PauseClrAndCaptureSamples(ContinuousProfiler*                       
         trace::Logger::Error("Could not resume runtime? HRESULT=0x", std::setfill('0'), std::setw(8), std::hex, hr);
     }
 
-    const size_t size = std::count_if(threadStacksBuffer.begin(), threadStacksBuffer.end(),
-                                      [](const std::pair<const ThreadID, std::vector<FunctionIdentifier>>& v)
-                                      { return !v.second.empty(); });
+    const size_t nonEmptyCount = std::count_if(threadStacksBuffer.begin(), threadStacksBuffer.end(),
+                                               [](const std::pair<const ThreadID, std::vector<FunctionIdentifier>>& v)
+                                               { return !v.second.empty(); });
 
     // Return early if all the buckets are empty
-    if (size == 0)
+    if (nonEmptyCount == 0)
     {
         return;
     }
 
-    prof->stats_.num_threads = static_cast<int>(size);
+    prof->stats_.num_threads = static_cast<int>(nonEmptyCount);
 
     if (samplingType == SamplingType::Continuous)
     {
@@ -944,15 +1077,6 @@ static void PauseClrAndCaptureSamples(ContinuousProfiler*                       
     {
         ResolveSymbolsAndPublishBufferForSelectedThreads(prof, threadStacksBuffer);
     }
-}
-
-void SleepMillis(unsigned int millis)
-{
-#ifdef _WIN32
-    Sleep(millis);
-#else
-    usleep(millis * 1000); // micros
-#endif
 }
 
 static unsigned int GetSleepTime(const ContinuousProfiler* const prof)
@@ -993,9 +1117,8 @@ static bool ShouldTrackIterations(const ContinuousProfiler* const prof)
     return prof->selectedThreadsSamplingInterval.has_value() && prof->threadSamplingInterval.has_value();
 }
 
-DWORD WINAPI SamplingThreadMain(_In_ LPVOID param)
+static void SamplingThreadMain(ContinuousProfiler* prof, const std::future<void>& future)
 {
-    const auto          prof   = static_cast<ContinuousProfiler*>(param);
     ICorProfilerInfo12* info12 = prof->info12;
 
     info12->InitializeCurrentThread();
@@ -1007,7 +1130,7 @@ DWORD WINAPI SamplingThreadMain(_In_ LPVOID param)
     const auto startTime    = std::chrono::steady_clock::now();
     auto       next_refresh = GetNextRefreshTime(startTime);
 
-    while (true)
+    while (!prof->IsShutdownRequested())
     {
         if (ShouldTrackIterations(prof))
         {
@@ -1018,9 +1141,13 @@ DWORD WINAPI SamplingThreadMain(_In_ LPVOID param)
         if (sleepTime == 0)
         {
             trace::Logger::Warn("Unexpected sampling interval configured, exiting sampling thread.");
-            return 1;
+            return;
         }
-        SleepMillis(sleepTime);
+
+        if (future.wait_for(std::chrono::milliseconds(sleepTime)) != std::future_status::timeout)
+        {
+            return;
+        }
 
         const auto samplingType = GetNextSamplingType(prof, iteration);
 
@@ -1030,6 +1157,11 @@ DWORD WINAPI SamplingThreadMain(_In_ LPVOID param)
         }
 
         PauseClrAndCaptureSamples(prof, info12, samplingType, threadStacksBuffer);
+
+        if (prof->IsShutdownRequested())
+        {
+            return;
+        }
 
         const auto now = std::chrono::steady_clock::now();
         // In order to avoid the need to recreate the vectors each iteration,
@@ -1060,22 +1192,41 @@ void ContinuousProfiler::SetGlobalInfo12(ICorProfilerInfo12* cor_profiler_info12
 void ContinuousProfiler::InitSelectiveSamplingBuffer()
 {
     selective_sampling_buffer.reserve(kSamplesBufferDefaultSize);
+    selective_sampling_thread_buffer.reserve(kSelectiveSamplingMaxSpans);
 }
 
 void ContinuousProfiler::StartThreadSampling()
 {
-#ifdef _WIN32
-    CreateThread(nullptr, 0, &SamplingThreadMain, this, 0, nullptr);
-#else
-    pthread_t thr;
-    pthread_create(&thr, NULL, (void* (*)(void*)) & SamplingThreadMain, this);
-#endif
+    shutdown_promise_       = std::promise<void>();
+    auto future             = shutdown_promise_.get_future();
+    thread_sampling_thread_ = std::make_unique<std::thread>(SamplingThreadMain, this, std::move(future));
 }
 
-thread_span_context GetCurrentSpanContext(ThreadID tid)
+void ContinuousProfiler::Shutdown()
+{
+    shutdown_promise_.set_value();
+    {
+        std::unique_lock<std::shared_mutex> unique_lock(profiling_lock);
+        shutdown_requested_.store(true);
+        StopAllocationSampling();
+    }
+    if (thread_sampling_thread_ != nullptr && thread_sampling_thread_->joinable())
+    {
+        thread_sampling_thread_->join();
+        thread_sampling_thread_.reset();
+        trace::Logger::Info("ContinuousProfiler sampling thread stopped.");
+    }
+}
+
+bool ContinuousProfiler::IsShutdownRequested() const
+{
+    return shutdown_requested_;
+}
+
+static thread_span_context GetCurrentSpanContext(ThreadID tid)
 {
     std::lock_guard<std::mutex> guard(thread_span_context_lock);
-    return thread_span_context_map[tid];
+    return GetContext(tid);
 }
 
 ThreadState* ContinuousProfiler::GetCurrentThreadState(ThreadID tid)
@@ -1188,6 +1339,12 @@ void ContinuousProfiler::AllocationTick(ULONG dataLen, LPCBYTE data)
         trace::Logger::Debug("Possible runtime suspension in progress, can't safely process allocation tick.");
         return;
     }
+
+    if (IsShutdownRequested())
+    {
+        return;
+    }
+
     if (this->allocationSubSampler == nullptr || !this->allocationSubSampler->ShouldSample())
     {
         return;
@@ -1246,20 +1403,37 @@ void ContinuousProfiler::AllocationTick(ULONG dataLen, LPCBYTE data)
 
 void ContinuousProfiler::StartAllocationSampling(const unsigned int maxMemorySamplesPerMinute)
 {
-    this->allocationSubSampler = new AllocationSubSampler(maxMemorySamplesPerMinute, 60);
+    this->allocationSubSampler = std::make_unique<AllocationSubSampler>(maxMemorySamplesPerMinute, 60);
 
-    EVENTPIPE_SESSION                 session;
     COR_PRF_EVENTPIPE_PROVIDER_CONFIG sessionConfig[] = {{WStr("Microsoft-Windows-DotNETRuntime"),
                                                           0x1, // CLR_GC_KEYWORD
                                                           // documentation says AllocationTick is at info but it lies
                                                           COR_PRF_EVENTPIPE_VERBOSE, nullptr}};
-    HRESULT                           hr = this->info12->EventPipeStartSession(1, sessionConfig, false, &session);
+    HRESULT                           hr = this->info12->EventPipeStartSession(1, sessionConfig, false, &session_);
     if (FAILED(hr))
     {
         trace::Logger::Error("Could not enable allocation sampling: session pipe error", hr);
     }
 
     trace::Logger::Info("ContinuousProfiler::MemoryProfiling started.");
+}
+
+void ContinuousProfiler::StopAllocationSampling()
+{
+    if (session_ == 0)
+    {
+        return;
+    }
+
+    HRESULT hr = this->info12->EventPipeStopSession(session_);
+    if (FAILED(hr))
+    {
+        trace::Logger::Error("Could not disable allocation sampling: session pipe error. HRESULT=0x", std::setfill('0'),
+                             std::setw(8), std::hex, hr);
+    }
+    session_ = 0;
+
+    trace::Logger::Info("ContinuousProfiler allocation sampling session stopped.");
 }
 
 void ContinuousProfiler::ThreadCreated(ThreadID thread_id)
@@ -1284,12 +1458,7 @@ void ContinuousProfiler::ThreadDestroyed(ThreadID thread_id)
     {
         std::lock_guard<std::mutex> guard(thread_span_context_lock);
 
-        thread_span_context_map.erase(thread_id);
-    }
-    {
-        std::lock_guard<std::mutex> guard(selective_sampling_threads_lock);
-
-        selective_sampling_threads_set.erase(thread_id);
+        thread_span_context_map.Remove(thread_id);
     }
 }
 void ContinuousProfiler::ThreadNameChanged(ThreadID thread_id, ULONG cch_name, WCHAR name[])
@@ -1367,6 +1536,12 @@ extern "C"
     {
         return SelectiveSamplingConsumeAndClearBuffer(len, buf);
     }
+    EXPORTTHIS void ContinuousProfilerNotifySpanStopped(uint64_t traceIdHigh, uint64_t traceIdLow, uint64_t spanId)
+    {
+        std::lock_guard<std::mutex>                    guard(thread_span_context_lock);
+        const continuous_profiler::thread_span_context spanContext = {traceIdHigh, traceIdLow, spanId};
+        thread_span_context_map.Remove(spanContext);
+    }
     EXPORTTHIS void ContinuousProfilerSetNativeContext(uint64_t traceIdHigh, uint64_t traceIdLow, uint64_t spanId)
     {
         ThreadID      threadId;
@@ -1377,48 +1552,51 @@ extern "C"
                                  hr);
             return;
         }
-
         std::lock_guard<std::mutex> guard(thread_span_context_lock);
 
-        thread_span_context_map[threadId] = continuous_profiler::thread_span_context(traceIdHigh, traceIdLow, spanId);
+        continuous_profiler::thread_span_context newSpanContext = {traceIdHigh, traceIdLow, spanId};
+        thread_span_context_map.Put(threadId, newSpanContext);
     }
-    EXPORTTHIS void SelectiveSamplingStart()
+    EXPORTTHIS void SelectiveSamplingStart(uint64_t traceIdHigh, uint64_t traceIdLow, uint64_t spanId)
     {
         if (profiler_info == nullptr)
         {
             return;
         }
 
-        ThreadID      threadId;
-        const HRESULT hr = profiler_info->GetCurrentThreadID(&threadId);
-        if (FAILED(hr))
+        continuous_profiler::thread_span_context context = {traceIdHigh, traceIdLow, spanId};
+        if (context.IsDefault())
         {
-            trace::Logger::Debug("GetCurrentThreadID failed. HRESULT=0x", std::setfill('0'), std::setw(8), std::hex,
-                                 hr);
             return;
         }
-
-        std::lock_guard<std::mutex> guard(selective_sampling_threads_lock);
-        selective_sampling_threads_set.insert(threadId);
+        std::lock_guard<std::mutex> guard(selective_sampling_lock);
+        // Don't allow for too many samples at once
+        if (selective_sampling_trace_map.size() >= kSelectiveSamplingMaxSpans)
+        {
+            trace::Logger::Warn("SelectiveSamplingStart: ignoring request to start sampling for span {",
+                                "traceIdHigh: ", traceIdHigh, ", traceIdLow: ", traceIdLow, ", spanId: ", spanId,
+                                "} because maximum number of spans is already being sampled.");
+            return;
+        }
+        const auto now =
+            std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now().time_since_epoch())
+                .count();
+        selective_sampling_trace_map[context] = now;
     }
 
-    EXPORTTHIS void SelectiveSamplingStop()
+    EXPORTTHIS void SelectiveSamplingStop(uint64_t traceIdHigh, uint64_t traceIdLow, uint64_t spanId)
     {
         if (profiler_info == nullptr)
         {
             return;
         }
 
-        ThreadID      threadId;
-        const HRESULT hr = profiler_info->GetCurrentThreadID(&threadId);
-        if (FAILED(hr))
+        continuous_profiler::thread_span_context context = {traceIdHigh, traceIdLow, spanId};
+        if (context.IsDefault())
         {
-            trace::Logger::Debug("GetCurrentThreadID failed. HRESULT=0x", std::setfill('0'), std::setw(8), std::hex,
-                                 hr);
             return;
         }
-
-        std::lock_guard<std::mutex> guard(selective_sampling_threads_lock);
-        selective_sampling_threads_set.erase(threadId);
+        std::lock_guard<std::mutex> guard(selective_sampling_lock);
+        selective_sampling_trace_map.erase(context);
     }
 }

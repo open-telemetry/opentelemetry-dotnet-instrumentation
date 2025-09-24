@@ -40,12 +40,14 @@ public class KafkaTests : TestHelper
         _kafka = kafka;
     }
 
-    [Theory]
+    [SkippableTheory]
     [Trait("Category", "EndToEnd")]
     [Trait("Containers", "Linux")]
     [MemberData(nameof(LibraryVersion.Kafka), MemberType = typeof(LibraryVersion))]
     public void SubmitsTraces(string packageVersion)
     {
+        SkipIfUnsupportedPlatform(packageVersion);
+
         var topicName = $"test-topic-{packageVersion}";
 
         using var collector = new MockSpansCollector(Output);
@@ -90,13 +92,15 @@ public class KafkaTests : TestHelper
         collector.AssertExpectations();
     }
 
-    [Theory]
+    [SkippableTheory]
     [Trait("Category", "EndToEnd")]
     [Trait("Containers", "Linux")]
     [MemberData(nameof(LibraryVersion.GetPlatformVersions), nameof(LibraryVersion.Kafka), MemberType = typeof(LibraryVersion))]
     // ReSharper disable once InconsistentNaming
     public void NoSpansForPartitionEOF(string packageVersion)
     {
+        SkipIfUnsupportedPlatform(packageVersion);
+
         var topicName = $"test-topic2-{packageVersion}";
 
         using var collector = new MockSpansCollector(Output);
@@ -111,6 +115,14 @@ public class KafkaTests : TestHelper
         });
 
         collector.AssertEmpty(TimeSpan.FromSeconds(10));
+    }
+
+    private static void SkipIfUnsupportedPlatform(string packageVersion)
+    {
+        if (!string.IsNullOrEmpty(packageVersion) && Version.Parse(packageVersion) < new Version(1, 9, 2) && EnvironmentTools.IsMacOS() && EnvironmentTools.IsArm64())
+        {
+            throw new SkipException("Confluent.Kafka < 1.9.2 is not supported on macOS ARM64.");
+        }
     }
 
     private static string GetConsumerGroupIdAttributeValue(string topicName)

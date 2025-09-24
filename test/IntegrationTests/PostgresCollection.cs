@@ -48,7 +48,7 @@ public class PostgresFixture : IAsyncLifetime
             .WithName($"postgres-{port}")
             .WithPortBinding(port, PostgresPort)
             .WithEnvironment("POSTGRES_HOST_AUTH_METHOD", "trust")
-            .WithWaitStrategy(Wait.ForUnixContainer().UntilPortIsAvailable(PostgresPort));
+            .WithWaitStrategy(Wait.ForUnixContainer().UntilInternalTcpPortIsAvailable(PostgresPort));
 
         var container = containersBuilder.Build();
         await container.StartAsync();

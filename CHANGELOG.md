@@ -18,14 +18,52 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 
 #### Dependency updates
 
-- .NET only, following packages updated
-  - `OpenTelemetry.Instrumentation.StackExchangeRedis` from `1.12.0-beta.1` to `1.12.0-beta.2`.
+- .NET Framework only, following packages updated
+  - `OpenTelemetry.Instrumentation.AspNet` from `1.12.0-beta.1` to `1.12.0-beta.2`.
 
 ### Deprecated
 
 ### Removed
 
 ### Fixed
+
+- Fixed deadlock occurring in Assembly Resolver.
+  See [#4269](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/issues/4269)
+  for details.
+- Fixed rule engine check for .NET 9 to reflect longer support for [STS channel](https://devblogs.microsoft.com/dotnet/dotnet-sts-releases-supported-for-24-months/).
+
+## [1.13.0-beta.1](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/tag/v1.13.0-beta.1)
+
+### Added
+
+- Extend support for [RabbitMQ.Client](https://www.nuget.org/packages/RabbitMQ.Client/)
+  traces instrumentation for versions `5.*`.
+- Experimental support for [span-based sampling](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/issues/4227).
+
+### Changed
+
+#### Dependency updates
+
+- .NET only, following packages updated
+  - `OpenTelemetry.Instrumentation.StackExchangeRedis` from `1.12.0-beta.1` to `1.12.0-beta.2`.
+- .NET Framework only, following packages updated
+  - `Microsoft.Bcl.AsyncInterfaces` from `9.0.6` to `9.0.8`,
+  - `Microsoft.Extensions.Configuration` from `9.0.6` to `9.0.8`,
+  - `Microsoft.Extensions.Configuration.Abstractions` `9.0.6` to `9.0.8`,
+  - `Microsoft.Extensions.Configuration.Binder` from `9.0.6` to `9.0.8`,
+  - `Microsoft.Extensions.DependencyInjection` from `9.0.6` to `9.0.8`,
+  - `Microsoft.Extensions.DependencyInjection.Abstractions` from `9.0.6` to `9.0.8`,
+  - `Microsoft.Extensions.Diagnostics.Abstractions` from `9.0.6` to `9.0.8`,
+  - `Microsoft.Extensions.Logging` from `9.0.6` to `9.0.8`,
+  - `Microsoft.Extensions.Logging.Abstractions` from `9.0.6` to `9.0.8`,
+  - `Microsoft.Extensions.Logging.Configuration` from `9.0.6` to `9.0.8`,
+  - `Microsoft.Extensions.Options` from `9.0.6` to `9.0.8`,
+  - `Microsoft.Extensions.Options.ConfigurationExtensions` from `9.0.6` to `9.0.8`,
+  - `Microsoft.Extensions.Primitives` from `9.0.6` to `9.0.8`,
+  - `System.Diagnostics.DiagnosticSource` from `9.0.6` to `9.0.8`,
+  - `System.IO.Pipelines` from `9.0.6` to `9.0.8`,
+  - `System.Text.Encodings.Web` update from `9.0.2` to `9.0.8`.
+  - `System.Text.Json` update from `9.0.2` to `9.0.8`.
 
 ## [1.12.0](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/tag/v1.12.0)
 

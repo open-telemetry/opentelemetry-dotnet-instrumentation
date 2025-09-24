@@ -48,7 +48,7 @@ internal class LogSettings : Settings
     /// </summary>
     public OtlpSettings? OtlpSettings { get; private set; }
 
-    protected override void OnLoad(Configuration configuration)
+    protected override void OnLoadEnvVar(Configuration configuration)
     {
         LogsEnabled = configuration.GetBool(ConfigurationKeys.Logs.LogsEnabled) ?? true;
         LogExporters = ParseLogExporter(configuration);

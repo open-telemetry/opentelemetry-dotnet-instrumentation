@@ -4,7 +4,6 @@
   </PropertyGroup>
   <ItemGroup>
     <PackageVersion Include="DotNet.ReproducibleBuilds" Version="1.2.25" />
-    <PackageVersion Include="log4net" Version="3.1.0" />
     <PackageVersion Include="MinVer" Version="6.0.0" />
     <PackageVersion Include="NLog" Version="5.3.2" />
     <PackageVersion Include="NLog.Extensions.Logging" Version="5.3.11" />
