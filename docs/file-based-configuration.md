@@ -36,13 +36,11 @@ You can configure resource attributes directly in YAML or via the
 
 ``` yaml
 resource:
-# Configure resource attributes. Entries have higher priority than entries from .resource.attributes_list.
-# Entries must contain .name and .value, and may optionally include .type. If an entry's .type omitted or null, string is used.
-# The .value's type must match the .type. Values for .type include: string, bool, int, double, string_array, bool_array, int_array, double_array.
+  # Configure resource attributes. Entries have higher priority than entries from .resource.attributes_list.
+  # Entries must contain .name and .value
   attributes:
     - name: service.name
       value: unknown_service
-      type: string
   # Alternatively, configure via a comma-separated list (same format as OTEL_RESOURCE_ATTRIBUTES).
   attributes_list: ${OTEL_RESOURCE_ATTRIBUTES}
 ```  
