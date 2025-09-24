@@ -4,6 +4,7 @@
 using System.Diagnostics;
 using System.Reflection;
 using OpenTelemetry.AutoInstrumentation.CallTarget;
+using OpenTelemetry.AutoInstrumentation.Configurations;
 using OpenTelemetry.AutoInstrumentation.Util;
 
 namespace OpenTelemetry.AutoInstrumentation.Instrumentations.NoCode;
@@ -11,6 +12,8 @@ namespace OpenTelemetry.AutoInstrumentation.Instrumentations.NoCode;
 internal static class NoCodeIntegrationHelper
 {
     private static readonly ActivitySource Source = new("OpenTelemetry.AutoInstrumentation.NoCode");
+
+    internal static List<NoCodeInstrumentedMethod> NoCodeEntries { get; set; } = [];
 
     internal static CallTargetState OnMethodBegin()
     {
@@ -21,11 +24,11 @@ internal static class NoCodeIntegrationHelper
         var typeName = method?.DeclaringType?.FullName;
         var assemblyName = method?.DeclaringType?.Assembly.GetName().Name;
         var parameters = method?.GetParameters()!;
-        var noCodeEntry = NoCodeBytecodeIntegrationBuilder.NoCodeEntries.Single(x =>
-            x.TargetType == typeName &&
-            x.TargetMethod == methodName &&
-            x.TargetAssembly == assemblyName &&
-            CheckParameters(x.TargetSignatureTypes, parameters));
+        var noCodeEntry = NoCodeEntries.Single(x =>
+            x.Definition.TargetType == typeName &&
+            x.Definition.TargetMethod == methodName &&
+            x.Definition.TargetAssembly == assemblyName &&
+            CheckParameters(x.SignatureTypes, parameters));
 
         // TODO Span kind and attributes from configuration
         // TODO Consider execute some dynamic code to build name/span/attributes based on config and taking data from method parameters
@@ -76,7 +79,7 @@ internal static class NoCodeIntegrationHelper
             return false;
         }
 
-        for (int i = 0; i < parameters.Length; i++)
+        for (var i = 0; i < parameters.Length; i++)
         {
             if (targetSignatureTypes[i + 1] != parameters[i].ParameterType.FullName)
             {

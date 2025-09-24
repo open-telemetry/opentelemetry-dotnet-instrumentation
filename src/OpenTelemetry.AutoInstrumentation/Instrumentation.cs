@@ -67,6 +67,8 @@ internal static class Instrumentation
 
     internal static Lazy<SdkSettings> SdkSettings { get; } = new(() => Settings.FromDefaultSources<SdkSettings>(FailFastSettings.Value.FailFast));
 
+    internal static Lazy<NoCodeSettings> NoCodeSettings { get; } = new(() => Settings.FromDefaultSources<NoCodeSettings>(FailFastSettings.Value.FailFast));
+
     /// <summary>
     /// Initialize the OpenTelemetry SDK with a pre-defined set of exporters, shims, and
     /// instrumentations.
@@ -184,7 +186,11 @@ internal static class Instrumentation
         if (GeneralSettings.Value.ProfilerEnabled)
         {
             RegisterDirectBytecodeInstrumentations(InstrumentationDefinitions.GetAllDefinitions());
-            RegisterBytecodeInstrumentations(NoCodeBytecodeIntegrationBuilder.GetNoCodeDefinitions(), "direct, no-code", NativeMethods.AddInstrumentations);
+            if (NoCodeSettings.Value.Enabled)
+            {
+                NoCodeIntegrationHelper.NoCodeEntries = NoCodeSettings.Value.InstrumentedMethods;
+                RegisterBytecodeInstrumentations(NoCodeSettings.Value.GetDirectPayload(), "direct, no-code", NativeMethods.AddInstrumentations);
+            }
 
             try
             {

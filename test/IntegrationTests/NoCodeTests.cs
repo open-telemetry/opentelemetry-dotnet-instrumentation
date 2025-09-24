@@ -18,6 +18,7 @@ public class NoCodeTests : TestHelper
     public void SubmitsTraces()
     {
         EnableBytecodeInstrumentation();
+        EnableFileBasedConfigWithDefaultPath();
         using var collector = new MockSpansCollector(Output);
         SetExporter(collector);
         collector.Expect("OpenTelemetry.AutoInstrumentation.NoCode", x => x.Name == "Span-TestMethod0");
