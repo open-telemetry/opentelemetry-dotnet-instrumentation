@@ -37,6 +37,6 @@ internal class ResourceSettings : Settings
 
         Resources = configuration.Resource?.ParseAttributes() ?? [];
 
-        // TODO initialize EnabledDetectors from file configuration
+        EnabledDetectors = configuration.Resource?.DetectionDevelopment?.Detectors?.GetEnabledResourceDetectors() ?? [];
     }
 }
