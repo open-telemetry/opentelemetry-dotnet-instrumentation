@@ -19,6 +19,12 @@ internal class ResourceConfiguration
     [YamlMember(Alias = "attributes_list")]
     public string? AttributesList { get; set; }
 
+    /// <summary>
+    /// Gets or sets the detection development configuration.
+    /// </summary>
+    [YamlMember(Alias = "detection/development")]
+    public DetectionDevelopment? DetectionDevelopment { get; set; }
+
     public List<KeyValuePair<string, object>> ParseAttributes()
     {
         var resourceAttributesWithPriority = new Dictionary<string, object>();
