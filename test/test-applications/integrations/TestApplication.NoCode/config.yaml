@@ -6,6 +6,16 @@ no_code/development:
         assembly:
           name: TestApplication.NoCode
         type: TestApplication.NoCode.NoCodeTestingClass
+        method: TestMethodStatic
+        signature:
+          returned_type: System.Void
+          parameter_types:
+      span:
+         name: Span-TestMethodStatic
+    - target:
+        assembly:
+          name: TestApplication.NoCode
+        type: TestApplication.NoCode.NoCodeTestingClass
         method: TestMethod
         signature:
           returned_type: System.Void
@@ -22,16 +32,6 @@ no_code/development:
           parameter_types:
       span:
          name: Span-TestMethodA
-    - target:
-        assembly:
-          name: TestApplication.NoCode
-        type: TestApplication.NoCode.NoCodeTestingClass
-        method: TestMethodStatic
-        signature:
-          returned_type: System.Void
-          parameter_types:
-      span:
-         name: Span-TestMethodStatic
     - target:
         assembly:
           name: TestApplication.NoCode
@@ -182,6 +182,16 @@ no_code/development:
         assembly:
           name: TestApplication.NoCode
         type: TestApplication.NoCode.NoCodeTestingClass
+        method: ReturningTestMethodStatic
+        signature:
+          returned_type: System.Int32
+          parameter_types:
+      span:
+         name: Span-ReturningTestMethodStatic
+    - target:
+        assembly:
+          name: TestApplication.NoCode
+        type: TestApplication.NoCode.NoCodeTestingClass
         method: ReturningTestMethod
         signature:
           returned_type: System.Int32
@@ -208,16 +218,6 @@ no_code/development:
           parameter_types:
       span:
          name: Span-ReturningCustomClassTestMethod
-    - target:
-        assembly:
-          name: TestApplication.NoCode
-        type: TestApplication.NoCode.NoCodeTestingClass
-        method: ReturningTestMethodStatic
-        signature:
-          returned_type: System.Int32
-          parameter_types:
-      span:
-         name: Span-ReturningTestMethodStatic
     - target:
         assembly:
           name: TestApplication.NoCode
@@ -368,6 +368,16 @@ no_code/development:
         assembly:
           name: TestApplication.NoCode
         type: TestApplication.NoCode.NoCodeTestingClass
+        method: TestMethodStaticAsync
+        signature:
+          returned_type: System.Threading.Tasks.Task
+          parameter_types:
+      span:
+         name: Span-TestMethodStaticAsync
+    - target:
+        assembly:
+          name: TestApplication.NoCode
+        type: TestApplication.NoCode.NoCodeTestingClass
         method: TestMethodAsync
         signature:
           returned_type: System.Threading.Tasks.Task
@@ -384,16 +394,6 @@ no_code/development:
           parameter_types:
       span:
          name: Span-TestMethodAAsync
-    - target:
-        assembly:
-          name: TestApplication.NoCode
-        type: TestApplication.NoCode.NoCodeTestingClass
-        method: TestMethodStaticAsync
-        signature:
-          returned_type: System.Threading.Tasks.Task
-          parameter_types:
-      span:
-         name: Span-TestMethodStaticAsync
     - target:
         assembly:
           name: TestApplication.NoCode

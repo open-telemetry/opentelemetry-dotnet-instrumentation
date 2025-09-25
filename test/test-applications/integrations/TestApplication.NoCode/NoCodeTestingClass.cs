@@ -14,12 +14,6 @@ internal class NoCodeTestingClass
     }
 
     [MethodImpl(MethodImplOptions.NoInlining)]
-    public static int ReturningTestMethodStatic()
-    {
-        return 0;
-    }
-
-    [MethodImpl(MethodImplOptions.NoInlining)]
     public void TestMethod()
     {
         // This method is intentionally left empty.
@@ -89,6 +83,14 @@ internal class NoCodeTestingClass
     public void TestMethod(string param1, string param2, string param3, string param4, string param5, string param6, string param7, string param8, string param9)
     {
         // This method is intentionally left empty.
+    }
+
+    [MethodImpl(MethodImplOptions.NoInlining)]
+#pragma warning disable SA1204 // Static elements should appear before instance elements
+    public static int ReturningTestMethodStatic()
+#pragma warning restore SA1204 // Static elements should appear before instance elements
+    {
+        return 0;
     }
 
     [MethodImpl(MethodImplOptions.NoInlining)]
