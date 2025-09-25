@@ -1,7 +1,6 @@
 // Copyright The OpenTelemetry Authors
 // SPDX-License-Identifier: Apache-2.0
 
-using System.Reflection;
 using Vendors.YamlDotNet.Core;
 using Vendors.YamlDotNet.Core.Events;
 using Vendors.YamlDotNet.Serialization;

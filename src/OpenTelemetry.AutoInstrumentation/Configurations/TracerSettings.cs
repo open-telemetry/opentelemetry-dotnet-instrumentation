@@ -53,7 +53,7 @@ internal class TracerSettings : Settings
     /// </summary>
     public OtlpSettings? OtlpSettings { get; private set; }
 
-    protected override void OnLoad(Configuration configuration)
+    protected override void OnLoadEnvVar(Configuration configuration)
     {
         TracesExporters = ParseTracesExporter(configuration);
         if (TracesExporters.Contains(TracesExporter.Otlp))
