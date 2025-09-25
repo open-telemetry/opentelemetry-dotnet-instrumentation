@@ -102,6 +102,20 @@ internal static class PackageVersionDefinitions
         },
         new()
         {
+            IntegrationName = "NLog",
+            NugetPackageName = "NLog",
+            TestApplicationName = "TestApplication.NLogBridge",
+            Versions = new List<PackageVersion>
+            {
+                // NLog 5.0+ required for Layout<T> typed layout support and .NET build-trimming
+                new("5.0.0"),
+                new("5.3.2"),
+                new("6.0.0"),
+                new("*")
+            }
+        },
+        new()
+        {
             IntegrationName = "MassTransit",
             NugetPackageName = "MassTransit",
             TestApplicationName = "TestApplication.MassTransit",
