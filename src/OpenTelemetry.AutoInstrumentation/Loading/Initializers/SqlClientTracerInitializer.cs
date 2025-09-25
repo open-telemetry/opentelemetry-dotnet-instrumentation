@@ -10,38 +10,42 @@ namespace OpenTelemetry.AutoInstrumentation.Loading.Initializers;
 internal sealed class SqlClientTracerInitializer : SqlClientInitializer
 {
     private readonly PluginManager _pluginManager;
-    private readonly TracerSettings _tracerSettings;
 
     private int _initialized;
 
-    public SqlClientTracerInitializer(LazyInstrumentationLoader lazyInstrumentationLoader, PluginManager pluginManager, TracerSettings tracerSettings)
+    public SqlClientTracerInitializer(LazyInstrumentationLoader lazyInstrumentationLoader, PluginManager pluginManager)
         : base(lazyInstrumentationLoader)
     {
         _pluginManager = pluginManager;
-        _tracerSettings = tracerSettings;
     }
 
     protected override void InitializeOnFirstCall(ILifespanManager lifespanManager)
     {
-        if (Interlocked.Exchange(ref _initialized, value: 1) != default)
+        if (Interlocked.Exchange(ref _initialized, value: 1) != 0)
         {
             // InitializeOnFirstCall() was already called before
             return;
         }
 
         var instrumentationType = Type.GetType("OpenTelemetry.Instrumentation.SqlClient.SqlClientInstrumentation, OpenTelemetry.Instrumentation.SqlClient")!;
+        var instanceField = instrumentationType?.GetField("Instance");
+        var instance = instanceField?.GetValue(null);
+        var traceOptionsProperty = instrumentationType?.GetProperty("TraceOptions");
 
-        var options = new OpenTelemetry.Instrumentation.SqlClient.SqlClientTraceInstrumentationOptions();
-        _pluginManager.ConfigureTracesOptions(options);
-
-        var propertyInfo = instrumentationType.GetProperty("TracingOptions", BindingFlags.Static | BindingFlags.Public);
-        propertyInfo?.SetValue(null, options);
-
-        var instrumentation = instrumentationType.InvokeMember("AddTracingHandle", BindingFlags.InvokeMethod | BindingFlags.Public | BindingFlags.Static, Type.DefaultBinder, null, []);
-
-        if (instrumentation != null)
+        if (traceOptionsProperty?.GetValue(instance) is OpenTelemetry.Instrumentation.SqlClient.SqlClientTraceInstrumentationOptions options)
         {
-            lifespanManager.Track(instrumentation);
+            _pluginManager.ConfigureTracesOptions(options);
+        }
+
+        var handleManagerType = Type.GetType("OpenTelemetry.Instrumentation.InstrumentationHandleManager, OpenTelemetry.Instrumentation.SqlClient");
+        var handleManagerField = instrumentationType?.GetField("HandleManager");
+        var handleManager = handleManagerField?.GetValue(instance);
+        var addTracingHandleMethod = handleManagerType?.GetMethod("AddTracingHandle");
+        var tracingHandle = addTracingHandleMethod?.Invoke(handleManager, []);
+
+        if (tracingHandle != null)
+        {
+            lifespanManager.Track(tracingHandle);
         }
     }
 }
