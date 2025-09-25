@@ -206,10 +206,10 @@ due to lack of stable semantic convention.
 
 **Status**: [Experimental](https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/versioning-and-stability.md).
 
-| ID        | Instrumented library                                                                                                            | Supported versions | Instrumentation type   | Status                                                                                                                            |
-|-----------|---------------------------------------------------------------------------------------------------------------------------------|--------------------|------------------------|-----------------------------------------------------------------------------------------------------------------------------------|
+| ID        | Instrumented library                                                                                                            | Supported versions | Instrumentation type     | Status                                                                                                                            |
+|-----------|---------------------------------------------------------------------------------------------------------------------------------|--------------------|--------------------------|-----------------------------------------------------------------------------------------------------------------------------------|
 | `ILOGGER` | [Microsoft.Extensions.Logging](https://www.nuget.org/packages/Microsoft.Extensions.Logging) **Not supported on .NET Framework** | ≥9.0.0             | bytecode or source \[1\] | [Experimental](https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/versioning-and-stability.md) |
-| `LOG4NET` | [log4net](https://www.nuget.org/packages/log4net) \[2\]                                                                           | ≥2.0.13 && < 4.0.0 | bytecode               | [Experimental](https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/versioning-and-stability.md) |
+| `LOG4NET` | [log4net](https://www.nuget.org/packages/log4net) \[2\]                                                                         | ≥2.0.13 && < 4.0.0 | bytecode                 | [Experimental](https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/versioning-and-stability.md) |
 
 \[1\]: For ASP.NET Core applications, the `LoggingBuilder` instrumentation
 can be enabled without using the .NET CLR Profiler by setting
@@ -503,3 +503,11 @@ instead.
 |----------------------------------|-------------------------------------------------------------------------|------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------|
 | `OTEL_DOTNET_AUTO_LOG_DIRECTORY` | Directory of the .NET Tracer logs.                                      | *See the previous note on default paths* | [Experimental](https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/versioning-and-stability.md) |
 | `OTEL_LOG_LEVEL`                 | SDK log level. (supported values: `none`,`error`,`warn`,`info`,`debug`) | `info`                                   | [Stable](https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/versioning-and-stability.md)       |
+
+## OpAMP Client
+
+| Environment variable                     | Description                                | Default value                     | Status                                                                                                                            |
+|------------------------------------------|--------------------------------------------|-----------------------------------|-----------------------------------------------------------------------------------------------------------------------------------|
+| `OTEL_DOTNET_AUTO_OPAMP_ENABLED`         | Enables OpAMP client.                      | `false`                           | [Experimental](https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/versioning-and-stability.md) |
+| `OTEL_DOTNET_AUTO_OPAMP_SERVER_URL`      | OpAMP server url.                          | `https://localhost:4318/v1/opamp` | [Experimental](https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/versioning-and-stability.md) |
+| `OTEL_DOTNET_AUTO_OPAMP_CONNECTION_TYPE` | OpAMP connection type (http or websocket). | `http`                            | [Experimental](https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/versioning-and-stability.md) |
