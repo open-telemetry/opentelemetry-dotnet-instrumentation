@@ -18,6 +18,7 @@ void CorProfiler::InitNetFxAssemblyRedirectsMap()
     const USHORT auto_major = atoi(AUTO_MAJOR);
 
     assembly_version_redirect_map_.insert({
+        { L"Google.Protobuf", {3, 31, 1, 0} },
         { L"Microsoft.Bcl.AsyncInterfaces", {9, 0, 0, 8} },
         { L"Microsoft.Extensions.Configuration", {9, 0, 0, 8} },
         { L"Microsoft.Extensions.Configuration.Abstractions", {9, 0, 0, 8} },
@@ -50,6 +51,7 @@ void CorProfiler::InitNetFxAssemblyRedirectsMap()
         { L"OpenTelemetry.Instrumentation.Runtime", {1, 12, 0, 496} },
         { L"OpenTelemetry.Instrumentation.SqlClient", {1, 12, 0, 582} },
         { L"OpenTelemetry.Instrumentation.Wcf", {1, 12, 0, 500} },
+        { L"OpenTelemetry.OpAmp.Client", {0, 1, 0, 664} },
         { L"OpenTelemetry.Resources.Azure", {1, 12, 0, 501} },
         { L"OpenTelemetry.Resources.Host", {1, 12, 0, 503} },
         { L"OpenTelemetry.Resources.OperatingSystem", {1, 12, 0, 504} },
@@ -61,6 +63,7 @@ void CorProfiler::InitNetFxAssemblyRedirectsMap()
         { L"System.Buffers", {4, 0, 5, 0} },
         { L"System.Collections", {4, 0, 11, 0} },
         { L"System.Collections.Concurrent", {4, 0, 11, 0} },
+        { L"System.Collections.Immutable", {8, 0, 0, 0} },
         { L"System.Collections.NonGeneric", {4, 0, 3, 0} },
         { L"System.Collections.Specialized", {4, 0, 3, 0} },
         { L"System.ComponentModel", {4, 0, 1, 0} },
