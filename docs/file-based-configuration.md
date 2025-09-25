@@ -48,6 +48,7 @@ resource:
 ### Resource Detectors Configuration
 
 For more details and updates, see: [Resource Detectors list and documentation](config.md/#resource-detectors)
+To disable a resource detector, comment out or remove its corresponding entry.
 
 ``` yaml
 resource:
