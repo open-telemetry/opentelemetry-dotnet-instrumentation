@@ -31,10 +31,7 @@ internal sealed class SqlClientTracerInitializer : SqlClientInitializer
 
         var instrumentationType = Type.GetType("OpenTelemetry.Instrumentation.SqlClient.SqlClientInstrumentation, OpenTelemetry.Instrumentation.SqlClient")!;
 
-        var options = new OpenTelemetry.Instrumentation.SqlClient.SqlClientTraceInstrumentationOptions
-        {
-            SetDbStatementForText = _tracerSettings.InstrumentationOptions.SqlClientSetDbStatementForText
-        };
+        var options = new OpenTelemetry.Instrumentation.SqlClient.SqlClientTraceInstrumentationOptions();
         _pluginManager.ConfigureTracesOptions(options);
 
         var propertyInfo = instrumentationType.GetProperty("TracingOptions", BindingFlags.Static | BindingFlags.Public);

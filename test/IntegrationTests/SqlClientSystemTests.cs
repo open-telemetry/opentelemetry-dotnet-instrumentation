@@ -18,42 +18,19 @@ public class SqlClientSystemTests : TestHelper
         _sqlServerFixture = sqlServerFixture;
     }
 
-    public static TheoryData<string, bool> GetData()
-    {
-        var theoryData = new TheoryData<string, bool>();
-
-        foreach (var version in LibraryVersion.SqlClientSystem)
-        {
-#if NET
-            theoryData.Add(version, true);
-#endif
-            theoryData.Add(version, false);
-        }
-
-        return theoryData;
-    }
-
     [SkippableTheory]
     [Trait("Category", "EndToEnd")]
     [Trait("Containers", "Linux")]
-    [MemberData(nameof(GetData))]
-    public void SubmitTraces(string packageVersion, bool dbStatementForText)
+    [MemberData(nameof(LibraryVersion.SqlClientSystem), MemberType = typeof(LibraryVersion))]
+    public void SubmitTraces(string packageVersion)
     {
         // Skip the test if fixture does not support current platform
         _sqlServerFixture.SkipIfUnsupportedPlatform();
 
-        SetEnvironmentVariable("OTEL_DOTNET_AUTO_SQLCLIENT_SET_DBSTATEMENT_FOR_TEXT", dbStatementForText.ToString());
         using var collector = new MockSpansCollector(Output);
         SetExporter(collector);
 
-        if (dbStatementForText)
-        {
-            collector.Expect("OpenTelemetry.Instrumentation.SqlClient", span => span.Attributes.Any(attr => attr.Key == "db.statement" && !string.IsNullOrWhiteSpace(attr.Value?.StringValue)));
-        }
-        else
-        {
-            collector.Expect("OpenTelemetry.Instrumentation.SqlClient", span => span.Attributes.All(attr => attr.Key != "db.statement"));
-        }
+        collector.Expect("OpenTelemetry.Instrumentation.SqlClient");
 
         RunTestApplication(new()
         {
