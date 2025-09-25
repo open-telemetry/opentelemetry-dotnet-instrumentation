@@ -47,7 +47,7 @@ resource:
 
 ### Resource Detectors Configuration
 
-For more details and updates, see: [Resource Detectors list and documentation](https://opentelemetry.io/docs/zero-code/dotnet/configuration/#resource-detectors)
+For more details and updates, see: [Resource Detectors list and documentation](config.md/#resource-detectors)
 
 ``` yaml
 resource:
