@@ -98,6 +98,18 @@ internal class NoCodeTestingClass
     }
 
     [MethodImpl(MethodImplOptions.NoInlining)]
+    public string ReturningStringTestMethod()
+    {
+        return string.Empty;
+    }
+
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    public TestClass ReturningCustomClassTestMethod()
+    {
+        return new TestClass();
+    }
+
+    [MethodImpl(MethodImplOptions.NoInlining)]
     public int ReturningTestMethod(string param1)
     {
         return 1;

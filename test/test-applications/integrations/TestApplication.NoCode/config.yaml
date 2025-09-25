@@ -192,6 +192,26 @@ no_code/development:
         assembly:
           name: TestApplication.NoCode
         type: TestApplication.NoCode.NoCodeTestingClass
+        method: ReturningStringTestMethod
+        signature:
+          returned_type: System.String
+          parameter_types:
+      span:
+         name: Span-ReturningStringTestMethod
+    - target:
+        assembly:
+          name: TestApplication.NoCode
+        type: TestApplication.NoCode.NoCodeTestingClass
+        method: ReturningCustomClassTestMethod
+        signature:
+          returned_type: TestApplication.NoCode.TestClass
+          parameter_types:
+      span:
+         name: Span-ReturningCustomClassTestMethod
+    - target:
+        assembly:
+          name: TestApplication.NoCode
+        type: TestApplication.NoCode.NoCodeTestingClass
         method: ReturningTestMethodStatic
         signature:
           returned_type: System.Int32

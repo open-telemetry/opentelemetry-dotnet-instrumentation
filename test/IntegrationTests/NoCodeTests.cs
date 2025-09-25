@@ -36,6 +36,8 @@ public class NoCodeTests : TestHelper
         collector.Expect("OpenTelemetry.AutoInstrumentation.NoCode", x => x.Name == "Span-TestMethod9");
 
         collector.Expect("OpenTelemetry.AutoInstrumentation.NoCode", x => x.Name == "Span-ReturningTestMethod0");
+        collector.Expect("OpenTelemetry.AutoInstrumentation.NoCode", x => x.Name == "Span-ReturningStringTestMethod");
+        collector.Expect("OpenTelemetry.AutoInstrumentation.NoCode", x => x.Name == "Span-ReturningCustomClassTestMethod");
         collector.Expect("OpenTelemetry.AutoInstrumentation.NoCode", x => x.Name == "Span-ReturningTestMethodStatic");
         collector.Expect("OpenTelemetry.AutoInstrumentation.NoCode", x => x.Name == "Span-ReturningTestMethod1String");
         collector.Expect("OpenTelemetry.AutoInstrumentation.NoCode", x => x.Name == "Span-ReturningTestMethod1Int");

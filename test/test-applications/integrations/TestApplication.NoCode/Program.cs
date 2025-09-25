@@ -29,6 +29,8 @@ public class Program
         NoCodeTestingClass.TestMethodStatic();
 
         _ = noCodeTestingClass.ReturningTestMethod();
+        _ = noCodeTestingClass.ReturningStringTestMethod();
+        _ = noCodeTestingClass.ReturningCustomClassTestMethod();
         _ = noCodeTestingClass.ReturningTestMethod(string.Empty);
         _ = noCodeTestingClass.ReturningTestMethod(int.MinValue);
         _ = noCodeTestingClass.ReturningTestMethod(string.Empty, string.Empty);
