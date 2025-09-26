@@ -15,7 +15,7 @@ OTEL_EXPERIMENTAL_FILE_BASED_CONFIGURATION_ENABLED=true
 
 By default, the value is false.
 
-You can also specify the configuration file path (default: config.yaml):
+You can also specify the configuration file path (default: `config.yaml`):
 
 ```bash
 OTEL_EXPERIMENTAL_CONFIG_FILE=/path/to/config.yaml
