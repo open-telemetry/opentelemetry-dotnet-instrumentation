@@ -1,7 +1,7 @@
 # File-based Configuration
 
 > **Status:** [Experimental](https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/versioning-and-stability.md)
-> For more information about the OpenTelemetry configuration specification, see:
+> For more information, see:
 > **[Configuration SDK specification](https://github.com/open-telemetry/opentelemetry-specification/blob/v1.49.0/specification/configuration/sdk.md)**  
 
 You can configure OpenTelemetry using a YAML file. This method is disabled
