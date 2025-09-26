@@ -27,6 +27,9 @@ instead of a fixed value.
 You can also use `${ENVIRONMENT_VARIABLE:-value}`, where `value` is the fallback
 if the environment variable is empty or not set.
 
+For more details about environment variables format, see:
+[OpenTelemetry YAML File Format Specification](https://github.com/open-telemetry/opentelemetry-specification/blob/v1.49.0/specification/configuration/data-model.md#yaml-file-format).
+
 ## Configuration Examples
 
 ### Resource Configuration
