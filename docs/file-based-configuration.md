@@ -4,8 +4,7 @@
 > For more information, see:
 > **[Configuration SDK specification](https://github.com/open-telemetry/opentelemetry-specification/blob/v1.49.0/specification/configuration/sdk.md)**  
 
-You can configure OpenTelemetry using a YAML file. This method is disabled
-by default and must be explicitly enabled.
+You can configure OpenTelemetry using a YAML file.
 
 To enable file-based configuration, set the following environment variable:
 
