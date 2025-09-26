@@ -37,6 +37,10 @@ For more details about environment variables format, see:
 You can configure resource attributes directly in YAML or via the
 `OTEL_RESOURCE_ATTRIBUTES` environment variable.
 
+For more details and updates about Resource Detectors Configuration, see:
+[Resource Detectors list and documentation](config.md/#resource-detectors)
+To disable a resource detector, comment out or remove its corresponding entry.
+
 ``` yaml
 resource:
   # Configure resource attributes. Entries have higher priority than entries from .resource.attributes_list.
@@ -46,15 +50,7 @@ resource:
       value: unknown_service
   # Alternatively, configure via a comma-separated list (same format as OTEL_RESOURCE_ATTRIBUTES).
   attributes_list: ${OTEL_RESOURCE_ATTRIBUTES}
-```  
-
-### Resource Detectors Configuration
-
-For more details and updates, see: [Resource Detectors list and documentation](config.md/#resource-detectors)
-To disable a resource detector, comment out or remove its corresponding entry.
-
-``` yaml
-resource:
+  # Resource Detectors Configuration
   detection/development:
     detectors:
       azureappservice: # Detects Azure App Service resource information
@@ -64,4 +60,4 @@ resource:
       process:         # Detects process-level attributes (process.*)
       processruntime:  # Detects process runtime attributes (process.runtime.*)
       service:         # Detects service.name and service.instance.id
-```
+```  
