@@ -43,6 +43,10 @@ To disable a resource detector, comment out or remove its corresponding entry.
 resource:
   # Configure resource attributes. Entries have higher priority than entries from .resource.attributes_list.
   # Entries must contain .name and .value
+  # By default service.name is generated automatically if not explicitly configured.
+  # If the application is hosted on IIS in .NET Framework this will be SiteName\VirtualPath (e.g., MySite\MyApp).
+  # Otherwise, it will use the name of the application entry Assembly.
+  # You can override this value manually below.
   attributes:
     - name: service.name
       value: unknown_service
@@ -50,6 +54,7 @@ resource:
   attributes_list: ${OTEL_RESOURCE_ATTRIBUTES}
   # Resource Detectors Configuration
   detection/development:
+    # If no detectors are specified, none will be added automatically.
     detectors:
       azureappservice: # Detects Azure App Service resource information
       container:       # Detects container resource info (container.* attributes) [Core only]
@@ -57,5 +62,4 @@ resource:
       operatingsystem: # Detects OS-level attributes (os.*)
       process:         # Detects process-level attributes (process.*)
       processruntime:  # Detects process runtime attributes (process.runtime.*)
-      service:         # Detects service.name and service.instance.id
 ```  
