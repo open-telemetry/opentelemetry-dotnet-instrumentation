@@ -7,7 +7,7 @@ namespace OpenTelemetry.AutoInstrumentation.Configurations.FileBasedConfiguratio
 
 internal class NoCodeSignature
 {
-    [YamlMember(Alias = "returned_type")]
+    [YamlMember(Alias = "return_type")]
     public string? ReturnedType { get; set; }
 
     [YamlMember(Alias = "parameter_types")]

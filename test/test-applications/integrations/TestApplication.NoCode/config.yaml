@@ -8,7 +8,7 @@ no_code/development:
         type: TestApplication.NoCode.NoCodeTestingClass
         method: TestMethodStatic
         signature:
-          returned_type: System.Void
+          return_type: System.Void
           parameter_types:
       span:
          name: Span-TestMethodStatic
@@ -18,7 +18,7 @@ no_code/development:
         type: TestApplication.NoCode.NoCodeTestingClass
         method: TestMethod
         signature:
-          returned_type: System.Void
+          return_type: System.Void
           parameter_types:
       span:
          name: Span-TestMethod0
@@ -28,7 +28,7 @@ no_code/development:
         type: TestApplication.NoCode.NoCodeTestingClass
         method: TestMethodA
         signature:
-          returned_type: System.Void
+          return_type: System.Void
           parameter_types:
       span:
          name: Span-TestMethodA
@@ -38,7 +38,7 @@ no_code/development:
         type: TestApplication.NoCode.NoCodeTestingClass
         method: TestMethod
         signature:
-          returned_type: System.Void
+          return_type: System.Void
           parameter_types:
             - System.String
       span:
@@ -49,7 +49,7 @@ no_code/development:
         type: TestApplication.NoCode.NoCodeTestingClass
         method: TestMethod
         signature:
-          returned_type: System.Void
+          return_type: System.Void
           parameter_types:
             - System.Int32
       span:
@@ -60,7 +60,7 @@ no_code/development:
         type: TestApplication.NoCode.NoCodeTestingClass
         method: TestMethod
         signature:
-          returned_type: System.Void
+          return_type: System.Void
           parameter_types:
             - System.String
             - System.String
@@ -72,7 +72,7 @@ no_code/development:
         type: TestApplication.NoCode.NoCodeTestingClass
         method: TestMethod
         signature:
-          returned_type: System.Void
+          return_type: System.Void
           parameter_types:
             - System.String
             - System.String
@@ -85,7 +85,7 @@ no_code/development:
         type: TestApplication.NoCode.NoCodeTestingClass
         method: TestMethod
         signature:
-          returned_type: System.Void
+          return_type: System.Void
           parameter_types:
             - System.String
             - System.String
@@ -99,7 +99,7 @@ no_code/development:
         type: TestApplication.NoCode.NoCodeTestingClass
         method: TestMethod
         signature:
-          returned_type: System.Void
+          return_type: System.Void
           parameter_types:
             - System.String
             - System.String
@@ -114,7 +114,7 @@ no_code/development:
         type: TestApplication.NoCode.NoCodeTestingClass
         method: TestMethod
         signature:
-          returned_type: System.Void
+          return_type: System.Void
           parameter_types:
             - System.String
             - System.String
@@ -130,7 +130,7 @@ no_code/development:
         type: TestApplication.NoCode.NoCodeTestingClass
         method: TestMethod
         signature:
-          returned_type: System.Void
+          return_type: System.Void
           parameter_types:
             - System.String
             - System.String
@@ -147,7 +147,7 @@ no_code/development:
         type: TestApplication.NoCode.NoCodeTestingClass
         method: TestMethod
         signature:
-          returned_type: System.Void
+          return_type: System.Void
           parameter_types:
             - System.String
             - System.String
@@ -165,7 +165,7 @@ no_code/development:
         type: TestApplication.NoCode.NoCodeTestingClass
         method: TestMethod
         signature:
-          returned_type: System.Void
+          return_type: System.Void
           parameter_types:
             - System.String
             - System.String
@@ -184,7 +184,7 @@ no_code/development:
         type: TestApplication.NoCode.NoCodeTestingClass
         method: ReturningTestMethodStatic
         signature:
-          returned_type: System.Int32
+          return_type: System.Int32
           parameter_types:
       span:
          name: Span-ReturningTestMethodStatic
@@ -194,7 +194,7 @@ no_code/development:
         type: TestApplication.NoCode.NoCodeTestingClass
         method: ReturningTestMethod
         signature:
-          returned_type: System.Int32
+          return_type: System.Int32
           parameter_types:
       span:
          name: Span-ReturningTestMethod0
@@ -204,7 +204,7 @@ no_code/development:
         type: TestApplication.NoCode.NoCodeTestingClass
         method: ReturningStringTestMethod
         signature:
-          returned_type: System.String
+          return_type: System.String
           parameter_types:
       span:
          name: Span-ReturningStringTestMethod
@@ -214,7 +214,7 @@ no_code/development:
         type: TestApplication.NoCode.NoCodeTestingClass
         method: ReturningCustomClassTestMethod
         signature:
-          returned_type: TestApplication.NoCode.TestClass
+          return_type: TestApplication.NoCode.TestClass
           parameter_types:
       span:
          name: Span-ReturningCustomClassTestMethod
@@ -224,7 +224,7 @@ no_code/development:
         type: TestApplication.NoCode.NoCodeTestingClass
         method: ReturningTestMethod
         signature:
-          returned_type: System.Int32
+          return_type: System.Int32
           parameter_types:
             - System.String
       span:
@@ -235,7 +235,7 @@ no_code/development:
         type: TestApplication.NoCode.NoCodeTestingClass
         method: ReturningTestMethod
         signature:
-          returned_type: System.Int32
+          return_type: System.Int32
           parameter_types:
             - System.Int32
       span:
@@ -246,7 +246,7 @@ no_code/development:
         type: TestApplication.NoCode.NoCodeTestingClass
         method: ReturningTestMethod
         signature:
-          returned_type: System.Int32
+          return_type: System.Int32
           parameter_types:
             - System.String
             - System.String
@@ -258,7 +258,7 @@ no_code/development:
         type: TestApplication.NoCode.NoCodeTestingClass
         method: ReturningTestMethod
         signature:
-          returned_type: System.Int32
+          return_type: System.Int32
           parameter_types:
             - System.String
             - System.String
@@ -271,7 +271,7 @@ no_code/development:
         type: TestApplication.NoCode.NoCodeTestingClass
         method: ReturningTestMethod
         signature:
-          returned_type: System.Int32
+          return_type: System.Int32
           parameter_types:
             - System.String
             - System.String
@@ -285,7 +285,7 @@ no_code/development:
         type: TestApplication.NoCode.NoCodeTestingClass
         method: ReturningTestMethod
         signature:
-          returned_type: System.Int32
+          return_type: System.Int32
           parameter_types:
             - System.String
             - System.String
@@ -300,7 +300,7 @@ no_code/development:
         type: TestApplication.NoCode.NoCodeTestingClass
         method: ReturningTestMethod
         signature:
-          returned_type: System.Int32
+          return_type: System.Int32
           parameter_types:
             - System.String
             - System.String
@@ -316,7 +316,7 @@ no_code/development:
         type: TestApplication.NoCode.NoCodeTestingClass
         method: ReturningTestMethod
         signature:
-          returned_type: System.Int32
+          return_type: System.Int32
           parameter_types:
             - System.String
             - System.String
@@ -333,7 +333,7 @@ no_code/development:
         type: TestApplication.NoCode.NoCodeTestingClass
         method: ReturningTestMethod
         signature:
-          returned_type: System.Int32
+          return_type: System.Int32
           parameter_types:
             - System.String
             - System.String
@@ -351,7 +351,7 @@ no_code/development:
         type: TestApplication.NoCode.NoCodeTestingClass
         method: ReturningTestMethod
         signature:
-          returned_type: System.Int32
+          return_type: System.Int32
           parameter_types:
             - System.String
             - System.String
@@ -370,7 +370,7 @@ no_code/development:
         type: TestApplication.NoCode.NoCodeTestingClass
         method: TestMethodStaticAsync
         signature:
-          returned_type: System.Threading.Tasks.Task
+          return_type: System.Threading.Tasks.Task
           parameter_types:
       span:
          name: Span-TestMethodStaticAsync
@@ -380,7 +380,7 @@ no_code/development:
         type: TestApplication.NoCode.NoCodeTestingClass
         method: TestMethodAsync
         signature:
-          returned_type: System.Threading.Tasks.Task
+          return_type: System.Threading.Tasks.Task
           parameter_types:
       span:
          name: Span-TestMethod0Async
@@ -390,7 +390,7 @@ no_code/development:
         type: TestApplication.NoCode.NoCodeTestingClass
         method: TestMethodAAsync
         signature:
-          returned_type: System.Threading.Tasks.Task
+          return_type: System.Threading.Tasks.Task
           parameter_types:
       span:
          name: Span-TestMethodAAsync
@@ -400,7 +400,7 @@ no_code/development:
         type: TestApplication.NoCode.NoCodeTestingClass
         method: TestMethodAsync
         signature:
-          returned_type: System.Threading.Tasks.Task
+          return_type: System.Threading.Tasks.Task
           parameter_types:
             - System.String
       span:
@@ -411,7 +411,7 @@ no_code/development:
         type: TestApplication.NoCode.NoCodeTestingClass
         method: TestMethodAsync
         signature:
-          returned_type: System.Threading.Tasks.Task
+          return_type: System.Threading.Tasks.Task
           parameter_types:
             - System.Int32
       span:
@@ -422,7 +422,7 @@ no_code/development:
         type: TestApplication.NoCode.NoCodeTestingClass
         method: TestMethodAsync
         signature:
-          returned_type: System.Threading.Tasks.Task
+          return_type: System.Threading.Tasks.Task
           parameter_types:
             - System.String
             - System.String
@@ -434,7 +434,7 @@ no_code/development:
         type: TestApplication.NoCode.NoCodeTestingClass
         method: TestMethodAsync
         signature:
-          returned_type: System.Threading.Tasks.Task
+          return_type: System.Threading.Tasks.Task
           parameter_types:
             - System.String
             - System.String
@@ -447,7 +447,7 @@ no_code/development:
         type: TestApplication.NoCode.NoCodeTestingClass
         method: TestMethodAsync
         signature:
-          returned_type: System.Threading.Tasks.Task
+          return_type: System.Threading.Tasks.Task
           parameter_types:
             - System.String
             - System.String
@@ -461,7 +461,7 @@ no_code/development:
         type: TestApplication.NoCode.NoCodeTestingClass
         method: TestMethodAsync
         signature:
-          returned_type: System.Threading.Tasks.Task
+          return_type: System.Threading.Tasks.Task
           parameter_types:
             - System.String
             - System.String
@@ -476,7 +476,7 @@ no_code/development:
         type: TestApplication.NoCode.NoCodeTestingClass
         method: TestMethodAsync
         signature:
-          returned_type: System.Threading.Tasks.Task
+          return_type: System.Threading.Tasks.Task
           parameter_types:
             - System.String
             - System.String
@@ -492,7 +492,7 @@ no_code/development:
         type: TestApplication.NoCode.NoCodeTestingClass
         method: TestMethodAsync
         signature:
-          returned_type: System.Threading.Tasks.Task
+          return_type: System.Threading.Tasks.Task
           parameter_types:
             - System.String
             - System.String
@@ -509,7 +509,7 @@ no_code/development:
         type: TestApplication.NoCode.NoCodeTestingClass
         method: TestMethodAsync
         signature:
-          returned_type: System.Threading.Tasks.Task
+          return_type: System.Threading.Tasks.Task
           parameter_types:
             - System.String
             - System.String
@@ -527,7 +527,7 @@ no_code/development:
         type: TestApplication.NoCode.NoCodeTestingClass
         method: TestMethodAsync
         signature:
-          returned_type: System.Threading.Tasks.Task
+          return_type: System.Threading.Tasks.Task
           parameter_types:
             - System.String
             - System.String
@@ -546,7 +546,7 @@ no_code/development:
         type: TestApplication.NoCode.NoCodeTestingClass
         method: IntTaskTestMethodAsync
         signature:
-          returned_type: System.Threading.Tasks.Task`1[System.Int32]
+          return_type: System.Threading.Tasks.Task`1[System.Int32]
           parameter_types:
       span:
          name: Span-IntTaskTestMethodAsync
@@ -556,7 +556,7 @@ no_code/development:
         type: TestApplication.NoCode.NoCodeTestingClass
         method: ValueTaskTestMethodAsync
         signature:
-          returned_type: System.Threading.Tasks.ValueTask
+          return_type: System.Threading.Tasks.ValueTask
           parameter_types:
       span:
          name: Span-ValueTaskTestMethodAsync
@@ -566,7 +566,7 @@ no_code/development:
         type: TestApplication.NoCode.NoCodeTestingClass
         method: IntValueTaskTestMethodAsync
         signature:
-          returned_type: System.Threading.Tasks.ValueTask`1[System.Int32]
+          return_type: System.Threading.Tasks.ValueTask`1[System.Int32]
           parameter_types:
       span:
          name: Span-IntValueTaskTestMethodAsync
@@ -576,7 +576,7 @@ no_code/development:
         type: TestApplication.NoCode.NoCodeTestingClass
         method: GenericTestMethod
         signature:
-          returned_type: System.Int32
+          return_type: System.Int32
           parameter_types:
       span:
          name: Span-GenericTestMethod
@@ -586,7 +586,7 @@ no_code/development:
         type: TestApplication.NoCode.NoCodeTestingClass
         method: GenericTestMethodAsync
         signature:
-          returned_type: System.Threading.Tasks.Task`1[System.Int32]
+          return_type: System.Threading.Tasks.Task`1[System.Int32]
           parameter_types:
       span:
          name: Span-GenericTestMethodAsync
