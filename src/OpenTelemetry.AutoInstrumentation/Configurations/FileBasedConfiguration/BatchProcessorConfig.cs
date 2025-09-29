@@ -2,43 +2,13 @@
 // SPDX-License-Identifier: Apache-2.0
 
 using System.Diagnostics;
+using OpenTelemetry.Exporter;
 using Vendors.YamlDotNet.Serialization;
 
 namespace OpenTelemetry.AutoInstrumentation.Configurations.FileBasedConfiguration;
 
 internal class BatchProcessorConfig
 {
-    public BatchProcessorConfig()
-    {
-    }
-
-    public BatchProcessorConfig(
-        int? scheduleDelay = null,
-        int? exportTimeout = null,
-        int? maxQueueSize = null,
-        int? maxExportBatchSize = null)
-    {
-        if (scheduleDelay is not null)
-        {
-            ScheduleDelay = scheduleDelay.Value;
-        }
-
-        if (exportTimeout is not null)
-        {
-            ExportTimeout = exportTimeout.Value;
-        }
-
-        if (maxQueueSize is not null)
-        {
-            MaxQueueSize = maxQueueSize.Value;
-        }
-
-        if (maxExportBatchSize is not null)
-        {
-            MaxExportBatchSize = maxExportBatchSize.Value;
-        }
-    }
-
     /// <summary>
     /// Gets or sets the delay interval (in milliseconds) between two consecutive exports.
     /// Value must be non-negative.
@@ -77,14 +47,11 @@ internal class BatchProcessorConfig
     [YamlMember(Alias = "exporter")]
     public ExporterConfig? Exporter { get; set; }
 
-    public BatchExportProcessorOptions<Activity> ToBatchExportProcessorOptions()
+    public void CopyTo(BatchExportProcessorOptions<Activity> options)
     {
-        return new BatchExportProcessorOptions<Activity>
-        {
-            ScheduledDelayMilliseconds = this.ScheduleDelay,
-            ExporterTimeoutMilliseconds = this.ExportTimeout,
-            MaxQueueSize = this.MaxQueueSize,
-            MaxExportBatchSize = this.MaxExportBatchSize
-        };
+        options.ScheduledDelayMilliseconds = ScheduleDelay;
+        options.ExporterTimeoutMilliseconds = ExportTimeout;
+        options.MaxQueueSize = MaxQueueSize;
+        options.MaxExportBatchSize = MaxExportBatchSize;
     }
 }

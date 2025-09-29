@@ -54,6 +54,10 @@ internal class TracerSettings : Settings
     /// </summary>
     public OtlpSettings? OtlpSettings { get; private set; }
 
+    public BatchProcessorConfig? BatchProcessorConfig { get; private set; } = null;
+
+    public ZipkinExporterConfig? ZipkinSettings { get; private set; } = null;
+
     protected override void OnLoadEnvVar(Configuration configuration)
     {
         TracesExporters = ParseTracesExporter(configuration);
@@ -101,7 +105,7 @@ internal class TracerSettings : Settings
             configuration.TracerProvider.Processors.TryGetValue("batch", out var batchProcessorConfig))
         {
             TracesEnabled = true;
-            // BatchProcessorConfig = batchProcessorConfig;
+            BatchProcessorConfig = batchProcessorConfig;
             var exporters = batchProcessorConfig.Exporter;
             var tracesExporters = new List<TracesExporter>();
             if (exporters != null)
@@ -121,7 +125,7 @@ internal class TracerSettings : Settings
                 if (exporters.Zipkin != null)
                 {
                     tracesExporters.Add(TracesExporter.Zipkin);
-                    // ZipkinSettings = exporters.Zipkin;
+                    ZipkinSettings = exporters.Zipkin;
                 }
 
                 if (exporters.Console != null)

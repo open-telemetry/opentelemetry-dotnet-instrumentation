@@ -18,7 +18,10 @@ public class FilebasedTracesSettingsTests
             {
                 Endpoint = "http://localhost:4317/"
             },
-            Zipkin = new ZipkinExporterConfig("http://localhost:9411/")
+            Zipkin = new ZipkinExporterConfig
+            {
+                Endpoint = "http://localhost:9411/"
+            },
         };
 
         var batchProcessorConfig = new BatchProcessorConfig
@@ -51,16 +54,17 @@ public class FilebasedTracesSettingsTests
         Assert.Contains(TracesExporter.Zipkin, settings.TracesExporters);
 
         Assert.NotNull(settings.OtlpSettings);
-        // Assert.NotNull(settings.ZipkinSettings);
+        Assert.NotNull(settings.ZipkinSettings);
 
         Assert.NotNull(settings.OtlpSettings.Endpoint);
         Assert.Equal("http://localhost:4317/", settings.OtlpSettings.Endpoint.ToString());
-        // Assert.Equal("http://localhost:9411/", settings.ZipkinSettings.Endpoint);
+        Assert.Equal("http://localhost:9411/", settings.ZipkinSettings.Endpoint);
 
-        // Assert.Equal(1000, settings.BatchProcessorConfig.ScheduleDelay);
-        // Assert.Equal(30000, settings.BatchProcessorConfig.ExportTimeout);
-        // Assert.Equal(2048, settings.BatchProcessorConfig.MaxQueueSize);
-        // Assert.Equal(512, settings.BatchProcessorConfig.MaxExportBatchSize);
+        Assert.NotNull(settings.BatchProcessorConfig);
+        Assert.Equal(1000, settings.BatchProcessorConfig.ScheduleDelay);
+        Assert.Equal(30000, settings.BatchProcessorConfig.ExportTimeout);
+        Assert.Equal(2048, settings.BatchProcessorConfig.MaxQueueSize);
+        Assert.Equal(512, settings.BatchProcessorConfig.MaxExportBatchSize);
     }
 
     [Fact]
@@ -81,7 +85,7 @@ public class FilebasedTracesSettingsTests
         Assert.False(settings.TracesEnabled);
         Assert.Empty(settings.TracesExporters);
         Assert.Null(settings.OtlpSettings);
-        // Assert.Null(settings.ZipkinSettings);
+        Assert.Null(settings.ZipkinSettings);
     }
 
     [Fact]
@@ -155,7 +159,7 @@ public class FilebasedTracesSettingsTests
         Assert.Single(settings.TracesExporters);
         Assert.Contains(TracesExporter.Console, settings.TracesExporters);
         Assert.Null(settings.OtlpSettings);
-        // Assert.Null(settings.ZipkinSettings);
+        Assert.Null(settings.ZipkinSettings);
     }
 
     [Fact]
@@ -165,7 +169,10 @@ public class FilebasedTracesSettingsTests
         {
             OtlpGrpc = new OtlpGrpcExporterConfig { Endpoint = "http://localhost:4317/" },
             Console = new object(),
-            Zipkin = new ZipkinExporterConfig("http://localhost:9411/")
+            Zipkin = new ZipkinExporterConfig
+            {
+                Endpoint = "http://localhost:9411/"
+            },
         };
 
         var batchProcessorConfig = new BatchProcessorConfig
@@ -221,6 +228,6 @@ public class FilebasedTracesSettingsTests
         Assert.True(settings.TracesEnabled);
         Assert.Empty(settings.TracesExporters);
         Assert.Null(settings.OtlpSettings);
-        // Assert.Null(settings.ZipkinSettings);
+        Assert.Null(settings.ZipkinSettings);
     }
 }
