@@ -27,7 +27,7 @@ public class NoCodeConfigurationTests
         Assert.Equal("TargetMethod", target.Method);
 
         Assert.NotNull(target.Signature);
-        Assert.Equal("ReturnedType", target.Signature.ReturnedType);
+        Assert.Equal("ReturnType", target.Signature.ReturnType);
         Assert.NotNull(target.Signature.ParameterTypes);
         Assert.Equal(["ParameterType1", "ParameterType2"], target.Signature.ParameterTypes);
 

@@ -90,9 +90,9 @@ internal class NoCodeSettings : Settings
                 continue;
             }
 
-            if (noCodeTarget.Signature.ReturnedType == null)
+            if (noCodeTarget.Signature.ReturnType == null)
             {
-                Log.Debug("No code target signature returned type is null. Skipping this entry.");
+                Log.Debug("No code target signature return type is null. Skipping this entry.");
                 continue;
             }
 
@@ -118,13 +118,13 @@ internal class NoCodeSettings : Settings
             int parametersCount;
             if (noCodeTarget.Signature.ParameterTypes == null || noCodeTarget.Signature.ParameterTypes.Length == 0)
             {
-                targetSignatureTypes = [noCodeTarget.Signature.ReturnedType];
+                targetSignatureTypes = [noCodeTarget.Signature.ReturnType];
                 parametersCount = 0;
             }
             else
             {
                 targetSignatureTypes = new string[noCodeTarget.Signature.ParameterTypes.Length + 1];
-                targetSignatureTypes[0] = noCodeTarget.Signature.ReturnedType;
+                targetSignatureTypes[0] = noCodeTarget.Signature.ReturnType;
                 parametersCount = noCodeTarget.Signature.ParameterTypes.Length;
                 Array.Copy(noCodeTarget.Signature.ParameterTypes, 0, targetSignatureTypes, 1, noCodeTarget.Signature.ParameterTypes.Length);
             }

@@ -9,7 +9,7 @@ no_code/development:
         type: TargetType
         method: TargetMethod
         signature:
-          return_type: ReturnedType
+          return_type: ReturnType
           parameter_types:
             - ParameterType1
             - ParameterType2
