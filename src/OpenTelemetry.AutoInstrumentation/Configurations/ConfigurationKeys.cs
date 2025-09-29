@@ -197,11 +197,6 @@ internal partial class ConfigurationKeys
             /// Configuration key for Oracle Client instrumentation to enable passing text query as a db.statement attribute.
             /// </summary>
             public const string OracleMdaSetDbStatementForText = "OTEL_DOTNET_AUTO_ORACLEMDA_SET_DBSTATEMENT_FOR_TEXT";
-
-            /// <summary>
-            /// Configuration key for SQL Client instrumentation to enable passing text query as a db.statement attribute.
-            /// </summary>
-            public const string SqlClientSetDbStatementForText = "OTEL_DOTNET_AUTO_SQLCLIENT_SET_DBSTATEMENT_FOR_TEXT";
         }
     }
 
