@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 using IntegrationTests.Helpers;
+using OpenTelemetry.Proto.Trace.V1;
 using Xunit.Abstractions;
 
 namespace IntegrationTests;
@@ -50,31 +51,40 @@ public class NoCodeTests : TestHelper
         collector.Expect("OpenTelemetry.AutoInstrumentation.NoCode", x => x.Name == "Span-ReturningTestMethod8");
         collector.Expect("OpenTelemetry.AutoInstrumentation.NoCode", x => x.Name == "Span-ReturningTestMethod9");
 
-        collector.Expect("OpenTelemetry.AutoInstrumentation.NoCode", x => x.Name == "Span-TestMethodStaticAsync");
-        collector.Expect("OpenTelemetry.AutoInstrumentation.NoCode", x => x.Name == "Span-TestMethod0Async");
-        collector.Expect("OpenTelemetry.AutoInstrumentation.NoCode", x => x.Name == "Span-TestMethodAAsync");
-        collector.Expect("OpenTelemetry.AutoInstrumentation.NoCode", x => x.Name == "Span-TestMethod1StringAsync");
-        collector.Expect("OpenTelemetry.AutoInstrumentation.NoCode", x => x.Name == "Span-TestMethod1IntAsync");
-        collector.Expect("OpenTelemetry.AutoInstrumentation.NoCode", x => x.Name == "Span-TestMethod2Async");
-        collector.Expect("OpenTelemetry.AutoInstrumentation.NoCode", x => x.Name == "Span-TestMethod3Async");
-        collector.Expect("OpenTelemetry.AutoInstrumentation.NoCode", x => x.Name == "Span-TestMethod4Async");
-        collector.Expect("OpenTelemetry.AutoInstrumentation.NoCode", x => x.Name == "Span-TestMethod5Async");
-        collector.Expect("OpenTelemetry.AutoInstrumentation.NoCode", x => x.Name == "Span-TestMethod6Async");
-        collector.Expect("OpenTelemetry.AutoInstrumentation.NoCode", x => x.Name == "Span-TestMethod7Async");
-        collector.Expect("OpenTelemetry.AutoInstrumentation.NoCode", x => x.Name == "Span-TestMethod8Async");
-        collector.Expect("OpenTelemetry.AutoInstrumentation.NoCode", x => x.Name == "Span-TestMethod9Async");
+        collector.Expect("OpenTelemetry.AutoInstrumentation.NoCode", x => x.Name == "Span-TestMethodStaticAsync" && AssertSpanDuration(x));
+        collector.Expect("OpenTelemetry.AutoInstrumentation.NoCode", x => x.Name == "Span-TestMethod0Async" && AssertSpanDuration(x));
+        collector.Expect("OpenTelemetry.AutoInstrumentation.NoCode", x => x.Name == "Span-TestMethodAAsync" && AssertSpanDuration(x));
+        collector.Expect("OpenTelemetry.AutoInstrumentation.NoCode", x => x.Name == "Span-TestMethod1StringAsync" && AssertSpanDuration(x));
+        collector.Expect("OpenTelemetry.AutoInstrumentation.NoCode", x => x.Name == "Span-TestMethod1IntAsync" && AssertSpanDuration(x));
+        collector.Expect("OpenTelemetry.AutoInstrumentation.NoCode", x => x.Name == "Span-TestMethod2Async" && AssertSpanDuration(x));
+        collector.Expect("OpenTelemetry.AutoInstrumentation.NoCode", x => x.Name == "Span-TestMethod3Async" && AssertSpanDuration(x));
+        collector.Expect("OpenTelemetry.AutoInstrumentation.NoCode", x => x.Name == "Span-TestMethod4Async" && AssertSpanDuration(x));
+        collector.Expect("OpenTelemetry.AutoInstrumentation.NoCode", x => x.Name == "Span-TestMethod5Async" && AssertSpanDuration(x));
+        collector.Expect("OpenTelemetry.AutoInstrumentation.NoCode", x => x.Name == "Span-TestMethod6Async" && AssertSpanDuration(x));
+        collector.Expect("OpenTelemetry.AutoInstrumentation.NoCode", x => x.Name == "Span-TestMethod7Async" && AssertSpanDuration(x));
+        collector.Expect("OpenTelemetry.AutoInstrumentation.NoCode", x => x.Name == "Span-TestMethod8Async" && AssertSpanDuration(x));
+        collector.Expect("OpenTelemetry.AutoInstrumentation.NoCode", x => x.Name == "Span-TestMethod9Async" && AssertSpanDuration(x));
 
-        collector.Expect("OpenTelemetry.AutoInstrumentation.NoCode", x => x.Name == "Span-IntTaskTestMethodAsync");
+        collector.Expect("OpenTelemetry.AutoInstrumentation.NoCode", x => x.Name == "Span-IntTaskTestMethodAsync" && AssertSpanDuration(x));
 #if NET
-        collector.Expect("OpenTelemetry.AutoInstrumentation.NoCode", x => x.Name == "Span-ValueTaskTestMethodAsync");
-        collector.Expect("OpenTelemetry.AutoInstrumentation.NoCode", x => x.Name == "Span-IntValueTaskTestMethodAsync");
+        collector.Expect("OpenTelemetry.AutoInstrumentation.NoCode", x => x.Name == "Span-ValueTaskTestMethodAsync" && AssertSpanDuration(x));
+        collector.Expect("OpenTelemetry.AutoInstrumentation.NoCode", x => x.Name == "Span-IntValueTaskTestMethodAsync" && AssertSpanDuration(x));
 #endif
 
         collector.Expect("OpenTelemetry.AutoInstrumentation.NoCode", x => x.Name == "Span-GenericTestMethod");
-        collector.Expect("OpenTelemetry.AutoInstrumentation.NoCode", x => x.Name == "Span-GenericTestMethodAsync");
+        collector.Expect("OpenTelemetry.AutoInstrumentation.NoCode", x => x.Name == "Span-GenericTestMethodAsync" && AssertSpanDuration(x));
 
         RunTestApplication();
 
         collector.AssertExpectations();
+    }
+
+    private bool AssertSpanDuration(Span span)
+    {
+        var ticks = (long)((span.EndTimeUnixNano - span.StartTimeUnixNano) / 100); // 100ns = 1 tick
+
+        var duration = TimeSpan.FromTicks(ticks);
+
+        return duration > TimeSpan.FromMilliseconds(100);
     }
 }

@@ -23,7 +23,13 @@ public static class NoCodeIntegration6
 
     internal static CallTargetReturn<TReturn> OnMethodEnd<TTarget, TReturn>(TTarget instance, TReturn returnValue, Exception? exception, in CallTargetState state)
     {
-        // handles non-void methods
+        // handles non-void, sync methods
         return NoCodeIntegrationHelper.OnMethodEnd(returnValue, exception, in state);
+    }
+
+    internal static TReturn OnAsyncMethodEnd<TTarget, TReturn>(TTarget instance, TReturn returnValue, Exception exception, in CallTargetState state)
+    {
+        // handles non-void, async methods
+        return NoCodeIntegrationHelper.OnAsyncMethodEnd(returnValue, exception, in state);
     }
 }

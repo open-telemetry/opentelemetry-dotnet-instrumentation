@@ -44,9 +44,57 @@ internal static class NoCodeIntegrationHelper
             return new CallTargetReturn<TReturn>(returnValue);
         }
 
+        var returnType = typeof(TReturn);
+        if (returnType.IsGenericType)
+        {
+            var genericReturnType = returnType.GetGenericTypeDefinition();
+            if (typeof(Task).IsAssignableFrom(returnType))
+            {
+                // The type is a Task<>
+                return new CallTargetReturn<TReturn>(returnValue);
+            }
+#if NET
+
+            if (genericReturnType == typeof(ValueTask<>))
+            {
+                // The type is a ValueTask<>
+                return new CallTargetReturn<TReturn>(returnValue);
+            }
+#endif
+        }
+        else
+        {
+            if (returnType == typeof(Task))
+            {
+                // The type is a Task
+                return new CallTargetReturn<TReturn>(returnValue);
+            }
+#if NET
+
+            if (returnType == typeof(ValueTask))
+            {
+                // The type is a ValueTask
+                return new CallTargetReturn<TReturn>(returnValue);
+            }
+#endif
+        }
+
         HandleActivity(exception, activity);
 
         return new CallTargetReturn<TReturn>(returnValue);
+    }
+
+    internal static TReturn OnAsyncMethodEnd<TReturn>(TReturn returnValue, Exception exception, in CallTargetState state)
+    {
+        var activity = state.Activity;
+        if (activity is null)
+        {
+            return returnValue;
+        }
+
+        HandleActivity(exception, activity);
+
+        return returnValue;
     }
 
     internal static CallTargetReturn OnMethodEnd(Exception? exception, in CallTargetState state)
