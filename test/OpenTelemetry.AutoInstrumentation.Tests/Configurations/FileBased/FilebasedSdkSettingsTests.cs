@@ -74,16 +74,32 @@ public class FilebasedSdkSettingsTests
     }
 
     [Fact]
-    public void GetEnabledPropagators_UnknownValues_AreIgnored()
+    public void LoadFile_GetEnabledPropagators_Empty()
     {
-        var config = new PropagatorConfiguration
+        var propagator = new PropagatorConfiguration();
+
+        var conf = new YamlConfiguration { Propagator = propagator };
+        var settings = new SdkSettings();
+
+        settings.LoadFile(conf);
+
+        Assert.Empty(settings.Propagators);
+    }
+
+    [Fact]
+    public void LoadFile_GetEnabledPropagators_UnknownValues_AreIgnored()
+    {
+        var propagator = new PropagatorConfiguration
         {
             CompositeList = "invalid,b3multi"
         };
 
-        var result = config.GetEnabledPropagators();
+        var conf = new YamlConfiguration { Propagator = propagator };
+        var settings = new SdkSettings();
 
-        Assert.Single(result);
-        Assert.Equal(Propagator.B3Multi, result[0]);
+        settings.LoadFile(conf);
+
+        Assert.Single(settings.Propagators);
+        Assert.Equal(Propagator.B3Multi, settings.Propagators[0]);
     }
 }
