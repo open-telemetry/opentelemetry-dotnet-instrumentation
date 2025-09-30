@@ -87,7 +87,7 @@ public static class LoggerIntegration
                 return;
             }
 
-            var setMethod = gdcType.GetMethod("Set", BindingFlags.Public | BindingFlags.Static, new Type[] { typeof(string), typeof(string) });
+            var setMethod = gdcType.GetMethod("Set", BindingFlags.Public | BindingFlags.Static, null, [typeof(string), typeof(string)], null);
             if (setMethod is null)
             {
                 return;

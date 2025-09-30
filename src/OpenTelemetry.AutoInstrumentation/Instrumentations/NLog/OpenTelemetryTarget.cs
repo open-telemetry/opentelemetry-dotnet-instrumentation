@@ -39,7 +39,7 @@ internal sealed class OpenTelemetryTarget
         var loggerProviderBuilder = (LoggerProviderBuilder)createLoggerProviderBuilderMethod.Invoke(null, null)!;
 
         loggerProviderBuilder = loggerProviderBuilder
-            .SetResourceBuilder(ResourceConfigurator.CreateResourceBuilder(Instrumentation.GeneralSettings.Value.EnabledResourceDetectors));
+            .SetResourceBuilder(ResourceConfigurator.CreateResourceBuilder(Instrumentation.ResourceSettings.Value));
 
         loggerProviderBuilder = loggerProviderBuilder.AddOtlpExporter();
 
