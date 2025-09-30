@@ -1,1 +1,1 @@
-FROM postgres:18.0@sha256:9685e09573f19eeb99d259547a1cb7a7a77cd15877f55f51e215ad06edf5c721
+FROM postgres:18.0@sha256:b0a5628e5f6f4ef1feb6a6d5ef2f399f080ad1fa5e333a24659cebfafaca2ac1
