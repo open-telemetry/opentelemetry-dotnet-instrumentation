@@ -109,7 +109,7 @@ internal static class PackageVersionDefinitions
             {
                 // NLog 5.0+ required for Layout<T> typed layout support and .NET build-trimming
                 new("5.0.0"),
-                new("5.3.2"),
+                new("5.3.4"),
                 new("6.0.0"),
                 new("*")
             }
