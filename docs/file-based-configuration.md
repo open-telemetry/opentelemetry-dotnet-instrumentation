@@ -81,10 +81,6 @@ tracer_provider:
           # Configure endpoint.
           # If omitted or null, http://localhost:9411/api/v2/spans is used.
           endpoint: http://localhost:9411/api/v2/spans
-          # Configure max time (in milliseconds) to wait for each export. 
-          # Value must be non-negative. A value of 0 indicates indefinite.
-          # If omitted or null, 10000 is used.
-          timeout: 10000
         # Add the console exporter to enable it.
         console:
 ```
