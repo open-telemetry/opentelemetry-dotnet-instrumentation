@@ -62,7 +62,7 @@ internal static class Program
 
     private static void LogUsingNLogDirectly()
     {
-        var log = LogManager.GetLogger(typeof(Program).FullName);
+        var log = LogManager.GetLogger(typeof(Program).FullName!);
 
         LogInsideActiveScope(() => log.Info("{0}, {1} at {2:t}!", "Hello", "world", DateTime.Now));
 
