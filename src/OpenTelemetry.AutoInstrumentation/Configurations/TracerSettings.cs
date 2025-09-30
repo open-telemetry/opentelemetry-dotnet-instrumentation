@@ -54,8 +54,18 @@ internal class TracerSettings : Settings
     /// </summary>
     public OtlpSettings? OtlpSettings { get; private set; }
 
+    /// <summary>
+    /// Gets tracing Batch Processor Configuration.
+    /// For environment variable configuration, this must be null,
+    /// and the configuration will be handled inside the Otlp exporter package.
+    /// </summary>
     public BatchProcessorConfig? BatchProcessorConfig { get; private set; } = null;
 
+    /// <summary>
+    /// Gets the tracing Zipkin settings.
+    /// For environment variable configuration, this must be null,
+    /// and the configuration will be handled inside the Zipkin exporter package.
+    /// </summary>
     public ZipkinExporterConfig? ZipkinSettings { get; private set; } = null;
 
     protected override void OnLoadEnvVar(Configuration configuration)
