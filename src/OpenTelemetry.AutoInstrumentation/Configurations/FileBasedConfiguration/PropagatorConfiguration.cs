@@ -21,51 +21,28 @@ internal class PropagatorConfiguration
 
     public IReadOnlyList<Propagator> GetEnabledPropagators()
     {
-        var seenPropagators = new HashSet<string>();
-        var resolvedPropagators = new List<string>();
-        var propagators = new List<Propagator>();
-
-        if (Composite != null)
+        if (Composite is null && string.IsNullOrEmpty(CompositeList))
         {
-            foreach (var key in Composite.Keys)
-            {
-                if (seenPropagators.Add(key))
-                {
-                    resolvedPropagators.Add(key);
-                }
-            }
+            return [];
         }
 
-        if (!string.IsNullOrEmpty(CompositeList))
-        {
-            var list = CompositeList!.Split(Constants.ConfigurationValues.Separator);
-            foreach (var item in list)
-            {
-                if (seenPropagators.Add(item))
-                {
-                    resolvedPropagators.Add(item);
-                }
-            }
-        }
+        var propagatorNames = (Composite?.Keys ?? Enumerable.Empty<string>())
+            .Concat(!string.IsNullOrEmpty(CompositeList)
+                    ? CompositeList!.Split(Constants.ConfigurationValues.Separator)
+                    : [])
+            .Distinct();
 
-        foreach (var propagatorName in resolvedPropagators)
-        {
-            switch (propagatorName.ToLowerInvariant())
+        var propagators = propagatorNames
+            .Select<string, Propagator?>(name => name switch
             {
-                case Constants.ConfigurationValues.Propagators.W3CTraceContext:
-                    propagators.Add(Propagator.W3CTraceContext);
-                    break;
-                case Constants.ConfigurationValues.Propagators.W3CBaggage:
-                    propagators.Add(Propagator.W3CBaggage);
-                    break;
-                case Constants.ConfigurationValues.Propagators.B3Multi:
-                    propagators.Add(Propagator.B3Multi);
-                    break;
-                case Constants.ConfigurationValues.Propagators.B3Single:
-                    propagators.Add(Propagator.B3Single);
-                    break;
-            }
-        }
+                Constants.ConfigurationValues.Propagators.W3CTraceContext => Propagator.W3CTraceContext,
+                Constants.ConfigurationValues.Propagators.W3CBaggage => Propagator.W3CBaggage,
+                Constants.ConfigurationValues.Propagators.B3Multi => Propagator.B3Multi,
+                Constants.ConfigurationValues.Propagators.B3Single => Propagator.B3Single,
+                _ => null
+            })
+            .OfType<Propagator>()
+            .ToList();
 
         return propagators;
     }
