@@ -20,18 +20,31 @@ internal sealed class SqlClientMetricsInitializer : SqlClientInitializer
 
     protected override void InitializeOnFirstCall(ILifespanManager lifespanManager)
     {
-        if (Interlocked.Exchange(ref _initialized, value: 1) != default)
+        if (Interlocked.Exchange(ref _initialized, value: 1) != 0)
         {
             // InitializeOnFirstCall() was already called before
             return;
         }
 
         var instrumentationType = Type.GetType("OpenTelemetry.Instrumentation.SqlClient.SqlClientInstrumentation, OpenTelemetry.Instrumentation.SqlClient")!;
-        var instrumentation = instrumentationType.InvokeMember("AddMetricHandle", BindingFlags.InvokeMethod | BindingFlags.Public | BindingFlags.Static, Type.DefaultBinder, null, []);
+        var instanceField = instrumentationType?.GetField("Instance");
+        var instance = instanceField?.GetValue(null);
+        var metricsOptionsPropertyInfo = instrumentationType?.GetProperty("MetricOptions");
 
-        if (instrumentation != null)
+        if (metricsOptionsPropertyInfo?.GetValue(instance) is OpenTelemetry.Instrumentation.SqlClient.SqlClientTraceInstrumentationOptions options)
         {
-            lifespanManager.Track(instrumentation);
+            _pluginManager.ConfigureTracesOptions(options);
+        }
+
+        var handleManagerType = Type.GetType("OpenTelemetry.Instrumentation.InstrumentationHandleManager, OpenTelemetry.Instrumentation.SqlClient");
+        var handleManagerField = instrumentationType?.GetField("HandleManager");
+        var handleManager = handleManagerField?.GetValue(instance);
+        var addMetricHandleMethod = handleManagerType?.GetMethod("AddMetricHandle");
+        var metricHandle = addMetricHandleMethod?.Invoke(handleManager, []);
+
+        if (metricHandle != null)
+        {
+            lifespanManager.Track(metricHandle);
         }
     }
 }

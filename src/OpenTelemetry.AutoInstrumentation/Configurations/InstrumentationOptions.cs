@@ -28,7 +28,6 @@ internal class InstrumentationOptions
         HttpInstrumentationCaptureRequestHeaders = configuration.ParseHeaders(ConfigurationKeys.Traces.InstrumentationOptions.HttpInstrumentationCaptureRequestHeaders, AdditionalTag.CreateHttpRequestCache);
         HttpInstrumentationCaptureResponseHeaders = configuration.ParseHeaders(ConfigurationKeys.Traces.InstrumentationOptions.HttpInstrumentationCaptureResponseHeaders, AdditionalTag.CreateHttpResponseCache);
         OracleMdaSetDbStatementForText = configuration.GetBool(ConfigurationKeys.Traces.InstrumentationOptions.OracleMdaSetDbStatementForText) ?? false;
-        SqlClientSetDbStatementForText = configuration.GetBool(ConfigurationKeys.Traces.InstrumentationOptions.SqlClientSetDbStatementForText) ?? false;
     }
 
 #if NETFRAMEWORK
@@ -89,9 +88,4 @@ internal class InstrumentationOptions
     /// Gets a value indicating whether text query in Oracle Client can be passed as a db.statement tag.
     /// </summary>
     public bool OracleMdaSetDbStatementForText { get; }
-
-    /// <summary>
-    /// Gets a value indicating whether text query in SQL Client can be passed as a db.statement tag.
-    /// </summary>
-    public bool SqlClientSetDbStatementForText { get; }
 }
