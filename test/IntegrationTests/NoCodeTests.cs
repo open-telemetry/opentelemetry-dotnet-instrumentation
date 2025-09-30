@@ -85,6 +85,6 @@ public class NoCodeTests : TestHelper
 
         var duration = TimeSpan.FromTicks(ticks);
 
-        return duration > TimeSpan.FromMilliseconds(100);
+        return duration > TimeSpan.FromMilliseconds(95); // all async methods have a 100ms delay, need to be a bit lower, some runs are a bit faster
     }
 }
