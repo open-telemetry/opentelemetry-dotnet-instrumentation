@@ -26,7 +26,7 @@ typeName: "NLog.Logger",
 methodName: "Log",
 returnTypeName: ClrNames.Void,
 parameterTypeNames: new[] { "NLog.LogEventInfo" },
-minimumVersion: "4.0.0",
+minimumVersion: "5.0.0",
 maximumVersion: "6.*.*",
 integrationName: "NLog",
 type: InstrumentationType.Log)]

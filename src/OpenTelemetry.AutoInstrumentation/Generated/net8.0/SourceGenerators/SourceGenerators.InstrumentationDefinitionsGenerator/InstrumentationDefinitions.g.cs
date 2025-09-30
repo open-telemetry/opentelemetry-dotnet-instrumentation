@@ -108,7 +108,7 @@ internal static partial class InstrumentationDefinitions
             // NLog
             if (logSettings.EnabledInstrumentations.Contains(LogInstrumentation.NLog))
             {
-                nativeCallTargetDefinitions.Add(new("NLog", "NLog.Logger", "Log", ["System.Void", "NLog.LogEventInfo"], 4, 0, 0, 6, 65535, 65535, AssemblyFullName, "OpenTelemetry.AutoInstrumentation.Instrumentations.NLog.Bridge.Integrations.LoggerIntegration"));
+                nativeCallTargetDefinitions.Add(new("NLog", "NLog.Logger", "Log", ["System.Void", "NLog.LogEventInfo"], 5, 0, 0, 6, 65535, 65535, AssemblyFullName, "OpenTelemetry.AutoInstrumentation.Instrumentations.NLog.Bridge.Integrations.LoggerIntegration"));
             }
         }
 
