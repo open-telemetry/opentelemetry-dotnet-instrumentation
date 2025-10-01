@@ -321,4 +321,4 @@ test/test-applications/integrations/dependency-libs/TestApplication.ContinuousPr
 
 lychee/out.md
 
-C:\Repos\opentelemetry-dotnet-instrumentation\src\OpenTelemetry.AutoInstrumentation\Generated\net8.0\System.Text.RegularExpressions.Generator\System.Text.RegularExpressions.Generator.RegexGenerator\RegexGenerator.g.cs
+src/OpenTelemetry.AutoInstrumentation/Generated/net8.0/System.Text.RegularExpressions.Generator/System.Text.RegularExpressions.Generator.RegexGenerator/RegexGenerator.g.cs
