@@ -25,6 +25,7 @@ instrumentation/development:
       wcfclient:
       wcfservice:
     metrics:
+      aspnet:
       aspnetcore:
       httpclient:
       netruntime:
