@@ -145,7 +145,7 @@ public class NLogBridgeTests : TestHelper
             Arguments = "--api nlog"
         });
 
-        var regex = new Regex(@"INFO  TestApplication\.NLogBridge\.Program - Hello, world at \d{2}\:\d{2}\! span_id=[a-f0-9]{16} trace_id=[a-f0-9]{32} trace_flags=01");
+        var regex = new Regex(@"INFO TestApplication\.NLogBridge\.Program - Hello, world at \d{2}\:\d{2}\! span_id=[a-f0-9]{16} trace_id=[a-f0-9]{32} trace_flags=01");
         var output = standardOutput;
         Assert.Matches(regex, output);
         Assert.Contains("ERROR TestApplication.NLogBridge.Program - Exception occured span_id=(null) trace_id=(null) trace_flags=(null)", output);
@@ -171,7 +171,7 @@ public class NLogBridgeTests : TestHelper
 
     private static void AssertStandardOutputExpectations(string standardOutput)
     {
-        Assert.Contains("INFO  TestApplication.NLogBridge.Program - Hello, world at", standardOutput);
+        Assert.Contains("INFO TestApplication.NLogBridge.Program - Hello, world at", standardOutput);
         Assert.Contains("ERROR TestApplication.NLogBridge.Program - Exception occured", standardOutput);
     }
 
