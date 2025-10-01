@@ -9,9 +9,9 @@ namespace OpenTelemetry.AutoInstrumentation.Tests.Configurations.FileBased.Parse
 public class ParserInstrumentationTests
 {
     [Fact]
-    public void Parse_FullConfigYaml_ShouldPopulateModelCorrectly()
+    public void Parse_Instrumentation_ShouldPopulateModelCorrectly()
     {
-        var config = YamlParser.ParseYaml("Configurations/FileBased/Files/TestInstrumentatioFile.yaml");
+        var config = YamlParser.ParseYaml("Configurations/FileBased/Files/TestInstrumentationFile.yaml");
 
         Assert.NotNull(config);
         Assert.NotNull(config.InstrumentationDevelopment);
@@ -75,5 +75,53 @@ public class ParserInstrumentationTests
         {
             FileBasedTestHelper.AssertAliasPropertyExists(logs, alias);
         }
+    }
+
+    [Fact]
+    public void Parse_InstrumentationConfiguration_ShouldPopulateModelCorrectly()
+    {
+        var config = YamlParser.ParseYaml("Configurations/FileBased/Files/TestInstrumentationConfigurationFile.yaml");
+
+        Assert.NotNull(config);
+        Assert.NotNull(config.InstrumentationDevelopment);
+        Assert.NotNull(config.InstrumentationDevelopment.DotNet);
+
+#if NET
+        string[] expectedTraces = [
+                    "aspnetcore", "entityframeworkcore", "graphql", "grpcnetclient", "httpclient", "oraclemda"
+                ];
+#endif
+#if NETFRAMEWORK
+        string[] expectedTraces = [
+                    "aspnet", "httpclient", "oraclemda", "grpcnetclient"
+                ];
+#endif
+
+        var traces = config.InstrumentationDevelopment.DotNet.Traces;
+        Assert.NotNull(traces);
+
+        foreach (var alias in expectedTraces)
+        {
+            FileBasedTestHelper.AssertAliasPropertyExists(traces, alias);
+        }
+
+        Assert.True(traces.OracleMda!.SetDbStatementForText);
+        Assert.Equal("X-Key=Value", traces.HttpClient!.CaptureRequestHeaders);
+        Assert.Equal("X-Key=Value", traces.HttpClient!.CaptureResponseHeaders);
+
+        Assert.Equal("X-Key=Value", traces.GrpcNetClient!.CaptureRequestMetadata);
+        Assert.Equal("X-Key=Value", traces.GrpcNetClient!.CaptureResponseMetadata);
+#if NET
+        Assert.True(traces.GraphQL!.SetDocument);
+        Assert.True(traces.EntityFrameworkCore!.SetDbStatementForText);
+
+        Assert.Equal("X-Key=Value", traces.AspNetCore!.CaptureRequestHeaders);
+        Assert.Equal("X-Key=Value", traces.AspNetCore!.CaptureResponseHeaders);
+
+#endif
+#if NETFRAMEWORK
+        Assert.Equal("X-Key=Value", traces.AspNet!.CaptureRequestHeaders);
+        Assert.Equal("X-Key=Value", traces.AspNet!.CaptureResponseHeaders);
+#endif
     }
 }

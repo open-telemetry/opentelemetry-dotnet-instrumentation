@@ -3,6 +3,7 @@
 
 using OpenTelemetry.AutoInstrumentation.Configurations;
 using OpenTelemetry.AutoInstrumentation.Configurations.FileBasedConfiguration;
+using OpenTelemetry.AutoInstrumentation.HeadersCapture;
 using Xunit;
 
 namespace OpenTelemetry.AutoInstrumentation.Tests.Configurations.FileBased;
@@ -41,25 +42,23 @@ public class FilebasedInstrumentationSettingsTests
     [Fact]
     public void LoadFile_SetsEnabledTracesInstrumentationOption()
     {
-/*        var instrumentation = new DotNetInstrumentation
+        var instrumentation = new DotNetInstrumentation
         {
             Traces = new DotNetTraces
             {
                 GrpcNetClient = new CaptureMetadataConfiguration
                 {
-                    CaptureRequestMetadata = new[] { "x-request-id", "x-b3-traceid" },
-                    CaptureResponseMetadata = new[] { "x-response-id", "x-b3-traceid" }
+                    CaptureRequestMetadata = "x-request-id",
+                    CaptureResponseMetadata = "x-response-id"
                 },
-#if NET
-                EntityFrameworkCore = new SetDbStatementForTextConfuguration
+                OracleMda = new SetDbStatementForTextConfuguration
                 {
                     SetDbStatementForText = true
                 },
-#endif
                 HttpClient = new CaptureHeadersConfiguration
                 {
-                    CaptureRequestHeaders = new[] { "x-request-id", "x-b3-traceid" },
-                    CaptureResponseHeaders = new[] { "x-response-id", "x-b3-traceid" }
+                    CaptureRequestHeaders = "x-request-id",
+                    CaptureResponseHeaders = "x-response-id"
                 }
             }
         };
@@ -77,8 +76,15 @@ public class FilebasedInstrumentationSettingsTests
         settings.LoadFile(conf);
 
         Assert.NotNull(settings.EnabledInstrumentations);
-        Assert.Contains(TracerInstrumentation.Azure, settings.EnabledInstrumentations);
-        Assert.Contains(TracerInstrumentation.Elasticsearch, settings.EnabledInstrumentations);*/
+        Assert.Contains(TracerInstrumentation.GrpcNetClient, settings.EnabledInstrumentations);
+        Assert.Contains(TracerInstrumentation.OracleMda, settings.EnabledInstrumentations);
+        Assert.Contains(TracerInstrumentation.HttpClient, settings.EnabledInstrumentations);
+
+        Assert.True(settings.InstrumentationOptions.OracleMdaSetDbStatementForText);
+        Assert.Contains(AdditionalTag.CreateGrpcRequestCache("x-request-id"), settings.InstrumentationOptions.GrpcNetClientInstrumentationCaptureRequestMetadata);
+        Assert.Contains(AdditionalTag.CreateGrpcResponseCache("x-response-id"), settings.InstrumentationOptions.GrpcNetClientInstrumentationCaptureResponseMetadata);
+        Assert.Contains(AdditionalTag.CreateHttpRequestCache("x-request-id"), settings.InstrumentationOptions.HttpInstrumentationCaptureRequestHeaders);
+        Assert.Contains(AdditionalTag.CreateHttpResponseCache("x-response-id"), settings.InstrumentationOptions.HttpInstrumentationCaptureResponseHeaders);
     }
 
     [Fact]
