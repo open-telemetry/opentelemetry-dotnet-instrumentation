@@ -63,3 +63,92 @@ resource:
       process:         # Detects process-level attributes (process.*)
       processruntime:  # Detects process runtime attributes (process.runtime.*)
 ```  
+
+## Instrumentation Configuration
+
+You can configure traces, metrics, and logs instrumentations.
+For more details and updates, see: [Instrumentation list and documentation](config.md#instrumentations)
+
+``` yaml
+instrumentation/development:
+  dotnet:
+    traces:
+      aspnet:              # ASP.NET (.NET Framework) MVC/WebApi [Framework only]
+      aspnetcore:          # ASP.NET Core [Core only]
+      azure:               # Azure SDK [Core & Framework]
+      elasticsearch:       # Elastic.Clients.Elasticsearch [Core & Framework]
+      elastictransport:    # Elastic.Transport (>=0.4.16) [Core & Framework]
+      entityframeworkcore: # Entity Framework Core (>=6.0.12) [Core only]
+      graphql:             # GraphQL (>=7.5.0) [Core only]
+      grpcnetclient:       # Grpc.Net.Client (>=2.52.0 & <3.0.0) [Core & Framework]
+      httpclient:          # System.Net.Http.HttpClient [Core & Framework]
+      kafka:               # Confluent.Kafka (>=1.4.0 & <3.0.0) [Core & Framework]
+      masstransit:         # MassTransit (>=8.0.0) [Core only]
+      mongodb:             # MongoDB.Driver (>=2.7.0 <4.0.0) [Core & Framework]
+      mysqlconnector:      # MySqlConnector (>=2.0.0) [Core only]
+      mysqldata:           # MySql.Data (>=8.1.0) [Core only]
+      npgsql:              # Npgsql (>=6.0.0) [Core only]
+      nservicebus:         # NServiceBus (>=8.0.0 & <10.0.0) [Core & Framework]
+      oraclemda:           # Oracle.ManagedDataAccess (>=23.4.0) [Core only]
+      rabbitmq:            # RabbitMQ.Client (>=6.0.0) [Core & Framework]
+      quartz:              # Quartz (>=3.4.0, not supported < .NET Framework 4.7.2)
+      sqlclient:           # Microsoft.Data.SqlClient & System.Data.SqlClient [Core & Framework]
+      stackexchangeredis:  # StackExchange.Redis (>=2.6.122 & <3.0.0) [Core only]
+      wcfclient:           # WCF Client [Core & Framework]
+      wcfservice:          # WCF Service [Framework only]
+    metrics:
+      aspnetcore:          # ASP.NET Core metrics [Core only]
+      httpclient:          # HttpClient metrics [Core & Framework]
+      netruntime:          # .NET Runtime metrics [Core only]
+      nservicebus:         # NServiceBus metrics [Core & Framework]
+      process:             # Process metrics [Core & Framework]
+      sqlclient:           # SQL Client metrics [Core & Framework]
+    logs:
+      ilogger:             # Microsoft.Extensions.Logging (>=9.0.0) [Core & Framework]
+      log4net:             # log4net (>=2.0.13 && <4.0.0) [Core & Framework]
+```
+
+## Instrumentation options
+
+``` yaml
+instrumentation/development:
+  dotnet:
+    traces:
+      entityframeworkcore:
+        # Whether the Entity Framework Core instrumentation can pass SQL statements through the db.statement attribute. Queries might contain sensitive information. If set to false, db.statement is recorded only for executing stored procedures.
+        # Default is false
+        set_db_statement_for_text: false
+      graphql:
+        # Whether the GraphQL instrumentation can pass raw queries through the graphql.document attribute. Queries might contain sensitive information.
+        # Default is false
+        set_document: false
+      oraclemda: 
+        # Whether the Oracle Client instrumentation can pass SQL statements through the db.statement attribute. Queries might contain sensitive information. If set to false, db.statement is recorded only for executing stored procedures.
+        # Default is false
+        set_db_statement_for_text: false
+      sqlclient:
+        # Whether the SQL Client instrumentation can pass SQL statements through the db.statement attribute. Queries might contain sensitive information. If set to false, db.statement is recorded only for executing stored procedures. 
+        # Not supported on .NET Framework for System.Data.SqlClient.
+        # Default is false
+        set_db_statement_for_text: false
+      aspnet:
+        # A comma-separated list of HTTP header names. ASP.NET instrumentations will capture HTTP request header values for all configured header names.
+        capture_request_headers: "X-Key=Value"
+        # A comma-separated list of HTTP header names. ASP.NET instrumentations will capture HTTP response header values for all configured header names.
+        capture_response_headers: "X-Key=Value"
+      aspnetcore:
+        # A comma-separated list of HTTP header names. ASP.NET Core instrumentations will capture HTTP request header values for all configured header names.
+        capture_request_headers: "X-Key=Value"
+        # A comma-separated list of HTTP header names. ASP.NET Core instrumentations will capture HTTP response header values for all configured header names.
+        capture_response_headers: "X-Key=Value"
+      httpclient:
+        # A comma-separated list of HTTP header names. HTTP Client instrumentations will capture HTTP request header values for all configured header names.
+        capture_request_headers: "X-Key=Value"
+        # A comma-separated list of HTTP header names. HTTP Client instrumentations will capture HTTP response header values for all configured header names.
+        capture_response_headers: "X-Key=Value"
+      grpcnetclient:
+        # A comma-separated list of gRPC metadata names. Grpc.Net.Client instrumentations will capture gRPC request metadata values for all configured metadata names.
+        capture_request_metadata: "X-Key=Value"
+        # A comma-separated list of gRPC metadata names. Grpc.Net.Client instrumentations will capture gRPC response metadata values for all configured metadata names.
+        capture_response_metadata: "X-Key=Value"
+```
