@@ -97,6 +97,7 @@ instrumentation/development:
       wcfclient:           # WCF Client [Core & Framework]
       wcfservice:          # WCF Service [Framework only]
     metrics:
+      aspnet:              # ASP.NET metrics [Framework only]
       aspnetcore:          # ASP.NET Core metrics [Core only]
       httpclient:          # HttpClient metrics [Core & Framework]
       netruntime:          # .NET Runtime metrics [Core only]
