@@ -9,6 +9,8 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 
 ### Added
 
+- Experimental support for OpAMP (by default the client is disabled).
+
 ### Changed
 
 #### Dependency updates
