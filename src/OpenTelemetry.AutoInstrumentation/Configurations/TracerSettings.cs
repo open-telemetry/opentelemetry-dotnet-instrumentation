@@ -1,6 +1,7 @@
 // Copyright The OpenTelemetry Authors
 // SPDX-License-Identifier: Apache-2.0
 
+using OpenTelemetry.AutoInstrumentation.Configurations.FileBasedConfiguration;
 using OpenTelemetry.AutoInstrumentation.Configurations.Otlp;
 using OpenTelemetry.AutoInstrumentation.Logging;
 
@@ -91,6 +92,13 @@ internal class TracerSettings : Settings
         OpenTracingEnabled = configuration.GetBool(ConfigurationKeys.Traces.OpenTracingEnabled) ?? false;
 
         InstrumentationOptions = new InstrumentationOptions(configuration);
+    }
+
+    protected override void OnLoadFile(YamlConfiguration configuration)
+    {
+        EnabledInstrumentations = configuration.InstrumentationDevelopment?.DotNet?.Traces?.GetEnabledInstrumentations() ?? [];
+
+        InstrumentationOptions = new InstrumentationOptions(configuration.InstrumentationDevelopment?.DotNet?.Traces);
     }
 
     private static IReadOnlyList<TracesExporter> ParseTracesExporter(Configuration configuration)
