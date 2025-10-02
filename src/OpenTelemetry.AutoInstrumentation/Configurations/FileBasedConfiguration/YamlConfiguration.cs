@@ -1,6 +1,7 @@
 // Copyright The OpenTelemetry Authors
 // SPDX-License-Identifier: Apache-2.0
 
+using System.Diagnostics;
 using Vendors.YamlDotNet.Serialization;
 
 namespace OpenTelemetry.AutoInstrumentation.Configurations.FileBasedConfiguration;
@@ -22,4 +23,12 @@ internal class YamlConfiguration
     /// </summary>
     [YamlMember(Alias = "resource")]
     public ResourceConfiguration? Resource { get; set; }
+
+    /// <summary>
+    /// Gets or sets the tracer provider configuration.
+    /// Configure tracer provider.
+    /// If omitted, a noop tracer provider is used.
+    /// </summary>
+    [YamlMember(Alias = "tracer_provider")]
+    public TracerProviderConfiguration? TracerProvider { get; set; }
 }
