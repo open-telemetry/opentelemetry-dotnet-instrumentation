@@ -104,6 +104,7 @@ internal sealed class OpenTelemetryTarget
             3 => 13,  // Warn
             4 => 17,  // Error
             5 => 21,  // Fatal
+            6 => 1,   // Off
             _ => 9
         };
     }
