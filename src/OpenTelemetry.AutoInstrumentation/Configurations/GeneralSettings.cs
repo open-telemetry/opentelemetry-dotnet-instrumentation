@@ -50,5 +50,7 @@ internal class GeneralSettings : Settings
     {
         SetupSdk = !configuration.Disabled;
         FlushOnUnhandledException = configuration.FlushOnUnhandledException;
+
+        ProfilerEnabled = configuration.EnableProfiling;
     }
 }

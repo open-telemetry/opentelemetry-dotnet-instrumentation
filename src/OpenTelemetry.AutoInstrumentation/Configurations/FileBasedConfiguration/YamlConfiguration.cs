@@ -43,4 +43,11 @@ internal class YamlConfiguration
     /// </summary>
     [YamlMember(Alias = "flush_on_unhandled_exception")]
     public bool FlushOnUnhandledException { get; set; } = false;
+
+    /// <summary>
+    /// Gets or sets a value indicating whether Profiling is enabled.
+    /// If omitted or null, true is used.
+    /// </summary>
+    [YamlMember(Alias = "enable_profiling")]
+    public bool EnableProfiling { get; set; } = true;
 }
