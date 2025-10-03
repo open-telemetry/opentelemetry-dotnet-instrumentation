@@ -41,6 +41,7 @@ mycompanymyproductmylibrary
 MYSQLCONNECTOR
 MYSQLDATA
 NETRUNTIME
+NLOG
 Npgsql
 NSERVICEBUS
 omnisharp
@@ -58,9 +59,9 @@ protos
 RABBITMQ
 Serilog
 spdlog
-srcs
 SQLCLIENT
 sqlserver
+srcs
 STACKEXCHANGEREDIS
 TMPDIR
 tracesexporter
