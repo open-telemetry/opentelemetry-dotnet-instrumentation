@@ -14,21 +14,19 @@ internal abstract class Settings
     private static readonly bool IsYamlConfigEnabled = Environment.GetEnvironmentVariable(ConfigurationKeys.FileBasedConfiguration.Enabled) == "true";
     private static readonly Lazy<YamlConfiguration> YamlConfiguration = new(ReadYamlConfiguration);
 
-    private bool FailFast { get; set; }
-
     public static T FromDefaultSources<T>(bool failFast)
         where T : Settings, new()
     {
         if (IsYamlConfigEnabled)
         {
-            var settings = new T { FailFast = failFast };
+            var settings = new T();
             settings.LoadFile(YamlConfiguration.Value);
             return settings;
         }
         else
         {
             var configuration = new Configuration(failFast, new EnvironmentConfigurationSource(failFast));
-            var settings = new T { FailFast = failFast };
+            var settings = new T();
             settings.LoadEnvVar(configuration);
             return settings;
         }
@@ -60,7 +58,7 @@ internal abstract class Settings
     {
         // TODO temporary fallback to env var configuration until we support all settings in yaml
         // TODO make the method abstract when all settings are supported in yaml
-        var envVarConfiguration = new Configuration(FailFast, new EnvironmentConfigurationSource(FailFast));
+        var envVarConfiguration = new Configuration(configuration.FailFast, new EnvironmentConfigurationSource(configuration.FailFast));
         OnLoadEnvVar(envVarConfiguration);
     }
 

@@ -30,6 +30,28 @@ For more details, see: [OpenTelemetry YAML File Format Specification](https://gi
 
 ## Configuration Examples
 
+## General Configuration
+
+``` yaml
+# The file format version.
+# The yaml format is documented at
+# <https://github.com/open-telemetry/opentelemetry-configuration/tree/main/schema>
+# By default, the latest version is used.
+file_format: "1.0-rc.1"
+# Configure if the SDK is disabled or not.
+# If omitted or null, false is used
+disabled: false
+# Configure if the Fail Fast is enabled or not.
+# If omitted or null, false is used
+fail_fast: false
+# Configure if the Flush On Unhandled Exception is enabled or not.
+# If omitted or null, false is used.
+flush_on_unhandled_exception: false
+# Configure if the Profiling is enabled or not.
+# If omitted or null, true is used.
+enable_profiling: true
+```
+
 ### Resource Configuration
 
 You can configure resource attributes directly in YAML or via the
