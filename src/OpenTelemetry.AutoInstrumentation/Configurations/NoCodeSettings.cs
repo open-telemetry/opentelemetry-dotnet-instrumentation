@@ -144,9 +144,9 @@ internal class NoCodeSettings : Settings
                 AssemblyFullName,
                 $"OpenTelemetry.AutoInstrumentation.Instrumentations.NoCode.NoCodeIntegration{parametersCount}");
 
-            Log.Debug($"NoCode adding instrumentation for assembly: '{noCodeTarget.Assembly.Name}', type: '{noCodeTarget.Type}', method: '{noCodeTarget.Method}' with signature: '{string.Join(",", targetSignatureTypes)}'");
-
             var activityKind = ParseActivityKind(noCodeEntry.Span.Kind);
+
+            Log.Debug($"NoCode adding instrumentation for assembly: '{noCodeTarget.Assembly.Name}', type: '{noCodeTarget.Type}', method: '{noCodeTarget.Method}' with signature: '{string.Join(",", targetSignatureTypes)}'");
 
             instrumentedMethods.Add(new NoCodeInstrumentedMethod(definition, targetSignatureTypes, noCodeEntry.Span.Name, activityKind));
         }
@@ -160,12 +160,7 @@ internal class NoCodeSettings : Settings
 
     private static ActivityKind ParseActivityKind(string? kindString)
     {
-        if (string.IsNullOrEmpty(kindString))
-        {
-            return ActivityKind.Internal; // Default
-        }
-
-        return kindString!.ToLowerInvariant() switch
+        return kindString switch
         {
             "internal" => ActivityKind.Internal,
             "server" => ActivityKind.Server,
