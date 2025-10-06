@@ -29,4 +29,10 @@ internal class YamlConfiguration
     /// </summary>
     [YamlMember(Alias = "propagator")]
     public PropagatorConfiguration? Propagator { get; set; }
+
+    /// <summary>
+    /// Gets or sets the no-code tracing configuration.
+    /// </summary>
+    [YamlMember(Alias = "no_code/development")]
+    public NoCodeConfiguration? NoCode { get; set; }
 }
