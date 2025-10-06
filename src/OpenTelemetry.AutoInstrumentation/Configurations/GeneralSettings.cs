@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 using OpenTelemetry.AutoInstrumentation.Configurations.FileBasedConfiguration;
+using Vendors.YamlDotNet.Core.Tokens;
 
 namespace OpenTelemetry.AutoInstrumentation.Configurations;
 
@@ -51,6 +52,6 @@ internal class GeneralSettings : Settings
         SetupSdk = !configuration.Disabled;
         FlushOnUnhandledException = configuration.FlushOnUnhandledException;
 
-        ProfilerEnabled = configuration.EnableProfiling;
+        ProfilerEnabled = Environment.GetEnvironmentVariable(ConfigurationKeys.ProfilingEnabled) == "1";
     }
 }

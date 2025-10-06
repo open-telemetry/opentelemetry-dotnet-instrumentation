@@ -47,9 +47,6 @@ fail_fast: false
 # Configure if the Flush On Unhandled Exception is enabled or not.
 # If omitted or null, false is used.
 flush_on_unhandled_exception: false
-# Configure if the Profiling is enabled or not.
-# If omitted or null, true is used.
-enable_profiling: true
 ```
 
 ### Resource Configuration

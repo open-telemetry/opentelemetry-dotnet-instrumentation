@@ -16,7 +16,6 @@ public class FilebasedGeneralSettingsTests
         {
             Disabled = false,
             FlushOnUnhandledException = true,
-            EnableProfiling = true,
         };
 
         var settings = new GeneralSettings();
@@ -25,7 +24,6 @@ public class FilebasedGeneralSettingsTests
 
         Assert.True(settings.SetupSdk);
         Assert.True(settings.FlushOnUnhandledException);
-        Assert.True(settings.ProfilerEnabled);
     }
 
     [Fact]
