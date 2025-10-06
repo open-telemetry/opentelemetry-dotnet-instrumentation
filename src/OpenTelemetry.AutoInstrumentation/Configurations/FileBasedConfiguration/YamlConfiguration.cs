@@ -22,4 +22,10 @@ internal class YamlConfiguration
     /// </summary>
     [YamlMember(Alias = "resource")]
     public ResourceConfiguration? Resource { get; set; }
+
+    /// <summary>
+    /// Gets or sets the no-code tracing configuration.
+    /// </summary>
+    [YamlMember(Alias = "no_code/development")]
+    public NoCodeConfiguration? NoCode { get; set; }
 }
