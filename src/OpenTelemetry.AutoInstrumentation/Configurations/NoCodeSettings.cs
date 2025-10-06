@@ -1,6 +1,7 @@
 // Copyright The OpenTelemetry Authors
 // SPDX-License-Identifier: Apache-2.0
 
+using System.Diagnostics;
 using OpenTelemetry.AutoInstrumentation.Configurations.FileBasedConfiguration;
 using OpenTelemetry.AutoInstrumentation.Logging;
 using static OpenTelemetry.AutoInstrumentation.InstrumentationDefinitions;
@@ -145,7 +146,9 @@ internal class NoCodeSettings : Settings
 
             Log.Debug($"NoCode adding instrumentation for assembly: '{noCodeTarget.Assembly.Name}', type: '{noCodeTarget.Type}', method: '{noCodeTarget.Method}' with signature: '{string.Join(",", targetSignatureTypes)}'");
 
-            instrumentedMethods.Add(new NoCodeInstrumentedMethod(definition, targetSignatureTypes, noCodeEntry.Span.Name));
+            var activityKind = ParseActivityKind(noCodeEntry.Span.Kind);
+
+            instrumentedMethods.Add(new NoCodeInstrumentedMethod(definition, targetSignatureTypes, noCodeEntry.Span.Name, activityKind));
         }
 
         if (instrumentedMethods.Count > 0)
@@ -153,5 +156,23 @@ internal class NoCodeSettings : Settings
             Enabled = true;
             InstrumentedMethods = instrumentedMethods;
         }
+    }
+
+    private static ActivityKind ParseActivityKind(string? kindString)
+    {
+        if (string.IsNullOrEmpty(kindString))
+        {
+            return ActivityKind.Internal; // Default
+        }
+
+        return kindString!.ToLowerInvariant() switch
+        {
+            "internal" => ActivityKind.Internal,
+            "server" => ActivityKind.Server,
+            "client" => ActivityKind.Client,
+            "producer" => ActivityKind.Producer,
+            "consumer" => ActivityKind.Consumer,
+            _ => ActivityKind.Internal // Default for unknown values
+        };
     }
 }
