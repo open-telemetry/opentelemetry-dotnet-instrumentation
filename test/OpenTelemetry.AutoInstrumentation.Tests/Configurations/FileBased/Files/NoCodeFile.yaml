@@ -6,7 +6,7 @@ no_code/development:
         assembly:
           name: TargetAssembly
           # TODO potenatil minimal and max version
-        type: TargetType
+        type: TargetNamespace.TargetType
         method: TargetMethod
         signature:
           return_type: ReturnType

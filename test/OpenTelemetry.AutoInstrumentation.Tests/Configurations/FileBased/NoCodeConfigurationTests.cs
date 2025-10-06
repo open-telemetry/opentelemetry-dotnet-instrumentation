@@ -23,7 +23,7 @@ public class NoCodeConfigurationTests
         var target = noCodeEntry.Target;
         Assert.NotNull(target.Assembly);
         Assert.Equal("TargetAssembly", target.Assembly.Name);
-        Assert.Equal("TargetType", target.Type);
+        Assert.Equal("TargetNamespace.TargetType", target.Type);
         Assert.Equal("TargetMethod", target.Method);
 
         Assert.NotNull(target.Signature);
