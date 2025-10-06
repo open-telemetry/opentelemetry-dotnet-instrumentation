@@ -52,6 +52,8 @@ internal class GeneralSettings : Settings
         SetupSdk = !configuration.Disabled;
         FlushOnUnhandledException = configuration.FlushOnUnhandledException;
 
+        // Using the environment variable instead of YamlConfiguration because the default.NET environment variable
+        // is used for enabling the profiler, and without this environment variable, the profiler will not work.
         ProfilerEnabled = Environment.GetEnvironmentVariable(ConfigurationKeys.ProfilingEnabled) == "1";
     }
 }
