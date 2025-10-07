@@ -33,5 +33,6 @@ public class NoCodeConfigurationTests
 
         Assert.NotNull(noCodeEntry.Span);
         Assert.Equal("SpanName", noCodeEntry.Span.Name);
+        Assert.Equal("server", noCodeEntry.Span.Kind);
     }
 }

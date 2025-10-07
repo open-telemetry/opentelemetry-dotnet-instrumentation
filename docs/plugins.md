@@ -104,7 +104,7 @@ public class MyPlugin
 
 > [!NOTE]
 > Automatic Instrumentation can configure particular properties before calling
-> `Configure{Signal}Methods`. It is plugin responsibility to not override this behavior.
+> `Configure{Signal}Options`. It is plugin responsibility to not override this behavior.
 > Example: `OpenTelemetry.Instrumentation.Http.HttpClientTraceInstrumentationOptions.EnrichWithHttpWebRequest`
 > is conditionally set by this project.
 

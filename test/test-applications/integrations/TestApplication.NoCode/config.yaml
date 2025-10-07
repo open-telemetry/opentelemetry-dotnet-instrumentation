@@ -12,6 +12,7 @@ no_code/development:
           parameter_types:
       span:
          name: Span-TestMethodStatic
+         kind: internal
     - target:
         assembly:
           name: TestApplication.NoCode
@@ -22,6 +23,7 @@ no_code/development:
           parameter_types:
       span:
          name: Span-TestMethod0
+         kind: client
     - target:
         assembly:
           name: TestApplication.NoCode
@@ -32,6 +34,7 @@ no_code/development:
           parameter_types:
       span:
          name: Span-TestMethodA
+         kind: consumer
     - target:
         assembly:
           name: TestApplication.NoCode
@@ -43,6 +46,7 @@ no_code/development:
             - System.String
       span:
          name: Span-TestMethod1String
+         kind: producer
     - target:
         assembly:
           name: TestApplication.NoCode
@@ -54,6 +58,7 @@ no_code/development:
             - System.Int32
       span:
          name: Span-TestMethod1Int
+         kind: server
     - target:
         assembly:
           name: TestApplication.NoCode

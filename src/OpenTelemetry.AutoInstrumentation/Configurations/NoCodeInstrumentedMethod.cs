@@ -1,15 +1,18 @@
 // Copyright The OpenTelemetry Authors
 // SPDX-License-Identifier: Apache-2.0
 
+using System.Diagnostics;
+
 namespace OpenTelemetry.AutoInstrumentation.Configurations;
 
 internal class NoCodeInstrumentedMethod
 {
-    public NoCodeInstrumentedMethod(NativeCallTargetDefinition definition, string[] signatureTypes, string spanName)
+    public NoCodeInstrumentedMethod(NativeCallTargetDefinition definition, string[] signatureTypes, string spanName, ActivityKind activityKind)
     {
         Definition = definition;
         SignatureTypes = signatureTypes;
         SpanName = spanName;
+        ActivityKind = activityKind;
     }
 
     public NativeCallTargetDefinition Definition { get; }
@@ -18,4 +21,6 @@ internal class NoCodeInstrumentedMethod
     public string[] SignatureTypes { get; }
 
     public string SpanName { get; }
+
+    public ActivityKind ActivityKind { get; }
 }

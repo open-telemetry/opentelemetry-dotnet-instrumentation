@@ -10,5 +10,6 @@ internal class NoCodeSpan
     [YamlMember(Alias = "name")]
     public string? Name { get; set; }
 
-    // TODO Add kind
+    [YamlMember(Alias = "kind")]
+    public string? Kind { get; set; }
 }
