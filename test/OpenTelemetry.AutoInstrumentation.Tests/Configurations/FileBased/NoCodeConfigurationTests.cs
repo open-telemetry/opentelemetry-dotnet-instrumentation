@@ -46,6 +46,8 @@ public class NoCodeConfigurationTests
             new() { Name = "attribute_key_double", Value = "123.45", Type = "double" },
             new() { Name = "attribute_key_string_array", Value = new[] { "value1", "value2", "value3" }, Type = "string_array" },
             new() { Name = "attribute_key_string_array_not_supported", Value = new object[] { "value1", new object[] { "value2" }, "value3" }, Type = "string_array" },
+            new() { Name = "attribute_key_bool_array", Value = new[] { true, false, true }, Type = "bool_array" },
+            new() { Name = "attribute_key_bool_array_not_supported", Value = new object[] { true, new[] { false }, true }, Type = "bool_array" },
         ];
 
         Assert.Equivalent(expectedAttributes, noCodeEntry.Span.Attributes);
@@ -58,6 +60,7 @@ public class NoCodeConfigurationTests
         expectedTagList.Add("attribute_key_int", 12345L);
         expectedTagList.Add("attribute_key_double", 123.45);
         expectedTagList.Add("attribute_key_string_array", new[] { "value1", "value2", "value3" });
+        expectedTagList.Add("attribute_key_bool_array", new[] { true, false, true });
 
         Assert.Equal(expectedTagList, tagList);
     }
