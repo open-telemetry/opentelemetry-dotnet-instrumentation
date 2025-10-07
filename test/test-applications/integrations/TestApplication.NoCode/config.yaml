@@ -404,6 +404,27 @@ no_code/development:
           parameter_types:
       span:
          name: Span-TestMethodStaticAsync
+         attributes:
+           - name: attribute_key_string0
+             value: string_value0
+           - name: attribute_key_string1
+             value: string_value1
+           - name: attribute_key_string2
+             value: string_value2
+           - name: attribute_key_string3
+             value: string_value3
+           - name: attribute_key_string4
+             value: string_value4
+           - name: attribute_key_string5
+             value: string_value5
+           - name: attribute_key_string6
+             value: string_value6
+           - name: attribute_key_string7
+             value: string_value7
+           - name: attribute_key_string8
+             value: string_value8
+           - name: attribute_key_string9
+             value: string_value9
     - target:
         assembly:
           name: TestApplication.NoCode

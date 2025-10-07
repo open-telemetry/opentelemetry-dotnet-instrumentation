@@ -24,9 +24,7 @@ public class NoCodeTests : TestHelper
         using var collector = new MockSpansCollector(Output);
         SetExporter(collector);
 
-        ArrayValue av = new ArrayValue { Values = { new AnyValue { StringValue = "value1" }, new AnyValue { StringValue = "value2" }, new AnyValue { StringValue = "value3" } }, };
-
-        List<KeyValue> expectedAttributes = [
+        List<KeyValue> allTypeOfAttributes = [
             new() { Key = "attribute_key_string", Value = new AnyValue { StringValue = "string_value" } },
             new() { Key = "attribute_key_bool", Value = new AnyValue { BoolValue = true } },
             new() { Key = "attribute_key_int", Value = new AnyValue { IntValue = 12345 } },
@@ -37,7 +35,7 @@ public class NoCodeTests : TestHelper
             new() { Key = "attribute_key_double_array", Value = new AnyValue { ArrayValue = new ArrayValue { Values = { new AnyValue { DoubleValue = 123.45 }, new AnyValue { DoubleValue = 678.90 } } } } },
         ];
 
-        collector.Expect("OpenTelemetry.AutoInstrumentation.NoCode", x => AssertSpan(x, "Span-TestMethodStatic", Span.Types.SpanKind.Internal, expectedAttributes));
+        collector.Expect("OpenTelemetry.AutoInstrumentation.NoCode", x => AssertSpan(x, "Span-TestMethodStatic", Span.Types.SpanKind.Internal, allTypeOfAttributes));
         collector.Expect("OpenTelemetry.AutoInstrumentation.NoCode", x => AssertSpan(x, "Span-TestMethod0", Span.Types.SpanKind.Client));
         collector.Expect("OpenTelemetry.AutoInstrumentation.NoCode", x => AssertSpan(x, "Span-TestMethodA", Span.Types.SpanKind.Consumer));
         collector.Expect("OpenTelemetry.AutoInstrumentation.NoCode", x => AssertSpan(x, "Span-TestMethod1String", Span.Types.SpanKind.Producer));
@@ -66,7 +64,22 @@ public class NoCodeTests : TestHelper
         collector.Expect("OpenTelemetry.AutoInstrumentation.NoCode", x => AssertSpan(x, "Span-ReturningTestMethod8"));
         collector.Expect("OpenTelemetry.AutoInstrumentation.NoCode", x => AssertSpan(x, "Span-ReturningTestMethod9"));
 
-        collector.Expect("OpenTelemetry.AutoInstrumentation.NoCode", x => AssertAsyncSpan(x, "Span-TestMethodStaticAsync"));
+        // TagList natively supports up to 9 attributes in the performant way, so we need to verify that more than 9 attributes are supported
+        List<KeyValue> moreThan9Attributes =
+        [
+            new() { Key = "attribute_key_string0", Value = new AnyValue { StringValue = "string_value0" } },
+            new() { Key = "attribute_key_string1", Value = new AnyValue { StringValue = "string_value1" } },
+            new() { Key = "attribute_key_string2", Value = new AnyValue { StringValue = "string_value2" } },
+            new() { Key = "attribute_key_string3", Value = new AnyValue { StringValue = "string_value3" } },
+            new() { Key = "attribute_key_string4", Value = new AnyValue { StringValue = "string_value4" } },
+            new() { Key = "attribute_key_string5", Value = new AnyValue { StringValue = "string_value5" } },
+            new() { Key = "attribute_key_string6", Value = new AnyValue { StringValue = "string_value6" } },
+            new() { Key = "attribute_key_string7", Value = new AnyValue { StringValue = "string_value7" } },
+            new() { Key = "attribute_key_string8", Value = new AnyValue { StringValue = "string_value8" } },
+            new() { Key = "attribute_key_string9", Value = new AnyValue { StringValue = "string_value9" } },
+        ];
+
+        collector.Expect("OpenTelemetry.AutoInstrumentation.NoCode", x => AssertAsyncSpan(x, "Span-TestMethodStaticAsync", Span.Types.SpanKind.Internal, moreThan9Attributes));
         collector.Expect("OpenTelemetry.AutoInstrumentation.NoCode", x => AssertAsyncSpan(x, "Span-TestMethod0Async"));
         collector.Expect("OpenTelemetry.AutoInstrumentation.NoCode", x => AssertAsyncSpan(x, "Span-TestMethodAAsync"));
         collector.Expect("OpenTelemetry.AutoInstrumentation.NoCode", x => AssertAsyncSpan(x, "Span-TestMethod1StringAsync"));
