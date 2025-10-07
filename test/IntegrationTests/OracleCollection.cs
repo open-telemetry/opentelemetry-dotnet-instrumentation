@@ -70,7 +70,7 @@ public class OracleFixture : IAsyncLifetime
             .WithEnvironment("APP_USER_PASSWORD", Password)
             .WithName($"oracle-{port}")
             .WithPortBinding(port, OraclePort)
-            .WithWaitStrategy(Wait.ForUnixContainer().UntilPortIsAvailable(OraclePort))
+            .WithWaitStrategy(Wait.ForUnixContainer().UntilInternalTcpPortIsAvailable(OraclePort))
             .WithWaitStrategy(Wait.ForUnixContainer().UntilCommandIsCompleted("./healthcheck.sh"));
 
         var container = containersBuilder.Build();

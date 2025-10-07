@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <ItemGroup>
     <PackageReference Include="Newtonsoft.Json" />
@@ -9,6 +9,24 @@
   <ItemGroup>
     <ProjectReference Include="..\..\src\OpenTelemetry.AutoInstrumentation\OpenTelemetry.AutoInstrumentation.csproj" />
     <ProjectReference Include="..\..\tools\DependencyListGenerator\DependencyListGenerator.csproj" Condition=" '$(TargetFramework)' == 'net9.0' " />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="Configurations\FileBased\Files\NoCodeFile.yaml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Configurations\FileBased\Files\TestGeneralFile.yaml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Configurations\FileBased\Files\TestResourceFile.yaml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Configurations\FileBased\Files\TestGeneralFileEnvVars.yaml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Configurations\FileBased\Files\TestResourceFileEnvVars.yaml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 
 </Project>

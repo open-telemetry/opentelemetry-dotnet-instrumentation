@@ -3,6 +3,7 @@
 
 #if NETFRAMEWORK
 
+using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using Microsoft.Win32;
 
@@ -11,7 +12,9 @@ namespace OpenTelemetry.AutoInstrumentation.Loader;
 /// <summary>
 /// A class that attempts to load the OpenTelemetry.AutoInstrumentation .NET assembly.
 /// </summary>
-internal partial class Loader
+/// [ToDo]: Change file name in the next PR. Remove suppress.
+[SuppressMessage("StyleCop.CSharp.OrderingRules", "SA1202:ElementsMustBeOrderedByAccess", Justification = "Make code review easy.")]
+internal partial class AssemblyResolver
 {
     private static string ResolveManagedProfilerDirectory()
     {
@@ -52,15 +55,16 @@ internal partial class Loader
         }
         catch (Exception ex)
         {
-            Logger.Debug(ex, "Error getting .NET Framework version from Windows Registry");
+            logger.Debug(ex, "Error getting .NET Framework version from Windows Registry");
         }
 
         return "net462";
     }
 
-    private static Assembly? AssemblyResolve_ManagedProfilerDependencies(object sender, ResolveEventArgs args)
+    internal static Assembly? AssemblyResolve_ManagedProfilerDependencies(object sender, ResolveEventArgs args)
     {
         var assemblyName = new AssemblyName(args.Name).Name;
+        logger.Debug($"Check assembly {assemblyName}");
 
         // On .NET Framework, having a non-US locale can cause mscorlib
         // to enter the AssemblyResolve event when searching for resources
@@ -72,7 +76,7 @@ internal partial class Loader
             return null;
         }
 
-        Logger.Debug("Requester [{0}] requested [{1}]", args.RequestingAssembly?.FullName ?? "<null>", args.Name ?? "<null>");
+        logger.Debug("Requester [{0}] requested [{1}]", args.RequestingAssembly?.FullName ?? "<null>", args.Name ?? "<null>");
 
         // All MongoDB* are signed and does not follow https://learn.microsoft.com/en-us/dotnet/standard/library-guidance/versioning#assembly-version
         // There is no possibility to automatically redirect from 2.28.0 to 2.29.0.
@@ -85,12 +89,12 @@ internal partial class Loader
             try
             {
                 var mongoAssembly = Assembly.Load(assemblyName);
-                Logger.Debug<string, bool>("Assembly.Load(\"{0}\") succeeded={1}", assemblyName, mongoAssembly != null);
+                logger.Debug<string, bool>("Assembly.Load(\"{0}\") succeeded={1}", assemblyName, mongoAssembly != null);
                 return mongoAssembly;
             }
             catch (Exception ex)
             {
-                Logger.Debug(ex, "Assembly.Load(\"{0}\") Exception: {1}", assemblyName, ex.Message);
+                logger.Debug(ex, "Assembly.Load(\"{0}\") Exception: {1}", assemblyName, ex.Message);
             }
 
             return null;
@@ -112,7 +116,7 @@ internal partial class Loader
                     }
                     catch (Exception ex)
                     {
-                        Logger.Debug(ex, "Error reading .link file {0}", link);
+                        logger.Debug(ex, "Error reading .link file {0}", link);
                     }
                 }
                 else
@@ -128,12 +132,12 @@ internal partial class Loader
             try
             {
                 var loadedAssembly = Assembly.LoadFrom(path);
-                Logger.Debug<string, bool>("Assembly.LoadFrom(\"{0}\") succeeded={1}", path, loadedAssembly != null);
+                logger.Debug<string, bool>("Assembly.LoadFrom(\"{0}\") succeeded={1}", path, loadedAssembly != null);
                 return loadedAssembly;
             }
             catch (Exception ex)
             {
-                Logger.Debug(ex, "Assembly.LoadFrom(\"{0}\") Exception: {1}", path, ex.Message);
+                logger.Debug(ex, "Assembly.LoadFrom(\"{0}\") Exception: {1}", path, ex.Message);
             }
         }
 

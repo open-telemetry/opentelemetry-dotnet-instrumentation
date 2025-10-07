@@ -10,6 +10,7 @@ using OpenTelemetry.AutoInstrumentation.Configurations;
 using OpenTelemetry.AutoInstrumentation.ContinuousProfiler;
 #endif
 using OpenTelemetry.AutoInstrumentation.Diagnostics;
+using OpenTelemetry.AutoInstrumentation.Instrumentations.NoCode;
 using OpenTelemetry.AutoInstrumentation.Loading;
 using OpenTelemetry.AutoInstrumentation.Logging;
 using OpenTelemetry.AutoInstrumentation.Plugins;
@@ -56,6 +57,8 @@ internal static class Instrumentation
 
     internal static Lazy<GeneralSettings> GeneralSettings { get; } = new(() => Settings.FromDefaultSources<GeneralSettings>(FailFastSettings.Value.FailFast));
 
+    internal static Lazy<ResourceSettings> ResourceSettings { get; } = new(() => Settings.FromDefaultSources<ResourceSettings>(FailFastSettings.Value.FailFast));
+
     internal static Lazy<TracerSettings> TracerSettings { get; } = new(() => Settings.FromDefaultSources<TracerSettings>(FailFastSettings.Value.FailFast));
 
     internal static Lazy<MetricSettings> MetricSettings { get; } = new(() => Settings.FromDefaultSources<MetricSettings>(FailFastSettings.Value.FailFast));
@@ -63,6 +66,8 @@ internal static class Instrumentation
     internal static Lazy<LogSettings> LogSettings { get; } = new(() => Settings.FromDefaultSources<LogSettings>(FailFastSettings.Value.FailFast));
 
     internal static Lazy<SdkSettings> SdkSettings { get; } = new(() => Settings.FromDefaultSources<SdkSettings>(FailFastSettings.Value.FailFast));
+
+    internal static Lazy<NoCodeSettings> NoCodeSettings { get; } = new(() => Settings.FromDefaultSources<NoCodeSettings>(FailFastSettings.Value.FailFast));
 
     /// <summary>
     /// Initialize the OpenTelemetry SDK with a pre-defined set of exporters, shims, and
@@ -134,7 +139,7 @@ internal static class Instrumentation
                     var builder = Sdk
                         .CreateTracerProviderBuilder()
                         .InvokePluginsBefore(_pluginManager)
-                        .SetResourceBuilder(ResourceConfigurator.CreateResourceBuilder(GeneralSettings.Value.EnabledResourceDetectors))
+                        .SetResourceBuilder(ResourceConfigurator.CreateResourceBuilder(ResourceSettings.Value))
                         .UseEnvironmentVariables(LazyInstrumentationLoader, TracerSettings.Value, _pluginManager)
                         .InvokePluginsAfter(_pluginManager);
 
@@ -156,7 +161,7 @@ internal static class Instrumentation
                     var builder = Sdk
                         .CreateMeterProviderBuilder()
                         .InvokePluginsBefore(_pluginManager)
-                        .SetResourceBuilder(ResourceConfigurator.CreateResourceBuilder(GeneralSettings.Value.EnabledResourceDetectors))
+                        .SetResourceBuilder(ResourceConfigurator.CreateResourceBuilder(ResourceSettings.Value))
                         .UseEnvironmentVariables(LazyInstrumentationLoader, MetricSettings.Value, _pluginManager)
                         .InvokePluginsAfter(_pluginManager);
 
@@ -181,6 +186,11 @@ internal static class Instrumentation
         if (GeneralSettings.Value.ProfilerEnabled)
         {
             RegisterDirectBytecodeInstrumentations(InstrumentationDefinitions.GetAllDefinitions());
+            if (NoCodeSettings.Value.Enabled)
+            {
+                NoCodeIntegrationHelper.NoCodeEntries = NoCodeSettings.Value.InstrumentedMethods;
+                RegisterBytecodeInstrumentations(NoCodeSettings.Value.GetDirectPayload(), "direct, no-code", NativeMethods.AddInstrumentations);
+            }
 
             try
             {
@@ -233,7 +243,7 @@ internal static class Instrumentation
             else
             {
                 Logger.Debug(
-                    $"Selective sampling configuration: sampling interval: {configuredSamplingInterval}, export interval: {configuredExportInterval}, export timeout: {configuredExportTimeout}, max memory samples per minute: {maxMemorySamplesPerMinute}, export interval: {exportInterval}, export timeout: {exportTimeout}, samples exporter: {exporter.GetType()}");
+                    $"Selective sampling configuration: sampling interval: {configuredSamplingInterval}, export interval: {configuredExportInterval}, export timeout: {configuredExportTimeout}, samples exporter: {exporter.GetType()}");
                 selectiveSamplingInterval = configuredSamplingInterval;
                 if (!TryInitializeSelectedThreadSamplingExport(exporter, configuredExportInterval, configuredExportTimeout))
                 {
@@ -355,7 +365,7 @@ internal static class Instrumentation
 
             // TODO: plugins support
             var loggerProvider = loggerProviderBuilder!
-                .SetResourceBuilder(ResourceConfigurator.CreateResourceBuilder(GeneralSettings.Value.EnabledResourceDetectors))
+                .SetResourceBuilder(ResourceConfigurator.CreateResourceBuilder(ResourceSettings.Value))
                 .UseEnvironmentVariables(LazyInstrumentationLoader, LogSettings.Value, _pluginManager!)
                 .Build();
             Logger.Information("OpenTelemetry logger provider initialized.");
@@ -457,7 +467,7 @@ internal static class Instrumentation
                     DelayedInitialization.Traces.AddGrpcClient(lazyInstrumentationLoader, pluginManager, tracerSettings);
                     break;
                 case TracerInstrumentation.SqlClient:
-                    DelayedInitialization.Traces.AddSqlClient(lazyInstrumentationLoader, pluginManager, tracerSettings);
+                    DelayedInitialization.Traces.AddSqlClient(lazyInstrumentationLoader, pluginManager);
                     break;
                 case TracerInstrumentation.Quartz:
                     DelayedInitialization.Traces.AddQuartz(lazyInstrumentationLoader, pluginManager);

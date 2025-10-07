@@ -1,7 +1,7 @@
 // Copyright The OpenTelemetry Authors
 // SPDX-License-Identifier: Apache-2.0
 
-using OpenTelemetry.Resources;
+using OpenTelemetry.Trace;
 
 namespace TestApplication.SelectiveSampler.Plugins;
 
@@ -12,9 +12,10 @@ public class SelectiveSamplerPlugin
         return SelectiveSamplerPluginHelper.GetTestConfiguration();
     }
 
-    public ResourceBuilder ConfigureResource(ResourceBuilder builder)
+    public TracerProviderBuilder BeforeConfigureTracerProvider(
+        TracerProviderBuilder builder)
     {
-        ResourcesProvider.Configure(builder);
+        builder.AddProcessor<FrequentSamplingProcessor>();
         return builder;
     }
 }

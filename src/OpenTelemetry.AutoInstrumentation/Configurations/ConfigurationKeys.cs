@@ -52,6 +52,33 @@ internal partial class ConfigurationKeys
     public const string EnabledResourceDetectorTemplate = "OTEL_DOTNET_AUTO_{0}_RESOURCE_DETECTOR_ENABLED";
 
     /// <summary>
+    /// Configuration key template for resource attributes.
+    /// </summary>
+    public const string ResourceAttributes = "OTEL_RESOURCE_ATTRIBUTES";
+
+    /// <summary>
+    /// Configuration key for setting the service name.
+    /// </summary>
+    public const string ServiceName = "OTEL_SERVICE_NAME";
+
+    /// <summary>
+    /// Configuration keys for file based configuration.
+    /// </summary>
+    public static class FileBasedConfiguration
+    {
+        /// <summary>
+        /// Configuration key for enabling file based configuration.
+        /// </summary>
+        public const string Enabled = "OTEL_EXPERIMENTAL_FILE_BASED_CONFIGURATION_ENABLED";
+
+        /// <summary>
+        /// Configuration key for the path to the configuration file.
+        /// Default is <c>"config.yaml"</c>.
+        /// </summary>
+        public const string FileName = "OTEL_EXPERIMENTAL_CONFIG_FILE";
+    }
+
+    /// <summary>
     /// Configuration keys for traces.
     /// </summary>
     public static class Traces
@@ -124,12 +151,12 @@ internal partial class ConfigurationKeys
             /// Configuration key for Entity Framework Core instrumentation to enable passing text query as a db.statement attribute.
             /// </summary>
             public const string EntityFrameworkCoreSetDbStatementForText = "OTEL_DOTNET_AUTO_ENTITYFRAMEWORKCORE_SET_DBSTATEMENT_FOR_TEXT";
-#endif
 
             /// <summary>
             /// Configuration key for GraphQL instrumentation to enable passing query as a document attribute.
             /// </summary>
             public const string GraphQLSetDocument = "OTEL_DOTNET_AUTO_GRAPHQL_SET_DOCUMENT";
+#endif
 
             /// <summary>
             /// Configuration key for GrpcNetClient instrumentation to enable capturing request metadata as span tags.
@@ -155,11 +182,6 @@ internal partial class ConfigurationKeys
             /// Configuration key for Oracle Client instrumentation to enable passing text query as a db.statement attribute.
             /// </summary>
             public const string OracleMdaSetDbStatementForText = "OTEL_DOTNET_AUTO_ORACLEMDA_SET_DBSTATEMENT_FOR_TEXT";
-
-            /// <summary>
-            /// Configuration key for SQL Client instrumentation to enable passing text query as a db.statement attribute.
-            /// </summary>
-            public const string SqlClientSetDbStatementForText = "OTEL_DOTNET_AUTO_SQLCLIENT_SET_DBSTATEMENT_FOR_TEXT";
         }
     }
 

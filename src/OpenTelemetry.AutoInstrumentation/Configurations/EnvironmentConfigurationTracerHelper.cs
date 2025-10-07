@@ -131,7 +131,7 @@ internal static class EnvironmentConfigurationTracerHelper
         public static TracerProviderBuilder AddAspNetInstrumentation(TracerProviderBuilder builder, PluginManager pluginManager, LazyInstrumentationLoader lazyInstrumentationLoader, TracerSettings tracerSettings)
         {
             DelayedInitialization.Traces.AddAspNet(lazyInstrumentationLoader, pluginManager, tracerSettings);
-            return builder.AddSource(OpenTelemetry.Instrumentation.AspNet.TelemetryHttpModule.AspNetSourceName);
+            return builder.AddSource("OpenTelemetry.Instrumentation.AspNet");
         }
 #endif
 
@@ -161,7 +161,7 @@ internal static class EnvironmentConfigurationTracerHelper
         [MethodImpl(MethodImplOptions.NoInlining)]
         public static TracerProviderBuilder AddSqlClientInstrumentation(TracerProviderBuilder builder, PluginManager pluginManager, LazyInstrumentationLoader lazyInstrumentationLoader, TracerSettings tracerSettings)
         {
-            DelayedInitialization.Traces.AddSqlClient(lazyInstrumentationLoader, pluginManager, tracerSettings);
+            DelayedInitialization.Traces.AddSqlClient(lazyInstrumentationLoader, pluginManager);
 
             return builder.AddSource("OpenTelemetry.Instrumentation.SqlClient");
         }

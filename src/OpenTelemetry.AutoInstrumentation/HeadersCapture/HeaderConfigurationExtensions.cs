@@ -9,11 +9,11 @@ internal static class HeaderConfigurationExtensions
 {
     public static IReadOnlyList<AdditionalTag> ParseHeaders(this Configuration source, string key, Func<string, AdditionalTag> stringToHeaderCacheConverter)
     {
-        var headers = source.ParseList(key, ',');
+        var headers = source.ParseList(key, Constants.ConfigurationValues.Separator);
 
         if (headers.Count == 0)
         {
-            return Array.Empty<AdditionalTag>();
+            return [];
         }
 
         return headers.Select(stringToHeaderCacheConverter).ToArray();

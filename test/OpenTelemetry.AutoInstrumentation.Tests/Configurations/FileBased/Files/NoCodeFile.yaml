@@ -1,0 +1,18 @@
+file_format: "1.0-rc.1"
+
+no_code/development:
+  targets:
+    - target:
+        assembly:
+          name: TargetAssembly
+          # TODO potenatil minimal and max version
+        type: TargetNamespace.TargetType
+        method: TargetMethod
+        signature:
+          return_type: ReturnType
+          parameter_types:
+            - ParameterType1
+            - ParameterType2
+      span:
+         name: SpanName
+         kind: server
