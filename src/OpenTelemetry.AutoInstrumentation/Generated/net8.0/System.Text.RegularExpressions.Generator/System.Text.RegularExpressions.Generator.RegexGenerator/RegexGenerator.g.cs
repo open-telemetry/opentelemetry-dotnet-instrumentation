@@ -25,7 +25,7 @@ namespace OpenTelemetry.AutoInstrumentation.Configurations.FileBasedConfiguratio
         /// ○ Match '}'.<br/>
         /// </code>
         /// </remarks>
-        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Text.RegularExpressions.Generator", "8.0.12.41914")]
+        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Text.RegularExpressions.Generator", "8.0.12.36514")]
         private static partial global::System.Text.RegularExpressions.Regex GetEnvVarRegex() => global::System.Text.RegularExpressions.Generated.GetEnvVarRegex_0.Instance;
     }
 }
@@ -43,7 +43,7 @@ namespace System.Text.RegularExpressions.Generated
     using System.Threading;
 
     /// <summary>Custom <see cref="Regex"/>-derived type for the GetEnvVarRegex method.</summary>
-    [GeneratedCodeAttribute("System.Text.RegularExpressions.Generator", "8.0.12.41914")]
+    [GeneratedCodeAttribute("System.Text.RegularExpressions.Generator", "8.0.12.36514")]
     file sealed class GetEnvVarRegex_0 : Regex
     {
         /// <summary>Cached, thread-safe singleton instance.</summary>
@@ -59,7 +59,7 @@ namespace System.Text.RegularExpressions.Generated
             base.factory = new RunnerFactory();
             base.capsize = 3;
         }
-            
+    
         /// <summary>Provides a factory for creating <see cref="RegexRunner"/> instances to be used by methods on <see cref="Regex"/>.</summary>
         private sealed class RunnerFactory : RegexRunnerFactory
         {
@@ -324,7 +324,7 @@ namespace System.Text.RegularExpressions.Generated
     }
     
     /// <summary>Helper methods used by generated <see cref="Regex"/>-derived implementations.</summary>
-    [GeneratedCodeAttribute("System.Text.RegularExpressions.Generator", "8.0.12.41914")]
+    [GeneratedCodeAttribute("System.Text.RegularExpressions.Generator", "8.0.12.36514")]
     file static class Utilities
     {
         /// <summary>Default timeout value set in <see cref="AppContext"/>, or <see cref="Regex.InfiniteMatchTimeout"/> if none was set.</summary>

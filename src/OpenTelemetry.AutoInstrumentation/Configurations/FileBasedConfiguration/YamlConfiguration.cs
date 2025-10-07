@@ -49,4 +49,10 @@ internal class YamlConfiguration
     /// </summary>
     [YamlMember(Alias = "no_code/development")]
     public NoCodeConfiguration? NoCode { get; set; }
+
+    /// <summary>
+    /// Gets or sets the plugins configuration.
+    /// </summary>
+    [YamlMember(Alias = "plugins/development")]
+    public PluginsConfiguration? Plugins { get; set; }
 }
