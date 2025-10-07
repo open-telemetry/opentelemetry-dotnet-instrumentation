@@ -26,19 +26,18 @@ no_code/development:
            - name: attribute_key_double
              value: 123.45
              type: double
-           # TODO Uncomment when parsing attributes is supported
            - name: attribute_key_string_array
              value: ["value1", "value2", "value3"]
              type: string_array
            - name: attribute_key_bool_array
              value: [true, false, true]
              type: bool_array
-           # - name: attribute_key_int_array
-           #   value: [123, 456, 789]
-           #   type: int_array
-           # - name: attribute_key_double_array
-           #   value: [123.45, 678.90]
-           #   type: double_array
+           - name: attribute_key_int_array
+             value: [123, 456, 789]
+             type: int_array
+           - name: attribute_key_double_array
+             value: [123.45, 678.90]
+             type: double_array
     - target:
         assembly:
           name: TestApplication.NoCode

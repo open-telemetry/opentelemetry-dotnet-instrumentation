@@ -77,9 +77,9 @@ internal class NoCodeSpan
                     {
                         tagList.Add(attributeName, intValue);
                     }
-                    else if (attributeValue is string intStringValue && long.TryParse(intStringValue, NumberStyles.Integer, CultureInfo.InvariantCulture, out var parsedInt))
+                    else if (attributeValue is string longStringValue && long.TryParse(longStringValue, NumberStyles.Integer, CultureInfo.InvariantCulture, out var parsedLong))
                     {
-                        tagList.Add(attributeName, parsedInt);
+                        tagList.Add(attributeName, parsedLong);
                     }
                     else
                     {
@@ -168,10 +168,72 @@ internal class NoCodeSpan
 
                     continue;
                 case "int_array":
-                    Log.Debug("NoCode - attribute is marked as int_array. It is not supported yet. Skipping.", attributeValue);
+                    if (attributeValue is List<object> objectIntValues)
+                    {
+                        var longs = new long[objectIntValues.Count];
+                        var nonLongValue = false;
+                        for (var j = 0; j < objectIntValues.Count; j++)
+                        {
+                            if (objectIntValues[j] is long longValueFromArray)
+                            {
+                                longs[j] = longValueFromArray;
+                            }
+                            else if (objectIntValues[j] is string longStringValue && long.TryParse(longStringValue, NumberStyles.Integer, CultureInfo.InvariantCulture, out var parsedLong))
+                            {
+                                longs[j] = parsedLong;
+                            }
+                            else
+                            {
+                                nonLongValue = true;
+                                Log.Debug("NoCode - attribute is marked as int_array but one of the values does not looks like a int '{0}'. Skipping the whole array.", objectIntValues[j]);
+                                break;
+                            }
+                        }
+
+                        if (!nonLongValue)
+                        {
+                            tagList.Add(attributeName, longs);
+                        }
+                    }
+                    else
+                    {
+                        Log.Debug("NoCode - attribute is marked as int_array but the value does not looks like a integers '{0}'. Skipping.", attributeValue);
+                    }
+
                     continue;
                 case "double_array":
-                    Log.Debug("NoCode - attribute is marked as double_array. It is not supported yet. Skipping.", attributeValue);
+                    if (attributeValue is List<object> objectDoubleValues)
+                    {
+                        var doubles = new double[objectDoubleValues.Count];
+                        var nodDoubleValue = false;
+                        for (var j = 0; j < objectDoubleValues.Count; j++)
+                        {
+                            if (objectDoubleValues[j] is double doubleValueFromArray)
+                            {
+                                doubles[j] = doubleValueFromArray;
+                            }
+                            else if (objectDoubleValues[j] is string doubleStringValue && double.TryParse(doubleStringValue, NumberStyles.Float | NumberStyles.AllowThousands, CultureInfo.InvariantCulture, out var parsedDouble))
+                            {
+                                doubles[j] = parsedDouble;
+                            }
+                            else
+                            {
+                                nodDoubleValue = true;
+                                Log.Debug("NoCode - attribute is marked as double_array but one of the values does not looks like a int '{0}'. Skipping the whole array.", objectDoubleValues[j]);
+                                break;
+                            }
+                        }
+
+                        if (!nodDoubleValue)
+                        {
+                            tagList.Add(attributeName, doubles);
+                        }
+                    }
+                    else
+                    {
+                        Log.Debug("NoCode - attribute is marked as double_array but the value does not looks like a doubles '{0}'. Skipping.", attributeValue);
+                    }
+
                     continue;
 
                 default:

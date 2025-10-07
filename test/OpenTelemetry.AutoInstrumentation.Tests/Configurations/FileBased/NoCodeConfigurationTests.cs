@@ -48,6 +48,10 @@ public class NoCodeConfigurationTests
             new() { Name = "attribute_key_string_array_not_supported", Value = new object[] { "value1", new object[] { "value2" }, "value3" }, Type = "string_array" },
             new() { Name = "attribute_key_bool_array", Value = new[] { true, false, true }, Type = "bool_array" },
             new() { Name = "attribute_key_bool_array_not_supported", Value = new object[] { true, new[] { false }, true }, Type = "bool_array" },
+            new() { Name = "attribute_key_int_array", Value = new[] { 123, 456, 789 }, Type = "int_array" },
+            new() { Name = "attribute_key_int_array_not_supported", Value = new object[] { new[] { 123 }, 456, 789 }, Type = "int_array" },
+            new() { Name = "attribute_key_double_array", Value = new object[] { 123.45, 678.90 }, Type = "double_array" },
+            new() { Name = "attribute_key_double_array_not_supported", Value = new object[] { 123.45, new[] { 678.90 } }, Type = "double_array" },
         ];
 
         Assert.Equivalent(expectedAttributes, noCodeEntry.Span.Attributes);
@@ -61,6 +65,8 @@ public class NoCodeConfigurationTests
         expectedTagList.Add("attribute_key_double", 123.45);
         expectedTagList.Add("attribute_key_string_array", new[] { "value1", "value2", "value3" });
         expectedTagList.Add("attribute_key_bool_array", new[] { true, false, true });
+        expectedTagList.Add("attribute_key_int_array", new[] { 123L, 456L, 789L });
+        expectedTagList.Add("attribute_key_double_array", new[] { 123.45, 678.90 });
 
         Assert.Equal(expectedTagList, tagList);
     }
