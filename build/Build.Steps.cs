@@ -399,7 +399,7 @@ partial class Build
 
         if (IsWin)
         {
-            (TracerHomeDirectory / "netfx" ).GlobFiles("**/*.link").DeleteFiles();
+            (TracerHomeDirectory / "netfx").GlobFiles("**/*.link").DeleteFiles();
             var latestFramework = TargetFramework.NetFramework.Last();
             (TracerHomeDirectory / "netfx" / latestFramework).GlobFiles("*.*")
                 .Where(file => TargetFramework.NetFramework.TakeUntil(older => older == latestFramework)

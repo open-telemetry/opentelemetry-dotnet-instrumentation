@@ -74,14 +74,14 @@ public static class AssemblyRedirectionSourceGenerator
         {
             foreach (var fileName in Directory.EnumerateFiles(fx.Value))
             {
-                    var filenameToProcess = fileName;
-                    if (Path.GetExtension(fileName) == "link")
-                    {
-                        filenameToProcess = Path.Combine(generatedFilePath, File.ReadAllText(fileName),
-                            Path.GetFileNameWithoutExtension(fileName));
-                    }
+                var filenameToProcess = fileName;
+                if (Path.GetExtension(fileName) == "link")
+                {
+                    filenameToProcess = Path.Combine(generatedFilePath, File.ReadAllText(fileName),
+                        Path.GetFileNameWithoutExtension(fileName));
+                }
 
-                    Process(filenameToProcess, fx.Key);
+                Process(filenameToProcess, fx.Key);
             }
         }
 
