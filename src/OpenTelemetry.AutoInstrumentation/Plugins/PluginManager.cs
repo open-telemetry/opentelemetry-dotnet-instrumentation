@@ -13,7 +13,7 @@ internal partial class PluginManager
 {
     private readonly IReadOnlyList<(Type Type, object Instance)> _plugins;
 
-    public PluginManager(GeneralSettings settings)
+    public PluginManager(PluginsSettings settings)
     {
         var plugins = new List<(Type, object)>();
 
@@ -131,10 +131,7 @@ internal partial class PluginManager
         foreach (var plugin in _plugins)
         {
             var mi = plugin.Type.GetMethod(methodName, Type.EmptyTypes);
-            if (mi is not null)
-            {
-                mi.Invoke(plugin.Instance, null);
-            }
+            mi?.Invoke(plugin.Instance, null);
         }
     }
 
@@ -142,11 +139,8 @@ internal partial class PluginManager
     {
         foreach (var plugin in _plugins)
         {
-            var mi = plugin.Type.GetMethod(methodName, new[] { arg.Type });
-            if (mi is not null)
-            {
-                mi.Invoke(plugin.Instance, new object[] { arg.Value });
-            }
+            var mi = plugin.Type.GetMethod(methodName, [arg.Type]);
+            mi?.Invoke(plugin.Instance, [arg.Value]);
         }
     }
 }

@@ -30,8 +30,15 @@ public class SettingsTests : IDisposable
     {
         var settings = Settings.FromDefaultSources<GeneralSettings>(false);
 
-        Assert.Empty(settings.Plugins);
         Assert.False(settings.FlushOnUnhandledException);
+    }
+
+    [Fact]
+    internal void PluginsSettings_DefaultValues()
+    {
+        var settings = Settings.FromDefaultSources<PluginsSettings>(false);
+
+        Assert.Empty(settings.Plugins);
     }
 
     [Fact]

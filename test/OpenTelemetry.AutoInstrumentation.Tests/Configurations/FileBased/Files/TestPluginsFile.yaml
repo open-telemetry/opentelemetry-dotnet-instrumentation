@@ -1,0 +1,5 @@
+file_format: "1.0-rc.1"
+plugins/development:
+  plugins:
+    - Test1.Plugins.Plugin, Test1.Plugins
+    - Test2.Plugins.Plugin, Test2.Plugins
