@@ -3729,14 +3729,15 @@ void CorProfiler::DetectFrameworkVersion()
     {
         if (key <= frameworkVersion && key > selectedKey)
         {
-            selectedKey = key;
+            selectedKey                                      = key;
             assembly_version_redirect_map_current_framework_ = &values;
         }
     }
 
     if (selectedKey != 0)
     {
-        Logger::Warn("DetectFrameworkVersion: No assembly redirection tables found. Assembly version redirecting will be disabled.");
+        Logger::Warn("DetectFrameworkVersion: No assembly redirection tables found. Assembly version redirecting will "
+                     "be disabled.");
     }
     else
     {
