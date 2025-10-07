@@ -102,3 +102,4 @@ propagator:
     b3multi:      # B3 multi-header propagator
   # Alternatively, configure via a comma-separated list (same format as OTEL_PROPAGATORS).
   composite_list: ${OTEL_PROPAGATORS}
+```
