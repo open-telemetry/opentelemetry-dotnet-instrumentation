@@ -290,16 +290,19 @@ partial class Build
                     .SetFramework(framework)
                     .SetOutput(TracerHomeDirectory / MapToFolderOutput(framework))));
 
-            // Publish OpenTelemetry.AutoInstrumentation.Assemblies.NetFramework for .NET Framework targets
-            DotNetPublish(s => s
-                .SetProject(Solution.GetProjectByName(Projects.AutoInstrumentationNetFxAssemblies))
-                .SetConfiguration(BuildConfiguration)
-                .SetTargetPlatformAnyCPU()
-                .EnableNoBuild()
-                .SetNoRestore(NoRestore)
-                .CombineWith(TargetFrameworksNetFx, (p, framework) => p
-                    .SetFramework(framework)
-                    .SetOutput(TracerHomeDirectory / MapToFolderOutputNetFx(framework))));
+            if (IsWin)
+            {
+                // Publish OpenTelemetry.AutoInstrumentation.Assemblies.NetFramework for .NET Framework targets
+                DotNetPublish(s => s
+                    .SetProject(Solution.GetProjectByName(Projects.AutoInstrumentationNetFxAssemblies))
+                    .SetConfiguration(BuildConfiguration)
+                    .SetTargetPlatformAnyCPU()
+                    .EnableNoBuild()
+                    .SetNoRestore(NoRestore)
+                    .CombineWith(TargetFrameworksNetFx, (p, framework) => p
+                        .SetFramework(framework)
+                        .SetOutput(TracerHomeDirectory / MapToFolderOutputNetFx(framework))));
+            }
 
             // StartupHook is supported starting .Net Core 3.1.
             // We need to emit AutoInstrumentationStartupHook for .Net Core 3.1 target framework
