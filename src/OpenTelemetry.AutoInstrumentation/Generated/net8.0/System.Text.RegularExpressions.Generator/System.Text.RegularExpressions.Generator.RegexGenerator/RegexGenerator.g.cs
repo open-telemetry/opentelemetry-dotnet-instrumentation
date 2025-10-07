@@ -25,7 +25,7 @@ namespace OpenTelemetry.AutoInstrumentation.Configurations.FileBasedConfiguratio
         /// ○ Match '}'.<br/>
         /// </code>
         /// </remarks>
-        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Text.RegularExpressions.Generator", "8.0.12.36514")]
+        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Text.RegularExpressions.Generator", "8.0.12.41914")]
         private static partial global::System.Text.RegularExpressions.Regex GetEnvVarRegex() => global::System.Text.RegularExpressions.Generated.GetEnvVarRegex_0.Instance;
     }
 }
@@ -43,12 +43,12 @@ namespace System.Text.RegularExpressions.Generated
     using System.Threading;
 
     /// <summary>Custom <see cref="Regex"/>-derived type for the GetEnvVarRegex method.</summary>
-    [GeneratedCodeAttribute("System.Text.RegularExpressions.Generator", "8.0.12.36514")]
+    [GeneratedCodeAttribute("System.Text.RegularExpressions.Generator", "8.0.12.41914")]
     file sealed class GetEnvVarRegex_0 : Regex
     {
         /// <summary>Cached, thread-safe singleton instance.</summary>
         internal static readonly GetEnvVarRegex_0 Instance = new();
-    
+
         /// <summary>Initializes the instance.</summary>
         private GetEnvVarRegex_0()
         {
@@ -59,13 +59,13 @@ namespace System.Text.RegularExpressions.Generated
             base.factory = new RunnerFactory();
             base.capsize = 3;
         }
-    
+
         /// <summary>Provides a factory for creating <see cref="RegexRunner"/> instances to be used by methods on <see cref="Regex"/>.</summary>
         private sealed class RunnerFactory : RegexRunnerFactory
         {
             /// <summary>Creates an instance of a <see cref="RegexRunner"/> used by methods on <see cref="Regex"/>.</summary>
             protected override RegexRunner CreateInstance() => new Runner();
-        
+
             /// <summary>Provides the runner that contains the custom logic implementing the specified regular expression.</summary>
             private sealed class Runner : RegexRunner
             {
@@ -85,14 +85,14 @@ namespace System.Text.RegularExpressions.Generated
                         }
                     }
                 }
-        
+
                 /// <summary>Search <paramref name="inputSpan"/> starting from base.runtextpos for the next location a match could possibly start.</summary>
                 /// <param name="inputSpan">The text being scanned by the regular expression.</param>
                 /// <returns>true if a possible match was found; false if no more matches are possible.</returns>
                 private bool TryFindNextPossibleStartingPosition(ReadOnlySpan<char> inputSpan)
                 {
                     int pos = base.runtextpos;
-                    
+
                     // Any possible match is at least 4 characters.
                     if (pos <= inputSpan.Length - 4)
                     {
@@ -105,12 +105,12 @@ namespace System.Text.RegularExpressions.Generated
                             return true;
                         }
                     }
-                    
+
                     // No match found.
                     base.runtextpos = inputSpan.Length;
                     return false;
                 }
-        
+
                 /// <summary>Determine whether <paramref name="inputSpan"/> at base.runtextpos is a match for the regular expression.</summary>
                 /// <param name="inputSpan">The text being scanned by the regular expression.</param>
                 /// <returns>true if the regular expression matches at the current position; otherwise, false.</returns>
@@ -125,189 +125,189 @@ namespace System.Text.RegularExpressions.Generated
                     int loop_iteration = 0;
                     int stackpos = 0;
                     ReadOnlySpan<char> slice = inputSpan.Slice(pos);
-                    
+
                     // Match the string "${".
                     if (!slice.StartsWith("${"))
                     {
                         UncaptureUntil(0);
                         return false; // The input didn't match.
                     }
-                    
+
                     // 1st capture group.
                     //{
-                        pos += 2;
-                        slice = inputSpan.Slice(pos);
-                        capture_starting_pos = pos;
-                        
-                        // Match a character in the set [0-9A-Z_] greedily at least once.
-                        //{
-                            charloop_starting_pos = pos;
-                            
-                            int iteration = slice.IndexOfAnyExcept(Utilities.s_ascii_FF03FEFFFF8700000000);
-                            if (iteration < 0)
-                            {
-                                iteration = slice.Length;
-                            }
-                            
-                            if (iteration == 0)
-                            {
-                                UncaptureUntil(0);
-                                return false; // The input didn't match.
-                            }
-                            
-                            slice = slice.Slice(iteration);
-                            pos += iteration;
-                            
-                            charloop_ending_pos = pos;
-                            charloop_starting_pos++;
-                            goto CharLoopEnd;
-                            
-                            CharLoopBacktrack:
-                            UncaptureUntil(charloop_capture_pos);
-                            
-                            if (Utilities.s_hasTimeout)
-                            {
-                                base.CheckTimeout();
-                            }
-                            
-                            if (charloop_starting_pos >= charloop_ending_pos)
-                            {
-                                UncaptureUntil(0);
-                                return false; // The input didn't match.
-                            }
-                            pos = --charloop_ending_pos;
-                            slice = inputSpan.Slice(pos);
-                            
-                            CharLoopEnd:
-                            charloop_capture_pos = base.Crawlpos();
-                        //}
-                        
-                        base.Capture(1, capture_starting_pos, pos);
-                        
-                        goto CaptureSkipBacktrack;
-                        
-                        CaptureBacktrack:
-                        goto CharLoopBacktrack;
-                        
-                        CaptureSkipBacktrack:;
+                    pos += 2;
+                    slice = inputSpan.Slice(pos);
+                    capture_starting_pos = pos;
+
+                    // Match a character in the set [0-9A-Z_] greedily at least once.
+                    //{
+                    charloop_starting_pos = pos;
+
+                    int iteration = slice.IndexOfAnyExcept(Utilities.s_ascii_FF03FEFFFF8700000000);
+                    if (iteration < 0)
+                    {
+                        iteration = slice.Length;
+                    }
+
+                    if (iteration == 0)
+                    {
+                        UncaptureUntil(0);
+                        return false; // The input didn't match.
+                    }
+
+                    slice = slice.Slice(iteration);
+                    pos += iteration;
+
+                    charloop_ending_pos = pos;
+                    charloop_starting_pos++;
+                    goto CharLoopEnd;
+
+                CharLoopBacktrack:
+                    UncaptureUntil(charloop_capture_pos);
+
+                    if (Utilities.s_hasTimeout)
+                    {
+                        base.CheckTimeout();
+                    }
+
+                    if (charloop_starting_pos >= charloop_ending_pos)
+                    {
+                        UncaptureUntil(0);
+                        return false; // The input didn't match.
+                    }
+                    pos = --charloop_ending_pos;
+                    slice = inputSpan.Slice(pos);
+
+                CharLoopEnd:
+                    charloop_capture_pos = base.Crawlpos();
                     //}
-                    
+
+                    base.Capture(1, capture_starting_pos, pos);
+
+                    goto CaptureSkipBacktrack;
+
+                CaptureBacktrack:
+                    goto CharLoopBacktrack;
+
+                CaptureSkipBacktrack:;
+                    //}
+
                     // Optional (greedy).
                     //{
-                        loop_iteration = 0;
-                        
-                        LoopBody:
-                        Utilities.StackPush(ref base.runstack!, ref stackpos, base.Crawlpos(), pos);
-                        
-                        loop_iteration++;
-                        
-                        // Match the string ":-".
-                        if (!slice.StartsWith(":-"))
-                        {
-                            goto LoopIterationNoMatch;
-                        }
-                        
-                        // 2nd capture group.
-                        //{
-                            pos += 2;
-                            slice = inputSpan.Slice(pos);
-                            int capture_starting_pos1 = pos;
-                            
-                            // Match a character other than '}' greedily any number of times.
-                            //{
-                                charloop_starting_pos1 = pos;
-                                
-                                int iteration1 = slice.IndexOf('}');
-                                if (iteration1 < 0)
-                                {
-                                    iteration1 = slice.Length;
-                                }
-                                
-                                slice = slice.Slice(iteration1);
-                                pos += iteration1;
-                                
-                                charloop_ending_pos1 = pos;
-                                goto CharLoopEnd1;
-                                
-                                CharLoopBacktrack1:
-                                UncaptureUntil(base.runstack![--stackpos]);
-                                Utilities.StackPop(base.runstack!, ref stackpos, out charloop_ending_pos1, out charloop_starting_pos1);
-                                
-                                if (Utilities.s_hasTimeout)
-                                {
-                                    base.CheckTimeout();
-                                }
-                                
-                                if (charloop_starting_pos1 >= charloop_ending_pos1)
-                                {
-                                    goto LoopIterationNoMatch;
-                                }
-                                pos = --charloop_ending_pos1;
-                                slice = inputSpan.Slice(pos);
-                                
-                                CharLoopEnd1:
-                                Utilities.StackPush(ref base.runstack!, ref stackpos, charloop_starting_pos1, charloop_ending_pos1, base.Crawlpos());
-                            //}
-                            
-                            base.Capture(2, capture_starting_pos1, pos);
-                            
-                            Utilities.StackPush(ref base.runstack!, ref stackpos, capture_starting_pos1);
-                            goto CaptureSkipBacktrack1;
-                            
-                            CaptureBacktrack1:
-                            capture_starting_pos1 = base.runstack![--stackpos];
-                            goto CharLoopBacktrack1;
-                            
-                            CaptureSkipBacktrack1:;
-                        //}
-                        
-                        
-                        // The loop has an upper bound of 1. Continue iterating greedily if it hasn't yet been reached.
-                        if (loop_iteration == 0)
-                        {
-                            goto LoopBody;
-                        }
-                        goto LoopEnd;
-                        
-                        // The loop iteration failed. Put state back to the way it was before the iteration.
-                        LoopIterationNoMatch:
-                        if (--loop_iteration < 0)
-                        {
-                            // Unable to match the remainder of the expression after exhausting the loop.
-                            goto CaptureBacktrack;
-                        }
-                        pos = base.runstack![--stackpos];
-                        UncaptureUntil(base.runstack![--stackpos]);
-                        slice = inputSpan.Slice(pos);
-                        goto LoopEnd;
-                        
-                        LoopBacktrack:
-                        if (Utilities.s_hasTimeout)
-                        {
-                            base.CheckTimeout();
-                        }
-                        
-                        if (loop_iteration == 0)
-                        {
-                            // No iterations of the loop remain to backtrack into. Fail the loop.
-                            goto CaptureBacktrack;
-                        }
-                        goto CaptureBacktrack1;
-                        LoopEnd:;
+                    loop_iteration = 0;
+
+                LoopBody:
+                    Utilities.StackPush(ref base.runstack!, ref stackpos, base.Crawlpos(), pos);
+
+                    loop_iteration++;
+
+                    // Match the string ":-".
+                    if (!slice.StartsWith(":-"))
+                    {
+                        goto LoopIterationNoMatch;
+                    }
+
+                    // 2nd capture group.
+                    //{
+                    pos += 2;
+                    slice = inputSpan.Slice(pos);
+                    int capture_starting_pos1 = pos;
+
+                    // Match a character other than '}' greedily any number of times.
+                    //{
+                    charloop_starting_pos1 = pos;
+
+                    int iteration1 = slice.IndexOf('}');
+                    if (iteration1 < 0)
+                    {
+                        iteration1 = slice.Length;
+                    }
+
+                    slice = slice.Slice(iteration1);
+                    pos += iteration1;
+
+                    charloop_ending_pos1 = pos;
+                    goto CharLoopEnd1;
+
+                CharLoopBacktrack1:
+                    UncaptureUntil(base.runstack![--stackpos]);
+                    Utilities.StackPop(base.runstack!, ref stackpos, out charloop_ending_pos1, out charloop_starting_pos1);
+
+                    if (Utilities.s_hasTimeout)
+                    {
+                        base.CheckTimeout();
+                    }
+
+                    if (charloop_starting_pos1 >= charloop_ending_pos1)
+                    {
+                        goto LoopIterationNoMatch;
+                    }
+                    pos = --charloop_ending_pos1;
+                    slice = inputSpan.Slice(pos);
+
+                CharLoopEnd1:
+                    Utilities.StackPush(ref base.runstack!, ref stackpos, charloop_starting_pos1, charloop_ending_pos1, base.Crawlpos());
                     //}
-                    
+
+                    base.Capture(2, capture_starting_pos1, pos);
+
+                    Utilities.StackPush(ref base.runstack!, ref stackpos, capture_starting_pos1);
+                    goto CaptureSkipBacktrack1;
+
+                CaptureBacktrack1:
+                    capture_starting_pos1 = base.runstack![--stackpos];
+                    goto CharLoopBacktrack1;
+
+                CaptureSkipBacktrack1:;
+                    //}
+
+
+                    // The loop has an upper bound of 1. Continue iterating greedily if it hasn't yet been reached.
+                    if (loop_iteration == 0)
+                    {
+                        goto LoopBody;
+                    }
+                    goto LoopEnd;
+
+                // The loop iteration failed. Put state back to the way it was before the iteration.
+                LoopIterationNoMatch:
+                    if (--loop_iteration < 0)
+                    {
+                        // Unable to match the remainder of the expression after exhausting the loop.
+                        goto CaptureBacktrack;
+                    }
+                    pos = base.runstack![--stackpos];
+                    UncaptureUntil(base.runstack![--stackpos]);
+                    slice = inputSpan.Slice(pos);
+                    goto LoopEnd;
+
+                LoopBacktrack:
+                    if (Utilities.s_hasTimeout)
+                    {
+                        base.CheckTimeout();
+                    }
+
+                    if (loop_iteration == 0)
+                    {
+                        // No iterations of the loop remain to backtrack into. Fail the loop.
+                        goto CaptureBacktrack;
+                    }
+                    goto CaptureBacktrack1;
+                LoopEnd:;
+                    //}
+
                     // Match '}'.
                     if (slice.IsEmpty || slice[0] != '}')
                     {
                         goto LoopBacktrack;
                     }
-                    
+
                     // The input matched.
                     pos++;
                     base.runtextpos = pos;
                     base.Capture(0, matchStart, pos);
                     return true;
-                    
+
                     // <summary>Undo captures until it reaches the specified capture position.</summary>
                     [MethodImpl(MethodImplOptions.AggressiveInlining)]
                     void UncaptureUntil(int capturePosition)
@@ -322,17 +322,17 @@ namespace System.Text.RegularExpressions.Generated
         }
 
     }
-    
+
     /// <summary>Helper methods used by generated <see cref="Regex"/>-derived implementations.</summary>
-    [GeneratedCodeAttribute("System.Text.RegularExpressions.Generator", "8.0.12.36514")]
+    [GeneratedCodeAttribute("System.Text.RegularExpressions.Generator", "8.0.12.41914")]
     file static class Utilities
     {
         /// <summary>Default timeout value set in <see cref="AppContext"/>, or <see cref="Regex.InfiniteMatchTimeout"/> if none was set.</summary>
         internal static readonly TimeSpan s_defaultTimeout = AppContext.GetData("REGEX_DEFAULT_MATCH_TIMEOUT") is TimeSpan timeout ? timeout : Regex.InfiniteMatchTimeout;
-        
+
         /// <summary>Whether <see cref="s_defaultTimeout"/> is non-infinite.</summary>
         internal static readonly bool s_hasTimeout = s_defaultTimeout != Regex.InfiniteMatchTimeout;
-        
+
         /// <summary>Pops 2 values from the backtracking stack.</summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static void StackPop(int[] stack, ref int pos, out int arg0, out int arg1)
@@ -340,7 +340,7 @@ namespace System.Text.RegularExpressions.Generated
             arg0 = stack[--pos];
             arg1 = stack[--pos];
         }
-        
+
         /// <summary>Pushes 1 value onto the backtracking stack.</summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static void StackPush(ref int[] stack, ref int pos, int arg0)
@@ -354,10 +354,10 @@ namespace System.Text.RegularExpressions.Generated
                 pos++;
                 return;
             }
-        
+
             // Otherwise, resize the stack to make room and try again.
             WithResize(ref stack, ref pos, arg0);
-        
+
             // <summary>Resize the backtracking stack array and push 1 value onto the stack.</summary>
             [MethodImpl(MethodImplOptions.NoInlining)]
             static void WithResize(ref int[] stack, ref int pos, int arg0)
@@ -366,7 +366,7 @@ namespace System.Text.RegularExpressions.Generated
                 StackPush(ref stack, ref pos, arg0);
             }
         }
-        
+
         /// <summary>Pushes 2 values onto the backtracking stack.</summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static void StackPush(ref int[] stack, ref int pos, int arg0, int arg1)
@@ -381,10 +381,10 @@ namespace System.Text.RegularExpressions.Generated
                 pos += 2;
                 return;
             }
-        
+
             // Otherwise, resize the stack to make room and try again.
             WithResize(ref stack, ref pos, arg0, arg1);
-        
+
             // <summary>Resize the backtracking stack array and push 2 values onto the stack.</summary>
             [MethodImpl(MethodImplOptions.NoInlining)]
             static void WithResize(ref int[] stack, ref int pos, int arg0, int arg1)
@@ -393,7 +393,7 @@ namespace System.Text.RegularExpressions.Generated
                 StackPush(ref stack, ref pos, arg0, arg1);
             }
         }
-        
+
         /// <summary>Pushes 3 values onto the backtracking stack.</summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static void StackPush(ref int[] stack, ref int pos, int arg0, int arg1, int arg2)
@@ -409,10 +409,10 @@ namespace System.Text.RegularExpressions.Generated
                 pos += 3;
                 return;
             }
-        
+
             // Otherwise, resize the stack to make room and try again.
             WithResize(ref stack, ref pos, arg0, arg1, arg2);
-        
+
             // <summary>Resize the backtracking stack array and push 3 values onto the stack.</summary>
             [MethodImpl(MethodImplOptions.NoInlining)]
             static void WithResize(ref int[] stack, ref int pos, int arg0, int arg1, int arg2)
@@ -421,7 +421,7 @@ namespace System.Text.RegularExpressions.Generated
                 StackPush(ref stack, ref pos, arg0, arg1, arg2);
             }
         }
-        
+
         /// <summary>Supports searching for characters in or not in "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ_".</summary>
         internal static readonly SearchValues<char> s_ascii_FF03FEFFFF8700000000 = SearchValues.Create("0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ_");
     }
