@@ -41,9 +41,13 @@ public class NoCodeConfigurationTests
 
         List<NoCodeAttribute> expectedAttributes = [
             new() { Name = "attribute_key_string", Value = "string_value", Type = "string" },
+            new() { Name = "attribute_key_string_not_supported", Value = new[] { "string_value" }, Type = "string" },
             new() { Name = "attribute_key_bool", Value = "true", Type = "bool" },
+            new() { Name = "attribute_key_bool_not_supported", Value = new[] { "true" }, Type = "bool" },
             new() { Name = "attribute_key_int", Value = "12345", Type = "int" },
+            new() { Name = "attribute_key_int_not_supported", Value = new[] { "12345" }, Type = "int" },
             new() { Name = "attribute_key_double", Value = "123.45", Type = "double" },
+            new() { Name = "attribute_key_double_not_supported", Value = new[] { "123.45" }, Type = "double" },
             new() { Name = "attribute_key_string_array", Value = new[] { "value1", "value2", "value3" }, Type = "string_array" },
             new() { Name = "attribute_key_string_array_not_supported", Value = new object[] { "value1", new object[] { "value2" }, "value3" }, Type = "string_array" },
             new() { Name = "attribute_key_bool_array", Value = new[] { true, false, true }, Type = "bool_array" },
@@ -52,6 +56,7 @@ public class NoCodeConfigurationTests
             new() { Name = "attribute_key_int_array_not_supported", Value = new object[] { new[] { 123 }, 456, 789 }, Type = "int_array" },
             new() { Name = "attribute_key_double_array", Value = new object[] { 123.45, 678.90 }, Type = "double_array" },
             new() { Name = "attribute_key_double_array_not_supported", Value = new object[] { 123.45, new[] { 678.90 } }, Type = "double_array" },
+            new() { Name = "attribute_key_non_supported_type", Value = "non_supported_value", Type = "non_supported_type" },
         ];
 
         Assert.Equivalent(expectedAttributes, noCodeEntry.Span.Attributes);
