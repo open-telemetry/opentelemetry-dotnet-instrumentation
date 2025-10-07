@@ -3242,6 +3242,10 @@ HRESULT CorProfiler::GenerateLoaderType(const ModuleID module_id,
     return S_OK;
 }
 
+// This method rewrites the IL of System.Data.SqlClient.SqlCommand.WriteBeginExecuteEvent
+// to ensure that the CommandText property is passed to the BeginExecute method. Previously,
+// the CommandText was not passed, except when executing a stored procedure, which limited
+// the usefulness of the telemetry data available for SQL instrumentation.
 HRESULT CorProfiler::RewriteILSystemDataCommandText(const ModuleID module_id)
 {
     if (Logger::IsDebugEnabled())

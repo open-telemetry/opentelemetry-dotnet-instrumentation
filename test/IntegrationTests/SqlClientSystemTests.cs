@@ -24,6 +24,21 @@ public class SqlClientSystemTests : TestHelper
 
         foreach (var version in LibraryVersion.SqlClientSystem)
         {
+#if NET
+            theoryData.Add(version, true);
+#endif
+            theoryData.Add(version, false);
+        }
+
+        return theoryData;
+    }
+
+    public static TheoryData<string, bool> GetDataForIlRewrite()
+    {
+        var theoryData = new TheoryData<string, bool>();
+
+        foreach (var version in LibraryVersion.SqlClientSystem)
+        {
             theoryData.Add(version, true);
             theoryData.Add(version, false);
         }
@@ -35,22 +50,16 @@ public class SqlClientSystemTests : TestHelper
     [Trait("Category", "EndToEnd")]
     [Trait("Containers", "Linux")]
     [MemberData(nameof(GetData))]
-    public void SubmitTraces(string packageVersion, bool enableIlRewrite)
+    public void SubmitTraces(string packageVersion, bool dbStatementForText)
     {
         // Skip the test if fixture does not support current platform
         _sqlServerFixture.SkipIfUnsupportedPlatform();
 
-        SetEnvironmentVariable("OTEL_DOTNET_AUTO_SQLCLIENT_SET_DBSTATEMENT_FOR_TEXT", "true");
-#if NETFRAMEWORK
-        SetEnvironmentVariable("OTEL_DOTNET_AUTO_SQLCLIENT_NETFX_ILREWRITE_ENABLED", enableIlRewrite.ToString());
-#else
-        enableIlRewrite.ToString(); // to avoid unused parameter warning
-#endif
+        SetEnvironmentVariable("OTEL_DOTNET_AUTO_SQLCLIENT_SET_DBSTATEMENT_FOR_TEXT", dbStatementForText.ToString());
         using var collector = new MockSpansCollector(Output);
         SetExporter(collector);
 
-#if NETFRAMEWORK
-        if (enableIlRewrite)
+        if (dbStatementForText)
         {
             collector.Expect("OpenTelemetry.Instrumentation.SqlClient", span => span.Attributes.Any(attr => attr.Key == "db.statement" && !string.IsNullOrWhiteSpace(attr.Value?.StringValue)));
         }
@@ -58,9 +67,6 @@ public class SqlClientSystemTests : TestHelper
         {
             collector.Expect("OpenTelemetry.Instrumentation.SqlClient", span => span.Attributes.All(attr => attr.Key != "db.statement"));
         }
-#else
-        collector.Expect("OpenTelemetry.Instrumentation.SqlClient", span => span.Attributes.Any(attr => attr.Key == "db.statement" && !string.IsNullOrWhiteSpace(attr.Value?.StringValue)));
-#endif
 
         RunTestApplication(new()
         {
@@ -70,6 +76,39 @@ public class SqlClientSystemTests : TestHelper
 
         collector.AssertExpectations();
     }
+
+#if NETFRAMEWORK
+    [SkippableTheory]
+    [Trait("Category", "EndToEnd")]
+    [Trait("Containers", "Linux")]
+    [MemberData(nameof(GetDataForIlRewrite))]
+    public void SqlClientIlRewrite(string packageVersion, bool enableIlRewrite)
+    {
+        // Skip the test if fixture does not support current platform
+        _sqlServerFixture.SkipIfUnsupportedPlatform();
+
+        SetEnvironmentVariable("OTEL_DOTNET_AUTO_SQLCLIENT_NETFX_ILREWRITE_ENABLED", enableIlRewrite.ToString());
+        using var collector = new MockSpansCollector(Output);
+        SetExporter(collector);
+
+        if (enableIlRewrite)
+        {
+            collector.Expect("OpenTelemetry.Instrumentation.SqlClient", span => span.Attributes.Any(attr => attr.Key == "db.statement" && !string.IsNullOrWhiteSpace(attr.Value?.StringValue)));
+        }
+        else
+        {
+            collector.Expect("OpenTelemetry.Instrumentation.SqlClient", span => span.Attributes.All(attr => attr.Key != "db.statement"));
+        }
+
+        RunTestApplication(new()
+        {
+            Arguments = $"{_sqlServerFixture.Password} {_sqlServerFixture.Port}",
+            PackageVersion = packageVersion
+        });
+
+        collector.Expect("OpenTelemetry.Instrumentation.SqlClient", span => span.Attributes.Any(attr => attr.Key == "db.statement" && !string.IsNullOrWhiteSpace(attr.Value?.StringValue)));
+    }
+#endif
 
     [SkippableTheory]
     [Trait("Category", "EndToEnd")]
