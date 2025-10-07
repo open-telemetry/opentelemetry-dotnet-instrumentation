@@ -28,11 +28,9 @@ public class NoCodeTests : TestHelper
 
         List<KeyValue> expectedAttributes = [
             new() { Key = "attribute_key_string", Value = new AnyValue { StringValue = "string_value" } },
-
-            // TODO Change to correct types when parsing attributes is supported
-            new() { Key = "attribute_key_bool", Value = new AnyValue { StringValue = "true" } },
-            new() { Key = "attribute_key_int", Value = new AnyValue { StringValue = "12345" } },
-            new() { Key = "attribute_key_double", Value = new AnyValue { StringValue = "123.45" } },
+            new() { Key = "attribute_key_bool", Value = new AnyValue { BoolValue = true } },
+            new() { Key = "attribute_key_int", Value = new AnyValue { IntValue = 12345 } },
+            new() { Key = "attribute_key_double", Value = new AnyValue { DoubleValue = 123.45 } },
 
             // TODO Uncomment when parsing attributes is supported
             // new() { Key = "attribute_key_string_array", Value = new AnyValue { ArrayValue = new ArrayValue { Values = { new AnyValue { StringValue = "value1" }, new AnyValue { StringValue = "value2" }, new AnyValue { StringValue = "value3" } } } } },

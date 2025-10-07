@@ -37,11 +37,12 @@ public class NoCodeConfigurationTests
         Assert.Equal("server", noCodeEntry.Span.Kind);
 
         Assert.NotNull(noCodeEntry.Span.Attributes);
-        Assert.Equal(2, noCodeEntry.Span.Attributes.Count);
 
         List<NoCodeAttribute> expectedAttributes = [
-            new() { Name = "attribute_key1", Value = "attribute_value1", Type = "int" },
-            new() { Name = "attribute_key2", Value = "attribute_value2", Type = "string" },
+            new() { Name = "attribute_key_string", Value = "string_value", Type = "string" },
+            new() { Name = "attribute_key_bool", Value = "true", Type = "bool" },
+            new() { Name = "attribute_key_int", Value = "12345", Type = "int" },
+            new() { Name = "attribute_key_double", Value = "123.45", Type = "double" },
         ];
 
         Assert.Equivalent(expectedAttributes, noCodeEntry.Span.Attributes);

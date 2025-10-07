@@ -3,6 +3,7 @@
 
 using System.Diagnostics;
 using OpenTelemetry.AutoInstrumentation.Configurations.FileBasedConfiguration;
+using OpenTelemetry.AutoInstrumentation.Configurations.FileBasedConfiguration.Parser;
 using OpenTelemetry.AutoInstrumentation.Logging;
 using static OpenTelemetry.AutoInstrumentation.InstrumentationDefinitions;
 
@@ -145,7 +146,7 @@ internal class NoCodeSettings : Settings
                 $"OpenTelemetry.AutoInstrumentation.Instrumentations.NoCode.NoCodeIntegration{parametersCount}");
 
             var activityKind = ParseActivityKind(noCodeEntry.Span.Kind);
-            var attributes = ParseAttributes(noCodeEntry.Span.Attributes);
+            var attributes = noCodeEntry.Span.ParseAttributes();
 
             Log.Debug($"NoCode adding instrumentation for assembly: '{noCodeTarget.Assembly.Name}', type: '{noCodeTarget.Type}', method: '{noCodeTarget.Method}' with signature: '{string.Join(",", targetSignatureTypes)}'");
 
@@ -157,27 +158,6 @@ internal class NoCodeSettings : Settings
             Enabled = true;
             InstrumentedMethods = instrumentedMethods;
         }
-    }
-
-    private static TagList ParseAttributes(List<NoCodeAttribute>? attributes)
-    {
-        TagList tagList = default;
-        if (attributes == null || attributes.Count == 0)
-        {
-            return tagList;
-        }
-
-        for (var i = 0; i < attributes.Count; i++)
-        {
-            var attribute = attributes[i];
-            if (!string.IsNullOrEmpty(attribute.Name) && attribute.Value != null)
-            {
-                // TODO parse type and convert value accordingly
-                tagList.Add(attribute.Name!, attribute.Value);
-            }
-        }
-
-        return tagList;
     }
 
     private static ActivityKind ParseActivityKind(string? kindString)
