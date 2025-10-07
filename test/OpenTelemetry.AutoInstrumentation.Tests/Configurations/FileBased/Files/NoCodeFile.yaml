@@ -16,3 +16,9 @@ no_code/development:
       span:
          name: SpanName
          kind: server
+         attributes:
+           - name: attribute_key1
+             value: attribute_value1
+             type: int
+           - name: attribute_key2
+             value: attribute_value2

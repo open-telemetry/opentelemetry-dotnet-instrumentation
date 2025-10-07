@@ -7,12 +7,13 @@ namespace OpenTelemetry.AutoInstrumentation.Configurations;
 
 internal class NoCodeInstrumentedMethod
 {
-    public NoCodeInstrumentedMethod(NativeCallTargetDefinition definition, string[] signatureTypes, string spanName, ActivityKind activityKind)
+    public NoCodeInstrumentedMethod(NativeCallTargetDefinition definition, string[] signatureTypes, string spanName, ActivityKind activityKind, TagList attributes)
     {
         Definition = definition;
         SignatureTypes = signatureTypes;
         SpanName = spanName;
         ActivityKind = activityKind;
+        Attributes = attributes;
     }
 
     public NativeCallTargetDefinition Definition { get; }
@@ -23,4 +24,6 @@ internal class NoCodeInstrumentedMethod
     public string SpanName { get; }
 
     public ActivityKind ActivityKind { get; }
+
+    public TagList Attributes { get; }
 }

@@ -1,6 +1,7 @@
 // Copyright The OpenTelemetry Authors
 // SPDX-License-Identifier: Apache-2.0
 
+using OpenTelemetry.AutoInstrumentation.Configurations.FileBasedConfiguration;
 using Xunit;
 using YamlParser = OpenTelemetry.AutoInstrumentation.Configurations.FileBasedConfiguration.Parser.Parser;
 
@@ -34,5 +35,15 @@ public class NoCodeConfigurationTests
         Assert.NotNull(noCodeEntry.Span);
         Assert.Equal("SpanName", noCodeEntry.Span.Name);
         Assert.Equal("server", noCodeEntry.Span.Kind);
+
+        Assert.NotNull(noCodeEntry.Span.Attributes);
+        Assert.Equal(2, noCodeEntry.Span.Attributes.Count);
+
+        List<NoCodeAttribute> expectedAttributes = [
+            new() { Name = "attribute_key1", Value = "attribute_value1", Type = "int" },
+            new() { Name = "attribute_key2", Value = "attribute_value2", Type = "string" },
+        ];
+
+        Assert.Equivalent(expectedAttributes, noCodeEntry.Span.Attributes);
     }
 }

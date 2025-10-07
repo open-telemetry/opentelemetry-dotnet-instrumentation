@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 using IntegrationTests.Helpers;
+using OpenTelemetry.Proto.Common.V1;
 using OpenTelemetry.Proto.Trace.V1;
 using Xunit.Abstractions;
 
@@ -22,7 +23,25 @@ public class NoCodeTests : TestHelper
         EnableFileBasedConfigWithDefaultPath();
         using var collector = new MockSpansCollector(Output);
         SetExporter(collector);
-        collector.Expect("OpenTelemetry.AutoInstrumentation.NoCode", x => AssertSpan(x, "Span-TestMethodStatic"));
+
+        ArrayValue av = new ArrayValue { Values = { new AnyValue { StringValue = "value1" }, new AnyValue { StringValue = "value2" }, new AnyValue { StringValue = "value3" } }, };
+
+        List<KeyValue> expectedAttributes = [
+            new() { Key = "attribute_key_string", Value = new AnyValue { StringValue = "string_value" } },
+
+            // TODO Change to correct types when parsing attributes is supported
+            new() { Key = "attribute_key_bool", Value = new AnyValue { StringValue = "true" } },
+            new() { Key = "attribute_key_int", Value = new AnyValue { StringValue = "12345" } },
+            new() { Key = "attribute_key_double", Value = new AnyValue { StringValue = "123.45" } },
+
+            // TODO Uncomment when parsing attributes is supported
+            // new() { Key = "attribute_key_string_array", Value = new AnyValue { ArrayValue = new ArrayValue { Values = { new AnyValue { StringValue = "value1" }, new AnyValue { StringValue = "value2" }, new AnyValue { StringValue = "value3" } } } } },
+            // new() { Key = "attribute_key_bool_array", Value = new AnyValue { ArrayValue = new ArrayValue { Values = { new AnyValue { BoolValue = true }, new AnyValue { BoolValue = false }, new AnyValue { BoolValue = true } } } } },
+            // new() { Key = "attribute_key_int_array", Value = new AnyValue { ArrayValue = new ArrayValue { Values = { new AnyValue { IntValue = 123 }, new AnyValue { IntValue = 456 }, new AnyValue { IntValue = 789 } } } } },
+            // new() { Key = "attribute_key_double_array", Value = new AnyValue { ArrayValue = new ArrayValue { Values = { new AnyValue { DoubleValue = 123.45 }, new AnyValue { DoubleValue = 678.90 } } } } },
+        ];
+
+        collector.Expect("OpenTelemetry.AutoInstrumentation.NoCode", x => AssertSpan(x, "Span-TestMethodStatic", Span.Types.SpanKind.Internal, expectedAttributes));
         collector.Expect("OpenTelemetry.AutoInstrumentation.NoCode", x => AssertSpan(x, "Span-TestMethod0", Span.Types.SpanKind.Client));
         collector.Expect("OpenTelemetry.AutoInstrumentation.NoCode", x => AssertSpan(x, "Span-TestMethodA", Span.Types.SpanKind.Consumer));
         collector.Expect("OpenTelemetry.AutoInstrumentation.NoCode", x => AssertSpan(x, "Span-TestMethod1String", Span.Types.SpanKind.Producer));
@@ -79,14 +98,16 @@ public class NoCodeTests : TestHelper
         collector.AssertExpectations();
     }
 
-    private bool AssertSpan(Span span, string expectedSpanName, Span.Types.SpanKind expectedSpanKind = Span.Types.SpanKind.Internal)
+    private bool AssertSpan(Span span, string expectedSpanName, Span.Types.SpanKind expectedSpanKind = Span.Types.SpanKind.Internal, List<KeyValue>? expectedAttributes = null)
     {
-        return span.Name == expectedSpanName && span.Kind == expectedSpanKind;
+        expectedAttributes ??= [];
+
+        return expectedSpanName == span.Name && expectedSpanKind == span.Kind && expectedAttributes.SequenceEqual(span.Attributes);
     }
 
-    private bool AssertAsyncSpan(Span span, string expectedSpanName, Span.Types.SpanKind expectedSpanKind = Span.Types.SpanKind.Internal)
+    private bool AssertAsyncSpan(Span span, string expectedSpanName, Span.Types.SpanKind expectedSpanKind = Span.Types.SpanKind.Internal, List<KeyValue>? expectedAttributes = null)
     {
-        return AssertSpan(span, expectedSpanName, expectedSpanKind) && AssertSpanDuration(span);
+        return AssertSpan(span, expectedSpanName, expectedSpanKind, expectedAttributes) && AssertSpanDuration(span);
     }
 
     private bool AssertSpanDuration(Span span)

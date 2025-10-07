@@ -145,10 +145,11 @@ internal class NoCodeSettings : Settings
                 $"OpenTelemetry.AutoInstrumentation.Instrumentations.NoCode.NoCodeIntegration{parametersCount}");
 
             var activityKind = ParseActivityKind(noCodeEntry.Span.Kind);
+            var attributes = ParseAttributes(noCodeEntry.Span.Attributes);
 
             Log.Debug($"NoCode adding instrumentation for assembly: '{noCodeTarget.Assembly.Name}', type: '{noCodeTarget.Type}', method: '{noCodeTarget.Method}' with signature: '{string.Join(",", targetSignatureTypes)}'");
 
-            instrumentedMethods.Add(new NoCodeInstrumentedMethod(definition, targetSignatureTypes, noCodeEntry.Span.Name, activityKind));
+            instrumentedMethods.Add(new NoCodeInstrumentedMethod(definition, targetSignatureTypes, noCodeEntry.Span.Name, activityKind, attributes));
         }
 
         if (instrumentedMethods.Count > 0)
@@ -156,6 +157,27 @@ internal class NoCodeSettings : Settings
             Enabled = true;
             InstrumentedMethods = instrumentedMethods;
         }
+    }
+
+    private static TagList ParseAttributes(List<NoCodeAttribute>? attributes)
+    {
+        TagList tagList = default;
+        if (attributes == null || attributes.Count == 0)
+        {
+            return tagList;
+        }
+
+        for (var i = 0; i < attributes.Count; i++)
+        {
+            var attribute = attributes[i];
+            if (!string.IsNullOrEmpty(attribute.Name) && attribute.Value != null)
+            {
+                // TODO parse type and convert value accordingly
+                tagList.Add(attribute.Name!, attribute.Value);
+            }
+        }
+
+        return tagList;
     }
 
     private static ActivityKind ParseActivityKind(string? kindString)
