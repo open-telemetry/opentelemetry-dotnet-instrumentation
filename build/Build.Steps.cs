@@ -290,7 +290,7 @@ partial class Build
                     .SetFramework(framework)
                     .SetOutput(TracerHomeDirectory / MapToFolderOutput(framework))));
 
-            // Publish OpenTelemetry.AutoInstrumentation.NetFx.Assemblies for .NET Framework targets
+            // Publish OpenTelemetry.AutoInstrumentation.Assemblies.NetFramework for .NET Framework targets
             DotNetPublish(s => s
                 .SetProject(Solution.GetProjectByName(Projects.AutoInstrumentationNetFxAssemblies))
                 .SetConfiguration(BuildConfiguration)
