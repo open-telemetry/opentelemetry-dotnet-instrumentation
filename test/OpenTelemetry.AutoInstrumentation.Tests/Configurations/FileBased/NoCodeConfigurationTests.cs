@@ -1,6 +1,7 @@
 // Copyright The OpenTelemetry Authors
 // SPDX-License-Identifier: Apache-2.0
 
+using System.Diagnostics;
 using OpenTelemetry.AutoInstrumentation.Configurations.FileBasedConfiguration;
 using Xunit;
 using YamlParser = OpenTelemetry.AutoInstrumentation.Configurations.FileBasedConfiguration.Parser.Parser;
@@ -43,8 +44,21 @@ public class NoCodeConfigurationTests
             new() { Name = "attribute_key_bool", Value = "true", Type = "bool" },
             new() { Name = "attribute_key_int", Value = "12345", Type = "int" },
             new() { Name = "attribute_key_double", Value = "123.45", Type = "double" },
+            new() { Name = "attribute_key_string_array", Value = new[] { "value1", "value2", "value3" }, Type = "string_array" },
+            new() { Name = "attribute_key_string_array_not_supported", Value = new object[] { "value1", new object[] { "value2" }, "value3" }, Type = "string_array" },
         ];
 
         Assert.Equivalent(expectedAttributes, noCodeEntry.Span.Attributes);
+
+        var tagList = noCodeEntry.Span.ParseAttributes();
+
+        TagList expectedTagList = default;
+        expectedTagList.Add("attribute_key_string", "string_value");
+        expectedTagList.Add("attribute_key_bool", true);
+        expectedTagList.Add("attribute_key_int", 12345L);
+        expectedTagList.Add("attribute_key_double", 123.45);
+        expectedTagList.Add("attribute_key_string_array", new[] { "value1", "value2", "value3" });
+
+        Assert.Equal(expectedTagList, tagList);
     }
 }

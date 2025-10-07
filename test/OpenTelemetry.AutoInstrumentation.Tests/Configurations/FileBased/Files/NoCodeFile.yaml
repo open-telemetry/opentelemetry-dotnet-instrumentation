@@ -29,9 +29,12 @@ no_code/development:
              value: 123.45
              type: double
            # TODO Uncomment when parsing attributes is supported
-           # - name: attribute_key_string_array
-           #   value: ["value1", "value2", "value3"]
-           #   type: string_array
+           - name: attribute_key_string_array
+             value: ["value1", "value2", "value3"]
+             type: string_array
+           - name: attribute_key_string_array_not_supported
+             value: ["value1", ["value2"], "value3"]
+             type: string_array
            # - name: attribute_key_bool_array
            #   value: [true, false, true]
            #   type: bool_array

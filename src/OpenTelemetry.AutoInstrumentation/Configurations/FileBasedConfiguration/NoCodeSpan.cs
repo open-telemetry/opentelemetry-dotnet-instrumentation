@@ -104,7 +104,34 @@ internal class NoCodeSpan
                     continue;
 
                 case "string_array":
-                    Log.Debug("NoCode - attribute is marked as string_array. It is not supported yet. Skipping.", attributeValue);
+                    if (attributeValue is List<object> values)
+                    {
+                        var strings = new string[values.Count];
+                        var nonStringValue = false;
+                        for (var j = 0; j < values.Count; j++)
+                        {
+                            if (values[j] is string str)
+                            {
+                                strings[j] = str;
+                            }
+                            else
+                            {
+                                nonStringValue = true;
+                                Log.Debug("NoCode - attribute is marked as string_array but one of the values does not looks like a string '{0}'. Skipping the whole array.", values[j]);
+                                break;
+                            }
+                        }
+
+                        if (!nonStringValue)
+                        {
+                            tagList.Add(attributeName, strings);
+                        }
+                    }
+                    else
+                    {
+                        Log.Debug("NoCode - attribute is marked as string_array but the value does not looks like a double '{0}'. Skipping.", attributeValue);
+                    }
+
                     continue;
                 case "bool_array":
                     Log.Debug("NoCode - attribute is marked as bool_array. It is not supported yet. Skipping.", attributeValue);
