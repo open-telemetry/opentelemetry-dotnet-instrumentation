@@ -72,7 +72,6 @@ public class SettingsTests : IDisposable
         Assert.Empty(settings.InstrumentationOptions.HttpInstrumentationCaptureRequestHeaders);
         Assert.Empty(settings.InstrumentationOptions.HttpInstrumentationCaptureResponseHeaders);
         Assert.False(settings.InstrumentationOptions.OracleMdaSetDbStatementForText);
-        Assert.False(settings.InstrumentationOptions.SqlClientSetDbStatementForText);
 
         Assert.NotNull(settings.OtlpSettings);
         Assert.Equal(OtlpExportProtocol.HttpProtobuf, settings.OtlpSettings.Protocol);
@@ -472,6 +471,5 @@ public class SettingsTests : IDisposable
         Environment.SetEnvironmentVariable(ConfigurationKeys.Traces.InstrumentationOptions.HttpInstrumentationCaptureRequestHeaders, null);
         Environment.SetEnvironmentVariable(ConfigurationKeys.Traces.InstrumentationOptions.HttpInstrumentationCaptureResponseHeaders, null);
         Environment.SetEnvironmentVariable(ConfigurationKeys.Traces.InstrumentationOptions.OracleMdaSetDbStatementForText, null);
-        Environment.SetEnvironmentVariable(ConfigurationKeys.Traces.InstrumentationOptions.SqlClientSetDbStatementForText, null);
     }
 }

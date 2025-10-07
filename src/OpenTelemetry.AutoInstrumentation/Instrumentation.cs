@@ -10,6 +10,7 @@ using OpenTelemetry.AutoInstrumentation.Configurations;
 using OpenTelemetry.AutoInstrumentation.ContinuousProfiler;
 #endif
 using OpenTelemetry.AutoInstrumentation.Diagnostics;
+using OpenTelemetry.AutoInstrumentation.Instrumentations.NoCode;
 using OpenTelemetry.AutoInstrumentation.Loading;
 using OpenTelemetry.AutoInstrumentation.Logging;
 using OpenTelemetry.AutoInstrumentation.Plugins;
@@ -65,6 +66,8 @@ internal static class Instrumentation
     internal static Lazy<LogSettings> LogSettings { get; } = new(() => Settings.FromDefaultSources<LogSettings>(FailFastSettings.Value.FailFast));
 
     internal static Lazy<SdkSettings> SdkSettings { get; } = new(() => Settings.FromDefaultSources<SdkSettings>(FailFastSettings.Value.FailFast));
+
+    internal static Lazy<NoCodeSettings> NoCodeSettings { get; } = new(() => Settings.FromDefaultSources<NoCodeSettings>(FailFastSettings.Value.FailFast));
 
     /// <summary>
     /// Initialize the OpenTelemetry SDK with a pre-defined set of exporters, shims, and
@@ -183,6 +186,11 @@ internal static class Instrumentation
         if (GeneralSettings.Value.ProfilerEnabled)
         {
             RegisterDirectBytecodeInstrumentations(InstrumentationDefinitions.GetAllDefinitions());
+            if (NoCodeSettings.Value.Enabled)
+            {
+                NoCodeIntegrationHelper.NoCodeEntries = NoCodeSettings.Value.InstrumentedMethods;
+                RegisterBytecodeInstrumentations(NoCodeSettings.Value.GetDirectPayload(), "direct, no-code", NativeMethods.AddInstrumentations);
+            }
 
             try
             {
@@ -459,7 +467,7 @@ internal static class Instrumentation
                     DelayedInitialization.Traces.AddGrpcClient(lazyInstrumentationLoader, pluginManager, tracerSettings);
                     break;
                 case TracerInstrumentation.SqlClient:
-                    DelayedInitialization.Traces.AddSqlClient(lazyInstrumentationLoader, pluginManager, tracerSettings);
+                    DelayedInitialization.Traces.AddSqlClient(lazyInstrumentationLoader, pluginManager);
                     break;
                 case TracerInstrumentation.Quartz:
                     DelayedInitialization.Traces.AddQuartz(lazyInstrumentationLoader, pluginManager);

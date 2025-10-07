@@ -18,12 +18,20 @@ This is enabled by default but can disabled via the
 
 #### Dependency updates
 
+- Updated [Core components](https://github.com/open-telemetry/opentelemetry-dotnet/blob/main/VERSIONING.md#core-components):
+  [`1.13.0`](https://github.com/open-telemetry/opentelemetry-dotnet/releases/tag/core-1.13.0).
+
+- Following packages updated
+- `OpenTelemetry.Instrumentation.SqlClient` from `1.12.0-beta.2` to `1.12.0-beta.3`.
 - .NET Framework only, following packages updated
   - `OpenTelemetry.Instrumentation.AspNet` from `1.12.0-beta.1` to `1.12.0-beta.2`.
 
 ### Deprecated
 
 ### Removed
+
+- Dropped support for `OTEL_DOTNET_AUTO_SQLCLIENT_SET_DBSTATEMENT_FOR_TEXT`.
+  This feature is always enabled. Statements are sanitized.
 
 ### Fixed
 
