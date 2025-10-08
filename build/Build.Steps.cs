@@ -400,6 +400,7 @@ partial class Build
         if (IsWin)
         {
             (TracerHomeDirectory / "netfx").GlobFiles("**/*.link").DeleteFiles();
+            (TracerHomeDirectory / "netfx").GlobFiles("**/_._").DeleteFiles();
             var latestFramework = TargetFramework.NetFramework.Last();
             (TracerHomeDirectory / "netfx" / latestFramework).GlobFiles("*.*")
                 .Where(file => TargetFramework.NetFramework.TakeUntil(older => older == latestFramework)
@@ -434,6 +435,16 @@ partial class Build
                         }
                     }
                 );
+            }
+
+            // Create placeholder file for empty directories
+            foreach (var currentFramework in TargetFramework.NetFramework)
+            {
+                if ((TracerHomeDirectory / "netfx" / currentFramework).GlobFiles("*.*").Count == 0)
+                {
+                    (TracerHomeDirectory / "netfx" / currentFramework / "_._")
+                        .WriteAllText(string.Empty, Encoding.ASCII, false);
+                }
             }
         }
     }
