@@ -19,7 +19,7 @@ internal class NoCodeSpan
     public string? Kind { get; set; }
 
     [YamlMember(Alias = "attributes")]
-    public List<NoCodeAttribute>? Attributes { get; set; }
+    public List<ResourceAttribute>? Attributes { get; set; }
 
     public TagList ParseAttributes()
     {

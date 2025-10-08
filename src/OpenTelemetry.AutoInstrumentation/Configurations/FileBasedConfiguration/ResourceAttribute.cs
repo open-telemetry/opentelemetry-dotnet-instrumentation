@@ -11,13 +11,13 @@ internal class ResourceAttribute
     /// Gets or sets the name of the resource attribute.
     /// </summary>
     [YamlMember(Alias = "name")]
-    public string Name { get; set; } = null!;
+    public string? Name { get; set; }
 
     /// <summary>
     /// Gets or sets the value of the resource attribute.
     /// </summary>
     [YamlMember(Alias = "value")]
-    public object Value { get; set; } = null!;
+    public object? Value { get; set; }
 
     /// <summary>
     /// Gets or sets the type of the resource attribute.

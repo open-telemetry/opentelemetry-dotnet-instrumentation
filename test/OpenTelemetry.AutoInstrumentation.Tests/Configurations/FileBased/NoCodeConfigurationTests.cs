@@ -39,7 +39,7 @@ public class NoCodeConfigurationTests
 
         Assert.NotNull(noCodeEntry.Span.Attributes);
 
-        List<NoCodeAttribute> expectedAttributes = [
+        List<ResourceAttribute> expectedAttributes = [
             new() { Name = "attribute_key_string", Value = "string_value", Type = "string" },
             new() { Name = "attribute_key_string_not_supported", Value = new[] { "string_value" }, Type = "string" },
             new() { Name = "attribute_key_bool", Value = "true", Type = "bool" },
@@ -52,10 +52,10 @@ public class NoCodeConfigurationTests
             new() { Name = "attribute_key_string_array_not_supported", Value = new object[] { "value1", new object[] { "value2" }, "value3" }, Type = "string_array" },
             new() { Name = "attribute_key_bool_array", Value = new[] { true, false, true }, Type = "bool_array" },
             new() { Name = "attribute_key_bool_array_not_supported", Value = new object[] { true, new[] { false }, true }, Type = "bool_array" },
-            new() { Name = "attribute_key_int_array", Value = new[] { 123, 456, 789 }, Type = "int_array" },
-            new() { Name = "attribute_key_int_array_not_supported", Value = new object[] { new[] { 123 }, 456, 789 }, Type = "int_array" },
-            new() { Name = "attribute_key_double_array", Value = new object[] { 123.45, 678.90 }, Type = "double_array" },
-            new() { Name = "attribute_key_double_array_not_supported", Value = new object[] { 123.45, new[] { 678.90 } }, Type = "double_array" },
+            new() { Name = "attribute_key_int_array", Value = new[] { "123", "456", "789" }, Type = "int_array" },
+            new() { Name = "attribute_key_int_array_not_supported", Value = new object[] { new[] { "123" }, "456", "789" }, Type = "int_array" },
+            new() { Name = "attribute_key_double_array", Value = new object[] { "123.45", "678.90" }, Type = "double_array" },
+            new() { Name = "attribute_key_double_array_not_supported", Value = new object[] { "123.45", new[] { "678.90" } }, Type = "double_array" },
             new() { Name = "attribute_key_non_supported_type", Value = "non_supported_value", Type = "non_supported_type" },
         ];
 
