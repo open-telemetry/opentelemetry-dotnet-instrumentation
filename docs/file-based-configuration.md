@@ -82,3 +82,24 @@ resource:
       process:         # Detects process-level attributes (process.*)
       processruntime:  # Detects process runtime attributes (process.runtime.*)
 ```  
+
+### Propagator Configuration
+
+You can configure text map context propagators directly in YAML or via the
+`OTEL_PROPAGATORS` environment variable.
+For more details and updates, see: [Propagators list and documentation](config.md/#propagators)
+To disable a propagator, comment out or remove its corresponding entry.
+
+``` yaml
+# If no propagators are specified, none will be added automatically.
+propagator:
+  # Composite propagators are evaluated together. 
+  # Entries from .composite_list are appended here (duplicates are filtered out).
+  composite:
+    tracecontext: # W3C Trace Context propagator
+    baggage:      # W3C Baggage propagator
+    b3:           # B3 single-header propagator
+    b3multi:      # B3 multi-header propagator
+  # Alternatively, configure via a comma-separated list (same format as OTEL_PROPAGATORS).
+  composite_list: ${OTEL_PROPAGATORS}
+```
