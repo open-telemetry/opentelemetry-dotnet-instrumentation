@@ -199,6 +199,7 @@
   \netfx\net471\System.Security.SecureString.dll,
   \netfx\net471\System.Threading.Overlapped.dll,
   \netfx\net471\System.Xml.XPath.XDocument.dll,
+  \netfx\net472\_._,
   \netfx\net47\Microsoft.Win32.Primitives.dll.link,
   \netfx\net47\System.AppContext.dll.link,
   \netfx\net47\System.Collections.Concurrent.dll.link,
