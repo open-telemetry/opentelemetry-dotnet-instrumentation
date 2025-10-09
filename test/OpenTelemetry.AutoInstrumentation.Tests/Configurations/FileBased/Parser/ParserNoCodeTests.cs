@@ -39,7 +39,7 @@ public class ParserNoCodeTests
 
         Assert.NotNull(noCodeEntry.Span.Attributes);
 
-        List<ResourceAttribute> expectedAttributes = [
+        List<YamlAttribute> expectedAttributes = [
             new() { Name = "attribute_key_string", Value = "string_value", Type = "string" },
             new() { Name = "attribute_key_string_not_supported", Value = new[] { "string_value" }, Type = "string" },
             new() { Name = "attribute_key_bool", Value = "true", Type = "bool" },

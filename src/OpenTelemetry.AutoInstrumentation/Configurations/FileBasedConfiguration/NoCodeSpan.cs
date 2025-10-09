@@ -17,7 +17,7 @@ internal class NoCodeSpan
     public string? Kind { get; set; }
 
     [YamlMember(Alias = "attributes")]
-    public List<ResourceAttribute>? Attributes { get; set; }
+    public List<YamlAttribute>? Attributes { get; set; }
 
     public TagList ParseAttributes()
     {
@@ -30,7 +30,7 @@ internal class NoCodeSpan
 
         foreach (var attribute in Attributes)
         {
-            if (ResourceAttribute.TryParseAttribute(attribute, out var name, out var value) && value != null)
+            if (YamlAttribute.TryParseAttribute(attribute, out var name, out var value) && value != null)
             {
                 tagList.Add(name, value);
             }

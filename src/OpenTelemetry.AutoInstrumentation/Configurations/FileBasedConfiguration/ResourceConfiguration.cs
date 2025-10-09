@@ -13,7 +13,7 @@ internal class ResourceConfiguration
     /// Gets or sets the list of resource attributes.
     /// </summary>
     [YamlMember(Alias = "attributes")]
-    public List<ResourceAttribute>? Attributes { get; set; }
+    public List<YamlAttribute>? Attributes { get; set; }
 
     /// <summary>
     /// Gets or sets the attributes list for the resource.
@@ -35,7 +35,7 @@ internal class ResourceConfiguration
         {
             foreach (var attribute in Attributes)
             {
-                if (ResourceAttribute.TryParseAttribute(attribute, out var name, out var value) && value != null)
+                if (YamlAttribute.TryParseAttribute(attribute, out var name, out var value) && value != null)
                 {
                     resourceAttributesWithPriority[name] = value;
                 }

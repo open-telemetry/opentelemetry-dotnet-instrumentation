@@ -7,7 +7,7 @@ using Vendors.YamlDotNet.Serialization;
 
 namespace OpenTelemetry.AutoInstrumentation.Configurations.FileBasedConfiguration;
 
-internal class ResourceAttribute
+internal class YamlAttribute
 {
     private static readonly IOtelLogger Log = OtelLogging.GetLogger();
 
@@ -29,7 +29,7 @@ internal class ResourceAttribute
     [YamlMember(Alias = "type")]
     public string Type { get; set; } = "string";
 
-    public static bool TryParseAttribute(ResourceAttribute attribute, out string name, out object? value)
+    public static bool TryParseAttribute(YamlAttribute attribute, out string name, out object? value)
     {
         name = attribute.Name ?? string.Empty;
         value = null;
