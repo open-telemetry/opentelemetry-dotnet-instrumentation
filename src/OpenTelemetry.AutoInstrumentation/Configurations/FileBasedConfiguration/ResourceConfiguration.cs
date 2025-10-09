@@ -1,6 +1,7 @@
 // Copyright The OpenTelemetry Authors
 // SPDX-License-Identifier: Apache-2.0
 
+using System.Diagnostics;
 using System.Globalization;
 using OpenTelemetry.AutoInstrumentation.Logging;
 using Vendors.YamlDotNet.Serialization;
@@ -29,25 +30,19 @@ internal class ResourceConfiguration
 
     public List<KeyValuePair<string, object>> ParseAttributes()
     {
-        var resourceAttributesWithPriority = new Dictionary<string, object>();
+        var resourceAttributesWithPriority = new List<KeyValuePair<string, object>>();
 
         if (Attributes != null)
         {
-            foreach (var attribute in Attributes)
-            {
-                if (YamlAttribute.TryParseAttribute(attribute, out var name, out var value) && value != null)
-                {
-                    resourceAttributesWithPriority[name] = value;
-                }
-            }
+            resourceAttributesWithPriority = YamlAttribute.ParseAttributes(Attributes).ToList();
         }
 
-        if (AttributesList != null)
+        if (!string.IsNullOrEmpty(AttributesList))
         {
             const char attributeListSplitter = ',';
             char[] attributeKeyValueSplitter = ['='];
 
-            var rawAttributes = AttributesList.Split(attributeListSplitter);
+            var rawAttributes = AttributesList!.Split(attributeListSplitter);
             foreach (var rawKeyValuePair in rawAttributes)
             {
                 var keyValuePair = rawKeyValuePair.Split(attributeKeyValueSplitter, 2);
@@ -57,14 +52,15 @@ internal class ResourceConfiguration
                 }
 
                 var key = keyValuePair[0].Trim();
+                var value = keyValuePair[1].Trim();
 
-                if (!resourceAttributesWithPriority.ContainsKey(key))
+                if (!resourceAttributesWithPriority.Any(kvp => kvp.Key == key))
                 {
-                    resourceAttributesWithPriority.Add(key, keyValuePair[1].Trim());
+                    resourceAttributesWithPriority.Add(new KeyValuePair<string, object>(key, value));
                 }
             }
         }
 
-        return resourceAttributesWithPriority.ToList();
+        return resourceAttributesWithPriority;
     }
 }

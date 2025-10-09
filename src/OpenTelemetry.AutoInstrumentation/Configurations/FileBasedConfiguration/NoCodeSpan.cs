@@ -21,19 +21,17 @@ internal class NoCodeSpan
 
     public TagList ParseAttributes()
     {
-        TagList tagList = default;
-
         if (Attributes == null || Attributes.Count == 0)
         {
-            return tagList;
+            return default;
         }
 
-        foreach (var attribute in Attributes)
+        var list = YamlAttribute.ParseAttributes(Attributes);
+
+        TagList tagList = default;
+        foreach (var kvp in list)
         {
-            if (YamlAttribute.TryParseAttribute(attribute, out var name, out var value) && value != null)
-            {
-                tagList.Add(name, value);
-            }
+            tagList.Add(kvp.Key, kvp.Value);
         }
 
         return tagList;

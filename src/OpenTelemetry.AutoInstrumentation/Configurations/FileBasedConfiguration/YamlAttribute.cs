@@ -29,165 +29,199 @@ internal class YamlAttribute
     [YamlMember(Alias = "type")]
     public string Type { get; set; } = "string";
 
-    public static bool TryParseAttribute(YamlAttribute attribute, out string name, out object? value)
+    public static List<KeyValuePair<string, object>> ParseAttributes(List<YamlAttribute>? attributes)
     {
-        name = attribute.Name ?? string.Empty;
-        value = null;
+        var container = new List<KeyValuePair<string, object>>();
 
-        if (string.IsNullOrEmpty(name))
+        if (attributes == null)
         {
-            Log.Debug("Attribute name is null or empty. Skipping.");
-            return false;
+            return container;
         }
 
-        var attributeValue = attribute.Value;
-
-        switch (attribute.Type)
+        foreach (var attribute in attributes)
         {
-            case "string":
-                if (attributeValue is string strValue)
-                {
-                    value = strValue;
-                    return true;
-                }
+            var name = attribute.Name ?? string.Empty;
 
-                Log.Debug("Attribute is marked as string but value is not a string '{0}'. Skipping.", attributeValue);
-                return false;
-            case "bool":
-                if (attributeValue is bool boolValue)
-                {
-                    value = boolValue;
-                    return true;
-                }
+            if (string.IsNullOrEmpty(name))
+            {
+                Log.Debug("Attribute name is null or empty. Skipping.");
+                continue;
+            }
 
-                if (attributeValue is string boolStr && bool.TryParse(boolStr, out var parsedBool))
-                {
-                    value = parsedBool;
-                    return true;
-                }
+            var attributeValue = attribute.Value;
 
-                Log.Debug("Attribute is marked as bool but value is not a bool '{0}'. Skipping.", attributeValue);
-                return false;
-            case "int":
-                if (attributeValue is long longValue)
-                {
-                    value = longValue;
-                    return true;
-                }
-
-                if (attributeValue is string longStr && long.TryParse(longStr, NumberStyles.Integer, CultureInfo.InvariantCulture, out var parsedLong))
-                {
-                    value = parsedLong;
-                    return true;
-                }
-
-                Log.Debug("Attribute is marked as int but value is not an integer '{0}'. Skipping.", attributeValue);
-                return false;
-            case "double":
-                if (attributeValue is double dblValue)
-                {
-                    value = dblValue;
-                    return true;
-                }
-
-                if (attributeValue is string dblStr && double.TryParse(dblStr, NumberStyles.Float | NumberStyles.AllowThousands, CultureInfo.InvariantCulture, out var parsedDouble))
-                {
-                    value = parsedDouble;
-                    return true;
-                }
-
-                Log.Debug("Attribute is marked as double but value is not a double '{0}'. Skipping.", attributeValue);
-                return false;
-            case "string_array":
-                if (attributeValue is List<object> stringList && stringList.All(v => v is string))
-                {
-                    value = stringList.Cast<string>().ToArray();
-                    return true;
-                }
-
-                Log.Debug("Attribute is marked as string_array but contains invalid values '{0}'. Skipping.", attributeValue);
-                return false;
-            case "bool_array":
-                if (attributeValue is List<object> boolList)
-                {
-                    var result = new List<bool>();
-                    foreach (var val in boolList)
+            switch (attribute.Type)
+            {
+                case "string":
+                    if (attributeValue is string strValue)
                     {
-                        if (val is bool b)
-                        {
-                            result.Add(b);
-                        }
-                        else if (val is string bs && bool.TryParse(bs, out var parsed))
-                        {
-                            result.Add(parsed);
-                        }
-                        else
-                        {
-                            Log.Debug("Attribute is marked as bool_array but element '{0}' is invalid. Skipping.", val);
-                            return false;
-                        }
+                        container.Add(new KeyValuePair<string, object>(name, strValue));
+                        continue;
                     }
 
-                    value = result.ToArray();
-                    return true;
-                }
+                    Log.Debug("Attribute is marked as string but value is not a string '{0}'. Skipping.", attributeValue);
+                    continue;
 
-                return false;
-            case "int_array":
-                if (attributeValue is List<object> intList)
-                {
-                    var result = new List<long>();
-                    foreach (var val in intList)
+                case "bool":
+                    if (attributeValue is bool boolValue)
                     {
-                        if (val is long l)
-                        {
-                            result.Add(l);
-                        }
-                        else if (val is string ls && long.TryParse(ls, NumberStyles.Integer, CultureInfo.InvariantCulture, out var parsed))
-                        {
-                            result.Add(parsed);
-                        }
-                        else
-                        {
-                            Log.Debug("Aattribute is marked as int_array but element '{0}' is invalid. Skipping.", val);
-                            return false;
-                        }
+                        container.Add(new KeyValuePair<string, object>(name, boolValue));
+                        continue;
                     }
 
-                    value = result.ToArray();
-                    return true;
-                }
-
-                return false;
-            case "double_array":
-                if (attributeValue is List<object> dblList)
-                {
-                    var result = new List<double>();
-                    foreach (var val in dblList)
+                    if (attributeValue is string boolStr && bool.TryParse(boolStr, out var parsedBool))
                     {
-                        if (val is double d)
-                        {
-                            result.Add(d);
-                        }
-                        else if (val is string ds && double.TryParse(ds, NumberStyles.Float | NumberStyles.AllowThousands, CultureInfo.InvariantCulture, out var parsed))
-                        {
-                            result.Add(parsed);
-                        }
-                        else
-                        {
-                            Log.Debug("Attribute is marked as double_array but element '{0}' is invalid. Skipping.", val);
-                            return false;
-                        }
+                        container.Add(new KeyValuePair<string, object>(name, parsedBool));
+                        continue;
                     }
 
-                    value = result.ToArray();
-                    return true;
-                }
+                    Log.Debug("Attribute is marked as bool but value is not a bool '{0}'. Skipping.", attributeValue);
+                    continue;
 
-                return false;
-            default:
-                Log.Debug("Attribute type is not recognized '{0}'. Skipping.", attribute.Type);
-                return false;
+                case "int":
+                    if (attributeValue is long longValue)
+                    {
+                        container.Add(new KeyValuePair<string, object>(name, longValue));
+                        continue;
+                    }
+
+                    if (attributeValue is string longStr && long.TryParse(longStr, NumberStyles.Integer, CultureInfo.InvariantCulture, out var parsedLong))
+                    {
+                        container.Add(new KeyValuePair<string, object>(name, parsedLong));
+                        continue;
+                    }
+
+                    Log.Debug("Attribute is marked as int but value is not an integer '{0}'. Skipping.", attributeValue);
+                    continue;
+
+                case "double":
+                    if (attributeValue is double dblValue)
+                    {
+                        container.Add(new KeyValuePair<string, object>(name, dblValue));
+                        continue;
+                    }
+
+                    if (attributeValue is string dblStr && double.TryParse(dblStr, NumberStyles.Float | NumberStyles.AllowThousands, CultureInfo.InvariantCulture, out var parsedDouble))
+                    {
+                        container.Add(new KeyValuePair<string, object>(name, parsedDouble));
+                        continue;
+                    }
+
+                    Log.Debug("Attribute is marked as double but value is not a double '{0}'. Skipping.", attributeValue);
+                    continue;
+
+                case "string_array":
+                    if (attributeValue is List<object> stringList && stringList.All(v => v is string))
+                    {
+                        container.Add(new KeyValuePair<string, object>(name, stringList.Cast<string>().ToArray()));
+                        continue;
+                    }
+
+                    Log.Debug("Attribute is marked as string_array but contains invalid values '{0}'. Skipping.", attributeValue);
+                    continue;
+
+                case "bool_array":
+                    if (attributeValue is List<object> boolList)
+                    {
+                        var result = new List<bool>();
+                        foreach (var val in boolList)
+                        {
+                            if (val is bool b)
+                            {
+                                result.Add(b);
+                            }
+                            else if (val is string bs && bool.TryParse(bs, out var parsed))
+                            {
+                                result.Add(parsed);
+                            }
+                            else
+                            {
+                                Log.Debug("Attribute is marked as bool_array but element '{0}' is invalid. Skipping.", val);
+                                result.Clear();
+                                break;
+                            }
+                        }
+
+                        if (result.Count == boolList.Count)
+                        {
+                            container.Add(new KeyValuePair<string, object>(name, result.ToArray()));
+                        }
+
+                        continue;
+                    }
+
+                    continue;
+
+                case "int_array":
+                    if (attributeValue is List<object> intList)
+                    {
+                        var result = new List<long>();
+                        foreach (var val in intList)
+                        {
+                            if (val is long l)
+                            {
+                                result.Add(l);
+                            }
+                            else if (val is string ls && long.TryParse(ls, NumberStyles.Integer, CultureInfo.InvariantCulture, out var parsed))
+                            {
+                                result.Add(parsed);
+                            }
+                            else
+                            {
+                                Log.Debug("Attribute is marked as int_array but element '{0}' is invalid. Skipping.", val);
+                                result.Clear();
+                                break;
+                            }
+                        }
+
+                        if (result.Count == intList.Count)
+                        {
+                            container.Add(new KeyValuePair<string, object>(name, result.ToArray()));
+                        }
+
+                        continue;
+                    }
+
+                    continue;
+
+                case "double_array":
+                    if (attributeValue is List<object> dblList)
+                    {
+                        var result = new List<double>();
+                        foreach (var val in dblList)
+                        {
+                            if (val is double d)
+                            {
+                                result.Add(d);
+                            }
+                            else if (val is string ds && double.TryParse(ds, NumberStyles.Float | NumberStyles.AllowThousands, CultureInfo.InvariantCulture, out var parsed))
+                            {
+                                result.Add(parsed);
+                            }
+                            else
+                            {
+                                Log.Debug("Attribute is marked as double_array but element '{0}' is invalid. Skipping.", val);
+                                result.Clear();
+                                break;
+                            }
+                        }
+
+                        if (result.Count == dblList.Count)
+                        {
+                            container.Add(new KeyValuePair<string, object>(name, result.ToArray()));
+                        }
+
+                        continue;
+                    }
+
+                    continue;
+
+                default:
+                    Log.Debug("Attribute type is not recognized '{0}'. Skipping.", attribute.Type);
+                    continue;
+            }
         }
+
+        return container;
     }
 }
