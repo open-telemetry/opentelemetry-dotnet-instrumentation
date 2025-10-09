@@ -36,7 +36,7 @@ internal class ResourceAttribute
 
         if (string.IsNullOrEmpty(name))
         {
-            Log.Debug("NoCode - attribute name is null or empty. Skipping.");
+            Log.Debug("Attribute name is null or empty. Skipping.");
             return false;
         }
 
@@ -51,7 +51,7 @@ internal class ResourceAttribute
                     return true;
                 }
 
-                Log.Debug("NoCode - attribute is marked as string but value is not a string '{0}'. Skipping.", attributeValue);
+                Log.Debug("Attribute is marked as string but value is not a string '{0}'. Skipping.", attributeValue);
                 return false;
             case "bool":
                 if (attributeValue is bool boolValue)
@@ -66,7 +66,7 @@ internal class ResourceAttribute
                     return true;
                 }
 
-                Log.Debug("NoCode - attribute is marked as bool but value is not a bool '{0}'. Skipping.", attributeValue);
+                Log.Debug("Attribute is marked as bool but value is not a bool '{0}'. Skipping.", attributeValue);
                 return false;
             case "int":
                 if (attributeValue is long longValue)
@@ -81,7 +81,7 @@ internal class ResourceAttribute
                     return true;
                 }
 
-                Log.Debug("NoCode - attribute is marked as int but value is not an integer '{0}'. Skipping.", attributeValue);
+                Log.Debug("Attribute is marked as int but value is not an integer '{0}'. Skipping.", attributeValue);
                 return false;
             case "double":
                 if (attributeValue is double dblValue)
@@ -96,7 +96,7 @@ internal class ResourceAttribute
                     return true;
                 }
 
-                Log.Debug("NoCode - attribute is marked as double but value is not a double '{0}'. Skipping.", attributeValue);
+                Log.Debug("Attribute is marked as double but value is not a double '{0}'. Skipping.", attributeValue);
                 return false;
             case "string_array":
                 if (attributeValue is List<object> stringList && stringList.All(v => v is string))
@@ -105,7 +105,7 @@ internal class ResourceAttribute
                     return true;
                 }
 
-                Log.Debug("NoCode - attribute is marked as string_array but contains invalid values '{0}'. Skipping.", attributeValue);
+                Log.Debug("Attribute is marked as string_array but contains invalid values '{0}'. Skipping.", attributeValue);
                 return false;
             case "bool_array":
                 if (attributeValue is List<object> boolList)
@@ -123,7 +123,7 @@ internal class ResourceAttribute
                         }
                         else
                         {
-                            Log.Debug("NoCode - attribute is marked as bool_array but element '{0}' is invalid. Skipping.", val);
+                            Log.Debug("Attribute is marked as bool_array but element '{0}' is invalid. Skipping.", val);
                             return false;
                         }
                     }
@@ -149,7 +149,7 @@ internal class ResourceAttribute
                         }
                         else
                         {
-                            Log.Debug("NoCode - attribute is marked as int_array but element '{0}' is invalid. Skipping.", val);
+                            Log.Debug("Aattribute is marked as int_array but element '{0}' is invalid. Skipping.", val);
                             return false;
                         }
                     }
@@ -175,7 +175,7 @@ internal class ResourceAttribute
                         }
                         else
                         {
-                            Log.Debug("NoCode - attribute is marked as double_array but element '{0}' is invalid. Skipping.", val);
+                            Log.Debug("Attribute is marked as double_array but element '{0}' is invalid. Skipping.", val);
                             return false;
                         }
                     }
@@ -186,7 +186,7 @@ internal class ResourceAttribute
 
                 return false;
             default:
-                Log.Debug("NoCode - attribute type is not recognized '{0}'. Skipping.", attribute.Type);
+                Log.Debug("Attribute type is not recognized '{0}'. Skipping.", attribute.Type);
                 return false;
         }
     }
