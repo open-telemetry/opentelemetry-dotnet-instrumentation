@@ -7,8 +7,10 @@ resource:
       value: unknown_service
     - name: attribute_key_string
       value: "string_value"
+      type: string
     - name: attribute_key_string_not_supported
       value: ["string_value"]
+      type: string
     - name: attribute_key_bool
       value: true
       type: bool

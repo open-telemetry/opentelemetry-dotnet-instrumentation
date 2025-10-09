@@ -6,9 +6,9 @@ using OpenTelemetry.AutoInstrumentation.Configurations.FileBasedConfiguration;
 using Xunit;
 using YamlParser = OpenTelemetry.AutoInstrumentation.Configurations.FileBasedConfiguration.Parser.Parser;
 
-namespace OpenTelemetry.AutoInstrumentation.Tests.Configurations.FileBased;
+namespace OpenTelemetry.AutoInstrumentation.Tests.Configurations.FileBased.Parser;
 
-public class NoCodeConfigurationTests
+public class ParserNoCodeTests
 {
     [Fact]
     public void NoCodeConfigurationCanBeParsed()
