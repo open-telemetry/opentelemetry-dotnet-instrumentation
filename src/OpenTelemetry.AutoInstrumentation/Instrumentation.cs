@@ -14,6 +14,7 @@ using OpenTelemetry.AutoInstrumentation.Instrumentations.NoCode;
 using OpenTelemetry.AutoInstrumentation.Loading;
 using OpenTelemetry.AutoInstrumentation.Logging;
 using OpenTelemetry.AutoInstrumentation.Plugins;
+using OpenTelemetry.AutoInstrumentation.Util;
 using OpenTelemetry.Logs;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Trace;
@@ -214,6 +215,13 @@ internal static class Instrumentation
         if (TracerSettings.Value.OpenTracingEnabled)
         {
             OpenTracingHelper.EnableOpenTracing(_tracerProvider);
+        }
+
+        if (GeneralSettings.Value.OpAmpClientEnabled)
+        {
+            var resources = ResourceHelper.AggregateResources(_tracerProvider, _meterProvider, LoggerProvider);
+
+            OpAmpHelper.EnableOpAmpClient(resources);
         }
     }
 
@@ -533,6 +541,8 @@ internal static class Instrumentation
 
         try
         {
+            OpAmpHelper.StopOpAmpClientIfRunning();
+
 #if NET
             LazyInstrumentationLoader?.Dispose();
             _sampleExporter?.Dispose();
