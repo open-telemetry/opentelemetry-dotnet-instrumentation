@@ -130,7 +130,7 @@ public class MyPlugin
 ### Metrics
 
 | Options type                                                             | NuGet package                                  | NuGet version |
-| ------------------------------------------------------------------------ | ---------------------------------------------- | ------------- |
+|--------------------------------------------------------------------------|------------------------------------------------|---------------|
 | OpenTelemetry.Metrics.MetricReaderOptions                                | OpenTelemetry                                  | 1.13.1        |
 | OpenTelemetry.Exporter.ConsoleExporterOptions                            | OpenTelemetry.Exporter.Console                 | 1.13.1        |
 | OpenTelemetry.Exporter.PrometheusExporterOptions                         | OpenTelemetry.Exporter.Prometheus.HttpListener | 1.13.1-beta.1 |
