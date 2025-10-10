@@ -125,12 +125,6 @@ HRESULT STDMETHODCALLTYPE CorProfiler::Initialize(IUnknown* cor_profiler_info_un
 
     // code is ready to get runtime information
     runtime_information_ = GetRuntimeInformation(this->info_);
-#ifdef _WIN32
-    if (runtime_information_.is_desktop())
-    {
-        DetectFrameworkVersion();
-    }
-#endif
 
     if (Logger::IsDebugEnabled())
     {
@@ -160,6 +154,7 @@ HRESULT STDMETHODCALLTYPE CorProfiler::Initialize(IUnknown* cor_profiler_info_un
     if (runtime_information_.is_desktop() && IsNetFxAssemblyRedirectionEnabled())
     {
         InitNetFxAssemblyRedirectsMap();
+        DetectFrameworkVersionTableForRedirectsMap();
     }
 #endif
 
@@ -3656,7 +3651,7 @@ HRESULT STDMETHODCALLTYPE CorProfiler::EventPipeEventDelivered(EVENTPIPE_PROVIDE
 }
 
 #ifdef _WIN32
-void CorProfiler::DetectFrameworkVersion()
+void CorProfiler::DetectFrameworkVersionTableForRedirectsMap()
 {
     // Default to 4.6.2 (462) if detection fails
     int frameworkVersion = 462;
@@ -3667,7 +3662,7 @@ void CorProfiler::DetectFrameworkVersion()
 
     if (result != ERROR_SUCCESS)
     {
-        Logger::Warn("DetectFrameworkVersion: Failed to open registry key, using default version 462");
+        Logger::Warn("DetectFrameworkVersionTableForRedirectsMap: Failed to open registry key, using default version 462");
     }
     else
     {
@@ -3682,7 +3677,7 @@ void CorProfiler::DetectFrameworkVersion()
 
         if (result != ERROR_SUCCESS || valueType != REG_DWORD)
         {
-            Logger::Warn("DetectFrameworkVersion: Failed to read Release value, using default version 462");
+            Logger::Warn("DetectFrameworkVersionTableForRedirectsMap: Failed to read Release value, using default version 462");
         }
         else
         {
@@ -3716,11 +3711,11 @@ void CorProfiler::DetectFrameworkVersion()
             }
             else
             {
-                Logger::Warn("DetectFrameworkVersion: Old .Net Framework detected, use 462 as fallback");
+                Logger::Warn("DetectFrameworkVersionTableForRedirectsMap: Old .Net Framework detected, use 462 as fallback");
             }
         }
 
-        Logger::Debug("DetectFrameworkVersion: Detected .NET Framework version ", frameworkVersion,
+        Logger::Debug("DetectFrameworkVersionTableForRedirectsMap: Detected .NET Framework version ", frameworkVersion,
                       " (Release: ", releaseValue, ")");
     }
 
@@ -3736,12 +3731,12 @@ void CorProfiler::DetectFrameworkVersion()
 
     if (selectedKey != 0)
     {
-        Logger::Warn("DetectFrameworkVersion: No assembly redirection tables found. Assembly version redirecting will "
-                     "be disabled.");
+        Logger::Debug("DetectFrameworkVersionTableForRedirectsMap: Use assembly redirection table for ", selectedKey);
     }
     else
     {
-        Logger::Debug("DetectFrameworkVersion: Use assembly redirection table for ", selectedKey);
+        Logger::Warn("DetectFrameworkVersionTableForRedirectsMap: No assembly redirection tables found. Assembly version redirecting will "
+                     "be disabled.");
     }
 }
 #endif

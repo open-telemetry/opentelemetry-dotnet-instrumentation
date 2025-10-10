@@ -113,7 +113,7 @@ private:
                                mdMethodDef*   patch_app_domain_setup_method);
     HRESULT ModifyAppDomainCreate(const ModuleID module_id, mdMethodDef patch_app_domain_setup_method);
     HRESULT AddIISPreStartInitFlags(const ModuleID module_id, const mdToken function_token);
-    void DetectFrameworkVersion();
+    void DetectFrameworkVersionTableForRedirectsMap();
 #endif
 
     //

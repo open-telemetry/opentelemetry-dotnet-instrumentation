@@ -1,4 +1,3 @@
-using System.Collections;
 using System.Text;
 using System.Text.RegularExpressions;
 using Mono.Cecil;
@@ -67,7 +66,6 @@ public static class AssemblyRedirectionSourceGenerator
         foreach (var fileName in Directory.EnumerateFiles(assembliesFolderPath))
         {
             Process(fileName, null);
-
         }
 
         foreach (var fx in folders)
@@ -75,9 +73,9 @@ public static class AssemblyRedirectionSourceGenerator
             foreach (var fileName in Directory.EnumerateFiles(fx.Value))
             {
                 var filenameToProcess = fileName;
-                if (Path.GetExtension(fileName) == "link")
+                if (Path.GetExtension(fileName) == ".link")
                 {
-                    filenameToProcess = Path.Combine(generatedFilePath, File.ReadAllText(fileName),
+                    filenameToProcess = Path.Combine(assembliesFolderPath, File.ReadAllText(fileName),
                         Path.GetFileNameWithoutExtension(fileName));
                 }
 
