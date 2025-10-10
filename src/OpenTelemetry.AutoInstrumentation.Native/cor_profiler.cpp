@@ -3662,7 +3662,8 @@ void CorProfiler::DetectFrameworkVersionTableForRedirectsMap()
 
     if (result != ERROR_SUCCESS)
     {
-        Logger::Warn("DetectFrameworkVersionTableForRedirectsMap: Failed to open registry key, using default version 462");
+        Logger::Warn(
+            "DetectFrameworkVersionTableForRedirectsMap: Failed to open registry key, using default version 462");
     }
     else
     {
@@ -3677,7 +3678,8 @@ void CorProfiler::DetectFrameworkVersionTableForRedirectsMap()
 
         if (result != ERROR_SUCCESS || valueType != REG_DWORD)
         {
-            Logger::Warn("DetectFrameworkVersionTableForRedirectsMap: Failed to read Release value, using default version 462");
+            Logger::Warn(
+                "DetectFrameworkVersionTableForRedirectsMap: Failed to read Release value, using default version 462");
         }
         else
         {
@@ -3711,7 +3713,8 @@ void CorProfiler::DetectFrameworkVersionTableForRedirectsMap()
             }
             else
             {
-                Logger::Warn("DetectFrameworkVersionTableForRedirectsMap: Old .Net Framework detected, use 462 as fallback");
+                Logger::Warn(
+                    "DetectFrameworkVersionTableForRedirectsMap: Old .Net Framework detected, use 462 as fallback");
             }
         }
 
@@ -3735,8 +3738,8 @@ void CorProfiler::DetectFrameworkVersionTableForRedirectsMap()
     }
     else
     {
-        Logger::Warn("DetectFrameworkVersionTableForRedirectsMap: No assembly redirection tables found. Assembly version redirecting will "
-                     "be disabled.");
+        Logger::Warn("DetectFrameworkVersionTableForRedirectsMap: No assembly redirection tables found. Assembly "
+                     "version redirecting will be disabled.");
     }
 }
 #endif
