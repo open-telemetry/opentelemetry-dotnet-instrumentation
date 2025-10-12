@@ -52,8 +52,6 @@ internal class Program
             }
         }
 
-
-
         var resultText = install
             ? $"Success: Installed {files.Count} libraries in the GAC."
             : $"Success: Uninstalled {files.Count} libraries from the GAC.";
