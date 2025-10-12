@@ -16,6 +16,7 @@ public class TargetFramework : Enumeration
     public static readonly TargetFramework NET8_0 = new() { Value = "net8.0" };
     public static readonly TargetFramework NET9_0 = new() { Value = "net9.0" };
 
+    // should be in version order
     public static readonly TargetFramework[] NetFramework = {
         NET462, NET47, NET471, NET472, NET472
     };

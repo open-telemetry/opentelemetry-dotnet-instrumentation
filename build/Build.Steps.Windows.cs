@@ -280,8 +280,15 @@ partial class Build
             throw new InvalidOperationException("This target must be run on Windows as Administrator.");
         }
 
-        var netFxAssembliesFolder = TracerHomeDirectory / MapToFolderOutput(TargetFramework.NET462);
+        // We assume that dev machine running test has .Net Framework not older than TargetFrameworksNetFx.Last()
+        var netFxCommonAssembliesFolder = TracerHomeDirectory / MapToFolderOutput(TargetFrameworksNetFx.Last());
+        var netFxAssembliesFolder = TracerHomeDirectory / MapToFolderOutputNetFx(TargetFrameworksNetFx.Last());
         var installTool = Solution.GetProjectByName(Projects.Tools.GacInstallTool);
+
+        DotNetRun(s => s
+            .SetProjectFile(installTool)
+            .SetConfiguration(BuildConfiguration)
+            .SetApplicationArguments(operation, netFxCommonAssembliesFolder));
 
         DotNetRun(s => s
             .SetProjectFile(installTool)
