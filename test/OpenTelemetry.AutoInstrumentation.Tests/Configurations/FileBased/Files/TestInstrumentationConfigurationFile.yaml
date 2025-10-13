@@ -8,15 +8,15 @@ instrumentation/development:
       oraclemda: 
         set_db_statement_for_text: true
       aspnet:
-        capture_request_headers: "X-Key=Value"
-        capture_response_headers: "X-Key=Value"
+        capture_request_headers: "X-Key"
+        capture_response_headers: "X-Key"
       aspnetcore:
-        capture_request_headers: "X-Key=Value"
-        capture_response_headers: "X-Key=Value"
+        capture_request_headers: "X-Key"
+        capture_response_headers: "X-Key"
       httpclient:
-        capture_request_headers: "X-Key=Value"
-        capture_response_headers: "X-Key=Value"
+        capture_request_headers: "X-Key"
+        capture_response_headers: "X-Key"
       grpcnetclient:
-        capture_request_metadata: "X-Key=Value"
-        capture_response_metadata: "X-Key=Value"
+        capture_request_metadata: "X-Key"
+        capture_response_metadata: "X-Key"
 
