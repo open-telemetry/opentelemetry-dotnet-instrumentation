@@ -114,6 +114,12 @@ For more information about attributes, see the [OpenTelemetry Attribute specific
 
 Instrument a simple static method:
 
+```csharp
+public static void TestMethodStatic();
+```
+
+Configuration:
+
 ```yaml
 no_code/development:
   targets:
@@ -134,6 +140,12 @@ no_code/development:
 
 When `kind` is omitted, it defaults to `internal`:
 
+```csharp
+public void TestMethodA();
+```
+
+Configuration:
+
 ```yaml
 no_code/development:
   targets:
@@ -153,6 +165,12 @@ no_code/development:
 ### Method with Parameters
 
 Instrument a method with specific parameters:
+
+```csharp
+public void TestMethod(string param1, string param2);
+```
+
+Configuration:
 
 ```yaml
 no_code/development:
@@ -180,6 +198,12 @@ no_code/development:
 
 Instrument an async method returning `Task<T>`:
 
+```csharp
+public async Task<int> IntTaskTestMethodAsync();
+```
+
+Configuration:
+
 ```yaml
 no_code/development:
   targets:
@@ -203,6 +227,12 @@ no_code/development:
 ### Multiple Attributes with Different Types
 
 Configure spans with various attribute types (from the actual test configuration):
+
+```csharp
+public static void TestMethodStatic();
+```
+
+Configuration with multiple attribute types:
 
 ```yaml
 no_code/development:
@@ -248,6 +278,19 @@ no_code/development:
 ### Method Overload Targeting
 
 Target specific method overloads by parameter types:
+
+```csharp
+// Parameterless overload
+public void TestMethod();
+
+// String parameter overload
+public void TestMethod(string param1);
+
+// Int parameter overload
+public void TestMethod(int param1);
+```
+
+Configuration for targeting specific overloads:
 
 ```yaml
 no_code/development:
@@ -298,6 +341,12 @@ no_code/development:
 
 Instrument methods returning `ValueTask` or `ValueTask<T>`:
 
+```csharp
+public async ValueTask<int> IntValueTaskTestMethodAsync();
+```
+
+Configuration:
+
 ```yaml
 no_code/development:
   targets:
@@ -318,6 +367,20 @@ no_code/development:
 
 Instrument generic methods (note the return type specification):
 
+```csharp
+public T? GenericTestMethod<T>();
+```
+
+> [!TIP]  
+> **Finding Generic Method Types**: For generic methods, you need to specify
+> the concrete types after generic type substitution for both return types and
+> parameter types. Use tools like [ILSpy](https://github.com/icsharpcode/ILSpy)
+> or similar IL viewers to examine the compiled method signatures and determine
+> the exact types to use in your configuration. In IlSpy you can use IL with C#
+> in drop down list.
+
+Configuration (when called as `GenericTestMethod<int>()`):
+
 ```yaml
 no_code/development:
   targets:
@@ -337,6 +400,16 @@ no_code/development:
 ### Methods with Return Values
 
 Instrument methods that return values:
+
+```csharp
+// Method returning string
+public string ReturningStringTestMethod();
+
+// Method returning custom class
+public TestClass ReturningCustomClassTestMethod();
+```
+
+Configuration:
 
 ```yaml
 no_code/development:
