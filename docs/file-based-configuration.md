@@ -55,6 +55,7 @@ flush_on_unhandled_exception: false
 tracer_provider:
   processors:
     # Configure a batch span processor.
+    # Support for multiple processors is not available yet (which does not comply with the specification).
     batch:
       # Configure delay interval (in milliseconds) between two consecutive exports. 
       # Value must be non-negative.
