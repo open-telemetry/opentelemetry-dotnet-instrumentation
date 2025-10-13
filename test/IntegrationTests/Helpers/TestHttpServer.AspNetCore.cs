@@ -56,6 +56,41 @@ public class TestHttpServer : IDisposable
         WriteOutput($"Listening on: {string.Join(',', pathHandlers.Select(handler => $"{address}{handler.Path}"))}");
     }
 
+    public TestHttpServer(ITestOutputHelper output, string name, int port, params PathHandler[] pathHandlers)
+    {
+        _output = output;
+        _name = name;
+        Port = port;
+
+        _listener = new HostBuilder()
+            .ConfigureWebHost(webHostBuilder =>
+            {
+                webHostBuilder
+                    .UseKestrel(options =>
+                        options.Listen(IPAddress.Loopback, port))
+                    .Configure(x =>
+                    {
+                        foreach (var pathHandler in pathHandlers)
+                        {
+                            x.Map(pathHandler.Path, x =>
+                            {
+                                x.Run(pathHandler.Delegate);
+                            });
+                        }
+                    });
+            })
+            .Build();
+
+        _listener.Start();
+
+        var server = _listener.Services.GetRequiredService<IServer>();
+        var address = server.Features
+                .Get<IServerAddressesFeature>()!
+                .Addresses
+                .First();
+        WriteOutput($"Listening on: {string.Join(',', pathHandlers.Select(handler => $"{address}{handler.Path}"))}");
+    }
+
     /// <summary>
     /// Gets the TCP port that this listener is listening on.
     /// </summary>
