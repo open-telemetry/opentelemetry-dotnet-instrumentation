@@ -430,18 +430,6 @@ When specifying return types in the signature, use these common .NET type names:
 - **ValueTask with return**: `System.Threading.Tasks.ValueTask\`1[ReturnType]`
 - **Custom classes**: `YourNamespace.YourClassName`
 
-## Span Kinds
-
-Choose appropriate span kinds based on the method's role. The `kind` field is
-optional and defaults to `internal` if omitted or if an invalid value is
-provided:
-
-- **`internal`**: Internal operations within your application (default)
-- **`server`**: Methods that handle incoming requests
-- **`client`**: Methods that make outgoing calls to external services
-- **`producer`**: Methods that produce messages or events
-- **`consumer`**: Methods that consume messages or events
-
 ## Test Application Reference
 
 For complete working examples, see the test application:
