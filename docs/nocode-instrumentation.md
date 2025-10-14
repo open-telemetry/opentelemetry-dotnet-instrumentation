@@ -489,3 +489,7 @@ The test application demonstrates instrumentation of:
   generic methods
 - **Performance Issues**: Consider the frequency of method calls and whether
   instrumentation is necessary for high-throughput methods
+- **Debug Logs**: Enable debug logging (see [Global settings](config.md#global-settings))
+  and search for log messages prefixed with `No code` to find information
+  specific to no-code instrumentation, including configuration parsing, method
+  targeting, and instrumentation application details.
