@@ -48,46 +48,23 @@ file_format: "1.0-rc.1"
 
 no_code/development:
   targets:
-    - target:
-        assembly:
-          name: TestApplication.NoCode
-        type: TestApplication.NoCode.NoCodeTestingClass
-        method: TestMethod
-        signature:
-          return_type: System.Void
-          parameter_types:
+    - target:                                             # Method target specification
+        assembly:                                         # Assembly information
+          name: TestApplication.NoCode                    # The name of the assembly containing the target method
+        type: TestApplication.NoCode.NoCodeTestingClass   # The fully qualified type name containing the method
+        method: TestMethod                                # The method name to instrument
+        signature:                                        # Method signature specification for precise targeting
+          return_type: System.Void                        # The method's return type (e.g., System.Void, System.String, System.Threading.Tasks.Task)
+          parameter_types:                                # Array of parameter types (empty array for parameterless methods)
             - System.String
       span:
-        name: Span-TestMethod1String
-        kind: internal
-        attributes:
-          - name: custom.attribute
-            value: "attribute_value"
-            type: string
+        name: Span-TestMethod1String                      # Custom span name (if not specified, defaults to method name)
+        kind: internal                                    # (Optional) Span kind: internal, server, client, producer, consumer (defaults to internal)
+        attributes:                                       # Array of custom attributes to add to the span
+          - name: custom.attribute                        # Attribute name
+            value: "attribute_value"                      # Attribute value
+            type: string                                  # Attribute type (see Attribute Types section below)
 ```
-
-### Target Configuration
-
-Each target specifies a method to instrument:
-
-- **`assembly.name`**: The name of the assembly containing the target method
-- **`type`**: The fully qualified type name containing the method
-- **`method`**: The method name to instrument
-- **`signature`**: Method signature specification for precise targeting
-  - **`return_type`**: The method's return type (e.g., `System.Void`,
-    `System.String`, `System.Threading.Tasks.Task`)
-  - **`parameter_types`**: Array of parameter types (empty array for
-    parameterless methods)
-
-### Span Configuration
-
-Configure the telemetry span created for the instrumented method:
-
-- **`name`**: Custom span name (if not specified, defaults to method name)
-- **`kind`**: (Optional) Span kind - one of: `internal`, `server`, `client`,
-  `producer`, `consumer`. Defaults to `internal` if omitted or if an invalid
-  value is provided
-- **`attributes`**: Array of custom attributes to add to the span
 
 ### Attribute Types
 
