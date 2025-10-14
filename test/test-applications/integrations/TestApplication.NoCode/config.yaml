@@ -5,7 +5,7 @@ tracer_provider:
     batch:
       exporter:
         otlp_http:
-          endpoint: http://localhost:4318/v1/traces
+          endpoint: ${OTEL_EXPORTER_OTLP_ENDPOINT}
 
 no_code/development:
   targets:

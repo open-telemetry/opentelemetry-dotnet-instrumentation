@@ -32,23 +32,6 @@ public class TestHttpServer : IDisposable
         _listenerThread.Start();
     }
 
-    public TestHttpServer(ITestOutputHelper output, Action<HttpListenerContext> requestHandler, string host, int port, string sufix = "/")
-    {
-        _output = output;
-        _requestHandler = requestHandler;
-
-        Port = port;
-
-        _listener = new HttpListener();
-        _listener.Start();
-        var prefix = new UriBuilder("http", host, port, sufix).ToString(); // See https://docs.microsoft.com/en-us/dotnet/api/system.net.httplistenerprefixcollection.add?redirectedfrom=MSDN&view=net-6.0#remarks for info about the host value.
-        _listener.Prefixes.Add(prefix);
-        WriteOutput($"Listening on '{prefix}'");
-
-        _listenerThread = new Thread(HandleHttpRequests);
-        _listenerThread.Start();
-    }
-
     /// <summary>
     /// Gets the TCP port that this listener is listening on.
     /// </summary>

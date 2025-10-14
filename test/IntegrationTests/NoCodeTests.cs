@@ -21,7 +21,7 @@ public class NoCodeTests : TestHelper
     {
         EnableBytecodeInstrumentation();
         EnableFileBasedConfigWithDefaultPath();
-        using var collector = new MockSpansCollector(Output, 4318);
+        using var collector = new MockSpansCollector(Output);
         SetExporter(collector);
 
         List<KeyValue> allTypeOfAttributes = [
