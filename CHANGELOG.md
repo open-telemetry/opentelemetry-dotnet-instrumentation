@@ -20,6 +20,7 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 
 - Following packages updated
 - `OpenTelemetry.Instrumentation.SqlClient` from `1.12.0-beta.2` to `1.12.0-beta.3`.
+- `OpenTelemetry.Instrumentation.Wcf` from `1.12.0-beta.1` to `1.13.0-beta.1`.
 - .NET Framework only, following packages updated
   - `OpenTelemetry.Instrumentation.AspNet` from `1.12.0-beta.1` to `1.12.0-beta.2`.
 
