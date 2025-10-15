@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <OutputType>Library</OutputType>
@@ -8,12 +8,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\..\..\..\src\OpenTelemetry.AutoInstrumentation\OpenTelemetry.AutoInstrumentation.csproj" />
-  </ItemGroup>
-
-  <ItemGroup Condition="'$(TargetFramework)' == 'net462'">
-    <PackageReference Include="System.Diagnostics.DiagnosticSource" VersionOverride="9.0.8"/>
-    <PackageReference Include="System.Memory" VersionOverride="4.6.3"/>
-    <PackageReference Include="System.ValueTuple" VersionOverride="4.6.1"/>
   </ItemGroup>
 
 </Project>
