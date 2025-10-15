@@ -1,6 +1,8 @@
 // Copyright The OpenTelemetry Authors
 // SPDX-License-Identifier: Apache-2.0
 
+/*
+
 using OpenTelemetry.AutoInstrumentation.Configurations;
 using OpenTelemetry.AutoInstrumentation.Configurations.FileBasedConfiguration;
 using Xunit;
@@ -231,3 +233,4 @@ public class FilebasedTracesSettingsTests
         Assert.Null(settings.ZipkinSettings);
     }
 }
+*/

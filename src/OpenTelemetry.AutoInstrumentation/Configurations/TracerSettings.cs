@@ -26,6 +26,8 @@ internal class TracerSettings : Settings
 
     /// <summary>
     /// Gets the list of enabled traces exporters.
+    /// For File based configuration, this must be empty,
+    /// and the configuration will be handled by Processors.
     /// </summary>
     public IReadOnlyList<TracesExporter> TracesExporters { get; private set; } = [];
 
@@ -55,18 +57,11 @@ internal class TracerSettings : Settings
     public OtlpSettings? OtlpSettings { get; private set; }
 
     /// <summary>
-    /// Gets tracing Batch Processor Configuration.
+    /// Gets tracing OTLP Settings.
     /// For environment variable configuration, this must be null,
-    /// and the configuration will be handled inside the Otlp exporter package.
+    /// and the configuration will be handled by TracesExporters
     /// </summary>
-    public BatchProcessorConfig? BatchProcessorConfig { get; private set; } = null;
-
-    /// <summary>
-    /// Gets the tracing Zipkin settings.
-    /// For environment variable configuration, this must be null,
-    /// and the configuration will be handled inside the Zipkin exporter package.
-    /// </summary>
-    public ZipkinExporterConfig? ZipkinSettings { get; private set; } = null;
+    public IReadOnlyList<ProcessorConfig>? Processors { get; private set; } = null;
 
     protected override void OnLoadEnvVar(Configuration configuration)
     {
@@ -110,46 +105,13 @@ internal class TracerSettings : Settings
 
     protected override void OnLoadFile(YamlConfiguration configuration)
     {
-        if (configuration.TracerProvider != null &&
-            configuration.TracerProvider.Processors != null &&
-            configuration.TracerProvider.Processors.TryGetValue("batch", out var batchProcessorConfig))
+        var processors = configuration.TracerProvider?.Processors;
+        if (processors != null && processors.Count > 0)
         {
             TracesEnabled = true;
-            BatchProcessorConfig = batchProcessorConfig;
-            var exporters = batchProcessorConfig.Exporter;
-            var tracesExporters = new List<TracesExporter>();
-            if (exporters != null)
-            {
-                if (exporters.OtlpGrpc != null)
-                {
-                    tracesExporters.Add(TracesExporter.Otlp);
-                    OtlpSettings = new OtlpSettings(OtlpSignalType.Traces, exporters.OtlpGrpc);
-                }
-
-                if (exporters.OtlpHttp != null)
-                {
-                    tracesExporters.Add(TracesExporter.Otlp);
-                    OtlpSettings = new OtlpSettings(OtlpSignalType.Traces, exporters.OtlpHttp);
-                }
-
-                if (exporters.Zipkin != null)
-                {
-                    tracesExporters.Add(TracesExporter.Zipkin);
-                    ZipkinSettings = exporters.Zipkin;
-                }
-
-                if (exporters.Console != null)
-                {
-                    tracesExporters.Add(TracesExporter.Console);
-                }
-
-                TracesExporters = tracesExporters;
-            }
         }
-        else
-        {
-            TracesEnabled = false;
-        }
+
+        Processors = processors;
     }
 
     private static List<TracesExporter> ParseTracesExporter(Configuration configuration)

@@ -34,10 +34,10 @@ internal class OtlpSettings
 
         TimeoutMilliseconds = configuration.Timeout;
 
-        Endpoint = !string.IsNullOrEmpty(configuration.Endpoint) ? new Uri(configuration.Endpoint) : null;
+        Endpoint = GetOtlpHttpEndpoint(configuration.Endpoint, signalType);
     }
 
-    public OtlpSettings(OtlpSignalType signalType, OtlpGrpcExporterConfig configuration)
+    public OtlpSettings(OtlpGrpcExporterConfig configuration)
     {
 #pragma warning disable CS0618 // OtlpExportProtocol.Grpc is obsolete
         Protocol = OtlpExportProtocol.Grpc;
@@ -47,7 +47,7 @@ internal class OtlpSettings
 
         TimeoutMilliseconds = configuration.Timeout;
 
-        Endpoint = !string.IsNullOrEmpty(configuration.Endpoint) ? new Uri(configuration.Endpoint) : null;
+        Endpoint = new Uri(configuration.Endpoint);
     }
 
     /// <summary>
@@ -93,6 +93,27 @@ internal class OtlpSettings
         {
             options.TimeoutMilliseconds = TimeoutMilliseconds.Value;
         }
+    }
+
+    private static Uri GetOtlpHttpEndpoint(string? endpoint, OtlpSignalType signalType)
+    {
+        if (string.IsNullOrWhiteSpace(endpoint))
+        {
+            endpoint = signalType switch
+            {
+                OtlpSignalType.Logs => "http://localhost:4318/v1/logs",
+                OtlpSignalType.Metrics => "http://localhost:4318/v1/metrics",
+                OtlpSignalType.Traces => "http://localhost:4318/v1/traces",
+                _ => throw new ArgumentOutOfRangeException(nameof(signalType), "Unknown signal type")
+            };
+        }
+
+        if (!Uri.TryCreate(endpoint, UriKind.Absolute, out var uri))
+        {
+            throw new ArgumentException($"Invalid endpoint URI: {endpoint}", nameof(endpoint));
+        }
+
+        return uri;
     }
 
     private static string? CombineHeaders(List<Header>? headers, string? headersList)

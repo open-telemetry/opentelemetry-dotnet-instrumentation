@@ -5,8 +5,8 @@ using Vendors.YamlDotNet.Serialization;
 
 namespace OpenTelemetry.AutoInstrumentation.Configurations.FileBasedConfiguration;
 
-internal class TracerProviderConfiguration
+internal class SimpleProcessorConfig
 {
-    [YamlMember(Alias = "processors")]
-    public List<ProcessorConfig> Processors { get; set; } = new();
+    [YamlMember(Alias = "exporter")]
+    public ExporterConfig? Exporter { get; set; }
 }

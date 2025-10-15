@@ -13,7 +13,7 @@ internal class OtlpGrpcExporterConfig
     /// If omitted or null, http://localhost:4317 is used.
     /// </summary>
     [YamlMember(Alias = "endpoint")]
-    public string? Endpoint { get; set; }
+    public string Endpoint { get; set; } = "http://localhost:4317";
 
     /// <summary>
     /// Gets or sets the headers for the exporter.

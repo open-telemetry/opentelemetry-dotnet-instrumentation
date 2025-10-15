@@ -17,8 +17,9 @@ public class ParserTracesTests
 
         Assert.NotNull(config.TracerProvider);
         Assert.NotNull(config.TracerProvider.Processors);
-        Assert.True(config.TracerProvider.Processors.ContainsKey("batch"));
-        var traceBatch = config.TracerProvider.Processors["batch"];
+        Assert.Equal(4, config.TracerProvider.Processors.Count);
+
+        var traceBatch = config.TracerProvider.Processors[0].Batch;
         Assert.NotNull(traceBatch);
 
         Assert.Equal(5000, traceBatch.ScheduleDelay);
@@ -27,17 +28,35 @@ public class ParserTracesTests
         Assert.Equal(512, traceBatch.MaxExportBatchSize);
 
         Assert.NotNull(traceBatch.Exporter);
-        Assert.NotNull(traceBatch.Exporter.OtlpHttp);
         var traceExporter = traceBatch.Exporter.OtlpHttp;
         Assert.NotNull(traceExporter);
 
         Assert.Equal("http://localhost:4318/v1/traces", traceExporter.Endpoint);
         Assert.Equal(10000, traceExporter.Timeout);
-        Assert.Null(traceExporter.HeadersList);
+
         Assert.NotNull(traceExporter.Headers);
         Assert.Single(traceExporter.Headers);
         Assert.Equal("header1234", traceExporter.Headers[0].Name);
         Assert.Equal("1234", traceExporter.Headers[0].Value);
+
+        var zipkinBatch = config.TracerProvider.Processors[1].Batch;
+        Assert.NotNull(zipkinBatch);
+        Assert.NotNull(zipkinBatch.Exporter);
+        var zipkinExporter = zipkinBatch.Exporter.Zipkin;
+        Assert.NotNull(zipkinExporter);
+        Assert.Equal("http://localhost:4318/v1/traces", zipkinExporter.Endpoint);
+
+        var grpcBatch = config.TracerProvider.Processors[2].Batch;
+        Assert.NotNull(grpcBatch);
+        Assert.NotNull(grpcBatch.Exporter);
+        var grpcExporter = grpcBatch.Exporter.OtlpGrpc;
+        Assert.NotNull(grpcExporter);
+        Assert.Equal("http://localhost:4318/v1/traces", grpcExporter.Endpoint);
+
+        var simpleProcessor = config.TracerProvider.Processors[3].Simple;
+        Assert.NotNull(simpleProcessor);
+        Assert.NotNull(simpleProcessor.Exporter);
+        Assert.NotNull(simpleProcessor.Exporter.Console);
     }
 
     [Fact]
@@ -57,8 +76,7 @@ public class ParserTracesTests
 
         Assert.NotNull(config.TracerProvider);
         Assert.NotNull(config.TracerProvider.Processors);
-        Assert.True(config.TracerProvider.Processors.ContainsKey("batch"));
-        var traceBatch = config.TracerProvider.Processors["batch"];
+        var traceBatch = config.TracerProvider.Processors[0].Batch;
         Assert.NotNull(traceBatch);
 
         Assert.NotNull(traceBatch.Exporter);
