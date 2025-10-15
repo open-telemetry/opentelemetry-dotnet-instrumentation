@@ -2,32 +2,29 @@
 // SPDX-License-Identifier: Apache-2.0
 
 using System.IO.Abstractions;
+using System.Runtime.Intrinsics.Arm;
 using DependencyListGenerator.DotNetOutdated.Services;
+using NuGet.Packaging;
 
 namespace DependencyListGenerator;
 
 public static class Generator
 {
-    public static IEnumerable<TransientDependency> EnumerateDependencies(string projectPath, Version version)
+    public static Dictionary<string, TransientDependency[]> EnumerateDependencies(string projectPath)
     {
         var dotNetRunner = new DotNetRunner();
         var fileSystem = new FileSystem();
 
         var analysisService = new ProjectAnalysisService(
-            dependencyGraphService: new DependencyGraphService(dotNetRunner, fileSystem),
             dotNetRestoreService: new DotNetRestoreService(dotNetRunner, fileSystem),
+            packageListService: new DotNetPackageListService(dotNetRunner, fileSystem),
             fileSystem: fileSystem);
 
-        var result = analysisService.AnalyzeProject(projectPath, true, true, 1024)[0];
-        var net462 = result.TargetFrameworks.First(x => x.Name.ToString() == (version.Build != 0 ? $".NETFramework,Version=v{version.Major}.{version.Minor}.{version.Build}" : $".NETFramework,Version=v{version.Major}.{version.Minor}"));
-
-        foreach (var dep in net462.Dependencies.OrderBy(x => x.Name))
-        {
-            // OpenTelemetry and OpenTracing dependencies are managed directly.
-            if (dep.IsTransitive && !dep.IsDevelopmentDependency && !dep.Name.StartsWith("OpenTelemetry") && dep.Name != "OpenTracing")
-            {
-                yield return new TransientDependency(dep.Name, dep.ResolvedVersion.ToString());
-            }
-        }
+        var result = analysisService.AnalyzeProject(projectPath, true)[0];
+        return result.TargetFrameworks.ToDictionary(
+            it => it.Name,
+            it => it.Dependencies.OrderBy(x => x.Name)
+                .Where(dep => !dep.IsDevelopmentDependency)
+                .Select(dep => new TransientDependency(dep.Name, dep.ResolvedVersion)).ToArray());
     }
 }

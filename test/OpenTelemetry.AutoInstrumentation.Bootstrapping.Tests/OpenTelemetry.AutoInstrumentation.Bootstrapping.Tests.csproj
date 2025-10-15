@@ -8,11 +8,4 @@
     <PackageReference Include="Newtonsoft.Json" />
   </ItemGroup>
 
-  <ItemGroup Condition="'$(TargetFramework)' == 'net462'">
-    <!--Need to add transitive dependencies explicitly, as we are not using pinnig for tests and test folder use older package versions-->
-    <PackageReference Include="System.Diagnostics.DiagnosticSource" VersionOverride="9.0.8"/>
-    <PackageReference Include="System.Memory" VersionOverride="4.6.3"/>
-    <PackageReference Include="System.ValueTuple" VersionOverride="4.6.1"/>
-  </ItemGroup>
-
 </Project>
