@@ -9,12 +9,14 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 
 ### Added
 
+- Configuration based instrumentation.
+
 ### Changed
 
 #### Dependency updates
 
 - Updated [Core components](https://github.com/open-telemetry/opentelemetry-dotnet/blob/main/VERSIONING.md#core-components):
-  [`1.13.0`](https://github.com/open-telemetry/opentelemetry-dotnet/releases/tag/core-1.13.0).
+  [`1.13.1`](https://github.com/open-telemetry/opentelemetry-dotnet/releases/tag/core-1.13.1).
 
 - Following packages updated
 - `OpenTelemetry.Instrumentation.SqlClient` from `1.12.0-beta.2` to `1.12.0-beta.3`.

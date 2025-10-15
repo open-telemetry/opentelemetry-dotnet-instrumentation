@@ -30,9 +30,8 @@ internal static class NoCodeIntegrationHelper
             x.Definition.TargetAssembly == assemblyName &&
             CheckParameters(x.SignatureTypes, parameters));
 
-        // TODO Span attributes from configuration
         // TODO Consider execute some dynamic code to build name/span/attributes based on config and taking data from method parameters
-        var activity = Source.StartActivity(name: noCodeEntry.SpanName, kind: noCodeEntry.ActivityKind, tags: [new("TODO", "attributes-from-configuration")]);
+        var activity = Source.StartActivity(name: noCodeEntry.SpanName, kind: noCodeEntry.ActivityKind, tags: noCodeEntry.Attributes);
         return new CallTargetState(activity, null);
     }
 
