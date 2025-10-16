@@ -54,9 +54,8 @@ flush_on_unhandled_exception: false
 ``` yaml
 tracer_provider:
   processors:
-    # Configure a batch span processor.
-    # Support for multiple processors is not available yet (which does not comply with the specification).
-    batch:
+    # Batch processor for OTLP HTTP
+    - batch:
       # Configure delay interval (in milliseconds) between two consecutive exports. 
       # Value must be non-negative.
       # If omitted or null, 5000 is used.
@@ -86,23 +85,31 @@ tracer_provider:
           # If an entry's .value is null, the entry is ignored.
           headers:
             - name: api-key
-            value: "1234"
+              value: "1234"
           # Configure headers. Entries have lower priority than entries from .headers.
           # The value is a list of comma separated key-value pairs matching the format of OTEL_EXPORTER_OTLP_HEADERS. See https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/protocol/exporter.md#configuration-options for details.
           # If omitted or null, no headers are added.
           headers_list: ${OTEL_EXPORTER_OTLP_TRACES_HEADERS}
-        # Configure the OTLP with gRPC transport exporter to enable it.
+
+    # Batch processor for OTLP gRPC
+    - batch:
         otlp_grpc:
           # Configuration otlp_grpc is the same as otlp_http.
           # if otlp_http is used it will override otlp_grpc.
           # On .NET Framework, the grpc OTLP exporter protocol is not supported.
-        # Configure the zipkin exporter to enable it.
-        zipkin:
-          # Configure endpoint.
-          # If omitted or null, http://localhost:9411/api/v2/spans is used.
-          endpoint: http://localhost:9411/api/v2/spans
-        # Add the console exporter to enable it.
-        console:
+
+    # Batch processor for Zipkin
+    - batch:
+        exporter:
+          zipkin:
+            # Configure endpoint.
+            # If omitted or null, http://localhost:9411/api/v2/spans is used.
+            endpoint: http://localhost:9411/api/v2/spans
+
+    # Simple processor for Console
+    - simple:
+        exporter:
+          console:
 ```
 
 ### Resource Configuration
