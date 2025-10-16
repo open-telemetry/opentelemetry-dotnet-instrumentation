@@ -12,6 +12,32 @@ no_code/development:
           parameter_types:
       span:
          name: Span-TestMethodStatic
+         kind: internal
+         attributes:
+           - name: attribute_key_string
+             value: "string_value"
+             type: string
+           - name: attribute_key_bool
+             value: true
+             type: bool
+           - name: attribute_key_int
+             value: 12345
+             type: int
+           - name: attribute_key_double
+             value: 123.45
+             type: double
+           - name: attribute_key_string_array
+             value: ["value1", "value2", "value3"]
+             type: string_array
+           - name: attribute_key_bool_array
+             value: [true, false, true]
+             type: bool_array
+           - name: attribute_key_int_array
+             value: [123, 456, 789]
+             type: int_array
+           - name: attribute_key_double_array
+             value: [123.45, 678.90]
+             type: double_array
     - target:
         assembly:
           name: TestApplication.NoCode
@@ -22,6 +48,7 @@ no_code/development:
           parameter_types:
       span:
          name: Span-TestMethod0
+         kind: client
     - target:
         assembly:
           name: TestApplication.NoCode
@@ -32,6 +59,7 @@ no_code/development:
           parameter_types:
       span:
          name: Span-TestMethodA
+         kind: consumer
     - target:
         assembly:
           name: TestApplication.NoCode
@@ -43,6 +71,7 @@ no_code/development:
             - System.String
       span:
          name: Span-TestMethod1String
+         kind: producer
     - target:
         assembly:
           name: TestApplication.NoCode
@@ -54,6 +83,7 @@ no_code/development:
             - System.Int32
       span:
          name: Span-TestMethod1Int
+         kind: server
     - target:
         assembly:
           name: TestApplication.NoCode
@@ -374,6 +404,27 @@ no_code/development:
           parameter_types:
       span:
          name: Span-TestMethodStaticAsync
+         attributes:
+           - name: attribute_key_string0
+             value: string_value0
+           - name: attribute_key_string1
+             value: string_value1
+           - name: attribute_key_string2
+             value: string_value2
+           - name: attribute_key_string3
+             value: string_value3
+           - name: attribute_key_string4
+             value: string_value4
+           - name: attribute_key_string5
+             value: string_value5
+           - name: attribute_key_string6
+             value: string_value6
+           - name: attribute_key_string7
+             value: string_value7
+           - name: attribute_key_string8
+             value: string_value8
+           - name: attribute_key_string9
+             value: string_value9
     - target:
         assembly:
           name: TestApplication.NoCode
