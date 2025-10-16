@@ -23,6 +23,19 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 - .NET Framework only, following packages updated
   - `OpenTelemetry.Instrumentation.AspNet` from `1.12.0-beta.1` to `1.12.0-beta.2`.
 
+#### Dependencies on .Net Framework
+
+When OpenTelemetry .NET AutoInstrumentation is compiled for .NET Framework,
+it uses the net462 Target Framework Moniker (TFM). As a result, the ZIP archive
+deployment contained dependency assemblies targeted for .NET Framework 4.6.2.
+Some of these assemblies were not designed to be used with later versions of
+.NET Framework.
+
+Now, when the OpenTelemetry ZIP archive is built, dependency assemblies are
+included for all supported .NET Framework versions. OpenTelemetry .NET
+AutoInstrumentation detects the .NET Framework version at install time
+and runtime, then loads the correct version of dependency assemblies.
+
 ### Deprecated
 
 ### Removed
@@ -36,21 +49,6 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
   See [#4269](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/issues/4269)
   for details.
 - Fixed rule engine check for .NET 9 to reflect longer support for [STS channel](https://devblogs.microsoft.com/dotnet/dotnet-sts-releases-supported-for-24-months/).
-
-### Changed
-
-#### Dependencies on .Net Framework
-
-When OpenTelemetry .NET AutoInstrumentation is compiled for .NET Framework,
-it uses the net462 Target Framework Moniker (TFM). As a result, the ZIP archive
-deployment contained dependency assemblies targeted for .NET Framework 4.6.2.
-Some of these assemblies were not designed to be used with later versions of
-.NET Framework. 
-
-Now, when the OpenTelemetry ZIP archive is built, dependency assemblies are
-included for all supported .NET Framework versions. OpenTelemetry .NET 
-AutoInstrumentation detects the .NET Framework version at install time 
-and runtime, then loads the correct version of dependency assemblies.
 
 ## [1.13.0-beta.1](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/tag/v1.13.0-beta.1)
 
