@@ -1,4 +1,4 @@
-﻿<Project>
+<Project>
   <Import Project="..\Directory.Packages.props" />
   <!-- Versions from Directory.Build.props in the same folder -->
   <ItemGroup>

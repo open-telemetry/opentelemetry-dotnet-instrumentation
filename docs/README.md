@@ -1,4 +1,4 @@
-﻿# OpenTelemetry .NET Automatic Instrumentation
+# OpenTelemetry .NET Automatic Instrumentation
 
 [![Slack](https://img.shields.io/badge/slack-@cncf/otel--dotnet--auto--instr-brightgreen.svg?logo=slack)](https://cloud-native.slack.com/archives/C01NR1YLSE7)
 [![NuGet](https://img.shields.io/nuget/v/OpenTelemetry.AutoInstrumentation.svg)](https://www.nuget.org/packages/OpenTelemetry.AutoInstrumentation)
