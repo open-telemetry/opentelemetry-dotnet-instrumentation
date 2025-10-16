@@ -68,6 +68,11 @@ internal class LogSettings : Settings
     protected override void OnLoadFile(YamlConfiguration configuration)
     {
         EnabledInstrumentations = configuration.InstrumentationDevelopment?.DotNet?.Logs?.GetEnabledInstrumentations() ?? [];
+
+        if (EnabledInstrumentations.Contains(LogInstrumentation.Log4Net))
+        {
+            EnableLog4NetBridge = configuration.InstrumentationDevelopment?.DotNet?.Logs?.Log4Net?.BridgeEnabled ?? false;
+        }
     }
 
     private static IReadOnlyList<LogExporter> ParseLogExporter(Configuration configuration)

@@ -153,4 +153,9 @@ instrumentation/development:
         capture_request_metadata: "X-Key,X-Custom-Header,X-Header-Example"
         # A comma-separated list of gRPC metadata names. Grpc.Net.Client instrumentations will capture gRPC response metadata values for all configured metadata names.
         capture_response_metadata: "X-Key,X-Custom-Header,X-Header-Example"
+    logs:
+      log4net:
+        # Logs bridge is disabled by default
+        # More info about log4net bridge can be found at https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/blob/main/docs/log4net-bridge.md
+        bridge_enabled: true
 ```

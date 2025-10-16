@@ -123,7 +123,10 @@ public class FilebasedInstrumentationSettingsTests
             Logs = new DotNetLogs
             {
                 ILogger = new object(),
-                Log4Net = new object(),
+                Log4Net = new()
+                {
+                    BridgeEnabled = true
+                },
             }
         };
 
@@ -142,5 +145,6 @@ public class FilebasedInstrumentationSettingsTests
         Assert.NotNull(settings.EnabledInstrumentations);
         Assert.Contains(LogInstrumentation.ILogger, settings.EnabledInstrumentations);
         Assert.Contains(LogInstrumentation.Log4Net, settings.EnabledInstrumentations);
+        Assert.True(settings.EnableLog4NetBridge);
     }
 }

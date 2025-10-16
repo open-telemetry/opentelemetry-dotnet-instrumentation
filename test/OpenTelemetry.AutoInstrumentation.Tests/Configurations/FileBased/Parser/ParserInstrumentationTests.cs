@@ -105,6 +105,10 @@ public class ParserInstrumentationTests
             FileBasedTestHelper.AssertAliasPropertyExists(traces, alias);
         }
 
+        var logs = config.InstrumentationDevelopment.DotNet.Logs;
+        Assert.NotNull(logs);
+        Assert.NotNull(logs.Log4Net);
+
         Assert.True(traces.OracleMda!.SetDbStatementForText);
         Assert.Equal("X-Key,X-Custom-Header,X-Header-Example", traces.HttpClient!.CaptureRequestHeaders);
         Assert.Equal("X-Key,X-Custom-Header,X-Header-Example", traces.HttpClient!.CaptureResponseHeaders);
@@ -123,5 +127,6 @@ public class ParserInstrumentationTests
         Assert.Equal("X-Key,X-Custom-Header,X-Header-Example", traces.AspNet!.CaptureRequestHeaders);
         Assert.Equal("X-Key,X-Custom-Header,X-Header-Example", traces.AspNet!.CaptureResponseHeaders);
 #endif
+        Assert.True(logs.Log4Net.BridgeEnabled);
     }
 }
