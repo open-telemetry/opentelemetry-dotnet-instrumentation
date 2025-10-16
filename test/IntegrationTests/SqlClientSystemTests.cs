@@ -83,7 +83,7 @@ public class SqlClientSystemTests : TestHelper
             PackageVersion = packageVersion
         });
 
-        collector.Expect("OpenTelemetry.Instrumentation.SqlClient", span => span.Attributes.Any(attr => attr.Key == "db.statement" && !string.IsNullOrWhiteSpace(attr.Value?.StringValue)));
+        collector.AssertExpectations();
     }
 #endif
 
