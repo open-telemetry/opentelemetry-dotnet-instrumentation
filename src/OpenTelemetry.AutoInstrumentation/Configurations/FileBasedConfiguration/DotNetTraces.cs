@@ -45,7 +45,7 @@ internal class DotNetTraces
     /// Gets or sets the GraphQL traces instrumentation configuration.
     /// </summary>
     [YamlMember(Alias = "graphql")]
-    public SetDocumentConfiguration? GraphQL { get; set; }
+    public GraphQLSetDocumentConfiguration? GraphQL { get; set; }
 
     /// <summary>
     /// Gets or sets the MassTransit traces instrumentation configuration.

@@ -7,7 +7,7 @@ using Vendors.YamlDotNet.Serialization;
 namespace OpenTelemetry.AutoInstrumentation.Configurations.FileBasedConfiguration;
 
 [EmptyObjectOnEmptyYaml]
-internal class SetDocumentConfiguration
+internal class GraphQLSetDocumentConfiguration
 {
     /// <summary>
     /// Gets or sets a value indicating whether the GraphQL instrumentation can pass raw queries through the graphql.document attribute.
