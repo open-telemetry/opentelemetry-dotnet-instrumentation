@@ -2,10 +2,10 @@ file_format: "1.0-rc.1"
 
 tracer_provider:
   processors:
-    batch:
-      exporter:
-        otlp_http:
-          endpoint: ${OTEL_EXPORTER_OTLP_ENDPOINT}
+    - batch:
+        exporter:
+          otlp_http:
+            endpoint: ${OTEL_EXPORTER_OTLP_ENDPOINT}
 
 no_code/development:
   targets:

@@ -1,8 +1,6 @@
 // Copyright The OpenTelemetry Authors
 // SPDX-License-Identifier: Apache-2.0
 
-/*
-
 using OpenTelemetry.AutoInstrumentation.Configurations;
 using OpenTelemetry.AutoInstrumentation.Configurations.FileBasedConfiguration;
 using Xunit;
@@ -14,35 +12,51 @@ public class FilebasedTracesSettingsTests
     [Fact]
     public void LoadFile_SetsBatchProcessorAndExportersCorrectly()
     {
-        var exporter = new ExporterConfig
+        var exporter1 = new ExporterConfig
         {
             OtlpGrpc = new OtlpGrpcExporterConfig
             {
                 Endpoint = "http://localhost:4317/"
-            },
+            }
+        };
+
+        var exporter2 = new ExporterConfig
+        {
             Zipkin = new ZipkinExporterConfig
             {
                 Endpoint = "http://localhost:9411/"
-            },
+            }
         };
 
-        var batchProcessorConfig = new BatchProcessorConfig
+        var batchProcessorConfig1 = new BatchProcessorConfig
         {
             ScheduleDelay = 1000,
             ExportTimeout = 30000,
             MaxQueueSize = 2048,
             MaxExportBatchSize = 512,
-            Exporter = exporter
+            Exporter = exporter1
+        };
+
+        var batchProcessorConfig2 = new BatchProcessorConfig
+        {
+            Exporter = exporter2
         };
 
         var conf = new YamlConfiguration
         {
             TracerProvider = new TracerProviderConfiguration
             {
-                Processors = new Dictionary<string, BatchProcessorConfig>
-                {
-                    { "batch", batchProcessorConfig }
-                }
+                Processors =
+                [
+                    new ProcessorConfig
+                    {
+                        Batch = batchProcessorConfig1
+                    },
+                    new ProcessorConfig
+                    {
+                        Batch = batchProcessorConfig2
+                    }
+                ]
             }
         };
 
@@ -51,22 +65,10 @@ public class FilebasedTracesSettingsTests
         settings.LoadFile(conf);
 
         Assert.True(settings.TracesEnabled);
-        Assert.Equal(2, settings.TracesExporters.Count);
-        Assert.Contains(TracesExporter.Otlp, settings.TracesExporters);
-        Assert.Contains(TracesExporter.Zipkin, settings.TracesExporters);
+        Assert.NotNull(settings.Processors);
+        Assert.Equal(2, settings.Processors.Count);
 
-        Assert.NotNull(settings.OtlpSettings);
-        Assert.NotNull(settings.ZipkinSettings);
-
-        Assert.NotNull(settings.OtlpSettings.Endpoint);
-        Assert.Equal("http://localhost:4317/", settings.OtlpSettings.Endpoint.ToString());
-        Assert.Equal("http://localhost:9411/", settings.ZipkinSettings.Endpoint);
-
-        Assert.NotNull(settings.BatchProcessorConfig);
-        Assert.Equal(1000, settings.BatchProcessorConfig.ScheduleDelay);
-        Assert.Equal(30000, settings.BatchProcessorConfig.ExportTimeout);
-        Assert.Equal(2048, settings.BatchProcessorConfig.MaxQueueSize);
-        Assert.Equal(512, settings.BatchProcessorConfig.MaxExportBatchSize);
+        Assert.Empty(settings.TracesExporters);
     }
 
     [Fact]
@@ -87,121 +89,7 @@ public class FilebasedTracesSettingsTests
         Assert.False(settings.TracesEnabled);
         Assert.Empty(settings.TracesExporters);
         Assert.Null(settings.OtlpSettings);
-        Assert.Null(settings.ZipkinSettings);
-    }
-
-    [Fact]
-    public void LoadFile_SetsOtlpHttpExporterCorrectly()
-    {
-        var exporter = new ExporterConfig
-        {
-            OtlpHttp = new OtlpHttpExporterConfig
-            {
-                Endpoint = "http://localhost:4318/"
-            }
-        };
-
-        var batchProcessorConfig = new BatchProcessorConfig
-        {
-            Exporter = exporter
-        };
-
-        var conf = new YamlConfiguration
-        {
-            TracerProvider = new TracerProviderConfiguration
-            {
-                Processors = new Dictionary<string, BatchProcessorConfig>
-                {
-                    { "batch", batchProcessorConfig }
-                }
-            }
-        };
-
-        var settings = new TracerSettings();
-
-        settings.LoadFile(conf);
-
-        Assert.True(settings.TracesEnabled);
-        Assert.Single(settings.TracesExporters);
-        Assert.Contains(TracesExporter.Otlp, settings.TracesExporters);
-        Assert.NotNull(settings.OtlpSettings);
-        Assert.NotNull(settings.OtlpSettings.Endpoint);
-        Assert.Equal("http://localhost:4318/", settings.OtlpSettings.Endpoint.ToString());
-    }
-
-    [Fact]
-    public void LoadFile_SetsConsoleExporterCorrectly()
-    {
-        var exporter = new ExporterConfig
-        {
-            Console = new object()
-        };
-
-        var batchProcessorConfig = new BatchProcessorConfig
-        {
-            Exporter = exporter
-        };
-
-        var conf = new YamlConfiguration
-        {
-            TracerProvider = new TracerProviderConfiguration
-            {
-                Processors = new Dictionary<string, BatchProcessorConfig>
-                {
-                    { "batch", batchProcessorConfig }
-                }
-            }
-        };
-
-        var settings = new TracerSettings();
-
-        settings.LoadFile(conf);
-
-        Assert.True(settings.TracesEnabled);
-        Assert.Single(settings.TracesExporters);
-        Assert.Contains(TracesExporter.Console, settings.TracesExporters);
-        Assert.Null(settings.OtlpSettings);
-        Assert.Null(settings.ZipkinSettings);
-    }
-
-    [Fact]
-    public void LoadFile_SetsMultipleExportersCorrectly()
-    {
-        var exporter = new ExporterConfig
-        {
-            OtlpGrpc = new OtlpGrpcExporterConfig { Endpoint = "http://localhost:4317/" },
-            Console = new object(),
-            Zipkin = new ZipkinExporterConfig
-            {
-                Endpoint = "http://localhost:9411/"
-            },
-        };
-
-        var batchProcessorConfig = new BatchProcessorConfig
-        {
-            Exporter = exporter
-        };
-
-        var conf = new YamlConfiguration
-        {
-            TracerProvider = new TracerProviderConfiguration
-            {
-                Processors = new Dictionary<string, BatchProcessorConfig>
-                {
-                    { "batch", batchProcessorConfig }
-                }
-            }
-        };
-
-        var settings = new TracerSettings();
-
-        settings.LoadFile(conf);
-
-        Assert.True(settings.TracesEnabled);
-        Assert.Equal(3, settings.TracesExporters.Count);
-        Assert.Contains(TracesExporter.Otlp, settings.TracesExporters);
-        Assert.Contains(TracesExporter.Console, settings.TracesExporters);
-        Assert.Contains(TracesExporter.Zipkin, settings.TracesExporters);
+        Assert.Null(settings.Processors);
     }
 
     [Fact]
@@ -216,10 +104,13 @@ public class FilebasedTracesSettingsTests
         {
             TracerProvider = new TracerProviderConfiguration
             {
-                Processors = new Dictionary<string, BatchProcessorConfig>
-                {
-                    { "batch", batchProcessorConfig }
-                }
+                Processors =
+                [
+                    new ProcessorConfig
+                    {
+                        Batch = batchProcessorConfig
+                    }
+                ]
             }
         };
 
@@ -229,8 +120,5 @@ public class FilebasedTracesSettingsTests
 
         Assert.True(settings.TracesEnabled);
         Assert.Empty(settings.TracesExporters);
-        Assert.Null(settings.OtlpSettings);
-        Assert.Null(settings.ZipkinSettings);
     }
 }
-*/

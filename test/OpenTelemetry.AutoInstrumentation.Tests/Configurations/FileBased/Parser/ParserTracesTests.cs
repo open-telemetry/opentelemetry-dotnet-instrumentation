@@ -44,14 +44,14 @@ public class ParserTracesTests
         Assert.NotNull(zipkinBatch.Exporter);
         var zipkinExporter = zipkinBatch.Exporter.Zipkin;
         Assert.NotNull(zipkinExporter);
-        Assert.Equal("http://localhost:4318/v1/traces", zipkinExporter.Endpoint);
+        Assert.Equal("http://localhost:9411/zipkin", zipkinExporter.Endpoint);
 
         var grpcBatch = config.TracerProvider.Processors[2].Batch;
         Assert.NotNull(grpcBatch);
         Assert.NotNull(grpcBatch.Exporter);
         var grpcExporter = grpcBatch.Exporter.OtlpGrpc;
         Assert.NotNull(grpcExporter);
-        Assert.Equal("http://localhost:4318/v1/traces", grpcExporter.Endpoint);
+        Assert.Equal("http://localhost:4317", grpcExporter.Endpoint);
 
         var simpleProcessor = config.TracerProvider.Processors[3].Simple;
         Assert.NotNull(simpleProcessor);

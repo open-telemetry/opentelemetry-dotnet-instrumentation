@@ -15,12 +15,12 @@ tracer_provider:
     - batch:
         exporter:
           zipkin:
-            endpoint: http://localhost:4318/v1/traces
+            endpoint: http://localhost:9411/zipkin
 
     - batch:
         exporter:
           otlp_grpc:
-            endpoint: http://localhost:4318/v1/traces
+            endpoint: http://localhost:4317
     - simple:
         exporter:
           console:
