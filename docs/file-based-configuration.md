@@ -108,3 +108,7 @@ propagator:
   # Alternatively, configure via a comma-separated list (same format as OTEL_PROPAGATORS).
   composite_list: ${OTEL_PROPAGATORS}
 ```
+
+### Configuration based instrumentation
+
+Documentation for configuration based instrumentation can be found in [nocode-instrumentation.md](nocode-instrumentation.md).

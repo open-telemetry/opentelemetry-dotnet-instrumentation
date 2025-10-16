@@ -78,7 +78,7 @@ internal class LazyInstrumentationLoader : IDisposable
 
         private void OnRequiredAssemblyDetected()
         {
-            if (Interlocked.Exchange(ref _initialized, value: 1) != default)
+            if (Interlocked.Exchange(ref _initialized, value: 1) != 0)
             {
                 // OnRequiredAssemblyDetected() was already called before
                 return;
@@ -86,8 +86,10 @@ internal class LazyInstrumentationLoader : IDisposable
 
             AppDomain.CurrentDomain.AssemblyLoad -= CurrentDomain_AssemblyLoad;
 
-            var initializerName = _instrumentationInitializer.GetType().Name;
-            OtelLogger.Debug("'{0}' started", initializerName);
+            var initializerName = _instrumentationInitializer.InitializerName;
+            OtelLogger.Debug("Starting '{0}' initializer", initializerName);
+
+            var noExceptions = true;
 
             try
             {
@@ -95,7 +97,13 @@ internal class LazyInstrumentationLoader : IDisposable
             }
             catch (Exception ex)
             {
+                noExceptions = false;
                 OtelLogger.Error(ex, "'{0}' failed", initializerName);
+            }
+
+            if (noExceptions)
+            {
+                OtelLogger.Debug("Initializer '{0}' completed", initializerName);
             }
         }
     }
