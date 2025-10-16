@@ -31,9 +31,13 @@
 #ifdef _WIN32
 #define DIR_SEPARATOR WStr('\\')
 #define ENV_VAR_PATH_SEPARATOR WStr(';')
+#define DIR_SEPARATOR_STR WStr("\\")
+#define ENV_VAR_PATH_SEPARATOR_STR WStr(";")
 #else
 #define DIR_SEPARATOR WStr('/')
 #define ENV_VAR_PATH_SEPARATOR WStr(':')
+#define DIR_SEPARATOR_STR WStr("/")
+#define ENV_VAR_PATH_SEPARATOR_STR WStr(":")
 #endif
 
 namespace trace
@@ -130,6 +134,52 @@ inline WSTRING GetCurrentModuleFileName()
 #endif
 
     return EmptyWStr;
+}
+
+inline WSTRING GetModuleFilePath(const WSTRING& moduleName)
+{
+    const WSTRING currentModuleFileName = GetCurrentModuleFileName();
+    if (currentModuleFileName == EmptyWStr)
+    {
+        return EmptyWStr;
+    }
+
+#ifdef _WIN32
+    // Use std::filesystem for path manipulation on Windows
+    std::filesystem::path currentPath(currentModuleFileName);
+    
+    // Get the parent directory of the parent directory (strip filename and its folder)
+    std::filesystem::path parentParentDir = currentPath.parent_path().parent_path();
+    
+    // Convert moduleName to string and replace forward slashes with backslashes on Windows
+    std::string moduleNameStr = ToString(moduleName);
+    std::replace(moduleNameStr.begin(), moduleNameStr.end(), '/', '\\');
+    
+    // Combine the parent parent directory with the module name
+    std::filesystem::path resultPath = parentParentDir / moduleNameStr;
+    
+    return resultPath.wstring();
+#else
+    // Manual path manipulation for Unix-like systems
+    size_t lastSeparator = currentModuleFileName.find_last_of(WStr('/'));
+    if (lastSeparator == WSTRING::npos)
+    {
+        return EmptyWStr;
+    }
+    
+    // Find the second-to-last separator to get the parent directory of the parent directory
+    size_t secondLastSeparator = currentModuleFileName.find_last_of(WStr('/'), lastSeparator - 1);
+    if (secondLastSeparator == WSTRING::npos)
+    {
+        return EmptyWStr;
+    }
+    
+    // Extract the parent parent directory path
+    WSTRING parentParentDir = currentModuleFileName.substr(0, secondLastSeparator);
+    
+    // Append the module name
+    return parentParentDir + WStr("/") + moduleName;
+#endif
 }
 
 } // namespace trace

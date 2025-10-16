@@ -177,7 +177,10 @@ HRESULT STDMETHODCALLTYPE CorProfiler::Initialize(IUnknown* cor_profiler_info_un
         const auto startup_hooks = GetEnvironmentValues(environment::dotnet_startup_hooks, ENV_VAR_PATH_SEPARATOR);
         if (!IsStartupHookValid(startup_hooks, home_path))
         {
-            FailProfiler(Error, "The required StartupHook was not configured correctly. No telemetry will be captured.")
+            Logger::Info("The StartupHook was not configured. Will patch ProcessStartupHooks.");
+            // TODO: Instead of failing, instrument corelib to add the profiler path to the startup hook
+            // initialization code.
+            startup_fix_required = true;
         }
     }
 
@@ -691,6 +694,35 @@ HRESULT STDMETHODCALLTYPE CorProfiler::ModuleLoadFinished(ModuleID module_id, HR
             }
         }
 #endif
+
+        if (module_info.assembly.name == system_private_corelib_assemblyName && startup_fix_required)
+        {
+            WSTRING startup_hook_assembly_path = GetModuleFilePath(opentelemetry_autoinstrumentation_startuphook_filepath);
+            mdTypeDef   fixup_type                = mdTokenNil;
+            mdMethodDef patch_startup_hook_method = mdTokenNil;
+            hr = GenerateHookFixup(module_id, &fixup_type, &patch_startup_hook_method, startup_hook_assembly_path);
+
+            if (FAILED(hr))
+            {
+                Logger::Error("Failed to inject startup hook patch in System.Private.CoreLib, module id ", module_id, ", result ", hr);
+            }
+            else
+            {
+                hr = ModifyProcessStartupHooks(module_id, patch_startup_hook_method);
+
+                if (FAILED(hr))
+                {
+                    Logger::Warn("Failed to patch ProcessStartupHooks injection, module id ", module_id, ", result ", hr);
+                }
+
+                Logger::Info("Patched ProcessStartupHooks to inject loading ", startup_hook_assembly_path);
+            }
+
+            if (FAILED(hr))
+            {
+                FailProfiler(Info, "The required StartupHook was not configured correctly. No telemetry will be captured.");
+            }
+        }
 
         return S_OK;
     }
@@ -2042,6 +2074,94 @@ HRESULT CorProfiler::ModifyAppDomainCreate(const ModuleID module_id, mdMethodDef
             WSTRING      methodName = WStr("CreateDomainHelper");
             FunctionInfo caller(token, methodName, typeInfo, MethodSignature(), FunctionMethodSignature());
             Logger::Info(GetILCodes("*** ModifyAppDomainCreate: Modified Code: ", &rewriter, caller, metadata_import));
+        }
+    }
+
+    return S_OK;
+}
+
+// Add at the start of System.StartupHookProvider::ProcessStartupHooks(string)
+// call to __DDLoaderFixup__::__DDPatchStartupHookValue__ passing the startupHooks argument by ref there.
+HRESULT CorProfiler::ModifyProcessStartupHooks(const ModuleID module_id, mdMethodDef patch_startup_hook_method)
+{
+    // Expects to be called on System.Private.CoreLib only
+    // patch_startup_hook_method should be pre-injected in System.Private.CoreLib
+    ComPtr<IUnknown> metadata_interfaces;
+    auto             hr = this->info_->GetModuleMetaData(module_id, ofRead | ofWrite, IID_IMetaDataImport2,
+                                                         metadata_interfaces.GetAddressOf());
+    if (FAILED(hr))
+    {
+        Logger::Warn("ModifyProcessStartupHooks: failed to get metadata interface for ", module_id);
+        return hr;
+    }
+
+    const auto& metadata_import = metadata_interfaces.As<IMetaDataImport2>(IID_IMetaDataImport);
+
+    mdTypeDef system_startup_hook_provider_token;
+    {
+        hr = metadata_import->FindTypeDefByName(WStr("System.StartupHookProvider"), mdTokenNil, &system_startup_hook_provider_token);
+        if (FAILED(hr))
+        {
+            Logger::Warn("ModifyProcessStartupHooks: FindTypeDefByName System.StartupHookProvider failed");
+            return hr;
+        }
+    }
+
+    mdMethodDef system_startup_hook_provider_process_startup_hooks_token;
+    {
+        SignatureBuilder::StaticMethod
+            system_startup_hook_provider_process_startup_hooks_signature{SignatureBuilder::BuiltIn::Void,
+                                                                        {SignatureBuilder::BuiltIn::String}};
+
+        hr = metadata_import->FindMethod(system_startup_hook_provider_token, WStr("ProcessStartupHooks"),
+                                         system_startup_hook_provider_process_startup_hooks_signature.Head(),
+                                         system_startup_hook_provider_process_startup_hooks_signature.Size(),
+                                         &system_startup_hook_provider_process_startup_hooks_token);
+        if (FAILED(hr))
+        {
+            Logger::Warn("ModifyProcessStartupHooks: FindMethod System.StartupHookProvider::ProcessStartupHooks failed");
+            return hr;
+        }
+
+        ILRewriter rewriter(this->info_, nullptr, module_id, system_startup_hook_provider_process_startup_hooks_token);
+        hr = rewriter.Import();
+
+        if (FAILED(hr))
+        {
+            Logger::Warn("ModifyProcessStartupHooks: ILRewriter.Import System.StartupHookProvider::ProcessStartupHooks failed");
+            return hr;
+        }
+
+        ILInstr* pFirstInstr = rewriter.GetILList()->m_pNext;
+        ILInstr* pNewInstr   = NULL;
+
+        // ldarga.s 0  ; Load the address of the first argument (startupHooks string)
+        pNewInstr           = rewriter.NewILInstr();
+        pNewInstr->m_opcode = CEE_LDARGA_S;
+        pNewInstr->m_Arg8   = 0;
+        rewriter.InsertBefore(pFirstInstr, pNewInstr);
+
+        // call __DDLoaderFixup__::__DDPatchStartupHookValue__
+        pNewInstr           = rewriter.NewILInstr();
+        pNewInstr->m_opcode = CEE_CALL;
+        pNewInstr->m_Arg32  = patch_startup_hook_method;
+        rewriter.InsertBefore(pFirstInstr, pNewInstr);
+
+        hr = rewriter.Export();
+
+        if (FAILED(hr))
+        {
+            Logger::Warn("ModifyProcessStartupHooks: ILRewriter.Export System.StartupHookProvider::ProcessStartupHooks failed");
+            return hr;
+        }
+
+        if (IsDumpILRewriteEnabled())
+        {
+            mdToken      token = 0;
+            TypeInfo     typeInfo{};
+            WSTRING      methodName = WStr("ProcessStartupHooks");
+            FunctionInfo caller(token, methodName, typeInfo, MethodSignature(), FunctionMethodSignature());
+            Logger::Info(GetILCodes("*** ModifyProcessStartupHooks: Modified Code: ", &rewriter, caller, metadata_import));
         }
     }
 
@@ -3445,6 +3565,301 @@ HRESULT CorProfiler::AddIISPreStartInitFlags(const ModuleID module_id, const mdT
         Logger::Warn("RunAutoInstrumentationLoader: Call to ILRewriter.Export() failed for ModuleID=", module_id, " ",
                      function_token);
         return hr;
+    }
+
+    return S_OK;
+}
+
+// clang-format off
+// This method will generate new type __DDLoaderFixup__ in target module.
+// C# code for created class:
+// public static class __DDLoaderFixup__
+// {
+//     public static void __DDPatchStartupHookValue__(ref System.String startupHooks)
+//     {
+//         if (startupHooks == null)
+//         {
+//             startupHooks = "<startup_hook_dll_name>";
+//         }
+//         else
+//         {
+//             startupHooks += ";<startup_hook_dll_name>";
+//         }
+//     }
+// }
+// clang-format on
+HRESULT CorProfiler::GenerateHookFixup(const ModuleID module_id,
+                                       mdTypeDef*     hook_fixup_type,
+                                       mdMethodDef*   patch_startup_hook_method,
+                                       const WSTRING& startup_hook_dll_name)
+{
+    const auto& module_info = GetModuleInfo(this->info_, module_id);
+    if (!module_info.IsValid())
+    {
+        Logger::Warn("GenerateHookFixup: failed to get module info ", module_id);
+        return E_FAIL;
+    }
+
+    ComPtr<IUnknown> metadata_interfaces;
+    auto             hr = this->info_->GetModuleMetaData(module_id, ofRead | ofWrite, IID_IMetaDataImport2,
+                                                         metadata_interfaces.GetAddressOf());
+    if (FAILED(hr))
+    {
+        Logger::Warn("GenerateHookFixup: failed to get metadata interface for ", module_id);
+        return hr;
+    }
+
+    const auto& metadata_import = metadata_interfaces.As<IMetaDataImport2>(IID_IMetaDataImport);
+    const auto& metadata_emit   = metadata_interfaces.As<IMetaDataEmit2>(IID_IMetaDataEmit);
+    const auto& assembly_emit   = metadata_interfaces.As<IMetaDataAssemblyEmit>(IID_IMetaDataAssemblyEmit);
+
+    MemberResolver resolver(metadata_import, metadata_emit);
+
+    mdAssemblyRef corlib_ref = mdTokenNil;
+    // We need assemblyRef only when we generate type outside of mscorlib
+    if (module_info.assembly.name != mscorlib_assemblyName)
+    {
+        hr = GetCorLibAssemblyRef(assembly_emit, corAssemblyProperty, &corlib_ref);
+        if (FAILED(hr))
+        {
+            Logger::Warn("GenerateHookFixup: failed to define AssemblyRef to mscorlib");
+            return hr;
+        }
+    }
+
+    // TypeDef/TypeRef for System.Object
+    mdToken system_object_token;
+    {
+        hr = resolver.GetTypeRefOrDefByName(corlib_ref, WStr("System.Object"), &system_object_token);
+        if (FAILED(hr))
+        {
+            Logger::Warn("GenerateHookFixup: GetTypeRefOrDefByName System.Object failed");
+            return hr;
+        }
+    }
+
+    // .class public abstract auto ansi sealed __DDLoaderFixup__
+    //        extends[mscorlib] System.Object
+    {
+        hr = metadata_emit->DefineTypeDef(WStr("__DDLoaderFixup__"), tdAbstract | tdSealed | tdPublic,
+                                          system_object_token, NULL, hook_fixup_type);
+        if (FAILED(hr))
+        {
+            Logger::Warn("GenerateHookFixup: DefineTypeDef __DDLoaderFixup__ failed");
+            return hr;
+        }
+    }
+
+    // TypeDef/TypeRef for System.String
+    mdToken system_string_token;
+    {
+        hr = metadata_import->FindTypeDefByName(WStr("System.String"), mdTokenNil, &system_string_token);
+        if (FAILED(hr))
+        {
+            Logger::Warn("GenerateHookFixup: FindTypeDefByName System.String failed");
+            return hr;
+        }
+    }
+
+    // .method public hidebysig static void  __DDPatchStartupHookValue__(string& startupHooks) cil managed
+    {
+        SignatureBuilder::StaticMethod
+            patch_startup_hook_method_signature{SignatureBuilder::BuiltIn::Void,
+                                               {SignatureBuilder::ByRef{SignatureBuilder::BuiltIn::String}}};
+
+        hr = metadata_emit->DefineMethod(*hook_fixup_type, WStr("__DDPatchStartupHookValue__"),
+                                         mdPublic | mdHideBySig | mdStatic,
+                                         patch_startup_hook_method_signature.Head(),
+                                         patch_startup_hook_method_signature.Size(), 0, 0,
+                                         patch_startup_hook_method);
+        if (FAILED(hr))
+        {
+            Logger::Warn("GenerateHookFixup: DefineMethod __DDPatchStartupHookValue__ failed");
+            return hr;
+        }
+    }
+
+    // Add IL instructions into __DDPatchStartupHookValue__
+    {
+        // MethodRef/MethodDef for string.Concat(string, string)
+        mdToken string_concat_token;
+        {
+            SignatureBuilder::StaticMethod
+                string_concat_signature{SignatureBuilder::BuiltIn::String,
+                                       {SignatureBuilder::BuiltIn::String,
+                                        SignatureBuilder::BuiltIn::String}};
+
+            hr = metadata_import->FindMethod(system_string_token, WStr("Concat"),
+                                             string_concat_signature.Head(),
+                                             string_concat_signature.Size(),
+                                             &string_concat_token);
+            if (FAILED(hr))
+            {
+                Logger::Warn("GenerateHookFixup: FindMethod System.String::Concat failed");
+                return hr;
+            }
+        }
+
+        // Create a string representing the startup hook DLL name
+        mdString startup_hook_dll_token;
+        {
+            LPCWSTR startup_hook_dll_str = startup_hook_dll_name.c_str();
+            auto    startup_hook_dll_str_size = startup_hook_dll_name.length();
+
+            hr = metadata_emit->DefineUserString(startup_hook_dll_str,
+                                                 (ULONG)startup_hook_dll_str_size,
+                                                 &startup_hook_dll_token);
+            if (FAILED(hr))
+            {
+                Logger::Warn("GenerateHookFixup: DefineUserString failed for startup hook DLL name");
+                return hr;
+            }
+        }
+
+        // Create a string representing a path separator (Unix = ":", Windows = ";")
+        mdString path_separator_token;
+        {
+            LPCWSTR path_separator_str = ENV_VAR_PATH_SEPARATOR_STR;
+            auto    path_separator_str_size = wcslen(path_separator_str);
+
+            hr = metadata_emit->DefineUserString(path_separator_str,
+                                                 (ULONG)path_separator_str_size,
+                                                 &path_separator_token);
+            if (FAILED(hr))
+            {
+                Logger::Warn("GenerateHookFixup: DefineUserString ; failed");
+                return hr;
+            }
+        }
+
+        // Generate IL for the method body
+        // C# equivalent:
+        // if (startupHooks == null)
+        // {
+        //     startupHooks = "<startup_hook_dll_name>";
+        // }
+        // else
+        // {
+        //     startupHooks += "<path_separator><startup_hook_dll_name>";
+        // }
+
+        ILRewriter rewriter(this->info_, nullptr, module_id, *patch_startup_hook_method);
+        rewriter.InitializeTiny();
+
+        ILInstr* pFirstInstr = rewriter.GetILList()->m_pNext;
+        ILInstr* pNewInstr   = NULL;
+
+        // Labels for branching
+        ILInstr* elseLabel = NULL;
+        ILInstr* endLabel  = NULL;
+
+        // ldarg.0     ; Load startupHooks by reference
+        pNewInstr           = rewriter.NewILInstr();
+        pNewInstr->m_opcode = CEE_LDARG_0;
+        rewriter.InsertBefore(pFirstInstr, pNewInstr);
+
+        // ldind.ref   ; Dereference to get the string value
+        pNewInstr           = rewriter.NewILInstr();
+        pNewInstr->m_opcode = CEE_LDIND_REF;
+        rewriter.InsertBefore(pFirstInstr, pNewInstr);
+
+        // brtrue.s elseLabel ; Branch to else if startupHooks is not null
+        elseLabel           = rewriter.NewILInstr();
+        elseLabel->m_opcode = CEE_NOP; // Placeholder, will be replaced
+        pNewInstr           = rewriter.NewILInstr();
+        pNewInstr->m_opcode = CEE_BRTRUE_S;
+        pNewInstr->m_pTarget = elseLabel;
+        rewriter.InsertBefore(pFirstInstr, pNewInstr);
+
+        // If block: startupHooks = "<startup_hook_dll_name>";
+        // ldarg.0     ; Load startupHooks by reference
+        pNewInstr           = rewriter.NewILInstr();
+        pNewInstr->m_opcode = CEE_LDARG_0;
+        rewriter.InsertBefore(pFirstInstr, pNewInstr);
+
+        // ldstr "<startup_hook_dll_name>"
+        pNewInstr           = rewriter.NewILInstr();
+        pNewInstr->m_opcode = CEE_LDSTR;
+        pNewInstr->m_Arg32  = startup_hook_dll_token;
+        rewriter.InsertBefore(pFirstInstr, pNewInstr);
+
+        // stind.ref   ; Store the string value
+        pNewInstr           = rewriter.NewILInstr();
+        pNewInstr->m_opcode = CEE_STIND_REF;
+        rewriter.InsertBefore(pFirstInstr, pNewInstr);
+
+        // br.s endLabel ; Branch to end
+        endLabel           = rewriter.NewILInstr();
+        endLabel->m_opcode = CEE_NOP; // Placeholder, will be replaced
+        pNewInstr           = rewriter.NewILInstr();
+        pNewInstr->m_opcode = CEE_BR_S;
+        pNewInstr->m_pTarget = endLabel;
+        rewriter.InsertBefore(pFirstInstr, pNewInstr);
+
+        // Else block: startupHooks += "<path_separator><startup_hook_dll_name>";
+        // Replace the placeholder else label
+        elseLabel->m_opcode = CEE_LDARG_0;
+        rewriter.InsertBefore(pFirstInstr, elseLabel);
+
+        // ldarg.0     ; Load startupHooks by reference for the assignment
+        pNewInstr           = rewriter.NewILInstr();
+        pNewInstr->m_opcode = CEE_LDARG_0;
+        rewriter.InsertBefore(pFirstInstr, pNewInstr);
+
+        // ldind.ref   ; Dereference to get the current string value
+        pNewInstr           = rewriter.NewILInstr();
+        pNewInstr->m_opcode = CEE_LDIND_REF;
+        rewriter.InsertBefore(pFirstInstr, pNewInstr);
+
+        // ldstr "<path_separator>"
+        pNewInstr           = rewriter.NewILInstr();
+        pNewInstr->m_opcode = CEE_LDSTR;
+        pNewInstr->m_Arg32  = path_separator_token;
+        rewriter.InsertBefore(pFirstInstr, pNewInstr);
+
+        // call string.Concat(string, string) - concatenate original with path separator
+        pNewInstr           = rewriter.NewILInstr();
+        pNewInstr->m_opcode = CEE_CALL;
+        pNewInstr->m_Arg32  = string_concat_token;
+        rewriter.InsertBefore(pFirstInstr, pNewInstr);
+
+        // ldstr "<startup_hook_dll_name>"
+        pNewInstr           = rewriter.NewILInstr();
+        pNewInstr->m_opcode = CEE_LDSTR;
+        pNewInstr->m_Arg32  = startup_hook_dll_token;
+        rewriter.InsertBefore(pFirstInstr, pNewInstr);
+
+        // call string.Concat(string, string) - concatenate result with dll name
+        pNewInstr           = rewriter.NewILInstr();
+        pNewInstr->m_opcode = CEE_CALL;
+        pNewInstr->m_Arg32  = string_concat_token;
+        rewriter.InsertBefore(pFirstInstr, pNewInstr);
+
+        // stind.ref   ; Store the concatenated string
+        pNewInstr           = rewriter.NewILInstr();
+        pNewInstr->m_opcode = CEE_STIND_REF;
+        rewriter.InsertBefore(pFirstInstr, pNewInstr);
+
+        // End label
+        // Replace the placeholder end label
+        endLabel->m_opcode = CEE_RET;
+        rewriter.InsertBefore(pFirstInstr, endLabel);
+
+        if (IsDumpILRewriteEnabled())
+        {
+            mdToken      token = 0;
+            TypeInfo     typeInfo{};
+            WSTRING      methodName = WStr("__DDPatchStartupHookValue__");
+            FunctionInfo caller(token, methodName, typeInfo, MethodSignature(), FunctionMethodSignature());
+            Logger::Info(GetILCodes("*** GenerateHookFixup: Modified Code: ", &rewriter, caller, metadata_import));
+        }
+
+        hr = rewriter.Export();
+        if (FAILED(hr))
+        {
+            Logger::Warn("GenerateHookFixup: Call to ILRewriter.Export() failed for ModuleID=", module_id);
+            return hr;
+        }
     }
 
     return S_OK;
