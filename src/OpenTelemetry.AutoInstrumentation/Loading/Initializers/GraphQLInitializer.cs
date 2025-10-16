@@ -15,7 +15,7 @@ internal class GraphQLInitializer : InstrumentationInitializer
     private readonly TracerSettings _tracerSettings;
 
     public GraphQLInitializer(PluginManager pluginManager, TracerSettings tracerSettings)
-    : base("GraphQL")
+    : base("GraphQL", nameof(GraphQLInitializer))
     {
         _pluginManager = pluginManager;
         _tracerSettings = tracerSettings;
