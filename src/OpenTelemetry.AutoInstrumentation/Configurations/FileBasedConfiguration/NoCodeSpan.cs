@@ -26,14 +26,6 @@ internal class NoCodeSpan
             return default;
         }
 
-        var list = YamlAttribute.ParseAttributes(Attributes);
-
-        TagList tagList = default;
-        foreach (var kvp in list)
-        {
-            tagList.Add(kvp.Key, kvp.Value);
-        }
-
-        return tagList;
+        return YamlAttribute.ParseAttributes(Attributes);
     }
 }

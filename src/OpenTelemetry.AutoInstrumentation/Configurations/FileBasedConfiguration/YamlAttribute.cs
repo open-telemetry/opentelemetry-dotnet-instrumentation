@@ -1,6 +1,7 @@
 // Copyright The OpenTelemetry Authors
 // SPDX-License-Identifier: Apache-2.0
 
+using System.Diagnostics;
 using System.Globalization;
 using OpenTelemetry.AutoInstrumentation.Logging;
 using Vendors.YamlDotNet.Serialization;
@@ -29,9 +30,9 @@ internal class YamlAttribute
     [YamlMember(Alias = "type")]
     public string Type { get; set; } = "string";
 
-    public static List<KeyValuePair<string, object>> ParseAttributes(List<YamlAttribute>? attributes)
+    public static TagList ParseAttributes(List<YamlAttribute>? attributes)
     {
-        var container = new List<KeyValuePair<string, object>>();
+        TagList container = default;
 
         if (attributes == null)
         {
@@ -55,7 +56,7 @@ internal class YamlAttribute
                 case "string":
                     if (attributeValue is string strValue)
                     {
-                        container.Add(new KeyValuePair<string, object>(name, strValue));
+                        container.Add(name, strValue);
                         continue;
                     }
 
@@ -65,13 +66,13 @@ internal class YamlAttribute
                 case "bool":
                     if (attributeValue is bool boolValue)
                     {
-                        container.Add(new KeyValuePair<string, object>(name, boolValue));
+                        container.Add(name, boolValue);
                         continue;
                     }
 
                     if (attributeValue is string boolStr && bool.TryParse(boolStr, out var parsedBool))
                     {
-                        container.Add(new KeyValuePair<string, object>(name, parsedBool));
+                        container.Add(name, parsedBool);
                         continue;
                     }
 
@@ -81,13 +82,13 @@ internal class YamlAttribute
                 case "int":
                     if (attributeValue is long longValue)
                     {
-                        container.Add(new KeyValuePair<string, object>(name, longValue));
+                        container.Add(name, longValue);
                         continue;
                     }
 
                     if (attributeValue is string longStr && long.TryParse(longStr, NumberStyles.Integer, CultureInfo.InvariantCulture, out var parsedLong))
                     {
-                        container.Add(new KeyValuePair<string, object>(name, parsedLong));
+                        container.Add(name, parsedLong);
                         continue;
                     }
 
@@ -97,13 +98,13 @@ internal class YamlAttribute
                 case "double":
                     if (attributeValue is double dblValue)
                     {
-                        container.Add(new KeyValuePair<string, object>(name, dblValue));
+                        container.Add(name, dblValue);
                         continue;
                     }
 
                     if (attributeValue is string dblStr && double.TryParse(dblStr, NumberStyles.Float | NumberStyles.AllowThousands, CultureInfo.InvariantCulture, out var parsedDouble))
                     {
-                        container.Add(new KeyValuePair<string, object>(name, parsedDouble));
+                        container.Add(name, parsedDouble);
                         continue;
                     }
 
@@ -113,7 +114,7 @@ internal class YamlAttribute
                 case "string_array":
                     if (attributeValue is List<object> stringList && stringList.All(v => v is string))
                     {
-                        container.Add(new KeyValuePair<string, object>(name, stringList.Cast<string>().ToArray()));
+                        container.Add(name, stringList.Cast<string>().ToArray());
                         continue;
                     }
 
@@ -144,7 +145,7 @@ internal class YamlAttribute
 
                         if (result.Count == boolList.Count)
                         {
-                            container.Add(new KeyValuePair<string, object>(name, result.ToArray()));
+                            container.Add(name, result.ToArray());
                         }
 
                         continue;
@@ -176,7 +177,7 @@ internal class YamlAttribute
 
                         if (result.Count == intList.Count)
                         {
-                            container.Add(new KeyValuePair<string, object>(name, result.ToArray()));
+                            container.Add(name, result.ToArray());
                         }
 
                         continue;
@@ -208,7 +209,7 @@ internal class YamlAttribute
 
                         if (result.Count == dblList.Count)
                         {
-                            container.Add(new KeyValuePair<string, object>(name, result.ToArray()));
+                            container.Add(name, result.ToArray());
                         }
 
                         continue;
