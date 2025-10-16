@@ -15,6 +15,7 @@ internal sealed class AspNetMetricsInitializer
     public AspNetMetricsInitializer(LazyInstrumentationLoader lazyInstrumentationLoader, PluginManager pluginManager)
     {
         _pluginManager = pluginManager;
+        lazyInstrumentationLoader.Add(new AspNetDirectInitializer(InitializeOnFirstCall, "AspNetDirectInitializerForMetrics"));
         lazyInstrumentationLoader.Add(new AspNetMvcInitializer(InitializeOnFirstCall, "AspNetMvcInitializerForMetrics"));
         lazyInstrumentationLoader.Add(new AspNetWebApiInitializer(InitializeOnFirstCall, "AspNetWebApiInitializerForMetrics"));
     }
