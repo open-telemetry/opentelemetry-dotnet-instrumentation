@@ -13,7 +13,7 @@ internal class EntityFrameworkCoreInitializer : InstrumentationInitializer
     private readonly TracerSettings _tracerSettings;
 
     public EntityFrameworkCoreInitializer(PluginManager pluginManager, TracerSettings tracerSettings)
-        : base("Microsoft.EntityFrameworkCore")
+        : base("Microsoft.EntityFrameworkCore", nameof(EntityFrameworkCoreInitializer))
     {
         _pluginManager = pluginManager;
         _tracerSettings = tracerSettings;
