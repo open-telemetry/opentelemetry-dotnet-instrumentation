@@ -2,9 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 using System.IO.Abstractions;
-using System.Runtime.Intrinsics.Arm;
 using DependencyListGenerator.DotNetOutdated.Services;
-using NuGet.Packaging;
 
 namespace DependencyListGenerator;
 

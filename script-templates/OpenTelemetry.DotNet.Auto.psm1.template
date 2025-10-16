@@ -1,4 +1,4 @@
-#
+﻿#
 # Copyright The OpenTelemetry Authors
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -480,7 +480,7 @@ function Update-OpenTelemetryCore() {
     Remove-Module OpenTelemetry.Dotnet.Auto
     Import-Module $modulePath
 
-    Install-OpenTelemetryCore -InstallDir $installDir -RegisterAssembliesInGAC $$RegisterAssembliesInGAC
+    Install-OpenTelemetryCore -InstallDir $installDir -RegisterAssembliesInGAC $RegisterAssembliesInGAC
     if ($RegisterIIS) {
         Register-OpenTelemetryForIIS
     }

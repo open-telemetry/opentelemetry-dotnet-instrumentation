@@ -1,4 +1,4 @@
-# OpenTelemetry .NET Automatic Instrumentation
+﻿# OpenTelemetry .NET Automatic Instrumentation
 
 [![Slack](https://img.shields.io/badge/slack-@cncf/otel--dotnet--auto--instr-brightgreen.svg?logo=slack)](https://cloud-native.slack.com/archives/C01NR1YLSE7)
 [![NuGet](https://img.shields.io/nuget/v/OpenTelemetry.AutoInstrumentation.svg)](https://www.nuget.org/packages/OpenTelemetry.AutoInstrumentation)
@@ -316,6 +316,14 @@ Unregister-OpenTelemetryForWindowsService -WindowsServiceName MyServiceName
 # Finally, uninstall OpenTelemetry instrumentation
 Uninstall-OpenTelemetryCore
 ```
+
+#### Update .Net Framework version
+
+By default, `Install-OpenTelemetryCore` and `Update-OpenTelemetryCore` register OpenTelemetry (and dependencies) 
+assemblies in the Global Assembly Cache (GAC). Some of these assemblies are tightly coupled to specific .NET Framework versions. 
+
+When upgrading from .NET Framework versions older than 4.7.2, these assemblies should be removed from the GAC.
+For such upgrade scenarios, it is recommended to uninstall and reinstall OpenTelemetry after the .NET Framework update is complete.
 
 ## Instrument a container
 
