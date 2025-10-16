@@ -178,8 +178,6 @@ HRESULT STDMETHODCALLTYPE CorProfiler::Initialize(IUnknown* cor_profiler_info_un
         if (!IsStartupHookValid(startup_hooks, home_path))
         {
             Logger::Info("The StartupHook was not configured. Will patch ProcessStartupHooks.");
-            // TODO: Instead of failing, instrument corelib to add the profiler path to the startup hook
-            // initialization code.
             startup_fix_required = true;
         }
     }
