@@ -106,22 +106,22 @@ public class ParserInstrumentationTests
         }
 
         Assert.True(traces.OracleMda!.SetDbStatementForText);
-        Assert.Equal("X-Key", traces.HttpClient!.CaptureRequestHeaders);
-        Assert.Equal("X-Key", traces.HttpClient!.CaptureResponseHeaders);
+        Assert.Equal("X-Key,X-Custom-Header,X-Header-Example", traces.HttpClient!.CaptureRequestHeaders);
+        Assert.Equal("X-Key,X-Custom-Header,X-Header-Example", traces.HttpClient!.CaptureResponseHeaders);
 
-        Assert.Equal("X-Key", traces.GrpcNetClient!.CaptureRequestMetadata);
-        Assert.Equal("X-Key", traces.GrpcNetClient!.CaptureResponseMetadata);
+        Assert.Equal("X-Key,X-Custom-Header,X-Header-Example", traces.GrpcNetClient!.CaptureRequestMetadata);
+        Assert.Equal("X-Key,X-Custom-Header,X-Header-Example", traces.GrpcNetClient!.CaptureResponseMetadata);
 #if NET
         Assert.True(traces.GraphQL!.SetDocument);
         Assert.True(traces.EntityFrameworkCore!.SetDbStatementForText);
 
-        Assert.Equal("X-Key", traces.AspNetCore!.CaptureRequestHeaders);
-        Assert.Equal("X-Key", traces.AspNetCore!.CaptureResponseHeaders);
+        Assert.Equal("X-Key,X-Custom-Header,X-Header-Example", traces.AspNetCore!.CaptureRequestHeaders);
+        Assert.Equal("X-Key,X-Custom-Header,X-Header-Example", traces.AspNetCore!.CaptureResponseHeaders);
 
 #endif
 #if NETFRAMEWORK
-        Assert.Equal("X-Key", traces.AspNet!.CaptureRequestHeaders);
-        Assert.Equal("X-Key", traces.AspNet!.CaptureResponseHeaders);
+        Assert.Equal("X-Key,X-Custom-Header,X-Header-Example", traces.AspNet!.CaptureRequestHeaders);
+        Assert.Equal("X-Key,X-Custom-Header,X-Header-Example", traces.AspNet!.CaptureResponseHeaders);
 #endif
     }
 }

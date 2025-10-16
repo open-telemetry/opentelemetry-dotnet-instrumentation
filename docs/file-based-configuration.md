@@ -135,22 +135,22 @@ instrumentation/development:
         set_db_statement_for_text: false
       aspnet:
         # A comma-separated list of HTTP header names. ASP.NET instrumentations will capture HTTP request header values for all configured header names.
-        capture_request_headers: "X-Key"
+        capture_request_headers: "X-Key,X-Custom-Header,X-Header-Example"
         # A comma-separated list of HTTP header names. ASP.NET instrumentations will capture HTTP response header values for all configured header names.
-        capture_response_headers: "X-Key"
+        capture_response_headers: "X-Key,X-Custom-Header,X-Header-Example"
       aspnetcore:
         # A comma-separated list of HTTP header names. ASP.NET Core instrumentations will capture HTTP request header values for all configured header names.
-        capture_request_headers: "X-Key"
+        capture_request_headers: "X-Key,X-Custom-Header,X-Header-Example"
         # A comma-separated list of HTTP header names. ASP.NET Core instrumentations will capture HTTP response header values for all configured header names.
-        capture_response_headers: "X-Key"
+        capture_response_headers: "X-Key,X-Custom-Header,X-Header-Example"
       httpclient:
         # A comma-separated list of HTTP header names. HTTP Client instrumentations will capture HTTP request header values for all configured header names.
-        capture_request_headers: "X-Key"
+        capture_request_headers: "X-Key,X-Custom-Header,X-Header-Example"
         # A comma-separated list of HTTP header names. HTTP Client instrumentations will capture HTTP response header values for all configured header names.
-        capture_response_headers: "X-Key"
+        capture_response_headers: "X-Key,X-Custom-Header,X-Header-Example"
       grpcnetclient:
         # A comma-separated list of gRPC metadata names. Grpc.Net.Client instrumentations will capture gRPC request metadata values for all configured metadata names.
-        capture_request_metadata: "X-Key"
+        capture_request_metadata: "X-Key,X-Custom-Header,X-Header-Example"
         # A comma-separated list of gRPC metadata names. Grpc.Net.Client instrumentations will capture gRPC response metadata values for all configured metadata names.
-        capture_response_metadata: "X-Key"
+        capture_response_metadata: "X-Key,X-Custom-Header,X-Header-Example"
 ```
