@@ -68,6 +68,7 @@ resource:
 
 You can configure traces, metrics, and logs instrumentations.
 For more details and updates, see: [Instrumentation list and documentation](config.md#instrumentations)
+To disable a instrumentation, comment out or remove its corresponding entry.
 
 ``` yaml
 instrumentation/development:
