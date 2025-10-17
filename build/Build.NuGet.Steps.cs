@@ -30,7 +30,7 @@ partial class Build
         .Description("Build the NuGet packages that are generated directly from src/**/*.csproj files")
         .Executes(() =>
         {
-            foreach (var project in Solution.GetManagedSrcProjects().Where(p => !p.Name.EndsWith("AdditionalDeps")))
+            foreach (var project in Solution.GetManagedSrcProjects().Where(p => !p.Name.EndsWith("AdditionalDeps") && !p.Name.Contains("Assemblies")))
             {
                 DotNetPack(x => x
                     .SetProject(project)
