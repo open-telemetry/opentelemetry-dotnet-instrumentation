@@ -341,6 +341,10 @@ See [config.md](config.md).
 
 See [manual-instrumentation.md](manual-instrumentation.md).
 
+### Configuration based instrumentation
+
+See [nocode-instrumentation.md](nocode-instrumentation.md)
+
 ## Log to trace correlation
 
 See [log-trace-correlation.md](log-trace-correlation.md).
