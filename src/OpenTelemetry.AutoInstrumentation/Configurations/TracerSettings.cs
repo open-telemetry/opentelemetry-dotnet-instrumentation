@@ -106,7 +106,7 @@ internal class TracerSettings : Settings
     protected override void OnLoadFile(YamlConfiguration configuration)
     {
         var processors = configuration.TracerProvider?.Processors;
-        if (processors != null && processors.Count > 0)
+        if (processors != null || processors?.Count > 0)
         {
             TracesEnabled = true;
         }
