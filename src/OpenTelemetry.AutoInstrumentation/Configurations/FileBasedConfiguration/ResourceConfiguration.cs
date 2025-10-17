@@ -1,6 +1,9 @@
 // Copyright The OpenTelemetry Authors
 // SPDX-License-Identifier: Apache-2.0
 
+using System.Diagnostics;
+using System.Globalization;
+using OpenTelemetry.AutoInstrumentation.Logging;
 using Vendors.YamlDotNet.Serialization;
 
 namespace OpenTelemetry.AutoInstrumentation.Configurations.FileBasedConfiguration;
@@ -11,7 +14,7 @@ internal class ResourceConfiguration
     /// Gets or sets the list of resource attributes.
     /// </summary>
     [YamlMember(Alias = "attributes")]
-    public List<ResourceAttribute>? Attributes { get; set; }
+    public List<YamlAttribute>? Attributes { get; set; }
 
     /// <summary>
     /// Gets or sets the attributes list for the resource.
@@ -27,26 +30,22 @@ internal class ResourceConfiguration
 
     public List<KeyValuePair<string, object>> ParseAttributes()
     {
-        var resourceAttributesWithPriority = new Dictionary<string, object>();
+        var resourceAttributesWithPriority = new List<KeyValuePair<string, object>>();
 
         if (Attributes != null)
         {
-            foreach (var attr in Attributes)
-            {
-                if (!resourceAttributesWithPriority.ContainsKey(attr.Name))
-                {
-                    // TODO parse type and converting the value accordingly.
-                    resourceAttributesWithPriority.Add(attr.Name, attr.Value);
-                }
-            }
+            resourceAttributesWithPriority = YamlAttribute.ParseAttributes(Attributes)
+                .Where(kv => kv.Value != null)
+                .Select(kv => new KeyValuePair<string, object>(kv.Key, kv.Value!))
+                .ToList();
         }
 
-        if (AttributesList != null)
+        if (!string.IsNullOrEmpty(AttributesList))
         {
             const char attributeListSplitter = ',';
             char[] attributeKeyValueSplitter = ['='];
 
-            var rawAttributes = AttributesList.Split(attributeListSplitter);
+            var rawAttributes = AttributesList!.Split(attributeListSplitter);
             foreach (var rawKeyValuePair in rawAttributes)
             {
                 var keyValuePair = rawKeyValuePair.Split(attributeKeyValueSplitter, 2);
@@ -56,14 +55,15 @@ internal class ResourceConfiguration
                 }
 
                 var key = keyValuePair[0].Trim();
+                var value = keyValuePair[1].Trim();
 
-                if (!resourceAttributesWithPriority.ContainsKey(key))
+                if (!resourceAttributesWithPriority.Any(kvp => kvp.Key == key))
                 {
-                    resourceAttributesWithPriority.Add(key, keyValuePair[1].Trim());
+                    resourceAttributesWithPriority.Add(new KeyValuePair<string, object>(key, value));
                 }
             }
         }
 
-        return resourceAttributesWithPriority.ToList();
+        return resourceAttributesWithPriority;
     }
 }
