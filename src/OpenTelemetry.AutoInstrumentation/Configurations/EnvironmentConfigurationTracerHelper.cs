@@ -2,7 +2,10 @@
 // SPDX-License-Identifier: Apache-2.0
 
 using System.Runtime.CompilerServices;
+using OpenTelemetry.AutoInstrumentation.Configurations.FileBasedConfiguration;
+using OpenTelemetry.AutoInstrumentation.Configurations.Otlp;
 using OpenTelemetry.AutoInstrumentation.Loading;
+using OpenTelemetry.AutoInstrumentation.Logging;
 using OpenTelemetry.AutoInstrumentation.Plugins;
 using OpenTelemetry.Trace;
 
@@ -10,6 +13,8 @@ namespace OpenTelemetry.AutoInstrumentation.Configurations;
 
 internal static class EnvironmentConfigurationTracerHelper
 {
+    private static readonly IOtelLogger Logger = OtelLogging.GetLogger();
+
     public static TracerProviderBuilder UseEnvironmentVariables(
         this TracerProviderBuilder builder,
         LazyInstrumentationLoader lazyInstrumentationLoader,
@@ -88,15 +93,78 @@ internal static class EnvironmentConfigurationTracerHelper
 
     private static TracerProviderBuilder SetExporter(this TracerProviderBuilder builder, TracerSettings settings, PluginManager pluginManager)
     {
-        foreach (var traceExporter in settings.TracesExporters)
+        // If no exporters are specified, it means to use processors (file-based configuration).
+        if (settings.TracesExporters.Count == 0)
         {
-            builder = traceExporter switch
+            if (settings.Processors != null)
             {
-                TracesExporter.Zipkin => Wrappers.AddZipkinExporter(builder, pluginManager),
-                TracesExporter.Otlp => Wrappers.AddOtlpExporter(builder, settings, pluginManager),
-                TracesExporter.Console => Wrappers.AddConsoleExporter(builder, pluginManager),
-                _ => throw new ArgumentOutOfRangeException($"Traces exporter '{traceExporter}' is incorrect")
-            };
+                foreach (var processor in settings.Processors)
+                {
+                    if (processor.Batch != null)
+                    {
+                        var exporerter = processor.Batch.Exporter;
+                        if (exporerter != null)
+                        {
+                            if (exporerter.OtlpHttp != null)
+                            {
+                                builder = Wrappers.AddOtlpHttpExporter(builder, pluginManager, processor.Batch, exporerter.OtlpHttp);
+                            }
+                            else if (exporerter.OtlpGrpc != null)
+                            {
+                                builder = Wrappers.AddOtlpGrpcExporter(builder, pluginManager, processor.Batch, exporerter.OtlpGrpc);
+                            }
+                            else if (exporerter.Zipkin != null)
+                            {
+                                builder = Wrappers.AddZipkinExporter(builder, pluginManager, processor.Batch, exporerter.Zipkin);
+                            }
+                            else
+                            {
+                                Logger.Debug("No valid exporter configured for batch processor, skipping.");
+                            }
+                        }
+                    }
+                    else if (processor.Simple != null)
+                    {
+                        var exporerter = processor.Simple.Exporter;
+                        if (exporerter != null)
+                        {
+                            if (exporerter.OtlpHttp != null)
+                            {
+                                builder = Wrappers.AddOtlpHttpExporter(builder, pluginManager, exporerter.OtlpHttp);
+                            }
+                            else if (exporerter.OtlpGrpc != null)
+                            {
+                                builder = Wrappers.AddOtlpGrpcExporter(builder, pluginManager, exporerter.OtlpGrpc);
+                            }
+                            else if (exporerter.Zipkin != null)
+                            {
+                                builder = Wrappers.AddZipkinExporter(builder, pluginManager, exporerter.Zipkin);
+                            }
+                            else if (exporerter.Console != null)
+                            {
+                                builder = Wrappers.AddConsoleExporter(builder, pluginManager);
+                            }
+                            else
+                            {
+                                Logger.Debug("No valid exporter configured for simple processor, skipping.");
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        else
+        {
+            foreach (var traceExporter in settings.TracesExporters)
+            {
+                builder = traceExporter switch
+                {
+                    TracesExporter.Zipkin => Wrappers.AddZipkinExporter(builder, pluginManager),
+                    TracesExporter.Otlp => Wrappers.AddOtlpExporter(builder, settings, pluginManager),
+                    TracesExporter.Console => Wrappers.AddConsoleExporter(builder, pluginManager),
+                    _ => throw new ArgumentOutOfRangeException($"Traces exporter '{traceExporter}' is incorrect")
+                };
+            }
         }
 
         return builder;
@@ -228,8 +296,89 @@ internal static class EnvironmentConfigurationTracerHelper
         {
             return builder.AddOtlpExporter(options =>
             {
-                // Copy Auto settings to SDK settings
                 settings.OtlpSettings?.CopyTo(options);
+
+                pluginManager.ConfigureTracesOptions(options);
+            });
+        }
+
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        public static TracerProviderBuilder AddOtlpHttpExporter(TracerProviderBuilder builder, PluginManager pluginManager, BatchProcessorConfig batch, OtlpHttpExporterConfig otlpHttp)
+        {
+            var otlpSettings = new OtlpSettings(OtlpSignalType.Traces, otlpHttp);
+            return builder.AddOtlpExporter(options =>
+            {
+                // Copy Auto settings to SDK settings
+                batch?.CopyTo(options.BatchExportProcessorOptions);
+                otlpSettings?.CopyTo(options);
+
+                pluginManager.ConfigureTracesOptions(options);
+            });
+        }
+
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        public static TracerProviderBuilder AddOtlpGrpcExporter(TracerProviderBuilder builder, PluginManager pluginManager, BatchProcessorConfig batch, OtlpGrpcExporterConfig otlpGrpc)
+        {
+            var otlpSettings = new OtlpSettings(otlpGrpc);
+            return builder.AddOtlpExporter(options =>
+            {
+                // Copy Auto settings to SDK settings
+                batch?.CopyTo(options.BatchExportProcessorOptions);
+                otlpSettings?.CopyTo(options);
+
+                pluginManager.ConfigureTracesOptions(options);
+            });
+        }
+
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        public static TracerProviderBuilder AddZipkinExporter(TracerProviderBuilder builder, PluginManager pluginManager, BatchProcessorConfig batch, ZipkinExporterConfig zipkin)
+        {
+            return builder.AddZipkinExporter(options =>
+            {
+                // Copy Auto settings to SDK settings
+                batch?.CopyTo(options.BatchExportProcessorOptions);
+                zipkin?.CopyTo(options);
+
+                pluginManager.ConfigureTracesOptions(options);
+            });
+        }
+
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        public static TracerProviderBuilder AddOtlpHttpExporter(TracerProviderBuilder builder, PluginManager pluginManager, OtlpHttpExporterConfig otlpHttp)
+        {
+            var otlpSettings = new OtlpSettings(OtlpSignalType.Traces, otlpHttp);
+            return builder.AddOtlpExporter(options =>
+            {
+                // Copy Auto settings to SDK settings
+                options.ExportProcessorType = ExportProcessorType.Simple;
+                otlpSettings?.CopyTo(options);
+
+                pluginManager.ConfigureTracesOptions(options);
+            });
+        }
+
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        public static TracerProviderBuilder AddOtlpGrpcExporter(TracerProviderBuilder builder, PluginManager pluginManager, OtlpGrpcExporterConfig otlpGrpc)
+        {
+            var otlpSettings = new OtlpSettings(otlpGrpc);
+            return builder.AddOtlpExporter(options =>
+            {
+                // Copy Auto settings to SDK settings
+                options.ExportProcessorType = ExportProcessorType.Simple;
+                otlpSettings?.CopyTo(options);
+
+                pluginManager.ConfigureTracesOptions(options);
+            });
+        }
+
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        public static TracerProviderBuilder AddZipkinExporter(TracerProviderBuilder builder, PluginManager pluginManager, ZipkinExporterConfig zipkin)
+        {
+            return builder.AddZipkinExporter(options =>
+            {
+                // Copy Auto settings to SDK settings
+                options.ExportProcessorType = ExportProcessorType.Simple;
+                zipkin?.CopyTo(options);
 
                 pluginManager.ConfigureTracesOptions(options);
             });
