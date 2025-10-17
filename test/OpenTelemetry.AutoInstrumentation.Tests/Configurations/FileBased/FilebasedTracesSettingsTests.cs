@@ -89,7 +89,8 @@ public class FilebasedTracesSettingsTests
         Assert.False(settings.TracesEnabled);
         Assert.Empty(settings.TracesExporters);
         Assert.Null(settings.OtlpSettings);
-        Assert.Null(settings.Processors);
+        Assert.NotNull(settings.Processors);
+        Assert.Empty(settings.Processors);
     }
 
     [Fact]
