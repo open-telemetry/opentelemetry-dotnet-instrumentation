@@ -3,6 +3,7 @@
 
 #if NETFRAMEWORK
 using System.Net.Http;
+using Google.Protobuf;
 using IntegrationTests.Helpers;
 using Xunit.Abstractions;
 
@@ -30,7 +31,7 @@ public class OwinIISTests
         // on the firewall.
         using var collector = new MockSpansCollector(Output, host: "*");
         using var fwPort = FirewallHelper.OpenWinPort(collector.Port, Output);
-        collector.Expect("OpenTelemetry.Instrumentation.AspNet");
+        collector.Expect("OpenTelemetry.Instrumentation.AspNet", x => x.ParentSpanId != ByteString.Empty); // verify that parent span id is propagated
 
         Dictionary<string, string> environmentVariables = new()
         {
@@ -78,6 +79,7 @@ public class OwinIISTests
     private async Task CallWebEndpoint(int webPort)
     {
         var client = new HttpClient();
+        client.DefaultRequestHeaders.Add("traceparent", "00-4bf92f3577b34da6a3ce929d0e0e4736-00f067aa0ba902b7-01"); // send a traceparent header to verify that parent span id is propagated
         var response = await client.GetAsync($"http://localhost:{webPort}/test/");
         Assert.Equal(System.Net.HttpStatusCode.OK, response.StatusCode);
         var content = await response.Content.ReadAsStringAsync();
