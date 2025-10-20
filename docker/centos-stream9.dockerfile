@@ -1,4 +1,4 @@
-FROM quay.io/centos/centos:stream9@sha256:9b0482e3e8ddedce22b5d841d04d0a73498237d93a0c5d75b8a07cc99222591d
+FROM quay.io/centos/centos:stream9@sha256:8e30e9e7ee0afd42477ef1e77d85b5f92493e09c5bc830f721ef5ca2b6863fff
 
 # Install dotnet sdk
 RUN dnf install -y \
@@ -7,8 +7,8 @@ RUN dnf install -y \
 COPY ./scripts/dotnet-install.sh ./dotnet-install.sh
 
 RUN chmod +x ./dotnet-install.sh \
-    && ./dotnet-install.sh -v 9.0.305 --install-dir /usr/share/dotnet --no-path \
-    && ./dotnet-install.sh -v 8.0.414 --install-dir /usr/share/dotnet --no-path \
+    && ./dotnet-install.sh -v 9.0.306 --install-dir /usr/share/dotnet --no-path \
+    && ./dotnet-install.sh -v 8.0.415 --install-dir /usr/share/dotnet --no-path \
     && rm dotnet-install.sh
 
 ENV PATH="$PATH:/usr/share/dotnet"
