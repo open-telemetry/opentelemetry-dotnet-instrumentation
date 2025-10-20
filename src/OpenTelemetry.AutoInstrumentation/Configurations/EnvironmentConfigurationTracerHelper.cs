@@ -102,20 +102,20 @@ internal static class EnvironmentConfigurationTracerHelper
                 {
                     if (processor.Batch != null)
                     {
-                        var exporerter = processor.Batch.Exporter;
-                        if (exporerter != null)
+                        var exporter = processor.Batch.Exporter;
+                        if (exporter != null)
                         {
-                            if (exporerter.OtlpHttp != null)
+                            if (exporter.OtlpHttp != null)
                             {
-                                builder = Wrappers.AddOtlpHttpExporter(builder, pluginManager, processor.Batch, exporerter.OtlpHttp);
+                                builder = Wrappers.AddOtlpHttpExporter(builder, pluginManager, processor.Batch, exporter.OtlpHttp);
                             }
-                            else if (exporerter.OtlpGrpc != null)
+                            else if (exporter.OtlpGrpc != null)
                             {
-                                builder = Wrappers.AddOtlpGrpcExporter(builder, pluginManager, processor.Batch, exporerter.OtlpGrpc);
+                                builder = Wrappers.AddOtlpGrpcExporter(builder, pluginManager, processor.Batch, exporter.OtlpGrpc);
                             }
-                            else if (exporerter.Zipkin != null)
+                            else if (exporter.Zipkin != null)
                             {
-                                builder = Wrappers.AddZipkinExporter(builder, pluginManager, processor.Batch, exporerter.Zipkin);
+                                builder = Wrappers.AddZipkinExporter(builder, pluginManager, processor.Batch, exporter.Zipkin);
                             }
                             else
                             {
@@ -125,22 +125,22 @@ internal static class EnvironmentConfigurationTracerHelper
                     }
                     else if (processor.Simple != null)
                     {
-                        var exporerter = processor.Simple.Exporter;
-                        if (exporerter != null)
+                        var exporter = processor.Simple.Exporter;
+                        if (exporter != null)
                         {
-                            if (exporerter.OtlpHttp != null)
+                            if (exporter.OtlpHttp != null)
                             {
-                                builder = Wrappers.AddOtlpHttpExporter(builder, pluginManager, exporerter.OtlpHttp);
+                                builder = Wrappers.AddOtlpHttpExporter(builder, pluginManager, exporter.OtlpHttp);
                             }
-                            else if (exporerter.OtlpGrpc != null)
+                            else if (exporter.OtlpGrpc != null)
                             {
-                                builder = Wrappers.AddOtlpGrpcExporter(builder, pluginManager, exporerter.OtlpGrpc);
+                                builder = Wrappers.AddOtlpGrpcExporter(builder, pluginManager, exporter.OtlpGrpc);
                             }
-                            else if (exporerter.Zipkin != null)
+                            else if (exporter.Zipkin != null)
                             {
-                                builder = Wrappers.AddZipkinExporter(builder, pluginManager, exporerter.Zipkin);
+                                builder = Wrappers.AddZipkinExporter(builder, pluginManager, exporter.Zipkin);
                             }
-                            else if (exporerter.Console != null)
+                            else if (exporter.Console != null)
                             {
                                 builder = Wrappers.AddConsoleExporter(builder, pluginManager);
                             }
