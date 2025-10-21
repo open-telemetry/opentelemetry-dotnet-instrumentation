@@ -2,8 +2,60 @@ file_format: "1.0-rc.1"
 
 resource:
   attributes:
+    # default type string
     - name: service.name
       value: unknown_service
+    - name: attribute_key_string
+      value: "string_value"
+      type: string
+    - name: attribute_key_string_not_supported
+      value: ["string_value"]
+      type: string
+    - name: attribute_key_bool
+      value: true
+      type: bool
+    - name: attribute_key_bool_not_supported
+      value: [true]
+      type: bool
+    - name: attribute_key_int
+      value: 12345
+      type: int
+    - name: attribute_key_int_not_supported
+      value: [12345]
+      type: int
+    - name: attribute_key_double
+      value: 123.45
+      type: double
+    - name: attribute_key_double_not_supported
+      value: [123.45]
+      type: double
+    - name: attribute_key_string_array
+      value: ["value1", "value2", "value3"]
+      type: string_array
+    - name: attribute_key_string_array_not_supported
+      value: ["value1", ["value2"], "value3"]
+      type: string_array
+    - name: attribute_key_bool_array
+      value: [true, false, true]
+      type: bool_array
+    - name: attribute_key_bool_array_not_supported
+      value: [true, [false], true]
+      type: bool_array
+    - name: attribute_key_int_array
+      value: [123, 456, 789]
+      type: int_array
+    - name: attribute_key_int_array_not_supported
+      value: [[123], 456, 789]
+      type: int_array
+    - name: attribute_key_double_array
+      value: [123.45, 678.90]
+      type: double_array
+    - name: attribute_key_double_array_not_supported
+      value: [123.45, [678.90]]
+      type: double_array
+    - name: attribute_key_non_supported_type
+      value: non_supported_value
+      type: non_supported_type
   attributes_list:
   detection/development:
     detectors:

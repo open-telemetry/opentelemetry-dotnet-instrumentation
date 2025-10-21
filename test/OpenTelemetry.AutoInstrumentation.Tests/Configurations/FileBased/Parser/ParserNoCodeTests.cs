@@ -6,9 +6,9 @@ using OpenTelemetry.AutoInstrumentation.Configurations.FileBasedConfiguration;
 using Xunit;
 using YamlParser = OpenTelemetry.AutoInstrumentation.Configurations.FileBasedConfiguration.Parser.Parser;
 
-namespace OpenTelemetry.AutoInstrumentation.Tests.Configurations.FileBased;
+namespace OpenTelemetry.AutoInstrumentation.Tests.Configurations.FileBased.Parser;
 
-public class NoCodeConfigurationTests
+public class ParserNoCodeTests
 {
     [Fact]
     public void NoCodeConfigurationCanBeParsed()
@@ -39,7 +39,7 @@ public class NoCodeConfigurationTests
 
         Assert.NotNull(noCodeEntry.Span.Attributes);
 
-        List<NoCodeAttribute> expectedAttributes = [
+        List<YamlAttribute> expectedAttributes = [
             new() { Name = "attribute_key_string", Value = "string_value", Type = "string" },
             new() { Name = "attribute_key_string_not_supported", Value = new[] { "string_value" }, Type = "string" },
             new() { Name = "attribute_key_bool", Value = "true", Type = "bool" },
