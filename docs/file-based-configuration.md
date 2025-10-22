@@ -61,7 +61,8 @@ To disable a resource detector, comment out or remove its corresponding entry.
 ``` yaml
 resource:
   # Configure resource attributes. Entries have higher priority than entries from .resource.attributes_list.
-  # Entries must contain .name and .value
+  # Entries must contain .name and .value, and may optionally include .type. If an entry's .type omitted or null, string is used.
+  # The .value's type must match the .type. Values for .type include: string, bool, int, double, string_array, bool_array, int_array, double_array.
   # By default service.name is generated automatically if not explicitly configured.
   # If the application is hosted on IIS in .NET Framework this will be SiteName\VirtualPath (e.g., MySite\MyApp).
   # Otherwise, it will use the name of the application entry Assembly.
@@ -69,6 +70,10 @@ resource:
   attributes:
     - name: service.name
       value: unknown_service
+      type: string
+    - name: attribute_key
+      value: ["value1", "value2", "value3"]
+      type: string_array
   # Alternatively, configure via a comma-separated list (same format as OTEL_RESOURCE_ATTRIBUTES).
   attributes_list: ${OTEL_RESOURCE_ATTRIBUTES}
   # Resource Detectors Configuration
@@ -82,3 +87,28 @@ resource:
       process:         # Detects process-level attributes (process.*)
       processruntime:  # Detects process runtime attributes (process.runtime.*)
 ```  
+
+### Propagator Configuration
+
+You can configure text map context propagators directly in YAML or via the
+`OTEL_PROPAGATORS` environment variable.
+For more details and updates, see: [Propagators list and documentation](config.md/#propagators)
+To disable a propagator, comment out or remove its corresponding entry.
+
+``` yaml
+# If no propagators are specified, none will be added automatically.
+propagator:
+  # Composite propagators are evaluated together. 
+  # Entries from .composite_list are appended here (duplicates are filtered out).
+  composite:
+    tracecontext: # W3C Trace Context propagator
+    baggage:      # W3C Baggage propagator
+    b3:           # B3 single-header propagator
+    b3multi:      # B3 multi-header propagator
+  # Alternatively, configure via a comma-separated list (same format as OTEL_PROPAGATORS).
+  composite_list: ${OTEL_PROPAGATORS}
+```
+
+### Configuration based instrumentation
+
+Documentation for configuration based instrumentation can be found in [nocode-instrumentation.md](nocode-instrumentation.md).

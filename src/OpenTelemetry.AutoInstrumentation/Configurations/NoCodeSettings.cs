@@ -3,6 +3,7 @@
 
 using System.Diagnostics;
 using OpenTelemetry.AutoInstrumentation.Configurations.FileBasedConfiguration;
+using OpenTelemetry.AutoInstrumentation.Configurations.FileBasedConfiguration.Parser;
 using OpenTelemetry.AutoInstrumentation.Logging;
 using static OpenTelemetry.AutoInstrumentation.InstrumentationDefinitions;
 
@@ -145,10 +146,11 @@ internal class NoCodeSettings : Settings
                 $"OpenTelemetry.AutoInstrumentation.Instrumentations.NoCode.NoCodeIntegration{parametersCount}");
 
             var activityKind = ParseActivityKind(noCodeEntry.Span.Kind);
+            var attributes = noCodeEntry.Span.ParseAttributes();
 
             Log.Debug($"NoCode adding instrumentation for assembly: '{noCodeTarget.Assembly.Name}', type: '{noCodeTarget.Type}', method: '{noCodeTarget.Method}' with signature: '{string.Join(",", targetSignatureTypes)}'");
 
-            instrumentedMethods.Add(new NoCodeInstrumentedMethod(definition, targetSignatureTypes, noCodeEntry.Span.Name, activityKind));
+            instrumentedMethods.Add(new NoCodeInstrumentedMethod(definition, targetSignatureTypes, noCodeEntry.Span.Name, activityKind, attributes));
         }
 
         if (instrumentedMethods.Count > 0)

@@ -7,8 +7,8 @@ internal class GenericInitializer : InstrumentationInitializer
 {
     private readonly Action<ILifespanManager> _initialize;
 
-    public GenericInitializer(string assemblyName, Action<ILifespanManager> initialize)
-        : base(assemblyName)
+    public GenericInitializer(string assemblyName, string initializerName, Action<ILifespanManager> initialize)
+        : base(assemblyName, initializerName)
     {
         _initialize = initialize;
     }

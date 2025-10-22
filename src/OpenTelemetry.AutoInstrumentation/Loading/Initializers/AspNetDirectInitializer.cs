@@ -5,12 +5,12 @@
 
 namespace OpenTelemetry.AutoInstrumentation.Loading.Initializers;
 
-internal class AspNetMvcInitializer : InstrumentationInitializer
+internal class AspNetDirectInitializer : InstrumentationInitializer
 {
     private readonly Action<ILifespanManager> _initialize;
 
-    public AspNetMvcInitializer(Action<ILifespanManager> initialize, string initializerName)
-        : base("System.Web.Mvc", initializerName)
+    public AspNetDirectInitializer(Action<ILifespanManager> initialize, string initializerName)
+        : base("System.Web", initializerName)
     {
         _initialize = initialize;
     }

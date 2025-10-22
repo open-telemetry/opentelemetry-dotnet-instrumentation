@@ -9,6 +9,7 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 
 ### Added
 
+- Configuration based instrumentation.
 - IL rewrite for SqlCommand on .NET Framework to ensure CommandText is available for 
 [SqlClient instrumentation](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/issues/4343).
 This is enabled by default but can disabled via the
@@ -19,12 +20,13 @@ This is enabled by default but can disabled via the
 #### Dependency updates
 
 - Updated [Core components](https://github.com/open-telemetry/opentelemetry-dotnet/blob/main/VERSIONING.md#core-components):
-  [`1.13.0`](https://github.com/open-telemetry/opentelemetry-dotnet/releases/tag/core-1.13.0).
+  [`1.13.1`](https://github.com/open-telemetry/opentelemetry-dotnet/releases/tag/core-1.13.1).
 
 - Following packages updated
 - `OpenTelemetry.Instrumentation.SqlClient` from `1.12.0-beta.2` to `1.12.0-beta.3`.
+- `OpenTelemetry.Instrumentation.Wcf` from `1.12.0-beta.1` to `1.13.0-beta.2`.
 - .NET Framework only, following packages updated
-  - `OpenTelemetry.Instrumentation.AspNet` from `1.12.0-beta.1` to `1.12.0-beta.2`.
+  - `OpenTelemetry.Instrumentation.AspNet` from `1.12.0-beta.1` to `1.13.0-beta.1`.
 
 ### Deprecated
 
