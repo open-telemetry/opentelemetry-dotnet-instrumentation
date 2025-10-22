@@ -1,4 +1,5 @@
 using System.Text;
+using System.Text.RegularExpressions;
 using Mono.Cecil;
 using Serilog;
 
@@ -7,8 +8,36 @@ public static class AssemblyRedirectionSourceGenerator
     public static void Generate(string assembliesFolderPath, string generatedFilePath)
     {
         Log.Debug("Generating assembly redirection file {0}", generatedFilePath);
-        var assemblies = new SortedDictionary<string, AssemblyNameDefinition>();
-        foreach (var fileName in Directory.EnumerateFiles(assembliesFolderPath))
+        var assemblies = new SortedDictionary<int, SortedDictionary<string, AssemblyNameDefinition>>();
+
+        var folders = new Dictionary<int, string>();
+
+        var frameworkVersionRegEx = new Regex(@"^net(?<version>\d{2,3})$");
+        foreach (var directory in Directory.EnumerateDirectories(assembliesFolderPath))
+        {
+            var folderName = Path.GetFileName(directory);
+            var framework = frameworkVersionRegEx.Match(folderName).Groups["version"].Value;
+            if (framework == string.Empty)
+            {
+                Log.Error("Unexpected folder name: {0}, will not be processed", framework);
+                continue;
+            }
+            var frameworkVersion = int.Parse(framework);
+            if (frameworkVersion < 100)
+            {
+                frameworkVersion *= 10;
+            }
+
+            if (folders.TryGetValue(frameworkVersion, out var folder))
+            {
+                Log.Error("For {0}: already registered folder {1}, {2} will be skipped", frameworkVersion, folder, directory);
+                continue;
+            }
+            folders[frameworkVersion] = directory;
+            assemblies[frameworkVersion] = new SortedDictionary<string, AssemblyNameDefinition>();
+        }
+
+        void Process(string fileName, int? framework)
         {
             try
             {
@@ -17,15 +46,40 @@ public static class AssemblyRedirectionSourceGenerator
                 if (assemblyDef.Name == "netstandard")
                 {
                     // Skip netstandard, since it doesn't need redirection.
-                    continue;
+                    return;
                 }
 
-                assemblies[assemblyDef.Name] = assemblyDef;
-                Log.Debug("Adding {0} assembly to the redirection map. Targeted version {1}", assemblyDef.Name, assemblyDef.Version);
+
+                foreach (var keys in framework != null ? (IEnumerable<int>)[framework.Value] : assemblies.Keys)
+                {
+                    assemblies[keys][assemblyDef.Name] = assemblyDef;
+                    Log.Debug("Adding {0} assembly to the redirection map {1}. Targeted version {2}", assemblyDef.Name,
+                        keys, assemblyDef.Version);
+                }
             }
             catch (BadImageFormatException)
             {
                 Log.Debug("Skipping \"{0}\" couldn't open it as a managed assembly", fileName);
+            }
+        }
+
+        foreach (var fileName in Directory.EnumerateFiles(assembliesFolderPath))
+        {
+            Process(fileName, null);
+        }
+
+        foreach (var fx in folders)
+        {
+            foreach (var fileName in Directory.EnumerateFiles(fx.Value))
+            {
+                var filenameToProcess = fileName;
+                if (Path.GetExtension(fileName) == ".link")
+                {
+                    filenameToProcess = Path.Combine(assembliesFolderPath, File.ReadAllText(fileName),
+                        Path.GetFileNameWithoutExtension(fileName));
+                }
+
+                Process(filenameToProcess, fx.Key);
             }
         }
 
@@ -35,7 +89,7 @@ public static class AssemblyRedirectionSourceGenerator
         Log.Information("Assembly redirection source generated {0}", generatedFilePath);
     }
 
-    private static string GenerateSourceContents(SortedDictionary<string, AssemblyNameDefinition> assemblies)
+    private static string GenerateSourceContents(SortedDictionary<int, SortedDictionary<string, AssemblyNameDefinition>> assemblies)
     {
         #pragma warning disable format
         return
@@ -70,22 +124,26 @@ public static class AssemblyRedirectionSourceGenerator
         #pragma warning restore format
     }
 
-    private static string GenerateEntries(SortedDictionary<string, AssemblyNameDefinition> assemblies)
+    private static string GenerateEntries(SortedDictionary<int, SortedDictionary<string, AssemblyNameDefinition>> frameworks)
     {
-        var longLineLength = 80;
-        var sb = new StringBuilder(assemblies.Count * longLineLength);
+        var sb = new StringBuilder();
 
-        foreach (var kvp in assemblies)
+        foreach (var fx in frameworks)
         {
-            var v = kvp.Value.Version!;
-            if (kvp.Key != "OpenTelemetry.AutoInstrumentation")
+            sb.AppendLine($"        {{ {fx.Key}, {{");
+            foreach (var kvp in fx.Value)
             {
-                sb.AppendLine($"        {{ L\"{kvp.Key}\", {{{v.Major}, {v.Minor}, {v.Build}, {v.Revision}}} }},");
+                var v = kvp.Value.Version!;
+                if (kvp.Key != "OpenTelemetry.AutoInstrumentation")
+                {
+                    sb.AppendLine($"            {{ L\"{kvp.Key}\", {{{v.Major}, {v.Minor}, {v.Build}, {v.Revision}}} }},");
+                }
+                else
+                {
+                    sb.AppendLine($"            {{ L\"{kvp.Key}\", {{auto_major, 0, 0, 0}} }},");
+                }
             }
-            else
-            {
-                sb.AppendLine($"        {{ L\"{kvp.Key}\", {{auto_major, 0, 0, 0}} }},");
-            }
+            sb.AppendLine("        }},");
         }
 
         return sb.ToString()
