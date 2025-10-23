@@ -174,6 +174,7 @@ add_library("OpenTelemetry.AutoInstrumentation.Native.static" STATIC
         member_resolver.cpp
         metadata_builder.cpp
         miniutf.cpp
+        regex_utils.cpp
         string_utils.cpp
         util.cpp
         calltarget_tokens.cpp
