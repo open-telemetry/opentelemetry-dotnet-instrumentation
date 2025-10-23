@@ -12,8 +12,8 @@
 namespace trace
 {
 
-bool ExtractVersion(const WSTRING& str, unsigned short& major, unsigned short& minor,
-                    unsigned short& build, unsigned short& revision)
+bool ExtractVersion(
+    const WSTRING& str, unsigned short& major, unsigned short& minor, unsigned short& build, unsigned short& revision)
 {
     if (str.empty())
     {
@@ -22,27 +22,31 @@ bool ExtractVersion(const WSTRING& str, unsigned short& major, unsigned short& m
 
 #ifdef _WIN32
     static std::wregex re(WStr("Version=([0-9]+)\\.([0-9]+)\\.([0-9]+)\\.([0-9]+)"));
-    std::wsmatch match;
+    std::wsmatch       match;
 
     if (std::regex_search(str, match, re) && match.size() == 5)
     {
-        WSTRINGSTREAM ss1(match.str(1)); ss1 >> major;
-        WSTRINGSTREAM ss2(match.str(2)); ss2 >> minor;
-        WSTRINGSTREAM ss3(match.str(3)); ss3 >> build;
-        WSTRINGSTREAM ss4(match.str(4)); ss4 >> revision;
+        WSTRINGSTREAM ss1(match.str(1));
+        ss1 >> major;
+        WSTRINGSTREAM ss2(match.str(2));
+        ss2 >> minor;
+        WSTRINGSTREAM ss3(match.str(3));
+        ss3 >> build;
+        WSTRINGSTREAM ss4(match.str(4));
+        ss4 >> revision;
         return true;
     }
 #else
     // On Linux/MacOS, convert to narrow string for regex
-    std::string narrow_str = ToString(str);
+    std::string       narrow_str = ToString(str);
     static std::regex re("Version=([0-9]+)\\.([0-9]+)\\.([0-9]+)\\.([0-9]+)");
-    std::smatch match;
+    std::smatch       match;
 
     if (std::regex_search(narrow_str, match, re) && match.size() == 5)
     {
-        major = (unsigned short)std::stoi(match.str(1));
-        minor = (unsigned short)std::stoi(match.str(2));
-        build = (unsigned short)std::stoi(match.str(3));
+        major    = (unsigned short)std::stoi(match.str(1));
+        minor    = (unsigned short)std::stoi(match.str(2));
+        build    = (unsigned short)std::stoi(match.str(3));
         revision = (unsigned short)std::stoi(match.str(4));
         return true;
     }
@@ -60,7 +64,7 @@ WSTRING ExtractCulture(const WSTRING& str)
 
 #ifdef _WIN32
     static std::wregex re(WStr("Culture=([a-zA-Z0-9]+)"));
-    std::wsmatch match;
+    std::wsmatch       match;
 
     if (std::regex_search(str, match, re) && match.size() == 2)
     {
@@ -68,9 +72,9 @@ WSTRING ExtractCulture(const WSTRING& str)
     }
 #else
     // On Linux/MacOS, convert to narrow string for regex
-    std::string narrow_str = ToString(str);
+    std::string       narrow_str = ToString(str);
     static std::regex re("Culture=([a-zA-Z0-9]+)");
-    std::smatch match;
+    std::smatch       match;
 
     if (std::regex_search(narrow_str, match, re) && match.size() == 2)
     {
@@ -90,13 +94,13 @@ bool ExtractPublicKeyToken(const WSTRING& str, unsigned char* data)
 
 #ifdef _WIN32
     static std::wregex re(WStr("PublicKeyToken=([a-fA-F0-9]{16})"));
-    std::wsmatch match;
+    std::wsmatch       match;
 
     if (std::regex_search(str, match, re) && match.size() == 2)
     {
         for (int i = 0; i < 8; i++)
         {
-            auto s = match.str(1).substr(i * 2, 2);
+            auto          s = match.str(1).substr(i * 2, 2);
             unsigned long x;
             WSTRINGSTREAM ss(s);
             ss >> std::hex >> x;
@@ -106,16 +110,16 @@ bool ExtractPublicKeyToken(const WSTRING& str, unsigned char* data)
     }
 #else
     // On Linux/MacOS, convert to narrow string for regex
-    std::string narrow_str = ToString(str);
+    std::string       narrow_str = ToString(str);
     static std::regex re("PublicKeyToken=([a-fA-F0-9]{16})");
-    std::smatch match;
+    std::smatch       match;
 
     if (std::regex_search(narrow_str, match, re) && match.size() == 2)
     {
         for (int i = 0; i < 8; i++)
         {
-            auto s = match.str(1).substr(i * 2, 2);
-            unsigned long x;
+            auto              s = match.str(1).substr(i * 2, 2);
+            unsigned long     x;
             std::stringstream ss(s);
             ss >> std::hex >> x;
             data[i] = (unsigned char)x;
