@@ -124,7 +124,8 @@ To disable a resource detector, comment out or remove its corresponding entry.
 ``` yaml
 resource:
   # Configure resource attributes. Entries have higher priority than entries from .resource.attributes_list.
-  # Entries must contain .name and .value
+  # Entries must contain .name and .value, and may optionally include .type. If an entry's .type omitted or null, string is used.
+  # The .value's type must match the .type. Values for .type include: string, bool, int, double, string_array, bool_array, int_array, double_array.
   # By default service.name is generated automatically if not explicitly configured.
   # If the application is hosted on IIS in .NET Framework this will be SiteName\VirtualPath (e.g., MySite\MyApp).
   # Otherwise, it will use the name of the application entry Assembly.
@@ -132,6 +133,10 @@ resource:
   attributes:
     - name: service.name
       value: unknown_service
+      type: string
+    - name: attribute_key
+      value: ["value1", "value2", "value3"]
+      type: string_array
   # Alternatively, configure via a comma-separated list (same format as OTEL_RESOURCE_ATTRIBUTES).
   attributes_list: ${OTEL_RESOURCE_ATTRIBUTES}
   # Resource Detectors Configuration
