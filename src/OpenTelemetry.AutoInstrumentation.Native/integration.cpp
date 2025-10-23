@@ -3,11 +3,18 @@
 
 #include "integration.h"
 
-#ifdef _WIN32
-#include <regex>
-#else
-#include <re2/re2.h>
+// Undefine macros from PAL headers that conflict with <regex>
+#ifdef __pre
+#undef __pre
 #endif
+#ifdef __post
+#undef __post
+#endif
+#ifdef __inner
+#undef __inner
+#endif
+
+#include <regex>
 #include <sstream>
 
 #include <unordered_map>
@@ -135,10 +142,9 @@ Version GetVersionFromAssemblyReferenceString(const WSTRING& str)
     }
 
 #ifdef _WIN32
-
     static auto re = std::wregex(WStr("Version=([0-9]+)\\.([0-9]+)\\.([0-9]+)\\.([0-9]+)"));
-
     std::wsmatch match;
+
     if (std::regex_search(str, match, re) && match.size() == 5)
     {
         WSTRINGSTREAM(match.str(1)) >> major;
@@ -146,12 +152,19 @@ Version GetVersionFromAssemblyReferenceString(const WSTRING& str)
         WSTRINGSTREAM(match.str(3)) >> build;
         WSTRINGSTREAM(match.str(4)) >> revision;
     }
-
 #else
+    // On Linux/MacOS, convert to narrow string and use regular regex
+    static std::regex re("Version=([0-9]+)\\.([0-9]+)\\.([0-9]+)\\.([0-9]+)");
+    std::string narrow_str = ToString(str);
+    std::smatch match;
 
-    static re2::RE2 re("Version=([0-9]+)\\.([0-9]+)\\.([0-9]+)\\.([0-9]+)", RE2::Quiet);
-    re2::RE2::PartialMatch(ToString(str), re, &major, &minor, &build, &revision);
-
+    if (std::regex_search(narrow_str, match, re) && match.size() == 5)
+    {
+        major = (unsigned short)std::stoi(match.str(1));
+        minor = (unsigned short)std::stoi(match.str(2));
+        build = (unsigned short)std::stoi(match.str(3));
+        revision = (unsigned short)std::stoi(match.str(4));
+    }
 #endif
 
     return {major, minor, build, revision};
@@ -167,24 +180,23 @@ WSTRING GetLocaleFromAssemblyReferenceString(const WSTRING& str)
     }
 
 #ifdef _WIN32
-
     static auto  re = std::wregex(WStr("Culture=([a-zA-Z0-9]+)"));
     std::wsmatch match;
+
     if (std::regex_search(str, match, re) && match.size() == 2)
     {
         locale = match.str(1);
     }
-
 #else
+    // On Linux/MacOS, convert to narrow string and use regular regex
+    static std::regex re("Culture=([a-zA-Z0-9]+)");
+    std::string narrow_str = ToString(str);
+    std::smatch match;
 
-    static re2::RE2 re("Culture=([a-zA-Z0-9]+)", RE2::Quiet);
-
-    std::string match;
-    if (re2::RE2::PartialMatch(ToString(str), re, &match))
+    if (std::regex_search(narrow_str, match, re) && match.size() == 2)
     {
-        locale = ToWSTRING(match);
+        locale = ToWSTRING(match.str(1));
     }
-
 #endif
 
     return locale;
@@ -200,9 +212,9 @@ PublicKey GetPublicKeyFromAssemblyReferenceString(const WSTRING& str)
     }
 
 #ifdef _WIN32
-
     static auto  re = std::wregex(WStr("PublicKeyToken=([a-fA-F0-9]{16})"));
     std::wsmatch match;
+
     if (std::regex_search(str, match, re) && match.size() == 2)
     {
         for (int i = 0; i < 8; i++)
@@ -213,22 +225,22 @@ PublicKey GetPublicKeyFromAssemblyReferenceString(const WSTRING& str)
             data[i] = BYTE(x);
         }
     }
-
 #else
+    // On Linux/MacOS, convert to narrow string and use regular regex
+    static std::regex re("PublicKeyToken=([a-fA-F0-9]{16})");
+    std::string narrow_str = ToString(str);
+    std::smatch match;
 
-    static re2::RE2 re("PublicKeyToken=([a-fA-F0-9]{16})");
-    std::string     match;
-    if (re2::RE2::PartialMatch(ToString(str), re, &match))
+    if (std::regex_search(narrow_str, match, re) && match.size() == 2)
     {
         for (int i = 0; i < 8; i++)
         {
-            auto          s = match.substr(i * 2, 2);
+            auto s = match.str(1).substr(i * 2, 2);
             unsigned long x;
             std::stringstream(s) >> std::hex >> x;
             data[i] = BYTE(x);
         }
     }
-
 #endif
 
     return PublicKey(data);

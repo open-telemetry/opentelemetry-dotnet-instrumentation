@@ -7,11 +7,19 @@
 #include <corprof.h>
 #include <string>
 #include <typeinfo>
-#ifdef _WIN32
-#include <regex>
-#else
-#include <re2/re2.h>
+
+// Undefine macros from PAL headers that conflict with <regex>
+#ifdef __pre
+#undef __pre
 #endif
+#ifdef __post
+#undef __post
+#endif
+#ifdef __inner
+#undef __inner
+#endif
+
+#include <regex>
 
 #include "clr_helpers.h"
 #include "dllmain.h"
@@ -78,19 +86,11 @@ HRESULT STDMETHODCALLTYPE CorProfiler::Initialize(IUnknown* cor_profiler_info_un
 
         // Update the list also in SmokeTests.NativeLogsHaveNoSensitiveData
         const auto secrets_pattern = "(?:^|_)(API|TOKEN|SECRET|KEY|PASSWORD|PASS|PWD|HEADER|CREDENTIALS)(?:_|$)";
-#ifdef _WIN32
         const std::regex secrets_regex(secrets_pattern, std::regex_constants::ECMAScript | std::regex_constants::icase);
-#else
-        static re2::RE2 re(secrets_pattern, RE2::Quiet);
-#endif
 
         for (const auto& env_variable : env_variables)
         {
-#ifdef _WIN32
             if (!std::regex_search(ToString(env_variable), secrets_regex))
-#else
-            if (!re2::RE2::PartialMatch(ToString(env_variable), re))
-#endif
             {
                 Logger::Debug("  ", env_variable);
             }
