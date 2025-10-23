@@ -44,7 +44,7 @@ internal class BatchProcessorConfig
     /// Gets or sets the exporters.
     /// </summary>
     [YamlMember(Alias = "exporter")]
-    public ExporterConfig? Exporter { get; set; }
+    public BatchTracerExporterConfig? Exporter { get; set; }
 
     public void CopyTo(BatchExportProcessorOptions<Activity> options)
     {

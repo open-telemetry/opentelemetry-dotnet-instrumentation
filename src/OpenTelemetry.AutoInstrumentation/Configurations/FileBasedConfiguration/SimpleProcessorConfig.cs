@@ -8,5 +8,5 @@ namespace OpenTelemetry.AutoInstrumentation.Configurations.FileBasedConfiguratio
 internal class SimpleProcessorConfig
 {
     [YamlMember(Alias = "exporter")]
-    public ExporterConfig? Exporter { get; set; }
+    public SimpleTracerExporterConfig? Exporter { get; set; }
 }

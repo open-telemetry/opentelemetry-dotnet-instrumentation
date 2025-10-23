@@ -5,7 +5,7 @@ using Vendors.YamlDotNet.Serialization;
 
 namespace OpenTelemetry.AutoInstrumentation.Configurations.FileBasedConfiguration;
 
-internal class ExporterConfig
+internal class SimpleTracerExporterConfig
 {
     /// <summary>
     /// Gets or sets the OTLP HTTP exporter configuration.
@@ -24,12 +24,6 @@ internal class ExporterConfig
     /// </summary>
     [YamlMember(Alias = "zipkin")]
     public ZipkinExporterConfig? Zipkin { get; set; }
-
-    /// <summary>
-    /// Gets or sets the Prometheus exporter configuration.
-    /// </summary>
-    [YamlMember(Alias = "prometheus")]
-    public object? Prometheus { get; set; }
 
     /// <summary>
     /// Gets or sets the console exporter configuration.

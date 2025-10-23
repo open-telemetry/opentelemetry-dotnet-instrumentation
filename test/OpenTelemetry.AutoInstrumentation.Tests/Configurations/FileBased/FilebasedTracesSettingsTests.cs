@@ -12,7 +12,7 @@ public class FilebasedTracesSettingsTests
     [Fact]
     public void LoadFile_SetsBatchProcessorAndExportersCorrectly()
     {
-        var exporter1 = new ExporterConfig
+        var exporter1 = new BatchTracerExporterConfig
         {
             OtlpGrpc = new OtlpGrpcExporterConfig
             {
@@ -20,7 +20,7 @@ public class FilebasedTracesSettingsTests
             }
         };
 
-        var exporter2 = new ExporterConfig
+        var exporter2 = new BatchTracerExporterConfig
         {
             Zipkin = new ZipkinExporterConfig
             {
