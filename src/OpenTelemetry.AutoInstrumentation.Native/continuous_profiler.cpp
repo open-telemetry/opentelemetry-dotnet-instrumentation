@@ -977,8 +977,8 @@ static void RemoveOutdatedEntries(std::unordered_map<trace_context, long long>& 
         {
             trace::Logger::Warn("SelectiveSampling: removing outdated entry for trace {",
                                 "traceIdHigh: ", it->first.trace_id_high_, ", traceIdLow: ", it->first.trace_id_low_,
-                                "} because it was enqueued more than ",
-                                kSelectiveSamplingMaxAgeMinutes, " minutes ago");
+                                "} because it was enqueued more than ", kSelectiveSamplingMaxAgeMinutes,
+                                " minutes ago");
             it = selectiveSamplingTraceSet.erase(it);
         }
         else

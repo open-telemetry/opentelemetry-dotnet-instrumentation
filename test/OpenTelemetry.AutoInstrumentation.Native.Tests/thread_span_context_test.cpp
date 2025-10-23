@@ -49,8 +49,8 @@ TEST(ThreadSpanContextMapTest, GetThreadsForTrace)
     threadSpanContextMap.Put(1, context);
     threadSpanContextMap.Put(2, other_context);
 
-    std::unordered_set<unsigned long long>       buffer;
-    continuous_profiler::trace_context trace_context = {1 ,1};
+    std::unordered_set<unsigned long long> buffer;
+    continuous_profiler::trace_context     trace_context = {1 ,1};
     threadSpanContextMap.GetAllThreads(trace_context, buffer);
 
     ASSERT_EQ(buffer.size(), 2);
