@@ -9,6 +9,221 @@ namespace OpenTelemetry.AutoInstrumentation.Tests.Configurations.FileBased;
 
 public class FilebasedTracesSettingsTests
 {
+    public static TheoryData<SkipConfigurationTestCase> LoadMethod_SkipWrongExporterConfiguration_Data()
+    {
+        return
+        [
+            new(new YamlConfiguration
+            {
+                TracerProvider = new TracerProviderConfiguration
+                {
+                    Processors = []
+                }
+            }),
+            new(new YamlConfiguration
+            {
+                TracerProvider = new TracerProviderConfiguration
+                {
+                    Processors = [new ProcessorConfig()]
+                }
+            }),
+            new(new YamlConfiguration
+            {
+                TracerProvider = new TracerProviderConfiguration
+                {
+                    Processors =
+                    [
+                        new ProcessorConfig
+                        {
+                            Batch = new BatchProcessorConfig(),
+                            Simple = new SimpleProcessorConfig()
+                        }
+                    ]
+                }
+            }),
+            new(new YamlConfiguration
+            {
+                TracerProvider = new TracerProviderConfiguration
+                {
+                    Processors =
+                    [
+                        new ProcessorConfig
+                        {
+                            Batch = new BatchProcessorConfig
+                            {
+                                Exporter = new BatchTracerExporterConfig
+                                {
+                                    OtlpHttp = new OtlpHttpExporterConfig(),
+                                    OtlpGrpc = new OtlpGrpcExporterConfig(),
+                                }
+                            },
+                        }
+                    ]
+                }
+            }),
+            new(new YamlConfiguration
+            {
+                TracerProvider = new TracerProviderConfiguration
+                {
+                    Processors =
+                    [
+                        new ProcessorConfig
+                        {
+                            Batch = new BatchProcessorConfig
+                            {
+                                Exporter = new BatchTracerExporterConfig
+                                {
+                                    OtlpHttp = new OtlpHttpExporterConfig(),
+                                    Zipkin = new ZipkinExporterConfig()
+                                }
+                            },
+                        }
+                    ]
+                }
+            }),
+            new(new YamlConfiguration
+            {
+                TracerProvider = new TracerProviderConfiguration
+                {
+                    Processors =
+                    [
+                        new ProcessorConfig
+                        {
+                            Batch = new BatchProcessorConfig
+                            {
+                                Exporter = new BatchTracerExporterConfig
+                                {
+                                    OtlpGrpc = new OtlpGrpcExporterConfig(),
+                                    Zipkin = new ZipkinExporterConfig()
+                                }
+                            },
+                        }
+                    ]
+                }
+            }),
+            new(new YamlConfiguration
+            {
+                TracerProvider = new TracerProviderConfiguration
+                {
+                    Processors =
+                    [
+                        new ProcessorConfig
+                        {
+                            Simple = new SimpleProcessorConfig
+                            {
+                                Exporter = new SimpleTracerExporterConfig
+                                {
+                                    OtlpHttp = new OtlpHttpExporterConfig(),
+                                    OtlpGrpc = new OtlpGrpcExporterConfig()
+                                }
+                            },
+                        }
+                    ]
+                }
+            }),
+            new(new YamlConfiguration
+            {
+                TracerProvider = new TracerProviderConfiguration
+                {
+                    Processors =
+                    [
+                        new ProcessorConfig
+                        {
+                            Simple = new SimpleProcessorConfig
+                            {
+                                Exporter = new SimpleTracerExporterConfig
+                                {
+                                    OtlpHttp = new OtlpHttpExporterConfig(),
+                                    Zipkin = new ZipkinExporterConfig()
+                                }
+                            },
+                        }
+                    ]
+                }
+            }),
+            new(new YamlConfiguration
+            {
+                TracerProvider = new TracerProviderConfiguration
+                {
+                    Processors =
+                    [
+                        new ProcessorConfig
+                        {
+                            Simple = new SimpleProcessorConfig
+                            {
+                                Exporter = new SimpleTracerExporterConfig
+                                {
+                                    OtlpHttp = new OtlpHttpExporterConfig(),
+                                    Console = new object()
+                                }
+                            },
+                        }
+                    ]
+                }
+            }),
+            new(new YamlConfiguration
+            {
+                TracerProvider = new TracerProviderConfiguration
+                {
+                    Processors =
+                    [
+                        new ProcessorConfig
+                        {
+                            Simple = new SimpleProcessorConfig
+                            {
+                                Exporter = new SimpleTracerExporterConfig
+                                {
+                                    OtlpGrpc = new OtlpGrpcExporterConfig(),
+                                    Zipkin = new ZipkinExporterConfig()
+                                }
+                            },
+                        }
+                    ]
+                }
+            }),
+            new(new YamlConfiguration
+            {
+                TracerProvider = new TracerProviderConfiguration
+                {
+                    Processors =
+                    [
+                        new ProcessorConfig
+                        {
+                            Simple = new SimpleProcessorConfig
+                            {
+                                Exporter = new SimpleTracerExporterConfig
+                                {
+                                    OtlpGrpc = new OtlpGrpcExporterConfig(),
+                                    Console = new object()
+                                }
+                            },
+                        }
+                    ]
+                }
+            }),
+            new(new YamlConfiguration
+            {
+                TracerProvider = new TracerProviderConfiguration
+                {
+                    Processors =
+                    [
+                        new ProcessorConfig
+                        {
+                            Simple = new SimpleProcessorConfig
+                            {
+                                Exporter = new SimpleTracerExporterConfig
+                                {
+                                    Zipkin = new ZipkinExporterConfig(),
+                                    Console = new object()
+                                }
+                            },
+                        }
+                    ]
+                }
+            }),
+        ];
+    }
+
     [Fact]
     public void LoadFile_SetsBatchProcessorAndExportersCorrectly()
     {
@@ -121,5 +336,26 @@ public class FilebasedTracesSettingsTests
 
         Assert.True(settings.TracesEnabled);
         Assert.Empty(settings.TracesExporters);
+    }
+
+    [Theory]
+    [MemberData(nameof(LoadMethod_SkipWrongExporterConfiguration_Data))]
+    public void LoadMethod_SkipWrongExporterConfiguration(SkipConfigurationTestCase skipConfigurationTestCase)
+    {
+        var settings = new TracerSettings();
+
+        settings.LoadFile(skipConfigurationTestCase.Configuration);
+
+        Assert.Empty(settings.TracesExporters);
+    }
+
+    public class SkipConfigurationTestCase
+    {
+        internal SkipConfigurationTestCase(YamlConfiguration configuration)
+        {
+            Configuration = configuration;
+        }
+
+        internal YamlConfiguration Configuration { get; }
     }
 }

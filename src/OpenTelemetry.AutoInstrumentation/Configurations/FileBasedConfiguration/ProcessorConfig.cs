@@ -8,8 +8,8 @@ namespace OpenTelemetry.AutoInstrumentation.Configurations.FileBasedConfiguratio
 internal class ProcessorConfig
 {
     [YamlMember(Alias = "batch")]
-    public BatchProcessorConfig Batch { get; set; } = new();
+    public BatchProcessorConfig? Batch { get; set; }
 
     [YamlMember(Alias = "simple")]
-    public SimpleProcessorConfig Simple { get; set; } = new();
+    public SimpleProcessorConfig? Simple { get; set; }
 }
