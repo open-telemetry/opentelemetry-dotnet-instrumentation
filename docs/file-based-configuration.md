@@ -175,48 +175,48 @@ propagator:
 ## Instrumentation Configuration
 
 You can configure traces, metrics, and logs instrumentations.
-For more details and updates, see: [Instrumentation list and documentation](config.md#instrumentations)
+Each entry in the example list below is equivalent to setting the corresponding
+environment variable described in the [Instrumentation list and documentation](config.md#instrumentations).
 To disable a instrumentation, comment out or remove its corresponding entry.
 
 ``` yaml
 instrumentation/development:
   dotnet:
     traces:
-      aspnet:              # ASP.NET (.NET Framework) MVC/WebApi [Framework only]
-      aspnetcore:          # ASP.NET Core [Core only]
-      azure:               # Azure SDK [Core & Framework]
-      elasticsearch:       # Elastic.Clients.Elasticsearch [Core & Framework]
-      elastictransport:    # Elastic.Transport (>=0.4.16) [Core & Framework]
-      entityframeworkcore: # Entity Framework Core (>=6.0.12) [Core only]
-      graphql:             # GraphQL (>=7.5.0) [Core only]
-      grpcnetclient:       # Grpc.Net.Client (>=2.52.0 & <3.0.0) [Core & Framework]
-      httpclient:          # System.Net.Http.HttpClient [Core & Framework]
-      kafka:               # Confluent.Kafka (>=1.4.0 & <3.0.0) [Core & Framework]
-      masstransit:         # MassTransit (>=8.0.0) [Core only]
-      mongodb:             # MongoDB.Driver (>=2.7.0 <4.0.0) [Core & Framework]
-      mysqlconnector:      # MySqlConnector (>=2.0.0) [Core only]
-      mysqldata:           # MySql.Data (>=8.1.0) [Core only]
-      npgsql:              # Npgsql (>=6.0.0) [Core only]
-      nservicebus:         # NServiceBus (>=8.0.0 & <10.0.0) [Core & Framework]
-      oraclemda:           # Oracle.ManagedDataAccess (>=23.4.0) [Core only]
-      rabbitmq:            # RabbitMQ.Client (>=6.0.0) [Core & Framework]
-      quartz:              # Quartz (>=3.4.0, not supported < .NET Framework 4.7.2)
-      sqlclient:           # Microsoft.Data.SqlClient & System.Data.SqlClient [Core & Framework]
-      stackexchangeredis:  # StackExchange.Redis (>=2.6.122 & <3.0.0) [Core only]
-      wcfclient:           # WCF Client [Core & Framework]
-      wcfservice:          # WCF Service [Framework only]
+      aspnet:              # ASP.NET
+      aspnetcore:          # ASP.NET Core
+      azure:               # Azure SDK
+      elasticsearch:       # Elastic.Clients.Elasticsearch
+      elastictransport:    # Elastic.Transport
+      entityframeworkcore: # Entity Framework Core
+      graphql:             # GraphQL
+      grpcnetclient:       # Grpc.Net.Client
+      httpclient:          # System.Net.Http.HttpClient
+      kafka:               # Confluent.Kafka
+      masstransit:         # MassTransit
+      mongodb:             # MongoDB.Driver
+      mysqlconnector:      # MySqlConnector
+      mysqldata:           # MySql.Data
+      npgsql:              # Npgsql
+      nservicebus:         # NServiceBus
+      oraclemda:           # Oracle.ManagedDataAccess
+      rabbitmq:            # RabbitMQ.Client
+      quartz:              # Quartz
+      sqlclient:           # Microsoft.Data.SqlClient & System.Data.SqlClient
+      stackexchangeredis:  # StackExchange.Redis
+      wcfclient:           # WCF Client
+      wcfservice:          # WCF Service
     metrics:
-      aspnet:              # ASP.NET metrics [Framework only]
-      aspnetcore:          # ASP.NET Core metrics [Core only]
-      httpclient:          # HttpClient metrics [Core & Framework]
-      netruntime:          # .NET Runtime metrics [Core only]
-      nservicebus:         # NServiceBus metrics [Core & Framework]
-      process:             # Process metrics [Core & Framework]
-      sqlclient:           # SQL Client metrics [Core & Framework]
+      aspnet:              # ASP.NET metrics
+      aspnetcore:          # ASP.NET Core metrics
+      httpclient:          # HttpClient metrics
+      netruntime:          # .NET Runtime metrics
+      nservicebus:         # NServiceBus metrics
+      process:             # Process metrics
+      sqlclient:           # SQL Client metrics
     logs:
-      ilogger:             # Microsoft.Extensions.Logging (>=9.0.0) [Core & Framework]
-      log4net:             # log4net (>=2.0.13 && <4.0.0) [Core & Framework]
-```
+      ilogger:             # Microsoft.Extensions.Logging
+      log4net:             # Log4Net
 
 ## Instrumentation options
 
