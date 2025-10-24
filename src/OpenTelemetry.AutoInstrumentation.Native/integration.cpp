@@ -150,11 +150,11 @@ WSTRING GetLocaleFromAssemblyReferenceString(const WSTRING& str)
 
 PublicKey GetPublicKeyFromAssemblyReferenceString(const WSTRING& str)
 {
-    BYTE data[8] = {0};
+    BYTE data[kPublicKeySize] = {0};
 
     if (!str.empty())
     {
-        ExtractPublicKeyToken(str, data);
+        ExtractPublicKeyToken(str, data, kPublicKeySize);
     }
 
     return PublicKey(data);

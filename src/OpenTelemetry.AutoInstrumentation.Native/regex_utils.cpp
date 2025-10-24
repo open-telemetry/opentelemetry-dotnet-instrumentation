@@ -85,7 +85,7 @@ WSTRING ExtractCulture(const WSTRING& str)
     return WSTRING();
 }
 
-bool ExtractPublicKeyToken(const WSTRING& str, unsigned char* data)
+bool ExtractPublicKeyToken(const WSTRING& str, unsigned char* data, const int length)
 {
     if (str.empty() || data == nullptr)
     {
@@ -98,7 +98,7 @@ bool ExtractPublicKeyToken(const WSTRING& str, unsigned char* data)
 
     if (std::regex_search(str, match, re) && match.size() == 2)
     {
-        for (int i = 0; i < 8; i++)
+        for (int i = 0; i < length; i++)
         {
             auto          s = match.str(1).substr(i * 2, 2);
             unsigned long x;
@@ -116,7 +116,7 @@ bool ExtractPublicKeyToken(const WSTRING& str, unsigned char* data)
 
     if (std::regex_search(narrow_str, match, re) && match.size() == 2)
     {
-        for (int i = 0; i < 8; i++)
+        for (int i = 0; i < length; i++)
         {
             auto              s = match.str(1).substr(i * 2, 2);
             unsigned long     x;

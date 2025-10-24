@@ -38,7 +38,7 @@ WSTRING ExtractCulture(const WSTRING& str);
 
 // Extracts public key token from assembly reference string (e.g., "PublicKeyToken=abcd1234...")
 // Returns true if public key was found and parsed successfully
-bool ExtractPublicKeyToken(const WSTRING& str, unsigned char* data);
+bool ExtractPublicKeyToken(const WSTRING& str, unsigned char* data, const int length);
 
 // Checks if a string matches a secrets pattern (for filtering sensitive environment variables)
 // Works with narrow strings (UTF-8)
