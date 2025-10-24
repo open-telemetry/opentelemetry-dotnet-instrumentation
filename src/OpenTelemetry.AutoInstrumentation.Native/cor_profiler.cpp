@@ -7,11 +7,6 @@
 #include <corprof.h>
 #include <string>
 #include <typeinfo>
-#ifdef _WIN32
-#include <regex>
-#else
-#include <re2/re2.h>
-#endif
 
 #include "clr_helpers.h"
 #include "dllmain.h"
@@ -25,6 +20,7 @@
 #include "module_metadata.h"
 #include "otel_profiler_constants.h"
 #include "pal.h"
+#include "regex_utils.h"
 #include "resource.h"
 #include "signature_builder.h"
 #include "startup_hook.h"
@@ -77,20 +73,9 @@ HRESULT STDMETHODCALLTYPE CorProfiler::Initialize(IUnknown* cor_profiler_info_un
         Logger::Debug("Environment variables:");
 
         // Update the list also in SmokeTests.NativeLogsHaveNoSensitiveData
-        const auto secrets_pattern = "(?:^|_)(API|TOKEN|SECRET|KEY|PASSWORD|PASS|PWD|HEADER|CREDENTIALS)(?:_|$)";
-#ifdef _WIN32
-        const std::regex secrets_regex(secrets_pattern, std::regex_constants::ECMAScript | std::regex_constants::icase);
-#else
-        static re2::RE2 re(secrets_pattern, RE2::Quiet);
-#endif
-
         for (const auto& env_variable : env_variables)
         {
-#ifdef _WIN32
-            if (!std::regex_search(ToString(env_variable), secrets_regex))
-#else
-            if (!re2::RE2::PartialMatch(ToString(env_variable), re))
-#endif
+            if (!MatchesSecretsPattern(ToString(env_variable)))
             {
                 Logger::Debug("  ", env_variable);
             }
