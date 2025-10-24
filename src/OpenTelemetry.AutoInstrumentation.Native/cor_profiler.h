@@ -45,6 +45,7 @@ private:
 
     // Startup helper variables
     bool first_jit_compilation_completed = false;
+    bool startup_fix_required            = false;
 
     bool corlib_module_loaded = false;
     AppDomainID corlib_app_domain_id = 0;
@@ -110,7 +111,12 @@ private:
                                mdTypeDef*     loader_type,
                                mdMethodDef*   init_method,
                                mdMethodDef*   patch_app_domain_setup_method);
+    HRESULT GenerateHookFixup(const ModuleID module_id,
+                              mdTypeDef*     hook_fixup_type,
+                              mdMethodDef*   patch_startup_hook_method,
+                              const WSTRING& startup_hook_dll_name);
     HRESULT ModifyAppDomainCreate(const ModuleID module_id, mdMethodDef patch_app_domain_setup_method);
+    HRESULT ModifyProcessStartupHooks(const ModuleID module_id, mdMethodDef patch_startup_hook_method);
     HRESULT AddIISPreStartInitFlags(const ModuleID module_id, const mdToken function_token);
 #endif
 
