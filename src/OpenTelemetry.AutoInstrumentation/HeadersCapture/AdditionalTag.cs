@@ -34,4 +34,25 @@ internal class AdditionalTag
     {
         return new AdditionalTag(key, Constants.HttpSpanAttributes.AttributeHttpResponseHeaderPrefix);
     }
+
+    public override bool Equals(object? obj)
+    {
+        if (obj is AdditionalTag other)
+        {
+            return Key == other.Key && TagName == other.TagName;
+        }
+
+        return false;
+    }
+
+    public override int GetHashCode()
+    {
+        unchecked
+        {
+            var hash = 17;
+            hash = (hash * 23) + (Key != null ? Key.GetHashCode() : 0);
+            hash = (hash * 23) + (TagName != null ? TagName.GetHashCode() : 0);
+            return hash;
+        }
+    }
 }

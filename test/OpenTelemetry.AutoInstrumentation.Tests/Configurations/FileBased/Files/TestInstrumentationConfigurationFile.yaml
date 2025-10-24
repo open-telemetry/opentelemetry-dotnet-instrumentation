@@ -1,0 +1,23 @@
+instrumentation/development:
+  dotnet:
+    traces:
+      graphql:
+        set_document: true
+      oraclemda: 
+        set_db_statement_for_text: true
+      aspnet:
+        capture_request_headers: "X-Key,X-Custom-Header,X-Header-Example"
+        capture_response_headers: "X-Key,X-Custom-Header,X-Header-Example"
+      aspnetcore:
+        capture_request_headers: "X-Key,X-Custom-Header,X-Header-Example"
+        capture_response_headers: "X-Key,X-Custom-Header,X-Header-Example"
+      httpclient:
+        capture_request_headers: "X-Key,X-Custom-Header,X-Header-Example"
+        capture_response_headers: "X-Key,X-Custom-Header,X-Header-Example"
+      grpcnetclient:
+        capture_request_metadata: "X-Key,X-Custom-Header,X-Header-Example"
+        capture_response_metadata: "X-Key,X-Custom-Header,X-Header-Example"
+    logs:
+      log4net:
+        bridge_enabled: true
+
