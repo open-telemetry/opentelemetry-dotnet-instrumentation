@@ -1,9 +1,6 @@
 // Copyright The OpenTelemetry Authors
 // SPDX-License-Identifier: Apache-2.0
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using OpenTelemetry.AutoInstrumentation.Logging;
 using OpenTelemetry.Trace;
 
@@ -33,31 +30,26 @@ internal static class SamplerFactory
             return null;
         }
 
-        var configuredSamplers = new List<(string key, Sampler? sampler)>();
+        var configuredSamplers = new Dictionary<string, Sampler?>();
 
         if (samplerConfig.AlwaysOn != null)
         {
-            configuredSamplers.Add(("always_on", new AlwaysOnSampler()));
+            configuredSamplers.Add("always_on", new AlwaysOnSampler());
         }
 
         if (samplerConfig.AlwaysOff != null)
         {
-            configuredSamplers.Add(("always_off", new AlwaysOffSampler()));
+            configuredSamplers.Add("always_off", new AlwaysOffSampler());
         }
 
         if (samplerConfig.TraceIdRatio != null)
         {
-            configuredSamplers.Add(("trace_id_ratio", CreateTraceIdRatioSampler(samplerConfig.TraceIdRatio, failFast, path + ".trace_id_ratio")));
-        }
-
-        if (samplerConfig.TraceIdRatioLegacy != null)
-        {
-            configuredSamplers.Add(("traceidratio", CreateTraceIdRatioSampler(samplerConfig.TraceIdRatioLegacy, failFast, path + ".traceidratio")));
+            configuredSamplers.Add("trace_id_ratio", CreateTraceIdRatioSampler(samplerConfig.TraceIdRatio, failFast, path + ".trace_id_ratio"));
         }
 
         if (samplerConfig.ParentBased != null)
         {
-            configuredSamplers.Add(("parent_based", CreateParentBasedSampler(samplerConfig.ParentBased, failFast, path + ".parent_based")));
+            configuredSamplers.Add("parent_based", CreateParentBasedSampler(samplerConfig.ParentBased, failFast, path + ".parent_based"));
         }
 
         if (configuredSamplers.Count == 0)
@@ -75,7 +67,7 @@ internal static class SamplerFactory
 
         if (configuredSamplers.Count > 1)
         {
-            var configuredNames = string.Join(", ", configuredSamplers.Select(s => s.key));
+            var configuredNames = string.Join(", ", configuredSamplers.Keys);
             var message = $"Sampler configuration '{path}' specifies multiple sampler types ({configuredNames}). Only one sampler can be configured.";
             Logger.Error(message);
 
@@ -87,7 +79,7 @@ internal static class SamplerFactory
             return null;
         }
 
-        var configuredSampler = configuredSamplers[0].sampler;
+        var configuredSampler = configuredSamplers.Values.First();
         if (configuredSampler == null)
         {
             var message = $"Sampler configuration '{path}' is invalid.";

@@ -351,16 +351,6 @@ public class FilebasedTracesSettingsTests
         Assert.Empty(settings.TracesExporters);
     }
 
-    public class SkipConfigurationTestCase
-    {
-        internal SkipConfigurationTestCase(YamlConfiguration configuration)
-        {
-            Configuration = configuration;
-        }
-
-        internal YamlConfiguration Configuration { get; }
-    }
-
     [Fact]
     public void LoadFile_ConfiguresParentBasedSampler()
     {
@@ -368,11 +358,11 @@ public class FilebasedTracesSettingsTests
         {
             ParentBased = new ParentBasedSamplerConfig
             {
-                Root = new SamplerConfig { AlwaysOn = new AlwaysOnSamplerConfig() },
-                RemoteParentSampled = new SamplerConfig { AlwaysOn = new AlwaysOnSamplerConfig() },
-                RemoteParentNotSampled = new SamplerConfig { AlwaysOff = new AlwaysOffSamplerConfig() },
-                LocalParentSampled = new SamplerConfig { AlwaysOn = new AlwaysOnSamplerConfig() },
-                LocalParentNotSampled = new SamplerConfig { AlwaysOff = new AlwaysOffSamplerConfig() }
+                Root = new SamplerConfig { AlwaysOn = new object() },
+                RemoteParentSampled = new SamplerConfig { AlwaysOn = new object() },
+                RemoteParentNotSampled = new SamplerConfig { AlwaysOff = new object() },
+                LocalParentSampled = new SamplerConfig { AlwaysOn = new object() },
+                LocalParentNotSampled = new SamplerConfig { AlwaysOff = new object() }
             }
         };
 
@@ -407,6 +397,16 @@ public class FilebasedTracesSettingsTests
 
     private static SamplingParameters CreateSamplingParameters(ActivityContext parentContext)
     {
-        return new SamplingParameters(parentContext, ActivityTraceId.CreateRandom(), "span", ActivityKind.Internal, new TagList(), new ActivityLink[] { });
+        return new SamplingParameters(parentContext, ActivityTraceId.CreateRandom(), "span", ActivityKind.Internal, default(TagList), new ActivityLink[] { });
+    }
+
+    public class SkipConfigurationTestCase
+    {
+        internal SkipConfigurationTestCase(YamlConfiguration configuration)
+        {
+            Configuration = configuration;
+        }
+
+        internal YamlConfiguration Configuration { get; }
     }
 }
