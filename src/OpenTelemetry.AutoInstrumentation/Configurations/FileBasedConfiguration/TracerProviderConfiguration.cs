@@ -9,4 +9,7 @@ internal class TracerProviderConfiguration
 {
     [YamlMember(Alias = "processors")]
     public List<ProcessorConfig> Processors { get; set; } = new();
+
+    [YamlMember(Alias = "sampler")]
+    public SamplerConfig? Sampler { get; set; }
 }

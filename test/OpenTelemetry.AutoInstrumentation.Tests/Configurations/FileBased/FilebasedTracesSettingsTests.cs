@@ -1,8 +1,10 @@
 // Copyright The OpenTelemetry Authors
 // SPDX-License-Identifier: Apache-2.0
 
+using System.Diagnostics;
 using OpenTelemetry.AutoInstrumentation.Configurations;
 using OpenTelemetry.AutoInstrumentation.Configurations.FileBasedConfiguration;
+using OpenTelemetry.Trace;
 using Xunit;
 
 namespace OpenTelemetry.AutoInstrumentation.Tests.Configurations.FileBased;
@@ -357,5 +359,54 @@ public class FilebasedTracesSettingsTests
         }
 
         internal YamlConfiguration Configuration { get; }
+    }
+
+    [Fact]
+    public void LoadFile_ConfiguresParentBasedSampler()
+    {
+        var samplerConfig = new SamplerConfig
+        {
+            ParentBased = new ParentBasedSamplerConfig
+            {
+                Root = new SamplerConfig { AlwaysOn = new AlwaysOnSamplerConfig() },
+                RemoteParentSampled = new SamplerConfig { AlwaysOn = new AlwaysOnSamplerConfig() },
+                RemoteParentNotSampled = new SamplerConfig { AlwaysOff = new AlwaysOffSamplerConfig() },
+                LocalParentSampled = new SamplerConfig { AlwaysOn = new AlwaysOnSamplerConfig() },
+                LocalParentNotSampled = new SamplerConfig { AlwaysOff = new AlwaysOffSamplerConfig() }
+            }
+        };
+
+        var conf = new YamlConfiguration
+        {
+            TracerProvider = new TracerProviderConfiguration
+            {
+                Sampler = samplerConfig
+            }
+        };
+
+        var settings = new TracerSettings();
+
+        settings.LoadFile(conf);
+
+        var sampler = Assert.IsType<ParentBasedSampler>(settings.Sampler);
+
+        Assert.Equal(SamplingDecision.RecordAndSample, sampler.ShouldSample(CreateSamplingParameters(default)).Decision);
+
+        var remoteSampledParent = new ActivityContext(ActivityTraceId.CreateRandom(), ActivitySpanId.CreateRandom(), ActivityTraceFlags.Recorded, traceState: null, isRemote: true);
+        Assert.Equal(SamplingDecision.RecordAndSample, sampler.ShouldSample(CreateSamplingParameters(remoteSampledParent)).Decision);
+
+        var remoteNotSampledParent = new ActivityContext(ActivityTraceId.CreateRandom(), ActivitySpanId.CreateRandom(), ActivityTraceFlags.None, traceState: null, isRemote: true);
+        Assert.Equal(SamplingDecision.Drop, sampler.ShouldSample(CreateSamplingParameters(remoteNotSampledParent)).Decision);
+
+        var localSampledParent = new ActivityContext(ActivityTraceId.CreateRandom(), ActivitySpanId.CreateRandom(), ActivityTraceFlags.Recorded, traceState: null, isRemote: false);
+        Assert.Equal(SamplingDecision.RecordAndSample, sampler.ShouldSample(CreateSamplingParameters(localSampledParent)).Decision);
+
+        var localNotSampledParent = new ActivityContext(ActivityTraceId.CreateRandom(), ActivitySpanId.CreateRandom(), ActivityTraceFlags.None, traceState: null, isRemote: false);
+        Assert.Equal(SamplingDecision.Drop, sampler.ShouldSample(CreateSamplingParameters(localNotSampledParent)).Decision);
+    }
+
+    private static SamplingParameters CreateSamplingParameters(ActivityContext parentContext)
+    {
+        return new SamplingParameters(parentContext, ActivityTraceId.CreateRandom(), "span", ActivityKind.Internal, new TagList(), new ActivityLink[] { });
     }
 }
