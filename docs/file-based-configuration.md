@@ -217,6 +217,7 @@ instrumentation/development:
     logs:
       ilogger:             # Microsoft.Extensions.Logging
       log4net:             # Log4Net
+```
 
 ## Instrumentation options
 
