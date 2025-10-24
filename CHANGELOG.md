@@ -10,7 +10,6 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 ### Added
 
 - Configuration based instrumentation.
-- Add support for configuring tracer sampler via file-based configuration.
 
 ### Changed
 
