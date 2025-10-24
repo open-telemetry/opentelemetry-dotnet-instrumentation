@@ -19,7 +19,6 @@ internal class InstrumentationOptions
 #if NET
         AspNetCoreInstrumentationCaptureRequestHeaders = configuration.ParseHeaders(ConfigurationKeys.Traces.InstrumentationOptions.AspNetCoreInstrumentationCaptureRequestHeaders, AdditionalTag.CreateHttpRequestCache);
         AspNetCoreInstrumentationCaptureResponseHeaders = configuration.ParseHeaders(ConfigurationKeys.Traces.InstrumentationOptions.AspNetCoreInstrumentationCaptureResponseHeaders, AdditionalTag.CreateHttpResponseCache);
-        EntityFrameworkCoreSetDbStatementForText = configuration.GetBool(ConfigurationKeys.Traces.InstrumentationOptions.EntityFrameworkCoreSetDbStatementForText) ?? false;
         GraphQLSetDocument = configuration.GetBool(ConfigurationKeys.Traces.InstrumentationOptions.GraphQLSetDocument) ?? false;
 #endif
 
@@ -52,11 +51,6 @@ internal class InstrumentationOptions
     /// Gets the list of HTTP response headers to be captured as the span tags by ASP.NET Core instrumentation.
     /// </summary>
     public IReadOnlyList<AdditionalTag> AspNetCoreInstrumentationCaptureResponseHeaders { get; }
-
-    /// <summary>
-    /// Gets a value indicating whether text query in Entity Framework Core can be passed as a db.statement tag.
-    /// </summary>
-    public bool EntityFrameworkCoreSetDbStatementForText { get; }
 
     /// <summary>
     /// Gets a value indicating whether GraphQL query can be passed as a Document tag.
