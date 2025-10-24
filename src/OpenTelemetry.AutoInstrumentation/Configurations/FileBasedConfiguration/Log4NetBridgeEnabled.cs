@@ -12,6 +12,6 @@ internal class Log4NetBridgeEnabled
     /// <summary>
     /// Gets or sets a value indicating whether the Log4Net bridge is enabled.
     /// </summary>
-    [YamlMember(Alias = "bridge_enbaled")]
+    [YamlMember(Alias = "bridge_enabled")]
     public bool BridgeEnabled { get; set; }
 }
