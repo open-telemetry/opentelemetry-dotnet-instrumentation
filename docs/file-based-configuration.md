@@ -232,11 +232,6 @@ instrumentation/development:
         # Whether the Oracle Client instrumentation can pass SQL statements through the db.statement attribute. Queries might contain sensitive information. If set to false, db.statement is recorded only for executing stored procedures.
         # Default is false
         set_db_statement_for_text: false
-      sqlclient:
-        # Whether the SQL Client instrumentation can pass SQL statements through the db.statement attribute. Queries might contain sensitive information. If set to false, db.statement is recorded only for executing stored procedures. 
-        # Not supported on .NET Framework for System.Data.SqlClient.
-        # Default is false
-        set_db_statement_for_text: false
       aspnet:
         # A comma-separated list of HTTP header names. ASP.NET instrumentations will capture HTTP request header values for all configured header names.
         capture_request_headers: "X-Key,X-Custom-Header,X-Header-Example"
