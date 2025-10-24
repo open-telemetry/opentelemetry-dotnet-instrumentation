@@ -1,6 +1,8 @@
 // Copyright The OpenTelemetry Authors
 // SPDX-License-Identifier: Apache-2.0
 
+using System;
+using OpenTelemetry.AutoInstrumentation.Configurations.FileBasedConfiguration;
 using OpenTelemetry.AutoInstrumentation.Configurations.Otlp;
 using OpenTelemetry.AutoInstrumentation.Logging;
 
@@ -43,6 +45,11 @@ internal class LogSettings : Settings
     /// </summary>
     public OtlpSettings? OtlpSettings { get; private set; }
 
+    /// <summary>
+    /// Gets the processors configured via file-based configuration.
+    /// </summary>
+    public IReadOnlyList<LogProcessorConfig>? Processors { get; private set; }
+
     protected override void OnLoadEnvVar(Configuration configuration)
     {
         LogsEnabled = configuration.GetBool(ConfigurationKeys.Logs.LogsEnabled) ?? true;
@@ -52,6 +59,7 @@ internal class LogSettings : Settings
             OtlpSettings = new OtlpSettings(OtlpSignalType.Logs, configuration);
         }
 
+        Processors = null;
         IncludeFormattedMessage = configuration.GetBool(ConfigurationKeys.Logs.IncludeFormattedMessage) ?? false;
         EnableLog4NetBridge = configuration.GetBool(ConfigurationKeys.Logs.EnableLog4NetBridge) ?? false;
 
@@ -62,6 +70,16 @@ internal class LogSettings : Settings
         EnabledInstrumentations = configuration.ParseEnabledEnumList<LogInstrumentation>(
             enabledByDefault: instrumentationEnabledByDefault,
             enabledConfigurationTemplate: ConfigurationKeys.Logs.EnabledLogsInstrumentationTemplate);
+    }
+
+    protected override void OnLoadFile(YamlConfiguration configuration)
+    {
+        var processors = configuration.LoggerProvider?.Processors;
+
+        LogsEnabled = processors != null && processors.Count > 0;
+        LogExporters = Array.Empty<LogExporter>();
+        OtlpSettings = null;
+        Processors = processors;
     }
 
     private static IReadOnlyList<LogExporter> ParseLogExporter(Configuration configuration)
