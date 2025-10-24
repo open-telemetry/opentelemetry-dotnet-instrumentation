@@ -59,6 +59,12 @@ public abstract class TestHelper
         SetEnvironmentVariable("OTEL_EXPORTER_OTLP_ENDPOINT", $"http://localhost:{collector.Port}");
     }
 
+    public void SetFileBasedExporter(MockSpansCollector collector)
+    {
+        SetEnvironmentVariable("OTEL_TRACES_EXPORTER", "otlp");
+        SetEnvironmentVariable("OTEL_EXPORTER_OTLP_ENDPOINT", $"http://localhost:{collector.Port}/v1/traces");
+    }
+
     public void SetExporter(MockMetricsCollector collector)
     {
         SetEnvironmentVariable("OTEL_METRICS_EXPORTER", "otlp");

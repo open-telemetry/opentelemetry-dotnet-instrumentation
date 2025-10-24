@@ -16,7 +16,8 @@
         "DOTNET_STARTUP_HOOKS": "$(SolutionDir)bin\\tracer-home\\net\\OpenTelemetry.AutoInstrumentation.StartupHook.dll",
         "OTEL_DOTNET_AUTO_HOME": "$(SolutionDir)bin\\tracer-home",
         "OTEL_TRACES_EXPORTER": "otlp,console",
-        "OTEL_LOG_LEVEL": "debug"
+        "OTEL_LOG_LEVEL": "debug",
+        "OTEL_EXPERIMENTAL_FILE_BASED_CONFIGURATION_ENABLED": "true"
       }
     }
   }
