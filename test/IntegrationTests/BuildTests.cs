@@ -6,7 +6,6 @@ using IntegrationTests.Helpers;
 
 namespace IntegrationTests;
 
-[UsesVerify]
 public class BuildTests
 {
     [Fact]

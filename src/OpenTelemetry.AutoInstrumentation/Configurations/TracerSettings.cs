@@ -26,23 +26,25 @@ internal class TracerSettings : Settings
 
     /// <summary>
     /// Gets the list of enabled traces exporters.
+    /// For File based configuration, this must be empty,
+    /// and the configuration will be handled by Processors.
     /// </summary>
-    public IReadOnlyList<TracesExporter> TracesExporters { get; private set; } = new List<TracesExporter>();
+    public IReadOnlyList<TracesExporter> TracesExporters { get; private set; } = [];
 
     /// <summary>
     /// Gets the list of enabled instrumentations.
     /// </summary>
-    public IReadOnlyList<TracerInstrumentation> EnabledInstrumentations { get; private set; } = new List<TracerInstrumentation>();
+    public IReadOnlyList<TracerInstrumentation> EnabledInstrumentations { get; private set; } = [];
 
     /// <summary>
     /// Gets the list of activity configurations to be added to the tracer at the startup.
     /// </summary>
-    public IList<string> ActivitySources { get; } = new List<string> { "OpenTelemetry.AutoInstrumentation.*" };
+    public IList<string> ActivitySources { get; } = ["OpenTelemetry.AutoInstrumentation.*"];
 
     /// <summary>
     /// Gets the list of legacy configurations to be added to the tracer at the startup.
     /// </summary>
-    public IList<string> AdditionalLegacySources { get; } = new List<string>();
+    public IList<string> AdditionalLegacySources { get; } = [];
 
     /// <summary>
     /// Gets the instrumentation options.
@@ -53,6 +55,13 @@ internal class TracerSettings : Settings
     /// Gets tracing OTLP Settings.
     /// </summary>
     public OtlpSettings? OtlpSettings { get; private set; }
+
+    /// <summary>
+    /// Gets tracing OTLP Settings.
+    /// For environment variable configuration, this must be null,
+    /// and the configuration will be handled by TracesExporters
+    /// </summary>
+    public IReadOnlyList<ProcessorConfig>? Processors { get; private set; } = null;
 
     protected override void OnLoadEnvVar(Configuration configuration)
     {
@@ -96,12 +105,20 @@ internal class TracerSettings : Settings
 
     protected override void OnLoadFile(YamlConfiguration configuration)
     {
+        var processors = configuration.TracerProvider?.Processors;
+        if (processors != null && processors.Count > 0)
+        {
+            TracesEnabled = true;
+        }
+
+        Processors = processors;
+
         EnabledInstrumentations = configuration.InstrumentationDevelopment?.DotNet?.Traces?.GetEnabledInstrumentations() ?? [];
 
         InstrumentationOptions = new InstrumentationOptions(configuration.InstrumentationDevelopment?.DotNet?.Traces);
     }
 
-    private static IReadOnlyList<TracesExporter> ParseTracesExporter(Configuration configuration)
+    private static List<TracesExporter> ParseTracesExporter(Configuration configuration)
     {
         var tracesExporterEnvVar = configuration.GetString(ConfigurationKeys.Traces.Exporter);
         var exporters = new List<TracesExporter>();

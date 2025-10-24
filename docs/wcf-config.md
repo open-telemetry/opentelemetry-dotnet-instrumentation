@@ -23,4 +23,4 @@ folder.
 ## References
 
 * [OpenTelemetry Project](https://opentelemetry.io/)
-* [OpenTelemetry Contrib WCF docs](https://github.com/open-telemetry/opentelemetry-dotnet-contrib/blob/Instrumentation.Wcf-1.0.0-rc.12/src/OpenTelemetry.Instrumentation.Wcf/README.md)
+* [OpenTelemetry Contrib WCF docs](https://github.com/open-telemetry/opentelemetry-dotnet-contrib/blob/Instrumentation.Wcf-1.13.0-beta.2/src/OpenTelemetry.Instrumentation.Wcf/README.md)

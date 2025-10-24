@@ -1,0 +1,9 @@
+file_format: "1.0-rc.1"
+
+propagator:
+  composite:
+    tracecontext:
+    baggage:
+    b3:
+    b3multi:
+

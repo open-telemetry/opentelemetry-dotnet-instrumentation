@@ -13,7 +13,7 @@ internal class EntityFrameworkCoreInitializer : InstrumentationInitializer
     private readonly TracerSettings _tracerSettings;
 
     public EntityFrameworkCoreInitializer(PluginManager pluginManager, TracerSettings tracerSettings)
-        : base("Microsoft.EntityFrameworkCore")
+        : base("Microsoft.EntityFrameworkCore", nameof(EntityFrameworkCoreInitializer))
     {
         _pluginManager = pluginManager;
         _tracerSettings = tracerSettings;
@@ -23,10 +23,7 @@ internal class EntityFrameworkCoreInitializer : InstrumentationInitializer
     {
         var instrumentationType = Type.GetType("OpenTelemetry.Instrumentation.EntityFrameworkCore.EntityFrameworkInstrumentation, OpenTelemetry.Instrumentation.EntityFrameworkCore")!;
 
-        var options = new OpenTelemetry.Instrumentation.EntityFrameworkCore.EntityFrameworkInstrumentationOptions
-        {
-            SetDbStatementForText = _tracerSettings.InstrumentationOptions.EntityFrameworkCoreSetDbStatementForText
-        };
+        var options = new OpenTelemetry.Instrumentation.EntityFrameworkCore.EntityFrameworkInstrumentationOptions();
 
         _pluginManager.ConfigureTracesOptions(options);
 

@@ -16,8 +16,8 @@ jobs:
         uses: actions/setup-dotnet@d4c94342e560b34958eacfc5d055d21461ed1c5d # tag: v5.0.0
         with:
           dotnet-version: | 
-            8.0.414
-            9.0.305
+            8.0.415
+            9.0.306
             
       - name: Test the PowerShell module instructions from README.md
         shell: powershell
@@ -56,7 +56,7 @@ jobs:
             log-dir: "/c/ProgramData/OpenTelemetry .NET AutoInstrumentation/logs"
           - machine: ubuntu-22.04
             log-dir: "/var/log/opentelemetry/dotnet"
-          - machine: macos-13
+          - machine: macos-14
             log-dir: "/var/log/opentelemetry/dotnet"
           - machine: ubuntu-22.04-arm
             log-dir: "/var/log/opentelemetry/dotnet"
@@ -67,8 +67,8 @@ jobs:
         uses: actions/setup-dotnet@d4c94342e560b34958eacfc5d055d21461ed1c5d # tag: v5.0.0
         with:
           dotnet-version: | 
-            8.0.414
-            9.0.305
+            8.0.415
+            9.0.306
 
       - name: Install MacOS CoreUtils
         if: ${{ runner.os == 'macOS' }}

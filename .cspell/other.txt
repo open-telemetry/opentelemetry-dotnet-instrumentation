@@ -49,6 +49,7 @@ OPERATINGSYSTEM
 ORACLEMDA
 OTEL_DOTNET_AUTO_FLUSH_ON_UNHANDLEDEXCEPTION
 OWIN
+parameterless
 pipefail
 portfile
 PROCESSRUNTIME
@@ -57,10 +58,11 @@ protobuf
 protos
 RABBITMQ
 Serilog
+Sonoma
 spdlog
-srcs
 SQLCLIENT
 sqlserver
+srcs
 STACKEXCHANGEREDIS
 TMPDIR
 tracesexporter
