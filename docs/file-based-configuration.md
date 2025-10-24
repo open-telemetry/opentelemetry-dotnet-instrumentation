@@ -224,10 +224,6 @@ instrumentation/development:
 instrumentation/development:
   dotnet:
     traces:
-      entityframeworkcore:
-        # Whether the Entity Framework Core instrumentation can pass SQL statements through the db.statement attribute. Queries might contain sensitive information. If set to false, db.statement is recorded only for executing stored procedures.
-        # Default is false
-        set_db_statement_for_text: false
       graphql:
         # Whether the GraphQL instrumentation can pass raw queries through the graphql.document attribute. Queries might contain sensitive information.
         # Default is false

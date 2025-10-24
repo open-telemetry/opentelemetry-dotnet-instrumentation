@@ -1,8 +1,6 @@
 instrumentation/development:
   dotnet:
     traces:
-      entityframeworkcore:
-        set_db_statement_for_text: true
       graphql:
         set_document: true
       oraclemda: 

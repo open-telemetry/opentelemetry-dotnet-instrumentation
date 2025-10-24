@@ -48,11 +48,6 @@ internal class InstrumentationOptions
                 AspNetCoreInstrumentationCaptureResponseHeaders = HeaderConfigurationExtensions.ParseHeaders(instrumentationConfiguration.AspNetCore.CaptureResponseHeaders, AdditionalTag.CreateHttpResponseCache);
             }
 
-            if (instrumentationConfiguration.EntityFrameworkCore != null)
-            {
-                EntityFrameworkCoreSetDbStatementForText = instrumentationConfiguration.EntityFrameworkCore.SetDbStatementForText;
-            }
-
             if (instrumentationConfiguration.GraphQL != null)
             {
                 GraphQLSetDocument = instrumentationConfiguration.GraphQL.SetDocument;

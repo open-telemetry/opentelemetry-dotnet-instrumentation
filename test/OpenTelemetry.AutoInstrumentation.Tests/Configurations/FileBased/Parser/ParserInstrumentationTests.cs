@@ -88,7 +88,7 @@ public class ParserInstrumentationTests
 
 #if NET
         string[] expectedTraces = [
-                    "aspnetcore", "entityframeworkcore", "graphql", "grpcnetclient", "httpclient", "oraclemda"
+                    "aspnetcore", "graphql", "grpcnetclient", "httpclient", "oraclemda"
                 ];
 #endif
 #if NETFRAMEWORK
@@ -117,7 +117,6 @@ public class ParserInstrumentationTests
         Assert.Equal("X-Key,X-Custom-Header,X-Header-Example", traces.GrpcNetClient!.CaptureResponseMetadata);
 #if NET
         Assert.True(traces.GraphQL!.SetDocument);
-        Assert.True(traces.EntityFrameworkCore!.SetDbStatementForText);
 
         Assert.Equal("X-Key,X-Custom-Header,X-Header-Example", traces.AspNetCore!.CaptureRequestHeaders);
         Assert.Equal("X-Key,X-Custom-Header,X-Header-Example", traces.AspNetCore!.CaptureResponseHeaders);

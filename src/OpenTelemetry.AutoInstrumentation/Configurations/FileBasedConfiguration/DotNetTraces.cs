@@ -39,7 +39,7 @@ internal class DotNetTraces
     /// Gets or sets the Entity Framework Core traces instrumentation configuration.
     /// </summary>
     [YamlMember(Alias = "entityframeworkcore")]
-    public SetDbStatementForTextConfuguration? EntityFrameworkCore { get; set; }
+    public object? EntityFrameworkCore { get; set; }
 
     /// <summary>
     /// Gets or sets the GraphQL traces instrumentation configuration.
