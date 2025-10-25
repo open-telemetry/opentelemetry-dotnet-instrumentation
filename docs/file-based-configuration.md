@@ -56,7 +56,7 @@ tracer_provider:
   processors:
     # Batch processor for OTLP HTTP
     - batch:
-      # Configure delay interval (in milliseconds) between two consecutive exports. 
+      # Configure delay interval (in milliseconds) between two consecutive exports.
       # Value must be non-negative.
       # If omitted or null, 5000 is used.
       schedule_delay: 5000
@@ -110,6 +110,36 @@ tracer_provider:
     - simple:
         exporter:
           console:
+
+  # Configure the sampler. If omitted, parent based sampler with a root of always_on is used.
+  sampler:
+    # Configure sampler to be parent_based.
+    parent_based:
+      # Configure root sampler.
+      # If omitted or null, always_on is used.
+      root:
+        # Configure sampler to be always_on.
+        always_on:
+      # Configure remote_parent_sampled sampler.
+      # If omitted or null, always_on is used.
+      remote_parent_sampled:
+        # Configure sampler to be always_on.
+        always_on:
+      # Configure remote_parent_not_sampled sampler.
+      # If omitted or null, always_off is used.
+      remote_parent_not_sampled:
+        # Configure sampler to be always_off.
+        always_off:
+      # Configure local_parent_sampled sampler.
+      # If omitted or null, always_on is used.
+      local_parent_sampled:
+        # Configure sampler to be always_on.
+        always_on:
+      # Configure local_parent_not_sampled sampler.
+      # If omitted or null, always_off is used.
+      local_parent_not_sampled:
+        # Configure sampler to be always_off.
+        always_off:
 ```
 
 ### Resource Configuration
