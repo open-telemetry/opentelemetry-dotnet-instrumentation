@@ -112,6 +112,79 @@ tracer_provider:
           console:
 ```
 
+### Logger Provider Configuration
+
+``` yaml
+logger_provider:
+  processors:
+    # Batch processor for OTLP HTTP
+    - batch:
+        # Configure delay interval (in milliseconds) between two consecutive exports.
+        # Value must be non-negative.
+        # If omitted or null, 5000 is used.
+        schedule_delay: 5000
+        # Configure maximum allowed time (in milliseconds) to export data.
+        # Value must be non-negative. A value of 0 indicates no limit (infinity).
+        # If omitted or null, 30000 is used.
+        export_timeout: 30000
+        # Configure maximum queue size. Value must be positive.
+        # If omitted or null, 2048 is used.
+        max_queue_size: 2048
+        # Configure maximum batch size. Value must be positive.
+        # If omitted or null, 512 is used.
+        max_export_batch_size: 512
+        # Configure exporter.
+        exporter:
+          # Configure the OTLP with HTTP transport exporter to enable it.
+          otlp_http:
+            # Configure endpoint, including the logs specific path.
+            # If omitted or null, http://localhost:4318/v1/logs is used.
+            endpoint: http://localhost:4318/v1/logs
+            # Configure headers. Entries have higher priority than entries from .headers_list.
+            # If an entry's .value is null, the entry is ignored.
+            headers:
+              - name: api-key
+                value: "1234"
+            # Configure headers. Entries have lower priority than entries from .headers.
+            # The value is a list of comma separated key-value pairs matching the format of OTEL_EXPORTER_OTLP_HEADERS.
+            # If omitted or null, no headers are added.
+            headers_list: api-key=1234
+            # Configure compression.
+            # Values include: gzip, none. Implementations may support other compression algorithms.
+            # If omitted or null, none is used.
+            compression: gzip
+            # Configure max time (in milliseconds) to wait for each export.
+            # Value must be non-negative. A value of 0 indicates no limit (infinity).
+            # If omitted or null, 10000 is used.
+            timeout: 10000
+
+    # Batch processor for OTLP gRPC
+    - batch:
+        exporter:
+          otlp_grpc:
+            # Configure endpoint.
+            # If omitted or null, http://localhost:4317 is used.
+            endpoint: http://localhost:4317
+            # Configure headers. Entries have higher priority than entries from .headers_list.
+            # If an entry's .value is null, the entry is ignored.
+            headers:
+              - name: api-key
+                value: "1234"
+            # Configure headers. Entries have lower priority than entries from .headers.
+            # The value is a list of comma separated key-value pairs matching the format of OTEL_EXPORTER_OTLP_HEADERS.
+            # If omitted or null, no headers are added.
+            headers_list: api-key=1234
+            # Configure max time (in milliseconds) to wait for each export.
+            # Value must be non-negative. A value of 0 indicates no limit (infinity).
+            # If omitted or null, 10000 is used.
+            timeout: 10000
+
+    # Simple processor for Console
+    - simple:
+        exporter:
+          console:
+```
+
 ### Resource Configuration
 
 You can configure resource attributes directly in YAML or via the
