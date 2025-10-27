@@ -23,7 +23,7 @@ internal class LogSettings : Settings
     /// <summary>
     /// Gets the list of enabled logs exporters.
     /// </summary>
-    public IReadOnlyList<LogExporter> LogExporters { get; private set; } = new List<LogExporter>();
+    public IReadOnlyList<LogExporter> LogExporters { get; private set; } = [];
 
     /// <summary>
     /// Gets a value indicating whether the IncludeFormattedMessage is enabled.
@@ -38,7 +38,7 @@ internal class LogSettings : Settings
     /// <summary>
     /// Gets the list of enabled instrumentations.
     /// </summary>
-    public IReadOnlyList<LogInstrumentation> EnabledInstrumentations { get; private set; } = new List<LogInstrumentation>();
+    public IReadOnlyList<LogInstrumentation> EnabledInstrumentations { get; private set; } = [];
 
     /// <summary>
     /// Gets logs OTLP Settings.
@@ -59,7 +59,6 @@ internal class LogSettings : Settings
             OtlpSettings = new OtlpSettings(OtlpSignalType.Logs, configuration);
         }
 
-        Processors = null;
         IncludeFormattedMessage = configuration.GetBool(ConfigurationKeys.Logs.IncludeFormattedMessage) ?? false;
         EnableLog4NetBridge = configuration.GetBool(ConfigurationKeys.Logs.EnableLog4NetBridge) ?? false;
 
@@ -77,12 +76,10 @@ internal class LogSettings : Settings
         var processors = configuration.LoggerProvider?.Processors;
 
         LogsEnabled = processors != null && processors.Count > 0;
-        LogExporters = Array.Empty<LogExporter>();
-        OtlpSettings = null;
         Processors = processors;
     }
 
-    private static IReadOnlyList<LogExporter> ParseLogExporter(Configuration configuration)
+    private static List<LogExporter> ParseLogExporter(Configuration configuration)
     {
         var logExporterEnvVar = configuration.GetString(ConfigurationKeys.Logs.Exporter);
         var exporters = new List<LogExporter>();
