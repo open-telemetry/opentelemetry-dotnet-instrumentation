@@ -47,6 +47,9 @@ fail_fast: false
 # Configure if the Flush On Unhandled Exception is enabled or not.
 # If omitted or null, false is used.
 flush_on_unhandled_exception: false
+# Configure if the  Logs Include Formatted Message is enabled or not.
+# If omitted or null, false is used.
+logs_include_formatted_message: false
 ```
 
 ### Tracer Provider Configuration
