@@ -39,4 +39,26 @@ internal class OtlpGrpcExporterConfig
     /// </summary>
     [YamlMember(Alias = "timeout")]
     public int? Timeout { get; set; } = 10000;
+
+    /// <summary>
+    /// Gets or sets the TLS configuration for the exporter.
+    /// </summary>
+    [YamlMember(Alias = "tls")]
+    public TlsConfig? Tls { get; set; }
+
+    /// <summary>
+    /// Gets or sets the compression for the exporter.
+    /// Values include: gzip, none. Implementations may support other compression algorithms.
+    /// If omitted or null, none is used.
+    /// </summary>
+    [YamlMember(Alias = "compression")]
+    public string? Compression { get; set; }
+
+    /// <summary>
+    /// Gets or sets the temporality preference for the exporter.
+    /// Values include: cumulative, delta, low_memory.
+    /// If omitted or null, cumulative is used.
+    /// </summary>
+    [YamlMember(Alias = "temporality_preference")]
+    public string? TemporalityPreference { get; set; }
 }

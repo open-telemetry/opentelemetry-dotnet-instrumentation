@@ -1,6 +1,8 @@
 // Copyright The OpenTelemetry Authors
 // SPDX-License-Identifier: Apache-2.0
 
+using System;
+using OpenTelemetry.AutoInstrumentation.Configurations.FileBasedConfiguration;
 using OpenTelemetry.AutoInstrumentation.Configurations.Otlp;
 using OpenTelemetry.AutoInstrumentation.Logging;
 
@@ -38,6 +40,13 @@ internal class MetricSettings : Settings
     /// </summary>
     public OtlpSettings? OtlpSettings { get; private set; }
 
+    /// <summary>
+    /// Gets the configured metric readers from the file-based configuration.
+    /// For environment variable configuration, this must be null,
+    /// and the configuration will be handled by MetricExporters.
+    /// </summary>
+    public IReadOnlyList<MetricReaderConfig>? Readers { get; private set; }
+
     protected override void OnLoadEnvVar(Configuration configuration)
     {
         MetricExporters = ParseMetricExporter(configuration);
@@ -64,6 +73,18 @@ internal class MetricSettings : Settings
         }
 
         MetricsEnabled = configuration.GetBool(ConfigurationKeys.Metrics.MetricsEnabled) ?? true;
+    }
+
+    protected override void OnLoadFile(YamlConfiguration configuration)
+    {
+        var readers = configuration.MeterProvider?.Readers;
+        if (readers != null && readers.Count > 0)
+        {
+            MetricsEnabled = true;
+        }
+
+        Readers = readers;
+        MetricExporters = Array.Empty<MetricsExporter>();
     }
 
     private static IReadOnlyList<MetricsExporter> ParseMetricExporter(Configuration configuration)

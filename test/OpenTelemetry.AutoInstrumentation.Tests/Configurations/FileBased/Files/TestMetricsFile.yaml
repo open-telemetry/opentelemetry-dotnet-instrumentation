@@ -1,0 +1,30 @@
+meter_provider:
+  readers:
+    - periodic:
+        interval: 45000
+        timeout: 15000
+        exporter:
+          otlp_http:
+            endpoint: http://localhost:4318/v1/metrics
+            timeout: 10000
+            compression: gzip
+            temporality_preference: cumulative
+            tls:
+              certificate_file: /path/to/certificate.pem
+              client_key_file: /path/to/client.key
+              client_certificate_file: /path/to/client.crt
+    - periodic:
+        exporter:
+          otlp_grpc:
+            endpoint: http://localhost:4317
+            timeout: 8000
+            temporality_preference: delta
+    - periodic:
+        exporter:
+          console:
+            temporality_preference: low_memory
+    - pull:
+        exporter:
+          prometheus:
+            host: 0.0.0.0
+            port: 9464
