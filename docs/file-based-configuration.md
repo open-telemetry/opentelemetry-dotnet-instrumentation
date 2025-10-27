@@ -112,6 +112,76 @@ tracer_provider:
           console:
 ```
 
+### Meter Provider Configuration
+
+``` yaml
+meter_provider:
+  readers:
+    - periodic:
+        # Configure delay interval (in milliseconds) between start of two consecutive exports.
+        # Value must be non-negative.
+        # If omitted or null, 60000 is used.
+        interval: 60000
+        # Configure maximum allowed time (in milliseconds) to export data.
+        # Value must be non-negative. A value of 0 indicates no limit (infinity).
+        # If omitted or null, 30000 is used.
+        timeout: 30000
+        # Configure exporter.
+        exporter:
+          # Configure exporter to be OTLP with HTTP transport.
+          otlp_http:
+            # Configure endpoint, including the metric specific path.
+            # If omitted or null, http://localhost:4318/v1/metrics is used.
+            endpoint: http://localhost:4318/v1/metrics
+            # Configure TLS settings for the exporter.
+            tls:
+              # Configure certificate used to verify a server's TLS credentials.
+              certificate_file: /path/to/ca.pem
+              # Configure mTLS private client key.
+              client_key_file: /path/to/client.key
+              # Configure mTLS client certificate.
+              client_certificate_file: /path/to/client.crt
+            # Configure compression.
+            # Values include: gzip, none. Implementations may support other compression algorithms.
+            # If omitted or null, none is used.
+            compression: gzip
+            # Configure max time (in milliseconds) to wait for each export.
+            # Value must be non-negative. A value of 0 indicates no limit (infinity).
+            # If omitted or null, 10000 is used.
+            timeout: 10000
+            # Configure temporality preference.
+            # Values include: cumulative, delta, low_memory.
+            # If omitted or null, cumulative is used.
+            temporality_preference: cumulative
+
+    - periodic:
+        # Configure exporter.
+        exporter:
+          # Configure exporter to be OTLP with gRPC transport.
+          otlp_grpc:
+            # Configure endpoint.
+            # If omitted or null, http://localhost:4317 is used.
+            endpoint: http://localhost:4317
+            # Configure temporality preference.
+            temporality_preference: delta
+
+    - periodic:
+        # Configure exporter.
+        exporter:
+          # Configure exporter to be console.
+          console:
+            temporality_preference: low_memory
+
+    - # Configure a pull based metric reader.
+      pull:
+        # Configure exporter.
+        exporter:
+          # Configure exporter to be Prometheus.
+          prometheus:
+            host: 0.0.0.0
+            port: 9464
+```
+
 ### Resource Configuration
 
 You can configure resource attributes directly in YAML or via the
