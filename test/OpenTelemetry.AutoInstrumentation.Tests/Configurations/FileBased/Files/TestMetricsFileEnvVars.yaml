@@ -10,4 +10,4 @@ meter_provider:
             headers_list: ${OTEL_EXPORTER_OTLP_METRICS_HEADERS}
     - periodic:
         exporter:
-          console: {}
+          console:

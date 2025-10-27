@@ -23,17 +23,17 @@ internal class MetricSettings : Settings
     /// <summary>
     /// Gets the list of enabled metrics exporters.
     /// </summary>
-    public IReadOnlyList<MetricsExporter> MetricExporters { get; private set; } = new List<MetricsExporter>();
+    public IReadOnlyList<MetricsExporter> MetricExporters { get; private set; } = [];
 
     /// <summary>
     /// Gets the list of enabled meters.
     /// </summary>
-    public IReadOnlyList<MetricInstrumentation> EnabledInstrumentations { get; private set; } = new List<MetricInstrumentation>();
+    public IReadOnlyList<MetricInstrumentation> EnabledInstrumentations { get; private set; } = [];
 
     /// <summary>
     /// Gets the list of meters to be added to the MeterProvider at the startup.
     /// </summary>
-    public IList<string> Meters { get; } = new List<string>();
+    public IList<string> Meters { get; } = [];
 
     /// <summary>
     /// Gets metrics OTLP Settings.
@@ -78,16 +78,11 @@ internal class MetricSettings : Settings
     protected override void OnLoadFile(YamlConfiguration configuration)
     {
         var readers = configuration.MeterProvider?.Readers;
-        if (readers != null && readers.Count > 0)
-        {
-            MetricsEnabled = true;
-        }
-
+        MetricsEnabled = readers != null && readers.Count > 0;
         Readers = readers;
-        MetricExporters = Array.Empty<MetricsExporter>();
     }
 
-    private static IReadOnlyList<MetricsExporter> ParseMetricExporter(Configuration configuration)
+    private static List<MetricsExporter> ParseMetricExporter(Configuration configuration)
     {
         var metricsExporterEnvVar = configuration.GetString(ConfigurationKeys.Metrics.Exporter);
         var exporters = new List<MetricsExporter>();

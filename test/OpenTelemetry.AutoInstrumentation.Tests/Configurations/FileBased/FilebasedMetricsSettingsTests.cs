@@ -18,7 +18,7 @@ public class FilebasedMetricsSettingsTests
             {
                 Interval = 1000,
                 Timeout = 2000,
-                Exporter = new MetricExporterConfig
+                Exporter = new MetricPeriodicExporterConfig
                 {
                     OtlpHttp = new OtlpHttpExporterConfig
                     {
@@ -56,13 +56,9 @@ public class FilebasedMetricsSettingsTests
         {
             Pull = new PullMetricReaderConfig
             {
-                Exporter = new MetricExporterConfig
+                Exporter = new MetricPullExporterConfig
                 {
-                    Prometheus = new PrometheusExporterConfig
-                    {
-                        Host = "127.0.0.1",
-                        Port = 9464
-                    }
+                    Prometheus = new object()
                 }
             }
         };

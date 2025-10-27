@@ -5,11 +5,11 @@ using Vendors.YamlDotNet.Serialization;
 
 namespace OpenTelemetry.AutoInstrumentation.Configurations.FileBasedConfiguration;
 
-internal class PullMetricReaderConfig
+internal class MetricPullExporterConfig
 {
     /// <summary>
-    /// Gets or sets the exporter configuration.
+    /// Gets or sets the Prometheus exporter configuration.
     /// </summary>
-    [YamlMember(Alias = "exporter")]
-    public MetricPullExporterConfig? Exporter { get; set; }
+    [YamlMember(Alias = "prometheus")]
+    public object? Prometheus { get; set; }
 }

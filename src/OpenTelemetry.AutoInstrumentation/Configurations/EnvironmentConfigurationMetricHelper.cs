@@ -65,40 +65,96 @@ internal static class EnvironmentConfigurationMetricHelper
 
     private static MeterProviderBuilder SetExporter(this MeterProviderBuilder builder, MetricSettings settings, PluginManager pluginManager)
     {
+        // If no exporters are specified, it means to use processors (file-based configuration).
         if (settings.MetricExporters.Count == 0)
         {
             if (settings.Readers != null)
             {
                 foreach (var reader in settings.Readers)
                 {
+                    if (reader.Periodic != null && reader.Pull != null)
+                    {
+                        Logger.Debug("Both periodic and pull metric readers are configured. It is not supported. Skipping.");
+                        continue;
+                    }
+
+                    if (reader.Periodic == null && reader.Pull == null)
+                    {
+                        Logger.Debug("No valid metric reader configured, skipping.");
+                        continue;
+                    }
+
                     if (reader.Periodic != null)
                     {
-                        builder = Wrappers.AddPeriodicReader(builder, pluginManager, reader.Periodic);
+                        var exporter = reader.Periodic.Exporter;
+                        if (exporter == null)
+                        {
+                            Logger.Debug("No exporter section for periodic metric reader. Skipping.");
+                            continue;
+                        }
+
+                        var exportersCount = 0;
+                        if (exporter.OtlpHttp != null)
+                        {
+                            exportersCount++;
+                        }
+
+                        if (exporter.OtlpGrpc != null)
+                        {
+                            exportersCount++;
+                        }
+
+                        if (exporter.Console != null)
+                        {
+                            exportersCount++;
+                        }
+
+                        switch (exportersCount)
+                        {
+                            case 0:
+                                Logger.Debug("No valid exporter configured for periodic metric reader. Skipping.");
+                                continue;
+                            case > 1:
+                                Logger.Debug("Multiple exporters are configured for periodic metric reader. Only one exporter is supported. Skipping.");
+                                continue;
+                        }
+
+                        if (exporter.OtlpHttp != null)
+                        {
+                            builder = Wrappers.AddOtlpHttpExporter(builder, pluginManager, reader.Periodic, exporter.OtlpHttp);
+                        }
+                        else if (exporter.OtlpGrpc != null)
+                        {
+                            builder = Wrappers.AddOtlpGrpcExporter(builder, pluginManager, reader.Periodic, exporter.OtlpGrpc);
+                        }
+                        else if (exporter.Console != null)
+                        {
+                            builder = Wrappers.AddConsoleExporter(builder, pluginManager);
+                        }
+
                         continue;
                     }
 
                     if (reader.Pull != null)
                     {
-                        builder = Wrappers.AddPullReader(builder, pluginManager, reader.Pull);
+                        builder = Wrappers.AddPrometheusHttpListener(builder, pluginManager);
                         continue;
                     }
-
-                    Logger.Debug("No valid metric reader configured, skipping.");
                 }
             }
-
-            return builder;
         }
-
-        foreach (var metricExporter in settings.MetricExporters)
+        else
         {
-            builder = metricExporter switch
+            foreach (var metricExporter in settings.MetricExporters)
             {
-                MetricsExporter.Prometheus => Wrappers.AddPrometheusHttpListener(builder, pluginManager),
-                MetricsExporter.Otlp => Wrappers.AddOtlpExporter(builder, settings, pluginManager),
-                MetricsExporter.Console => Wrappers.AddConsoleExporter(builder, pluginManager),
-                _ => throw new ArgumentOutOfRangeException($"Metrics exporter '{metricExporter}' is incorrect")
-            };
+                builder = metricExporter switch
+                {
+                    MetricsExporter.Prometheus => Wrappers.AddPrometheusHttpListener(builder, pluginManager),
+                    MetricsExporter.Otlp => Wrappers.AddOtlpExporter(builder, settings, pluginManager),
+                    MetricsExporter.Console => Wrappers.AddConsoleExporter(builder, pluginManager),
+                    _ => throw new ArgumentOutOfRangeException($"Metrics exporter '{metricExporter}' is incorrect")
+                };
+            }
         }
 
         return builder;
@@ -110,128 +166,6 @@ internal static class EnvironmentConfigurationMetricHelper
     /// </summary>
     private static class Wrappers
     {
-        [MethodImpl(MethodImplOptions.NoInlining)]
-        public static MeterProviderBuilder AddPeriodicReader(
-            MeterProviderBuilder builder,
-            PluginManager pluginManager,
-            PeriodicMetricReaderConfig readerConfig)
-        {
-            var exporter = readerConfig.Exporter;
-            if (exporter == null)
-            {
-                Logger.Debug("No exporter configured for periodic metric reader. Skipping.");
-                return builder;
-            }
-
-            var exportersCount = 0;
-
-            if (exporter.OtlpHttp != null)
-            {
-                exportersCount++;
-            }
-
-            if (exporter.OtlpGrpc != null)
-            {
-                exportersCount++;
-            }
-
-            if (exporter.Console != null)
-            {
-                exportersCount++;
-            }
-
-            if (exporter.Prometheus != null)
-            {
-                exportersCount++;
-            }
-
-            switch (exportersCount)
-            {
-                case 0:
-                    Logger.Debug("No valid exporter configured for periodic metric reader. Skipping.");
-                    return builder;
-                case > 1:
-                    Logger.Debug("Multiple exporters are configured for periodic metric reader. Only one exporter is supported. Skipping.");
-                    return builder;
-            }
-
-            if (exporter.OtlpHttp != null)
-            {
-                return AddOtlpHttpExporter(builder, pluginManager, readerConfig, exporter.OtlpHttp);
-            }
-
-            if (exporter.OtlpGrpc != null)
-            {
-                return AddOtlpGrpcExporter(builder, pluginManager, readerConfig, exporter.OtlpGrpc);
-            }
-
-            if (exporter.Console != null)
-            {
-                return AddConsoleExporter(builder, pluginManager, readerConfig, exporter.Console);
-            }
-
-            if (exporter.Prometheus != null)
-            {
-                return AddPrometheusHttpListener(builder, pluginManager, exporter.Prometheus);
-            }
-
-            return builder;
-        }
-
-        [MethodImpl(MethodImplOptions.NoInlining)]
-        public static MeterProviderBuilder AddPullReader(
-            MeterProviderBuilder builder,
-            PluginManager pluginManager,
-            PullMetricReaderConfig readerConfig)
-        {
-            var exporter = readerConfig.Exporter;
-            if (exporter == null)
-            {
-                Logger.Debug("No exporter configured for pull metric reader. Skipping.");
-                return builder;
-            }
-
-            var exportersCount = 0;
-
-            if (exporter.OtlpHttp != null)
-            {
-                exportersCount++;
-            }
-
-            if (exporter.OtlpGrpc != null)
-            {
-                exportersCount++;
-            }
-
-            if (exporter.Console != null)
-            {
-                exportersCount++;
-            }
-
-            if (exporter.Prometheus != null)
-            {
-                exportersCount++;
-            }
-
-            switch (exportersCount)
-            {
-                case 0:
-                    Logger.Debug("No valid exporter configured for pull metric reader. Skipping.");
-                    return builder;
-                case > 1:
-                    Logger.Debug("Multiple exporters are configured for pull metric reader. Only one exporter is supported. Skipping.");
-                    return builder;
-            }
-
-            if (exporter.Prometheus != null)
-            {
-                return AddPrometheusHttpListener(builder, pluginManager, exporter.Prometheus);
-            }
-
-            Logger.Debug("Only the Prometheus exporter is supported for pull metric reader. Skipping.");
-            return builder;
-        }
-
         // Meters
 #if NETFRAMEWORK
         [MethodImpl(MethodImplOptions.NoInlining)]
@@ -278,16 +212,12 @@ internal static class EnvironmentConfigurationMetricHelper
         // Exporters
 
         [MethodImpl(MethodImplOptions.NoInlining)]
-        public static MeterProviderBuilder AddConsoleExporter(
-            MeterProviderBuilder builder,
-            PluginManager pluginManager,
-            PeriodicMetricReaderConfig readerConfig,
-            ConsoleMetricExporterConfig consoleExporter)
+        public static MeterProviderBuilder AddConsoleExporter(MeterProviderBuilder builder, PluginManager pluginManager, PeriodicMetricReaderConfig readerConfig)
         {
             return builder.AddConsoleExporter((consoleExporterOptions, metricReaderOptions) =>
             {
+                readerConfig.CopyTo(metricReaderOptions.PeriodicExportingMetricReaderOptions);
                 pluginManager.ConfigureMetricsOptions(consoleExporterOptions);
-                ConfigureMetricReaderOptions(metricReaderOptions, readerConfig, consoleExporter.TemporalityPreference);
                 pluginManager.ConfigureMetricsOptions(metricReaderOptions);
             });
         }
@@ -311,30 +241,6 @@ internal static class EnvironmentConfigurationMetricHelper
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]
-        public static MeterProviderBuilder AddPrometheusHttpListener(
-            MeterProviderBuilder builder,
-            PluginManager pluginManager,
-            PrometheusExporterConfig prometheusExporter)
-        {
-            Logger.Warning("Prometheus exporter is configured. It is intended for the inner dev loop. Do NOT use in production");
-
-            return builder.AddPrometheusHttpListener(options =>
-            {
-                if (!string.IsNullOrWhiteSpace(prometheusExporter.Host))
-                {
-                    options.Host = prometheusExporter.Host;
-                }
-
-                if (prometheusExporter.Port.HasValue)
-                {
-                    options.Port = prometheusExporter.Port.Value;
-                }
-
-                pluginManager.ConfigureMetricsOptions(options);
-            });
-        }
-
-        [MethodImpl(MethodImplOptions.NoInlining)]
         public static MeterProviderBuilder AddOtlpExporter(MeterProviderBuilder builder, MetricSettings settings, PluginManager pluginManager)
         {
             return builder.AddOtlpExporter((options, metricReaderOptions) =>
@@ -348,79 +254,33 @@ internal static class EnvironmentConfigurationMetricHelper
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]
-        public static MeterProviderBuilder AddOtlpHttpExporter(
-            MeterProviderBuilder builder,
-            PluginManager pluginManager,
-            PeriodicMetricReaderConfig readerConfig,
-            OtlpHttpExporterConfig otlpHttp)
+        public static MeterProviderBuilder AddOtlpHttpExporter(MeterProviderBuilder builder, PluginManager pluginManager, PeriodicMetricReaderConfig readerConfig, OtlpHttpExporterConfig otlpHttp)
         {
+            var otlpSettings = new OtlpSettings(OtlpSignalType.Metrics, otlpHttp);
             return builder.AddOtlpExporter((options, metricReaderOptions) =>
             {
-                var otlpSettings = new OtlpSettings(OtlpSignalType.Metrics, otlpHttp);
                 otlpSettings.CopyTo(options);
+                readerConfig.CopyTo(metricReaderOptions.PeriodicExportingMetricReaderOptions);
+                metricReaderOptions.TemporalityPreference = otlpHttp.GetTemporalityPreference();
 
                 pluginManager.ConfigureMetricsOptions(options);
-                ConfigureMetricReaderOptions(metricReaderOptions, readerConfig, otlpHttp.TemporalityPreference);
                 pluginManager.ConfigureMetricsOptions(metricReaderOptions);
             });
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]
-        public static MeterProviderBuilder AddOtlpGrpcExporter(
-            MeterProviderBuilder builder,
-            PluginManager pluginManager,
-            PeriodicMetricReaderConfig readerConfig,
-            OtlpGrpcExporterConfig otlpGrpc)
+        public static MeterProviderBuilder AddOtlpGrpcExporter(MeterProviderBuilder builder, PluginManager pluginManager, PeriodicMetricReaderConfig readerConfig, OtlpGrpcExporterConfig otlpGrpc)
         {
+            var otlpSettings = new OtlpSettings(otlpGrpc);
             return builder.AddOtlpExporter((options, metricReaderOptions) =>
             {
-                var otlpSettings = new OtlpSettings(otlpGrpc);
                 otlpSettings.CopyTo(options);
+                readerConfig.CopyTo(metricReaderOptions.PeriodicExportingMetricReaderOptions);
+                metricReaderOptions.TemporalityPreference = otlpGrpc.GetTemporalityPreference();
 
                 pluginManager.ConfigureMetricsOptions(options);
-                ConfigureMetricReaderOptions(metricReaderOptions, readerConfig, otlpGrpc.TemporalityPreference);
                 pluginManager.ConfigureMetricsOptions(metricReaderOptions);
             });
         }
-    }
-
-    private static void ConfigureMetricReaderOptions(
-        MetricReaderOptions metricReaderOptions,
-        PeriodicMetricReaderConfig readerConfig,
-        string? temporalityPreference)
-    {
-        metricReaderOptions.MetricReaderType = MetricReaderType.PeriodicExportingMetricReader;
-        metricReaderOptions.PeriodicExportingMetricReaderOptions.ExportIntervalMilliseconds = readerConfig.Interval;
-        metricReaderOptions.PeriodicExportingMetricReaderOptions.ExportTimeoutMilliseconds = readerConfig.Timeout;
-
-        if (TryParseTemporalityPreference(temporalityPreference, out var temporality))
-        {
-            metricReaderOptions.TemporalityPreference = temporality;
-        }
-    }
-
-    private static bool TryParseTemporalityPreference(string? value, out MetricReaderTemporalityPreference temporalityPreference)
-    {
-        if (!string.IsNullOrWhiteSpace(value))
-        {
-            switch (value.Trim().ToLowerInvariant())
-            {
-                case "cumulative":
-                    temporalityPreference = MetricReaderTemporalityPreference.Cumulative;
-                    return true;
-                case "delta":
-                    temporalityPreference = MetricReaderTemporalityPreference.Delta;
-                    return true;
-                case "low_memory":
-                    temporalityPreference = MetricReaderTemporalityPreference.LowMemory;
-                    return true;
-                default:
-                    Logger.Debug($"Unknown temporality preference '{value}'. Skipping.");
-                    break;
-            }
-        }
-
-        temporalityPreference = default;
-        return false;
     }
 }

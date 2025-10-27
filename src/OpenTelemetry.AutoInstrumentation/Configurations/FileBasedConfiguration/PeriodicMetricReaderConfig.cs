@@ -1,6 +1,8 @@
 // Copyright The OpenTelemetry Authors
 // SPDX-License-Identifier: Apache-2.0
 
+using System.Diagnostics;
+using OpenTelemetry.Metrics;
 using Vendors.YamlDotNet.Serialization;
 
 namespace OpenTelemetry.AutoInstrumentation.Configurations.FileBasedConfiguration;
@@ -27,5 +29,11 @@ internal class PeriodicMetricReaderConfig
     /// Gets or sets the exporter configuration.
     /// </summary>
     [YamlMember(Alias = "exporter")]
-    public MetricExporterConfig? Exporter { get; set; }
+    public MetricPeriodicExporterConfig? Exporter { get; set; }
+
+    public void CopyTo(PeriodicExportingMetricReaderOptions options)
+    {
+        options.ExportIntervalMilliseconds = Interval;
+        options.ExportTimeoutMilliseconds = Timeout;
+    }
 }
