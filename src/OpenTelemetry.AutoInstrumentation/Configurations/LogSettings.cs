@@ -77,6 +77,7 @@ internal class LogSettings : Settings
 
         LogsEnabled = processors != null && processors.Count > 0;
         Processors = processors;
+        IncludeFormattedMessage = configuration.LogsIncludeFormattedMessage;
     }
 
     private static List<LogExporter> ParseLogExporter(Configuration configuration)

@@ -130,4 +130,19 @@ public class FilebasedLogsSettingsTests
         Assert.Single(settings.Processors);
         Assert.Empty(settings.LogExporters);
     }
+
+    [Fact]
+    public void LoadFile_LogsIncludeFormatedMessage()
+    {
+        var conf = new YamlConfiguration
+        {
+            LogsIncludeFormattedMessage = true,
+        };
+
+        var settings = new LogSettings();
+
+        settings.LoadFile(conf);
+
+        Assert.True(settings.IncludeFormattedMessage);
+    }
 }

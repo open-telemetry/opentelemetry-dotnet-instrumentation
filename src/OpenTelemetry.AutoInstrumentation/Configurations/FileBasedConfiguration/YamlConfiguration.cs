@@ -68,6 +68,13 @@ internal class YamlConfiguration
     public bool FlushOnUnhandledException { get; set; } = false;
 
     /// <summary>
+    /// Gets or sets a value indicating whether the Logs Include Formatted Message is enabled.
+    /// If omitted or null, false is used.
+    /// </summary>
+    [YamlMember(Alias = "logs_include_formatted_message")]
+    public bool LogsIncludeFormattedMessage { get; set; } = false;
+
+    /// <summary>
     /// Gets or sets the no-code tracing configuration.
     /// </summary>
     [YamlMember(Alias = "no_code/development")]

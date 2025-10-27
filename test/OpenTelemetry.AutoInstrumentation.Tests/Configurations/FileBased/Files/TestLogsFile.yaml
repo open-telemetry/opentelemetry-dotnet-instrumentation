@@ -1,3 +1,5 @@
+logs_include_formatted_message: true
+
 logger_provider:
   processors:
     - batch:

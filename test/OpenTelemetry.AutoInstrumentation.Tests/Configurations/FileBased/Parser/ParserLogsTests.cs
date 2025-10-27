@@ -15,6 +15,7 @@ public class ParserLogsTests
         var config = YamlParser.ParseYaml("Configurations/FileBased/Files/TestLogsFile.yaml");
         Assert.NotNull(config);
 
+        Assert.True(config.LogsIncludeFormattedMessage);
         Assert.NotNull(config.LoggerProvider);
         Assert.NotNull(config.LoggerProvider.Processors);
         Assert.Equal(3, config.LoggerProvider.Processors.Count);
