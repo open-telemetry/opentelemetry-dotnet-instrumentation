@@ -22,7 +22,7 @@ public class NoCodeTests : TestHelper
         EnableBytecodeInstrumentation();
         EnableFileBasedConfigWithDefaultPath();
         using var collector = new MockSpansCollector(Output);
-        SetExporter(collector);
+        SetFileBasedExporter(collector);
 
         List<KeyValue> allTypeOfAttributes = [
             new() { Key = "attribute_key_string", Value = new AnyValue { StringValue = "string_value" } },

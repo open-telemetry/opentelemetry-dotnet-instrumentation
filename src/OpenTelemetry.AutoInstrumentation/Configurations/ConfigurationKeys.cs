@@ -148,11 +148,6 @@ internal partial class ConfigurationKeys
             public const string AspNetCoreInstrumentationCaptureResponseHeaders = "OTEL_DOTNET_AUTO_TRACES_ASPNETCORE_INSTRUMENTATION_CAPTURE_RESPONSE_HEADERS";
 
             /// <summary>
-            /// Configuration key for Entity Framework Core instrumentation to enable passing text query as a db.statement attribute.
-            /// </summary>
-            public const string EntityFrameworkCoreSetDbStatementForText = "OTEL_DOTNET_AUTO_ENTITYFRAMEWORKCORE_SET_DBSTATEMENT_FOR_TEXT";
-
-            /// <summary>
             /// Configuration key for GraphQL instrumentation to enable passing query as a document attribute.
             /// </summary>
             public const string GraphQLSetDocument = "OTEL_DOTNET_AUTO_GRAPHQL_SET_DOCUMENT";

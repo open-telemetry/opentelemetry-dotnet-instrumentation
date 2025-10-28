@@ -106,7 +106,7 @@ CI tests run against the following operating systems:
 - [Debian x64](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/blob/main/docker/debian.dockerfile)
 - [Debian ARM64](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/blob/main/docker/debian-arm64.dockerfile)
 - [CentOS Stream 9 x64](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/blob/main/docker/centos-stream9.dockerfile)
-- [macOS Ventura 13 x64](https://github.com/actions/runner-images/blob/main/images/macos/macos-13-Readme.md)
+- [macOS Sonoma 14 ARM64](https://github.com/actions/runner-images/blob/main/images/macos/macos-14-Readme.md)
 - [Microsoft Windows Server 2022 x64](https://github.com/actions/runner-images/blob/main/images/windows/Windows2022-Readme.md)
 - [Microsoft Windows Server 2025 x64](https://github.com/actions/runner-images/blob/main/images/windows/Windows2025-Readme.md)
 - [Ubuntu 22.04 LTS x64](https://github.com/actions/runner-images/blob/main/images/ubuntu/Ubuntu2204-Readme.md)
@@ -159,7 +159,7 @@ When running your application, make sure to:
 | `CORECLR_PROFILER`         | .NET                | `{918728DD-259F-4A6A-AC2B-B85E1B658318}`                                  |
 | `CORECLR_PROFILER_PATH`    | .NET on Linux glibc | `$INSTALL_DIR/linux-x64/OpenTelemetry.AutoInstrumentation.Native.so`      |
 | `CORECLR_PROFILER_PATH`    | .NET on Linux musl  | `$INSTALL_DIR/linux-musl-x64/OpenTelemetry.AutoInstrumentation.Native.so` |
-| `CORECLR_PROFILER_PATH`    | .NET on macOS       | `$INSTALL_DIR/osx-x64/OpenTelemetry.AutoInstrumentation.Native.dylib`     |
+| `CORECLR_PROFILER_PATH`    | .NET on macOS       | `$INSTALL_DIR/osx-arm64/OpenTelemetry.AutoInstrumentation.Native.dylib`     |
 | `CORECLR_PROFILER_PATH_32` | .NET on Windows     | `$INSTALL_DIR/win-x86/OpenTelemetry.AutoInstrumentation.Native.dll`       |
 | `CORECLR_PROFILER_PATH_64` | .NET on Windows     | `$INSTALL_DIR/win-x64/OpenTelemetry.AutoInstrumentation.Native.dll`       |
 | `DOTNET_ADDITIONAL_DEPS`   | .NET                | `$INSTALL_DIR/AdditionalDeps`                                             |

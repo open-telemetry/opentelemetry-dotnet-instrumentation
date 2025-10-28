@@ -58,6 +58,7 @@ protobuf
 protos
 RABBITMQ
 Serilog
+Sonoma
 spdlog
 SQLCLIENT
 sqlserver
