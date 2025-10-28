@@ -37,7 +37,24 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
   - `OpenTelemetry.Instrumentation.StackExchangeRedis` from `1.12.0-beta.2` to `1.13.0-beta.1`,
   - `OpenTelemetry.Resources.Container` from `1.12.0-beta.1` to `1.13.0-beta.1`.
 - .NET Framework only, following packages updated
-  - `OpenTelemetry.Instrumentation.AspNet` from `1.12.0-beta.1` to `1.13.0-rc.1`.
+  - `Microsoft.Bcl.AsyncInterfaces` from `9.0.8` to `9.0.10`,
+  - `Microsoft.Extensions.Configuration` from `9.0.8` to `9.0.10`,
+  - `Microsoft.Extensions.Configuration.Abstractions` from `9.0.8` to `9.0.10`,
+  - `Microsoft.Extensions.Configuration.Binder` from `9.0.8` to `9.0.10`,
+  - `Microsoft.Extensions.DependencyInjection` from `9.0.8` to `9.0.10`,
+  - `Microsoft.Extensions.DependencyInjection.Abstractions` from `9.0.8` to `9.0.10`,
+  - `Microsoft.Extensions.Diagnostics.Abstractions` from `9.0.8` to `9.0.10`,
+  - `Microsoft.Extensions.Logging` from `9.0.8` to `9.0.10`,
+  - `Microsoft.Extensions.Logging.Abstractions` from `9.0.8` to `9.0.10`,
+  - `Microsoft.Extensions.Logging.Configuration` from `9.0.8` to `9.0.10`,
+  - `Microsoft.Extensions.Options` from `9.0.8` to `9.0.10`,
+  - `Microsoft.Extensions.Options.ConfigurationExtensions` from `9.0.8` to `9.0.10`,
+  - `Microsoft.Extensions.Primitives` from `9.0.8` to `9.0.10`,
+  - `OpenTelemetry.Instrumentation.AspNet` from `1.12.0-beta.1` to `1.13.0-rc.1`,
+  - `System.Diagnostics.DiagnosticSource` from `9.0.8` to `9.0.10`,
+  - `System.IO.Pipelines` from `9.0.8` to `9.0.10`,
+  - `System.Text.Encodings.Web` from `9.0.8` to `9.0.10`,
+  - `System.Text.Json` from `9.0.8` to `9.0.10`.
 
 ### Deprecated
 
