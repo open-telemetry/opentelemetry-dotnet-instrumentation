@@ -168,9 +168,9 @@ meter_provider:
         exporter:
           # Configure exporter to be console.
           console:
-          
-    # Periodic reader for Prometheus
-    - periodic:
+
+    # Pull reader for Prometheus
+    - pull:
         # Configure exporter.
         exporter:
           # Configure exporter to be Prometheus.
