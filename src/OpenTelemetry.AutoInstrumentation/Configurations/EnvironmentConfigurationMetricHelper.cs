@@ -131,14 +131,21 @@ internal static class EnvironmentConfigurationMetricHelper
                         {
                             builder = Wrappers.AddConsoleExporter(builder, pluginManager);
                         }
-
-                        continue;
                     }
 
                     if (reader.Pull != null)
                     {
-                        builder = Wrappers.AddPrometheusHttpListener(builder, pluginManager);
-                        continue;
+                        var exporter = reader.Pull.Exporter;
+                        if (exporter == null)
+                        {
+                            Logger.Debug("No exporter section for periodic metric reader. Skipping.");
+                            continue;
+                        }
+
+                        if (exporter.Prometheus != null)
+                        {
+                            builder = Wrappers.AddPrometheusHttpListener(builder, pluginManager);
+                        }
                     }
                 }
             }
