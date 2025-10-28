@@ -234,7 +234,15 @@ and [logs bridge](./log4net-bridge.md).
 | `OTEL_DOTNET_EXPERIMENTAL_ASPNETCORE_DISABLE_URL_QUERY_REDACTION`                 | Whether the ASP.NET Core instrumentation turns off redaction of the `url.query` attribute value.                                                                                                                                         | `false`       | [Experimental](https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/versioning-and-stability.md) |
 | `OTEL_DOTNET_EXPERIMENTAL_HTTPCLIENT_DISABLE_URL_QUERY_REDACTION`                 | Whether the HTTP client instrumentation turns off redaction of the `url.full` attribute value.                                                                                                                                           | `false`       | [Experimental](https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/versioning-and-stability.md) |
 | `OTEL_DOTNET_EXPERIMENTAL_ASPNET_DISABLE_URL_QUERY_REDACTION`                     | Whether the ASP.NET instrumentation turns off redaction of the `url.query` attribute value.                                                                                                                                              | `false`       | [Experimental](https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/versioning-and-stability.md) |
-| `OTEL_DOTNET_AUTO_SQLCLIENT_NETFX_ILREWRITE_ENABLED`                              | Enables IL rewriting of `SqlCommand` on .NET Framework to ensure `CommandText` is present for `SqlClient` instrumentation, which is required for `db.query.text` and `db.query.summary` to be populated.                                 | `false`       | [Experimental](https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/versioning-and-stability.md) |
+| `OTEL_DOTNET_AUTO_SQLCLIENT_NETFX_ILREWRITE_ENABLED`                              | \[1\]                                                                                                                                                                                                                                    | `false`       | [Experimental](https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/versioning-and-stability.md) |
+
+\[1\]: Enables IL rewriting of `SqlCommand` on .NET Framework to ensure
+`CommandText` is present for `SqlClient` instrumentation, which is required for
+`db.query.text` and `db.query.summary` to be populated. Previously, `CommandText`
+was only available for stored procedures. With this setting enabled, it is also
+available for raw queries. This changes the behavior of events emitted by the
+[`SqlEventSource`](https://github.com/dotnet/SqlClient/blob/v1.0.19239.1/src/Microsoft.Data.SqlClient/netfx/src/Microsoft/Data/SqlClient/SqlCommand.cs#L6369),
+which might impact other parts of the application if this mechanism is used.
 
 ## Propagators
 
