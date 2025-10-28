@@ -196,7 +196,7 @@ public static partial class LibraryVersion
                 "3.0.0",
 #endif
 #if NET9_0 || NET8_0 || NET462
-                "3.5.0",
+                "3.4.3",
 #endif
 #endif
             ];
