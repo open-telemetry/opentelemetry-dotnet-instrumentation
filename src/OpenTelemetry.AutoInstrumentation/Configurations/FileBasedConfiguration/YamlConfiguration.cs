@@ -24,6 +24,14 @@ internal class YamlConfiguration
     public ResourceConfiguration? Resource { get; set; }
 
     /// <summary>
+    /// Gets or sets the tracer provider configuration.
+    /// Configure tracer provider.
+    /// If omitted, a noop tracer provider is used.
+    /// </summary>
+    [YamlMember(Alias = "tracer_provider")]
+    public TracerProviderConfiguration? TracerProvider { get; set; }
+
+    /// <summary>
     /// Gets or sets the text map context propagator configuration.
     /// If omitted, a noop propagator is used.
     /// </summary>
