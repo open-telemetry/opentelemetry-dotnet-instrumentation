@@ -56,10 +56,10 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
   - `System.Text.Encodings.Web` from `9.0.8` to `9.0.10`,
   - `System.Text.Json` from `9.0.8` to `9.0.10`.
 
-#### Dependencies on .Net Framework
+#### Dependencies on .NET Framework
 
 When OpenTelemetry .NET AutoInstrumentation is compiled for .NET Framework,
-it uses the net462 Target Framework Moniker (TFM). As a result, the ZIP archive
+it uses the `net462` Target Framework Moniker (TFM). As a result, the ZIP archive
 deployment contained dependency assemblies targeted for .NET Framework 4.6.2.
 Some of these assemblies were not designed to be used with later versions of
 .NET Framework.

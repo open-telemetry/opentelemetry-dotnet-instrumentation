@@ -17,8 +17,7 @@ public class DotNetPackageListService
     {
         string[] arguments = new[]
         {
-            "list", $"\"{projectPath}\"", "package", "--include-transitive", "--format", "json", "--output-version",
-            "1"
+            "list", $"\"{projectPath}\"", "package", "--include-transitive", "--format", "json", "--output-version", "1"
         };
 
         return _dotNetRunner.Run(_fileSystem.Path.GetDirectoryName(projectPath), arguments);
