@@ -19,9 +19,6 @@
     <PackageVersion Include="Microsoft.Extensions.Options" Version="9.0.10" />
     <PackageVersion Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="9.0.10" />
     <PackageVersion Include="Microsoft.Extensions.Primitives" Version="9.0.10" />
-    <PackageVersion Include="OpenTelemetry.Api.ProviderBuilderExtensions" Version="1.13.1" />
-    <PackageVersion Include="OpenTelemetry.Instrumentation.AspNet.TelemetryHttpModule" Version="1.13.0-rc.1" />
-    <PackageVersion Include="OpenTracing" Version="0.12.1" />
     <PackageVersion Include="System.Buffers" Version="4.6.1" />
     <PackageVersion Include="System.Diagnostics.DiagnosticSource" Version="9.0.10" />
     <PackageVersion Include="System.IO.Pipelines" Version="9.0.10" />
