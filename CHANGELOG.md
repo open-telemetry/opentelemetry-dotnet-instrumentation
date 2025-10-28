@@ -10,7 +10,6 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 ### Added
 
 - Configuration based instrumentation.
-- File-based configuration support for meter provider readers and exporters.
 
 ### Changed
 
