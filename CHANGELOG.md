@@ -37,7 +37,7 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
   - `OpenTelemetry.Instrumentation.StackExchangeRedis` from `1.12.0-beta.2` to `1.13.0-beta.1`,
   - `OpenTelemetry.Resources.Container` from `1.12.0-beta.1` to `1.13.0-beta.1`.
 - .NET Framework only, following packages updated
-  - `OpenTelemetry.Instrumentation.AspNet` from `1.12.0-beta.1` to `1.13.0-beta.2`.
+  - `OpenTelemetry.Instrumentation.AspNet` from `1.12.0-beta.1` to `1.13.0-rc.1`.
 
 ### Deprecated
 
