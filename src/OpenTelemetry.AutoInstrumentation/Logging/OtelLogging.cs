@@ -11,33 +11,22 @@ namespace OpenTelemetry.AutoInstrumentation.Logging;
 /// </summary>
 internal static class OtelLogging
 {
-    private const string OtelDotnetAutoLogDirectory = "OTEL_DOTNET_AUTO_LOG_DIRECTORY";
-    private const string OtelLogLevel = "OTEL_LOG_LEVEL";
-    private const string OtelDotnetAutoLogFileSize = "OTEL_DOTNET_AUTO_LOG_FILE_SIZE";
-    private const string OtelDotnetAutoLogger = "OTEL_DOTNET_AUTO_LOGGER";
-    private const string NixDefaultDirectory = "/var/log/opentelemetry/dotnet";
-
-    private static readonly long FileSizeLimitBytes = GetConfiguredFileSizeLimitBytes();
     private static readonly ConcurrentDictionary<string, IOtelLogger> OtelLoggers = new();
 
-    private static LogLevel? _configuredLogLevel = GetConfiguredLogLevel();
-    private static LogSink _configuredLogSink = GetConfiguredLogSink();
+    // Keep configuration as a replaceable instance so Reset() can rebuild it.
+    private static LoggingConfiguration _config = new();
 
     /// <summary>
     /// Returns Logger implementation.
     /// </summary>
-    /// <returns>Logger</returns>
     public static IOtelLogger GetLogger()
     {
-        // Default to managed logs
         return GetLogger("Managed");
     }
 
     /// <summary>
-    /// Returns Logger implementation.
+    /// Returns Logger implementation for the given suffix.
     /// </summary>
-    /// <param name="suffix">Suffix of the log file.</param>
-    /// <returns>Logger</returns>
     public static IOtelLogger GetLogger(string suffix)
     {
         return OtelLoggers.GetOrAdd(suffix, CreateLogger);
@@ -47,148 +36,73 @@ internal static class OtelLogging
     {
         try
         {
-            // Update logger associated with the key, so that future calls to GetLogger
-            // return NoopLogger.
             if (OtelLoggers.TryUpdate(suffix, NoopLogger.Instance, otelLogger))
             {
                 otelLogger.Close();
             }
         }
-        catch (Exception)
+        catch
         {
             // intentionally empty
         }
     }
 
-    // Helper method for testing
     internal static void Reset()
     {
-        _configuredLogLevel = GetConfiguredLogLevel();
-        _configuredLogSink = GetConfiguredLogSink();
+        // Rebuild configuration from current source (YAML or ENV).
+        _config = new LoggingConfiguration();
         OtelLoggers.Clear();
-    }
-
-    internal static LogLevel? GetConfiguredLogLevel()
-    {
-        LogLevel? logLevel = LogLevel.Information;
-        try
-        {
-            var configuredValue = Environment.GetEnvironmentVariable(OtelLogLevel) ?? string.Empty;
-
-            logLevel = configuredValue switch
-            {
-                Constants.ConfigurationValues.LogLevel.Error => LogLevel.Error,
-                Constants.ConfigurationValues.LogLevel.Warning => LogLevel.Warning,
-                Constants.ConfigurationValues.LogLevel.Information => LogLevel.Information,
-                Constants.ConfigurationValues.LogLevel.Debug => LogLevel.Debug,
-                Constants.ConfigurationValues.None => null,
-                _ => logLevel
-            };
-        }
-        catch (Exception)
-        {
-            // theoretically, can happen when process has no privileges to check env
-        }
-
-        return logLevel;
-    }
-
-    internal static LogSink GetConfiguredLogSink()
-    {
-        // Use File as a default sink
-        var logSink = LogSink.File;
-
-        try
-        {
-            var configuredValue = Environment.GetEnvironmentVariable(OtelDotnetAutoLogger) ?? string.Empty;
-
-            logSink = configuredValue switch
-            {
-                Constants.ConfigurationValues.Loggers.File => LogSink.File,
-                Constants.ConfigurationValues.Loggers.Console => LogSink.Console,
-                Constants.ConfigurationValues.None => LogSink.NoOp,
-                _ => logSink
-            };
-        }
-        catch (Exception)
-        {
-            // theoretically, can happen when process has no privileges to check env
-        }
-
-        return logSink;
-    }
-
-    internal static long GetConfiguredFileSizeLimitBytes()
-    {
-        const long defaultFileSizeLimitBytes = 10 * 1024 * 1024;
-
-        try
-        {
-            var configuredFileSizeLimit = Environment.GetEnvironmentVariable(OtelDotnetAutoLogFileSize);
-            if (string.IsNullOrEmpty(configuredFileSizeLimit))
-            {
-                return defaultFileSizeLimitBytes;
-            }
-
-            return long.TryParse(configuredFileSizeLimit, out var limit) && limit > 0 ? limit : defaultFileSizeLimitBytes;
-        }
-        catch (Exception)
-        {
-            // theoretically, can happen when process has no privileges to check env
-            return defaultFileSizeLimitBytes;
-        }
     }
 
     private static IOtelLogger CreateLogger(string suffix)
     {
-        if (!_configuredLogLevel.HasValue)
+        // If configuration explicitly disables logging (LogLevel == null), return Noop.
+        if (!_config.LogLevel.HasValue)
         {
             return NoopLogger.Instance;
         }
 
         var sink = CreateSink(suffix);
-
-        return new InternalLogger(sink, _configuredLogLevel.Value);
+        return new InternalLogger(sink, _config.LogLevel.Value);
     }
 
     private static ISink CreateSink(string suffix)
     {
-        // Uses ISink? here, sink creation can fail so we specify default fallback at the end.
-        var sink = _configuredLogSink switch
+        // Try to create the configured sink; fall back to Noop on any failure.
+        ISink? sink = _config.Logger switch
         {
             LogSink.NoOp => NoopSink.Instance,
             LogSink.Console => new ConsoleSink(suffix),
             LogSink.File => CreateFileSink(suffix),
-            // default to null, then default value is specified only at the end.
-            _ => null,
+            _ => null
         };
 
-        return sink ??
-            // Default to NoopSink
-            NoopSink.Instance;
+        // Default to NoopSink if creation failed.
+        return sink ?? NoopSink.Instance;
     }
 
     private static ISink? CreateFileSink(string suffix)
     {
         try
         {
-            var logDirectory = GetLogDirectory();
-            if (logDirectory != null)
+            var logDirectory = _config.LogDirectory;
+            if (!string.IsNullOrEmpty(logDirectory))
             {
                 var fileName = GetLogFileName(suffix);
-                var logPath = Path.Combine(logDirectory, fileName);
+                var logPath = Path.Combine(logDirectory!, fileName);
 
                 var rollingFileSink = new RollingFileSink(
                     path: logPath,
-                    fileSizeLimitBytes: FileSizeLimitBytes,
+                    fileSizeLimitBytes: _config.LogFileSize,
                     retainedFileCountLimit: 10,
                     rollingInterval: RollingInterval.Day,
                     rollOnFileSizeLimit: true,
                     retainedFileTimeLimit: null);
+
                 return new PeriodicFlushToDiskSink(rollingFileSink, TimeSpan.FromSeconds(5));
             }
         }
-        catch (Exception)
+        catch
         {
             // unable to configure logging to a file
         }
@@ -224,59 +138,5 @@ internal static class OtelLogging
             .Replace(Path.DirectorySeparatorChar, '-')
             .Replace(Path.AltDirectorySeparatorChar, '-')
             .Trim('-');
-    }
-
-    private static string? GetLogDirectory()
-    {
-        string? logDirectory;
-
-        try
-        {
-            logDirectory = Environment.GetEnvironmentVariable(OtelDotnetAutoLogDirectory);
-
-            if (logDirectory == null)
-            {
-                if (Environment.OSVersion.Platform == PlatformID.Win32NT)
-                {
-                    var windowsDefaultDirectory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), @"OpenTelemetry .NET AutoInstrumentation", "logs");
-                    logDirectory = windowsDefaultDirectory;
-                }
-                else
-                {
-                    // Linux
-                    logDirectory = NixDefaultDirectory;
-                }
-            }
-
-            logDirectory = CreateDirectoryIfMissing(logDirectory) ?? Path.GetTempPath();
-        }
-        catch
-        {
-            // The try block may throw a SecurityException if not granted the System.Security.Permissions.FileIOPermission
-            // because of the following API calls
-            //   - Directory.Exists
-            //   - Environment.GetFolderPath
-            //   - Path.GetTempPath
-
-            // Unsafe to log
-            logDirectory = null;
-        }
-
-        return logDirectory;
-    }
-
-    private static string? CreateDirectoryIfMissing(string pathToCreate)
-    {
-        try
-        {
-            Directory.CreateDirectory(pathToCreate);
-            return pathToCreate;
-        }
-        catch
-        {
-            // Unable to create the directory meaning that the user will have to create it on their own.
-            // It is unsafe to log here, so return null to defer deciding what the path is
-            return null;
-        }
     }
 }

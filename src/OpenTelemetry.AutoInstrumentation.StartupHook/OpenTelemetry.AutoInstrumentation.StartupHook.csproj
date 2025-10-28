@@ -46,6 +46,9 @@
     <Compile Include="..\OpenTelemetry.AutoInstrumentation\Logging\ISink.cs">
       <Link>Logging\ISink.cs</Link>
     </Compile>
+    <Compile Include="..\OpenTelemetry.AutoInstrumentation\Logging\LoggingConfiguration.cs">
+      <Link>Logging\LoggingConfiguration.cs</Link>
+    </Compile>
     <Compile Include="..\OpenTelemetry.AutoInstrumentation\Logging\LogLevel.cs">
       <Link>Logging\LogLevel.cs</Link>
     </Compile>
@@ -66,6 +69,12 @@
     </Compile>
     <Compile Include="..\OpenTelemetry.AutoInstrumentation\Configurations\ConfigurationKeys.FailFast.cs">
       <Link>Configurations\ConfigurationKeys.FailFast.cs</Link>
+    </Compile>
+    <Compile Include="..\OpenTelemetry.AutoInstrumentation\Vendors\YamlDotNet\**\*.cs">
+      <Link>Vendors\YamlDotNet\%(RecursiveDir)%(Filename)%(Extension)</Link>
+    </Compile>
+    <Compile Include="..\OpenTelemetry.AutoInstrumentation\Vendors\.editorconfig">
+      <Link>Vendors\.editorconfig</Link>
     </Compile>
   </ItemGroup>
 

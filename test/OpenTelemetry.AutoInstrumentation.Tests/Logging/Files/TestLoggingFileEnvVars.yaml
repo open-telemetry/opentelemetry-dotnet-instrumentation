@@ -1,0 +1,4 @@
+﻿log_level: "${OTEL_LOG_LEVEL}"
+log_directory: "${OTEL_DOTNET_AUTO_LOG_DIRECTORY}"
+log_file_size: ${OTEL_DOTNET_AUTO_LOG_FILE_SIZE}
+logger: "${OTEL_DOTNET_AUTO_LOGGER}"
