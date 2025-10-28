@@ -286,8 +286,8 @@ partial class Build
         }
 
         // We assume that dev machine running test has .Net Framework not older than TargetFrameworksNetFx.Last()
-        var netFxCommonAssembliesFolder = TracerHomeDirectory / MapToFolderOutput(TargetFrameworksNetFx.Last());
-        var netFxAssembliesFolder = TracerHomeDirectory / MapToFolderOutputNetFx(TargetFrameworksNetFx.Last());
+        var netFxCommonAssembliesFolder = TracerHomeDirectory / MapToFolderOutput(TargetFrameworksForNetFxPacking.Last());
+        var netFxAssembliesFolder = TracerHomeDirectory / MapToFolderOutputNetFx(TargetFrameworksForNetFxPacking.Last());
         var installTool = Solution.GetProjectByName(Projects.Tools.GacInstallTool);
 
         DotNetRun(s => s

@@ -49,7 +49,7 @@ partial class Build
        TargetFramework.NET462,
     };
 
-    private static readonly IEnumerable<TargetFramework> TargetFrameworksNetFx = new[]
+    private static readonly IEnumerable<TargetFramework> TargetFrameworksForNetFxPacking = new[]
     {
         TargetFramework.NET462,
         TargetFramework.NET47,
@@ -299,7 +299,7 @@ partial class Build
                     .SetTargetPlatformAnyCPU()
                     .EnableNoBuild()
                     .SetNoRestore(NoRestore)
-                    .CombineWith(TargetFrameworksNetFx, (p, framework) => p
+                    .CombineWith(TargetFrameworksForNetFxPacking, (p, framework) => p
                         .SetFramework(framework)
                         .SetOutput(TracerHomeDirectory / MapToFolderOutputNetFx(framework))));
             }
@@ -819,7 +819,7 @@ partial class Build
 
     private string MapToFolderOutput(TargetFramework targetFramework)
     {
-        return targetFramework.ToString().StartsWith("net4") ? $"netfx" : "net";
+        return targetFramework.ToString().StartsWith("net4") ? "netfx" : "net";
     }
 
     private string MapToFolderOutputNetFx(TargetFramework targetFramework)

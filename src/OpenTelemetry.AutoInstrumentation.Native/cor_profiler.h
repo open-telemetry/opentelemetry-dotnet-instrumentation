@@ -1,4 +1,4 @@
-/*
+﻿/*
  * Copyright The OpenTelemetry Authors
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -97,6 +97,8 @@ private:
     //
     std::unordered_map<int, std::unordered_map<WSTRING, AssemblyVersionRedirection>> assembly_version_redirect_map_;
     std::unordered_map<WSTRING, AssemblyVersionRedirection>* assembly_version_redirect_map_current_framework_;
+    int                                                      assembly_version_redirect_map_current_framework_key_ = 0;
+
     void InitNetFxAssemblyRedirectsMap();
     void RedirectAssemblyReferences(
         const ComPtr<IMetaDataAssemblyImport>& assembly_import,
@@ -143,6 +145,7 @@ public:
     // GetAssemblyAndSymbolsBytes is used when injecting the Loader into a .NET Framework application.
     void GetAssemblyAndSymbolsBytes(BYTE** pAssemblyArray, int* assemblySize, BYTE** pSymbolsArray,
                                     int* symbolsSize) const;
+    int  GetDetectedFrameworkVersion() const;
 #endif
 
     //

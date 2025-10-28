@@ -1,4 +1,4 @@
-// Copyright The OpenTelemetry Authors
+﻿// Copyright The OpenTelemetry Authors
 // SPDX-License-Identifier: Apache-2.0
 
 #include "cor_profiler.h"
@@ -3656,91 +3656,101 @@ void CorProfiler::DetectFrameworkVersionTableForRedirectsMap()
     // Default to 4.6.2 (462) if detection fails
     int frameworkVersion = 462;
 
-    HKEY hKey   = nullptr;
-    LONG result = RegOpenKeyExW(HKEY_LOCAL_MACHINE, L"SOFTWARE\\Microsoft\\NET Framework Setup\\NDP\\v4\\Full\\", 0,
-                                KEY_READ, &hKey);
-
-    if (result != ERROR_SUCCESS)
+    // Check for 4.7.2 first
+    // If we ever need to detect higher versions, we should use
+    // the registry method below directly or find another option
+    ICorProfilerInfo8* info8 = nullptr;
+    HRESULT            hr    = this->info_->QueryInterface(__uuidof(ICorProfilerInfo8), (void**)&info8);
+    if (SUCCEEDED(hr))
     {
-        Logger::Warn(
-            "DetectFrameworkVersionTableForRedirectsMap: Failed to open registry key, using default version 462");
+        info8->Release();
+        info8            = nullptr;
+        frameworkVersion = 472;
+
+        Logger::Debug("DetectFrameworkVersionTableForRedirectsMap: Detected .NET Framework 4.7.2 (ICorProfilerInfo8)");
     }
     else
     {
-        DWORD releaseValue = 0;
-        DWORD dataSize     = sizeof(DWORD);
-        DWORD valueType    = REG_DWORD;
 
-        result =
-            RegQueryValueExW(hKey, L"Release", nullptr, &valueType, reinterpret_cast<LPBYTE>(&releaseValue), &dataSize);
+        HKEY hKey   = nullptr;
+        LONG result = RegOpenKeyExW(HKEY_LOCAL_MACHINE, L"SOFTWARE\\Microsoft\\NET Framework Setup\\NDP\\v4\\Full\\", 0,
+                                    KEY_READ, &hKey);
 
-        RegCloseKey(hKey);
-
-        if (result != ERROR_SUCCESS || valueType != REG_DWORD)
+        if (result != ERROR_SUCCESS)
         {
-            Logger::Warn(
-                "DetectFrameworkVersionTableForRedirectsMap: Failed to read Release value, using default version 462");
+            Logger::Warn("DetectFrameworkVersionTableForRedirectsMap: Failed to open registry key, using default "
+                         "version 462");
         }
         else
         {
+            DWORD releaseValue = 0;
+            DWORD dataSize     = sizeof(DWORD);
+            DWORD valueType    = REG_DWORD;
 
-            // Map release numbers to framework versions
-            // Based on Microsoft documentation:
-            // https://docs.microsoft.com/en-us/dotnet/framework/migration-guide/how-to-determine-which-versions-are-installed
-            if (releaseValue >= 533320)
+            result = RegQueryValueExW(hKey, L"Release", nullptr, &valueType, reinterpret_cast<LPBYTE>(&releaseValue),
+                                      &dataSize);
+
+            RegCloseKey(hKey);
+
+            if (result != ERROR_SUCCESS || valueType != REG_DWORD)
             {
-                frameworkVersion = 481; // 4.8.1
-            }
-            else if (releaseValue >= 528040)
-            {
-                frameworkVersion = 480; // 4.8
-            }
-            else if (releaseValue >= 461808)
-            {
-                frameworkVersion = 472; // 4.7.2
-            }
-            else if (releaseValue >= 461308)
-            {
-                frameworkVersion = 471; // 4.7.1
-            }
-            else if (releaseValue >= 460798)
-            {
-                frameworkVersion = 470; // 4.7
-            }
-            else if (releaseValue >= 394802)
-            {
-                frameworkVersion = 462; // 4.6.2
+                Logger::Warn("DetectFrameworkVersionTableForRedirectsMap: Failed to read Release value, using "
+                             "default version 462");
             }
             else
             {
-                Logger::Warn(
-                    "DetectFrameworkVersionTableForRedirectsMap: Old .Net Framework detected, use 462 as fallback");
+                // Map release numbers to framework versions
+                // Based on Microsoft documentation:
+                // https://docs.microsoft.com/en-us/dotnet/framework/migration-guide/how-to-determine-which-versions-are-installed
+                if (releaseValue >= 461308)
+                {
+                    frameworkVersion = 471; // 4.7.1
+                }
+                else if (releaseValue >= 460798)
+                {
+                    frameworkVersion = 470; // 4.7
+                }
+                else if (releaseValue >= 394802)
+                {
+                    frameworkVersion = 462; // 4.6.2
+                }
+                else
+                {
+                    Logger::Warn("DetectFrameworkVersionTableForRedirectsMap: Old .NET Framework detected, use 462 "
+                                 "as fallback");
+                }
             }
-        }
 
-        Logger::Debug("DetectFrameworkVersionTableForRedirectsMap: Detected .NET Framework version ", frameworkVersion,
-                      " (Release: ", releaseValue, ")");
+            Logger::Debug("DetectFrameworkVersionTableForRedirectsMap: Detected .NET Framework version ",
+                          frameworkVersion, " (Release: ", releaseValue, ")");
+        }
     }
 
-    int selectedKey = 0;
+    assembly_version_redirect_map_current_framework_key_ = 0;
     for (auto& [key, values] : assembly_version_redirect_map_)
     {
-        if (key <= frameworkVersion && key > selectedKey)
+        if (key <= frameworkVersion && key > assembly_version_redirect_map_current_framework_key_)
         {
-            selectedKey                                      = key;
-            assembly_version_redirect_map_current_framework_ = &values;
+            assembly_version_redirect_map_current_framework_key_ = key;
+            assembly_version_redirect_map_current_framework_     = &values;
         }
     }
 
-    if (selectedKey != 0)
+    if (assembly_version_redirect_map_current_framework_key_ != 0)
     {
-        Logger::Debug("DetectFrameworkVersionTableForRedirectsMap: Use assembly redirection table for ", selectedKey);
+        Logger::Debug("DetectFrameworkVersionTableForRedirectsMap: Use assembly redirection table for ",
+                      assembly_version_redirect_map_current_framework_key_);
     }
     else
     {
         Logger::Warn("DetectFrameworkVersionTableForRedirectsMap: No assembly redirection tables found. Assembly "
                      "version redirecting will be disabled.");
     }
+}
+
+int CorProfiler::GetDetectedFrameworkVersion() const
+{
+    return assembly_version_redirect_map_current_framework_key_;
 }
 #endif
 
