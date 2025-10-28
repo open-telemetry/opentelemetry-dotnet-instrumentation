@@ -145,7 +145,11 @@ public:
     // GetAssemblyAndSymbolsBytes is used when injecting the Loader into a .NET Framework application.
     void GetAssemblyAndSymbolsBytes(BYTE** pAssemblyArray, int* assemblySize, BYTE** pSymbolsArray,
                                     int* symbolsSize) const;
-    int  GetDetectedFrameworkVersion() const;
+
+    // Return redirection table used in runtime
+    // that will match TFM folder to load assemblies.
+    // It may not be actual .NET Framework version.
+    int  GetNetFrameworkRedirectionVersion() const;
 #endif
 
     //

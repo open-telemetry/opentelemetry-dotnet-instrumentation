@@ -79,8 +79,8 @@ EXTERN_C void* dddlsym(void* __restrict __handle, const char* __restrict __name)
 #endif
 
 #ifdef _WIN32
-EXTERN_C INT32 STDAPICALLTYPE GetDetectedNetFrameworkVersion()
+EXTERN_C INT32 STDAPICALLTYPE GetNetFrameworkRedirectionVersion()
 {
-    return trace::profiler != nullptr ? trace::profiler->GetDetectedFrameworkVersion() : 0;
+    return trace::profiler != nullptr ? trace::profiler->GetNetFrameworkRedirectionVersion() : 0;
 }
 #endif

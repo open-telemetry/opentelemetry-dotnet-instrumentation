@@ -3733,7 +3733,7 @@ void CorProfiler::DetectFrameworkVersionTableForRedirectsMap()
     }
 }
 
-int CorProfiler::GetDetectedFrameworkVersion() const
+int CorProfiler::GetNetFrameworkRedirectionVersion() const
 {
     return assembly_version_redirect_map_current_framework_key_;
 }

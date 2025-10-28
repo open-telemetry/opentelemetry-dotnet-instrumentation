@@ -16,4 +16,4 @@ EXPORTS
     ContinuousProfilerNotifySpanStopped
     SelectiveSamplingStart
     SelectiveSamplingStop
-    GetDetectedNetFrameworkVersion
+    GetNetFrameworkRedirectionVersion

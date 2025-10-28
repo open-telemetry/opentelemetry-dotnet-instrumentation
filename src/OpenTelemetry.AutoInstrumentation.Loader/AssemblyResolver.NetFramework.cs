@@ -96,8 +96,12 @@ internal partial class AssemblyResolver
         return null;
     }
 
+    /// <summary>
+    /// Return redirection table used in runtime that will match TFM folder to load assemblies.
+    /// It may not be actual .NET Framework version.
+    /// </summary>
     [DllImport("OpenTelemetry.AutoInstrumentation.Native.dll")]
-    private static extern int GetDetectedNetFrameworkVersion();
+    private static extern int GetNetFrameworkRedirectionVersion();
 
     private string ResolveManagedProfilerDirectory()
     {
@@ -109,7 +113,7 @@ internal partial class AssemblyResolver
         var frameworkFolderName = "net462";
         try
         {
-            var detectedVersion = GetDetectedNetFrameworkVersion();
+            var detectedVersion = GetNetFrameworkRedirectionVersion();
             var candidateFolderName = detectedVersion % 10 != 0 ? $"net{detectedVersion}" : $"net{detectedVersion / 10}";
             if (Directory.Exists(Path.Combine(basePath, candidateFolderName)))
             {
