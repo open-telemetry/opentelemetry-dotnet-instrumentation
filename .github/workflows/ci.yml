@@ -82,7 +82,7 @@ jobs:
           path: ${{ env.NUGET_PACKAGES }}
 
       - name: Download Artifacts from build job
-        uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0 # tag: v5.0.0
+        uses: actions/download-artifact@018cc2cf5baa6db3ef3c5f8a56943fffe632ef53 # tag: v6.0.0
         with:
           name: bin-${{ matrix.artifact-name }}
           path: bin/tracer-home
@@ -98,7 +98,7 @@ jobs:
 
       - name: Upload test logs
         if: always()
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # tag: v4.6.2
+        uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # tag: v5.0.0
         with:
           name: test-logs-${{ matrix.machine }}-${{ matrix.test-tfm }}-containers-${{ matrix.containers }}
           path: test-artifacts/
@@ -141,7 +141,7 @@ jobs:
           path: ${{ env.NUGET_PACKAGES }}
 
       - name: Download Artifacts from build job
-        uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0 # tag: v5.0.0
+        uses: actions/download-artifact@018cc2cf5baa6db3ef3c5f8a56943fffe632ef53 # tag: v6.0.0
         with:
           name: bin-${{ matrix.artifact-name }}
           path: bin/tracer-home
@@ -184,7 +184,7 @@ jobs:
           path: ${{ env.NUGET_PACKAGES }}
 
       - name: Download Artifacts from build job
-        uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0 # tag: v5.0.0
+        uses: actions/download-artifact@018cc2cf5baa6db3ef3c5f8a56943fffe632ef53 # tag: v6.0.0
         with:
           name: bin-${{ matrix.artifact-name }}
           path: bin/tracer-home
@@ -197,7 +197,7 @@ jobs:
 
       - name: Upload test logs
         if: always()
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # tag: v4.6.2
+        uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # tag: v5.0.0
         with:
           name: test-logs-${{ matrix.machine }}-containers-${{ matrix.containers }}
           path: test-artifacts/
@@ -238,7 +238,7 @@ jobs:
         fetch-depth: 0 # fetching all, needed to correctly calculate version
 
     - name: Download Artifacts from build job
-      uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0 # tag: v5.0.0
+      uses: actions/download-artifact@018cc2cf5baa6db3ef3c5f8a56943fffe632ef53 # tag: v6.0.0
       with:
         name: bin-${{ matrix.build-source }}
         path: bin/tracer-home
@@ -252,7 +252,7 @@ jobs:
 
     - name: Upload test logs
       if: always()
-      uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # tag: v4.6.2
+      uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # tag: v5.0.0
       with:
         name: test-logs-container-${{ matrix.machine }}-${{ matrix.base-image }}
         path: test-artifacts/
@@ -291,7 +291,7 @@ jobs:
           path: ${{ env.NUGET_PACKAGES }}
 
       - name: Download NuGet Artifacts from build-nuget-packages job
-        uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0 # tag: v5.0.0
+        uses: actions/download-artifact@018cc2cf5baa6db3ef3c5f8a56943fffe632ef53 # tag: v6.0.0
         with:
           name: bin-nuget-packages
           path: bin/nuget-artifacts/
@@ -301,7 +301,7 @@ jobs:
 
       - name: Upload test logs
         if: always()
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # tag: v4.6.2
+        uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # tag: v5.0.0
         with:
           name: test-logs-nuget-packages-${{ matrix.machine }}
           path: test-artifacts/
