@@ -3643,7 +3643,8 @@ void CorProfiler::DetectFrameworkVersionTableForRedirectsMap()
 
     // Check for 4.7.2 first
     // If we ever need to detect higher versions, we should use
-    // the registry method below directly or find another option
+    // the registry method below directly (adding detection for 4.7.2 and up)
+    // or find another option
     ICorProfilerInfo8* info8 = nullptr;
     HRESULT            hr    = this->info_->QueryInterface(__uuidof(ICorProfilerInfo8), (void**)&info8);
     if (SUCCEEDED(hr))
