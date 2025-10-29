@@ -77,7 +77,7 @@ public sealed class NugetSampleTests : TestHelper
 
         if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
         {
-            return "osx-x64";
+            return "osx-arm64";
         }
 
         if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))

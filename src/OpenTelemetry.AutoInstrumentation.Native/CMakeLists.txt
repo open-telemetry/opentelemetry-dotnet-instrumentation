@@ -99,12 +99,6 @@ SET(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${OUTPUT_BIN_DIR})
 # Add custom commands to setup dependencies via git
 
 add_custom_command(
-    OUTPUT ${OUTPUT_DEPS_DIR}/re2/obj/libre2.a
-    COMMAND git clone -c advice.detachedHead=false --quiet --depth 1 --branch 2023-03-01 https://github.com/google/re2.git && cd re2 && env ARFLAGS=\"-r -s -c\" CXXFLAGS=\"-std=c++11 -O3 -g -fPIC\" make
-    WORKING_DIRECTORY ${OUTPUT_DEPS_DIR}
-)
-
-add_custom_command(
     OUTPUT ${OUTPUT_DEPS_DIR}/fmt/libfmt.a
     COMMAND cp -R ${CMAKE_BINARY_DIR}/../lib/fmt/. ./fmt && cd fmt && cmake -DCMAKE_POSITION_INDEPENDENT_CODE=TRUE -DFMT_TEST=0 -DFMT_DOC=0 . && make
     WORKING_DIRECTORY ${OUTPUT_DEPS_DIR}
@@ -180,6 +174,7 @@ add_library("OpenTelemetry.AutoInstrumentation.Native.static" STATIC
         member_resolver.cpp
         metadata_builder.cpp
         miniutf.cpp
+        regex_utils.cpp
         string_utils.cpp
         util.cpp
         calltarget_tokens.cpp
@@ -192,7 +187,6 @@ add_library("OpenTelemetry.AutoInstrumentation.Native.static" STATIC
         lib/coreclr/src/pal/prebuilt/idl/corprof_i.cpp
         # Source dependencies retrievied via additional commands using git
         ${OUTPUT_DEPS_DIR}/fmt/libfmt.a
-        ${OUTPUT_DEPS_DIR}/re2/obj/libre2.a
 )
 
 set_target_properties("OpenTelemetry.AutoInstrumentation.Native.static" PROPERTIES PREFIX "")
@@ -205,19 +199,16 @@ target_include_directories("OpenTelemetry.AutoInstrumentation.Native.static"
         PUBLIC lib/coreclr/src/inc
         PUBLIC lib/spdlog/include
         PUBLIC ${OUTPUT_DEPS_DIR}/fmt/include
-        PUBLIC ${OUTPUT_DEPS_DIR}/re2
 )
 
 # Define linker libraries
 if (ISMACOS)
     target_link_libraries("OpenTelemetry.AutoInstrumentation.Native.static"
-        ${OUTPUT_DEPS_DIR}/re2/obj/libre2.a
         ${OUTPUT_DEPS_DIR}/fmt/libfmt.a
         ${CMAKE_DL_LIBS}
     )
 elseif(ISLINUX)
     target_link_libraries("OpenTelemetry.AutoInstrumentation.Native.static"
-        ${OUTPUT_DEPS_DIR}/re2/obj/libre2.a
         ${OUTPUT_DEPS_DIR}/fmt/libfmt.a
         ${CMAKE_DL_LIBS}
         -static-libgcc
