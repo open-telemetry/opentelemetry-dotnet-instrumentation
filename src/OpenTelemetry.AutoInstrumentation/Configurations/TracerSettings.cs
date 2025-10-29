@@ -119,7 +119,7 @@ internal class TracerSettings : Settings
 
         Processors = processors;
 
-        Sampler = SamplerFactory.CreateSampler(configuration.TracerProvider?.Sampler, configuration.FailFast);
+        Sampler = SamplerFactory.CreateSampler(configuration.TracerProvider?.Sampler, configuration.FailFast) ?? new ParentBasedSampler(new AlwaysOnSampler());
     }
 
     private static List<TracesExporter> ParseTracesExporter(Configuration configuration)
