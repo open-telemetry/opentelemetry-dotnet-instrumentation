@@ -41,6 +41,43 @@ public class NetFrameworkDistroTests
     }
 
     [SkippableFact]
+    public void ValidateTransientDependenciesPackageVersionsDefined()
+    {
+        Skip.IfNot(RuntimeInformation.IsOSPlatform(OSPlatform.Windows), "Supported only on Windows.");
+
+        var currentTestLocation = Assembly.GetExecutingAssembly().Location;
+        var testDir = FindParentDir(currentTestLocation, "test");
+        var srcDir = Path.Combine(Directory.GetParent(testDir)!.FullName, "src");
+        var codeDir = Path.Combine(srcDir, "OpenTelemetry.AutoInstrumentation.Assemblies.NetFramework");
+        var projectPath = Path.Combine(codeDir, "OpenTelemetry.AutoInstrumentation.Assemblies.NetFramework.csproj");
+        var packagesPath = Path.Combine(codeDir, "Directory.Packages.props");
+
+        var discoveredDependencies = Generator.EnumerateDependencies(projectPath);
+
+        List<(string Package, string Tfm)> undefinedDependencies = new();
+
+        foreach (var tfmDependencies in discoveredDependencies)
+        {
+            using var collection = new Microsoft.Build.Evaluation.ProjectCollection();
+            // We use "15.0" as toolkit version, it should be replaced with "Current"
+            // when Microsoft.Build will be updated.
+            var project =
+                new Microsoft.Build.Evaluation.Project(
+                    Path.Combine(Path.GetDirectoryName(packagesPath)!, "Directory.Packages.props"),
+                    new Dictionary<string, string> { ["TargetFramework"] = tfmDependencies.Key },
+                    "15.0",
+                    collection);
+
+            var definedVersions = project
+                .Items.Where(it => it.ItemType == "PackageVersion").ToDictionary(item => item.EvaluatedInclude, item => item.GetMetadata("Version"));
+
+            undefinedDependencies.AddRange(tfmDependencies.Value.Where(dep => !definedVersions.ContainsKey(dep.Name)).Select(dep => (dep.Name, tfmDependencies.Key)));
+        }
+
+        Assert.Empty(undefinedDependencies);
+    }
+
+    [SkippableFact]
     public void ReferencedPackagesNoUnsupportedTfm()
     {
         Skip.IfNot(RuntimeInformation.IsOSPlatform(OSPlatform.Windows), "Supported only on Windows.");
