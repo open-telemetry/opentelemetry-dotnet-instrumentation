@@ -316,7 +316,6 @@ function Register-AssembliesInGAC() {
         { $_ -ge 533320 } { $fxversion = 'net472'; break } # net481 or later, pin to 4.7.2
         { $_ -ge 528040 } { $fxversion = 'net472'; break } # net48, pin to 4.7.2
         { $_ -ge 461808 } { $fxversion = 'net472'; break }
-        { $_ -ge 461808 } { $fxversion = 'net472'; break }
         { $_ -ge 461308 } { $fxversion = 'net471'; break }
         { $_ -ge 460798 } { $fxversion = 'net47'; break }
         { $_ -ge 394802 } { $fxversion = 'net462'; break }
