@@ -395,6 +395,71 @@ public class FilebasedTracesSettingsTests
         Assert.Equal(SamplingDecision.Drop, sampler.ShouldSample(CreateSamplingParameters(localNotSampledParent)).Decision);
     }
 
+    [Fact]
+    public void LoadFile_ConfiguresAlwaysOnSampler()
+    {
+        var conf = new YamlConfiguration
+        {
+            TracerProvider = new TracerProviderConfiguration
+            {
+                Sampler = new SamplerConfig { AlwaysOn = new object() }
+            }
+        };
+
+        var settings = new TracerSettings();
+        settings.LoadFile(conf);
+
+        var sampler = Assert.IsType<AlwaysOnSampler>(settings.Sampler);
+        var decision = sampler.ShouldSample(CreateSamplingParameters(default)).Decision;
+        Assert.Equal(SamplingDecision.RecordAndSample, decision);
+    }
+
+    [Fact]
+    public void LoadFile_ConfiguresAlwaysOffSampler()
+    {
+        var conf = new YamlConfiguration
+        {
+            TracerProvider = new TracerProviderConfiguration
+            {
+                Sampler = new SamplerConfig { AlwaysOff = new object() }
+            }
+        };
+
+        var settings = new TracerSettings();
+        settings.LoadFile(conf);
+
+        var sampler = Assert.IsType<AlwaysOffSampler>(settings.Sampler);
+        var decision = sampler.ShouldSample(CreateSamplingParameters(default)).Decision;
+        Assert.Equal(SamplingDecision.Drop, decision);
+    }
+
+    [Fact]
+    public void LoadFile_ConfiguresTraceIdRatioSampler()
+    {
+        const double ratio = 0.25;
+
+        var conf = new YamlConfiguration
+        {
+            TracerProvider = new TracerProviderConfiguration
+            {
+                Sampler = new SamplerConfig
+                {
+                    TraceIdRatio = new TraceIdRatioSamplerConfig
+                    {
+                        Ratio = ratio
+                    }
+                }
+            }
+        };
+
+        var settings = new TracerSettings();
+        settings.LoadFile(conf);
+
+        var sampler = Assert.IsType<TraceIdRatioBasedSampler>(settings.Sampler);
+        var decision = sampler.ShouldSample(CreateSamplingParameters(default)).Decision;
+        Assert.True(decision == SamplingDecision.Drop || decision == SamplingDecision.RecordAndSample);
+    }
+
     private static SamplingParameters CreateSamplingParameters(ActivityContext parentContext)
     {
         return new SamplingParameters(parentContext, ActivityTraceId.CreateRandom(), "span", ActivityKind.Internal, default(TagList), new ActivityLink[] { });
