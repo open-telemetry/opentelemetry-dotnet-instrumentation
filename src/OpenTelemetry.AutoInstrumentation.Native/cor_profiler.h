@@ -232,6 +232,11 @@ public:
     //
     void ConfigureContinuousProfiler(bool threadSamplingEnabled, unsigned int threadSamplingInterval, bool allocationSamplingEnabled, unsigned int maxMemorySamplesPerMinute, unsigned int selectedThreadsSamplingInterval);
 
+    //
+    // IL Rewriting methods
+    //
+    HRESULT RewriteILSystemDataCommandText(const ModuleID module_id);
+
     friend class TracerMethodRewriter;
 };
 
