@@ -112,6 +112,10 @@ internal class TracerSettings : Settings
         }
 
         Processors = processors;
+
+        EnabledInstrumentations = configuration.InstrumentationDevelopment?.DotNet?.Traces?.GetEnabledInstrumentations() ?? [];
+
+        InstrumentationOptions = new InstrumentationOptions(configuration.InstrumentationDevelopment?.DotNet?.Traces);
     }
 
     private static List<TracesExporter> ParseTracesExporter(Configuration configuration)
