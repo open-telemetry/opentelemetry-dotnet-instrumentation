@@ -87,6 +87,7 @@
   \netfx\OpenTelemetry.dll,
   \netfx\OpenTracing.dll,
   \netfx\System.Buffers.dll,
+  \netfx\System.Collections.Immutable.dll,
   \netfx\System.Diagnostics.DiagnosticSource.dll,
   \netfx\System.IO.Pipelines.dll,
   \netfx\System.Memory.dll,
@@ -348,4 +349,4 @@
   \store\x86\net9.0\microsoft.extensions.primitives\9.0.0\lib\net9.0\Microsoft.Extensions.Primitives.dll,
   \win-x64\OpenTelemetry.AutoInstrumentation.Native.dll,
   \win-x86\OpenTelemetry.AutoInstrumentation.Native.dll
-]
+  ]
