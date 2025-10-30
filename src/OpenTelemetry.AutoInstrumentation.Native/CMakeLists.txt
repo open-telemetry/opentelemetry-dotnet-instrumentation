@@ -93,20 +93,6 @@ SET(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${OUTPUT_BIN_DIR})
 SET(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${OUTPUT_BIN_DIR})
 
 # ******************************************************
-# Dependencies
-# ******************************************************
-
-# Add custom commands to setup dependencies via git
-
-add_custom_command(
-    OUTPUT ${OUTPUT_DEPS_DIR}/fmt/libfmt.a
-    COMMAND cp -R ${CMAKE_BINARY_DIR}/../lib/fmt/. ./fmt && cd fmt && cmake -DCMAKE_POSITION_INDEPENDENT_CODE=TRUE -DFMT_TEST=0 -DFMT_DOC=0 . && make
-    WORKING_DIRECTORY ${OUTPUT_DEPS_DIR}
-)
-
-
-
-# ******************************************************
 # Compiler options
 # ******************************************************
 
@@ -185,8 +171,6 @@ add_library("OpenTelemetry.AutoInstrumentation.Native.static" STATIC
         method_rewriter.cpp
         tracer_tokens.cpp
         lib/coreclr/src/pal/prebuilt/idl/corprof_i.cpp
-        # Source dependencies retrievied via additional commands using git
-        ${OUTPUT_DEPS_DIR}/fmt/libfmt.a
 )
 
 set_target_properties("OpenTelemetry.AutoInstrumentation.Native.static" PROPERTIES PREFIX "")
@@ -198,18 +182,15 @@ target_include_directories("OpenTelemetry.AutoInstrumentation.Native.static"
         PUBLIC lib/coreclr/src/pal/inc
         PUBLIC lib/coreclr/src/inc
         PUBLIC lib/spdlog/include
-        PUBLIC ${OUTPUT_DEPS_DIR}/fmt/include
 )
 
 # Define linker libraries
 if (ISMACOS)
     target_link_libraries("OpenTelemetry.AutoInstrumentation.Native.static"
-        ${OUTPUT_DEPS_DIR}/fmt/libfmt.a
         ${CMAKE_DL_LIBS}
     )
 elseif(ISLINUX)
     target_link_libraries("OpenTelemetry.AutoInstrumentation.Native.static"
-        ${OUTPUT_DEPS_DIR}/fmt/libfmt.a
         ${CMAKE_DL_LIBS}
         -static-libgcc
         -static-libstdc++
