@@ -1,4 +1,4 @@
-// Copyright The OpenTelemetry Authors
+﻿// Copyright The OpenTelemetry Authors
 // SPDX-License-Identifier: Apache-2.0
 
 #include "cor_profiler.h"
@@ -110,6 +110,7 @@ HRESULT STDMETHODCALLTYPE CorProfiler::Initialize(IUnknown* cor_profiler_info_un
 
     // code is ready to get runtime information
     runtime_information_ = GetRuntimeInformation(this->info_);
+
     if (Logger::IsDebugEnabled())
     {
         if (runtime_information_.is_desktop())
@@ -138,6 +139,7 @@ HRESULT STDMETHODCALLTYPE CorProfiler::Initialize(IUnknown* cor_profiler_info_un
     if (runtime_information_.is_desktop() && IsNetFxAssemblyRedirectionEnabled())
     {
         InitNetFxAssemblyRedirectsMap();
+        DetectFrameworkVersionTableForRedirectsMap();
     }
 #endif
 
@@ -354,6 +356,11 @@ HRESULT STDMETHODCALLTYPE CorProfiler::AssemblyLoadFinished(AssemblyID assembly_
 void CorProfiler::RedirectAssemblyReferences(const ComPtr<IMetaDataAssemblyImport>& assembly_import,
                                              const ComPtr<IMetaDataAssemblyEmit>&   assembly_emit)
 {
+    if (!assembly_version_redirect_map_current_framework_)
+    {
+        return;
+    }
+
     HRESULT       hr               = S_FALSE;
     HCORENUM      core_enum_handle = NULL;
     const ULONG   assembly_refs_sz = 16;
@@ -401,8 +408,8 @@ void CorProfiler::RedirectAssemblyReferences(const ComPtr<IMetaDataAssemblyImpor
                               "] version=", AssemblyVersionStr(assembly_metadata));
             }
 
-            const auto found_redirect = assembly_version_redirect_map_.find(wsz_name);
-            if (found_redirect == assembly_version_redirect_map_.end())
+            const auto found_redirect = assembly_version_redirect_map_current_framework_->find(wsz_name);
+            if (found_redirect == assembly_version_redirect_map_current_framework_->end())
             {
                 // No redirection to be applied here.
                 continue;
@@ -3772,5 +3779,110 @@ HRESULT STDMETHODCALLTYPE CorProfiler::EventPipeEventDelivered(EVENTPIPE_PROVIDE
     }
     return S_OK;
 }
+
+#ifdef _WIN32
+void CorProfiler::DetectFrameworkVersionTableForRedirectsMap()
+{
+    // Default to 4.6.2 (462) if detection fails
+    int frameworkVersion = 462;
+
+    // Check for 4.7.2 first
+    // If we ever need to detect higher versions, we should use
+    // the registry method below directly (adding detection for 4.7.2 and up)
+    // or find another option
+    ICorProfilerInfo8* info8 = nullptr;
+    HRESULT            hr    = this->info_->QueryInterface(__uuidof(ICorProfilerInfo8), (void**)&info8);
+    if (SUCCEEDED(hr))
+    {
+        info8->Release();
+        info8            = nullptr;
+        frameworkVersion = 472;
+
+        Logger::Debug("DetectFrameworkVersionTableForRedirectsMap: Detected .NET Framework 4.7.2 (ICorProfilerInfo8)");
+    }
+    else
+    {
+
+        HKEY hKey   = nullptr;
+        LONG result = RegOpenKeyExW(HKEY_LOCAL_MACHINE, L"SOFTWARE\\Microsoft\\NET Framework Setup\\NDP\\v4\\Full\\", 0,
+                                    KEY_READ, &hKey);
+
+        if (result != ERROR_SUCCESS)
+        {
+            Logger::Warn("DetectFrameworkVersionTableForRedirectsMap: Failed to open registry key, using default "
+                         "version 462");
+        }
+        else
+        {
+            DWORD releaseValue = 0;
+            DWORD dataSize     = sizeof(DWORD);
+            DWORD valueType    = REG_DWORD;
+
+            result = RegQueryValueExW(hKey, L"Release", nullptr, &valueType, reinterpret_cast<LPBYTE>(&releaseValue),
+                                      &dataSize);
+
+            RegCloseKey(hKey);
+
+            if (result != ERROR_SUCCESS || valueType != REG_DWORD)
+            {
+                Logger::Warn("DetectFrameworkVersionTableForRedirectsMap: Failed to read Release value, using "
+                             "default version 462");
+            }
+            else
+            {
+                // Map release numbers to framework versions
+                // Based on Microsoft documentation:
+                // https://docs.microsoft.com/en-us/dotnet/framework/migration-guide/how-to-determine-which-versions-are-installed
+                if (releaseValue >= 461308)
+                {
+                    frameworkVersion = 471; // 4.7.1
+                }
+                else if (releaseValue >= 460798)
+                {
+                    frameworkVersion = 470; // 4.7
+                }
+                else if (releaseValue >= 394802)
+                {
+                    frameworkVersion = 462; // 4.6.2
+                }
+                else
+                {
+                    Logger::Warn("DetectFrameworkVersionTableForRedirectsMap: Old .NET Framework detected, use 462 "
+                                 "as fallback");
+                }
+            }
+
+            Logger::Debug("DetectFrameworkVersionTableForRedirectsMap: Detected .NET Framework version ",
+                          frameworkVersion, " (Release: ", releaseValue, ")");
+        }
+    }
+
+    assembly_version_redirect_map_current_framework_key_ = 0;
+    for (auto& [key, values] : assembly_version_redirect_map_)
+    {
+        if (key <= frameworkVersion && key > assembly_version_redirect_map_current_framework_key_)
+        {
+            assembly_version_redirect_map_current_framework_key_ = key;
+            assembly_version_redirect_map_current_framework_     = &values;
+        }
+    }
+
+    if (assembly_version_redirect_map_current_framework_key_ != 0)
+    {
+        Logger::Debug("DetectFrameworkVersionTableForRedirectsMap: Use assembly redirection table for ",
+                      assembly_version_redirect_map_current_framework_key_);
+    }
+    else
+    {
+        Logger::Warn("DetectFrameworkVersionTableForRedirectsMap: No assembly redirection tables found. Assembly "
+                     "version redirecting will be disabled.");
+    }
+}
+
+int CorProfiler::GetNetFrameworkRedirectionVersion() const
+{
+    return assembly_version_redirect_map_current_framework_key_;
+}
+#endif
 
 } // namespace trace

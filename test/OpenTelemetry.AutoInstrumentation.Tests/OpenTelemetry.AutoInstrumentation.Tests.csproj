@@ -1,9 +1,10 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <ItemGroup>
     <PackageReference Include="Newtonsoft.Json" />
     <PackageReference Include="Xunit.SkippableFact" />
     <PackageReference Include="log4net" />
+    <PackageReference Include="Microsoft.Build" Condition=" '$(TargetFramework)' == 'net9.0' "/>
   </ItemGroup>
 
   <ItemGroup>
