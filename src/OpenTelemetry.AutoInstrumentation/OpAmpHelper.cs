@@ -20,11 +20,11 @@ internal static class OpAmpHelper
 
     public static bool IsRunning { get; private set; }
 
-    public static void EnableOpAmpClient(Resource resources)
+    public static void EnableOpAmpClient(Resource resources, OpAmpSettings opAmpSettins)
     {
         try
         {
-            _client = new OpAmpClient(settings => ConfigureClient(settings, resources));
+            _client = new OpAmpClient(settings => ConfigureClient(settings, opAmpSettins, resources));
 
             _clientRunningTask = Task.Run(async () =>
             {
@@ -77,17 +77,17 @@ internal static class OpAmpHelper
         }
     }
 
-    private static void ConfigureClient(OpAmpClientSettings settings, Resource resources)
+    private static void ConfigureClient(OpAmpClientSettings settings, OpAmpSettings opAmpSettings, Resource resources)
     {
         // Configure connection type
-        var connectionType = GetConnectionType();
+        var connectionType = opAmpSettings.ServerConnectionType;
         if (connectionType.HasValue)
         {
             settings.ConnectionType = connectionType.Value;
         }
 
         // Configure server URL
-        var serverUrl = GetServerUrl();
+        var serverUrl = opAmpSettings.ServerUrl;
         if (serverUrl != null)
         {
             settings.ServerUrl = serverUrl;
@@ -116,37 +116,6 @@ internal static class OpAmpHelper
         }
 
         settings.Identification.AddNonIdentifyingAttribute("opamp.version", GetOpAmpVersion());
-    }
-
-    private static Uri? GetServerUrl()
-    {
-        var url = Environment.GetEnvironmentVariable(ConfigurationKeys.OpAmpServerUrl);
-
-        if (string.IsNullOrWhiteSpace(url))
-        {
-            // indicates that the default value should be used
-            return null;
-        }
-
-        return new Uri(url);
-    }
-
-    private static ConnectionType? GetConnectionType()
-    {
-        var type = Environment.GetEnvironmentVariable(ConfigurationKeys.OpAmpConnectionType);
-
-        if (string.IsNullOrWhiteSpace(type))
-        {
-            // indicates that the default value should be used
-            return null;
-        }
-
-        return type.ToLower() switch
-        {
-            "websocket" => ConnectionType.WebSocket,
-            "http" => ConnectionType.Http,
-            _ => throw new InvalidOperationException($"{ConfigurationKeys.OpAmpConnectionType} environment variable has an invalid value. Valid values are 'websocket' and 'http'."),
-        };
     }
 
     private static string GetOpAmpVersion()

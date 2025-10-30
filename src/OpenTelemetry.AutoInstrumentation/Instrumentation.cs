@@ -70,6 +70,8 @@ internal static class Instrumentation
 
     internal static Lazy<NoCodeSettings> NoCodeSettings { get; } = new(() => Settings.FromDefaultSources<NoCodeSettings>(FailFastSettings.Value.FailFast));
 
+    internal static Lazy<OpAmpSettings> OpAmpSettings { get; } = new(() => Settings.FromDefaultSources<OpAmpSettings>(FailFastSettings.Value.FailFast));
+
     /// <summary>
     /// Initialize the OpenTelemetry SDK with a pre-defined set of exporters, shims, and
     /// instrumentations.
@@ -217,11 +219,11 @@ internal static class Instrumentation
             OpenTracingHelper.EnableOpenTracing(_tracerProvider);
         }
 
-        if (GeneralSettings.Value.OpAmpClientEnabled)
+        if (OpAmpSettings.Value.OpAmpClientEnabled)
         {
             var resources = ResourceHelper.AggregateResources(_tracerProvider, _meterProvider, LoggerProvider);
 
-            OpAmpHelper.EnableOpAmpClient(resources);
+            OpAmpHelper.EnableOpAmpClient(resources, OpAmpSettings.Value);
         }
     }
 

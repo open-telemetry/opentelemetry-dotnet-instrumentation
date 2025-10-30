@@ -30,11 +30,6 @@ internal class GeneralSettings : Settings
     /// </summary>
     public bool ProfilerEnabled { get; private set; }
 
-    /// <summary>
-    /// Gets a value indicating whether the OpAmp client is enabled.
-    /// </summary>
-    public bool OpAmpClientEnabled { get; private set; }
-
     protected override void OnLoadEnvVar(Configuration configuration)
     {
         var providerPlugins = configuration.GetString(ConfigurationKeys.ProviderPlugins);
@@ -50,7 +45,6 @@ internal class GeneralSettings : Settings
         SetupSdk = configuration.GetBool(ConfigurationKeys.SetupSdk) ?? true;
 
         ProfilerEnabled = configuration.GetString(ConfigurationKeys.ProfilingEnabled) == "1";
-        OpAmpClientEnabled = configuration.GetBool(ConfigurationKeys.OpAmpEnabled) ?? false;
     }
 
     protected override void OnLoadFile(YamlConfiguration configuration)
