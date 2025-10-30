@@ -30,7 +30,13 @@ internal class Program
 
         var install = flag == InstallFlag;
         var publisher = new System.EnterpriseServices.Internal.Publish();
-        var files = Directory.GetFiles(dir, "*.dll");
+        var files = Directory.GetFiles(dir, "*.dll").ToList();
+        var links = Directory.GetFiles(dir, "*.link");
+        foreach (var link in links)
+        {
+            var linkTarget = File.ReadAllText(link);
+            files.Add(Path.Combine(dir, "..", linkTarget, Path.GetFileNameWithoutExtension(link)));
+        }
 
         foreach (var file in files)
         {
@@ -47,8 +53,8 @@ internal class Program
         }
 
         var resultText = install
-            ? $"Success: Installed {files.Length} libraries in the GAC."
-            : $"Success: Uninstalled {files.Length} libraries from the GAC.";
+            ? $"Success: Installed {files.Count} libraries in the GAC."
+            : $"Success: Uninstalled {files.Count} libraries from the GAC.";
         Console.WriteLine(resultText);
     }
 }
