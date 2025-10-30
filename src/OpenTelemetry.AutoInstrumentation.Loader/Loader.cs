@@ -9,7 +9,7 @@ namespace OpenTelemetry.AutoInstrumentation.Loader;
 /// <summary>
 /// A class that attempts to load the OpenTelemetry.AutoInstrumentation .NET assembly.
 /// </summary>
-internal partial class Loader
+internal class Loader
 {
     private const string LoaderLoggerSuffix = "Loader";
     private static readonly IOtelLogger Logger = OtelLogging.GetLogger(LoaderLoggerSuffix);
@@ -22,10 +22,9 @@ internal partial class Loader
     /// </summary>
     static Loader()
     {
-        AssemblyResolver.SetLoggerNoLock(Logger);
         try
         {
-            AppDomain.CurrentDomain.AssemblyResolve += AssemblyResolver.AssemblyResolve_ManagedProfilerDependencies;
+            AppDomain.CurrentDomain.AssemblyResolve += new AssemblyResolver(Logger).AssemblyResolve_ManagedProfilerDependencies;
         }
         catch (Exception ex)
         {

@@ -317,6 +317,14 @@ Unregister-OpenTelemetryForWindowsService -WindowsServiceName MyServiceName
 Uninstall-OpenTelemetryCore
 ```
 
+#### Update .NET Framework version
+
+By default, `Install-OpenTelemetryCore` and `Update-OpenTelemetryCore` register OpenTelemetry (and dependencies) 
+assemblies in the Global Assembly Cache (GAC). Some of these assemblies are tightly coupled to specific .NET Framework versions. 
+
+When upgrading from .NET Framework versions older than 4.7.2, these assemblies should be removed from the GAC.
+For such upgrade scenarios, it is recommended to uninstall and reinstall OpenTelemetry after the .NET Framework update is complete.
+
 ## Instrument a container
 
 You can find our demonstrative example
