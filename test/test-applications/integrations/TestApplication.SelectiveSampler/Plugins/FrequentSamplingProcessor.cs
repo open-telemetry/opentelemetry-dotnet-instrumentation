@@ -32,7 +32,7 @@ public class FrequentSamplingProcessor : BaseProcessor<Activity>
     public override void OnStart(Activity data)
     {
         // Native side API is trace-based, notifying only of root span is sufficient.
-        if (data.Parent == null)
+        if (IsLocalRoot(data))
         {
             _startSamplingDelegate?.Invoke(data.TraceId);
         }
@@ -40,9 +40,14 @@ public class FrequentSamplingProcessor : BaseProcessor<Activity>
 
     public override void OnEnd(Activity data)
     {
-        if (data.Parent == null)
+        if (IsLocalRoot(data))
         {
             _stopSamplingDelegate?.Invoke(data.TraceId);
         }
+    }
+
+    private static bool IsLocalRoot(Activity data)
+    {
+        return data.Parent == null || data.HasRemoteParent;
     }
 }
