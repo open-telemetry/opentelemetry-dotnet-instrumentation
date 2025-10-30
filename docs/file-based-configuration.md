@@ -30,7 +30,7 @@ For more details, see: [OpenTelemetry YAML File Format Specification](https://gi
 
 ## Configuration Examples
 
-## General Configuration
+### General Configuration
 
 ``` yaml
 # The file format version.
@@ -170,6 +170,27 @@ propagator:
     b3multi:      # B3 multi-header propagator
   # Alternatively, configure via a comma-separated list (same format as OTEL_PROPAGATORS).
   composite_list: ${OTEL_PROPAGATORS}
+```
+
+## Internal logs
+
+You can configure internal logging using the following YAML configuration
+For more details, see: [Internal logs documentation](config.md/#internal-logs)
+
+``` yaml
+# Values include: none, error, warn, info, debug.
+# if omitted or null, info is used. 
+log_level: "info"
+# Configure the directory where log files are stored.
+# If omitted or null, default is used.
+log_directory: "/var/log/opentelemetry/dotnet/app1"
+# Configure the maximum size of log files (in bytes).
+# If omitted or null, 10485760(10MB) is used.
+log_file_size: 10485760
+# Configure AutoInstrumentation diagnostic logs sink.
+# Values include: none, console, file.
+# If omitted or null, file is used.
+logger: "file"
 ```
 
 ### Configuration based instrumentation
