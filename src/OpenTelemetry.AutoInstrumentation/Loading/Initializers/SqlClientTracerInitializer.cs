@@ -1,8 +1,6 @@
 // Copyright The OpenTelemetry Authors
 // SPDX-License-Identifier: Apache-2.0
 
-using System.Reflection;
-using OpenTelemetry.AutoInstrumentation.Configurations;
 using OpenTelemetry.AutoInstrumentation.Plugins;
 
 namespace OpenTelemetry.AutoInstrumentation.Loading.Initializers;
@@ -14,7 +12,7 @@ internal sealed class SqlClientTracerInitializer : SqlClientInitializer
     private int _initialized;
 
     public SqlClientTracerInitializer(LazyInstrumentationLoader lazyInstrumentationLoader, PluginManager pluginManager)
-        : base(lazyInstrumentationLoader)
+        : base(lazyInstrumentationLoader, nameof(SqlClientTracerInitializer))
     {
         _pluginManager = pluginManager;
     }
