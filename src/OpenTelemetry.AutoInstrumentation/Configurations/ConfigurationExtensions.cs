@@ -32,9 +32,9 @@ internal static class ConfigurationExtensions
 
         if (string.IsNullOrWhiteSpace(values))
         {
-            return Array.Empty<string>();
+            return [];
         }
 
-        return values!.Split(new[] { valueSeparator }, StringSplitOptions.RemoveEmptyEntries);
+        return values!.Split([valueSeparator], StringSplitOptions.RemoveEmptyEntries);
     }
 }

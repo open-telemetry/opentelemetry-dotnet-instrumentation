@@ -18,4 +18,21 @@ internal static class HeaderConfigurationExtensions
 
         return headers.Select(stringToHeaderCacheConverter).ToArray();
     }
+
+    public static IReadOnlyList<AdditionalTag> ParseHeaders(string? headersList, Func<string, AdditionalTag> stringToHeaderCacheConverter)
+    {
+        if (string.IsNullOrWhiteSpace(headersList))
+        {
+            return [];
+        }
+
+        var headers = headersList!.Split([Constants.ConfigurationValues.Separator], StringSplitOptions.RemoveEmptyEntries);
+
+        if (headers.Length == 0)
+        {
+            return [];
+        }
+
+        return headers.Select(stringToHeaderCacheConverter).ToArray();
+    }
 }
