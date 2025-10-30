@@ -3,7 +3,6 @@
 
 using OpenTelemetry.AutoInstrumentation.Configurations.FileBasedConfiguration;
 using OpenTelemetry.AutoInstrumentation.Logging;
-using OpenTelemetry.OpAmp.Client.Settings;
 
 namespace OpenTelemetry.AutoInstrumentation.Configurations;
 
@@ -24,20 +23,20 @@ internal class OpAmpSettings : Settings
     /// <summary>
     /// Gets the type of connection used for communication.
     /// </summary>
-    public ConnectionType? ServerConnectionType { get; private set; }
+    public string? ConnectionType { get; private set; }
 
     protected override void OnLoadEnvVar(Configuration configuration)
     {
         OpAmpClientEnabled = configuration.GetBool(ConfigurationKeys.OpAmpEnabled) ?? false;
         ServerUrl = GetServerUrl(configuration.GetString(ConfigurationKeys.OpAmpServerUrl), configuration.FailFast);
-        ServerConnectionType = GetConnectionType(configuration.GetString(ConfigurationKeys.OpAmpConnectionType), configuration.FailFast);
+        ConnectionType = GetConnectionType(configuration.GetString(ConfigurationKeys.OpAmpConnectionType), configuration.FailFast);
     }
 
     protected override void OnLoadFile(YamlConfiguration configuration)
     {
         OpAmpClientEnabled = configuration.OpAmp?.Enabled ?? false;
         ServerUrl = GetServerUrl(configuration.OpAmp?.ServerUrl, configuration.FailFast);
-        ServerConnectionType = GetConnectionType(configuration.OpAmp?.ConnectionType, configuration.FailFast);
+        ConnectionType = GetConnectionType(configuration.OpAmp?.ConnectionType, configuration.FailFast);
     }
 
     private static Uri? GetServerUrl(string? configurationValue, bool failFast)
@@ -66,7 +65,7 @@ internal class OpAmpSettings : Settings
         }
     }
 
-    private static ConnectionType? GetConnectionType(string? configurationValue, bool failFast)
+    private static string? GetConnectionType(string? configurationValue, bool failFast)
     {
         if (string.IsNullOrWhiteSpace(configurationValue))
         {
@@ -74,24 +73,20 @@ internal class OpAmpSettings : Settings
             return null;
         }
 
-        var parsedValue = configurationValue!.ToLower() switch
+        var isValid = configurationValue!.ToLower() is "http" or "websocket";
+        if (isValid)
         {
-            "websocket" => ConnectionType.WebSocket,
-            "http" => ConnectionType.Http,
-            _ => (ConnectionType?)null,
-        };
-
-        if (parsedValue == null)
-        {
-            var unsupportedMessage = $"OpAMP connection type configuration has an invalid value: '{configurationValue}'.";
-            Logger.Error(unsupportedMessage);
-
-            if (failFast)
-            {
-                throw new NotSupportedException(unsupportedMessage);
-            }
+            return configurationValue!.ToLower();
         }
 
-        return parsedValue;
+        var unsupportedMessage = $"OpAMP connection type configuration has an invalid value: '{configurationValue}'.";
+        Logger.Error(unsupportedMessage);
+
+        if (failFast)
+        {
+            throw new NotSupportedException(unsupportedMessage);
+        }
+
+        return null;
     }
 }
