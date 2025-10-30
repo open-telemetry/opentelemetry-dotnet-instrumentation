@@ -358,11 +358,11 @@ public class FilebasedTracesSettingsTests
         {
             ParentBased = new ParentBasedSamplerConfig
             {
-                Root = new SamplerConfig { AlwaysOn = new object() },
-                RemoteParentSampled = new SamplerConfig { AlwaysOn = new object() },
-                RemoteParentNotSampled = new SamplerConfig { AlwaysOff = new object() },
-                LocalParentSampled = new SamplerConfig { AlwaysOn = new object() },
-                LocalParentNotSampled = new SamplerConfig { AlwaysOff = new object() }
+                Root = new SamplerVariantsConfig { AlwaysOn = new object() },
+                RemoteParentSampled = new SamplerVariantsConfig { AlwaysOn = new object() },
+                RemoteParentNotSampled = new SamplerVariantsConfig { AlwaysOff = new object() },
+                LocalParentSampled = new SamplerVariantsConfig { AlwaysOn = new object() },
+                LocalParentNotSampled = new SamplerVariantsConfig { AlwaysOff = new object() }
             }
         };
 

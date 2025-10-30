@@ -137,27 +137,72 @@ internal static class SamplerFactory
         return new ParentBasedSampler(rootSampler, remoteParentSampled, remoteParentNotSampled, localParentSampled, localParentNotSampled);
     }
 
-    private static Sampler GetSamplerOrDefault(SamplerConfig? samplerConfig, Sampler defaultSampler, bool failFast, string path, string defaultSamplerName)
+    private static Sampler GetSamplerOrDefault(SamplerVariantsConfig? samplerConfig, Sampler defaultSampler, bool failFast, string path, string defaultSamplerName)
     {
         if (samplerConfig == null)
         {
             return defaultSampler;
         }
 
-        var sampler = CreateSamplerInternal(samplerConfig, failFast, path);
-        if (sampler != null)
+        var configuredSamplers = new Dictionary<string, Sampler?>();
+
+        if (samplerConfig.AlwaysOn != null)
         {
-            return sampler;
+            configuredSamplers.Add("always_on", new AlwaysOnSampler());
         }
 
-        var message = $"Sampler configuration '{path}' is invalid. Falling back to default '{defaultSamplerName}' sampler.";
-        Logger.Warning(message);
-
-        if (failFast)
+        if (samplerConfig.AlwaysOff != null)
         {
-            throw new InvalidOperationException(message);
+            configuredSamplers.Add("always_off", new AlwaysOffSampler());
         }
 
-        return defaultSampler;
+        if (samplerConfig.TraceIdRatio != null)
+        {
+            configuredSamplers.Add("trace_id_ratio", CreateTraceIdRatioSampler(
+                samplerConfig.TraceIdRatio, failFast, $"{path}.trace_id_ratio"));
+        }
+
+        if (configuredSamplers.Count == 0)
+        {
+            var message = $"Sampler configuration '{path}' does not specify a sampler type.";
+            Logger.Warning(message);
+
+            if (failFast)
+            {
+                throw new InvalidOperationException(message);
+            }
+
+            return defaultSampler;
+        }
+
+        if (configuredSamplers.Count > 1)
+        {
+            var configuredNames = string.Join(", ", configuredSamplers.Keys);
+            var message = $"Sampler configuration '{path}' specifies multiple sampler types ({configuredNames}). Only one sampler can be configured.";
+            Logger.Error(message);
+
+            if (failFast)
+            {
+                throw new InvalidOperationException(message);
+            }
+
+            return defaultSampler;
+        }
+
+        var sampler = configuredSamplers.Values.First();
+        if (sampler == null)
+        {
+            var message = $"Sampler configuration '{path}' is invalid. Falling back to default '{defaultSamplerName}' sampler.";
+            Logger.Warning(message);
+
+            if (failFast)
+            {
+                throw new InvalidOperationException(message);
+            }
+
+            return defaultSampler;
+        }
+
+        return sampler;
     }
 }

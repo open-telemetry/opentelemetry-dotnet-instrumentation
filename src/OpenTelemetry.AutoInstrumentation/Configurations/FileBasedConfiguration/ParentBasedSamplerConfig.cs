@@ -10,17 +10,17 @@ namespace OpenTelemetry.AutoInstrumentation.Configurations.FileBasedConfiguratio
 internal class ParentBasedSamplerConfig
 {
     [YamlMember(Alias = "root")]
-    public SamplerConfig? Root { get; set; }
+    public SamplerVariantsConfig? Root { get; set; }
 
     [YamlMember(Alias = "remote_parent_sampled")]
-    public SamplerConfig? RemoteParentSampled { get; set; }
+    public SamplerVariantsConfig? RemoteParentSampled { get; set; }
 
     [YamlMember(Alias = "remote_parent_not_sampled")]
-    public SamplerConfig? RemoteParentNotSampled { get; set; }
+    public SamplerVariantsConfig? RemoteParentNotSampled { get; set; }
 
     [YamlMember(Alias = "local_parent_sampled")]
-    public SamplerConfig? LocalParentSampled { get; set; }
+    public SamplerVariantsConfig? LocalParentSampled { get; set; }
 
     [YamlMember(Alias = "local_parent_not_sampled")]
-    public SamplerConfig? LocalParentNotSampled { get; set; }
+    public SamplerVariantsConfig? LocalParentNotSampled { get; set; }
 }
