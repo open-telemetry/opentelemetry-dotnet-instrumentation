@@ -1,0 +1,12 @@
+logger_provider:
+  processors:
+    - batch:
+        schedule_delay: ${OTEL_BSP_SCHEDULE_DELAY}
+        export_timeout: ${OTEL_BSP_EXPORT_TIMEOUT}
+        max_queue_size: ${OTEL_BSP_MAX_QUEUE_SIZE}
+        max_export_batch_size: ${OTEL_BSP_MAX_EXPORT_BATCH_SIZE}
+        exporter:
+          otlp_http:
+            endpoint: ${OTEL_EXPORTER_OTLP_LOGS_ENDPOINT}
+            timeout: ${OTEL_EXPORTER_OTLP_LOGS_TIMEOUT}
+            headers_list: ${OTEL_EXPORTER_OTLP_LOGS_HEADERS}
