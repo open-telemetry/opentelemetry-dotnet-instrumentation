@@ -1,7 +1,6 @@
 // Copyright The OpenTelemetry Authors
 // SPDX-License-Identifier: Apache-2.0
 
-using System;
 using OpenTelemetry.AutoInstrumentation.Configurations.FileBasedConfiguration;
 using OpenTelemetry.AutoInstrumentation.Configurations.Otlp;
 using OpenTelemetry.AutoInstrumentation.Logging;
@@ -80,6 +79,8 @@ internal class MetricSettings : Settings
         var readers = configuration.MeterProvider?.Readers;
         MetricsEnabled = readers != null && readers.Count > 0;
         Readers = readers;
+
+        EnabledInstrumentations = configuration.InstrumentationDevelopment?.DotNet?.Metrics?.GetEnabledInstrumentations() ?? [];
     }
 
     private static List<MetricsExporter> ParseMetricExporter(Configuration configuration)

@@ -11,26 +11,17 @@ namespace OpenTelemetry.AutoInstrumentation.Loader;
 /// </summary>
 internal partial class AssemblyResolver
 {
-    private static readonly string ManagedProfilerDirectory;
+    private readonly string _managedProfilerDirectory;
 
-    private static IOtelLogger logger = NoopLogger.Instance;
+    private readonly IOtelLogger _logger;
 
-    /// <summary>
-    /// Initializes static members of the <see cref="AssemblyResolver"/> class.
-    /// </summary>
-    static AssemblyResolver()
+    public AssemblyResolver(IOtelLogger otelLogger)
     {
-        ManagedProfilerDirectory = ResolveManagedProfilerDirectory();
+        _logger = otelLogger;
+        _managedProfilerDirectory = ResolveManagedProfilerDirectory();
     }
 
-    // This method is not thread safe. To avoid adding lock here, it should only be
-    // called in the static constructor of Loader.
-    internal static void SetLoggerNoLock(IOtelLogger otelLogger)
-    {
-        logger = otelLogger;
-    }
-
-    private static string? ReadEnvironmentVariable(string key)
+    private string? ReadEnvironmentVariable(string key)
     {
         try
         {
@@ -38,7 +29,7 @@ internal partial class AssemblyResolver
         }
         catch (Exception ex)
         {
-            logger.Error(ex, "Error while loading environment variable {0}", key);
+            _logger.Error(ex, "Error while loading environment variable {0}", key);
         }
 
         return null;

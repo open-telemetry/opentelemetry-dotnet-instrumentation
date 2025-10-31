@@ -197,7 +197,7 @@ chmod +x $HOME/.otel-dotnet-auto/instrument.sh
 . $HOME/.otel-dotnet-auto/instrument.sh
 
 # Run your application with instrumentation
-OTEL_SERVICE_NAME=myapp OTEL_RESOURCE_ATTRIBUTES=deployment.environment=staging,service.version=1.0.0 ./MyNetApp
+OTEL_SERVICE_NAME=myapp OTEL_RESOURCE_ATTRIBUTES=deployment.environment.name=staging,service.version=1.0.0 ./MyNetApp
 ```
 
 NOTE: for air-gapped environments you can provide either the installation archive directly with:
@@ -316,6 +316,14 @@ Unregister-OpenTelemetryForWindowsService -WindowsServiceName MyServiceName
 # Finally, uninstall OpenTelemetry instrumentation
 Uninstall-OpenTelemetryCore
 ```
+
+#### Update .NET Framework version
+
+By default, `Install-OpenTelemetryCore` and `Update-OpenTelemetryCore` register OpenTelemetry (and dependencies) 
+assemblies in the Global Assembly Cache (GAC). Some of these assemblies are tightly coupled to specific .NET Framework versions. 
+
+When upgrading from .NET Framework versions older than 4.7.2, these assemblies should be removed from the GAC.
+For such upgrade scenarios, it is recommended to uninstall and reinstall OpenTelemetry after the .NET Framework update is complete.
 
 ## Instrument a container
 

@@ -28,6 +28,30 @@ public class SqlClientSystemDataTests : TestHelper
         collector.AssertExpectations();
     }
 
+    [SkippableTheory]
+    [Trait("Category", "EndToEnd")]
+    [InlineData(true)]
+    [InlineData(false)]
+    public void SqlClientIlRewrite(bool enableIlRewrite)
+    {
+        SetEnvironmentVariable("OTEL_DOTNET_AUTO_SQLCLIENT_NETFX_ILREWRITE_ENABLED", enableIlRewrite.ToString());
+        using var collector = new MockSpansCollector(Output);
+        SetExporter(collector);
+
+        if (enableIlRewrite)
+        {
+            collector.Expect("OpenTelemetry.Instrumentation.SqlClient", span => span.Attributes.Any(attr => attr.Key == "db.statement" && !string.IsNullOrWhiteSpace(attr.Value?.StringValue)));
+        }
+        else
+        {
+            collector.Expect("OpenTelemetry.Instrumentation.SqlClient", span => span.Attributes.All(attr => attr.Key != "db.statement"));
+        }
+
+        RunTestApplication();
+
+        collector.AssertExpectations();
+    }
+
     [Fact]
     [Trait("Category", "EndToEnd")]
     public void SubmitMetrics()

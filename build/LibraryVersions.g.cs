@@ -19,14 +19,14 @@ public static partial class LibraryVersion
             "TestApplication.Azure",
             [
                 new("12.22.2"),
-                new("12.25.0"),
+                new("12.26.0"),
             ]
         },
         {
             "TestApplication.Elasticsearch",
             [
                 new("8.15.10"),
-                new("9.1.5"),
+                new("9.2.0"),
             ]
         },
         {
@@ -34,7 +34,7 @@ public static partial class LibraryVersion
             [
                 new("6.0.35"),
                 new("8.0.10"),
-                new("9.0.8"),
+                new("9.0.10"),
             ]
         },
         {
@@ -51,7 +51,7 @@ public static partial class LibraryVersion
             [
                 new("7.5.0", additionalMetaData: new() { { "GraphQLMicrosoftDI", "7.5.0" }, { "GraphQLServerTransportsAspNetCore", "7.5.0" }, { "GraphQLServerUIPGraphiQL", "7.5.0" } }),
                 new("8.0.2", additionalMetaData: new() { { "GraphQLMicrosoftDI", "8.0.2" }, { "GraphQLServerTransportsAspNetCore", "8.0.2" }, { "GraphQLServerUIPGraphiQL", "8.0.2" } }),
-                new("8.5.0", additionalMetaData: new() { { "GraphQLMicrosoftDI", "8.5.0" }, { "GraphQLServerTransportsAspNetCore", "8.3.0" }, { "GraphQLServerUIPGraphiQL", "8.3.0" } }),
+                new("8.7.0", additionalMetaData: new() { { "GraphQLMicrosoftDI", "8.7.0" }, { "GraphQLServerTransportsAspNetCore", "8.3.2" }, { "GraphQLServerUIPGraphiQL", "8.3.2" } }),
             ]
         },
         {
@@ -72,14 +72,14 @@ public static partial class LibraryVersion
             "TestApplication.MassTransit",
             [
                 new("8.3.0"),
-                new("8.5.2"),
+                new("8.5.5"),
             ]
         },
         {
             "TestApplication.SqlClient.Microsoft",
             [
                 new("5.2.2"),
-                new("6.1.1"),
+                new("6.1.2"),
             ]
         },
         {
@@ -109,14 +109,14 @@ public static partial class LibraryVersion
             "TestApplication.MySqlData",
             [
                 new("9.0.0"),
-                new("9.4.0"),
+                new("9.5.0"),
             ]
         },
         {
             "TestApplication.Npgsql",
             [
                 new("8.0.5"),
-                new("9.0.3", supportedFrameworks: [ "net9.0", "net8.0" ]),
+                new("9.0.4", supportedFrameworks: [ "net9.0", "net8.0" ]),
             ]
         },
         {
@@ -145,7 +145,7 @@ public static partial class LibraryVersion
             "TestApplication.Quartz",
             [
                 new("3.6.0"),
-                new("3.15.0"),
+                new("3.15.1"),
             ]
         },
         {
@@ -161,7 +161,7 @@ public static partial class LibraryVersion
             "TestApplication.StackExchangeRedis",
             [
                 new("2.6.122"),
-                new("2.9.11"),
+                new("2.9.32"),
             ]
         },
         {
@@ -177,7 +177,7 @@ public static partial class LibraryVersion
             [
                 new("1.8.2"),
                 new("1.9.2"),
-                new("2.11.1"),
+                new("2.12.0"),
             ]
         },
     };
