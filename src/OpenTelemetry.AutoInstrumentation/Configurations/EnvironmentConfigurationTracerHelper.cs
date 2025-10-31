@@ -62,11 +62,17 @@ internal static class EnvironmentConfigurationTracerHelper
             builder.AddOpenTracingShimSource();
         }
 
-        builder
+        builder = builder
             // Exporters can cause dependency loads.
             // Should be called later if dependency listeners are already setup.
-            .SetExporter(settings, pluginManager)
-            .AddSource(settings.ActivitySources.ToArray());
+            .SetExporter(settings, pluginManager);
+
+        if (settings.Sampler != null)
+        {
+            builder = builder.SetSampler(settings.Sampler);
+        }
+
+        builder = builder.AddSource(settings.ActivitySources.ToArray());
 
         foreach (var legacySource in settings.AdditionalLegacySources)
         {
