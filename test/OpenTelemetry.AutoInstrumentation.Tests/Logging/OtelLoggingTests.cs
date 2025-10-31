@@ -5,106 +5,19 @@ using OpenTelemetry.AutoInstrumentation.Logging;
 using OpenTelemetry.AutoInstrumentation.Tests.Util;
 using Xunit;
 
-namespace OpenTelemetry.AutoInstrumentation.Tests;
+namespace OpenTelemetry.AutoInstrumentation.Tests.Logging;
 
 [Collection("Non-Parallel Collection")]
 public class OtelLoggingTests : IDisposable
 {
     public OtelLoggingTests()
     {
-        UnsetLoggingEnvVars();
+        UnsetAllLoggingEnvVars();
     }
 
     public void Dispose()
     {
-        UnsetLoggingEnvVars();
-    }
-
-    [Fact]
-    public void WhenNoFileSizeIsConfigured_Then_DefaultIsUsed()
-    {
-        var defaultSize = OtelLogging.GetConfiguredFileSizeLimitBytes();
-        Assert.Equal(10 * 1024 * 1024, defaultSize);
-    }
-
-    [Fact]
-    public void WhenValidFileSizeIsConfigured_Then_ItIsUsed()
-    {
-        Environment.SetEnvironmentVariable("OTEL_DOTNET_AUTO_LOG_FILE_SIZE", "1024");
-
-        Assert.Equal(1024, OtelLogging.GetConfiguredFileSizeLimitBytes());
-    }
-
-    [Fact]
-    public void WhenInvalidFileSizeIsConfigured_Then_DefaultIsUsed()
-    {
-        Environment.SetEnvironmentVariable("OTEL_DOTNET_AUTO_LOG_FILE_SIZE", "-1");
-
-        Assert.Equal(10 * 1024 * 1024, OtelLogging.GetConfiguredFileSizeLimitBytes());
-    }
-
-    [Fact]
-    public void WhenLogLevelIsNotConfigured_Then_DefaultIsUsed()
-    {
-        Environment.SetEnvironmentVariable("OTEL_LOG_LEVEL", null);
-
-        Assert.Equal(LogLevel.Information, OtelLogging.GetConfiguredLogLevel());
-    }
-
-    [Fact]
-    public void WhenInvalidLogLevelIsConfigured_Then_DefaultIsUsed()
-    {
-        Environment.SetEnvironmentVariable("OTEL_LOG_LEVEL", "invalid");
-
-        Assert.Equal(LogLevel.Information, OtelLogging.GetConfiguredLogLevel());
-    }
-
-    [Fact]
-    public void WhenValidLogLevelIsConfigured_Then_ItIsUsed()
-    {
-        Environment.SetEnvironmentVariable("OTEL_LOG_LEVEL", "warn");
-
-        Assert.Equal(LogLevel.Warning, OtelLogging.GetConfiguredLogLevel());
-    }
-
-    [Fact]
-    public void WhenNoLoggingIsConfigured_Then_LogLevelHasNoValue()
-    {
-        Environment.SetEnvironmentVariable("OTEL_LOG_LEVEL", "none");
-
-        Assert.Null(OtelLogging.GetConfiguredLogLevel());
-    }
-
-    [Fact]
-    public void WhenLogSinkIsNotConfigured_Then_DefaultIsUsed()
-    {
-        Environment.SetEnvironmentVariable("OTEL_DOTNET_AUTO_LOGGER", null);
-
-        Assert.Equal(LogSink.File, OtelLogging.GetConfiguredLogSink());
-    }
-
-    [Fact]
-    public void WhenInvalidLogSinkIsConfigured_Then_DefaultIsUsed()
-    {
-        Environment.SetEnvironmentVariable("OTEL_DOTNET_AUTO_LOGGER", "invalid");
-
-        Assert.Equal(LogSink.File, OtelLogging.GetConfiguredLogSink());
-    }
-
-    [Fact]
-    public void WhenValidLogSinkIsConfigured_Then_ItIsUsed()
-    {
-        Environment.SetEnvironmentVariable("OTEL_DOTNET_AUTO_LOGGER", "console");
-
-        Assert.Equal(LogSink.Console, OtelLogging.GetConfiguredLogSink());
-    }
-
-    [Fact]
-    public void WhenNoLogSinkIsConfigured_Then_NoOpSinkIsUsed()
-    {
-        Environment.SetEnvironmentVariable("OTEL_DOTNET_AUTO_LOGGER", "none");
-
-        Assert.Equal(LogSink.NoOp, OtelLogging.GetConfiguredLogSink());
+        UnsetAllLoggingEnvVars();
     }
 
     [Fact]
@@ -128,11 +41,9 @@ public class OtelLoggingTests : IDisposable
             logger.Close(); // Shutdown the logger to release the file
 
             var files = tempLogsDirectory.GetFiles();
-
             var file = Assert.Single(files);
 
             var content = File.ReadAllText(file.FullName);
-
             Assert.Contains(logLine, content);
         }
         finally
@@ -147,16 +58,14 @@ public class OtelLoggingTests : IDisposable
         Environment.SetEnvironmentVariable("OTEL_LOG_LEVEL", "debug");
         Environment.SetEnvironmentVariable("OTEL_DOTNET_AUTO_LOGGER", "console");
 
-        var currentWritter = Console.Out;
+        var currentWriter = Console.Out;
 
         using var ms = new MemoryStream();
         using var tw = new StreamWriter(ms);
-
         Console.SetOut(tw);
 
         try
         {
-            // Reset internal state
             OtelLogging.Reset();
 
             var logger = OtelLogging.GetLogger("ConsoleUnitTests");
@@ -174,7 +83,7 @@ public class OtelLoggingTests : IDisposable
         }
         finally
         {
-            Console.SetOut(currentWritter);
+            Console.SetOut(currentWriter);
         }
     }
 
@@ -184,16 +93,14 @@ public class OtelLoggingTests : IDisposable
         Environment.SetEnvironmentVariable("OTEL_LOG_LEVEL", "debug");
         Environment.SetEnvironmentVariable("OTEL_DOTNET_AUTO_LOGGER", "console");
 
-        var currentWritter = Console.Out;
+        var currentWriter = Console.Out;
 
         using var ms = new MemoryStream();
         using var tw = new StreamWriter(ms);
-
         Console.SetOut(tw);
 
         try
         {
-            // Reset internal state
             OtelLogging.Reset();
 
             var loggerSuffix = "ConsoleUnitTests";
@@ -219,7 +126,7 @@ public class OtelLoggingTests : IDisposable
         }
         finally
         {
-            Console.SetOut(currentWritter);
+            Console.SetOut(currentWriter);
         }
     }
 
@@ -229,16 +136,14 @@ public class OtelLoggingTests : IDisposable
         Environment.SetEnvironmentVariable("OTEL_LOG_LEVEL", "debug");
         Environment.SetEnvironmentVariable("OTEL_DOTNET_AUTO_LOGGER", "console");
 
-        var currentWritter = Console.Out;
+        var currentWriter = Console.Out;
 
         using var ms = new MemoryStream();
         using var tw = new StreamWriter(ms);
-
         Console.SetOut(tw);
 
         try
         {
-            // Reset internal state
             OtelLogging.Reset();
 
             var loggerSuffix = "ConsoleUnitTests";
@@ -265,26 +170,32 @@ public class OtelLoggingTests : IDisposable
         }
         finally
         {
-            Console.SetOut(currentWritter);
+            Console.SetOut(currentWriter);
         }
     }
 
-    private static void LogAndFlush(IOtelLogger logger, string logLine, StreamWriter? tw)
+    private static void LogAndFlush(IOtelLogger logger, string line, StreamWriter? tw)
     {
-        logger.Debug(logLine, false);
-        tw?.Flush(); // Forces rows to be written
+        logger.Debug(line, false);
+        tw?.Flush();
     }
 
-    private static string ReadWrittenContent(MemoryStream ms, StreamReader streamReader)
+    private static string ReadWrittenContent(MemoryStream ms, StreamReader reader)
     {
-        ms.Position = 0; // reset reading position
-        return streamReader.ReadToEnd();
+        ms.Position = 0;
+        return reader.ReadToEnd();
     }
 
-    private static void UnsetLoggingEnvVars()
+    private static void UnsetAllLoggingEnvVars()
     {
+        // logging
         Environment.SetEnvironmentVariable("OTEL_LOG_LEVEL", null);
         Environment.SetEnvironmentVariable("OTEL_DOTNET_AUTO_LOG_FILE_SIZE", null);
         Environment.SetEnvironmentVariable("OTEL_DOTNET_AUTO_LOGGER", null);
+        Environment.SetEnvironmentVariable("OTEL_DOTNET_AUTO_LOG_DIRECTORY", null);
+
+        // force ENV mode in tests (disable YAML)
+        Environment.SetEnvironmentVariable("OTEL_EXPERIMENTAL_FILE_BASED_CONFIGURATION_ENABLED", "false");
+        Environment.SetEnvironmentVariable("OTEL_EXPERIMENTAL_CONFIG_FILE", null);
     }
 }

@@ -43,6 +43,9 @@
   <Compile Include="..\OpenTelemetry.AutoInstrumentation\Logging\ISink.cs">
     <Link>Logging\ISink.cs</Link>
   </Compile>
+  <Compile Include="..\OpenTelemetry.AutoInstrumentation\Logging\LoggingConfiguration.cs">
+    <Link>Logging\LoggingConfiguration.cs</Link>
+  </Compile>
   <Compile Include="..\OpenTelemetry.AutoInstrumentation\Logging\LogLevel.cs">
     <Link>Logging\LogLevel.cs</Link>
   </Compile>
@@ -62,5 +65,11 @@
     <Link>AutoInstrumentationEventSource.cs</Link>
   </Compile>
   <Compile Include="..\OpenTelemetry.AutoInstrumentation\Constants.cs" Link="Constants.cs" />
-  </ItemGroup>
+  <Compile Include="..\OpenTelemetry.AutoInstrumentation\Vendors\YamlDotNet\**\*.cs">
+    <Link>Vendors\YamlDotNet\%(RecursiveDir)%(Filename)%(Extension)</Link>
+  </Compile>
+  <Compile Include="..\OpenTelemetry.AutoInstrumentation\Vendors\.editorconfig">
+    <Link>Vendors\.editorconfig</Link>
+  </Compile>
+ </ItemGroup>
 </Project>

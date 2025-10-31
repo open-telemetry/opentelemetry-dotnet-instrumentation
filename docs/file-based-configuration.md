@@ -30,7 +30,7 @@ For more details, see: [OpenTelemetry YAML File Format Specification](https://gi
 
 ## Configuration Examples
 
-## General Configuration
+### General Configuration
 
 ``` yaml
 # The file format version.
@@ -258,6 +258,27 @@ instrumentation/development:
         # Logs bridge is disabled by default
         # More info about log4net bridge can be found at https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/blob/main/docs/log4net-bridge.md
         bridge_enabled: true
+```
+
+## Internal logs
+
+You can configure internal logging using the following YAML configuration
+For more details, see: [Internal logs documentation](config.md/#internal-logs)
+
+``` yaml
+# Values include: none, error, warn, info, debug.
+# if omitted or null, info is used. 
+log_level: "info"
+# Configure the directory where log files are stored.
+# If omitted or null, default is used.
+log_directory: "/var/log/opentelemetry/dotnet/app1"
+# Configure the maximum size of log files (in bytes).
+# If omitted or null, 10485760(10MB) is used.
+log_file_size: 10485760
+# Configure AutoInstrumentation diagnostic logs sink.
+# Values include: none, console, file.
+# If omitted or null, file is used.
+logger: "file"
 ```
 
 ### Configuration based instrumentation
