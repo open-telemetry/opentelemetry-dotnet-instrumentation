@@ -149,7 +149,7 @@ public class FilebasedInstrumentationSettingsTests
     }
 
     [Fact]
-    public void LoadFile_AddAdditionalSources_List()
+    public void LoadFile_AddTracesAdditionalSources_List()
     {
         var instrumentation = new DotNetInstrumentation
         {
@@ -179,7 +179,7 @@ public class FilebasedInstrumentationSettingsTests
     }
 
     [Fact]
-    public void LoadFile_AddAdditionalSources_CSV()
+    public void LoadFile_AddTracesAdditionalSources_CSV()
     {
         var instrumentation = new DotNetInstrumentation
         {
@@ -209,7 +209,7 @@ public class FilebasedInstrumentationSettingsTests
     }
 
     [Fact]
-    public void LoadFile_AddAdditionalSources_MergeListAndCSV()
+    public void LoadFile_AddTracesAdditionalSources_MergeListAndCSV()
     {
         var instrumentation = new DotNetInstrumentation
         {
@@ -238,5 +238,87 @@ public class FilebasedInstrumentationSettingsTests
         Assert.Contains("Some.Additional.Legacy.Source1", settings.AdditionalLegacySources);
         Assert.Contains("Some.Additional.Legacy.Source1", settings.AdditionalLegacySources);
         Assert.Contains("Some.Additional.Legacy.Source3", settings.AdditionalLegacySources);
+    }
+
+    [Fact]
+    public void LoadFile_AddMetricsAdditionalSources_List()
+    {
+        var instrumentation = new DotNetInstrumentation
+        {
+            Metrics = new DotNetMetrics
+            {
+                AdditionalSources = ["Some.Additional.Source1", "Some.Additional.Source2"],
+            }
+        };
+
+        var conf = new YamlConfiguration
+        {
+            InstrumentationDevelopment = new InstrumentationDevelopment
+            {
+                DotNet = instrumentation
+            }
+        };
+
+        var settings = new MetricSettings();
+
+        settings.LoadFile(conf);
+
+        Assert.Contains("Some.Additional.Source1", settings.Meters);
+        Assert.Contains("Some.Additional.Source2", settings.Meters);
+    }
+
+    [Fact]
+    public void LoadFile_AddMetricsAdditionalSources_CSV()
+    {
+        var instrumentation = new DotNetInstrumentation
+        {
+            Metrics = new DotNetMetrics
+            {
+                AdditionalSources = ["Some.Additional.Source1,Some.Additional.Source2"],
+            }
+        };
+
+        var conf = new YamlConfiguration
+        {
+            InstrumentationDevelopment = new InstrumentationDevelopment
+            {
+                DotNet = instrumentation
+            }
+        };
+
+        var settings = new MetricSettings();
+
+        settings.LoadFile(conf);
+
+        Assert.Contains("Some.Additional.Source1", settings.Meters);
+        Assert.Contains("Some.Additional.Source2", settings.Meters);
+    }
+
+    [Fact]
+    public void LoadFile_AddMetricsAdditionalSources_MergeListAndCSV()
+    {
+        var instrumentation = new DotNetInstrumentation
+        {
+            Metrics = new DotNetMetrics
+            {
+                AdditionalSources = ["Some.Additional.Source1,Some.Additional.Source2", "Some.Additional.Source3"],
+            }
+        };
+
+        var conf = new YamlConfiguration
+        {
+            InstrumentationDevelopment = new InstrumentationDevelopment
+            {
+                DotNet = instrumentation
+            }
+        };
+
+        var settings = new MetricSettings();
+
+        settings.LoadFile(conf);
+
+        Assert.Contains("Some.Additional.Source1", settings.Meters);
+        Assert.Contains("Some.Additional.Source2", settings.Meters);
+        Assert.Contains("Some.Additional.Source3", settings.Meters);
     }
 }

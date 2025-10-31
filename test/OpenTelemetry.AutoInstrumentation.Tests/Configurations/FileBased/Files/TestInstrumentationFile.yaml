@@ -30,6 +30,9 @@ instrumentation/development:
       wcfclient:
       wcfservice:
     metrics:
+      additional_sources:
+        - "Some.Additional.Source1"
+        - "Some.Additional.Source2"
       aspnet:
       aspnetcore:
       httpclient:

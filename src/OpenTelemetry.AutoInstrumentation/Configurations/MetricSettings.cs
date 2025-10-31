@@ -1,6 +1,7 @@
 // Copyright The OpenTelemetry Authors
 // SPDX-License-Identifier: Apache-2.0
 
+using System.Diagnostics;
 using OpenTelemetry.AutoInstrumentation.Configurations.FileBasedConfiguration;
 using OpenTelemetry.AutoInstrumentation.Configurations.Otlp;
 using OpenTelemetry.AutoInstrumentation.Logging;
@@ -70,6 +71,26 @@ internal class MetricSettings : Settings
     protected override void OnLoadFile(YamlConfiguration configuration)
     {
         EnabledInstrumentations = configuration.InstrumentationDevelopment?.DotNet?.Metrics?.GetEnabledInstrumentations() ?? [];
+
+        var additionalSources = configuration.InstrumentationDevelopment?.DotNet?.Metrics?.AdditionalSources;
+        if (additionalSources != null)
+        {
+            for (var i = 0; i < additionalSources.Count; i++)
+            {
+                var item = additionalSources[i];
+                if (i == 0 && item.Contains(Constants.ConfigurationValues.Separator) == true)
+                {
+                    foreach (var part in item.Split(Constants.ConfigurationValues.Separator))
+                    {
+                        Meters.Add(part);
+                    }
+                }
+                else
+                {
+                    Meters.Add(item);
+                }
+            }
+        }
     }
 
     private static IReadOnlyList<MetricsExporter> ParseMetricExporter(Configuration configuration)

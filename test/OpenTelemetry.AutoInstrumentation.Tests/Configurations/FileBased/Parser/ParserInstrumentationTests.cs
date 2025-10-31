@@ -75,6 +75,10 @@ public class ParserInstrumentationTests
             FileBasedTestHelper.AssertAliasPropertyExists(metrics, alias);
         }
 
+        Assert.NotNull(metrics.AdditionalSources);
+        Assert.Contains("Some.Additional.Source1", metrics.AdditionalSources);
+        Assert.Contains("Some.Additional.Source2", metrics.AdditionalSources);
+
         string[] expectedLogs = ["ilogger", "log4net"];
 
         var logs = config.InstrumentationDevelopment.DotNet.Logs;
