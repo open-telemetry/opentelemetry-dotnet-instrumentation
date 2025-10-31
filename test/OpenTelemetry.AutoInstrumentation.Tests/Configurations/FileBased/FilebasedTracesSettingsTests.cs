@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 using System.Diagnostics;
+using System.Reflection;
 using OpenTelemetry.AutoInstrumentation.Configurations;
 using OpenTelemetry.AutoInstrumentation.Configurations.FileBasedConfiguration;
 using OpenTelemetry.Trace;
@@ -381,6 +382,82 @@ public class FilebasedTracesSettingsTests
         var sampler = Assert.IsType<ParentBasedSampler>(settings.Sampler);
 
         Assert.Equal(SamplingDecision.RecordAndSample, sampler.ShouldSample(CreateSamplingParameters(default)).Decision);
+
+        var remoteSampledParent = new ActivityContext(ActivityTraceId.CreateRandom(), ActivitySpanId.CreateRandom(), ActivityTraceFlags.Recorded, traceState: null, isRemote: true);
+        Assert.Equal(SamplingDecision.RecordAndSample, sampler.ShouldSample(CreateSamplingParameters(remoteSampledParent)).Decision);
+
+        var remoteNotSampledParent = new ActivityContext(ActivityTraceId.CreateRandom(), ActivitySpanId.CreateRandom(), ActivityTraceFlags.None, traceState: null, isRemote: true);
+        Assert.Equal(SamplingDecision.Drop, sampler.ShouldSample(CreateSamplingParameters(remoteNotSampledParent)).Decision);
+
+        var localSampledParent = new ActivityContext(ActivityTraceId.CreateRandom(), ActivitySpanId.CreateRandom(), ActivityTraceFlags.Recorded, traceState: null, isRemote: false);
+        Assert.Equal(SamplingDecision.RecordAndSample, sampler.ShouldSample(CreateSamplingParameters(localSampledParent)).Decision);
+
+        var localNotSampledParent = new ActivityContext(ActivityTraceId.CreateRandom(), ActivitySpanId.CreateRandom(), ActivityTraceFlags.None, traceState: null, isRemote: false);
+        Assert.Equal(SamplingDecision.Drop, sampler.ShouldSample(CreateSamplingParameters(localNotSampledParent)).Decision);
+    }
+
+    [Fact]
+    public void LoadFile_ConfiguresParentBasedSamplerWithTraceIdRatio()
+    {
+        const double ratio = 0.25;
+
+        var samplerConfig = new SamplerConfig
+        {
+            ParentBased = new ParentBasedSamplerConfig
+            {
+                Root = new SamplerVariantsConfig
+                {
+                    TraceIdRatio = new TraceIdRatioSamplerConfig { Ratio = ratio }
+                }
+            }
+        };
+
+        var conf = new YamlConfiguration
+        {
+            TracerProvider = new TracerProviderConfiguration { Sampler = samplerConfig }
+        };
+
+        var settings = new TracerSettings();
+        settings.LoadFile(conf);
+
+        var sampler = Assert.IsType<ParentBasedSampler>(settings.Sampler);
+
+        var pbType = typeof(ParentBasedSampler);
+        var pbFieldVals = pbType
+            .GetFields(BindingFlags.NonPublic | BindingFlags.Instance)
+            .Select(f => f.GetValue(sampler))
+            .Where(v => v is not null)
+            .ToList();
+        var pbPropVals = pbType
+            .GetProperties(BindingFlags.NonPublic | BindingFlags.Instance)
+            .Where(p => p.CanRead)
+            .Select(p => p.GetValue(sampler))
+            .Where(v => v is not null)
+            .ToList();
+
+        var rootObj = pbFieldVals.Concat(pbPropVals)
+            .FirstOrDefault(v => v is TraceIdRatioBasedSampler);
+        Assert.NotNull(rootObj);
+
+        var rootSampler = Assert.IsType<TraceIdRatioBasedSampler>(rootObj);
+        var tirType = typeof(TraceIdRatioBasedSampler);
+        var ratioCandidates = tirType
+            .GetFields(BindingFlags.NonPublic | BindingFlags.Instance)
+            .Where(f => f.FieldType == typeof(double))
+            .Select(f => f.GetValue(rootSampler))
+            .OfType<double>()
+            .ToList();
+
+        Assert.NotEmpty(ratioCandidates);
+
+        // Using an epsilon-based comparison instead of direct equality
+        // because floating-point values can differ slightly due to precision errors.
+        // This ensures the test is stable.
+        Assert.Contains(ratioCandidates, v => Math.Abs(v - ratio) < 1e-9);
+
+        var noParent = default(ActivityContext);
+        var decision = sampler.ShouldSample(CreateSamplingParameters(noParent)).Decision;
+        Assert.True(decision == SamplingDecision.RecordAndSample || decision == SamplingDecision.Drop);
 
         var remoteSampledParent = new ActivityContext(ActivityTraceId.CreateRandom(), ActivitySpanId.CreateRandom(), ActivityTraceFlags.Recorded, traceState: null, isRemote: true);
         Assert.Equal(SamplingDecision.RecordAndSample, sampler.ShouldSample(CreateSamplingParameters(remoteSampledParent)).Decision);
