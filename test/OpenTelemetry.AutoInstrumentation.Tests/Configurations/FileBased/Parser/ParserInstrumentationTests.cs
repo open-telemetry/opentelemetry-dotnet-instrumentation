@@ -6,6 +6,7 @@ using YamlParser = OpenTelemetry.AutoInstrumentation.Configurations.FileBasedCon
 
 namespace OpenTelemetry.AutoInstrumentation.Tests.Configurations.FileBased.Parser;
 
+[Collection("Non-Parallel Collection")]
 public class ParserInstrumentationTests
 {
     [Fact]
