@@ -116,6 +116,46 @@ internal class TracerSettings : Settings
         EnabledInstrumentations = configuration.InstrumentationDevelopment?.DotNet?.Traces?.GetEnabledInstrumentations() ?? [];
 
         InstrumentationOptions = new InstrumentationOptions(configuration.InstrumentationDevelopment?.DotNet?.Traces);
+
+        var additionalSources = configuration.InstrumentationDevelopment?.DotNet?.Traces?.AdditionalSources;
+        if (additionalSources != null)
+        {
+            for (var i = 0; i < additionalSources.Count; i++)
+            {
+                var item = additionalSources[i];
+                if (i == 0 && item.Contains(Constants.ConfigurationValues.Separator) == true)
+                {
+                    foreach (var part in item.Split(Constants.ConfigurationValues.Separator))
+                    {
+                        ActivitySources.Add(part);
+                    }
+                }
+                else
+                {
+                    ActivitySources.Add(item);
+                }
+            }
+        }
+
+        var additionalLegacySources = configuration.InstrumentationDevelopment?.DotNet?.Traces?.AdditionalLegacySources;
+        if (additionalLegacySources != null)
+        {
+            for (var i = 0; i < additionalLegacySources.Count; i++)
+            {
+                var item = additionalLegacySources[i];
+                if (i == 0 && item.Contains(Constants.ConfigurationValues.Separator) == true)
+                {
+                    foreach (var part in item.Split(Constants.ConfigurationValues.Separator))
+                    {
+                        AdditionalLegacySources.Add(part);
+                    }
+                }
+                else
+                {
+                    AdditionalLegacySources.Add(item);
+                }
+            }
+        }
     }
 
     private static List<TracesExporter> ParseTracesExporter(Configuration configuration)

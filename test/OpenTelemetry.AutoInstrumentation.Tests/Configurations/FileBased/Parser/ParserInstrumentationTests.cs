@@ -6,11 +6,14 @@ using YamlParser = OpenTelemetry.AutoInstrumentation.Configurations.FileBasedCon
 
 namespace OpenTelemetry.AutoInstrumentation.Tests.Configurations.FileBased.Parser;
 
+[Collection("Non-Parallel Collection")]
 public class ParserInstrumentationTests
 {
     [Fact]
     public void Parse_Instrumentation_ShouldPopulateModelCorrectly()
     {
+        Environment.SetEnvironmentVariable("OTEL_DOTNET_AUTO_TRACES_ADDITIONAL_LEGACY_SOURCES", "Some.Additional.Legacy.Source1,Some.Additional.Legacy.Source2");
+
         var config = YamlParser.ParseYaml("Configurations/FileBased/Files/TestInstrumentationFile.yaml");
 
         Assert.NotNull(config);
@@ -43,6 +46,13 @@ public class ParserInstrumentationTests
             FileBasedTestHelper.AssertAliasPropertyExists(traces, alias);
         }
 
+        Assert.NotNull(traces.AdditionalSources);
+        Assert.Contains("Some.Additional.Source1", traces.AdditionalSources);
+        Assert.Contains("Some.Additional.Source2", traces.AdditionalSources);
+
+        Assert.NotNull(traces.AdditionalLegacySources);
+        Assert.Contains("Some.Additional.Legacy.Source1,Some.Additional.Legacy.Source2", traces.AdditionalLegacySources);
+
 #if NET
         string[] expectedMetrics =
         [
@@ -65,6 +75,10 @@ public class ParserInstrumentationTests
         {
             FileBasedTestHelper.AssertAliasPropertyExists(metrics, alias);
         }
+
+        Assert.NotNull(metrics.AdditionalSources);
+        Assert.Contains("Some.Additional.Source1", metrics.AdditionalSources);
+        Assert.Contains("Some.Additional.Source2", metrics.AdditionalSources);
 
         string[] expectedLogs = ["ilogger", "log4net"];
 

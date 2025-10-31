@@ -8,6 +8,12 @@ namespace OpenTelemetry.AutoInstrumentation.Configurations.FileBasedConfiguratio
 
 internal class DotNetMetrics
 {
+    /// <summary>
+    /// Gets or sets the list of additional `System.Diagnostics.Metrics.Meter` names to be added to the meter at the startup.
+    /// </summary>
+    [YamlMember(Alias = "additional_sources")]
+    public List<string>? AdditionalSources { get; set; }
+
 #if NETFRAMEWORK
     /// <summary>
     /// Gets or sets the ASP.NET metrics instrumentation configuration.
