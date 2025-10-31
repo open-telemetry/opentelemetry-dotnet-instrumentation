@@ -50,6 +50,7 @@ bool IsDumpILRewriteEnabled();
 bool IsAzureAppServices();
 bool IsFailFastEnabled();
 bool IsNetFxAssemblyRedirectionEnabled();
+bool IsSqlClientNetFxILRewriteEnabled();
 
 }  // namespace trace
 

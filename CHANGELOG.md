@@ -10,6 +10,10 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 ### Added
 
 - Configuration based instrumentation.
+- IL rewrite for SqlCommand on .NET Framework to ensure `CommandText` is
+  available for [SqlClient instrumentation](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/issues/4343).
+  This is disabled by default and can be enabled via the
+  `OTEL_DOTNET_AUTO_SQLCLIENT_NETFX_ILREWRITE_ENABLED` environment variable.
 
 ### Changed
 
@@ -37,7 +41,37 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
   - `OpenTelemetry.Instrumentation.StackExchangeRedis` from `1.12.0-beta.2` to `1.13.0-beta.1`,
   - `OpenTelemetry.Resources.Container` from `1.12.0-beta.1` to `1.13.0-beta.1`.
 - .NET Framework only, following packages updated
-  - `OpenTelemetry.Instrumentation.AspNet` from `1.12.0-beta.1` to `1.13.0-beta.2`.
+  - `Microsoft.Bcl.AsyncInterfaces` from `9.0.8` to `9.0.10`,
+  - `Microsoft.Extensions.Configuration` from `9.0.8` to `9.0.10`,
+  - `Microsoft.Extensions.Configuration.Abstractions` from `9.0.8` to `9.0.10`,
+  - `Microsoft.Extensions.Configuration.Binder` from `9.0.8` to `9.0.10`,
+  - `Microsoft.Extensions.DependencyInjection` from `9.0.8` to `9.0.10`,
+  - `Microsoft.Extensions.DependencyInjection.Abstractions` from `9.0.8` to `9.0.10`,
+  - `Microsoft.Extensions.Diagnostics.Abstractions` from `9.0.8` to `9.0.10`,
+  - `Microsoft.Extensions.Logging` from `9.0.8` to `9.0.10`,
+  - `Microsoft.Extensions.Logging.Abstractions` from `9.0.8` to `9.0.10`,
+  - `Microsoft.Extensions.Logging.Configuration` from `9.0.8` to `9.0.10`,
+  - `Microsoft.Extensions.Options` from `9.0.8` to `9.0.10`,
+  - `Microsoft.Extensions.Options.ConfigurationExtensions` from `9.0.8` to `9.0.10`,
+  - `Microsoft.Extensions.Primitives` from `9.0.8` to `9.0.10`,
+  - `OpenTelemetry.Instrumentation.AspNet` from `1.12.0-beta.1` to `1.13.0-rc.1`,
+  - `System.Diagnostics.DiagnosticSource` from `9.0.8` to `9.0.10`,
+  - `System.IO.Pipelines` from `9.0.8` to `9.0.10`,
+  - `System.Text.Encodings.Web` from `9.0.8` to `9.0.10`,
+  - `System.Text.Json` from `9.0.8` to `9.0.10`.
+
+#### Dependencies on .NET Framework
+
+When OpenTelemetry .NET AutoInstrumentation is compiled for .NET Framework,
+it uses the `net462` Target Framework Moniker (TFM). As a result, the ZIP archive
+deployment contained dependency assemblies targeted for .NET Framework 4.6.2.
+Some of these assemblies were not designed to be used with later versions of
+.NET Framework.
+
+Now, when the OpenTelemetry ZIP archive is built, dependency assemblies are
+included for all supported .NET Framework versions. OpenTelemetry .NET
+AutoInstrumentation detects the .NET Framework version at install time
+and runtime, then loads the correct version of dependency assemblies.
 
 ### Deprecated
 

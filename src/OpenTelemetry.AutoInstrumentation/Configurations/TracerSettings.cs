@@ -109,6 +109,10 @@ internal class TracerSettings : Settings
 
         TracesEnabled = processors != null && processors.Count > 0;
         Processors = processors;
+
+        EnabledInstrumentations = configuration.InstrumentationDevelopment?.DotNet?.Traces?.GetEnabledInstrumentations() ?? [];
+
+        InstrumentationOptions = new InstrumentationOptions(configuration.InstrumentationDevelopment?.DotNet?.Traces);
     }
 
     private static List<TracesExporter> ParseTracesExporter(Configuration configuration)

@@ -1,7 +1,6 @@
 // Copyright The OpenTelemetry Authors
 // SPDX-License-Identifier: Apache-2.0
 
-using System;
 using OpenTelemetry.AutoInstrumentation.Configurations.FileBasedConfiguration;
 using OpenTelemetry.AutoInstrumentation.Configurations.Otlp;
 using OpenTelemetry.AutoInstrumentation.Logging;
@@ -78,6 +77,13 @@ internal class LogSettings : Settings
         LogsEnabled = processors != null && processors.Count > 0;
         Processors = processors;
         IncludeFormattedMessage = configuration.LogsIncludeFormattedMessage;
+         
+        EnabledInstrumentations = configuration.InstrumentationDevelopment?.DotNet?.Logs?.GetEnabledInstrumentations() ?? [];
+
+        if (EnabledInstrumentations.Contains(LogInstrumentation.Log4Net))
+        {
+            EnableLog4NetBridge = configuration.InstrumentationDevelopment?.DotNet?.Logs?.Log4Net?.BridgeEnabled ?? false;
+        }
     }
 
     private static List<LogExporter> ParseLogExporter(Configuration configuration)

@@ -14,9 +14,14 @@ internal static class Program
     {
         Thread.CurrentThread.Name = "Main";
 
-        using (ActivitySource.StartActivity())
+        // Trace with nested activities
+        using (ActivitySource.StartActivity("outer"))
         {
-            await SimpleAsyncCase();
+            Thread.Sleep(100);
+            using (ActivitySource.StartActivity("inner"))
+            {
+                await SimpleAsyncCase();
+            }
         }
     }
 
