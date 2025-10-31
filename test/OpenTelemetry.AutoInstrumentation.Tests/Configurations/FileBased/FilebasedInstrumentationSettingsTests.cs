@@ -147,4 +147,96 @@ public class FilebasedInstrumentationSettingsTests
         Assert.Contains(LogInstrumentation.Log4Net, settings.EnabledInstrumentations);
         Assert.True(settings.EnableLog4NetBridge);
     }
+
+    [Fact]
+    public void LoadFile_AddAdditionalSources_List()
+    {
+        var instrumentation = new DotNetInstrumentation
+        {
+            Traces = new DotNetTraces
+            {
+                AdditionalSources = ["Some.Additional.Source1", "Some.Additional.Source2"],
+                AdditionalLegacySources = ["Some.Additional.Legacy.Source1", "Some.Additional.Legacy.Source2"]
+            }
+        };
+
+        var conf = new YamlConfiguration
+        {
+            InstrumentationDevelopment = new InstrumentationDevelopment
+            {
+                DotNet = instrumentation
+            }
+        };
+
+        var settings = new TracerSettings();
+
+        settings.LoadFile(conf);
+
+        Assert.Contains("Some.Additional.Source1", settings.ActivitySources);
+        Assert.Contains("Some.Additional.Source2", settings.ActivitySources);
+        Assert.Contains("Some.Additional.Legacy.Source1", settings.AdditionalLegacySources);
+        Assert.Contains("Some.Additional.Legacy.Source1", settings.AdditionalLegacySources);
+    }
+
+    [Fact]
+    public void LoadFile_AddAdditionalSources_CSV()
+    {
+        var instrumentation = new DotNetInstrumentation
+        {
+            Traces = new DotNetTraces
+            {
+                AdditionalSources = ["Some.Additional.Source1,Some.Additional.Source2"],
+                AdditionalLegacySources = ["Some.Additional.Legacy.Source1,Some.Additional.Legacy.Source2"]
+            }
+        };
+
+        var conf = new YamlConfiguration
+        {
+            InstrumentationDevelopment = new InstrumentationDevelopment
+            {
+                DotNet = instrumentation
+            }
+        };
+
+        var settings = new TracerSettings();
+
+        settings.LoadFile(conf);
+
+        Assert.Contains("Some.Additional.Source1", settings.ActivitySources);
+        Assert.Contains("Some.Additional.Source2", settings.ActivitySources);
+        Assert.Contains("Some.Additional.Legacy.Source1", settings.AdditionalLegacySources);
+        Assert.Contains("Some.Additional.Legacy.Source1", settings.AdditionalLegacySources);
+    }
+
+    [Fact]
+    public void LoadFile_AddAdditionalSources_MergeListAndCSV()
+    {
+        var instrumentation = new DotNetInstrumentation
+        {
+            Traces = new DotNetTraces
+            {
+                AdditionalSources = ["Some.Additional.Source1,Some.Additional.Source2", "Some.Additional.Source3"],
+                AdditionalLegacySources = ["Some.Additional.Legacy.Source1,Some.Additional.Legacy.Source2", "Some.Additional.Legacy.Source3"]
+            }
+        };
+
+        var conf = new YamlConfiguration
+        {
+            InstrumentationDevelopment = new InstrumentationDevelopment
+            {
+                DotNet = instrumentation
+            }
+        };
+
+        var settings = new TracerSettings();
+
+        settings.LoadFile(conf);
+
+        Assert.Contains("Some.Additional.Source1", settings.ActivitySources);
+        Assert.Contains("Some.Additional.Source2", settings.ActivitySources);
+        Assert.Contains("Some.Additional.Source3", settings.ActivitySources);
+        Assert.Contains("Some.Additional.Legacy.Source1", settings.AdditionalLegacySources);
+        Assert.Contains("Some.Additional.Legacy.Source1", settings.AdditionalLegacySources);
+        Assert.Contains("Some.Additional.Legacy.Source3", settings.AdditionalLegacySources);
+    }
 }

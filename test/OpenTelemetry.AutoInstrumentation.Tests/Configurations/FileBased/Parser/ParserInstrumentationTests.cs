@@ -11,6 +11,8 @@ public class ParserInstrumentationTests
     [Fact]
     public void Parse_Instrumentation_ShouldPopulateModelCorrectly()
     {
+        Environment.SetEnvironmentVariable("OTEL_DOTNET_AUTO_TRACES_ADDITIONAL_LEGACY_SOURCES", "Some.Additional.Legacy.Source1,Some.Additional.Legacy.Source2");
+
         var config = YamlParser.ParseYaml("Configurations/FileBased/Files/TestInstrumentationFile.yaml");
 
         Assert.NotNull(config);
@@ -42,6 +44,13 @@ public class ParserInstrumentationTests
         {
             FileBasedTestHelper.AssertAliasPropertyExists(traces, alias);
         }
+
+        Assert.NotNull(traces.AdditionalSources);
+        Assert.Contains("Some.Additional.Source1", traces.AdditionalSources);
+        Assert.Contains("Some.Additional.Source2", traces.AdditionalSources);
+
+        Assert.NotNull(traces.AdditionalLegacySources);
+        Assert.Contains("Some.Additional.Legacy.Source1,Some.Additional.Legacy.Source2", traces.AdditionalLegacySources);
 
 #if NET
         string[] expectedMetrics =
