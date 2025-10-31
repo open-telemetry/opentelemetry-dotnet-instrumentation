@@ -14,6 +14,7 @@ using OpenTelemetry.AutoInstrumentation.Instrumentations.NoCode;
 using OpenTelemetry.AutoInstrumentation.Loading;
 using OpenTelemetry.AutoInstrumentation.Logging;
 using OpenTelemetry.AutoInstrumentation.Plugins;
+using OpenTelemetry.AutoInstrumentation.Util;
 using OpenTelemetry.Logs;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Trace;
@@ -68,6 +69,8 @@ internal static class Instrumentation
     internal static Lazy<SdkSettings> SdkSettings { get; } = new(() => Settings.FromDefaultSources<SdkSettings>(FailFastSettings.Value.FailFast));
 
     internal static Lazy<NoCodeSettings> NoCodeSettings { get; } = new(() => Settings.FromDefaultSources<NoCodeSettings>(FailFastSettings.Value.FailFast));
+
+    internal static Lazy<OpAmpSettings> OpAmpSettings { get; } = new(() => Settings.FromDefaultSources<OpAmpSettings>(FailFastSettings.Value.FailFast));
 
     /// <summary>
     /// Initialize the OpenTelemetry SDK with a pre-defined set of exporters, shims, and
@@ -214,6 +217,13 @@ internal static class Instrumentation
         if (TracerSettings.Value.OpenTracingEnabled)
         {
             OpenTracingHelper.EnableOpenTracing(_tracerProvider);
+        }
+
+        if (OpAmpSettings.Value.OpAmpClientEnabled)
+        {
+            var resources = ResourceHelper.AggregateResources(_tracerProvider, _meterProvider, LoggerProvider);
+
+            OpAmpHelper.EnableOpAmpClient(resources, OpAmpSettings.Value);
         }
     }
 
@@ -533,6 +543,8 @@ internal static class Instrumentation
 
         try
         {
+            OpAmpHelper.StopOpAmpClientIfRunning();
+
 #if NET
             LazyInstrumentationLoader?.Dispose();
             _sampleExporter?.Dispose();

@@ -74,4 +74,10 @@ internal class YamlConfiguration
     /// </summary>
     [YamlMember(Alias = "no_code/development")]
     public NoCodeConfiguration? NoCode { get; set; }
+
+    /// <summary>
+    /// Gets or sets the OpAMP settings.
+    /// </summary>
+    [YamlMember(Alias = "opamp")]
+    public OpAmpConfiguration? OpAmp { get; set; }
 }
