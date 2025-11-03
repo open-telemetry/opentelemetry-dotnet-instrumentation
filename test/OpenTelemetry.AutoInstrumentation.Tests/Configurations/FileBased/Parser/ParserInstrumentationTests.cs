@@ -149,7 +149,7 @@ public class ParserInstrumentationTests
         Environment.SetEnvironmentVariable("OTEL_DOTNET_AUTO_TRACES_ADDITIONAL_LEGACY_SOURCES", "Some.Additional.Legacy.Source1,Some.Additional.Legacy.Source2");
         Environment.SetEnvironmentVariable("OTEL_DOTNET_AUTO_METRICS_ADDITIONAL_SOURCES", "Some.Additional.Source1,Some.Additional.Source2");
 
-        var config = YamlParser.ParseYaml("Configurations/FileBased/Files/TestGeneralFileEnvVars.yaml");
+        var config = YamlParser.ParseYaml("Configurations/FileBased/Files/TestInstrumentationFileEnvVars.yaml");
 
         Assert.NotNull(config);
         Assert.NotNull(config.InstrumentationDevelopment);
