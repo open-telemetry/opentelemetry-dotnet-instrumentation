@@ -46,24 +46,26 @@ The no-code instrumentation configuration is defined under the
 ```yaml
 file_format: "1.0-rc.1"
 
-no_code/development:
-  targets:
-    - target:                                             # Method target specification
-        assembly:                                         # Assembly information
-          name: TestApplication.NoCode                    # The name of the assembly containing the target method
-        type: TestApplication.NoCode.NoCodeTestingClass   # The fully qualified type name containing the method
-        method: TestMethod                                # The method name to instrument
-        signature:                                        # Method signature specification for precise targeting
-          return_type: System.Void                        # The method's return type (e.g., System.Void, System.String, System.Threading.Tasks.Task)
-          parameter_types:                                # Array of parameter types (empty array for parameterless methods)
-            - System.String
-      span:
-        name: Span-TestMethod1String                      # Custom span name (if not specified, defaults to method name)
-        kind: internal                                    # (Optional) Span kind: internal, server, client, producer, consumer (defaults to internal)
-        attributes:                                       # Array of custom attributes to add to the span
-          - name: custom.attribute                        # Attribute name
-            value: "attribute_value"                      # Attribute value
-            type: string                                  # Attribute type (see Attribute Types section below)
+instrumentation/development:
+  dotnet:
+    no_code:
+      targets:
+        - target:                                             # Method target specification
+            assembly:                                         # Assembly information
+              name: TestApplication.NoCode                    # The name of the assembly containing the target method
+            type: TestApplication.NoCode.NoCodeTestingClass   # The fully qualified type name containing the method
+            method: TestMethod                                # The method name to instrument
+            signature:                                        # Method signature specification for precise targeting
+              return_type: System.Void                        # The method's return type (e.g., System.Void, System.String, System.Threading.Tasks.Task)
+              parameter_types:                                # Array of parameter types (empty array for parameterless methods)
+                - System.String
+          span:
+            name: Span-TestMethod1String                      # Custom span name (if not specified, defaults to method name)
+            kind: internal                                    # (Optional) Span kind: internal, server, client, producer, consumer (defaults to internal)
+            attributes:                                       # Array of custom attributes to add to the span
+              - name: custom.attribute                        # Attribute name
+                value: "attribute_value"                      # Attribute value
+                type: string                                  # Attribute type (see Attribute Types section below)
 ```
 
 ### Attribute Types
@@ -98,19 +100,21 @@ public static void TestMethodStatic();
 Configuration:
 
 ```yaml
-no_code/development:
-  targets:
-    - target:
-        assembly:
-          name: TestApplication.NoCode
-        type: TestApplication.NoCode.NoCodeTestingClass
-        method: TestMethodStatic
-        signature:
-          return_type: System.Void
-          parameter_types:
-      span:
-        name: Span-TestMethodStatic
-        kind: internal
+instrumentation/development:
+  dotnet:
+    no_code:
+      targets:
+        - target:
+            assembly:
+              name: TestApplication.NoCode
+            type: TestApplication.NoCode.NoCodeTestingClass
+            method: TestMethodStatic
+            signature:
+              return_type: System.Void
+              parameter_types:
+          span:
+            name: Span-TestMethodStatic
+            kind: internal
 ```
 
 ### Method Instrumentation with Default Span Kind
@@ -124,19 +128,21 @@ public void TestMethodA();
 Configuration:
 
 ```yaml
-no_code/development:
-  targets:
-    - target:
-        assembly:
-          name: TestApplication.NoCode
-        type: TestApplication.NoCode.NoCodeTestingClass
-        method: TestMethodA
-        signature:
-          return_type: System.Void
-          parameter_types:
-      span:
-        name: Span-TestMethodA
-        # kind defaults to 'internal' when omitted
+instrumentation/development:
+  dotnet:
+    no_code:
+      targets:
+        - target:
+            assembly:
+              name: TestApplication.NoCode
+            type: TestApplication.NoCode.NoCodeTestingClass
+            method: TestMethodA
+            signature:
+              return_type: System.Void
+              parameter_types:
+          span:
+            name: Span-TestMethodA
+            # kind defaults to 'internal' when omitted
 ```
 
 ### Method with Parameters
@@ -150,25 +156,27 @@ public void TestMethod(string param1, string param2);
 Configuration:
 
 ```yaml
-no_code/development:
-  targets:
-    - target:
-        assembly:
-          name: TestApplication.NoCode
-        type: TestApplication.NoCode.NoCodeTestingClass
-        method: TestMethod
-        signature:
-          return_type: System.Void
-          parameter_types:
-            - System.String
-            - System.String
-      span:
-        name: Span-TestMethod2
-        kind: server
-        attributes:
-          - name: operation.type
-            value: "test_method"
-            type: string
+instrumentation/development:
+  dotnet:
+    no_code:
+      targets:
+        - target:
+            assembly:
+              name: TestApplication.NoCode
+            type: TestApplication.NoCode.NoCodeTestingClass
+            method: TestMethod
+            signature:
+              return_type: System.Void
+              parameter_types:
+                - System.String
+                - System.String
+          span:
+            name: Span-TestMethod2
+            kind: server
+            attributes:
+              - name: operation.type
+                value: "test_method"
+                type: string
 ```
 
 ### Async Method Instrumentation
@@ -182,23 +190,25 @@ public async Task<int> IntTaskTestMethodAsync();
 Configuration:
 
 ```yaml
-no_code/development:
-  targets:
-    - target:
-        assembly:
-          name: TestApplication.NoCode
-        type: TestApplication.NoCode.NoCodeTestingClass
-        method: IntTaskTestMethodAsync
-        signature:
-          return_type: System.Threading.Tasks.Task`1[System.Int32]
-          parameter_types:
-      span:
-        name: Span-IntTaskTestMethodAsync
-        kind: client
-        attributes:
-          - name: async.operation
-            value: "task_with_return"
-            type: string
+instrumentation/development:
+  dotnet:
+    no_code:
+      targets:
+        - target:
+            assembly:
+              name: TestApplication.NoCode
+            type: TestApplication.NoCode.NoCodeTestingClass
+            method: IntTaskTestMethodAsync
+            signature:
+              return_type: System.Threading.Tasks.Task`1[System.Int32]
+              parameter_types:
+          span:
+            name: Span-IntTaskTestMethodAsync
+            kind: client
+            attributes:
+              - name: async.operation
+                value: "task_with_return"
+                type: string
 ```
 
 ### Multiple Attributes with Different Types
@@ -212,44 +222,46 @@ public static void TestMethodStatic();
 Configuration with multiple attribute types:
 
 ```yaml
-no_code/development:
-  targets:
-    - target:
-        assembly:
-          name: TestApplication.NoCode
-        type: TestApplication.NoCode.NoCodeTestingClass
-        method: TestMethodStatic
-        signature:
-          return_type: System.Void
-          parameter_types:
-      span:
-        name: Span-TestMethodStatic
-        kind: internal
-        attributes:
-          - name: attribute_key_string
-            value: "string_value"
-            type: string
-          - name: attribute_key_bool
-            value: true
-            type: bool
-          - name: attribute_key_int
-            value: 12345
-            type: int
-          - name: attribute_key_double
-            value: 123.45
-            type: double
-          - name: attribute_key_string_array
-            value: ["value1", "value2", "value3"]
-            type: string_array
-          - name: attribute_key_bool_array
-            value: [true, false, true]
-            type: bool_array
-          - name: attribute_key_int_array
-            value: [123, 456, 789]
-            type: int_array
-          - name: attribute_key_double_array
-            value: [123.45, 678.90]
-            type: double_array
+instrumentation/development:
+  dotnet:
+    no_code:
+      targets:
+        - target:
+            assembly:
+              name: TestApplication.NoCode
+            type: TestApplication.NoCode.NoCodeTestingClass
+            method: TestMethodStatic
+            signature:
+              return_type: System.Void
+              parameter_types:
+          span:
+            name: Span-TestMethodStatic
+            kind: internal
+            attributes:
+              - name: attribute_key_string
+                value: "string_value"
+                type: string
+              - name: attribute_key_bool
+                value: true
+                type: bool
+              - name: attribute_key_int
+                value: 12345
+                type: int
+              - name: attribute_key_double
+                value: 123.45
+                type: double
+              - name: attribute_key_string_array
+                value: ["value1", "value2", "value3"]
+                type: string_array
+              - name: attribute_key_bool_array
+                value: [true, false, true]
+                type: bool_array
+              - name: attribute_key_int_array
+                value: [123, 456, 789]
+                type: int_array
+              - name: attribute_key_double_array
+                value: [123.45, 678.90]
+                type: double_array
 ```
 
 ### Method Overload Targeting
@@ -270,48 +282,50 @@ public void TestMethod(int param1);
 Configuration for targeting specific overloads:
 
 ```yaml
-no_code/development:
-  targets:
-    # Parameterless overload
-    - target:
-        assembly:
-          name: TestApplication.NoCode
-        type: TestApplication.NoCode.NoCodeTestingClass
-        method: TestMethod
-        signature:
-          return_type: System.Void
-          parameter_types:
-      span:
-        name: Span-TestMethod0
-        kind: client
-    
-    # String parameter overload
-    - target:
-        assembly:
-          name: TestApplication.NoCode
-        type: TestApplication.NoCode.NoCodeTestingClass
-        method: TestMethod
-        signature:
-          return_type: System.Void
-          parameter_types:
-            - System.String
-      span:
-        name: Span-TestMethod1String
-        kind: producer
-    
-    # Int parameter overload
-    - target:
-        assembly:
-          name: TestApplication.NoCode
-        type: TestApplication.NoCode.NoCodeTestingClass
-        method: TestMethod
-        signature:
-          return_type: System.Void
-          parameter_types:
-            - System.Int32
-      span:
-        name: Span-TestMethod1Int
-        kind: server
+instrumentation/development:
+  dotnet:
+    no_code:
+      targets:
+        # Parameterless overload
+        - target:
+            assembly:
+              name: TestApplication.NoCode
+            type: TestApplication.NoCode.NoCodeTestingClass
+            method: TestMethod
+            signature:
+              return_type: System.Void
+              parameter_types:
+          span:
+            name: Span-TestMethod0
+            kind: client
+        
+        # String parameter overload
+        - target:
+            assembly:
+              name: TestApplication.NoCode
+            type: TestApplication.NoCode.NoCodeTestingClass
+            method: TestMethod
+            signature:
+              return_type: System.Void
+              parameter_types:
+                - System.String
+          span:
+            name: Span-TestMethod1String
+            kind: producer
+        
+        # Int parameter overload
+        - target:
+            assembly:
+              name: TestApplication.NoCode
+            type: TestApplication.NoCode.NoCodeTestingClass
+            method: TestMethod
+            signature:
+              return_type: System.Void
+              parameter_types:
+                - System.Int32
+          span:
+            name: Span-TestMethod1Int
+            kind: server
 ```
 
 ### ValueTask Support (.NET 8+ only)
@@ -325,19 +339,21 @@ public async ValueTask<int> IntValueTaskTestMethodAsync();
 Configuration:
 
 ```yaml
-no_code/development:
-  targets:
-    - target:
-        assembly:
-          name: TestApplication.NoCode
-        type: TestApplication.NoCode.NoCodeTestingClass
-        method: IntValueTaskTestMethodAsync
-        signature:
-          return_type: System.Threading.Tasks.ValueTask`1[System.Int32]
-          parameter_types:
-      span:
-        name: Span-IntValueTaskTestMethodAsync
-        kind: client
+instrumentation/development:
+  dotnet:
+    no_code:
+      targets:
+        - target:
+            assembly:
+              name: TestApplication.NoCode
+            type: TestApplication.NoCode.NoCodeTestingClass
+            method: IntValueTaskTestMethodAsync
+            signature:
+              return_type: System.Threading.Tasks.ValueTask`1[System.Int32]
+              parameter_types:
+          span:
+            name: Span-IntValueTaskTestMethodAsync
+            kind: client
 ```
 
 ### Generic Method Instrumentation
@@ -359,19 +375,21 @@ public T? GenericTestMethod<T>();
 Configuration (when called as `GenericTestMethod<int>()`):
 
 ```yaml
-no_code/development:
-  targets:
-    - target:
-        assembly:
-          name: TestApplication.NoCode
-        type: TestApplication.NoCode.NoCodeTestingClass
-        method: GenericTestMethod
-        signature:
-          return_type: System.Int32
-          parameter_types:
-      span:
-        name: Span-GenericTestMethod
-        kind: internal
+instrumentation/development:
+  dotnet:
+    no_code:
+      targets:
+        - target:
+            assembly:
+              name: TestApplication.NoCode
+            type: TestApplication.NoCode.NoCodeTestingClass
+            method: GenericTestMethod
+            signature:
+              return_type: System.Int32
+              parameter_types:
+          span:
+            name: Span-GenericTestMethod
+            kind: internal
 ```
 
 ### Methods with Return Values
@@ -389,33 +407,35 @@ public TestClass ReturningCustomClassTestMethod();
 Configuration:
 
 ```yaml
-no_code/development:
-  targets:
-    # Method returning string
-    - target:
-        assembly:
-          name: TestApplication.NoCode
-        type: TestApplication.NoCode.NoCodeTestingClass
-        method: ReturningStringTestMethod
-        signature:
-          return_type: System.String
-          parameter_types:
-      span:
-        name: Span-ReturningStringTestMethod
-        kind: internal
-    
-    # Method returning custom class
-    - target:
-        assembly:
-          name: TestApplication.NoCode
-        type: TestApplication.NoCode.NoCodeTestingClass
-        method: ReturningCustomClassTestMethod
-        signature:
-          return_type: TestApplication.NoCode.TestClass
-          parameter_types:
-      span:
-        name: Span-ReturningCustomClassTestMethod
-        kind: internal
+instrumentation/development:
+  dotnet:
+    no_code:
+      targets:
+        # Method returning string
+        - target:
+            assembly:
+              name: TestApplication.NoCode
+            type: TestApplication.NoCode.NoCodeTestingClass
+            method: ReturningStringTestMethod
+            signature:
+              return_type: System.String
+              parameter_types:
+          span:
+            name: Span-ReturningStringTestMethod
+            kind: internal
+        
+        # Method returning custom class
+        - target:
+            assembly:
+              name: TestApplication.NoCode
+            type: TestApplication.NoCode.NoCodeTestingClass
+            method: ReturningCustomClassTestMethod
+            signature:
+              return_type: TestApplication.NoCode.TestClass
+              parameter_types:
+          span:
+            name: Span-ReturningCustomClassTestMethod
+            kind: internal
 ```
 
 ## Common Return Types
