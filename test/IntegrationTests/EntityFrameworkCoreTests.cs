@@ -15,36 +15,15 @@ public class EntityFrameworkCoreTests : TestHelper
     {
     }
 
-    public static TheoryData<string, bool> GetData()
-    {
-        var theoryData = new TheoryData<string, bool>();
-
-        foreach (var version in LibraryVersion.EntityFrameworkCore)
-        {
-            theoryData.Add(version, true);
-            theoryData.Add(version, false);
-        }
-
-        return theoryData;
-    }
-
     [Theory]
     [Trait("Category", "EndToEnd")]
-    [MemberData(nameof(GetData))]
-    public void SubmitTraces(string packageVersion, bool dbStatementForText)
+    [MemberData(nameof(LibraryVersion.EntityFrameworkCore), MemberType = typeof(LibraryVersion))]
+    public void SubmitTraces(string packageVersion)
     {
-        SetEnvironmentVariable("OTEL_DOTNET_AUTO_ENTITYFRAMEWORKCORE_SET_DBSTATEMENT_FOR_TEXT", dbStatementForText.ToString());
         using var collector = new MockSpansCollector(Output);
         SetExporter(collector);
 
-        if (dbStatementForText)
-        {
-            collector.Expect("OpenTelemetry.Instrumentation.EntityFrameworkCore", span => span.Attributes.Any(attr => attr.Key == "db.statement" && !string.IsNullOrWhiteSpace(attr.Value?.StringValue)));
-        }
-        else
-        {
-            collector.Expect("OpenTelemetry.Instrumentation.EntityFrameworkCore", span => span.Attributes.All(attr => attr.Key != "db.statement"));
-        }
+        collector.Expect("OpenTelemetry.Instrumentation.EntityFrameworkCore");
 
         RunTestApplication(new TestSettings { PackageVersion = packageVersion });
 

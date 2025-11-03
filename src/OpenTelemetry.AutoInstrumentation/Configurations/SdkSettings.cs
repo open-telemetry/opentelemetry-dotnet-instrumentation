@@ -1,6 +1,7 @@
 // Copyright The OpenTelemetry Authors
 // SPDX-License-Identifier: Apache-2.0
 
+using OpenTelemetry.AutoInstrumentation.Configurations.FileBasedConfiguration;
 using OpenTelemetry.AutoInstrumentation.Logging;
 
 namespace OpenTelemetry.AutoInstrumentation.Configurations;
@@ -15,14 +16,19 @@ internal class SdkSettings : Settings
     /// <summary>
     /// Gets the list of propagators to be used.
     /// </summary>
-    public IList<Propagator> Propagators { get; private set; } = new List<Propagator>();
+    public IReadOnlyList<Propagator> Propagators { get; private set; } = [];
 
     protected override void OnLoadEnvVar(Configuration configuration)
     {
         Propagators = ParsePropagator(configuration);
     }
 
-    private static IList<Propagator> ParsePropagator(Configuration configuration)
+    protected override void OnLoadFile(YamlConfiguration configuration)
+    {
+        Propagators = configuration.Propagator?.GetEnabledPropagators() ?? [];
+    }
+
+    private static List<Propagator> ParsePropagator(Configuration configuration)
     {
         var propagatorEnvVar = configuration.GetString(ConfigurationKeys.Sdk.Propagators);
         var propagators = new List<Propagator>();

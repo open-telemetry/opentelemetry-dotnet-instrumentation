@@ -71,7 +71,6 @@ public class SettingsTests : IDisposable
 #if NET
         Assert.Empty(settings.InstrumentationOptions.AspNetCoreInstrumentationCaptureRequestHeaders);
         Assert.Empty(settings.InstrumentationOptions.AspNetCoreInstrumentationCaptureResponseHeaders);
-        Assert.False(settings.InstrumentationOptions.EntityFrameworkCoreSetDbStatementForText);
         Assert.False(settings.InstrumentationOptions.GraphQLSetDocument);
 #endif
         Assert.Empty(settings.InstrumentationOptions.GrpcNetClientInstrumentationCaptureRequestMetadata);

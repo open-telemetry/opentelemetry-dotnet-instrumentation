@@ -27,7 +27,7 @@ jobs:
             containers: windows
           - machine: ubuntu-22.04
             containers: linux
-          - machine: macos-13
+          - machine: macos-14
             containers: none
           - machine: ubuntu-22.04-arm
             containers: linux
@@ -41,15 +41,15 @@ jobs:
         uses: actions/setup-dotnet@d4c94342e560b34958eacfc5d055d21461ed1c5d # tag: v5.0.0
         with:
           dotnet-version: | 
-            8.0.414
-            9.0.305
+            8.0.415
+            9.0.306
 
       - name: Run BuildTracer and ManagedTests
         run: ./build.cmd BuildTracer ManagedTests --containers ${{ matrix.containers }} --test-project "${{ github.event.inputs.testProject }}" --test-name '"${{ github.event.inputs.testName }}"' --test-count ${{ github.event.inputs.count }}
 
       - name: Upload logs
         if: always()
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # tag: v4.6.2
+        uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # tag: v5.0.0
         with:
           name: logs-${{ matrix.machine }}
           path: test-artifacts/

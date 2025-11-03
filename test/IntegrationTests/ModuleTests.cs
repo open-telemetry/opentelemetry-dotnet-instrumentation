@@ -9,7 +9,6 @@ using Xunit.Abstractions;
 
 namespace IntegrationTests;
 
-[UsesVerify]
 public class ModuleTests : TestHelper
 {
     public ModuleTests(ITestOutputHelper output)
