@@ -113,46 +113,43 @@ internal class TracerSettings : Settings
 
         Processors = processors;
 
-        EnabledInstrumentations = configuration.InstrumentationDevelopment?.DotNet?.Traces?.GetEnabledInstrumentations() ?? [];
+        var traces = configuration.InstrumentationDevelopment?.DotNet?.Traces;
 
-        InstrumentationOptions = new InstrumentationOptions(configuration.InstrumentationDevelopment?.DotNet?.Traces);
+        EnabledInstrumentations = traces?.GetEnabledInstrumentations() ?? [];
 
-        var additionalSources = configuration.InstrumentationDevelopment?.DotNet?.Traces?.AdditionalSources;
-        if (additionalSources != null)
+        InstrumentationOptions = new InstrumentationOptions(traces);
+
+        if (traces != null)
         {
-            for (var i = 0; i < additionalSources.Count; i++)
+            if (traces.AdditionalSources != null)
             {
-                var item = additionalSources[i];
-                if (i == 0 && item.Contains(Constants.ConfigurationValues.Separator) == true)
+                foreach (var configurationName in traces.AdditionalSources)
                 {
-                    foreach (var part in item.Split(Constants.ConfigurationValues.Separator))
-                    {
-                        ActivitySources.Add(part);
-                    }
-                }
-                else
-                {
-                    ActivitySources.Add(item);
+                    ActivitySources.Add(configurationName);
                 }
             }
-        }
 
-        var additionalLegacySources = configuration.InstrumentationDevelopment?.DotNet?.Traces?.AdditionalLegacySources;
-        if (additionalLegacySources != null)
-        {
-            for (var i = 0; i < additionalLegacySources.Count; i++)
+            if (traces.AdditionalSourcesList != null)
             {
-                var item = additionalLegacySources[i];
-                if (i == 0 && item.Contains(Constants.ConfigurationValues.Separator) == true)
+                foreach (var configurationName in traces.AdditionalSourcesList.Split(Constants.ConfigurationValues.Separator))
                 {
-                    foreach (var part in item.Split(Constants.ConfigurationValues.Separator))
-                    {
-                        AdditionalLegacySources.Add(part);
-                    }
+                    ActivitySources.Add(configurationName);
                 }
-                else
+            }
+
+            if (traces.AdditionalLegacySources != null)
+            {
+                foreach (var configurationName in traces.AdditionalLegacySources)
                 {
-                    AdditionalLegacySources.Add(item);
+                    AdditionalLegacySources.Add(configurationName);
+                }
+            }
+
+            if (traces.AdditionalLegacySourcesList != null)
+            {
+                foreach (var configurationName in traces.AdditionalLegacySourcesList.Split(Constants.ConfigurationValues.Separator))
+                {
+                    AdditionalLegacySources.Add(configurationName);
                 }
             }
         }

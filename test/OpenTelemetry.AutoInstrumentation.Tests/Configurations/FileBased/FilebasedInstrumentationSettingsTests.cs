@@ -185,8 +185,8 @@ public class FilebasedInstrumentationSettingsTests
         {
             Traces = new DotNetTraces
             {
-                AdditionalSources = ["Some.Additional.Source1,Some.Additional.Source2"],
-                AdditionalLegacySources = ["Some.Additional.Legacy.Source1,Some.Additional.Legacy.Source2"]
+                AdditionalSourcesList = "Some.Additional.Source1,Some.Additional.Source2",
+                AdditionalLegacySourcesList = "Some.Additional.Legacy.Source1,Some.Additional.Legacy.Source2"
             }
         };
 
@@ -215,8 +215,10 @@ public class FilebasedInstrumentationSettingsTests
         {
             Traces = new DotNetTraces
             {
-                AdditionalSources = ["Some.Additional.Source1,Some.Additional.Source2", "Some.Additional.Source3"],
-                AdditionalLegacySources = ["Some.Additional.Legacy.Source1,Some.Additional.Legacy.Source2", "Some.Additional.Legacy.Source3"]
+                AdditionalSourcesList = "Some.Additional.Source1,Some.Additional.Source2",
+                AdditionalSources = ["Some.Additional.Source3"],
+                AdditionalLegacySourcesList = "Some.Additional.Legacy.Source1,Some.Additional.Legacy.Source2",
+                AdditionalLegacySources = ["Some.Additional.Legacy.Source3"]
             }
         };
 
