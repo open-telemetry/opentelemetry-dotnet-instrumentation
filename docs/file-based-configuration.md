@@ -56,7 +56,7 @@ tracer_provider:
   processors:
     # Batch processor for OTLP HTTP
     - batch:
-      # Configure delay interval (in milliseconds) between two consecutive exports. 
+      # Configure delay interval (in milliseconds) between two consecutive exports.
       # Value must be non-negative.
       # If omitted or null, 5000 is used.
       schedule_delay: 5000
@@ -176,6 +176,80 @@ meter_provider:
           # Configure exporter to be Prometheus.
           prometheus:
 ```
+
+### Sampler Configuration
+
+1. Parent Based Always On Sampler Configuration
+
+   ``` yaml
+   tracer_provider:
+     # Configure the sampler. If omitted, parent based sampler with a root of always_on is used.
+     sampler:
+       # Configure sampler to be parent_based.
+       parent_based:
+         # Configure root sampler.
+         # If omitted or null, always_on is used.
+         root:
+           # Configure sampler to be always_on.
+           always_on:
+         # Configure remote_parent_sampled sampler.
+         # If omitted or null, always_on is used.
+         remote_parent_sampled:
+           # Configure sampler to be always_on.
+           always_on:
+         # Configure remote_parent_not_sampled sampler.
+         # If omitted or null, always_off is used.
+         remote_parent_not_sampled:
+           # Configure sampler to be always_off.
+           always_off:
+         # Configure local_parent_sampled sampler.
+         # If omitted or null, always_on is used.
+         local_parent_sampled:
+           # Configure sampler to be always_on.
+           always_on:
+         # Configure local_parent_not_sampled sampler.
+         # If omitted or null, always_off is used.
+         local_parent_not_sampled:
+           # Configure sampler to be always_off.
+           always_off:
+   ```
+
+2. Parent Based Trace Id Ratio Sampler Configuration
+
+   ``` yaml
+   tracer_provider:
+     # Configure the sampler. If omitted, parent based sampler with a root of always_on is used.
+     sampler:
+       # Configure sampler to be parent_based.
+       parent_based:
+         # Configure root sampler.
+         # If omitted or null, always_on is used.
+         root:
+           # Configure sampler to be always_on.
+           trace_id_ratio:
+             # Configure ratio between 0.0 and 1.0.
+             ratio: 0.25
+   ```
+
+3. Always On Sampler Configuration
+
+   ``` yaml
+   tracer_provider:
+     # Configure the sampler. If omitted, parent based  sampler with a root of always_on is used.
+     sampler:
+       # Configure sampler to be always_on.
+       always_on:
+   ```
+
+4. Always Off Sampler Configuration
+
+   ``` yaml
+   tracer_provider:
+     # Configure the sampler. If omitted, parent based sampler with a root of always_on is used.
+     sampler:
+       # Configure sampler to be always_off.
+       always_off:
+   ```
 
 ### Resource Configuration
 
