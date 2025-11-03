@@ -1,6 +1,6 @@
 instrumentation/development:
   dotnet:
-    no_code/development:
+    no_code:
       targets:
         - target:
             assembly:

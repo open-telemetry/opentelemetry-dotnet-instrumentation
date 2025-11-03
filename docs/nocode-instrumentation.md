@@ -48,7 +48,7 @@ file_format: "1.0-rc.1"
 
 instrumentation/development:
   dotnet:
-    no_code/development:
+    no_code:
       targets:
         - target:                                             # Method target specification
             assembly:                                         # Assembly information
@@ -102,7 +102,7 @@ Configuration:
 ```yaml
 instrumentation/development:
   dotnet:
-    no_code/development:
+    no_code:
       targets:
         - target:
             assembly:
@@ -130,7 +130,7 @@ Configuration:
 ```yaml
 instrumentation/development:
   dotnet:
-    no_code/development:
+    no_code:
       targets:
         - target:
             assembly:
@@ -158,7 +158,7 @@ Configuration:
 ```yaml
 instrumentation/development:
   dotnet:
-    no_code/development:
+    no_code:
       targets:
         - target:
             assembly:
@@ -192,7 +192,7 @@ Configuration:
 ```yaml
 instrumentation/development:
   dotnet:
-    no_code/development:
+    no_code:
       targets:
         - target:
             assembly:
@@ -224,7 +224,7 @@ Configuration with multiple attribute types:
 ```yaml
 instrumentation/development:
   dotnet:
-    no_code/development:
+    no_code:
       targets:
         - target:
             assembly:
@@ -284,7 +284,7 @@ Configuration for targeting specific overloads:
 ```yaml
 instrumentation/development:
   dotnet:
-    no_code/development:
+    no_code:
       targets:
         # Parameterless overload
         - target:
@@ -341,7 +341,7 @@ Configuration:
 ```yaml
 instrumentation/development:
   dotnet:
-    no_code/development:
+    no_code:
       targets:
         - target:
             assembly:
@@ -377,7 +377,7 @@ Configuration (when called as `GenericTestMethod<int>()`):
 ```yaml
 instrumentation/development:
   dotnet:
-    no_code/development:
+    no_code:
       targets:
         - target:
             assembly:
@@ -409,7 +409,7 @@ Configuration:
 ```yaml
 instrumentation/development:
   dotnet:
-    no_code/development:
+    no_code:
       targets:
         # Method returning string
         - target:

@@ -28,6 +28,6 @@ internal class DotNetInstrumentation
     /// <summary>
     /// Gets or sets the no-code tracing configuration.
     /// </summary>
-    [YamlMember(Alias = "no_code/development")]
+    [YamlMember(Alias = "no_code")]
     public NoCodeConfiguration? NoCode { get; set; }
 }
