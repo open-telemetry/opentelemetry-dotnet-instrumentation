@@ -1,7 +1,6 @@
 // Copyright The OpenTelemetry Authors
 // SPDX-License-Identifier: Apache-2.0
 
-using System.Diagnostics;
 using OpenTelemetry.AutoInstrumentation.Configurations.FileBasedConfiguration;
 using OpenTelemetry.AutoInstrumentation.Configurations.Otlp;
 using OpenTelemetry.AutoInstrumentation.Logging;
@@ -23,17 +22,17 @@ internal class MetricSettings : Settings
     /// <summary>
     /// Gets the list of enabled metrics exporters.
     /// </summary>
-    public IReadOnlyList<MetricsExporter> MetricExporters { get; private set; } = new List<MetricsExporter>();
+    public IReadOnlyList<MetricsExporter> MetricExporters { get; private set; } = [];
 
     /// <summary>
     /// Gets the list of enabled meters.
     /// </summary>
-    public IReadOnlyList<MetricInstrumentation> EnabledInstrumentations { get; private set; } = new List<MetricInstrumentation>();
+    public IReadOnlyList<MetricInstrumentation> EnabledInstrumentations { get; private set; } = [];
 
     /// <summary>
     /// Gets the list of meters to be added to the MeterProvider at the startup.
     /// </summary>
-    public IList<string> Meters { get; } = new List<string>();
+    public IList<string> Meters { get; } = [];
 
     /// <summary>
     /// Gets metrics OTLP Settings.
@@ -70,30 +69,30 @@ internal class MetricSettings : Settings
 
     protected override void OnLoadFile(YamlConfiguration configuration)
     {
-        EnabledInstrumentations = configuration.InstrumentationDevelopment?.DotNet?.Metrics?.GetEnabledInstrumentations() ?? [];
+        var metrics = configuration.InstrumentationDevelopment?.DotNet?.Metrics;
+        EnabledInstrumentations = metrics?.GetEnabledInstrumentations() ?? [];
 
-        var additionalSources = configuration.InstrumentationDevelopment?.DotNet?.Metrics?.AdditionalSources;
-        if (additionalSources != null)
+        if (metrics != null)
         {
-            for (var i = 0; i < additionalSources.Count; i++)
+            if (metrics.AdditionalSources != null)
             {
-                var item = additionalSources[i];
-                if (i == 0 && item.Contains(Constants.ConfigurationValues.Separator) == true)
+                foreach (var sourceName in metrics.AdditionalSources)
                 {
-                    foreach (var part in item.Split(Constants.ConfigurationValues.Separator))
-                    {
-                        Meters.Add(part);
-                    }
+                    Meters.Add(sourceName);
                 }
-                else
+            }
+
+            if (metrics.AdditionalSourcesList != null)
+            {
+                foreach (var sourceName in metrics.AdditionalSourcesList.Split(Constants.ConfigurationValues.Separator))
                 {
-                    Meters.Add(item);
+                    Meters.Add(sourceName);
                 }
             }
         }
     }
 
-    private static IReadOnlyList<MetricsExporter> ParseMetricExporter(Configuration configuration)
+    private static List<MetricsExporter> ParseMetricExporter(Configuration configuration)
     {
         var metricsExporterEnvVar = configuration.GetString(ConfigurationKeys.Metrics.Exporter);
         var exporters = new List<MetricsExporter>();

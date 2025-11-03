@@ -14,6 +14,12 @@ internal class DotNetMetrics
     [YamlMember(Alias = "additional_sources")]
     public List<string>? AdditionalSources { get; set; }
 
+    /// <summary>
+    /// Gets or sets additional `System.Diagnostics.Metrics.Meter` names list to be added to the meter at the startup.
+    /// </summary>
+    [YamlMember(Alias = "additional_sources_list")]
+    public string? AdditionalSourcesList { get; set; }
+
 #if NETFRAMEWORK
     /// <summary>
     /// Gets or sets the ASP.NET metrics instrumentation configuration.

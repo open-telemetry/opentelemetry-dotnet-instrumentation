@@ -276,7 +276,7 @@ public class FilebasedInstrumentationSettingsTests
         {
             Metrics = new DotNetMetrics
             {
-                AdditionalSources = ["Some.Additional.Source1,Some.Additional.Source2"],
+                AdditionalSourcesList = "Some.Additional.Source1,Some.Additional.Source2"
             }
         };
 
@@ -303,7 +303,8 @@ public class FilebasedInstrumentationSettingsTests
         {
             Metrics = new DotNetMetrics
             {
-                AdditionalSources = ["Some.Additional.Source1,Some.Additional.Source2", "Some.Additional.Source3"],
+                AdditionalSourcesList = "Some.Additional.Source1,Some.Additional.Source2",
+                AdditionalSources = ["Some.Additional.Source3"],
             }
         };
 
