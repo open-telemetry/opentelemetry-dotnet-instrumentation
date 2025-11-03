@@ -141,4 +141,30 @@ public class ParserInstrumentationTests
 #endif
         Assert.True(logs.Log4Net.BridgeEnabled);
     }
+
+    [Fact]
+    public void Parse_EnvVarYaml_ShouldPopulateModelCompletely()
+    {
+        Environment.SetEnvironmentVariable("OTEL_DOTNET_AUTO_TRACES_ADDITIONAL_SOURCES", "Some.Additional.Source1,Some.Additional.Source2");
+        Environment.SetEnvironmentVariable("OTEL_DOTNET_AUTO_TRACES_ADDITIONAL_LEGACY_SOURCES", "Some.Additional.Legacy.Source1,Some.Additional.Legacy.Source2");
+        Environment.SetEnvironmentVariable("OTEL_DOTNET_AUTO_METRICS_ADDITIONAL_SOURCES", "Some.Additional.Source1,Some.Additional.Source2");
+
+        var config = YamlParser.ParseYaml("Configurations/FileBased/Files/TestGeneralFileEnvVars.yaml");
+
+        Assert.NotNull(config);
+        Assert.NotNull(config.InstrumentationDevelopment);
+        Assert.NotNull(config.InstrumentationDevelopment.DotNet);
+
+        var traces = config.InstrumentationDevelopment.DotNet.Traces;
+        Assert.NotNull(traces);
+        Assert.NotNull(traces.AdditionalSourcesList);
+        Assert.NotNull(traces.AdditionalLegacySourcesList);
+        Assert.Equal("Some.Additional.Source1,Some.Additional.Source2", traces.AdditionalSourcesList);
+        Assert.Equal("Some.Additional.Legacy.Source1,Some.Additional.Legacy.Source2", traces.AdditionalLegacySourcesList);
+
+        var metrics = config.InstrumentationDevelopment.DotNet.Metrics;
+        Assert.NotNull(metrics);
+        Assert.NotNull(metrics.AdditionalSourcesList);
+        Assert.Equal("Some.Additional.Source1,Some.Additional.Source2", metrics.AdditionalSourcesList);
+    }
 }
