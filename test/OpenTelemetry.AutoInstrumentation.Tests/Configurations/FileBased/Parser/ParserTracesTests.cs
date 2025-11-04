@@ -57,6 +57,20 @@ public class ParserTracesTests
         Assert.NotNull(simpleProcessor);
         Assert.NotNull(simpleProcessor.Exporter);
         Assert.NotNull(simpleProcessor.Exporter.Console);
+
+        var sampler = config.TracerProvider.Sampler;
+        Assert.NotNull(sampler);
+        Assert.NotNull(sampler.ParentBased);
+        Assert.NotNull(sampler.ParentBased.Root);
+        Assert.NotNull(sampler.ParentBased.Root.AlwaysOn);
+        Assert.NotNull(sampler.ParentBased.RemoteParentSampled);
+        Assert.NotNull(sampler.ParentBased.RemoteParentSampled.AlwaysOn);
+        Assert.NotNull(sampler.ParentBased.RemoteParentNotSampled);
+        Assert.NotNull(sampler.ParentBased.RemoteParentNotSampled.AlwaysOff);
+        Assert.NotNull(sampler.ParentBased.LocalParentSampled);
+        Assert.NotNull(sampler.ParentBased.LocalParentSampled.AlwaysOn);
+        Assert.NotNull(sampler.ParentBased.LocalParentNotSampled);
+        Assert.NotNull(sampler.ParentBased.LocalParentNotSampled.AlwaysOff);
     }
 
     [Fact]

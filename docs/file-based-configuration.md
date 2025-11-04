@@ -59,7 +59,7 @@ tracer_provider:
   processors:
     # Batch processor for OTLP HTTP
     - batch:
-      # Configure delay interval (in milliseconds) between two consecutive exports. 
+      # Configure delay interval (in milliseconds) between two consecutive exports.
       # Value must be non-negative.
       # If omitted or null, 5000 is used.
       schedule_delay: 5000
@@ -188,6 +188,80 @@ logger_provider:
           console:
 ```
 
+### Sampler Configuration
+
+1. Parent Based Always On Sampler Configuration
+
+   ``` yaml
+   tracer_provider:
+     # Configure the sampler. If omitted, parent based sampler with a root of always_on is used.
+     sampler:
+       # Configure sampler to be parent_based.
+       parent_based:
+         # Configure root sampler.
+         # If omitted or null, always_on is used.
+         root:
+           # Configure sampler to be always_on.
+           always_on:
+         # Configure remote_parent_sampled sampler.
+         # If omitted or null, always_on is used.
+         remote_parent_sampled:
+           # Configure sampler to be always_on.
+           always_on:
+         # Configure remote_parent_not_sampled sampler.
+         # If omitted or null, always_off is used.
+         remote_parent_not_sampled:
+           # Configure sampler to be always_off.
+           always_off:
+         # Configure local_parent_sampled sampler.
+         # If omitted or null, always_on is used.
+         local_parent_sampled:
+           # Configure sampler to be always_on.
+           always_on:
+         # Configure local_parent_not_sampled sampler.
+         # If omitted or null, always_off is used.
+         local_parent_not_sampled:
+           # Configure sampler to be always_off.
+           always_off:
+   ```
+
+2. Parent Based Trace Id Ratio Sampler Configuration
+
+   ``` yaml
+   tracer_provider:
+     # Configure the sampler. If omitted, parent based sampler with a root of always_on is used.
+     sampler:
+       # Configure sampler to be parent_based.
+       parent_based:
+         # Configure root sampler.
+         # If omitted or null, always_on is used.
+         root:
+           # Configure sampler to be always_on.
+           trace_id_ratio:
+             # Configure ratio between 0.0 and 1.0.
+             ratio: 0.25
+   ```
+
+3. Always On Sampler Configuration
+
+   ``` yaml
+   tracer_provider:
+     # Configure the sampler. If omitted, parent based  sampler with a root of always_on is used.
+     sampler:
+       # Configure sampler to be always_on.
+       always_on:
+   ```
+
+4. Always Off Sampler Configuration
+
+   ``` yaml
+   tracer_provider:
+     # Configure the sampler. If omitted, parent based sampler with a root of always_on is used.
+     sampler:
+       # Configure sampler to be always_off.
+       always_off:
+   ```
+
 ### Resource Configuration
 
 You can configure resource attributes directly in YAML or via the
@@ -225,7 +299,24 @@ resource:
       operatingsystem: # Detects OS-level attributes (os.*)
       process:         # Detects process-level attributes (process.*)
       processruntime:  # Detects process runtime attributes (process.runtime.*)
-```  
+```
+
+### Plugins Configuration
+
+For more details and updates about Plugins Configuration, see:
+[Plugins documentation](plugins.md)
+
+``` yaml
+plugins/development:
+  # Configure plugins. Entries have higher priority than entries from .plugins_list.
+  # List of plugins to load. Each entry is the full type name, followed by the assembly name.
+  # For example: MyNamespace.MyPlugin, MyAssembly, Version=1.0.0, Culture=neutral, PublicKeyToken=null
+  plugins:
+    - Test1.Plugins.Plugin, Test1.Plugins, Version=1.0.0, Culture=neutral, PublicKeyToken=null
+    - Test2.Plugins.Plugin, Test2.Plugins
+  # Alternatively, configure via a colon-separated list (same format as OTEL_DOTNET_AUTO_PLUGINS).
+  plugins_list: ${OTEL_DOTNET_AUTO_PLUGINS}
+```
 
 ### Propagator Configuration
 
@@ -334,6 +425,32 @@ instrumentation/development:
         # Logs bridge is disabled by default
         # More info about log4net bridge can be found at https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/blob/main/docs/log4net-bridge.md
         bridge_enabled: true
+```
+
+## Instrumentation Additional Sources
+
+``` yaml
+instrumentation/development:
+  dotnet:
+    traces:
+      # List of additional System.Diagnostics.ActivitySource names to be added to the tracer at the startup. 
+      # Use it to capture manually instrumented spans.
+      additional_sources:
+        - Another.Source.Name
+      # Alternatively, configure via a comma-separated list (same format as OTEL_DOTNET_AUTO_TRACES_ADDITIONAL_SOURCES).
+      additional_sources_list: ${OTEL_DOTNET_AUTO_TRACES_ADDITIONAL_SOURCES}
+      # List of additional legacy source names to be added to the tracer at the startup. 
+      # Use it to capture System.Diagnostics.Activity objects created without using the System.Diagnostics.ActivitySource API.
+      additional_legacy_sources:
+        - Legacy.Source.Name
+      # Alternatively, configure via a comma-separated list (same format as OTEL_DOTNET_AUTO_TRACES_ADDITIONAL_LEGACY_SOURCES).
+      additional_legacy_sources_list: ${OTEL_DOTNET_AUTO_TRACES_ADDITIONAL_LEGACY_SOURCES}
+    metrics:
+      # List of additional System.Diagnostics.Metrics.Meter names to be added to the meter at the startup. 
+      additional_sources:
+        - MyProduct.MyLibrary.Metrics
+      # Alternatively, configure via a comma-separated list (same format as OTEL_DOTNET_AUTO_METRICS_ADDITIONAL_SOURCES).
+      additional_sources_list: ${OTEL_DOTNET_AUTO_METRICS_ADDITIONAL_SOURCES}
 ```
 
 ### Configuration based instrumentation
