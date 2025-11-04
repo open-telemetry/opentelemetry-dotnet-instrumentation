@@ -223,7 +223,24 @@ resource:
       operatingsystem: # Detects OS-level attributes (os.*)
       process:         # Detects process-level attributes (process.*)
       processruntime:  # Detects process runtime attributes (process.runtime.*)
-```  
+```
+
+### Plugins Configuration
+
+For more details and updates about Plugins Configuration, see:
+[Plugins documentation](plugins.md)
+
+``` yaml
+plugins/development:
+  # Configure plugins. Entries have higher priority than entries from .plugins_list.
+  # List of plugins to load. Each entry is the full type name, followed by the assembly name.
+  # For example: MyNamespace.MyPlugin, MyAssembly, Version=1.0.0, Culture=neutral, PublicKeyToken=null
+  plugins:
+    - Test1.Plugins.Plugin, Test1.Plugins, Version=1.0.0, Culture=neutral, PublicKeyToken=null
+    - Test2.Plugins.Plugin, Test2.Plugins
+  # Alternatively, configure via a colon-separated list (same format as OTEL_DOTNET_AUTO_PLUGINS).
+  plugins_list: ${OTEL_DOTNET_AUTO_PLUGINS}
+```
 
 ### Propagator Configuration
 

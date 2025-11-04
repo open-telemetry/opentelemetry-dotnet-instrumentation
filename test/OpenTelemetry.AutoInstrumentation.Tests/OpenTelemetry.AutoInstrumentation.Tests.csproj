@@ -28,10 +28,16 @@
     <None Update="Configurations\FileBased\Files\NoCodeFile.yaml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Update="Configurations\FileBased\Files\TestPluginsFile.yaml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Update="Configurations\FileBased\Files\TestPropagatorFile.yaml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="Configurations\FileBased\Files\TestGeneralFile.yaml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Configurations\FileBased\Files\TestPluginsFileEnvVars.yaml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="Configurations\FileBased\Files\TestResourceFile.yaml">

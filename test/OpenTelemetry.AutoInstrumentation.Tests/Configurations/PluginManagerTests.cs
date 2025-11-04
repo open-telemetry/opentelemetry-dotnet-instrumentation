@@ -150,14 +150,14 @@ public class PluginManagerTests
         Assert.Equal("value", resource.Attributes.First().Value);
     }
 
-    private static GeneralSettings GetSettings(string assemblyQualifiedName)
+    private static PluginsSettings GetSettings(string assemblyQualifiedName)
     {
         var config = new Configuration(false, new NameValueConfigurationSource(false, new NameValueCollection()
         {
             { ConfigurationKeys.ProviderPlugins, assemblyQualifiedName }
         }));
 
-        var settings = new GeneralSettings();
+        var settings = new PluginsSettings();
         settings.LoadEnvVar(config);
         return settings;
     }
