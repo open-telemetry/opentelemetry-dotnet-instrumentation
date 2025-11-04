@@ -14,7 +14,6 @@ logger_provider:
               - name: api-key
                 value: "1234"
             headers_list: api-key=1234
-            compression: gzip
             timeout: 10000
 
     - batch:

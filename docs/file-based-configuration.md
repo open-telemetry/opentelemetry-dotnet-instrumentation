@@ -152,10 +152,6 @@ logger_provider:
             # The value is a list of comma separated key-value pairs matching the format of OTEL_EXPORTER_OTLP_HEADERS.
             # If omitted or null, no headers are added.
             headers_list: api-key=1234
-            # Configure compression.
-            # Values include: gzip, none. Implementations may support other compression algorithms.
-            # If omitted or null, none is used.
-            compression: gzip
             # Configure max time (in milliseconds) to wait for each export.
             # Value must be non-negative. A value of 0 indicates no limit (infinity).
             # If omitted or null, 10000 is used.
