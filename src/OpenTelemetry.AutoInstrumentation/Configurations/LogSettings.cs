@@ -77,7 +77,7 @@ internal class LogSettings : Settings
         LogsEnabled = processors != null && processors.Count > 0;
         Processors = processors;
         IncludeFormattedMessage = configuration.LogsIncludeFormattedMessage;
-         
+
         EnabledInstrumentations = configuration.InstrumentationDevelopment?.DotNet?.Logs?.GetEnabledInstrumentations() ?? [];
 
         if (EnabledInstrumentations.Contains(LogInstrumentation.Log4Net))
