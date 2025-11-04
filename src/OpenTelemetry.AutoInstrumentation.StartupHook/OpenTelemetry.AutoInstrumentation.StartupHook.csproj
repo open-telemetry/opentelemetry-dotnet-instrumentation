@@ -73,9 +73,9 @@
     <Compile Include="..\OpenTelemetry.AutoInstrumentation\Vendors\YamlDotNet\**\*.cs">
       <Link>Vendors\YamlDotNet\%(RecursiveDir)%(Filename)%(Extension)</Link>
     </Compile>
-    <Compile Include="..\OpenTelemetry.AutoInstrumentation\Vendors\.editorconfig">
+    <EmbeddedResource Include="..\OpenTelemetry.AutoInstrumentation\Vendors\.editorconfig">
       <Link>Vendors\.editorconfig</Link>
-    </Compile>
+    </EmbeddedResource>
   </ItemGroup>
 
 </Project>
