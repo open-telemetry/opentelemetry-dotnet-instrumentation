@@ -80,7 +80,27 @@ internal class MetricSettings : Settings
         MetricsEnabled = readers != null && readers.Count > 0;
         Readers = readers;
 
-        EnabledInstrumentations = configuration.InstrumentationDevelopment?.DotNet?.Metrics?.GetEnabledInstrumentations() ?? [];
+        var metrics = configuration.InstrumentationDevelopment?.DotNet?.Metrics;
+        EnabledInstrumentations = metrics?.GetEnabledInstrumentations() ?? [];
+
+        if (metrics != null)
+        {
+            if (metrics.AdditionalSources != null)
+            {
+                foreach (var sourceName in metrics.AdditionalSources)
+                {
+                    Meters.Add(sourceName);
+                }
+            }
+
+            if (metrics.AdditionalSourcesList != null)
+            {
+                foreach (var sourceName in metrics.AdditionalSourcesList.Split(Constants.ConfigurationValues.Separator))
+                {
+                    Meters.Add(sourceName);
+                }
+            }
+        }
     }
 
     private static List<MetricsExporter> ParseMetricExporter(Configuration configuration)

@@ -121,9 +121,45 @@ internal class TracerSettings : Settings
 
         Sampler = SamplerFactory.CreateSampler(configuration.TracerProvider?.Sampler, configuration.FailFast) ?? new ParentBasedSampler(new AlwaysOnSampler());
 
-        EnabledInstrumentations = configuration.InstrumentationDevelopment?.DotNet?.Traces?.GetEnabledInstrumentations() ?? [];
+        var traces = configuration.InstrumentationDevelopment?.DotNet?.Traces;
+        EnabledInstrumentations = traces?.GetEnabledInstrumentations() ?? [];
 
-        InstrumentationOptions = new InstrumentationOptions(configuration.InstrumentationDevelopment?.DotNet?.Traces);
+        InstrumentationOptions = new InstrumentationOptions(traces);
+
+        if (traces != null)
+        {
+            if (traces.AdditionalSources != null)
+            {
+                foreach (var configurationName in traces.AdditionalSources)
+                {
+                    ActivitySources.Add(configurationName);
+                }
+            }
+
+            if (traces.AdditionalSourcesList != null)
+            {
+                foreach (var configurationName in traces.AdditionalSourcesList.Split(Constants.ConfigurationValues.Separator))
+                {
+                    ActivitySources.Add(configurationName);
+                }
+            }
+
+            if (traces.AdditionalLegacySources != null)
+            {
+                foreach (var configurationName in traces.AdditionalLegacySources)
+                {
+                    AdditionalLegacySources.Add(configurationName);
+                }
+            }
+
+            if (traces.AdditionalLegacySourcesList != null)
+            {
+                foreach (var configurationName in traces.AdditionalLegacySourcesList.Split(Constants.ConfigurationValues.Separator))
+                {
+                    AdditionalLegacySources.Add(configurationName);
+                }
+            }
+        }
     }
 
     private static List<TracesExporter> ParseTracesExporter(Configuration configuration)

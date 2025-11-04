@@ -76,10 +76,4 @@ internal class YamlConfiguration
     /// </summary>
     [YamlMember(Alias = "flush_on_unhandled_exception")]
     public bool FlushOnUnhandledException { get; set; } = false;
-
-    /// <summary>
-    /// Gets or sets the no-code tracing configuration.
-    /// </summary>
-    [YamlMember(Alias = "no_code/development")]
-    public NoCodeConfiguration? NoCode { get; set; }
 }

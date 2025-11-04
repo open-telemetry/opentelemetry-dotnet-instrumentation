@@ -399,6 +399,32 @@ instrumentation/development:
         bridge_enabled: true
 ```
 
+## Instrumentation Additional Sources
+
+``` yaml
+instrumentation/development:
+  dotnet:
+    traces:
+      # List of additional System.Diagnostics.ActivitySource names to be added to the tracer at the startup. 
+      # Use it to capture manually instrumented spans.
+      additional_sources:
+        - Another.Source.Name
+      # Alternatively, configure via a comma-separated list (same format as OTEL_DOTNET_AUTO_TRACES_ADDITIONAL_SOURCES).
+      additional_sources_list: ${OTEL_DOTNET_AUTO_TRACES_ADDITIONAL_SOURCES}
+      # List of additional legacy source names to be added to the tracer at the startup. 
+      # Use it to capture System.Diagnostics.Activity objects created without using the System.Diagnostics.ActivitySource API.
+      additional_legacy_sources:
+        - Legacy.Source.Name
+      # Alternatively, configure via a comma-separated list (same format as OTEL_DOTNET_AUTO_TRACES_ADDITIONAL_LEGACY_SOURCES).
+      additional_legacy_sources_list: ${OTEL_DOTNET_AUTO_TRACES_ADDITIONAL_LEGACY_SOURCES}
+    metrics:
+      # List of additional System.Diagnostics.Metrics.Meter names to be added to the meter at the startup. 
+      additional_sources:
+        - MyProduct.MyLibrary.Metrics
+      # Alternatively, configure via a comma-separated list (same format as OTEL_DOTNET_AUTO_METRICS_ADDITIONAL_SOURCES).
+      additional_sources_list: ${OTEL_DOTNET_AUTO_METRICS_ADDITIONAL_SOURCES}
+```
+
 ### Configuration based instrumentation
 
 Documentation for configuration based instrumentation can be found in [nocode-instrumentation.md](nocode-instrumentation.md).
