@@ -43,7 +43,7 @@ internal class OtlpGrpcExporterConfig
 
     /// <summary>
     /// Gets or sets the temporality preference for the exporter.
-    /// Values include: cumulative, delta, low_memory.
+    /// Values include: cumulative, delta.
     /// If omitted or null, cumulative is used.
     /// </summary>
     [YamlMember(Alias = "temporality_preference")]
