@@ -8,6 +8,30 @@ namespace OpenTelemetry.AutoInstrumentation.Configurations.FileBasedConfiguratio
 
 internal class DotNetTraces
 {
+    /// <summary>
+    /// Gets or sets the list of additional `System.Diagnostics.ActivitySource` names to be added to the tracer at the startup.
+    /// </summary>
+    [YamlMember(Alias = "additional_sources")]
+    public List<string>? AdditionalSources { get; set; }
+
+    /// <summary>
+    /// Gets or sets additional`System.Diagnostics.ActivitySource` names list to be added to the tracer at the startup.
+    /// </summary>
+    [YamlMember(Alias = "additional_sources_list")]
+    public string? AdditionalSourcesList { get; set; }
+
+    /// <summary>
+    /// Gets or sets the list of additional `System.Diagnostics.Activity` names to be added to the tracer at the startup.
+    /// </summary>
+    [YamlMember(Alias = "additional_legacy_sources")]
+    public List<string>? AdditionalLegacySources { get; set; }
+
+    /// <summary>
+    /// Gets or sets additional `System.Diagnostics.Activity` names list to be added to the tracer at the startup.
+    /// </summary>
+    [YamlMember(Alias = "additional_legacy_sources_list")]
+    public string? AdditionalLegacySourcesList { get; set; }
+
 #if NETFRAMEWORK
     /// <summary>
     /// Gets or sets the ASP.NET traces instrumentation configuration.
