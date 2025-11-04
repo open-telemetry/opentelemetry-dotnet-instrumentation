@@ -70,8 +70,8 @@ internal class YamlConfiguration
     public bool FlushOnUnhandledException { get; set; } = false;
 
     /// <summary>
-    /// Gets or sets the no-code tracing configuration.
+    /// Gets or sets the plugins configuration.
     /// </summary>
-    [YamlMember(Alias = "no_code/development")]
-    public NoCodeConfiguration? NoCode { get; set; }
+    [YamlMember(Alias = "plugins/development")]
+    public PluginsConfiguration? Plugins { get; set; }
 }

@@ -22,17 +22,17 @@ internal class MetricSettings : Settings
     /// <summary>
     /// Gets the list of enabled metrics exporters.
     /// </summary>
-    public IReadOnlyList<MetricsExporter> MetricExporters { get; private set; } = new List<MetricsExporter>();
+    public IReadOnlyList<MetricsExporter> MetricExporters { get; private set; } = [];
 
     /// <summary>
     /// Gets the list of enabled meters.
     /// </summary>
-    public IReadOnlyList<MetricInstrumentation> EnabledInstrumentations { get; private set; } = new List<MetricInstrumentation>();
+    public IReadOnlyList<MetricInstrumentation> EnabledInstrumentations { get; private set; } = [];
 
     /// <summary>
     /// Gets the list of meters to be added to the MeterProvider at the startup.
     /// </summary>
-    public IList<string> Meters { get; } = new List<string>();
+    public IList<string> Meters { get; } = [];
 
     /// <summary>
     /// Gets metrics OTLP Settings.
@@ -69,10 +69,30 @@ internal class MetricSettings : Settings
 
     protected override void OnLoadFile(YamlConfiguration configuration)
     {
-        EnabledInstrumentations = configuration.InstrumentationDevelopment?.DotNet?.Metrics?.GetEnabledInstrumentations() ?? [];
+        var metrics = configuration.InstrumentationDevelopment?.DotNet?.Metrics;
+        EnabledInstrumentations = metrics?.GetEnabledInstrumentations() ?? [];
+
+        if (metrics != null)
+        {
+            if (metrics.AdditionalSources != null)
+            {
+                foreach (var sourceName in metrics.AdditionalSources)
+                {
+                    Meters.Add(sourceName);
+                }
+            }
+
+            if (metrics.AdditionalSourcesList != null)
+            {
+                foreach (var sourceName in metrics.AdditionalSourcesList.Split(Constants.ConfigurationValues.Separator))
+                {
+                    Meters.Add(sourceName);
+                }
+            }
+        }
     }
 
-    private static IReadOnlyList<MetricsExporter> ParseMetricExporter(Configuration configuration)
+    private static List<MetricsExporter> ParseMetricExporter(Configuration configuration)
     {
         var metricsExporterEnvVar = configuration.GetString(ConfigurationKeys.Metrics.Exporter);
         var exporters = new List<MetricsExporter>();

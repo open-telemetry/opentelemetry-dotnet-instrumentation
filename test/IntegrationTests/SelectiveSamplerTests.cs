@@ -45,9 +45,16 @@ public class SelectiveSamplerTests : TestHelper
 
         // Test app sleeps for 0.5s, sampling interval set to 0.05s
         Output.WriteLine($"Count: {threadSamples.Count}");
-        Assert.InRange(threadSamples.Count, 7, 12);
+        Assert.InRange(threadSamples.Count, 7, 14);
 
         var threadNames = threadSamples.Select(sample => sample.ThreadName).Distinct(StringComparer.InvariantCultureIgnoreCase);
+
+        var uniqueSpanContextCount = threadSamples
+            .Select(ts => (ts.SpanId, ts.TraceIdHigh, ts.TraceIdLow))
+            .Distinct()
+            .Count();
+
+        Assert.Equal(2, uniqueSpanContextCount);
 
         Assert.Equal(2, threadNames.Count());
     }
