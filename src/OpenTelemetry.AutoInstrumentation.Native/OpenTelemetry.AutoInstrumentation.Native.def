@@ -1,4 +1,4 @@
-LIBRARY "OpenTelemetry.AutoInstrumentation.Native.dll"
+﻿LIBRARY "OpenTelemetry.AutoInstrumentation.Native.dll"
 
 EXPORTS
     DllCanUnloadNow PRIVATE
@@ -16,3 +16,4 @@ EXPORTS
     ContinuousProfilerNotifySpanStopped
     SelectiveSamplingStart
     SelectiveSamplingStop
+    GetNetFrameworkRedirectionVersion

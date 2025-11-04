@@ -56,7 +56,7 @@ tracer_provider:
   processors:
     # Batch processor for OTLP HTTP
     - batch:
-      # Configure delay interval (in milliseconds) between two consecutive exports. 
+      # Configure delay interval (in milliseconds) between two consecutive exports.
       # Value must be non-negative.
       # If omitted or null, 5000 is used.
       schedule_delay: 5000
@@ -177,6 +177,80 @@ meter_provider:
           prometheus:
 ```
 
+### Sampler Configuration
+
+1. Parent Based Always On Sampler Configuration
+
+   ``` yaml
+   tracer_provider:
+     # Configure the sampler. If omitted, parent based sampler with a root of always_on is used.
+     sampler:
+       # Configure sampler to be parent_based.
+       parent_based:
+         # Configure root sampler.
+         # If omitted or null, always_on is used.
+         root:
+           # Configure sampler to be always_on.
+           always_on:
+         # Configure remote_parent_sampled sampler.
+         # If omitted or null, always_on is used.
+         remote_parent_sampled:
+           # Configure sampler to be always_on.
+           always_on:
+         # Configure remote_parent_not_sampled sampler.
+         # If omitted or null, always_off is used.
+         remote_parent_not_sampled:
+           # Configure sampler to be always_off.
+           always_off:
+         # Configure local_parent_sampled sampler.
+         # If omitted or null, always_on is used.
+         local_parent_sampled:
+           # Configure sampler to be always_on.
+           always_on:
+         # Configure local_parent_not_sampled sampler.
+         # If omitted or null, always_off is used.
+         local_parent_not_sampled:
+           # Configure sampler to be always_off.
+           always_off:
+   ```
+
+2. Parent Based Trace Id Ratio Sampler Configuration
+
+   ``` yaml
+   tracer_provider:
+     # Configure the sampler. If omitted, parent based sampler with a root of always_on is used.
+     sampler:
+       # Configure sampler to be parent_based.
+       parent_based:
+         # Configure root sampler.
+         # If omitted or null, always_on is used.
+         root:
+           # Configure sampler to be always_on.
+           trace_id_ratio:
+             # Configure ratio between 0.0 and 1.0.
+             ratio: 0.25
+   ```
+
+3. Always On Sampler Configuration
+
+   ``` yaml
+   tracer_provider:
+     # Configure the sampler. If omitted, parent based  sampler with a root of always_on is used.
+     sampler:
+       # Configure sampler to be always_on.
+       always_on:
+   ```
+
+4. Always Off Sampler Configuration
+
+   ``` yaml
+   tracer_provider:
+     # Configure the sampler. If omitted, parent based sampler with a root of always_on is used.
+     sampler:
+       # Configure sampler to be always_off.
+       always_off:
+   ```
+
 ### Resource Configuration
 
 You can configure resource attributes directly in YAML or via the
@@ -235,6 +309,94 @@ propagator:
     b3multi:      # B3 multi-header propagator
   # Alternatively, configure via a comma-separated list (same format as OTEL_PROPAGATORS).
   composite_list: ${OTEL_PROPAGATORS}
+```
+
+## Instrumentation Configuration
+
+You can configure traces, metrics, and logs instrumentations.
+Each entry in the example list below is equivalent to setting the corresponding
+environment variable described in the [Instrumentation list and documentation](config.md#instrumentations).
+To disable a instrumentation, comment out or remove its corresponding entry.
+
+``` yaml
+instrumentation/development:
+  dotnet:
+    traces:
+      aspnet:              # ASP.NET
+      aspnetcore:          # ASP.NET Core
+      azure:               # Azure SDK
+      elasticsearch:       # Elastic.Clients.Elasticsearch
+      elastictransport:    # Elastic.Transport
+      entityframeworkcore: # Entity Framework Core
+      graphql:             # GraphQL
+      grpcnetclient:       # Grpc.Net.Client
+      httpclient:          # System.Net.Http.HttpClient
+      kafka:               # Confluent.Kafka
+      masstransit:         # MassTransit
+      mongodb:             # MongoDB.Driver
+      mysqlconnector:      # MySqlConnector
+      mysqldata:           # MySql.Data
+      npgsql:              # Npgsql
+      nservicebus:         # NServiceBus
+      oraclemda:           # Oracle.ManagedDataAccess
+      rabbitmq:            # RabbitMQ.Client
+      quartz:              # Quartz
+      sqlclient:           # Microsoft.Data.SqlClient & System.Data.SqlClient
+      stackexchangeredis:  # StackExchange.Redis
+      wcfclient:           # WCF Client
+      wcfservice:          # WCF Service
+    metrics:
+      aspnet:              # ASP.NET metrics
+      aspnetcore:          # ASP.NET Core metrics
+      httpclient:          # HttpClient metrics
+      netruntime:          # .NET Runtime metrics
+      nservicebus:         # NServiceBus metrics
+      process:             # Process metrics
+      sqlclient:           # SQL Client metrics
+    logs:
+      ilogger:             # Microsoft.Extensions.Logging
+      log4net:             # Log4Net
+```
+
+## Instrumentation options
+
+``` yaml
+instrumentation/development:
+  dotnet:
+    traces:
+      graphql:
+        # Whether the GraphQL instrumentation can pass raw queries through the graphql.document attribute. Queries might contain sensitive information.
+        # Default is false
+        set_document: false
+      oraclemda: 
+        # Whether the Oracle Client instrumentation can pass SQL statements through the db.statement attribute. Queries might contain sensitive information. If set to false, db.statement is recorded only for executing stored procedures.
+        # Default is false
+        set_db_statement_for_text: false
+      aspnet:
+        # A comma-separated list of HTTP header names. ASP.NET instrumentations will capture HTTP request header values for all configured header names.
+        capture_request_headers: "X-Key,X-Custom-Header,X-Header-Example"
+        # A comma-separated list of HTTP header names. ASP.NET instrumentations will capture HTTP response header values for all configured header names.
+        capture_response_headers: "X-Key,X-Custom-Header,X-Header-Example"
+      aspnetcore:
+        # A comma-separated list of HTTP header names. ASP.NET Core instrumentations will capture HTTP request header values for all configured header names.
+        capture_request_headers: "X-Key,X-Custom-Header,X-Header-Example"
+        # A comma-separated list of HTTP header names. ASP.NET Core instrumentations will capture HTTP response header values for all configured header names.
+        capture_response_headers: "X-Key,X-Custom-Header,X-Header-Example"
+      httpclient:
+        # A comma-separated list of HTTP header names. HTTP Client instrumentations will capture HTTP request header values for all configured header names.
+        capture_request_headers: "X-Key,X-Custom-Header,X-Header-Example"
+        # A comma-separated list of HTTP header names. HTTP Client instrumentations will capture HTTP response header values for all configured header names.
+        capture_response_headers: "X-Key,X-Custom-Header,X-Header-Example"
+      grpcnetclient:
+        # A comma-separated list of gRPC metadata names. Grpc.Net.Client instrumentations will capture gRPC request metadata values for all configured metadata names.
+        capture_request_metadata: "X-Key,X-Custom-Header,X-Header-Example"
+        # A comma-separated list of gRPC metadata names. Grpc.Net.Client instrumentations will capture gRPC response metadata values for all configured metadata names.
+        capture_response_metadata: "X-Key,X-Custom-Header,X-Header-Example"
+    logs:
+      log4net:
+        # Logs bridge is disabled by default
+        # More info about log4net bridge can be found at https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/blob/main/docs/log4net-bridge.md
+        bridge_enabled: true
 ```
 
 ### Configuration based instrumentation

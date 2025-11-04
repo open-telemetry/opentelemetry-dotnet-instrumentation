@@ -4,6 +4,7 @@
 using OpenTelemetry.AutoInstrumentation.Configurations.FileBasedConfiguration;
 using OpenTelemetry.AutoInstrumentation.Configurations.Otlp;
 using OpenTelemetry.AutoInstrumentation.Logging;
+using OpenTelemetry.Trace;
 
 namespace OpenTelemetry.AutoInstrumentation.Configurations;
 
@@ -63,6 +64,11 @@ internal class TracerSettings : Settings
     /// </summary>
     public IReadOnlyList<ProcessorConfig>? Processors { get; private set; } = null;
 
+    /// <summary>
+    /// Gets the sampler configured via file-based configuration.
+    /// </summary>
+    public Sampler? Sampler { get; private set; }
+
     protected override void OnLoadEnvVar(Configuration configuration)
     {
         TracesExporters = ParseTracesExporter(configuration);
@@ -112,6 +118,12 @@ internal class TracerSettings : Settings
         }
 
         Processors = processors;
+
+        Sampler = SamplerFactory.CreateSampler(configuration.TracerProvider?.Sampler, configuration.FailFast) ?? new ParentBasedSampler(new AlwaysOnSampler());
+
+        EnabledInstrumentations = configuration.InstrumentationDevelopment?.DotNet?.Traces?.GetEnabledInstrumentations() ?? [];
+
+        InstrumentationOptions = new InstrumentationOptions(configuration.InstrumentationDevelopment?.DotNet?.Traces);
     }
 
     private static List<TracesExporter> ParseTracesExporter(Configuration configuration)

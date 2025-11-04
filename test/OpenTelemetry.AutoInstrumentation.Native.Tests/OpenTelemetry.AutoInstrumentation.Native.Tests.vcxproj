@@ -27,7 +27,7 @@
     <CharacterSet>Unicode</CharacterSet>
     <TargetFrameworkVersion>v4.6.2</TargetFrameworkVersion>
     <LIB_PATH>..\..\src\OpenTelemetry.AutoInstrumentation.Native\lib\</LIB_PATH>
-    <LIB_INCLUDES>$(LIB_PATH)fmt_$(LIB_PLATFORM)-windows-static\include;$(LIB_PATH)spdlog\include;$(LIB_PATH)coreclr\src\pal\prebuilt\inc</LIB_INCLUDES>
+    <LIB_INCLUDES>$(LIB_PATH)spdlog\include;$(LIB_PATH)coreclr\src\pal\prebuilt\inc</LIB_INCLUDES>
     <ProjectName>OpenTelemetry.AutoInstrumentation.Native.Tests</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
