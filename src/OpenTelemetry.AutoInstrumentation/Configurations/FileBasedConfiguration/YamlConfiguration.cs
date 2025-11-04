@@ -76,4 +76,10 @@ internal class YamlConfiguration
     /// </summary>
     [YamlMember(Alias = "flush_on_unhandled_exception")]
     public bool FlushOnUnhandledException { get; set; } = false;
+
+    /// <summary>
+    /// Gets or sets the plugins configuration.
+    /// </summary>
+    [YamlMember(Alias = "plugins/development")]
+    public PluginsConfiguration? Plugins { get; set; }
 }
