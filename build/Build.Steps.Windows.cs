@@ -288,7 +288,7 @@ partial class Build
 
                 var label = GetLabel(someFramework);
                 var versionGroup = packagesProject.Xml.ItemGroups.First(x => x.Label == label);
-                
+
                 var packageVersionsToProcess = versionGroup.Children
                     .Select(GetPackageProperties)
                     .Where(pkg => pkg.PackageName != null && pkg.PackageVersion != null)
