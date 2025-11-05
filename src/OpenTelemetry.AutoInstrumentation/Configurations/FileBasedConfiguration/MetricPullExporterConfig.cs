@@ -5,11 +5,11 @@ using Vendors.YamlDotNet.Serialization;
 
 namespace OpenTelemetry.AutoInstrumentation.Configurations.FileBasedConfiguration;
 
-internal class BatchProcessorConfig : BatchProcessorConfigBase
+internal class MetricPullExporterConfig
 {
     /// <summary>
-    /// Gets or sets the exporters.
+    /// Gets or sets the Prometheus exporter configuration.
     /// </summary>
-    [YamlMember(Alias = "exporter")]
-    public BatchTracerExporterConfig? Exporter { get; set; }
+    [YamlMember(Alias = "prometheus")]
+    public object? Prometheus { get; set; }
 }

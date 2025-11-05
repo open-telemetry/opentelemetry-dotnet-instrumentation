@@ -5,11 +5,11 @@ using Vendors.YamlDotNet.Serialization;
 
 namespace OpenTelemetry.AutoInstrumentation.Configurations.FileBasedConfiguration;
 
-internal class BatchProcessorConfig : BatchProcessorConfigBase
+internal class PullMetricReaderConfig
 {
     /// <summary>
-    /// Gets or sets the exporters.
+    /// Gets or sets the exporter configuration.
     /// </summary>
     [YamlMember(Alias = "exporter")]
-    public BatchTracerExporterConfig? Exporter { get; set; }
+    public MetricPullExporterConfig? Exporter { get; set; }
 }

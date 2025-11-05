@@ -39,6 +39,13 @@ internal class MetricSettings : Settings
     /// </summary>
     public OtlpSettings? OtlpSettings { get; private set; }
 
+    /// <summary>
+    /// Gets the configured metric readers from the file-based configuration.
+    /// For environment variable configuration, this must be null,
+    /// and the configuration will be handled by MetricExporters.
+    /// </summary>
+    public IReadOnlyList<MetricReaderConfig>? Readers { get; private set; }
+
     protected override void OnLoadEnvVar(Configuration configuration)
     {
         MetricExporters = ParseMetricExporter(configuration);
@@ -69,6 +76,10 @@ internal class MetricSettings : Settings
 
     protected override void OnLoadFile(YamlConfiguration configuration)
     {
+        var readers = configuration.MeterProvider?.Readers;
+        MetricsEnabled = readers != null && readers.Count > 0;
+        Readers = readers;
+
         var metrics = configuration.InstrumentationDevelopment?.DotNet?.Metrics;
         EnabledInstrumentations = metrics?.GetEnabledInstrumentations() ?? [];
 
