@@ -115,6 +115,71 @@ tracer_provider:
           console:
 ```
 
+### Meter Provider Configuration
+
+``` yaml
+meter_provider:
+  readers:
+    # Periodic reader for OTLP HTTP
+    - periodic:
+        # Configure delay interval (in milliseconds) between start of two consecutive exports.
+        # Value must be non-negative.
+        # If omitted or null, 60000 is used.
+        interval: 60000
+        # Configure maximum allowed time (in milliseconds) to export data.
+        # Value must be non-negative. A value of 0 indicates no limit (infinity).
+        # If omitted or null, 30000 is used.
+        timeout: 30000
+        # Configure exporter.
+        exporter:
+          # Configure exporter to be OTLP with HTTP transport.
+          otlp_http:
+            # Configure endpoint, including the metric specific path.
+            # If omitted or null, http://localhost:4318/v1/metrics is used.
+            endpoint: http://localhost:4318/v1/metrics
+            # Configure max time (in milliseconds) to wait for each export.
+            # Value must be non-negative. A value of 0 indicates no limit (infinity).
+            # If omitted or null, 10000 is used.
+            timeout: 10000
+            # Configure headers. Entries have higher priority than entries from .headers_list.
+            # If an entry's .value is null, the entry is ignored.
+            headers:
+              - name: api-key
+                value: "1234"
+            # Configure headers. Entries have lower priority than entries from .headers.
+            # The value is a list of comma separated key-value pairs matching the format of OTEL_EXPORTER_OTLP_HEADERS. See https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/protocol/exporter.md#configuration-options for details.
+            # If omitted or null, no headers are added.
+            headers_list: ${OTEL_EXPORTER_OTLP_TRACES_HEADERS}
+            # Configure temporality preference.
+            # Values include: cumulative, delta.
+            # If omitted or null, cumulative is used.
+            temporality_preference: cumulative
+
+    # Periodic reader for OTLP gRPC
+    - periodic:
+        # Configure exporter.
+        exporter:
+          # Configure exporter to be OTLP with gRPC transport.
+          otlp_grpc:
+          # Configuration otlp_grpc is the same as otlp_http.
+          # if otlp_http is used it will override otlp_grpc.
+          # On .NET Framework, the grpc OTLP exporter protocol is not supported.
+
+    # Periodic reader for Console
+    - periodic:
+        # Configure exporter.
+        exporter:
+          # Configure exporter to be console.
+          console:
+
+    # Pull reader for Prometheus
+    - pull:
+        # Configure exporter.
+        exporter:
+          # Configure exporter to be Prometheus.
+          prometheus:
+```
+
 ### Logger Provider Configuration
 
 ``` yaml

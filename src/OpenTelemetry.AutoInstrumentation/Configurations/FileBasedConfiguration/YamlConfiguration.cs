@@ -42,6 +42,14 @@ internal class YamlConfiguration
     public TracerProviderConfiguration? TracerProvider { get; set; }
 
     /// <summary>
+    /// Gets or sets the meter provider configuration.
+    /// Configure meter provider.
+    /// If omitted, a noop meter provider is used.
+    /// </summary>
+    [YamlMember(Alias = "meter_provider")]
+    public MeterProviderConfiguration? MeterProvider { get; set; }
+
+    /// <summary>
     /// Gets or sets the logger provider configuration.
     /// Configure logger provider.
     /// If omitted, a noop logger provider is used.

@@ -1,0 +1,13 @@
+meter_provider:
+  readers:
+    - periodic:
+        interval: ${OTEL_METRIC_EXPORT_INTERVAL:-60000}
+        timeout: ${OTEL_METRIC_EXPORT_TIMEOUT:-30000}
+        exporter:
+          otlp_http:
+            endpoint: ${OTEL_EXPORTER_OTLP_METRICS_ENDPOINT}
+            timeout: ${OTEL_EXPORTER_OTLP_METRICS_TIMEOUT}
+            headers_list: ${OTEL_EXPORTER_OTLP_METRICS_HEADERS}
+    - periodic:
+        exporter:
+          console:
