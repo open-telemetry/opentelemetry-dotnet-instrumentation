@@ -42,6 +42,14 @@ internal class YamlConfiguration
     public TracerProviderConfiguration? TracerProvider { get; set; }
 
     /// <summary>
+    /// Gets or sets the logger provider configuration.
+    /// Configure logger provider.
+    /// If omitted, a noop logger provider is used.
+    /// </summary>
+    [YamlMember(Alias = "logger_provider")]
+    public LoggerProviderConfiguration? LoggerProvider { get; set; }
+
+    /// <summary>
     /// Gets or sets the text map context propagator configuration.
     /// If omitted, a noop propagator is used.
     /// </summary>
@@ -68,6 +76,13 @@ internal class YamlConfiguration
     /// </summary>
     [YamlMember(Alias = "flush_on_unhandled_exception")]
     public bool FlushOnUnhandledException { get; set; } = false;
+
+    /// <summary>
+    /// Gets or sets a value indicating whether the Logs Include Formatted Message is enabled.
+    /// If omitted or null, false is used.
+    /// </summary>
+    [YamlMember(Alias = "logs_include_formatted_message")]
+    public bool LogsIncludeFormattedMessage { get; set; } = false;
 
     /// <summary>
     /// Gets or sets the plugins configuration.
