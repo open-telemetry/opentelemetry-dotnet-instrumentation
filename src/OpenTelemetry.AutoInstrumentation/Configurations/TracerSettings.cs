@@ -112,11 +112,8 @@ internal class TracerSettings : Settings
     protected override void OnLoadFile(YamlConfiguration configuration)
     {
         var processors = configuration.TracerProvider?.Processors;
-        if (processors != null && processors.Count > 0)
-        {
-            TracesEnabled = true;
-        }
 
+        TracesEnabled = processors != null && processors.Count > 0;
         Processors = processors;
 
         Sampler = SamplerFactory.CreateSampler(configuration.TracerProvider?.Sampler, configuration.FailFast) ?? new ParentBasedSampler(new AlwaysOnSampler());
