@@ -106,17 +106,6 @@ private:
     // Loader methods. These are only used on the .NET Framework.
     //
     HRESULT RunAutoInstrumentationLoader(const ComPtr<IMetaDataEmit2>&, const ModuleID module_id, const mdToken function_token, const FunctionInfo& caller, const ModuleMetadata& module_metadata);
-    HRESULT GenerateLoaderMethod(const ModuleID module_id, mdMethodDef* ret_method_token);
-    HRESULT GenerateLoaderType(const ModuleID module_id,
-                               mdTypeDef*     loader_type,
-                               mdMethodDef*   init_method,
-                               mdMethodDef*   patch_app_domain_setup_method);
-    HRESULT GenerateHookFixup(const ModuleID module_id,
-                              mdTypeDef*     hook_fixup_type,
-                              mdMethodDef*   patch_startup_hook_method,
-                              const WSTRING& startup_hook_dll_name);
-    HRESULT ModifyAppDomainCreate(const ModuleID module_id, mdMethodDef patch_app_domain_setup_method);
-    HRESULT ModifyProcessStartupHooks(const ModuleID module_id, mdMethodDef patch_startup_hook_method);
     HRESULT AddIISPreStartInitFlags(const ModuleID module_id, const mdToken function_token);
 #endif
 
@@ -127,8 +116,6 @@ private:
     bool GetIntegrationTypeRef(ModuleMetadata& module_metadata, ModuleID module_id,
                                const IntegrationDefinition& integration_definition, mdTypeRef& integration_type_ref);
     bool ProfilerAssemblyIsLoadedIntoAppDomain(AppDomainID app_domain_id);
-    std::string GetILCodes(const std::string& title, ILRewriter* rewriter, const FunctionInfo& caller,
-                           const ComPtr<IMetaDataImport2>& metadata_import);
 
     //
     // Initialization methods
@@ -148,6 +135,11 @@ public:
     void GetAssemblyAndSymbolsBytes(BYTE** pAssemblyArray, int* assemblySize, BYTE** pSymbolsArray,
                                     int* symbolsSize) const;
 #endif
+
+    std::string GetILCodes(const std::string&              title,
+                           ILRewriter*                     rewriter,
+                           const FunctionInfo&             caller,
+                           const ComPtr<IMetaDataImport2>& metadata_import);
 
     //
     // ICorProfilerCallback methods

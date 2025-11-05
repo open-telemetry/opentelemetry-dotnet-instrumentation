@@ -9,16 +9,16 @@
 #ifdef _WIN32
 
 #include "windows.h"
-#include <filesystem>
 #include <process.h>
 
 #else
 
 #include <fstream>
-#include <unistd.h>
 #include <dlfcn.h>
 
 #endif
+
+#include <filesystem>
 
 #if MACOS
 #include <libproc.h>
@@ -26,19 +26,8 @@
 
 #include "environment_variables.h"
 #include "string_utils.h" // NOLINT
+#include "file_utils.h"
 #include "util.h"
-
-#ifdef _WIN32
-#define DIR_SEPARATOR WStr('\\')
-#define ENV_VAR_PATH_SEPARATOR WStr(';')
-#define DIR_SEPARATOR_STR WStr("\\")
-#define ENV_VAR_PATH_SEPARATOR_STR WStr(";")
-#else
-#define DIR_SEPARATOR WStr('/')
-#define ENV_VAR_PATH_SEPARATOR WStr(':')
-#define DIR_SEPARATOR_STR WStr("/")
-#define ENV_VAR_PATH_SEPARATOR_STR WStr(":")
-#endif
 
 namespace trace
 {
@@ -48,11 +37,11 @@ inline WSTRING GetOpenTelemetryLogFilePath(const std::string& file_name_suffix)
 {
     const auto file_name = TLoggerPolicy::file_name + file_name_suffix + ".log";
 
-    WSTRING directory = GetEnvironmentValue(environment::log_directory);
+    std::filesystem::path directory = GetEnvironmentValue(environment::log_directory);
 
-    if (directory.length() > 0)
+    if (!directory.empty())
     {
-        return directory + DIR_SEPARATOR + ToWSTRING(file_name);
+        return PATH_TO_WSTRING(directory / file_name);
     }
 #ifdef _WIN32
     std::filesystem::path program_data_path;
@@ -63,10 +52,10 @@ inline WSTRING GetOpenTelemetryLogFilePath(const std::string& file_name_suffix)
         program_data_path = WStr(R"(C:\ProgramData)");
     }
 
-    // on Windows WSTRING == wstring
-    return (program_data_path / TLoggerPolicy::folder_path  / file_name).wstring();
+    return PATH_TO_WSTRING(program_data_path / TLoggerPolicy::folder_path  / file_name);
 #else
-    return ToWSTRING("/var/log/opentelemetry/dotnet/" + file_name);
+    std::filesystem::path program_data_path = WStr("/var/log/opentelemetry/dotnet/");
+    return PATH_TO_WSTRING(program_data_path / file_name);
 #endif
 }
 
@@ -136,50 +125,34 @@ inline WSTRING GetCurrentModuleFileName()
     return EmptyWStr;
 }
 
-inline WSTRING GetModuleFilePath(const WSTRING& moduleName)
+inline WSTRING GetHomePath()
 {
-    const WSTRING currentModuleFileName = GetCurrentModuleFileName();
-    if (currentModuleFileName == EmptyWStr)
+    std::filesystem::path home_path;
+
+    // First choice is the environment variable
+    const auto env_home_path = GetEnvironmentValue(environment::profiler_home_path);
+    if (!env_home_path.empty())
+    {
+        home_path = std::filesystem::absolute(env_home_path);
+    }
+    else
+    {
+        // Without a home path set, try to use the offset from the profiler assembly.
+        const auto module_filename = GetCurrentModuleFileName();
+        if (module_filename.empty())
+        {
+            return EmptyWStr;
+        }
+
+        home_path = std::filesystem::path(module_filename).parent_path();
+    }
+
+    if (!std::filesystem::exists(home_path))
     {
         return EmptyWStr;
     }
 
-#ifdef _WIN32
-    // Use std::filesystem for path manipulation on Windows
-    std::filesystem::path currentPath(currentModuleFileName);
-    
-    // Get the parent directory of the parent directory (strip filename and its folder)
-    std::filesystem::path parentParentDir = currentPath.parent_path().parent_path();
-    
-    // Convert moduleName to string and replace forward slashes with backslashes on Windows
-    std::string moduleNameStr = ToString(moduleName);
-    std::replace(moduleNameStr.begin(), moduleNameStr.end(), '/', '\\');
-    
-    // Combine the parent parent directory with the module name
-    std::filesystem::path resultPath = parentParentDir / moduleNameStr;
-    
-    return resultPath.wstring();
-#else
-    // Manual path manipulation for Unix-like systems
-    size_t lastSeparator = currentModuleFileName.find_last_of(WStr('/'));
-    if (lastSeparator == WSTRING::npos)
-    {
-        return EmptyWStr;
-    }
-    
-    // Find the second-to-last separator to get the parent directory of the parent directory
-    size_t secondLastSeparator = currentModuleFileName.find_last_of(WStr('/'), lastSeparator - 1);
-    if (secondLastSeparator == WSTRING::npos)
-    {
-        return EmptyWStr;
-    }
-    
-    // Extract the parent parent directory path
-    WSTRING parentParentDir = currentModuleFileName.substr(0, secondLastSeparator);
-    
-    // Append the module name
-    return parentParentDir + WStr("/") + moduleName;
-#endif
+    return PATH_TO_WSTRING(home_path);
 }
 
 } // namespace trace
