@@ -1,15 +1,15 @@
 # sdk-migration-config.yaml is a typical starting point for configuring the SDK when migrating
 # from environment variable based configuration.
 #
-# This template includes env var substitution references (i.e. ${MY_ENV}) for all spec defined
-# env vars (https://opentelemetry.io/docs/specs/otel/configuration/sdk-environment-variables/)
-# which map cleanly to declarative configuration. For example, OTEL_SDK_DISABLED is referenced
+# This template includes env var substitution references (i.e. ${MY_ENV}) for all documented
+# env vars (https://opentelemetry.io/docs/zero-code/dotnet/configuration/)
+# which map cleanly to declarative configuration. For example, OTEL_DOTNET_AUTO_FAIL_FAST_ENABLED is referenced
 # below, but OTEL_TRACES_EXPORTER is not since it does not map well to the hierarchical
 # structure of declarative configuration.
 #
 # NOTE: With the exception of env var substitution syntax, SDKs ignore environment variables
-# when interpreting config files. For example, if "disabled: ${OTEL_SDK_DISABLED:-false}"
-# is replaced with "disabled: false", then setting the env var OTEL_SDK_DISABLED will have
+# when interpreting config files. For example, if "fail_fast: ${OTEL_DOTNET_AUTO_FAIL_FAST_ENABLED:-false}"
+# is replaced with "fail_fast: false", then setting the env var OTEL_DOTNET_AUTO_FAIL_FAST_ENABLED will have
 # no effect. See https://opentelemetry.io/docs/specs/otel/configuration/data-model/
 # for more information. The following spec defined env vars are NOT referenced and are thus
 # ignored:
@@ -22,7 +22,10 @@
 # - OTEL_EXPORTER_OTLP_PROTOCOL, OTEL_EXPORTER_OTLP_{SIGNAL}_PROTOCOL
 # - OTEL_EXPORTER_OTLP_ENDPOINT
 # - OTEL_EXPORTER_OTLP_TIMEOUT
-
+# - OTEL_DOTNET_AUTO_RESOURCE_DETECTOR_ENABLED, OTEL_DOTNET_AUTO_{DETECTOR}_RESOURCE_DETECTOR_ENABLED,
+# - OTEL_DOTNET_AUTO_INSTRUMENTATION_ENABLED, OTEL_DOTNET_AUTO_{SIGNAL}_INSTRUMENTATION_ENABLED, OTEL_DOTNET_AUTO_{SIGNAL}_{INSTRUMENTATION}_INSTRUMENTATION_ENABLED
+#
+# Read the documentation for details which env vars are supported for missing configurations: https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/blob/main/docs/file-based-configuration.md
 
 # The file format version.
 # The yaml format is documented at
