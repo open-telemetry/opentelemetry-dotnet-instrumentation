@@ -1500,8 +1500,6 @@ HRESULT StubGenerator::PatchProcessStartupHooks(const ModuleID module_id, const 
         {
             Logger::Warn("Failed to patch ProcessStartupHooks injection, module id ", module_id, ", result ", hr);
         }
-
-        Logger::Info("Patched ProcessStartupHooks to inject loading ", startup_hook_assembly_path);
     }
 
     return hr;

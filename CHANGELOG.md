@@ -12,6 +12,7 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 - Configuration based instrumentation.
 
 ### Changed
+- Setting `DOTNET_STARTUP_HOOKS` is now optional if the profiler is configured. If it is not set, the profiler looks for the startup hooks assembly and injects the configuration into the application.
 
 #### Dependency updates
 
