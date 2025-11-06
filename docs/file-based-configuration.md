@@ -113,6 +113,14 @@ file-based configuration to include these parameters.
 
 ---
 
+### Instrumentations disable URL query redaction
+
+| Environment variable                                              | Description                                                                                      |
+| ----------------------------------------------------------------- | ------------------------------------------------------------------------------------------------ |
+| `OTEL_DOTNET_EXPERIMENTAL_ASPNETCORE_DISABLE_URL_QUERY_REDACTION` | Whether the ASP.NET Core instrumentation turns off redaction of the `url.query` attribute value. |
+| `OTEL_DOTNET_EXPERIMENTAL_HTTPCLIENT_DISABLE_URL_QUERY_REDACTION` | Whether the HTTP client instrumentation turns off redaction of the `url.full` attribute value.   |
+| `OTEL_DOTNET_EXPERIMENTAL_ASPNET_DISABLE_URL_QUERY_REDACTION`     | Whether the ASP.NET instrumentation turns off redaction of the `url.query` attribute value.      |
+
 ## Configuration Examples
 
 ## General Configuration
