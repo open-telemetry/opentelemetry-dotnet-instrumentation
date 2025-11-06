@@ -28,6 +28,90 @@ if the environment variable is empty or not set.
 
 For more details, see: [OpenTelemetry YAML File Format Specification](https://github.com/open-telemetry/opentelemetry-specification/blob/v1.49.0/specification/configuration/data-model.md#yaml-file-format).
 
+## Not Supported configurations
+
+> ⚠️ **Important:**  
+> File-based configuration support is currently **limited**.  
+> Some options related to runtime behavior, process management, and .NET CLR profiler
+> settings **cannot be configured via YAML files**.  
+> These options **must still be set using environment variables** to
+> ensure correct runtime behavior and instrumentation activation.
+
+The settings listed below are **not yet supported** through the configuration
+file and should continue to be configured via **environment variables**.
+
+Future versions of the .NET Auto-Instrumentation may extend
+file-based configuration to include these parameters.
+
+### General
+
+| Environment variable                            | Description                                                                                                  |
+| ----------------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
+| `OTEL_DOTNET_AUTO_HOME`                         | Installation location.                                                                                       |
+| `OTEL_DOTNET_AUTO_EXCLUDE_PROCESSES`            | Names of the executable files that the profiler cannot instrument.                                           |
+| `OTEL_DOTNET_AUTO_OPENTRACING_ENABLED`          | Enables OpenTracing tracer.                                                                                  |
+| `OTEL_DOTNET_AUTO_NETFX_REDIRECT_ENABLED`       | Enables automatic redirection of the assemblies used by the automatic instrumentation on the .NET Framework. |
+
+---
+
+### Limits
+
+| Environment variable                          | Description                                                                                                  |
+| --------------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
+| `OTEL_ATTRIBUTE_VALUE_LENGTH_LIMIT`           | Maximum allowed attribute value size.                                                                        |
+| `OTEL_ATTRIBUTE_COUNT_LIMIT`                  | Maximum allowed span attribute count.                                                                        |
+| `OTEL_SPAN_ATTRIBUTE_VALUE_LENGTH_LIMIT`      | Maximum allowed attribute value size.                                                                        |
+| `OTEL_SPAN_ATTRIBUTE_COUNT_LIMIT`             | Maximum allowed span attribute count.                                                                        |
+| `OTEL_SPAN_EVENT_COUNT_LIMIT`                 | Maximum allowed span event count.                                                                            |
+| `OTEL_SPAN_LINK_COUNT_LIMIT`                  | Maximum allowed span link count.                                                                             |
+| `OTEL_EVENT_ATTRIBUTE_COUNT_LIMIT`            | Maximum allowed attribute per span event count.                                                              |
+| `OTEL_LINK_ATTRIBUTE_COUNT_LIMIT`             | Maximum allowed attribute per span link count.                                                               |
+| `OTEL_LOGRECORD_ATTRIBUTE_VALUE_LENGTH_LIMIT` | Maximum allowed log record attribute value size.                                                             |
+| `OTEL_LOGRECORD_ATTRIBUTE_COUNT_LIMIT`        | Maximum allowed log record attribute count.                                                                  |
+
+---
+
+### Rule Engine
+
+| Environment variable                | Description              |
+| ----------------------------------- | ------------------------ |
+| `OTEL_DOTNET_AUTO_RULE_ENGINE_ENABLED` | Enables RuleEngine.      |
+
+---
+
+### .NET CLR Profiler
+
+| .NET Framework variable  | .NET Core variable         | Description                                                                |
+| ------------------------ | -------------------------- | -------------------------------------------------------------------------- |
+| `COR_ENABLE_PROFILING`   | `CORECLR_ENABLE_PROFILING` | Enables the profiler.                                                      |
+| `COR_PROFILER`           | `CORECLR_PROFILER`         | CLSID of the profiler.                                                     |
+| `COR_PROFILER_PATH`      | `CORECLR_PROFILER_PATH`    | Path to the profiler.                                                      |
+| `COR_PROFILER_PATH_32`   | `CORECLR_PROFILER_PATH_32` | Path to the 32-bit profiler. Bitness-specific paths take precedence.       |
+| `COR_PROFILER_PATH_64`   | `CORECLR_PROFILER_PATH_64` | Path to the 64-bit profiler. Bitness-specific paths take precedence.       |
+
+---
+
+### .NET Runtime
+
+| Environment variable     | Description                                          |
+|--------------------------|------------------------------------------------------|
+| `DOTNET_STARTUP_HOOKS`   | Specifies managed assemblies to load during startup. |
+| `DOTNET_ADDITIONAL_DEPS` | Additional .deps.json files to include.              |
+| `DOTNET_SHARED_STORE`    | Path to additional shared assemblies.                |
+
+---
+
+### Internal Logs
+
+| Environment variable             | Description                                                                           |
+|----------------------------------|---------------------------------------------------------------------------------------|
+| `OTEL_DOTNET_AUTO_LOG_DIRECTORY` | Directory of the .NET Tracer logs.                                                    |
+| `OTEL_LOG_LEVEL`                 | SDK log level.                                                                        |
+| `OTEL_DOTNET_AUTO_LOGGER`        | Auto-Instrumentation diagnostic logs sink.                                            |
+| `OTEL_DOTNET_AUTO_LOG_FILE_SIZE` | Maximum size (in bytes) of a single log file created by the Auto-Instrumentation.     |
+
+---
+
 ## Configuration Examples
 
 ## General Configuration
