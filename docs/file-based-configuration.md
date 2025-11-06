@@ -45,12 +45,13 @@ file-based configuration to include these parameters.
 
 ### General
 
-| Environment variable                            | Description                                                                                                  |
-| ----------------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
-| `OTEL_DOTNET_AUTO_HOME`                         | Installation location.                                                                                       |
-| `OTEL_DOTNET_AUTO_EXCLUDE_PROCESSES`            | Names of the executable files that the profiler cannot instrument.                                           |
-| `OTEL_DOTNET_AUTO_OPENTRACING_ENABLED`          | Enables OpenTracing tracer.                                                                                  |
-| `OTEL_DOTNET_AUTO_NETFX_REDIRECT_ENABLED`       | Enables automatic redirection of the assemblies used by the automatic instrumentation on the .NET Framework. |
+| Environment variable                                 | Description                                                                                                               |
+| ---------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
+| `OTEL_DOTNET_AUTO_HOME`                              | Installation location.                                                                                                    |
+| `OTEL_DOTNET_AUTO_EXCLUDE_PROCESSES`                 | Names of the executable files that the profiler cannot instrument.                                                        |
+| `OTEL_DOTNET_AUTO_OPENTRACING_ENABLED`               | Enables OpenTracing tracer.                                                                                               |
+| `OTEL_DOTNET_AUTO_NETFX_REDIRECT_ENABLED`            | Enables automatic redirection of the assemblies used by the automatic instrumentation on the .NET Framework.              |
+| `OTEL_DOTNET_AUTO_SQLCLIENT_NETFX_ILREWRITE_ENABLED` | Enables IL rewriting of `SqlCommand` on .NET Framework to ensure `CommandText` is present for `SqlClient` instrumentation |
 
 ---
 
