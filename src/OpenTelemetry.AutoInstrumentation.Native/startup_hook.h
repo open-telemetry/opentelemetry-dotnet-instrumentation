@@ -12,6 +12,9 @@
 namespace trace
 {
 
+const WSTRING opentelemetry_autoinstrumentation_startuphook_filepath =
+    WStr("OpenTelemetry.AutoInstrumentation.StartupHook.dll");
+
 inline bool IsStartupHookValid(const std::vector<WSTRING>& startup_hooks, const WSTRING& home_path)
 {
     if (startup_hooks.empty())
@@ -19,14 +22,12 @@ inline bool IsStartupHookValid(const std::vector<WSTRING>& startup_hooks, const 
         return false;
     }
 
-    auto startuphook_path =
-        std::filesystem::path(home_path)
-        / "net" / "OpenTelemetry.AutoInstrumentation.StartupHook.dll";
+    auto startuphook_path = std::filesystem::path(home_path) / "net"
+                            / opentelemetry_autoinstrumentation_startuphook_filepath;
     if (!std::filesystem::exists(startuphook_path))
     {
-        startuphook_path = 
-            std::filesystem::path(home_path)
-            / "OpenTelemetry.AutoInstrumentation.StartupHook.dll";
+        startuphook_path = std::filesystem::path(home_path)
+                            / opentelemetry_autoinstrumentation_startuphook_filepath;
     }
     if (!std::filesystem::exists(startuphook_path))
     {
@@ -59,8 +60,7 @@ inline WSTRING GetStartupHookPath(const WSTRING& profiler_path)
     //  <OTEL_HOME>/net/OpenTelemetry.AutoInstrumentation.StartupHook.dll
     auto startuphook_path =
         std::filesystem::path(profiler_path).parent_path().parent_path()
-        / "net"
-        / "OpenTelemetry.AutoInstrumentation.StartupHook.dll";
+            / "net" / opentelemetry_autoinstrumentation_startuphook_filepath;
     if (std::filesystem::exists(startuphook_path))
     {
         return PATH_TO_WSTRING(startuphook_path);
@@ -71,7 +71,7 @@ inline WSTRING GetStartupHookPath(const WSTRING& profiler_path)
     //  <APP_FOLDER>/OpenTelemetry.AutoInstrumentation.StartupHook.dll
     startuphook_path =
         std::filesystem::path(profiler_path).parent_path()
-        / "OpenTelemetry.AutoInstrumentation.StartupHook.dll";
+            / opentelemetry_autoinstrumentation_startuphook_filepath;
     if (std::filesystem::exists(startuphook_path))
     {
         return PATH_TO_WSTRING(startuphook_path);
@@ -82,7 +82,7 @@ inline WSTRING GetStartupHookPath(const WSTRING& profiler_path)
     //  <APP_FOLDER>/OpenTelemetry.AutoInstrumentation.StartupHook.dll
     startuphook_path =
         std::filesystem::path(profiler_path).parent_path().parent_path().parent_path()
-        / "OpenTelemetry.AutoInstrumentation.StartupHook.dll";
+            / opentelemetry_autoinstrumentation_startuphook_filepath;
     if (std::filesystem::exists(startuphook_path))
     {
         return PATH_TO_WSTRING(startuphook_path);

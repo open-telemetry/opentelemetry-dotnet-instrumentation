@@ -66,11 +66,6 @@ const WSTRING skip_assemblies[]{WStr("mscorlib"),
 const WSTRING mscorlib_assemblyName = WStr("mscorlib");
 const WSTRING system_private_corelib_assemblyName = WStr("System.Private.CoreLib");
 const WSTRING opentelemetry_autoinstrumentation_loader_assemblyName = WStr("OpenTelemetry.AutoInstrumentation.Loader");
-#ifdef _WIN32
-const WSTRING opentelemetry_autoinstrumentation_startuphook_filepath = WStr("net\\OpenTelemetry.AutoInstrumentation.StartupHook.dll");
-#else
-const WSTRING opentelemetry_autoinstrumentation_startuphook_filepath = WStr("net/OpenTelemetry.AutoInstrumentation.StartupHook.dll");
-#endif
 
 const WSTRING managed_profiler_name = WStr("OpenTelemetry.AutoInstrumentation");
 
