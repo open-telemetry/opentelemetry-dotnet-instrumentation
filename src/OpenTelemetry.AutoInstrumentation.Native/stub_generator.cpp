@@ -1643,22 +1643,10 @@ HRESULT StubGenerator::GenerateHookFixup(const ModuleID module_id,
 
     MemberResolver resolver(metadata_import, metadata_emit);
 
-    mdAssemblyRef corlib_ref = mdTokenNil;
-    // We need assemblyRef only when we generate type outside of mscorlib
-    if (module_info.assembly.name != mscorlib_assemblyName)
-    {
-        hr = GetCorLibAssemblyRef(assembly_emit, m_corAssemblyProperty, &corlib_ref);
-        if (FAILED(hr))
-        {
-            Logger::Warn("GenerateHookFixup: failed to define AssemblyRef to mscorlib");
-            return hr;
-        }
-    }
-
-    // TypeDef/TypeRef for System.Object
+    // TypeDef for System.Object
     mdToken system_object_token;
     {
-        hr = resolver.GetTypeRefOrDefByName(corlib_ref, WStr("System.Object"), &system_object_token);
+        hr = metadata_import->FindTypeDefByName(WStr("System.Object"), mdTokenNil, &system_object_token);
         if (FAILED(hr))
         {
             Logger::Warn("GenerateHookFixup: GetTypeRefOrDefByName System.Object failed");
