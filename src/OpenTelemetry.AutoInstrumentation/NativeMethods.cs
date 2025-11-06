@@ -119,38 +119,48 @@ internal static class NativeMethods
         }
     }
 
-    public static void SelectiveSamplingStart(Activity activity)
+    public static void SelectiveSamplingStart(ActivityTraceId traceId)
     {
-        if (!TryParseSpanContext(activity, out var traceIdHigh, out var traceIdLow, out var spanId))
+        if (!TryParseTraceContext(traceId, out var traceIdHigh, out var traceIdLow))
         {
             return;
         }
 
         if (IsWindows)
         {
-            Windows.SelectiveSamplingStart(traceIdHigh, traceIdLow, spanId);
+            Windows.SelectiveSamplingStart(traceIdHigh, traceIdLow);
         }
         else
         {
-            NonWindows.SelectiveSamplingStart(traceIdHigh, traceIdLow, spanId);
+            NonWindows.SelectiveSamplingStart(traceIdHigh, traceIdLow);
         }
     }
 
-    public static void SelectiveSamplingStop(Activity activity)
+    public static void SelectiveSamplingStop(ActivityTraceId traceId)
     {
-        if (!TryParseSpanContext(activity, out var traceIdHigh, out var traceIdLow, out var spanId))
+        if (!TryParseTraceContext(traceId, out var traceIdHigh, out var traceIdLow))
         {
             return;
         }
 
         if (IsWindows)
         {
-            Windows.SelectiveSamplingStop(traceIdHigh, traceIdLow, spanId);
+            Windows.SelectiveSamplingStop(traceIdHigh, traceIdLow);
         }
         else
         {
-            NonWindows.SelectiveSamplingStop(traceIdHigh, traceIdLow, spanId);
+            NonWindows.SelectiveSamplingStop(traceIdHigh, traceIdLow);
         }
+    }
+
+    private static bool TryParseTraceContext(ActivityTraceId currentActivityTraceId, out ulong traceIdHigh, out ulong traceIdLow)
+    {
+        traceIdLow = 0;
+        traceIdHigh = 0;
+        var hexTraceId = currentActivityTraceId.ToHexString();
+
+        return ulong.TryParse(hexTraceId.AsSpan(0, 16), NumberStyles.HexNumber, CultureInfo.InvariantCulture, out traceIdHigh) &&
+               ulong.TryParse(hexTraceId.AsSpan(16), NumberStyles.HexNumber, CultureInfo.InvariantCulture, out traceIdLow);
     }
 
     private static bool TryParseSpanContext(Activity currentActivity, out ulong traceIdHigh, out ulong traceIdLow, out ulong spanId)
@@ -197,10 +207,10 @@ internal static class NativeMethods
         public static extern void ContinuousProfilerNotifySpanStopped(ulong traceIdHigh, ulong traceIdLow, ulong spanId);
 
         [DllImport("OpenTelemetry.AutoInstrumentation.Native.dll")]
-        public static extern void SelectiveSamplingStart(ulong traceIdHigh, ulong traceIdLow, ulong spanId);
+        public static extern void SelectiveSamplingStart(ulong traceIdHigh, ulong traceIdLow);
 
         [DllImport("OpenTelemetry.AutoInstrumentation.Native.dll")]
-        public static extern void SelectiveSamplingStop(ulong traceIdHigh, ulong traceIdLow, ulong spanId);
+        public static extern void SelectiveSamplingStop(ulong traceIdHigh, ulong traceIdLow);
 #endif
 
     }
@@ -234,10 +244,10 @@ internal static class NativeMethods
         public static extern void ContinuousProfilerNotifySpanStopped(ulong traceIdHigh, ulong traceIdLow, ulong spanId);
 
         [DllImport("OpenTelemetry.AutoInstrumentation.Native")]
-        public static extern void SelectiveSamplingStart(ulong traceIdHigh, ulong traceIdLow, ulong spanId);
+        public static extern void SelectiveSamplingStart(ulong traceIdHigh, ulong traceIdLow);
 
         [DllImport("OpenTelemetry.AutoInstrumentation.Native")]
-        public static extern void SelectiveSamplingStop(ulong traceIdHigh, ulong traceIdLow, ulong spanId);
+        public static extern void SelectiveSamplingStop(ulong traceIdHigh, ulong traceIdLow);
 #endif
     }
 }

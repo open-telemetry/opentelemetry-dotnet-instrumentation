@@ -1,0 +1,22 @@
+meter_provider:
+  readers:
+    - periodic:
+        interval: 45000
+        timeout: 15000
+        exporter:
+          otlp_http:
+            endpoint: http://localhost:4318/v1/metrics
+            timeout: 10000
+            temporality_preference: cumulative
+    - periodic:
+        exporter:
+          otlp_grpc:
+            endpoint: http://localhost:4317
+            timeout: 8000
+            temporality_preference: delta
+    - periodic:
+        exporter:
+          console:
+    - pull:
+        exporter:
+          prometheus:

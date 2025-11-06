@@ -30,8 +30,15 @@ public class SettingsTests : IDisposable
     {
         var settings = Settings.FromDefaultSources<GeneralSettings>(false);
 
-        Assert.Empty(settings.Plugins);
         Assert.False(settings.FlushOnUnhandledException);
+    }
+
+    [Fact]
+    internal void PluginsSettings_DefaultValues()
+    {
+        var settings = Settings.FromDefaultSources<PluginsSettings>(false);
+
+        Assert.Empty(settings.Plugins);
     }
 
     [Fact]
@@ -64,7 +71,6 @@ public class SettingsTests : IDisposable
 #if NET
         Assert.Empty(settings.InstrumentationOptions.AspNetCoreInstrumentationCaptureRequestHeaders);
         Assert.Empty(settings.InstrumentationOptions.AspNetCoreInstrumentationCaptureResponseHeaders);
-        Assert.False(settings.InstrumentationOptions.EntityFrameworkCoreSetDbStatementForText);
         Assert.False(settings.InstrumentationOptions.GraphQLSetDocument);
 #endif
         Assert.Empty(settings.InstrumentationOptions.GrpcNetClientInstrumentationCaptureRequestMetadata);

@@ -22,6 +22,7 @@ internal sealed class AspNetInitializer
     {
         _pluginManager = pluginManager;
         _tracerSettings = tracerSettings;
+        lazyInstrumentationLoader.Add(new AspNetDirectInitializer(InitializeOnFirstCall, "AspNetDirectInitializerForTraces"));
         lazyInstrumentationLoader.Add(new AspNetMvcInitializer(InitializeOnFirstCall, "AspNetMvcInitializerForTraces"));
         lazyInstrumentationLoader.Add(new AspNetWebApiInitializer(InitializeOnFirstCall, "AspNetWebApiInitializerForTraces"));
     }

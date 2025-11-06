@@ -1,6 +1,7 @@
 // Copyright The OpenTelemetry Authors
 // SPDX-License-Identifier: Apache-2.0
 
+using OpenTelemetry.AutoInstrumentation.Configurations.FileBasedConfiguration;
 using OpenTelemetry.AutoInstrumentation.Configurations.Otlp;
 using OpenTelemetry.AutoInstrumentation.Logging;
 
@@ -21,22 +22,29 @@ internal class MetricSettings : Settings
     /// <summary>
     /// Gets the list of enabled metrics exporters.
     /// </summary>
-    public IReadOnlyList<MetricsExporter> MetricExporters { get; private set; } = new List<MetricsExporter>();
+    public IReadOnlyList<MetricsExporter> MetricExporters { get; private set; } = [];
 
     /// <summary>
     /// Gets the list of enabled meters.
     /// </summary>
-    public IReadOnlyList<MetricInstrumentation> EnabledInstrumentations { get; private set; } = new List<MetricInstrumentation>();
+    public IReadOnlyList<MetricInstrumentation> EnabledInstrumentations { get; private set; } = [];
 
     /// <summary>
     /// Gets the list of meters to be added to the MeterProvider at the startup.
     /// </summary>
-    public IList<string> Meters { get; } = new List<string>();
+    public IList<string> Meters { get; } = [];
 
     /// <summary>
     /// Gets metrics OTLP Settings.
     /// </summary>
     public OtlpSettings? OtlpSettings { get; private set; }
+
+    /// <summary>
+    /// Gets the configured metric readers from the file-based configuration.
+    /// For environment variable configuration, this must be null,
+    /// and the configuration will be handled by MetricExporters.
+    /// </summary>
+    public IReadOnlyList<MetricReaderConfig>? Readers { get; private set; }
 
     protected override void OnLoadEnvVar(Configuration configuration)
     {
@@ -66,7 +74,36 @@ internal class MetricSettings : Settings
         MetricsEnabled = configuration.GetBool(ConfigurationKeys.Metrics.MetricsEnabled) ?? true;
     }
 
-    private static IReadOnlyList<MetricsExporter> ParseMetricExporter(Configuration configuration)
+    protected override void OnLoadFile(YamlConfiguration configuration)
+    {
+        var readers = configuration.MeterProvider?.Readers;
+        MetricsEnabled = readers != null && readers.Count > 0;
+        Readers = readers;
+
+        var metrics = configuration.InstrumentationDevelopment?.DotNet?.Metrics;
+        EnabledInstrumentations = metrics?.GetEnabledInstrumentations() ?? [];
+
+        if (metrics != null)
+        {
+            if (metrics.AdditionalSources != null)
+            {
+                foreach (var sourceName in metrics.AdditionalSources)
+                {
+                    Meters.Add(sourceName);
+                }
+            }
+
+            if (metrics.AdditionalSourcesList != null)
+            {
+                foreach (var sourceName in metrics.AdditionalSourcesList.Split(Constants.ConfigurationValues.Separator))
+                {
+                    Meters.Add(sourceName);
+                }
+            }
+        }
+    }
+
+    private static List<MetricsExporter> ParseMetricExporter(Configuration configuration)
     {
         var metricsExporterEnvVar = configuration.GetString(ConfigurationKeys.Metrics.Exporter);
         var exporters = new List<MetricsExporter>();

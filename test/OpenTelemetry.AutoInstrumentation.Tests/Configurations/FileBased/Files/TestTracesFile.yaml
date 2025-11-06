@@ -1,0 +1,38 @@
+tracer_provider:
+  processors:
+    - batch:
+        schedule_delay: 5000
+        export_timeout: 30000
+        max_queue_size: 2048
+        max_export_batch_size: 512
+        exporter:
+          otlp_http:
+            endpoint: http://localhost:4318/v1/traces
+            timeout: 10000
+            headers:
+              - name: header1234
+                value: "1234"
+    - batch:
+        exporter:
+          zipkin:
+            endpoint: http://localhost:9411/zipkin
+
+    - batch:
+        exporter:
+          otlp_grpc:
+            endpoint: http://localhost:4317
+    - simple:
+        exporter:
+          console:
+  sampler:
+    parent_based:
+      root:
+        always_on:
+      remote_parent_sampled:
+        always_on:
+      remote_parent_not_sampled:
+        always_off:
+      local_parent_sampled:
+        always_on:
+      local_parent_not_sampled:
+        always_off:

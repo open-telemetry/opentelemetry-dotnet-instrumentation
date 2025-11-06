@@ -1,4 +1,4 @@
-/*
+﻿/*
  * Copyright The OpenTelemetry Authors
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -96,7 +96,10 @@ private:
     //
     // Assembly redirect private members.
     //
-    std::unordered_map<WSTRING, AssemblyVersionRedirection> assembly_version_redirect_map_;
+    std::unordered_map<int, std::unordered_map<WSTRING, AssemblyVersionRedirection>> assembly_version_redirect_map_;
+    std::unordered_map<WSTRING, AssemblyVersionRedirection>* assembly_version_redirect_map_current_framework_;
+    int                                                      assembly_version_redirect_map_current_framework_key_ = 0;
+
     void InitNetFxAssemblyRedirectsMap();
     void RedirectAssemblyReferences(
         const ComPtr<IMetaDataAssemblyImport>& assembly_import,
@@ -107,6 +110,7 @@ private:
     //
     HRESULT RunAutoInstrumentationLoader(const ComPtr<IMetaDataEmit2>&, const ModuleID module_id, const mdToken function_token, const FunctionInfo& caller, const ModuleMetadata& module_metadata);
     HRESULT AddIISPreStartInitFlags(const ModuleID module_id, const mdToken function_token);
+    void DetectFrameworkVersionTableForRedirectsMap();
 #endif
 
     //
@@ -134,6 +138,11 @@ public:
     // GetAssemblyAndSymbolsBytes is used when injecting the Loader into a .NET Framework application.
     void GetAssemblyAndSymbolsBytes(BYTE** pAssemblyArray, int* assemblySize, BYTE** pSymbolsArray,
                                     int* symbolsSize) const;
+
+    // Return redirection table used in runtime
+    // that will match TFM folder to load assemblies.
+    // It may not be actual .NET Framework version.
+    int  GetNetFrameworkRedirectionVersion() const;
 #endif
 
     std::string GetILCodes(const std::string&              title,
@@ -220,6 +229,11 @@ public:
     // Continuous Profiler methods
     //
     void ConfigureContinuousProfiler(bool threadSamplingEnabled, unsigned int threadSamplingInterval, bool allocationSamplingEnabled, unsigned int maxMemorySamplesPerMinute, unsigned int selectedThreadsSamplingInterval);
+
+    //
+    // IL Rewriting methods
+    //
+    HRESULT RewriteILSystemDataCommandText(const ModuleID module_id);
 
     friend class TracerMethodRewriter;
 };
