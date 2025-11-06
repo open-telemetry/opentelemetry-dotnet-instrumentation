@@ -1,3 +1,5 @@
+# default-config.yaml is a file with the standard configurations that were used with default env var configuration.
+
 # The file format version.
 # The yaml format is documented at
 # <https://github.com/open-telemetry/opentelemetry-configuration/tree/main/schema>
