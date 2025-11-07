@@ -37,7 +37,7 @@ For more details, see: [OpenTelemetry YAML File Format Specification](https://gi
 > These options **must still be set using environment variables** to
 > ensure correct runtime behavior and instrumentation activation.
 
-The settings listed below are **not yet supported** through the configuration
+The settings listed below are **not supported** through the configuration
 file and should continue to be configured via **environment variables**.
 
 Future versions of the .NET Auto-Instrumentation may extend
