@@ -62,8 +62,8 @@ public class HttpTests : TestHelper
     public void SubmitTracesFileBased()
     {
         using var collector = new MockSpansCollector(Output);
-        EnableFileBasedConfigWithDefaultPath();
         SetFileBasedExporter(collector);
+        EnableFileBasedConfigWithDefaultPath();
 
         Span? clientSpan = null;
         collector.Expect("System.Net.Http", span =>
