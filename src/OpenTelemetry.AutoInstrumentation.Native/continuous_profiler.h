@@ -7,6 +7,7 @@
 #define OTEL_CONTINUOUS_PROFILER_H_
 
 #include "continuous_profiler_clr_helpers.h"
+#include "stack_capture_strategy.h"
 
 #include <mutex>
 #include <cinttypes>
@@ -265,7 +266,7 @@ class NamingHelper
 {
 public:
     // These are permanent parts of the helper object
-    ICorProfilerInfo12* info12_ = nullptr;
+    ICorProfilerInfo7* info7_ = nullptr;
 
     NamingHelper();
     void ClearFunctionIdentifierCache();
@@ -320,11 +321,15 @@ public:
     void                        StopAllocationSampling();
     void                        AllocationTick(ULONG dataLen, LPCBYTE data);
     ICorProfilerInfo12*         info12;
+    ICorProfilerInfo7*          info7;
     static void                 ThreadCreated(ThreadID thread_id);
     void                        ThreadDestroyed(ThreadID thread_id);
     void                        ThreadNameChanged(ThreadID thread_id, ULONG cch_name, WCHAR name[]);
 
     void SetGlobalInfo12(ICorProfilerInfo12* info12);
+    void SetGlobalInfo7(ICorProfilerInfo7* cor_profiler_info7);
+    void SetStackCaptureStrategy(IStackCaptureStrategy* strategy);
+    IStackCaptureStrategy* GetStackCaptureStrategy() const;
     ThreadState* GetCurrentThreadState(ThreadID tid);
 
     std::unordered_map<ThreadID, ThreadState*> managed_tid_to_state_;
@@ -342,6 +347,7 @@ private:
     std::unique_ptr<std::thread> thread_sampling_thread_;
     EVENTPIPE_SESSION            session_ = 0;
     std::promise<void>           shutdown_promise_;
+    IStackCaptureStrategy* stack_capture_strategy_ = nullptr; // Non-owning pointer
 };
 
 } // namespace continuous_profiler

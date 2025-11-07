@@ -1,8 +1,6 @@
 // Copyright The OpenTelemetry Authors
 // SPDX-License-Identifier: Apache-2.0
 
-#if NET
-
 using OpenTelemetry.AutoInstrumentation.Logging;
 
 namespace OpenTelemetry.AutoInstrumentation.ContinuousProfiler;
@@ -53,10 +51,12 @@ internal class BufferProcessor
         {
             SampleType.Continuous => NativeMethods.ContinuousProfilerReadThreadSamples(_buffer.Length, _buffer),
             SampleType.SelectedThreads => NativeMethods.SelectiveSamplerReadThreadSamples(_buffer.Length, _buffer),
+#if NET
             SampleType.Allocation => NativeMethods.ContinuousProfilerReadAllocationSamples(_buffer.Length, _buffer),
+#else
+            SampleType.Allocation => 0,
+#endif
             _ => throw new ArgumentOutOfRangeException(nameof(sampleType), sampleType, null)
         };
     }
 }
-
-#endif
