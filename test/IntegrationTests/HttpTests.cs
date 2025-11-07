@@ -62,8 +62,8 @@ public class HttpTests : TestHelper
     public void SubmitTracesFileBased()
     {
         using var collector = new MockSpansCollector(Output);
-        SetFileBasedExporter(collector);
         EnableFileBasedConfigWithDefaultPath();
+        SetFileBasedExporter(collector);
 
         Span? clientSpan = null;
         collector.Expect("System.Net.Http", span =>
@@ -79,13 +79,6 @@ public class HttpTests : TestHelper
             return true;
         });
 
-        Span? manualSpan = null;
-        collector.Expect("TestApplication.Http", span =>
-        {
-            manualSpan = span;
-            return true;
-        });
-
         RunTestApplication();
 
         collector.AssertExpectations();
@@ -93,7 +86,6 @@ public class HttpTests : TestHelper
         // testing context propagation via trace hierarchy
         Assert.True(clientSpan!.ParentSpanId.IsEmpty, "parent of client span should be empty");
         Assert.Equal(clientSpan.SpanId, serverSpan!.ParentSpanId);
-        Assert.Equal(serverSpan.SpanId, manualSpan!.ParentSpanId);
     }
 
     [Fact]

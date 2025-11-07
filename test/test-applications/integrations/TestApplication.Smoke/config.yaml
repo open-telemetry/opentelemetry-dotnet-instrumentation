@@ -11,6 +11,4 @@ meter_provider:
 instrumentation/development:
   dotnet:
     metrics:
-      httpclient:
-      process:
       netruntime:

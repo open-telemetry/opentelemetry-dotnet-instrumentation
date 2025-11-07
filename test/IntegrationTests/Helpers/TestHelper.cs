@@ -72,7 +72,7 @@ public abstract class TestHelper
 
     public void SetFileBasedExporter(MockMetricsCollector collector)
     {
-        SetEnvironmentVariable("OTEL_EXPORTER_OTLP_METRICS_ENDPOINT", $"http://localhost:{collector.Port}/v1/mertics");
+        SetEnvironmentVariable("OTEL_EXPORTER_OTLP_METRICS_ENDPOINT", $"http://localhost:{collector.Port}/v1/metrics");
     }
 
     public void SetExporter(MockLogsCollector collector)

@@ -6,6 +6,10 @@ tracer_provider:
         exporter:
           otlp_http:
             endpoint: ${OTEL_EXPORTER_OTLP_TRACES_ENDPOINT}
+    - batch:
+        exporter:
+          zipkin:
+            endpoint: http://localhost:9411/api/v2/spans
 
 instrumentation/development:
   dotnet:
