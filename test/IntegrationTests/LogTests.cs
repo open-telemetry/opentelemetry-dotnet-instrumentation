@@ -61,6 +61,7 @@ public class LogTests : TestHelper
     {
         using var collector = new MockLogsCollector(Output);
         SetFileBasedExporter(collector);
+        EnableFileBasedConfigWithDefaultPath();
 
         // When includeFormattedMessage is set to false
         // LogRecord is not parsed and body will not have data.
@@ -72,7 +73,6 @@ public class LogTests : TestHelper
         });
 
         SetEnvironmentVariable("ASPNETCORE_HOSTINGSTARTUPASSEMBLIES", "OpenTelemetry.AutoInstrumentation.AspNetCoreBootstrapper");
-        EnableFileBasedConfigWithDefaultPath();
 
         RunTestApplication();
 
