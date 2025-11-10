@@ -141,8 +141,37 @@ internal static class OpenTelemetryLogHelpers
         // including exception details, custom properties, and structured logging parameters
 
         var instanceVar = Expression.Variable(logRecordAttributesListType, "instance");
-        var constructorInfo = logRecordAttributesListType.GetConstructor(Type.EmptyTypes)!;
-        var assignInstanceVar = Expression.Assign(instanceVar, Expression.New(constructorInfo));
+        var constructorInfo = logRecordAttributesListType.GetConstructor(Type.EmptyTypes);
+
+        Expression assignInstanceVar;
+
+        // If no parameterless constructor, try to find other constructors or use default for structs
+        if (constructorInfo == null)
+        {
+            var constructors = logRecordAttributesListType.GetConstructors();
+            Logger.Debug($"LogRecordAttributeList constructors: {string.Join(", ", constructors.Select(c => $"({string.Join(", ", c.GetParameters().Select(p => p.ParameterType.Name))})"))}");
+            Logger.Debug($"LogRecordAttributeList IsValueType: {logRecordAttributesListType.IsValueType}");
+
+            // Try to find a constructor that takes an int (capacity)
+            constructorInfo = logRecordAttributesListType.GetConstructor(new[] { typeof(int) });
+            if (constructorInfo != null)
+            {
+                assignInstanceVar = Expression.Assign(instanceVar, Expression.New(constructorInfo, Expression.Constant(4)));
+            }
+            else if (logRecordAttributesListType.IsValueType)
+            {
+                // For structs, use default value
+                assignInstanceVar = Expression.Assign(instanceVar, Expression.Default(logRecordAttributesListType));
+            }
+            else
+            {
+                throw new InvalidOperationException($"No suitable constructor found for {logRecordAttributesListType.Name}");
+            }
+        }
+        else
+        {
+            assignInstanceVar = Expression.Assign(instanceVar, Expression.New(constructorInfo));
+        }
 
         var addAttributeMethodInfo = logRecordAttributesListType.GetMethod("Add", new[] { typeof(string), typeof(object) })!;
 

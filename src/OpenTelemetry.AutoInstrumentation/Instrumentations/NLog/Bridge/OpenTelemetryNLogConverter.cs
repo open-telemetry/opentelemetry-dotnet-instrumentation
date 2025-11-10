@@ -52,8 +52,20 @@ internal class OpenTelemetryNLogConverter
     [DuckReverseMethod(ParameterTypeNames = new[] { "NLog.LogEventInfo, NLog" })]
     public void WriteLogEvent(ILoggingEvent loggingEvent)
     {
+        Logger.Debug($"OpenTelemetryNLogConverter.WriteLogEvent called! LogEvent: {loggingEvent.GetType().Name}, Level: {loggingEvent.Level.Name}");
+
         if (Sdk.SuppressInstrumentation || loggingEvent.Level.Ordinal == OffOrdinal)
         {
+            Logger.Debug($"Suppressing instrumentation or OFF level. SuppressInstrumentation: {Sdk.SuppressInstrumentation}, Level: {loggingEvent.Level.Ordinal}");
+            return;
+        }
+
+        var emitter = OpenTelemetryLogHelpers.LogEmitter;
+        Logger.Debug($"LogEmitter is null: {emitter == null}");
+
+        if (emitter == null)
+        {
+            Logger.Debug("LogEmitter is null, skipping log emission");
             return;
         }
 
@@ -94,17 +106,26 @@ internal class OpenTelemetryNLogConverter
             formattedMessage = loggingEvent.FormattedMessage;
         }
 
-        logEmitter(
-            logger,
-            messageTemplate ?? loggingEvent.FormattedMessage,
-            loggingEvent.TimeStamp,
-            loggingEvent.Level.Name,
-            mappedLogLevel,
-            loggingEvent.Exception,
-            GetProperties(loggingEvent),
-            Activity.Current,
-            parameters,
-            formattedMessage);
+        Logger.Debug("About to call logEmitter");
+        try
+        {
+            logEmitter(
+                logger,
+                messageTemplate ?? loggingEvent.FormattedMessage,
+                loggingEvent.TimeStamp,
+                loggingEvent.Level.Name,
+                mappedLogLevel,
+                loggingEvent.Exception,
+                GetProperties(loggingEvent),
+                Activity.Current,
+                parameters,
+                formattedMessage);
+            Logger.Debug("logEmitter call completed successfully");
+        }
+        catch (Exception ex)
+        {
+            Logger.Error($"Error calling logEmitter: {ex}");
+        }
     }
 
     internal static int MapLogLevel(int levelOrdinal)
@@ -125,8 +146,31 @@ internal class OpenTelemetryNLogConverter
     {
         try
         {
-            var properties = loggingEvent.GetProperties();
-            return properties == null ? null : GetFilteredProperties(properties);
+            var properties = loggingEvent.Properties;
+            if (properties == null)
+            {
+                return null;
+            }
+
+            // Try to cast to IDictionary first, if that fails, try IEnumerable<KeyValuePair>
+            if (properties is IDictionary dict)
+            {
+                return GetFilteredProperties(dict);
+            }
+            else if (properties is IEnumerable<KeyValuePair<string, object?>> enumerable)
+            {
+                return GetFilteredProperties(enumerable);
+            }
+            else
+            {
+                // If it's some other type, try to duck cast it
+                if (properties.TryDuckCast<IDictionary>(out var duckDict))
+                {
+                    return GetFilteredProperties(duckDict);
+                }
+            }
+
+            return null;
         }
         catch (Exception)
         {
@@ -153,6 +197,24 @@ internal class OpenTelemetryNLogConverter
             }
 
             yield return new KeyValuePair<string, object?>(key, properties[key]);
+        }
+    }
+
+    private static IEnumerable<KeyValuePair<string, object?>> GetFilteredProperties(IEnumerable<KeyValuePair<string, object?>> properties)
+    {
+        foreach (var property in properties)
+        {
+            var key = property.Key;
+            if (key.StartsWith("NLog.") ||
+                key.StartsWith("nlog:") ||
+                key == LogsTraceContextInjectionConstants.SpanIdPropertyName ||
+                key == LogsTraceContextInjectionConstants.TraceIdPropertyName ||
+                key == LogsTraceContextInjectionConstants.TraceFlagsPropertyName)
+            {
+                continue;
+            }
+
+            yield return property;
         }
     }
 

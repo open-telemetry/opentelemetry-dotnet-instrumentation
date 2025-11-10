@@ -1,10 +1,9 @@
 // Copyright The OpenTelemetry Authors
 // SPDX-License-Identifier: Apache-2.0
 
-using System.Diagnostics;
-using System.Reflection;
 using OpenTelemetry.AutoInstrumentation.CallTarget;
-using OpenTelemetry.AutoInstrumentation.Instrumentations.NLog.AutoInjection;
+using OpenTelemetry.AutoInstrumentation.DuckTyping;
+using OpenTelemetry.AutoInstrumentation.Instrumentations.NLog.Bridge;
 using OpenTelemetry.AutoInstrumentation.Logging;
 #if NET
 using OpenTelemetry.AutoInstrumentation.Logger;
@@ -46,8 +45,10 @@ public static class LoggerIntegration
     /// <param name="instance">The NLog Logger instance.</param>
     /// <param name="logEvent">The NLog LogEventInfo being logged.</param>
     /// <returns>A CallTargetState (unused in this case).</returns>
-    internal static CallTargetState OnMethodBegin<TTarget>(TTarget instance, ILoggingEvent logEvent)
+    internal static CallTargetState OnMethodBegin<TTarget>(TTarget instance, object logEvent)
     {
+        Logger.Debug($"NLog LoggerIntegration.OnMethodBegin called! LogEvent: {logEvent.GetType().Name}");
+
 #if NET
         // Check if ILogger bridge has been initialized and warn if so
         // This prevents conflicts between different logging bridges
@@ -63,47 +64,25 @@ public static class LoggerIntegration
         }
 #endif
 
+        Logger.Debug($"NLog bridge enabled: {Instrumentation.LogSettings.Value.EnableNLogBridge}");
+
         // Only process the log event if the NLog bridge is enabled
         if (Instrumentation.LogSettings.Value.EnableNLogBridge)
         {
-            // Ensure the OpenTelemetry NLog target is configured (zero-config path)
-            NLogAutoInjector.EnsureConfigured();
-
-            // Inject trace context into NLog GlobalDiagnosticsContext for current destination outputs
-            TrySetTraceContext(Activity.Current);
+            Logger.Debug("Forwarding log event to OpenTelemetryNLogConverter");
+            // Convert the object to our duck-typed struct
+            if (logEvent.TryDuckCast<ILoggingEvent>(out var duckLogEvent))
+            {
+                // Forward the log event to the OpenTelemetry converter
+                OpenTelemetryNLogConverter.Instance.WriteLogEvent(duckLogEvent);
+            }
+            else
+            {
+                Logger.Debug($"Failed to duck cast logEvent of type {logEvent.GetType().Name} to ILoggingEvent");
+            }
         }
 
         // Return default state - we don't need to track anything between begin/end
         return CallTargetState.GetDefault();
-    }
-
-    private static void TrySetTraceContext(Activity? activity)
-    {
-        try
-        {
-            var gdcType = Type.GetType("NLog.GlobalDiagnosticsContext, NLog");
-            if (gdcType is null)
-            {
-                return;
-            }
-
-            var setMethod = gdcType.GetMethod("Set", BindingFlags.Public | BindingFlags.Static, null, [typeof(string), typeof(string)], null);
-            if (setMethod is null)
-            {
-                return;
-            }
-
-            string spanId = activity?.SpanId.ToString() ?? "(null)";
-            string traceId = activity?.TraceId.ToString() ?? "(null)";
-            string traceFlags = activity is null ? "(null)" : ((byte)activity.ActivityTraceFlags).ToString("x2");
-
-            setMethod.Invoke(null, new object[] { "span_id", spanId });
-            setMethod.Invoke(null, new object[] { "trace_id", traceId });
-            setMethod.Invoke(null, new object[] { "trace_flags", traceFlags });
-        }
-        catch
-        {
-            // best-effort only
-        }
     }
 }
