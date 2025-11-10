@@ -1,52 +1,35 @@
 # NLog OpenTelemetry Auto-Instrumentation
 
-This directory contains the NLog instrumentation for OpenTelemetry .NET Auto-Instrumentation. This instrumentation provides automatic zero-config injection for bridging NLog logging events to OpenTelemetry using duck typing.
+This directory contains the NLog instrumentation for OpenTelemetry .NET Auto-Instrumentation. This instrumentation provides automatic bytecode interception for bridging NLog logging events to OpenTelemetry using duck typing.
 
 ## Overview
 
 The NLog instrumentation offers automatic integration through:
-1. **Zero-Config Auto-Injection**: Automatically injects duck-typed `OpenTelemetryTarget` into existing NLog configurations
-2. **Duck Typing Integration**: Uses `[DuckReverseMethod]` to avoid direct NLog assembly references
+1. **Bytecode Interception**: Automatically intercepts `NLog.Logger.Log` calls via bytecode instrumentation
+2. **Duck Typing Integration**: Uses duck typing to avoid direct NLog assembly references
 3. **Log Event Bridging**: Converting NLog log events to OpenTelemetry log records
 4. **Structured Logging Support**: Leveraging NLog's layout abilities for enrichment
 5. **Trace Context Integration**: Automatically including trace context in log records
 6. **Custom Properties**: Forwarding custom properties while filtering internal NLog properties
 
-**Note**: XML configuration via `nlog.config` is not supported. The target works exclusively through auto-injection and relies on OpenTelemetry environment variables for configuration.
+**Note**: No NLog configuration changes are required. The instrumentation works exclusively through bytecode interception and relies on OpenTelemetry environment variables for configuration.
 
 ## Architecture
 
-### Zero-Config Path (Auto-Injection)
+### Bytecode Interception Path
 ```
 NLog Logger.Log() Call
     ↓
-LoggerIntegration (CallTarget)
+LoggerIntegration (CallTarget - Bytecode Interception)
     ↓
-NLogAutoInjector.EnsureConfigured()
-    ↓
-OpenTelemetryTarget → NLog Configuration
-    ↓
-OpenTelemetryNLogConverter
+OpenTelemetryNLogConverter.WriteLogEvent()
     ↓
 OpenTelemetry LogRecord
     ↓
 OTLP Exporters
 ```
 
-### Auto-Injection Path (Duck Typing)
-```
-NLog Logger.Log() Call
-    ↓
-LoggerIntegration (CallTarget)
-    ↓
-NLogAutoInjector.EnsureConfigured()
-    ↓
-OpenTelemetryTarget (Duck-typed proxy) → NLog Configuration
-    ↓
-OpenTelemetry LogRecord
-    ↓
-OTLP Exporters
-```
+The instrumentation intercepts `NLog.Logger.Log` method calls at the bytecode level, allowing it to capture log events without requiring any NLog configuration changes.
 
 ## Components
 
@@ -56,14 +39,10 @@ OTLP Exporters
 - **`ILoggingEvent.cs`**: Duck typing interface for NLog's LogEventInfo
 - **`OpenTelemetryNLogConverter.cs`**: Internal converter that transforms NLog events to OpenTelemetry log records
 - **`OpenTelemetryLogHelpers.cs`**: Helper for creating OpenTelemetry log records via expression trees
-- **`NLogAutoInjector.cs`**: Handles programmatic injection of OpenTelemetryTarget into NLog configuration
-
-#### Duck-Typed NLog Target
-- **`OpenTelemetryTarget.cs`**: Duck-typed NLog target using `[DuckReverseMethod]` to avoid direct NLog assembly references
 
 ### Integration
 
-- **`LoggerIntegration.cs`**: CallTarget integration that intercepts `NLog.Logger.Log` to trigger auto-injection and GDC trace context
+- **`LoggerIntegration.cs`**: CallTarget integration that intercepts `NLog.Logger.Log` via bytecode instrumentation to capture log events
 
 ### Trace Context
 
@@ -75,7 +54,7 @@ The NLog instrumentation is configured entirely through OpenTelemetry environmen
 
 ### Environment Variables
 
-The NLog auto-injection is controlled by:
+The NLog bridge is controlled by:
 
 - `OTEL_DOTNET_AUTO_LOGS_ENABLED=true`: Enables logging instrumentation
 - `OTEL_DOTNET_AUTO_LOGS_ENABLE_NLOG_BRIDGE=true`: Enables the NLog bridge specifically
@@ -94,7 +73,7 @@ export OTEL_BSP_MAX_EXPORT_BATCH_SIZE="512"
 
 ### Behavior
 
-The target automatically:
+The bridge automatically:
 - Uses formatted message if available, otherwise raw message
 - Includes event parameters when present
 - Captures trace context from `Activity.Current`
@@ -104,7 +83,7 @@ The target automatically:
 
 - **NLog**: 5.0.0+ (required for Layout&lt;T&gt; typed layout support and .NET build-trimming)
 - **.NET Framework**: 4.6.2+
-- **.NET**: 6.0+, 8.0, 9.0
+- **.NET**: 8.0, 9.0
 
 ## Level Mapping
 
@@ -137,9 +116,9 @@ The following properties are filtered out when forwarding to OpenTelemetry:
 
 ## Performance Considerations
 
-- **Logger Caching**: OpenTelemetry loggers are cached (up to 100) to avoid recreation overhead
+- **Logger Caching**: OpenTelemetry loggers are cached to avoid recreation overhead
 - **Lazy Initialization**: Components are initialized only when needed
-- **Minimal Overhead**: The target is injected once during configuration loading
+- **Minimal Overhead**: Bytecode interception adds minimal overhead to logging calls
 
 ## Error Handling
 
@@ -164,7 +143,6 @@ A complete test application is available at `test/test-applications/integrations
 - Exception logging
 - Custom properties
 - Trace context propagation
-- Both auto-injection and manual target configuration paths
 
 ## Troubleshooting
 
@@ -186,7 +164,7 @@ A complete test application is available at `test/test-applications/integrations
 ### Debug Information
 
 Enable debug logging to see:
-- Target injection success/failure
+- Bytecode interception success/failure
 - Logger creation and caching
 - Property filtering decisions
 

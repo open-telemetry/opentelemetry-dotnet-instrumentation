@@ -217,8 +217,8 @@ the `ASPNETCORE_HOSTINGSTARTUPASSEMBLIES` environment variable to
 \[2\]: Instrumentation provides both [trace context injection](./log-trace-correlation.md#log4net-trace-context-injection)
 and [logs bridge](./log4net-bridge.md).
 
-\[3\]: The NLog instrumentation uses duck typing for zero-config auto-injection.
-Configuration is handled entirely through OpenTelemetry environment variables.
+\[3\]:  Instrumentation provides both [trace context injection](./log-trace-correlation.md#log4net-trace-context-injection)
+and [logs bridge](./nlog-bridge.md).
 
 ### Instrumentation options
 

@@ -48,5 +48,3 @@ In order for the bridge to be added, at least 1 other appender has to be configu
 Bridge should not be used when appenders are configured for both root and component loggers.
 Enabling a bridge in such scenario would result in bridge being appended to both appender collections,
 and logs duplication. 
-
-
