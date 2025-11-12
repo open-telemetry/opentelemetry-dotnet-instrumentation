@@ -189,10 +189,11 @@ tracer_provider:
 
     # Batch processor for OTLP gRPC
     - batch:
-        otlp_grpc:
-          # Configuration otlp_grpc is the same as otlp_http.
-          # if otlp_http is used it will override otlp_grpc.
-          # On .NET Framework, the grpc OTLP exporter protocol is not supported.
+        exporter:
+          # Configure exporter to be OTLP with gRPC transport.
+          otlp_grpc:
+            # Configuration otlp_grpc is the same as otlp_http.
+            # On .NET Framework, the grpc OTLP exporter protocol is not supported.
 
     # Batch processor for Zipkin
     - batch:
@@ -255,7 +256,6 @@ meter_provider:
           # Configure exporter to be OTLP with gRPC transport.
           otlp_grpc:
           # Configuration otlp_grpc is the same as otlp_http.
-          # if otlp_http is used it will override otlp_grpc.
           # On .NET Framework, the grpc OTLP exporter protocol is not supported.
 
     # Periodic reader for Console
@@ -318,23 +318,10 @@ logger_provider:
     # Batch processor for OTLP gRPC
     - batch:
         exporter:
+          # Configure exporter to be OTLP with gRPC transport.
           otlp_grpc:
-            # Configure endpoint.
-            # If omitted or null, http://localhost:4317 is used.
-            endpoint: http://localhost:4317
-            # Configure headers. Entries have higher priority than entries from .headers_list.
-            # If an entry's .value is null, the entry is ignored.
-            headers:
-              - name: api-key
-                value: "1234"
-            # Configure headers. Entries have lower priority than entries from .headers.
-            # The value is a list of comma separated key-value pairs matching the format of OTEL_EXPORTER_OTLP_HEADERS.
-            # If omitted or null, no headers are added.
-            headers_list: api-key=1234
-            # Configure max time (in milliseconds) to wait for each export.
-            # Value must be non-negative. A value of 0 indicates no limit (infinity).
-            # If omitted or null, 10000 is used.
-            timeout: 10000
+          # Configuration otlp_grpc is the same as otlp_http.
+          # On .NET Framework, the grpc OTLP exporter protocol is not supported.
 
     # Simple processor for Console
     - simple:
@@ -400,7 +387,7 @@ logger_provider:
 
    ``` yaml
    tracer_provider:
-     # Configure the sampler. If omitted, parent based  sampler with a root of always_on is used.
+     # Configure the sampler. If omitted, parent based sampler with a root of always_on is used.
      sampler:
        # Configure sampler to be always_on.
        always_on:
