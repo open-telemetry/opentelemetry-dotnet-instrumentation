@@ -117,7 +117,7 @@ HRESULT StubGenerator::ModifyProcessStartupHooks(const ModuleID module_id, mdMet
         pNewInstr->m_Arg8   = 0;
         rewriter.InsertBefore(pFirstInstr, pNewInstr);
 
-        // call __DDLoaderFixup__::__DDPatchStartupHookValue__
+        // call __OTLoaderFixup__::__OTPatchStartupHookValue__
         pNewInstr           = rewriter.NewILInstr();
         pNewInstr->m_opcode = CEE_CALL;
         pNewInstr->m_Arg32  = patch_startup_hook_method;
