@@ -1,0 +1,97 @@
+# default-config.yaml is a file with the standard configurations that were used with default env var configuration.
+
+# The file format version.
+# The yaml format is documented at
+# <https://github.com/open-telemetry/opentelemetry-configuration/tree/main/schema>
+# By default, the latest version is used.
+file_format: "1.0-rc.1"
+
+# Propagator Configuration
+propagator:
+  # If no propagators are specified, none will be added automatically.
+  composite:
+    tracecontext: # W3C Trace Context propagator
+    baggage:      # W3C Baggage propagator
+
+# Tracer Provider Configuration
+tracer_provider:
+  processors:
+    # Batch processor for OTLP HTTP
+    - batch:
+        # Configure exporters.
+        exporter:
+          # Configure exporter to be OTLP with HTTP transport.
+          otlp_http:
+
+# Meter Provider Configuration
+meter_provider:
+  readers:
+    # Periodic reader for OTLP HTTP
+    - periodic:
+        # Configure exporter.
+        exporter:
+          # Configure exporter to be OTLP with HTTP transport.
+          otlp_http:
+
+# Logger Provider Configuration
+logger_provider:
+  processors:
+    # Batch processor for OTLP HTTP
+    - batch:
+        # Configure exporter.
+        exporter:
+          # Configure exporter to be OTLP with HTTP transport.
+          otlp_http:
+
+# Resource Configuration
+resource:
+  # Resource Detectors Configuration
+  detection/development:
+    # If no detectors are specified, none will be added automatically.
+    detectors:
+      azureappservice: # Detects Azure App Service resource information
+      container:       # Detects container resource info (container.* attributes) [Core only]
+      host:            # Detects host resource info (host.* attributes)
+      operatingsystem: # Detects OS-level attributes (os.*)
+      process:         # Detects process-level attributes (process.*)
+      processruntime:  # Detects process runtime attributes (process.runtime.*)
+
+# Instrumentation Configuration
+instrumentation/development:
+  # If no instrumentation is specified, none will be added automatically.
+  dotnet:
+    traces:
+      aspnet:              # ASP.NET
+      aspnetcore:          # ASP.NET Core
+      azure:               # Azure SDK
+      elasticsearch:       # Elastic.Clients.Elasticsearch
+      elastictransport:    # Elastic.Transport
+      entityframeworkcore: # Entity Framework Core
+      graphql:             # GraphQL
+      grpcnetclient:       # Grpc.Net.Client
+      httpclient:          # System.Net.Http.HttpClient
+      kafka:               # Confluent.Kafka
+      masstransit:         # MassTransit
+      mongodb:             # MongoDB.Driver
+      mysqlconnector:      # MySqlConnector
+      mysqldata:           # MySql.Data
+      npgsql:              # Npgsql
+      nservicebus:         # NServiceBus
+      oraclemda:           # Oracle.ManagedDataAccess
+      rabbitmq:            # RabbitMQ.Client
+      quartz:              # Quartz
+      sqlclient:           # Microsoft.Data.SqlClient & System.Data.SqlClient
+      stackexchangeredis:  # StackExchange.Redis
+      wcfclient:           # WCF Client
+      wcfservice:          # WCF Service
+    metrics:
+      aspnet:              # ASP.NET metrics
+      aspnetcore:          # ASP.NET Core metrics
+      httpclient:          # HttpClient metrics
+      netruntime:          # .NET Runtime metrics
+      nservicebus:         # NServiceBus metrics
+      process:             # Process metrics
+      sqlclient:           # SQL Client metrics
+    logs:
+      ilogger:             # Microsoft.Extensions.Logging
+      log4net:             # Log4Net
