@@ -10,7 +10,7 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 ### Added
 
 - Experimental support for file-based configuration.
-- Configuration based instrumentation.
+- Experimental support for configuration based instrumentation.
 - IL rewrite for SqlCommand on .NET Framework to ensure `CommandText` is
   available for [SqlClient instrumentation](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/issues/4343).
   This is disabled by default and can be enabled via the
