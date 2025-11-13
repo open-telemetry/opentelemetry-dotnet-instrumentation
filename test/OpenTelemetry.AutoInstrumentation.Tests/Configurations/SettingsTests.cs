@@ -398,40 +398,43 @@ public class SettingsTests : IDisposable
     [Fact]
     internal void OtlpExportProtocol_CheckPriorityEnvIsSet_Traces()
     {
-        Environment.SetEnvironmentVariable(AutoOtlpDefinitions.TracesEndpointEnvVarName, "http://example.org/traces/v1");
-        Environment.SetEnvironmentVariable(AutoOtlpDefinitions.TracesProtocolEnvVarName, "http/protobuf");
-        Environment.SetEnvironmentVariable(AutoOtlpDefinitions.TracesTimeoutEnvVarName, "1");
-        Environment.SetEnvironmentVariable(AutoOtlpDefinitions.TracesHeadersEnvVarName, "key1=value1,key2=value2");
+        VerifyOtlpPrioritySettings(((string Endpoint, string Protocol, string Timeout, string Headers) values) =>
+        {
+            Environment.SetEnvironmentVariable(AutoOtlpDefinitions.TracesEndpointEnvVarName, values.Endpoint);
+            Environment.SetEnvironmentVariable(AutoOtlpDefinitions.TracesProtocolEnvVarName, values.Protocol);
+            Environment.SetEnvironmentVariable(AutoOtlpDefinitions.TracesTimeoutEnvVarName, values.Timeout);
+            Environment.SetEnvironmentVariable(AutoOtlpDefinitions.TracesHeadersEnvVarName, values.Headers);
 
-        var settings = Settings.FromDefaultSources<TracerSettings>(false).OtlpSettings;
-
-        VerifyOtlpPrioritySettings(settings);
+            return Settings.FromDefaultSources<TracerSettings>(false).OtlpSettings;
+        });
     }
 
     [Fact]
     internal void OtlpExportProtocol_CheckPriorityEnvIsSet_Metrics()
     {
-        Environment.SetEnvironmentVariable(AutoOtlpDefinitions.MetricsEndpointEnvVarName, "http://example.org/traces/v1");
-        Environment.SetEnvironmentVariable(AutoOtlpDefinitions.MetricsProtocolEnvVarName, "http/protobuf");
-        Environment.SetEnvironmentVariable(AutoOtlpDefinitions.MetricsTimeoutEnvVarName, "1");
-        Environment.SetEnvironmentVariable(AutoOtlpDefinitions.MetricsHeadersEnvVarName, "key1=value1,key2=value2");
+        VerifyOtlpPrioritySettings(((string Endpoint, string Protocol, string Timeout, string Headers) values) =>
+        {
+            Environment.SetEnvironmentVariable(AutoOtlpDefinitions.MetricsEndpointEnvVarName, values.Endpoint);
+            Environment.SetEnvironmentVariable(AutoOtlpDefinitions.MetricsProtocolEnvVarName, values.Protocol);
+            Environment.SetEnvironmentVariable(AutoOtlpDefinitions.MetricsTimeoutEnvVarName, values.Timeout);
+            Environment.SetEnvironmentVariable(AutoOtlpDefinitions.MetricsHeadersEnvVarName, values.Headers);
 
-        var settings = Settings.FromDefaultSources<MetricSettings>(false).OtlpSettings;
-
-        VerifyOtlpPrioritySettings(settings);
+            return Settings.FromDefaultSources<MetricSettings>(false).OtlpSettings;
+        });
     }
 
     [Fact]
     internal void OtlpExportProtocol_CheckPriorityEnvIsSet_Logs()
     {
-        Environment.SetEnvironmentVariable(AutoOtlpDefinitions.LogsEndpointEnvVarName, "http://example.org/traces/v1");
-        Environment.SetEnvironmentVariable(AutoOtlpDefinitions.LogsProtocolEnvVarName, "http/protobuf");
-        Environment.SetEnvironmentVariable(AutoOtlpDefinitions.LogsTimeoutEnvVarName, "1");
-        Environment.SetEnvironmentVariable(AutoOtlpDefinitions.LogsHeadersEnvVarName, "key1=value1,key2=value2");
+        VerifyOtlpPrioritySettings(((string Endpoint, string Protocol, string Timeout, string Headers) values) =>
+        {
+            Environment.SetEnvironmentVariable(AutoOtlpDefinitions.LogsEndpointEnvVarName, values.Endpoint);
+            Environment.SetEnvironmentVariable(AutoOtlpDefinitions.LogsProtocolEnvVarName, values.Protocol);
+            Environment.SetEnvironmentVariable(AutoOtlpDefinitions.LogsTimeoutEnvVarName, values.Timeout);
+            Environment.SetEnvironmentVariable(AutoOtlpDefinitions.LogsHeadersEnvVarName, values.Headers);
 
-        var settings = Settings.FromDefaultSources<LogSettings>(false).OtlpSettings;
-
-        VerifyOtlpPrioritySettings(settings);
+            return Settings.FromDefaultSources<LogSettings>(false).OtlpSettings;
+        });
     }
 
     [Theory]
@@ -535,12 +538,22 @@ public class SettingsTests : IDisposable
             .ToList() ?? Enumerable.Empty<string>();
     }
 
-    private void VerifyOtlpPrioritySettings(OtlpSettings? settings)
+    private static void VerifyOtlpPrioritySettings(Func<(string Endpoint, string Protocol, string Timeout, string Headers), OtlpSettings?> setup)
     {
+        var endpoint = "http://example.org/traces/v1";
+        var endpointValue = new Uri(endpoint);
+        var protocol = "http/protobuf";
+        var protocolValue = OtlpExportProtocol.HttpProtobuf;
+        var timeout = "1";
+        var timeoutValue = 1;
+        var headers = "key1=value1,key2=value2";
+
+        var settings = setup((endpoint, protocol, timeout, headers));
+
         Assert.NotNull(settings);
-        Assert.Equal(new Uri("http://example.org/traces/v1"), settings.Endpoint);
-        Assert.Equal(OtlpExportProtocol.HttpProtobuf, settings.Protocol);
-        Assert.Equal(1, settings.TimeoutMilliseconds);
-        Assert.Equal("key1=value1,key2=value2", settings.Headers);
+        Assert.Equal(endpointValue, settings.Endpoint);
+        Assert.Equal(protocolValue, settings.Protocol);
+        Assert.Equal(timeoutValue, settings.TimeoutMilliseconds);
+        Assert.Equal(headers, settings.Headers);
     }
 }
