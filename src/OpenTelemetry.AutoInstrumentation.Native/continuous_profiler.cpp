@@ -1626,7 +1626,7 @@ extern "C"
                                 "} because maximum number of traces is already being sampled.");
             return;
         }
-        const auto deadline                   = std::chrono::steady_clock::now() + std::chrono::minutes(kSelectiveSamplingMaxAgeMinutes);
+        const auto deadline = std::chrono::steady_clock::now() + std::chrono::minutes(kSelectiveSamplingMaxAgeMinutes);
         selective_sampling_trace_map[context] =
             std::chrono::duration_cast<std::chrono::milliseconds>(deadline.time_since_epoch()).count();
     }
