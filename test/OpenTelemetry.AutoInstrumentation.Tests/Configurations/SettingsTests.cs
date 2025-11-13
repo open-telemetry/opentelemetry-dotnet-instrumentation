@@ -1,6 +1,7 @@
 // Copyright The OpenTelemetry Authors
 // SPDX-License-Identifier: Apache-2.0
 
+using System.Reflection;
 using OpenTelemetry.AutoInstrumentation.Configurations;
 using OpenTelemetry.AutoInstrumentation.Configurations.Otlp;
 using OpenTelemetry.Exporter;
@@ -405,7 +406,6 @@ public class SettingsTests : IDisposable
         var settings = Settings.FromDefaultSources<TracerSettings>(false).OtlpSettings;
 
         VerifyOtlpPrioritySettings(settings);
-        ClearEnvVars();
     }
 
     [Fact]
@@ -419,7 +419,6 @@ public class SettingsTests : IDisposable
         var settings = Settings.FromDefaultSources<MetricSettings>(false).OtlpSettings;
 
         VerifyOtlpPrioritySettings(settings);
-        ClearEnvVars();
     }
 
     [Fact]
@@ -433,7 +432,6 @@ public class SettingsTests : IDisposable
         var settings = Settings.FromDefaultSources<LogSettings>(false).OtlpSettings;
 
         VerifyOtlpPrioritySettings(settings);
-        ClearEnvVars();
     }
 
     [Theory]
@@ -520,6 +518,21 @@ public class SettingsTests : IDisposable
         Environment.SetEnvironmentVariable(ConfigurationKeys.Traces.InstrumentationOptions.HttpInstrumentationCaptureRequestHeaders, null);
         Environment.SetEnvironmentVariable(ConfigurationKeys.Traces.InstrumentationOptions.HttpInstrumentationCaptureResponseHeaders, null);
         Environment.SetEnvironmentVariable(ConfigurationKeys.Traces.InstrumentationOptions.OracleMdaSetDbStatementForText, null);
+
+        // Cleanup OTLP env vars
+        foreach (var envVar in GetAllOtlpEnvVarNames())
+        {
+            Environment.SetEnvironmentVariable(envVar, null);
+        }
+    }
+
+    private static IEnumerable<string> GetAllOtlpEnvVarNames()
+    {
+        return typeof(AutoOtlpDefinitions)
+            .GetFields(BindingFlags.Public | BindingFlags.Static)
+            .Where(f => f.FieldType == typeof(string))
+            .Select(f => (string)f.GetValue(null)!)
+            .ToList() ?? Enumerable.Empty<string>();
     }
 
     private void VerifyOtlpPrioritySettings(OtlpSettings? settings)
