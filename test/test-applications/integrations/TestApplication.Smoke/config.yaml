@@ -1,0 +1,14 @@
+file_format: "1.0-rc.1"
+
+meter_provider:
+  readers:
+    - periodic:
+        interval: ${OTEL_METRIC_EXPORT_INTERVAL}
+        exporter:
+          otlp_http:
+            endpoint: ${OTEL_EXPORTER_OTLP_METRICS_ENDPOINT}
+
+instrumentation/development:
+  dotnet:
+    metrics:
+      netruntime:

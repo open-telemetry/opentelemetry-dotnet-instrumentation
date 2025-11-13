@@ -5,7 +5,7 @@ tracer_provider:
     - batch:
         exporter:
           otlp_http:
-            endpoint: ${OTEL_EXPORTER_OTLP_ENDPOINT}
+            endpoint: ${OTEL_EXPORTER_OTLP_TRACES_ENDPOINT}
 
 instrumentation/development:
   dotnet:
