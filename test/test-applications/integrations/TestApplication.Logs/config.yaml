@@ -1,0 +1,13 @@
+file_format: "1.0-rc.1"
+
+logger_provider:
+  processors:
+    - batch:
+        exporter:
+          otlp_http:
+            endpoint: ${OTEL_EXPORTER_OTLP_LOGS_ENDPOINT}
+
+instrumentation/development:
+  dotnet:
+    logs:
+      ilogger:

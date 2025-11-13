@@ -57,6 +57,29 @@ public class LogTests : TestHelper
     }
 
     [Fact]
+    public void SubmitLogsFileBased()
+    {
+        using var collector = new MockLogsCollector(Output);
+        SetFileBasedExporter(collector);
+        EnableFileBasedConfigWithDefaultPath();
+
+        // When includeFormattedMessage is set to false
+        // LogRecord is not parsed and body will not have data.
+        // This is a default collector behavior.
+        collector.Expect(logRecord =>
+        {
+            var logsAsString = Convert.ToString(logRecord);
+            return logsAsString != null && logsAsString.Contains("TestApplication.Logs.Controllers.TestController");
+        });
+
+        SetEnvironmentVariable("ASPNETCORE_HOSTINGSTARTUPASSEMBLIES", "OpenTelemetry.AutoInstrumentation.AspNetCoreBootstrapper");
+
+        RunTestApplication();
+
+        collector.AssertExpectations();
+    }
+
+    [Fact]
     public async Task EnableLogsWithCLRAndHostingStartup()
     {
         using var collector = new MockLogsCollector(Output);
