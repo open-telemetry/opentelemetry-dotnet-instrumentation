@@ -12,15 +12,11 @@
 
 #ifdef _WIN32
 #define PATH_TO_WSTRING(path_expr) (path_expr).wstring()
-#define DIR_SEPARATOR WStr('\\')
 #define ENV_VAR_PATH_SEPARATOR WStr(';')
-#define DIR_SEPARATOR_STR WStr("\\")
 #define ENV_VAR_PATH_SEPARATOR_STR WStr(";")
 #else
 #define PATH_TO_WSTRING(path_expr) ToWSTRING((path_expr).string())
-#define DIR_SEPARATOR WStr('/')
 #define ENV_VAR_PATH_SEPARATOR WStr(':')
-#define DIR_SEPARATOR_STR WStr("/")
 #define ENV_VAR_PATH_SEPARATOR_STR WStr(":")
 #endif
 
