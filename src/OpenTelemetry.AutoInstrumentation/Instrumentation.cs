@@ -1,14 +1,9 @@
 // Copyright The OpenTelemetry Authors
 // SPDX-License-Identifier: Apache-2.0
 
-#if NET
-using System.Diagnostics;
-#endif
 using System.Reflection;
 using OpenTelemetry.AutoInstrumentation.Configurations;
-#if NET
 using OpenTelemetry.AutoInstrumentation.ContinuousProfiler;
-#endif
 using OpenTelemetry.AutoInstrumentation.Diagnostics;
 using OpenTelemetry.AutoInstrumentation.Instrumentations.NoCode;
 using OpenTelemetry.AutoInstrumentation.Loading;
@@ -39,10 +34,8 @@ internal static class Instrumentation
 
     private static PluginManager? _pluginManager;
 
-#if NET
     private static SampleExporter? _sampleExporter;
     private static SampleExporterBuilder? _sampleExporterBuilder;
-#endif
 
     internal static LoggerProvider? LoggerProvider
     {
@@ -111,7 +104,6 @@ internal static class Instrumentation
             AppDomain.CurrentDomain.ProcessExit += OnExit;
             AppDomain.CurrentDomain.DomainUnload += OnExit;
 
-#if NET
             var profilerEnabled = GeneralSettings.Value.ProfilerEnabled;
 
             if (profilerEnabled)
@@ -122,7 +114,6 @@ internal static class Instrumentation
             {
                 Logger.Information("CLR Profiler is not enabled. Continuous Profiler will be not started even if configured correctly.");
             }
-#endif
 
             if (TracerSettings.Value.TracesEnabled || MetricSettings.Value.MetricsEnabled)
             {
@@ -219,7 +210,6 @@ internal static class Instrumentation
         }
     }
 
-#if NET
     private static void InitializeSampling()
     {
         var (threadSamplingEnabled, threadSamplingInterval, allocationSamplingEnabled, maxMemorySamplesPerMinute, exportInterval, exportTimeout, continuousProfilerExporter) = _pluginManager!.GetFirstContinuousConfiguration();
@@ -296,13 +286,15 @@ internal static class Instrumentation
 
         InitializeBufferProcessing(exportInterval, exportTimeout);
 
+#if NET
         var handler = selectiveSampleExportMethod.CreateDelegate<Action<byte[], int, CancellationToken>>(exporter!);
+#else
+        var handler = (Action<byte[], int, CancellationToken>)selectiveSampleExportMethod.CreateDelegate(typeof(Action<byte[], int, CancellationToken>), exporter!);
+#endif
         _sampleExporterBuilder?.AddHandler(SampleType.SelectedThreads, handler, exportTimeout);
         return true;
     }
-#endif
 
-#if NET
     private static bool TryInitializeContinuousSamplingExport(
         object continuousProfilerExporter,
         bool threadSamplingEnabled,
@@ -326,9 +318,13 @@ internal static class Instrumentation
             return false;
         }
 
+#if NET
         var threadSamplesMethod = exportThreadSamplesMethod.CreateDelegate<Action<byte[], int, CancellationToken>>(continuousProfilerExporter);
         var allocationSamplesMethod = exportAllocationSamplesMethod.CreateDelegate<Action<byte[], int, CancellationToken>>(continuousProfilerExporter);
-
+#else
+        var threadSamplesMethod = (Action<byte[], int, CancellationToken>)exportThreadSamplesMethod.CreateDelegate(typeof(Action<byte[], int, CancellationToken>), continuousProfilerExporter);
+        var allocationSamplesMethod = (Action<byte[], int, CancellationToken>)exportAllocationSamplesMethod.CreateDelegate(typeof(Action<byte[], int, CancellationToken>), continuousProfilerExporter);
+#endif
         InitializeBufferProcessing(exportInterval, exportTimeout);
 
         if (threadSamplingEnabled)
@@ -352,7 +348,6 @@ internal static class Instrumentation
             .SetExportInterval(exportInterval)
             .SetExportTimeout(exportTimeout);
     }
-#endif
 
     private static LoggerProvider? InitializeLoggerProvider()
     {
@@ -535,11 +530,9 @@ internal static class Instrumentation
 
         try
         {
-#if NET
             LazyInstrumentationLoader?.Dispose();
             _sampleExporter?.Dispose();
 
-#endif
             _tracerProvider?.Dispose();
             _meterProvider?.Dispose();
             if (LoggerProviderFactory.IsValueCreated)

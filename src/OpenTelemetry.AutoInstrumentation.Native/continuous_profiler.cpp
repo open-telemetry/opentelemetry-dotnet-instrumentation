@@ -98,7 +98,7 @@ static std::mutex name_cache_lock = std::mutex();
 
 static std::shared_mutex profiling_lock = std::shared_mutex();
 
-static ICorProfilerInfo12* profiler_info; // After feature sets settle down, perhaps this should be refactored and have
+static ICorProfilerInfo7* profiler_info; // After feature sets settle down, perhaps this should be refactored and have
                                           // a single static instance of ThreadSampler
 
 // Dirt-simple back pressure system to save overhead if managed code is not reading fast enough
@@ -611,7 +611,7 @@ void NamingHelper::ClearFunctionIdentifierCache()
     mdToken  function_token = 0;
     // theoretically there is a possibility to use GetFunctionInfo method, but it does not support generic methods
     const HRESULT hr =
-        info12_->GetFunctionInfo2(func_id, frame_info, nullptr, &module_id, &function_token, 0, nullptr, nullptr);
+        info7_->GetFunctionInfo2(func_id, frame_info, nullptr, &module_id, &function_token, 0, nullptr, nullptr);
     if (FAILED(hr))
     {
         trace::Logger::Debug("GetFunctionInfo2 failed. HRESULT=0x", std::setfill('0'), std::setw(8), std::hex, hr);
@@ -641,7 +641,7 @@ void NamingHelper::GetFunctionName(FunctionIdentifier function_identifier, trace
     }
 
     ComPtr<IMetaDataImport2> metadata_import;
-    HRESULT hr = info12_->GetModuleMetaData(function_identifier.module_id, ofRead, IID_IMetaDataImport2,
+    HRESULT hr = info7_->GetModuleMetaData(function_identifier.module_id, ofRead, IID_IMetaDataImport2,
                                             reinterpret_cast<IUnknown**>(&metadata_import));
     if (FAILED(hr))
     {
@@ -788,6 +788,17 @@ struct DoStackSnapshotParams
     DoStackSnapshotParams(ContinuousProfiler* p, std::vector<FunctionIdentifier>* b) : prof(p), buffer(b) {}
 };
 
+struct DoStackSnapshotParamsEx : DoStackSnapshotParams
+{
+    using ThreadStacks = std::unordered_map<ThreadID, std::vector<FunctionIdentifier>>;
+    ThreadStacks* threadStacksBuffer;
+    DoStackSnapshotParamsEx(ContinuousProfiler* p, std::vector<FunctionIdentifier>* b, ThreadStacks* t)
+        : DoStackSnapshotParams(p, b), threadStacksBuffer(t)
+    {
+    }
+};
+
+
 static HRESULT __stdcall FrameCallback(_In_ FunctionID         func_id,
                                        _In_ UINT_PTR           ip,
                                        _In_ COR_PRF_FRAME_INFO frame_info,
@@ -833,30 +844,38 @@ static HRESULT __stdcall FrameCallback(_In_ FunctionID         func_id,
 
 static void CaptureFunctionIdentifiersForThreads(
     ContinuousProfiler*                                            prof,
-    ICorProfilerInfo12*                                            info12,
+    ICorProfilerInfo7*                                            info7,
     const std::unordered_set<ThreadID>&                            selectedThreads,
     std::unordered_map<ThreadID, std::vector<FunctionIdentifier>>& threadStacksBuffer)
 {
     prof->helper.ClearFunctionIdentifierCache();
-    for (auto threadId : selectedThreads)
+
+    if (auto stackCaptureStrategy = prof->GetStackCaptureStrategy();
+        stackCaptureStrategy != nullptr)
     {
-        DoStackSnapshotParams doStackSnapshotParams(prof, &threadStacksBuffer[threadId]);
-        HRESULT               snapshotHr = info12->DoStackSnapshot(threadId, &FrameCallback, COR_PRF_SNAPSHOT_DEFAULT,
-                                                                   &doStackSnapshotParams, nullptr, 0);
-        if (FAILED(snapshotHr))
-        {
-            trace::Logger::Debug("DoStackSnapshot failed. HRESULT=0x", std::setfill('0'), std::setw(8), std::hex,
-                                 snapshotHr);
-        }
+        auto callBackRaw = [](FunctionID func_id, UINT_PTR ip, COR_PRF_FRAME_INFO frame_info, ULONG32 context_size,
+            BYTE context[], void* client_data) -> HRESULT
+            {
+                auto       params = static_cast<continuous_profiler::StackSnapshotCallbackParams*>(client_data);
+                auto       thread = params->threadId;
+                auto       doStackSnapshotParams = static_cast<DoStackSnapshotParamsEx*>(params->clientData);
+                doStackSnapshotParams->buffer = &((*doStackSnapshotParams->threadStacksBuffer)[thread]);
+                FrameCallback(func_id, ip, frame_info, context_size, context, doStackSnapshotParams);
+                return S_OK;
+            };
+        DoStackSnapshotParamsEx doStackSnapshotParamsEx(prof, nullptr, &threadStacksBuffer);
+        StackSnapshotCallbackParams params{
+            callBackRaw, &doStackSnapshotParamsEx };
+        stackCaptureStrategy->CaptureStacks(selectedThreads, &params);
     }
 }
 
-static std::unordered_set<ThreadID> EnumerateThreads(ICorProfilerInfo12* info12)
+static std::unordered_set<ThreadID> EnumerateThreads(ICorProfilerInfo7* info7)
 {
     std::unordered_set<ThreadID> threads;
 
     ICorProfilerThreadEnum* thread_enum = nullptr;
-    HRESULT                 hr          = info12->EnumThreads(&thread_enum);
+    HRESULT                 hr          = info7->EnumThreads(&thread_enum);
     if (FAILED(hr))
     {
         trace::Logger::Debug("Could not EnumThreads. HRESULT=0x", std::setfill('0'), std::setw(8), std::hex, hr);
@@ -989,7 +1008,7 @@ static void RemoveOutdatedEntries(std::unordered_map<trace_context, long long>& 
 }
 
 static void PauseClrAndCaptureSamples(ContinuousProfiler*                                            prof,
-                                      ICorProfilerInfo12*                                            info12,
+                                      ICorProfilerInfo7*                                            info7,
                                       const SamplingType                                             samplingType,
                                       std::unordered_map<ThreadID, std::vector<FunctionIdentifier>>& threadStacksBuffer)
 {
@@ -1046,51 +1065,32 @@ static void PauseClrAndCaptureSamples(ContinuousProfiler*                       
 
     const auto start = std::chrono::steady_clock::now();
 
-    HRESULT hr = info12->SuspendRuntime();
-
-    if (FAILED(hr))
+    try
     {
-        trace::Logger::Warn("Could not suspend runtime to sample threads. HRESULT=0x", std::setfill('0'), std::setw(8),
-                            std::hex, hr);
-    }
-    else
-    {
-        try
-        {
 
-            if (samplingType == SamplingType::Continuous)
-            {
-                auto allThreads = EnumerateThreads(info12);
-                CaptureFunctionIdentifiersForThreads(prof, info12, allThreads, threadStacksBuffer);
-            }
-            else if (samplingType == SamplingType::SelectedThreads)
-            {
-                CaptureFunctionIdentifiersForThreads(prof, info12, selective_sampling_thread_buffer,
-                                                     threadStacksBuffer);
-            }
-        }
-        catch (const std::exception& e)
+        if (samplingType == SamplingType::Continuous)
         {
-            trace::Logger::Warn("Could not capture thread samples: ", e.what());
+            auto allThreads = EnumerateThreads(info7);
+            CaptureFunctionIdentifiersForThreads(prof, info7, allThreads, threadStacksBuffer);
         }
-        catch (...)
+        else if (samplingType == SamplingType::SelectedThreads)
         {
-            trace::Logger::Warn("Could not capture thread sample for unknown reasons");
+            CaptureFunctionIdentifiersForThreads(prof, info7, selective_sampling_thread_buffer, threadStacksBuffer);
         }
     }
-    // I don't have any proof but I sure hope that if suspending fails then it's still ok to ask to resume, with no
-    // ill effects
-    hr = info12->ResumeRuntime();
+    catch (const std::exception& e)
+    {
+        trace::Logger::Warn("Could not capture thread samples: ", e.what());
+    }
+    catch (...)
+    {
+        trace::Logger::Warn("Could not capture thread sample for unknown reasons");
+    }
 
     const auto end            = std::chrono::steady_clock::now();
     const auto elapsed_micros = std::chrono::duration_cast<std::chrono::microseconds>(end - start).count();
 
     prof->stats_.micros_suspended = static_cast<int>(elapsed_micros);
-
-    if (FAILED(hr))
-    {
-        trace::Logger::Error("Could not resume runtime? HRESULT=0x", std::setfill('0'), std::setw(8), std::hex, hr);
-    }
 
     const size_t nonEmptyCount = std::count_if(threadStacksBuffer.begin(), threadStacksBuffer.end(),
                                                [](const std::pair<const ThreadID, std::vector<FunctionIdentifier>>& v)
@@ -1154,9 +1154,9 @@ static bool ShouldTrackIterations(const ContinuousProfiler* const prof)
 
 static void SamplingThreadMain(ContinuousProfiler* prof, const std::future<void>& future)
 {
-    ICorProfilerInfo12* info12 = prof->info12;
+    ICorProfilerInfo7* info7 = prof->info7;
 
-    info12->InitializeCurrentThread();
+    info7->InitializeCurrentThread();
 
     std::unordered_map<ThreadID, std::vector<FunctionIdentifier>> threadStacksBuffer;
     unsigned int                                                  iteration = 0;
@@ -1191,7 +1191,7 @@ static void SamplingThreadMain(ContinuousProfiler* prof, const std::future<void>
             iteration = 0;
         }
 
-        PauseClrAndCaptureSamples(prof, info12, samplingType, threadStacksBuffer);
+        PauseClrAndCaptureSamples(prof, info7, samplingType, threadStacksBuffer);
 
         if (prof->IsShutdownRequested())
         {
@@ -1217,11 +1217,28 @@ static void SamplingThreadMain(ContinuousProfiler* prof, const std::future<void>
     }
 }
 
+void ContinuousProfiler::SetGlobalInfo7(ICorProfilerInfo7* cor_profiler_info7)
+{
+    info7 = cor_profiler_info7;
+    this->helper.info7_ = cor_profiler_info7;
+    profiler_info = cor_profiler_info7;
+}
+
 void ContinuousProfiler::SetGlobalInfo12(ICorProfilerInfo12* cor_profiler_info12)
 {
-    profiler_info        = cor_profiler_info12;
-    this->info12         = cor_profiler_info12;
-    this->helper.info12_ = cor_profiler_info12;
+    // ICorProfilerInfo12 derives from ICorProfilerInfo7, so we can use it as ICorProfilerInfo7
+    SetGlobalInfo7(cor_profiler_info12);
+    info12 = cor_profiler_info12;
+}
+
+void ContinuousProfiler::SetStackCaptureStrategy(IStackCaptureStrategy* stack_capture_strategy)
+{
+    stack_capture_strategy_ = stack_capture_strategy;
+}
+
+IStackCaptureStrategy* ContinuousProfiler::GetStackCaptureStrategy() const
+{
+    return stack_capture_strategy_;
 }
 
 void ContinuousProfiler::InitSelectiveSamplingBuffer()
@@ -1296,7 +1313,7 @@ constexpr auto AllocationTickV4SizeWithoutTypeName    = 4 + 4 + 2 + 8 + EtwPoint
 static void CaptureAllocationStack(ContinuousProfiler* prof, std::vector<FunctionIdentifier>& threadStack)
 {
     DoStackSnapshotParams doStackSnapshotParams(prof, &threadStack);
-    HRESULT               hr = prof->info12->DoStackSnapshot((ThreadID)NULL, &FrameCallback, COR_PRF_SNAPSHOT_DEFAULT,
+    HRESULT               hr = prof->info7->DoStackSnapshot((ThreadID)NULL, &FrameCallback, COR_PRF_SNAPSHOT_DEFAULT,
                                                              &doStackSnapshotParams, nullptr, 0);
     if (FAILED(hr))
     {
@@ -1395,7 +1412,7 @@ void ContinuousProfiler::AllocationTick(ULONG dataLen, LPCBYTE data)
     size_t typeNameCharLen = (dataLen - AllocationTickV4SizeWithoutTypeName) / 2 - 1;
 
     ThreadID      threadId;
-    const HRESULT hr = info12->GetCurrentThreadID(&threadId);
+    const HRESULT hr = info7->GetCurrentThreadID(&threadId);
     if (FAILED(hr))
     {
         trace::Logger::Debug("GetCurrentThreadId failed, ", hr);
