@@ -1627,7 +1627,8 @@ extern "C"
             return;
         }
         const auto deadline                   = std::chrono::steady_clock::now() + std::chrono::minutes(kSelectiveSamplingMaxAgeMinutes);
-        selective_sampling_trace_map[context] = std::chrono::duration_cast<std::chrono::milliseconds>(deadline.time_since_epoch()).count();
+        selective_sampling_trace_map[context] =
+            std::chrono::duration_cast<std::chrono::milliseconds>(deadline.time_since_epoch()).count();
     }
 
     EXPORTTHIS void SelectiveSamplingStop(uint64_t traceIdHigh, uint64_t traceIdLow)
