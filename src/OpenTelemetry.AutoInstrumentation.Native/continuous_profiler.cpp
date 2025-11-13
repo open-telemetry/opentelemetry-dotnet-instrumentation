@@ -963,7 +963,8 @@ static void ResolveSymbolsAndPublishBufferForSelectedThreads(
     AppendToSelectedThreadsSampleBuffer(static_cast<int32_t>(localBytes.size()), localBytes.data());
 }
 
-static void RemoveOutdatedEntries(std::unordered_map<trace_context, long long>& selectiveSamplingTraceSet, ContinuousProfiler* prof)
+static void RemoveOutdatedEntries(std::unordered_map<trace_context, long long>& selectiveSamplingTraceSet,
+                                  ContinuousProfiler*                           prof)
 {
     const auto now = std::chrono::steady_clock::now();
 
@@ -976,8 +977,7 @@ static void RemoveOutdatedEntries(std::unordered_map<trace_context, long long>& 
     // Remove entries queued more than kSelectiveSamplingMaxAgeMinutes minutes ago.
     for (auto it = selectiveSamplingTraceSet.begin(); it != selectiveSamplingTraceSet.end();)
     {
-        const auto deadline =
-            std::chrono::time_point<std::chrono::steady_clock>(std::chrono::milliseconds(it->second));
+        const auto deadline = std::chrono::time_point<std::chrono::steady_clock>(std::chrono::milliseconds(it->second));
         if (now >= deadline)
         {
             trace::Logger::Warn("SelectiveSampling: removing outdated entry for trace {",
@@ -1626,11 +1626,8 @@ extern "C"
                                 "} because maximum number of traces is already being sampled.");
             return;
         }
-        const auto deadline = std::chrono::steady_clock::now() + std::chrono::minutes(kSelectiveSamplingMaxAgeMinutes);
-        const auto ts       =
-            std::chrono::duration_cast<std::chrono::milliseconds>(deadline.time_since_epoch())
-                .count();
-        selective_sampling_trace_map[context] = ts;
+        const auto deadline                   = std::chrono::steady_clock::now() + std::chrono::minutes(kSelectiveSamplingMaxAgeMinutes);
+        selective_sampling_trace_map[context] = std::chrono::duration_cast<std::chrono::milliseconds>(deadline.time_since_epoch()).count();
     }
 
     EXPORTTHIS void SelectiveSamplingStop(uint64_t traceIdHigh, uint64_t traceIdLow)
