@@ -158,8 +158,44 @@ internal class OtlpSettings
     {
         // the default in SDK is grpc. http/protobuf should be default for our purposes
         var priorityVar = OtlpSpecConfigDefinitions.GetProtocolEnvVar(signalType);
-        var exporterOtlpProtocol = configuration.GetString(priorityVar) ??
-            configuration.GetString(OtlpSpecConfigDefinitions.DefaultProtocolEnvVarName);
+        var exporterOtlpProtocol = configuration.GetString(priorityVar);
+
+        // SDK handles only general environment variables.
+        // In case priority env is set, the value must be maually passed.
+        if (!string.IsNullOrEmpty(exporterOtlpProtocol))
+        {
+            switch (exporterOtlpProtocol)
+            {
+                case "grpc":
+#if NETFRAMEWORK
+                    if (configuration.FailFast)
+                    {
+                        throw new ArgumentException(
+                            $"OTLP protocol 'grpc' is not supported on .NET Framework in environment variable '{priorityVar}'. Use 'http/protobuf' instead.");
+                    }
+                    else
+                    {
+                        // null value here means that it will be handled by OTEL .NET SDK
+                        return null;
+                    }
+#else
+                    return OtlpExportProtocol.Grpc;
+#endif
+                case "http/protobuf":
+                    return OtlpExportProtocol.HttpProtobuf;
+                default:
+                    if (configuration.FailFast)
+                    {
+                        throw new ArgumentException(
+                            $"Invalid OTLP protocol value '{exporterOtlpProtocol}' in environment variable '{priorityVar}'. Supported values are 'grpc' and 'http/protobuf'.");
+                    }
+
+                    // null value here means that it will be handled by OTEL .NET SDK
+                    return null;
+            }
+        }
+
+        exporterOtlpProtocol = configuration.GetString(OtlpSpecConfigDefinitions.DefaultProtocolEnvVarName);
 
         if (string.IsNullOrEmpty(exporterOtlpProtocol))
         {

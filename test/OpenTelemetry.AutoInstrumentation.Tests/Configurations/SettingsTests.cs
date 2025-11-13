@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 using OpenTelemetry.AutoInstrumentation.Configurations;
+using OpenTelemetry.AutoInstrumentation.Configurations.Otlp;
 using OpenTelemetry.Exporter;
 using Xunit;
 
@@ -393,6 +394,45 @@ public class SettingsTests : IDisposable
         Assert.Equal(expectedOtlpExportProtocol, settings.OtlpSettings.Protocol);
     }
 
+    [Fact]
+    internal void OtlpExportProtocol_CheckPriorityEnvIsSet_Traces()
+    {
+        Environment.SetEnvironmentVariable(AutoOtlpDefinitions.TracesEndpointEnvVarName, "http://example.org/traces/v1");
+        Environment.SetEnvironmentVariable(AutoOtlpDefinitions.TracesProtocolEnvVarName, "http/protobuf");
+        Environment.SetEnvironmentVariable(AutoOtlpDefinitions.TracesTimeoutEnvVarName, "1");
+        Environment.SetEnvironmentVariable(AutoOtlpDefinitions.TracesHeadersEnvVarName, "key1=value1,key2=value2");
+
+        var settings = Settings.FromDefaultSources<TracerSettings>(false).OtlpSettings;
+
+        VerifyOtlpPrioritySettings(settings);
+    }
+
+    [Fact]
+    internal void OtlpExportProtocol_CheckPriorityEnvIsSet_Metrics()
+    {
+        Environment.SetEnvironmentVariable(AutoOtlpDefinitions.MetricsEndpointEnvVarName, "http://example.org/traces/v1");
+        Environment.SetEnvironmentVariable(AutoOtlpDefinitions.MetricsProtocolEnvVarName, "http/protobuf");
+        Environment.SetEnvironmentVariable(AutoOtlpDefinitions.MetricsTimeoutEnvVarName, "1");
+        Environment.SetEnvironmentVariable(AutoOtlpDefinitions.MetricsHeadersEnvVarName, "key1=value1,key2=value2");
+
+        var settings = Settings.FromDefaultSources<MetricSettings>(false).OtlpSettings;
+
+        VerifyOtlpPrioritySettings(settings);
+    }
+
+    [Fact]
+    internal void OtlpExportProtocol_CheckPriorityEnvIsSet_Logs()
+    {
+        Environment.SetEnvironmentVariable(AutoOtlpDefinitions.LogsEndpointEnvVarName, "http://example.org/traces/v1");
+        Environment.SetEnvironmentVariable(AutoOtlpDefinitions.LogsProtocolEnvVarName, "http/protobuf");
+        Environment.SetEnvironmentVariable(AutoOtlpDefinitions.LogsTimeoutEnvVarName, "1");
+        Environment.SetEnvironmentVariable(AutoOtlpDefinitions.LogsHeadersEnvVarName, "key1=value1,key2=value2");
+
+        var settings = Settings.FromDefaultSources<LogSettings>(false).OtlpSettings;
+
+        VerifyOtlpPrioritySettings(settings);
+    }
+
     [Theory]
     [InlineData("true", true)]
     [InlineData("false", false)]
@@ -477,5 +517,14 @@ public class SettingsTests : IDisposable
         Environment.SetEnvironmentVariable(ConfigurationKeys.Traces.InstrumentationOptions.HttpInstrumentationCaptureRequestHeaders, null);
         Environment.SetEnvironmentVariable(ConfigurationKeys.Traces.InstrumentationOptions.HttpInstrumentationCaptureResponseHeaders, null);
         Environment.SetEnvironmentVariable(ConfigurationKeys.Traces.InstrumentationOptions.OracleMdaSetDbStatementForText, null);
+    }
+
+    private void VerifyOtlpPrioritySettings(OtlpSettings? settings)
+    {
+        Assert.NotNull(settings);
+        Assert.Equal(new Uri("http://example.org/traces/v1"), settings.Endpoint);
+        Assert.Equal(OtlpExportProtocol.HttpProtobuf, settings.Protocol);
+        Assert.Equal(1, settings.TimeoutMilliseconds);
+        Assert.Equal("key1=value1,key2=value2", settings.Headers);
     }
 }
