@@ -1,0 +1,256 @@
+# sdk-migration-config.yaml is a typical starting point for configuring the SDK when migrating
+# from environment variable based configuration.
+#
+# This template includes env var substitution references (i.e. ${MY_ENV}) for all documented
+# env vars (https://opentelemetry.io/docs/zero-code/dotnet/configuration/)
+# which map cleanly to declarative configuration. For example, OTEL_DOTNET_AUTO_FAIL_FAST_ENABLED is referenced
+# below, but OTEL_TRACES_EXPORTER is not since it does not map well to the hierarchical
+# structure of declarative configuration.
+#
+# NOTE: With the exception of env var substitution syntax, SDKs ignore environment variables
+# when interpreting config files. For example, if "fail_fast: ${OTEL_DOTNET_AUTO_FAIL_FAST_ENABLED:-false}"
+# is replaced with "fail_fast: false", then setting the env var OTEL_DOTNET_AUTO_FAIL_FAST_ENABLED will have
+# no effect. See https://opentelemetry.io/docs/specs/otel/configuration/data-model/
+# for more information. The following spec defined env vars are NOT referenced and are thus
+# ignored:
+#
+# - OTEL_TRACES_SAMPLER
+# - OTEL_TRACES_SAMPLER_ARG
+# - OTEL_TRACES_EXPORTER
+# - OTEL_METRICS_EXPORTER
+# - OTEL_LOGS_EXPORTER
+# - OTEL_EXPORTER_OTLP_PROTOCOL, OTEL_EXPORTER_OTLP_{SIGNAL}_PROTOCOL
+# - OTEL_EXPORTER_OTLP_ENDPOINT
+# - OTEL_EXPORTER_OTLP_TIMEOUT
+# - OTEL_DOTNET_AUTO_RESOURCE_DETECTOR_ENABLED, OTEL_DOTNET_AUTO_{DETECTOR}_RESOURCE_DETECTOR_ENABLED,
+# - OTEL_DOTNET_AUTO_INSTRUMENTATION_ENABLED, OTEL_DOTNET_AUTO_{SIGNAL}_INSTRUMENTATION_ENABLED, OTEL_DOTNET_AUTO_{SIGNAL}_{INSTRUMENTATION}_INSTRUMENTATION_ENABLED
+#
+# Read the documentation for details which env vars are supported for missing configurations: https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/blob/main/docs/file-based-configuration.md
+
+# The file format version.
+# The yaml format is documented at
+# <https://github.com/open-telemetry/opentelemetry-configuration/tree/main/schema>
+# By default, the latest version is used.
+file_format: "1.0-rc.1"
+# Configure if the SDK is disabled or not.
+# If omitted or null, false is used
+# This setting is inverted (if OTEL_DOTNET_AUTO_SETUP_SDK is true, the SDK is disabled)
+disabled: ${OTEL_DOTNET_AUTO_SETUP_SDK:-false}
+# Configure if the Fail Fast is enabled or not.
+# If omitted or null, false is used
+fail_fast: ${OTEL_DOTNET_AUTO_FAIL_FAST_ENABLED:-false}
+# Configure if the Flush On Unhandled Exception is enabled or not.
+# If omitted or null, false is used.
+flush_on_unhandled_exception: ${OTEL_DOTNET_AUTO_FLUSH_ON_UNHANDLEDEXCEPTION:-false}
+# Configure if the Logs Include Formatted Message is enabled or not.
+# If omitted or null, false is used.
+logs_include_formatted_message: ${OTEL_DOTNET_AUTO_LOGS_INCLUDE_FORMATTED_MESSAGE:-false}
+
+# Resource Configuration
+resource:
+  # Configure resource attributes. Entries have higher priority than entries from .resource.attributes_list.
+  attributes:
+    - # The attribute name.
+      name: service.name
+      # The attribute value.
+      # The type of value must match .type.
+      value: ${OTEL_SERVICE_NAME:-unknown_service}
+  # Configure resource attributes. Entries have lower priority than entries from .resource.attributes.
+  # The value is a list of comma separated key-value pairs matching the format of OTEL_RESOURCE_ATTRIBUTES. See https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/configuration/sdk-environment-variables.md#general-sdk-configuration for details.
+  # If omitted or null, no resource attributes are added.
+  attributes_list: ${OTEL_RESOURCE_ATTRIBUTES}
+
+# Propagator Configuration
+propagator:
+  # If no propagators are specified, none will be added automatically.
+  composite_list: ${OTEL_PROPAGATORS:-tracecontext,baggage}
+
+# Tracer Provider Configuration
+tracer_provider:
+  # Configure span processors.
+  processors:
+    - batch:
+        # Configure delay interval (in milliseconds) between two consecutive exports. 
+        # Value must be non-negative.
+        # If omitted or null, 5000 is used.
+        schedule_delay: ${OTEL_BSP_SCHEDULE_DELAY:-5000}
+        # Configure maximum allowed time (in milliseconds) to export data. 
+        # Value must be non-negative. A value of 0 indicates no limit (infinity).
+        # If omitted or null, 30000 is used.
+        export_timeout: ${OTEL_BSP_EXPORT_TIMEOUT:-30000}
+        # Configure maximum queue size. Value must be positive.
+        # If omitted or null, 2048 is used.
+        max_queue_size: ${OTEL_BSP_MAX_QUEUE_SIZE:-2048}
+        # Configure maximum batch size. Value must be positive.
+        # If omitted or null, 512 is used.
+        max_export_batch_size: ${OTEL_BSP_MAX_EXPORT_BATCH_SIZE:-512}
+        # Configure exporter.
+        exporter:
+          # Configure exporter to be OTLP with HTTP transport.
+          otlp_http:
+            # Configure endpoint, including the signal specific path.
+            # If omitted or null, the http://localhost:4318/v1/{signal} (where signal is 'traces', 'logs', or 'metrics') is used.
+            endpoint: ${OTEL_EXPORTER_OTLP_TRACES_ENDPOINT:-http://localhost:4318/v1/traces}
+            # Configure max time (in milliseconds) to wait for each export.
+            # Value must be non-negative. A value of 0 indicates no limit (infinity).
+            # If omitted or null, 10000 is used.
+            timeout: ${OTEL_EXPORTER_OTLP_TRACES_TIMEOUT:-10000}
+            # Configure headers.
+            # The value is a list of comma separated key-value pairs matching the format of OTEL_EXPORTER_OTLP_HEADERS. See https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/protocol/exporter.md#configuration-options for details.
+            # If omitted or null, no headers are added.
+            headers_list: ${OTEL_EXPORTER_OTLP_TRACES_HEADERS}
+
+# Meter Provider Configuration
+meter_provider:
+  # Configure metric readers.
+  readers:
+    - periodic:
+        # Configure delay interval (in milliseconds) between start of two consecutive exports. 
+        # Value must be non-negative.
+        # If omitted or null, 60000 is used.
+        interval: ${OTEL_METRIC_EXPORT_INTERVAL:-60000}
+        # Configure maximum allowed time (in milliseconds) to export data. 
+        # Value must be non-negative. A value of 0 indicates no limit (infinity).
+        # If omitted or null, 30000 is used.
+        timeout: ${OTEL_METRIC_EXPORT_TIMEOUT:-30000}
+        # Configure exporter.
+        exporter:
+          # Configure exporter to be OTLP with HTTP transport.
+          otlp_http:
+            # Configure endpoint, including the signal specific path.
+            # If omitted or null, the http://localhost:4318/v1/{signal} (where signal is 'traces', 'logs', or 'metrics') is used.
+            endpoint: ${OTEL_EXPORTER_OTLP_METRICS_ENDPOINT:-http://localhost:4318/v1/metrics}      
+            # Configure max time (in milliseconds) to wait for each export.
+            # Value must be non-negative. A value of 0 indicates no limit (infinity).
+            # If omitted or null, 10000 is used.
+            timeout: ${OTEL_EXPORTER_OTLP_METRICS_TIMEOUT:-10000}
+            # Configure headers.
+            # The value is a list of comma separated key-value pairs matching the format of OTEL_EXPORTER_OTLP_HEADERS. See https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/protocol/exporter.md#configuration-options for details.
+            # If omitted or null, no headers are added.
+            headers_list: ${OTEL_EXPORTER_OTLP_METRICS_HEADERS}
+            # Configure temporality preference.
+            # Values include: cumulative, delta. For behavior of values, see https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/metrics/sdk_exporters/otlp.md.
+            # If omitted or null, cumulative is used.
+            temporality_preference: ${OTEL_EXPORTER_OTLP_METRICS_TEMPORALITY_PREFERENCE:-cumulative}
+
+# Logger Provider Configuration
+logger_provider:
+  # Configure log record processors.
+  processors:
+    - batch:
+        # Configure delay interval (in milliseconds) between two consecutive exports. 
+        # Value must be non-negative.
+        # If omitted or null, 1000 is used.
+        schedule_delay: ${OTEL_BLRP_SCHEDULE_DELAY:-1000}
+        # Configure maximum allowed time (in milliseconds) to export data. 
+        # Value must be non-negative. A value of 0 indicates no limit (infinity).
+        # If omitted or null, 30000 is used.
+        export_timeout: ${OTEL_BLRP_EXPORT_TIMEOUT:-30000}
+        # Configure maximum queue size. Value must be positive.
+        # If omitted or null, 2048 is used.
+        max_queue_size: ${OTEL_BLRP_MAX_QUEUE_SIZE:-2048}
+        # Configure maximum batch size. Value must be positive.
+        # If omitted or null, 512 is used.
+        max_export_batch_size: ${OTEL_BLRP_MAX_EXPORT_BATCH_SIZE:-512}
+        # Configure exporter.
+        exporter:
+          # Configure exporter to be OTLP with HTTP transport.
+          otlp_http:
+            # Configure endpoint, including the signal specific path.
+            # If omitted or null, the http://localhost:4318/v1/{signal} (where signal is 'traces', 'logs', or 'metrics') is used.
+            endpoint: ${OTEL_EXPORTER_OTLP_LOGS_ENDPOINT:-http://localhost:4318/v1/logs}
+            # Configure max time (in milliseconds) to wait for each export.
+            # Value must be non-negative. A value of 0 indicates no limit (infinity).
+            # If omitted or null, 10000 is used.
+            timeout: ${OTEL_EXPORTER_OTLP_LOGS_TIMEOUT:-10000}
+            # Configure headers.
+            # The value is a list of comma separated key-value pairs matching the format of OTEL_EXPORTER_OTLP_HEADERS. See https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/protocol/exporter.md#configuration-options for details.
+            # If omitted or null, no headers are added.
+            headers_list: ${OTEL_EXPORTER_OTLP_LOGS_HEADERS}
+
+# Plugins Configuration
+plugins/development:
+  # Colon-separated list of plugins to load.
+  # More information about plugins can be found at https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/blob/main/docs/plugins.md
+  plugins_list: ${OTEL_DOTNET_AUTO_PLUGINS}
+
+# Instrumentation Configuration
+instrumentation/development:
+  # If no instrumentation is specified, none will be added automatically.
+  dotnet:
+    traces:
+      # List of additional System.Diagnostics.ActivitySource names to be added to the tracer at the startup. 
+      # Use it to capture manually instrumented spans.
+      additional_sources_list: ${OTEL_DOTNET_AUTO_TRACES_ADDITIONAL_SOURCES}
+      # List of additional legacy source names to be added to the tracer at the startup. 
+      # Use it to capture System.Diagnostics.Activity objects created without using the System.Diagnostics.ActivitySource API. 
+      additional_legacy_sources_list: ${OTEL_DOTNET_AUTO_TRACES_ADDITIONAL_LEGACY_SOURCES}
+      # Enable or disable specific instrumentations.
+      aspnet:              # ASP.NET
+        # A comma-separated list of HTTP header names. ASP.NET instrumentations will capture HTTP request header values for all configured header names.
+        # If omitted or null, no headers are captured.
+        capture_request_headers: ${OTEL_DOTNET_AUTO_TRACES_ASPNET_INSTRUMENTATION_CAPTURE_REQUEST_HEADERS}
+        # A comma-separated list of HTTP header names. ASP.NET instrumentations will capture HTTP response header values for all configured header names.
+        # If omitted or null, no headers are captured.
+        capture_response_headers: ${OTEL_DOTNET_AUTO_TRACES_ASPNET_INSTRUMENTATION_CAPTURE_RESPONSE_HEADERS}
+      aspnetcore:          # ASP.NET Core
+        # A comma-separated list of HTTP header names. ASP.NET Core instrumentations will capture HTTP request header values for all configured header names.
+        # If omitted or null, no headers are captured.
+        capture_request_headers: ${OTEL_DOTNET_AUTO_TRACES_ASPNETCORE_INSTRUMENTATION_CAPTURE_REQUEST_HEADERS}
+        # A comma-separated list of HTTP header names. ASP.NET Core instrumentations will capture HTTP response header values for all configured header names.
+        # If omitted or null, no headers are captured.
+        capture_response_headers: ${OTEL_DOTNET_AUTO_TRACES_ASPNETCORE_INSTRUMENTATION_CAPTURE_RESPONSE_HEADERS}
+      azure:               # Azure SDK
+      elasticsearch:       # Elastic.Clients.Elasticsearch
+      elastictransport:    # Elastic.Transport
+      entityframeworkcore: # Entity Framework Core
+      graphql:             # GraphQL
+        # Whether the GraphQL instrumentation can pass raw queries through the graphql.document attribute. Queries might contain sensitive information.
+        # If omitted false is used.
+        set_document: ${OTEL_DOTNET_AUTO_GRAPHQL_SET_DOCUMENT:-false}
+      grpcnetclient:       # Grpc.Net.Client
+        # A comma-separated list of gRPC metadata names. Grpc.Net.Client instrumentations will capture gRPC request metadata values for all configured metadata names.
+        # If omitted or null, no metadata is captured.
+        capture_request_metadata: ${OTEL_DOTNET_AUTO_TRACES_GRPCNETCLIENT_INSTRUMENTATION_CAPTURE_REQUEST_METADATA}
+        # A comma-separated list of gRPC metadata names. Grpc.Net.Client instrumentations will capture gRPC response metadata values for all configured metadata names.
+        # If omitted or null, no metadata is captured.
+        capture_response_metadata: ${OTEL_DOTNET_AUTO_TRACES_GRPCNETCLIENT_INSTRUMENTATION_CAPTURE_RESPONSE_METADATA}
+      httpclient:          # System.Net.Http.HttpClient
+        # A comma-separated list of HTTP header names. HTTP Client instrumentations will capture HTTP request header values for all configured header names.
+        # If omitted or null, no headers are captured.
+        capture_request_headers: ${OTEL_DOTNET_AUTO_TRACES_HTTP_INSTRUMENTATION_CAPTURE_REQUEST_HEADERS}
+        # If omitted or null, no headers are captured.
+        # A comma-separated list of HTTP header names. HTTP Client instrumentations will capture HTTP response header values for all configured header names.
+        capture_response_headers: ${OTEL_DOTNET_AUTO_TRACES_HTTP_INSTRUMENTATION_CAPTURE_RESPONSE_HEADERS}
+      kafka:               # Confluent.Kafka
+      masstransit:         # MassTransit
+      mongodb:             # MongoDB.Driver
+      mysqlconnector:      # MySqlConnector
+      mysqldata:           # MySql.Data
+      npgsql:              # Npgsql
+      nservicebus:         # NServiceBus
+      oraclemda:           # Oracle.ManagedDataAccess
+        # Whether the Oracle Client instrumentation can pass SQL statements through the db.statement attribute. Queries might contain sensitive information. If set to false, db.statement is recorded only for executing stored procedures.
+        # If omitted false is used.
+        set_db_statement_for_text: ${OTEL_DOTNET_AUTO_ORACLE_SET_DB_STATEMENT_FOR_TEXT:-false}
+      rabbitmq:            # RabbitMQ.Client
+      quartz:              # Quartz
+      sqlclient:           # Microsoft.Data.SqlClient & System.Data.SqlClient
+      stackexchangeredis:  # StackExchange.Redis
+      wcfclient:           # WCF Client
+      wcfservice:          # WCF Service
+    metrics:
+      # List of additional System.Diagnostics.Metrics.Meter names to be added to the meter at the startup.
+      additional_sources_list: ${OTEL_DOTNET_AUTO_METRICS_ADDITIONAL_SOURCES}
+      # Enable or disable specific instrumentations.
+      aspnet:              # ASP.NET metrics
+      aspnetcore:          # ASP.NET Core metrics
+      httpclient:          # HttpClient metrics
+      netruntime:          # .NET Runtime metrics
+      nservicebus:         # NServiceBus metrics
+      process:             # Process metrics
+      sqlclient:           # SQL Client metrics
+    logs:
+      ilogger:             # Microsoft.Extensions.Logging
+      log4net:             # Log4Net
+        
