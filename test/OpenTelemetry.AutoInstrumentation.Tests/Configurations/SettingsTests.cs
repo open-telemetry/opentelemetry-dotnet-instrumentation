@@ -405,6 +405,7 @@ public class SettingsTests : IDisposable
         var settings = Settings.FromDefaultSources<TracerSettings>(false).OtlpSettings;
 
         VerifyOtlpPrioritySettings(settings);
+        ClearEnvVars();
     }
 
     [Fact]
@@ -418,6 +419,7 @@ public class SettingsTests : IDisposable
         var settings = Settings.FromDefaultSources<MetricSettings>(false).OtlpSettings;
 
         VerifyOtlpPrioritySettings(settings);
+        ClearEnvVars();
     }
 
     [Fact]
@@ -431,6 +433,7 @@ public class SettingsTests : IDisposable
         var settings = Settings.FromDefaultSources<LogSettings>(false).OtlpSettings;
 
         VerifyOtlpPrioritySettings(settings);
+        ClearEnvVars();
     }
 
     [Theory]
