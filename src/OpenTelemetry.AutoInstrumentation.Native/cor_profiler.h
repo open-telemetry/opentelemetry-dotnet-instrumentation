@@ -45,6 +45,7 @@ private:
 
     // Startup helper variables
     bool first_jit_compilation_completed = false;
+    bool startup_fix_required            = false;
 
     bool corlib_module_loaded = false;
     AppDomainID corlib_app_domain_id = 0;
@@ -125,8 +126,6 @@ private:
     bool GetIntegrationTypeRef(ModuleMetadata& module_metadata, ModuleID module_id,
                                const IntegrationDefinition& integration_definition, mdTypeRef& integration_type_ref);
     bool ProfilerAssemblyIsLoadedIntoAppDomain(AppDomainID app_domain_id);
-    std::string GetILCodes(const std::string& title, ILRewriter* rewriter, const FunctionInfo& caller,
-                           const ComPtr<IMetaDataImport2>& metadata_import);
 
     //
     // Initialization methods
@@ -151,6 +150,11 @@ public:
     // It may not be actual .NET Framework version.
     int  GetNetFrameworkRedirectionVersion() const;
 #endif
+
+    std::string GetILCodes(const std::string&              title,
+                           ILRewriter*                     rewriter,
+                           const FunctionInfo&             caller,
+                           const ComPtr<IMetaDataImport2>& metadata_import);
 
     //
     // ICorProfilerCallback methods

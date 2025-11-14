@@ -12,6 +12,9 @@
 namespace trace
 {
 
+const WSTRING opentelemetry_autoinstrumentation_startuphook_filepath =
+    WStr("OpenTelemetry.AutoInstrumentation.StartupHook.dll");
+
 inline bool IsStartupHookValid(const std::vector<WSTRING>& startup_hooks, const WSTRING& home_path)
 {
     if (startup_hooks.empty())
@@ -19,13 +22,14 @@ inline bool IsStartupHookValid(const std::vector<WSTRING>& startup_hooks, const 
         return false;
     }
 
-    const auto expected_deployment_startuphook_path =
-        std::filesystem::path(home_path)
-        / "net" / "OpenTelemetry.AutoInstrumentation.StartupHook.dll";
-    const auto expected_nuget_startuphook_path = 
-        std::filesystem::path(home_path)
-        / "OpenTelemetry.AutoInstrumentation.StartupHook.dll";
-    if (!std::filesystem::exists(expected_deployment_startuphook_path) && !std::filesystem::exists(expected_nuget_startuphook_path))
+    auto startuphook_path = std::filesystem::path(home_path) / "net"
+                            / opentelemetry_autoinstrumentation_startuphook_filepath;
+    if (!std::filesystem::exists(startuphook_path))
+    {
+        startuphook_path = std::filesystem::path(home_path)
+                            / opentelemetry_autoinstrumentation_startuphook_filepath;
+    }
+    if (!std::filesystem::exists(startuphook_path))
     {
         return false;
     }
@@ -34,12 +38,57 @@ inline bool IsStartupHookValid(const std::vector<WSTRING>& startup_hooks, const 
     {
         const auto start_hook_path = std::filesystem::path(*i);
         std::error_code ec;
-        if (std::filesystem::equivalent(expected_deployment_startuphook_path, start_hook_path, ec) || std::filesystem::equivalent(expected_nuget_startuphook_path, start_hook_path, ec))
+        if (std::filesystem::equivalent(startuphook_path, start_hook_path, ec))
         {
             return true;
         }
     }
     return false;
+}
+
+
+inline WSTRING GetStartupHookPath(const WSTRING& profiler_path)
+{
+    if (profiler_path == EmptyWStr)
+    {
+        return EmptyWStr;
+    }
+
+    // Find the StartupHook DLL based on the following possible folder structures:
+    // 1. ZIP:
+    //  <OTEL_HOME>/<RID>/<native_profiler_dll>
+    //  <OTEL_HOME>/net/OpenTelemetry.AutoInstrumentation.StartupHook.dll
+    auto startuphook_path =
+        std::filesystem::path(profiler_path).parent_path().parent_path()
+            / "net" / opentelemetry_autoinstrumentation_startuphook_filepath;
+    if (std::filesystem::exists(startuphook_path))
+    {
+        return PATH_TO_WSTRING(startuphook_path);
+    }
+
+    // 2. NuGet, platform dependent deployment:
+    //  <APP_FOLDER>/<native_profiler_dll>
+    //  <APP_FOLDER>/OpenTelemetry.AutoInstrumentation.StartupHook.dll
+    startuphook_path =
+        std::filesystem::path(profiler_path).parent_path()
+            / opentelemetry_autoinstrumentation_startuphook_filepath;
+    if (std::filesystem::exists(startuphook_path))
+    {
+        return PATH_TO_WSTRING(startuphook_path);
+    }
+
+    // 3. NuGet, platform independent deployment:
+    //  <APP_FOLDER>/runtimes/<RID>/<native_profiler_dll>
+    //  <APP_FOLDER>/OpenTelemetry.AutoInstrumentation.StartupHook.dll
+    startuphook_path =
+        std::filesystem::path(profiler_path).parent_path().parent_path().parent_path()
+            / opentelemetry_autoinstrumentation_startuphook_filepath;
+    if (std::filesystem::exists(startuphook_path))
+    {
+        return PATH_TO_WSTRING(startuphook_path);
+    }
+
+    return EmptyWStr;
 }
 
 }  // namespace trace
