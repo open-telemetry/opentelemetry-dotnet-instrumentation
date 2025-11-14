@@ -18,6 +18,9 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 
 ### Changed
 
+- Fixed `OTEL_EXPORTER_OTLP_TRACES_PROTOCOL`, `OTEL_EXPORTER_OTLP_METRICS_PROTOCOL`
+  `OTEL_EXPORTER_OTLP_LOGS_PROTOCOL` handling. See [#4593](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/issues/4593).
+
 #### Dependency updates
 
 - Updated [Core components](https://github.com/open-telemetry/opentelemetry-dotnet/blob/main/VERSIONING.md#core-components):
