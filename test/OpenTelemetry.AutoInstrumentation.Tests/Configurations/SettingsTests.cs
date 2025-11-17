@@ -1,7 +1,9 @@
 // Copyright The OpenTelemetry Authors
 // SPDX-License-Identifier: Apache-2.0
 
+using System.Reflection;
 using OpenTelemetry.AutoInstrumentation.Configurations;
+using OpenTelemetry.AutoInstrumentation.Configurations.Otlp;
 using OpenTelemetry.Exporter;
 using Xunit;
 
@@ -393,6 +395,48 @@ public class SettingsTests : IDisposable
         Assert.Equal(expectedOtlpExportProtocol, settings.OtlpSettings.Protocol);
     }
 
+    [Fact]
+    internal void OtlpExportProtocol_CheckPriorityEnvIsSet_Traces()
+    {
+        VerifyOtlpPrioritySettings(((string Endpoint, string Protocol, string Timeout, string Headers) values) =>
+        {
+            Environment.SetEnvironmentVariable(AutoOtlpDefinitions.TracesEndpointEnvVarName, values.Endpoint);
+            Environment.SetEnvironmentVariable(AutoOtlpDefinitions.TracesProtocolEnvVarName, values.Protocol);
+            Environment.SetEnvironmentVariable(AutoOtlpDefinitions.TracesTimeoutEnvVarName, values.Timeout);
+            Environment.SetEnvironmentVariable(AutoOtlpDefinitions.TracesHeadersEnvVarName, values.Headers);
+
+            return Settings.FromDefaultSources<TracerSettings>(false).OtlpSettings;
+        });
+    }
+
+    [Fact]
+    internal void OtlpExportProtocol_CheckPriorityEnvIsSet_Metrics()
+    {
+        VerifyOtlpPrioritySettings(((string Endpoint, string Protocol, string Timeout, string Headers) values) =>
+        {
+            Environment.SetEnvironmentVariable(AutoOtlpDefinitions.MetricsEndpointEnvVarName, values.Endpoint);
+            Environment.SetEnvironmentVariable(AutoOtlpDefinitions.MetricsProtocolEnvVarName, values.Protocol);
+            Environment.SetEnvironmentVariable(AutoOtlpDefinitions.MetricsTimeoutEnvVarName, values.Timeout);
+            Environment.SetEnvironmentVariable(AutoOtlpDefinitions.MetricsHeadersEnvVarName, values.Headers);
+
+            return Settings.FromDefaultSources<MetricSettings>(false).OtlpSettings;
+        });
+    }
+
+    [Fact]
+    internal void OtlpExportProtocol_CheckPriorityEnvIsSet_Logs()
+    {
+        VerifyOtlpPrioritySettings(((string Endpoint, string Protocol, string Timeout, string Headers) values) =>
+        {
+            Environment.SetEnvironmentVariable(AutoOtlpDefinitions.LogsEndpointEnvVarName, values.Endpoint);
+            Environment.SetEnvironmentVariable(AutoOtlpDefinitions.LogsProtocolEnvVarName, values.Protocol);
+            Environment.SetEnvironmentVariable(AutoOtlpDefinitions.LogsTimeoutEnvVarName, values.Timeout);
+            Environment.SetEnvironmentVariable(AutoOtlpDefinitions.LogsHeadersEnvVarName, values.Headers);
+
+            return Settings.FromDefaultSources<LogSettings>(false).OtlpSettings;
+        });
+    }
+
     [Theory]
     [InlineData("true", true)]
     [InlineData("false", false)]
@@ -477,5 +521,39 @@ public class SettingsTests : IDisposable
         Environment.SetEnvironmentVariable(ConfigurationKeys.Traces.InstrumentationOptions.HttpInstrumentationCaptureRequestHeaders, null);
         Environment.SetEnvironmentVariable(ConfigurationKeys.Traces.InstrumentationOptions.HttpInstrumentationCaptureResponseHeaders, null);
         Environment.SetEnvironmentVariable(ConfigurationKeys.Traces.InstrumentationOptions.OracleMdaSetDbStatementForText, null);
+
+        // Cleanup OTLP env vars
+        foreach (var envVar in GetAllOtlpEnvVarNames())
+        {
+            Environment.SetEnvironmentVariable(envVar, null);
+        }
+    }
+
+    private static IEnumerable<string> GetAllOtlpEnvVarNames()
+    {
+        return typeof(AutoOtlpDefinitions)
+            .GetFields(BindingFlags.Public | BindingFlags.Static)
+            .Where(f => f.FieldType == typeof(string))
+            .Select(f => (string)f.GetValue(null)!)
+            .ToList() ?? Enumerable.Empty<string>();
+    }
+
+    private static void VerifyOtlpPrioritySettings(Func<(string Endpoint, string Protocol, string Timeout, string Headers), OtlpSettings?> setup)
+    {
+        var endpoint = "http://example.org/traces/v1";
+        var endpointValue = new Uri(endpoint);
+        var protocol = "http/protobuf";
+        var protocolValue = OtlpExportProtocol.HttpProtobuf;
+        var timeout = "1";
+        var timeoutValue = 1;
+        var headers = "key1=value1,key2=value2";
+
+        var settings = setup((endpoint, protocol, timeout, headers));
+
+        Assert.NotNull(settings);
+        Assert.Equal(endpointValue, settings.Endpoint);
+        Assert.Equal(protocolValue, settings.Protocol);
+        Assert.Equal(timeoutValue, settings.TimeoutMilliseconds);
+        Assert.Equal(headers, settings.Headers);
     }
 }
