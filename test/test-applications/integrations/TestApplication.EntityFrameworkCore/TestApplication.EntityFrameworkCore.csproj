@@ -7,5 +7,6 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" VersionOverride="$(LibraryVersion)" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" />
+    <PackageReference Include="System.Diagnostics.DiagnosticSource" Condition=" '$(TargetFramework)' == 'net8.0' " />
   </ItemGroup>
 </Project>
