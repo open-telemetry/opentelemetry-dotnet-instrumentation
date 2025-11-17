@@ -34,7 +34,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        test-tfm: [ net9.0, net8.0, net462 ]
+        test-tfm: [ net10.0, net9.0, net8.0, net462 ]
         machine: [ windows-2022, windows-2025, ubuntu-22.04, macos-14, ubuntu-22.04-arm ]
         exclude:
           - test-tfm: net462

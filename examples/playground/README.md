@@ -22,9 +22,9 @@ and run the playground application with auto instrumentation.
 ./examples/playground/run.sh
 ```
 
-| Env var         | Description                                               | Default  |
-|-----------------|-----------------------------------------------------------|----------|
-| `CONFIGURATION` | Build configuration. Possible values: `Debug`, `Release`. | `Debug`  |
-| `DOTNET`        | .NET version. Possible values: `net9.0`, `net8.0`.        | `net8.0` |
+| Env var         | Description                                                   | Default  |
+|-----------------|---------------------------------------------------------------|----------|
+| `CONFIGURATION` | Build configuration. Possible values: `Debug`, `Release`.     | `Debug`  |
+| `DOTNET`        | .NET version. Possible values: `net10.0`. `net9.0`, `net8.0`. | `net8.0` |
 
 The application should be hosted on <http://localhost:5000/`>.

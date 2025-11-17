@@ -186,16 +186,16 @@ public static partial class LibraryVersion
 #if DEFAULT_TEST_PACKAGE_VERSIONS
                 string.Empty,
 #else
-#if NET9_0 || NET8_0 || NET462
+#if NET10_0 || NET9_0 || NET8_0 || NET462
                 "2.19.0",
 #endif
-#if NET9_0 || NET8_0 || NET462
+#if NET10_0 || NET9_0 || NET8_0 || NET462
                 "2.30.0",
 #endif
-#if NET9_0 || NET8_0 || NET462
+#if NET10_0 || NET9_0 || NET8_0 || NET462
                 "3.0.0",
 #endif
-#if NET9_0 || NET8_0 || NET462
+#if NET10_0 || NET9_0 || NET8_0 || NET462
                 "3.4.3",
 #endif
 #endif
@@ -245,7 +245,7 @@ public static partial class LibraryVersion
                 string.Empty,
 #else
                 "8.0.5",
-#if NET9_0 || NET8_0
+#if NET10_0 || NET9_0 || NET8_0
                 "9.0.4",
 #endif
 #endif
@@ -263,10 +263,10 @@ public static partial class LibraryVersion
                 string.Empty,
 #else
                 "8.2.5",
-#if NET9_0 || NET8_0
+#if NET10_0 || NET9_0 || NET8_0
                 "9.1.0",
 #endif
-#if NET9_0 || NET8_0
+#if NET10_0 || NET9_0 || NET8_0
                 "9.2.7",
 #endif
 #endif
