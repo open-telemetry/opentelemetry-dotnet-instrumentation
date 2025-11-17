@@ -73,16 +73,17 @@ internal class LogSettings : Settings
     protected override void OnLoadFile(YamlConfiguration configuration)
     {
         var processors = configuration.LoggerProvider?.Processors;
-
         LogsEnabled = processors != null && processors.Count > 0;
         Processors = processors;
+
         IncludeFormattedMessage = configuration.LogsIncludeFormattedMessage;
 
-        EnabledInstrumentations = configuration.InstrumentationDevelopment?.DotNet?.Logs?.GetEnabledInstrumentations() ?? [];
+        var logs = configuration.InstrumentationDevelopment?.DotNet?.Logs;
+        EnabledInstrumentations = logs?.GetEnabledInstrumentations() ?? [];
 
         if (EnabledInstrumentations.Contains(LogInstrumentation.Log4Net))
         {
-            EnableLog4NetBridge = configuration.InstrumentationDevelopment?.DotNet?.Logs?.Log4Net?.BridgeEnabled ?? false;
+            EnableLog4NetBridge = logs?.Log4Net?.BridgeEnabled ?? false;
         }
     }
 

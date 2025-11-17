@@ -24,9 +24,7 @@ StubGenerator::StubGenerator(CorProfiler*            profiler,
 {
 }
 
-StubGenerator::~StubGenerator()
-{
-}
+StubGenerator::~StubGenerator() {}
 
 HRESULT StubGenerator::PatchProcessStartupHooks(const ModuleID module_id, const WSTRING& startup_hook_assembly_path)
 {
@@ -53,14 +51,14 @@ HRESULT StubGenerator::PatchProcessStartupHooks(const ModuleID module_id, const 
 }
 
 // Add at the start of System.StartupHookProvider::ProcessStartupHooks(string)
-// call to __DDLoaderFixup__::__DDPatchStartupHookValue__ passing the startupHooks argument by ref there.
+// call to __OTLoaderFixup__::__OTPatchStartupHookValue__ passing the startupHooks argument by ref there.
 HRESULT StubGenerator::ModifyProcessStartupHooks(const ModuleID module_id, mdMethodDef patch_startup_hook_method)
 {
     // Expects to be called on System.Private.CoreLib only
     // patch_startup_hook_method should be pre-injected in System.Private.CoreLib
     ComPtr<IUnknown> metadata_interfaces;
     auto             hr = m_pICorProfilerInfo->GetModuleMetaData(module_id, ofRead | ofWrite, IID_IMetaDataImport2,
-                                                     metadata_interfaces.GetAddressOf());
+                                                                 metadata_interfaces.GetAddressOf());
     if (FAILED(hr))
     {
         Logger::Warn("ModifyProcessStartupHooks: failed to get metadata interface for ", module_id);

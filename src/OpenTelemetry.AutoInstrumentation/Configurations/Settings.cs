@@ -54,13 +54,7 @@ internal abstract class Settings
     /// using the specified <see cref="YamlConfiguration"/> to initialize values.
     /// </summary>
     /// <param name="configuration">The <see cref="YamlConfiguration"/> to use when retrieving configuration values.</param>
-    protected virtual void OnLoadFile(YamlConfiguration configuration)
-    {
-        // TODO temporary fallback to env var configuration until we support all settings in yaml
-        // TODO make the method abstract when all settings are supported in yaml
-        var envVarConfiguration = new Configuration(configuration.FailFast, new EnvironmentConfigurationSource(configuration.FailFast));
-        OnLoadEnvVar(envVarConfiguration);
-    }
+    protected abstract void OnLoadFile(YamlConfiguration configuration);
 
     private static YamlConfiguration ReadYamlConfiguration()
     {
