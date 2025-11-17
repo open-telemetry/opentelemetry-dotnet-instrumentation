@@ -17,7 +17,10 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
   `OTEL_DOTNET_AUTO_SQLCLIENT_NETFX_ILREWRITE_ENABLED` environment variable.
 
 ### Changed
-- Setting `DOTNET_STARTUP_HOOKS` is now optional if the profiler is configured. If it is not set, the profiler looks for the startup hooks assembly and injects the configuration into the application.
+
+- Setting `DOTNET_STARTUP_HOOKS` is now optional if the .NET CLR profiler
+  is configured. If it is not set, the profiler looks for the startup hooks
+  assembly and injects the configuration into the application.
 
 #### Dependency updates
 
