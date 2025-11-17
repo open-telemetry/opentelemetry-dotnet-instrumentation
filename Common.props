@@ -8,11 +8,6 @@
     <NuGetAuditMode>all</NuGetAuditMode>
     <NuGetAuditLevel>low</NuGetAuditLevel>
   </PropertyGroup>
-
-  <!-- <PropertyGroup>
-    Temp, needed to compile with .NET10 SDK
-    <NoWarn>$(NoWarn);NU1510</NoWarn>
-  </PropertyGroup> -->
   
   <!-- StyleCop -->
   <ItemGroup>
