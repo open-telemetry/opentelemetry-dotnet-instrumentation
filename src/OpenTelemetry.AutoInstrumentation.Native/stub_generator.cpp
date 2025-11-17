@@ -20,20 +20,17 @@ namespace trace
 StubGenerator::StubGenerator(CorProfiler*            profiler,
                              ICorProfilerInfo7*      pICorProfilerInfo,
                              const AssemblyProperty& corAssemblyProperty)
-    : m_profiler(profiler)
-    , m_pICorProfilerInfo(pICorProfilerInfo)
-    , m_corAssemblyProperty(corAssemblyProperty)
+    : m_profiler(profiler), m_pICorProfilerInfo(pICorProfilerInfo), m_corAssemblyProperty(corAssemblyProperty)
 {
 }
-
 
 StubGenerator::~StubGenerator() {}
 
 HRESULT StubGenerator::PatchProcessStartupHooks(const ModuleID module_id, const WSTRING& startup_hook_assembly_path)
 {
-    mdTypeDef     fixup_type                = mdTokenNil;
-    mdMethodDef   patch_startup_hook_method = mdTokenNil;
-    HRESULT hr = GenerateHookFixup(module_id, &fixup_type, &patch_startup_hook_method, startup_hook_assembly_path);
+    mdTypeDef   fixup_type                = mdTokenNil;
+    mdMethodDef patch_startup_hook_method = mdTokenNil;
+    HRESULT     hr = GenerateHookFixup(module_id, &fixup_type, &patch_startup_hook_method, startup_hook_assembly_path);
 
     if (FAILED(hr))
     {
@@ -61,7 +58,7 @@ HRESULT StubGenerator::ModifyProcessStartupHooks(const ModuleID module_id, mdMet
     // patch_startup_hook_method should be pre-injected in System.Private.CoreLib
     ComPtr<IUnknown> metadata_interfaces;
     auto             hr = m_pICorProfilerInfo->GetModuleMetaData(module_id, ofRead | ofWrite, IID_IMetaDataImport2,
-                                                         metadata_interfaces.GetAddressOf());
+                                                                 metadata_interfaces.GetAddressOf());
     if (FAILED(hr))
     {
         Logger::Warn("ModifyProcessStartupHooks: failed to get metadata interface for ", module_id);
@@ -98,7 +95,8 @@ HRESULT StubGenerator::ModifyProcessStartupHooks(const ModuleID module_id, mdMet
             return hr;
         }
 
-        ILRewriter rewriter(m_pICorProfilerInfo, nullptr, module_id, system_startup_hook_provider_process_startup_hooks_token);
+        ILRewriter rewriter(m_pICorProfilerInfo, nullptr, module_id,
+                            system_startup_hook_provider_process_startup_hooks_token);
         hr = rewriter.Import();
 
         if (FAILED(hr))
@@ -138,8 +136,8 @@ HRESULT StubGenerator::ModifyProcessStartupHooks(const ModuleID module_id, mdMet
             TypeInfo     typeInfo{};
             WSTRING      methodName = WStr("ProcessStartupHooks");
             FunctionInfo caller(token, methodName, typeInfo, MethodSignature(), FunctionMethodSignature());
-            Logger::Info(
-                m_profiler->GetILCodes("*** ModifyProcessStartupHooks: Modified Code: ", &rewriter, caller, metadata_import));
+            Logger::Info(m_profiler->GetILCodes("*** ModifyProcessStartupHooks: Modified Code: ", &rewriter, caller,
+                                                metadata_import));
         }
     }
 
@@ -165,9 +163,9 @@ HRESULT StubGenerator::ModifyProcessStartupHooks(const ModuleID module_id, mdMet
 // }
 // clang-format on
 HRESULT StubGenerator::GenerateHookFixup(const ModuleID module_id,
-                                       mdTypeDef*     hook_fixup_type,
-                                       mdMethodDef*   patch_startup_hook_method,
-                                       const WSTRING& startup_hook_dll_name)
+                                         mdTypeDef*     hook_fixup_type,
+                                         mdMethodDef*   patch_startup_hook_method,
+                                         const WSTRING& startup_hook_dll_name)
 {
     const auto& module_info = GetModuleInfo(this->m_pICorProfilerInfo, module_id);
     if (!module_info.IsValid())
@@ -277,9 +275,9 @@ HRESULT StubGenerator::GenerateHookFixup(const ModuleID module_id,
         // Create a string representing a path separator (Unix = ":", Windows = ";")
         mdString path_separator_token;
         {
-            const WSTRING path_separator = ENV_VAR_PATH_SEPARATOR_STR;
-            LPCWSTR path_separator_str      = path_separator.c_str();
-            auto    path_separator_str_size = path_separator.length();
+            const WSTRING path_separator          = ENV_VAR_PATH_SEPARATOR_STR;
+            LPCWSTR       path_separator_str      = path_separator.c_str();
+            auto          path_separator_str_size = path_separator.length();
 
             hr = metadata_emit->DefineUserString(path_separator_str, (ULONG)path_separator_str_size,
                                                  &path_separator_token);
@@ -366,8 +364,8 @@ HRESULT StubGenerator::GenerateHookFixup(const ModuleID module_id,
         pNewInstr->m_opcode = CEE_STIND_REF;
         rewriter.InsertBefore(pFirstInstr, pNewInstr);
 
-        pNewInstr            = rewriter.NewILInstr();
-        pNewInstr->m_opcode  = CEE_RET;
+        pNewInstr           = rewriter.NewILInstr();
+        pNewInstr->m_opcode = CEE_RET;
         rewriter.InsertBefore(pFirstInstr, pNewInstr);
 
         // Replace the placeholder else label
@@ -432,7 +430,8 @@ HRESULT StubGenerator::GenerateHookFixup(const ModuleID module_id,
             TypeInfo     typeInfo{};
             WSTRING      methodName = WStr("__OTPatchStartupHookValue__");
             FunctionInfo caller(token, methodName, typeInfo, MethodSignature(), FunctionMethodSignature());
-            Logger::Info(this->m_profiler->GetILCodes("*** GenerateHookFixup: Modified Code: ", &rewriter, caller, metadata_import));
+            Logger::Info(this->m_profiler->GetILCodes("*** GenerateHookFixup: Modified Code: ", &rewriter, caller,
+                                                      metadata_import));
         }
 
         hr = rewriter.Export();

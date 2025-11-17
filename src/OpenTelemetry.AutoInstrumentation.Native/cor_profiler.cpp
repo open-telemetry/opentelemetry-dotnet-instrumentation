@@ -699,8 +699,9 @@ HRESULT STDMETHODCALLTYPE CorProfiler::ModuleLoadFinished(ModuleID module_id, HR
             WSTRING startup_hook_assembly_path = GetStartupHookPath(GetCurrentModuleFileName());
             if (startup_hook_assembly_path == EmptyWStr)
             {
-                FailProfiler(Info,
-                             "The required StartupHook assembly path could not be determined. No telemetry will be captured.");
+                FailProfiler(
+                    Info,
+                    "The required StartupHook assembly path could not be determined. No telemetry will be captured.");
             }
 
             Logger::Info("Patching ProcessStartupHooks with StartupHook assembly path: ", startup_hook_assembly_path);
