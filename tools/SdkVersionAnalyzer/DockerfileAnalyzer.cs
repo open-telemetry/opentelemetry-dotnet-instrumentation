@@ -46,6 +46,7 @@ internal static partial class DockerfileAnalyzer
     {
         string? net8SdkVersion = null;
         string? net9SdkVersion = null;
+        string? net10SdkVersion = null;
 
         var dockerfile = Dockerfile.Parse(content);
         var instruction = GetDotnetInstallingInstruction(dockerfile);
@@ -57,6 +58,7 @@ internal static partial class DockerfileAnalyzer
         //     && chmod +x ./dotnet-install.sh \
         //     && ./dotnet-install.sh -v 8.0.404 --install-dir /usr/share/dotnet --no-path \
         //     && ./dotnet-install.sh -v 9.0.100 --install-dir /usr/share/dotnet --no-path \
+        //     && ./dotnet-install.sh -v 10.0.100 --install-dir /usr/share/dotnet --no-path \
         //     && rm dotnet-install.sh
 
         if (instruction is not null)
@@ -73,6 +75,10 @@ internal static partial class DockerfileAnalyzer
                 {
                     net9SdkVersion = extractedSdkVersion;
                 }
+                else if (VersionComparer.IsNet10Version(extractedSdkVersion))
+                {
+                    net10SdkVersion = extractedSdkVersion;
+                }
             }
         }
 
@@ -86,10 +92,18 @@ internal static partial class DockerfileAnalyzer
         if (IsDotnetSdkImage(imageName))
         {
             var (sdkVersion, _) = GetSdkVersionAndSuffix(imageName);
-            net9SdkVersion = sdkVersion;
+
+            if (VersionComparer.IsNet9Version(sdkVersion))
+            {
+                net9SdkVersion = sdkVersion;
+            }
+            else if (VersionComparer.IsNet10Version(sdkVersion))
+            {
+                net10SdkVersion = sdkVersion;
+            }
         }
 
-        return VersionComparer.CompareVersions(expectedDotnetSdkVersion, net8SdkVersion, net9SdkVersion);
+        return VersionComparer.CompareVersions(expectedDotnetSdkVersion, net8SdkVersion, net9SdkVersion, net10SdkVersion);
     }
 
     private static string GetModifiedImageName(DotnetSdkVersion requestedDotnetSdkVersion, ImageName imageName)
@@ -136,6 +150,11 @@ internal static partial class DockerfileAnalyzer
         if (VersionComparer.IsNet9Version(oldVersion))
         {
             return requestedDotnetSdkVersion.Net9SdkVersion!;
+        }
+
+        if (VersionComparer.IsNet10Version(oldVersion))
+        {
+            return requestedDotnetSdkVersion.Net10SdkVersion!;
         }
 
         return oldVersion;
