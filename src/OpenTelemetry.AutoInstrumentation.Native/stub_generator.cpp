@@ -51,7 +51,7 @@ HRESULT StubGenerator::PatchProcessStartupHooks(const ModuleID module_id, const 
 }
 
 // Add at the start of System.StartupHookProvider::ProcessStartupHooks(string)
-// call to __DDLoaderFixup__::__DDPatchStartupHookValue__ passing the startupHooks argument by ref there.
+// call to __OTLoaderFixup__::__OTPatchStartupHookValue__ passing the startupHooks argument by ref there.
 HRESULT StubGenerator::ModifyProcessStartupHooks(const ModuleID module_id, mdMethodDef patch_startup_hook_method)
 {
     // Expects to be called on System.Private.CoreLib only
