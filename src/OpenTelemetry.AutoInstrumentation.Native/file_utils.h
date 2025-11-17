@@ -15,7 +15,7 @@
 #define ENV_VAR_PATH_SEPARATOR WStr(';')
 #define ENV_VAR_PATH_SEPARATOR_STR WStr(";")
 #else
-#define PATH_TO_WSTRING(path_expr) ToWSTRING((path_expr).string())
+#define PATH_TO_WSTRING(path_expr) (path_expr).u16string()
 #define ENV_VAR_PATH_SEPARATOR WStr(':')
 #define ENV_VAR_PATH_SEPARATOR_STR WStr(":")
 #endif

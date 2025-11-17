@@ -125,36 +125,6 @@ inline WSTRING GetCurrentModuleFileName()
     return EmptyWStr;
 }
 
-inline WSTRING GetHomePath()
-{
-    std::filesystem::path home_path;
-
-    // First choice is the environment variable
-    const auto env_home_path = GetEnvironmentValue(environment::profiler_home_path);
-    if (!env_home_path.empty())
-    {
-        home_path = std::filesystem::absolute(env_home_path);
-    }
-    else
-    {
-        // Without a home path set, try to use the offset from the profiler assembly.
-        const auto module_filename = GetCurrentModuleFileName();
-        if (module_filename.empty())
-        {
-            return EmptyWStr;
-        }
-
-        home_path = std::filesystem::path(module_filename).parent_path();
-    }
-
-    if (!std::filesystem::exists(home_path))
-    {
-        return EmptyWStr;
-    }
-
-    return PATH_TO_WSTRING(home_path);
-}
-
 } // namespace trace
 
 #endif // OTEL_CLR_PROFILER_PAL_H_

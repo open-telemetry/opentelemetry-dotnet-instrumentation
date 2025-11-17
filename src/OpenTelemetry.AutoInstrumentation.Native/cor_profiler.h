@@ -44,6 +44,7 @@ private:
     std::mutex definitions_ids_lock_;
 
     // Startup helper variables
+    WSTRING home_path;
     bool first_jit_compilation_completed = false;
     bool startup_fix_required            = false;
 

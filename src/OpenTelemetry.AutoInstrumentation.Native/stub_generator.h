@@ -36,9 +36,9 @@ public:
 private:
     HRESULT ModifyProcessStartupHooks(const ModuleID module_id, mdMethodDef patch_startup_hook_method);
     HRESULT GenerateHookFixup(const ModuleID module_id,
+                              const WSTRING& startup_hook_dll_name,
                               mdTypeDef*     hook_fixup_type,
-                              mdMethodDef*   patch_startup_hook_method,
-                              const WSTRING& startup_hook_dll_name);
+                              mdMethodDef*   patch_startup_hook_method);
 };
 
 } // namespace trace
