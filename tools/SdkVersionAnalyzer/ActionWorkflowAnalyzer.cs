@@ -79,13 +79,14 @@ internal static class ActionWorkflowAnalyzer
     private static Scalar GetNewDotnetVersionScalar(DotnetSdkVersion newDotnetSdkVersion)
     {
         const char separator = '\n';
-        var val = $"{newDotnetSdkVersion.Net8SdkVersion!}{separator}{newDotnetSdkVersion.Net9SdkVersion!}{separator}";
+        var val = $"{newDotnetSdkVersion.Net8SdkVersion!}{separator}{newDotnetSdkVersion.Net9SdkVersion!}{separator}{newDotnetSdkVersion.Net10SdkVersion!}";
 
         // Use ctor with default values, apart from ScalarStyle.
         // Use ScalarStyle.Literal to get dotnet-version with value similar to below:
         //  dotnet-version: |
         //    8.0.404
         //    9.0.100
+        //    10.0.100
 
         return new Scalar(AnchorName.Empty, TagName.Empty, val, ScalarStyle.Literal, true, true, Mark.Empty, Mark.Empty);
     }
@@ -152,9 +153,11 @@ internal static class ActionWorkflowAnalyzer
         // dotnet-version: |
         //   8.0.404
         //   9.0.100
+        //   10.0.100
 
         string? sdk8Version = null;
         string? sdk9Version = null;
+        string? sdk10Version = null;
 
         foreach (var version in dotnetVersionNode.ToString().Split())
         {
@@ -167,11 +170,16 @@ internal static class ActionWorkflowAnalyzer
             {
                 sdk9Version = version;
             }
+
+            if (VersionComparer.IsNet10Version(version))
+            {
+                sdk10Version = version;
+            }
         }
 
         if (sdk8Version is not null || sdk9Version is not null)
         {
-            return new DotnetSdkVersion(sdk8Version, sdk9Version);
+            return new DotnetSdkVersion(sdk8Version, sdk9Version, sdk10Version);
         }
 
         return null;
