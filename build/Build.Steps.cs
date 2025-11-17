@@ -58,7 +58,7 @@ partial class Build
     };
 
     private static readonly IEnumerable<TargetFramework> TestFrameworks = TargetFrameworks
-        .Concat(TargetFramework.NET9_0);
+        .Concat(TargetFramework.NET9_0, TargetFramework.NET10_0);
 
     Target CreateRequiredDirectories => _ => _
         .Unlisted()
@@ -662,9 +662,9 @@ partial class Build
                 .CombineWith(TestFrameworks.ExceptNetFramework(), (p, framework) => p
                 .SetFramework(framework)
                 // Additional-deps probes the directory using SemVer format.
-                // Example: For netcoreapp3.1 framework, additional-deps uses 3.1.0 or 3.1.1 and so on.
+                // Example: For net8.0, additional-deps uses 8.0.0.
                 // Major and Minor version are extracted from framework and default value of 0 is appended for patch.
-                .SetOutput(AdditionalDepsDirectory / "shared" / "Microsoft.NETCore.App" / framework.ToString().Substring(framework.ToString().Length - 3) + ".0")));
+                .SetOutput(AdditionalDepsDirectory / "shared" / "Microsoft.NETCore.App" / framework.ToString().Substring("net".Length) + ".0")));
 
             AdditionalDepsDirectory.GlobFiles("**/*deps.json")
                 .ForEach(file =>
@@ -686,9 +686,10 @@ partial class Build
                     // To allow roll forward for applications, like Roslyn, that target one tfm
                     // but have a later runtime move the libraries under the original tfm folder
                     // to the latest one.
-                    if (folderRuntimeName == TargetFramework.NET8_0 || folderRuntimeName == TargetFramework.NET9_0)
+                    if (folderRuntimeName == TargetFramework.NET8_0 || folderRuntimeName == TargetFramework.NET9_0 || folderRuntimeName == TargetFramework.NET10_0)
                     {
-                        depsJson.RollFrameworkForward(TargetFramework.NET8_0, TargetFramework.NET9_0, architectureStores);
+                        depsJson.RollFrameworkForward(TargetFramework.NET8_0, TargetFramework.NET10_0, architectureStores);
+                        depsJson.RollFrameworkForward(TargetFramework.NET9_0, TargetFramework.NET10_0, architectureStores);
                     }
 
                     // Write the updated deps.json file.

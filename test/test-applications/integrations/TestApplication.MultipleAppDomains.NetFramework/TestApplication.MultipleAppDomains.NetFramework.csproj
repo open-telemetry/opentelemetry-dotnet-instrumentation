@@ -3,9 +3,4 @@
   <ItemGroup>
     <ProjectReference Include="..\dependency-libs\TestLibrary.InstrumentationTarget\TestLibrary.InstrumentationTarget.csproj" />
   </ItemGroup>
-
-  <ItemGroup>
-    <!-- System.Private.Uri is indirect reference. Bumping it to mitigate https://github.com/advisories/GHSA-xhfc-gr8f-ffwc -->
-    <PackageReference Include="System.Private.Uri" />
-  </ItemGroup>
 </Project>

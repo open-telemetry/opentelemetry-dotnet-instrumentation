@@ -9,6 +9,7 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 
 ### Added
 
+- Support for .NET 10.
 - Experimental support for file-based configuration.
 - Experimental support for configuration based instrumentation.
 - IL rewrite for SqlCommand on .NET Framework to ensure `CommandText` is
