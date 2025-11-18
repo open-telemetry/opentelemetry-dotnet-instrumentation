@@ -41,6 +41,12 @@ public class Program
         // Trigger authorization metrics for .NET 10+
         httpClient.GetAsync($"{dnsAddress}/protected").Wait();
 
+#if NET10_0_OR_GREATER
+        // Trigger Blazor Components metrics for .NET 10+
+        // This will trigger Microsoft.AspNetCore.Components and Microsoft.AspNetCore.Components.Server.Circuits metrics
+        httpClient.GetAsync($"{dnsAddress}/blazor").Wait();
+#endif
+
         var hubConnection = new HubConnectionBuilder().WithUrl($"{dnsAddress}/signalr").Build();
         hubConnection.StartAsync().Wait();
         hubConnection.StopAsync().Wait();

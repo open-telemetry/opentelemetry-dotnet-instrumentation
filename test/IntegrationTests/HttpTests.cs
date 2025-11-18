@@ -140,9 +140,9 @@ public class HttpTests : TestHelper
         collector.Expect("Microsoft.AspNetCore.RateLimiting");
 
 #if NET10_0_OR_GREATER
-        collector.Expect("Microsoft.AspNetCore.Components"); // missing
+        collector.Expect("Microsoft.AspNetCore.Components");
         collector.Expect("Microsoft.AspNetCore.Components.Server.Circuits"); // missing
-        collector.Expect("Microsoft.AspNetCore.Components.Lifecycle"); // missing
+        collector.Expect("Microsoft.AspNetCore.Components.Lifecycle");
         collector.Expect("Microsoft.AspNetCore.Authorization");
         collector.Expect("Microsoft.AspNetCore.Authentication");
         collector.Expect("Microsoft.AspNetCore.Identity"); // missing

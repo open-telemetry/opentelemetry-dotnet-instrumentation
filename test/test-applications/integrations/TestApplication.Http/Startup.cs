@@ -37,6 +37,12 @@ public class Startup
                 policy.RequireAuthenticatedUser();
             });
         });
+
+#if NET10_0_OR_GREATER
+        // Add Blazor Server to enable Components metrics
+        services.AddRazorPages();
+        services.AddServerSideBlazor();
+#endif
     }
 
     // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -48,10 +54,17 @@ public class Startup
             .UseExceptionHandler(new ExceptionHandlerOptions { ExceptionHandler = _ => Task.CompletedTask }) // together with call to /exception enables metrics for Microsoft.AspNetCore.Diagnostics for .NET8+
             .UseRateLimiter() // enables metrics for Microsoft.AspNetCore.RateLimiting in .NET8+
             .UseAuthorization() // enables metrics for Microsoft.AspNetCore.Authorization in .NET10+
-            .UseEndpoints(x => x.MapHub<TestHub>("/signalr")) // together with connection to SignalR Hub enables metrics for Microsoft.AspNetCore.Http.Connections for .NET8
-            .Map(
-                "/test",
-                configuration => configuration.Run(async context =>
+            .UseEndpoints(endpoints =>
+            {
+                endpoints.MapHub<TestHub>("/signalr"); // together with connection to SignalR Hub enables metrics for Microsoft.AspNetCore.Http.Connections for .NET8
+#if NET10_0_OR_GREATER
+                endpoints.MapBlazorHub(); // enables metrics for Microsoft.AspNetCore.Components.Server.Circuits in .NET10+
+                endpoints.MapFallbackToPage("/_Host"); // enables metrics for Microsoft.AspNetCore.Components in .NET10+
+#endif
+
+                endpoints.Map(
+                    "/test",
+                    async context =>
                 {
                     using (var activity = MyActivitySource.StartActivity("manual span"))
                     {
@@ -63,10 +76,9 @@ public class Startup
                     context.Response.Headers.Append("Custom-Response-Test-Header3", "Test-Value3");
 
                     await context.Response.WriteAsync("Pong");
-                }))
-            .Map(
-                "/protected",
-                configuration => configuration.Run(async context =>
+                });
+
+                endpoints.Map("/protected", async context =>
                 {
                     var authorizationService = context.RequestServices.GetRequiredService<IAuthorizationService>();
                     var policy = new AuthorizationPolicyBuilder().RequireAuthenticatedUser().Build();
@@ -81,10 +93,9 @@ public class Startup
                         context.Response.StatusCode = 403;
                         await context.Response.WriteAsync("Forbidden");
                     }
-                }))
-            .Map(
-                "/login",
-                configuration => configuration.Run(async context =>
+                });
+
+                endpoints.Map("/login", async context =>
                 {
                     var authenticationService = context.RequestServices.GetRequiredService<IAuthenticationService>();
                     var claimsPrincipal = new ClaimsPrincipal(
@@ -94,18 +105,19 @@ public class Startup
                     var authProperties = new AuthenticationProperties();
                     await authenticationService.SignInAsync(context, CookieAuthenticationDefaults.AuthenticationScheme, claimsPrincipal, authProperties);
                     await context.Response.WriteAsync("Logged in");
-                }))
-            .Map(
-                "/logout",
-                configuration => configuration.Run(async context =>
+                });
+
+                endpoints.Map("/logout", async context =>
                 {
                     var authenticationService = context.RequestServices.GetRequiredService<IAuthenticationService>();
                     var authProperties = new AuthenticationProperties();
                     await authenticationService.SignOutAsync(context, CookieAuthenticationDefaults.AuthenticationScheme, authProperties);
                     await context.Response.WriteAsync("Logged out");
-                }))
-            .Map(
-                "/exception",
-                configuration => configuration.Run(_ => throw new InvalidOperationException("Just to throw something")));
+                });
+
+                endpoints.Map(
+                    "/exception",
+                    _ => throw new InvalidOperationException("Just to throw something"));
+        });
     }
 }
