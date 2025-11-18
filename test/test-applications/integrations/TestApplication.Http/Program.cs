@@ -33,6 +33,14 @@ public class Program
         httpClient.DefaultRequestHeaders.Add("Custom-Request-Test-Header3", "Test-Value3");
         httpClient.GetAsync($"{dnsAddress}/test").Wait();
         httpClient.GetAsync($"{dnsAddress}/exception").Wait();
+
+        // Trigger authentication metrics for .NET 10+
+        httpClient.GetAsync($"{dnsAddress}/login").Wait();
+        httpClient.GetAsync($"{dnsAddress}/logout").Wait();
+
+        // Trigger authorization metrics for .NET 10+
+        httpClient.GetAsync($"{dnsAddress}/protected").Wait();
+
         var hubConnection = new HubConnectionBuilder().WithUrl($"{dnsAddress}/signalr").Build();
         hubConnection.StartAsync().Wait();
         hubConnection.StopAsync().Wait();

@@ -143,8 +143,8 @@ public class HttpTests : TestHelper
         collector.Expect("Microsoft.AspNetCore.Components"); // missing
         collector.Expect("Microsoft.AspNetCore.Components.Server.Circuits"); // missing
         collector.Expect("Microsoft.AspNetCore.Components.Lifecycle"); // missing
-        collector.Expect("Microsoft.AspNetCore.Authorization"); // missing
-        collector.Expect("Microsoft.AspNetCore.Authentication"); // missing
+        collector.Expect("Microsoft.AspNetCore.Authorization");
+        collector.Expect("Microsoft.AspNetCore.Authentication");
         collector.Expect("Microsoft.AspNetCore.Identity"); // missing
         collector.Expect("Microsoft.AspNetCore.MemoryPool");
 #endif

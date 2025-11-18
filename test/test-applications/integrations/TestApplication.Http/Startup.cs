@@ -2,6 +2,10 @@
 // SPDX-License-Identifier: Apache-2.0
 
 using System.Diagnostics;
+using System.Security.Claims;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authorization;
 
 namespace TestApplication.Http;
 
@@ -19,6 +23,20 @@ public class Startup
     // This method gets called by the runtime. Use this method to add services to the container.
     public void ConfigureServices(IServiceCollection services)
     {
+        services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+            .AddCookie(CookieAuthenticationDefaults.AuthenticationScheme, options =>
+            {
+                options.LoginPath = "/login";
+                options.LogoutPath = "/logout";
+            });
+
+        services.AddAuthorization(options =>
+        {
+            options.AddPolicy("TestPolicy", policy =>
+            {
+                policy.RequireAuthenticatedUser();
+            });
+        });
     }
 
     // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -26,8 +44,10 @@ public class Startup
     {
         app
             .UseRouting() // enables metrics for Microsoft.AspNetCore.Routing in .NET8+
+            .UseAuthentication() // enables metrics for Microsoft.AspNetCore.Authentication in .NET10+
             .UseExceptionHandler(new ExceptionHandlerOptions { ExceptionHandler = _ => Task.CompletedTask }) // together with call to /exception enables metrics for Microsoft.AspNetCore.Diagnostics for .NET8+
             .UseRateLimiter() // enables metrics for Microsoft.AspNetCore.RateLimiting in .NET8+
+            .UseAuthorization() // enables metrics for Microsoft.AspNetCore.Authorization in .NET10+
             .UseEndpoints(x => x.MapHub<TestHub>("/signalr")) // together with connection to SignalR Hub enables metrics for Microsoft.AspNetCore.Http.Connections for .NET8
             .Map(
                 "/test",
@@ -43,6 +63,46 @@ public class Startup
                     context.Response.Headers.Append("Custom-Response-Test-Header3", "Test-Value3");
 
                     await context.Response.WriteAsync("Pong");
+                }))
+            .Map(
+                "/protected",
+                configuration => configuration.Run(async context =>
+                {
+                    var authorizationService = context.RequestServices.GetRequiredService<IAuthorizationService>();
+                    var policy = new AuthorizationPolicyBuilder().RequireAuthenticatedUser().Build();
+                    var result = await authorizationService.AuthorizeAsync(context.User, policy);
+
+                    if (result.Succeeded)
+                    {
+                        await context.Response.WriteAsync("Protected");
+                    }
+                    else
+                    {
+                        context.Response.StatusCode = 403;
+                        await context.Response.WriteAsync("Forbidden");
+                    }
+                }))
+            .Map(
+                "/login",
+                configuration => configuration.Run(async context =>
+                {
+                    var authenticationService = context.RequestServices.GetRequiredService<IAuthenticationService>();
+                    var claimsPrincipal = new ClaimsPrincipal(
+                        new ClaimsIdentity(
+                            new[] { new Claim(ClaimTypes.Name, "TestUser") },
+                            CookieAuthenticationDefaults.AuthenticationScheme));
+                    var authProperties = new AuthenticationProperties();
+                    await authenticationService.SignInAsync(context, CookieAuthenticationDefaults.AuthenticationScheme, claimsPrincipal, authProperties);
+                    await context.Response.WriteAsync("Logged in");
+                }))
+            .Map(
+                "/logout",
+                configuration => configuration.Run(async context =>
+                {
+                    var authenticationService = context.RequestServices.GetRequiredService<IAuthenticationService>();
+                    var authProperties = new AuthenticationProperties();
+                    await authenticationService.SignOutAsync(context, CookieAuthenticationDefaults.AuthenticationScheme, authProperties);
+                    await context.Response.WriteAsync("Logged out");
                 }))
             .Map(
                 "/exception",
