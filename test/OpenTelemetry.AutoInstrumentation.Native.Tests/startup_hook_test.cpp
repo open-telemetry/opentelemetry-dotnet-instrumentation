@@ -61,7 +61,8 @@ TEST(StartupHookTest, StartupHookIsInvalidWhenNotInTheCorrectLocation)
 TEST(StartupHookTest, StartupHookIsValidWhenMultipleStartupHooksDefined)
 {
     const auto startup_hooks = std::vector<WSTRING>{
-        (base_path / "folder1" / "StartupHook.dll").wstring(), otel_startup_hook_path,
+        (base_path / "folder1" / "StartupHook.dll").wstring(),
+        otel_startup_hook_path,
         (base_path / "folder2" / "StartupHook.dll").wstring(),
     };
 

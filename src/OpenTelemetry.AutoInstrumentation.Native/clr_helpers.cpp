@@ -58,9 +58,9 @@ AssemblyInfo GetAssemblyInfo(ICorProfilerInfo7* info, const AssemblyID& assembly
 
     if (FAILED(hr) || app_domain_name_len == 0)
     {
-        Logger::Warn("Error loading the appdomain for assembly: ", assembly_id, " [AssemblyName=",
-                     WSTRING(assembly_name), ", AssemblyLength=", assembly_name_len, ", HRESULT=0x", std::setfill('0'),
-                     std::setw(8), std::hex, hr, ", AppDomainId=", app_domain_id, "]");
+        Logger::Warn("Error loading the appdomain for assembly: ", assembly_id,
+                     " [AssemblyName=", WSTRING(assembly_name), ", AssemblyLength=", assembly_name_len, ", HRESULT=0x",
+                     std::setfill('0'), std::setw(8), std::hex, hr, ", AppDomainId=", app_domain_id, "]");
         return {};
     }
 
@@ -205,7 +205,7 @@ ModuleInfo GetModuleInfo(ICorProfilerInfo7* info, const ModuleID& module_id)
     AssemblyID    assembly_id  = 0;
     DWORD         module_flags = 0;
     const HRESULT hr           = info->GetModuleInfo2(module_id, &base_load_address, module_path_size, &module_path_len,
-                                            module_path, &assembly_id, &module_flags);
+                                                      module_path, &assembly_id, &module_flags);
     if (FAILED(hr) || module_path_len == 0)
     {
         return {};
@@ -986,8 +986,8 @@ bool FindTypeDefByName(const trace::WSTRING            instrumentationTargetMeth
             // This can happen between .NET framework and .NET core, not all apis are
             // available in both. Eg: WinHttpHandler, CurlHandler, and some methods in
             // System.Data
-            Logger::Debug("Can't load the parent TypeDef: ", nameParts[0], " for nested class: ",
-                          instrumentationTargetMethodTypeName, ", Module: ", assemblyName);
+            Logger::Debug("Can't load the parent TypeDef: ", nameParts[0],
+                          " for nested class: ", instrumentationTargetMethodTypeName, ", Module: ", assemblyName);
             return false;
         }
         instrumentedMethodTypeName = nameParts[1];

@@ -197,8 +197,8 @@ HRESULT STDMETHODCALLTYPE CorProfiler::Initialize(IUnknown* cor_profiler_info_un
 
     auto work_offloader = std::make_shared<RejitWorkOffloader>(this->info_);
 
-    rejit_handler = info12 != nullptr ? std::make_shared<RejitHandler>(info12, work_offloader)
-                                      : std::make_shared<RejitHandler>(this->info_, work_offloader);
+    rejit_handler                   = info12 != nullptr ? std::make_shared<RejitHandler>(info12, work_offloader)
+                                                        : std::make_shared<RejitHandler>(this->info_, work_offloader);
     tracer_integration_preprocessor = std::make_unique<TracerRejitPreprocessor>(rejit_handler, work_offloader);
 
     DWORD event_mask = COR_PRF_DISABLE_TRANSPARENCY_CHECKS_UNDER_FULL_TRUST | COR_PRF_MONITOR_MODULE_LOADS |
@@ -321,7 +321,7 @@ HRESULT STDMETHODCALLTYPE CorProfiler::AssemblyLoadFinished(AssemblyID assembly_
 
         ComPtr<IUnknown> metadata_interfaces;
         auto             hr = this->info_->GetModuleMetaData(assembly_info.manifest_module_id, ofRead | ofWrite,
-                                                 IID_IMetaDataImport2, metadata_interfaces.GetAddressOf());
+                                                             IID_IMetaDataImport2, metadata_interfaces.GetAddressOf());
         if (FAILED(hr))
         {
             Logger::Warn("AssemblyLoadFinished failed to get metadata interface for module id ",
@@ -406,8 +406,8 @@ void CorProfiler::RedirectAssemblyReferences(const ComPtr<IMetaDataAssemblyImpor
             const auto wsz_name = WSTRING(name);
             if (Logger::IsDebugEnabled())
             {
-                Logger::Debug("RedirectAssemblyReferences: AssemblyRef for [", wsz_name, "] version=",
-                              AssemblyVersionStr(assembly_metadata));
+                Logger::Debug("RedirectAssemblyReferences: AssemblyRef for [", wsz_name,
+                              "] version=", AssemblyVersionStr(assembly_metadata));
             }
 
             const auto found_redirect = assembly_version_redirect_map_current_framework_->find(wsz_name);
@@ -422,8 +422,9 @@ void CorProfiler::RedirectAssemblyReferences(const ComPtr<IMetaDataAssemblyImpor
             if (version_comparison > 0)
             {
                 // Redirection was a higher version, let's proceed with the redirection
-                Logger::Info("RedirectAssemblyReferences: redirecting [", wsz_name, "] from_version=",
-                             AssemblyVersionStr(assembly_metadata), " to_version=", redirect.VersionStr(),
+                Logger::Info("RedirectAssemblyReferences: redirecting [", wsz_name,
+                             "] from_version=", AssemblyVersionStr(assembly_metadata),
+                             " to_version=", redirect.VersionStr(),
                              " previous_redirects=", redirect.ulRedirectionCount);
                 assembly_metadata.usMajorVersion   = redirect.usMajorVersion;
                 assembly_metadata.usMinorVersion   = redirect.usMinorVersion;
@@ -447,8 +448,9 @@ void CorProfiler::RedirectAssemblyReferences(const ComPtr<IMetaDataAssemblyImpor
                 // No need to redirect since it is the same assembly version on the ref and on the map
                 if (Logger::IsDebugEnabled())
                 {
-                    Logger::Debug("RedirectAssemblyReferences: same version for [", wsz_name, "] version=",
-                                  redirect.VersionStr(), " previous_redirects=", redirect.ulRedirectionCount);
+                    Logger::Debug("RedirectAssemblyReferences: same version for [", wsz_name,
+                                  "] version=", redirect.VersionStr(),
+                                  " previous_redirects=", redirect.ulRedirectionCount);
                 }
             }
             else
@@ -460,9 +462,9 @@ void CorProfiler::RedirectAssemblyReferences(const ComPtr<IMetaDataAssemblyImpor
                 {
                     // Redirection was not applied yet use the higher version. Also increment the redirection
                     // count to indicate that this version was already used.
-                    Logger::Info("RedirectAssemblyReferences: redirection update for [", wsz_name, "] to_version=",
-                                 AssemblyVersionStr(assembly_metadata), " previous_version_redirection=",
-                                 redirect.VersionStr());
+                    Logger::Info("RedirectAssemblyReferences: redirection update for [", wsz_name,
+                                 "] to_version=", AssemblyVersionStr(assembly_metadata),
+                                 " previous_version_redirection=", redirect.VersionStr());
                     redirect.usMajorVersion   = assembly_metadata.usMajorVersion;
                     redirect.usMinorVersion   = assembly_metadata.usMinorVersion;
                     redirect.usBuildNumber    = assembly_metadata.usBuildNumber;
@@ -475,8 +477,8 @@ void CorProfiler::RedirectAssemblyReferences(const ComPtr<IMetaDataAssemblyImpor
                     // So it is possible that nothing will happen but we can't be sure. Using higher versions on
                     // the OpenTelemetry.AutoInstrumentation dependencies minimizes the chances of hitting this code
                     // path.
-                    Logger::Error("RedirectAssemblyReferences: AssemblyRef [", wsz_name, "] version=",
-                                  AssemblyVersionStr(assembly_metadata),
+                    Logger::Error("RedirectAssemblyReferences: AssemblyRef [", wsz_name,
+                                  "] version=", AssemblyVersionStr(assembly_metadata),
                                   " has a higher version than an earlier applied redirection to version=",
                                   redirect.VersionStr());
                 }
@@ -507,10 +509,11 @@ void CorProfiler::RewritingPInvokeMaps(const ModuleMetadata& module_metadata, co
         if (SUCCEEDED(hr))
         {
             // Enumerate all methods inside the native methods type with the PInvokes
-            Enumerator<mdMethodDef> enumMethods = Enumerator<mdMethodDef>(
-                [metadata_import, nativeMethodsTypeDef](HCORENUM* ptr, mdMethodDef arr[], ULONG max, ULONG* cnt)
-                    -> HRESULT { return metadata_import->EnumMethods(ptr, nativeMethodsTypeDef, arr, max, cnt); },
-                [metadata_import](HCORENUM ptr) -> void { metadata_import->CloseEnum(ptr); });
+            Enumerator<mdMethodDef> enumMethods = Enumerator<
+                mdMethodDef>([metadata_import, nativeMethodsTypeDef](HCORENUM* ptr, mdMethodDef arr[], ULONG max,
+                                                                     ULONG* cnt) -> HRESULT
+                             { return metadata_import->EnumMethods(ptr, nativeMethodsTypeDef, arr, max, cnt); },
+                             [metadata_import](HCORENUM ptr) -> void { metadata_import->CloseEnum(ptr); });
 
             EnumeratorIterator<mdMethodDef> enumIterator = enumMethods.begin();
             while (enumIterator != enumMethods.end())
@@ -639,7 +642,7 @@ HRESULT STDMETHODCALLTYPE CorProfiler::ModuleLoadFinished(ModuleID module_id, HR
 
         ComPtr<IUnknown> metadata_interfaces;
         auto             hr = this->info_->GetModuleMetaData(module_id, ofRead | ofWrite, IID_IMetaDataImport2,
-                                                 metadata_interfaces.GetAddressOf());
+                                                             metadata_interfaces.GetAddressOf());
 
         // Get the IMetaDataAssemblyImport interface to get metadata from the
         // managed assembly
@@ -786,7 +789,7 @@ HRESULT STDMETHODCALLTYPE CorProfiler::ModuleLoadFinished(ModuleID module_id, HR
     {
         ComPtr<IUnknown> metadata_interfaces;
         auto             hr = this->info_->GetModuleMetaData(module_id, ofRead | ofWrite, IID_IMetaDataImport2,
-                                                 metadata_interfaces.GetAddressOf());
+                                                             metadata_interfaces.GetAddressOf());
 
         if (FAILED(hr))
         {
@@ -1039,8 +1042,8 @@ HRESULT STDMETHODCALLTYPE CorProfiler::JITInlining(FunctionID callerId, Function
     if (is_attached_ && rejit_handler != nullptr &&
         rejit_handler->HasModuleAndMethod(calleeModuleId, calleFunctionToken))
     {
-        Logger::Debug("*** JITInlining: Inlining disabled for [ModuleId=", calleeModuleId, ", MethodDef=",
-                      TokenStr(&calleFunctionToken), "]");
+        Logger::Debug("*** JITInlining: Inlining disabled for [ModuleId=", calleeModuleId,
+                      ", MethodDef=", TokenStr(&calleFunctionToken), "]");
         *pfShouldInline = false;
     }
 
@@ -1208,8 +1211,9 @@ void CorProfiler::ConfigureContinuousProfiler(bool         threadSamplingEnabled
                                               unsigned int selectedThreadsSamplingInterval)
 {
     Logger::Info("ConfigureContinuousProfiler: thread sampling enabled: ", threadSamplingEnabled,
-                 ", thread sampling interval: ", threadSamplingInterval, ", allocationSamplingEnabled: ",
-                 allocationSamplingEnabled, ", max memory samples per minute: ", maxMemorySamplesPerMinute,
+                 ", thread sampling interval: ", threadSamplingInterval,
+                 ", allocationSamplingEnabled: ", allocationSamplingEnabled,
+                 ", max memory samples per minute: ", maxMemorySamplesPerMinute,
                  ", selected threads sampling interval: ", selectedThreadsSamplingInterval);
 
     const bool selectiveSamplingConfigured = selectedThreadsSamplingInterval != 0;
@@ -1338,8 +1342,8 @@ HRESULT STDMETHODCALLTYPE CorProfiler::GetAssemblyReferences(const WCHAR*       
     {
         if (assembly_name.rfind(skip_assembly_pattern, 0) == 0)
         {
-            Logger::Debug("GetAssemblyReferences skipping module by pattern: Name=", assembly_name, " Path=",
-                          wszAssemblyPath);
+            Logger::Debug("GetAssemblyReferences skipping module by pattern: Name=", assembly_name,
+                          " Path=", wszAssemblyPath);
             return S_OK;
         }
     }
@@ -1348,8 +1352,8 @@ HRESULT STDMETHODCALLTYPE CorProfiler::GetAssemblyReferences(const WCHAR*       
     {
         if (assembly_name == skip_assembly)
         {
-            Logger::Debug("GetAssemblyReferences skipping known assembly: Name=", assembly_name, " Path=",
-                          wszAssemblyPath);
+            Logger::Debug("GetAssemblyReferences skipping known assembly: Name=", assembly_name,
+                          " Path=", wszAssemblyPath);
             return S_OK;
         }
     }
@@ -1456,8 +1460,8 @@ HRESULT STDMETHODCALLTYPE CorProfiler::JITCompilationStartedOnNetFramework(Funct
     const auto& assemblyImport = metadataInterfaces.As<IMetaDataAssemblyImport>(IID_IMetaDataAssemblyImport);
     const auto& assemblyEmit   = metadataInterfaces.As<IMetaDataAssemblyEmit>(IID_IMetaDataAssemblyEmit);
 
-    Logger::Debug("Temporaly allocating the ModuleMetadata for injection. ModuleId=", module_id, " ModuleName=",
-                  module_info.assembly.name);
+    Logger::Debug("Temporaly allocating the ModuleMetadata for injection. ModuleId=", module_id,
+                  " ModuleName=", module_info.assembly.name);
 
     std::unique_ptr<ModuleMetadata> module_metadata =
         std::make_unique<ModuleMetadata>(metadataImport, metadataEmit, assemblyImport, assemblyEmit,
@@ -1473,8 +1477,8 @@ HRESULT STDMETHODCALLTYPE CorProfiler::JITCompilationStartedOnNetFramework(Funct
 
     if (Logger::IsDebugEnabled())
     {
-        Logger::Debug("JITCompilationStarted: function_id=", function_id, " token=", function_token, " name=",
-                      caller.type.name, ".", caller.name, "()");
+        Logger::Debug("JITCompilationStarted: function_id=", function_id, " token=", function_token,
+                      " name=", caller.type.name, ".", caller.name, "()");
     }
 
     // In NETFx, NInject creates a temporary appdomain where the tracer can be laoded
@@ -1516,10 +1520,10 @@ HRESULT STDMETHODCALLTYPE CorProfiler::JITCompilationStartedOnNetFramework(Funct
     {
         bool domain_neutral_assembly = runtime_information_.is_desktop() && corlib_module_loaded &&
                                        module_metadata->app_domain_id == corlib_app_domain_id;
-        Logger::Info("JITCompilationStarted: Startup hook registered in function_id=", function_id, " token=",
-                     function_token, " name=", caller.type.name, ".", caller.name, "(), assembly_name=",
-                     module_metadata->assemblyName, " app_domain_id=", module_metadata->app_domain_id,
-                     " domain_neutral=", domain_neutral_assembly);
+        Logger::Info("JITCompilationStarted: Startup hook registered in function_id=", function_id,
+                     " token=", function_token, " name=", caller.type.name, ".", caller.name,
+                     "(), assembly_name=", module_metadata->assemblyName,
+                     " app_domain_id=", module_metadata->app_domain_id, " domain_neutral=", domain_neutral_assembly);
 
         first_jit_compilation_app_domains.insert(module_metadata->app_domain_id);
 
@@ -1603,10 +1607,10 @@ bool CorProfiler::GetIntegrationTypeRef(ModuleMetadata&              module_meta
         if (FAILED(hr))
         {
             Logger::Warn("GetIntegrationTypeRef failed to emit wrapper assembly ref for assembly=",
-                         integration_definition.integration_type.assembly.name, ", Version=",
-                         integration_definition.integration_type.assembly.version.str(), ", Culture=",
-                         integration_definition.integration_type.assembly.locale, " PublicKeyToken=",
-                         integration_definition.integration_type.assembly.public_key.str());
+                         integration_definition.integration_type.assembly.name,
+                         ", Version=", integration_definition.integration_type.assembly.version.str(),
+                         ", Culture=", integration_definition.integration_type.assembly.locale,
+                         " PublicKeyToken=", integration_definition.integration_type.assembly.public_key.str());
             return false;
         }
 
@@ -1898,7 +1902,7 @@ HRESULT CorProfiler::ModifyAppDomainCreate(const ModuleID module_id, mdMethodDef
     // patch_app_domain_setup_method should be pre-injected in mscorlib
     ComPtr<IUnknown> metadata_interfaces;
     auto             hr = this->info_->GetModuleMetaData(module_id, ofRead | ofWrite, IID_IMetaDataImport2,
-                                             metadata_interfaces.GetAddressOf());
+                                                         metadata_interfaces.GetAddressOf());
     if (FAILED(hr))
     {
         Logger::Warn("ModifyAppDomainCreate: failed to get metadata interface for ", module_id);
@@ -2137,7 +2141,7 @@ HRESULT CorProfiler::GenerateLoaderType(const ModuleID module_id,
 
     ComPtr<IUnknown> metadata_interfaces;
     auto             hr = this->info_->GetModuleMetaData(module_id, ofRead | ofWrite, IID_IMetaDataImport2,
-                                             metadata_interfaces.GetAddressOf());
+                                                         metadata_interfaces.GetAddressOf());
     if (FAILED(hr))
     {
         Logger::Warn("GenerateLoaderType: failed to get metadata interface for ", module_id);
@@ -2291,7 +2295,9 @@ HRESULT CorProfiler::GenerateLoaderType(const ModuleID module_id,
     mdMethodDef already_loaded_method_token;
     {
         BYTE already_loaded_signature[] = {
-            IMAGE_CEE_CS_CALLCONV_DEFAULT, 0, ELEMENT_TYPE_BOOLEAN,
+            IMAGE_CEE_CS_CALLCONV_DEFAULT,
+            0,
+            ELEMENT_TYPE_BOOLEAN,
         };
         hr = metadata_emit->DefineMethod(*loader_type, WStr("IsAlreadyLoaded"), mdPrivate | mdHideBySig | mdStatic,
                                          already_loaded_signature, sizeof(already_loaded_signature), 0, 0,
@@ -3265,7 +3271,7 @@ HRESULT CorProfiler::RewriteILSystemDataCommandText(const ModuleID module_id)
 
     ComPtr<IUnknown> metadata_interfaces;
     auto             hr = this->info_->GetModuleMetaData(module_id, ofRead | ofWrite, IID_IMetaDataImport2,
-                                             metadata_interfaces.GetAddressOf());
+                                                         metadata_interfaces.GetAddressOf());
 
     if (FAILED(hr))
     {
@@ -3393,7 +3399,7 @@ HRESULT CorProfiler::GenerateLoaderMethod(const ModuleID module_id, mdMethodDef*
 {
     ComPtr<IUnknown> metadata_interfaces;
     auto             hr = this->info_->GetModuleMetaData(module_id, ofRead | ofWrite, IID_IMetaDataImport2,
-                                             metadata_interfaces.GetAddressOf());
+                                                         metadata_interfaces.GetAddressOf());
     if (FAILED(hr))
     {
         Logger::Warn("GenerateLoaderMethod: failed to get metadata interface for ", module_id);
@@ -3447,7 +3453,7 @@ HRESULT CorProfiler::AddIISPreStartInitFlags(const ModuleID module_id, const mdT
 {
     ComPtr<IUnknown> metadata_interfaces;
     auto             hr = this->info_->GetModuleMetaData(module_id, ofRead | ofWrite, IID_IMetaDataImport2,
-                                             metadata_interfaces.GetAddressOf());
+                                                         metadata_interfaces.GetAddressOf());
     if (FAILED(hr))
     {
         Logger::Warn("GenerateLoaderMethod: failed to get metadata interface for ", module_id);
@@ -3518,7 +3524,7 @@ HRESULT CorProfiler::AddIISPreStartInitFlags(const ModuleID module_id, const mdT
                                                     ELEMENT_TYPE_VOID,                 // Return type
                                                     ELEMENT_TYPE_STRING,               // List of parameter types
                                                     ELEMENT_TYPE_OBJECT};
-    mdMemberRef appdomain_set_data_member_ref;
+    mdMemberRef   appdomain_set_data_member_ref;
     hr = metadata_emit->DefineMemberRef(system_appdomain_type_ref, WStr("SetData"), appdomain_set_data_signature,
                                         sizeof(appdomain_set_data_signature), &appdomain_set_data_member_ref);
 
@@ -3645,8 +3651,8 @@ HRESULT STDMETHODCALLTYPE CorProfiler::ReJITCompilationStarted(FunctionID functi
         return S_OK;
     }
 
-    Logger::Debug("ReJITCompilationStarted: [functionId: ", functionId, ", rejitId: ", rejitId, ", safeToBlock: ",
-                  fIsSafeToBlock, "]");
+    Logger::Debug("ReJITCompilationStarted: [functionId: ", functionId, ", rejitId: ", rejitId,
+                  ", safeToBlock: ", fIsSafeToBlock, "]");
 
     // we notify the reJIT handler of this event
     return rejit_handler->NotifyReJITCompilationStarted(functionId, rejitId);
@@ -3674,8 +3680,8 @@ HRESULT STDMETHODCALLTYPE CorProfiler::ReJITCompilationFinished(FunctionID funct
 {
     if (is_attached_ && Logger::IsDebugEnabled())
     {
-        Logger::Debug("ReJITCompilationFinished: [functionId: ", functionId, ", rejitId: ", rejitId, ", hrStatus: ",
-                      HResultStr(hrStatus), ", safeToBlock: ", fIsSafeToBlock, "]");
+        Logger::Debug("ReJITCompilationFinished: [functionId: ", functionId, ", rejitId: ", rejitId,
+                      ", hrStatus: ", HResultStr(hrStatus), ", safeToBlock: ", fIsSafeToBlock, "]");
     }
 
     return S_OK;
@@ -3876,7 +3882,7 @@ void CorProfiler::DetectFrameworkVersionTableForRedirectsMap()
     }
 
     assembly_version_redirect_map_current_framework_key_ = 0;
-    for (auto & [ key, values ] : assembly_version_redirect_map_)
+    for (auto& [key, values] : assembly_version_redirect_map_)
     {
         if (key <= frameworkVersion && key > assembly_version_redirect_map_current_framework_key_)
         {
