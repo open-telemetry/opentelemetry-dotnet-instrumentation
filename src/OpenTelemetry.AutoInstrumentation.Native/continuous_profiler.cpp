@@ -1607,28 +1607,33 @@ extern "C"
     }
     EXPORTTHIS void SelectiveSamplingStart(uint64_t traceIdHigh, uint64_t traceIdLow)
     {
-        if (profiler_info == nullptr)
         {
-            return;
-        }
+            std::lock_guard<std::mutex> guard(selective_sampling_lock);
 
-        const continuous_profiler::trace_context context = {traceIdHigh, traceIdLow};
-        if (context.IsDefault())
-        {
-            return;
+            if (profiler_info == nullptr)
+            {
+                return;
+            }
+
+            const continuous_profiler::trace_context context = {traceIdHigh, traceIdLow};
+            if (context.IsDefault())
+            {
+                return;
+            }
+
+            // Don't allow for too many samples at once
+            if (selective_sampling_trace_map.size() < kSelectiveSamplingMaxTraces)
+            {
+                const auto deadline =
+                    std::chrono::steady_clock::now() + std::chrono::minutes(kSelectiveSamplingMaxAgeMinutes);
+                selective_sampling_trace_map[context] =
+                    std::chrono::duration_cast<std::chrono::milliseconds>(deadline.time_since_epoch()).count();
+                return;
+            }
         }
-        std::lock_guard<std::mutex> guard(selective_sampling_lock);
-        // Don't allow for too many samples at once
-        if (selective_sampling_trace_map.size() >= kSelectiveSamplingMaxTraces)
-        {
-            trace::Logger::Warn("SelectiveSamplingStart: ignoring request to start sampling for trace {",
-                                "traceIdHigh: ", traceIdHigh, ", traceIdLow: ", traceIdLow,
-                                "} because maximum number of traces is already being sampled.");
-            return;
-        }
-        const auto deadline = std::chrono::steady_clock::now() + std::chrono::minutes(kSelectiveSamplingMaxAgeMinutes);
-        selective_sampling_trace_map[context] =
-            std::chrono::duration_cast<std::chrono::milliseconds>(deadline.time_since_epoch()).count();
+        trace::Logger::Warn("SelectiveSamplingStart: ignoring request to start sampling for trace {",
+                            "traceIdHigh: ", traceIdHigh, ", traceIdLow: ", traceIdLow,
+                            "} because maximum number of traces is already being sampled.");
     }
 
     EXPORTTHIS void SelectiveSamplingStop(uint64_t traceIdHigh, uint64_t traceIdLow)
