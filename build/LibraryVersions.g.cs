@@ -26,7 +26,7 @@ public static partial class LibraryVersion
             "TestApplication.Elasticsearch",
             [
                 new("8.15.10"),
-                new("9.2.0"),
+                new("9.2.1"),
             ]
         },
         {
@@ -34,7 +34,7 @@ public static partial class LibraryVersion
             [
                 new("6.0.35"),
                 new("8.0.10"),
-                new("9.0.10"),
+                new("9.0.11"),
             ]
         },
         {
@@ -92,17 +92,17 @@ public static partial class LibraryVersion
         {
             "TestApplication.MongoDB",
             [
-                new("2.19.0", supportedFrameworks: [ "net9.0", "net8.0", "net462" ]),
-                new("2.30.0", supportedFrameworks: [ "net9.0", "net8.0", "net462" ]),
-                new("3.0.0", supportedFrameworks: [ "net9.0", "net8.0", "net472" ]),
-                new("3.4.3", supportedFrameworks: [ "net9.0", "net8.0", "net472" ]),
+                new("2.19.0", supportedFrameworks: [ "net10.0", "net9.0", "net8.0", "net462" ]),
+                new("2.30.0", supportedFrameworks: [ "net10.0", "net9.0", "net8.0", "net462" ]),
+                new("3.0.0", supportedFrameworks: [ "net10.0", "net9.0", "net8.0", "net472" ]),
+                new("3.4.3", supportedFrameworks: [ "net10.0", "net9.0", "net8.0", "net472" ]),
             ]
         },
         {
             "TestApplication.MySqlConnector",
             [
                 new("2.0.0"),
-                new("2.4.0"),
+                new("2.5.0"),
             ]
         },
         {
@@ -116,29 +116,29 @@ public static partial class LibraryVersion
             "TestApplication.Npgsql",
             [
                 new("8.0.5"),
-                new("9.0.4", supportedFrameworks: [ "net9.0", "net8.0" ]),
+                new("9.0.4", supportedFrameworks: [ "net10.0", "net9.0", "net8.0" ]),
             ]
         },
         {
             "TestApplication.NServiceBus",
             [
                 new("8.2.5"),
-                new("9.1.0", supportedFrameworks: [ "net9.0", "net8.0" ]),
-                new("9.2.7", supportedFrameworks: [ "net9.0", "net8.0" ]),
+                new("9.1.0", supportedFrameworks: [ "net10.0", "net9.0", "net8.0" ]),
+                new("9.2.7", supportedFrameworks: [ "net10.0", "net9.0", "net8.0" ]),
             ]
         },
         {
             "TestApplication.OracleMda.NetFramework",
             [
                 new("23.5.1", supportedFrameworks: [ "net472" ]),
-                new("23.9.1", supportedFrameworks: [ "net472" ]),
+                new("23.26.0", supportedFrameworks: [ "net472" ]),
             ]
         },
         {
             "TestApplication.OracleMda.Core",
             [
                 new("23.5.1"),
-                new("23.9.1"),
+                new("23.26.0"),
             ]
         },
         {
@@ -154,7 +154,7 @@ public static partial class LibraryVersion
                 new("5.1.2"),
                 new("6.8.1"),
                 new("7.0.0"),
-                new("7.1.2"),
+                new("7.2.0"),
             ]
         },
         {

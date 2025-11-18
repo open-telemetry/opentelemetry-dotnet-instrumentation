@@ -58,6 +58,37 @@ public class HttpTests : TestHelper
     }
 
     [Fact]
+    [Trait("Category", "EndToEnd")]
+    public void SubmitTracesFileBased()
+    {
+        using var collector = new MockSpansCollector(Output);
+        SetFileBasedExporter(collector);
+        EnableFileBasedConfigWithDefaultPath();
+
+        Span? clientSpan = null;
+        collector.Expect("System.Net.Http", span =>
+        {
+            clientSpan = span;
+            return true;
+        });
+
+        Span? serverSpan = null;
+        collector.Expect("Microsoft.AspNetCore", span =>
+        {
+            serverSpan = span;
+            return true;
+        });
+
+        RunTestApplication();
+
+        collector.AssertExpectations();
+
+        // testing context propagation via trace hierarchy
+        Assert.True(clientSpan!.ParentSpanId.IsEmpty, "parent of client span should be empty");
+        Assert.Equal(clientSpan.SpanId, serverSpan!.ParentSpanId);
+    }
+
+    [Fact]
     public void SubmitTracesCapturesHttpHeaders()
     {
         using var collector = new MockSpansCollector(Output);

@@ -1223,6 +1223,7 @@ void CorProfiler::ConfigureContinuousProfiler(bool         threadSamplingEnabled
     if (selectiveSamplingConfigured)
     {
         this->continuousProfiler->selectedThreadsSamplingInterval = selectedThreadsSamplingInterval;
+        this->continuousProfiler->nextOutdatedEntriesScan         = std::chrono::steady_clock::now();
         continuous_profiler::ContinuousProfiler::InitSelectiveSamplingBuffer();
     }
 

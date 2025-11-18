@@ -4,7 +4,8 @@
       "commandName": "Project",
       "launchBrowser": true,
       "environmentVariables": {
-        "ASPNETCORE_ENVIRONMENT": "Development"
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "OTEL_EXPERIMENTAL_FILE_BASED_CONFIGURATION_ENABLED": "true"
       },
       "applicationUrl": "http://localhost:63944"
     }
