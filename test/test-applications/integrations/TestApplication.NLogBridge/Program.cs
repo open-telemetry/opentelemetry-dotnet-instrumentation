@@ -56,8 +56,27 @@ internal static class Program
 
     private static void LogInsideActiveScope(Action action)
     {
-        using var activity = Source.StartActivity("ManuallyStarted");
-        action();
+        // Create an Activity manually to ensure trace context is available
+        // This simulates what happens in a real distributed tracing scenario
+        var activity = new Activity("ManuallyStarted");
+        activity.SetIdFormat(ActivityIdFormat.W3C);
+        activity.Start();
+
+        // Verify the activity is current
+        Console.WriteLine($"Activity.Current is null: {Activity.Current == null}");
+        if (Activity.Current != null)
+        {
+            Console.WriteLine($"TraceId: {Activity.Current.TraceId}, SpanId: {Activity.Current.SpanId}");
+        }
+
+        try
+        {
+            action();
+        }
+        finally
+        {
+            activity.Stop();
+        }
     }
 
     private static void LogUsingNLogDirectly()

@@ -7,9 +7,9 @@ This directory contains the NLog instrumentation for OpenTelemetry .NET Auto-Ins
 The NLog instrumentation offers automatic integration through:
 1. **Bytecode Interception**: Automatically intercepts `NLog.Logger.Log` calls via bytecode instrumentation
 2. **Duck Typing Integration**: Uses duck typing to avoid direct NLog assembly references
-3. **Log Event Bridging**: Converting NLog log events to OpenTelemetry log records
+3. **Log Event Bridging**: Converting NLog log events to OpenTelemetry log records (when bridge is enabled)
 4. **Structured Logging Support**: Leveraging NLog's layout abilities for enrichment
-5. **Trace Context Integration**: Automatically including trace context in log records
+5. **Trace Context Injection**: Automatically injects trace context into NLog properties for all targets
 6. **Custom Properties**: Forwarding custom properties while filtering internal NLog properties
 
 **Note**: No NLog configuration changes are required. The instrumentation works exclusively through bytecode interception and relies on OpenTelemetry environment variables for configuration.
@@ -21,15 +21,21 @@ The NLog instrumentation offers automatic integration through:
 NLog Logger.Log() Call
     ↓
 LoggerIntegration (CallTarget - Bytecode Interception)
-    ↓
-OpenTelemetryNLogConverter.WriteLogEvent()
-    ↓
-OpenTelemetry LogRecord
-    ↓
-OTLP Exporters
+    ├─ ALWAYS: Inject trace context into NLog properties
+    │   (Available to ALL NLog targets: file, console, database, etc.)
+    │
+    └─ IF bridge enabled: Forward to OpenTelemetry
+        ↓
+        OpenTelemetryNLogConverter.WriteLogEvent()
+        ↓
+        OpenTelemetry LogRecord
+        ↓
+        OTLP Exporters
 ```
 
-The instrumentation intercepts `NLog.Logger.Log` method calls at the bytecode level, allowing it to capture log events without requiring any NLog configuration changes.
+The instrumentation intercepts `NLog.Logger.Log` method calls at the bytecode level, allowing it to:
+1. **Always inject trace context** into NLog's LogEventInfo properties (regardless of bridge status)
+2. **Optionally forward logs** to OpenTelemetry when the bridge is enabled
 
 ## Components
 
@@ -73,11 +79,30 @@ export OTEL_BSP_MAX_EXPORT_BATCH_SIZE="512"
 
 ### Behavior
 
-The bridge automatically:
-- Uses formatted message if available, otherwise raw message
-- Includes event parameters when present
+The instrumentation automatically:
+- **Injects trace context** into NLog properties (TraceId, SpanId, TraceFlags) for ALL NLog targets
+- Uses formatted message if available, otherwise raw message (when bridge enabled)
+- Includes event parameters when present (when bridge enabled)
 - Captures trace context from `Activity.Current`
-- Forwards custom properties while filtering internal NLog properties
+- Forwards custom properties while filtering internal NLog properties (when bridge enabled)
+
+#### Trace Context Injection
+
+Trace context is **always injected** into NLog's LogEventInfo properties, regardless of whether the OpenTelemetry bridge is enabled. This allows NLog's own targets (file, console, database, etc.) to access trace context using NLog's layout renderers:
+
+```xml
+<target xsi:type="Console" name="console"
+        layout="${longdate} ${message} TraceId=${event-properties:TraceId} SpanId=${event-properties:SpanId}" />
+```
+
+The following properties are injected when an active `Activity` exists:
+- `TraceId`: The W3C trace ID
+- `SpanId`: The W3C span ID  
+- `TraceFlags`: The W3C trace flags
+
+#### OpenTelemetry Bridge
+
+When `OTEL_DOTNET_AUTO_LOGS_ENABLE_NLOG_BRIDGE=true`, log events are additionally forwarded to OpenTelemetry's logging infrastructure for export via OTLP or other configured exporters.
 
 ## Supported Versions
 

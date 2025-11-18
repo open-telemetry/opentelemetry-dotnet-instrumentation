@@ -1,9 +1,12 @@
 // Copyright The OpenTelemetry Authors
 // SPDX-License-Identifier: Apache-2.0
 
+using System.Collections;
+using System.Diagnostics;
 using OpenTelemetry.AutoInstrumentation.CallTarget;
 using OpenTelemetry.AutoInstrumentation.DuckTyping;
 using OpenTelemetry.AutoInstrumentation.Instrumentations.NLog.Bridge;
+using OpenTelemetry.AutoInstrumentation.Instrumentations.NLog.TraceContextInjection;
 using OpenTelemetry.AutoInstrumentation.Logging;
 #if NET
 using OpenTelemetry.AutoInstrumentation.Logger;
@@ -39,7 +42,7 @@ public static class LoggerIntegration
     /// <summary>
     /// Intercepts NLog's Logger.Log method calls to capture log events.
     /// This method is called before the original Log method executes,
-    /// allowing us to capture and forward log events to OpenTelemetry.
+    /// allowing us to inject trace context and forward log events to OpenTelemetry.
     /// </summary>
     /// <typeparam name="TTarget">The type of the logger instance.</typeparam>
     /// <param name="instance">The NLog Logger instance.</param>
@@ -48,6 +51,10 @@ public static class LoggerIntegration
     internal static CallTargetState OnMethodBegin<TTarget>(TTarget instance, object logEvent)
     {
         Logger.Debug($"NLog LoggerIntegration.OnMethodBegin called! LogEvent: {logEvent.GetType().Name}");
+
+        // Always inject trace context into NLog properties for all sinks to use
+        // This allows NLog's own targets (file, console, etc.) to access trace context
+        TryInjectTraceContext(logEvent);
 
 #if NET
         // Check if ILogger bridge has been initialized and warn if so
@@ -66,7 +73,7 @@ public static class LoggerIntegration
 
         Logger.Debug($"NLog bridge enabled: {Instrumentation.LogSettings.Value.EnableNLogBridge}");
 
-        // Only process the log event if the NLog bridge is enabled
+        // Only forward to OpenTelemetry if the NLog bridge is enabled
         if (Instrumentation.LogSettings.Value.EnableNLogBridge)
         {
             Logger.Debug("Forwarding log event to OpenTelemetryNLogConverter");
@@ -84,5 +91,54 @@ public static class LoggerIntegration
 
         // Return default state - we don't need to track anything between begin/end
         return CallTargetState.GetDefault();
+    }
+
+    /// <summary>
+    /// Injects OpenTelemetry trace context into NLog's LogEventInfo properties.
+    /// This allows NLog's own targets (file, console, database, etc.) to access
+    /// trace context even when the OpenTelemetry bridge is disabled.
+    /// </summary>
+    /// <param name="logEvent">The NLog LogEventInfo object.</param>
+    private static void TryInjectTraceContext(object logEvent)
+    {
+        try
+        {
+            var activity = Activity.Current;
+            if (activity == null)
+            {
+                return;
+            }
+
+            // Duck cast to access Properties collection
+            if (!logEvent.TryDuckCast<ILoggingEvent>(out var duckLogEvent))
+            {
+                return;
+            }
+
+            // Get the Properties object
+            var properties = duckLogEvent.Properties;
+            if (properties == null)
+            {
+                return;
+            }
+
+            // Try to cast to IDictionary to add trace context properties
+            if (properties is IDictionary dict)
+            {
+                dict[LogsTraceContextInjectionConstants.TraceIdPropertyName] = activity.TraceId.ToString();
+                dict[LogsTraceContextInjectionConstants.SpanIdPropertyName] = activity.SpanId.ToString();
+                dict[LogsTraceContextInjectionConstants.TraceFlagsPropertyName] = activity.ActivityTraceFlags.ToString();
+            }
+            else if (properties.TryDuckCast<IDictionary>(out var duckDict))
+            {
+                duckDict[LogsTraceContextInjectionConstants.TraceIdPropertyName] = activity.TraceId.ToString();
+                duckDict[LogsTraceContextInjectionConstants.SpanIdPropertyName] = activity.SpanId.ToString();
+                duckDict[LogsTraceContextInjectionConstants.TraceFlagsPropertyName] = activity.ActivityTraceFlags.ToString();
+            }
+        }
+        catch (Exception ex)
+        {
+            Logger.Debug($"Failed to inject trace context into NLog properties: {ex.Message}");
+        }
     }
 }
