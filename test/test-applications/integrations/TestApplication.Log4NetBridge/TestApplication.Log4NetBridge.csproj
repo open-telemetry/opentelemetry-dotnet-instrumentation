@@ -4,8 +4,6 @@
       <PackageReference Include="Microsoft.Extensions.Logging"/>
       <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" />
       <PackageReference Include="System.Diagnostics.DiagnosticSource" />
-    <!-- System.Private.Uri is indirect reference. Bumping it to mitigate https://github.com/advisories/GHSA-xhfc-gr8f-ffwc -->
-      <PackageReference Include="System.Private.Uri" />
     </ItemGroup>
     <ItemGroup>
       <None Include="App.config" />
