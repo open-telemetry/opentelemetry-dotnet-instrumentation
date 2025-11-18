@@ -12,7 +12,7 @@
 #include <atlcom.h>
 #include <sstream>
 #include <iomanip>
-#include <cstdarg>
+#include "logger.h"
 
 #ifndef DECLSPEC_IMPORT
 #define DECLSPEC_IMPORT __declspec(dllimport)
@@ -24,54 +24,6 @@ extern "C" {
 }
 
 namespace ProfilerStackCapture {
-
-    // ========================================================================================
-    // Error Handling and Logging Infrastructure
-    // ========================================================================================
-
-    /// @brief Helper to format GetLastError with hex and decimal
-    static std::string FormatLastError(DWORD lastError) {
-        std::stringstream ss;
-        ss << "0x" << std::hex << std::setw(8) << std::setfill('0') << lastError 
-           << " (" << std::dec << lastError << ")";
-        return ss.str();
-    }
-
-    /// @brief Format HRESULT as human-readable string
-    static std::string FormatHResult(HRESULT hr) {
-        std::stringstream ss;
-        ss << "0x" << std::hex << std::setw(8) << std::setfill('0') << hr;
-        
-        // Add well-known error names
-        if (hr == S_OK) ss << " (S_OK)";
-        else if (hr == E_FAIL) ss << " (E_FAIL)";
-        else if (hr == E_ABORT) ss << " (E_ABORT)";
-        else if (hr == E_INVALIDARG) ss << " (E_INVALIDARG)";
-        else if (hr == CORPROF_E_STACKSNAPSHOT_UNSAFE) ss << " (CORPROF_E_STACKSNAPSHOT_UNSAFE)";
-        else if (hr == CORPROF_E_STACKSNAPSHOT_ABORTED) ss << " (CORPROF_E_STACKSNAPSHOT_ABORTED)";
-        
-        return ss.str();
-    }
-
-    // ErrorContext implementation
-    std::string ErrorContext::ToString() const {
-        std::stringstream ss;
-        ss << "Operation: " << operation;
-        
-        if (FAILED(hresult)) {
-            ss << ", HRESULT: " << FormatHResult(hresult);
-        }
-        
-        if (win32Error != 0) {
-            ss << ", Win32Error: " << FormatLastError(win32Error);
-        }
-        
-        if (!details.empty()) {
-            ss << ", Details: " << details;
-        }
-        
-        return ss.str();
-    }
 
     
     // ========================================================================================
@@ -137,7 +89,6 @@ namespace ProfilerStackCapture {
             if(testAlloc) {
                 delete testAlloc;
             }
-            OutputDebugStringA("[StackCapture] Exception in probe operations\n");
             return E_FAIL;
         }
         
@@ -149,12 +100,6 @@ namespace ProfilerStackCapture {
     // PrepareContextForSnapshot - walks native stack to find managed frame and prepares context for DoStackSnapshot
     static HRESULT PrepareContextForSnapshot(ThreadID managedThreadId, HANDLE threadHandle, CONTEXT* pContext, 
                                              IProfilerApi* profilerApi, std::atomic<bool>* pStopRequested) {
-        char startLog[256];
-        sprintf_s(startLog, "[StackCapture] PrepareContextForSnapshot START - ManagedID=%lld, Initial RIP=0x%016llX\n",
-                 static_cast<long long>(managedThreadId),
-                 static_cast<unsigned long long>(pContext->Rip));
-        OutputDebugStringA(startLog);
-        
         const int MAX_WALK_EVER = 10000;
         int walkCount = 0;
         DWORD64 origRSP = 0;
@@ -163,35 +108,24 @@ namespace ProfilerStackCapture {
         FunctionID fid = 0;
         HRESULT hr = profilerApi->GetFunctionFromIP(reinterpret_cast<LPCBYTE>(pContext->Rip), &fid);
         if (SUCCEEDED(hr) && fid != 0) {
-            OutputDebugStringA("[StackCapture] Already at managed frame (fast path)\n");
             return S_OK;
         }
         
         // Walk native frames to find managed code
         for (walkCount = 0; walkCount < MAX_WALK_EVER; ++walkCount) {
             if (pStopRequested && pStopRequested->load()) {
-                OutputDebugStringA("[StackCapture] Stop requested during pre-walk\n");
                 return E_ABORT;
             }
             
             // Check for stack progress
             if (origRSP != 0 && pContext->Rsp <= origRSP) {
-                OutputDebugStringA("[StackCapture] Stack not progressing - terminating walk\n");
                 break;
             }
             origRSP = pContext->Rsp;
             
             // Check for end of stack
             if (pContext->Rip == 0) {
-                OutputDebugStringA("[StackCapture] Reached end of stack (RIP=0)\n");
                 break;
-            }
-            
-            // Log progress every 100 frames
-            if (walkCount % 100 == 0 && walkCount > 0) {
-                char progressLog[256];
-                sprintf_s(progressLog, "[StackCapture] Unwind progress: %d frames\n", walkCount);
-                OutputDebugStringA(progressLog);
             }
             
             // Try to find runtime function for current RIP
@@ -205,10 +139,6 @@ namespace ProfilerStackCapture {
                 // Leaf function - read return address from stack
                 DWORD64 returnAddress = 0;
                 if (!ReadReturnAddressFromStack(pContext->Rsp, &returnAddress)) {
-                    char errorLog[256];
-                    sprintf_s(errorLog, "[StackCapture] Failed to read return address at walk %d from RSP=0x%016llX\n",
-                             walkCount, static_cast<unsigned long long>(pContext->Rsp));
-                    OutputDebugStringA(errorLog);
                     return E_FAIL;
                 }
                 
@@ -221,11 +151,7 @@ namespace ProfilerStackCapture {
                 instructionPointer = imageBase + runtimeFunction->BeginAddress;
                 
                 // Unwind to previous frame
-                ULONG64 establisherFrame = 0;
-                if (!SafeRtlVirtualUnwind(imageBase, pContext->Rip, runtimeFunction, pContext, &establisherFrame)) {
-                    char errorLog[256];
-                    sprintf_s(errorLog, "[StackCapture] RtlVirtualUnwind failed at walk %d\n", walkCount);
-                    OutputDebugStringA(errorLog);
+                if (!SafeRtlVirtualUnwind(imageBase, pContext->Rip, runtimeFunction, pContext, nullptr)) {
                     return E_FAIL;
                 }
             }
@@ -233,30 +159,13 @@ namespace ProfilerStackCapture {
             // Check if this instruction pointer is managed
             hr = profilerApi->GetFunctionFromIP(reinterpret_cast<LPCBYTE>(instructionPointer), &fid);
             if (SUCCEEDED(hr) && fid != 0) {
-                char foundLog[256];
-                sprintf_s(foundLog, "[StackCapture] Found managed frame at walk %d - IP=0x%016llX, FunctionID=0x%016llX\n",
-                         walkCount, static_cast<unsigned long long>(instructionPointer),
-                         static_cast<unsigned long long>(fid));
-                OutputDebugStringA(foundLog);
-                
                 // Update context to point to this managed frame
                 pContext->Rip = instructionPointer;
-                
-                char seedLog[256];
-                sprintf_s(seedLog, "[StackCapture] Seed context prepared - RIP=0x%016llX, RSP=0x%016llX\n",
-                         static_cast<unsigned long long>(pContext->Rip),
-                         static_cast<unsigned long long>(pContext->Rsp));
-                OutputDebugStringA(seedLog);
-                
                 return S_OK;
             }
         }
         
         // Exhausted all frames without finding managed code
-        char failLog[256];
-        sprintf_s(failLog, "[StackCapture] No managed frame found after %d walks - thread appears to be pure native\n", walkCount);
-        OutputDebugStringA(failLog);
-        
         return E_FAIL;
     }
 
@@ -410,43 +319,23 @@ namespace ProfilerStackCapture {
     ScopedThreadSuspend::ScopedThreadSuspend(DWORD nativeThreadId) : threadHandle_(INVALID_HANDLE_VALUE), suspended_(false) {
         threadHandle_ = OpenThread(THREAD_GET_CONTEXT | THREAD_SUSPEND_RESUME, FALSE, nativeThreadId);
         if (threadHandle_ == NULL) {
-            DWORD lastError = GetLastError();
-            std::stringstream ss;
-            ss << "[StackCapture] OpenThread failed for thread " << nativeThreadId 
-               << ", LastError=" << FormatLastError(lastError);
-            OutputDebugStringA(ss.str().c_str());
             throw std::runtime_error("Failed to open thread handle");
         }
         
         DWORD suspendCount = SuspendThread(threadHandle_);
         if (suspendCount == static_cast<DWORD>(-1)) {
-            DWORD lastError = GetLastError();
-            std::stringstream ss;
-            ss << "[StackCapture] SuspendThread failed for thread " << nativeThreadId 
-               << ", LastError=" << FormatLastError(lastError);
-            OutputDebugStringA(ss.str().c_str());
             CloseHandle(threadHandle_);
             threadHandle_ = INVALID_HANDLE_VALUE;
             throw std::runtime_error("Failed to suspend thread");
         }
         
-        std::stringstream ss;
-        ss << "[StackCapture] Successfully suspended thread " << nativeThreadId 
-           << ", previous suspend count=" << suspendCount;
-        OutputDebugStringA(ss.str().c_str());
         suspended_ = true;
     }
     
     ScopedThreadSuspend::~ScopedThreadSuspend() { 
         if (threadHandle_ != INVALID_HANDLE_VALUE) { 
             if (suspended_) {
-                DWORD suspendCount = ResumeThread(threadHandle_);
-                if (suspendCount == static_cast<DWORD>(-1)) {
-                    DWORD lastError = GetLastError();
-                    std::stringstream ss;
-                    ss << "[StackCapture] ResumeThread failed, LastError=" << FormatLastError(lastError);
-                    OutputDebugStringA(ss.str().c_str());
-                }
+                ResumeThread(threadHandle_);
             }
             CloseHandle(threadHandle_); 
         } 
@@ -483,7 +372,7 @@ namespace ProfilerStackCapture {
         : profilerApi_(std::move(profilerApi)), options_(options)
     {
         invocationQueue_ = std::make_unique<InvocationQueue>();
-        OutputDebugStringA("[StackCapture] Engine initialized\n");
+        trace::Logger::Info(L"[StackCapture] Engine initialized with canary prefix: ", options_.canaryThreadNamePrefix);
     }
     StackCaptureEngine::~StackCaptureEngine()
     {
@@ -505,9 +394,8 @@ namespace ProfilerStackCapture {
         
         // Clear canary if it was this thread
         if (canaryThread_.managedId == threadId) {
-            std::stringstream ss;
-            ss << "[StackCapture] Canary thread destroyed - ManagedID=" << threadId;
-            OutputDebugStringA(ss.str().c_str());
+            trace::Logger::Info("[StackCapture] Canary thread destroyed - ManagedID=", threadId, 
+                              ", NativeID=", canaryThread_.nativeId);
             canaryThread_.reset();
         }
         
@@ -524,16 +412,14 @@ namespace ProfilerStackCapture {
             return S_OK;
         }
 
-        auto nameIt      = threadNames_.find(managedThreadId);
+        auto nameIt = threadNames_.find(managedThreadId);
         if (nameIt != threadNames_.end())
         {
             if (nameIt->second.find(options_.canaryThreadNamePrefix) == 0)
             {
                 canaryThread_ = CanaryThreadInfo{managedThreadId, osThreadId, nameIt->second};
-                std::wstringstream wss;
-                wss << L"[StackCapture] Designated canary thread: ManagedID=" << managedThreadId << L", NativeID="
-                    << osThreadId << L", Name=" << nameIt->second << L"\n";
-                OutputDebugStringW(wss.str().c_str());
+                trace::Logger::Info("[StackCapture] Canary thread designated via ThreadAssignedToOSThread - ManagedID=", 
+                                  managedThreadId, ", NativeID=", osThreadId, ", Name=", nameIt->second);
             }
         }
 
@@ -566,6 +452,13 @@ namespace ProfilerStackCapture {
             if (osThreadIt != activeThreads_.end())
             {
                 canaryThread_ = CanaryThreadInfo{threadId, osThreadIt->second, threadName};
+                trace::Logger::Info("[StackCapture] Canary thread designated via ThreadNameChanged - ManagedID=", 
+                                  threadId, ", NativeID=", osThreadIt->second, ", Name=", threadName);
+            }
+            else
+            {
+                trace::Logger::Debug("[StackCapture] Canary thread name matched but OS thread not yet assigned - ManagedID=", 
+                                   threadId, ", Name=", threadName);
             }
         }
 
@@ -582,91 +475,88 @@ namespace ProfilerStackCapture {
     bool StackCaptureEngine::SafetyProbe() {
         if (!invocationQueue_) return true;
         
-        std::stringstream logStart;
-        logStart << "[StackCapture] SafetyProbe START - CanaryManagedID=" << canaryThread_.managedId
-                 << ", CanaryNativeID=" << canaryThread_.nativeId;
-        OutputDebugStringA(logStart.str().c_str());
-        
         std::atomic<HRESULT> snapshotHr{ S_OK };
         InvocationStatus status = InvocationStatus::TimedOut;
         
         try {
+            // Attempt to suspend canary thread
+            trace::Logger::Debug("[StackCapture] SafetyProbe: Suspending canary thread");
             ScopedThreadSuspend canaryThread(canaryThread_.nativeId);
+            
             CONTEXT canaryCtx = {};
             canaryCtx.ContextFlags = CONTEXT_FULL;
             
+            // Get thread context
             if (!GetThreadContext(canaryThread.GetHandle(), &canaryCtx)) {
-                DWORD lastError = GetLastError();
-                std::stringstream ss;
-                ss << "[StackCapture] GetThreadContext FAILED for canary - NativeID=" << canaryThread_.nativeId 
-                   << ", LastError=" << FormatLastError(lastError);
-                OutputDebugStringA(ss.str().c_str());
+                DWORD error = GetLastError();
+                trace::Logger::Error("[StackCapture] SafetyProbe failed - GetThreadContext failed. Error=", error, 
+                                   ", NativeID=", canaryThread_.nativeId);
                 return false;
             }
             
-            std::stringstream ctxLog;
-            ctxLog << "[StackCapture] Canary context captured - RIP=0x" << std::hex << canaryCtx.Rip 
-                   << ", RSP=0x" << canaryCtx.Rsp << std::dec;
-            OutputDebugStringA(ctxLog.str().c_str());
+            trace::Logger::Debug("[StackCapture] SafetyProbe: Thread context captured. RIP=0x", 
+                               std::hex, canaryCtx.Rip, ", RSP=0x", canaryCtx.Rsp, std::dec);
+            
             auto canaryManagedId = canaryThread_.managedId;
+            
             // Enqueue probe worker (uses SEH-protected helper)
+            trace::Logger::Debug("[StackCapture] SafetyProbe: Enqueueing probe operations with timeout=", 
+                               options_.probeTimeout.count(), "ms");
+            
             status = invocationQueue_->Invoke([this, canaryManagedId, canaryCtx, &snapshotHr]() {
-                OutputDebugStringA("[StackCapture] Probe worker executing...\n");
-                
                 HRESULT hr = ExecuteProbeOperations(profilerApi_.get(), canaryManagedId, canaryCtx);
                 snapshotHr.store(hr);
-                
-                std::stringstream dssLog;
-                dssLog << "[StackCapture] Probe operations result=0x" << std::hex << hr << std::dec;
-                OutputDebugStringA(dssLog.str().c_str());
             }, options_.probeTimeout);
             
             // Canary thread auto-resumes here via RAII
             
-        } catch (const std::exception& ex) { 
-            std::stringstream ss;
-            ss << "[StackCapture] Exception in SafetyProbe: " << ex.what();
-            OutputDebugStringA(ss.str().c_str());
+        } catch (const std::exception& ex) {
+            trace::Logger::Error("[StackCapture] SafetyProbe failed - Exception during thread suspension/context capture: ", 
+                               ex.what());
             return false; 
         }
         
+        // Check invocation status
         if (status != InvocationStatus::Invoked) {
-            std::stringstream ss;
-            ss << "[StackCapture] SafetyProbe TIMED OUT - timeout=" << options_.probeTimeout.count() << "ms";
-            OutputDebugStringA(ss.str().c_str());
+            trace::Logger::Warn("[StackCapture] SafetyProbe failed - Probe operations timed out after ", 
+                              options_.probeTimeout.count(), "ms");
             return false;
         }
         
+        trace::Logger::Debug("[StackCapture] SafetyProbe: Probe operations completed within timeout");
+        
+        // Analyze HRESULT from probe operations
         HRESULT hr = snapshotHr.load();
+        
         if (hr == CORPROF_E_STACKSNAPSHOT_UNSAFE) {
-            OutputDebugStringA("[StackCapture] DoStackSnapshot reported UNSAFE (0x80131354)\n");
+            trace::Logger::Warn("[StackCapture] SafetyProbe detected UNSAFE condition - DoStackSnapshot returned CORPROF_E_STACKSNAPSHOT_UNSAFE");
             return false;
         }
         
         if (FAILED(hr)) {
-            std::stringstream ss;
-            ss << "[StackCapture] Probe operations failed with HRESULT=0x" << std::hex << hr << std::dec;
-            OutputDebugStringA(ss.str().c_str());
+            // Log specific HRESULT codes for diagnostics
+            if (hr == E_FAIL) {
+                trace::Logger::Error("[StackCapture] SafetyProbe failed - Probe operations returned E_FAIL (0x", 
+                                   std::hex, hr, std::dec, ")");
+            } else if (hr == E_ABORT) {
+                trace::Logger::Error("[StackCapture] SafetyProbe failed - Probe operations aborted (0x",
+                                   std::hex, hr, std::dec, ")");
+            } else {
+                trace::Logger::Error("[StackCapture] SafetyProbe failed - Probe operations returned HRESULT=0x", 
+                                   std::hex, hr, std::dec);
+            }
             return false;
         }
         
-        OutputDebugStringA("[StackCapture] SafetyProbe PASSED\n");
+        trace::Logger::Debug("[StackCapture] SafetyProbe succeeded - Stack capture is safe");
         return true;
     }
 
     HRESULT StackCaptureEngine::CaptureStackSeeded(ThreadID managedThreadId, HANDLE threadHandle, StackCaptureContext* stackCaptureContext) {
-        std::stringstream startLog;
-        startLog << "[StackCapture] CaptureStackSeeded START - ManagedID=" << managedThreadId;
-        OutputDebugStringA(startLog.str().c_str());
-        
         CONTEXT context = {}; 
         context.ContextFlags = CONTEXT_FULL;
         
         if (!GetThreadContext(threadHandle, &context)) {
-            DWORD lastError = GetLastError();
-            std::stringstream ss;
-            ss << "[StackCapture] GetThreadContext FAILED - LastError=" << FormatLastError(lastError);
-            OutputDebugStringA(ss.str().c_str());
             return E_FAIL;
         }
         
@@ -679,20 +569,23 @@ namespace ProfilerStackCapture {
         hr = profilerApi_->DoStackSnapshot(managedThreadId, continuous_profiler::IStackCaptureStrategy::StackSnapshotCallbackDefault, COR_PRF_SNAPSHOT_DEFAULT,
             stackCaptureContext->clientParams, reinterpret_cast<BYTE*>(&context), sizeof(CONTEXT));
         
-        std::stringstream resultLog;
-        resultLog << "[StackCapture] DoStackSnapshot result=0x" << std::hex << hr ;
-        OutputDebugStringA(resultLog.str().c_str());
-        
         return hr;
     }
 
     bool StackCaptureEngine::IsManagedFunction(BYTE* ip) const { FunctionID fid = 0; HRESULT hr = profilerApi_->GetFunctionFromIP(ip, &fid); return SUCCEEDED(hr) && fid != 0; }
 
     bool StackCaptureEngine::WaitForCanaryThread(std::chrono::milliseconds timeout) {
+        trace::Logger::Debug("[StackCapture] Waiting for canary thread (timeout=", timeout.count(), "ms)");
         std::unique_lock<std::mutex> lock(threadListMutex_);
-        return captureCondVar_.wait_for(lock, timeout, [this]() {
+        bool result = captureCondVar_.wait_for(lock, timeout, [this]() {
             return stopRequested_.load() || canaryThread_.isValid();
         });
+        
+        if (!result) {
+            trace::Logger::Warn("[StackCapture] Canary thread wait timed out after ", timeout.count(), "ms");
+        }
+        
+        return result;
     }
 
     HRESULT StackCaptureEngine::CaptureStacks(std::unordered_set<ThreadID> const& threads, continuous_profiler::StackSnapshotCallbackParams* clientData)
@@ -714,9 +607,6 @@ namespace ProfilerStackCapture {
                 auto                        it = activeThreads_.find(managedId);
                 if (it == activeThreads_.end())
                 {
-                    std::stringstream ss;
-                    ss << "[StackCapture] Thread not found in active list: ManagedID=" << managedId;
-                    OutputDebugStringA(ss.str().c_str());
                     continue;
                 }
                 nativeId = it->second;
@@ -733,11 +623,8 @@ namespace ProfilerStackCapture {
                 HRESULT             hr = CaptureStackSeeded(managedId, targetThread.GetHandle(), &stackCaptureContext);
                 CaptureResult       result = SUCCEEDED(hr) ? CaptureResult::Success : CaptureResult::Failed;
             }
-            catch (const std::exception& ex)
+            catch (const std::exception&)
             {
-                std::stringstream ss;
-                ss << "[StackCapture] Exception capturing thread " << managedId << ": " << ex.what();
-                OutputDebugStringA(ss.str().c_str());
                 std::vector<StackFrame> empty;
             }
         }

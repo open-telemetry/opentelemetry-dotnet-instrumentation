@@ -16,6 +16,7 @@ public:
     explicit NetFxStackCaptureStrategy(ICorProfilerInfo2* profilerInfo)
         : engine_(std::make_unique<ProfilerStackCapture::StackCaptureEngine>(
               std::make_unique<ProfilerStackCapture::ProfilerApiAdapter>(profilerInfo))) {
+        trace::Logger::Info("Initialized NetFxStackCaptureStrategy (per-thread suspension)");
     }
     
     HRESULT CaptureStacks(

@@ -6,6 +6,7 @@
 
 #include "stack_capture_strategy.h"
 
+#include "logger.h"
 #include <sstream>
 
 namespace continuous_profiler {
@@ -16,7 +17,7 @@ class DotNetStackCaptureStrategy : public IStackCaptureStrategy {
 public:
     explicit DotNetStackCaptureStrategy(ICorProfilerInfo12* profilerInfo)
         : profilerInfo_(profilerInfo) {
-        //trace::Logger::Info("Initialized DotNetStackCaptureStrategy (CLR suspension)");
+        trace::Logger::Info("Initialized DotNetStackCaptureStrategy (CLR suspension)");
     }
     
     HRESULT CaptureStacks(
@@ -54,12 +55,13 @@ public:
             // RuntimeSuspensionGuard destructor will automatically resume CLR
             return SUCCEEDED(captureResult) ? S_OK : captureResult;
         }
-        catch (const std::runtime_error&)
+        catch (const std::runtime_error& ex)
         {
+            trace::Logger::Error("DotNetStackCaptureStrategy: Runtime Error: ", ex.what());
             return E_FAIL;
         }
-        catch (const std::exception&) {
-            //trace::Logger::Error("DotNetStackCaptureStrategy: Exception during CaptureStacks: ", ex.what());
+        catch (const std::exception& ex) {
+            trace::Logger::Error("DotNetStackCaptureStrategy: Exception during CaptureStacks: ", ex.what());
             return E_FAIL;
         }
     }
