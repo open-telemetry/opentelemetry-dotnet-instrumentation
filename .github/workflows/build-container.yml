@@ -29,7 +29,7 @@ jobs:
     steps:
 
     - name: Checkout
-      uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # tag: v5.0.0
+      uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # tag: v5.0.1
       with:
         fetch-depth: 0 # fetching all, needed to correctly calculate version
 
@@ -46,16 +46,16 @@ jobs:
         docker build -t mybuildimage -f "./docker/${{ matrix.base-image }}.dockerfile" .
         docker run --mount type=bind,source="${GITHUB_WORKSPACE}",target=/project --rm mybuildimage /bin/sh -c '
           set -e
-          dotnet publish -f net9.0 -c Release ./test/test-applications/integrations/TestApplication.Smoke
+          dotnet publish -f net10.0 -c Release ./test/test-applications/integrations/TestApplication.Smoke
           export OTEL_DOTNET_AUTO_HOME="${PWD}/bin/tracer-home"
           . ./instrument.sh
-          ./test/test-applications/integrations/bin/TestApplication.Smoke/Release/net9.0/publish/TestApplication.Smoke
+          ./test/test-applications/integrations/bin/TestApplication.Smoke/Release/net10.0/publish/TestApplication.Smoke
             test "$(ls -A /var/log/opentelemetry/dotnet )"
         '
 
     - name: Publish Linux build
       if: (${{ job.status }} != 'cancelled')
-      uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # tag: v4.6.2
+      uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # tag: v5.0.0
       with:
         name: bin-${{ matrix.base-image }}-${{ matrix.architecture }}
         path: bin/tracer-home

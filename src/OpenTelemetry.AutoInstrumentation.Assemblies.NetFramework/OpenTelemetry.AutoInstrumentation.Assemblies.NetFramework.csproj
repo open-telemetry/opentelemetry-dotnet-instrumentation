@@ -1,0 +1,19 @@
+﻿<Project>
+  <Import Project="Sdk.props" Sdk="Microsoft.NET.Sdk" />
+  <Import Project="..\CommonExcludedAssets.props" />
+
+  <PropertyGroup>
+    <TargetFrameworks>net462;net47;net471;net472</TargetFrameworks>
+    <DebugType>none</DebugType>
+    <CopyBuildOutputToOutputDirectory>false</CopyBuildOutputToOutputDirectory>
+    <AccelerateBuildsInVisualStudio>false</AccelerateBuildsInVisualStudio>
+    <DisableFastUpToDateCheck>true</DisableFastUpToDateCheck>
+    <CopyBuildOutputToPublishDirectory>false</CopyBuildOutputToPublishDirectory>
+    <PublishDocumentationFile>false</PublishDocumentationFile>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\OpenTelemetry.AutoInstrumentation\OpenTelemetry.AutoInstrumentation.csproj" />
+  </ItemGroup>
+  <Import Project="Sdk.targets" Sdk="Microsoft.NET.Sdk" />
+  <Target Name="Compile" />
+</Project>

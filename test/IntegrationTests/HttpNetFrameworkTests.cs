@@ -29,6 +29,21 @@ public class HttpNetFrameworkTests : TestHelper
     }
 
     [Fact]
+    [Trait("Category", "EndToEnd")]
+    public void SubmitTracesFileBased()
+    {
+        using var collector = new MockSpansCollector(Output);
+        SetFileBasedExporter(collector);
+        EnableFileBasedConfigWithDefaultPath();
+
+        collector.Expect("OpenTelemetry.Instrumentation.Http.HttpWebRequest");
+
+        RunTestApplication();
+
+        collector.AssertExpectations();
+    }
+
+    [Fact]
     public void SubmitTracesCapturesHttpHeaders()
     {
         using var collector = new MockSpansCollector(Output);

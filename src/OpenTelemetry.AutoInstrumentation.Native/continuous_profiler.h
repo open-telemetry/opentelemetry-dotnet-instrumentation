@@ -32,8 +32,8 @@ extern "C"
     EXPORTTHIS int32_t SelectiveSamplerReadThreadSamples(int32_t len, unsigned char* buf);
     // ReSharper disable CppInconsistentNaming
     EXPORTTHIS void ContinuousProfilerSetNativeContext(uint64_t traceIdHigh, uint64_t traceIdLow, uint64_t spanId);
-    EXPORTTHIS void SelectiveSamplingStart(uint64_t traceIdHigh, uint64_t traceIdLow, uint64_t spanId);
-    EXPORTTHIS void SelectiveSamplingStop(uint64_t traceIdHigh, uint64_t traceIdLow, uint64_t spanId);
+    EXPORTTHIS void SelectiveSamplingStart(uint64_t traceIdHigh, uint64_t traceIdLow);
+    EXPORTTHIS void SelectiveSamplingStop(uint64_t traceIdHigh, uint64_t traceIdLow);
     // ReSharper restore CppInconsistentNaming
 }
 
@@ -56,33 +56,56 @@ struct FunctionIdentifierResolveArgs
     FunctionID  function_id;
     COR_PRF_FRAME_INFO frame_info;
 
+    FunctionIdentifierResolveArgs() = delete;
+    FunctionIdentifierResolveArgs(const FunctionID func_id, const COR_PRF_FRAME_INFO frame_info)
+        : function_id(func_id)
+        , frame_info(frame_info)
+    {
+    }
     bool operator==(const FunctionIdentifierResolveArgs& p) const
     {
         return function_id == p.function_id && frame_info == p.frame_info;
     }
 };
 
+struct trace_context
+{
+    uint64_t trace_id_high_;
+    uint64_t trace_id_low_;
+
+    trace_context(): trace_id_high_(0), trace_id_low_(0)
+    {
+    }
+    trace_context(const uint64_t trace_id_high, const uint64_t trace_id_low)
+        : trace_id_high_(trace_id_high)
+        , trace_id_low_(trace_id_low)
+    {
+    }
+
+    bool operator==(const trace_context& p) const
+    {
+        return trace_id_low_ == p.trace_id_low_ && trace_id_high_ == p.trace_id_high_;
+    }
+    [[nodiscard]] bool IsDefault() const;
+};
+
 class thread_span_context
 {
 public:
-    uint64_t trace_id_high_;
-    uint64_t trace_id_low_;
+    trace_context trace_context_;
     uint64_t span_id_;
 
-    thread_span_context() : trace_id_high_(0), trace_id_low_(0), span_id_(0)
+    thread_span_context() : span_id_(0)
     {
     }
     thread_span_context(uint64_t _traceIdHigh, uint64_t _traceIdLow, uint64_t _spanId) :
-        trace_id_high_(_traceIdHigh), trace_id_low_(_traceIdLow), span_id_(_spanId)
+        trace_context_(_traceIdHigh, _traceIdLow), span_id_(_spanId)
     {
     }
-    thread_span_context(thread_span_context const& other) :
-        trace_id_high_(other.trace_id_high_), trace_id_low_(other.trace_id_low_), span_id_(other.span_id_)
-    {
-    }
+
     bool operator==(const thread_span_context& other) const
     {
-        return trace_id_high_ == other.trace_id_high_ && trace_id_low_ == other.trace_id_low_ && span_id_ == other.span_id_;
+        return trace_context_ == other.trace_context_ && span_id_ == other.span_id_;
     }
     bool operator!=(const thread_span_context& other) const
     {
@@ -120,11 +143,20 @@ struct std::hash<continuous_profiler::FunctionIdentifierResolveArgs>
 };
 
 template <>
+struct std::hash<continuous_profiler::trace_context>
+{
+    std::size_t operator()(const continuous_profiler::trace_context& k) const noexcept
+    {
+        return hash_combine(k.trace_id_high_, k.trace_id_low_);
+    }
+};
+
+template <>
 struct std::hash<continuous_profiler::thread_span_context>
 {
     std::size_t operator()(const continuous_profiler::thread_span_context& k) const noexcept
     {
-        return hash_combine(k.trace_id_high_, k.trace_id_low_, k.span_id_);
+        return hash_combine(k.trace_context_, k.span_id_);
     }
 };
 
@@ -171,6 +203,7 @@ public:
     void StartBatch() const;
     void StartSelectedThreadsBatch() const;
     void EndSelectedThreadsBatch() const;
+    void WriteSpanContext(const thread_span_context& span_context) const;
     void StartSample(ThreadID id, const ThreadState* state, const thread_span_context& span_context) const;
     void StartSampleForSelectedThread(const ThreadState* state, const thread_span_context& span_context) const;
     void MarkSelectedForFrequentSampling(bool value) const;
@@ -198,15 +231,16 @@ namespace continuous_profiler
 class ThreadSpanContextMap
 {
 public:
-    void                                Put(ThreadID threadId, const thread_span_context& currentSpanContext);
-    std::optional<thread_span_context>  Get(ThreadID threadId);
-    const std::unordered_set<ThreadID>* Get(const thread_span_context& spanContext);
-    void                                Remove(const thread_span_context& spanContext);
-    void                                Remove(ThreadID threadId);
+    void                               Put(ThreadID threadId, const thread_span_context& currentSpanContext);
+    std::optional<thread_span_context> GetContext(ThreadID threadId);
+    void                               GetAllThreads(trace_context traceContext, std::unordered_set<ThreadID>& buffer);
+    void                               Remove(const thread_span_context& spanContext);
+    void                               Remove(ThreadID threadId);
 
 private:
-    std::unordered_map<ThreadID, thread_span_context>                     thread_span_context_map;
-    std::unordered_map<thread_span_context, std::unordered_set<ThreadID>> span_context_thread_map;
+    std::unordered_map<ThreadID, thread_span_context>                          thread_span_context_map;
+    std::unordered_map<thread_span_context, std::unordered_set<ThreadID>>      span_context_thread_map;
+    std::unordered_map<trace_context, std::unordered_set<thread_span_context>> trace_active_span_map;
 };
 template <typename TKey, typename TValue>
 class NameCache
@@ -275,20 +309,21 @@ enum class SamplingType : int32_t { Continuous = 1, SelectedThreads = 2 };
 class ContinuousProfiler
 {
 public:
-    std::optional<unsigned int> threadSamplingInterval;
-    std::optional<unsigned int> selectedThreadsSamplingInterval;
-    void                        StartThreadSampling();
-    void                        Shutdown();
-    bool                        IsShutdownRequested() const;
-    static void                 InitSelectiveSamplingBuffer();
-    unsigned int                maxMemorySamplesPerMinute;
-    void                        StartAllocationSampling(unsigned int maxMemorySamplesPerMinute);
-    void                        StopAllocationSampling();
-    void                        AllocationTick(ULONG dataLen, LPCBYTE data);
-    ICorProfilerInfo12*         info12;
-    static void                 ThreadCreated(ThreadID thread_id);
-    void                        ThreadDestroyed(ThreadID thread_id);
-    void                        ThreadNameChanged(ThreadID thread_id, ULONG cch_name, WCHAR name[]);
+    std::optional<unsigned int>                        threadSamplingInterval;
+    std::optional<unsigned int>                        selectedThreadsSamplingInterval;
+    std::chrono::time_point<std::chrono::steady_clock> nextOutdatedEntriesScan;
+    void                                               StartThreadSampling();
+    void                                               Shutdown();
+    bool                                               IsShutdownRequested() const;
+    static void                                        InitSelectiveSamplingBuffer();
+    unsigned int                                       maxMemorySamplesPerMinute;
+    void                                               StartAllocationSampling(unsigned int maxMemorySamplesPerMinute);
+    void                                               StopAllocationSampling();
+    void                                               AllocationTick(ULONG dataLen, LPCBYTE data);
+    ICorProfilerInfo12*                                info12;
+    static void                                        ThreadCreated(ThreadID thread_id);
+    void                                               ThreadDestroyed(ThreadID thread_id);
+    void                                               ThreadNameChanged(ThreadID thread_id, ULONG cch_name, WCHAR name[]);
 
     void SetGlobalInfo12(ICorProfilerInfo12* info12);
     ThreadState* GetCurrentThreadState(ThreadID tid);

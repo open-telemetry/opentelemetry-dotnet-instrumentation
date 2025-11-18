@@ -9,10 +9,10 @@ internal class HttpClientMetricsInitializer
 
     public HttpClientMetricsInitializer(LazyInstrumentationLoader lazyInstrumentationLoader)
     {
-        lazyInstrumentationLoader.Add(new GenericInitializer("System.Net.Http", InitializeOnFirstCall));
+        lazyInstrumentationLoader.Add(new GenericInitializer("System.Net.Http", "HttpClientMetricsInitializer", InitializeOnFirstCall));
 
 #if NETFRAMEWORK
-        lazyInstrumentationLoader.Add(new GenericInitializer("System.Net", InitializeOnFirstCall));
+        lazyInstrumentationLoader.Add(new GenericInitializer("System.Net", "HttpClientMetricsInitializerForSystemNet", InitializeOnFirstCall));
 #endif
     }
 

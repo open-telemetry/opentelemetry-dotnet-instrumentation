@@ -19,7 +19,7 @@
 namespace trace
 {
 
-const size_t kPublicKeySize = 8;
+constexpr size_t kPublicKeySize = 8;
 const WSTRING tracemethodintegration_assemblyname = WStr("#TraceMethodFeature");
 
 // PublicKey represents an Assembly Public Key token, which is an 8 byte binary

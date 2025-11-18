@@ -10,6 +10,7 @@ using OpenTelemetry.AutoInstrumentation.Configurations;
 using OpenTelemetry.AutoInstrumentation.ContinuousProfiler;
 #endif
 using OpenTelemetry.AutoInstrumentation.Diagnostics;
+using OpenTelemetry.AutoInstrumentation.Instrumentations.NoCode;
 using OpenTelemetry.AutoInstrumentation.Loading;
 using OpenTelemetry.AutoInstrumentation.Logging;
 using OpenTelemetry.AutoInstrumentation.Plugins;
@@ -66,6 +67,10 @@ internal static class Instrumentation
 
     internal static Lazy<SdkSettings> SdkSettings { get; } = new(() => Settings.FromDefaultSources<SdkSettings>(FailFastSettings.Value.FailFast));
 
+    internal static Lazy<NoCodeSettings> NoCodeSettings { get; } = new(() => Settings.FromDefaultSources<NoCodeSettings>(FailFastSettings.Value.FailFast));
+
+    internal static Lazy<PluginsSettings> PluginsSettings { get; } = new(() => Settings.FromDefaultSources<PluginsSettings>(FailFastSettings.Value.FailFast));
+
     /// <summary>
     /// Initialize the OpenTelemetry SDK with a pre-defined set of exporters, shims, and
     /// instrumentations.
@@ -99,7 +104,7 @@ internal static class Instrumentation
             // Initialize SdkSelfDiagnosticsEventListener to create an EventListener for the OpenTelemetry SDK
             _sdkEventListener = new(Logger);
 
-            _pluginManager = new PluginManager(GeneralSettings.Value);
+            _pluginManager = new PluginManager(PluginsSettings.Value);
             _pluginManager.Initializing();
 
             // Register to shutdown events
@@ -183,6 +188,11 @@ internal static class Instrumentation
         if (GeneralSettings.Value.ProfilerEnabled)
         {
             RegisterDirectBytecodeInstrumentations(InstrumentationDefinitions.GetAllDefinitions());
+            if (NoCodeSettings.Value.Enabled)
+            {
+                NoCodeIntegrationHelper.NoCodeEntries = NoCodeSettings.Value.InstrumentedMethods;
+                RegisterBytecodeInstrumentations(NoCodeSettings.Value.GetDirectPayload(), "direct, no-code", NativeMethods.AddInstrumentations);
+            }
 
             try
             {

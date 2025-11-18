@@ -11,8 +11,8 @@ namespace TestApplication.SelectiveSampler.Plugins;
 // Custom processor that selects all spans for frequent sampling.
 public class FrequentSamplingProcessor : BaseProcessor<Activity>
 {
-    private static Action<Activity>? _startSamplingDelegate;
-    private static Action<Activity>? _stopSamplingDelegate;
+    private static Action<ActivityTraceId>? _startSamplingDelegate;
+    private static Action<ActivityTraceId>? _stopSamplingDelegate;
 
     public FrequentSamplingProcessor()
     {
@@ -22,20 +22,32 @@ public class FrequentSamplingProcessor : BaseProcessor<Activity>
             throw new Exception("OpenTelemetry.AutoInstrumentation.NativeMethods could not be found.");
         }
 
-        var startMethod = nativeMethodsType.GetMethod("SelectiveSamplingStart", BindingFlags.Static | BindingFlags.Public, null, [typeof(Activity)], null);
-        var stopMethod = nativeMethodsType!.GetMethod("SelectiveSamplingStop", BindingFlags.Static | BindingFlags.Public, null, [typeof(Activity)], null);
+        var startMethod = nativeMethodsType.GetMethod("SelectiveSamplingStart", BindingFlags.Static | BindingFlags.Public, null, [typeof(ActivityTraceId)], null);
+        var stopMethod = nativeMethodsType!.GetMethod("SelectiveSamplingStop", BindingFlags.Static | BindingFlags.Public, null, [typeof(ActivityTraceId)], null);
 
-        _startSamplingDelegate = (Action<Activity>)Delegate.CreateDelegate(typeof(Action<Activity>), startMethod!);
-        _stopSamplingDelegate = (Action<Activity>)Delegate.CreateDelegate(typeof(Action<Activity>), stopMethod!);
+        _startSamplingDelegate = (Action<ActivityTraceId>)Delegate.CreateDelegate(typeof(Action<ActivityTraceId>), startMethod!);
+        _stopSamplingDelegate = (Action<ActivityTraceId>)Delegate.CreateDelegate(typeof(Action<ActivityTraceId>), stopMethod!);
     }
 
     public override void OnStart(Activity data)
     {
-        _startSamplingDelegate?.Invoke(data);
+        // Native side API is trace-based, notifying only of root span is sufficient.
+        if (IsLocalRoot(data))
+        {
+            _startSamplingDelegate?.Invoke(data.TraceId);
+        }
     }
 
     public override void OnEnd(Activity data)
     {
-        _stopSamplingDelegate?.Invoke(data);
+        if (IsLocalRoot(data))
+        {
+            _stopSamplingDelegate?.Invoke(data.TraceId);
+        }
+    }
+
+    private static bool IsLocalRoot(Activity data)
+    {
+        return data.Parent == null || data.HasRemoteParent;
     }
 }

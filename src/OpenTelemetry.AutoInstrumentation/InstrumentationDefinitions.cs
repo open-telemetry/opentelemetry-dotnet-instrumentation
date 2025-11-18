@@ -5,7 +5,7 @@ namespace OpenTelemetry.AutoInstrumentation;
 
 internal static partial class InstrumentationDefinitions
 {
-    private static readonly string AssemblyFullName = typeof(InstrumentationDefinitions).Assembly.FullName!;
+    internal static readonly string AssemblyFullName = typeof(InstrumentationDefinitions).Assembly.FullName!;
 
     internal static Payload GetAllDefinitions()
     {

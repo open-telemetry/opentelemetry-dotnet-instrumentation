@@ -5,6 +5,8 @@
   OpenTelemetry.AutoInstrumentation,
   OpenTelemetry.AutoInstrumentation.Loader,
   OpenTelemetry.Exporter.OpenTelemetryProtocol,
+  OpenTelemetry.Instrumentation.AspNet,
+  OpenTelemetry.Instrumentation.AspNet.TelemetryHttpModule,
   OpenTelemetry.Instrumentation.Process,
   OpenTelemetry.Instrumentation.Runtime,
   OpenTelemetry.Resources.Azure,

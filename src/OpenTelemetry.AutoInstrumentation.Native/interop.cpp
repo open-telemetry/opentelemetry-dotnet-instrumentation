@@ -1,4 +1,4 @@
-// Copyright The OpenTelemetry Authors
+﻿// Copyright The OpenTelemetry Authors
 // SPDX-License-Identifier: Apache-2.0
 
 //---------------------------------------------------------------------------------------
@@ -75,5 +75,12 @@ EXTERN_C char* dddlerror(void)
 EXTERN_C void* dddlsym(void* __restrict __handle, const char* __restrict __name)
 {
     return dlsym(__handle, __name);
+}
+#endif
+
+#ifdef _WIN32
+EXTERN_C INT32 STDAPICALLTYPE GetNetFrameworkRedirectionVersion()
+{
+    return trace::profiler != nullptr ? trace::profiler->GetNetFrameworkRedirectionVersion() : 0;
 }
 #endif

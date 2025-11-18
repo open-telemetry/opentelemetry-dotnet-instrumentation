@@ -35,7 +35,7 @@ Attempting to detect the runtime and use the native profiler from corresponding 
 
   case $(uname -m) in
     x86_64)  ARCHITECTURE="x64" ;;
-    aarch64) ARCHITECTURE="arm64" ;;
+    aarch64|arm64) ARCHITECTURE="arm64" ;;
   esac
 
   case "$ARCHITECTURE" in

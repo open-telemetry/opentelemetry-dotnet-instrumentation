@@ -1,0 +1,18 @@
+file_format: "1.0-rc.1"
+
+tracer_provider:
+  processors:
+    - batch:
+        exporter:
+          otlp_http:
+            endpoint: ${OTEL_EXPORTER_OTLP_TRACES_ENDPOINT}
+    - batch:
+        exporter:
+          zipkin:
+            endpoint: http://localhost:9411/api/v2/spans
+
+instrumentation/development:
+  dotnet:
+    traces:
+      aspnetcore:
+      httpclient:
