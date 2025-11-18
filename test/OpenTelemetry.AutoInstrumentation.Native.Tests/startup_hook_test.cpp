@@ -104,20 +104,25 @@ TEST(StartupHookTest, GetStartupHookPathReturnsCorrectPath)
     // Test for ZIP layout
     auto profiler_path =
         (std::filesystem::path(home_path) / "win-x64" / "OpenTelemetry.AutoInstrumentation.Native.dll").wstring();
-    auto startup_hook_path = GetStartupHookPath(profiler_path);
+    auto startup_hook_path = GetStartupHookPath(profiler_path, EmptyWStr);
     ASSERT_EQ(startup_hook_path, otel_startup_hook_path);
 
     // Test for NuGet platform dependent layout
     profiler_path =
         (std::filesystem::path(home_path) / "net" / "OpenTelemetry.AutoInstrumentation.Native.dll").wstring();
-    startup_hook_path = GetStartupHookPath(profiler_path);
+    startup_hook_path = GetStartupHookPath(profiler_path, EmptyWStr);
     ASSERT_EQ(startup_hook_path, otel_startup_hook_path);
 
     // Test for NuGet platform independent layout
     profiler_path = (std::filesystem::path(home_path) / "net" / "runtimes" / "win-x64" /
                      "OpenTelemetry.AutoInstrumentation.Native.dll")
                         .wstring();
-    startup_hook_path = GetStartupHookPath(profiler_path);
+    startup_hook_path = GetStartupHookPath(profiler_path, EmptyWStr);
+    ASSERT_EQ(startup_hook_path, otel_startup_hook_path);
+
+    // Test for OTEL_HOME set
+    profiler_path = (std::filesystem::path(base_path) / "OpenTelemetry.AutoInstrumentation.Native.dll").wstring();
+    startup_hook_path = GetStartupHookPath(profiler_path, home_path);
     ASSERT_EQ(startup_hook_path, otel_startup_hook_path);
 }
 
@@ -126,6 +131,6 @@ TEST(StartupHookTest, GetStartupHookPathReturnsEmptyWhenNotFound)
     // Using "home_path" here would find the DLL as we traverse up to the parent
     // directory, so use a completely unrelated path, e.g. base_path
     auto profiler_path = (std::filesystem::path(base_path) / "OpenTelemetry.AutoInstrumentation.Native.dll").wstring();
-    auto startup_hook_path = GetStartupHookPath(profiler_path);
+    auto startup_hook_path = GetStartupHookPath(profiler_path, EmptyWStr);
     ASSERT_EQ(startup_hook_path, EmptyWStr);
 }
