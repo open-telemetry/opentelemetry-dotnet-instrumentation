@@ -138,6 +138,17 @@ public class HttpTests : TestHelper
         collector.Expect("Microsoft.AspNetCore.Routing");
         collector.Expect("Microsoft.AspNetCore.Diagnostics");
         collector.Expect("Microsoft.AspNetCore.RateLimiting");
+
+#if NET10_0_OR_GREATER
+        collector.Expect("Microsoft.AspNetCore.Components"); // missing
+        collector.Expect("Microsoft.AspNetCore.Components.Server.Circuits"); // missing
+        collector.Expect("Microsoft.AspNetCore.Components.Lifecycle"); // missing
+        collector.Expect("Microsoft.AspNetCore.Authorization"); // missing
+        collector.Expect("Microsoft.AspNetCore.Authentication"); // missing
+        collector.Expect("Microsoft.AspNetCore.Identity"); // missing
+        collector.Expect("Microsoft.AspNetCore.MemoryPool");
+#endif
+
         collector.ExpectAdditionalEntries(x => x.All(m => m.InstrumentationScopeName != "OpenTelemetry.Instrumentation.Http"));
 
         RunTestApplication();
