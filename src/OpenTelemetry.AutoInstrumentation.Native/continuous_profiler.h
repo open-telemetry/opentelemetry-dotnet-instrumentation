@@ -312,6 +312,7 @@ class ContinuousProfiler
 public:
     std::optional<unsigned int> threadSamplingInterval;
     std::optional<unsigned int> selectedThreadsSamplingInterval;
+    std::chrono::time_point<std::chrono::steady_clock> nextOutdatedEntriesScan;
     void                        StartThreadSampling();
     void                        Shutdown();
     bool                        IsShutdownRequested() const;
