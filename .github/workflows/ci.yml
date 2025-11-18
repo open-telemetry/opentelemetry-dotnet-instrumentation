@@ -34,11 +34,11 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        test-tfm: [ net9.0, net8.0, net462 ]
-        machine: [ windows-2022, windows-2025, ubuntu-22.04, macos-13, ubuntu-22.04-arm ]
+        test-tfm: [ net10.0, net9.0, net8.0, net462 ]
+        machine: [ windows-2022, windows-2025, ubuntu-22.04, macos-14, ubuntu-22.04-arm ]
         exclude:
           - test-tfm: net462
-            machine: macos-13
+            machine: macos-14
           - test-tfm: net462
             machine: ubuntu-22.04
           - test-tfm: net462
@@ -53,9 +53,9 @@ jobs:
           - machine: ubuntu-22.04
             containers: linux
             artifact-name: ubuntu-22.04
-          - machine: macos-13
+          - machine: macos-14
             containers: none
-            artifact-name: macos-13
+            artifact-name: macos-14
           - machine: ubuntu-22.04-arm
             containers: linux
             artifact-name: ubuntu-22.04-arm
@@ -63,7 +63,7 @@ jobs:
     steps:
 
       - name: Checkout
-        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # tag: v5.0.0
+        uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # tag: v5.0.1
         with:
           fetch-depth: 0 # fetching all, needed to correctly calculate version
 
@@ -71,8 +71,9 @@ jobs:
         uses: actions/setup-dotnet@d4c94342e560b34958eacfc5d055d21461ed1c5d # tag: v5.0.0
         with:
           dotnet-version: | 
-            8.0.414
-            9.0.305
+            8.0.416
+            9.0.307
+            10.0.100
 
       - name: Check for NuGet packages cache
         uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # tag: v4.3.0
@@ -82,7 +83,7 @@ jobs:
           path: ${{ env.NUGET_PACKAGES }}
 
       - name: Download Artifacts from build job
-        uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0 # tag: v5.0.0
+        uses: actions/download-artifact@018cc2cf5baa6db3ef3c5f8a56943fffe632ef53 # tag: v6.0.0
         with:
           name: bin-${{ matrix.artifact-name }}
           path: bin/tracer-home
@@ -98,7 +99,7 @@ jobs:
 
       - name: Upload test logs
         if: always()
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # tag: v4.6.2
+        uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # tag: v5.0.0
         with:
           name: test-logs-${{ matrix.machine }}-${{ matrix.test-tfm }}-containers-${{ matrix.containers }}
           path: test-artifacts/
@@ -122,7 +123,7 @@ jobs:
     steps:
 
       - name: Checkout
-        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # tag: v5.0.0
+        uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # tag: v5.0.1
         with:
           fetch-depth: 0 # fetching all, needed to correctly calculate version
 
@@ -130,8 +131,9 @@ jobs:
         uses: actions/setup-dotnet@d4c94342e560b34958eacfc5d055d21461ed1c5d # tag: v5.0.0
         with:
           dotnet-version: | 
-            8.0.414
-            9.0.305
+            8.0.416
+            9.0.307
+            10.0.100
 
       - name: Check for NuGet packages cache
         uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # tag: v4.3.0
@@ -141,7 +143,7 @@ jobs:
           path: ${{ env.NUGET_PACKAGES }}
 
       - name: Download Artifacts from build job
-        uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0 # tag: v5.0.0
+        uses: actions/download-artifact@018cc2cf5baa6db3ef3c5f8a56943fffe632ef53 # tag: v6.0.0
         with:
           name: bin-${{ matrix.artifact-name }}
           path: bin/tracer-home
@@ -165,7 +167,7 @@ jobs:
     steps:
 
       - name: Checkout
-        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # tag: v5.0.0
+        uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # tag: v5.0.1
         with:
           fetch-depth: 0 # fetching all, needed to correctly calculate version
 
@@ -173,8 +175,9 @@ jobs:
         uses: actions/setup-dotnet@d4c94342e560b34958eacfc5d055d21461ed1c5d # tag: v5.0.0
         with:
           dotnet-version: | 
-            8.0.414
-            9.0.305
+            8.0.416
+            9.0.307
+            10.0.100
 
       - name: Check for NuGet packages cache
         uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # tag: v4.3.0
@@ -184,7 +187,7 @@ jobs:
           path: ${{ env.NUGET_PACKAGES }}
 
       - name: Download Artifacts from build job
-        uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0 # tag: v5.0.0
+        uses: actions/download-artifact@018cc2cf5baa6db3ef3c5f8a56943fffe632ef53 # tag: v6.0.0
         with:
           name: bin-${{ matrix.artifact-name }}
           path: bin/tracer-home
@@ -197,7 +200,7 @@ jobs:
 
       - name: Upload test logs
         if: always()
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # tag: v4.6.2
+        uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # tag: v5.0.0
         with:
           name: test-logs-${{ matrix.machine }}-containers-${{ matrix.containers }}
           path: test-artifacts/
@@ -233,12 +236,12 @@ jobs:
     steps:
 
     - name: Checkout
-      uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # tag: v5.0.0
+      uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # tag: v5.0.1
       with:
         fetch-depth: 0 # fetching all, needed to correctly calculate version
 
     - name: Download Artifacts from build job
-      uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0 # tag: v5.0.0
+      uses: actions/download-artifact@018cc2cf5baa6db3ef3c5f8a56943fffe632ef53 # tag: v6.0.0
       with:
         name: bin-${{ matrix.build-source }}
         path: bin/tracer-home
@@ -252,7 +255,7 @@ jobs:
 
     - name: Upload test logs
       if: always()
-      uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # tag: v4.6.2
+      uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # tag: v5.0.0
       with:
         name: test-logs-container-${{ matrix.machine }}-${{ matrix.base-image }}
         path: test-artifacts/
@@ -264,7 +267,7 @@ jobs:
       matrix:
         include:
           - machine: ubuntu-22.04
-          - machine: macos-13
+          - machine: macos-14
           - machine: windows-2022
           - machine: windows-2025
           - machine: ubuntu-22.04-arm
@@ -272,7 +275,7 @@ jobs:
     steps:
       
       - name: Checkout
-        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # tag: v5.0.0
+        uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # tag: v5.0.1
         with:
           fetch-depth: 0 # fetching all, needed to correctly calculate version
 
@@ -280,8 +283,9 @@ jobs:
         uses: actions/setup-dotnet@d4c94342e560b34958eacfc5d055d21461ed1c5d # tag: v5.0.0
         with:
           dotnet-version: | 
-            8.0.414
-            9.0.305
+            8.0.416
+            9.0.307
+            10.0.100
 
       - name: Check for NuGet packages cache
         uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # tag: v4.3.0
@@ -291,7 +295,7 @@ jobs:
           path: ${{ env.NUGET_PACKAGES }}
 
       - name: Download NuGet Artifacts from build-nuget-packages job
-        uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0 # tag: v5.0.0
+        uses: actions/download-artifact@018cc2cf5baa6db3ef3c5f8a56943fffe632ef53 # tag: v6.0.0
         with:
           name: bin-nuget-packages
           path: bin/nuget-artifacts/
@@ -301,7 +305,7 @@ jobs:
 
       - name: Upload test logs
         if: always()
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # tag: v4.6.2
+        uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # tag: v5.0.0
         with:
           name: test-logs-nuget-packages-${{ matrix.machine }}
           path: test-artifacts/

@@ -11,7 +11,7 @@ internal static class OtlpResourceExpectorExtensions
     {
         resourceExpector.Expect("service.name", serviceName); // this is set via env var and App.config, but env var has precedence
 #if NETFRAMEWORK
-        resourceExpector.Expect("deployment.environment", "test"); // this is set via App.config
+        resourceExpector.Expect("deployment.environment.name", "test"); // this is set via App.config
 #endif
         resourceExpector.Expect("telemetry.sdk.name", "opentelemetry");
         resourceExpector.Expect("telemetry.sdk.language", "dotnet");

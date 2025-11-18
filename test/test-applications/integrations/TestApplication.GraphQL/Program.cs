@@ -12,13 +12,17 @@ public class Program
     {
         var directory = Directory.GetCurrentDirectory();
 
-        var host = new WebHostBuilder()
-            .UseKestrel(serverOptions =>
-                // Explicitly set AllowSynchronousIO to true since the default changes
-                // between AspNetCore 2.0 and 3.0
-                serverOptions.AllowSynchronousIO = true)
-            .UseContentRoot(directory)
-            .UseStartup<Startup>()
+        var host = new HostBuilder()
+            .ConfigureWebHost(webHostBuilder =>
+            {
+                webHostBuilder
+                    .UseKestrel(serverOptions =>
+                        // Explicitly set AllowSynchronousIO to true since the default changes
+                        // between AspNetCore 2.0 and 3.0
+                        serverOptions.AllowSynchronousIO = true)
+                    .UseContentRoot(directory)
+                    .UseStartup<Startup>();
+            })
             .Build();
 
         var logger = host.Services.GetRequiredService<ILogger<Program>>();

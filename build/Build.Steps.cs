@@ -1,5 +1,7 @@
 using System.Diagnostics;
 using System.Runtime.InteropServices;
+using System.Security.Cryptography;
+using System.Text;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using Extensions;
@@ -43,12 +45,20 @@ partial class Build
 
     private static readonly IEnumerable<TargetFramework> TargetFrameworks = new[]
     {
+       TargetFramework.NET8_0,
+       TargetFramework.NET462,
+    };
+
+    private static readonly IEnumerable<TargetFramework> TargetFrameworksForNetFxPacking = new[]
+    {
         TargetFramework.NET462,
-        TargetFramework.NET8_0
+        TargetFramework.NET47,
+        TargetFramework.NET471,
+        TargetFramework.NET472,
     };
 
     private static readonly IEnumerable<TargetFramework> TestFrameworks = TargetFrameworks
-        .Concat(TargetFramework.NET9_0);
+        .Concat(TargetFramework.NET9_0, TargetFramework.NET10_0);
 
     Target CreateRequiredDirectories => _ => _
         .Unlisted()
@@ -267,17 +277,32 @@ partial class Build
         {
             var targetFrameworks = IsWin
                 ? TargetFrameworks
-                : TargetFrameworks.Where(framework => !framework.ToString().StartsWith("net4"));
+                : TargetFrameworks.ExceptNetFramework();
 
+            // Publish Projects.AutoInstrumentation for .NET targets
             DotNetPublish(s => s
                 .SetProject(Solution.GetProjectByName(Projects.AutoInstrumentation))
                 .SetConfiguration(BuildConfiguration)
                 .SetTargetPlatformAnyCPU()
                 .EnableNoBuild()
                 .SetNoRestore(NoRestore)
-                .CombineWith(targetFrameworks, (p, framework) => p
+                .CombineWith(targetFrameworks.ExceptNetFramework(), (p, framework) => p
                     .SetFramework(framework)
                     .SetOutput(TracerHomeDirectory / MapToFolderOutput(framework))));
+
+            if (IsWin)
+            {
+                // Publish OpenTelemetry.AutoInstrumentation.Assemblies.NetFramework for .NET Framework targets
+                DotNetPublish(s => s
+                    .SetProject(Solution.GetProjectByName(Projects.AutoInstrumentationNetFxAssemblies))
+                    .SetConfiguration(BuildConfiguration)
+                    .SetTargetPlatformAnyCPU()
+                    .EnableNoBuild()
+                    .SetNoRestore(NoRestore)
+                    .CombineWith(TargetFrameworksForNetFxPacking, (p, framework) => p
+                        .SetFramework(framework)
+                        .SetOutput(TracerHomeDirectory / MapToFolderOutputNetFx(framework))));
+            }
 
             // StartupHook is supported starting .Net Core 3.1.
             // We need to emit AutoInstrumentationStartupHook for .Net Core 3.1 target framework
@@ -313,6 +338,8 @@ partial class Build
             RemoveFilesInNetFolderAvailableInAdditionalStore();
 
             RemoveNonLibraryFilesFromOutput();
+
+            RemoveDuplicateNetFxLibraries();
         });
 
     void RemoveNonLibraryFilesFromOutput()
@@ -351,6 +378,72 @@ partial class Build
                 else
                 {
                     Log.Warning("Cannot remove file available in additional store from net folder " + additionalStoreLibrary.Name + " net folder version: " + netLibraryFileVersionInfo.FileVersion + " additional store version: " + additionalStoreLibraryFileVersionInfo.FileVersion);
+                }
+            }
+        }
+    }
+
+    void RemoveDuplicateNetFxLibraries()
+    {
+        bool FilesAreEqual(string filePath1, string filePath2)
+        {
+            using var hashAlg = SHA256.Create();
+            using var stream1 = File.OpenRead(filePath1);
+            using var stream2 = File.OpenRead(filePath2);
+
+            var hash1 = hashAlg.ComputeHash(stream1);
+            var hash2 = hashAlg.ComputeHash(stream2);
+
+            return hash1.SequenceEqual(hash2);
+        }
+
+        if (IsWin)
+        {
+            (TracerHomeDirectory / "netfx").GlobFiles("**/*.link").DeleteFiles();
+            (TracerHomeDirectory / "netfx").GlobFiles("**/_._").DeleteFiles();
+            var latestFramework = TargetFramework.NetFramework.Last();
+            (TracerHomeDirectory / "netfx" / latestFramework).GlobFiles("*.*")
+                .Where(file => TargetFramework.NetFramework.TakeUntil(older => older == latestFramework)
+                    .All(olderFramework =>
+                    {
+                        var duplicateCandidate = TracerHomeDirectory / "netfx" / olderFramework / file.Name;
+                        return File.Exists(duplicateCandidate) && FilesAreEqual(file, duplicateCandidate);
+                    })).ForEach(file =>
+                    {
+                        file.MoveToDirectory(TracerHomeDirectory / "netfx", ExistsPolicy.FileOverwrite);
+                        TargetFramework.NetFramework.TakeUntil(older => older == latestFramework)
+                            .ForEach(olderFramework =>
+                                (TracerHomeDirectory / "netfx" / olderFramework / file.Name).DeleteFile());
+                    }
+                );
+
+            foreach (var currentFramework in TargetFramework.NetFramework.Skip(1).Reverse())
+            {
+                (TracerHomeDirectory / "netfx" / currentFramework).GlobFiles("*.dll").ForEach(file =>
+                    {
+                        foreach (var olderFramework in TargetFramework.NetFramework.TakeUntil(older =>
+                                     older == currentFramework))
+                        {
+                            var duplicateCandidate = TracerHomeDirectory / "netfx" / olderFramework / file.Name;
+                            if (File.Exists(duplicateCandidate) && FilesAreEqual(file, duplicateCandidate))
+                            {
+                                file.DeleteFile();
+                                (TracerHomeDirectory / "netfx" / currentFramework / (file.Name + ".link")).WriteAllText(
+                                    olderFramework, Encoding.ASCII, false);
+                                break;
+                            }
+                        }
+                    }
+                );
+            }
+
+            // Create placeholder file for empty directories
+            foreach (var currentFramework in TargetFramework.NetFramework)
+            {
+                if ((TracerHomeDirectory / "netfx" / currentFramework).GlobFiles("*.*").Count == 0)
+                {
+                    (TracerHomeDirectory / "netfx" / currentFramework / "_._")
+                        .WriteAllText(string.Empty, Encoding.ASCII, false);
                 }
             }
         }
@@ -569,9 +662,9 @@ partial class Build
                 .CombineWith(TestFrameworks.ExceptNetFramework(), (p, framework) => p
                 .SetFramework(framework)
                 // Additional-deps probes the directory using SemVer format.
-                // Example: For netcoreapp3.1 framework, additional-deps uses 3.1.0 or 3.1.1 and so on.
+                // Example: For net8.0, additional-deps uses 8.0.0.
                 // Major and Minor version are extracted from framework and default value of 0 is appended for patch.
-                .SetOutput(AdditionalDepsDirectory / "shared" / "Microsoft.NETCore.App" / framework.ToString().Substring(framework.ToString().Length - 3) + ".0")));
+                .SetOutput(AdditionalDepsDirectory / "shared" / "Microsoft.NETCore.App" / framework.ToString().Substring("net".Length) + ".0")));
 
             AdditionalDepsDirectory.GlobFiles("**/*deps.json")
                 .ForEach(file =>
@@ -593,9 +686,10 @@ partial class Build
                     // To allow roll forward for applications, like Roslyn, that target one tfm
                     // but have a later runtime move the libraries under the original tfm folder
                     // to the latest one.
-                    if (folderRuntimeName == TargetFramework.NET8_0 || folderRuntimeName == TargetFramework.NET9_0)
+                    if (folderRuntimeName == TargetFramework.NET8_0 || folderRuntimeName == TargetFramework.NET9_0 || folderRuntimeName == TargetFramework.NET10_0)
                     {
-                        depsJson.RollFrameworkForward(TargetFramework.NET8_0, TargetFramework.NET9_0, architectureStores);
+                        depsJson.RollFrameworkForward(TargetFramework.NET8_0, TargetFramework.NET10_0, architectureStores);
+                        depsJson.RollFrameworkForward(TargetFramework.NET9_0, TargetFramework.NET10_0, architectureStores);
                     }
 
                     // Write the updated deps.json file.
@@ -727,6 +821,11 @@ partial class Build
     private string MapToFolderOutput(TargetFramework targetFramework)
     {
         return targetFramework.ToString().StartsWith("net4") ? "netfx" : "net";
+    }
+
+    private string MapToFolderOutputNetFx(TargetFramework targetFramework)
+    {
+        return $"netfx/{targetFramework}";
     }
 
     private void RestoreLegacyNuGetPackagesConfig(IEnumerable<Project> legacyRestoreProjects)

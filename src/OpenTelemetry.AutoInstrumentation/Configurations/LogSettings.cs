@@ -1,6 +1,7 @@
 // Copyright The OpenTelemetry Authors
 // SPDX-License-Identifier: Apache-2.0
 
+using OpenTelemetry.AutoInstrumentation.Configurations.FileBasedConfiguration;
 using OpenTelemetry.AutoInstrumentation.Configurations.Otlp;
 using OpenTelemetry.AutoInstrumentation.Logging;
 
@@ -21,7 +22,7 @@ internal class LogSettings : Settings
     /// <summary>
     /// Gets the list of enabled logs exporters.
     /// </summary>
-    public IReadOnlyList<LogExporter> LogExporters { get; private set; } = new List<LogExporter>();
+    public IReadOnlyList<LogExporter> LogExporters { get; private set; } = [];
 
     /// <summary>
     /// Gets a value indicating whether the IncludeFormattedMessage is enabled.
@@ -41,12 +42,17 @@ internal class LogSettings : Settings
     /// <summary>
     /// Gets the list of enabled instrumentations.
     /// </summary>
-    public IReadOnlyList<LogInstrumentation> EnabledInstrumentations { get; private set; } = new List<LogInstrumentation>();
+    public IReadOnlyList<LogInstrumentation> EnabledInstrumentations { get; private set; } = [];
 
     /// <summary>
     /// Gets logs OTLP Settings.
     /// </summary>
     public OtlpSettings? OtlpSettings { get; private set; }
+
+    /// <summary>
+    /// Gets the processors configured via file-based configuration.
+    /// </summary>
+    public IReadOnlyList<LogProcessorConfig>? Processors { get; private set; }
 
     protected override void OnLoadEnvVar(Configuration configuration)
     {
@@ -70,7 +76,24 @@ internal class LogSettings : Settings
             enabledConfigurationTemplate: ConfigurationKeys.Logs.EnabledLogsInstrumentationTemplate);
     }
 
-    private static IReadOnlyList<LogExporter> ParseLogExporter(Configuration configuration)
+    protected override void OnLoadFile(YamlConfiguration configuration)
+    {
+        var processors = configuration.LoggerProvider?.Processors;
+        LogsEnabled = processors != null && processors.Count > 0;
+        Processors = processors;
+
+        IncludeFormattedMessage = configuration.LogsIncludeFormattedMessage;
+
+        var logs = configuration.InstrumentationDevelopment?.DotNet?.Logs;
+        EnabledInstrumentations = logs?.GetEnabledInstrumentations() ?? [];
+
+        if (EnabledInstrumentations.Contains(LogInstrumentation.Log4Net))
+        {
+            EnableLog4NetBridge = logs?.Log4Net?.BridgeEnabled ?? false;
+        }
+    }
+
+    private static List<LogExporter> ParseLogExporter(Configuration configuration)
     {
         var logExporterEnvVar = configuration.GetString(ConfigurationKeys.Logs.Exporter);
         var exporters = new List<LogExporter>();

@@ -4,6 +4,7 @@
     <PackageReference Include="Newtonsoft.Json" />
     <PackageReference Include="Xunit.SkippableFact" />
     <PackageReference Include="log4net" />
+    <PackageReference Include="Microsoft.Build" Condition=" '$(TargetFramework)' == 'net9.0' " />
   </ItemGroup>
 
   <ItemGroup>
@@ -12,7 +13,55 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Update="Configurations\FileBased\Files\TestInstrumentationConfigurationFile.yaml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Configurations\FileBased\Files\TestInstrumentationFileEnvVars.yaml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Configurations\FileBased\Files\TestInstrumentationFile.yaml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Configurations\FileBased\Files\TestTracesFile.yaml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Configurations\FileBased\Files\TestMetricsFile.yaml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Configurations\FileBased\Files\TestLogsFile.yaml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Configurations\FileBased\Files\NoCodeFile.yaml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Configurations\FileBased\Files\TestPluginsFile.yaml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Configurations\FileBased\Files\TestPropagatorFile.yaml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Configurations\FileBased\Files\TestGeneralFile.yaml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Configurations\FileBased\Files\TestPluginsFileEnvVars.yaml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Update="Configurations\FileBased\Files\TestResourceFile.yaml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Configurations\FileBased\Files\TestTracesFileEnvVars.yaml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Configurations\FileBased\Files\TestMetricsFileEnvVars.yaml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Configurations\FileBased\Files\TestLogsFileEnvVars.yaml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Configurations\FileBased\Files\TestPropagatorFileEnvVars.yaml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Configurations\FileBased\Files\TestGeneralFileEnvVars.yaml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="Configurations\FileBased\Files\TestResourceFileEnvVars.yaml">

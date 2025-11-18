@@ -9,8 +9,8 @@ internal class AspNetWebApiInitializer : InstrumentationInitializer
 {
     private readonly Action<ILifespanManager> _initialize;
 
-    public AspNetWebApiInitializer(Action<ILifespanManager> initialize)
-        : base("System.Web.Http")
+    public AspNetWebApiInitializer(Action<ILifespanManager> initialize, string initializerName)
+        : base("System.Web.Http", initializerName)
     {
         _initialize = initialize;
     }

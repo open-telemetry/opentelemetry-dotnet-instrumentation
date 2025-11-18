@@ -15,7 +15,7 @@ internal class GrpcClientInitializer : InstrumentationInitializer
     private readonly TracerSettings _tracerSettings;
 
     public GrpcClientInitializer(PluginManager pluginManager, TracerSettings tracerSettings)
-        : base("Grpc.Net.Client")
+        : base("Grpc.Net.Client", nameof(GrpcClientInitializer))
     {
         _pluginManager = pluginManager;
         _tracerSettings = tracerSettings;

@@ -1,15 +1,13 @@
 // Copyright The OpenTelemetry Authors
 // SPDX-License-Identifier: Apache-2.0
 
+using OpenTelemetry.AutoInstrumentation.Configurations.FileBasedConfiguration;
+using Vendors.YamlDotNet.Core.Tokens;
+
 namespace OpenTelemetry.AutoInstrumentation.Configurations;
 
 internal class GeneralSettings : Settings
 {
-    /// <summary>
-    /// Gets the list of plugins represented by <see cref="Type.AssemblyQualifiedName"/>.
-    /// </summary>
-    public IList<string> Plugins { get; } = new List<string>();
-
     /// <summary>
     /// Gets a value indicating whether the <see cref="AppDomain.UnhandledException"/> event should trigger
     /// the flushing of telemetry data.
@@ -29,18 +27,19 @@ internal class GeneralSettings : Settings
 
     protected override void OnLoadEnvVar(Configuration configuration)
     {
-        var providerPlugins = configuration.GetString(ConfigurationKeys.ProviderPlugins);
-        if (providerPlugins != null)
-        {
-            foreach (var pluginAssemblyQualifiedName in providerPlugins.Split(Constants.ConfigurationValues.DotNetQualifiedNameSeparator))
-            {
-                Plugins.Add(pluginAssemblyQualifiedName);
-            }
-        }
-
         FlushOnUnhandledException = configuration.GetBool(ConfigurationKeys.FlushOnUnhandledException) ?? false;
         SetupSdk = configuration.GetBool(ConfigurationKeys.SetupSdk) ?? true;
 
         ProfilerEnabled = configuration.GetString(ConfigurationKeys.ProfilingEnabled) == "1";
+    }
+
+    protected override void OnLoadFile(YamlConfiguration configuration)
+    {
+        SetupSdk = !configuration.Disabled;
+        FlushOnUnhandledException = configuration.FlushOnUnhandledException;
+
+        // Using the environment variable instead of YamlConfiguration because the default.NET environment variable
+        // is used for enabling the profiler, and without this environment variable, the profiler will not work.
+        ProfilerEnabled = Environment.GetEnvironmentVariable(ConfigurationKeys.ProfilingEnabled) == "1";
     }
 }

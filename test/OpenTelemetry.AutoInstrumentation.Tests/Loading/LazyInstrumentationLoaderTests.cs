@@ -43,7 +43,7 @@ public class LazyInstrumentationLoaderTests
         public const string DummyAssemblyName = "Dummy.Assembly";
 
         public DummyInitializer()
-            : base(DummyAssemblyName)
+            : base(DummyAssemblyName, nameof(DummyInitializer))
         {
         }
 

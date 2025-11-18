@@ -37,10 +37,10 @@ jobs:
     steps:
 
       - name: Checkout
-        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # tag: v5.0.0
+        uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # tag: v5.0.1
 
       - name: Download artifacts
-        uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0 # tag: v5.0.0
+        uses: actions/download-artifact@018cc2cf5baa6db3ef3c5f8a56943fffe632ef53 # tag: v6.0.0
         with:
           path: .
 
@@ -52,7 +52,7 @@ jobs:
       - run: cd bin-ubuntu-22.04 ; zip -qq -r ../opentelemetry-dotnet-instrumentation-linux-glibc-x64.zip . * ; cd ..
       - run: cd bin-ubuntu-22.04-arm ; zip -qq -r ../opentelemetry-dotnet-instrumentation-linux-glibc-arm64.zip . * ; cd ..
       - run: cd bin-windows-2022 ; zip -qq -r ../opentelemetry-dotnet-instrumentation-windows.zip . * ; cd ..
-      - run: cd bin-macos-13 ; zip -qq -r ../opentelemetry-dotnet-instrumentation-macos.zip . * ; cd ..
+      - run: cd bin-macos-14 ; zip -qq -r ../opentelemetry-dotnet-instrumentation-macos.zip . * ; cd ..
       - run: cd bin-nuget-packages ; zip -qq -r ../opentelemetry-dotnet-instrumentation-nuget-packages.zip . * ; cd ..
       - run: cp installation-scripts-windows-2022/otel-dotnet-auto-install.sh ./otel-dotnet-auto-install.sh
       - run: cp installation-scripts-windows-2022/OpenTelemetry.DotNet.Auto.psm1 ./OpenTelemetry.DotNet.Auto.psm1

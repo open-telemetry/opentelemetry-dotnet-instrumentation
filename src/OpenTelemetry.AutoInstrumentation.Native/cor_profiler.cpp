@@ -1,4 +1,4 @@
-// Copyright The OpenTelemetry Authors
+﻿// Copyright The OpenTelemetry Authors
 // SPDX-License-Identifier: Apache-2.0
 
 #include "cor_profiler.h"
@@ -7,11 +7,6 @@
 #include <corprof.h>
 #include <string>
 #include <typeinfo>
-#ifdef _WIN32
-#include <regex>
-#else
-#include <re2/re2.h>
-#endif
 
 #include "clr_helpers.h"
 #include "dllmain.h"
@@ -25,6 +20,7 @@
 #include "module_metadata.h"
 #include "otel_profiler_constants.h"
 #include "pal.h"
+#include "regex_utils.h"
 #include "resource.h"
 #include "signature_builder.h"
 #include "startup_hook.h"
@@ -77,20 +73,9 @@ HRESULT STDMETHODCALLTYPE CorProfiler::Initialize(IUnknown* cor_profiler_info_un
         Logger::Debug("Environment variables:");
 
         // Update the list also in SmokeTests.NativeLogsHaveNoSensitiveData
-        const auto secrets_pattern = "(?:^|_)(API|TOKEN|SECRET|KEY|PASSWORD|PASS|PWD|HEADER|CREDENTIALS)(?:_|$)";
-#ifdef _WIN32
-        const std::regex secrets_regex(secrets_pattern, std::regex_constants::ECMAScript | std::regex_constants::icase);
-#else
-        static re2::RE2 re(secrets_pattern, RE2::Quiet);
-#endif
-
         for (const auto& env_variable : env_variables)
         {
-#ifdef _WIN32
-            if (!std::regex_search(ToString(env_variable), secrets_regex))
-#else
-            if (!re2::RE2::PartialMatch(ToString(env_variable), re))
-#endif
+            if (!MatchesSecretsPattern(ToString(env_variable)))
             {
                 Logger::Debug("  ", env_variable);
             }
@@ -125,6 +110,7 @@ HRESULT STDMETHODCALLTYPE CorProfiler::Initialize(IUnknown* cor_profiler_info_un
 
     // code is ready to get runtime information
     runtime_information_ = GetRuntimeInformation(this->info_);
+
     if (Logger::IsDebugEnabled())
     {
         if (runtime_information_.is_desktop())
@@ -153,6 +139,7 @@ HRESULT STDMETHODCALLTYPE CorProfiler::Initialize(IUnknown* cor_profiler_info_un
     if (runtime_information_.is_desktop() && IsNetFxAssemblyRedirectionEnabled())
     {
         InitNetFxAssemblyRedirectsMap();
+        DetectFrameworkVersionTableForRedirectsMap();
     }
 #endif
 
@@ -369,6 +356,11 @@ HRESULT STDMETHODCALLTYPE CorProfiler::AssemblyLoadFinished(AssemblyID assembly_
 void CorProfiler::RedirectAssemblyReferences(const ComPtr<IMetaDataAssemblyImport>& assembly_import,
                                              const ComPtr<IMetaDataAssemblyEmit>&   assembly_emit)
 {
+    if (!assembly_version_redirect_map_current_framework_)
+    {
+        return;
+    }
+
     HRESULT       hr               = S_FALSE;
     HCORENUM      core_enum_handle = NULL;
     const ULONG   assembly_refs_sz = 16;
@@ -416,8 +408,8 @@ void CorProfiler::RedirectAssemblyReferences(const ComPtr<IMetaDataAssemblyImpor
                               "] version=", AssemblyVersionStr(assembly_metadata));
             }
 
-            const auto found_redirect = assembly_version_redirect_map_.find(wsz_name);
-            if (found_redirect == assembly_version_redirect_map_.end())
+            const auto found_redirect = assembly_version_redirect_map_current_framework_->find(wsz_name);
+            if (found_redirect == assembly_version_redirect_map_current_framework_->end())
             {
                 // No redirection to be applied here.
                 continue;
@@ -620,6 +612,14 @@ HRESULT STDMETHODCALLTYPE CorProfiler::ModuleLoadFinished(ModuleID module_id, HR
                       std::boolalpha, " | IsNGEN = ", module_info.IsNGEN(), " | IsDynamic = ", module_info.IsDynamic(),
                       " | IsResource = ", module_info.IsResource(), std::noboolalpha);
     }
+
+#ifdef _WIN32
+    if (runtime_information_.is_desktop() && module_info.assembly.name == WStr("System.Data") &&
+        IsSqlClientNetFxILRewriteEnabled())
+    {
+        RewriteILSystemDataCommandText(module_id);
+    }
+#endif
 
     if (module_info.IsNGEN())
     {
@@ -1214,6 +1214,7 @@ void CorProfiler::ConfigureContinuousProfiler(bool         threadSamplingEnabled
     if (selectiveSamplingConfigured)
     {
         this->continuousProfiler->selectedThreadsSamplingInterval = selectedThreadsSamplingInterval;
+        this->continuousProfiler->nextOutdatedEntriesScan         = std::chrono::steady_clock::now();
         continuous_profiler::ContinuousProfiler::InitSelectiveSamplingBuffer();
     }
 
@@ -3234,6 +3235,143 @@ HRESULT CorProfiler::GenerateLoaderType(const ModuleID module_id,
     return S_OK;
 }
 
+// This method rewrites the IL of System.Data.SqlClient.SqlCommand.WriteBeginExecuteEvent
+// to ensure that the CommandText property is passed to the BeginExecute method. Previously,
+// the CommandText was not passed, except when executing a stored procedure, which limited
+// the usefulness of the telemetry data available for SQL instrumentation.
+HRESULT CorProfiler::RewriteILSystemDataCommandText(const ModuleID module_id)
+{
+    if (Logger::IsDebugEnabled())
+    {
+        Logger::Debug("RewriteILSystemDataCommandText: Attempting IL rewrite for System.Data");
+    }
+
+    ComPtr<IUnknown> metadata_interfaces;
+    auto             hr = this->info_->GetModuleMetaData(module_id, ofRead | ofWrite, IID_IMetaDataImport2,
+                                                         metadata_interfaces.GetAddressOf());
+
+    if (FAILED(hr))
+    {
+        Logger::Warn("RewriteILSystemDataCommandText: Failed to get metadata interface for ", module_id);
+        return hr;
+    }
+
+    const auto& metadata_import = metadata_interfaces.As<IMetaDataImport2>(IID_IMetaDataImport);
+    const auto& metadata_emit   = metadata_interfaces.As<IMetaDataEmit2>(IID_IMetaDataEmit);
+
+    // Find the type definition for System.Data.SqlClient.SqlCommand
+    mdTypeDef system_data_sqlclient_sqlcommand;
+    hr = metadata_import->FindTypeDefByName(WStr("System.Data.SqlClient.SqlCommand"), mdTokenNil,
+                                            &system_data_sqlclient_sqlcommand);
+
+    if (FAILED(hr))
+    {
+        Logger::Warn("RewriteILSystemDataCommandText: FindTypeDefByName System.Data.SqlClient.SqlCommand failed");
+        return hr;
+    }
+
+    SignatureBuilder::InstanceMethod write_begin_execute_event_signature{{SignatureBuilder::BuiltIn::Void}, {}};
+
+    // Find the method definition for WriteBeginExecuteEvent
+    mdMethodDef write_begin_execute_event_token;
+    hr = metadata_import->FindMethod(system_data_sqlclient_sqlcommand, WStr("WriteBeginExecuteEvent"),
+                                     write_begin_execute_event_signature.Head(),
+                                     write_begin_execute_event_signature.Size(), &write_begin_execute_event_token);
+
+    if (FAILED(hr))
+    {
+        Logger::Warn("RewriteILSystemDataCommandText: FindMethod "
+                     "System.Data.SqlClient.SqlCommand::WriteBeginExecuteEvent failed");
+        return hr;
+    }
+
+    ILRewriter rewriter(this->info_, nullptr, module_id, write_begin_execute_event_token);
+    hr = rewriter.Import();
+
+    if (FAILED(hr))
+    {
+        Logger::Warn("RewriteILSystemDataCommandText: ILRewriter.Import failed");
+        return hr;
+    }
+
+    // 1. Find the last callvirt instruction (BeginExecute)
+    // callvirt instance void System.Data.SqlEventSource::BeginExecute(int32, string, string, string)
+    ILInstr* lastInstr      = rewriter.GetILList()->m_pPrev;
+    ILInstr* targetCallvirt = nullptr;
+    for (ILInstr* instr = lastInstr; instr != rewriter.GetILList(); instr = instr->m_pPrev)
+    {
+        if (instr->m_opcode == CEE_CALLVIRT)
+        {
+            targetCallvirt = instr;
+            break;
+        }
+    }
+
+    if (!targetCallvirt)
+    {
+        Logger::Warn("RewriteILSystemDataCommandText: Could not find callvirt instruction for BeginExecute");
+        return E_FAIL;
+    }
+
+    // 2. Insert pop before the callvirt (remove last argument)
+    ILInstr* popInstr  = rewriter.NewILInstr();
+    popInstr->m_opcode = CEE_POP;
+    rewriter.InsertBefore(targetCallvirt, popInstr);
+
+    // 3. Insert ldarg.0 after pop (load 'this')
+    ILInstr* ldarg0Instr  = rewriter.NewILInstr();
+    ldarg0Instr->m_opcode = CEE_LDARG_0;
+    rewriter.InsertAfter(popInstr, ldarg0Instr);
+
+    // 4. Insert callvirt to get_CommandText after ldarg.0
+
+    SignatureBuilder::InstanceMethod get_command_text_signature{{SignatureBuilder::BuiltIn::String}, {}};
+
+    mdTypeRef dbCommandTypeRef;
+    hr = metadata_emit->DefineTypeRefByName(mdTokenNil, WStr("System.Data.Common.DbCommand"), &dbCommandTypeRef);
+
+    if (FAILED(hr))
+    {
+        Logger::Warn("RewriteILSystemDataCommandText: DefineTypeRefByName System.Data.Common.DbCommand failed");
+        return hr;
+    }
+
+    mdMemberRef getCommandTextMemberRef;
+    hr = metadata_emit->DefineMemberRef(dbCommandTypeRef, WStr("get_CommandText"), get_command_text_signature.Head(),
+                                        get_command_text_signature.Size(), &getCommandTextMemberRef);
+
+    if (FAILED(hr))
+    {
+        Logger::Warn("RewriteILSystemDataCommandText: DefineMemberRef get_CommandText failed");
+        return hr;
+    }
+
+    ILInstr* callvirtGetCommandTextInstr  = rewriter.NewILInstr();
+    callvirtGetCommandTextInstr->m_opcode = CEE_CALLVIRT;
+    callvirtGetCommandTextInstr->m_Arg32  = getCommandTextMemberRef;
+    rewriter.InsertAfter(ldarg0Instr, callvirtGetCommandTextInstr);
+
+    if (IsDumpILRewriteEnabled())
+    {
+        mdToken      token = 0;
+        TypeInfo     typeInfo{};
+        WSTRING      methodName = WStr("WriteBeginExecuteEvent");
+        FunctionInfo caller(token, methodName, typeInfo, MethodSignature(), FunctionMethodSignature());
+        Logger::Info(
+            GetILCodes("*** ModifyWriteBeginExecuteEvent: Modified Code: ", &rewriter, caller, metadata_import));
+    }
+
+    hr = rewriter.Export();
+
+    if (FAILED(hr))
+    {
+        Logger::Warn("RewriteILSystemDataCommandText: Call to ILRewriter.Export() failed for ModuleID=", module_id);
+        return hr;
+    }
+
+    return hr;
+}
+
 HRESULT CorProfiler::GenerateLoaderMethod(const ModuleID module_id, mdMethodDef* ret_method_token)
 {
     ComPtr<IUnknown> metadata_interfaces;
@@ -3642,5 +3780,110 @@ HRESULT STDMETHODCALLTYPE CorProfiler::EventPipeEventDelivered(EVENTPIPE_PROVIDE
     }
     return S_OK;
 }
+
+#ifdef _WIN32
+void CorProfiler::DetectFrameworkVersionTableForRedirectsMap()
+{
+    // Default to 4.6.2 (462) if detection fails
+    int frameworkVersion = 462;
+
+    // Check for 4.7.2 first
+    // If we ever need to detect higher versions, we should use
+    // the registry method below directly (adding detection for 4.7.2 and up)
+    // or find another option
+    ICorProfilerInfo8* info8 = nullptr;
+    HRESULT            hr    = this->info_->QueryInterface(__uuidof(ICorProfilerInfo8), (void**)&info8);
+    if (SUCCEEDED(hr))
+    {
+        info8->Release();
+        info8            = nullptr;
+        frameworkVersion = 472;
+
+        Logger::Debug("DetectFrameworkVersionTableForRedirectsMap: Detected .NET Framework 4.7.2 (ICorProfilerInfo8)");
+    }
+    else
+    {
+
+        HKEY hKey   = nullptr;
+        LONG result = RegOpenKeyExW(HKEY_LOCAL_MACHINE, L"SOFTWARE\\Microsoft\\NET Framework Setup\\NDP\\v4\\Full\\", 0,
+                                    KEY_READ, &hKey);
+
+        if (result != ERROR_SUCCESS)
+        {
+            Logger::Warn("DetectFrameworkVersionTableForRedirectsMap: Failed to open registry key, using default "
+                         "version 462");
+        }
+        else
+        {
+            DWORD releaseValue = 0;
+            DWORD dataSize     = sizeof(DWORD);
+            DWORD valueType    = REG_DWORD;
+
+            result = RegQueryValueExW(hKey, L"Release", nullptr, &valueType, reinterpret_cast<LPBYTE>(&releaseValue),
+                                      &dataSize);
+
+            RegCloseKey(hKey);
+
+            if (result != ERROR_SUCCESS || valueType != REG_DWORD)
+            {
+                Logger::Warn("DetectFrameworkVersionTableForRedirectsMap: Failed to read Release value, using "
+                             "default version 462");
+            }
+            else
+            {
+                // Map release numbers to framework versions
+                // Based on Microsoft documentation:
+                // https://docs.microsoft.com/en-us/dotnet/framework/migration-guide/how-to-determine-which-versions-are-installed
+                if (releaseValue >= 461308)
+                {
+                    frameworkVersion = 471; // 4.7.1
+                }
+                else if (releaseValue >= 460798)
+                {
+                    frameworkVersion = 470; // 4.7
+                }
+                else if (releaseValue >= 394802)
+                {
+                    frameworkVersion = 462; // 4.6.2
+                }
+                else
+                {
+                    Logger::Warn("DetectFrameworkVersionTableForRedirectsMap: Old .NET Framework detected, use 462 "
+                                 "as fallback");
+                }
+            }
+
+            Logger::Debug("DetectFrameworkVersionTableForRedirectsMap: Detected .NET Framework version ",
+                          frameworkVersion, " (Release: ", releaseValue, ")");
+        }
+    }
+
+    assembly_version_redirect_map_current_framework_key_ = 0;
+    for (auto& [key, values] : assembly_version_redirect_map_)
+    {
+        if (key <= frameworkVersion && key > assembly_version_redirect_map_current_framework_key_)
+        {
+            assembly_version_redirect_map_current_framework_key_ = key;
+            assembly_version_redirect_map_current_framework_     = &values;
+        }
+    }
+
+    if (assembly_version_redirect_map_current_framework_key_ != 0)
+    {
+        Logger::Debug("DetectFrameworkVersionTableForRedirectsMap: Use assembly redirection table for ",
+                      assembly_version_redirect_map_current_framework_key_);
+    }
+    else
+    {
+        Logger::Warn("DetectFrameworkVersionTableForRedirectsMap: No assembly redirection tables found. Assembly "
+                     "version redirecting will be disabled.");
+    }
+}
+
+int CorProfiler::GetNetFrameworkRedirectionVersion() const
+{
+    return assembly_version_redirect_map_current_framework_key_;
+}
+#endif
 
 } // namespace trace

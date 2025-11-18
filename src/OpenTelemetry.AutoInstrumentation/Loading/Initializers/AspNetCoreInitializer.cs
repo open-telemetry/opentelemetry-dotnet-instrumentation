@@ -16,7 +16,7 @@ internal class AspNetCoreInitializer : InstrumentationInitializer
     private readonly TracerSettings _tracerSettings;
 
     public AspNetCoreInitializer(PluginManager pluginManager, TracerSettings tracerSettings)
-        : base("Microsoft.AspNetCore.Http")
+        : base("Microsoft.AspNetCore.Http", nameof(AspNetCoreInitializer))
     {
         _pluginManager = pluginManager;
         _tracerSettings = tracerSettings;
