@@ -122,7 +122,7 @@ TEST(StartupHookTest, GetStartupHookPathReturnsCorrectPath)
     ASSERT_EQ(startup_hook_path, otel_startup_hook_path);
 
     // Test for OTEL_HOME set
-    profiler_path = (std::filesystem::path(base_path) / "OpenTelemetry.AutoInstrumentation.Native.dll").wstring();
+    profiler_path     = (std::filesystem::path(base_path) / "OpenTelemetry.AutoInstrumentation.Native.dll").wstring();
     startup_hook_path = GetStartupHookPath(profiler_path, home_path);
     ASSERT_EQ(startup_hook_path, otel_startup_hook_path);
 }
