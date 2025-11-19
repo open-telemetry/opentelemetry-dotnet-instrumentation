@@ -700,7 +700,7 @@ HRESULT STDMETHODCALLTYPE CorProfiler::ModuleLoadFinished(ModuleID module_id, HR
             if (startup_hook_assembly_path == EmptyWStr)
             {
                 FailProfiler(
-                    Info,
+                    Error,
                     "The required StartupHook assembly path could not be determined. No telemetry will be captured.");
             }
 
@@ -710,7 +710,7 @@ HRESULT STDMETHODCALLTYPE CorProfiler::ModuleLoadFinished(ModuleID module_id, HR
 
             if (FAILED(hr))
             {
-                FailProfiler(Info,
+                FailProfiler(Error,
                              "The required StartupHook was not configured correctly. No telemetry will be captured.");
             }
         }

@@ -46,7 +46,7 @@ private:
     // Startup helper variables
     WSTRING home_path;
     bool first_jit_compilation_completed = false;
-    std::atomic_bool startup_fix_required = {false};
+    bool startup_fix_required = false;
 
     bool corlib_module_loaded = false;
     AppDomainID corlib_app_domain_id = 0;

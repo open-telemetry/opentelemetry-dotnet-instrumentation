@@ -28,6 +28,11 @@ StubGenerator::~StubGenerator() {}
 
 HRESULT StubGenerator::PatchProcessStartupHooks(const ModuleID module_id, const WSTRING& startup_hook_assembly_path)
 {
+    if (startup_hook_assembly_path.empty())
+    {
+        return E_INVALIDARG;
+    }
+
     mdTypeDef   fixup_type                = mdTokenNil;
     mdMethodDef patch_startup_hook_method = mdTokenNil;
     HRESULT     hr = GenerateHookFixup(module_id, startup_hook_assembly_path, &fixup_type, &patch_startup_hook_method);
