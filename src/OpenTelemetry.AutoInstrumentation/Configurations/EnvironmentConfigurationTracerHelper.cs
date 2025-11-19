@@ -283,7 +283,11 @@ internal static class EnvironmentConfigurationTracerHelper
         public static TracerProviderBuilder AddAspNetCoreInstrumentation(TracerProviderBuilder builder, PluginManager pluginManager, LazyInstrumentationLoader lazyInstrumentationLoader, TracerSettings tracerSettings)
         {
             DelayedInitialization.Traces.AddAspNetCore(lazyInstrumentationLoader, pluginManager, tracerSettings);
-            return builder.AddSource("Microsoft.AspNetCore");
+            return builder.AddSource(
+                "Microsoft.AspNetCore",
+                // Blazor activities first added in .NET 10.0
+                "Microsoft.AspNetCore.Components",
+                "Microsoft.AspNetCore.Components.Server.Circuits");
         }
 
         public static TracerProviderBuilder AddGraphQLInstrumentation(TracerProviderBuilder builder, PluginManager pluginManager, LazyInstrumentationLoader lazyInstrumentationLoader, TracerSettings tracerSettings)
