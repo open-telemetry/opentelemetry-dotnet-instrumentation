@@ -6,6 +6,11 @@ using System.Security.Claims;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
+#if NET10_0_OR_GREATER
+using System.Diagnostics.Metrics;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.DependencyInjection.Extensions;
+#endif
 
 namespace TestApplication.Http;
 
@@ -42,6 +47,33 @@ public class Startup
         // Add Blazor Server to enable Components metrics
         services.AddRazorPages();
         services.AddServerSideBlazor();
+
+        // Add Identity to enable Microsoft.AspNetCore.Identity metrics
+        services.AddIdentityCore<TestUser>()
+            .AddUserManager<UserManager<TestUser>>();
+
+        // Workaround for .NET 10 bug: Manually register the internal UserManagerMetrics type
+        // Remove this workaround when upgrading to a .NET version that contains the fix
+        // Tracked under https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/issues/4623
+        var userManagerMetricsType = typeof(UserManager<>).Assembly.GetType("Microsoft.AspNetCore.Identity.UserManagerMetrics");
+        if (userManagerMetricsType != null)
+        {
+            services.TryAddSingleton(
+                userManagerMetricsType,
+                serviceProvider =>
+                {
+                    var meterFactory = serviceProvider.GetRequiredService<IMeterFactory>();
+                    return Activator.CreateInstance(
+                        userManagerMetricsType,
+                        System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic,
+                        null,
+                        [meterFactory],
+                        null)!;
+                });
+        }
+
+        // Add in-memory user store for testing
+        services.AddSingleton<IUserStore<TestUser>, InMemoryUserStore>();
 #endif
     }
 
@@ -114,6 +146,29 @@ public class Startup
                     await authenticationService.SignOutAsync(context, CookieAuthenticationDefaults.AuthenticationScheme, authProperties);
                     await context.Response.WriteAsync("Logged out");
                 });
+
+#if NET10_0_OR_GREATER
+                // Endpoints to trigger Identity metrics
+                endpoints.Map("/identity/create-user", async context =>
+                {
+                    var userManager = context.RequestServices.GetRequiredService<UserManager<TestUser>>();
+                    var user = new TestUser
+                    {
+                        Id = Guid.NewGuid().ToString(),
+                        UserName = "testuser" + Guid.NewGuid().ToString("N")[..8],
+                        Email = "test@example.com"
+                    };
+                    var result = await userManager.CreateAsync(user, "Password123!");
+                    await context.Response.WriteAsync(result.Succeeded ? "User created" : "Failed to create user");
+                });
+
+                endpoints.Map("/identity/find-user", async context =>
+                {
+                    var userManager = context.RequestServices.GetRequiredService<UserManager<TestUser>>();
+                    var user = await userManager.FindByNameAsync("testuser");
+                    await context.Response.WriteAsync(user != null ? "User found" : "User not found");
+                });
+#endif
 
                 endpoints.Map(
                     "/exception",

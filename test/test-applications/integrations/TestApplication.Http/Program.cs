@@ -45,6 +45,11 @@ public class Program
         // Trigger Blazor Components metrics for .NET 10+
         // This will trigger Microsoft.AspNetCore.Components and Microsoft.AspNetCore.Components.Server.Circuits metrics
         httpClient.GetAsync($"{dnsAddress}/blazor").Wait();
+
+        // Trigger Identity metrics for .NET 10+
+        // This will trigger Microsoft.AspNetCore.Identity metrics
+        httpClient.GetAsync($"{dnsAddress}/identity/create-user").Wait();
+        httpClient.GetAsync($"{dnsAddress}/identity/find-user").Wait();
 #endif
 
         var hubConnection = new HubConnectionBuilder().WithUrl($"{dnsAddress}/signalr").Build();
