@@ -141,7 +141,7 @@ namespace ProfilerStackCapture {
                 if (!ReadReturnAddressFromStack(pContext->Rsp, &returnAddress)) {
                     return E_FAIL;
                 }
-                
+                // no runtime function,  manually unwind to previous frame, adjust the RIP and RSP fields
                 pContext->Rip = returnAddress;
                 pContext->Rsp += sizeof(DWORD64);
                 instructionPointer = returnAddress;
@@ -150,17 +150,27 @@ namespace ProfilerStackCapture {
                 // Has unwind info - use function begin address (critical for CLR detection)
                 instructionPointer = imageBase + runtimeFunction->BeginAddress;
                 
-                // Unwind to previous frame
+                // Unwind to previous frame, updates Rip and Rsp fields, we have runtimeFunction to guide us
                 if (!SafeRtlVirtualUnwind(imageBase, pContext->Rip, runtimeFunction, pContext, nullptr)) {
                     return E_FAIL;
                 }
             }
+            // Virtual unwind traverses frames, so after unwind, RIP points to caller's instruction
+            // For leaf functions, we manually set RIP to return address
+            // Illustration: we use virtual unwind or manual stack read to move from:
+            // SleepEx() -> CLR transition stub -> YourApp.DoWork()
+            // Before: 
+            // kernel32.dll!SleepEx ->RIP might point to this (native code)
+            // |_CLR transition stub
+            //   |_YourApp.DoWork() -> We want to start HERE in managed code, not in SleepEx or the transition stub
+            // After: RIP is adjusted to point to the managed frame - YourApp.DoWork()
+
             
             // Check if this instruction pointer is managed
             hr = profilerApi->GetFunctionFromIP(reinterpret_cast<LPCBYTE>(instructionPointer), &fid);
             if (SUCCEEDED(hr) && fid != 0) {
-                // Update context to point to this managed frame
-                pContext->Rip = instructionPointer;
+                // Update context to point to this managed frame's beginning
+                pContext->Rip = instructionPointer; // this is the seed for DoStackSnapshot
                 return S_OK;
             }
         }
@@ -625,7 +635,6 @@ namespace ProfilerStackCapture {
             }
             catch (const std::exception&)
             {
-                std::vector<StackFrame> empty;
             }
         }
         return S_OK;
