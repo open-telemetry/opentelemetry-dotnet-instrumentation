@@ -11,6 +11,9 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 
 - Support for .NET 10.
 - Support for [ASP.NET Core 10 metrics](https://learn.microsoft.com/en-us/aspnet/core/log-mon/metrics/built-in?view=aspnetcore-10.0).
+- Support for ASP.NET Core 10 Blazor traces from
+  `Microsoft.AspNetCore.Components`
+  and `"Microsoft.AspNetCore.Components.Server.Circuits`.
 - Experimental support for file-based configuration.
 - Experimental support for configuration based instrumentation.
 - IL rewrite for SqlCommand on .NET Framework to ensure `CommandText` is
