@@ -97,17 +97,6 @@ namespace ProfilerStackCapture {
         StackFrame(FunctionID id, bool native = false) : functionId(id), isNative(native) {}
     };
 
-    enum class CaptureResult {
-        Success,
-        Failed,
-        Aborted,
-        Unsafe,
-        ThreadNotFound,
-        DeadlockDetected,
-        NoCanaryThread
-    };
-
-    using StackCaptureCallback = std::function<bool(ThreadID threadId, const std::vector<StackFrame>& stack, CaptureResult result)>;
     struct CaptureOptions {
         std::chrono::milliseconds probeTimeout = std::chrono::milliseconds(250);
         std::chrono::milliseconds snapshotInterval = std::chrono::milliseconds(1000);
@@ -126,7 +115,6 @@ namespace ProfilerStackCapture {
             BYTE* context,
             ULONG contextSize) = 0;
         virtual HRESULT GetFunctionFromIP(LPCBYTE ip, FunctionID* functionId) = 0;
-        virtual HRESULT GetFunctionNameFromFunctionID(FunctionID, std::string&) { return E_NOTIMPL; }
     };
 
     class ProfilerApiAdapter : public IProfilerApi {
@@ -136,7 +124,6 @@ namespace ProfilerStackCapture {
         explicit ProfilerApiAdapter(ICorProfilerInfo2* profilerInfo) : profilerInfo_(profilerInfo) {}
         HRESULT DoStackSnapshot(ThreadID threadId, StackSnapshotCallback callback, DWORD infoFlags, void* clientData, BYTE* context, ULONG contextSize) override;
         HRESULT GetFunctionFromIP(LPCBYTE ip, FunctionID* functionId) override;
-        HRESULT GetFunctionNameFromFunctionID(FunctionID functionId, std::string& functionName) override;
     };
 
     struct ThreadJoinerOnDelete { 

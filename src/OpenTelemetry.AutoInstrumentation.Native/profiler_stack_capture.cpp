@@ -37,6 +37,8 @@ namespace ProfilerStackCapture {
             return true;
         } 
         __except (EXCEPTION_EXECUTE_HANDLER) {
+            trace::Logger::Debug("[StackCapture] ReadReturnAddressFromStack - Access violation reading RSP=0x", 
+                           std::hex, rsp, std::dec, ", ExceptionCode=0x", std::hex, GetExceptionCode(), std::dec);
             return false;
         }
     }
@@ -56,6 +58,9 @@ namespace ProfilerStackCapture {
             return true;
         } 
         __except (EXCEPTION_EXECUTE_HANDLER) {
+            trace::Logger::Debug("[StackCapture] SafeRtlVirtualUnwind - RtlVirtualUnwind failed. ImageBase=0x", 
+                           std::hex, imageBase, ", ControlPC=0x", controlPc, std::dec, 
+                           ", ExceptionCode=0x", std::hex, GetExceptionCode(), std::dec);
             return false;
         }
     }
@@ -86,6 +91,9 @@ namespace ProfilerStackCapture {
             result = profilerApi->DoStackSnapshot(canaryManagedId, probeCallback, COR_PRF_SNAPSHOT_DEFAULT, nullptr, nullptr, 0);
         } 
         __except (EXCEPTION_EXECUTE_HANDLER) {
+            DWORD exceptionCode = GetExceptionCode();
+            trace::Logger::Debug("[StackCapture] ExecuteProbeOperations - Exception during safety tests. ExceptionCode=0x", 
+                       std::hex, exceptionCode, std::dec, ", RIP=0x", canaryCtx.Rip);
             if(testAlloc) {
                 delete testAlloc;
             }
@@ -101,7 +109,6 @@ namespace ProfilerStackCapture {
     static HRESULT PrepareContextForSnapshot(ThreadID managedThreadId, HANDLE threadHandle, CONTEXT* pContext, 
                                              IProfilerApi* profilerApi, std::atomic<bool>* pStopRequested) {
         const int MAX_WALK_EVER = 10000;
-        int walkCount = 0;
         DWORD64 origRSP = 0;
         
         // Quick check: are we already at managed code?
@@ -112,7 +119,7 @@ namespace ProfilerStackCapture {
         }
         
         // Walk native frames to find managed code
-        for (walkCount = 0; walkCount < MAX_WALK_EVER; ++walkCount) {
+        for (int walkCount = 0; walkCount < MAX_WALK_EVER; ++walkCount) {
             if (pStopRequested && pStopRequested->load()) {
                 return E_ABORT;
             }
@@ -260,70 +267,6 @@ namespace ProfilerStackCapture {
     {
         return profilerInfo_->GetFunctionFromIP(ip, functionId);
     }
-    HRESULT ProfilerApiAdapter::GetFunctionNameFromFunctionID(FunctionID functionId, std::string& functionName)
-    {
-        if (functionId == 0)
-        {
-            functionName.clear();
-            return E_INVALIDARG;
-        }
-        ClassID  classId  = 0;
-        ModuleID moduleId = 0;
-        mdToken  token    = 0;
-        HRESULT  hr       = profilerInfo_->GetFunctionInfo(functionId, &classId, &moduleId, &token);
-        if (FAILED(hr))
-        {
-            functionName.clear();
-            return hr;
-        }
-        CComPtr<IMetaDataImport> metaDataImport;
-        hr = profilerInfo_->GetModuleMetaData(moduleId, ofRead, IID_IMetaDataImport, (IUnknown**)&metaDataImport);
-        if (FAILED(hr) || !metaDataImport)
-        {
-            functionName.clear();
-            return hr;
-        }
-        WCHAR methodName[512] = {};
-        ULONG nameLen         = 0;
-        hr = metaDataImport->GetMethodProps(token, nullptr, methodName, _countof(methodName), &nameLen, nullptr,
-                                            nullptr, nullptr, nullptr, nullptr);
-        if (FAILED(hr))
-        {
-            functionName.clear();
-            return hr;
-        }
-        WCHAR className[512] = {};
-        if (classId != 0)
-        {
-            mdTypeDef typeDef = 0;
-            hr                = profilerInfo_->GetClassIDInfo(classId, &moduleId, &typeDef);
-            if (SUCCEEDED(hr))
-            {
-                ULONG classNameLen = 0;
-                metaDataImport->GetTypeDefProps(typeDef, className, _countof(className), &classNameLen, nullptr,
-                                                nullptr);
-            }
-        }
-        std::wstring wFuncName;
-        if (className[0] != 0)
-        {
-            wFuncName = className;
-            wFuncName += L".";
-        }
-        wFuncName += methodName;
-        int utf8Len = WideCharToMultiByte(CP_UTF8, 0, wFuncName.c_str(), -1, nullptr, 0, nullptr, nullptr);
-        if (utf8Len > 0)
-        {
-            functionName.resize(utf8Len - 1);
-            WideCharToMultiByte(CP_UTF8, 0, wFuncName.c_str(), -1, &functionName[0], utf8Len, nullptr, nullptr);
-        }
-        else
-        {
-            functionName.clear();
-            return E_FAIL;
-        }
-        return S_OK;
-    }
 
     // ScopedThreadSuspend
     ScopedThreadSuspend::ScopedThreadSuspend(DWORD nativeThreadId) : threadHandle_(INVALID_HANDLE_VALUE), suspended_(false) {
@@ -375,7 +318,6 @@ namespace ProfilerStackCapture {
         }
         return *this;
     }
-    
 
     // StackCaptureEngine
     StackCaptureEngine::StackCaptureEngine(std::unique_ptr<IProfilerApi> profilerApi, const CaptureOptions& options)
@@ -579,6 +521,14 @@ namespace ProfilerStackCapture {
         hr = profilerApi_->DoStackSnapshot(managedThreadId, continuous_profiler::IStackCaptureStrategy::StackSnapshotCallbackDefault, COR_PRF_SNAPSHOT_DEFAULT,
             stackCaptureContext->clientParams, reinterpret_cast<BYTE*>(&context), sizeof(CONTEXT));
         
+        if (FAILED(hr)) {
+            trace::Logger::Error("[StackCapture] CaptureStackSeeded - DoStackSnapshot failed. HRESULT=0x",
+                       std::hex, hr, std::dec, ", ThreadID=", managedThreadId,
+                       ", SeededRIP=0x", std::hex, context.Rip, std::dec);
+        } else {
+            trace::Logger::Debug("[StackCapture] CaptureStackSeeded - Successfully captured stack. ThreadID=", managedThreadId);
+        }
+
         return hr;
     }
 
@@ -626,15 +576,18 @@ namespace ProfilerStackCapture {
                 ScopedThreadSuspend targetThread(nativeId);
                 if (!SafetyProbe())
                 {
+                    trace::Logger::Debug("[StackCapture] CaptureStacks - Skipping thread due to safety probe failure. ManagedID=", 
+                      managedId, ", NativeID=", nativeId);
                     continue;
                 }
                 clientData->threadId = managedId;
                 StackCaptureContext stackCaptureContext{0, &stopRequested_, clientData};
-                HRESULT             hr = CaptureStackSeeded(managedId, targetThread.GetHandle(), &stackCaptureContext);
-                CaptureResult       result = SUCCEEDED(hr) ? CaptureResult::Success : CaptureResult::Failed;
+                CaptureStackSeeded(managedId, targetThread.GetHandle(), &stackCaptureContext);
             }
-            catch (const std::exception&)
+            catch (const std::exception& ex)
             {
+                trace::Logger::Error("[StackCapture] CaptureStacks - Exception during stack capture for ManagedID=", managedId, 
+                                   ", NativeID=", nativeId, ": ", ex.what());
             }
         }
         return S_OK;
