@@ -99,7 +99,7 @@ static std::mutex name_cache_lock = std::mutex();
 static std::shared_mutex profiling_lock = std::shared_mutex();
 
 static ICorProfilerInfo7* profiler_info; // After feature sets settle down, perhaps this should be refactored and have
-                                          // a single static instance of ThreadSampler
+                                         // a single static instance of ThreadSampler
 
 // Dirt-simple back pressure system to save overhead if managed code is not reading fast enough
 bool ThreadSamplingShouldProduceThreadSample()
@@ -641,8 +641,8 @@ void NamingHelper::GetFunctionName(FunctionIdentifier function_identifier, trace
     }
 
     ComPtr<IMetaDataImport2> metadata_import;
-    HRESULT hr = info7_->GetModuleMetaData(function_identifier.module_id, ofRead, IID_IMetaDataImport2,
-                                            reinterpret_cast<IUnknown**>(&metadata_import));
+    HRESULT                  hr = info7_->GetModuleMetaData(function_identifier.module_id, ofRead, IID_IMetaDataImport2,
+                                                            reinterpret_cast<IUnknown**>(&metadata_import));
     if (FAILED(hr))
     {
         trace::Logger::Debug("GetModuleMetaData failed. HRESULT=0x", std::setfill('0'), std::setw(8), std::hex, hr);
@@ -798,7 +798,6 @@ struct DoStackSnapshotParamsEx : DoStackSnapshotParams
     }
 };
 
-
 static HRESULT __stdcall FrameCallback(_In_ FunctionID         func_id,
                                        _In_ UINT_PTR           ip,
                                        _In_ COR_PRF_FRAME_INFO frame_info,
@@ -844,28 +843,26 @@ static HRESULT __stdcall FrameCallback(_In_ FunctionID         func_id,
 
 static void CaptureFunctionIdentifiersForThreads(
     ContinuousProfiler*                                            prof,
-    ICorProfilerInfo7*                                            info7,
+    ICorProfilerInfo7*                                             info7,
     const std::unordered_set<ThreadID>&                            selectedThreads,
     std::unordered_map<ThreadID, std::vector<FunctionIdentifier>>& threadStacksBuffer)
 {
     prof->helper.ClearFunctionIdentifierCache();
 
-    if (auto stackCaptureStrategy = prof->GetStackCaptureStrategy();
-        stackCaptureStrategy != nullptr)
+    if (auto stackCaptureStrategy = prof->GetStackCaptureStrategy(); stackCaptureStrategy != nullptr)
     {
         auto callBackRaw = [](FunctionID func_id, UINT_PTR ip, COR_PRF_FRAME_INFO frame_info, ULONG32 context_size,
-            BYTE context[], void* client_data) -> HRESULT
-            {
-                auto       params = static_cast<continuous_profiler::StackSnapshotCallbackParams*>(client_data);
-                auto       thread = params->threadId;
-                auto       doStackSnapshotParams = static_cast<DoStackSnapshotParamsEx*>(params->clientData);
-                doStackSnapshotParams->buffer = &((*doStackSnapshotParams->threadStacksBuffer)[thread]);
-                FrameCallback(func_id, ip, frame_info, context_size, context, doStackSnapshotParams);
-                return S_OK;
-            };
-        DoStackSnapshotParamsEx doStackSnapshotParamsEx(prof, nullptr, &threadStacksBuffer);
-        StackSnapshotCallbackParams params{
-            callBackRaw, &doStackSnapshotParamsEx };
+                              BYTE context[], void* client_data) -> HRESULT
+        {
+            auto params                   = static_cast<continuous_profiler::StackSnapshotCallbackParams*>(client_data);
+            auto thread                   = params->threadId;
+            auto doStackSnapshotParams    = static_cast<DoStackSnapshotParamsEx*>(params->clientData);
+            doStackSnapshotParams->buffer = &((*doStackSnapshotParams->threadStacksBuffer)[thread]);
+            FrameCallback(func_id, ip, frame_info, context_size, context, doStackSnapshotParams);
+            return S_OK;
+        };
+        DoStackSnapshotParamsEx     doStackSnapshotParamsEx(prof, nullptr, &threadStacksBuffer);
+        StackSnapshotCallbackParams params{callBackRaw, &doStackSnapshotParamsEx};
         stackCaptureStrategy->CaptureStacks(selectedThreads, &params);
     }
 }
@@ -1018,7 +1015,7 @@ static void RemoveOutdatedEntries(std::unordered_map<trace_context, long long>& 
 }
 
 static void PauseClrAndCaptureSamples(ContinuousProfiler*                                            prof,
-                                      ICorProfilerInfo7*                                            info7,
+                                      ICorProfilerInfo7*                                             info7,
                                       const SamplingType                                             samplingType,
                                       std::unordered_map<ThreadID, std::vector<FunctionIdentifier>>& threadStacksBuffer)
 {
@@ -1229,9 +1226,9 @@ static void SamplingThreadMain(ContinuousProfiler* prof, const std::future<void>
 
 void ContinuousProfiler::SetGlobalInfo7(ICorProfilerInfo7* cor_profiler_info7)
 {
-    info7 = cor_profiler_info7;
+    info7               = cor_profiler_info7;
     this->helper.info7_ = cor_profiler_info7;
-    profiler_info = cor_profiler_info7;
+    profiler_info       = cor_profiler_info7;
 }
 
 void ContinuousProfiler::SetGlobalInfo12(ICorProfilerInfo12* cor_profiler_info12)
@@ -1324,7 +1321,7 @@ static void CaptureAllocationStack(ContinuousProfiler* prof, std::vector<Functio
 {
     DoStackSnapshotParams doStackSnapshotParams(prof, &threadStack);
     HRESULT               hr = prof->info7->DoStackSnapshot((ThreadID)NULL, &FrameCallback, COR_PRF_SNAPSHOT_DEFAULT,
-                                                             &doStackSnapshotParams, nullptr, 0);
+                                                            &doStackSnapshotParams, nullptr, 0);
     if (FAILED(hr))
     {
         trace::Logger::Debug("DoStackSnapshot failed. HRESULT=0x", std::setfill('0'), std::setw(8), std::hex, hr);

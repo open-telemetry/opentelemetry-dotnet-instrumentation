@@ -276,10 +276,8 @@ HRESULT STDMETHODCALLTYPE CorProfiler::Initialize(IUnknown* cor_profiler_info_un
     is_attached_.store(true);
     profiler = this;
 
-    stack_capture_strategy_ = continuous_profiler::StackCaptureStrategyFactory::Create(
-        this->info_,
-        runtime_information_
-    );
+    stack_capture_strategy_ =
+        continuous_profiler::StackCaptureStrategyFactory::Create(this->info_, runtime_information_);
 
     return S_OK;
 }
@@ -3786,8 +3784,7 @@ HRESULT STDMETHODCALLTYPE CorProfiler::ThreadNameChanged(ThreadID threadId, ULON
 
     return S_OK;
 }
-HRESULT STDMETHODCALLTYPE CorProfiler::ThreadAssignedToOSThread(ThreadID managedThreadId,
-    DWORD    osThreadId)
+HRESULT STDMETHODCALLTYPE CorProfiler::ThreadAssignedToOSThread(ThreadID managedThreadId, DWORD osThreadId)
 {
     if (stack_capture_strategy_)
     {
