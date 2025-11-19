@@ -14,7 +14,7 @@ public class ParserResourceTests
     [Fact]
     public void Parse_FullConfigYaml_ShouldPopulateModelCorrectly()
     {
-        var config = YamlParser.ParseYaml("Configurations/FileBased/Files/TestResourceFile.yaml");
+        var config = YamlParser.ParseYaml<YamlConfiguration>("Configurations/FileBased/Files/TestResourceFile.yaml");
 
         Assert.NotNull(config);
 
@@ -94,7 +94,7 @@ public class ParserResourceTests
         Environment.SetEnvironmentVariable("OTEL_SERVICE_NAME", "my‑service");
         Environment.SetEnvironmentVariable("OTEL_RESOURCE_ATTRIBUTES", "key=value");
 
-        var config = YamlParser.ParseYaml("Configurations/FileBased/Files/TestResourceFileEnvVars.yaml");
+        var config = YamlParser.ParseYaml<YamlConfiguration>("Configurations/FileBased/Files/TestResourceFileEnvVars.yaml");
 
         Assert.Equal("1.0-rc.1", config.FileFormat);
         var serviceAttr = config.Resource?.Attributes?.First(a => a.Name == "service.name");
