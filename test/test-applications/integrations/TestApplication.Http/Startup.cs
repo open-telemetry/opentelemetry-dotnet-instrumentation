@@ -173,6 +173,6 @@ public class Startup
                 endpoints.Map(
                     "/exception",
                     _ => throw new InvalidOperationException("Just to throw something"));
-        });
+            });
     }
 }
