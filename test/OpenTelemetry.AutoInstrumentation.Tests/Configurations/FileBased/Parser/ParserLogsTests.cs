@@ -1,6 +1,7 @@
 // Copyright The OpenTelemetry Authors
 // SPDX-License-Identifier: Apache-2.0
 
+using OpenTelemetry.AutoInstrumentation.Configurations.FileBasedConfiguration;
 using Xunit;
 using YamlParser = OpenTelemetry.AutoInstrumentation.Configurations.FileBasedConfiguration.Parser.Parser;
 
@@ -12,7 +13,7 @@ public class ParserLogsTests
     [Fact]
     public void Parse_FullConfigYaml_ShouldPopulateModelCorrectly()
     {
-        var config = YamlParser.ParseYaml("Configurations/FileBased/Files/TestLogsFile.yaml");
+        var config = YamlParser.ParseYaml<YamlConfiguration>("Configurations/FileBased/Files/TestLogsFile.yaml");
         Assert.NotNull(config);
 
         Assert.True(config.LogsIncludeFormattedMessage);
@@ -68,7 +69,7 @@ public class ParserLogsTests
         Environment.SetEnvironmentVariable("OTEL_EXPORTER_OTLP_LOGS_TIMEOUT", "15000");
         Environment.SetEnvironmentVariable("OTEL_EXPORTER_OTLP_LOGS_HEADERS", "header1=value1,header2=value2");
 
-        var config = YamlParser.ParseYaml("Configurations/FileBased/Files/TestLogsFileEnvVars.yaml");
+        var config = YamlParser.ParseYaml<YamlConfiguration>("Configurations/FileBased/Files/TestLogsFileEnvVars.yaml");
         Assert.NotNull(config);
 
         Assert.NotNull(config.LoggerProvider);

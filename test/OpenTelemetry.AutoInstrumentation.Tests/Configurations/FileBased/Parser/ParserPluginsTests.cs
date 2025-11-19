@@ -1,6 +1,7 @@
 // Copyright The OpenTelemetry Authors
 // SPDX-License-Identifier: Apache-2.0
 
+using OpenTelemetry.AutoInstrumentation.Configurations.FileBasedConfiguration;
 using Xunit;
 using YamlParser = OpenTelemetry.AutoInstrumentation.Configurations.FileBasedConfiguration.Parser.Parser;
 
@@ -12,7 +13,7 @@ public class ParserPluginsTests
     [Fact]
     public void Parse_FullConfigYaml_ShouldPopulateModelCorrectly()
     {
-        var config = YamlParser.ParseYaml("Configurations/FileBased/Files/TestPluginsFile.yaml");
+        var config = YamlParser.ParseYaml<YamlConfiguration>("Configurations/FileBased/Files/TestPluginsFile.yaml");
 
         Assert.NotNull(config);
 
@@ -29,7 +30,7 @@ public class ParserPluginsTests
     {
         Environment.SetEnvironmentVariable("OTEL_DOTNET_AUTO_PLUGINS", "Test.Plugins.Plugin, Test.Plugins");
 
-        var config = YamlParser.ParseYaml("Configurations/FileBased/Files/TestPluginsFileEnvVars.yaml");
+        var config = YamlParser.ParseYaml<YamlConfiguration>("Configurations/FileBased/Files/TestPluginsFileEnvVars.yaml");
 
         Assert.NotNull(config);
 
