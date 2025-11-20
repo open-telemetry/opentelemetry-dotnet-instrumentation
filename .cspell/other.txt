@@ -41,6 +41,7 @@ mycompanymyproductmylibrary
 MYSQLCONNECTOR
 MYSQLDATA
 NETRUNTIME
+NLOG
 Npgsql
 NSERVICEBUS
 omnisharp

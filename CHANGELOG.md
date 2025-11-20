@@ -9,6 +9,9 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 
 ### Added
 
+- Support for [`NLog`](https://www.nuget.org/packages/NLog/)
+  logs instrumentation for versions `5.*` and `6.*` on .NET using duck typing
+  for zero-config auto-injection.
 - Support for .NET 10.
 - Support for [ASP.NET Core 10 metrics](https://learn.microsoft.com/en-us/aspnet/core/log-mon/metrics/built-in?view=aspnetcore-10.0).
 - Support for ASP.NET Core 10 Blazor traces from
