@@ -44,6 +44,17 @@ public class SmokeTests : TestHelper
 #endif
     }
 
+#if !NETFRAMEWORK
+    [Fact]
+    [Trait("Category", "EndToEnd")]
+    public void WhenStartupHookIsNotEnabledWithProfiler()
+    {
+        EnableBytecodeInstrumentation();
+        SetEnvironmentVariable("DOTNET_STARTUP_HOOKS", null);
+        VerifyTestApplicationInstrumented();
+    }
+#endif
+
     [Fact]
     [Trait("Category", "EndToEnd")]
     public void WhenClrProfilerIsNotEnabled()

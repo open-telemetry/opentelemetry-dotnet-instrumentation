@@ -13,7 +13,7 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 - Support for [ASP.NET Core 10 metrics](https://learn.microsoft.com/en-us/aspnet/core/log-mon/metrics/built-in?view=aspnetcore-10.0).
 - Support for ASP.NET Core 10 Blazor traces from
   `Microsoft.AspNetCore.Components`
-  and `"Microsoft.AspNetCore.Components.Server.Circuits`.
+  and `Microsoft.AspNetCore.Components.Server.Circuits`.
 - Experimental support for file-based configuration.
 - Experimental support for configuration based instrumentation.
 - IL rewrite for SqlCommand on .NET Framework to ensure `CommandText` is
@@ -25,6 +25,9 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 
 - Changed minimal supported version of `Microsoft.Extensions.Logging`
   for `ILOGGER` instrumentation from `9.0.0` to `8.0.0`.
+- Setting `DOTNET_STARTUP_HOOKS` is now optional if the .NET CLR profiler
+  is configured. If it is not set, the profiler looks for the startup hooks
+  assembly and injects the configuration into the application.
 - Support `OTEL_EXPORTER_OTLP_TRACES_PROTOCOL`, `OTEL_EXPORTER_OTLP_METRICS_PROTOCOL`
   `OTEL_EXPORTER_OTLP_LOGS_PROTOCOL` for all signals. See [#4627](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/issues/4627).
 
