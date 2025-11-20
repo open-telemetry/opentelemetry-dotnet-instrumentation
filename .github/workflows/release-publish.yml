@@ -17,7 +17,7 @@ jobs:
         with:
           dotnet-version: | 
             8.0.416
-            9.0.307
+            9.0.308
             10.0.100
 
       - name: Test the PowerShell module instructions from README.md
@@ -69,7 +69,7 @@ jobs:
         with:
           dotnet-version: | 
             8.0.416
-            9.0.307
+            9.0.308
             10.0.100
 
       - name: Install MacOS CoreUtils
