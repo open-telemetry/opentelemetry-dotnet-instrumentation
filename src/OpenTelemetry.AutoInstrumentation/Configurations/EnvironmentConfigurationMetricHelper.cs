@@ -42,12 +42,21 @@ internal static class EnvironmentConfigurationMetricHelper
 
 #if NET
                 MetricInstrumentation.AspNetCore => builder
-                    .AddMeter("Microsoft.AspNetCore.Hosting")
-                    .AddMeter("Microsoft.AspNetCore.Server.Kestrel")
-                    .AddMeter("Microsoft.AspNetCore.Http.Connections")
-                    .AddMeter("Microsoft.AspNetCore.Routing")
-                    .AddMeter("Microsoft.AspNetCore.Diagnostics")
-                    .AddMeter("Microsoft.AspNetCore.RateLimiting"),
+                    .AddMeter(
+                        "Microsoft.AspNetCore.Hosting",
+                        "Microsoft.AspNetCore.Server.Kestrel",
+                        "Microsoft.AspNetCore.Http.Connections",
+                        "Microsoft.AspNetCore.Routing",
+                        "Microsoft.AspNetCore.Diagnostics",
+                        "Microsoft.AspNetCore.RateLimiting",
+                        // Following metrics added in .NET 10
+                        "Microsoft.AspNetCore.Components",
+                        "Microsoft.AspNetCore.Components.Server.Circuits",
+                        "Microsoft.AspNetCore.Components.Lifecycle",
+                        "Microsoft.AspNetCore.Authorization",
+                        "Microsoft.AspNetCore.Authentication",
+                        "Microsoft.AspNetCore.Identity",
+                        "Microsoft.AspNetCore.MemoryPool"),
 #endif
                 MetricInstrumentation.SqlClient => Wrappers.AddSqlClientInstrumentation(builder, lazyInstrumentationLoader, pluginManager),
                 _ => null,
@@ -94,6 +103,7 @@ internal static class EnvironmentConfigurationMetricHelper
                         }
 
                         var exportersCount = 0;
+
                         if (exporter.OtlpHttp != null)
                         {
                             exportersCount++;

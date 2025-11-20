@@ -10,29 +10,29 @@
     <PackageVersion Include="Microsoft.Build.Utilities.Core" Version="15.9.20" />
     <PackageVersion Include="NuGet.Versioning" Version="$(NuGetVersioningVersion)" />
   </ItemGroup>
-  <!-- Versions from OpenTelemetry.AutoInstrumentation.csproj and OTEL transitive depedendencies-->
+  <!-- Versions from OpenTelemetry.AutoInstrumentation.csproj and OTEL transitive dependencies-->
   <ItemGroup>
-    <PackageVersion Include="OpenTelemetry.Api.ProviderBuilderExtensions" Version="1.13.1" />
-    <PackageVersion Include="OpenTelemetry.Exporter.Prometheus.HttpListener" Version="1.13.1-beta.1" />
-    <PackageVersion Include="OpenTelemetry.Exporter.Zipkin" Version="1.13.1" />
-    <PackageVersion Include="OpenTelemetry.Extensions.Propagators" Version="1.13.1" />
-    <PackageVersion Include="OpenTelemetry.Instrumentation.AspNet" Version="1.13.0-rc.1" />
-    <PackageVersion Include="OpenTelemetry.Instrumentation.AspNet.TelemetryHttpModule" Version="1.13.0-rc.1" />
-    <PackageVersion Include="OpenTelemetry.Instrumentation.AspNetCore" Version="1.13.0" />
-    <PackageVersion Include="OpenTelemetry.Instrumentation.EntityFrameworkCore" Version="1.13.0-beta.1" />
-    <PackageVersion Include="OpenTelemetry.Instrumentation.GrpcNetClient" Version="1.13.0-beta.1" />
-    <PackageVersion Include="OpenTelemetry.Instrumentation.Process" Version="1.13.0-beta.1" />
-    <PackageVersion Include="OpenTelemetry.Instrumentation.Quartz" Version="1.13.0-beta.1" />
-    <PackageVersion Include="OpenTelemetry.Instrumentation.Runtime" Version="1.13.0" />
-    <PackageVersion Include="OpenTelemetry.Instrumentation.SqlClient" Version="1.13.0-beta.1" />
-    <PackageVersion Include="OpenTelemetry.Instrumentation.StackExchangeRedis" Version="1.13.0-beta.1" />
-    <PackageVersion Include="OpenTelemetry.Shims.OpenTracing" Version="1.13.1-beta.1" />
-    <PackageVersion Include="OpenTelemetry.Resources.Azure" Version="1.13.0-beta.1" />
-    <PackageVersion Include="OpenTelemetry.Resources.Container" Version="1.13.0-beta.1" />
-    <PackageVersion Include="OpenTelemetry.Resources.Host" Version="1.13.0-beta.1" />
-    <PackageVersion Include="OpenTelemetry.Resources.OperatingSystem" Version="1.13.0-beta.1" />
-    <PackageVersion Include="OpenTelemetry.Resources.Process" Version="1.13.0-beta.1" />
-    <PackageVersion Include="OpenTelemetry.Resources.ProcessRuntime" Version="1.13.0-beta.1" />
+    <PackageVersion Include="OpenTelemetry.Api.ProviderBuilderExtensions" Version="1.14.0" />
+    <PackageVersion Include="OpenTelemetry.Exporter.Prometheus.HttpListener" Version="1.14.0-beta.1" />
+    <PackageVersion Include="OpenTelemetry.Exporter.Zipkin" Version="1.14.0" />
+    <PackageVersion Include="OpenTelemetry.Extensions.Propagators" Version="1.14.0" />
+    <PackageVersion Include="OpenTelemetry.Instrumentation.AspNet" Version="1.14.0-rc.1" />
+    <PackageVersion Include="OpenTelemetry.Instrumentation.AspNet.TelemetryHttpModule" Version="1.14.0-rc.1" />
+    <PackageVersion Include="OpenTelemetry.Instrumentation.AspNetCore" Version="1.14.0" />
+    <PackageVersion Include="OpenTelemetry.Instrumentation.EntityFrameworkCore" Version="1.14.0-beta.2" />
+    <PackageVersion Include="OpenTelemetry.Instrumentation.GrpcNetClient" Version="1.14.0-beta.1" />
+    <PackageVersion Include="OpenTelemetry.Instrumentation.Process" Version="1.14.0-beta.2" />
+    <PackageVersion Include="OpenTelemetry.Instrumentation.Quartz" Version="1.14.0-beta.2" />
+    <PackageVersion Include="OpenTelemetry.Instrumentation.Runtime" Version="1.14.0" />
+    <PackageVersion Include="OpenTelemetry.Instrumentation.SqlClient" Version="1.14.0-beta.1" />
+    <PackageVersion Include="OpenTelemetry.Instrumentation.StackExchangeRedis" Version="1.14.0-beta.1" />
+    <PackageVersion Include="OpenTelemetry.Shims.OpenTracing" Version="1.14.0-beta.1" />
+    <PackageVersion Include="OpenTelemetry.Resources.Azure" Version="1.14.0-beta.1" />
+    <PackageVersion Include="OpenTelemetry.Resources.Container" Version="1.14.0-beta.1" />
+    <PackageVersion Include="OpenTelemetry.Resources.Host" Version="1.14.0-beta.1" />
+    <PackageVersion Include="OpenTelemetry.Resources.OperatingSystem" Version="1.14.0-beta.1" />
+    <PackageVersion Include="OpenTelemetry.Resources.Process" Version="1.14.0-beta.1" />
+    <PackageVersion Include="OpenTelemetry.Resources.ProcessRuntime" Version="1.14.0-beta.1" />
     <PackageVersion Include="OpenTracing" Version="0.12.1" />
   </ItemGroup>
   <!-- Versions from SourceGenerators.csproj -->

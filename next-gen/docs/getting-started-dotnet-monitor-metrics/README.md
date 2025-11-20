@@ -190,14 +190,14 @@ powerful visualizations for the metrics.
 
 ### Explore metrics using Grafana
 
-[Install Grafana](https://grafana.com/docs/grafana/latest/installation/).
+[Install Grafana](https://grafana.com/docs/grafana/latest/setup-grafana/installation/).
 
 Start the standalone Grafana server (`grafana-server.exe` or
 `./bin/grafana-server`, depending on the operating system). Then, use the
 browser to navigate to [http://localhost:3000/](http://localhost:3000/).
 
 Follow the instructions in the Grafana getting started
-[doc](https://grafana.com/docs/grafana/latest/getting-started/getting-started/#step-2-log-in)
+[doc](https://grafana.com/docs/grafana/latest/fundamentals/getting-started/first-dashboards/#sign-in-to-grafana)
 to log in.
 
 After successfully logging in, click on the explore option on the left panel of

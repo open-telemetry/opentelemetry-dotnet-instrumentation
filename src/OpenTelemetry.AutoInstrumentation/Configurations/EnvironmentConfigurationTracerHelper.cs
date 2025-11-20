@@ -108,121 +108,121 @@ internal static class EnvironmentConfigurationTracerHelper
                 {
                     if (processor.Batch != null && processor.Simple != null)
                     {
-                        Logger.Debug("Both batch and simple processors are configured. It is not supported. Skipping.");
+                        Logger.Debug("Both batch and simple tracer processors are configured. It is not supported. Skipping.");
                         continue;
                     }
 
                     if (processor.Batch == null && processor.Simple == null)
                     {
-                        Logger.Debug("No valid processor configured, skipping.");
+                        Logger.Debug("No valid tracer processor configured, skipping.");
                         continue;
                     }
 
                     if (processor.Batch != null)
                     {
                         var exporter = processor.Batch.Exporter;
-                        if (exporter != null)
+                        if (exporter == null)
                         {
-                            var exportersCount = 0;
+                            Logger.Debug("No exporter section for batch tracer processor. Skipping.");
+                            continue;
+                        }
 
-                            if (exporter.OtlpHttp != null)
-                            {
-                                exportersCount++;
-                            }
+                        var exportersCount = 0;
 
-                            if (exporter.OtlpGrpc != null)
-                            {
-                                exportersCount++;
-                            }
+                        if (exporter.OtlpHttp != null)
+                        {
+                            exportersCount++;
+                        }
 
-                            if (exporter.Zipkin != null)
-                            {
-                                exportersCount++;
-                            }
+                        if (exporter.OtlpGrpc != null)
+                        {
+                            exportersCount++;
+                        }
 
-                            switch (exportersCount)
-                            {
-                                case 0:
-                                    Logger.Debug("No valid exporter configured for batch processor. Skipping.");
-                                    continue;
-                                case > 1:
-                                    Logger.Debug("Multiple exporters are configured for batch processor. Only one exporter is supported. Skipping.");
-                                    continue;
-                            }
+                        if (exporter.Zipkin != null)
+                        {
+                            exportersCount++;
+                        }
 
-                            if (exporter.OtlpHttp != null)
-                            {
-                                if (exporter.OtlpGrpc != null || exporter.Zipkin != null)
-                                {
-                                    Logger.Debug("Both gRPC and Zipkin exporters are configured, using gRPC.");
-                                    continue;
-                                }
+                        switch (exportersCount)
+                        {
+                            case 0:
+                                Logger.Debug("No valid exporter configured for batch tracer processor. Skipping.");
+                                continue;
+                            case > 1:
+                                Logger.Debug("Multiple exporters are configured for batch tracer processor. Only one exporter is supported. Skipping.");
+                                continue;
+                        }
 
-                                builder = Wrappers.AddOtlpHttpExporter(builder, pluginManager, processor.Batch, exporter.OtlpHttp);
-                            }
-                            else if (exporter.OtlpGrpc != null)
-                            {
-                                builder = Wrappers.AddOtlpGrpcExporter(builder, pluginManager, processor.Batch, exporter.OtlpGrpc);
-                            }
-                            else if (exporter.Zipkin != null)
-                            {
-                                builder = Wrappers.AddZipkinExporter(builder, pluginManager, processor.Batch, exporter.Zipkin);
-                            }
+                        if (exporter.OtlpHttp != null)
+                        {
+                            builder = Wrappers.AddOtlpHttpExporter(builder, pluginManager, processor.Batch, exporter.OtlpHttp);
+                        }
+                        else if (exporter.OtlpGrpc != null)
+                        {
+                            builder = Wrappers.AddOtlpGrpcExporter(builder, pluginManager, processor.Batch, exporter.OtlpGrpc);
+                        }
+                        else if (exporter.Zipkin != null)
+                        {
+                            builder = Wrappers.AddZipkinExporter(builder, pluginManager, processor.Batch, exporter.Zipkin);
                         }
                     }
                     else if (processor.Simple != null)
                     {
                         var exporter = processor.Simple.Exporter;
-                        if (exporter != null)
+                        if (exporter == null)
                         {
-                            var exportersCount = 0;
+                            Logger.Debug("No exporter section for simple tracer processor. Skipping.");
+                            continue;
+                        }
 
-                            if (exporter.OtlpHttp != null)
-                            {
-                                exportersCount++;
-                            }
+                        var exportersCount = 0;
 
-                            if (exporter.OtlpGrpc != null)
-                            {
-                                exportersCount++;
-                            }
+                        if (exporter.OtlpHttp != null)
+                        {
+                            exportersCount++;
+                        }
 
-                            if (exporter.Zipkin != null)
-                            {
-                                exportersCount++;
-                            }
+                        if (exporter.OtlpGrpc != null)
+                        {
+                            exportersCount++;
+                        }
 
-                            if (exporter.Console != null)
-                            {
-                                exportersCount++;
-                            }
+                        if (exporter.Zipkin != null)
+                        {
+                            exportersCount++;
+                        }
 
-                            switch (exportersCount)
-                            {
-                                case 0:
-                                    Logger.Debug("No valid exporter configured for batch processor. Skipping.");
-                                    continue;
-                                case > 1:
-                                    Logger.Debug("Multiple exporters are configured for batch processor. Only one exporter is supported. Skipping.");
-                                    continue;
-                            }
+                        if (exporter.Console != null)
+                        {
+                            exportersCount++;
+                        }
 
-                            if (exporter.OtlpHttp != null)
-                            {
-                                builder = Wrappers.AddOtlpHttpExporter(builder, pluginManager, exporter.OtlpHttp);
-                            }
-                            else if (exporter.OtlpGrpc != null)
-                            {
-                                builder = Wrappers.AddOtlpGrpcExporter(builder, pluginManager, exporter.OtlpGrpc);
-                            }
-                            else if (exporter.Zipkin != null)
-                            {
-                                builder = Wrappers.AddZipkinExporter(builder, pluginManager, exporter.Zipkin);
-                            }
-                            else if (exporter.Console != null)
-                            {
-                                builder = Wrappers.AddConsoleExporter(builder, pluginManager);
-                            }
+                        switch (exportersCount)
+                        {
+                            case 0:
+                                Logger.Debug("No valid exporter configured for simple tracer processor. Skipping.");
+                                continue;
+                            case > 1:
+                                Logger.Debug("Multiple exporters are configured for simple tracer processor. Only one exporter is supported. Skipping.");
+                                continue;
+                        }
+
+                        if (exporter.OtlpHttp != null)
+                        {
+                            builder = Wrappers.AddOtlpHttpExporter(builder, pluginManager, exporter.OtlpHttp);
+                        }
+                        else if (exporter.OtlpGrpc != null)
+                        {
+                            builder = Wrappers.AddOtlpGrpcExporter(builder, pluginManager, exporter.OtlpGrpc);
+                        }
+                        else if (exporter.Zipkin != null)
+                        {
+                            builder = Wrappers.AddZipkinExporter(builder, pluginManager, exporter.Zipkin);
+                        }
+                        else if (exporter.Console != null)
+                        {
+                            builder = Wrappers.AddConsoleExporter(builder, pluginManager);
                         }
                     }
                 }
@@ -283,7 +283,11 @@ internal static class EnvironmentConfigurationTracerHelper
         public static TracerProviderBuilder AddAspNetCoreInstrumentation(TracerProviderBuilder builder, PluginManager pluginManager, LazyInstrumentationLoader lazyInstrumentationLoader, TracerSettings tracerSettings)
         {
             DelayedInitialization.Traces.AddAspNetCore(lazyInstrumentationLoader, pluginManager, tracerSettings);
-            return builder.AddSource("Microsoft.AspNetCore");
+            return builder.AddSource(
+                "Microsoft.AspNetCore",
+                // Blazor activities first added in .NET 10.0
+                "Microsoft.AspNetCore.Components",
+                "Microsoft.AspNetCore.Components.Server.Circuits");
         }
 
         public static TracerProviderBuilder AddGraphQLInstrumentation(TracerProviderBuilder builder, PluginManager pluginManager, LazyInstrumentationLoader lazyInstrumentationLoader, TracerSettings tracerSettings)

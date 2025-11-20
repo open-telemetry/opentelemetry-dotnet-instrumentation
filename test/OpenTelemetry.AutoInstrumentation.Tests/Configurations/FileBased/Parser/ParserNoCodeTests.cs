@@ -13,7 +13,7 @@ public class ParserNoCodeTests
     [Fact]
     public void NoCodeConfigurationCanBeParsed()
     {
-        var config = YamlParser.ParseYaml("Configurations/FileBased/Files/NoCodeFile.yaml");
+        var config = YamlParser.ParseYaml<YamlConfiguration>("Configurations/FileBased/Files/NoCodeFile.yaml");
 
         Assert.NotNull(config);
         Assert.NotNull(config.InstrumentationDevelopment);

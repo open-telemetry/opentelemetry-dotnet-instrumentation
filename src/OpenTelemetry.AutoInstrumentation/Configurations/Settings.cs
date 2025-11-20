@@ -54,20 +54,14 @@ internal abstract class Settings
     /// using the specified <see cref="YamlConfiguration"/> to initialize values.
     /// </summary>
     /// <param name="configuration">The <see cref="YamlConfiguration"/> to use when retrieving configuration values.</param>
-    protected virtual void OnLoadFile(YamlConfiguration configuration)
-    {
-        // TODO temporary fallback to env var configuration until we support all settings in yaml
-        // TODO make the method abstract when all settings are supported in yaml
-        var envVarConfiguration = new Configuration(configuration.FailFast, new EnvironmentConfigurationSource(configuration.FailFast));
-        OnLoadEnvVar(envVarConfiguration);
-    }
+    protected abstract void OnLoadFile(YamlConfiguration configuration);
 
     private static YamlConfiguration ReadYamlConfiguration()
     {
         var configFile = Environment.GetEnvironmentVariable(ConfigurationKeys.FileBasedConfiguration.FileName) ?? "config.yaml";
         // TODO validate file existence
 
-        var config = Parser.ParseYaml(configFile);
+        var config = Parser.ParseYaml<YamlConfiguration>(configFile);
 
         // TODO validate file format version https://github.com/open-telemetry/opentelemetry-configuration/blob/4f185c07eaaffc18c9ad34a46085e7ad6625fca0/README.md#file-format
         return config;

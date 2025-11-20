@@ -309,20 +309,21 @@ enum class SamplingType : int32_t { Continuous = 1, SelectedThreads = 2 };
 class ContinuousProfiler
 {
 public:
-    std::optional<unsigned int> threadSamplingInterval;
-    std::optional<unsigned int> selectedThreadsSamplingInterval;
-    void                        StartThreadSampling();
-    void                        Shutdown();
-    bool                        IsShutdownRequested() const;
-    static void                 InitSelectiveSamplingBuffer();
-    unsigned int                maxMemorySamplesPerMinute;
-    void                        StartAllocationSampling(unsigned int maxMemorySamplesPerMinute);
-    void                        StopAllocationSampling();
-    void                        AllocationTick(ULONG dataLen, LPCBYTE data);
-    ICorProfilerInfo12*         info12;
-    static void                 ThreadCreated(ThreadID thread_id);
-    void                        ThreadDestroyed(ThreadID thread_id);
-    void                        ThreadNameChanged(ThreadID thread_id, ULONG cch_name, WCHAR name[]);
+    std::optional<unsigned int>                        threadSamplingInterval;
+    std::optional<unsigned int>                        selectedThreadsSamplingInterval;
+    std::chrono::time_point<std::chrono::steady_clock> nextOutdatedEntriesScan;
+    void                                               StartThreadSampling();
+    void                                               Shutdown();
+    bool                                               IsShutdownRequested() const;
+    static void                                        InitSelectiveSamplingBuffer();
+    unsigned int                                       maxMemorySamplesPerMinute;
+    void                                               StartAllocationSampling(unsigned int maxMemorySamplesPerMinute);
+    void                                               StopAllocationSampling();
+    void                                               AllocationTick(ULONG dataLen, LPCBYTE data);
+    ICorProfilerInfo12*                                info12;
+    static void                                        ThreadCreated(ThreadID thread_id);
+    void                                               ThreadDestroyed(ThreadID thread_id);
+    void                                               ThreadNameChanged(ThreadID thread_id, ULONG cch_name, WCHAR name[]);
 
     void SetGlobalInfo12(ICorProfilerInfo12* info12);
     ThreadState* GetCurrentThreadState(ThreadID tid);
