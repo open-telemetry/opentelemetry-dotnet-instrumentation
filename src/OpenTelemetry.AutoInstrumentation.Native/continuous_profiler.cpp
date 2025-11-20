@@ -471,95 +471,37 @@ void ThreadSamplesBuffer::WriteCurrentTimeMillis() const
 
 void ThreadSpanContextMap::Remove(const thread_span_context& spanContext)
 {
-    const auto foundBySpanContext = span_context_thread_map.find(spanContext);
-    if (foundBySpanContext == span_context_thread_map.end())
+    for (auto it = thread_span_context_map.begin(); it != thread_span_context_map.end();)
     {
-        return; // nothing to remove
-    }
-    const auto& threadIds = foundBySpanContext->second;
-    for (auto threadId : threadIds)
-    {
-        thread_span_context_map.erase(threadId);
-    }
-    span_context_thread_map.erase(spanContext);
-
-    const auto foundByTraceContext = trace_active_span_map.find(spanContext.trace_context_);
-    if (foundByTraceContext == trace_active_span_map.end())
-    {
-        return; // nothing to remove
-    }
-    auto& traceActiveSpans = foundByTraceContext->second;
-    traceActiveSpans.erase(spanContext);
-    if (traceActiveSpans.empty())
-    {
-        trace_active_span_map.erase(spanContext.trace_context_);
+        if (it->second == spanContext)
+        {
+            it = thread_span_context_map.erase(it);
+        }
+        else
+        {
+            ++it;
+        }
     }
 }
 
 void ThreadSpanContextMap::Remove(ThreadID threadId)
 {
-    const auto foundByThreadId = thread_span_context_map.find(threadId);
-    if (foundByThreadId == thread_span_context_map.end())
-    {
-        return; // nothing to remove
-    }
-
-    const auto spanContext        = foundByThreadId->second;
-    const auto foundBySpanContext = span_context_thread_map.find(spanContext);
-    if (foundBySpanContext != span_context_thread_map.end())
-    {
-        auto& threadIds = foundBySpanContext->second;
-        threadIds.erase(threadId);
-    }
-
     thread_span_context_map.erase(threadId);
+}
+
+std::unordered_map<ThreadID, thread_span_context>::const_iterator ThreadSpanContextMap::begin() const
+{
+    return thread_span_context_map.begin();
+}
+
+std::unordered_map<ThreadID, thread_span_context>::const_iterator ThreadSpanContextMap::end() const
+{
+    return thread_span_context_map.end();
 }
 
 void ThreadSpanContextMap::Put(ThreadID threadId, const thread_span_context& currentSpanContext)
 {
-    const auto foundByThreadId = thread_span_context_map.find(threadId);
-    if (foundByThreadId != thread_span_context_map.end())
-    {
-        const auto previousContext = foundByThreadId->second;
-        if (!previousContext.IsDefault())
-        {
-            span_context_thread_map[previousContext].erase(threadId);
-        }
-    }
-
     thread_span_context_map[threadId] = currentSpanContext;
-    if (currentSpanContext.IsDefault())
-    {
-        return;
-    }
-
-    span_context_thread_map[currentSpanContext].insert(threadId);
-
-    // Also note of possibly new activity, store it in trace map.
-    // This is a noop if already present.
-    trace_active_span_map[currentSpanContext.trace_context_].insert(currentSpanContext);
-}
-
-void ThreadSpanContextMap::GetAllThreads(const trace_context traceContext, std::unordered_set<ThreadID>& buffer)
-{
-    const auto traceSpans = trace_active_span_map.find(traceContext);
-    if (traceSpans == trace_active_span_map.end())
-    {
-        return;
-    }
-
-    const auto& spanContexts = traceSpans->second;
-    for (const auto& spanContext : spanContexts)
-    {
-        const auto foundBySpanContext = span_context_thread_map.find(spanContext);
-        if (foundBySpanContext == span_context_thread_map.end())
-        {
-            continue;
-        }
-
-        const auto& threadIds = foundBySpanContext->second;
-        buffer.insert(threadIds.begin(), threadIds.end());
-    }
 }
 
 std::optional<thread_span_context> ThreadSpanContextMap::GetContext(ThreadID threadId)
@@ -1032,10 +974,14 @@ static void PauseClrAndCaptureSamples(ContinuousProfiler*                       
         }
 
         selective_sampling_thread_buffer.clear();
-        for (const auto& [traceContext, _] : selective_sampling_trace_map)
+        for (auto& [threadId, spanContext] : thread_span_context_map)
         {
-            thread_span_context_map.GetAllThreads(traceContext, selective_sampling_thread_buffer);
+            if (selective_sampling_trace_map.find(spanContext.trace_context_) != selective_sampling_trace_map.end())
+            {
+                selective_sampling_thread_buffer.insert(threadId);
+            }
         }
+
         if (selective_sampling_thread_buffer.empty())
         {
             return;
