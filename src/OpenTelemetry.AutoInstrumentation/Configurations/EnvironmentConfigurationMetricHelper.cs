@@ -94,6 +94,7 @@ internal static class EnvironmentConfigurationMetricHelper
                         }
 
                         var exportersCount = 0;
+
                         if (exporter.OtlpHttp != null)
                         {
                             exportersCount++;

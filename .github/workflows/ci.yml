@@ -34,7 +34,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        test-tfm: [ net9.0, net8.0, net462 ]
+        test-tfm: [ net10.0, net9.0, net8.0, net462 ]
         machine: [ windows-2022, windows-2025, ubuntu-22.04, macos-14, ubuntu-22.04-arm ]
         exclude:
           - test-tfm: net462
@@ -63,7 +63,7 @@ jobs:
     steps:
 
       - name: Checkout
-        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # tag: v5.0.0
+        uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # tag: v5.0.1
         with:
           fetch-depth: 0 # fetching all, needed to correctly calculate version
 
@@ -73,6 +73,7 @@ jobs:
           dotnet-version: | 
             8.0.416
             9.0.307
+            10.0.100
 
       - name: Check for NuGet packages cache
         uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # tag: v4.3.0
@@ -122,7 +123,7 @@ jobs:
     steps:
 
       - name: Checkout
-        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # tag: v5.0.0
+        uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # tag: v5.0.1
         with:
           fetch-depth: 0 # fetching all, needed to correctly calculate version
 
@@ -132,6 +133,7 @@ jobs:
           dotnet-version: | 
             8.0.416
             9.0.307
+            10.0.100
 
       - name: Check for NuGet packages cache
         uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # tag: v4.3.0
@@ -165,7 +167,7 @@ jobs:
     steps:
 
       - name: Checkout
-        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # tag: v5.0.0
+        uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # tag: v5.0.1
         with:
           fetch-depth: 0 # fetching all, needed to correctly calculate version
 
@@ -175,6 +177,7 @@ jobs:
           dotnet-version: | 
             8.0.416
             9.0.307
+            10.0.100
 
       - name: Check for NuGet packages cache
         uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # tag: v4.3.0
@@ -233,7 +236,7 @@ jobs:
     steps:
 
     - name: Checkout
-      uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # tag: v5.0.0
+      uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # tag: v5.0.1
       with:
         fetch-depth: 0 # fetching all, needed to correctly calculate version
 
@@ -272,7 +275,7 @@ jobs:
     steps:
       
       - name: Checkout
-        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # tag: v5.0.0
+        uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # tag: v5.0.1
         with:
           fetch-depth: 0 # fetching all, needed to correctly calculate version
 
@@ -282,6 +285,7 @@ jobs:
           dotnet-version: | 
             8.0.416
             9.0.307
+            10.0.100
 
       - name: Check for NuGet packages cache
         uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # tag: v4.3.0

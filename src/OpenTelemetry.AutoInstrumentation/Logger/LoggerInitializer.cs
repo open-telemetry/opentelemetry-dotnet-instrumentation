@@ -139,32 +139,31 @@ internal static class LoggerInitializer
                                 continue;
                             }
 
-                            var count = 0;
+                            var exportersCount = 0;
+
                             if (exporter.OtlpHttp != null)
                             {
-                                count++;
+                                exportersCount++;
                             }
 
                             if (exporter.OtlpGrpc != null)
                             {
-                                count++;
+                                exportersCount++;
                             }
 
                             if (exporter.Console != null)
                             {
-                                count++;
+                                exportersCount++;
                             }
 
-                            if (count == 0)
+                            switch (exportersCount)
                             {
-                                AutoInstrumentationEventSource.Log.Verbose("Logs: No valid exporter found for simple processor, skipping.");
-                                continue;
-                            }
-
-                            if (count > 1)
-                            {
-                                AutoInstrumentationEventSource.Log.Verbose("Logs: Multiple exporters configured for simple processor, only one supported. Skipping.");
-                                continue;
+                                case 0:
+                                    AutoInstrumentationEventSource.Log.Verbose("Logs: No valid exporter found for simple processor, skipping.");
+                                    continue;
+                                case > 1:
+                                    AutoInstrumentationEventSource.Log.Verbose("Logs: Multiple exporters configured for simple processor, only one supported. Skipping.");
+                                    continue;
                             }
 
                             if (exporter.OtlpHttp != null)
