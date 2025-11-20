@@ -177,8 +177,8 @@ public class MockProfilesCollector : IDisposable
 #if NETFRAMEWORK
     private void HandleHttpRequests(HttpListenerContext ctx)
     {
-        var metricsMessage = ExportProfilesServiceRequest.Parser.ParseFrom(ctx.Request.InputStream);
-        HandleProfilesMessage(metricsMessage);
+        var profilesMessage = ExportProfilesServiceRequest.Parser.ParseFrom(ctx.Request.InputStream);
+        HandleProfilesMessage(profilesMessage);
 
         ctx.GenerateEmptyProtobufResponse<ExportProfilesServiceResponse>();
     }
