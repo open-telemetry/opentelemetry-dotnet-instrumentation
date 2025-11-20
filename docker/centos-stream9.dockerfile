@@ -8,7 +8,7 @@ COPY ./scripts/dotnet-install.sh ./dotnet-install.sh
 
 RUN chmod +x ./dotnet-install.sh \
     && ./dotnet-install.sh -v 10.0.100 --install-dir /usr/share/dotnet --no-path \
-    && ./dotnet-install.sh -v 9.0.307 --install-dir /usr/share/dotnet --no-path \
+    && ./dotnet-install.sh -v 9.0.308 --install-dir /usr/share/dotnet --no-path \
     && ./dotnet-install.sh -v 8.0.416 --install-dir /usr/share/dotnet --no-path \
     && rm dotnet-install.sh
 

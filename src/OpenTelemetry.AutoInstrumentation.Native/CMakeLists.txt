@@ -169,6 +169,7 @@ add_library("OpenTelemetry.AutoInstrumentation.Native.static" STATIC
         rejit_preprocessor.cpp
         rejit_work_offloader.cpp
         environment_variables_util.cpp
+        stub_generator.cpp
         method_rewriter.cpp
         tracer_tokens.cpp
         lib/coreclr/src/pal/prebuilt/idl/corprof_i.cpp

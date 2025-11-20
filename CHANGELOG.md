@@ -25,6 +25,9 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 
 - Changed minimal supported version of `Microsoft.Extensions.Logging`
   for `ILOGGER` instrumentation from `9.0.0` to `8.0.0`.
+- Setting `DOTNET_STARTUP_HOOKS` is now optional if the .NET CLR profiler
+  is configured. If it is not set, the profiler looks for the startup hooks
+  assembly and injects the configuration into the application.
 
 #### Dependency updates
 
