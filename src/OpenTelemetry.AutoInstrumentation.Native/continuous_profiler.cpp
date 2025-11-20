@@ -801,8 +801,10 @@ static HRESULT __stdcall FrameCallback(_In_ FunctionID         func_id,
 
     // Use '0' as a frame_info value.
     // It is documented to be equivalent to using value provided in frame_info parameter.
-    // See https://github.com/dotnet/runtime/blob/988296b080776c885ee0725b481db4ae4d4360ed/src/coreclr/inc/corprof.idl#L3167-L3172
-    // and https://github.com/dotnet/runtime/blob/bda571bfc728369cc2bbd33f2c161ea73c762b8d/docs/design/coreclr/profiling/davbr-blog-archive/Generics%20and%20Your%20Profiler.md?plain=1#L82-L101 
+    // See
+    // https://github.com/dotnet/runtime/blob/988296b080776c885ee0725b481db4ae4d4360ed/src/coreclr/inc/corprof.idl#L3167-L3172
+    // and
+    // https://github.com/dotnet/runtime/blob/bda571bfc728369cc2bbd33f2c161ea73c762b8d/docs/design/coreclr/profiling/davbr-blog-archive/Generics%20and%20Your%20Profiler.md?plain=1#L82-L101
     // for details.
 
     const auto identifier = params->prof->helper.Lookup(func_id, 0);
