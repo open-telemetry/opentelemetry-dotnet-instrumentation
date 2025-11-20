@@ -158,10 +158,11 @@ internal class OtlpSettings
     {
         // the default in SDK is grpc. http/protobuf should be default for our purposes
         var priorityVar = OtlpSpecConfigDefinitions.GetProtocolEnvVar(signalType);
-        var exporterOtlpProtocol = configuration.GetString(priorityVar);
+        var exporterOtlpProtocol = configuration.GetString(priorityVar) ??
+            configuration.GetString(OtlpSpecConfigDefinitions.DefaultProtocolEnvVarName);
 
         // SDK handles only general environment variables.
-        // In case priority env is set, the value must be maually passed.
+        // In case priority env is set, the value must be manually passed.
         if (!string.IsNullOrEmpty(exporterOtlpProtocol))
         {
             switch (exporterOtlpProtocol)
@@ -195,15 +196,7 @@ internal class OtlpSettings
             }
         }
 
-        exporterOtlpProtocol = configuration.GetString(OtlpSpecConfigDefinitions.DefaultProtocolEnvVarName);
-
-        if (string.IsNullOrEmpty(exporterOtlpProtocol))
-        {
-            // override settings only for http/protobuf
-            return OtlpExportProtocol.HttpProtobuf;
-        }
-
-        // null value here means that it will be handled by OTEL .NET SDK
-        return null;
+        // In case of absent value, it will fall back to default value "otlp"
+        return OtlpExportProtocol.HttpProtobuf;
     }
 }

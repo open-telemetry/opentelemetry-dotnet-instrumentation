@@ -3,7 +3,6 @@
 
 using System.Reflection;
 using OpenTelemetry.AutoInstrumentation.Configurations;
-using OpenTelemetry.AutoInstrumentation.Configurations.Otlp;
 using OpenTelemetry.Exporter;
 using Xunit;
 
@@ -381,8 +380,12 @@ public class SettingsTests : IDisposable
     [Theory]
     [InlineData("", OtlpExportProtocol.HttpProtobuf)]
     [InlineData(null, OtlpExportProtocol.HttpProtobuf)]
-    [InlineData("http/protobuf", null)]
+    [InlineData("http/protobuf", OtlpExportProtocol.HttpProtobuf)]
+#if NETFRAMEWORK
     [InlineData("grpc", null)]
+#else
+    [InlineData("grpc", OtlpExportProtocol.Grpc)]
+#endif
     [InlineData("nonExistingProtocol", null)]
     internal void OtlpExportProtocol_DependsOnCorrespondingEnvVariable(string? otlpProtocol, OtlpExportProtocol? expectedOtlpExportProtocol)
     {
@@ -395,46 +398,77 @@ public class SettingsTests : IDisposable
         Assert.Equal(expectedOtlpExportProtocol, settings.OtlpSettings.Protocol);
     }
 
-    [Fact]
-    internal void OtlpExportProtocol_CheckPriorityEnvIsSet_Traces()
+    [Theory]
+    // endpoint, protocol, timeout, headers, expectedProtocol, expectedTimeout
+    [InlineData("http://example.org/traces/v1", "http/protobuf", "1", "key1=value1,key2=value2", OtlpExportProtocol.HttpProtobuf, 1)]
+#if NETFRAMEWORK
+    [InlineData("http://example.org/traces/v1", "grpc", "15000", "a=b,c=d", null, 15000)]
+#else
+    [InlineData("http://example.org/traces/v1", "grpc", "15000", "a=b,c=d", OtlpExportProtocol.Grpc, 15000)]
+#endif
+    [InlineData("http://example.org/traces/v1", "invalid", "42", "x=y", null, 42)]
+    internal void OtlpExportProtocol_CheckPriorityEnvIsSet_Traces(string endpoint, string protocol, string timeout, string headers, OtlpExportProtocol? expectedProtocol, int expectedTimeout)
     {
-        VerifyOtlpPrioritySettings(((string Endpoint, string Protocol, string Timeout, string Headers) values) =>
-        {
-            Environment.SetEnvironmentVariable(AutoOtlpDefinitions.TracesEndpointEnvVarName, values.Endpoint);
-            Environment.SetEnvironmentVariable(AutoOtlpDefinitions.TracesProtocolEnvVarName, values.Protocol);
-            Environment.SetEnvironmentVariable(AutoOtlpDefinitions.TracesTimeoutEnvVarName, values.Timeout);
-            Environment.SetEnvironmentVariable(AutoOtlpDefinitions.TracesHeadersEnvVarName, values.Headers);
+        Environment.SetEnvironmentVariable(AutoOtlpDefinitions.TracesEndpointEnvVarName, endpoint);
+        Environment.SetEnvironmentVariable(AutoOtlpDefinitions.TracesProtocolEnvVarName, protocol);
+        Environment.SetEnvironmentVariable(AutoOtlpDefinitions.TracesTimeoutEnvVarName, timeout);
+        Environment.SetEnvironmentVariable(AutoOtlpDefinitions.TracesHeadersEnvVarName, headers);
 
-            return Settings.FromDefaultSources<TracerSettings>(false).OtlpSettings;
-        });
+        var settings = Settings.FromDefaultSources<TracerSettings>(false).OtlpSettings;
+
+        Assert.NotNull(settings);
+        Assert.Equal(new Uri(endpoint), settings.Endpoint);
+        Assert.Equal(expectedProtocol, settings.Protocol);
+        Assert.Equal(expectedTimeout, settings.TimeoutMilliseconds);
+        Assert.Equal(headers, settings.Headers);
     }
 
-    [Fact]
-    internal void OtlpExportProtocol_CheckPriorityEnvIsSet_Metrics()
+    [Theory]
+    [InlineData("http://example.org/metrics/v1", "http/protobuf", "1", "key1=value1,key2=value2", OtlpExportProtocol.HttpProtobuf, 1)]
+#if NETFRAMEWORK
+    [InlineData("http://example.org/metrics/v1", "grpc", "25000", "m=n", null, 25000)]
+#else
+    [InlineData("http://example.org/metrics/v1", "grpc", "25000", "m=n", OtlpExportProtocol.Grpc, 25000)]
+#endif
+    [InlineData("http://example.org/metrics/v1", "invalid", "100", "a=b", null, 100)]
+    internal void OtlpExportProtocol_CheckPriorityEnvIsSet_Metrics(string endpoint, string protocol, string timeout, string headers, OtlpExportProtocol? expectedProtocol, int expectedTimeout)
     {
-        VerifyOtlpPrioritySettings(((string Endpoint, string Protocol, string Timeout, string Headers) values) =>
-        {
-            Environment.SetEnvironmentVariable(AutoOtlpDefinitions.MetricsEndpointEnvVarName, values.Endpoint);
-            Environment.SetEnvironmentVariable(AutoOtlpDefinitions.MetricsProtocolEnvVarName, values.Protocol);
-            Environment.SetEnvironmentVariable(AutoOtlpDefinitions.MetricsTimeoutEnvVarName, values.Timeout);
-            Environment.SetEnvironmentVariable(AutoOtlpDefinitions.MetricsHeadersEnvVarName, values.Headers);
+        Environment.SetEnvironmentVariable(AutoOtlpDefinitions.MetricsEndpointEnvVarName, endpoint);
+        Environment.SetEnvironmentVariable(AutoOtlpDefinitions.MetricsProtocolEnvVarName, protocol);
+        Environment.SetEnvironmentVariable(AutoOtlpDefinitions.MetricsTimeoutEnvVarName, timeout);
+        Environment.SetEnvironmentVariable(AutoOtlpDefinitions.MetricsHeadersEnvVarName, headers);
 
-            return Settings.FromDefaultSources<MetricSettings>(false).OtlpSettings;
-        });
+        var settings = Settings.FromDefaultSources<MetricSettings>(false).OtlpSettings;
+
+        Assert.NotNull(settings);
+        Assert.Equal(new Uri(endpoint), settings.Endpoint);
+        Assert.Equal(expectedProtocol, settings.Protocol);
+        Assert.Equal(expectedTimeout, settings.TimeoutMilliseconds);
+        Assert.Equal(headers, settings.Headers);
     }
 
-    [Fact]
-    internal void OtlpExportProtocol_CheckPriorityEnvIsSet_Logs()
+    [Theory]
+    [InlineData("http://example.org/logs/v1", "http/protobuf", "1", "key1=value1,key2=value2", OtlpExportProtocol.HttpProtobuf, 1)]
+#if NETFRAMEWORK
+    [InlineData("http://example.org/logs/v1", "grpc", "5000", "l=m", null, 5000)]
+#else
+    [InlineData("http://example.org/logs/v1", "grpc", "5000", "l=m", OtlpExportProtocol.Grpc, 5000)]
+#endif
+    [InlineData("http://example.org/logs/v1", "invalid", "77", "z=zz", null, 77)]
+    internal void OtlpExportProtocol_CheckPriorityEnvIsSet_Logs(string endpoint, string protocol, string timeout, string headers, OtlpExportProtocol? expectedProtocol, int expectedTimeout)
     {
-        VerifyOtlpPrioritySettings(((string Endpoint, string Protocol, string Timeout, string Headers) values) =>
-        {
-            Environment.SetEnvironmentVariable(AutoOtlpDefinitions.LogsEndpointEnvVarName, values.Endpoint);
-            Environment.SetEnvironmentVariable(AutoOtlpDefinitions.LogsProtocolEnvVarName, values.Protocol);
-            Environment.SetEnvironmentVariable(AutoOtlpDefinitions.LogsTimeoutEnvVarName, values.Timeout);
-            Environment.SetEnvironmentVariable(AutoOtlpDefinitions.LogsHeadersEnvVarName, values.Headers);
+        Environment.SetEnvironmentVariable(AutoOtlpDefinitions.LogsEndpointEnvVarName, endpoint);
+        Environment.SetEnvironmentVariable(AutoOtlpDefinitions.LogsProtocolEnvVarName, protocol);
+        Environment.SetEnvironmentVariable(AutoOtlpDefinitions.LogsTimeoutEnvVarName, timeout);
+        Environment.SetEnvironmentVariable(AutoOtlpDefinitions.LogsHeadersEnvVarName, headers);
 
-            return Settings.FromDefaultSources<LogSettings>(false).OtlpSettings;
-        });
+        var settings = Settings.FromDefaultSources<LogSettings>(false).OtlpSettings;
+
+        Assert.NotNull(settings);
+        Assert.Equal(new Uri(endpoint), settings.Endpoint);
+        Assert.Equal(expectedProtocol, settings.Protocol);
+        Assert.Equal(expectedTimeout, settings.TimeoutMilliseconds);
+        Assert.Equal(headers, settings.Headers);
     }
 
     [Theory]
@@ -536,24 +570,5 @@ public class SettingsTests : IDisposable
             .Where(f => f.FieldType == typeof(string))
             .Select(f => (string)f.GetValue(null)!)
             .ToList() ?? Enumerable.Empty<string>();
-    }
-
-    private static void VerifyOtlpPrioritySettings(Func<(string Endpoint, string Protocol, string Timeout, string Headers), OtlpSettings?> setup)
-    {
-        var endpoint = "http://example.org/traces/v1";
-        var endpointValue = new Uri(endpoint);
-        var protocol = "http/protobuf";
-        var protocolValue = OtlpExportProtocol.HttpProtobuf;
-        var timeout = "1";
-        var timeoutValue = 1;
-        var headers = "key1=value1,key2=value2";
-
-        var settings = setup((endpoint, protocol, timeout, headers));
-
-        Assert.NotNull(settings);
-        Assert.Equal(endpointValue, settings.Endpoint);
-        Assert.Equal(protocolValue, settings.Protocol);
-        Assert.Equal(timeoutValue, settings.TimeoutMilliseconds);
-        Assert.Equal(headers, settings.Headers);
     }
 }
