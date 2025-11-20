@@ -32,7 +32,7 @@ jobs:
       - name: Setup .NET
         uses: actions/setup-dotnet@d4c94342e560b34958eacfc5d055d21461ed1c5d # tag: v5.0.0
         with:
-          dotnet-version: 9.0.307
+          dotnet-version: 9.0.308
 
       - name: Check for NuGet packages cache
         uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # tag: v4.3.0
