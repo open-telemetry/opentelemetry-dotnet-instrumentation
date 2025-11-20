@@ -54,17 +54,19 @@ struct FunctionIdentifier
 struct FunctionIdentifierResolveArgs
 {
     FunctionID  function_id;
-    COR_PRF_FRAME_INFO frame_info;
 
     FunctionIdentifierResolveArgs() = delete;
-    FunctionIdentifierResolveArgs(const FunctionID func_id, const COR_PRF_FRAME_INFO frame_info)
+    FunctionIdentifierResolveArgs(const FunctionID func_id)
         : function_id(func_id)
-        , frame_info(frame_info)
     {
     }
     bool operator==(const FunctionIdentifierResolveArgs& p) const
     {
-        return function_id == p.function_id && frame_info == p.frame_info;
+        return function_id == p.function_id;
+    }
+    bool operator!=(const FunctionIdentifierResolveArgs& p) const
+    {
+        return !(*this == p);
     }
 };
 
@@ -85,6 +87,10 @@ struct trace_context
     bool operator==(const trace_context& p) const
     {
         return trace_id_low_ == p.trace_id_low_ && trace_id_high_ == p.trace_id_high_;
+    }
+    bool operator!=(const trace_context& p) const
+    {
+        return !(*this == p);
     }
     [[nodiscard]] bool IsDefault() const;
 };
@@ -138,7 +144,7 @@ struct std::hash<continuous_profiler::FunctionIdentifierResolveArgs>
 {
     std::size_t operator()(const continuous_profiler::FunctionIdentifierResolveArgs& k) const noexcept
     {
-        return hash_combine(k.function_id, k.frame_info);
+        return hash_combine(k.function_id);
     }
 };
 

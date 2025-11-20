@@ -767,13 +767,13 @@ trace::WSTRING* NamingHelper::Lookup(const FunctionIdentifier& function_identifi
 
 FunctionIdentifier NamingHelper::Lookup(const FunctionID functionId, const COR_PRF_FRAME_INFO frameInfo)
 {
-    const FunctionIdentifierResolveArgs cacheKey         = {functionId, frameInfo};
+    const FunctionIdentifierResolveArgs cacheKey         = {functionId};
     const auto                          cachedIdentifier = function_identifier_cache_.Get(cacheKey);
     if (cachedIdentifier.is_valid)
     {
         return cachedIdentifier;
     }
-    const auto resolvedIdentifier = this->GetFunctionIdentifier(cacheKey.function_id, cacheKey.frame_info);
+    const auto resolvedIdentifier = this->GetFunctionIdentifier(cacheKey.function_id, frameInfo);
     function_identifier_cache_.Put(cacheKey, resolvedIdentifier);
     return resolvedIdentifier;
 }
@@ -799,7 +799,13 @@ static HRESULT __stdcall FrameCallback(_In_ FunctionID         func_id,
     const auto params = static_cast<DoStackSnapshotParams*>(client_data);
     params->prof->stats_.total_frames++;
 
-    const auto identifier = params->prof->helper.Lookup(func_id, frame_info);
+    // Use '0' as a frame_info value.
+    // It is documented to be equivalent to using value provided in frame_info parameter.
+    // See https://github.com/dotnet/runtime/blob/988296b080776c885ee0725b481db4ae4d4360ed/src/coreclr/inc/corprof.idl#L3167-L3172
+    // and https://github.com/dotnet/runtime/blob/bda571bfc728369cc2bbd33f2c161ea73c762b8d/docs/design/coreclr/profiling/davbr-blog-archive/Generics%20and%20Your%20Profiler.md?plain=1#L82-L101 
+    // for details.
+
+    const auto identifier = params->prof->helper.Lookup(func_id, 0);
     params->buffer->push_back(identifier);
 
     return S_OK;
