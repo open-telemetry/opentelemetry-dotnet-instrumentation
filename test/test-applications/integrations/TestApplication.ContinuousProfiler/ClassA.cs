@@ -30,7 +30,7 @@ internal static class ClassA
 
         for (var i = 0; i < numberOfItems; i++)
         {
-            TextWriter.Null.Write(items[i][^2]);
+            TextWriter.Null.Write(items[i][items[i].Length - 2]);
         }
     }
 
@@ -48,8 +48,13 @@ internal static class ClassA
             int.MaxValue,
             ulong.MaxValue,
             long.MaxValue,
+#if NET
             nint.MaxValue,
             nuint.MaxValue);
+#else
+            0x7fffffff,
+            0xffffffff);
+#endif
     }
 
     [MethodImpl(MethodImplOptions.NoInlining)]
@@ -105,7 +110,11 @@ internal static class ClassA
         static void Action(int s) => InternalClassB<string, int>.DoubleInternalClassB.TripleInternalClassB<int>.MethodB(s, [3], TimeSpan.Zero, 0, ["a"], []);
     }
 
+#if NET
     [DllImport("TestApplication.ContinuousProfiler.NativeDep")]
+#else
+    [DllImport("TestApplication.ContinuousProfiler.NativeDep.dll")]
+#endif
     private static extern int OTelAutoCallbackTest(Callback fp, int n);
 
     internal static class InternalClassB<TA, TD>
