@@ -66,8 +66,6 @@ public class OracleFixture : IAsyncLifetime
         var containersBuilder = new ContainerBuilder()
             .WithImage(OracleImage)
             .WithEnvironment("ORACLE_RANDOM_PASSWORD", "yes")
-            .WithEnvironment("APP_USER", "appuser")
-            .WithEnvironment("APP_USER_PASSWORD", Password)
             .WithName($"oracle-{port}")
             .WithPortBinding(port, OraclePort)
             .WithWaitStrategy(Wait.ForUnixContainer().UntilInternalTcpPortIsAvailable(OraclePort))
@@ -75,6 +73,15 @@ public class OracleFixture : IAsyncLifetime
 
         var container = containersBuilder.Build();
         await container.StartAsync();
+
+        // Create the application user after container is ready
+        // First ensure the pluggable database is open, then create the user
+        var createUserScript = $"ALTER PLUGGABLE DATABASE ALL OPEN; " +
+                               $"ALTER SESSION SET CONTAINER=FREEPDB1; " +
+                               $"CREATE USER appuser IDENTIFIED BY \"{Password}\" QUOTA UNLIMITED ON USERS; " +
+                               $"GRANT CONNECT, RESOURCE TO appuser;";
+
+        await container.ExecAsync(new[] { "bash", "-c", $"echo \"{createUserScript}\" | sqlplus -s / as sysdba" });
 
         return container;
     }
