@@ -399,19 +399,17 @@ public class SettingsTests : IDisposable
     }
 
     [Theory]
-    // endpoint, protocol, timeout, headers, expectedProtocol, expectedTimeout
-    [InlineData("http://example.org/traces/v1", "http/protobuf", "1", "key1=value1,key2=value2", OtlpExportProtocol.HttpProtobuf, 1)]
+    [InlineData("http/protobuf", "1", "key1=value1,key2=value2", OtlpExportProtocol.HttpProtobuf, 1)]
 #if NETFRAMEWORK
-    [InlineData("http://example.org/traces/v1", "grpc", "15000", "a=b,c=d", OtlpExportProtocol.HttpProtobuf, 15000)]
+    [InlineData("grpc", "15000", "a=b,c=d", OtlpExportProtocol.HttpProtobuf, 15000)]
 #else
-    [InlineData("http://example.org/traces/v1", "grpc", "15000", "a=b,c=d", OtlpExportProtocol.Grpc, 15000)]
+    [InlineData("grpc", "15000", "a=b,c=d", OtlpExportProtocol.Grpc, 15000)]
 #endif
-    [InlineData("http://example.org/traces/v1", "invalid", "42", "x=y", OtlpExportProtocol.HttpProtobuf, 42)]
-    internal void OtlpExportProtocol_CheckPriorityEnvIsSet_Traces(string endpoint, string protocol, string timeout, string headers, OtlpExportProtocol? expectedProtocol, int expectedTimeout)
+    [InlineData("invalid", "42", "x=y", OtlpExportProtocol.HttpProtobuf, 42)]
+    internal void OtlpExportProtocol_CheckPriorityEnvIsSet_Traces(string? protocol, string timeout, string headers, OtlpExportProtocol? expectedProtocol, int expectedTimeout)
     {
         var unexpectedProtocolForDistraction = expectedProtocol == OtlpExportProtocol.HttpProtobuf ? "grpc" : "http/protobuf";
         Environment.SetEnvironmentVariable(AutoOtlpDefinitions.DefaultProtocolEnvVarName, unexpectedProtocolForDistraction); // set a different default to verify priority
-        Environment.SetEnvironmentVariable(AutoOtlpDefinitions.TracesEndpointEnvVarName, endpoint);
         Environment.SetEnvironmentVariable(AutoOtlpDefinitions.TracesProtocolEnvVarName, protocol);
         Environment.SetEnvironmentVariable(AutoOtlpDefinitions.TracesTimeoutEnvVarName, timeout);
         Environment.SetEnvironmentVariable(AutoOtlpDefinitions.TracesHeadersEnvVarName, headers);
@@ -419,25 +417,23 @@ public class SettingsTests : IDisposable
         var settings = Settings.FromDefaultSources<TracerSettings>(false).OtlpSettings;
 
         Assert.NotNull(settings);
-        Assert.Equal(new Uri(endpoint), settings.Endpoint);
         Assert.Equal(expectedProtocol, settings.Protocol);
         Assert.Equal(expectedTimeout, settings.TimeoutMilliseconds);
         Assert.Equal(headers, settings.Headers);
     }
 
     [Theory]
-    [InlineData("http://example.org/metrics/v1", "http/protobuf", "1", "key1=value1,key2=value2", OtlpExportProtocol.HttpProtobuf, 1)]
+    [InlineData("http/protobuf", "1", "key1=value1,key2=value2", OtlpExportProtocol.HttpProtobuf, 1)]
 #if NETFRAMEWORK
-    [InlineData("http://example.org/metrics/v1", "grpc", "25000", "m=n", OtlpExportProtocol.HttpProtobuf, 25000)]
+    [InlineData("grpc", "25000", "m=n", OtlpExportProtocol.HttpProtobuf, 25000)]
 #else
-    [InlineData("http://example.org/metrics/v1", "grpc", "25000", "m=n", OtlpExportProtocol.Grpc, 25000)]
+    [InlineData("grpc", "25000", "m=n", OtlpExportProtocol.Grpc, 25000)]
 #endif
-    [InlineData("http://example.org/metrics/v1", "invalid", "100", "a=b", OtlpExportProtocol.HttpProtobuf, 100)]
-    internal void OtlpExportProtocol_CheckPriorityEnvIsSet_Metrics(string endpoint, string protocol, string timeout, string headers, OtlpExportProtocol? expectedProtocol, int expectedTimeout)
+    [InlineData("invalid", "100", "a=b", OtlpExportProtocol.HttpProtobuf, 100)]
+    internal void OtlpExportProtocol_CheckPriorityEnvIsSet_Metrics(string? protocol, string timeout, string headers, OtlpExportProtocol? expectedProtocol, int expectedTimeout)
     {
         var unexpectedProtocolForDistraction = expectedProtocol == OtlpExportProtocol.HttpProtobuf ? "grpc" : "http/protobuf";
         Environment.SetEnvironmentVariable(AutoOtlpDefinitions.DefaultProtocolEnvVarName, unexpectedProtocolForDistraction); // set a different default to verify priority
-        Environment.SetEnvironmentVariable(AutoOtlpDefinitions.MetricsEndpointEnvVarName, endpoint);
         Environment.SetEnvironmentVariable(AutoOtlpDefinitions.MetricsProtocolEnvVarName, protocol);
         Environment.SetEnvironmentVariable(AutoOtlpDefinitions.MetricsTimeoutEnvVarName, timeout);
         Environment.SetEnvironmentVariable(AutoOtlpDefinitions.MetricsHeadersEnvVarName, headers);
@@ -445,25 +441,23 @@ public class SettingsTests : IDisposable
         var settings = Settings.FromDefaultSources<MetricSettings>(false).OtlpSettings;
 
         Assert.NotNull(settings);
-        Assert.Equal(new Uri(endpoint), settings.Endpoint);
         Assert.Equal(expectedProtocol, settings.Protocol);
         Assert.Equal(expectedTimeout, settings.TimeoutMilliseconds);
         Assert.Equal(headers, settings.Headers);
     }
 
     [Theory]
-    [InlineData("http://example.org/logs/v1", "http/protobuf", "1", "key1=value1,key2=value2", OtlpExportProtocol.HttpProtobuf, 1)]
+    [InlineData("http/protobuf", "1", "key1=value1,key2=value2", OtlpExportProtocol.HttpProtobuf, 1)]
 #if NETFRAMEWORK
-    [InlineData("http://example.org/logs/v1", "grpc", "5000", "l=m", OtlpExportProtocol.HttpProtobuf, 5000)]
+    [InlineData("grpc", "5000", "l=m", OtlpExportProtocol.HttpProtobuf, 5000)]
 #else
-    [InlineData("http://example.org/logs/v1", "grpc", "5000", "l=m", OtlpExportProtocol.Grpc, 5000)]
+    [InlineData("grpc", "5000", "l=m", OtlpExportProtocol.Grpc, 5000)]
 #endif
-    [InlineData("http://example.org/logs/v1", "invalid", "77", "z=zz", OtlpExportProtocol.HttpProtobuf, 77)]
-    internal void OtlpExportProtocol_CheckPriorityEnvIsSet_Logs(string endpoint, string protocol, string timeout, string headers, OtlpExportProtocol? expectedProtocol, int expectedTimeout)
+    [InlineData("invalid", "77", "z=zz", OtlpExportProtocol.HttpProtobuf, 77)]
+    internal void OtlpExportProtocol_CheckPriorityEnvIsSet_Logs(string? protocol, string timeout, string headers, OtlpExportProtocol? expectedProtocol, int expectedTimeout)
     {
         var unexpectedProtocolForDistraction = expectedProtocol == OtlpExportProtocol.HttpProtobuf ? "grpc" : "http/protobuf";
         Environment.SetEnvironmentVariable(AutoOtlpDefinitions.DefaultProtocolEnvVarName, unexpectedProtocolForDistraction); // set a different default to verify priority
-        Environment.SetEnvironmentVariable(AutoOtlpDefinitions.LogsEndpointEnvVarName, endpoint);
         Environment.SetEnvironmentVariable(AutoOtlpDefinitions.LogsProtocolEnvVarName, protocol);
         Environment.SetEnvironmentVariable(AutoOtlpDefinitions.LogsTimeoutEnvVarName, timeout);
         Environment.SetEnvironmentVariable(AutoOtlpDefinitions.LogsHeadersEnvVarName, headers);
@@ -471,7 +465,6 @@ public class SettingsTests : IDisposable
         var settings = Settings.FromDefaultSources<LogSettings>(false).OtlpSettings;
 
         Assert.NotNull(settings);
-        Assert.Equal(new Uri(endpoint), settings.Endpoint);
         Assert.Equal(expectedProtocol, settings.Protocol);
         Assert.Equal(expectedTimeout, settings.TimeoutMilliseconds);
         Assert.Equal(headers, settings.Headers);
