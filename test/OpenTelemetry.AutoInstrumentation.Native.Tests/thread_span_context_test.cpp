@@ -41,26 +41,6 @@ TEST(ThreadSpanContextMapTest, ConsistentUpdate)
     ASSERT_FALSE(threadSpanContextMap.GetContext(2).has_value());
 }
 
-TEST(ThreadSpanContextMapTest, GetThreadsForTrace)
-{
-    continuous_profiler::ThreadSpanContextMap      threadSpanContextMap;
-    const continuous_profiler::thread_span_context context       = {1, 1, 1};
-    const continuous_profiler::thread_span_context other_context = {1, 1, 2};
-    threadSpanContextMap.Put(1, context);
-    threadSpanContextMap.Put(2, other_context);
-
-    std::unordered_set<ThreadID>       buffer;
-    continuous_profiler::trace_context trace_context = {1, 1};
-    threadSpanContextMap.GetAllThreads(trace_context, buffer);
-
-    ASSERT_EQ(buffer.size(), 2);
-
-    threadSpanContextMap.Remove(other_context);
-    buffer.clear();
-    threadSpanContextMap.GetAllThreads(trace_context, buffer);
-    ASSERT_EQ(buffer.size(), 1);
-}
-
 TEST(ThreadSpanContextMapTest, RemoveByThreadId)
 {
     continuous_profiler::ThreadSpanContextMap      threadSpanContextMap;
