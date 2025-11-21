@@ -161,8 +161,14 @@ internal class OtlpSettings
     {
         // http/protobuf should be default for our purposes. Always set a value to avoid relying on SDK, because the default in SDK is grpc.
         var priorityVar = OtlpSpecConfigDefinitions.GetProtocolEnvVar(signalType);
-        var exporterOtlpProtocol = configuration.GetString(priorityVar) ??
-            configuration.GetString(OtlpSpecConfigDefinitions.DefaultProtocolEnvVarName);
+        var defaultVar = OtlpSpecConfigDefinitions.DefaultProtocolEnvVarName;
+        string? usedEnvVarName = priorityVar;
+        var exporterOtlpProtocol = configuration.GetString(priorityVar);
+        if (exporterOtlpProtocol == null)
+        {
+            exporterOtlpProtocol = configuration.GetString(defaultVar);
+            usedEnvVarName = defaultVar;
+        }
 
         if (!string.IsNullOrEmpty(exporterOtlpProtocol))
         {
@@ -170,7 +176,7 @@ internal class OtlpSettings
             {
                 case "grpc":
 #if NETFRAMEWORK
-                    Logger.Warning($"OTLP protocol 'grpc' is not supported on .NET Framework in environment variable '{priorityVar}'. Changing to 'http/protobuf' instead.");
+                    Logger.Warning($"OTLP protocol 'grpc' is not supported on .NET Framework in environment variable '{usedEnvVarName}'. Changing to 'http/protobuf' instead.");
                     return OtlpExportProtocol.HttpProtobuf;
 #else
                     return OtlpExportProtocol.Grpc;
@@ -178,7 +184,7 @@ internal class OtlpSettings
                 case "http/protobuf":
                     return OtlpExportProtocol.HttpProtobuf;
                 default:
-                    Logger.Warning($"Invalid OTLP protocol value '{exporterOtlpProtocol}' in environment variable '{priorityVar}'. Supported values are 'grpc' and 'http/protobuf'. Defaulting to 'http/protobuf'.");
+                    Logger.Warning($"Invalid OTLP protocol value '{exporterOtlpProtocol}' in environment variable '{usedEnvVarName}'. Supported values are 'grpc' and 'http/protobuf'. Defaulting to 'http/protobuf'.");
                     return OtlpExportProtocol.HttpProtobuf;
             }
         }
