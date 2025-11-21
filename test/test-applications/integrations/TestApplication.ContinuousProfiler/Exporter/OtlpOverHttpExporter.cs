@@ -27,7 +27,11 @@ public class OtlpOverHttpExporter
     public OtlpOverHttpExporter(TimeSpan cpuPeriod, SampleNativeFormatParser parser)
     {
         _parser = parser;
+#if NET
         this.cpuPeriod = (long)cpuPeriod.TotalNanoseconds;
+#else
+        this.cpuPeriod = cpuPeriod.Ticks * 100L; // convert to nanoseconds
+#endif
     }
 
     public void ExportThreadSamples(byte[] buffer, int read, CancellationToken cancellationToken)
@@ -148,7 +152,7 @@ public class OtlpOverHttpExporter
 
         if (!string.IsNullOrEmpty(threadSample.ThreadName))
         {
-            extendedPprofBuilder.AddAttribute(sampleBuilder, "thread.name", threadSample.ThreadName);
+            extendedPprofBuilder.AddAttribute(sampleBuilder, "thread.name", threadSample.ThreadName!);
         }
 
         return sampleBuilder;
@@ -255,7 +259,11 @@ public class OtlpOverHttpExporter
 
     private HttpResponseMessage SendHttpRequest(HttpRequestMessage request, CancellationToken cancellationToken)
     {
+#if NET
         return _httpClient.Send(request, cancellationToken);
+#else
+        return _httpClient.SendAsync(request, cancellationToken).GetAwaiter().GetResult();
+#endif
     }
 
     private HttpContent CreateHttpContent(ExportProfilesServiceRequest exportRequest)
@@ -290,10 +298,12 @@ public class OtlpOverHttpExporter
             Headers.ContentType = ProtobufMediaTypeHeader;
         }
 
+#if NET
         protected override void SerializeToStream(Stream stream, TransportContext? context, CancellationToken cancellationToken)
         {
             SerializeToStreamInternal(stream);
         }
+#endif
 
         protected override Task SerializeToStreamAsync(Stream stream, TransportContext? context)
         {

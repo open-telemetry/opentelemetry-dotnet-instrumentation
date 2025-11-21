@@ -14,6 +14,7 @@
 #include "environment_variables_util.h"
 #include "il_rewriter.h"
 #include "il_rewriter_wrapper.h"
+#include "stub_generator.h"
 #include "integration.h"
 #include "logger.h"
 #include "metadata_builder.h"
@@ -160,11 +161,12 @@ HRESULT STDMETHODCALLTYPE CorProfiler::Initialize(IUnknown* cor_profiler_info_un
         // and the necessary dependencies are not available yet.
 
         // Ensure that OTel StartupHook is listed.
-        const auto home_path     = GetEnvironmentValue(environment::profiler_home_path);
+        home_path                = GetEnvironmentValue(environment::profiler_home_path);
         const auto startup_hooks = GetEnvironmentValues(environment::dotnet_startup_hooks, ENV_VAR_PATH_SEPARATOR);
         if (!IsStartupHookValid(startup_hooks, home_path))
         {
-            FailProfiler(Error, "The required StartupHook was not configured correctly. No telemetry will be captured.")
+            Logger::Info("The StartupHook was not configured. Will patch ProcessStartupHooks.");
+            startup_fix_required = true;
         }
     }
 
@@ -691,6 +693,27 @@ HRESULT STDMETHODCALLTYPE CorProfiler::ModuleLoadFinished(ModuleID module_id, HR
             }
         }
 #endif
+
+        if (module_info.assembly.name == system_private_corelib_assemblyName && startup_fix_required)
+        {
+            WSTRING startup_hook_assembly_path = GetStartupHookPath(GetCurrentModuleFileName(), home_path);
+            if (startup_hook_assembly_path == EmptyWStr)
+            {
+                FailProfiler(
+                    Error,
+                    "The required StartupHook assembly path could not be determined. No telemetry will be captured.");
+            }
+
+            Logger::Info("Patching ProcessStartupHooks with StartupHook assembly path: ", startup_hook_assembly_path);
+            StubGenerator stubGenerator(this, this->info_, corAssemblyProperty);
+            hr = stubGenerator.PatchProcessStartupHooks(module_id, startup_hook_assembly_path);
+
+            if (FAILED(hr))
+            {
+                FailProfiler(Error,
+                             "The required StartupHook was not configured correctly. No telemetry will be captured.");
+            }
+        }
 
         return S_OK;
     }

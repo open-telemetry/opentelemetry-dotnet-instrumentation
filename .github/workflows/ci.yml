@@ -72,7 +72,7 @@ jobs:
         with:
           dotnet-version: | 
             8.0.416
-            9.0.307
+            9.0.308
             10.0.100
 
       - name: Check for NuGet packages cache
@@ -132,7 +132,7 @@ jobs:
         with:
           dotnet-version: | 
             8.0.416
-            9.0.307
+            9.0.308
             10.0.100
 
       - name: Check for NuGet packages cache
@@ -176,7 +176,7 @@ jobs:
         with:
           dotnet-version: | 
             8.0.416
-            9.0.307
+            9.0.308
             10.0.100
 
       - name: Check for NuGet packages cache
@@ -284,7 +284,7 @@ jobs:
         with:
           dotnet-version: | 
             8.0.416
-            9.0.307
+            9.0.308
             10.0.100
 
       - name: Check for NuGet packages cache

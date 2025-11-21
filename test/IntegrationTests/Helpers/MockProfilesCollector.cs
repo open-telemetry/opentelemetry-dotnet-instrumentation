@@ -1,14 +1,17 @@
 // Copyright The OpenTelemetry Authors
 // SPDX-License-Identifier: Apache-2.0
 
-#if NET
-
 using System.Collections.Concurrent;
 using System.Text;
-using Microsoft.AspNetCore.Http;
 using OpenTelemetry.Proto.Collector.Profiles.V1Development;
 using OpenTelemetry.Proto.Profiles.V1Development;
 using Xunit.Abstractions;
+
+#if NETFRAMEWORK
+using System.Net;
+#else
+using Microsoft.AspNetCore.Http;
+#endif
 
 namespace IntegrationTests.Helpers;
 
@@ -21,10 +24,14 @@ public class MockProfilesCollector : IDisposable
     private readonly BlockingCollection<Collected> _profilesSnapshots = new(10); // bounded to avoid memory leak; contains protobuf type
     private CollectedExpectation? _collectedExpectation;
 
-    public MockProfilesCollector(ITestOutputHelper output)
+    public MockProfilesCollector(ITestOutputHelper output, string host = "localhost")
     {
         _output = output;
+#if NETFRAMEWORK
+        _listener = new(output, HandleHttpRequests, host, "/v1/metrics/");
+#else
         _listener = new(output, nameof(MockProfilesCollector), new PathHandler(HandleHttpRequests, "/v1development/profiles"));
+#endif
     }
 
     /// <summary>
@@ -167,6 +174,15 @@ public class MockProfilesCollector : IDisposable
         Assert.Fail(message.ToString());
     }
 
+#if NETFRAMEWORK
+    private void HandleHttpRequests(HttpListenerContext ctx)
+    {
+        var profilesMessage = ExportProfilesServiceRequest.Parser.ParseFrom(ctx.Request.InputStream);
+        HandleProfilesMessage(profilesMessage);
+
+        ctx.GenerateEmptyProtobufResponse<ExportProfilesServiceResponse>();
+    }
+#else
     private async Task HandleHttpRequests(HttpContext ctx)
     {
         using var bodyStream = await ctx.ReadBodyToMemoryAsync();
@@ -175,6 +191,7 @@ public class MockProfilesCollector : IDisposable
 
         await ctx.GenerateEmptyProtobufResponseAsync<ExportProfilesServiceResponse>();
     }
+#endif
 
     private void HandleProfilesMessage(ExportProfilesServiceRequest profileMessage)
     {
@@ -233,5 +250,3 @@ public class MockProfilesCollector : IDisposable
         public string? Description { get; }
     }
 }
-
-#endif
