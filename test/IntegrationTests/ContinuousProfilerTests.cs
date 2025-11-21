@@ -34,6 +34,29 @@ public class ContinuousProfilerTests : TestHelper
     }
 #endif
 
+#if NETFRAMEWORK
+    [Fact]
+    [Trait("Category", "EndToEnd")]
+    public void ExportAllocationSamples_NetFramework_NoSamplesCollected()
+    {
+        EnableBytecodeInstrumentation();
+        using var collector = new MockProfilesCollector(Output);
+        SetExporter(collector);
+        SetEnvironmentVariable("OTEL_DOTNET_AUTO_PLUGINS", "TestApplication.ContinuousProfiler.AllocationPlugin, TestApplication.ContinuousProfiler, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null");
+        SetEnvironmentVariable("OTEL_DOTNET_AUTO_TRACES_ADDITIONAL_SOURCES", "TestApplication.ContinuousProfiler");
+        var (_, _, processId) = RunTestApplication();
+
+        // Assert that no allocation samples are collected on .NET Framework
+        collector.Expect(
+        profileData => !profileData.ResourceProfiles.Any(resourceProfiles =>  resourceProfiles.ScopeProfiles.Any(scopeProfile =>  scopeProfile.Profiles.Any(profile =>  ContainSampleType(profile, "allocations", "bytes")))),
+        "No allocation samples should be collected on .NET Framework");
+        collector.ResourceExpector.ExpectStandardResources(processId, "TestApplication.ContinuousProfiler");
+
+        collector.AssertExpectations();
+        collector.ResourceExpector.AssertExpectations();
+    }
+#endif
+
     [Fact]
     [Trait("Category", "EndToEnd")]
     public void ExportThreadSamples()

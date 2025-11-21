@@ -1462,6 +1462,11 @@ void ContinuousProfiler::AllocationTick(ULONG dataLen, LPCBYTE data)
 
 void ContinuousProfiler::StartAllocationSampling(const unsigned int maxMemorySamplesPerMinute)
 {
+    if (!info12) // no info12 - we are on .Net Fx - ignore allocation sampling request
+    {
+        trace::Logger::Warn("Ignore Allocation Sampling request, it is not supported for .Net Framework applications");
+        return;
+    }
     this->allocationSubSampler = std::make_unique<AllocationSubSampler>(maxMemorySamplesPerMinute, 60);
 
     COR_PRF_EVENTPIPE_PROVIDER_CONFIG sessionConfig[] = {{WStr("Microsoft-Windows-DotNETRuntime"),
@@ -1479,6 +1484,10 @@ void ContinuousProfiler::StartAllocationSampling(const unsigned int maxMemorySam
 
 void ContinuousProfiler::StopAllocationSampling()
 {
+    if (!info12) // no info12 - we are on .Net Fx - ignore allocation sampling stop request
+    {
+        return;
+    }
     if (session_ == 0)
     {
         return;

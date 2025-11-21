@@ -321,8 +321,8 @@ public:
     void                        StartAllocationSampling(unsigned int maxMemorySamplesPerMinute);
     void                        StopAllocationSampling();
     void                        AllocationTick(ULONG dataLen, LPCBYTE data);
-    ICorProfilerInfo12*         info12;
-    ICorProfilerInfo7*          info7;
+    ICorProfilerInfo12*         info12 = nullptr;
+    ICorProfilerInfo7*          info7 = nullptr;
     static void                 ThreadCreated(ThreadID thread_id);
     void                        ThreadDestroyed(ThreadID thread_id);
     void                        ThreadNameChanged(ThreadID thread_id, ULONG cch_name, WCHAR name[]);
