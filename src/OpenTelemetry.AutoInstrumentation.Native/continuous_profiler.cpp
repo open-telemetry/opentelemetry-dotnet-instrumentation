@@ -1116,7 +1116,7 @@ static bool ShouldTrackIterations(const ContinuousProfiler* const prof)
     return prof->selectedThreadsSamplingInterval.has_value() && prof->threadSamplingInterval.has_value();
 }
 
-static void SamplingThreadMain(ContinuousProfiler* prof, const std::future<void>& future)
+static void SamplingThreadMain(ContinuousProfiler* prof)
 {
     ICorProfilerInfo12* info12 = prof->info12;
 
@@ -1143,9 +1143,13 @@ static void SamplingThreadMain(ContinuousProfiler* prof, const std::future<void>
             return;
         }
 
-        if (future.wait_for(std::chrono::milliseconds(sleepTime)) != std::future_status::timeout)
         {
-            return;
+            std::unique_lock<std::mutex> lock(prof->shutdown_mutex_);
+            if (prof->shutdown_cv_.wait_for(lock, std::chrono::milliseconds(sleepTime),
+                                            [prof] { return prof->IsShutdownRequested(); }))
+            {
+                return; // Shutdown signaled
+            }
         }
 
         const auto samplingType = GetNextSamplingType(prof, iteration);
@@ -1196,19 +1200,18 @@ void ContinuousProfiler::InitSelectiveSamplingBuffer()
 
 void ContinuousProfiler::StartThreadSampling()
 {
-    shutdown_promise_       = std::promise<void>();
-    auto future             = shutdown_promise_.get_future();
-    thread_sampling_thread_ = std::make_unique<std::thread>(SamplingThreadMain, this, std::move(future));
+    thread_sampling_thread_ = std::make_unique<std::thread>(SamplingThreadMain, this);
 }
 
 void ContinuousProfiler::Shutdown()
 {
-    shutdown_promise_.set_value();
+    shutdown_requested_.store(true, std::memory_order_release);
+    shutdown_cv_.notify_all();
     {
         std::unique_lock<std::shared_mutex> unique_lock(profiling_lock);
-        shutdown_requested_.store(true);
         StopAllocationSampling();
     }
+
     if (thread_sampling_thread_ != nullptr && thread_sampling_thread_->joinable())
     {
         thread_sampling_thread_->join();
@@ -1219,7 +1222,7 @@ void ContinuousProfiler::Shutdown()
 
 bool ContinuousProfiler::IsShutdownRequested() const
 {
-    return shutdown_requested_;
+    return shutdown_requested_.load(std::memory_order_acquire);
 }
 
 static thread_span_context GetCurrentSpanContext(ThreadID tid)
