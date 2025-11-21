@@ -1,8 +1,5 @@
 // Copyright The OpenTelemetry Authors
 // SPDX-License-Identifier: Apache-2.0
-
-#if NET
-
 using IntegrationTests.Helpers;
 using OpenTelemetry.Proto.Collector.Profiles.V1Development;
 using OpenTelemetry.Proto.Profiles.V1Development;
@@ -17,6 +14,7 @@ public class ContinuousProfilerTests : TestHelper
     {
     }
 
+#if NET // allocator tests are only supported on .NET
     [Fact]
     [Trait("Category", "EndToEnd")]
     public void ExportAllocationSamples()
@@ -34,6 +32,7 @@ public class ContinuousProfilerTests : TestHelper
         collector.AssertExpectations();
         collector.ResourceExpector.AssertExpectations();
     }
+#endif
 
     [Fact]
     [Trait("Category", "EndToEnd")]
@@ -143,4 +142,3 @@ public class ContinuousProfilerTests : TestHelper
         return stackTrace.Contains(expectedStackTrace);
     }
 }
-#endif
