@@ -55,17 +55,19 @@ struct FunctionIdentifier
 struct FunctionIdentifierResolveArgs
 {
     FunctionID  function_id;
-    COR_PRF_FRAME_INFO frame_info;
 
     FunctionIdentifierResolveArgs() = delete;
-    FunctionIdentifierResolveArgs(const FunctionID func_id, const COR_PRF_FRAME_INFO frame_info)
+    FunctionIdentifierResolveArgs(const FunctionID func_id)
         : function_id(func_id)
-        , frame_info(frame_info)
     {
     }
     bool operator==(const FunctionIdentifierResolveArgs& p) const
     {
-        return function_id == p.function_id && frame_info == p.frame_info;
+        return function_id == p.function_id;
+    }
+    bool operator!=(const FunctionIdentifierResolveArgs& p) const
+    {
+        return !(*this == p);
     }
 };
 
@@ -86,6 +88,10 @@ struct trace_context
     bool operator==(const trace_context& p) const
     {
         return trace_id_low_ == p.trace_id_low_ && trace_id_high_ == p.trace_id_high_;
+    }
+    bool operator!=(const trace_context& p) const
+    {
+        return !(*this == p);
     }
     [[nodiscard]] bool IsDefault() const;
 };
@@ -139,7 +145,7 @@ struct std::hash<continuous_profiler::FunctionIdentifierResolveArgs>
 {
     std::size_t operator()(const continuous_profiler::FunctionIdentifierResolveArgs& k) const noexcept
     {
-        return hash_combine(k.function_id, k.frame_info);
+        return hash_combine(k.function_id);
     }
 };
 
@@ -232,16 +238,15 @@ namespace continuous_profiler
 class ThreadSpanContextMap
 {
 public:
-    void                               Put(ThreadID threadId, const thread_span_context& currentSpanContext);
-    std::optional<thread_span_context> GetContext(ThreadID threadId);
-    void                               GetAllThreads(trace_context traceContext, std::unordered_set<ThreadID>& buffer);
-    void                               Remove(const thread_span_context& spanContext);
-    void                               Remove(ThreadID threadId);
+    void                                                              Put(ThreadID threadId, const thread_span_context& currentSpanContext);
+    std::optional<thread_span_context>                                GetContext(ThreadID threadId);
+    void                                                              Remove(const thread_span_context& spanContext);
+    void                                                              Remove(ThreadID threadId);
+    std::unordered_map<ThreadID, thread_span_context>::const_iterator begin() const;
+    std::unordered_map<ThreadID, thread_span_context>::const_iterator end() const;
 
 private:
-    std::unordered_map<ThreadID, thread_span_context>                          thread_span_context_map;
-    std::unordered_map<thread_span_context, std::unordered_set<ThreadID>>      span_context_thread_map;
-    std::unordered_map<trace_context, std::unordered_set<thread_span_context>> trace_active_span_map;
+    std::unordered_map<ThreadID, thread_span_context> thread_span_context_map;
 };
 template <typename TKey, typename TValue>
 class NameCache
