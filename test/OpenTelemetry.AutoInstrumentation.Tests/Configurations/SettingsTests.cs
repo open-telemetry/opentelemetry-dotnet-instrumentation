@@ -382,11 +382,11 @@ public class SettingsTests : IDisposable
     [InlineData(null, OtlpExportProtocol.HttpProtobuf)]
     [InlineData("http/protobuf", OtlpExportProtocol.HttpProtobuf)]
 #if NETFRAMEWORK
-    [InlineData("grpc", null)]
+    [InlineData("grpc", OtlpExportProtocol.HttpProtobuf)]
 #else
     [InlineData("grpc", OtlpExportProtocol.Grpc)]
 #endif
-    [InlineData("nonExistingProtocol", null)]
+    [InlineData("nonExistingProtocol", OtlpExportProtocol.HttpProtobuf)]
     internal void OtlpExportProtocol_DependsOnCorrespondingEnvVariable(string? otlpProtocol, OtlpExportProtocol? expectedOtlpExportProtocol)
     {
         Environment.SetEnvironmentVariable(AutoOtlpDefinitions.DefaultProtocolEnvVarName, otlpProtocol);
@@ -402,11 +402,11 @@ public class SettingsTests : IDisposable
     // endpoint, protocol, timeout, headers, expectedProtocol, expectedTimeout
     [InlineData("http://example.org/traces/v1", "http/protobuf", "1", "key1=value1,key2=value2", OtlpExportProtocol.HttpProtobuf, 1)]
 #if NETFRAMEWORK
-    [InlineData("http://example.org/traces/v1", "grpc", "15000", "a=b,c=d", null, 15000)]
+    [InlineData("http://example.org/traces/v1", "grpc", "15000", "a=b,c=d", OtlpExportProtocol.HttpProtobuf, 15000)]
 #else
     [InlineData("http://example.org/traces/v1", "grpc", "15000", "a=b,c=d", OtlpExportProtocol.Grpc, 15000)]
 #endif
-    [InlineData("http://example.org/traces/v1", "invalid", "42", "x=y", null, 42)]
+    [InlineData("http://example.org/traces/v1", "invalid", "42", "x=y", OtlpExportProtocol.HttpProtobuf, 42)]
     internal void OtlpExportProtocol_CheckPriorityEnvIsSet_Traces(string endpoint, string protocol, string timeout, string headers, OtlpExportProtocol? expectedProtocol, int expectedTimeout)
     {
         Environment.SetEnvironmentVariable(AutoOtlpDefinitions.TracesEndpointEnvVarName, endpoint);
@@ -426,11 +426,11 @@ public class SettingsTests : IDisposable
     [Theory]
     [InlineData("http://example.org/metrics/v1", "http/protobuf", "1", "key1=value1,key2=value2", OtlpExportProtocol.HttpProtobuf, 1)]
 #if NETFRAMEWORK
-    [InlineData("http://example.org/metrics/v1", "grpc", "25000", "m=n", null, 25000)]
+    [InlineData("http://example.org/metrics/v1", "grpc", "25000", "m=n", OtlpExportProtocol.HttpProtobuf, 25000)]
 #else
     [InlineData("http://example.org/metrics/v1", "grpc", "25000", "m=n", OtlpExportProtocol.Grpc, 25000)]
 #endif
-    [InlineData("http://example.org/metrics/v1", "invalid", "100", "a=b", null, 100)]
+    [InlineData("http://example.org/metrics/v1", "invalid", "100", "a=b", OtlpExportProtocol.HttpProtobuf, 100)]
     internal void OtlpExportProtocol_CheckPriorityEnvIsSet_Metrics(string endpoint, string protocol, string timeout, string headers, OtlpExportProtocol? expectedProtocol, int expectedTimeout)
     {
         Environment.SetEnvironmentVariable(AutoOtlpDefinitions.MetricsEndpointEnvVarName, endpoint);
@@ -450,11 +450,11 @@ public class SettingsTests : IDisposable
     [Theory]
     [InlineData("http://example.org/logs/v1", "http/protobuf", "1", "key1=value1,key2=value2", OtlpExportProtocol.HttpProtobuf, 1)]
 #if NETFRAMEWORK
-    [InlineData("http://example.org/logs/v1", "grpc", "5000", "l=m", null, 5000)]
+    [InlineData("http://example.org/logs/v1", "grpc", "5000", "l=m", OtlpExportProtocol.HttpProtobuf, 5000)]
 #else
     [InlineData("http://example.org/logs/v1", "grpc", "5000", "l=m", OtlpExportProtocol.Grpc, 5000)]
 #endif
-    [InlineData("http://example.org/logs/v1", "invalid", "77", "z=zz", null, 77)]
+    [InlineData("http://example.org/logs/v1", "invalid", "77", "z=zz", OtlpExportProtocol.HttpProtobuf, 77)]
     internal void OtlpExportProtocol_CheckPriorityEnvIsSet_Logs(string endpoint, string protocol, string timeout, string headers, OtlpExportProtocol? expectedProtocol, int expectedTimeout)
     {
         Environment.SetEnvironmentVariable(AutoOtlpDefinitions.LogsEndpointEnvVarName, endpoint);
