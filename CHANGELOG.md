@@ -28,9 +28,6 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 - Setting `DOTNET_STARTUP_HOOKS` is now optional if the .NET CLR profiler
   is configured. If it is not set, the profiler looks for the startup hooks
   assembly and injects the configuration into the application.
-- Fix bug in signal specific OTLP exporter variables: `OTEL_EXPORTER_OTLP_TRACES_PROTOCOL`,
-  `OTEL_EXPORTER_OTLP_METRICS_PROTOCOL` and `OTEL_EXPORTER_OTLP_LOGS_PROTOCOL`.
-  See [#4627](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/issues/4627).
 
 #### Dependency updates
 
@@ -105,6 +102,10 @@ and runtime, then loads the correct version of dependency assemblies.
   See [#4269](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/issues/4269)
   for details.
 - Fixed rule engine check for .NET 9 to reflect longer support for [STS channel](https://devblogs.microsoft.com/dotnet/dotnet-sts-releases-supported-for-24-months/).
+- Fix bug in signal specific OTLP exporter variables: `OTEL_EXPORTER_OTLP_TRACES_PROTOCOL`,
+  `OTEL_EXPORTER_OTLP_METRICS_PROTOCOL` and `OTEL_EXPORTER_OTLP_LOGS_PROTOCOL`.
+  See [#4593](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/issues/4593)
+  for details.
 
 ## [1.13.0-beta.1](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/tag/v1.13.0-beta.1)
 
