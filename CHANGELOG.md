@@ -451,7 +451,7 @@ release.
 - The environment variables `OTEL_TRACES_EXPORTER`, `OTEL_METRICS_EXPORTER`,
   and `OTEL_LOGS_EXPORTER` now support configuring console exporters for traces,
   metrics, and logs, respectively.
-- Support signal specific OTLP exporter variables (See [docs](/docs/config.md#otlp)):
+- Support signal specific OTLP exporter variables (See [docs](./docs/config.md#otlp)):
   - `OTEL_EXPORTER_OTLP_TRACES_ENDPOINT`,
   - `OTEL_EXPORTER_OTLP_TRACES_HEADERS`,
   - `OTEL_EXPORTER_OTLP_TRACES_TIMEOUT`,
@@ -965,14 +965,14 @@ This release is built on top of [OpenTelemetry .NET](https://github.com/open-tel
 
 - Added `BeforeConfigureTracerProvider`, `BeforeConfigureMeterProvider`,
   `TracerProviderInitialized` and `MeterProviderInitialized` for plugins.
-  See [plugins documentation](/docs/plugins.md) for details.
+  See [plugins documentation](./docs/plugins.md) for details.
 - Added support for Azure SDK traces instrumentation on .NET.
 
 ### Changed
 
 - In plugins `ConfigureTracerProvider` and `ConfigureMeterProvider` are changed now
   to `AfterConfigureTracerProvider` and `AfterConfigureMeterProvider`.
-  See [plugins documentation](/docs/plugins.md) for details.
+  See [plugins documentation](./docs/plugins.md) for details.
 - Minimal version of `Grpc.Net.Client` supported on .NET updated to `2.52.0`.
 
 ### Fixed
