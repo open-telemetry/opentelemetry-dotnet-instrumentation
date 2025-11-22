@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 using OpenTelemetry.AutoInstrumentation.Configurations.FileBasedConfiguration;
+using OpenTelemetry.AutoInstrumentation.Logging;
 using OpenTelemetry.Exporter;
 
 namespace OpenTelemetry.AutoInstrumentation.Configurations.Otlp;
@@ -12,6 +13,8 @@ namespace OpenTelemetry.AutoInstrumentation.Configurations.Otlp;
 /// </summary>
 internal class OtlpSettings
 {
+    private static readonly IOtelLogger Logger = OtelLogging.GetLogger();
+
     public OtlpSettings(OtlpSignalType signalType, Configuration configuration)
     {
         Protocol = GetExporterOtlpProtocol(signalType, configuration);
@@ -156,18 +159,37 @@ internal class OtlpSettings
 
     private static OtlpExportProtocol? GetExporterOtlpProtocol(OtlpSignalType signalType, Configuration configuration)
     {
-        // the default in SDK is grpc. http/protobuf should be default for our purposes
+        // http/protobuf should be default for our purposes. Always set a value to avoid relying on SDK, because the default in SDK is grpc.
         var priorityVar = OtlpSpecConfigDefinitions.GetProtocolEnvVar(signalType);
-        var exporterOtlpProtocol = configuration.GetString(priorityVar) ??
-            configuration.GetString(OtlpSpecConfigDefinitions.DefaultProtocolEnvVarName);
-
-        if (string.IsNullOrEmpty(exporterOtlpProtocol))
+        var defaultVar = OtlpSpecConfigDefinitions.DefaultProtocolEnvVarName;
+        string? usedEnvVarName = priorityVar;
+        var exporterOtlpProtocol = configuration.GetString(priorityVar);
+        if (exporterOtlpProtocol == null)
         {
-            // override settings only for http/protobuf
-            return OtlpExportProtocol.HttpProtobuf;
+            exporterOtlpProtocol = configuration.GetString(defaultVar);
+            usedEnvVarName = defaultVar;
         }
 
-        // null value here means that it will be handled by OTEL .NET SDK
-        return null;
+        if (!string.IsNullOrEmpty(exporterOtlpProtocol))
+        {
+            switch (exporterOtlpProtocol)
+            {
+                case "grpc":
+#if NETFRAMEWORK
+                    Logger.Warning($"OTLP protocol 'grpc' is not supported on .NET Framework in environment variable '{usedEnvVarName}'. Changing to 'http/protobuf' instead.");
+                    return OtlpExportProtocol.HttpProtobuf;
+#else
+                    return OtlpExportProtocol.Grpc;
+#endif
+                case "http/protobuf":
+                    return OtlpExportProtocol.HttpProtobuf;
+                default:
+                    Logger.Warning($"Invalid OTLP protocol value '{exporterOtlpProtocol}' in environment variable '{usedEnvVarName}'. Supported values are 'grpc' and 'http/protobuf'. Defaulting to 'http/protobuf'.");
+                    return OtlpExportProtocol.HttpProtobuf;
+            }
+        }
+
+        // In case of absent value, it will fall back to default value
+        return OtlpExportProtocol.HttpProtobuf;
     }
 }
