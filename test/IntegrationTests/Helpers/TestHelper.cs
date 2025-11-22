@@ -86,12 +86,10 @@ public abstract class TestHelper
         SetEnvironmentVariable("OTEL_EXPORTER_OTLP_LOGS_ENDPOINT", $"http://localhost:{collector.Port}/v1/logs");
     }
 
-#if NET
     public void SetExporter(MockProfilesCollector collector)
     {
         SetEnvironmentVariable("OTEL_EXPORTER_OTLP_ENDPOINT", $"http://localhost:{collector.Port}");
     }
-#endif
 
     public void EnableBytecodeInstrumentation()
     {

@@ -447,7 +447,7 @@ the rules when the application restarts.
 
 The CLR uses the following
 environment variables to set up the profiler. See
-[.NET Runtime Profiler Loading](https://github.com/dotnet/runtime/blob/main/docs/design/coreclr/profiling/Profiler%20Loading.md)
+[.NET Runtime Profiler Loading](https://github.com/dotnet/runtime/blob/59f2833b98e15e0831be8ad24fb321ee7bf9bd54/docs/design/coreclr/profiling/Profiler%20Loading.md)
 for more information.
 
 | .NET Framework environment variable | .NET environment variable  | Description                                                                             | Required value                                                                                                                                                                                                                                                    | Status                                                                                                                            |
