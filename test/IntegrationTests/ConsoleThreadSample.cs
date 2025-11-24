@@ -1,7 +1,6 @@
 // Copyright The OpenTelemetry Authors
 // SPDX-License-Identifier: Apache-2.0
 
-#if NET
 namespace IntegrationTests;
 
 internal class ConsoleThreadSample
@@ -16,11 +15,5 @@ internal class ConsoleThreadSample
 
     public string? ThreadName { get; set; }
 
-    public uint ThreadIndex { get; set; }
-
     public bool SelectedForFrequentSampling { get; set; }
-
-    public IList<string> Frames { get; set; } = new List<string>();
 }
-
-#endif
