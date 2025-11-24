@@ -52,8 +52,8 @@
     <PackageVersion Include="System.Diagnostics.DiagnosticSource" Version="10.0.0" />
     <PackageVersion Include="System.Reactive" Version="6.1.0" />
     <PackageVersion Include="System.Security.Cryptography.Pkcs" Version="10.0.0" />
-    <PackageVersion Include="System.ServiceModel.Http" Version="8.1.2" />
-    <PackageVersion Include="System.ServiceModel.NetTcp" Version="8.1.2" />
+    <PackageVersion Include="System.ServiceModel.Http" Version="10.0.652802" />
+    <PackageVersion Include="System.ServiceModel.NetTcp" Version="10.0.652802" />
     <PackageVersion Include="System.Text.Json" Version="10.0.0" />
     <PackageVersion Include="System.ValueTuple" Version="4.6.1" />
     <PackageVersion Include="Testcontainers" Version="4.8.1" />

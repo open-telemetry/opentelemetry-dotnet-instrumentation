@@ -271,7 +271,8 @@ internal static class PackageVersionDefinitions
             {
                 new("4.10.2"),
                 new("6.2.0"),
-                new("*")
+                new("8.1.2"),
+                new("*", supportedTargetFrameworks: ["net10.0"], supportedExecutionFrameworks: ["net10.0"])
             }
         },
         new()
