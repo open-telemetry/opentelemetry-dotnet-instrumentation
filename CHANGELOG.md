@@ -13,7 +13,7 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 - Support for [ASP.NET Core 10 metrics](https://learn.microsoft.com/en-us/aspnet/core/log-mon/metrics/built-in?view=aspnetcore-10.0).
 - Support for ASP.NET Core 10 Blazor traces from
   `Microsoft.AspNetCore.Components`
-  and `"Microsoft.AspNetCore.Components.Server.Circuits`.
+  and `Microsoft.AspNetCore.Components.Server.Circuits`.
 - Experimental support for file-based configuration.
 - Experimental support for configuration based instrumentation.
 - IL rewrite for SqlCommand on .NET Framework to ensure `CommandText` is
@@ -102,6 +102,10 @@ and runtime, then loads the correct version of dependency assemblies.
   See [#4269](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/issues/4269)
   for details.
 - Fixed rule engine check for .NET 9 to reflect longer support for [STS channel](https://devblogs.microsoft.com/dotnet/dotnet-sts-releases-supported-for-24-months/).
+- Fix bug in signal specific OTLP exporter variables: `OTEL_EXPORTER_OTLP_TRACES_PROTOCOL`,
+  `OTEL_EXPORTER_OTLP_METRICS_PROTOCOL` and `OTEL_EXPORTER_OTLP_LOGS_PROTOCOL`.
+  See [#4593](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/issues/4593)
+  for details.
 
 ## [1.13.0-beta.1](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/tag/v1.13.0-beta.1)
 
