@@ -14,6 +14,7 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 - Support for ASP.NET Core 10 Blazor traces from
   `Microsoft.AspNetCore.Components`
   and `Microsoft.AspNetCore.Components.Server.Circuits`.
+- WCF Client support for `System.ServiceModel.Primitives` `10.0.*` on .NET 10.
 - Experimental support for file-based configuration.
 - Experimental support for configuration based instrumentation.
 - IL rewrite for SqlCommand on .NET Framework to ensure `CommandText` is
