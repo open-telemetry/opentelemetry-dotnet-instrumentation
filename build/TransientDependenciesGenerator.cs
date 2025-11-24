@@ -131,7 +131,7 @@ internal static class TransientDependenciesGenerator
             }
         }
 
-        // clea unused dependencies
+        // clean unused dependencies
         foreach (var framework in targetProject.GetTargetFrameworks() ?? [])
         {
             CleanUnusedDependencies(framework, deps, packagesProject);
