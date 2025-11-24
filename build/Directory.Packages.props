@@ -3,11 +3,15 @@
 
   <ItemGroup>
     <PackageVersion Include="Mono.Cecil" Version="0.11.6" />
-    <PackageVersion Include="Nuke.Common" Version="9.0.4" />
+    <PackageVersion Include="Nuke.Common" Version="10.0.0" />
+    <PackageVersion Include="Nuget.CommandLine" Version="7.0.0" />
+  </ItemGroup>
+  
+  <ItemGroup Condition=" '$(IsLegacyUbuntu)' != '' " >
+    <PackageVersion Update="Nuke.Common" Version="9.0.4" />
     <!-- Microsoft.Build is an indirect reference from Nuke.Common. Fixes https://github.com/advisories/GHSA-w3q9-fxm7-j8fq -->
     <PackageVersion Include="Microsoft.Build" Version="17.14.28" />
     <!-- Microsoft.Build.Tasks.Core is an indirect reference from Nuke.Common. Fixes https://github.com/advisories/GHSA-w3q9-fxm7-j8fq -->
     <PackageVersion Include="Microsoft.Build.Tasks.Core" Version="17.14.28" />
-    <PackageVersion Include="Nuget.CommandLine" Version="7.0.0" />
   </ItemGroup>
 </Project>
