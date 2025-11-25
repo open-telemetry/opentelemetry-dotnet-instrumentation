@@ -5,7 +5,24 @@ All notable changes to this component are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/compare/v1.12.0..HEAD)
+## [Unreleased](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/compare/v1.13.0..HEAD)
+
+### Added
+
+### Changed
+
+#### Dependency updates
+
+### Deprecated
+
+### Removed
+
+### Fixed
+
+## [1.13.0](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/tag/v1.13.0)
+
+This release include all changes from [1.13.0-beta.1](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/tag/v1.13.0-beta.1)
+release.
 
 ### Added
 
@@ -86,8 +103,6 @@ Now, when the OpenTelemetry ZIP archive is built, dependency assemblies are
 included for all supported .NET Framework versions. OpenTelemetry .NET
 AutoInstrumentation detects the .NET Framework version at install time
 and runtime, then loads the correct version of dependency assemblies.
-
-### Deprecated
 
 ### Removed
 
