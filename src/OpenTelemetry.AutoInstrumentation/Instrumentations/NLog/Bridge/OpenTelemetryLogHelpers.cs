@@ -148,10 +148,6 @@ internal static class OpenTelemetryLogHelpers
         // If no parameterless constructor, try to find other constructors or use default for structs
         if (constructorInfo == null)
         {
-            var constructors = logRecordAttributesListType.GetConstructors();
-            Logger.Debug($"LogRecordAttributeList constructors: {string.Join(", ", constructors.Select(c => $"({string.Join(", ", c.GetParameters().Select(p => p.ParameterType.Name))})"))}");
-            Logger.Debug($"LogRecordAttributeList IsValueType: {logRecordAttributesListType.IsValueType}");
-
             // Try to find a constructor that takes an int (capacity)
             constructorInfo = logRecordAttributesListType.GetConstructor(new[] { typeof(int) });
             if (constructorInfo != null)
@@ -174,14 +170,15 @@ internal static class OpenTelemetryLogHelpers
         }
 
         var addAttributeMethodInfo = logRecordAttributesListType.GetMethod("Add", new[] { typeof(string), typeof(object) })!;
+        var recordExceptionMethodInfo = logRecordAttributesListType.GetMethod("RecordException", BindingFlags.Instance | BindingFlags.Public)!;
 
         var expressions = new List<Expression> { assignInstanceVar };
 
-        // Add exception as an attribute if present
-        var addExceptionExpression = Expression.IfThen(
+        // Record exception using RecordException which adds exception.type, exception.message, exception.stacktrace
+        var recordExceptionExpression = Expression.IfThen(
             Expression.NotEqual(exception, Expression.Constant(null)),
-            Expression.Call(instanceVar, addAttributeMethodInfo, Expression.Constant("exception"), exception));
-        expressions.Add(addExceptionExpression);
+            Expression.Call(instanceVar, recordExceptionMethodInfo, exception));
+        expressions.Add(recordExceptionExpression);
 
         // Add custom properties if present
         var addPropertiesExpression = BuildAddPropertiesExpression(instanceVar, properties, addAttributeMethodInfo);
@@ -271,10 +268,7 @@ internal static class OpenTelemetryLogHelpers
                 Expression.Call(
                     instanceVar,
                     addAttributeMethodInfo,
-                    Expression.Call(
-                        typeof(string).GetMethod("Concat", new[] { typeof(string), typeof(string) })!,
-                        Expression.Constant("arg_"),
-                        Expression.Call(indexVar, typeof(int).GetMethod("ToString", Type.EmptyTypes)!)),
+                    Expression.Call(indexVar, typeof(int).GetMethod("ToString", Type.EmptyTypes)!),
                     Expression.ArrayIndex(argsParam, indexVar)),
                 Expression.Assign(indexVar, Expression.Add(indexVar, Expression.Constant(1)))),
             breakLabel);
