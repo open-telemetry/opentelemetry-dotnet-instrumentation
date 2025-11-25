@@ -82,7 +82,7 @@ public class OracleFixture : IAsyncLifetime
                                $"GRANT CONNECT, RESOURCE TO appuser;";
 
         var createResult = await container.ExecAsync(new[] { "bash", "-c", $"echo \"{createUserScript}\" | sqlplus -s / as sysdba" });
-        
+
         if (createResult.ExitCode != 0)
         {
             throw new InvalidOperationException($"Failed to create Oracle user. Exit code: {createResult.ExitCode}, Output: {createResult.Stdout}, Error: {createResult.Stderr}");
@@ -91,7 +91,7 @@ public class OracleFixture : IAsyncLifetime
         // Verify the user was created successfully by attempting to query it
         var verifyScript = "ALTER SESSION SET CONTAINER=FREEPDB1; SELECT username FROM dba_users WHERE username='APPUSER';";
         var verifyResult = await container.ExecAsync(new[] { "bash", "-c", $"echo \"{verifyScript}\" | sqlplus -s / as sysdba" });
-        
+
         if (verifyResult.ExitCode != 0 || !verifyResult.Stdout.Contains("APPUSER"))
         {
             throw new InvalidOperationException($"User creation verification failed. Exit code: {verifyResult.ExitCode}, Output: {verifyResult.Stdout}");
