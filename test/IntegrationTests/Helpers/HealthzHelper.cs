@@ -29,7 +29,7 @@ internal static class HealthzHelper
                     return;
                 }
 
-                output.WriteLine($"Healthz endpoint retured HTTP status code: {response.StatusCode}");
+                output.WriteLine($"Healthz endpoint returned HTTP status code: {response.StatusCode}");
             }
             catch (Exception ex)
             {
