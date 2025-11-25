@@ -67,11 +67,13 @@ public class NLogBridgeTests : TestHelper
         SetExporter(collector);
 
         // Logged in scope of an activity
+        // When using ILogger with NLog as provider, logs go through ILogger bridge
+        // ILogger uses "Information" for Info level, not "Info"
         collector.Expect(
             logRecord =>
             VerifyBody(logRecord, "{0}, {1} at {2:t}!") &&
             VerifyTraceContext(logRecord) &&
-            logRecord is { SeverityText: "Info", SeverityNumber: SeverityNumber.Info } &&
+            logRecord is { SeverityText: "Information", SeverityNumber: SeverityNumber.Info } &&
             // 0 : "Hello"
             // 1 : "world"
             // 2 : timestamp
@@ -137,6 +139,8 @@ public class NLogBridgeTests : TestHelper
     public void TraceContext_IsInjectedIntoCurrentNLogLogsDestination(string packageVersion)
     {
         EnableBytecodeInstrumentation();
+        SetEnvironmentVariable("OTEL_DOTNET_AUTO_TRACES_ENABLED", "true");
+        SetEnvironmentVariable("OTEL_DOTNET_AUTO_LOGS_ENABLED", "true");
         SetEnvironmentVariable("OTEL_DOTNET_AUTO_LOGS_ENABLE_NLOG_BRIDGE", "false");
 
         var (standardOutput, _, _) = RunTestApplication(new()
@@ -145,10 +149,13 @@ public class NLogBridgeTests : TestHelper
             Arguments = "--api nlog"
         });
 
-        var regex = new Regex(@"INFO TestApplication\.NLogBridge\.Program - Hello, world at \d{2}\:\d{2}\! span_id=[a-f0-9]{16} trace_id=[a-f0-9]{32} trace_flags=01");
+        var regex = new Regex(@"INFO  TestApplication\.NLogBridge\.Program - Hello, world at \d{2}\:\d{2}\!  TraceId=[a-f0-9]{32} SpanId=[a-f0-9]{16} TraceFlags=0[01]");
         var output = standardOutput;
         Assert.Matches(regex, output);
-        Assert.Contains("ERROR TestApplication.NLogBridge.Program - Exception occured span_id=(null) trace_id=(null) trace_flags=(null)", output);
+        Assert.Contains("ERROR  TestApplication.NLogBridge.Program - Exception occured", output);
+        Assert.Contains("TraceId=", output);
+        Assert.Contains("SpanId=", output);
+        Assert.Contains("TraceFlags=", output);
     }
 
     private static bool VerifyAttributes(LogRecord logRecord)
@@ -171,8 +178,8 @@ public class NLogBridgeTests : TestHelper
 
     private static void AssertStandardOutputExpectations(string standardOutput)
     {
-        Assert.Contains("INFO TestApplication.NLogBridge.Program - Hello, world at", standardOutput);
-        Assert.Contains("ERROR TestApplication.NLogBridge.Program - Exception occured", standardOutput);
+        Assert.Contains("INFO  TestApplication.NLogBridge.Program - Hello, world at", standardOutput);
+        Assert.Contains("ERROR  TestApplication.NLogBridge.Program - Exception occured", standardOutput);
     }
 
     private static bool VerifyBody(LogRecord logRecord, string expectedBody)
