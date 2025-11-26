@@ -2,6 +2,7 @@ aspnet
 ASPNETCORE
 ASSERTE
 autoinstrumentation
+Blazor
 Bootstrapper
 buildtasks
 callq

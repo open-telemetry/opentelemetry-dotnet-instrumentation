@@ -345,7 +345,7 @@ function Register-AssembliesInGAC() {
         if (Test-AssemblyNotForGAC $dlls[$i].Name) {
             continue
         }
-        #Write-Host $dlls[$i].FullName
+
         $publish.GacInstall($dlls[$i].FullName)
     }
     Write-Progress -Activity "Registering .NET Framework dlls in GAC" -Status "Ready" -Completed

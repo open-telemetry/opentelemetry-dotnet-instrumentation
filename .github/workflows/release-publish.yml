@@ -13,11 +13,11 @@ jobs:
     steps:
 
       - name: Setup .NET
-        uses: actions/setup-dotnet@d4c94342e560b34958eacfc5d055d21461ed1c5d # tag: v5.0.0
+        uses: actions/setup-dotnet@2016bd2012dba4e32de620c46fe006a3ac9f0602 # tag: v5.0.1
         with:
           dotnet-version: | 
             8.0.416
-            9.0.307
+            9.0.308
             10.0.100
 
       - name: Test the PowerShell module instructions from README.md
@@ -65,11 +65,11 @@ jobs:
     steps:
 
       - name: Setup .NET
-        uses: actions/setup-dotnet@d4c94342e560b34958eacfc5d055d21461ed1c5d # tag: v5.0.0
+        uses: actions/setup-dotnet@2016bd2012dba4e32de620c46fe006a3ac9f0602 # tag: v5.0.1
         with:
           dotnet-version: | 
             8.0.416
-            9.0.307
+            9.0.308
             10.0.100
 
       - name: Install MacOS CoreUtils
@@ -111,7 +111,7 @@ jobs:
     steps:
 
       - name: Checkout
-        uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # tag: v5.0.1
+        uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # tag: v6.0.0
 
       - name: Test the Shell scripts from README.md in Docker container
         run: |

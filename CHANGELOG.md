@@ -5,7 +5,24 @@ All notable changes to this component are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/compare/v1.12.0..HEAD)
+## [Unreleased](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/compare/v1.13.0..HEAD)
+
+### Added
+
+### Changed
+
+#### Dependency updates
+
+### Deprecated
+
+### Removed
+
+### Fixed
+
+## [1.13.0](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/tag/v1.13.0)
+
+This release include all changes from [1.13.0-beta.1](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/tag/v1.13.0-beta.1)
+release.
 
 ### Added
 
@@ -13,6 +30,11 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
   logs instrumentation for versions `5.*` and `6.*` on .NET using duck typing
   for zero-config auto-injection.
 - Support for .NET 10.
+- Support for [ASP.NET Core 10 metrics](https://learn.microsoft.com/en-us/aspnet/core/log-mon/metrics/built-in?view=aspnetcore-10.0).
+- Support for ASP.NET Core 10 Blazor traces from
+  `Microsoft.AspNetCore.Components`
+  and `Microsoft.AspNetCore.Components.Server.Circuits`.
+- WCF Client support for `System.ServiceModel.Primitives` `10.0.*` on .NET 10.
 - Experimental support for file-based configuration.
 - Experimental support for configuration based instrumentation.
 - IL rewrite for SqlCommand on .NET Framework to ensure `CommandText` is
@@ -24,6 +46,9 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 
 - Changed minimal supported version of `Microsoft.Extensions.Logging`
   for `ILOGGER` instrumentation from `9.0.0` to `8.0.0`.
+- Setting `DOTNET_STARTUP_HOOKS` is now optional if the .NET CLR profiler
+  is configured. If it is not set, the profiler looks for the startup hooks
+  assembly and injects the configuration into the application.
 
 #### Dependency updates
 
@@ -82,8 +107,6 @@ included for all supported .NET Framework versions. OpenTelemetry .NET
 AutoInstrumentation detects the .NET Framework version at install time
 and runtime, then loads the correct version of dependency assemblies.
 
-### Deprecated
-
 ### Removed
 
 - Dropped support for `OTEL_DOTNET_AUTO_SQLCLIENT_SET_DBSTATEMENT_FOR_TEXT`
@@ -98,6 +121,10 @@ and runtime, then loads the correct version of dependency assemblies.
   See [#4269](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/issues/4269)
   for details.
 - Fixed rule engine check for .NET 9 to reflect longer support for [STS channel](https://devblogs.microsoft.com/dotnet/dotnet-sts-releases-supported-for-24-months/).
+- Fix bug in signal specific OTLP exporter variables: `OTEL_EXPORTER_OTLP_TRACES_PROTOCOL`,
+  `OTEL_EXPORTER_OTLP_METRICS_PROTOCOL` and `OTEL_EXPORTER_OTLP_LOGS_PROTOCOL`.
+  See [#4593](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/issues/4593)
+  for details.
 
 ## [1.13.0-beta.1](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/tag/v1.13.0-beta.1)
 
@@ -443,7 +470,7 @@ release.
 - The environment variables `OTEL_TRACES_EXPORTER`, `OTEL_METRICS_EXPORTER`,
   and `OTEL_LOGS_EXPORTER` now support configuring console exporters for traces,
   metrics, and logs, respectively.
-- Support signal specific OTLP exporter variables (See [docs](/docs/config.md#otlp)):
+- Support signal specific OTLP exporter variables (See [docs](./docs/config.md#otlp)):
   - `OTEL_EXPORTER_OTLP_TRACES_ENDPOINT`,
   - `OTEL_EXPORTER_OTLP_TRACES_HEADERS`,
   - `OTEL_EXPORTER_OTLP_TRACES_TIMEOUT`,
@@ -957,14 +984,14 @@ This release is built on top of [OpenTelemetry .NET](https://github.com/open-tel
 
 - Added `BeforeConfigureTracerProvider`, `BeforeConfigureMeterProvider`,
   `TracerProviderInitialized` and `MeterProviderInitialized` for plugins.
-  See [plugins documentation](/docs/plugins.md) for details.
+  See [plugins documentation](./docs/plugins.md) for details.
 - Added support for Azure SDK traces instrumentation on .NET.
 
 ### Changed
 
 - In plugins `ConfigureTracerProvider` and `ConfigureMeterProvider` are changed now
   to `AfterConfigureTracerProvider` and `AfterConfigureMeterProvider`.
-  See [plugins documentation](/docs/plugins.md) for details.
+  See [plugins documentation](./docs/plugins.md) for details.
 - Minimal version of `Grpc.Net.Client` supported on .NET updated to `2.52.0`.
 
 ### Fixed
