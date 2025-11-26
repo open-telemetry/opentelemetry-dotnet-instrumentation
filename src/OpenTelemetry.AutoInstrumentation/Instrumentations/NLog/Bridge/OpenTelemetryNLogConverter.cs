@@ -31,7 +31,6 @@ internal class OpenTelemetryNLogConverter
 
     private static readonly IOtelLogger Logger = OtelLogging.GetLogger();
     private static readonly Lazy<OpenTelemetryNLogConverter> InstanceField = new(InitializeTarget, true);
-    private static readonly Lazy<Func<IEnumerable<KeyValuePair<string, object?>>?>> GlobalDiagnosticsContextGetter = new(CreateGlobalDiagnosticsContextGetter, true);
 
     private readonly Func<string?, object?>? _getLoggerFactory;
     private readonly ConcurrentDictionary<string, object> _loggers = new(StringComparer.Ordinal);
@@ -132,24 +131,6 @@ internal class OpenTelemetryNLogConverter
     {
         var result = new List<KeyValuePair<string, object?>>();
 
-        // Get GlobalDiagnosticsContext properties
-        try
-        {
-            var gdcProperties = GlobalDiagnosticsContextGetter.Value?.Invoke();
-            if (gdcProperties != null)
-            {
-                foreach (var prop in gdcProperties)
-                {
-                    result.Add(prop);
-                }
-            }
-        }
-        catch (Exception ex)
-        {
-            Logger.Debug($"Failed to get GlobalDiagnosticsContext properties: {ex.Message}");
-        }
-
-        // Get event-specific properties
         try
         {
             var properties = loggingEvent.Properties;
@@ -249,77 +230,6 @@ internal class OpenTelemetryNLogConverter
     private static OpenTelemetryNLogConverter InitializeTarget()
     {
         return new OpenTelemetryNLogConverter(Instrumentation.LoggerProvider!);
-    }
-
-    private static Func<IEnumerable<KeyValuePair<string, object?>>?> CreateGlobalDiagnosticsContextGetter()
-    {
-        try
-        {
-            // Find the NLog assembly
-            var nlogAssembly = AppDomain.CurrentDomain.GetAssemblies()
-                .FirstOrDefault(a => a.GetName().Name == "NLog");
-
-            if (nlogAssembly == null)
-            {
-                Logger.Debug("NLog assembly not found for GlobalDiagnosticsContext access.");
-                return () => null;
-            }
-
-            // Get the GlobalDiagnosticsContext type
-            var gdcType = nlogAssembly.GetType("NLog.GlobalDiagnosticsContext");
-            if (gdcType == null)
-            {
-                Logger.Debug("GlobalDiagnosticsContext type not found.");
-                return () => null;
-            }
-
-            // Get the GetNames method
-            var getNamesMethod = gdcType.GetMethod("GetNames", BindingFlags.Public | BindingFlags.Static);
-            if (getNamesMethod == null)
-            {
-                Logger.Debug("GlobalDiagnosticsContext.GetNames method not found.");
-                return () => null;
-            }
-
-            // Get the GetObject method
-            var getObjectMethod = gdcType.GetMethod("GetObject", BindingFlags.Public | BindingFlags.Static, null, new[] { typeof(string) }, null);
-            if (getObjectMethod == null)
-            {
-                Logger.Debug("GlobalDiagnosticsContext.GetObject method not found.");
-                return () => null;
-            }
-
-            return () =>
-            {
-                try
-                {
-                    var names = getNamesMethod.Invoke(null, null) as IEnumerable<string>;
-                    if (names == null)
-                    {
-                        return null;
-                    }
-
-                    var result = new List<KeyValuePair<string, object?>>();
-                    foreach (var name in names)
-                    {
-                        var value = getObjectMethod.Invoke(null, new object[] { name });
-                        result.Add(new KeyValuePair<string, object?>(name, value));
-                    }
-
-                    return result.Count > 0 ? result : null;
-                }
-                catch (Exception ex)
-                {
-                    Logger.Debug($"Error getting GlobalDiagnosticsContext values: {ex.Message}");
-                    return null;
-                }
-            };
-        }
-        catch (Exception ex)
-        {
-            Logger.Debug($"Failed to create GlobalDiagnosticsContext getter: {ex.Message}");
-            return () => null;
-        }
     }
 
     private object? GetLogger(string? loggerName)

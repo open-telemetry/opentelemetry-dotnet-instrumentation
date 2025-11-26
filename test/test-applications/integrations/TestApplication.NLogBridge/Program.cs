@@ -15,9 +15,6 @@ internal static class Program
     {
         if (args.Length == 2)
         {
-            // Set global context property for testing
-            GlobalDiagnosticsContext.Set("test_key", "test_value");
-
             var logApiName = args[1];
             switch (logApiName)
             {

@@ -30,8 +30,8 @@ public class NLogBridgeTests : TestHelper
             VerifyBody(logRecord, "{0}, {1} at {2:t}!") &&
             VerifyTraceContext(logRecord) &&
             logRecord is { SeverityText: "Info", SeverityNumber: SeverityNumber.Info } &&
-            VerifyAttributes(logRecord) &&
-            logRecord.Attributes.Count == 4,
+            VerifyParameterAttributes(logRecord) &&
+            logRecord.Attributes.Count == 3,
             "Expected Info record.");
 
         // Logged with exception
@@ -40,7 +40,7 @@ public class NLogBridgeTests : TestHelper
             VerifyBody(logRecord, "Exception occured") &&
             logRecord is { SeverityText: "Error", SeverityNumber: SeverityNumber.Error } &&
             VerifyExceptionAttributes(logRecord) &&
-            logRecord.Attributes.Count == 4,
+            logRecord.Attributes.Count == 3,
             "Expected Error record.");
 
         EnableBytecodeInstrumentation();
@@ -158,15 +158,13 @@ public class NLogBridgeTests : TestHelper
         Assert.Contains("TraceFlags=", output);
     }
 
-    private static bool VerifyAttributes(LogRecord logRecord)
+    private static bool VerifyParameterAttributes(LogRecord logRecord)
     {
         var firstArgAttribute = logRecord.Attributes.SingleOrDefault(value => value.Key == "0");
         var secondArgAttribute = logRecord.Attributes.SingleOrDefault(value => value.Key == "1");
-        var customAttribute = logRecord.Attributes.SingleOrDefault(value => value.Key == "test_key");
         return firstArgAttribute?.Value.StringValue == "Hello" &&
                secondArgAttribute?.Value.StringValue == "world" &&
-               logRecord.Attributes.Count(value => value.Key == "2") == 1 &&
-               customAttribute?.Value.StringValue == "test_value";
+               logRecord.Attributes.Count(value => value.Key == "2") == 1;
     }
 
     private static bool VerifyTraceContext(LogRecord logRecord)

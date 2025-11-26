@@ -10,8 +10,7 @@ The NLog instrumentation offers automatic integration through:
 3. **Log Event Bridging**: Converting NLog log events to OpenTelemetry log records (when bridge is enabled)
 4. **Structured Logging Support**: Leveraging NLog's layout abilities for enrichment
 5. **Trace Context Injection**: Automatically injects trace context into NLog properties for all targets
-6. **GlobalDiagnosticsContext Support**: Captures properties from NLog's GlobalDiagnosticsContext
-7. **Custom Properties**: Forwarding custom properties while filtering internal NLog properties
+6. **Custom Properties**: Forwarding custom properties while filtering internal NLog properties
 
 **Note**: No NLog configuration changes are required. The instrumentation works exclusively through bytecode interception and relies on OpenTelemetry environment variables for configuration.
 
@@ -93,7 +92,6 @@ The instrumentation automatically:
 - Uses formatted message if available, otherwise raw message (when bridge enabled)
 - Includes event parameters when present (when bridge enabled)
 - Captures trace context from `Activity.Current`
-- Captures properties from `GlobalDiagnosticsContext`
 - Forwards custom properties while filtering internal NLog properties (when bridge enabled)
 
 #### Trace Context Injection
@@ -149,7 +147,6 @@ The instrumentation uses duck typing to interact with NLog without requiring dir
 
 ### Captured Properties
 - All custom properties from `LogEventInfo.Properties`
-- All properties from `GlobalDiagnosticsContext`
 - Message template arguments (indexed as "0", "1", "2", etc.)
 
 ### Filtered Properties
@@ -169,7 +166,6 @@ Exceptions are recorded using OpenTelemetry's `RecordException` method, which ad
 - **Logger Caching**: OpenTelemetry loggers are cached (up to 100 entries) to avoid recreation overhead
 - **Lazy Initialization**: Components are initialized only when needed
 - **Minimal Overhead**: Bytecode interception adds minimal overhead to logging calls
-- **Reflection Caching**: GlobalDiagnosticsContext access is cached via delegates
 
 ## Error Handling
 
@@ -197,7 +193,6 @@ A complete test application is available at `test/test-applications/integrations
 - Microsoft.Extensions.Logging integration via NLogLoggerProvider
 - Structured logging scenarios
 - Exception logging
-- GlobalDiagnosticsContext properties
 - Trace context propagation
 
 ## Troubleshooting
@@ -217,7 +212,6 @@ A complete test application is available at `test/test-applications/integrations
 3. **Missing Properties**
    - Check NLog configuration for property capture
    - Verify properties don't start with filtered prefixes
-   - Ensure GlobalDiagnosticsContext.Set() is called before logging
 
 4. **Duplicate Logs**
    - If using NLog as ILogger provider, logs go through ILogger bridge
