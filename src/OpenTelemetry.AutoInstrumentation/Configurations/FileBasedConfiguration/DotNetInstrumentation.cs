@@ -24,4 +24,10 @@ internal class DotNetInstrumentation
     /// </summary>
     [YamlMember(Alias = "logs")]
     public DotNetLogs? Logs { get; set; }
+
+    /// <summary>
+    /// Gets or sets the no-code tracing configuration.
+    /// </summary>
+    [YamlMember(Alias = "no_code")]
+    public NoCodeConfiguration? NoCode { get; set; }
 }

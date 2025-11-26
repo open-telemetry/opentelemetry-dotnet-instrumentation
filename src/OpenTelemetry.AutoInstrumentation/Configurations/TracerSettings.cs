@@ -4,6 +4,7 @@
 using OpenTelemetry.AutoInstrumentation.Configurations.FileBasedConfiguration;
 using OpenTelemetry.AutoInstrumentation.Configurations.Otlp;
 using OpenTelemetry.AutoInstrumentation.Logging;
+using OpenTelemetry.Trace;
 
 namespace OpenTelemetry.AutoInstrumentation.Configurations;
 
@@ -63,6 +64,11 @@ internal class TracerSettings : Settings
     /// </summary>
     public IReadOnlyList<ProcessorConfig>? Processors { get; private set; } = null;
 
+    /// <summary>
+    /// Gets the sampler configured via file-based configuration.
+    /// </summary>
+    public Sampler? Sampler { get; private set; }
+
     protected override void OnLoadEnvVar(Configuration configuration)
     {
         TracesExporters = ParseTracesExporter(configuration);
@@ -106,16 +112,49 @@ internal class TracerSettings : Settings
     protected override void OnLoadFile(YamlConfiguration configuration)
     {
         var processors = configuration.TracerProvider?.Processors;
-        if (processors != null && processors.Count > 0)
-        {
-            TracesEnabled = true;
-        }
-
+        TracesEnabled = processors != null && processors.Count > 0;
         Processors = processors;
 
-        EnabledInstrumentations = configuration.InstrumentationDevelopment?.DotNet?.Traces?.GetEnabledInstrumentations() ?? [];
+        var traces = configuration.InstrumentationDevelopment?.DotNet?.Traces;
+        EnabledInstrumentations = traces?.GetEnabledInstrumentations() ?? [];
+        InstrumentationOptions = new InstrumentationOptions(traces);
 
-        InstrumentationOptions = new InstrumentationOptions(configuration.InstrumentationDevelopment?.DotNet?.Traces);
+        if (traces != null)
+        {
+            if (traces.AdditionalSources != null)
+            {
+                foreach (var configurationName in traces.AdditionalSources)
+                {
+                    ActivitySources.Add(configurationName);
+                }
+            }
+
+            if (traces.AdditionalSourcesList != null)
+            {
+                foreach (var configurationName in traces.AdditionalSourcesList.Split(Constants.ConfigurationValues.Separator))
+                {
+                    ActivitySources.Add(configurationName);
+                }
+            }
+
+            if (traces.AdditionalLegacySources != null)
+            {
+                foreach (var configurationName in traces.AdditionalLegacySources)
+                {
+                    AdditionalLegacySources.Add(configurationName);
+                }
+            }
+
+            if (traces.AdditionalLegacySourcesList != null)
+            {
+                foreach (var configurationName in traces.AdditionalLegacySourcesList.Split(Constants.ConfigurationValues.Separator))
+                {
+                    AdditionalLegacySources.Add(configurationName);
+                }
+            }
+        }
+
+        Sampler = SamplerFactory.CreateSampler(configuration.TracerProvider?.Sampler, configuration.FailFast) ?? new ParentBasedSampler(new AlwaysOnSampler());
     }
 
     private static List<TracesExporter> ParseTracesExporter(Configuration configuration)

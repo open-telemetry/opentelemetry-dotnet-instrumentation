@@ -2,4 +2,9 @@
   <PropertyGroup>
     <TargetFrameworks>net462</TargetFrameworks>
   </PropertyGroup>
+  <ItemGroup>
+    <None Update="config.yaml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
 </Project>

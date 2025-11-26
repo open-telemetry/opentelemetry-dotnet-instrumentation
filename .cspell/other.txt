@@ -74,3 +74,4 @@ unregistration
 vcpkg
 WCFCLIENT
 WCFSERVICE
+LOGRECORD

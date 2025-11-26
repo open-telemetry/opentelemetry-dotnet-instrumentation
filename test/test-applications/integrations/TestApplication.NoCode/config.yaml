@@ -5,646 +5,648 @@ tracer_provider:
     - batch:
         exporter:
           otlp_http:
-            endpoint: ${OTEL_EXPORTER_OTLP_ENDPOINT}
+            endpoint: ${OTEL_EXPORTER_OTLP_TRACES_ENDPOINT}
 
-no_code/development:
-  targets:
-    - target:
-        assembly:
-          name: TestApplication.NoCode
-        type: TestApplication.NoCode.NoCodeTestingClass
-        method: TestMethodStatic
-        signature:
-          return_type: System.Void
-          parameter_types:
-      span:
-         name: Span-TestMethodStatic
-         kind: internal
-         attributes:
-           - name: attribute_key_string
-             value: "string_value"
-             type: string
-           - name: attribute_key_bool
-             value: true
-             type: bool
-           - name: attribute_key_int
-             value: 12345
-             type: int
-           - name: attribute_key_double
-             value: 123.45
-             type: double
-           - name: attribute_key_string_array
-             value: ["value1", "value2", "value3"]
-             type: string_array
-           - name: attribute_key_bool_array
-             value: [true, false, true]
-             type: bool_array
-           - name: attribute_key_int_array
-             value: [123, 456, 789]
-             type: int_array
-           - name: attribute_key_double_array
-             value: [123.45, 678.90]
-             type: double_array
-    - target:
-        assembly:
-          name: TestApplication.NoCode
-        type: TestApplication.NoCode.NoCodeTestingClass
-        method: TestMethod
-        signature:
-          return_type: System.Void
-          parameter_types:
-      span:
-         name: Span-TestMethod0
-         kind: client
-    - target:
-        assembly:
-          name: TestApplication.NoCode
-        type: TestApplication.NoCode.NoCodeTestingClass
-        method: TestMethodA
-        signature:
-          return_type: System.Void
-          parameter_types:
-      span:
-         name: Span-TestMethodA
-         kind: consumer
-    - target:
-        assembly:
-          name: TestApplication.NoCode
-        type: TestApplication.NoCode.NoCodeTestingClass
-        method: TestMethod
-        signature:
-          return_type: System.Void
-          parameter_types:
-            - System.String
-      span:
-         name: Span-TestMethod1String
-         kind: producer
-    - target:
-        assembly:
-          name: TestApplication.NoCode
-        type: TestApplication.NoCode.NoCodeTestingClass
-        method: TestMethod
-        signature:
-          return_type: System.Void
-          parameter_types:
-            - System.Int32
-      span:
-         name: Span-TestMethod1Int
-         kind: server
-    - target:
-        assembly:
-          name: TestApplication.NoCode
-        type: TestApplication.NoCode.NoCodeTestingClass
-        method: TestMethod
-        signature:
-          return_type: System.Void
-          parameter_types:
-            - System.String
-            - System.String
-      span:
-         name: Span-TestMethod2
-    - target:
-        assembly:
-          name: TestApplication.NoCode
-        type: TestApplication.NoCode.NoCodeTestingClass
-        method: TestMethod
-        signature:
-          return_type: System.Void
-          parameter_types:
-            - System.String
-            - System.String
-            - System.String
-      span:
-         name: Span-TestMethod3
-    - target:
-        assembly:
-          name: TestApplication.NoCode
-        type: TestApplication.NoCode.NoCodeTestingClass
-        method: TestMethod
-        signature:
-          return_type: System.Void
-          parameter_types:
-            - System.String
-            - System.String
-            - System.String
-            - System.String
-      span:
-         name: Span-TestMethod4
-    - target:
-        assembly:
-          name: TestApplication.NoCode
-        type: TestApplication.NoCode.NoCodeTestingClass
-        method: TestMethod
-        signature:
-          return_type: System.Void
-          parameter_types:
-            - System.String
-            - System.String
-            - System.String
-            - System.String
-            - System.String
-      span:
-         name: Span-TestMethod5
-    - target:
-        assembly:
-          name: TestApplication.NoCode
-        type: TestApplication.NoCode.NoCodeTestingClass
-        method: TestMethod
-        signature:
-          return_type: System.Void
-          parameter_types:
-            - System.String
-            - System.String
-            - System.String
-            - System.String
-            - System.String
-            - System.String
-      span:
-         name: Span-TestMethod6
-    - target:
-        assembly:
-          name: TestApplication.NoCode
-        type: TestApplication.NoCode.NoCodeTestingClass
-        method: TestMethod
-        signature:
-          return_type: System.Void
-          parameter_types:
-            - System.String
-            - System.String
-            - System.String
-            - System.String
-            - System.String
-            - System.String
-            - System.String
-      span:
-         name: Span-TestMethod7
-    - target:
-        assembly:
-          name: TestApplication.NoCode
-        type: TestApplication.NoCode.NoCodeTestingClass
-        method: TestMethod
-        signature:
-          return_type: System.Void
-          parameter_types:
-            - System.String
-            - System.String
-            - System.String
-            - System.String
-            - System.String
-            - System.String
-            - System.String
-            - System.String
-      span:
-         name: Span-TestMethod8
-    - target:
-        assembly:
-          name: TestApplication.NoCode
-        type: TestApplication.NoCode.NoCodeTestingClass
-        method: TestMethod
-        signature:
-          return_type: System.Void
-          parameter_types:
-            - System.String
-            - System.String
-            - System.String
-            - System.String
-            - System.String
-            - System.String
-            - System.String
-            - System.String
-            - System.String
-      span:
-         name: Span-TestMethod9
-    - target:
-        assembly:
-          name: TestApplication.NoCode
-        type: TestApplication.NoCode.NoCodeTestingClass
-        method: ReturningTestMethodStatic
-        signature:
-          return_type: System.Int32
-          parameter_types:
-      span:
-         name: Span-ReturningTestMethodStatic
-    - target:
-        assembly:
-          name: TestApplication.NoCode
-        type: TestApplication.NoCode.NoCodeTestingClass
-        method: ReturningTestMethod
-        signature:
-          return_type: System.Int32
-          parameter_types:
-      span:
-         name: Span-ReturningTestMethod0
-    - target:
-        assembly:
-          name: TestApplication.NoCode
-        type: TestApplication.NoCode.NoCodeTestingClass
-        method: ReturningStringTestMethod
-        signature:
-          return_type: System.String
-          parameter_types:
-      span:
-         name: Span-ReturningStringTestMethod
-    - target:
-        assembly:
-          name: TestApplication.NoCode
-        type: TestApplication.NoCode.NoCodeTestingClass
-        method: ReturningCustomClassTestMethod
-        signature:
-          return_type: TestApplication.NoCode.TestClass
-          parameter_types:
-      span:
-         name: Span-ReturningCustomClassTestMethod
-    - target:
-        assembly:
-          name: TestApplication.NoCode
-        type: TestApplication.NoCode.NoCodeTestingClass
-        method: ReturningTestMethod
-        signature:
-          return_type: System.Int32
-          parameter_types:
-            - System.String
-      span:
-         name: Span-ReturningTestMethod1String
-    - target:
-        assembly:
-          name: TestApplication.NoCode
-        type: TestApplication.NoCode.NoCodeTestingClass
-        method: ReturningTestMethod
-        signature:
-          return_type: System.Int32
-          parameter_types:
-            - System.Int32
-      span:
-         name: Span-ReturningTestMethod1Int
-    - target:
-        assembly:
-          name: TestApplication.NoCode
-        type: TestApplication.NoCode.NoCodeTestingClass
-        method: ReturningTestMethod
-        signature:
-          return_type: System.Int32
-          parameter_types:
-            - System.String
-            - System.String
-      span:
-         name: Span-ReturningTestMethod2
-    - target:
-        assembly:
-          name: TestApplication.NoCode
-        type: TestApplication.NoCode.NoCodeTestingClass
-        method: ReturningTestMethod
-        signature:
-          return_type: System.Int32
-          parameter_types:
-            - System.String
-            - System.String
-            - System.String
-      span:
-         name: Span-ReturningTestMethod3
-    - target:
-        assembly:
-          name: TestApplication.NoCode
-        type: TestApplication.NoCode.NoCodeTestingClass
-        method: ReturningTestMethod
-        signature:
-          return_type: System.Int32
-          parameter_types:
-            - System.String
-            - System.String
-            - System.String
-            - System.String
-      span:
-         name: Span-ReturningTestMethod4
-    - target:
-        assembly:
-          name: TestApplication.NoCode
-        type: TestApplication.NoCode.NoCodeTestingClass
-        method: ReturningTestMethod
-        signature:
-          return_type: System.Int32
-          parameter_types:
-            - System.String
-            - System.String
-            - System.String
-            - System.String
-            - System.String
-      span:
-         name: Span-ReturningTestMethod5
-    - target:
-        assembly:
-          name: TestApplication.NoCode
-        type: TestApplication.NoCode.NoCodeTestingClass
-        method: ReturningTestMethod
-        signature:
-          return_type: System.Int32
-          parameter_types:
-            - System.String
-            - System.String
-            - System.String
-            - System.String
-            - System.String
-            - System.String
-      span:
-         name: Span-ReturningTestMethod6
-    - target:
-        assembly:
-          name: TestApplication.NoCode
-        type: TestApplication.NoCode.NoCodeTestingClass
-        method: ReturningTestMethod
-        signature:
-          return_type: System.Int32
-          parameter_types:
-            - System.String
-            - System.String
-            - System.String
-            - System.String
-            - System.String
-            - System.String
-            - System.String
-      span:
-         name: Span-ReturningTestMethod7
-    - target:
-        assembly:
-          name: TestApplication.NoCode
-        type: TestApplication.NoCode.NoCodeTestingClass
-        method: ReturningTestMethod
-        signature:
-          return_type: System.Int32
-          parameter_types:
-            - System.String
-            - System.String
-            - System.String
-            - System.String
-            - System.String
-            - System.String
-            - System.String
-            - System.String
-      span:
-         name: Span-ReturningTestMethod8
-    - target:
-        assembly:
-          name: TestApplication.NoCode
-        type: TestApplication.NoCode.NoCodeTestingClass
-        method: ReturningTestMethod
-        signature:
-          return_type: System.Int32
-          parameter_types:
-            - System.String
-            - System.String
-            - System.String
-            - System.String
-            - System.String
-            - System.String
-            - System.String
-            - System.String
-            - System.String
-      span:
-         name: Span-ReturningTestMethod9
-    - target:
-        assembly:
-          name: TestApplication.NoCode
-        type: TestApplication.NoCode.NoCodeTestingClass
-        method: TestMethodStaticAsync
-        signature:
-          return_type: System.Threading.Tasks.Task
-          parameter_types:
-      span:
-         name: Span-TestMethodStaticAsync
-         attributes:
-           - name: attribute_key_string0
-             value: string_value0
-           - name: attribute_key_string1
-             value: string_value1
-           - name: attribute_key_string2
-             value: string_value2
-           - name: attribute_key_string3
-             value: string_value3
-           - name: attribute_key_string4
-             value: string_value4
-           - name: attribute_key_string5
-             value: string_value5
-           - name: attribute_key_string6
-             value: string_value6
-           - name: attribute_key_string7
-             value: string_value7
-           - name: attribute_key_string8
-             value: string_value8
-           - name: attribute_key_string9
-             value: string_value9
-    - target:
-        assembly:
-          name: TestApplication.NoCode
-        type: TestApplication.NoCode.NoCodeTestingClass
-        method: TestMethodAsync
-        signature:
-          return_type: System.Threading.Tasks.Task
-          parameter_types:
-      span:
-         name: Span-TestMethod0Async
-    - target:
-        assembly:
-          name: TestApplication.NoCode
-        type: TestApplication.NoCode.NoCodeTestingClass
-        method: TestMethodAAsync
-        signature:
-          return_type: System.Threading.Tasks.Task
-          parameter_types:
-      span:
-         name: Span-TestMethodAAsync
-    - target:
-        assembly:
-          name: TestApplication.NoCode
-        type: TestApplication.NoCode.NoCodeTestingClass
-        method: TestMethodAsync
-        signature:
-          return_type: System.Threading.Tasks.Task
-          parameter_types:
-            - System.String
-      span:
-         name: Span-TestMethod1StringAsync
-    - target:
-        assembly:
-          name: TestApplication.NoCode
-        type: TestApplication.NoCode.NoCodeTestingClass
-        method: TestMethodAsync
-        signature:
-          return_type: System.Threading.Tasks.Task
-          parameter_types:
-            - System.Int32
-      span:
-         name: Span-TestMethod1IntAsync
-    - target:
-        assembly:
-          name: TestApplication.NoCode
-        type: TestApplication.NoCode.NoCodeTestingClass
-        method: TestMethodAsync
-        signature:
-          return_type: System.Threading.Tasks.Task
-          parameter_types:
-            - System.String
-            - System.String
-      span:
-         name: Span-TestMethod2Async
-    - target:
-        assembly:
-          name: TestApplication.NoCode
-        type: TestApplication.NoCode.NoCodeTestingClass
-        method: TestMethodAsync
-        signature:
-          return_type: System.Threading.Tasks.Task
-          parameter_types:
-            - System.String
-            - System.String
-            - System.String
-      span:
-         name: Span-TestMethod3Async
-    - target:
-        assembly:
-          name: TestApplication.NoCode
-        type: TestApplication.NoCode.NoCodeTestingClass
-        method: TestMethodAsync
-        signature:
-          return_type: System.Threading.Tasks.Task
-          parameter_types:
-            - System.String
-            - System.String
-            - System.String
-            - System.String
-      span:
-         name: Span-TestMethod4Async
-    - target:
-        assembly:
-          name: TestApplication.NoCode
-        type: TestApplication.NoCode.NoCodeTestingClass
-        method: TestMethodAsync
-        signature:
-          return_type: System.Threading.Tasks.Task
-          parameter_types:
-            - System.String
-            - System.String
-            - System.String
-            - System.String
-            - System.String
-      span:
-         name: Span-TestMethod5Async
-    - target:
-        assembly:
-          name: TestApplication.NoCode
-        type: TestApplication.NoCode.NoCodeTestingClass
-        method: TestMethodAsync
-        signature:
-          return_type: System.Threading.Tasks.Task
-          parameter_types:
-            - System.String
-            - System.String
-            - System.String
-            - System.String
-            - System.String
-            - System.String
-      span:
-         name: Span-TestMethod6Async
-    - target:
-        assembly:
-          name: TestApplication.NoCode
-        type: TestApplication.NoCode.NoCodeTestingClass
-        method: TestMethodAsync
-        signature:
-          return_type: System.Threading.Tasks.Task
-          parameter_types:
-            - System.String
-            - System.String
-            - System.String
-            - System.String
-            - System.String
-            - System.String
-            - System.String
-      span:
-         name: Span-TestMethod7Async
-    - target:
-        assembly:
-          name: TestApplication.NoCode
-        type: TestApplication.NoCode.NoCodeTestingClass
-        method: TestMethodAsync
-        signature:
-          return_type: System.Threading.Tasks.Task
-          parameter_types:
-            - System.String
-            - System.String
-            - System.String
-            - System.String
-            - System.String
-            - System.String
-            - System.String
-            - System.String
-      span:
-         name: Span-TestMethod8Async
-    - target:
-        assembly:
-          name: TestApplication.NoCode
-        type: TestApplication.NoCode.NoCodeTestingClass
-        method: TestMethodAsync
-        signature:
-          return_type: System.Threading.Tasks.Task
-          parameter_types:
-            - System.String
-            - System.String
-            - System.String
-            - System.String
-            - System.String
-            - System.String
-            - System.String
-            - System.String
-            - System.String
-      span:
-         name: Span-TestMethod9Async
-    - target:
-        assembly:
-          name: TestApplication.NoCode
-        type: TestApplication.NoCode.NoCodeTestingClass
-        method: IntTaskTestMethodAsync
-        signature:
-          return_type: System.Threading.Tasks.Task`1[System.Int32]
-          parameter_types:
-      span:
-         name: Span-IntTaskTestMethodAsync
-    - target:
-        assembly:
-          name: TestApplication.NoCode
-        type: TestApplication.NoCode.NoCodeTestingClass
-        method: ValueTaskTestMethodAsync
-        signature:
-          return_type: System.Threading.Tasks.ValueTask
-          parameter_types:
-      span:
-         name: Span-ValueTaskTestMethodAsync
-    - target:
-        assembly:
-          name: TestApplication.NoCode
-        type: TestApplication.NoCode.NoCodeTestingClass
-        method: IntValueTaskTestMethodAsync
-        signature:
-          return_type: System.Threading.Tasks.ValueTask`1[System.Int32]
-          parameter_types:
-      span:
-         name: Span-IntValueTaskTestMethodAsync
-    - target:
-        assembly:
-          name: TestApplication.NoCode
-        type: TestApplication.NoCode.NoCodeTestingClass
-        method: GenericTestMethod
-        signature:
-          return_type: System.Int32
-          parameter_types:
-      span:
-         name: Span-GenericTestMethod
-    - target:
-        assembly:
-          name: TestApplication.NoCode
-        type: TestApplication.NoCode.NoCodeTestingClass
-        method: GenericTestMethodAsync
-        signature:
-          return_type: System.Threading.Tasks.Task`1[System.Int32]
-          parameter_types:
-      span:
-         name: Span-GenericTestMethodAsync
+instrumentation/development:
+  dotnet:
+    no_code:
+      targets:
+        - target:
+            assembly:
+              name: TestApplication.NoCode
+            type: TestApplication.NoCode.NoCodeTestingClass
+            method: TestMethodStatic
+            signature:
+              return_type: System.Void
+              parameter_types:
+          span:
+             name: Span-TestMethodStatic
+             kind: internal
+             attributes:
+               - name: attribute_key_string
+                 value: "string_value"
+                 type: string
+               - name: attribute_key_bool
+                 value: true
+                 type: bool
+               - name: attribute_key_int
+                 value: 12345
+                 type: int
+               - name: attribute_key_double
+                 value: 123.45
+                 type: double
+               - name: attribute_key_string_array
+                 value: ["value1", "value2", "value3"]
+                 type: string_array
+               - name: attribute_key_bool_array
+                 value: [true, false, true]
+                 type: bool_array
+               - name: attribute_key_int_array
+                 value: [123, 456, 789]
+                 type: int_array
+               - name: attribute_key_double_array
+                 value: [123.45, 678.90]
+                 type: double_array
+        - target:
+            assembly:
+              name: TestApplication.NoCode
+            type: TestApplication.NoCode.NoCodeTestingClass
+            method: TestMethod
+            signature:
+              return_type: System.Void
+              parameter_types:
+          span:
+             name: Span-TestMethod0
+             kind: client
+        - target:
+            assembly:
+              name: TestApplication.NoCode
+            type: TestApplication.NoCode.NoCodeTestingClass
+            method: TestMethodA
+            signature:
+              return_type: System.Void
+              parameter_types:
+          span:
+             name: Span-TestMethodA
+             kind: consumer
+        - target:
+            assembly:
+              name: TestApplication.NoCode
+            type: TestApplication.NoCode.NoCodeTestingClass
+            method: TestMethod
+            signature:
+              return_type: System.Void
+              parameter_types:
+                - System.String
+          span:
+             name: Span-TestMethod1String
+             kind: producer
+        - target:
+            assembly:
+              name: TestApplication.NoCode
+            type: TestApplication.NoCode.NoCodeTestingClass
+            method: TestMethod
+            signature:
+              return_type: System.Void
+              parameter_types:
+                - System.Int32
+          span:
+             name: Span-TestMethod1Int
+             kind: server
+        - target:
+            assembly:
+              name: TestApplication.NoCode
+            type: TestApplication.NoCode.NoCodeTestingClass
+            method: TestMethod
+            signature:
+              return_type: System.Void
+              parameter_types:
+                - System.String
+                - System.String
+          span:
+             name: Span-TestMethod2
+        - target:
+            assembly:
+              name: TestApplication.NoCode
+            type: TestApplication.NoCode.NoCodeTestingClass
+            method: TestMethod
+            signature:
+              return_type: System.Void
+              parameter_types:
+                - System.String
+                - System.String
+                - System.String
+          span:
+             name: Span-TestMethod3
+        - target:
+            assembly:
+              name: TestApplication.NoCode
+            type: TestApplication.NoCode.NoCodeTestingClass
+            method: TestMethod
+            signature:
+              return_type: System.Void
+              parameter_types:
+                - System.String
+                - System.String
+                - System.String
+                - System.String
+          span:
+             name: Span-TestMethod4
+        - target:
+            assembly:
+              name: TestApplication.NoCode
+            type: TestApplication.NoCode.NoCodeTestingClass
+            method: TestMethod
+            signature:
+              return_type: System.Void
+              parameter_types:
+                - System.String
+                - System.String
+                - System.String
+                - System.String
+                - System.String
+          span:
+             name: Span-TestMethod5
+        - target:
+            assembly:
+              name: TestApplication.NoCode
+            type: TestApplication.NoCode.NoCodeTestingClass
+            method: TestMethod
+            signature:
+              return_type: System.Void
+              parameter_types:
+                - System.String
+                - System.String
+                - System.String
+                - System.String
+                - System.String
+                - System.String
+          span:
+             name: Span-TestMethod6
+        - target:
+            assembly:
+              name: TestApplication.NoCode
+            type: TestApplication.NoCode.NoCodeTestingClass
+            method: TestMethod
+            signature:
+              return_type: System.Void
+              parameter_types:
+                - System.String
+                - System.String
+                - System.String
+                - System.String
+                - System.String
+                - System.String
+                - System.String
+          span:
+             name: Span-TestMethod7
+        - target:
+            assembly:
+              name: TestApplication.NoCode
+            type: TestApplication.NoCode.NoCodeTestingClass
+            method: TestMethod
+            signature:
+              return_type: System.Void
+              parameter_types:
+                - System.String
+                - System.String
+                - System.String
+                - System.String
+                - System.String
+                - System.String
+                - System.String
+                - System.String
+          span:
+             name: Span-TestMethod8
+        - target:
+            assembly:
+              name: TestApplication.NoCode
+            type: TestApplication.NoCode.NoCodeTestingClass
+            method: TestMethod
+            signature:
+              return_type: System.Void
+              parameter_types:
+                - System.String
+                - System.String
+                - System.String
+                - System.String
+                - System.String
+                - System.String
+                - System.String
+                - System.String
+                - System.String
+          span:
+             name: Span-TestMethod9
+        - target:
+            assembly:
+              name: TestApplication.NoCode
+            type: TestApplication.NoCode.NoCodeTestingClass
+            method: ReturningTestMethodStatic
+            signature:
+              return_type: System.Int32
+              parameter_types:
+          span:
+             name: Span-ReturningTestMethodStatic
+        - target:
+            assembly:
+              name: TestApplication.NoCode
+            type: TestApplication.NoCode.NoCodeTestingClass
+            method: ReturningTestMethod
+            signature:
+              return_type: System.Int32
+              parameter_types:
+          span:
+             name: Span-ReturningTestMethod0
+        - target:
+            assembly:
+              name: TestApplication.NoCode
+            type: TestApplication.NoCode.NoCodeTestingClass
+            method: ReturningStringTestMethod
+            signature:
+              return_type: System.String
+              parameter_types:
+          span:
+             name: Span-ReturningStringTestMethod
+        - target:
+            assembly:
+              name: TestApplication.NoCode
+            type: TestApplication.NoCode.NoCodeTestingClass
+            method: ReturningCustomClassTestMethod
+            signature:
+              return_type: TestApplication.NoCode.TestClass
+              parameter_types:
+          span:
+             name: Span-ReturningCustomClassTestMethod
+        - target:
+            assembly:
+              name: TestApplication.NoCode
+            type: TestApplication.NoCode.NoCodeTestingClass
+            method: ReturningTestMethod
+            signature:
+              return_type: System.Int32
+              parameter_types:
+                - System.String
+          span:
+             name: Span-ReturningTestMethod1String
+        - target:
+            assembly:
+              name: TestApplication.NoCode
+            type: TestApplication.NoCode.NoCodeTestingClass
+            method: ReturningTestMethod
+            signature:
+              return_type: System.Int32
+              parameter_types:
+                - System.Int32
+          span:
+             name: Span-ReturningTestMethod1Int
+        - target:
+            assembly:
+              name: TestApplication.NoCode
+            type: TestApplication.NoCode.NoCodeTestingClass
+            method: ReturningTestMethod
+            signature:
+              return_type: System.Int32
+              parameter_types:
+                - System.String
+                - System.String
+          span:
+             name: Span-ReturningTestMethod2
+        - target:
+            assembly:
+              name: TestApplication.NoCode
+            type: TestApplication.NoCode.NoCodeTestingClass
+            method: ReturningTestMethod
+            signature:
+              return_type: System.Int32
+              parameter_types:
+                - System.String
+                - System.String
+                - System.String
+          span:
+             name: Span-ReturningTestMethod3
+        - target:
+            assembly:
+              name: TestApplication.NoCode
+            type: TestApplication.NoCode.NoCodeTestingClass
+            method: ReturningTestMethod
+            signature:
+              return_type: System.Int32
+              parameter_types:
+                - System.String
+                - System.String
+                - System.String
+                - System.String
+          span:
+             name: Span-ReturningTestMethod4
+        - target:
+            assembly:
+              name: TestApplication.NoCode
+            type: TestApplication.NoCode.NoCodeTestingClass
+            method: ReturningTestMethod
+            signature:
+              return_type: System.Int32
+              parameter_types:
+                - System.String
+                - System.String
+                - System.String
+                - System.String
+                - System.String
+          span:
+             name: Span-ReturningTestMethod5
+        - target:
+            assembly:
+              name: TestApplication.NoCode
+            type: TestApplication.NoCode.NoCodeTestingClass
+            method: ReturningTestMethod
+            signature:
+              return_type: System.Int32
+              parameter_types:
+                - System.String
+                - System.String
+                - System.String
+                - System.String
+                - System.String
+                - System.String
+          span:
+             name: Span-ReturningTestMethod6
+        - target:
+            assembly:
+              name: TestApplication.NoCode
+            type: TestApplication.NoCode.NoCodeTestingClass
+            method: ReturningTestMethod
+            signature:
+              return_type: System.Int32
+              parameter_types:
+                - System.String
+                - System.String
+                - System.String
+                - System.String
+                - System.String
+                - System.String
+                - System.String
+          span:
+             name: Span-ReturningTestMethod7
+        - target:
+            assembly:
+              name: TestApplication.NoCode
+            type: TestApplication.NoCode.NoCodeTestingClass
+            method: ReturningTestMethod
+            signature:
+              return_type: System.Int32
+              parameter_types:
+                - System.String
+                - System.String
+                - System.String
+                - System.String
+                - System.String
+                - System.String
+                - System.String
+                - System.String
+          span:
+             name: Span-ReturningTestMethod8
+        - target:
+            assembly:
+              name: TestApplication.NoCode
+            type: TestApplication.NoCode.NoCodeTestingClass
+            method: ReturningTestMethod
+            signature:
+              return_type: System.Int32
+              parameter_types:
+                - System.String
+                - System.String
+                - System.String
+                - System.String
+                - System.String
+                - System.String
+                - System.String
+                - System.String
+                - System.String
+          span:
+             name: Span-ReturningTestMethod9
+        - target:
+            assembly:
+              name: TestApplication.NoCode
+            type: TestApplication.NoCode.NoCodeTestingClass
+            method: TestMethodStaticAsync
+            signature:
+              return_type: System.Threading.Tasks.Task
+              parameter_types:
+          span:
+             name: Span-TestMethodStaticAsync
+             attributes:
+               - name: attribute_key_string0
+                 value: string_value0
+               - name: attribute_key_string1
+                 value: string_value1
+               - name: attribute_key_string2
+                 value: string_value2
+               - name: attribute_key_string3
+                 value: string_value3
+               - name: attribute_key_string4
+                 value: string_value4
+               - name: attribute_key_string5
+                 value: string_value5
+               - name: attribute_key_string6
+                 value: string_value6
+               - name: attribute_key_string7
+                 value: string_value7
+               - name: attribute_key_string8
+                 value: string_value8
+               - name: attribute_key_string9
+                 value: string_value9
+        - target:
+            assembly:
+              name: TestApplication.NoCode
+            type: TestApplication.NoCode.NoCodeTestingClass
+            method: TestMethodAsync
+            signature:
+              return_type: System.Threading.Tasks.Task
+              parameter_types:
+          span:
+             name: Span-TestMethod0Async
+        - target:
+            assembly:
+              name: TestApplication.NoCode
+            type: TestApplication.NoCode.NoCodeTestingClass
+            method: TestMethodAAsync
+            signature:
+              return_type: System.Threading.Tasks.Task
+              parameter_types:
+          span:
+             name: Span-TestMethodAAsync
+        - target:
+            assembly:
+              name: TestApplication.NoCode
+            type: TestApplication.NoCode.NoCodeTestingClass
+            method: TestMethodAsync
+            signature:
+              return_type: System.Threading.Tasks.Task
+              parameter_types:
+                - System.String
+          span:
+             name: Span-TestMethod1StringAsync
+        - target:
+            assembly:
+              name: TestApplication.NoCode
+            type: TestApplication.NoCode.NoCodeTestingClass
+            method: TestMethodAsync
+            signature:
+              return_type: System.Threading.Tasks.Task
+              parameter_types:
+                - System.Int32
+          span:
+             name: Span-TestMethod1IntAsync
+        - target:
+            assembly:
+              name: TestApplication.NoCode
+            type: TestApplication.NoCode.NoCodeTestingClass
+            method: TestMethodAsync
+            signature:
+              return_type: System.Threading.Tasks.Task
+              parameter_types:
+                - System.String
+                - System.String
+          span:
+             name: Span-TestMethod2Async
+        - target:
+            assembly:
+              name: TestApplication.NoCode
+            type: TestApplication.NoCode.NoCodeTestingClass
+            method: TestMethodAsync
+            signature:
+              return_type: System.Threading.Tasks.Task
+              parameter_types:
+                - System.String
+                - System.String
+                - System.String
+          span:
+             name: Span-TestMethod3Async
+        - target:
+            assembly:
+              name: TestApplication.NoCode
+            type: TestApplication.NoCode.NoCodeTestingClass
+            method: TestMethodAsync
+            signature:
+              return_type: System.Threading.Tasks.Task
+              parameter_types:
+                - System.String
+                - System.String
+                - System.String
+                - System.String
+          span:
+             name: Span-TestMethod4Async
+        - target:
+            assembly:
+              name: TestApplication.NoCode
+            type: TestApplication.NoCode.NoCodeTestingClass
+            method: TestMethodAsync
+            signature:
+              return_type: System.Threading.Tasks.Task
+              parameter_types:
+                - System.String
+                - System.String
+                - System.String
+                - System.String
+                - System.String
+          span:
+             name: Span-TestMethod5Async
+        - target:
+            assembly:
+              name: TestApplication.NoCode
+            type: TestApplication.NoCode.NoCodeTestingClass
+            method: TestMethodAsync
+            signature:
+              return_type: System.Threading.Tasks.Task
+              parameter_types:
+                - System.String
+                - System.String
+                - System.String
+                - System.String
+                - System.String
+                - System.String
+          span:
+             name: Span-TestMethod6Async
+        - target:
+            assembly:
+              name: TestApplication.NoCode
+            type: TestApplication.NoCode.NoCodeTestingClass
+            method: TestMethodAsync
+            signature:
+              return_type: System.Threading.Tasks.Task
+              parameter_types:
+                - System.String
+                - System.String
+                - System.String
+                - System.String
+                - System.String
+                - System.String
+                - System.String
+          span:
+             name: Span-TestMethod7Async
+        - target:
+            assembly:
+              name: TestApplication.NoCode
+            type: TestApplication.NoCode.NoCodeTestingClass
+            method: TestMethodAsync
+            signature:
+              return_type: System.Threading.Tasks.Task
+              parameter_types:
+                - System.String
+                - System.String
+                - System.String
+                - System.String
+                - System.String
+                - System.String
+                - System.String
+                - System.String
+          span:
+             name: Span-TestMethod8Async
+        - target:
+            assembly:
+              name: TestApplication.NoCode
+            type: TestApplication.NoCode.NoCodeTestingClass
+            method: TestMethodAsync
+            signature:
+              return_type: System.Threading.Tasks.Task
+              parameter_types:
+                - System.String
+                - System.String
+                - System.String
+                - System.String
+                - System.String
+                - System.String
+                - System.String
+                - System.String
+                - System.String
+          span:
+             name: Span-TestMethod9Async
+        - target:
+            assembly:
+              name: TestApplication.NoCode
+            type: TestApplication.NoCode.NoCodeTestingClass
+            method: IntTaskTestMethodAsync
+            signature:
+              return_type: System.Threading.Tasks.Task`1[System.Int32]
+              parameter_types:
+          span:
+             name: Span-IntTaskTestMethodAsync
+        - target:
+            assembly:
+              name: TestApplication.NoCode
+            type: TestApplication.NoCode.NoCodeTestingClass
+            method: ValueTaskTestMethodAsync
+            signature:
+              return_type: System.Threading.Tasks.ValueTask
+              parameter_types:
+          span:
+             name: Span-ValueTaskTestMethodAsync
+        - target:
+            assembly:
+              name: TestApplication.NoCode
+            type: TestApplication.NoCode.NoCodeTestingClass
+            method: IntValueTaskTestMethodAsync
+            signature:
+              return_type: System.Threading.Tasks.ValueTask`1[System.Int32]
+              parameter_types:
+          span:
+             name: Span-IntValueTaskTestMethodAsync
+        - target:
+            assembly:
+              name: TestApplication.NoCode
+            type: TestApplication.NoCode.NoCodeTestingClass
+            method: GenericTestMethod
+            signature:
+              return_type: System.Int32
+              parameter_types:
+          span:
+             name: Span-GenericTestMethod
+        - target:
+            assembly:
+              name: TestApplication.NoCode
+            type: TestApplication.NoCode.NoCodeTestingClass
+            method: GenericTestMethodAsync
+            signature:
+              return_type: System.Threading.Tasks.Task`1[System.Int32]
+              parameter_types:
+          span:
+             name: Span-GenericTestMethodAsync

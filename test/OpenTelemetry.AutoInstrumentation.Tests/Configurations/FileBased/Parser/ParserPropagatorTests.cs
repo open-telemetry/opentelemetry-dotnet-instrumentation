@@ -1,6 +1,7 @@
 // Copyright The OpenTelemetry Authors
 // SPDX-License-Identifier: Apache-2.0
 
+using OpenTelemetry.AutoInstrumentation.Configurations.FileBasedConfiguration;
 using Xunit;
 using YamlParser = OpenTelemetry.AutoInstrumentation.Configurations.FileBasedConfiguration.Parser.Parser;
 
@@ -12,7 +13,7 @@ public class ParserPropagatorTests
     [Fact]
     public void Parse_FullConfigYaml_ShouldPopulateModelCorrectly()
     {
-        var config = YamlParser.ParseYaml("Configurations/FileBased/Files/TestPropagatorFile.yaml");
+        var config = YamlParser.ParseYaml<YamlConfiguration>("Configurations/FileBased/Files/TestPropagatorFile.yaml");
 
         Assert.NotNull(config);
         Assert.NotNull(config.Propagator);
@@ -35,7 +36,7 @@ public class ParserPropagatorTests
     {
         Environment.SetEnvironmentVariable("OTEL_PROPAGATORS", "tracecontext,baggage,b3,b3multi");
 
-        var config = YamlParser.ParseYaml("Configurations/FileBased/Files/TestPropagatorFileEnvVars.yaml");
+        var config = YamlParser.ParseYaml<YamlConfiguration>("Configurations/FileBased/Files/TestPropagatorFileEnvVars.yaml");
 
         Assert.NotNull(config);
         Assert.NotNull(config.Propagator);

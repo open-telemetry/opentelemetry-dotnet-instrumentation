@@ -34,7 +34,7 @@ internal class NoCodeSettings : Settings
 
     protected override void OnLoadFile(YamlConfiguration configuration)
     {
-        var noCodeConfiguration = configuration.NoCode;
+        var noCodeConfiguration = configuration.InstrumentationDevelopment?.DotNet?.NoCode;
 
         if (noCodeConfiguration is null)
         {

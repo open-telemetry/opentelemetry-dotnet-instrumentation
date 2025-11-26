@@ -37,4 +37,28 @@ public class RuntimeTests : TestHelper
             process?.Kill();
         }
     }
+
+    [Fact]
+    [Trait("Category", "EndToEnd")]
+    public void SubmitMetricsFileBased()
+    {
+        using var collector = new MockMetricsCollector(Output);
+        SetFileBasedExporter(collector);
+        EnableFileBasedConfigWithDefaultPath();
+#if NET9_0_OR_GREATER
+        collector.Expect("System.Runtime");
+#else
+        collector.Expect("OpenTelemetry.Instrumentation.Runtime");
+#endif
+
+        using var process = StartTestApplication();
+        try
+        {
+            collector.AssertExpectations();
+        }
+        finally
+        {
+            process?.Kill();
+        }
+    }
 }

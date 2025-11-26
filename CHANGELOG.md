@@ -5,11 +5,35 @@ All notable changes to this component are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/compare/v1.12.0..HEAD)
+## [Unreleased](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/compare/v1.13.0..HEAD)
 
 ### Added
 
-- Configuration based instrumentation.
+### Changed
+
+#### Dependency updates
+
+### Deprecated
+
+### Removed
+
+### Fixed
+
+## [1.13.0](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/tag/v1.13.0)
+
+This release include all changes from [1.13.0-beta.1](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/tag/v1.13.0-beta.1)
+release.
+
+### Added
+
+- Support for .NET 10.
+- Support for [ASP.NET Core 10 metrics](https://learn.microsoft.com/en-us/aspnet/core/log-mon/metrics/built-in?view=aspnetcore-10.0).
+- Support for ASP.NET Core 10 Blazor traces from
+  `Microsoft.AspNetCore.Components`
+  and `Microsoft.AspNetCore.Components.Server.Circuits`.
+- WCF Client support for `System.ServiceModel.Primitives` `10.0.*` on .NET 10.
+- Experimental support for file-based configuration.
+- Experimental support for configuration based instrumentation.
 - IL rewrite for SqlCommand on .NET Framework to ensure `CommandText` is
   available for [SqlClient instrumentation](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/issues/4343).
   This is disabled by default and can be enabled via the
@@ -18,48 +42,55 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 
 ### Changed
 
+- Changed minimal supported version of `Microsoft.Extensions.Logging`
+  for `ILOGGER` instrumentation from `9.0.0` to `8.0.0`.
+- Setting `DOTNET_STARTUP_HOOKS` is now optional if the .NET CLR profiler
+  is configured. If it is not set, the profiler looks for the startup hooks
+  assembly and injects the configuration into the application.
+
 #### Dependency updates
 
 - Updated [Core components](https://github.com/open-telemetry/opentelemetry-dotnet/blob/main/VERSIONING.md#core-components):
-  [`1.13.1`](https://github.com/open-telemetry/opentelemetry-dotnet/releases/tag/core-1.13.1).
+  [`1.14.0`](https://github.com/open-telemetry/opentelemetry-dotnet/releases/tag/core-1.14.0).
 
 - Following packages updated
-  - `OpenTelemetry.Instrumentation.GrpcNetClient` from `1.12.0-beta.1` to `1.13.0-beta.1`,
-  - `OpenTelemetry.Instrumentation.Http` from `1.12.0` to `1.13.0`,
-  - `OpenTelemetry.Instrumentation.Process` from `1.12.0-beta.1` to `1.13.0-beta.1`,
-  - `OpenTelemetry.Instrumentation.Quartz` from `1.12.0-beta.1` to `1.13.0-beta.1`,
-  - `OpenTelemetry.Instrumentation.Runtime` from `1.12.0` to `1.13.0`,
-  - `OpenTelemetry.Instrumentation.SqlClient` from `1.12.0-beta.2` to `1.13.0-beta.1`,
-  - `OpenTelemetry.Instrumentation.Wcf` from `1.12.0-beta.1` to `1.13.0-beta.2`,
-  - `OpenTelemetry.Resources.Azure` from `1.12.0-beta.1` to `1.13.0-beta.1`,
-  - `OpenTelemetry.Resources.Host` from `1.12.0-beta.1` to `1.13.0-beta.1`,
-  - `OpenTelemetry.Resources.OperatingSystem` from `1.12.0-beta.1` to `1.13.0-beta.1`,
-  - `OpenTelemetry.Resources.Process` from `1.12.0-beta.1` to `1.13.0-beta.1`,
-  - `OpenTelemetry.Resources.ProcessRuntime` from `1.12.0-beta.1` to `1.13.0-beta.1`.
+  - `OpenTelemetry.Instrumentation.GrpcNetClient` from `1.12.0-beta.1` to `1.14.0-beta.1`,
+  - `OpenTelemetry.Instrumentation.Http` from `1.12.0` to `1.14.0`,
+  - `OpenTelemetry.Instrumentation.Process` from `1.12.0-beta.1` to `1.14.0-beta.2`,
+  - `OpenTelemetry.Instrumentation.Quartz` from `1.12.0-beta.1` to `1.14.0-beta.2`,
+  - `OpenTelemetry.Instrumentation.Runtime` from `1.12.0` to `1.14.0`,
+  - `OpenTelemetry.Instrumentation.SqlClient` from `1.12.0-beta.2` to `1.14.0-beta.1`,
+  - `OpenTelemetry.Instrumentation.Wcf` from `1.12.0-beta.1` to `1.14.0-beta.1`,
+  - `OpenTelemetry.Resources.Azure` from `1.12.0-beta.1` to `1.14.0-beta.1`,
+  - `OpenTelemetry.Resources.Host` from `1.12.0-beta.1` to `1.14.0-beta.1`,
+  - `OpenTelemetry.Resources.OperatingSystem` from `1.12.0-beta.1` to `1.14.0-beta.1`,
+  - `OpenTelemetry.Resources.Process` from `1.12.0-beta.1` to `1.14.0-beta.1`,
+  - `OpenTelemetry.Resources.ProcessRuntime` from `1.12.0-beta.1` to `1.14.0-beta.1`.
 - .NET only, following packages updated
-  - `OpenTelemetry.Instrumentation.AspNetCore` from `1.12.0` to `1.13.0`,
-  - `OpenTelemetry.Instrumentation.EntityFrameworkCore` from `1.12.0-beta.2` to `1.13.0-beta.1`,
-  - `OpenTelemetry.Instrumentation.StackExchangeRedis` from `1.12.0-beta.2` to `1.13.0-beta.1`,
-  - `OpenTelemetry.Resources.Container` from `1.12.0-beta.1` to `1.13.0-beta.1`.
+  - `OpenTelemetry.Instrumentation.AspNetCore` from `1.12.0` to `1.14.0`,
+  - `OpenTelemetry.Instrumentation.EntityFrameworkCore` from `1.12.0-beta.2` to `1.14.0-beta.2`,
+  - `OpenTelemetry.Instrumentation.StackExchangeRedis` from `1.12.0-beta.2` to `1.14.0-beta.1`,
+  - `OpenTelemetry.Resources.Container` from `1.12.0-beta.1` to `1.14.0-beta.1`,
+  - `System.Diagnostics.DiagnosticSource` from `9.0.0` to `10.0.0`.
 - .NET Framework only, following packages updated
-  - `Microsoft.Bcl.AsyncInterfaces` from `9.0.8` to `9.0.10`,
-  - `Microsoft.Extensions.Configuration` from `9.0.8` to `9.0.10`,
-  - `Microsoft.Extensions.Configuration.Abstractions` from `9.0.8` to `9.0.10`,
-  - `Microsoft.Extensions.Configuration.Binder` from `9.0.8` to `9.0.10`,
-  - `Microsoft.Extensions.DependencyInjection` from `9.0.8` to `9.0.10`,
-  - `Microsoft.Extensions.DependencyInjection.Abstractions` from `9.0.8` to `9.0.10`,
-  - `Microsoft.Extensions.Diagnostics.Abstractions` from `9.0.8` to `9.0.10`,
-  - `Microsoft.Extensions.Logging` from `9.0.8` to `9.0.10`,
-  - `Microsoft.Extensions.Logging.Abstractions` from `9.0.8` to `9.0.10`,
-  - `Microsoft.Extensions.Logging.Configuration` from `9.0.8` to `9.0.10`,
-  - `Microsoft.Extensions.Options` from `9.0.8` to `9.0.10`,
-  - `Microsoft.Extensions.Options.ConfigurationExtensions` from `9.0.8` to `9.0.10`,
-  - `Microsoft.Extensions.Primitives` from `9.0.8` to `9.0.10`,
-  - `OpenTelemetry.Instrumentation.AspNet` from `1.12.0-beta.1` to `1.13.0-rc.1`,
-  - `System.Diagnostics.DiagnosticSource` from `9.0.8` to `9.0.10`,
-  - `System.IO.Pipelines` from `9.0.8` to `9.0.10`,
-  - `System.Text.Encodings.Web` from `9.0.8` to `9.0.10`,
-  - `System.Text.Json` from `9.0.8` to `9.0.10`.
+  - `Microsoft.Bcl.AsyncInterfaces` from `9.0.8` to `10.0.0`,
+  - `Microsoft.Extensions.Configuration` from `9.0.8` to `10.0.0`,
+  - `Microsoft.Extensions.Configuration.Abstractions` from `9.0.8` to `10.0.0`,
+  - `Microsoft.Extensions.Configuration.Binder` from `9.0.8` to `10.0.0`,
+  - `Microsoft.Extensions.DependencyInjection` from `9.0.8` to `10.0.0`,
+  - `Microsoft.Extensions.DependencyInjection.Abstractions` from `9.0.8` to `10.0.0`,
+  - `Microsoft.Extensions.Diagnostics.Abstractions` from `9.0.8` to `10.0.0`,
+  - `Microsoft.Extensions.Logging` from `9.0.8` to `10.0.0`,
+  - `Microsoft.Extensions.Logging.Abstractions` from `9.0.8` to `10.0.0`,
+  - `Microsoft.Extensions.Logging.Configuration` from `9.0.8` to `10.0.0`,
+  - `Microsoft.Extensions.Options` from `9.0.8` to `10.0.0`,
+  - `Microsoft.Extensions.Options.ConfigurationExtensions` from `9.0.8` to `10.0.0`,
+  - `Microsoft.Extensions.Primitives` from `9.0.8` to `10.0.0`,
+  - `OpenTelemetry.Instrumentation.AspNet` from `1.12.0-beta.1` to `1.14.0-rc.1`,
+  - `System.Diagnostics.DiagnosticSource` from `9.0.8` to `10.0.0`,
+  - `System.IO.Pipelines` from `9.0.8` to `10.0.0`,
+  - `System.Text.Encodings.Web` from `9.0.8` to `10.0.0`,
+  - `System.Text.Json` from `9.0.8` to `10.0.0`.
 
 #### Dependencies on .NET Framework
 
@@ -73,8 +104,6 @@ Now, when the OpenTelemetry ZIP archive is built, dependency assemblies are
 included for all supported .NET Framework versions. OpenTelemetry .NET
 AutoInstrumentation detects the .NET Framework version at install time
 and runtime, then loads the correct version of dependency assemblies.
-
-### Deprecated
 
 ### Removed
 
@@ -90,6 +119,10 @@ and runtime, then loads the correct version of dependency assemblies.
   See [#4269](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/issues/4269)
   for details.
 - Fixed rule engine check for .NET 9 to reflect longer support for [STS channel](https://devblogs.microsoft.com/dotnet/dotnet-sts-releases-supported-for-24-months/).
+- Fix bug in signal specific OTLP exporter variables: `OTEL_EXPORTER_OTLP_TRACES_PROTOCOL`,
+  `OTEL_EXPORTER_OTLP_METRICS_PROTOCOL` and `OTEL_EXPORTER_OTLP_LOGS_PROTOCOL`.
+  See [#4593](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/issues/4593)
+  for details.
 
 ## [1.13.0-beta.1](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/tag/v1.13.0-beta.1)
 
@@ -435,7 +468,7 @@ release.
 - The environment variables `OTEL_TRACES_EXPORTER`, `OTEL_METRICS_EXPORTER`,
   and `OTEL_LOGS_EXPORTER` now support configuring console exporters for traces,
   metrics, and logs, respectively.
-- Support signal specific OTLP exporter variables (See [docs](/docs/config.md#otlp)):
+- Support signal specific OTLP exporter variables (See [docs](./docs/config.md#otlp)):
   - `OTEL_EXPORTER_OTLP_TRACES_ENDPOINT`,
   - `OTEL_EXPORTER_OTLP_TRACES_HEADERS`,
   - `OTEL_EXPORTER_OTLP_TRACES_TIMEOUT`,
@@ -949,14 +982,14 @@ This release is built on top of [OpenTelemetry .NET](https://github.com/open-tel
 
 - Added `BeforeConfigureTracerProvider`, `BeforeConfigureMeterProvider`,
   `TracerProviderInitialized` and `MeterProviderInitialized` for plugins.
-  See [plugins documentation](/docs/plugins.md) for details.
+  See [plugins documentation](./docs/plugins.md) for details.
 - Added support for Azure SDK traces instrumentation on .NET.
 
 ### Changed
 
 - In plugins `ConfigureTracerProvider` and `ConfigureMeterProvider` are changed now
   to `AfterConfigureTracerProvider` and `AfterConfigureMeterProvider`.
-  See [plugins documentation](/docs/plugins.md) for details.
+  See [plugins documentation](./docs/plugins.md) for details.
 - Minimal version of `Grpc.Net.Client` supported on .NET updated to `2.52.0`.
 
 ### Fixed

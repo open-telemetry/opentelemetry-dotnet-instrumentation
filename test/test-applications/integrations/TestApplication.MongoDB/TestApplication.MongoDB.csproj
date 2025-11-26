@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFrameworks>net9.0;net8.0</TargetFrameworks>
+    <TargetFrameworks>net10.0;net9.0;net8.0</TargetFrameworks>
     <TargetFrameworks Condition="'$(OS)' == 'Windows_NT' and ('$(LibraryVersion)' == '' or '$(LibraryVersion)' &gt;= '3.0.0')">$(TargetFrameworks);net472</TargetFrameworks>
     <TargetFrameworks Condition="'$(OS)' == 'Windows_NT' and '$(LibraryVersion)' != '' and '$(LibraryVersion)' &lt; '3.0.0'">$(TargetFrameworks);net462</TargetFrameworks>
   </PropertyGroup>
@@ -15,9 +15,10 @@
 
   <ItemGroup>
     <PackageReference Include="MongoDB.Driver" VersionOverride="$(LibraryVersion)" />
-    <!-- Workaround! Microsoft.Extensions.Logging.Abstractions v9.0.0 is minimal version supported by auto instrumentation.
+    <!-- Workaround! Microsoft.Extensions.Logging.Abstractions v8.0.0 is minimal version supported by auto instrumentation.
     MongoDB.Driver 2.18+ references older version. It prevents to load required version from Additional Dependencies store-->
-    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" VersionOverride="9.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" VersionOverride="8.0.0" />
+    <PackageReference Include="System.Diagnostics.DiagnosticSource" Condition=" '$(TargetFramework)' == 'net8.0' " />
   </ItemGroup>
 
 </Project>

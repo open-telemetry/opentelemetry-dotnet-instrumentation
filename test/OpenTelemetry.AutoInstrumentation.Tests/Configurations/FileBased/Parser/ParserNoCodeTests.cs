@@ -13,14 +13,14 @@ public class ParserNoCodeTests
     [Fact]
     public void NoCodeConfigurationCanBeParsed()
     {
-        var config = YamlParser.ParseYaml("Configurations/FileBased/Files/NoCodeFile.yaml");
+        var config = YamlParser.ParseYaml<YamlConfiguration>("Configurations/FileBased/Files/NoCodeFile.yaml");
 
         Assert.NotNull(config);
-        Assert.Equal("1.0-rc.1", config.FileFormat);
-
-        Assert.NotNull(config.NoCode);
-        Assert.NotNull(config.NoCode.Targets);
-        var noCodeEntry = Assert.Single(config.NoCode.Targets);
+        Assert.NotNull(config.InstrumentationDevelopment);
+        Assert.NotNull(config.InstrumentationDevelopment.DotNet);
+        Assert.NotNull(config.InstrumentationDevelopment.DotNet.NoCode);
+        Assert.NotNull(config.InstrumentationDevelopment.DotNet.NoCode.Targets);
+        var noCodeEntry = Assert.Single(config.InstrumentationDevelopment.DotNet.NoCode.Targets);
         Assert.NotNull(noCodeEntry.Target);
         var target = noCodeEntry.Target;
         Assert.NotNull(target.Assembly);

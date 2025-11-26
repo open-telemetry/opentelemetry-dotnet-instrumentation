@@ -70,6 +70,8 @@ internal static class Instrumentation
 
     internal static Lazy<NoCodeSettings> NoCodeSettings { get; } = new(() => Settings.FromDefaultSources<NoCodeSettings>(FailFastSettings.Value.FailFast));
 
+    internal static Lazy<PluginsSettings> PluginsSettings { get; } = new(() => Settings.FromDefaultSources<PluginsSettings>(FailFastSettings.Value.FailFast));
+
     internal static Lazy<OpAmpSettings> OpAmpSettings { get; } = new(() => Settings.FromDefaultSources<OpAmpSettings>(FailFastSettings.Value.FailFast));
 
     /// <summary>
@@ -105,7 +107,7 @@ internal static class Instrumentation
             // Initialize SdkSelfDiagnosticsEventListener to create an EventListener for the OpenTelemetry SDK
             _sdkEventListener = new(Logger);
 
-            _pluginManager = new PluginManager(GeneralSettings.Value);
+            _pluginManager = new PluginManager(PluginsSettings.Value);
             _pluginManager.Initializing();
 
             // Register to shutdown events

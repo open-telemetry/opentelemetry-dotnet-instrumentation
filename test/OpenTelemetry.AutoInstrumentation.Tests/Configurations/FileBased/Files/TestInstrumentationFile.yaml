@@ -1,6 +1,12 @@
 instrumentation/development:
   dotnet:
     traces:
+      additional_sources:
+        - "Some.Additional.Source1"
+        - "Some.Additional.Source2"
+      additional_legacy_sources: 
+        - "Some.Additional.Legacy.Source1"
+        - "Some.Additional.Legacy.Source2"
       aspnet:
       aspnetcore:
       azure:
@@ -25,6 +31,9 @@ instrumentation/development:
       wcfclient:
       wcfservice:
     metrics:
+      additional_sources:
+        - "Some.Additional.Source1"
+        - "Some.Additional.Source2"
       aspnet:
       aspnetcore:
       httpclient:

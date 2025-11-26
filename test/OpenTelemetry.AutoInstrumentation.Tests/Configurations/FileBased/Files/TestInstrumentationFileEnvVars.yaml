@@ -1,0 +1,7 @@
+instrumentation/development:
+  dotnet:
+    traces:
+      additional_sources_list: ${OTEL_DOTNET_AUTO_TRACES_ADDITIONAL_SOURCES}
+      additional_legacy_sources_list: ${OTEL_DOTNET_AUTO_TRACES_ADDITIONAL_LEGACY_SOURCES}
+    metrics:
+      additional_sources_list: ${OTEL_DOTNET_AUTO_METRICS_ADDITIONAL_SOURCES}

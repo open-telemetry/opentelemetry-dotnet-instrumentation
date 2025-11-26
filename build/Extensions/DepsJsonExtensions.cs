@@ -13,6 +13,7 @@ internal static class DepsJsonExtensions
         {
             ".NETCoreApp,Version=v8.0" => "net8.0",
             ".NETCoreApp,Version=v9.0" => "net9.0",
+            ".NETCoreApp,Version=v10.0" => "net10.0",
             _ => throw new ArgumentOutOfRangeException(nameof(runtimeName), runtimeName,
                 "This value is not supported. You have probably introduced new .NET version to AutoInstrumentation")
         };
@@ -122,7 +123,7 @@ internal static class DepsJsonExtensions
 
     public static void RemoveDuplicatedLibraries(this JsonObject depsJson, ReadOnlyCollection<AbsolutePath> architectureStores)
     {
-        var duplicatedLibraries = new List<(string Name, string Version)>(0);
+        var duplicatedLibraries = new List<(string Name, string Version)> { ("Microsoft.Extensions.Configuration.Binder", "8.0.0") };
 
         foreach (var duplicatedLibrary in duplicatedLibraries)
         {

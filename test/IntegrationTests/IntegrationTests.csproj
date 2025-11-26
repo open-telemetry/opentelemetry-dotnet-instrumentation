@@ -15,8 +15,6 @@
     <PackageReference Include="Newtonsoft.Json" />
     <PackageReference Include="StrongNamer" Condition="$(TargetFramework.StartsWith('net4'))" />
     <PackageReference Include="System.Collections.Immutable" />
-    <PackageReference Include="System.Runtime.InteropServices" />
-    <PackageReference Include="System.Runtime.InteropServices.RuntimeInformation" />
     <PackageReference Include="Testcontainers" />
     <PackageReference Include="Verify.Xunit" />
     <PackageReference Include="Xunit.SkippableFact" />

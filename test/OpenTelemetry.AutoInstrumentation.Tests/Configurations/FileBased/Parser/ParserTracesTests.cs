@@ -1,6 +1,7 @@
 // Copyright The OpenTelemetry Authors
 // SPDX-License-Identifier: Apache-2.0
 
+using OpenTelemetry.AutoInstrumentation.Configurations.FileBasedConfiguration;
 using Xunit;
 using YamlParser = OpenTelemetry.AutoInstrumentation.Configurations.FileBasedConfiguration.Parser.Parser;
 
@@ -12,7 +13,7 @@ public class ParserTracesTests
     [Fact]
     public void Parse_FullConfigYaml_ShouldPopulateModelCorrectly()
     {
-        var config = YamlParser.ParseYaml("Configurations/FileBased/Files/TestTracesFile.yaml");
+        var config = YamlParser.ParseYaml<YamlConfiguration>("Configurations/FileBased/Files/TestTracesFile.yaml");
         Assert.NotNull(config);
 
         Assert.NotNull(config.TracerProvider);
@@ -57,6 +58,20 @@ public class ParserTracesTests
         Assert.NotNull(simpleProcessor);
         Assert.NotNull(simpleProcessor.Exporter);
         Assert.NotNull(simpleProcessor.Exporter.Console);
+
+        var sampler = config.TracerProvider.Sampler;
+        Assert.NotNull(sampler);
+        Assert.NotNull(sampler.ParentBased);
+        Assert.NotNull(sampler.ParentBased.Root);
+        Assert.NotNull(sampler.ParentBased.Root.AlwaysOn);
+        Assert.NotNull(sampler.ParentBased.RemoteParentSampled);
+        Assert.NotNull(sampler.ParentBased.RemoteParentSampled.AlwaysOn);
+        Assert.NotNull(sampler.ParentBased.RemoteParentNotSampled);
+        Assert.NotNull(sampler.ParentBased.RemoteParentNotSampled.AlwaysOff);
+        Assert.NotNull(sampler.ParentBased.LocalParentSampled);
+        Assert.NotNull(sampler.ParentBased.LocalParentSampled.AlwaysOn);
+        Assert.NotNull(sampler.ParentBased.LocalParentNotSampled);
+        Assert.NotNull(sampler.ParentBased.LocalParentNotSampled.AlwaysOff);
     }
 
     [Fact]
@@ -71,7 +86,7 @@ public class ParserTracesTests
         Environment.SetEnvironmentVariable("OTEL_EXPORTER_OTLP_TRACES_TIMEOUT", "15000");
         Environment.SetEnvironmentVariable("OTEL_EXPORTER_OTLP_TRACES_HEADERS", "header1=value1,header2=value2");
 
-        var config = YamlParser.ParseYaml("Configurations/FileBased/Files/TestTracesFileEnvVars.yaml");
+        var config = YamlParser.ParseYaml<YamlConfiguration>("Configurations/FileBased/Files/TestTracesFileEnvVars.yaml");
         Assert.NotNull(config);
 
         Assert.NotNull(config.TracerProvider);

@@ -3,8 +3,11 @@
 
 #if NET
 
+using System.Diagnostics;
 using System.Runtime.InteropServices;
+using System.Text;
 using System.Text.Json;
+using Google.Protobuf;
 using IntegrationTests.Helpers;
 using Xunit.Abstractions;
 
@@ -24,9 +27,15 @@ public class SelectiveSamplerTests : TestHelper
         // TODO: Huge variance in delay between samples on MacOS on CI
         Skip.If(RuntimeInformation.IsOSPlatform(OSPlatform.OSX));
 
+        using var collector = new MockSpansCollector(Output);
+        SetExporter(collector);
+
         EnableBytecodeInstrumentation();
         SetEnvironmentVariable("OTEL_DOTNET_AUTO_PLUGINS", "TestApplication.SelectiveSampler.Plugins.SelectiveSamplerPlugin, TestApplication.SelectiveSampler, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null");
         SetEnvironmentVariable("OTEL_DOTNET_AUTO_TRACES_ADDITIONAL_SOURCES", "TestApplication.SelectiveSampler");
+
+        collector.Expect("TestApplication.SelectiveSampler", span => span.Name == "outer", "Outer span from test application.");
+        collector.Expect("TestApplication.SelectiveSampler", span => span.Name == "inner", "Inner span from test application.");
 
         var (output, _, processId) = RunTestApplication();
 
@@ -49,14 +58,15 @@ public class SelectiveSamplerTests : TestHelper
 
         var threadNames = threadSamples.Select(sample => sample.ThreadName).Distinct(StringComparer.InvariantCultureIgnoreCase);
 
-        var uniqueSpanContextCount = threadSamples
-            .Select(ts => (ts.SpanId, ts.TraceIdHigh, ts.TraceIdLow))
-            .Distinct()
-            .Count();
+        var threadSampleSpanContexts = threadSamples
+            .Select(ts => ((ulong)ts.SpanId, (ulong)ts.TraceIdHigh, (ulong)ts.TraceIdLow))
+            .Distinct();
 
-        Assert.Equal(2, uniqueSpanContextCount);
-
+        Assert.Equal(2, threadSampleSpanContexts.Count());
         Assert.Equal(2, threadNames.Count());
+
+        collector.ExpectCollected(collectedSpans => VerifyMatching(threadSampleSpanContexts, collectedSpans));
+        collector.AssertExpectations();
     }
 
     [SkippableFact]
@@ -139,6 +149,34 @@ public class SelectiveSamplerTests : TestHelper
     {
         const int nanosecondsInTick = 100;
         return DateTime.UnixEpoch.AddTicks(timestampNanoseconds / nanosecondsInTick);
+    }
+
+    private static bool VerifyMatching(
+        IEnumerable<(ulong SpanId, ulong TraceIdHigh, ulong TraceIdLow)> threadSampleSpanContexts,
+        ICollection<MockSpansCollector.Collected> collectedSpans)
+    {
+        foreach (var (spanId, traceIdHigh, traceIdLow) in threadSampleSpanContexts)
+        {
+            // Reverse the conversion done in TryParseTraceContext methods in NativeMethods.cs
+            var sampleSpanId = ActivitySpanId.CreateFromString(spanId.ToString("x16"));
+            var sampleTraceId = ActivityTraceId.CreateFromString($"{traceIdHigh:x16}{traceIdLow:x16}");
+
+            var match = collectedSpans.Any(c =>
+            {
+                var spanSpanId = ActivitySpanId.CreateFromBytes(c.Span.SpanId.ToByteArray());
+                var spanTraceId = ActivityTraceId.CreateFromBytes(c.Span.TraceId.ToByteArray());
+                return spanSpanId == sampleSpanId && spanTraceId == sampleTraceId;
+            });
+
+            if (match)
+            {
+                continue;
+            }
+
+            return false;
+        }
+
+        return true;
     }
 }
 #endif
