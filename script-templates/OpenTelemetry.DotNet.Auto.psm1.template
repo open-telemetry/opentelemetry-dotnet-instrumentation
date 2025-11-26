@@ -473,7 +473,7 @@ function Update-OpenTelemetryCore() {
 
     Uninstall-OpenTelemetryCore
     if ($RegisterIIS) {
-        Unregister-OpenTelemetryForIIS -NoReset $true
+        Unregister-OpenTelemetryForIIS -NoReset
     }
 
     $tempDir = Get-Temp-Directory
@@ -522,9 +522,15 @@ function Register-OpenTelemetryForCurrentSession() {
 <#
     .SYNOPSIS
     Setups IIS environment variables to enable automatic instrumentation.
-    Performs IIS reset after registration.
+    Performs IIS reset after registration by default.
+    .PARAMETER NoReset
+    Does not perform IIS reset.
 #>
 function Register-OpenTelemetryForIIS() {
+    param(
+        [switch]$NoReset
+    )
+
     $installDir = Get-Current-InstallDir
 
     if (-not $installDir) {
@@ -538,7 +544,9 @@ function Register-OpenTelemetryForIIS() {
     Setup-Windows-Service -InstallDir $installDir -WindowsServiceName "W3SVC"
     Setup-Windows-Service -InstallDir $installDir -WindowsServiceName "WAS"
 
-    Reset-IIS
+    if (-not $NoReset) {
+        Reset-IIS
+    }
 }
 
 <#
@@ -549,13 +557,16 @@ function Register-OpenTelemetryForIIS() {
     Actual Windows service name in registry.
     .PARAMETER OTelServiceName
     Specifies OpenTelemetry service name to identify your service.
+    .PARAMETER NoReset
+    Does not perform service restart.
 #>
 function Register-OpenTelemetryForWindowsService() {
     param(
         [Parameter(Mandatory = $true)]
         [string]$WindowsServiceName,
         [Parameter(Mandatory = $true)]
-        [string]$OTelServiceName
+        [string]$OTelServiceName,
+        [switch]$NoReset
     )
 
     $installDir = Get-Current-InstallDir
@@ -565,7 +576,10 @@ function Register-OpenTelemetryForWindowsService() {
     }
 
     Setup-Windows-Service -InstallDir $installDir -WindowsServiceName $WindowsServiceName -OTelServiceName $OTelServiceName
-    Restart-Service -Name $WindowsServiceName -Force
+    
+    if (-not $NoReset) {
+        Restart-Service -Name $WindowsServiceName -Force
+    }
 }
 
 <#
@@ -606,8 +620,7 @@ function Unregister-OpenTelemetryForCurrentSession() {
 #>
 function Unregister-OpenTelemetryForIIS() {
     param(
-        [Parameter(Mandatory = $false)]
-        [bool]$NoReset = $false
+        [switch]$NoReset
     )
 
     Cleanup-Environment-Variables -WindowsServiceName "W3SVC"
@@ -624,15 +637,21 @@ function Unregister-OpenTelemetryForIIS() {
     Performs service restart after removal.
     .PARAMETER WindowsServiceName
     Actual Windows service Name in registry.
+    .PARAMETER NoReset
+    Does not perform service restart.
 #>
 function Unregister-OpenTelemetryForWindowsService() {
     param(
         [Parameter(Mandatory = $true)]
-        [string]$WindowsServiceName
+        [string]$WindowsServiceName,
+        [switch]$NoReset
     )  
 
     Cleanup-Environment-Variables -WindowsServiceName $WindowsServiceName
-    Restart-Service -Name $WindowsServiceName -Force
+    
+    if (-not $NoReset) {
+        Restart-Service -Name $WindowsServiceName -Force
+    }
 }
 
 <#

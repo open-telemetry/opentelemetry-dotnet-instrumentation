@@ -17,7 +17,8 @@ Register-OpenTelemetryForWindowsService -WindowsServiceName "WindowsServiceName"
 ```
 
 > [!WARNING]
-> `Register-OpenTelemetryForWindowsService` performs a service restart.
+> `Register-OpenTelemetryForWindowsService` performs a service restart by default.
+> Use `-NoReset` to skip the restart.
 
 ## Configuration
 
