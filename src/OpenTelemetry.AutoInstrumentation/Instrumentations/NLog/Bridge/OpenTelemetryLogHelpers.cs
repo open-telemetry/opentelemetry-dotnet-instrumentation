@@ -316,13 +316,26 @@ internal static class OpenTelemetryLogHelpers
         // Get the EmitLog method from the logger
         var emitLogRecordMethod = loggerType.GetMethod("EmitLog", BindingFlags.Instance | BindingFlags.Public, null, new[] { logRecordDataType.MakeByRefType(), logRecordAttributesListType.MakeByRefType() }, null)!;
 
-        // Build the complete expression that creates the log record, creates attributes, and emits the log
+        // Create local variables to hold the log record and attributes
+        // This is required for .NET Framework compatibility - expression trees with
+        // TryExpression cannot be passed directly to methods with ref parameters.
+        // By assigning to local variables first, we avoid this limitation.
+        var logRecordVar = Expression.Variable(logRecordDataType, "logRecord");
+        var attributesVar = Expression.Variable(logRecordAttributesListType, "attributes");
+
+        // Build the complete expression that:
+        // 1. Creates the log record and assigns to local variable
+        // 2. Creates attributes and assigns to local variable
+        // 3. Calls EmitLog with the local variables by reference
         var completeExpression = Expression.Block(
+            new[] { logRecordVar, attributesVar },
+            Expression.Assign(logRecordVar, logRecordExpression),
+            Expression.Assign(attributesVar, attributesExpression),
             Expression.Call(
                 Expression.Convert(loggerInstance, loggerType),
                 emitLogRecordMethod,
-                logRecordExpression,
-                attributesExpression));
+                logRecordVar,
+                attributesVar));
 
         // Compile the expression into a delegate
         var lambda = Expression.Lambda<EmitLog>(
