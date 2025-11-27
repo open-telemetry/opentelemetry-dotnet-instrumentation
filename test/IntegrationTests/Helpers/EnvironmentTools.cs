@@ -19,13 +19,13 @@ public static class EnvironmentTools
     {
         var startDirectory = Environment.CurrentDirectory;
         var currentDirectory = Directory.GetParent(startDirectory);
-        const string searchItem = @"OpenTelemetry.AutoInstrumentation.sln";
+        const string searchItem = @"OpenTelemetry.AutoInstrumentation.slnx";
 
         while (true)
         {
-            var slnFile = currentDirectory?.GetFiles(searchItem).SingleOrDefault();
+            var solutionFile = currentDirectory?.GetFiles(searchItem).SingleOrDefault();
 
-            if (slnFile != null)
+            if (solutionFile != null)
             {
                 break;
             }

@@ -1,0 +1,456 @@
+<Solution>
+  <Configurations>
+    <Platform Name="Any CPU" />
+    <Platform Name="ARM64" />
+    <Platform Name="x64" />
+    <Platform Name="x86" />
+  </Configurations>
+  <Folder Name="/build/">
+    <Project Path="build/_build.csproj">
+      <Build Project="false" />
+    </Project>
+  </Folder>
+  <Folder Name="/examples/">
+    <Project Path="examples/demo/Client/Examples.Client.csproj" />
+    <Project Path="examples/demo/Service/Examples.Service.csproj" />
+    <Project Path="examples/playground/AspNetCoreMvc/Examples.AspNetCoreMvc.csproj" />
+  </Folder>
+  <Folder Name="/next-gen/">
+    <Project Path="next-gen/docs/getting-started-dotnet-monitor-logs/getting-started-dotnet-monitor-logs.csproj" />
+    <Project Path="next-gen/docs/getting-started-dotnet-monitor-metrics/getting-started-dotnet-monitor-metrics.csproj" />
+  </Folder>
+  <Folder Name="/nuget/">
+    <File Path="nuget/OpenTelemetry.AutoInstrumentation.Runtime.Native/OpenTelemetry.AutoInstrumentation.Runtime.Native.nuspec" />
+    <File Path="nuget/OpenTelemetry.AutoInstrumentation/OpenTelemetry.AutoInstrumentation.nuspec" />
+  </Folder>
+  <Folder Name="/Solution Items/">
+    <File Path=".dockerignore" />
+    <File Path=".editorconfig" />
+    <File Path=".gitattributes" />
+    <File Path=".gitignore" />
+    <File Path="build.cmd" />
+    <File Path="build.ps1" />
+    <File Path="build.sh" />
+    <File Path="CHANGELOG.md" />
+    <File Path="Common.props" />
+    <File Path="Common.targets" />
+    <File Path="Directory.Build.props" />
+    <File Path="Directory.Packages.props" />
+    <File Path="docs/README.md" />
+    <File Path="GlobalSuppressions.cs" />
+    <File Path="LICENSE" />
+    <File Path="stylecop.json" />
+  </Folder>
+  <Folder Name="/src/">
+    <File Path="src/CommonExcludedAssets.props" />
+    <File Path="src/Directory.Build.props" />
+    <File Path="src/Directory.Packages.props" />
+    <File Path="src/GlobalSuppressions.cs" />
+    <Project Path="src/OpenTelemetry.AutoInstrumentation.AdditionalDeps/OpenTelemetry.AutoInstrumentation.AdditionalDeps.csproj" />
+    <Project Path="src/OpenTelemetry.AutoInstrumentation.AspNetCoreBootstrapper/OpenTelemetry.AutoInstrumentation.AspNetCoreBootstrapper.csproj" />
+    <Project Path="src/OpenTelemetry.AutoInstrumentation.Assemblies.NetFramework/OpenTelemetry.AutoInstrumentation.Assemblies.NetFramework.csproj" />
+    <Project Path="src/OpenTelemetry.AutoInstrumentation.BuildTasks/OpenTelemetry.AutoInstrumentation.BuildTasks.csproj" />
+    <Project Path="src/OpenTelemetry.AutoInstrumentation.Loader/OpenTelemetry.AutoInstrumentation.Loader.csproj" />
+    <Project Path="src/OpenTelemetry.AutoInstrumentation.Native/OpenTelemetry.AutoInstrumentation.Native.DLL.vcxproj">
+      <BuildDependency Project="src/OpenTelemetry.AutoInstrumentation.Loader/OpenTelemetry.AutoInstrumentation.Loader.csproj" />
+      <Platform Solution="Debug|ARM64" Project="x64" />
+      <Platform Solution="Release|Any CPU" Project="Win32" />
+      <Platform Solution="Release|ARM64" Project="Win32" />
+    </Project>
+    <Project Path="src/OpenTelemetry.AutoInstrumentation.Native/OpenTelemetry.AutoInstrumentation.Native.vcxproj">
+      <BuildDependency Project="src/OpenTelemetry.AutoInstrumentation.Loader/OpenTelemetry.AutoInstrumentation.Loader.csproj" />
+      <Platform Solution="Debug|ARM64" Project="x64" />
+      <Platform Solution="Release|Any CPU" Project="Win32" />
+      <Platform Solution="Release|ARM64" Project="Win32" />
+    </Project>
+    <Project Path="src/OpenTelemetry.AutoInstrumentation.StartupHook/OpenTelemetry.AutoInstrumentation.StartupHook.csproj" />
+    <Project Path="src/OpenTelemetry.AutoInstrumentation/OpenTelemetry.AutoInstrumentation.csproj" />
+    <Project Path="src/SourceGenerators/SourceGenerators.csproj" />
+  </Folder>
+  <Folder Name="/test/">
+    <File Path="test/Directory.Build.props" />
+    <File Path="test/Directory.Packages.props" />
+    <Project Path="test/IntegrationTests/IntegrationTests.csproj">
+      <Platform Solution="Debug|ARM64" Project="ARM64" />
+      <Platform Solution="Debug|x64" Project="x64" />
+    </Project>
+    <Project Path="test/NuGetPackagesTests/NuGetPackagesTests.csproj" />
+    <Project Path="test/OpenTelemetry.AutoInstrumentation.Bootstrapping.Tests/OpenTelemetry.AutoInstrumentation.Bootstrapping.Tests.csproj" />
+    <Project Path="test/OpenTelemetry.AutoInstrumentation.BuildTasks.Tests/OpenTelemetry.AutoInstrumentation.BuildTasks.Tests.csproj" />
+    <Project Path="test/OpenTelemetry.AutoInstrumentation.Loader.Tests/OpenTelemetry.AutoInstrumentation.Loader.Tests.csproj" />
+    <Project Path="test/OpenTelemetry.AutoInstrumentation.Native.Tests/OpenTelemetry.AutoInstrumentation.Native.Tests.vcxproj">
+      <Platform Solution="Debug|ARM64" Project="x64" />
+      <Platform Solution="Release|Any CPU" Project="Win32" />
+      <Platform Solution="Release|ARM64" Project="Win32" />
+    </Project>
+    <Project Path="test/OpenTelemetry.AutoInstrumentation.StartupHook.Tests/OpenTelemetry.AutoInstrumentation.StartupHook.Tests.csproj" />
+    <Project Path="test/OpenTelemetry.AutoInstrumentation.Tests/OpenTelemetry.AutoInstrumentation.Tests.csproj" />
+  </Folder>
+  <Folder Name="/test/test-applications/" />
+  <Folder Name="/test/test-applications/integrations/">
+    <File Path="test/test-applications/integrations/Directory.Build.props" />
+    <File Path="test/test-applications/integrations/Directory.Build.targets" />
+    <Project Path="test/test-applications/integrations/TestApplication.AspNet.NetFramework/TestApplication.AspNet.NetFramework.csproj">
+      <Platform Solution="*|x64" Project="x64" />
+      <Platform Solution="*|x86" Project="x86" />
+    </Project>
+    <Project Path="test/test-applications/integrations/TestApplication.AssemblyRedirection.NetFramework/TestApplication.AssemblyRedirection.NetFramework.csproj">
+      <Platform Solution="*|Any CPU" Project="x64" />
+      <Platform Solution="*|x64" Project="x64" />
+      <Platform Solution="*|x86" Project="x86" />
+      <Platform Solution="Debug|ARM64" Project="ARM64" />
+      <Platform Solution="Release|ARM64" Project="x64" />
+    </Project>
+    <Project Path="test/test-applications/integrations/TestApplication.Azure/TestApplication.Azure.csproj">
+      <Platform Solution="*|Any CPU" Project="x64" />
+      <Platform Solution="*|x64" Project="x64" />
+      <Platform Solution="*|x86" Project="x86" />
+      <Platform Solution="Debug|ARM64" Project="ARM64" />
+      <Platform Solution="Release|ARM64" Project="x64" />
+    </Project>
+    <Project Path="test/test-applications/integrations/TestApplication.ContinuousProfiler.ContextTracking/TestApplication.ContinuousProfiler.ContextTracking.csproj">
+      <Platform Solution="*|Any CPU" Project="x64" />
+      <Platform Solution="*|x64" Project="x64" />
+      <Platform Solution="*|x86" Project="x86" />
+      <Platform Solution="Debug|ARM64" Project="ARM64" />
+      <Platform Solution="Release|ARM64" Project="x64" />
+    </Project>
+    <Project Path="test/test-applications/integrations/TestApplication.ContinuousProfiler/TestApplication.ContinuousProfiler.csproj">
+      <Platform Solution="*|Any CPU" Project="x64" />
+      <Platform Solution="*|x64" Project="x64" />
+      <Platform Solution="*|x86" Project="x86" />
+      <Platform Solution="Debug|ARM64" Project="ARM64" />
+      <Platform Solution="Release|ARM64" Project="x64" />
+    </Project>
+    <Project Path="test/test-applications/integrations/TestApplication.CustomSdk/TestApplication.CustomSdk.csproj">
+      <Platform Solution="*|Any CPU" Project="x64" />
+      <Platform Solution="*|x64" Project="x64" />
+      <Platform Solution="*|x86" Project="x86" />
+      <Platform Solution="Debug|ARM64" Project="ARM64" />
+      <Platform Solution="Release|ARM64" Project="x64" />
+    </Project>
+    <Project Path="test/test-applications/integrations/TestApplication.DomainNeutral.NetFramework/TestApplication.DomainNeutral.NetFramework.csproj">
+      <Platform Solution="*|Any CPU" Project="x64" />
+      <Platform Solution="*|x64" Project="x64" />
+      <Platform Solution="*|x86" Project="x86" />
+      <Platform Solution="Debug|ARM64" Project="ARM64" />
+      <Platform Solution="Release|ARM64" Project="x64" />
+    </Project>
+    <Project Path="test/test-applications/integrations/TestApplication.Elasticsearch/TestApplication.Elasticsearch.csproj">
+      <Platform Solution="*|Any CPU" Project="x64" />
+      <Platform Solution="*|x64" Project="x64" />
+      <Platform Solution="*|x86" Project="x86" />
+      <Platform Solution="Debug|ARM64" Project="ARM64" />
+      <Platform Solution="Release|ARM64" Project="x64" />
+    </Project>
+    <Project Path="test/test-applications/integrations/TestApplication.EntityFrameworkCore.Pomelo.MySql/TestApplication.EntityFrameworkCore.Pomelo.MySql.csproj">
+      <Platform Solution="*|Any CPU" Project="x64" />
+      <Platform Solution="*|x64" Project="x64" />
+      <Platform Solution="*|x86" Project="x86" />
+      <Platform Solution="Debug|ARM64" Project="ARM64" />
+      <Platform Solution="Release|ARM64" Project="x64" />
+    </Project>
+    <Project Path="test/test-applications/integrations/TestApplication.EntityFrameworkCore/TestApplication.EntityFrameworkCore.csproj">
+      <Platform Solution="*|Any CPU" Project="x64" />
+      <Platform Solution="*|x64" Project="x64" />
+      <Platform Solution="*|x86" Project="x86" />
+      <Platform Solution="Debug|ARM64" Project="ARM64" />
+      <Platform Solution="Release|ARM64" Project="x64" />
+    </Project>
+    <Project Path="test/test-applications/integrations/TestApplication.GraphQL/TestApplication.GraphQL.csproj">
+      <Platform Solution="*|Any CPU" Project="x64" />
+      <Platform Solution="*|x64" Project="x64" />
+      <Platform Solution="*|x86" Project="x86" />
+      <Platform Solution="Debug|ARM64" Project="ARM64" />
+      <Platform Solution="Release|ARM64" Project="x64" />
+    </Project>
+    <Project Path="test/test-applications/integrations/TestApplication.GrpcNetClient/TestApplication.GrpcNetClient.csproj">
+      <Platform Solution="*|Any CPU" Project="x64" />
+      <Platform Solution="*|x64" Project="x64" />
+      <Platform Solution="*|x86" Project="x86" />
+      <Platform Solution="Debug|ARM64" Project="ARM64" />
+      <Platform Solution="Release|ARM64" Project="x64" />
+    </Project>
+    <Project Path="test/test-applications/integrations/TestApplication.Http.NetFramework/TestApplication.Http.NetFramework.csproj">
+      <Platform Solution="*|Any CPU" Project="x64" />
+      <Platform Solution="*|x64" Project="x64" />
+      <Platform Solution="*|x86" Project="x86" />
+      <Platform Solution="Debug|ARM64" Project="ARM64" />
+      <Platform Solution="Release|ARM64" Project="x64" />
+    </Project>
+    <Project Path="test/test-applications/integrations/TestApplication.Http/TestApplication.Http.csproj">
+      <Platform Solution="*|Any CPU" Project="x64" />
+      <Platform Solution="*|x64" Project="x64" />
+      <Platform Solution="*|x86" Project="x86" />
+      <Platform Solution="Debug|ARM64" Project="ARM64" />
+      <Platform Solution="Release|ARM64" Project="x64" />
+    </Project>
+    <Project Path="test/test-applications/integrations/TestApplication.Kafka/TestApplication.Kafka.csproj">
+      <Platform Solution="*|Any CPU" Project="x64" />
+      <Platform Solution="*|x64" Project="x64" />
+      <Platform Solution="*|x86" Project="x86" />
+      <Platform Solution="Debug|ARM64" Project="ARM64" />
+      <Platform Solution="Release|ARM64" Project="x64" />
+    </Project>
+    <Project Path="test/test-applications/integrations/TestApplication.Log4NetBridge/TestApplication.Log4NetBridge.csproj">
+      <Platform Solution="*|Any CPU" Project="x64" />
+      <Platform Solution="*|ARM64" Project="x64" />
+      <Platform Solution="*|x64" Project="x64" />
+      <Platform Solution="*|x86" Project="x86" />
+    </Project>
+    <Project Path="test/test-applications/integrations/TestApplication.Logs/TestApplication.Logs.csproj">
+      <Platform Solution="*|Any CPU" Project="x64" />
+      <Platform Solution="*|x64" Project="x64" />
+      <Platform Solution="*|x86" Project="x86" />
+      <Platform Solution="Debug|ARM64" Project="ARM64" />
+      <Platform Solution="Release|ARM64" Project="x64" />
+    </Project>
+    <Project Path="test/test-applications/integrations/TestApplication.MassTransit/TestApplication.MassTransit.csproj">
+      <Platform Solution="*|Any CPU" Project="x64" />
+      <Platform Solution="*|x64" Project="x64" />
+      <Platform Solution="*|x86" Project="x86" />
+      <Platform Solution="Debug|ARM64" Project="ARM64" />
+      <Platform Solution="Release|ARM64" Project="x64" />
+    </Project>
+    <Project Path="test/test-applications/integrations/TestApplication.MinimalApi/TestApplication.MinimalApi.csproj">
+      <Platform Solution="*|Any CPU" Project="x64" />
+      <Platform Solution="*|x64" Project="x64" />
+      <Platform Solution="*|x86" Project="x86" />
+      <Platform Solution="Debug|ARM64" Project="ARM64" />
+      <Platform Solution="Release|ARM64" Project="x64" />
+    </Project>
+    <Project Path="test/test-applications/integrations/TestApplication.Modules/TestApplication.Modules.csproj">
+      <Platform Solution="*|Any CPU" Project="x64" />
+      <Platform Solution="*|x64" Project="x64" />
+      <Platform Solution="*|x86" Project="x86" />
+      <Platform Solution="Debug|ARM64" Project="ARM64" />
+      <Platform Solution="Release|ARM64" Project="x64" />
+    </Project>
+    <Project Path="test/test-applications/integrations/TestApplication.MongoDB/TestApplication.MongoDB.csproj">
+      <Platform Solution="*|Any CPU" Project="x64" />
+      <Platform Solution="*|x64" Project="x64" />
+      <Platform Solution="*|x86" Project="x86" />
+      <Platform Solution="Debug|ARM64" Project="ARM64" />
+      <Platform Solution="Release|ARM64" Project="x64" />
+    </Project>
+    <Project Path="test/test-applications/integrations/TestApplication.MultipleAppDomains.NetFramework/TestApplication.MultipleAppDomains.NetFramework.csproj">
+      <Platform Solution="*|Any CPU" Project="x64" />
+      <Platform Solution="*|x64" Project="x64" />
+      <Platform Solution="*|x86" Project="x86" />
+      <Platform Solution="Debug|ARM64" Project="ARM64" />
+      <Platform Solution="Release|ARM64" Project="x64" />
+    </Project>
+    <Project Path="test/test-applications/integrations/TestApplication.MySqlConnector/TestApplication.MySqlConnector.csproj">
+      <Platform Solution="*|Any CPU" Project="x64" />
+      <Platform Solution="*|x64" Project="x64" />
+      <Platform Solution="*|x86" Project="x86" />
+      <Platform Solution="Debug|ARM64" Project="ARM64" />
+      <Platform Solution="Release|ARM64" Project="x64" />
+    </Project>
+    <Project Path="test/test-applications/integrations/TestApplication.MySqlData/TestApplication.MySqlData.csproj">
+      <Platform Solution="*|Any CPU" Project="x64" />
+      <Platform Solution="*|x64" Project="x64" />
+      <Platform Solution="*|x86" Project="x86" />
+      <Platform Solution="Debug|ARM64" Project="ARM64" />
+      <Platform Solution="Release|ARM64" Project="x64" />
+    </Project>
+    <Project Path="test/test-applications/integrations/TestApplication.NoCode/TestApplication.NoCode.csproj">
+      <Platform Solution="*|Any CPU" Project="x64" />
+      <Platform Solution="*|ARM64" Project="x64" />
+      <Platform Solution="*|x64" Project="x64" />
+      <Platform Solution="*|x86" Project="x86" />
+    </Project>
+    <Project Path="test/test-applications/integrations/TestApplication.Npgsql/TestApplication.Npgsql.csproj">
+      <Platform Solution="*|Any CPU" Project="x64" />
+      <Platform Solution="*|x64" Project="x64" />
+      <Platform Solution="*|x86" Project="x86" />
+      <Platform Solution="Debug|ARM64" Project="ARM64" />
+      <Platform Solution="Release|ARM64" Project="x64" />
+    </Project>
+    <Project Path="test/test-applications/integrations/TestApplication.NServiceBus/TestApplication.NServiceBus.csproj">
+      <Platform Solution="*|Any CPU" Project="x64" />
+      <Platform Solution="*|x64" Project="x64" />
+      <Platform Solution="*|x86" Project="x86" />
+      <Platform Solution="Debug|ARM64" Project="ARM64" />
+      <Platform Solution="Release|ARM64" Project="x64" />
+    </Project>
+    <Project Path="test/test-applications/integrations/TestApplication.OpenTracing/TestApplication.OpenTracing.csproj">
+      <Platform Solution="*|Any CPU" Project="x64" />
+      <Platform Solution="*|x64" Project="x64" />
+      <Platform Solution="*|x86" Project="x86" />
+      <Platform Solution="Debug|ARM64" Project="ARM64" />
+      <Platform Solution="Release|ARM64" Project="x64" />
+    </Project>
+    <Project Path="test/test-applications/integrations/TestApplication.OracleMda.Core/TestApplication.OracleMda.Core.csproj">
+      <Platform Solution="*|Any CPU" Project="x64" />
+      <Platform Solution="*|ARM64" Project="x64" />
+      <Platform Solution="*|x64" Project="x64" />
+      <Platform Solution="*|x86" Project="x86" />
+    </Project>
+    <Project Path="test/test-applications/integrations/TestApplication.OracleMda.NetFramework/TestApplication.OracleMda.NetFramework.csproj">
+      <Platform Solution="*|Any CPU" Project="x64" />
+      <Platform Solution="*|ARM64" Project="x64" />
+      <Platform Solution="*|x64" Project="x64" />
+      <Platform Solution="*|x86" Project="x86" />
+    </Project>
+    <Project Path="test/test-applications/integrations/TestApplication.Owin.IIS.NetFramework/TestApplication.Owin.IIS.NetFramework.csproj" />
+    <Project Path="test/test-applications/integrations/TestApplication.Plugins/TestApplication.Plugins.csproj">
+      <Platform Solution="*|Any CPU" Project="x64" />
+      <Platform Solution="*|x64" Project="x64" />
+      <Platform Solution="*|x86" Project="x86" />
+      <Platform Solution="Debug|ARM64" Project="ARM64" />
+      <Platform Solution="Release|ARM64" Project="x64" />
+    </Project>
+    <Project Path="test/test-applications/integrations/TestApplication.ProfilerSpanStoppageHandling/TestApplication.ProfilerSpanStoppageHandling.csproj">
+      <Platform Solution="*|Any CPU" Project="x64" />
+      <Platform Solution="*|ARM64" Project="x64" />
+      <Platform Solution="*|x64" Project="x64" />
+      <Platform Solution="*|x86" Project="x86" />
+    </Project>
+    <Project Path="test/test-applications/integrations/TestApplication.Quartz/TestApplication.Quartz.csproj">
+      <Platform Solution="*|Any CPU" Project="x64" />
+      <Platform Solution="*|x64" Project="x64" />
+      <Platform Solution="*|x86" Project="x86" />
+      <Platform Solution="Debug|ARM64" Project="ARM64" />
+      <Platform Solution="Release|ARM64" Project="x64" />
+    </Project>
+    <Project Path="test/test-applications/integrations/TestApplication.RabbitMq/TestApplication.RabbitMq.csproj">
+      <Platform Solution="*|Any CPU" Project="x64" />
+      <Platform Solution="*|ARM64" Project="x64" />
+      <Platform Solution="*|x64" Project="x64" />
+      <Platform Solution="*|x86" Project="x86" />
+    </Project>
+    <Project Path="test/test-applications/integrations/TestApplication.SelectiveSampler/TestApplication.SelectiveSampler.csproj">
+      <Platform Solution="*|Any CPU" Project="x64" />
+      <Platform Solution="*|ARM64" Project="x64" />
+      <Platform Solution="*|x64" Project="x64" />
+      <Platform Solution="*|x86" Project="x86" />
+    </Project>
+    <Project Path="test/test-applications/integrations/TestApplication.Smoke/TestApplication.Smoke.csproj">
+      <Platform Solution="*|Any CPU" Project="x64" />
+      <Platform Solution="*|x64" Project="x64" />
+      <Platform Solution="*|x86" Project="x86" />
+      <Platform Solution="Debug|ARM64" Project="ARM64" />
+      <Platform Solution="Release|ARM64" Project="x64" />
+    </Project>
+    <Project Path="test/test-applications/integrations/TestApplication.SqlClient.Microsoft/TestApplication.SqlClient.Microsoft.csproj">
+      <Platform Solution="*|Any CPU" Project="x64" />
+      <Platform Solution="*|x64" Project="x64" />
+      <Platform Solution="*|x86" Project="x86" />
+      <Platform Solution="Debug|ARM64" Project="ARM64" />
+      <Platform Solution="Release|ARM64" Project="x64" />
+    </Project>
+    <Project Path="test/test-applications/integrations/TestApplication.SqlClient.System.NetFramework/TestApplication.SqlClient.System.NetFramework.csproj">
+      <Platform Solution="*|Any CPU" Project="x64" />
+      <Platform Solution="*|x64" Project="x64" />
+      <Platform Solution="*|x86" Project="x86" />
+      <Platform Solution="Debug|ARM64" Project="ARM64" />
+      <Platform Solution="Release|ARM64" Project="x64" />
+    </Project>
+    <Project Path="test/test-applications/integrations/TestApplication.SqlClient.System/TestApplication.SqlClient.System.csproj">
+      <Platform Solution="*|Any CPU" Project="x64" />
+      <Platform Solution="*|x64" Project="x64" />
+      <Platform Solution="*|x86" Project="x86" />
+      <Platform Solution="Debug|ARM64" Project="ARM64" />
+      <Platform Solution="Release|ARM64" Project="x64" />
+    </Project>
+    <Project Path="test/test-applications/integrations/TestApplication.StackExchangeRedis/TestApplication.StackExchangeRedis.csproj">
+      <Platform Solution="*|Any CPU" Project="x64" />
+      <Platform Solution="*|x64" Project="x64" />
+      <Platform Solution="*|x86" Project="x86" />
+      <Platform Solution="Debug|ARM64" Project="ARM64" />
+      <Platform Solution="Release|ARM64" Project="x64" />
+    </Project>
+    <Project Path="test/test-applications/integrations/TestApplication.StrongNamed/TestApplication.StrongNamed.csproj">
+      <Platform Solution="*|Any CPU" Project="x64" />
+      <Platform Solution="*|x64" Project="x64" />
+      <Platform Solution="*|x86" Project="x86" />
+      <Platform Solution="Debug|ARM64" Project="ARM64" />
+      <Platform Solution="Release|ARM64" Project="x64" />
+    </Project>
+    <Project Path="test/test-applications/integrations/TestApplication.Wcf.Client.DotNet/TestApplication.Wcf.Client.DotNet.csproj">
+      <Platform Solution="*|Any CPU" Project="x64" />
+      <Platform Solution="*|x64" Project="x64" />
+      <Platform Solution="*|x86" Project="x86" />
+      <Platform Solution="Debug|ARM64" Project="ARM64" />
+      <Platform Solution="Release|ARM64" Project="x64" />
+    </Project>
+    <Project Path="test/test-applications/integrations/TestApplication.Wcf.Client.NetFramework/TestApplication.Wcf.Client.NetFramework.csproj">
+      <Platform Solution="*|Any CPU" Project="x64" />
+      <Platform Solution="*|x64" Project="x64" />
+      <Platform Solution="*|x86" Project="x86" />
+      <Platform Solution="Debug|ARM64" Project="ARM64" />
+      <Platform Solution="Release|ARM64" Project="x64" />
+    </Project>
+    <Project Path="test/test-applications/integrations/TestApplication.Wcf.Server.IIS.NetFramework/TestApplication.Wcf.Server.IIS.NetFramework.csproj" />
+    <Project Path="test/test-applications/integrations/TestApplication.Wcf.Server.NetFramework/TestApplication.Wcf.Server.NetFramework.csproj">
+      <Platform Solution="*|Any CPU" Project="x64" />
+      <Platform Solution="*|x64" Project="x64" />
+      <Platform Solution="*|x86" Project="x86" />
+      <Platform Solution="Debug|ARM64" Project="ARM64" />
+      <Platform Solution="Release|ARM64" Project="x64" />
+    </Project>
+    <Project Path="test/test-applications/integrations/TestApplication.Worker/TestApplication.Worker.csproj">
+      <Platform Solution="*|Any CPU" Project="x64" />
+      <Platform Solution="*|x64" Project="x64" />
+      <Platform Solution="*|x86" Project="x86" />
+      <Platform Solution="Debug|ARM64" Project="ARM64" />
+      <Platform Solution="Release|ARM64" Project="x64" />
+    </Project>
+  </Folder>
+  <Folder Name="/test/test-applications/integrations/dependency-libs/">
+    <File Path="test/test-applications/integrations/dependency-libs/Directory.Build.props" />
+    <File Path="test/test-applications/integrations/dependency-libs/Directory.Build.targets" />
+    <Project Path="test/test-applications/integrations/dependency-libs/TestApplication.ContinuousProfiler.Fs/TestApplication.ContinuousProfiler.Fs.fsproj" />
+    <Project Path="test/test-applications/integrations/dependency-libs/TestApplication.ContinuousProfiler.NativeDep/TestApplication.ContinuousProfiler.NativeDep.vcxproj">
+      <Platform Solution="*|ARM64" Project="x64" />
+    </Project>
+    <Project Path="test/test-applications/integrations/dependency-libs/TestApplication.ContinuousProfiler.Vb/TestApplication.ContinuousProfiler.Vb.vbproj" />
+    <Project Path="test/test-applications/integrations/dependency-libs/TestApplication.ExampleLibrary/TestApplication.ExampleLibrary.csproj">
+      <Platform Solution="*|Any CPU" Project="x64" />
+      <Platform Solution="*|x64" Project="x64" />
+      <Platform Solution="*|x86" Project="x86" />
+      <Platform Solution="Debug|ARM64" Project="ARM64" />
+      <Platform Solution="Release|ARM64" Project="x64" />
+    </Project>
+    <Project Path="test/test-applications/integrations/dependency-libs/TestApplication.ExampleLibraryTracer/TestApplication.ExampleLibraryTracer.csproj">
+      <Platform Solution="*|Any CPU" Project="x64" />
+      <Platform Solution="*|x64" Project="x64" />
+      <Platform Solution="*|x86" Project="x86" />
+      <Platform Solution="Debug|ARM64" Project="ARM64" />
+      <Platform Solution="Release|ARM64" Project="x64" />
+    </Project>
+    <Project Path="test/test-applications/integrations/dependency-libs/TestApplication.Shared/TestApplication.Shared.csproj">
+      <Platform Solution="*|Any CPU" Project="x64" />
+      <Platform Solution="*|x64" Project="x64" />
+      <Platform Solution="*|x86" Project="x86" />
+      <Platform Solution="Debug|ARM64" Project="ARM64" />
+      <Platform Solution="Release|ARM64" Project="x64" />
+    </Project>
+    <Project Path="test/test-applications/integrations/dependency-libs/TestLibrary.InstrumentationTarget/TestLibrary.InstrumentationTarget.csproj">
+      <Platform Solution="*|Any CPU" Project="x64" />
+      <Platform Solution="*|x64" Project="x64" />
+      <Platform Solution="*|x86" Project="x86" />
+      <Platform Solution="Debug|ARM64" Project="ARM64" />
+      <Platform Solution="Release|ARM64" Project="x64" />
+    </Project>
+  </Folder>
+  <Folder Name="/test/test-applications/mocks/">
+    <File Path="test/test-applications/mocks/Directory.Build.props" />
+    <Project Path="test/test-applications/mocks/OpenTelemetry.AutoInstrumentation.Mock/OpenTelemetry.AutoInstrumentation.Mock.csproj" />
+  </Folder>
+  <Folder Name="/test/test-applications/nuget-packages/">
+    <File Path="test/test-applications/nuget-packages/Directory.Build.props" />
+    <File Path="test/test-applications/nuget-packages/Directory.Build.targets" />
+    <File Path="test/test-applications/nuget-packages/Directory.Packages.props" />
+    <Project Path="test/test-applications/nuget-packages/TestApplication.NugetSample/TestApplication.NugetSample.csproj" />
+  </Folder>
+  <Folder Name="/tools/">
+    <File Path="tools/Directory.Build.targets" />
+    <File Path="tools/Directory.Packages.props" />
+    <Project Path="tools/DependencyListGenerator/DependencyListGenerator.csproj" />
+    <Project Path="tools/GacInstallTool/GacInstallTool.csproj" />
+    <Project Path="tools/LibraryVersionsGenerator/LibraryVersionsGenerator.csproj" />
+    <Project Path="tools/SdkVersionAnalyzer/SdkVersionAnalyzer.csproj" />
+  </Folder>
+</Solution>

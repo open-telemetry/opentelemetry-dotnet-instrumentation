@@ -20,7 +20,7 @@ using static Nuke.Common.Tools.DotNet.DotNetTasks;
 
 partial class Build
 {
-    [Solution("OpenTelemetry.AutoInstrumentation.sln")] readonly Solution Solution;
+    [Solution("OpenTelemetry.AutoInstrumentation.slnx")] readonly Solution Solution;
 
     AbsolutePath OutputDirectory => RootDirectory / "bin";
     AbsolutePath SourceDirectory => RootDirectory / "src";
