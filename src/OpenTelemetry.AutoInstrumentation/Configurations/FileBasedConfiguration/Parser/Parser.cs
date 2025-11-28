@@ -2,22 +2,24 @@
 // SPDX-License-Identifier: Apache-2.0
 
 using Vendors.YamlDotNet.Serialization;
+using Vendors.YamlDotNet.Serialization.NamingConventions;
 using Vendors.YamlDotNet.Serialization.NodeDeserializers;
 
 namespace OpenTelemetry.AutoInstrumentation.Configurations.FileBasedConfiguration.Parser;
 
 internal static class Parser
 {
-    public static YamlConfiguration ParseYaml(string filePath)
+    public static T ParseYaml<T>(string filePath)
     {
         var deserializer = new DeserializerBuilder()
             .WithNodeDeserializer(existing => new ConditionalDeserializer(existing), s => s.InsteadOf<NullNodeDeserializer>())
             .WithTypeConverter(new EnvVarTypeConverter())
+            .WithNamingConvention(UnderscoredNamingConvention.Instance)
             .IgnoreUnmatchedProperties()
             .Build();
 
         var yaml = File.ReadAllText(filePath);
-        var config = deserializer.Deserialize<YamlConfiguration>(yaml);
+        var config = deserializer.Deserialize<T>(yaml);
         return config;
     }
 }

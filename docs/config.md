@@ -364,7 +364,8 @@ Important environment variables include:
   `.csproj` file.
 - On .NET Framework, the `grpc` OTLP exporter protocol is not supported.
 
-**[2]**: The recognized (case-insensitive) values for `OTEL_EXPORTER_OTLP_METRICS_TEMPORALITY_PREFERENCE` are:
+**[2]**: The recognized (case-insensitive) values for
+`OTEL_EXPORTER_OTLP_METRICS_TEMPORALITY_PREFERENCE` are:
 
 - `Cumulative`: Choose cumulative aggregation temporality for all instrument kinds.
 - `Delta`: Choose Delta aggregation temporality for Counter, Asynchronous
@@ -450,7 +451,7 @@ the rules when the application restarts.
 
 The CLR uses the following
 environment variables to set up the profiler. See
-[.NET Runtime Profiler Loading](https://github.com/dotnet/runtime/blob/main/docs/design/coreclr/profiling/Profiler%20Loading.md)
+[.NET Runtime Profiler Loading](https://github.com/dotnet/runtime/blob/59f2833b98e15e0831be8ad24fb321ee7bf9bd54/docs/design/coreclr/profiling/Profiler%20Loading.md)
 for more information.
 
 | .NET Framework environment variable | .NET environment variable  | Description                                                                             | Required value                                                                                                                                                                                                                                                    | Status                                                                                                                            |
@@ -484,7 +485,7 @@ CORECLR_PROFILER_PATH_64
 
 On .NET it is required to set the
 [`DOTNET_STARTUP_HOOKS`](https://github.com/dotnet/runtime/blob/main/docs/design/features/host-startup-hook.md)
-environment variable.
+environment variable if the .NET CLR Profiler is not used.
 
 The [`DOTNET_ADDITIONAL_DEPS`](https://github.com/dotnet/runtime/blob/main/docs/design/features/additional-deps.md)
 and [`DOTNET_SHARED_STORE`](https://docs.microsoft.com/en-us/dotnet/core/deploying/runtime-store)
@@ -495,6 +496,15 @@ environment variable are used to mitigate assembly version conflicts in .NET.
 | `DOTNET_STARTUP_HOOKS`   | `$INSTALL_DIR/net/OpenTelemetry.AutoInstrumentation.StartupHook.dll` | [Experimental](https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/versioning-and-stability.md) |
 | `DOTNET_ADDITIONAL_DEPS` | `$INSTALL_DIR/AdditionalDeps`                                        | [Experimental](https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/versioning-and-stability.md) |
 | `DOTNET_SHARED_STORE`    | `$INSTALL_DIR/store`                                                 | [Experimental](https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/versioning-and-stability.md) |
+
+If the .NET CLR Profiler is used and the
+[`DOTNET_STARTUP_HOOKS`](https://github.com/dotnet/runtime/blob/main/docs/design/features/host-startup-hook.md)
+environment variable is not set, the profiler looks for
+`OpenTelemetry.AutoInstrumentation.StartupHook.dll` in an appropriate directory
+relative to the `OpenTelemetry.AutoInstrumentation.Native.dll` file location.
+The folder structure can match the ZIP archive structure or the NuGet package
+structure (either platform dependent or independent). If the startup hook
+assembly is not found, the profiler loading will be aborted.
 
 ## Internal logs
 

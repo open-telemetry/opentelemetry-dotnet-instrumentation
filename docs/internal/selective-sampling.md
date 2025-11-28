@@ -12,12 +12,12 @@ the span context will be sampled, until span is deselected.
 
 Span can be selected for frequent sampling by calling:
 ```csharp
-SelectiveSamplingStart(Activity activity)
+SelectiveSamplingStart(ActivityTraceId traceId)
   ```
 
 Span is removed from selection by calling:
 ```csharp
-SelectiveSamplingStop(Activity activity)
+SelectiveSamplingStop(ActivityTraceId traceId)
   ```
 
 You can enable frequent sampling using the custom plugin, which
@@ -64,6 +64,8 @@ for sample implementation of plugin.
 
 ## Limits
 
+- Instrumentation can't guarantee that configured sampling period will always be respected
+(timestamps encoded in samples buffer mark points in time when samples were collected).
 - Spans selected for frequent sampling more than 15 minutes in the past will be considered stale
   and will be automatically deselected.
 - Number of spans selected for frequent sampling is limited to 50 at a time.

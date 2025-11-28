@@ -1,7 +1,7 @@
-FROM mcr.microsoft.com/dotnet/sdk:8.0.414-jammy@sha256:b6142e9f2ba1d33700791de1b5946dd3f75d65198ca73be99aca966ee37896f1
+FROM mcr.microsoft.com/dotnet/sdk:8.0.416-jammy@sha256:71217e2029c9844f13aa98114ae4aea9e77287cd8c152f7b7c09f8af61a1affa
 
 # install OpenTelemetry .NET Automatic Instrumentation
-ARG OTEL_VERSION=1.12.0
+ARG OTEL_VERSION=1.13.0
 ENV OTEL_DOTNET_AUTO_HOME=/otel-dotnet-auto
 ADD https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/download/v${OTEL_VERSION}/otel-dotnet-auto-install.sh otel-dotnet-auto-install.sh
 RUN apt-get update && apt-get install -y unzip && \

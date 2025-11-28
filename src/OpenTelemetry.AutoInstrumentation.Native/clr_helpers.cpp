@@ -325,7 +325,7 @@ mdAssemblyRef FindAssemblyRef(const ComPtr<IMetaDataAssemblyImport>& assembly_im
 }
 
 HRESULT GetCorLibAssemblyRef(const ComPtr<IMetaDataAssemblyEmit>& assembly_emit,
-                             AssemblyProperty&                    corAssemblyProperty,
+                             const AssemblyProperty&              corAssemblyProperty,
                              mdAssemblyRef*                       corlib_ref)
 {
     if (corAssemblyProperty.ppbPublicKey != nullptr)
