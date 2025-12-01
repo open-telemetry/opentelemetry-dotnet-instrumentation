@@ -32,7 +32,7 @@ internal class StartupHook
             var ruleEngine = new RuleEngine();
             if (!ruleEngine.ValidateRules())
             {
-                throw new Exception(
+                throw new InvalidOperationException(
                     "Rule Engine Failure: One or more rules failed validation. Automatic Instrumentation won't be loaded.");
             }
 
@@ -47,7 +47,7 @@ internal class StartupHook
             {
                 if (failFast)
                 {
-                    throw new Exception("StartupHook failed to create an instance of the Loader");
+                    throw new InvalidOperationException("StartupHook failed to create an instance of the Loader");
                 }
             }
             else
