@@ -6,6 +6,7 @@
          Reference: https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/issues/1644 -->
     <TargetFrameworks>netcoreapp3.1</TargetFrameworks>
     <Description>StartupHook used by the OpenTelemetry.AutoInstrumentation project.</Description>
+    <AnalysisLevel>latest-All</AnalysisLevel>
   </PropertyGroup>
 
   <ItemGroup>
