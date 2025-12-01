@@ -228,7 +228,9 @@ internal class InternalLogger : IOtelLogger
                 WriteEventSourceLog(level, rawMessage);
             }
         }
+#pragma warning disable CA1031 // Do not catch general exception
         catch (Exception)
+#pragma warning restore CA1031 // Do not catch general exception
         {
             try
             {
@@ -238,7 +240,9 @@ internal class InternalLogger : IOtelLogger
                     : "; " + string.Join(", ", args);
                 Console.Error.WriteLine($"{messageTemplate}{properties}{ex}");
             }
-            catch
+#pragma warning disable CA1031 // Do not catch general exception
+            catch (Exception)
+#pragma warning restore CA1031 // Do not catch general exception
             {
                 // ignore
             }

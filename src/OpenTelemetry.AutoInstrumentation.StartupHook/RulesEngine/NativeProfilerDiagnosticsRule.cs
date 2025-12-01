@@ -49,7 +49,9 @@ internal class NativeProfilerDiagnosticsRule : Rule
 
             Logger.Error("IsProfilerAttached returned false, the native log should describe the root cause.");
         }
+#pragma warning disable CA1031 // Do not catch general exception
         catch (Exception ex)
+#pragma warning restore CA1031 // Do not catch general exception
         {
             /* Native profiler is not attached. Continue with diagnosis */
             Logger.Debug(ex, "Error checking if native profiler is attached.");

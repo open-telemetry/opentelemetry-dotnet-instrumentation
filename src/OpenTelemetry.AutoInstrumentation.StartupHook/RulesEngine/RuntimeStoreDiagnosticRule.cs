@@ -49,7 +49,9 @@ internal class RuntimeStoreDiagnosticRule : Rule
                 {
                     appInstrumentationAssembly = Assembly.Load(assemblyName);
                 }
+#pragma warning disable CA1031 // Do not catch general exception
                 catch (Exception ex)
+#pragma warning restore CA1031 // Do not catch general exception
                 {
                     Logger.Warning(ex, $"Rule Engine: Assembly load failed. Skipping rule evaluation for assembly - {assemblyName}");
                     continue;
@@ -84,7 +86,9 @@ internal class RuntimeStoreDiagnosticRule : Rule
                 }
             }
         }
+#pragma warning disable CA1031 // Do not catch general exception
         catch (Exception ex)
+#pragma warning restore CA1031 // Do not catch general exception
         {
             // Exception in rule evaluation should not impact the result of the rule.
             Logger.Warning(ex, "Rule Engine: Couldn't evaluate reference to runtime store assemblies in an app.");
