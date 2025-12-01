@@ -82,7 +82,7 @@ internal class StartupHook
 
             // StartupHook and Loader assemblies are in the same path
             var startupAssemblyDirectoryPath = Path.GetDirectoryName(startupAssemblyFilePath) ??
-                                               throw new NullReferenceException("StartupAssemblyFilePath is NULL");
+                                               throw new InvalidOperationException("StartupAssemblyFilePath is NULL");
             return startupAssemblyDirectoryPath;
         }
         catch (Exception ex)
