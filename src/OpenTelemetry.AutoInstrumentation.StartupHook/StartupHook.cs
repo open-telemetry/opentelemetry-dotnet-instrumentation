@@ -74,7 +74,7 @@ internal class StartupHook
         try
         {
             var startupAssemblyFilePath = Assembly.GetExecutingAssembly().Location;
-            if (startupAssemblyFilePath.StartsWith(@"\\?\"))
+            if (startupAssemblyFilePath.StartsWith(@"\\?\", StringComparison.Ordinal))
             {
                 // This will only be used in case the local path exceeds max_path size limit
                 startupAssemblyFilePath = startupAssemblyFilePath.Substring(4);
