@@ -1,6 +1,8 @@
 // Copyright The OpenTelemetry Authors
 // SPDX-License-Identifier: Apache-2.0
 
+using System.Globalization;
+
 namespace OpenTelemetry.AutoInstrumentation.Logging;
 
 internal class InternalLogger : IOtelLogger
@@ -214,7 +216,7 @@ internal class InternalLogger : IOtelLogger
         try
         {
             // Use template if no arguments provided, otherwise format the template with provided arguments.
-            var rawMessage = args == NoPropertyValues ? messageTemplate : string.Format(messageTemplate, args);
+            var rawMessage = args == NoPropertyValues ? messageTemplate : string.Format(CultureInfo.InvariantCulture, messageTemplate, args);
             if (exception != null)
             {
                 rawMessage += $"{Environment.NewLine}Exception: {exception.Message}{Environment.NewLine}{exception}";
@@ -226,7 +228,7 @@ internal class InternalLogger : IOtelLogger
                 WriteEventSourceLog(level, rawMessage);
             }
         }
-        catch
+        catch (Exception)
         {
             try
             {
