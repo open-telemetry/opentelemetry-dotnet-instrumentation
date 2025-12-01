@@ -20,7 +20,7 @@ internal class ApplicationInExcludeListRule : Rule
     internal override bool Evaluate()
     {
         var appDomainName = GetAppDomainName();
-        if (appDomainName.Equals("dotnet", StringComparison.InvariantCultureIgnoreCase))
+        if (appDomainName.Equals("dotnet", StringComparison.OrdinalIgnoreCase))
         {
             Logger.Information($"Rule Engine: AppDomain name is dotnet. Skipping initialization.");
             return false;
