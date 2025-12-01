@@ -123,10 +123,7 @@ public class InstrumentationDefinitionsGenerator : IIncrementalGenerator
                 {
                     byName.Add(
                         targetToGenerate.IntegrationName,
-                        new List<(string IntegrationType, TargetToGenerate Target)>
-                        {
-                            (integrationToGenerate.Value.IntegrationType, targetToGenerate)
-                        });
+                        [(integrationToGenerate.Value.IntegrationType, targetToGenerate)]);
                 }
 
                 instrumentationCount++;
