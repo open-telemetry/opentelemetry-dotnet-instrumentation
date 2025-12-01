@@ -65,7 +65,7 @@ internal class ApplicationInExcludeListRule : Rule
         }
     }
 
-    private static ICollection<string> GetExcludedApplicationNames()
+    private static List<string> GetExcludedApplicationNames()
     {
         var excludedProcesses = new List<string>();
 

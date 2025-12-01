@@ -154,7 +154,7 @@ internal static class OtelLogging
     private static ISink CreateSink(string suffix)
     {
         // Uses ISink? here, sink creation can fail so we specify default fallback at the end.
-        var sink = _configuredLogSink switch
+        ISink? sink = _configuredLogSink switch
         {
             LogSink.NoOp => NoopSink.Instance,
             LogSink.Console => new ConsoleSink(suffix),
@@ -168,7 +168,7 @@ internal static class OtelLogging
             NoopSink.Instance;
     }
 
-    private static ISink? CreateFileSink(string suffix)
+    private static PeriodicFlushToDiskSink? CreateFileSink(string suffix)
     {
         try
         {
