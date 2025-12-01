@@ -23,7 +23,7 @@ internal class StartupHook
     /// </summary>
     public static void Initialize()
     {
-        bool.TryParse(Environment.GetEnvironmentVariable(ConfigurationKeys.FailFast), out var failFast);
+        _ = bool.TryParse(Environment.GetEnvironmentVariable(ConfigurationKeys.FailFast), out var failFast);
 
         try
         {
