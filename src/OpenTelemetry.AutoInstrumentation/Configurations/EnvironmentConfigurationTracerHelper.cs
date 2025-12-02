@@ -59,6 +59,7 @@ internal static class EnvironmentConfigurationTracerHelper
 
         if (settings.OpenTracingEnabled)
         {
+            Logger.Warning("OpenTracing is deprecated and it is enabled by the configuration. It will be removed in future versions. Consider migrating to OpenTelemetry API.");
             builder.AddOpenTracingShimSource();
         }
 

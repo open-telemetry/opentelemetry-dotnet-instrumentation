@@ -25,6 +25,8 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 
 ### Deprecated
 
+- Deprecate support for `OpenTracing`.
+
 ### Removed
 
 ### Fixed
