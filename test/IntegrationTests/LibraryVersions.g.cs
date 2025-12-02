@@ -141,7 +141,7 @@ public static partial class LibraryVersion
                 "5.0.0",
                 "5.3.4",
                 "6.0.0",
-                "6.0.4",
+                "6.0.6",
 #endif
             ];
             return theoryData;
