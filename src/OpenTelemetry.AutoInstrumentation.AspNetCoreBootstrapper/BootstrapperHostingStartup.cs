@@ -13,7 +13,7 @@ namespace OpenTelemetry.AutoInstrumentation.AspNetCoreBootstrapper;
 /// <summary>
 /// Add summary.
 /// </summary>
-internal class BootstrapperHostingStartup : IHostingStartup
+internal sealed class BootstrapperHostingStartup : IHostingStartup
 {
     private const string BootstrapperLoggerSuffix = "AspNetCoreBootstrapper";
     private static readonly IOtelLogger Logger = OtelLogging.GetLogger(BootstrapperLoggerSuffix);
