@@ -8,7 +8,7 @@
 [![FOSSA License Status](https://app.fossa.com/api/projects/custom%2B162%2Fgithub.com%2Fopen-telemetry%2Fopentelemetry-dotnet-instrumentation.svg?type=shield&issueType=license)](https://app.fossa.com/projects/custom%2B162%2Fgithub.com%2Fopen-telemetry%2Fopentelemetry-dotnet-instrumentation?ref=badge_shield&issueType=license)
 [![FOSSA Security Status](https://app.fossa.com/api/projects/custom%2B162%2Fgithub.com%2Fopen-telemetry%2Fopentelemetry-dotnet-instrumentation.svg?type=shield&issueType=security)](https://app.fossa.com/projects/custom%2B162%2Fgithub.com%2Fopen-telemetry%2Fopentelemetry-dotnet-instrumentation?ref=badge_shield&issueType=security)
 
-This project adds [OpenTelemetry instrumentation](https://opentelemetry.io/docs/concepts/instrumenting/#automatic-instrumentation)
+This project adds [OpenTelemetry instrumentation](https://opentelemetry.io/docs/concepts/instrumentation/zero-code/)
 to .NET applications without having to modify their source code.
 
 ---
@@ -17,7 +17,7 @@ to .NET applications without having to modify their source code.
 > The following documentation refers to the in-development version
 of OpenTelemetry .NET Automatic Instrumentation. Docs for the latest version
 ([1.13.0](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/latest))
-can be found in [opentelemetry.io](https://opentelemetry.io/docs/zero-code/net/)
+can be found in [opentelemetry.io](https://opentelemetry.io/docs/zero-code/dotnet/)
 or [here](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/blob/v1.13.0/docs/README.md).
 
 ---
