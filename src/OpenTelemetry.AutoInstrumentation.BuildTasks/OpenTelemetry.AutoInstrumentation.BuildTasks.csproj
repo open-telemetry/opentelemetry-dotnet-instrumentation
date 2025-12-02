@@ -13,6 +13,7 @@
 
     <!-- The version of certain packages is needed to copy dependencies when creating the NuGet package -->
     <NuGetVersioningVersion>6.5.0</NuGetVersioningVersion>
+    <AnalysisLevel>latest-All</AnalysisLevel>
   </PropertyGroup>
 
   <!-- ItemGroup with build files -->
