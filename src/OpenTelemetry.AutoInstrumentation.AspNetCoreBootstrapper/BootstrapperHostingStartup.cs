@@ -13,7 +13,9 @@ namespace OpenTelemetry.AutoInstrumentation.AspNetCoreBootstrapper;
 /// <summary>
 /// Add summary.
 /// </summary>
+#pragma warning disable CA1812 // Avoid uninstantiated internal classes. This class is instantiated by ASP.NET Core via reflection.
 internal sealed class BootstrapperHostingStartup : IHostingStartup
+#pragma warning restore CA1812 // Avoid uninstantiated internal classes. This class is instantiated by ASP.NET Core via reflection.
 {
     private const string BootstrapperLoggerSuffix = "AspNetCoreBootstrapper";
     private static readonly IOtelLogger Logger = OtelLogging.GetLogger(BootstrapperLoggerSuffix);
