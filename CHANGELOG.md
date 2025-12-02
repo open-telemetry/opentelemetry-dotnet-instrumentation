@@ -9,14 +9,15 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 
 ### Added
 
-- Add `-NoReset` switch parameter to skip service restart in PowerShell registration functions.
+- Add `-NoReset` switch parameter to skip service restart in PowerShell
+  registration functions.
 
 ### Changed
 
 - `-NoReset` parameter in `Unregister-OpenTelemetryForIIS` changed from
   `[bool]` to `[switch]`. Use `-NoReset` instead of `-NoReset $true`.
-  Note: `-NoReset $true` still works, but `-NoReset $false` will not do what you expect.
-  You should omit the parameter for the expected behavior.
+  Note: `-NoReset $true` still works, but `-NoReset $false` will not do what you
+  expect. You should omit the parameter for the expected behavior.
 
 #### Dependency updates
 
