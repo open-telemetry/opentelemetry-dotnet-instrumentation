@@ -20,7 +20,7 @@ public class CheckForInstrumentationPackages : Microsoft.Build.Utilities.Task
     /// Gets or sets the list of instrumentation target items.
     /// </summary>
     /// <remarks>
-    /// See the <code>InstrumentationTarget</code>"/> items on the <code>.targets</code> file for a list of the
+    /// See the <code>InstrumentationTarget</code> items on the <code>.targets</code> file for a list of the
     /// required metadata.
     /// </remarks>
     [Required]
@@ -82,7 +82,7 @@ public class CheckForInstrumentationPackages : Microsoft.Build.Utilities.Task
         }
 
         // Process each instrumentation target item.
-        foreach (var instrumentationTarget in InstrumentationTargetItems ?? Array.Empty<ITaskItem>())
+        foreach (var instrumentationTarget in InstrumentationTargetItems ?? [])
         {
             MissingInstrumentationAdapterPackage(instrumentationTarget, runtimeCopyLocalItemsDictionary);
         }
