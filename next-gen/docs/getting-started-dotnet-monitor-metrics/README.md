@@ -215,7 +215,6 @@ of increase of myFruitCounter over the past 5 minutes:
 ## Learn more
 
 - [What is Prometheus?](https://prometheus.io/docs/introduction/overview/)
-- [Prometheus now supports OpenTelemetry
-  Metrics](https://horovits.medium.com/prometheus-now-supports-opentelemetry-metrics-83f85878e46a)
+- [Using Prometheus as your OpenTelemetry backend](https://prometheus.io/docs/guides/opentelemetry/)
 - [Grafana support for
   Prometheus](https://prometheus.io/docs/visualization/grafana/#creating-a-prometheus-graph)

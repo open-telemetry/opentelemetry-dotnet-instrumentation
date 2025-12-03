@@ -155,8 +155,3 @@ diagnostics.
 
 Check the logs in the specified artifacts folder in your settings.json file to
 validate the log collection.
-
-## Learn more
-
-- [Dotnet Monitor Collection
-  Rules](https://horovits.medium.com/prometheus-now-supports-opentelemetry-metrics-83f85878e46a)
