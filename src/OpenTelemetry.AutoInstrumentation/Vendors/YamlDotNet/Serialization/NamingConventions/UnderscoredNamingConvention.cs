@@ -33,17 +33,6 @@ namespace Vendors.YamlDotNet.Serialization.NamingConventions
         public UnderscoredNamingConvention() { }
         public string Apply(string value)
         {
-            // If the string ends with "Development", replace the ending with "/development"
-            const string target = "Development";
-            if (value != null &&
-                value.EndsWith(target, StringComparison.Ordinal) &&
-                value.Length > target.Length &&
-                char.IsUpper(value, value.Length - target.Length))
-            {
-                var prefix = value.Substring(0, value.Length - target.Length);
-                value = prefix + "/development";
-            }
-
             return value.FromCamelCase("_");
         }
 
