@@ -1,6 +1,9 @@
 // Copyright The OpenTelemetry Authors
 // SPDX-License-Identifier: Apache-2.0
 
+#if !RABBITMQ_7_0_0_OR_GREATER
+using System.Reflection;
+#endif
 using System.Text;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
