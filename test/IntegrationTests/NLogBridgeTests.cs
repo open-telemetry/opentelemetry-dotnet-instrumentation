@@ -139,8 +139,6 @@ public class NLogBridgeTests : TestHelper
     public void TraceContext_IsInjectedIntoCurrentNLogLogsDestination(string packageVersion)
     {
         EnableBytecodeInstrumentation();
-        SetEnvironmentVariable("OTEL_DOTNET_AUTO_TRACES_ENABLED", "true");
-        SetEnvironmentVariable("OTEL_DOTNET_AUTO_LOGS_ENABLED", "true");
         SetEnvironmentVariable("OTEL_DOTNET_AUTO_LOGS_ENABLE_NLOG_BRIDGE", "false");
 
         var (standardOutput, _, _) = RunTestApplication(new()
