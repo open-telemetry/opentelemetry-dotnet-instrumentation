@@ -18,7 +18,7 @@ internal sealed class OtelDefaultNamingConvention : INamingConvention
     {
         // If the string ends with "Development", replace the ending with "/development"
         const string target = "Development";
-        if (value.EndsWith(target, StringComparison.Ordinal))
+        if (value.EndsWith(target, StringComparison.Ordinal) && value.Length > target.Length)
         {
             var prefix = value.Substring(0, value.Length - target.Length);
             value = prefix + "/development";
