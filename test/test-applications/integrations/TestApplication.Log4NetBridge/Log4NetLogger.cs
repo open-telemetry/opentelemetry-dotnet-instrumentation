@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: Apache-2.0
 
 using log4net;
-using log4net.Config;
 using Microsoft.Extensions.Logging;
 
 namespace TestApplication.Log4NetBridge;

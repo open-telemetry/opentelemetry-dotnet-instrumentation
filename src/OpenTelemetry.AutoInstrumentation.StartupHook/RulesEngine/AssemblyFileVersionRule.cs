@@ -61,7 +61,7 @@ internal class AssemblyFileVersionRule : Rule
         }
         catch (Exception ex)
         {
-            // Exception in rule evaluation should not impact the result of the rule.
+            // An exception in rule evaluation should not impact the result of the rule.
             Logger.Warning($"Rule Engine: Couldn't evaluate assembly reference file version. Exception: {ex}");
         }
 

@@ -3,7 +3,6 @@
 
 using System.Diagnostics;
 using OpenTelemetry.AutoInstrumentation.Configurations.FileBasedConfiguration;
-using OpenTelemetry.AutoInstrumentation.Configurations.FileBasedConfiguration.Parser;
 using OpenTelemetry.AutoInstrumentation.Logging;
 using static OpenTelemetry.AutoInstrumentation.InstrumentationDefinitions;
 
