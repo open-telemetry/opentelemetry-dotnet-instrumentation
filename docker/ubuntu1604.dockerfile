@@ -37,4 +37,6 @@ RUN chmod +x ./dotnet-install.sh \
     && ./dotnet-install.sh -v 9.0.308 --install-dir /usr/share/dotnet --no-path \
     && rm dotnet-install.sh
 
+ENV IsLegacyUbuntu=true
+
 WORKDIR /project

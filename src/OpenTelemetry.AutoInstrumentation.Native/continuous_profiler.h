@@ -348,12 +348,13 @@ public:
     SamplingStatistics stats_;
     void AllocateBuffer();
     void PublishBuffer();
+    mutable std::mutex      shutdown_mutex_;
+    std::condition_variable shutdown_cv_;
+
 private:
     std::atomic_bool             shutdown_requested_{ false };
     std::unique_ptr<std::thread> thread_sampling_thread_;
     EVENTPIPE_SESSION            session_ = 0;
-    std::promise<void>           shutdown_promise_;
-    IStackCaptureStrategy* stack_capture_strategy_ = nullptr; // Non-owning pointer
 };
 
 } // namespace continuous_profiler

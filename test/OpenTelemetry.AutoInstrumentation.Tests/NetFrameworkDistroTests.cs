@@ -3,7 +3,7 @@
 
 // This test is defined in NET 9.0 because the tool is written in .NET 9.0
 // The actual test is testing .NET Framework context.
-#if NET9_0
+#if NET10_0
 
 using System.Reflection;
 using System.Runtime.InteropServices;

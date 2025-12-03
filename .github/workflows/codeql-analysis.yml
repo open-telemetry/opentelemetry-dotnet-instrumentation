@@ -53,7 +53,7 @@ jobs:
         disk-root: "D:"
 
     - name: Checkout repository
-      uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # tag: v5.0.1
+      uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # tag: v6.0.1
 
     # Add any setup steps before running the `github/codeql-action/init` action.
     # This includes steps like installing compilers or runtimes (`actions/setup-node`
@@ -63,7 +63,7 @@ jobs:
 
     # Initializes the CodeQL tools for scanning.
     - name: Initialize CodeQL
-      uses: github/codeql-action/init@e12f0178983d466f2f6028f5cc7a6d786fd97f4b # tag: v4.31.4
+      uses: github/codeql-action/init@fe4161a26a8629af62121b670040955b330f9af2 # tag: v4.31.6
       with:
         languages: ${{ matrix.language }}
         build-mode: ${{ matrix.build-mode }}
@@ -75,7 +75,7 @@ jobs:
         # queries: security-extended,security-and-quality
 
     - name: Setup dotnet
-      uses: actions/setup-dotnet@d4c94342e560b34958eacfc5d055d21461ed1c5d # tag: v5.0.0
+      uses: actions/setup-dotnet@2016bd2012dba4e32de620c46fe006a3ac9f0602 # tag: v5.0.1
       with:
         dotnet-version: | 
           8.0.416
@@ -93,6 +93,6 @@ jobs:
       run: ./build.cmd BuildTracer
 
     - name: Perform CodeQL Analysis
-      uses: github/codeql-action/analyze@e12f0178983d466f2f6028f5cc7a6d786fd97f4b # tag: v4.31.4
+      uses: github/codeql-action/analyze@fe4161a26a8629af62121b670040955b330f9af2 # tag: v4.31.6
       with:
         category: "/language:${{matrix.language}}"

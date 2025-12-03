@@ -1,8 +1,6 @@
 // Copyright The OpenTelemetry Authors
 // SPDX-License-Identifier: Apache-2.0
 
-using System.Threading.Tasks;
-using NServiceBus;
 using NServiceBus.Logging;
 
 namespace TestApplication.NServiceBus;

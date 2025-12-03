@@ -6,7 +6,7 @@ using OpenTelemetry.AutoInstrumentation.CallTarget;
 using OpenTelemetry.AutoInstrumentation.DuckTyping;
 using OpenTelemetry.AutoInstrumentation.Instrumentations.Kafka.DuckTypes;
 using OpenTelemetry.AutoInstrumentation.Util;
-using OpenTelemetry.Context.Propagation;
+
 // ReSharper disable ConditionIsAlwaysTrueOrFalseAccordingToNullableAPIContract
 
 namespace OpenTelemetry.AutoInstrumentation.Instrumentations.Kafka.Integrations;

@@ -124,7 +124,7 @@ public sealed class InstrumentationTargetTests : TestHelper
     {
         const string warningMessage = "RuntimeIdentifier (RID) is not set." +
                                       " Consider setting it to avoid copying native libraries for all of the platforms supported by the OpenTelemetry.AutoInstrumentation package." +
-                                      " See the docs at https://opentelemetry.io/docs/zero-code/net/nuget-packages/#using-the-nuget-packages for details." +
+                                      " See the docs at https://opentelemetry.io/docs/zero-code/dotnet/nuget-packages/#using-the-nuget-packages for details." +
                                       " In order to suppress this warning, set DisableAutoInstrumentationCheckForRuntimeIdentifier property to true.";
 
         var (exitCode, standardOutput) = RunDotnetCliAndWaitForCompletion($"publish {arguments}");

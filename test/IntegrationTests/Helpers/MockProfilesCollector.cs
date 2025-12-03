@@ -28,7 +28,7 @@ public class MockProfilesCollector : IDisposable
     {
         _output = output;
 #if NETFRAMEWORK
-        _listener = new(output, HandleHttpRequests, host, "/v1/metrics/");
+        _listener = new(output, HandleHttpRequests, host, "/v1development/profiles");
 #else
         _listener = new(output, nameof(MockProfilesCollector), new PathHandler(HandleHttpRequests, "/v1development/profiles"));
 #endif
