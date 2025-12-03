@@ -31,6 +31,7 @@ namespace Vendors.YamlDotNet.Serialization.NamingConventions
     {
         [Obsolete("Use the Instance static field instead of creating new instances")]
         public UnderscoredNamingConvention() { }
+
         public string Apply(string value)
         {
             return value.FromCamelCase("_");
