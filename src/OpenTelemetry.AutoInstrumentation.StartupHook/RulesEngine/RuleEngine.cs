@@ -70,9 +70,7 @@ internal class RuleEngine
                 return false;
             }
         }
-#pragma warning disable CA1031 // Do not catch general exception
         catch (Exception ex)
-#pragma warning restore CA1031 // Do not catch general exception
         {
             Logger.Warning($"Error evaluating rule '{rule.Name}': {ex.Message}");
         }

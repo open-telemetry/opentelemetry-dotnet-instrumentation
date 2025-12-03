@@ -40,9 +40,7 @@ internal class OpenTelemetrySdkMinimumVersionRule : Rule
                 }
             }
         }
-#pragma warning disable CA1031 // Do not catch general exception
         catch (Exception ex)
-#pragma warning restore CA1031 // Do not catch general exception
         {
             // Exception in evaluation should not throw or crash the process.
             logger.Information($"Rule Engine: Couldn't evaluate reference to OpenTelemetry Sdk in an app. Exception: {ex}");

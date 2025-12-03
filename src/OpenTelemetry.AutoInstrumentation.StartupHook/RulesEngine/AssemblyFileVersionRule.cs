@@ -59,9 +59,7 @@ internal class AssemblyFileVersionRule : Rule
                 }
             }
         }
-#pragma warning disable CA1031 // Do not catch general exception
         catch (Exception ex)
-#pragma warning restore CA1031 // Do not catch general exception
         {
             // An exception in rule evaluation should not impact the result of the rule.
             Logger.Warning($"Rule Engine: Couldn't evaluate assembly reference file version. Exception: {ex}");

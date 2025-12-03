@@ -45,9 +45,7 @@ internal class ApplicationInExcludeListRule : Rule
         {
             return Process.GetCurrentProcess().MainModule.ModuleName;
         }
-#pragma warning disable CA1031 // Do not catch general exception
         catch (Exception ex)
-#pragma warning restore CA1031 // Do not catch general exception
         {
             Logger.Error($"Error getting Process.MainModule.ModuleName: {ex}");
             return string.Empty;
@@ -60,9 +58,7 @@ internal class ApplicationInExcludeListRule : Rule
         {
             return AppDomain.CurrentDomain.FriendlyName;
         }
-#pragma warning disable CA1031 // Do not catch general exception
         catch (Exception ex)
-#pragma warning restore CA1031 // Do not catch general exception
         {
             Logger.Error($"Error getting AppDomain.CurrentDomain.FriendlyName: {ex}");
             return string.Empty;
