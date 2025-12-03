@@ -11,7 +11,7 @@ public class DefaultNamingConventionTests
     [Fact]
     public void Test_UnderScore()
     {
-        var config = YamlParser.ParseYaml<DefaultNamingConvention>("Configurations/FileBased/Files/TestGeneralFile.yaml");
+        var config = YamlParser.ParseYaml<DefaultNamingConvention>("Configurations/FileBased/Files/DefaultNamingConvention.yaml");
 
         Assert.True(config.UnderScore);
         Assert.True(config.UnderScoreDevelopment);
