@@ -1,14 +1,15 @@
 // Copyright The OpenTelemetry Authors
 // SPDX-License-Identifier: Apache-2.0
 
+using System.Globalization;
+
 namespace LibraryVersionsGenerator;
 
 internal sealed class XUnitFileBuilder : CSharpFileBuilder
 {
     public override CSharpFileBuilder BeginTestPackage(string testApplicationName, string integrationName)
     {
-        Builder.AppendLine(
-            @$"    public static TheoryData<string> {integrationName}
+        var theoryDataTemplate = @$"    public static TheoryData<string> {integrationName}
     {{
         get
         {{
@@ -16,7 +17,9 @@ internal sealed class XUnitFileBuilder : CSharpFileBuilder
             [
 #if DEFAULT_TEST_PACKAGE_VERSIONS
                 string.Empty,
-#else");
+#else";
+
+        Builder.AppendLine(theoryDataTemplate);
         return this;
     }
 
@@ -30,11 +33,11 @@ internal sealed class XUnitFileBuilder : CSharpFileBuilder
         var conditionalCompilation = supportedFrameworks.Length > 0;
         if (conditionalCompilation)
         {
-            Builder.AppendFormat("#if {0}", string.Join(" || ", supportedFrameworks.Select(x => x.ToUpperInvariant().Replace('.', '_'))));
+            Builder.AppendFormat(CultureInfo.InvariantCulture, "#if {0}", string.Join(" || ", supportedFrameworks.Select(x => x.ToUpperInvariant().Replace('.', '_'))));
             Builder.AppendLine();
         }
 
-        Builder.AppendLine($"                \"{version}\",");
+        Builder.AppendLine(CultureInfo.InvariantCulture, $"                \"{version}\",");
 
         if (conditionalCompilation)
         {
@@ -69,13 +72,13 @@ internal sealed class XUnitFileBuilder : CSharpFileBuilder
 
         foreach (var item in definitions)
         {
-            Builder.AppendLine($"       {{ \"{item.IntegrationName}\", {item.IntegrationName} }},");
+            Builder.AppendLine(CultureInfo.InvariantCulture, $"       {{ \"{item.IntegrationName}\", {item.IntegrationName} }},");
 
-            if (additionalPlatforms.Any(x => x.StartsWith(item.IntegrationName + "_")))
+            if (additionalPlatforms.Any(x => x.StartsWith(item.IntegrationName + "_", StringComparison.Ordinal)))
             {
-                foreach (var platform in additionalPlatforms.Where(x => x.StartsWith(item.IntegrationName)))
+                foreach (var platform in additionalPlatforms.Where(x => x.StartsWith(item.IntegrationName, StringComparison.Ordinal)))
                 {
-                    Builder.AppendLine($"       {{ \"{platform}\", {platform} }},");
+                    Builder.AppendLine(CultureInfo.InvariantCulture, $"       {{ \"{platform}\", {platform} }},");
                 }
             }
         }
