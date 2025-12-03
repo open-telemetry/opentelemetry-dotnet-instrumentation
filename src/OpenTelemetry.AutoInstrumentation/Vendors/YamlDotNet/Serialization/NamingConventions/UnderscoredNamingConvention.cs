@@ -1,4 +1,4 @@
-﻿// This file is part of YamlDotNet - A .NET library for YAML.
+// This file is part of YamlDotNet - A .NET library for YAML.
 // Copyright (c) Antoine Aubry and contributors
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy of
@@ -31,9 +31,19 @@ namespace Vendors.YamlDotNet.Serialization.NamingConventions
     {
         [Obsolete("Use the Instance static field instead of creating new instances")]
         public UnderscoredNamingConvention() { }
-
         public string Apply(string value)
         {
+            // If the string ends with "Development", replace the ending with "/development"
+            const string target = "Development";
+            if (value != null &&
+                value.EndsWith(target, StringComparison.Ordinal) &&
+                value.Length > target.Length &&
+                char.IsUpper(value, value.Length - target.Length))
+            {
+                var prefix = value.Substring(0, value.Length - target.Length);
+                value = prefix + "/development";
+            }
+
             return value.FromCamelCase("_");
         }
 
