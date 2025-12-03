@@ -8,12 +8,9 @@ namespace OpenTelemetry.AutoInstrumentation.Configurations.FileBasedConfiguratio
 
 internal sealed class OtelDefaultNamingConvention : INamingConvention
 {
-#pragma warning disable CS0618 // Type or member is obsolete
     public static readonly INamingConvention Instance = new OtelDefaultNamingConvention();
-#pragma warning restore CS0618 // Type or member is obsolete
 
-    [Obsolete("Use the Instance static field instead of creating new instances")]
-    public OtelDefaultNamingConvention()
+    private OtelDefaultNamingConvention()
     {
     }
 
