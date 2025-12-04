@@ -338,7 +338,7 @@ void ThreadSamplesBuffer::StartSample(ThreadID                   id,
     WriteByte(kThreadSamplesStartSample);
     if (state->thread_name_.empty())
     {
-        WriteString(L"ThreadID_" + std::to_wstring(id));
+        WriteString(trace::ToWSTRING(std::to_string(id)));
     }
     else
     {
