@@ -186,6 +186,8 @@ internal static class NativeMethods
 #endif
     }
 
+    // the "dll" extension is required on .NET Framework
+    // and optional on .NET Core
     private static class Windows
     {
         [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
