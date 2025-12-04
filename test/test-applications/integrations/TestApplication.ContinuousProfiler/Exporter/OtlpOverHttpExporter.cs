@@ -18,7 +18,11 @@ public class OtlpOverHttpExporter
 {
     private const string MediaContentType = "application/x-protobuf";
 
+#if NETFRAMEWORK
+    private readonly string _endpoint = Environment.GetEnvironmentVariable("OTEL_EXPORTER_OTLP_ENDPOINT") + "/v1/metrics";
+#else
     private readonly string _endpoint = Environment.GetEnvironmentVariable("OTEL_EXPORTER_OTLP_ENDPOINT") + "/v1development/profiles";
+#endif
     private readonly HttpClient _httpClient = new();
     private readonly long cpuPeriod;
 

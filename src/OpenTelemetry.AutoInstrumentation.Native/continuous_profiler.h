@@ -355,6 +355,7 @@ private:
     std::atomic_bool             shutdown_requested_{ false };
     std::unique_ptr<std::thread> thread_sampling_thread_;
     EVENTPIPE_SESSION            session_ = 0;
+    IStackCaptureStrategy*       stack_capture_strategy_ = nullptr; // Non-owning pointer
 };
 
 } // namespace continuous_profiler

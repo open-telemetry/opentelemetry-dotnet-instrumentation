@@ -28,7 +28,7 @@ public class MockProfilesCollector : IDisposable
     {
         _output = output;
 #if NETFRAMEWORK
-        _listener = new(output, HandleHttpRequests, host, "/v1development/profiles");
+        _listener = new(output, HandleHttpRequests, host, "/v1/metrics/");
 #else
         _listener = new(output, nameof(MockProfilesCollector), new PathHandler(HandleHttpRequests, "/v1development/profiles"));
 #endif
@@ -129,6 +129,32 @@ public class MockProfilesCollector : IDisposable
         {
             // timeout
             FailExpectations(missingExpectations, expectationsMet, additionalEntries);
+        }
+    }
+
+    public void AssertEmpty(TimeSpan? timeout = null)
+    {
+        timeout ??= TestTimeout.Expectation;
+
+        if (_profilesSnapshots.TryTake(out var collected, timeout.Value))
+        {
+            var message = new StringBuilder();
+            message.AppendLine("Expected no profiles to be collected, but found:");
+            message.AppendLine($"  \"{collected}\"");
+
+            // Drain any additional items
+            var additionalCount = 0;
+            while (_profilesSnapshots.TryTake(out _, TimeSpan.Zero))
+            {
+                additionalCount++;
+            }
+
+            if (additionalCount > 0)
+            {
+                message.AppendLine($"  ... and {additionalCount} more profile batch(es)");
+            }
+
+            Assert.Fail(message.ToString());
         }
     }
 

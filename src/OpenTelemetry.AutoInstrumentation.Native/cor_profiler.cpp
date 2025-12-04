@@ -1185,6 +1185,21 @@ void CorProfiler::InternalAddInstrumentation(WCHAR* id, CallTargetDefinition* it
 
 bool CorProfiler::InitThreadSampler()
 {
+#ifdef _WIN64
+    // for net fx, the native thread ID is needed by stack capture
+    // the profiler callback, ThreadAssignedToOSThread is not invoked for main thread
+    // for the following macihnery to work,
+    // 1 The thread needs to have executed managed code first
+    // 2. InitThreadSampler must must be executing in context of main thread
+    // InitThreadSampler is called from managed code
+    // And more importantly, the main thread calls InitThreadSampler
+    ThreadID mainThreadId = 0;
+    if (auto hr = info_->GetCurrentThreadID(&mainThreadId); SUCCEEDED(hr))
+    {
+        ThreadAssignedToOSThread(mainThreadId, ::GetCurrentThreadId());
+    }
+#endif
+
     DWORD pdvEventsLow;
     DWORD pdvEventsHigh;
     auto  hr = this->info_->GetEventMask2(&pdvEventsLow, &pdvEventsHigh);

@@ -1,6 +1,6 @@
 // Copyright The OpenTelemetry Authors
 // SPDX-License-Identifier: Apache-2.0
-
+#if NET
 using IntegrationTests.Helpers;
 using Xunit.Abstractions;
 
@@ -29,3 +29,4 @@ public class ContinuousProfilerSpanStoppageHandlingTests : TestHelper
         Assert.DoesNotContain(groupedByTimestampAscending.Last(), sample => sample.SpanId != 0);
     }
 }
+#endif

@@ -46,14 +46,7 @@ public class ContinuousProfilerTests : TestHelper
         SetEnvironmentVariable("OTEL_DOTNET_AUTO_TRACES_ADDITIONAL_SOURCES", "TestApplication.ContinuousProfiler");
         var (_, _, processId) = RunTestApplication();
 
-        // Assert that no allocation samples are collected on .NET Framework
-        collector.Expect(
-        profileData => !profileData.ResourceProfiles.Any(resourceProfiles =>  resourceProfiles.ScopeProfiles.Any(scopeProfile =>  scopeProfile.Profiles.Any(profile =>  ContainSampleType(profile, "allocations", "bytes")))),
-        "No allocation samples should be collected on .NET Framework");
-        collector.ResourceExpector.ExpectStandardResources(processId, "TestApplication.ContinuousProfiler");
-
-        collector.AssertExpectations();
-        collector.ResourceExpector.AssertExpectations();
+        collector.AssertEmpty();
     }
 #endif
 
@@ -119,6 +112,7 @@ public class ContinuousProfilerTests : TestHelper
 
     private static List<string> CreateExpectedStackTrace()
     {
+#if NET
         var stackTrace = new List<string>
         {
             "System.Threading.Thread.Sleep(System.TimeSpan)",
@@ -150,6 +144,31 @@ public class ContinuousProfilerTests : TestHelper
         stackTrace.Add("My.Custom.Test.Namespace.ClassA.MethodA()");
 
         return stackTrace;
+#else
+        var stackTrace = new List<string>
+   {
+    "System.Threading.Thread.Sleep(System.Int32)",
+    "System.Threading.Thread.Sleep(System.TimeSpan)",
+    "TestApplication.ContinuousProfiler.Fs.ClassFs.methodFs(System.String)",
+    "My.Custom.Test.Namespace.TestDynamicClass.TryInvoke(System.Dynamic.InvokeBinder, System.Object[], System.Object&)",
+    "System.Dynamic.UpdateDelegates.UpdateAndExecuteVoid3[T0, T1, T2](System.Runtime.CompilerServices.CallSite, T0, T1, T2)",
+    "Unknown_Native_Function(unknown)",
+    "My.Custom.Test.Namespace.ClassENonStandardCharactersĄĘÓŁŻŹĆąęółżźśćĜЖᏳⳄʤǋₓڿଟഐቐ〣‿੮ᾭ_`1.GenericMethodDFromGenericClass[TMethod, TMethod2](TClass, TMethod, TMethod2)",
+    "My.Custom.Test.Namespace.GenericClassC`1.GenericMethodCFromGenericClass(T)",
+    "Unknown_Native_Function(unknown)",
+    "My.Custom.Test.Namespace.ClassA.<MethodAOthers>g__Action|7_0[T](System.Int32)",
+    "My.Custom.Test.Namespace.ClassA.MethodAOthers[T](System.String, System.Object, My.Custom.Test.Namespace.CustomClass, My.Custom.Test.Namespace.CustomStruct, My.Custom.Test.Namespace.CustomClass[], My.Custom.Test.Namespace.CustomStruct[], System.Collections.Generic.List`1[T])",
+    "My.Custom.Test.Namespace.ClassA.MethodAPointer(System.Int32*)",
+    "My.Custom.Test.Namespace.ClassA.MethodAFloats(System.Single, System.Double)",
+    "My.Custom.Test.Namespace.ClassA.MethodAInts(System.UInt16, System.Int16, System.UInt32, System.Int32, System.UInt64, System.Int64, System.IntPtr, System.UIntPtr)",
+    "My.Custom.Test.Namespace.ClassA.MethodABytes(System.Boolean, System.Char, System.SByte, System.Byte)",
+    "My.Custom.Test.Namespace.ClassA.MethodA()",
+    "Program.<Main>$(System.String[])",
+    "Unknown_Native_Function(unknown)",
+   };
+
+        return stackTrace;
+#endif
     }
 
     private bool ContainStackTraceForClassHierarchy(Profile profile, string expectedStackTrace)

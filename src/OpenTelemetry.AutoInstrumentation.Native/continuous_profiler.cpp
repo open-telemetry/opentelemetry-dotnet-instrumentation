@@ -336,7 +336,14 @@ void ThreadSamplesBuffer::StartSample(ThreadID                   id,
 {
     CHECK_SAMPLES_BUFFER_LENGTH()
     WriteByte(kThreadSamplesStartSample);
-    WriteString(state->thread_name_);
+    if (state->thread_name_.empty())
+    {
+        WriteString(L"ThreadID_" + std::to_wstring(id));
+    }
+    else
+    {
+        WriteString(state->thread_name_);
+    }
     WriteSpanContext(span_context);
     // Feature possibilities: (managed/native) thread priority, cpu/wait times, etc.
 }
@@ -842,7 +849,7 @@ static void ResolveFrames(ContinuousProfiler*                    prof,
                           const std::vector<FunctionIdentifier>& threadStack,
                           ThreadSamplesBuffer&                   buffer)
 {
-    for (auto functionIdentifier : threadStack)
+    for (const auto& functionIdentifier : threadStack)
     {
         const trace::WSTRING* name = prof->helper.Lookup(functionIdentifier, prof->stats_);
         // This is where line numbers could be calculated
