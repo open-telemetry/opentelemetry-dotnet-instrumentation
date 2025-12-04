@@ -291,7 +291,7 @@ internal static class PackageVersionDefinitions
         }
     };
 
-    internal record PackageVersionDefinition
+    internal sealed record PackageVersionDefinition
     {
         public required string IntegrationName { get; init; }
 
