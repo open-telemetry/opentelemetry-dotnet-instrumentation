@@ -1,13 +1,8 @@
 // Copyright The OpenTelemetry Authors
 // SPDX-License-Identifier: Apache-2.0
 
-#if NET
-
 using System.Diagnostics;
 using System.Runtime.InteropServices;
-using System.Text;
-using System.Text.Json;
-using Google.Protobuf;
 using IntegrationTests.Helpers;
 using Xunit.Abstractions;
 
@@ -69,6 +64,8 @@ public class SelectiveSamplerTests : TestHelper
         collector.AssertExpectations();
     }
 
+#if NET
+// TODO Implement better tests for .NET Framework, Continuous Profiler is not stopping all threads at once.
     [SkippableFact]
     [Trait("Category", "EndToEnd")]
     public void ExportThreadSamplesInMixedMode()
@@ -124,6 +121,7 @@ public class SelectiveSamplerTests : TestHelper
             counter++;
         }
     }
+#endif
 
     private static bool IndicatesSelectiveSampling(IGrouping<long, ConsoleThreadSample> samples)
     {
@@ -148,7 +146,15 @@ public class SelectiveSamplerTests : TestHelper
     private static DateTime ToDateTime(long timestampNanoseconds)
     {
         const int nanosecondsInTick = 100;
+
+#if NET
         return DateTime.UnixEpoch.AddTicks(timestampNanoseconds / nanosecondsInTick);
+#else
+        const int daysTo1970 = 719_162;
+        const long unixEpochTicks = daysTo1970 * TimeSpan.TicksPerDay;
+
+        return new DateTime(unixEpochTicks, DateTimeKind.Utc).AddTicks(timestampNanoseconds / nanosecondsInTick);
+#endif
     }
 
     private static bool VerifyMatching(
@@ -158,8 +164,8 @@ public class SelectiveSamplerTests : TestHelper
         foreach (var (spanId, traceIdHigh, traceIdLow) in threadSampleSpanContexts)
         {
             // Reverse the conversion done in TryParseTraceContext methods in NativeMethods.cs
-            var sampleSpanId = ActivitySpanId.CreateFromString(spanId.ToString("x16"));
-            var sampleTraceId = ActivityTraceId.CreateFromString($"{traceIdHigh:x16}{traceIdLow:x16}");
+            var sampleSpanId = ActivitySpanId.CreateFromString(spanId.ToString("x16").AsSpan());
+            var sampleTraceId = ActivityTraceId.CreateFromString($"{traceIdHigh:x16}{traceIdLow:x16}".AsSpan());
 
             var match = collectedSpans.Any(c =>
             {
@@ -179,4 +185,3 @@ public class SelectiveSamplerTests : TestHelper
         return true;
     }
 }
-#endif
