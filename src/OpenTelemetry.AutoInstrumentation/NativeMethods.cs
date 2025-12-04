@@ -200,6 +200,7 @@ internal static class NativeMethods
         [DllImport("OpenTelemetry.AutoInstrumentation.Native.dll")]
         public static extern void ConfigureContinuousProfiler(bool threadSamplingEnabled, uint threadSamplingInterval, bool allocationSamplingEnabled, uint maxMemorySamplesPerMinute, uint selectedThreadSamplingInterval);
 
+        [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
         [DllImport("OpenTelemetry.AutoInstrumentation.Native.dll")]
         public static extern int ContinuousProfilerReadThreadSamples(int len, byte[] buf);
 
@@ -243,11 +244,12 @@ internal static class NativeMethods
         [DllImport("OpenTelemetry.AutoInstrumentation.Native")]
         public static extern void ConfigureContinuousProfiler(bool threadSamplingEnabled, uint threadSamplingInterval, bool allocationSamplingEnabled, uint maxMemorySamplesPerMinute, uint selectedThreadSamplingInterval);
 
+        [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
         [DllImport("OpenTelemetry.AutoInstrumentation.Native")]
         public static extern int ContinuousProfilerReadThreadSamples(int len, byte[] buf);
 
 #if NET
-
+        [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
         [DllImport("OpenTelemetry.AutoInstrumentation.Native")]
         public static extern int ContinuousProfilerReadAllocationSamples(int len, byte[] buf);
 #endif
