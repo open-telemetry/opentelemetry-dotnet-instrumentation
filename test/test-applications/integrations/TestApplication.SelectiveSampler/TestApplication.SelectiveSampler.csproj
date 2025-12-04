@@ -1,12 +1,8 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-
-  <PropertyGroup>
-    <OutputType>Exe</OutputType>
-    <TargetFrameworks>net10.0;net9.0;net8.0</TargetFrameworks>
-  </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="OpenTelemetry" />
     <PackageReference Include="System.Diagnostics.DiagnosticSource" />
+    <PackageReference Include="System.Text.Json" Condition="'$(TargetFramework)' == 'net462'" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="..\TestApplication.ContinuousProfiler\Exporter\AllocationSample.cs">
