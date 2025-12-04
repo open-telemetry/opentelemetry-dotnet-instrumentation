@@ -112,7 +112,6 @@ public class ContinuousProfilerTests : TestHelper
 
     private static List<string> CreateExpectedStackTrace()
     {
-#if NET
         var stackTrace = new List<string>
         {
             "System.Threading.Thread.Sleep(System.TimeSpan)",
@@ -120,13 +119,16 @@ public class ContinuousProfilerTests : TestHelper
             "TestApplication.ContinuousProfiler.Vb.ClassVb.MethodVb(System.String)",
             "My.Custom.Test.Namespace.TestDynamicClass.TryInvoke(System.Dynamic.InvokeBinder, System.Object[], System.Object\u0026)",
             "System.Dynamic.UpdateDelegates.UpdateAndExecuteVoid3[T0, T1, T2](System.Runtime.CompilerServices.CallSite, T0, T1, T2)",
+#if NETFRAMEWORK
+            "Unknown_Native_Function(unknown)",
+#endif
             "My.Custom.Test.Namespace.ClassENonStandardCharacters\u0104\u0118\u00D3\u0141\u017B\u0179\u0106\u0105\u0119\u00F3\u0142\u017C\u017A\u015B\u0107\u011C\u0416\u13F3\u2CC4\u02A4\u01CB\u2093\u06BF\u0B1F\u0D10\u1250\u3023\u203F\u0A6E\u1FAD_\u00601.GenericMethodDFromGenericClass[TMethod, TMethod2](TClass, TMethod, TMethod2)",
             "My.Custom.Test.Namespace.ClassD`21.MethodD(T01, T02, T03, T04, T05, T06, T07, T08, T09, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20, Unknown)",
             "My.Custom.Test.Namespace.GenericClassC`1.GenericMethodCFromGenericClass[T01, T02, T03, T04, T05, T06, T07, T08, T09, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20](T01, T02, T03, T04, T05, T06, T07, T08, T09, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20, Unknown)",
             "My.Custom.Test.Namespace.GenericClassC`1.GenericMethodCFromGenericClass(T)"
         };
 
-#if DEBUG
+#if NETFRAMEWORK || DEBUG
         stackTrace.Add("Unknown_Native_Function(unknown)");
 #else
         if (Environment.OSVersion.Platform != PlatformID.Win32NT)
@@ -144,31 +146,6 @@ public class ContinuousProfilerTests : TestHelper
         stackTrace.Add("My.Custom.Test.Namespace.ClassA.MethodA()");
 
         return stackTrace;
-#else
-        var stackTrace = new List<string>
-   {
-    "System.Threading.Thread.Sleep(System.Int32)",
-    "System.Threading.Thread.Sleep(System.TimeSpan)",
-    "TestApplication.ContinuousProfiler.Fs.ClassFs.methodFs(System.String)",
-    "My.Custom.Test.Namespace.TestDynamicClass.TryInvoke(System.Dynamic.InvokeBinder, System.Object[], System.Object&)",
-    "System.Dynamic.UpdateDelegates.UpdateAndExecuteVoid3[T0, T1, T2](System.Runtime.CompilerServices.CallSite, T0, T1, T2)",
-    "Unknown_Native_Function(unknown)",
-    "My.Custom.Test.Namespace.ClassENonStandardCharactersĄĘÓŁŻŹĆąęółżźśćĜЖᏳⳄʤǋₓڿଟഐቐ〣‿੮ᾭ_`1.GenericMethodDFromGenericClass[TMethod, TMethod2](TClass, TMethod, TMethod2)",
-    "My.Custom.Test.Namespace.GenericClassC`1.GenericMethodCFromGenericClass(T)",
-    "Unknown_Native_Function(unknown)",
-    "My.Custom.Test.Namespace.ClassA.<MethodAOthers>g__Action|7_0[T](System.Int32)",
-    "My.Custom.Test.Namespace.ClassA.MethodAOthers[T](System.String, System.Object, My.Custom.Test.Namespace.CustomClass, My.Custom.Test.Namespace.CustomStruct, My.Custom.Test.Namespace.CustomClass[], My.Custom.Test.Namespace.CustomStruct[], System.Collections.Generic.List`1[T])",
-    "My.Custom.Test.Namespace.ClassA.MethodAPointer(System.Int32*)",
-    "My.Custom.Test.Namespace.ClassA.MethodAFloats(System.Single, System.Double)",
-    "My.Custom.Test.Namespace.ClassA.MethodAInts(System.UInt16, System.Int16, System.UInt32, System.Int32, System.UInt64, System.Int64, System.IntPtr, System.UIntPtr)",
-    "My.Custom.Test.Namespace.ClassA.MethodABytes(System.Boolean, System.Char, System.SByte, System.Byte)",
-    "My.Custom.Test.Namespace.ClassA.MethodA()",
-    "Program.<Main>$(System.String[])",
-    "Unknown_Native_Function(unknown)",
-   };
-
-        return stackTrace;
-#endif
     }
 
     private bool ContainStackTraceForClassHierarchy(Profile profile, string expectedStackTrace)
