@@ -147,7 +147,7 @@ public class NLogBridgeTests : TestHelper
             Arguments = "--api nlog"
         });
 
-        var regex = new Regex(@"INFO  TestApplication\.NLogBridge\.Program - Hello, world at \d{1,2}\:\d{2}( [AP]M)?\!  TraceId=[a-f0-9]{32} SpanId=[a-f0-9]{16} TraceFlags=0[01]");
+        var regex = new Regex(@"INFO  TestApplication\.NLogBridge\.Program - Hello, world at \d{1,2}\:\d{2}(\s*[AP]M)?\!  TraceId=[a-f0-9]{32} SpanId=[a-f0-9]{16} TraceFlags=0[01]");
         var output = standardOutput;
         Assert.Matches(regex, output);
         Assert.Contains("ERROR  TestApplication.NLogBridge.Program - Exception occured", output);
