@@ -368,6 +368,7 @@ internal static class EnvironmentConfigurationTracerHelper
         [MethodImpl(MethodImplOptions.NoInlining)]
         public static TracerProviderBuilder AddZipkinExporter(TracerProviderBuilder builder, PluginManager pluginManager)
         {
+            Logger.Warning("Zipkin exporter is deprecated and it is enabled by the configuration. It will be removed in future versions. Consider migrating to OTLP exporter.");
             return builder.AddZipkinExporter(pluginManager.ConfigureTracesOptions);
         }
 
@@ -413,6 +414,7 @@ internal static class EnvironmentConfigurationTracerHelper
         [MethodImpl(MethodImplOptions.NoInlining)]
         public static TracerProviderBuilder AddZipkinExporter(TracerProviderBuilder builder, PluginManager pluginManager, BatchProcessorConfig batch, ZipkinExporterConfig zipkin)
         {
+            Logger.Warning("Zipkin exporter is deprecated and it is enabled by the configuration. It will be removed in future versions. Consider migrating to OTLP exporter.");
             return builder.AddZipkinExporter(options =>
             {
                 // Copy Auto settings to SDK settings
@@ -454,6 +456,7 @@ internal static class EnvironmentConfigurationTracerHelper
         [MethodImpl(MethodImplOptions.NoInlining)]
         public static TracerProviderBuilder AddZipkinExporter(TracerProviderBuilder builder, PluginManager pluginManager, ZipkinExporterConfig zipkin)
         {
+            Logger.Warning("Zipkin exporter is deprecated and it is enabled by the configuration. It will be removed in future versions. Consider migrating to OTLP exporter.");
             return builder.AddZipkinExporter(options =>
             {
                 // Copy Auto settings to SDK settings
