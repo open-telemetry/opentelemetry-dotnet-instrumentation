@@ -1,15 +1,18 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-    <PropertyGroup>
-        <TargetFramework>net10.0</TargetFramework>
-        <ImplicitUsings>enable</ImplicitUsings>
-        <Nullable>enable</Nullable>
-        <OutputType>Exe</OutputType>
-    </PropertyGroup>
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <OutputType>Exe</OutputType>
+    <!-- CA1303 Do not pass literals as localized parameters. It is internal tool, so no need to localize Console messages. -->
+    <NoWarn>$(NoWarn);CA1303</NoWarn>
+    <AnalysisLevel>latest-All</AnalysisLevel>
+  </PropertyGroup>
 
-    <ItemGroup>
-      <PackageReference Include="Valleysoft.DockerfileModel" />
-      <PackageReference Include="YamlDotNet" />
-    </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Valleysoft.DockerfileModel" />
+    <PackageReference Include="YamlDotNet" />
+  </ItemGroup>
 
 </Project>
