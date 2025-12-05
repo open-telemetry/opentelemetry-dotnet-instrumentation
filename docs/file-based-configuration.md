@@ -196,6 +196,7 @@ tracer_provider:
             # On .NET Framework, the grpc OTLP exporter protocol is not supported.
 
     # Batch processor for Zipkin
+    # This configuration is deprecated and will be removed in upcoming release.
     - batch:
         exporter:
           zipkin:
