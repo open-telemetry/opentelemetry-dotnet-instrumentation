@@ -7,7 +7,7 @@ using Vendors.YamlDotNet.Serialization;
 namespace OpenTelemetry.AutoInstrumentation.Configurations.FileBasedConfiguration;
 
 [EmptyObjectOnEmptyYaml]
-internal class Log4NetBridgeEnabled
+internal class LogBridgeEnabled
 {
     /// <summary>
     /// Gets or sets a value indicating whether the Log4Net bridge is enabled.

@@ -91,6 +91,11 @@ internal class LogSettings : Settings
         {
             EnableLog4NetBridge = logs?.Log4Net?.BridgeEnabled ?? false;
         }
+
+        if (EnabledInstrumentations.Contains(LogInstrumentation.NLog))
+        {
+            EnableNLogBridge = logs?.NLog?.BridgeEnabled ?? false;
+        }
     }
 
     private static List<LogExporter> ParseLogExporter(Configuration configuration)
