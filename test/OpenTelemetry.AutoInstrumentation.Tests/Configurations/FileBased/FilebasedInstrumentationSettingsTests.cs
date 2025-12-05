@@ -127,6 +127,10 @@ public class FilebasedInstrumentationSettingsTests
                 {
                     BridgeEnabled = true
                 },
+                NLog = new()
+                {
+                    BridgeEnabled = true
+                }
             }
         };
 
@@ -145,7 +149,9 @@ public class FilebasedInstrumentationSettingsTests
         Assert.NotNull(settings.EnabledInstrumentations);
         Assert.Contains(LogInstrumentation.ILogger, settings.EnabledInstrumentations);
         Assert.Contains(LogInstrumentation.Log4Net, settings.EnabledInstrumentations);
+        Assert.Contains(LogInstrumentation.NLog, settings.EnabledInstrumentations);
         Assert.True(settings.EnableLog4NetBridge);
+        Assert.True(settings.EnableNLogBridge);
     }
 
     [Fact]
