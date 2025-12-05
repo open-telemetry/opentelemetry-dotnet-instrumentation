@@ -23,6 +23,7 @@
 #include "rejit_handler.h"
 #include <unordered_set>
 #include "clr_helpers.h"
+#include "stack_capture_strategy.h"
 
 // Forward declaration
 namespace continuous_profiler
@@ -57,6 +58,8 @@ private:
     bool is_desktop_iis = false;
 
     continuous_profiler::ContinuousProfiler* continuousProfiler;
+    std::unique_ptr<continuous_profiler::IStackCaptureStrategy> stack_capture_strategy_;
+    HRESULT STDMETHODCALLTYPE ThreadAssignedToOSThread(ThreadID managedThreadId, DWORD osThreadId) override;
 
 
     //

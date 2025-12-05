@@ -1,8 +1,5 @@
 // Copyright The OpenTelemetry Authors
 // SPDX-License-Identifier: Apache-2.0
-
-#if NET
-
 using IntegrationTests.Helpers;
 using OpenTelemetry.Proto.Collector.Profiles.V1Development;
 using Xunit.Abstractions;
@@ -60,4 +57,3 @@ public class ContinuousProfilerContextTrackingTests : TestHelper
         return true;
     }
 }
-#endif
