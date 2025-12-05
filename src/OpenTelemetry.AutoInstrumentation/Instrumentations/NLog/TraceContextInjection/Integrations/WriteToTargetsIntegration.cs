@@ -24,7 +24,7 @@ namespace OpenTelemetry.AutoInstrumentation.Instrumentations.NLog.TraceContextIn
     typeName: "NLog.Logger",
     methodName: "WriteToTargets",
     returnTypeName: ClrNames.Void,
-    parameterTypeNames: new[] { "NLog.LogEventInfo", "NLog.Internal.ITargetWithFilterChain" },
+    parameterTypeNames: ["NLog.LogEventInfo", "NLog.Internal.ITargetWithFilterChain"],
     minimumVersion: "5.0.0",
     maximumVersion: "5.*.*",
     integrationName: "NLog",
