@@ -7,7 +7,7 @@ namespace TestApplication.NLogBridge;
 
 public class NLogLoggerProvider : ILoggerProvider
 {
-    public Microsoft.Extensions.Logging.ILogger CreateLogger(string categoryName)
+    public ILogger CreateLogger(string categoryName)
     {
         return new NLogLogger(categoryName);
     }
