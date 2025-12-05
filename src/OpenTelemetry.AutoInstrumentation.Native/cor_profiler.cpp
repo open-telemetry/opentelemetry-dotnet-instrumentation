@@ -1188,7 +1188,7 @@ bool CorProfiler::InitThreadSampler()
 #ifdef _WIN64
     // for net fx, the native thread ID is needed by stack capture
     // the profiler callback, ThreadAssignedToOSThread is not invoked for main thread
-    // for the following macihnery to work,
+    // for the following machinery to work,
     // 1 The thread needs to have executed managed code first
     // 2. InitThreadSampler must must be executing in context of main thread
     // InitThreadSampler is called from managed code
