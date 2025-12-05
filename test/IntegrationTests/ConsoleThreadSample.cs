@@ -15,5 +15,7 @@ internal class ConsoleThreadSample
 
     public string? ThreadName { get; set; }
 
+    public string Source { get; set; } = string.Empty;
+
     public bool SelectedForFrequentSampling { get; set; }
 }
