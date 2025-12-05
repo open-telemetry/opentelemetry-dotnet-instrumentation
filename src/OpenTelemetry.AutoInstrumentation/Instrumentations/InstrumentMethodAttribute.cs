@@ -8,7 +8,7 @@ namespace OpenTelemetry.AutoInstrumentation.Instrumentations;
 /// by modifying the method body with callbacks. Used to generate the integration definitions file.
 /// </summary>
 [AttributeUsage(AttributeTargets.Class | AttributeTargets.Assembly, AllowMultiple = true, Inherited = false)]
-internal class InstrumentMethodAttribute : Attribute
+internal sealed class InstrumentMethodAttribute : Attribute
 {
     public InstrumentMethodAttribute(string assemblyName, string typeName, string methodName, string returnTypeName, string[] parameterTypeNames, string minimumVersion, string maximumVersion, string integrationName, InstrumentationType type, IntegrationKind integrationKind = IntegrationKind.Direct)
     {

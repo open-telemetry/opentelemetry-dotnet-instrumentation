@@ -6,6 +6,6 @@ namespace OpenTelemetry.AutoInstrumentation.DuckTyping;
 /// <summary>
 /// Duck reverse method attribute
 /// </summary>
-internal class DuckReverseMethodAttribute : DuckAttributeBase
+internal sealed class DuckReverseMethodAttribute : DuckAttributeBase
 {
 }
