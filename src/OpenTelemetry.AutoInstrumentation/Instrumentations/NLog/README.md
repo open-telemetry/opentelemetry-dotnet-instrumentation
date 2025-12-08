@@ -44,7 +44,6 @@ The instrumentation intercepts NLog's internal `WriteToTargets` (NLog 5.x) and `
 #### Duck Types (`ILoggingEvent.cs`)
 - **`ILoggingEvent`**: Duck typing struct for NLog's LogEventInfo
 - **`LoggingLevel`**: Duck typing struct for NLog's LogLevel
-- **`IMessageTemplateParameters`**: Interface for structured logging parameters
 
 #### Bridge Components (`Bridge/`)
 - **`OpenTelemetryNLogConverter.cs`**: Converts NLog events to OpenTelemetry log records
@@ -146,7 +145,6 @@ The instrumentation uses duck typing to interact with NLog without requiring dir
 - **`ILoggingEvent`**: Maps to `NLog.LogEventInfo` (using `[DuckCopy]` struct)
 - **`LoggingLevel`**: Maps to `NLog.LogLevel` (using `[DuckCopy]` struct)
 - **`ILogEventInfoProperties`**: Maps to LogEventInfo.Properties for trace context injection
-- **`IMessageTemplateParameters`**: Maps to structured logging parameters
 
 ## Property Handling
 

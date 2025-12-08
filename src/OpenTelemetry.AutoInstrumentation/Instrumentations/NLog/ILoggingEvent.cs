@@ -88,19 +88,3 @@ internal struct LoggingLevel
     public string Name;
 }
 
-/// <summary>
-/// Duck typing interface for NLog's message template structure.
-/// This represents structured logging information when using message templates.
-/// </summary>
-internal interface IMessageTemplateParameters : IDuckType
-{
-    /// <summary>
-    /// Gets the message template format string.
-    /// </summary>
-    public string? MessageTemplate { get; }
-
-    /// <summary>
-    /// Gets the parameters for the message template.
-    /// </summary>
-    public object?[]? Parameters { get; }
-}
