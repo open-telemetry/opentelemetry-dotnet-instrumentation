@@ -15,11 +15,13 @@ internal partial class EnvVarTypeConverter : IYamlTypeConverter
     [
         typeof(string),
         typeof(int),
+        typeof(uint),
         typeof(long),
         typeof(float),
         typeof(double),
         typeof(bool),
         typeof(int?),
+        typeof(uint?),
         typeof(object),
     ];
 
@@ -54,11 +56,13 @@ internal partial class EnvVarTypeConverter : IYamlTypeConverter
             {
                 Type t when t == typeof(string) => replacedValue,
                 Type t when t == typeof(int) => int.Parse(replacedValue),
+                Type t when t == typeof(uint) => uint.Parse(replacedValue),
                 Type t when t == typeof(long) => long.Parse(replacedValue),
                 Type t when t == typeof(float) => float.Parse(replacedValue, CultureInfo.InvariantCulture),
                 Type t when t == typeof(double) => double.Parse(replacedValue, CultureInfo.InvariantCulture),
                 Type t when t == typeof(bool) => bool.Parse(replacedValue),
                 Type t when t == typeof(int?) => int.Parse(replacedValue),
+                Type t when t == typeof(uint?) => uint.Parse(replacedValue),
                 Type t when t == typeof(object) => replacedValue,
                 _ => throw new NotSupportedException($"Type {type.FullName} is not supported by the converter")
             };
