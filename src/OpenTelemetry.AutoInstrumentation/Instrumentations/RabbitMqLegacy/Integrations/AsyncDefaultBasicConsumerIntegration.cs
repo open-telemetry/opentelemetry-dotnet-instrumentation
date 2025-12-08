@@ -21,7 +21,7 @@ namespace OpenTelemetry.AutoInstrumentation.Instrumentations.RabbitMqLegacy.Inte
     maximumVersion: IntegrationConstants.Max5SupportedVersion,
     integrationName: IntegrationConstants.RabbitMqByteCodeIntegrationName,
     type: InstrumentationType.Trace,
-    integrationKind: IntegrationKind.Derived)]
+    kind: IntegrationKind.Derived)]
 [InstrumentMethod(
     assemblyName: IntegrationConstants.RabbitMqAssemblyName,
     typeName: IntegrationConstants.AsyncDefaultBasicConsumerTypeName,
@@ -32,7 +32,7 @@ namespace OpenTelemetry.AutoInstrumentation.Instrumentations.RabbitMqLegacy.Inte
     maximumVersion: IntegrationConstants.Max6SupportedVersion,
     integrationName: IntegrationConstants.RabbitMqByteCodeIntegrationName,
     type: InstrumentationType.Trace,
-    integrationKind: IntegrationKind.Derived)]
+    kind: IntegrationKind.Derived)]
 public static class AsyncDefaultBasicConsumerIntegration
 {
     internal static CallTargetState OnMethodBegin<TTarget, TBasicProperties, TBody>(TTarget instance, string? consumerTag, ulong deliveryTag, bool redelivered, string? exchange, string? routingKey, TBasicProperties properties, TBody body)
