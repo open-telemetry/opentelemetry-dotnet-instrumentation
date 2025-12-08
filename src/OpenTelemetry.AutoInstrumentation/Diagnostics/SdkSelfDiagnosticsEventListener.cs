@@ -4,6 +4,7 @@
 // Source originated from https://github.com/open-telemetry/opentelemetry-dotnet/blob/23609730ddd73c860553de847e67c9b2226cff94/src/OpenTelemetry/Internal/SelfDiagnosticsEventListener.cs
 
 using System.Diagnostics.Tracing;
+using System.Globalization;
 using OpenTelemetry.AutoInstrumentation.Logging;
 
 namespace OpenTelemetry.AutoInstrumentation.Diagnostics;
@@ -92,7 +93,7 @@ internal class SdkSelfDiagnosticsEventListener : EventListener
             payloadArray = Array.Empty<object>();
         }
 
-        var message = eventData.Message != null ? string.Format(eventData.Message ?? string.Empty, payloadArray) : string.Empty;
+        var message = eventData.Message != null ? string.Format(CultureInfo.InvariantCulture, eventData.Message ?? string.Empty, payloadArray) : string.Empty;
 
         switch (eventData.Level)
         {
