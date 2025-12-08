@@ -148,7 +148,7 @@ internal class OpenTelemetryLog4NetAppender
                 continue;
             }
 
-            if (key.StartsWith("log4net:") ||
+            if (key.StartsWith("log4net:", StringComparison.Ordinal) ||
                 key == LogsTraceContextInjectionConstants.SpanIdPropertyName ||
                 key == LogsTraceContextInjectionConstants.TraceIdPropertyName ||
                 key == LogsTraceContextInjectionConstants.TraceFlagsPropertyName)

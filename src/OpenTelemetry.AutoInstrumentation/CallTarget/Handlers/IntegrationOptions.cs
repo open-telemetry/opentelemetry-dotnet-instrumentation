@@ -36,7 +36,7 @@ internal static class IntegrationOptions<TIntegration, TTarget>
         }
         else if (exception is FileLoadException fileLoadException)
         {
-            if (fileLoadException.FileName != null && (fileLoadException.FileName.StartsWith("System.Diagnostics.DiagnosticSource") || fileLoadException.FileName.StartsWith("System.Runtime.CompilerServices.Unsafe")))
+            if (fileLoadException.FileName != null && (fileLoadException.FileName.StartsWith("System.Diagnostics.DiagnosticSource", StringComparison.Ordinal) || fileLoadException.FileName.StartsWith("System.Runtime.CompilerServices.Unsafe", StringComparison.Ordinal)))
             {
                 Log.Warning($"FileLoadException for '{fileLoadException.FileName}' has been detected, the integration <{typeof(TIntegration)}, {typeof(TTarget)}> will be disabled.");
                 _disableIntegration = true;

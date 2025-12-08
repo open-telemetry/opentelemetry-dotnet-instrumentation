@@ -434,7 +434,7 @@ internal static partial class DuckType
             // We omit target methods with different names.
             if (candidateMethod.Name != name)
             {
-                if (!useRelaxedNameComparison || !candidateMethod.Name.EndsWith("." + name))
+                if (!useRelaxedNameComparison || !candidateMethod.Name.EndsWith("." + name, StringComparison.Ordinal))
                 {
                     continue;
                 }
