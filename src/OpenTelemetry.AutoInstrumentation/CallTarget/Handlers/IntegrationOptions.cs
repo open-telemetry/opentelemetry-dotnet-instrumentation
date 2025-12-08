@@ -12,7 +12,7 @@ internal static class IntegrationOptions<TIntegration, TTarget>
 {
     private static readonly IOtelLogger Log = OtelLogging.GetLogger();
 
-    private static volatile bool _disableIntegration = false;
+    private static volatile bool _disableIntegration;
 
     internal static bool IsIntegrationEnabled => !_disableIntegration;
 

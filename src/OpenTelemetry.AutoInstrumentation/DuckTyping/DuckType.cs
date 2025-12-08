@@ -1162,7 +1162,7 @@ internal static partial class DuckType
         /// </summary>
         public static readonly Type Type = typeof(T);
 
-        private static CreateTypeResult _fastPath = default;
+        private static CreateTypeResult _fastPath;
 
         /// <summary>
         /// Gets the proxy type for a target type using the T proxy definition
