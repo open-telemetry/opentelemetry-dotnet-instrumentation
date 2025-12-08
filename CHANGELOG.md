@@ -27,7 +27,7 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 ### Deprecated
 
 - Deprecate support for `OpenTracing`.
-- Deprecate support for Zipkin exporter.
+- Deprecate support for Zipkin exporter. Use OTLP exporter instead.
 
 ### Removed
 
