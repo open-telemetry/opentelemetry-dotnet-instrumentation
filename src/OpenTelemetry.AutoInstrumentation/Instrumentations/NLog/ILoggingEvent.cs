@@ -87,4 +87,3 @@ internal struct LoggingLevel
     /// </summary>
     public string Name;
 }
-
