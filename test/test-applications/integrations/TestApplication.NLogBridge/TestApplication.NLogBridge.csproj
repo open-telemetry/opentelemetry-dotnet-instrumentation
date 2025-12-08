@@ -1,6 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <ItemGroup>
       <PackageReference Include="NLog" VersionOverride="$(LibraryVersion)" />
+      <PackageReference Include="NLog.Extensions.Logging" VersionOverride="$(LibraryVersion)" />
       <PackageReference Include="Microsoft.Extensions.Logging"/>
       <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" />
       <PackageReference Include="System.Diagnostics.DiagnosticSource" />
