@@ -93,7 +93,7 @@ internal class SdkSelfDiagnosticsEventListener : EventListener
             payloadArray = Array.Empty<object>();
         }
 
-        var message = eventData.Message != null ? string.Format(CultureInfo.InvariantCulture, eventData.Message ?? string.Empty, payloadArray) : string.Empty;
+        var message = eventData.Message != null ? string.Format(CultureInfo.InvariantCulture, eventData.Message, payloadArray) : string.Empty;
 
         switch (eventData.Level)
         {
