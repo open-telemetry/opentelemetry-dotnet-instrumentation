@@ -421,7 +421,11 @@ internal static partial class DuckType
                 else
                 {
                     // Nested types are separated with a "." on explicit implementation.
+#if NET
+                    interfaceTypeName = interfaceTypeName.Replace("+", ".", StringComparison.Ordinal);
+#else
                     interfaceTypeName = interfaceTypeName.Replace("+", ".");
+#endif
 
                     name = interfaceTypeName + "." + name;
                 }
@@ -430,7 +434,7 @@ internal static partial class DuckType
             // We omit target methods with different names.
             if (candidateMethod.Name != name)
             {
-                if (!useRelaxedNameComparison || !candidateMethod.Name.EndsWith("." + name))
+                if (!useRelaxedNameComparison || !candidateMethod.Name.EndsWith("." + name, StringComparison.Ordinal))
                 {
                     continue;
                 }

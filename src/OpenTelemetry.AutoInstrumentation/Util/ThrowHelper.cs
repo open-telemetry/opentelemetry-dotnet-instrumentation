@@ -47,11 +47,6 @@ internal class ThrowHelper
     [MethodImpl(MethodImplOptions.NoInlining)]
     [DebuggerHidden]
     [DoesNotReturn]
-    internal static void ThrowException(string message) => throw new Exception(message);
-
-    [MethodImpl(MethodImplOptions.NoInlining)]
-    [DebuggerHidden]
-    [DoesNotReturn]
     internal static void ThrowInvalidCastException(string message) => throw new InvalidCastException(message);
 
     [MethodImpl(MethodImplOptions.NoInlining)]
@@ -67,5 +62,7 @@ internal class ThrowHelper
     [MethodImpl(MethodImplOptions.NoInlining)]
     [DebuggerHidden]
     [DoesNotReturn]
+#pragma warning disable CA2201 // Do not raise reserved exception types. Needed in DuckTyping scenarios.
     internal static void ThrowNullReferenceException(string message) => throw new NullReferenceException(message);
+#pragma warning restore CA2201 // Do not raise reserved exception types. Needed in DuckTyping scenarios.
 }

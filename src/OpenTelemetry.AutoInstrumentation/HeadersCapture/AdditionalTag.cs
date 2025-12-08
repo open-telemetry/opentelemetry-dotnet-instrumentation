@@ -50,8 +50,13 @@ internal class AdditionalTag
         unchecked
         {
             var hash = 17;
+#if NET
+            hash = (hash * 23) + (Key != null ? Key.GetHashCode(StringComparison.Ordinal) : 0);
+            hash = (hash * 23) + (TagName != null ? TagName.GetHashCode(StringComparison.Ordinal) : 0);
+#else
             hash = (hash * 23) + (Key != null ? Key.GetHashCode() : 0);
             hash = (hash * 23) + (TagName != null ? TagName.GetHashCode() : 0);
+#endif
             return hash;
         }
     }

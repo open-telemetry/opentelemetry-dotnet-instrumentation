@@ -367,12 +367,21 @@ internal static partial class DuckType
             AssemblyName asmName = typeToDelegateTo.Assembly.GetName();
             assembly = asmName.Name ?? string.Empty;
             byte[] pbToken = asmName.GetPublicKeyToken() ?? Array.Empty<byte>();
+#if NET
+            assembly += "__" + BitConverter.ToString(pbToken).Replace("-", string.Empty, StringComparison.Ordinal);
+            assembly = assembly.Replace(".", "_", StringComparison.Ordinal).Replace("+", "__", StringComparison.Ordinal);
+#else
             assembly += "__" + BitConverter.ToString(pbToken).Replace("-", string.Empty);
             assembly = assembly.Replace(".", "_").Replace("+", "__");
+#endif
         }
 
         // Create a valid type name that can be used as a member of a class. (BenchmarkDotNet fails if is an invalid name)
+#if NET
+        string proxyTypeName = $"{assembly}.{typeToDelegateTo.FullName?.Replace(".", "_", StringComparison.Ordinal).Replace("+", "__", StringComparison.Ordinal)}.{typeToDeriveFrom.FullName?.Replace(".", "_", StringComparison.Ordinal).Replace("+", "__", StringComparison.Ordinal)}_{++_typeCount}";
+#else
         string proxyTypeName = $"{assembly}.{typeToDelegateTo.FullName?.Replace(".", "_").Replace("+", "__")}.{typeToDeriveFrom.FullName?.Replace(".", "_").Replace("+", "__")}_{++_typeCount}";
+#endif
 
         // Create Type
         proxyTypeBuilder = moduleBuilder.DefineType(
@@ -408,7 +417,7 @@ internal static partial class DuckType
         return moduleBuilder;
     }
 
-    private static FieldInfo CreateIDuckTypeImplementation(TypeBuilder proxyTypeBuilder, Type targetType)
+    private static FieldBuilder CreateIDuckTypeImplementation(TypeBuilder proxyTypeBuilder, Type targetType)
     {
         Type instanceType = targetType;
         if (!UseDirectAccessTo(proxyTypeBuilder, targetType))
@@ -1153,7 +1162,7 @@ internal static partial class DuckType
         /// </summary>
         public static readonly Type Type = typeof(T);
 
-        private static CreateTypeResult _fastPath = default;
+        private static CreateTypeResult _fastPath;
 
         /// <summary>
         /// Gets the proxy type for a target type using the T proxy definition
