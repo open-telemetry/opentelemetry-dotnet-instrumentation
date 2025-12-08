@@ -367,12 +367,21 @@ internal static partial class DuckType
             AssemblyName asmName = typeToDelegateTo.Assembly.GetName();
             assembly = asmName.Name ?? string.Empty;
             byte[] pbToken = asmName.GetPublicKeyToken() ?? Array.Empty<byte>();
+#if NET
+            assembly += "__" + BitConverter.ToString(pbToken).Replace("-", string.Empty, StringComparison.Ordinal);
+            assembly = assembly.Replace(".", "_", StringComparison.Ordinal).Replace("+", "__", StringComparison.Ordinal);
+#else
             assembly += "__" + BitConverter.ToString(pbToken).Replace("-", string.Empty);
             assembly = assembly.Replace(".", "_").Replace("+", "__");
+#endif
         }
 
         // Create a valid type name that can be used as a member of a class. (BenchmarkDotNet fails if is an invalid name)
+#if NET
+        string proxyTypeName = $"{assembly}.{typeToDelegateTo.FullName?.Replace(".", "_", StringComparison.Ordinal).Replace("+", "__", StringComparison.Ordinal)}.{typeToDeriveFrom.FullName?.Replace(".", "_", StringComparison.Ordinal).Replace("+", "__", StringComparison.Ordinal)}_{++_typeCount}";
+#else
         string proxyTypeName = $"{assembly}.{typeToDelegateTo.FullName?.Replace(".", "_").Replace("+", "__")}.{typeToDeriveFrom.FullName?.Replace(".", "_").Replace("+", "__")}_{++_typeCount}";
+#endif
 
         // Create Type
         proxyTypeBuilder = moduleBuilder.DefineType(
