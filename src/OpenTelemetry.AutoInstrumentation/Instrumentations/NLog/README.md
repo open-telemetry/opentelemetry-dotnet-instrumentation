@@ -55,8 +55,13 @@ The instrumentation intercepts NLog's internal `WriteToTargets` (NLog 5.x) and `
 #### Integrations
 - **`WriteToTargetsIntegration.cs`**: For NLog 5.3.0+ (uses `ITargetWithFilterChain` interface)
 - **`WriteToTargetsLegacyIntegration.cs`**: For NLog 5.0.0-5.2.x (uses `TargetWithFilterChain` class)
+- **`WriteToTargetsWithWrapperTypeIntegration.cs`**: For NLog 5.3.0+ with wrapperType parameter
+- **`WriteToTargetsWithWrapperTypeLegacyIntegration.cs`**: For NLog 5.0.0-5.2.x with wrapperType parameter
 - **`WriteLogEventToTargetsIntegration.cs`**: For NLog 6.x (method renamed to `WriteLogEventToTargets`)
+- **`WriteLogEventToTargetsWithWrapperTypeIntegration.cs`**: For NLog 6.x with wrapperType parameter
 - **`NLogIntegrationHelper.cs`**: Shared helper with common trace context injection and bridge logic
+
+The wrapperType integrations handle calls made via `Logger.Log(Type wrapperType, LogEventInfo logEvent)`.
 
 #### Supporting Types
 - **`ILogEventInfoProperties.cs`**: Duck-typed interface for accessing LogEventInfo.Properties
@@ -231,4 +236,7 @@ export OTEL_DOTNET_AUTO_LOG_DIRECTORY=/path/to/logs
 - Builds expression trees dynamically for efficient log record creation
 - Follows the same patterns as Log4Net instrumentation for consistency
 - Designed to be thread-safe and performant in high-throughput scenarios
-- Three separate integrations handle NLog version differences (5.0-5.2, 5.3+, 6.x)
+- Six separate integrations handle NLog version differences and method overloads:
+  - 2 for NLog 5.0-5.2 (with and without wrapperType parameter)
+  - 2 for NLog 5.3+ (with and without wrapperType parameter)
+  - 2 for NLog 6.x (with and without wrapperType parameter)
