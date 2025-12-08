@@ -166,7 +166,11 @@ internal class OpenTelemetryLog4NetAppender
         {
             var methodInfo = typeof(LoggerProvider)
                 .GetMethod("GetLogger", BindingFlags.NonPublic | BindingFlags.Instance, null, new[] { typeof(string) }, null)!;
+#if NET
+            return methodInfo.CreateDelegate<Func<string?, object?>>(loggerProvider);
+#else
             return (Func<string?, object?>)methodInfo.CreateDelegate(typeof(Func<string?, object?>), loggerProvider);
+#endif
         }
         catch (Exception e)
         {

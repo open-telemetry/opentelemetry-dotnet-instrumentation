@@ -115,7 +115,11 @@ public static class ProducerDeliveryHandlerActionIntegration
                     BindingFlags.Static | BindingFlags.NonPublic)!;
 
             var constructedMethod = method.MakeGenericMethod(typeof(TActionOfDeliveryReport).GetGenericArguments());
+#if NET
+            Delegate = constructedMethod.CreateDelegate<CreateWrapperDelegate>();
+#else
             Delegate = (CreateWrapperDelegate)constructedMethod.CreateDelegate(typeof(CreateWrapperDelegate));
+#endif
         }
 
         private delegate TActionOfDeliveryReport CreateWrapperDelegate(TActionOfDeliveryReport action, Activity activity);
