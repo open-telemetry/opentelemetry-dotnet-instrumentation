@@ -33,7 +33,7 @@ internal static class VersionComparer
 
     public static bool IsNet10Version(string versionString)
     {
-        return versionString.StartsWith("10");
+        return versionString.StartsWith("10", StringComparison.Ordinal);
     }
 
     private static bool CompareVersion(string expectedVersion, string? extractedVersion)

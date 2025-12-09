@@ -168,6 +168,6 @@ internal static partial class DockerfileAnalyzer
 
     private static RunInstruction? GetDotnetInstallingInstruction(Dockerfile dockerfile)
     {
-        return dockerfile.Items.OfType<RunInstruction>().SingleOrDefault(i => i.ToString().Contains("./dotnet-install.sh"));
+        return dockerfile.Items.OfType<RunInstruction>().SingleOrDefault(i => i.ToString().Contains("./dotnet-install.sh", StringComparison.Ordinal));
     }
 }

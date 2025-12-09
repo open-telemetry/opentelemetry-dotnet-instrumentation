@@ -103,7 +103,7 @@ internal static class OpenTelemetryLogHelpers
 
         var instanceVar = Expression.Variable(bodySetterMethodInfo.DeclaringType!, "instance");
 
-        var constructorInfo = logRecordDataType.GetConstructor(BindingFlags.Instance | BindingFlags.Public, null, CallingConventions.HasThis, new[] { typeof(Activity) }, null)!;
+        var constructorInfo = logRecordDataType.GetConstructor(BindingFlags.Instance | BindingFlags.Public, null, CallingConventions.HasThis, [typeof(Activity)], null)!;
         var assignInstanceVar = Expression.Assign(instanceVar, Expression.New(constructorInfo, activity));
         var setBody = Expression.IfThen(Expression.NotEqual(body, Expression.Constant(null)), Expression.Call(instanceVar, bodySetterMethodInfo, body));
         var setTimestamp = Expression.Call(instanceVar, timestampSetterMethodInfo, timestamp);
@@ -111,7 +111,7 @@ internal static class OpenTelemetryLogHelpers
         var setSeverityLevel = Expression.Call(instanceVar, severityLevelSetterMethodInfo, Expression.Convert(severityLevel, typeof(Nullable<>).MakeGenericType(severityType)));
 
         return Expression.Block(
-            new[] { instanceVar },
+            [instanceVar],
             assignInstanceVar,
             setBody,
             setTimestamp,
@@ -149,7 +149,7 @@ internal static class OpenTelemetryLogHelpers
         if (constructorInfo == null)
         {
             // Try to find a constructor that takes an int (capacity)
-            constructorInfo = logRecordAttributesListType.GetConstructor(new[] { typeof(int) });
+            constructorInfo = logRecordAttributesListType.GetConstructor([typeof(int)]);
             if (constructorInfo != null)
             {
                 assignInstanceVar = Expression.Assign(instanceVar, Expression.New(constructorInfo, Expression.Constant(4)));
@@ -169,7 +169,7 @@ internal static class OpenTelemetryLogHelpers
             assignInstanceVar = Expression.Assign(instanceVar, Expression.New(constructorInfo));
         }
 
-        var addAttributeMethodInfo = logRecordAttributesListType.GetMethod("Add", new[] { typeof(string), typeof(object) })!;
+        var addAttributeMethodInfo = logRecordAttributesListType.GetMethod("Add", [typeof(string), typeof(object)])!;
         var recordExceptionMethodInfo = logRecordAttributesListType.GetMethod("RecordException", BindingFlags.Instance | BindingFlags.Public)!;
 
         var expressions = new List<Expression> { assignInstanceVar };
@@ -197,7 +197,7 @@ internal static class OpenTelemetryLogHelpers
         expressions.Add(instanceVar);
 
         return Expression.Block(
-            new[] { instanceVar },
+            [instanceVar],
             expressions);
     }
 
@@ -241,7 +241,7 @@ internal static class OpenTelemetryLogHelpers
         return Expression.IfThen(
             Expression.NotEqual(properties, Expression.Constant(null)),
             Expression.Block(
-                new[] { enumeratorVar, currentVar },
+                [enumeratorVar, currentVar],
                 Expression.Assign(enumeratorVar, Expression.Call(properties, getEnumeratorMethod)),
                 loop));
     }
@@ -276,7 +276,7 @@ internal static class OpenTelemetryLogHelpers
         return Expression.IfThen(
             Expression.NotEqual(argsParam, Expression.Constant(null)),
             Expression.Block(
-                new[] { indexVar },
+                [indexVar],
                 Expression.Assign(indexVar, Expression.Constant(0)),
                 loop));
     }
@@ -314,7 +314,7 @@ internal static class OpenTelemetryLogHelpers
         var attributesExpression = BuildLogRecordAttributes(logRecordAttributesListType, exception, properties, args, renderedMessage);
 
         // Get the EmitLog method from the logger
-        var emitLogRecordMethod = loggerType.GetMethod("EmitLog", BindingFlags.Instance | BindingFlags.Public, null, new[] { logRecordDataType.MakeByRefType(), logRecordAttributesListType.MakeByRefType() }, null)!;
+        var emitLogRecordMethod = loggerType.GetMethod("EmitLog", BindingFlags.Instance | BindingFlags.Public, null, [logRecordDataType.MakeByRefType(), logRecordAttributesListType.MakeByRefType()], null)!;
 
         // Create local variables to hold the log record and attributes
         // This is required for .NET Framework compatibility - expression trees with
@@ -328,7 +328,7 @@ internal static class OpenTelemetryLogHelpers
         // 2. Creates attributes and assigns to local variable
         // 3. Calls EmitLog with the local variables by reference
         var completeExpression = Expression.Block(
-            new[] { logRecordVar, attributesVar },
+            [logRecordVar, attributesVar],
             Expression.Assign(logRecordVar, logRecordExpression),
             Expression.Assign(attributesVar, attributesExpression),
             Expression.Call(

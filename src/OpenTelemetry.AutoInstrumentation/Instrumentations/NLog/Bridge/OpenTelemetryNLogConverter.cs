@@ -49,7 +49,7 @@ internal class OpenTelemetryNLogConverter
     [DuckReverseMethod]
     public string Name { get; set; } = nameof(OpenTelemetryNLogConverter);
 
-    [DuckReverseMethod(ParameterTypeNames = new[] { "NLog.LogEventInfo, NLog" })]
+    [DuckReverseMethod(ParameterTypeNames = ["NLog.LogEventInfo, NLog"])]
     public void WriteLogEvent(ILoggingEvent loggingEvent)
     {
         if (Sdk.SuppressInstrumentation || loggingEvent.Level.Ordinal == OffOrdinal)
@@ -217,7 +217,7 @@ internal class OpenTelemetryNLogConverter
         try
         {
             var methodInfo = typeof(LoggerProvider)
-                .GetMethod("GetLogger", BindingFlags.NonPublic | BindingFlags.Instance, null, new[] { typeof(string) }, null)!;
+                .GetMethod("GetLogger", BindingFlags.NonPublic | BindingFlags.Instance, null, [typeof(string)], null)!;
             return (Func<string?, object?>)methodInfo.CreateDelegate(typeof(Func<string?, object?>), loggerProvider);
         }
         catch (Exception e)

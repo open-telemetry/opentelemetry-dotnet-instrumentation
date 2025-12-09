@@ -17,7 +17,13 @@ internal class DotNetLogs
     /// Gets or sets the Log4Net logs instrumentation configuration.
     /// </summary>
     [YamlMember(Alias = "log4net")]
-    public Log4NetBridgeEnabled? Log4Net { get; set; }
+    public LogBridgeEnabled? Log4Net { get; set; }
+
+    /// <summary>
+    /// Gets or sets the Log4Net logs instrumentation configuration.
+    /// </summary>
+    [YamlMember(Alias = "nlog")]
+    public LogBridgeEnabled? NLog { get; set; }
 
     /// <summary>
     /// Returns the list of enabled log instrumentations.
@@ -34,6 +40,11 @@ internal class DotNetLogs
         if (Log4Net != null)
         {
             result.Add(LogInstrumentation.Log4Net);
+        }
+
+        if (NLog != null)
+        {
+            result.Add(LogInstrumentation.NLog);
         }
 
         return result;
