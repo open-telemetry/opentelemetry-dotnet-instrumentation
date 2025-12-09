@@ -8,6 +8,6 @@ namespace OpenTelemetry.AutoInstrumentation.CallTarget;
 /// should execute under the current synchronization context/task scheduler.
 /// </summary>
 [AttributeUsage(AttributeTargets.Method)]
-internal class PreserveContextAttribute : Attribute
+internal sealed class PreserveContextAttribute : Attribute
 {
 }

@@ -86,7 +86,9 @@ public static class ProducerDeliveryHandlerActionIntegration
             {
                 if (deliveryReport.Error is { IsError: true })
                 {
+#pragma warning disable CA2201 // We need to create a generic exception here to capture error information
                     activity.SetException(new Exception(deliveryReport.Error.ToString()));
+#pragma warning restore CA2201 // We need to create a generic exception here to capture error information
                 }
 
                 KafkaInstrumentation.SetDeliveryResults(activity, deliveryReport);
@@ -115,7 +117,11 @@ public static class ProducerDeliveryHandlerActionIntegration
                     BindingFlags.Static | BindingFlags.NonPublic)!;
 
             var constructedMethod = method.MakeGenericMethod(typeof(TActionOfDeliveryReport).GetGenericArguments());
+#if NET
+            Delegate = constructedMethod.CreateDelegate<CreateWrapperDelegate>();
+#else
             Delegate = (CreateWrapperDelegate)constructedMethod.CreateDelegate(typeof(CreateWrapperDelegate));
+#endif
         }
 
         private delegate TActionOfDeliveryReport CreateWrapperDelegate(TActionOfDeliveryReport action, Activity activity);
