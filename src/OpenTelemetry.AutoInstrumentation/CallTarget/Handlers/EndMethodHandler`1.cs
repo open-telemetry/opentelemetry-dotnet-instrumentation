@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: Apache-2.0
 
 using System.Diagnostics;
-using System.Reflection.Emit;
 using System.Runtime.CompilerServices;
 using OpenTelemetry.AutoInstrumentation.CallTarget.Handlers.Continuations;
 
@@ -17,10 +16,10 @@ internal static class EndMethodHandler<TIntegration, TTarget, TReturn>
 
     static EndMethodHandler()
     {
-        Type returnType = typeof(TReturn);
+        var returnType = typeof(TReturn);
         try
         {
-            DynamicMethod? dynMethod = IntegrationMapper.CreateEndMethodDelegate(typeof(TIntegration), typeof(TTarget), returnType);
+            var dynMethod = IntegrationMapper.CreateEndMethodDelegate(typeof(TIntegration), typeof(TTarget), returnType);
             if (dynMethod != null)
             {
                 _invokeDelegate = (InvokeDelegate)dynMethod.CreateDelegate(typeof(InvokeDelegate));
@@ -83,7 +82,7 @@ internal static class EndMethodHandler<TIntegration, TTarget, TReturn>
 
         if (_invokeDelegate != null)
         {
-            CallTargetReturn<TReturn?> returnWrap = _invokeDelegate(instance, returnValue, exception, in state);
+            var returnWrap = _invokeDelegate(instance, returnValue, exception, in state);
             returnValue = returnWrap.GetReturnValue();
         }
 

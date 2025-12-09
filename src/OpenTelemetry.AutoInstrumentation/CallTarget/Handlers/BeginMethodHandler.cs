@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: Apache-2.0
 
 using System.Diagnostics;
-using System.Reflection.Emit;
 using System.Runtime.CompilerServices;
 
 #pragma warning disable SA1649 // File name must match first type name
@@ -17,7 +16,7 @@ internal static class BeginMethodHandler<TIntegration, TTarget>
     {
         try
         {
-            DynamicMethod? dynMethod = IntegrationMapper.CreateBeginMethodDelegate(typeof(TIntegration), typeof(TTarget), []);
+            var dynMethod = IntegrationMapper.CreateBeginMethodDelegate(typeof(TIntegration), typeof(TTarget), []);
             if (dynMethod != null)
             {
                 _invokeDelegate = (InvokeDelegate)dynMethod.CreateDelegate(typeof(InvokeDelegate));

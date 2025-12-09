@@ -41,7 +41,7 @@ internal static partial class DuckType
 
         if (type.IsGenericType && !type.IsGenericTypeDefinition)
         {
-            foreach (Type t in type.GetGenericArguments())
+            foreach (var t in type.GetGenericArguments())
             {
                 if (!t.IsVisible)
                 {

@@ -141,7 +141,7 @@ internal static partial class DuckType
     /// <returns>ModuleBuilder instance</returns>
     private static ModuleBuilder GetModuleBuilder(Type targetType, bool isVisible)
     {
-        Assembly targetAssembly = targetType.Assembly;
+        var targetAssembly = targetType.Assembly;
 
         if (!isVisible)
         {

@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: Apache-2.0
 
 using System.Diagnostics;
-using System.Reflection.Emit;
 using System.Runtime.CompilerServices;
 
 namespace OpenTelemetry.AutoInstrumentation.CallTarget.Handlers;
@@ -15,7 +14,7 @@ internal static class BeginMethodSlowHandler<TIntegration, TTarget>
     {
         try
         {
-            DynamicMethod? dynMethod = IntegrationMapper.CreateSlowBeginMethodDelegate(typeof(TIntegration), typeof(TTarget));
+            var dynMethod = IntegrationMapper.CreateSlowBeginMethodDelegate(typeof(TIntegration), typeof(TTarget));
             if (dynMethod != null)
             {
                 _invokeDelegate = (InvokeDelegate)dynMethod.CreateDelegate(typeof(InvokeDelegate));

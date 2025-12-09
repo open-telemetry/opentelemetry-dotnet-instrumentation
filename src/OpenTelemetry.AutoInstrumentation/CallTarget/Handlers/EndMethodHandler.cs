@@ -1,7 +1,6 @@
 // Copyright The OpenTelemetry Authors
 // SPDX-License-Identifier: Apache-2.0
 
-using System.Reflection.Emit;
 using System.Runtime.CompilerServices;
 
 namespace OpenTelemetry.AutoInstrumentation.CallTarget.Handlers;
@@ -14,7 +13,7 @@ internal static class EndMethodHandler<TIntegration, TTarget>
     {
         try
         {
-            DynamicMethod? dynMethod = IntegrationMapper.CreateEndMethodDelegate(typeof(TIntegration), typeof(TTarget));
+            var dynMethod = IntegrationMapper.CreateEndMethodDelegate(typeof(TIntegration), typeof(TTarget));
             if (dynMethod != null)
             {
                 _invokeDelegate = (InvokeDelegate)dynMethod.CreateDelegate(typeof(InvokeDelegate));

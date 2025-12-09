@@ -38,7 +38,7 @@ internal class IntegrationMapper
             "Creating BeginMethod Dynamic Method for '{0}' integration. [Target={1}]",
             integrationType.FullName,
             targetType.FullName);
-        MethodInfo? onMethodBeginMethodInfo = integrationType.GetMethod(BeginMethodName, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static);
+        var onMethodBeginMethodInfo = integrationType.GetMethod(BeginMethodName, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static);
         if (onMethodBeginMethodInfo is null)
         {
             Log.Debug(
@@ -53,13 +53,13 @@ internal class IntegrationMapper
             ThrowHelper.ThrowArgumentException($"The return type of the method: {BeginMethodName} in type: {integrationType.FullName} is not {nameof(CallTargetState)}");
         }
 
-        Type[] genericArgumentsTypes = onMethodBeginMethodInfo.GetGenericArguments();
+        var genericArgumentsTypes = onMethodBeginMethodInfo.GetGenericArguments();
         if (genericArgumentsTypes.Length < 1)
         {
             ThrowHelper.ThrowArgumentException($"The method: {BeginMethodName} in type: {integrationType.FullName} doesn't have the generic type for the instance type.");
         }
 
-        ParameterInfo[] onMethodBeginParameters = onMethodBeginMethodInfo.GetParameters();
+        var onMethodBeginParameters = onMethodBeginMethodInfo.GetParameters();
         if (onMethodBeginParameters.Length < argumentsTypes.Length)
         {
             ThrowHelper.ThrowArgumentException($"The method: {BeginMethodName} with {onMethodBeginParameters.Length} parameters in type: {integrationType.FullName} has less parameters than required.");
@@ -75,9 +75,9 @@ internal class IntegrationMapper
 
         List<Type> callGenericTypes = [];
 
-        bool mustLoadInstance = onMethodBeginParameters.Length != argumentsTypes.Length;
-        Type instanceGenericType = genericArgumentsTypes[0];
-        Type? instanceGenericConstraint = instanceGenericType.GetGenericParameterConstraints().FirstOrDefault();
+        var mustLoadInstance = onMethodBeginParameters.Length != argumentsTypes.Length;
+        var instanceGenericType = genericArgumentsTypes[0];
+        var instanceGenericConstraint = instanceGenericType.GetGenericParameterConstraints().FirstOrDefault();
         Type? instanceProxyType = null;
         if (instanceGenericConstraint != null)
         {
@@ -90,14 +90,14 @@ internal class IntegrationMapper
             callGenericTypes.Add(targetType);
         }
 
-        DynamicMethod callMethod = new DynamicMethod(
+        var callMethod = new DynamicMethod(
             $"{onMethodBeginMethodInfo.DeclaringType?.Name}.{onMethodBeginMethodInfo.Name}",
             typeof(CallTargetState),
             new Type[] { targetType }.Concat(argumentsTypes),
             onMethodBeginMethodInfo.Module,
             true);
 
-        ILGenerator ilWriter = callMethod.GetILGenerator();
+        var ilWriter = callMethod.GetILGenerator();
 
         // Load the instance if is needed
         if (mustLoadInstance)
@@ -113,8 +113,8 @@ internal class IntegrationMapper
         // Load arguments
         for (var i = mustLoadInstance ? 1 : 0; i < onMethodBeginParameters.Length; i++)
         {
-            Type sourceParameterType = argumentsTypes[mustLoadInstance ? i - 1 : i];
-            Type targetParameterType = onMethodBeginParameters[i].ParameterType;
+            var sourceParameterType = argumentsTypes[mustLoadInstance ? i - 1 : i];
+            var targetParameterType = onMethodBeginParameters[i].ParameterType;
             Type? targetParameterTypeConstraint = null;
             Type? parameterProxyType = null;
 
@@ -210,7 +210,7 @@ internal class IntegrationMapper
             "Creating SlowBeginMethod Dynamic Method for '{0}' integration. [Target={1}]",
             integrationType.FullName,
             targetType.FullName);
-        MethodInfo? onMethodBeginMethodInfo = integrationType.GetMethod(BeginMethodName, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static);
+        var onMethodBeginMethodInfo = integrationType.GetMethod(BeginMethodName, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static);
         if (onMethodBeginMethodInfo is null)
         {
             Log.Debug(
@@ -225,19 +225,19 @@ internal class IntegrationMapper
             ThrowHelper.ThrowArgumentException($"The return type of the method: {BeginMethodName} in type: {integrationType.FullName} is not {nameof(CallTargetState)}");
         }
 
-        Type[] genericArgumentsTypes = onMethodBeginMethodInfo.GetGenericArguments();
+        var genericArgumentsTypes = onMethodBeginMethodInfo.GetGenericArguments();
         if (genericArgumentsTypes.Length < 1)
         {
             ThrowHelper.ThrowArgumentException($"The method: {BeginMethodName} in type: {integrationType.FullName} doesn't have the generic type for the instance type.");
         }
 
-        ParameterInfo[] onMethodBeginParameters = onMethodBeginMethodInfo.GetParameters();
+        var onMethodBeginParameters = onMethodBeginMethodInfo.GetParameters();
 
         List<Type> callGenericTypes = [];
 
-        bool mustLoadInstance = onMethodBeginParameters[0].ParameterType.IsGenericParameter && onMethodBeginParameters[0].ParameterType.GenericParameterPosition == 0;
-        Type instanceGenericType = genericArgumentsTypes[0];
-        Type? instanceGenericConstraint = instanceGenericType.GetGenericParameterConstraints().FirstOrDefault();
+        var mustLoadInstance = onMethodBeginParameters[0].ParameterType.IsGenericParameter && onMethodBeginParameters[0].ParameterType.GenericParameterPosition == 0;
+        var instanceGenericType = genericArgumentsTypes[0];
+        var instanceGenericConstraint = instanceGenericType.GetGenericParameterConstraints().FirstOrDefault();
         Type? instanceProxyType = null;
         if (instanceGenericConstraint != null)
         {
@@ -250,14 +250,14 @@ internal class IntegrationMapper
             callGenericTypes.Add(targetType);
         }
 
-        DynamicMethod callMethod = new DynamicMethod(
+        var callMethod = new DynamicMethod(
             $"{onMethodBeginMethodInfo.DeclaringType?.Name}.{onMethodBeginMethodInfo.Name}",
             typeof(CallTargetState),
             [targetType, typeof(object[])],
             onMethodBeginMethodInfo.Module,
             true);
 
-        ILGenerator ilWriter = callMethod.GetILGenerator();
+        var ilWriter = callMethod.GetILGenerator();
 
         // Load the instance if is needed
         if (mustLoadInstance)
@@ -273,7 +273,7 @@ internal class IntegrationMapper
         // Load arguments
         for (var i = mustLoadInstance ? 1 : 0; i < onMethodBeginParameters.Length; i++)
         {
-            Type targetParameterType = onMethodBeginParameters[i].ParameterType;
+            var targetParameterType = onMethodBeginParameters[i].ParameterType;
             Type? targetParameterTypeConstraint = null;
 
             if (targetParameterType.IsGenericParameter)
@@ -332,7 +332,7 @@ internal class IntegrationMapper
             "Creating EndMethod Dynamic Method for '{0}' integration. [Target={1}]",
             integrationType.FullName,
             targetType.FullName);
-        MethodInfo? onMethodEndMethodInfo = GetOnMethodEndMethodInfo(integrationType, "CallTargetReturn");
+        var onMethodEndMethodInfo = GetOnMethodEndMethodInfo(integrationType, "CallTargetReturn");
         if (onMethodEndMethodInfo is null)
         {
             return null;
@@ -343,13 +343,13 @@ internal class IntegrationMapper
             ThrowHelper.ThrowArgumentException($"The return type of the method: {EndMethodName} in type: {integrationType.FullName} is not {nameof(CallTargetReturn)}");
         }
 
-        Type[] genericArgumentsTypes = onMethodEndMethodInfo.GetGenericArguments();
+        var genericArgumentsTypes = onMethodEndMethodInfo.GetGenericArguments();
         if (genericArgumentsTypes.Length != 1)
         {
             ThrowHelper.ThrowArgumentException($"The method: {EndMethodName} in type: {integrationType.FullName} must have a single generic type for the instance type.");
         }
 
-        ParameterInfo[] onMethodEndParameters = onMethodEndMethodInfo.GetParameters();
+        var onMethodEndParameters = onMethodEndMethodInfo.GetParameters();
         if (onMethodEndParameters.Length < 2)
         {
             ThrowHelper.ThrowArgumentException($"The method: {EndMethodName} with {onMethodEndParameters.Length} parameters in type: {integrationType.FullName} has less parameters than required.");
@@ -364,7 +364,7 @@ internal class IntegrationMapper
             ThrowHelper.ThrowArgumentException($"The Exception type parameter of the method: {EndMethodName} in type: {integrationType.FullName} is missing.");
         }
 
-        Type stateParameterType = onMethodEndParameters[onMethodEndParameters.Length - 1].ParameterType;
+        var stateParameterType = onMethodEndParameters[onMethodEndParameters.Length - 1].ParameterType;
         if (stateParameterType != typeof(CallTargetState))
         {
             if (!stateParameterType.IsByRef || stateParameterType.GetElementType() != typeof(CallTargetState))
@@ -375,9 +375,9 @@ internal class IntegrationMapper
 
         List<Type> callGenericTypes = [];
 
-        bool mustLoadInstance = onMethodEndParameters.Length == 3;
-        Type instanceGenericType = genericArgumentsTypes[0];
-        Type? instanceGenericConstraint = instanceGenericType.GetGenericParameterConstraints().FirstOrDefault();
+        var mustLoadInstance = onMethodEndParameters.Length == 3;
+        var instanceGenericType = genericArgumentsTypes[0];
+        var instanceGenericConstraint = instanceGenericType.GetGenericParameterConstraints().FirstOrDefault();
         Type? instanceProxyType = null;
         if (instanceGenericConstraint != null)
         {
@@ -390,14 +390,14 @@ internal class IntegrationMapper
             callGenericTypes.Add(targetType);
         }
 
-        DynamicMethod callMethod = new DynamicMethod(
+        var callMethod = new DynamicMethod(
             $"{onMethodEndMethodInfo.DeclaringType?.Name}.{onMethodEndMethodInfo.Name}",
             typeof(CallTargetReturn),
             [targetType, typeof(Exception), typeof(CallTargetState).MakeByRefType()],
             onMethodEndMethodInfo.Module,
             true);
 
-        ILGenerator ilWriter = callMethod.GetILGenerator();
+        var ilWriter = callMethod.GetILGenerator();
 
         // Load the instance if is needed
         if (mustLoadInstance)
@@ -451,7 +451,7 @@ internal class IntegrationMapper
             integrationType.FullName,
             targetType.FullName,
             returnType.FullName);
-        MethodInfo? onMethodEndMethodInfo = GetOnMethodEndMethodInfo(integrationType, "CallTargetReturn`1");
+        var onMethodEndMethodInfo = GetOnMethodEndMethodInfo(integrationType, "CallTargetReturn`1");
         if (onMethodEndMethodInfo is null)
         {
             return null;
@@ -462,13 +462,13 @@ internal class IntegrationMapper
             ThrowHelper.ThrowArgumentException($"The return type of the method: {EndMethodName} in type: {integrationType.FullName} is not {nameof(CallTargetReturn)}");
         }
 
-        Type[] genericArgumentsTypes = onMethodEndMethodInfo.GetGenericArguments();
+        var genericArgumentsTypes = onMethodEndMethodInfo.GetGenericArguments();
         if (genericArgumentsTypes.Length < 1 || genericArgumentsTypes.Length > 2)
         {
             ThrowHelper.ThrowArgumentException($"The method: {EndMethodName} in type: {integrationType.FullName} must have the generic type for the instance type.");
         }
 
-        ParameterInfo[] onMethodEndParameters = onMethodEndMethodInfo.GetParameters();
+        var onMethodEndParameters = onMethodEndMethodInfo.GetParameters();
         if (onMethodEndParameters.Length < 3)
         {
             ThrowHelper.ThrowArgumentException($"The method: {EndMethodName} with {onMethodEndParameters.Length} parameters in type: {integrationType.FullName} has less parameters than required.");
@@ -483,7 +483,7 @@ internal class IntegrationMapper
             ThrowHelper.ThrowArgumentException($"The Exception type parameter of the method: {EndMethodName} in type: {integrationType.FullName} is missing.");
         }
 
-        Type stateParameterType = onMethodEndParameters[onMethodEndParameters.Length - 1].ParameterType;
+        var stateParameterType = onMethodEndParameters[onMethodEndParameters.Length - 1].ParameterType;
         if (stateParameterType != typeof(CallTargetState))
         {
             if (!stateParameterType.IsByRef || stateParameterType.GetElementType() != typeof(CallTargetState))
@@ -494,9 +494,9 @@ internal class IntegrationMapper
 
         List<Type> callGenericTypes = [];
 
-        bool mustLoadInstance = onMethodEndParameters.Length == 4;
-        Type instanceGenericType = genericArgumentsTypes[0];
-        Type? instanceGenericConstraint = instanceGenericType.GetGenericParameterConstraints().FirstOrDefault();
+        var mustLoadInstance = onMethodEndParameters.Length == 4;
+        var instanceGenericType = genericArgumentsTypes[0];
+        var instanceGenericConstraint = instanceGenericType.GetGenericParameterConstraints().FirstOrDefault();
         Type? instanceProxyType = null;
         if (instanceGenericConstraint != null)
         {
@@ -509,8 +509,8 @@ internal class IntegrationMapper
             callGenericTypes.Add(targetType);
         }
 
-        int returnParameterIndex = onMethodEndParameters.Length == 4 ? 1 : 0;
-        bool isAGenericReturnValue = onMethodEndParameters[returnParameterIndex].ParameterType.IsGenericParameter;
+        var returnParameterIndex = onMethodEndParameters.Length == 4 ? 1 : 0;
+        var isAGenericReturnValue = onMethodEndParameters[returnParameterIndex].ParameterType.IsGenericParameter;
         Type? returnValueGenericType = null;
         Type? returnValueGenericConstraint = null;
         Type? returnValueProxyType = null;
@@ -534,14 +534,14 @@ internal class IntegrationMapper
             ThrowHelper.ThrowArgumentException($"The ReturnValue type parameter of the method: {EndMethodName} in type: {integrationType.FullName} is invalid. [{onMethodEndParameters[returnParameterIndex].ParameterType} != {returnType}]");
         }
 
-        DynamicMethod callMethod = new DynamicMethod(
+        var callMethod = new DynamicMethod(
             $"{onMethodEndMethodInfo.DeclaringType?.Name}.{onMethodEndMethodInfo.Name}.{targetType.Name}.{returnType.Name}",
             typeof(CallTargetReturn<>).MakeGenericType(returnType),
             [targetType, returnType, typeof(Exception), typeof(CallTargetState).MakeByRefType()],
             onMethodEndMethodInfo.Module,
             true);
 
-        ILGenerator ilWriter = callMethod.GetILGenerator();
+        var ilWriter = callMethod.GetILGenerator();
 
         // Load the instance if is needed
         if (mustLoadInstance)
@@ -578,7 +578,7 @@ internal class IntegrationMapper
         // Unwrap return value proxy
         if (returnValueProxyType != null)
         {
-            MethodInfo unwrapReturnValue = UnwrapReturnValueMethodInfo.MakeGenericMethod(returnValueProxyType, returnType);
+            var unwrapReturnValue = UnwrapReturnValueMethodInfo.MakeGenericMethod(returnValueProxyType, returnType);
             ilWriter.EmitCall(OpCodes.Call, unwrapReturnValue, null);
         }
 
@@ -613,7 +613,7 @@ internal class IntegrationMapper
             integrationType.FullName,
             targetType.FullName,
             returnType.FullName);
-        MethodInfo? onAsyncMethodEndMethodInfo = integrationType.GetMethod(EndAsyncMethodName, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static);
+        var onAsyncMethodEndMethodInfo = integrationType.GetMethod(EndAsyncMethodName, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static);
         if (onAsyncMethodEndMethodInfo is null)
         {
             Log.Warning($"Couldn't find the method: {EndAsyncMethodName} in type: {integrationType.FullName}");
@@ -625,13 +625,13 @@ internal class IntegrationMapper
             ThrowHelper.ThrowArgumentException($"The return type of the method: {EndAsyncMethodName} in type: {integrationType.FullName} is not {returnType}");
         }
 
-        Type[] genericArgumentsTypes = onAsyncMethodEndMethodInfo.GetGenericArguments();
+        var genericArgumentsTypes = onAsyncMethodEndMethodInfo.GetGenericArguments();
         if (genericArgumentsTypes.Length < 1 || genericArgumentsTypes.Length > 2)
         {
             ThrowHelper.ThrowArgumentException($"The method: {EndAsyncMethodName} in type: {integrationType.FullName} must have the generic type for the instance type.");
         }
 
-        ParameterInfo[] onAsyncMethodEndParameters = onAsyncMethodEndMethodInfo.GetParameters();
+        var onAsyncMethodEndParameters = onAsyncMethodEndMethodInfo.GetParameters();
         if (onAsyncMethodEndParameters.Length < 3)
         {
             ThrowHelper.ThrowArgumentException($"The method: {EndAsyncMethodName} with {onAsyncMethodEndParameters.Length} parameters in type: {integrationType.FullName} has less parameters than required.");
@@ -646,7 +646,7 @@ internal class IntegrationMapper
             ThrowHelper.ThrowArgumentException($"The Exception type parameter of the method: {EndAsyncMethodName} in type: {integrationType.FullName} is missing.");
         }
 
-        Type stateParameterType = onAsyncMethodEndParameters[onAsyncMethodEndParameters.Length - 1].ParameterType;
+        var stateParameterType = onAsyncMethodEndParameters[onAsyncMethodEndParameters.Length - 1].ParameterType;
         if (stateParameterType != typeof(CallTargetState))
         {
             if (!stateParameterType.IsByRef || stateParameterType.GetElementType() != typeof(CallTargetState))
@@ -655,13 +655,13 @@ internal class IntegrationMapper
             }
         }
 
-        bool preserveContext = onAsyncMethodEndMethodInfo.GetCustomAttribute<PreserveContextAttribute>() != null;
+        var preserveContext = onAsyncMethodEndMethodInfo.GetCustomAttribute<PreserveContextAttribute>() != null;
 
         List<Type> callGenericTypes = [];
 
-        bool mustLoadInstance = onAsyncMethodEndParameters.Length == 4;
-        Type instanceGenericType = genericArgumentsTypes[0];
-        Type? instanceGenericConstraint = instanceGenericType.GetGenericParameterConstraints().FirstOrDefault();
+        var mustLoadInstance = onAsyncMethodEndParameters.Length == 4;
+        var instanceGenericType = genericArgumentsTypes[0];
+        var instanceGenericConstraint = instanceGenericType.GetGenericParameterConstraints().FirstOrDefault();
         Type? instanceProxyType = null;
         if (instanceGenericConstraint != null)
         {
@@ -674,8 +674,8 @@ internal class IntegrationMapper
             callGenericTypes.Add(targetType);
         }
 
-        int returnParameterIndex = onAsyncMethodEndParameters.Length == 4 ? 1 : 0;
-        bool isAGenericReturnValue = onAsyncMethodEndParameters[returnParameterIndex].ParameterType.IsGenericParameter;
+        var returnParameterIndex = onAsyncMethodEndParameters.Length == 4 ? 1 : 0;
+        var isAGenericReturnValue = onAsyncMethodEndParameters[returnParameterIndex].ParameterType.IsGenericParameter;
         Type? returnValueGenericType = null;
         Type? returnValueGenericConstraint = null;
         Type? returnValueProxyType = null;
@@ -699,14 +699,14 @@ internal class IntegrationMapper
             ThrowHelper.ThrowArgumentException($"The ReturnValue type parameter of the method: {EndAsyncMethodName} in type: {integrationType.FullName} is invalid. [{onAsyncMethodEndParameters[returnParameterIndex].ParameterType} != {returnType}]");
         }
 
-        DynamicMethod callMethod = new DynamicMethod(
+        var callMethod = new DynamicMethod(
             $"{onAsyncMethodEndMethodInfo.DeclaringType?.Name}.{onAsyncMethodEndMethodInfo.Name}.{targetType.Name}.{returnType.Name}",
             returnType,
             [targetType, returnType, typeof(Exception), typeof(CallTargetState).MakeByRefType()],
             onAsyncMethodEndMethodInfo.Module,
             true);
 
-        ILGenerator ilWriter = callMethod.GetILGenerator();
+        var ilWriter = callMethod.GetILGenerator();
 
         // Load the instance if is needed
         if (mustLoadInstance)
@@ -743,7 +743,7 @@ internal class IntegrationMapper
         // Unwrap return value proxy
         if (returnValueProxyType != null)
         {
-            MethodInfo unwrapReturnValue = UnwrapReturnValueMethodInfo.MakeGenericMethod(returnValueProxyType, returnType);
+            var unwrapReturnValue = UnwrapReturnValueMethodInfo.MakeGenericMethod(returnValueProxyType, returnType);
             ilWriter.EmitCall(OpCodes.Call, unwrapReturnValue, null);
         }
 
@@ -768,7 +768,7 @@ internal class IntegrationMapper
             // If the type defines multiple OnMethodEnd methods to work with both void return types and non-void return types,
             // iterate over the methods to disambiguate
             var possibleMethods = integrationType.GetMethods(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static);
-            for (int i = 0; i < possibleMethods.Length; i++)
+            for (var i = 0; i < possibleMethods.Length; i++)
             {
                 var possibleMethod = possibleMethods[i];
 
@@ -784,7 +784,7 @@ internal class IntegrationMapper
 
     private static void WriteCreateNewProxyInstance(ILGenerator ilWriter, Type proxyType, Type targetType)
     {
-        ConstructorInfo proxyTypeCtor = proxyType.GetConstructors()[0];
+        var proxyTypeCtor = proxyType.GetConstructors()[0];
 
         if (targetType.IsValueType && !proxyTypeCtor.GetParameters()[0].ParameterType.IsValueType)
         {
@@ -872,7 +872,7 @@ internal class IntegrationMapper
             return (T?)value;
         }
 
-        Type valueType = value.GetType();
+        var valueType = value.GetType();
         if (valueType == conversionType || conversionType.IsAssignableFrom(valueType))
         {
             return (T)value;

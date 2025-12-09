@@ -53,7 +53,7 @@ internal static partial class DuckType
         EnsureArguments(proxyType, instance);
 
         // Create Type
-        CreateTypeResult result = GetOrCreateProxyType(proxyType, instance.GetType());
+        var result = GetOrCreateProxyType(proxyType, instance.GetType());
 
         // Create instance
         return result.CreateInstance(instance);
@@ -84,7 +84,7 @@ internal static partial class DuckType
         EnsureArguments(proxyType, instance);
 
         // Create Type
-        CreateTypeResult result = GetOrCreateProxyType(proxyType, instance.GetType());
+        var result = GetOrCreateProxyType(proxyType, instance.GetType());
 
         // Create instance
         return result.CanCreate();
@@ -126,7 +126,7 @@ internal static partial class DuckType
         EnsureArguments(typeToDeriveFrom, delegationInstance);
 
         // Create Type
-        CreateTypeResult result = GetOrCreateReverseProxyType(typeToDeriveFrom, delegationInstance.GetType());
+        var result = GetOrCreateReverseProxyType(typeToDeriveFrom, delegationInstance.GetType());
 
         // Create instance
         return result.CreateInstance(delegationInstance);
@@ -197,7 +197,7 @@ internal static partial class DuckType
                     }
 
                     // Create Type
-                    Type proxyType = proxyTypeBuilder!.CreateTypeInfo()!.AsType();
+                    var proxyType = proxyTypeBuilder!.CreateTypeInfo()!.AsType();
                     return new CreateTypeResult(proxyDefinitionType, proxyType, targetType, CreateStructCopyMethod(moduleBuilder, proxyDefinitionType, proxyType, targetType), null);
                 }
                 else
@@ -215,7 +215,7 @@ internal static partial class DuckType
                     }
 
                     // Create Type
-                    Type proxyType = proxyTypeBuilder!.CreateTypeInfo()!.AsType();
+                    var proxyType = proxyTypeBuilder!.CreateTypeInfo()!.AsType();
                     return new CreateTypeResult(proxyDefinitionType, proxyType, targetType, GetCreateProxyInstanceDelegate(moduleBuilder, proxyDefinitionType, proxyType, targetType), null);
                 }
             }
@@ -294,7 +294,7 @@ internal static partial class DuckType
                 }
 
                 // Create Type
-                Type? proxyType = proxyTypeBuilder!.CreateTypeInfo()!.AsType();
+                var proxyType = proxyTypeBuilder!.CreateTypeInfo()!.AsType();
                 return new CreateTypeResult(typeToDeriveFrom, proxyType, typeToDelegateTo, GetCreateProxyInstanceDelegate(moduleBuilder, typeToDeriveFrom, proxyType, typeToDelegateTo), null);
             }
             catch (DuckTypeException ex)
@@ -360,13 +360,13 @@ internal static partial class DuckType
         EnsureTypeVisibility(moduleBuilder, typeToDelegateTo);
         EnsureTypeVisibility(moduleBuilder, typeToDeriveFrom);
 
-        string assembly = string.Empty;
+        var assembly = string.Empty;
         if (typeToDelegateTo.Assembly is not null)
         {
             // Include target assembly name and public token.
-            AssemblyName asmName = typeToDelegateTo.Assembly.GetName();
+            var asmName = typeToDelegateTo.Assembly.GetName();
             assembly = asmName.Name ?? string.Empty;
-            byte[] pbToken = asmName.GetPublicKeyToken() ?? [];
+            var pbToken = asmName.GetPublicKeyToken() ?? [];
 #if NET
             assembly += "__" + BitConverter.ToString(pbToken).Replace("-", string.Empty, StringComparison.Ordinal);
             assembly = assembly.Replace(".", "_", StringComparison.Ordinal).Replace("+", "__", StringComparison.Ordinal);
@@ -378,9 +378,9 @@ internal static partial class DuckType
 
         // Create a valid type name that can be used as a member of a class. (BenchmarkDotNet fails if is an invalid name)
 #if NET
-        string proxyTypeName = $"{assembly}.{typeToDelegateTo.FullName?.Replace(".", "_", StringComparison.Ordinal).Replace("+", "__", StringComparison.Ordinal)}.{typeToDeriveFrom.FullName?.Replace(".", "_", StringComparison.Ordinal).Replace("+", "__", StringComparison.Ordinal)}_{++_typeCount}";
+        var proxyTypeName = $"{assembly}.{typeToDelegateTo.FullName?.Replace(".", "_", StringComparison.Ordinal).Replace("+", "__", StringComparison.Ordinal)}.{typeToDeriveFrom.FullName?.Replace(".", "_", StringComparison.Ordinal).Replace("+", "__", StringComparison.Ordinal)}_{++_typeCount}";
 #else
-        string proxyTypeName = $"{assembly}.{typeToDelegateTo.FullName?.Replace(".", "_").Replace("+", "__")}.{typeToDeriveFrom.FullName?.Replace(".", "_").Replace("+", "__")}_{++_typeCount}";
+        var proxyTypeName = $"{assembly}.{typeToDelegateTo.FullName?.Replace(".", "_").Replace("+", "__")}.{typeToDeriveFrom.FullName?.Replace(".", "_").Replace("+", "__")}_{++_typeCount}";
 #endif
 
         // Create Type
@@ -394,11 +394,11 @@ internal static partial class DuckType
         instanceField = CreateIDuckTypeImplementation(proxyTypeBuilder, typeToDelegateTo);
 
         // Define .ctor to store the instance field
-        ConstructorBuilder ctorBuilder = proxyTypeBuilder.DefineConstructor(
+        var ctorBuilder = proxyTypeBuilder.DefineConstructor(
             MethodAttributes.Public | MethodAttributes.HideBySig | MethodAttributes.SpecialName | MethodAttributes.RTSpecialName,
             CallingConventions.Standard,
             [instanceField.FieldType]);
-        ILGenerator ctorIL = ctorBuilder.GetILGenerator();
+        var ctorIL = ctorBuilder.GetILGenerator();
         ctorIL.Emit(OpCodes.Ldarg_0);
         ctorIL.Emit(OpCodes.Ldarg_1);
         ctorIL.Emit(OpCodes.Stfld, instanceField);
@@ -419,21 +419,21 @@ internal static partial class DuckType
 
     private static FieldBuilder CreateIDuckTypeImplementation(TypeBuilder proxyTypeBuilder, Type targetType)
     {
-        Type instanceType = targetType;
+        var instanceType = targetType;
         if (!UseDirectAccessTo(proxyTypeBuilder, targetType))
         {
             instanceType = typeof(object);
         }
 
-        FieldBuilder instanceField = proxyTypeBuilder.DefineField("_currentInstance", instanceType, FieldAttributes.Private | FieldAttributes.InitOnly);
+        var instanceField = proxyTypeBuilder.DefineField("_currentInstance", instanceType, FieldAttributes.Private | FieldAttributes.InitOnly);
 
-        PropertyBuilder propInstance = proxyTypeBuilder.DefineProperty("Instance", PropertyAttributes.None, typeof(object), null);
-        MethodBuilder getPropInstance = proxyTypeBuilder.DefineMethod(
+        var propInstance = proxyTypeBuilder.DefineProperty("Instance", PropertyAttributes.None, typeof(object), null);
+        var getPropInstance = proxyTypeBuilder.DefineMethod(
             "get_Instance",
             MethodAttributes.Public | MethodAttributes.Virtual | MethodAttributes.Final | MethodAttributes.HideBySig | MethodAttributes.NewSlot,
             typeof(object),
             Type.EmptyTypes);
-        ILGenerator il = getPropInstance.GetILGenerator();
+        var il = getPropInstance.GetILGenerator();
         il.Emit(OpCodes.Ldarg_0);
         il.Emit(OpCodes.Ldfld, instanceField);
         if (instanceType.IsValueType)
@@ -444,8 +444,8 @@ internal static partial class DuckType
         il.Emit(OpCodes.Ret);
         propInstance.SetGetMethod(getPropInstance);
 
-        PropertyBuilder propType = proxyTypeBuilder.DefineProperty("Type", PropertyAttributes.None, typeof(Type), null);
-        MethodBuilder getPropType = proxyTypeBuilder.DefineMethod(
+        var propType = proxyTypeBuilder.DefineProperty("Type", PropertyAttributes.None, typeof(Type), null);
+        var getPropType = proxyTypeBuilder.DefineMethod(
             "get_Type",
             MethodAttributes.Public | MethodAttributes.Virtual | MethodAttributes.Final | MethodAttributes.HideBySig | MethodAttributes.NewSlot,
             typeof(Type),
@@ -459,7 +459,7 @@ internal static partial class DuckType
         var toStringTargetType = targetType.GetMethod("ToString", Type.EmptyTypes);
         if (toStringTargetType is not null)
         {
-            MethodBuilder toStringMethod = proxyTypeBuilder.DefineMethod("ToString", toStringTargetType.Attributes, typeof(string), Type.EmptyTypes);
+            var toStringMethod = proxyTypeBuilder.DefineMethod("ToString", toStringTargetType.Attributes, typeof(string), Type.EmptyTypes);
             il = toStringMethod.GetILGenerator();
             il.Emit(OpCodes.Ldarg_0);
             if (instanceType.IsValueType)
@@ -497,29 +497,29 @@ internal static partial class DuckType
     /// <param name="selectedProperties">Existing selected properties</param>
     private static void AddInterfaceProperties(Type proxyDefinitionType, List<PropertyInfo> selectedProperties)
     {
-        Type[] implementedInterfaces = proxyDefinitionType.GetInterfaces();
-        foreach (Type imInterface in implementedInterfaces)
+        var implementedInterfaces = proxyDefinitionType.GetInterfaces();
+        foreach (var imInterface in implementedInterfaces)
         {
             if (imInterface == typeof(IDuckType))
             {
                 continue;
             }
 
-            IEnumerable<PropertyInfo> newProps = imInterface.GetProperties().Where(p => selectedProperties.All(i => i.Name != p.Name));
+            var newProps = imInterface.GetProperties().Where(p => selectedProperties.All(i => i.Name != p.Name));
             selectedProperties.AddRange(newProps);
         }
     }
 
     private static List<PropertyInfo> GetProperties(Type proxyDefinitionType)
     {
-        List<PropertyInfo> selectedProperties = new List<PropertyInfo>(proxyDefinitionType.IsInterface ? proxyDefinitionType.GetProperties() : GetBaseProperties(proxyDefinitionType));
+        var selectedProperties = new List<PropertyInfo>(proxyDefinitionType.IsInterface ? proxyDefinitionType.GetProperties() : GetBaseProperties(proxyDefinitionType));
         AddInterfaceProperties(proxyDefinitionType, selectedProperties);
 
         return selectedProperties;
 
         static IEnumerable<PropertyInfo> GetBaseProperties(Type baseType)
         {
-            foreach (PropertyInfo prop in baseType.GetProperties())
+            foreach (var prop in baseType.GetProperties())
             {
                 if (prop.CanRead && prop.GetMethod is not null && (prop.GetMethod.IsAbstract || prop.GetMethod.IsVirtual))
                 {
@@ -536,7 +536,7 @@ internal static partial class DuckType
     private static List<PropertyInfo> GetReverseProperties(Type proxyDefinitionType)
     {
         List<PropertyInfo> selectedProperties = [];
-        foreach (PropertyInfo prop in proxyDefinitionType.GetProperties())
+        foreach (var prop in proxyDefinitionType.GetProperties())
         {
             if (prop.CanRead && prop.GetMethod is not null && prop.GetMethod.IsAbstract)
             {
@@ -561,9 +561,9 @@ internal static partial class DuckType
     private static void CreateProperties(TypeBuilder? proxyTypeBuilder, Type proxyDefinitionType, Type targetType, FieldInfo? instanceField)
     {
         // Gets all properties to be implemented
-        List<PropertyInfo> proxyTypeProperties = GetProperties(proxyDefinitionType);
+        var proxyTypeProperties = GetProperties(proxyDefinitionType);
 
-        foreach (PropertyInfo proxyProperty in proxyTypeProperties)
+        foreach (var proxyProperty in proxyTypeProperties)
         {
             // Ignore the properties marked with `DuckIgnore` attribute
             if (proxyProperty.GetCustomAttribute<DuckIgnoreAttribute>(true) is not null)
@@ -579,7 +579,7 @@ internal static partial class DuckType
 
             PropertyBuilder? propertyBuilder = null;
 
-            DuckAttribute duckAttribute = proxyProperty.GetCustomAttribute<DuckAttribute>(true) ?? new DuckAttribute();
+            var duckAttribute = proxyProperty.GetCustomAttribute<DuckAttribute>(true) ?? new DuckAttribute();
             duckAttribute.Name ??= proxyProperty.Name;
 
             switch (duckAttribute.Kind)
@@ -630,7 +630,7 @@ internal static partial class DuckType
                             DuckTypePropertyCantBeReadException.Throw(targetProperty);
                         }
 
-                        MethodBuilder? getMethodBuilder = GetPropertyGetMethod(
+                        var getMethodBuilder = GetPropertyGetMethod(
                             proxyTypeBuilder,
                             targetType: targetType,
                             proxyMember: proxyProperty,
@@ -659,7 +659,7 @@ internal static partial class DuckType
                             DuckTypeStructMembersCannotBeChangedException.Throw(targetProperty.DeclaringType);
                         }
 
-                        MethodBuilder? setMethodBuilder = GetPropertySetMethod(
+                        var setMethodBuilder = GetPropertySetMethod(
                             proxyTypeBuilder,
                             targetType: targetType,
                             proxyMember: proxyProperty,
@@ -677,7 +677,7 @@ internal static partial class DuckType
                     break;
 
                 case DuckKind.Field:
-                    FieldInfo? targetField = targetType.GetField(duckAttribute.Name, duckAttribute.BindingFlags);
+                    var targetField = targetType.GetField(duckAttribute.Name, duckAttribute.BindingFlags);
                     if (targetField is null)
                     {
                         DuckTypePropertyOrFieldNotFoundException.Throw(proxyProperty.Name, duckAttribute.Name, targetType);
@@ -688,7 +688,7 @@ internal static partial class DuckType
 
                     if (proxyProperty.CanRead)
                     {
-                        MethodBuilder? getMethodBuilder = GetFieldGetMethod(proxyTypeBuilder, targetType, proxyProperty, targetField, instanceField);
+                        var getMethodBuilder = GetFieldGetMethod(proxyTypeBuilder, targetType, proxyProperty, targetField, instanceField);
                         if (getMethodBuilder is not null)
                         {
                             propertyBuilder?.SetGetMethod(getMethodBuilder);
@@ -709,7 +709,7 @@ internal static partial class DuckType
                             DuckTypeStructMembersCannotBeChangedException.Throw(targetField.DeclaringType);
                         }
 
-                        MethodBuilder? setMethodBuilder = GetFieldSetMethod(proxyTypeBuilder, targetType, proxyProperty, targetField, instanceField);
+                        var setMethodBuilder = GetFieldSetMethod(proxyTypeBuilder, targetType, proxyProperty, targetField, instanceField);
                         if (setMethodBuilder is not null)
                         {
                             propertyBuilder?.SetSetMethod(setMethodBuilder);
@@ -734,9 +734,9 @@ internal static partial class DuckType
 
         // Get all the properties on our delegation type that we're going to delegate to
         // Note that these don't need to be abstract/virtual, unlike in a normal (forward) proxy
-        List<PropertyInfo> delegationTypeProperties = new List<PropertyInfo>(typeToDelegateTo.GetProperties());
+        var delegationTypeProperties = new List<PropertyInfo>(typeToDelegateTo.GetProperties());
 
-        foreach (PropertyInfo implementationProperty in delegationTypeProperties)
+        foreach (var implementationProperty in delegationTypeProperties)
         {
             // Ignore methods without a `DuckReverse` attribute
             if (implementationProperty.GetCustomAttribute<DuckReverseMethodAttribute>(true) is null)
@@ -746,7 +746,7 @@ internal static partial class DuckType
 
             PropertyBuilder? propertyBuilder = null;
 
-            DuckReverseMethodAttribute duckAttribute = implementationProperty.GetCustomAttribute<DuckReverseMethodAttribute>(true) ?? new DuckReverseMethodAttribute();
+            var duckAttribute = implementationProperty.GetCustomAttribute<DuckReverseMethodAttribute>(true) ?? new DuckReverseMethodAttribute();
             duckAttribute.Name ??= implementationProperty.Name;
 
             // The "implementor" property cannot be abstract or interface if we're doing a reverse proxy
@@ -784,7 +784,7 @@ internal static partial class DuckType
                     DuckTypePropertyCantBeReadException.Throw(overriddenProperty);
                 }
 
-                MethodBuilder? getMethodBuilder = GetPropertyGetMethod(
+                var getMethodBuilder = GetPropertyGetMethod(
                     proxyTypeBuilder,
                     targetType: typeToDeriveFrom,
                     proxyMember: overriddenProperty,
@@ -813,7 +813,7 @@ internal static partial class DuckType
                     DuckTypeStructMembersCannotBeChangedException.Throw(overriddenProperty.DeclaringType);
                 }
 
-                MethodBuilder? setMethodBuilder = GetPropertySetMethod(
+                var setMethodBuilder = GetPropertySetMethod(
                     proxyTypeBuilder,
                     targetType: typeToDeriveFrom,
                     proxyMember: overriddenProperty,
@@ -847,7 +847,7 @@ internal static partial class DuckType
     private static void CreatePropertiesFromStruct(TypeBuilder? proxyTypeBuilder, Type proxyDefinitionType, Type targetType, FieldInfo? instanceField)
     {
         // Gets all fields to be copied
-        foreach (FieldInfo proxyFieldInfo in proxyDefinitionType.GetFields())
+        foreach (var proxyFieldInfo in proxyDefinitionType.GetFields())
         {
             // Skip readonly fields
             if ((proxyFieldInfo.Attributes & FieldAttributes.InitOnly) != 0)
@@ -864,13 +864,13 @@ internal static partial class DuckType
             PropertyBuilder? propertyBuilder = null;
             MethodBuilder? getMethodBuilder = null;
 
-            DuckAttribute duckAttribute = proxyFieldInfo.GetCustomAttribute<DuckAttribute>(true) ?? new DuckAttribute();
+            var duckAttribute = proxyFieldInfo.GetCustomAttribute<DuckAttribute>(true) ?? new DuckAttribute();
             duckAttribute.Name ??= proxyFieldInfo.Name;
 
             switch (duckAttribute.Kind)
             {
                 case DuckKind.Property:
-                    PropertyInfo? targetProperty = targetType.GetProperty(duckAttribute.Name, duckAttribute.BindingFlags);
+                    var targetProperty = targetType.GetProperty(duckAttribute.Name, duckAttribute.BindingFlags);
                     if (targetProperty is null)
                     {
                         DuckTypePropertyOrFieldNotFoundException.Throw(proxyFieldInfo.Name, duckAttribute.Name, targetType);
@@ -902,7 +902,7 @@ internal static partial class DuckType
                     break;
 
                 case DuckKind.Field:
-                    FieldInfo? targetField = targetType.GetField(duckAttribute.Name, duckAttribute.BindingFlags);
+                    var targetField = targetType.GetField(duckAttribute.Name, duckAttribute.BindingFlags);
                     if (targetField is null)
                     {
                         DuckTypePropertyOrFieldNotFoundException.Throw(proxyFieldInfo.Name, duckAttribute.Name, targetType);
@@ -923,15 +923,15 @@ internal static partial class DuckType
 
     private static Delegate GetCreateProxyInstanceDelegate(ModuleBuilder? moduleBuilder, Type proxyDefinitionType, Type proxyType, Type targetType)
     {
-        ConstructorInfo ctor = proxyType.GetConstructors()[0];
+        var ctor = proxyType.GetConstructors()[0];
 
-        DynamicMethod createProxyMethod = new DynamicMethod(
+        var createProxyMethod = new DynamicMethod(
             $"CreateProxyInstance<{proxyType.Name}>",
             proxyDefinitionType,
             [typeof(object)],
             typeof(DuckType).Module,
             true);
-        ILGenerator il = createProxyMethod.GetILGenerator();
+        var il = createProxyMethod.GetILGenerator();
         il.Emit(OpCodes.Ldarg_0);
         if (UseDirectAccessTo(moduleBuilder, targetType))
         {
@@ -953,25 +953,25 @@ internal static partial class DuckType
         }
 
         il.Emit(OpCodes.Ret);
-        Type delegateType = typeof(CreateProxyInstance<>).MakeGenericType(proxyDefinitionType);
+        var delegateType = typeof(CreateProxyInstance<>).MakeGenericType(proxyDefinitionType);
         return createProxyMethod.CreateDelegate(delegateType);
     }
 
     private static Delegate CreateStructCopyMethod(ModuleBuilder? moduleBuilder, Type proxyDefinitionType, Type proxyType, Type targetType)
     {
-        ConstructorInfo ctor = proxyType.GetConstructors()[0];
+        var ctor = proxyType.GetConstructors()[0];
 
-        DynamicMethod createStructMethod = new DynamicMethod(
+        var createStructMethod = new DynamicMethod(
             $"CreateStructInstance<{proxyType.Name}>",
             proxyDefinitionType,
             [typeof(object)],
             typeof(DuckType).Module,
             true);
-        ILGenerator il = createStructMethod.GetILGenerator();
+        var il = createStructMethod.GetILGenerator();
 
         // First we declare the locals
-        LocalBuilder proxyLocal = il.DeclareLocal(proxyType);
-        LocalBuilder structLocal = il.DeclareLocal(proxyDefinitionType);
+        var proxyLocal = il.DeclareLocal(proxyType);
+        var structLocal = il.DeclareLocal(proxyDefinitionType);
 
         // We create an instance of the proxy type
         il.Emit(OpCodes.Ldloca_S, proxyLocal.LocalIndex);
@@ -995,7 +995,7 @@ internal static partial class DuckType
         il.Emit(OpCodes.Initobj, proxyDefinitionType);
 
         // Start copy properties from the proxy to the structure
-        foreach (FieldInfo finfo in proxyDefinitionType.GetFields())
+        foreach (var finfo in proxyDefinitionType.GetFields())
         {
             // Skip readonly fields
             if ((finfo.Attributes & FieldAttributes.InitOnly) != 0)
@@ -1009,7 +1009,7 @@ internal static partial class DuckType
                 continue;
             }
 
-            PropertyInfo? prop = proxyType.GetProperty(finfo.Name);
+            var prop = proxyType.GetProperty(finfo.Name);
             if (prop?.GetMethod is not null)
             {
                 il.Emit(OpCodes.Ldloca_S, structLocal.LocalIndex);
@@ -1023,7 +1023,7 @@ internal static partial class DuckType
         il.WriteLoadLocal(structLocal.LocalIndex);
         il.Emit(OpCodes.Ret);
 
-        Type delegateType = typeof(CreateProxyInstance<>).MakeGenericType(proxyDefinitionType);
+        var delegateType = typeof(CreateProxyInstance<>).MakeGenericType(proxyDefinitionType);
         return createStructMethod.CreateDelegate(delegateType);
     }
 
@@ -1063,7 +1063,7 @@ internal static partial class DuckType
             Success = proxyType != null && exceptionInfo == null;
             if (exceptionInfo is not null)
             {
-                MethodInfo methodInfo = typeof(CreateTypeResult).GetMethod(nameof(ThrowOnError), BindingFlags.NonPublic | BindingFlags.Instance)!;
+                var methodInfo = typeof(CreateTypeResult).GetMethod(nameof(ThrowOnError), BindingFlags.NonPublic | BindingFlags.Instance)!;
                 _activator = methodInfo
                     .MakeGenericMethod(proxyTypeDefinition)
                     .CreateDelegate(
@@ -1173,13 +1173,13 @@ internal static partial class DuckType
         public static CreateTypeResult GetProxy(Type targetType)
         {
             // We set a fast path for the first proxy type for a proxy definition. (It's likely to have a proxy definition just for one target type)
-            CreateTypeResult fastPath = _fastPath;
+            var fastPath = _fastPath;
             if (fastPath.TargetType == targetType)
             {
                 return fastPath;
             }
 
-            CreateTypeResult result = GetOrCreateProxyType(Type, targetType);
+            var result = GetOrCreateProxyType(Type, targetType);
 
             fastPath = _fastPath;
             if (fastPath.TargetType is null)
@@ -1267,13 +1267,13 @@ internal static partial class DuckType
         public static CreateTypeResult GetReverseProxy(Type targetType)
         {
             // We set a fast path for the first proxy type for a proxy definition. (It's likely to have a proxy definition just for one target type)
-            CreateTypeResult fastPath = _fastPath;
+            var fastPath = _fastPath;
             if (fastPath.TargetType == targetType)
             {
                 return fastPath;
             }
 
-            CreateTypeResult result = GetOrCreateReverseProxyType(Type, targetType);
+            var result = GetOrCreateReverseProxyType(Type, targetType);
 
             fastPath = _fastPath;
             if (fastPath.TargetType is null)
