@@ -6,16 +6,28 @@ using OpenTelemetry.AutoInstrumentation.CallTarget;
 namespace OpenTelemetry.AutoInstrumentation.Instrumentations.NLog.TraceContextInjection.Integrations;
 
 /// <summary>
-/// NLog integration for NLog 5.x (with wrapperType parameter and TargetWithFilterChain).
-/// This integration intercepts NLog's internal WriteToTargets method to:
+/// NLog integration for WriteToTargets/WriteLogEventToTargets methods (3-parameter overloads with wrapperType).
+/// This integration intercepts NLog's internal methods to:
 /// 1. Inject trace context (TraceId, SpanId, TraceFlags) into the LogEventInfo properties
 /// 2. Forward log events to OpenTelemetry when the bridge is enabled
 /// </summary>
 /// <remarks>
-/// This overload is called when using Logger.Log(Type wrapperType, LogEventInfo logEvent).
-/// NLog 5.x has assembly version 5.0.0.0 regardless of the NuGet package version.
-/// Early NLog 5.x versions (5.0.0 - 5.2.x) use the concrete TargetWithFilterChain class.
+/// Covers methods called when using Logger.Log(Type wrapperType, LogEventInfo logEvent):
+/// - NLog 5.x WriteToTargets with ITargetWithFilterChain (5.3.0+)
+/// - NLog 5.x WriteToTargets with TargetWithFilterChain (5.0.0-5.2.x)
+/// - NLog 6.x WriteLogEventToTargets with ITargetWithFilterChain
+/// The native profiler will match the correct signature at runtime.
 /// </remarks>
+[InstrumentMethod(
+    assemblyName: "NLog",
+    typeName: "NLog.Logger",
+    methodName: "WriteToTargets",
+    returnTypeName: ClrNames.Void,
+    parameterTypeNames: new[] { "System.Type", "NLog.LogEventInfo", "NLog.Internal.ITargetWithFilterChain" },
+    minimumVersion: "5.0.0",
+    maximumVersion: "5.*.*",
+    integrationName: "NLog",
+    type: InstrumentationType.Log)]
 [InstrumentMethod(
     assemblyName: "NLog",
     typeName: "NLog.Logger",
@@ -26,10 +38,20 @@ namespace OpenTelemetry.AutoInstrumentation.Instrumentations.NLog.TraceContextIn
     maximumVersion: "5.*.*",
     integrationName: "NLog",
     type: InstrumentationType.Log)]
-public static class WriteToTargetsWithWrapperTypeLegacyIntegration
+[InstrumentMethod(
+    assemblyName: "NLog",
+    typeName: "NLog.Logger",
+    methodName: "WriteLogEventToTargets",
+    returnTypeName: ClrNames.Void,
+    parameterTypeNames: new[] { "System.Type", "NLog.LogEventInfo", "NLog.Internal.ITargetWithFilterChain" },
+    minimumVersion: "6.0.0",
+    maximumVersion: "6.*.*",
+    integrationName: "NLog",
+    type: InstrumentationType.Log)]
+public static class NLogWriteToTargetsWithWrapperTypeIntegration
 {
     /// <summary>
-    /// Intercepts NLog's WriteToTargets method (with wrapperType) to inject trace context and forward to OpenTelemetry.
+    /// Intercepts NLog's WriteToTargets/WriteLogEventToTargets method (with wrapperType) to inject trace context and forward to OpenTelemetry.
     /// </summary>
     /// <typeparam name="TTarget">The type of the logger instance.</typeparam>
     /// <param name="instance">The NLog Logger instance.</param>
