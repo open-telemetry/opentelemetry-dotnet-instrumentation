@@ -172,8 +172,10 @@ internal static partial class DuckType
 
         static ModuleBuilder CreateModuleBuilder(string name, Assembly targetAssembly)
         {
-            var assemblyName = new AssemblyName(name + $"_{++_assemblyCount}");
-            assemblyName.Version = targetAssembly.GetName().Version;
+            var assemblyName = new AssemblyName(name + $"_{++_assemblyCount}")
+            {
+                Version = targetAssembly.GetName().Version
+            };
             var assemblyBuilder = AssemblyBuilder.DefineDynamicAssembly(assemblyName, AssemblyBuilderAccess.Run);
             return assemblyBuilder.DefineDynamicModule("MainModule");
         }
