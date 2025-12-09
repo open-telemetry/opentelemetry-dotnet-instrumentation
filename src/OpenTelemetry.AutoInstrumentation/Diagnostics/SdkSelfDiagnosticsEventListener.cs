@@ -30,7 +30,7 @@ internal class SdkSelfDiagnosticsEventListener : EventListener
         List<EventSource>? eventSources;
         lock (lockObj)
         {
-            eventSources = this.eventSourcesBeforeConstructor;
+            eventSources = eventSourcesBeforeConstructor;
             eventSourcesBeforeConstructor = null;
         }
 
