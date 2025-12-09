@@ -7,6 +7,7 @@ using System.Reflection;
 #pragma warning disable SA1649 // File name must match first type name
 #pragma warning disable SA1402 // File may only contain a single class
 #pragma warning disable CA1032 // Implement standard exception constructors
+#pragma warning disable CA1064 // Exceptions should be public. Exceptions are intended for internal use only.
 
 namespace OpenTelemetry.AutoInstrumentation.DuckTyping;
 
