@@ -20,7 +20,7 @@ internal class SdkSelfDiagnosticsEventListener : EventListener
     private readonly object lockObj = new();
     private readonly EventLevel logLevel;
     private readonly IOtelLogger log;
-    private readonly List<EventSource>? eventSourcesBeforeConstructor = new();
+    private readonly List<EventSource>? eventSourcesBeforeConstructor = [];
 
     public SdkSelfDiagnosticsEventListener(IOtelLogger logger)
     {
@@ -90,7 +90,7 @@ internal class SdkSelfDiagnosticsEventListener : EventListener
         }
         else
         {
-            payloadArray = Array.Empty<object>();
+            payloadArray = [];
         }
 
         var message = eventData.Message != null ? string.Format(CultureInfo.InvariantCulture, eventData.Message, payloadArray) : string.Empty;

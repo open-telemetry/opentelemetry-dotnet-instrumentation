@@ -17,7 +17,7 @@ internal static class BeginMethodHandler<TIntegration, TTarget>
     {
         try
         {
-            DynamicMethod? dynMethod = IntegrationMapper.CreateBeginMethodDelegate(typeof(TIntegration), typeof(TTarget), Array.Empty<Type>());
+            DynamicMethod? dynMethod = IntegrationMapper.CreateBeginMethodDelegate(typeof(TIntegration), typeof(TTarget), []);
             if (dynMethod != null)
             {
                 _invokeDelegate = (InvokeDelegate)dynMethod.CreateDelegate(typeof(InvokeDelegate));

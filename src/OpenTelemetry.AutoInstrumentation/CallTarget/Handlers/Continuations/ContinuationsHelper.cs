@@ -42,7 +42,7 @@ internal static class ContinuationsHelper
 
         static Converter()
         {
-            DynamicMethod dMethod = new DynamicMethod($"Converter<{typeof(TFrom).Name},{typeof(TTo).Name}>", typeof(TTo), new[] { typeof(TFrom) }, typeof(ConvertDelegate).Module, true);
+            DynamicMethod dMethod = new DynamicMethod($"Converter<{typeof(TFrom).Name},{typeof(TTo).Name}>", typeof(TTo), [typeof(TFrom)], typeof(ConvertDelegate).Module, true);
             ILGenerator il = dMethod.GetILGenerator();
             il.Emit(OpCodes.Ldarg_0);
             il.Emit(OpCodes.Ret);

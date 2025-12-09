@@ -338,11 +338,11 @@ internal static partial class DuckType
 #pragma warning restore SYSLIB0050
             if (typeToDeriveFrom.IsInterface)
             {
-                interfaceTypes = new[] { typeToDeriveFrom, typeof(IDuckType) };
+                interfaceTypes = [typeToDeriveFrom, typeof(IDuckType)];
             }
             else
             {
-                interfaceTypes = new[] { typeof(IDuckType) };
+                interfaceTypes = [typeof(IDuckType)];
             }
         }
         else
@@ -350,7 +350,7 @@ internal static partial class DuckType
             // If the proxy type definition is a class then we create a class proxy
             parentType = typeToDeriveFrom;
             typeAttributes = TypeAttributes.Public | TypeAttributes.Class | TypeAttributes.AutoClass | TypeAttributes.AnsiClass | TypeAttributes.BeforeFieldInit | TypeAttributes.AutoLayout | TypeAttributes.Sealed;
-            interfaceTypes = new[] { typeof(IDuckType) };
+            interfaceTypes = [typeof(IDuckType)];
         }
 
         // Gets the module builder
@@ -366,7 +366,7 @@ internal static partial class DuckType
             // Include target assembly name and public token.
             AssemblyName asmName = typeToDelegateTo.Assembly.GetName();
             assembly = asmName.Name ?? string.Empty;
-            byte[] pbToken = asmName.GetPublicKeyToken() ?? Array.Empty<byte>();
+            byte[] pbToken = asmName.GetPublicKeyToken() ?? [];
 #if NET
             assembly += "__" + BitConverter.ToString(pbToken).Replace("-", string.Empty, StringComparison.Ordinal);
             assembly = assembly.Replace(".", "_", StringComparison.Ordinal).Replace("+", "__", StringComparison.Ordinal);
@@ -397,7 +397,7 @@ internal static partial class DuckType
         ConstructorBuilder ctorBuilder = proxyTypeBuilder.DefineConstructor(
             MethodAttributes.Public | MethodAttributes.HideBySig | MethodAttributes.SpecialName | MethodAttributes.RTSpecialName,
             CallingConventions.Standard,
-            new[] { instanceField.FieldType });
+            [instanceField.FieldType]);
         ILGenerator ctorIL = ctorBuilder.GetILGenerator();
         ctorIL.Emit(OpCodes.Ldarg_0);
         ctorIL.Emit(OpCodes.Ldarg_1);
@@ -535,7 +535,7 @@ internal static partial class DuckType
 
     private static List<PropertyInfo> GetReverseProperties(Type proxyDefinitionType)
     {
-        List<PropertyInfo> selectedProperties = new List<PropertyInfo>();
+        List<PropertyInfo> selectedProperties = [];
         foreach (PropertyInfo prop in proxyDefinitionType.GetProperties())
         {
             if (prop.CanRead && prop.GetMethod is not null && prop.GetMethod.IsAbstract)
@@ -928,7 +928,7 @@ internal static partial class DuckType
         DynamicMethod createProxyMethod = new DynamicMethod(
             $"CreateProxyInstance<{proxyType.Name}>",
             proxyDefinitionType,
-            new[] { typeof(object) },
+            [typeof(object)],
             typeof(DuckType).Module,
             true);
         ILGenerator il = createProxyMethod.GetILGenerator();
@@ -964,7 +964,7 @@ internal static partial class DuckType
         DynamicMethod createStructMethod = new DynamicMethod(
             $"CreateStructInstance<{proxyType.Name}>",
             proxyDefinitionType,
-            new[] { typeof(object) },
+            [typeof(object)],
             typeof(DuckType).Module,
             true);
         ILGenerator il = createStructMethod.GetILGenerator();

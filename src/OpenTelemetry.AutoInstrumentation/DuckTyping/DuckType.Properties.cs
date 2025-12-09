@@ -221,7 +221,7 @@ internal static partial class DuckType
         else if (proxyMember is FieldInfo proxyField)
         {
             proxyMemberName = proxyField.Name;
-            proxyParameterTypes = new[] { proxyField.FieldType };
+            proxyParameterTypes = [proxyField.FieldType];
             if (proxyParameterTypes.Length != targetParametersTypes.Length)
             {
                 DuckTypePropertyArgumentsLengthException.Throw(targetProperty);

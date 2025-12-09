@@ -73,7 +73,7 @@ internal class IntegrationMapper
             ThrowHelper.ThrowArgumentException($"The first generic argument for method: {BeginMethodName} in type: {integrationType.FullName} must be the same as the first parameter for the instance value.");
         }
 
-        List<Type> callGenericTypes = new List<Type>();
+        List<Type> callGenericTypes = [];
 
         bool mustLoadInstance = onMethodBeginParameters.Length != argumentsTypes.Length;
         Type instanceGenericType = genericArgumentsTypes[0];
@@ -233,7 +233,7 @@ internal class IntegrationMapper
 
         ParameterInfo[] onMethodBeginParameters = onMethodBeginMethodInfo.GetParameters();
 
-        List<Type> callGenericTypes = new List<Type>();
+        List<Type> callGenericTypes = [];
 
         bool mustLoadInstance = onMethodBeginParameters[0].ParameterType.IsGenericParameter && onMethodBeginParameters[0].ParameterType.GenericParameterPosition == 0;
         Type instanceGenericType = genericArgumentsTypes[0];
@@ -253,7 +253,7 @@ internal class IntegrationMapper
         DynamicMethod callMethod = new DynamicMethod(
             $"{onMethodBeginMethodInfo.DeclaringType?.Name}.{onMethodBeginMethodInfo.Name}",
             typeof(CallTargetState),
-            new Type[] { targetType, typeof(object[]) },
+            [targetType, typeof(object[])],
             onMethodBeginMethodInfo.Module,
             true);
 
@@ -373,7 +373,7 @@ internal class IntegrationMapper
             }
         }
 
-        List<Type> callGenericTypes = new List<Type>();
+        List<Type> callGenericTypes = [];
 
         bool mustLoadInstance = onMethodEndParameters.Length == 3;
         Type instanceGenericType = genericArgumentsTypes[0];
@@ -393,7 +393,7 @@ internal class IntegrationMapper
         DynamicMethod callMethod = new DynamicMethod(
             $"{onMethodEndMethodInfo.DeclaringType?.Name}.{onMethodEndMethodInfo.Name}",
             typeof(CallTargetReturn),
-            new Type[] { targetType, typeof(Exception), typeof(CallTargetState).MakeByRefType() },
+            [targetType, typeof(Exception), typeof(CallTargetState).MakeByRefType()],
             onMethodEndMethodInfo.Module,
             true);
 
@@ -492,7 +492,7 @@ internal class IntegrationMapper
             }
         }
 
-        List<Type> callGenericTypes = new List<Type>();
+        List<Type> callGenericTypes = [];
 
         bool mustLoadInstance = onMethodEndParameters.Length == 4;
         Type instanceGenericType = genericArgumentsTypes[0];
@@ -537,7 +537,7 @@ internal class IntegrationMapper
         DynamicMethod callMethod = new DynamicMethod(
             $"{onMethodEndMethodInfo.DeclaringType?.Name}.{onMethodEndMethodInfo.Name}.{targetType.Name}.{returnType.Name}",
             typeof(CallTargetReturn<>).MakeGenericType(returnType),
-            new Type[] { targetType, returnType, typeof(Exception), typeof(CallTargetState).MakeByRefType() },
+            [targetType, returnType, typeof(Exception), typeof(CallTargetState).MakeByRefType()],
             onMethodEndMethodInfo.Module,
             true);
 
@@ -657,7 +657,7 @@ internal class IntegrationMapper
 
         bool preserveContext = onAsyncMethodEndMethodInfo.GetCustomAttribute<PreserveContextAttribute>() != null;
 
-        List<Type> callGenericTypes = new List<Type>();
+        List<Type> callGenericTypes = [];
 
         bool mustLoadInstance = onAsyncMethodEndParameters.Length == 4;
         Type instanceGenericType = genericArgumentsTypes[0];
@@ -702,7 +702,7 @@ internal class IntegrationMapper
         DynamicMethod callMethod = new DynamicMethod(
             $"{onAsyncMethodEndMethodInfo.DeclaringType?.Name}.{onAsyncMethodEndMethodInfo.Name}.{targetType.Name}.{returnType.Name}",
             returnType,
-            new Type[] { targetType, returnType, typeof(Exception), typeof(CallTargetState).MakeByRefType() },
+            [targetType, returnType, typeof(Exception), typeof(CallTargetState).MakeByRefType()],
             onAsyncMethodEndMethodInfo.Module,
             true);
 

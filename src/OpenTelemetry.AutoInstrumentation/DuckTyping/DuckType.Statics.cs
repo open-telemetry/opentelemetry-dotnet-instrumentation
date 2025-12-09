@@ -48,11 +48,11 @@ internal static partial class DuckType
         IgnoresAccessChecksToAssembliesSetDictionary = new();
 
         _getTypeFromHandleMethodInfo = typeof(Type).GetMethod(nameof(Type.GetTypeFromHandle));
-        _enumToObjectMethodInfo = typeof(Enum).GetMethod(nameof(Enum.ToObject), new[] { typeof(Type), typeof(object) });
+        _enumToObjectMethodInfo = typeof(Enum).GetMethod(nameof(Enum.ToObject), [typeof(Type), typeof(object)]);
         _duckTypeInstancePropertyInfo = typeof(IDuckType).GetProperty(nameof(IDuckType.Instance));
         _methodBuilderGetToken = typeof(MethodBuilder).GetMethod("GetToken", BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance)
                                  ?? typeof(MethodBuilder).GetProperty("MetadataToken", BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance)?.GetMethod;
-        _ignoresAccessChecksToAttributeCtor = typeof(IgnoresAccessChecksToAttribute).GetConstructor(new[] { typeof(string) });
+        _ignoresAccessChecksToAttributeCtor = typeof(IgnoresAccessChecksToAttribute).GetConstructor([typeof(string)]);
 
         _assemblyCount = 0;
         _typeCount = 0;

@@ -12,7 +12,7 @@ namespace OpenTelemetry.AutoInstrumentation.DuckTyping;
 // ReSharper disable once InconsistentNaming
 internal static class ILHelpersExtensions
 {
-    private static readonly List<DynamicMethod> DynamicMethods = new();
+    private static readonly List<DynamicMethod> DynamicMethods = [];
 
     internal static DynamicMethod GetDynamicMethodForIndex(int index)
     {
@@ -28,7 +28,7 @@ internal static class ILHelpersExtensions
         TypeBuilder delegateType = modBuilder.DefineType($"{dynamicMethod.Name}Delegate_" + Guid.NewGuid().ToString("N"), TypeAttributes.Class | TypeAttributes.Public | TypeAttributes.Sealed | TypeAttributes.AnsiClass | TypeAttributes.AutoClass, typeof(MulticastDelegate));
 
         // Delegate .ctor
-        ConstructorBuilder constructorBuilder = delegateType.DefineConstructor(MethodAttributes.RTSpecialName | MethodAttributes.HideBySig | MethodAttributes.Public, CallingConventions.Standard, new Type[] { typeof(object), typeof(IntPtr) });
+        ConstructorBuilder constructorBuilder = delegateType.DefineConstructor(MethodAttributes.RTSpecialName | MethodAttributes.HideBySig | MethodAttributes.Public, CallingConventions.Standard, [typeof(object), typeof(IntPtr)]);
         constructorBuilder.SetImplementationFlags(MethodImplAttributes.Runtime | MethodImplAttributes.Managed);
 
         // Define the Invoke method for the delegate
@@ -421,7 +421,7 @@ internal static class ILHelpersExtensions
         // We fill the DelegateCache<> for that custom type with the delegate instance
         var delegateCacheType = typeof(DuckType.DelegateCache<>).MakeGenericType(delegateType);
         MethodInfo fillDelegateMethodInfo = delegateCacheType.GetMethod("FillDelegate", BindingFlags.NonPublic | BindingFlags.Static)!;
-        fillDelegateMethodInfo?.Invoke(null, new object[] { index });
+        fillDelegateMethodInfo?.Invoke(null, [index]);
 
         // We get the delegate instance and load it in to the stack before the parameters (at the begining of the IL body)
         il.SetOffset(0);

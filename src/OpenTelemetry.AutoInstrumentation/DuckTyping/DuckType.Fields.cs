@@ -54,7 +54,7 @@ internal static partial class DuckType
             returnType = UseDirectAccessTo(proxyTypeBuilder, targetField.FieldType) ? targetField.FieldType : typeof(object);
 
             // We create the dynamic method
-            Type[] dynParameters = targetField.IsStatic ? Type.EmptyTypes : new[] { typeof(object) };
+            Type[] dynParameters = targetField.IsStatic ? Type.EmptyTypes : [typeof(object)];
             DynamicMethod dynMethod = new DynamicMethod(dynMethodName, returnType, dynParameters, proxyTypeBuilder.Module, true);
 
             // Emit the dynamic method body
@@ -126,7 +126,7 @@ internal static partial class DuckType
             "set_" + proxyMemberName,
             MethodAttributes.Public | MethodAttributes.SpecialName | MethodAttributes.Final | MethodAttributes.HideBySig | MethodAttributes.Virtual,
             typeof(void),
-            new[] { proxyMemberReturnType });
+            [proxyMemberReturnType]);
 
         LazyILGenerator il = new LazyILGenerator(method?.GetILGenerator());
         Type currentValueType = proxyMemberReturnType;
@@ -177,7 +177,7 @@ internal static partial class DuckType
             il.WriteTypeConversion(currentValueType, dynValueType);
 
             // Create dynamic method
-            Type[] dynParameters = targetField.IsStatic ? new[] { dynValueType } : new[] { typeof(object), dynValueType };
+            Type[] dynParameters = targetField.IsStatic ? [dynValueType] : [typeof(object), dynValueType];
             DynamicMethod dynMethod = new DynamicMethod(dynMethodName, typeof(void), dynParameters, proxyTypeBuilder.Module, true);
 
             // Write the dynamic method body

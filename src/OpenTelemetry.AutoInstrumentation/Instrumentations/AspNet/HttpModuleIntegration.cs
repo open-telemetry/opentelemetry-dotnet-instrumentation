@@ -16,7 +16,7 @@ namespace OpenTelemetry.AutoInstrumentation.Instrumentations.AspNet;
     "System.Web.Compilation.BuildManager",
     "InvokePreStartInitMethodsCore",
     ClrNames.Void,
-    new[] { "System.Collections.Generic.ICollection`1[System.Reflection.MethodInfo]", "System.Func`1[System.IDisposable]" },
+    ["System.Collections.Generic.ICollection`1[System.Reflection.MethodInfo]", "System.Func`1[System.IDisposable]"],
     "4.0.0",
     "4.*.*",
     "AspNet",

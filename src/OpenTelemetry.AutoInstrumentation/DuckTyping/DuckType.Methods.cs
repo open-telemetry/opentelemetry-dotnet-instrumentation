@@ -762,7 +762,7 @@ internal static partial class DuckType
                             int localIndex = localTargetArg?.LocalIndex ?? 0;
 
                             // We need to store the output parameter data to set the proxy parameter value after we call the target method
-                            outputAndRefParameters ??= new List<OutputAndRefParameterData>();
+                            outputAndRefParameters ??= [];
                             outputAndRefParameters.Add(new OutputAndRefParameterData(localIndex, innerParamType, idx, outerParamType));
 
                             // Load the local var ref (to be used in the target method param as output)
@@ -794,7 +794,7 @@ internal static partial class DuckType
                             int localIndex = localTargetArg?.LocalIndex ?? 0;
 
                             // We need to store the ref parameter data to set the proxy parameter value after we call the target method
-                            outputAndRefParameters ??= new List<OutputAndRefParameterData>();
+                            outputAndRefParameters ??= [];
                             outputAndRefParameters.Add(new OutputAndRefParameterData(localIndex, innerParamType, idx, outerParamType));
 
                             // Load the argument (ref)
