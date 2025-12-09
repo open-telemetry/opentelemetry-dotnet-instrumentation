@@ -34,7 +34,7 @@ internal static partial class DuckType
     /// <typeparam name="T">Duck type</typeparam>
     /// <returns>Duck type proxy</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    [return: NotNullIfNotNull("instance")]
+    [return: NotNullIfNotNull(nameof(instance))]
     public static T? Create<T>(object? instance)
     {
         return CreateCache<T>.Create(instance);
@@ -1196,7 +1196,7 @@ internal static partial class DuckType
         /// <param name="instance">Object instance</param>
         /// <returns>Proxy instance</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        [return: NotNullIfNotNull("instance")]
+        [return: NotNullIfNotNull(nameof(instance))]
         public static T? Create(object? instance)
         {
             if (instance is null)
@@ -1214,7 +1214,7 @@ internal static partial class DuckType
         /// <param name="instance">Object instance</param>
         /// <returns>Proxy instance</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        [return: NotNullIfNotNull("instance")]
+        [return: NotNullIfNotNull(nameof(instance))]
         public static T? CreateFrom<TOriginal>(TOriginal instance)
         {
             if (instance is null)
@@ -1247,7 +1247,7 @@ internal static partial class DuckType
         /// <param name="instance">Object instance</param>
         /// <returns>Proxy instance</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        [return: NotNullIfNotNull("instance")]
+        [return: NotNullIfNotNull(nameof(instance))]
         public static T? CreateReverse(object? instance)
         {
             if (instance is null)
