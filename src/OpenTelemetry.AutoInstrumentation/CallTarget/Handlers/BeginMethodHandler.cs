@@ -29,10 +29,7 @@ internal static class BeginMethodHandler<TIntegration, TTarget>
         }
         finally
         {
-            if (_invokeDelegate is null)
-            {
-                _invokeDelegate = instance => CallTargetState.GetDefault();
-            }
+            _invokeDelegate ??= instance => CallTargetState.GetDefault();
         }
     }
 

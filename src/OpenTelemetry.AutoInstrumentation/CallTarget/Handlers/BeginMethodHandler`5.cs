@@ -34,10 +34,8 @@ internal static class BeginMethodHandler<TIntegration, TTarget, TArg1, TArg2, TA
         }
         finally
         {
-            if (_invokeDelegate is null)
-            {
-                _invokeDelegate = (TTarget instance, ref TArg1 arg1, ref TArg2 arg2, ref TArg3 arg3, ref TArg4 arg4, ref TArg5 arg5) => CallTargetState.GetDefault();
-            }
+            _invokeDelegate ??=
+                (TTarget instance, ref TArg1 arg1, ref TArg2 arg2, ref TArg3 arg3, ref TArg4 arg4, ref TArg5 arg5) => CallTargetState.GetDefault();
         }
     }
 
