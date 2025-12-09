@@ -33,17 +33,20 @@ internal static class EndMethodHandler<TIntegration, TTarget, TReturn>
 
         if (returnType.IsGenericType)
         {
-            Type genericReturnType = returnType.GetGenericTypeDefinition();
             if (typeof(Task).IsAssignableFrom(returnType))
             {
                 // The type is a Task<>
                 _continuationGenerator = (ContinuationGenerator<TTarget, TReturn>?)Activator.CreateInstance(typeof(TaskContinuationGenerator<,,,>).MakeGenericType(typeof(TIntegration), typeof(TTarget), returnType, ContinuationsHelper.GetResultType(returnType)));
             }
 #if NET
-            else if (genericReturnType == typeof(ValueTask<>))
+            else
             {
-                // The type is a ValueTask<>
-                _continuationGenerator = (ContinuationGenerator<TTarget, TReturn>?)Activator.CreateInstance(typeof(ValueTaskContinuationGenerator<,,,>).MakeGenericType(typeof(TIntegration), typeof(TTarget), returnType, ContinuationsHelper.GetResultType(returnType)));
+                var genericReturnType = returnType.GetGenericTypeDefinition();
+                if (genericReturnType == typeof(ValueTask<>))
+                {
+                    // The type is a ValueTask<>
+                    _continuationGenerator = (ContinuationGenerator<TTarget, TReturn>?)Activator.CreateInstance(typeof(ValueTaskContinuationGenerator<,,,>).MakeGenericType(typeof(TIntegration), typeof(TTarget), returnType, ContinuationsHelper.GetResultType(returnType)));
+                }
             }
 #endif
         }
