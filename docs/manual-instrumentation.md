@@ -1,8 +1,8 @@
 # Manually instrument a .NET application
 
 The automatic instrumentation provides a base you can build on by adding your own
-manual instrumentation. By using both automatic and manual instrumentation, you can
-better instrument the logic and functionality of your applications, clients,
+manual instrumentation. By using both automatic and manual instrumentation, you
+can better instrument the logic and functionality of your applications, clients,
 and frameworks.
 
 ## Traces
@@ -36,7 +36,8 @@ by setting the `OTEL_DOTNET_AUTO_TRACES_ADDITIONAL_SOURCES` environmental variab
 You can set the value to either `Examples.ManualInstrumentations.Registered`
 or to `Examples.ManualInstrumentations.*`, which registers the entire prefix.
 
-You can see a sample console application with manual instrumentation [here](../examples/demo/Service/Program.cs).
+You can see a sample console application with manual instrumentation
+under [examples/demo](../examples/demo/Service/Program.cs).
 
 > Note that an `Activity` created for `NonRegistered.ManualInstrumentations`
 `ActivitySource` is not handled by the OpenTelemetry Automatic Instrumentation.
@@ -79,7 +80,8 @@ To create your custom metrics manually, follow these steps:
     You can set the value to either `Examples.Service`
     or to `Examples.*`, which registers the entire prefix.
 
-You can see a sample console application with manual metric instrumentation [here](../examples/demo/Service/Program.cs).
+You can see a sample console application with manual metric instrumentation
+under [examples/demo](../examples/demo/Service/Program.cs).
 
 ## Further reading
 
