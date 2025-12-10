@@ -64,7 +64,6 @@ public class SelectiveSamplerTests : TestHelper
         collector.AssertExpectations();
     }
 
-// TODO Implement better tests for .NET Framework, Continuous Profiler is not stopping all threads at once.
     [SkippableFact]
     [Trait("Category", "EndToEnd")]
     public void ExportThreadSamplesInMixedMode()
@@ -104,8 +103,10 @@ public class SelectiveSamplerTests : TestHelper
             // batch to contain multiple samples as a result of continuous profiling.
             if (counter % 4 == 0)
             {
+#if NET
+                // on .NET Framework there is no guarantee that samples collected from all threads
                 Assert.NotEqual(1, group.Count());
-
+#endif
                 // Sample for thread selected for frequent sampling when collecting samples of all threads
                 // should be marked with SelectedForFrequentSampling flag.
                 Assert.Single(group, sample => sample.SelectedForFrequentSampling);
@@ -123,7 +124,7 @@ public class SelectiveSamplerTests : TestHelper
 
     private static bool IndicatesSelectiveSampling(IGrouping<long, ConsoleThreadSample> samples)
     {
-        return samples.Count() == 1;
+        return samples.Count() == 1 && samples.Single().Source == "selective-sampler";
     }
 
     private static bool CollectedBeforeSpanStarted(IGrouping<long, ConsoleThreadSample> samples)
