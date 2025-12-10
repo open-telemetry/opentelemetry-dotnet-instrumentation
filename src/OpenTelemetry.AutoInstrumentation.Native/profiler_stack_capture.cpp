@@ -1,7 +1,7 @@
 // Copyright The OpenTelemetry Authors
 // SPDX-License-Identifier: Apache-2.0
 
-#ifdef _WIN64
+#ifdef _M_AMD64
 #include "profiler_stack_capture.h"
 
 #include <stdexcept>
@@ -219,7 +219,10 @@ static HRESULT PrepareContextForSnapshot(ThreadID           managedThreadId,
         }
     }
 
-    // Exhausted all frames without finding managed code
+    // Exhausted all frames without finding managed code, log it
+    trace::Logger::Warn(
+        "[StackCapture] PrepareContextForSnapshot - Unable to locate managed frame in stack walk for ThreadID=",
+        managedThreadId);
     return E_FAIL;
 }
 
@@ -365,7 +368,7 @@ StackCaptureEngine::StackCaptureEngine(std::unique_ptr<IProfilerApi> profilerApi
     : profilerApi_(std::move(profilerApi)), options_(options)
 {
     invocationQueue_ = std::make_unique<InvocationQueue>();
-    trace::Logger::Info(L"[StackCapture] Engine initialized with canary prefix: ", options_.canaryThreadNamePrefix);
+    trace::Logger::Info(L"[StackCapture] Engine initialized with canary prefix: ", options_.canaryThreadName);
 }
 StackCaptureEngine::~StackCaptureEngine()
 {
@@ -410,9 +413,9 @@ HRESULT StackCaptureEngine::ThreadAssignedToOSThread(ThreadID managedThreadId, D
     auto nameIt = threadNames_.find(managedThreadId);
     if (nameIt != threadNames_.end())
     {
-        if (nameIt->second.find(options_.canaryThreadNamePrefix) == 0)
+        if (nameIt->second == options_.canaryThreadName)
         {
-            canaryThread_ = CanaryThreadInfo{managedThreadId, osThreadId, nameIt->second};
+            canaryThread_ = CanaryThreadInfo{managedThreadId, osThreadId};
             trace::Logger::Info("[StackCapture] Canary thread designated via ThreadAssignedToOSThread - ManagedID=",
                                 managedThreadId, ", NativeID=", osThreadId, ", Name=", nameIt->second);
         }
@@ -440,13 +443,13 @@ HRESULT StackCaptureEngine::ThreadNameChanged(ThreadID threadId, ULONG cchName, 
 
     std::wstring threadName(name, cchName);
     threadNames_[threadId] = threadName;
-
-    if (threadName.find(options_.canaryThreadNamePrefix) == 0)
+    trace::Logger::Debug("[StackCapture] ThreadNameChanged - ManagedID=", threadId, ", Name=", threadName);
+    if (threadName == options_.canaryThreadName)
     {
         auto osThreadIt = activeThreads_.find(threadId);
         if (osThreadIt != activeThreads_.end())
         {
-            canaryThread_ = CanaryThreadInfo{threadId, osThreadIt->second, threadName};
+            canaryThread_ = CanaryThreadInfo{threadId, osThreadIt->second};
             trace::Logger::Info("[StackCapture] Canary thread designated via ThreadNameChanged - ManagedID=", threadId,
                                 ", NativeID=", osThreadIt->second, ", Name=", threadName);
         }
@@ -477,8 +480,6 @@ bool StackCaptureEngine::SafetyProbe()
 
     try
     {
-        // Attempt to suspend canary thread
-        trace::Logger::Debug("[StackCapture] SafetyProbe: Suspending canary thread");
         ScopedThreadSuspend canaryThread(canaryThread_.nativeId);
 
         CONTEXT canaryCtx      = {};
@@ -493,14 +494,7 @@ bool StackCaptureEngine::SafetyProbe()
             return false;
         }
 
-        trace::Logger::Debug("[StackCapture] SafetyProbe: Thread context captured. RIP=0x", std::hex, canaryCtx.Rip,
-                             ", RSP=0x", canaryCtx.Rsp, std::dec);
-
         auto canaryManagedId = canaryThread_.managedId;
-
-        // Enqueue probe worker (uses SEH-protected helper)
-        trace::Logger::Debug("[StackCapture] SafetyProbe: Enqueueing probe operations with timeout=",
-                             options_.probeTimeout.count(), "ms");
 
         status = invocationQueue_->Invoke(
             [this, canaryManagedId, canaryCtx, &snapshotHr]()
@@ -526,8 +520,6 @@ bool StackCaptureEngine::SafetyProbe()
                             options_.probeTimeout.count(), "ms");
         return false;
     }
-
-    trace::Logger::Debug("[StackCapture] SafetyProbe: Probe operations completed within timeout");
 
     // Analyze HRESULT from probe operations
     HRESULT hr = snapshotHr.load();
@@ -626,8 +618,8 @@ bool StackCaptureEngine::WaitForCanaryThread(std::chrono::milliseconds timeout)
     return result;
 }
 
-HRESULT StackCaptureEngine::CaptureStacks(std::unordered_set<ThreadID> const&               threads,
-                                          continuous_profiler::StackSnapshotCallbackParams* clientData)
+HRESULT StackCaptureEngine::CaptureStacks(std::unordered_set<ThreadID> const&                threads,
+                                          continuous_profiler::StackSnapshotCallbackContext* clientData)
 {
     bool canaryReady = WaitForCanaryThread();
 

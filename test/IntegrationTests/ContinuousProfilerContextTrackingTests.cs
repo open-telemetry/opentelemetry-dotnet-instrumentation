@@ -49,7 +49,6 @@ public class ContinuousProfilerContextTrackingTests : TestHelper
             if (samplesWithTraceContext.FirstOrDefault() is { } sampleWithTraceContext)
             {
                 var threadId = GetThreadName(profile, sampleWithTraceContext);
-                Output.WriteLine($"Found trace context on thread: {threadId}");
                 managedThreadsWithTraceContext.Add(threadId!);
             }
         }

@@ -23,62 +23,6 @@
 
 namespace ProfilerStackCapture {
 
-    // Forward declarations
-    class ILogger;
-
-    /// @brief Log severity levels for diagnostic output
-    enum class LogLevel {
-        Trace,      // Detailed trace information
-        Debug,      // Debug-level messages
-        Info,       // Informational messages
-        Warning,    // Warning conditions
-        Error,      // Error conditions
-        Critical    // Critical failures
-    };
-
-    /// @brief Logger interface that can be replaced by consumer's logging framework
-    /// @note Default implementation uses OutputDebugString, but consumers should provide
-    ///       their own implementation for production use
-    class ILogger {
-    public:
-        virtual ~ILogger() = default;
-        
-        /// @brief Log a message with specified severity
-        /// @param level Severity level
-        /// @param message Message to log
-        virtual void Log(LogLevel level, const char* message) = 0;
-        
-        /// @brief Check if a log level is enabled
-        /// @param level Level to check
-        /// @return true if logging is enabled for this level
-        virtual bool IsEnabled(LogLevel level) const = 0;
-    };
-
-    /// @brief Default logger implementation using OutputDebugString
-  
-    /// @brief Rich error context for diagnostic purposes
-    struct ErrorContext {
-        HRESULT hresult;              // COM error code
-        DWORD win32Error;             // GetLastError() value
-        std::string operation;        // Operation that failed
-        std::string details;          // Additional diagnostic information
-        
-        ErrorContext() 
-            : hresult(S_OK), win32Error(0) {}
-        
-        ErrorContext(HRESULT hr, const std::string& op, const std::string& det = "") 
-            : hresult(hr), win32Error(GetLastError()), operation(op), details(det) {}
-        
-        ErrorContext(HRESULT hr, DWORD lastErr, const std::string& op, const std::string& det = "")
-            : hresult(hr), win32Error(lastErr), operation(op), details(det) {}
-        
-        /// @brief Format error context as human-readable string
-        std::string ToString() const;
-        
-        /// @brief Check if this represents an error condition
-        bool IsError() const { return FAILED(hresult) || win32Error != 0; }
-    };
-
     class IThreadActivityListener
     {
     public:
@@ -87,21 +31,11 @@ namespace ProfilerStackCapture {
         virtual HRESULT STDMETHODCALLTYPE ThreadAssignedToOSThread(ThreadID managedThreadId,
             DWORD osThreadId) = 0;
         virtual HRESULT STDMETHODCALLTYPE ThreadNameChanged(ThreadID threadId, ULONG cchName, WCHAR name[]) = 0;
-
-
-    };
-
-    struct StackFrame {
-        FunctionID functionId;
-        bool isNative;
-        StackFrame(FunctionID id, bool native = false) : functionId(id), isNative(native) {}
     };
 
     struct CaptureOptions {
         std::chrono::milliseconds probeTimeout = std::chrono::milliseconds(250);
-        std::chrono::milliseconds snapshotInterval = std::chrono::milliseconds(1000);
-        size_t maxStackDepth = 10000;
-        const wchar_t* canaryThreadNamePrefix = L"OpenTelemetry Continuous";
+        const wchar_t* canaryThreadName = L"OpenTelemetry Profiler Canary Thread";
     };
 
     class IProfilerApi {
@@ -179,12 +113,10 @@ namespace ProfilerStackCapture {
     {
         ThreadID     managedId = 0;
         DWORD        nativeId  = 0;
-        std::wstring name;
         void         reset()
         {
             managedId = 0;
             nativeId  = 0;
-            name.clear();
         }
         bool isValid() const
         {
@@ -195,7 +127,7 @@ namespace ProfilerStackCapture {
     {
         size_t                   maxDepth;
         std::atomic<bool>* stopRequested;
-        continuous_profiler::StackSnapshotCallbackParams* clientParams = nullptr;
+        continuous_profiler::StackSnapshotCallbackContext* clientParams = nullptr;
     };
 
     class StackCaptureEngine : public IThreadActivityListener {
@@ -203,7 +135,7 @@ namespace ProfilerStackCapture {
         explicit StackCaptureEngine(std::unique_ptr<IProfilerApi> profilerApi, const CaptureOptions& options = {});
         ~StackCaptureEngine();
         bool    WaitForCanaryThread(std::chrono::milliseconds timeout = std::chrono::milliseconds(0));
-        HRESULT CaptureStacks(const std::unordered_set<ThreadID> &threads, continuous_profiler::StackSnapshotCallbackParams* clientData);
+        HRESULT CaptureStacks(const std::unordered_set<ThreadID> &threads, continuous_profiler::StackSnapshotCallbackContext* clientData);
         void Stop();
         
         HRESULT STDMETHODCALLTYPE ThreadCreated(ThreadID threadId) override { return S_OK; }
@@ -216,19 +148,9 @@ namespace ProfilerStackCapture {
         bool IsManagedFunction(BYTE* instructionPointer) const;
         bool SafetyProbe();
         
-        // Logging helpers
-        void LogTrace(const char* format, ...);
-        void LogDebug(const char* format, ...);
-        void LogInfo(const char* format, ...);
-        void LogWarning(const char* format, ...);
-        void LogError(const char* format, ...);
-        void LogCritical(const char* format, ...);
-        void LogError(const ErrorContext& errorCtx);
-        
         std::unique_ptr<IProfilerApi> profilerApi_;
         CaptureOptions options_;
         std::atomic<bool> stopRequested_{};
-        std::shared_ptr<ILogger> logger_;
         
         // Single mutex protects all thread-related data (activeThreads_, threadNames_, canaryThread_)
         mutable std::mutex threadListMutex_;

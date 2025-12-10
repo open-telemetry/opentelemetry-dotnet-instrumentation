@@ -22,7 +22,7 @@ public:
     
     HRESULT CaptureStacks(
         const std::unordered_set<ThreadID>& threads,
-        StackSnapshotCallbackParams* clientData) override {
+        StackSnapshotCallbackContext* clientData) override {
         
         if (threads.empty()) {
             return S_OK;
@@ -80,7 +80,6 @@ private:
             if (auto suspendResult = profilerInfo_->SuspendRuntime(); FAILED(suspendResult))
             {
                 auto errorString = "SuspendRuntime failed with HRESULT=" + std::to_string(suspendResult);
-                //trace::Logger::Error(errorString); // Log before throwing
                 throw std::runtime_error(errorString);
             }
         }
@@ -88,8 +87,8 @@ private:
         ~RuntimeSuspensionGuard() {
             
             if (HRESULT resumeHr = profilerInfo_->ResumeRuntime(); FAILED(resumeHr)) {
-                /*trace::Logger::Error("DotNetStackCaptureStrategy: ResumeRuntime FAILED! HRESULT=", 
-                                    trace::HResultStr(resumeHr));*/
+                trace::Logger::Error("DotNetStackCaptureStrategy: ResumeRuntime FAILED! HRESULT=", 
+                                    trace::HResultStr(resumeHr));
             }
         }
         

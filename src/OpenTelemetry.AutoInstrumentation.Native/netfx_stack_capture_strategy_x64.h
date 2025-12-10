@@ -11,17 +11,17 @@ namespace continuous_profiler {
 
 /// @brief Stack capture strategy for .NET Framework
 /// @details Uses thread suspension + seeded DoStackSnapshot via StackCaptureEngine
-class NetFxStackCaptureStrategy : public IStackCaptureStrategy {
+class NetFxStackCaptureStrategyX64 : public IStackCaptureStrategy {
 public:
-    explicit NetFxStackCaptureStrategy(ICorProfilerInfo2* profilerInfo)
+    explicit NetFxStackCaptureStrategyX64(ICorProfilerInfo2* profilerInfo)
         : engine_(std::make_unique<ProfilerStackCapture::StackCaptureEngine>(
               std::make_unique<ProfilerStackCapture::ProfilerApiAdapter>(profilerInfo))) {
-        trace::Logger::Info("Initialized NetFxStackCaptureStrategy (per-thread suspension)");
+        trace::Logger::Info("Initialized NetFxStackCaptureStrategyX64 (per-thread suspension)");
     }
     
     HRESULT CaptureStacks(
         const std::unordered_set<ThreadID>& threads,
-        StackSnapshotCallbackParams* clientData) override {
+        StackSnapshotCallbackContext* clientData) override {
         // StackCaptureEngine handles:
         // - Per-thread suspension via ScopedThreadSuspend
         // - Safety probes with canary thread

@@ -348,13 +348,21 @@ void ThreadSamplesBuffer::StartSample(ThreadID                   id,
     // Feature possibilities: (managed/native) thread priority, cpu/wait times, etc.
 }
 
-void ThreadSamplesBuffer::StartSampleForSelectedThread(const ThreadState*         state,
+void ThreadSamplesBuffer::StartSampleForSelectedThread(ThreadID                   id,
+                                                       const ThreadState*         state,
                                                        const thread_span_context& span_context) const
 {
     CHECK_SAMPLES_BUFFER_LENGTH()
     WriteByte(kSelectedThreadSample);
     WriteCurrentTimeMillis();
-    WriteString(state->thread_name_);
+    if (state->thread_name_.empty())
+    {
+        WriteString(trace::ToWSTRING(std::to_string(id)));
+    }
+    else
+    {
+        WriteString(state->thread_name_);
+    }
     WriteSpanContext(span_context);
 }
 
@@ -737,16 +745,6 @@ struct DoStackSnapshotParams
     DoStackSnapshotParams(ContinuousProfiler* p, std::vector<FunctionIdentifier>* b) : prof(p), buffer(b) {}
 };
 
-struct DoStackSnapshotParamsEx : DoStackSnapshotParams
-{
-    using ThreadStacks = std::unordered_map<ThreadID, std::vector<FunctionIdentifier>>;
-    ThreadStacks* threadStacksBuffer;
-    DoStackSnapshotParamsEx(ContinuousProfiler* p, std::vector<FunctionIdentifier>* b, ThreadStacks* t)
-        : DoStackSnapshotParams(p, b), threadStacksBuffer(t)
-    {
-    }
-};
-
 static HRESULT __stdcall FrameCallback(_In_ FunctionID         func_id,
                                        _In_ UINT_PTR           ip,
                                        _In_ COR_PRF_FRAME_INFO frame_info,
@@ -808,19 +806,18 @@ static void CaptureFunctionIdentifiersForThreads(
 
     if (auto stackCaptureStrategy = prof->GetStackCaptureStrategy(); stackCaptureStrategy != nullptr)
     {
-        auto callBackRaw = [](FunctionID func_id, UINT_PTR ip, COR_PRF_FRAME_INFO frame_info, ULONG32 context_size,
-                              BYTE context[], void* client_data) -> HRESULT
+        auto frameProcessor = [&threadStacksBuffer, prof](StackSnapshotCallbackContext* snapshot_context) -> HRESULT
         {
-            auto params                   = static_cast<continuous_profiler::StackSnapshotCallbackParams*>(client_data);
-            auto thread                   = params->threadId;
-            auto doStackSnapshotParams    = static_cast<DoStackSnapshotParamsEx*>(params->clientData);
-            doStackSnapshotParams->buffer = &((*doStackSnapshotParams->threadStacksBuffer)[thread]);
-            FrameCallback(func_id, ip, frame_info, context_size, context, doStackSnapshotParams);
+            auto                  thread = snapshot_context->threadId;
+            DoStackSnapshotParams doStackSnapshotParams{prof, &threadStacksBuffer[thread]};
+            FrameCallback(snapshot_context->functionId, snapshot_context->instructionPointer,
+                          snapshot_context->frameInfo, snapshot_context->contextSize, snapshot_context->context,
+                          &doStackSnapshotParams);
             return S_OK;
         };
-        DoStackSnapshotParamsEx     doStackSnapshotParamsEx(prof, nullptr, &threadStacksBuffer);
-        StackSnapshotCallbackParams params{callBackRaw, &doStackSnapshotParamsEx};
-        stackCaptureStrategy->CaptureStacks(selectedThreads, &params);
+
+        StackSnapshotCallbackContext context{frameProcessor};
+        stackCaptureStrategy->CaptureStacks(selectedThreads, &context);
     }
 }
 
@@ -926,7 +923,7 @@ static void ResolveSymbolsAndPublishBufferForSelectedThreads(
         thread_span_context spanContext = GetContext(threadId);
         const auto          threadState = GetThreadState(prof->managed_tid_to_state_, threadId);
 
-        localBuf.StartSampleForSelectedThread(threadState, spanContext);
+        localBuf.StartSampleForSelectedThread(threadId, threadState, spanContext);
         ResolveFrames(prof, threadStack, localBuf);
         localBuf.EndSample();
     }

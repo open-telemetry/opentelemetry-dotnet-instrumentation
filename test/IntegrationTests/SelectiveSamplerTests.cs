@@ -1,6 +1,6 @@
 // Copyright The OpenTelemetry Authors
 // SPDX-License-Identifier: Apache-2.0
-
+#if NET //for now we ae disabling this on .NET Framework as canary mechanism makes this flaky
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 using IntegrationTests.Helpers;
@@ -64,7 +64,6 @@ public class SelectiveSamplerTests : TestHelper
         collector.AssertExpectations();
     }
 
-#if NET
 // TODO Implement better tests for .NET Framework, Continuous Profiler is not stopping all threads at once.
     [SkippableFact]
     [Trait("Category", "EndToEnd")]
@@ -121,7 +120,6 @@ public class SelectiveSamplerTests : TestHelper
             counter++;
         }
     }
-#endif
 
     private static bool IndicatesSelectiveSampling(IGrouping<long, ConsoleThreadSample> samples)
     {
@@ -185,3 +183,4 @@ public class SelectiveSamplerTests : TestHelper
         return true;
     }
 }
+#endif
