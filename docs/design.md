@@ -34,8 +34,8 @@ and its initialization can also be delegated to the application code.
 The current implementation relies on the [host startup hook](https://github.com/dotnet/runtime/blob/main/docs/design/features/host-startup-hook.md)
 or the [CLR Profiler API](https://docs.microsoft.com/en-us/dotnet/framework/unmanaged-api/profiling)
 and neither is supported when publishing AOT compiled applications.
-- **Side-by-side usage with other CLR Profiler based tools**: Various tools for .NET
-are also implemented using a CLR Profiler. However, only a single CLR Profiler
+- **Side-by-side usage with other CLR Profiler based tools**: Various tools for
+.NET are also implemented using a CLR Profiler. However, only a single CLR Profiler
 can be used when running the application. The CLR Profiler component is required
 on the **.NET Framework** and optional for **.NET** applications, more info below.
 

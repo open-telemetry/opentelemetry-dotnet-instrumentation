@@ -3,10 +3,10 @@
 **Status**: [Experimental](https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/versioning-and-stability.md).
 
 You can use `OTEL_DOTNET_AUTO_PLUGINS` environment variable to extend the
-configuration and overwrite options of the OpenTelemetry .NET SDK Tracer, Meter or
-Logs. A plugin must be a non-static, non-abstract class which has a default constructor
-and that implements at least one of the configuration methods below showed
-in an example plugin class:
+configuration and overwrite options of the OpenTelemetry .NET SDK Tracer, Meter
+or Logs. A plugin must be a non-static, non-abstract class which has a default
+constructor and that implements at least one of the configuration methods below
+showed in an example plugin class:
 
 ```csharp
 
