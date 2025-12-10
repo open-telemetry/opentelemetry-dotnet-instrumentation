@@ -60,7 +60,9 @@ internal class TaskContinuationGenerator<TIntegration, TTarget, TReturn, TResult
 
         if (previousTask.Status == TaskStatus.RanToCompletion)
         {
+#pragma warning disable CA1849 // 'Task<TResult>.Result' synchronously blocks. Use await instead. It is fine, as we already checked the task is completed.
             taskResult = previousTask.Result;
+#pragma warning restore CA1849 // 'Task<TResult>.Result' synchronously blocks. Use await instead. It is fine, as we already checked the task is completed.
         }
         else if (previousTask.Status == TaskStatus.Faulted)
         {
