@@ -71,7 +71,7 @@ internal static class OpenTelemetryLogHelpers
 
         var instanceVar = Expression.Variable(bodySetterMethodInfo.DeclaringType!, "instance");
 
-        var constructorInfo = logRecordDataType.GetConstructor(BindingFlags.Instance | BindingFlags.Public, null, CallingConventions.HasThis, new[] { typeof(Activity) }, null)!;
+        var constructorInfo = logRecordDataType.GetConstructor(BindingFlags.Instance | BindingFlags.Public, null, CallingConventions.HasThis, [typeof(Activity)], null)!;
         var assignInstanceVar = Expression.Assign(instanceVar, Expression.New(constructorInfo, activity));
         var setBody = Expression.IfThen(Expression.NotEqual(body, Expression.Constant(null)), Expression.Call(instanceVar, bodySetterMethodInfo, body));
         var setTimestamp = Expression.Call(instanceVar, timestampSetterMethodInfo, timestamp);
@@ -79,7 +79,7 @@ internal static class OpenTelemetryLogHelpers
         var setSeverityLevel = Expression.Call(instanceVar, severityLevelSetterMethodInfo, Expression.Convert(severityLevel, typeof(Nullable<>).MakeGenericType(severityType)));
 
         return Expression.Block(
-            new[] { instanceVar },
+            [instanceVar],
             assignInstanceVar,
             setBody,
             setTimestamp,
@@ -179,7 +179,7 @@ internal static class OpenTelemetryLogHelpers
         var dictionaryEnumerator = typeof(IEnumerator<KeyValuePair<string, object?>>);
 
         var exceptionRecordMethod = logRecordAttributesListType.GetMethod("RecordException", BindingFlags.Instance | BindingFlags.Public)!;
-        var addAttributeMethod = logRecordAttributesListType.GetMethod("Add", BindingFlags.Instance | BindingFlags.Public, null, new[] { stringType, typeof(object) }, null)!;
+        var addAttributeMethod = logRecordAttributesListType.GetMethod("Add", BindingFlags.Instance | BindingFlags.Public, null, [stringType, typeof(object)], null)!;
         var disposeMethod = disposableInterface.GetMethod(nameof(IDisposable.Dispose))!;
         var moveNextMethod = enumeratorInterface.GetMethod(nameof(IEnumerator.MoveNext))!;
         var getEnumeratorMethod = typeof(IEnumerable<KeyValuePair<string, object?>>).GetMethod(nameof(IEnumerable.GetEnumerator))!;
@@ -209,7 +209,7 @@ internal static class OpenTelemetryLogHelpers
             Expression.IfThenElse(
                 Expression.Equal(moveNext, Expression.Constant(true)),
                 Expression.Block(
-                    new[] { loopVar, keyVar },
+                    [loopVar, keyVar],
                     Expression.Assign(loopVar, Expression.Property(enumeratorVar, nameof(IEnumerator.Current))),
                     Expression.Assign(keyVar, getKeyProperty),
                     Expression.Call(instanceVar, addAttributeMethod, keyVar, Expression.Property(loopVar, "Value"))),
@@ -218,12 +218,12 @@ internal static class OpenTelemetryLogHelpers
 
         var addPropertiesWithForeach =
             Expression.Block(
-                new[] { enumeratorVar },
+                [enumeratorVar],
                 enumeratorAssign,
                 Expression.TryFinally(
                     loopAndAddProperties,
                     Expression.Block(
-                        new[] { disposable },
+                        [disposable],
                         Expression.Assign(disposable, Expression.TypeAs(enumeratorVar, disposableInterface)),
                         Expression.IfThen(Expression.NotEqual(disposable, Expression.Constant(null)), enumeratorDispose))));
 
@@ -245,7 +245,7 @@ internal static class OpenTelemetryLogHelpers
         var addPropertiesIfNotNull = Expression.IfThen(Expression.NotEqual(properties, Expression.Constant(null)), addPropertiesWithForeach);
         var addArgsIfNotNull = Expression.IfThen(Expression.NotEqual(argsParam, Expression.Constant(null)), loopAndAddArgs);
         return Expression.Block(
-            new[] { instanceVar, argsIndexVar, argsValueVar },
+            [instanceVar, argsIndexVar, argsValueVar],
             assignInstanceVar,
             recordExceptionIfNotNull,
             setRenderedMessageIfNotNull,
@@ -300,13 +300,13 @@ internal static class OpenTelemetryLogHelpers
 
         var instanceCasted = Expression.Convert(instance, loggerType);
 
-        var methodInfo = loggerType.GetMethod("EmitLog", BindingFlags.Instance | BindingFlags.Public, null, new[] { logRecordDataType.MakeByRefType(), logRecordAttributesListType.MakeByRefType() }, null);
+        var methodInfo = loggerType.GetMethod("EmitLog", BindingFlags.Instance | BindingFlags.Public, null, [logRecordDataType.MakeByRefType(), logRecordAttributesListType.MakeByRefType()], null);
 
         var logRecord = BuildLogRecord(logRecordDataType, typeof(LoggerProvider).Assembly.GetType("OpenTelemetry.Logs.LogRecordSeverity")!, bodyParam, timestampParam, severityTextParam, severityLevelParam, activityParam);
         var logRecordAttributes = BuildLogRecordAttributes(logRecordAttributesListType, exceptionParam, propertiesParam, argsParam, renderedMessageParam);
 
         var block = Expression.Block(
-            new[] { logRecordDataVar, logRecordAttributesVar },
+            [logRecordDataVar, logRecordAttributesVar],
             Expression.Assign(logRecordDataVar, logRecord),
             Expression.Assign(logRecordAttributesVar, logRecordAttributes),
             Expression.Call(instanceCasted, methodInfo!, logRecordDataVar, logRecordAttributesVar));

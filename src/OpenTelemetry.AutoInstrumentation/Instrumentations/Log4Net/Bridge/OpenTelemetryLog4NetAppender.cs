@@ -47,7 +47,7 @@ internal class OpenTelemetryLog4NetAppender
     [DuckReverseMethod]
     public string Name { get; set; } = nameof(OpenTelemetryLog4NetAppender);
 
-    [DuckReverseMethod(ParameterTypeNames = new[] { "log4net.Core.LoggingEvent, log4net" })]
+    [DuckReverseMethod(ParameterTypeNames = ["log4net.Core.LoggingEvent, log4net"])]
     public void DoAppend(ILoggingEvent loggingEvent)
     {
         if (Sdk.SuppressInstrumentation || loggingEvent.Level.Value == LevelOffValue)
@@ -165,7 +165,7 @@ internal class OpenTelemetryLog4NetAppender
         try
         {
             var methodInfo = typeof(LoggerProvider)
-                .GetMethod("GetLogger", BindingFlags.NonPublic | BindingFlags.Instance, null, new[] { typeof(string) }, null)!;
+                .GetMethod("GetLogger", BindingFlags.NonPublic | BindingFlags.Instance, null, [typeof(string)], null)!;
 #if NET
             return methodInfo.CreateDelegate<Func<string?, object?>>(loggerProvider);
 #else
