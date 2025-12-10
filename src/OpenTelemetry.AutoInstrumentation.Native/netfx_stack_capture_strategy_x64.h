@@ -4,6 +4,8 @@
 #ifndef OTEL_PROFILER_NETFX_STACK_CAPTURE_STRATEGY_H_
 #define OTEL_PROFILER_NETFX_STACK_CAPTURE_STRATEGY_H_
 
+#ifdef _M_AMD64
+
 #include "stack_capture_strategy.h"
 #include "profiler_stack_capture.h"
 
@@ -59,4 +61,5 @@ private:
 
 } // namespace continuous_profiler
 
+#endif // _M_AMD64
 #endif // OTEL_PROFILER_NETFX_STACK_CAPTURE_STRATEGY_H_

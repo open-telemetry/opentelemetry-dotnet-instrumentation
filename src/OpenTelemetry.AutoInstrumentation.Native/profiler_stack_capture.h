@@ -3,6 +3,8 @@
 #ifndef OTEL_PROFILER_STACK_CAPTURE_H_
 #define OTEL_PROFILER_STACK_CAPTURE_H_
 
+#ifdef _M_AMD64
+
 #include <windows.h>
 #include <vector>
 #include <functional>
@@ -163,4 +165,6 @@ namespace ProfilerStackCapture {
     };
 
 } // namespace ProfilerStackCapture
+
+#endif // _M_AMD64
 #endif // OTEL_PROFILER_STACK_CAPTURE_H_
