@@ -8,5 +8,5 @@ namespace OpenTelemetry.AutoInstrumentation.Configurations.FileBasedConfiguratio
 internal class LoggerProviderConfiguration
 {
     [YamlMember(Alias = "processors")]
-    public List<LogProcessorConfig> Processors { get; set; } = new();
+    public List<LogProcessorConfig> Processors { get; set; } = [];
 }

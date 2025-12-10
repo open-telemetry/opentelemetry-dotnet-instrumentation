@@ -35,7 +35,7 @@ internal class TaskContinuationGenerator<TIntegration, TTarget, TReturn> : Conti
             return returnValue;
         }
 
-        Task previousTask = FromTReturn<Task>(returnValue);
+        var previousTask = FromTReturn<Task>(returnValue);
         if (previousTask.Status == TaskStatus.RanToCompletion)
         {
             _continuation(instance, default, null, in state);

@@ -16,7 +16,7 @@ namespace OpenTelemetry.AutoInstrumentation.Instrumentations.AspNet;
     "System.Web.Compilation.BuildManager",
     "InvokePreStartInitMethodsCore",
     ClrNames.Void,
-    new[] { "System.Collections.Generic.ICollection`1[System.Reflection.MethodInfo]", "System.Func`1[System.IDisposable]" },
+    ["System.Collections.Generic.ICollection`1[System.Reflection.MethodInfo]", "System.Func`1[System.IDisposable]"],
     "4.0.0",
     "4.*.*",
     "AspNet",
@@ -48,7 +48,9 @@ public static class HttpModuleIntegration
         {
             HttpApplication.RegisterModule(typeof(TelemetryHttpModule));
         }
-        catch
+#pragma warning disable CA1031 // Do not catch general exception types. Intentionally catching all exceptions to avoid breaking the application
+        catch (Exception)
+#pragma warning restore CA1031 // Do not catch general exception types. Intentionally catching all exceptions to avoid breaking the application
         {
             // Exception while registering telemetry http module
             // nothing we can do with this

@@ -18,7 +18,7 @@ namespace OpenTelemetry.AutoInstrumentation.Instrumentations.Kafka.Integrations;
     typeName: IntegrationConstants.ProducerDeliveryHandlerShimTypeName,
     methodName: ".ctor",
     returnTypeName: ClrNames.Void,
-    parameterTypeNames: new[] { ClrNames.String, "!0", "!1", IntegrationConstants.ActionOfDeliveryReportTypeName },
+    parameterTypeNames: [ClrNames.String, "!0", "!1", IntegrationConstants.ActionOfDeliveryReportTypeName],
     minimumVersion: IntegrationConstants.MinVersion,
     maximumVersion: IntegrationConstants.MaxVersion,
     integrationName: IntegrationConstants.IntegrationName,

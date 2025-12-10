@@ -74,9 +74,9 @@ file-based configuration to include these parameters.
 
 ### Rule Engine
 
-| Environment variable                | Description              |
-| ----------------------------------- | ------------------------ |
-| `OTEL_DOTNET_AUTO_RULE_ENGINE_ENABLED` | Enables RuleEngine.      |
+| Environment variable                   | Description         |
+| -------------------------------------- | ------------------- |
+| `OTEL_DOTNET_AUTO_RULE_ENGINE_ENABLED` | Enables RuleEngine. |
 
 ---
 

@@ -1,11 +1,12 @@
-# Handle adding automatic instrumentation to application with existing OpenTelemetry SDK and instrumentation references
+# Add automatic instrumentation to application with existing OpenTelemetry SDK
 
 This document explains how OpenTelemetry automatic instrumentation interacts with
 applications that already include references to the OpenTelemetry SDK or instrumentation
 libraries. It covers the role and impact of the `OTEL_DOTNET_AUTO_SETUP_SDK`
-environment variable and provides troubleshooting guidance for conflicts between automatic
-instrumentation and existing references. The objective is to help users understand and
-effectively integrate OpenTelemetry automatic instrumentation into their applications.
+environment variable and provides troubleshooting guidance for conflicts between
+automatic instrumentation and existing references. The objective is to help
+users understand and effectively integrate OpenTelemetry automatic
+instrumentation into their applications.
 
 ## Interaction with existing OpenTelemetry SDK and instrumentation references
 
@@ -22,9 +23,9 @@ conflicts.
 The `OTEL_DOTNET_AUTO_SETUP_SDK` environment variable plays a crucial role in
 managing the interaction between OpenTelemetry automatic instrumentation and existing
 OpenTelemetry references within an application. When set to `true`, this
-environment variable instructs the automatic instrumentation to automatically set up
-the OpenTelemetry SDK, ensuring that it is properly configured to work with the
-instrumentation injected by the automatic instrumentation.
+environment variable instructs the automatic instrumentation to automatically
+set up the OpenTelemetry SDK, ensuring that it is properly configured to work
+with the instrumentation injected by the automatic instrumentation.
 
 This automatic setup is particularly useful in scenarios where the application
 has its own references to OpenTelemetry libraries, as it helps to harmonize the

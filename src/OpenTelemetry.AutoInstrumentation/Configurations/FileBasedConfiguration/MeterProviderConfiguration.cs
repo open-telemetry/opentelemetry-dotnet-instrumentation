@@ -8,5 +8,5 @@ namespace OpenTelemetry.AutoInstrumentation.Configurations.FileBasedConfiguratio
 internal class MeterProviderConfiguration
 {
     [YamlMember(Alias = "readers")]
-    public List<MetricReaderConfig> Readers { get; set; } = new();
+    public List<MetricReaderConfig> Readers { get; set; } = [];
 }
