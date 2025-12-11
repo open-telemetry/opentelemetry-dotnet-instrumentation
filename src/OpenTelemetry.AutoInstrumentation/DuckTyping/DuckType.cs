@@ -604,7 +604,7 @@ internal static partial class DuckType
                     {
                         // This will run only when multiple indexers are defined in a class, that way we can end up with multiple properties with the same name.
                         // In this case we make sure we select the indexer we want
-                        targetProperty = targetType.GetProperty(duckAttribute.Name, proxyProperty.PropertyType, proxyProperty.GetIndexParameters().Select(i => i.ParameterType).ToArray());
+                        targetProperty = targetType.GetProperty(duckAttribute.Name, proxyProperty.PropertyType, [.. proxyProperty.GetIndexParameters().Select(i => i.ParameterType)]);
                     }
 
                     if (targetProperty is null)
@@ -777,7 +777,7 @@ internal static partial class DuckType
             {
                 // This will run only when multiple indexers are defined in a class, that way we can end up with multiple properties with the same name.
                 // In this case we make sure we select the indexer we want
-                overriddenProperty = typeToDeriveFrom.GetProperty(duckAttribute.Name, implementationProperty.PropertyType, implementationProperty.GetIndexParameters().Select(i => i.ParameterType).ToArray());
+                overriddenProperty = typeToDeriveFrom.GetProperty(duckAttribute.Name, implementationProperty.PropertyType, [.. implementationProperty.GetIndexParameters().Select(i => i.ParameterType)]);
             }
 
             if (overriddenProperty is null)
