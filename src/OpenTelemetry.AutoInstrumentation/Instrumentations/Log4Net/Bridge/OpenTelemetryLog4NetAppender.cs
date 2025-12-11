@@ -119,7 +119,9 @@ internal class OpenTelemetryLog4NetAppender
     }
 
     [DuckReverseMethod]
+#pragma warning disable CA1822 // Method does not access instance data and can be marked as static. Needed for duck typing.
     public void Close()
+#pragma warning restore CA1822 // Method does not access instance data and can be marked as static. Needed for duck typing.
     {
     }
 
