@@ -38,22 +38,22 @@ internal static class ContinuationsHelper
 
     private static class Converter<TFrom, TTo>
     {
-        private static readonly ConvertDelegate _converter;
-
-        static Converter()
-        {
-            var dMethod = new DynamicMethod($"Converter<{typeof(TFrom).Name},{typeof(TTo).Name}>", typeof(TTo), [typeof(TFrom)], typeof(ConvertDelegate).Module, true);
-            var il = dMethod.GetILGenerator();
-            il.Emit(OpCodes.Ldarg_0);
-            il.Emit(OpCodes.Ret);
-            _converter = (ConvertDelegate)dMethod.CreateDelegate(typeof(ConvertDelegate));
-        }
+        private static readonly ConvertDelegate Instance = CreateConverter();
 
         private delegate TTo ConvertDelegate(TFrom value);
 
         public static TTo Convert(TFrom value)
         {
-            return _converter(value);
+            return Instance(value);
+        }
+
+        private static ConvertDelegate CreateConverter()
+        {
+            var dMethod = new DynamicMethod($"Converter<{typeof(TFrom).Name},{typeof(TTo).Name}>", typeof(TTo), [typeof(TFrom)], typeof(ConvertDelegate).Module, true);
+            var il = dMethod.GetILGenerator();
+            il.Emit(OpCodes.Ldarg_0);
+            il.Emit(OpCodes.Ret);
+            return (ConvertDelegate)dMethod.CreateDelegate(typeof(ConvertDelegate));
         }
     }
 #endif
