@@ -35,8 +35,8 @@ internal class ValueTaskContinuationGenerator<TIntegration, TTarget, TReturn> : 
         }
 
         var previousValueTask = FromTReturn<ValueTask>(returnValue);
-
-        return ToTReturn(InnerSetValueTaskContinuation(instance, previousValueTask, state));
+        var continuationValueTask = InnerSetValueTaskContinuation(instance, previousValueTask, state);
+        return ToTReturn(continuationValueTask);
 
         static async ValueTask InnerSetValueTaskContinuation(TTarget instance, ValueTask previousValueTask, CallTargetState state)
         {
