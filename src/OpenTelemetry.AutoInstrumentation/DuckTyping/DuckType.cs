@@ -376,7 +376,7 @@ internal static partial class DuckType
             assembly = asmName.Name ?? string.Empty;
             var pbToken = asmName.GetPublicKeyToken() ?? [];
 #if NET
-            assembly += "__" + BitConverter.ToString(pbToken).Replace("-", string.Empty, StringComparison.Ordinal);
+            assembly += "__" + Convert.ToHexString(pbToken);
             assembly = assembly.Replace(".", "_", StringComparison.Ordinal).Replace("+", "__", StringComparison.Ordinal);
 #else
             assembly += "__" + BitConverter.ToString(pbToken).Replace("-", string.Empty);
