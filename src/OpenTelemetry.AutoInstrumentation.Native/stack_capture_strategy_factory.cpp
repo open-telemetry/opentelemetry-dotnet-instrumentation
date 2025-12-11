@@ -3,7 +3,7 @@
 
 #include "stack_capture_strategy_factory.h"
 #include "dot_net_stack_capture_strategy.h"
-#ifdef _M_AMD64
+#if defined(_WIN32) && defined(_M_AMD64)
 #include "netfx_stack_capture_strategy_x64.h"
 #endif
 
@@ -16,7 +16,7 @@ std::unique_ptr<IStackCaptureStrategy> StackCaptureStrategyFactory::Create(ICorP
 
     if (runtimeInfo.is_desktop())
     {
-#ifdef _M_AMD64
+#if defined(_WIN32) && defined(_M_AMD64)
         trace::Logger::Info("StackCaptureStrategyFactory: Creating NetFxStackCaptureStrategyX64");
         return std::make_unique<NetFxStackCaptureStrategyX64>(profilerInfo);
 #else

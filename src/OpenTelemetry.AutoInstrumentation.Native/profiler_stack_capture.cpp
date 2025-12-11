@@ -1,7 +1,7 @@
 // Copyright The OpenTelemetry Authors
 // SPDX-License-Identifier: Apache-2.0
 
-#ifdef _M_AMD64
+#if defined(_WIN32) && defined(_M_AMD64)
 #include "profiler_stack_capture.h"
 
 #include <stdexcept>
@@ -666,4 +666,4 @@ HRESULT StackCaptureEngine::CaptureStacks(std::unordered_set<ThreadID> const&   
 }
 
 } // namespace ProfilerStackCapture
-#endif
+#endif // defined(_WIN32) && defined(_M_AMD64)
