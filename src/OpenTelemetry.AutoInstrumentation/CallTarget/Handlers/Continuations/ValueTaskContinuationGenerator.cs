@@ -53,7 +53,9 @@ internal class ValueTaskContinuationGenerator<TIntegration, TTarget, TReturn> : 
                     // *
                     _continuation!(instance, default, ex, in state);
                 }
+#pragma warning disable CA1031 // Do not catch general exception types. Ignored to handle continuation task.
                 catch (Exception contEx)
+#pragma warning restore CA1031 // Do not catch general exception types. Ignored to handle continuation task.
                 {
                     IntegrationOptions<TIntegration, TTarget>.LogException(contEx, "Exception occurred when calling the CallTarget integration continuation.");
                 }
@@ -68,7 +70,9 @@ internal class ValueTaskContinuationGenerator<TIntegration, TTarget, TReturn> : 
                 // *
                 _continuation!(instance, default, default, in state);
             }
+#pragma warning disable CA1031 // Do not catch general exception types. Ignored to handle continuation task.
             catch (Exception contEx)
+#pragma warning restore CA1031 // Do not catch general exception types. Ignored to handle continuation task.
             {
                 IntegrationOptions<TIntegration, TTarget>.LogException(contEx, "Exception occurred when calling the CallTarget integration continuation.");
             }

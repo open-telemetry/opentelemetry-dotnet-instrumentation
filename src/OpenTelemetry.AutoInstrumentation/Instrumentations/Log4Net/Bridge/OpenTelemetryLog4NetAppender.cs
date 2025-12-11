@@ -133,7 +133,9 @@ internal class OpenTelemetryLog4NetAppender
             var properties = loggingEvent.GetProperties();
             return properties == null ? null : GetFilteredProperties(properties);
         }
+#pragma warning disable CA1031 // Do not catch general exception types. Handling all exceptions to avoid breaking application flow.
         catch (Exception)
+#pragma warning restore CA1031 // Do not catch general exception types. Handling all exceptions to avoid breaking application flow.
         {
             return null;
         }
@@ -172,7 +174,9 @@ internal class OpenTelemetryLog4NetAppender
             return (Func<string?, object?>)methodInfo.CreateDelegate(typeof(Func<string?, object?>), loggerProvider);
 #endif
         }
+#pragma warning disable CA1031 // Do not catch general exception types. Handling all exceptions to avoid breaking application flow.
         catch (Exception e)
+#pragma warning restore CA1031 // Do not catch general exception types. Handling all exceptions to avoid breaking application flow.
         {
             Logger.Error(e, "Failed to create logger factory delegate.");
             return null;

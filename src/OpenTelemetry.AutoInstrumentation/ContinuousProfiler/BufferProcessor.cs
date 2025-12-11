@@ -40,7 +40,9 @@ internal class BufferProcessor
             {
                 handler(_buffer, read, cts.Token);
             }
+#pragma warning disable CA1031 // Do not catch general exception types. Needed to catch exceptions from user-defined handlers.
             catch (Exception e)
+#pragma warning restore CA1031 // Do not catch general exception types. Needed to catch exceptions from user-defined handlers.
             {
                 Logger.Warning(e, $"Failed to process {sampleType} samples.");
             }

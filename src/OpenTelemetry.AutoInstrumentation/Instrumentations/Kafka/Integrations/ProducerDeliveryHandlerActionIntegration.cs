@@ -55,7 +55,9 @@ public static class ProducerDeliveryHandlerActionIntegration
 
             return CallTargetState.GetDefault();
         }
+#pragma warning disable CA1031 // Do not catch general exception types. Ignored to avoid breaking application flow in case of errors.
         catch (Exception)
+#pragma warning restore CA1031 // Do not catch general exception types. Ignored to avoid breaking application flow in case of errors.
         {
             return CallTargetState.GetDefault();
         }
@@ -69,7 +71,9 @@ public static class ProducerDeliveryHandlerActionIntegration
             {
                 action.Invoke(inst);
             }
+#pragma warning disable CA1031 // Do not catch general exception types. Ignored to avoid breaking application flow in case of errors.
             catch (Exception)
+#pragma warning restore CA1031 // Do not catch general exception types. Ignored to avoid breaking application flow in case of errors.
             {
                 state.Activity?.Stop();
             }

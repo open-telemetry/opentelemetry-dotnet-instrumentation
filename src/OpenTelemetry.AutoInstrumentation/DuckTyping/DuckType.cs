@@ -223,14 +223,18 @@ internal static partial class DuckType
             {
                 return new CreateTypeResult(proxyDefinitionType, null, targetType, null, ExceptionDispatchInfo.Capture(ex));
             }
+#pragma warning disable CA1031 // Do not catch general exception types. Needed to wrap any exception into DuckTypeException.
             catch (Exception ex)
+#pragma warning restore CA1031 // Do not catch general exception types. Needed to wrap any exception into DuckTypeException.
             {
                 try
                 {
                     DuckTypeException.Throw($"Error creating duck type for type: '{targetType}' using proxy: '{proxyDefinitionType}'", ex);
                     return default;
                 }
+#pragma warning disable CA1031 // Do not catch general exception types. Needed to correctly handle DuckTyping.
                 catch (Exception ex2)
+#pragma warning restore CA1031 // Do not catch general exception types. Needed to correctly handle DuckTyping.
                 {
                     return new CreateTypeResult(proxyDefinitionType, null, targetType, null, ExceptionDispatchInfo.Capture(ex2));
                 }
@@ -301,14 +305,18 @@ internal static partial class DuckType
             {
                 return new CreateTypeResult(typeToDeriveFrom, null, typeToDelegateTo, null, ExceptionDispatchInfo.Capture(ex));
             }
+#pragma warning disable CA1031 // Do not catch general exception types. Needed to wrap any exception into DuckTypeException.
             catch (Exception ex)
+#pragma warning restore CA1031 // Do not catch general exception types. Needed to wrap any exception into DuckTypeException.
             {
                 try
                 {
                     DuckTypeException.Throw($"Error creating duck type for type: '{typeToDelegateTo}' using proxy: '{typeToDeriveFrom}'", ex);
                     return default;
                 }
+#pragma warning disable CA1031 // Do not catch general exception types. Needed to correctly handle DuckTyping.
                 catch (Exception ex2)
+#pragma warning restore CA1031 // Do not catch general exception types. Needed to correctly handle DuckTyping.
                 {
                     return new CreateTypeResult(typeToDeriveFrom, null, typeToDelegateTo, null, ExceptionDispatchInfo.Capture(ex2));
                 }
@@ -590,7 +598,9 @@ internal static partial class DuckType
                     {
                         targetProperty = targetType.GetProperty(duckAttribute.Name, duckAttribute.BindingFlags);
                     }
-                    catch
+#pragma warning disable CA1031 // Do not catch general exception types. Needed to correctly handle DuckTyping.
+                    catch (Exception)
+#pragma warning restore CA1031 // Do not catch general exception types. Needed to correctly handle DuckTyping.
                     {
                         // This will run only when multiple indexers are defined in a class, that way we can end up with multiple properties with the same name.
                         // In this case we make sure we select the indexer we want
@@ -761,7 +771,9 @@ internal static partial class DuckType
             {
                 overriddenProperty = typeToDeriveFrom.GetProperty(duckAttribute.Name, duckAttribute.BindingFlags);
             }
-            catch
+#pragma warning disable CA1031 // Do not catch general exception types. Needed to correctly handle DuckTyping.
+            catch (Exception)
+#pragma warning restore CA1031 // Do not catch general exception types. Needed to correctly handle DuckTyping.
             {
                 // This will run only when multiple indexers are defined in a class, that way we can end up with multiple properties with the same name.
                 // In this case we make sure we select the indexer we want
