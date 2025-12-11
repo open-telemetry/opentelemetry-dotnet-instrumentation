@@ -29,7 +29,9 @@ internal static class OpenTelemetryLogHelpers
 
             LogEmitter = BuildEmitLog(logRecordDataType, logRecordAttributesListType, loggerType!);
         }
+#pragma warning disable CA1031 // Do not catch general exception types. Logged and ignored to avoid breaking logging.
         catch (Exception e)
+#pragma warning restore CA1031 // Do not catch general exception types. Logged and ignored to avoid breaking logging.
         {
             Logger.Error(e, "Failed to initialize LogEmitter delegate.");
         }
