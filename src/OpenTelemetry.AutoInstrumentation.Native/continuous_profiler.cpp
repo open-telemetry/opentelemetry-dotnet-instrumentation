@@ -336,14 +336,7 @@ void ThreadSamplesBuffer::StartSample(ThreadID                   id,
 {
     CHECK_SAMPLES_BUFFER_LENGTH()
     WriteByte(kThreadSamplesStartSample);
-    if (state->thread_name_.empty())
-    {
-        WriteString(trace::ToWSTRING(std::to_string(id)));
-    }
-    else
-    {
-        WriteString(state->thread_name_);
-    }
+    WriteString(state->thread_name_);
     WriteSpanContext(span_context);
     // Feature possibilities: (managed/native) thread priority, cpu/wait times, etc.
 }
@@ -355,14 +348,7 @@ void ThreadSamplesBuffer::StartSampleForSelectedThread(ThreadID                 
     CHECK_SAMPLES_BUFFER_LENGTH()
     WriteByte(kSelectedThreadSample);
     WriteCurrentTimeMillis();
-    if (state->thread_name_.empty())
-    {
-        WriteString(trace::ToWSTRING(std::to_string(id)));
-    }
-    else
-    {
-        WriteString(state->thread_name_);
-    }
+    WriteString(state->thread_name_);
     WriteSpanContext(span_context);
 }
 
