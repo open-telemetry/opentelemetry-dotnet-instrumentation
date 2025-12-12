@@ -8,6 +8,7 @@ using OpenTelemetry.AutoInstrumentation.Logging;
 
 namespace OpenTelemetry.AutoInstrumentation.RulesEngine;
 
+// TODO remove Store rule after we get rid of Store approach altogether
 internal class RuntimeStoreDiagnosticRule : Rule
 {
     private const string RuntimeStoreEnvironmentVariable = "DOTNET_SHARED_STORE";

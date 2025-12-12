@@ -24,7 +24,7 @@ internal class Loader
     {
         try
         {
-            AppDomain.CurrentDomain.AssemblyResolve += new AssemblyResolver(Logger).AssemblyResolve_ManagedProfilerDependencies;
+            new AssemblyResolver(Logger).RegisterAssemblyResolving();
         }
         catch (Exception ex)
         {

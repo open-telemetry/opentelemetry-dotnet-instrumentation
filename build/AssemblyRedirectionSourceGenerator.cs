@@ -10,76 +10,103 @@ public static class AssemblyRedirectionSourceGenerator
         Log.Debug("Generating assembly redirection file {0}", generatedFilePath);
         var assemblies = new SortedDictionary<int, SortedDictionary<string, AssemblyNameDefinition>>();
 
-        var folders = new Dictionary<int, string>();
-
-        var frameworkVersionRegEx = new Regex(@"^net(?<version>\d{2,3})$");
-        foreach (var directory in Directory.EnumerateDirectories(assembliesFolderPath))
+        // Process both netfx and net folders with their specific regex patterns for version extraction
+        // TODO for now generate headers files with 3 digit version numbers for net framework and 4+ digit version numbers for net (core)
+        // e.g. net462 -> 462, net47 -> 470, net8.0 -> 8000, net10.0 -> 10000
+        // TODO rename header file to more general name since it will contain both netfx and net redirections
+        var rootFolders = new[]
         {
-            var folderName = Path.GetFileName(directory);
-            var framework = frameworkVersionRegEx.Match(folderName).Groups["version"].Value;
-            if (framework == string.Empty)
+            (Name: "netfx", Pattern: new Regex(@"^net(?<version>\d{2,3})$")),  // .NET Framework: net462, net47, net471, net472
+            (Name: "net", Pattern: new Regex(@"^net(?<version>\d{1,2}\.\d)$"))  // .NET (Core): net8.0, net9.0, net10.0
+        };
+
+        foreach (var (rootFolderName, frameworkVersionRegEx) in rootFolders)
+        {
+            var rootFolderPath = Path.Combine(assembliesFolderPath, rootFolderName);
+            if (!Directory.Exists(rootFolderPath))
             {
-                Log.Error("Unexpected folder name: {0}, will not be processed", framework);
+                Log.Warning("Root folder {0} does not exist, skipping", rootFolderPath);
                 continue;
             }
-            var frameworkVersion = int.Parse(framework);
-            if (frameworkVersion < 100)
-            {
-                frameworkVersion *= 10;
-            }
 
-            if (folders.TryGetValue(frameworkVersion, out var folder))
-            {
-                Log.Error("For {0}: already registered folder {1}, {2} will be skipped", frameworkVersion, folder, directory);
-                continue;
-            }
-            folders[frameworkVersion] = directory;
-            assemblies[frameworkVersion] = new SortedDictionary<string, AssemblyNameDefinition>();
-        }
+            var frameworkFolders = new Dictionary<int, string>();
 
-        void Process(string fileName, int? framework)
-        {
-            try
+            // Discover framework-specific subfolders
+            foreach (var directory in Directory.EnumerateDirectories(rootFolderPath))
             {
-                using var moduleDef = ModuleDefinition.ReadModule(fileName);
-                var assemblyDef = moduleDef.Assembly.Name!;
-                if (assemblyDef.Name == "netstandard")
+                var folderName = Path.GetFileName(directory);
+                var framework = frameworkVersionRegEx.Match(folderName).Groups["version"].Value;
+                if (framework == string.Empty)
                 {
-                    // Skip netstandard, since it doesn't need redirection.
-                    return;
+                    Log.Error("Unexpected folder name: {0}, folder \"{1}\" will not be processed", framework, directory);
+                    continue;
                 }
 
-
-                foreach (var keys in framework != null ? (IEnumerable<int>)[framework.Value] : assemblies.Keys)
+                var frameworkVersion = int.Parse(framework.Replace(".", ""));
+                // .NET (Core) versions should go higher than .NET Framework versions
+                if (framework.Contains('.'))
                 {
-                    assemblies[keys][assemblyDef.Name] = assemblyDef;
-                    Log.Debug("Adding {0} assembly to the redirection map {1}. Targeted version {2}", assemblyDef.Name,
-                        keys, assemblyDef.Version);
+                    frameworkVersion *= 100;
                 }
-            }
-            catch (BadImageFormatException)
-            {
-                Log.Debug("Skipping \"{0}\" couldn't open it as a managed assembly", fileName);
-            }
-        }
-
-        foreach (var fileName in Directory.EnumerateFiles(assembliesFolderPath))
-        {
-            Process(fileName, null);
-        }
-
-        foreach (var fx in folders)
-        {
-            foreach (var fileName in Directory.EnumerateFiles(fx.Value))
-            {
-                var filenameToProcess = fileName;
-                if (Path.GetExtension(fileName) == ".link")
+                if (frameworkVersion < 100)
                 {
-                    filenameToProcess = Path.Combine(assembliesFolderPath, File.ReadAllText(fileName),
-                        Path.GetFileNameWithoutExtension(fileName));
+                    frameworkVersion *= 10;
                 }
 
-                Process(filenameToProcess, fx.Key);
+                if (frameworkFolders.TryGetValue(frameworkVersion, out var folder))
+                {
+                    Log.Error("For {0}: already registered folder {1}, {2} will be skipped", frameworkVersion, folder, directory);
+                    continue;
+                }
+                frameworkFolders[frameworkVersion] = directory;
+                assemblies[frameworkVersion] = new SortedDictionary<string, AssemblyNameDefinition>();
+            }
+
+            void Process(string fileName, int? framework)
+            {
+                try
+                {
+                    using var moduleDef = ModuleDefinition.ReadModule(fileName);
+                    var assemblyDef = moduleDef.Assembly.Name!;
+                    if (assemblyDef.Name == "netstandard")
+                    {
+                        // Skip netstandard, since it doesn't need redirection.
+                        return;
+                    }
+
+                    foreach (var keys in framework != null ? (IEnumerable<int>)[framework.Value] : frameworkFolders.Keys)
+                    {
+                        assemblies[keys][assemblyDef.Name] = assemblyDef;
+                        Log.Debug("Adding {0} assembly to the redirection map {1}. Targeted version {2}", assemblyDef.Name,
+                            keys, assemblyDef.Version);
+                    }
+                }
+                catch (BadImageFormatException)
+                {
+                    Log.Debug("Skipping \"{0}\" couldn't open it as a managed assembly", fileName);
+                }
+            }
+
+            // Process common assemblies in root folder
+            foreach (var fileName in Directory.EnumerateFiles(rootFolderPath))
+            {
+                Process(fileName, null);
+            }
+
+            // Process framework-specific assemblies
+            foreach (var fx in frameworkFolders)
+            {
+                foreach (var fileName in Directory.EnumerateFiles(fx.Value))
+                {
+                    var filenameToProcess = fileName;
+                    if (Path.GetExtension(fileName) == ".link")
+                    {
+                        filenameToProcess = Path.Combine(fx.Value, "..", File.ReadAllText(fileName),
+                            Path.GetFileNameWithoutExtension(fileName));
+                    }
+
+                    Process(filenameToProcess, fx.Key);
+                }
             }
         }
 

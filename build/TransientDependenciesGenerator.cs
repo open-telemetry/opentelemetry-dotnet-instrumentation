@@ -89,7 +89,8 @@ internal static class TransientDependenciesGenerator
             }
         }
 
-        // group dependencies
+        // TODO after extending to .net (core) this doesn't do anything, need to group by family: .net frameworks vs .net (core)
+        //group dependencies
         {
             var commonLabel = GetLabel(null);
             var commonGroup = packagesProject.Xml.ItemGroups.FirstOrDefault(x => x.Label == commonLabel);

@@ -225,6 +225,8 @@ partial class Build
         }
     }
 
+    //TODO: rename to all frameworks and move out of Windows specific file
+    //TODO probably should happen for non-Windows too
     Target GenerateNetFxTransientDependencies => _ => _
         .Unlisted()
         .After(Restore)
@@ -238,16 +240,17 @@ partial class Build
             TransientDependenciesGenerator.Run(targetProject);
         });
 
+    //TODO: rename to all frameworks and move out of Windows specific file
+    //TODO probably should happen for non-Windows too
     Target GenerateNetFxAssemblyRedirectionSource => _ => _
         .Unlisted()
         .After(PublishManagedProfiler)
         .OnlyWhenStatic(() => IsWin)
         .Executes(() =>
         {
-            var netFxAssembliesFolder = TracerHomeDirectory / MapToFolderOutput(TargetFramework.NET462);
             var generatedSourceFile = SourceDirectory / Projects.AutoInstrumentationNative / "netfx_assembly_redirection.h";
 
-            AssemblyRedirectionSourceGenerator.Generate(netFxAssembliesFolder, generatedSourceFile);
+            AssemblyRedirectionSourceGenerator.Generate(TracerHomeDirectory, generatedSourceFile);
         });
 
     Target InstallNetFxAssembliesGAC => _ => _

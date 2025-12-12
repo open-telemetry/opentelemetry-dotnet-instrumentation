@@ -1,6 +1,7 @@
 // Copyright The OpenTelemetry Authors
 // SPDX-License-Identifier: Apache-2.0
 
+using System;
 using System.Reflection;
 using OpenTelemetry.AutoInstrumentation.Configurations;
 using OpenTelemetry.AutoInstrumentation.Logging;
@@ -23,6 +24,31 @@ internal class StartupHook
     /// </summary>
     public static void Initialize()
     {
+        // TODO temporarily trace resolution events at the earliest stage of the application startup to make sure we don't skip resolutions before actual handler setup in Loader
+        AppDomain.CurrentDomain.AssemblyResolve += (_, args) =>
+        {
+            Console.ForegroundColor = ConsoleColor.Yellow;
+            Console.WriteLine($"Resolving ({args.Name}) from assembly <{args.RequestingAssembly}>: SKIP");
+            Console.ResetColor();
+            return null;
+        };
+        System.Runtime.Loader.AssemblyLoadContext.Default.Resolving += (context, assemblyName) =>
+        {
+            Console.ForegroundColor = ConsoleColor.DarkYellow;
+            Console.WriteLine($"Resolving <{assemblyName}>@({context}): SKIP");
+            Console.ResetColor();
+
+            return null;
+        };
+#pragma warning disable CA1303 // Do not pass literals as localized parameters
+        Console.WriteLine($"List of Trusted Platfrom Assemblies:");
+        var tpaList = (AppContext.GetData("TRUSTED_PLATFORM_ASSEMBLIES") as string)?.Split(';') ?? [];
+        foreach (var it in tpaList)
+        {
+            Console.WriteLine($" - {it}");
+        }
+#pragma warning restore CA1303 // Do not pass literals as localized parameters
+
         _ = bool.TryParse(Environment.GetEnvironmentVariable(ConfigurationKeys.FailFast), out var failFast);
 
         try
@@ -38,7 +64,7 @@ internal class StartupHook
 
             Logger.Information("Initialization.");
 
-            // Creating an instance of OpenTelemetry.AutoInstrumentation.Loader.Startup
+            // Creating an instance of OpenTelemetry.AutoInstrumentation.Loader.Loader
             // will initialize Instrumentation through its static constructor.
             var loaderFilePath = Path.Combine(LoaderAssemblyLocation, "OpenTelemetry.AutoInstrumentation.Loader.dll");
             var loaderAssembly = Assembly.LoadFrom(loaderFilePath);

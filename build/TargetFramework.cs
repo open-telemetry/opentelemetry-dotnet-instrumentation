@@ -12,15 +12,21 @@ public class TargetFramework : Enumeration
     public static readonly TargetFramework NET47 = new() { Value = "net47" };
     public static readonly TargetFramework NET471 = new() { Value = "net471" };
     public static readonly TargetFramework NET472 = new() { Value = "net472" };
+    // TODO remove
     public static readonly TargetFramework NETCore3_1 = new() { Value = "netcoreapp3.1" };
     public static readonly TargetFramework NET8_0 = new() { Value = "net8.0" };
     public static readonly TargetFramework NET9_0 = new() { Value = "net9.0" };
     public static readonly TargetFramework NET10_0 = new() { Value = "net10.0" };
 
     // should be in version order
-    public static readonly TargetFramework[] NetFramework = {
+    public static readonly TargetFramework[] NetFramework = [
         NET462, NET47, NET471, NET472
-    };
+    ];
+
+    // should be in version order
+    public static readonly TargetFramework[] Net = [
+        NET8_0, NET9_0, NET10_0
+    ];
 
     public static implicit operator string(TargetFramework framework)
     {

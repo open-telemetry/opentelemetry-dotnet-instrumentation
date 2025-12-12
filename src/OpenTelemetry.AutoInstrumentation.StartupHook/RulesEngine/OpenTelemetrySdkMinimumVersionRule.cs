@@ -30,6 +30,9 @@ internal class OpenTelemetrySdkMinimumVersionRule : Rule
 
         try
         {
+            // TODO: Consider refactor, e.g. checking TPA list for customer's version instead of type loading.
+            // Current approach is fragile: dependning on timing of our assembly resolution handler setup
+            // we may unexpectedly load our assembly here. Plus current expected location of our assembly becomes wrong
             var loadedOTelFileVersion = GetVersionFromApp();
             if (loadedOTelFileVersion != null)
             {
