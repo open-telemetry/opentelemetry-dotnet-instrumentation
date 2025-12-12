@@ -180,7 +180,7 @@ internal class IntegrationMapper
         }
 
         // Call method
-        onMethodBeginMethodInfo = onMethodBeginMethodInfo.MakeGenericMethod(callGenericTypes.ToArray());
+        onMethodBeginMethodInfo = onMethodBeginMethodInfo.MakeGenericMethod([.. callGenericTypes]);
         ilWriter.EmitCall(OpCodes.Call, onMethodBeginMethodInfo, null);
         ilWriter.Emit(OpCodes.Ret);
 
@@ -307,7 +307,7 @@ internal class IntegrationMapper
         }
 
         // Call method
-        onMethodBeginMethodInfo = onMethodBeginMethodInfo.MakeGenericMethod(callGenericTypes.ToArray());
+        onMethodBeginMethodInfo = onMethodBeginMethodInfo.MakeGenericMethod([.. callGenericTypes]);
         ilWriter.EmitCall(OpCodes.Call, onMethodBeginMethodInfo, null);
         ilWriter.Emit(OpCodes.Ret);
 
@@ -421,7 +421,7 @@ internal class IntegrationMapper
         }
 
         // Call Method
-        onMethodEndMethodInfo = onMethodEndMethodInfo.MakeGenericMethod(callGenericTypes.ToArray());
+        onMethodEndMethodInfo = onMethodEndMethodInfo.MakeGenericMethod([.. callGenericTypes]);
         ilWriter.EmitCall(OpCodes.Call, onMethodEndMethodInfo, null);
 
         ilWriter.Emit(OpCodes.Ret);
@@ -572,7 +572,7 @@ internal class IntegrationMapper
         }
 
         // Call Method
-        onMethodEndMethodInfo = onMethodEndMethodInfo.MakeGenericMethod(callGenericTypes.ToArray());
+        onMethodEndMethodInfo = onMethodEndMethodInfo.MakeGenericMethod([.. callGenericTypes]);
         ilWriter.EmitCall(OpCodes.Call, onMethodEndMethodInfo, null);
 
         // Unwrap return value proxy
@@ -737,7 +737,7 @@ internal class IntegrationMapper
         }
 
         // Call Method
-        onAsyncMethodEndMethodInfo = onAsyncMethodEndMethodInfo.MakeGenericMethod(callGenericTypes.ToArray());
+        onAsyncMethodEndMethodInfo = onAsyncMethodEndMethodInfo.MakeGenericMethod([.. callGenericTypes]);
         ilWriter.EmitCall(OpCodes.Call, onAsyncMethodEndMethodInfo, null);
 
         // Unwrap return value proxy

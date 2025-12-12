@@ -67,7 +67,7 @@ internal static class EnvironmentConfigurationMetricHelper
         // Should be called later if dependency listeners are already setup.
         builder
             .SetExporter(settings, pluginManager)
-            .AddMeter(settings.Meters.ToArray());
+            .AddMeter([.. settings.Meters]);
 
         return builder;
     }
