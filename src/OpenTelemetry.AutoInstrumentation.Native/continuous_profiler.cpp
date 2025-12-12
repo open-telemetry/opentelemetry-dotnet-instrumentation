@@ -330,9 +330,7 @@ void ThreadSamplesBuffer::WriteSpanContext(const thread_span_context& span_conte
     WriteUInt64(span_context.span_id_);
 }
 
-void ThreadSamplesBuffer::StartSample(ThreadID                   id,
-                                      const ThreadState*         state,
-                                      const thread_span_context& span_context) const
+void ThreadSamplesBuffer::StartSample(const ThreadState* state, const thread_span_context& span_context) const
 {
     CHECK_SAMPLES_BUFFER_LENGTH()
     WriteByte(kThreadSamplesStartSample);
@@ -341,8 +339,7 @@ void ThreadSamplesBuffer::StartSample(ThreadID                   id,
     // Feature possibilities: (managed/native) thread priority, cpu/wait times, etc.
 }
 
-void ThreadSamplesBuffer::StartSampleForSelectedThread(ThreadID                   id,
-                                                       const ThreadState*         state,
+void ThreadSamplesBuffer::StartSampleForSelectedThread(const ThreadState*         state,
                                                        const thread_span_context& span_context) const
 {
     CHECK_SAMPLES_BUFFER_LENGTH()
@@ -873,7 +870,7 @@ static void ResolveSymbolsAndPublishBufferForAllThreads(
         thread_span_context spanContext = GetContext(threadId);
         const auto          threadState = GetThreadState(prof->managed_tid_to_state_, threadId);
 
-        prof->cur_cpu_writer_->StartSample(threadId, threadState, spanContext);
+        prof->cur_cpu_writer_->StartSample(threadState, spanContext);
 
         if (prof->selectedThreadsSamplingInterval.has_value())
         {
@@ -909,7 +906,7 @@ static void ResolveSymbolsAndPublishBufferForSelectedThreads(
         thread_span_context spanContext = GetContext(threadId);
         const auto          threadState = GetThreadState(prof->managed_tid_to_state_, threadId);
 
-        localBuf.StartSampleForSelectedThread(threadId, threadState, spanContext);
+        localBuf.StartSampleForSelectedThread(threadState, spanContext);
         ResolveFrames(prof, threadStack, localBuf);
         localBuf.EndSample();
     }

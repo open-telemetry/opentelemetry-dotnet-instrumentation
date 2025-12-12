@@ -211,9 +211,9 @@ public:
     void StartSelectedThreadsBatch() const;
     void EndSelectedThreadsBatch() const;
     void WriteSpanContext(const thread_span_context& span_context) const;
-    void StartSample(ThreadID id, const ThreadState* state, const thread_span_context& span_context) const;
-    void StartSampleForSelectedThread(ThreadID id, const ThreadState* state,
-                                      const thread_span_context&    span_context) const;
+    void StartSample(const ThreadState* state, const thread_span_context& span_context) const;
+    void StartSampleForSelectedThread(const ThreadState*         state,
+                                      const thread_span_context& span_context) const;
     void MarkSelectedForFrequentSampling(bool value) const;
     void RecordFrame(const FunctionIdentifier& fid, const trace::WSTRING& frame);
     void EndSample() const;
