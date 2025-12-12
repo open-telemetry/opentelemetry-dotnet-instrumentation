@@ -392,7 +392,7 @@ internal static class ILHelpersExtensions
             OpCodes.Calli,
             method.CallingConvention,
             method.ReturnType,
-            method.GetParameters().Select(p => p.ParameterType).ToArray(),
+            [.. method.GetParameters().Select(p => p.ParameterType)],
             null!);
     }
 

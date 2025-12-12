@@ -45,7 +45,7 @@ internal static partial class DuckType
 
                     if (!methodAlreadySelected)
                     {
-                        var prevMethod = baseType.GetMethod(interfaceMethod.Name, DuckAttribute.DefaultFlags, null, interfaceMethod.GetParameters().Select(p => p.ParameterType).ToArray(), null);
+                        var prevMethod = baseType.GetMethod(interfaceMethod.Name, DuckAttribute.DefaultFlags, null, [.. interfaceMethod.GetParameters().Select(p => p.ParameterType)], null);
                         if (prevMethod == null || prevMethod.GetCustomAttribute<DuckIgnoreAttribute>() is null)
                         {
                             selectedMethods.Add(interfaceMethod);
@@ -161,7 +161,7 @@ internal static partial class DuckType
                     DuckTypeTargetMethodNotFoundException.Throw(proxyMethodDefinition);
                 }
 
-                targetMethod = targetMethod.MakeGenericMethod(proxyDuckAttribute.GenericParameterTypeNames.Select(name => Type.GetType(name, throwOnError: true)!).ToArray());
+                targetMethod = targetMethod.MakeGenericMethod([.. proxyDuckAttribute.GenericParameterTypeNames.Select(name => Type.GetType(name, throwOnError: true)!)]);
             }
 
             // Gets target method parameters
@@ -915,8 +915,8 @@ internal static partial class DuckType
 
             // We create the dynamic method
             var originalTargetParameters = targetMethod.GetParameters().Select(p => p.ParameterType).ToArray();
-            var targetParameters = targetMethod.IsStatic ? originalTargetParameters : (new[] { typeof(object) }).Concat(originalTargetParameters).ToArray();
-            var dynParameters = targetMethod.IsStatic ? targetMethodParametersTypes : (new[] { typeof(object) }).Concat(targetMethodParametersTypes).ToArray();
+            var targetParameters = targetMethod.IsStatic ? originalTargetParameters : [.. (new[] { typeof(object) }), .. originalTargetParameters];
+            var dynParameters = targetMethod.IsStatic ? targetMethodParametersTypes : [.. (new[] { typeof(object) }), .. targetMethodParametersTypes];
             var dynMethod = new DynamicMethod(dynMethodName, returnType, dynParameters, proxyTypeBuilder.Module, true);
 
             // Emit the dynamic method body

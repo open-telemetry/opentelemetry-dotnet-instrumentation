@@ -48,9 +48,7 @@ public static class HttpModuleIntegration
         {
             HttpApplication.RegisterModule(typeof(TelemetryHttpModule));
         }
-#pragma warning disable CA1031 // Do not catch general exception types. Intentionally catching all exceptions to avoid breaking the application
         catch (Exception)
-#pragma warning restore CA1031 // Do not catch general exception types. Intentionally catching all exceptions to avoid breaking the application
         {
             // Exception while registering telemetry http module
             // nothing we can do with this

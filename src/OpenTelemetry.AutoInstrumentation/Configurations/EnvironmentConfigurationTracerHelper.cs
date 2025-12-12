@@ -73,7 +73,7 @@ internal static class EnvironmentConfigurationTracerHelper
             builder = builder.SetSampler(settings.Sampler);
         }
 
-        builder = builder.AddSource(settings.ActivitySources.ToArray());
+        builder = builder.AddSource([.. settings.ActivitySources]);
 
         foreach (var legacySource in settings.AdditionalLegacySources)
         {
