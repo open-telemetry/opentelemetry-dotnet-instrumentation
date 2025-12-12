@@ -26,7 +26,7 @@ std::unique_ptr<IStackCaptureStrategy> StackCaptureStrategyFactory::Create(ICorP
     }
     else
     {
-        // trace::Logger::Info("StackCaptureStrategyFactory: Creating DotNetStackCaptureStrategy");
+        trace::Logger::Info("StackCaptureStrategyFactory: Creating DotNetStackCaptureStrategy");
         //  Safe cast - we only get here if runtime is .NET Core 6+, which has ICorProfilerInfo12, comments above
         return std::make_unique<DotNetStackCaptureStrategy>(static_cast<ICorProfilerInfo12*>(profilerInfo));
     }
