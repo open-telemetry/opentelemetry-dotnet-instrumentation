@@ -107,9 +107,16 @@ public static class ProducerDeliveryHandlerActionIntegration
 
     private static class WrapperCache<TActionOfDeliveryReport>
     {
-        private static readonly CreateWrapperDelegate Delegate;
+        private static readonly CreateWrapperDelegate Delegate = Initialize();
 
-        static WrapperCache()
+        private delegate TActionOfDeliveryReport CreateWrapperDelegate(TActionOfDeliveryReport action, Activity activity);
+
+        public static TActionOfDeliveryReport Create(TActionOfDeliveryReport action, Activity activity)
+        {
+            return Delegate(action, activity);
+        }
+
+        private static CreateWrapperDelegate Initialize()
         {
             var method =
                 typeof(ProducerDeliveryHandlerActionIntegration).GetMethod(
@@ -118,17 +125,10 @@ public static class ProducerDeliveryHandlerActionIntegration
 
             var constructedMethod = method.MakeGenericMethod(typeof(TActionOfDeliveryReport).GetGenericArguments());
 #if NET
-            Delegate = constructedMethod.CreateDelegate<CreateWrapperDelegate>();
+            return constructedMethod.CreateDelegate<CreateWrapperDelegate>();
 #else
-            Delegate = (CreateWrapperDelegate)constructedMethod.CreateDelegate(typeof(CreateWrapperDelegate));
+            return (CreateWrapperDelegate)constructedMethod.CreateDelegate(typeof(CreateWrapperDelegate));
 #endif
-        }
-
-        private delegate TActionOfDeliveryReport CreateWrapperDelegate(TActionOfDeliveryReport action, Activity activity);
-
-        public static TActionOfDeliveryReport Create(TActionOfDeliveryReport action, Activity activity)
-        {
-            return Delegate(action, activity);
         }
     }
 }

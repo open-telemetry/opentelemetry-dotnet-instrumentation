@@ -9,7 +9,9 @@ namespace OpenTelemetry.AutoInstrumentation.CallTarget;
 /// <summary>
 /// Call target execution state
 /// </summary>
+#pragma warning disable CA1815 // Override equals and operator equals on value types
 public readonly struct CallTargetState
+#pragma warning restore CA1815 // Override equals and operator equals on value types
 {
     private readonly Activity? _previousActivity;
     private readonly Activity? _activity;

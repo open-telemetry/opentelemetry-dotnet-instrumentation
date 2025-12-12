@@ -8,7 +8,6 @@
     <Description>StartupHook used by the OpenTelemetry.AutoInstrumentation project.</Description>
     <!-- Suppress CA1031 warnings about catching general exception types. In this project we need to catch all exceptions to prevent the application from crashing. -->
     <NoWarn>$(NoWarn);CA1031</NoWarn>
-    <AnalysisLevel>latest-All</AnalysisLevel>
   </PropertyGroup>
 
   <ItemGroup>

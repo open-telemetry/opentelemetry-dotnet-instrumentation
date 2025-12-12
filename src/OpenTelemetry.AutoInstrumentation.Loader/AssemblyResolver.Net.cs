@@ -54,7 +54,7 @@ internal partial class AssemblyResolver
         }
         else
         {
-            var entry = StoreFiles?.FirstOrDefault(e => e.EndsWith($"{assemblyName.Name}.dll"));
+            var entry = StoreFiles?.FirstOrDefault(e => e.EndsWith($"{assemblyName.Name}.dll", StringComparison.Ordinal));
             if (entry != null)
             {
                 return DependencyLoadContext.LoadFromAssemblyPath(entry);

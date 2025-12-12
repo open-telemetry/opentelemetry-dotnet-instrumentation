@@ -100,6 +100,7 @@ internal partial class AssemblyResolver
     /// Return redirection table used in runtime that will match TFM folder to load assemblies.
     /// It may not be actual .NET Framework version.
     /// </summary>
+    [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
     [DllImport("OpenTelemetry.AutoInstrumentation.Native.dll")]
     private static extern int GetNetFrameworkRedirectionVersion();
 

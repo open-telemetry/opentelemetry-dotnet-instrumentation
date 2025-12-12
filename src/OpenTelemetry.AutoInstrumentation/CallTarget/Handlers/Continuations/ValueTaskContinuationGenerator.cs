@@ -9,7 +9,9 @@ internal class ValueTaskContinuationGenerator<TIntegration, TTarget, TReturn> : 
     private static readonly ContinuationMethodDelegate? _continuation;
     private static readonly bool _preserveContext;
 
+#pragma warning disable CA1810 // Initialize reference type static fields inline
     static ValueTaskContinuationGenerator()
+#pragma warning restore CA1810 // Initialize reference type static fields inline
     {
         var result = IntegrationMapper.CreateAsyncEndMethodDelegate(typeof(TIntegration), typeof(TTarget), typeof(object));
         if (result.Method != null)

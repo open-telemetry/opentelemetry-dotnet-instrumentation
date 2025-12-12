@@ -5,7 +5,6 @@
   <PropertyGroup>
     <TargetFrameworks>net8.0</TargetFrameworks>
     <Description>ASP.NET Core Bootstrapper used by the OpenTelemetry.AutoInstrumentation project.</Description>
-    <AnalysisLevel>latest-All</AnalysisLevel>
   </PropertyGroup>
   
   <ItemGroup>

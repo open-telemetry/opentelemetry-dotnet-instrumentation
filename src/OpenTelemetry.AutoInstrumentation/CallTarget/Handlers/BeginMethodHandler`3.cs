@@ -12,7 +12,9 @@ internal static class BeginMethodHandler<TIntegration, TTarget, TArg1, TArg2, TA
 {
     private static readonly InvokeDelegate _invokeDelegate;
 
+#pragma warning disable CA1810 // Initialize reference type static fields inline. This static constructor is necessary for initializing the instrumentation delegate for bytecode instrumentation. Not possible to omit constructor due to exception trow scenario.
     static BeginMethodHandler()
+#pragma warning restore CA1810 // Initialize reference type static fields inline. This static constructor is necessary for initializing the instrumentation delegate for bytecode instrumentation. Not possible to omit constructor due to exception trow scenario.
     {
         try
         {
@@ -27,7 +29,9 @@ internal static class BeginMethodHandler<TIntegration, TTarget, TArg1, TArg2, TA
         }
         catch (Exception ex)
         {
+#pragma warning disable CA1065 // Do not raise exceptions in unexpected locations. Needed for bytecode instrumentation.
             throw new CallTargetInvokerException(ex);
+#pragma warning restore CA1065 // Do not raise exceptions in unexpected locations. Needed for bytecode instrumentation.
         }
         finally
         {
