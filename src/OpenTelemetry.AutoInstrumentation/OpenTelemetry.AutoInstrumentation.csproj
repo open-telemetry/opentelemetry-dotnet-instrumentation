@@ -39,6 +39,7 @@
     <PackageReference Include="OpenTelemetry.Instrumentation.Runtime" />
     <PackageReference Include="OpenTelemetry.Instrumentation.Process" />
     <PackageReference Include="OpenTelemetry.Instrumentation.SqlClient" />
+    <PackageReference Include="OpenTelemetry.OpAmp.Client" />
     <PackageReference Include="OpenTelemetry.Resources.Azure" />
     <PackageReference Include="OpenTelemetry.Resources.Host" />
     <PackageReference Include="OpenTelemetry.Resources.OperatingSystem" />
