@@ -1,1 +1,1 @@
-﻿FROM gvenzl/oracle-free:23.26.0-slim-faststart@sha256:b831a1c80e94a1a28cbee900de6de813b2f6b64bf5b3f00b454e506e2d96fea9
+﻿FROM gvenzl/oracle-free:23.26.0-slim@sha256:e30ad1d22b0b1fda5d37bd5e7d295b3e1622efccf1f21d34c148836b474793b5
