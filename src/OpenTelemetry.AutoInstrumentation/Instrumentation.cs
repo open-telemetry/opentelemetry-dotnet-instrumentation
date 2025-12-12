@@ -201,9 +201,7 @@ internal static class Instrumentation
                     RegisterDirectBytecodeInstrumentations(payload);
                 }
             }
-#pragma warning disable CA1031 // Do not catch general exception types. Needed to catch all exceptions from plugins.
             catch (Exception ex)
-#pragma warning restore CA1031 // Do not catch general exception types. Needed to catch all exceptions from plugins.
             {
                 Logger.Error(ex, "Exception occurred while registering instrumentations from plugins.");
             }
@@ -402,9 +400,7 @@ internal static class Instrumentation
 
             Logger.Information("The profiler has been initialized with {0} {1} definitions for {2}.", payload.Definitions.Length, type, payload.DefinitionsId);
         }
-#pragma warning disable CA1031 // Do not catch general exception types. Needed to log all errors during registration.
         catch (Exception ex)
-#pragma warning restore CA1031 // Do not catch general exception types. Needed to log all errors during registration.
         {
             Logger.Error(ex, ex.Message);
         }
@@ -555,17 +551,13 @@ internal static class Instrumentation
 
             Logger.Information("OpenTelemetry Automatic Instrumentation exit.");
         }
-#pragma warning disable CA1031 // Do not catch general exception types. We want to log any exception during exit.
         catch (Exception ex)
-#pragma warning restore CA1031 // Do not catch general exception types. We want to log any exception during exit.
         {
             try
             {
                 Logger.Error(ex, "An error occurred while attempting to exit.");
             }
-#pragma warning disable CA1031 // Do not catch general exception types. Needed to avoid throwing from exit.
             catch (Exception)
-#pragma warning restore CA1031 // Do not catch general exception types. Needed to avoid throwing from exit.
             {
                 // If we encounter an error while logging there is nothing else we can do
                 // with the exception.
@@ -587,9 +579,7 @@ internal static class Instrumentation
                 OnExit(sender, args);
             }
         }
-#pragma warning disable CA1031 // Do not catch general exception types. Intentionally catching all exceptions to avoid any issues during unhandled exception processing.
         catch (Exception)
-#pragma warning restore CA1031 // Do not catch general exception types. Intentionally catching all exceptions to avoid any issues during unhandled exception processing.
         {
             // Logger was already shutdown.
         }

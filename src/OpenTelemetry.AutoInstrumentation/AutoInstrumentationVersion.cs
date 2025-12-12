@@ -33,9 +33,7 @@ internal class AutoInstrumentationVersion
 #endif
             return indexOfPlusSign > 0 ? informationalVersion.Substring(0, indexOfPlusSign) : informationalVersion;
         }
-#pragma warning disable CA1031 // Do not catch general exception types. Intentionally catching all exceptions to avoid any issues getting the version.
         catch (Exception)
-#pragma warning restore CA1031 // Do not catch general exception types. Intentionally catching all exceptions to avoid any issues getting the version.
         {
             return string.Empty;
         }

@@ -20,9 +20,7 @@ internal class EnvironmentConfigurationSource : StringConfigurationSource
         {
             return Environment.GetEnvironmentVariable(key);
         }
-#pragma warning disable CA1031 // Do not catch general exception types.
         catch (Exception)
-#pragma warning restore CA1031 // Do not catch general exception types.
         {
             // We should not add a dependency from the Configuration system to the Logger system,
             // so do nothing

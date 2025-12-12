@@ -75,9 +75,7 @@ internal class TaskContinuationGenerator<TIntegration, TTarget, TReturn, TResult
                 // The only supported way to extract the cancellation exception is to await the task
                 await previousTask.ConfigureAwait(_preserveContext);
             }
-#pragma warning disable CA1031 // Do not catch general exception types. Ignored to handle continuation task.
             catch (Exception ex)
-#pragma warning restore CA1031 // Do not catch general exception types. Ignored to handle continuation task.
             {
                 exception = ex;
             }
@@ -90,9 +88,7 @@ internal class TaskContinuationGenerator<TIntegration, TTarget, TReturn, TResult
             // *
             continuationResult = _continuation!(target, taskResult, exception, in state);
         }
-#pragma warning disable CA1031 // Do not catch general exception types. Ignored to handle continuation task.
         catch (Exception ex)
-#pragma warning restore CA1031 // Do not catch general exception types. Ignored to handle continuation task.
         {
             IntegrationOptions<TIntegration, TTarget>.LogException(ex, "Exception occurred when calling the CallTarget integration continuation.");
         }

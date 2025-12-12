@@ -95,9 +95,7 @@ internal class LazyInstrumentationLoader : IDisposable
             {
                 _instrumentationInitializer.Initialize(_lifespanManager);
             }
-#pragma warning disable CA1031 // Do not catch general exception types. We want to log all exceptions from initializers.
             catch (Exception ex)
-#pragma warning restore CA1031 // Do not catch general exception types. We want to log all exceptions from initializers.
             {
                 noExceptions = false;
                 OtelLogger.Error(ex, "'{0}' failed", initializerName);
