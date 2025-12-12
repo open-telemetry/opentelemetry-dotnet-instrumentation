@@ -14,7 +14,9 @@ internal static class EndMethodHandler<TIntegration, TTarget, TReturn>
     private static readonly InvokeDelegate? _invokeDelegate;
     private static readonly ContinuationGenerator<TTarget, TReturn>? _continuationGenerator;
 
+#pragma warning disable CA1810 // Initialize reference type static fields inline. This static constructor is necessary for initializing the instrumentation delegate for bytecode instrumentation. Not possible to omit constructor due to exception trow scenario.
     static EndMethodHandler()
+#pragma warning restore CA1810 // Initialize reference type static fields inline. This static constructor is necessary for initializing the instrumentation delegate for bytecode instrumentation. Not possible to omit constructor due to exception trow scenario.
     {
         var returnType = typeof(TReturn);
         try
