@@ -1,1 +1,2 @@
-
+OpenTelemetry.AutoInstrumentation.Instrumentations.NLog.TraceContextInjection.Integrations.NLogWriteToTargetsIntegration
+OpenTelemetry.AutoInstrumentation.Instrumentations.NLog.TraceContextInjection.Integrations.NLogWriteToTargetsWithWrapperTypeIntegration

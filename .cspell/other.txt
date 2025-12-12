@@ -29,6 +29,7 @@ ILOGGER
 inetsrv
 JIT
 LINQ
+longdate
 MASSTRANSIT
 metricsexporter
 mkdir
@@ -41,6 +42,7 @@ mycompanymyproductmylibrary
 MYSQLCONNECTOR
 MYSQLDATA
 NETRUNTIME
+NLOG
 Npgsql
 NSERVICEBUS
 omnisharp

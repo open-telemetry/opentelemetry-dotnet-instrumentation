@@ -19,7 +19,7 @@ public class TargetFramework : Enumeration
 
     // should be in version order
     public static readonly TargetFramework[] NetFramework = {
-        NET462, NET47, NET471, NET472, NET472
+        NET462, NET47, NET471, NET472
     };
 
     public static implicit operator string(TargetFramework framework)

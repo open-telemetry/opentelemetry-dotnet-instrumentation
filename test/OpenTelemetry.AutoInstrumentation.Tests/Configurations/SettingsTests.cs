@@ -355,6 +355,7 @@ public class SettingsTests : IDisposable
     [Theory]
     [InlineData("ILOGGER", LogInstrumentation.ILogger)]
     [InlineData("LOG4NET", LogInstrumentation.Log4Net)]
+    [InlineData("NLOG", LogInstrumentation.NLog)]
     internal void LogSettings_Instrumentations_SupportedValues(string logInstrumentation, LogInstrumentation expectedLogInstrumentation)
     {
         Environment.SetEnvironmentVariable(ConfigurationKeys.Logs.LogsInstrumentationEnabled, "false");
