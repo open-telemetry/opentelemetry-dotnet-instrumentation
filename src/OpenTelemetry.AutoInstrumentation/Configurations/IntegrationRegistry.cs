@@ -20,7 +20,7 @@ internal static class IntegrationRegistry
 
         Names = new string[values.Cast<int>().Max() + 1];
 
-        foreach (TracerInstrumentation value in values)
+        foreach (var value in values)
         {
             var name = value.ToString();
 
