@@ -27,7 +27,9 @@ internal static class EndMethodHandler<TIntegration, TTarget, TReturn>
         }
         catch (Exception ex)
         {
+#pragma warning disable CA1065 // Do not raise exceptions in unexpected locations. Needed for bytecode instrumentation.
             throw new CallTargetInvokerException(ex);
+#pragma warning restore CA1065 // Do not raise exceptions in unexpected locations. Needed for bytecode instrumentation.
         }
 
         if (returnType.IsGenericType)

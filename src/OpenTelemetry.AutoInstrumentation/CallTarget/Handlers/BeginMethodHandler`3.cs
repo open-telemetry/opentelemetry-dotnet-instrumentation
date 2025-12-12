@@ -27,7 +27,9 @@ internal static class BeginMethodHandler<TIntegration, TTarget, TArg1, TArg2, TA
         }
         catch (Exception ex)
         {
+#pragma warning disable CA1065 // Do not raise exceptions in unexpected locations. Needed for bytecode instrumentation.
             throw new CallTargetInvokerException(ex);
+#pragma warning restore CA1065 // Do not raise exceptions in unexpected locations. Needed for bytecode instrumentation.
         }
         finally
         {
