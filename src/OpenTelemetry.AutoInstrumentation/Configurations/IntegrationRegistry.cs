@@ -11,7 +11,11 @@ internal static class IntegrationRegistry
 
     static IntegrationRegistry()
     {
+#if NET
+        var values = Enum.GetValues<TracerInstrumentation>();
+#else
         var values = Enum.GetValues(typeof(TracerInstrumentation));
+#endif
         var ids = new Dictionary<string, int>(values.Length);
 
         Names = new string[values.Cast<int>().Max() + 1];

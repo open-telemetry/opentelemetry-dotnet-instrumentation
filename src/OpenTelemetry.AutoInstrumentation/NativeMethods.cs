@@ -9,7 +9,7 @@ namespace OpenTelemetry.AutoInstrumentation;
 
 internal static class NativeMethods
 {
-    private static readonly bool IsWindows = string.Equals(FrameworkDescription.Instance.OSPlatform, "Windows", StringComparison.OrdinalIgnoreCase);
+    private static readonly bool IsWindows = RuntimeInformation.IsOSPlatform(OSPlatform.Windows);
 
     public static void AddInstrumentations(string id, NativeCallTargetDefinition[] methodArrays)
     {

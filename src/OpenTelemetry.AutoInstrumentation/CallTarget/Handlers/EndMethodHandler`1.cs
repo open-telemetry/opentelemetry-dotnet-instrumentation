@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: Apache-2.0
 
 using System.Diagnostics;
-using System.Reflection.Emit;
 using System.Runtime.CompilerServices;
 using OpenTelemetry.AutoInstrumentation.CallTarget.Handlers.Continuations;
 
@@ -17,10 +16,10 @@ internal static class EndMethodHandler<TIntegration, TTarget, TReturn>
 
     static EndMethodHandler()
     {
-        Type returnType = typeof(TReturn);
+        var returnType = typeof(TReturn);
         try
         {
-            DynamicMethod? dynMethod = IntegrationMapper.CreateEndMethodDelegate(typeof(TIntegration), typeof(TTarget), returnType);
+            var dynMethod = IntegrationMapper.CreateEndMethodDelegate(typeof(TIntegration), typeof(TTarget), returnType);
             if (dynMethod != null)
             {
                 _invokeDelegate = (InvokeDelegate)dynMethod.CreateDelegate(typeof(InvokeDelegate));
@@ -33,17 +32,20 @@ internal static class EndMethodHandler<TIntegration, TTarget, TReturn>
 
         if (returnType.IsGenericType)
         {
-            Type genericReturnType = returnType.GetGenericTypeDefinition();
             if (typeof(Task).IsAssignableFrom(returnType))
             {
                 // The type is a Task<>
                 _continuationGenerator = (ContinuationGenerator<TTarget, TReturn>?)Activator.CreateInstance(typeof(TaskContinuationGenerator<,,,>).MakeGenericType(typeof(TIntegration), typeof(TTarget), returnType, ContinuationsHelper.GetResultType(returnType)));
             }
 #if NET
-            else if (genericReturnType == typeof(ValueTask<>))
+            else
             {
-                // The type is a ValueTask<>
-                _continuationGenerator = (ContinuationGenerator<TTarget, TReturn>?)Activator.CreateInstance(typeof(ValueTaskContinuationGenerator<,,,>).MakeGenericType(typeof(TIntegration), typeof(TTarget), returnType, ContinuationsHelper.GetResultType(returnType)));
+                var genericReturnType = returnType.GetGenericTypeDefinition();
+                if (genericReturnType == typeof(ValueTask<>))
+                {
+                    // The type is a ValueTask<>
+                    _continuationGenerator = (ContinuationGenerator<TTarget, TReturn>?)Activator.CreateInstance(typeof(ValueTaskContinuationGenerator<,,,>).MakeGenericType(typeof(TIntegration), typeof(TTarget), returnType, ContinuationsHelper.GetResultType(returnType)));
+                }
             }
 #endif
         }
@@ -80,7 +82,7 @@ internal static class EndMethodHandler<TIntegration, TTarget, TReturn>
 
         if (_invokeDelegate != null)
         {
-            CallTargetReturn<TReturn?> returnWrap = _invokeDelegate(instance, returnValue, exception, in state);
+            var returnWrap = _invokeDelegate(instance, returnValue, exception, in state);
             returnValue = returnWrap.GetReturnValue();
         }
 

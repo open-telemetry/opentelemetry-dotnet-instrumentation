@@ -74,9 +74,9 @@ file-based configuration to include these parameters.
 
 ### Rule Engine
 
-| Environment variable                | Description              |
-| ----------------------------------- | ------------------------ |
-| `OTEL_DOTNET_AUTO_RULE_ENGINE_ENABLED` | Enables RuleEngine.      |
+| Environment variable                   | Description         |
+| -------------------------------------- | ------------------- |
+| `OTEL_DOTNET_AUTO_RULE_ENGINE_ENABLED` | Enables RuleEngine. |
 
 ---
 
@@ -196,6 +196,7 @@ tracer_provider:
             # On .NET Framework, the grpc OTLP exporter protocol is not supported.
 
     # Batch processor for Zipkin
+    # This configuration is deprecated and will be removed in upcoming release.
     - batch:
         exporter:
           zipkin:

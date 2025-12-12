@@ -19,7 +19,7 @@ namespace OpenTelemetry.AutoInstrumentation.Instrumentations.Kafka.Integrations;
     typeName: IntegrationConstants.ProducerTypeName,
     methodName: IntegrationConstants.ProduceSyncMethodName,
     returnTypeName: ClrNames.Void,
-    parameterTypeNames: new[] { IntegrationConstants.TopicPartitionTypeName, IntegrationConstants.MessageTypeName, IntegrationConstants.ActionOfDeliveryReportTypeName },
+    parameterTypeNames: [IntegrationConstants.TopicPartitionTypeName, IntegrationConstants.MessageTypeName, IntegrationConstants.ActionOfDeliveryReportTypeName],
     minimumVersion: IntegrationConstants.MinVersion,
     maximumVersion: IntegrationConstants.MaxVersion,
     integrationName: IntegrationConstants.IntegrationName,

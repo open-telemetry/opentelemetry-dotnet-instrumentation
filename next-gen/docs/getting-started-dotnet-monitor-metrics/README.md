@@ -54,8 +54,7 @@ outlined in [Configuring API Key
 Authentication](https://github.com/dotnet/dotnet-monitor/blob/main/documentation/api-key-setup.md#configuring-api-key-authentication).
 If your use case is limited to a test environment, you might opt to bypass API
 key configuration by using the `--no-auth` switch when running dotnet-monitor.
-Learn more about dotnet-monitor authentication
-[here](https://github.com/dotnet/dotnet-monitor/blob/1beca4d497da1e60985394fe7d1195c0663f7095/documentation/authentication.md?plain=1#L115).
+Learn more about [dotnet-monitor authentication](https://github.com/dotnet/dotnet-monitor/blob/1beca4d497da1e60985394fe7d1195c0663f7095/documentation/authentication.md?plain=1#L115).
 
 2. **Set a default process and customize metrics collection**: To monitor a
    specific local process and capture custom metrics, use a settings.json file.
@@ -204,8 +203,7 @@ After successfully logging in, click on the explore option on the left panel of
 the website - we should be able to write some queries to explore our metrics
 now!
 
-Feel free to find some handy PromQL
-[here](https://promlabs.com/promql-cheat-sheet/).
+Feel free to find some [handy PromQL](https://promlabs.com/promql-cheat-sheet/).
 
 In the below example, the query targets to find out what is the per-second rate
 of increase of myFruitCounter over the past 5 minutes:

@@ -34,7 +34,7 @@ internal class ValueTaskContinuationGenerator<TIntegration, TTarget, TReturn> : 
             return returnValue;
         }
 
-        ValueTask previousValueTask = FromTReturn<ValueTask>(returnValue);
+        var previousValueTask = FromTReturn<ValueTask>(returnValue);
 
         return ToTReturn(InnerSetValueTaskContinuation(instance, previousValueTask, state));
 
