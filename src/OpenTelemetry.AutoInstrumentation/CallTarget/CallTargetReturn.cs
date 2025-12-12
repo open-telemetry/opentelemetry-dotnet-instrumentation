@@ -31,7 +31,9 @@ public readonly ref struct CallTargetReturn<T>
     /// <returns>Default call target return value</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #pragma warning disable CA1024 // Use properties where appropriate
+#pragma warning disable CA1000 // Do not declare static members on generic types, needed for bytecode instrumentation
     public static CallTargetReturn<T> GetDefault()
+#pragma warning restore CA1000 // Do not declare static members on generic types, needed for bytecode instrumentation
 #pragma warning restore CA1024 // Use properties where appropriate
     {
         return default;
