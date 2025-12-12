@@ -9,16 +9,16 @@
 #ifdef _WIN32
 
 #include "windows.h"
-#include <filesystem>
 #include <process.h>
 
 #else
 
 #include <fstream>
-#include <unistd.h>
 #include <dlfcn.h>
 
 #endif
+
+#include <filesystem>
 
 #if MACOS
 #include <libproc.h>
@@ -26,15 +26,8 @@
 
 #include "environment_variables.h"
 #include "string_utils.h" // NOLINT
+#include "file_utils.h"
 #include "util.h"
-
-#ifdef _WIN32
-#define DIR_SEPARATOR WStr('\\')
-#define ENV_VAR_PATH_SEPARATOR WStr(';')
-#else
-#define DIR_SEPARATOR WStr('/')
-#define ENV_VAR_PATH_SEPARATOR WStr(':')
-#endif
 
 namespace trace
 {
@@ -44,11 +37,11 @@ inline WSTRING GetOpenTelemetryLogFilePath(const std::string& file_name_suffix)
 {
     const auto file_name = TLoggerPolicy::file_name + file_name_suffix + ".log";
 
-    WSTRING directory = GetEnvironmentValue(environment::log_directory);
+    std::filesystem::path directory = GetEnvironmentValue(environment::log_directory);
 
-    if (directory.length() > 0)
+    if (!directory.empty())
     {
-        return directory + DIR_SEPARATOR + ToWSTRING(file_name);
+        return PATH_TO_WSTRING(directory / file_name);
     }
 #ifdef _WIN32
     std::filesystem::path program_data_path;
@@ -59,10 +52,10 @@ inline WSTRING GetOpenTelemetryLogFilePath(const std::string& file_name_suffix)
         program_data_path = WStr(R"(C:\ProgramData)");
     }
 
-    // on Windows WSTRING == wstring
-    return (program_data_path / TLoggerPolicy::folder_path  / file_name).wstring();
+    return PATH_TO_WSTRING(program_data_path / TLoggerPolicy::folder_path  / file_name);
 #else
-    return ToWSTRING("/var/log/opentelemetry/dotnet/" + file_name);
+    std::filesystem::path program_data_path = WStr("/var/log/opentelemetry/dotnet/");
+    return PATH_TO_WSTRING(program_data_path / file_name);
 #endif
 }
 

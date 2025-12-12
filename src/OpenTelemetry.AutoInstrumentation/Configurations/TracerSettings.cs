@@ -62,7 +62,7 @@ internal class TracerSettings : Settings
     /// For environment variable configuration, this must be null,
     /// and the configuration will be handled by TracesExporters
     /// </summary>
-    public IReadOnlyList<ProcessorConfig>? Processors { get; private set; } = null;
+    public IReadOnlyList<ProcessorConfig>? Processors { get; private set; }
 
     /// <summary>
     /// Gets the sampler configured via file-based configuration.
@@ -112,15 +112,11 @@ internal class TracerSettings : Settings
     protected override void OnLoadFile(YamlConfiguration configuration)
     {
         var processors = configuration.TracerProvider?.Processors;
-
         TracesEnabled = processors != null && processors.Count > 0;
         Processors = processors;
 
-        Sampler = SamplerFactory.CreateSampler(configuration.TracerProvider?.Sampler, configuration.FailFast) ?? new ParentBasedSampler(new AlwaysOnSampler());
-
         var traces = configuration.InstrumentationDevelopment?.DotNet?.Traces;
         EnabledInstrumentations = traces?.GetEnabledInstrumentations() ?? [];
-
         InstrumentationOptions = new InstrumentationOptions(traces);
 
         if (traces != null)
@@ -157,6 +153,8 @@ internal class TracerSettings : Settings
                 }
             }
         }
+
+        Sampler = SamplerFactory.CreateSampler(configuration.TracerProvider?.Sampler, configuration.FailFast) ?? new ParentBasedSampler(new AlwaysOnSampler());
     }
 
     private static List<TracesExporter> ParseTracesExporter(Configuration configuration)

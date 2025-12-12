@@ -4,12 +4,12 @@
     <PackageReference Include="Newtonsoft.Json" />
     <PackageReference Include="Xunit.SkippableFact" />
     <PackageReference Include="log4net" />
-    <PackageReference Include="Microsoft.Build" Condition=" '$(TargetFramework)' == 'net9.0' " />
+    <PackageReference Include="Microsoft.Build" Condition=" '$(TargetFramework)' == 'net10.0' " />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\OpenTelemetry.AutoInstrumentation\OpenTelemetry.AutoInstrumentation.csproj" />
-    <ProjectReference Include="..\..\tools\DependencyListGenerator\DependencyListGenerator.csproj" Condition=" '$(TargetFramework)' == 'net9.0' " />
+    <ProjectReference Include="..\..\tools\DependencyListGenerator\DependencyListGenerator.csproj" Condition=" '$(TargetFramework)' == 'net10.0' " />
   </ItemGroup>
 
   <ItemGroup>
@@ -65,6 +65,9 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="Configurations\FileBased\Files\TestResourceFileEnvVars.yaml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Configurations\FileBased\Files\DefaultNamingConvention.yaml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>

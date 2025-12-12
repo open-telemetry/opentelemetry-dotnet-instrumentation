@@ -28,16 +28,17 @@ jobs:
     steps:
 
       - name: Checkout
-        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # tag: v5.0.0
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # tag: v6.0.1
         with:
           fetch-depth: 0 # fetching all, needed to correctly calculate version
 
       - name: Setup .NET
-        uses: actions/setup-dotnet@d4c94342e560b34958eacfc5d055d21461ed1c5d # tag: v5.0.0
+        uses: actions/setup-dotnet@2016bd2012dba4e32de620c46fe006a3ac9f0602 # tag: v5.0.1
         with:
           dotnet-version: | 
-            8.0.415
-            9.0.306
+            8.0.416
+            9.0.308
+            10.0.101
 
       - name: Check for NuGet packages cache
         uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # tag: v4.3.0
@@ -86,10 +87,10 @@ jobs:
         shell: bash
         run: |
           set -e
-          dotnet publish -f net9.0 -c Release ./test/test-applications/integrations/TestApplication.Smoke
+          dotnet publish -f net10.0 -c Release ./test/test-applications/integrations/TestApplication.Smoke
           export OTEL_DOTNET_AUTO_HOME="${PWD}/bin/tracer-home"
           . ./instrument.sh
-          ./test/test-applications/integrations/bin/TestApplication.Smoke/Release/net9.0/publish/TestApplication.Smoke
+          ./test/test-applications/integrations/bin/TestApplication.Smoke/Release/net10.0/publish/TestApplication.Smoke
             test "$(ls -A '${{ matrix.log-dir }}' )"
 
       - name: Test the Windows PowerShell module instructions from README.md
@@ -100,12 +101,12 @@ jobs:
           Import-Module "${PWD}/bin/installation-scripts/OpenTelemetry.DotNet.Auto.psm1"
           [System.Environment]::SetEnvironmentVariable("OTEL_DOTNET_AUTO_INSTALL_DIR", "${PWD}/bin/tracer-home", [System.EnvironmentVariableTarget]::Machine)
           Register-OpenTelemetryForCurrentSession -OTelServiceName "MyServiceDisplayName"
-          ./test/test-applications/integrations/bin/TestApplication.Smoke/Release/net9.0/TestApplication.Smoke.exe
+          ./test/test-applications/integrations/bin/TestApplication.Smoke/Release/net10.0/TestApplication.Smoke.exe
           if (-not $?) { throw "dotnet help returned exit code: $LASTEXITCODE" }
           if (-not (Test-Path $log_path)) { throw "Log file does not exist. Instrumentation test failed." }
           Remove-Item $log_path
           Unregister-OpenTelemetryForCurrentSession
-          ./test/test-applications/integrations/bin/TestApplication.Smoke/Release/net9.0/TestApplication.Smoke.exe
+          ./test/test-applications/integrations/bin/TestApplication.Smoke/Release/net10.0/TestApplication.Smoke.exe
           if (-not $?) { throw "dotnet help returned exit code: $LASTEXITCODE" }
           if (Test-Path $log_path) { throw "Log file exists. Instrumentation unregister failed." }
 

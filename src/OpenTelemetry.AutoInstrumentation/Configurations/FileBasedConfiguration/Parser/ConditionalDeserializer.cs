@@ -23,7 +23,9 @@ internal class ConditionalDeserializer : INodeDeserializer
          out object? value,
          ObjectDeserializer rootDeserializer)
     {
-        if (!expectedType.IsDefined(typeof(EmptyObjectOnEmptyYamlAttribute), inherit: true))
+        var isEmptyObjectOnEmptyYamlAttribute = expectedType.CustomAttributes.Any(a => string.Equals(a.AttributeType.Name, "EmptyObjectOnEmptyYamlAttribute", StringComparison.Ordinal));
+
+        if (!isEmptyObjectOnEmptyYamlAttribute)
         {
             return _inner.Deserialize(reader, expectedType, nestedObjectDeserializer, out value, rootDeserializer);
         }

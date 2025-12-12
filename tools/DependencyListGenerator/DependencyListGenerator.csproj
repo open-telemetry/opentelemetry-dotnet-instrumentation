@@ -1,18 +1,18 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net9.0</TargetFramework>
+    <TargetFramework Condition=" '$(IsLegacyUbuntu)' == '' " >net10.0</TargetFramework>
+    <TargetFramework Condition=" '$(IsLegacyUbuntu)' != '' " >net9.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>disable</Nullable>
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>$(MSBuildThisFileDirectory)..\..\test\test-keypair.snk</AssemblyOriginatorKeyFile>
+    <AnalysisLevel>latest-All</AnalysisLevel>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="McMaster.Extensions.CommandLineUtils" />
     <PackageReference Include="NuGet.ProjectModel" />
-    <!-- System.Security.Cryptography.Pkcs is an indirect reference from NuGet.ProjectModel. Fixes https://github.com/advisories/GHSA-447r-wph3-92pm -->
-    <PackageReference Include="System.Security.Cryptography.Pkcs" />
     <PackageReference Include="System.IO.Abstractions" />
   </ItemGroup>
 

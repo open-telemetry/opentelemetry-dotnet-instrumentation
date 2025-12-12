@@ -25,7 +25,7 @@ jobs:
     steps:
 
     - name: Checkout
-      uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # tag: v5.0.0
+      uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # tag: v6.0.1
 
     - name: Restore lychee cache
       uses: actions/cache/restore@0057852bfaa89a56745cba8c7296529d2fc39830 # tag: v4.3.0
@@ -43,12 +43,15 @@ jobs:
         args: "--cache --max-cache-age 1d --threads 1 --max-concurrency 1 --verbose --retry-wait-time 5 --max-retries 3 --timeout 60 --no-progress './**/*.md' './**/*.html'"
 
     - name: Run markdownlint
-      uses: streetsidesoftware/cspell-action@76c6f6d52abd57f4bcab5f3fde1bbd4f19a99eb0 # tag: v7.2.1
+      uses: streetsidesoftware/cspell-action@e5a858a18b7e0b56e0342b1dcad796308b7341a2 # tag: v8.1.1
       with:
         files: '**/*.md'
 
     - name: Run cspell
-      uses: DavidAnson/markdownlint-cli2-action@992badcdf24e3b8eb7e87ff9287fe931bcb00c6e # tag: v20.0.0
+      uses: DavidAnson/markdownlint-cli2-action@07035fd053f7be764496c0f8d8f9f41f98305101 # tag: v22.0.0
+      with:
+        globs: '**/*.md;!.github/**;!lychee/out.md'
+        separator: ';'
 
     - name: Save lychee cache
       if: always()

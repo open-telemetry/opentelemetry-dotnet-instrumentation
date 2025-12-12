@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: Apache-2.0
 
 using System.Runtime.CompilerServices;
-using OpenTelemetry;
 using OpenTelemetry.AutoInstrumentation.Configurations.FileBasedConfiguration;
 using OpenTelemetry.AutoInstrumentation.Configurations.Otlp;
 using OpenTelemetry.AutoInstrumentation.Loading;
@@ -36,13 +35,13 @@ internal static class EnvironmentConfigurationLogHelper
                 {
                     if (processor.Batch != null && processor.Simple != null)
                     {
-                        Logger.Debug("Both batch and simple processors are configured. It is not supported. Skipping.");
+                        Logger.Debug("Both batch and simple logger processors are configured. It is not supported. Skipping.");
                         continue;
                     }
 
                     if (processor.Batch == null && processor.Simple == null)
                     {
-                        Logger.Debug("No valid processor configured, skipping.");
+                        Logger.Debug("No valid logger processor configured, skipping.");
                         continue;
                     }
 
@@ -51,7 +50,7 @@ internal static class EnvironmentConfigurationLogHelper
                         var exporter = processor.Batch.Exporter;
                         if (exporter == null)
                         {
-                            Logger.Debug("No exporter configured for batch processor. Skipping.");
+                            Logger.Debug("No exporter configured for batch logger processor. Skipping.");
                             continue;
                         }
 
@@ -70,10 +69,10 @@ internal static class EnvironmentConfigurationLogHelper
                         switch (exportersCount)
                         {
                             case 0:
-                                Logger.Debug("No valid exporter configured for batch processor. Skipping.");
+                                Logger.Debug("No valid exporter configured for batch logger processor. Skipping.");
                                 continue;
                             case > 1:
-                                Logger.Debug("Multiple exporters are configured for batch processor. Only one exporter is supported. Skipping.");
+                                Logger.Debug("Multiple exporters are configured for batch logger processor. Only one exporter is supported. Skipping.");
                                 continue;
                         }
 
@@ -91,7 +90,7 @@ internal static class EnvironmentConfigurationLogHelper
                         var exporter = processor.Simple.Exporter;
                         if (exporter == null)
                         {
-                            Logger.Debug("No exporter configured for simple processor. Skipping.");
+                            Logger.Debug("No exporter configured for simple logger processor. Skipping.");
                             continue;
                         }
 
@@ -115,10 +114,10 @@ internal static class EnvironmentConfigurationLogHelper
                         switch (exportersCount)
                         {
                             case 0:
-                                Logger.Debug("No valid exporter configured for simple processor. Skipping.");
+                                Logger.Debug("No valid exporter configured for simple logger processor. Skipping.");
                                 continue;
                             case > 1:
-                                Logger.Debug("Multiple exporters are configured for simple processor. Only one exporter is supported. Skipping.");
+                                Logger.Debug("Multiple exporters are configured for simple logger processor. Only one exporter is supported. Skipping.");
                                 continue;
                         }
 

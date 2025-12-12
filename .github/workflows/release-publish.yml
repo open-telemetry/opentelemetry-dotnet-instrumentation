@@ -13,19 +13,20 @@ jobs:
     steps:
 
       - name: Setup .NET
-        uses: actions/setup-dotnet@d4c94342e560b34958eacfc5d055d21461ed1c5d # tag: v5.0.0
+        uses: actions/setup-dotnet@2016bd2012dba4e32de620c46fe006a3ac9f0602 # tag: v5.0.1
         with:
           dotnet-version: | 
-            8.0.415
-            9.0.306
-            
+            8.0.416
+            9.0.308
+            10.0.101
+
       - name: Test the PowerShell module instructions from README.md
         shell: powershell
         run: |
           mkdir testapp
           cd testapp
           dotnet new console
-          dotnet publish -f net9.0 -c Release
+          dotnet publish -f net10.0 -c Release
           $module_url = "https://github.com/${{ github.repository }}/releases/download/${{ github.event.release.tag_name }}/OpenTelemetry.DotNet.Auto.psm1"
           $dl_path = Join-Path $env:temp "OpenTelemetry.DotNet.Auto.psm1"
           $log_path = "C:\ProgramData\OpenTelemetry .NET AutoInstrumentation\logs\*"
@@ -34,12 +35,12 @@ jobs:
           Install-OpenTelemetryCore
           $install_dir = Get-OpenTelemetryInstallDirectory
           Register-OpenTelemetryForCurrentSession -OTelServiceName "MyServiceDisplayName"
-          ./bin/Release/net9.0/publish/testapp
+          ./bin/Release/net10.0/publish/testapp
           if (-not $?) { throw "dotnet help returned exit code: $LASTEXITCODE" }
           if (-not (Test-Path $log_path)) { throw "Log file does not exist. Instrumentation test failed." }
           Remove-Item $log_path
           Unregister-OpenTelemetryForCurrentSession
-          ./bin/Release/net9.0/publish/testapp
+          ./bin/Release/net10.0/publish/testapp
           if (-not $?) { throw "dotnet help returned exit code: $LASTEXITCODE" }
           if (Test-Path $log_path) { throw "Log file exists. Instrumentation unregister failed." }
           Uninstall-OpenTelemetryCore
@@ -64,11 +65,12 @@ jobs:
     steps:
 
       - name: Setup .NET
-        uses: actions/setup-dotnet@d4c94342e560b34958eacfc5d055d21461ed1c5d # tag: v5.0.0
+        uses: actions/setup-dotnet@2016bd2012dba4e32de620c46fe006a3ac9f0602 # tag: v5.0.1
         with:
           dotnet-version: | 
-            8.0.415
-            9.0.306
+            8.0.416
+            9.0.308
+            10.0.101
 
       - name: Install MacOS CoreUtils
         if: ${{ runner.os == 'macOS' }}
@@ -85,13 +87,13 @@ jobs:
           mkdir testapp
           cd testapp
           dotnet new console
-          dotnet publish -f net9.0 -c Release
+          dotnet publish -f net10.0 -c Release
           curl -sSfL https://github.com/${{ github.repository }}/releases/download/${{ github.event.release.tag_name }}/otel-dotnet-auto-install.sh -O
           sh ./otel-dotnet-auto-install.sh
             test "$(ls -A "$HOME/.otel-dotnet-auto")"
           curl -sSfL https://raw.githubusercontent.com/${{ github.repository }}/${{ github.sha }}/instrument.sh -O
           . ./instrument.sh
-          ./bin/Release/net9.0/publish/testapp
+          ./bin/Release/net10.0/publish/testapp
             test "$(ls -A '${{ matrix.log-dir }}' )"
 
   shell-scripts-container:
@@ -101,15 +103,15 @@ jobs:
         include:
           - machine: ubuntu-22.04
             base-image: alpine
-            net-version: net9.0
+            net-version: net10.0
           - machine: ubuntu-22.04-arm
             base-image: alpine
-            net-version: net9.0
+            net-version: net10.0
     runs-on: ${{ matrix.machine }}
     steps:
 
       - name: Checkout
-        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # tag: v5.0.0
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # tag: v6.0.1
 
       - name: Test the Shell scripts from README.md in Docker container
         run: |

@@ -1,6 +1,7 @@
 // Copyright The OpenTelemetry Authors
 // SPDX-License-Identifier: Apache-2.0
 
+using System.Reflection;
 using OpenTelemetry.AutoInstrumentation.Configurations;
 using OpenTelemetry.Exporter;
 using Xunit;
@@ -379,9 +380,13 @@ public class SettingsTests : IDisposable
     [Theory]
     [InlineData("", OtlpExportProtocol.HttpProtobuf)]
     [InlineData(null, OtlpExportProtocol.HttpProtobuf)]
-    [InlineData("http/protobuf", null)]
-    [InlineData("grpc", null)]
-    [InlineData("nonExistingProtocol", null)]
+    [InlineData("http/protobuf", OtlpExportProtocol.HttpProtobuf)]
+#if NETFRAMEWORK
+    [InlineData("grpc", OtlpExportProtocol.HttpProtobuf)]
+#else
+    [InlineData("grpc", OtlpExportProtocol.Grpc)]
+#endif
+    [InlineData("nonExistingProtocol", OtlpExportProtocol.HttpProtobuf)]
     internal void OtlpExportProtocol_DependsOnCorrespondingEnvVariable(string? otlpProtocol, OtlpExportProtocol? expectedOtlpExportProtocol)
     {
         Environment.SetEnvironmentVariable(AutoOtlpDefinitions.DefaultProtocolEnvVarName, otlpProtocol);
@@ -391,6 +396,78 @@ public class SettingsTests : IDisposable
         // null values for expected data will be handled by OTel .NET SDK
         Assert.NotNull(settings.OtlpSettings);
         Assert.Equal(expectedOtlpExportProtocol, settings.OtlpSettings.Protocol);
+    }
+
+    [Theory]
+    [InlineData("http/protobuf", "1", "key1=value1,key2=value2", OtlpExportProtocol.HttpProtobuf, 1)]
+#if NETFRAMEWORK
+    [InlineData("grpc", "15000", "a=b,c=d", OtlpExportProtocol.HttpProtobuf, 15000)]
+#else
+    [InlineData("grpc", "15000", "a=b,c=d", OtlpExportProtocol.Grpc, 15000)]
+#endif
+    [InlineData("invalid", "42", "x=y", OtlpExportProtocol.HttpProtobuf, 42)]
+    internal void OtlpExportProtocol_CheckPriorityEnvIsSet_Traces(string? protocol, string timeout, string headers, OtlpExportProtocol? expectedProtocol, int expectedTimeout)
+    {
+        var unexpectedProtocolForDistraction = expectedProtocol == OtlpExportProtocol.HttpProtobuf ? "grpc" : "http/protobuf";
+        Environment.SetEnvironmentVariable(AutoOtlpDefinitions.DefaultProtocolEnvVarName, unexpectedProtocolForDistraction); // set a different default to verify priority
+        Environment.SetEnvironmentVariable(AutoOtlpDefinitions.TracesProtocolEnvVarName, protocol);
+        Environment.SetEnvironmentVariable(AutoOtlpDefinitions.TracesTimeoutEnvVarName, timeout);
+        Environment.SetEnvironmentVariable(AutoOtlpDefinitions.TracesHeadersEnvVarName, headers);
+
+        var settings = Settings.FromDefaultSources<TracerSettings>(false).OtlpSettings;
+
+        Assert.NotNull(settings);
+        Assert.Equal(expectedProtocol, settings.Protocol);
+        Assert.Equal(expectedTimeout, settings.TimeoutMilliseconds);
+        Assert.Equal(headers, settings.Headers);
+    }
+
+    [Theory]
+    [InlineData("http/protobuf", "1", "key1=value1,key2=value2", OtlpExportProtocol.HttpProtobuf, 1)]
+#if NETFRAMEWORK
+    [InlineData("grpc", "25000", "m=n", OtlpExportProtocol.HttpProtobuf, 25000)]
+#else
+    [InlineData("grpc", "25000", "m=n", OtlpExportProtocol.Grpc, 25000)]
+#endif
+    [InlineData("invalid", "100", "a=b", OtlpExportProtocol.HttpProtobuf, 100)]
+    internal void OtlpExportProtocol_CheckPriorityEnvIsSet_Metrics(string? protocol, string timeout, string headers, OtlpExportProtocol? expectedProtocol, int expectedTimeout)
+    {
+        var unexpectedProtocolForDistraction = expectedProtocol == OtlpExportProtocol.HttpProtobuf ? "grpc" : "http/protobuf";
+        Environment.SetEnvironmentVariable(AutoOtlpDefinitions.DefaultProtocolEnvVarName, unexpectedProtocolForDistraction); // set a different default to verify priority
+        Environment.SetEnvironmentVariable(AutoOtlpDefinitions.MetricsProtocolEnvVarName, protocol);
+        Environment.SetEnvironmentVariable(AutoOtlpDefinitions.MetricsTimeoutEnvVarName, timeout);
+        Environment.SetEnvironmentVariable(AutoOtlpDefinitions.MetricsHeadersEnvVarName, headers);
+
+        var settings = Settings.FromDefaultSources<MetricSettings>(false).OtlpSettings;
+
+        Assert.NotNull(settings);
+        Assert.Equal(expectedProtocol, settings.Protocol);
+        Assert.Equal(expectedTimeout, settings.TimeoutMilliseconds);
+        Assert.Equal(headers, settings.Headers);
+    }
+
+    [Theory]
+    [InlineData("http/protobuf", "1", "key1=value1,key2=value2", OtlpExportProtocol.HttpProtobuf, 1)]
+#if NETFRAMEWORK
+    [InlineData("grpc", "5000", "l=m", OtlpExportProtocol.HttpProtobuf, 5000)]
+#else
+    [InlineData("grpc", "5000", "l=m", OtlpExportProtocol.Grpc, 5000)]
+#endif
+    [InlineData("invalid", "77", "z=zz", OtlpExportProtocol.HttpProtobuf, 77)]
+    internal void OtlpExportProtocol_CheckPriorityEnvIsSet_Logs(string? protocol, string timeout, string headers, OtlpExportProtocol? expectedProtocol, int expectedTimeout)
+    {
+        var unexpectedProtocolForDistraction = expectedProtocol == OtlpExportProtocol.HttpProtobuf ? "grpc" : "http/protobuf";
+        Environment.SetEnvironmentVariable(AutoOtlpDefinitions.DefaultProtocolEnvVarName, unexpectedProtocolForDistraction); // set a different default to verify priority
+        Environment.SetEnvironmentVariable(AutoOtlpDefinitions.LogsProtocolEnvVarName, protocol);
+        Environment.SetEnvironmentVariable(AutoOtlpDefinitions.LogsTimeoutEnvVarName, timeout);
+        Environment.SetEnvironmentVariable(AutoOtlpDefinitions.LogsHeadersEnvVarName, headers);
+
+        var settings = Settings.FromDefaultSources<LogSettings>(false).OtlpSettings;
+
+        Assert.NotNull(settings);
+        Assert.Equal(expectedProtocol, settings.Protocol);
+        Assert.Equal(expectedTimeout, settings.TimeoutMilliseconds);
+        Assert.Equal(headers, settings.Headers);
     }
 
     [Theory]
@@ -477,5 +554,20 @@ public class SettingsTests : IDisposable
         Environment.SetEnvironmentVariable(ConfigurationKeys.Traces.InstrumentationOptions.HttpInstrumentationCaptureRequestHeaders, null);
         Environment.SetEnvironmentVariable(ConfigurationKeys.Traces.InstrumentationOptions.HttpInstrumentationCaptureResponseHeaders, null);
         Environment.SetEnvironmentVariable(ConfigurationKeys.Traces.InstrumentationOptions.OracleMdaSetDbStatementForText, null);
+
+        // Cleanup OTLP env vars
+        foreach (var envVar in GetAllOtlpEnvVarNames())
+        {
+            Environment.SetEnvironmentVariable(envVar, null);
+        }
+    }
+
+    private static IEnumerable<string> GetAllOtlpEnvVarNames()
+    {
+        return typeof(AutoOtlpDefinitions)
+            .GetFields(BindingFlags.Public | BindingFlags.Static)
+            .Where(f => f.FieldType == typeof(string))
+            .Select(f => (string)f.GetValue(null)!)
+            .ToList() ?? Enumerable.Empty<string>();
     }
 }

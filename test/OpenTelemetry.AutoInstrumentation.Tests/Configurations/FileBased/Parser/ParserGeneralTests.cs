@@ -1,6 +1,7 @@
 // Copyright The OpenTelemetry Authors
 // SPDX-License-Identifier: Apache-2.0
 
+using OpenTelemetry.AutoInstrumentation.Configurations.FileBasedConfiguration;
 using Xunit;
 using YamlParser = OpenTelemetry.AutoInstrumentation.Configurations.FileBasedConfiguration.Parser.Parser;
 
@@ -12,7 +13,7 @@ public class ParserGeneralTests
     [Fact]
     public void Parse_FullConfigYaml_ShouldPopulateModelCorrectly()
     {
-        var config = YamlParser.ParseYaml("Configurations/FileBased/Files/TestGeneralFile.yaml");
+        var config = YamlParser.ParseYaml<YamlConfiguration>("Configurations/FileBased/Files/TestGeneralFile.yaml");
 
         Assert.NotNull(config);
 
@@ -29,7 +30,7 @@ public class ParserGeneralTests
         Environment.SetEnvironmentVariable("OTEL_DOTNET_AUTO_FAIL_FAST_ENABLED", "true");
         Environment.SetEnvironmentVariable("OTEL_DOTNET_AUTO_FLUSH_ON_UNHANDLEDEXCEPTION", "false");
 
-        var config = YamlParser.ParseYaml("Configurations/FileBased/Files/TestGeneralFileEnvVars.yaml");
+        var config = YamlParser.ParseYaml<YamlConfiguration>("Configurations/FileBased/Files/TestGeneralFileEnvVars.yaml");
 
         Assert.NotNull(config);
 

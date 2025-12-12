@@ -147,10 +147,10 @@ internal static class PackageVersionDefinitions
             Versions = new List<PackageVersion>
             {
                 // new("2.7.0"), - high vulnerability https://github.com/advisories/GHSA-7j9m-j397-g4wx, < 2.19.0
-                new("2.19.0", supportedTargetFrameworks: ["net9.0", "net8.0", "net462"], supportedExecutionFrameworks: ["net9.0", "net8.0", "net462"]),
-                new("2.30.0", supportedTargetFrameworks: ["net9.0", "net8.0", "net462"], supportedExecutionFrameworks: ["net9.0", "net8.0", "net462"]),
-                new("3.0.0", supportedTargetFrameworks: ["net9.0", "net8.0", "net472"], supportedExecutionFrameworks: ["net9.0", "net8.0", "net462"]),
-                new("*", supportedTargetFrameworks: ["net9.0", "net8.0", "net472"], supportedExecutionFrameworks: ["net9.0", "net8.0", "net462"])
+                new("2.19.0", supportedTargetFrameworks: ["net10.0", "net9.0", "net8.0", "net462"], supportedExecutionFrameworks: ["net10.0", "net9.0", "net8.0", "net462"]),
+                new("2.30.0", supportedTargetFrameworks: ["net10.0", "net9.0", "net8.0", "net462"], supportedExecutionFrameworks: ["net10.0", "net9.0", "net8.0", "net462"]),
+                new("3.0.0", supportedTargetFrameworks: ["net10.0", "net9.0", "net8.0", "net472"], supportedExecutionFrameworks: ["net10.0", "net9.0", "net8.0", "net462"]),
+                new("*", supportedTargetFrameworks: ["net10.0", "net9.0", "net8.0", "net472"], supportedExecutionFrameworks: ["net10.0", "net9.0", "net8.0", "net462"])
             }
         },
         new()
@@ -186,7 +186,7 @@ internal static class PackageVersionDefinitions
                 // new("6.0.0"), - high vulnerability https://github.com/advisories/GHSA-x9vc-6hfv-hg8c, <= 6.0.10, <= 7.0.6, and <= 8.0.2 test should be skipped
                 // new("6.0.11"), - transitive vulnerabilities https://github.com/advisories/GHSA-8g4q-xg66-9fp4 <= 6.0.12, <=7.0.8, <=8.0.4 test should be skipped
                 new("8.0.5"),
-                new("*", supportedTargetFrameworks: ["net9.0", "net8.0"], supportedExecutionFrameworks: ["net9.0", "net8.0"])
+                new("*", supportedTargetFrameworks: ["net10.0", "net9.0", "net8.0"], supportedExecutionFrameworks: ["net10.0", "net9.0", "net8.0"])
             }
         },
         new()
@@ -198,10 +198,8 @@ internal static class PackageVersionDefinitions
             {
                 // new("8.0.0"), - transitive vulnerabilities https://github.com/advisories/GHSA-8g4q-xg66-9fp4, <=8.2.3
                 new("8.2.5"),
-                new("9.1.0", supportedTargetFrameworks: ["net9.0", "net8.0"], supportedExecutionFrameworks: ["net9.0", "net8.0"
-                ]), // breaking change, new Meter name
-                new("*", supportedTargetFrameworks: ["net9.0", "net8.0"], supportedExecutionFrameworks: ["net9.0", "net8.0"
-                ])
+                new("9.1.0", supportedTargetFrameworks: ["net10.0", "net9.0", "net8.0"], supportedExecutionFrameworks: ["net10.0", "net9.0", "net8.0"]), // breaking change, new Meter name
+                new("*", supportedTargetFrameworks: ["net10.0", "net9.0", "net8.0"], supportedExecutionFrameworks: ["net10.0", "net9.0", "net8.0"])
             }
         },
         new()
@@ -273,7 +271,8 @@ internal static class PackageVersionDefinitions
             {
                 new("4.10.2"),
                 new("6.2.0"),
-                new("*")
+                new("8.1.2"),
+                new("*", supportedTargetFrameworks: ["net10.0"], supportedExecutionFrameworks: ["net10.0"])
             }
         },
         new()
@@ -292,7 +291,7 @@ internal static class PackageVersionDefinitions
         }
     };
 
-    internal record PackageVersionDefinition
+    internal sealed record PackageVersionDefinition
     {
         public required string IntegrationName { get; init; }
 

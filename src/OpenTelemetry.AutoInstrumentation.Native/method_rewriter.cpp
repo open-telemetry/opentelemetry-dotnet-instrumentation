@@ -174,7 +174,7 @@ HRESULT TracerMethodRewriter::Rewrite(RejitHandlerModule* moduleHandler, RejitHa
     mdToken  callTargetStateToken  = mdTokenNil;
     mdToken  exceptionToken        = mdTokenNil;
     mdToken  callTargetReturnToken = mdTokenNil;
-    ILInstr* firstInstruction;
+    ILInstr* firstInstruction      = nullptr;
     tracerTokens->ModifyLocalSigAndInitialize(&reWriterWrapper, caller, &callTargetStateIndex, &exceptionIndex,
                                               &callTargetReturnIndex, &returnValueIndex, &callTargetStateToken,
                                               &exceptionToken, &callTargetReturnToken, &firstInstruction);

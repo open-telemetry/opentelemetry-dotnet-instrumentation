@@ -22,7 +22,7 @@ internal class EnvironmentInitializer
                 continue;
             }
 
-            if (!setting.StartsWith(VariablePrefix))
+            if (!setting.StartsWith(VariablePrefix, StringComparison.Ordinal))
             {
                 // not OTEL_ setting
                 continue;

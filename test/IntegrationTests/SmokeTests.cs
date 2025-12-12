@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: Apache-2.0
 
 using System.Diagnostics;
-using System.Reflection;
 using IntegrationTests.Helpers;
 using Xunit.Abstractions;
 
@@ -43,6 +42,17 @@ public class SmokeTests : TestHelper
         VerifyTestApplicationNotInstrumented();
 #endif
     }
+
+#if !NETFRAMEWORK
+    [Fact]
+    [Trait("Category", "EndToEnd")]
+    public void WhenStartupHookIsNotEnabledWithProfiler()
+    {
+        EnableBytecodeInstrumentation();
+        SetEnvironmentVariable("DOTNET_STARTUP_HOOKS", null);
+        VerifyTestApplicationInstrumented();
+    }
+#endif
 
     [Fact]
     [Trait("Category", "EndToEnd")]

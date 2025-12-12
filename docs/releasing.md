@@ -16,7 +16,6 @@
 1. Create a pull request with `release PR` label on GitHub
    with the changes described in the changelog.
 
-
 1. Add tests section in pull request description displaying current status of testing:
 
      ```markdown

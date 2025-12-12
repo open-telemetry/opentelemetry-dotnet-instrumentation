@@ -10,7 +10,11 @@ internal static class ConfigurationExtensions
     public static IReadOnlyList<TEnum> ParseEnabledEnumList<TEnum>(this Configuration source, bool enabledByDefault, string enabledConfigurationTemplate)
         where TEnum : struct, Enum, IConvertible
     {
+#if NET
+        var allConfigurations = Enum.GetValues<TEnum>();
+#else
         var allConfigurations = Enum.GetValues(typeof(TEnum)).Cast<TEnum>().ToArray();
+#endif
         var enabledConfigurations = new List<TEnum>(allConfigurations.Length);
 
         foreach (var configuration in allConfigurations)

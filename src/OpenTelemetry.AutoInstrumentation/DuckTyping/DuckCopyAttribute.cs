@@ -7,6 +7,6 @@ namespace OpenTelemetry.AutoInstrumentation.DuckTyping;
 /// Duck copy struct attribute
 /// </summary>
 [AttributeUsage(AttributeTargets.Struct, AllowMultiple = false)]
-internal class DuckCopyAttribute : Attribute
+internal sealed class DuckCopyAttribute : Attribute
 {
 }

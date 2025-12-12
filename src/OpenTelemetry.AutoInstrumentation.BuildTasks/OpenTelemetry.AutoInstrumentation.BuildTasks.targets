@@ -7,7 +7,7 @@
         Condition="!$(SkippedInstrumentations.Contains('StackExchange.Redis')) AND !$(TargetFramework.StartsWith('net4'))"
         TargetNuGetPackageVersionRange="[2.6.122, 3.0.0)"
         InstrumentationNuGetPackageId="OpenTelemetry.Instrumentation.StackExchangeRedis"
-        InstrumentationNuGetPackageVersion="1.13.0-beta.1" />
+        InstrumentationNuGetPackageVersion="1.14.0-beta.1" />
 
     </ItemGroup>
 
@@ -28,7 +28,7 @@
  <Target Name="VerifyIfRuntimeIdSpecified" BeforeTargets="Publish" Condition="'$(RuntimeIdentifier)' == '' AND $(DisableAutoInstrumentationCheckForRuntimeIdentifier) != 'true'">
    <ItemGroup>
     <Lines Include="RuntimeIdentifier (RID) is not set. Consider setting it to avoid copying native libraries for all of the platforms supported by the OpenTelemetry.AutoInstrumentation package." />
-    <Lines Include="See the docs at https://opentelemetry.io/docs/zero-code/net/nuget-packages/#using-the-nuget-packages for details." />
+    <Lines Include="See the docs at https://opentelemetry.io/docs/zero-code/dotnet/nuget-packages/#using-the-nuget-packages for details." />
     <Lines Include="In order to suppress this warning, set DisableAutoInstrumentationCheckForRuntimeIdentifier property to true." />
    </ItemGroup>
    <Warning Text="@(Lines, ' ')">

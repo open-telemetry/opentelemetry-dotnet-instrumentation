@@ -24,7 +24,8 @@ occurred. See this [issue](https://github.com/open-telemetry/opentelemetry-dotne
 for further details.
 
 > [!WARNING]
-> `Register-OpenTelemetryForIIS` performs IIS restart.
+> `Register-OpenTelemetryForIIS` performs IIS restart by default.
+> Use `-NoReset` to skip the restart.
 
 ## Configuration
 
