@@ -23,9 +23,20 @@ internal class SampleExporter : IDisposable
 
     public SampleExporter(BufferProcessor bufferProcessor, TimeSpan exportInterval, TimeSpan exportTimeout)
     {
+#if NET
         ArgumentOutOfRangeException.ThrowIfLessThanOrEqual(exportInterval, TimeSpan.Zero);
         ArgumentOutOfRangeException.ThrowIfLessThanOrEqual(exportTimeout, TimeSpan.Zero);
+#else
+        if (exportInterval <= TimeSpan.Zero)
+        {
+            throw new ArgumentOutOfRangeException(nameof(exportInterval));
+        }
 
+        if (exportTimeout <= TimeSpan.Zero)
+        {
+            throw new ArgumentOutOfRangeException(nameof(exportTimeout));
+        }
+#endif
         _exportInterval = exportInterval;
         _exportTimeout = exportTimeout;
         _bufferProcessor = bufferProcessor;
