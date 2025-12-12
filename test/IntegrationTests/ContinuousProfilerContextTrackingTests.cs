@@ -1,8 +1,5 @@
 // Copyright The OpenTelemetry Authors
 // SPDX-License-Identifier: Apache-2.0
-
-#if NET
-
 using IntegrationTests.Helpers;
 using OpenTelemetry.Proto.Collector.Profiles.V1Development;
 using Xunit.Abstractions;
@@ -45,13 +42,14 @@ public class ContinuousProfilerContextTrackingTests : TestHelper
             var samplesInBatch = profile.Sample;
 
             var samplesWithTraceContext = samplesInBatch.Where(s => s.HasLinkIndex).ToList();
-
+#if NET
             Assert.True(samplesWithTraceContext.Count <= 1, "at most one sample in a batch should have trace context associated.");
-
+#endif
             totalSamplesWithTraceContextCount += samplesWithTraceContext.Count;
             if (samplesWithTraceContext.FirstOrDefault() is { } sampleWithTraceContext)
             {
-                managedThreadsWithTraceContext.Add(profile.AttributeTable[sampleWithTraceContext.AttributeIndices.Single()].Value.StringValue);
+                var threadId = GetThreadName(profile, sampleWithTraceContext);
+                managedThreadsWithTraceContext.Add(threadId!);
             }
         }
 
@@ -59,5 +57,25 @@ public class ContinuousProfilerContextTrackingTests : TestHelper
         Assert.True(totalSamplesWithTraceContextCount >= 3, "there should be sample with trace context in most of the batches.");
         return true;
     }
+
+    private string GetThreadName(OpenTelemetry.Proto.Profiles.V1Development.Profile profile, OpenTelemetry.Proto.Profiles.V1Development.Sample sample)
+    {
+        foreach (var attrIndex in sample.AttributeIndices)
+        {
+            if (attrIndex < profile.AttributeTable.Count)
+            {
+                var attribute = profile.AttributeTable[(int)attrIndex];
+                var key = attribute.Key;
+
+                // Look for thread.name attribute
+                if (key == "thread.name" && attribute.Value.HasStringValue)
+                {
+                    var name = attribute.Value.StringValue;
+                    return string.IsNullOrWhiteSpace(name) ? "unknown" : name;
+                }
+            }
+        }
+
+        return "unknown";
+    }
 }
-#endif

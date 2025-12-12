@@ -1,8 +1,6 @@
 // Copyright The OpenTelemetry Authors
 // SPDX-License-Identifier: Apache-2.0
 
-#if NET
-
 using System.Diagnostics;
 using OpenTelemetry.AutoInstrumentation.Logging;
 
@@ -25,9 +23,20 @@ internal class SampleExporter : IDisposable
 
     public SampleExporter(BufferProcessor bufferProcessor, TimeSpan exportInterval, TimeSpan exportTimeout)
     {
+#if NET
         ArgumentOutOfRangeException.ThrowIfLessThanOrEqual(exportInterval, TimeSpan.Zero);
         ArgumentOutOfRangeException.ThrowIfLessThanOrEqual(exportTimeout, TimeSpan.Zero);
+#else
+        if (exportInterval <= TimeSpan.Zero)
+        {
+            throw new ArgumentOutOfRangeException(nameof(exportInterval));
+        }
 
+        if (exportTimeout <= TimeSpan.Zero)
+        {
+            throw new ArgumentOutOfRangeException(nameof(exportTimeout));
+        }
+#endif
         _exportInterval = exportInterval;
         _exportTimeout = exportTimeout;
         _bufferProcessor = bufferProcessor;
@@ -49,8 +58,8 @@ internal class SampleExporter : IDisposable
     {
         Activity.CurrentChanged -= Activity_CurrentChanged;
 
-        var configuredGracePeriod = 2 * _exportTimeout;
-        var finalGracePeriod = (int)Math.Min(configuredGracePeriod.TotalMilliseconds, 60000);
+        var configuredGracePeriod = 2 * _exportTimeout.TotalMilliseconds;
+        var finalGracePeriod = (int)Math.Min(configuredGracePeriod, 60000);
         _shutdownTrigger.Set();
         if (_thread != null && !_thread.Join(finalGracePeriod))
         {
@@ -110,4 +119,3 @@ internal class SampleExporter : IDisposable
         }
     }
 }
-#endif

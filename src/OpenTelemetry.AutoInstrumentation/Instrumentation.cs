@@ -1,14 +1,9 @@
 // Copyright The OpenTelemetry Authors
 // SPDX-License-Identifier: Apache-2.0
 
-#if NET
-using System.Diagnostics;
-#endif
 using System.Reflection;
 using OpenTelemetry.AutoInstrumentation.Configurations;
-#if NET
 using OpenTelemetry.AutoInstrumentation.ContinuousProfiler;
-#endif
 using OpenTelemetry.AutoInstrumentation.Diagnostics;
 using OpenTelemetry.AutoInstrumentation.Instrumentations.NoCode;
 using OpenTelemetry.AutoInstrumentation.Loading;
@@ -31,6 +26,7 @@ internal static class Instrumentation
     private static readonly Lazy<LoggerProvider?> LoggerProviderFactory = new(InitializeLoggerProvider, true);
 
     private static int _initialized;
+    private static int _continuousProfilingInitialized; // Process-wide guard for continuous profiling
     private static int _isExiting;
     private static SdkSelfDiagnosticsEventListener? _sdkEventListener;
 
@@ -39,9 +35,11 @@ internal static class Instrumentation
 
     private static PluginManager? _pluginManager;
 
-#if NET
     private static SampleExporter? _sampleExporter;
     private static SampleExporterBuilder? _sampleExporterBuilder;
+
+#if NETFRAMEWORK
+    private static CanaryThreadManager? _canaryThreadManager;
 #endif
 
     internal static LoggerProvider? LoggerProvider
@@ -111,18 +109,18 @@ internal static class Instrumentation
             AppDomain.CurrentDomain.ProcessExit += OnExit;
             AppDomain.CurrentDomain.DomainUnload += OnExit;
 
-#if NET
             var profilerEnabled = GeneralSettings.Value.ProfilerEnabled;
 
             if (profilerEnabled)
             {
-                InitializeSampling();
+                // Continuous profiling is process-wide and must be initialized only once
+                // from the default AppDomain to avoid multiple canary threads
+                TryInitializeContinuousProfiling();
             }
             else
             {
                 Logger.Information("CLR Profiler is not enabled. Continuous Profiler will be not started even if configured correctly.");
             }
-#endif
 
             if (TracerSettings.Value.TracesEnabled || MetricSettings.Value.MetricsEnabled)
             {
@@ -219,7 +217,42 @@ internal static class Instrumentation
         }
     }
 
-#if NET
+    private static void TryInitializeContinuousProfiling()
+    {
+#if NETFRAMEWORK
+        // Check AppDomain FIRST, before touching the flag
+        if (!AppDomain.CurrentDomain.IsDefaultAppDomain())
+        {
+            Logger.Information(
+                "Skipping continuous profiling initialization from non-default AppDomain. " +
+                "AppDomain: {0}",
+                AppDomain.CurrentDomain.FriendlyName);
+            return;  // No flag manipulation needed
+        }
+
+        Logger.Information(
+            "Initializing continuous profiling from default AppDomain: {0}",
+            AppDomain.CurrentDomain.FriendlyName);
+#endif
+
+        // NOW attempt to claim initialization rights
+        if (Interlocked.CompareExchange(ref _continuousProfilingInitialized, 1, 0) != 0)
+        {
+            Logger.Debug("Continuous profiling already initialized in this process. Skipping.");
+            return;
+        }
+
+        try
+        {
+            InitializeSampling();
+        }
+        catch (Exception ex)
+        {
+            Logger.Error(ex, "Failed to initialize continuous profiling.");
+            Interlocked.Exchange(ref _continuousProfilingInitialized, 0);
+        }
+    }
+
     private static void InitializeSampling()
     {
         var (threadSamplingEnabled, threadSamplingInterval, allocationSamplingEnabled, maxMemorySamplesPerMinute, exportInterval, exportTimeout, continuousProfilerExporter) = _pluginManager!.GetFirstContinuousConfiguration();
@@ -278,6 +311,19 @@ internal static class Instrumentation
         }
 
         NativeMethods.ConfigureNativeContinuousProfiler(threadSamplingEnabled, threadSamplingInterval, allocationSamplingEnabled, maxMemorySamplesPerMinute, selectiveSamplingInterval);
+#if NETFRAMEWORK
+        // On .NET Framework, we need a dedicated canary thread for seeded stack walking
+        _canaryThreadManager = new CanaryThreadManager();
+        if (!_canaryThreadManager.Start(TimeSpan.FromSeconds(5)))
+        {
+            Logger.Error("Failed to start canary thread. Continuous profiling will not be enabled.");
+            _canaryThreadManager.Dispose();
+            _canaryThreadManager = null;
+            return;
+        }
+
+        Logger.Information("Canary thread started successfully for .NET Framework profiling.");
+#endif
         _sampleExporter = _sampleExporterBuilder?.Build();
     }
 
@@ -296,13 +342,15 @@ internal static class Instrumentation
 
         InitializeBufferProcessing(exportInterval, exportTimeout);
 
+#if NET
         var handler = selectiveSampleExportMethod.CreateDelegate<Action<byte[], int, CancellationToken>>(exporter!);
+#else
+        var handler = (Action<byte[], int, CancellationToken>)selectiveSampleExportMethod.CreateDelegate(typeof(Action<byte[], int, CancellationToken>), exporter!);
+#endif
         _sampleExporterBuilder?.AddHandler(SampleType.SelectedThreads, handler, exportTimeout);
         return true;
     }
-#endif
 
-#if NET
     private static bool TryInitializeContinuousSamplingExport(
         object continuousProfilerExporter,
         bool threadSamplingEnabled,
@@ -326,8 +374,8 @@ internal static class Instrumentation
             return false;
         }
 
-        var threadSamplesMethod = exportThreadSamplesMethod.CreateDelegate<Action<byte[], int, CancellationToken>>(continuousProfilerExporter);
-        var allocationSamplesMethod = exportAllocationSamplesMethod.CreateDelegate<Action<byte[], int, CancellationToken>>(continuousProfilerExporter);
+        var threadSamplesMethod = (Action<byte[], int, CancellationToken>)exportThreadSamplesMethod.CreateDelegate(typeof(Action<byte[], int, CancellationToken>), continuousProfilerExporter);
+        var allocationSamplesMethod = (Action<byte[], int, CancellationToken>)exportAllocationSamplesMethod.CreateDelegate(typeof(Action<byte[], int, CancellationToken>), continuousProfilerExporter);
 
         InitializeBufferProcessing(exportInterval, exportTimeout);
 
@@ -352,7 +400,6 @@ internal static class Instrumentation
             .SetExportInterval(exportInterval)
             .SetExportTimeout(exportTimeout);
     }
-#endif
 
     private static LoggerProvider? InitializeLoggerProvider()
     {
@@ -535,11 +582,13 @@ internal static class Instrumentation
 
         try
         {
-#if NET
             LazyInstrumentationLoader?.Dispose();
             _sampleExporter?.Dispose();
 
+#if NETFRAMEWORK
+            _canaryThreadManager?.Dispose();
 #endif
+
             _tracerProvider?.Dispose();
             _meterProvider?.Dispose();
             if (LoggerProviderFactory.IsValueCreated)
