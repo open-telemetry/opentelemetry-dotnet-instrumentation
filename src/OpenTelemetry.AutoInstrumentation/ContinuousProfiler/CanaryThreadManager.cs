@@ -100,7 +100,7 @@ internal sealed class CanaryThreadManager : IDisposable
         {
             Logger.Debug(
                 "Canary thread started. ManagedThreadId: {0}",
-                Thread.CurrentThread.ManagedThreadId);
+                Environment.CurrentManagedThreadId);
 
             // Signal that the thread has started
             // The native profiler will detect this thread via ThreadCreated/ThreadAssignedToOSThread callbacks
