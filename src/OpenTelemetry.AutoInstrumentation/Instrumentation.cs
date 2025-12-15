@@ -374,8 +374,13 @@ internal static class Instrumentation
             return false;
         }
 
+#if NET
+        var threadSamplesMethod = exportThreadSamplesMethod.CreateDelegate<Action<byte[], int, CancellationToken>>(continuousProfilerExporter);
+        var allocationSamplesMethod = exportAllocationSamplesMethod.CreateDelegate<Action<byte[], int, CancellationToken>>(continuousProfilerExporter);
+#else
         var threadSamplesMethod = (Action<byte[], int, CancellationToken>)exportThreadSamplesMethod.CreateDelegate(typeof(Action<byte[], int, CancellationToken>), continuousProfilerExporter);
         var allocationSamplesMethod = (Action<byte[], int, CancellationToken>)exportAllocationSamplesMethod.CreateDelegate(typeof(Action<byte[], int, CancellationToken>), continuousProfilerExporter);
+#endif
 
         InitializeBufferProcessing(exportInterval, exportTimeout);
 
