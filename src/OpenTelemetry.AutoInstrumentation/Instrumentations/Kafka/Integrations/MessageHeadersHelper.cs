@@ -9,12 +9,7 @@ namespace OpenTelemetry.AutoInstrumentation.Instrumentations.Kafka.Integrations;
 internal static class MessageHeadersHelper<TTypeMarker>
 {
     // ReSharper disable once StaticMemberInGenericType
-    private static readonly Type HeadersType;
-
-    static MessageHeadersHelper()
-    {
-        HeadersType = typeof(TTypeMarker).Assembly.GetType("Confluent.Kafka.Headers")!;
-    }
+    private static readonly Type HeadersType = typeof(TTypeMarker).Assembly.GetType("Confluent.Kafka.Headers")!;
 
     public static IHeaders? Create()
     {
