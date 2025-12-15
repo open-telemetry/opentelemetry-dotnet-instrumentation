@@ -522,3 +522,11 @@ instead.
 | `OTEL_LOG_LEVEL`                 | SDK log level. (supported values: `none`,`error`,`warn`,`info`,`debug`)               | `info`                                   | [Stable](https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/versioning-and-stability.md)       |
 | `OTEL_DOTNET_AUTO_LOGGER`        | AutoInstrumentation diagnostic logs sink. (supported values: `none`,`file`,`console`) | `file`                                   | [Experimental](https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/versioning-and-stability.md) |
 | `OTEL_DOTNET_AUTO_LOG_FILE_SIZE` | Maximum size (in bytes) of a single log file created by the Auto Instrumentation      | 10 485 760 (10 MB)                       | [Experimental](https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/versioning-and-stability.md) |
+
+## OpAMP Client
+
+| Environment variable                     | Description                                | Default value                     | Status                                                                                                                            |
+|------------------------------------------|--------------------------------------------|-----------------------------------|-----------------------------------------------------------------------------------------------------------------------------------|
+| `OTEL_DOTNET_AUTO_OPAMP_ENABLED`         | Enables OpAMP client.                      | `false`                           | [Experimental](https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/versioning-and-stability.md) |
+| `OTEL_DOTNET_AUTO_OPAMP_SERVER_URL`      | OpAMP server url.                          | `https://localhost:4318/v1/opamp` | [Experimental](https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/versioning-and-stability.md) |
+| `OTEL_DOTNET_AUTO_OPAMP_CONNECTION_TYPE` | OpAMP connection type (http or websocket). | `http`                            | [Experimental](https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/versioning-and-stability.md) |

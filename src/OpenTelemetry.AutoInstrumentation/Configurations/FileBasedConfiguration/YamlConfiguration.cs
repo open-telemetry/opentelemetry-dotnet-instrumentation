@@ -95,4 +95,10 @@ internal class YamlConfiguration
     /// </summary>
     [YamlMember(Alias = "plugins/development")]
     public PluginsConfiguration? Plugins { get; set; }
+
+    /// <summary>
+    /// Gets or sets the OpAMP settings.
+    /// </summary>
+    [YamlMember(Alias = "opamp")]
+    public OpAmpConfiguration? OpAmp { get; set; }
 }

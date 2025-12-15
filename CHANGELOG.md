@@ -52,6 +52,7 @@ release.
   available for [SqlClient instrumentation](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/issues/4343).
   This is disabled by default and can be enabled via the
   `OTEL_DOTNET_AUTO_SQLCLIENT_NETFX_ILREWRITE_ENABLED` environment variable.
+- Experimental support for OpAMP (by default the client is disabled).
 
 ### Changed
 

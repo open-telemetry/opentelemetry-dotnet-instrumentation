@@ -19,6 +19,7 @@ void CorProfiler::InitNetFxAssemblyRedirectsMap()
 
     assembly_version_redirect_map_.insert({
         { 462, {
+            { L"Google.Protobuf", {3, 31, 1, 0} },
             { L"Microsoft.Bcl.AsyncInterfaces", {10, 0, 0, 0} },
             { L"Microsoft.Extensions.Configuration", {10, 0, 0, 0} },
             { L"Microsoft.Extensions.Configuration.Abstractions", {10, 0, 0, 0} },
@@ -51,6 +52,7 @@ void CorProfiler::InitNetFxAssemblyRedirectsMap()
             { L"OpenTelemetry.Instrumentation.Runtime", {1, 14, 0, 775} },
             { L"OpenTelemetry.Instrumentation.SqlClient", {1, 14, 0, 768} },
             { L"OpenTelemetry.Instrumentation.Wcf", {1, 14, 0, 773} },
+            { L"OpenTelemetry.OpAmp.Client", {0, 1, 0, 791} },
             { L"OpenTelemetry.Resources.Azure", {1, 14, 0, 766} },
             { L"OpenTelemetry.Resources.Host", {1, 14, 0, 767} },
             { L"OpenTelemetry.Resources.OperatingSystem", {1, 14, 0, 772} },
@@ -163,6 +165,7 @@ void CorProfiler::InitNetFxAssemblyRedirectsMap()
             { L"System.Xml.XPath.XDocument", {4, 1, 0, 0} },
         }},
         { 470, {
+            { L"Google.Protobuf", {3, 31, 1, 0} },
             { L"Microsoft.Bcl.AsyncInterfaces", {10, 0, 0, 0} },
             { L"Microsoft.Extensions.Configuration", {10, 0, 0, 0} },
             { L"Microsoft.Extensions.Configuration.Abstractions", {10, 0, 0, 0} },
@@ -195,6 +198,7 @@ void CorProfiler::InitNetFxAssemblyRedirectsMap()
             { L"OpenTelemetry.Instrumentation.Runtime", {1, 14, 0, 775} },
             { L"OpenTelemetry.Instrumentation.SqlClient", {1, 14, 0, 768} },
             { L"OpenTelemetry.Instrumentation.Wcf", {1, 14, 0, 773} },
+            { L"OpenTelemetry.OpAmp.Client", {0, 1, 0, 791} },
             { L"OpenTelemetry.Resources.Azure", {1, 14, 0, 766} },
             { L"OpenTelemetry.Resources.Host", {1, 14, 0, 767} },
             { L"OpenTelemetry.Resources.OperatingSystem", {1, 14, 0, 772} },
@@ -307,6 +311,7 @@ void CorProfiler::InitNetFxAssemblyRedirectsMap()
             { L"System.Xml.XPath.XDocument", {4, 1, 0, 0} },
         }},
         { 471, {
+            { L"Google.Protobuf", {3, 31, 1, 0} },
             { L"Microsoft.Bcl.AsyncInterfaces", {10, 0, 0, 0} },
             { L"Microsoft.Extensions.Configuration", {10, 0, 0, 0} },
             { L"Microsoft.Extensions.Configuration.Abstractions", {10, 0, 0, 0} },
@@ -338,6 +343,7 @@ void CorProfiler::InitNetFxAssemblyRedirectsMap()
             { L"OpenTelemetry.Instrumentation.Runtime", {1, 14, 0, 775} },
             { L"OpenTelemetry.Instrumentation.SqlClient", {1, 14, 0, 768} },
             { L"OpenTelemetry.Instrumentation.Wcf", {1, 14, 0, 773} },
+            { L"OpenTelemetry.OpAmp.Client", {0, 1, 0, 791} },
             { L"OpenTelemetry.Resources.Azure", {1, 14, 0, 766} },
             { L"OpenTelemetry.Resources.Host", {1, 14, 0, 767} },
             { L"OpenTelemetry.Resources.OperatingSystem", {1, 14, 0, 772} },
@@ -368,6 +374,7 @@ void CorProfiler::InitNetFxAssemblyRedirectsMap()
             { L"System.Xml.XPath.XDocument", {4, 1, 0, 0} },
         }},
         { 472, {
+            { L"Google.Protobuf", {3, 31, 1, 0} },
             { L"Microsoft.Bcl.AsyncInterfaces", {10, 0, 0, 0} },
             { L"Microsoft.Extensions.Configuration", {10, 0, 0, 0} },
             { L"Microsoft.Extensions.Configuration.Abstractions", {10, 0, 0, 0} },
@@ -399,6 +406,7 @@ void CorProfiler::InitNetFxAssemblyRedirectsMap()
             { L"OpenTelemetry.Instrumentation.Runtime", {1, 14, 0, 775} },
             { L"OpenTelemetry.Instrumentation.SqlClient", {1, 14, 0, 768} },
             { L"OpenTelemetry.Instrumentation.Wcf", {1, 14, 0, 773} },
+            { L"OpenTelemetry.OpAmp.Client", {0, 1, 0, 791} },
             { L"OpenTelemetry.Resources.Azure", {1, 14, 0, 766} },
             { L"OpenTelemetry.Resources.Host", {1, 14, 0, 767} },
             { L"OpenTelemetry.Resources.OperatingSystem", {1, 14, 0, 772} },
