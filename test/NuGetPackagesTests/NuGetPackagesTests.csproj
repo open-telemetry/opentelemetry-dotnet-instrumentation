@@ -4,8 +4,30 @@
     <DefineConstants>$(DefineConstants);_WINDOWS</DefineConstants>
   </PropertyGroup>
 
+  <PropertyGroup>
+    <DefineConstants>$(DefineConstants);NUGET_PACKAGE_TESTS</DefineConstants>
+    <AnalysisLevel>latest-All</AnalysisLevel>
+  </PropertyGroup>
+
   <ItemGroup>
-    <Compile Include="..\IntegrationTests\Helpers\**\*.cs" />
+    <Compile Include="..\IntegrationTests\Helpers\Compatibility\StringBuilderExtensions.cs" />
+    <Compile Include="..\IntegrationTests\Helpers\CollectorRequestHelper.cs" />
+    <Compile Include="..\IntegrationTests\Helpers\CollectorResponseHelper.cs" />
+    <Compile Include="..\IntegrationTests\Helpers\EnvironmentHelper.cs" />
+    <Compile Include="..\IntegrationTests\Helpers\EnvironmentTools.cs" />
+    <Compile Include="..\IntegrationTests\Helpers\InstrumentedProcessHelper.cs" />
+    <Compile Include="..\IntegrationTests\Helpers\MockSpansCollector.cs" />
+    <Compile Include="..\IntegrationTests\Helpers\OtlpResourceExpector.cs" />
+    <Compile Include="..\IntegrationTests\Helpers\OutputHelper.cs" />
+    <Compile Include="..\IntegrationTests\Helpers\PathHandler.cs" />
+    <Compile Include="..\IntegrationTests\Helpers\ProcessHelper.cs" />
+    <Compile Include="..\IntegrationTests\Helpers\TcpPortProvider.cs" />
+    <Compile Include="..\IntegrationTests\Helpers\TestAppStartupMode.cs" />
+    <Compile Include="..\IntegrationTests\Helpers\TestHelper.cs" />
+    <Compile Include="..\IntegrationTests\Helpers\TestHttpServer.AspNetCore.cs" />
+    <Compile Include="..\IntegrationTests\Helpers\TestHttpServer.NetFramework.cs" />
+    <Compile Include="..\IntegrationTests\Helpers\TestSettings.cs" />
+    <Compile Include="..\IntegrationTests\Helpers\TestTimeout.cs" />
   </ItemGroup>
 
   <ItemGroup>

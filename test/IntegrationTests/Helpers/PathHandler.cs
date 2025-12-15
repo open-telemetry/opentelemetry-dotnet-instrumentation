@@ -6,7 +6,8 @@ using Microsoft.AspNetCore.Http;
 
 namespace IntegrationTests.Helpers;
 
-public class PathHandler
+#pragma warning disable CA1812 // Mark members as static. There is some issue in dotnet format.
+internal sealed class PathHandler
 {
     public PathHandler(RequestDelegate @delegate, string path)
     {

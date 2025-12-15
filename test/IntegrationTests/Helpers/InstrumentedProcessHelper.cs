@@ -6,14 +6,18 @@ using System.Text;
 
 namespace IntegrationTests.Helpers;
 
-public class InstrumentedProcessHelper
+internal static class InstrumentedProcessHelper
 {
     public static Process? Start(string executable, string? arguments, EnvironmentHelper environmentHelper)
     {
+#if NET
+        ArgumentNullException.ThrowIfNull(environmentHelper);
+#else
         if (environmentHelper == null)
         {
             throw new ArgumentNullException(nameof(environmentHelper));
         }
+#endif
 
         var startInfo = new ProcessStartInfo(executable, arguments ?? string.Empty);
 

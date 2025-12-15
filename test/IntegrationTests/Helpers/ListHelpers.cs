@@ -9,7 +9,7 @@ internal static class ListHelpers
     {
         return list.Select(x =>
             {
-                var keyValuePair = x.Split(new[] { '=' }, 2);
+                var keyValuePair = x.Split(['='], 2);
 
                 return new KeyValuePair<string, string>(keyValuePair[0], keyValuePair[1]);
             })

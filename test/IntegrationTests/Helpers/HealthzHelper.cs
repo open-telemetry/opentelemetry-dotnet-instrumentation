@@ -14,16 +14,16 @@ internal static class HealthzHelper
     public static async Task TestAsync(string healthzUrl, ITestOutputHelper output)
     {
         output.WriteLine($"Testing healthz endpoint: {healthzUrl}");
-        HttpClient client = new();
+        using HttpClient client = new();
 
-        var intervalMilliseconds = 500;
-        var maxMillisecondsToWait = 15_000;
-        var maxRetries = maxMillisecondsToWait / intervalMilliseconds;
-        for (int retry = 0; retry < maxRetries; retry++)
+        const int intervalMilliseconds = 500;
+        const int maxMillisecondsToWait = 15_000;
+        const int maxRetries = maxMillisecondsToWait / intervalMilliseconds;
+        for (var retry = 0; retry < maxRetries; retry++)
         {
             try
             {
-                var response = await client.GetAsync(healthzUrl);
+                var response = await client.GetAsync(new Uri(healthzUrl)).ConfigureAwait(false);
                 if (response.StatusCode == HttpStatusCode.OK)
                 {
                     return;
@@ -31,12 +31,14 @@ internal static class HealthzHelper
 
                 output.WriteLine($"Healthz endpoint returned HTTP status code: {response.StatusCode}");
             }
+#pragma warning disable CA1031 // Do not catch general exception types
             catch (Exception ex)
+#pragma warning restore CA1031 // Do not catch general exception types
             {
                 output.WriteLine($"Healthz endpoint call failed: {ex.Message}");
             }
 
-            await Task.Delay(intervalMilliseconds);
+            await Task.Delay(intervalMilliseconds).ConfigureAwait(false);
         }
 
         throw new InvalidOperationException($"Healthz endpoint never returned OK: {healthzUrl}");
