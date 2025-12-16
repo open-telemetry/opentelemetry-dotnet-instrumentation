@@ -66,8 +66,22 @@ internal static class Program
 
         LogInsideActiveScope(() => log.Info("{0}, {1} at {2:t}!", "Hello", "world", DateTime.Now));
 
+        // Test the Logger.Log(Type wrapperType, LogEventInfo logEvent) overload
+        // This exercises the 3-parameter WriteToTargets/WriteLogEventToTargets method
+        LogInsideActiveScope(() => LogWithWrapperType(log, "Message via wrapperType overload"));
+
         var (message, ex) = GetException();
         log.Error(ex, message);
+    }
+
+    /// <summary>
+    /// Logs a message using the Logger.Log(Type wrapperType, LogEventInfo logEvent) overload.
+    /// This is used when creating custom logger wrappers.
+    /// </summary>
+    private static void LogWithWrapperType(NLog.ILogger logger, string message)
+    {
+        var logEvent = LogEventInfo.Create(NLog.LogLevel.Info, logger.Name, message);
+        logger.Log(typeof(Program), logEvent);
     }
 
     private static (string Message, Exception Exception) GetException()

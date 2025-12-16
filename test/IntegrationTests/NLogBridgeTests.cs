@@ -34,6 +34,15 @@ public class NLogBridgeTests : TestHelper
             logRecord.Attributes.Count == 3,
             "Expected Info record.");
 
+        // Logged via Logger.Log(Type wrapperType, LogEventInfo logEvent) overload
+        // This tests the 3-parameter WriteToTargets/WriteLogEventToTargets instrumentation
+        collector.Expect(
+            logRecord =>
+            VerifyBody(logRecord, "Message via wrapperType overload") &&
+            VerifyTraceContext(logRecord) &&
+            logRecord is { SeverityText: "Info", SeverityNumber: SeverityNumber.Info },
+            "Expected Info record via wrapperType overload.");
+
         // Logged with exception
         collector.Expect(
             logRecord =>
@@ -99,7 +108,7 @@ public class NLogBridgeTests : TestHelper
             Arguments = "--api ILogger"
         });
 
-        AssertStandardOutputExpectations(standardOutput);
+        AssertStandardOutputExpectations(standardOutput, expectWrapperTypeMessage: false);
 
         collector.AssertExpectations();
     }
@@ -123,7 +132,7 @@ public class NLogBridgeTests : TestHelper
             Arguments = "--api ILogger"
         });
 
-        AssertStandardOutputExpectations(standardOutput);
+        AssertStandardOutputExpectations(standardOutput, expectWrapperTypeMessage: false);
 
         // wait for fixed amount of time for logs to be collected before asserting
         await Task.Delay(TimeSpan.FromSeconds(5));
@@ -172,9 +181,14 @@ public class NLogBridgeTests : TestHelper
                logRecord.Flags != 0;
     }
 
-    private static void AssertStandardOutputExpectations(string standardOutput)
+    private static void AssertStandardOutputExpectations(string standardOutput, bool expectWrapperTypeMessage = true)
     {
         Assert.Contains("INFO  TestApplication.NLogBridge.Program - Hello, world at", standardOutput);
+        if (expectWrapperTypeMessage)
+        {
+            Assert.Contains("INFO  TestApplication.NLogBridge.Program - Message via wrapperType overload", standardOutput);
+        }
+
         Assert.Contains("ERROR  TestApplication.NLogBridge.Program - Exception occured", standardOutput);
     }
 
