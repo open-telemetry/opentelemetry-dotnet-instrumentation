@@ -38,7 +38,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{9E5F0022-0A5
 		src\CommonExcludedAssets.props = src\CommonExcludedAssets.props
 		src\Directory.Build.props = src\Directory.Build.props
 		src\Directory.Packages.props = src\Directory.Packages.props
-		src\GlobalSuppressions.cs = src\GlobalSuppressions.cs
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OpenTelemetry.AutoInstrumentation.BuildTasks", "src\OpenTelemetry.AutoInstrumentation.BuildTasks\OpenTelemetry.AutoInstrumentation.BuildTasks.csproj", "{12A213FD-12A3-406C-8284-E7EA0B180428}"

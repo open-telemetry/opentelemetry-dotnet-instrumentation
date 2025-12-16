@@ -12,7 +12,9 @@ internal class TaskContinuationGenerator<TIntegration, TTarget, TReturn, TResult
     private static readonly ContinuationMethodDelegate? _continuation;
     private static readonly bool _preserveContext;
 
+#pragma warning disable CA1810 // Initialize reference type static fields inline
     static TaskContinuationGenerator()
+#pragma warning restore CA1810 // Initialize reference type static fields inline
     {
         var result = IntegrationMapper.CreateAsyncEndMethodDelegate(typeof(TIntegration), typeof(TTarget), typeof(TResult));
         if (result.Method != null)
@@ -60,7 +62,9 @@ internal class TaskContinuationGenerator<TIntegration, TTarget, TReturn, TResult
 
         if (previousTask.Status == TaskStatus.RanToCompletion)
         {
+#pragma warning disable CA1849 // 'Task<TResult>.Result' synchronously blocks. Use await instead. It is fine, as we already checked the task is completed.
             taskResult = previousTask.Result;
+#pragma warning restore CA1849 // 'Task<TResult>.Result' synchronously blocks. Use await instead. It is fine, as we already checked the task is completed.
         }
         else if (previousTask.Status == TaskStatus.Faulted)
         {

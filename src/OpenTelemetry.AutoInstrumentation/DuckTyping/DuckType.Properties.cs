@@ -34,7 +34,7 @@ internal static partial class DuckType
         if (proxyMember is PropertyInfo proxyProperty)
         {
             proxyMemberReturnType = proxyProperty.PropertyType;
-            proxyParameterTypes = GetPropertyGetParametersTypes(proxyTypeBuilder, proxyProperty, true).ToArray();
+            proxyParameterTypes = [.. GetPropertyGetParametersTypes(proxyTypeBuilder, proxyProperty, true)];
             if (proxyParameterTypes.Length != targetParametersTypes.Length)
             {
                 DuckTypePropertyArgumentsLengthException.Throw(proxyProperty);
@@ -125,7 +125,7 @@ internal static partial class DuckType
 
             // We create the dynamic method
             var targetParameters = GetPropertyGetParametersTypes(proxyTypeBuilder, targetProperty, false, !targetMethod.IsStatic).ToArray();
-            var dynParameters = targetMethod.IsStatic ? targetParametersTypes : (new[] { typeof(object) }).Concat(targetParametersTypes).ToArray();
+            var dynParameters = targetMethod.IsStatic ? targetParametersTypes : [.. (new[] { typeof(object) }), .. targetParametersTypes];
             var dynMethod = new DynamicMethod(dynMethodName, returnType, dynParameters, proxyTypeBuilder.Module, true);
 
             // Emit the dynamic method body
@@ -155,7 +155,7 @@ internal static partial class DuckType
             // Dry run: We enable all checks done in the preview if branch
             returnType = UseDirectAccessTo(proxyTypeBuilder, targetProperty.PropertyType) ? targetProperty.PropertyType : typeof(object);
             var targetParameters = GetPropertyGetParametersTypes(proxyTypeBuilder, targetProperty, false, !targetMethod.IsStatic).ToArray();
-            var dynParameters = targetMethod.IsStatic ? targetParametersTypes : (new[] { typeof(object) }).Concat(targetParametersTypes).ToArray();
+            var dynParameters = targetMethod.IsStatic ? targetParametersTypes : [.. (new[] { typeof(object) }), .. targetParametersTypes];
             for (var idx = targetMethod.IsStatic ? 0 : 1; idx < dynParameters.Length; idx++)
             {
                 ILHelpersExtensions.CheckTypeConversion(dynParameters[idx], targetParameters[idx]);
@@ -212,7 +212,7 @@ internal static partial class DuckType
         if (proxyMember is PropertyInfo proxyProperty)
         {
             proxyMemberName = proxyProperty.Name;
-            proxyParameterTypes = GetPropertySetParametersTypes(proxyTypeBuilder, proxyProperty, true).ToArray();
+            proxyParameterTypes = [.. GetPropertySetParametersTypes(proxyTypeBuilder, proxyProperty, true)];
             if (proxyParameterTypes.Length != targetParametersTypes.Length)
             {
                 DuckTypePropertyArgumentsLengthException.Throw(proxyProperty);
@@ -300,7 +300,7 @@ internal static partial class DuckType
 
             // We create the dynamic method
             var targetParameters = GetPropertySetParametersTypes(proxyTypeBuilder, targetProperty, false, !targetMethod.IsStatic).ToArray();
-            var dynParameters = targetMethod.IsStatic ? targetParametersTypes : (new[] { typeof(object) }).Concat(targetParametersTypes).ToArray();
+            var dynParameters = targetMethod.IsStatic ? targetParametersTypes : [.. (new[] { typeof(object) }), .. targetParametersTypes];
             var dynMethod = new DynamicMethod(dynMethodName, typeof(void), dynParameters, proxyTypeBuilder.Module, true);
 
             // Emit the dynamic method body
@@ -327,7 +327,7 @@ internal static partial class DuckType
         else
         {
             var targetParameters = GetPropertySetParametersTypes(proxyTypeBuilder, targetProperty, false, !targetMethod.IsStatic).ToArray();
-            var dynParameters = targetMethod.IsStatic ? targetParametersTypes : (new[] { typeof(object) }).Concat(targetParametersTypes).ToArray();
+            var dynParameters = targetMethod.IsStatic ? targetParametersTypes : [.. (new[] { typeof(object) }), .. targetParametersTypes];
             for (var idx = targetMethod.IsStatic ? 0 : 1; idx < dynParameters.Length; idx++)
             {
                 ILHelpersExtensions.CheckTypeConversion(dynParameters[idx], targetParameters[idx]);

@@ -9,6 +9,8 @@
     <GeneratedFolder>Generated</GeneratedFolder>
     <CompilerGeneratedFilesOutputPath>$(GeneratedFolder)\$(TargetFramework)</CompilerGeneratedFilesOutputPath>
     <CopyLocalLockFileAssemblies>false</CopyLocalLockFileAssemblies>
+    <!-- Do not catch general exception types. Typically, we need to handle all Exception to do not break application. -->
+    <NoWarn>$(NoWarn);CA1031</NoWarn>
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\SourceGenerators\SourceGenerators.csproj" ReferenceOutputAssembly="false" OutputItemType="Analyzer" />

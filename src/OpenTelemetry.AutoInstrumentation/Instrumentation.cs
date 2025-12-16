@@ -568,7 +568,7 @@ internal static class Instrumentation
             {
                 Logger.Error(ex, "An error occurred while attempting to exit.");
             }
-            catch
+            catch (Exception)
             {
                 // If we encounter an error while logging there is nothing else we can do
                 // with the exception.

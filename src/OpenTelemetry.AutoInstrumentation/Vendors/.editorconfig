@@ -16,3 +16,6 @@ dotnet_diagnostic.CS8604.severity = none
 
 # CS8669: The annotation for nullable reference types should only be used in code within a '#nullable' annotations context. Auto-generated code requires an explicit '#nullable' directive in source.
 dotnet_diagnostic.CS8669.severity = none
+
+#CA5394: Random is an insecure random number generator. Use cryptographically secure random number generators when randomness is required for security.
+dotnet_diagnostic.CA5394.severity = none

@@ -73,17 +73,17 @@ jobs:
           dotnet-version: | 
             8.0.416
             9.0.308
-            10.0.100
+            10.0.101
 
       - name: Check for NuGet packages cache
-        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # tag: v4.3.0
+        uses: actions/cache@9255dc7a253b0ccc959486e2bca901246202afeb # tag: v5.0.1
         id: nuget-cache
         with:
           key: ${{ hashFiles('**/Directory.packages.props', './build/LibraryVersions.g.cs', '**/packages.config' ) }}
           path: ${{ env.NUGET_PACKAGES }}
 
       - name: Download Artifacts from build job
-        uses: actions/download-artifact@018cc2cf5baa6db3ef3c5f8a56943fffe632ef53 # tag: v6.0.0
+        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # tag: v7.0.0
         with:
           name: bin-${{ matrix.artifact-name }}
           path: bin/tracer-home
@@ -99,7 +99,7 @@ jobs:
 
       - name: Upload test logs
         if: always()
-        uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # tag: v5.0.0
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # tag: v6.0.0
         with:
           name: test-logs-${{ matrix.machine }}-${{ matrix.test-tfm }}-containers-${{ matrix.containers }}
           path: test-artifacts/
@@ -133,17 +133,17 @@ jobs:
           dotnet-version: | 
             8.0.416
             9.0.308
-            10.0.100
+            10.0.101
 
       - name: Check for NuGet packages cache
-        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # tag: v4.3.0
+        uses: actions/cache@9255dc7a253b0ccc959486e2bca901246202afeb # tag: v5.0.1
         id: nuget-cache
         with:
           key: ${{ hashFiles('**/Directory.packages.props', './build/LibraryVersions.g.cs', '**/packages.config' ) }}
           path: ${{ env.NUGET_PACKAGES }}
 
       - name: Download Artifacts from build job
-        uses: actions/download-artifact@018cc2cf5baa6db3ef3c5f8a56943fffe632ef53 # tag: v6.0.0
+        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # tag: v7.0.0
         with:
           name: bin-${{ matrix.artifact-name }}
           path: bin/tracer-home
@@ -177,17 +177,17 @@ jobs:
           dotnet-version: | 
             8.0.416
             9.0.308
-            10.0.100
+            10.0.101
 
       - name: Check for NuGet packages cache
-        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # tag: v4.3.0
+        uses: actions/cache@9255dc7a253b0ccc959486e2bca901246202afeb # tag: v5.0.1
         id: nuget-cache
         with:
           key: ${{ hashFiles('**/Directory.packages.props', './build/LibraryVersions.g.cs', '**/packages.config' ) }}
           path: ${{ env.NUGET_PACKAGES }}
 
       - name: Download Artifacts from build job
-        uses: actions/download-artifact@018cc2cf5baa6db3ef3c5f8a56943fffe632ef53 # tag: v6.0.0
+        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # tag: v7.0.0
         with:
           name: bin-${{ matrix.artifact-name }}
           path: bin/tracer-home
@@ -200,7 +200,7 @@ jobs:
 
       - name: Upload test logs
         if: always()
-        uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # tag: v5.0.0
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # tag: v6.0.0
         with:
           name: test-logs-${{ matrix.machine }}-containers-${{ matrix.containers }}
           path: test-artifacts/
@@ -241,7 +241,7 @@ jobs:
         fetch-depth: 0 # fetching all, needed to correctly calculate version
 
     - name: Download Artifacts from build job
-      uses: actions/download-artifact@018cc2cf5baa6db3ef3c5f8a56943fffe632ef53 # tag: v6.0.0
+      uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # tag: v7.0.0
       with:
         name: bin-${{ matrix.build-source }}
         path: bin/tracer-home
@@ -255,7 +255,7 @@ jobs:
 
     - name: Upload test logs
       if: always()
-      uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # tag: v5.0.0
+      uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # tag: v6.0.0
       with:
         name: test-logs-container-${{ matrix.machine }}-${{ matrix.base-image }}
         path: test-artifacts/
@@ -285,17 +285,17 @@ jobs:
           dotnet-version: | 
             8.0.416
             9.0.308
-            10.0.100
+            10.0.101
 
       - name: Check for NuGet packages cache
-        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # tag: v4.3.0
+        uses: actions/cache@9255dc7a253b0ccc959486e2bca901246202afeb # tag: v5.0.1
         id: nuget-cache
         with:
           key: ${{ hashFiles('**/Directory.packages.props', './build/LibraryVersions.g.cs', '**/packages.config' ) }}
           path: ${{ env.NUGET_PACKAGES }}
 
       - name: Download NuGet Artifacts from build-nuget-packages job
-        uses: actions/download-artifact@018cc2cf5baa6db3ef3c5f8a56943fffe632ef53 # tag: v6.0.0
+        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # tag: v7.0.0
         with:
           name: bin-nuget-packages
           path: bin/nuget-artifacts/
@@ -305,7 +305,7 @@ jobs:
 
       - name: Upload test logs
         if: always()
-        uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # tag: v5.0.0
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # tag: v6.0.0
         with:
           name: test-logs-nuget-packages-${{ matrix.machine }}
           path: test-artifacts/
