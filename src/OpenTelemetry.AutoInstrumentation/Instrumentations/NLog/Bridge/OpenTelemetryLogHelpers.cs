@@ -208,7 +208,7 @@ internal static class OpenTelemetryLogHelpers
     /// <param name="properties">The properties parameter expression.</param>
     /// <param name="addAttributeMethodInfo">The Add method for adding attributes.</param>
     /// <returns>An expression that adds all custom properties to the attributes list.</returns>
-    private static Expression BuildAddPropertiesExpression(ParameterExpression instanceVar, ParameterExpression properties, MethodInfo addAttributeMethodInfo)
+    private static ConditionalExpression BuildAddPropertiesExpression(ParameterExpression instanceVar, ParameterExpression properties, MethodInfo addAttributeMethodInfo)
     {
         // Create a foreach loop to iterate over properties and add them as attributes
         var enumerableType = typeof(IEnumerable<KeyValuePair<string, object?>>);
@@ -253,7 +253,7 @@ internal static class OpenTelemetryLogHelpers
     /// <param name="argsParam">The arguments parameter expression.</param>
     /// <param name="addAttributeMethodInfo">The Add method for adding attributes.</param>
     /// <returns>An expression that adds structured logging arguments as attributes.</returns>
-    private static Expression BuildAddArgsExpression(ParameterExpression instanceVar, ParameterExpression argsParam, MethodInfo addAttributeMethodInfo)
+    private static ConditionalExpression BuildAddArgsExpression(ParameterExpression instanceVar, ParameterExpression argsParam, MethodInfo addAttributeMethodInfo)
     {
         // Create a for loop to iterate over args array and add them as indexed attributes
         var lengthProperty = typeof(Array).GetProperty("Length")!;

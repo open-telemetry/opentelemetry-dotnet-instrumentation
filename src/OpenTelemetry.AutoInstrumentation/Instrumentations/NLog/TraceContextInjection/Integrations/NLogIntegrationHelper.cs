@@ -18,9 +18,9 @@ namespace OpenTelemetry.AutoInstrumentation.Instrumentations.NLog.TraceContextIn
 /// </summary>
 internal static class NLogIntegrationHelper
 {
+#if NET
     private static readonly IOtelLogger Logger = OtelLogging.GetLogger();
 
-#if NET
     private static int _warningLogged;
 #endif
 

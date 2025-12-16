@@ -127,7 +127,7 @@ internal class OpenTelemetryNLogConverter
         };
     }
 
-    private static IEnumerable<KeyValuePair<string, object?>>? GetProperties(ILoggingEvent loggingEvent)
+    private static List<KeyValuePair<string, object?>>? GetProperties(ILoggingEvent loggingEvent)
     {
         var result = new List<KeyValuePair<string, object?>>();
 
@@ -181,11 +181,7 @@ internal class OpenTelemetryNLogConverter
                 continue;
             }
 
-            if (key.StartsWith("NLog.") ||
-                key.StartsWith("nlog:") ||
-                key == LogsTraceContextInjectionConstants.SpanIdPropertyName ||
-                key == LogsTraceContextInjectionConstants.TraceIdPropertyName ||
-                key == LogsTraceContextInjectionConstants.TraceFlagsPropertyName)
+            if (EvaluateFilterCondition(key))
             {
                 continue;
             }
@@ -198,12 +194,7 @@ internal class OpenTelemetryNLogConverter
     {
         foreach (var property in properties)
         {
-            var key = property.Key;
-            if (key.StartsWith("NLog.") ||
-                key.StartsWith("nlog:") ||
-                key == LogsTraceContextInjectionConstants.SpanIdPropertyName ||
-                key == LogsTraceContextInjectionConstants.TraceIdPropertyName ||
-                key == LogsTraceContextInjectionConstants.TraceFlagsPropertyName)
+            if (EvaluateFilterCondition(property.Key))
             {
                 continue;
             }
@@ -212,13 +203,26 @@ internal class OpenTelemetryNLogConverter
         }
     }
 
+    private static bool EvaluateFilterCondition(string key)
+    {
+        return key.StartsWith("NLog.", StringComparison.Ordinal) ||
+               key.StartsWith("nlog:", StringComparison.Ordinal) ||
+               key == LogsTraceContextInjectionConstants.SpanIdPropertyName ||
+               key == LogsTraceContextInjectionConstants.TraceIdPropertyName ||
+               key == LogsTraceContextInjectionConstants.TraceFlagsPropertyName;
+    }
+
     private static Func<string?, object?>? CreateGetLoggerDelegate(LoggerProvider loggerProvider)
     {
         try
         {
             var methodInfo = typeof(LoggerProvider)
                 .GetMethod("GetLogger", BindingFlags.NonPublic | BindingFlags.Instance, null, [typeof(string)], null)!;
+#if  NET
+            return methodInfo.CreateDelegate<Func<string?, object?>>(loggerProvider);
+#else
             return (Func<string?, object?>)methodInfo.CreateDelegate(typeof(Func<string?, object?>), loggerProvider);
+#endif
         }
         catch (Exception e)
         {
