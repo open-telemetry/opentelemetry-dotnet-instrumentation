@@ -85,7 +85,9 @@ public readonly struct CallTargetState
     /// </summary>
     /// <returns>Default call target state</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
+#pragma warning disable CA1024 // Use properties where appropriate
     public static CallTargetState GetDefault()
+#pragma warning restore CA1024 // Use properties where appropriate
     {
         return default;
     }

@@ -67,6 +67,9 @@
     <None Update="Configurations\FileBased\Files\TestResourceFileEnvVars.yaml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Update="Configurations\FileBased\Files\DefaultNamingConvention.yaml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 
 </Project>

@@ -18,7 +18,7 @@ to .NET applications without having to modify their source code.
 of OpenTelemetry .NET Automatic Instrumentation. Docs for the latest version
 ([1.13.0](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/latest))
 can be found in [opentelemetry.io](https://opentelemetry.io/docs/zero-code/dotnet/)
-or [here](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/blob/v1.13.0/docs/README.md).
+or [versioned README](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/blob/v1.13.0/docs/README.md).
 
 ---
 
@@ -73,8 +73,8 @@ Instrumentation does the following:
 You can enable the OpenTelemetry .NET Automatic Instrumentation as a .NET Profiler
 to inject additional instrumentations of this project at runtime, using a technique
 known as [monkey-patching](https://en.wikipedia.org/wiki/Monkey_patch). When enabled,
-the OpenTelemetry .NET Automatic Instrumentation generates traces for libraries that
-don't already generate traces using the OpenTelemetry .NET SDK.
+the OpenTelemetry .NET Automatic Instrumentation generates traces for libraries
+that don't already generate traces using the OpenTelemetry .NET SDK.
 
 See [design.md](design.md) for an architectural overview.
 
@@ -136,8 +136,8 @@ See [Limitations](./using-the-nuget-packages.md#limitations) for incompatible sc
 
 ### Install manually
 
-To install the automatic instrumentation manually, download and extract the appropriate binaries from
-[the latest release](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/latest).
+To install the automatic instrumentation manually, download and extract the
+appropriate binaries from [the latest release](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/latest).
 
 > [!NOTE]
 > The path where you put the binaries is referenced as `$INSTALL_DIR`.
@@ -149,6 +149,9 @@ When running your application, make sure to:
 1. Set the [resources](config.md#resources).
 1. Set the environment variables from the table below.
 
+> [!NOTE]
+> Some settings can be omitted on .NET. For more information, see [config.md](config.md#net-clr-profiler).
+
 | Environment variable       | .NET version        | Value                                                                     |
 |----------------------------|---------------------|---------------------------------------------------------------------------|
 | `COR_ENABLE_PROFILING`     | .NET Framework      | `1`                                                                       |
@@ -159,7 +162,7 @@ When running your application, make sure to:
 | `CORECLR_PROFILER`         | .NET                | `{918728DD-259F-4A6A-AC2B-B85E1B658318}`                                  |
 | `CORECLR_PROFILER_PATH`    | .NET on Linux glibc | `$INSTALL_DIR/linux-x64/OpenTelemetry.AutoInstrumentation.Native.so`      |
 | `CORECLR_PROFILER_PATH`    | .NET on Linux musl  | `$INSTALL_DIR/linux-musl-x64/OpenTelemetry.AutoInstrumentation.Native.so` |
-| `CORECLR_PROFILER_PATH`    | .NET on macOS       | `$INSTALL_DIR/osx-arm64/OpenTelemetry.AutoInstrumentation.Native.dylib`     |
+| `CORECLR_PROFILER_PATH`    | .NET on macOS       | `$INSTALL_DIR/osx-arm64/OpenTelemetry.AutoInstrumentation.Native.dylib`   |
 | `CORECLR_PROFILER_PATH_32` | .NET on Windows     | `$INSTALL_DIR/win-x86/OpenTelemetry.AutoInstrumentation.Native.dll`       |
 | `CORECLR_PROFILER_PATH_64` | .NET on Windows     | `$INSTALL_DIR/win-x64/OpenTelemetry.AutoInstrumentation.Native.dll`       |
 | `DOTNET_ADDITIONAL_DEPS`   | .NET                | `$INSTALL_DIR/AdditionalDeps`                                             |
@@ -167,11 +170,15 @@ When running your application, make sure to:
 | `DOTNET_STARTUP_HOOKS`     | .NET                | `$INSTALL_DIR/net/OpenTelemetry.AutoInstrumentation.StartupHook.dll`      |
 | `OTEL_DOTNET_AUTO_HOME`    | All versions        | `$INSTALL_DIR`                                                            |
 
-> [!NOTE]
-> Some settings can be omitted on .NET. For more information, see [config.md](config.md#net-clr-profiler).
-
 > [!IMPORTANT]
-> Starting in .NET 8, the environment variable `DOTNET_EnableDiagnostics=0` disables all diagnostics, including the CLR Profiler facility which is needed to launch the instrumentation, if not using .NET Startup hooks. Ensure that `DOTNET_EnableDiagnostics=1`, or if you'd like to limit diagnostics only to the CLR Profiler, you may set both `DOTNET_EnableDiagnostics=1` and `DOTNET_EnableDiagnostics_Profiler=1` while setting other diagnostics features to 0. See this [issue](https://github.com/dotnet/runtime/issues/96227#issuecomment-1865326080) for more guidance.
+> Starting in .NET 8, the environment variable `DOTNET_EnableDiagnostics=0`
+disables all diagnostics, including the CLR Profiler facility which is needed
+to launch the instrumentation, if not using .NET Startup hooks. Ensure that
+`DOTNET_EnableDiagnostics=1`, or if you'd like to limit diagnostics only to
+the CLR Profiler, you may set both `DOTNET_EnableDiagnostics=1` and
+`DOTNET_EnableDiagnostics_Profiler=1` while setting other diagnostics features
+to 0. See this [issue](https://github.com/dotnet/runtime/issues/96227#issuecomment-1865326080)
+for more guidance.
 
 ### Shell scripts
 
@@ -200,19 +207,19 @@ chmod +x $HOME/.otel-dotnet-auto/instrument.sh
 OTEL_SERVICE_NAME=myapp OTEL_RESOURCE_ATTRIBUTES=deployment.environment.name=staging,service.version=1.0.0 ./MyNetApp
 ```
 
-NOTE: for air-gapped environments you can provide either the installation archive directly with:
+NOTE: for air-gapped environments you can provide either the installation
+archive directly with:
 
 ```sh
 LOCAL_PATH=<PATH_TO_ARCHIVE> sh ./otel-dotnet-auto-install.sh
 ```
 
-or the folder with the archives, this has the added benefit that the install script will determine
-the correct archive to choose.
+or the folder with the archives, this has the added benefit that the install
+script will determine the correct archive to choose.
 
 ```sh
 DOWNLOAD_DIR=<PATH_TO_FOLDER_WITH_ARCHIVES> sh ./otel-dotnet-auto-install.sh
 ```
-
 
 `otel-dotnet-auto-install.sh` script
 uses environment variables as parameters:
@@ -319,16 +326,18 @@ Uninstall-OpenTelemetryCore
 
 #### Update .NET Framework version
 
-By default, `Install-OpenTelemetryCore` and `Update-OpenTelemetryCore` register OpenTelemetry (and dependencies) 
-assemblies in the Global Assembly Cache (GAC). Some of these assemblies are tightly coupled to specific .NET Framework versions. 
+By default, `Install-OpenTelemetryCore` and `Update-OpenTelemetryCore` register
+OpenTelemetry (and dependencies) assemblies in the Global Assembly Cache (GAC).
+Some of these assemblies are tightly coupled to specific .NET Framework versions.
 
-When upgrading from .NET Framework versions older than 4.7.2, these assemblies should be removed from the GAC.
-For such upgrade scenarios, it is recommended to uninstall and reinstall OpenTelemetry after the .NET Framework update is complete.
+When upgrading from .NET Framework versions older than 4.7.2, these assemblies
+should be removed from the GAC. For such upgrade scenarios, it is recommended
+to uninstall and reinstall OpenTelemetry after the .NET Framework update is complete.
 
 ## Instrument a container
 
 You can find our demonstrative example
-that uses Docker Compose [here](../examples/demo).
+that uses [Docker Compose](../examples/demo).
 
 You can also consider using
 the [Kubernetes Operator for OpenTelemetry Collector](https://github.com/open-telemetry/opentelemetry-operator).

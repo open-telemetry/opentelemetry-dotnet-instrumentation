@@ -43,4 +43,3 @@ Levels with numerical values of:
 - Equal to `LogLevel.Trace` is mapped to `LogRecordSeverity.Trace`
 - Equal to `LogLevel.Off` is mapped to `LogRecordSeverity.Trace`
 - Any other is mapped to `LogRecordSeverity.Info`.
-

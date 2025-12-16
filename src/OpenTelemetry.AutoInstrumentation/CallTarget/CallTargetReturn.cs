@@ -30,7 +30,9 @@ public readonly ref struct CallTargetReturn<T>
     /// </summary>
     /// <returns>Default call target return value</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
+#pragma warning disable CA1024 // Use properties where appropriate
     public static CallTargetReturn<T> GetDefault()
+#pragma warning restore CA1024 // Use properties where appropriate
     {
         return default;
     }
@@ -40,7 +42,9 @@ public readonly ref struct CallTargetReturn<T>
     /// </summary>
     /// <returns>Return value</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
+#pragma warning disable CA1024 // Use properties where appropriate
     public T GetReturnValue() => _returnValue;
+#pragma warning restore CA1024 // Use properties where appropriate
 
     /// <summary>
     /// ToString override
@@ -64,7 +68,9 @@ public readonly ref struct CallTargetReturn
     /// </summary>
     /// <returns>Default call target return value</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
+#pragma warning disable CA1024 // Use properties where appropriate
     public static CallTargetReturn GetDefault()
+#pragma warning restore CA1024 // Use properties where appropriate
     {
         return default;
     }

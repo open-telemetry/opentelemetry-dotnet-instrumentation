@@ -7,7 +7,7 @@ namespace OpenTelemetry.AutoInstrumentation.Logging;
 
 internal class InternalLogger : IOtelLogger
 {
-    private static readonly object[] NoPropertyValues = Array.Empty<object>();
+    private static readonly object[] NoPropertyValues = [];
 
     private ISink _sink;
 
@@ -180,7 +180,7 @@ internal class InternalLogger : IOtelLogger
         // Avoid boxing + array allocation if disabled
         if (IsEnabled(level))
         {
-            WriteImpl(level, exception, messageTemplate, new object?[] { property }, writeToEventLog);
+            WriteImpl(level, exception, messageTemplate, [property], writeToEventLog);
         }
     }
 
@@ -189,7 +189,7 @@ internal class InternalLogger : IOtelLogger
         // Avoid boxing + array allocation if disabled
         if (IsEnabled(level))
         {
-            WriteImpl(level, exception, messageTemplate, new object?[] { property0, property1 }, writeToEventLog);
+            WriteImpl(level, exception, messageTemplate, [property0, property1], writeToEventLog);
         }
     }
 
@@ -198,7 +198,7 @@ internal class InternalLogger : IOtelLogger
         // Avoid boxing + array allocation if disabled
         if (IsEnabled(level))
         {
-            WriteImpl(level, exception, messageTemplate, new object?[] { property0, property1, property2 }, writeToEventLog);
+            WriteImpl(level, exception, messageTemplate, [property0, property1, property2], writeToEventLog);
         }
     }
 

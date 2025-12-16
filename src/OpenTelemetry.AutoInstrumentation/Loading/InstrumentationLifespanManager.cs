@@ -9,7 +9,7 @@ internal class InstrumentationLifespanManager : ILifespanManager
 {
     // some instrumentations requires to keep references to objects
     // so that they are not garbage collected
-    private readonly ConcurrentBag<object> _instrumentations = new();
+    private readonly ConcurrentBag<object> _instrumentations = [];
 
     public void Track(object instance)
     {

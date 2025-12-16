@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: Apache-2.0
 
 using Vendors.YamlDotNet.Serialization;
-using Vendors.YamlDotNet.Serialization.NamingConventions;
 using Vendors.YamlDotNet.Serialization.NodeDeserializers;
 
 namespace OpenTelemetry.AutoInstrumentation.Configurations.FileBasedConfiguration.Parser;
@@ -14,7 +13,7 @@ internal static class Parser
         var deserializer = new DeserializerBuilder()
             .WithNodeDeserializer(existing => new ConditionalDeserializer(existing), s => s.InsteadOf<NullNodeDeserializer>())
             .WithTypeConverter(new EnvVarTypeConverter())
-            .WithNamingConvention(UnderscoredNamingConvention.Instance)
+            .WithNamingConvention(OtelDefaultNamingConvention.Instance)
             .IgnoreUnmatchedProperties()
             .Build();
 

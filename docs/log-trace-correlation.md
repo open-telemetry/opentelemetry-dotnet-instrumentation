@@ -49,7 +49,8 @@ See [`log4net-bridge`](./log4net-bridge.md).
 > log4net trace context injection is an experimental feature.
 
 The `log4net` trace context injection is enabled by default.
-It can be disabled by setting `OTEL_DOTNET_AUTO_LOGS_LOG4NET_INSTRUMENTATION_ENABLED` to `false`.
+It can be disabled by setting
+`OTEL_DOTNET_AUTO_LOGS_LOG4NET_INSTRUMENTATION_ENABLED` to `false`.
 
 Context injection is supported for `log4net` in versions >= 2.0.13 && < 4.0.0
 
@@ -72,7 +73,8 @@ See [`nlog-bridge`](./nlog-bridge.md).
 > NLog trace context injection is an experimental feature.
 
 The `NLog` trace context injection is enabled by default.
-It can be disabled by setting `OTEL_DOTNET_AUTO_LOGS_NLOG_INSTRUMENTATION_ENABLED` to `false`.
+It can be disabled by setting
+`OTEL_DOTNET_AUTO_LOGS_NLOG_INSTRUMENTATION_ENABLED` to `false`.
 
 Context injection is supported for `NLOG` in versions >= 5.0.0 && < 7.0.0
 

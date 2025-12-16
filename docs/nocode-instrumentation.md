@@ -2,7 +2,8 @@
 
 > [!IMPORTANT]  
 > **Status:** [Experimental](https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/versioning-and-stability.md)
-> This feature is experimental. Functionality and the file schema is subject to change.
+> This feature is experimental. Functionality and the file schema is subject to
+> change.
 >
 > To utilize this feature you need to switch to [file-based configuration](file-based-configuration.md)
 
