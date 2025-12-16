@@ -105,13 +105,13 @@ internal static class PackageVersionDefinitions
             IntegrationName = "NLog",
             NugetPackageName = "NLog",
             TestApplicationName = "TestApplication.NLogBridge",
-            Versions = new List<PackageVersion>
+            Versions = new List<NLogVersion>
             {
                 // NLog 5.0+ required for Layout<T> typed layout support and .NET build-trimming
-                new("5.0.0"),
-                new("5.3.4"), // 5.3.0 - breaking change in the instrumented method contract
-                new("6.0.0"), // 6.0.0 - breaking change in the instrumented method contract
-                new("*")
+                new("5.0.0") { NLogExtensionsLoggingVersion = "5.0.0" },
+                new("5.3.4") { NLogExtensionsLoggingVersion = "5.3.15" }, // 5.3.0 - breaking change in the instrumented method contract
+                new("6.0.0") { NLogExtensionsLoggingVersion = "6.0.0" }, // 6.0.0 - breaking change in the instrumented method contract
+                new("*") { NLogExtensionsLoggingVersion = "*" }
             }
         },
         new()

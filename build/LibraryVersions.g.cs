@@ -71,10 +71,10 @@ public static partial class LibraryVersion
         {
             "TestApplication.NLogBridge",
             [
-                new("5.0.0"),
-                new("5.3.4"),
-                new("6.0.0"),
-                new("6.0.6"),
+                new("5.0.0", additionalMetaData: new() { { "NLogExtensionsLogging", "5.0.0" } }),
+                new("5.3.4", additionalMetaData: new() { { "NLogExtensionsLogging", "5.3.15" } }),
+                new("6.0.0", additionalMetaData: new() { { "NLogExtensionsLogging", "6.0.0" } }),
+                new("6.0.6", additionalMetaData: new() { { "NLogExtensionsLogging", "6.1.0" } }),
             ]
         },
         {
