@@ -7,13 +7,13 @@ using DotNet.Testcontainers.Containers;
 
 namespace IntegrationTests.Helpers;
 
-internal class DockerSystemHelper
+internal sealed class DockerSystemHelper
 {
     public static async Task<bool> GetIsWindowsEngineEnabled()
     {
         using var client = GetDockerClient();
 
-        var version = await client.System.GetVersionAsync();
+        var version = await client.System.GetVersionAsync().ConfigureAwait(false);
         return version.Os.IndexOf("Windows", StringComparison.OrdinalIgnoreCase) > -1;
     }
 

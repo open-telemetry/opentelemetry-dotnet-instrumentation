@@ -3,7 +3,9 @@
 
 namespace IntegrationTests.Helpers;
 
+#pragma warning disable CA1515 // Consider making public types internal. Needed for xunit tests.
 public enum TestAppStartupMode
+#pragma warning restore CA1515 // Consider making public types internal. Needed for xunit tests.
 {
     /// <summary>
     /// Automatically determine startup mode

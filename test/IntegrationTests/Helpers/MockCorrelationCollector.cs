@@ -12,7 +12,7 @@ using Xunit.Abstractions;
 
 namespace IntegrationTests.Helpers;
 
-public class MockCorrelationCollector : IDisposable
+internal sealed class MockCorrelationCollector : IDisposable
 {
     private readonly BlockingCollection<LogRecord> _logs = new(100);
     private readonly BlockingCollection<MockSpansCollector.Collected> _spans = new(100);
@@ -68,7 +68,7 @@ public class MockCorrelationCollector : IDisposable
 
     private async Task HandleLogHttpRequests(HttpContext ctx)
     {
-        using var bodyStream = await ctx.ReadBodyToMemoryAsync();
+        using var bodyStream = await ctx.ReadBodyToMemoryAsync().ConfigureAwait(false);
         var logsMessage = ExportLogsServiceRequest.Parser.ParseFrom(bodyStream);
         foreach (var resourceLogs in logsMessage.ResourceLogs ?? Enumerable.Empty<ResourceLogs>())
         {
@@ -81,12 +81,12 @@ public class MockCorrelationCollector : IDisposable
             }
         }
 
-        await ctx.GenerateEmptyProtobufResponseAsync<ExportLogsServiceResponse>();
+        await ctx.GenerateEmptyProtobufResponseAsync<ExportLogsServiceResponse>().ConfigureAwait(false);
     }
 
     private async Task HandleSpanHttpRequests(HttpContext ctx)
     {
-        using var bodyStream = await ctx.ReadBodyToMemoryAsync();
+        using var bodyStream = await ctx.ReadBodyToMemoryAsync().ConfigureAwait(false);
         var traceMessage = ExportTraceServiceRequest.Parser.ParseFrom(bodyStream);
         foreach (var resourceSpan in traceMessage.ResourceSpans ?? Enumerable.Empty<ResourceSpans>())
         {
@@ -99,7 +99,7 @@ public class MockCorrelationCollector : IDisposable
             }
         }
 
-        await ctx.GenerateEmptyProtobufResponseAsync<ExportTraceServiceResponse>();
+        await ctx.GenerateEmptyProtobufResponseAsync<ExportTraceServiceResponse>().ConfigureAwait(false);
     }
 }
 #endif
