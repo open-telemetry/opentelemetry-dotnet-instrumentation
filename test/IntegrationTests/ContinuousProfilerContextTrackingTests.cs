@@ -52,9 +52,16 @@ public class ContinuousProfilerContextTrackingTests : TestHelper
                 managedThreadsWithTraceContext.Add(threadId!);
             }
         }
-
+#if NET
         Assert.True(managedThreadsWithTraceContext.Count > 1, "at least 2 distinct threads should have trace context associated.");
         Assert.True(totalSamplesWithTraceContextCount >= 3, "there should be sample with trace context in most of the batches.");
+#else
+        // for net fx, thread pool threads do not have names, hence it is not possible to uniquely
+        // identify distinct threads. We will restrict our test to ensure we have at least the main thread is reporting context
+        Assert.True(managedThreadsWithTraceContext.Count > 0, "at least one thread should have trace context associated.");
+        Assert.True(totalSamplesWithTraceContextCount > 0, "there should be at least one sample with trace context .");
+#endif
+
         return true;
     }
 

@@ -33,6 +33,14 @@ class ContinuousProfiler;
 
 namespace trace
 {
+struct ContinuousProfilerParams
+{
+    bool         threadSamplingEnabled;
+    unsigned int threadSamplingInterval;
+    bool         allocationSamplingEnabled;
+    unsigned int maxMemorySamplesPerMinute;
+    unsigned int selectedThreadsSamplingInterval;
+};
 
 class CorProfiler : public CorProfilerBase
 {
@@ -59,6 +67,7 @@ private:
 
     continuous_profiler::ContinuousProfiler* continuousProfiler;
     std::unique_ptr<continuous_profiler::IStackCaptureStrategy> stack_capture_strategy_;
+    std::once_flag sampling_init_flag_;
     HRESULT STDMETHODCALLTYPE ThreadAssignedToOSThread(ThreadID managedThreadId, DWORD osThreadId) override;
 
 
@@ -136,6 +145,7 @@ private:
     //
     void InternalAddInstrumentation(WCHAR* id, CallTargetDefinition* items, int size, bool isDerived);
     bool InitThreadSampler();
+    void ConfigureContinuousProfilerInternal(const ContinuousProfilerParams& params);
 
 public:
     CorProfiler() = default;

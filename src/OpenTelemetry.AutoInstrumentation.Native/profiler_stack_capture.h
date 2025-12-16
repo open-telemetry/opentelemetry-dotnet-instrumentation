@@ -5,8 +5,6 @@
 
 #if defined(_WIN32) && defined(_M_AMD64)
 
-#include <windows.h>
-#include <vector>
 #include <functional>
 #include <memory>
 #include <thread>
@@ -147,7 +145,6 @@ namespace ProfilerStackCapture {
         
     private:
         HRESULT CaptureStackSeeded(ThreadID managedThreadId, HANDLE threadHandle, StackCaptureContext* stackCaptureContext);
-        bool IsManagedFunction(BYTE* instructionPointer) const;
         bool SafetyProbe();
         
         std::unique_ptr<IProfilerApi> profilerApi_;

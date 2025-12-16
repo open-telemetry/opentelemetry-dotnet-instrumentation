@@ -10,8 +10,6 @@
 #include <dbghelp.h>
 #include <atlbase.h>
 #include <atlcom.h>
-#include <sstream>
-#include <iomanip>
 #include "logger.h"
 
 #ifndef DECLSPEC_IMPORT
@@ -219,8 +217,9 @@ static HRESULT PrepareContextForSnapshot(ThreadID           managedThreadId,
         }
     }
 
-    // Exhausted all frames without finding managed code, log it
-    trace::Logger::Warn(
+    // Exhausted all frames without finding managed code, let us log at debug level to avoid noise
+    // failure to find managed frame is expected in some scenarios (e.g., native threads)
+    trace::Logger::Debug(
         "[StackCapture] PrepareContextForSnapshot - Unable to locate managed frame in stack walk for ThreadID=",
         managedThreadId);
     return E_FAIL;
@@ -560,6 +559,23 @@ HRESULT StackCaptureEngine::CaptureStackSeeded(ThreadID             managedThrea
                                                HANDLE               threadHandle,
                                                StackCaptureContext* stackCaptureContext)
 {
+    // Try unseeded first - fast path for threads already in managed code
+    stackCaptureContext->clientParams->threadId = managedThreadId;
+    HRESULT hr                                  = profilerApi_->DoStackSnapshot(managedThreadId,
+                                                                                continuous_profiler::IStackCaptureStrategy::StackSnapshotCallbackDefault,
+                                                                                COR_PRF_SNAPSHOT_DEFAULT, stackCaptureContext->clientParams,
+                                                                                nullptr, // No seed
+                                                                                0);
+
+    if (SUCCEEDED(hr))
+    {
+        trace::Logger::Debug("[StackCapture] Unseeded capture succeeded. ThreadID=", managedThreadId);
+        return hr;
+    }
+
+    trace::Logger::Debug("[StackCapture] Unseeded failed (0x", std::hex, hr, "), attempting seeded capture...");
+
+    // Fallback: PrepareContext will check if we're at managed code before walking
     CONTEXT context      = {};
     context.ContextFlags = CONTEXT_FULL;
 
@@ -567,40 +583,28 @@ HRESULT StackCaptureEngine::CaptureStackSeeded(ThreadID             managedThrea
     {
         return E_FAIL;
     }
-
-    // Prepare context (uses SEH-protected helpers internally, no C++ RAII in that path)
-    HRESULT hr =
-        PrepareContextForSnapshot(managedThreadId, threadHandle, &context, profilerApi_.get(), &stopRequested_);
+    hr = PrepareContextForSnapshot(managedThreadId, threadHandle, &context, profilerApi_.get(), &stopRequested_);
     if (FAILED(hr))
     {
         return hr;
     }
-    stackCaptureContext->clientParams->threadId = managedThreadId;
-    hr                                          = profilerApi_->DoStackSnapshot(managedThreadId,
-                                                                                continuous_profiler::IStackCaptureStrategy::StackSnapshotCallbackDefault,
-                                                                                COR_PRF_SNAPSHOT_DEFAULT, stackCaptureContext->clientParams,
-                                                                                reinterpret_cast<BYTE*>(&context), sizeof(CONTEXT));
+
+    hr = profilerApi_->DoStackSnapshot(managedThreadId,
+                                       continuous_profiler::IStackCaptureStrategy::StackSnapshotCallbackDefault,
+                                       COR_PRF_SNAPSHOT_DEFAULT, stackCaptureContext->clientParams,
+                                       reinterpret_cast<BYTE*>(&context), sizeof(CONTEXT));
 
     if (FAILED(hr))
     {
-        trace::Logger::Error("[StackCapture] CaptureStackSeeded - DoStackSnapshot failed. HRESULT=0x", std::hex, hr,
-                             std::dec, ", ThreadID=", managedThreadId, ", SeededRIP=0x", std::hex, context.Rip,
-                             std::dec);
+        trace::Logger::Debug("[StackCapture] Seeded capture failed. HRESULT=0x", std::hex, hr,
+                             ", ThreadID=", managedThreadId);
     }
     else
     {
-        trace::Logger::Debug("[StackCapture] CaptureStackSeeded - Successfully captured stack. ThreadID=",
-                             managedThreadId);
+        trace::Logger::Debug("[StackCapture] Seeded capture succeeded. ThreadID=", managedThreadId);
     }
 
     return hr;
-}
-
-bool StackCaptureEngine::IsManagedFunction(BYTE* ip) const
-{
-    FunctionID fid = 0;
-    HRESULT    hr  = profilerApi_->GetFunctionFromIP(ip, &fid);
-    return SUCCEEDED(hr) && fid != 0;
 }
 
 bool StackCaptureEngine::WaitForCanaryThread(std::chrono::milliseconds timeout)

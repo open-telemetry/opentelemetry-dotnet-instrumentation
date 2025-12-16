@@ -1232,15 +1232,25 @@ void CorProfiler::ConfigureContinuousProfiler(bool         threadSamplingEnabled
                                               unsigned int maxMemorySamplesPerMinute,
                                               unsigned int selectedThreadsSamplingInterval)
 {
-    Logger::Info("ConfigureContinuousProfiler: thread sampling enabled: ", threadSamplingEnabled,
-                 ", thread sampling interval: ", threadSamplingInterval,
-                 ", allocationSamplingEnabled: ", allocationSamplingEnabled,
-                 ", max memory samples per minute: ", maxMemorySamplesPerMinute,
-                 ", selected threads sampling interval: ", selectedThreadsSamplingInterval);
+    ContinuousProfilerParams params{threadSamplingEnabled, threadSamplingInterval, allocationSamplingEnabled,
+                                    maxMemorySamplesPerMinute, selectedThreadsSamplingInterval};
+    // Guard against multiple initialization: In .NET Framework, this method may be called
+    // once per AppDomain, but the continuous profiler is a process-level singleton.
+    // std::call_once ensures thread-safe one-time initialization across all AppDomains.
+    std::call_once(sampling_init_flag_, [this, &params]() { ConfigureContinuousProfilerInternal(params); });
+}
 
-    const bool selectiveSamplingConfigured = selectedThreadsSamplingInterval != 0;
+void CorProfiler::ConfigureContinuousProfilerInternal(const ContinuousProfilerParams& params)
+{
+    Logger::Info("ConfigureContinuousProfiler: thread sampling enabled: ", params.threadSamplingEnabled,
+                 ", thread sampling interval: ", params.threadSamplingInterval,
+                 ", allocationSamplingEnabled: ", params.allocationSamplingEnabled,
+                 ", max memory samples per minute: ", params.maxMemorySamplesPerMinute,
+                 ", selected threads sampling interval: ", params.selectedThreadsSamplingInterval);
 
-    if (!threadSamplingEnabled && !allocationSamplingEnabled && !selectiveSamplingConfigured)
+    const bool selectiveSamplingConfigured = params.selectedThreadsSamplingInterval != 0;
+
+    if (!params.threadSamplingEnabled && !params.allocationSamplingEnabled && !selectiveSamplingConfigured)
     {
         Logger::Debug("ConfigureContinuousProfiler: no sampling type configured.");
         return;
@@ -1252,26 +1262,26 @@ void CorProfiler::ConfigureContinuousProfiler(bool         threadSamplingEnabled
         return;
     }
 
-    if (threadSamplingEnabled)
+    if (params.threadSamplingEnabled)
     {
-        this->continuousProfiler->threadSamplingInterval = threadSamplingInterval;
+        this->continuousProfiler->threadSamplingInterval = params.threadSamplingInterval;
     }
     if (selectiveSamplingConfigured)
     {
-        this->continuousProfiler->selectedThreadsSamplingInterval = selectedThreadsSamplingInterval;
+        this->continuousProfiler->selectedThreadsSamplingInterval = params.selectedThreadsSamplingInterval;
         this->continuousProfiler->nextOutdatedEntriesScan         = std::chrono::steady_clock::now();
         continuous_profiler::ContinuousProfiler::InitSelectiveSamplingBuffer();
     }
 
-    if (threadSamplingEnabled || selectiveSamplingConfigured)
+    if (params.threadSamplingEnabled || selectiveSamplingConfigured)
     {
         Logger::Info("ContinuousProfiler::StartThreadSampling");
         this->continuousProfiler->StartThreadSampling();
     }
 
-    if (allocationSamplingEnabled)
+    if (params.allocationSamplingEnabled)
     {
-        this->continuousProfiler->StartAllocationSampling(maxMemorySamplesPerMinute);
+        this->continuousProfiler->StartAllocationSampling(params.maxMemorySamplesPerMinute);
     }
 }
 
@@ -1525,9 +1535,23 @@ HRESULT STDMETHODCALLTYPE CorProfiler::JITCompilationStartedOnNetFramework(Funct
     auto valid_loader_callsite = true;
     if (is_desktop_iis)
     {
-        valid_loader_callsite = module_metadata->assemblyName == WStr("System.Web") &&
-                                caller.type.name == WStr("System.Web.Compilation.BuildManager") &&
-                                caller.name == WStr("InvokePreStartInitMethods");
+        // For IIS: prefer injection into BuildManager.InvokePreStartInitMethods (application AppDomain)
+        // but also allow injection into default AppDomain for continuous profiling support
+        bool is_build_manager_injection = module_metadata->assemblyName == WStr("System.Web") &&
+                                          caller.type.name == WStr("System.Web.Compilation.BuildManager") &&
+                                          caller.name == WStr("InvokePreStartInitMethods");
+
+        bool is_default_appdomain = corlib_module_loaded && module_metadata->app_domain_id == corlib_app_domain_id;
+
+        valid_loader_callsite = is_build_manager_injection || is_default_appdomain;
+
+        if (is_default_appdomain && !is_build_manager_injection)
+        {
+            Logger::Info("JITCompilationStarted: Allowing loader injection into default AppDomain for IIS continuous "
+                         "profiling. ",
+                         "AppDomain: ", module_metadata->app_domain_id, ", Assembly: ", module_metadata->assemblyName,
+                         ", Method: ", caller.type.name, ".", caller.name);
+        }
     }
     else if (module_metadata->assemblyName == WStr("System") ||
              module_metadata->assemblyName == WStr("System.Net.Http"))
