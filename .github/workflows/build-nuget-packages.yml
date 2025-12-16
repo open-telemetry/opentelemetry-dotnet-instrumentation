@@ -38,44 +38,44 @@ jobs:
             10.0.101
 
       - name: Check for NuGet packages cache
-        uses: actions/cache@a7833574556fa59680c1b7cb190c1735db73ebf0 # tag: v5.0.0
+        uses: actions/cache@9255dc7a253b0ccc959486e2bca901246202afeb # tag: v5.0.1
         id: nuget-cache
         with:
           key: ${{ hashFiles('**/Directory.packages.props', './build/LibraryVersions.g.cs', '**/packages.config' ) }}
           path: ${{ env.NUGET_PACKAGES }}
 
       - name: Download Windows Artifacts from build job
-        uses: actions/download-artifact@018cc2cf5baa6db3ef3c5f8a56943fffe632ef53 # tag: v6.0.0
+        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # tag: v7.0.0
         with:
           name: bin-windows-2022
           path: bin/ci-artifacts/bin-windows-2022
 
       - name: Download Ubuntu x64 Artifacts from build job
-        uses: actions/download-artifact@018cc2cf5baa6db3ef3c5f8a56943fffe632ef53 # tag: v6.0.0
+        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # tag: v7.0.0
         with:
           name: bin-ubuntu-22.04
           path: bin/ci-artifacts/bin-ubuntu-22.04
 
       - name: Download Ubuntu arm64 Artifacts from build job
-        uses: actions/download-artifact@018cc2cf5baa6db3ef3c5f8a56943fffe632ef53 # tag: v6.0.0
+        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # tag: v7.0.0
         with:
           name: bin-ubuntu-22.04-arm
           path: bin/ci-artifacts/bin-ubuntu-22.04-arm
 
       - name: Download Alpine x64 Artifacts from build job
-        uses: actions/download-artifact@018cc2cf5baa6db3ef3c5f8a56943fffe632ef53 # tag: v6.0.0
+        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # tag: v7.0.0
         with:
           name: bin-alpine-x64
           path: bin/ci-artifacts/bin-alpine-x64
 
       - name: Download Alpine arm64 Artifacts from build job
-        uses: actions/download-artifact@018cc2cf5baa6db3ef3c5f8a56943fffe632ef53 # tag: v6.0.0
+        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # tag: v7.0.0
         with:
           name: bin-alpine-arm64
           path: bin/ci-artifacts/bin-alpine-arm64
 
       - name: Download Mac-OS Artifacts from build job
-        uses: actions/download-artifact@018cc2cf5baa6db3ef3c5f8a56943fffe632ef53 # tag: v6.0.0
+        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # tag: v7.0.0
         with:
           name: bin-macos-14
           path: bin/ci-artifacts/bin-macos-14
@@ -104,7 +104,7 @@ jobs:
           }
         
       - name: Upload Nuget Artifacts
-        uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # tag: v5.0.0
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # tag: v6.0.0
         with:
           name: bin-nuget-packages
           path: bin/nuget-artifacts/
