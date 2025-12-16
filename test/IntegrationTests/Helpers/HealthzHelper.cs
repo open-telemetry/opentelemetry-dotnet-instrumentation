@@ -11,10 +11,11 @@ namespace IntegrationTests.Helpers;
 
 internal static class HealthzHelper
 {
+    private static readonly HttpClient HttpClient = new();
+
     public static async Task TestAsync(string healthzUrl, ITestOutputHelper output)
     {
         output.WriteLine($"Testing healthz endpoint: {healthzUrl}");
-        using HttpClient client = new();
 
         const int intervalMilliseconds = 500;
         const int maxMillisecondsToWait = 15_000;
@@ -23,7 +24,7 @@ internal static class HealthzHelper
         {
             try
             {
-                var response = await client.GetAsync(new Uri(healthzUrl)).ConfigureAwait(false);
+                var response = await HttpClient.GetAsync(new Uri(healthzUrl)).ConfigureAwait(false);
                 if (response.StatusCode == HttpStatusCode.OK)
                 {
                     return;
