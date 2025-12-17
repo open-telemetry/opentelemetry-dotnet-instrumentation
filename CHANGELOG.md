@@ -11,6 +11,7 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 
 - Add `-NoReset` switch parameter to skip service restart in PowerShell
   registration functions.
+- Support for file-based configuration of the IL rewrite for SqlCommand setting
 
 ### Changed
 
