@@ -17,6 +17,8 @@ instrumentation/development:
       grpcnetclient:
         capture_request_metadata: "X-Key,X-Custom-Header,X-Header-Example"
         capture_response_metadata: "X-Key,X-Custom-Header,X-Header-Example"
+      sqlclient:
+        netfx_ilrewrite_enabled: true
     logs:
       log4net:
         bridge_enabled: true

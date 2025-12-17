@@ -102,12 +102,12 @@ public class ParserInstrumentationTests
 
 #if NET
         string[] expectedTraces = [
-                    "aspnetcore", "graphql", "grpcnetclient", "httpclient", "oraclemda"
+                    "aspnetcore", "graphql", "grpcnetclient", "httpclient", "oraclemda", "sqlclient"
                 ];
 #endif
 #if NETFRAMEWORK
         string[] expectedTraces = [
-                    "aspnet", "httpclient", "oraclemda", "grpcnetclient"
+                    "aspnet", "httpclient", "oraclemda", "grpcnetclient", "sqlclient"
                 ];
 #endif
 
@@ -140,6 +140,8 @@ public class ParserInstrumentationTests
         Assert.Equal("X-Key,X-Custom-Header,X-Header-Example", traces.AspNet!.CaptureRequestHeaders);
         Assert.Equal("X-Key,X-Custom-Header,X-Header-Example", traces.AspNet!.CaptureResponseHeaders);
 #endif
+        Assert.True(traces.SqlClient!.NetFxIlRewriteEnabled);
+
         Assert.True(logs.Log4Net.BridgeEnabled);
     }
 
