@@ -11,6 +11,7 @@ internal class ThreadSample
         long traceIdLow,
         long spanId,
         string? threadName,
+        string source,
         uint threadIndex = 0,
         bool selectedForFrequentSampling = false)
     {
@@ -19,6 +20,7 @@ internal class ThreadSample
         TraceIdLow = traceIdLow;
         SpanId = spanId;
         ThreadName = threadName;
+        Source = source;
         ThreadIndex = threadIndex;
         SelectedForFrequentSampling = selectedForFrequentSampling;
     }
@@ -36,6 +38,8 @@ internal class ThreadSample
     public uint ThreadIndex { get; }
 
     public bool SelectedForFrequentSampling { get; }
+
+    public string Source { get; }
 
     public IList<string> Frames { get; } = new List<string>();
 }

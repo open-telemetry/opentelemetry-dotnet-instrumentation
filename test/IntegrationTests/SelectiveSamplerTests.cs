@@ -1,13 +1,8 @@
 // Copyright The OpenTelemetry Authors
 // SPDX-License-Identifier: Apache-2.0
-
-#if NET
-
+#if NET //for now we ae disabling this on .NET Framework as canary mechanism makes this flaky
 using System.Diagnostics;
 using System.Runtime.InteropServices;
-using System.Text;
-using System.Text.Json;
-using Google.Protobuf;
 using IntegrationTests.Helpers;
 using Xunit.Abstractions;
 
@@ -108,8 +103,10 @@ public class SelectiveSamplerTests : TestHelper
             // batch to contain multiple samples as a result of continuous profiling.
             if (counter % 4 == 0)
             {
+#if NET
+                // on .NET Framework there is no guarantee that samples collected from all threads
                 Assert.NotEqual(1, group.Count());
-
+#endif
                 // Sample for thread selected for frequent sampling when collecting samples of all threads
                 // should be marked with SelectedForFrequentSampling flag.
                 Assert.Single(group, sample => sample.SelectedForFrequentSampling);
@@ -127,7 +124,7 @@ public class SelectiveSamplerTests : TestHelper
 
     private static bool IndicatesSelectiveSampling(IGrouping<long, ConsoleThreadSample> samples)
     {
-        return samples.Count() == 1;
+        return samples.Count() == 1 && samples.Single().Source == "selective-sampler";
     }
 
     private static bool CollectedBeforeSpanStarted(IGrouping<long, ConsoleThreadSample> samples)
@@ -148,7 +145,15 @@ public class SelectiveSamplerTests : TestHelper
     private static DateTime ToDateTime(long timestampNanoseconds)
     {
         const int nanosecondsInTick = 100;
+
+#if NET
         return DateTime.UnixEpoch.AddTicks(timestampNanoseconds / nanosecondsInTick);
+#else
+        const int daysTo1970 = 719_162;
+        const long unixEpochTicks = daysTo1970 * TimeSpan.TicksPerDay;
+
+        return new DateTime(unixEpochTicks, DateTimeKind.Utc).AddTicks(timestampNanoseconds / nanosecondsInTick);
+#endif
     }
 
     private static bool VerifyMatching(
@@ -158,8 +163,8 @@ public class SelectiveSamplerTests : TestHelper
         foreach (var (spanId, traceIdHigh, traceIdLow) in threadSampleSpanContexts)
         {
             // Reverse the conversion done in TryParseTraceContext methods in NativeMethods.cs
-            var sampleSpanId = ActivitySpanId.CreateFromString(spanId.ToString("x16"));
-            var sampleTraceId = ActivityTraceId.CreateFromString($"{traceIdHigh:x16}{traceIdLow:x16}");
+            var sampleSpanId = ActivitySpanId.CreateFromString(spanId.ToString("x16").AsSpan());
+            var sampleTraceId = ActivityTraceId.CreateFromString($"{traceIdHigh:x16}{traceIdLow:x16}".AsSpan());
 
             var match = collectedSpans.Any(c =>
             {
