@@ -62,3 +62,27 @@ Following properties are set by default on the collection of logging event's pro
 
 This allows for trace context to be logged into currently configured log destination,
  e.g. a file. In order to use them, pattern needs to be updated.
+
+### `NLog`
+
+See [`nlog-bridge`](./nlog-bridge.md).
+
+## `NLog` trace context injection
+
+> [!IMPORTANT]
+> NLog trace context injection is an experimental feature.
+
+The `NLog` trace context injection is enabled by default.
+It can be disabled by setting
+`OTEL_DOTNET_AUTO_LOGS_NLOG_INSTRUMENTATION_ENABLED` to `false`.
+
+Context injection is supported for `NLOG` in versions >= 5.0.0 && < 7.0.0
+
+Following properties are set by default on the collection of logging event's properties:
+
+- `trace_id`
+- `span_id`
+- `trace_flags`
+
+This allows for trace context to be logged into currently configured log destination,
+ e.g. a file. In order to use them, pattern needs to be updated.

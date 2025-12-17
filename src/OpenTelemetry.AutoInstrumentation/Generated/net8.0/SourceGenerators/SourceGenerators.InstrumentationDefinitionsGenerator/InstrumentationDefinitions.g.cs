@@ -17,7 +17,7 @@ internal static partial class InstrumentationDefinitions
 {
     private static NativeCallTargetDefinition[] GetDefinitionsArray()
     {
-        var nativeCallTargetDefinitions = new List<NativeCallTargetDefinition>(39);
+        var nativeCallTargetDefinitions = new List<NativeCallTargetDefinition>(45);
         // Traces
         var tracerSettings = Instrumentation.TracerSettings.Value;
         if (tracerSettings.TracesEnabled)
@@ -103,6 +103,17 @@ internal static partial class InstrumentationDefinitions
             if (logSettings.EnabledInstrumentations.Contains(LogInstrumentation.ILogger))
             {
                 nativeCallTargetDefinitions.Add(new("Microsoft.Extensions.Logging", "Microsoft.Extensions.Logging.LoggingBuilder", ".ctor", ["System.Void", "Microsoft.Extensions.DependencyInjection.IServiceCollection"], 8, 0, 0, 10, 65535, 65535, AssemblyFullName, "OpenTelemetry.AutoInstrumentation.Instrumentations.Logger.LoggingBuilderIntegration"));
+            }
+
+            // NLog
+            if (logSettings.EnabledInstrumentations.Contains(LogInstrumentation.NLog))
+            {
+                nativeCallTargetDefinitions.Add(new("NLog", "NLog.Logger", "WriteToTargets", ["System.Void", "NLog.LogEventInfo", "NLog.Internal.ITargetWithFilterChain"], 5, 0, 0, 5, 65535, 65535, AssemblyFullName, "OpenTelemetry.AutoInstrumentation.Instrumentations.NLog.TraceContextInjection.Integrations.NLogWriteToTargetsIntegration"));
+                nativeCallTargetDefinitions.Add(new("NLog", "NLog.Logger", "WriteToTargets", ["System.Void", "NLog.LogEventInfo", "NLog.Internal.TargetWithFilterChain"], 5, 0, 0, 5, 65535, 65535, AssemblyFullName, "OpenTelemetry.AutoInstrumentation.Instrumentations.NLog.TraceContextInjection.Integrations.NLogWriteToTargetsIntegration"));
+                nativeCallTargetDefinitions.Add(new("NLog", "NLog.Logger", "WriteLogEventToTargets", ["System.Void", "NLog.LogEventInfo", "NLog.Internal.ITargetWithFilterChain"], 6, 0, 0, 6, 65535, 65535, AssemblyFullName, "OpenTelemetry.AutoInstrumentation.Instrumentations.NLog.TraceContextInjection.Integrations.NLogWriteToTargetsIntegration"));
+                nativeCallTargetDefinitions.Add(new("NLog", "NLog.Logger", "WriteToTargets", ["System.Void", "System.Type", "NLog.LogEventInfo", "NLog.Internal.ITargetWithFilterChain"], 5, 0, 0, 5, 65535, 65535, AssemblyFullName, "OpenTelemetry.AutoInstrumentation.Instrumentations.NLog.TraceContextInjection.Integrations.NLogWriteToTargetsWithWrapperTypeIntegration"));
+                nativeCallTargetDefinitions.Add(new("NLog", "NLog.Logger", "WriteToTargets", ["System.Void", "System.Type", "NLog.LogEventInfo", "NLog.Internal.TargetWithFilterChain"], 5, 0, 0, 5, 65535, 65535, AssemblyFullName, "OpenTelemetry.AutoInstrumentation.Instrumentations.NLog.TraceContextInjection.Integrations.NLogWriteToTargetsWithWrapperTypeIntegration"));
+                nativeCallTargetDefinitions.Add(new("NLog", "NLog.Logger", "WriteLogEventToTargets", ["System.Void", "System.Type", "NLog.LogEventInfo", "NLog.Internal.ITargetWithFilterChain"], 6, 0, 0, 6, 65535, 65535, AssemblyFullName, "OpenTelemetry.AutoInstrumentation.Instrumentations.NLog.TraceContextInjection.Integrations.NLogWriteToTargetsWithWrapperTypeIntegration"));
             }
         }
 

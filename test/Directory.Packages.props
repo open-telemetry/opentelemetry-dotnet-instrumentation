@@ -35,6 +35,8 @@
     <PackageVersion Include="MySql.Data" Version="9.5.0" />
     <PackageVersion Include="NServiceBus" Version="9.2.7" />
     <PackageVersion Include="Newtonsoft.Json" Version="13.0.4" />
+    <PackageVersion Include="NLog" Version="6.0.6" />
+    <PackageVersion Include="NLog.Extensions.Logging" Version="6.1.0" />
     <PackageVersion Include="Npgsql" Version="9.0.4" />
     <PackageVersion Include="NuGet.Versioning" Version="6.14.0" />
     <PackageVersion Include="OpenTracing" Version="0.12.1" />
