@@ -14,5 +14,5 @@ internal class SqlClientConfiguration
     /// to ensure CommandText is available.
     /// </summary>
     [YamlMember(Alias = "netfx_ilrewrite_enabled")]
-    public bool? NetFxIlRewriteEnabled { get; set; }
+    public bool NetFxIlRewriteEnabled { get; set; }
 }

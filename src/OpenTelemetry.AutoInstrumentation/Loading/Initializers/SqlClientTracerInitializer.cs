@@ -1,6 +1,7 @@
 // Copyright The OpenTelemetry Authors
 // SPDX-License-Identifier: Apache-2.0
 
+using OpenTelemetry.AutoInstrumentation.Configurations;
 using OpenTelemetry.AutoInstrumentation.Plugins;
 
 namespace OpenTelemetry.AutoInstrumentation.Loading.Initializers;
@@ -8,13 +9,15 @@ namespace OpenTelemetry.AutoInstrumentation.Loading.Initializers;
 internal sealed class SqlClientTracerInitializer : SqlClientInitializer
 {
     private readonly PluginManager _pluginManager;
+    private readonly TracerSettings _tracerSettings;
 
     private int _initialized;
 
-    public SqlClientTracerInitializer(LazyInstrumentationLoader lazyInstrumentationLoader, PluginManager pluginManager)
+    public SqlClientTracerInitializer(LazyInstrumentationLoader lazyInstrumentationLoader, PluginManager pluginManager, TracerSettings tracerSettings)
         : base(lazyInstrumentationLoader, nameof(SqlClientTracerInitializer))
     {
         _pluginManager = pluginManager;
+        _tracerSettings = tracerSettings;
     }
 
     protected override void InitializeOnFirstCall(ILifespanManager lifespanManager)
@@ -45,5 +48,7 @@ internal sealed class SqlClientTracerInitializer : SqlClientInitializer
         {
             lifespanManager.Track(tracingHandle);
         }
+
+        NativeMethods.SetSqlClientNetFxILRewriteEnabled(_tracerSettings.InstrumentationOptions.SqlClientNetFxIlRewriteEnabled);
     }
 }

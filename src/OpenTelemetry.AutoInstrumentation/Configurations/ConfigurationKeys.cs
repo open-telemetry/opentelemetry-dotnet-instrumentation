@@ -120,11 +120,6 @@ internal partial class ConfigurationKeys
         public const string AdditionalLegacySources = "OTEL_DOTNET_AUTO_TRACES_ADDITIONAL_LEGACY_SOURCES";
 
         /// <summary>
-        /// Configuration key for enabling IL rewriting of SqlClient on .NET Framework to ensure CommandText is available.
-        /// </summary>
-        public const string SqlClientNetFxILRewriteEnabled = "OTEL_DOTNET_AUTO_SQLCLIENT_NETFX_ILREWRITE_ENABLED";
-
-        /// <summary>
         /// Configuration keys for instrumentation options.
         /// </summary>
         public static class InstrumentationOptions
@@ -182,6 +177,11 @@ internal partial class ConfigurationKeys
             /// Configuration key for Oracle Client instrumentation to enable passing text query as a db.statement attribute.
             /// </summary>
             public const string OracleMdaSetDbStatementForText = "OTEL_DOTNET_AUTO_ORACLEMDA_SET_DBSTATEMENT_FOR_TEXT";
+
+            /// <summary>
+            /// Configuration key for enabling IL rewriting of SqlClient on .NET Framework to ensure CommandText is available.
+            /// </summary>
+            public const string SqlClientNetFxILRewriteEnabled = "OTEL_DOTNET_AUTO_SQLCLIENT_NETFX_ILREWRITE_ENABLED";
         }
     }
 
