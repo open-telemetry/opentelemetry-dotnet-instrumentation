@@ -394,6 +394,22 @@ HRESULT StackCaptureEngine::ThreadDestroyed(ThreadID threadId)
         trace::Logger::Info("[StackCapture] Canary thread destroyed - ManagedID=", threadId,
                             ", NativeID=", canaryThread_.nativeId);
         canaryThread_.reset();
+        // threadNames_ has map of thread ID and names - find another canary if possible
+        for (const auto& [managedId, name] : threadNames_)
+        {
+            if (options_.IsCanaryThread(name))
+            {
+                auto osThreadIt = activeThreads_.find(managedId);
+                if (osThreadIt != activeThreads_.end())
+                {
+                    canaryThread_ = CanaryThreadInfo{managedId, osThreadIt->second};
+                    trace::Logger::Info("[StackCapture] New canary thread designated after destruction - ManagedID=",
+                                        managedId, ", NativeID=", osThreadIt->second, ", Name=", name);
+                    captureCondVar_.notify_all();
+                    break;
+                }
+            }
+        }
     }
 
     return S_OK;
@@ -412,18 +428,13 @@ HRESULT StackCaptureEngine::ThreadAssignedToOSThread(ThreadID managedThreadId, D
     auto nameIt = threadNames_.find(managedThreadId);
     if (nameIt != threadNames_.end())
     {
-        if (nameIt->second == options_.canaryThreadName)
+        if (options_.IsCanaryThread(nameIt->second))
         {
             canaryThread_ = CanaryThreadInfo{managedThreadId, osThreadId};
             trace::Logger::Info("[StackCapture] Canary thread designated via ThreadAssignedToOSThread - ManagedID=",
                                 managedThreadId, ", NativeID=", osThreadId, ", Name=", nameIt->second);
+            captureCondVar_.notify_all();
         }
-    }
-
-    // Notify waiting capture thread if canary was found
-    if (canaryThread_.isValid())
-    {
-        captureCondVar_.notify_one();
     }
 
     return S_OK;
@@ -435,20 +446,17 @@ HRESULT StackCaptureEngine::ThreadNameChanged(ThreadID threadId, ULONG cchName, 
         return S_OK;
 
     std::lock_guard<std::mutex> lock(threadListMutex_);
-    if (canaryThread_.isValid())
-    {
-        return S_OK;
-    }
 
     std::wstring threadName(name, cchName);
     threadNames_[threadId] = threadName;
     trace::Logger::Debug("[StackCapture] ThreadNameChanged - ManagedID=", threadId, ", Name=", threadName);
-    if (threadName == options_.canaryThreadName)
+    if (options_.IsCanaryThread(threadName))
     {
         auto osThreadIt = activeThreads_.find(threadId);
-        if (osThreadIt != activeThreads_.end())
+        if (osThreadIt != activeThreads_.end() && !canaryThread_.isValid())
         {
             canaryThread_ = CanaryThreadInfo{threadId, osThreadIt->second};
+            captureCondVar_.notify_all();
             trace::Logger::Info("[StackCapture] Canary thread designated via ThreadNameChanged - ManagedID=", threadId,
                                 ", NativeID=", osThreadIt->second, ", Name=", threadName);
         }
@@ -460,16 +468,10 @@ HRESULT StackCaptureEngine::ThreadNameChanged(ThreadID threadId, ULONG cchName, 
         }
     }
 
-    // Notify waiting capture thread if canary was found
-    if (canaryThread_.isValid())
-    {
-        captureCondVar_.notify_one();
-    }
-
     return S_OK;
 }
 
-bool StackCaptureEngine::SafetyProbe()
+bool StackCaptureEngine::SafetyProbe(const CanaryThreadInfo& canaryInfo)
 {
     if (!invocationQueue_)
         return true;
@@ -479,7 +481,7 @@ bool StackCaptureEngine::SafetyProbe()
 
     try
     {
-        ScopedThreadSuspend canaryThread(canaryThread_.nativeId);
+        ScopedThreadSuspend canaryThread(canaryInfo.nativeId);
 
         CONTEXT canaryCtx      = {};
         canaryCtx.ContextFlags = CONTEXT_FULL;
@@ -493,7 +495,7 @@ bool StackCaptureEngine::SafetyProbe()
             return false;
         }
 
-        auto canaryManagedId = canaryThread_.managedId;
+        auto canaryManagedId = canaryInfo.managedId;
 
         status = invocationQueue_->Invoke(
             [this, canaryManagedId, canaryCtx, &snapshotHr]()
@@ -607,34 +609,43 @@ HRESULT StackCaptureEngine::CaptureStackSeeded(ThreadID             managedThrea
     return hr;
 }
 
-bool StackCaptureEngine::WaitForCanaryThread(std::chrono::milliseconds timeout)
+CanaryThreadInfo StackCaptureEngine::WaitForCanaryThread(std::chrono::milliseconds timeout)
 {
     trace::Logger::Debug("[StackCapture] Waiting for canary thread (timeout=", timeout.count(), "ms)");
-    std::unique_lock<std::mutex> lock(threadListMutex_);
-    bool                         result =
-        captureCondVar_.wait_for(lock, timeout, [this]() { return stopRequested_.load() || canaryThread_.isValid(); });
-
-    if (!result)
+    CanaryThreadInfo canary;
     {
-        trace::Logger::Warn("[StackCapture] Canary thread wait timed out after ", timeout.count(), "ms");
+        std::unique_lock<std::mutex> lock(threadListMutex_);
+        bool                         result = captureCondVar_.wait_for(lock, timeout,
+                                                                       [this]() { return stopRequested_.load() || canaryThread_.isValid(); });
+
+        if (!result)
+        {
+            trace::Logger::Warn("[StackCapture] Canary thread wait timed out after ", timeout.count(), "ms");
+        }
+        else
+        {
+            canary = canaryThread_;
+            trace::Logger::Debug("[StackCapture] Canary thread ready - ManagedID=", canary.managedId,
+                                 ", NativeID=", canary.nativeId);
+        }
     }
 
-    return result;
+    return canary;
 }
 
 HRESULT StackCaptureEngine::CaptureStacks(std::unordered_set<ThreadID> const&                threads,
                                           continuous_profiler::StackSnapshotCallbackContext* clientData)
 {
-    bool canaryReady = WaitForCanaryThread();
+    auto canary = WaitForCanaryThread();
 
-    if (!canaryReady)
+    if (!canary.isValid())
         return E_FAIL;
 
     for (const auto& managedId : threads)
     {
         if (stopRequested_)
             break;
-        if (managedId == canaryThread_.managedId)
+        if (managedId == canary.managedId)
             continue;
         DWORD nativeId = 0;
         {
@@ -649,7 +660,7 @@ HRESULT StackCaptureEngine::CaptureStacks(std::unordered_set<ThreadID> const&   
         try
         {
             ScopedThreadSuspend targetThread(nativeId);
-            if (!SafetyProbe())
+            if (!SafetyProbe(canary))
             {
                 trace::Logger::Debug(
                     "[StackCapture] CaptureStacks - Skipping thread due to safety probe failure. ManagedID=", managedId,

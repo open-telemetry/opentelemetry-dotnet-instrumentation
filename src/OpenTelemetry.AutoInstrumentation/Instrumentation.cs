@@ -285,21 +285,17 @@ internal static class Instrumentation
 
         NativeMethods.ConfigureNativeContinuousProfiler(threadSamplingEnabled, threadSamplingInterval, allocationSamplingEnabled, maxMemorySamplesPerMinute, selectiveSamplingInterval);
 #if NETFRAMEWORK
-        if (AppDomain.CurrentDomain.IsDefaultAppDomain())
+        // On .NET Framework, we need a dedicated canary thread for seeded stack walking
+        _canaryThreadManager = new CanaryThreadManager();
+        if (!_canaryThreadManager.Start(TimeSpan.FromSeconds(5)))
         {
-            // On .NET Framework, we need a dedicated canary thread for seeded stack walking
-            // host the canary thread manager in the default app domain only to avoid multiple canary threads
-            _canaryThreadManager = new CanaryThreadManager();
-            if (!_canaryThreadManager.Start(TimeSpan.FromSeconds(5)))
-            {
-                Logger.Error("Failed to start canary thread. Continuous profiling will not be enabled.");
-                _canaryThreadManager.Dispose();
-                _canaryThreadManager = null;
-                return;
-            }
-
-            Logger.Information("Canary thread started successfully for .NET Framework profiling.");
+            Logger.Error("Failed to start canary thread. Continuous profiling will not be enabled.");
+            _canaryThreadManager.Dispose();
+            _canaryThreadManager = null;
+            return;
         }
+
+        Logger.Information("Canary thread started successfully for .NET Framework profiling.");
 #endif
         _sampleExporter = _sampleExporterBuilder?.Build();
     }

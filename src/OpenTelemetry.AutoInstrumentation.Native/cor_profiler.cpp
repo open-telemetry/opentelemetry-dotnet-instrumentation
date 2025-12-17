@@ -1535,23 +1535,9 @@ HRESULT STDMETHODCALLTYPE CorProfiler::JITCompilationStartedOnNetFramework(Funct
     auto valid_loader_callsite = true;
     if (is_desktop_iis)
     {
-        // For IIS: prefer injection into BuildManager.InvokePreStartInitMethods (application AppDomain)
-        // but also allow injection into default AppDomain for continuous profiling support
-        bool is_build_manager_injection = module_metadata->assemblyName == WStr("System.Web") &&
-                                          caller.type.name == WStr("System.Web.Compilation.BuildManager") &&
-                                          caller.name == WStr("InvokePreStartInitMethods");
-
-        bool is_default_appdomain = corlib_module_loaded && module_metadata->app_domain_id == corlib_app_domain_id;
-
-        valid_loader_callsite = is_build_manager_injection || is_default_appdomain;
-
-        if (is_default_appdomain && !is_build_manager_injection)
-        {
-            Logger::Info("JITCompilationStarted: Allowing loader injection into default AppDomain for IIS continuous "
-                         "profiling. ",
-                         "AppDomain: ", module_metadata->app_domain_id, ", Assembly: ", module_metadata->assemblyName,
-                         ", Method: ", caller.type.name, ".", caller.name);
-        }
+        valid_loader_callsite = module_metadata->assemblyName == WStr("System.Web") &&
+                                caller.type.name == WStr("System.Web.Compilation.BuildManager") &&
+                                caller.name == WStr("InvokePreStartInitMethods");
     }
     else if (module_metadata->assemblyName == WStr("System") ||
              module_metadata->assemblyName == WStr("System.Net.Http"))

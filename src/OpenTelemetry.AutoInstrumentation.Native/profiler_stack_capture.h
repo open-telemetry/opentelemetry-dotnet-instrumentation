@@ -36,6 +36,9 @@ namespace ProfilerStackCapture {
     struct CaptureOptions {
         std::chrono::milliseconds probeTimeout = std::chrono::milliseconds(250);
         const wchar_t* canaryThreadName = L"OpenTelemetry Profiler Canary Thread";
+        bool                      IsCanaryThread(const std::wstring& threadName) const {
+            return threadName.find(canaryThreadName) == 0;
+        }
     };
 
     class IProfilerApi {
@@ -134,7 +137,7 @@ namespace ProfilerStackCapture {
     public:
         explicit StackCaptureEngine(std::unique_ptr<IProfilerApi> profilerApi, const CaptureOptions& options = {});
         ~StackCaptureEngine();
-        bool    WaitForCanaryThread(std::chrono::milliseconds timeout = std::chrono::milliseconds(0));
+        CanaryThreadInfo    WaitForCanaryThread(std::chrono::milliseconds timeout = std::chrono::milliseconds(0));
         HRESULT CaptureStacks(const std::unordered_set<ThreadID> &threads, continuous_profiler::StackSnapshotCallbackContext* clientData);
         void Stop();
         
@@ -145,7 +148,7 @@ namespace ProfilerStackCapture {
         
     private:
         HRESULT CaptureStackSeeded(ThreadID managedThreadId, HANDLE threadHandle, StackCaptureContext* stackCaptureContext);
-        bool SafetyProbe();
+        bool SafetyProbe(const CanaryThreadInfo& canaryInfo);
         
         std::unique_ptr<IProfilerApi> profilerApi_;
         CaptureOptions options_;

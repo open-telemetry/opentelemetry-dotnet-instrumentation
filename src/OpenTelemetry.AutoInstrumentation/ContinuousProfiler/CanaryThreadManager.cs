@@ -43,7 +43,7 @@ internal sealed class CanaryThreadManager : IDisposable
 
         _canaryThread = new Thread(CanaryThreadProc)
         {
-            Name = CanaryThreadName,
+            Name = $"{CanaryThreadName} - {AppDomain.CurrentDomain.Id})",
             IsBackground = true,
         };
 
