@@ -5,7 +5,7 @@ using Xunit.Abstractions;
 
 namespace IntegrationTests.Helpers;
 
-public static class OutputHelper
+internal static class OutputHelper
 {
     public static void WriteResult(this ITestOutputHelper outputHelper, ProcessHelper processHelper)
     {

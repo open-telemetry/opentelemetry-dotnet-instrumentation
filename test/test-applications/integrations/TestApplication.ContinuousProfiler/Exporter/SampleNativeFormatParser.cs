@@ -93,6 +93,7 @@ public class SampleNativeFormatParser
                         traceIdLow,
                         spanId,
                         threadName,
+                        "continuous-profiler",
                         threadIndex,
                         selectedForFrequentSampling);
 
@@ -176,7 +177,8 @@ public class SampleNativeFormatParser
                         traceIdHigh,
                         traceIdLow,
                         spanId,
-                        threadName);
+                        threadName,
+                        "allocation");
 
                     var code = ReadShort(buffer, ref position);
 
@@ -245,6 +247,7 @@ public class SampleNativeFormatParser
                         traceIdLow,
                         spanId,
                         threadName,
+                        "selective-sampler",
                         threadIndex++,
                         true);
 

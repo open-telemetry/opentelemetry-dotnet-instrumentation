@@ -9,7 +9,7 @@ using Xunit.Abstractions;
 namespace IntegrationTests;
 
 [Trait("Category", "EndToEnd")]
-public sealed class InstrumentationTargetTests : TestHelper
+public class InstrumentationTargetTests : TestHelper
 {
     private const string DotNetCli = "dotnet";
     private const string TargetAppName = "InstrumentationTargetTest";
@@ -91,6 +91,39 @@ public sealed class InstrumentationTargetTests : TestHelper
         });
     }
 
+    private static void ChangeDefaultProgramToHelloWorld()
+    {
+        const string programContent = """
+
+                                      public static class Program
+                                      {
+                                          public static void Main()
+                                          {
+                                              System.Console.WriteLine("Hello World!");
+                                          }
+                                      }
+
+                                      """;
+
+        File.WriteAllText("Program.cs", programContent);
+    }
+
+    private static void ChangeProjectDefaultsAndTargetFramework(string tfm)
+    {
+        var projectFile = $"{TargetAppName}.csproj";
+        var projectText = File.ReadAllText(projectFile);
+#if NET
+        projectText = projectText.Replace("<TargetFramework>net8.0</TargetFramework>", $"<TargetFramework>{tfm}</TargetFramework>", StringComparison.Ordinal);
+        projectText = projectText.Replace("<ImplicitUsings>enable</ImplicitUsings>", $"<ImplicitUsings>disable</ImplicitUsings>", StringComparison.Ordinal);
+        projectText = projectText.Replace("<Nullable>enable</Nullable>", $"<Nullable>disable</Nullable>", StringComparison.Ordinal);
+#else
+        projectText = projectText.Replace("<TargetFramework>net8.0</TargetFramework>", $"<TargetFramework>{tfm}</TargetFramework>");
+        projectText = projectText.Replace("<ImplicitUsings>enable</ImplicitUsings>", $"<ImplicitUsings>disable</ImplicitUsings>");
+        projectText = projectText.Replace("<Nullable>enable</Nullable>", $"<Nullable>disable</Nullable>");
+#endif
+        File.WriteAllText(projectFile, projectText);
+    }
+
     private static void RunInTempDir(Action action)
     {
         string? prevWorkingDir = null;
@@ -131,11 +164,11 @@ public sealed class InstrumentationTargetTests : TestHelper
         Assert.Equal(0, exitCode);
         if (expectWarning)
         {
-            Assert.Contains(warningMessage, standardOutput);
+            Assert.Contains(warningMessage, standardOutput, StringComparison.Ordinal);
         }
         else
         {
-            Assert.DoesNotContain(warningMessage, standardOutput);
+            Assert.DoesNotContain(warningMessage, standardOutput, StringComparison.Ordinal);
         }
     }
 #endif
@@ -169,39 +202,12 @@ public sealed class InstrumentationTargetTests : TestHelper
         Assert.Equal(0, RunDotNetCli("build"));
     }
 
-    private void ChangeDefaultProgramToHelloWorld()
-    {
-        const string programContent = """
-
-                                      public static class Program
-                                      {
-                                          public static void Main()
-                                          {
-                                              System.Console.WriteLine("Hello World!");
-                                          }
-                                      }
-
-                                      """;
-
-        File.WriteAllText("Program.cs", programContent);
-    }
-
-    private void ChangeProjectDefaultsAndTargetFramework(string tfm)
-    {
-        var projectFile = $"{TargetAppName}.csproj";
-        var projectText = File.ReadAllText(projectFile);
-        projectText = projectText.Replace("<TargetFramework>net8.0</TargetFramework>", $"<TargetFramework>{tfm}</TargetFramework>");
-        projectText = projectText.Replace("<ImplicitUsings>enable</ImplicitUsings>", $"<ImplicitUsings>disable</ImplicitUsings>");
-        projectText = projectText.Replace("<Nullable>enable</Nullable>", $"<Nullable>disable</Nullable>");
-        File.WriteAllText(projectFile, projectText);
-    }
-
     private int RunDotNetCli(string arguments, string? expectedOutputFragment = null)
     {
         var (exitCode, standardOutput) = RunDotnetCliAndWaitForCompletion(arguments);
         if (expectedOutputFragment is not null)
         {
-            Assert.Contains(expectedOutputFragment, standardOutput);
+            Assert.Contains(expectedOutputFragment, standardOutput, StringComparison.Ordinal);
         }
 
         return exitCode;

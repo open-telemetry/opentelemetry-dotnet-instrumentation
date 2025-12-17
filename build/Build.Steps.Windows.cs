@@ -1,3 +1,6 @@
+using System;
+using System.Collections.Generic;
+using System.IO;
 using Nuke.Common;
 using Nuke.Common.IO;
 using Nuke.Common.ProjectModel;
@@ -26,6 +29,7 @@ partial class Build
                 ? new[] { MSBuildTargetPlatform.x64, MSBuildTargetPlatform.x86 }
                 : new[] { MSBuildTargetPlatform.x86 };
 
+            SupportVs2026IfAvailable();
             foreach (var project in Solution.GetNativeSrcProjects())
             {
                 PerformLegacyRestoreIfNeeded(project);
@@ -33,6 +37,7 @@ partial class Build
                 var (major, minor, patch) = VersionHelper.GetVersionParts();
 
                 // Can't use dotnet msbuild, as needs to use the VS version of MSBuild
+
                 MSBuild(s => s
                     .SetTargetPath(project)
                     .SetConfiguration(BuildConfiguration)
@@ -43,6 +48,26 @@ partial class Build
                     .SetProperty("OTEL_AUTO_VERSION_PATCH", patch)
                     .CombineWith(platforms, (m, platform) => m
                         .SetTargetPlatform(platform)));
+            }
+
+            static void SupportVs2026IfAvailable()
+            {
+                // Typical installation folder: C:\Program Files\Microsoft Visual Studio\18\Enterprise\MSBuild\Current\Bin\amd64
+                // Waiting for official support in Nuke package https://github.com/nuke-build/nuke/pull/1583
+
+                string[] editions = ["Enterprise", "Professional", "Community", "Preview"];
+
+                foreach (var edition in editions)
+                {
+                    var msBuildPath = Path.Combine(SpecialFolder(SpecialFolders.ProgramFiles).NotNull(),
+                        $@"Microsoft Visual Studio\18\{edition}\MSBuild\Current\Bin\amd64\MSBuild.exe");
+
+                    if (File.Exists(msBuildPath))
+                    {
+                        MSBuildPath = msBuildPath;
+                        return;
+                    }
+                }
             }
         });
 

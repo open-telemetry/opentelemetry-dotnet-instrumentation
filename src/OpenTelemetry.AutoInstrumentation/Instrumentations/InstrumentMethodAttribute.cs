@@ -8,9 +8,9 @@ namespace OpenTelemetry.AutoInstrumentation.Instrumentations;
 /// by modifying the method body with callbacks. Used to generate the integration definitions file.
 /// </summary>
 [AttributeUsage(AttributeTargets.Class | AttributeTargets.Assembly, AllowMultiple = true, Inherited = false)]
-internal class InstrumentMethodAttribute : Attribute
+internal sealed class InstrumentMethodAttribute : Attribute
 {
-    public InstrumentMethodAttribute(string assemblyName, string typeName, string methodName, string returnTypeName, string[] parameterTypeNames, string minimumVersion, string maximumVersion, string integrationName, InstrumentationType type, IntegrationKind integrationKind = IntegrationKind.Direct)
+    public InstrumentMethodAttribute(string assemblyName, string typeName, string methodName, string returnTypeName, string[] parameterTypeNames, string minimumVersion, string maximumVersion, string integrationName, InstrumentationType type, IntegrationKind kind = IntegrationKind.Direct)
     {
         AssemblyName = assemblyName;
         TypeName = typeName;
@@ -24,7 +24,7 @@ internal class InstrumentMethodAttribute : Attribute
         };
         IntegrationName = integrationName;
         Type = type;
-        Kind = integrationKind;
+        Kind = kind;
     }
 
     /// <summary>
@@ -76,17 +76,17 @@ internal class InstrumentMethodAttribute : Attribute
     }
 
     /// <summary>
-    /// Gets or sets the integration name. Allows to group several integration with a single integration name.
+    /// Gets the integration name. Allows to group several integrations with a single integration name.
     /// </summary>
-    public string IntegrationName { get; set; }
+    public string IntegrationName { get; }
 
     /// <summary>
-    /// Gets or sets the integration type.
+    /// Gets the integration type.
     /// </summary>
-    public InstrumentationType Type { get; set; }
+    public InstrumentationType Type { get; }
 
     /// <summary>
-    /// Gets or sets the integration kind.
+    /// Gets the integration kind.
     /// </summary>
-    public IntegrationKind Kind { get; set; }
+    public IntegrationKind Kind { get; }
 }

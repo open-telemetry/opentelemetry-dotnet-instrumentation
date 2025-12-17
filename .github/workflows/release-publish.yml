@@ -18,7 +18,7 @@ jobs:
           dotnet-version: | 
             8.0.416
             9.0.308
-            10.0.100
+            10.0.101
 
       - name: Test the PowerShell module instructions from README.md
         shell: powershell
@@ -70,7 +70,7 @@ jobs:
           dotnet-version: | 
             8.0.416
             9.0.308
-            10.0.100
+            10.0.101
 
       - name: Install MacOS CoreUtils
         if: ${{ runner.os == 'macOS' }}
@@ -111,7 +111,7 @@ jobs:
     steps:
 
       - name: Checkout
-        uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # tag: v6.0.0
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # tag: v6.0.1
 
       - name: Test the Shell scripts from README.md in Docker container
         run: |

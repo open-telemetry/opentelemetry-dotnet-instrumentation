@@ -3,6 +3,7 @@
 
 using System.Collections.Concurrent;
 using System.Diagnostics;
+using System.Globalization;
 using System.Runtime.Serialization;
 using System.Text;
 using Newtonsoft.Json;
@@ -18,7 +19,7 @@ using Microsoft.AspNetCore.Http;
 
 namespace IntegrationTests.Helpers;
 
-public class MockZipkinCollector : IDisposable
+internal sealed class MockZipkinCollector : IDisposable
 {
     private readonly ITestOutputHelper _output;
     private readonly TestHttpServer _listener;
@@ -124,19 +125,19 @@ public class MockZipkinCollector : IDisposable
         message.AppendLine("Missing expectations:");
         foreach (var logline in missingExpectations)
         {
-            message.AppendLine($"  - \"{logline.Description}\"");
+            message.AppendLine(CultureInfo.InvariantCulture, $"  - \"{logline.Description}\"");
         }
 
         message.AppendLine("Entries meeting expectations:");
         foreach (var logline in expectationsMet)
         {
-            message.AppendLine($"    \"{logline}\"");
+            message.AppendLine(CultureInfo.InvariantCulture, $"    \"{logline}\"");
         }
 
         message.AppendLine("Additional entries:");
         foreach (var logline in additionalEntries)
         {
-            message.AppendLine($"  + \"{logline}\"");
+            message.AppendLine(CultureInfo.InvariantCulture, $"  + \"{logline}\"");
         }
 
         Assert.Fail(message.ToString());
@@ -152,10 +153,10 @@ public class MockZipkinCollector : IDisposable
 #else
     private async Task HandleHttpRequests(HttpContext ctx)
     {
-        using var bodyStream = await ctx.ReadBodyToMemoryAsync();
+        using var bodyStream = await ctx.ReadBodyToMemoryAsync().ConfigureAwait(false);
         HandleJsonStream(bodyStream);
 
-        await ctx.GenerateEmptyJsonResponseAsync();
+        await ctx.GenerateEmptyJsonResponseAsync().ConfigureAwait(false);
     }
 #endif
 
@@ -176,7 +177,7 @@ public class MockZipkinCollector : IDisposable
     }
 
     [DebuggerDisplay("TraceId={TraceId}, SpanId={SpanId}, Service={Service}, Name={Name}")]
-    public class ZSpanMock
+    internal sealed class ZSpanMock
     {
         [JsonExtensionData]
         private Dictionary<string, JToken> _zipkinData;
@@ -211,7 +212,11 @@ public class MockZipkinCollector : IDisposable
             {
                 if (_zipkinData.TryGetValue("kind", out var value))
                 {
+#if NET
+                    return Enum.Parse<ActivityKind>(value.ToString(), true);
+#else
                     return (ActivityKind)Enum.Parse(typeof(ActivityKind), value.ToString(), true);
+#endif
                 }
 
                 return ActivityKind.Internal;
@@ -220,7 +225,7 @@ public class MockZipkinCollector : IDisposable
 
         public long Start
         {
-            get => Convert.ToInt64(_zipkinData["timestamp"].ToString());
+            get => Convert.ToInt64(_zipkinData["timestamp"].ToString(), CultureInfo.InvariantCulture);
         }
 
         public long Duration { get; set; }
@@ -267,33 +272,33 @@ public class MockZipkinCollector : IDisposable
         public override string ToString()
         {
             var sb = new StringBuilder();
-            sb.AppendLine($"TraceId: {TraceId}");
-            sb.AppendLine($"ParentId: {ParentId}");
-            sb.AppendLine($"SpanId: {SpanId}");
-            sb.AppendLine($"Service: {Service}");
-            sb.AppendLine($"Name: {Name}");
-            sb.AppendLine($"Library: {Library}");
-            sb.AppendLine($"Kind: {Kind}");
-            sb.AppendLine($"Start: {Start}");
-            sb.AppendLine($"Duration: {Duration}");
-            sb.AppendLine($"Error: {Error}");
+            sb.AppendLine(CultureInfo.InvariantCulture, $"TraceId: {TraceId}");
+            sb.AppendLine(CultureInfo.InvariantCulture, $"ParentId: {ParentId}");
+            sb.AppendLine(CultureInfo.InvariantCulture, $"SpanId: {SpanId}");
+            sb.AppendLine(CultureInfo.InvariantCulture, $"Service: {Service}");
+            sb.AppendLine(CultureInfo.InvariantCulture, $"Name: {Name}");
+            sb.AppendLine(CultureInfo.InvariantCulture, $"Library: {Library}");
+            sb.AppendLine(CultureInfo.InvariantCulture, $"Kind: {Kind}");
+            sb.AppendLine(CultureInfo.InvariantCulture, $"Start: {Start}");
+            sb.AppendLine(CultureInfo.InvariantCulture, $"Duration: {Duration}");
+            sb.AppendLine(CultureInfo.InvariantCulture, $"Error: {Error}");
             sb.AppendLine("Tags:");
 
             if (Tags?.Count > 0)
             {
                 foreach (var kv in Tags)
                 {
-                    sb.Append($"\t{kv.Key}:{kv.Value}\n");
+                    sb.Append(CultureInfo.InvariantCulture, $"\t{kv.Key}:{kv.Value}\n");
                 }
             }
 
             sb.AppendLine("Logs:");
             foreach (var e in Logs)
             {
-                sb.Append($"\t{e.Key}:\n");
+                sb.Append(CultureInfo.InvariantCulture, $"\t{e.Key}:\n");
                 foreach (var kv in e.Value)
                 {
-                    sb.Append($"\t\t{kv.Key}:{kv.Value}\n");
+                    sb.Append(CultureInfo.InvariantCulture, $"\t\t{kv.Key}:{kv.Value}\n");
                 }
             }
 
@@ -311,17 +316,21 @@ public class MockZipkinCollector : IDisposable
             Library = Tags.GetValueOrDefault("otel.library.name");
 
             var error = Tags.GetValueOrDefault("error") ?? "false";
-            Error = (byte)(error.ToLowerInvariant().Equals("true") ? 1 : 0);
+#pragma warning disable CA1308 // Normalize strings to uppercase
+            Error = (byte)(error.ToLowerInvariant().Equals("true", StringComparison.Ordinal) ? 1 : 0);
+#pragma warning restore CA1308 // Normalize strings to uppercase
 
             var spanKind = _zipkinData.GetValueOrDefault("kind")?.ToString();
             if (spanKind != null)
             {
+#pragma warning disable CA1308 // Normalize strings to uppercase
                 Tags["span.kind"] = spanKind.ToLowerInvariant();
+#pragma warning restore CA1308 // Normalize strings to uppercase
             }
         }
     }
 
-    private class Expectation
+    private sealed class Expectation
     {
         public Expectation(Func<ZSpanMock, bool> predicate, string? description)
         {

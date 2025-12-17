@@ -3,7 +3,6 @@
 
 using System.ServiceModel;
 using System.ServiceModel.Channels;
-using System.Threading.Tasks;
 
 namespace TestApplication.Wcf.Client.NetFramework;
 

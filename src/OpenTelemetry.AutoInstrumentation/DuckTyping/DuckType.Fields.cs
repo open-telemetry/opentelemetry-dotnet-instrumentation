@@ -18,17 +18,17 @@ internal static partial class DuckType
         FieldInfo targetField,
         FieldInfo? instanceField)
     {
-        string proxyMemberName = proxyMember.Name;
-        Type proxyMemberReturnType = proxyMember is PropertyInfo pinfo ? pinfo.PropertyType : proxyMember is FieldInfo finfo ? finfo.FieldType : typeof(object);
+        var proxyMemberName = proxyMember.Name;
+        var proxyMemberReturnType = proxyMember is PropertyInfo pinfo ? pinfo.PropertyType : proxyMember is FieldInfo finfo ? finfo.FieldType : typeof(object);
 
-        MethodBuilder? proxyMethod = proxyTypeBuilder?.DefineMethod(
+        var proxyMethod = proxyTypeBuilder?.DefineMethod(
             "get_" + proxyMemberName,
             MethodAttributes.Public | MethodAttributes.SpecialName | MethodAttributes.Final | MethodAttributes.HideBySig | MethodAttributes.Virtual,
             proxyMemberReturnType,
             Type.EmptyTypes);
 
-        LazyILGenerator il = new LazyILGenerator(proxyMethod?.GetILGenerator());
-        Type returnType = targetField.FieldType;
+        var il = new LazyILGenerator(proxyMethod?.GetILGenerator());
+        var returnType = targetField.FieldType;
 
         // Load the instance
         if (!targetField.IsStatic)
@@ -50,15 +50,15 @@ internal static partial class DuckType
         {
             // If the instance or the field are non public we need to create a Dynamic method to overpass the visibility checks
             // we can't access non public types so we have to cast to object type (in the instance object and the return type if is needed).
-            string dynMethodName = $"_getNonPublicField_{targetField.DeclaringType.Name}_{targetField.Name}";
+            var dynMethodName = $"_getNonPublicField_{targetField.DeclaringType.Name}_{targetField.Name}";
             returnType = UseDirectAccessTo(proxyTypeBuilder, targetField.FieldType) ? targetField.FieldType : typeof(object);
 
             // We create the dynamic method
-            Type[] dynParameters = targetField.IsStatic ? Type.EmptyTypes : new[] { typeof(object) };
-            DynamicMethod dynMethod = new DynamicMethod(dynMethodName, returnType, dynParameters, proxyTypeBuilder.Module, true);
+            var dynParameters = targetField.IsStatic ? Type.EmptyTypes : [typeof(object)];
+            var dynMethod = new DynamicMethod(dynMethodName, returnType, dynParameters, proxyTypeBuilder.Module, true);
 
             // Emit the dynamic method body
-            LazyILGenerator dynIL = new LazyILGenerator(dynMethod.GetILGenerator());
+            var dynIL = new LazyILGenerator(dynMethod.GetILGenerator());
 
             if (!targetField.IsStatic)
             {
@@ -119,17 +119,17 @@ internal static partial class DuckType
         FieldInfo targetField,
         FieldInfo? instanceField)
     {
-        string proxyMemberName = proxyMember.Name;
-        Type proxyMemberReturnType = proxyMember is PropertyInfo pinfo ? pinfo.PropertyType : proxyMember is FieldInfo finfo ? finfo.FieldType : typeof(object);
+        var proxyMemberName = proxyMember.Name;
+        var proxyMemberReturnType = proxyMember is PropertyInfo pinfo ? pinfo.PropertyType : proxyMember is FieldInfo finfo ? finfo.FieldType : typeof(object);
 
-        MethodBuilder? method = proxyTypeBuilder?.DefineMethod(
+        var method = proxyTypeBuilder?.DefineMethod(
             "set_" + proxyMemberName,
             MethodAttributes.Public | MethodAttributes.SpecialName | MethodAttributes.Final | MethodAttributes.HideBySig | MethodAttributes.Virtual,
             typeof(void),
-            new[] { proxyMemberReturnType });
+            [proxyMemberReturnType]);
 
-        LazyILGenerator il = new LazyILGenerator(method?.GetILGenerator());
-        Type currentValueType = proxyMemberReturnType;
+        var il = new LazyILGenerator(method?.GetILGenerator());
+        var currentValueType = proxyMemberReturnType;
 
         // Load instance
         if (!targetField.IsStatic)
@@ -170,18 +170,18 @@ internal static partial class DuckType
         else if (targetField.DeclaringType is not null && proxyTypeBuilder is not null)
         {
             // If the instance or the field are non public we need to create a Dynamic method to overpass the visibility checks
-            string dynMethodName = $"_setField_{targetField.DeclaringType.Name}_{targetField.Name}";
+            var dynMethodName = $"_setField_{targetField.DeclaringType.Name}_{targetField.Name}";
 
             // Convert the field type for the dynamic method
-            Type dynValueType = UseDirectAccessTo(proxyTypeBuilder, targetField.FieldType) ? targetField.FieldType : typeof(object);
+            var dynValueType = UseDirectAccessTo(proxyTypeBuilder, targetField.FieldType) ? targetField.FieldType : typeof(object);
             il.WriteTypeConversion(currentValueType, dynValueType);
 
             // Create dynamic method
-            Type[] dynParameters = targetField.IsStatic ? new[] { dynValueType } : new[] { typeof(object), dynValueType };
-            DynamicMethod dynMethod = new DynamicMethod(dynMethodName, typeof(void), dynParameters, proxyTypeBuilder.Module, true);
+            Type[] dynParameters = targetField.IsStatic ? [dynValueType] : [typeof(object), dynValueType];
+            var dynMethod = new DynamicMethod(dynMethodName, typeof(void), dynParameters, proxyTypeBuilder.Module, true);
 
             // Write the dynamic method body
-            LazyILGenerator dynIL = new LazyILGenerator(dynMethod.GetILGenerator());
+            var dynIL = new LazyILGenerator(dynMethod.GetILGenerator());
             dynIL.Emit(OpCodes.Ldarg_0);
 
             if (targetField.IsStatic)
@@ -210,7 +210,7 @@ internal static partial class DuckType
         else
         {
             // Dry run: We enable all checks done in the preview if branch
-            Type dynValueType = UseDirectAccessTo(proxyTypeBuilder, targetField.FieldType) ? targetField.FieldType : typeof(object);
+            var dynValueType = UseDirectAccessTo(proxyTypeBuilder, targetField.FieldType) ? targetField.FieldType : typeof(object);
             ILHelpersExtensions.CheckTypeConversion(currentValueType, dynValueType);
             ILHelpersExtensions.CheckTypeConversion(dynValueType, targetField.FieldType);
         }

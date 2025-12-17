@@ -1,14 +1,9 @@
 // Copyright The OpenTelemetry Authors
 // SPDX-License-Identifier: Apache-2.0
 
-#if NET
-using System.Diagnostics;
-#endif
 using System.Reflection;
 using OpenTelemetry.AutoInstrumentation.Configurations;
-#if NET
 using OpenTelemetry.AutoInstrumentation.ContinuousProfiler;
-#endif
 using OpenTelemetry.AutoInstrumentation.Diagnostics;
 using OpenTelemetry.AutoInstrumentation.Instrumentations.NoCode;
 using OpenTelemetry.AutoInstrumentation.Loading;
@@ -39,9 +34,11 @@ internal static class Instrumentation
 
     private static PluginManager? _pluginManager;
 
-#if NET
     private static SampleExporter? _sampleExporter;
     private static SampleExporterBuilder? _sampleExporterBuilder;
+
+#if NETFRAMEWORK
+    private static CanaryThreadManager? _canaryThreadManager;
 #endif
 
     internal static LoggerProvider? LoggerProvider
@@ -111,18 +108,16 @@ internal static class Instrumentation
             AppDomain.CurrentDomain.ProcessExit += OnExit;
             AppDomain.CurrentDomain.DomainUnload += OnExit;
 
-#if NET
             var profilerEnabled = GeneralSettings.Value.ProfilerEnabled;
 
             if (profilerEnabled)
             {
-                InitializeSampling();
+                TryInitializeContinuousProfiling();
             }
             else
             {
                 Logger.Information("CLR Profiler is not enabled. Continuous Profiler will be not started even if configured correctly.");
             }
-#endif
 
             if (TracerSettings.Value.TracesEnabled || MetricSettings.Value.MetricsEnabled)
             {
@@ -219,7 +214,18 @@ internal static class Instrumentation
         }
     }
 
-#if NET
+    private static void TryInitializeContinuousProfiling()
+    {
+        try
+        {
+            InitializeSampling();
+        }
+        catch (Exception ex)
+        {
+            Logger.Error(ex, "Failed to initialize continuous profiling.");
+        }
+    }
+
     private static void InitializeSampling()
     {
         var (threadSamplingEnabled, threadSamplingInterval, allocationSamplingEnabled, maxMemorySamplesPerMinute, exportInterval, exportTimeout, continuousProfilerExporter) = _pluginManager!.GetFirstContinuousConfiguration();
@@ -278,6 +284,19 @@ internal static class Instrumentation
         }
 
         NativeMethods.ConfigureNativeContinuousProfiler(threadSamplingEnabled, threadSamplingInterval, allocationSamplingEnabled, maxMemorySamplesPerMinute, selectiveSamplingInterval);
+#if NETFRAMEWORK
+        // On .NET Framework, we need a dedicated canary thread for seeded stack walking
+        _canaryThreadManager = new CanaryThreadManager();
+        if (!_canaryThreadManager.Start(TimeSpan.FromSeconds(5)))
+        {
+            Logger.Error("Failed to start canary thread. Continuous profiling will not be enabled.");
+            _canaryThreadManager.Dispose();
+            _canaryThreadManager = null;
+            return;
+        }
+
+        Logger.Information("Canary thread started successfully for .NET Framework profiling.");
+#endif
         _sampleExporter = _sampleExporterBuilder?.Build();
     }
 
@@ -296,13 +315,15 @@ internal static class Instrumentation
 
         InitializeBufferProcessing(exportInterval, exportTimeout);
 
+#if NET
         var handler = selectiveSampleExportMethod.CreateDelegate<Action<byte[], int, CancellationToken>>(exporter!);
+#else
+        var handler = (Action<byte[], int, CancellationToken>)selectiveSampleExportMethod.CreateDelegate(typeof(Action<byte[], int, CancellationToken>), exporter!);
+#endif
         _sampleExporterBuilder?.AddHandler(SampleType.SelectedThreads, handler, exportTimeout);
         return true;
     }
-#endif
 
-#if NET
     private static bool TryInitializeContinuousSamplingExport(
         object continuousProfilerExporter,
         bool threadSamplingEnabled,
@@ -326,8 +347,13 @@ internal static class Instrumentation
             return false;
         }
 
+#if NET
         var threadSamplesMethod = exportThreadSamplesMethod.CreateDelegate<Action<byte[], int, CancellationToken>>(continuousProfilerExporter);
         var allocationSamplesMethod = exportAllocationSamplesMethod.CreateDelegate<Action<byte[], int, CancellationToken>>(continuousProfilerExporter);
+#else
+        var threadSamplesMethod = (Action<byte[], int, CancellationToken>)exportThreadSamplesMethod.CreateDelegate(typeof(Action<byte[], int, CancellationToken>), continuousProfilerExporter);
+        var allocationSamplesMethod = (Action<byte[], int, CancellationToken>)exportAllocationSamplesMethod.CreateDelegate(typeof(Action<byte[], int, CancellationToken>), continuousProfilerExporter);
+#endif
 
         InitializeBufferProcessing(exportInterval, exportTimeout);
 
@@ -352,13 +378,23 @@ internal static class Instrumentation
             .SetExportInterval(exportInterval)
             .SetExportTimeout(exportTimeout);
     }
-#endif
 
     private static LoggerProvider? InitializeLoggerProvider()
     {
         // ILogger bridge is initialized using ILogger-specific extension methods in LoggerInitializer class.
         // That extension methods sets up its own LogProvider.
-        if (LogSettings.Value.EnableLog4NetBridge && LogSettings.Value.LogsEnabled && LogSettings.Value.EnabledInstrumentations.Contains(LogInstrumentation.Log4Net))
+
+        Logger.Debug($"InitializeLoggerProvider called. LogsEnabled={LogSettings.Value.LogsEnabled}, EnableLog4NetBridge={LogSettings.Value.EnableLog4NetBridge}, EnableNLogBridge={LogSettings.Value.EnableNLogBridge}");
+        Logger.Debug($"EnabledInstrumentations: {string.Join(", ", LogSettings.Value.EnabledInstrumentations)}");
+
+        // Initialize logger provider if any bridge is enabled
+        var shouldInitialize = LogSettings.Value.LogsEnabled && (
+            (LogSettings.Value.EnableLog4NetBridge && LogSettings.Value.EnabledInstrumentations.Contains(LogInstrumentation.Log4Net)) ||
+            (LogSettings.Value.EnableNLogBridge && LogSettings.Value.EnabledInstrumentations.Contains(LogInstrumentation.NLog)));
+
+        Logger.Debug($"ShouldInitialize logger provider: {shouldInitialize}");
+
+        if (shouldInitialize)
         {
             // TODO: Replace reflection usage when Logs Api is made public in non-rc builds.
             // Sdk.CreateLoggerProviderBuilder()
@@ -535,11 +571,13 @@ internal static class Instrumentation
 
         try
         {
-#if NET
             LazyInstrumentationLoader?.Dispose();
             _sampleExporter?.Dispose();
 
+#if NETFRAMEWORK
+            _canaryThreadManager?.Dispose();
 #endif
+
             _tracerProvider?.Dispose();
             _meterProvider?.Dispose();
             if (LoggerProviderFactory.IsValueCreated)
@@ -557,7 +595,7 @@ internal static class Instrumentation
             {
                 Logger.Error(ex, "An error occurred while attempting to exit.");
             }
-            catch
+            catch (Exception)
             {
                 // If we encounter an error while logging there is nothing else we can do
                 // with the exception.

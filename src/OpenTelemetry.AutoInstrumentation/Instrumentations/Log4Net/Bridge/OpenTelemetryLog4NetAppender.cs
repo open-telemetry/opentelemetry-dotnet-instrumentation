@@ -47,7 +47,7 @@ internal class OpenTelemetryLog4NetAppender
     [DuckReverseMethod]
     public string Name { get; set; } = nameof(OpenTelemetryLog4NetAppender);
 
-    [DuckReverseMethod(ParameterTypeNames = new[] { "log4net.Core.LoggingEvent, log4net" })]
+    [DuckReverseMethod(ParameterTypeNames = ["log4net.Core.LoggingEvent, log4net"])]
     public void DoAppend(ILoggingEvent loggingEvent)
     {
         if (Sdk.SuppressInstrumentation || loggingEvent.Level.Value == LevelOffValue)
@@ -119,7 +119,9 @@ internal class OpenTelemetryLog4NetAppender
     }
 
     [DuckReverseMethod]
+#pragma warning disable CA1822 // Method does not access instance data and can be marked as static. Needed for duck typing.
     public void Close()
+#pragma warning restore CA1822 // Method does not access instance data and can be marked as static. Needed for duck typing.
     {
     }
 
@@ -148,7 +150,7 @@ internal class OpenTelemetryLog4NetAppender
                 continue;
             }
 
-            if (key.StartsWith("log4net:") ||
+            if (key.StartsWith("log4net:", StringComparison.Ordinal) ||
                 key == LogsTraceContextInjectionConstants.SpanIdPropertyName ||
                 key == LogsTraceContextInjectionConstants.TraceIdPropertyName ||
                 key == LogsTraceContextInjectionConstants.TraceFlagsPropertyName)
@@ -165,8 +167,12 @@ internal class OpenTelemetryLog4NetAppender
         try
         {
             var methodInfo = typeof(LoggerProvider)
-                .GetMethod("GetLogger", BindingFlags.NonPublic | BindingFlags.Instance, null, new[] { typeof(string) }, null)!;
+                .GetMethod("GetLogger", BindingFlags.NonPublic | BindingFlags.Instance, null, [typeof(string)], null)!;
+#if NET
+            return methodInfo.CreateDelegate<Func<string?, object?>>(loggerProvider);
+#else
             return (Func<string?, object?>)methodInfo.CreateDelegate(typeof(Func<string?, object?>), loggerProvider);
+#endif
         }
         catch (Exception e)
         {

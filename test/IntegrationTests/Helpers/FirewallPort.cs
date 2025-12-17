@@ -5,7 +5,7 @@ using Xunit.Abstractions;
 
 namespace IntegrationTests.Helpers;
 
-public class FirewallPort : IDisposable
+internal sealed class FirewallPort : IDisposable
 {
     private readonly ITestOutputHelper _output;
 

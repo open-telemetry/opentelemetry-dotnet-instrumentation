@@ -17,7 +17,7 @@ namespace OpenTelemetry.AutoInstrumentation.Instrumentations.Kafka.Integrations;
     typeName: IntegrationConstants.ConsumerTypeName,
     methodName: IntegrationConstants.ConsumeSyncMethodName,
     returnTypeName: IntegrationConstants.ConsumeResultTypeName,
-    parameterTypeNames: new[] { ClrNames.Int32 },
+    parameterTypeNames: [ClrNames.Int32],
     minimumVersion: IntegrationConstants.MinVersion,
     maximumVersion: IntegrationConstants.MaxVersion,
     integrationName: IntegrationConstants.IntegrationName,

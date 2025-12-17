@@ -16,47 +16,31 @@ namespace OpenTelemetry.AutoInstrumentation.DuckTyping;
 internal static partial class DuckType
 {
     [DebuggerBrowsable(DebuggerBrowsableState.Never)]
-    private static readonly object Locker;
+    private static readonly object Locker = new();
     [DebuggerBrowsable(DebuggerBrowsableState.Never)]
-    private static readonly ConcurrentDictionary<TypesTuple, Lazy<CreateTypeResult>> DuckTypeCache;
+    private static readonly ConcurrentDictionary<TypesTuple, Lazy<CreateTypeResult>> DuckTypeCache = new();
     [DebuggerBrowsable(DebuggerBrowsableState.Never)]
-    private static readonly Dictionary<Assembly, ModuleBuilder> ActiveBuilders;
+    private static readonly Dictionary<Assembly, ModuleBuilder> ActiveBuilders = new();
     [DebuggerBrowsable(DebuggerBrowsableState.Never)]
-    private static readonly Dictionary<ModuleBuilder, HashSet<string>> IgnoresAccessChecksToAssembliesSetDictionary;
+    private static readonly Dictionary<ModuleBuilder, HashSet<string>> IgnoresAccessChecksToAssembliesSetDictionary = new();
 
     [DebuggerBrowsable(DebuggerBrowsableState.Never)]
-    private static readonly MethodInfo? _getTypeFromHandleMethodInfo;
+    private static readonly MethodInfo? _getTypeFromHandleMethodInfo = typeof(Type).GetMethod(nameof(Type.GetTypeFromHandle));
     [DebuggerBrowsable(DebuggerBrowsableState.Never)]
-    private static readonly MethodInfo? _enumToObjectMethodInfo;
+    private static readonly MethodInfo? _enumToObjectMethodInfo = typeof(Enum).GetMethod(nameof(Enum.ToObject), [typeof(Type), typeof(object)]);
     [DebuggerBrowsable(DebuggerBrowsableState.Never)]
-    private static readonly PropertyInfo? _duckTypeInstancePropertyInfo;
+    private static readonly PropertyInfo? _duckTypeInstancePropertyInfo = typeof(IDuckType).GetProperty(nameof(IDuckType.Instance));
     [DebuggerBrowsable(DebuggerBrowsableState.Never)]
-    private static readonly MethodInfo? _methodBuilderGetToken;
+    private static readonly MethodInfo? _methodBuilderGetToken = typeof(MethodBuilder).GetMethod("GetToken", BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance)
+                                                                 ?? typeof(MethodBuilder).GetProperty("MetadataToken", BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance)?.GetMethod;
+
     [DebuggerBrowsable(DebuggerBrowsableState.Never)]
-    private static readonly ConstructorInfo? _ignoresAccessChecksToAttributeCtor;
+    private static readonly ConstructorInfo? _ignoresAccessChecksToAttributeCtor = typeof(IgnoresAccessChecksToAttribute).GetConstructor([typeof(string)]);
 
     [DebuggerBrowsable(DebuggerBrowsableState.Never)]
     private static long _assemblyCount;
     [DebuggerBrowsable(DebuggerBrowsableState.Never)]
     private static long _typeCount;
-
-    static DuckType()
-    {
-        Locker = new();
-        DuckTypeCache = new();
-        ActiveBuilders = new();
-        IgnoresAccessChecksToAssembliesSetDictionary = new();
-
-        _getTypeFromHandleMethodInfo = typeof(Type).GetMethod(nameof(Type.GetTypeFromHandle));
-        _enumToObjectMethodInfo = typeof(Enum).GetMethod(nameof(Enum.ToObject), new[] { typeof(Type), typeof(object) });
-        _duckTypeInstancePropertyInfo = typeof(IDuckType).GetProperty(nameof(IDuckType.Instance));
-        _methodBuilderGetToken = typeof(MethodBuilder).GetMethod("GetToken", BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance)
-                                 ?? typeof(MethodBuilder).GetProperty("MetadataToken", BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance)?.GetMethod;
-        _ignoresAccessChecksToAttributeCtor = typeof(IgnoresAccessChecksToAttribute).GetConstructor(new[] { typeof(string) });
-
-        _assemblyCount = 0;
-        _typeCount = 0;
-    }
 
     /// <summary>
     /// Gets the Type.GetTypeFromHandle method info
@@ -141,7 +125,7 @@ internal static partial class DuckType
     /// <returns>ModuleBuilder instance</returns>
     private static ModuleBuilder GetModuleBuilder(Type targetType, bool isVisible)
     {
-        Assembly targetAssembly = targetType.Assembly;
+        var targetAssembly = targetType.Assembly;
 
         if (!isVisible)
         {
@@ -172,8 +156,10 @@ internal static partial class DuckType
 
         static ModuleBuilder CreateModuleBuilder(string name, Assembly targetAssembly)
         {
-            var assemblyName = new AssemblyName(name + $"_{++_assemblyCount}");
-            assemblyName.Version = targetAssembly.GetName().Version;
+            var assemblyName = new AssemblyName(name + $"_{++_assemblyCount}")
+            {
+                Version = targetAssembly.GetName().Version
+            };
             var assemblyBuilder = AssemblyBuilder.DefineDynamicAssembly(assemblyName, AssemblyBuilderAccess.Run);
             return assemblyBuilder.DefineDynamicModule("MainModule");
         }

@@ -7,6 +7,7 @@
     <Nullable>disable</Nullable>
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>$(MSBuildThisFileDirectory)..\..\test\test-keypair.snk</AssemblyOriginatorKeyFile>
+    <AnalysisLevel>latest-All</AnalysisLevel>
   </PropertyGroup>
 
   <ItemGroup>

@@ -42,6 +42,6 @@ internal class PluginsConfiguration
             }
         }
 
-        return uniquePlugins.ToList();
+        return [.. uniquePlugins];
     }
 }

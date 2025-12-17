@@ -20,21 +20,21 @@ internal static partial class DuckType
         Func<LazyILGenerator, Type, Type, Type> duckCastInnerToOuterFunc,
         Func<Type, Type, bool> needsDuckChaining)
     {
-        MethodInfo? targetMethod = targetProperty.GetMethod;
+        var targetMethod = targetProperty.GetMethod;
         if (targetMethod is null)
         {
             return null;
         }
 
-        string proxyMemberName = proxyMember.Name;
-        Type proxyMemberReturnType = typeof(object);
-        Type[] proxyParameterTypes = Type.EmptyTypes;
-        Type[] targetParametersTypes = GetPropertyGetParametersTypes(proxyTypeBuilder, targetProperty, true).ToArray();
+        var proxyMemberName = proxyMember.Name;
+        var proxyMemberReturnType = typeof(object);
+        var proxyParameterTypes = Type.EmptyTypes;
+        var targetParametersTypes = GetPropertyGetParametersTypes(proxyTypeBuilder, targetProperty, true).ToArray();
 
         if (proxyMember is PropertyInfo proxyProperty)
         {
             proxyMemberReturnType = proxyProperty.PropertyType;
-            proxyParameterTypes = GetPropertyGetParametersTypes(proxyTypeBuilder, proxyProperty, true).ToArray();
+            proxyParameterTypes = [.. GetPropertyGetParametersTypes(proxyTypeBuilder, proxyProperty, true)];
             if (proxyParameterTypes.Length != targetParametersTypes.Length)
             {
                 DuckTypePropertyArgumentsLengthException.Throw(proxyProperty);
@@ -50,14 +50,14 @@ internal static partial class DuckType
             }
         }
 
-        MethodBuilder? proxyMethod = proxyTypeBuilder?.DefineMethod(
+        var proxyMethod = proxyTypeBuilder?.DefineMethod(
             "get_" + proxyMemberName,
             MethodAttributes.Public | MethodAttributes.SpecialName | MethodAttributes.Final | MethodAttributes.HideBySig | MethodAttributes.Virtual,
             proxyMemberReturnType,
             proxyParameterTypes);
 
-        LazyILGenerator il = new LazyILGenerator(proxyMethod?.GetILGenerator());
-        Type returnType = targetProperty.PropertyType;
+        var il = new LazyILGenerator(proxyMethod?.GetILGenerator());
+        var returnType = targetProperty.PropertyType;
 
         // Load the instance if needed
         if (!targetMethod.IsStatic)
@@ -70,10 +70,10 @@ internal static partial class DuckType
         }
 
         // Load the indexer keys to the stack
-        for (int pIndex = 0; pIndex < proxyParameterTypes.Length; pIndex++)
+        for (var pIndex = 0; pIndex < proxyParameterTypes.Length; pIndex++)
         {
-            Type proxyParamType = proxyParameterTypes[pIndex];
-            Type targetParamType = targetParametersTypes[pIndex];
+            var proxyParamType = proxyParameterTypes[pIndex];
+            var targetParamType = targetParametersTypes[pIndex];
 
             // Check if the type can be converted of if we need to enable duck chaining
             if (NeedsDuckChaining(targetParamType, proxyParamType))
@@ -120,23 +120,23 @@ internal static partial class DuckType
             // If the instance is not public we need to create a Dynamic method to overpass the visibility checks
             // we can't access non public types so we have to cast to object type (in the instance object and the return type).
 
-            string dynMethodName = $"_getNonPublicProperty_{targetProperty.DeclaringType.Name}_{targetProperty.Name}";
+            var dynMethodName = $"_getNonPublicProperty_{targetProperty.DeclaringType.Name}_{targetProperty.Name}";
             returnType = UseDirectAccessTo(proxyTypeBuilder, targetProperty.PropertyType) ? targetProperty.PropertyType : typeof(object);
 
             // We create the dynamic method
-            Type[] targetParameters = GetPropertyGetParametersTypes(proxyTypeBuilder, targetProperty, false, !targetMethod.IsStatic).ToArray();
-            Type[] dynParameters = targetMethod.IsStatic ? targetParametersTypes : (new[] { typeof(object) }).Concat(targetParametersTypes).ToArray();
-            DynamicMethod dynMethod = new DynamicMethod(dynMethodName, returnType, dynParameters, proxyTypeBuilder.Module, true);
+            var targetParameters = GetPropertyGetParametersTypes(proxyTypeBuilder, targetProperty, false, !targetMethod.IsStatic).ToArray();
+            var dynParameters = targetMethod.IsStatic ? targetParametersTypes : [.. (new[] { typeof(object) }), .. targetParametersTypes];
+            var dynMethod = new DynamicMethod(dynMethodName, returnType, dynParameters, proxyTypeBuilder.Module, true);
 
             // Emit the dynamic method body
-            LazyILGenerator dynIL = new LazyILGenerator(dynMethod.GetILGenerator());
+            var dynIL = new LazyILGenerator(dynMethod.GetILGenerator());
 
             if (!targetMethod.IsStatic)
             {
                 dynIL.LoadInstanceArgument(typeof(object), targetProperty.DeclaringType);
             }
 
-            for (int idx = targetMethod.IsStatic ? 0 : 1; idx < dynParameters.Length; idx++)
+            for (var idx = targetMethod.IsStatic ? 0 : 1; idx < dynParameters.Length; idx++)
             {
                 dynIL.WriteLoadArgument(idx, true);
                 dynIL.WriteTypeConversion(dynParameters[idx], targetParameters[idx]);
@@ -154,9 +154,9 @@ internal static partial class DuckType
         {
             // Dry run: We enable all checks done in the preview if branch
             returnType = UseDirectAccessTo(proxyTypeBuilder, targetProperty.PropertyType) ? targetProperty.PropertyType : typeof(object);
-            Type[] targetParameters = GetPropertyGetParametersTypes(proxyTypeBuilder, targetProperty, false, !targetMethod.IsStatic).ToArray();
-            Type[] dynParameters = targetMethod.IsStatic ? targetParametersTypes : (new[] { typeof(object) }).Concat(targetParametersTypes).ToArray();
-            for (int idx = targetMethod.IsStatic ? 0 : 1; idx < dynParameters.Length; idx++)
+            var targetParameters = GetPropertyGetParametersTypes(proxyTypeBuilder, targetProperty, false, !targetMethod.IsStatic).ToArray();
+            var dynParameters = targetMethod.IsStatic ? targetParametersTypes : [.. (new[] { typeof(object) }), .. targetParametersTypes];
+            for (var idx = targetMethod.IsStatic ? 0 : 1; idx < dynParameters.Length; idx++)
             {
                 ILHelpersExtensions.CheckTypeConversion(dynParameters[idx], targetParameters[idx]);
             }
@@ -199,20 +199,20 @@ internal static partial class DuckType
         Func<LazyILGenerator, Type, Type, Type> duckCastOuterToInner,
         Func<Type, Type, bool> needsDuckChaining)
     {
-        MethodInfo? targetMethod = targetProperty.SetMethod;
+        var targetMethod = targetProperty.SetMethod;
         if (targetMethod is null)
         {
             return null;
         }
 
         string? proxyMemberName = null;
-        Type[] proxyParameterTypes = Type.EmptyTypes;
-        Type[] targetParametersTypes = GetPropertySetParametersTypes(proxyTypeBuilder, targetProperty, true).ToArray();
+        var proxyParameterTypes = Type.EmptyTypes;
+        var targetParametersTypes = GetPropertySetParametersTypes(proxyTypeBuilder, targetProperty, true).ToArray();
 
         if (proxyMember is PropertyInfo proxyProperty)
         {
             proxyMemberName = proxyProperty.Name;
-            proxyParameterTypes = GetPropertySetParametersTypes(proxyTypeBuilder, proxyProperty, true).ToArray();
+            proxyParameterTypes = [.. GetPropertySetParametersTypes(proxyTypeBuilder, proxyProperty, true)];
             if (proxyParameterTypes.Length != targetParametersTypes.Length)
             {
                 DuckTypePropertyArgumentsLengthException.Throw(proxyProperty);
@@ -221,20 +221,20 @@ internal static partial class DuckType
         else if (proxyMember is FieldInfo proxyField)
         {
             proxyMemberName = proxyField.Name;
-            proxyParameterTypes = new[] { proxyField.FieldType };
+            proxyParameterTypes = [proxyField.FieldType];
             if (proxyParameterTypes.Length != targetParametersTypes.Length)
             {
                 DuckTypePropertyArgumentsLengthException.Throw(targetProperty);
             }
         }
 
-        MethodBuilder? proxyMethod = proxyTypeBuilder?.DefineMethod(
+        var proxyMethod = proxyTypeBuilder?.DefineMethod(
             "set_" + proxyMemberName,
             MethodAttributes.Public | MethodAttributes.SpecialName | MethodAttributes.Final | MethodAttributes.HideBySig | MethodAttributes.Virtual,
             typeof(void),
             proxyParameterTypes);
 
-        LazyILGenerator il = new LazyILGenerator(proxyMethod?.GetILGenerator());
+        var il = new LazyILGenerator(proxyMethod?.GetILGenerator());
 
         // Load the instance if needed
         if (!targetMethod.IsStatic)
@@ -247,10 +247,10 @@ internal static partial class DuckType
         }
 
         // Load the indexer keys and set value to the stack
-        for (int pIndex = 0; pIndex < proxyParameterTypes.Length; pIndex++)
+        for (var pIndex = 0; pIndex < proxyParameterTypes.Length; pIndex++)
         {
-            Type proxyParamType = proxyParameterTypes[pIndex];
-            Type targetParamType = targetParametersTypes[pIndex];
+            var proxyParamType = proxyParameterTypes[pIndex];
+            var targetParamType = targetParametersTypes[pIndex];
 
             // Check if the type can be converted of if we need to enable duck chaining
             if (needsDuckChaining(targetParamType, proxyParamType))
@@ -296,22 +296,22 @@ internal static partial class DuckType
             // If the instance is not public we need to create a Dynamic method to overpass the visibility checks
             // we can't access non public types so we have to cast to object type (in the instance object and the return type).
 
-            string dynMethodName = $"_setNonPublicProperty+{targetProperty.DeclaringType.Name}.{targetProperty.Name}";
+            var dynMethodName = $"_setNonPublicProperty+{targetProperty.DeclaringType.Name}.{targetProperty.Name}";
 
             // We create the dynamic method
-            Type[] targetParameters = GetPropertySetParametersTypes(proxyTypeBuilder, targetProperty, false, !targetMethod.IsStatic).ToArray();
-            Type[] dynParameters = targetMethod.IsStatic ? targetParametersTypes : (new[] { typeof(object) }).Concat(targetParametersTypes).ToArray();
-            DynamicMethod dynMethod = new DynamicMethod(dynMethodName, typeof(void), dynParameters, proxyTypeBuilder.Module, true);
+            var targetParameters = GetPropertySetParametersTypes(proxyTypeBuilder, targetProperty, false, !targetMethod.IsStatic).ToArray();
+            var dynParameters = targetMethod.IsStatic ? targetParametersTypes : [.. (new[] { typeof(object) }), .. targetParametersTypes];
+            var dynMethod = new DynamicMethod(dynMethodName, typeof(void), dynParameters, proxyTypeBuilder.Module, true);
 
             // Emit the dynamic method body
-            LazyILGenerator dynIL = new LazyILGenerator(dynMethod.GetILGenerator());
+            var dynIL = new LazyILGenerator(dynMethod.GetILGenerator());
 
             if (!targetMethod.IsStatic)
             {
                 dynIL.LoadInstanceArgument(typeof(object), targetProperty.DeclaringType);
             }
 
-            for (int idx = targetMethod.IsStatic ? 0 : 1; idx < dynParameters.Length; idx++)
+            for (var idx = targetMethod.IsStatic ? 0 : 1; idx < dynParameters.Length; idx++)
             {
                 dynIL.WriteLoadArgument(idx, true);
                 dynIL.WriteTypeConversion(dynParameters[idx], targetParameters[idx]);
@@ -326,9 +326,9 @@ internal static partial class DuckType
         }
         else
         {
-            Type[] targetParameters = GetPropertySetParametersTypes(proxyTypeBuilder, targetProperty, false, !targetMethod.IsStatic).ToArray();
-            Type[] dynParameters = targetMethod.IsStatic ? targetParametersTypes : (new[] { typeof(object) }).Concat(targetParametersTypes).ToArray();
-            for (int idx = targetMethod.IsStatic ? 0 : 1; idx < dynParameters.Length; idx++)
+            var targetParameters = GetPropertySetParametersTypes(proxyTypeBuilder, targetProperty, false, !targetMethod.IsStatic).ToArray();
+            var dynParameters = targetMethod.IsStatic ? targetParametersTypes : [.. (new[] { typeof(object) }), .. targetParametersTypes];
+            for (var idx = targetMethod.IsStatic ? 0 : 1; idx < dynParameters.Length; idx++)
             {
                 ILHelpersExtensions.CheckTypeConversion(dynParameters[idx], targetParameters[idx]);
             }
@@ -351,8 +351,8 @@ internal static partial class DuckType
             yield return typeof(object);
         }
 
-        ParameterInfo[] idxParams = property.GetIndexParameters();
-        foreach (ParameterInfo parameter in idxParams)
+        var idxParams = property.GetIndexParameters();
+        foreach (var parameter in idxParams)
         {
             if (originalTypes || UseDirectAccessTo(typeBuilder, parameter.ParameterType))
             {
@@ -372,7 +372,7 @@ internal static partial class DuckType
             yield return typeof(object);
         }
 
-        foreach (Type indexType in GetPropertyGetParametersTypes(typeBuilder, property, originalTypes))
+        foreach (var indexType in GetPropertyGetParametersTypes(typeBuilder, property, originalTypes))
         {
             yield return indexType;
         }

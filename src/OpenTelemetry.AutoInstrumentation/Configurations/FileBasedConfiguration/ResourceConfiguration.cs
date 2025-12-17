@@ -1,9 +1,6 @@
 // Copyright The OpenTelemetry Authors
 // SPDX-License-Identifier: Apache-2.0
 
-using System.Diagnostics;
-using System.Globalization;
-using OpenTelemetry.AutoInstrumentation.Logging;
 using Vendors.YamlDotNet.Serialization;
 
 namespace OpenTelemetry.AutoInstrumentation.Configurations.FileBasedConfiguration;
@@ -34,10 +31,9 @@ internal class ResourceConfiguration
 
         if (Attributes != null)
         {
-            resourceAttributesWithPriority = YamlAttribute.ParseAttributes(Attributes)
+            resourceAttributesWithPriority = [.. YamlAttribute.ParseAttributes(Attributes)
                 .Where(kv => kv.Value != null)
-                .Select(kv => new KeyValuePair<string, object>(kv.Key, kv.Value!))
-                .ToList();
+                .Select(kv => new KeyValuePair<string, object>(kv.Key, kv.Value!))];
         }
 
         if (!string.IsNullOrEmpty(AttributesList))

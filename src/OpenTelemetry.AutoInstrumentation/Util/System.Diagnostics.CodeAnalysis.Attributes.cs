@@ -113,7 +113,9 @@ internal sealed class MemberNotNullAttribute : Attribute
     /// <param name="member">
     /// The field or property member that is promised to be not-null.
     /// </param>
-    public MemberNotNullAttribute(string member) => Members = new[] { member };
+#pragma warning disable CA1019 // Add public read-only properties to attribute classes, it is available by Members property
+    public MemberNotNullAttribute(string member) => Members = [member];
+#pragma warning restore CA1019 // Add public read-only properties to attribute classes, it is available by Members property
 
     /// <summary>Initializes a new instance of the <see cref="MemberNotNullAttribute"/> class with the list of field and property members.</summary>
     /// <param name="members">
@@ -136,10 +138,12 @@ internal sealed class MemberNotNullWhenAttribute : Attribute
     /// <param name="member">
     /// The field or property member that is promised to be not-null.
     /// </param>
+#pragma warning disable CA1019 // Add public read-only properties to attribute classes, it is available by Members property
     public MemberNotNullWhenAttribute(bool returnValue, string member)
+#pragma warning disable CA1019 // Add public read-only properties to attribute classes, it is available by Members property
     {
         ReturnValue = returnValue;
-        Members = new[] { member };
+        Members = [member];
     }
 
     /// <summary>Initializes a new instance of the <see cref="MemberNotNullWhenAttribute"/> class with the specified return value condition and list of field and property members.</summary>

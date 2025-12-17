@@ -123,6 +123,7 @@ internal static class ClassA
         {
             internal static class TripleInternalClassB<TC>
             {
+                [MethodImpl(MethodImplOptions.NoInlining)]
                 public static void MethodB<TB>(int testArg, TC[] a, TB b, TD t, IList<TA> c, IList<string> d)
                 {
                     OTelAutoCallbackTest(TestCallback, testArg);

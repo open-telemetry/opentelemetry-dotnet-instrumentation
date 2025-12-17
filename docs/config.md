@@ -206,6 +206,7 @@ due to lack of stable semantic convention.
 |-----------|---------------------------------------------------------------------------------------------------------------------------------|--------------------|--------------------------|-----------------------------------------------------------------------------------------------------------------------------------|
 | `ILOGGER` | [Microsoft.Extensions.Logging](https://www.nuget.org/packages/Microsoft.Extensions.Logging) **Not supported on .NET Framework** | ≥8.0.0             | bytecode or source \[1\] | [Experimental](https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/versioning-and-stability.md) |
 | `LOG4NET` | [log4net](https://www.nuget.org/packages/log4net) \[2\]                                                                         | ≥2.0.13 && < 4.0.0 | bytecode                 | [Experimental](https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/versioning-and-stability.md) |
+| `NLOG`    | [NLog](https://www.nuget.org/packages/NLog) \[3\]                                                                               | ≥5.0.0 && < 7.0.0  | bytecode                 | [Experimental](https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/versioning-and-stability.md) |
 
 \[1\]: For ASP.NET Core applications, the `LoggingBuilder` instrumentation
 can be enabled without using the .NET CLR Profiler by setting
@@ -214,6 +215,9 @@ the `ASPNETCORE_HOSTINGSTARTUPASSEMBLIES` environment variable to
 
 \[2\]: Instrumentation provides both [trace context injection](./log-trace-correlation.md#log4net-trace-context-injection)
 and [logs bridge](./log4net-bridge.md).
+
+\[3\]:  Instrumentation provides both [trace context injection](./log-trace-correlation.md#log4net-trace-context-injection)
+and [logs bridge](./nlog-bridge.md).
 
 ### Instrumentation options
 
@@ -283,9 +287,11 @@ Exporters output the telemetry.
 
 | Environment variable    | Description                                                                                                                                                                                                                                                                                                    | Default value | Status                                                                                                                      |
 |-------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|---------------|-----------------------------------------------------------------------------------------------------------------------------|
-| `OTEL_TRACES_EXPORTER`  | Comma-separated list of exporters. Supported options: `otlp`, `zipkin`, `console`, `none`. See [the OpenTelemetry specification](https://github.com/open-telemetry/opentelemetry-specification/blob/v1.35.0/specification/configuration/sdk-environment-variables.md#exporter-selection) for more details.     | `otlp`        | [Stable](https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/versioning-and-stability.md) |
+| `OTEL_TRACES_EXPORTER`  | Comma-separated list of exporters. Supported options: `otlp`, `zipkin` [1], `console`, `none`. See [the OpenTelemetry specification](https://github.com/open-telemetry/opentelemetry-specification/blob/v1.35.0/specification/configuration/sdk-environment-variables.md#exporter-selection) for more details. | `otlp`        | [Stable](https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/versioning-and-stability.md) |
 | `OTEL_METRICS_EXPORTER` | Comma-separated list of exporters. Supported options: `otlp`, `prometheus`, `console`, `none`. See [the OpenTelemetry specification](https://github.com/open-telemetry/opentelemetry-specification/blob/v1.35.0/specification/configuration/sdk-environment-variables.md#exporter-selection) for more details. | `otlp`        | [Stable](https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/versioning-and-stability.md) |
 | `OTEL_LOGS_EXPORTER`    | Comma-separated list of exporters. Supported options: `otlp`, `console`, `none`. See [the OpenTelemetry specification](https://github.com/open-telemetry/opentelemetry-specification/blob/v1.35.0/specification/configuration/sdk-environment-variables.md#exporter-selection) for more details.               | `otlp`        | [Stable](https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/versioning-and-stability.md) |
+
+**[1]**: `zipkin` is deprecated and will be removed in the upcoming release.
 
 ### Traces exporter
 
