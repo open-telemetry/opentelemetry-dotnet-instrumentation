@@ -51,6 +51,7 @@ bool IsAzureAppServices();
 bool IsFailFastEnabled();
 bool IsNetFxAssemblyRedirectionEnabled();
 bool IsSqlClientNetFxILRewriteEnabled();
+void SetSqlClientNetFxILRewriteEnabled(bool enabled);
 
 }  // namespace trace
 

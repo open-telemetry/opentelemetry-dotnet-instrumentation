@@ -45,6 +45,18 @@ internal static class NativeMethods
         }
     }
 
+    public static void SetSqlClientNetFxILRewriteEnabled(bool enabled)
+    {
+        if (IsWindows)
+        {
+            Windows.SetSqlClientNetFxILRewriteEnabled(enabled);
+        }
+        else
+        {
+            NonWindows.SetSqlClientNetFxILRewriteEnabled(enabled);
+        }
+    }
+
 #if NET
     public static void ConfigureNativeContinuousProfiler(bool threadSamplingEnabled, uint threadSamplingInterval, bool allocationSamplingEnabled, uint maxMemorySamplesPerMinute, uint selectedThreadSamplingInterval)
     {
@@ -190,6 +202,10 @@ internal static class NativeMethods
 
         [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
         [DllImport("OpenTelemetry.AutoInstrumentation.Native.dll")]
+        public static extern void SetSqlClientNetFxILRewriteEnabled(bool enabled);
+
+        [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
+        [DllImport("OpenTelemetry.AutoInstrumentation.Native.dll")]
         public static extern void ConfigureContinuousProfiler(bool threadSamplingEnabled, uint threadSamplingInterval, bool allocationSamplingEnabled, uint maxMemorySamplesPerMinute, uint selectedThreadSamplingInterval);
 
 #if NET
@@ -235,6 +251,10 @@ internal static class NativeMethods
         [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
         [DllImport("OpenTelemetry.AutoInstrumentation.Native")]
         public static extern void AddDerivedInstrumentations([MarshalAs(UnmanagedType.LPWStr)] string id, [In] NativeCallTargetDefinition[] methodArrays, int size);
+
+        [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
+        [DllImport("OpenTelemetry.AutoInstrumentation.Native")]
+        public static extern void SetSqlClientNetFxILRewriteEnabled(bool enabled);
 
         [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
         [DllImport("OpenTelemetry.AutoInstrumentation.Native")]

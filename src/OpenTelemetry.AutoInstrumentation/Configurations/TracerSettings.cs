@@ -121,6 +121,15 @@ internal class TracerSettings : Settings
 
         if (traces != null)
         {
+            if (traces.SqlClient?.NetFxIlRewriteEnabled is bool netFxIlRewriteEnabled &&
+    Environment.GetEnvironmentVariable(ConfigurationKeys.Traces.SqlClientNetFxILRewriteEnabled) == null)
+            {
+                NativeMethods.SetSqlClientNetFxILRewriteEnabled(netFxIlRewriteEnabled);
+                Environment.SetEnvironmentVariable(
+                    ConfigurationKeys.Traces.SqlClientNetFxILRewriteEnabled,
+                    netFxIlRewriteEnabled.ToString().ToLowerInvariant());
+            }
+
             if (traces.AdditionalSources != null)
             {
                 foreach (var configurationName in traces.AdditionalSources)
