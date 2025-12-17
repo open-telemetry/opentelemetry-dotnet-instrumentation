@@ -236,6 +236,9 @@ instrumentation/development:
       rabbitmq:            # RabbitMQ.Client
       quartz:              # Quartz
       sqlclient:           # Microsoft.Data.SqlClient & System.Data.SqlClient
+        # Enables IL rewriting of SqlCommand on .NET Framework to ensure CommandText is available for instrumentation.
+        # If omitted false is used.
+        netfx_ilrewrite_enabled: ${OTEL_DOTNET_AUTO_SQLCLIENT_NETFX_ILREWRITE_ENABLED:-false}
       stackexchangeredis:  # StackExchange.Redis
       wcfclient:           # WCF Client
       wcfservice:          # WCF Service
