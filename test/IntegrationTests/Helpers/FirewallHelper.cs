@@ -5,12 +5,12 @@ using Xunit.Abstractions;
 
 namespace IntegrationTests.Helpers;
 
-public static class FirewallHelper
+internal static class FirewallHelper
 {
     public static FirewallPort OpenWinPort(int port, ITestOutputHelper output)
     {
-        string ruleName = $"TraceAgent-{port}";
-        string psCommand = $"New-NetFirewallRule -DisplayName '{ruleName}' -Direction Inbound -LocalPort {port} -Protocol TCP -Action Allow -Profile Any";
+        var ruleName = $"TraceAgent-{port}";
+        var psCommand = $"New-NetFirewallRule -DisplayName '{ruleName}' -Direction Inbound -LocalPort {port} -Protocol TCP -Action Allow -Profile Any";
 
         PowershellHelper.RunCommand(psCommand, output);
 
@@ -19,7 +19,7 @@ public static class FirewallHelper
 
     public static void CloseWinPort(string ruleName, ITestOutputHelper output)
     {
-        string psCommand = $"Remove-NetFirewallRule -DisplayName {ruleName}";
+        var psCommand = $"Remove-NetFirewallRule -DisplayName {ruleName}";
 
         PowershellHelper.RunCommand(psCommand, output);
     }

@@ -82,12 +82,12 @@ internal struct NativeCallTargetDefinition
         TargetSignatureTypes = IntPtr.Zero;
         if (targetSignatureTypes?.Length > 0)
         {
-            TargetSignatureTypes = Marshal.AllocHGlobal(targetSignatureTypes.Length * Marshal.SizeOf(typeof(IntPtr)));
+            TargetSignatureTypes = Marshal.AllocHGlobal(targetSignatureTypes.Length * Marshal.SizeOf<IntPtr>());
             var ptr = TargetSignatureTypes;
             for (var i = 0; i < targetSignatureTypes.Length; i++)
             {
                 Marshal.WriteIntPtr(ptr, Marshal.StringToHGlobalUni(targetSignatureTypes[i]));
-                ptr += Marshal.SizeOf(typeof(IntPtr));
+                ptr += Marshal.SizeOf<IntPtr>();
             }
         }
 
@@ -108,7 +108,7 @@ internal struct NativeCallTargetDefinition
         for (var i = 0; i < TargetSignatureTypesLength; i++)
         {
             Marshal.FreeHGlobal(Marshal.ReadIntPtr(ptr));
-            ptr += Marshal.SizeOf(typeof(IntPtr));
+            ptr += Marshal.SizeOf<IntPtr>();
         }
 
         Marshal.FreeHGlobal(TargetSignatureTypes);

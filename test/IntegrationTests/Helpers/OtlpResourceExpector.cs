@@ -9,7 +9,7 @@ using OpenTelemetry.Proto.Resource.V1;
 
 namespace IntegrationTests.Helpers;
 
-public class OtlpResourceExpector : IDisposable
+internal sealed class OtlpResourceExpector : IDisposable
 {
     private readonly List<ResourceExpectation> _resourceExpectations = new();
     private readonly List<string> _existenceChecks = new();
@@ -76,7 +76,7 @@ public class OtlpResourceExpector : IDisposable
                 var keyExists = _resourceAttributes.Any(attr => attr.Key == key);
                 if (!keyExists)
                 {
-                    message.AppendLine($"Resource attribute \"{key}\" was not found");
+                    message.AppendLine(CultureInfo.InvariantCulture, $"Resource attribute \"{key}\" was not found");
                 }
             }
 
@@ -141,20 +141,20 @@ public class OtlpResourceExpector : IDisposable
         foreach (var expectation in missingExpectations)
         {
             var value = !string.IsNullOrEmpty(expectation.StringValue) ? expectation.StringValue : expectation.IntValue!.Value.ToString(CultureInfo.InvariantCulture);
-            message.AppendLine($"  - \"{expectation.Key}={value}\"");
+            message.AppendLine(CultureInfo.InvariantCulture, $"  - \"{expectation.Key}={value}\"");
         }
 
         message.AppendLine("Actual resource attributes:");
         foreach (var attribute in attributes)
         {
             var value = !string.IsNullOrEmpty(attribute.Value.StringValue) ? attribute.Value.StringValue : attribute.Value.IntValue.ToString(CultureInfo.InvariantCulture);
-            message.AppendLine($"  + \"{attribute.Key}={value}\"");
+            message.AppendLine(CultureInfo.InvariantCulture, $"  + \"{attribute.Key}={value}\"");
         }
 
         Assert.Fail(message.ToString());
     }
 
-    private class ResourceExpectation
+    private sealed class ResourceExpectation
     {
         public ResourceExpectation(string key, string stringValue)
         {

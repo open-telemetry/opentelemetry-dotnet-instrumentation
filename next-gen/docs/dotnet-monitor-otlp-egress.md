@@ -15,24 +15,24 @@ using dotnet-monitor and send off OTLP data.
 Event sources:
 
 * Tracing:
-  https://github.com/dotnet/runtime/blob/main/src/libraries/System.Diagnostics.DiagnosticSource/src/System/Diagnostics/DiagnosticSourceEventSource.cs
+  <https://github.com/dotnet/runtime/blob/main/src/libraries/System.Diagnostics.DiagnosticSource/src/System/Diagnostics/DiagnosticSourceEventSource.cs>
 
 * Metrics:
-  https://github.com/dotnet/runtime/blob/main/src/libraries/System.Diagnostics.DiagnosticSource/src/System/Diagnostics/Metrics/MetricsEventSource.cs
+  <https://github.com/dotnet/runtime/blob/main/src/libraries/System.Diagnostics.DiagnosticSource/src/System/Diagnostics/Metrics/MetricsEventSource.cs>
 
 * Logging:
-  https://github.com/dotnet/runtime/blob/main/src/libraries/Microsoft.Extensions.Logging.EventSource/src/LoggingEventSource.cs
+  <https://github.com/dotnet/runtime/blob/main/src/libraries/Microsoft.Extensions.Logging.EventSource/src/LoggingEventSource.cs>
 
 There are three different repos in play in the design:
 
-* https://github.com/dotnet/diagnostics/
+* <https://github.com/dotnet/diagnostics/>
 
   Contains the low-level functionality used by various dotnet diagnostic tools
   (dotnet-monitor, dotnet-counters, dotnet-trace, etc.). The clients used to
   perform diagnostics as well as the event pipe logic to read from
   `EventSource`s.
 
-* https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation
+* <https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation>
 
   Is going to contain the mini-OpenTelemetry SDK dotnet-monitor will use to do
   the heavy lifting. This is being called a mini-SDK because it only needs to
@@ -41,7 +41,7 @@ There are three different repos in play in the design:
   have a forwarding concept, so there is just an API to submitted an "ended"
   span.
 
-* https://github.com/dotnet/dotnet-monitor
+* <https://github.com/dotnet/dotnet-monitor>
 
   Contains the code for dotnet-monitor. The goal for the dotnet-monitor team is
   to own as little OpenTelemetry code as possible. It should all be loaded from
@@ -101,7 +101,7 @@ levels](https://github.com/dotnet/runtime/blob/87e9f1d94f94f7e9b38da74fd93ea856b
 
 A proof of concept was built.
 
-* https://github.com/CodeBlanch/diagnostics/tree/traces-pipeline
+* <https://github.com/CodeBlanch/diagnostics/tree/traces-pipeline>
 
   Contains the changes to the dotnet-diagnostics repo. Adds more data in the
   metrics pipeline to support more of the OTLP data model. Adds a new logging
@@ -110,22 +110,22 @@ A proof of concept was built.
   distributed tracing (Activity) pipeline. Distributed tracing is not currently
   supported anywhere in these tools.
 
-* https://github.com/CodeBlanch/dotnet-monitor/tree/otel-poc
+* <https://github.com/CodeBlanch/dotnet-monitor/tree/otel-poc>
 
   Contains the dotnet-monitor code and the mini-SDK.
 
   The mini-SDK is mostly:
-  https://github.com/CodeBlanch/dotnet-monitor/tree/otel-poc/src/Microsoft.Diagnostics.Monitoring.OpenTelemetry
+  <https://github.com/CodeBlanch/dotnet-monitor/tree/otel-poc/src/Microsoft.Diagnostics.Monitoring.OpenTelemetry>
 
   But there are also options here:
-  https://github.com/CodeBlanch/dotnet-monitor/tree/otel-poc/src/Tools/dotnet-monitor/OpenTelemetry/Options
+  <https://github.com/CodeBlanch/dotnet-monitor/tree/otel-poc/src/Tools/dotnet-monitor/OpenTelemetry/Options>
 
   The dotnet-monitor team doesn't want to own options. They just want to pass
   `IConfiguration` to the mini-SDK so those options should be moved.
 
   The main dotnet-monitor code which establishes the pipelines and sets up the
   SDK is here:
-  https://github.com/CodeBlanch/dotnet-monitor/blob/otel-poc/src/Tools/dotnet-monitor/OpenTelemetry/OpenTelemetryService.cs
+  <https://github.com/CodeBlanch/dotnet-monitor/blob/otel-poc/src/Tools/dotnet-monitor/OpenTelemetry/OpenTelemetryService.cs>
 
   There is some support for `Resource` configuration in the PoC. Users may set
   static resource key/values or they can set keys which will be
@@ -143,26 +143,26 @@ A proof of concept was built.
 
 ### .NET 9
 
-* https://github.com/dotnet/runtime/pull/107576
+* <https://github.com/dotnet/runtime/pull/107576>
 
   We added a version to the EventSources so dotnet-monitor can determine which
   features are available. For example ParentBased(Ratio) sampling only works on
   .NET9+.
 
-* https://github.com/dotnet/runtime/pull/105581
+* <https://github.com/dotnet/runtime/pull/105581>
 
   dotnet-monitor today can listen to metrics but you have to add everything
   explicitly. A wildcard feature was added so users can easily listen to things
   like "MyCompany.*".
 
-* https://github.com/dotnet/runtime/pull/104134
+* <https://github.com/dotnet/runtime/pull/104134>
 
   Before this change if a listener subscribes to the tracing EventSource it is
   basically in "AlwaysOn" mode meaning every Activity is created. We added a
   sampler mode which is more or less "ParentBased(TraceIdRatioBased)" to give
   users more control.
 
-* https://github.com/dotnet/runtime/pull/103655
+* <https://github.com/dotnet/runtime/pull/103655>
 
   Before this change log correlation didn't work.
 
@@ -170,22 +170,22 @@ A proof of concept was built.
 
 Work to move the dotnet/diagnostics changes from the PoC into the actual code:
 
-* https://github.com/dotnet/diagnostics/pull/5124
-* https://github.com/dotnet/diagnostics/pull/5120
-* https://github.com/dotnet/diagnostics/pull/5078
+* <https://github.com/dotnet/diagnostics/pull/5124>
+* <https://github.com/dotnet/diagnostics/pull/5120>
+* <https://github.com/dotnet/diagnostics/pull/5078>
 
 ### Known gaps
 
-* https://github.com/dotnet/runtime/issues/109388
+* <https://github.com/dotnet/runtime/issues/109388>
 
   The current metrics EventSource doesn't expose a proper histogram. It only
   exposes what would be called a Summary histogram in OTel world.
 
-* https://github.com/dotnet/runtime/issues/102924
+* <https://github.com/dotnet/runtime/issues/102924>
 
   There is no way to listen to Activity Links or Events using the existing
   tracing EventSource.
 
-* https://github.com/dotnet/aspnetcore/issues/52439
+* <https://github.com/dotnet/aspnetcore/issues/52439>
 
   AspNetCore doesn't populate spans with data.

@@ -3,7 +3,7 @@
 
 namespace LibraryVersionsGenerator.Models;
 
-internal class GraphQLVersion : PackageVersion
+internal sealed class GraphQLVersion : PackageVersion
 {
     public GraphQLVersion(string version)
         : base(version)

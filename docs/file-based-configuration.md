@@ -73,9 +73,9 @@ file-based configuration to include these parameters.
 
 ### Rule Engine
 
-| Environment variable                | Description              |
-| ----------------------------------- | ------------------------ |
-| `OTEL_DOTNET_AUTO_RULE_ENGINE_ENABLED` | Enables RuleEngine.      |
+| Environment variable                   | Description         |
+| -------------------------------------- | ------------------- |
+| `OTEL_DOTNET_AUTO_RULE_ENGINE_ENABLED` | Enables RuleEngine. |
 
 ---
 
@@ -195,6 +195,7 @@ tracer_provider:
             # On .NET Framework, the grpc OTLP exporter protocol is not supported.
 
     # Batch processor for Zipkin
+    # This configuration is deprecated and will be removed in upcoming release.
     - batch:
         exporter:
           zipkin:
@@ -524,6 +525,7 @@ instrumentation/development:
     logs:
       ilogger:             # Microsoft.Extensions.Logging
       log4net:             # Log4Net
+      nlog:                # NLog
 ```
 
 ## Instrumentation options
@@ -568,6 +570,10 @@ instrumentation/development:
       log4net:
         # Logs bridge is disabled by default
         # More info about log4net bridge can be found at https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/blob/main/docs/log4net-bridge.md
+        bridge_enabled: true
+      nlog:
+        # Logs bridge is disabled by default
+        # More info about NLog bridge can be found at https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/blob/main/docs/nlog-bridge.md
         bridge_enabled: true
 ```
 

@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 using System.Collections.Concurrent;
+using System.Globalization;
 using System.Text;
 using OpenTelemetry.Proto.Collector.Trace.V1;
 using OpenTelemetry.Proto.Trace.V1;
@@ -15,7 +16,8 @@ using Microsoft.AspNetCore.Http;
 
 namespace IntegrationTests.Helpers;
 
-public class MockSpansCollector : IDisposable
+#pragma warning disable CA1812 // Mark members as static. There is some issue in dotnet format.
+internal sealed class MockSpansCollector : IDisposable
 {
     private readonly ITestOutputHelper _output;
     private readonly TestHttpServer _listener;
@@ -28,10 +30,10 @@ public class MockSpansCollector : IDisposable
     {
         _output = output;
 
-#if NETFRAMEWORK
-        _listener = new TestHttpServer(output, HandleHttpRequests, host, "/v1/traces/");
-#else
+#if NET
         _listener = new TestHttpServer(output, nameof(MockSpansCollector), new PathHandler(HandleHttpRequests, "/v1/traces"));
+#else
+        _listener = new TestHttpServer(output, HandleHttpRequests, host, "/v1/traces/");
 #endif
     }
 
@@ -146,7 +148,7 @@ public class MockSpansCollector : IDisposable
         message.AppendLine("Collected spans:");
         foreach (var line in expectationsMet)
         {
-            message.AppendLine($"    \"{line}\"");
+            message.AppendLine(CultureInfo.InvariantCulture, $"    \"{line}\"");
         }
 
         Assert.Fail(message.ToString());
@@ -163,19 +165,19 @@ public class MockSpansCollector : IDisposable
         message.AppendLine("Missing expectations:");
         foreach (var logline in missingExpectations)
         {
-            message.AppendLine($"  - \"{logline.Description}\"");
+            message.AppendLine(CultureInfo.InvariantCulture, $"  - \"{logline.Description}\"");
         }
 
         message.AppendLine("Entries meeting expectations:");
         foreach (var logline in expectationsMet)
         {
-            message.AppendLine($"    \"{logline}\"");
+            message.AppendLine(CultureInfo.InvariantCulture, $"    \"{logline}\"");
         }
 
         message.AppendLine("Additional entries:");
         foreach (var logline in additionalEntries)
         {
-            message.AppendLine($"  + \"{logline}\"");
+            message.AppendLine(CultureInfo.InvariantCulture, $"  + \"{logline}\"");
         }
 
         Assert.Fail(message.ToString());
@@ -192,11 +194,11 @@ public class MockSpansCollector : IDisposable
 #else
     private async Task HandleHttpRequests(HttpContext ctx)
     {
-        using var bodyStream = await ctx.ReadBodyToMemoryAsync();
+        using var bodyStream = await ctx.ReadBodyToMemoryAsync().ConfigureAwait(false);
         var traceMessage = ExportTraceServiceRequest.Parser.ParseFrom(bodyStream);
         HandleTraceMessage(traceMessage);
 
-        await ctx.GenerateEmptyProtobufResponseAsync<ExportTraceServiceResponse>();
+        await ctx.GenerateEmptyProtobufResponseAsync<ExportTraceServiceResponse>().ConfigureAwait(false);
     }
 #endif
 
@@ -221,7 +223,7 @@ public class MockSpansCollector : IDisposable
         _output.WriteLine($"[{name}]: {msg}");
     }
 
-    public class Collected
+    internal sealed class Collected
     {
         public Collected(string instrumentationScopeName, Span span)
         {
@@ -239,7 +241,7 @@ public class MockSpansCollector : IDisposable
         }
     }
 
-    private class Expectation
+    private sealed class Expectation
     {
         public Expectation(string instrumentationScopeName, Func<Span, bool> predicate, string? description)
         {

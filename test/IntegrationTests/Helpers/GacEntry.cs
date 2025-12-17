@@ -6,7 +6,7 @@ using System.EnterpriseServices.Internal;
 
 namespace IntegrationTests.Helpers;
 
-public class GacEntry : IDisposable
+internal sealed class GacEntry : IDisposable
 {
     private readonly string _assemblyPath;
     private readonly Publish _publish = new Publish();

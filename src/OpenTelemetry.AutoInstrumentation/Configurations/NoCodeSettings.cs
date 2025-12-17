@@ -3,7 +3,6 @@
 
 using System.Diagnostics;
 using OpenTelemetry.AutoInstrumentation.Configurations.FileBasedConfiguration;
-using OpenTelemetry.AutoInstrumentation.Configurations.FileBasedConfiguration.Parser;
 using OpenTelemetry.AutoInstrumentation.Logging;
 using static OpenTelemetry.AutoInstrumentation.InstrumentationDefinitions;
 
@@ -23,7 +22,7 @@ internal class NoCodeSettings : Settings
         {
             // Fixed Id for definitions payload (to avoid loading same integrations from multiple AppDomains)
             DefinitionsId = "D3B88A224E034D60AC3A923BABEE6B7F",
-            Definitions = InstrumentedMethods.Select(x => x.Definition).ToArray(),
+            Definitions = [.. InstrumentedMethods.Select(x => x.Definition)],
         };
     }
 

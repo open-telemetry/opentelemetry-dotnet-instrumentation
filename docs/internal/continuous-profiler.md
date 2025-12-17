@@ -148,7 +148,8 @@ threadSamplingEnabled, threadSamplingInterval, allocationSamplingEnabled, maxMem
 ```
 
 * `allocationSamplingEnabled = true`
-* `maxMemorySamplesPerMinute = 200` // minimum value: 1, Splunk is using 200 by default
+* `maxMemorySamplesPerMinute = 200` // minimum value: 1, Splunk is using 200 by
+  default
 * `exportInterval = TimeSpan.FromMilliseconds(500);` // Interval to read data from
   buffers and call exporter, common for Thread and Allocation sampling
 * `object continuousProfilerExporter = new ConsoleExporter();` // Exporter, common

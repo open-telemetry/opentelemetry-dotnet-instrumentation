@@ -102,6 +102,20 @@ internal static class PackageVersionDefinitions
         },
         new()
         {
+            IntegrationName = "NLog",
+            NugetPackageName = "NLog",
+            TestApplicationName = "TestApplication.NLogBridge",
+            Versions = new List<NLogVersion>
+            {
+                // NLog 5.0+ required for Layout<T> typed layout support and .NET build-trimming
+                new("5.0.0") { NLogExtensionsLoggingVersion = "5.0.0" },
+                new("5.3.4") { NLogExtensionsLoggingVersion = "5.3.15" }, // 5.3.0 - breaking change in the instrumented method contract
+                new("6.0.0") { NLogExtensionsLoggingVersion = "6.0.0" }, // 6.0.0 - breaking change in the instrumented method contract
+                new("*") { NLogExtensionsLoggingVersion = "*" }
+            }
+        },
+        new()
+        {
             IntegrationName = "MassTransit",
             NugetPackageName = "MassTransit",
             TestApplicationName = "TestApplication.MassTransit",
@@ -291,7 +305,7 @@ internal static class PackageVersionDefinitions
         }
     };
 
-    internal record PackageVersionDefinition
+    internal sealed record PackageVersionDefinition
     {
         public required string IntegrationName { get; init; }
 

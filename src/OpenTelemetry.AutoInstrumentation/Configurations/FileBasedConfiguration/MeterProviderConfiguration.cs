@@ -1,7 +1,6 @@
 // Copyright The OpenTelemetry Authors
 // SPDX-License-Identifier: Apache-2.0
 
-using System.Collections.Generic;
 using Vendors.YamlDotNet.Serialization;
 
 namespace OpenTelemetry.AutoInstrumentation.Configurations.FileBasedConfiguration;
@@ -9,5 +8,5 @@ namespace OpenTelemetry.AutoInstrumentation.Configurations.FileBasedConfiguratio
 internal class MeterProviderConfiguration
 {
     [YamlMember(Alias = "readers")]
-    public List<MetricReaderConfig> Readers { get; set; } = new();
+    public List<MetricReaderConfig> Readers { get; set; } = [];
 }

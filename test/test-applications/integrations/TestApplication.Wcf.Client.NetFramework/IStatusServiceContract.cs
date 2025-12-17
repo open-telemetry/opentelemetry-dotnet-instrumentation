@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: Apache-2.0
 
 using System.ServiceModel;
-using System.Threading.Tasks;
 
 namespace TestApplication.Wcf.Client.NetFramework;
 

@@ -3,6 +3,7 @@
 
 #if NET
 
+using System.Globalization;
 using System.Net;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -15,7 +16,7 @@ using Xunit.Abstractions;
 
 namespace IntegrationTests.Helpers;
 
-public class TestHttpServer : IDisposable
+internal sealed class TestHttpServer : IDisposable
 {
     private readonly ITestOutputHelper _output;
     private readonly string _name;
@@ -52,7 +53,7 @@ public class TestHttpServer : IDisposable
                 .Get<IServerAddressesFeature>()!
                 .Addresses
                 .First();
-        Port = int.Parse(address.Split(':').Last());
+        Port = int.Parse(address.Split(':').Last(), CultureInfo.InvariantCulture);
         WriteOutput($"Listening on: {string.Join(',', pathHandlers.Select(handler => $"{address}{handler.Path}"))}");
     }
 

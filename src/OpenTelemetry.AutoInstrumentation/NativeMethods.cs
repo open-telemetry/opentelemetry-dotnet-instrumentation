@@ -9,7 +9,7 @@ namespace OpenTelemetry.AutoInstrumentation;
 
 internal static class NativeMethods
 {
-    private static readonly bool IsWindows = string.Equals(FrameworkDescription.Instance.OSPlatform, "Windows", StringComparison.OrdinalIgnoreCase);
+    private static readonly bool IsWindows = RuntimeInformation.IsOSPlatform(OSPlatform.Windows);
 
     public static void AddInstrumentations(string id, NativeCallTargetDefinition[] methodArrays)
     {
@@ -57,7 +57,6 @@ internal static class NativeMethods
         }
     }
 
-#if NET
     public static void ConfigureNativeContinuousProfiler(bool threadSamplingEnabled, uint threadSamplingInterval, bool allocationSamplingEnabled, uint maxMemorySamplesPerMinute, uint selectedThreadSamplingInterval)
     {
         if (IsWindows)
@@ -75,10 +74,12 @@ internal static class NativeMethods
         return IsWindows ? Windows.ContinuousProfilerReadThreadSamples(len, buf) : NonWindows.ContinuousProfilerReadThreadSamples(len, buf);
     }
 
+#if NET
     public static int ContinuousProfilerReadAllocationSamples(int len, byte[] buf)
     {
         return IsWindows ? Windows.ContinuousProfilerReadAllocationSamples(len, buf) : NonWindows.ContinuousProfilerReadAllocationSamples(len, buf);
     }
+#endif
 
     public static int SelectiveSamplerReadThreadSamples(int len, byte[] buf)
     {
@@ -170,9 +171,13 @@ internal static class NativeMethods
         traceIdLow = 0;
         traceIdHigh = 0;
         var hexTraceId = currentActivityTraceId.ToHexString();
-
+#if NET
         return ulong.TryParse(hexTraceId.AsSpan(0, 16), NumberStyles.HexNumber, CultureInfo.InvariantCulture, out traceIdHigh) &&
                ulong.TryParse(hexTraceId.AsSpan(16), NumberStyles.HexNumber, CultureInfo.InvariantCulture, out traceIdLow);
+#else
+        return ulong.TryParse(hexTraceId.Substring(0, 16), NumberStyles.HexNumber, CultureInfo.InvariantCulture, out traceIdHigh) &&
+               ulong.TryParse(hexTraceId.Substring(16), NumberStyles.HexNumber, CultureInfo.InvariantCulture, out traceIdLow);
+#endif
     }
 
     private static bool TryParseSpanContext(Activity currentActivity, out ulong traceIdHigh, out ulong traceIdLow, out ulong spanId)
@@ -181,12 +186,17 @@ internal static class NativeMethods
         traceIdHigh = 0;
         spanId = 0;
         var hexTraceId = currentActivity.TraceId.ToHexString();
-
+#if NET
         return ulong.TryParse(hexTraceId.AsSpan(0, 16), NumberStyles.HexNumber, CultureInfo.InvariantCulture, out traceIdHigh) &&
                ulong.TryParse(hexTraceId.AsSpan(16), NumberStyles.HexNumber, CultureInfo.InvariantCulture, out traceIdLow) &&
                ulong.TryParse(currentActivity.SpanId.ToHexString(), NumberStyles.HexNumber, CultureInfo.InvariantCulture, out spanId);
-    }
+#else
+        return ulong.TryParse(hexTraceId.Substring(0, 16), NumberStyles.HexNumber, CultureInfo.InvariantCulture, out traceIdHigh) &&
+               ulong.TryParse(hexTraceId.Substring(16), NumberStyles.HexNumber, CultureInfo.InvariantCulture, out traceIdLow) &&
+               ulong.TryParse(currentActivity.SpanId.ToHexString(), NumberStyles.HexNumber, CultureInfo.InvariantCulture, out spanId);
+
 #endif
+    }
 
     // the "dll" extension is required on .NET Framework
     // and optional on .NET Core
@@ -208,15 +218,15 @@ internal static class NativeMethods
         [DllImport("OpenTelemetry.AutoInstrumentation.Native.dll")]
         public static extern void ConfigureContinuousProfiler(bool threadSamplingEnabled, uint threadSamplingInterval, bool allocationSamplingEnabled, uint maxMemorySamplesPerMinute, uint selectedThreadSamplingInterval);
 
-#if NET
-
         [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
         [DllImport("OpenTelemetry.AutoInstrumentation.Native.dll")]
         public static extern int ContinuousProfilerReadThreadSamples(int len, byte[] buf);
 
+#if  NET
         [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
         [DllImport("OpenTelemetry.AutoInstrumentation.Native.dll")]
         public static extern int ContinuousProfilerReadAllocationSamples(int len, byte[] buf);
+#endif
 
         [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
         [DllImport("OpenTelemetry.AutoInstrumentation.Native.dll")]
@@ -237,8 +247,6 @@ internal static class NativeMethods
         [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
         [DllImport("OpenTelemetry.AutoInstrumentation.Native.dll")]
         public static extern void SelectiveSamplingStop(ulong traceIdHigh, ulong traceIdLow);
-#endif
-
     }
 
     // assume .NET Core if not running on Windows
@@ -260,14 +268,15 @@ internal static class NativeMethods
         [DllImport("OpenTelemetry.AutoInstrumentation.Native")]
         public static extern void ConfigureContinuousProfiler(bool threadSamplingEnabled, uint threadSamplingInterval, bool allocationSamplingEnabled, uint maxMemorySamplesPerMinute, uint selectedThreadSamplingInterval);
 
-#if NET
         [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
         [DllImport("OpenTelemetry.AutoInstrumentation.Native")]
         public static extern int ContinuousProfilerReadThreadSamples(int len, byte[] buf);
 
+#if NET
         [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
         [DllImport("OpenTelemetry.AutoInstrumentation.Native")]
         public static extern int ContinuousProfilerReadAllocationSamples(int len, byte[] buf);
+#endif
 
         [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
         [DllImport("OpenTelemetry.AutoInstrumentation.Native")]
@@ -288,6 +297,5 @@ internal static class NativeMethods
         [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
         [DllImport("OpenTelemetry.AutoInstrumentation.Native")]
         public static extern void SelectiveSamplingStop(ulong traceIdHigh, ulong traceIdLow);
-#endif
     }
 }

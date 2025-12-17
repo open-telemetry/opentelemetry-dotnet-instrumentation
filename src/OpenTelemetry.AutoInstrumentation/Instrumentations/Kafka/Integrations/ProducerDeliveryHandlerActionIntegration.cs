@@ -18,7 +18,7 @@ namespace OpenTelemetry.AutoInstrumentation.Instrumentations.Kafka.Integrations;
     typeName: IntegrationConstants.ProducerDeliveryHandlerShimTypeName,
     methodName: ".ctor",
     returnTypeName: ClrNames.Void,
-    parameterTypeNames: new[] { ClrNames.String, "!0", "!1", IntegrationConstants.ActionOfDeliveryReportTypeName },
+    parameterTypeNames: [ClrNames.String, "!0", "!1", IntegrationConstants.ActionOfDeliveryReportTypeName],
     minimumVersion: IntegrationConstants.MinVersion,
     maximumVersion: IntegrationConstants.MaxVersion,
     integrationName: IntegrationConstants.IntegrationName,
@@ -86,7 +86,9 @@ public static class ProducerDeliveryHandlerActionIntegration
             {
                 if (deliveryReport.Error is { IsError: true })
                 {
+#pragma warning disable CA2201 // We need to create a generic exception here to capture error information
                     activity.SetException(new Exception(deliveryReport.Error.ToString()));
+#pragma warning restore CA2201 // We need to create a generic exception here to capture error information
                 }
 
                 KafkaInstrumentation.SetDeliveryResults(activity, deliveryReport);
@@ -105,9 +107,16 @@ public static class ProducerDeliveryHandlerActionIntegration
 
     private static class WrapperCache<TActionOfDeliveryReport>
     {
-        private static readonly CreateWrapperDelegate Delegate;
+        private static readonly CreateWrapperDelegate Delegate = Initialize();
 
-        static WrapperCache()
+        private delegate TActionOfDeliveryReport CreateWrapperDelegate(TActionOfDeliveryReport action, Activity activity);
+
+        public static TActionOfDeliveryReport Create(TActionOfDeliveryReport action, Activity activity)
+        {
+            return Delegate(action, activity);
+        }
+
+        private static CreateWrapperDelegate Initialize()
         {
             var method =
                 typeof(ProducerDeliveryHandlerActionIntegration).GetMethod(
@@ -115,14 +124,11 @@ public static class ProducerDeliveryHandlerActionIntegration
                     BindingFlags.Static | BindingFlags.NonPublic)!;
 
             var constructedMethod = method.MakeGenericMethod(typeof(TActionOfDeliveryReport).GetGenericArguments());
-            Delegate = (CreateWrapperDelegate)constructedMethod.CreateDelegate(typeof(CreateWrapperDelegate));
-        }
-
-        private delegate TActionOfDeliveryReport CreateWrapperDelegate(TActionOfDeliveryReport action, Activity activity);
-
-        public static TActionOfDeliveryReport Create(TActionOfDeliveryReport action, Activity activity)
-        {
-            return Delegate(action, activity);
+#if NET
+            return constructedMethod.CreateDelegate<CreateWrapperDelegate>();
+#else
+            return (CreateWrapperDelegate)constructedMethod.CreateDelegate(typeof(CreateWrapperDelegate));
+#endif
         }
     }
 }

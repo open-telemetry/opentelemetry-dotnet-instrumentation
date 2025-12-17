@@ -6,7 +6,7 @@ using Xunit.Abstractions;
 
 namespace IntegrationTests.Helpers;
 
-public static class PowershellHelper
+internal static class PowershellHelper
 {
     public static (string StandardOutput, string ErrorOutput) RunCommand(string psCommand, ITestOutputHelper outputHelper)
     {
@@ -22,7 +22,7 @@ public static class PowershellHelper
         };
 
         var process = Process.Start(startInfo);
-        var helper = new ProcessHelper(process);
+        using var helper = new ProcessHelper(process);
         process?.WaitForExit();
 
         outputHelper.WriteLine($"PS> {psCommand}");

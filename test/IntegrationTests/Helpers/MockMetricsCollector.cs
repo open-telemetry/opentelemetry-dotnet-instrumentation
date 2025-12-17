@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 using System.Collections.Concurrent;
+using System.Globalization;
 using System.Text;
 using OpenTelemetry.Proto.Collector.Metrics.V1;
 using OpenTelemetry.Proto.Metrics.V1;
@@ -15,7 +16,7 @@ using Microsoft.AspNetCore.Http;
 
 namespace IntegrationTests.Helpers;
 
-public class MockMetricsCollector : IDisposable
+internal sealed class MockMetricsCollector : IDisposable
 {
     private readonly ITestOutputHelper _output;
     private readonly TestHttpServer _listener;
@@ -154,7 +155,7 @@ public class MockMetricsCollector : IDisposable
         message.AppendLine("Additional entries -  metrics:");
         foreach (var line in expectationsMet)
         {
-            message.AppendLine($"    \"{line}\"");
+            message.AppendLine(CultureInfo.InvariantCulture, $"    \"{line}\"");
         }
 
         Assert.Fail(message.ToString());
@@ -171,19 +172,19 @@ public class MockMetricsCollector : IDisposable
         message.AppendLine("Missing expectations:");
         foreach (var logline in missingExpectations)
         {
-            message.AppendLine($"  - \"{logline.Description}\"");
+            message.AppendLine(CultureInfo.InvariantCulture, $"  - \"{logline.Description}\"");
         }
 
         message.AppendLine("Entries meeting expectations:");
         foreach (var logline in expectationsMet)
         {
-            message.AppendLine($"    \"{logline}\"");
+            message.AppendLine(CultureInfo.InvariantCulture, $"    \"{logline}\"");
         }
 
         message.AppendLine("Additional entries:");
         foreach (var logline in additionalEntries)
         {
-            message.AppendLine($"  + \"{logline}\"");
+            message.AppendLine(CultureInfo.InvariantCulture, $"  + \"{logline}\"");
         }
 
         Assert.Fail(message.ToString());
@@ -200,11 +201,11 @@ public class MockMetricsCollector : IDisposable
 #else
     private async Task HandleHttpRequests(HttpContext ctx)
     {
-        using var bodyStream = await ctx.ReadBodyToMemoryAsync();
+        using var bodyStream = await ctx.ReadBodyToMemoryAsync().ConfigureAwait(false);
         var metricsMessage = ExportMetricsServiceRequest.Parser.ParseFrom(bodyStream);
         HandleMetricsMessage(metricsMessage);
 
-        await ctx.GenerateEmptyProtobufResponseAsync<ExportMetricsServiceResponse>();
+        await ctx.GenerateEmptyProtobufResponseAsync<ExportMetricsServiceResponse>().ConfigureAwait(false);
     }
 #endif
 
@@ -234,7 +235,7 @@ public class MockMetricsCollector : IDisposable
         _output.WriteLine($"[{name}]: {msg}");
     }
 
-    public class Collected
+    internal sealed class Collected
     {
         public Collected(string instrumentationScopeName, Metric metric)
         {
@@ -252,7 +253,7 @@ public class MockMetricsCollector : IDisposable
         }
     }
 
-    private class Expectation
+    private sealed class Expectation
     {
         public Expectation(string instrumentationScopeName, Func<Metric, bool> predicate, string? description)
         {

@@ -1,9 +1,7 @@
 // Copyright The OpenTelemetry Authors
 // SPDX-License-Identifier: Apache-2.0
 
-using System.Threading.Tasks;
 using MassTransit;
-using Microsoft.Extensions.Logging;
 using TestApplication.MassTransit.Contracts;
 
 namespace TestApplication.MassTransit.Consumers;

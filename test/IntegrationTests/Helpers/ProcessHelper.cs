@@ -9,7 +9,7 @@ namespace IntegrationTests.Helpers;
 /// <summary>
 /// Drains the standard and error output of a process
 /// </summary>
-public class ProcessHelper : IDisposable
+internal sealed class ProcessHelper : IDisposable
 {
     private readonly ManualResetEventSlim _outputMutex = new();
     private readonly StringBuilder _outputBuffer = new();
