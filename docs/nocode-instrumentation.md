@@ -393,6 +393,68 @@ instrumentation/development:
             kind: internal
 ```
 
+### Generic Class Instrumentation
+
+Instrument methods in generic classes with class-level type parameters:
+
+```csharp
+public class GenericNoCodeTestingClass<TFooClass, TBarClass>
+{
+    public TFooMethod GenericTestMethod<TFooMethod, TBarMethod>(
+        TFooMethod fooMethod, 
+        TBarMethod barMethod, 
+        TFooClass fooClass, 
+        TBarClass barClass)
+    {
+        return fooMethod;
+    }
+}
+```
+
+For generic classes, use the backtick notation with the number of class-level
+type parameters:
+
+Generic Type Parameter Notation:
+
+- Class-level type parameters: Use `!!0`, `!!1`, etc. (where `!!0` is the first
+  class type parameter)
+- Method-level type parameters: Use `!0`, `!1`, etc. (where `!0` is the first
+  method type parameter)
+- In the type name, use backtick notation: `ClassName\`N` where N is the number
+  of generic parameters
+
+Configuration:
+
+```yaml
+instrumentation/development:
+  dotnet:
+    no_code:
+      targets:
+        - target:
+            assembly:
+              name: TestApplication.NoCode
+            type: TestApplication.NoCode.GenericNoCodeTestingClass`2
+            method: GenericTestMethod
+            signature:
+              return_type: '!0'
+              parameter_types:
+                - '!0'
+                - '!1'
+                - '!!0'
+                - '!!1'
+          span:
+            name: Span-GenericTestMethodWithParameters
+            kind: internal
+```
+
+In this example:
+
+- `GenericNoCodeTestingClass\`2` indicates a class with 2 generic type parameters
+- `'!0'` represents the first method type parameter (`TFooMethod`)
+- `'!1'` represents the second method type parameter (`TBarMethod`)
+- `'!!0'` represents the first class type parameter (`TFooClass`)
+- `'!!1'` represents the second class type parameter (`TBarClass`)
+
 ### Methods with Return Values
 
 Instrument methods that return values:

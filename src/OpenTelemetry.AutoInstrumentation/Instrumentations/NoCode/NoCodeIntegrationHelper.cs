@@ -128,12 +128,28 @@ internal static class NoCodeIntegrationHelper
 
         for (var i = 0; i < parameters.Length; i++)
         {
-            if (targetSignatureTypes[i + 1] != parameters[i].ParameterType.FullName)
+            var parameterTypeNameDefinition = GetParameterTypeNameDefinition(parameters[i]);
+            if (targetSignatureTypes[i + 1] != parameterTypeNameDefinition)
             {
                 return false;
             }
         }
 
         return true;
+    }
+
+    private static string GetParameterTypeNameDefinition(ParameterInfo parameterInfo)
+    {
+        if (parameterInfo.ParameterType.IsGenericParameter)
+        {
+            var definedOnMethod = parameterInfo.ParameterType.DeclaringMethod != null;
+            var genericParameterPosition = parameterInfo.ParameterType.GenericParameterPosition;
+
+            return definedOnMethod
+                ? $"!!{genericParameterPosition}"
+                : $"!{genericParameterPosition}";
+        }
+
+        return parameterInfo.ParameterType.FullName!;
     }
 }

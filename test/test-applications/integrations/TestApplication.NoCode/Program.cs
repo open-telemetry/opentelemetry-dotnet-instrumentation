@@ -12,6 +12,7 @@ public class Program
         ConsoleHelper.WriteSplashScreen(args);
 
         var noCodeTestingClass = new NoCodeTestingClass();
+        var genericNoCodeTestingClass = new GenericNoCodeTestingClass<int, long>();
 
         noCodeTestingClass.TestMethod();
         noCodeTestingClass.TestMethodA();
@@ -67,5 +68,6 @@ public class Program
 
         _ = noCodeTestingClass.GenericTestMethod<int>();
         _ = await noCodeTestingClass.GenericTestMethodAsync<int>();
+        _ = genericNoCodeTestingClass.GenericTestMethod(string.Empty, new object(), 123, 456L);
     }
 }

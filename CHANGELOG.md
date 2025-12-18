@@ -36,6 +36,8 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 
 ### Fixed
 
+- Fixed configuration based instrumentation for generic classes and methods.
+
 ## [1.13.0](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/tag/v1.13.0)
 
 This release include all changes from [1.13.0-beta.1](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/tag/v1.13.0-beta.1)
