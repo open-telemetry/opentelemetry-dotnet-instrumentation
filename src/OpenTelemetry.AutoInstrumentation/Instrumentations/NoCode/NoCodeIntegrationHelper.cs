@@ -153,6 +153,5 @@ internal static class NoCodeIntegrationHelper
         return definedOnMethod
                 ? GenericParameterMethodNames[genericParameterPosition]
                 : GenericParameterClassNames[genericParameterPosition];
-        }
     }
 }
