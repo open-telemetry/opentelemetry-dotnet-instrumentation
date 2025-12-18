@@ -56,7 +56,8 @@ bool IsSqlClientNetFxILRewriteEnabled()
         return sqlclient_netfx_ilrewrite_enabled_override.value();
     }
 
-    ToBooleanWithDefault(GetEnvironmentValue(environment::sqlclient_netfx_ilrewrite_enabled), false);
+    // fallback to default
+    return false;
 }
 
 void SetSqlClientNetFxILRewriteEnabled(bool enabled)
