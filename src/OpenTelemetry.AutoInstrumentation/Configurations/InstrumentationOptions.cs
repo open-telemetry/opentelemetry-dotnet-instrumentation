@@ -17,7 +17,6 @@ internal class InstrumentationOptions
         AspNetInstrumentationCaptureRequestHeaders = configuration.ParseHeaders(ConfigurationKeys.Traces.InstrumentationOptions.AspNetInstrumentationCaptureRequestHeaders, AdditionalTag.CreateHttpRequestCache);
         AspNetInstrumentationCaptureResponseHeaders = configuration.ParseHeaders(ConfigurationKeys.Traces.InstrumentationOptions.AspNetInstrumentationCaptureResponseHeaders, AdditionalTag.CreateHttpResponseCache);
         SqlClientNetFxIlRewriteEnabled = configuration.GetBool(ConfigurationKeys.Traces.InstrumentationOptions.SqlClientNetFxILRewriteEnabled) ?? false;
-        NativeMethods.SetSqlClientNetFxILRewriteEnabled(SqlClientNetFxIlRewriteEnabled);
 #endif
 #if NET
         AspNetCoreInstrumentationCaptureRequestHeaders = configuration.ParseHeaders(ConfigurationKeys.Traces.InstrumentationOptions.AspNetCoreInstrumentationCaptureRequestHeaders, AdditionalTag.CreateHttpRequestCache);
@@ -46,7 +45,6 @@ internal class InstrumentationOptions
             if (instrumentationConfiguration.SqlClient != null)
             {
                 SqlClientNetFxIlRewriteEnabled = instrumentationConfiguration.SqlClient.NetFxIlRewriteEnabled;
-                NativeMethods.SetSqlClientNetFxILRewriteEnabled(SqlClientNetFxIlRewriteEnabled);
             }
 #endif
 #if NET
