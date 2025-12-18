@@ -18,9 +18,9 @@ public class MassTransitTests : TestHelper
     [Theory]
     [Trait("Category", "EndToEnd")]
     [MemberData(nameof(LibraryVersion.MassTransit), MemberType = typeof(LibraryVersion))]
-    public void SubmitsTraces(string packageVersion)
+    public async Task SubmitsTraces(string packageVersion)
     {
-        using var collector = new MockSpansCollector(Output);
+        using var collector = await MockSpansCollector.InitializeAsync(Output);
         SetExporter(collector);
         collector.Expect("MassTransit", span => span.Kind == SpanKind.Producer, "Producer");
         collector.Expect("MassTransit", span => span.Kind == SpanKind.Consumer, "Consumer");

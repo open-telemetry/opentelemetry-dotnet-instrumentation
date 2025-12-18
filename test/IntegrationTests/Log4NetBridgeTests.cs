@@ -19,9 +19,9 @@ public class Log4NetBridgeTests : TestHelper
     [Theory]
     [Trait("Category", "EndToEnd")]
     [MemberData(nameof(LibraryVersion.log4net), MemberType = typeof(LibraryVersion))]
-    public void SubmitLogs_ThroughLog4NetBridge_WhenLog4NetIsUsedDirectlyForLogging(string packageVersion)
+    public async Task SubmitLogs_ThroughLog4NetBridge_WhenLog4NetIsUsedDirectlyForLogging(string packageVersion)
     {
-        using var collector = new MockLogsCollector(Output);
+        using var collector = await MockLogsCollector.InitializeAsync(Output);
         SetExporter(collector);
 
         // Logged in scope of an activity
@@ -61,9 +61,9 @@ public class Log4NetBridgeTests : TestHelper
     [Theory]
     [Trait("Category", "EndToEnd")]
     [MemberData(nameof(LibraryVersion.log4net), MemberType = typeof(LibraryVersion))]
-    public void SubmitLogs_ThroughILoggerBridge_WhenLog4NetIsUsedAsILoggerAppenderForLogging(string packageVersion)
+    public async Task SubmitLogs_ThroughILoggerBridge_WhenLog4NetIsUsedAsILoggerAppenderForLogging(string packageVersion)
     {
-        using var collector = new MockLogsCollector(Output);
+        using var collector = await MockLogsCollector.InitializeAsync(Output);
         SetExporter(collector);
 
         // Logged in scope of an activity
@@ -107,7 +107,7 @@ public class Log4NetBridgeTests : TestHelper
     [MemberData(nameof(LibraryVersion.log4net), MemberType = typeof(LibraryVersion))]
     public async Task SubmitLogs_ThroughILoggerBridge_WhenLog4NetIsUsedAsILoggerAppenderForLogging_WithoutDuplicates(string packageVersion)
     {
-        using var collector = new MockLogsCollector(Output);
+        using var collector = await MockLogsCollector.InitializeAsync(Output);
         SetExporter(collector);
 
         collector.ExpectCollected(records => records.Count == 3, "App logs should be exported once.");

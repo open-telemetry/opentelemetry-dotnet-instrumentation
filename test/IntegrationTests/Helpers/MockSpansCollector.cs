@@ -31,7 +31,7 @@ internal sealed class MockSpansCollector : IDisposable
         _output = output;
 
 #if NET
-        _listener = new TestHttpServer(output, nameof(MockSpansCollector), new PathHandler(HandleHttpRequests, "/v1/traces"));
+        _listener = new TestHttpServer(output, nameof(MockSpansCollector), new PathHandler(HandleHttpRequests, "/v1/traces"), MockCollectorHealthZ.CreateHealthZHandler());
 #else
         _listener = new TestHttpServer(output, HandleHttpRequests, host, "/v1/traces/");
 #endif

@@ -16,9 +16,9 @@ public class GrpcNetClientTests : TestHelper
     [Theory]
     [Trait("Category", "EndToEnd")]
     [MemberData(nameof(LibraryVersion.GrpcNetClient), MemberType = typeof(LibraryVersion))]
-    public void SubmitsTraces(string packageVersion)
+    public async Task SubmitsTraces(string packageVersion)
     {
-        using var collector = new MockSpansCollector(Output);
+        using var collector = await MockSpansCollector.InitializeAsync(Output);
         SetExporter(collector);
         collector.Expect("OpenTelemetry.Instrumentation.GrpcNetClient");
 
@@ -34,9 +34,9 @@ public class GrpcNetClientTests : TestHelper
     [Theory]
     [Trait("Category", "EndToEnd")]
     [MemberData(nameof(LibraryVersion.GrpcNetClient), MemberType = typeof(LibraryVersion))]
-    public void SubmitTracesCapturesGrpcMetadata(string packageVersion)
+    public async Task SubmitTracesCapturesGrpcMetadata(string packageVersion)
     {
-        using var collector = new MockSpansCollector(Output);
+        using var collector = await MockSpansCollector.InitializeAsync(Output);
         SetExporter(collector);
 
         collector.Expect("OpenTelemetry.Instrumentation.GrpcNetClient", span =>

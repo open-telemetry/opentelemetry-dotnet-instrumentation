@@ -16,9 +16,9 @@ public class ElasticsearchTests : TestHelper
     [Theory]
     [Trait("Category", "EndToEnd")]
     [MemberData(nameof(LibraryVersion.Elasticsearch), MemberType = typeof(LibraryVersion))]
-    public void SubmitsTraces(string packageVersion)
+    public async Task SubmitsTraces(string packageVersion)
     {
-        using var collector = new MockSpansCollector(Output);
+        using var collector = await MockSpansCollector.InitializeAsync(Output);
         SetExporter(collector);
 
         if (string.IsNullOrEmpty(packageVersion) || new Version(packageVersion).CompareTo(new Version(8, 10, 0)) >= 0)

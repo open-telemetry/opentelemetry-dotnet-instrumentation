@@ -18,9 +18,9 @@ public class EntityFrameworkCoreTests : TestHelper
     [Theory]
     [Trait("Category", "EndToEnd")]
     [MemberData(nameof(LibraryVersion.EntityFrameworkCore), MemberType = typeof(LibraryVersion))]
-    public void SubmitTraces(string packageVersion)
+    public async Task SubmitTraces(string packageVersion)
     {
-        using var collector = new MockSpansCollector(Output);
+        using var collector = await MockSpansCollector.InitializeAsync(Output);
         SetExporter(collector);
 
         collector.Expect("OpenTelemetry.Instrumentation.EntityFrameworkCore");

@@ -19,9 +19,9 @@ public class NLogBridgeTests : TestHelper
     [Theory]
     [Trait("Category", "EndToEnd")]
     [MemberData(nameof(LibraryVersion.NLog), MemberType = typeof(LibraryVersion))]
-    public void SubmitLogs_ThroughNLogBridge_WhenNLogIsUsedDirectlyForLogging(string packageVersion)
+    public async Task SubmitLogs_ThroughNLogBridge_WhenNLogIsUsedDirectlyForLogging(string packageVersion)
     {
-        using var collector = new MockLogsCollector(Output);
+        using var collector = await MockLogsCollector.InitializeAsync(Output);
         SetExporter(collector);
 
         // Logged in scope of an activity
@@ -70,9 +70,9 @@ public class NLogBridgeTests : TestHelper
     [Theory]
     [Trait("Category", "EndToEnd")]
     [MemberData(nameof(LibraryVersion.NLog), MemberType = typeof(LibraryVersion))]
-    public void SubmitLogs_ThroughILoggerBridge_WhenNLogIsUsedAsILoggerProviderForLogging(string packageVersion)
+    public async Task SubmitLogs_ThroughILoggerBridge_WhenNLogIsUsedAsILoggerProviderForLogging(string packageVersion)
     {
-        using var collector = new MockLogsCollector(Output);
+        using var collector = await MockLogsCollector.InitializeAsync(Output);
         SetExporter(collector);
 
         // Logged in scope of an activity
@@ -118,7 +118,7 @@ public class NLogBridgeTests : TestHelper
     [MemberData(nameof(LibraryVersion.NLog), MemberType = typeof(LibraryVersion))]
     public async Task SubmitLogs_ThroughILoggerBridge_WhenNLogIsUsedAsILoggerProviderForLogging_WithoutDuplicates(string packageVersion)
     {
-        using var collector = new MockLogsCollector(Output);
+        using var collector = await MockLogsCollector.InitializeAsync(Output);
         SetExporter(collector);
 
         collector.ExpectCollected(records => records.Count == 3, "App logs should be exported once.");

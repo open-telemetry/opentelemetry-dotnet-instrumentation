@@ -20,9 +20,9 @@ public class HttpTests : TestHelper
     [InlineData("b3multi")]
     [InlineData("b3")]
     [Trait("Category", "EndToEnd")]
-    public void SubmitTraces(string propagators)
+    public async Task SubmitTraces(string propagators)
     {
-        using var collector = new MockSpansCollector(Output);
+        using var collector = await MockSpansCollector.InitializeAsync(Output);
         SetExporter(collector);
         Span? clientSpan = null;
         collector.Expect("System.Net.Http", span =>
@@ -69,9 +69,9 @@ public class HttpTests : TestHelper
 
     [Fact]
     [Trait("Category", "EndToEnd")]
-    public void SubmitTracesFileBased()
+    public async Task SubmitTracesFileBased()
     {
-        using var collector = new MockSpansCollector(Output);
+        using var collector = await MockSpansCollector.InitializeAsync(Output);
         SetFileBasedExporter(collector);
         EnableFileBasedConfigWithDefaultPath();
 
@@ -99,9 +99,9 @@ public class HttpTests : TestHelper
     }
 
     [Fact]
-    public void SubmitTracesCapturesHttpHeaders()
+    public async Task SubmitTracesCapturesHttpHeaders()
     {
-        using var collector = new MockSpansCollector(Output);
+        using var collector = await MockSpansCollector.InitializeAsync(Output);
         SetExporter(collector);
 
         collector.Expect("System.Net.Http", span =>
@@ -136,9 +136,9 @@ public class HttpTests : TestHelper
 
     [Fact]
     [Trait("Category", "EndToEnd")]
-    public void SubmitMetrics()
+    public async Task SubmitMetrics()
     {
-        using var collector = new MockMetricsCollector(Output);
+        using var collector = await MockMetricsCollector.InitializeAsync(Output);
         SetExporter(collector);
         collector.Expect("System.Net.Http");
         collector.Expect("System.Net.NameResolution");

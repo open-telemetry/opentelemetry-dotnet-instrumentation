@@ -23,7 +23,7 @@ public class MinimalApiTests : TestHelper
     [Trait("Category", "EndToEnd")]
     public async Task SubmitsLogsWithoutDuplicates(bool enableByteCodeInstrumentation, bool enableHostingStartupAssembly)
     {
-        using var collector = new MockLogsCollector(Output);
+        using var collector = await MockLogsCollector.InitializeAsync(Output);
         SetExporter(collector);
 
         SetEnvironmentVariable("OTEL_DOTNET_AUTO_LOGS_INCLUDE_FORMATTED_MESSAGE", "true");

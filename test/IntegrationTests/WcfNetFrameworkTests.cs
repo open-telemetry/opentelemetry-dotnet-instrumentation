@@ -24,9 +24,9 @@ public class WcfNetFrameworkTests : WcfTestsBase
 
     [Fact]
     [Trait("Category", "EndToEnd")]
-    public void SubmitsTracesNoEndpoint()
+    public async Task SubmitsTracesNoEndpoint()
     {
-        using var collector = new MockSpansCollector(Output);
+        using var collector = await MockSpansCollector.InitializeAsync(Output);
         SetExporter(collector);
 
         collector.Expect("OpenTelemetry.Instrumentation.Wcf", span => span.Status.Code == Status.Types.StatusCode.Error, "Client 1");

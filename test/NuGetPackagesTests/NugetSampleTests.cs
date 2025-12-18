@@ -29,28 +29,28 @@ public class NugetSampleTests : TestHelper
     }
 
     [Fact]
-    public void InstrumentExecutableFromRidSpecificDir()
+    public async Task InstrumentExecutableFromRidSpecificDir()
     {
-        InstrumentExecutable(_ridSpecificAppDir);
+        await InstrumentExecutable(_ridSpecificAppDir);
     }
 
 #if NET
     [Fact]
-    public void InstrumentExecutableFromBaseDir()
+    public async Task InstrumentExecutableFromBaseDir()
     {
-        InstrumentExecutable(_baseAppDir);
+        await InstrumentExecutable(_baseAppDir);
     }
 
     [Fact]
-    public void InstrumentDllFromRidSpecificDir()
+    public async Task InstrumentDllFromRidSpecificDir()
     {
-        InstrumentDll(_ridSpecificAppDir);
+        await InstrumentDll(_ridSpecificAppDir);
     }
 
     [Fact]
-    public void InstrumentDllFromBaseDir()
+    public async Task InstrumentDllFromBaseDir()
     {
-        InstrumentDll(_baseAppDir);
+        await InstrumentDll(_baseAppDir);
     }
 #endif
 
@@ -90,9 +90,9 @@ public class NugetSampleTests : TestHelper
     }
 
 #if NET
-    private void InstrumentDll(string appDir)
+    private async Task InstrumentDll(string appDir)
     {
-        RunAndAssertHttpSpans(() =>
+        await RunAndAssertHttpSpans(() =>
         {
             using var testServer = TestHttpServer.CreateDefaultTestServer(Output);
 #if NET
@@ -105,19 +105,19 @@ public class NugetSampleTests : TestHelper
                 : EnvironmentHelper.FullTestApplicationName + ".dll";
             var dllPath = Path.Combine(appDir, dllName);
             RunInstrumentationTarget($"dotnet {dllPath} --test-server-port {testServer.Port}", appDir);
-        });
+        }).ConfigureAwait(false);
     }
 #endif
 
-    private void InstrumentExecutable(string appDir)
+    private async Task InstrumentExecutable(string appDir)
     {
-        RunAndAssertHttpSpans(() =>
+        await RunAndAssertHttpSpans(() =>
         {
             using var testServer = TestHttpServer.CreateDefaultTestServer(Output);
             var instrumentationTarget = Path.Combine(appDir, EnvironmentHelper.FullTestApplicationName);
             instrumentationTarget = EnvironmentTools.IsWindows() ? instrumentationTarget + ".exe" : instrumentationTarget;
             RunInstrumentationTarget($"{instrumentationTarget} --test-server-port {testServer.Port}", appDir);
-        });
+        }).ConfigureAwait(false);
     }
 
     private void RunInstrumentationTarget(string instrumentationTarget, string appDir)
@@ -147,9 +147,9 @@ public class NugetSampleTests : TestHelper
         Assert.Equal(0, process.ExitCode);
     }
 
-    private void RunAndAssertHttpSpans(Action appLauncherAction)
+    private async Task RunAndAssertHttpSpans(Action appLauncherAction)
     {
-        using var collector = new MockSpansCollector(Output);
+        using var collector = await MockSpansCollector.InitializeAsync(Output).ConfigureAwait(false);
         SetExporter(collector);
 
 #if NETFRAMEWORK

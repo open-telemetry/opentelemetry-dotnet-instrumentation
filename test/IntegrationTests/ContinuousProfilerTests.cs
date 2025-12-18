@@ -17,10 +17,10 @@ public class ContinuousProfilerTests : TestHelper
 #if NET // allocator tests are only supported on .NET
     [Fact]
     [Trait("Category", "EndToEnd")]
-    public void ExportAllocationSamples()
+    public async Task ExportAllocationSamples()
     {
         EnableBytecodeInstrumentation();
-        using var collector = new MockProfilesCollector(Output);
+        using var collector = await MockProfilesCollector.InitializeAsync(Output);
         SetExporter(collector);
         SetEnvironmentVariable("OTEL_DOTNET_AUTO_PLUGINS", "TestApplication.ContinuousProfiler.AllocationPlugin, TestApplication.ContinuousProfiler, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null");
         SetEnvironmentVariable("OTEL_DOTNET_AUTO_TRACES_ADDITIONAL_SOURCES", "TestApplication.ContinuousProfiler");
@@ -37,10 +37,10 @@ public class ContinuousProfilerTests : TestHelper
 #if NETFRAMEWORK
     [Fact]
     [Trait("Category", "EndToEnd")]
-    public void ExportAllocationSamples_NetFramework_NoSamplesCollected()
+    public async Task ExportAllocationSamples_NetFramework_NoSamplesCollected()
     {
         EnableBytecodeInstrumentation();
-        using var collector = new MockProfilesCollector(Output);
+        using var collector = await MockProfilesCollector.InitializeAsync(Output);
         SetExporter(collector);
         SetEnvironmentVariable("OTEL_DOTNET_AUTO_PLUGINS", "TestApplication.ContinuousProfiler.AllocationPlugin, TestApplication.ContinuousProfiler, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null");
         SetEnvironmentVariable("OTEL_DOTNET_AUTO_TRACES_ADDITIONAL_SOURCES", "TestApplication.ContinuousProfiler");
@@ -52,10 +52,10 @@ public class ContinuousProfilerTests : TestHelper
 
     [Fact]
     [Trait("Category", "EndToEnd")]
-    public void ExportThreadSamples()
+    public async Task ExportThreadSamples()
     {
         EnableBytecodeInstrumentation();
-        using var collector = new MockProfilesCollector(Output);
+        using var collector = await MockProfilesCollector.InitializeAsync(Output);
         SetExporter(collector);
         SetEnvironmentVariable("OTEL_DOTNET_AUTO_PLUGINS", "TestApplication.ContinuousProfiler.ThreadPlugin, TestApplication.ContinuousProfiler, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null");
         SetEnvironmentVariable("OTEL_DOTNET_AUTO_TRACES_ADDITIONAL_SOURCES", "TestApplication.ContinuousProfiler");

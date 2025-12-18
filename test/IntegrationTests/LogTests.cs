@@ -21,9 +21,9 @@ public class LogTests : TestHelper
     [InlineData(false, true)]
     [InlineData(false, false)]
     [Trait("Category", "EndToEnd")]
-    public void SubmitLogs(bool enableClrProfiler, bool includeFormattedMessage)
+    public async Task SubmitLogs(bool enableClrProfiler, bool includeFormattedMessage)
     {
-        using var collector = new MockLogsCollector(Output);
+        using var collector = await MockLogsCollector.InitializeAsync(Output);
         SetExporter(collector);
         if (includeFormattedMessage)
         {
@@ -57,9 +57,9 @@ public class LogTests : TestHelper
     }
 
     [Fact]
-    public void SubmitLogsFileBased()
+    public async Task SubmitLogsFileBased()
     {
-        using var collector = new MockLogsCollector(Output);
+        using var collector = await MockLogsCollector.InitializeAsync(Output);
         SetFileBasedExporter(collector);
         EnableFileBasedConfigWithDefaultPath();
 
@@ -82,7 +82,7 @@ public class LogTests : TestHelper
     [Fact]
     public async Task EnableLogsWithCLRAndHostingStartup()
     {
-        using var collector = new MockLogsCollector(Output);
+        using var collector = await MockLogsCollector.InitializeAsync(Output);
         SetExporter(collector);
 
         collector.ExpectCollected(ValidateSingleAppLogRecord, "App log record should be exported once.");

@@ -18,9 +18,9 @@ public class NServiceBusTests : TestHelper
     [Theory]
     [Trait("Category", "EndToEnd")]
     [MemberData(nameof(LibraryVersion.NServiceBus), MemberType = typeof(LibraryVersion))]
-    public void SubmitsTraces(string packageVersion)
+    public async Task SubmitsTraces(string packageVersion)
     {
-        using var collector = new MockSpansCollector(Output);
+        using var collector = await MockSpansCollector.InitializeAsync(Output);
         SetExporter(collector);
         collector.Expect("NServiceBus.Core");
         SetEnvironmentVariable(ConfigurationKeys.Metrics.MetricsEnabled, bool.FalseString); // make sure that metrics instrumentation is not needed
@@ -39,9 +39,9 @@ public class NServiceBusTests : TestHelper
     [Theory]
     [Trait("Category", "EndToEnd")]
     [MemberData(nameof(LibraryVersion.NServiceBus), MemberType = typeof(LibraryVersion))]
-    public void SubmitMetrics(string packageVersion)
+    public async Task SubmitMetrics(string packageVersion)
     {
-        using var collector = new MockMetricsCollector(Output);
+        using var collector = await MockMetricsCollector.InitializeAsync(Output);
         SetExporter(collector);
 
 #if NET

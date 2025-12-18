@@ -25,46 +25,46 @@ public class SmokeTests : TestHelper
 
     [Fact]
     [Trait("Category", "EndToEnd")]
-    public void SubmitsTraces()
+    public async Task SubmitsTraces()
     {
-        VerifyTestApplicationInstrumented();
+        await VerifyTestApplicationInstrumented();
     }
 
     [Fact]
     [Trait("Category", "EndToEnd")]
-    public void WhenStartupHookIsNotEnabled()
+    public async Task WhenStartupHookIsNotEnabled()
     {
         SetEnvironmentVariable("DOTNET_STARTUP_HOOKS", null);
 #if NETFRAMEWORK
-        VerifyTestApplicationInstrumented();
+        await VerifyTestApplicationInstrumented();
 #else
         // on .NET it is required to set DOTNET_STARTUP_HOOKS
-        VerifyTestApplicationNotInstrumented();
+        await VerifyTestApplicationNotInstrumented();
 #endif
     }
 
 #if !NETFRAMEWORK
     [Fact]
     [Trait("Category", "EndToEnd")]
-    public void WhenStartupHookIsNotEnabledWithProfiler()
+    public async Task WhenStartupHookIsNotEnabledWithProfiler()
     {
         EnableBytecodeInstrumentation();
         SetEnvironmentVariable("DOTNET_STARTUP_HOOKS", null);
-        VerifyTestApplicationInstrumented();
+        await VerifyTestApplicationInstrumented();
     }
 #endif
 
     [Fact]
     [Trait("Category", "EndToEnd")]
-    public void WhenClrProfilerIsNotEnabled()
+    public async Task WhenClrProfilerIsNotEnabled()
     {
         SetEnvironmentVariable("COR_ENABLE_PROFILING", "0");
         SetEnvironmentVariable("CORECLR_ENABLE_PROFILING", "0");
 #if NETFRAMEWORK
         // on .NET Framework it is required to set the CLR .NET Profiler
-        VerifyTestApplicationNotInstrumented();
+        await VerifyTestApplicationNotInstrumented();
 #else
-        VerifyTestApplicationInstrumented();
+        await VerifyTestApplicationInstrumented();
 #endif
     }
 
@@ -73,7 +73,7 @@ public class SmokeTests : TestHelper
     [Trait("Category", "EndToEnd")]
     [InlineData(TestAppStartupMode.DotnetCLI)]
     [InlineData(TestAppStartupMode.Exe)]
-    public void WhenClrProfilerIsNotEnabledStartupHookIsEnabledApplicationIsExcluded(TestAppStartupMode testAppStartupMode)
+    public async Task WhenClrProfilerIsNotEnabledStartupHookIsEnabledApplicationIsExcluded(TestAppStartupMode testAppStartupMode)
     {
         switch (testAppStartupMode)
         {
@@ -89,33 +89,33 @@ public class SmokeTests : TestHelper
 
         SetEnvironmentVariable("CORECLR_ENABLE_PROFILING", "0");
 
-        VerifyTestApplicationNotInstrumented(testAppStartupMode);
+        await VerifyTestApplicationNotInstrumented(testAppStartupMode);
     }
 #endif
 
     [Fact]
     [Trait("Category", "EndToEnd")]
-    public void ApplicationIsNotExcluded()
+    public async Task ApplicationIsNotExcluded()
     {
         SetEnvironmentVariable("OTEL_DOTNET_AUTO_EXCLUDE_PROCESSES", string.Empty);
 
-        VerifyTestApplicationInstrumented(TestAppStartupMode.Exe);
+        await VerifyTestApplicationInstrumented(TestAppStartupMode.Exe);
     }
 
     [Fact]
     [Trait("Category", "EndToEnd")]
-    public void ApplicationIsExcluded()
+    public async Task ApplicationIsExcluded()
     {
         SetEnvironmentVariable("OTEL_DOTNET_AUTO_EXCLUDE_PROCESSES", $"{EnvironmentHelper.FullTestApplicationName},{EnvironmentHelper.FullTestApplicationName}.exe");
 
-        VerifyTestApplicationNotInstrumented(TestAppStartupMode.Exe);
+        await VerifyTestApplicationNotInstrumented(TestAppStartupMode.Exe);
     }
 
     [Fact]
     [Trait("Category", "EndToEnd")]
-    public void SubmitMetrics()
+    public async Task SubmitMetrics()
     {
-        using var collector = new MockMetricsCollector(Output);
+        using var collector = await MockMetricsCollector.InitializeAsync(Output);
         SetExporter(collector);
         collector.Expect("MyCompany.MyProduct.MyLibrary", metric => metric.Name == "MyFruitCounter");
 
@@ -127,9 +127,9 @@ public class SmokeTests : TestHelper
 
     [Fact]
     [Trait("Category", "EndToEnd")]
-    public void TracesResource()
+    public async Task TracesResource()
     {
-        using var collector = new MockSpansCollector(Output);
+        using var collector = await MockSpansCollector.InitializeAsync(Output);
         SetExporter(collector);
 
         EnableOnlyHttpClientTraceInstrumentation();
@@ -144,9 +144,9 @@ public class SmokeTests : TestHelper
 
     [Fact]
     [Trait("Category", "EndToEnd")]
-    public void MetricsResource()
+    public async Task MetricsResource()
     {
-        using var collector = new MockMetricsCollector(Output);
+        using var collector = await MockMetricsCollector.InitializeAsync(Output);
         SetExporter(collector);
 
         EnableOnlyHttpClientTraceInstrumentation();
@@ -161,9 +161,9 @@ public class SmokeTests : TestHelper
 #if NET // The feature is not supported on .NET Framework
     [Fact]
     [Trait("Category", "EndToEnd")]
-    public void LogsResource()
+    public async Task LogsResource()
     {
-        using var collector = new MockLogsCollector(Output);
+        using var collector = await MockLogsCollector.InitializeAsync(Output);
         SetExporter(collector);
 
         EnableOnlyHttpClientTraceInstrumentation();
@@ -178,9 +178,9 @@ public class SmokeTests : TestHelper
 
     [Fact]
     [Trait("Category", "EndToEnd")]
-    public void OtlpTracesExporter()
+    public async Task OtlpTracesExporter()
     {
-        using var collector = new MockSpansCollector(Output);
+        using var collector = await MockSpansCollector.InitializeAsync(Output);
         SetExporter(collector);
         collector.Expect("MyCompany.MyProduct.MyLibrary", span => span.Name == "SayHello");
 
@@ -227,9 +227,9 @@ public class SmokeTests : TestHelper
 
     [Fact]
     [Trait("Category", "EndToEnd")]
-    public void ZipkinAndOtlpTracesExporter()
+    public async Task ZipkinAndOtlpTracesExporter()
     {
-        using var otlpCollector = new MockSpansCollector(Output);
+        using var otlpCollector = await MockSpansCollector.InitializeAsync(Output);
         SetExporter(otlpCollector);
         otlpCollector.Expect("MyCompany.MyProduct.MyLibrary", span => span.Name == "SayHello");
 
@@ -318,7 +318,7 @@ public class SmokeTests : TestHelper
     [Trait("Category", "EndToEnd")]
     public async Task PrometheusAndOtlpMetricsExporter()
     {
-        using var otlpCollector = new MockMetricsCollector(Output);
+        using var otlpCollector = await MockMetricsCollector.InitializeAsync(Output);
         SetExporter(otlpCollector);
 
         EnableOnlyHttpClientTraceInstrumentation();
@@ -365,9 +365,9 @@ public class SmokeTests : TestHelper
 #if NET // The feature is not supported on .NET Framework
     [Fact]
     [Trait("Category", "EndToEnd")]
-    public void SubmitLogs()
+    public async Task SubmitLogs()
     {
-        using var collector = new MockLogsCollector(Output);
+        using var collector = await MockLogsCollector.InitializeAsync(Output);
         SetExporter(collector);
         collector.Expect(logRecord => Convert.ToString(logRecord.Body) == "{ \"stringValue\": \"Example log message\" }");
 
@@ -407,9 +407,9 @@ public class SmokeTests : TestHelper
     [InlineData("OTEL_DOTNET_AUTO_LOGS_ENABLED", "false")]
     [InlineData("OTEL_LOGS_EXPORTER", "none")]
     [Trait("Category", "EndToEnd")]
-    public void LogsNoneInstrumentations(string envVarName, string envVarVal)
+    public async Task LogsNoneInstrumentations(string envVarName, string envVarVal)
     {
-        using var collector = new MockLogsCollector(Output);
+        using var collector = await MockLogsCollector.InitializeAsync(Output);
         SetExporter(collector);
 
         EnableOnlyHttpClientTraceInstrumentation();
@@ -427,9 +427,9 @@ public class SmokeTests : TestHelper
     [InlineData("OTEL_DOTNET_AUTO_TRACES_INSTRUMENTATION_ENABLED", "false")]
     [InlineData("OTEL_TRACES_EXPORTER", "none")]
     [Trait("Category", "EndToEnd")]
-    public void TracesNoneInstrumentations(string envVarName, string envVarVal)
+    public async Task TracesNoneInstrumentations(string envVarName, string envVarVal)
     {
-        using var collector = new MockSpansCollector(Output);
+        using var collector = await MockSpansCollector.InitializeAsync(Output);
         SetExporter(collector);
         SetEnvironmentVariable(envVarName, envVarVal);
         RunTestApplication();
@@ -442,9 +442,9 @@ public class SmokeTests : TestHelper
     [InlineData("OTEL_DOTNET_AUTO_METRICS_ENABLED", "false")]
     [InlineData("OTEL_METRICS_EXPORTER", "none")]
     [Trait("Category", "EndToEnd")]
-    public void MetricsNoneInstrumentations(string envVarName, string envVarVal)
+    public async Task MetricsNoneInstrumentations(string envVarName, string envVarVal)
     {
-        using var collector = new MockMetricsCollector(Output);
+        using var collector = await MockMetricsCollector.InitializeAsync(Output);
         SetExporter(collector);
         EnableOnlyHttpClientTraceInstrumentation();
         SetEnvironmentVariable(envVarName, envVarVal);
@@ -454,9 +454,9 @@ public class SmokeTests : TestHelper
 
     [Fact]
     [Trait("Category", "EndToEnd")]
-    public void LogsDisabledInstrumentation()
+    public async Task LogsDisabledInstrumentation()
     {
-        using var collector = new MockLogsCollector(Output);
+        using var collector = await MockLogsCollector.InitializeAsync(Output);
         SetEnvironmentVariable("OTEL_DOTNET_AUTO_LOGS_DISABLED_INSTRUMENTATIONS", "ILogger");
         EnableOnlyHttpClientTraceInstrumentation();
         EnableBytecodeInstrumentation();
@@ -466,9 +466,9 @@ public class SmokeTests : TestHelper
 
     [Fact]
     [Trait("Category", "EndToEnd")]
-    public void MetricsDisabledInstrumentation()
+    public async Task MetricsDisabledInstrumentation()
     {
-        using var collector = new MockMetricsCollector(Output);
+        using var collector = await MockMetricsCollector.InitializeAsync(Output);
         SetEnvironmentVariable("OTEL_DOTNET_AUTO_METRICS_HTTPCLIENT_INSTRUMENTATION_ENABLED", "false");
         EnableOnlyHttpClientTraceInstrumentation();
         EnableBytecodeInstrumentation();
@@ -478,9 +478,9 @@ public class SmokeTests : TestHelper
 
     [Fact]
     [Trait("Category", "EndToEnd")]
-    public void TracesDisabledInstrumentation()
+    public async Task TracesDisabledInstrumentation()
     {
-        using var collector = new MockSpansCollector(Output);
+        using var collector = await MockSpansCollector.InitializeAsync(Output);
         SetExporter(collector);
         SetEnvironmentVariable("OTEL_DOTNET_AUTO_TRACES_HTTPCLIENT_INSTRUMENTATION_ENABLED", "false");
         RunTestApplication();
@@ -489,12 +489,12 @@ public class SmokeTests : TestHelper
 
     [Fact]
     [Trait("Category", "EndToEnd")]
-    public void ApplicationFailFastDisabled()
+    public async Task ApplicationFailFastDisabled()
     {
         SetEnvironmentVariable("OTEL_DOTNET_AUTO_EXCLUDE_PROCESSES", $"dotnet,dotnet.exe,{EnvironmentHelper.FullTestApplicationName},{EnvironmentHelper.FullTestApplicationName}.exe");
         SetEnvironmentVariable("OTEL_DOTNET_AUTO_FAIL_FAST_ENABLED", "false");
 
-        VerifyTestApplicationNotInstrumented();
+        await VerifyTestApplicationNotInstrumented();
     }
 
     [Theory]
@@ -604,9 +604,9 @@ public class SmokeTests : TestHelper
     }
 #endif
 
-    private void VerifyTestApplicationInstrumented(TestAppStartupMode startupMode = TestAppStartupMode.Auto)
+    private async Task VerifyTestApplicationInstrumented(TestAppStartupMode startupMode = TestAppStartupMode.Auto)
     {
-        using var collector = new MockSpansCollector(Output);
+        using var collector = await MockSpansCollector.InitializeAsync(Output);
         SetExporter(collector);
         collector.Expect("MyCompany.MyProduct.MyLibrary");
 #if NETFRAMEWORK
@@ -622,9 +622,9 @@ public class SmokeTests : TestHelper
         collector.AssertExpectations();
     }
 
-    private void VerifyTestApplicationNotInstrumented(TestAppStartupMode startupMode = TestAppStartupMode.Auto)
+    private async Task VerifyTestApplicationNotInstrumented(TestAppStartupMode startupMode = TestAppStartupMode.Auto)
     {
-        using var collector = new MockSpansCollector(Output);
+        using var collector = await MockSpansCollector.InitializeAsync(Output);
         SetExporter(collector);
 
         EnableOnlyHttpClientTraceInstrumentation();

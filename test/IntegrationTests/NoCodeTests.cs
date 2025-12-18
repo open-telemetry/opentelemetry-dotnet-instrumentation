@@ -17,11 +17,11 @@ public class NoCodeTests : TestHelper
 
     [Fact]
     [Trait("Category", "EndToEnd")]
-    public void SubmitsTraces()
+    public async Task SubmitsTraces()
     {
         EnableBytecodeInstrumentation();
         EnableFileBasedConfigWithDefaultPath();
-        using var collector = new MockSpansCollector(Output);
+        using var collector = await MockSpansCollector.InitializeAsync(Output);
         SetFileBasedExporter(collector);
 
         List<KeyValue> allTypeOfAttributes = [

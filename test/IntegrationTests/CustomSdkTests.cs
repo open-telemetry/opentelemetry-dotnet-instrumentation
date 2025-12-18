@@ -23,10 +23,10 @@ public class CustomSdkTests : TestHelper
     [Fact]
     [Trait("Category", "EndToEnd")]
     [Trait("Containers", "Linux")]
-    public void SubmitsTraces()
+    public async Task SubmitsTraces()
     {
         using var testServer = TestHttpServer.CreateDefaultTestServer(Output);
-        using var collector = new MockSpansCollector(Output);
+        using var collector = await MockSpansCollector.InitializeAsync(Output);
         SetExporter(collector);
 
         // ensure spans are exported by custom sdk with custom resource
@@ -54,10 +54,10 @@ public class CustomSdkTests : TestHelper
     [Fact]
     [Trait("Category", "EndToEnd")]
     [Trait("Containers", "Linux")]
-    public void SubmitsMetrics()
+    public async Task SubmitsMetrics()
     {
         using var testServer = TestHttpServer.CreateDefaultTestServer(Output);
-        using var collector = new MockMetricsCollector(Output);
+        using var collector = await MockMetricsCollector.InitializeAsync(Output);
         SetExporter(collector);
 
         // ensure metrics are exported by custom sdk with custom resource

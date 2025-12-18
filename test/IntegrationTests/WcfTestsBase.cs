@@ -44,7 +44,7 @@ public abstract class WcfTestsBase : TestHelper, IDisposable
     {
         Assert.True(EnvironmentTools.IsWindowsAdministrator(), "This test requires Windows Administrator privileges.");
 
-        var collector = new MockSpansCollector(Output);
+        var collector = await MockSpansCollector.InitializeAsync(Output);
         SetExporter(collector);
 
         var serverHelper = new WcfServerTestHelper(Output);
