@@ -4,15 +4,11 @@
  */
 
 #include "environment_variables_util.h"
-#include <optional>
-
-namespace
-{
-std::optional<bool> sqlclient_netfx_ilrewrite_enabled_override;
-}
 
 namespace trace
 {
+
+bool sqlclient_netfx_ilrewrite_enabled = false;
 
 bool DisableOptimizations()
 {
@@ -51,18 +47,12 @@ bool IsNetFxAssemblyRedirectionEnabled()
 
 bool IsSqlClientNetFxILRewriteEnabled()
 {
-    if (sqlclient_netfx_ilrewrite_enabled_override.has_value())
-    {
-        return sqlclient_netfx_ilrewrite_enabled_override.value();
-    }
-
-    // fallback to default
-    return false;
+    return sqlclient_netfx_ilrewrite_enabled;
 }
 
 void SetSqlClientNetFxILRewriteEnabled(bool enabled)
 {
-    sqlclient_netfx_ilrewrite_enabled_override = enabled;
+    sqlclient_netfx_ilrewrite_enabled = enabled;
 }
 
 } // namespace trace
