@@ -25,7 +25,7 @@ internal sealed class MockProfilesCollector : IDisposable
     private readonly BlockingCollection<Collected> _profilesSnapshots = new(10); // bounded to avoid memory leak; contains protobuf type
     private CollectedExpectation? _collectedExpectation;
 
-    public MockProfilesCollector(ITestOutputHelper output, string host = "localhost")
+    private MockProfilesCollector(ITestOutputHelper output, string host)
     {
         _output = output;
 #if NETFRAMEWORK
@@ -41,6 +41,21 @@ internal sealed class MockProfilesCollector : IDisposable
     public int Port { get => _listener.Port; }
 
     public OtlpResourceExpector ResourceExpector { get; } = new();
+
+#if NET
+    public static async Task<MockProfilesCollector> InitializeAsync(ITestOutputHelper output, string host = "localhost")
+#else
+    public static Task<MockProfilesCollector> InitializeAsync(ITestOutputHelper output, string host = "localhost")
+#endif
+    {
+        var collector = new MockProfilesCollector(output, host);
+#if NET
+        await MockCollectorHealthZ.WarmupHealthZEndpoint(output, host, collector.Port);
+        return collector;
+#else
+        return Task.FromResult(collector);
+#endif
+    }
 
     public void Dispose()
     {

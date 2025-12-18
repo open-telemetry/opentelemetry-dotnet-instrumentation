@@ -26,7 +26,7 @@ internal sealed class MockSpansCollector : IDisposable
     private readonly List<Expectation> _expectations = new();
     private Func<ICollection<Collected>, bool>? _collectedExpectation;
 
-    public MockSpansCollector(ITestOutputHelper output, string host = "localhost")
+    private MockSpansCollector(ITestOutputHelper output, string host)
     {
         _output = output;
 
@@ -43,6 +43,21 @@ internal sealed class MockSpansCollector : IDisposable
     public int Port { get => _listener.Port; }
 
     public OtlpResourceExpector ResourceExpector { get; } = new();
+
+#if NET
+    public static async Task<MockSpansCollector> InitializeAsync(ITestOutputHelper output, string host = "localhost")
+#else
+    public static Task<MockSpansCollector> InitializeAsync(ITestOutputHelper output, string host = "localhost")
+#endif
+    {
+        var collector = new MockSpansCollector(output, host);
+#if NET
+        await MockCollectorHealthZ.WarmupHealthZEndpoint(output, host, collector.Port).ConfigureAwait(false);
+        return collector;
+#else
+        return Task.FromResult(collector);
+#endif
+    }
 
     public void Dispose()
     {

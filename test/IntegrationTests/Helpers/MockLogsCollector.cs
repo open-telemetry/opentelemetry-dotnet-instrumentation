@@ -24,14 +24,14 @@ internal sealed class MockLogsCollector : IDisposable
 
     private CollectedExpectation? _collectedExpectation;
 
-    public MockLogsCollector(ITestOutputHelper output, string host = "localhost")
+    private MockLogsCollector(ITestOutputHelper output, string host)
     {
         _output = output;
 
 #if NETFRAMEWORK
         _listener = new(output, HandleHttpRequests, host, "/v1/logs/");
 #else
-        _listener = new(output, nameof(MockLogsCollector), new PathHandler(HandleHttpRequests, "/v1/logs"));
+        _listener = new(output, nameof(MockLogsCollector), new PathHandler(HandleHttpRequests, "/v1/logs"), MockCollectorHealthZ.CreateHealthZHandler());
 #endif
     }
 
@@ -41,6 +41,21 @@ internal sealed class MockLogsCollector : IDisposable
     public int Port { get => _listener.Port; }
 
     public OtlpResourceExpector ResourceExpector { get; } = new();
+
+#if NET
+    public static async Task<MockLogsCollector> InitializeAsync(ITestOutputHelper output, string host = "localhost")
+#else
+    public static Task<MockLogsCollector> InitializeAsync(ITestOutputHelper output, string host = "localhost")
+#endif
+    {
+        var collector = new MockLogsCollector(output, host);
+#if NET
+        await MockCollectorHealthZ.WarmupHealthZEndpoint(output, host, collector.Port);
+        return collector;
+#else
+        return Task.FromResult(collector);
+#endif
+    }
 
     public void Dispose()
     {

@@ -25,13 +25,13 @@ internal sealed class MockMetricsCollector : IDisposable
     private readonly BlockingCollection<List<Collected>> _metricsSnapshots = new(10); // bounded to avoid memory leak; contains protobuf type
     private Func<ICollection<Collected>, bool>? _additionalEntriesExpectation;
 
-    public MockMetricsCollector(ITestOutputHelper output, string host = "localhost")
+    private MockMetricsCollector(ITestOutputHelper output, string host)
     {
         _output = output;
 #if NETFRAMEWORK
         _listener = new(output, HandleHttpRequests, host, "/v1/metrics/");
 #else
-        _listener = new(output, nameof(MockMetricsCollector), new PathHandler(HandleHttpRequests, "/v1/metrics"));
+        _listener = new(output, nameof(MockMetricsCollector), new PathHandler(HandleHttpRequests, "/v1/metrics"), MockCollectorHealthZ.CreateHealthZHandler());
 #endif
     }
 
@@ -41,6 +41,21 @@ internal sealed class MockMetricsCollector : IDisposable
     public int Port { get => _listener.Port; }
 
     public OtlpResourceExpector ResourceExpector { get; } = new();
+
+#if NET
+    public static async Task<MockMetricsCollector> InitializeAsync(ITestOutputHelper output, string host = "localhost")
+#else
+    public static Task<MockMetricsCollector> InitializeAsync(ITestOutputHelper output, string host = "localhost")
+#endif
+    {
+        var collector = new MockMetricsCollector(output, host);
+#if NET
+        await MockCollectorHealthZ.WarmupHealthZEndpoint(output, host, collector.Port);
+        return collector;
+#else
+        return Task.FromResult(collector);
+#endif
+    }
 
     public void Dispose()
     {
