@@ -12,6 +12,8 @@ namespace OpenTelemetry.AutoInstrumentation.Instrumentations.NoCode;
 internal static class NoCodeIntegrationHelper
 {
     private static readonly ActivitySource Source = new("OpenTelemetry.AutoInstrumentation.NoCode");
+    private static readonly string[] GenericParameterClassNames = ["!0", "!1", "!2", "!3", "!4", "!5", "!6", "!7", "!8", "!9"];
+    private static readonly string[] GenericParameterMethodNames = ["!!0", "!!1", "!!2", "!!3", "!!4", "!!5", "!!6", "!!7", "!!8", "!!9"];
 
     internal static List<NoCodeInstrumentedMethod> NoCodeEntries { get; set; } = [];
 
@@ -140,16 +142,17 @@ internal static class NoCodeIntegrationHelper
 
     private static string GetParameterTypeNameDefinition(ParameterInfo parameterInfo)
     {
-        if (parameterInfo.ParameterType.IsGenericParameter)
+        if (!string.IsNullOrEmpty(parameterInfo.ParameterType.FullName))
         {
-            var definedOnMethod = parameterInfo.ParameterType.DeclaringMethod != null;
-            var genericParameterPosition = parameterInfo.ParameterType.GenericParameterPosition;
-
-            return definedOnMethod
-                ? $"!!{genericParameterPosition}"
-                : $"!{genericParameterPosition}";
+            return parameterInfo.ParameterType.FullName;
         }
 
-        return parameterInfo.ParameterType.FullName!;
+        var definedOnMethod = parameterInfo.ParameterType.DeclaringMethod != null;
+        var genericParameterPosition = parameterInfo.ParameterType.GenericParameterPosition;
+
+        return definedOnMethod
+                ? GenericParameterMethodNames[genericParameterPosition]
+                : GenericParameterClassNames[genericParameterPosition];
+        }
     }
 }
