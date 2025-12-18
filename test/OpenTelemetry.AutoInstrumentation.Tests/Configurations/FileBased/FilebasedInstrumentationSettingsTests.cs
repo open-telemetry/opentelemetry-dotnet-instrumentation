@@ -331,6 +331,7 @@ public class FilebasedInstrumentationSettingsTests
         Assert.Contains("Some.Additional.Source3", settings.Meters);
     }
 
+#if NETFRAMEWORK
     [Fact]
     public void LoadFile_SetsSqlClientNetFxIlRewriteEnvironmentVariable()
     {
@@ -356,4 +357,5 @@ public class FilebasedInstrumentationSettingsTests
 
         Assert.True(settings.InstrumentationOptions.SqlClientNetFxIlRewriteEnabled);
     }
+#endif
 }

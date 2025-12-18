@@ -139,8 +139,8 @@ public class ParserInstrumentationTests
 #if NETFRAMEWORK
         Assert.Equal("X-Key,X-Custom-Header,X-Header-Example", traces.AspNet!.CaptureRequestHeaders);
         Assert.Equal("X-Key,X-Custom-Header,X-Header-Example", traces.AspNet!.CaptureResponseHeaders);
-#endif
         Assert.True(traces.SqlClient!.NetFxIlRewriteEnabled);
+#endif
 
         Assert.True(logs.Log4Net.BridgeEnabled);
     }

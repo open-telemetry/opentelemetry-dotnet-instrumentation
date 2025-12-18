@@ -16,6 +16,8 @@ internal class InstrumentationOptions
 #if NETFRAMEWORK
         AspNetInstrumentationCaptureRequestHeaders = configuration.ParseHeaders(ConfigurationKeys.Traces.InstrumentationOptions.AspNetInstrumentationCaptureRequestHeaders, AdditionalTag.CreateHttpRequestCache);
         AspNetInstrumentationCaptureResponseHeaders = configuration.ParseHeaders(ConfigurationKeys.Traces.InstrumentationOptions.AspNetInstrumentationCaptureResponseHeaders, AdditionalTag.CreateHttpResponseCache);
+        SqlClientNetFxIlRewriteEnabled = configuration.GetBool(ConfigurationKeys.Traces.InstrumentationOptions.SqlClientNetFxILRewriteEnabled) ?? false;
+        NativeMethods.SetSqlClientNetFxILRewriteEnabled(SqlClientNetFxIlRewriteEnabled);
 #endif
 #if NET
         AspNetCoreInstrumentationCaptureRequestHeaders = configuration.ParseHeaders(ConfigurationKeys.Traces.InstrumentationOptions.AspNetCoreInstrumentationCaptureRequestHeaders, AdditionalTag.CreateHttpRequestCache);
@@ -28,7 +30,6 @@ internal class InstrumentationOptions
         HttpInstrumentationCaptureRequestHeaders = configuration.ParseHeaders(ConfigurationKeys.Traces.InstrumentationOptions.HttpInstrumentationCaptureRequestHeaders, AdditionalTag.CreateHttpRequestCache);
         HttpInstrumentationCaptureResponseHeaders = configuration.ParseHeaders(ConfigurationKeys.Traces.InstrumentationOptions.HttpInstrumentationCaptureResponseHeaders, AdditionalTag.CreateHttpResponseCache);
         OracleMdaSetDbStatementForText = configuration.GetBool(ConfigurationKeys.Traces.InstrumentationOptions.OracleMdaSetDbStatementForText) ?? false;
-        SqlClientNetFxIlRewriteEnabled = configuration.GetBool(ConfigurationKeys.Traces.InstrumentationOptions.SqlClientNetFxILRewriteEnabled) ?? false;
     }
 
     internal InstrumentationOptions(DotNetTraces? instrumentationConfiguration)
@@ -40,6 +41,12 @@ internal class InstrumentationOptions
             {
                 AspNetInstrumentationCaptureRequestHeaders = HeaderConfigurationExtensions.ParseHeaders(instrumentationConfiguration.AspNet.CaptureRequestHeaders, AdditionalTag.CreateHttpRequestCache);
                 AspNetInstrumentationCaptureResponseHeaders = HeaderConfigurationExtensions.ParseHeaders(instrumentationConfiguration.AspNet.CaptureResponseHeaders, AdditionalTag.CreateHttpResponseCache);
+            }
+
+            if (instrumentationConfiguration.SqlClient != null)
+            {
+                SqlClientNetFxIlRewriteEnabled = instrumentationConfiguration.SqlClient.NetFxIlRewriteEnabled;
+                NativeMethods.SetSqlClientNetFxILRewriteEnabled(SqlClientNetFxIlRewriteEnabled);
             }
 #endif
 #if NET
@@ -71,11 +78,6 @@ internal class InstrumentationOptions
             {
                 OracleMdaSetDbStatementForText = instrumentationConfiguration.OracleMda.SetDbStatementForText;
             }
-
-            if (instrumentationConfiguration.SqlClient != null)
-            {
-                SqlClientNetFxIlRewriteEnabled = instrumentationConfiguration.SqlClient.NetFxIlRewriteEnabled;
-            }
         }
     }
 
@@ -89,6 +91,12 @@ internal class InstrumentationOptions
     /// Gets the list of HTTP response headers to be captured as the span tags by ASP.NET instrumentation.
     /// </summary>
     public IReadOnlyList<AdditionalTag> AspNetInstrumentationCaptureResponseHeaders { get; } = [];
+
+    /// <summary>
+    /// Gets a value indicating whether the SqlClient instrumentation on .NET Framework should rewrite IL
+    /// to ensure CommandText is available.
+    /// </summary>
+    public bool SqlClientNetFxIlRewriteEnabled { get; }
 #endif
 
 #if NET
@@ -132,10 +140,4 @@ internal class InstrumentationOptions
     /// Gets a value indicating whether text query in Oracle Client can be passed as a db.statement tag.
     /// </summary>
     public bool OracleMdaSetDbStatementForText { get; }
-
-    /// <summary>
-    /// Gets a value indicating whether the SqlClient instrumentation on .NET Framework should rewrite IL
-    /// to ensure CommandText is available.
-    /// </summary>
-    public bool SqlClientNetFxIlRewriteEnabled { get; }
 }

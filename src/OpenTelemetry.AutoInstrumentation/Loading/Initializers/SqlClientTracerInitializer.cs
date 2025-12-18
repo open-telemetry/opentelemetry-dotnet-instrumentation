@@ -9,15 +9,18 @@ namespace OpenTelemetry.AutoInstrumentation.Loading.Initializers;
 internal sealed class SqlClientTracerInitializer : SqlClientInitializer
 {
     private readonly PluginManager _pluginManager;
+#if NETFRAMEWORK
     private readonly TracerSettings _tracerSettings;
-
+#endif
     private int _initialized;
 
     public SqlClientTracerInitializer(LazyInstrumentationLoader lazyInstrumentationLoader, PluginManager pluginManager, TracerSettings tracerSettings)
         : base(lazyInstrumentationLoader, nameof(SqlClientTracerInitializer))
     {
         _pluginManager = pluginManager;
+#if NETFRAMEWORK
         _tracerSettings = tracerSettings;
+#endif
     }
 
     protected override void InitializeOnFirstCall(ILifespanManager lifespanManager)
@@ -27,6 +30,10 @@ internal sealed class SqlClientTracerInitializer : SqlClientInitializer
             // InitializeOnFirstCall() was already called before
             return;
         }
+
+#if NETFRAMEWORK
+        NativeMethods.SetSqlClientNetFxILRewriteEnabled(_tracerSettings.InstrumentationOptions.SqlClientNetFxIlRewriteEnabled);
+#endif
 
         var instrumentationType = Type.GetType("OpenTelemetry.Instrumentation.SqlClient.SqlClientInstrumentation, OpenTelemetry.Instrumentation.SqlClient")!;
         var instanceField = instrumentationType?.GetField("Instance");
@@ -48,7 +55,5 @@ internal sealed class SqlClientTracerInitializer : SqlClientInitializer
         {
             lifespanManager.Track(tracingHandle);
         }
-
-        NativeMethods.SetSqlClientNetFxILRewriteEnabled(_tracerSettings.InstrumentationOptions.SqlClientNetFxIlRewriteEnabled);
     }
 }
