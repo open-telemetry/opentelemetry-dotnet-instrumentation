@@ -3,6 +3,7 @@
 
 using System.Diagnostics;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using OpenTelemetry.AutoInstrumentation.CallTarget;
 using OpenTelemetry.AutoInstrumentation.Configurations;
 using OpenTelemetry.AutoInstrumentation.Util;
@@ -19,9 +20,7 @@ internal static class NoCodeIntegrationHelper
 
     internal static CallTargetState OnMethodBegin()
     {
-        const int methodNameFrameIndex = 3;
-
-        var method = new StackFrame(methodNameFrameIndex).GetMethod();
+        var method = GetFirstNonOtelAutoMethod();
         var methodName = method?.Name;
         var typeName = method?.DeclaringType?.FullName;
         var assemblyName = method?.DeclaringType?.Assembly.GetName().Name;
@@ -153,5 +152,24 @@ internal static class NoCodeIntegrationHelper
         return definedOnMethod
                 ? GenericParameterMethodNames[genericParameterPosition]
                 : GenericParameterClassNames[genericParameterPosition];
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static MethodBase? GetFirstNonOtelAutoMethod()
+    {
+        // Typically, the first method outside OpenTelemetry.AutoInstrumentation assembly is at skipFrames = 3
+        // For some cases, compiler does not inline all OpenTelemetry.AutoInstrumentation methods, so we check up to skipFrames = 10
+
+        for (var skipFrames = 3; skipFrames < 10; skipFrames++)
+        {
+            var method = new StackFrame(skipFrames).GetMethod();
+            var assemblyName = method?.DeclaringType?.Assembly.GetName().Name;
+            if (assemblyName != null && !assemblyName.Equals("OpenTelemetry.AutoInstrumentation", StringComparison.Ordinal))
+            {
+                return method;
+            }
+        }
+
+        return null;
     }
 }
