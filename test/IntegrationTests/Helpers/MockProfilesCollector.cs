@@ -31,7 +31,7 @@ internal sealed class MockProfilesCollector : IDisposable
 #if NETFRAMEWORK
         _listener = new(output, HandleHttpRequests, host, "/v1development/profiles/");
 #else
-        _listener = new(output, nameof(MockProfilesCollector), new PathHandler(HandleHttpRequests, "/v1development/profiles"));
+        _listener = new(output, nameof(MockProfilesCollector), new PathHandler(HandleHttpRequests, "/v1development/profiles"), MockCollectorHealthZ.CreateHealthZHandler());
 #endif
     }
 
