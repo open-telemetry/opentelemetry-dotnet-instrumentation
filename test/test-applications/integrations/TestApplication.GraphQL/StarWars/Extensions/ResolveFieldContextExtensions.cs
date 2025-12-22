@@ -6,7 +6,7 @@ namespace StarWars.Extensions;
 
 public static class ResolveFieldContextExtensions
 {
-    public static Connection<TU> GetPagedResults<T, TU>(this IResolveConnectionContext<T> context, StarWarsData data, List<string> ids)
+    public static Connection<TU> GetPagedResults<T, TU>(this IResolveConnectionContext<T> context, StarWarsData data, IReadOnlyList<string> ids)
         where TU : StarWarsCharacter
     {
         List<string> idList;
@@ -20,7 +20,7 @@ public static class ResolveFieldContextExtensions
             if (context.After != null)
             {
                 idList = ids
-                    .SkipWhile(x => !Convert.ToBase64String(System.Text.Encoding.UTF8.GetBytes(x)).Equals(context.After))
+                    .SkipWhile(x => !Convert.ToBase64String(System.Text.Encoding.UTF8.GetBytes(x)).Equals(context.After, StringComparison.Ordinal))
                     .Take(context.First ?? pageSize).ToList();
             }
             else
@@ -34,7 +34,7 @@ public static class ResolveFieldContextExtensions
             if (context.Before != null)
             {
                 idList = ids.Reverse<string>()
-                    .SkipWhile(x => !Convert.ToBase64String(System.Text.Encoding.UTF8.GetBytes(x)).Equals(context.Before))
+                    .SkipWhile(x => !Convert.ToBase64String(System.Text.Encoding.UTF8.GetBytes(x)).Equals(context.Before, StringComparison.Ordinal))
                     .Take(context.Last ?? pageSize).ToList();
             }
             else

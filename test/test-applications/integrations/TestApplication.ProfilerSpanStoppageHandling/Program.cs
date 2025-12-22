@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Hosting.Server.Features;
 
 namespace TestApplication.ProfilerSpanStoppageHandling;
 
-public class Program
+internal static class Program
 {
     public static void Main(string[] args)
     {

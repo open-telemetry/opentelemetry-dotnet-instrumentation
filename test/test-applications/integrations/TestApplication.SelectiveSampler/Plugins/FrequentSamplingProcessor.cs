@@ -18,7 +18,7 @@ public class FrequentSamplingProcessor : BaseProcessor<Activity>
         var nativeMethodsType = Type.GetType("OpenTelemetry.AutoInstrumentation.NativeMethods, OpenTelemetry.AutoInstrumentation");
         if (nativeMethodsType == null)
         {
-            throw new Exception("OpenTelemetry.AutoInstrumentation.NativeMethods could not be found.");
+            throw new InvalidOperationException("OpenTelemetry.AutoInstrumentation.NativeMethods could not be found.");
         }
 
         var startMethod = nativeMethodsType.GetMethod("SelectiveSamplingStart", BindingFlags.Static | BindingFlags.Public, null, [typeof(ActivityTraceId)], null);

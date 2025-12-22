@@ -9,7 +9,7 @@ using ValueType = OpenTelemetry.Proto.Profiles.V1Development.ValueType;
 
 namespace TestApplication.ContinuousProfiler;
 
-internal class ExtendedPprofBuilder
+internal sealed class ExtendedPprofBuilder
 {
     private readonly LocationCache _locationCache;
     private readonly LinkCache _linkCache;

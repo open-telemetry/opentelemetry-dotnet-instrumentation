@@ -5,7 +5,7 @@ using TestApplication.Shared;
 
 namespace TestApplication.NoCode;
 
-public class Program
+internal static class Program
 {
     public static async Task Main(string[] args)
     {
@@ -14,6 +14,7 @@ public class Program
         var noCodeTestingClass = new NoCodeTestingClass();
         var genericNoCodeTestingClass = new GenericNoCodeTestingClass<int, long>();
 
+#pragma warning disable CA1849 // Call async methods when in an async method
         noCodeTestingClass.TestMethod();
         noCodeTestingClass.TestMethodA();
         noCodeTestingClass.TestMethod(string.Empty);
@@ -28,6 +29,7 @@ public class Program
         noCodeTestingClass.TestMethod(string.Empty, string.Empty, string.Empty, string.Empty, string.Empty, string.Empty, string.Empty, string.Empty, string.Empty);
 
         NoCodeTestingClass.TestMethodStatic();
+#pragma warning restore CA1849 // Call async methods when in an async method
 
         _ = noCodeTestingClass.ReturningTestMethod();
         _ = noCodeTestingClass.ReturningStringTestMethod();
@@ -45,29 +47,31 @@ public class Program
 
         _ = NoCodeTestingClass.ReturningTestMethodStatic();
 
-        await noCodeTestingClass.TestMethodAsync();
-        await noCodeTestingClass.TestMethodAAsync();
-        await noCodeTestingClass.TestMethodAsync(string.Empty);
-        await noCodeTestingClass.TestMethodAsync(int.MinValue);
-        await noCodeTestingClass.TestMethodAsync(string.Empty, string.Empty);
-        await noCodeTestingClass.TestMethodAsync(string.Empty, string.Empty, string.Empty);
-        await noCodeTestingClass.TestMethodAsync(string.Empty, string.Empty, string.Empty, string.Empty);
-        await noCodeTestingClass.TestMethodAsync(string.Empty, string.Empty, string.Empty, string.Empty, string.Empty);
-        await noCodeTestingClass.TestMethodAsync(string.Empty, string.Empty, string.Empty, string.Empty, string.Empty, string.Empty);
-        await noCodeTestingClass.TestMethodAsync(string.Empty, string.Empty, string.Empty, string.Empty, string.Empty, string.Empty, string.Empty);
-        await noCodeTestingClass.TestMethodAsync(string.Empty, string.Empty, string.Empty, string.Empty, string.Empty, string.Empty, string.Empty, string.Empty);
-        await noCodeTestingClass.TestMethodAsync(string.Empty, string.Empty, string.Empty, string.Empty, string.Empty, string.Empty, string.Empty, string.Empty, string.Empty);
+        await noCodeTestingClass.TestMethodAsync().ConfigureAwait(false);
+        await noCodeTestingClass.TestMethodAAsync().ConfigureAwait(false);
+        await noCodeTestingClass.TestMethodAsync(string.Empty).ConfigureAwait(false);
+        await noCodeTestingClass.TestMethodAsync(int.MinValue).ConfigureAwait(false);
+        await noCodeTestingClass.TestMethodAsync(string.Empty, string.Empty).ConfigureAwait(false);
+        await noCodeTestingClass.TestMethodAsync(string.Empty, string.Empty, string.Empty).ConfigureAwait(false);
+        await noCodeTestingClass.TestMethodAsync(string.Empty, string.Empty, string.Empty, string.Empty).ConfigureAwait(false);
+        await noCodeTestingClass.TestMethodAsync(string.Empty, string.Empty, string.Empty, string.Empty, string.Empty).ConfigureAwait(false);
+        await noCodeTestingClass.TestMethodAsync(string.Empty, string.Empty, string.Empty, string.Empty, string.Empty, string.Empty).ConfigureAwait(false);
+        await noCodeTestingClass.TestMethodAsync(string.Empty, string.Empty, string.Empty, string.Empty, string.Empty, string.Empty, string.Empty).ConfigureAwait(false);
+        await noCodeTestingClass.TestMethodAsync(string.Empty, string.Empty, string.Empty, string.Empty, string.Empty, string.Empty, string.Empty, string.Empty).ConfigureAwait(false);
+        await noCodeTestingClass.TestMethodAsync(string.Empty, string.Empty, string.Empty, string.Empty, string.Empty, string.Empty, string.Empty, string.Empty, string.Empty).ConfigureAwait(false);
 
-        await NoCodeTestingClass.TestMethodStaticAsync();
+        await NoCodeTestingClass.TestMethodStaticAsync().ConfigureAwait(false);
 
-        _ = await noCodeTestingClass.IntTaskTestMethodAsync();
+        _ = await noCodeTestingClass.IntTaskTestMethodAsync().ConfigureAwait(false);
 #if NET
-        await noCodeTestingClass.ValueTaskTestMethodAsync();
-        _ = await noCodeTestingClass.IntValueTaskTestMethodAsync();
+        await noCodeTestingClass.ValueTaskTestMethodAsync().ConfigureAwait(false);
+        _ = await noCodeTestingClass.IntValueTaskTestMethodAsync().ConfigureAwait(false);
 #endif
 
+#pragma warning disable CA1849 // Call async methods when in an async method
         _ = noCodeTestingClass.GenericTestMethod<int>();
-        _ = await noCodeTestingClass.GenericTestMethodAsync<int>();
+#pragma warning restore CA1849 // Call async methods when in an async method
+        _ = await noCodeTestingClass.GenericTestMethodAsync<int>().ConfigureAwait(false);
         _ = genericNoCodeTestingClass.GenericTestMethod(string.Empty, new object(), 123, 456L);
     }
 }

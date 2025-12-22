@@ -43,7 +43,7 @@ var app = builder.Build();
 // Configure the HTTP request pipeline.
 app.MapGrpcService<GreeterService>();
 
-await app.StartAsync();
+await app.StartAsync().ConfigureAwait(false);
 #endif
 
 var uri = $"http://localhost:{port}";

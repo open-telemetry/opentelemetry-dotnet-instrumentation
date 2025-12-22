@@ -6,7 +6,7 @@ using TestApplication.Shared;
 
 namespace TestApplication.Npgsql;
 
-public static class Program
+internal static class Program
 {
     public static async Task Main(string[] args)
     {
@@ -17,11 +17,11 @@ public static class Program
         var connString = $"Server=127.0.0.1;Port={postgresPort};User ID=postgres";
 
         await using var conn = new NpgsqlConnection(connString);
-        await conn.OpenAsync();
+        await conn.OpenAsync().ConfigureAwait(false);
 
         using var cmd = new NpgsqlCommand(@"SELECT 123;", conn);
         await using var reader = await cmd.ExecuteReaderAsync();
-        while (await reader.ReadAsync())
+        while (await reader.ReadAsync().ConfigureAwait(false))
         {
             Console.WriteLine(reader.GetInt32(0));
         }

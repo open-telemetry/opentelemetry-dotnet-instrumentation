@@ -6,7 +6,7 @@ using Microsoft.Extensions.Logging;
 
 namespace TestApplication.Log4NetBridge;
 
-internal class Log4NetLogger : ILogger
+internal sealed class Log4NetLogger : ILogger
 {
     private readonly ILog _log;
 

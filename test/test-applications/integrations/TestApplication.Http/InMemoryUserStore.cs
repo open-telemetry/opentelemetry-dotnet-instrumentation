@@ -9,7 +9,7 @@ namespace TestApplication.Http;
 /// <summary>
 /// In-memory user store for testing Identity metrics
 /// </summary>
-public class InMemoryUserStore : IUserStore<TestUser>, IUserPasswordStore<TestUser>
+internal class InMemoryUserStore : IUserStore<TestUser>, IUserPasswordStore<TestUser>
 {
     private readonly Dictionary<string, TestUser> _users = new();
     private readonly Dictionary<string, string> _passwords = new();

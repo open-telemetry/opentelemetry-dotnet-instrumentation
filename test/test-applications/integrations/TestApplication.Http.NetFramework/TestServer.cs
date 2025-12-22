@@ -7,7 +7,7 @@ using TestApplication.Http.NetFramework.Helpers;
 
 namespace TestApplication.Http.NetFramework;
 
-public class TestServer : IDisposable
+internal sealed class TestServer : IDisposable
 {
     private readonly HttpListener _listener;
     private readonly Thread _listenerThread;

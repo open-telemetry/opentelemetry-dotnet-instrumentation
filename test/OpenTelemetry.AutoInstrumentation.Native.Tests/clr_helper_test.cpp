@@ -106,8 +106,10 @@ TEST_F(CLRHelperTest, GetsTypeInfoFromTypeDefs)
 
 TEST_F(CLRHelperTest, GetsTypeInfoFromTypeRefs)
 {
-    std::set<std::wstring> expected = {L"DebuggingModes",
+    std::set<std::wstring> expected = {L"ConfiguredTaskAwaiter",
+                                       L"DebuggingModes",
                                        L"Enumerator",
+                                       L"System.ArgumentNullException",
                                        L"System.Array",
                                        L"System.Attribute",
                                        L"System.AttributeTargets",
@@ -139,12 +141,11 @@ TEST_F(CLRHelperTest, GetsTypeInfoFromTypeRefs)
                                        L"System.Reflection.AssemblyTitleAttribute",
                                        L"System.Runtime.CompilerServices.AsyncStateMachineAttribute",
                                        L"System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1",
+                                       L"System.Runtime.CompilerServices.ConfiguredTaskAwaitable",
                                        L"System.Runtime.CompilerServices.CompilationRelaxationsAttribute",
                                        L"System.Runtime.CompilerServices.CompilerGeneratedAttribute",
                                        L"System.Runtime.CompilerServices.IAsyncStateMachine",
                                        L"System.Runtime.CompilerServices.RuntimeCompatibilityAttribute",
-                                       L"System.Runtime.CompilerServices.TaskAwaiter",
-                                       L"System.Runtime.CompilerServices.TaskAwaiter`1",
                                        L"System.Runtime.Versioning.TargetFrameworkAttribute",
                                        L"System.RuntimeTypeHandle",
                                        L"System.String",

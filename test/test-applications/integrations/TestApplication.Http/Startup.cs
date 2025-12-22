@@ -107,23 +107,23 @@ public class Startup
                     context.Response.Headers.Append("Custom-Response-Test-Header2", "Test-Value2");
                     context.Response.Headers.Append("Custom-Response-Test-Header3", "Test-Value3");
 
-                    await context.Response.WriteAsync("Pong");
+                    await context.Response.WriteAsync("Pong").ConfigureAwait(false);
                 });
 
                 endpoints.Map("/protected", async context =>
                 {
                     var authorizationService = context.RequestServices.GetRequiredService<IAuthorizationService>();
                     var policy = new AuthorizationPolicyBuilder().RequireAuthenticatedUser().Build();
-                    var result = await authorizationService.AuthorizeAsync(context.User, policy);
+                    var result = await authorizationService.AuthorizeAsync(context.User, policy).ConfigureAwait(false);
 
                     if (result.Succeeded)
                     {
-                        await context.Response.WriteAsync("Protected");
+                        await context.Response.WriteAsync("Protected").ConfigureAwait(false);
                     }
                     else
                     {
                         context.Response.StatusCode = 403;
-                        await context.Response.WriteAsync("Forbidden");
+                        await context.Response.WriteAsync("Forbidden").ConfigureAwait(false);
                     }
                 });
 
@@ -135,16 +135,16 @@ public class Startup
                             new[] { new Claim(ClaimTypes.Name, "TestUser") },
                             CookieAuthenticationDefaults.AuthenticationScheme));
                     var authProperties = new AuthenticationProperties();
-                    await authenticationService.SignInAsync(context, CookieAuthenticationDefaults.AuthenticationScheme, claimsPrincipal, authProperties);
-                    await context.Response.WriteAsync("Logged in");
+                    await authenticationService.SignInAsync(context, CookieAuthenticationDefaults.AuthenticationScheme, claimsPrincipal, authProperties).ConfigureAwait(false);
+                    await context.Response.WriteAsync("Logged in").ConfigureAwait(false);
                 });
 
                 endpoints.Map("/logout", async context =>
                 {
                     var authenticationService = context.RequestServices.GetRequiredService<IAuthenticationService>();
                     var authProperties = new AuthenticationProperties();
-                    await authenticationService.SignOutAsync(context, CookieAuthenticationDefaults.AuthenticationScheme, authProperties);
-                    await context.Response.WriteAsync("Logged out");
+                    await authenticationService.SignOutAsync(context, CookieAuthenticationDefaults.AuthenticationScheme, authProperties).ConfigureAwait(false);
+                    await context.Response.WriteAsync("Logged out").ConfigureAwait(false);
                 });
 
 #if NET10_0_OR_GREATER
@@ -158,15 +158,15 @@ public class Startup
                         UserName = "testuser" + Guid.NewGuid().ToString("N")[..8],
                         Email = "test@example.com"
                     };
-                    var result = await userManager.CreateAsync(user, "Password123!");
-                    await context.Response.WriteAsync(result.Succeeded ? "User created" : "Failed to create user");
+                    var result = await userManager.CreateAsync(user, "Password123!").ConfigureAwait(false);
+                    await context.Response.WriteAsync(result.Succeeded ? "User created" : "Failed to create user").ConfigureAwait(false);
                 });
 
                 endpoints.Map("/identity/find-user", async context =>
                 {
                     var userManager = context.RequestServices.GetRequiredService<UserManager<TestUser>>();
-                    var user = await userManager.FindByNameAsync("testuser");
-                    await context.Response.WriteAsync(user != null ? "User found" : "User not found");
+                    var user = await userManager.FindByNameAsync("testuser").ConfigureAwait(false);
+                    await context.Response.WriteAsync(user != null ? "User found" : "User not found").ConfigureAwait(false);
                 });
 #endif
 

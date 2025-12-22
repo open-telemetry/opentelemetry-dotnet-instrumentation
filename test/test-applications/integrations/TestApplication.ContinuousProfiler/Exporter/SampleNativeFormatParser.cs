@@ -8,7 +8,7 @@ namespace TestApplication.ContinuousProfiler;
 /// <summary>
 /// Parser the native code's pause-time-optimized format.
 /// </summary>
-public class SampleNativeFormatParser
+internal class SampleNativeFormatParser
 {
     // TODO use value from ContinuousProfilerProcessor.BackgroundThreadName when it will be moved to main project
     public const string BackgroundThreadName = "OpenTelemetry Continuous Profiler Thread";

@@ -21,9 +21,9 @@ var containerName = $"test-container-{Guid.NewGuid()}";
 var containerClient = blobServiceClient.GetBlobContainerClient(containerName);
 
 // Create the container if it does not exist
-await containerClient.CreateIfNotExistsAsync();
+await containerClient.CreateIfNotExistsAsync().ConfigureAwait(false);
 
-var exists = await containerClient.ExistsAsync();
+var exists = await containerClient.ExistsAsync().ConfigureAwait(false);
 
 Console.WriteLine(exists);
 

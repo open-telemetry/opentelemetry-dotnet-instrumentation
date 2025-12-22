@@ -17,7 +17,7 @@ public class GreeterService : Greeter.GreeterBase
             { "Custom-Response-Test-Header3", "Test-Value3" }
         };
 
-        await context.WriteResponseHeadersAsync(headers);
+        await context.WriteResponseHeadersAsync(headers).ConfigureAwait(false);
 
         return new HelloReply
         {
