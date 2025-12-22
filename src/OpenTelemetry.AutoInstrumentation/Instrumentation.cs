@@ -131,6 +131,12 @@ internal static class Instrumentation
 
             if (TracerSettings.Value.TracesEnabled)
             {
+#if NETFRAMEWORK
+                if (TracerSettings.Value.InstrumentationOptions.SqlClientNetFxIlRewriteEnabled)
+                {
+                    NativeMethods.SetSqlClientNetFxILRewriteEnabled(true);
+                }
+#endif
                 if (GeneralSettings.Value.SetupSdk)
                 {
                     var builder = Sdk
@@ -505,7 +511,7 @@ internal static class Instrumentation
                     DelayedInitialization.Traces.AddGrpcClient(lazyInstrumentationLoader, pluginManager, tracerSettings);
                     break;
                 case TracerInstrumentation.SqlClient:
-                    DelayedInitialization.Traces.AddSqlClient(lazyInstrumentationLoader, pluginManager, tracerSettings);
+                    DelayedInitialization.Traces.AddSqlClient(lazyInstrumentationLoader, pluginManager);
                     break;
                 case TracerInstrumentation.Quartz:
                     DelayedInitialization.Traces.AddQuartz(lazyInstrumentationLoader, pluginManager);
