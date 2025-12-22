@@ -19,10 +19,10 @@ var contextOptions = new DbContextOptionsBuilder<TestDbContext>()
 
 await using (var context = new TestDbContext(contextOptions))
 {
-    await context.Database.EnsureDeletedAsync();
-    await context.Database.EnsureCreatedAsync();
-    await context.AddAsync(new TestItem { Name = "TestItem" });
-    await context.SaveChangesAsync();
+    await context.Database.EnsureDeletedAsync().ConfigureAwait(false);
+    await context.Database.EnsureCreatedAsync().ConfigureAwait(false);
+    await context.AddAsync(new TestItem { Name = "TestItem" }).ConfigureAwait(false);
+    await context.SaveChangesAsync().ConfigureAwait(false);
 }
 
 await using (var context = new TestDbContext(contextOptions))

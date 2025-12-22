@@ -6,7 +6,7 @@ public abstract class StarWarsCharacter
 
     public string? Name { get; set; }
 
-    public List<string> Friends { get; set; } = new List<string>();
+    public IReadOnlyList<string> Friends { get; set; } = new List<string>();
 
     public int[]? AppearsIn { get; set; }
 

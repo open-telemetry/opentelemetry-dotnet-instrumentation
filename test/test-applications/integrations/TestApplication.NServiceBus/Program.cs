@@ -14,11 +14,11 @@ endpointConfiguration.UseTransport(learningTransport);
 endpointConfiguration.UseSerialization<XmlSerializer>();
 
 using var cancellation = new CancellationTokenSource();
-var endpointInstance = await Endpoint.Start(endpointConfiguration, cancellation.Token);
+var endpointInstance = await Endpoint.Start(endpointConfiguration, cancellation.Token).ConfigureAwait(false);
 
 try
 {
-    await endpointInstance.SendLocal(new TestMessage(), cancellation.Token);
+    await endpointInstance.SendLocal(new TestMessage(), cancellation.Token).ConfigureAwait(false);
 
     // The "LONG_RUNNING" environment variable is used by tests that access/receive
     // data that takes time to be produced.
@@ -30,10 +30,15 @@ try
         // be ensured. Anyway, tests that set "LONG_RUNNING" env var to true are expected
         // to kill the process directly.
         Console.WriteLine("LONG_RUNNING is true, waiting for process to be killed...");
+
+#if NET
+        await Process.GetCurrentProcess().WaitForExitAsync().ConfigureAwait(false);
+#else
         Process.GetCurrentProcess().WaitForExit();
+#endif
     }
 }
 finally
 {
-    await endpointInstance.Stop(cancellation.Token);
+    await endpointInstance.Stop(cancellation.Token).ConfigureAwait(false);
 }

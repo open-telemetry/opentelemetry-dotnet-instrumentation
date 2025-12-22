@@ -19,9 +19,9 @@ public class Worker : BackgroundService
     {
         while (!stoppingToken.IsCancellationRequested)
         {
-            await _bus.Publish(new TestMessage { Value = $"The time is {DateTimeOffset.Now}" }, stoppingToken);
+            await _bus.Publish(new TestMessage { Value = $"The time is {DateTimeOffset.Now}" }, stoppingToken).ConfigureAwait(false);
 
-            await Task.Delay(1000, stoppingToken);
+            await Task.Delay(1000, stoppingToken).ConfigureAwait(false);
         }
     }
 }

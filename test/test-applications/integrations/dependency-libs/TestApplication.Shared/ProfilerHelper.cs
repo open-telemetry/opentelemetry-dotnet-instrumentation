@@ -8,7 +8,7 @@ using System.Linq;
 
 namespace TestApplication.Shared;
 
-public static class ProfilerHelper
+internal static class ProfilerHelper
 {
     public static IEnumerable<KeyValuePair<string, string>> GetEnvironmentConfiguration()
     {
@@ -18,7 +18,7 @@ public static class ProfilerHelper
                       from prefix in prefixes
                       let key = (envVar.Key as string)?.ToUpperInvariant()
                       let value = envVar.Value as string
-                      where key.StartsWith(prefix)
+                      where key.StartsWith(prefix, StringComparison.Ordinal)
                       orderby key
                       select new KeyValuePair<string, string>(key, value);
 

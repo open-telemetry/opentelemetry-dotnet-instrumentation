@@ -78,7 +78,7 @@ internal static class Program
     /// Logs a message using the Logger.Log(Type wrapperType, LogEventInfo logEvent) overload.
     /// This is used when creating custom logger wrappers.
     /// </summary>
-    private static void LogWithWrapperType(NLog.ILogger logger, string message)
+    private static void LogWithWrapperType(Logger logger, string message)
     {
         var logEvent = LogEventInfo.Create(NLog.LogLevel.Info, logger.Name, message);
         logger.Log(typeof(Program), logEvent);

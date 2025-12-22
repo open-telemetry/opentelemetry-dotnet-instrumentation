@@ -18,6 +18,9 @@
 
     <!-- Keep the same base output path to simplify re-use of test helpers -->
     <BaseOutputPath>..\bin\$(MSBuildProjectName)\</BaseOutputPath>
+    <AnalysisLevel>latest-All</AnalysisLevel>
+    <!-- CA1031: Do not catch general exception types -->
+    <NoWarn>$(NoWarn);CA1031</NoWarn>
   </PropertyGroup>
 
 </Project>

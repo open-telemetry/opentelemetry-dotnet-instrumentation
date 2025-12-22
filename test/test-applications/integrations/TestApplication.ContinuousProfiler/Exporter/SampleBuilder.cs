@@ -5,7 +5,7 @@ using OpenTelemetry.Proto.Profiles.V1Development;
 
 namespace TestApplication.ContinuousProfiler;
 
-internal class SampleBuilder
+internal sealed class SampleBuilder
 {
     private readonly Sample _sample = new();
     private long? _value;
