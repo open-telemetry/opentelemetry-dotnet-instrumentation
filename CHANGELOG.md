@@ -14,6 +14,8 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 - Support for [`NLog`](https://www.nuget.org/packages/NLog/)
   logs instrumentation for versions `5.*` and `6.*` on .NET using duck typing
   for zero-config auto-injection.
+- Support for file-based configuration of the IL rewrite for
+  SqlClient instrumentation setting
 
 ### Changed
 

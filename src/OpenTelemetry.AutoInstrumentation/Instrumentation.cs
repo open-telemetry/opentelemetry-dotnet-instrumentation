@@ -131,6 +131,12 @@ internal static class Instrumentation
 
             if (TracerSettings.Value.TracesEnabled)
             {
+#if NETFRAMEWORK
+                if (TracerSettings.Value.InstrumentationOptions.SqlClientNetFxIlRewriteEnabled)
+                {
+                    NativeMethods.SetSqlClientNetFxILRewriteEnabled(true);
+                }
+#endif
                 if (GeneralSettings.Value.SetupSdk)
                 {
                     var builder = Sdk

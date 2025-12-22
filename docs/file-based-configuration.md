@@ -51,7 +51,6 @@ file-based configuration to include these parameters.
 | `OTEL_DOTNET_AUTO_EXCLUDE_PROCESSES`                 | Names of the executable files that the profiler cannot instrument.                                                        |
 | `OTEL_DOTNET_AUTO_OPENTRACING_ENABLED`               | Enables OpenTracing tracer.                                                                                               |
 | `OTEL_DOTNET_AUTO_NETFX_REDIRECT_ENABLED`            | Enables automatic redirection of the assemblies used by the automatic instrumentation on the .NET Framework.              |
-| `OTEL_DOTNET_AUTO_SQLCLIENT_NETFX_ILREWRITE_ENABLED` | Enables IL rewriting of `SqlCommand` on .NET Framework to ensure `CommandText` is present for `SqlClient` instrumentation |
 
 ---
 
@@ -543,6 +542,10 @@ instrumentation/development:
         # Whether the Oracle Client instrumentation can pass SQL statements through the db.statement attribute. Queries might contain sensitive information. If set to false, db.statement is recorded only for executing stored procedures.
         # Default is false
         set_db_statement_for_text: false
+      sqlclient:
+        # Enables IL rewriting of SqlCommand on .NET Framework to ensure CommandText is available for instrumentation.
+        # Default is false
+        netfx_ilrewrite_enabled: false
       aspnet:
         # A comma-separated list of HTTP header names. ASP.NET instrumentations will capture HTTP request header values for all configured header names.
         capture_request_headers: "X-Key,X-Custom-Header,X-Header-Example"

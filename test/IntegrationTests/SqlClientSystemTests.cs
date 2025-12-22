@@ -18,14 +18,16 @@ public class SqlClientSystemTests : TestHelper
         _sqlServerFixture = sqlServerFixture;
     }
 
-    public static TheoryData<string, bool> GetDataForIlRewrite()
+    public static TheoryData<string, bool, bool> GetDataForIlRewrite()
     {
-        var theoryData = new TheoryData<string, bool>();
+        var theoryData = new TheoryData<string, bool, bool>();
 
         foreach (var version in LibraryVersion.SqlClientSystem)
         {
-            theoryData.Add(version, true);
-            theoryData.Add(version, false);
+            theoryData.Add(version, true, true);
+            theoryData.Add(version, true, false);
+            theoryData.Add(version, false, true);
+            theoryData.Add(version, false, false);
         }
 
         return theoryData;
@@ -59,14 +61,22 @@ public class SqlClientSystemTests : TestHelper
     [Trait("Category", "EndToEnd")]
     [Trait("Containers", "Linux")]
     [MemberData(nameof(GetDataForIlRewrite))]
-    public void SqlClientIlRewrite(string packageVersion, bool enableIlRewrite)
+    public void SqlClientIlRewrite(string packageVersion, bool enableIlRewrite, bool isFileBased)
     {
         // Skip the test if fixture does not support current platform
         _sqlServerFixture.SkipIfUnsupportedPlatform();
 
         SetEnvironmentVariable("OTEL_DOTNET_AUTO_SQLCLIENT_NETFX_ILREWRITE_ENABLED", enableIlRewrite.ToString());
         using var collector = new MockSpansCollector(Output);
-        SetExporter(collector);
+        if (isFileBased)
+        {
+            SetFileBasedExporter(collector);
+            EnableFileBasedConfigWithDefaultPath();
+        }
+        else
+        {
+            SetExporter(collector);
+        }
 
         if (enableIlRewrite)
         {

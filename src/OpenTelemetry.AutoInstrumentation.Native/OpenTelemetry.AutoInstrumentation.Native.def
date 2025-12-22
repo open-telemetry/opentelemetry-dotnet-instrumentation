@@ -7,6 +7,7 @@ EXPORTS
     IsProfilerAttached
     AddInstrumentations
     AddDerivedInstrumentations
+    SetSqlClientNetFxILRewriteEnabled
     InitializeTraceMethods
     ConfigureContinuousProfiler
     ContinuousProfilerReadThreadSamples

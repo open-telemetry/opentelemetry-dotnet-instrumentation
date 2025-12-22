@@ -8,6 +8,8 @@
 namespace trace
 {
 
+bool sqlclient_netfx_ilrewrite_enabled = false;
+
 bool DisableOptimizations()
 {
     CheckIfTrue(GetEnvironmentValue(environment::clr_disable_optimizations));
@@ -45,7 +47,12 @@ bool IsNetFxAssemblyRedirectionEnabled()
 
 bool IsSqlClientNetFxILRewriteEnabled()
 {
-    ToBooleanWithDefault(GetEnvironmentValue(environment::sqlclient_netfx_ilrewrite_enabled), false);
+    return sqlclient_netfx_ilrewrite_enabled;
+}
+
+void SetSqlClientNetFxILRewriteEnabled(bool enabled)
+{
+    sqlclient_netfx_ilrewrite_enabled = enabled;
 }
 
 } // namespace trace
