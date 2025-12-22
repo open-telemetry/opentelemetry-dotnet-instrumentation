@@ -26,7 +26,7 @@ public static class Program
             }
             else
             {
-                throw new Exception($"Unrecognized command-line arguments: \"{string.Join(" ", args)}\"");
+                throw new InvalidOperationException($"Unrecognized command-line arguments: \"{string.Join(" ", args)}\"");
             }
         }
 

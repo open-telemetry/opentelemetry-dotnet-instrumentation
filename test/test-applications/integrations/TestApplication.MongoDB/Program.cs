@@ -72,15 +72,15 @@ public static class Program
     {
         var allFilter = new BsonDocument();
 
-        await collection.DeleteManyAsync(allFilter);
-        await collection.InsertOneAsync(newDocument);
+        await collection.DeleteManyAsync(allFilter).ConfigureAwait(false);
+        await collection.InsertOneAsync(newDocument).ConfigureAwait(false);
 
-        var count = await collection.CountDocumentsAsync(new BsonDocument());
+        var count = await collection.CountDocumentsAsync(new BsonDocument()).ConfigureAwait(false);
 
         Console.WriteLine($"Documents: {count}");
 
-        var find = await collection.FindAsync(allFilter);
-        var allDocuments = await find.ToListAsync();
+        var find = await collection.FindAsync(allFilter).ConfigureAwait(false);
+        var allDocuments = await find.ToListAsync().ConfigureAwait(false);
         Console.WriteLine(allDocuments.FirstOrDefault());
     }
 

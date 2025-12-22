@@ -16,7 +16,7 @@ internal class Program
         // and verify that trace context flows properly between threads that carry out parts of the async operation.
         using var activity = Source.StartActivity();
 
-        await DoSomethingAsync();
+        await DoSomethingAsync().ConfigureAwait(false);
     }
 
     private static async Task DoSomethingAsync()

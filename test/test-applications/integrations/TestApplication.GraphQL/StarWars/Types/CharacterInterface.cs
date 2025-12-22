@@ -18,7 +18,7 @@ public class CharacterInterface : InterfaceGraphType<StarWarsCharacter>
         Field<ListGraphType<CharacterInterface>>("friends");
         Field<ConnectionType<CharacterInterface, EdgeType<CharacterInterface>>>("friendsConnection");
 
-        Field<ListGraphType<EpisodeEnum>>("appearsIn")
+        Field<ListGraphType<Episodes>>("appearsIn")
             .Description("Which movie they appear in.");
     }
 }

@@ -31,7 +31,7 @@ public class DroidType : ObjectGraphType<Droid>
             .Bidirectional()
             .Resolve(context => context.GetPagedResults<Droid, StarWarsCharacter>(data, context.Source.Friends));
 
-        Field<ListGraphType<EpisodeEnum>>("appearsIn")
+        Field<ListGraphType<Episodes>>("appearsIn")
             .Description("Which movie they appear in.");
 
         Field(d => d.PrimaryFunction, nullable: true)

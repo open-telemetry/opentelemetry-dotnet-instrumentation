@@ -14,7 +14,7 @@ using OpenTelemetry.Proto.Resource.V1;
 
 namespace TestApplication.ContinuousProfiler;
 
-public class OtlpOverHttpExporter
+internal class OtlpOverHttpExporter
 {
     private const string MediaContentType = "application/x-protobuf";
 
@@ -257,6 +257,11 @@ public class OtlpOverHttpExporter
         return scopeProfiles;
     }
 
+    private static ExportRequestContent CreateHttpContent(ExportProfilesServiceRequest exportRequest)
+    {
+        return new ExportRequestContent(exportRequest);
+    }
+
     private HttpResponseMessage SendHttpRequest(HttpRequestMessage request, CancellationToken cancellationToken)
     {
 #if NET
@@ -264,11 +269,6 @@ public class OtlpOverHttpExporter
 #else
         return _httpClient.SendAsync(request, cancellationToken).GetAwaiter().GetResult();
 #endif
-    }
-
-    private HttpContent CreateHttpContent(ExportProfilesServiceRequest exportRequest)
-    {
-        return new ExportRequestContent(exportRequest);
     }
 
     private HttpRequestMessage CreateHttpRequest(ExportProfilesServiceRequest exportRequest)

@@ -6,7 +6,7 @@ using TestApplication.ContinuousProfiler;
 
 namespace TestApplication.SelectiveSampler.Plugins;
 
-internal class JsonConsoleExporter
+internal sealed class JsonConsoleExporter
 {
     private readonly SampleNativeFormatParser _sampleNativeFormatParser;
 

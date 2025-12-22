@@ -20,8 +20,10 @@ public class CsrfMiddleware
 
     public async Task InvokeAsync(HttpContext context)
     {
+        ArgumentNullException.ThrowIfNull(context);
+
         context.Request.Headers["GraphQL-Require-Preflight"] = "1";
 
-        await _next(context);
+        await _next(context).ConfigureAwait(false);
     }
 }

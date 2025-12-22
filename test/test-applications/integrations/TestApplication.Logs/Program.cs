@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Hosting.Server.Features;
 
 namespace TestApplication.Logs;
 
-public class Program
+internal static class Program
 {
     public static void Main(string[] args)
     {
@@ -18,7 +18,7 @@ public class Program
         var addressFeature = server?.Features.Get<IServerAddressesFeature>();
         var address = addressFeature?.Addresses.First();
         using var httpClient = new HttpClient();
-        httpClient.GetAsync($"{address}/test").Wait();
+        httpClient.GetAsync(new Uri($"{address}/test")).Wait();
     }
 
     public static IHostBuilder CreateHostBuilder(string[] args) =>

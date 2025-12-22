@@ -4,6 +4,7 @@
 #if !RABBITMQ_7_0_0_OR_GREATER
 using System.Reflection;
 #endif
+using System.Globalization;
 using System.Text;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
@@ -18,7 +19,7 @@ internal static class Program
     {
         ConsoleHelper.WriteSplashScreen(args);
 
-        var factory = new ConnectionFactory { HostName = "localhost", Port = int.Parse(GetRabbitMqPort(args)) };
+        var factory = new ConnectionFactory { HostName = "localhost", Port = int.Parse(GetRabbitMqPort(args), CultureInfo.InvariantCulture) };
         await using var connection = await factory.CreateConnectionAsync();
         await using var channel = await connection.CreateChannelAsync();
 
@@ -29,7 +30,7 @@ internal static class Program
             durable: false,
             exclusive: false,
             autoDelete: false,
-            arguments: null);
+            arguments: null).ConfigureAwait(false);
 
         const string message = "Hello World!";
         ReadOnlyMemory<byte> body = Encoding.UTF8.GetBytes(message);
@@ -38,7 +39,7 @@ internal static class Program
             exchange: string.Empty,
             routingKey: "hello",
             body: body,
-            mandatory: false);
+            mandatory: false).ConfigureAwait(false);
         Console.WriteLine($"Sent: {message}");
 
         var consumer = new AsyncEventingBasicConsumer(channel);
@@ -54,7 +55,7 @@ internal static class Program
             return Task.CompletedTask;
         };
 
-        await channel.BasicConsumeAsync(queue: "hello", autoAck: true, consumer);
+        await channel.BasicConsumeAsync(queue: "hello", autoAck: true, consumer).ConfigureAwait(false);
 
         resetEvent.Wait(TimeSpan.FromSeconds(5));
     }

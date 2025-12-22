@@ -7,13 +7,13 @@ using TestApplication.Shared;
 
 namespace TestApplication.MassTransit;
 
-public class Program
+internal static class Program
 {
     public static async Task Main(string[] args)
     {
         ConsoleHelper.WriteSplashScreen(args);
         using var cancellationTokenSource = new CancellationTokenSource(TimeSpan.FromSeconds(5));
-        await CreateHostBuilder(args).Build().RunAsync(cancellationTokenSource.Token);
+        await CreateHostBuilder(args).Build().RunAsync(cancellationTokenSource.Token).ConfigureAwait(false);
     }
 
     public static IHostBuilder CreateHostBuilder(string[] args) =>
