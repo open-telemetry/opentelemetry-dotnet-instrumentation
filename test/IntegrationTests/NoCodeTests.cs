@@ -101,6 +101,7 @@ public class NoCodeTests : TestHelper
 
         collector.ExpectNoCode("Span-GenericTestMethod");
         collector.ExpectAsyncNoCode("Span-GenericTestMethodAsync");
+        collector.ExpectNoCode("Span-GenericTestMethodWithParameters");
 
         RunTestApplication();
 
