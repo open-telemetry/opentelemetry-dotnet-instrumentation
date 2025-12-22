@@ -16,11 +16,11 @@ public class DomainNeutralTests : TestHelper
 
     [Fact]
     [Trait("Category", "EndToEnd")]
-    public void SubmitsTraces()
+    public async Task SubmitsTraces()
     {
         Assert.True(EnvironmentTools.IsWindowsAdministrator(), "This test requires Windows Administrator privileges.");
 
-        using var collector = new MockSpansCollector(Output);
+        using var collector = await MockSpansCollector.InitializeAsync(Output);
         SetExporter(collector);
         collector.Expect("ByteCode.Plugin.StrongNamedValidation");
 

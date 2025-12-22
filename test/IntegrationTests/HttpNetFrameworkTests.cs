@@ -16,9 +16,9 @@ public class HttpNetFrameworkTests : TestHelper
 
     [Fact]
     [Trait("Category", "EndToEnd")]
-    public void SubmitTraces()
+    public async Task SubmitTraces()
     {
-        using var collector = new MockSpansCollector(Output);
+        using var collector = await MockSpansCollector.InitializeAsync(Output);
         SetExporter(collector);
 
         collector.Expect("OpenTelemetry.Instrumentation.Http.HttpWebRequest");
@@ -30,9 +30,9 @@ public class HttpNetFrameworkTests : TestHelper
 
     [Fact]
     [Trait("Category", "EndToEnd")]
-    public void SubmitTracesFileBased()
+    public async Task SubmitTracesFileBased()
     {
-        using var collector = new MockSpansCollector(Output);
+        using var collector = await MockSpansCollector.InitializeAsync(Output);
         SetFileBasedExporter(collector);
         EnableFileBasedConfigWithDefaultPath();
 
@@ -44,9 +44,9 @@ public class HttpNetFrameworkTests : TestHelper
     }
 
     [Fact]
-    public void SubmitTracesCapturesHttpHeaders()
+    public async Task SubmitTracesCapturesHttpHeaders()
     {
-        using var collector = new MockSpansCollector(Output);
+        using var collector = await MockSpansCollector.InitializeAsync(Output);
         SetExporter(collector);
 
         collector.Expect("OpenTelemetry.Instrumentation.Http.HttpWebRequest", span =>

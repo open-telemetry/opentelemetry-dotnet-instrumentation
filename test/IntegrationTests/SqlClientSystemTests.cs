@@ -35,12 +35,12 @@ public class SqlClientSystemTests : TestHelper
     [Trait("Category", "EndToEnd")]
     [Trait("Containers", "Linux")]
     [MemberData(nameof(LibraryVersion.SqlClientSystem), MemberType = typeof(LibraryVersion))]
-    public void SubmitTraces(string packageVersion)
+    public async Task SubmitTraces(string packageVersion)
     {
         // Skip the test if fixture does not support current platform
         _sqlServerFixture.SkipIfUnsupportedPlatform();
 
-        using var collector = new MockSpansCollector(Output);
+        using var collector = await MockSpansCollector.InitializeAsync(Output);
         SetExporter(collector);
 
         collector.Expect("OpenTelemetry.Instrumentation.SqlClient");
@@ -59,13 +59,13 @@ public class SqlClientSystemTests : TestHelper
     [Trait("Category", "EndToEnd")]
     [Trait("Containers", "Linux")]
     [MemberData(nameof(GetDataForIlRewrite))]
-    public void SqlClientIlRewrite(string packageVersion, bool enableIlRewrite)
+    public async Task SqlClientIlRewrite(string packageVersion, bool enableIlRewrite)
     {
         // Skip the test if fixture does not support current platform
         _sqlServerFixture.SkipIfUnsupportedPlatform();
 
         SetEnvironmentVariable("OTEL_DOTNET_AUTO_SQLCLIENT_NETFX_ILREWRITE_ENABLED", enableIlRewrite.ToString());
-        using var collector = new MockSpansCollector(Output);
+        using var collector = await MockSpansCollector.InitializeAsync(Output);
         SetExporter(collector);
 
         if (enableIlRewrite)
@@ -91,12 +91,12 @@ public class SqlClientSystemTests : TestHelper
     [Trait("Category", "EndToEnd")]
     [Trait("Containers", "Linux")]
     [MemberData(nameof(LibraryVersion.SqlClientSystem), MemberType = typeof(LibraryVersion))]
-    public void SubmitMetrics(string packageVersion)
+    public async Task SubmitMetrics(string packageVersion)
     {
         // Skip the test if fixture does not support current platform
         _sqlServerFixture.SkipIfUnsupportedPlatform();
 
-        using var collector = new MockMetricsCollector(Output);
+        using var collector = await MockMetricsCollector.InitializeAsync(Output);
         SetExporter(collector);
 
         collector.Expect("OpenTelemetry.Instrumentation.SqlClient");

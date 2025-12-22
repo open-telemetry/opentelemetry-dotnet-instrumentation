@@ -36,7 +36,7 @@ public sealed class DotNetCliTests : TestHelper, IDisposable
     }
 
     [Fact]
-    public void WorkFlow()
+    public async Task WorkFlow()
     {
         using var testServer = TestHttpServer.CreateDefaultTestServer(Output);
         // Ensure no MS telemetry spans.
@@ -54,12 +54,12 @@ public sealed class DotNetCliTests : TestHelper, IDisposable
         RunDotNetCli("build");
 
         var targetAppDllPath = Path.Combine(".", "bin", "Debug", tfm, TargetAppName + ".dll");
-        RunAppWithDotNetCliAndAssertHttpSpans(targetAppDllPath);
+        await RunAppWithDotNetCliAndAssertHttpSpans(targetAppDllPath);
 
         // Not necessary, but, testing a common command.
         RunDotNetCli("clean");
 
-        RunAppWithDotNetCliAndAssertHttpSpans("run -c Release");
+        await RunAppWithDotNetCliAndAssertHttpSpans("run -c Release");
     }
 
     private static void ChangeDefaultProgramToHttpClient(int testServerPort)
@@ -105,9 +105,9 @@ public sealed class DotNetCliTests : TestHelper, IDisposable
         Assert.Equal(0, process.ExitCode);
     }
 
-    private void RunAppWithDotNetCliAndAssertHttpSpans(string arguments)
+    private async Task RunAppWithDotNetCliAndAssertHttpSpans(string arguments)
     {
-        using var collector = new MockSpansCollector(Output);
+        using var collector = await MockSpansCollector.InitializeAsync(Output);
         SetExporter(collector);
 
         collector.Expect("System.Net.Http");

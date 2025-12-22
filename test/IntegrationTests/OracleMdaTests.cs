@@ -42,14 +42,14 @@ public class OracleMdaTests : TestHelper
     [Trait("Category", "EndToEnd")]
     [Trait("Containers", "Linux")]
     [MemberData(nameof(GetData))]
-    public void SubmitTraces(string packageVersion, bool dbStatementForText)
+    public async Task SubmitTraces(string packageVersion, bool dbStatementForText)
     {
         // Skip the test if fixture does not support current platform
         _oracle.SkipIfUnsupportedPlatform();
 
         SetEnvironmentVariable("OTEL_DOTNET_AUTO_ORACLEMDA_SET_DBSTATEMENT_FOR_TEXT", dbStatementForText.ToString());
 
-        using var collector = new MockSpansCollector(Output);
+        using var collector = await MockSpansCollector.InitializeAsync(Output);
         SetExporter(collector);
 
 #if  NETFRAMEWORK

@@ -17,9 +17,9 @@ public class ProcessTests : TestHelper
 
     [Fact]
     [Trait("Category", "EndToEnd")]
-    public void SubmitMetrics()
+    public async Task SubmitMetrics()
     {
-        using var collector = new MockMetricsCollector(Output);
+        using var collector = await MockMetricsCollector.InitializeAsync(Output);
         SetExporter(collector);
         collector.Expect("OpenTelemetry.Instrumentation.Process");
 

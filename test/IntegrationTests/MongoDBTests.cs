@@ -39,9 +39,9 @@ public class MongoDBTests : TestHelper
     [Trait("Category", "EndToEnd")]
     [Trait("Containers", "Any")]
     [MemberData(nameof(LibraryVersion.MongoDB), MemberType = typeof(LibraryVersion))]
-    public void SubmitsTraces(string packageVersion)
+    public async Task SubmitsTraces(string packageVersion)
     {
-        using var collector = new MockSpansCollector(Output);
+        using var collector = await MockSpansCollector.InitializeAsync(Output);
         SetExporter(collector);
         const int spanCount = 3;
         for (int i = 0; i < spanCount; i++)

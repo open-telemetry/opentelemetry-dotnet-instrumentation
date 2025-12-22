@@ -17,9 +17,9 @@ public class StrongNamedTests : TestHelper
     }
 
     [Fact]
-    public void SubmitsTraces()
+    public async Task SubmitsTraces()
     {
-        using var collector = new MockSpansCollector(Output);
+        using var collector = await MockSpansCollector.InitializeAsync(Output);
         SetExporter(collector);
         collector.Expect("ByteCode.Plugin.StrongNamedValidation");
 

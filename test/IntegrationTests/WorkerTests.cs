@@ -19,7 +19,7 @@ public class WorkerTests : TestHelper
     [Fact]
     public async Task SubmitsLogsWithoutDuplicates()
     {
-        using var collector = new MockLogsCollector(Output);
+        using var collector = await MockLogsCollector.InitializeAsync(Output);
         SetExporter(collector);
 
         collector.ExpectCollected(ValidateSingleAppLogRecord, "App log record should be exported once.");

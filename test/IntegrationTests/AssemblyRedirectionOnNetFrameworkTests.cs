@@ -15,9 +15,9 @@ public class AssemblyRedirectionOnNetFrameworkTests : TestHelper
     }
 
     [Fact]
-    public void SubmitsTraces()
+    public async Task SubmitsTraces()
     {
-        using var collector = new MockSpansCollector(Output);
+        using var collector = await MockSpansCollector.InitializeAsync(Output);
         SetExporter(collector);
 
         const string TestApplicationActivitySource = "AssemblyRedirection.NetFramework.ActivitySource";

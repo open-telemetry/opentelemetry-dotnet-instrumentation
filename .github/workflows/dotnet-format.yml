@@ -31,4 +31,4 @@ jobs:
         dotnet-version: 10.0.101
 
     - name: dotnet format
-      run: dotnet format .\OpenTelemetry.AutoInstrumentation.sln --no-restore --verify-no-changes
+      run: dotnet format .\OpenTelemetry.AutoInstrumentation.sln --verify-no-changes

@@ -17,9 +17,9 @@ public class SqlClientSystemDataTests : TestHelper
 
     [Fact]
     [Trait("Category", "EndToEnd")]
-    public void SubmitTraces()
+    public async Task SubmitTraces()
     {
-        using var collector = new MockSpansCollector(Output);
+        using var collector = await MockSpansCollector.InitializeAsync(Output);
         SetExporter(collector);
         collector.Expect("OpenTelemetry.Instrumentation.SqlClient");
 
@@ -32,10 +32,10 @@ public class SqlClientSystemDataTests : TestHelper
     [Trait("Category", "EndToEnd")]
     [InlineData(true)]
     [InlineData(false)]
-    public void SqlClientIlRewrite(bool enableIlRewrite)
+    public async Task SqlClientIlRewrite(bool enableIlRewrite)
     {
         SetEnvironmentVariable("OTEL_DOTNET_AUTO_SQLCLIENT_NETFX_ILREWRITE_ENABLED", enableIlRewrite.ToString());
-        using var collector = new MockSpansCollector(Output);
+        using var collector = await MockSpansCollector.InitializeAsync(Output);
         SetExporter(collector);
 
         if (enableIlRewrite)
@@ -54,9 +54,9 @@ public class SqlClientSystemDataTests : TestHelper
 
     [Fact]
     [Trait("Category", "EndToEnd")]
-    public void SubmitMetrics()
+    public async Task SubmitMetrics()
     {
-        using var collector = new MockMetricsCollector(Output);
+        using var collector = await MockMetricsCollector.InitializeAsync(Output);
         SetExporter(collector);
 
         collector.Expect("OpenTelemetry.Instrumentation.SqlClient");

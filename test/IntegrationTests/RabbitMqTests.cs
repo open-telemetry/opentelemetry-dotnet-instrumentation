@@ -46,18 +46,18 @@ public class RabbitMqTests : TestHelper
     [Trait("Category", "EndToEnd")]
     [Trait("Containers", "Linux")]
     [MemberData(nameof(LibraryVersion.RabbitMq), MemberType = typeof(LibraryVersion))]
-    public void SubmitsTraces(string packageVersion)
+    public async Task SubmitsTraces(string packageVersion)
     {
         // Skip the test if fixture does not support current platform
         _rabbitMq.SkipIfUnsupportedPlatform();
 
         if (string.IsNullOrEmpty(packageVersion) || Version.Parse(packageVersion) >= new Version(7, 0, 0))
         {
-            TestRabbitMq7Plus(packageVersion);
+            await TestRabbitMq7Plus(packageVersion);
         }
         else
         {
-            TestRabbitMqLegacy(packageVersion);
+            await TestRabbitMqLegacy(packageVersion);
         }
     }
 
@@ -93,9 +93,9 @@ public class RabbitMqTests : TestHelper
                bodySize == 13;
     }
 
-    private void TestRabbitMq7Plus(string packageVersion)
+    private async Task TestRabbitMq7Plus(string packageVersion)
     {
-        using var collector = new MockSpansCollector(Output);
+        using var collector = await MockSpansCollector.InitializeAsync(Output);
         SetExporter(collector);
         collector.Expect("RabbitMQ.Client.Publisher");
         collector.Expect("RabbitMQ.Client.Subscriber");
@@ -109,9 +109,9 @@ public class RabbitMqTests : TestHelper
         collector.AssertExpectations();
     }
 
-    private void TestRabbitMqLegacy(string packageVersion)
+    private async Task TestRabbitMqLegacy(string packageVersion)
     {
-        using var collector = new MockSpansCollector(Output);
+        using var collector = await MockSpansCollector.InitializeAsync(Output);
         SetExporter(collector);
 
         collector.Expect("OpenTelemetry.AutoInstrumentation.RabbitMq", span => ValidateProducerSpan(span));

@@ -15,10 +15,10 @@ public class ContinuousProfilerContextTrackingTests : TestHelper
 
     [Fact]
     [Trait("Category", "EndToEnd")]
-    public void TraceContextIsCorrectlyAssociatedWithThreadSamples()
+    public async Task TraceContextIsCorrectlyAssociatedWithThreadSamples()
     {
         EnableBytecodeInstrumentation();
-        using var collector = new MockProfilesCollector(Output);
+        using var collector = await MockProfilesCollector.InitializeAsync(Output);
         SetExporter(collector);
         SetEnvironmentVariable("OTEL_DOTNET_AUTO_PLUGINS", "TestApplication.ContinuousProfiler.ContextTracking.TestPlugin, TestApplication.ContinuousProfiler.ContextTracking, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null");
         SetEnvironmentVariable("OTEL_DOTNET_AUTO_TRACES_ADDITIONAL_SOURCES", "TestApplication.ContinuousProfiler.ContextTracking");

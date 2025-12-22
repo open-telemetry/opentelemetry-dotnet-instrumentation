@@ -21,9 +21,9 @@ public class NpqsqlTests : TestHelper
     [Trait("Category", "EndToEnd")]
     [Trait("Containers", "Linux")]
     [MemberData(nameof(LibraryVersion.Npgsql), MemberType = typeof(LibraryVersion))]
-    public void SubmitTraces(string packageVersion)
+    public async Task SubmitTraces(string packageVersion)
     {
-        using var collector = new MockSpansCollector(Output);
+        using var collector = await MockSpansCollector.InitializeAsync(Output);
         SetExporter(collector);
         collector.Expect("Npgsql");
 
@@ -41,9 +41,9 @@ public class NpqsqlTests : TestHelper
     [Trait("Category", "EndToEnd")]
     [Trait("Containers", "Linux")]
     [MemberData(nameof(LibraryVersion.Npgsql), MemberType = typeof(LibraryVersion))]
-    public void SubmitMetrics(string packageVersion)
+    public async Task SubmitMetrics(string packageVersion)
     {
-        using var collector = new MockMetricsCollector(Output);
+        using var collector = await MockMetricsCollector.InitializeAsync(Output);
         SetExporter(collector);
         collector.Expect("Npgsql");
 

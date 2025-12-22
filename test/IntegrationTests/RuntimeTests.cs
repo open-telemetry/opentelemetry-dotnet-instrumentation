@@ -17,9 +17,9 @@ public class RuntimeTests : TestHelper
 
     [Fact]
     [Trait("Category", "EndToEnd")]
-    public void SubmitMetrics()
+    public async Task SubmitMetrics()
     {
-        using var collector = new MockMetricsCollector(Output);
+        using var collector = await MockMetricsCollector.InitializeAsync(Output);
         SetExporter(collector);
 #if NET9_0_OR_GREATER
         collector.Expect("System.Runtime");
@@ -40,9 +40,9 @@ public class RuntimeTests : TestHelper
 
     [Fact]
     [Trait("Category", "EndToEnd")]
-    public void SubmitMetricsFileBased()
+    public async Task SubmitMetricsFileBased()
     {
-        using var collector = new MockMetricsCollector(Output);
+        using var collector = await MockMetricsCollector.InitializeAsync(Output);
         SetFileBasedExporter(collector);
         EnableFileBasedConfigWithDefaultPath();
 #if NET9_0_OR_GREATER

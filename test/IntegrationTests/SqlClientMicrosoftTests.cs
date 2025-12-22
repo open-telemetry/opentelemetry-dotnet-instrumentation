@@ -22,12 +22,12 @@ public class SqlClientMicrosoftTests : TestHelper
     [Trait("Category", "EndToEnd")]
     [Trait("Containers", "Linux")]
     [MemberData(nameof(LibraryVersion.SqlClientMicrosoft), MemberType = typeof(LibraryVersion))]
-    public void SubmitTraces(string packageVersion)
+    public async Task SubmitTraces(string packageVersion)
     {
         // Skip the test if fixture does not support current platform
         _sqlServerFixture.SkipIfUnsupportedPlatform();
 
-        using var collector = new MockSpansCollector(Output);
+        using var collector = await MockSpansCollector.InitializeAsync(Output);
         SetExporter(collector);
         collector.Expect("OpenTelemetry.Instrumentation.SqlClient");
 
@@ -44,12 +44,12 @@ public class SqlClientMicrosoftTests : TestHelper
     [Trait("Category", "EndToEnd")]
     [Trait("Containers", "Linux")]
     [MemberData(nameof(LibraryVersion.SqlClientMicrosoft), MemberType = typeof(LibraryVersion))]
-    public void SubmitMetrics(string packageVersion)
+    public async Task SubmitMetrics(string packageVersion)
     {
         // Skip the test if fixture does not support current platform
         _sqlServerFixture.SkipIfUnsupportedPlatform();
 
-        using var collector = new MockMetricsCollector(Output);
+        using var collector = await MockMetricsCollector.InitializeAsync(Output);
         SetExporter(collector);
 
         collector.Expect("OpenTelemetry.Instrumentation.SqlClient");

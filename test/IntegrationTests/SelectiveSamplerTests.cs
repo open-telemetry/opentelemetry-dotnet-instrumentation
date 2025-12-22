@@ -17,12 +17,12 @@ public class SelectiveSamplerTests : TestHelper
 
     [SkippableFact]
     [Trait("Category", "EndToEnd")]
-    public void ExportThreadSamples()
+    public async Task ExportThreadSamples()
     {
         // TODO: Huge variance in delay between samples on MacOS on CI
         Skip.If(RuntimeInformation.IsOSPlatform(OSPlatform.OSX));
 
-        using var collector = new MockSpansCollector(Output);
+        using var collector = await MockSpansCollector.InitializeAsync(Output);
         SetExporter(collector);
 
         EnableBytecodeInstrumentation();

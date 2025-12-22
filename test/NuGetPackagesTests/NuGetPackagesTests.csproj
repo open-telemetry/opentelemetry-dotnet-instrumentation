@@ -16,6 +16,7 @@
     <Compile Include="..\IntegrationTests\Helpers\EnvironmentHelper.cs" />
     <Compile Include="..\IntegrationTests\Helpers\EnvironmentTools.cs" />
     <Compile Include="..\IntegrationTests\Helpers\InstrumentedProcessHelper.cs" />
+    <Compile Include="..\IntegrationTests\Helpers\MockCollectorHealthZ.cs" />
     <Compile Include="..\IntegrationTests\Helpers\MockSpansCollector.cs" />
     <Compile Include="..\IntegrationTests\Helpers\OtlpResourceExpector.cs" />
     <Compile Include="..\IntegrationTests\Helpers\OutputHelper.cs" />

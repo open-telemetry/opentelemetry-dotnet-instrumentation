@@ -60,7 +60,7 @@ public class AspNetTests
         // accessible to the Windows docker container where the test application is executed by binding
         // the endpoint to all network interfaces. In order to do that it is necessary to open the port
         // on the firewall.
-        using var collector = new MockSpansCollector(Output, host: "*");
+        using var collector = await MockSpansCollector.InitializeAsync(Output, host: "*");
         using var fwPort = FirewallHelper.OpenWinPort(collector.Port, Output);
         collector.Expect("OpenTelemetry.Instrumentation.AspNet"); // Expect Mvc span
         collector.Expect("OpenTelemetry.Instrumentation.AspNet"); // Expect WebApi span
@@ -93,7 +93,7 @@ public class AspNetTests
         // accessible to the Windows docker container where the test application is executed by binding
         // the endpoint to all network interfaces. In order to do that it is necessary to open the port
         // on the firewall.
-        using var collector = new MockSpansCollector(Output, host: "*");
+        using var collector = await MockSpansCollector.InitializeAsync(Output, host: "*");
         using var fwPort = FirewallHelper.OpenWinPort(collector.Port, Output);
         collector.Expect("OpenTelemetry.Instrumentation.AspNet", span => // Expect Mvc span
         {
@@ -161,7 +161,7 @@ public class AspNetTests
         // accessible to the Windows docker container where the test application is executed by binding
         // the endpoint to all network interfaces. In order to do that it is necessary to open the port
         // on the firewall.
-        using var collector = new MockSpansCollector(Output, host: "*");
+        using var collector = await MockSpansCollector.InitializeAsync(Output, host: "*");
         using var fwPort = FirewallHelper.OpenWinPort(collector.Port, Output);
         collector.ResourceExpector.Expect("service.name", ServiceName); // this is set via env var in Dockerfile and Wep.config, but env var has precedence
         collector.ResourceExpector.Expect("deployment.environment.name", "test"); // this is set via Wep.config
@@ -193,7 +193,7 @@ public class AspNetTests
         // accessible to the Windows docker container where the test application is executed by binding
         // the endpoint to all network interfaces. In order to do that it is necessary to open the port
         // on the firewall.
-        using var collector = new MockMetricsCollector(Output, host: "*");
+        using var collector = await MockMetricsCollector.InitializeAsync(Output, host: "*");
         using var fwPort = FirewallHelper.OpenWinPort(collector.Port, Output);
         collector.Expect("OpenTelemetry.Instrumentation.AspNet");
 

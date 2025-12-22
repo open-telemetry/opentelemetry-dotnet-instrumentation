@@ -44,13 +44,13 @@ public class KafkaTests : TestHelper
     [Trait("Category", "EndToEnd")]
     [Trait("Containers", "Linux")]
     [MemberData(nameof(LibraryVersion.Kafka), MemberType = typeof(LibraryVersion))]
-    public void SubmitsTraces(string packageVersion)
+    public async Task SubmitsTraces(string packageVersion)
     {
         SkipIfUnsupportedPlatform(packageVersion);
 
         var topicName = $"test-topic-{packageVersion}";
 
-        using var collector = new MockSpansCollector(Output);
+        using var collector = await MockSpansCollector.InitializeAsync(Output);
         SetExporter(collector);
 
         // Failed produce attempts made before topic is created.
@@ -97,13 +97,13 @@ public class KafkaTests : TestHelper
     [Trait("Containers", "Linux")]
     [MemberData(nameof(LibraryVersion.GetPlatformVersions), nameof(LibraryVersion.Kafka), MemberType = typeof(LibraryVersion))]
     // ReSharper disable once InconsistentNaming
-    public void NoSpansForPartitionEOF(string packageVersion)
+    public async Task NoSpansForPartitionEOF(string packageVersion)
     {
         SkipIfUnsupportedPlatform(packageVersion);
 
         var topicName = $"test-topic2-{packageVersion}";
 
-        using var collector = new MockSpansCollector(Output);
+        using var collector = await MockSpansCollector.InitializeAsync(Output);
         SetExporter(collector);
 
         EnableBytecodeInstrumentation();
