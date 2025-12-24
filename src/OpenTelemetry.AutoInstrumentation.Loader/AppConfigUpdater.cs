@@ -29,7 +29,7 @@ internal static class AppConfigUpdater
     /// <param name="appDomainSetup">appDomainSetup to be updated</param>
     public static void ModifyConfig(AppDomainSetup appDomainSetup)
     {
-        var patchMode = Environment.GetEnvironmentVariable("OTEL_APP_DOMAIN_STRATEGY") ?? string.Empty;
+        var patchMode = Environment.GetEnvironmentVariable("OTEL_DOTNET_AUTO_APP_DOMAIN_STRATEGY") ?? string.Empty;
         if (!Enum.TryParse<PatchMode>(patchMode, ignoreCase: true, out var mode))
         {
             mode = PatchMode.LoaderOptimizationSingleDomain;
