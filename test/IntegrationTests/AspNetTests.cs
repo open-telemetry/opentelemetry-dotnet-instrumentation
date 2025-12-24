@@ -43,16 +43,29 @@ public class AspNetTests
         Integrated
     }
 
+    public enum AppDomainWorkaround
+    {
+#pragma warning disable SA1602
+        None,
+        AssemblyRedirect,
+        LoaderOptimizationSingleDomain
+#pragma warning restore SA1602
+    }
+
     private ITestOutputHelper Output { get; }
 
+    // Currently when assemblies registered in GAC, AppDomain workaround is not required to load the assemblies in additional AppDomains.
+    // But it resulted in app crash with "Loading this assembly would produce a different grant set from other instances" with OTEL 1.13.0
     [Theory]
     [Trait("Category", "EndToEnd")]
     [Trait("Containers", "Windows")]
-    [InlineData(AppPoolMode.Classic, Gac.UseGac)]
-    [InlineData(AppPoolMode.Classic, Gac.UseLocal)]
-    [InlineData(AppPoolMode.Integrated, Gac.UseGac)]
-    [InlineData(AppPoolMode.Integrated, Gac.UseLocal)]
-    public async Task SubmitsTraces(AppPoolMode appPoolMode, Gac useGac)
+    [InlineData(AppPoolMode.Integrated, Gac.UseGac, AppDomainWorkaround.LoaderOptimizationSingleDomain)]
+    [InlineData(AppPoolMode.Classic, Gac.UseGac, AppDomainWorkaround.LoaderOptimizationSingleDomain)]
+    [InlineData(AppPoolMode.Classic, Gac.UseGac, AppDomainWorkaround.AssemblyRedirect)]
+    [InlineData(AppPoolMode.Classic, Gac.UseGac, AppDomainWorkaround.None)]
+    [InlineData(AppPoolMode.Classic, Gac.UseLocal, AppDomainWorkaround.LoaderOptimizationSingleDomain)]
+    [InlineData(AppPoolMode.Classic, Gac.UseLocal, AppDomainWorkaround.AssemblyRedirect)]
+    public async Task SubmitsTraces(AppPoolMode appPoolMode, Gac useGac, AppDomainWorkaround appDomain)
     {
         Assert.True(EnvironmentTools.IsWindowsAdministrator(), "This test requires Windows Administrator privileges.");
 
@@ -68,7 +81,8 @@ public class AspNetTests
         var collectorUrl = $"http://{DockerNetworkHelper.IntegrationTestsGateway}:{collector.Port}";
         Dictionary<string, string> environmentVariables = new()
         {
-            ["OTEL_EXPORTER_OTLP_ENDPOINT"] = collectorUrl
+            ["OTEL_EXPORTER_OTLP_ENDPOINT"] = collectorUrl,
+            ["OTEL_APP_DOMAIN_STRATEGY"] = appDomain.ToString()
         };
         var webPort = TcpPortProvider.GetOpenPort();
         var imageName = GetTestImageName(appPoolMode, useGac);

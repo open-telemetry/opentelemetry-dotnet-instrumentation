@@ -95,42 +95,5 @@ internal partial class AssemblyResolver
 
         return null;
     }
-
-    /// <summary>
-    /// Return redirection table used in runtime that will match TFM folder to load assemblies.
-    /// It may not be actual .NET Framework version.
-    /// </summary>
-    [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
-    [DllImport("OpenTelemetry.AutoInstrumentation.Native.dll")]
-    private static extern int GetNetFrameworkRedirectionVersion();
-
-    private string ResolveManagedProfilerDirectory()
-    {
-        var tracerHomeDirectory = ReadEnvironmentVariable("OTEL_DOTNET_AUTO_HOME") ?? string.Empty;
-        var tracerFrameworkDirectory = "netfx";
-
-        var basePath = Path.Combine(tracerHomeDirectory, tracerFrameworkDirectory);
-        // fallback to net462 in case of any issues
-        var frameworkFolderName = "net462";
-        try
-        {
-            var detectedVersion = GetNetFrameworkRedirectionVersion();
-            var candidateFolderName = detectedVersion % 10 != 0 ? $"net{detectedVersion}" : $"net{detectedVersion / 10}";
-            if (Directory.Exists(Path.Combine(basePath, candidateFolderName)))
-            {
-                frameworkFolderName = candidateFolderName;
-            }
-            else
-            {
-                _logger.Warning($"Framework folder {candidateFolderName} not found. Fallback to {frameworkFolderName}.");
-            }
-        }
-        catch (Exception ex)
-        {
-            _logger.Warning(ex, $"Error getting .NET Framework version from native profiler. Fallback to {frameworkFolderName}.");
-        }
-
-        return Path.Combine(basePath, frameworkFolderName);
-    }
 }
 #endif
