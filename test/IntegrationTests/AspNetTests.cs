@@ -82,7 +82,7 @@ public class AspNetTests
         Dictionary<string, string> environmentVariables = new()
         {
             ["OTEL_EXPORTER_OTLP_ENDPOINT"] = collectorUrl,
-            ["OTEL_APP_DOMAIN_STRATEGY"] = appDomain.ToString()
+            ["OTEL_DOTNET_AUTO_APP_DOMAIN_STRATEGY"] = appDomain.ToString()
         };
         var webPort = TcpPortProvider.GetOpenPort();
         var imageName = GetTestImageName(appPoolMode, useGac);

@@ -58,19 +58,49 @@ internal static class AppConfigUpdater
     /// <param name="appDomainSetup">appDomainSetup to be updated</param>
     private static void ModifyAssemblyRedirectConfig(AppDomainSetup appDomainSetup)
     {
-        var configPath = appDomainSetup.ConfigurationFile;
         try
         {
-            Logger.Debug($"Try to modify {configPath}");
-            var config = XDocument.Load(configPath);
+            XDocument? config = null;
+
+            // First, try to get configuration from bytes
+            var configBytes = appDomainSetup.GetConfigurationBytes();
+            if (configBytes != null && configBytes.Length > 0)
+            {
+                Logger.Debug("Loading config from GetConfigurationBytes");
+                using var memoryStream = new MemoryStream(configBytes);
+                config = XDocument.Load(memoryStream);
+            }
+            else
+            {
+                var configPath = appDomainSetup.ConfigurationFile;
+                if (!string.IsNullOrEmpty(configPath))
+                {
+                    try
+                    {
+                        Logger.Debug($"Try to modify {configPath}");
+                        config = XDocument.Load(configPath);
+                    }
+                    catch (Exception)
+                    {
+                        Logger.Debug($"Failed to load {configPath}, new config will be used instead");
+                    }
+                }
+
+                if (config == null)
+                {
+                    Logger.Debug("Creating new config document");
+                    config = new XDocument(new XDeclaration("1.0", "utf-8", null), new XElement(Names.Configuration));
+                }
+            }
+
             ModifyConfig(config);
 
             var settings = new XmlWriterSettings { OmitXmlDeclaration = false, Encoding = Encoding.UTF8 };
-            using var memoryStream = new MemoryStream();
-            using var xmlWriter = XmlWriter.Create(memoryStream, settings);
+            using var outputStream = new MemoryStream();
+            using var xmlWriter = XmlWriter.Create(outputStream, settings);
             config.WriteTo(xmlWriter);
             xmlWriter.Flush();
-            appDomainSetup.SetConfigurationBytes(memoryStream.ToArray());
+            appDomainSetup.SetConfigurationBytes(outputStream.ToArray());
             Logger.Information($"Config modified: {config}");
         }
         catch (Exception e)
