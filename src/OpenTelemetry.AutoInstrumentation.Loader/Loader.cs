@@ -11,10 +11,7 @@ namespace OpenTelemetry.AutoInstrumentation.Loader;
 /// </summary>
 internal class Loader
 {
-    private const string LoaderLoggerSuffix = "Loader";
-    private static readonly IOtelLogger Logger = OtelLogging.GetLogger(LoaderLoggerSuffix);
-
-    private static int _isExiting;
+    private static readonly IOtelLogger Logger = EnvironmentHelper.Logger;
 
     /// <summary>
     /// Initializes static members of the <see cref="Loader"/> class.
@@ -34,27 +31,13 @@ internal class Loader
         TryLoadManagedAssembly();
 
         // AssemblyResolve_ManagedProfilerDependencies logs only if Debug enabled.
-        // If Debug is not enabled, logger won't be needed anymore.
-        if (Logger.IsEnabled(LogLevel.Debug))
+        // If Debug is not enabled, most probably it is normal to close this logger.
+        // AppConfigUpdater still may use this logger, but in ASP.NET default AppDomain Loader will not be called.
+        // For other application, AppConfigUpdater will be used only if app creates additional AppDomains - which is rare scenario.
+        if (!Logger.IsEnabled(LogLevel.Debug))
         {
-            // Register shutdown on exit
-            AppDomain.CurrentDomain.ProcessExit += OnExit;
+            EnvironmentHelper.CloseLogger();
         }
-        else
-        {
-            OtelLogging.CloseLogger(LoaderLoggerSuffix, Logger);
-        }
-    }
-
-    private static void OnExit(object? sender, EventArgs e)
-    {
-        if (Interlocked.Exchange(ref _isExiting, value: 1) != 0)
-        {
-            // OnExit() was already called before
-            return;
-        }
-
-        OtelLogging.CloseLogger(LoaderLoggerSuffix, Logger);
     }
 
     private static void TryLoadManagedAssembly()

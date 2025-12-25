@@ -17,20 +17,6 @@ internal partial class AssemblyResolver
     public AssemblyResolver(IOtelLogger otelLogger)
     {
         _logger = otelLogger;
-        _managedProfilerDirectory = ResolveManagedProfilerDirectory();
-    }
-
-    private string? ReadEnvironmentVariable(string key)
-    {
-        try
-        {
-            return Environment.GetEnvironmentVariable(key);
-        }
-        catch (Exception ex)
-        {
-            _logger.Error(ex, "Error while loading environment variable {0}", key);
-        }
-
-        return null;
+        _managedProfilerDirectory = EnvironmentHelper.ManagedProfilerDirectory;
     }
 }
