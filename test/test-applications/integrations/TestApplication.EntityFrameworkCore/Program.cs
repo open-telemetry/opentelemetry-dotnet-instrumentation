@@ -16,16 +16,16 @@ var contextOptions = new DbContextOptionsBuilder<TestDbContext>()
     .UseSqlite(inMemoryDatabase)
     .Options;
 
-using var connection = RelationalOptionsExtension.Extract(contextOptions).Connection;
+await using var connection = RelationalOptionsExtension.Extract(contextOptions).Connection;
 
-using (var context = new TestDbContext(contextOptions))
+await using (var context = new TestDbContext(contextOptions))
 {
     await context.Database.EnsureCreatedAsync().ConfigureAwait(false);
     await context.AddAsync(new TestItem { Name = "TestItem" }).ConfigureAwait(false);
     await context.SaveChangesAsync().ConfigureAwait(false);
 }
 
-using (var context = new TestDbContext(contextOptions))
+await using (var context = new TestDbContext(contextOptions))
 {
     foreach (var testItem in context.Set<TestItem>())
     {
