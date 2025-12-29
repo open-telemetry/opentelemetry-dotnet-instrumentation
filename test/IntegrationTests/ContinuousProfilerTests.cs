@@ -112,8 +112,8 @@ public class ContinuousProfilerTests : TestHelper
 
     private static List<string> CreateExpectedStackTrace()
     {
-        var stackTrace = new List<string>
-        {
+        List<string> stackTrace =
+        [
             "System.Threading.Thread.Sleep(System.TimeSpan)",
             "TestApplication.ContinuousProfiler.Fs.ClassFs.methodFs(System.String)",
             "TestApplication.ContinuousProfiler.Vb.ClassVb.MethodVb(System.String)",
@@ -126,7 +126,7 @@ public class ContinuousProfilerTests : TestHelper
             "My.Custom.Test.Namespace.ClassD`21.MethodD(T01, T02, T03, T04, T05, T06, T07, T08, T09, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20, Unknown)",
             "My.Custom.Test.Namespace.GenericClassC`1.GenericMethodCFromGenericClass[T01, T02, T03, T04, T05, T06, T07, T08, T09, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20](T01, T02, T03, T04, T05, T06, T07, T08, T09, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20, Unknown)",
             "My.Custom.Test.Namespace.GenericClassC`1.GenericMethodCFromGenericClass(T)"
-        };
+        ];
 
 #if NETFRAMEWORK || DEBUG
         stackTrace.Add("Unknown_Native_Function(unknown)");
@@ -148,7 +148,7 @@ public class ContinuousProfilerTests : TestHelper
         return stackTrace;
     }
 
-    private bool ContainStackTraceForClassHierarchy(Profile profile, string expectedStackTrace)
+    private static bool ContainStackTraceForClassHierarchy(Profile profile, string expectedStackTrace)
     {
         var frames = profile.LocationTable
             .SelectMany(location => location.Line)

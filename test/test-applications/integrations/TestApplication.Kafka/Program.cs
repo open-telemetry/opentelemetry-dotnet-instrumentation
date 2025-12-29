@@ -100,6 +100,7 @@ internal static class Program
         // after topic creation completed.
         await WaitForSuccessfulProduceAsync(producer, topicName, cts.Token).ConfigureAwait(false);
 
+#pragma warning disable CA1849 // Call async methods when in an async method. Needed for bytecode compatibility testing.
         producer.Produce(topicName, CreateTestMessage());
         producer.Produce(
             topicName,
@@ -119,6 +120,7 @@ internal static class Program
 
         // Produce a tombstone.
         producer.Produce(topicName, new Message<string, string> { Key = MessageKey, Value = null! });
+#pragma warning restore CA1849 // Call async methods when in an async method. Needed for bytecode compatibility testing.
         return 0;
     }
 

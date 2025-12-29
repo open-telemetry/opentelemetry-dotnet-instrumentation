@@ -46,7 +46,7 @@ public class NLogBridgeTests : TestHelper
         // Logged with exception
         collector.Expect(
             logRecord =>
-            VerifyBody(logRecord, "Exception occured") &&
+            VerifyBody(logRecord, "Exception occurred") &&
             logRecord is { SeverityText: "Error", SeverityNumber: SeverityNumber.Error } &&
             VerifyExceptionAttributes(logRecord) &&
             logRecord.Attributes.Count == 3,

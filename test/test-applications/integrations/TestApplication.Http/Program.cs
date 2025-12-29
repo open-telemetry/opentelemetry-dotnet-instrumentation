@@ -10,7 +10,7 @@ using Microsoft.AspNetCore.SignalR.Client;
 
 namespace TestApplication.Http;
 
-public static class Program
+internal static class Program
 {
     public static void Main(string[] args)
     {
@@ -26,7 +26,7 @@ public static class Program
         var server = (IServer?)host.Services.GetService(typeof(IServer));
         var addressFeature = server?.Features.Get<IServerAddressesFeature>();
         var address = addressFeature?.Addresses.First();
-        var dnsAddress = address?.Replace("127.0.0.1", "localhost"); // needed to force DNS resolution to test metrics
+        var dnsAddress = address?.Replace("127.0.0.1", "localhost", StringComparison.Ordinal); // needed to force DNS resolution to test metrics
         using var httpClient = new HttpClient();
         httpClient.DefaultRequestHeaders.Add("Custom-Request-Test-Header1", "Test-Value1");
         httpClient.DefaultRequestHeaders.Add("Custom-Request-Test-Header2", "Test-Value2");

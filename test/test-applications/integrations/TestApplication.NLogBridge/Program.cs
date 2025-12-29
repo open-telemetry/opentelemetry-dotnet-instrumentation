@@ -46,10 +46,10 @@ internal static class Program
         });
         var logger = loggerFactory.CreateLogger(typeof(Program));
 
-        LogInsideActiveScope(() => logger.LogInformation("{0}, {1} at {2:t}!", "Hello", "world", DateTime.Now));
+        LogInsideActiveScope(() => logger.LogHelloWorld("Hello", "world", DateTime.Now));
 
-        var (message, ex) = GetException();
-        logger.LogError(ex, message);
+        var ex = GetException();
+        logger.LogExceptionOccurred(ex);
     }
 
     private static void LogInsideActiveScope(Action action)
@@ -70,8 +70,8 @@ internal static class Program
         // This exercises the 3-parameter WriteToTargets/WriteLogEventToTargets method
         LogInsideActiveScope(() => LogWithWrapperType(log, "Message via wrapperType overload"));
 
-        var (message, ex) = GetException();
-        log.Error(ex, message);
+        var ex = GetException();
+        log.Error(ex, "Exception occurred");
     }
 
     /// <summary>
@@ -84,7 +84,7 @@ internal static class Program
         logger.Log(typeof(Program), logEvent);
     }
 
-    private static (string Message, Exception Exception) GetException()
+    private static Exception GetException()
     {
         try
         {
@@ -92,7 +92,7 @@ internal static class Program
         }
         catch (Exception ex)
         {
-            return ("Exception occured", ex);
+            return ex;
         }
     }
 }

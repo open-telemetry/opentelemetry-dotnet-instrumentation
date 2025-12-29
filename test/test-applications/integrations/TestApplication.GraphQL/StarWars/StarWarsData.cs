@@ -1,8 +1,11 @@
+using System.Globalization;
 using StarWars.Types;
 
 namespace StarWars;
 
-public class StarWarsData
+#pragma warning disable CA1812 // Avoid uninstantiated internal classes. This class is instantiated by GraphQL.
+internal sealed class StarWarsData
+#pragma warning restore CA1812 // Avoid uninstantiated internal classes. This class is instantiated by GraphQL.
 {
     private readonly List<StarWarsCharacter> _characters = new();
 
@@ -67,7 +70,7 @@ public class StarWarsData
 
     public StarWarsCharacter AddCharacter(StarWarsCharacter character)
     {
-        character.Id = _characters.Count.ToString();
+        character.Id = _characters.Count.ToString(CultureInfo.InvariantCulture);
         _characters.Add(character);
         return character;
     }

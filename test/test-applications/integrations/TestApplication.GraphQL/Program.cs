@@ -30,7 +30,7 @@ internal sealed class Program
 
         foreach (var kvp in envVars)
         {
-            logger.LogInformation($"{kvp.Key} = {kvp.Value}");
+            logger.LogEnvironmentVariable(kvp.Key, kvp.Value);
         }
 
         host.Run();

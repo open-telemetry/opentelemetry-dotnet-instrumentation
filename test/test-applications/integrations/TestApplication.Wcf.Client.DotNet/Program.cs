@@ -12,7 +12,7 @@ internal static class Program
 {
     private static readonly ActivitySource Source = new(Assembly.GetExecutingAssembly().GetName().Name!, "1.0.0.0");
 
-    public static async Task Main(string[] args)
+    public static async Task Main()
     {
         var netTcpAddress = "net.tcp://127.0.0.1:9090/Telemetry";
         var httpAddress = "http://127.0.0.1:9009/Telemetry";
@@ -38,7 +38,7 @@ internal static class Program
         // Note: Best practice is to re-use your client/channel instances.
         // This code is not meant to illustrate best practices, only the
         // instrumentation.
-        var client = new StatusServiceClient(binding, new EndpointAddress(new Uri(address)));
+        using var client = new StatusServiceClient(binding, new EndpointAddress(new Uri(address)));
         await client.OpenAsync().ConfigureAwait(false);
 
         try

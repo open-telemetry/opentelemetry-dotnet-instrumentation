@@ -11,7 +11,7 @@ var mySqlPort = GetMySqlPort(args);
 
 var connectionString = $@"Server=127.0.0.1;Port={mySqlPort};Uid=root;Database=TestDatabase";
 
-var serverVersion = ServerVersion.AutoDetect(connectionString);
+var serverVersion = await ServerVersion.AutoDetectAsync(connectionString).ConfigureAwait(false);
 
 var contextOptions = new DbContextOptionsBuilder<TestDbContext>()
     .UseMySql(connectionString, serverVersion)

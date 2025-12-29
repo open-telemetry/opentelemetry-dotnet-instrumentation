@@ -6,7 +6,9 @@ using TestApplication.MassTransit.Contracts;
 
 namespace TestApplication.MassTransit.Consumers;
 
-public class TestConsumer :
+#pragma warning disable CA1812 // Avoid uninstantiated internal classes. This class is instantiated by MassTransit.
+internal sealed class TestConsumer :
+#pragma warning restore CA1812 // Avoid uninstantiated internal classes. This class is instantiated by MassTransit.
     IConsumer<TestMessage>
 {
     private readonly ILogger<TestConsumer> _logger;
@@ -18,7 +20,7 @@ public class TestConsumer :
 
     public Task Consume(ConsumeContext<TestMessage> context)
     {
-        _logger.LogInformation("Received Text: {Text}", context.Message.Value);
+        _logger.LogReceivedText(context.Message.Value);
         return Task.CompletedTask;
     }
 }

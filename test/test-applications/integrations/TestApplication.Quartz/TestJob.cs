@@ -5,7 +5,9 @@ using Quartz;
 
 namespace TestApplication.Quartz;
 
-public class TestJob : IJob
+#pragma warning disable CA1812 // Avoid uninstantiated internal classes. This class is instantiated by Quartz.NET.
+internal sealed class TestJob : IJob
+#pragma warning restore CA1812 // Avoid uninstantiated internal classes. This class is instantiated by Quartz.NET.
 {
     public Task Execute(IJobExecutionContext context)
     {

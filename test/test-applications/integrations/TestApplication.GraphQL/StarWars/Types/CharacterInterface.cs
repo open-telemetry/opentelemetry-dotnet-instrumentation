@@ -3,7 +3,9 @@ using GraphQL.Types.Relay;
 
 namespace StarWars.Types;
 
-public class CharacterInterface : InterfaceGraphType<StarWarsCharacter>
+#pragma warning disable CA1812 // Avoid uninstantiated internal classes. This class is instantiated by GraphQL.
+internal sealed class CharacterInterface : InterfaceGraphType<StarWarsCharacter>
+#pragma warning restore CA1812 // Avoid uninstantiated internal classes. This class is instantiated by GraphQL.
 {
     public CharacterInterface()
     {

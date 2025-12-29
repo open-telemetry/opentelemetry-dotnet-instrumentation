@@ -3,6 +3,4 @@
 
 namespace My.Custom.Test.Namespace;
 
-internal class CustomClass
-{
-}
+internal sealed class CustomClass;

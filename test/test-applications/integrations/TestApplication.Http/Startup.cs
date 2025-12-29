@@ -14,9 +14,11 @@ using Microsoft.Extensions.DependencyInjection.Extensions;
 
 namespace TestApplication.Http;
 
-public class Startup
+#pragma warning disable CA1812 // Avoid uninstantiated internal classes. This class is instantiated by app builder.
+internal sealed class Startup
+#pragma warning restore CA1812 // Avoid uninstantiated internal classes. This class is instantiated by app builder.
 {
-    private static readonly ActivitySource MyActivitySource = new ActivitySource("TestApplication.Http", "1.0.0");
+    private static readonly ActivitySource MyActivitySource = new("TestApplication.Http", "1.0.0");
 
     public Startup(IConfiguration configuration)
     {
@@ -26,7 +28,7 @@ public class Startup
     public IConfiguration Configuration { get; }
 
     // This method gets called by the runtime. Use this method to add services to the container.
-    public void ConfigureServices(IServiceCollection services)
+    public static void ConfigureServices(IServiceCollection services)
     {
         services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
             .AddCookie(CookieAuthenticationDefaults.AuthenticationScheme, options =>
@@ -78,7 +80,7 @@ public class Startup
     }
 
     // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-    public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+    public static void Configure(IApplicationBuilder app, IWebHostEnvironment env)
     {
         app
             .UseRouting() // enables metrics for Microsoft.AspNetCore.Routing in .NET8+
@@ -132,7 +134,7 @@ public class Startup
                     var authenticationService = context.RequestServices.GetRequiredService<IAuthenticationService>();
                     var claimsPrincipal = new ClaimsPrincipal(
                         new ClaimsIdentity(
-                            new[] { new Claim(ClaimTypes.Name, "TestUser") },
+                            [new Claim(ClaimTypes.Name, "TestUser")],
                             CookieAuthenticationDefaults.AuthenticationScheme));
                     var authProperties = new AuthenticationProperties();
                     await authenticationService.SignInAsync(context, CookieAuthenticationDefaults.AuthenticationScheme, claimsPrincipal, authProperties).ConfigureAwait(false);

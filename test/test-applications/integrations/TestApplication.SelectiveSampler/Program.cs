@@ -7,19 +7,21 @@ namespace TestApplication.SelectiveSampler;
 
 internal static class Program
 {
-    private static readonly ActivitySource ActivitySource = new("TestApplication.SelectiveSampler", "1.0.0");
+    private static readonly ActivitySource MyActivitySource = new("TestApplication.SelectiveSampler", "1.0.0");
 
     public static async Task Main(string[] args)
     {
         Thread.CurrentThread.Name = "Main";
 
         // Trace with nested activities
-        using (ActivitySource.StartActivity("outer"))
+        using (MyActivitySource.StartActivity("outer"))
         {
+#pragma warning disable CA1849 // Call async methods when in an async method. Intentional sync wait for testing purposes.
             Thread.Sleep(100);
-            using (ActivitySource.StartActivity("inner"))
+#pragma warning restore CA1849 // Call async methods when in an async method. Intentional sync wait for testing purposes.
+            using (MyActivitySource.StartActivity("inner"))
             {
-                await SimpleAsyncCase();
+                await SimpleAsyncCase().ConfigureAwait(false);
             }
         }
     }

@@ -11,12 +11,12 @@ internal static class Program
     {
         try
         {
-            var serviceHost = new ServiceHost(typeof(StatusService));
+            using var serviceHost = new ServiceHost(typeof(StatusService));
             serviceHost.Open();
 
             Console.WriteLine($"[{DateTimeOffset.UtcNow:o}] Server waiting for calls");
 
-            var manualResetEvent = new ManualResetEvent(false);
+            using var manualResetEvent = new ManualResetEvent(false);
             manualResetEvent.WaitOne();
         }
         catch (Exception e)

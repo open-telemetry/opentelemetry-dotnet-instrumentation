@@ -3,7 +3,9 @@ using StarWars.Extensions;
 
 namespace StarWars.Types;
 
-public class HumanType : ObjectGraphType<Human>
+#pragma warning disable CA1812 // Avoid uninstantiated internal classes. This class is instantiated by GraphQL.
+internal sealed class HumanType : ObjectGraphType<Human>
+#pragma warning restore CA1812 // Avoid uninstantiated internal classes. This class is instantiated by GraphQL.
 {
     public HumanType(StarWarsData data)
     {

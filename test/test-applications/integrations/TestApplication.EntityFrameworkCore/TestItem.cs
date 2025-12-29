@@ -3,7 +3,7 @@
 
 namespace TestApplication.EntityFrameworkCore;
 
-public class TestItem
+internal sealed class TestItem
 {
     public int Id { get; set; }
 
