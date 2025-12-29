@@ -10,7 +10,7 @@ using TestApplication.Shared;
 
 ConsoleHelper.WriteSplashScreen(args);
 
-using var inMemoryDatabase = CreateInMemoryDatabase();
+await using var inMemoryDatabase = CreateInMemoryDatabase();
 
 var contextOptions = new DbContextOptionsBuilder<TestDbContext>()
     .UseSqlite(inMemoryDatabase)
