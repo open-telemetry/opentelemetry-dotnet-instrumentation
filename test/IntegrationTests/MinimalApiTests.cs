@@ -55,18 +55,18 @@ public class MinimalApiTests : TestHelper
         collector.AssertCollected();
     }
 
-    private static bool ValidateCombinedLogsExport(IEnumerable<LogRecord> records)
+    private static bool ValidateCombinedLogsExport(ICollection<LogRecord> records)
     {
         return ValidateSingleAppLogExport(records) && ValidateSingleBeforeHostLogRecord(records);
     }
 
-    private static bool ValidateSingleBeforeHostLogRecord(IEnumerable<LogRecord> records)
+    private static bool ValidateSingleBeforeHostLogRecord(ICollection<LogRecord> records)
     {
         var beforeHostLogCount = records.Count(lr => Convert.ToString(lr.Body) == "{ \"stringValue\": \"Logged before host is built.\" }");
         return beforeHostLogCount == 1;
     }
 
-    private static bool ValidateSingleAppLogExport(IEnumerable<LogRecord> records)
+    private static bool ValidateSingleAppLogExport(ICollection<LogRecord> records)
     {
         var appLogCount = records.Count(lr => Convert.ToString(lr.Body) == "{ \"stringValue\": \"Request received.\" }");
         return appLogCount == 1;

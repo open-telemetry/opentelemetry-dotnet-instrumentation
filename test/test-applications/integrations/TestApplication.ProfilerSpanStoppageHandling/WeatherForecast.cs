@@ -3,7 +3,9 @@
 
 namespace TestApplication.ProfilerSpanStoppageHandling;
 
+#pragma warning disable CA1515 // Consider making public types internal
 public class WeatherForecast
+#pragma warning restore CA1515 // Consider making public types internal
 {
     public DateOnly Date { get; set; }
 

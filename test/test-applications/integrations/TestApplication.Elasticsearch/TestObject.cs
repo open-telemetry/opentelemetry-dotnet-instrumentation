@@ -3,7 +3,9 @@
 
 namespace TestApplication.Elasticsearch;
 
-public class TestObject
+#pragma warning disable CA1812 // Avoid uninstantiated internal classes. This class is instantiated by reflection.
+internal sealed class TestObject
+#pragma warning restore CA1812 // Avoid uninstantiated internal classes. This class is instantiated by reflection.
 {
     public int Id { get; set; }
 }

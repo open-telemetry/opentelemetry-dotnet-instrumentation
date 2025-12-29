@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Identity;
 
 namespace TestApplication.Http;
 
-public class TestUser : IdentityUser
+internal sealed class TestUser : IdentityUser
 {
 }
 #endif

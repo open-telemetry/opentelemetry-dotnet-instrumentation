@@ -80,7 +80,9 @@ internal static class Program
     {
         try
         {
+#pragma warning disable CA2100 // Review SQL queries for security vulnerabilities. All queries are static strings.
             using var command = new SqlCommand(commandString, connection);
+#pragma warning restore CA2100 // Review SQL queries for security vulnerabilities. All queries are static strings.
             using var reader = command.ExecuteReader();
             Console.WriteLine($"SQL query executed successfully: {commandString}");
         }
@@ -103,7 +105,9 @@ internal static class Program
     {
         try
         {
+#pragma warning disable CA2100 // Review SQL queries for security vulnerabilities. All queries are static strings.
             using var command = new SqlCommand(commandString, connection);
+#pragma warning restore CA2100 // Review SQL queries for security vulnerabilities. All queries are static strings.
             using var reader = await command.ExecuteReaderAsync().ConfigureAwait(false);
             Console.WriteLine($"Async SQL query executed successfully: {commandString}");
         }

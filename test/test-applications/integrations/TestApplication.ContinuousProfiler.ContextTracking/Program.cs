@@ -5,11 +5,11 @@ using System.Diagnostics;
 
 namespace TestApplication.ContinuousProfiler.ContextTracking;
 
-internal class Program
+internal static class Program
 {
     private static readonly ActivitySource Source = new ActivitySource("TestApplication.ContinuousProfiler.ContextTracking");
 
-    public static async Task Main(string[] args)
+    public static async Task Main()
     {
         Thread.CurrentThread.Name = "TestName";
         // Start an activity that remains active until async operation completes,

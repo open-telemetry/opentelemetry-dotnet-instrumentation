@@ -1,5 +1,4 @@
 using System.Reactive.Linq;
-using System.Reactive.Subjects;
 using GraphQL;
 using GraphQL.Types;
 using StarWars.Types;
@@ -12,11 +11,11 @@ namespace StarWars;
 ///   "query": "subscription HumanAddedSub{ humanAdded { name } }",
 /// }.
 /// </example>
-internal class StarWarsSubscription : ObjectGraphType<object>
+#pragma warning disable CA1812 // Avoid uninstantiated internal classes. This class is instantiated by GraphQL.
+internal sealed class StarWarsSubscription : ObjectGraphType<object>
+#pragma warning restore CA1812 // Avoid uninstantiated internal classes. This class is instantiated by GraphQL.
 {
     private readonly StarWarsData _starWarsData;
-
-    private readonly ISubject<Human> _humanStream = new ReplaySubject<Human>(1);
 
     public StarWarsSubscription(StarWarsData data)
     {

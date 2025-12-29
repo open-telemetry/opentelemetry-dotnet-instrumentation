@@ -22,7 +22,7 @@ internal static class Program
     {
         ConsoleHelper.WriteSplashScreen(args);
 
-        (string databasePassword, string databasePort) = ParseArgs(args);
+        var (databasePassword, databasePort) = ParseArgs(args);
         var connectionString = GetConnectionString(databasePassword, databasePort);
 
         using (var connection = new SqlConnection(connectionString))
@@ -86,7 +86,9 @@ internal static class Program
     {
         try
         {
+#pragma warning disable CA2100 // Review SQL queries for security vulnerabilities. All queries are static strings.
             using var command = new SqlCommand(commandString, connection);
+#pragma warning restore CA2100 // Review SQL queries for security vulnerabilities. All queries are static strings.
             using var reader = command.ExecuteReader();
             Console.WriteLine($"SQL query executed successfully: {commandString}");
         }
@@ -109,7 +111,9 @@ internal static class Program
     {
         try
         {
+#pragma warning disable CA2100 // Review SQL queries for security vulnerabilities. All queries are static strings.
             using var command = new SqlCommand(commandString, connection);
+#pragma warning restore CA2100 // Review SQL queries for security vulnerabilities. All queries are static strings.
             using var reader = await command.ExecuteReaderAsync().ConfigureAwait(false);
             Console.WriteLine($"Async SQL query executed successfully: {commandString}");
         }

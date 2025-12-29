@@ -7,7 +7,7 @@ using TestApplication.Shared;
 
 namespace TestApplication.MongoDB;
 
-public static class Program
+internal static class Program
 {
     public static void Main(string[] args)
     {
@@ -32,7 +32,11 @@ public static class Program
 
         var connectionString = $"mongodb://{Host()}:{mongoPort}";
 
+#if MONGODB_3_OR_GREATER
+        using var client = new MongoClient(connectionString);
+#else
         var client = new MongoClient(connectionString);
+#endif
         var database = client.GetDatabase(mongoDatabase);
         var collection = database.GetCollection<BsonDocument>(mongoCollection);
 

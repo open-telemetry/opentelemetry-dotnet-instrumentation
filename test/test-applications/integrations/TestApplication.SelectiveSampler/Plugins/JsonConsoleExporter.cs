@@ -15,7 +15,7 @@ internal sealed class JsonConsoleExporter
         _sampleNativeFormatParser = sampleNativeFormatParser;
     }
 
-    public static JsonConsoleExporter Instance { get; } = new JsonConsoleExporter(new SampleNativeFormatParser(true));
+    public static JsonConsoleExporter Instance { get; } = new(new SampleNativeFormatParser(true));
 
     public void ExportSelectedThreadSamples(byte[] buffer, int read, CancellationToken cancellationToken)
     {
@@ -29,7 +29,9 @@ internal sealed class JsonConsoleExporter
         WriteToConsole(samples ?? []);
     }
 
+#pragma warning disable CA1822 // Mark members as static. Needed for AutoInstrumentation plugin loading.
     public void ExportAllocationSamples(byte[] buffer, int read, CancellationToken cancellationToken)
+#pragma warning restore CA1822 // Mark members as static. Needed for AutoInstrumentation plugin loading.
     {
     }
 

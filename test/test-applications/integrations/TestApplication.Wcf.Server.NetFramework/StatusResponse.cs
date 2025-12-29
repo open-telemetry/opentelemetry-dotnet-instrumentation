@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace TestApplication.Wcf.Server.NetFramework;
 
 [DataContract(Namespace = "http://opentelemetry.io/")]
-public class StatusResponse
+internal sealed class StatusResponse
 {
     [DataMember]
     public DateTimeOffset ServerTime { get; set; }

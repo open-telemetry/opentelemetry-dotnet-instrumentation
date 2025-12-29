@@ -4,7 +4,9 @@
 namespace TestApplication.ProfilerSpanStoppageHandling;
 
 // A dependency that queues work in it's ctor.
+#pragma warning disable CA1515 // Consider making public types internal
 public sealed class TestDependency : IDisposable
+#pragma warning restore CA1515 // Consider making public types internal
 {
     private readonly Task _task;
     private readonly ManualResetEventSlim _resetEvent = new(false);
