@@ -34,13 +34,13 @@ internal class StarWarsSubscription : ObjectGraphType<object>
     {
         var listOfHumans = new List<Human>();
 
-        var result = await _starWarsData.GetHumanByIdAsync("1");
+        var result = await _starWarsData.GetHumanByIdAsync("1").ConfigureAwait(false);
         if (result != null)
         {
             listOfHumans.Add(result);
         }
 
-        result = await _starWarsData.GetHumanByIdAsync("2");
+        result = await _starWarsData.GetHumanByIdAsync("2").ConfigureAwait(false);
         if (result != null)
         {
             listOfHumans.Add(result);

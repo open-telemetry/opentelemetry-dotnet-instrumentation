@@ -92,7 +92,7 @@ internal static class Program
                     await client.CloseAsync().ConfigureAwait(false);
                 }
             }
-            catch
+            catch (Exception)
             {
             }
         }

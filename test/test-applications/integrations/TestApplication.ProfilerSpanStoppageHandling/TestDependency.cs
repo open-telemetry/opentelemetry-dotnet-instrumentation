@@ -4,7 +4,7 @@
 namespace TestApplication.ProfilerSpanStoppageHandling;
 
 // A dependency that queues work in it's ctor.
-public class TestDependency : IDisposable
+public sealed class TestDependency : IDisposable
 {
     private readonly Task _task;
     private readonly ManualResetEventSlim _resetEvent = new(false);

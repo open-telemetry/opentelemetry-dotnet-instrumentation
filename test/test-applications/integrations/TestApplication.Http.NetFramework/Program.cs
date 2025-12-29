@@ -6,14 +6,14 @@ using System.Text;
 
 namespace TestApplication.Http.NetFramework;
 
-public class Program
+internal static class Program
 {
     public static void Main(string[] args)
     {
         using var listener = new TestServer("/test/");
         var address = $"http://localhost:{listener.Port}";
 
-        var request = (HttpWebRequest)WebRequest.Create($"{address}/test");
+        var request = (HttpWebRequest)WebRequest.Create(new Uri($"{address}/test"));
         request.Method = "POST";
         request.ContentType = "text/plain";
         request.Headers.Add("Custom-Request-Test-Header1", "Test-Value1");

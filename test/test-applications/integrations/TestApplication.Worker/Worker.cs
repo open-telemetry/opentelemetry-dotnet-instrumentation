@@ -17,7 +17,7 @@ public class Worker : BackgroundService
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         _logger.LogInformation("Worker running.");
-        await Task.Delay(1000, stoppingToken);
+        await Task.Delay(1000, stoppingToken).ConfigureAwait(false);
         // When completed, the entire app host will stop.
         _hostApplicationLifetime.StopApplication();
     }

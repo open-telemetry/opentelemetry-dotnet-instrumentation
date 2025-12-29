@@ -10,17 +10,19 @@ using TestApplication.Shared;
 
 ConsoleHelper.WriteSplashScreen(args);
 
+await using var inMemoryDatabase = CreateInMemoryDatabase();
+
 var contextOptions = new DbContextOptionsBuilder<TestDbContext>()
-    .UseSqlite(CreateInMemoryDatabase())
+    .UseSqlite(inMemoryDatabase)
     .Options;
 
 await using var connection = RelationalOptionsExtension.Extract(contextOptions).Connection;
 
 await using (var context = new TestDbContext(contextOptions))
 {
-    await context.Database.EnsureCreatedAsync();
-    await context.AddAsync(new TestItem { Name = "TestItem" });
-    await context.SaveChangesAsync();
+    await context.Database.EnsureCreatedAsync().ConfigureAwait(false);
+    await context.AddAsync(new TestItem { Name = "TestItem" }).ConfigureAwait(false);
+    await context.SaveChangesAsync().ConfigureAwait(false);
 }
 
 await using (var context = new TestDbContext(contextOptions))

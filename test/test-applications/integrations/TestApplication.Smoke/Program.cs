@@ -9,7 +9,7 @@ using TestApplication.Shared;
 
 namespace TestApplication.Smoke;
 
-public class Program
+internal sealed class Program
 {
     public const string SourceName = "MyCompany.MyProduct.MyLibrary";
 
@@ -40,7 +40,7 @@ public class Program
         using var activity = myActivitySource.StartActivity("SayHello");
         activity?.SetTag("foo", 1);
         activity?.SetTag("bar", "Hello, World!");
-        activity?.SetTag("baz", new int[] { 1, 2, 3 });
+        activity?.SetTag("baz", (int[])[1, 2, 3]);
 
         using var client = new HttpClient
         {
@@ -49,7 +49,7 @@ public class Program
 
         try
         {
-            client.GetStringAsync("http://httpstat.us/200").Wait();
+            client.GetStringAsync(new Uri("http://httpstat.us/200")).Wait();
         }
         catch (Exception ex)
         {

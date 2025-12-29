@@ -117,14 +117,14 @@ internal static class ClassA
 #endif
     private static extern int OTelAutoCallbackTest(Callback fp, int n);
 
-    internal static class InternalClassB<TA, TD>
+    internal static class InternalClassB<T1, T4>
     {
         internal static class DoubleInternalClassB
         {
-            internal static class TripleInternalClassB<TC>
+            internal static class TripleInternalClassB<T3>
             {
                 [MethodImpl(MethodImplOptions.NoInlining)]
-                public static void MethodB<TB>(int testArg, TC[] a, TB b, TD t, IList<TA> c, IList<string> d)
+                public static void MethodB<T2>(int testArg, T3[] a, T2 b, T4 t, IList<T1> c, IList<string> d)
                 {
                     OTelAutoCallbackTest(TestCallback, testArg);
                 }

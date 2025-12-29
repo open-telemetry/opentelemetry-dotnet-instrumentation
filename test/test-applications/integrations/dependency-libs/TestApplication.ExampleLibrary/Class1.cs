@@ -7,6 +7,7 @@ namespace TestApplication.ExampleLibrary;
 
 public class Class1
 {
+#pragma warning disable CA1822 // Mark members as static
     public int Add(int x, int y)
     {
         return x + y;
@@ -17,7 +18,9 @@ public class Class1
         return x * y;
     }
 
+#pragma warning disable CA1051 // Do not declare visible instance fields
     public Func<int, int, int> Divide = (int x, int y) => x / y;
+#pragma warning restore CA1051 // Do not declare visible instance fields
 
     public string ToCustomString()
     {
@@ -31,7 +34,7 @@ public class Class1
 
     public Class1[] ToArray()
     {
-        return new Class1[] { this };
+        return [this];
     }
 
     public Array ToCustomArray()
@@ -41,23 +44,27 @@ public class Class1
         return Array.CreateInstance(typeof(Class1), lengthsArray, lowerBoundsArray);
     }
 
+#pragma warning disable CA1814 // Prefer jagged arrays over multidimensional
     public Class1[,,] ToMdArray()
     {
         return new Class1[4, 2, 3];
+#pragma warning restore CA1814 // Prefer jagged arrays over multidimensional
     }
 
     public Class1?[][] ToJaggedArray()
     {
         return new Class1?[][]
         {
-            new Class1?[] { this },
-            new Class1?[] { null, null }
+            [this],
+            [null, null]
         };
     }
 
+#pragma warning disable CA1002 // Do not expose generic lists
     public List<Class1> ToList()
+#pragma warning restore CA1002 // Do not expose generic lists
     {
-        return new List<Class1>() { this };
+        return [this];
     }
 
     public List<Class1>.Enumerator ToEnumerator()
@@ -129,4 +136,5 @@ public class Class1
     {
         return 0.1;
     }
+#pragma warning restore CA1822 // Mark members as static
 }
