@@ -30,28 +30,6 @@ internal partial class AssemblyResolver
 
         _logger.Debug("Requester [{0}] requested [{1}]", args.RequestingAssembly?.FullName ?? "<null>", args.Name ?? "<null>");
 
-        // All MongoDB* are signed and does not follow https://learn.microsoft.com/en-us/dotnet/standard/library-guidance/versioning#assembly-version
-        // There is no possibility to automatically redirect from 2.28.0 to 2.29.0.
-        // Loading assembly and ignoring this version.
-        if (assemblyName.StartsWith("MongoDB", StringComparison.OrdinalIgnoreCase) &&
-            (string.Equals(assemblyName, "MongoDB.Driver.Core", StringComparison.OrdinalIgnoreCase) ||
-            string.Equals(assemblyName, "MongoDB.Bson", StringComparison.OrdinalIgnoreCase) ||
-            string.Equals(assemblyName, "MongoDB.Libmongocrypt", StringComparison.OrdinalIgnoreCase)))
-        {
-            try
-            {
-                var mongoAssembly = Assembly.Load(assemblyName);
-                _logger.Debug<string, bool>("Assembly.Load(\"{0}\") succeeded={1}", assemblyName, mongoAssembly != null);
-                return mongoAssembly;
-            }
-            catch (Exception ex)
-            {
-                _logger.Debug(ex, "Assembly.Load(\"{0}\") Exception: {1}", assemblyName, ex.Message);
-            }
-
-            return null;
-        }
-
         var path = Path.Combine(Path.GetDirectoryName(_managedProfilerDirectory) ?? _managedProfilerDirectory, $"{assemblyName}.dll");
         if (!File.Exists(path))
         {
