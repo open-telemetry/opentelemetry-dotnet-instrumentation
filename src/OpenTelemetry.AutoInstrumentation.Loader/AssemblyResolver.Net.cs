@@ -92,13 +92,5 @@ internal partial class AssemblyResolver
             return null;
         }
     }
-
-    private string ResolveManagedProfilerDirectory()
-    {
-        string tracerFrameworkDirectory = "net";
-        string tracerHomeDirectory = ReadEnvironmentVariable("OTEL_DOTNET_AUTO_HOME") ?? string.Empty;
-
-        return Path.Combine(tracerHomeDirectory, tracerFrameworkDirectory);
-    }
 }
 #endif
