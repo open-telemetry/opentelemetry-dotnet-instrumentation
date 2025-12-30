@@ -60,7 +60,7 @@ internal static class PackageVersionDefinitions
             [
                 new("6.0.3"),
                 new("7.0.0"),
-                new("8.0.0"),
+                new("8.0.3"),
                 new("*")
             ]
         },
