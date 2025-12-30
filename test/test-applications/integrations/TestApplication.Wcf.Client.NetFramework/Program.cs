@@ -5,6 +5,7 @@ using System.Diagnostics;
 using System.Reflection;
 using System.ServiceModel;
 using System.ServiceModel.Channels;
+using TestApplication.Shared;
 
 namespace TestApplication.Wcf.Client.NetFramework;
 
@@ -14,6 +15,8 @@ internal static class Program
 
     public static async Task Main(string[] args)
     {
+        ConsoleHelper.WriteSplashScreen(args);
+
         string netTcpAddress;
         string httpAddress;
         if (args.Length == 0)

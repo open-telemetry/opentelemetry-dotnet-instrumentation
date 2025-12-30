@@ -7,12 +7,15 @@ using System.Reflection;
 
 namespace TestApplication.MultipleAppDomains.NetFramework;
 
+using TestApplication.Shared;
 using TestLibrary.InstrumentationTarget;
 
 internal static class Program
 {
     public static void Main(string[] args)
     {
+        ConsoleHelper.WriteSplashScreen(args);
+
         // Always execute the code to be instrumented.
         var command = new Command();
         command.Execute();

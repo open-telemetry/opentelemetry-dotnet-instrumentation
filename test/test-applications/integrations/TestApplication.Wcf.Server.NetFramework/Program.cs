@@ -2,13 +2,16 @@
 // SPDX-License-Identifier: Apache-2.0
 
 using System.ServiceModel;
+using TestApplication.Shared;
 
 namespace TestApplication.Wcf.Server.NetFramework;
 
 internal static class Program
 {
-    public static void Main()
+    public static void Main(string[] args)
     {
+        ConsoleHelper.WriteSplashScreen(args);
+
         try
         {
             using var serviceHost = new ServiceHost(typeof(StatusService));

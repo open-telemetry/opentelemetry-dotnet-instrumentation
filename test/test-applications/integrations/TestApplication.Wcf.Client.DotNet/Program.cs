@@ -5,6 +5,7 @@ using System.Diagnostics;
 using System.Reflection;
 using System.ServiceModel;
 using System.ServiceModel.Channels;
+using TestApplication.Shared;
 
 namespace TestApplication.Wcf.Client.DotNet;
 
@@ -12,8 +13,10 @@ internal static class Program
 {
     private static readonly ActivitySource Source = new(Assembly.GetExecutingAssembly().GetName().Name!, "1.0.0.0");
 
-    public static async Task Main()
+    public static async Task Main(string[] args)
     {
+        ConsoleHelper.WriteSplashScreen(args);
+
         var netTcpAddress = "net.tcp://127.0.0.1:9090/Telemetry";
         var httpAddress = "http://127.0.0.1:9009/Telemetry";
 

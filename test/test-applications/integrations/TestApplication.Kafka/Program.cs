@@ -3,6 +3,7 @@
 
 using Confluent.Kafka;
 using Confluent.Kafka.Admin;
+using TestApplication.Shared;
 
 namespace TestApplication.Kafka;
 
@@ -13,6 +14,8 @@ internal static class Program
 
     public static async Task<int> Main(string[] args)
     {
+        ConsoleHelper.WriteSplashScreen(args);
+
         if (args.Length < 4)
         {
             throw new ArgumentException("Required parameters not provided.");
