@@ -7,6 +7,7 @@ using System.Threading.RateLimiting;
 using Microsoft.AspNetCore.Hosting.Server;
 using Microsoft.AspNetCore.Hosting.Server.Features;
 using Microsoft.AspNetCore.SignalR.Client;
+using TestApplication.Shared;
 
 namespace TestApplication.Http;
 
@@ -14,6 +15,7 @@ internal static class Program
 {
     public static void Main(string[] args)
     {
+        ConsoleHelper.WriteSplashScreen(args);
         var disableDistributedContextPropagator = Environment.GetEnvironmentVariable("DISABLE_DistributedContextPropagator") == "true";
         if (disableDistributedContextPropagator)
         {

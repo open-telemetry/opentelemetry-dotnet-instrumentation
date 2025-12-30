@@ -5,6 +5,7 @@ using System.Diagnostics;
 using Microsoft.Extensions.Logging;
 using NLog;
 using NLog.Extensions.Logging;
+using TestApplication.Shared;
 
 namespace TestApplication.NLogBridge;
 
@@ -14,6 +15,8 @@ internal static class Program
 
     private static void Main(string[] args)
     {
+        ConsoleHelper.WriteSplashScreen(args);
+
         if (args.Length == 2)
         {
             var logApiName = args[1];

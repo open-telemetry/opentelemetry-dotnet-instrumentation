@@ -4,6 +4,7 @@
 using System.Diagnostics;
 using log4net;
 using Microsoft.Extensions.Logging;
+using TestApplication.Shared;
 
 [assembly: log4net.Config.XmlConfigurator(Watch = true)]
 
@@ -15,6 +16,8 @@ internal static class Program
 
     private static void Main(string[] args)
     {
+        ConsoleHelper.WriteSplashScreen(args);
+
         if (args.Length == 2)
         {
             log4net.GlobalContext.Properties["test_key"] = "test_value";

@@ -3,6 +3,7 @@
 
 using System.Net;
 using System.Text;
+using TestApplication.Shared;
 
 namespace TestApplication.Http.NetFramework;
 
@@ -10,6 +11,7 @@ internal static class Program
 {
     public static void Main(string[] args)
     {
+        ConsoleHelper.WriteSplashScreen(args);
         using var listener = new TestServer("/test/");
         var address = $"http://localhost:{listener.Port}";
 

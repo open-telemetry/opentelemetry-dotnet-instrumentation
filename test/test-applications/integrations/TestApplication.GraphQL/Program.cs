@@ -9,6 +9,7 @@ internal sealed class Program
 {
     public static void Main(string[] args)
     {
+        ConsoleHelper.WriteSplashScreen(args);
         var directory = Directory.GetCurrentDirectory();
 
         var host = new HostBuilder()
