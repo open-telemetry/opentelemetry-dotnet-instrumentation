@@ -11,7 +11,7 @@ namespace LibraryVersionsGenerator;
 
 internal static class Program
 {
-    private static Dictionary<string, string> _packageVersions = new Dictionary<string, string>();
+    private static Dictionary<string, string> _packageVersions = [];
 
     public static async Task Main()
     {
