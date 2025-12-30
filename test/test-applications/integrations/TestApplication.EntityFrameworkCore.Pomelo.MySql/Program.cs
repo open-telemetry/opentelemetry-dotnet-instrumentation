@@ -17,7 +17,7 @@ var contextOptions = new DbContextOptionsBuilder<TestDbContext>()
     .UseMySql(connectionString, serverVersion)
     .Options;
 
-await using (var context = new TestDbContext(contextOptions))
+using (var context = new TestDbContext(contextOptions))
 {
     await context.Database.EnsureDeletedAsync().ConfigureAwait(false);
     await context.Database.EnsureCreatedAsync().ConfigureAwait(false);
@@ -25,7 +25,7 @@ await using (var context = new TestDbContext(contextOptions))
     await context.SaveChangesAsync().ConfigureAwait(false);
 }
 
-await using (var context = new TestDbContext(contextOptions))
+using (var context = new TestDbContext(contextOptions))
 {
     foreach (var testItem in context.Set<TestItem>())
     {
