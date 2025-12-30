@@ -2,7 +2,9 @@ using GraphQL.Types;
 
 namespace StarWars.Types;
 
-public class HumanInputType : InputObjectGraphType<Human>
+#pragma warning disable CA1812 // Avoid uninstantiated internal classes. This class is instantiated by GraphQL.
+internal sealed class HumanInputType : InputObjectGraphType<Human>
+#pragma warning disable CA1812 // Avoid uninstantiated internal classes. This class is instantiated by GraphQL.
 {
     public HumanInputType()
     {

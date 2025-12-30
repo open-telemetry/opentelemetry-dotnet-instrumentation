@@ -5,7 +5,7 @@ using System.Dynamic;
 
 namespace My.Custom.Test.Namespace;
 
-internal class TestDynamicClass : DynamicObject
+internal sealed class TestDynamicClass : DynamicObject
 {
     public override bool TryInvoke(InvokeBinder binder, object?[]? args, out object? result)
     {

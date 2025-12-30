@@ -5,7 +5,7 @@ using System.Runtime.CompilerServices;
 
 namespace TestApplication.NoCode;
 
-internal class NoCodeTestingClass
+internal sealed class NoCodeTestingClass
 {
     [MethodImpl(MethodImplOptions.NoInlining)]
     public static void TestMethodStatic()

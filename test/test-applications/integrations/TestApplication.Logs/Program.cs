@@ -4,6 +4,7 @@
 using System.Net.Http;
 using Microsoft.AspNetCore.Hosting.Server;
 using Microsoft.AspNetCore.Hosting.Server.Features;
+using TestApplication.Shared;
 
 namespace TestApplication.Logs;
 
@@ -11,6 +12,8 @@ internal static class Program
 {
     public static void Main(string[] args)
     {
+        ConsoleHelper.WriteSplashScreen(args);
+
         using var host = CreateHostBuilder(args).Build();
         host.Start();
 

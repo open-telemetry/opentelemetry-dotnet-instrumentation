@@ -1,16 +1,21 @@
 // Copyright The OpenTelemetry Authors
 // SPDX-License-Identifier: Apache-2.0
 
+#if NETFRAMEWORK
 using System.Reflection;
+#endif
 
 namespace TestApplication.MultipleAppDomains.NetFramework;
 
+using TestApplication.Shared;
 using TestLibrary.InstrumentationTarget;
 
-public static class Program
+internal static class Program
 {
     public static void Main(string[] args)
     {
+        ConsoleHelper.WriteSplashScreen(args);
+
         // Always execute the code to be instrumented.
         var command = new Command();
         command.Execute();
@@ -24,10 +29,8 @@ public static class Program
                 // Nothing else to do, exit.
                 return;
             }
-            else
-            {
-                throw new InvalidOperationException($"Unrecognized command-line arguments: \"{string.Join(" ", args)}\"");
-            }
+
+            throw new InvalidOperationException($"Unrecognized command-line arguments: \"{string.Join(" ", args)}\"");
         }
 
 #if NETFRAMEWORK
@@ -40,10 +43,10 @@ public static class Program
             // Use a name that contains characters that can't be used in file names.
             appDomains[i] = AppDomain.CreateDomain("|invalid:in:file:name|");
             var targetAppDomain = appDomains[i];
-            tasks.Add(Task.Run(() => targetAppDomain.ExecuteAssembly(applicationCodeBase, new string[] { NoAppDomainsSwitch })));
+            tasks.Add(Task.Run(() => targetAppDomain.ExecuteAssembly(applicationCodeBase, [NoAppDomainsSwitch])));
         }
 
-        Task.WaitAll(tasks.ToArray());
+        Task.WaitAll([.. tasks]);
 
         for (var i = 0; i < appDomains.Length; i++)
         {

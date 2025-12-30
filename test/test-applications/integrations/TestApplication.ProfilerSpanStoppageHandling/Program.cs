@@ -4,6 +4,7 @@
 using System.Net.Http;
 using Microsoft.AspNetCore.Hosting.Server;
 using Microsoft.AspNetCore.Hosting.Server.Features;
+using TestApplication.Shared;
 
 namespace TestApplication.ProfilerSpanStoppageHandling;
 
@@ -11,6 +12,8 @@ internal static class Program
 {
     public static void Main(string[] args)
     {
+        ConsoleHelper.WriteSplashScreen(args);
+
         var builder = WebApplication.CreateBuilder(args);
 
         // Add services to the container.
@@ -32,7 +35,8 @@ internal static class Program
         var addressFeature = server?.Features.Get<IServerAddressesFeature>();
         var address = addressFeature?.Addresses.First();
         using var httpClient = new HttpClient();
-        httpClient.Send(new HttpRequestMessage(HttpMethod.Get, $"{address}/weatherforecast"));
+        using var request = new HttpRequestMessage(HttpMethod.Get, $"{address}/weatherforecast");
+        httpClient.Send(request);
         // Allow for additional batch of callstacks to be collected.
         Thread.Sleep(1000);
     }

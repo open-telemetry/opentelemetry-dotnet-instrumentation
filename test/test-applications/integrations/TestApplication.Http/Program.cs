@@ -7,13 +7,15 @@ using System.Threading.RateLimiting;
 using Microsoft.AspNetCore.Hosting.Server;
 using Microsoft.AspNetCore.Hosting.Server.Features;
 using Microsoft.AspNetCore.SignalR.Client;
+using TestApplication.Shared;
 
 namespace TestApplication.Http;
 
-public static class Program
+internal static class Program
 {
     public static void Main(string[] args)
     {
+        ConsoleHelper.WriteSplashScreen(args);
         var disableDistributedContextPropagator = Environment.GetEnvironmentVariable("DISABLE_DistributedContextPropagator") == "true";
         if (disableDistributedContextPropagator)
         {
@@ -26,7 +28,7 @@ public static class Program
         var server = (IServer?)host.Services.GetService(typeof(IServer));
         var addressFeature = server?.Features.Get<IServerAddressesFeature>();
         var address = addressFeature?.Addresses.First();
-        var dnsAddress = address?.Replace("127.0.0.1", "localhost"); // needed to force DNS resolution to test metrics
+        var dnsAddress = address?.Replace("127.0.0.1", "localhost", StringComparison.Ordinal); // needed to force DNS resolution to test metrics
         using var httpClient = new HttpClient();
         httpClient.DefaultRequestHeaders.Add("Custom-Request-Test-Header1", "Test-Value1");
         httpClient.DefaultRequestHeaders.Add("Custom-Request-Test-Header2", "Test-Value2");

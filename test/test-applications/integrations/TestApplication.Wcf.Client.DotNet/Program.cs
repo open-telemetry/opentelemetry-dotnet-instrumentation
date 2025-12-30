@@ -5,6 +5,7 @@ using System.Diagnostics;
 using System.Reflection;
 using System.ServiceModel;
 using System.ServiceModel.Channels;
+using TestApplication.Shared;
 
 namespace TestApplication.Wcf.Client.DotNet;
 
@@ -14,6 +15,8 @@ internal static class Program
 
     public static async Task Main(string[] args)
     {
+        ConsoleHelper.WriteSplashScreen(args);
+
         var netTcpAddress = "net.tcp://127.0.0.1:9090/Telemetry";
         var httpAddress = "http://127.0.0.1:9009/Telemetry";
 
@@ -38,7 +41,7 @@ internal static class Program
         // Note: Best practice is to re-use your client/channel instances.
         // This code is not meant to illustrate best practices, only the
         // instrumentation.
-        var client = new StatusServiceClient(binding, new EndpointAddress(new Uri(address)));
+        using var client = new StatusServiceClient(binding, new EndpointAddress(new Uri(address)));
         await client.OpenAsync().ConfigureAwait(false);
 
         try

@@ -4,7 +4,7 @@
 using System.Diagnostics;
 using My.Custom.Test.Namespace;
 
-ActivitySource activitySource = new("TestApplication.ContinuousProfiler", "1.0.0");
+using ActivitySource activitySource = new("TestApplication.ContinuousProfiler", "1.0.0");
 
 using var activity = activitySource.StartActivity();
 ClassA.MethodA();

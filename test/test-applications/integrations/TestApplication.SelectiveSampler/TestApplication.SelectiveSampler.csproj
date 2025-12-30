@@ -8,9 +8,6 @@
     <Compile Include="..\TestApplication.ContinuousProfiler\Exporter\AllocationSample.cs">
       <Link>AllocationSample.cs</Link>
     </Compile>
-    <Compile Include="..\TestApplication.ContinuousProfiler\Exporter\ResourcesProvider.cs">
-      <Link>ResourcesProvider.cs</Link>
-    </Compile>
     <Compile Include="..\TestApplication.ContinuousProfiler\Exporter\SampleNativeFormatParser.cs">
       <Link>SampleNativeFormatParser.cs</Link>
     </Compile>

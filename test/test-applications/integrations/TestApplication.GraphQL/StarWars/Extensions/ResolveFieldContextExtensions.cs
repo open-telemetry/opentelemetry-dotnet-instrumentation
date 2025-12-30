@@ -4,7 +4,7 @@ using StarWars.Types;
 
 namespace StarWars.Extensions;
 
-public static class ResolveFieldContextExtensions
+internal static class ResolveFieldContextExtensions
 {
     public static Connection<TU> GetPagedResults<T, TU>(this IResolveConnectionContext<T> context, StarWarsData data, IReadOnlyList<string> ids)
         where TU : StarWarsCharacter
@@ -31,22 +31,14 @@ public static class ResolveFieldContextExtensions
         }
         else
         {
-            if (context.Before != null)
-            {
-                idList = ids.Reverse<string>()
-                    .SkipWhile(x => !Convert.ToBase64String(System.Text.Encoding.UTF8.GetBytes(x)).Equals(context.Before, StringComparison.Ordinal))
-                    .Take(context.Last ?? pageSize).ToList();
-            }
-            else
-            {
-                idList = ids.Reverse<string>()
-                    .Take(context.Last ?? pageSize).ToList();
-            }
+            idList = ids.Reverse()
+                .SkipWhile(x => !Convert.ToBase64String(System.Text.Encoding.UTF8.GetBytes(x)).Equals(context.Before, StringComparison.Ordinal))
+                .Take(context.Last ?? pageSize).ToList();
         }
 
         list = data.GetCharactersAsync(idList).Result as List<TU> ?? throw new InvalidOperationException($"GetCharactersAsync method should return list of '{typeof(TU).Name}' items.");
         cursor = list.Count > 0 ? list.Last().Cursor : null;
-        endCursor = ids.Count > 0 ? Convert.ToBase64String(System.Text.Encoding.UTF8.GetBytes(ids.Last())) : null;
+        endCursor = ids.Count > 0 ? Convert.ToBase64String(System.Text.Encoding.UTF8.GetBytes(ids[^1])) : null;
 
         return new Connection<TU>
         {

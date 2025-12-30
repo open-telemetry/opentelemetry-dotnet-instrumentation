@@ -15,7 +15,9 @@ namespace StarWars;
 ///   }
 /// }.
 /// </example>
-public class StarWarsMutation : ObjectGraphType
+#pragma warning disable CA1812 // Avoid uninstantiated internal classes. This class is instantiated by GraphQL.
+internal sealed class StarWarsMutation : ObjectGraphType
+#pragma warning restore CA1812 // Avoid uninstantiated internal classes. This class is instantiated by GraphQL.
 {
     public StarWarsMutation(StarWarsData data)
     {

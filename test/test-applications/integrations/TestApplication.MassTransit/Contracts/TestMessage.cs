@@ -3,7 +3,7 @@
 
 namespace TestApplication.MassTransit.Contracts;
 
-public record TestMessage
+internal sealed record TestMessage
 {
     public string? Value { get; set; }
 }
