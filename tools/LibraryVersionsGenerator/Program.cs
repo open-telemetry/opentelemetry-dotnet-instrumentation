@@ -57,7 +57,7 @@ internal static class Program
                         {
                             if (!platformVersions.TryGetValue(platform, out var value))
                             {
-                                value = new List<string>();
+                                value = [];
                                 platformVersions.Add(platform, value);
                             }
 
@@ -103,7 +103,7 @@ internal static class Program
 
                     foreach (var version in platform.Value)
                     {
-                        xUnitFileStringBuilder.AddVersion(version, Array.Empty<string>());
+                        xUnitFileStringBuilder.AddVersion(version, []);
                     }
 
                     xUnitFileStringBuilder.EndTestPackage();
