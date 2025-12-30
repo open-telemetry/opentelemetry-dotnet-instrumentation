@@ -116,7 +116,7 @@ internal static class Program
             .AddSource("TestApplication.CustomSdk")
             .AddSource("NServiceBus.Core")
             .ConfigureResource(builder =>
-                builder.AddAttributes(new[] { new KeyValuePair<string, object>("test_attr", "added_manually") }))
+                builder.AddAttributes([new KeyValuePair<string, object>("test_attr", "added_manually")]))
             .AddOtlpExporter()
             .Build();
     }
@@ -136,7 +136,7 @@ internal static class Program
             // custom metric
             .AddMeter("TestApplication.CustomSdk")
             .ConfigureResource(builder =>
-                builder.AddAttributes(new[] { new KeyValuePair<string, object>("test_attr", "added_manually") }))
+                builder.AddAttributes([new KeyValuePair<string, object>("test_attr", "added_manually")]))
             .AddOtlpExporter()
             .Build();
     }

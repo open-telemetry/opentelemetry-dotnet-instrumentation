@@ -31,11 +31,9 @@ internal static class Program
 
         var response = request.GetResponse();
 
-        using (var responseStream = response.GetResponseStream())
-        using (var responseReader = new StreamReader(responseStream))
-        {
-            var text = responseReader.ReadToEnd();
-            Console.WriteLine("[CLIENT] Received: {0}", text);
-        }
+        using var responseStream = response.GetResponseStream();
+        using var responseReader = new StreamReader(responseStream);
+        var text = responseReader.ReadToEnd();
+        Console.WriteLine("[CLIENT] Received: {0}", text);
     }
 }
