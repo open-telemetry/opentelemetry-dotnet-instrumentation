@@ -11,7 +11,11 @@ var mySqlPort = GetMySqlPort(args);
 
 var connectionString = $@"Server=127.0.0.1;Port={mySqlPort};Uid=root;Database=TestDatabase";
 
+#if POMELO_9_0_OR_GREATER
 var serverVersion = await ServerVersion.AutoDetectAsync(connectionString).ConfigureAwait(false);
+#else
+var serverVersion = ServerVersion.AutoDetect(connectionString);
+#endif
 
 var contextOptions = new DbContextOptionsBuilder<TestDbContext>()
     .UseMySql(connectionString, serverVersion)
