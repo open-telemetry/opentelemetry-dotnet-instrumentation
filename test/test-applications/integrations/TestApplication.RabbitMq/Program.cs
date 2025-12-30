@@ -20,8 +20,8 @@ internal static class Program
         ConsoleHelper.WriteSplashScreen(args);
 
         var factory = new ConnectionFactory { HostName = "localhost", Port = int.Parse(GetRabbitMqPort(args), CultureInfo.InvariantCulture) };
-        await using var connection = await factory.CreateConnectionAsync();
-        await using var channel = await connection.CreateChannelAsync();
+        using var connection = await factory.CreateConnectionAsync().ConfigureAwait(false);
+        using var channel = await connection.CreateChannelAsync().ConfigureAwait(false);
 
         Console.WriteLine(channel.GetType().FullName);
 
