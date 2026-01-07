@@ -111,13 +111,15 @@ internal static class ClassA
         static void Action(int s) => InternalClassB<string, int>.DoubleInternalClassB.TripleInternalClassB<int>.MethodB(s, [3], TimeSpan.Zero, 0, ["a"], []);
     }
 
-    [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
+    [DefaultDllImportSearchPaths(DllImportSearchPath.AssemblyDirectory)]
 #if NET
     [DllImport("TestApplication.ContinuousProfiler.NativeDep")]
 #else
     [DllImport("TestApplication.ContinuousProfiler.NativeDep.dll")]
 #endif
+#pragma warning disable CA5393 // Do not use unsafe DllImportSearchPath value. Needed to execute on macOS or Linux.
     private static extern int OTelAutoCallbackTest(Callback fp, int n);
+#pragma warning restore CA5393 // Do not use unsafe DllImportSearchPath value. Needed to execute on macOS or Linux.
 
     internal static class InternalClassB<T1, T4>
     {

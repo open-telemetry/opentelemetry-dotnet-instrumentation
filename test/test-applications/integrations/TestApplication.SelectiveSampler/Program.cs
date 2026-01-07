@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: Apache-2.0
 
 using System.Diagnostics;
-using TestApplication.Shared;
 
 namespace TestApplication.SelectiveSampler;
 
@@ -12,7 +11,6 @@ internal static class Program
 
     public static async Task Main(string[] args)
     {
-        ConsoleHelper.WriteSplashScreen(args);
         Thread.CurrentThread.Name = "Main";
 
         // Trace with nested activities

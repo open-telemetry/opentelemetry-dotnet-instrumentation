@@ -4,7 +4,6 @@
 using System.Net.Http;
 using Microsoft.AspNetCore.Hosting.Server;
 using Microsoft.AspNetCore.Hosting.Server.Features;
-using TestApplication.Shared;
 
 namespace TestApplication.ProfilerSpanStoppageHandling;
 
@@ -12,8 +11,6 @@ internal static class Program
 {
     public static void Main(string[] args)
     {
-        ConsoleHelper.WriteSplashScreen(args);
-
         var builder = WebApplication.CreateBuilder(args);
 
         // Add services to the container.
