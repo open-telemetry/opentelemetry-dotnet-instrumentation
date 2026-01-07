@@ -45,6 +45,11 @@ bool IsNetFxAssemblyRedirectionEnabled()
     ToBooleanWithDefault(GetEnvironmentValue(environment::netfx_assembly_redirection_enabled), true);
 }
 
+bool IsSqlClientNetFxILRewriteEnabled()
+{
+    return sqlclient_netfx_ilrewrite_enabled;
+}
+
 void SetSqlClientNetFxILRewriteEnabled(bool enabled)
 {
     sqlclient_netfx_ilrewrite_enabled = enabled;
