@@ -14,6 +14,15 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 - Support for [`NLog`](https://www.nuget.org/packages/NLog/)
   logs instrumentation for versions `5.*` and `6.*` on .NET using duck typing
   for zero-config auto-injection.
+- Configuration `OTEL_DOTNET_AUTO_APP_DOMAIN_STRATEGY` added with ability to
+  use:
+  - `LoaderOptimizationSingleDomain` - all non-default application domains
+     will be forced to load with `LoaderOptimization.SingleDomain`, preventing
+     their assemblies loading as domain neutral;
+  - `AssemblyRedirect` - modify app config binding redirects to load required
+    assembly versions;
+  - `None` - do not use any special strategy for non-default application
+    domains.
 
 ### Changed
 
