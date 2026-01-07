@@ -80,7 +80,7 @@ public class NLogBridgeTests : TestHelper
         // ILogger uses "Information" for Info level, not "Info"
         collector.Expect(
             logRecord =>
-            VerifyBody(logRecord, "{0}, {1} at {2:t}!") &&
+            VerifyBody(logRecord, "{hello}, {world} at {time:t}!") &&
             VerifyTraceContext(logRecord) &&
             logRecord is { SeverityText: "Information", SeverityNumber: SeverityNumber.Info } &&
             // 0 : "Hello"
