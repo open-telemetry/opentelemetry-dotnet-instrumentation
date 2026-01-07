@@ -92,7 +92,7 @@ public class NLogBridgeTests : TestHelper
         // Logged with exception
         collector.Expect(
             logRecord =>
-            VerifyBody(logRecord, "Exception occured") &&
+            VerifyBody(logRecord, "Exception occurred") &&
             // OtlpLogExporter adds exception related attributes (ConsoleExporter doesn't show them)
             logRecord is { SeverityText: "Error", SeverityNumber: SeverityNumber.Error } &&
             VerifyExceptionAttributes(logRecord) &&
@@ -159,7 +159,7 @@ public class NLogBridgeTests : TestHelper
         var regex = new Regex(@"INFO  TestApplication\.NLogBridge\.Program - Hello, world at \d{1,2}\:\d{2}(\s*[AP]M)?\!  TraceId=[a-f0-9]{32} SpanId=[a-f0-9]{16} TraceFlags=0[01]");
         var output = standardOutput;
         Assert.Matches(regex, output);
-        Assert.Contains("ERROR  TestApplication.NLogBridge.Program - Exception occured", output);
+        Assert.Contains("ERROR  TestApplication.NLogBridge.Program - Exception occurred", output);
         Assert.Contains("TraceId=", output);
         Assert.Contains("SpanId=", output);
         Assert.Contains("TraceFlags=", output);
@@ -189,7 +189,7 @@ public class NLogBridgeTests : TestHelper
             Assert.Contains("INFO  TestApplication.NLogBridge.Program - Message via wrapperType overload", standardOutput);
         }
 
-        Assert.Contains("ERROR  TestApplication.NLogBridge.Program - Exception occured", standardOutput);
+        Assert.Contains("ERROR  TestApplication.NLogBridge.Program - Exception occurred", standardOutput);
     }
 
     private static bool VerifyBody(LogRecord logRecord, string expectedBody)
