@@ -43,6 +43,7 @@
 
 namespace trace {
 
+bool sqlclient_netfx_ilrewrite_enabled;
 bool DisableOptimizations();
 bool EnableInlining();
 bool IsNGENEnabled();
@@ -50,7 +51,6 @@ bool IsDumpILRewriteEnabled();
 bool IsAzureAppServices();
 bool IsFailFastEnabled();
 bool IsNetFxAssemblyRedirectionEnabled();
-bool IsSqlClientNetFxILRewriteEnabled();
 void SetSqlClientNetFxILRewriteEnabled(bool enabled);
 
 }  // namespace trace

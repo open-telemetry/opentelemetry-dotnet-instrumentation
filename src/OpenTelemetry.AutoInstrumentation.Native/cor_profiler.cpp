@@ -622,7 +622,7 @@ HRESULT STDMETHODCALLTYPE CorProfiler::ModuleLoadFinished(ModuleID module_id, HR
 
 #ifdef _WIN32
     if (runtime_information_.is_desktop() && module_info.assembly.name == WStr("System.Data") &&
-        IsSqlClientNetFxILRewriteEnabled())
+        sqlclient_netfx_ilrewrite_enabled)
     {
         RewriteILSystemDataCommandText(module_id);
     }
