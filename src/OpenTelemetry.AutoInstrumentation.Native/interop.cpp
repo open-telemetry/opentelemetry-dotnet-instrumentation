@@ -10,7 +10,7 @@
 //---------------------------------------------------------------------------------------
 
 #include "cor_profiler.h"
-#include "environment_variables_util.h"
+#include "configuration.h"
 
 #ifndef _WIN32
 #include <dlfcn.h>
