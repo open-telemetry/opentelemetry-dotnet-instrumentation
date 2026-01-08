@@ -415,6 +415,23 @@ public static partial class LibraryVersion
             return theoryData;
         }
     }
+    public static TheoryData<string> WCFCoreServer
+    {
+        get
+        {
+            TheoryData<string> theoryData =
+            [
+#if DEFAULT_TEST_PACKAGE_VERSIONS
+                string.Empty,
+#else
+#if NET10_0 || NET9_0 || NET8_0
+                "1.8.0",
+#endif
+#endif
+            ];
+            return theoryData;
+        }
+    }
     public static readonly IReadOnlyDictionary<string, TheoryData<string>> LookupMap = new Dictionary<string, TheoryData<string>>
     {
        { "Azure", Azure },
@@ -440,5 +457,6 @@ public static partial class LibraryVersion
        { "StackExchangeRedis", StackExchangeRedis },
        { "WCFCoreClient", WCFCoreClient },
        { "Kafka", Kafka },
+       { "WCFCoreServer", WCFCoreServer },
     };
 }
