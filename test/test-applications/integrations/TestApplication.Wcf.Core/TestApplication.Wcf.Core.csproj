@@ -7,5 +7,6 @@
     <PackageReference Include="CoreWCF.Http" VersionOverride="$(LibraryVersion)" />
     <PackageReference Include="CoreWCF.NetTcp" VersionOverride="$(LibraryVersion)" />
     <PackageReference Include="CoreWCF.Primitives" VersionOverride="$(LibraryVersion)" />
+    <PackageReference Include="System.Diagnostics.DiagnosticSource" />
   </ItemGroup>
 </Project>
