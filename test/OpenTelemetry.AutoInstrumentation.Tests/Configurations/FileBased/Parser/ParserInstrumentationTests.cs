@@ -25,7 +25,7 @@ public class ParserInstrumentationTests
                     "entityframeworkcore", "graphql", "grpcnetclient", "httpclient",
                     "kafka", "masstransit", "mongodb", "mysqlconnector",
                     "mysqldata", "npgsql", "nservicebus", "oraclemda", "rabbitmq",
-                    "quartz", "sqlclient", "stackexchangeredis", "wcfclient"
+                    "quartz", "sqlclient", "stackexchangeredis", "wcfclient", "wcfcore"
                 ];
 #endif
 #if NETFRAMEWORK
@@ -39,6 +39,9 @@ public class ParserInstrumentationTests
 
         var traces = config.InstrumentationDevelopment.DotNet.Traces;
         Assert.NotNull(traces);
+
+        // some properties (4) are not directly related to expected traces aliases
+        FileBasedTestHelper.AssertCountOfAliasProperties(traces, expectedTraces.Length + 4);
 
         foreach (var alias in expectedTraces)
         {

@@ -16,6 +16,8 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
   for zero-config auto-injection.
 - Support for file-based configuration of the IL rewrite for
   SqlClient instrumentation setting
+- Support for [CoreWCF.Primitives](https://www.nuget.org/packages/CoreWCF.Primitives/)
+  traces instrumentation for versions `1.8.0`+.
 
 ### Changed
 

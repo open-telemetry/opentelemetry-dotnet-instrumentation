@@ -132,5 +132,12 @@ internal enum TracerInstrumentation
     /// <summary>
     /// RabbitMQ client instrumentation
     /// </summary>
-    RabbitMq = 22
+    RabbitMq = 22,
+
+#if NET
+    /// <summary>
+    /// CoreWCF instrumentation.
+    /// </summary>
+    WcfCore = 23
+#endif
 }

@@ -512,6 +512,7 @@ instrumentation/development:
       quartz:              # Quartz
       sqlclient:           # Microsoft.Data.SqlClient & System.Data.SqlClient
       stackexchangeredis:  # StackExchange.Redis
+      wcfcore:             # CoreWCF.Primitives
       wcfclient:           # WCF Client
       wcfservice:          # WCF Service
     metrics:

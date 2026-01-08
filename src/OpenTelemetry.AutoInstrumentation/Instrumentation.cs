@@ -534,6 +534,8 @@ internal static class Instrumentation
                 case TracerInstrumentation.GraphQL:
                     DelayedInitialization.Traces.AddGraphQL(LazyInstrumentationLoader, pluginManager, tracerSettings);
                     break;
+                case TracerInstrumentation.WcfCore:
+                    break;
 #endif
                 case TracerInstrumentation.Azure:
                     break;
