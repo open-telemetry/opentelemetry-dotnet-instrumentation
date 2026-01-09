@@ -7,9 +7,7 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 #if NET10_0_OR_GREATER
-using System.Diagnostics.Metrics;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.Extensions.DependencyInjection.Extensions;
 #endif
 
 namespace TestApplication.Http;
@@ -53,26 +51,6 @@ internal sealed class Startup
         // Add Identity to enable Microsoft.AspNetCore.Identity metrics
         services.AddIdentityCore<TestUser>()
             .AddUserManager<UserManager<TestUser>>();
-
-        // Workaround for .NET 10 bug: Manually register the internal UserManagerMetrics type
-        // Remove this workaround when upgrading to a .NET version that contains the fix
-        // Tracked under https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/issues/4623
-        var userManagerMetricsType = typeof(UserManager<>).Assembly.GetType("Microsoft.AspNetCore.Identity.UserManagerMetrics");
-        if (userManagerMetricsType != null)
-        {
-            services.TryAddSingleton(
-                userManagerMetricsType,
-                serviceProvider =>
-                {
-                    var meterFactory = serviceProvider.GetRequiredService<IMeterFactory>();
-                    return Activator.CreateInstance(
-                        userManagerMetricsType,
-                        System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic,
-                        null,
-                        [meterFactory],
-                        null)!;
-                });
-        }
 
         // Add in-memory user store for testing
         services.AddSingleton<IUserStore<TestUser>, InMemoryUserStore>();
