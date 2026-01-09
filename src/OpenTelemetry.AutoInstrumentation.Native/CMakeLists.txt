@@ -150,6 +150,7 @@ endif()
 add_library("OpenTelemetry.AutoInstrumentation.Native.static" STATIC
         class_factory.cpp
         clr_helpers.cpp
+	configuration.cpp
         continuous_profiler_clr_helpers.cpp
         continuous_profiler.cpp
         cor_profiler_base.cpp

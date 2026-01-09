@@ -12,6 +12,7 @@
 #include "dllmain.h"
 #include "environment_variables.h"
 #include "environment_variables_util.h"
+#include "configuration.h"
 #include "il_rewriter.h"
 #include "il_rewriter_wrapper.h"
 #include "stub_generator.h"

@@ -1,0 +1,14 @@
+file_format: "1.0-rc.1"
+
+tracer_provider:
+  processors:
+    - batch:
+        exporter:
+          otlp_http:
+            endpoint: ${OTEL_EXPORTER_OTLP_TRACES_ENDPOINT}
+
+instrumentation/development:
+  dotnet:
+    traces:
+      sqlclient:
+        netfx_ilrewrite_enabled: ${OTEL_DOTNET_AUTO_SQLCLIENT_NETFX_ILREWRITE_ENABLED}

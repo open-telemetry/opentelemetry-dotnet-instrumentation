@@ -177,6 +177,11 @@ internal partial class ConfigurationKeys
             /// Configuration key for Oracle Client instrumentation to enable passing text query as a db.statement attribute.
             /// </summary>
             public const string OracleMdaSetDbStatementForText = "OTEL_DOTNET_AUTO_ORACLEMDA_SET_DBSTATEMENT_FOR_TEXT";
+
+            /// <summary>
+            /// Configuration key for enabling IL rewriting of SqlClient on .NET Framework to ensure CommandText is available.
+            /// </summary>
+            public const string SqlClientNetFxILRewriteEnabled = "OTEL_DOTNET_AUTO_SQLCLIENT_NETFX_ILREWRITE_ENABLED";
         }
     }
 

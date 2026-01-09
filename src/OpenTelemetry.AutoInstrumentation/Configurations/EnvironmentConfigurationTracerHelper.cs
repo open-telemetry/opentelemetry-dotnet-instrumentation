@@ -35,7 +35,7 @@ internal static class EnvironmentConfigurationTracerHelper
                 TracerInstrumentation.GrpcNetClient => Wrappers.AddGrpcClientInstrumentation(builder, pluginManager, lazyInstrumentationLoader, settings),
                 TracerInstrumentation.HttpClient => Wrappers.AddHttpClientInstrumentation(builder, pluginManager, lazyInstrumentationLoader, settings),
                 TracerInstrumentation.Npgsql => builder.AddSource("Npgsql"),
-                TracerInstrumentation.SqlClient => Wrappers.AddSqlClientInstrumentation(builder, pluginManager, lazyInstrumentationLoader, settings),
+                TracerInstrumentation.SqlClient => Wrappers.AddSqlClientInstrumentation(builder, pluginManager, lazyInstrumentationLoader),
                 TracerInstrumentation.NServiceBus => builder.AddSource("NServiceBus.Core"),
                 TracerInstrumentation.Elasticsearch => builder.AddSource("Elastic.Clients.Elasticsearch.ElasticsearchClient"),
                 TracerInstrumentation.ElasticTransport => builder.AddSource("Elastic.Transport"),
@@ -307,7 +307,7 @@ internal static class EnvironmentConfigurationTracerHelper
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]
-        public static TracerProviderBuilder AddSqlClientInstrumentation(TracerProviderBuilder builder, PluginManager pluginManager, LazyInstrumentationLoader lazyInstrumentationLoader, TracerSettings tracerSettings)
+        public static TracerProviderBuilder AddSqlClientInstrumentation(TracerProviderBuilder builder, PluginManager pluginManager, LazyInstrumentationLoader lazyInstrumentationLoader)
         {
             DelayedInitialization.Traces.AddSqlClient(lazyInstrumentationLoader, pluginManager);
 
