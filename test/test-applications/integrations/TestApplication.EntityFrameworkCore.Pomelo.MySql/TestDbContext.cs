@@ -5,7 +5,9 @@ using Microsoft.EntityFrameworkCore;
 
 namespace TestApplication.EntityFrameworkCore.Pomelo.MySql;
 
-public class TestDbContext : DbContext
+#pragma warning disable CA1812 // Avoid uninstantiated internal classes. This class is instantiated by EF Core.
+internal sealed class TestDbContext : DbContext
+#pragma warning restore CA1812 // Avoid uninstantiated internal classes. This class is instantiated by EF Core.
 {
     public TestDbContext(DbContextOptions options)
         : base(options)

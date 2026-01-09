@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 using System.Reflection;
+using TestApplication.Shared;
 
 namespace TestApplication.DomainNeutral.NetFramework;
 
@@ -12,6 +13,7 @@ internal static class Program
     [LoaderOptimization(LoaderOptimization.MultiDomain)]
     public static void Main(string[] args)
     {
+        ConsoleHelper.WriteSplashScreen(args);
         var command = new Command();
         command.Execute();
 

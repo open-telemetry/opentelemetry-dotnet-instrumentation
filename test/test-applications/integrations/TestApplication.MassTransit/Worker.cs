@@ -6,7 +6,9 @@ using TestApplication.MassTransit.Contracts;
 
 namespace TestApplication.MassTransit;
 
-public class Worker : BackgroundService
+#pragma warning disable CA1812 // Avoid uninstantiated internal classes. This class is instantiated by MassTransit.
+internal sealed class Worker : BackgroundService
+#pragma warning restore CA1812 // Avoid uninstantiated internal classes. This class is instantiated by MassTransit.
 {
     private readonly IBus _bus;
 

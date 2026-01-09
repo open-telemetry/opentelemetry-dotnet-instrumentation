@@ -16,5 +16,6 @@
     <!-- CA1031: Do not catch general exception types -->
     <!-- CA1303: Do not pass literals as localized parameters -->
     <NoWarn>$(NoWarn);CA1031;CA1303</NoWarn>
+    <AnalysisLevel>latest-All</AnalysisLevel>
   </PropertyGroup>
 </Project>

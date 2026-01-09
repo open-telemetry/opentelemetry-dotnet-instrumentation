@@ -5,6 +5,7 @@ using System.Diagnostics;
 using System.Reflection;
 using System.ServiceModel;
 using System.ServiceModel.Channels;
+using TestApplication.Shared;
 
 namespace TestApplication.Wcf.Client.NetFramework;
 
@@ -14,6 +15,8 @@ internal static class Program
 
     public static async Task Main(string[] args)
     {
+        ConsoleHelper.WriteSplashScreen(args);
+
         string netTcpAddress;
         string httpAddress;
         if (args.Length == 0)
@@ -30,7 +33,7 @@ internal static class Program
         }
         else
         {
-            throw new Exception(
+            throw new InvalidOperationException(
                 "TestApplication.Wcf.Client.NetFramework application requires either 0 or exactly 2 arguments.");
         }
 
@@ -55,7 +58,7 @@ internal static class Program
         // Note: Best practice is to re-use your client/channel instances.
         // This code is not meant to illustrate best practices, only the
         // instrumentation.
-        var client = new StatusServiceClient(binding, new EndpointAddress(new Uri(address)));
+        using var client = new StatusServiceClient(binding, new EndpointAddress(new Uri(address)));
         await client.OpenAsync().ConfigureAwait(false);
 
         try

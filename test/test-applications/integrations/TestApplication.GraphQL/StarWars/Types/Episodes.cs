@@ -2,7 +2,7 @@ using GraphQL.Types;
 
 namespace StarWars.Types;
 
-public class Episodes : EnumerationGraphType
+internal sealed class Episodes : EnumerationGraphType
 {
     public Episodes()
     {

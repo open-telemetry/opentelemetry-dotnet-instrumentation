@@ -2,7 +2,7 @@ using GraphQL.Types;
 
 namespace StarWars.Types;
 
-public class HumanInputType : InputObjectGraphType<Human>
+internal sealed class HumanInputType : InputObjectGraphType<Human>
 {
     public HumanInputType()
     {

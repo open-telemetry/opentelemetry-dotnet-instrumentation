@@ -3,7 +3,7 @@ using StarWars.Extensions;
 
 namespace StarWars.Types;
 
-public class HumanType : ObjectGraphType<Human>
+internal sealed class HumanType : ObjectGraphType<Human>
 {
     public HumanType(StarWarsData data)
     {

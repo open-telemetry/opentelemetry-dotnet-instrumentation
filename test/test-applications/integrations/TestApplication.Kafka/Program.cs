@@ -3,6 +3,7 @@
 
 using Confluent.Kafka;
 using Confluent.Kafka.Admin;
+using TestApplication.Shared;
 
 namespace TestApplication.Kafka;
 
@@ -13,6 +14,8 @@ internal static class Program
 
     public static async Task<int> Main(string[] args)
     {
+        ConsoleHelper.WriteSplashScreen(args);
+
         if (args.Length < 4)
         {
             throw new ArgumentException("Required parameters not provided.");
@@ -100,6 +103,7 @@ internal static class Program
         // after topic creation completed.
         await WaitForSuccessfulProduceAsync(producer, topicName, cts.Token).ConfigureAwait(false);
 
+#pragma warning disable CA1849 // Call async methods when in an async method. Needed for bytecode compatibility testing.
         producer.Produce(topicName, CreateTestMessage());
         producer.Produce(
             topicName,
@@ -119,6 +123,7 @@ internal static class Program
 
         // Produce a tombstone.
         producer.Produce(topicName, new Message<string, string> { Key = MessageKey, Value = null! });
+#pragma warning restore CA1849 // Call async methods when in an async method. Needed for bytecode compatibility testing.
         return 0;
     }
 

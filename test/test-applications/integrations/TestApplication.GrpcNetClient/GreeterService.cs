@@ -6,7 +6,9 @@ using Grpc.Core;
 
 namespace TestApplication.GrpcNetClient;
 
-public class GreeterService : Greeter.GreeterBase
+#pragma warning disable CA1812 // Avoid uninstantiated internal classes. This class is instantiated by app builder.
+internal sealed class GreeterService : Greeter.GreeterBase
+#pragma warning restore CA1812 // Avoid uninstantiated internal classes. This class is instantiated by app builder.
 {
     public override async Task<HelloReply> SayHello(HelloRequest request, ServerCallContext context)
     {

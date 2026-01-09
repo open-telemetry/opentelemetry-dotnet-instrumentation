@@ -73,7 +73,7 @@ public static partial class LibraryVersion
 #else
                 "6.0.3",
                 "7.0.0",
-                "8.0.0",
+                "8.0.3",
                 "9.0.0",
 #endif
             ];

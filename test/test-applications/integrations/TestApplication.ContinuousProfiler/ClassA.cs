@@ -1,6 +1,7 @@
 // Copyright The OpenTelemetry Authors
 // SPDX-License-Identifier: Apache-2.0
 
+using System.Globalization;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
@@ -19,7 +20,7 @@ internal static class ClassA
         var items = new List<string>();
         for (var i = 0; i < numberOfItems; i++)
         {
-            items.Add(i.ToString("D10000"));
+            items.Add(i.ToString("D10000", CultureInfo.InvariantCulture));
         }
 
         MethodABytes(
@@ -76,8 +77,8 @@ internal static class ClassA
         float fl,
         double db)
     {
-        int a = 1;
-        int* pointer = &a;
+        var a = 1;
+        var pointer = &a;
         MethodAPointer(pointer);
     }
 
@@ -89,8 +90,8 @@ internal static class ClassA
             new object(),
             new CustomClass(),
             default,
-            Array.Empty<CustomClass>(),
-            Array.Empty<CustomStruct>(),
+            [],
+            [],
             new List<string>());
     }
 
@@ -110,12 +111,15 @@ internal static class ClassA
         static void Action(int s) => InternalClassB<string, int>.DoubleInternalClassB.TripleInternalClassB<int>.MethodB(s, [3], TimeSpan.Zero, 0, ["a"], []);
     }
 
+    [DefaultDllImportSearchPaths(DllImportSearchPath.AssemblyDirectory)]
 #if NET
     [DllImport("TestApplication.ContinuousProfiler.NativeDep")]
 #else
     [DllImport("TestApplication.ContinuousProfiler.NativeDep.dll")]
 #endif
+#pragma warning disable CA5393 // Do not use unsafe DllImportSearchPath value. Needed to execute on macOS or Linux.
     private static extern int OTelAutoCallbackTest(Callback fp, int n);
+#pragma warning restore CA5393 // Do not use unsafe DllImportSearchPath value. Needed to execute on macOS or Linux.
 
     internal static class InternalClassB<T1, T4>
     {
@@ -126,7 +130,7 @@ internal static class ClassA
                 [MethodImpl(MethodImplOptions.NoInlining)]
                 public static void MethodB<T2>(int testArg, T3[] a, T2 b, T4 t, IList<T1> c, IList<string> d)
                 {
-                    OTelAutoCallbackTest(TestCallback, testArg);
+                    _ = OTelAutoCallbackTest(TestCallback, testArg);
                 }
             }
         }

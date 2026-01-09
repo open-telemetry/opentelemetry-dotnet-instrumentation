@@ -3,7 +3,7 @@ using StarWars.Extensions;
 
 namespace StarWars.Types;
 
-public class DroidType : ObjectGraphType<Droid>
+internal sealed class DroidType : ObjectGraphType<Droid>
 {
     public DroidType(StarWarsData data)
     {

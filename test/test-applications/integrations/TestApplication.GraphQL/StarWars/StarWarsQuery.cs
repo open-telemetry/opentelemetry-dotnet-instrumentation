@@ -4,7 +4,7 @@ using StarWars.Types;
 
 namespace StarWars;
 
-public class StarWarsQuery : ObjectGraphType<object>
+internal sealed class StarWarsQuery : ObjectGraphType<object>
 {
     public StarWarsQuery(StarWarsData data)
     {

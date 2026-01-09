@@ -14,7 +14,7 @@ using OpenTelemetry.Proto.Resource.V1;
 
 namespace TestApplication.ContinuousProfiler;
 
-internal class OtlpOverHttpExporter
+internal sealed class OtlpOverHttpExporter : IDisposable
 {
     private const string MediaContentType = "application/x-protobuf";
 
@@ -128,6 +128,11 @@ internal class OtlpOverHttpExporter
         {
             Console.WriteLine(e);
         }
+    }
+
+    public void Dispose()
+    {
+        _httpClient.Dispose();
     }
 
     private static SampleBuilder CreateSampleBuilder(ThreadSample threadSample, ExtendedPprofBuilder extendedPprofBuilder)
@@ -245,11 +250,13 @@ internal class OtlpOverHttpExporter
 
     private static ScopeProfiles CreateScopeProfiles()
     {
-        var scopeProfiles = new ScopeProfiles();
-        scopeProfiles.Scope = new InstrumentationScope
+        var scopeProfiles = new ScopeProfiles
         {
-            Name = "OpenTelemetry.AutoInstrumentation",
-            // TODO consider setting Version here
+            Scope = new InstrumentationScope
+            {
+                Name = "OpenTelemetry.AutoInstrumentation",
+                // TODO consider setting Version here
+            }
         };
 
         // TODO handle schema Url scopeProfiles.SchemaUrl

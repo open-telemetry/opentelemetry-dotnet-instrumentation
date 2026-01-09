@@ -3,7 +3,7 @@ using GraphQL.Types;
 
 namespace StarWars;
 
-public class StarWarsSchema : Schema
+internal sealed class StarWarsSchema : Schema
 {
     public StarWarsSchema(IServiceProvider provider)
         : base(provider)

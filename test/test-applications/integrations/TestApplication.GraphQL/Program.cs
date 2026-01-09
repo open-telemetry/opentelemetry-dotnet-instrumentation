@@ -9,6 +9,7 @@ internal sealed class Program
 {
     public static void Main(string[] args)
     {
+        ConsoleHelper.WriteSplashScreen(args);
         var directory = Directory.GetCurrentDirectory();
 
         var host = new HostBuilder()
@@ -30,7 +31,7 @@ internal sealed class Program
 
         foreach (var kvp in envVars)
         {
-            logger.LogInformation($"{kvp.Key} = {kvp.Value}");
+            logger.LogEnvironmentVariable(kvp.Key, kvp.Value);
         }
 
         host.Run();
