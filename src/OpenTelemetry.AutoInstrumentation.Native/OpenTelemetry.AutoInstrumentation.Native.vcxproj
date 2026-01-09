@@ -174,6 +174,7 @@
     <ClInclude Include="calltarget_tokens.h" />
     <ClInclude Include="class_factory.h" />
     <ClInclude Include="com_ptr.h" />
+    <ClInclude Include="configuration.h" />
     <ClInclude Include="continuous_profiler_clr_helpers.h" />
     <ClInclude Include="continuous_profiler.h" />
     <ClInclude Include="cor_profiler.h" />
@@ -220,6 +221,7 @@
     <ClCompile Include="calltarget_tokens.cpp" />
     <ClCompile Include="class_factory.cpp" />
     <ClCompile Include="clr_helpers.cpp" />
+    <ClCompile Include="configuration.cpp" />
     <ClCompile Include="continuous_profiler_clr_helpers.cpp" />
     <ClCompile Include="continuous_profiler.cpp" />
     <ClCompile Include="cor_profiler_base.cpp" />

@@ -4,4 +4,10 @@
     <PackageReference Include="System.Data.SqlClient" />
     <PackageReference Include="System.ValueTuple" Condition="'$(TargetFramework)' == 'net462'" />
   </ItemGroup>
+
+  <ItemGroup>
+    <None Update="config.yaml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
 </Project>
