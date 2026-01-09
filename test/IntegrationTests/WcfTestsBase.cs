@@ -33,6 +33,7 @@ public abstract class WcfTestsBase : TestHelper, IDisposable
         else
         {
             _serverProcess.Process.Kill();
+            _serverProcess.Process.WaitForExit();
         }
 
         Output.WriteLine("ProcessId: " + _serverProcess.Process.Id);
