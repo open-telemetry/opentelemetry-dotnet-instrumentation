@@ -40,8 +40,8 @@ public class ParserInstrumentationTests
         var traces = config.InstrumentationDevelopment.DotNet.Traces;
         Assert.NotNull(traces);
 
-        // some properties (4) are not directly related to expected traces aliases
-        FileBasedTestHelper.AssertCountOfAliasProperties(traces, expectedTraces.Length + 4);
+        const int countOfNonTracesProperties = 4;
+        FileBasedTestHelper.AssertCountOfAliasProperties(traces, expectedTraces.Length + countOfNonTracesProperties);
 
         foreach (var alias in expectedTraces)
         {
