@@ -6,17 +6,16 @@ using Xunit.Abstractions;
 
 namespace IntegrationTests;
 
-internal class WcfServerTestHelper : TestHelper
+internal sealed class WcfServerTestHelper : WcfServerTestHelperBase
 {
-    private const string ServiceName = "TestApplication.Wcf.Server.NetFramework";
-
     public WcfServerTestHelper(ITestOutputHelper output)
-        : base("Wcf.Server.NetFramework", output)
+        : base("Wcf.Server.NetFramework", output, "TestApplication.Wcf.Server.NetFramework")
     {
-        SetEnvironmentVariable("OTEL_SERVICE_NAME", ServiceName);
     }
 
-    public ProcessHelper RunWcfServer(MockSpansCollector collector)
+    internal override string ServerInstrumentationScopeName { get => "OpenTelemetry.Instrumentation.Wcf"; }
+
+    internal override ProcessHelper RunWcfServer(MockSpansCollector collector)
     {
         var baseBinDirectory = EnvironmentHelper.GetTestApplicationBaseBinDirectory();
         var exeFileName = $"{EnvironmentHelper.FullTestApplicationName}.exe";

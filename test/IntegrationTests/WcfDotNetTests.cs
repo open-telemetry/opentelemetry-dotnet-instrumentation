@@ -14,13 +14,30 @@ public class WcfDotNetTests : WcfTestsBase
     {
     }
 
+    public static TheoryData<string, Func<ITestOutputHelper, WcfServerTestHelperBase>> GetData()
+    {
+        var theoryData = new TheoryData<string, Func<ITestOutputHelper, WcfServerTestHelperBase>>();
+
+        foreach (var version in LibraryVersion.WCFCoreClient)
+        {
+            theoryData.Add(version, output => new WcfServerTestHelper(output));
+
+            foreach (var wcfCoreServerVersion in LibraryVersion.WCFCoreServer)
+            {
+                theoryData.Add(version, output => new WcfCoreServerTestHelper(output, wcfCoreServerVersion));
+            }
+        }
+
+        return theoryData;
+    }
+
     [Trait("Category", "EndToEnd")]
     [Theory]
-    [MemberData(nameof(LibraryVersion.WCFCoreClient), MemberType = typeof(LibraryVersion))]
-    public async Task SubmitTraces(string clientPackageVersion)
+    [MemberData(nameof(GetData))]
+    public async Task SubmitTraces(string clientPackageVersion, Func<ITestOutputHelper, WcfServerTestHelperBase> wcfServerTestHelperFactory)
     {
         EnableBytecodeInstrumentation();
-        await SubmitsTracesInternal(clientPackageVersion);
+        await SubmitsTracesInternal(clientPackageVersion, wcfServerTestHelperFactory(Output));
     }
 }
 

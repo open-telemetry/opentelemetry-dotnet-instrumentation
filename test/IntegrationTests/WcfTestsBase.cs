@@ -40,15 +40,15 @@ public abstract class WcfTestsBase : TestHelper, IDisposable
         Output.WriteResult(_serverProcess);
     }
 
-    protected async Task SubmitsTracesInternal(string clientPackageVersion)
+    protected async Task SubmitsTracesInternal(string clientPackageVersion, WcfServerTestHelperBase wcfServerTestHelperBase)
     {
         Assert.True(EnvironmentTools.IsWindowsAdministrator(), "This test requires Windows Administrator privileges.");
 
         var collector = new MockSpansCollector(Output);
         SetExporter(collector);
 
-        var serverHelper = new WcfServerTestHelper(Output);
-        _serverProcess = serverHelper.RunWcfServer(collector);
+        _serverProcess = wcfServerTestHelperBase.RunWcfServer(collector);
+
         await WaitForServer();
 
         RunTestApplication(new TestSettings
@@ -56,9 +56,9 @@ public abstract class WcfTestsBase : TestHelper, IDisposable
             PackageVersion = clientPackageVersion
         });
 
-        collector.Expect("OpenTelemetry.Instrumentation.Wcf", span => span.Kind == SpanKind.Server, "Server 1");
+        collector.Expect(wcfServerTestHelperBase.ServerInstrumentationScopeName, span => span.Kind == SpanKind.Server, "Server 1");
         collector.Expect("OpenTelemetry.Instrumentation.Wcf", span => span.Kind == SpanKind.Client, "Client 1");
-        collector.Expect("OpenTelemetry.Instrumentation.Wcf", span => span.Kind == SpanKind.Server, "Server 2");
+        collector.Expect(wcfServerTestHelperBase.ServerInstrumentationScopeName, span => span.Kind == SpanKind.Server, "Server 2");
         collector.Expect("OpenTelemetry.Instrumentation.Wcf", span => span.Kind == SpanKind.Client, "Client 2");
 
         collector.Expect($"TestApplication.{_testAppName}", span => span.Kind == SpanKind.Internal, "Custom parent");
