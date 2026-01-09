@@ -3,6 +3,7 @@
 
 #if NET
 
+using System.Globalization;
 using IntegrationTests.Helpers;
 using OpenTelemetry.Proto.Logs.V1;
 using Xunit.Abstractions;
@@ -38,7 +39,7 @@ public class WorkerTests : TestHelper
 
     private static bool ValidateSingleAppLogRecord(IEnumerable<LogRecord> records)
     {
-        return records.Count(lr => Convert.ToString(lr.Body) == "{ \"stringValue\": \"Worker running.\" }") == 1;
+        return records.Count(lr => Convert.ToString(lr.Body, CultureInfo.InvariantCulture) == "{ \"stringValue\": \"Worker running.\" }") == 1;
     }
 }
 

@@ -40,20 +40,20 @@ public class KafkaFixture : IAsyncLifetime
         _containerNetwork = new NetworkBuilder()
             .WithName(_testNetworkName)
             .Build();
-        await _containerNetwork.CreateAsync();
-        _kafkaContainer = await LaunchKafkaContainer(_containerNetwork);
+        await _containerNetwork.CreateAsync().ConfigureAwait(false);
+        _kafkaContainer = await LaunchKafkaContainer(_containerNetwork).ConfigureAwait(false);
     }
 
     public async Task DisposeAsync()
     {
         if (_kafkaContainer != null)
         {
-            await _kafkaContainer.DisposeAsync();
+            await _kafkaContainer.DisposeAsync().ConfigureAwait(false);
         }
 
         if (_containerNetwork != null)
         {
-            await _containerNetwork.DisposeAsync();
+            await _containerNetwork.DisposeAsync().ConfigureAwait(false);
         }
     }
 
@@ -81,7 +81,7 @@ public class KafkaFixture : IAsyncLifetime
             .WithNetwork(containerNetwork)
             .Build();
 
-        await container.StartAsync();
+        await container.StartAsync().ConfigureAwait(false);
 
         return container;
     }

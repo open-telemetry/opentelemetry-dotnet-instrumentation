@@ -30,14 +30,14 @@ public class AzureFixture : IAsyncLifetime
 
     public async Task InitializeAsync()
     {
-        _container = await LaunchAzureContainerAsync(Port);
+        _container = await LaunchAzureContainerAsync(Port).ConfigureAwait(false);
     }
 
     public async Task DisposeAsync()
     {
         if (_container != null)
         {
-            await ShutdownAzureContainerAsync(_container);
+            await ShutdownAzureContainerAsync(_container).ConfigureAwait(false);
         }
     }
 
@@ -50,13 +50,13 @@ public class AzureFixture : IAsyncLifetime
             .WithWaitStrategy(Wait.ForUnixContainer().UntilInternalTcpPortIsAvailable(BlobServicePort));
 
         var container = containersBuilder.Build();
-        await container.StartAsync();
+        await container.StartAsync().ConfigureAwait(false);
 
         return container;
     }
 
     private static async Task ShutdownAzureContainerAsync(IContainer container)
     {
-        await container.DisposeAsync();
+        await container.DisposeAsync().ConfigureAwait(false);
     }
 }

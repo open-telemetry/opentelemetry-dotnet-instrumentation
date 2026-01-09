@@ -6,7 +6,7 @@ using OpenTelemetry.AutoInstrumentation.Configurations;
 
 namespace OpenTelemetry.AutoInstrumentation.Tests.Configurations;
 
-internal class NameValueConfigurationSource : StringConfigurationSource
+internal sealed class NameValueConfigurationSource : StringConfigurationSource
 {
     private readonly NameValueCollection _nameValueCollection;
 

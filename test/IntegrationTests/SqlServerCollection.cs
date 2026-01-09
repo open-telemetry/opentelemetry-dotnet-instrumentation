@@ -44,14 +44,14 @@ public class SqlServerFixture : IAsyncLifetime
             return;
         }
 
-        _container = await LaunchSqlServerContainerAsync();
+        _container = await LaunchSqlServerContainerAsync().ConfigureAwait(false);
     }
 
     public async Task DisposeAsync()
     {
         if (_container != null)
         {
-            await ShutdownSqlServerContainerAsync(_container);
+            await ShutdownSqlServerContainerAsync(_container).ConfigureAwait(false);
         }
     }
 
@@ -65,7 +65,7 @@ public class SqlServerFixture : IAsyncLifetime
 
     private static async Task ShutdownSqlServerContainerAsync(IContainer container)
     {
-        await container.DisposeAsync();
+        await container.DisposeAsync().ConfigureAwait(false);
     }
 
     private async Task<IContainer> LaunchSqlServerContainerAsync()
@@ -80,7 +80,7 @@ public class SqlServerFixture : IAsyncLifetime
             .WithWaitStrategy(Wait.ForUnixContainer().AddCustomWaitStrategy(new UntilAsyncOperationIsSucceeded(DatabaseLoginOperation, 15)));
 
         var container = databaseContainersBuilder.Build();
-        await container.StartAsync();
+        await container.StartAsync().ConfigureAwait(false);
 
         return container;
     }
@@ -92,14 +92,14 @@ public class SqlServerFixture : IAsyncLifetime
             string connectionString = $"Server=127.0.0.1,{Port};User=sa;Password={Password};TrustServerCertificate=True;";
             using (var connection = new SqlConnection(connectionString))
             {
-                connection.Open();
+                await connection.OpenAsync().ConfigureAwait(false);
                 return true;
             }
         }
-        catch
+        catch (Exception)
         {
             // Slow down next connection attempt
-            await Task.Delay(TimeSpan.FromSeconds(2));
+            await Task.Delay(TimeSpan.FromSeconds(2)).ConfigureAwait(false);
 
             return false;
         }

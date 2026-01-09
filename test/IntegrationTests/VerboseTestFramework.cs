@@ -32,7 +32,7 @@ public class VerboseTestFramework : XunitTestFramework
         {
             using (var assemblyRunner = new VerboseTestAssemblyRunner(TestAssembly, testCases, DiagnosticMessageSink, executionMessageSink, executionOptions))
             {
-                await assemblyRunner.RunAsync();
+                await assemblyRunner.RunAsync().ConfigureAwait(false);
             }
         }
     }
@@ -104,7 +104,7 @@ public class VerboseTestFramework : XunitTestFramework
 
             try
             {
-                var result = await base.RunTestCaseAsync(testCase);
+                var result = await base.RunTestCaseAsync(testCase).ConfigureAwait(false);
                 var status = result.Failed > 0 ? "FAIL" : "PASS";
                 _diagnosticMessageSink.OnMessage(new DiagnosticMessage($"--- {status}: {test} ({result.Time:0.00}s)"));
                 return result;

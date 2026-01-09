@@ -42,14 +42,14 @@ public class OracleFixture : IAsyncLifetime
             return;
         }
 
-        _container = await LaunchOracleContainerAsync(Port);
+        _container = await LaunchOracleContainerAsync(Port).ConfigureAwait(false);
     }
 
     public async Task DisposeAsync()
     {
         if (_container != null)
         {
-            await ShutdownOracleContainerAsync(_container);
+            await ShutdownOracleContainerAsync(_container).ConfigureAwait(false);
         }
     }
 
@@ -59,6 +59,11 @@ public class OracleFixture : IAsyncLifetime
         {
             throw new SkipException("Oracle is supported only on AMD64.");
         }
+    }
+
+    private static async Task ShutdownOracleContainerAsync(IContainer container)
+    {
+        await container.DisposeAsync().ConfigureAwait(false);
     }
 
     private async Task<IContainer> LaunchOracleContainerAsync(int port)
@@ -74,13 +79,8 @@ public class OracleFixture : IAsyncLifetime
             .WithWaitStrategy(Wait.ForUnixContainer().UntilCommandIsCompleted("./healthcheck.sh"));
 
         var container = containersBuilder.Build();
-        await container.StartAsync();
+        await container.StartAsync().ConfigureAwait(false);
 
         return container;
-    }
-
-    private async Task ShutdownOracleContainerAsync(IContainer container)
-    {
-        await container.DisposeAsync();
     }
 }

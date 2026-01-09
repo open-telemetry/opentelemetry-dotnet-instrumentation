@@ -20,7 +20,7 @@ public class ApiController : ControllerBase
     [Route("delay-async/{seconds}")]
     public async Task<ActionResult> DelayAsync(int seconds)
     {
-        await Task.Delay(TimeSpan.FromSeconds(seconds));
+        await Task.Delay(TimeSpan.FromSeconds(seconds)).ConfigureAwait(false);
         return Ok(seconds);
     }
 }

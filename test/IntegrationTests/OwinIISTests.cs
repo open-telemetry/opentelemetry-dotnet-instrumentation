@@ -80,9 +80,9 @@ public class OwinIISTests
     {
         var client = new HttpClient();
         client.DefaultRequestHeaders.Add("traceparent", "00-4bf92f3577b34da6a3ce929d0e0e4736-00f067aa0ba902b7-01"); // send a traceparent header to verify that parent span id is propagated
-        var response = await client.GetAsync($"http://localhost:{webPort}/test/");
+        var response = await client.GetAsync(new Uri($"http://localhost:{webPort}/test/")).ConfigureAwait(false);
         Assert.Equal(System.Net.HttpStatusCode.OK, response.StatusCode);
-        var content = await response.Content.ReadAsStringAsync();
+        var content = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
         Output.WriteLine("Response:");
         Output.WriteLine(content);
     }

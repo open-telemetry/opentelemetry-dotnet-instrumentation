@@ -44,12 +44,12 @@ public abstract class WcfTestsBase : TestHelper, IDisposable
     {
         Assert.True(EnvironmentTools.IsWindowsAdministrator(), "This test requires Windows Administrator privileges.");
 
-        var collector = new MockSpansCollector(Output);
+        using var collector = new MockSpansCollector(Output);
         SetExporter(collector);
 
         var serverHelper = new WcfServerTestHelper(Output);
         _serverProcess = serverHelper.RunWcfServer(collector);
-        await WaitForServer();
+        await WaitForServer().ConfigureAwait(false);
 
         RunTestApplication(new TestSettings
         {
@@ -80,14 +80,14 @@ public abstract class WcfTestsBase : TestHelper, IDisposable
         {
             try
             {
-                await tcpClient.ConnectAsync("127.0.0.1", tcpPort);
+                await tcpClient.ConnectAsync("127.0.0.1", tcpPort).ConfigureAwait(false);
                 Output.WriteLine("WCF Server is running.");
                 return;
             }
             catch (Exception)
             {
                 retries++;
-                await Task.Delay(500);
+                await Task.Delay(500).ConfigureAwait(false);
             }
         }
 

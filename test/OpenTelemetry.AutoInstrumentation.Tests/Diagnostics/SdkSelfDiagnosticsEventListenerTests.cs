@@ -32,7 +32,7 @@ public class SdkSelfDiagnosticsEventListenerTests
         OpenTelemetrySdkEventSourceForTests.Log.Critical();
 
         Assert.Equal(2, testSink.Messages.Count);
-        Assert.All(testSink.Messages, message => Assert.Contains("Error", message));
+        Assert.All(testSink.Messages, message => Assert.Contains("Error", message, StringComparison.Ordinal));
     }
 
     [Fact]

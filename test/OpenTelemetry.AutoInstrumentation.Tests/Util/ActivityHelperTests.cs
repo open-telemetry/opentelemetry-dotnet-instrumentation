@@ -22,7 +22,7 @@ public class ActivityHelperTests
     [Fact]
     public void SetException_NotThrow_WhenExceptionIsNull()
     {
-        var activity = new Activity("test-operation");
+        using var activity = new Activity("test-operation");
 
         var action = () =>
         {
@@ -38,7 +38,7 @@ public class ActivityHelperTests
     {
         using var activity = new Activity("test-operation");
 
-        var exceptionMessage = "test-message";
+        const string exceptionMessage = "test-message";
         activity.SetException(new Exception(exceptionMessage));
 
         Assert.Equal(ActivityStatusCode.Error, activity.Status);

@@ -219,7 +219,7 @@ public class AspNetTests
             (AppPoolMode.Classic, Gac.UseLocal) => "testapplication-aspnet-netframework-classic-nogac",
             (AppPoolMode.Integrated, Gac.UseGac) => "testapplication-aspnet-netframework-integrated",
             (AppPoolMode.Integrated, Gac.UseLocal) => "testapplication-aspnet-netframework-integrated-nogac",
-            _ => throw new ArgumentOutOfRangeException()
+            _ => throw new ArgumentOutOfRangeException(nameof(appPoolMode), $"Pair of {appPoolMode} and {useGac} is not supported.")
         };
     }
 
@@ -231,13 +231,13 @@ public class AspNetTests
         client.DefaultRequestHeaders.Add("Custom-Request-Test-Header2", "Test-Value2");
         client.DefaultRequestHeaders.Add("Custom-Request-Test-Header3", "Test-Value3");
 
-        var response = await client.GetAsync($"http://localhost:{webPort}");
-        var content = await response.Content.ReadAsStringAsync();
+        var response = await client.GetAsync(new Uri($"http://localhost:{webPort}")).ConfigureAwait(false);
+        var content = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
         Output.WriteLine("MVC Response:");
         Output.WriteLine(content);
 
-        response = await client.GetAsync($"http://localhost:{webPort}/api/values");
-        content = await response.Content.ReadAsStringAsync();
+        response = await client.GetAsync(new Uri($"http://localhost:{webPort}/api/values")).ConfigureAwait(false);
+        content = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
         Output.WriteLine("WebApi Response:");
         Output.WriteLine(content);
     }

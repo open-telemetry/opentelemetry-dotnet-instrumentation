@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 #if NET //for now we ae disabling this on .NET Framework as canary mechanism makes this flaky
 using System.Diagnostics;
+using System.Globalization;
 using System.Runtime.InteropServices;
 using IntegrationTests.Helpers;
 using Xunit.Abstractions;
@@ -78,7 +79,7 @@ public class SelectiveSamplerTests : TestHelper
 
         var threadSamples = ConsoleProfileExporterHelpers.ExtractSamples(output);
 
-        var groupedByTimestampAscending = threadSamples.GroupBy(sample => sample.TimestampNanoseconds).OrderBy(samples => samples.Key);
+        var groupedByTimestampAscending = threadSamples.GroupBy(sample => sample.TimestampNanoseconds).OrderBy(samples => samples.Key).ToList();
 
         // Based on the test app, samples for all the threads should be collected at least 2 times.
         Assert.True(groupedByTimestampAscending.Count(
@@ -163,7 +164,7 @@ public class SelectiveSamplerTests : TestHelper
         foreach (var (spanId, traceIdHigh, traceIdLow) in threadSampleSpanContexts)
         {
             // Reverse the conversion done in TryParseTraceContext methods in NativeMethods.cs
-            var sampleSpanId = ActivitySpanId.CreateFromString(spanId.ToString("x16").AsSpan());
+            var sampleSpanId = ActivitySpanId.CreateFromString(spanId.ToString("x16", CultureInfo.InvariantCulture).AsSpan());
             var sampleTraceId = ActivityTraceId.CreateFromString($"{traceIdHigh:x16}{traceIdLow:x16}".AsSpan());
 
             var match = collectedSpans.Any(c =>
