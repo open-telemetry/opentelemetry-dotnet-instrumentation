@@ -11,9 +11,7 @@ namespace StarWars;
 ///   "query": "subscription HumanAddedSub{ humanAdded { name } }",
 /// }.
 /// </example>
-#pragma warning disable CA1812 // Avoid uninstantiated internal classes. This class is instantiated by GraphQL.
 internal sealed class StarWarsSubscription : ObjectGraphType<object>
-#pragma warning restore CA1812 // Avoid uninstantiated internal classes. This class is instantiated by GraphQL.
 {
     private readonly StarWarsData _starWarsData;
 

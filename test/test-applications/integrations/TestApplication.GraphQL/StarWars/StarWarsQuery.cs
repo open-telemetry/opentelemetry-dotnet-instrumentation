@@ -4,9 +4,7 @@ using StarWars.Types;
 
 namespace StarWars;
 
-#pragma warning disable CA1812 // Avoid uninstantiated internal classes. This class is instantiated by GraphQL.
 internal sealed class StarWarsQuery : ObjectGraphType<object>
-#pragma warning restore CA1812 // Avoid uninstantiated internal classes. This class is instantiated by GraphQL.
 {
     public StarWarsQuery(StarWarsData data)
     {

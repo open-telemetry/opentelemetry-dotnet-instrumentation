@@ -2,9 +2,7 @@ using GraphQL.Types;
 
 namespace StarWars.Types;
 
-#pragma warning disable CA1812 // Avoid uninstantiated internal classes. This class is instantiated by GraphQL.
 internal sealed class Episodes : EnumerationGraphType
-#pragma warning restore CA1812 // Avoid uninstantiated internal classes. This class is instantiated by GraphQL.
 {
     public Episodes()
     {

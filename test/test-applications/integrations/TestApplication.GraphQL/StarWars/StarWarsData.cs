@@ -3,9 +3,7 @@ using StarWars.Types;
 
 namespace StarWars;
 
-#pragma warning disable CA1812 // Avoid uninstantiated internal classes. This class is instantiated by GraphQL.
 internal sealed class StarWarsData
-#pragma warning restore CA1812 // Avoid uninstantiated internal classes. This class is instantiated by GraphQL.
 {
     private readonly List<StarWarsCharacter> _characters = new();
 
