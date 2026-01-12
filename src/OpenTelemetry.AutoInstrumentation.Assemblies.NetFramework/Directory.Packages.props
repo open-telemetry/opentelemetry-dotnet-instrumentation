@@ -21,6 +21,7 @@
     <PackageVersion Include="Microsoft.Extensions.Primitives" Version="10.0.0" />
     <PackageVersion Include="System.Buffers" Version="4.6.1" />
     <PackageVersion Include="System.Diagnostics.DiagnosticSource" Version="10.0.0" />
+    <PackageVersion Include="System.IO.Compression" Version="4.3.0" />
     <PackageVersion Include="System.IO.Pipelines" Version="10.0.0" />
     <PackageVersion Include="System.Memory" Version="4.6.3" />
     <PackageVersion Include="System.Numerics.Vectors" Version="4.6.1" />
@@ -28,6 +29,7 @@
     <PackageVersion Include="System.Runtime.InteropServices.RuntimeInformation" Version="4.3.0" />
     <PackageVersion Include="System.Text.Encodings.Web" Version="10.0.0" />
     <PackageVersion Include="System.Text.Json" Version="10.0.0" />
+    <PackageVersion Include="System.Threading.Channels" Version="5.0.0" />
     <PackageVersion Include="System.Threading.Tasks.Extensions" Version="4.6.3" />
     <PackageVersion Include="System.ValueTuple" Version="4.6.1" />
   </ItemGroup>
