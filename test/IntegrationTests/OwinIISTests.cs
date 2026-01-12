@@ -47,6 +47,7 @@ public class OwinIISTests
         };
         var webPort = TcpPortProvider.GetOpenPort();
 #pragma warning disable CA2007 // Do not directly await a Task. https://github.com/dotnet/roslyn-analyzers/issues/7185
+        // TODO remove pragma when https://github.com/dotnet/roslyn-analyzers/issues/7185 is fixed
         await using var container = await IISContainerTestHelper.StartContainerAsync("testapplication-owin-iis-netframework", webPort, environmentVariables, Output);
 #pragma warning restore CA2007 // Do not directly await a Task. https://github.com/dotnet/roslyn-analyzers/issues/7185
 
@@ -80,6 +81,7 @@ public class OwinIISTests
         };
         var webPort = TcpPortProvider.GetOpenPort();
 #pragma warning disable CA2007 // Do not directly await a Task. https://github.com/dotnet/roslyn-analyzers/issues/7185
+        // TODO remove pragma when https://github.com/dotnet/roslyn-analyzers/issues/7185 is fixed
         await using var container = await IISContainerTestHelper.StartContainerAsync("testapplication-owin-iis-netframework", webPort, environmentVariables, Output);
 #pragma warning restore CA2007 // Do not directly await a Task. https://github.com/dotnet/roslyn-analyzers/issues/7185
 

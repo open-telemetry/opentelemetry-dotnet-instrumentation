@@ -10,6 +10,7 @@ using Xunit.Sdk;
 namespace IntegrationTests.Helpers;
 
 #pragma warning disable CA1812 // Mark members as static. There is some issue in dotnet format.
+// TODO remove pragma when dotnet format issue is fixed
 public class VerboseTestFramework : XunitTestFramework
 {
     public VerboseTestFramework(IMessageSink messageSink)

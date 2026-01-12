@@ -55,6 +55,7 @@ public class WcfIISTests : TestHelper
         _environmentVariables["OTEL_EXPORTER_OTLP_ENDPOINT"] = collectorUrl;
 
 #pragma warning disable CA2007 // Do not directly await a Task. https://github.com/dotnet/roslyn-analyzers/issues/7185
+        // TODO remove pragma when https://github.com/dotnet/roslyn-analyzers/issues/7185 is fixed
         await using var container = await StartContainerAsync(netTcpPort, httpPort);
 #pragma warning restore CA2007 // Do not directly await a Task. https://github.com/dotnet/roslyn-analyzers/issues/7185
 

@@ -6,6 +6,7 @@ using Xunit;
 namespace OpenTelemetry.AutoInstrumentation.Bootstrapping.Tests;
 
 #pragma warning disable CA1812 // Mark members as static. There is some issue in dotnet format.
+// TODO remove pragma when dotnet format issue is fixed
 internal sealed class FactRequiringEnvVarAttribute : FactAttribute
 #pragma warning restore CA1812 // Mark members as static. There is some issue in dotnet format.
 {
