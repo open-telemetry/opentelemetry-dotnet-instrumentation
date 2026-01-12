@@ -235,7 +235,9 @@ internal sealed class MockMetricsCollector : IDisposable
         _output.WriteLine($"[{name}]: {msg}");
     }
 
+#pragma warning disable CA1812 // Mark members as static. There is some issue in dotnet format.
     internal sealed class Collected
+#pragma warning restore CA1812 // Mark members as static. There is some issue in dotnet format.
     {
         public Collected(string instrumentationScopeName, Metric metric)
         {
