@@ -9,9 +9,9 @@ using static IntegrationTests.Helpers.DockerFileHelper;
 namespace IntegrationTests;
 
 [CollectionDefinition(Name)]
-public class PostgresCollection : ICollectionFixture<PostgresFixture>
+public class PostgresCollectionFixture : ICollectionFixture<PostgresFixture>
 {
-    public const string Name = nameof(PostgresCollection);
+    public const string Name = nameof(PostgresCollectionFixture);
 }
 
 public class PostgresFixture : IAsyncLifetime
@@ -30,18 +30,18 @@ public class PostgresFixture : IAsyncLifetime
 
     public async Task InitializeAsync()
     {
-        _container = await LaunchPostgresContainerAsync(Port);
+        _container = await LaunchPostgresContainerAsync(Port).ConfigureAwait(false);
     }
 
     public async Task DisposeAsync()
     {
         if (_container != null)
         {
-            await ShutdownPostgresContainerAsync(_container);
+            await ShutdownPostgresContainerAsync(_container).ConfigureAwait(false);
         }
     }
 
-    private async Task<IContainer> LaunchPostgresContainerAsync(int port)
+    private static async Task<IContainer> LaunchPostgresContainerAsync(int port)
     {
         var containersBuilder = new ContainerBuilder()
             .WithImage(PostgresImage)
@@ -51,13 +51,13 @@ public class PostgresFixture : IAsyncLifetime
             .WithWaitStrategy(Wait.ForUnixContainer().UntilInternalTcpPortIsAvailable(PostgresPort));
 
         var container = containersBuilder.Build();
-        await container.StartAsync();
+        await container.StartAsync().ConfigureAwait(false);
 
         return container;
     }
 
-    private async Task ShutdownPostgresContainerAsync(IContainer container)
+    private static async Task ShutdownPostgresContainerAsync(IContainer container)
     {
-        await container.DisposeAsync();
+        await container.DisposeAsync().ConfigureAwait(false);
     }
 }

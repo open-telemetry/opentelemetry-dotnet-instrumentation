@@ -8,7 +8,7 @@ using Xunit.Abstractions;
 
 namespace IntegrationTests;
 
-[Collection(RabbitMqCollection.Name)]
+[Collection(RabbitMqCollectionFixture.Name)]
 public class RabbitMqTests : TestHelper
 {
     // https://github.com/open-telemetry/semantic-conventions/blob/d515887174e20a3546e89df5cb5a306231e1424b/docs/messaging/rabbitmq.md

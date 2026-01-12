@@ -37,8 +37,9 @@ public class WcfDotNetTests : WcfTestsBase
     [MemberData(nameof(GetData))]
     public async Task SubmitTraces(string clientPackageVersion, Func<ITestOutputHelper, WcfServerTestHelperBase> wcfServerTestHelperFactory)
     {
+        Assert.NotNull(wcfServerTestHelperFactory);
         EnableBytecodeInstrumentation();
-        await SubmitsTracesInternal(clientPackageVersion, wcfServerTestHelperFactory(Output));
+        await SubmitsTracesInternal(clientPackageVersion, wcfServerTestHelperFactory(Output)).ConfigureAwait(true);
     }
 }
 

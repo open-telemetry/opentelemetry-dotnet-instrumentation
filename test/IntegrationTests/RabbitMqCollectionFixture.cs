@@ -9,9 +9,9 @@ using static IntegrationTests.Helpers.DockerFileHelper;
 namespace IntegrationTests;
 
 [CollectionDefinition(Name)]
-public class RabbitMqCollection : ICollectionFixture<RabbitMqFixture>
+public class RabbitMqCollectionFixture : ICollectionFixture<RabbitMqFixture>
 {
-    public const string Name = nameof(RabbitMqCollection);
+    public const string Name = nameof(RabbitMqCollectionFixture);
 }
 
 public class RabbitMqFixture : IAsyncLifetime
@@ -40,14 +40,14 @@ public class RabbitMqFixture : IAsyncLifetime
             return;
         }
 
-        _container = await LaunchRabbitMqContainerAsync(Port);
+        _container = await LaunchRabbitMqContainerAsync(Port).ConfigureAwait(false);
     }
 
     public async Task DisposeAsync()
     {
         if (_container != null)
         {
-            await ShutdownRabbitMqContainerAsync(_container);
+            await ShutdownRabbitMqContainerAsync(_container).ConfigureAwait(false);
         }
     }
 
@@ -68,13 +68,13 @@ public class RabbitMqFixture : IAsyncLifetime
             .WithWaitStrategy(Wait.ForUnixContainer().UntilInternalTcpPortIsAvailable(RabbitMqPort));
 
         var container = containersBuilder.Build();
-        await container.StartAsync();
+        await container.StartAsync().ConfigureAwait(false);
 
         return container;
     }
 
     private static async Task ShutdownRabbitMqContainerAsync(IContainer container)
     {
-        await container.DisposeAsync();
+        await container.DisposeAsync().ConfigureAwait(false);
     }
 }

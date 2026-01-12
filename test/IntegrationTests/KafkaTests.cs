@@ -8,7 +8,7 @@ using Xunit.Abstractions;
 
 namespace IntegrationTests;
 
-[Collection(KafkaCollection.Name)]
+[Collection(KafkaCollectionFixture.Name)]
 public class KafkaTests : TestHelper
 {
     private const string MessagingPublishOperationAttributeValue = "publish";
@@ -58,7 +58,7 @@ public class KafkaTests : TestHelper
         collector.Expect(KafkaInstrumentationScopeName, span => span.Kind == Span.Types.SpanKind.Producer && ValidateProduceExceptionSpan(span, topicName), "Failed Produce attempt without delivery handler set.");
         collector.Expect(KafkaInstrumentationScopeName, span => span.Kind == Span.Types.SpanKind.Producer && ValidateResultProcessingProduceExceptionSpan(span, topicName), "Failed ProduceAsync attempt.");
 
-        if (packageVersion == string.Empty || Version.Parse(packageVersion) != new Version(1, 4, 0))
+        if (packageVersion.Length == 0 || Version.Parse(packageVersion) != new Version(1, 4, 0))
         {
             // Failed consume attempt.
             collector.Expect(
@@ -153,8 +153,7 @@ public class KafkaTests : TestHelper
 
     private static bool ValidateProduceExceptionSpan(Span span, string topicName)
     {
-        return ValidateBasicProduceExceptionSpan(span, topicName) &&
-               span.Attributes.Count(kv => kv.Key == KafkaMessageOffsetAttributeName) == 0;
+        return ValidateBasicProduceExceptionSpan(span, topicName) && span.Attributes.All(kv => kv.Key != KafkaMessageOffsetAttributeName);
     }
 
     private static bool ValidateResultProcessingProduceExceptionSpan(Span span, string topicName)

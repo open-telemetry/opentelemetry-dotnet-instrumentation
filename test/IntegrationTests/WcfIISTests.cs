@@ -54,7 +54,10 @@ public class WcfIISTests : TestHelper
         var collectorUrl = $"http://{DockerNetworkHelper.IntegrationTestsGateway}:{collector.Port}";
         _environmentVariables["OTEL_EXPORTER_OTLP_ENDPOINT"] = collectorUrl;
 
+#pragma warning disable CA2007 // Do not directly await a Task. https://github.com/dotnet/roslyn-analyzers/issues/7185
+        // TODO remove pragma when https://github.com/dotnet/roslyn-analyzers/issues/7185 is fixed
         await using var container = await StartContainerAsync(netTcpPort, httpPort);
+#pragma warning restore CA2007 // Do not directly await a Task. https://github.com/dotnet/roslyn-analyzers/issues/7185
 
         RunTestApplication(new TestSettings
         {
@@ -66,7 +69,7 @@ public class WcfIISTests : TestHelper
 
     private static bool IndicatesHealthCheckRequest(Span span)
     {
-        return span.Attributes.Single(attr => attr.Key == "rpc.method").Value.StringValue == string.Empty;
+        return span.Attributes.Single(attr => attr.Key == "rpc.method").Value.StringValue.Length == 0;
     }
 
     private static bool ValidateExpectedSpanHierarchy(ICollection<MockSpansCollector.Collected> collectedSpans)
@@ -85,7 +88,7 @@ public class WcfIISTests : TestHelper
     {
         const string imageName = "testapplication-wcf-server-iis-netframework";
 
-        var networkName = await DockerNetworkHelper.SetupIntegrationTestsNetworkAsync();
+        var networkName = await DockerNetworkHelper.SetupIntegrationTestsNetworkAsync().ConfigureAwait(false);
 
         var logPath = EnvironmentHelper.IsRunningOnCI()
             ? Path.Combine(Environment.GetEnvironmentVariable("GITHUB_WORKSPACE"), "test-artifacts", "profiler-logs")
@@ -114,13 +117,13 @@ public class WcfIISTests : TestHelper
         using var cts = new CancellationTokenSource(TimeSpan.FromMinutes(5));
         try
         {
-            await container.StartAsync(cts.Token);
+            await container.StartAsync(cts.Token).ConfigureAwait(false);
             Output.WriteLine("Container was started successfully.");
         }
         catch
         {
             Output.WriteLine("Container failed to start in a required time frame.");
-            await container.DisposeAsync();
+            await container.DisposeAsync().ConfigureAwait(false);
             throw;
         }
 

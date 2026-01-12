@@ -23,7 +23,7 @@ internal sealed class WcfServerTestHelper : WcfServerTestHelperBase
 
         if (!File.Exists(testApplicationPath))
         {
-            throw new Exception($"Unable to find executing assembly at {testApplicationPath}");
+            throw new InvalidOperationException($"Unable to find executing assembly at {testApplicationPath}");
         }
 
         SetExporter(collector);

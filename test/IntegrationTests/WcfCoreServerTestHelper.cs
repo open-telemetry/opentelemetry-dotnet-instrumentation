@@ -1,6 +1,8 @@
 // Copyright The OpenTelemetry Authors
 // SPDX-License-Identifier: Apache-2.0
 
+#if NET
+
 using IntegrationTests.Helpers;
 using Xunit.Abstractions;
 
@@ -24,7 +26,7 @@ internal sealed class WcfCoreServerTestHelper : WcfServerTestHelperBase
 
         if (!File.Exists(testApplicationPath))
         {
-            throw new Exception($"Unable to find executing assembly at {testApplicationPath}");
+            throw new InvalidOperationException($"Unable to find executing assembly at {testApplicationPath}");
         }
 
         SetExporter(collector);
@@ -32,3 +34,4 @@ internal sealed class WcfCoreServerTestHelper : WcfServerTestHelperBase
         return new ProcessHelper(process);
     }
 }
+#endif

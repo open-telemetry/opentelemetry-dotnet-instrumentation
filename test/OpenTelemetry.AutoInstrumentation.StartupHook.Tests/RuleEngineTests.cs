@@ -6,7 +6,7 @@ using Xunit;
 
 namespace OpenTelemetry.AutoInstrumentation.StartupHook.Tests;
 
-public class RuleEngineTests : IDisposable
+public sealed class RuleEngineTests : IDisposable
 {
     public void Dispose()
     {
@@ -92,12 +92,12 @@ public class RuleEngineTests : IDisposable
         Assert.True(testRule.IsEvaluated);
     }
 
-    private void SetShouldTrackEnvironmentVariable(bool? value)
+    private static void SetShouldTrackEnvironmentVariable(bool? value)
     {
         Environment.SetEnvironmentVariable("OTEL_DOTNET_AUTO_RULE_ENGINE_ENABLED", value?.ToString());
     }
 
-    private class TestRule : Rule
+    private sealed class TestRule : Rule
     {
         internal bool IsEvaluated { get; private set; }
 

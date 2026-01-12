@@ -158,6 +158,10 @@ public class ContinuousProfilerTests : TestHelper
 
         var stackTrace = string.Join("\n", frames);
 
+#if NET
+        return stackTrace.Contains(expectedStackTrace, StringComparison.Ordinal);
+#else
         return stackTrace.Contains(expectedStackTrace);
+#endif
     }
 }
