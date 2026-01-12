@@ -285,7 +285,7 @@ public class PluginManagerTests
         }
 
         public ResourceBuilder ConfigureResource(ResourceBuilder builder)
-#pragma warning restore CA1822 // Mark members as static It is needed for plugin purposes.
+#pragma warning restore CA1822 // Mark members as static. It is needed for plugin purposes.
         {
             var attributes = new List<KeyValuePair<string, object>>
             {
