@@ -12,7 +12,7 @@ public class AspNetTests
 {
     private const string ServiceName = "TestApplication.AspNet.NetFramework";
 
-    private static readonly HttpClient HttpClient = new();
+    private static readonly HttpClient Client = new();
 
     public AspNetTests(ITestOutputHelper output)
     {
@@ -235,16 +235,16 @@ public class AspNetTests
 
     private async Task CallTestApplicationEndpoint(int webPort)
     {
-        HttpClient.DefaultRequestHeaders.Add("Custom-Request-Test-Header1", "Test-Value1");
-        HttpClient.DefaultRequestHeaders.Add("Custom-Request-Test-Header2", "Test-Value2");
-        HttpClient.DefaultRequestHeaders.Add("Custom-Request-Test-Header3", "Test-Value3");
+        Client.DefaultRequestHeaders.Add("Custom-Request-Test-Header1", "Test-Value1");
+        Client.DefaultRequestHeaders.Add("Custom-Request-Test-Header2", "Test-Value2");
+        Client.DefaultRequestHeaders.Add("Custom-Request-Test-Header3", "Test-Value3");
 
-        var response = await HttpClient.GetAsync(new Uri($"http://localhost:{webPort}")).ConfigureAwait(false);
+        var response = await Client.GetAsync(new Uri($"http://localhost:{webPort}")).ConfigureAwait(false);
         var content = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
         Output.WriteLine("MVC Response:");
         Output.WriteLine(content);
 
-        response = await HttpClient.GetAsync(new Uri($"http://localhost:{webPort}/api/values")).ConfigureAwait(false);
+        response = await Client.GetAsync(new Uri($"http://localhost:{webPort}/api/values")).ConfigureAwait(false);
         content = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
         Output.WriteLine("WebApi Response:");
         Output.WriteLine(content);

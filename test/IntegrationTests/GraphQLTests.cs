@@ -14,7 +14,7 @@ namespace IntegrationTests;
 
 public class GraphQLTests : TestHelper
 {
-    private static readonly HttpClient HttpClient = new();
+    private static readonly HttpClient Client = new();
 
     public GraphQLTests(ITestOutputHelper output)
     : base("GraphQL", output)
@@ -156,7 +156,7 @@ public class GraphQLTests : TestHelper
     {
         foreach (var requestInfo in requests)
         {
-            await SubmitRequestAsync(HttpClient, aspNetCorePort, requestInfo).ConfigureAwait(false);
+            await SubmitRequestAsync(Client, aspNetCorePort, requestInfo).ConfigureAwait(false);
         }
     }
 
