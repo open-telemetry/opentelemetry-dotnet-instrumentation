@@ -12,7 +12,15 @@ public class AspNetTests
 {
     private const string ServiceName = "TestApplication.AspNet.NetFramework";
 
-    private static readonly HttpClient Client = new();
+    private static readonly HttpClient Client = new()
+    {
+        DefaultRequestHeaders =
+        {
+            { "Custom-Request-Test-Header1", "Test-Value1" },
+            { "Custom-Request-Test-Header2", "Test-Value2" },
+            { "Custom-Request-Test-Header3", "Test-Value3" }
+        }
+    };
 
     public AspNetTests(ITestOutputHelper output)
     {
@@ -235,10 +243,6 @@ public class AspNetTests
 
     private async Task CallTestApplicationEndpoint(int webPort)
     {
-        Client.DefaultRequestHeaders.Add("Custom-Request-Test-Header1", "Test-Value1");
-        Client.DefaultRequestHeaders.Add("Custom-Request-Test-Header2", "Test-Value2");
-        Client.DefaultRequestHeaders.Add("Custom-Request-Test-Header3", "Test-Value3");
-
         var response = await Client.GetAsync(new Uri($"http://localhost:{webPort}")).ConfigureAwait(false);
         var content = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
         Output.WriteLine("MVC Response:");
