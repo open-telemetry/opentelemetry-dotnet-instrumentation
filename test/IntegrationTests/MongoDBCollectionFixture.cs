@@ -71,7 +71,7 @@ public class MongoDBFixture : IAsyncLifetime
             ? Wait.ForWindowsContainer()
             : Wait.ForUnixContainer();
 #else
-        return await Task.Run(Wait.ForUnixContainer);
+        return await Task.Run(Wait.ForUnixContainer).ConfigureAwait(false);
 #endif
     }
 }
