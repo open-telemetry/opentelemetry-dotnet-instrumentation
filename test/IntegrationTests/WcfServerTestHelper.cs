@@ -1,12 +1,17 @@
 // Copyright The OpenTelemetry Authors
 // SPDX-License-Identifier: Apache-2.0
 
+#if _WINDOWS
+
 using IntegrationTests.Helpers;
 using Xunit.Abstractions;
 
 namespace IntegrationTests;
 
+#pragma warning disable CA1812 // Mark members as static. There is some issue in dotnet format.
+// TODO remove pragma when dotnet format issue is fixed
 internal sealed class WcfServerTestHelper : WcfServerTestHelperBase
+#pragma warning restore CA1812 // Mark members as static. There is some issue in dotnet format.
 {
     public WcfServerTestHelper(ITestOutputHelper output)
         : base("Wcf.Server.NetFramework", output, "TestApplication.Wcf.Server.NetFramework")
@@ -31,3 +36,4 @@ internal sealed class WcfServerTestHelper : WcfServerTestHelperBase
         return new ProcessHelper(process);
     }
 }
+#endif

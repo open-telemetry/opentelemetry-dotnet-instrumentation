@@ -8,7 +8,10 @@ using Xunit.Abstractions;
 
 namespace IntegrationTests;
 
+#pragma warning disable CA1812 // Mark members as static. There is some issue in dotnet format.
+// TODO remove pragma when dotnet format issue is fixed
 internal sealed class WcfCoreServerTestHelper : WcfServerTestHelperBase
+#pragma warning restore CA1812 // Mark members as static. There is some issue in dotnet format.
 {
     private readonly string _packageVersion;
 

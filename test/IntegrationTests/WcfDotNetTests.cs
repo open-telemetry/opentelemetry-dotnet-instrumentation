@@ -13,7 +13,7 @@ public class WcfDotNetTests : WcfTestsBase
     {
     }
 
-    public static TheoryData<string, Func<ITestOutputHelper, WcfServerTestHelperBase>> GetData()
+    public static TheoryData<string, Func<ITestOutputHelper, WcfServerTestHelperBase>> TestData()
     {
         var theoryData = new TheoryData<string, Func<ITestOutputHelper, WcfServerTestHelperBase>>();
 
@@ -34,7 +34,7 @@ public class WcfDotNetTests : WcfTestsBase
 
     [Trait("Category", "EndToEnd")]
     [Theory]
-    [MemberData(nameof(GetData))]
+    [MemberData(nameof(TestData))]
     public async Task SubmitTraces(string clientPackageVersion, Func<ITestOutputHelper, WcfServerTestHelperBase> wcfServerTestHelperFactory)
     {
         Assert.NotNull(wcfServerTestHelperFactory);
