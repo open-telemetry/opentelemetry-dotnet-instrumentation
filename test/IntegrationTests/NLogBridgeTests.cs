@@ -136,7 +136,7 @@ public class NLogBridgeTests : TestHelper
         AssertStandardOutputExpectations(standardOutput, expectWrapperTypeMessage: false);
 
         // wait for fixed amount of time for logs to be collected before asserting
-        await Task.Delay(TimeSpan.FromSeconds(5));
+        await Task.Delay(TimeSpan.FromSeconds(5)).ConfigureAwait(true);
 
         collector.AssertCollected();
     }

@@ -295,7 +295,7 @@ public class SmokeTests : TestHelper
                 Assert.Contains("TYPE ", content, StringComparison.Ordinal); // should export any metric
             };
 
-            await AssertRepeatingExecutionDoesNotThrow(assert, TimeSpan.FromSeconds(1), TimeSpan.FromMinutes(1));
+            await AssertRepeatingExecutionDoesNotThrow(assert, TimeSpan.FromSeconds(1), TimeSpan.FromMinutes(1)).ConfigureAwait(true);
             var exception = await Record.ExceptionAsync(() => assert());
             Assert.Null(exception);
         }
@@ -346,7 +346,7 @@ public class SmokeTests : TestHelper
                 await Task.Delay(TimeSpan.FromSeconds(1)).ConfigureAwait(false);
             }
 
-            await AssertRepeatingExecutionDoesNotThrow(Assert, TimeSpan.FromSeconds(1), TimeSpan.FromMinutes(1));
+            await AssertRepeatingExecutionDoesNotThrow(Assert, TimeSpan.FromSeconds(1), TimeSpan.FromMinutes(1)).ConfigureAwait(true);
         }
         finally
         {

@@ -44,7 +44,7 @@ public class OwinIISTests
         await using var container = await IISContainerTestHelper.StartContainerAsync("testapplication-owin-iis-netframework", webPort, environmentVariables, Output);
 #pragma warning restore CA2007 // Do not directly await a Task. https://github.com/dotnet/roslyn-analyzers/issues/7185
 
-        await CallWebEndpoint(webPort);
+        await CallWebEndpoint(webPort).ConfigureAwait(true);
 
         collector.AssertExpectations();
     }
@@ -77,7 +77,7 @@ public class OwinIISTests
         await using var container = await IISContainerTestHelper.StartContainerAsync("testapplication-owin-iis-netframework", webPort, environmentVariables, Output);
 #pragma warning restore CA2007 // Do not directly await a Task. https://github.com/dotnet/roslyn-analyzers/issues/7185
 
-        await CallWebEndpoint(webPort);
+        await CallWebEndpoint(webPort).ConfigureAwait(true);
 
         collector.AssertExpectations();
     }

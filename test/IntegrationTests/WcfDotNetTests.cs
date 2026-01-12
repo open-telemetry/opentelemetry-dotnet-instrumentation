@@ -20,7 +20,7 @@ public class WcfDotNetTests : WcfTestsBase
     public async Task SubmitTraces(string clientPackageVersion)
     {
         EnableBytecodeInstrumentation();
-        await SubmitsTracesInternal(clientPackageVersion);
+        await SubmitsTracesInternal(clientPackageVersion).ConfigureAwait(true);
     }
 }
 

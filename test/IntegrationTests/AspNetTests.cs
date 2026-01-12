@@ -77,7 +77,7 @@ public class AspNetTests
 #pragma warning disable CA2007 // Do not directly await a Task. https://github.com/dotnet/roslyn-analyzers/issues/7185
         await using var container = await IISContainerTestHelper.StartContainerAsync(imageName, webPort, environmentVariables, Output);
 #pragma warning restore CA2007 // Do not directly await a Task. https://github.com/dotnet/roslyn-analyzers/issues/7185
-        await CallTestApplicationEndpoint(webPort);
+        await CallTestApplicationEndpoint(webPort).ConfigureAwait(true);
 
         collector.AssertExpectations();
     }
@@ -151,7 +151,7 @@ public class AspNetTests
 #pragma warning disable CA2007 // Do not directly await a Task. https://github.com/dotnet/roslyn-analyzers/issues/7185
         await using var container = await IISContainerTestHelper.StartContainerAsync(imageName, webPort, environmentVariables, Output);
 #pragma warning restore CA2007 // Do not directly await a Task. https://github.com/dotnet/roslyn-analyzers/issues/7185
-        await CallTestApplicationEndpoint(webPort);
+        await CallTestApplicationEndpoint(webPort).ConfigureAwait(true);
 
         collector.AssertExpectations();
     }
@@ -185,7 +185,7 @@ public class AspNetTests
 #pragma warning disable CA2007 // Do not directly await a Task. https://github.com/dotnet/roslyn-analyzers/issues/7185
         await using var container = await IISContainerTestHelper.StartContainerAsync("testapplication-aspnet-netframework-integrated", webPort, environmentVariables, Output);
 #pragma warning restore CA2007 // Do not directly await a Task. https://github.com/dotnet/roslyn-analyzers/issues/7185
-        await CallTestApplicationEndpoint(webPort);
+        await CallTestApplicationEndpoint(webPort).ConfigureAwait(true);
 
         collector.ResourceExpector.AssertExpectations();
     }
@@ -216,7 +216,7 @@ public class AspNetTests
 #pragma warning disable CA2007 // Do not directly await a Task. https://github.com/dotnet/roslyn-analyzers/issues/7185
         await using var container = await IISContainerTestHelper.StartContainerAsync("testapplication-aspnet-netframework-integrated", webPort, environmentVariables, Output);
 #pragma warning restore CA2007 // Do not directly await a Task. https://github.com/dotnet/roslyn-analyzers/issues/7185
-        await CallTestApplicationEndpoint(webPort);
+        await CallTestApplicationEndpoint(webPort).ConfigureAwait(true);
 
         collector.AssertExpectations();
     }

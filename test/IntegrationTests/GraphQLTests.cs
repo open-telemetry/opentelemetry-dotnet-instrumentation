@@ -78,8 +78,8 @@ public class GraphQLTests : TestHelper
         using var helper = new ProcessHelper(process);
         try
         {
-            await HealthzHelper.TestAsync($"http://localhost:{aspNetCorePort}/alive-check", Output);
-            await SubmitRequestsAsync(aspNetCorePort, requests);
+            await HealthzHelper.TestAsync($"http://localhost:{aspNetCorePort}/alive-check", Output).ConfigureAwait(true);
+            await SubmitRequestsAsync(aspNetCorePort, requests).ConfigureAwait(true);
 
             collector.AssertExpectations();
         }
@@ -88,7 +88,7 @@ public class GraphQLTests : TestHelper
             if (process != null && !process.HasExited)
             {
                 process.Kill();
-                await process.WaitForExitAsync();
+                await process.WaitForExitAsync().ConfigureAwait(true);
                 Output.WriteLine("Exit Code: " + process.ExitCode);
             }
 
