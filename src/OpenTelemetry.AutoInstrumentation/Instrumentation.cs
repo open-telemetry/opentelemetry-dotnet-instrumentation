@@ -513,6 +513,8 @@ internal static class Instrumentation
                 case TracerInstrumentation.SqlClient:
                     DelayedInitialization.Traces.AddSqlClient(lazyInstrumentationLoader, pluginManager);
                     break;
+                case TracerInstrumentation.StackExchangeRedis:
+                    break;
                 case TracerInstrumentation.Quartz:
                     DelayedInitialization.Traces.AddQuartz(lazyInstrumentationLoader, pluginManager);
                     break;
@@ -526,8 +528,6 @@ internal static class Instrumentation
                     break;
                 case TracerInstrumentation.EntityFrameworkCore:
                     DelayedInitialization.Traces.AddEntityFrameworkCore(LazyInstrumentationLoader, pluginManager, tracerSettings);
-                    break;
-                case TracerInstrumentation.StackExchangeRedis:
                     break;
                 case TracerInstrumentation.MassTransit:
                     break;
