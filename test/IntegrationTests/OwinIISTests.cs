@@ -11,7 +11,13 @@ namespace IntegrationTests;
 
 public class OwinIISTests
 {
-    private static readonly HttpClient Client = new();
+    private static readonly HttpClient Client = new()
+    {
+        DefaultRequestHeaders =
+        {
+            { "traceparent", "00-4bf92f3577b34da6a3ce929d0e0e4736-00f067aa0ba902b7-01" } // send a traceparent header to verify that parent span id is propagated
+        }
+    };
 
     public OwinIISTests(ITestOutputHelper output)
     {
@@ -84,7 +90,6 @@ public class OwinIISTests
 
     private async Task CallWebEndpoint(int webPort)
     {
-        Client.DefaultRequestHeaders.Add("traceparent", "00-4bf92f3577b34da6a3ce929d0e0e4736-00f067aa0ba902b7-01"); // send a traceparent header to verify that parent span id is propagated
         var response = await Client.GetAsync(new Uri($"http://localhost:{webPort}/test/")).ConfigureAwait(false);
         Assert.Equal(System.Net.HttpStatusCode.OK, response.StatusCode);
         var content = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
