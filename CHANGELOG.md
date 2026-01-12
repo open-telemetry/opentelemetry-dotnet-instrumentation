@@ -16,6 +16,7 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
   for zero-config auto-injection.
 - Support for file-based configuration of the IL rewrite for
   SqlClient instrumentation setting
+- Support for `temporality_preference` in file-based configuration for Console exporter.
 
 ### Changed
 
