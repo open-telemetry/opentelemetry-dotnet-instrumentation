@@ -9,9 +9,9 @@ using static IntegrationTests.Helpers.DockerFileHelper;
 namespace IntegrationTests;
 
 [CollectionDefinition(Name)]
-public class OracleCollection : ICollectionFixture<OracleFixture>
+public class OracleCollectionFixture : ICollectionFixture<OracleFixture>
 {
-    public const string Name = nameof(OracleCollection);
+    public const string Name = nameof(OracleCollectionFixture);
 }
 
 public class OracleFixture : IAsyncLifetime

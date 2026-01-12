@@ -9,9 +9,9 @@ using static IntegrationTests.Helpers.DockerFileHelper;
 namespace IntegrationTests;
 
 [CollectionDefinition(Name)]
-public class AzureCollection : ICollectionFixture<AzureFixture>
+public class AzureCollectionFixture : ICollectionFixture<AzureFixture>
 {
-    public const string Name = nameof(AzureCollection);
+    public const string Name = nameof(AzureCollectionFixture);
 }
 
 public class AzureFixture : IAsyncLifetime

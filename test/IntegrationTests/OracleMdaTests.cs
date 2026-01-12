@@ -6,7 +6,7 @@ using Xunit.Abstractions;
 
 namespace IntegrationTests;
 
-[Collection(OracleCollection.Name)]
+[Collection(OracleCollectionFixture.Name)]
 public class OracleMdaTests : TestHelper
 {
     private readonly OracleFixture _oracle;

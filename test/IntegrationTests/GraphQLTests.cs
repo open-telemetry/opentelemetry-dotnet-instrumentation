@@ -14,6 +14,8 @@ namespace IntegrationTests;
 
 public class GraphQLTests : TestHelper
 {
+    private static readonly HttpClient HttpClient = new();
+
     public GraphQLTests(ITestOutputHelper output)
     : base("GraphQL", output)
     {
@@ -86,7 +88,7 @@ public class GraphQLTests : TestHelper
             if (process != null && !process.HasExited)
             {
                 process.Kill();
-                process.WaitForExit();
+                await process.WaitForExitAsync();
                 Output.WriteLine("Exit Code: " + process.ExitCode);
             }
 
@@ -152,10 +154,9 @@ public class GraphQLTests : TestHelper
 
     private async Task SubmitRequestsAsync(int aspNetCorePort, IEnumerable<RequestInfo> requests)
     {
-        var client = new HttpClient();
         foreach (var requestInfo in requests)
         {
-            await SubmitRequestAsync(client, aspNetCorePort, requestInfo).ConfigureAwait(false);
+            await SubmitRequestAsync(HttpClient, aspNetCorePort, requestInfo).ConfigureAwait(false);
         }
     }
 
@@ -208,7 +209,7 @@ public class GraphQLTests : TestHelper
         }
     }
 
-    private class RequestInfo
+    private sealed class RequestInfo
     {
         public string? Url { get; set; }
 

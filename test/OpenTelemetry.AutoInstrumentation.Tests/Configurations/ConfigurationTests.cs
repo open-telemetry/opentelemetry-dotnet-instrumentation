@@ -29,7 +29,7 @@ public class ConfigurationTests
     [Fact]
     public void ParseEnabledEnumList_Default_Enabled()
     {
-        var source = new Configuration(false, new NameValueConfigurationSource(false, new NameValueCollection()));
+        var source = new Configuration(false, new NameValueConfigurationSource(false, []));
 
         var list = source.ParseEnabledEnumList<TestEnum>(
             enabledByDefault: true,
@@ -41,7 +41,7 @@ public class ConfigurationTests
     [Fact]
     public void ParseEnabledEnumList_Default_Disabled()
     {
-        var source = new Configuration(false, new NameValueConfigurationSource(false, new NameValueCollection()));
+        var source = new Configuration(false, new NameValueConfigurationSource(false, []));
 
         var list = source.ParseEnabledEnumList<TestEnum>(
             enabledByDefault: false,
@@ -163,7 +163,7 @@ public class ConfigurationTests
     [Fact]
     public void ParseList_ParseNullAsEmpty()
     {
-        var source = new Configuration(false, new NameValueConfigurationSource(false, new NameValueCollection()));
+        var source = new Configuration(false, new NameValueConfigurationSource(false, []));
 
         var list = source.ParseList("TEST_LIST", ',');
 

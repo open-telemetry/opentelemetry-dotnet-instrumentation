@@ -10,9 +10,9 @@ using static IntegrationTests.Helpers.DockerFileHelper;
 namespace IntegrationTests;
 
 [CollectionDefinition(Name)]
-public class MongoDBCollection : ICollectionFixture<MongoDBFixture>
+public class MongoDBCollectionFixture : ICollectionFixture<MongoDBFixture>
 {
-    public const string Name = nameof(MongoDBCollection);
+    public const string Name = nameof(MongoDBCollectionFixture);
 }
 
 public class MongoDBFixture : IAsyncLifetime

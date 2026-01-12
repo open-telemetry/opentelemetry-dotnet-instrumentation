@@ -7,7 +7,7 @@ using Xunit.Abstractions;
 
 namespace IntegrationTests;
 
-[Collection(SqlServerCollection.Name)]
+[Collection(SqlServerCollectionFixture.Name)]
 public class SqlClientSystemTests : TestHelper
 {
     private readonly SqlServerFixture _sqlServerFixture;

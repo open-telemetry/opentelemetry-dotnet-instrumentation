@@ -11,6 +11,8 @@ namespace IntegrationTests;
 
 public class OwinIISTests
 {
+    private static readonly HttpClient HttpClient = new();
+
     public OwinIISTests(ITestOutputHelper output)
     {
         Output = output;
@@ -38,7 +40,9 @@ public class OwinIISTests
             ["OTEL_EXPORTER_OTLP_ENDPOINT"] = $"http://{DockerNetworkHelper.IntegrationTestsGateway}:{collector.Port}"
         };
         var webPort = TcpPortProvider.GetOpenPort();
+#pragma warning disable CA2007 // Do not directly await a Task. https://github.com/dotnet/roslyn-analyzers/issues/7185
         await using var container = await IISContainerTestHelper.StartContainerAsync("testapplication-owin-iis-netframework", webPort, environmentVariables, Output);
+#pragma warning restore CA2007 // Do not directly await a Task. https://github.com/dotnet/roslyn-analyzers/issues/7185
 
         await CallWebEndpoint(webPort);
 
@@ -69,7 +73,9 @@ public class OwinIISTests
             ["OTEL_DOTNET_AUTO_METRICS_ASPNET_INSTRUMENTATION_ENABLED"] = "true" // Helps to reduce noise by enabling only AspNet metrics.
         };
         var webPort = TcpPortProvider.GetOpenPort();
+#pragma warning disable CA2007 // Do not directly await a Task. https://github.com/dotnet/roslyn-analyzers/issues/7185
         await using var container = await IISContainerTestHelper.StartContainerAsync("testapplication-owin-iis-netframework", webPort, environmentVariables, Output);
+#pragma warning restore CA2007 // Do not directly await a Task. https://github.com/dotnet/roslyn-analyzers/issues/7185
 
         await CallWebEndpoint(webPort);
 
@@ -78,9 +84,8 @@ public class OwinIISTests
 
     private async Task CallWebEndpoint(int webPort)
     {
-        var client = new HttpClient();
-        client.DefaultRequestHeaders.Add("traceparent", "00-4bf92f3577b34da6a3ce929d0e0e4736-00f067aa0ba902b7-01"); // send a traceparent header to verify that parent span id is propagated
-        var response = await client.GetAsync(new Uri($"http://localhost:{webPort}/test/")).ConfigureAwait(false);
+        HttpClient.DefaultRequestHeaders.Add("traceparent", "00-4bf92f3577b34da6a3ce929d0e0e4736-00f067aa0ba902b7-01"); // send a traceparent header to verify that parent span id is propagated
+        var response = await HttpClient.GetAsync(new Uri($"http://localhost:{webPort}/test/")).ConfigureAwait(false);
         Assert.Equal(System.Net.HttpStatusCode.OK, response.StatusCode);
         var content = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
         Output.WriteLine("Response:");

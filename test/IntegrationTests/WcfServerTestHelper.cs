@@ -6,7 +6,7 @@ using Xunit.Abstractions;
 
 namespace IntegrationTests;
 
-internal class WcfServerTestHelper : TestHelper
+internal sealed class WcfServerTestHelper : TestHelper
 {
     private const string ServiceName = "TestApplication.Wcf.Server.NetFramework";
 
@@ -24,7 +24,7 @@ internal class WcfServerTestHelper : TestHelper
 
         if (!File.Exists(testApplicationPath))
         {
-            throw new Exception($"Unable to find executing assembly at {testApplicationPath}");
+            throw new InvalidOperationException($"Unable to find executing assembly at {testApplicationPath}");
         }
 
         SetExporter(collector);

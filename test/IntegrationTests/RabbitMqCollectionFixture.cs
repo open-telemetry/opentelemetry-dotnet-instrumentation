@@ -9,9 +9,9 @@ using static IntegrationTests.Helpers.DockerFileHelper;
 namespace IntegrationTests;
 
 [CollectionDefinition(Name)]
-public class RabbitMqCollection : ICollectionFixture<RabbitMqFixture>
+public class RabbitMqCollectionFixture : ICollectionFixture<RabbitMqFixture>
 {
-    public const string Name = nameof(RabbitMqCollection);
+    public const string Name = nameof(RabbitMqCollectionFixture);
 }
 
 public class RabbitMqFixture : IAsyncLifetime

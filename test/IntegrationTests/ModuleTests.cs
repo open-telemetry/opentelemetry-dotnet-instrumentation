@@ -88,7 +88,11 @@ public class ModuleTests : TestHelper
                 Assert.Fail("Could not find modules report file.");
             }
 
+#if NET
+            var json = await File.ReadAllTextAsync(tempPath).ConfigureAwait(false);
+#else
             var json = File.ReadAllText(tempPath);
+#endif
             var modules = JsonConvert.DeserializeObject<string[]>(json);
 
             await Verifier.Verify(modules)
