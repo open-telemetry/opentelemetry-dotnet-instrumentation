@@ -40,7 +40,7 @@ public class LazyInstrumentationLoaderTests
         assemblyBuilder.DefineDynamicModule(assemblyName.Name!);
     }
 
-    private class DummyInitializer : InstrumentationInitializer, IDisposable
+    private sealed class DummyInitializer : InstrumentationInitializer, IDisposable
     {
         public const string DummyAssemblyName = "Dummy.Assembly";
 

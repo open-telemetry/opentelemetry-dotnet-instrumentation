@@ -133,7 +133,7 @@ public sealed class OtelLoggingTests : IDisposable
 
             var content = File.ReadAllText(file.FullName);
 
-            Assert.Contains(logLine, content);
+            Assert.Contains(logLine, content, StringComparison.Ordinal);
         }
         finally
         {
@@ -170,7 +170,7 @@ public sealed class OtelLoggingTests : IDisposable
             ms.Position = 0; // reset reading position
             var content = reader.ReadToEnd();
 
-            Assert.Contains(logLine, content);
+            Assert.Contains(logLine, content, StringComparison.Ordinal);
         }
         finally
         {

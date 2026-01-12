@@ -48,10 +48,17 @@ public class SdkSelfDiagnosticsEventListenerTests
         OpenTelemetrySdkEventSourceForTests.Log.Error();
 
         Assert.Equal(4, testSink.Messages.Count);
+#if NET
+        Assert.Contains(testSink.Messages, msg => msg.Contains("Error", StringComparison.Ordinal));
+        Assert.Contains(testSink.Messages, msg => msg.Contains("Warning", StringComparison.Ordinal));
+        Assert.Contains(testSink.Messages, msg => msg.Contains("Information", StringComparison.Ordinal));
+        Assert.Contains(testSink.Messages, msg => msg.Contains("Debug", StringComparison.Ordinal));
+#else
         Assert.Contains(testSink.Messages, msg => msg.Contains("Error"));
         Assert.Contains(testSink.Messages, msg => msg.Contains("Warning"));
         Assert.Contains(testSink.Messages, msg => msg.Contains("Information"));
         Assert.Contains(testSink.Messages, msg => msg.Contains("Debug"));
+#endif
     }
 
     [EventSource(Name = "OpenTelemetry-Instrumentation-AspNet-Telemetry-For-Tests")]
@@ -77,7 +84,7 @@ public class SdkSelfDiagnosticsEventListenerTests
     }
 
     [EventSource(Name = "OpenTelemetry-Sdk-For-Tests")]
-    internal class OpenTelemetrySdkEventSourceForTests : EventSource
+    internal sealed class OpenTelemetrySdkEventSourceForTests : EventSource
     {
         public static readonly OpenTelemetrySdkEventSourceForTests Log = new();
 
