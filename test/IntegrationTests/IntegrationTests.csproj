@@ -2,7 +2,9 @@
 
   <PropertyGroup Condition=" '$(OS)' == 'Windows_NT' ">
     <DefineConstants>$(DefineConstants);_WINDOWS</DefineConstants>
+  </PropertyGroup>
 
+  <PropertyGroup>
     <!-- CA1515: Consider making public types internal. Needed mostly for Fixture classes. -->
     <NoWarn>$(NoWarn);CA1515</NoWarn>
   </PropertyGroup>
