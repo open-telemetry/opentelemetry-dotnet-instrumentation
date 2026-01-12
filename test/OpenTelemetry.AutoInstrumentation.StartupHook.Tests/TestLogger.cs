@@ -185,7 +185,7 @@ internal sealed class TestLogger : IOtelLogger
     {
     }
 
-    internal class LogRecord
+    internal sealed class LogRecord
     {
         public LogRecord(LogLevel logLevel, string message, Exception? exception = null)
         {
