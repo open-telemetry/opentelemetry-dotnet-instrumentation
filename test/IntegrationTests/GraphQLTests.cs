@@ -3,6 +3,7 @@
 
 #if NET
 
+using System.Globalization;
 using System.Net;
 using System.Text;
 using IntegrationTests.Helpers;
@@ -114,7 +115,7 @@ public class GraphQLTests : TestHelper
 
     private static string GetTraceIdHex(byte id)
     {
-        return id.ToString("x32");
+        return id.ToString("x32", CultureInfo.InvariantCulture);
     }
 
     private void Expect(
@@ -154,7 +155,7 @@ public class GraphQLTests : TestHelper
         var client = new HttpClient();
         foreach (var requestInfo in requests)
         {
-            await SubmitRequestAsync(client, aspNetCorePort, requestInfo);
+            await SubmitRequestAsync(client, aspNetCorePort, requestInfo).ConfigureAwait(false);
         }
     }
 
@@ -173,7 +174,7 @@ public class GraphQLTests : TestHelper
                 using var requestMessage = new HttpRequestMessage(HttpMethod.Get, url);
                 requestMessage.Headers.Add("traceparent", w3c);
 
-                response = await client.SendAsync(requestMessage);
+                response = await client.SendAsync(requestMessage).ConfigureAwait(false);
             }
             else if (method == "POST")
             {
@@ -186,7 +187,7 @@ public class GraphQLTests : TestHelper
                 requestMessage.Content = new StringContent(requestInfo.RequestBody, Encoding.UTF8, "application/json");
                 requestMessage.Headers.Add("traceparent", w3c);
 
-                response = await client.SendAsync(requestMessage);
+                response = await client.SendAsync(requestMessage).ConfigureAwait(false);
             }
             else
             {
@@ -196,7 +197,7 @@ public class GraphQLTests : TestHelper
 
             if (printResponseText)
             {
-                var content = await response.Content.ReadAsStringAsync();
+                var content = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
 
                 Output.WriteLine($"[http] {response.StatusCode} {content}");
             }

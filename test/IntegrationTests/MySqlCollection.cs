@@ -30,14 +30,14 @@ public class MySqlFixture : IAsyncLifetime
 
     public async Task InitializeAsync()
     {
-        _container = await LaunchMySqlContainerAsync(Port);
+        _container = await LaunchMySqlContainerAsync(Port).ConfigureAwait(false);
     }
 
     public async Task DisposeAsync()
     {
         if (_container != null)
         {
-            await ShutdownMySqlContainerAsync(_container);
+            await ShutdownMySqlContainerAsync(_container).ConfigureAwait(false);
         }
     }
 
@@ -51,13 +51,13 @@ public class MySqlFixture : IAsyncLifetime
             .WithWaitStrategy(Wait.ForUnixContainer().UntilInternalTcpPortIsAvailable(MySqlPort));
 
         var container = containersBuilder.Build();
-        await container.StartAsync();
+        await container.StartAsync().ConfigureAwait(false);
 
         return container;
     }
 
     private static async Task ShutdownMySqlContainerAsync(IContainer container)
     {
-        await container.DisposeAsync();
+        await container.DisposeAsync().ConfigureAwait(false);
     }
 }

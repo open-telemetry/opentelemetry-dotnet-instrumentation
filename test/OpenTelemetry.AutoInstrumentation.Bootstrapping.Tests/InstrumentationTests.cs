@@ -13,7 +13,7 @@ namespace OpenTelemetry.AutoInstrumentation.Bootstrapping.Tests;
 /// Take notice that each test should be executed as a separate process. Because of that, the tests require
 /// BOOSTRAPPING_TESTS environmental variable to be set, to mitigate the risk of running all of the tests at once.
 /// </summary>
-public class InstrumentationTests
+public sealed class InstrumentationTests : IDisposable
 {
     private readonly ActivitySource _otelActivitySource = new("OpenTelemetry.AutoInstrumentation.*");
     private readonly ActivitySource _customActivitySource = new("Custom");
@@ -72,6 +72,12 @@ public class InstrumentationTests
 
         Assert.Null(otelActivity);
         Assert.NotNull(customActivity);
+    }
+
+    public void Dispose()
+    {
+        _otelActivitySource.Dispose();
+        _customActivitySource.Dispose();
     }
 
     public sealed class FactRequiringEnvVarAttribute : FactAttribute

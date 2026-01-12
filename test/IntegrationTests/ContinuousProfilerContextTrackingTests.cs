@@ -30,7 +30,7 @@ public class ContinuousProfilerContextTrackingTests : TestHelper
         collector.AssertCollected();
     }
 
-    private bool AssertAllProfiles(ICollection<ExportProfilesServiceRequest> profilesServiceRequests)
+    private static bool AssertAllProfiles(ICollection<ExportProfilesServiceRequest> profilesServiceRequests)
     {
         var totalSamplesWithTraceContextCount = 0;
         var managedThreadsWithTraceContext = new HashSet<string>();
@@ -65,7 +65,7 @@ public class ContinuousProfilerContextTrackingTests : TestHelper
         return true;
     }
 
-    private string GetThreadName(OpenTelemetry.Proto.Profiles.V1Development.Profile profile, OpenTelemetry.Proto.Profiles.V1Development.Sample sample)
+    private static string GetThreadName(OpenTelemetry.Proto.Profiles.V1Development.Profile profile, OpenTelemetry.Proto.Profiles.V1Development.Sample sample)
     {
         foreach (var attrIndex in sample.AttributeIndices)
         {

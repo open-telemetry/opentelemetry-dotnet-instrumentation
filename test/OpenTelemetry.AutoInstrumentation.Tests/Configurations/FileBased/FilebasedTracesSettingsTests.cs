@@ -539,7 +539,7 @@ public class FilebasedTracesSettingsTests
 
     private static SamplingParameters CreateSamplingParameters(ActivityContext parentContext)
     {
-        return new SamplingParameters(parentContext, ActivityTraceId.CreateRandom(), "span", ActivityKind.Internal, default(TagList), new ActivityLink[] { });
+        return new SamplingParameters(parentContext, ActivityTraceId.CreateRandom(), "span", ActivityKind.Internal, default(TagList), []);
     }
 
     public class SkipConfigurationTestCase

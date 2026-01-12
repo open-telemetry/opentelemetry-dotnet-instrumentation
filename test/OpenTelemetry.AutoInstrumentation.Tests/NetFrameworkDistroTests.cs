@@ -102,13 +102,13 @@ public class NetFrameworkDistroTests
             foreach (var folder in Directory.EnumerateDirectories(packageFolder, "net4*", SearchOption.AllDirectories))
             {
                 var tfm = Path.GetFileName(folder);
-                if (tfm.Contains("."))
+                if (tfm.Contains('.', StringComparison.Ordinal))
                 {
                     // .NET 40.x
                     continue;
                 }
 
-                if (knownOldPrefix.Any(prefix => tfm.StartsWith(prefix)))
+                if (knownOldPrefix.Any(prefix => tfm.StartsWith(prefix, StringComparison.Ordinal)))
                 {
                     continue;
                 }

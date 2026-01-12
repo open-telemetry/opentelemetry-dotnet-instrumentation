@@ -164,17 +164,17 @@ public class PluginManagerTests
 
     public class MockPlugin
     {
-        public bool IsInitializingCalled { get; private set; } = false;
+        public bool IsInitializingCalled { get; private set; }
 
-        public bool IsTracerProviderInitializedCalled { get; private set; } = false;
+        public bool IsTracerProviderInitializedCalled { get; private set; }
 
-        public bool IsMeterProviderInitializedCalled { get; private set; } = false;
+        public bool IsMeterProviderInitializedCalled { get; private set; }
 
         public void Initializing()
         {
             if (IsInitializingCalled)
             {
-                throw new InvalidOperationException("Allready called");
+                throw new InvalidOperationException("Already called");
             }
 
             IsInitializingCalled = true;
@@ -184,7 +184,7 @@ public class PluginManagerTests
         {
             if (IsTracerProviderInitializedCalled)
             {
-                throw new InvalidOperationException("Allready called");
+                throw new InvalidOperationException("Already called");
             }
 
             IsTracerProviderInitializedCalled = true;
@@ -194,7 +194,7 @@ public class PluginManagerTests
         {
             if (IsMeterProviderInitializedCalled)
             {
-                throw new InvalidOperationException("Allready called");
+                throw new InvalidOperationException("Already called");
             }
 
             IsMeterProviderInitializedCalled = true;

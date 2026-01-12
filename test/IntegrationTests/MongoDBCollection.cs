@@ -31,20 +31,20 @@ public class MongoDBFixture : IAsyncLifetime
 
     public async Task InitializeAsync()
     {
-        _container = await LaunchMongoContainerAsync(Port);
+        _container = await LaunchMongoContainerAsync(Port).ConfigureAwait(false);
     }
 
     public async Task DisposeAsync()
     {
         if (_container != null)
         {
-            await ShutdownMongoContainerAsync(_container);
+            await ShutdownMongoContainerAsync(_container).ConfigureAwait(false);
         }
     }
 
-    private async Task<IContainer> LaunchMongoContainerAsync(int port)
+    private static async Task<IContainer> LaunchMongoContainerAsync(int port)
     {
-        var waitForOs = await GetWaitForOSTypeAsync();
+        var waitForOs = await GetWaitForOSTypeAsync().ConfigureAwait(false);
         var mongoContainersBuilder = new ContainerBuilder()
             .WithImage(MongoDBImage)
             .WithName($"mongo-db-{port}")
@@ -52,20 +52,20 @@ public class MongoDBFixture : IAsyncLifetime
             .WithWaitStrategy(waitForOs.UntilInternalTcpPortIsAvailable(MongoDBPort));
 
         var container = mongoContainersBuilder.Build();
-        await container.StartAsync();
+        await container.StartAsync().ConfigureAwait(false);
 
         return container;
     }
 
-    private async Task ShutdownMongoContainerAsync(IContainer container)
+    private static async Task ShutdownMongoContainerAsync(IContainer container)
     {
-        await container.DisposeAsync();
+        await container.DisposeAsync().ConfigureAwait(false);
     }
 
-    private async Task<IWaitForContainerOS> GetWaitForOSTypeAsync()
+    private static async Task<IWaitForContainerOS> GetWaitForOSTypeAsync()
     {
 #if _WINDOWS
-        var isWindowsEngine = await DockerSystemHelper.GetIsWindowsEngineEnabled();
+        var isWindowsEngine = await DockerSystemHelper.GetIsWindowsEngineEnabled().ConfigureAwait(false);
 
         return isWindowsEngine
             ? Wait.ForWindowsContainer()

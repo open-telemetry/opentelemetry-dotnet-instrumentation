@@ -19,8 +19,8 @@ public class DefaultNamingConventionTests
 
     public class DefaultNamingConvention
     {
-        public bool UnderScore { get; set; } = false;
+        public bool UnderScore { get; set; }
 
-        public bool UnderScoreDevelopment { get; set; } = false;
+        public bool UnderScoreDevelopment { get; set; }
     }
 }
