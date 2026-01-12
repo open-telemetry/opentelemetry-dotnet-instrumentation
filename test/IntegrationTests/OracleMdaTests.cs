@@ -21,7 +21,7 @@ public class OracleMdaTests : TestHelper
         _oracle = oracle;
     }
 
-    public static TheoryData<string, bool> GetData()
+    public static TheoryData<string, bool> TestData()
     {
         var theoryData = new TheoryData<string, bool>();
 
@@ -41,7 +41,7 @@ public class OracleMdaTests : TestHelper
     [SkippableTheory]
     [Trait("Category", "EndToEnd")]
     [Trait("Containers", "Linux")]
-    [MemberData(nameof(GetData))]
+    [MemberData(nameof(TestData))]
     public void SubmitTraces(string packageVersion, bool dbStatementForText)
     {
         // Skip the test if fixture does not support current platform

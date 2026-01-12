@@ -18,7 +18,8 @@ public class SqlClientSystemTests : TestHelper
         _sqlServerFixture = sqlServerFixture;
     }
 
-    public static TheoryData<string, bool, bool> GetDataForIlRewrite()
+#if NETFRAMEWORK
+    public static TheoryData<string, bool, bool> TestDataForIlRewrite()
     {
         var theoryData = new TheoryData<string, bool, bool>();
 
@@ -32,6 +33,7 @@ public class SqlClientSystemTests : TestHelper
 
         return theoryData;
     }
+#endif
 
     [SkippableTheory]
     [Trait("Category", "EndToEnd")]
@@ -60,7 +62,7 @@ public class SqlClientSystemTests : TestHelper
     [SkippableTheory]
     [Trait("Category", "EndToEnd")]
     [Trait("Containers", "Linux")]
-    [MemberData(nameof(GetDataForIlRewrite))]
+    [MemberData(nameof(TestDataForIlRewrite))]
     public void SqlClientIlRewrite(string packageVersion, bool enableIlRewrite, bool isFileBased)
     {
         // Skip the test if fixture does not support current platform

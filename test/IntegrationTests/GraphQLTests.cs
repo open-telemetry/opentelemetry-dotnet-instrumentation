@@ -21,7 +21,7 @@ public class GraphQLTests : TestHelper
     {
     }
 
-    public static TheoryData<string, bool> GetData()
+    public static TheoryData<string, bool> TestData()
     {
         var theoryData = new TheoryData<string, bool>();
 
@@ -36,7 +36,7 @@ public class GraphQLTests : TestHelper
 
     [Theory]
     [Trait("Category", "EndToEnd")]
-    [MemberData(nameof(GetData))]
+    [MemberData(nameof(TestData))]
     public async Task SubmitsTraces(string packageVersion, bool setDocument)
     {
         var requests = new List<RequestInfo>();
