@@ -79,17 +79,4 @@ public sealed class InstrumentationTests : IDisposable
         _otelActivitySource.Dispose();
         _customActivitySource.Dispose();
     }
-
-    public sealed class FactRequiringEnvVarAttribute : FactAttribute
-    {
-        private const string EnvVar = "BOOSTRAPPING_TESTS";
-
-        public FactRequiringEnvVarAttribute()
-        {
-            if (string.IsNullOrEmpty(Environment.GetEnvironmentVariable(EnvVar)))
-            {
-                Skip = $"Ignore as {EnvVar} is not set";
-            }
-        }
-    }
 }

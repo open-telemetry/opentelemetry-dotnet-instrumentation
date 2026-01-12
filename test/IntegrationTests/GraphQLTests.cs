@@ -14,12 +14,14 @@ namespace IntegrationTests;
 
 public class GraphQLTests : TestHelper
 {
+    private static readonly HttpClient Client = new();
+
     public GraphQLTests(ITestOutputHelper output)
     : base("GraphQL", output)
     {
     }
 
-    public static TheoryData<string, bool> GetData()
+    public static TheoryData<string, bool> TestData()
     {
         var theoryData = new TheoryData<string, bool>();
 
@@ -34,7 +36,7 @@ public class GraphQLTests : TestHelper
 
     [Theory]
     [Trait("Category", "EndToEnd")]
-    [MemberData(nameof(GetData))]
+    [MemberData(nameof(TestData))]
     public async Task SubmitsTraces(string packageVersion, bool setDocument)
     {
         var requests = new List<RequestInfo>();
@@ -76,8 +78,8 @@ public class GraphQLTests : TestHelper
         using var helper = new ProcessHelper(process);
         try
         {
-            await HealthzHelper.TestAsync($"http://localhost:{aspNetCorePort}/alive-check", Output);
-            await SubmitRequestsAsync(aspNetCorePort, requests);
+            await HealthzHelper.TestAsync($"http://localhost:{aspNetCorePort}/alive-check", Output).ConfigureAwait(true);
+            await SubmitRequestsAsync(aspNetCorePort, requests).ConfigureAwait(true);
 
             collector.AssertExpectations();
         }
@@ -86,7 +88,7 @@ public class GraphQLTests : TestHelper
             if (process != null && !process.HasExited)
             {
                 process.Kill();
-                process.WaitForExit();
+                await process.WaitForExitAsync().ConfigureAwait(true);
                 Output.WriteLine("Exit Code: " + process.ExitCode);
             }
 
@@ -152,10 +154,9 @@ public class GraphQLTests : TestHelper
 
     private async Task SubmitRequestsAsync(int aspNetCorePort, IEnumerable<RequestInfo> requests)
     {
-        var client = new HttpClient();
         foreach (var requestInfo in requests)
         {
-            await SubmitRequestAsync(client, aspNetCorePort, requestInfo).ConfigureAwait(false);
+            await SubmitRequestAsync(Client, aspNetCorePort, requestInfo).ConfigureAwait(false);
         }
     }
 
@@ -208,7 +209,7 @@ public class GraphQLTests : TestHelper
         }
     }
 
-    private class RequestInfo
+    private sealed class RequestInfo
     {
         public string? Url { get; set; }
 

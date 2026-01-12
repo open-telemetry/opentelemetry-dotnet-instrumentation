@@ -9,9 +9,9 @@ using static IntegrationTests.Helpers.DockerFileHelper;
 namespace IntegrationTests;
 
 [CollectionDefinition(Name)]
-public class PostgresCollection : ICollectionFixture<PostgresFixture>
+public class PostgresCollectionFixture : ICollectionFixture<PostgresFixture>
 {
-    public const string Name = nameof(PostgresCollection);
+    public const string Name = nameof(PostgresCollectionFixture);
 }
 
 public class PostgresFixture : IAsyncLifetime

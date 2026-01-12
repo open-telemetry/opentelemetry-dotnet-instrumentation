@@ -97,7 +97,7 @@ public sealed class RuleEngineTests : IDisposable
         Environment.SetEnvironmentVariable("OTEL_DOTNET_AUTO_RULE_ENGINE_ENABLED", value?.ToString());
     }
 
-    private class TestRule : Rule
+    private sealed class TestRule : Rule
     {
         internal bool IsEvaluated { get; private set; }
 

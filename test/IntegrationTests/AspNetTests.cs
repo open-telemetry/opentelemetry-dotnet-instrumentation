@@ -12,6 +12,16 @@ public class AspNetTests
 {
     private const string ServiceName = "TestApplication.AspNet.NetFramework";
 
+    private static readonly HttpClient Client = new()
+    {
+        DefaultRequestHeaders =
+        {
+            { "Custom-Request-Test-Header1", "Test-Value1" },
+            { "Custom-Request-Test-Header2", "Test-Value2" },
+            { "Custom-Request-Test-Header3", "Test-Value3" }
+        }
+    };
+
     public AspNetTests(ITestOutputHelper output)
     {
         Output = output;
@@ -72,8 +82,11 @@ public class AspNetTests
         };
         var webPort = TcpPortProvider.GetOpenPort();
         var imageName = GetTestImageName(appPoolMode, useGac);
+#pragma warning disable CA2007 // Do not directly await a Task. https://github.com/dotnet/roslyn-analyzers/issues/7185
+        // TODO remove pragma when https://github.com/dotnet/roslyn-analyzers/issues/7185 is fixed
         await using var container = await IISContainerTestHelper.StartContainerAsync(imageName, webPort, environmentVariables, Output);
-        await CallTestApplicationEndpoint(webPort);
+#pragma warning restore CA2007 // Do not directly await a Task. https://github.com/dotnet/roslyn-analyzers/issues/7185
+        await CallTestApplicationEndpoint(webPort).ConfigureAwait(true);
 
         collector.AssertExpectations();
     }
@@ -144,8 +157,11 @@ public class AspNetTests
         };
         var webPort = TcpPortProvider.GetOpenPort();
         var imageName = GetTestImageName(appPoolMode, useGac);
+#pragma warning disable CA2007 // Do not directly await a Task. https://github.com/dotnet/roslyn-analyzers/issues/7185
+        // TODO remove pragma when https://github.com/dotnet/roslyn-analyzers/issues/7185 is fixed
         await using var container = await IISContainerTestHelper.StartContainerAsync(imageName, webPort, environmentVariables, Output);
-        await CallTestApplicationEndpoint(webPort);
+#pragma warning restore CA2007 // Do not directly await a Task. https://github.com/dotnet/roslyn-analyzers/issues/7185
+        await CallTestApplicationEndpoint(webPort).ConfigureAwait(true);
 
         collector.AssertExpectations();
     }
@@ -176,8 +192,11 @@ public class AspNetTests
         };
 
         var webPort = TcpPortProvider.GetOpenPort();
+#pragma warning disable CA2007 // Do not directly await a Task. https://github.com/dotnet/roslyn-analyzers/issues/7185
+        // TODO remove pragma when https://github.com/dotnet/roslyn-analyzers/issues/7185 is fixed
         await using var container = await IISContainerTestHelper.StartContainerAsync("testapplication-aspnet-netframework-integrated", webPort, environmentVariables, Output);
-        await CallTestApplicationEndpoint(webPort);
+#pragma warning restore CA2007 // Do not directly await a Task. https://github.com/dotnet/roslyn-analyzers/issues/7185
+        await CallTestApplicationEndpoint(webPort).ConfigureAwait(true);
 
         collector.ResourceExpector.AssertExpectations();
     }
@@ -205,8 +224,11 @@ public class AspNetTests
             ["OTEL_DOTNET_AUTO_METRICS_ASPNET_INSTRUMENTATION_ENABLED"] = "true" // Helps to reduce noise by enabling only AspNet metrics.
         };
         var webPort = TcpPortProvider.GetOpenPort();
+#pragma warning disable CA2007 // Do not directly await a Task. https://github.com/dotnet/roslyn-analyzers/issues/7185
+        // TODO remove pragma when https://github.com/dotnet/roslyn-analyzers/issues/7185 is fixed
         await using var container = await IISContainerTestHelper.StartContainerAsync("testapplication-aspnet-netframework-integrated", webPort, environmentVariables, Output);
-        await CallTestApplicationEndpoint(webPort);
+#pragma warning restore CA2007 // Do not directly await a Task. https://github.com/dotnet/roslyn-analyzers/issues/7185
+        await CallTestApplicationEndpoint(webPort).ConfigureAwait(true);
 
         collector.AssertExpectations();
     }
@@ -225,18 +247,12 @@ public class AspNetTests
 
     private async Task CallTestApplicationEndpoint(int webPort)
     {
-        var client = new HttpClient();
-
-        client.DefaultRequestHeaders.Add("Custom-Request-Test-Header1", "Test-Value1");
-        client.DefaultRequestHeaders.Add("Custom-Request-Test-Header2", "Test-Value2");
-        client.DefaultRequestHeaders.Add("Custom-Request-Test-Header3", "Test-Value3");
-
-        var response = await client.GetAsync(new Uri($"http://localhost:{webPort}")).ConfigureAwait(false);
+        var response = await Client.GetAsync(new Uri($"http://localhost:{webPort}")).ConfigureAwait(false);
         var content = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
         Output.WriteLine("MVC Response:");
         Output.WriteLine(content);
 
-        response = await client.GetAsync(new Uri($"http://localhost:{webPort}/api/values")).ConfigureAwait(false);
+        response = await Client.GetAsync(new Uri($"http://localhost:{webPort}/api/values")).ConfigureAwait(false);
         content = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
         Output.WriteLine("WebApi Response:");
         Output.WriteLine(content);

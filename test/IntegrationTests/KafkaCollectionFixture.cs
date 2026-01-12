@@ -10,9 +10,9 @@ using static IntegrationTests.Helpers.DockerFileHelper;
 namespace IntegrationTests;
 
 [CollectionDefinition(Name)]
-public class KafkaCollection : ICollectionFixture<KafkaFixture>
+public class KafkaCollectionFixture : ICollectionFixture<KafkaFixture>
 {
-    public const string Name = nameof(KafkaCollection);
+    public const string Name = nameof(KafkaCollectionFixture);
 }
 
 /// <summary>

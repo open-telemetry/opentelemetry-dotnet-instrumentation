@@ -94,7 +94,7 @@ public class LogTests : TestHelper
         RunTestApplication();
 
         // wait for fixed amount of time for logs to be collected before asserting
-        await Task.Delay(TimeSpan.FromSeconds(10));
+        await Task.Delay(TimeSpan.FromSeconds(10)).ConfigureAwait(true);
 
         collector.AssertCollected();
     }

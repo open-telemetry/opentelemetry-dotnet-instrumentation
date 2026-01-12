@@ -8,7 +8,7 @@ using Xunit.Abstractions;
 
 namespace IntegrationTests;
 
-[Collection(KafkaCollection.Name)]
+[Collection(KafkaCollectionFixture.Name)]
 public class KafkaTests : TestHelper
 {
     private const string MessagingPublishOperationAttributeValue = "publish";

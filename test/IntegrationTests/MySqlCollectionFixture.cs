@@ -9,9 +9,9 @@ using static IntegrationTests.Helpers.DockerFileHelper;
 namespace IntegrationTests;
 
 [CollectionDefinition(Name)]
-public class MySqlCollection : ICollectionFixture<MySqlFixture>
+public class MySqlCollectionFixture : ICollectionFixture<MySqlFixture>
 {
-    public const string Name = nameof(MySqlCollection);
+    public const string Name = nameof(MySqlCollectionFixture);
 }
 
 public class MySqlFixture : IAsyncLifetime

@@ -9,7 +9,7 @@ using Xunit.Abstractions;
 
 namespace IntegrationTests;
 
-internal class IISContainerTestHelper
+internal static class IISContainerTestHelper
 {
     public static async Task<IContainer> StartContainerAsync(
         string imageName,

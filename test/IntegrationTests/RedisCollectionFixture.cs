@@ -11,9 +11,9 @@ using static IntegrationTests.Helpers.DockerFileHelper;
 namespace IntegrationTests;
 
 [CollectionDefinition(Name)]
-public class RedisCollection : ICollectionFixture<RedisFixture>
+public class RedisCollectionFixture : ICollectionFixture<RedisFixture>
 {
-    public const string Name = nameof(RedisCollection);
+    public const string Name = nameof(RedisCollectionFixture);
 }
 
 public class RedisFixture : IAsyncLifetime

@@ -14,7 +14,7 @@ public class ActivityHelperTests
     {
         const Activity? activity = null;
 
-        var action = () => activity.SetException(new Exception());
+        var action = () => activity.SetException(new InvalidOperationException());
 
         Assert.Null(Record.Exception(() => action()));
     }
@@ -39,7 +39,7 @@ public class ActivityHelperTests
         using var activity = new Activity("test-operation");
 
         const string exceptionMessage = "test-message";
-        activity.SetException(new Exception(exceptionMessage));
+        activity.SetException(new InvalidOperationException(exceptionMessage));
 
         Assert.Equal(ActivityStatusCode.Error, activity.Status);
         Assert.Equal(exceptionMessage, activity.StatusDescription);

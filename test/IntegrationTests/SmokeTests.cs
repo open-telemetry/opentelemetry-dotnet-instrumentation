@@ -295,7 +295,7 @@ public class SmokeTests : TestHelper
                 Assert.Contains("TYPE ", content, StringComparison.Ordinal); // should export any metric
             };
 
-            await AssertRepeatingExecutionDoesNotThrow(assert, TimeSpan.FromSeconds(1), TimeSpan.FromMinutes(1));
+            await AssertRepeatingExecutionDoesNotThrow(assert, TimeSpan.FromSeconds(1), TimeSpan.FromMinutes(1)).ConfigureAwait(true);
             var exception = await Record.ExceptionAsync(() => assert());
             Assert.Null(exception);
         }
@@ -346,7 +346,7 @@ public class SmokeTests : TestHelper
                 await Task.Delay(TimeSpan.FromSeconds(1)).ConfigureAwait(false);
             }
 
-            await AssertRepeatingExecutionDoesNotThrow(Assert, TimeSpan.FromSeconds(1), TimeSpan.FromMinutes(1));
+            await AssertRepeatingExecutionDoesNotThrow(Assert, TimeSpan.FromSeconds(1), TimeSpan.FromMinutes(1)).ConfigureAwait(true);
         }
         finally
         {
@@ -538,7 +538,9 @@ public class SmokeTests : TestHelper
 
             if (!EnvironmentTools.IsWindows())
             {
+#pragma warning disable CA1308 // Normalize strings to uppercase. Needed to be lowercased.
                 SetEnvironmentVariable($"otel_{item.ToLowerInvariant()}_value2", "this is secret!");
+#pragma warning restore CA1308 // Normalize strings to uppercase. Needed to be lowercased.
             }
         }
 
@@ -554,7 +556,11 @@ public class SmokeTests : TestHelper
             Assert.NotEmpty(environmentVariables);
 
             var secretVariables = environmentVariables
+#if NET
+                .Where(item => secretIdentificators.Any(i => item.Key.Contains(i, StringComparison.Ordinal)))
+#else
                 .Where(item => secretIdentificators.Any(i => item.Key.Contains(i)))
+#endif
                 .ToList();
 
             Assert.NotEmpty(secretVariables);
@@ -568,13 +574,14 @@ public class SmokeTests : TestHelper
 
     private static ICollection<KeyValuePair<string, string>> ParseEnvironmentVariablesLog(string log)
     {
-        var lines = log.Split(new[] { Environment.NewLine }, StringSplitOptions.None);
+        var lines = log.Split([Environment.NewLine], StringSplitOptions.None);
         var variables = lines
-            .SkipWhile(x => !x.Contains("Environment variables:"))
 #if NETFRAMEWORK
+            .SkipWhile(x => !x.Contains("Environment variables:"))
             .TakeWhile(x => !x.Contains(".NET Runtime: .NET Framework"))
 #else
-            .TakeWhile(x => !x.Contains("Interface ICorProfilerInfo12 found."))
+            .SkipWhile(x => !x.Contains("Environment variables:", StringComparison.Ordinal))
+            .TakeWhile(x => !x.Contains("Interface ICorProfilerInfo12 found.", StringComparison.Ordinal))
 #endif
             .Skip(1)
             .Select(ParseEnvironmentVariableLogEntry)

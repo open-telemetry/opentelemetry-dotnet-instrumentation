@@ -3,6 +3,7 @@
 
 using System.Diagnostics;
 using System.Diagnostics.Metrics;
+using Examples.Service;
 using Microsoft.Data.SqlClient;
 
 // .NET Diagnostics: create the span factory
@@ -29,7 +30,9 @@ async Task<string> Handler(ILogger<Program> logger)
         activity?.SetTag("bar", "Hello, World!");
         activity?.SetTag("baz", (int[])[1, 2, 3]);
 
+#pragma warning disable CA5394 // Do not use insecure randomness. Not related to security, just a demo.
         var waitTime = Random.Shared.NextDouble(); // max 1 seconds
+#pragma warning restore CA5394 // Do not use insecure randomness. Not related to security, just a demo.
         await Task.Delay(TimeSpan.FromSeconds(waitTime)).ConfigureAwait(false);
 
         activity?.SetStatus(ActivityStatusCode.Ok);
@@ -39,7 +42,7 @@ async Task<string> Handler(ILogger<Program> logger)
     }
 
     // .NET ILogger: create a log
-    logger.LogInformation("Success! Today is: {Date:MMMM dd, yyyy}", DateTimeOffset.UtcNow);
+    logger.Success(DateTimeOffset.UtcNow);
 
     return "Hello there";
 }
