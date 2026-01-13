@@ -17,6 +17,7 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 - Support for file-based configuration of the IL rewrite for
   SqlClient instrumentation setting
 - Add support for `StackExchange.Redis` for applications targeting .NET Framework.
+- Automatically set the `service.instance.id` resource attribute if not provided.
 
 ### Changed
 

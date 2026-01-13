@@ -40,5 +40,6 @@ internal static class OtlpResourceExpectorExtensions
         resourceExpector.Exist("os.description");
         resourceExpector.Exist("os.name");
         resourceExpector.Exist("os.version");
+        resourceExpector.Exist("service.instance.id");
     }
 }
