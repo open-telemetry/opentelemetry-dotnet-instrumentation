@@ -46,6 +46,7 @@
     <PackageVersion Include="Pipelines.Sockets.Unofficial" Version="2.2.8" />
     <PackageVersion Include="StackExchange.Redis" Version="2.6.122" />
     <PackageVersion Include="System.Drawing.Common" Version="4.7.2" />
+    <PackageVersion Include="System.Threading.Channels" Version="5.0.0" />
     <PackageVersion Include="System.Windows.Extensions" Version="4.7.0" />
   </ItemGroup>
 </Project>

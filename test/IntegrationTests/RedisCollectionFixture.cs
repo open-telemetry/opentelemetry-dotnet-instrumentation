@@ -1,8 +1,6 @@
 // Copyright The OpenTelemetry Authors
 // SPDX-License-Identifier: Apache-2.0
 
-#if NET
-
 using DotNet.Testcontainers.Builders;
 using DotNet.Testcontainers.Containers;
 using IntegrationTests.Helpers;
@@ -62,4 +60,3 @@ public class RedisFixture : IAsyncLifetime
         await container.DisposeAsync().ConfigureAwait(false);
     }
 }
-#endif
