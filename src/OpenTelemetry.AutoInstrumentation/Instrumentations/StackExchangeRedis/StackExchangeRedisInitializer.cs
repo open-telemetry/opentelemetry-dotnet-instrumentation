@@ -1,8 +1,6 @@
 // Copyright The OpenTelemetry Authors
 // SPDX-License-Identifier: Apache-2.0
 
-#if NET
-
 namespace OpenTelemetry.AutoInstrumentation.Instrumentations.StackExchangeRedis;
 
 internal static class StackExchangeRedisInitializer
@@ -21,4 +19,3 @@ internal static class StackExchangeRedisInitializer
         Instrumentation.LifespanManager.Track(instrumentation);
     }
 }
-#endif

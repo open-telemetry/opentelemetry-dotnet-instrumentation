@@ -211,6 +211,11 @@
     <ClInclude Include="dllmain.h" />
     <ClInclude Include="resource.h" />
   </ItemGroup>
+  <PropertyGroup Condition=" '$(BuildingInsideVisualStudio)' == 'true' ">
+    <OTEL_AUTO_VERSION_MAJOR>$([MSBuild]::ValueOrDefault('$(OTEL_AUTO_VERSION_MAJOR)', '1'))</OTEL_AUTO_VERSION_MAJOR>
+    <OTEL_AUTO_VERSION_MINOR>$([MSBuild]::ValueOrDefault('$(OTEL_AUTO_VERSION_MINOR)', '0'))</OTEL_AUTO_VERSION_MINOR>
+    <OTEL_AUTO_VERSION_PATCH>$([MSBuild]::ValueOrDefault('$(OTEL_AUTO_VERSION_PATCH)', '0'))</OTEL_AUTO_VERSION_PATCH>
+  </PropertyGroup>
   <ItemGroup>
     <ResourceCompile Include="Resource.rc">
       <AdditionalOptions>/dOTEL_AUTO_VERSION_MAJOR="$(OTEL_AUTO_VERSION_MAJOR)" /dOTEL_AUTO_VERSION_MINOR="$(OTEL_AUTO_VERSION_MINOR)" /dOTEL_AUTO_VERSION_PATCH="$(OTEL_AUTO_VERSION_PATCH)"</AdditionalOptions>

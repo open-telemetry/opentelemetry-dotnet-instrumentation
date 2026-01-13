@@ -19,23 +19,46 @@ public class ParserInstrumentationTests
         Assert.NotNull(config.InstrumentationDevelopment);
         Assert.NotNull(config.InstrumentationDevelopment.DotNet);
 
+        string[] expectedTraces =
+        [
+#if NETFRAMEWORK
+            "aspnet",
+#else
+            "aspnetcore",
+#endif
+            "azure",
+            "elasticsearch",
+            "elastictransport",
 #if NET
-        string[] expectedTraces = [
-                    "aspnetcore", "azure", "elasticsearch", "elastictransport",
-                    "entityframeworkcore", "graphql", "grpcnetclient", "httpclient",
-                    "kafka", "masstransit", "mongodb", "mysqlconnector",
-                    "mysqldata", "npgsql", "nservicebus", "oraclemda", "rabbitmq",
-                    "quartz", "sqlclient", "stackexchangeredis", "wcfclient", "wcfcore"
-                ];
+            "entityframeworkcore",
+            "graphql",
+#endif
+            "grpcnetclient",
+            "httpclient",
+            "kafka",
+#if NET
+            "masstransit",
+#endif
+            "mongodb",
+            "mysqlconnector",
+#if NET
+            "mysqldata",
+#endif
+            "npgsql",
+            "nservicebus",
+            "oraclemda",
+            "rabbitmq",
+            "quartz",
+            "sqlclient",
+            "stackexchangeredis",
+            "wcfclient",
+#if NET
+            "wcfcore"
 #endif
 #if NETFRAMEWORK
-        string[] expectedTraces = [
-                    "aspnet", "azure", "elasticsearch", "elastictransport",
-                    "grpcnetclient", "httpclient", "kafka", "mongodb",
-                    "mysqlconnector", "npgsql", "nservicebus", "oraclemda",
-                    "rabbitmq", "quartz", "sqlclient", "wcfclient", "wcfservice"
-                ];
+            "wcfservice",
 #endif
+        ];
 
         var traces = config.InstrumentationDevelopment.DotNet.Traces;
         Assert.NotNull(traces);
@@ -56,20 +79,19 @@ public class ParserInstrumentationTests
         Assert.Contains("Some.Additional.Legacy.Source1", traces.AdditionalLegacySources);
         Assert.Contains("Some.Additional.Legacy.Source2", traces.AdditionalLegacySources);
 
-#if NET
         string[] expectedMetrics =
         [
-            "aspnetcore", "httpclient", "netruntime",
-            "nservicebus", "process", "sqlclient"
-        ];
-#endif
 #if NETFRAMEWORK
-        string[] expectedMetrics =
-        [
-            "aspnet", "httpclient", "netruntime",
-            "nservicebus", "process", "sqlclient"
-        ];
+            "aspnet",
+#else
+            "aspnetcore",
 #endif
+            "httpclient",
+            "netruntime",
+            "nservicebus",
+            "process",
+            "sqlclient",
+        ];
 
         var metrics = config.InstrumentationDevelopment.DotNet.Metrics;
         Assert.NotNull(metrics);
@@ -103,16 +125,19 @@ public class ParserInstrumentationTests
         Assert.NotNull(config.InstrumentationDevelopment);
         Assert.NotNull(config.InstrumentationDevelopment.DotNet);
 
-#if NET
-        string[] expectedTraces = [
-                    "aspnetcore", "graphql", "grpcnetclient", "httpclient", "oraclemda", "sqlclient"
-                ];
-#endif
+        string[] expectedTraces =
+        [
 #if NETFRAMEWORK
-        string[] expectedTraces = [
-                    "aspnet", "httpclient", "oraclemda", "grpcnetclient", "sqlclient"
-                ];
+            "aspnet",
+#else
+            "aspnetcore",
+            "graphql",
 #endif
+            "grpcnetclient",
+            "httpclient",
+            "oraclemda",
+            "sqlclient",
+        ];
 
         var traces = config.InstrumentationDevelopment.DotNet.Traces;
         Assert.NotNull(traces);
