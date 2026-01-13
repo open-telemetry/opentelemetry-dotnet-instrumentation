@@ -22,7 +22,7 @@
     <!-- Dependencies below are shipped in the distribution folder, but not included in the NuGet package. -->
     <!-- If necessary these packages are flagged by custom build tasks and manually added to the targeted  -->
     <!-- projects that are using the NuGet package. -->
-    <PackageReference Include="OpenTelemetry.Instrumentation.StackExchangeRedis" Condition=" '$(TargetFramework)' == 'net8.0' OR '$([MSBuild]::GetTargetFrameworkIdentifier(`$(TargetFramework)`))' == '.NETFramework'" />
+    <PackageReference Include="OpenTelemetry.Instrumentation.StackExchangeRedis" />
   </ItemGroup>
 
   <ItemGroup>

@@ -5,8 +5,9 @@
     <PackageReference Include="System.Drawing.Common" ExcludeAssets="all" />
     <PackageReference Include="System.Windows.Extensions" ExcludeAssets="all" />
   </ItemGroup>
-  <ItemGroup Condition=" '$(TargetFramework)' == 'net8.0' OR '$([MSBuild]::GetTargetFrameworkIdentifier(`$(TargetFramework)`))' == '.NETFramework' " Label="(Transient) dependencies of OpenTelemetry.Instrumentation.StackExchangeRedis">
+  <ItemGroup Label="(Transient) dependencies of OpenTelemetry.Instrumentation.StackExchangeRedis">
     <PackageReference Include="Pipelines.Sockets.Unofficial" ExcludeAssets="all" />
     <PackageReference Include="StackExchange.Redis" ExcludeAssets="all" />
+    <PackageReference Include="System.Threading.Channels" ExcludeAssets="all" />
   </ItemGroup>
 </Project>
