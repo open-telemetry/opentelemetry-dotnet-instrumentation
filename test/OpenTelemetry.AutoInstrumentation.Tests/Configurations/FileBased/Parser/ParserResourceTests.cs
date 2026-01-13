@@ -90,7 +90,7 @@ public class ParserResourceTests
     public void Parse_EnvVarYaml_ShouldPopulateModelCompletely()
     {
         Environment.SetEnvironmentVariable("OTEL_SDK_DISABLED", "true");
-        Environment.SetEnvironmentVariable("OTEL_SERVICE_NAME", "my‑service");
+        Environment.SetEnvironmentVariable("OTEL_SERVICE_NAME", "my-service");
         Environment.SetEnvironmentVariable("OTEL_RESOURCE_ATTRIBUTES", "key=value");
 
         var config = YamlParser.ParseYaml<YamlConfiguration>("Configurations/FileBased/Files/TestResourceFileEnvVars.yaml");
@@ -98,6 +98,6 @@ public class ParserResourceTests
         Assert.Equal("1.0-rc.1", config.FileFormat);
         var serviceAttr = config.Resource?.Attributes?.First(a => a.Name == "service.name");
         Assert.NotNull(serviceAttr);
-        Assert.Equal("my‑service", serviceAttr.Value);
+        Assert.Equal("my-service", serviceAttr.Value);
     }
 }
