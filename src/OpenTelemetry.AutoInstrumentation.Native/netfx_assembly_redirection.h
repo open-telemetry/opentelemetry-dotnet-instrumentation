@@ -148,7 +148,6 @@ void CorProfiler::InitNetFxAssemblyRedirectsMap()
             { L"System.Text.Json", {10, 0, 0, 0} },
             { L"System.Text.RegularExpressions", {4, 1, 1, 0} },
             { L"System.Threading", {4, 0, 11, 0} },
-            { L"System.Threading.Channels", {5, 0, 0, 0} },
             { L"System.Threading.Overlapped", {4, 1, 0, 0} },
             { L"System.Threading.Tasks", {4, 0, 11, 0} },
             { L"System.Threading.Tasks.Extensions", {4, 2, 4, 0} },
@@ -294,7 +293,6 @@ void CorProfiler::InitNetFxAssemblyRedirectsMap()
             { L"System.Text.Json", {10, 0, 0, 0} },
             { L"System.Text.RegularExpressions", {4, 1, 1, 0} },
             { L"System.Threading", {4, 0, 11, 0} },
-            { L"System.Threading.Channels", {5, 0, 0, 0} },
             { L"System.Threading.Overlapped", {4, 1, 0, 0} },
             { L"System.Threading.Tasks", {4, 0, 11, 0} },
             { L"System.Threading.Tasks.Extensions", {4, 2, 4, 0} },
@@ -368,7 +366,6 @@ void CorProfiler::InitNetFxAssemblyRedirectsMap()
             { L"System.Security.SecureString", {4, 1, 0, 0} },
             { L"System.Text.Encodings.Web", {10, 0, 0, 0} },
             { L"System.Text.Json", {10, 0, 0, 0} },
-            { L"System.Threading.Channels", {5, 0, 0, 0} },
             { L"System.Threading.Overlapped", {4, 1, 0, 0} },
             { L"System.Threading.Tasks.Extensions", {4, 2, 4, 0} },
             { L"System.Xml.XPath.XDocument", {4, 1, 0, 0} },
@@ -421,7 +418,6 @@ void CorProfiler::InitNetFxAssemblyRedirectsMap()
             { L"System.Runtime.CompilerServices.Unsafe", {6, 0, 3, 0} },
             { L"System.Text.Encodings.Web", {10, 0, 0, 0} },
             { L"System.Text.Json", {10, 0, 0, 0} },
-            { L"System.Threading.Channels", {5, 0, 0, 0} },
             { L"System.Threading.Tasks.Extensions", {4, 2, 4, 0} },
         }}
     });
