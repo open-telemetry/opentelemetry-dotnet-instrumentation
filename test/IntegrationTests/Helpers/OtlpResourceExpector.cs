@@ -11,8 +11,8 @@ namespace IntegrationTests.Helpers;
 
 internal sealed class OtlpResourceExpector : IDisposable
 {
-    private readonly List<ResourceExpectation> _resourceExpectations = new();
-    private readonly List<string> _existenceChecks = new();
+    private readonly List<ResourceExpectation> _resourceExpectations = [];
+    private readonly List<string> _existenceChecks = [];
 
     private readonly ManualResetEvent _resourceAttributesEvent = new(false); // synchronizes access to _resourceAttributes
     private RepeatedField<KeyValue>? _resourceAttributes; // protobuf type
@@ -115,13 +115,11 @@ internal sealed class OtlpResourceExpector : IDisposable
 
                     var expectation = missingExpectations[i];
 
-                    if (expectation.StringValue != null)
+                    if (expectation.StringValue != null &&
+                        ((!expectation.IsRegex && resourceAttribute.Value.StringValue != expectation.StringValue) ||
+                         (expectation.IsRegex && !System.Text.RegularExpressions.Regex.IsMatch(resourceAttribute.Value.StringValue, expectation.StringValue))))
                     {
-                        if ((!expectation.IsRegex && resourceAttribute.Value.StringValue != expectation.StringValue) ||
-                            (expectation.IsRegex && !System.Text.RegularExpressions.Regex.IsMatch(resourceAttribute.Value.StringValue, expectation.StringValue)))
-                        {
-                            continue;
-                        }
+                        continue;
                     }
 
                     if (expectation.IntValue != null && resourceAttribute.Value.IntValue != expectation.IntValue)
@@ -143,7 +141,7 @@ internal sealed class OtlpResourceExpector : IDisposable
 
     private static void FailResource(List<ResourceExpectation> missingExpectations, RepeatedField<KeyValue>? attributes)
     {
-        attributes ??= new();
+        attributes ??= [];
 
         var message = new StringBuilder();
         message.AppendLine();

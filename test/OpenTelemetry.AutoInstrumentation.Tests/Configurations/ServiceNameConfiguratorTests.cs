@@ -41,9 +41,9 @@ public class ServiceNameConfiguratorTests
             var resourceBuilder = ResourceConfigurator.CreateResourceBuilder(new ResourceSettings());
             var resource = resourceBuilder.Build();
 
-            var actualVaue = resource.Attributes.FirstOrDefault(a => a.Key == attributeName).Value as string;
+            var actualValue = resource.Attributes.FirstOrDefault(a => a.Key == attributeName).Value as string;
 
-            Assert.Equal(expectedValue, actualVaue);
+            Assert.Equal(expectedValue, actualValue);
         }
         finally
         {
