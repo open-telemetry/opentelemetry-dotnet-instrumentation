@@ -8,7 +8,7 @@ using Xunit.Abstractions;
 
 namespace IntegrationTests;
 
-public class AspNetTests
+public class AspNetTests(ITestOutputHelper output)
 {
     private const string ServiceName = "TestApplication.AspNet.NetFramework";
 
@@ -21,11 +21,6 @@ public class AspNetTests
             { "Custom-Request-Test-Header3", "Test-Value3" }
         }
     };
-
-    public AspNetTests(ITestOutputHelper output)
-    {
-        Output = output;
-    }
 
     public enum Gac
     {
@@ -53,7 +48,7 @@ public class AspNetTests
         Integrated
     }
 
-    private ITestOutputHelper Output { get; }
+    private ITestOutputHelper Output { get; } = output;
 
     [Theory]
     [Trait("Category", "EndToEnd")]
@@ -179,8 +174,9 @@ public class AspNetTests
         // on the firewall.
         using var collector = new MockSpansCollector(Output, host: "*");
         using var fwPort = FirewallHelper.OpenWinPort(collector.Port, Output);
-        collector.ResourceExpector.Expect("service.name", ServiceName); // this is set via env var in Dockerfile and Wep.config, but env var has precedence
-        collector.ResourceExpector.Expect("deployment.environment.name", "test"); // this is set via Wep.config
+        collector.ResourceExpector.Expect("service.name", ServiceName); // this is set via env var in Dockerfile and Web.config, but env var has precedence
+        collector.ResourceExpector.Expect("deployment.environment.name", "test"); // this is set via Web.config
+        collector.ResourceExpector.Matches("service.instance.id", "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"); // automatically generated
 
         var collectorUrl = $"http://{DockerNetworkHelper.IntegrationTestsGateway}:{collector.Port}";
 
