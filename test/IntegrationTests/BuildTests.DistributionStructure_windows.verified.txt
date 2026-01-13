@@ -91,7 +91,6 @@
   \netfx\System.Runtime.CompilerServices.Unsafe.dll,
   \netfx\System.Text.Encodings.Web.dll,
   \netfx\System.Text.Json.dll,
-  \netfx\System.Threading.Channels.dll,
   \netfx\System.Threading.Tasks.Extensions.dll,
   \netfx\net462\Microsoft.Win32.Primitives.dll,
   \netfx\net462\System.AppContext.dll,
