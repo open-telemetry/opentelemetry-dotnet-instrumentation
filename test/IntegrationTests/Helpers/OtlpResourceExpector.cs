@@ -47,6 +47,11 @@ internal sealed class OtlpResourceExpector : IDisposable
         _resourceExpectations.Add(new ResourceExpectation(key, value));
     }
 
+    public void Matches(string key, string regex)
+    {
+        _resourceExpectations.Add(new ResourceExpectation(key, regex, isRegex: true));
+    }
+
     public void AssertExpectations(TimeSpan? timeout = null)
     {
         if (_resourceExpectations.Count == 0 && _existenceChecks.Count == 0)
@@ -108,12 +113,18 @@ internal sealed class OtlpResourceExpector : IDisposable
                         continue;
                     }
 
-                    if (missingExpectations[i].StringValue != null && resourceAttribute.Value.StringValue != missingExpectations[i].StringValue)
+                    var expectation = missingExpectations[i];
+
+                    if (expectation.StringValue != null)
                     {
-                        continue;
+                        if ((!expectation.IsRegex && resourceAttribute.Value.StringValue != expectation.StringValue) ||
+                            (expectation.IsRegex && !System.Text.RegularExpressions.Regex.IsMatch(resourceAttribute.Value.StringValue, expectation.StringValue)))
+                        {
+                            continue;
+                        }
                     }
 
-                    if (missingExpectations[i].IntValue != null && resourceAttribute.Value.IntValue != missingExpectations[i].IntValue)
+                    if (expectation.IntValue != null && resourceAttribute.Value.IntValue != expectation.IntValue)
                     {
                         continue;
                     }
@@ -140,7 +151,9 @@ internal sealed class OtlpResourceExpector : IDisposable
         message.AppendLine("Missing resource expectations:");
         foreach (var expectation in missingExpectations)
         {
-            var value = !string.IsNullOrEmpty(expectation.StringValue) ? expectation.StringValue : expectation.IntValue!.Value.ToString(CultureInfo.InvariantCulture);
+            var value = string.IsNullOrEmpty(expectation.StringValue)
+                ? expectation.IntValue!.Value.ToString(CultureInfo.InvariantCulture)
+                : expectation.IsRegex ? $"/{expectation.StringValue}/" : expectation.StringValue;
             message.AppendLine(CultureInfo.InvariantCulture, $"  - \"{expectation.Key}={value}\"");
         }
 
@@ -156,10 +169,11 @@ internal sealed class OtlpResourceExpector : IDisposable
 
     private sealed class ResourceExpectation
     {
-        public ResourceExpectation(string key, string stringValue)
+        public ResourceExpectation(string key, string stringValue, bool isRegex = false)
         {
             Key = key;
             StringValue = stringValue;
+            IsRegex = isRegex;
         }
 
         public ResourceExpectation(string key, long intValue)
@@ -173,5 +187,7 @@ internal sealed class OtlpResourceExpector : IDisposable
         public string? StringValue { get; }
 
         public long? IntValue { get; }
+
+        public bool IsRegex { get; }
     }
 }

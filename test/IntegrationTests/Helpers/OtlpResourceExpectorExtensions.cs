@@ -10,6 +10,7 @@ internal static class OtlpResourceExpectorExtensions
     public static void ExpectStandardResources(this OtlpResourceExpector resourceExpector, int processId, string serviceName)
     {
         resourceExpector.Expect("service.name", serviceName); // this is set via env var and App.config, but env var has precedence
+        resourceExpector.Matches("service.instance.id", "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$");
 #if NETFRAMEWORK
         resourceExpector.Expect("deployment.environment.name", "test"); // this is set via App.config
 #endif
@@ -40,6 +41,5 @@ internal static class OtlpResourceExpectorExtensions
         resourceExpector.Exist("os.description");
         resourceExpector.Exist("os.name");
         resourceExpector.Exist("os.version");
-        resourceExpector.Exist("service.instance.id");
     }
 }
