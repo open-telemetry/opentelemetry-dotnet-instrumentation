@@ -50,7 +50,7 @@ public class AspNetTests(ITestOutputHelper output)
 
     private ITestOutputHelper Output { get; } = output;
 
-    [Theory]
+    [WindowsAdministratorTheory]
     [Trait("Category", "EndToEnd")]
     [Trait("Containers", "Windows")]
     [InlineData(AppPoolMode.Classic, Gac.UseGac)]
@@ -59,8 +59,6 @@ public class AspNetTests(ITestOutputHelper output)
     [InlineData(AppPoolMode.Integrated, Gac.UseLocal)]
     public async Task SubmitsTraces(AppPoolMode appPoolMode, Gac useGac)
     {
-        Assert.True(EnvironmentTools.IsWindowsAdministrator(), "This test requires Windows Administrator privileges.");
-
         // Using "*" as host requires Administrator. This is needed to make the mock collector endpoint
         // accessible to the Windows docker container where the test application is executed by binding
         // the endpoint to all network interfaces. In order to do that it is necessary to open the port
@@ -86,7 +84,7 @@ public class AspNetTests(ITestOutputHelper output)
         collector.AssertExpectations();
     }
 
-    [Theory]
+    [WindowsAdministratorTheory]
     [Trait("Category", "EndToEnd")]
     [Trait("Containers", "Windows")]
     [InlineData(AppPoolMode.Classic, Gac.UseGac)]
@@ -95,8 +93,6 @@ public class AspNetTests(ITestOutputHelper output)
     [InlineData(AppPoolMode.Integrated, Gac.UseLocal)]
     public async Task SubmitTracesCapturesHttpHeaders(AppPoolMode appPoolMode, Gac useGac)
     {
-        Assert.True(EnvironmentTools.IsWindowsAdministrator(), "This test requires Windows Administrator privileges.");
-
         // Using "*" as host requires Administrator. This is needed to make the mock collector endpoint
         // accessible to the Windows docker container where the test application is executed by binding
         // the endpoint to all network interfaces. In order to do that it is necessary to open the port
@@ -161,13 +157,11 @@ public class AspNetTests(ITestOutputHelper output)
         collector.AssertExpectations();
     }
 
-    [Fact]
+    [WindowsAdministratorFact]
     [Trait("Category", "EndToEnd")]
     [Trait("Containers", "Windows")]
     public async Task TracesResource()
     {
-        Assert.True(EnvironmentTools.IsWindowsAdministrator(), "This test requires Windows Administrator privileges.");
-
         // Using "*" as host requires Administrator. This is needed to make the mock collector endpoint
         // accessible to the Windows docker container where the test application is executed by binding
         // the endpoint to all network interfaces. In order to do that it is necessary to open the port
@@ -197,13 +191,11 @@ public class AspNetTests(ITestOutputHelper output)
         collector.ResourceExpector.AssertExpectations();
     }
 
-    [Fact]
+    [WindowsAdministratorFact]
     [Trait("Category", "EndToEnd")]
     [Trait("Containers", "Windows")]
     public async Task SubmitMetrics()
     {
-        Assert.True(EnvironmentTools.IsWindowsAdministrator(), "This test requires Windows Administrator privileges.");
-
         // Using "*" as host requires Administrator. This is needed to make the mock collector endpoint
         // accessible to the Windows docker container where the test application is executed by binding
         // the endpoint to all network interfaces. In order to do that it is necessary to open the port

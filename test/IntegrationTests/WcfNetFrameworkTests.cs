@@ -15,7 +15,7 @@ public class WcfNetFrameworkTests : WcfTestsBase
     {
     }
 
-    [Fact]
+    [WindowsAdministratorFact]
     [Trait("Category", "EndToEnd")]
     public async Task SubmitsTraces()
     {
