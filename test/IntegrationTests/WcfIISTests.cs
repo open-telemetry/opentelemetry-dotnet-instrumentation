@@ -97,8 +97,7 @@ public class WcfIISTests : TestHelper
         Directory.CreateDirectory(logPath);
         Output.WriteLine("Collecting docker logs to: " + logPath);
 
-        var builder = new ContainerBuilder()
-            .WithImage(imageName)
+        var builder = new ContainerBuilder(imageName)
             .WithCleanUp(cleanUp: true)
             .WithName(imageName)
             .WithNetwork(networkName)

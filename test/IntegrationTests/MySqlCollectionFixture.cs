@@ -43,8 +43,7 @@ public class MySqlFixture : IAsyncLifetime
 
     private static async Task<IContainer> LaunchMySqlContainerAsync(int port)
     {
-        var containersBuilder = new ContainerBuilder()
-            .WithImage(MySqlImage)
+        var containersBuilder = new ContainerBuilder(MySqlImage)
             .WithName($"mysql-{port}")
             .WithPortBinding(port, MySqlPort)
             .WithEnvironment("MYSQL_ALLOW_EMPTY_PASSWORD", "true")

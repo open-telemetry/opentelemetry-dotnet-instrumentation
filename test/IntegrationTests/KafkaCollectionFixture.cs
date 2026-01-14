@@ -59,8 +59,7 @@ public class KafkaFixture : IAsyncLifetime
 
     private async Task<IContainer?> LaunchKafkaContainer(INetwork? containerNetwork)
     {
-        var container = new ContainerBuilder()
-            .WithImage(KafkaImage)
+        var container = new ContainerBuilder(KafkaImage)
             .WithName(_kafkaContainerName)
             .WithPortBinding(Port)
             .WithEnvironment("KAFKA_BROKER_ID", "1")
