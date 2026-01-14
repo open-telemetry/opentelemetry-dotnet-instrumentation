@@ -19,14 +19,14 @@ public static partial class LibraryVersion
             "TestApplication.Azure",
             [
                 new("12.22.2"),
-                new("12.26.0"),
+                new("12.27.0"),
             ]
         },
         {
             "TestApplication.Elasticsearch",
             [
                 new("8.15.10"),
-                new("9.2.1"),
+                new("9.2.2"),
             ]
         },
         {
@@ -51,7 +51,7 @@ public static partial class LibraryVersion
             [
                 new("7.5.0", additionalMetaData: new() { { "GraphQLMicrosoftDI", "7.5.0" }, { "GraphQLServerTransportsAspNetCore", "7.5.0" }, { "GraphQLServerUIPGraphiQL", "7.5.0" } }),
                 new("8.0.2", additionalMetaData: new() { { "GraphQLMicrosoftDI", "8.0.2" }, { "GraphQLServerTransportsAspNetCore", "8.0.2" }, { "GraphQLServerUIPGraphiQL", "8.0.2" } }),
-                new("8.7.0", additionalMetaData: new() { { "GraphQLMicrosoftDI", "8.7.0" }, { "GraphQLServerTransportsAspNetCore", "8.3.2" }, { "GraphQLServerUIPGraphiQL", "8.3.2" } }),
+                new("8.8.3", additionalMetaData: new() { { "GraphQLMicrosoftDI", "8.8.3" }, { "GraphQLServerTransportsAspNetCore", "8.3.3" }, { "GraphQLServerUIPGraphiQL", "8.3.3" } }),
             ]
         },
         {
@@ -81,7 +81,7 @@ public static partial class LibraryVersion
             "TestApplication.MassTransit",
             [
                 new("8.3.0"),
-                new("8.5.5"),
+                new("8.5.7"),
             ]
         },
         {
@@ -170,7 +170,7 @@ public static partial class LibraryVersion
             "TestApplication.StackExchangeRedis",
             [
                 new("2.6.122"),
-                new("2.9.32"),
+                new("2.10.1"),
             ]
         },
         {
@@ -187,7 +187,7 @@ public static partial class LibraryVersion
             [
                 new("1.8.2"),
                 new("1.9.2"),
-                new("2.12.0"),
+                new("2.13.0"),
             ]
         },
         {
