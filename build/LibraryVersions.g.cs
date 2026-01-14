@@ -19,7 +19,7 @@ public static partial class LibraryVersion
             "TestApplication.Azure",
             [
                 new("12.22.2"),
-                new("12.27.0"),
+                new("12.26.0"),
             ]
         },
         {

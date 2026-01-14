@@ -1,7 +1,7 @@
 <Project>
   <Import Project="..\Directory.Packages.props" />
   <ItemGroup>
-    <PackageVersion Include="Azure.Storage.Blobs" Version="12.27.0" />
+    <PackageVersion Include="Azure.Storage.Blobs" Version="12.26.0" />
     <PackageVersion Include="Confluent.Kafka" Version="2.13.0" />
     <PackageVersion Include="CoreWCF.Http" Version="1.8.0" />
     <PackageVersion Include="CoreWCF.NetTcp" Version="1.8.0" />
