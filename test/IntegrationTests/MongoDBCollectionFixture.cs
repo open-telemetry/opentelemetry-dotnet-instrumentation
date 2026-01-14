@@ -10,9 +10,9 @@ using static IntegrationTests.Helpers.DockerFileHelper;
 namespace IntegrationTests;
 
 [CollectionDefinition(Name)]
-public class MongoDBCollection : ICollectionFixture<MongoDBFixture>
+public class MongoDBCollectionFixture : ICollectionFixture<MongoDBFixture>
 {
-    public const string Name = nameof(MongoDBCollection);
+    public const string Name = nameof(MongoDBCollectionFixture);
 }
 
 public class MongoDBFixture : IAsyncLifetime
@@ -45,8 +45,7 @@ public class MongoDBFixture : IAsyncLifetime
     private static async Task<IContainer> LaunchMongoContainerAsync(int port)
     {
         var waitForOs = await GetWaitForOSTypeAsync().ConfigureAwait(false);
-        var mongoContainersBuilder = new ContainerBuilder()
-            .WithImage(MongoDBImage)
+        var mongoContainersBuilder = new ContainerBuilder(MongoDBImage)
             .WithName($"mongo-db-{port}")
             .WithPortBinding(port, MongoDBPort)
             .WithWaitStrategy(waitForOs.UntilInternalTcpPortIsAvailable(MongoDBPort));
@@ -71,7 +70,7 @@ public class MongoDBFixture : IAsyncLifetime
             ? Wait.ForWindowsContainer()
             : Wait.ForUnixContainer();
 #else
-        return await Task.Run(Wait.ForUnixContainer);
+        return await Task.Run(Wait.ForUnixContainer).ConfigureAwait(false);
 #endif
     }
 }

@@ -1,23 +1,14 @@
 // Copyright The OpenTelemetry Authors
 // SPDX-License-Identifier: Apache-2.0
 
-#if NET
 using IntegrationTests.Helpers;
 using Xunit.Abstractions;
 
 namespace IntegrationTests;
 
-[Collection(RedisCollection.Name)]
-public class StackExchangeRedisTests : TestHelper
+[Collection(RedisCollectionFixture.Name)]
+public class StackExchangeRedisTests(ITestOutputHelper output, RedisFixture redis) : TestHelper("StackExchangeRedis", output)
 {
-    private readonly RedisFixture _redis;
-
-    public StackExchangeRedisTests(ITestOutputHelper output, RedisFixture redis)
-        : base("StackExchangeRedis", output)
-    {
-        _redis = redis;
-    }
-
     [Theory]
     [Trait("Category", "EndToEnd")]
     [Trait("Containers", "Linux")]
@@ -35,11 +26,10 @@ public class StackExchangeRedisTests : TestHelper
         EnableBytecodeInstrumentation();
         RunTestApplication(new()
         {
-            Arguments = $"--redis {_redis.Port}",
+            Arguments = $"--redis {redis.Port}",
             PackageVersion = packageVersion
         });
 
         collector.AssertExpectations();
     }
 }
-#endif

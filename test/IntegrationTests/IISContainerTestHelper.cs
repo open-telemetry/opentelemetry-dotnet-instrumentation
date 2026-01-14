@@ -9,7 +9,7 @@ using Xunit.Abstractions;
 
 namespace IntegrationTests;
 
-internal class IISContainerTestHelper
+internal static class IISContainerTestHelper
 {
     public static async Task<IContainer> StartContainerAsync(
         string imageName,
@@ -25,8 +25,7 @@ internal class IISContainerTestHelper
         Directory.CreateDirectory(logPath);
         testOutputHelper.WriteLine("Collecting docker logs to: " + logPath);
 
-        var builder = new ContainerBuilder()
-            .WithImage(imageName)
+        var builder = new ContainerBuilder(imageName)
             .WithCleanUp(cleanUp: true)
             .WithName($"{imageName}-{webPort}")
             .WithNetwork(networkName)

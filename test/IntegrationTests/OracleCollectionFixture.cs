@@ -9,9 +9,9 @@ using static IntegrationTests.Helpers.DockerFileHelper;
 namespace IntegrationTests;
 
 [CollectionDefinition(Name)]
-public class OracleCollection : ICollectionFixture<OracleFixture>
+public class OracleCollectionFixture : ICollectionFixture<OracleFixture>
 {
-    public const string Name = nameof(OracleCollection);
+    public const string Name = nameof(OracleCollectionFixture);
 }
 
 public class OracleFixture : IAsyncLifetime
@@ -68,8 +68,7 @@ public class OracleFixture : IAsyncLifetime
 
     private async Task<IContainer> LaunchOracleContainerAsync(int port)
     {
-        var containersBuilder = new ContainerBuilder()
-            .WithImage(OracleImage)
+        var containersBuilder = new ContainerBuilder(OracleImage)
             .WithEnvironment("ORACLE_RANDOM_PASSWORD", "yes")
             .WithEnvironment("APP_USER", "appuser")
             .WithEnvironment("APP_USER_PASSWORD", Password)

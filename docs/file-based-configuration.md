@@ -517,6 +517,7 @@ instrumentation/development:
       sqlclient:           # Microsoft.Data.SqlClient & System.Data.SqlClient
       stackexchangeredis:  # StackExchange.Redis
       wcfclient:           # WCF Client
+      wcfcore:             # CoreWCF.Primitives
       wcfservice:          # WCF Service
     metrics:
       aspnet:              # ASP.NET metrics

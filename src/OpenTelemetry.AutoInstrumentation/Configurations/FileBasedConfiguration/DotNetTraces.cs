@@ -52,6 +52,7 @@ internal class DotNetTraces
     /// </summary>
     [YamlMember(Alias = "aspnetcore")]
     public CaptureHeadersConfiguration? AspNetCore { get; set; }
+#endif
 
     /// <summary>
     /// Gets or sets the StackExchange.Redis traces instrumentation configuration.
@@ -59,6 +60,7 @@ internal class DotNetTraces
     [YamlMember(Alias = "stackexchangeredis")]
     public object? StackExchangeRedis { get; set; }
 
+#if NET
     /// <summary>
     /// Gets or sets the Entity Framework Core traces instrumentation configuration.
     /// </summary>
@@ -173,6 +175,14 @@ internal class DotNetTraces
     /// </summary>
     [YamlMember(Alias = "wcfclient")]
     public object? WcfClient { get; set; }
+
+#if NET
+    /// <summary>
+    /// Gets or sets the CoreWCF traces instrumentation configuration.
+    /// </summary>
+    [YamlMember(Alias = "wcfcore")]
+    public object? WcfCore { get; set; }
+#endif
 
     /// <summary>
     /// Returns the list of enabled traces instrumentations.

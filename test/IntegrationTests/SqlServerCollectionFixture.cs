@@ -11,9 +11,9 @@ using static IntegrationTests.Helpers.DockerFileHelper;
 namespace IntegrationTests;
 
 [CollectionDefinition(Name)]
-public class SqlServerCollection : ICollectionFixture<SqlServerFixture>
+public class SqlServerCollectionFixture : ICollectionFixture<SqlServerFixture>
 {
-    public const string Name = nameof(SqlServerCollection);
+    public const string Name = nameof(SqlServerCollectionFixture);
 }
 
 public class SqlServerFixture : IAsyncLifetime
@@ -70,8 +70,7 @@ public class SqlServerFixture : IAsyncLifetime
 
     private async Task<IContainer> LaunchSqlServerContainerAsync()
     {
-        var databaseContainersBuilder = new ContainerBuilder()
-            .WithImage(DatabaseImage)
+        var databaseContainersBuilder = new ContainerBuilder(DatabaseImage)
             .WithName($"sql-server-{Port}")
             .WithPortBinding(Port, DatabasePort)
             .WithEnvironment("SA_PASSWORD", Password)
@@ -89,14 +88,14 @@ public class SqlServerFixture : IAsyncLifetime
     {
         try
         {
-            string connectionString = $"Server=127.0.0.1,{Port};User=sa;Password={Password};TrustServerCertificate=True;";
-            using (var connection = new SqlConnection(connectionString))
-            {
-                await connection.OpenAsync().ConfigureAwait(false);
-                return true;
-            }
+            var connectionString = $"Server=127.0.0.1,{Port};User=sa;Password={Password};TrustServerCertificate=True;";
+            using var connection = new SqlConnection(connectionString);
+            await connection.OpenAsync().ConfigureAwait(false);
+            return true;
         }
+#pragma warning disable CA1031 // Do not catch general exception types. Any exception means the operation failed.
         catch (Exception)
+#pragma warning restore CA1031 // Do not catch general exception types. Any exception means the operation failed.
         {
             // Slow down next connection attempt
             await Task.Delay(TimeSpan.FromSeconds(2)).ConfigureAwait(false);

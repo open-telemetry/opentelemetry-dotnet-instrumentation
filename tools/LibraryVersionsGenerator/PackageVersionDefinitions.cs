@@ -302,6 +302,17 @@ internal static class PackageVersionDefinitions
                 new("1.9.2"), // First version supported on macOS ARM64
                 new("*")
             ]
+        },
+        new()
+        {
+            IntegrationName = "WCFCoreServer",
+            NugetPackageName = "CoreWCF.Primitives",
+            TestApplicationName = "TestApplication.Wcf.Core",
+            Versions =
+            [
+                new("1.8.0", supportedTargetFrameworks: ["net10.0", "net9.0", "net8.0"], supportedExecutionFrameworks: ["net10.0", "net9.0", "net8.0"]),
+                new("*", supportedTargetFrameworks: ["net10.0", "net9.0", "net8.0"], supportedExecutionFrameworks: ["net10.0", "net9.0", "net8.0"])
+            ]
         }
     ];
 

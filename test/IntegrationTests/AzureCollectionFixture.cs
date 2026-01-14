@@ -9,9 +9,9 @@ using static IntegrationTests.Helpers.DockerFileHelper;
 namespace IntegrationTests;
 
 [CollectionDefinition(Name)]
-public class AzureCollection : ICollectionFixture<AzureFixture>
+public class AzureCollectionFixture : ICollectionFixture<AzureFixture>
 {
-    public const string Name = nameof(AzureCollection);
+    public const string Name = nameof(AzureCollectionFixture);
 }
 
 public class AzureFixture : IAsyncLifetime
@@ -43,8 +43,7 @@ public class AzureFixture : IAsyncLifetime
 
     private static async Task<IContainer> LaunchAzureContainerAsync(int port)
     {
-        var containersBuilder = new ContainerBuilder()
-            .WithImage(AzureStorageImage)
+        var containersBuilder = new ContainerBuilder(AzureStorageImage)
             .WithName($"azure-storage-{port}")
             .WithPortBinding(port, BlobServicePort)
             .WithWaitStrategy(Wait.ForUnixContainer().UntilInternalTcpPortIsAvailable(BlobServicePort));

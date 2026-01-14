@@ -29,6 +29,7 @@ instrumentation/development:
       sqlclient:
       stackexchangeredis:
       wcfclient:
+      wcfcore:
       wcfservice:
     metrics:
       additional_sources:

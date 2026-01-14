@@ -10,9 +10,9 @@ using static IntegrationTests.Helpers.DockerFileHelper;
 namespace IntegrationTests;
 
 [CollectionDefinition(Name)]
-public class KafkaCollection : ICollectionFixture<KafkaFixture>
+public class KafkaCollectionFixture : ICollectionFixture<KafkaFixture>
 {
-    public const string Name = nameof(KafkaCollection);
+    public const string Name = nameof(KafkaCollectionFixture);
 }
 
 /// <summary>
@@ -59,8 +59,7 @@ public class KafkaFixture : IAsyncLifetime
 
     private async Task<IContainer?> LaunchKafkaContainer(INetwork? containerNetwork)
     {
-        var container = new ContainerBuilder()
-            .WithImage(KafkaImage)
+        var container = new ContainerBuilder(KafkaImage)
             .WithName(_kafkaContainerName)
             .WithPortBinding(Port)
             .WithEnvironment("KAFKA_BROKER_ID", "1")

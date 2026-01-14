@@ -47,17 +47,18 @@ internal enum TracerInstrumentation
     /// MySqlData instrumentation.
     /// </summary>
     MySqlData = 6,
+#endif
 
     /// <summary>
     /// StackExchangeRedis instrumentation.
     /// </summary>
     StackExchangeRedis = 7,
-#endif
 
     /// <summary>
     /// GrpcNetClient instrumentation.
     /// </summary>
     GrpcNetClient = 8,
+
 #if NETFRAMEWORK
     /// <summary>
     /// WCF instrumentation.
@@ -132,5 +133,12 @@ internal enum TracerInstrumentation
     /// <summary>
     /// RabbitMQ client instrumentation
     /// </summary>
-    RabbitMq = 22
+    RabbitMq = 22,
+
+#if NET
+    /// <summary>
+    /// CoreWCF instrumentation.
+    /// </summary>
+    WcfCore = 23
+#endif
 }

@@ -17,7 +17,9 @@ using Microsoft.AspNetCore.Http;
 namespace IntegrationTests.Helpers;
 
 #pragma warning disable CA1812 // Mark members as static. There is some issue in dotnet format.
+// TODO remove pragma when dotnet format issue is fixed
 internal sealed class MockSpansCollector : IDisposable
+#pragma warning restore CA1812 // Mark members as static. There is some issue in dotnet format.
 {
     private readonly ITestOutputHelper _output;
     private readonly TestHttpServer _listener;
@@ -223,7 +225,10 @@ internal sealed class MockSpansCollector : IDisposable
         _output.WriteLine($"[{name}]: {msg}");
     }
 
+#pragma warning disable CA1812 // Mark members as static. There is some issue in dotnet format.
+    // TODO remove pragma when dotnet format issue is fixed
     internal sealed class Collected
+#pragma warning restore CA1812 // Mark members as static. There is some issue in dotnet format.
     {
         public Collected(string instrumentationScopeName, Span span)
         {

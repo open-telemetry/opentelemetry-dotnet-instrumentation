@@ -9,9 +9,9 @@ using static IntegrationTests.Helpers.DockerFileHelper;
 namespace IntegrationTests;
 
 [CollectionDefinition(Name)]
-public class PostgresCollection : ICollectionFixture<PostgresFixture>
+public class PostgresCollectionFixture : ICollectionFixture<PostgresFixture>
 {
-    public const string Name = nameof(PostgresCollection);
+    public const string Name = nameof(PostgresCollectionFixture);
 }
 
 public class PostgresFixture : IAsyncLifetime
@@ -43,8 +43,7 @@ public class PostgresFixture : IAsyncLifetime
 
     private static async Task<IContainer> LaunchPostgresContainerAsync(int port)
     {
-        var containersBuilder = new ContainerBuilder()
-            .WithImage(PostgresImage)
+        var containersBuilder = new ContainerBuilder(PostgresImage)
             .WithName($"postgres-{port}")
             .WithPortBinding(port, PostgresPort)
             .WithEnvironment("POSTGRES_HOST_AUTH_METHOD", "trust")
