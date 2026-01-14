@@ -118,9 +118,14 @@ add_compile_options(-fstack-protector-strong)
 if (CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL 13.0)
     include(CheckCXXCompilerFlag)
     check_cxx_compiler_flag("-fcf-protection=full" HAS_FCF_PROTECTION)
+    check_cxx_compiler_flag("-fsanitize=safe-stack" HAS_SAFE_STACK)
 
     if (HAS_FCF_PROTECTION)
         add_compile_options(-fcf-protection=full)
+    endif()
+
+    if (HAS_SAFE_STACK)
+        add_compile_options(-fsanitize=safe-stack)
     endif()
 endif()
 
@@ -181,6 +186,10 @@ if (ISLINUX)
     add_link_options(-Wl,-z,now)
     # Mark stack as non-executable
     add_link_options(-Wl,-z,noexecstack)
+endif()
+
+if (HAS_SAFE_STACK)
+    add_link_options(-fsanitize=safe-stack)
 endif()
 
 # ******************************************************
