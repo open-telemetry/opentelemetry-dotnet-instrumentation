@@ -106,11 +106,33 @@ endif()
 add_compile_options(-std=c++17 -fPIC -fms-extensions)
 add_compile_options(-DPAL_STDCPP_COMPAT -DPLATFORM_UNIX -DUNICODE)
 add_compile_options(-Wno-invalid-noreturn -Wno-macro-redefined)
+
+# ******************************************************
+# Security hardening flags
+# ******************************************************
+
+# Stack protection (buffer overflow detection)
+add_compile_options(-fstack-protector-strong)
+
+# Control Flow Integrity (CFG equivalent)
+if (CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL 13.0)
+    add_compile_options(-fcf-protection=full)
+endif()
+
 if (ISMACOS)
     add_compile_options(-stdlib=libc++ -DMACOS -Wno-pragma-pack)
+    # Enable all hardening features on macOS
+    add_compile_options(-fstack-check)
 elseif(ISLINUX)
     add_compile_options(-stdlib=libstdc++ -DLINUX -Wno-pragmas)
+    # Enable additional hardening on Linux
+    add_compile_options(-D_FORTIFY_SOURCE=2)
+    if (ISAMD64)
+        # CET (Control-flow Enforcement Technology) for x86_64
+        add_compile_options(-fcf-protection=full)
+    endif()
 endif()
+
 if (BIT64)
     add_compile_options(-DBIT64 -DHOST_64BIT)
 endif()
@@ -122,6 +144,10 @@ elseif (ISARM64)
     add_compile_options(-DARM64)
     # See https://github.com/dotnet/runtime/issues/78286
     add_compile_definitions(HOST_ARM64)
+    # Branch Target Identification for ARM64 (CFG equivalent)
+    if (CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL 10.0)
+        add_compile_options(-mbranch-protection=standard)
+    endif()
 elseif (ISARM)
     add_compile_options(-DARM)
 endif()
@@ -129,6 +155,27 @@ endif()
 add_compile_definitions(OTEL_AUTO_VERSION_MAJOR=${OTEL_AUTO_VERSION_MAJOR})
 add_compile_definitions(OTEL_AUTO_VERSION_MINOR=${OTEL_AUTO_VERSION_MINOR})
 add_compile_definitions(OTEL_AUTO_VERSION_PATCH=${OTEL_AUTO_VERSION_PATCH})
+
+# ******************************************************
+# Linker options for security hardening
+# ******************************************************
+
+# ASLR (Position Independent Executable) and additional security features
+if (ISMACOS)
+    add_link_options(-Wl,-pie)
+    # Mark heap as non-executable
+    add_link_options(-Wl,-no_heap_execute)
+    # Disable executable stack
+    add_link_options(-Wl,-no_execute_stack)
+elseif(ISLINUX)
+    add_link_options(-Wl,-pie)
+    # Enable RELRO (Relocation Read-Only)
+    add_link_options(-Wl,-z,relro)
+    # Enable full RELRO (bind now)
+    add_link_options(-Wl,-z,now)
+    # Mark stack as non-executable
+    add_link_options(-Wl,-z,noexecstack)
+endif()
 
 # ******************************************************
 # Suppress Warning on MacOS
@@ -177,6 +224,7 @@ add_library("OpenTelemetry.AutoInstrumentation.Native.static" STATIC
 )
 
 set_target_properties("OpenTelemetry.AutoInstrumentation.Native.static" PROPERTIES PREFIX "")
+set_target_properties("OpenTelemetry.AutoInstrumentation.Native.static" PROPERTIES POSITION_INDEPENDENT_CODE ON)
 
 # Define directories includes
 target_include_directories("OpenTelemetry.AutoInstrumentation.Native.static"
@@ -218,6 +266,7 @@ else()
 endif()
 
 set_target_properties(${TARGET_NAME} PROPERTIES PREFIX "")
+set_target_properties(${TARGET_NAME} PROPERTIES POSITION_INDEPENDENT_CODE ON)
 
 # Define linker libraries
 target_link_libraries(${TARGET_NAME} "OpenTelemetry.AutoInstrumentation.Native.static")
