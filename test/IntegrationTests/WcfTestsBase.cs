@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 using System.Net.Sockets;
+using System.Runtime.InteropServices;
 using IntegrationTests.Helpers;
 using Xunit.Abstractions;
 using static OpenTelemetry.Proto.Trace.V1.Span.Types;
@@ -45,7 +46,11 @@ public abstract class WcfTestsBase : TestHelper, IDisposable
                 }
                 else
                 {
-                    _serverProcess.Process.Kill();
+                    if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) || !SendSigTerm(_serverProcess.Process.Id))
+                    {
+                        _serverProcess.Process.Kill();
+                    }
+
                     _serverProcess.Process.WaitForExit();
                 }
 
@@ -121,5 +126,27 @@ public abstract class WcfTestsBase : TestHelper, IDisposable
         }
 
         Assert.Fail("WCF Server did not open the port.");
+    }
+
+    [DllImport("libc", SetLastError = true)]
+#pragma warning disable CA5392 // Use DefaultDllImportSearchPaths attribute for P/Invokes
+#pragma warning disable SA1204 // Static elements should appear before instance elements
+#pragma warning disable SA1300 // Element should begin with upper-case letter
+    private static extern int kill(int pid, int sig);
+#pragma warning restore SA1300 // Element should begin with upper-case letter
+#pragma warning restore SA1204 // Static elements should appear before instance elements
+#pragma warning restore CA5392 // Use DefaultDllImportSearchPaths attribute for P/Invokes
+
+    private static bool SendSigTerm(int processId)
+    {
+        if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+        {
+            const int sigTerm = 15;
+            var result = kill(processId, sigTerm);
+
+            return result == 0;
+        }
+
+        return false;
     }
 }

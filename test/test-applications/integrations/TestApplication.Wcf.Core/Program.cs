@@ -26,7 +26,7 @@ builder.WebHost.ConfigureKestrel(options =>
 // Configure NetTcp transport
 builder.WebHost.UseNetTcp(9090);
 
-var app = builder.Build();
+using var app = builder.Build();
 
 // Configure CoreWCF
 app.UseServiceModel(serviceBuilder =>
