@@ -174,18 +174,13 @@ add_compile_definitions(OTEL_AUTO_VERSION_PATCH=${OTEL_AUTO_VERSION_PATCH})
 # ******************************************************
 
 # ASLR (Position Independent Executable) and additional security features
-if (ISMACOS)
-    add_link_options(-Wl,-pie)
-elseif(ISLINUX)
-    add_link_options(-Wl,-pie)
+if (ISLINUX)
     # Enable RELRO (Relocation Read-Only)
     add_link_options(-Wl,-z,relro)
     # Enable full RELRO (bind now)
     add_link_options(-Wl,-z,now)
     # Mark stack as non-executable
     add_link_options(-Wl,-z,noexecstack)
-    # Mark heap as non-executable
-    add_link_options(-Wl,-z,noexecheap)
 endif()
 
 # ******************************************************
