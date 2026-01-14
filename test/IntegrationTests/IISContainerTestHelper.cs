@@ -25,8 +25,7 @@ internal static class IISContainerTestHelper
         Directory.CreateDirectory(logPath);
         testOutputHelper.WriteLine("Collecting docker logs to: " + logPath);
 
-        var builder = new ContainerBuilder()
-            .WithImage(imageName)
+        var builder = new ContainerBuilder(imageName)
             .WithCleanUp(cleanUp: true)
             .WithName($"{imageName}-{webPort}")
             .WithNetwork(networkName)

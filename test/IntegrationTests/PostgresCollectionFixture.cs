@@ -43,8 +43,7 @@ public class PostgresFixture : IAsyncLifetime
 
     private static async Task<IContainer> LaunchPostgresContainerAsync(int port)
     {
-        var containersBuilder = new ContainerBuilder()
-            .WithImage(PostgresImage)
+        var containersBuilder = new ContainerBuilder(PostgresImage)
             .WithName($"postgres-{port}")
             .WithPortBinding(port, PostgresPort)
             .WithEnvironment("POSTGRES_HOST_AUTH_METHOD", "trust")

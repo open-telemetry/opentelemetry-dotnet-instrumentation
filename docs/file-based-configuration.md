@@ -264,6 +264,10 @@ meter_provider:
         exporter:
           # Configure exporter to be console.
           console:
+            # Configure temporality preference.
+            # Values include: cumulative, delta.
+            # If omitted or null, cumulative is used.
+            temporality_preference: cumulative
 
     # Pull reader for Prometheus
     - pull:

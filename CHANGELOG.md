@@ -20,6 +20,8 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 - Automatically set the `service.instance.id` resource attribute if not provided.
 - Support for [CoreWCF.Primitives](https://www.nuget.org/packages/CoreWCF.Primitives/)
   traces instrumentation for versions `1.8.0`+.
+- Support for `temporality_preference` in file-based configuration
+  for Console Metric Exporter.
 - Enable ASLR, CET and CFG for native profiler libraries on Windows.
 
 ### Changed
@@ -31,6 +33,8 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 
 #### Dependency updates
 
+- Following packages updated
+  - `OpenTelemetry.Instrumentation.SqlClient` from `1.14.0-beta.1` to `1.14.0-rc.1`.
 - .NET Framework only, following packages updated
   - `OpenTelemetry.Instrumentation.AspNet` from `1.14.0-rc.1` to `1.14.0`.
 

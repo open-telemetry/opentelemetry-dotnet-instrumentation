@@ -17,6 +17,7 @@ meter_provider:
     - periodic:
         exporter:
           console:
+            temporality_preference: delta
     - pull:
         exporter:
           prometheus:

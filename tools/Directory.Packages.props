@@ -4,7 +4,7 @@
     <PackageVersion Include="McMaster.Extensions.CommandLineUtils" Version="4.1.1" />
     <PackageVersion Include="Microsoft.Build" Version="17.14.28" />
     <PackageVersion Include="NuGet.ProjectModel" Version="7.0.0" />
-    <PackageVersion Include="System.IO.Abstractions" Version="22.0.16" />
+    <PackageVersion Include="System.IO.Abstractions" Version="22.1.0" />
     <PackageVersion Include="Valleysoft.DockerfileModel" Version="1.2.0" />
     <PackageVersion Include="YamlDotNet" Version="16.3.0" />
   </ItemGroup>
