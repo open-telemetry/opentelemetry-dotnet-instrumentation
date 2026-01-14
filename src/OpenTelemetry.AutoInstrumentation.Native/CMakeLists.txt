@@ -115,18 +115,16 @@ add_compile_options(-Wno-invalid-noreturn -Wno-macro-redefined)
 add_compile_options(-fstack-protector-strong)
 
 # Control Flow Integrity (CFG equivalent)
-if (CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL 13.0)
-    include(CheckCXXCompilerFlag)
-    check_cxx_compiler_flag("-fcf-protection=full" HAS_FCF_PROTECTION)
-    check_cxx_compiler_flag("-fsanitize=safe-stack" HAS_SAFE_STACK)
+include(CheckCXXCompilerFlag)
+check_cxx_compiler_flag("-fcf-protection=full" HAS_FCF_PROTECTION)
+check_cxx_compiler_flag("-fsanitize=safe-stack" HAS_SAFE_STACK)
 
-    if (HAS_FCF_PROTECTION)
-        add_compile_options(-fcf-protection=full)
-    endif()
+if (HAS_FCF_PROTECTION)
+    add_compile_options(-fcf-protection=full)
+endif()
 
-    if (HAS_SAFE_STACK)
-        add_compile_options(-fsanitize=safe-stack)
-    endif()
+if (HAS_SAFE_STACK)
+    add_compile_options(-fsanitize=safe-stack)
 endif()
 
 if (ISMACOS)
@@ -212,7 +210,7 @@ endif()
 add_library("OpenTelemetry.AutoInstrumentation.Native.static" STATIC
         class_factory.cpp
         clr_helpers.cpp
-	configuration.cpp
+        configuration.cpp
         continuous_profiler_clr_helpers.cpp
         continuous_profiler.cpp
         cor_profiler_base.cpp
