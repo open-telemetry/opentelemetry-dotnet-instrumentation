@@ -176,6 +176,14 @@ internal class DotNetTraces
     [YamlMember(Alias = "wcfclient")]
     public object? WcfClient { get; set; }
 
+#if NET
+    /// <summary>
+    /// Gets or sets the CoreWCF traces instrumentation configuration.
+    /// </summary>
+    [YamlMember(Alias = "wcfcore")]
+    public object? WcfCore { get; set; }
+#endif
+
     /// <summary>
     /// Returns the list of enabled traces instrumentations.
     /// </summary>

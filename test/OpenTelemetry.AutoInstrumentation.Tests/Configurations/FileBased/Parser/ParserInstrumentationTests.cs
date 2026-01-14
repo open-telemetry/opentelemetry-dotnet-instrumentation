@@ -52,6 +52,9 @@ public class ParserInstrumentationTests
             "sqlclient",
             "stackexchangeredis",
             "wcfclient",
+#if NET
+            "wcfcore"
+#endif
 #if NETFRAMEWORK
             "wcfservice",
 #endif
@@ -59,6 +62,9 @@ public class ParserInstrumentationTests
 
         var traces = config.InstrumentationDevelopment.DotNet.Traces;
         Assert.NotNull(traces);
+
+        const int countOfNonTracesProperties = 4;
+        FileBasedTestHelper.AssertCountOfAliasProperties(traces, expectedTraces.Length + countOfNonTracesProperties);
 
         foreach (var alias in expectedTraces)
         {

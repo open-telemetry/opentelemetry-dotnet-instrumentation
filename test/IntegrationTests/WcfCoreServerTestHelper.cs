@@ -1,7 +1,7 @@
 // Copyright The OpenTelemetry Authors
 // SPDX-License-Identifier: Apache-2.0
 
-#if _WINDOWS
+#if NET
 
 using IntegrationTests.Helpers;
 using Xunit.Abstractions;
@@ -10,21 +10,22 @@ namespace IntegrationTests;
 
 #pragma warning disable CA1812 // Mark members as static. There is some issue in dotnet format.
 // TODO remove pragma when dotnet format issue is fixed
-internal sealed class WcfServerTestHelper : WcfServerTestHelperBase
+internal sealed class WcfCoreServerTestHelper : WcfServerTestHelperBase
 #pragma warning restore CA1812 // Mark members as static. There is some issue in dotnet format.
 {
-    public WcfServerTestHelper(ITestOutputHelper output)
-        : base("Wcf.Server.NetFramework", output, "TestApplication.Wcf.Server.NetFramework")
+    private readonly string _packageVersion;
+
+    public WcfCoreServerTestHelper(ITestOutputHelper output, string packageVersion)
+        : base("Wcf.Core", output, "TestApplication.Wcf.Core")
     {
+        _packageVersion = packageVersion;
     }
 
-    internal override string ServerInstrumentationScopeName { get => "OpenTelemetry.Instrumentation.Wcf"; }
+    internal override string ServerInstrumentationScopeName { get => "CoreWCF.Primitives"; }
 
     internal override ProcessHelper RunWcfServer(MockSpansCollector collector)
     {
-        var baseBinDirectory = EnvironmentHelper.GetTestApplicationBaseBinDirectory();
-        var exeFileName = $"{EnvironmentHelper.FullTestApplicationName}.exe";
-        var testApplicationPath = Path.Combine(baseBinDirectory, EnvironmentTools.GetPlatformDir(), EnvironmentTools.GetBuildConfiguration(), "net462", exeFileName);
+        var testApplicationPath = EnvironmentHelper.GetTestApplicationPath(_packageVersion, startupMode: TestAppStartupMode.Exe);
 
         if (!File.Exists(testApplicationPath))
         {

@@ -318,6 +318,9 @@ public sealed class SettingsTests : IDisposable
     [InlineData("KAFKA", TracerInstrumentation.Kafka)]
     [InlineData("ORACLEMDA", TracerInstrumentation.OracleMda)]
     [InlineData("RABBITMQ", TracerInstrumentation.RabbitMq)]
+#if NET
+    [InlineData("WCFCORE", TracerInstrumentation.WcfCore)]
+#endif
     internal void TracerSettings_Instrumentations_SupportedValues(string tracerInstrumentation, TracerInstrumentation expectedTracerInstrumentation)
     {
         Environment.SetEnvironmentVariable(ConfigurationKeys.Traces.TracesInstrumentationEnabled, "false");

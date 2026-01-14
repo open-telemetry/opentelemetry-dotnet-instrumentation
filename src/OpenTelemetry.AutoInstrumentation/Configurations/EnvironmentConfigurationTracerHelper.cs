@@ -52,6 +52,7 @@ internal static class EnvironmentConfigurationTracerHelper
                 TracerInstrumentation.MySqlData => builder.AddSource("connector-net"),
                 TracerInstrumentation.EntityFrameworkCore => Wrappers.AddEntityFrameworkCoreInstrumentation(builder, pluginManager, lazyInstrumentationLoader, settings),
                 TracerInstrumentation.GraphQL => Wrappers.AddGraphQLInstrumentation(builder, pluginManager, lazyInstrumentationLoader, settings),
+                TracerInstrumentation.WcfCore => builder.AddSource("CoreWCF.Primitives"),
 #endif
                 _ => null
             };
