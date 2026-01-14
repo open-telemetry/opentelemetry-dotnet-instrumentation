@@ -167,7 +167,6 @@
       <ModuleDefinitionFile>.\OpenTelemetry.AutoInstrumentation.Native.def</ModuleDefinitionFile>
       <CETCompat>true</CETCompat>
       <DynamicBase>true</DynamicBase>
-      <AdditionalOptions>/CETCOMPAT %(AdditionalOptions)</AdditionalOptions>
     </Link>
     <PreBuildEvent>
       <Command>IF EXIST "$(SolutionDir)pre-build-events-cpp.bat" CALL "$(SolutionDir)pre-build-events-cpp.bat"  "$(TargetPath)"  "$(TargetFileName)"  "$(TargetDir)"  "$(TargetName)"</Command>
@@ -198,7 +197,6 @@
       <ModuleDefinitionFile>.\OpenTelemetry.AutoInstrumentation.Native.def</ModuleDefinitionFile>
       <CETCompat>true</CETCompat>
       <DynamicBase>true</DynamicBase>
-      <AdditionalOptions>/CETCOMPAT %(AdditionalOptions)</AdditionalOptions>
     </Link>
     <PreBuildEvent>
       <Command>IF EXIST "$(SolutionDir)pre-build-events-cpp.bat" CALL "$(SolutionDir)pre-build-events-cpp.bat"  "$(TargetPath)"  "$(TargetFileName)"  "$(TargetDir)"  "$(TargetName)"</Command>
