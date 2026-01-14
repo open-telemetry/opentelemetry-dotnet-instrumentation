@@ -116,7 +116,12 @@ add_compile_options(-fstack-protector-strong)
 
 # Control Flow Integrity (CFG equivalent)
 if (CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL 13.0)
-    add_compile_options(-fcf-protection=full)
+    include(CheckCXXCompilerFlag)
+    check_cxx_compiler_flag("-fcf-protection=full" HAS_FCF_PROTECTION)
+
+    if (HAS_FCF_PROTECTION)
+        add_compile_options(-fcf-protection=full)
+    endif()
 endif()
 
 if (ISMACOS)
@@ -127,7 +132,7 @@ elseif(ISLINUX)
     add_compile_options(-stdlib=libstdc++ -DLINUX -Wno-pragmas)
     # Enable additional hardening on Linux
     add_compile_options(-D_FORTIFY_SOURCE=2)
-    if (ISAMD64)
+    if (ISAMD64 AND HAS_FCF_PROTECTION)
         # CET (Control-flow Enforcement Technology) for x86_64
         add_compile_options(-fcf-protection=full)
     endif()
