@@ -43,8 +43,7 @@ public class RedisFixture : IAsyncLifetime
 
     private static async Task<IContainer> LaunchRedisContainerAsync(int port)
     {
-        var containersBuilder = new ContainerBuilder()
-            .WithImage(RedisImage)
+        var containersBuilder = new ContainerBuilder(RedisImage)
             .WithName($"redis-{port}")
             .WithPortBinding(port, RedisPort)
             .WithWaitStrategy(Wait.ForUnixContainer().UntilInternalTcpPortIsAvailable(RedisPort));

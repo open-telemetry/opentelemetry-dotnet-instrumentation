@@ -70,8 +70,7 @@ public class SqlServerFixture : IAsyncLifetime
 
     private async Task<IContainer> LaunchSqlServerContainerAsync()
     {
-        var databaseContainersBuilder = new ContainerBuilder()
-            .WithImage(DatabaseImage)
+        var databaseContainersBuilder = new ContainerBuilder(DatabaseImage)
             .WithName($"sql-server-{Port}")
             .WithPortBinding(Port, DatabasePort)
             .WithEnvironment("SA_PASSWORD", Password)

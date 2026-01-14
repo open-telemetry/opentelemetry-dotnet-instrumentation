@@ -68,8 +68,7 @@ public class OracleFixture : IAsyncLifetime
 
     private async Task<IContainer> LaunchOracleContainerAsync(int port)
     {
-        var containersBuilder = new ContainerBuilder()
-            .WithImage(OracleImage)
+        var containersBuilder = new ContainerBuilder(OracleImage)
             .WithEnvironment("ORACLE_RANDOM_PASSWORD", "yes")
             .WithEnvironment("APP_USER", "appuser")
             .WithEnvironment("APP_USER_PASSWORD", Password)

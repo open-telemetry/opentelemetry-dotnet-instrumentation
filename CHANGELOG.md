@@ -30,6 +30,8 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 
 #### Dependency updates
 
+- Following packages updated
+  - `OpenTelemetry.Instrumentation.SqlClient` from `1.14.0-beta.1` to `1.14.0-rc.1`.
 - .NET Framework only, following packages updated
   - `OpenTelemetry.Instrumentation.AspNet` from `1.14.0-rc.1` to `1.14.0`.
 
