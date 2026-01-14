@@ -130,8 +130,16 @@ if (ISMACOS)
     add_compile_options(-fstack-check)
 elseif(ISLINUX)
     add_compile_options(-stdlib=libstdc++ -DLINUX -Wno-pragmas)
-    # Enable additional hardening on Linux
-    add_compile_options(-D_FORTIFY_SOURCE=2)
+    # Enable additional hardening on modern versions of Linux
+    # Require glibc 2.27+ for _FORTIFY_SOURCE=2
+    execute_process(COMMAND ldd --version OUTPUT_VARIABLE LDD_VERSION)
+    if (LDD_VERSION MATCHES "([0-9]+)\\.([0-9]+)")
+        set(GLIBC_MAJOR ${CMAKE_MATCH_1})
+        set(GLIBC_MINOR ${CMAKE_MATCH_2})        
+        if ((GLIBC_MAJOR EQUAL 2 AND GLIBC_MINOR GREATER 26) OR GLIBC_MAJOR GREATER 2)
+            add_compile_options(-D_FORTIFY_SOURCE=2)
+        endif()
+    endif()
     if (ISAMD64 AND HAS_FCF_PROTECTION)
         # CET (Control-flow Enforcement Technology) for x86_64
         add_compile_options(-fcf-protection=full)
