@@ -22,6 +22,7 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
   traces instrumentation for versions `1.8.0`+.
 - Support for `temporality_preference` in file-based configuration
   for Console Metric Exporter.
+- Enable ASLR, CET and CFG for native profiler libraries on Windows.
 
 ### Changed
 

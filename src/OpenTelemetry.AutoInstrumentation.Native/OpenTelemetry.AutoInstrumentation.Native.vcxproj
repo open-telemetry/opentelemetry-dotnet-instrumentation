@@ -47,12 +47,14 @@
     <PlatformToolset>v143</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
+    <LinkControlFlowGuard>true</LinkControlFlowGuard>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v143</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
+    <LinkControlFlowGuard>true</LinkControlFlowGuard>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
@@ -138,12 +140,15 @@
       <PreprocessorDefinitions>_TARGET_64BIT;BIT64;HOST_64BIT;AMD64;_UNICODE;UNICODE;OTEL_AUTO_VERSION_MAJOR=$(OTEL_AUTO_VERSION_MAJOR);OTEL_AUTO_VERSION_MINOR=$(OTEL_AUTO_VERSION_MINOR);OTEL_AUTO_VERSION_PATCH=$(OTEL_AUTO_VERSION_PATCH);%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>$(LIB_INCLUDES);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <TreatWarningAsError>true</TreatWarningAsError>
+      <ControlFlowGuard>Guard</ControlFlowGuard>
     </ClCompile>
     <Lib>
       <AdditionalLibraryDirectories>$(LIB_INCLUDES);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Lib>
     <Link>
       <AdditionalLibraryDirectories>$(LIB_INCLUDES);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <CETCompat>true</CETCompat>
+      <DynamicBase>true</DynamicBase>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -162,12 +167,15 @@
       <PreprocessorDefinitions>_UNICODE;UNICODE;X86;HOST_X86;OTEL_AUTO_VERSION_MAJOR=$(OTEL_AUTO_VERSION_MAJOR);OTEL_AUTO_VERSION_MINOR=$(OTEL_AUTO_VERSION_MINOR);OTEL_AUTO_VERSION_PATCH=$(OTEL_AUTO_VERSION_PATCH);%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>$(LIB_INCLUDES);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <TreatWarningAsError>true</TreatWarningAsError>
+      <ControlFlowGuard>Guard</ControlFlowGuard>
     </ClCompile>
     <Lib>
       <AdditionalLibraryDirectories>$(LIB_INCLUDES);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Lib>
     <Link>
       <AdditionalLibraryDirectories>$(LIB_INCLUDES);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <CETCompat>true</CETCompat>
+      <DynamicBase>true</DynamicBase>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
