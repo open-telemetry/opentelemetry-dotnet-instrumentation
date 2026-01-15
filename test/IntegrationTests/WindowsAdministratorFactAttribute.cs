@@ -11,6 +11,9 @@ public sealed class WindowsAdministratorFactAttribute : FactAttribute
     public WindowsAdministratorFactAttribute()
         : base()
     {
-        Skip = EnvironmentTools.IsWindowsAdministrator() ? null : "This test requires Windows Administrator privileges.";
+        Skip = GetSkipReason();
     }
+
+    internal static string? GetSkipReason() =>
+        !EnvironmentTools.IsWindows() || EnvironmentTools.IsWindowsAdministrator() ? null : "This test requires administrative privileges on Windows.";
 }
