@@ -33,7 +33,7 @@ public class WcfDotNetTests : WcfTestsBase
     }
 
     [Trait("Category", "EndToEnd")]
-    [Theory]
+    [WindowsAdministratorTheory]
     [MemberData(nameof(TestData))]
     public async Task SubmitTraces(string clientPackageVersion, Func<ITestOutputHelper, WcfServerTestHelperBase> wcfServerTestHelperFactory)
     {
