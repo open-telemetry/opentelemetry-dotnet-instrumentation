@@ -74,13 +74,14 @@ public abstract class WcfTestsBase : TestHelper, IDisposable
         using var collector = new MockSpansCollector(Output);
         SetExporter(collector);
 
-        _serverProcess = wcfServerTestHelperBase.RunWcfServer(collector);
+        (_serverProcess, var tcpPort, var httpPort) = wcfServerTestHelperBase.RunWcfServer(collector);
 
-        await WaitForServer().ConfigureAwait(false);
+        await WaitForServer(tcpPort).ConfigureAwait(false);
 
         RunTestApplication(new TestSettings
         {
-            PackageVersion = clientPackageVersion
+            PackageVersion = clientPackageVersion,
+            Arguments = $"--tcpPort {tcpPort} --httpPort {httpPort}"
         });
 
         collector.Expect(wcfServerTestHelperBase.ServerInstrumentationScopeName, span => span.Kind == SpanKind.Server, "Server 1");
@@ -96,9 +97,8 @@ public abstract class WcfTestsBase : TestHelper, IDisposable
         collector.AssertExpectations();
     }
 
-    private async Task WaitForServer()
+    private async Task WaitForServer(int tcpPort)
     {
-        const int tcpPort = 9090;
         using var tcpClient = new TcpClient();
         var retries = 0;
 

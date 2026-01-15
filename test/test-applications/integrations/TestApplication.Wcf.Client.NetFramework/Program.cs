@@ -31,10 +31,16 @@ internal static class Program
             netTcpAddress = $"net.tcp://localhost:{args[0]}/StatusService.svc";
             httpAddress = $"http://localhost:{args[1]}/StatusService.svc";
         }
+        else if (args.Length == 4)
+        {
+            // Self-hosted service addresses
+            netTcpAddress = $"net.tcp://127.0.0.1:{args[1]}/Telemetry";
+            httpAddress = $"http://127.0.0.1:{args[3]}/Telemetry";
+        }
         else
         {
             throw new InvalidOperationException(
-                "TestApplication.Wcf.Client.NetFramework application requires either 0 or exactly 2 arguments.");
+                "TestApplication.Wcf.Client.NetFramework application requires either 0, 2, or 4 arguments.");
         }
 
         using var parent = Source.StartActivity("Parent");
@@ -99,5 +105,25 @@ internal static class Program
             {
             }
         }
+    }
+
+    private static int GetTcpPort(string[] args)
+    {
+        if (args.Length > 0)
+        {
+            return int.Parse(args[0], System.Globalization.CultureInfo.InvariantCulture);
+        }
+
+        return 9090;
+    }
+
+    private static int GetHttpPort(string[] args)
+    {
+        if (args.Length > 1)
+        {
+            return int.Parse(args[1], System.Globalization.CultureInfo.InvariantCulture);
+        }
+
+        return 9009;
     }
 }

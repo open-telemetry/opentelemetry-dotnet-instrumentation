@@ -16,5 +16,5 @@ public abstract class WcfServerTestHelperBase : TestHelper
 
     internal abstract string ServerInstrumentationScopeName { get; }
 
-    internal abstract ProcessHelper RunWcfServer(MockSpansCollector collector);
+    internal abstract (ProcessHelper ProcessHelper, int TcpPort, int HttpPort) RunWcfServer(MockSpansCollector collector);
 }
