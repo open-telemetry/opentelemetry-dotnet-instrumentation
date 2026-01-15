@@ -35,10 +35,10 @@ internal sealed class WcfServerTestHelper : WcfServerTestHelperBase
         var tcpPort = TcpPortProvider.GetOpenPort();
 
         SetExporter(collector);
-#pragma warning disable CA2000 // Dispose objects before losing scope. Process is disposed by ProcessHelper.
+#pragma warning disable CA2000 // Dispose objects before losing scope.
         var process = InstrumentedProcessHelper.Start(testApplicationPath, $"--tcpPort {tcpPort} --httpPort {httpPort}", EnvironmentHelper);
-#pragma warning restore CA2000 // Dispose objects before losing scope. Process is disposed by ProcessHelper.
         return (new ProcessHelper(process), tcpPort, httpPort);
+#pragma warning restore CA2000 // Dispose objects before losing scope.
     }
 }
 #endif

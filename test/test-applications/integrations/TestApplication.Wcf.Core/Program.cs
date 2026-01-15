@@ -42,7 +42,7 @@ app.UseServiceModel(serviceBuilder =>
     serviceBuilder.AddService<StatusService>();
 
     // Configure BasicHttpBinding endpoint
-    serviceBuilder.AddServiceEndpoint<StatusService, IStatusServiceContract>(new BasicHttpBinding(),  httpAddress);
+    serviceBuilder.AddServiceEndpoint<StatusService, IStatusServiceContract>(new BasicHttpBinding(), httpAddress);
 
     // Configure NetTcpBinding endpoint with SecurityMode.None
     serviceBuilder.AddServiceEndpoint<StatusService, IStatusServiceContract>(new NetTcpBinding(SecurityMode.None), $"net.tcp://127.0.0.1:{tcpPort}/Telemetry");

@@ -106,24 +106,4 @@ internal static class Program
             }
         }
     }
-
-    private static int GetTcpPort(string[] args)
-    {
-        if (args.Length > 0)
-        {
-            return int.Parse(args[0], System.Globalization.CultureInfo.InvariantCulture);
-        }
-
-        return 9090;
-    }
-
-    private static int GetHttpPort(string[] args)
-    {
-        if (args.Length > 1)
-        {
-            return int.Parse(args[1], System.Globalization.CultureInfo.InvariantCulture);
-        }
-
-        return 9009;
-    }
 }
