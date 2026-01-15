@@ -503,7 +503,7 @@ partial class Build
         .After(CreateRequiredDirectories)
         .Executes(() =>
         {
-            var refName = "main";
+            var refName = "local-dev";
             var gitSha = "?";
 
             if (Environment.GetEnvironmentVariable("GITHUB_ACTIONS") is "true")
