@@ -23,7 +23,7 @@ internal sealed class WcfCoreServerTestHelper : WcfServerTestHelperBase
 
     internal override string ServerInstrumentationScopeName { get => "CoreWCF.Primitives"; }
 
-    internal override ProcessHelper RunWcfServer(MockSpansCollector collector)
+    internal override (ProcessHelper ProcessHelper, int TcpPort, int HttpPort) RunWcfServer(MockSpansCollector collector)
     {
         var testApplicationPath = EnvironmentHelper.GetTestApplicationPath(_packageVersion, startupMode: TestAppStartupMode.Exe);
 
@@ -32,9 +32,12 @@ internal sealed class WcfCoreServerTestHelper : WcfServerTestHelperBase
             throw new InvalidOperationException($"Unable to find executing assembly at {testApplicationPath}");
         }
 
+        var httpPort = TcpPortProvider.GetOpenPort();
+        var tcpPort = TcpPortProvider.GetOpenPort();
+
         SetExporter(collector);
-        var process = InstrumentedProcessHelper.Start(testApplicationPath, null, EnvironmentHelper);
-        return new ProcessHelper(process);
+        var process = InstrumentedProcessHelper.Start(testApplicationPath, $"--tcpPort {tcpPort} --httpPort {httpPort}", EnvironmentHelper);
+        return (new ProcessHelper(process), tcpPort, httpPort);
     }
 }
 #endif

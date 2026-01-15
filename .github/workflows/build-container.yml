@@ -54,7 +54,7 @@ jobs:
         '
 
     - name: Publish Linux build
-      if: (${{ job.status }} != 'cancelled')
+      if: ${{ !cancelled() }}
       uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # tag: v6.0.0
       with:
         name: bin-${{ matrix.base-image }}-${{ matrix.architecture }}
