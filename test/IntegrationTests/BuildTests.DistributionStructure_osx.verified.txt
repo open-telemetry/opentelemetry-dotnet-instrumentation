@@ -44,7 +44,6 @@
   /net/System.ServiceModel.dll,
   /net/ruleEngine.json,
   /osx-arm64/OpenTelemetry.AutoInstrumentation.Native.dylib,
-  /osx-arm64/OpenTelemetry.AutoInstrumentation.Native.dSYM,
   /store/arm64/net10.0/microsoft.extensions.configuration.abstractions/8.0.0/lib/net10.0/Microsoft.Extensions.Configuration.Abstractions.dll,
   /store/arm64/net10.0/microsoft.extensions.configuration.binder/8.0.2/lib/net10.0/Microsoft.Extensions.Configuration.Binder.dll,
   /store/arm64/net10.0/microsoft.extensions.configuration/8.0.0/lib/net10.0/Microsoft.Extensions.Configuration.dll,

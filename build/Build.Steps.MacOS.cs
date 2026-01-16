@@ -46,16 +46,11 @@ partial class Build
         .Executes(() =>
         {
             // Create home directory
-            var source = NativeProfilerProject.Directory / "build" / "bin";
-            var sourceLib = source / $"{NativeProfilerProject.Name}.dylib";
-            var sourceSymbols = source / $"{NativeProfilerProject.Name}.dSYM";
+            var source = NativeProfilerProject.Directory / "build" / "bin" / $"{NativeProfilerProject.Name}.dylib";
             var platform = Platform.ToString().ToLowerInvariant();
             var dest = TracerHomeDirectory / $"osx-{platform}";
+            Log.Information($"Copying '{source}' to '{dest}'");
 
-            Log.Information($"Copying '{sourceLib}' to '{dest}'");
-            sourceLib.CopyToDirectory(dest, ExistsPolicy.FileOverwrite);
-
-            Log.Information($"Copying '{sourceSymbols}' to '{dest}'");
-            sourceSymbols.CopyToDirectory(dest, ExistsPolicy.FileOverwrite);
+            source.CopyToDirectory(dest, ExistsPolicy.FileOverwrite);
         });
 }

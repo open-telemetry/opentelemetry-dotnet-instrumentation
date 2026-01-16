@@ -127,8 +127,10 @@ elseif (ISARM)
 endif()
 
 # Produce symbol files
-set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -g")
-set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -g")
+if (ISLINUX)
+    set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -g")
+    set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -g")
+endif()
 
 add_compile_definitions(OTEL_AUTO_VERSION_MAJOR=${OTEL_AUTO_VERSION_MAJOR})
 add_compile_definitions(OTEL_AUTO_VERSION_MINOR=${OTEL_AUTO_VERSION_MINOR})
@@ -222,12 +224,7 @@ else()
 endif()
 
 # Strip symbols from the binaries into a separate file
-if (ISMACOS)
-    add_custom_command(TARGET "OpenTelemetry.AutoInstrumentation.Native" POST_BUILD
-        COMMAND dsymutil $<TARGET_FILE:OpenTelemetry.AutoInstrumentation.Native>
-        COMMAND strip -S $<TARGET_FILE:OpenTelemetry.AutoInstrumentation.Native>
-    )
-elseif (ISLINUX)
+if (ISLINUX)
     add_custom_command(TARGET "OpenTelemetry.AutoInstrumentation.Native" POST_BUILD
         COMMAND ${CMAKE_OBJCOPY}
                 --only-keep-debug $<TARGET_FILE:OpenTelemetry.AutoInstrumentation.Native> $<TARGET_FILE:OpenTelemetry.AutoInstrumentation.Native>.debug
