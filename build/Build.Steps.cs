@@ -503,8 +503,9 @@ partial class Build
         .After(CreateRequiredDirectories)
         .Executes(() =>
         {
+            var version = VersionHelper.GetVersion();
             var refName = "local-dev";
-            var gitSha = "?";
+            var gitSha = VersionHelper.GetCommitId();
 
             if (Environment.GetEnvironmentVariable("GITHUB_ACTIONS") is "true")
             {
@@ -513,7 +514,7 @@ partial class Build
             }
 
             var dest = TracerHomeDirectory / "VERSION";
-            dest.WriteAllLines([$"{refName}@{gitSha}"]);
+            dest.WriteAllLines([version, $"{refName}@{gitSha}"]);
         });
 
     Target RunNativeTests => _ => _
