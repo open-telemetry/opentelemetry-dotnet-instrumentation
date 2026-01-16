@@ -115,16 +115,13 @@ add_compile_options(-Wno-invalid-noreturn -Wno-macro-redefined)
 add_compile_options(-fstack-protector-strong)
 
 # Control Flow Integrity (CFG equivalent)
+# We should also enable SafeStack for the compiler and linker too (-fsanitize=safe-stack), but it requires dynamic linking to work.
+# See https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/pull/4770#issuecomment-3758136539.
 include(CheckCXXCompilerFlag)
 check_cxx_compiler_flag("-fcf-protection=full" HAS_FCF_PROTECTION)
-check_cxx_compiler_flag("-fsanitize=safe-stack" HAS_SAFE_STACK)
 
 if (HAS_FCF_PROTECTION)
     add_compile_options(-fcf-protection=full)
-endif()
-
-if (HAS_SAFE_STACK)
-    add_compile_options(-fsanitize=safe-stack)
 endif()
 
 if (ISMACOS)
@@ -184,10 +181,6 @@ if (ISLINUX)
     add_link_options(-Wl,-z,now)
     # Mark stack as non-executable
     add_link_options(-Wl,-z,noexecstack)
-endif()
-
-if (HAS_SAFE_STACK)
-    add_link_options(-fsanitize=safe-stack)
 endif()
 
 # ******************************************************
