@@ -224,7 +224,7 @@ endif()
 # Strip symbols from the binaries into a separate file
 if (ISMACOS)
     add_custom_command(TARGET "OpenTelemetry.AutoInstrumentation.Native" POST_BUILD
-        COMMAND dsymutil $<TARGET_FILE:OpenTelemetry.AutoInstrumentation.Native> -o $<TARGET_FILE:OpenTelemetry.AutoInstrumentation.Native>.dSYM
+        COMMAND dsymutil $<TARGET_FILE:OpenTelemetry.AutoInstrumentation.Native>
         COMMAND strip -S $<TARGET_FILE:OpenTelemetry.AutoInstrumentation.Native>
     )
 elseif (ISLINUX)
