@@ -140,10 +140,6 @@ elseif(ISLINUX)
             add_compile_options(-D_FORTIFY_SOURCE=2)
         endif()
     endif()
-    if (ISAMD64 AND HAS_FCF_PROTECTION)
-        # CET (Control-flow Enforcement Technology) for x86_64
-        add_compile_options(-fcf-protection=full)
-    endif()
 endif()
 
 if (BIT64)
