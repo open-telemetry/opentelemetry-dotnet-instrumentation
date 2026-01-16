@@ -3,7 +3,7 @@
   \AdditionalDeps\shared\Microsoft.NETCore.App\8.0.0\OpenTelemetry.AutoInstrumentation.AdditionalDeps.deps.json,
   \AdditionalDeps\shared\Microsoft.NETCore.App\9.0.0\OpenTelemetry.AutoInstrumentation.AdditionalDeps.deps.json,
   \LICENSE,
-  /VERSION,
+  \VERSION,
   \instrument.sh,
   \net\OpenTelemetry.Api.ProviderBuilderExtensions.dll,
   \net\OpenTelemetry.Api.dll,
