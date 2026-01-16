@@ -126,6 +126,10 @@ elseif (ISARM)
     add_compile_options(-DARM)
 endif()
 
+# Produce symbol files
+set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -g")
+set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -g")
+
 add_compile_definitions(OTEL_AUTO_VERSION_MAJOR=${OTEL_AUTO_VERSION_MAJOR})
 add_compile_definitions(OTEL_AUTO_VERSION_MINOR=${OTEL_AUTO_VERSION_MINOR})
 add_compile_definitions(OTEL_AUTO_VERSION_PATCH=${OTEL_AUTO_VERSION_PATCH})
@@ -214,6 +218,21 @@ else()
     add_library(${TARGET_NAME} SHARED
         dllmain.cpp
         interop.cpp
+    )
+endif()
+
+# Strip symbols from the binaries into a separate file
+if (ISMACOS)
+    add_custom_command(TARGET "OpenTelemetry.AutoInstrumentation.Native" POST_BUILD
+        COMMAND dsymutil $<TARGET_FILE:OpenTelemetry.AutoInstrumentation.Native> -o $<TARGET_FILE:OpenTelemetry.AutoInstrumentation.Native>.dSYM
+        COMMAND strip -S $<TARGET_FILE:OpenTelemetry.AutoInstrumentation.Native>
+    )
+elseif (ISLINUX)
+    add_custom_command(TARGET "OpenTelemetry.AutoInstrumentation.Native" POST_BUILD
+        COMMAND ${CMAKE_OBJCOPY}
+                --only-keep-debug $<TARGET_FILE:OpenTelemetry.AutoInstrumentation.Native> $<TARGET_FILE:OpenTelemetry.AutoInstrumentation.Native>.debug
+        COMMAND ${CMAKE_STRIP} --strip-debug $<TARGET_FILE:OpenTelemetry.AutoInstrumentation.Native>
+        COMMAND ${CMAKE_OBJCOPY} --add-gnu-debuglink=$<TARGET_FILE:OpenTelemetry.AutoInstrumentation.Native>.debug $<TARGET_FILE:OpenTelemetry.AutoInstrumentation.Native>
     )
 endif()
 
