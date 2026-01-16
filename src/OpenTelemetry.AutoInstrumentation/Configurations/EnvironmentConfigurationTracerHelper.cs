@@ -45,13 +45,14 @@ internal static class EnvironmentConfigurationTracerHelper
                 TracerInstrumentation.WcfClient => AddWcfIfNeeded(builder, ref wcfInstrumentationAdded),
                 TracerInstrumentation.OracleMda => Wrappers.AddOracleMdaInstrumentation(builder, lazyInstrumentationLoader, settings),
                 TracerInstrumentation.RabbitMq => builder.AddSource("RabbitMQ.Client.Publisher").AddSource("RabbitMQ.Client.Subscriber"),
+                TracerInstrumentation.StackExchangeRedis => builder.AddSource("OpenTelemetry.Instrumentation.StackExchangeRedis"),
 #if NET
                 TracerInstrumentation.AspNetCore => Wrappers.AddAspNetCoreInstrumentation(builder, pluginManager, lazyInstrumentationLoader, settings),
                 TracerInstrumentation.MassTransit => builder.AddSource("MassTransit"),
                 TracerInstrumentation.MySqlData => builder.AddSource("connector-net"),
-                TracerInstrumentation.StackExchangeRedis => builder.AddSource("OpenTelemetry.Instrumentation.StackExchangeRedis"),
                 TracerInstrumentation.EntityFrameworkCore => Wrappers.AddEntityFrameworkCoreInstrumentation(builder, pluginManager, lazyInstrumentationLoader, settings),
                 TracerInstrumentation.GraphQL => Wrappers.AddGraphQLInstrumentation(builder, pluginManager, lazyInstrumentationLoader, settings),
+                TracerInstrumentation.WcfCore => builder.AddSource("CoreWCF.Primitives"),
 #endif
                 _ => null
             };

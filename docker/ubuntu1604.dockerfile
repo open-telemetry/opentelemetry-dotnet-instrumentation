@@ -34,7 +34,7 @@ RUN wget -O - https://apt.kitware.com/keys/kitware-archive-latest.asc 2>/dev/nul
 COPY ./scripts/dotnet-install.sh ./dotnet-install.sh
 
 RUN chmod +x ./dotnet-install.sh \
-    && ./dotnet-install.sh -v 9.0.308 --install-dir /usr/share/dotnet --no-path \
+    && ./dotnet-install.sh -v 9.0.309 --install-dir /usr/share/dotnet --no-path \
     && rm dotnet-install.sh
 
 ENV IsLegacyUbuntu=true

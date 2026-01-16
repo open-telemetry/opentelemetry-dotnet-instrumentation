@@ -1,8 +1,6 @@
 // Copyright The OpenTelemetry Authors
 // SPDX-License-Identifier: Apache-2.0
 
-#if NET
-
 using DotNet.Testcontainers.Builders;
 using DotNet.Testcontainers.Containers;
 using IntegrationTests.Helpers;
@@ -45,8 +43,7 @@ public class RedisFixture : IAsyncLifetime
 
     private static async Task<IContainer> LaunchRedisContainerAsync(int port)
     {
-        var containersBuilder = new ContainerBuilder()
-            .WithImage(RedisImage)
+        var containersBuilder = new ContainerBuilder(RedisImage)
             .WithName($"redis-{port}")
             .WithPortBinding(port, RedisPort)
             .WithWaitStrategy(Wait.ForUnixContainer().UntilInternalTcpPortIsAvailable(RedisPort));
@@ -62,4 +59,3 @@ public class RedisFixture : IAsyncLifetime
         await container.DisposeAsync().ConfigureAwait(false);
     }
 }
-#endif

@@ -289,15 +289,15 @@ public sealed class SettingsTests : IDisposable
 #if NET
     [InlineData("GRAPHQL", TracerInstrumentation.GraphQL)]
 #endif
+    [InlineData("GRPCNETCLIENT", TracerInstrumentation.GrpcNetClient)]
     [InlineData("HTTPCLIENT", TracerInstrumentation.HttpClient)]
     [InlineData("MONGODB", TracerInstrumentation.MongoDB)]
 #if NET
     [InlineData("MYSQLDATA", TracerInstrumentation.MySqlData)]
-    [InlineData("STACKEXCHANGEREDIS", TracerInstrumentation.StackExchangeRedis)]
 #endif
     [InlineData("NPGSQL", TracerInstrumentation.Npgsql)]
     [InlineData("SQLCLIENT", TracerInstrumentation.SqlClient)]
-    [InlineData("GRPCNETCLIENT", TracerInstrumentation.GrpcNetClient)]
+    [InlineData("STACKEXCHANGEREDIS", TracerInstrumentation.StackExchangeRedis)]
 #if NETFRAMEWORK
     [InlineData("WCFSERVICE", TracerInstrumentation.WcfService)]
 #endif
@@ -318,6 +318,9 @@ public sealed class SettingsTests : IDisposable
     [InlineData("KAFKA", TracerInstrumentation.Kafka)]
     [InlineData("ORACLEMDA", TracerInstrumentation.OracleMda)]
     [InlineData("RABBITMQ", TracerInstrumentation.RabbitMq)]
+#if NET
+    [InlineData("WCFCORE", TracerInstrumentation.WcfCore)]
+#endif
     internal void TracerSettings_Instrumentations_SupportedValues(string tracerInstrumentation, TracerInstrumentation expectedTracerInstrumentation)
     {
         Environment.SetEnvironmentVariable(ConfigurationKeys.Traces.TracesInstrumentationEnabled, "false");

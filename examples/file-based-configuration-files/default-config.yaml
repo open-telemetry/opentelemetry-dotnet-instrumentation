@@ -83,6 +83,7 @@ instrumentation/development:
       sqlclient:           # Microsoft.Data.SqlClient & System.Data.SqlClient
       stackexchangeredis:  # StackExchange.Redis
       wcfclient:           # WCF Client
+      wcfcore:             # CoreWCF.Primitives
       wcfservice:          # WCF Service
     metrics:
       aspnet:              # ASP.NET metrics
@@ -95,3 +96,4 @@ instrumentation/development:
     logs:
       ilogger:             # Microsoft.Extensions.Logging
       log4net:             # Log4Net
+      nlog:                # NLog

@@ -264,6 +264,10 @@ meter_provider:
         exporter:
           # Configure exporter to be console.
           console:
+            # Configure temporality preference.
+            # Values include: cumulative, delta.
+            # If omitted or null, cumulative is used.
+            temporality_preference: cumulative
 
     # Pull reader for Prometheus
     - pull:
@@ -513,6 +517,7 @@ instrumentation/development:
       sqlclient:           # Microsoft.Data.SqlClient & System.Data.SqlClient
       stackexchangeredis:  # StackExchange.Redis
       wcfclient:           # WCF Client
+      wcfcore:             # CoreWCF.Primitives
       wcfservice:          # WCF Service
     metrics:
       aspnet:              # ASP.NET metrics

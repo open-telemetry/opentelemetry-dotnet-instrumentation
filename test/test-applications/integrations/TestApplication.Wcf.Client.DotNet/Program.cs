@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 using System.Diagnostics;
+using System.Globalization;
 using System.Reflection;
 using System.ServiceModel;
 using System.ServiceModel.Channels;
@@ -17,8 +18,11 @@ internal static class Program
     {
         ConsoleHelper.WriteSplashScreen(args);
 
-        var netTcpAddress = "net.tcp://127.0.0.1:9090/Telemetry";
-        var httpAddress = "http://127.0.0.1:9009/Telemetry";
+        var tcpPort = GetTcpPort(args);
+        var httpPort = GetHttpPort(args);
+
+        var netTcpAddress = $"net.tcp://127.0.0.1:{tcpPort}/Telemetry";
+        var httpAddress = $"http://127.0.0.1:{httpPort}/Telemetry";
 
         using var parent = Source.StartActivity("Parent");
         try
@@ -77,5 +81,25 @@ internal static class Program
             {
             }
         }
+    }
+
+    private static int GetTcpPort(string[] args)
+    {
+        if (args.Length > 1)
+        {
+            return int.Parse(args[1], CultureInfo.InvariantCulture);
+        }
+
+        return 9090;
+    }
+
+    private static int GetHttpPort(string[] args)
+    {
+        if (args.Length > 3)
+        {
+            return int.Parse(args[3], CultureInfo.InvariantCulture);
+        }
+
+        return 9009;
     }
 }

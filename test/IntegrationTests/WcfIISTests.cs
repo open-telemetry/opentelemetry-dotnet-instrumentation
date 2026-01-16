@@ -20,13 +20,11 @@ public class WcfIISTests : TestHelper
     {
     }
 
-    [Fact]
+    [WindowsAdministratorFact]
     [Trait("Category", "EndToEnd")]
     [Trait("Containers", "Windows")]
     public async Task SubmitsTraces()
     {
-        Assert.True(EnvironmentTools.IsWindowsAdministrator(), "This test requires Windows Administrator privileges.");
-
         // Using "*" as host requires Administrator. This is needed to make the mock collector endpoint
         // accessible to the Windows docker container where the test application is executed by binding
         // the endpoint to all network interfaces. In order to do that it is necessary to open the port
@@ -97,8 +95,7 @@ public class WcfIISTests : TestHelper
         Directory.CreateDirectory(logPath);
         Output.WriteLine("Collecting docker logs to: " + logPath);
 
-        var builder = new ContainerBuilder()
-            .WithImage(imageName)
+        var builder = new ContainerBuilder(imageName)
             .WithCleanUp(cleanUp: true)
             .WithName(imageName)
             .WithNetwork(networkName)

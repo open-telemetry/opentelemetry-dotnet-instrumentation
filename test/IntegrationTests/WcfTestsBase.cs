@@ -46,6 +46,7 @@ public abstract class WcfTestsBase : TestHelper, IDisposable
                 else
                 {
                     _serverProcess.Process.Kill();
+                    _serverProcess.Process.WaitForExit();
                 }
 
                 Output.WriteLine("ProcessId: " + _serverProcess.Process.Id);
@@ -59,25 +60,32 @@ public abstract class WcfTestsBase : TestHelper, IDisposable
         _disposed = true;
     }
 
-    protected async Task SubmitsTracesInternal(string clientPackageVersion)
+    protected async Task SubmitsTracesInternal(string clientPackageVersion, WcfServerTestHelperBase wcfServerTestHelperBase)
     {
-        Assert.True(EnvironmentTools.IsWindowsAdministrator(), "This test requires Windows Administrator privileges.");
-
+#if NET
+        Assert.NotNull(wcfServerTestHelperBase);
+#else
+        if (wcfServerTestHelperBase == null)
+        {
+            throw new ArgumentNullException(nameof(wcfServerTestHelperBase));
+        }
+#endif
         using var collector = new MockSpansCollector(Output);
         SetExporter(collector);
 
-        var serverHelper = new WcfServerTestHelper(Output);
-        _serverProcess = serverHelper.RunWcfServer(collector);
-        await WaitForServer().ConfigureAwait(false);
+        (_serverProcess, var tcpPort, var httpPort) = wcfServerTestHelperBase.RunWcfServer(collector);
+
+        await WaitForServer(tcpPort).ConfigureAwait(false);
 
         RunTestApplication(new TestSettings
         {
-            PackageVersion = clientPackageVersion
+            PackageVersion = clientPackageVersion,
+            Arguments = $"--tcpPort {tcpPort} --httpPort {httpPort}"
         });
 
-        collector.Expect("OpenTelemetry.Instrumentation.Wcf", span => span.Kind == SpanKind.Server, "Server 1");
+        collector.Expect(wcfServerTestHelperBase.ServerInstrumentationScopeName, span => span.Kind == SpanKind.Server, "Server 1");
         collector.Expect("OpenTelemetry.Instrumentation.Wcf", span => span.Kind == SpanKind.Client, "Client 1");
-        collector.Expect("OpenTelemetry.Instrumentation.Wcf", span => span.Kind == SpanKind.Server, "Server 2");
+        collector.Expect(wcfServerTestHelperBase.ServerInstrumentationScopeName, span => span.Kind == SpanKind.Server, "Server 2");
         collector.Expect("OpenTelemetry.Instrumentation.Wcf", span => span.Kind == SpanKind.Client, "Client 2");
 
         collector.Expect($"TestApplication.{_testAppName}", span => span.Kind == SpanKind.Internal, "Custom parent");
@@ -88,9 +96,8 @@ public abstract class WcfTestsBase : TestHelper, IDisposable
         collector.AssertExpectations();
     }
 
-    private async Task WaitForServer()
+    private async Task WaitForServer(int tcpPort)
     {
-        const int tcpPort = 9090;
         using var tcpClient = new TcpClient();
         var retries = 0;
 
