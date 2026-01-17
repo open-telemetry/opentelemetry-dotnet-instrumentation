@@ -104,7 +104,8 @@ public static partial class LibraryVersion
                 new("2.19.0", supportedFrameworks: [ "net10.0", "net9.0", "net8.0", "net462" ]),
                 new("2.30.0", supportedFrameworks: [ "net10.0", "net9.0", "net8.0", "net462" ]),
                 new("3.0.0", supportedFrameworks: [ "net10.0", "net9.0", "net8.0", "net472" ]),
-                new("3.4.3", supportedFrameworks: [ "net10.0", "net9.0", "net8.0", "net472" ]),
+                new("3.5.0", supportedFrameworks: [ "net10.0", "net9.0", "net8.0", "net472" ]),
+                new("3.5.2", supportedFrameworks: [ "net10.0", "net9.0", "net8.0", "net472" ]),
             ]
         },
         {

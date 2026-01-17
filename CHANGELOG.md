@@ -23,6 +23,8 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 - Support for `temporality_preference` in file-based configuration
   for Console Metric Exporter.
 - Enable ASLR, CET and CFG for native profiler libraries on Windows.
+- Support for [MongoDB.Driver](https://www.nuget.org/packages/MongoDB.Driver/)
+  traces instrumentation for versions `3.5.0`+.
 
 ### Changed
 
