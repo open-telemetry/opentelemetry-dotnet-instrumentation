@@ -101,7 +101,7 @@ internal sealed class MockSpansCollector : IDisposable
                         continue;
                     }
 
-                    if (missingExpectation.ScopeVersion != null & missingExpectation.ScopeVersion != resourceSpans.Scope.Version)
+                    if (missingExpectation.ScopeVersion != null && missingExpectation.ScopeVersion != resourceSpans.Scope.Version)
                     {
                         continue;
                     }
