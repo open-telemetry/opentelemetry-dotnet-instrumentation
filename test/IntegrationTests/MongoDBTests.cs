@@ -44,12 +44,12 @@ public class MongoDBTests : TestHelper
         using var collector = new MockSpansCollector(Output);
         SetExporter(collector);
         const int spanCount = 3;
-        for (int i = 0; i < spanCount; i++)
+        for (var i = 0; i < spanCount; i++)
         {
-            collector.Expect(MongoDBInstrumentationScopeName);
+            collector.Expect(MongoDBInstrumentationScopeName, VersionHelper.AutoInstrumentationVersion);
         }
 
-        collector.Expect(MongoDBInstrumentationScopeName, span => ValidateSpan(span));
+        collector.Expect(MongoDBInstrumentationScopeName, VersionHelper.AutoInstrumentationVersion, span => ValidateSpan(span));
 
         EnableBytecodeInstrumentation();
         RunTestApplication(new()
