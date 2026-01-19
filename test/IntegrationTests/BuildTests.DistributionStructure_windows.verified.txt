@@ -368,5 +368,7 @@
   \store\x86\net9.0\microsoft.extensions.primitives\8.0.0\lib\net10.0\Microsoft.Extensions.Primitives.dll,
   \store\x86\net9.0\system.diagnostics.diagnosticsource\10.0.0\lib\net10.0\System.Diagnostics.DiagnosticSource.dll,
   \win-x64\OpenTelemetry.AutoInstrumentation.Native.dll,
-  \win-x86\OpenTelemetry.AutoInstrumentation.Native.dll
+  \win-x64\OpenTelemetry.AutoInstrumentation.Native.pdb,
+  \win-x86\OpenTelemetry.AutoInstrumentation.Native.dll,
+  \win-x86\OpenTelemetry.AutoInstrumentation.Native.pdb
 ]
