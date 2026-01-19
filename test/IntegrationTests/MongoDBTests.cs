@@ -16,7 +16,7 @@ public class MongoDBTests : TestHelper
     private const string MongoDbCollectionName = "employees";
     private const string MongoDbSystem = "mongodb";
 
-    private const string DbSystemAttributeName = "db.system";
+    private const string DbSystemAttributeName = "db.system.name";
     private const string DbCollectionNameAttributeName = "db.collection.name";
     private const string DbNamespaceAttributeName = "db.namespace";
     private const string DbOperationNameAttributeName = "db.operation.name";
