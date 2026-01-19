@@ -7,7 +7,6 @@
 
 #include "cor_profiler.h"
 
-#ifdef _WIN32
 #define STR(Z1) #Z1
 #define AUTO_MAJOR STR(OTEL_AUTO_VERSION_MAJOR) 
 
@@ -534,4 +533,3 @@ void CorProfiler::InitNetFxAssemblyRedirectsMap()
     });
 }
 }
-#endif

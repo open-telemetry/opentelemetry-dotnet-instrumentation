@@ -1,6 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.IO;
 using Nuke.Common;
 using Nuke.Common.IO;
 using Nuke.Common.ProjectModel;
@@ -225,34 +222,6 @@ partial class Build
         }
     }
 
-    //TODO: rename to all frameworks and move out of Windows specific file
-    //TODO probably should happen for non-Windows too
-    Target GenerateNetFxTransientDependencies => _ => _
-        .Unlisted()
-        .After(Restore)
-        .OnlyWhenStatic(() => IsWin)
-        .Executes(() =>
-        {
-            // The target project needs to have its NuGet packages restored prior to running the tool.
-            var targetProject = Solution.GetProjectByName(Projects.AutoInstrumentationNetFxAssemblies);
-            DotNetRestore(s => s.SetProjectFile(targetProject));
-
-            TransientDependenciesGenerator.Run(targetProject);
-        });
-
-    //TODO: rename to all frameworks and move out of Windows specific file
-    //TODO probably should happen for non-Windows too
-    Target GenerateNetFxAssemblyRedirectionSource => _ => _
-        .Unlisted()
-        .After(PublishManagedProfiler)
-        .OnlyWhenStatic(() => IsWin)
-        .Executes(() =>
-        {
-            var generatedSourceFile = SourceDirectory / Projects.AutoInstrumentationNative / "netfx_assembly_redirection.h";
-
-            AssemblyRedirectionSourceGenerator.Generate(TracerHomeDirectory, generatedSourceFile);
-        });
-
     Target InstallNetFxAssembliesGAC => _ => _
         .Unlisted()
         .After(BuildTracer)
@@ -279,8 +248,9 @@ partial class Build
         }
 
         // We assume that dev machine running test has .Net Framework not older than TargetFrameworksNetFx.Last()
-        var netFxCommonAssembliesFolder = TracerHomeDirectory / MapToFolderOutput(TargetFrameworksForNetFxPacking.Last());
-        var netFxAssembliesFolder = TracerHomeDirectory / MapToFolderOutputNetFx(TargetFrameworksForNetFxPacking.Last());
+        var lastFramework = TargetFrameworksForNetFxPacking.Last();
+        var netFxCommonAssembliesFolder = TracerHomeDirectory / lastFramework.OutputFolder;
+        var netFxAssembliesFolder = TracerHomeDirectory / lastFramework.OutputFolder / lastFramework;
         var installTool = Solution.GetProjectByName(Projects.Tools.GacInstallTool);
 
         DotNetRun(s => s

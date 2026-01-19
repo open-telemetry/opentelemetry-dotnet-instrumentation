@@ -38,9 +38,7 @@
 #include <mach-o/getsect.h>
 #endif
 
-#ifdef _WIN32
 #include "netfx_assembly_redirection.h"
-#endif
 
 #define FailProfiler(LEVEL, MESSAGE)                                                                                   \
     Logger::LEVEL(MESSAGE);                                                                                            \
@@ -138,13 +136,11 @@ HRESULT STDMETHODCALLTYPE CorProfiler::Initialize(IUnknown* cor_profiler_info_un
         FailProfiler(Warn, "Failed to attach profiler: Not supported .NET version (lower than 6.0).")
     }
 
-#ifdef _WIN32
-    if (/* runtime_information_.is_desktop() && */IsNetFxAssemblyRedirectionEnabled())
+    if (IsNetFxAssemblyRedirectionEnabled())
     {
         InitNetFxAssemblyRedirectsMap();
         DetectFrameworkVersionTableForRedirectsMap();
     }
-#endif
 
     const auto& process_name          = GetCurrentProcessName();
     const auto& exclude_process_names = GetEnvironmentValues(environment::exclude_process_names);
@@ -360,7 +356,6 @@ HRESULT STDMETHODCALLTYPE CorProfiler::AssemblyLoadFinished(AssemblyID assembly_
     return S_OK;
 }
 
-#ifdef _WIN32
 void CorProfiler::RedirectAssemblyReferences(const ComPtr<IMetaDataAssemblyImport>& assembly_import,
                                              const ComPtr<IMetaDataAssemblyEmit>&   assembly_emit)
 {
@@ -492,7 +487,6 @@ void CorProfiler::RedirectAssemblyReferences(const ComPtr<IMetaDataAssemblyImpor
         }
     }
 }
-#endif
 
 void CorProfiler::RewritingPInvokeMaps(const ModuleMetadata& module_metadata, const WSTRING& nativemethods_type_name)
 {
@@ -760,11 +754,10 @@ HRESULT STDMETHODCALLTYPE CorProfiler::ModuleLoadFinished(ModuleID module_id, HR
         return S_OK;
     }
 
-    // It is not safe to skip assemblies if applying redirection on .NET Framework
-    if (/* !runtime_information_.is_desktop() || */!IsNetFxAssemblyRedirectionEnabled())
+    // It is not safe to skip assemblies if applying redirection
+    if (!IsNetFxAssemblyRedirectionEnabled())
     {
-        // Not .NET Framework or assembly redirection is disabled, check if the
-        // assembly can be skipped.
+        // If assembly redirection is disabled, check if the assembly can be skipped.
         for (auto&& skip_assembly : skip_assemblies)
         {
             if (module_info.assembly.name == skip_assembly)
@@ -785,11 +778,8 @@ HRESULT STDMETHODCALLTYPE CorProfiler::ModuleLoadFinished(ModuleID module_id, HR
         }
     }
 
-//#ifdef _WIN32
-    const bool perform_netfx_redirect = /*runtime_information_.is_desktop() && */IsNetFxAssemblyRedirectionEnabled();
-//#else
-//    const bool perform_netfx_redirect = false;
-//#endif // _WIN32
+    //TODO rename
+    const bool perform_netfx_redirect = IsNetFxAssemblyRedirectionEnabled();
 
     if (perform_netfx_redirect || module_info.assembly.name == managed_profiler_name)
     {
@@ -813,14 +803,14 @@ HRESULT STDMETHODCALLTYPE CorProfiler::ModuleLoadFinished(ModuleID module_id, HR
             ModuleMetadata(metadata_import, metadata_emit, assembly_import, assembly_emit, module_info.assembly.name,
                            module_info.assembly.app_domain_id, &corAssemblyProperty);
 
-#ifdef _WIN32
         if (perform_netfx_redirect)
         {
-            // On the .NET Framework redirect any assembly reference to the versions required by
-            // OpenTelemetry.AutoInstrumentation assembly, the ones under netfx/ folder.
+            // Redirect any assembly reference to the versions required by
+            // OpenTelemetry.AutoInstrumentation assembly:
+            //  - for .NET Frameworks - the ones under netfx/ folder
+            //  - for .NET (Core) - the ones under net/ folder
             RedirectAssemblyReferences(assembly_import, assembly_emit);
         }
-#endif // _WIN32
 
         if (module_info.assembly.name == managed_profiler_name)
         {
@@ -3862,11 +3852,12 @@ HRESULT STDMETHODCALLTYPE CorProfiler::EventPipeEventDelivered(EVENTPIPE_PROVIDE
     return S_OK;
 }
 
-#ifdef _WIN32
 void CorProfiler::DetectFrameworkVersionTableForRedirectsMap()
 {
     int frameworkVersion = 0;
 
+    // TODO ugly ifdef to separate .NET Framework and .NET (Core) detection
+#ifdef _WIN32
     if (runtime_information_.is_desktop())
     {
         // .NET Framework detection
@@ -3941,6 +3932,7 @@ void CorProfiler::DetectFrameworkVersionTableForRedirectsMap()
         }
     }
     else
+#endif
     {
         // .NET (Core) detection
         // Map major.minor version to framework version key to match generator: net8.0 -> 8000, net9.0 -> 9000, etc
@@ -3988,6 +3980,10 @@ void CorProfiler::DetectFrameworkVersionTableForRedirectsMap()
     }
 }
 
+#ifdef _WIN32
+// even though this method looks at the current framework of redirection map
+// which is supported on any platform, we only use this method for .NET Framework
+// in Loader AssemblyResolver.NetFramework
 int CorProfiler::GetNetFrameworkRedirectionVersion() const
 {
     return assembly_version_redirect_map_current_framework_key_;

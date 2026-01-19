@@ -22,25 +22,21 @@ internal partial class AssemblyResolver
 
     internal void RegisterAssemblyResolving()
     {
-        // While we could subscribe to AppDomain.CurrentDomain.AssemblyResolve, the timing of when that
-        // subscription occurs relative to the built-in handler (Assembly.LoadFromResolveHandler) is
-        // unpredictable - it depends on static constructor execution order and module initialization timing,
-        // making it fragile to code changes.
+        // ASSEMBLY RESOLUTION TIMING
+        // When the runtime cannot find an assembly, AssemblyLoadContext.Default.Resolving fires before
+        // AppDomain.CurrentDomain.AssemblyResolve, so we subscribe to the former for guaranteed control.
         //
-        // Problem: If the built-in handler executes first, it loads co-located assemblies into the Default context
-        // via Assembly.LoadFrom, and this is our exact layout - OpenTelemetry library and its dependencies (e.g.,
-        // System.Diagnostics.DiagnosticSource.dll) are next to each other. When the host app's TPA has a
-        // lower version, the built-in handler will fail. Restructuring to avoid co-location would work but
-        // is equally fragile and maintenance-prone.
-        //
-        // Solution: Subscribe to AssemblyLoadContext.Default.Resolving - this event fires BEFORE any
-        // AppDomain.CurrentDomain.AssemblyResolve handlers (including the built-in one), guaranteeing we
-        // control the resolution process
+        // While we could subscribe to AppDomain.CurrentDomain.AssemblyResolve, the timing of this
+        // subscription relative to the built-in handler (Assembly.LoadFromResolveHandler) is unpredictable
+        // and fragile to code changes. If the built-in handler runs first, it loads co-located assemblies
+        // (our layout - OpenTelemetry library and its dependency System.Diagnostics.DiagnosticSource.dll)
+        // into the Default context via Assembly.LoadFrom, causing version conflicts when the customer
+        // application has TPA with a lower version (in the example, of DiagnosticSource.dll)
 
         // ASSEMBLY RESOLUTION STRATEGY
         //
         // === NATIVE PROFILER DEPLOYMENT ===
-        // The native profiler already redirected  (IL rewriting) all references to our versions.
+        // The native profiler already redirected (IL rewriting) all references to our versions.
         // The Resolving event fires when runtime cannot find the assembly:
         //
         // Case 1: Assembly NOT in TrustedPlatformAssembly list (our dependencies; e.g., OpenTelemetry.Api.dll)

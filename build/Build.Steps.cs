@@ -127,6 +127,28 @@ partial class Build
             }
         }));
 
+    Target GenerateNetFxTransientDependencies => _ => _
+        .Unlisted()
+        .After(Restore)
+        .Executes(() =>
+        {
+            // The target project needs to have its NuGet packages restored prior to running the tool.
+            var targetProject = Solution.GetProjectByName(Projects.AutoInstrumentationNetFxAssemblies);
+            DotNetRestore(s => s.SetProjectFile(targetProject));
+
+            TransientDependenciesGenerator.Run(targetProject);
+        });
+
+    Target GenerateNetFxAssemblyRedirectionSource => _ => _
+        .Unlisted()
+        .After(PublishManagedProfiler)
+        .Executes(() =>
+        {
+            var generatedSourceFile = SourceDirectory / Projects.AutoInstrumentationNative / "netfx_assembly_redirection.h";
+
+            AssemblyRedirectionSourceGenerator.Generate(TracerHomeDirectory, generatedSourceFile);
+        });
+
     Target CompileManagedSrc => _ => _
         .Description("Compiles the managed code in the src directory")
         .After(GenerateNetFxTransientDependencies)
@@ -286,34 +308,57 @@ partial class Build
         .After(CompileManagedSrc)
         .Executes(() =>
         {
-            //TODO rename the project and variable to AutoInstrumentationAllAssemblies since it's now publishing for both .NET Framework and .NET (Core)
-            if (IsWin)
-            {
-                // Publish OpenTelemetry.AutoInstrumentation.Assemblies.NetFramework for .NET Framework targets
-                DotNetPublish(s => s
-                    .SetProject(Solution.GetProjectByName(Projects.AutoInstrumentationNetFxAssemblies))
-                    .SetConfiguration(BuildConfiguration)
-                    .SetTargetPlatformAnyCPU()
-                    .EnableNoBuild()
-                    .SetNoRestore(NoRestore)
-                    .CombineWith(AllTargetFrameworks, (p, framework) => p
-                        .SetFramework(framework)
-                        .SetOutput(TracerHomeDirectory / MapToFolderOutput(framework) / framework)));
-            }
+            var targetFrameworks = IsWin
+                ? AllTargetFrameworks
+                : AllTargetFrameworks.ExceptNetFramework();
 
-            RemoveNonLibraryFilesFromOutput();
+            // Publish OpenTelemetry.AutoInstrumentation.Assemblies.NetFramework for all target frameworks
+            DotNetPublish(s => s
+                .SetProject(Solution.GetProjectByName(Projects.AutoInstrumentationNetFxAssemblies))
+                .SetConfiguration(BuildConfiguration)
+                .SetTargetPlatformAnyCPU()
+                .EnableNoBuild()
+                .SetNoRestore(NoRestore)
+                .CombineWith(targetFrameworks, (p, framework) => p
+                    .SetFramework(framework)
+                    .SetOutput(TracerHomeDirectory / framework.OutputFolder / framework)));
 
-            RemoveDuplicateNetFxLibraries();
+            AssertTracerHomeAssemblies(targetFrameworks);
+
+            CleanupTracerHomeAssemblies();
+
+            OptimizeTracerHomeAssemblies(targetFrameworks);
         });
 
-    void RemoveNonLibraryFilesFromOutput()
+    void AssertTracerHomeAssemblies(IEnumerable<TargetFramework> frameworks)
     {
-        TracerHomeDirectory.GlobFiles("**/*.xml").ForEach(file => file.DeleteFile());
-        (TracerHomeDirectory / "net").GlobFiles("*.json").ForEach(file => file.DeleteFile());
-        if (IsWin)
+        // Check that all target framework directories exist
+        var missingDirectories = frameworks
+            .Select(it => TracerHomeDirectory / it.OutputFolder / it)
+            .Where(it => !it.DirectoryExists())
+            .ToList();
+
+        if (missingDirectories.Count > 0)
         {
-            (TracerHomeDirectory / "netfx").GlobFiles("*.json").ForEach(file => file.DeleteFile());
+            throw new InvalidOperationException($"Missing framework directories: [{string.Join(", ", missingDirectories)}]");
         }
+
+        // Check that there are no nested directories in target framework folders
+        var problematicDirectories = frameworks
+            .Select(it => TracerHomeDirectory / it.OutputFolder / it)
+            .Where(it => it.GlobDirectories("*").Count != 0)
+            .ToList();
+
+        if (problematicDirectories.Count > 0)
+        {
+            throw new InvalidOperationException($"Loader expects flat framework directories. Subdirectories found in: [{string.Join(", ", problematicDirectories)}]");
+        }
+    }
+
+    void CleanupTracerHomeAssemblies()
+    {
+        // remove unnecessary files that may come with target frameworks dependencies
+        TracerHomeDirectory.GlobFiles("**/*.pdb", "**/*.xml", "**/*.json", "**/*.dylib", "**/*.so").ForEach(file => file.DeleteFile());
     }
 
     // TODO remove
@@ -348,9 +393,9 @@ partial class Build
         }
     }
 
-    void RemoveDuplicateNetFxLibraries()
+    void OptimizeTracerHomeAssemblies(IEnumerable<TargetFramework> frameworks)
     {
-        bool FilesAreEqual(string filePath1, string filePath2)
+        static bool FilesAreEqual(string filePath1, string filePath2)
         {
             using var hashAlg = SHA256.Create();
             using var stream1 = File.OpenRead(filePath1);
@@ -362,74 +407,50 @@ partial class Build
             return hash1.SequenceEqual(hash2);
         }
 
-        void ProcessFrameworkFolder(AbsolutePath baseDirectory, IEnumerable<TargetFramework> frameworks)
+        // process framework groups separately: .NET Frameworks (/netfx folder) vs .NET (Core) (/net folder)
+        // move all duplicated libraries from framework-specific folders to base folder
+        foreach (var group in frameworks.GroupBy(it => it.OutputFolder))
         {
-            // Check that there are no nested directories in framework folders
-            var problematicDirectories = frameworks
-                .Select(framework => baseDirectory / framework)
-                .Where(frameworkDir => frameworkDir.DirectoryExists() && frameworkDir.GlobDirectories("*").Count != 0)
-                .ToList();
+            var baseDirectory = TracerHomeDirectory / group.Key;
+            var frameworkList = group.ToList();
 
-            if (problematicDirectories.Count > 0)
-            {
-                throw new InvalidOperationException($"Loader expects flat framework directories. Subdirectories found in: [{string.Join(", ", problematicDirectories)}]");
-            }
+            baseDirectory.GlobFiles("**/*.link", "**/_._").DeleteFiles();
 
-            baseDirectory.GlobFiles("**/*.link").DeleteFiles();
-            baseDirectory.GlobFiles("**/_._").DeleteFiles();
+            var latestFramework = frameworkList.Last();
+            var olderFrameworks = frameworkList.TakeUntil(older => older == latestFramework).ToList();
 
-            var latestFramework = frameworks.Last();
+            // Move common files to base directory
             (baseDirectory / latestFramework).GlobFiles("*.*")
-                .Where(file => frameworks.TakeUntil(older => older == latestFramework)
-                    .All(olderFramework =>
-                    {
-                        var duplicateCandidate = baseDirectory / olderFramework / file.Name;
-                        return File.Exists(duplicateCandidate) && FilesAreEqual(file, duplicateCandidate);
-                    })).ForEach(file =>
-                    {
-                        Log.Debug("Move Common File To Base Directory: \"{0}\"", baseDirectory / file.Name);
-                        file.MoveToDirectory(baseDirectory, ExistsPolicy.FileOverwrite);
-                        frameworks.TakeUntil(older => older == latestFramework)
-                            .ForEach(olderFramework =>
-                                (baseDirectory / olderFramework / file.Name).DeleteFile());
-                    }
-                );
-
-            foreach (var currentFramework in frameworks.Skip(1).Reverse())
-            {
-                (baseDirectory / currentFramework).GlobFiles("*.dll").ForEach(file =>
+                .Where(file => olderFrameworks.All(older =>
+                    File.Exists(baseDirectory / older / file.Name) &&
+                    FilesAreEqual(file, baseDirectory / older / file.Name)))
+                .ForEach(file =>
                 {
-                    foreach (var olderFramework in frameworks.TakeUntil(older => older == currentFramework))
-                    {
-                        var duplicateCandidate = baseDirectory / olderFramework / file.Name;
-                        if (File.Exists(duplicateCandidate) && FilesAreEqual(file, duplicateCandidate))
-                        {
-                            Log.Debug("Generate Link File \"{0}\" To: {1}", baseDirectory / currentFramework / file.Name + ".link", olderFramework);
-                            file.DeleteFile();
-                            (baseDirectory / currentFramework / (file.Name + ".link")).WriteAllText(
-                                olderFramework, Encoding.ASCII, false);
-                            break;
-                        }
-                    }
+                    Log.Debug("Move Common File To Base Directory: \"{0}\"", baseDirectory / file.Name);
+                    file.MoveToDirectory(baseDirectory, ExistsPolicy.FileOverwrite);
+                    olderFrameworks.ForEach(older => (baseDirectory / older / file.Name).DeleteFile());
                 });
-            }
 
-            // Create placeholder file for empty directories
-            foreach (var currentFramework in frameworks)
-            {
-                if ((baseDirectory / currentFramework).GlobFiles("*.*").Count == 0)
-                {
-                    (baseDirectory / currentFramework / "_._")
-                        .WriteAllText(string.Empty, Encoding.ASCII, false);
-                }
-            }
-        }
+            // Create link files for duplicates
+            frameworkList.Skip(1).Reverse()
+                .ForEach(current => (baseDirectory / current).GlobFiles("*.dll")
+                    .ForEach(file =>
+                    {
+                        var linkTarget = frameworkList.TakeUntil(older => older == current)
+                            .FirstOrDefault(older => File.Exists(baseDirectory / older / file.Name) &&
+                                                    FilesAreEqual(file, baseDirectory / older / file.Name));
 
-        ProcessFrameworkFolder(TracerHomeDirectory / "net", TargetFramework.Net);
+                        if (linkTarget != null)
+                        {
+                            Log.Debug("Generate Link File \"{0}\" To: {1}", file + ".link", linkTarget);
+                            file.DeleteFile();
+                            (baseDirectory / current / (file.Name + ".link")).WriteAllText(linkTarget, Encoding.ASCII, false);
+                        }
+                    }));
 
-        if (IsWin)
-        {
-            ProcessFrameworkFolder(TracerHomeDirectory / "netfx", TargetFramework.NetFramework);
+            // Create placeholder files for empty directories
+            frameworkList.Where(fw => (baseDirectory / fw).GlobFiles("*.*").Count == 0)
+                .ForEach(fw => (baseDirectory / fw / "_._").WriteAllText(string.Empty, Encoding.ASCII, false));
         }
     }
 
@@ -801,17 +822,6 @@ partial class Build
                     .SetProcessEnvironmentVariable("BOOSTRAPPING_TESTS", "true"));
             }
         }
-    }
-
-    private string MapToFolderOutput(TargetFramework targetFramework)
-    {
-        return targetFramework.ToString().StartsWith("net4") ? "netfx" : "net";
-    }
-
-    //TODO: maybe not needed and can be leveraged by the code above
-    private string MapToFolderOutputNetFx(TargetFramework targetFramework)
-    {
-        return $"netfx/{targetFramework}";
     }
 
     private void RestoreLegacyNuGetPackagesConfig(IEnumerable<Project> legacyRestoreProjects)

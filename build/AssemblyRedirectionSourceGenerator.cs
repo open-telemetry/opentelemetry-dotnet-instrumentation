@@ -130,7 +130,6 @@ public static class AssemblyRedirectionSourceGenerator
 
         #include "cor_profiler.h"
 
-        #ifdef _WIN32
         #define STR(Z1) #Z1
         #define AUTO_MAJOR STR(OTEL_AUTO_VERSION_MAJOR) 
         
@@ -145,7 +144,6 @@ public static class AssemblyRedirectionSourceGenerator
             });
         }
         }
-        #endif
 
         """;
         #pragma warning restore format

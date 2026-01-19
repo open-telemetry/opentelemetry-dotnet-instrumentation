@@ -7,16 +7,16 @@ using Serilog;
 [TypeConverter(typeof(TargetFrameworkTypeConverter))]
 public class TargetFramework : Enumeration
 {
-    public static readonly TargetFramework NOT_SPECIFIED = new() { Value = string.Empty };
-    public static readonly TargetFramework NET462 = new() { Value = "net462" };
-    public static readonly TargetFramework NET47 = new() { Value = "net47" };
-    public static readonly TargetFramework NET471 = new() { Value = "net471" };
-    public static readonly TargetFramework NET472 = new() { Value = "net472" };
-    // TODO remove
-    public static readonly TargetFramework NETCore3_1 = new() { Value = "netcoreapp3.1" };
-    public static readonly TargetFramework NET8_0 = new() { Value = "net8.0" };
-    public static readonly TargetFramework NET9_0 = new() { Value = "net9.0" };
-    public static readonly TargetFramework NET10_0 = new() { Value = "net10.0" };
+    public static readonly TargetFramework NOT_SPECIFIED = new() { Value = string.Empty, OutputFolder = string.Empty };
+    public static readonly TargetFramework NET462 = new() { Value = "net462", OutputFolder = "netfx" };
+    public static readonly TargetFramework NET47 = new() { Value = "net47", OutputFolder = "netfx" };
+    public static readonly TargetFramework NET471 = new() { Value = "net471", OutputFolder = "netfx" };
+    public static readonly TargetFramework NET472 = new() { Value = "net472", OutputFolder = "netfx" };
+    public static readonly TargetFramework NET8_0 = new() { Value = "net8.0", OutputFolder = "net" };
+    public static readonly TargetFramework NET9_0 = new() { Value = "net9.0", OutputFolder = "net" };
+    public static readonly TargetFramework NET10_0 = new() { Value = "net10.0", OutputFolder = "net" };
+
+    public string OutputFolder { get; init; }
 
     // should be in version order
     public static readonly TargetFramework[] NetFramework = [
