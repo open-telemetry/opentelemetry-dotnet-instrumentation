@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <TargetFrameworks>net10.0;net9.0;net8.0</TargetFrameworks>
-    <DefineConstants Condition="'$(LibraryVersion)' == '' or '$(LibraryVersion)'>='9.0.0'">$(DefineConstants);POMELO_9_0_OR_GREATER</DefineConstants>
+    <DefineConstants Condition="'$(LibraryVersion)' == '' or $([MSBuild]::VersionGreaterThanOrEquals('$(LibraryVersion)', '9.0.0'))">$(DefineConstants);POMELO_9_0_OR_GREATER</DefineConstants>
   </PropertyGroup>
 
   <ItemGroup>
