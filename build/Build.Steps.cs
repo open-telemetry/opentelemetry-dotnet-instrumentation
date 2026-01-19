@@ -510,7 +510,6 @@ partial class Build
             if (Environment.GetEnvironmentVariable("GITHUB_ACTIONS") is "true")
             {
                 refName = Environment.GetEnvironmentVariable("GITHUB_REF_NAME");
-                gitSha = Environment.GetEnvironmentVariable("GITHUB_SHA");
             }
 
             var dest = TracerHomeDirectory / "VERSION";
