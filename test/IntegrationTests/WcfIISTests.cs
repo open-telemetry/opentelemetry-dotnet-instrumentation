@@ -74,10 +74,10 @@ public class WcfIISTests : TestHelper
     {
         var wcfServerSpans = collectedSpans.Where(collected =>
             collected.Span.Kind == Span.Types.SpanKind.Server &&
-            collected.InstrumentationScopeName == "OpenTelemetry.Instrumentation.Wcf");
+            collected.Scope.Name == "OpenTelemetry.Instrumentation.Wcf");
         var aspNetServerSpan = collectedSpans.Single(collected =>
             collected.Span.Kind == Span.Types.SpanKind.Server &&
-            collected.InstrumentationScopeName == "OpenTelemetry.Instrumentation.AspNet");
+            collected.Scope.Name == "OpenTelemetry.Instrumentation.AspNet");
         var aspNetParentedWcfServerSpans = wcfServerSpans.Count(sp => sp.Span.ParentSpanId == aspNetServerSpan.Span.SpanId);
         return aspNetParentedWcfServerSpans == 1 && WcfClientInstrumentation.ValidateExpectedSpanHierarchy(collectedSpans);
     }

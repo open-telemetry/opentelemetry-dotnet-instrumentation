@@ -5,6 +5,7 @@ using System.Collections.Concurrent;
 using System.Globalization;
 using System.Text;
 using OpenTelemetry.Proto.Collector.Trace.V1;
+using OpenTelemetry.Proto.Common.V1;
 using OpenTelemetry.Proto.Trace.V1;
 using Xunit.Abstractions;
 
@@ -89,7 +90,7 @@ internal sealed class MockSpansCollector : IDisposable
                 var found = false;
                 for (var i = missingExpectations.Count - 1; i >= 0; i--)
                 {
-                    if (missingExpectations[i].InstrumentationScopeName != resourceSpans.InstrumentationScopeName)
+                    if (missingExpectations[i].InstrumentationScopeName != resourceSpans.Scope.Name)
                     {
                         continue;
                     }
@@ -213,7 +214,7 @@ internal sealed class MockSpansCollector : IDisposable
             {
                 foreach (var span in scopeSpans.Spans ?? Enumerable.Empty<Span>())
                 {
-                    _spans.Add(new Collected(scopeSpans.Scope.Name, span));
+                    _spans.Add(new Collected(scopeSpans.Scope, span));
                 }
             }
         }
@@ -230,19 +231,19 @@ internal sealed class MockSpansCollector : IDisposable
     internal sealed class Collected
 #pragma warning restore CA1812 // Mark members as static. There is some issue in dotnet format.
     {
-        public Collected(string instrumentationScopeName, Span span)
+        public Collected(InstrumentationScope scope, Span span)
         {
-            InstrumentationScopeName = instrumentationScopeName;
+            Scope = scope;
             Span = span;
         }
 
-        public string InstrumentationScopeName { get; }
+        public InstrumentationScope Scope { get; }
 
         public Span Span { get; } // protobuf type
 
         public override string ToString()
         {
-            return $"InstrumentationScopeName = {InstrumentationScopeName}, Span = {Span}";
+            return $"Scope.Name = {Scope.Name}, Scope.Version={Scope.Version}, Span = {Span}";
         }
     }
 
