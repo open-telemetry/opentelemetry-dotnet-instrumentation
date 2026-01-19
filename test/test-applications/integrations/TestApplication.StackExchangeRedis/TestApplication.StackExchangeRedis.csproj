@@ -8,4 +8,10 @@
     <PackageReference Include="System.Diagnostics.DiagnosticSource" Condition=" '$(TargetFramework)' == 'net8.0' " />
   </ItemGroup>
 
+  <ItemGroup Condition=" '$(TargetFramework)' == 'net462' and ( '$(LibraryVersion)' == '' or '$(LibraryVersion)' &gt;= '2.10.1' ) ">
+    <!-- Fix MSB3277 for StackExchange.Redis 2.10.1+ -->
+    <PackageReference Include="System.IO.Compression" ExcludeAssets="compile" />
+    <PackageReference Include="System.Runtime.InteropServices.RuntimeInformation" ExcludeAssets="compile" />
+  </ItemGroup>
+
 </Project>

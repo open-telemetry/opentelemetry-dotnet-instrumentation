@@ -55,7 +55,9 @@
     <PackageVersion Include="System.Collections.Immutable" Version="10.0.0" />
     <PackageVersion Include="System.Data.SqlClient" Version="4.9.0" />
     <PackageVersion Include="System.Diagnostics.DiagnosticSource" Version="10.0.0" />
+    <PackageVersion Include="System.IO.Compression" Version="4.3.0" />
     <PackageVersion Include="System.Reactive" Version="6.1.0" />
+    <PackageVersion Include="System.Runtime.InteropServices.RuntimeInformation" Version="4.3.0" />
     <PackageVersion Include="System.Security.Cryptography.Pkcs" Version="10.0.2" />
     <PackageVersion Include="System.ServiceModel.Http" Version="10.0.652802" />
     <PackageVersion Include="System.ServiceModel.NetTcp" Version="10.0.652802" />
