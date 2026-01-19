@@ -55,7 +55,8 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 
 ### Changed
 
-- Update `db.system` to `db.system.name` in accordance with OpenTelemetry Semantic Conventions v1.39.0.
+- Update `db.system` to `db.system.name` in accordance with
+  OpenTelemetry Semantic Conventions v1.39.0.
 - `-NoReset` parameter in `Unregister-OpenTelemetryForIIS` changed from
   `[bool]` to `[switch]`. Use `-NoReset` instead of `-NoReset $true`.
   Note: `-NoReset $true` still works, but `-NoReset $false` will not do what you
