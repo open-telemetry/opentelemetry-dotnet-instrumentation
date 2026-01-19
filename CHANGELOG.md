@@ -78,7 +78,8 @@ release.
 - Setting `DOTNET_STARTUP_HOOKS` is now optional if the .NET CLR profiler
   is configured. If it is not set, the profiler looks for the startup hooks
   assembly and injects the configuration into the application.
-- `OpenTelemetry.AutoInstrumentation.` prefixed instrumentations report Scope Version.
+- `OpenTelemetry.AutoInstrumentation.` prefixed instrumentations
+  report Scope Version.
 
 #### Dependency updates
 
