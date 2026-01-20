@@ -419,7 +419,7 @@ To verify the attestation of a file from a GitHub release use the [GitHub CLI](h
 For example:
 
 ```bash
-gh attestation verify --owner open-telemetry .\otel-dotnet-auto-install.sh
+gh attestation verify --owner open-telemetry ./otel-dotnet-auto-install.sh
 ```
 
 > [!NOTE]
