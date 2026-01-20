@@ -12,8 +12,6 @@ internal static class MongoDBInstrumentation
 {
     private static readonly ActivitySource Source = CreateActivitySource();
 
-
-
     public static Activity? StartDatabaseActivity(
         object? instance,
         IConnection connection)
