@@ -1,9 +1,7 @@
 using System.Diagnostics;
-using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
-using System.Text.Json.Nodes;
 using Extensions;
 using Nuke.Common;
 using Nuke.Common.IO;
@@ -29,8 +27,6 @@ partial class Build
     AbsolutePath TracerHomeDirectory => TracerHome ?? (OutputDirectory / "tracer-home");
     AbsolutePath TestArtifactsDirectory => RootDirectory / "test-artifacts";
     AbsolutePath ProfilerTestLogs => TestArtifactsDirectory / "profiler-logs";
-    AbsolutePath AdditionalDepsDirectory => TracerHomeDirectory / "AdditionalDeps";
-    AbsolutePath StoreDirectory => TracerHomeDirectory / "store";
 
     Project NativeProfilerProject => Solution.GetProjectByName(Projects.AutoInstrumentationNative);
 
@@ -361,38 +357,6 @@ partial class Build
         TracerHomeDirectory.GlobFiles("**/*.pdb", "**/*.xml", "**/*.json", "**/*.dylib", "**/*.so").ForEach(file => file.DeleteFile());
     }
 
-    // TODO remove
-    void RemoveFilesInNetFolderAvailableInAdditionalStore()
-    {
-        Log.Debug("Removing files available in additional store from net folder");
-        var netFolder = TracerHomeDirectory / "net";
-        var additionalStoreFolder = TracerHomeDirectory / "store";
-
-        var netLibraries = netFolder.GlobFiles("**/*.dll");
-        var netLibrariesByName = netLibraries.ToDictionary(x => x.Name);
-        var additionalStoreLibraries = additionalStoreFolder.GlobFiles("**/*.dll");
-
-        foreach (var additionalStoreLibrary in additionalStoreLibraries)
-        {
-            if (netLibrariesByName.TryGetValue(additionalStoreLibrary.Name, out var netLibrary))
-            {
-                var netLibraryFileVersionInfo = FileVersionInfo.GetVersionInfo(netLibrary);
-                var additionalStoreLibraryFileVersionInfo = FileVersionInfo.GetVersionInfo(additionalStoreLibrary);
-
-                if (netLibraryFileVersionInfo.FileVersion == additionalStoreLibraryFileVersionInfo.FileVersion)
-                {
-                    Log.Debug("Delete file available in additional store from net folder " + additionalStoreLibrary.Name + " version: " + netLibraryFileVersionInfo.FileVersion);
-                    netLibrary.DeleteFile();
-                    netLibrariesByName.Remove(additionalStoreLibrary.Name);
-                }
-                else
-                {
-                    Log.Warning("Cannot remove file available in additional store from net folder " + additionalStoreLibrary.Name + " net folder version: " + netLibraryFileVersionInfo.FileVersion + " additional store version: " + additionalStoreLibraryFileVersionInfo.FileVersion);
-                }
-            }
-        }
-    }
-
     void OptimizeTracerHomeAssemblies(IEnumerable<TargetFramework> frameworks)
     {
         static bool FilesAreEqual(string filePath1, string filePath2)
@@ -638,76 +602,6 @@ partial class Build
                         s => s.SetFramework(TestTargetFramework))
                 );
             }
-        });
-
-    // TODO: to remove
-    Target CopyAdditionalDeps => _ => _
-        .Unlisted()
-        .Description("Creates AutoInstrumentation.AdditionalDeps and shared store in tracer-home")
-        .After(CompileManagedSrc)
-        .Executes(() =>
-        {
-            if (AdditionalDepsDirectory.DirectoryExists())
-            {
-                Directory.Delete(AdditionalDepsDirectory, true);
-            }
-
-            if (StoreDirectory.DirectoryExists())
-            {
-                Directory.Delete(StoreDirectory, true);
-            }
-
-            DotNetPublish(s => s
-                .SetProject(Solution.GetProjectByName(Projects.AutoInstrumentationAdditionalDeps))
-                .SetConfiguration(BuildConfiguration)
-                .SetTargetPlatformAnyCPU()
-                .SetProperty("NukePlatform", Platform)
-                .SetProperty("TracerHomePath", TracerHomeDirectory)
-                .EnableNoBuild()
-                .SetNoRestore(NoRestore)
-                .CombineWith(TestFrameworks.ExceptNetFramework(), (p, framework) => p
-                .SetFramework(framework)
-                // Additional-deps probes the directory using SemVer format.
-                // Example: For net8.0, additional-deps uses 8.0.0.
-                // Major and Minor version are extracted from framework and default value of 0 is appended for patch.
-                .SetOutput(AdditionalDepsDirectory / "shared" / "Microsoft.NETCore.App" / framework.ToString().Substring("net".Length) + ".0")));
-
-            AdditionalDepsDirectory.GlobFiles("**/*deps.json")
-                .ForEach(file =>
-                {
-                    var rawJson = File.ReadAllText(file);
-                    var depsJson = JsonNode.Parse(rawJson).AsObject();
-
-                    var folderRuntimeName = depsJson.GetFolderRuntimeName();
-                    var architectureStores = new List<AbsolutePath>()
-                        .AddIf(StoreDirectory / "x64" / folderRuntimeName, RuntimeInformation.OSArchitecture == Architecture.X64)
-                        .AddIf(StoreDirectory / "x86" / folderRuntimeName, IsWin) // Only Windows supports x86 runtime
-                        .AddIf(StoreDirectory / "arm64" / folderRuntimeName, IsArm64)
-                        .AsReadOnly();
-
-                    depsJson.CopyNativeDependenciesToStore(file, architectureStores);
-                    depsJson.RemoveDuplicatedLibraries(architectureStores);
-                    depsJson.RemoveOpenTelemetryLibraries();
-
-                    // To allow roll forward for applications, like Roslyn, that target one tfm
-                    // but have a later runtime move the libraries under the original tfm folder
-                    // to the latest one.
-                    if (folderRuntimeName == TargetFramework.NET8_0 || folderRuntimeName == TargetFramework.NET9_0 || folderRuntimeName == TargetFramework.NET10_0)
-                    {
-                        depsJson.RollFrameworkForward(TargetFramework.NET8_0, TargetFramework.NET10_0, architectureStores);
-                        depsJson.RollFrameworkForward(TargetFramework.NET9_0, TargetFramework.NET10_0, architectureStores);
-                    }
-
-                    // Write the updated deps.json file.
-                    File.WriteAllText(file, depsJson.ToJsonString(new()
-                    {
-                        WriteIndented = true
-                    }));
-                });
-
-            // Cleanup Additional Deps Directory
-            AdditionalDepsDirectory.GlobFiles("**/*.dll", "**/*.pdb", "**/*.xml", "**/*.dylib", "**/*.so").ForEach(file => file.DeleteFile());
-            AdditionalDepsDirectory.GlobDirectories("**/runtimes").ForEach(directory => directory.DeleteDirectory());
         });
 
     Target PublishRuleEngineJson => _ => _

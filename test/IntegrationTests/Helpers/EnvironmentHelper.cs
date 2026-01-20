@@ -266,31 +266,11 @@ internal sealed class EnvironmentHelper
         return startupHookOutputPath;
     }
 
-    private static string GetSharedStorePath()
-    {
-        string storePath = Path.Combine(
-            GetNukeBuildOutput(),
-            "store");
-
-        return storePath;
-    }
-
-    private static string GetAdditionalDepsPath()
-    {
-        string additionalDeps = Path.Combine(
-            GetNukeBuildOutput(),
-            "AdditionalDeps");
-
-        return additionalDeps;
-    }
-
     private void SetDefaultEnvironmentVariables()
     {
         string profilerPath = GetProfilerPath();
 
         CustomEnvironmentVariables["DOTNET_STARTUP_HOOKS"] = GetStartupHookOutputPath();
-        CustomEnvironmentVariables["DOTNET_SHARED_STORE"] = GetSharedStorePath();
-        CustomEnvironmentVariables["DOTNET_ADDITIONAL_DEPS"] = GetAdditionalDepsPath();
 
         // call TestHelper.EnableBytecodeInstrumentation() to enable CoreCLR Profiler when bytecode instrumentation is needed
         // it is not enabled by default to make sure that the instrumentations that do not require CoreCLR Profiler are working without it
