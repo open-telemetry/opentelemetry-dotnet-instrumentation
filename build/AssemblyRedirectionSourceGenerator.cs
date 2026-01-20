@@ -131,7 +131,14 @@ public static class AssemblyRedirectionSourceGenerator
 
         #define STR(Z1) #Z1
         #define AUTO_MAJOR STR(OTEL_AUTO_VERSION_MAJOR) 
-        
+
+        // Macro to handle cross-platform UTF-16 string literals
+        #ifdef _WIN32
+        #define _W(s) L##s
+        #else
+        #define _W(s) u##s
+        #endif
+
         namespace trace
         {
         void CorProfiler::InitAssemblyRedirectsMap()
@@ -160,11 +167,11 @@ public static class AssemblyRedirectionSourceGenerator
                 var v = kvp.Value.Version!;
                 if (kvp.Key != "OpenTelemetry.AutoInstrumentation")
                 {
-                    sb.AppendLine($"            {{ L\"{kvp.Key}\", {{{v.Major}, {v.Minor}, {v.Build}, {v.Revision}}} }},");
+                    sb.AppendLine($"            {{ _W(\"{kvp.Key}\"), {{{v.Major}, {v.Minor}, {v.Build}, {v.Revision}}} }},");
                 }
                 else
                 {
-                    sb.AppendLine($"            {{ L\"{kvp.Key}\", {{auto_major, 0, 0, 0}} }},");
+                    sb.AppendLine($"            {{ _W(\"{kvp.Key}\"), {{auto_major, 0, 0, 0}} }},");
                 }
             }
             sb.AppendLine("        }},");
