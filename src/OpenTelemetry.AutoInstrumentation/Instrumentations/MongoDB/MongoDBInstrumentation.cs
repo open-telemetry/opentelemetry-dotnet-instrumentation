@@ -12,18 +12,7 @@ internal static class MongoDBInstrumentation
 {
     private static readonly ActivitySource Source = CreateActivitySource();
 
-    private static ActivitySource CreateActivitySource()
-    {
-        var assemblyName = typeof(MongoDBInstrumentation).Assembly.GetName();
-        var version = assemblyName.Version?.ToString();
-        var activitySourceOptions = new ActivitySourceOptions(assemblyName.Name!)
-        {
-            Version = version,
-            TelemetrySchemaUrl = "https://opentelemetry.io/schemas/1.39.0",
-        };
 
-        return new ActivitySource(activitySourceOptions);
-    }
 
     public static Activity? StartDatabaseActivity(
         object? instance,
@@ -59,6 +48,19 @@ internal static class MongoDBInstrumentation
         }
 
         return activity;
+    }
+
+    private static ActivitySource CreateActivitySource()
+    {
+        var assemblyName = typeof(MongoDBInstrumentation).Assembly.GetName();
+        var version = assemblyName.Version?.ToString();
+        var activitySourceOptions = new ActivitySourceOptions(assemblyName.Name!)
+        {
+            Version = version,
+            TelemetrySchemaUrl = "https://opentelemetry.io/schemas/1.39.0",
+        };
+
+        return new ActivitySource(activitySourceOptions);
     }
 
     private static void SetCommonAttributes(
