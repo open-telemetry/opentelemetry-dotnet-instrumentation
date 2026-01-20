@@ -54,9 +54,15 @@ public static partial class LibraryVersion
 #if DEFAULT_TEST_PACKAGE_VERSIONS
                 string.Empty,
 #else
-                "6.0.35",
-                "8.0.10",
-                "9.0.11",
+                "6.0.36",
+                "8.0.23",
+                "9.0.12",
+#if NET10_0
+                "10.0.0",
+#endif
+#if NET10_0
+                "10.0.2",
+#endif
 #endif
             ];
             return theoryData;
@@ -141,7 +147,7 @@ public static partial class LibraryVersion
                 "5.0.0",
                 "5.3.4",
                 "6.0.0",
-                "6.0.6",
+                "6.0.7",
 #endif
             ];
             return theoryData;
@@ -173,7 +179,7 @@ public static partial class LibraryVersion
                 string.Empty,
 #else
                 "5.2.2",
-                "6.1.3",
+                "6.1.4",
 #endif
             ];
             return theoryData;
@@ -217,7 +223,7 @@ public static partial class LibraryVersion
                 "3.5.0",
 #endif
 #if NET10_0 || NET9_0 || NET8_0 || NET462
-                "3.5.2",
+                "3.6.0",
 #endif
 #endif
             ];
@@ -265,9 +271,12 @@ public static partial class LibraryVersion
 #if DEFAULT_TEST_PACKAGE_VERSIONS
                 string.Empty,
 #else
-                "8.0.5",
+                "8.0.8",
 #if NET10_0 || NET9_0 || NET8_0
                 "9.0.4",
+#endif
+#if NET10_0 || NET9_0 || NET8_0
+                "10.0.1",
 #endif
 #endif
             ];
@@ -288,7 +297,7 @@ public static partial class LibraryVersion
                 "9.1.0",
 #endif
 #if NET10_0 || NET9_0 || NET8_0
-                "9.2.7",
+                "9.2.8",
 #endif
 #endif
             ];
