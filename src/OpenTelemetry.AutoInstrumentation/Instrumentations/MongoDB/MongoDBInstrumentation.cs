@@ -10,7 +10,20 @@ namespace OpenTelemetry.AutoInstrumentation.Instrumentations.MongoDB;
 
 internal static class MongoDBInstrumentation
 {
-    private static readonly ActivitySource Source = new("OpenTelemetry.AutoInstrumentation.MongoDB", AutoInstrumentationVersion.Version);
+    private static readonly ActivitySource Source = CreateActivitySource();
+
+    private static ActivitySource CreateActivitySource()
+    {
+        var assemblyName = typeof(MongoDBInstrumentation).Assembly.GetName();
+        var version = assemblyName.Version?.ToString();
+        var activitySourceOptions = new ActivitySourceOptions(assemblyName.Name!)
+        {
+            Version = version,
+            TelemetrySchemaUrl = "https://opentelemetry.io/schemas/1.39.0",
+        };
+
+        return new ActivitySource(activitySourceOptions);
+    }
 
     public static Activity? StartDatabaseActivity(
         object? instance,
