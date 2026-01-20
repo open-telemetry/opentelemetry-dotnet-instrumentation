@@ -139,9 +139,7 @@ public static class AssemblyRedirectionSourceGenerator
         {
             const USHORT auto_major = atoi(AUTO_MAJOR);
 
-            assembly_version_redirect_map_.insert({
-                {{GenerateEntries(assemblies)}}
-            });
+        {{GenerateEntries(assemblies)}}
         }
         }
 
@@ -155,26 +153,24 @@ public static class AssemblyRedirectionSourceGenerator
 
         foreach (var fx in frameworks)
         {
-            sb.AppendLine($"        {{ {fx.Key}, {{");
+            sb.AppendLine($"    assembly_version_redirect_map_[{fx.Key}] = {{");
             foreach (var kvp in fx.Value)
             {
                 var v = kvp.Value.Version!;
                 if (kvp.Key != "OpenTelemetry.AutoInstrumentation")
                 {
-                    sb.AppendLine($"            {{ L\"{kvp.Key}\", {{{v.Major}, {v.Minor}, {v.Build}, {v.Revision}}} }},");
+                    sb.AppendLine($"        {{ L\"{kvp.Key}\", {{{v.Major}, {v.Minor}, {v.Build}, {v.Revision}}} }},");
                 }
                 else
                 {
-                    sb.AppendLine($"            {{ L\"{kvp.Key}\", {{auto_major, 0, 0, 0}} }},");
+                    sb.AppendLine($"        {{ L\"{kvp.Key}\", {{auto_major, 0, 0, 0}} }},");
                 }
             }
-            sb.AppendLine("        }},");
+            sb.AppendLine("    };");
         }
 
         return sb.ToString()
-            .AsSpan() // Optimisation for following string manipulations
-            .Trim() // Remove whitespaces
-            .TrimEnd(',') // Remove trailing comma
+            .AsSpan()
             .ToString();
     }
 }
