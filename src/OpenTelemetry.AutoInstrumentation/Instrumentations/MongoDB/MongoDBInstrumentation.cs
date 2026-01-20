@@ -36,16 +36,33 @@ internal static class MongoDBInstrumentation
             return null;
         }
 
-        var spanName = $"{operationName} {collection}";
-
-        var activity = Source.StartActivity(name: spanName, kind: ActivityKind.Client);
-
-        if (activity is { IsAllDataRequested: true })
+        var tags = new ActivityTagsCollection
         {
-            SetCommonAttributes(activity, operationName, collection, database, serverAddress, serverName, serverPort);
+            { DatabaseAttributes.Keys.DbSystem, DatabaseAttributes.Values.MongoDB.MongoDbSystem },
+            { DatabaseAttributes.Keys.DbCollectionName, collection },
+            { DatabaseAttributes.Keys.DbNamespace, database },
+            { DatabaseAttributes.Keys.DbOperationName, operationName },
+        };
+
+        if (!string.IsNullOrEmpty(serverAddress))
+        {
+            tags.Add(NetworkAttributes.Keys.NetworkPeerAddress, serverAddress);
         }
 
-        return activity;
+        if (!string.IsNullOrEmpty(serverName))
+        {
+            tags.Add(NetworkAttributes.Keys.ServerAddress, serverName);
+        }
+
+        if (serverPort is not null)
+        {
+            tags.Add(NetworkAttributes.Keys.ServerPort, serverPort);
+            tags.Add(NetworkAttributes.Keys.NetworkPeerPort, serverPort);
+        }
+
+        var spanName = $"{operationName} {collection}";
+
+        return Source.StartActivity(spanName, ActivityKind.Client, default(ActivityContext), tags);
     }
 
     private static ActivitySource CreateActivitySource()
@@ -59,37 +76,6 @@ internal static class MongoDBInstrumentation
         };
 
         return new ActivitySource(activitySourceOptions);
-    }
-
-    private static void SetCommonAttributes(
-        Activity activity,
-        string? operationName,
-        string? collection,
-        string? database,
-        string? serverAddress,
-        string? serverName,
-        int? serverPort)
-    {
-        activity.SetTag(DatabaseAttributes.Keys.DbSystem, DatabaseAttributes.Values.MongoDB.MongoDbSystem);
-        activity.SetTag(DatabaseAttributes.Keys.DbCollectionName, collection);
-        activity.SetTag(DatabaseAttributes.Keys.DbNamespace, database);
-        activity.SetTag(DatabaseAttributes.Keys.DbOperationName, operationName);
-
-        if (!string.IsNullOrEmpty(serverAddress))
-        {
-            activity.SetTag(NetworkAttributes.Keys.NetworkPeerAddress, serverAddress);
-        }
-
-        if (!string.IsNullOrEmpty(serverName))
-        {
-            activity.SetTag(NetworkAttributes.Keys.ServerAddress, serverName);
-        }
-
-        if (serverPort is not null)
-        {
-            activity.SetTag(NetworkAttributes.Keys.ServerPort, serverPort);
-            activity.SetTag(NetworkAttributes.Keys.NetworkPeerPort, serverPort);
-        }
     }
 
     private static bool TryGetDatabaseName(object instance, out string? database)
