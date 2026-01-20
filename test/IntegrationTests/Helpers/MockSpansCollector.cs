@@ -5,6 +5,7 @@ using System.Collections.Concurrent;
 using System.Globalization;
 using System.Text;
 using OpenTelemetry.Proto.Collector.Trace.V1;
+using OpenTelemetry.Proto.Common.V1;
 using OpenTelemetry.Proto.Trace.V1;
 using Xunit.Abstractions;
 
@@ -54,12 +55,17 @@ internal sealed class MockSpansCollector : IDisposable
         _listener.Dispose();
     }
 
-    public void Expect(string instrumentationScopeName, Func<Span, bool>? predicate = null, string? description = null)
+    public void Expect(string scopeName, Func<Span, bool>? predicate = null, string? description = null)
     {
-        description ??= $"<no description> Instrumentation Scope Name: '{instrumentationScopeName}', predicate is null: '{predicate == null}'";
+        Expect(scopeName, null, predicate, description);
+    }
+
+    public void Expect(string scopeName, string? scopeVersion, Func<Span, bool>? predicate = null, string? description = null)
+    {
+        description ??= $"<no description> Scope Name: '{scopeName}', Scope Version: '{scopeVersion}', predicate is null: '{predicate == null}'";
         predicate ??= x => true;
 
-        _expectations.Add(new Expectation(instrumentationScopeName, predicate, description));
+        _expectations.Add(new Expectation(scopeName, scopeVersion, predicate, description));
     }
 
     public void ExpectCollected(Func<ICollection<Collected>, bool> collectedExpectation)
@@ -89,12 +95,18 @@ internal sealed class MockSpansCollector : IDisposable
                 var found = false;
                 for (var i = missingExpectations.Count - 1; i >= 0; i--)
                 {
-                    if (missingExpectations[i].InstrumentationScopeName != resourceSpans.InstrumentationScopeName)
+                    var missingExpectation = missingExpectations[i];
+                    if (missingExpectation.ScopeName != resourceSpans.Scope.Name)
                     {
                         continue;
                     }
 
-                    if (!missingExpectations[i].Predicate(resourceSpans.Span))
+                    if (missingExpectation.ScopeVersion != null && missingExpectation.ScopeVersion != resourceSpans.Scope.Version)
+                    {
+                        continue;
+                    }
+
+                    if (!missingExpectation.Predicate(resourceSpans.Span))
                     {
                         continue;
                     }
@@ -213,7 +225,7 @@ internal sealed class MockSpansCollector : IDisposable
             {
                 foreach (var span in scopeSpans.Spans ?? Enumerable.Empty<Span>())
                 {
-                    _spans.Add(new Collected(scopeSpans.Scope.Name, span));
+                    _spans.Add(new Collected(scopeSpans.Scope, span));
                 }
             }
         }
@@ -230,32 +242,35 @@ internal sealed class MockSpansCollector : IDisposable
     internal sealed class Collected
 #pragma warning restore CA1812 // Mark members as static. There is some issue in dotnet format.
     {
-        public Collected(string instrumentationScopeName, Span span)
+        public Collected(InstrumentationScope scope, Span span)
         {
-            InstrumentationScopeName = instrumentationScopeName;
+            Scope = scope;
             Span = span;
         }
 
-        public string InstrumentationScopeName { get; }
+        public InstrumentationScope Scope { get; }
 
         public Span Span { get; } // protobuf type
 
         public override string ToString()
         {
-            return $"InstrumentationScopeName = {InstrumentationScopeName}, Span = {Span}";
+            return $"Scope.Name = {Scope.Name}, Scope.Version={Scope.Version}, Span = {Span}";
         }
     }
 
     private sealed class Expectation
     {
-        public Expectation(string instrumentationScopeName, Func<Span, bool> predicate, string? description)
+        public Expectation(string scopeName, string? scopeVersion, Func<Span, bool> predicate, string? description)
         {
-            InstrumentationScopeName = instrumentationScopeName;
+            ScopeName = scopeName;
+            ScopeVersion = scopeVersion;
             Predicate = predicate;
             Description = description;
         }
 
-        public string InstrumentationScopeName { get; }
+        public string ScopeName { get; }
+
+        public string? ScopeVersion { get; }
 
         public Func<Span, bool> Predicate { get; }
 

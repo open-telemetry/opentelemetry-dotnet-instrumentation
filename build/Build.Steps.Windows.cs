@@ -119,13 +119,16 @@ partial class Build
         {
             foreach (var architecture in ArchitecturesForPlatform)
             {
-                var source = NativeProfilerProject.Directory / "bin" / BuildConfiguration / architecture.ToString() /
-                             $"{NativeProfilerProject.Name}.dll";
+                var sourceDir = NativeProfilerProject.Directory / "bin" / BuildConfiguration / architecture.ToString();
+                var sourceDll = sourceDir / $"{NativeProfilerProject.Name}.dll";
+                var sourcePdb = sourceDir / $"{NativeProfilerProject.Name}.pdb";
                 var dest = TracerHomeDirectory / $"win-{architecture}";
 
-                Log.Information($"Copying '{source}' to '{dest}'");
+                Log.Information($"Copying '{sourceDll}' to '{dest}'");
+                sourceDll.CopyToDirectory(dest, ExistsPolicy.FileOverwrite);
 
-                source.CopyToDirectory(dest, ExistsPolicy.FileOverwrite);
+                Log.Information($"Copying '{sourcePdb}' to '{dest}'");
+                sourcePdb.CopyToDirectory(dest, ExistsPolicy.FileOverwrite);
             }
         });
 
