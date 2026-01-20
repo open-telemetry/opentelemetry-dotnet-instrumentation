@@ -254,7 +254,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestApplication.ProfilerSpa
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestApplication.NoCode", "test\test-applications\integrations\TestApplication.NoCode\TestApplication.NoCode.csproj", "{500BF40F-EECB-4F6A-377B-EDBDFFDE09BE}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpenTelemetry.AutoInstrumentation.Assemblies.NetFramework", "src\OpenTelemetry.AutoInstrumentation.Assemblies.NetFramework\OpenTelemetry.AutoInstrumentation.Assemblies.NetFramework.csproj", "{B69564D4-7D5B-7147-6CBA-233BB8A33C50}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpenTelemetry.AutoInstrumentation.Assemblies", "src\OpenTelemetry.AutoInstrumentation.Assemblies\OpenTelemetry.AutoInstrumentation.Assemblies.csproj", "{B69564D4-7D5B-7147-6CBA-233BB8A33C50}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestApplication.Wcf.Core", "test\test-applications\integrations\TestApplication.Wcf.Core\TestApplication.Wcf.Core.csproj", "{0F864722-CE44-4D99-9B67-CF0ED1893FF1}"
 EndProject

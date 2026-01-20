@@ -122,12 +122,11 @@ private:
     //
     // Assembly redirect private members.
     //
-    // TODO rename
     std::unordered_map<int, std::unordered_map<WSTRING, AssemblyVersionRedirection>> assembly_version_redirect_map_;
     std::unordered_map<WSTRING, AssemblyVersionRedirection>* assembly_version_redirect_map_current_framework_;
     int                                                      assembly_version_redirect_map_current_framework_key_ = 0;
 
-    void InitNetFxAssemblyRedirectsMap();
+    void InitAssemblyRedirectsMap();
     void RedirectAssemblyReferences(const ComPtr<IMetaDataAssemblyImport>& assembly_import,
                                     const ComPtr<IMetaDataAssemblyEmit>&   assembly_emit);
     void DetectFrameworkVersionTableForRedirectsMap();

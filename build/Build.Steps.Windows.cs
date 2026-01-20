@@ -16,7 +16,7 @@ partial class Build
     Target CompileNativeSrcWindows => _ => _
         .Unlisted()
         .After(CompileManagedSrc)
-        .After(GenerateNetFxAssemblyRedirectionSource)
+        .After(GenerateAssemblyRedirectionSource)
         .OnlyWhenStatic(() => IsWin)
         .Executes(() =>
         {
@@ -71,7 +71,7 @@ partial class Build
     Target CompileNativeDependenciesForManagedTestsWindows => _ => _
         .Unlisted()
         .After(CompileManagedSrc)
-        .After(GenerateNetFxAssemblyRedirectionSource)
+        .After(GenerateAssemblyRedirectionSource)
         .OnlyWhenStatic(() => IsWin)
         .Executes(() =>
         {

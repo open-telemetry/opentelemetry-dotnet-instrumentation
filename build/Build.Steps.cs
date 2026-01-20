@@ -127,31 +127,31 @@ partial class Build
             }
         }));
 
-    Target GenerateNetFxTransientDependencies => _ => _
+    Target GenerateTransientDependencies => _ => _
         .Unlisted()
         .After(Restore)
         .Executes(() =>
         {
             // The target project needs to have its NuGet packages restored prior to running the tool.
-            var targetProject = Solution.GetProjectByName(Projects.AutoInstrumentationNetFxAssemblies);
+            var targetProject = Solution.GetProjectByName(Projects.AutoInstrumentationAssemblies);
             DotNetRestore(s => s.SetProjectFile(targetProject));
 
             TransientDependenciesGenerator.Run(targetProject);
         });
 
-    Target GenerateNetFxAssemblyRedirectionSource => _ => _
+    Target GenerateAssemblyRedirectionSource => _ => _
         .Unlisted()
         .After(PublishManagedProfiler)
         .Executes(() =>
         {
-            var generatedSourceFile = SourceDirectory / Projects.AutoInstrumentationNative / "netfx_assembly_redirection.h";
+            var generatedSourceFile = SourceDirectory / Projects.AutoInstrumentationNative / "assembly_redirection.h";
 
             AssemblyRedirectionSourceGenerator.Generate(TracerHomeDirectory, generatedSourceFile);
         });
 
     Target CompileManagedSrc => _ => _
         .Description("Compiles the managed code in the src directory")
-        .After(GenerateNetFxTransientDependencies)
+        .After(GenerateTransientDependencies)
         .After(CreateRequiredDirectories)
         .After(Restore)
         .Executes(() =>
@@ -314,7 +314,7 @@ partial class Build
 
             // Publish OpenTelemetry.AutoInstrumentation.Assemblies.NetFramework for all target frameworks
             DotNetPublish(s => s
-                .SetProject(Solution.GetProjectByName(Projects.AutoInstrumentationNetFxAssemblies))
+                .SetProject(Solution.GetProjectByName(Projects.AutoInstrumentationAssemblies))
                 .SetConfiguration(BuildConfiguration)
                 .SetTargetPlatformAnyCPU()
                 .EnableNoBuild()

@@ -13,7 +13,6 @@ public static class AssemblyRedirectionSourceGenerator
         // Process both netfx and net folders with their specific regex patterns for version extraction
         // TODO for now generate headers files with 3 digit version numbers for net framework and 4+ digit version numbers for net (core)
         // e.g. net462 -> 462, net47 -> 470, net8.0 -> 8000, net10.0 -> 10000
-        // TODO rename header file to more general name since it will contain both netfx and net redirections
         var rootFolders = new[]
         {
             (Name: "netfx", Pattern: new Regex(@"^net(?<version>\d{2,3})$")),  // .NET Framework: net462, net47, net471, net472
@@ -42,8 +41,8 @@ public static class AssemblyRedirectionSourceGenerator
                     continue;
                 }
 
+                // TODO ugly hack to place .NET (Core) above .NET Framework, improve later
                 var frameworkVersion = int.Parse(framework.Replace(".", ""));
-                // .NET (Core) versions should go higher than .NET Framework versions
                 if (framework.Contains('.'))
                 {
                     frameworkVersion *= 100;
@@ -135,7 +134,7 @@ public static class AssemblyRedirectionSourceGenerator
         
         namespace trace
         {
-        void CorProfiler::InitNetFxAssemblyRedirectsMap()
+        void CorProfiler::InitAssemblyRedirectsMap()
         {
             const USHORT auto_major = atoi(AUTO_MAJOR);
 

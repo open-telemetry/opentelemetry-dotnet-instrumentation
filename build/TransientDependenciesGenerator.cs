@@ -49,7 +49,7 @@ internal static class TransientDependenciesGenerator
     {
         var project = targetProject.GetMSBuildProject();
         var deps = Generator.EnumerateDependencies(project.FullPath);
-        var packages = targetProject.Solution.Directory / "src" / Projects.AutoInstrumentationNetFxAssemblies /
+        var packages = targetProject.Solution.Directory / "src" / Projects.AutoInstrumentationAssemblies /
                        "Directory.Packages.props";
         var packagesProject = ProjectModelTasks.ParseProject(packages);
 

@@ -38,10 +38,9 @@ bool IsFailFastEnabled()
     CheckIfTrue(GetEnvironmentValue(environment::fail_fast_enabled));
 }
 
-// TODO rename along with the variable
-bool IsNetFxAssemblyRedirectionEnabled()
+bool IsAssemblyRedirectionEnabled()
 {
-    ToBooleanWithDefault(GetEnvironmentValue(environment::netfx_assembly_redirection_enabled), true);
+    ToBooleanWithDefault(GetEnvironmentValue(environment::assembly_redirection_enabled), true);
 }
 
 } // namespace trace

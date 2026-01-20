@@ -1,7 +1,7 @@
 public static class Projects
 {
     public const string AutoInstrumentation = "OpenTelemetry.AutoInstrumentation";
-    public const string AutoInstrumentationNetFxAssemblies = "OpenTelemetry.AutoInstrumentation.Assemblies.NetFramework";
+    public const string AutoInstrumentationAssemblies = "OpenTelemetry.AutoInstrumentation.Assemblies";
     public const string AutoInstrumentationLoader = "OpenTelemetry.AutoInstrumentation.Loader";
     public const string AutoInstrumentationNative = "OpenTelemetry.AutoInstrumentation.Native";
     public const string AutoInstrumentationStartupHook = "OpenTelemetry.AutoInstrumentation.StartupHook";

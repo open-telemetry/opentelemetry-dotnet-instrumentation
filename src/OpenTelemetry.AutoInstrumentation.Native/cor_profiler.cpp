@@ -8,6 +8,7 @@
 #include <string>
 #include <typeinfo>
 
+#include "assembly_redirection.h"
 #include "clr_helpers.h"
 #include "dllmain.h"
 #include "environment_variables.h"
@@ -37,8 +38,6 @@
 #include <mach-o/dyld.h>
 #include <mach-o/getsect.h>
 #endif
-
-#include "netfx_assembly_redirection.h"
 
 #define FailProfiler(LEVEL, MESSAGE)                                                                                   \
     Logger::LEVEL(MESSAGE);                                                                                            \
@@ -136,9 +135,9 @@ HRESULT STDMETHODCALLTYPE CorProfiler::Initialize(IUnknown* cor_profiler_info_un
         FailProfiler(Warn, "Failed to attach profiler: Not supported .NET version (lower than 6.0).")
     }
 
-    if (IsNetFxAssemblyRedirectionEnabled())
+    if (IsAssemblyRedirectionEnabled())
     {
-        InitNetFxAssemblyRedirectsMap();
+        InitAssemblyRedirectsMap();
         DetectFrameworkVersionTableForRedirectsMap();
     }
 
@@ -755,7 +754,7 @@ HRESULT STDMETHODCALLTYPE CorProfiler::ModuleLoadFinished(ModuleID module_id, HR
     }
 
     // It is not safe to skip assemblies if applying redirection
-    if (!IsNetFxAssemblyRedirectionEnabled())
+    if (!IsAssemblyRedirectionEnabled())
     {
         // If assembly redirection is disabled, check if the assembly can be skipped.
         for (auto&& skip_assembly : skip_assemblies)
@@ -778,10 +777,9 @@ HRESULT STDMETHODCALLTYPE CorProfiler::ModuleLoadFinished(ModuleID module_id, HR
         }
     }
 
-    // TODO rename
-    const bool perform_netfx_redirect = IsNetFxAssemblyRedirectionEnabled();
+    const bool perform_redirect = IsAssemblyRedirectionEnabled();
 
-    if (perform_netfx_redirect || module_info.assembly.name == managed_profiler_name)
+    if (perform_redirect || module_info.assembly.name == managed_profiler_name)
     {
         ComPtr<IUnknown> metadata_interfaces;
         auto             hr = this->info_->GetModuleMetaData(module_id, ofRead | ofWrite, IID_IMetaDataImport2,
@@ -803,7 +801,7 @@ HRESULT STDMETHODCALLTYPE CorProfiler::ModuleLoadFinished(ModuleID module_id, HR
             ModuleMetadata(metadata_import, metadata_emit, assembly_import, assembly_emit, module_info.assembly.name,
                            module_info.assembly.app_domain_id, &corAssemblyProperty);
 
-        if (perform_netfx_redirect)
+        if (perform_redirect)
         {
             // Redirect any assembly reference to the versions required by
             // OpenTelemetry.AutoInstrumentation assembly:

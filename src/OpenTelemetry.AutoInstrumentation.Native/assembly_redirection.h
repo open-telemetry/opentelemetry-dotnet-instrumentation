@@ -12,7 +12,7 @@
 
 namespace trace
 {
-void CorProfiler::InitNetFxAssemblyRedirectsMap()
+void CorProfiler::InitAssemblyRedirectsMap()
 {
     const USHORT auto_major = atoi(AUTO_MAJOR);
 
