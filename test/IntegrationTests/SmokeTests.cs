@@ -396,7 +396,7 @@ public class SmokeTests : TestHelper
         EnableBytecodeInstrumentation();
         RunTestApplication();
 
-        collector.ExpectSpan(collectedSpan => collectedSpan.InstrumentationScopeName == "MyCompany.MyProduct.MyLibrary");
+        collector.ExpectSpan(collectedSpan => collectedSpan.Scope.Name == "MyCompany.MyProduct.MyLibrary");
         collector.ExpectLogRecord(record => Convert.ToString(record.Body, CultureInfo.InvariantCulture) == "{ \"stringValue\": \"Example log message\" }");
 
         collector.AssertCorrelation();
