@@ -32,9 +32,11 @@ public static partial class LibraryVersion
         {
             "TestApplication.EntityFrameworkCore",
             [
-                new("6.0.35"),
-                new("8.0.10"),
-                new("9.0.11"),
+                new("6.0.36"),
+                new("8.0.23"),
+                new("9.0.12"),
+                new("10.0.0", supportedFrameworks: [ "net10.0" ]),
+                new("10.0.2", supportedFrameworks: [ "net10.0" ]),
             ]
         },
         {
@@ -74,7 +76,7 @@ public static partial class LibraryVersion
                 new("5.0.0", additionalMetaData: new() { { "NLogExtensionsLogging", "5.0.0" } }),
                 new("5.3.4", additionalMetaData: new() { { "NLogExtensionsLogging", "5.3.15" } }),
                 new("6.0.0", additionalMetaData: new() { { "NLogExtensionsLogging", "6.0.0" } }),
-                new("6.0.6", additionalMetaData: new() { { "NLogExtensionsLogging", "6.1.0" } }),
+                new("6.0.7", additionalMetaData: new() { { "NLogExtensionsLogging", "6.1.0" } }),
             ]
         },
         {
@@ -88,7 +90,7 @@ public static partial class LibraryVersion
             "TestApplication.SqlClient.Microsoft",
             [
                 new("5.2.2"),
-                new("6.1.3"),
+                new("6.1.4"),
             ]
         },
         {
@@ -125,8 +127,9 @@ public static partial class LibraryVersion
         {
             "TestApplication.Npgsql",
             [
-                new("8.0.5"),
+                new("8.0.8"),
                 new("9.0.4", supportedFrameworks: [ "net10.0", "net9.0", "net8.0" ]),
+                new("10.0.1", supportedFrameworks: [ "net10.0", "net9.0", "net8.0" ]),
             ]
         },
         {
@@ -134,7 +137,7 @@ public static partial class LibraryVersion
             [
                 new("8.2.5"),
                 new("9.1.0", supportedFrameworks: [ "net10.0", "net9.0", "net8.0" ]),
-                new("9.2.7", supportedFrameworks: [ "net10.0", "net9.0", "net8.0" ]),
+                new("9.2.8", supportedFrameworks: [ "net10.0", "net9.0", "net8.0" ]),
             ]
         },
         {

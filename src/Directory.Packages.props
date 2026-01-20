@@ -2,7 +2,7 @@
   <Import Project="..\Directory.Packages.props" />
   <!-- Versions from Directory.Build.props in the same folder -->
   <ItemGroup>
-    <PackageVersion Include="Microsoft.CodeAnalysis.PublicApiAnalyzers" Version="4.14.0" />
+    <PackageVersion Include="Microsoft.CodeAnalysis.PublicApiAnalyzers" Version="5.0.0-1.25277.114" />
     <PackageVersion Include="Microsoft.NETFramework.ReferenceAssemblies" Version="1.0.3" />
   </ItemGroup>
   <!-- Versions from OpenTelemetry.AutoInstrumentation.BuildTasks.csproj -->
