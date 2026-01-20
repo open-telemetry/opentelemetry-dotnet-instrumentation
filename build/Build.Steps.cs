@@ -497,6 +497,25 @@ partial class Build
             source.CopyToDirectory(dest, ExistsPolicy.FileOverwrite);
         });
 
+    Target CreateVersionFile => _ => _
+        .Unlisted()
+        .After(Clean)
+        .After(CreateRequiredDirectories)
+        .Executes(() =>
+        {
+            var version = VersionHelper.GetVersion();
+            var refName = "local-dev";
+            var gitSha = VersionHelper.GetCommitId();
+
+            if (Environment.GetEnvironmentVariable("GITHUB_ACTIONS") is "true")
+            {
+                refName = Environment.GetEnvironmentVariable("GITHUB_REF_NAME");
+            }
+
+            var dest = TracerHomeDirectory / "VERSION";
+            dest.WriteAllLines([version, $"{refName}@{gitSha}"]);
+        });
+
     Target RunNativeTests => _ => _
         .Unlisted()
         .DependsOn(RunNativeTestsWindows)
