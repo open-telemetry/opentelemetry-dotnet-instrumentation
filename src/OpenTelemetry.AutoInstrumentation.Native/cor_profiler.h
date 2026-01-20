@@ -122,7 +122,7 @@ private:
     //
     // Assembly redirect private members.
     //
-    //TODO rename
+    // TODO rename
     std::unordered_map<int, std::unordered_map<WSTRING, AssemblyVersionRedirection>> assembly_version_redirect_map_;
     std::unordered_map<WSTRING, AssemblyVersionRedirection>* assembly_version_redirect_map_current_framework_;
     int                                                      assembly_version_redirect_map_current_framework_key_ = 0;

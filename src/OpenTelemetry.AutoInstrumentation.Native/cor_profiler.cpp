@@ -778,7 +778,7 @@ HRESULT STDMETHODCALLTYPE CorProfiler::ModuleLoadFinished(ModuleID module_id, HR
         }
     }
 
-    //TODO rename
+    // TODO rename
     const bool perform_netfx_redirect = IsNetFxAssemblyRedirectionEnabled();
 
     if (perform_netfx_redirect || module_info.assembly.name == managed_profiler_name)
