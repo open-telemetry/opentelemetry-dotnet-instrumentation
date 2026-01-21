@@ -79,7 +79,7 @@ jobs:
       with:
         dotnet-version: | 
           8.0.417
-          9.0.309
+          9.0.310
           10.0.102
 
     # If the analyze step fails for one of the languages you are analyzing with
