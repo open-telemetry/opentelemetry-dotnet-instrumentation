@@ -108,11 +108,6 @@ internal static class Instrumentation
             AppDomain.CurrentDomain.ProcessExit += OnExit;
             AppDomain.CurrentDomain.DomainUnload += OnExit;
 
-#if NETFRAMEWORK
-
-            NativeMethods.SetNetFxAssemblyRedirectionEnabled(GeneralSettings.Value.NetFxRedirectEnabled);
-#endif
-
             var profilerEnabled = GeneralSettings.Value.ProfilerEnabled;
 
             if (profilerEnabled)
@@ -124,6 +119,12 @@ internal static class Instrumentation
                 Logger.Information("CLR Profiler is not enabled. Continuous Profiler will be not started even if configured correctly.");
             }
 
+#if NETFRAMEWORK
+            if (!GeneralSettings.Value.NetFxRedirectEnabled)
+            {
+                NativeMethods.SetNetFxAssemblyRedirectionEnabled(false);
+            }
+#endif
             if (TracerSettings.Value.TracesEnabled || MetricSettings.Value.MetricsEnabled)
             {
                 if (GeneralSettings.Value.FlushOnUnhandledException)
