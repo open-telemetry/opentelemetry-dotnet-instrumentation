@@ -16,6 +16,7 @@ public class FilebasedGeneralSettingsTests
         {
             Disabled = false,
             FlushOnUnhandledException = true,
+            NetFxRedirectEnabled = false,
         };
 
         var settings = new GeneralSettings();
@@ -24,6 +25,7 @@ public class FilebasedGeneralSettingsTests
 
         Assert.True(settings.SetupSdk);
         Assert.True(settings.FlushOnUnhandledException);
+        Assert.False(settings.NetFxRedirectEnabled);
     }
 
     [Fact]

@@ -2,4 +2,4 @@ file_format: "1.0-rc.1"
 disabled: ${OTEL_SDK_DISABLED}
 fail_fast: ${OTEL_DOTNET_AUTO_FAIL_FAST_ENABLED}
 flush_on_unhandled_exception: ${OTEL_DOTNET_AUTO_FLUSH_ON_UNHANDLEDEXCEPTION}
-
+netfx_redirect_enabled: ${OTEL_DOTNET_AUTO_NETFX_REDIRECT_ENABLED}

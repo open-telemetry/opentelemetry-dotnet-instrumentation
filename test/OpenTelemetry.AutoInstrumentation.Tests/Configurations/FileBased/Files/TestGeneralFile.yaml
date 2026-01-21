@@ -2,3 +2,4 @@ file_format: "1.0-rc.1"
 disabled: false
 fail_fast: false
 flush_on_unhandled_exception: false
+netfx_redirect_enabled: false

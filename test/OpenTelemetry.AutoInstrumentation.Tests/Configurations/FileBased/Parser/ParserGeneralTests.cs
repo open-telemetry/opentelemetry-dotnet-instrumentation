@@ -21,6 +21,7 @@ public class ParserGeneralTests
         Assert.False(config.Disabled);
         Assert.False(config.FailFast);
         Assert.False(config.FlushOnUnhandledException);
+        Assert.False(config.NetFxRedirectEnabled);
     }
 
     [Fact]
@@ -29,6 +30,7 @@ public class ParserGeneralTests
         Environment.SetEnvironmentVariable("OTEL_SDK_DISABLED", "true");
         Environment.SetEnvironmentVariable("OTEL_DOTNET_AUTO_FAIL_FAST_ENABLED", "true");
         Environment.SetEnvironmentVariable("OTEL_DOTNET_AUTO_FLUSH_ON_UNHANDLEDEXCEPTION", "false");
+        Environment.SetEnvironmentVariable("OTEL_DOTNET_AUTO_NETFX_REDIRECT_ENABLED", "false");
 
         var config = YamlParser.ParseYaml<YamlConfiguration>("Configurations/FileBased/Files/TestGeneralFileEnvVars.yaml");
 
@@ -38,5 +40,6 @@ public class ParserGeneralTests
         Assert.True(config.Disabled);
         Assert.True(config.FailFast);
         Assert.False(config.FlushOnUnhandledException);
+        Assert.False(config.NetFxRedirectEnabled);
     }
 }
