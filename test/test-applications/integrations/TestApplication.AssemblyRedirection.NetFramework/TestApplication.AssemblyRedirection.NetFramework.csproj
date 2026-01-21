@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <!-- In order to test assembly redirection this project will force the use of specific versions -->
     <ManagePackageVersionsCentrally>false</ManagePackageVersionsCentrally>
@@ -8,5 +8,11 @@
   <ItemGroup>
     <!-- WARNING: Keep this version of System.Diagnostics.DiagnosticSource to ensure the test is validating the actual scenario. -->
     <PackageReference Include="System.Diagnostics.DiagnosticSource" Version="6.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="config.yaml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 </Project>

@@ -14,14 +14,27 @@ public class AssemblyRedirectionOnNetFrameworkTests : TestHelper
     {
     }
 
-    [Fact]
-    public void SubmitsTraces()
+    [Theory]
+    [InlineData(true, true)]
+    [InlineData(false, true)]
+    [InlineData(true, false)]
+    [InlineData(false, false)]
+    public void SubmitsTraces(bool isFileBased, bool isNetFxRedirectEnabled)
     {
         using var collector = new MockSpansCollector(Output);
-        SetExporter(collector);
+        if (isFileBased)
+        {
+            SetFileBasedExporter(collector);
+            EnableFileBasedConfigWithDefaultPath();
+        }
+        else
+        {
+            SetExporter(collector);
+        }
 
         const string TestApplicationActivitySource = "AssemblyRedirection.NetFramework.ActivitySource";
         SetEnvironmentVariable("OTEL_DOTNET_AUTO_TRACES_ADDITIONAL_SOURCES", TestApplicationActivitySource);
+        SetEnvironmentVariable("OTEL_DOTNET_AUTO_NETFX", isNetFxRedirectEnabled.ToString());
         collector.Expect(TestApplicationActivitySource);
 
         RunTestApplication();
