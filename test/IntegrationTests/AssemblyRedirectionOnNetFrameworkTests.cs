@@ -34,7 +34,7 @@ public class AssemblyRedirectionOnNetFrameworkTests : TestHelper
 
         const string TestApplicationActivitySource = "AssemblyRedirection.NetFramework.ActivitySource";
         SetEnvironmentVariable("OTEL_DOTNET_AUTO_TRACES_ADDITIONAL_SOURCES", TestApplicationActivitySource);
-        SetEnvironmentVariable("OTEL_DOTNET_AUTO_NETFX", isNetFxRedirectEnabled.ToString());
+        SetEnvironmentVariable("OTEL_DOTNET_AUTO_NETFX_REDIRECT_ENABLED", isNetFxRedirectEnabled.ToString());
         collector.Expect(TestApplicationActivitySource);
 
         RunTestApplication();
