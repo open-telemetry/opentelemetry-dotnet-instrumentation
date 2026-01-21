@@ -45,6 +45,9 @@ flush_on_unhandled_exception: ${OTEL_DOTNET_AUTO_FLUSH_ON_UNHANDLEDEXCEPTION:-fa
 # Configure if the Logs Include Formatted Message is enabled or not.
 # If omitted or null, false is used.
 logs_include_formatted_message: ${OTEL_DOTNET_AUTO_LOGS_INCLUDE_FORMATTED_MESSAGE:-false}
+# Configure if the .NET Framework Assembly Redirect is enabled or not.
+# If omitted or null, true is used.
+netfx_redirect_enabled: ${OTEL_DOTNET_AUTO_NETFX_REDIRECT_ENABLED:-true}
 
 # Resource Configuration
 resource:

@@ -50,7 +50,6 @@ file-based configuration to include these parameters.
 | `OTEL_DOTNET_AUTO_HOME`                              | Installation location.                                                                                                    |
 | `OTEL_DOTNET_AUTO_EXCLUDE_PROCESSES`                 | Names of the executable files that the profiler cannot instrument.                                                        |
 | `OTEL_DOTNET_AUTO_OPENTRACING_ENABLED`               | Enables OpenTracing tracer.                                                                                               |
-| `OTEL_DOTNET_AUTO_NETFX_REDIRECT_ENABLED`            | Enables automatic redirection of the assemblies used by the automatic instrumentation on the .NET Framework.              |
 
 ---
 
@@ -142,6 +141,9 @@ flush_on_unhandled_exception: false
 # Configure if the Logs Include Formatted Message is enabled or not.
 # If omitted or null, false is used.
 logs_include_formatted_message: false
+# Configure if the .NET Framework Assembly Redirect is enabled or not.
+# If omitted or null, true is used.
+netfx_redirect_enabled: true
 ```
 
 ### Tracer Provider Configuration
