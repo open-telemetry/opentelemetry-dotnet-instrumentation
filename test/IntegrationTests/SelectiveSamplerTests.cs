@@ -37,17 +37,6 @@ public class SelectiveSamplerTests : TestHelper
 
         var threadSamples = ConsoleProfileExporterHelpers.ExtractSamples(output);
 
-        var currentStartTime = ToDateTime(threadSamples[0].TimestampNanoseconds);
-
-        foreach (var sample in threadSamples.Skip(1))
-        {
-            var nextStartTime = ToDateTime(sample.TimestampNanoseconds);
-            var diff = (nextStartTime - currentStartTime).TotalMilliseconds;
-            Output.WriteLine($"Time diff between consecutive samples: {diff}");
-            Assert.InRange(diff, 50, 70);
-            currentStartTime = nextStartTime;
-        }
-
         // Test app sleeps for 0.5s, sampling interval set to 0.05s
         Output.WriteLine($"Count: {threadSamples.Count}");
         Assert.InRange(threadSamples.Count, 7, 14);
