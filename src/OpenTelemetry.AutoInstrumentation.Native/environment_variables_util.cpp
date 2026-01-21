@@ -38,9 +38,4 @@ bool IsFailFastEnabled()
     CheckIfTrue(GetEnvironmentValue(environment::fail_fast_enabled));
 }
 
-bool IsNetFxAssemblyRedirectionEnabled()
-{
-    ToBooleanWithDefault(GetEnvironmentValue(environment::netfx_assembly_redirection_enabled), true);
-}
-
 } // namespace trace

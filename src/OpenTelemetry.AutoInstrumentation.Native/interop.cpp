@@ -47,6 +47,11 @@ EXTERN_C VOID STDAPICALLTYPE SetSqlClientNetFxILRewriteEnabled(bool enabled)
     return trace::SetSqlClientNetFxILRewriteEnabled(enabled);
 }
 
+EXTERN_C VOID STDAPICALLTYPE SetNetFxAssemblyRedirectionEnabled(bool enabled)
+{
+    return trace::SetNetFxAssemblyRedirectionEnabled(enabled);
+}
+
 EXTERN_C VOID STDAPICALLTYPE ConfigureContinuousProfiler(bool         threadSamplingEnabled,
                                                          unsigned int threadSamplingInterval,
                                                          bool         allocationSamplingEnabled,

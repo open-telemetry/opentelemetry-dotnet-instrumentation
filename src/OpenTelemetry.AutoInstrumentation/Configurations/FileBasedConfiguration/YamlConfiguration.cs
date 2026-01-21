@@ -95,4 +95,11 @@ internal class YamlConfiguration
     /// </summary>
     [YamlMember(Alias = "plugins/development")]
     public PluginsConfiguration? Plugins { get; set; }
+
+    /// <summary>
+    /// Gets or sets a value indicating whether the .NET Framework assembly redirection is enabled.
+    /// If omitted or null, true is used.
+    /// </summary>
+    [YamlMember(Alias = "netfx_redirect_enabled")]
+    public bool NetFxRedirectEnabled { get; set; } = true;
 }

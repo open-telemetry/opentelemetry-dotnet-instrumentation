@@ -11,6 +11,8 @@ namespace trace
 
 bool IsSqlClientNetFxILRewriteEnabled();
 void SetSqlClientNetFxILRewriteEnabled(bool enabled);
+bool IsNetFxAssemblyRedirectionEnabled();
+void SetNetFxAssemblyRedirectionEnabled(bool enabled);
 
 } // namespace trace
 

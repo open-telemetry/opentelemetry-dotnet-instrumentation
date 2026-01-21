@@ -108,6 +108,11 @@ internal static class Instrumentation
             AppDomain.CurrentDomain.ProcessExit += OnExit;
             AppDomain.CurrentDomain.DomainUnload += OnExit;
 
+#if NETFRAMEWORK
+
+            NativeMethods.SetNetFxAssemblyRedirectionEnabled(GeneralSettings.Value.NetFxRedirectEnabled);
+#endif
+
             var profilerEnabled = GeneralSettings.Value.ProfilerEnabled;
 
             if (profilerEnabled)

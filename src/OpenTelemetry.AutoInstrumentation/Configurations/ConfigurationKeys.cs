@@ -40,6 +40,11 @@ internal partial class ConfigurationKeys
     public const string SetupSdk = "OTEL_DOTNET_AUTO_SETUP_SDK";
 
     /// <summary>
+    /// Configuration key for controlling whether automatic instrumentation should set up OpenTelemetry .NET SDK at startup.
+    /// </summary>
+    public const string NetFxRedirectEnabled = "OTEL_DOTNET_AUTO_NETFX_REDIRECT_ENABLED";
+
+    /// <summary>
     /// Configuration key for enabling all instrumentations.
     /// </summary>
     public const string InstrumentationEnabled = "OTEL_DOTNET_AUTO_INSTRUMENTATION_ENABLED";

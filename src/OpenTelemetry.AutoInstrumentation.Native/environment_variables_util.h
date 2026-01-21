@@ -49,7 +49,6 @@ bool IsNGENEnabled();
 bool IsDumpILRewriteEnabled();
 bool IsAzureAppServices();
 bool IsFailFastEnabled();
-bool IsNetFxAssemblyRedirectionEnabled();
 
 }  // namespace trace
 

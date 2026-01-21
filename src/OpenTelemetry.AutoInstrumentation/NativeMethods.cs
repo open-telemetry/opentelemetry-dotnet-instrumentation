@@ -57,6 +57,18 @@ internal static class NativeMethods
             NonWindows.SetSqlClientNetFxILRewriteEnabled(enabled);
         }
     }
+
+    public static void SetNetFxAssemblyRedirectionEnabled(bool enabled)
+    {
+        if (IsWindows)
+        {
+            Windows.SetNetFxAssemblyRedirectionEnabled(enabled);
+        }
+        else
+        {
+            NonWindows.SetNetFxAssemblyRedirectionEnabled(enabled);
+        }
+    }
 #endif
 
     public static void ConfigureNativeContinuousProfiler(bool threadSamplingEnabled, uint threadSamplingInterval, bool allocationSamplingEnabled, uint maxMemorySamplesPerMinute, uint selectedThreadSamplingInterval)
@@ -216,6 +228,10 @@ internal static class NativeMethods
         [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
         [DllImport("OpenTelemetry.AutoInstrumentation.Native.dll")]
         public static extern void SetSqlClientNetFxILRewriteEnabled(bool enabled);
+
+        [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
+        [DllImport("OpenTelemetry.AutoInstrumentation.Native.dll")]
+        public static extern void SetNetFxAssemblyRedirectionEnabled(bool enabled);
 #endif
 
         [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
@@ -268,6 +284,10 @@ internal static class NativeMethods
         [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
         [DllImport("OpenTelemetry.AutoInstrumentation.Native")]
         public static extern void SetSqlClientNetFxILRewriteEnabled(bool enabled);
+
+        [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
+        [DllImport("OpenTelemetry.AutoInstrumentation.Native")]
+        public static extern void SetNetFxAssemblyRedirectionEnabled(bool enabled);
 #endif
 
         [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
