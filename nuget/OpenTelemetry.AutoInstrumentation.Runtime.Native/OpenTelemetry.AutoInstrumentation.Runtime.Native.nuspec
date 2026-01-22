@@ -22,7 +22,10 @@
   </metadata>
 
   <files>
-    <file src="**\*" target="\" />
+    <file src="**\*.dll" target="\" />
+    <file src="**\*.dylib" target="\" />
+    <file src="**\*.pdb" target="\" />
+    <file src="**\*.so" target="\" />
     <file src="..\..\opentelemetry-icon-color.png" target="images\opentelemetry-icon-color.png" />
     <file src="..\..\src\OpenTelemetry.AutoInstrumentation.Native\README.md" target="docs\README.md" />
   </files>
