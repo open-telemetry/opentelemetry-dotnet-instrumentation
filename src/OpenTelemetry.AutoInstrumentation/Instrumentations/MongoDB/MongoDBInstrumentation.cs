@@ -3,6 +3,7 @@
 
 using System.Diagnostics;
 using System.Net;
+using OpenTelemetry.Trace;
 using OpenTelemetry.AutoInstrumentation.DuckTyping;
 using OpenTelemetry.AutoInstrumentation.Instrumentations.MongoDB.DuckTypes;
 
@@ -71,6 +72,32 @@ internal static class MongoDBInstrumentation
         var spanName = $"{operationName} {collection}";
 
         return Source.StartActivity(spanName, ActivityKind.Client, default(ActivityContext), tags);
+    }
+
+    internal static void OnError(Activity activity, Exception exception)
+    {
+        activity.SetException(exception);
+
+        if (exception.GetType().Name.Equals("MongoCommandException", StringComparison.Ordinal))
+        {
+            try
+            {
+                // Reflection to get the Code property from MongoCommandException
+                var propertyInfo = exception.GetType().GetProperty("Code");
+                if (propertyInfo != null)
+                {
+                    var code = propertyInfo.GetValue(exception);
+                    if (code != null)
+                    {
+                        activity.SetTag("db.response.status_code", code.ToString());
+                    }
+                }
+            }
+            catch
+            {
+                // accessing the property failed, ignore
+            }
+        }
     }
 
     private static ActivitySource CreateActivitySource()
@@ -191,29 +218,4 @@ internal static class MongoDBInstrumentation
         return true;
     }
 
-    internal static void OnError(Activity activity, Exception exception)
-    {
-        activity.SetException(exception);
 
-        if (exception.GetType().Name.Equals("MongoCommandException", StringComparison.Ordinal))
-        {
-            try
-            {
-                // Reflection to get the Code property from MongoCommandException
-                var propertyInfo = exception.GetType().GetProperty("Code");
-                if (propertyInfo != null)
-                {
-                    var code = propertyInfo.GetValue(exception);
-                    if (code != null)
-                    {
-                        activity.SetTag("db.response.status_code", code.ToString());
-                    }
-                }
-            }
-            catch
-            {
-                // accessing the property failed, ignore
-            }
-        }
-    }
-}
