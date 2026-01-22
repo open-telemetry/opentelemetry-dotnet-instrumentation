@@ -21,12 +21,13 @@ internal static class MongoDBInstrumentation
             return null;
         }
 
-        if (!TryGetDatabaseName(instance, out var database))
+        string? database = null;
+        if (TryGetDatabaseName(instance, out var dbName))
         {
-            return null;
+            database = dbName;
         }
 
-        if (!TryGetQueryDetails(instance, out var collection, out var operationName))
+        if (!TryGetQueryDetails(instance, out var collection, out var operationName, out var batchSize))
         {
             return null;
         }
@@ -38,18 +39,26 @@ internal static class MongoDBInstrumentation
 
         var tags = new ActivityTagsCollection
         {
-            { DatabaseAttributes.Keys.DbSystem, DatabaseAttributes.Values.MongoDB.MongoDbSystem },
+            { DatabaseAttributes.Keys.DbSystemName, DatabaseAttributes.Values.MongoDB.MongoDbSystem },
             { DatabaseAttributes.Keys.DbCollectionName, collection },
-            { DatabaseAttributes.Keys.DbNamespace, database },
             { DatabaseAttributes.Keys.DbOperationName, operationName },
         };
 
-        if (!string.IsNullOrEmpty(serverAddress))
+        if (database != null)
         {
-            tags.Add(NetworkAttributes.Keys.NetworkPeerAddress, serverAddress);
+            tags.Add(DatabaseAttributes.Keys.DbNamespace, database);
         }
 
-        if (!string.IsNullOrEmpty(serverName))
+        if (batchSize.HasValue)
+        {
+            tags.Add(DatabaseAttributes.Keys.DbOperationBatchSize, batchSize.Value);
+        }
+
+        if (!string.IsNullOrEmpty(serverAddress))
+        {
+            tags.Add(NetworkAttributes.Keys.ServerAddress, serverAddress);
+        }
+        else if (!string.IsNullOrEmpty(serverName))
         {
             tags.Add(NetworkAttributes.Keys.ServerAddress, serverName);
         }
@@ -57,7 +66,6 @@ internal static class MongoDBInstrumentation
         if (serverPort is not null)
         {
             tags.Add(NetworkAttributes.Keys.ServerPort, serverPort);
-            tags.Add(NetworkAttributes.Keys.NetworkPeerPort, serverPort);
         }
 
         var spanName = $"{operationName} {collection}";
@@ -96,10 +104,11 @@ internal static class MongoDBInstrumentation
         return true;
     }
 
-    private static bool TryGetQueryDetails(object instance, out string? collection, out string? operationName)
+    private static bool TryGetQueryDetails(object instance, out string? collection, out string? operationName, out int? batchSize)
     {
         collection = null;
         operationName = null;
+        batchSize = null;
 
         if (instance.TryDuckCast<IWireProtocolWithCommandStruct>(out var protocolWithCommand)
          && protocolWithCommand.Command is not null
@@ -115,6 +124,30 @@ internal static class MongoDBInstrumentation
 
             collection = firstElement.Value?.ToString();
             operationName = mongoOperationName;
+
+            if (operationName == "insert" || operationName == "update" || operationName == "delete")
+            {
+                var targetField = operationName switch
+                {
+                    "insert" => "documents",
+                    "update" => "updates",
+                    "delete" => "deletes",
+                    _ => null
+                };
+
+                if (targetField != null)
+                {
+                    for (var i = 1; i < bsonDocument.ElementCount; i++)
+                    {
+                        var element = bsonDocument.GetElement(i);
+                        if (element.Name == targetField && element.Value.TryDuckCast<IBsonArrayProxy>(out var bsonArray))
+                        {
+                            batchSize = bsonArray.Count;
+                            break;
+                        }
+                    }
+                }
+            }
         }
 
         if (string.IsNullOrEmpty(collection) || string.IsNullOrEmpty(operationName))
@@ -156,5 +189,31 @@ internal static class MongoDBInstrumentation
         }
 
         return true;
+    }
+
+    internal static void OnError(Activity activity, Exception exception)
+    {
+        activity.SetException(exception);
+
+        if (exception.GetType().Name.Equals("MongoCommandException", StringComparison.Ordinal))
+        {
+            try
+            {
+                // Reflection to get the Code property from MongoCommandException
+                var propertyInfo = exception.GetType().GetProperty("Code");
+                if (propertyInfo != null)
+                {
+                    var code = propertyInfo.GetValue(exception);
+                    if (code != null)
+                    {
+                        activity.SetTag("db.response.status_code", code.ToString());
+                    }
+                }
+            }
+            catch
+            {
+                // accessing the property failed, ignore
+            }
+        }
     }
 }
