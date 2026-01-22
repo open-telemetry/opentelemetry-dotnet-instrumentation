@@ -81,11 +81,14 @@ public class SelectiveSamplerTests : TestHelper
         var counter = 0;
 
         // Sampling starts early, at the start of instrumentation init.
-        var groupingStartingWithAllThreadSamples = groupedByTimestampAscending.SkipWhile(
-            samples =>
-                IndicatesSelectiveSampling(samples) ||
-                CollectedBeforeSpanStarted(samples) ||
-                CollectedBeforeFrequentSamplingStarted(samples));
+        var groupingStartingWithAllThreadSamples = groupedByTimestampAscending
+            .SkipWhile(
+                samples =>
+                    IndicatesSelectiveSampling(samples) ||
+                    CollectedBeforeSpanStarted(samples) ||
+                    CollectedBeforeFrequentSamplingStarted(samples))
+            // Omit last group from verification, as it may be collected after activity stopped.
+            .SkipLast(1);
 
         foreach (var group in groupingStartingWithAllThreadSamples)
         {
