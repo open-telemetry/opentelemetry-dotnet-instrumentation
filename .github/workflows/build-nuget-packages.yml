@@ -34,7 +34,7 @@ jobs:
         with:
           dotnet-version: | 
             8.0.417
-            9.0.309
+            9.0.310
             10.0.102
 
       - name: Check for NuGet packages cache
@@ -89,7 +89,7 @@ jobs:
       - name: Install Meziantou.Framework.NuGetPackageValidation.Tool
         run: dotnet tool install --global Meziantou.Framework.NuGetPackageValidation.Tool --version 1.0.30
 
-      - name: Validate nuget packages
+      - name: Validate NuGet packages
         shell: pwsh
         run: |
           foreach ($file in (Get-ChildItem bin/nuget-artifacts//*.nupkg)) {
@@ -103,7 +103,7 @@ jobs:
             }
           }
         
-      - name: Upload Nuget Artifacts
+      - name: Upload NuGet Artifacts
         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # tag: v6.0.0
         with:
           name: bin-nuget-packages

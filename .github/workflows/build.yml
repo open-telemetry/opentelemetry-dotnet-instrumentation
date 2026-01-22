@@ -37,7 +37,7 @@ jobs:
         with:
           dotnet-version: | 
             8.0.417
-            9.0.309
+            9.0.310
             10.0.102
 
       - name: Check for NuGet packages cache
@@ -73,7 +73,9 @@ jobs:
         if: ${{ matrix.machine == 'ubuntu-22.04' }}
         run: |
           rm ./bin/tracer-home/linux-x64/OpenTelemetry.AutoInstrumentation.Native.so
+          rm ./bin/tracer-home/linux-x64/OpenTelemetry.AutoInstrumentation.Native.so.debug
           cp ./bin/ci-artifacts/bin-ubuntu1604-native/linux-x64/OpenTelemetry.AutoInstrumentation.Native.so ./bin/tracer-home/linux-x64/OpenTelemetry.AutoInstrumentation.Native.so
+          cp ./bin/ci-artifacts/bin-ubuntu1604-native/linux-x64/OpenTelemetry.AutoInstrumentation.Native.so.debug ./bin/tracer-home/linux-x64/OpenTelemetry.AutoInstrumentation.Native.so.debug
 
       - name: Install MacOS CoreUtils
         if: ${{ runner.os == 'macOS' }}

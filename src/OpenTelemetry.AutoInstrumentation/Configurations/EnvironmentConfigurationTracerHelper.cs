@@ -370,7 +370,9 @@ internal static class EnvironmentConfigurationTracerHelper
         public static TracerProviderBuilder AddZipkinExporter(TracerProviderBuilder builder, PluginManager pluginManager)
         {
             Logger.Warning("Zipkin exporter is deprecated and it is enabled by the configuration. It will be removed in future versions. Consider migrating to OTLP exporter.");
+#pragma warning disable CS0618 // Type or member is obsolete. Zipkin is deprecated. It should be removed in December 2026.
             return builder.AddZipkinExporter(pluginManager.ConfigureTracesOptions);
+#pragma warning restore CS0618 // Type or member is obsolete. Zipkin is deprecated. It should be removed in December 2026.
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]
@@ -416,6 +418,7 @@ internal static class EnvironmentConfigurationTracerHelper
         public static TracerProviderBuilder AddZipkinExporter(TracerProviderBuilder builder, PluginManager pluginManager, BatchProcessorConfig batch, ZipkinExporterConfig zipkin)
         {
             Logger.Warning("Zipkin exporter is deprecated and it is enabled by the configuration. It will be removed in future versions. Consider migrating to OTLP exporter.");
+#pragma warning disable CS0618 // Type or member is obsolete. Zipkin is deprecated. It should be removed in December 2026.
             return builder.AddZipkinExporter(options =>
             {
                 // Copy Auto settings to SDK settings
@@ -424,6 +427,7 @@ internal static class EnvironmentConfigurationTracerHelper
 
                 pluginManager.ConfigureTracesOptions(options);
             });
+#pragma warning restore CS0618 // Type or member is obsolete. Zipkin is deprecated. It should be removed in December 2026.
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]
@@ -458,6 +462,7 @@ internal static class EnvironmentConfigurationTracerHelper
         public static TracerProviderBuilder AddZipkinExporter(TracerProviderBuilder builder, PluginManager pluginManager, ZipkinExporterConfig zipkin)
         {
             Logger.Warning("Zipkin exporter is deprecated and it is enabled by the configuration. It will be removed in future versions. Consider migrating to OTLP exporter.");
+#pragma warning disable CS0618 // Type or member is obsolete. Zipkin is deprecated. It should be removed in December 2026.
             return builder.AddZipkinExporter(options =>
             {
                 // Copy Auto settings to SDK settings
@@ -466,6 +471,7 @@ internal static class EnvironmentConfigurationTracerHelper
 
                 pluginManager.ConfigureTracesOptions(options);
             });
+#pragma warning restore CS0618 // Type or member is obsolete. Zipkin is deprecated. It should be removed in December 2026.
         }
     }
 }

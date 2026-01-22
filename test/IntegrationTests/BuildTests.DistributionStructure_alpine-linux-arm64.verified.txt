@@ -6,6 +6,7 @@
   /VERSION,
   /instrument.sh,
   /linux-musl-arm64/OpenTelemetry.AutoInstrumentation.Native.so,
+  /linux-musl-arm64/OpenTelemetry.AutoInstrumentation.Native.so.debug,
   /net/OpenTelemetry.Api.ProviderBuilderExtensions.dll,
   /net/OpenTelemetry.Api.dll,
   /net/OpenTelemetry.AutoInstrumentation.AspNetCoreBootstrapper.dll,

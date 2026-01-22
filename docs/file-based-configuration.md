@@ -91,6 +91,16 @@ file-based configuration to include these parameters.
 
 ---
 
+### OTLP
+
+| Environment variable                    | Description                                                                               |
+| --------------------------------------- | ----------------------------------------------------------------------------------------- |
+| `OTEL_EXPORTER_OTLP_CERTIFICATE`        | Path to the CA certificate file (PEM format) used to verify the server's TLS certificate. |
+| `OTEL_EXPORTER_OTLP_CLIENT_CERTIFICATE` | Path to the client certificate file (PEM format) for mTLS authentication.                 |
+| `OTEL_EXPORTER_OTLP_CLIENT_KEY`         | Path to the client private key file (PEM format) for mTLS authentication.                 |
+
+---
+
 ### .NET Runtime
 
 | Environment variable     | Description                                          |
