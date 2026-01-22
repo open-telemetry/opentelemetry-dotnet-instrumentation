@@ -3,9 +3,9 @@
 
 using System.Diagnostics;
 using System.Net;
-using OpenTelemetry.Trace;
 using OpenTelemetry.AutoInstrumentation.DuckTyping;
 using OpenTelemetry.AutoInstrumentation.Instrumentations.MongoDB.DuckTypes;
+using OpenTelemetry.Trace;
 
 namespace OpenTelemetry.AutoInstrumentation.Instrumentations.MongoDB;
 
@@ -217,5 +217,6 @@ internal static class MongoDBInstrumentation
 
         return true;
     }
+}
 
 
