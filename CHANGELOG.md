@@ -23,6 +23,9 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 - Support for `temporality_preference` in file-based configuration
   for Console Metric Exporter.
 - Enable ASLR, CET and CFG for native profiler libraries on Windows.
+- Enable compiler flags to harden native profiler libraries on macOS and Linux.
+- Support for [MongoDB.Driver](https://www.nuget.org/packages/MongoDB.Driver/)
+  traces instrumentation for versions `3.5.0`+.
 
 ### Changed
 
@@ -33,10 +36,45 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 
 #### Dependency updates
 
+- Updated [Core components](https://github.com/open-telemetry/opentelemetry-dotnet/blob/main/VERSIONING.md#core-components):
+  [`1.15.0`](https://github.com/open-telemetry/opentelemetry-dotnet/releases/tag/core-1.15.0).
 - Following packages updated
-  - `OpenTelemetry.Instrumentation.SqlClient` from `1.14.0-beta.1` to `1.14.0-rc.1`.
+  - `OpenTelemetry.Instrumentation.GrpcNetClient` from `1.14.0-beta.1` to `1.15.0-beta.1`,
+  - `OpenTelemetry.Instrumentation.Process` from `1.14.0-beta.2` to `1.15.0-beta.1`,
+  - `OpenTelemetry.Instrumentation.Runtime` from `1.14.0` to `1.15.0`,
+  - `OpenTelemetry.Instrumentation.Quartz` from `1.14.0-beta.2` to `1.15.0-beta.1`,
+  - `OpenTelemetry.Instrumentation.SqlClient` from `1.14.0-rc.1` to `1.15.0-rc.1`,
+  - `OpenTelemetry.Instrumentation.StackExchangeRedis` from `1.14.0-beta.1` to `1.15.0-beta.1`,
+  - `OpenTelemetry.Instrumentation.Wcf` from `1.14.0-beta.1` to `1.15.0-beta.1`,
+  - `OpenTelemetry.Resources.Azure` from `1.14.0-beta.1` to `1.15.0-beta.1`,
+  - `OpenTelemetry.Resources.Container` from `1.14.0-beta.1` to `1.15.0-beta.1`,
+  - `OpenTelemetry.Resources.Host` from `1.14.0-beta.1` to `1.15.0-beta.1`,
+  - `OpenTelemetry.Resources.OperatingSystem` from `1.14.0-beta.1` to `1.15.0-beta.1`,
+  - `OpenTelemetry.Resources.Process` from `1.14.0-beta.1` to `1.15.0-beta.1`,
+  - `OpenTelemetry.Resources.ProcessRuntime` from `1.14.0-beta.1` to `1.15.0-beta.1`.
+- .NET only, following packages updated
+  - `OpenTelemetry.Instrumentation.AspNetCore` from `1.14.0` to `1.15.0`,
+  - `OpenTelemetry.Instrumentation.EntityFrameworkCore` from `1.14.0-beta.2`
+    to `1.15.0-beta.1`.
 - .NET Framework only, following packages updated
-  - `OpenTelemetry.Instrumentation.AspNet` from `1.14.0-rc.1` to `1.14.0`.
+  - `OpenTelemetry.Instrumentation.AspNet` from `1.14.0-rc.1` to `1.15.0`,
+  - `Microsoft.Bcl.AsyncInterfaces` from `10.0.0` to `10.0.2`,
+  - `Microsoft.Extensions.Configuration` from `10.0.0` to `10.0.2`,
+  - `Microsoft.Extensions.Configuration.Abstractions` from `10.0.0` to `10.0.2`,
+  - `Microsoft.Extensions.Configuration.Binder` from `10.0.0` to `10.0.2`,
+  - `Microsoft.Extensions.DependencyInjection` from `10.0.0` to `10.0.2`,
+  - `Microsoft.Extensions.DependencyInjection.Abstractions` from `10.0.0` to `10.0.2`,
+  - `Microsoft.Extensions.Diagnostics.Abstractions` from `10.0.0` to `10.0.2`,
+  - `Microsoft.Extensions.Logging` from `10.0.0` to `10.0.2`,
+  - `Microsoft.Extensions.Logging.Abstractions` from `10.0.0` to `10.0.2`,
+  - `Microsoft.Extensions.Logging.Configuration` from `10.0.0` to `10.0.2`,
+  - `Microsoft.Extensions.Options` from `10.0.0` to `10.0.2`,
+  - `Microsoft.Extensions.Options.ConfigurationExtensions` from `10.0.0` to `10.0.2`,
+  - `Microsoft.Extensions.Primitives` from `10.0.0` to `10.0.2`,
+  - `System.Diagnostics.DiagnosticSource` from `10.0.0` to `10.0.2`,
+  - `System.IO.Pipelines` from `10.0.0` to `10.0.2`,
+  - `System.Text.Encodings.Web` from `10.0.0` to `10.0.2`,
+  - `System.Text.Json` from `10.0.0` to `10.0.2`.
 
 ### Deprecated
 
@@ -76,6 +114,8 @@ release.
 - Setting `DOTNET_STARTUP_HOOKS` is now optional if the .NET CLR profiler
   is configured. If it is not set, the profiler looks for the startup hooks
   assembly and injects the configuration into the application.
+- `OpenTelemetry.AutoInstrumentation.` prefixed instrumentations
+  report Scope Version.
 
 #### Dependency updates
 

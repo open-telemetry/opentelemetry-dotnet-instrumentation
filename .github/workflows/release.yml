@@ -28,11 +28,13 @@ jobs:
     uses: ./.github/workflows/build-nuget-packages.yml
 
   create-release:
-    name: Create GH release
+    name: Create GitHub release
     runs-on: ubuntu-22.04
     needs: [ build, build-container, build-nuget-packages ]
     permissions:
+      attestations: write
       contents: write
+      id-token: write
     timeout-minutes: 10
     steps:
 
@@ -47,17 +49,78 @@ jobs:
       - name: Install zip
         uses: montudor/action-zip@0852c26906e00f8a315c704958823928d8018b28 # tag: v1.0.0
 
-      - run: cd bin-alpine-x64 ; zip -qq -r ../opentelemetry-dotnet-instrumentation-linux-musl-x64.zip . * ; cd ..
-      - run: cd bin-alpine-arm64 ; zip -qq -r ../opentelemetry-dotnet-instrumentation-linux-musl-arm64.zip . * ; cd ..
-      - run: cd bin-ubuntu-22.04 ; zip -qq -r ../opentelemetry-dotnet-instrumentation-linux-glibc-x64.zip . * ; cd ..
-      - run: cd bin-ubuntu-22.04-arm ; zip -qq -r ../opentelemetry-dotnet-instrumentation-linux-glibc-arm64.zip . * ; cd ..
-      - run: cd bin-windows-2022 ; zip -qq -r ../opentelemetry-dotnet-instrumentation-windows.zip . * ; cd ..
-      - run: cd bin-macos-14 ; zip -qq -r ../opentelemetry-dotnet-instrumentation-macos.zip . * ; cd ..
-      - run: cd bin-nuget-packages ; zip -qq -r ../opentelemetry-dotnet-instrumentation-nuget-packages.zip . * ; cd ..
-      - run: cp installation-scripts-windows-2022/otel-dotnet-auto-install.sh ./otel-dotnet-auto-install.sh
-      - run: cp installation-scripts-windows-2022/OpenTelemetry.DotNet.Auto.psm1 ./OpenTelemetry.DotNet.Auto.psm1
+      - name: Create ZIP artifacts
+        shell: bash
+        run: |
+          set -euo pipefail
+          packages=(
+            "alpine-x64 linux-musl-x64"
+            "alpine-arm64 linux-musl-arm64"
+            "ubuntu-22.04 linux-glibc-x64"
+            "ubuntu-22.04-arm linux-glibc-arm64"
+            "windows-2022 windows"
+            "macos-14 macos"
+            "nuget-packages nuget-packages"
+          )
+
+          for package in "${packages[@]}"; do
+            read -r dir archive <<< "${package}"
+            src="./bin-${dir}"
+            (cd "${src}" && zip -qq -r "../opentelemetry-dotnet-instrumentation-${archive}.zip" ./* && cd ..)
+          done
+
+      - name: Collect install scripts
+        shell: bash
+        run: |
+          set -euo pipefail
+          src="./installation-scripts-windows-2022"
+          files=(
+            "otel-dotnet-auto-install.sh"
+            "OpenTelemetry.DotNet.Auto.psm1"
+          )
+
+          for file in "${files[@]}"; do
+            cp "${src}/${file}" "${file}"
+          done
+
+      - name: Generate checksums
+        shell: bash
+        run: |
+          set -euo pipefail
+          artifacts=(
+            "opentelemetry-dotnet-instrumentation-linux-glibc-arm64.zip"
+            "opentelemetry-dotnet-instrumentation-linux-glibc-x64.zip"
+            "opentelemetry-dotnet-instrumentation-linux-musl-arm64.zip"
+            "opentelemetry-dotnet-instrumentation-linux-musl-x64.zip"
+            "opentelemetry-dotnet-instrumentation-macos.zip"
+            "opentelemetry-dotnet-instrumentation-nuget-packages.zip"
+            "opentelemetry-dotnet-instrumentation-windows.zip"
+            "otel-dotnet-auto-install.sh"
+            "OpenTelemetry.DotNet.Auto.psm1"
+          )
+
+          for file in "${artifacts[@]}"; do
+            sha256sum "${file}" >> "./checksums.txt"
+          done
+
+          echo "Verifying checksums"
+          sha256sum "./checksums.txt" --check || exit 1
+
+      - name: Attest artifacts
+        uses: actions/attest-build-provenance@00014ed6ed5efc5b1ab7f7f34a39eb55d41aa4f8 # v3.1.0
+        with:
+          subject-path: |
+            ./*.zip
+            ./otel-dotnet-auto-install.sh
+            ./OpenTelemetry.DotNet.Auto.psm1
+            ./checksums.txt
 
       - name: Create Release
-        run: gh release create ${{ github.ref_name }} --title ${{ github.ref_name }} --verify-tag --draft ./*.zip ./otel-dotnet-auto-install.sh ./OpenTelemetry.DotNet.Auto.psm1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: >
+          gh release create "${GITHUB_REF_NAME}" --title "${GITHUB_REF_NAME}" --verify-tag --draft
+          ./*.zip
+          ./otel-dotnet-auto-install.sh
+          ./OpenTelemetry.DotNet.Auto.psm1
+          ./checksums.txt

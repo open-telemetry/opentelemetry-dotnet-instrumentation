@@ -72,11 +72,11 @@ jobs:
         with:
           dotnet-version: | 
             8.0.417
-            9.0.309
+            9.0.310
             10.0.102
 
       - name: Check for NuGet packages cache
-        uses: actions/cache@9255dc7a253b0ccc959486e2bca901246202afeb # tag: v5.0.1
+        uses: actions/cache@8b402f58fbc84540c8b491a91e594a4576fec3d7 # tag: v5.0.2
         id: nuget-cache
         with:
           key: ${{ hashFiles('**/Directory.packages.props', './build/LibraryVersions.g.cs', '**/packages.config' ) }}
@@ -132,11 +132,11 @@ jobs:
         with:
           dotnet-version: | 
             8.0.417
-            9.0.309
+            9.0.310
             10.0.102
 
       - name: Check for NuGet packages cache
-        uses: actions/cache@9255dc7a253b0ccc959486e2bca901246202afeb # tag: v5.0.1
+        uses: actions/cache@8b402f58fbc84540c8b491a91e594a4576fec3d7 # tag: v5.0.2
         id: nuget-cache
         with:
           key: ${{ hashFiles('**/Directory.packages.props', './build/LibraryVersions.g.cs', '**/packages.config' ) }}
@@ -176,11 +176,11 @@ jobs:
         with:
           dotnet-version: | 
             8.0.417
-            9.0.309
+            9.0.310
             10.0.102
 
       - name: Check for NuGet packages cache
-        uses: actions/cache@9255dc7a253b0ccc959486e2bca901246202afeb # tag: v5.0.1
+        uses: actions/cache@8b402f58fbc84540c8b491a91e594a4576fec3d7 # tag: v5.0.2
         id: nuget-cache
         with:
           key: ${{ hashFiles('**/Directory.packages.props', './build/LibraryVersions.g.cs', '**/packages.config' ) }}
@@ -284,11 +284,11 @@ jobs:
         with:
           dotnet-version: | 
             8.0.417
-            9.0.309
+            9.0.310
             10.0.102
 
       - name: Check for NuGet packages cache
-        uses: actions/cache@9255dc7a253b0ccc959486e2bca901246202afeb # tag: v5.0.1
+        uses: actions/cache@8b402f58fbc84540c8b491a91e594a4576fec3d7 # tag: v5.0.2
         id: nuget-cache
         with:
           key: ${{ hashFiles('**/Directory.packages.props', './build/LibraryVersions.g.cs', '**/packages.config' ) }}

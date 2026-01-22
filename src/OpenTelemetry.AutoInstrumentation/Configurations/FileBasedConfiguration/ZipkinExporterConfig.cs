@@ -17,7 +17,9 @@ internal class ZipkinExporterConfig
     [YamlMember(Alias = "endpoint")]
     public string Endpoint { get; set; } = "http://localhost:9411/api/v2/spans";
 
+#pragma warning disable CS0618 // Type or member is obsolete. Zipkin is deprecated. It should be removed in December 2026.
     public void CopyTo(ZipkinExporterOptions options)
+#pragma warning restore CS0618 // Type or member is obsolete. Zipkin is deprecated. It should be removed in December 2026.
     {
         options.Endpoint = new Uri(Endpoint);
     }

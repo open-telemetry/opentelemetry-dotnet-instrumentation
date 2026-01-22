@@ -2,8 +2,8 @@
 
   <ItemGroup>
     <PackageReference Include="MySql.Data" VersionOverride="$(LibraryVersion)" />
-    <PackageReference Include="System.Diagnostics.DiagnosticSource" Condition="'$(LibraryVersion)' != '' and '$(LibraryVersion)'&lt;'9.0.0'"/>
-    <PackageReference Include="Google.Protobuf" Condition="'$(LibraryVersion)' != '' and '$(LibraryVersion)'&lt;'8.3.0'"/>
+    <PackageReference Include="System.Diagnostics.DiagnosticSource" Condition="'$(LibraryVersion)' != '' and $([MSBuild]::VersionLessThan('$(LibraryVersion)', '9.0.0'))"/>
+    <PackageReference Include="Google.Protobuf" Condition="'$(LibraryVersion)' != '' and $([MSBuild]::VersionLessThan('$(LibraryVersion)', '8.3.0'))"/>
     <!-- System.Text.Json is indirect reference. Bumping it to mitigate https://github.com/advisories/GHSA-8g4q-xg66-9fp4 -->
     <PackageReference Include="System.Text.Json" />
   </ItemGroup>

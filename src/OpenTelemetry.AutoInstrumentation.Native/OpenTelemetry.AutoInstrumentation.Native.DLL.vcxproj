@@ -98,6 +98,9 @@
     <TargetName>OpenTelemetry.AutoInstrumentation.Native</TargetName>
     <TargetExt>.dll</TargetExt>
   </PropertyGroup>
+  <PropertyGroup>
+    <SourceLink>$(IntDir)source_link.json</SourceLink>
+  </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
@@ -167,6 +170,7 @@
       <ModuleDefinitionFile>.\OpenTelemetry.AutoInstrumentation.Native.def</ModuleDefinitionFile>
       <CETCompat>true</CETCompat>
       <DynamicBase>true</DynamicBase>
+      <AdditionalOptions>%22/SOURCELINK:$(SourceLink)%22 %(AdditionalOptions)</AdditionalOptions>
     </Link>
     <PreBuildEvent>
       <Command>IF EXIST "$(SolutionDir)pre-build-events-cpp.bat" CALL "$(SolutionDir)pre-build-events-cpp.bat"  "$(TargetPath)"  "$(TargetFileName)"  "$(TargetDir)"  "$(TargetName)"</Command>
@@ -197,6 +201,7 @@
       <ModuleDefinitionFile>.\OpenTelemetry.AutoInstrumentation.Native.def</ModuleDefinitionFile>
       <CETCompat>true</CETCompat>
       <DynamicBase>true</DynamicBase>
+      <AdditionalOptions>%22/SOURCELINK:$(SourceLink)%22 %(AdditionalOptions)</AdditionalOptions>
     </Link>
     <PreBuildEvent>
       <Command>IF EXIST "$(SolutionDir)pre-build-events-cpp.bat" CALL "$(SolutionDir)pre-build-events-cpp.bat"  "$(TargetPath)"  "$(TargetFileName)"  "$(TargetDir)"  "$(TargetName)"</Command>
@@ -232,4 +237,22 @@
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
+  <Target Name="GenerateSourceLink" BeforeTargets="ClCompile">
+    <PropertyGroup>
+      <_SrcRootDirectory>$([System.IO.Directory]::GetParent($(MSBuildThisFileDirectory.TrimEnd("\"))))</_SrcRootDirectory>
+      <_SrcRootDirectory>$([System.IO.Directory]::GetParent($(_SrcRootDirectory.TrimEnd("\"))))</_SrcRootDirectory>
+      <_SourceLinkRoot>$(_SrcRootDirectory.Replace("\", "\\"))</_SourceLinkRoot>
+    </PropertyGroup>
+    <PropertyGroup Condition=" '$(GITHUB_ACTIONS)' == 'true' ">
+      <_RemoteUri>$(GITHUB_SERVER_URL)/$(GITHUB_REPOSITORY)</_RemoteUri>
+      <_LatestCommit>$(GITHUB_SHA)</_LatestCommit>
+    </PropertyGroup>
+    <Exec Command="git config --get remote.origin.url" ConsoleToMsBuild="true" Condition=" '$(_RemoteUri)' == '' ">
+      <Output TaskParameter="ConsoleOutput" PropertyName="_RemoteUri" />
+    </Exec>
+    <Exec Command="git rev-parse HEAD" ConsoleToMsBuild="true" Condition=" '$(_LatestCommit)' == '' ">
+      <Output TaskParameter="ConsoleOutput" PropertyName="_LatestCommit" />
+    </Exec>
+    <WriteLinesToFile File="$(SourceLink)" Overwrite="true" Lines="{&quot;documents&quot;: { &quot;$(_SourceLinkRoot)\\*&quot; : &quot;$(_RemoteUri.Replace(&quot;.git&quot;, &quot;&quot;).Replace(&quot;github.com&quot;, &quot;raw.githubusercontent.com&quot;))/$(_LatestCommit)/*&quot; }}" />
+  </Target>
 </Project>

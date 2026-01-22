@@ -4,7 +4,7 @@
   <ItemGroup>
     <PackageVersion Include="Mono.Cecil" Version="0.11.6" />
     <PackageVersion Include="Nuke.Common" Version="10.1.0" />
-    <PackageVersion Include="Nuget.CommandLine" Version="7.0.0" />
+    <PackageVersion Include="Nuget.CommandLine" Version="7.0.1" />
   </ItemGroup>
   
   <ItemGroup Condition=" '$(IsLegacyUbuntu)' != '' " >

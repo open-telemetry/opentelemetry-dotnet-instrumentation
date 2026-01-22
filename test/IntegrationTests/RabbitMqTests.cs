@@ -114,12 +114,12 @@ public class RabbitMqTests : TestHelper
         using var collector = new MockSpansCollector(Output);
         SetExporter(collector);
 
-        collector.Expect("OpenTelemetry.AutoInstrumentation.RabbitMq", span => ValidateProducerSpan(span));
-        collector.Expect("OpenTelemetry.AutoInstrumentation.RabbitMq", span => ValidateProducerSpan(span));
-        collector.Expect("OpenTelemetry.AutoInstrumentation.RabbitMq", span => ValidateProducerSpan(span));
-        collector.Expect("OpenTelemetry.AutoInstrumentation.RabbitMq", span => ValidateConsumerSpan(span, "receive"));
-        collector.Expect("OpenTelemetry.AutoInstrumentation.RabbitMq", span => ValidateConsumerSpan(span, "deliver"));
-        collector.Expect("OpenTelemetry.AutoInstrumentation.RabbitMq", span => ValidateConsumerSpan(span, "deliver"));
+        collector.Expect("OpenTelemetry.AutoInstrumentation.RabbitMq", VersionHelper.AutoInstrumentationVersion, span => ValidateProducerSpan(span));
+        collector.Expect("OpenTelemetry.AutoInstrumentation.RabbitMq", VersionHelper.AutoInstrumentationVersion, span => ValidateProducerSpan(span));
+        collector.Expect("OpenTelemetry.AutoInstrumentation.RabbitMq", VersionHelper.AutoInstrumentationVersion, span => ValidateProducerSpan(span));
+        collector.Expect("OpenTelemetry.AutoInstrumentation.RabbitMq", VersionHelper.AutoInstrumentationVersion, span => ValidateConsumerSpan(span, "receive"));
+        collector.Expect("OpenTelemetry.AutoInstrumentation.RabbitMq", VersionHelper.AutoInstrumentationVersion, span => ValidateConsumerSpan(span, "deliver"));
+        collector.Expect("OpenTelemetry.AutoInstrumentation.RabbitMq", VersionHelper.AutoInstrumentationVersion, span => ValidateConsumerSpan(span, "deliver"));
 
         collector.ExpectCollected(collected => ValidatePropagation(collected));
 
