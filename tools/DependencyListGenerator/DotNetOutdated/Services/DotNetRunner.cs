@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using System.IO;
 using System.Text;
 using McMaster.Extensions.CommandLineUtils;
 
@@ -11,7 +12,18 @@ public static class DotNetRunner
 {
     public static RunStatus Run(string workingDirectory, string[] arguments)
     {
-        var psi = new ProcessStartInfo(DotNetExe.FullPathOrDefault(), string.Join(" ", arguments))
+        // 1. Get the path from the library
+        var dotnetPath = DotNetExe.FullPathOrDefault();
+
+        // 2. Check if the file actually exists. If not, just use "dotnet"
+        // and let the OS find it in the PATH.
+        // on Linux DotNetExe.FullPathOrDefault() may wrongly return "/usr/local/share/dotnet/dotnet"
+        if (dotnetPath == null || !File.Exists(dotnetPath))
+        {
+            dotnetPath = "dotnet";
+        }
+
+        var psi = new ProcessStartInfo(dotnetPath, string.Join(" ", arguments))
         {
             WorkingDirectory = workingDirectory,
             UseShellExecute = false,
