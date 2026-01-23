@@ -102,7 +102,7 @@ public class MongoDBTests : TestHelper
         var serverAddress = serverAddressAttr.Value.StringValue;
         var serverPort = serverPortAttr.Value.IntValue;
 
-        return serverAddress == "localhost" &&
+        return (serverAddress == "localhost" || serverAddress is "127.0.0.1" or "::1") &&
                serverPort == _mongoDB.Port;
     }
 }
