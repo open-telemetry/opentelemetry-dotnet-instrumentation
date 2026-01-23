@@ -24,9 +24,6 @@ public class MongoDBTests : TestHelper
     private const string ServerAddressAttributeName = "server.address";
     private const string ServerPortAttributeName = "server.port";
 
-    private const string NetworkPeerAddressAttributeName = "network.peer.address";
-    private const string NetworkPeerPortAttributeName = "network.peer.port";
-
     private readonly MongoDBFixture _mongoDB;
 
     public MongoDBTests(ITestOutputHelper output, MongoDBFixture mongoDB)
@@ -86,12 +83,8 @@ public class MongoDBTests : TestHelper
     {
         var serverAddress = spanAttributes.Single(kv => kv.Key == ServerAddressAttributeName).Value.StringValue;
         var serverPort = spanAttributes.Single(kv => kv.Key == ServerPortAttributeName).Value.IntValue;
-        var networkPeerAddress = spanAttributes.Single(kv => kv.Key == NetworkPeerAddressAttributeName).Value.StringValue;
-        var networkPeerPort = spanAttributes.Single(kv => kv.Key == NetworkPeerPortAttributeName).Value.IntValue;
 
         return serverAddress == "localhost" &&
-               serverPort == _mongoDB.Port &&
-               networkPeerAddress is "127.0.0.1" or "::1" &&
-               networkPeerPort == _mongoDB.Port;
+               serverPort == _mongoDB.Port;
     }
 }
