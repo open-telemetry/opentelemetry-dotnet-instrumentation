@@ -11,6 +11,7 @@
     <DisableFastUpToDateCheck>true</DisableFastUpToDateCheck>
     <CopyBuildOutputToPublishDirectory>false</CopyBuildOutputToPublishDirectory>
     <PublishDocumentationFile>false</PublishDocumentationFile>
+    <DisableTransitiveFrameworkReferences>true</DisableTransitiveFrameworkReferences>
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\OpenTelemetry.AutoInstrumentation\OpenTelemetry.AutoInstrumentation.csproj" />

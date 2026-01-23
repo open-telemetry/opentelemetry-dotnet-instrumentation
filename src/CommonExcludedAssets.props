@@ -1,13 +1,20 @@
-<Project>
-  <!-- ExcludeAssets="all" prevents copying libraries to the output -->
+<Project Label='ExcludeAssets="all" prevents copying libraries to the output'>
   <ItemGroup Condition=" '$(TargetFrameworkIdentifier)' != '.NETFramework' " Label="Transient dependencies of OpenTelemetry.Instrumentation.Wcf">
     <PackageReference Include="Microsoft.Win32.SystemEvents" ExcludeAssets="all" />
     <PackageReference Include="System.Drawing.Common" ExcludeAssets="all" />
     <PackageReference Include="System.Windows.Extensions" ExcludeAssets="all" />
   </ItemGroup>
-  <ItemGroup Label="(Transient) dependencies of OpenTelemetry.Instrumentation.StackExchangeRedis">
+  <ItemGroup Label="Transient dependencies of OpenTelemetry.Instrumentation.StackExchangeRedis">
     <PackageReference Include="Pipelines.Sockets.Unofficial" ExcludeAssets="all" />
     <PackageReference Include="StackExchange.Redis" ExcludeAssets="all" />
     <PackageReference Include="System.Threading.Channels" ExcludeAssets="all" Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'" Label="Prevent NU1510 on .NET-only builds (e.g. Linux); package is redundant in .NET 8+" />
+  </ItemGroup>
+  <!-- TODO: should be discussed or a ticket should be filed: bring additional assemblies previously not in the output -->
+  <ItemGroup Label="Packages requiring filtering re-evaluation">
+    <PackageReference Include="Microsoft.NETCore.Platforms" ExcludeAssets="all" Condition=" '$(TargetFrameworkIdentifier)' == '.NETCoreApp' " Label="Legacy transitive dependencies likely not bringing any libraries to output: likely should be excluded" />
+    <PackageReference Include="System.IO.Pipelines" ExcludeAssets="all" Condition=" '$(TargetFramework)' == 'net8.0' " Label="Transient dependencies of OpenTelemetry.Instrumentation.StackExchangeRedis: likely should be excluded" />
+    <PackageReference Include="System.Security.Cryptography.Cng" ExcludeAssets="all" Condition=" '$(TargetFrameworkIdentifier)' == '.NETCoreApp' " Label="Transient dependencies of OpenTelemetry.Instrumentation.Wcf: likely should be excluded" />
+    <PackageReference Include="System.Security.Cryptography.Pkcs" ExcludeAssets="all" Condition=" '$(TargetFrameworkIdentifier)' == '.NETCoreApp' " Label="Transient dependencies of OpenTelemetry.Instrumentation.Wcf: likely should be excluded" />
+    <PackageReference Include="System.Security.Cryptography.Xml" ExcludeAssets="all" Condition=" '$(TargetFrameworkIdentifier)' == '.NETCoreApp' " Label="Transient dependencies of OpenTelemetry.Instrumentation.Wcf: likely should be excluded" />
   </ItemGroup>
 </Project>
