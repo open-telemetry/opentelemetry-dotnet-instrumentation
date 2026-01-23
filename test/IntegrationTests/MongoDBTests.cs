@@ -63,10 +63,20 @@ public class MongoDBTests : TestHelper
 
     private static bool ValidateDatabaseAttributes(IReadOnlyCollection<KeyValue> spanAttributes)
     {
-        var collectionName = spanAttributes.Single(kv => kv.Key == DbCollectionNameAttributeName).Value.StringValue;
-        var dbNamespace = spanAttributes.Single(kv => kv.Key == DbNamespaceAttributeName).Value.StringValue;
-        var dbSystem = spanAttributes.Single(kv => kv.Key == DbSystemAttributeName).Value.StringValue;
-        var dbOperationName = spanAttributes.Single(kv => kv.Key == DbOperationNameAttributeName).Value.StringValue;
+        var collectionNameAttr = spanAttributes.FirstOrDefault(kv => kv.Key == DbCollectionNameAttributeName);
+        var dbNamespaceAttr = spanAttributes.FirstOrDefault(kv => kv.Key == DbNamespaceAttributeName);
+        var dbSystemAttr = spanAttributes.FirstOrDefault(kv => kv.Key == DbSystemAttributeName);
+        var dbOperationNameAttr = spanAttributes.FirstOrDefault(kv => kv.Key == DbOperationNameAttributeName);
+
+        if (collectionNameAttr == null || dbNamespaceAttr == null || dbSystemAttr == null || dbOperationNameAttr == null)
+        {
+            return false;
+        }
+
+        var collectionName = collectionNameAttr.Value.StringValue;
+        var dbNamespace = dbNamespaceAttr.Value.StringValue;
+        var dbSystem = dbSystemAttr.Value.StringValue;
+        var dbOperationName = dbOperationNameAttr.Value.StringValue;
 
         return collectionName == MongoDbCollectionName &&
                dbNamespace == MongoDbNamespace &&
@@ -81,8 +91,16 @@ public class MongoDBTests : TestHelper
 
     private bool ValidateNetworkAttributes(IReadOnlyCollection<KeyValue> spanAttributes)
     {
-        var serverAddress = spanAttributes.Single(kv => kv.Key == ServerAddressAttributeName).Value.StringValue;
-        var serverPort = spanAttributes.Single(kv => kv.Key == ServerPortAttributeName).Value.IntValue;
+        var serverAddressAttr = spanAttributes.FirstOrDefault(kv => kv.Key == ServerAddressAttributeName);
+        var serverPortAttr = spanAttributes.FirstOrDefault(kv => kv.Key == ServerPortAttributeName);
+
+        if (serverAddressAttr == null || serverPortAttr == null)
+        {
+            return false;
+        }
+
+        var serverAddress = serverAddressAttr.Value.StringValue;
+        var serverPort = serverPortAttr.Value.IntValue;
 
         return serverAddress == "localhost" &&
                serverPort == _mongoDB.Port;
