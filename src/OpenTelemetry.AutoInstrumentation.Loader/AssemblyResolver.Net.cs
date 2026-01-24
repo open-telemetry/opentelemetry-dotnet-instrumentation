@@ -1,6 +1,7 @@
 // Copyright The OpenTelemetry Authors
 // SPDX-License-Identifier: Apache-2.0
 
+// TODO remove prgama after cleanup
 #pragma warning disable CA1303 // Do not pass literals as localized parameters
 #if NET
 using System.Diagnostics.CodeAnalysis;
@@ -23,33 +24,35 @@ internal partial class AssemblyResolver
     internal void RegisterAssemblyResolving()
     {
         // ASSEMBLY RESOLUTION TIMING
+        //
         // When the runtime cannot find an assembly, AssemblyLoadContext.Default.Resolving fires before
         // AppDomain.CurrentDomain.AssemblyResolve, so we subscribe to the former for guaranteed control.
         //
         // While we could subscribe to AppDomain.CurrentDomain.AssemblyResolve, the timing of this
-        // subscription relative to the built-in handler (Assembly.LoadFromResolveHandler) is unpredictable
-        // and fragile to code changes. If the built-in handler runs first, it loads co-located assemblies
-        // (our layout - OpenTelemetry library and its dependency System.Diagnostics.DiagnosticSource.dll)
-        // into the Default context via Assembly.LoadFrom, causing version conflicts when the customer
-        // application has TPA with a lower version (in the example, of DiagnosticSource.dll)
+        // subscription relative to the built-in handler (Assembly.LoadFromResolveHandler) subscription is
+        // unpredictable and fragile to code changes. If the built-in handler runs first, it loads co-located
+        // assemblies (our layout - OpenTelemetry.dll library and its dependency System.Diagnostics.DiagnosticSource.dll)
+        // into the Default context via Assembly.LoadFrom, causing loading failure if the customer application
+        // has the same dependency but to a lower version (in the example above, DiagnosticSource dll)
 
         // ASSEMBLY RESOLUTION STRATEGY
         //
         // === NATIVE PROFILER DEPLOYMENT ===
         // The native profiler already redirected (IL rewriting) all references to our versions.
-        // The Resolving event fires when runtime cannot find the assembly:
+        // The Resolving event fires when runtime cannot find the assembly in two cases:
         //
-        // Case 1: Assembly NOT in TrustedPlatformAssembly list (our dependencies; e.g., OpenTelemetry.Api.dll)
+        // Case 1: Assembly NOT in TrustedPlatformAssembly list (our dependencies; e.g., OpenTelemetry.dll)
         //   -> Runtime has no default location for this assembly
         //   -> Resolving event fires
         //   -> We load to Default AssemblyLoadContext (no version conflict risk)
         //
-        // Case 2: Assembly IN TPA with version conflict
+        // Case 2: Assembly IN TPA with lower version (conflict)
         //   -> Customer's TPA has lower version, profiler redirects to higher version
-        //   -> Runtime cannot satisfy higher version from TPA
+        //   -> Runtime cannot satisfy higher version due to TPA conflict
         //   -> Resolving event fires
-        //   -> We load to Custom ALC for isolation
-        //   -> NOTE: If TPA has same/higher version, runtime successfully auto-loads to Default ALC; event never fires (accepted)
+        //   -> We load to Custom ALC for isolation (loading to Default ALC will fail)
+        //   -> NOTE: If TPA has same/higher version, runtime successfully auto-loads to Default ALC;
+        //            event never fires (accepted)
         //
         // === NUGET PACKAGE DEPLOYMENT (Need Investigation) ===
         // NuGet resolves versions at build time; TPA typically has correct versions.
@@ -127,8 +130,8 @@ internal partial class AssemblyResolver
             }
 
             // else load into default ALC
-            _logger.Debug("Loading {0} with Assembly.LoadFrom", assemblyPath);
-            return Assembly.LoadFrom(assemblyPath);
+            _logger.Debug("Loading {0} with AssemblyLoadContext.Default.LoadFromAssemblyPath", assemblyPath);
+            return AssemblyLoadContext.Default.LoadFromAssemblyPath(assemblyPath);
         }
 
         // TODO temporary colored console output for debugging purpose
