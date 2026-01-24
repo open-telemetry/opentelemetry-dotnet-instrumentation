@@ -3,6 +3,7 @@
 
 using System.Diagnostics;
 using System.Net;
+using System.Reflection;
 using OpenTelemetry.AutoInstrumentation.DuckTyping;
 using OpenTelemetry.AutoInstrumentation.Instrumentations.MongoDB.DuckTypes;
 using OpenTelemetry.AutoInstrumentation.Util;
