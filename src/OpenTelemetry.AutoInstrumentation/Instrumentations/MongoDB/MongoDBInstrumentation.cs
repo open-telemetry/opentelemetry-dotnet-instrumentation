@@ -20,7 +20,8 @@ internal static class MongoDBInstrumentation
     {
         try
         {
-            MongoCommandExceptionCodePropertyInfo = Type.GetType("MongoDB.Driver.MongoCommandException, MongoDB.Driver")?.GetProperty("Code");
+            MongoCommandExceptionCodePropertyInfo = Type.GetType(
+                "MongoDB.Driver.MongoCommandException, MongoDB.Driver")?.GetProperty("Code");
         }
         catch
         {
@@ -89,7 +90,8 @@ internal static class MongoDBInstrumentation
     {
         activity.SetException(exception);
 
-        if (MongoCommandExceptionCodePropertyInfo != null && exception.GetType().Name.Equals("MongoCommandException", StringComparison.Ordinal))
+        if (MongoCommandExceptionCodePropertyInfo != null &&
+            exception.GetType().Name.Equals("MongoCommandException", StringComparison.Ordinal))
         {
             try
             {
@@ -124,7 +126,8 @@ internal static class MongoDBInstrumentation
         database = null;
         if (instance.TryDuckCast<IWireProtocolWithDatabaseNamespaceStruct>(out var protocolWithDatabaseNamespace)
          && protocolWithDatabaseNamespace.DatabaseNamespace is not null
-         && protocolWithDatabaseNamespace.DatabaseNamespace.TryDuckCast<DatabaseNamespaceStruct>(out var databaseNamespace))
+         && protocolWithDatabaseNamespace.DatabaseNamespace.TryDuckCast<DatabaseNamespaceStruct>(
+                out var databaseNamespace))
         {
             database = databaseNamespace.DatabaseName;
         }
@@ -137,7 +140,11 @@ internal static class MongoDBInstrumentation
         return true;
     }
 
-    private static bool TryGetQueryDetails(object instance, out string? collection, out string? operationName, out int? batchSize)
+    private static bool TryGetQueryDetails(
+        object instance,
+        out string? collection,
+        out string? operationName,
+        out int? batchSize)
     {
         collection = null;
         operationName = null;
@@ -173,7 +180,8 @@ internal static class MongoDBInstrumentation
                     for (var i = 1; i < bsonDocument.ElementCount; i++)
                     {
                         var element = bsonDocument.GetElement(i);
-                        if (element.Name == targetField && element.Value.TryDuckCast<IBsonArrayProxy>(out var bsonArray))
+                        if (element.Name == targetField &&
+                            element.Value.TryDuckCast<IBsonArrayProxy>(out var bsonArray))
                         {
                             batchSize = bsonArray.Count;
                             break;

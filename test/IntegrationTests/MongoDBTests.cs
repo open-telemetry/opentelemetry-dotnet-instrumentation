@@ -46,13 +46,18 @@ public class MongoDBTests : TestHelper
             collector.Expect(MongoDBInstrumentationScopeName, VersionHelper.AutoInstrumentationVersion);
         }
 
-        collector.Expect(MongoDBInstrumentationScopeName, VersionHelper.AutoInstrumentationVersion, span => ValidateSpan(span));
+        collector.Expect(
+            MongoDBInstrumentationScopeName,
+            VersionHelper.AutoInstrumentationVersion,
+            span => ValidateSpan(span));
 
         EnableBytecodeInstrumentation();
         RunTestApplication(new()
         {
 #if NET462
-            Framework = string.IsNullOrEmpty(packageVersion) || new Version(packageVersion) >= new Version(3, 0, 0) ? "net472" : "net462",
+            Framework = string.IsNullOrEmpty(packageVersion) || new Version(packageVersion) >= new Version(3, 0, 0)
+                ? "net472"
+                : "net462",
 #endif
             Arguments = $"--mongo-db {_mongoDB.Port} {MongoDbNamespace} {MongoDbCollectionName}",
             PackageVersion = packageVersion
@@ -68,7 +73,10 @@ public class MongoDBTests : TestHelper
         var dbSystemAttr = spanAttributes.FirstOrDefault(kv => kv.Key == DbSystemAttributeName);
         var dbOperationNameAttr = spanAttributes.FirstOrDefault(kv => kv.Key == DbOperationNameAttributeName);
 
-        if (collectionNameAttr == null || dbNamespaceAttr == null || dbSystemAttr == null || dbOperationNameAttr == null)
+        if (collectionNameAttr == null ||
+            dbNamespaceAttr == null ||
+            dbSystemAttr == null ||
+            dbOperationNameAttr == null)
         {
             return false;
         }
@@ -86,7 +94,9 @@ public class MongoDBTests : TestHelper
 
     private bool ValidateSpan(Span span)
     {
-        return span.Kind == Span.Types.SpanKind.Client && ValidateDatabaseAttributes(span.Attributes) && ValidateNetworkAttributes(span.Attributes);
+        return span.Kind == Span.Types.SpanKind.Client &&
+               ValidateDatabaseAttributes(span.Attributes) &&
+               ValidateNetworkAttributes(span.Attributes);
     }
 
     private bool ValidateNetworkAttributes(IReadOnlyCollection<KeyValue> spanAttributes)
