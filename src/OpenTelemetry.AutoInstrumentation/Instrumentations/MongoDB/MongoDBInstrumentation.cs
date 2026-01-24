@@ -13,6 +13,19 @@ namespace OpenTelemetry.AutoInstrumentation.Instrumentations.MongoDB;
 internal static class MongoDBInstrumentation
 {
     private static readonly ActivitySource Source = CreateActivitySource();
+    private static readonly PropertyInfo? MongoCommandExceptionCodePropertyInfo;
+
+    static MongoDBInstrumentation()
+    {
+        try
+        {
+            MongoCommandExceptionCodePropertyInfo = Type.GetType("MongoDB.Driver.MongoCommandException, MongoDB.Driver")?.GetProperty("Code");
+        }
+        catch
+        {
+            MongoCommandExceptionCodePropertyInfo = null;
+        }
+    }
 
     public static Activity? StartDatabaseActivity(
         object? instance,
@@ -34,7 +47,7 @@ internal static class MongoDBInstrumentation
             return null;
         }
 
-        if (!TryGetNetworkAttributes(connection, out var serverAddress, out var serverName, out var serverPort))
+        if (!TryGetNetworkAttributes(connection, out var serverAddress, out var serverPort))
         {
             return null;
         }
@@ -60,10 +73,6 @@ internal static class MongoDBInstrumentation
         {
             tags.Add(NetworkAttributes.Keys.ServerAddress, serverAddress);
         }
-        else if (!string.IsNullOrEmpty(serverName))
-        {
-            tags.Add(NetworkAttributes.Keys.ServerAddress, serverName);
-        }
 
         if (serverPort is not null)
         {
@@ -79,19 +88,14 @@ internal static class MongoDBInstrumentation
     {
         activity.SetException(exception);
 
-        if (exception.GetType().Name.Equals("MongoCommandException", StringComparison.Ordinal))
+        if (MongoCommandExceptionCodePropertyInfo != null && exception.GetType().Name.Equals("MongoCommandException", StringComparison.Ordinal))
         {
             try
             {
-                // Reflection to get the Code property from MongoCommandException
-                var propertyInfo = exception.GetType().GetProperty("Code");
-                if (propertyInfo != null)
+                var code = MongoCommandExceptionCodePropertyInfo.GetValue(exception);
+                if (code != null)
                 {
-                    var code = propertyInfo.GetValue(exception);
-                    if (code != null)
-                    {
-                        activity.SetTag("db.response.status_code", code.ToString());
-                    }
+                    activity.SetTag("db.response.status_code", code.ToString());
                 }
             }
             catch
@@ -186,10 +190,9 @@ internal static class MongoDBInstrumentation
         return true;
     }
 
-    private static bool TryGetNetworkAttributes(IConnection connection, out string? serverAddress, out string? serverName, out int? serverPort)
+    private static bool TryGetNetworkAttributes(IConnection connection, out string? serverAddress, out int? serverPort)
     {
         serverAddress = null;
-        serverName = null;
         serverPort = null;
 
         if (connection.EndPoint == null)
@@ -201,19 +204,11 @@ internal static class MongoDBInstrumentation
         {
             serverAddress = ipEndPoint.Address.ToString();
             serverPort = ipEndPoint.Port;
-
-            serverName = Dns.GetHostEntry(serverAddress).ToString();
         }
         else if (connection.EndPoint is DnsEndPoint dnsEndPoint)
         {
-            serverName = dnsEndPoint.Host;
+            serverAddress = dnsEndPoint.Host;
             serverPort = dnsEndPoint.Port;
-
-            var ipAddresses = Dns.GetHostAddresses(serverName);
-            if (ipAddresses.Length > 0)
-            {
-                serverAddress = ipAddresses[0].ToString();
-            }
         }
 
         return true;
