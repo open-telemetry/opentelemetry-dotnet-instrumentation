@@ -2,6 +2,7 @@ using System.Diagnostics;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
+using System.Text.RegularExpressions;
 using Extensions;
 using Nuke.Common;
 using Nuke.Common.IO;
@@ -140,9 +141,37 @@ partial class Build
         .After(PublishManagedProfiler)
         .Executes(() =>
         {
-            var generatedSourceFile = SourceDirectory / Projects.AutoInstrumentationNative / "assembly_redirection.h";
+            var nativeDirectory = SourceDirectory / Projects.AutoInstrumentationNative;
 
-            AssemblyRedirectionSourceGenerator.Generate(TracerHomeDirectory, generatedSourceFile);
+            if (IsWin)
+            {
+                // any really
+                var netFxRoot = TargetFramework.NetFramework.First().OutputFolder;
+                // Generate .NET Framework redirects
+                // .NET Framework version normalization:
+                // net462 -> 462, net47 -> 470, net471 -> 471, net472 -> 472
+                // Frameworks with only 2 digits (e.g., 47) are padded with 0 (470)
+                AssemblyRedirectionSourceGenerator.Generate(
+                    TracerHomeDirectory / netFxRoot,
+                    nativeDirectory / $"assembly_redirection_{netFxRoot}.h",
+                    new Regex(@"^net(?<version>\d{2,3})$"),
+                    groups => groups["version"].Value switch
+                    {
+                        var it when it.Length == 2 => it + "0",
+                        var it => it
+                    });
+            }
+
+            // any really
+            var netRoot = TargetFramework.Net.First().OutputFolder;
+            // Generate .NET (Core) redirects
+            // .NET Core version normalization:
+            // net8.0 -> 80, net9.0 -> 90, net10.0 -> 100
+            AssemblyRedirectionSourceGenerator.Generate(
+                TracerHomeDirectory / netRoot,
+                nativeDirectory / $"assembly_redirection_{netRoot}.h",
+                new Regex(@"^net(?<major>\d{1,2})\.(?<minor>\d)$"),
+                groups => groups["major"].Value + groups["minor"].Value);
         });
 
     Target CompileManagedSrc => _ => _

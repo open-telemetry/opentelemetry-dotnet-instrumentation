@@ -5,117 +5,95 @@ using Serilog;
 
 public static class AssemblyRedirectionSourceGenerator
 {
-    public static void Generate(string assembliesFolderPath, string generatedFilePath)
+    public static void Generate(
+        string assembliesFolderPath,
+        string generatedFilePath,
+        Regex versionRegex,
+        Func<GroupCollection, string> versionNormalizer)
     {
         Log.Debug("Generating assembly redirection file {0}", generatedFilePath);
+
+        var macroName = Path.GetFileNameWithoutExtension(generatedFilePath).ToUpperInvariant();
+
         var assemblies = new SortedDictionary<int, SortedDictionary<string, AssemblyNameDefinition>>();
 
-        // Process both netfx and net folders with their specific regex patterns for version extraction
-        // TODO for now generate headers files with 3 digit version numbers for net framework and 4+ digit version numbers for net (core)
-        // e.g. net462 -> 462, net47 -> 470, net8.0 -> 8000, net10.0 -> 10000
-        var rootFolders = new[]
-        {
-            (Name: "netfx", Pattern: new Regex(@"^net(?<version>\d{2,3})$")),  // .NET Framework: net462, net47, net471, net472
-            (Name: "net", Pattern: new Regex(@"^net(?<version>\d{1,2}\.\d)$"))  // .NET (Core): net8.0, net9.0, net10.0
-        };
+        var folders = new Dictionary<int, string>();
 
-        foreach (var (rootFolderName, frameworkVersionRegEx) in rootFolders)
+        // Discover framework-specific subfolders
+        foreach (var directory in Directory.EnumerateDirectories(assembliesFolderPath))
         {
-            var rootFolderPath = Path.Combine(assembliesFolderPath, rootFolderName);
-            if (!Directory.Exists(rootFolderPath))
+            var folderName = Path.GetFileName(directory);
+            var framework = versionNormalizer(versionRegex.Match(folderName).Groups);
+            if (framework == string.Empty)
             {
-                Log.Warning("Root folder {0} does not exist, skipping", rootFolderPath);
+                Log.Error("Unexpected folder name: {0}, will not be processed", framework);
                 continue;
             }
+            var frameworkVersion = int.Parse(framework);
 
-            var frameworkFolders = new Dictionary<int, string>();
-
-            // Discover framework-specific subfolders
-            foreach (var directory in Directory.EnumerateDirectories(rootFolderPath))
+            if (folders.TryGetValue(frameworkVersion, out var folder))
             {
-                var folderName = Path.GetFileName(directory);
-                var framework = frameworkVersionRegEx.Match(folderName).Groups["version"].Value;
-                if (framework == string.Empty)
-                {
-                    Log.Error("Unexpected folder name: {0}, folder \"{1}\" will not be processed", framework, directory);
-                    continue;
-                }
-
-                // TODO ugly hack to place .NET (Core) above .NET Framework, improve later
-                var frameworkVersion = int.Parse(framework.Replace(".", ""));
-                if (framework.Contains('.'))
-                {
-                    frameworkVersion *= 100;
-                }
-                if (frameworkVersion < 100)
-                {
-                    frameworkVersion *= 10;
-                }
-
-                if (frameworkFolders.TryGetValue(frameworkVersion, out var folder))
-                {
-                    Log.Error("For {0}: already registered folder {1}, {2} will be skipped", frameworkVersion, folder, directory);
-                    continue;
-                }
-                frameworkFolders[frameworkVersion] = directory;
-                assemblies[frameworkVersion] = new SortedDictionary<string, AssemblyNameDefinition>();
+                Log.Error("For {0}: already registered folder {1}, {2} will be skipped", frameworkVersion, folder, directory);
+                continue;
             }
+            folders[frameworkVersion] = directory;
+            assemblies[frameworkVersion] = new SortedDictionary<string, AssemblyNameDefinition>();
+        }
 
-            void Process(string fileName, int? framework)
+        void Process(string fileName, int? framework)
+        {
+            try
             {
-                try
+                using var moduleDef = ModuleDefinition.ReadModule(fileName);
+                var assemblyDef = moduleDef.Assembly.Name!;
+                if (assemblyDef.Name == "netstandard")
                 {
-                    using var moduleDef = ModuleDefinition.ReadModule(fileName);
-                    var assemblyDef = moduleDef.Assembly.Name!;
-                    if (assemblyDef.Name == "netstandard")
-                    {
-                        // Skip netstandard, since it doesn't need redirection.
-                        return;
-                    }
-
-                    foreach (var keys in framework != null ? (IEnumerable<int>)[framework.Value] : frameworkFolders.Keys)
-                    {
-                        assemblies[keys][assemblyDef.Name] = assemblyDef;
-                        Log.Debug("Adding {0} assembly to the redirection map {1}. Targeted version {2}", assemblyDef.Name,
-                            keys, assemblyDef.Version);
-                    }
+                    // Skip netstandard, since it doesn't need redirection.
+                    return;
                 }
-                catch (BadImageFormatException)
+
+                foreach (var keys in framework != null ? (IEnumerable<int>)[framework.Value] : folders.Keys)
                 {
-                    Log.Debug("Skipping \"{0}\" couldn't open it as a managed assembly", fileName);
+                    assemblies[keys][assemblyDef.Name] = assemblyDef;
+                    Log.Debug("Adding {0} assembly to the redirection map {1}. Targeted version {2}", assemblyDef.Name,
+                        keys, assemblyDef.Version);
                 }
             }
-
-            // Process common assemblies in root folder
-            foreach (var fileName in Directory.EnumerateFiles(rootFolderPath))
+            catch (BadImageFormatException)
             {
-                Process(fileName, null);
-            }
-
-            // Process framework-specific assemblies
-            foreach (var fx in frameworkFolders)
-            {
-                foreach (var fileName in Directory.EnumerateFiles(fx.Value))
-                {
-                    var filenameToProcess = fileName;
-                    if (Path.GetExtension(fileName) == ".link")
-                    {
-                        filenameToProcess = Path.Combine(fx.Value, "..", File.ReadAllText(fileName),
-                            Path.GetFileNameWithoutExtension(fileName));
-                    }
-
-                    Process(filenameToProcess, fx.Key);
-                }
+                Log.Debug("Skipping \"{0}\" couldn't open it as a managed assembly", fileName);
             }
         }
 
-        var sourceContents = GenerateSourceContents(assemblies);
+        // Process common assemblies in root folder
+        foreach (var fileName in Directory.EnumerateFiles(assembliesFolderPath))
+        {
+            Process(fileName, null);
+        }
+
+        // Process framework-specific assemblies
+        foreach (var fx in folders)
+        {
+            foreach (var fileName in Directory.EnumerateFiles(fx.Value))
+            {
+                var filenameToProcess = fileName;
+                if (Path.GetExtension(fileName) == ".link")
+                {
+                    filenameToProcess = Path.Combine(fx.Value, "..", File.ReadAllText(fileName),
+                        Path.GetFileNameWithoutExtension(fileName));
+                }
+
+                Process(filenameToProcess, fx.Key);
+            }
+        }
+
+        var sourceContents = GenerateSourceContents(assemblies, macroName);
 
         File.WriteAllText(generatedFilePath, sourceContents);
         Log.Information("Assembly redirection source generated {0}", generatedFilePath);
     }
 
-    private static string GenerateSourceContents(SortedDictionary<int, SortedDictionary<string, AssemblyNameDefinition>> assemblies)
+    private static string GenerateSourceContents(SortedDictionary<int, SortedDictionary<string, AssemblyNameDefinition>> assemblies, string macroName)
     {
         #pragma warning disable format
         return
@@ -127,11 +105,6 @@ public static class AssemblyRedirectionSourceGenerator
 
         // Auto-generated file, do not change it - generated by the {{nameof(AssemblyRedirectionSourceGenerator)}} type
 
-        #include "cor_profiler.h"
-
-        #define STR(Z1) #Z1
-        #define AUTO_MAJOR STR(OTEL_AUTO_VERSION_MAJOR) 
-
         // Macro to handle cross-platform UTF-16 string literals
         #ifdef _WIN32
         #define _W(s) L##s
@@ -139,17 +112,8 @@ public static class AssemblyRedirectionSourceGenerator
         #define _W(s) u##s
         #endif
 
-        namespace trace
-        {
-        void CorProfiler::InitAssemblyRedirectsMap()
-        {
-            const USHORT auto_major = atoi(AUTO_MAJOR);
-
-            assembly_version_redirect_map_.insert({
-                {{GenerateEntries(assemblies)}}
-            });
-        }
-        }
+        #define {{macroName}} \
+            {{GenerateEntries(assemblies)}}
 
         """;
         #pragma warning restore format
@@ -161,26 +125,26 @@ public static class AssemblyRedirectionSourceGenerator
 
         foreach (var fx in frameworks)
         {
-            sb.AppendLine($"        {{ {fx.Key}, {{");
+            sb.AppendLine($"    {{ {fx.Key}, {{ \\");
             foreach (var kvp in fx.Value)
             {
                 var v = kvp.Value.Version!;
                 if (kvp.Key != "OpenTelemetry.AutoInstrumentation")
                 {
-                    sb.AppendLine($"            {{ _W(\"{kvp.Key}\"), {{{v.Major}, {v.Minor}, {v.Build}, {v.Revision}}} }},");
+                    sb.AppendLine($"        {{ _W(\"{kvp.Key}\"), {{{v.Major}, {v.Minor}, {v.Build}, {v.Revision}}} }}, \\");
                 }
                 else
                 {
-                    sb.AppendLine($"            {{ _W(\"{kvp.Key}\"), {{auto_major, 0, 0, 0}} }},");
+                    sb.AppendLine($"        {{ _W(\"{kvp.Key}\"), {{auto_major, 0, 0, 0}} }}, \\");
                 }
             }
-            sb.AppendLine("        }},");
+            sb.AppendLine("    }}, \\");
         }
 
         return sb.ToString()
             .AsSpan() // Optimisation for following string manipulations
             .Trim() // Remove whitespaces
-            .TrimEnd(',') // Remove trailing comma
+            .TrimEnd(", \\") // Remove trailing comma
             .ToString();
     }
 }

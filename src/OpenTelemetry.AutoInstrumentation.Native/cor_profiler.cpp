@@ -3933,14 +3933,14 @@ void CorProfiler::DetectFrameworkVersionTableForRedirectsMap()
 #endif
     {
         // .NET (Core) detection
-        // Map major.minor version to framework version key to match generator: net8.0 -> 8000, net9.0 -> 9000, etc
+        // Map major.minor version to framework version key to match generator: net8.0 -> 80, net9.0 -> 90, etc
         int majorVersion = runtime_information_.major_version;
         int minorVersion = runtime_information_.minor_version;
 
         if (majorVersion >= 6)
         {
             // Calculate key the same way as AssemblyRedirectionSourceGenerator:
-            frameworkVersion = (majorVersion * 10 + minorVersion) * 100;
+            frameworkVersion = (majorVersion * 10 + minorVersion);
 
             Logger::Debug("DetectFrameworkVersionTableForRedirectsMap: Detected .NET ", majorVersion, ".", minorVersion,
                           " (framework key: ", frameworkVersion, ")");
@@ -3948,9 +3948,9 @@ void CorProfiler::DetectFrameworkVersionTableForRedirectsMap()
         else
         {
             // Default to .NET 8.0 if version detection fails or unsupported version
-            frameworkVersion = 8000;
+            frameworkVersion = 80;
             Logger::Warn("DetectFrameworkVersionTableForRedirectsMap: Unsupported or undetected .NET (Core) version ",
-                         majorVersion, ".", minorVersion, ", using default version 8000");
+                         majorVersion, ".", minorVersion, ", using default version 80");
         }
     }
 
