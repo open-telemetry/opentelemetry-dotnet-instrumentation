@@ -11,7 +11,17 @@
     <DisableFastUpToDateCheck>true</DisableFastUpToDateCheck>
     <CopyBuildOutputToPublishDirectory>false</CopyBuildOutputToPublishDirectory>
     <PublishDocumentationFile>false</PublishDocumentationFile>
-    <DisableTransitiveFrameworkReferences>true</DisableTransitiveFrameworkReferences>
+
+    <DisableTransitiveFrameworkReferences
+      Label="Includes direct dependencies in publish output that would otherwise
+             be excluded if they are part of other dependencies' framework references
+             (e.g., OpenTelemetry => 'Microsoft.Extensions.Configuration',
+                    also in AspNetCoreBootstrapper [FrameworkReference]=> 'Microsoft.AspNetCore.App').
+             Maintaining complete dependency list is crucial for assembly
+             redirection in applications that share these direct dependencies
+             (e.g., Standalone app => 'Microsoft.Extensions.Configuration',
+                    not via [FrameworkReference] 'Microsoft.AspNetCore.App').">true</DisableTransitiveFrameworkReferences>
+
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\OpenTelemetry.AutoInstrumentation\OpenTelemetry.AutoInstrumentation.csproj" />
