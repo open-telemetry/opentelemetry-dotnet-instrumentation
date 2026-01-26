@@ -52,7 +52,7 @@ public static class AssemblyRedirectionSourceGenerator
                     return;
                 }
 
-                foreach (var keys in framework != null ? (IEnumerable<int>)[framework.Value] : assembliesFolderPath.Keys)
+                foreach (var keys in framework != null ? (IEnumerable<int>)[framework.Value] : assemblies.Keys)
                 {
                     assemblies[keys][assemblyDef.Name] = assemblyDef;
                     Log.Debug("Adding {0} assembly to the redirection map {1}. Targeted version {2}", assemblyDef.Name,
