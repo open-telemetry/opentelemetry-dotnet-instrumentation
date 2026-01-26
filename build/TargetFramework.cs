@@ -7,14 +7,17 @@ using Serilog;
 [TypeConverter(typeof(TargetFrameworkTypeConverter))]
 public class TargetFramework : Enumeration
 {
+    public const string OutputFolderNet = "net";
+    public const string OutputFolderNetFramework = "netfx";
+
     private TargetFramework(string value)
     {
         Value = value;
         OutputFolder = value switch
         {
-            _ when value.StartsWith("net") && value.Contains('.') => "net",
+            _ when value.StartsWith("net") && value.Contains('.') => OutputFolderNet,
             // with the right order this check can be simplieid to just check for "net" prefix, but keep it explicit for clarity
-            _ when value.StartsWith("net") && !value.Contains('.') => "netfx",
+            _ when value.StartsWith("net") && !value.Contains('.') => OutputFolderNetFramework,
             _ => string.Empty
         };
     }

@@ -37,25 +37,24 @@ partial class Build
 
     IEnumerable<MSBuildTargetPlatform> ArchitecturesForPlatform =>
         Equals(Platform, MSBuildTargetPlatform.x64)
-            ? new[] { MSBuildTargetPlatform.x64, MSBuildTargetPlatform.x86 }
-            : new[] { MSBuildTargetPlatform.x86 };
+            ? [MSBuildTargetPlatform.x64, MSBuildTargetPlatform.x86]
+            : [MSBuildTargetPlatform.x86];
 
-    private static readonly IEnumerable<TargetFramework> TargetFrameworks = new[]
-    {
+    private static readonly IEnumerable<TargetFramework> TargetFrameworks =
+    [
        TargetFramework.NET8_0,
        TargetFramework.NET462,
-    };
+    ];
 
-    private static readonly IEnumerable<TargetFramework> TargetFrameworksForNetFxPacking = new[]
-    {
+    private static readonly IEnumerable<TargetFramework> TargetFrameworksForNetFxPacking =
+    [
         TargetFramework.NET462,
         TargetFramework.NET47,
         TargetFramework.NET471,
         TargetFramework.NET472,
-    };
+    ];
 
-    //TODO optimize
-    private static readonly IEnumerable<TargetFramework> AllTargetFrameworks =
+    private static readonly IEnumerable<TargetFramework> TargetFrameworksForPublish =
     [
         TargetFramework.NET462,
         TargetFramework.NET47,
@@ -66,8 +65,12 @@ partial class Build
         TargetFramework.NET10_0
     ];
 
-    private static readonly IEnumerable<TargetFramework> TestFrameworks = TargetFrameworks
-        .Concat(TargetFramework.NET9_0, TargetFramework.NET10_0);
+    private static readonly IEnumerable<TargetFramework> TestFrameworks =
+    [
+        ..TargetFrameworks,
+        TargetFramework.NET9_0,
+        TargetFramework.NET10_0
+    ];
 
     Target CreateRequiredDirectories => _ => _
         .Unlisted()
@@ -134,44 +137,6 @@ partial class Build
             DotNetRestore(s => s.SetProjectFile(targetProject));
 
             TransientDependenciesGenerator.Run(targetProject);
-        });
-
-    Target GenerateAssemblyRedirectionSource => _ => _
-        .Unlisted()
-        .After(PublishManagedProfiler)
-        .Executes(() =>
-        {
-            var nativeDirectory = SourceDirectory / Projects.AutoInstrumentationNative;
-
-            if (IsWin)
-            {
-                // any really
-                var netFxRoot = TargetFramework.NetFramework.First().OutputFolder;
-                // Generate .NET Framework redirects
-                // .NET Framework version normalization:
-                // net462 -> 462, net47 -> 470, net471 -> 471, net472 -> 472
-                // Frameworks with only 2 digits (e.g., 47) are padded with 0 (470)
-                AssemblyRedirectionSourceGenerator.Generate(
-                    TracerHomeDirectory / netFxRoot,
-                    nativeDirectory / $"assembly_redirection_{netFxRoot}.h",
-                    new Regex(@"^net(?<version>\d{2,3})$"),
-                    groups => groups["version"].Value switch
-                    {
-                        var it when it.Length == 2 => it + "0",
-                        var it => it
-                    });
-            }
-
-            // any really
-            var netRoot = TargetFramework.Net.First().OutputFolder;
-            // Generate .NET (Core) redirects
-            // .NET Core version normalization:
-            // net8.0 -> 80, net9.0 -> 90, net10.0 -> 100
-            AssemblyRedirectionSourceGenerator.Generate(
-                TracerHomeDirectory / netRoot,
-                nativeDirectory / $"assembly_redirection_{netRoot}.h",
-                new Regex(@"^net(?<major>\d{1,2})\.(?<minor>\d)$"),
-                groups => groups["major"].Value + groups["minor"].Value);
         });
 
     Target CompileManagedSrc => _ => _
@@ -334,8 +299,8 @@ partial class Build
         .Executes(() =>
         {
             var targetFrameworks = IsWin
-                ? AllTargetFrameworks
-                : AllTargetFrameworks.ExceptNetFramework();
+                ? TargetFrameworksForPublish
+                : TargetFrameworksForPublish.ExceptNetFramework();
 
             // Publish OpenTelemetry.AutoInstrumentation.Assemblies.NetFramework for all target frameworks
             DotNetPublish(s => s
@@ -446,6 +411,36 @@ partial class Build
                 .ForEach(fw => (baseDirectory / fw / "_._").WriteAllText(string.Empty, Encoding.ASCII, false));
         }
     }
+
+    Target GenerateAssemblyRedirectionSource => _ => _
+        .Unlisted()
+        .After(PublishManagedProfiler)
+        .Executes(() =>
+        {
+            if (IsWin)
+            {
+                // Generate .NET Framework redirects
+                // .NET Framework version normalization:
+                // net462 -> 462, net47 -> 470, net471 -> 471, net472 -> 472
+                // Frameworks with only 2 digits (e.g., 47) are padded with 0 (470)
+                AssemblyRedirectionSourceGenerator.Generate(
+                    TracerHomeDirectory / TargetFramework.OutputFolderNetFramework,
+                    SourceDirectory / Projects.AutoInstrumentationNative / $"assembly_redirection_{TargetFramework.OutputFolderNetFramework}.h",
+                    new Regex(@"^net(?<major>\d)(?<minor>\d)(?<patch>\d)?$"),
+                    groups => groups["patch"].Success
+                        ? groups["major"].Value + groups["minor"].Value + groups["patch"].Value
+                        : groups["major"].Value + groups["minor"].Value + "0");
+            }
+
+            // Generate .NET (Core) redirects
+            // .NET Core version normalization:
+            // net8.0 -> 80, net9.0 -> 90, net10.0 -> 100
+            AssemblyRedirectionSourceGenerator.Generate(
+                TracerHomeDirectory / TargetFramework.OutputFolderNet,
+                SourceDirectory / Projects.AutoInstrumentationNative / $"assembly_redirection_{TargetFramework.OutputFolderNet}.h",
+                new Regex(@"^net(?<major>\d{1,2})\.(?<minor>\d)$"),
+                groups => groups["major"].Value + groups["minor"].Value);
+        });
 
     Target PublishNativeProfiler => _ => _
         .Unlisted()
