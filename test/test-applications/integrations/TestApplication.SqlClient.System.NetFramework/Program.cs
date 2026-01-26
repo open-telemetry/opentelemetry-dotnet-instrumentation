@@ -10,7 +10,7 @@ namespace TestApplication.SqlClient.System;
 /// <summary>
 /// This test application uses SqlConnection from System.Data (shipped with .NET Framework).
 /// </summary>
-public class Program
+internal static class Program
 {
     private const string CreateCommand = "CREATE TABLE MY_TABLE ( Id int, Value1 varchar(255), Value2 varchar(255) )";
     private const string DropCommand = "DROP TABLE MY_TABLE";
@@ -30,7 +30,7 @@ public class Program
 
         using (var connection = new SqlConnection(connectionString))
         {
-            await ExecuteAsyncCommands(connection);
+            await ExecuteAsyncCommands(connection).ConfigureAwait(false);
         }
 
         // The "LONG_RUNNING" environment variable is used by tests that access/receive
@@ -80,7 +80,9 @@ public class Program
     {
         try
         {
+#pragma warning disable CA2100 // Review SQL queries for security vulnerabilities. All queries are static strings.
             using var command = new SqlCommand(commandString, connection);
+#pragma warning restore CA2100 // Review SQL queries for security vulnerabilities. All queries are static strings.
             using var reader = command.ExecuteReader();
             Console.WriteLine($"SQL query executed successfully: {commandString}");
         }
@@ -92,19 +94,21 @@ public class Program
 
     private static async Task ExecuteAsyncCommands(SqlConnection connection)
     {
-        await connection.OpenAsync();
-        await ExecuteCreateAsync(connection);
-        await ExecuteInsertAsync(connection);
-        await ExecuteSelectAsync(connection);
-        await ExecuteDropAsync(connection);
+        await connection.OpenAsync().ConfigureAwait(false);
+        await ExecuteCreateAsync(connection).ConfigureAwait(false);
+        await ExecuteInsertAsync(connection).ConfigureAwait(false);
+        await ExecuteSelectAsync(connection).ConfigureAwait(false);
+        await ExecuteDropAsync(connection).ConfigureAwait(false);
     }
 
     private static async Task ExecuteCommandAsync(string commandString, SqlConnection connection)
     {
         try
         {
+#pragma warning disable CA2100 // Review SQL queries for security vulnerabilities. All queries are static strings.
             using var command = new SqlCommand(commandString, connection);
-            using var reader = await command.ExecuteReaderAsync();
+#pragma warning restore CA2100 // Review SQL queries for security vulnerabilities. All queries are static strings.
+            using var reader = await command.ExecuteReaderAsync().ConfigureAwait(false);
             Console.WriteLine($"Async SQL query executed successfully: {commandString}");
         }
         catch (Exception ex)
@@ -115,21 +119,21 @@ public class Program
 
     private static async Task ExecuteCreateAsync(SqlConnection connection)
     {
-        await ExecuteCommandAsync(CreateCommand, connection);
+        await ExecuteCommandAsync(CreateCommand, connection).ConfigureAwait(false);
     }
 
     private static async Task ExecuteInsertAsync(SqlConnection connection)
     {
-        await ExecuteCommandAsync(InsertCommand, connection);
+        await ExecuteCommandAsync(InsertCommand, connection).ConfigureAwait(false);
     }
 
     private static async Task ExecuteSelectAsync(SqlConnection connection)
     {
-        await ExecuteCommandAsync(SelectCommand, connection);
+        await ExecuteCommandAsync(SelectCommand, connection).ConfigureAwait(false);
     }
 
     private static async Task ExecuteDropAsync(SqlConnection connection)
     {
-        await ExecuteCommandAsync(DropCommand, connection);
+        await ExecuteCommandAsync(DropCommand, connection).ConfigureAwait(false);
     }
 }

@@ -26,15 +26,17 @@ public static partial class LibraryVersion
             "TestApplication.Elasticsearch",
             [
                 new("8.15.10"),
-                new("9.2.1"),
+                new("9.2.2"),
             ]
         },
         {
             "TestApplication.EntityFrameworkCore",
             [
-                new("6.0.35"),
-                new("8.0.10"),
-                new("9.0.11"),
+                new("6.0.36"),
+                new("8.0.23"),
+                new("9.0.12"),
+                new("10.0.0", supportedFrameworks: [ "net10.0" ]),
+                new("10.0.2", supportedFrameworks: [ "net10.0" ]),
             ]
         },
         {
@@ -42,7 +44,7 @@ public static partial class LibraryVersion
             [
                 new("6.0.3"),
                 new("7.0.0"),
-                new("8.0.0"),
+                new("8.0.3"),
                 new("9.0.0"),
             ]
         },
@@ -51,7 +53,7 @@ public static partial class LibraryVersion
             [
                 new("7.5.0", additionalMetaData: new() { { "GraphQLMicrosoftDI", "7.5.0" }, { "GraphQLServerTransportsAspNetCore", "7.5.0" }, { "GraphQLServerUIPGraphiQL", "7.5.0" } }),
                 new("8.0.2", additionalMetaData: new() { { "GraphQLMicrosoftDI", "8.0.2" }, { "GraphQLServerTransportsAspNetCore", "8.0.2" }, { "GraphQLServerUIPGraphiQL", "8.0.2" } }),
-                new("8.7.0", additionalMetaData: new() { { "GraphQLMicrosoftDI", "8.7.0" }, { "GraphQLServerTransportsAspNetCore", "8.3.2" }, { "GraphQLServerUIPGraphiQL", "8.3.2" } }),
+                new("8.8.3", additionalMetaData: new() { { "GraphQLMicrosoftDI", "8.8.3" }, { "GraphQLServerTransportsAspNetCore", "8.3.3" }, { "GraphQLServerUIPGraphiQL", "8.3.3" } }),
             ]
         },
         {
@@ -74,21 +76,21 @@ public static partial class LibraryVersion
                 new("5.0.0", additionalMetaData: new() { { "NLogExtensionsLogging", "5.0.0" } }),
                 new("5.3.4", additionalMetaData: new() { { "NLogExtensionsLogging", "5.3.15" } }),
                 new("6.0.0", additionalMetaData: new() { { "NLogExtensionsLogging", "6.0.0" } }),
-                new("6.0.6", additionalMetaData: new() { { "NLogExtensionsLogging", "6.1.0" } }),
+                new("6.0.7", additionalMetaData: new() { { "NLogExtensionsLogging", "6.1.0" } }),
             ]
         },
         {
             "TestApplication.MassTransit",
             [
                 new("8.3.0"),
-                new("8.5.5"),
+                new("8.5.7"),
             ]
         },
         {
             "TestApplication.SqlClient.Microsoft",
             [
                 new("5.2.2"),
-                new("6.1.3"),
+                new("6.1.4"),
             ]
         },
         {
@@ -104,7 +106,8 @@ public static partial class LibraryVersion
                 new("2.19.0", supportedFrameworks: [ "net10.0", "net9.0", "net8.0", "net462" ]),
                 new("2.30.0", supportedFrameworks: [ "net10.0", "net9.0", "net8.0", "net462" ]),
                 new("3.0.0", supportedFrameworks: [ "net10.0", "net9.0", "net8.0", "net472" ]),
-                new("3.4.3", supportedFrameworks: [ "net10.0", "net9.0", "net8.0", "net472" ]),
+                new("3.5.0", supportedFrameworks: [ "net10.0", "net9.0", "net8.0", "net472" ]),
+                new("3.6.0", supportedFrameworks: [ "net10.0", "net9.0", "net8.0", "net472" ]),
             ]
         },
         {
@@ -124,8 +127,9 @@ public static partial class LibraryVersion
         {
             "TestApplication.Npgsql",
             [
-                new("8.0.5"),
+                new("8.0.8"),
                 new("9.0.4", supportedFrameworks: [ "net10.0", "net9.0", "net8.0" ]),
+                new("10.0.1", supportedFrameworks: [ "net10.0", "net9.0", "net8.0" ]),
             ]
         },
         {
@@ -133,7 +137,7 @@ public static partial class LibraryVersion
             [
                 new("8.2.5"),
                 new("9.1.0", supportedFrameworks: [ "net10.0", "net9.0", "net8.0" ]),
-                new("9.2.7", supportedFrameworks: [ "net10.0", "net9.0", "net8.0" ]),
+                new("9.2.8", supportedFrameworks: [ "net10.0", "net9.0", "net8.0" ]),
             ]
         },
         {
@@ -170,7 +174,7 @@ public static partial class LibraryVersion
             "TestApplication.StackExchangeRedis",
             [
                 new("2.6.122"),
-                new("2.9.32"),
+                new("2.10.1"),
             ]
         },
         {
@@ -187,7 +191,13 @@ public static partial class LibraryVersion
             [
                 new("1.8.2"),
                 new("1.9.2"),
-                new("2.12.0"),
+                new("2.13.0"),
+            ]
+        },
+        {
+            "TestApplication.Wcf.Core",
+            [
+                new("1.8.0", supportedFrameworks: [ "net10.0", "net9.0", "net8.0" ]),
             ]
         },
     };

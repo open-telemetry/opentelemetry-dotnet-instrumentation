@@ -9,7 +9,7 @@ using ValueType = OpenTelemetry.Proto.Profiles.V1Development.ValueType;
 
 namespace TestApplication.ContinuousProfiler;
 
-internal class ExtendedPprofBuilder
+internal sealed class ExtendedPprofBuilder
 {
     private readonly LocationCache _locationCache;
     private readonly LinkCache _linkCache;
@@ -82,10 +82,10 @@ internal class ExtendedPprofBuilder
         sampleBuilder.AddAttribute(attributeId);
     }
 
-    private class StringCache
+    private sealed class StringCache
     {
         private readonly Profile _profile;
-        private readonly Dictionary<string, int> _table = new();
+        private readonly Dictionary<string, int> _table = [];
         private int _index;
 
         public StringCache(Profile profile)
@@ -107,11 +107,11 @@ internal class ExtendedPprofBuilder
         }
     }
 
-    private class FunctionCache
+    private sealed class FunctionCache
     {
         private readonly Profile _profile;
         private readonly StringCache _stringCache;
-        private readonly Dictionary<string, int> _table = new();
+        private readonly Dictionary<string, int> _table = [];
         private int _index;
 
         public FunctionCache(Profile profile, StringCache stringCache)
@@ -143,7 +143,7 @@ internal class ExtendedPprofBuilder
         }
     }
 
-    private class LocationCache
+    private sealed class LocationCache
     {
         private readonly Profile _profile;
         private readonly FunctionCache _functionCache;
@@ -169,10 +169,10 @@ internal class ExtendedPprofBuilder
         }
     }
 
-    private class LinkCache
+    private sealed class LinkCache
     {
         private readonly Profile _profile;
-        private readonly Dictionary<Tuple<long, long, long>, int> _table = new();
+        private readonly Dictionary<Tuple<long, long, long>, int> _table = [];
         private int _index;
 
         public LinkCache(Profile profile)
@@ -210,10 +210,10 @@ internal class ExtendedPprofBuilder
         }
     }
 
-    private class AttributeCache
+    private sealed class AttributeCache
     {
         private readonly Profile _profile;
-        private readonly Dictionary<KeyValue, int> _table = new();
+        private readonly Dictionary<KeyValue, int> _table = [];
         private int _index;
 
         public AttributeCache(Profile profile)

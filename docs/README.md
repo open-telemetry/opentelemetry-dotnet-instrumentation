@@ -16,9 +16,9 @@ to .NET applications without having to modify their source code.
 > [!WARNING]
 > The following documentation refers to the in-development version
 of OpenTelemetry .NET Automatic Instrumentation. Docs for the latest version
-([1.13.0](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/latest))
+([1.14.0](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/latest))
 can be found in [opentelemetry.io](https://opentelemetry.io/docs/zero-code/dotnet/)
-or [versioned README](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/blob/v1.13.0/docs/README.md).
+or [versioned README](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/blob/v1.14.0/docs/README.md).
 
 ---
 
@@ -54,7 +54,7 @@ OpenTelemetry .NET Automatic Instrumentation is built on top of
 [OpenTelemetry .NET](https://github.com/open-telemetry/opentelemetry-dotnet):
 
 - [Core components](https://github.com/open-telemetry/opentelemetry-dotnet/blob/main/VERSIONING.md#core-components):
-[`1.14.0`](https://github.com/open-telemetry/opentelemetry-dotnet/releases/tag/core-1.10.0)
+[`1.15.0`](https://github.com/open-telemetry/opentelemetry-dotnet/releases/tag/core-1.15.0)
 - `System.Diagnostics.DiagnosticSource`: [`10.0.0`](https://www.nuget.org/packages/System.Diagnostics.DiagnosticSource/10.0.0)
   referencing `System.Runtime.CompilerServices.Unsafe`: [`6.1.2`](https://www.nuget.org/packages/System.Runtime.CompilerServices.Unsafe/6.1.2)
 
@@ -232,7 +232,7 @@ uses environment variables as parameters:
 | `TMPDIR`                | (deprecated) prefer `DOWNLOAD_DIR`                                              | No       | `$(mktemp -d)`              |
 | `DOWNLOAD_DIR`          | Folder to download the archive to. Will use local archive if it already exists  | No       | `$TMPDIR` or `$(mktemp -d)` |
 | `LOCAL_PATH`            | Full path the archive to use for installation. (ideal for air-gapped scenarios) | No       | *Calculated*                |
-| `VERSION`               | Version to download                                                             | No       | `1.13.0`                    |
+| `VERSION`               | Version to download                                                             | No       | `1.14.0`                    |
 
 [instrument.sh](../instrument.sh) script
 uses environment variables as parameters:
@@ -260,7 +260,7 @@ Example usage (run as administrator):
 #Requires -PSEdition Desktop
 
 # Download the module
-$module_url = "https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/download/v1.13.0/OpenTelemetry.DotNet.Auto.psm1"
+$module_url = "https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/download/v1.14.0/OpenTelemetry.DotNet.Auto.psm1"
 $download_path = Join-Path $env:temp "OpenTelemetry.DotNet.Auto.psm1"
 Invoke-WebRequest -Uri $module_url -OutFile $download_path -UseBasicParsing
 
@@ -408,3 +408,22 @@ For more information about the approver role, see the [community repository](htt
 - [Tony Redondo](https://github.com/tonyredondo)
 
 For more information about the emeritus role, see the [community repository](https://github.com/open-telemetry/community/blob/main/guides/contributor/membership.md#emeritus-maintainerapprovertriager).
+
+## Attestation
+
+Starting with the `1.14.0` release the files included in the GitHub releases
+are attested using [GitHub Artifact attestations](https://docs.github.com/actions/concepts/security/artifact-attestations).
+
+To verify the attestation of a file from a GitHub release use the [GitHub CLI](https://cli.github.com/).
+
+For example:
+
+```bash
+gh attestation verify --owner open-telemetry ./otel-dotnet-auto-install.sh
+```
+
+> [!NOTE]
+> A successful verification outputs `Verification succeeded!`.
+
+For more verification options please refer to the [`gh attestation verify`
+documentation](https://cli.github.com/manual/gh_attestation_verify).

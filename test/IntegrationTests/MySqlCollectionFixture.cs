@@ -9,9 +9,9 @@ using static IntegrationTests.Helpers.DockerFileHelper;
 namespace IntegrationTests;
 
 [CollectionDefinition(Name)]
-public class MySqlCollection : ICollectionFixture<MySqlFixture>
+public class MySqlCollectionFixture : ICollectionFixture<MySqlFixture>
 {
-    public const string Name = nameof(MySqlCollection);
+    public const string Name = nameof(MySqlCollectionFixture);
 }
 
 public class MySqlFixture : IAsyncLifetime
@@ -30,34 +30,33 @@ public class MySqlFixture : IAsyncLifetime
 
     public async Task InitializeAsync()
     {
-        _container = await LaunchMySqlContainerAsync(Port);
+        _container = await LaunchMySqlContainerAsync(Port).ConfigureAwait(false);
     }
 
     public async Task DisposeAsync()
     {
         if (_container != null)
         {
-            await ShutdownMySqlContainerAsync(_container);
+            await ShutdownMySqlContainerAsync(_container).ConfigureAwait(false);
         }
     }
 
     private static async Task<IContainer> LaunchMySqlContainerAsync(int port)
     {
-        var containersBuilder = new ContainerBuilder()
-            .WithImage(MySqlImage)
+        var containersBuilder = new ContainerBuilder(MySqlImage)
             .WithName($"mysql-{port}")
             .WithPortBinding(port, MySqlPort)
             .WithEnvironment("MYSQL_ALLOW_EMPTY_PASSWORD", "true")
             .WithWaitStrategy(Wait.ForUnixContainer().UntilInternalTcpPortIsAvailable(MySqlPort));
 
         var container = containersBuilder.Build();
-        await container.StartAsync();
+        await container.StartAsync().ConfigureAwait(false);
 
         return container;
     }
 
     private static async Task ShutdownMySqlContainerAsync(IContainer container)
     {
-        await container.DisposeAsync();
+        await container.DisposeAsync().ConfigureAwait(false);
     }
 }

@@ -1,6 +1,8 @@
 // Copyright The OpenTelemetry Authors
 // SPDX-License-Identifier: Apache-2.0
 
+using OpenTelemetry.AutoInstrumentation.Configurations.FileBasedConfiguration.Parser;
+using OpenTelemetry.Metrics;
 using Vendors.YamlDotNet.Serialization;
 
 namespace OpenTelemetry.AutoInstrumentation.Configurations.FileBasedConfiguration;
@@ -23,5 +25,5 @@ internal class MetricPeriodicExporterConfig
     /// Gets or sets the console exporter configuration.
     /// </summary>
     [YamlMember(Alias = "console")]
-    public object? Console { get; set; }
+    public ConsoleExporterConfig? Console { get; set; }
 }

@@ -10,7 +10,7 @@ namespace OpenTelemetry.AutoInstrumentation.Instrumentations.MongoDB;
 
 internal static class MongoDBInstrumentation
 {
-    private static readonly ActivitySource Source = new("OpenTelemetry.AutoInstrumentation.MongoDB");
+    private static readonly ActivitySource Source = new("OpenTelemetry.AutoInstrumentation.MongoDB", AutoInstrumentationVersion.Version);
 
     public static Activity? StartDatabaseActivity(
         object? instance,

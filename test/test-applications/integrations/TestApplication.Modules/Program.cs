@@ -6,7 +6,7 @@ using TestApplication.Shared;
 
 namespace TestApplication.Smoke;
 
-public class Program
+internal static class Program
 {
     public static void Main(string[] args)
     {
@@ -20,7 +20,7 @@ public class Program
         var otelLibs = AppDomain.CurrentDomain
             .GetAssemblies()
             .Select(x => x.GetName().Name)
-            .Where(name => name != null && name.StartsWith("OpenTelemetry"))
+            .Where(name => name != null && name.StartsWith("OpenTelemetry", StringComparison.Ordinal))
             .OrderBy(name => name)
             .ToList();
 

@@ -3,6 +3,4 @@
 
 namespace TestApplication.NServiceBus;
 
-public class TestMessage : IMessage
-{
-}
+internal sealed class TestMessage : IMessage;

@@ -3,7 +3,7 @@ using StarWars.Extensions;
 
 namespace StarWars.Types;
 
-public class HumanType : ObjectGraphType<Human>
+internal sealed class HumanType : ObjectGraphType<Human>
 {
     public HumanType(StarWarsData data)
     {
@@ -30,7 +30,7 @@ public class HumanType : ObjectGraphType<Human>
             .Bidirectional()
             .Resolve(context => context.GetPagedResults<Human, StarWarsCharacter>(data, context.Source.Friends));
 
-        Field<ListGraphType<EpisodeEnum>>("appearsIn").Description("Which movie they appear in.");
+        Field<ListGraphType<Episodes>>("appearsIn").Description("Which movie they appear in.");
 
         Field<StringGraphType>("homePlanet")
             .Description("The home planet of the human.")

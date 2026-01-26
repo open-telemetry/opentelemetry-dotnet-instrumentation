@@ -8,19 +8,16 @@ using OpenTelemetry;
 namespace TestApplication.SelectiveSampler.Plugins;
 
 // Custom processor that selects all spans for frequent sampling.
-public class FrequentSamplingProcessor : BaseProcessor<Activity>
+#pragma warning disable CA1812 // Avoid uninstantiated internal classes. This class is instantiated by reflection.
+internal sealed class FrequentSamplingProcessor : BaseProcessor<Activity>
+#pragma warning disable CA1812 // Avoid uninstantiated internal classes. This class is instantiated by reflection.
 {
     private static Action<ActivityTraceId>? _startSamplingDelegate;
     private static Action<ActivityTraceId>? _stopSamplingDelegate;
 
     public FrequentSamplingProcessor()
     {
-        var nativeMethodsType = Type.GetType("OpenTelemetry.AutoInstrumentation.NativeMethods, OpenTelemetry.AutoInstrumentation");
-        if (nativeMethodsType == null)
-        {
-            throw new Exception("OpenTelemetry.AutoInstrumentation.NativeMethods could not be found.");
-        }
-
+        var nativeMethodsType = Type.GetType("OpenTelemetry.AutoInstrumentation.NativeMethods, OpenTelemetry.AutoInstrumentation") ?? throw new InvalidOperationException("OpenTelemetry.AutoInstrumentation.NativeMethods could not be found.");
         var startMethod = nativeMethodsType.GetMethod("SelectiveSamplingStart", BindingFlags.Static | BindingFlags.Public, null, [typeof(ActivityTraceId)], null);
         var stopMethod = nativeMethodsType!.GetMethod("SelectiveSamplingStop", BindingFlags.Static | BindingFlags.Public, null, [typeof(ActivityTraceId)], null);
 

@@ -9,5 +9,7 @@
 
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>$(MSBuildThisFileDirectory)..\..\test-keypair.snk</AssemblyOriginatorKeyFile>
+    <!-- CA1031: Do not pass literals as localized parameters -->
+    <NoWarn>$(NoWarn);CA1303</NoWarn>
   </PropertyGroup>
 </Project>

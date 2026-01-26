@@ -5,7 +5,7 @@ using OpenTelemetry.Resources;
 
 namespace TestApplication.ContinuousProfiler;
 
-internal class ResourcesProvider
+internal static class ResourcesProvider
 {
     public static Resource Resource { get; private set; } = Resource.Empty;
 

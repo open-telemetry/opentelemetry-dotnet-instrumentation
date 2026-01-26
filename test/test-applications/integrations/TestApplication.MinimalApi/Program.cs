@@ -11,13 +11,13 @@ using var loggerFactory = LoggerFactory.Create(builder =>
                 .AddFilter("Microsoft", LogLevel.Warning);
         });
 var logger = loggerFactory.CreateLogger<Program>();
-logger.LogInformation("Logged before host is built.");
+logger.LogBeforeHostBuilt();
 var builder = WebApplication.CreateBuilder(args);
 
 using var app = builder.Build();
 app.MapGet("/test", (ILogger<Program> logger) =>
 {
-    logger.LogInformation("Request received.");
+    logger.LogRequestReceived();
     return "Hello World!";
 });
 
@@ -28,4 +28,13 @@ var addressFeature = server?.Features.Get<IServerAddressesFeature>();
 var address = addressFeature?.Addresses.First();
 
 using var httpClient = new HttpClient();
-httpClient.GetAsync($"{address}/test").Wait();
+httpClient.GetAsync(new Uri($"{address}/test")).Wait();
+
+internal static partial class LoggerExtensions
+{
+    [LoggerMessage(Level = LogLevel.Information, Message = "Logged before host is built.")]
+    public static partial void LogBeforeHostBuilt(this ILogger logger);
+
+    [LoggerMessage(Level = LogLevel.Information, Message = "Request received.")]
+    public static partial void LogRequestReceived(this ILogger logger);
+}

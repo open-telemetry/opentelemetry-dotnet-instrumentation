@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 #if NET
+using System.Globalization;
 using IntegrationTests.Helpers;
 using OpenTelemetry.Proto.Logs.V1;
 using Xunit.Abstractions;
@@ -27,7 +28,7 @@ public class LogTests : TestHelper
         SetExporter(collector);
         if (includeFormattedMessage)
         {
-            collector.Expect(logRecord => Convert.ToString(logRecord.Body) == "{ \"stringValue\": \"Information from Test App.\" }");
+            collector.Expect(logRecord => Convert.ToString(logRecord.Body, CultureInfo.InvariantCulture) == "{ \"stringValue\": \"Information from Test App.\" }");
         }
         else
         {
@@ -36,8 +37,8 @@ public class LogTests : TestHelper
             // This is a default collector behavior.
             collector.Expect(logRecord =>
             {
-                var logsAsString = Convert.ToString(logRecord);
-                return logsAsString != null && logsAsString.Contains("TestApplication.Logs.Controllers.TestController");
+                var logsAsString = Convert.ToString(logRecord, CultureInfo.InvariantCulture);
+                return logsAsString != null && logsAsString.Contains("TestApplication.Logs.Controllers.TestController", StringComparison.Ordinal);
             });
         }
 
@@ -68,8 +69,8 @@ public class LogTests : TestHelper
         // This is a default collector behavior.
         collector.Expect(logRecord =>
         {
-            var logsAsString = Convert.ToString(logRecord);
-            return logsAsString != null && logsAsString.Contains("TestApplication.Logs.Controllers.TestController");
+            var logsAsString = Convert.ToString(logRecord, CultureInfo.InvariantCulture);
+            return logsAsString != null && logsAsString.Contains("TestApplication.Logs.Controllers.TestController", StringComparison.Ordinal);
         });
 
         SetEnvironmentVariable("ASPNETCORE_HOSTINGSTARTUPASSEMBLIES", "OpenTelemetry.AutoInstrumentation.AspNetCoreBootstrapper");
@@ -93,14 +94,14 @@ public class LogTests : TestHelper
         RunTestApplication();
 
         // wait for fixed amount of time for logs to be collected before asserting
-        await Task.Delay(TimeSpan.FromSeconds(10));
+        await Task.Delay(TimeSpan.FromSeconds(10)).ConfigureAwait(true);
 
         collector.AssertCollected();
     }
 
     private static bool ValidateSingleAppLogRecord(IEnumerable<LogRecord> records)
     {
-        return records.Count(lr => Convert.ToString(lr.Body) == "{ \"stringValue\": \"Information from Test App.\" }") == 1;
+        return records.Count(lr => Convert.ToString(lr.Body, CultureInfo.InvariantCulture) == "{ \"stringValue\": \"Information from Test App.\" }") == 1;
     }
 }
 #endif

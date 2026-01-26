@@ -3,7 +3,7 @@
 
 namespace TestApplication.Shared;
 
-public static class ConsoleHelper
+internal static class ConsoleHelper
 {
     public static void WriteSplashScreen(string[] args)
     {

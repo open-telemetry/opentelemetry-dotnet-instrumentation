@@ -3,7 +3,9 @@
 
 namespace TestApplication.MassTransit.Contracts;
 
-public record TestMessage
+#pragma warning disable CA1515 // Consider making public types internal. It is public because MassTransit needs to access it.
+public sealed record TestMessage
+#pragma warning disable CA1515 // Consider making public types internal. It is public because MassTransit needs to access it.
 {
     public string? Value { get; set; }
 }

@@ -3,6 +3,9 @@
 
 using System.Diagnostics;
 using System.Diagnostics.Metrics;
+#if NET
+using System.Text;
+#endif
 using OpenTelemetry.Logs;
 
 namespace OpenTelemetry.AutoInstrumentation.Configurations;
@@ -47,12 +50,7 @@ internal partial class ConfigurationKeys
     public const string ResourceDetectorEnabled = "OTEL_DOTNET_AUTO_RESOURCE_DETECTOR_ENABLED";
 
     /// <summary>
-    /// Configuration key template for enabling resource detectors.
-    /// </summary>
-    public const string EnabledResourceDetectorTemplate = "OTEL_DOTNET_AUTO_{0}_RESOURCE_DETECTOR_ENABLED";
-
-    /// <summary>
-    /// Configuration key template for resource attributes.
+    /// Configuration key for resource attributes.
     /// </summary>
     public const string ResourceAttributes = "OTEL_RESOURCE_ATTRIBUTES";
 
@@ -60,6 +58,15 @@ internal partial class ConfigurationKeys
     /// Configuration key for setting the service name.
     /// </summary>
     public const string ServiceName = "OTEL_SERVICE_NAME";
+
+    /// <summary>
+    /// Configuration key template for enabling resource detectors.
+    /// </summary>
+#if NET
+    public static readonly CompositeFormat EnabledResourceDetectorTemplate = CompositeFormat.Parse("OTEL_DOTNET_AUTO_{0}_RESOURCE_DETECTOR_ENABLED");
+#else
+    public const string EnabledResourceDetectorTemplate = "OTEL_DOTNET_AUTO_{0}_RESOURCE_DETECTOR_ENABLED";
+#endif
 
     /// <summary>
     /// Configuration keys for file based configuration.
@@ -105,11 +112,6 @@ internal partial class ConfigurationKeys
         public const string TracesInstrumentationEnabled = "OTEL_DOTNET_AUTO_TRACES_INSTRUMENTATION_ENABLED";
 
         /// <summary>
-        /// Configuration key template for disabled trace instrumentations.
-        /// </summary>
-        public const string EnabledTracesInstrumentationTemplate = "OTEL_DOTNET_AUTO_TRACES_{0}_INSTRUMENTATION_ENABLED";
-
-        /// <summary>
         /// Configuration key for additional <see cref="ActivitySource"/> names to be added to the tracer at the startup.
         /// </summary>
         public const string AdditionalSources = "OTEL_DOTNET_AUTO_TRACES_ADDITIONAL_SOURCES";
@@ -118,6 +120,15 @@ internal partial class ConfigurationKeys
         /// Configuration key for additional legacy source names to be added to the tracer at the startup.
         /// </summary>
         public const string AdditionalLegacySources = "OTEL_DOTNET_AUTO_TRACES_ADDITIONAL_LEGACY_SOURCES";
+
+        /// <summary>
+        /// Configuration key template for disabled trace instrumentations.
+        /// </summary>
+#if NET
+        public static readonly CompositeFormat EnabledTracesInstrumentationTemplate = CompositeFormat.Parse("OTEL_DOTNET_AUTO_TRACES_{0}_INSTRUMENTATION_ENABLED");
+#else
+        public const string EnabledTracesInstrumentationTemplate = "OTEL_DOTNET_AUTO_TRACES_{0}_INSTRUMENTATION_ENABLED";
+#endif
 
         /// <summary>
         /// Configuration keys for instrumentation options.
@@ -177,6 +188,11 @@ internal partial class ConfigurationKeys
             /// Configuration key for Oracle Client instrumentation to enable passing text query as a db.statement attribute.
             /// </summary>
             public const string OracleMdaSetDbStatementForText = "OTEL_DOTNET_AUTO_ORACLEMDA_SET_DBSTATEMENT_FOR_TEXT";
+
+            /// <summary>
+            /// Configuration key for enabling IL rewriting of SqlClient on .NET Framework to ensure CommandText is available.
+            /// </summary>
+            public const string SqlClientNetFxILRewriteEnabled = "OTEL_DOTNET_AUTO_SQLCLIENT_NETFX_ILREWRITE_ENABLED";
         }
     }
 
@@ -202,14 +218,18 @@ internal partial class ConfigurationKeys
         public const string MetricsInstrumentationEnabled = "OTEL_DOTNET_AUTO_METRICS_INSTRUMENTATION_ENABLED";
 
         /// <summary>
-        /// Configuration key template for enabled metric instrumentations.
-        /// </summary>
-        public const string EnabledMetricsInstrumentationTemplate = "OTEL_DOTNET_AUTO_METRICS_{0}_INSTRUMENTATION_ENABLED";
-
-        /// <summary>
         /// Configuration key for additional <see cref="Meter"/> names to be added to the meter at the startup.
         /// </summary>
         public const string AdditionalSources = "OTEL_DOTNET_AUTO_METRICS_ADDITIONAL_SOURCES";
+
+        /// <summary>
+        /// Configuration key template for enabled metric instrumentations.
+        /// </summary>
+#if NET
+        public static readonly CompositeFormat EnabledMetricsInstrumentationTemplate = CompositeFormat.Parse("OTEL_DOTNET_AUTO_METRICS_{0}_INSTRUMENTATION_ENABLED");
+#else
+        public const string EnabledMetricsInstrumentationTemplate = "OTEL_DOTNET_AUTO_METRICS_{0}_INSTRUMENTATION_ENABLED";
+#endif
     }
 
     /// <summary>
@@ -254,7 +274,11 @@ internal partial class ConfigurationKeys
         /// <summary>
         /// Configuration key template for enabled log instrumentations.
         /// </summary>
+#if NET
+        public static readonly CompositeFormat EnabledLogsInstrumentationTemplate = CompositeFormat.Parse("OTEL_DOTNET_AUTO_LOGS_{0}_INSTRUMENTATION_ENABLED");
+#else
         public const string EnabledLogsInstrumentationTemplate = "OTEL_DOTNET_AUTO_LOGS_{0}_INSTRUMENTATION_ENABLED";
+#endif
     }
 
     /// <summary>

@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace TestApplication.Wcf.Client.DotNet;
 
 [DataContract(Namespace = "http://opentelemetry.io/")]
-public class StatusRequest
+internal sealed class StatusRequest
 {
     [DataMember]
     public string? Status { get; set; }

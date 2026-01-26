@@ -8,7 +8,7 @@ using Xunit.Abstractions;
 
 namespace IntegrationTests;
 
-[Collection(MongoDBCollection.Name)]
+[Collection(MongoDBCollectionFixture.Name)]
 public class MongoDBTests : TestHelper
 {
     private const string MongoDBInstrumentationScopeName = "OpenTelemetry.AutoInstrumentation.MongoDB";
@@ -44,12 +44,12 @@ public class MongoDBTests : TestHelper
         using var collector = new MockSpansCollector(Output);
         SetExporter(collector);
         const int spanCount = 3;
-        for (int i = 0; i < spanCount; i++)
+        for (var i = 0; i < spanCount; i++)
         {
-            collector.Expect(MongoDBInstrumentationScopeName);
+            collector.Expect(MongoDBInstrumentationScopeName, VersionHelper.AutoInstrumentationVersion);
         }
 
-        collector.Expect(MongoDBInstrumentationScopeName, span => ValidateSpan(span));
+        collector.Expect(MongoDBInstrumentationScopeName, VersionHelper.AutoInstrumentationVersion, span => ValidateSpan(span));
 
         EnableBytecodeInstrumentation();
         RunTestApplication(new()
@@ -62,6 +62,19 @@ public class MongoDBTests : TestHelper
         });
 
         collector.AssertExpectations();
+    }
+
+    private static bool ValidateDatabaseAttributes(IReadOnlyCollection<KeyValue> spanAttributes)
+    {
+        var collectionName = spanAttributes.Single(kv => kv.Key == DbCollectionNameAttributeName).Value.StringValue;
+        var dbNamespace = spanAttributes.Single(kv => kv.Key == DbNamespaceAttributeName).Value.StringValue;
+        var dbSystem = spanAttributes.Single(kv => kv.Key == DbSystemAttributeName).Value.StringValue;
+        var dbOperationName = spanAttributes.Single(kv => kv.Key == DbOperationNameAttributeName).Value.StringValue;
+
+        return collectionName == MongoDbCollectionName &&
+               dbNamespace == MongoDbNamespace &&
+               dbSystem == MongoDbSystem &&
+               !string.IsNullOrWhiteSpace(dbOperationName);
     }
 
     private bool ValidateSpan(Span span)
@@ -80,18 +93,5 @@ public class MongoDBTests : TestHelper
                serverPort == _mongoDB.Port &&
                networkPeerAddress is "127.0.0.1" or "::1" &&
                networkPeerPort == _mongoDB.Port;
-    }
-
-    private bool ValidateDatabaseAttributes(IReadOnlyCollection<KeyValue> spanAttributes)
-    {
-        var collectionName = spanAttributes.Single(kv => kv.Key == DbCollectionNameAttributeName).Value.StringValue;
-        var dbNamespace = spanAttributes.Single(kv => kv.Key == DbNamespaceAttributeName).Value.StringValue;
-        var dbSystem = spanAttributes.Single(kv => kv.Key == DbSystemAttributeName).Value.StringValue;
-        var dbOperationName = spanAttributes.Single(kv => kv.Key == DbOperationNameAttributeName).Value.StringValue;
-
-        return collectionName == MongoDbCollectionName &&
-               dbNamespace == MongoDbNamespace &&
-               dbSystem == MongoDbSystem &&
-               !string.IsNullOrWhiteSpace(dbOperationName);
     }
 }

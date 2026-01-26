@@ -5,7 +5,9 @@
 //     dotnet run http://localhost:5200
 if (args.Length != 1)
 {
-    Console.WriteLine(@"URL missing");
+#pragma warning disable CA1303 // Do not pass literals as localized parameters
+    Console.WriteLine("URL missing");
+#pragma warning restore CA1303 // Do not pass literals as localized parameters
     return 2;
 }
 
@@ -15,7 +17,7 @@ while (true)
 {
     try
     {
-        var content = await httpClient.GetStringAsync(url);
+        var content = await httpClient.GetStringAsync(new Uri(url)).ConfigureAwait(false);
         Console.WriteLine(content);
     }
     catch (HttpRequestException ex)
@@ -23,5 +25,5 @@ while (true)
         Console.WriteLine(ex.Message);
     }
 
-    Thread.Sleep(5000);
+    await Task.Delay(5000).ConfigureAwait(false);
 }

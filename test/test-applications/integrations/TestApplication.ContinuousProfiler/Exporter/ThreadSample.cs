@@ -3,7 +3,7 @@
 
 namespace TestApplication.ContinuousProfiler;
 
-internal class ThreadSample
+internal sealed class ThreadSample
 {
     public ThreadSample(
         long timestampMilliseconds,

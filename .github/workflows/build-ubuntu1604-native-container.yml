@@ -17,7 +17,7 @@ jobs:
     steps:
 
     - name: Checkout
-      uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # tag: v6.0.1
+      uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # tag: v6.0.2
       with:
         fetch-depth: 0 # fetching all, needed to correctly calculate version
 
@@ -29,7 +29,7 @@ jobs:
           /bin/sh -c 'export PATH="$PATH:/usr/share/dotnet" && git config --global --add safe.directory /project && ./build.sh BuildNativeWorkflow'
 
     - name: Publish native library Linux build
-      if: (${{ job.status }} != 'cancelled')
+      if: ${{ !cancelled() }}
       uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # tag: v6.0.0
       with:
         name: bin-ubuntu1604-native

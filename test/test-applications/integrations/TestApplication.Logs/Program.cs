@@ -4,13 +4,16 @@
 using System.Net.Http;
 using Microsoft.AspNetCore.Hosting.Server;
 using Microsoft.AspNetCore.Hosting.Server.Features;
+using TestApplication.Shared;
 
 namespace TestApplication.Logs;
 
-public class Program
+internal static class Program
 {
     public static void Main(string[] args)
     {
+        ConsoleHelper.WriteSplashScreen(args);
+
         using var host = CreateHostBuilder(args).Build();
         host.Start();
 
@@ -18,7 +21,7 @@ public class Program
         var addressFeature = server?.Features.Get<IServerAddressesFeature>();
         var address = addressFeature?.Addresses.First();
         using var httpClient = new HttpClient();
-        httpClient.GetAsync($"{address}/test").Wait();
+        httpClient.GetAsync(new Uri($"{address}/test")).Wait();
     }
 
     public static IHostBuilder CreateHostBuilder(string[] args) =>

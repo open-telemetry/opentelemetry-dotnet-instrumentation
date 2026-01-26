@@ -12,4 +12,9 @@
   <ItemGroup>
     <Compile Include="$(MSBuildThisFileDirectory)GlobalSuppressions.cs" Link="GlobalSuppressions.integrations.cs" />
   </ItemGroup>
+  <PropertyGroup>
+    <!-- CA1031: Do not catch general exception types -->
+    <!-- CA1303: Do not pass literals as localized parameters -->
+    <NoWarn>$(NoWarn);CA1031;CA1303</NoWarn>
+  </PropertyGroup>
 </Project>

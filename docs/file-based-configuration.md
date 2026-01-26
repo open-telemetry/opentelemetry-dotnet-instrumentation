@@ -51,7 +51,6 @@ file-based configuration to include these parameters.
 | `OTEL_DOTNET_AUTO_EXCLUDE_PROCESSES`                 | Names of the executable files that the profiler cannot instrument.                                                        |
 | `OTEL_DOTNET_AUTO_OPENTRACING_ENABLED`               | Enables OpenTracing tracer.                                                                                               |
 | `OTEL_DOTNET_AUTO_NETFX_REDIRECT_ENABLED`            | Enables automatic redirection of the assemblies used by the automatic instrumentation on the .NET Framework.              |
-| `OTEL_DOTNET_AUTO_SQLCLIENT_NETFX_ILREWRITE_ENABLED` | Enables IL rewriting of `SqlCommand` on .NET Framework to ensure `CommandText` is present for `SqlClient` instrumentation |
 
 ---
 
@@ -89,6 +88,16 @@ file-based configuration to include these parameters.
 | `COR_PROFILER_PATH`      | `CORECLR_PROFILER_PATH`    | Path to the profiler.                                                      |
 | `COR_PROFILER_PATH_32`   | `CORECLR_PROFILER_PATH_32` | Path to the 32-bit profiler. Bitness-specific paths take precedence.       |
 | `COR_PROFILER_PATH_64`   | `CORECLR_PROFILER_PATH_64` | Path to the 64-bit profiler. Bitness-specific paths take precedence.       |
+
+---
+
+### OTLP
+
+| Environment variable                    | Description                                                                               |
+| --------------------------------------- | ----------------------------------------------------------------------------------------- |
+| `OTEL_EXPORTER_OTLP_CERTIFICATE`        | Path to the CA certificate file (PEM format) used to verify the server's TLS certificate. |
+| `OTEL_EXPORTER_OTLP_CLIENT_CERTIFICATE` | Path to the client certificate file (PEM format) for mTLS authentication.                 |
+| `OTEL_EXPORTER_OTLP_CLIENT_KEY`         | Path to the client private key file (PEM format) for mTLS authentication.                 |
 
 ---
 
@@ -265,6 +274,10 @@ meter_provider:
         exporter:
           # Configure exporter to be console.
           console:
+            # Configure temporality preference.
+            # Values include: cumulative, delta.
+            # If omitted or null, cumulative is used.
+            temporality_preference: cumulative
 
     # Pull reader for Prometheus
     - pull:
@@ -514,6 +527,7 @@ instrumentation/development:
       sqlclient:           # Microsoft.Data.SqlClient & System.Data.SqlClient
       stackexchangeredis:  # StackExchange.Redis
       wcfclient:           # WCF Client
+      wcfcore:             # CoreWCF.Primitives
       wcfservice:          # WCF Service
     metrics:
       aspnet:              # ASP.NET metrics
@@ -543,6 +557,10 @@ instrumentation/development:
         # Whether the Oracle Client instrumentation can pass SQL statements through the db.statement attribute. Queries might contain sensitive information. If set to false, db.statement is recorded only for executing stored procedures.
         # Default is false
         set_db_statement_for_text: false
+      sqlclient:
+        # Enables IL rewriting of SqlCommand on .NET Framework to ensure CommandText is available for instrumentation.
+        # Default is false
+        netfx_ilrewrite_enabled: false
       aspnet:
         # A comma-separated list of HTTP header names. ASP.NET instrumentations will capture HTTP request header values for all configured header names.
         capture_request_headers: "X-Key,X-Custom-Header,X-Header-Example"

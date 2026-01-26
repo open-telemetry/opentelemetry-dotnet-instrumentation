@@ -9,9 +9,9 @@ using static IntegrationTests.Helpers.DockerFileHelper;
 namespace IntegrationTests;
 
 [CollectionDefinition(Name)]
-public class OracleCollection : ICollectionFixture<OracleFixture>
+public class OracleCollectionFixture : ICollectionFixture<OracleFixture>
 {
-    public const string Name = nameof(OracleCollection);
+    public const string Name = nameof(OracleCollectionFixture);
 }
 
 public class OracleFixture : IAsyncLifetime
@@ -42,14 +42,14 @@ public class OracleFixture : IAsyncLifetime
             return;
         }
 
-        _container = await LaunchOracleContainerAsync(Port);
+        _container = await LaunchOracleContainerAsync(Port).ConfigureAwait(false);
     }
 
     public async Task DisposeAsync()
     {
         if (_container != null)
         {
-            await ShutdownOracleContainerAsync(_container);
+            await ShutdownOracleContainerAsync(_container).ConfigureAwait(false);
         }
     }
 
@@ -61,10 +61,14 @@ public class OracleFixture : IAsyncLifetime
         }
     }
 
+    private static async Task ShutdownOracleContainerAsync(IContainer container)
+    {
+        await container.DisposeAsync().ConfigureAwait(false);
+    }
+
     private async Task<IContainer> LaunchOracleContainerAsync(int port)
     {
-        var containersBuilder = new ContainerBuilder()
-            .WithImage(OracleImage)
+        var containersBuilder = new ContainerBuilder(OracleImage)
             .WithEnvironment("ORACLE_RANDOM_PASSWORD", "yes")
             .WithEnvironment("APP_USER", "appuser")
             .WithEnvironment("APP_USER_PASSWORD", Password)
@@ -74,13 +78,8 @@ public class OracleFixture : IAsyncLifetime
             .WithWaitStrategy(Wait.ForUnixContainer().UntilCommandIsCompleted("./healthcheck.sh"));
 
         var container = containersBuilder.Build();
-        await container.StartAsync();
+        await container.StartAsync().ConfigureAwait(false);
 
         return container;
-    }
-
-    private async Task ShutdownOracleContainerAsync(IContainer container)
-    {
-        await container.DisposeAsync();
     }
 }

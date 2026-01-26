@@ -6,7 +6,7 @@ namespace OpenTelemetry.AutoInstrumentation.Logging;
 /// <summary>
 /// Test implementation.
 /// </summary>
-internal class TestLogger : IOtelLogger
+internal sealed class TestLogger : IOtelLogger
 {
     public List<LogRecord> LogRecords { get; } = new List<LogRecord>();
 
@@ -185,7 +185,7 @@ internal class TestLogger : IOtelLogger
     {
     }
 
-    internal class LogRecord
+    internal sealed class LogRecord
     {
         public LogRecord(LogLevel logLevel, string message, Exception? exception = null)
         {
