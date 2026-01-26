@@ -7,16 +7,28 @@ using Serilog;
 [TypeConverter(typeof(TargetFrameworkTypeConverter))]
 public class TargetFramework : Enumeration
 {
-    public static readonly TargetFramework NOT_SPECIFIED = new() { Value = string.Empty, OutputFolder = string.Empty };
-    public static readonly TargetFramework NET462 = new() { Value = "net462", OutputFolder = "netfx" };
-    public static readonly TargetFramework NET47 = new() { Value = "net47", OutputFolder = "netfx" };
-    public static readonly TargetFramework NET471 = new() { Value = "net471", OutputFolder = "netfx" };
-    public static readonly TargetFramework NET472 = new() { Value = "net472", OutputFolder = "netfx" };
-    public static readonly TargetFramework NET8_0 = new() { Value = "net8.0", OutputFolder = "net" };
-    public static readonly TargetFramework NET9_0 = new() { Value = "net9.0", OutputFolder = "net" };
-    public static readonly TargetFramework NET10_0 = new() { Value = "net10.0", OutputFolder = "net" };
+    private TargetFramework(string value)
+    {
+        Value = value;
+        OutputFolder = value switch
+        {
+            _ when value.StartsWith("net") && value.Contains('.') => "net",
+            // with the right order this check can be simplieid to just check for "net" prefix, but keep it explicit for clarity
+            _ when value.StartsWith("net") && !value.Contains('.') => "netfx",
+            _ => string.Empty
+        };
+    }
 
-    public string OutputFolder { get; init; }
+    public static readonly TargetFramework NOT_SPECIFIED = new(string.Empty);
+    public static readonly TargetFramework NET462 = new("net462");
+    public static readonly TargetFramework NET47 = new("net47");
+    public static readonly TargetFramework NET471 = new("net471");
+    public static readonly TargetFramework NET472 = new("net472");
+    public static readonly TargetFramework NET8_0 = new("net8.0");
+    public static readonly TargetFramework NET9_0 = new("net9.0");
+    public static readonly TargetFramework NET10_0 = new("net10.0");
+
+    public string OutputFolder { get; private init; }
 
     // should be in version order
     public static readonly TargetFramework[] NetFramework = [
