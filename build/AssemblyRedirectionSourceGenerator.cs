@@ -52,7 +52,7 @@ public static class AssemblyRedirectionSourceGenerator
                     return;
                 }
 
-                foreach (var keys in framework != null ? (IEnumerable<int>)[framework.Value] : folders.Keys)
+                foreach (var keys in framework != null ? (IEnumerable<int>)[framework.Value] : assembliesFolderPath.Keys)
                 {
                     assemblies[keys][assemblyDef.Name] = assemblyDef;
                     Log.Debug("Adding {0} assembly to the redirection map {1}. Targeted version {2}", assemblyDef.Name,
@@ -79,7 +79,7 @@ public static class AssemblyRedirectionSourceGenerator
                 var filenameToProcess = fileName;
                 if (Path.GetExtension(fileName) == ".link")
                 {
-                    filenameToProcess = Path.Combine(fx.Value, "..", File.ReadAllText(fileName),
+                    filenameToProcess = Path.Combine(assembliesFolderPath, File.ReadAllText(fileName),
                         Path.GetFileNameWithoutExtension(fileName));
                 }
 
