@@ -7,7 +7,7 @@ using TestApplication.Shared;
 
 namespace TestApplication.MongoDB;
 
-public static class Program
+internal static class Program
 {
     public static void Main(string[] args)
     {
@@ -32,7 +32,11 @@ public static class Program
 
         var connectionString = $"mongodb://{Host()}:{mongoPort}";
 
+#if MONGODB_3_OR_GREATER
+        using var client = new MongoClient(connectionString);
+#else
         var client = new MongoClient(connectionString);
+#endif
         var database = client.GetDatabase(mongoDatabase);
         var collection = database.GetCollection<BsonDocument>(mongoCollection);
 
@@ -72,15 +76,15 @@ public static class Program
     {
         var allFilter = new BsonDocument();
 
-        await collection.DeleteManyAsync(allFilter);
-        await collection.InsertOneAsync(newDocument);
+        await collection.DeleteManyAsync(allFilter).ConfigureAwait(false);
+        await collection.InsertOneAsync(newDocument).ConfigureAwait(false);
 
-        var count = await collection.CountDocumentsAsync(new BsonDocument());
+        var count = await collection.CountDocumentsAsync(new BsonDocument()).ConfigureAwait(false);
 
         Console.WriteLine($"Documents: {count}");
 
-        var find = await collection.FindAsync(allFilter);
-        var allDocuments = await find.ToListAsync();
+        var find = await collection.FindAsync(allFilter).ConfigureAwait(false);
+        var allDocuments = await find.ToListAsync().ConfigureAwait(false);
         Console.WriteLine(allDocuments.FirstOrDefault());
     }
 

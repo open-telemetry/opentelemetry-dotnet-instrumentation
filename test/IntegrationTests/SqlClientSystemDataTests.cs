@@ -40,11 +40,11 @@ public class SqlClientSystemDataTests : TestHelper
 
         if (enableIlRewrite)
         {
-            collector.Expect("OpenTelemetry.Instrumentation.SqlClient", span => span.Attributes.Any(attr => attr.Key == "db.statement" && !string.IsNullOrWhiteSpace(attr.Value?.StringValue)));
+            collector.Expect("OpenTelemetry.Instrumentation.SqlClient", span => span.Attributes.Any(attr => attr.Key == "db.query.text" && !string.IsNullOrWhiteSpace(attr.Value?.StringValue)));
         }
         else
         {
-            collector.Expect("OpenTelemetry.Instrumentation.SqlClient", span => span.Attributes.All(attr => attr.Key != "db.statement"));
+            collector.Expect("OpenTelemetry.Instrumentation.SqlClient", span => span.Attributes.All(attr => attr.Key != "db.query.text"));
         }
 
         RunTestApplication();

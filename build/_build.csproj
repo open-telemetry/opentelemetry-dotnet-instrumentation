@@ -5,7 +5,7 @@
     <TargetFramework Condition=" '$(IsLegacyUbuntu)' == '' " >net10.0</TargetFramework>
     <TargetFramework Condition=" '$(IsLegacyUbuntu)' != '' " >net9.0</TargetFramework>
     <RootNamespace></RootNamespace>
-    <NoWarn>CS0649;CS0169</NoWarn>
+    <NoWarn>$(NoWarn);CS0649;CS0169</NoWarn>
     <NukeRootDirectory>..\</NukeRootDirectory>
     <NukeScriptDirectory>..\</NukeScriptDirectory>
     <NukeTelemetryVersion>1</NukeTelemetryVersion>

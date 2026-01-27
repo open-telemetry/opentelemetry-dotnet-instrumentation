@@ -55,8 +55,10 @@ partial class Build
         .After(CompileNativeSrc, PublishManagedProfiler)
         .Executes(() =>
         {
-            // Copy Native file
-            var source = NativeProfilerProject.Directory / "build" / "bin" / $"{NativeProfilerProject.Name}.so";
+            // Copy Native files
+            var source = NativeProfilerProject.Directory / "build" / "bin";
+            var sourceLib = source / $"{NativeProfilerProject.Name}.so";
+            var sourceDebug = source / $"{NativeProfilerProject.Name}.so.debug";
             var platform = Platform.ToString().ToLowerInvariant();
             string clrProfilerDirectoryName = Environment.GetEnvironmentVariable("OS_TYPE") switch
             {
@@ -65,9 +67,12 @@ partial class Build
             };
 
             var dest = TracerHomeDirectory / clrProfilerDirectoryName;
-            Log.Information($"Copying '{source}' to '{dest}'");
 
-            source.CopyToDirectory(dest, ExistsPolicy.FileOverwrite);
+            Log.Information($"Copying '{sourceLib}' to '{dest}'");
+            sourceLib.CopyToDirectory(dest, ExistsPolicy.FileOverwrite);
+
+            Log.Information($"Copying '{sourceDebug}' to '{dest}'");
+            sourceDebug.CopyToDirectory(dest, ExistsPolicy.FileOverwrite);
         });
 
     Target RunNativeTestsLinux => _ => _

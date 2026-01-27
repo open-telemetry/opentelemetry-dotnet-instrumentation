@@ -2,16 +2,9 @@ using GraphQL.Types;
 
 namespace StarWars.Types;
 
-public enum Episodes
+internal sealed class Episodes : EnumerationGraphType
 {
-    NEWHOPE = 4,
-    EMPIRE = 5,
-    JEDI = 6
-}
-
-public class EpisodeEnum : EnumerationGraphType
-{
-    public EpisodeEnum()
+    public Episodes()
     {
         Name = "Episode";
         Description = "One of the films in the Star Wars Trilogy.";

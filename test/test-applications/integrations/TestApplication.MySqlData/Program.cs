@@ -6,7 +6,7 @@ using TestApplication.Shared;
 
 namespace TestApplication.MySqlData;
 
-public static class Program
+internal static class Program
 {
     public static async Task Main(string[] args)
     {
@@ -17,11 +17,11 @@ public static class Program
         var connString = $@"Server=127.0.0.1;Port={mySqlPort};Uid=root";
 
         using var connection = new MySqlConnection(connString);
-        await connection.OpenAsync();
+        await connection.OpenAsync().ConfigureAwait(false);
 
         using var cmd = new MySqlCommand(@"SELECT 123;", connection);
-        using var reader = await cmd.ExecuteReaderAsync();
-        while (await reader.ReadAsync())
+        using var reader = await cmd.ExecuteReaderAsync().ConfigureAwait(false);
+        while (await reader.ReadAsync().ConfigureAwait(false))
         {
             Console.WriteLine(reader.GetInt32(0));
         }

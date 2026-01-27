@@ -7,7 +7,7 @@ using Xunit.Abstractions;
 
 namespace IntegrationTests;
 
-[Collection(SqlServerCollection.Name)]
+[Collection(SqlServerCollectionFixture.Name)]
 public class SqlClientSystemTests : TestHelper
 {
     private readonly SqlServerFixture _sqlServerFixture;
@@ -18,18 +18,22 @@ public class SqlClientSystemTests : TestHelper
         _sqlServerFixture = sqlServerFixture;
     }
 
-    public static TheoryData<string, bool> GetDataForIlRewrite()
+#if NETFRAMEWORK
+    public static TheoryData<string, bool, bool> TestDataForIlRewrite()
     {
-        var theoryData = new TheoryData<string, bool>();
+        var theoryData = new TheoryData<string, bool, bool>();
 
         foreach (var version in LibraryVersion.SqlClientSystem)
         {
-            theoryData.Add(version, true);
-            theoryData.Add(version, false);
+            theoryData.Add(version, true, true);
+            theoryData.Add(version, true, false);
+            theoryData.Add(version, false, true);
+            theoryData.Add(version, false, false);
         }
 
         return theoryData;
     }
+#endif
 
     [SkippableTheory]
     [Trait("Category", "EndToEnd")]
@@ -58,23 +62,31 @@ public class SqlClientSystemTests : TestHelper
     [SkippableTheory]
     [Trait("Category", "EndToEnd")]
     [Trait("Containers", "Linux")]
-    [MemberData(nameof(GetDataForIlRewrite))]
-    public void SqlClientIlRewrite(string packageVersion, bool enableIlRewrite)
+    [MemberData(nameof(TestDataForIlRewrite))]
+    public void SqlClientIlRewrite(string packageVersion, bool enableIlRewrite, bool isFileBased)
     {
         // Skip the test if fixture does not support current platform
         _sqlServerFixture.SkipIfUnsupportedPlatform();
 
         SetEnvironmentVariable("OTEL_DOTNET_AUTO_SQLCLIENT_NETFX_ILREWRITE_ENABLED", enableIlRewrite.ToString());
         using var collector = new MockSpansCollector(Output);
-        SetExporter(collector);
-
-        if (enableIlRewrite)
+        if (isFileBased)
         {
-            collector.Expect("OpenTelemetry.Instrumentation.SqlClient", span => span.Attributes.Any(attr => attr.Key == "db.statement" && !string.IsNullOrWhiteSpace(attr.Value?.StringValue)));
+            SetFileBasedExporter(collector);
+            EnableFileBasedConfigWithDefaultPath();
         }
         else
         {
-            collector.Expect("OpenTelemetry.Instrumentation.SqlClient", span => span.Attributes.All(attr => attr.Key != "db.statement"));
+            SetExporter(collector);
+        }
+
+        if (enableIlRewrite)
+        {
+            collector.Expect("OpenTelemetry.Instrumentation.SqlClient", span => span.Attributes.Any(attr => attr.Key == "db.query.text" && !string.IsNullOrWhiteSpace(attr.Value?.StringValue)));
+        }
+        else
+        {
+            collector.Expect("OpenTelemetry.Instrumentation.SqlClient", span => span.Attributes.All(attr => attr.Key != "db.query.text"));
         }
 
         RunTestApplication(new()

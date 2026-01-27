@@ -6,7 +6,7 @@ using System.ServiceModel;
 namespace TestApplication.Wcf.Server.NetFramework;
 
 [ServiceContract(Namespace = "http://opentelemetry.io/", Name = "StatusService", SessionMode = SessionMode.Allowed)]
-public interface IStatusServiceContract
+internal interface IStatusServiceContract
 {
     [OperationContract]
     Task<StatusResponse> PingAsync(StatusRequest request);

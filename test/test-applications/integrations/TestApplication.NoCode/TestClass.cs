@@ -3,4 +3,4 @@
 
 namespace TestApplication.NoCode;
 
-public class TestClass;
+internal sealed class TestClass;

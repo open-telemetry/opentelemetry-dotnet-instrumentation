@@ -7,16 +7,16 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 #if NET10_0_OR_GREATER
-using System.Diagnostics.Metrics;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.Extensions.DependencyInjection.Extensions;
 #endif
 
 namespace TestApplication.Http;
 
-public class Startup
+#pragma warning disable CA1812 // Avoid uninstantiated internal classes. This class is instantiated by app builder.
+internal sealed class Startup
+#pragma warning restore CA1812 // Avoid uninstantiated internal classes. This class is instantiated by app builder.
 {
-    private static readonly ActivitySource MyActivitySource = new ActivitySource("TestApplication.Http", "1.0.0");
+    private static readonly ActivitySource MyActivitySource = new("TestApplication.Http", "1.0.0");
 
     public Startup(IConfiguration configuration)
     {
@@ -26,7 +26,7 @@ public class Startup
     public IConfiguration Configuration { get; }
 
     // This method gets called by the runtime. Use this method to add services to the container.
-    public void ConfigureServices(IServiceCollection services)
+    public static void ConfigureServices(IServiceCollection services)
     {
         services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
             .AddCookie(CookieAuthenticationDefaults.AuthenticationScheme, options =>
@@ -52,33 +52,13 @@ public class Startup
         services.AddIdentityCore<TestUser>()
             .AddUserManager<UserManager<TestUser>>();
 
-        // Workaround for .NET 10 bug: Manually register the internal UserManagerMetrics type
-        // Remove this workaround when upgrading to a .NET version that contains the fix
-        // Tracked under https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/issues/4623
-        var userManagerMetricsType = typeof(UserManager<>).Assembly.GetType("Microsoft.AspNetCore.Identity.UserManagerMetrics");
-        if (userManagerMetricsType != null)
-        {
-            services.TryAddSingleton(
-                userManagerMetricsType,
-                serviceProvider =>
-                {
-                    var meterFactory = serviceProvider.GetRequiredService<IMeterFactory>();
-                    return Activator.CreateInstance(
-                        userManagerMetricsType,
-                        System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic,
-                        null,
-                        [meterFactory],
-                        null)!;
-                });
-        }
-
         // Add in-memory user store for testing
         services.AddSingleton<IUserStore<TestUser>, InMemoryUserStore>();
 #endif
     }
 
     // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-    public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+    public static void Configure(IApplicationBuilder app, IWebHostEnvironment env)
     {
         app
             .UseRouting() // enables metrics for Microsoft.AspNetCore.Routing in .NET8+
@@ -107,23 +87,23 @@ public class Startup
                     context.Response.Headers.Append("Custom-Response-Test-Header2", "Test-Value2");
                     context.Response.Headers.Append("Custom-Response-Test-Header3", "Test-Value3");
 
-                    await context.Response.WriteAsync("Pong");
+                    await context.Response.WriteAsync("Pong").ConfigureAwait(false);
                 });
 
                 endpoints.Map("/protected", async context =>
                 {
                     var authorizationService = context.RequestServices.GetRequiredService<IAuthorizationService>();
                     var policy = new AuthorizationPolicyBuilder().RequireAuthenticatedUser().Build();
-                    var result = await authorizationService.AuthorizeAsync(context.User, policy);
+                    var result = await authorizationService.AuthorizeAsync(context.User, policy).ConfigureAwait(false);
 
                     if (result.Succeeded)
                     {
-                        await context.Response.WriteAsync("Protected");
+                        await context.Response.WriteAsync("Protected").ConfigureAwait(false);
                     }
                     else
                     {
                         context.Response.StatusCode = 403;
-                        await context.Response.WriteAsync("Forbidden");
+                        await context.Response.WriteAsync("Forbidden").ConfigureAwait(false);
                     }
                 });
 
@@ -132,19 +112,19 @@ public class Startup
                     var authenticationService = context.RequestServices.GetRequiredService<IAuthenticationService>();
                     var claimsPrincipal = new ClaimsPrincipal(
                         new ClaimsIdentity(
-                            new[] { new Claim(ClaimTypes.Name, "TestUser") },
+                            [new Claim(ClaimTypes.Name, "TestUser")],
                             CookieAuthenticationDefaults.AuthenticationScheme));
                     var authProperties = new AuthenticationProperties();
-                    await authenticationService.SignInAsync(context, CookieAuthenticationDefaults.AuthenticationScheme, claimsPrincipal, authProperties);
-                    await context.Response.WriteAsync("Logged in");
+                    await authenticationService.SignInAsync(context, CookieAuthenticationDefaults.AuthenticationScheme, claimsPrincipal, authProperties).ConfigureAwait(false);
+                    await context.Response.WriteAsync("Logged in").ConfigureAwait(false);
                 });
 
                 endpoints.Map("/logout", async context =>
                 {
                     var authenticationService = context.RequestServices.GetRequiredService<IAuthenticationService>();
                     var authProperties = new AuthenticationProperties();
-                    await authenticationService.SignOutAsync(context, CookieAuthenticationDefaults.AuthenticationScheme, authProperties);
-                    await context.Response.WriteAsync("Logged out");
+                    await authenticationService.SignOutAsync(context, CookieAuthenticationDefaults.AuthenticationScheme, authProperties).ConfigureAwait(false);
+                    await context.Response.WriteAsync("Logged out").ConfigureAwait(false);
                 });
 
 #if NET10_0_OR_GREATER
@@ -158,15 +138,15 @@ public class Startup
                         UserName = "testuser" + Guid.NewGuid().ToString("N")[..8],
                         Email = "test@example.com"
                     };
-                    var result = await userManager.CreateAsync(user, "Password123!");
-                    await context.Response.WriteAsync(result.Succeeded ? "User created" : "Failed to create user");
+                    var result = await userManager.CreateAsync(user, "Password123!").ConfigureAwait(false);
+                    await context.Response.WriteAsync(result.Succeeded ? "User created" : "Failed to create user").ConfigureAwait(false);
                 });
 
                 endpoints.Map("/identity/find-user", async context =>
                 {
                     var userManager = context.RequestServices.GetRequiredService<UserManager<TestUser>>();
-                    var user = await userManager.FindByNameAsync("testuser");
-                    await context.Response.WriteAsync(user != null ? "User found" : "User not found");
+                    var user = await userManager.FindByNameAsync("testuser").ConfigureAwait(false);
+                    await context.Response.WriteAsync(user != null ? "User found" : "User not found").ConfigureAwait(false);
                 });
 #endif
 

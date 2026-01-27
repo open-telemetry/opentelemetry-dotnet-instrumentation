@@ -7,7 +7,7 @@ using DotNet.Testcontainers.Containers;
 
 namespace IntegrationTests.Helpers;
 
-internal sealed class DockerSystemHelper
+internal static class DockerSystemHelper
 {
     public static async Task<bool> GetIsWindowsEngineEnabled()
     {

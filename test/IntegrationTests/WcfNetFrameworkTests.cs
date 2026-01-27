@@ -15,11 +15,11 @@ public class WcfNetFrameworkTests : WcfTestsBase
     {
     }
 
-    [Fact]
+    [WindowsAdministratorFact]
     [Trait("Category", "EndToEnd")]
     public async Task SubmitsTraces()
     {
-        await SubmitsTracesInternal(string.Empty);
+        await SubmitsTracesInternal(string.Empty, new WcfServerTestHelper(Output)).ConfigureAwait(true);
     }
 
     [Fact]

@@ -17,10 +17,12 @@ public class DefaultNamingConventionTests
         Assert.True(config.UnderScoreDevelopment);
     }
 
-    public class DefaultNamingConvention
+#pragma warning disable CA1812 //  Avoid uninstantiated internal classes. Used in tests by Yaml deserializer.
+    internal sealed class DefaultNamingConvention
+#pragma warning restore CA1812 //  Avoid uninstantiated internal classes. Used in tests by Yaml deserializer.
     {
-        public bool UnderScore { get; set; } = false;
+        public bool UnderScore { get; set; }
 
-        public bool UnderScoreDevelopment { get; set; } = false;
+        public bool UnderScoreDevelopment { get; set; }
     }
 }

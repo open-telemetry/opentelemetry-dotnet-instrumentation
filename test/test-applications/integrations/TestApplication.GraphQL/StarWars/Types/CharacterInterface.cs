@@ -3,7 +3,7 @@ using GraphQL.Types.Relay;
 
 namespace StarWars.Types;
 
-public class CharacterInterface : InterfaceGraphType<StarWarsCharacter>
+internal sealed class CharacterInterface : InterfaceGraphType<StarWarsCharacter>
 {
     public CharacterInterface()
     {
@@ -18,7 +18,7 @@ public class CharacterInterface : InterfaceGraphType<StarWarsCharacter>
         Field<ListGraphType<CharacterInterface>>("friends");
         Field<ConnectionType<CharacterInterface, EdgeType<CharacterInterface>>>("friendsConnection");
 
-        Field<ListGraphType<EpisodeEnum>>("appearsIn")
+        Field<ListGraphType<Episodes>>("appearsIn")
             .Description("Which movie they appear in.");
     }
 }

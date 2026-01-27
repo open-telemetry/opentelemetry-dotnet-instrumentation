@@ -1,5 +1,4 @@
 using System.Reactive.Linq;
-using System.Reactive.Subjects;
 using GraphQL;
 using GraphQL.Types;
 using StarWars.Types;
@@ -12,11 +11,9 @@ namespace StarWars;
 ///   "query": "subscription HumanAddedSub{ humanAdded { name } }",
 /// }.
 /// </example>
-internal class StarWarsSubscription : ObjectGraphType<object>
+internal sealed class StarWarsSubscription : ObjectGraphType<object>
 {
     private readonly StarWarsData _starWarsData;
-
-    private readonly ISubject<Human> _humanStream = new ReplaySubject<Human>(1);
 
     public StarWarsSubscription(StarWarsData data)
     {
@@ -34,13 +31,13 @@ internal class StarWarsSubscription : ObjectGraphType<object>
     {
         var listOfHumans = new List<Human>();
 
-        var result = await _starWarsData.GetHumanByIdAsync("1");
+        var result = await _starWarsData.GetHumanByIdAsync("1").ConfigureAwait(false);
         if (result != null)
         {
             listOfHumans.Add(result);
         }
 
-        result = await _starWarsData.GetHumanByIdAsync("2");
+        result = await _starWarsData.GetHumanByIdAsync("2").ConfigureAwait(false);
         if (result != null)
         {
             listOfHumans.Add(result);

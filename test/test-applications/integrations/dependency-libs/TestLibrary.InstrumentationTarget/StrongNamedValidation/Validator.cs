@@ -21,9 +21,9 @@ namespace TestLibrary.InstrumentationTarget.StrongNamedValidation;
 //    maximumVersion: "1.65535.65535",
 //    integrationName: "StrongNamedValidation",
 //    type: InstrumentationType.Trace)]
-public static class Validation
+public static class Validator
 {
-    private static readonly ActivitySource ValidationActivitySource = new ActivitySource("ByteCode.Plugin.StrongNamedValidation");
+    private static readonly ActivitySource ValidationActivitySource = new("ByteCode.Plugin.StrongNamedValidation");
 
     /// <summary>
     /// OnMethodBegin callback.
@@ -33,8 +33,8 @@ public static class Validation
     /// <returns>Calltarget state value</returns>
     internal static CallTargetState OnMethodBegin<TTarget>(TTarget instance)
     {
-        using var activity = ValidationActivitySource.StartActivity(nameof(Validation));
-        Console.WriteLine($"Validation: {typeof(Validation).FullName}");
+        using var activity = ValidationActivitySource.StartActivity(nameof(Validator));
+        Console.WriteLine($"Validator: {typeof(Validator).FullName}");
         return CallTargetState.GetDefault();
     }
 }

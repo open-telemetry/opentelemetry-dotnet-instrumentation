@@ -35,7 +35,7 @@ internal static class EnvironmentConfigurationTracerHelper
                 TracerInstrumentation.GrpcNetClient => Wrappers.AddGrpcClientInstrumentation(builder, pluginManager, lazyInstrumentationLoader, settings),
                 TracerInstrumentation.HttpClient => Wrappers.AddHttpClientInstrumentation(builder, pluginManager, lazyInstrumentationLoader, settings),
                 TracerInstrumentation.Npgsql => builder.AddSource("Npgsql"),
-                TracerInstrumentation.SqlClient => Wrappers.AddSqlClientInstrumentation(builder, pluginManager, lazyInstrumentationLoader, settings),
+                TracerInstrumentation.SqlClient => Wrappers.AddSqlClientInstrumentation(builder, pluginManager, lazyInstrumentationLoader),
                 TracerInstrumentation.NServiceBus => builder.AddSource("NServiceBus.Core"),
                 TracerInstrumentation.Elasticsearch => builder.AddSource("Elastic.Clients.Elasticsearch.ElasticsearchClient"),
                 TracerInstrumentation.ElasticTransport => builder.AddSource("Elastic.Transport"),
@@ -45,13 +45,14 @@ internal static class EnvironmentConfigurationTracerHelper
                 TracerInstrumentation.WcfClient => AddWcfIfNeeded(builder, ref wcfInstrumentationAdded),
                 TracerInstrumentation.OracleMda => Wrappers.AddOracleMdaInstrumentation(builder, lazyInstrumentationLoader, settings),
                 TracerInstrumentation.RabbitMq => builder.AddSource("RabbitMQ.Client.Publisher").AddSource("RabbitMQ.Client.Subscriber"),
+                TracerInstrumentation.StackExchangeRedis => builder.AddSource("OpenTelemetry.Instrumentation.StackExchangeRedis"),
 #if NET
                 TracerInstrumentation.AspNetCore => Wrappers.AddAspNetCoreInstrumentation(builder, pluginManager, lazyInstrumentationLoader, settings),
                 TracerInstrumentation.MassTransit => builder.AddSource("MassTransit"),
                 TracerInstrumentation.MySqlData => builder.AddSource("connector-net"),
-                TracerInstrumentation.StackExchangeRedis => builder.AddSource("OpenTelemetry.Instrumentation.StackExchangeRedis"),
                 TracerInstrumentation.EntityFrameworkCore => Wrappers.AddEntityFrameworkCoreInstrumentation(builder, pluginManager, lazyInstrumentationLoader, settings),
                 TracerInstrumentation.GraphQL => Wrappers.AddGraphQLInstrumentation(builder, pluginManager, lazyInstrumentationLoader, settings),
+                TracerInstrumentation.WcfCore => builder.AddSource("CoreWCF.Primitives"),
 #endif
                 _ => null
             };
@@ -307,7 +308,7 @@ internal static class EnvironmentConfigurationTracerHelper
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]
-        public static TracerProviderBuilder AddSqlClientInstrumentation(TracerProviderBuilder builder, PluginManager pluginManager, LazyInstrumentationLoader lazyInstrumentationLoader, TracerSettings tracerSettings)
+        public static TracerProviderBuilder AddSqlClientInstrumentation(TracerProviderBuilder builder, PluginManager pluginManager, LazyInstrumentationLoader lazyInstrumentationLoader)
         {
             DelayedInitialization.Traces.AddSqlClient(lazyInstrumentationLoader, pluginManager);
 
@@ -369,7 +370,9 @@ internal static class EnvironmentConfigurationTracerHelper
         public static TracerProviderBuilder AddZipkinExporter(TracerProviderBuilder builder, PluginManager pluginManager)
         {
             Logger.Warning("Zipkin exporter is deprecated and it is enabled by the configuration. It will be removed in future versions. Consider migrating to OTLP exporter.");
+#pragma warning disable CS0618 // Type or member is obsolete. Zipkin is deprecated. It should be removed in December 2026.
             return builder.AddZipkinExporter(pluginManager.ConfigureTracesOptions);
+#pragma warning restore CS0618 // Type or member is obsolete. Zipkin is deprecated. It should be removed in December 2026.
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]
@@ -415,6 +418,7 @@ internal static class EnvironmentConfigurationTracerHelper
         public static TracerProviderBuilder AddZipkinExporter(TracerProviderBuilder builder, PluginManager pluginManager, BatchProcessorConfig batch, ZipkinExporterConfig zipkin)
         {
             Logger.Warning("Zipkin exporter is deprecated and it is enabled by the configuration. It will be removed in future versions. Consider migrating to OTLP exporter.");
+#pragma warning disable CS0618 // Type or member is obsolete. Zipkin is deprecated. It should be removed in December 2026.
             return builder.AddZipkinExporter(options =>
             {
                 // Copy Auto settings to SDK settings
@@ -423,6 +427,7 @@ internal static class EnvironmentConfigurationTracerHelper
 
                 pluginManager.ConfigureTracesOptions(options);
             });
+#pragma warning restore CS0618 // Type or member is obsolete. Zipkin is deprecated. It should be removed in December 2026.
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]
@@ -457,6 +462,7 @@ internal static class EnvironmentConfigurationTracerHelper
         public static TracerProviderBuilder AddZipkinExporter(TracerProviderBuilder builder, PluginManager pluginManager, ZipkinExporterConfig zipkin)
         {
             Logger.Warning("Zipkin exporter is deprecated and it is enabled by the configuration. It will be removed in future versions. Consider migrating to OTLP exporter.");
+#pragma warning disable CS0618 // Type or member is obsolete. Zipkin is deprecated. It should be removed in December 2026.
             return builder.AddZipkinExporter(options =>
             {
                 // Copy Auto settings to SDK settings
@@ -465,6 +471,7 @@ internal static class EnvironmentConfigurationTracerHelper
 
                 pluginManager.ConfigureTracesOptions(options);
             });
+#pragma warning restore CS0618 // Type or member is obsolete. Zipkin is deprecated. It should be removed in December 2026.
         }
     }
 }

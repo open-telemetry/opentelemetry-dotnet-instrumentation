@@ -101,6 +101,7 @@ public class NoCodeTests : TestHelper
 
         collector.ExpectNoCode("Span-GenericTestMethod");
         collector.ExpectAsyncNoCode("Span-GenericTestMethodAsync");
+        collector.ExpectNoCode("Span-GenericTestMethodWithParameters");
 
         RunTestApplication();
 
@@ -122,7 +123,7 @@ file static class NoCodeMockSpansCollectorExtensions
 
     private static void ExpectNoCode(this MockSpansCollector collector, Func<Span, string, Span.Types.SpanKind, List<KeyValue>?, bool> assert, string expectedSpanName, Span.Types.SpanKind expectedSpanKind, List<KeyValue>? expectedAttributes)
     {
-        collector.Expect("OpenTelemetry.AutoInstrumentation.NoCode", x => assert(x, expectedSpanName, expectedSpanKind, expectedAttributes), GetSpanDescription(expectedSpanName, expectedSpanKind, expectedAttributes));
+        collector.Expect("OpenTelemetry.AutoInstrumentation.NoCode", VersionHelper.AutoInstrumentationVersion, x => assert(x, expectedSpanName, expectedSpanKind, expectedAttributes), GetSpanDescription(expectedSpanName, expectedSpanKind, expectedAttributes));
     }
 
     private static string GetSpanDescription(string expectedSpanName, Span.Types.SpanKind expectedSpanKind, List<KeyValue>? expectedAttributes)

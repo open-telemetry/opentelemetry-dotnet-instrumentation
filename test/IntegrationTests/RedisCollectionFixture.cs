@@ -1,8 +1,6 @@
 // Copyright The OpenTelemetry Authors
 // SPDX-License-Identifier: Apache-2.0
 
-#if NET
-
 using DotNet.Testcontainers.Builders;
 using DotNet.Testcontainers.Containers;
 using IntegrationTests.Helpers;
@@ -11,9 +9,9 @@ using static IntegrationTests.Helpers.DockerFileHelper;
 namespace IntegrationTests;
 
 [CollectionDefinition(Name)]
-public class RedisCollection : ICollectionFixture<RedisFixture>
+public class RedisCollectionFixture : ICollectionFixture<RedisFixture>
 {
-    public const string Name = nameof(RedisCollection);
+    public const string Name = nameof(RedisCollectionFixture);
 }
 
 public class RedisFixture : IAsyncLifetime
@@ -32,34 +30,32 @@ public class RedisFixture : IAsyncLifetime
 
     public async Task InitializeAsync()
     {
-        _container = await LaunchRedisContainerAsync(Port);
+        _container = await LaunchRedisContainerAsync(Port).ConfigureAwait(false);
     }
 
     public async Task DisposeAsync()
     {
         if (_container != null)
         {
-            await ShutdownRedisContainerAsync(_container);
+            await ShutdownRedisContainerAsync(_container).ConfigureAwait(false);
         }
     }
 
-    private async Task<IContainer> LaunchRedisContainerAsync(int port)
+    private static async Task<IContainer> LaunchRedisContainerAsync(int port)
     {
-        var containersBuilder = new ContainerBuilder()
-            .WithImage(RedisImage)
+        var containersBuilder = new ContainerBuilder(RedisImage)
             .WithName($"redis-{port}")
             .WithPortBinding(port, RedisPort)
             .WithWaitStrategy(Wait.ForUnixContainer().UntilInternalTcpPortIsAvailable(RedisPort));
 
         var container = containersBuilder.Build();
-        await container.StartAsync();
+        await container.StartAsync().ConfigureAwait(false);
 
         return container;
     }
 
-    private async Task ShutdownRedisContainerAsync(IContainer container)
+    private static async Task ShutdownRedisContainerAsync(IContainer container)
     {
-        await container.DisposeAsync();
+        await container.DisposeAsync().ConfigureAwait(false);
     }
 }
-#endif

@@ -40,6 +40,7 @@
     <PlatformToolset>v143</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
+    <LinkControlFlowGuard>true</LinkControlFlowGuard>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
@@ -53,6 +54,7 @@
     <PlatformToolset>v143</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
+    <LinkControlFlowGuard>true</LinkControlFlowGuard>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
@@ -95,6 +97,9 @@
     <IntDir>obj\$(Configuration)\x86\</IntDir>
     <TargetName>OpenTelemetry.AutoInstrumentation.Native</TargetName>
     <TargetExt>.dll</TargetExt>
+  </PropertyGroup>
+  <PropertyGroup>
+    <SourceLink>$(IntDir)source_link.json</SourceLink>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
@@ -155,6 +160,7 @@
       <LanguageStandard>stdcpp17</LanguageStandard>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <AdditionalIncludeDirectories>$(LIB_INCLUDES);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <ControlFlowGuard>Guard</ControlFlowGuard>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -162,6 +168,9 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <ModuleDefinitionFile>.\OpenTelemetry.AutoInstrumentation.Native.def</ModuleDefinitionFile>
+      <CETCompat>true</CETCompat>
+      <DynamicBase>true</DynamicBase>
+      <AdditionalOptions>%22/SOURCELINK:$(SourceLink)%22 %(AdditionalOptions)</AdditionalOptions>
     </Link>
     <PreBuildEvent>
       <Command>IF EXIST "$(SolutionDir)pre-build-events-cpp.bat" CALL "$(SolutionDir)pre-build-events-cpp.bat"  "$(TargetPath)"  "$(TargetFileName)"  "$(TargetDir)"  "$(TargetName)"</Command>
@@ -182,6 +191,7 @@
       <LanguageStandard>stdcpp17</LanguageStandard>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <AdditionalIncludeDirectories>$(LIB_INCLUDES);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <ControlFlowGuard>Guard</ControlFlowGuard>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -189,6 +199,9 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <ModuleDefinitionFile>.\OpenTelemetry.AutoInstrumentation.Native.def</ModuleDefinitionFile>
+      <CETCompat>true</CETCompat>
+      <DynamicBase>true</DynamicBase>
+      <AdditionalOptions>%22/SOURCELINK:$(SourceLink)%22 %(AdditionalOptions)</AdditionalOptions>
     </Link>
     <PreBuildEvent>
       <Command>IF EXIST "$(SolutionDir)pre-build-events-cpp.bat" CALL "$(SolutionDir)pre-build-events-cpp.bat"  "$(TargetPath)"  "$(TargetFileName)"  "$(TargetDir)"  "$(TargetName)"</Command>
@@ -211,6 +224,11 @@
     <ClInclude Include="dllmain.h" />
     <ClInclude Include="resource.h" />
   </ItemGroup>
+  <PropertyGroup Condition=" '$(BuildingInsideVisualStudio)' == 'true' ">
+    <OTEL_AUTO_VERSION_MAJOR>$([MSBuild]::ValueOrDefault('$(OTEL_AUTO_VERSION_MAJOR)', '1'))</OTEL_AUTO_VERSION_MAJOR>
+    <OTEL_AUTO_VERSION_MINOR>$([MSBuild]::ValueOrDefault('$(OTEL_AUTO_VERSION_MINOR)', '0'))</OTEL_AUTO_VERSION_MINOR>
+    <OTEL_AUTO_VERSION_PATCH>$([MSBuild]::ValueOrDefault('$(OTEL_AUTO_VERSION_PATCH)', '0'))</OTEL_AUTO_VERSION_PATCH>
+  </PropertyGroup>
   <ItemGroup>
     <ResourceCompile Include="Resource.rc">
       <AdditionalOptions>/dOTEL_AUTO_VERSION_MAJOR="$(OTEL_AUTO_VERSION_MAJOR)" /dOTEL_AUTO_VERSION_MINOR="$(OTEL_AUTO_VERSION_MINOR)" /dOTEL_AUTO_VERSION_PATCH="$(OTEL_AUTO_VERSION_PATCH)"</AdditionalOptions>
@@ -219,4 +237,22 @@
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
+  <Target Name="GenerateSourceLink" BeforeTargets="ClCompile">
+    <PropertyGroup>
+      <_SrcRootDirectory>$([System.IO.Directory]::GetParent($(MSBuildThisFileDirectory.TrimEnd("\"))))</_SrcRootDirectory>
+      <_SrcRootDirectory>$([System.IO.Directory]::GetParent($(_SrcRootDirectory.TrimEnd("\"))))</_SrcRootDirectory>
+      <_SourceLinkRoot>$(_SrcRootDirectory.Replace("\", "\\"))</_SourceLinkRoot>
+    </PropertyGroup>
+    <PropertyGroup Condition=" '$(GITHUB_ACTIONS)' == 'true' ">
+      <_RemoteUri>$(GITHUB_SERVER_URL)/$(GITHUB_REPOSITORY)</_RemoteUri>
+      <_LatestCommit>$(GITHUB_SHA)</_LatestCommit>
+    </PropertyGroup>
+    <Exec Command="git config --get remote.origin.url" ConsoleToMsBuild="true" Condition=" '$(_RemoteUri)' == '' ">
+      <Output TaskParameter="ConsoleOutput" PropertyName="_RemoteUri" />
+    </Exec>
+    <Exec Command="git rev-parse HEAD" ConsoleToMsBuild="true" Condition=" '$(_LatestCommit)' == '' ">
+      <Output TaskParameter="ConsoleOutput" PropertyName="_LatestCommit" />
+    </Exec>
+    <WriteLinesToFile File="$(SourceLink)" Overwrite="true" Lines="{&quot;documents&quot;: { &quot;$(_SourceLinkRoot)\\*&quot; : &quot;$(_RemoteUri.Replace(&quot;.git&quot;, &quot;&quot;).Replace(&quot;github.com&quot;, &quot;raw.githubusercontent.com&quot;))/$(_LatestCommit)/*&quot; }}" />
+  </Target>
 </Project>

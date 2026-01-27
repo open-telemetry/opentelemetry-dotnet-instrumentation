@@ -650,3 +650,17 @@ instrumentation/development:
               parameter_types:
           span:
              name: Span-GenericTestMethodAsync
+        - target:
+            assembly:
+              name: TestApplication.NoCode
+            type: TestApplication.NoCode.GenericNoCodeTestingClass`2
+            method: GenericTestMethod
+            signature:
+              return_type: '!!0'
+              parameter_types:
+                - '!!0'
+                - '!!1'
+                - '!0'
+                - '!1'
+          span:
+             name: Span-GenericTestMethodWithParameters

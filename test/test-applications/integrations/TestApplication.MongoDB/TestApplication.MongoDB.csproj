@@ -1,16 +1,11 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFrameworks>net10.0;net9.0;net8.0</TargetFrameworks>
-    <TargetFrameworks Condition="'$(OS)' == 'Windows_NT' and ('$(LibraryVersion)' == '' or '$(LibraryVersion)' &gt;= '3.0.0')">$(TargetFrameworks);net472</TargetFrameworks>
-    <TargetFrameworks Condition="'$(OS)' == 'Windows_NT' and '$(LibraryVersion)' != '' and '$(LibraryVersion)' &lt; '3.0.0'">$(TargetFrameworks);net462</TargetFrameworks>
-  </PropertyGroup>
-
-  <PropertyGroup>
-    <!-- Required to build multiple projects with the same Configuration|Platform -->
-    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
-    <GenerateTargetFrameworkAttribute>false</GenerateTargetFrameworkAttribute>
+    <TargetFrameworks Condition="'$(OS)' == 'Windows_NT' and ('$(LibraryVersion)' == '' or $([MSBuild]::VersionGreaterThanOrEquals('$(LibraryVersion)', '3.0.0')))">$(TargetFrameworks);net472</TargetFrameworks>
+    <TargetFrameworks Condition="'$(OS)' == 'Windows_NT' and '$(LibraryVersion)' != '' and $([MSBuild]::VersionLessThan('$(LibraryVersion)', '3.0.0'))">$(TargetFrameworks);net462</TargetFrameworks>
+    <DefineConstants Condition="'$(LibraryVersion)' == '' or $([MSBuild]::VersionGreaterThanOrEquals('$(LibraryVersion)', '3.0.0'))">$(DefineConstants);MONGODB_3_OR_GREATER</DefineConstants>
   </PropertyGroup>
 
   <ItemGroup>

@@ -5,6 +5,7 @@ using System.Diagnostics;
 using System.Reflection;
 using System.ServiceModel;
 using System.ServiceModel.Channels;
+using TestApplication.Shared;
 
 namespace TestApplication.Wcf.Client.NetFramework;
 
@@ -14,6 +15,8 @@ internal static class Program
 
     public static async Task Main(string[] args)
     {
+        ConsoleHelper.WriteSplashScreen(args);
+
         string netTcpAddress;
         string httpAddress;
         if (args.Length == 0)
@@ -28,10 +31,16 @@ internal static class Program
             netTcpAddress = $"net.tcp://localhost:{args[0]}/StatusService.svc";
             httpAddress = $"http://localhost:{args[1]}/StatusService.svc";
         }
+        else if (args.Length == 4)
+        {
+            // Self-hosted service addresses
+            netTcpAddress = $"net.tcp://127.0.0.1:{args[1]}/Telemetry";
+            httpAddress = $"http://127.0.0.1:{args[3]}/Telemetry";
+        }
         else
         {
-            throw new Exception(
-                "TestApplication.Wcf.Client.NetFramework application requires either 0 or exactly 2 arguments.");
+            throw new InvalidOperationException(
+                "TestApplication.Wcf.Client.NetFramework application requires either 0, 2, or 4 arguments.");
         }
 
         using var parent = Source.StartActivity("Parent");
@@ -55,7 +64,7 @@ internal static class Program
         // Note: Best practice is to re-use your client/channel instances.
         // This code is not meant to illustrate best practices, only the
         // instrumentation.
-        var client = new StatusServiceClient(binding, new EndpointAddress(new Uri(address)));
+        using var client = new StatusServiceClient(binding, new EndpointAddress(new Uri(address)));
         await client.OpenAsync().ConfigureAwait(false);
 
         try
@@ -92,7 +101,7 @@ internal static class Program
                     await client.CloseAsync().ConfigureAwait(false);
                 }
             }
-            catch
+            catch (Exception)
             {
             }
         }
