@@ -282,10 +282,10 @@ allocation sampling.
 
 ## Feature support matrix
 
-| Feature | .NET 6.0+ | .NET Framework 4.6.2+ |
-|---------|-----------|----------------------|
-| Thread sampling | ✅ Supported | ✅ Supported (Windows x64 only) |
-| Allocation sampling | ✅ Supported | ❌ Not supported |
+| Feature             | .NET 6.0+    | .NET Framework 4.6.2+           |
+| ------------------- | ------------ | ------------------------------- |
+| Thread sampling     | ✅ Supported | ✅ Supported (Windows x64 only) |
+| Allocation sampling | ✅ Supported | ❌ Not supported                |
 
 ## Plugin
 
