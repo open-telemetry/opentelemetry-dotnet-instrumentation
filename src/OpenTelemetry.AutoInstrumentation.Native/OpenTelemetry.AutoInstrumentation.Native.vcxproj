@@ -180,8 +180,8 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="assembly_redirection.h" />
-    <ClInclude Include="assembly_redirection_netfx.h" />
     <ClInclude Include="assembly_redirection_net.h" />
+    <ClInclude Include="assembly_redirection_netfx.h" />
     <ClInclude Include="calltarget_tokens.h" />
     <ClInclude Include="class_factory.h" />
     <ClInclude Include="com_ptr.h" />

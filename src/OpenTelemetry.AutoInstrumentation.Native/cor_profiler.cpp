@@ -3905,6 +3905,8 @@ void CorProfiler::DetectFrameworkVersionTableForRedirectsMap()
                 else
                 {
                     // Map release numbers to framework versions
+                    // Based on Microsoft documentation:
+                    // https://docs.microsoft.com/en-us/dotnet/framework/migration-guide/how-to-determine-which-versions-are-installed
                     if (releaseValue >= 461308)
                     {
                         frameworkVersion = 471; // 4.7.1
