@@ -50,7 +50,7 @@
         { _W("OpenTelemetry.Instrumentation.Wcf"), {1, 15, 0, 890} }, \
         { _W("OpenTelemetry.Resources.Azure"), {1, 15, 0, 889} }, \
         { _W("OpenTelemetry.Resources.Container"), {1, 15, 0, 883} }, \
-        { _W("OpenTelemetry.Resources.Host"), {1, 15, 0, 888} }, \
+        { _W("OpenTelemetry.Resources.Host"), {1, 15, 0, 917} }, \
         { _W("OpenTelemetry.Resources.OperatingSystem"), {1, 15, 0, 886} }, \
         { _W("OpenTelemetry.Resources.Process"), {1, 15, 0, 887} }, \
         { _W("OpenTelemetry.Resources.ProcessRuntime"), {1, 15, 0, 885} }, \
@@ -99,7 +99,7 @@
         { _W("OpenTelemetry.Instrumentation.Wcf"), {1, 15, 0, 890} }, \
         { _W("OpenTelemetry.Resources.Azure"), {1, 15, 0, 889} }, \
         { _W("OpenTelemetry.Resources.Container"), {1, 15, 0, 883} }, \
-        { _W("OpenTelemetry.Resources.Host"), {1, 15, 0, 888} }, \
+        { _W("OpenTelemetry.Resources.Host"), {1, 15, 0, 917} }, \
         { _W("OpenTelemetry.Resources.OperatingSystem"), {1, 15, 0, 886} }, \
         { _W("OpenTelemetry.Resources.Process"), {1, 15, 0, 887} }, \
         { _W("OpenTelemetry.Resources.ProcessRuntime"), {1, 15, 0, 885} }, \
@@ -148,7 +148,7 @@
         { _W("OpenTelemetry.Instrumentation.Wcf"), {1, 15, 0, 890} }, \
         { _W("OpenTelemetry.Resources.Azure"), {1, 15, 0, 889} }, \
         { _W("OpenTelemetry.Resources.Container"), {1, 15, 0, 883} }, \
-        { _W("OpenTelemetry.Resources.Host"), {1, 15, 0, 888} }, \
+        { _W("OpenTelemetry.Resources.Host"), {1, 15, 0, 917} }, \
         { _W("OpenTelemetry.Resources.OperatingSystem"), {1, 15, 0, 886} }, \
         { _W("OpenTelemetry.Resources.Process"), {1, 15, 0, 887} }, \
         { _W("OpenTelemetry.Resources.ProcessRuntime"), {1, 15, 0, 885} }, \
