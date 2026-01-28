@@ -256,14 +256,20 @@ internal sealed class EnvironmentHelper
         return $"net{_major}{_minor}{_patch ?? string.Empty}";
     }
 
-    private static string GetStartupHookOutputPath()
+    private string GetStartupHookOutputPath()
     {
         string startupHookOutputPath = Path.Combine(
             GetNukeBuildOutput(),
             "net",
             "OpenTelemetry.AutoInstrumentation.StartupHook.dll");
 
-        return startupHookOutputPath;
+        if (File.Exists(startupHookOutputPath))
+        {
+            _output?.WriteLine($"Found startup hook at {startupHookOutputPath}.");
+            return startupHookOutputPath;
+        }
+
+        throw new InvalidOperationException($"Unable to find startup hook at: {startupHookOutputPath}");
     }
 
     private void SetDefaultEnvironmentVariables()

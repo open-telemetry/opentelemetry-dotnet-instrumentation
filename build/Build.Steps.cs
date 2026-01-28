@@ -348,7 +348,7 @@ partial class Build
     void CleanupTracerHomeAssemblies()
     {
         // remove unnecessary files that may come with target frameworks dependencies
-        TracerHomeDirectory.GlobFiles("**/*.pdb", "**/*.xml", "**/*.json", "**/*.dylib", "**/*.so").ForEach(file => file.DeleteFile());
+        TracerHomeDirectory.GlobFiles("**/*.xml", "**/*.json", "**/*.dylib", "**/*.so").ForEach(file => file.DeleteFile());
     }
 
     void OptimizeTracerHomeAssemblies(IEnumerable<TargetFramework> frameworks)

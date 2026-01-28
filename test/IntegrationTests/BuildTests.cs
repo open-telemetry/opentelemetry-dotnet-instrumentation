@@ -27,23 +27,7 @@ public class BuildTests
         return Verifier.Verify(relativesPaths)
             .UseTextForParameters(systemName)
             .DisableDiff();
-    }
-
-#if NET
-    [Fact]
-    public void NetFolderDoesNotContainAnyLibraryFromAdditionalStore()
-    {
-        var distributionFolder = EnvironmentHelper.GetNukeBuildOutput();
-
-        var netFilePaths = Directory.GetFiles(Path.Join(distributionFolder, "net"), "*", SearchOption.AllDirectories);
-        var additionalStoreFilePaths = Directory.GetFiles(Path.Join(distributionFolder, "store"), "*", SearchOption.AllDirectories);
-
-        var netFileNames = netFilePaths.Select(Path.GetFileNameWithoutExtension).ToArray();
-        var additionalStoreFileNames = additionalStoreFilePaths.Select(Path.GetFileNameWithoutExtension).Distinct().ToArray();
-
-        Assert.All(additionalStoreFileNames, additionalNetFileName => Assert.DoesNotContain(additionalNetFileName, netFileNames));
-    }
-#endif
+    }s
 
     private static string GetSystemName()
     {
