@@ -302,7 +302,7 @@ partial class Build
                 ? TargetFrameworksForPublish
                 : TargetFrameworksForPublish.ExceptNetFramework();
 
-            // Publish OpenTelemetry.AutoInstrumentation.Assemblies.NetFramework for all target frameworks
+            // Publish OpenTelemetry.AutoInstrumentation.Assemblies for all target frameworks
             DotNetPublish(s => s
                 .SetProject(Solution.GetProjectByName(Projects.AutoInstrumentationAssemblies))
                 .SetConfiguration(BuildConfiguration)

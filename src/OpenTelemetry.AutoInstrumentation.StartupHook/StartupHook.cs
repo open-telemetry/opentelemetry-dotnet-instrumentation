@@ -28,14 +28,14 @@ internal class StartupHook
         AppDomain.CurrentDomain.AssemblyResolve += (_, args) =>
         {
             Console.ForegroundColor = ConsoleColor.Yellow;
-            Console.WriteLine($"Resolving ({args.Name}) from assembly <{args.RequestingAssembly}>: SKIP");
+            Console.WriteLine($"[StartupHook] Resolving ({args.Name}) from assembly <{args.RequestingAssembly}>: SKIP");
             Console.ResetColor();
             return null;
         };
         System.Runtime.Loader.AssemblyLoadContext.Default.Resolving += (context, assemblyName) =>
         {
             Console.ForegroundColor = ConsoleColor.DarkYellow;
-            Console.WriteLine($"Resolving <{assemblyName}>@({context}): SKIP");
+            Console.WriteLine($"[StartupHook] Resolving <{assemblyName}>@({context}): SKIP");
             Console.ResetColor();
 
             return null;
