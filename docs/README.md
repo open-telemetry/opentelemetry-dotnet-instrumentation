@@ -433,12 +433,14 @@ For example:
 
 ```bash
 RELEASE_TAG="v1.14.0"
-gh release verify --repo open-telemetry/opentelemetry-dotnet-instrumentation "${RELEASE_TAG}"
+gh release verify "${RELEASE_TAG}" --repo open-telemetry/opentelemetry-dotnet-instrumentation
+gh release verify-asset "${RELEASE_TAG}" ./otel-dotnet-auto-install.sh --repo open-telemetry/opentelemetry-dotnet-instrumentation
 ```
 
 > [!NOTE]
 > A successful verification outputs `Release <tag> verified!`.
 
 For more verification options please refer to the documentation for
-[`gh attestation verify`](https://cli.github.com/manual/gh_attestation_verify) and
-[`gh release verify`](https://cli.github.com/manual/gh_release_verify).
+[`gh attestation verify`](https://cli.github.com/manual/gh_attestation_verify),
+[`gh release verify`](https://cli.github.com/manual/gh_release_verify),
+and [`gh release verify-asset`](https://cli.github.com/manual/gh_release_verify-asset).
