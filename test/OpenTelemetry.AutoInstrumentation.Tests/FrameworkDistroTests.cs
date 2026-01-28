@@ -108,7 +108,7 @@ public class FrameworkDistroTests
         });
     }
 
-    // Bring back: [Fact] Current fails on my local Linux, will investigate later.
+    [Fact]
     public void ReferencedPackagesNoUnsupportedNet()
     {
         var currentTestLocation = Assembly.GetExecutingAssembly().Location;
