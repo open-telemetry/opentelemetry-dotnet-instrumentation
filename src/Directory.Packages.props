@@ -29,7 +29,7 @@
     <PackageVersion Include="OpenTelemetry.Shims.OpenTracing" Version="1.15.0-beta.1" />
     <PackageVersion Include="OpenTelemetry.Resources.Azure" Version="1.15.0-beta.1" />
     <PackageVersion Include="OpenTelemetry.Resources.Container" Version="1.15.0-beta.1" />
-    <PackageVersion Include="OpenTelemetry.Resources.Host" Version="1.15.0-beta.1" />
+    <PackageVersion Include="OpenTelemetry.Resources.Host" Version="1.15.0-beta.2" />
     <PackageVersion Include="OpenTelemetry.Resources.OperatingSystem" Version="1.15.0-beta.1" />
     <PackageVersion Include="OpenTelemetry.Resources.Process" Version="1.15.0-beta.1" />
     <PackageVersion Include="OpenTelemetry.Resources.ProcessRuntime" Version="1.15.0-beta.1" />
