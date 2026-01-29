@@ -14,9 +14,19 @@ namespace OpenTelemetry.AutoInstrumentation.Instrumentations.MongoDB;
 
 internal static class MongoDBInstrumentation
 {
+#if NET8_0_OR_GREATER
+    private static readonly ActivitySource Source = new(
+        new ActivitySourceOptions
+        {
+            Name = "OpenTelemetry.AutoInstrumentation.MongoDB",
+            Version = AutoInstrumentationVersion.Version,
+            TelemetrySchemaUrl = DatabaseAttributes.SchemaUrl
+        });
+#else
     private static readonly ActivitySource Source = new(
         "OpenTelemetry.AutoInstrumentation.MongoDB",
         AutoInstrumentationVersion.Version);
+#endif
 
     private static readonly PropertyInfo? MongoCommandExceptionCodePropertyInfo = GetMongoCommandExceptionCodePropertyInfo();
 
