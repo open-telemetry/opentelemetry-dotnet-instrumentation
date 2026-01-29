@@ -5,6 +5,7 @@
 #pragma warning disable CA1303 // Do not pass literals as localized parameters
 #if NET
 using System.Diagnostics.CodeAnalysis;
+using System.IO;
 using System.Reflection;
 using System.Runtime.Loader;
 
@@ -70,7 +71,7 @@ internal partial class AssemblyResolver
     {
         try
         {
-            var tpaList = (AppContext.GetData("TRUSTED_PLATFORM_ASSEMBLIES") as string)?.Split(';') ?? [];
+            var tpaList = (AppContext.GetData("TRUSTED_PLATFORM_ASSEMBLIES") as string)?.Split(Path.PathSeparator) ?? [];
             return [.. tpaList.Select(Path.GetFileNameWithoutExtension).OfType<string>()];
         }
         catch
