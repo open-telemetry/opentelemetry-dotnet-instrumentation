@@ -113,20 +113,12 @@ public abstract class TestHelper
         SetEnvironmentVariable("OTEL_EXPERIMENTAL_CONFIG_FILE", Path.Combine(EnvironmentHelper.GetTestApplicationApplicationOutputDirectory(), "config.yaml"));
     }
 
-    /// <summary>
-    /// Starts the test application and waits for it to exit.
-    /// Use this when you need to verify the process output or exit code, or when the test application
-    /// completes its work and exits naturally.
-    /// Assertion exceptions are thrown if it timed out or the exit code is non-zero.
-    /// For tests that need to collect telemetry from a running process and then terminate it manually,
-    /// use <see cref="StartTestApplication"/> instead.
-    /// </summary>
     internal (string StandardOutput, string ErrorOutput, int ProcessId) RunTestApplication(TestSettings? testSettings = null)
     {
+        // RunTestApplication starts the test application, wait up to DefaultProcessTimeout.
+        // Assertion exceptions are thrown if it timed out or the exit code is non-zero.
         testSettings ??= new();
-        // Don't drain streams here because ProcessHelper will do it and capture the output.
-        // Calling BeginOutputReadLine twice would throw InvalidOperationException.
-        using var process = StartTestApplication(testSettings, drainStreams: false);
+        using var process = StartTestApplication(testSettings);
         Output.WriteLine($"ProcessName: " + process?.ProcessName);
         using var helper = new ProcessHelper(process);
 
@@ -150,20 +142,10 @@ public abstract class TestHelper
         return (helper.StandardOutput, helper.ErrorOutput, processId);
     }
 
-    /// <summary>
-    /// Starts the test application and returns immediately.
-    /// Use this when you need to collect telemetry while the process runs, will manually terminate
-    /// the process (e.g., process.Kill()), or don't need to verify exit code or output.
-    /// By default, output streams are drained asynchronously to prevent deadlock.
-    /// For tests that need to wait for clean exit and verify output, use <see cref="RunTestApplication"/> instead.
-    /// </summary>
-    /// <param name="testSettings">Optional test settings.</param>
-    /// <param name="drainStreams">
-    /// If true (default), output streams are drained asynchronously to prevent process deadlock.
-    /// Set to false only if you will create a ProcessHelper to capture output.
-    /// </param>
-    internal Process? StartTestApplication(TestSettings? testSettings = null, bool drainStreams = true)
+    internal Process? StartTestApplication(TestSettings? testSettings = null)
     {
+        // StartTestApplication starts the test application
+        // and returns the Process instance for further interaction.
         testSettings ??= new();
 
         var startupMode = testSettings.StartupMode;
@@ -179,33 +161,21 @@ public abstract class TestHelper
             throw new InvalidOperationException($"application not found: {testApplicationPath}");
         }
 
-        Process? process;
         if (startupMode == TestAppStartupMode.DotnetCLI)
         {
             Output.WriteLine($"DotnetCLI Starting Application: {testApplicationPath}");
             var executable = EnvironmentHelper.GetTestApplicationExecutionSource();
             var args = $"{testApplicationPath} {testSettings.Arguments ?? string.Empty}";
-            process = InstrumentedProcessHelper.Start(executable, args, EnvironmentHelper);
+            return InstrumentedProcessHelper.Start(executable, args, EnvironmentHelper);
         }
         else if (startupMode == TestAppStartupMode.Exe)
         {
             Output.WriteLine($"Starting Application: {testApplicationPath}");
-            process = InstrumentedProcessHelper.Start(testApplicationPath, testSettings.Arguments, EnvironmentHelper);
+            return InstrumentedProcessHelper.Start(testApplicationPath, testSettings.Arguments, EnvironmentHelper);
         }
         else
         {
             throw new InvalidOperationException($"StartupMode '{startupMode}' has no logic defined.");
         }
-
-        // Start draining output streams to prevent deadlock when buffers fill up.
-        // This happens asynchronously and doesn't block the caller.
-        // Skip if caller will create a ProcessHelper (which also calls BeginOutputReadLine).
-        if (process != null && drainStreams)
-        {
-            process.BeginOutputReadLine();
-            process.BeginErrorReadLine();
-        }
-
-        return process;
     }
 }
