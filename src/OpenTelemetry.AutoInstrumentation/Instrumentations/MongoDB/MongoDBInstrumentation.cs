@@ -16,8 +16,7 @@ internal static class MongoDBInstrumentation
 {
     private static readonly ActivitySource Source = new(
         "OpenTelemetry.AutoInstrumentation.MongoDB",
-        AutoInstrumentationVersion.Version,
-        DatabaseAttributes.SchemaUrl);
+        AutoInstrumentationVersion.Version);
 
     private static readonly PropertyInfo? MongoCommandExceptionCodePropertyInfo = GetMongoCommandExceptionCodePropertyInfo();
 
