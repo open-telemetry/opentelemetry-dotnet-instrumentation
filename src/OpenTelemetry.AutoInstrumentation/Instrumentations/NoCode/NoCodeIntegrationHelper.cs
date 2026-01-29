@@ -13,7 +13,7 @@ namespace OpenTelemetry.AutoInstrumentation.Instrumentations.NoCode;
 internal static class NoCodeIntegrationHelper
 {
     private static readonly ActivitySource Source = new("OpenTelemetry.AutoInstrumentation.NoCode", AutoInstrumentationVersion.Version);
- 
+
     private static readonly string[] GenericParameterClassNames = ["!0", "!1", "!2", "!3", "!4", "!5", "!6", "!7", "!8", "!9"];
     private static readonly string[] GenericParameterMethodNames = ["!!0", "!!1", "!!2", "!!3", "!!4", "!!5", "!!6", "!!7", "!!8", "!!9"];
 
