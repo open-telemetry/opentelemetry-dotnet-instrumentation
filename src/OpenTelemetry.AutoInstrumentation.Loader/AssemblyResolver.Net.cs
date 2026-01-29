@@ -5,7 +5,6 @@
 #pragma warning disable CA1303 // Do not pass literals as localized parameters
 #if NET
 using System.Diagnostics.CodeAnalysis;
-using System.IO;
 using System.Reflection;
 using System.Runtime.Loader;
 
@@ -87,6 +86,7 @@ internal partial class AssemblyResolver
 
     private Assembly? Resolving_ManagedProfilerDependencies(AssemblyLoadContext context, AssemblyName assemblyName)
     {
+        // TODO do we want to cache this information so we don't need to check and read files every time?
         bool TryFindAssemblyPath(AssemblyName assemblyName, [NotNullWhen(true)] out string? assemblyPath)
         {
             // For .NET (Core) most of the assembblies are different per runtime version so we start first with runtime specific folder
@@ -97,6 +97,35 @@ internal partial class AssemblyResolver
                 return true;
             }
 
+            // if assembly is missing it might be linked, so we check for .link file
+            var link = Path.Combine(_managedProfilerDirectory, CommonLanguageRuntimeVersionFolder, $"{assemblyName.Name}.dll.link");
+            if (File.Exists(link))
+            {
+                try
+                {
+                    var linkRuntimeVersionFolder = File.ReadAllText(link).Trim();
+                    var linkPath = Path.Combine(_managedProfilerDirectory, linkRuntimeVersionFolder, $"{assemblyName.Name}.dll");
+                    if (File.Exists(linkPath))
+                    {
+                        assemblyPath = linkPath;
+                        return true;
+                    }
+                    else
+                    {
+                        _logger.Error($"Linked assembly path \"{linkPath}\" does not exist");
+                        assemblyPath = null;
+                        return false;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    _logger.Debug(ex, $"Error reading .link file: \"{link}\"");
+                    assemblyPath = null;
+                    return false;
+                }
+            }
+
+            // then we fallback to root managed profiler folder
             var rootPath = Path.Combine(_managedProfilerDirectory, $"{assemblyName.Name}.dll");
             if (File.Exists(rootPath))
             {
