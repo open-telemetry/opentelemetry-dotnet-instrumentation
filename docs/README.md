@@ -425,5 +425,22 @@ gh attestation verify --owner open-telemetry ./otel-dotnet-auto-install.sh
 > [!NOTE]
 > A successful verification outputs `Verification succeeded!`.
 
-For more verification options please refer to the [`gh attestation verify`
-documentation](https://cli.github.com/manual/gh_attestation_verify).
+This repository also uses
+[GitHub Immutable Releases](https://docs.github.com/code-security/concepts/supply-chain-security/immutable-releases)
+which can also be verified.
+
+For example:
+
+```bash
+RELEASE_TAG="v1.14.0"
+gh release verify "${RELEASE_TAG}" --repo open-telemetry/opentelemetry-dotnet-instrumentation
+gh release verify-asset "${RELEASE_TAG}" ./otel-dotnet-auto-install.sh --repo open-telemetry/opentelemetry-dotnet-instrumentation
+```
+
+> [!NOTE]
+> A successful verification outputs `Release <tag> verified!`.
+
+For more verification options please refer to the documentation for
+[`gh attestation verify`](https://cli.github.com/manual/gh_attestation_verify),
+[`gh release verify`](https://cli.github.com/manual/gh_release_verify),
+and [`gh release verify-asset`](https://cli.github.com/manual/gh_release_verify-asset).
