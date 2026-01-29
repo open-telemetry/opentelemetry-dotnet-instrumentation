@@ -16,9 +16,8 @@ internal static class MongoDBInstrumentation
 {
 #if NET8_0_OR_GREATER
     private static readonly ActivitySource Source = new(
-        new ActivitySourceOptions
+        new ActivitySourceOptions("OpenTelemetry.AutoInstrumentation.MongoDB")
         {
-            Name = "OpenTelemetry.AutoInstrumentation.MongoDB",
             Version = AutoInstrumentationVersion.Version,
             TelemetrySchemaUrl = DatabaseAttributes.SchemaUrl
         });
