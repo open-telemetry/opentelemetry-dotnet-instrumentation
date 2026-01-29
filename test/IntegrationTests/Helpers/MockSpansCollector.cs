@@ -27,6 +27,7 @@ internal sealed class MockSpansCollector : IDisposable
 
     private readonly BlockingCollection<Collected> _spans = new(100); // bounded to avoid memory leak
     private readonly List<Expectation> _expectations = new();
+    private string? _schemaUrl;
     private Func<ICollection<Collected>, bool>? _collectedExpectation;
 
     public MockSpansCollector(ITestOutputHelper output, string host = "localhost")
@@ -55,17 +56,17 @@ internal sealed class MockSpansCollector : IDisposable
         _listener.Dispose();
     }
 
-    public void Expect(string scopeName, Func<Span, bool>? predicate = null, string? description = null)
+    public void Expect(string scopeName, Func<Span, bool>? predicate = null, string? description = null, string? schemaUrl = null)
     {
-        Expect(scopeName, null, predicate, description);
+        Expect(scopeName, null, predicate, description, schemaUrl);
     }
 
-    public void Expect(string scopeName, string? scopeVersion, Func<Span, bool>? predicate = null, string? description = null)
+    public void Expect(string scopeName, string? scopeVersion, Func<Span, bool>? predicate = null, string? description = null, string? schemaUrl = null)
     {
-        description ??= $"<no description> Scope Name: '{scopeName}', Scope Version: '{scopeVersion}', predicate is null: '{predicate == null}'";
+        description ??= $"<no description> Scope Name: '{scopeName}', Scope Version: '{scopeVersion}', Schema Url: '{schemaUrl}', predicate is null: '{predicate == null}'";
         predicate ??= x => true;
 
-        _expectations.Add(new Expectation(scopeName, scopeVersion, predicate, description));
+        _expectations.Add(new Expectation(scopeName, scopeVersion, schemaUrl, predicate, description));
     }
 
     public void ExpectCollected(Func<ICollection<Collected>, bool> collectedExpectation)
@@ -102,6 +103,11 @@ internal sealed class MockSpansCollector : IDisposable
                     }
 
                     if (missingExpectation.ScopeVersion != null && missingExpectation.ScopeVersion != resourceSpans.Scope.Version)
+                    {
+                        continue;
+                    }
+ 
+                    if (missingExpectation.SchemaUrl != null && missingExpectation.SchemaUrl != resourceSpans.Scope.SchemaUrl)
                     {
                         continue;
                     }
@@ -260,10 +266,11 @@ internal sealed class MockSpansCollector : IDisposable
 
     private sealed class Expectation
     {
-        public Expectation(string scopeName, string? scopeVersion, Func<Span, bool> predicate, string? description)
+        public Expectation(string scopeName, string? scopeVersion, string? schemaUrl, Func<Span, bool> predicate, string? description)
         {
             ScopeName = scopeName;
             ScopeVersion = scopeVersion;
+            SchemaUrl = schemaUrl;
             Predicate = predicate;
             Description = description;
         }
@@ -271,6 +278,8 @@ internal sealed class MockSpansCollector : IDisposable
         public string ScopeName { get; }
 
         public string? ScopeVersion { get; }
+
+        public string? SchemaUrl { get; }
 
         public Func<Span, bool> Predicate { get; }
 

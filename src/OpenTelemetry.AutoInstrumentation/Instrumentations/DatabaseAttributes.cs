@@ -7,6 +7,8 @@ namespace OpenTelemetry.AutoInstrumentation.Instrumentations;
 
 internal static class DatabaseAttributes
 {
+    public const string SchemaUrl = "https://opentelemetry.io/schemas/1.39.0";
+
     internal static class Keys
     {
         [Obsolete("Use DbSystemName instead.")]

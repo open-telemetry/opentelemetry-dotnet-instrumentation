@@ -51,7 +51,8 @@ public class MongoDBTests : TestHelper
         collector.Expect(
             MongoDBInstrumentationScopeName,
             VersionHelper.AutoInstrumentationVersion,
-            span => ValidateSpan(span));
+            span => ValidateSpan(span),
+            schemaUrl: "https://opentelemetry.io/schemas/1.39.0");
 
         EnableBytecodeInstrumentation();
         RunTestApplication(new()
