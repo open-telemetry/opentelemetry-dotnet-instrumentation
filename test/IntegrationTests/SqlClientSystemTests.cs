@@ -73,7 +73,7 @@ public class SqlClientSystemTests : TestHelper
         if (isFileBased)
         {
             SetFileBasedExporter(collector);
-            EnableFileBasedConfigWithDefaultPath();
+            EnableFileBasedConfigWithDefaultPath(packageVersion);
         }
         else
         {
