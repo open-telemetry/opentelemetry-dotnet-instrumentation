@@ -33,7 +33,7 @@ sampler uses two independent buffers to store samples alternatively.
 ### Requirements
 
 * .NET 6.0 or higher, OR
-* .NET Framework 4.6.2 or higher (Windows x64 only)
+* .NET Framework 4.6.2 or higher (x64 only)
 
 ### .NET Framework support
 
@@ -131,7 +131,8 @@ There is no such functionality. All managed threads are captured by the profiler
 
 This section covers troubleshooting specific to .NET Framework thread sampling.
 Enable `debug` level logging in the native profiler to see detailed stack
-capture diagnostics.
+capture diagnostics. You can do this by setting the environment variable
+`OTEL_LOG_LEVEL=debug` when the instrumented application starts.
 
 #### How do I know if .NET Framework stack capture is initialized?
 
