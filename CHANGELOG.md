@@ -5,7 +5,7 @@ All notable changes to this component are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/compare/v1.14.0..HEAD)
+## [Unreleased](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/compare/v1.14.1..HEAD)
 
 ### Added
 
@@ -18,6 +18,18 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 ### Removed
 
 ### Fixed
+
+## [1.14.1](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/tag/v1.14.1)
+
+### Changed
+
+#### Dependency updates
+
+- Following packages updated
+  - `OpenTelemetry.Instrumentation.SqlClient` from `1.15.0-rc.1` to `1.15.0`,
+  - `OpenTelemetry.Resources.Host` from `1.15.0-beta.1` to `1.15.0-beta.2`.
+- .NET Framework only, following packages updated
+  - `OpenTelemetry.Instrumentation.AspNet` from `1.15.0` to `1.15.1`.
 
 ## [1.14.0](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/tag/v1.14.0)
 
