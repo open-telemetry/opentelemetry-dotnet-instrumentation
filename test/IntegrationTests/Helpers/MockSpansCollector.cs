@@ -27,7 +27,6 @@ internal sealed class MockSpansCollector : IDisposable
 
     private readonly BlockingCollection<Collected> _spans = new(100); // bounded to avoid memory leak
     private readonly List<Expectation> _expectations = new();
-    private string? _schemaUrl;
     private Func<ICollection<Collected>, bool>? _collectedExpectation;
 
     public MockSpansCollector(ITestOutputHelper output, string host = "localhost")
@@ -106,8 +105,8 @@ internal sealed class MockSpansCollector : IDisposable
                     {
                         continue;
                     }
- 
-                    if (missingExpectation.SchemaUrl != null && missingExpectation.SchemaUrl != resourceSpans.Scope.SchemaUrl)
+
+                    if (missingExpectation.SchemaUrl != null && missingExpectation.SchemaUrl != resourceSpans.SchemaUrl)
                     {
                         continue;
                     }
@@ -231,7 +230,7 @@ internal sealed class MockSpansCollector : IDisposable
             {
                 foreach (var span in scopeSpans.Spans ?? Enumerable.Empty<Span>())
                 {
-                    _spans.Add(new Collected(scopeSpans.Scope, span));
+                    _spans.Add(new Collected(scopeSpans.Scope, span, scopeSpans.SchemaUrl));
                 }
             }
         }
@@ -248,19 +247,22 @@ internal sealed class MockSpansCollector : IDisposable
     internal sealed class Collected
 #pragma warning restore CA1812 // Mark members as static. There is some issue in dotnet format.
     {
-        public Collected(InstrumentationScope scope, Span span)
+        public Collected(InstrumentationScope scope, Span span, string schemaUrl)
         {
             Scope = scope;
             Span = span;
+            SchemaUrl = schemaUrl;
         }
 
         public InstrumentationScope Scope { get; }
 
         public Span Span { get; } // protobuf type
 
+        public string SchemaUrl { get; }
+
         public override string ToString()
         {
-            return $"Scope.Name = {Scope.Name}, Scope.Version={Scope.Version}, Span = {Span}";
+            return $"Scope.Name = {Scope.Name}, Scope.Version={Scope.Version}, SchemaUrl={SchemaUrl}, Span = {Span}";
         }
     }
 
