@@ -16,9 +16,9 @@ to .NET applications without having to modify their source code.
 > [!WARNING]
 > The following documentation refers to the in-development version
 of OpenTelemetry .NET Automatic Instrumentation. Docs for the latest version
-([1.14.0](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/latest))
+([1.14.1](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/latest))
 can be found in [opentelemetry.io](https://opentelemetry.io/docs/zero-code/dotnet/)
-or [versioned README](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/blob/v1.14.0/docs/README.md).
+or [versioned README](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/blob/v1.14.1/docs/README.md).
 
 ---
 
@@ -229,7 +229,7 @@ uses environment variables as parameters:
 | `TMPDIR`                | (deprecated) prefer `DOWNLOAD_DIR`                                              | No       | `$(mktemp -d)`              |
 | `DOWNLOAD_DIR`          | Folder to download the archive to. Will use local archive if it already exists  | No       | `$TMPDIR` or `$(mktemp -d)` |
 | `LOCAL_PATH`            | Full path the archive to use for installation. (ideal for air-gapped scenarios) | No       | *Calculated*                |
-| `VERSION`               | Version to download                                                             | No       | `1.14.0`                    |
+| `VERSION`               | Version to download                                                             | No       | `1.14.1`                    |
 
 [instrument.sh](../instrument.sh) script
 uses environment variables as parameters:
@@ -257,7 +257,7 @@ Example usage (run as administrator):
 #Requires -PSEdition Desktop
 
 # Download the module
-$module_url = "https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/download/v1.14.0/OpenTelemetry.DotNet.Auto.psm1"
+$module_url = "https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/download/v1.14.1/OpenTelemetry.DotNet.Auto.psm1"
 $download_path = Join-Path $env:temp "OpenTelemetry.DotNet.Auto.psm1"
 Invoke-WebRequest -Uri $module_url -OutFile $download_path -UseBasicParsing
 
@@ -422,5 +422,22 @@ gh attestation verify --owner open-telemetry ./otel-dotnet-auto-install.sh
 > [!NOTE]
 > A successful verification outputs `Verification succeeded!`.
 
-For more verification options please refer to the [`gh attestation verify`
-documentation](https://cli.github.com/manual/gh_attestation_verify).
+This repository also uses
+[GitHub Immutable Releases](https://docs.github.com/code-security/concepts/supply-chain-security/immutable-releases)
+which can also be verified.
+
+For example:
+
+```bash
+RELEASE_TAG="v1.14.0"
+gh release verify "${RELEASE_TAG}" --repo open-telemetry/opentelemetry-dotnet-instrumentation
+gh release verify-asset "${RELEASE_TAG}" ./otel-dotnet-auto-install.sh --repo open-telemetry/opentelemetry-dotnet-instrumentation
+```
+
+> [!NOTE]
+> A successful verification outputs `Release <tag> verified!`.
+
+For more verification options please refer to the documentation for
+[`gh attestation verify`](https://cli.github.com/manual/gh_attestation_verify),
+[`gh release verify`](https://cli.github.com/manual/gh_release_verify),
+and [`gh release verify-asset`](https://cli.github.com/manual/gh_release_verify-asset).
