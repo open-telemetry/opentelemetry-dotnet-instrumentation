@@ -17,20 +17,8 @@ internal static class MongoDBInstrumentation
     private static readonly ActivitySource Source = new(
         "OpenTelemetry.AutoInstrumentation.MongoDB",
         AutoInstrumentationVersion.Version);
-    private static readonly PropertyInfo? MongoCommandExceptionCodePropertyInfo;
 
-    static MongoDBInstrumentation()
-    {
-        try
-        {
-            MongoCommandExceptionCodePropertyInfo = Type.GetType(
-                "MongoDB.Driver.MongoCommandException, MongoDB.Driver")?.GetProperty("Code");
-        }
-        catch
-        {
-            MongoCommandExceptionCodePropertyInfo = null;
-        }
-    }
+    private static readonly PropertyInfo? MongoCommandExceptionCodePropertyInfo = GetMongoCommandExceptionCodePropertyInfo();
 
     public static Activity? StartDatabaseActivity(
         object? instance,
@@ -108,6 +96,19 @@ internal static class MongoDBInstrumentation
             {
                 // accessing the property failed, ignore
             }
+        }
+    }
+
+    private static PropertyInfo? GetMongoCommandExceptionCodePropertyInfo()
+    {
+        try
+        {
+            return Type.GetType(
+                "MongoDB.Driver.MongoCommandException, MongoDB.Driver")?.GetProperty("Code");
+        }
+        catch
+        {
+            return null;
         }
     }
 
