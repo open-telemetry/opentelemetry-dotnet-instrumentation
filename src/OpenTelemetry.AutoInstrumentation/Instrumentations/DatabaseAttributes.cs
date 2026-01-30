@@ -14,6 +14,7 @@ internal static class DatabaseAttributes
         public const string DbNamespace = "db.namespace";
         public const string DbOperationName = "db.operation.name";
         public const string DbOperationBatchSize = "db.operation.batch.size";
+        public const string DbResponseStatusCode = "db.response.status_code";
     }
 
     internal static class Values

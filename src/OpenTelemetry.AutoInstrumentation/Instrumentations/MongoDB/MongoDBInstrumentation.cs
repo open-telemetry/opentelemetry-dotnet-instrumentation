@@ -87,7 +87,7 @@ internal static class MongoDBInstrumentation
                 var code = MongoCommandExceptionCodePropertyInfo.GetValue(exception);
                 if (code != null)
                 {
-                    activity.SetTag("db.response.status_code", code.ToString());
+                    activity.SetTag(DatabaseAttributes.Keys.DbResponseStatusCode, code.ToString());
                 }
             }
             catch
