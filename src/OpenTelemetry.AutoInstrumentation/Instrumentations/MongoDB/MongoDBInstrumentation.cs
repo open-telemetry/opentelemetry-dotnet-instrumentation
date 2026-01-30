@@ -30,11 +30,7 @@ internal static class MongoDBInstrumentation
             return null;
         }
 
-        string? database = null;
-        if (TryGetDatabaseName(instance, out var dbName))
-        {
-            database = dbName;
-        }
+        _ = TryGetDatabaseName(instance, out var database);
 
         if (!TryGetQueryDetails(instance, out var collection, out var operationName, out var batchSize))
         {
