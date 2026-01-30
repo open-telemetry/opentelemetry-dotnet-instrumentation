@@ -1,8 +1,6 @@
 // Copyright The OpenTelemetry Authors
 // SPDX-License-Identifier: Apache-2.0
 
-using System;
-
 namespace OpenTelemetry.AutoInstrumentation.Instrumentations;
 
 internal static class DatabaseAttributes
@@ -11,8 +9,6 @@ internal static class DatabaseAttributes
 
     internal static class Keys
     {
-        [Obsolete("Use DbSystemName instead.")]
-        public const string DbSystem = "db.system.name";
         public const string DbSystemName = "db.system.name";
         public const string DbCollectionName = "db.collection.name";
         public const string DbNamespace = "db.namespace";
