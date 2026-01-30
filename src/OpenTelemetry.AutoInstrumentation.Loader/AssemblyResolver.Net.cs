@@ -15,7 +15,7 @@ namespace OpenTelemetry.AutoInstrumentation.Loader;
 /// </summary>
 internal partial class AssemblyResolver
 {
-    internal static AssemblyLoadContext DependencyLoadContext { get; } = new ManagedProfilerAssemblyLoadContext();
+    internal static AssemblyLoadContext DependencyLoadContext { get; } = new ManagedProfilerAssemblyLoadContext("OpenTelemetry.AutoInstrumentation.Loader.AssemblyResolver");
 
     internal static string[] TrustedPlatformAssemblyNames { get; } = GetTrustedPlatformAssemblyNames();
 
@@ -125,7 +125,7 @@ internal partial class AssemblyResolver
                 }
             }
 
-            // then we fallback to root managed profiler folder
+            // last we fallback to root managed profiler folder
             var rootPath = Path.Combine(_managedProfilerDirectory, $"{assemblyName.Name}.dll");
             if (File.Exists(rootPath))
             {
@@ -137,57 +137,29 @@ internal partial class AssemblyResolver
             return false;
         }
 
-        Assembly? Load()
+        // TODO if we still want the mscorlib.resources safeguard to be universal (issue is described in .NET Framework implementation),
+        // TODO  we can implement it in runtime-agnostic AssemblyResolver partial class
+        // TODO  and make additional no-op check for System.Net.Http in .Net Framework implementation
+        // TODO  but skip it for .Net (Core) where we don't redirect this assembly, so this event won't be fired unless there's an external issue we can't fix
+
+        _logger.Debug($"Check assembly {assemblyName}");
+
+        if (!TryFindAssemblyPath(assemblyName, out var assemblyPath))
         {
-            // TODO if we still want the mscorlib.resources safeguard to be universal (issue is described in .NET Framework implementation),
-            // TODO  we can implement it in runtime-agnostic AssemblyResolver partial class
-            // TODO  and make additional no-op check for System.Net.Http in .Net Framework implementation
-            // TODO  but skip it for .Net (Core) where we don't redirect this assembly, so this event won't be fired unless there's an external issue we can't fix
-
-            _logger.Debug($"Check assembly {assemblyName}");
-
-            if (!TryFindAssemblyPath(assemblyName, out var assemblyPath))
-            {
-                _logger.Debug($"Skip loading unexpected assembly {assemblyName}");
-                return null;
-            }
-
-            // Load conflicting library into a custom ALC
-            if (TrustedPlatformAssemblyNames.Contains(assemblyName.Name))
-            {
-                _logger.Debug("Loading {0} with DependencyLoadContext.LoadFromAssemblyPath", assemblyPath);
-                return DependencyLoadContext.LoadFromAssemblyPath(assemblyPath);
-            }
-
-            // else load into default ALC
-            _logger.Debug("Loading {0} with AssemblyLoadContext.Default.LoadFromAssemblyPath", assemblyPath);
-            return AssemblyLoadContext.Default.LoadFromAssemblyPath(assemblyPath);
+            _logger.Debug($"Skip loading unexpected assembly {assemblyName}");
+            return null;
         }
 
-        // TODO temporary colored console output for debugging purpose
-        if (Environment.GetEnvironmentVariable("4715_DEBUG_TRACES") is not null)
+        // Load conflicting library into a custom ALC
+        if (TrustedPlatformAssemblyNames.Contains(assemblyName.Name))
         {
-            Console.ForegroundColor = ConsoleColor.Blue;
-            Console.Write($"Resolving <{assemblyName}>@({context}):");
+            _logger.Debug("Loading {0} with DependencyLoadContext.LoadFromAssemblyPath", assemblyPath);
+            return DependencyLoadContext.LoadFromAssemblyPath(assemblyPath);
         }
 
-        var assembly = Load();
-        if (Environment.GetEnvironmentVariable("4715_DEBUG_TRACES") is not null)
-        {
-            if (assembly != null)
-            {
-                Console.ForegroundColor = ConsoleColor.Green;
-                Console.WriteLine($" <{assembly}>@({AssemblyLoadContext.GetLoadContext(assembly)}):{assembly.Location}");
-            }
-            else
-            {
-                Console.WriteLine(" SKIP");
-            }
-
-            Console.ResetColor();
-        }
-
-        return assembly;
+        // else load into default ALC
+        _logger.Debug("Loading {0} with AssemblyLoadContext.Default.LoadFromAssemblyPath", assemblyPath);
+        return AssemblyLoadContext.Default.LoadFromAssemblyPath(assemblyPath);
     }
 
     private string ResolveManagedProfilerDirectory()

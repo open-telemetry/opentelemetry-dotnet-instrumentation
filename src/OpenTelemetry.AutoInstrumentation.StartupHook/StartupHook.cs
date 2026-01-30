@@ -1,8 +1,6 @@
 // Copyright The OpenTelemetry Authors
 // SPDX-License-Identifier: Apache-2.0
 
-using System;
-using System.IO;
 using System.Reflection;
 using OpenTelemetry.AutoInstrumentation.Configurations;
 using OpenTelemetry.AutoInstrumentation.Logging;
@@ -25,34 +23,6 @@ internal class StartupHook
     /// </summary>
     public static void Initialize()
     {
-        // TODO temporarily trace resolution events at the earliest stage of the application startup to make sure we don't skip resolutions before actual handler setup in Loader
-        if (Environment.GetEnvironmentVariable("4715_DEBUG_TRACES") is not null)
-        {
-            AppDomain.CurrentDomain.AssemblyResolve += (_, args) =>
-            {
-                Console.ForegroundColor = ConsoleColor.Yellow;
-                Console.WriteLine($"[StartupHook] Resolving ({args.Name}) from assembly <{args.RequestingAssembly}>: SKIP");
-                Console.ResetColor();
-                return null;
-            };
-            System.Runtime.Loader.AssemblyLoadContext.Default.Resolving += (context, assemblyName) =>
-            {
-                Console.ForegroundColor = ConsoleColor.DarkYellow;
-                Console.WriteLine($"[StartupHook] Resolving <{assemblyName}>@({context}): SKIP");
-                Console.ResetColor();
-
-                return null;
-            };
-#pragma warning disable CA1303 // Do not pass literals as localized parameters
-            Console.WriteLine($"List of Trusted Platfrom Assemblies:");
-            var tpaList = (AppContext.GetData("TRUSTED_PLATFORM_ASSEMBLIES") as string)?.Split(Path.PathSeparator) ?? [];
-            foreach (var it in tpaList)
-            {
-                Console.WriteLine($" - {it}");
-            }
-#pragma warning restore CA1303 // Do not pass literals as localized parameters
-        }
-
         _ = bool.TryParse(Environment.GetEnvironmentVariable(ConfigurationKeys.FailFast), out var failFast);
 
         try
