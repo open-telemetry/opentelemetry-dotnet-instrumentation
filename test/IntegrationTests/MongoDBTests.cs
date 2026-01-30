@@ -46,19 +46,13 @@ public class MongoDBTests : TestHelper
             collector.Expect(MongoDBInstrumentationScopeName, VersionHelper.AutoInstrumentationVersion);
         }
 
-        collector.Expect(
-            MongoDBInstrumentationScopeName,
-            VersionHelper.AutoInstrumentationVersion,
-            ValidateSpan,
-            schemaUrl: "https://opentelemetry.io/schemas/1.39.0");
+        collector.Expect(MongoDBInstrumentationScopeName, VersionHelper.AutoInstrumentationVersion, ValidateSpan, schemaUrl: "https://opentelemetry.io/schemas/1.39.0");
 
         EnableBytecodeInstrumentation();
         RunTestApplication(new()
         {
 #if NET462
-            Framework = string.IsNullOrEmpty(packageVersion) || new Version(packageVersion) >= new Version(3, 0, 0)
-                ? "net472"
-                : "net462",
+            Framework = string.IsNullOrEmpty(packageVersion) || new Version(packageVersion) >= new Version(3, 0, 0) ? "net472" : "net462",
 #endif
             Arguments = $"--mongo-db {_mongoDB.Port} {MongoDbNamespace} {MongoDbCollectionName}",
             PackageVersion = packageVersion
@@ -95,9 +89,7 @@ public class MongoDBTests : TestHelper
 
     private bool ValidateSpan(Span span)
     {
-        return span.Kind == Span.Types.SpanKind.Client &&
-               ValidateDatabaseAttributes(span.Attributes) &&
-               ValidateNetworkAttributes(span.Attributes);
+        return span.Kind == Span.Types.SpanKind.Client && ValidateDatabaseAttributes(span.Attributes) && ValidateNetworkAttributes(span.Attributes);
     }
 
     private bool ValidateNetworkAttributes(IReadOnlyCollection<KeyValue> spanAttributes)
