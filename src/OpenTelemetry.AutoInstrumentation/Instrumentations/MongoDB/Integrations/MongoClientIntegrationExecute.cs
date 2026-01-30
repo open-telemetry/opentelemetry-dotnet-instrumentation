@@ -93,21 +93,14 @@ namespace OpenTelemetry.AutoInstrumentation.Instrumentations.MongoDB.Integration
     type: InstrumentationType.Trace)]
 public static class MongoClientIntegrationExecute
 {
-    internal static CallTargetState OnMethodBegin<TTarget, TConnection>(
-        TTarget instance,
-        TConnection connection,
-        CancellationToken cancellationToken)
+    internal static CallTargetState OnMethodBegin<TTarget, TConnection>(TTarget instance, TConnection connection, CancellationToken cancellationToken)
         where TConnection : IConnection
     {
         var activity = MongoDBInstrumentation.StartDatabaseActivity(instance, connection);
         return new CallTargetState(activity, null);
     }
 
-    internal static CallTargetReturn<TReturn> OnMethodEnd<TTarget, TReturn>(
-        TTarget instance,
-        TReturn returnValue,
-        Exception exception,
-        in CallTargetState state)
+    internal static CallTargetReturn<TReturn> OnMethodEnd<TTarget, TReturn>(TTarget instance, TReturn returnValue, Exception exception, in CallTargetState state)
     {
         var activity = state.Activity;
         if (activity is null)
