@@ -43,6 +43,9 @@ internal class AssemblyFileVersionRule : Rule
                 {
                     var autoInstrumentationFileVersion = new Version(ruleFileInfo.FileVersion);
 
+                    // TODO double check what assemblies are expected to be loaded here:
+                    // should they benefit from our assembly resolving handler or should they stay away
+                    // Maybe TPA file location should be checked instead?
                     var appInstrumentationAssembly = Assembly.Load(referencedAssembly);
                     var appInstrumentationFileVersionInfo = FileVersionInfo.GetVersionInfo(appInstrumentationAssembly.Location);
                     var appInstrumentationFileVersion = new Version(appInstrumentationFileVersionInfo.FileVersion);
