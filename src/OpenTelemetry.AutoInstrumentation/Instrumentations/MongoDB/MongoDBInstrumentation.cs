@@ -83,6 +83,8 @@ internal static class MongoDBInstrumentation
     internal static void OnError(Activity activity, Exception exception)
     {
         activity.SetException(exception);
+        activity.SetStatus(ActivityStatusCode.Error);
+        activity.SetTag("error.type", exception.GetType().FullName);
 
         if (MongoCommandExceptionCodePropertyInfo != null &&
             exception.GetType().Name.Equals("MongoCommandException", StringComparison.Ordinal))

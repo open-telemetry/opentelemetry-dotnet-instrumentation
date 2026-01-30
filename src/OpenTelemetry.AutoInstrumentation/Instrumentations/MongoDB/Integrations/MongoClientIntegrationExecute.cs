@@ -117,10 +117,6 @@ public static class MongoClientIntegrationExecute
 
         if (exception is not null)
         {
-            activity.SetException(exception);
-            activity.SetStatus(ActivityStatusCode.Error);
-            activity.SetTag("error.type", exception.GetType().FullName);
-
             MongoDBInstrumentation.OnError(activity, exception);
         }
 

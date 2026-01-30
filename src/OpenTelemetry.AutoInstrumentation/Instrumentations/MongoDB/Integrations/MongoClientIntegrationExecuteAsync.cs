@@ -117,9 +117,6 @@ public static class MongoClientIntegrationExecuteAsync
 
         if (exception is not null)
         {
-            activity.SetStatus(ActivityStatusCode.Error);
-            activity.SetTag("error.type", exception.GetType().FullName);
-
             MongoDBInstrumentation.OnError(activity, exception);
         }
 
