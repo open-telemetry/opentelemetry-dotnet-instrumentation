@@ -3,7 +3,6 @@
 
 using OpenTelemetry.AutoInstrumentation.CallTarget;
 using OpenTelemetry.AutoInstrumentation.Instrumentations.MongoDB.DuckTypes;
-using OpenTelemetry.AutoInstrumentation.Util;
 
 namespace OpenTelemetry.AutoInstrumentation.Instrumentations.MongoDB.Integrations;
 
