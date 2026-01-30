@@ -1,14 +1,12 @@
 // Copyright The OpenTelemetry Authors
 // SPDX-License-Identifier: Apache-2.0
 
-using System;
 using System.Diagnostics;
 using System.Net;
 using System.Reflection;
 using OpenTelemetry.AutoInstrumentation.DuckTyping;
 using OpenTelemetry.AutoInstrumentation.Instrumentations.MongoDB.DuckTypes;
 using OpenTelemetry.AutoInstrumentation.Util;
-using OpenTelemetry.Trace;
 
 namespace OpenTelemetry.AutoInstrumentation.Instrumentations.MongoDB;
 
