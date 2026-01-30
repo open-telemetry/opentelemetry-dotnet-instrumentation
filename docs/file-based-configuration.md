@@ -50,7 +50,7 @@ file-based configuration to include these parameters.
 | `OTEL_DOTNET_AUTO_HOME`                              | Installation location.                                                                                                    |
 | `OTEL_DOTNET_AUTO_EXCLUDE_PROCESSES`                 | Names of the executable files that the profiler cannot instrument.                                                        |
 | `OTEL_DOTNET_AUTO_OPENTRACING_ENABLED`               | Enables OpenTracing tracer.                                                                                               |
-| `OTEL_DOTNET_AUTO_NETFX_REDIRECT_ENABLED`            | Enables automatic redirection of the assemblies used by the automatic instrumentation on the .NET Framework.              |
+| `OTEL_DOTNET_AUTO_REDIRECT_ENABLED`                  | Enables automatic redirection of the assemblies used by the automatic instrumentation.                                    |
 
 ---
 
