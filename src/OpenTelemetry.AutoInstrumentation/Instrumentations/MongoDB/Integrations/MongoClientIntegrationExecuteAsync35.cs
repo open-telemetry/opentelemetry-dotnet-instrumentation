@@ -60,7 +60,7 @@ public static class MongoClientIntegrationExecuteAsync35
 
         if (exception is not null)
         {
-            activity.SetException(exception);
+            MongoDBInstrumentation.OnError(activity, exception);
         }
 
         activity.Stop();
