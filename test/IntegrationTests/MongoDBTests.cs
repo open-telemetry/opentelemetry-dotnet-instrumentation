@@ -48,19 +48,11 @@ public class MongoDBTests : TestHelper
             collector.Expect(MongoDBInstrumentationScopeName, VersionHelper.AutoInstrumentationVersion);
         }
 
-#if NET8_0_OR_GREATER
-        // Schema URL is only available in .NET 8+
         collector.Expect(
             MongoDBInstrumentationScopeName,
             VersionHelper.AutoInstrumentationVersion,
-            span => ValidateSpan(span),
+            ValidateSpan,
             schemaUrl: "https://opentelemetry.io/schemas/1.39.0");
-#else
-        collector.Expect(
-            MongoDBInstrumentationScopeName,
-            VersionHelper.AutoInstrumentationVersion,
-            span => ValidateSpan(span));
-#endif
 
         EnableBytecodeInstrumentation();
         RunTestApplication(new()
