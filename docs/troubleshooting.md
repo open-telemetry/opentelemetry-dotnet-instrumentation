@@ -154,29 +154,29 @@ to use the same versions as OpenTelemetry .NET Automatic Instrumentation.
 The following dependencies are used by OpenTelemetry .NET Automatic Instrumentation:
 
 - [OpenTelemetry.AutoInstrumentation](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/blob/main/src/OpenTelemetry.AutoInstrumentation/OpenTelemetry.AutoInstrumentation.csproj)
-- [OpenTelemetry.AutoInstrumentation.AdditionalDeps](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/blob/main/src/OpenTelemetry.AutoInstrumentation.AdditionalDeps/Directory.Build.props)
+- <TODO: do I need to add more projects here>
 
 Find their versions in the following locations:
 
 - [Directory.Packages.props](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/blob/main/Directory.Packages.props)
 - [src/Directory.Packages.props](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/blob/main/src/Directory.Packages.props)
-- [src/OpenTelemetry.AutoInstrumentation.AdditionalDeps/Directory.Packages.props](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/blob/main/src/OpenTelemetry.AutoInstrumentation.AdditionalDeps/Directory.Packages.props)
+- [src/OpenTelemetry.AutoInstrumentation.Assemblies/Directory.Packages.props](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/blob/main/src/OpenTelemetry.AutoInstrumentation.Assemblies/Directory.Packages.props)
 
-By default, assembly references for .NET Framework applications are redirected
+By default, assembly references for .NET applications are redirected
 during runtime to the versions used by the automatic instrumentation.
-This behavior can be controlled through the [`OTEL_DOTNET_AUTO_NETFX_REDIRECT_ENABLED`](./config.md#additional-settings)
+This behavior can be controlled through the [`OTEL_DOTNET_AUTO_REDIRECT_ENABLED`](./config.md#additional-settings)
 setting.
 
 If the application already ships binding redirection for assemblies
 used by automatic instrumentation this automatic redirection may fail,
 see [#2833](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/issues/2833).
 Check if any existing binding redirect prevent redirection to the versions
-listed at [netfx_assembly_redirection.h](../src/OpenTelemetry.AutoInstrumentation.Native/netfx_assembly_redirection.h).
+listed at [assembly_redirection_net.h](../src/OpenTelemetry.AutoInstrumentation.Native/assembly_redirection_net.h) for .NET application
+and [assembly_redirection_netfx.h](../src/OpenTelemetry.AutoInstrumentation.Native/assembly_redirection_netfx.h) for .NET Framework application.
 
 For the automatic redirection above to work there are two specific scenarios that
-require the assemblies used to instrument .NET Framework
-applications, the ones under the `netfx` folder of the installation directory,
-to be also installed into the Global Assembly Cache (GAC):
+require the assemblies used to instrument .NET Framework applications,
+the ones under the `netfx` folder of the installation directory, to be also installed into the Global Assembly Cache (GAC):
 
 1. [__Monkey patch instrumentation__](https://en.wikipedia.org/wiki/Monkey_patch#:~:text=Monkey%20patching%20is%20a%20technique,Python%2C%20Groovy%2C%20etc.)
 of assemblies loaded as domain-neutral.
@@ -190,46 +190,3 @@ are updated.
 
 For more information about the GAC usage by the automatic instrumentation,
 see issue [#1906](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/issues/1906#issuecomment-1376292814).
-
-### Assembly in AdditionalDeps was not found
-
-#### Symptoms
-
-You get an error message similar to the following:
-
-```txt
-An assembly specified in the application dependencies manifest (OpenTelemetry.AutoInstrumentation.AdditionalDeps.deps.json) was not found  
-```
-
-#### Related issues
-
-- [#1744](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/issues/1744)
-- [#2181](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/issues/2181)
-
-#### Solution
-
-If you encounter an issue not listed on this page, see [General steps](#general-steps)
-to collect additional diagnostic information. This might help facilitate troubleshooting.
-
-### Runtime Store Assembly Version Conflicts
-
-#### Symptoms
-
-Applications may crash or behave unexpectedly due to version mismatches between
-the application's assemblies and those in the .NET runtime store. The
-RuntimeStoreDiagnosticRule in RuleEngine helps identify these mismatches by
-logging a warning if the application references a lower version than the runtime
-store.
-
-Sample Diagnostic Output:
-
-```plaintext
-[Warning] Rule Engine: Application references lower version of runtime store assembly C:\path\to\assembly.dll - 6.0.0.0.
-[Debug] Rule Engine: Runtime store assembly C:\path\to\assembly.dll validated successfully.
-```
-
-#### Solution
-
-For resolving runtime store assembly version conflicts, follow the same solution
-as outlined for [Assembly version conflicts](#assembly-version-conflicts) in
-this document.

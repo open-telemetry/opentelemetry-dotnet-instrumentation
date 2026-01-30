@@ -500,15 +500,9 @@ On .NET it is required to set the
 [`DOTNET_STARTUP_HOOKS`](https://github.com/dotnet/runtime/blob/main/docs/design/features/host-startup-hook.md)
 environment variable if the .NET CLR Profiler is not used.
 
-The [`DOTNET_ADDITIONAL_DEPS`](https://github.com/dotnet/runtime/blob/main/docs/design/features/additional-deps.md)
-and [`DOTNET_SHARED_STORE`](https://docs.microsoft.com/en-us/dotnet/core/deploying/runtime-store)
-environment variable are used to mitigate assembly version conflicts in .NET.
-
 | Environment variable     | Required value                                                       | Status                                                                                                                            |
 |--------------------------|----------------------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------|
 | `DOTNET_STARTUP_HOOKS`   | `$INSTALL_DIR/net/OpenTelemetry.AutoInstrumentation.StartupHook.dll` | [Experimental](https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/versioning-and-stability.md) |
-| `DOTNET_ADDITIONAL_DEPS` | `$INSTALL_DIR/AdditionalDeps`                                        | [Experimental](https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/versioning-and-stability.md) |
-| `DOTNET_SHARED_STORE`    | `$INSTALL_DIR/store`                                                 | [Experimental](https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/versioning-and-stability.md) |
 
 If the .NET CLR Profiler is used and the
 [`DOTNET_STARTUP_HOOKS`](https://github.com/dotnet/runtime/blob/main/docs/design/features/host-startup-hook.md)

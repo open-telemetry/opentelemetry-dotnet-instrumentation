@@ -220,16 +220,8 @@ Two issues might arise from incorrect versioning:
 2. Multiple versions of the assembly in the same process,
    as the runtime treats them independently.
 
-On the .NET Framework, by default, the CLR Profiler redirects any
+On the .NET Framework and .NET, by default, the CLR Profiler redirects any
 assembly references to the versions shipped with the Managed Profiler.
-
-#### Configuration resolution
-
-.NET [Framework-dependent deployment](https://docs.microsoft.com/en-us/dotnet/core/deploying/deploy-with-cli#framework-dependent-deployment)
-applications might use [DOTNET_ADDITIONAL_DEPS](https://github.com/dotnet/runtime/blob/main/docs/design/features/additional-deps.md)
-and [DOTNET_SHARED_STORE](https://docs.microsoft.com/en-us/dotnet/core/deploying/runtime-store)
-from OpenTelemetry .NET Automatic Instrumentation installation location
-to resolve assembly conflicts.
 
 #### Build time resolution
 
@@ -262,7 +254,7 @@ differs depending on the .NET version:
 - .NET Framework is referencing the latest supported version.
   Automatic redirection is forcing this version
   if instrumented application bring own copy.
-- .NET is referencing the lowest supported version.
+- .NET is referencing the latest supported version for a given runtime (e.g. for net8.0 latest 8.x, net9.0 - latest 9.x etc.).
   The version can be upgraded by the instrumented application.
 
 ## Further reading
