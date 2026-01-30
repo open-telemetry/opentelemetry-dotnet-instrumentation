@@ -254,7 +254,8 @@ differs depending on the .NET version:
 - .NET Framework is referencing the latest supported version.
   Automatic redirection is forcing this version
   if instrumented application bring own copy.
-- .NET is referencing the latest supported version for a given runtime (e.g. for net8.0 latest 8.x, net9.0 - latest 9.x etc.).
+- .NET is referencing the latest supported version for a given runtime
+  (e.g. for net8.0 latest 8.x, net9.0 - latest 9.x etc.).
   The version can be upgraded by the instrumented application.
 
 ## Further reading
