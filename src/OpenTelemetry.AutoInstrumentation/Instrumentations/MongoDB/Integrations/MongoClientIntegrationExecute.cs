@@ -1,7 +1,6 @@
 // Copyright The OpenTelemetry Authors
 // SPDX-License-Identifier: Apache-2.0
 
-using System;
 using System.Diagnostics;
 using OpenTelemetry.AutoInstrumentation.CallTarget;
 using OpenTelemetry.AutoInstrumentation.Instrumentations.MongoDB.DuckTypes;
@@ -118,6 +117,7 @@ public static class MongoClientIntegrationExecute
 
         if (exception is not null)
         {
+            activity.SetException(exception);
             activity.SetStatus(ActivityStatusCode.Error);
             activity.SetTag("error.type", exception.GetType().FullName);
 
