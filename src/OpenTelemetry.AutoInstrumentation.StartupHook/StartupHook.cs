@@ -26,29 +26,32 @@ internal class StartupHook
     public static void Initialize()
     {
         // TODO temporarily trace resolution events at the earliest stage of the application startup to make sure we don't skip resolutions before actual handler setup in Loader
-        AppDomain.CurrentDomain.AssemblyResolve += (_, args) =>
+        if (Environment.GetEnvironmentVariable("4715_DEBUG_TRACES") is not null)
         {
-            Console.ForegroundColor = ConsoleColor.Yellow;
-            Console.WriteLine($"[StartupHook] Resolving ({args.Name}) from assembly <{args.RequestingAssembly}>: SKIP");
-            Console.ResetColor();
-            return null;
-        };
-        System.Runtime.Loader.AssemblyLoadContext.Default.Resolving += (context, assemblyName) =>
-        {
-            Console.ForegroundColor = ConsoleColor.DarkYellow;
-            Console.WriteLine($"[StartupHook] Resolving <{assemblyName}>@({context}): SKIP");
-            Console.ResetColor();
+            AppDomain.CurrentDomain.AssemblyResolve += (_, args) =>
+            {
+                Console.ForegroundColor = ConsoleColor.Yellow;
+                Console.WriteLine($"[StartupHook] Resolving ({args.Name}) from assembly <{args.RequestingAssembly}>: SKIP");
+                Console.ResetColor();
+                return null;
+            };
+            System.Runtime.Loader.AssemblyLoadContext.Default.Resolving += (context, assemblyName) =>
+            {
+                Console.ForegroundColor = ConsoleColor.DarkYellow;
+                Console.WriteLine($"[StartupHook] Resolving <{assemblyName}>@({context}): SKIP");
+                Console.ResetColor();
 
-            return null;
-        };
+                return null;
+            };
 #pragma warning disable CA1303 // Do not pass literals as localized parameters
-        Console.WriteLine($"List of Trusted Platfrom Assemblies:");
-        var tpaList = (AppContext.GetData("TRUSTED_PLATFORM_ASSEMBLIES") as string)?.Split(Path.PathSeparator) ?? [];
-        foreach (var it in tpaList)
-        {
-            Console.WriteLine($" - {it}");
-        }
+            Console.WriteLine($"List of Trusted Platfrom Assemblies:");
+            var tpaList = (AppContext.GetData("TRUSTED_PLATFORM_ASSEMBLIES") as string)?.Split(Path.PathSeparator) ?? [];
+            foreach (var it in tpaList)
+            {
+                Console.WriteLine($" - {it}");
+            }
 #pragma warning restore CA1303 // Do not pass literals as localized parameters
+        }
 
         _ = bool.TryParse(Environment.GetEnvironmentVariable(ConfigurationKeys.FailFast), out var failFast);
 

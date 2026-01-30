@@ -13,20 +13,27 @@ internal class ManagedProfilerAssemblyLoadContext : AssemblyLoadContext
     public ManagedProfilerAssemblyLoadContext(string? name = null, bool isCollectible = false)
         : base(name ?? "OpenTelemetry.AutoInstrumentation.Loader", isCollectible)
     {
-        Resolving += (context, assemblyName) =>
+        if (Environment.GetEnvironmentVariable("4715_DEBUG_TRACES") is not null)
         {
-            Console.ForegroundColor = ConsoleColor.DarkMagenta;
-            Console.WriteLine($"Resolving <{assemblyName}>@({context}): SKIP");
-            Console.ResetColor();
-            return null;
-        };
+            Resolving += (context, assemblyName) =>
+            {
+                Console.ForegroundColor = ConsoleColor.DarkMagenta;
+                Console.WriteLine($"Resolving <{assemblyName}>@({context}): SKIP");
+                Console.ResetColor();
+                return null;
+            };
+        }
     }
 
     protected override Assembly? Load(AssemblyName assemblyName)
     {
-        Console.ForegroundColor = ConsoleColor.DarkMagenta;
-        Console.WriteLine($"Loading <{assemblyName}>@({this}): SKIP");
-        Console.ResetColor();
+        if (Environment.GetEnvironmentVariable("4715_DEBUG_TRACES") is not null)
+        {
+            Console.ForegroundColor = ConsoleColor.DarkMagenta;
+            Console.WriteLine($"Loading <{assemblyName}>@({this}): SKIP");
+            Console.ResetColor();
+        }
+
         return null;
     }
 }

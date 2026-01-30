@@ -165,21 +165,28 @@ internal partial class AssemblyResolver
         }
 
         // TODO temporary colored console output for debugging purpose
-        Console.ForegroundColor = ConsoleColor.Blue;
-        Console.Write($"Resolving <{assemblyName}>@({context}):");
+        if (Environment.GetEnvironmentVariable("4715_DEBUG_TRACES") is not null)
+        {
+            Console.ForegroundColor = ConsoleColor.Blue;
+            Console.Write($"Resolving <{assemblyName}>@({context}):");
+        }
 
         var assembly = Load();
-        if (assembly != null)
+        if (Environment.GetEnvironmentVariable("4715_DEBUG_TRACES") is not null)
         {
-            Console.ForegroundColor = ConsoleColor.Green;
-            Console.WriteLine($" <{assembly}>@({System.Runtime.Loader.AssemblyLoadContext.GetLoadContext(assembly)}):{assembly.Location}");
-        }
-        else
-        {
-            Console.WriteLine(" SKIP");
+            if (assembly != null)
+            {
+                Console.ForegroundColor = ConsoleColor.Green;
+                Console.WriteLine($" <{assembly}>@({AssemblyLoadContext.GetLoadContext(assembly)}):{assembly.Location}");
+            }
+            else
+            {
+                Console.WriteLine(" SKIP");
+            }
+
+            Console.ResetColor();
         }
 
-        Console.ResetColor();
         return assembly;
     }
 
