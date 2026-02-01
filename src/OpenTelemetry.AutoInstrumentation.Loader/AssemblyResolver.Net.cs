@@ -1,8 +1,6 @@
 // Copyright The OpenTelemetry Authors
 // SPDX-License-Identifier: Apache-2.0
 
-// TODO remove prgama after cleanup
-#pragma warning disable CA1303 // Do not pass literals as localized parameters
 #if NET
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
@@ -15,7 +13,7 @@ namespace OpenTelemetry.AutoInstrumentation.Loader;
 /// </summary>
 internal partial class AssemblyResolver
 {
-    internal static AssemblyLoadContext DependencyLoadContext { get; } = new ManagedProfilerAssemblyLoadContext("OpenTelemetry.AutoInstrumentation.Loader.AssemblyResolver");
+    internal static AssemblyLoadContext DependencyLoadContext { get; } = new AssemblyLoadContext("OpenTelemetry.AutoInstrumentation.Loader.AssemblyResolver", false);
 
     internal static string[] TrustedPlatformAssemblyNames { get; } = GetTrustedPlatformAssemblyNames();
 
@@ -171,4 +169,3 @@ internal partial class AssemblyResolver
     }
 }
 #endif
-#pragma warning restore CA1303 // Do not pass literals as localized parameters
