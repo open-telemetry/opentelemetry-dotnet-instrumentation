@@ -129,10 +129,12 @@ public class MongoDBTests : TestHelper
         var hasErrorType = span.Attributes.Any(kv => kv.Key == "error.type" && !string.IsNullOrEmpty(kv.Value.StringValue));
         var hasExceptionDetails = span.Events.Any(e => e.Name == "exception");
         var hasErrorStatus = span.Status?.Code == Status.Types.StatusCode.Error;
+        var hasDbResponseStatusCode = span.Attributes.Any(kv => kv.Key == "db.response.status_code" && !string.IsNullOrEmpty(kv.Value.StringValue));
 
         return span.Kind == Span.Types.SpanKind.Client &&
                ValidateDatabaseAttributes(span.Attributes) &&
-               (hasErrorType || hasExceptionDetails || hasErrorStatus);
+               (hasErrorType || hasExceptionDetails || hasErrorStatus) &&
+               hasDbResponseStatusCode;
     }
 
     private bool ValidateNetworkAttributes(IReadOnlyCollection<KeyValue> spanAttributes)
