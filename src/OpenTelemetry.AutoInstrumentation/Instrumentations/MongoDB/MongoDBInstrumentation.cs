@@ -37,10 +37,7 @@ internal static class MongoDBInstrumentation
             return null;
         }
 
-        if (!TryGetNetworkAttributes(connection, out var serverAddress, out var serverPort))
-        {
-            return null;
-        }
+        _ = TryGetNetworkAttributes(connection, out var serverAddress, out var serverPort);
 
         var tags = new ActivityTagsCollection
         {
@@ -80,7 +77,7 @@ internal static class MongoDBInstrumentation
         activity.SetTag(GenericAttributes.Keys.ErrorType, exception.GetType().FullName);
 
         if (MongoCommandExceptionCodePropertyInfo != null &&
-            exception.GetType().FullName.Equals("MongoDB.Driver.MongoCommandException", StringComparison.Ordinal))
+            exception.GetType().FullName?.Equals("MongoDB.Driver.MongoCommandException", StringComparison.Ordinal) == true)
         {
             try
             {
