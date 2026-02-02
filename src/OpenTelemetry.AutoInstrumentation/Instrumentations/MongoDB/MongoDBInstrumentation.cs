@@ -80,7 +80,7 @@ internal static class MongoDBInstrumentation
         activity.SetTag(GenericAttributes.Keys.ErrorType, exception.GetType().FullName);
 
         if (MongoCommandExceptionCodePropertyInfo != null &&
-            exception.GetType().Name.Equals("MongoCommandException", StringComparison.Ordinal))
+            exception.GetType().FullName.Equals("MongoDB.Driver.MongoCommandException", StringComparison.Ordinal))
         {
             try
             {

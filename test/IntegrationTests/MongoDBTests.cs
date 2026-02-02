@@ -68,6 +68,7 @@ public class MongoDBTests : TestHelper
         var dbSystemAttr = spanAttributes.FirstOrDefault(kv => kv.Key == DbSystemNameAttributeName);
         var dbOperationNameAttr = spanAttributes.FirstOrDefault(kv => kv.Key == DbOperationNameAttributeName);
 
+        // Validate all required attributes are present
         if (collectionNameAttr == null ||
             dbNamespaceAttr == null ||
             dbSystemAttr == null ||
@@ -81,6 +82,11 @@ public class MongoDBTests : TestHelper
         var dbSystem = dbSystemAttr.Value.StringValue;
         var dbOperationName = dbOperationNameAttr.Value.StringValue;
 
+        // Validate attribute values match expectations for v1.39.0 semantic conventions
+        // - db.system.name (renamed from db.system)
+        // - db.collection.name (renamed from db.mongodb.collection)
+        // - db.namespace (replaces db.name)
+        // - db.operation.name (new in v1.39.0)
         return collectionName == MongoDbCollectionName &&
                dbNamespace == MongoDbNamespace &&
                dbSystem == MongoDbSystem &&
