@@ -61,6 +61,31 @@ public class MongoDBTests : TestHelper
         collector.AssertExpectations();
     }
 
+    [Theory]
+    [Trait("Category", "EndToEnd")]
+    [Trait("Containers", "Any")]
+    [MemberData(nameof(LibraryVersion.MongoDB), MemberType = typeof(LibraryVersion))]
+    public void SubmitsTracesWithErrorDetails(string packageVersion)
+    {
+        using var collector = new MockSpansCollector(Output);
+        SetExporter(collector);
+
+        // Expect at least one span with error details
+        collector.Expect(MongoDBInstrumentationScopeName, VersionHelper.AutoInstrumentationVersion, ValidateErrorSpan, schemaUrl: "https://opentelemetry.io/schemas/1.39.0");
+
+        EnableBytecodeInstrumentation();
+        RunTestApplication(new()
+        {
+#if NET462
+            Framework = string.IsNullOrEmpty(packageVersion) || new Version(packageVersion) >= new Version(3, 0, 0) ? "net472" : "net462",
+#endif
+            Arguments = $"--mongo-db {_mongoDB.Port} {MongoDbNamespace} {MongoDbCollectionName} --trigger-error",
+            PackageVersion = packageVersion
+        });
+
+        collector.AssertExpectations();
+    }
+
     private static bool ValidateDatabaseAttributes(IReadOnlyCollection<KeyValue> spanAttributes)
     {
         var collectionNameAttr = spanAttributes.FirstOrDefault(kv => kv.Key == DbCollectionNameAttributeName);
@@ -96,6 +121,18 @@ public class MongoDBTests : TestHelper
     private bool ValidateSpan(Span span)
     {
         return span.Kind == Span.Types.SpanKind.Client && ValidateDatabaseAttributes(span.Attributes) && ValidateNetworkAttributes(span.Attributes);
+    }
+
+    private bool ValidateErrorSpan(Span span)
+    {
+        // Validate that the span has error information
+        var hasErrorType = span.Attributes.Any(kv => kv.Key == "error.type" && !string.IsNullOrEmpty(kv.Value.StringValue));
+        var hasExceptionDetails = span.Events.Any(e => e.Name == "exception");
+        var hasErrorStatus = span.Status?.Code == Status.Types.StatusCode.Error;
+
+        return span.Kind == Span.Types.SpanKind.Client &&
+               ValidateDatabaseAttributes(span.Attributes) &&
+               (hasErrorType || hasExceptionDetails || hasErrorStatus);
     }
 
     private bool ValidateNetworkAttributes(IReadOnlyCollection<KeyValue> spanAttributes)
