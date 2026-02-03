@@ -19,7 +19,7 @@ internal static class MongoDBInstrumentation
             TelemetrySchemaUrl = DatabaseAttributes.SchemaUrl
         });
 
-    private static readonly PropertyInfo? MongoCommandExceptionCodePropertyInfo = GetMongoCommandExceptionCodePropertyInfo();
+    private static PropertyInfo? mongoCommandExceptionCodePropertyInfo;
 
     public static Activity? StartDatabaseActivity(
         object? instance,
@@ -76,12 +76,18 @@ internal static class MongoDBInstrumentation
         activity.SetException(exception);
         activity.SetTag(GenericAttributes.Keys.ErrorType, exception.GetType().FullName);
 
-        if (MongoCommandExceptionCodePropertyInfo != null &&
-            exception.GetType().FullName?.Equals("MongoDB.Driver.MongoCommandException", StringComparison.Ordinal) == true)
+        if (exception.GetType().FullName?.Equals("MongoDB.Driver.MongoCommandException", StringComparison.Ordinal) == true)
         {
             try
             {
-                var code = MongoCommandExceptionCodePropertyInfo.GetValue(exception);
+                var codeProperty = mongoCommandExceptionCodePropertyInfo;
+                if (codeProperty == null || codeProperty.DeclaringType != exception.GetType())
+                {
+                    codeProperty = exception.GetType().GetProperty("Code");
+                    mongoCommandExceptionCodePropertyInfo = codeProperty;
+                }
+
+                var code = codeProperty?.GetValue(exception);
                 if (code != null)
                 {
                     activity.SetTag(DatabaseAttributes.Keys.DbResponseStatusCode, code.ToString());
@@ -91,19 +97,6 @@ internal static class MongoDBInstrumentation
             {
                 // accessing the property failed, ignore
             }
-        }
-    }
-
-    private static PropertyInfo? GetMongoCommandExceptionCodePropertyInfo()
-    {
-        try
-        {
-            return Type.GetType(
-                "MongoDB.Driver.MongoCommandException, MongoDB.Driver")?.GetProperty("Code");
-        }
-        catch
-        {
-            return null;
         }
     }
 
