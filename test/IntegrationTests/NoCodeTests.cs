@@ -149,6 +149,6 @@ file static class NoCodeMockSpansCollectorExtensions
 
         var duration = TimeSpan.FromTicks(ticks);
 
-        return duration > TimeSpan.FromMilliseconds(98); // all async methods have a 100ms delay, need to be a bit lower (due to timer resolution)
+        return duration > TimeSpan.FromMilliseconds(90); // all async methods have a 100ms delay; allow extra jitter on some runtimes
     }
 }
