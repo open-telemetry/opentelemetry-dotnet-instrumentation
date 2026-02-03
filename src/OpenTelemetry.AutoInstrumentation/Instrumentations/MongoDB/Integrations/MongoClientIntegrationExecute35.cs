@@ -39,9 +39,19 @@ namespace OpenTelemetry.AutoInstrumentation.Instrumentations.MongoDB.Integration
     maximumVersion: MongoDBConstants.MaximumVersion35,
     integrationName: MongoDBConstants.IntegrationName,
     type: InstrumentationType.Trace)]
+[InstrumentMethod(
+    assemblyName: MongoDBConstants.AssemblyName3,
+    typeName: "MongoDB.Driver.Core.WireProtocol.CommandWireProtocol`1",
+    methodName: "Execute",
+    returnTypeName: "!0",
+    parameterTypeNames: ["MongoDB.Driver.OperationContext", "MongoDB.Driver.Core.Connections.IConnection"],
+    minimumVersion: MongoDBConstants.MinimumVersion35,
+    maximumVersion: MongoDBConstants.MaximumVersion35,
+    integrationName: MongoDBConstants.IntegrationName,
+    type: InstrumentationType.Trace)]
 public static class MongoClientIntegrationExecute35
 {
-    internal static CallTargetState OnMethodBegin<TTarget, TConnection, TOperationContext>(TTarget instance, TConnection connection, TOperationContext? operationContext)
+    internal static CallTargetState OnMethodBegin<TTarget, TOperationContext, TConnection>(TTarget instance, TOperationContext? operationContext, TConnection connection)
         where TConnection : IConnection
     {
         var activity = MongoDBInstrumentation.StartDatabaseActivity(instance, connection);
