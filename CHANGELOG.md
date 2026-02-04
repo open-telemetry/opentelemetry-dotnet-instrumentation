@@ -12,8 +12,11 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 ### Changed
 
 - MongoDB instrumentation is updated to comply with v1.39.0 Semantic Convention
-  (for example, `db.system` -> `db.system.name`)
-
+  - Renamed the `db.system` attribute to `db.system.name`,
+  - Added `db.operation.batch.size` attribute,
+  - Added the `db.response.status_code` and `error.type` attributes to error spans,
+  - Removed the `network.peer.address` and `network.peer.port` attributes.
+  - 
 #### Dependency updates
 
 ### Deprecated
