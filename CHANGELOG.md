@@ -16,7 +16,7 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
   - Added `db.operation.batch.size` attribute,
   - Added the `db.response.status_code` and `error.type` attributes to error spans,
   - Removed the `network.peer.address` and `network.peer.port` attributes.
-  - 
+
 #### Dependency updates
 
 ### Deprecated
