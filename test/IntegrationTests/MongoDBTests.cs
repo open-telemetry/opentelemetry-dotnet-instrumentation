@@ -20,9 +20,13 @@ public class MongoDBTests : TestHelper
     private const string DbCollectionNameAttributeName = "db.collection.name";
     private const string DbNamespaceAttributeName = "db.namespace";
     private const string DbOperationNameAttributeName = "db.operation.name";
+    private const string DbOperationBatchSizeAttributeName = "db.operation.batch.size";
 
     private const string ServerAddressAttributeName = "server.address";
     private const string ServerPortAttributeName = "server.port";
+    private const string ErrorTypeAttributeName = "error.type";
+    private const string ExceptionEventName = "exception";
+    private const string DbResponseStatusCodeAttributeName = "db.response.status_code";
 
     private readonly MongoDBFixture _mongoDB;
 
@@ -112,10 +116,24 @@ public class MongoDBTests : TestHelper
         // - db.collection.name (renamed from db.mongodb.collection)
         // - db.namespace (replaces db.name)
         // - db.operation.name (new in v1.39.0)
-        return collectionName == MongoDbCollectionName &&
-               dbNamespace == MongoDbNamespace &&
-               dbSystem == MongoDbSystem &&
-               !string.IsNullOrWhiteSpace(dbOperationName);
+        if (collectionName != MongoDbCollectionName ||
+            dbNamespace != MongoDbNamespace ||
+            dbSystem != MongoDbSystem ||
+            string.IsNullOrWhiteSpace(dbOperationName))
+        {
+            return false;
+        }
+
+        if (dbOperationName is "insert" or "update" or "delete")
+        {
+            var batchSizeAttr = spanAttributes.FirstOrDefault(kv => kv.Key == DbOperationBatchSizeAttributeName);
+            if (batchSizeAttr == null || batchSizeAttr.Value.IntValue <= 0)
+            {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     private bool ValidateSpan(Span span)
@@ -126,10 +144,10 @@ public class MongoDBTests : TestHelper
     private bool ValidateErrorSpan(Span span)
     {
         // Validate that the span has error information
-        var hasErrorType = span.Attributes.Any(kv => kv.Key == "error.type" && !string.IsNullOrEmpty(kv.Value.StringValue));
-        var hasExceptionDetails = span.Events.Any(e => e.Name == "exception");
+        var hasErrorType = span.Attributes.Any(kv => kv.Key == ErrorTypeAttributeName && !string.IsNullOrEmpty(kv.Value.StringValue));
+        var hasExceptionDetails = span.Events.Any(e => e.Name == ExceptionEventName);
         var hasErrorStatus = span.Status?.Code == Status.Types.StatusCode.Error;
-        var hasDbResponseStatusCode = span.Attributes.Any(kv => kv.Key == "db.response.status_code" && !string.IsNullOrEmpty(kv.Value.StringValue));
+        var hasDbResponseStatusCode = span.Attributes.Any(kv => kv.Key == DbResponseStatusCodeAttributeName && !string.IsNullOrEmpty(kv.Value.StringValue));
 
         return span.Kind == Span.Types.SpanKind.Client &&
                ValidateDatabaseAttributes(span.Attributes) &&

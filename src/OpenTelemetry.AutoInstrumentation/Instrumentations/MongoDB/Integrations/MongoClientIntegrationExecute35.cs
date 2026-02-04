@@ -31,16 +31,6 @@ namespace OpenTelemetry.AutoInstrumentation.Instrumentations.MongoDB.Integration
     type: InstrumentationType.Trace)]
 [InstrumentMethod(
     assemblyName: MongoDBConstants.AssemblyName3,
-    typeName: "MongoDB.Driver.Core.WireProtocol.QueryWireProtocol`1",
-    methodName: "Execute",
-    returnTypeName: "!0",
-    parameterTypeNames: ["MongoDB.Driver.OperationContext", "MongoDB.Driver.Core.Connections.IConnection"],
-    minimumVersion: MongoDBConstants.MinimumVersion35,
-    maximumVersion: MongoDBConstants.MaximumVersion35,
-    integrationName: MongoDBConstants.IntegrationName,
-    type: InstrumentationType.Trace)]
-[InstrumentMethod(
-    assemblyName: MongoDBConstants.AssemblyName3,
     typeName: "MongoDB.Driver.Core.WireProtocol.CommandWireProtocol`1",
     methodName: "Execute",
     returnTypeName: "!0",
