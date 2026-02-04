@@ -3,7 +3,6 @@
 
 using System.Diagnostics;
 using System.Net;
-using System.Reflection;
 using OpenTelemetry.AutoInstrumentation.DuckTyping;
 using OpenTelemetry.AutoInstrumentation.Instrumentations.MongoDB.DuckTypes;
 using OpenTelemetry.AutoInstrumentation.Util;
@@ -18,8 +17,6 @@ internal static class MongoDBInstrumentation
             Version = AutoInstrumentationVersion.Version,
             TelemetrySchemaUrl = DatabaseAttributes.SchemaUrl
         });
-
-    private static PropertyInfo? mongoCommandExceptionCodePropertyInfo;
 
     public static Activity? StartDatabaseActivity(
         object? instance,
@@ -80,13 +77,7 @@ internal static class MongoDBInstrumentation
         {
             try
             {
-                var codeProperty = mongoCommandExceptionCodePropertyInfo;
-                if (codeProperty == null || codeProperty.DeclaringType != exception.GetType())
-                {
-                    codeProperty = exception.GetType().GetProperty("Code");
-                    mongoCommandExceptionCodePropertyInfo = codeProperty;
-                }
-
+                var codeProperty = exception.GetType().GetProperty("Code");
                 var code = codeProperty?.GetValue(exception);
                 if (code != null)
                 {

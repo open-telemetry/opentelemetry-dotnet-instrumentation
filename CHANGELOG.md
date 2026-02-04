@@ -11,7 +11,8 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 
 ### Changed
 
-- MongoDB instrumentation is updated to comply with v1.39.0 Semantic Convention (for example, `db.system` -> `db.system.name`)
+- MongoDB instrumentation is updated to comply with v1.39.0 Semantic Convention
+  (for example, `db.system` -> `db.system.name`)
 
 #### Dependency updates
 

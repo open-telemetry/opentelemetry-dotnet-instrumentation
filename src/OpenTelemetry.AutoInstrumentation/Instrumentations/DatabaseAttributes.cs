@@ -9,7 +9,6 @@ internal static class DatabaseAttributes
 
     internal static class Keys
     {
-        public const string DbSystem = "db.system";
         public const string DbSystemName = "db.system.name";
         public const string DbCollectionName = "db.collection.name";
         public const string DbNamespace = "db.namespace";
