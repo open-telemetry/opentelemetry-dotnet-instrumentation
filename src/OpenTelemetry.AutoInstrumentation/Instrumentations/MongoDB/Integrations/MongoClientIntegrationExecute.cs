@@ -41,6 +41,16 @@ namespace OpenTelemetry.AutoInstrumentation.Instrumentations.MongoDB.Integration
     integrationName: MongoDBConstants.IntegrationName,
     type: InstrumentationType.Trace)]
 [InstrumentMethod(
+    assemblyName: MongoDBConstants.AssemblyName3,
+    typeName: "MongoDB.Driver.Core.WireProtocol.QueryWireProtocol`1",
+    methodName: "Execute",
+    returnTypeName: "!0",
+    parameterTypeNames: ["MongoDB.Driver.Core.Connections.IConnection", ClrNames.CancellationToken],
+    minimumVersion: MongoDBConstants.MinimumVersion3,
+    maximumVersion: MongoDBConstants.MaximumVersion3,
+    integrationName: MongoDBConstants.IntegrationName,
+    type: InstrumentationType.Trace)]
+[InstrumentMethod(
     assemblyName: MongoDBConstants.AssemblyName,
     typeName: "MongoDB.Driver.Core.WireProtocol.CommandUsingQueryMessageWireProtocol`1",
     methodName: "Execute",
@@ -64,6 +74,16 @@ namespace OpenTelemetry.AutoInstrumentation.Instrumentations.MongoDB.Integration
 [InstrumentMethod(
     assemblyName: MongoDBConstants.AssemblyName,
     typeName: "MongoDB.Driver.Core.WireProtocol.WriteWireProtocolBase`1",
+    methodName: "Execute",
+    returnTypeName: "!0",
+    parameterTypeNames: ["MongoDB.Driver.Core.Connections.IConnection", ClrNames.CancellationToken],
+    minimumVersion: MongoDBConstants.MinimumVersion,
+    maximumVersion: MongoDBConstants.MaximumVersion,
+    integrationName: MongoDBConstants.IntegrationName,
+    type: InstrumentationType.Trace)]
+[InstrumentMethod(
+    assemblyName: MongoDBConstants.AssemblyName,
+    typeName: "MongoDB.Driver.Core.WireProtocol.QueryWireProtocol`1",
     methodName: "Execute",
     returnTypeName: "!0",
     parameterTypeNames: ["MongoDB.Driver.Core.Connections.IConnection", ClrNames.CancellationToken],
