@@ -140,7 +140,7 @@ public class MongoDBTests : TestHelper
         var hasErrorType = span.Attributes.Any(kv => kv.Key == ErrorTypeAttributeName && !string.IsNullOrEmpty(kv.Value.StringValue));
         var hasExceptionDetails = span.Events.Any(e => e.Name == ExceptionEventName);
         var hasErrorStatus = span.Status?.Code == Status.Types.StatusCode.Error;
-        var hasDbResponseStatusCode = span.Attributes.Any(kv => kv.Key == DbResponseStatusCodeAttributeName && !string.IsNullOrEmpty(kv.Value.StringValue));
+        var hasDbResponseStatusCode = span.Attributes.Any(kv => kv.Key == DbResponseStatusCodeAttributeName && kv.Value.IntValue > 0);
 
         return span.Kind == Span.Types.SpanKind.Client &&
                ValidateDatabaseAttributes(span.Attributes) &&
