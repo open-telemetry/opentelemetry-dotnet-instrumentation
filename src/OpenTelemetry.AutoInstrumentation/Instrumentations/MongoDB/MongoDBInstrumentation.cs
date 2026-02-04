@@ -73,21 +73,9 @@ internal static class MongoDBInstrumentation
         activity.SetException(exception);
         activity.SetTag(GenericAttributes.Keys.ErrorType, exception.GetType().FullName);
 
-        if (exception.GetType().FullName?.Equals("MongoDB.Driver.MongoCommandException", StringComparison.Ordinal) == true)
+        if (exception.TryDuckCast<IMongoCommandExceptionProxy>(out var mongoCommandException))
         {
-            try
-            {
-                var codeProperty = exception.GetType().GetProperty("Code");
-                var code = codeProperty?.GetValue(exception);
-                if (code != null)
-                {
-                    activity.SetTag(DatabaseAttributes.Keys.DbResponseStatusCode, code.ToString());
-                }
-            }
-            catch
-            {
-                // accessing the property failed, ignore
-            }
+            activity.SetTag(DatabaseAttributes.Keys.DbResponseStatusCode, mongoCommandException.Code);
         }
     }
 
