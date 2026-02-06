@@ -38,7 +38,7 @@ internal class StartupHook
 
             Logger.Information("Initialization.");
 
-            // Creating an instance of OpenTelemetry.AutoInstrumentation.Loader.Startup
+            // Creating an instance of OpenTelemetry.AutoInstrumentation.Loader.Loader
             // will initialize Instrumentation through its static constructor.
             var loaderFilePath = Path.Combine(LoaderAssemblyLocation, "OpenTelemetry.AutoInstrumentation.Loader.dll");
             var loaderAssembly = Assembly.LoadFrom(loaderFilePath);

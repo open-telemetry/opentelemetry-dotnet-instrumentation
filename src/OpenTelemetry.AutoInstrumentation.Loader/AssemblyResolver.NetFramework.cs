@@ -13,7 +13,20 @@ namespace OpenTelemetry.AutoInstrumentation.Loader;
 /// </summary>
 internal partial class AssemblyResolver
 {
-    internal Assembly? AssemblyResolve_ManagedProfilerDependencies(object sender, ResolveEventArgs args)
+    internal void RegisterAssemblyResolving()
+    {
+        AppDomain.CurrentDomain.AssemblyResolve += AssemblyResolve_ManagedProfilerDependencies;
+    }
+
+    /// <summary>
+    /// Return redirection table used in runtime that will match TFM folder to load assemblies.
+    /// It may not be actual .NET Framework version.
+    /// </summary>
+    [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
+    [DllImport("OpenTelemetry.AutoInstrumentation.Native.dll")]
+    private static extern int GetNetFrameworkRedirectionVersion();
+
+    private Assembly? AssemblyResolve_ManagedProfilerDependencies(object sender, ResolveEventArgs args)
     {
         var assemblyName = new AssemblyName(args.Name).Name;
         _logger.Debug($"Check assembly {assemblyName}");
@@ -73,14 +86,6 @@ internal partial class AssemblyResolver
 
         return null;
     }
-
-    /// <summary>
-    /// Return redirection table used in runtime that will match TFM folder to load assemblies.
-    /// It may not be actual .NET Framework version.
-    /// </summary>
-    [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
-    [DllImport("OpenTelemetry.AutoInstrumentation.Native.dll")]
-    private static extern int GetNetFrameworkRedirectionVersion();
 
     private string ResolveManagedProfilerDirectory()
     {

@@ -2,8 +2,9 @@
 // SPDX-License-Identifier: Apache-2.0
 
 #if NET
+using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
-using System.Runtime.InteropServices;
+using System.Runtime.Loader;
 
 namespace OpenTelemetry.AutoInstrumentation.Loader;
 
@@ -12,85 +13,151 @@ namespace OpenTelemetry.AutoInstrumentation.Loader;
 /// </summary>
 internal partial class AssemblyResolver
 {
-    internal static System.Runtime.Loader.AssemblyLoadContext DependencyLoadContext { get; } = new ManagedProfilerAssemblyLoadContext();
+    internal static AssemblyLoadContext DependencyLoadContext { get; } = new AssemblyLoadContext("OpenTelemetry.AutoInstrumentation.Loader.AssemblyResolver", false);
 
-    internal static string[]? StoreFiles { get; } = GetStoreFiles();
+    internal static string[] TrustedPlatformAssemblyNames { get; } = GetTrustedPlatformAssemblyNames();
 
-    internal Assembly? AssemblyResolve_ManagedProfilerDependencies(object? sender, ResolveEventArgs args)
+    internal static string CommonLanguageRuntimeVersionFolder { get; } = GetCommonLanguageRuntimeVersionFolder();
+
+    internal void RegisterAssemblyResolving()
     {
-        var assemblyName = new AssemblyName(args.Name);
-        _logger.Debug($"Check assembly {assemblyName}");
+        // ASSEMBLY RESOLUTION TIMING
+        //
+        // When the runtime cannot find an assembly, AssemblyLoadContext.Default.Resolving fires before
+        // AppDomain.CurrentDomain.AssemblyResolve, so we subscribe to the former for guaranteed control.
+        //
+        // While we could subscribe to AppDomain.CurrentDomain.AssemblyResolve, the timing of this
+        // subscription relative to the built-in handler (Assembly.LoadFromResolveHandler) subscription is
+        // unpredictable and fragile to code changes. If the built-in handler runs first, it loads co-located
+        // assemblies (our layout - OpenTelemetry.dll library and its dependency System.Diagnostics.DiagnosticSource.dll)
+        // into the Default context via Assembly.LoadFrom, causing loading failure if the customer application
+        // has the same dependency but to a lower version (in the example above, DiagnosticSource dll)
 
-        // On .NET Framework, having a non-US locale can cause mscorlib
-        // to enter the AssemblyResolve event when searching for resources
-        // in its satellite assemblies. This seems to have been fixed in
-        // .NET Core in the 2.0 servicing branch, so we should not see this
-        // occur, but guard against it anyways. If we do see it, exit early
-        // so we don't cause infinite recursion.
-        if (string.Equals(assemblyName.Name, "System.Private.CoreLib.resources", StringComparison.OrdinalIgnoreCase) ||
-            string.Equals(assemblyName.Name, "System.Net.Http", StringComparison.OrdinalIgnoreCase))
-        {
-            return null;
-        }
-
-        var path = Path.Combine(_managedProfilerDirectory, $"{assemblyName.Name}.dll");
-
-        // Only load the main profiler into the default Assembly Load Context.
-        // If OpenTelemetry.AutoInstrumentation or other libraries are provided by the NuGet package their loads are handled in the following two ways.
-        // 1) The AssemblyVersion is greater than or equal to the version used by OpenTelemetry.AutoInstrumentation, the assembly
-        //    will load successfully and will not invoke this resolve event.
-        // 2) The AssemblyVersion is lower than the version used by OpenTelemetry.AutoInstrumentation, the assembly will fail to load
-        //    and invoke this resolve event. It must be loaded in a separate AssemblyLoadContext since the application will only
-        //    load the originally referenced version
-        if (assemblyName.Name != null && assemblyName.Name.StartsWith("OpenTelemetry.AutoInstrumentation", StringComparison.OrdinalIgnoreCase) && File.Exists(path))
-        {
-            _logger.Debug("Loading {0} with Assembly.LoadFrom", path);
-            return Assembly.LoadFrom(path);
-        }
-        else if (File.Exists(path))
-        {
-            _logger.Debug("Loading {0} with DependencyLoadContext.LoadFromAssemblyPath", path);
-            return DependencyLoadContext.LoadFromAssemblyPath(path); // Load unresolved framework and third-party dependencies into a custom Assembly Load Context
-        }
-        else
-        {
-            var entry = StoreFiles?.FirstOrDefault(e => e.EndsWith($"{assemblyName.Name}.dll", StringComparison.Ordinal));
-            if (entry != null)
-            {
-                return DependencyLoadContext.LoadFromAssemblyPath(entry);
-            }
-
-            return null;
-        }
+        // ASSEMBLY RESOLUTION STRATEGY
+        //
+        // === NATIVE PROFILER DEPLOYMENT ===
+        // The native profiler already redirected (IL rewriting) all references to our versions.
+        // The Resolving event fires when runtime cannot find the assembly in two cases:
+        //
+        // Case 1: Assembly NOT in TrustedPlatformAssembly list (our dependencies; e.g., OpenTelemetry.dll)
+        //   -> Runtime has no default location for this assembly
+        //   -> Resolving event fires
+        //   -> We load to Default AssemblyLoadContext (no version conflict risk)
+        //
+        // Case 2: Assembly IN TPA with lower version (conflict)
+        //   -> Customer's TPA has lower version, profiler redirects to higher version
+        //   -> Runtime cannot satisfy higher version due to TPA conflict
+        //   -> Resolving event fires
+        //   -> We load to Custom ALC for isolation (loading to Default ALC will fail)
+        //   -> NOTE: If TPA has same/higher version, runtime successfully auto-loads to Default ALC;
+        //            event never fires (accepted)
+        //
+        // === NUGET PACKAGE DEPLOYMENT (Need Investigation) ===
+        // NuGet resolves versions at build time; TPA typically has correct versions.
+        // This handler serves as fallback for edge cases.
+        //
+        // === STARTUP HOOK ONLY (Not Currently Supported) ===
+        // StartupHook lacks:
+        //   - Native profiler's IL redirection capabilities
+        //   - Build-time version resolution benefits
+        // To be implemented in follow-up changes.
+        AssemblyLoadContext.Default.Resolving += Resolving_ManagedProfilerDependencies;
     }
 
-    private static string[]? GetStoreFiles()
+    private static string[] GetTrustedPlatformAssemblyNames()
     {
         try
         {
-            var storeDirectory = Environment.GetEnvironmentVariable("DOTNET_SHARED_STORE");
-            if (storeDirectory == null || !Directory.Exists(storeDirectory))
-            {
-                return null;
-            }
-
-            var architecture = RuntimeInformation.ProcessArchitecture switch
-            {
-                Architecture.X86 => "x86",
-                Architecture.Arm64 => "arm64",
-                _ => "x64" // Default to x64 for architectures not explicitly handled
-            };
-
-            var targetFramework = $"net{Environment.Version.Major}.{Environment.Version.Minor}";
-            var finalPath = Path.Combine(storeDirectory, architecture, targetFramework);
-
-            var storeFiles = Directory.GetFiles(finalPath, "Microsoft.Extensions*.dll", SearchOption.AllDirectories);
-            return storeFiles;
+            var tpaList = (AppContext.GetData("TRUSTED_PLATFORM_ASSEMBLIES") as string)?.Split(Path.PathSeparator) ?? [];
+            return [.. tpaList.Select(Path.GetFileNameWithoutExtension).OfType<string>()];
         }
         catch
         {
+            return [];
+        }
+    }
+
+    private static string GetCommonLanguageRuntimeVersionFolder()
+    {
+        return $"net{Environment.Version.Major}.{Environment.Version.Minor}";
+    }
+
+    private Assembly? Resolving_ManagedProfilerDependencies(AssemblyLoadContext context, AssemblyName assemblyName)
+    {
+        // TODO do we want to cache this information so we don't need to check and read files every time?
+        bool TryFindAssemblyPath(AssemblyName assemblyName, [NotNullWhen(true)] out string? assemblyPath)
+        {
+            // For .NET (Core) most of the assembblies are different per runtime version so we start first with runtime specific folder
+            var runtimeSpecificPath = Path.Combine(_managedProfilerDirectory, CommonLanguageRuntimeVersionFolder, $"{assemblyName.Name}.dll");
+            if (File.Exists(runtimeSpecificPath))
+            {
+                assemblyPath = runtimeSpecificPath;
+                return true;
+            }
+
+            // if assembly is missing it might be linked, so we check for .link file
+            var link = Path.Combine(_managedProfilerDirectory, CommonLanguageRuntimeVersionFolder, $"{assemblyName.Name}.dll.link");
+            if (File.Exists(link))
+            {
+                try
+                {
+                    var linkRuntimeVersionFolder = File.ReadAllText(link).Trim();
+                    var linkPath = Path.Combine(_managedProfilerDirectory, linkRuntimeVersionFolder, $"{assemblyName.Name}.dll");
+                    if (File.Exists(linkPath))
+                    {
+                        assemblyPath = linkPath;
+                        return true;
+                    }
+                    else
+                    {
+                        _logger.Error($"Linked assembly path \"{linkPath}\" does not exist");
+                        assemblyPath = null;
+                        return false;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    _logger.Debug(ex, $"Error reading .link file: \"{link}\"");
+                    assemblyPath = null;
+                    return false;
+                }
+            }
+
+            // last we fallback to root managed profiler folder
+            var rootPath = Path.Combine(_managedProfilerDirectory, $"{assemblyName.Name}.dll");
+            if (File.Exists(rootPath))
+            {
+                assemblyPath = rootPath;
+                return true;
+            }
+
+            assemblyPath = null;
+            return false;
+        }
+
+        // TODO if we still want the mscorlib.resources safeguard to be universal (issue is described in .NET Framework implementation),
+        // TODO  we can implement it in runtime-agnostic AssemblyResolver partial class
+        // TODO  and make additional no-op check for System.Net.Http in .Net Framework implementation
+        // TODO  but skip it for .Net (Core) where we don't redirect this assembly, so this event won't be fired unless there's an external issue we can't fix
+
+        _logger.Debug($"Check assembly {assemblyName}");
+
+        if (!TryFindAssemblyPath(assemblyName, out var assemblyPath))
+        {
+            _logger.Debug($"Skip loading unexpected assembly {assemblyName}");
             return null;
         }
+
+        // Load conflicting library into a custom ALC
+        if (TrustedPlatformAssemblyNames.Contains(assemblyName.Name))
+        {
+            _logger.Debug("Loading {0} with DependencyLoadContext.LoadFromAssemblyPath", assemblyPath);
+            return DependencyLoadContext.LoadFromAssemblyPath(assemblyPath);
+        }
+
+        // else load into default ALC
+        _logger.Debug("Loading {0} with AssemblyLoadContext.Default.LoadFromAssemblyPath", assemblyPath);
+        return AssemblyLoadContext.Default.LoadFromAssemblyPath(assemblyPath);
     }
 
     private string ResolveManagedProfilerDirectory()
