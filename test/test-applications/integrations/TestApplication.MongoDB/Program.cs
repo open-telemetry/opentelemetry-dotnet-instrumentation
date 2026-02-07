@@ -16,6 +16,7 @@ internal static class Program
         var mongoPort = GetMongoPort(args);
         var mongoDatabase = GetMongoDbName(args);
         var mongoCollection = GetMongoCollectionName(args);
+        var shouldTriggerError = ShouldTriggerError(args);
         var newDocument = new BsonDocument
         {
             { "name", "MongoDB" },
@@ -40,8 +41,37 @@ internal static class Program
         var database = client.GetDatabase(mongoDatabase);
         var collection = database.GetCollection<BsonDocument>(mongoCollection);
 
-        Run(collection, newDocument);
-        RunAsync(collection, newDocument).Wait();
+        if (shouldTriggerError)
+        {
+            RunWithError(collection, newDocument);
+        }
+        else
+        {
+            Run(collection, newDocument);
+            RunAsync(collection, newDocument).Wait();
+        }
+    }
+
+    public static void RunWithError(IMongoCollection<BsonDocument> collection, BsonDocument newDocument)
+    {
+        try
+        {
+            // Trigger an error by trying to create an index with invalid options
+            // This will cause a MongoCommandException
+            var keys = Builders<BsonDocument>.IndexKeys.Ascending("invalid_field");
+            var options = new CreateIndexOptions
+            {
+                Unique = true,
+                Name = string.Empty // Empty name will cause an error
+            };
+            var indexModel = new CreateIndexModel<BsonDocument>(keys, options);
+            collection.Indexes.CreateOne(indexModel);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Expected error occurred: {ex.GetType().Name}");
+            // Error should be captured in traces
+        }
     }
 
     public static void Run(IMongoCollection<BsonDocument> collection, BsonDocument newDocument)
@@ -121,5 +151,10 @@ internal static class Program
         }
 
         return "employees";
+    }
+
+    private static bool ShouldTriggerError(string[] args)
+    {
+        return args.Any(arg => arg.Equals("--trigger-error", StringComparison.OrdinalIgnoreCase));
     }
 }
