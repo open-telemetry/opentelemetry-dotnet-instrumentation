@@ -30,8 +30,8 @@ internal class Loader
         // TODO 1. for PoC run the isolated ALC for StartupHook-only deployment here in Loader
         // TODO 1. but once we decide on whether we should avoid custom ALC effect on RuleEngine validations
         // TODO 1. we may want to move this to first thing in StartupHook to reduce assemblies leak to default ALC
-        // TODO 2. Make sure that if isolation stays here we'll adapt OpenTelemetry.AutoInstrumentation.Loader.Tests.Ctor_LoadsManagedAssembly
-        // TODO 2. to not hang because of the waitings dead-lock
+        // TODO 2. Make sure that if isolation stays here we extend OpenTelemetry.AutoInstrumentation.Loader.Tests.Ctor_LoadsManagedAssembly
+        // TODO 2. to cover StartupHook-only deployment mode and to not hang because of the waiting dead-lock
         if (Environment.GetEnvironmentVariable("DOTNET_STARTUP_HOOKS") is string startupHooks &&
             startupHooks.Contains("OpenTelemetry.AutoInstrumentation.StartupHook", StringComparison.Ordinal) &&
             Environment.GetEnvironmentVariable("CORECLR_ENABLE_PROFILING") != "1")
@@ -138,7 +138,7 @@ internal class Loader
             // 4. Set entry assembly for those frameworks and third-party that depends on it
 
 #if NET9_0_OR_GREATER
-            Assembly.SetEntryAssembly(customerEntry);
+            Assembly.SetEntryAssembly(targetEntryAssembly);
             Logger.Debug("Set entry assembly via Public Api");
 #else
             AssemblyHelper.SetEntryAssembly(targetEntryAssembly);
