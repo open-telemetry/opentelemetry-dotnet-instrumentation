@@ -173,7 +173,16 @@ internal class Loader
 
     private static string GetTargetAppPath()
     {
-        // Try command line args first
+        // Try entry assembly first (should already be loaded in Default ALC)
+        var entryAssembly = Assembly.GetEntryAssembly();
+        if (!string.IsNullOrEmpty(entryAssembly?.Location))
+        {
+            return entryAssembly.Location;
+        }
+
+        // Fallback: try command line args
+        Logger.Warning("Entry assembly location is unavailable, falling back to command line parsing. This may indicate an unexpected runtime scenario.");
+
         var args = Environment.GetCommandLineArgs();
         if (args.Length > 0 &&
             (args[0].EndsWith(".dll", StringComparison.OrdinalIgnoreCase) ||
@@ -183,16 +192,9 @@ internal class Loader
             return Path.GetFullPath(args[0]);
         }
 
-        // Fallback: use entry assembly location (already loaded in Default ALC)
-        var entryAssembly = Assembly.GetEntryAssembly();
-        if (!string.IsNullOrEmpty(entryAssembly?.Location))
-        {
-            return entryAssembly.Location;
-        }
-
         throw new InvalidOperationException(
-            "Cannot determine customer application path. " +
-            "GetCommandLineArgs()[0] is not a valid assembly and GetEntryAssembly().Location is empty.");
+            "Cannot determine target application path. " +
+            "GetEntryAssembly().Location is empty and GetCommandLineArgs()[0] is not a valid assembly.");
     }
 
     private static string ResolveManagedProfilerDirectory()
