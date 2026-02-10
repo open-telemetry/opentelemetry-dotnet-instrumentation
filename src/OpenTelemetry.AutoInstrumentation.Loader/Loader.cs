@@ -1,11 +1,7 @@
 // Copyright The OpenTelemetry Authors
 // SPDX-License-Identifier: Apache-2.0
 
-using System.Diagnostics;
 using System.Reflection;
-#if NET
-using System.Runtime.Loader;
-#endif
 using OpenTelemetry.AutoInstrumentation.Logging;
 
 namespace OpenTelemetry.AutoInstrumentation.Loader;
@@ -136,14 +132,8 @@ internal class Loader
             Logger.Debug($"Loaded target entry assembly: {targetEntryAssembly.FullName}");
 
             // 4. Set entry assembly for those frameworks and third-party that depends on it
-
-#if NET9_0_OR_GREATER
             Assembly.SetEntryAssembly(targetEntryAssembly);
-            Logger.Debug("Set entry assembly via Public Api");
-#else
-            AssemblyHelper.SetEntryAssembly(targetEntryAssembly);
-            Logger.Debug("Set entry assembly via reflection");
-#endif
+            Logger.Debug("Set entry assembly");
 
             // 5. Load and initialize OTel instrumentation in the SAME context
             var instrumentationPath = Path.Combine(managedProfilerDirectory, "OpenTelemetry.AutoInstrumentation.dll");

@@ -7,6 +7,7 @@
     <OutputPath>..\bin\ProfilerResources\</OutputPath>
     <!-- Do not catch general exception types. Typically, we need to handle all Exception to do not break application. -->
     <NoWarn>$(NoWarn);CA1031</NoWarn>
+    <LangVersion>14.0</LangVersion>
   </PropertyGroup>
 <ItemGroup>
   <Compile Include="..\OpenTelemetry.AutoInstrumentation\Logging\InternalLogger.cs">
