@@ -154,7 +154,6 @@ to use the same versions as OpenTelemetry .NET Automatic Instrumentation.
 The following dependencies are used by OpenTelemetry .NET Automatic Instrumentation:
 
 - [OpenTelemetry.AutoInstrumentation](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/blob/main/src/OpenTelemetry.AutoInstrumentation/OpenTelemetry.AutoInstrumentation.csproj)
-- <TODO: do I need to add more projects here>
 
 Find their versions in the following locations:
 
