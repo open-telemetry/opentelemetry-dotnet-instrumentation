@@ -40,7 +40,18 @@ bool IsFailFastEnabled()
 
 bool IsAssemblyRedirectionEnabled()
 {
-    ToBooleanWithDefault(GetEnvironmentValue(environment::assembly_redirection_enabled), true);
+    auto assemblyRedirectEnvValue = GetEnvironmentValue(environment::assembly_redirection_enabled);
+
+#ifdef _WIN32
+    // For .Net Framework if the primary variable is NOT set (neither True nor False),
+    // then we consider it "unset" and check the legacy fallback.
+    if (!TrueCondition(assemblyRedirectEnvValue) && !FalseCondition(assemblyRedirectEnvValue))
+    {
+        assemblyRedirectEnvValue = GetEnvironmentValue(environment::assembly_redirection_enabled_netfx_legacy);
+    }
+#endif
+
+    ToBooleanWithDefault(assemblyRedirectEnvValue, true);
 }
 
 } // namespace trace
