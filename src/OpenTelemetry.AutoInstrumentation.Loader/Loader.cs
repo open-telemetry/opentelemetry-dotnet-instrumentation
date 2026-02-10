@@ -135,15 +135,8 @@ internal class Loader
             Logger.Debug("Set entry assembly to target assembly loaded in isolated context");
 
             // 5. Load and initialize OTel instrumentation in the SAME context
-            var instrumentationPath = Path.Combine(managedProfilerDirectory, "OpenTelemetry.AutoInstrumentation.dll");
-            var instrumentationAssembly = ctx.LoadFromAssemblyPath(instrumentationPath);
-            Logger.Debug($"Loaded instrumentation assembly to isolated context: {instrumentationAssembly.FullName}");
-
-            var initType = instrumentationAssembly.GetType("OpenTelemetry.AutoInstrumentation.Instrumentation");
-            var initMethod = initType?.GetMethod("Initialize", BindingFlags.Public | BindingFlags.Static);
-            initMethod?.Invoke(null, null);
-
-            Logger.Information("Instrumentation initialized in isolated context");
+            // (thanks to contextual reflection set above, the assembly search will load it to custom context)
+            TryLoadManagedAssembly();
 
             // 6. Invoke customer's Main
             var entryPoint = targetEntryAssembly.EntryPoint!;
