@@ -34,6 +34,8 @@ internal class ManagedProfilerAssemblyLoadContext(string managedProfilerDirector
         }
 
         // Already loaded in this context?
+        // Return any loaded assembly with matching name, regardless of version
+        // (we enforce single version per name in this context)
         var cached = Assemblies.FirstOrDefault(a => a.GetName().Name == name);
         if (cached != null)
         {

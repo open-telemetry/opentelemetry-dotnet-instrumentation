@@ -27,7 +27,7 @@ internal class Loader
         // TODO 1. but once we decide on whether we should avoid custom ALC effect on RuleEngine validations
         // TODO 1. we may want to move this to first thing in StartupHook to reduce assemblies leak to default ALC
         // TODO 2. Make sure that if isolation stays here we extend OpenTelemetry.AutoInstrumentation.Loader.Tests.Ctor_LoadsManagedAssembly
-        // TODO 2. to cover StartupHook-only deployment mode and to not hang because of the waiting dead-lock
+        // TODO 2. to cover StartupHook-only deployment mode and do not hang because of the waiting dead-lock
         if (Environment.GetEnvironmentVariable("DOTNET_STARTUP_HOOKS") is string startupHooks &&
             startupHooks.Contains("OpenTelemetry.AutoInstrumentation.StartupHook", StringComparison.Ordinal) &&
             Environment.GetEnvironmentVariable("CORECLR_ENABLE_PROFILING") != "1")
@@ -107,12 +107,10 @@ internal class Loader
 #if NET
     private static void RunInIsolation()
     {
-        // POC: StartupHook-only deployment with ALC isolation
-
         int? result = null;
         try
         {
-            Logger.Information("Starting isolated ALC mode");
+            Logger.Information("Starting isolated AssemblyLoadContext mode");
 
             var targetAppPath = GetTargetAppPath();
             var managedProfilerDirectory = ResolveManagedProfilerDirectory();
@@ -122,23 +120,24 @@ internal class Loader
 
             // 1. Create isolated context
             var ctx = new ManagedProfilerAssemblyLoadContext(managedProfilerDirectory);
-            Logger.Debug("Created isolated AssemblyLoadContext");
+            Logger.Debug("Created isolated context");
 
             // 2. Enable contextual reflection (helps with Assembly.Load(string), Type.GetType)
             ctx.EnterContextualReflection();
+            Logger.Debug("Contextual Reflection is set to isolated context");
 
             // 3. Load customer entry assembly into isolated context
             var targetEntryAssembly = ctx.LoadFromAssemblyPath(targetAppPath);
-            Logger.Debug($"Loaded target entry assembly: {targetEntryAssembly.FullName}");
+            Logger.Debug($"Loaded target entry assembly to isolated context: {targetEntryAssembly.FullName}");
 
             // 4. Set entry assembly for those frameworks and third-party that depends on it
             Assembly.SetEntryAssembly(targetEntryAssembly);
-            Logger.Debug("Set entry assembly");
+            Logger.Debug("Set entry assembly to target assembly loaded in isolated context");
 
             // 5. Load and initialize OTel instrumentation in the SAME context
             var instrumentationPath = Path.Combine(managedProfilerDirectory, "OpenTelemetry.AutoInstrumentation.dll");
             var instrumentationAssembly = ctx.LoadFromAssemblyPath(instrumentationPath);
-            Logger.Debug($"Loaded instrumentation assembly: {instrumentationAssembly.FullName}");
+            Logger.Debug($"Loaded instrumentation assembly to isolated context: {instrumentationAssembly.FullName}");
 
             var initType = instrumentationAssembly.GetType("OpenTelemetry.AutoInstrumentation.Instrumentation");
             var initMethod = initType?.GetMethod("Initialize", BindingFlags.Public | BindingFlags.Static);
@@ -166,7 +165,7 @@ internal class Loader
         }
         finally
         {
-            // 7. Exit to prevent runtime from calling Main on Default ALC's copy
+            // 7. Exit to prevent runtime from calling Main on the target assembly already loaded to Default ALC
             Environment.Exit(result ?? 0);
         }
     }
