@@ -1,10 +1,10 @@
 // Copyright The OpenTelemetry Authors
 // SPDX-License-Identifier: Apache-2.0
 
-#if NET
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using System.Runtime.Loader;
+using OpenTelemetry.AutoInstrumentation.Util;
 
 namespace OpenTelemetry.AutoInstrumentation.Loader;
 
@@ -16,8 +16,6 @@ internal partial class AssemblyResolver
     internal static AssemblyLoadContext DependencyLoadContext { get; } = new AssemblyLoadContext("OpenTelemetry.AutoInstrumentation.Loader.AssemblyResolver", false);
 
     internal static string[] TrustedPlatformAssemblyNames { get; } = GetTrustedPlatformAssemblyNames();
-
-    internal static string CommonLanguageRuntimeVersionFolder { get; } = GetCommonLanguageRuntimeVersionFolder();
 
     internal void RegisterAssemblyResolving()
     {
@@ -66,20 +64,7 @@ internal partial class AssemblyResolver
 
     private static string[] GetTrustedPlatformAssemblyNames()
     {
-        try
-        {
-            var tpaList = (AppContext.GetData("TRUSTED_PLATFORM_ASSEMBLIES") as string)?.Split(Path.PathSeparator) ?? [];
-            return [.. tpaList.Select(Path.GetFileNameWithoutExtension).OfType<string>()];
-        }
-        catch
-        {
-            return [];
-        }
-    }
-
-    private static string GetCommonLanguageRuntimeVersionFolder()
-    {
-        return $"net{Environment.Version.Major}.{Environment.Version.Minor}";
+        return [.. TrustedPlatformAssembliesHelper.TpaPaths.Select(Path.GetFileNameWithoutExtension).OfType<string>()];
     }
 
     private Assembly? Resolving_ManagedProfilerDependencies(AssemblyLoadContext context, AssemblyName assemblyName)
@@ -88,7 +73,8 @@ internal partial class AssemblyResolver
         bool TryFindAssemblyPath(AssemblyName assemblyName, [NotNullWhen(true)] out string? assemblyPath)
         {
             // For .NET (Core) most of the assembblies are different per runtime version so we start first with runtime specific folder
-            var runtimeSpecificPath = Path.Combine(_managedProfilerDirectory, CommonLanguageRuntimeVersionFolder, $"{assemblyName.Name}.dll");
+            // _managedProfilerDirectory already contains the version folder (e.g., tracer-home/net/net8.0)
+            var runtimeSpecificPath = Path.Combine(_managedProfilerDirectory, $"{assemblyName.Name}.dll");
             if (File.Exists(runtimeSpecificPath))
             {
                 assemblyPath = runtimeSpecificPath;
@@ -96,13 +82,14 @@ internal partial class AssemblyResolver
             }
 
             // if assembly is missing it might be linked, so we check for .link file
-            var link = Path.Combine(_managedProfilerDirectory, CommonLanguageRuntimeVersionFolder, $"{assemblyName.Name}.dll.link");
+            var link = Path.Combine(_managedProfilerDirectory, $"{assemblyName.Name}.dll.link");
             if (File.Exists(link))
             {
                 try
                 {
                     var linkRuntimeVersionFolder = File.ReadAllText(link).Trim();
-                    var linkPath = Path.Combine(_managedProfilerDirectory, linkRuntimeVersionFolder, $"{assemblyName.Name}.dll");
+                    // Get parent directory (tracer-home/net) to combine with link target version folder
+                    var linkPath = Path.Combine(Path.GetDirectoryName(_managedProfilerDirectory) ?? _managedProfilerDirectory, linkRuntimeVersionFolder, $"{assemblyName.Name}.dll");
                     if (File.Exists(linkPath))
                     {
                         assemblyPath = linkPath;
@@ -110,21 +97,21 @@ internal partial class AssemblyResolver
                     }
                     else
                     {
-                        _logger.Error($"Linked assembly path \"{linkPath}\" does not exist");
+                        logger.Error($"Linked assembly path \"{linkPath}\" does not exist");
                         assemblyPath = null;
                         return false;
                     }
                 }
                 catch (Exception ex)
                 {
-                    _logger.Debug(ex, $"Error reading .link file: \"{link}\"");
+                    logger.Debug(ex, $"Error reading .link file: \"{link}\"");
                     assemblyPath = null;
                     return false;
                 }
             }
 
-            // last we fallback to root managed profiler folder
-            var rootPath = Path.Combine(_managedProfilerDirectory, $"{assemblyName.Name}.dll");
+            // last we fallback to root managed profiler folder (tracer-home/net)
+            var rootPath = Path.Combine(Path.GetDirectoryName(_managedProfilerDirectory) ?? _managedProfilerDirectory, $"{assemblyName.Name}.dll");
             if (File.Exists(rootPath))
             {
                 assemblyPath = rootPath;
@@ -135,32 +122,23 @@ internal partial class AssemblyResolver
             return false;
         }
 
-        _logger.Debug($"Check assembly: ({assemblyName})");
+        logger.Debug($"Check assembly: ({assemblyName})");
 
         if (!TryFindAssemblyPath(assemblyName, out var assemblyPath))
         {
-            _logger.Debug($"Skip loading unexpected assembly: ({assemblyName})");
+            logger.Debug($"Skip loading unexpected assembly: ({assemblyName})");
             return null;
         }
 
         // Load conflicting library into a custom ALC
         if (TrustedPlatformAssemblyNames.Contains(assemblyName.Name))
         {
-            _logger.Debug($"Loading \"{assemblyPath}\" with DependencyLoadContext.LoadFromAssemblyPath");
+            logger.Debug($"Loading \"{assemblyPath}\" with DependencyLoadContext.LoadFromAssemblyPath");
             return DependencyLoadContext.LoadFromAssemblyPath(assemblyPath);
         }
 
         // else load into default ALC
-        _logger.Debug($"Loading \"{assemblyPath}\" with AssemblyLoadContext.Default.LoadFromAssemblyPath");
+        logger.Debug($"Loading \"{assemblyPath}\" with AssemblyLoadContext.Default.LoadFromAssemblyPath");
         return AssemblyLoadContext.Default.LoadFromAssemblyPath(assemblyPath);
     }
-
-    private string ResolveManagedProfilerDirectory()
-    {
-        string tracerFrameworkDirectory = "net";
-        string tracerHomeDirectory = ReadEnvironmentVariable("OTEL_DOTNET_AUTO_HOME") ?? string.Empty;
-
-        return Path.Combine(tracerHomeDirectory, tracerFrameworkDirectory);
-    }
 }
-#endif

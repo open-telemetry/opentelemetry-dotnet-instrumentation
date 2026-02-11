@@ -11,7 +11,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Include="..\OpenTelemetry.AutoInstrumentation\Constants.cs" Link="Constants.cs" />
     <Compile Include="..\OpenTelemetry.AutoInstrumentation\Logging\InternalLogger.cs">
       <Link>Logging\InternalLogger.cs</Link>
     </Compile>
@@ -69,6 +68,10 @@
     <Compile Include="..\OpenTelemetry.AutoInstrumentation\Configurations\ConfigurationKeys.FailFast.cs">
       <Link>Configurations\ConfigurationKeys.FailFast.cs</Link>
     </Compile>
+    <Compile Include="..\OpenTelemetry.AutoInstrumentation\Constants.cs" Link="Constants.cs" />
+    <Compile Include="..\OpenTelemetry.AutoInstrumentation\Util\TrustedPlatformAssembliesHelper.Net.cs" Link="TrustedPlatformAssembliesHelper.Net.cs" />
+    <Compile Include="..\OpenTelemetry.AutoInstrumentation\Util\ManagedProfilerLocationHelper.cs" Link="ManagedProfilerLocationHelper.cs" />
+    <Compile Include="..\OpenTelemetry.AutoInstrumentation\Util\ManagedProfilerLocationHelper.Net.cs" Link="ManagedProfilerLocationHelper.Net.cs" />
   </ItemGroup>
 
 </Project>

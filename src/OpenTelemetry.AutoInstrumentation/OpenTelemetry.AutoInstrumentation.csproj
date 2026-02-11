@@ -26,6 +26,23 @@
   </ItemGroup>
 
   <ItemGroup>
+    <!-- 1. Exclude platform-specific files from the default compilation -->
+    <Compile Remove="**\*.Net.cs" />
+    <Compile Remove="**\*.NetFramework.cs" />
+
+    <!-- 2. Keep both visible in the Solution Explorer as 'None' items (non-compiled) -->
+    <None Include="**\*.Net.cs" />
+    <None Include="**\*.NetFramework.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- 3. Include NetFramework version files -->
+    <Compile Include="**\*.NetFramework.cs" Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'" />
+    <!-- 4. Include .Net version files -->
+    <Compile Include="**\*.Net.cs" Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp'" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="OpenTelemetry" />
     <PackageReference Include="OpenTelemetry.Api" />
     <PackageReference Include="OpenTelemetry.Exporter.Console" />

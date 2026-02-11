@@ -2,13 +2,14 @@
 // SPDX-License-Identifier: Apache-2.0
 
 using System.Diagnostics;
-using System.Reflection;
 using OpenTelemetry.AutoInstrumentation.Logging;
+using OpenTelemetry.AutoInstrumentation.Util;
 
 namespace OpenTelemetry.AutoInstrumentation.RulesEngine;
 
 internal class OpenTelemetrySdkMinimumVersionRule : Rule
 {
+    private const string OpenTelemetryAssemblyFileName = "OpenTelemetry.dll";
     private static IOtelLogger logger = OtelLogging.GetLogger("StartupHook");
 
     public OpenTelemetrySdkMinimumVersionRule()
@@ -26,20 +27,16 @@ internal class OpenTelemetrySdkMinimumVersionRule : Rule
 
     internal override bool Evaluate()
     {
-        string? oTelPackageVersion = null;
-
         try
         {
-            // TODO: Consider refactor, e.g. checking TPA list for customer's version instead of type loading.
-            // Current approach is fragile: dependning on timing of our assembly resolution handler setup
-            // we may unexpectedly load our assembly here. Plus current expected location of our assembly becomes wrong
             var loadedOTelFileVersion = GetVersionFromApp();
             if (loadedOTelFileVersion != null)
             {
                 var autoInstrumentationOTelFileVersion = GetVersionFromAutoInstrumentation();
                 if (loadedOTelFileVersion < autoInstrumentationOTelFileVersion)
                 {
-                    oTelPackageVersion = loadedOTelFileVersion.ToString();
+                    logger.Error($"Rule Engine: Application has direct or indirect reference to older version of OpenTelemetry package {loadedOTelFileVersion}.");
+                    return false;
                 }
             }
         }
@@ -50,26 +47,19 @@ internal class OpenTelemetrySdkMinimumVersionRule : Rule
             return true;
         }
 
-        if (oTelPackageVersion != null)
-        {
-            logger.Error($"Rule Engine: Application has direct or indirect reference to older version of OpenTelemetry package {oTelPackageVersion}.");
-            return false;
-        }
-
         logger.Information("Rule Engine: OpenTelemetrySdkMinimumVersionRule evaluation success.");
         return true;
     }
 
     protected virtual Version? GetVersionFromApp()
     {
-        var openTelemetryType = Type.GetType("OpenTelemetry.Sdk, OpenTelemetry");
-        if (openTelemetryType != null)
+        // if customer application has reference to OpenTelemetry SDK, we can get the file from TPA list
+        var openTelemetryLocation = TrustedPlatformAssembliesHelper.TpaPaths.FirstOrDefault(path => Path.GetFileName(path).Equals(OpenTelemetryAssemblyFileName, StringComparison.OrdinalIgnoreCase));
+        if (openTelemetryLocation != null)
         {
-            var loadedOTelAssembly = Assembly.GetAssembly(openTelemetryType);
-            var loadedOTelFileVersionInfo = FileVersionInfo.GetVersionInfo(loadedOTelAssembly?.Location);
-            var loadedOTelFileVersion = new Version(loadedOTelFileVersionInfo.FileVersion);
-
-            return loadedOTelFileVersion;
+            var openTelemetryFileVersionInfo = FileVersionInfo.GetVersionInfo(openTelemetryLocation);
+            var openTelemetryFileVersion = new Version(openTelemetryFileVersionInfo.FileVersion);
+            return openTelemetryFileVersion;
         }
 
         return null;
@@ -77,10 +67,10 @@ internal class OpenTelemetrySdkMinimumVersionRule : Rule
 
     protected virtual Version? GetVersionFromAutoInstrumentation()
     {
-        var autoInstrumentationOTelLocation = Path.Combine(StartupHook.LoaderAssemblyLocation ?? string.Empty, "OpenTelemetry.dll");
-        var autoInstrumentationOTelFileVersionInfo = FileVersionInfo.GetVersionInfo(autoInstrumentationOTelLocation);
-        var autoInstrumentationOTelFileVersion = new Version(autoInstrumentationOTelFileVersionInfo.FileVersion);
+        var openTelemetryLocation = Path.Combine(ManagedProfilerLocationHelper.ResolveManagedProfilerDirectory(logger), OpenTelemetryAssemblyFileName);
+        var openTelemetryFileVersionInfo = FileVersionInfo.GetVersionInfo(openTelemetryLocation);
+        var openTelemetryFileVersion = new Version(openTelemetryFileVersionInfo.FileVersion);
 
-        return autoInstrumentationOTelFileVersion;
+        return openTelemetryFileVersion;
     }
 }

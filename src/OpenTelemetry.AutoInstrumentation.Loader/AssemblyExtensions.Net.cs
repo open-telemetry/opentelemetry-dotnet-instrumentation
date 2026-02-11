@@ -1,7 +1,6 @@
 // Copyright The OpenTelemetry Authors
 // SPDX-License-Identifier: Apache-2.0
 
-#if NET
 #if !NET9_0_OR_GREATER
 
 using System.Reflection;
@@ -34,5 +33,4 @@ internal static class AssemblyExtensions
             ?.CreateDelegate<Action<Assembly>>();
 }
 
-#endif
 #endif

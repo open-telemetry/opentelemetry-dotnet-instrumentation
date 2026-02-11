@@ -79,11 +79,18 @@ internal static class Constants
 
     public static class EnvironmentVariables
     {
+        // Profiler related environment variables
         public const string ProfilerEnabledVariable = "CORECLR_ENABLE_PROFILING";
         public const string ProfilerIdVariable = "CORECLR_PROFILER";
         public const string ProfilerPathVariable = "CORECLR_PROFILER_PATH";
         public const string Profiler32BitPathVariable = "CORECLR_PROFILER_PATH_32";
         public const string Profiler64BitPathVariable = "CORECLR_PROFILER_PATH_64";
         public const string ProfilerId = "{918728DD-259F-4A6A-AC2B-B85E1B658318}";
+
+        // OpenTelemetry environment variables
+        public const string OtelDotnetAutoHome = "OTEL_DOTNET_AUTO_HOME";
+
+        // Trausted Platform Assemblies environment variables
+        public const string TrustedPlatformAssemblies = "TRUSTED_PLATFORM_ASSEMBLIES";
     }
 }

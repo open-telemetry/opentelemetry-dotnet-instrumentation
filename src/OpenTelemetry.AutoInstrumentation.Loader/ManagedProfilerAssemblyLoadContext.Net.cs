@@ -1,10 +1,10 @@
 // Copyright The OpenTelemetry Authors
 // SPDX-License-Identifier: Apache-2.0
 
-#if NET
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using System.Runtime.Loader;
+using OpenTelemetry.AutoInstrumentation.Util;
 
 namespace OpenTelemetry.AutoInstrumentation.Loader;
 
@@ -56,21 +56,11 @@ internal class ManagedProfilerAssemblyLoadContext(string managedProfilerDirector
 
     private static Dictionary<string, string> ParseTrustedPlatformAssemblies()
     {
-        try
-        {
-            return (AppContext.GetData("TRUSTED_PLATFORM_ASSEMBLIES") as string)?.Split(Path.PathSeparator)
-                .Where(it => !string.IsNullOrEmpty(it))
-                .Select(it => new { FileName = Path.GetFileNameWithoutExtension(it), Path = it })
-                .Where(it => !string.IsNullOrEmpty(it.FileName))
-                .DistinctBy(it => it.FileName, StringComparer.OrdinalIgnoreCase)
-                .ToDictionary(it => it.FileName, it => it.Path, StringComparer.OrdinalIgnoreCase)
-                ?? [];
-        }
-        catch
-        {
-            // Ignore errors parsing TPA
-            return new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
-        }
+        return TrustedPlatformAssembliesHelper.TpaPaths
+            .Select(path => new { Name = Path.GetFileNameWithoutExtension(path), Path = path })
+            .Where(x => !string.IsNullOrEmpty(x.Name))
+            .DistinctBy(x => x.Name, StringComparer.OrdinalIgnoreCase)
+            .ToDictionary(x => x.Name, x => x.Path, StringComparer.OrdinalIgnoreCase);
     }
 
     private static string? PickHigherVersion(string? tpaPath, string? managedProfilerPath)
@@ -148,4 +138,3 @@ internal class ManagedProfilerAssemblyLoadContext(string managedProfilerDirector
         return false;
     }
 }
-#endif
