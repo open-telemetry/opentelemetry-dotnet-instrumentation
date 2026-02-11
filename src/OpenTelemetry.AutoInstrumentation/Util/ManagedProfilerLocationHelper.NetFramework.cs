@@ -8,16 +8,17 @@ namespace OpenTelemetry.AutoInstrumentation.Util;
 
 internal static partial class ManagedProfilerLocationHelper
 {
-    public static string ResolveManagedProfilerDirectory(IOtelLogger logger)
+    public static string ManagedProfilerRuntimeDirectory { get; } = Path.Combine(TracerHomeDirectory, "netfx");
+
+    public static string ResolveManagedProfilerVersionDirectory(IOtelLogger logger)
     {
-        var frameworkDirectoryName = "netfx";
         var fallbackFrameworkFolderName = "net462";
 
         try
         {
             var detectedVersion = GetNetFrameworkRedirectionVersion();
             var detectedDirectoryName = detectedVersion % 10 != 0 ? $"net{detectedVersion}" : $"net{detectedVersion / 10}";
-            var detectedDirectoryPath = Path.Combine(TracerHomeDirectory, frameworkDirectoryName, detectedDirectoryName);
+            var detectedDirectoryPath = Path.Combine(ManagedProfilerRuntimeDirectory, detectedDirectoryName);
 
             if (Directory.Exists(detectedDirectoryPath))
             {
@@ -31,7 +32,7 @@ internal static partial class ManagedProfilerLocationHelper
             logger.Warning(ex, $"Error getting .NET Framework version from native profiler. Fallback to {fallbackFrameworkFolderName}.");
         }
 
-        return Path.Combine(TracerHomeDirectory, frameworkDirectoryName, fallbackFrameworkFolderName);
+        return Path.Combine(ManagedProfilerRuntimeDirectory, fallbackFrameworkFolderName);
     }
 
     [DllImport("OpenTelemetry.AutoInstrumentation.Native.dll")]

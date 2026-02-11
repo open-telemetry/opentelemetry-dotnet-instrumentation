@@ -72,9 +72,9 @@ internal partial class AssemblyResolver
         // TODO do we want to cache this information so we don't need to check and read files every time?
         bool TryFindAssemblyPath(AssemblyName assemblyName, [NotNullWhen(true)] out string? assemblyPath)
         {
-            // For .NET (Core) most of the assembblies are different per runtime version so we start first with runtime specific folder
-            // _managedProfilerDirectory already contains the version folder (e.g., tracer-home/net/net8.0)
-            var runtimeSpecificPath = Path.Combine(_managedProfilerDirectory, $"{assemblyName.Name}.dll");
+            // For .NET (Core) most of the assembblies are different per runtime version so we start
+            // with runtime version specific folder (e.g., tracer-home/net/net8.0)
+            var runtimeSpecificPath = Path.Combine(_managedProfilerVersionDirectory, $"{assemblyName.Name}.dll");
             if (File.Exists(runtimeSpecificPath))
             {
                 assemblyPath = runtimeSpecificPath;
@@ -82,14 +82,14 @@ internal partial class AssemblyResolver
             }
 
             // if assembly is missing it might be linked, so we check for .link file
-            var link = Path.Combine(_managedProfilerDirectory, $"{assemblyName.Name}.dll.link");
+            var link = Path.Combine(_managedProfilerVersionDirectory, $"{assemblyName.Name}.dll.link");
             if (File.Exists(link))
             {
                 try
                 {
                     var linkRuntimeVersionFolder = File.ReadAllText(link).Trim();
                     // Get parent directory (tracer-home/net) to combine with link target version folder
-                    var linkPath = Path.Combine(Path.GetDirectoryName(_managedProfilerDirectory) ?? _managedProfilerDirectory, linkRuntimeVersionFolder, $"{assemblyName.Name}.dll");
+                    var linkPath = Path.Combine(_managedProfilerRuntimeDirectory, linkRuntimeVersionFolder, $"{assemblyName.Name}.dll");
                     if (File.Exists(linkPath))
                     {
                         assemblyPath = linkPath;
@@ -111,7 +111,7 @@ internal partial class AssemblyResolver
             }
 
             // last we fallback to root managed profiler folder (tracer-home/net)
-            var rootPath = Path.Combine(Path.GetDirectoryName(_managedProfilerDirectory) ?? _managedProfilerDirectory, $"{assemblyName.Name}.dll");
+            var rootPath = Path.Combine(_managedProfilerRuntimeDirectory, $"{assemblyName.Name}.dll");
             if (File.Exists(rootPath))
             {
                 assemblyPath = rootPath;

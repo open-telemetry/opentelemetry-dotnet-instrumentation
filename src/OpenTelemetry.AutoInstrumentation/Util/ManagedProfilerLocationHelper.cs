@@ -5,7 +5,7 @@ namespace OpenTelemetry.AutoInstrumentation.Util;
 
 internal static partial class ManagedProfilerLocationHelper
 {
-    private static readonly string TracerHomeDirectory =
+    public static string TracerHomeDirectory { get; } =
         ReadEnvironmentVariable(Constants.EnvironmentVariables.OtelDotnetAutoHome) ?? string.Empty;
 
     private static string? ReadEnvironmentVariable(string key)

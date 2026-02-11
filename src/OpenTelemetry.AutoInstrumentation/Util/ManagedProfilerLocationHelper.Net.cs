@@ -7,11 +7,12 @@ namespace OpenTelemetry.AutoInstrumentation.Util;
 
 internal static partial class ManagedProfilerLocationHelper
 {
-    public static string ResolveManagedProfilerDirectory(IOtelLogger logger)
+    public static string ManagedProfilerRuntimeDirectory { get; } = Path.Combine(TracerHomeDirectory, "net");
+
+    public static string ResolveManagedProfilerVersionDirectory(IOtelLogger logger)
     {
-        var frameworkDirectoryName = "net";
         var commonLanguageRuntimeVersionFolder = $"net{Environment.Version.Major}.{Environment.Version.Minor}";
 
-        return Path.Combine(TracerHomeDirectory, frameworkDirectoryName, commonLanguageRuntimeVersionFolder);
+        return Path.Combine(ManagedProfilerRuntimeDirectory, commonLanguageRuntimeVersionFolder);
     }
 }

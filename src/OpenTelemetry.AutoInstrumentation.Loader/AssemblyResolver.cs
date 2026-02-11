@@ -11,5 +11,7 @@ namespace OpenTelemetry.AutoInstrumentation.Loader;
 /// </summary>
 internal partial class AssemblyResolver(IOtelLogger logger)
 {
-    private readonly string _managedProfilerDirectory = ManagedProfilerLocationHelper.ResolveManagedProfilerDirectory(logger);
+    private readonly string _managedProfilerRuntimeDirectory = ManagedProfilerLocationHelper.ManagedProfilerRuntimeDirectory;
+
+    private readonly string _managedProfilerVersionDirectory = ManagedProfilerLocationHelper.ResolveManagedProfilerVersionDirectory(logger);
 }

@@ -41,19 +41,19 @@ internal partial class AssemblyResolver
 
         logger.Debug("Requester [{0}] requested [{1}]", args.RequestingAssembly?.FullName ?? "<null>", args.Name ?? "<null>");
 
-        var path = Path.Combine(Path.GetDirectoryName(_managedProfilerDirectory) ?? _managedProfilerDirectory, $"{assemblyName}.dll");
+        var path = Path.Combine(_managedProfilerRuntimeDirectory, $"{assemblyName}.dll");
         if (!File.Exists(path))
         {
-            path = Path.Combine(_managedProfilerDirectory, $"{assemblyName}.dll");
+            path = Path.Combine(_managedProfilerVersionDirectory, $"{assemblyName}.dll");
             if (!File.Exists(path))
             {
-                var link = Path.Combine(_managedProfilerDirectory, $"{assemblyName}.dll.link");
+                var link = Path.Combine(_managedProfilerVersionDirectory, $"{assemblyName}.dll.link");
                 if (File.Exists(link))
                 {
                     try
                     {
                         var linkPath = File.ReadAllText(link).Trim();
-                        path = Path.Combine(Path.GetDirectoryName(_managedProfilerDirectory) ?? _managedProfilerDirectory, linkPath, $"{assemblyName}.dll");
+                        path = Path.Combine(_managedProfilerRuntimeDirectory, linkPath, $"{assemblyName}.dll");
                     }
                     catch (Exception ex)
                     {

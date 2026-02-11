@@ -3,6 +3,9 @@
 
 using System.Reflection;
 using OpenTelemetry.AutoInstrumentation.Logging;
+#if NET
+using OpenTelemetry.AutoInstrumentation.Util;
+#endif
 
 namespace OpenTelemetry.AutoInstrumentation.Loader;
 
@@ -113,7 +116,7 @@ internal class Loader
             Logger.Information("Starting isolated AssemblyLoadContext mode");
 
             var targetAppPath = GetTargetAppPath();
-            var managedProfilerDirectory = ResolveManagedProfilerDirectory();
+            var managedProfilerDirectory = ManagedProfilerLocationHelper.ManagedProfilerRuntimeDirectory;
 
             Logger.Debug($"Target app path: {targetAppPath}");
             Logger.Debug($"Managed Profiler directory: {managedProfilerDirectory}");
@@ -187,14 +190,6 @@ internal class Loader
         throw new InvalidOperationException(
             "Cannot determine target application path. " +
             "GetEntryAssembly().Location is empty and GetCommandLineArgs()[0] is not a valid assembly.");
-    }
-
-    private static string ResolveManagedProfilerDirectory()
-    {
-        string tracerFrameworkDirectory = "net";
-        string tracerHomeDirectory = Environment.GetEnvironmentVariable("OTEL_DOTNET_AUTO_HOME") ?? string.Empty;
-
-        return Path.Combine(tracerHomeDirectory, tracerFrameworkDirectory);
     }
 #endif
 }

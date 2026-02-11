@@ -69,6 +69,8 @@ internal class StartupHook
         }
     }
 
+    // TODO is it assumed that the loader assembly will always be in the same folder as startup hook assembly
+    //  or is it assumed that both are in tracer-home? Because we now have ManagedProfilerLocationHelper, so maybe we should us it instead
     private static string GetLoaderAssemblyLocation()
     {
         try
