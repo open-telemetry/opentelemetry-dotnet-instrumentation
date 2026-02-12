@@ -1,9 +1,9 @@
 // Copyright The OpenTelemetry Authors
 // SPDX-License-Identifier: Apache-2.0
 
-using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using System.Runtime.Loader;
+using OpenTelemetry.AutoInstrumentation.Logging;
 using OpenTelemetry.AutoInstrumentation.Util;
 
 namespace OpenTelemetry.AutoInstrumentation.Loader;
@@ -11,7 +11,7 @@ namespace OpenTelemetry.AutoInstrumentation.Loader;
 /// <summary>
 /// A class that attempts to load the OpenTelemetry.AutoInstrumentation .NET assembly.
 /// </summary>
-internal partial class AssemblyResolver
+internal partial class AssemblyResolver(IOtelLogger logger)
 {
     internal static AssemblyLoadContext DependencyLoadContext { get; } = new AssemblyLoadContext("OpenTelemetry.AutoInstrumentation.Loader.AssemblyResolver", false);
 
@@ -19,18 +19,6 @@ internal partial class AssemblyResolver
 
     internal void RegisterAssemblyResolving()
     {
-        // ASSEMBLY RESOLUTION TIMING
-        //
-        // When the runtime cannot find an assembly, AssemblyLoadContext.Default.Resolving fires before
-        // AppDomain.CurrentDomain.AssemblyResolve, so we subscribe to the former for guaranteed control.
-        //
-        // While we could subscribe to AppDomain.CurrentDomain.AssemblyResolve, the timing of this
-        // subscription relative to the built-in handler (Assembly.LoadFromResolveHandler) subscription is
-        // unpredictable and fragile to code changes. If the built-in handler runs first, it loads co-located
-        // assemblies (our layout - OpenTelemetry.dll library and its dependency System.Diagnostics.DiagnosticSource.dll)
-        // into the Default context via Assembly.LoadFrom, causing loading failure if the customer application
-        // has the same dependency but to a lower version (in the example above, DiagnosticSource dll)
-
         // ASSEMBLY RESOLUTION STRATEGY
         //
         // === NATIVE PROFILER DEPLOYMENT ===
@@ -50,15 +38,22 @@ internal partial class AssemblyResolver
         //   -> NOTE: If TPA has same/higher version, runtime successfully auto-loads to Default ALC;
         //            event never fires (accepted)
         //
-        // === NUGET PACKAGE DEPLOYMENT (Need Investigation) ===
+        // === NUGET PACKAGE DEPLOYMENT ===
         // NuGet resolves versions at build time; TPA typically has correct versions.
         // This handler serves as fallback for edge cases.
+
+        // ASSEMBLY RESOLUTION TIMING
         //
-        // === STARTUP HOOK ONLY (Not Currently Supported) ===
-        // StartupHook lacks:
-        //   - Native profiler's IL redirection capabilities
-        //   - Build-time version resolution benefits
-        // To be implemented in follow-up changes.
+        // When the runtime cannot find an assembly, AssemblyLoadContext.Default.Resolving fires before
+        // AppDomain.CurrentDomain.AssemblyResolve, so we subscribe to the former for guaranteed control.
+        //
+        // While we could subscribe to AppDomain.CurrentDomain.AssemblyResolve, the timing of this
+        // subscription relative to the built-in handler (Assembly.LoadFromResolveHandler) subscription is
+        // unpredictable and fragile to code changes. If the built-in handler runs first, it loads co-located
+        // assemblies (our layout - OpenTelemetry.dll library and its dependency System.Diagnostics.DiagnosticSource.dll)
+        // into the Default context via Assembly.LoadFrom, causing loading failure if the customer application
+        // has the same dependency but to a lower version (in the example above, DiagnosticSource dll)
+
         AssemblyLoadContext.Default.Resolving += Resolving_ManagedProfilerDependencies;
     }
 
@@ -69,64 +64,20 @@ internal partial class AssemblyResolver
 
     private Assembly? Resolving_ManagedProfilerDependencies(AssemblyLoadContext context, AssemblyName assemblyName)
     {
-        // TODO do we want to cache this information so we don't need to check and read files every time?
-        bool TryFindAssemblyPath(AssemblyName assemblyName, [NotNullWhen(true)] out string? assemblyPath)
-        {
-            // For .NET (Core) most of the assembblies are different per runtime version so we start
-            // with runtime version specific folder (e.g., tracer-home/net/net8.0)
-            var runtimeSpecificPath = Path.Combine(_managedProfilerVersionDirectory, $"{assemblyName.Name}.dll");
-            if (File.Exists(runtimeSpecificPath))
-            {
-                assemblyPath = runtimeSpecificPath;
-                return true;
-            }
-
-            // if assembly is missing it might be linked, so we check for .link file
-            var link = Path.Combine(_managedProfilerVersionDirectory, $"{assemblyName.Name}.dll.link");
-            if (File.Exists(link))
-            {
-                try
-                {
-                    var linkRuntimeVersionFolder = File.ReadAllText(link).Trim();
-                    // Get parent directory (tracer-home/net) to combine with link target version folder
-                    var linkPath = Path.Combine(_managedProfilerRuntimeDirectory, linkRuntimeVersionFolder, $"{assemblyName.Name}.dll");
-                    if (File.Exists(linkPath))
-                    {
-                        assemblyPath = linkPath;
-                        return true;
-                    }
-                    else
-                    {
-                        logger.Error($"Linked assembly path \"{linkPath}\" does not exist");
-                        assemblyPath = null;
-                        return false;
-                    }
-                }
-                catch (Exception ex)
-                {
-                    logger.Debug(ex, $"Error reading .link file: \"{link}\"");
-                    assemblyPath = null;
-                    return false;
-                }
-            }
-
-            // last we fallback to root managed profiler folder (tracer-home/net)
-            var rootPath = Path.Combine(_managedProfilerRuntimeDirectory, $"{assemblyName.Name}.dll");
-            if (File.Exists(rootPath))
-            {
-                assemblyPath = rootPath;
-                return true;
-            }
-
-            assemblyPath = null;
-            return false;
-        }
-
         logger.Debug($"Check assembly: ({assemblyName})");
 
-        if (!TryFindAssemblyPath(assemblyName, out var assemblyPath))
+        if (assemblyName.Name is null)
         {
-            logger.Debug($"Skip loading unexpected assembly: ({assemblyName})");
+            logger.Debug($"Skip resolving assembly with null name");
+            return null;
+        }
+
+        // TODO we may want to cache assembly paths for assemblies loading to custom ALC to avoid repeated file system calls on every resolution,
+        // or simply check if the assembly is already loaded into custom ALC but that require rewriting the logic a bit
+        var assemblyPath = ManagedProfilerLocationHelper.GetAssemblyPath(assemblyName.Name, logger);
+        if (assemblyPath is null)
+        {
+            logger.Debug($"Skip resolving unexpected assembly: ({assemblyName})");
             return null;
         }
 

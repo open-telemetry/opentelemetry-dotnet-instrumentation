@@ -7,7 +7,6 @@
     <OutputPath>..\bin\ProfilerResources\</OutputPath>
     <!-- Do not catch general exception types. Typically, we need to handle all Exception to do not break application. -->
     <NoWarn>$(NoWarn);CA1031</NoWarn>
-    <LangVersion>14.0</LangVersion>
   </PropertyGroup>
 
   <ItemGroup>
@@ -82,10 +81,20 @@
     <Compile Include="..\OpenTelemetry.AutoInstrumentation\AutoInstrumentationEventSource.cs">
       <Link>AutoInstrumentationEventSource.cs</Link>
     </Compile>
-    <Compile Include="..\OpenTelemetry.AutoInstrumentation\Constants.cs" Link="Constants.cs" />
-    <Compile Include="..\OpenTelemetry.AutoInstrumentation\Util\TrustedPlatformAssembliesHelper.Net.cs" Link="TrustedPlatformAssembliesHelper.Net.cs" Condition="'$(TargetFramework)' == 'net8.0'" />
-    <Compile Include="..\OpenTelemetry.AutoInstrumentation\Util\ManagedProfilerLocationHelper.cs" Link="ManagedProfilerLocationHelper.cs" />
-    <Compile Include="..\OpenTelemetry.AutoInstrumentation\Util\ManagedProfilerLocationHelper.NetFramework.cs" Link="ManagedProfilerLocationHelper.NetFramework.cs" Condition="'$(TargetFramework)' == 'net462'" />
-    <Compile Include="..\OpenTelemetry.AutoInstrumentation\Util\ManagedProfilerLocationHelper.Net.cs" Link="ManagedProfilerLocationHelper.Net.cs" Condition="'$(TargetFramework)' == 'net8.0'" />
+    <Compile Include="..\OpenTelemetry.AutoInstrumentation\Constants.cs"
+             Link="Constants.cs" />
+    <Compile Include="..\OpenTelemetry.AutoInstrumentation\Util\TrustedPlatformAssembliesHelper.Net.cs"
+             Link="Util\TrustedPlatformAssembliesHelper.cs"
+             Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp'" />
+    <Compile Include="..\OpenTelemetry.AutoInstrumentation\Util\ManagedProfilerLocationHelper.cs"
+             Link="Util\ManagedProfilerLocationHelper.cs" />
+    <Compile Include="..\OpenTelemetry.AutoInstrumentation\Util\ManagedProfilerLocationHelper.NetFramework.cs"
+             Link="Util\ManagedProfilerLocationHelper.NetFramework.cs"
+             DependentUpon="ManagedProfilerLocationHelper.cs"
+             Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'" />
+    <Compile Include="..\OpenTelemetry.AutoInstrumentation\Util\ManagedProfilerLocationHelper.Net.cs"
+             Link="Util\ManagedProfilerLocationHelper.Net.cs"
+             DependentUpon="ManagedProfilerLocationHelper.cs"
+             Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp'" />
   </ItemGroup>
 </Project>

@@ -5,6 +5,7 @@
          this project should target netcoreapp3.1.
          Reference: https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/issues/1644 -->
     <TargetFrameworks>netcoreapp3.1</TargetFrameworks>
+    <LangVersion>14.0</LangVersion>
     <Description>StartupHook used by the OpenTelemetry.AutoInstrumentation project.</Description>
     <!-- Suppress CA1031 warnings about catching general exception types. In this project we need to catch all exceptions to prevent the application from crashing. -->
     <NoWarn>$(NoWarn);CA1031</NoWarn>
@@ -68,10 +69,15 @@
     <Compile Include="..\OpenTelemetry.AutoInstrumentation\Configurations\ConfigurationKeys.FailFast.cs">
       <Link>Configurations\ConfigurationKeys.FailFast.cs</Link>
     </Compile>
-    <Compile Include="..\OpenTelemetry.AutoInstrumentation\Constants.cs" Link="Constants.cs" />
-    <Compile Include="..\OpenTelemetry.AutoInstrumentation\Util\TrustedPlatformAssembliesHelper.Net.cs" Link="TrustedPlatformAssembliesHelper.Net.cs" />
-    <Compile Include="..\OpenTelemetry.AutoInstrumentation\Util\ManagedProfilerLocationHelper.cs" Link="ManagedProfilerLocationHelper.cs" />
-    <Compile Include="..\OpenTelemetry.AutoInstrumentation\Util\ManagedProfilerLocationHelper.Net.cs" Link="ManagedProfilerLocationHelper.Net.cs" />
+    <Compile Include="..\OpenTelemetry.AutoInstrumentation\Constants.cs"
+             Link="Constants.cs" />
+    <Compile Include="..\OpenTelemetry.AutoInstrumentation\Util\TrustedPlatformAssembliesHelper.Net.cs"
+             Link="Util\TrustedPlatformAssembliesHelper.cs" />
+    <Compile Include="..\OpenTelemetry.AutoInstrumentation\Util\ManagedProfilerLocationHelper.cs"
+             Link="Util\ManagedProfilerLocationHelper.cs" />
+    <Compile Include="..\OpenTelemetry.AutoInstrumentation\Util\ManagedProfilerLocationHelper.Net.cs"
+             Link="Util\ManagedProfilerLocationHelper.Net.cs"
+             DependentUpon="ManagedProfilerLocationHelper.cs" />
   </ItemGroup>
 
 </Project>

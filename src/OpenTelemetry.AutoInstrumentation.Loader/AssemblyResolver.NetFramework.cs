@@ -2,27 +2,20 @@
 // SPDX-License-Identifier: Apache-2.0
 
 using System.Reflection;
-using System.Runtime.InteropServices;
+using OpenTelemetry.AutoInstrumentation.Logging;
+using OpenTelemetry.AutoInstrumentation.Util;
 
 namespace OpenTelemetry.AutoInstrumentation.Loader;
 
 /// <summary>
 /// A class that attempts to load the OpenTelemetry.AutoInstrumentation .NET assembly.
 /// </summary>
-internal partial class AssemblyResolver
+internal partial class AssemblyResolver(IOtelLogger logger)
 {
     internal void RegisterAssemblyResolving()
     {
         AppDomain.CurrentDomain.AssemblyResolve += AssemblyResolve_ManagedProfilerDependencies;
     }
-
-    /// <summary>
-    /// Return redirection table used in runtime that will match TFM folder to load assemblies.
-    /// It may not be actual .NET Framework version.
-    /// </summary>
-    [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
-    [DllImport("OpenTelemetry.AutoInstrumentation.Native.dll")]
-    private static extern int GetNetFrameworkRedirectionVersion();
 
     private Assembly? AssemblyResolve_ManagedProfilerDependencies(object sender, ResolveEventArgs args)
     {
@@ -41,45 +34,22 @@ internal partial class AssemblyResolver
 
         logger.Debug("Requester [{0}] requested [{1}]", args.RequestingAssembly?.FullName ?? "<null>", args.Name ?? "<null>");
 
-        var path = Path.Combine(_managedProfilerRuntimeDirectory, $"{assemblyName}.dll");
-        if (!File.Exists(path))
+        var assemblyPath = ManagedProfilerLocationHelper.GetAssemblyPath(assemblyName, logger);
+        if (assemblyPath is null)
         {
-            path = Path.Combine(_managedProfilerVersionDirectory, $"{assemblyName}.dll");
-            if (!File.Exists(path))
-            {
-                var link = Path.Combine(_managedProfilerVersionDirectory, $"{assemblyName}.dll.link");
-                if (File.Exists(link))
-                {
-                    try
-                    {
-                        var linkPath = File.ReadAllText(link).Trim();
-                        path = Path.Combine(_managedProfilerRuntimeDirectory, linkPath, $"{assemblyName}.dll");
-                    }
-                    catch (Exception ex)
-                    {
-                        logger.Debug(ex, "Error reading .link file {0}", link);
-                    }
-                }
-                else
-                {
-                    // Not found
-                    return null;
-                }
-            }
+            logger.Debug($"Skip resolving unexpected assembly: ({assemblyName})");
+            return null;
         }
 
-        if (File.Exists(path))
+        try
         {
-            try
-            {
-                var loadedAssembly = Assembly.LoadFrom(path);
-                logger.Debug<string, bool>("Assembly.LoadFrom(\"{0}\") succeeded={1}", path, loadedAssembly != null);
-                return loadedAssembly;
-            }
-            catch (Exception ex)
-            {
-                logger.Debug(ex, "Assembly.LoadFrom(\"{0}\") Exception: {1}", path, ex.Message);
-            }
+            var loadedAssembly = Assembly.LoadFrom(assemblyPath);
+            logger.Debug<string, bool>("Assembly.LoadFrom(\"{0}\") succeeded={1}", assemblyPath, loadedAssembly != null);
+            return loadedAssembly;
+        }
+        catch (Exception ex)
+        {
+            logger.Debug(ex, "Assembly.LoadFrom(\"{0}\") Exception: {1}", assemblyPath, ex.Message);
         }
 
         return null;

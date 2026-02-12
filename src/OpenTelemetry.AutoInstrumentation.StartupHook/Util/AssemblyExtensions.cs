@@ -5,12 +5,12 @@
 
 using System.Reflection;
 
-namespace OpenTelemetry.AutoInstrumentation.Loader;
+namespace OpenTelemetry.AutoInstrumentation.Util;
 
 /// <summary>
-/// Provides SetEntryAssembly for .NET 8 via reflection.
+/// Provides SetEntryAssembly for frameworks before .NET 9.
 /// On .NET 9+ the public API exists, so this is excluded.
-/// Delete this file when .NET 8 support is dropped.
+/// Delete this file when the project targets .NET9+.
 /// </summary>
 internal static class AssemblyExtensions
 {
