@@ -21,6 +21,7 @@ internal sealed class MockLogsCollector : IDisposable
     private readonly TestHttpServer _listener;
     private readonly BlockingCollection<LogRecord> _logs = new(100); // bounded to avoid memory leak
     private readonly List<Expectation> _expectations = new();
+    private int _logsReceived;
 
     private CollectedExpectation? _collectedExpectation;
 
@@ -44,10 +45,10 @@ internal sealed class MockLogsCollector : IDisposable
 
     public void Dispose()
     {
-        WriteOutput($"Shutting down. Total logs requests received: '{_logs.Count}'");
+        _listener.Dispose();
+        WriteOutput($"Shutting down. Total logs received: '{_logsReceived}'");
         ResourceExpector.Dispose();
         _logs.Dispose();
-        _listener.Dispose();
     }
 
     public void Expect(Func<LogRecord, bool> predicate, string? description = null)
@@ -213,6 +214,7 @@ internal sealed class MockLogsCollector : IDisposable
             {
                 foreach (var logRecord in scopeLogs.LogRecords ?? Enumerable.Empty<LogRecord>())
                 {
+                    Interlocked.Increment(ref _logsReceived);
                     _logs.Add(logRecord);
                 }
             }
