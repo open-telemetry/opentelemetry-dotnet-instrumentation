@@ -25,7 +25,7 @@ internal class AssemblyFileVersionRule : Rule
 
         try
         {
-            var ruleEngineFileLocation = Path.Combine(ManagedProfilerLocationHelper.ManagedProfilerRuntimeDirectory, "ruleEngine.json");
+            var ruleEngineFileLocation = Path.Combine(StartupHook.LoaderAssemblyLocation ?? string.Empty, "ruleEngine.json");
             var ruleEngineContent = File.ReadAllText(ruleEngineFileLocation);
             var ruleFileInfoList = JsonSerializer.Deserialize<List<RuleFileInfo>>(ruleEngineContent);
             var entryAssembly = Assembly.GetEntryAssembly();

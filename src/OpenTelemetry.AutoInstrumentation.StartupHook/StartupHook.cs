@@ -6,7 +6,6 @@ using OpenTelemetry.AutoInstrumentation;
 using OpenTelemetry.AutoInstrumentation.Configurations;
 using OpenTelemetry.AutoInstrumentation.Logging;
 using OpenTelemetry.AutoInstrumentation.RulesEngine;
-using OpenTelemetry.AutoInstrumentation.Util;
 
 /// <summary>
 /// Dotnet StartupHook
@@ -19,6 +18,9 @@ internal class StartupHook
     private const string StartuphookLoggerSuffix = "StartupHook";
     private static readonly IOtelLogger Logger = OtelLogging.GetLogger(StartuphookLoggerSuffix);
 
+    // This property must be initialized before any rule is evaluated since it may be used during rule evaluation.
+    internal static string? LoaderAssemblyLocation { get; set; }
+
     /// <summary>
     /// Load and initialize OpenTelemetry.AutoInstrumentation assembly to bring OpenTelemetry SDK
     /// with a pre-defined set of exporters, shims, and instrumentations.
@@ -29,6 +31,8 @@ internal class StartupHook
 
         try
         {
+            LoaderAssemblyLocation = GetLoaderAssemblyLocation();
+
             var ruleEngine = new RuleEngine();
             if (!ruleEngine.ValidateRules())
             {
@@ -81,18 +85,18 @@ internal class StartupHook
                 //   to execute the customer's entrypoint normally (graceful degradation)
             }
 
-            // if we run normally with Native profiler, we load the loader and
-            // let it setup assembly resolution and initialize instrumentation
-            var loaderFilePath = ManagedProfilerLocationHelper.GetAssemblyPath(LoaderAssemblyName)
-                ?? throw new FileNotFoundException("Loader assembly not found in expected location.");
+            // If we run normally with Native profiler, we load the Loader,
+            // create an instance of OpenTelemetry.AutoInstrumentation.Loader.Loader
+            // which will setup assembly resolution and initialize Instrumentation
+            var loaderFilePath = Path.Combine(LoaderAssemblyLocation, $"{LoaderAssemblyName}.dll");
             var loaderAssembly = Assembly.LoadFrom(loaderFilePath)
-                ?? throw new InvalidOperationException("Failed to load Loader");
+                ?? throw new InvalidOperationException("Failed to load Loader assembly");
             var loaderInstance = loaderAssembly.CreateInstance(LoaderTypeName)
                 ?? throw new InvalidOperationException("Failed to create an instance of the Loader");
         }
         catch (Exception ex)
         {
-            Logger.Error(ex, $"Error in StartupHook initialization");
+            Logger.Error(ex, $"Error in StartupHook initialization: LoaderFolderLocation: {LoaderAssemblyLocation}");
             if (failFast)
             {
                 throw;
@@ -135,5 +139,28 @@ internal class StartupHook
         throw new InvalidOperationException(
             "Cannot determine target application path. " +
             "GetEntryAssembly().Location is empty and GetCommandLineArgs()[0] is not a valid assembly.");
+    }
+
+    private static string GetLoaderAssemblyLocation()
+    {
+        try
+        {
+            var startupAssemblyFilePath = Assembly.GetExecutingAssembly().Location;
+            if (startupAssemblyFilePath.StartsWith(@"\\?\", StringComparison.Ordinal))
+            {
+                // This will only be used in case the local path exceeds max_path size limit
+                startupAssemblyFilePath = startupAssemblyFilePath[4..];
+            }
+
+            // StartupHook and Loader assemblies are in the same path
+            var startupAssemblyDirectoryPath = Path.GetDirectoryName(startupAssemblyFilePath)
+                ?? throw new InvalidOperationException("StartupAssemblyFilePath is NULL");
+            return startupAssemblyDirectoryPath;
+        }
+        catch (Exception ex)
+        {
+            Logger.Error(ex, "Error getting loader directory location");
+            throw;
+        }
     }
 }

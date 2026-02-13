@@ -67,7 +67,7 @@ internal class OpenTelemetrySdkMinimumVersionRule : Rule
 
     protected virtual Version? GetVersionFromAutoInstrumentation()
     {
-        var openTelemetryLocation = ManagedProfilerLocationHelper.GetAssemblyPath(OpenTelemetryAssemblyFileName, logger);
+        var openTelemetryLocation = Path.Combine(StartupHook.LoaderAssemblyLocation ?? string.Empty, OpenTelemetryAssemblyFileName);
         var openTelemetryFileVersionInfo = FileVersionInfo.GetVersionInfo(openTelemetryLocation);
         var openTelemetryFileVersion = new Version(openTelemetryFileVersionInfo.FileVersion);
 
