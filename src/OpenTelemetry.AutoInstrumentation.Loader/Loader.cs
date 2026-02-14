@@ -22,6 +22,8 @@ internal class Loader
     /// </summary>
     static Loader()
     {
+        // TODO: For NuGet-based deployment, skip AssemblyResolver or adjust it to
+        // assemblies layout in application output without /net or /netfx subdirectories
 #if NET
         // For .Net (Core) if we run in isolated context (set up by StartupHook's IsolatedAssemblyResolver),
         // skip AssemblyResolver. The isolated AssemblyLoadContext already handles all assembly resolution.

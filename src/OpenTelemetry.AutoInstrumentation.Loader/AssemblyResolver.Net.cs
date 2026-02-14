@@ -37,10 +37,6 @@ internal partial class AssemblyResolver(IOtelLogger logger)
         //   -> We load to Custom ALC for isolation (loading to Default ALC will fail)
         //   -> NOTE: If TPA has same/higher version, runtime successfully auto-loads to Default ALC;
         //            event never fires (accepted)
-        //
-        // === NUGET PACKAGE DEPLOYMENT ===
-        // NuGet resolves versions at build time; TPA typically has correct versions.
-        // This handler serves as fallback for edge cases.
 
         // ASSEMBLY RESOLUTION TIMING
         //
