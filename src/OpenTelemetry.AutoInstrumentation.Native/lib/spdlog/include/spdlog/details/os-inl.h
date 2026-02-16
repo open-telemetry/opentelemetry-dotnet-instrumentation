@@ -267,7 +267,8 @@ SPDLOG_INLINE int utc_minutes_offset(const std::tm &tm) {
 
     #if defined(sun) || defined(__sun) || defined(_AIX) || \
         (defined(__NEWLIB__) && !defined(__TM_GMTOFF)) ||  \
-        (!defined(_BSD_SOURCE) && !defined(_GNU_SOURCE))
+        (!defined(__APPLE__) && !defined(_BSD_SOURCE) && !defined(_GNU_SOURCE) && \
+            (!defined(_POSIX_VERSION) || (_POSIX_VERSION < 202405L)))
     // 'tm_gmtoff' field is BSD extension and it's missing on SunOS/Solaris
     struct helper {
         static long int calculate_gmt_offset(const std::tm &localtm = details::os::localtime(),
@@ -483,12 +484,12 @@ SPDLOG_INLINE void utf8_to_wstrbuf(string_view_t str, wmemory_buf_t &target) {
 
     // find the size to allocate for the result buffer
     int result_size =
-        ::MultiByteToWideChar(CP_UTF8, MB_ERR_INVALID_CHARS, str.data(), str_size, NULL, 0);
+        ::MultiByteToWideChar(CP_UTF8, 0, str.data(), str_size, NULL, 0);
 
     if (result_size > 0) {
         target.resize(result_size);
-        result_size = ::MultiByteToWideChar(CP_UTF8, MB_ERR_INVALID_CHARS, str.data(), str_size,
-                                            target.data(), result_size);
+        result_size = ::MultiByteToWideChar(CP_UTF8, 0, str.data(), str_size, target.data(),
+                                            result_size);
         if (result_size > 0) {
             assert(result_size == target.size());
             return;
@@ -587,6 +588,18 @@ SPDLOG_INLINE bool fsync(FILE *fp) {
 #else
     return ::fsync(fileno(fp)) == 0;
 #endif
+}
+
+// Do non-locking fwrite if possible by the os or use the regular locking fwrite
+// Return true on success.
+SPDLOG_INLINE bool fwrite_bytes(const void *ptr, const size_t n_bytes, FILE *fp) {
+    #if defined(_WIN32) && defined(SPDLOG_FWRITE_UNLOCKED)
+    return _fwrite_nolock(ptr, 1, n_bytes, fp) == n_bytes;
+    #elif defined(SPDLOG_FWRITE_UNLOCKED)
+    return ::fwrite_unlocked(ptr, 1, n_bytes, fp) == n_bytes;
+    #else
+    return std::fwrite(ptr, 1, n_bytes, fp) == n_bytes;
+    #endif
 }
 
 }  // namespace os

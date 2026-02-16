@@ -60,13 +60,19 @@ SPDLOG_INLINE filename_t rotating_file_sink<Mutex>::calc_filename(const filename
 
     filename_t basename, ext;
     std::tie(basename, ext) = details::file_helper::split_by_extension(filename);
-    return fmt_lib::format(SPDLOG_FILENAME_T("{}.{}{}"), basename, index, ext);
+    return fmt_lib::format(SPDLOG_FMT_STRING(SPDLOG_FILENAME_T("{}.{}{}")), basename, index, ext);
 }
 
 template <typename Mutex>
 SPDLOG_INLINE filename_t rotating_file_sink<Mutex>::filename() {
     std::lock_guard<Mutex> lock(base_sink<Mutex>::mutex_);
     return file_helper_.filename();
+}
+
+template <typename Mutex>
+SPDLOG_INLINE void rotating_file_sink<Mutex>::rotate_now() {
+    std::lock_guard<Mutex> lock(base_sink<Mutex>::mutex_);
+    rotate_();
 }
 
 template <typename Mutex>
