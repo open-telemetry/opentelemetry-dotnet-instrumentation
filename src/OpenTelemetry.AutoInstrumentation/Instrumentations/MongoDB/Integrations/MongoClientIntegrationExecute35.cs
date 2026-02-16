@@ -3,7 +3,6 @@
 
 using OpenTelemetry.AutoInstrumentation.CallTarget;
 using OpenTelemetry.AutoInstrumentation.Instrumentations.MongoDB.DuckTypes;
-using OpenTelemetry.AutoInstrumentation.Util;
 
 namespace OpenTelemetry.AutoInstrumentation.Instrumentations.MongoDB.Integrations;
 
@@ -32,7 +31,7 @@ namespace OpenTelemetry.AutoInstrumentation.Instrumentations.MongoDB.Integration
     type: InstrumentationType.Trace)]
 [InstrumentMethod(
     assemblyName: MongoDBConstants.AssemblyName3,
-    typeName: "MongoDB.Driver.Core.WireProtocol.QueryWireProtocol`1",
+    typeName: "MongoDB.Driver.Core.WireProtocol.CommandWireProtocol`1",
     methodName: "Execute",
     returnTypeName: "!0",
     parameterTypeNames: ["MongoDB.Driver.OperationContext", "MongoDB.Driver.Core.Connections.IConnection"],
@@ -42,7 +41,7 @@ namespace OpenTelemetry.AutoInstrumentation.Instrumentations.MongoDB.Integration
     type: InstrumentationType.Trace)]
 public static class MongoClientIntegrationExecute35
 {
-    internal static CallTargetState OnMethodBegin<TTarget, TConnection, TOperationContext>(TTarget instance, TConnection connection, TOperationContext? operationContext)
+    internal static CallTargetState OnMethodBegin<TTarget, TOperationContext, TConnection>(TTarget instance, TOperationContext? operationContext, TConnection connection)
         where TConnection : IConnection
     {
         var activity = MongoDBInstrumentation.StartDatabaseActivity(instance, connection);
@@ -59,7 +58,7 @@ public static class MongoClientIntegrationExecute35
 
         if (exception is not null)
         {
-            activity.SetException(exception);
+            MongoDBInstrumentation.OnError(activity, exception);
         }
 
         activity.Stop();
