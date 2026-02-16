@@ -521,7 +521,7 @@ release.
 
 - Support for .NET 6 and .NET 7. Both framework reached end of support.
 - Support for macOS Monterey 12 x64.
-  macOs libraries are built and tested against [macOS Ventura 13 x64](https://github.com/actions/runner-images/blob/main/images/macos/macos-13-Readme.md).
+  macOs libraries are built and tested against macOS Ventura 13 x64.
 - `MongoDB.Driver.Core.Extensions.DiagnosticSources` dependency is removed.
 
 ## [1.9.0](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/tag/v1.9.0)
@@ -545,7 +545,7 @@ release.
 ### Deprecated
 
 - Support for macOS Monterey 12 x64.
-  All further releases will be supporting [macOS Ventura 13 x64](https://github.com/actions/runner-images/blob/main/images/macos/macos-13-Readme.md)
+  All further releases will be supporting macOS Ventura 13 x64
   and newer.
 
 ### Removed
