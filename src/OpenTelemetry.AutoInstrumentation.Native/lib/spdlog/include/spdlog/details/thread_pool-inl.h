@@ -38,8 +38,7 @@ SPDLOG_INLINE thread_pool::thread_pool(size_t q_max_items,
     : thread_pool(q_max_items, threads_n, on_thread_start, [] {}) {}
 
 SPDLOG_INLINE thread_pool::thread_pool(size_t q_max_items, size_t threads_n)
-    : thread_pool(
-          q_max_items, threads_n, [] {}, [] {}) {}
+    : thread_pool(q_max_items, threads_n, [] {}, [] {}) {}
 
 // message all threads to terminate gracefully join them
 SPDLOG_INLINE thread_pool::~thread_pool() {
