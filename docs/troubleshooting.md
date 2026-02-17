@@ -161,8 +161,8 @@ Find their versions in the following locations:
 - [src/Directory.Packages.props](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/blob/main/src/Directory.Packages.props)
 - [src/OpenTelemetry.AutoInstrumentation.Assemblies/Directory.Packages.props](../src/OpenTelemetry.AutoInstrumentation.Assemblies/Directory.Packages.props)
 
-For non-NuGet installations, the startup scripts automatically configure assembly redirections
-at runtime. This ensures the application uses the versions required by the instrumentation.
+For non-NuGet installations, the startup scripts automatically configure assembly
+redirection at runtime.
 This behavior can be controlled through the [`OTEL_DOTNET_AUTO_REDIRECT_ENABLED`](./config.md#additional-settings)
 setting.
 

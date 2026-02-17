@@ -52,13 +52,13 @@ If the assembly is still not found, the following events fire in order:
    Default ALC)
 3. **`AppDomain.CurrentDomain.AssemblyResolve`**
 
-This order is important for the assembly conflic resiolution strategies adopted
-in our instrumentation: Custom ALC `Load()` method is the earliest opportunity
-to supply an assembly when loading to custom ALC, while `Default.Resolving`
-gives the earliest opportunity to supply an assembly before any other event-based
-handler runs. Note that `AppDomain.CurrentDomain.AssemblyResolve` also receives
-a built-in handler, which automatically resolves co-located dependencies
-from the same directory — so subscribing to it may not always be relyable.
+This order is important for the assembly conflict resolution strategies:
+the custom ALC's `Load()` method provides the earliest opportunity to supply an
+assembly when loading to a custom context, while `Default.Resolving` is the
+earliest event-based callback for the Default ALC. Note that
+`AppDomain.CurrentDomain.AssemblyResolve` also receives a built-in handler that
+automatically resolves co-located dependencies from the same directory — so
+subscribing to it may not always be reliable.
 
 #### Key property: type isolation
 
@@ -135,9 +135,9 @@ ships, the resolution follows the pipeline described above.
 #### Managed assembly resolver (.NET)
 
 On .NET, the instrumentation subscribes to
-`AssemblyLoadContext.Default.Resolving` as described in the
-[resolution order](#resolution-order) section as the earlies and most reliable opportunity
-to provide an assembly for Default ALC use case. Because assembly references have already
+`AssemblyLoadContext.Default.Resolving` — the earliest event-based callback in the
+[resolution order](#resolution-order) — to reliably supply an assembly before
+any other handler runs. Because assembly references have already
 been rewritten by the native profiler, this event fires in two situations:
 
 | Situation | Why it fires | Where we load the assembly |
