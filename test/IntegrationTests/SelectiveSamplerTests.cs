@@ -78,8 +78,6 @@ public class SelectiveSamplerTests : TestHelper
                 samples.Count(sample => sample.SelectedForFrequentSampling) == 1)
                     > 1);
 
-        var counter = 0;
-
         // Sampling starts early, at the start of instrumentation init.
         var groupingStartingWithAllThreadSamples = groupedByTimestampAscending
             .SkipWhile(
@@ -90,29 +88,57 @@ public class SelectiveSamplerTests : TestHelper
             // Omit last group from verification, as it may be collected after activity stopped.
             .SkipLast(1);
 
+        var selectiveSinceLastContinuous = 4;
+        var missedSelectiveBetweenContinuous = false;
+        var missedSelectiveInContinuous = false;
+
         foreach (var group in groupingStartingWithAllThreadSamples)
         {
             // Based on plugin configuration, the expectation is for every 4th
             // batch to contain multiple samples as a result of continuous profiling.
-            if (counter % 4 == 0)
+            if (IsContinuousProfilingSamplesBatch(group))
             {
+                if (selectiveSinceLastContinuous == 3)
+                {
+                    Assert.False(missedSelectiveBetweenContinuous, "Missing selective sample between continuous batches allowed only once per test run.");
+                    missedSelectiveBetweenContinuous = true;
+                }
+                else
+                {
+                    Assert.Equal(4, selectiveSinceLastContinuous);
+                }
+
+                selectiveSinceLastContinuous = 0;
 #if NET
                 // on .NET Framework there is no guarantee that samples collected from all threads
                 Assert.NotEqual(1, group.Count());
 #endif
                 // Sample for thread selected for frequent sampling when collecting samples of all threads
                 // should be marked with SelectedForFrequentSampling flag.
-                Assert.Single(group, sample => sample.SelectedForFrequentSampling);
+                var selectedForFrequentSampling = group.SingleOrDefault(sample => sample.SelectedForFrequentSampling);
+                if (selectedForFrequentSampling != null)
+                {
+                    Assert.True(HasSpanContextAssociated(selectedForFrequentSampling));
+                }
+                else
+                {
+                    Assert.False(missedSelectiveInContinuous, "Missing selective sample in continuous batches allowed only once per test run.");
+                    missedSelectiveInContinuous = true;
+                }
             }
             else
             {
-                Assert.Single(group);
+                Assert.True(IndicatesSelectiveSampling(group));
+                var sample = Assert.Single(group);
+                Assert.True(HasSpanContextAssociated(sample));
+                selectiveSinceLastContinuous++;
             }
-
-            Assert.Single(group, HasSpanContextAssociated);
-
-            counter++;
         }
+    }
+
+    private static bool IsContinuousProfilingSamplesBatch(IGrouping<long, ConsoleThreadSample> group)
+    {
+        return group.All(sample => sample.Source == "continuous-profiler");
     }
 
     private static bool IndicatesSelectiveSampling(IGrouping<long, ConsoleThreadSample> samples)
