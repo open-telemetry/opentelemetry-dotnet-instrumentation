@@ -43,7 +43,7 @@ public class StrongNamedTests : TestHelper
 
         var assembly = Assembly.ReflectionOnlyLoadFrom(testApplicationPath);
 
-        Assert.Equal("c0db600a13f60b51", BitConverter.ToString(assembly.GetName().GetPublicKeyToken()).Replace("-", string.Empty).ToLowerInvariant());
+        Assert.Equal("C0DB600A13F60B51", BitConverter.ToString(assembly.GetName().GetPublicKeyToken()).Replace("-", string.Empty).ToUpperInvariant());
     }
 #endif
 

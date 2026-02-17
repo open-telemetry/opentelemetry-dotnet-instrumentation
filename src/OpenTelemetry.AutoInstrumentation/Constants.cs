@@ -27,6 +27,7 @@ internal static class Constants
     public static class ResourceAttributes
     {
         public const string AttributeServiceName = "service.name";
+        public const string AttributeServiceInstanceId = "service.instance.id";
     }
 
     public static class ConfigurationValues

@@ -11,6 +11,11 @@ namespace OpenTelemetry.AutoInstrumentation.Instrumentations.MongoDB.DuckTypes;
 internal interface IBsonDocumentProxy : IDuckType
 {
     /// <summary>
+    /// Gets the number of elements.
+    /// </summary>
+    public int ElementCount { get; }
+
+    /// <summary>
     /// Gets an element of this document.
     /// </summary>
     /// <param name="index">The zero based index of the element.</param>

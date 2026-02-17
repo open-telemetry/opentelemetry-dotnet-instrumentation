@@ -41,4 +41,5 @@ stdlibc
 struct
 TRACEFILE
 typeof
+WCFCORE
 Xunit

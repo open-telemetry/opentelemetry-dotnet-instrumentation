@@ -123,7 +123,7 @@ file static class NoCodeMockSpansCollectorExtensions
 
     private static void ExpectNoCode(this MockSpansCollector collector, Func<Span, string, Span.Types.SpanKind, List<KeyValue>?, bool> assert, string expectedSpanName, Span.Types.SpanKind expectedSpanKind, List<KeyValue>? expectedAttributes)
     {
-        collector.Expect("OpenTelemetry.AutoInstrumentation.NoCode", x => assert(x, expectedSpanName, expectedSpanKind, expectedAttributes), GetSpanDescription(expectedSpanName, expectedSpanKind, expectedAttributes));
+        collector.Expect("OpenTelemetry.AutoInstrumentation.NoCode", VersionHelper.AutoInstrumentationVersion, x => assert(x, expectedSpanName, expectedSpanKind, expectedAttributes), GetSpanDescription(expectedSpanName, expectedSpanKind, expectedAttributes));
     }
 
     private static string GetSpanDescription(string expectedSpanName, Span.Types.SpanKind expectedSpanKind, List<KeyValue>? expectedAttributes)
@@ -149,6 +149,8 @@ file static class NoCodeMockSpansCollectorExtensions
 
         var duration = TimeSpan.FromTicks(ticks);
 
-        return duration > TimeSpan.FromMilliseconds(98); // all async methods have a 100ms delay, need to be a bit lower (due to timer resolution)
+        // All async methods have a 100ms delay, need to be a bit lower (due to timer resolution).
+        // Decrease by a margin of a default timer resolution on Windows (~16ms) to avoid flaky tests.
+        return duration > TimeSpan.FromMilliseconds(84);
     }
 }

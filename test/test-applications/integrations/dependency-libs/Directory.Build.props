@@ -9,7 +9,6 @@
   </ItemGroup>
 
   <PropertyGroup>
-    <AnalysisLevel>latest-All</AnalysisLevel>
     <!-- CA1031: Do not pass literals as localized parameters -->
     <NoWarn>$(NoWarn);CA1303</NoWarn>
   </PropertyGroup>

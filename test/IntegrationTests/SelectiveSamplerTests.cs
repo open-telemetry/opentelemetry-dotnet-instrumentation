@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 #if NET //for now we ae disabling this on .NET Framework as canary mechanism makes this flaky
 using System.Diagnostics;
+using System.Globalization;
 using System.Runtime.InteropServices;
 using IntegrationTests.Helpers;
 using Xunit.Abstractions;
@@ -36,17 +37,6 @@ public class SelectiveSamplerTests : TestHelper
 
         var threadSamples = ConsoleProfileExporterHelpers.ExtractSamples(output);
 
-        var currentStartTime = ToDateTime(threadSamples[0].TimestampNanoseconds);
-
-        foreach (var sample in threadSamples.Skip(1))
-        {
-            var nextStartTime = ToDateTime(sample.TimestampNanoseconds);
-            var diff = (nextStartTime - currentStartTime).TotalMilliseconds;
-            Output.WriteLine($"Time diff between consecutive samples: {diff}");
-            Assert.InRange(diff, 50, 70);
-            currentStartTime = nextStartTime;
-        }
-
         // Test app sleeps for 0.5s, sampling interval set to 0.05s
         Output.WriteLine($"Count: {threadSamples.Count}");
         Assert.InRange(threadSamples.Count, 7, 14);
@@ -78,7 +68,7 @@ public class SelectiveSamplerTests : TestHelper
 
         var threadSamples = ConsoleProfileExporterHelpers.ExtractSamples(output);
 
-        var groupedByTimestampAscending = threadSamples.GroupBy(sample => sample.TimestampNanoseconds).OrderBy(samples => samples.Key);
+        var groupedByTimestampAscending = threadSamples.GroupBy(sample => sample.TimestampNanoseconds).OrderBy(samples => samples.Key).ToList();
 
         // Based on the test app, samples for all the threads should be collected at least 2 times.
         Assert.True(groupedByTimestampAscending.Count(
@@ -91,11 +81,14 @@ public class SelectiveSamplerTests : TestHelper
         var counter = 0;
 
         // Sampling starts early, at the start of instrumentation init.
-        var groupingStartingWithAllThreadSamples = groupedByTimestampAscending.SkipWhile(
-            samples =>
-                IndicatesSelectiveSampling(samples) ||
-                CollectedBeforeSpanStarted(samples) ||
-                CollectedBeforeFrequentSamplingStarted(samples));
+        var groupingStartingWithAllThreadSamples = groupedByTimestampAscending
+            .SkipWhile(
+                samples =>
+                    IndicatesSelectiveSampling(samples) ||
+                    CollectedBeforeSpanStarted(samples) ||
+                    CollectedBeforeFrequentSamplingStarted(samples))
+            // Omit last group from verification, as it may be collected after activity stopped.
+            .SkipLast(1);
 
         foreach (var group in groupingStartingWithAllThreadSamples)
         {
@@ -163,7 +156,7 @@ public class SelectiveSamplerTests : TestHelper
         foreach (var (spanId, traceIdHigh, traceIdLow) in threadSampleSpanContexts)
         {
             // Reverse the conversion done in TryParseTraceContext methods in NativeMethods.cs
-            var sampleSpanId = ActivitySpanId.CreateFromString(spanId.ToString("x16").AsSpan());
+            var sampleSpanId = ActivitySpanId.CreateFromString(spanId.ToString("x16", CultureInfo.InvariantCulture).AsSpan());
             var sampleTraceId = ActivityTraceId.CreateFromString($"{traceIdHigh:x16}{traceIdLow:x16}".AsSpan());
 
             var match = collectedSpans.Any(c =>

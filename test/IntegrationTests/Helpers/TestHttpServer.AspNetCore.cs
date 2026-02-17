@@ -42,7 +42,8 @@ internal sealed class TestHttpServer : IDisposable
                                 x.Run(pathHandler.Delegate);
                             });
                         }
-                    });
+                    })
+                    .UseShutdownTimeout(TimeSpan.FromSeconds(5));
             })
             .Build();
 
@@ -69,7 +70,8 @@ internal sealed class TestHttpServer : IDisposable
 
     public void Dispose()
     {
-        WriteOutput($"Shutting down");
+        WriteOutput("Shutting down");
+        _listener.StopAsync().GetAwaiter().GetResult();
         _listener.Dispose();
     }
 

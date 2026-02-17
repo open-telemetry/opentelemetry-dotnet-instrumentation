@@ -25,10 +25,10 @@ jobs:
     steps:
 
     - name: Checkout
-      uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # tag: v6.0.1
+      uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # tag: v6.0.2
 
     - name: Restore lychee cache
-      uses: actions/cache/restore@9255dc7a253b0ccc959486e2bca901246202afeb # tag: v5.0.1
+      uses: actions/cache/restore@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # tag: v5.0.3
       id: cache-restore
       with:
         path: .lycheecache
@@ -43,7 +43,7 @@ jobs:
         args: "--cache --max-cache-age 1d --threads 1 --max-concurrency 1 --verbose --retry-wait-time 5 --max-retries 3 --timeout 60 --no-progress './**/*.md' './**/*.html'"
 
     - name: Run markdownlint
-      uses: streetsidesoftware/cspell-action@24fa8d3096a314ce263f39578744e9d9f8d80acf # tag: v8.1.2
+      uses: streetsidesoftware/cspell-action@d5d910b521ad408f1e7383c24609079f5a88bdca # tag: v8.2.0
       with:
         files: '**/*.md'
 
@@ -55,7 +55,7 @@ jobs:
 
     - name: Save lychee cache
       if: always()
-      uses: actions/cache/save@9255dc7a253b0ccc959486e2bca901246202afeb # tag: v5.0.1
+      uses: actions/cache/save@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # tag: v5.0.3
       with:
         path: .lycheecache
         key: ${{ steps.cache-restore.outputs.cache-primary-key }}

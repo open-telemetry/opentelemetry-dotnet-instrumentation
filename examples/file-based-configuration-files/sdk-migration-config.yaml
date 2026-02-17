@@ -241,6 +241,7 @@ instrumentation/development:
         netfx_ilrewrite_enabled: ${OTEL_DOTNET_AUTO_SQLCLIENT_NETFX_ILREWRITE_ENABLED:-false}
       stackexchangeredis:  # StackExchange.Redis
       wcfclient:           # WCF Client
+      wcfcore:             # CoreWCF.Primitives
       wcfservice:          # WCF Service
     metrics:
       # List of additional System.Diagnostics.Metrics.Meter names to be added to the meter at the startup.
@@ -256,4 +257,5 @@ instrumentation/development:
     logs:
       ilogger:             # Microsoft.Extensions.Logging
       log4net:             # Log4Net
+      nlog:                # NLog
         

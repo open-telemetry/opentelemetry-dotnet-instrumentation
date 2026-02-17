@@ -20,6 +20,6 @@ public class InternalLoggerTests
         logger.Debug("debug message", false);
 
         var messages = Assert.Single(sink.Messages);
-        Assert.Contains("[Information] info message", messages);
+        Assert.Contains("[Information] info message", messages, StringComparison.Ordinal);
     }
 }

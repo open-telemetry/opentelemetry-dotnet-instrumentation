@@ -33,7 +33,7 @@ public class MultipleAppDomainsTests : TestHelper
         var (_, standardErrorOutput, _) = RunTestApplication();
 
         // Nothing regarding log should have been logged to the console.
-        Assert.DoesNotContain("Log:", standardErrorOutput);
+        Assert.DoesNotContain("Log:", standardErrorOutput, StringComparison.Ordinal);
 
         collector.AssertExpectations();
     }

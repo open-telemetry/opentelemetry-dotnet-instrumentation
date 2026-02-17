@@ -91,6 +91,16 @@ file-based configuration to include these parameters.
 
 ---
 
+### OTLP
+
+| Environment variable                    | Description                                                                               |
+| --------------------------------------- | ----------------------------------------------------------------------------------------- |
+| `OTEL_EXPORTER_OTLP_CERTIFICATE`        | Path to the CA certificate file (PEM format) used to verify the server's TLS certificate. |
+| `OTEL_EXPORTER_OTLP_CLIENT_CERTIFICATE` | Path to the client certificate file (PEM format) for mTLS authentication.                 |
+| `OTEL_EXPORTER_OTLP_CLIENT_KEY`         | Path to the client private key file (PEM format) for mTLS authentication.                 |
+
+---
+
 ### .NET Runtime
 
 | Environment variable     | Description                                          |
@@ -264,6 +274,10 @@ meter_provider:
         exporter:
           # Configure exporter to be console.
           console:
+            # Configure temporality preference.
+            # Values include: cumulative, delta.
+            # If omitted or null, cumulative is used.
+            temporality_preference: cumulative
 
     # Pull reader for Prometheus
     - pull:
@@ -513,6 +527,7 @@ instrumentation/development:
       sqlclient:           # Microsoft.Data.SqlClient & System.Data.SqlClient
       stackexchangeredis:  # StackExchange.Redis
       wcfclient:           # WCF Client
+      wcfcore:             # CoreWCF.Primitives
       wcfservice:          # WCF Service
     metrics:
       aspnet:              # ASP.NET metrics

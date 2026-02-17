@@ -9,6 +9,8 @@ using Xunit.Sdk;
 
 namespace IntegrationTests.Helpers;
 
+#pragma warning disable CA1812 // Mark members as static. There is some issue in dotnet format.
+// TODO remove pragma when dotnet format issue is fixed
 public class VerboseTestFramework : XunitTestFramework
 {
     public VerboseTestFramework(IMessageSink messageSink)
@@ -21,7 +23,7 @@ public class VerboseTestFramework : XunitTestFramework
         return new VerboseTestExecutor(assemblyName, SourceInformationProvider, DiagnosticMessageSink);
     }
 
-    private class VerboseTestExecutor : XunitTestFrameworkExecutor
+    private sealed class VerboseTestExecutor : XunitTestFrameworkExecutor
     {
         public VerboseTestExecutor(AssemblyName assemblyName, ISourceInformationProvider sourceInformationProvider, IMessageSink diagnosticMessageSink)
             : base(assemblyName, sourceInformationProvider, diagnosticMessageSink)
@@ -32,12 +34,12 @@ public class VerboseTestFramework : XunitTestFramework
         {
             using (var assemblyRunner = new VerboseTestAssemblyRunner(TestAssembly, testCases, DiagnosticMessageSink, executionMessageSink, executionOptions))
             {
-                await assemblyRunner.RunAsync();
+                await assemblyRunner.RunAsync().ConfigureAwait(false);
             }
         }
     }
 
-    private class VerboseTestAssemblyRunner : XunitTestAssemblyRunner
+    private sealed class VerboseTestAssemblyRunner : XunitTestAssemblyRunner
     {
         public VerboseTestAssemblyRunner(ITestAssembly testAssembly, IEnumerable<IXunitTestCase> testCases, IMessageSink diagnosticMessageSink, IMessageSink executionMessageSink, ITestFrameworkExecutionOptions executionOptions)
             : base(testAssembly, testCases, diagnosticMessageSink, executionMessageSink, executionOptions)
@@ -50,7 +52,7 @@ public class VerboseTestFramework : XunitTestFramework
         }
     }
 
-    private class VerboseTestCollectionRunner : XunitTestCollectionRunner
+    private sealed class VerboseTestCollectionRunner : XunitTestCollectionRunner
     {
         private readonly IMessageSink _diagnosticMessageSink;
 
@@ -67,7 +69,7 @@ public class VerboseTestFramework : XunitTestFramework
         }
     }
 
-    private class VerboseTestClassRunner : XunitTestClassRunner
+    private sealed class VerboseTestClassRunner : XunitTestClassRunner
     {
         public VerboseTestClassRunner(ITestClass testClass, IReflectionTypeInfo @class, IEnumerable<IXunitTestCase> testCases, IMessageSink diagnosticMessageSink, IMessageBus messageBus, ITestCaseOrderer testCaseOrderer, ExceptionAggregator aggregator, CancellationTokenSource cancellationTokenSource, IDictionary<Type, object> collectionFixtureMappings)
             : base(testClass, @class, testCases, diagnosticMessageSink, messageBus, testCaseOrderer, aggregator, cancellationTokenSource, collectionFixtureMappings)
@@ -81,7 +83,7 @@ public class VerboseTestFramework : XunitTestFramework
         }
     }
 
-    private class VerboseTestMethodRunner : XunitTestMethodRunner
+    private sealed class VerboseTestMethodRunner : XunitTestMethodRunner
     {
         private readonly IMessageSink _diagnosticMessageSink;
 
@@ -104,7 +106,7 @@ public class VerboseTestFramework : XunitTestFramework
 
             try
             {
-                var result = await base.RunTestCaseAsync(testCase);
+                var result = await base.RunTestCaseAsync(testCase).ConfigureAwait(false);
                 var status = result.Failed > 0 ? "FAIL" : "PASS";
                 _diagnosticMessageSink.OnMessage(new DiagnosticMessage($"--- {status}: {test} ({result.Time:0.00}s)"));
                 return result;
@@ -117,3 +119,4 @@ public class VerboseTestFramework : XunitTestFramework
         }
     }
 }
+#pragma warning restore CA1812 // Mark members as static. There is some issue in dotnet format.

@@ -12,7 +12,7 @@ namespace OpenTelemetry.AutoInstrumentation.Instrumentations.RabbitMqLegacy;
 
 internal static class RabbitMqInstrumentation
 {
-    private static readonly ActivitySource Source = new("OpenTelemetry.AutoInstrumentation.RabbitMq");
+    private static readonly ActivitySource Source = new("OpenTelemetry.AutoInstrumentation.RabbitMq", AutoInstrumentationVersion.Version);
 
     public static Activity? StartReceive<TModelBase>(TModelBase instance)
         where TModelBase : IModelBase

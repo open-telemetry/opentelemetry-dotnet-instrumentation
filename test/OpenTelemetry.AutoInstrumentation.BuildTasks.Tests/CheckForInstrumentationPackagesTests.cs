@@ -152,10 +152,10 @@ public class CheckForInstrumentationPackagesTests
         return taskItems;
     }
 
-    private class TaskWithMockBuildEngine
+    private sealed class TaskWithMockBuildEngine
     {
-        private List<BuildMessageEventArgs> _buildMessageEventArgsList = new List<BuildMessageEventArgs>();
-        private List<BuildErrorEventArgs> _buildErrorEventArgsList = new List<BuildErrorEventArgs>();
+        private readonly List<BuildMessageEventArgs> _buildMessageEventArgsList = [];
+        private readonly List<BuildErrorEventArgs> _buildErrorEventArgsList = [];
 
         public TaskWithMockBuildEngine()
         {

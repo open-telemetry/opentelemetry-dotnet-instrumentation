@@ -6,6 +6,6 @@
 
   <ItemGroup>
     <PackageReference Include="OpenTelemetry.AutoInstrumentation" Version="$(NuGetPackageVersion)" Condition=" '$(NuGetPackageVersion)' != '' " />
-    <PackageReference Include="OpenTelemetry.AutoInstrumentation" Version="1.12.0" Condition=" '$(NuGetPackageVersion)' == '' " />
+    <PackageReference Include="OpenTelemetry.AutoInstrumentation" Version="1.14.1" Condition=" '$(NuGetPackageVersion)' == '' " />
   </ItemGroup>
 </Project>

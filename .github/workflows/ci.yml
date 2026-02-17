@@ -63,20 +63,20 @@ jobs:
     steps:
 
       - name: Checkout
-        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # tag: v6.0.1
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # tag: v6.0.2
         with:
           fetch-depth: 0 # fetching all, needed to correctly calculate version
 
       - name: Setup .NET
-        uses: actions/setup-dotnet@2016bd2012dba4e32de620c46fe006a3ac9f0602 # tag: v5.0.1
+        uses: actions/setup-dotnet@baa11fbfe1d6520db94683bd5c7a3818018e4309 # tag: v5.1.0
         with:
           dotnet-version: | 
-            8.0.416
-            9.0.308
-            10.0.101
+            8.0.418
+            9.0.311
+            10.0.103
 
       - name: Check for NuGet packages cache
-        uses: actions/cache@9255dc7a253b0ccc959486e2bca901246202afeb # tag: v5.0.1
+        uses: actions/cache@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # tag: v5.0.3
         id: nuget-cache
         with:
           key: ${{ hashFiles('**/Directory.packages.props', './build/LibraryVersions.g.cs', '**/packages.config' ) }}
@@ -90,7 +90,7 @@ jobs:
 
       - name: Install SQL Server (localdb)
         if: ${{ runner.os == 'Windows' }}
-        uses: potatoqualitee/mssqlsuite@7682f39841e862cde023c8bc97c55592c0af4eb0 # tag: v1.11
+        uses: potatoqualitee/mssqlsuite@2291d923e83859edd871679c05b379037376761f # tag: v1.12
         with: 
           install: localdb
 
@@ -123,20 +123,20 @@ jobs:
     steps:
 
       - name: Checkout
-        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # tag: v6.0.1
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # tag: v6.0.2
         with:
           fetch-depth: 0 # fetching all, needed to correctly calculate version
 
       - name: Setup .NET
-        uses: actions/setup-dotnet@2016bd2012dba4e32de620c46fe006a3ac9f0602 # tag: v5.0.1
+        uses: actions/setup-dotnet@baa11fbfe1d6520db94683bd5c7a3818018e4309 # tag: v5.1.0
         with:
           dotnet-version: | 
-            8.0.416
-            9.0.308
-            10.0.101
+            8.0.418
+            9.0.311
+            10.0.103
 
       - name: Check for NuGet packages cache
-        uses: actions/cache@9255dc7a253b0ccc959486e2bca901246202afeb # tag: v5.0.1
+        uses: actions/cache@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # tag: v5.0.3
         id: nuget-cache
         with:
           key: ${{ hashFiles('**/Directory.packages.props', './build/LibraryVersions.g.cs', '**/packages.config' ) }}
@@ -167,20 +167,20 @@ jobs:
     steps:
 
       - name: Checkout
-        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # tag: v6.0.1
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # tag: v6.0.2
         with:
           fetch-depth: 0 # fetching all, needed to correctly calculate version
 
       - name: Setup .NET
-        uses: actions/setup-dotnet@2016bd2012dba4e32de620c46fe006a3ac9f0602 # tag: v5.0.1
+        uses: actions/setup-dotnet@baa11fbfe1d6520db94683bd5c7a3818018e4309 # tag: v5.1.0
         with:
           dotnet-version: | 
-            8.0.416
-            9.0.308
-            10.0.101
+            8.0.418
+            9.0.311
+            10.0.103
 
       - name: Check for NuGet packages cache
-        uses: actions/cache@9255dc7a253b0ccc959486e2bca901246202afeb # tag: v5.0.1
+        uses: actions/cache@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # tag: v5.0.3
         id: nuget-cache
         with:
           key: ${{ hashFiles('**/Directory.packages.props', './build/LibraryVersions.g.cs', '**/packages.config' ) }}
@@ -236,7 +236,7 @@ jobs:
     steps:
 
     - name: Checkout
-      uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # tag: v6.0.1
+      uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # tag: v6.0.2
       with:
         fetch-depth: 0 # fetching all, needed to correctly calculate version
 
@@ -275,20 +275,20 @@ jobs:
     steps:
       
       - name: Checkout
-        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # tag: v6.0.1
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # tag: v6.0.2
         with:
           fetch-depth: 0 # fetching all, needed to correctly calculate version
 
       - name: Setup .NET
-        uses: actions/setup-dotnet@2016bd2012dba4e32de620c46fe006a3ac9f0602 # tag: v5.0.1
+        uses: actions/setup-dotnet@baa11fbfe1d6520db94683bd5c7a3818018e4309 # tag: v5.1.0
         with:
           dotnet-version: | 
-            8.0.416
-            9.0.308
-            10.0.101
+            8.0.418
+            9.0.311
+            10.0.103
 
       - name: Check for NuGet packages cache
-        uses: actions/cache@9255dc7a253b0ccc959486e2bca901246202afeb # tag: v5.0.1
+        uses: actions/cache@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # tag: v5.0.3
         id: nuget-cache
         with:
           key: ${{ hashFiles('**/Directory.packages.props', './build/LibraryVersions.g.cs', '**/packages.config' ) }}

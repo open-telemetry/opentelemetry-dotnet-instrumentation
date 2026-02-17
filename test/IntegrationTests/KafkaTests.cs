@@ -8,7 +8,7 @@ using Xunit.Abstractions;
 
 namespace IntegrationTests;
 
-[Collection(KafkaCollection.Name)]
+[Collection(KafkaCollectionFixture.Name)]
 public class KafkaTests : TestHelper
 {
     private const string MessagingPublishOperationAttributeValue = "publish";
@@ -54,31 +54,32 @@ public class KafkaTests : TestHelper
         SetExporter(collector);
 
         // Failed produce attempts made before topic is created.
-        collector.Expect(KafkaInstrumentationScopeName, span => span.Kind == Span.Types.SpanKind.Producer && ValidateResultProcessingProduceExceptionSpan(span, topicName), "Failed Produce attempt with delivery handler set.");
-        collector.Expect(KafkaInstrumentationScopeName, span => span.Kind == Span.Types.SpanKind.Producer && ValidateProduceExceptionSpan(span, topicName), "Failed Produce attempt without delivery handler set.");
-        collector.Expect(KafkaInstrumentationScopeName, span => span.Kind == Span.Types.SpanKind.Producer && ValidateResultProcessingProduceExceptionSpan(span, topicName), "Failed ProduceAsync attempt.");
+        collector.Expect(KafkaInstrumentationScopeName, VersionHelper.AutoInstrumentationVersion, span => span.Kind == Span.Types.SpanKind.Producer && ValidateResultProcessingProduceExceptionSpan(span, topicName), "Failed Produce attempt with delivery handler set.");
+        collector.Expect(KafkaInstrumentationScopeName, VersionHelper.AutoInstrumentationVersion, span => span.Kind == Span.Types.SpanKind.Producer && ValidateProduceExceptionSpan(span, topicName), "Failed Produce attempt without delivery handler set.");
+        collector.Expect(KafkaInstrumentationScopeName, VersionHelper.AutoInstrumentationVersion, span => span.Kind == Span.Types.SpanKind.Producer && ValidateResultProcessingProduceExceptionSpan(span, topicName), "Failed ProduceAsync attempt.");
 
-        if (packageVersion == string.Empty || Version.Parse(packageVersion) != new Version(1, 4, 0))
+        if (packageVersion.Length == 0 || Version.Parse(packageVersion) != new Version(1, 4, 0))
         {
             // Failed consume attempt.
             collector.Expect(
                 KafkaInstrumentationScopeName,
+                VersionHelper.AutoInstrumentationVersion,
                 span => span.Kind == Span.Types.SpanKind.Consumer && ValidateConsumeExceptionSpan(span, topicName),
                 "Failed Consume attempt.");
         }
 
         // Successful produce attempts after topic was created with admin client.
-        collector.Expect(KafkaInstrumentationScopeName, span => span.Kind == Span.Types.SpanKind.Producer && ValidateProducerSpan(span, topicName, 0), "Successful ProduceAsync attempt.");
-        collector.Expect(KafkaInstrumentationScopeName, span => span.Kind == Span.Types.SpanKind.Producer && ValidateProducerSpan(span, topicName, -1), "Successful Produce attempt without delivery handler set.");
-        collector.Expect(KafkaInstrumentationScopeName, span => span.Kind == Span.Types.SpanKind.Producer && ValidateProducerSpan(span, topicName, 0), "Successful Produce attempt with delivery handler set.");
+        collector.Expect(KafkaInstrumentationScopeName, VersionHelper.AutoInstrumentationVersion, span => span.Kind == Span.Types.SpanKind.Producer && ValidateProducerSpan(span, topicName, 0), "Successful ProduceAsync attempt.");
+        collector.Expect(KafkaInstrumentationScopeName, VersionHelper.AutoInstrumentationVersion, span => span.Kind == Span.Types.SpanKind.Producer && ValidateProducerSpan(span, topicName, -1), "Successful Produce attempt without delivery handler set.");
+        collector.Expect(KafkaInstrumentationScopeName, VersionHelper.AutoInstrumentationVersion, span => span.Kind == Span.Types.SpanKind.Producer && ValidateProducerSpan(span, topicName, 0), "Successful Produce attempt with delivery handler set.");
 
         // Successful produce attempt after topic was created for tombstones.
-        collector.Expect(KafkaInstrumentationScopeName, span => span.Kind == Span.Types.SpanKind.Producer && ValidateProducerSpan(span, topicName, -1, true), "Successful sync Publish attempt with a tombstone.");
+        collector.Expect(KafkaInstrumentationScopeName, VersionHelper.AutoInstrumentationVersion, span => span.Kind == Span.Types.SpanKind.Producer && ValidateProducerSpan(span, topicName, -1, true), "Successful sync Publish attempt with a tombstone.");
 
         // Successful consume attempts.
-        collector.Expect(KafkaInstrumentationScopeName, span => span.Kind == Span.Types.SpanKind.Consumer && ValidateConsumerSpan(span, topicName, 0), "First successful Consume attempt.");
-        collector.Expect(KafkaInstrumentationScopeName, span => span.Kind == Span.Types.SpanKind.Consumer && ValidateConsumerSpan(span, topicName, 1), "Second successful Consume attempt.");
-        collector.Expect(KafkaInstrumentationScopeName, span => span.Kind == Span.Types.SpanKind.Consumer && ValidateConsumerSpan(span, topicName, 2), "Third successful Consume attempt.");
+        collector.Expect(KafkaInstrumentationScopeName, VersionHelper.AutoInstrumentationVersion, span => span.Kind == Span.Types.SpanKind.Consumer && ValidateConsumerSpan(span, topicName, 0), "First successful Consume attempt.");
+        collector.Expect(KafkaInstrumentationScopeName, VersionHelper.AutoInstrumentationVersion, span => span.Kind == Span.Types.SpanKind.Consumer && ValidateConsumerSpan(span, topicName, 1), "Second successful Consume attempt.");
+        collector.Expect(KafkaInstrumentationScopeName, VersionHelper.AutoInstrumentationVersion, span => span.Kind == Span.Types.SpanKind.Consumer && ValidateConsumerSpan(span, topicName, 2), "Third successful Consume attempt.");
 
         collector.ExpectCollected(collection => ValidatePropagation(collection, topicName));
         EnableBytecodeInstrumentation();
@@ -153,8 +154,7 @@ public class KafkaTests : TestHelper
 
     private static bool ValidateProduceExceptionSpan(Span span, string topicName)
     {
-        return ValidateBasicProduceExceptionSpan(span, topicName) &&
-               span.Attributes.Count(kv => kv.Key == KafkaMessageOffsetAttributeName) == 0;
+        return ValidateBasicProduceExceptionSpan(span, topicName) && span.Attributes.All(kv => kv.Key != KafkaMessageOffsetAttributeName);
     }
 
     private static bool ValidateResultProcessingProduceExceptionSpan(Span span, string topicName)

@@ -1,4 +1,4 @@
-# Continuous profiler
+﻿# Continuous profiler
 
 > [!IMPORTANT]  
 > Continuous profiler is an experimental feature. It will be subject to change,
@@ -32,12 +32,21 @@ sampler uses two independent buffers to store samples alternatively.
 
 ### Requirements
 
-* .NET 6.0 or higher (`ICorProfilerInfo12` available in runtime).
-* .NET Framework is not supported, as `ICorProfiler10` and `ICorProfiler12`
-  are not available in .NET Fx.
+* .NET 6.0 or higher, OR
+* .NET Framework 4.6.2 or higher (x64 only)
 
-Note that `ICorProfiler10` can be used, but .NET Core 3.1 or .NET 5.0 aren't
-supported by the OpenTelemetry .NET Automatic Instrumentation.
+### .NET Framework support
+
+Thread sampling is supported on .NET Framework 4.6.2+ running on Windows x64.
+No additional configuration is required beyond implementing and configuring
+the custom plugin in exactly the same manner as you would for .NET (Core).
+Behind the scenes, the samples are captured and exported in the same format
+as they would be in .NET.
+
+> [!NOTE]  
+> .NET Framework support uses a different native stack walking strategy
+> optimized for the .NET Framework runtime, but the exported data format
+> remains identical to .NET (Core).
 
 ### Enable the profiler
 
@@ -105,12 +114,76 @@ If you see these log messages, check the exporter implementation.
 
 #### What if I'm on an unsupported .NET version?
 
-None of the .NET Framework versions is supported. You have to switch
-to a supported .NET version.
+For thread sampling, you need either:
+
+* .NET 6.0 or higher, OR
+* .NET Framework 4.6.2 or higher (Windows x64 only)
+
+If you're on an unsupported version (e.g., .NET Core 3.1, .NET 5.0, or
+.NET Framework on non-x64 platforms), you'll need to upgrade to a supported
+runtime version.
 
 #### Can I tell the sampler to ignore some threads?
 
 There is no such functionality. All managed threads are captured by the profiler.
+
+### Troubleshoot .NET Framework thread sampling
+
+This section covers troubleshooting specific to .NET Framework thread sampling.
+Enable `debug` level logging in the native profiler to see detailed stack
+capture diagnostics. You can do this by setting the environment variable
+`OTEL_LOG_LEVEL=debug` when the instrumented application starts.
+
+#### How do I know if .NET Framework stack capture is initialized?
+
+Look for the following message in the native logs:
+
+```text
+[debug] [StackCapture] Canary thread ready
+```
+
+This indicates successful initialization of the stack capture machinery.
+The canary thread is used internally to verify that stack walking operations
+are safe to perform.
+
+#### How do I know if stack capture is working?
+
+Look for the following message in the native logs:
+
+```text
+[debug] [StackCapture] Unseeded capture succeeded.
+```
+
+This indicates that stack samples are being successfully captured for threads.
+
+#### What does "Unable to locate managed frame" mean?
+
+You may see messages like:
+
+```text
+[debug] [StackCapture] PrepareContextForSnapshot - Unable to locate managed frame in stack walk for ThreadID=...
+```
+
+**This is normal and expected behavior.** This message appears when a thread is
+executing code that cannot be resolved to a managed frame, such as:
+
+* Native code execution
+* System calls
+* Transitions between managed and native code
+* Threads blocked in native wait states
+
+The profiler will continue to capture samples from other threads and will
+successfully capture this thread's stack in subsequent sampling intervals
+when it returns to managed code.
+
+#### What if I don't see the canary thread ready message?
+
+If you don't see `[StackCapture] Canary thread ready` in the logs:
+
+1. Verify that the application is running on Windows x64
+2. Ensure thread sampling is enabled in the plugin configuration
+3. Check that the profiler is successfully attached (look for
+   `ContinuousProfiler::StartThreadSampling` in the logs)
 
 ## Allocation sampling
 
@@ -134,8 +207,12 @@ and exports in the way defined by the plugin..
 
 ### Requirements
 
-* .NET 6.0 or higher (`ICorProfilerInfo12` available in runtime) - technically
-  it could be .NET5 which is not supported by OTel/MS.
+* .NET 6.0 or higher (`ICorProfilerInfo12` available in runtime)
+
+> [!NOTE]  
+> Allocation sampling is **not supported** on .NET Framework. The required
+> `ICorProfilerInfo10` and `ICorProfilerInfo12` interfaces for allocation tick
+> events are not available in the .NET Framework runtime.
 
 ### Enable the profiler
 
@@ -199,8 +276,17 @@ between your process and the Collector.
 
 #### What if I'm on an unsupported .NET version?
 
-None of the .NET Framework versions is supported. You have to switch to
-supported .NET version.
+Allocation sampling requires .NET 6.0 or higher. It is not available on
+.NET Framework due to missing `ICorProfilerInfo10`/`ICorProfilerInfo12` APIs
+for allocation tick events. You'll need to use .NET 6.0+ if you require
+allocation sampling.
+
+## Feature support matrix
+
+| Feature             | .NET 6.0+    | .NET Framework 4.6.2+           |
+| ------------------- | ------------ | ------------------------------- |
+| Thread sampling     | ✅ Supported | ✅ Supported (Windows x64 only) |
+| Allocation sampling | ✅ Supported | ❌ Not supported                |
 
 ## Plugin
 
@@ -228,7 +314,7 @@ public Tuple<bool, uint, bool, uint, TimeSpan, TimeSpan, object> GetContinuousPr
 {
     var threadSamplingEnabled = true; // enables thread sampling
     var threadSamplingInterval = 10000u; // interval to stop CLR runtime and fetch stacks. 10 000ms is Splunk default. 1000ms is the lowest supported value by Splunk. The code does not contains any limitations this. Plugins is responsible for checks.
-    var allocationSamplingEnabled = true; // enables allocation sampling
+    var allocationSamplingEnabled = true; // enables allocation sampling (ignored on .NET Framework)
     var maxMemorySamplesPerMinute = 200u; // max number of samples in minutes. 200 is tested default value by Splunk.
     var exportInterval = TimeSpan.FromMilliseconds(500); // Pause time before next execution of exporting/reading buffer  process
     var exportTimeout = TimeSpan.FromMilliseconds(500); // Export timeout
@@ -239,6 +325,12 @@ public Tuple<bool, uint, bool, uint, TimeSpan, TimeSpan, object> GetContinuousPr
 
 if more than one plugin implement `GetContinuousProfilerConfiguration` only
 the first one will be used. Other will be ignored.
+
+> [!NOTE]  
+> On .NET Framework, the `allocationSamplingEnabled` setting is ignored since
+> allocation sampling is not supported. The same plugin configuration works
+> for both .NET and .NET Framework - thread sampling will be enabled on both
+> platforms when configured.
 
 ### Exporter contract
 
@@ -255,6 +347,11 @@ The Exporter is responsible both for parsing this buffer and exporting it.
 
 Example: [`OtlpOverHttpExporter`](../../test/test-applications/integrations/TestApplication.ContinuousProfiler/Exporter/OtlpOverHttpExporter.cs).
 
+> [!NOTE]  
+> The `ExportAllocationSamples` method will not be called on .NET Framework
+> since allocation sampling is not supported. However, the exporter must still
+> implement this method to satisfy the contract.
+
 ### Native parser
 
 As there is no default OpenTelemetry Protocol format there is not easy way to
@@ -264,3 +361,6 @@ It should be changed when the OTel Proposal will be merged, and we can start imp
 real OTLP exporter.
 
 Implementation can be found in [`SampleNativeFormatParser`](../../test/test-applications/integrations/TestApplication.ContinuousProfiler/Exporter/SampleNativeFormatParser.cs).
+
+The same parser implementation works for both .NET and .NET Framework - the
+native buffer format is identical across both platforms.

@@ -5,7 +5,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" VersionOverride="$(LibraryVersion)" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" VersionOverride="$(LibraryVersion)" Condition=" '$(LibraryVersion)' != '' or '$(TargetFramework)' == 'net10.0' " />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" VersionOverride="9.0.12" Condition=" '$(LibraryVersion)' == '' and ('$(TargetFramework)' == 'net9.0' or '$(TargetFramework)' == 'net8.0' ) " />
     <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" />
     <PackageReference Include="System.Diagnostics.DiagnosticSource" Condition=" '$(TargetFramework)' == 'net8.0' " />
   </ItemGroup>

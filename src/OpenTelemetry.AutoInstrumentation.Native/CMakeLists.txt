@@ -106,11 +106,42 @@ endif()
 add_compile_options(-std=c++17 -fPIC -fms-extensions)
 add_compile_options(-DPAL_STDCPP_COMPAT -DPLATFORM_UNIX -DUNICODE)
 add_compile_options(-Wno-invalid-noreturn -Wno-macro-redefined)
+
+# ******************************************************
+# Security hardening flags
+# ******************************************************
+
+# Stack protection (buffer overflow detection)
+add_compile_options(-fstack-protector-strong)
+
+# Control Flow Integrity (CFG equivalent)
+# We should also enable SafeStack for the compiler and linker too (-fsanitize=safe-stack), but it requires dynamic linking to work.
+# See https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/pull/4770#issuecomment-3758136539.
+include(CheckCXXCompilerFlag)
+check_cxx_compiler_flag("-fcf-protection=full" HAS_FCF_PROTECTION)
+
+if (HAS_FCF_PROTECTION)
+    add_compile_options(-fcf-protection=full)
+endif()
+
 if (ISMACOS)
     add_compile_options(-stdlib=libc++ -DMACOS -Wno-pragma-pack)
+    # Enable all hardening features on macOS
+    add_compile_options(-fstack-check)
 elseif(ISLINUX)
     add_compile_options(-stdlib=libstdc++ -DLINUX -Wno-pragmas)
+    # Enable additional hardening on modern versions of Linux
+    # Require glibc 2.27+ for _FORTIFY_SOURCE=2
+    execute_process(COMMAND ldd --version OUTPUT_VARIABLE LDD_VERSION)
+    if (LDD_VERSION MATCHES "([0-9]+)\\.([0-9]+)")
+        set(GLIBC_MAJOR ${CMAKE_MATCH_1})
+        set(GLIBC_MINOR ${CMAKE_MATCH_2})
+        if ((GLIBC_MAJOR EQUAL 2 AND GLIBC_MINOR GREATER 26) OR GLIBC_MAJOR GREATER 2)
+            add_compile_options(-D_FORTIFY_SOURCE=2)
+        endif()
+    endif()
 endif()
+
 if (BIT64)
     add_compile_options(-DBIT64 -DHOST_64BIT)
 endif()
@@ -122,13 +153,37 @@ elseif (ISARM64)
     add_compile_options(-DARM64)
     # See https://github.com/dotnet/runtime/issues/78286
     add_compile_definitions(HOST_ARM64)
+    # Branch Target Identification for ARM64 (CFG equivalent)
+    if (CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL 10.0)
+        add_compile_options(-mbranch-protection=standard)
+    endif()
 elseif (ISARM)
     add_compile_options(-DARM)
+endif()
+
+# Produce symbol files
+if (ISLINUX)
+    set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -g")
+    set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -g")
 endif()
 
 add_compile_definitions(OTEL_AUTO_VERSION_MAJOR=${OTEL_AUTO_VERSION_MAJOR})
 add_compile_definitions(OTEL_AUTO_VERSION_MINOR=${OTEL_AUTO_VERSION_MINOR})
 add_compile_definitions(OTEL_AUTO_VERSION_PATCH=${OTEL_AUTO_VERSION_PATCH})
+
+# ******************************************************
+# Linker options for security hardening
+# ******************************************************
+
+# ASLR (Position Independent Executable) and additional security features
+if (ISLINUX)
+    # Enable RELRO (Relocation Read-Only)
+    add_link_options(-Wl,-z,relro)
+    # Enable full RELRO (bind now)
+    add_link_options(-Wl,-z,now)
+    # Mark stack as non-executable
+    add_link_options(-Wl,-z,noexecstack)
+endif()
 
 # ******************************************************
 # Suppress Warning on MacOS
@@ -150,7 +205,7 @@ endif()
 add_library("OpenTelemetry.AutoInstrumentation.Native.static" STATIC
         class_factory.cpp
         clr_helpers.cpp
-	configuration.cpp
+        configuration.cpp
         continuous_profiler_clr_helpers.cpp
         continuous_profiler.cpp
         cor_profiler_base.cpp
@@ -177,6 +232,7 @@ add_library("OpenTelemetry.AutoInstrumentation.Native.static" STATIC
 )
 
 set_target_properties("OpenTelemetry.AutoInstrumentation.Native.static" PROPERTIES PREFIX "")
+set_target_properties("OpenTelemetry.AutoInstrumentation.Native.static" PROPERTIES POSITION_INDEPENDENT_CODE ON)
 
 # Define directories includes
 target_include_directories("OpenTelemetry.AutoInstrumentation.Native.static"
@@ -217,7 +273,18 @@ else()
     )
 endif()
 
+# Strip symbols from the binaries into a separate file
+if (ISLINUX)
+    add_custom_command(TARGET "OpenTelemetry.AutoInstrumentation.Native" POST_BUILD
+        COMMAND ${CMAKE_OBJCOPY}
+                --only-keep-debug $<TARGET_FILE:OpenTelemetry.AutoInstrumentation.Native> $<TARGET_FILE:OpenTelemetry.AutoInstrumentation.Native>.debug
+        COMMAND ${CMAKE_STRIP} --strip-debug $<TARGET_FILE:OpenTelemetry.AutoInstrumentation.Native>
+        COMMAND ${CMAKE_OBJCOPY} --add-gnu-debuglink=$<TARGET_FILE:OpenTelemetry.AutoInstrumentation.Native>.debug $<TARGET_FILE:OpenTelemetry.AutoInstrumentation.Native>
+    )
+endif()
+
 set_target_properties(${TARGET_NAME} PROPERTIES PREFIX "")
+set_target_properties(${TARGET_NAME} PROPERTIES POSITION_INDEPENDENT_CODE ON)
 
 # Define linker libraries
 target_link_libraries(${TARGET_NAME} "OpenTelemetry.AutoInstrumentation.Native.static")

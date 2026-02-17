@@ -1,6 +1,7 @@
 // Copyright The OpenTelemetry Authors
 // SPDX-License-Identifier: Apache-2.0
 
+using System.Globalization;
 using System.Reflection;
 using OpenTelemetry.AutoInstrumentation.Configurations;
 using OpenTelemetry.Exporter;
@@ -14,7 +15,7 @@ namespace OpenTelemetry.AutoInstrumentation.Tests.Configurations;
 // in parallel
 // see https://xunit.net/docs/running-tests-in-parallel
 [Collection("Non-Parallel Collection")]
-public class SettingsTests : IDisposable
+public sealed class SettingsTests : IDisposable
 {
     public SettingsTests()
     {
@@ -288,15 +289,15 @@ public class SettingsTests : IDisposable
 #if NET
     [InlineData("GRAPHQL", TracerInstrumentation.GraphQL)]
 #endif
+    [InlineData("GRPCNETCLIENT", TracerInstrumentation.GrpcNetClient)]
     [InlineData("HTTPCLIENT", TracerInstrumentation.HttpClient)]
     [InlineData("MONGODB", TracerInstrumentation.MongoDB)]
 #if NET
     [InlineData("MYSQLDATA", TracerInstrumentation.MySqlData)]
-    [InlineData("STACKEXCHANGEREDIS", TracerInstrumentation.StackExchangeRedis)]
 #endif
     [InlineData("NPGSQL", TracerInstrumentation.Npgsql)]
     [InlineData("SQLCLIENT", TracerInstrumentation.SqlClient)]
-    [InlineData("GRPCNETCLIENT", TracerInstrumentation.GrpcNetClient)]
+    [InlineData("STACKEXCHANGEREDIS", TracerInstrumentation.StackExchangeRedis)]
 #if NETFRAMEWORK
     [InlineData("WCFSERVICE", TracerInstrumentation.WcfService)]
 #endif
@@ -317,10 +318,13 @@ public class SettingsTests : IDisposable
     [InlineData("KAFKA", TracerInstrumentation.Kafka)]
     [InlineData("ORACLEMDA", TracerInstrumentation.OracleMda)]
     [InlineData("RABBITMQ", TracerInstrumentation.RabbitMq)]
+#if NET
+    [InlineData("WCFCORE", TracerInstrumentation.WcfCore)]
+#endif
     internal void TracerSettings_Instrumentations_SupportedValues(string tracerInstrumentation, TracerInstrumentation expectedTracerInstrumentation)
     {
         Environment.SetEnvironmentVariable(ConfigurationKeys.Traces.TracesInstrumentationEnabled, "false");
-        Environment.SetEnvironmentVariable(string.Format(ConfigurationKeys.Traces.EnabledTracesInstrumentationTemplate, tracerInstrumentation), "true");
+        Environment.SetEnvironmentVariable(string.Format(CultureInfo.InvariantCulture, ConfigurationKeys.Traces.EnabledTracesInstrumentationTemplate, tracerInstrumentation), "true");
 
         var settings = Settings.FromDefaultSources<TracerSettings>(false);
 
@@ -345,7 +349,7 @@ public class SettingsTests : IDisposable
     internal void MeterSettings_Instrumentations_SupportedValues(string meterInstrumentation, MetricInstrumentation expectedMetricInstrumentation)
     {
         Environment.SetEnvironmentVariable(ConfigurationKeys.Metrics.MetricsInstrumentationEnabled, "false");
-        Environment.SetEnvironmentVariable(string.Format(ConfigurationKeys.Metrics.EnabledMetricsInstrumentationTemplate, meterInstrumentation), "true");
+        Environment.SetEnvironmentVariable(string.Format(CultureInfo.InvariantCulture, ConfigurationKeys.Metrics.EnabledMetricsInstrumentationTemplate, meterInstrumentation), "true");
 
         var settings = Settings.FromDefaultSources<MetricSettings>(false);
 
@@ -359,7 +363,7 @@ public class SettingsTests : IDisposable
     internal void LogSettings_Instrumentations_SupportedValues(string logInstrumentation, LogInstrumentation expectedLogInstrumentation)
     {
         Environment.SetEnvironmentVariable(ConfigurationKeys.Logs.LogsInstrumentationEnabled, "false");
-        Environment.SetEnvironmentVariable(string.Format(ConfigurationKeys.Logs.EnabledLogsInstrumentationTemplate, logInstrumentation), "true");
+        Environment.SetEnvironmentVariable(string.Format(CultureInfo.InvariantCulture, ConfigurationKeys.Logs.EnabledLogsInstrumentationTemplate, logInstrumentation), "true");
 
         var settings = Settings.FromDefaultSources<LogSettings>(false);
 
@@ -496,7 +500,7 @@ public class SettingsTests : IDisposable
     internal void ResourceSettings_ResourceDetectors_SupportedValues(string resourceDetector, ResourceDetector expectedResourceDetector)
     {
         Environment.SetEnvironmentVariable(ConfigurationKeys.ResourceDetectorEnabled, "false");
-        Environment.SetEnvironmentVariable(string.Format(ConfigurationKeys.EnabledResourceDetectorTemplate, resourceDetector), "true");
+        Environment.SetEnvironmentVariable(string.Format(CultureInfo.InvariantCulture, ConfigurationKeys.EnabledResourceDetectorTemplate, resourceDetector), "true");
 
         var settings = Settings.FromDefaultSources<ResourceSettings>(false);
 
@@ -506,25 +510,37 @@ public class SettingsTests : IDisposable
     private static void ClearEnvVars()
     {
         Environment.SetEnvironmentVariable(ConfigurationKeys.Logs.LogsInstrumentationEnabled, null);
+#if NET
+        foreach (var logInstrumentation in Enum.GetValues<LogInstrumentation>())
+#else
         foreach (var logInstrumentation in Enum.GetValues(typeof(LogInstrumentation)).Cast<LogInstrumentation>())
+#endif
         {
-            Environment.SetEnvironmentVariable(string.Format(ConfigurationKeys.Logs.EnabledLogsInstrumentationTemplate, logInstrumentation.ToString().ToUpperInvariant()), null);
+            Environment.SetEnvironmentVariable(string.Format(CultureInfo.InvariantCulture, ConfigurationKeys.Logs.EnabledLogsInstrumentationTemplate, logInstrumentation.ToString().ToUpperInvariant()), null);
         }
 
         Environment.SetEnvironmentVariable(ConfigurationKeys.Logs.Exporter, null);
         Environment.SetEnvironmentVariable(ConfigurationKeys.Logs.IncludeFormattedMessage, null);
 
         Environment.SetEnvironmentVariable(ConfigurationKeys.Metrics.MetricsInstrumentationEnabled, null);
+#if NET
+        foreach (var metricInstrumentation in Enum.GetValues<MetricInstrumentation>())
+#else
         foreach (var metricInstrumentation in Enum.GetValues(typeof(MetricInstrumentation)).Cast<MetricInstrumentation>())
+#endif
         {
-            Environment.SetEnvironmentVariable(string.Format(ConfigurationKeys.Metrics.EnabledMetricsInstrumentationTemplate, metricInstrumentation.ToString().ToUpperInvariant()), null);
+            Environment.SetEnvironmentVariable(string.Format(CultureInfo.InvariantCulture, ConfigurationKeys.Metrics.EnabledMetricsInstrumentationTemplate, metricInstrumentation.ToString().ToUpperInvariant()), null);
         }
 
         Environment.SetEnvironmentVariable(ConfigurationKeys.Metrics.Exporter, null);
         Environment.SetEnvironmentVariable(ConfigurationKeys.Traces.TracesInstrumentationEnabled, null);
+#if NET
+        foreach (var tracerInstrumentation in Enum.GetValues<TracerInstrumentation>())
+#else
         foreach (var tracerInstrumentation in Enum.GetValues(typeof(TracerInstrumentation)).Cast<TracerInstrumentation>())
+#endif
         {
-            Environment.SetEnvironmentVariable(string.Format(ConfigurationKeys.Traces.EnabledTracesInstrumentationTemplate, tracerInstrumentation.ToString().ToUpperInvariant()), null);
+            Environment.SetEnvironmentVariable(string.Format(CultureInfo.InvariantCulture, ConfigurationKeys.Traces.EnabledTracesInstrumentationTemplate, tracerInstrumentation.ToString().ToUpperInvariant()), null);
         }
 
         Environment.SetEnvironmentVariable(ConfigurationKeys.Traces.Exporter, null);
@@ -533,9 +549,13 @@ public class SettingsTests : IDisposable
         Environment.SetEnvironmentVariable(ConfigurationKeys.ResourceDetectorEnabled, null);
 
         Environment.SetEnvironmentVariable(ConfigurationKeys.ResourceDetectorEnabled, null);
+#if NET
+        foreach (var resourceDetector in Enum.GetValues<ResourceDetector>())
+#else
         foreach (var resourceDetector in Enum.GetValues(typeof(ResourceDetector)).Cast<ResourceDetector>())
+#endif
         {
-            Environment.SetEnvironmentVariable(string.Format(ConfigurationKeys.EnabledResourceDetectorTemplate, resourceDetector.ToString().ToUpperInvariant()), null);
+            Environment.SetEnvironmentVariable(string.Format(CultureInfo.InvariantCulture, ConfigurationKeys.EnabledResourceDetectorTemplate, resourceDetector.ToString().ToUpperInvariant()), null);
         }
 
         Environment.SetEnvironmentVariable(ConfigurationKeys.Sdk.Propagators, null);

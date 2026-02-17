@@ -10,9 +10,9 @@ using static IntegrationTests.Helpers.DockerFileHelper;
 namespace IntegrationTests;
 
 [CollectionDefinition(Name)]
-public class KafkaCollection : ICollectionFixture<KafkaFixture>
+public class KafkaCollectionFixture : ICollectionFixture<KafkaFixture>
 {
-    public const string Name = nameof(KafkaCollection);
+    public const string Name = nameof(KafkaCollectionFixture);
 }
 
 /// <summary>
@@ -40,27 +40,26 @@ public class KafkaFixture : IAsyncLifetime
         _containerNetwork = new NetworkBuilder()
             .WithName(_testNetworkName)
             .Build();
-        await _containerNetwork.CreateAsync();
-        _kafkaContainer = await LaunchKafkaContainer(_containerNetwork);
+        await _containerNetwork.CreateAsync().ConfigureAwait(false);
+        _kafkaContainer = await LaunchKafkaContainer(_containerNetwork).ConfigureAwait(false);
     }
 
     public async Task DisposeAsync()
     {
         if (_kafkaContainer != null)
         {
-            await _kafkaContainer.DisposeAsync();
+            await _kafkaContainer.DisposeAsync().ConfigureAwait(false);
         }
 
         if (_containerNetwork != null)
         {
-            await _containerNetwork.DisposeAsync();
+            await _containerNetwork.DisposeAsync().ConfigureAwait(false);
         }
     }
 
     private async Task<IContainer?> LaunchKafkaContainer(INetwork? containerNetwork)
     {
-        var container = new ContainerBuilder()
-            .WithImage(KafkaImage)
+        var container = new ContainerBuilder(KafkaImage)
             .WithName(_kafkaContainerName)
             .WithPortBinding(Port)
             .WithEnvironment("KAFKA_BROKER_ID", "1")
@@ -81,7 +80,7 @@ public class KafkaFixture : IAsyncLifetime
             .WithNetwork(containerNetwork)
             .Build();
 
-        await container.StartAsync();
+        await container.StartAsync().ConfigureAwait(false);
 
         return container;
     }

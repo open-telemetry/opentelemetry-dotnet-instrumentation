@@ -45,10 +45,12 @@ internal static class PackageVersionDefinitions
             TestApplicationName = "TestApplication.EntityFrameworkCore",
             Versions =
             [
-                new("6.0.35"),
+                new("6.0.36"),
                 // new("7.0.20"), all versions contains references to vulnerable packages https://github.com/advisories/GHSA-hh2w-p6rv-4g7w
-                new("8.0.10"),
-                new("*")
+                new("8.0.23"),
+                new("9.0.12"),
+                new("10.0.0", supportedTargetFrameworks: ["net10.0"], supportedExecutionFrameworks: ["net10.0"]),
+                new("*", supportedTargetFrameworks: ["net10.0"], supportedExecutionFrameworks: ["net10.0"])
             ]
         },
         new()
@@ -164,6 +166,7 @@ internal static class PackageVersionDefinitions
                 new("2.19.0", supportedTargetFrameworks: ["net10.0", "net9.0", "net8.0", "net462"], supportedExecutionFrameworks: ["net10.0", "net9.0", "net8.0", "net462"]),
                 new("2.30.0", supportedTargetFrameworks: ["net10.0", "net9.0", "net8.0", "net462"], supportedExecutionFrameworks: ["net10.0", "net9.0", "net8.0", "net462"]),
                 new("3.0.0", supportedTargetFrameworks: ["net10.0", "net9.0", "net8.0", "net472"], supportedExecutionFrameworks: ["net10.0", "net9.0", "net8.0", "net462"]),
+                new("3.5.0", supportedTargetFrameworks: ["net10.0", "net9.0", "net8.0", "net472"], supportedExecutionFrameworks: ["net10.0", "net9.0", "net8.0", "net462"]),
                 new("*", supportedTargetFrameworks: ["net10.0", "net9.0", "net8.0", "net472"], supportedExecutionFrameworks: ["net10.0", "net9.0", "net8.0", "net462"])
             ]
         },
@@ -199,7 +202,8 @@ internal static class PackageVersionDefinitions
             [
                 // new("6.0.0"), - high vulnerability https://github.com/advisories/GHSA-x9vc-6hfv-hg8c, <= 6.0.10, <= 7.0.6, and <= 8.0.2 test should be skipped
                 // new("6.0.11"), - transitive vulnerabilities https://github.com/advisories/GHSA-8g4q-xg66-9fp4 <= 6.0.12, <=7.0.8, <=8.0.4 test should be skipped
-                new("8.0.5"),
+                new("8.0.8"),
+                new("9.0.4", supportedTargetFrameworks: ["net10.0", "net9.0", "net8.0"], supportedExecutionFrameworks: ["net10.0", "net9.0", "net8.0"]),
                 new("*", supportedTargetFrameworks: ["net10.0", "net9.0", "net8.0"], supportedExecutionFrameworks: ["net10.0", "net9.0", "net8.0"])
             ]
         },
@@ -301,6 +305,17 @@ internal static class PackageVersionDefinitions
                 new("1.8.2"), // 1.8.0-1.8.1 are known to have issues with arm64, 1.8.0 and lower versions have transitive vulnerabilities https://github.com/confluentinc/confluent-kafka-dotnet/blob/fa0f92a4593e5a19b5a052b633ddf47fee47588c/CHANGELOG.md#security
                 new("1.9.2"), // First version supported on macOS ARM64
                 new("*")
+            ]
+        },
+        new()
+        {
+            IntegrationName = "WCFCoreServer",
+            NugetPackageName = "CoreWCF.Primitives",
+            TestApplicationName = "TestApplication.Wcf.Core",
+            Versions =
+            [
+                new("1.8.0", supportedTargetFrameworks: ["net10.0", "net9.0", "net8.0"], supportedExecutionFrameworks: ["net10.0", "net9.0", "net8.0"]),
+                new("*", supportedTargetFrameworks: ["net10.0", "net9.0", "net8.0"], supportedExecutionFrameworks: ["net10.0", "net9.0", "net8.0"])
             ]
         }
     ];
