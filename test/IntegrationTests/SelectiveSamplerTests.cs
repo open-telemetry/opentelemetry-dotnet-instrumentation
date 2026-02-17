@@ -88,7 +88,7 @@ public class SelectiveSamplerTests : TestHelper
             // Omit last group from verification, as it may be collected after activity stopped.
             .SkipLast(1);
 
-        var selectiveSinceLastContinuous = 4;
+        var selectiveSinceLastContinuous = 3;
         var missedSelectiveBetweenContinuous = false;
         var missedSelectiveInContinuous = false;
 
@@ -98,14 +98,14 @@ public class SelectiveSamplerTests : TestHelper
             // batch to contain multiple samples as a result of continuous profiling.
             if (IsContinuousProfilingSamplesBatch(group))
             {
-                if (selectiveSinceLastContinuous == 3)
+                if (selectiveSinceLastContinuous == 2)
                 {
                     Assert.False(missedSelectiveBetweenContinuous, "Missing selective sample between continuous batches allowed only once per test run.");
                     missedSelectiveBetweenContinuous = true;
                 }
                 else
                 {
-                    Assert.Equal(4, selectiveSinceLastContinuous);
+                    Assert.Equal(3, selectiveSinceLastContinuous);
                 }
 
                 selectiveSinceLastContinuous = 0;
