@@ -220,11 +220,13 @@ internal class TracerSettings : Settings
 
     private static IReadOnlyList<TracerInstrumentation> FilterConflictingInstrumentations(IReadOnlyList<TracerInstrumentation> instrumentations)
     {
+#if NET
         if (instrumentations.Contains(TracerInstrumentation.EntityFrameworkCore) && instrumentations.Contains(TracerInstrumentation.Npgsql))
         {
             Logger.Warning("Entity Framework Core and Npgsql trace instrumentations cannot run together; disabling Npgsql instrumentation to avoid invalid trace patterns.");
             return instrumentations.Where(instrumentation => instrumentation != TracerInstrumentation.Npgsql).ToArray();
         }
+#endif
 
         return instrumentations;
     }
