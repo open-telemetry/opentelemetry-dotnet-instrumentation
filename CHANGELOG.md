@@ -545,7 +545,7 @@ release.
 ### Deprecated
 
 - Support for macOS Monterey 12 x64.
-  All further releases will be supporting [macOS Ventura 13 x64](https://github.com/actions/runner-images/blob/main/images/macos/macos-13-Readme.md)
+  All further releases will be supporting [macOS Ventura 13 x64](https://github.com/github-maccloud/runner-images/blob/71f0157880be328a2b0a4dc81cda61735ba6c45d/images/macos/macos-13-Readme.md)
   and newer.
 
 ### Removed
