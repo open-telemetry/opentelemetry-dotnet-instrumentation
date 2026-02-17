@@ -3,7 +3,6 @@
 
 using OpenTelemetry.AutoInstrumentation.CallTarget;
 using OpenTelemetry.AutoInstrumentation.Instrumentations.MongoDB.DuckTypes;
-using OpenTelemetry.AutoInstrumentation.Util;
 
 namespace OpenTelemetry.AutoInstrumentation.Instrumentations.MongoDB.Integrations;
 
@@ -110,7 +109,7 @@ public static class MongoClientIntegrationExecuteAsync
 
         if (exception is not null)
         {
-            activity.SetException(exception);
+            MongoDBInstrumentation.OnError(activity, exception);
         }
 
         activity.Stop();

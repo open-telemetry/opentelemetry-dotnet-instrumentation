@@ -3,7 +3,6 @@
 
 using OpenTelemetry.AutoInstrumentation.CallTarget;
 using OpenTelemetry.AutoInstrumentation.Instrumentations.MongoDB.DuckTypes;
-using OpenTelemetry.AutoInstrumentation.Util;
 
 namespace OpenTelemetry.AutoInstrumentation.Instrumentations.MongoDB.Integrations;
 
@@ -32,7 +31,7 @@ namespace OpenTelemetry.AutoInstrumentation.Instrumentations.MongoDB.Integration
     type: InstrumentationType.Trace)]
 [InstrumentMethod(
     assemblyName: MongoDBConstants.AssemblyName3,
-    typeName: "MongoDB.Driver.Core.WireProtocol.QueryWireProtocol`1",
+    typeName: "MongoDB.Driver.Core.WireProtocol.CommandWireProtocol`1",
     methodName: "ExecuteAsync",
     returnTypeName: ClrNames.GenericTaskWithGenericClassParameter,
     parameterTypeNames: ["MongoDB.Driver.OperationContext", "MongoDB.Driver.Core.Connections.IConnection"],
@@ -60,7 +59,7 @@ public static class MongoClientIntegrationExecuteAsync35
 
         if (exception is not null)
         {
-            activity.SetException(exception);
+            MongoDBInstrumentation.OnError(activity, exception);
         }
 
         activity.Stop();

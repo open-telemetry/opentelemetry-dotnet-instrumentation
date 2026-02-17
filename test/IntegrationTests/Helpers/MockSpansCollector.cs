@@ -55,17 +55,17 @@ internal sealed class MockSpansCollector : IDisposable
         _listener.Dispose();
     }
 
-    public void Expect(string scopeName, Func<Span, bool>? predicate = null, string? description = null)
+    public void Expect(string scopeName, Func<Span, bool>? predicate = null, string? description = null, string? schemaUrl = null)
     {
-        Expect(scopeName, null, predicate, description);
+        Expect(scopeName, null, predicate, description, schemaUrl);
     }
 
-    public void Expect(string scopeName, string? scopeVersion, Func<Span, bool>? predicate = null, string? description = null)
+    public void Expect(string scopeName, string? scopeVersion, Func<Span, bool>? predicate = null, string? description = null, string? schemaUrl = null)
     {
-        description ??= $"<no description> Scope Name: '{scopeName}', Scope Version: '{scopeVersion}', predicate is null: '{predicate == null}'";
+        description ??= $"<no description> Scope Name: '{scopeName}', Scope Version: '{scopeVersion}', Schema Url: '{schemaUrl}', predicate is null: '{predicate == null}'";
         predicate ??= x => true;
 
-        _expectations.Add(new Expectation(scopeName, scopeVersion, predicate, description));
+        _expectations.Add(new Expectation(scopeName, scopeVersion, schemaUrl, predicate, description));
     }
 
     public void ExpectCollected(Func<ICollection<Collected>, bool> collectedExpectation)
@@ -102,6 +102,11 @@ internal sealed class MockSpansCollector : IDisposable
                     }
 
                     if (missingExpectation.ScopeVersion != null && missingExpectation.ScopeVersion != resourceSpans.Scope.Version)
+                    {
+                        continue;
+                    }
+
+                    if (missingExpectation.SchemaUrl != null && missingExpectation.SchemaUrl != resourceSpans.SchemaUrl)
                     {
                         continue;
                     }
@@ -225,7 +230,7 @@ internal sealed class MockSpansCollector : IDisposable
             {
                 foreach (var span in scopeSpans.Spans ?? Enumerable.Empty<Span>())
                 {
-                    _spans.Add(new Collected(scopeSpans.Scope, span));
+                    _spans.Add(new Collected(scopeSpans.Scope, span, scopeSpans.SchemaUrl));
                 }
             }
         }
@@ -242,28 +247,32 @@ internal sealed class MockSpansCollector : IDisposable
     internal sealed class Collected
 #pragma warning restore CA1812 // Mark members as static. There is some issue in dotnet format.
     {
-        public Collected(InstrumentationScope scope, Span span)
+        public Collected(InstrumentationScope scope, Span span, string schemaUrl)
         {
             Scope = scope;
             Span = span;
+            SchemaUrl = schemaUrl;
         }
 
         public InstrumentationScope Scope { get; }
 
         public Span Span { get; } // protobuf type
 
+        public string SchemaUrl { get; }
+
         public override string ToString()
         {
-            return $"Scope.Name = {Scope.Name}, Scope.Version={Scope.Version}, Span = {Span}";
+            return $"Scope.Name = {Scope.Name}, Scope.Version={Scope.Version}, SchemaUrl={SchemaUrl}, Span = {Span}";
         }
     }
 
     private sealed class Expectation
     {
-        public Expectation(string scopeName, string? scopeVersion, Func<Span, bool> predicate, string? description)
+        public Expectation(string scopeName, string? scopeVersion, string? schemaUrl, Func<Span, bool> predicate, string? description)
         {
             ScopeName = scopeName;
             ScopeVersion = scopeVersion;
+            SchemaUrl = schemaUrl;
             Predicate = predicate;
             Description = description;
         }
@@ -271,6 +280,8 @@ internal sealed class MockSpansCollector : IDisposable
         public string ScopeName { get; }
 
         public string? ScopeVersion { get; }
+
+        public string? SchemaUrl { get; }
 
         public Func<Span, bool> Predicate { get; }
 
