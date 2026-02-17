@@ -12,14 +12,14 @@ this are, and what limitations to be aware of.
 Understanding the runtime's assembly-loading pipeline is essential to
 understanding why the instrumentation does what it does.
 
-### .NET (Core)
+### .NET
 
 On .NET (Core), the assembly-loading subsystem is built around
 `AssemblyLoadContext` (ALC). There are two important concepts:
 
 | Concept | Description |
 | --- | --- |
-| **Default ALC** | The main context that the runtime creates. All application assemblies listed in the Trusted Platform Assemblies (TPA) list are loaded here automatically. |
+| **Default ALC** | The main context that the runtime creates to load application. All application assemblies listed in the Trusted Platform Assemblies (TPA) list are loaded here automatically. |
 | **Custom ALC** | A user-created context that can load assemblies independently, providing isolation from the Default ALC. |
 
 #### Assembly binding
@@ -33,9 +33,9 @@ callbacks fire for that reference again.
 When code triggers an assembly reference, the runtime first checks
 whether the assembly is **already loaded** in the current ALC at the
 requested version or higher. If a match is found, that instance is
-used immediately and no further steps run. If a same-named assembly is
-loaded but at a lower version, the match fails and resolution
-continues.
+used immediately and no further steps run. If an assembly is missing
+or a same-named assembly is loaded but at a lower version, the match
+fails and resolution continues.
 
 Next, the runtime invokes the current ALC's **`Load()` method**. For the
 Default ALC this performs a TPA list lookup. For a custom ALC this calls
@@ -52,13 +52,13 @@ If the assembly is still not found, the following events fire in order:
    Default ALC)
 3. **`AppDomain.CurrentDomain.AssemblyResolve`**
 
-This order is important: subscribing to `Default.Resolving` gives a
-handler the earliest opportunity to supply an assembly before any other
-event-based handler runs. Note that `AppDomain.CurrentDomain.AssemblyResolve`
-also receives a built-in handler when `Assembly.LoadFrom` is used,
-which automatically resolves co-located dependencies from the same
-directory — another reason the instrumentation prefers
-`Default.Resolving` for reliable control.
+This order is important for the assembly conflic resiolution strategies adopted
+in our instrumentation: Custom ALC `Load()` method is the earliest opportunity
+to supply an assembly when loading to custom ALC, while `Default.Resolving`
+gives the earliest opportunity to supply an assembly before any other event-based
+handler runs. Note that `AppDomain.CurrentDomain.AssemblyResolve` also receives
+a built-in handler, which automatically resolves co-located dependencies
+from the same directory — so subscribing to it may not always be relyable.
 
 #### Key property: type isolation
 
@@ -136,9 +136,9 @@ ships, the resolution follows the pipeline described above.
 
 On .NET, the instrumentation subscribes to
 `AssemblyLoadContext.Default.Resolving` as described in the
-[resolution order](#resolution-order) section. Because assembly
-references have already been rewritten by the native profiler, this
-event fires in two situations:
+[resolution order](#resolution-order) section as the earlies and most reliable opportunity
+to provide an assembly for Default ALC use case. Because assembly references have already
+been rewritten by the native profiler, this event fires in two situations:
 
 | Situation | Why it fires | Where we load the assembly |
 | --- | --- | --- |
@@ -146,9 +146,10 @@ event fires in two situations:
 | Assembly **is** in the TPA list but with a **lower** version | The profiler rewrote the reference to a higher version that the TPA cannot satisfy | **Custom ALC** — loading into the Default ALC would fail because the TPA already provides a lower version |
 
 When a TPA-conflicting assembly is loaded into a custom ALC it is
-isolated from the Default ALC version. If the TPA already has the same
-or a higher version, the runtime satisfies the reference automatically
-and the event never fires — no action is needed.
+isolated from the Default ALC version.
+
+Note, that if the TPA already has the same or a higher version, the runtime satisfies
+the reference automatically and the event never fires — no action is needed.
 
 #### Managed assembly resolver (.NET Framework)
 

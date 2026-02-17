@@ -58,8 +58,9 @@ OpenTelemetry .NET Automatic Instrumentation is built on top of
 - `System.Diagnostics.DiagnosticSource`: [`10.0.0`](https://www.nuget.org/packages/System.Diagnostics.DiagnosticSource/10.0.0)
   referencing `System.Runtime.CompilerServices.Unsafe`: [`6.1.2`](https://www.nuget.org/packages/System.Runtime.CompilerServices.Unsafe/6.1.2)
 
-You can find all references in
-[OpenTelemetry.AutoInstrumentation.csproj](../src/OpenTelemetry.AutoInstrumentation/OpenTelemetry.AutoInstrumentation.csproj).
+You can find all references here:
+- [OpenTelemetry.AutoInstrumentation.csproj](../src/OpenTelemetry.AutoInstrumentation/OpenTelemetry.AutoInstrumentation.csproj)
+- [OpenTelemetry.AutoInstrumentation.Assemblies/Directory.Packages.props](../src/OpenTelemetry.AutoInstrumentation.Assemblies/Directory.Packages.props)
 
 To automatically instrument applications, the OpenTelemetry .NET Automatic
 Instrumentation does the following:
