@@ -59,6 +59,7 @@ OpenTelemetry .NET Automatic Instrumentation is built on top of
   referencing `System.Runtime.CompilerServices.Unsafe`: [`6.1.2`](https://www.nuget.org/packages/System.Runtime.CompilerServices.Unsafe/6.1.2)
 
 You can find all references here:
+
 - [OpenTelemetry.AutoInstrumentation.csproj](../src/OpenTelemetry.AutoInstrumentation/OpenTelemetry.AutoInstrumentation.csproj)
 - [OpenTelemetry.AutoInstrumentation.Assemblies/Directory.Packages.props](../src/OpenTelemetry.AutoInstrumentation.Assemblies/Directory.Packages.props)
 

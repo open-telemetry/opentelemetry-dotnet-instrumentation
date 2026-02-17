@@ -206,11 +206,13 @@ to access objects from the APIs being instrumented.
 
 ### Assembly conflict resolution
 
-The injection of the OpenTelemetry .NET SDK and any source instrumentation brings
-the risk of assembly version conflicts. This issue is more likely with packages like
+The injection of the OpenTelemetry .NET SDK and any source instrumentation
+brings the risk of assembly version conflicts. This issue is more likely with
+packages like
 [`System.Diagnostics.DiagnosticSource`](https://www.nuget.org/packages/System.Diagnostics.DiagnosticSource/)
 which contains the [`Activity` type](https://docs.microsoft.com/en-us/dotnet/api/system.diagnostics.activity?view=net-5.0)
-used by the OpenTelemetry .NET API to represent a span. If not handled, conflicts can lead to:
+used by the OpenTelemetry .NET API to represent a span. If not handled,
+conflicts can lead to:
 
 1. APIs required by the OpenTelemetry SDK being unavailable
 2. Multiple versions of the same assembly loaded in the process
@@ -219,19 +221,25 @@ used by the OpenTelemetry .NET API to represent a span. If not handled, conflict
 
 The approach to resolving conflicts differs by deployment mode:
 
-- **NuGet package deployment**: Versions are resolved at build time by NuGet's dependency resolution.
-  The `OTEL_DOTNET_AUTO_REDIRECT_ENABLED` environment variable has no effect and should be disabled
-  to avoid unnecessary overhead.
+- **NuGet package deployment**: Versions are resolved at build time by
+  NuGet's dependency resolution. The
+  `OTEL_DOTNET_AUTO_REDIRECT_ENABLED` environment variable has no effect
+  and should be disabled to avoid unnecessary overhead.
 
-- **Native Profiler deployment**: The CLR Profiler redirects assembly references to the instrumentation's
-  versions if they are higher (enabled by default, but can be disabled by setting `OTEL_DOTNET_AUTO_REDIRECT_ENABLED = false` if needed).
-  The **Loader** then handles runtime resolution using `AssemblyLoadContext` (.NET) or
-  `AppDomain.AssemblyResolve` (.NET Framework) to resolve assembly conflicts.
+- **Native Profiler deployment**: The CLR Profiler redirects assembly
+  references to the instrumentation's versions if they are higher (enabled
+  by default, but can be disabled by setting
+  `OTEL_DOTNET_AUTO_REDIRECT_ENABLED = false` if needed). The **Loader**
+  then handles runtime resolution using `AssemblyLoadContext` (.NET) or
+  `AppDomain.AssemblyResolve` (.NET Framework) to resolve assembly
+  conflicts.
 
-- **StartupHook-only deployment** (.NET only): A full isolation of application in custom `AssemblyLoadContext`.
+- **StartupHook-only deployment** (.NET only): A full isolation of
+  application in custom `AssemblyLoadContext`.
 
-**For a comprehensive explanation of how the .NET runtime resolves assemblies and the resolution
-strategies for each deployment mode, see [Assembly Conflict Resolution](./assembly-conflict-resolution.md).**
+**For a comprehensive explanation of how the .NET runtime resolves
+assemblies and the resolution strategies for each deployment mode, see
+[Assembly Conflict Resolution](./assembly-conflict-resolution.md).**
 
 ## Further reading
 
