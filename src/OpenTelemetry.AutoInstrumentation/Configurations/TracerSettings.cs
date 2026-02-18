@@ -1,7 +1,6 @@
 // Copyright The OpenTelemetry Authors
 // SPDX-License-Identifier: Apache-2.0
 
-using System.Linq;
 using OpenTelemetry.AutoInstrumentation.Configurations.FileBasedConfiguration;
 using OpenTelemetry.AutoInstrumentation.Configurations.Otlp;
 using OpenTelemetry.AutoInstrumentation.Logging;
@@ -82,9 +81,9 @@ internal class TracerSettings : Settings
             configuration.GetBool(ConfigurationKeys.Traces.TracesInstrumentationEnabled) ??
             configuration.GetBool(ConfigurationKeys.InstrumentationEnabled) ?? true;
 
-        EnabledInstrumentations = FilterConflictingInstrumentations(configuration.ParseEnabledEnumList<TracerInstrumentation>(
+        EnabledInstrumentations = configuration.ParseEnabledEnumList<TracerInstrumentation>(
             enabledByDefault: instrumentationEnabledByDefault,
-            enabledConfigurationTemplate: ConfigurationKeys.Traces.EnabledTracesInstrumentationTemplate));
+            enabledConfigurationTemplate: ConfigurationKeys.Traces.EnabledTracesInstrumentationTemplate);
 
         var additionalSources = configuration.GetString(ConfigurationKeys.Traces.AdditionalSources);
         if (additionalSources != null)
@@ -117,7 +116,7 @@ internal class TracerSettings : Settings
         Processors = processors;
 
         var traces = configuration.InstrumentationDevelopment?.DotNet?.Traces;
-        EnabledInstrumentations = FilterConflictingInstrumentations(traces?.GetEnabledInstrumentations() ?? []);
+        EnabledInstrumentations = traces?.GetEnabledInstrumentations() ?? [];
         InstrumentationOptions = new InstrumentationOptions(traces);
 
         if (traces != null)
@@ -216,18 +215,5 @@ internal class TracerSettings : Settings
         }
 
         return exporters;
-    }
-
-    private static IReadOnlyList<TracerInstrumentation> FilterConflictingInstrumentations(IReadOnlyList<TracerInstrumentation> instrumentations)
-    {
-#if NET
-        if (instrumentations.Contains(TracerInstrumentation.EntityFrameworkCore) && instrumentations.Contains(TracerInstrumentation.Npgsql))
-        {
-            Logger.Warning("Entity Framework Core and Npgsql trace instrumentations cannot run together; disabling Npgsql instrumentation to avoid invalid trace patterns.");
-            return instrumentations.Where(instrumentation => instrumentation != TracerInstrumentation.Npgsql).ToArray();
-        }
-#endif
-
-        return instrumentations;
     }
 }
