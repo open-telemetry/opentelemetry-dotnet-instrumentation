@@ -22,20 +22,14 @@ public class EntityFrameworkCoreNpgsqlTests : TestHelper
     [Fact]
     [Trait("Category", "EndToEnd")]
     [Trait("Containers", "Linux")]
-    public void SubmitTraces_NpgsqlSpanHasApplicationSpanAsParent()
+    public void SubmitTraces_DoesNotEmitEntityFrameworkCoreSpan()
     {
         using var collector = new MockSpansCollector(Output);
         SetExporter(collector);
 
-        collector.Expect("TestApplication.EntityFrameworkCore.Npgsql");
         collector.Expect("Npgsql");
         collector.ExpectCollected(collected =>
-        {
-            var applicationSpan = collected.First(span => span.Scope.Name == "TestApplication.EntityFrameworkCore.Npgsql");
-            var npgsqlSpan = collected.First(span => span.Scope.Name == "Npgsql");
-
-            return npgsqlSpan.Span.ParentSpanId.Equals(applicationSpan.Span.SpanId);
-        });
+            collected.All(span => span.Scope.Name != "OpenTelemetry.Instrumentation.EntityFrameworkCore"));
 
         RunTestApplication(new()
         {

@@ -7,6 +7,7 @@
   <ItemGroup>
     <PackageReference Include="Npgsql" VersionOverride="9.0.4" />
     <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" VersionOverride="9.0.4" />
+    <PackageReference Include="System.Diagnostics.DiagnosticSource" Condition="'$(TargetFramework)' == 'net8.0'" />
   </ItemGroup>
 
 </Project>
