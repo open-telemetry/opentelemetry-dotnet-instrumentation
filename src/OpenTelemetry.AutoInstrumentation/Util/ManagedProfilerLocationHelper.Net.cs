@@ -23,7 +23,7 @@ internal static partial class ManagedProfilerLocationHelper
         var runtimeDir = ManagedProfilerRuntimeDirectory;
         LazyInitializer.EnsureInitialized(ref _managedProfilerVersionDirectory, () => ResolveManagedProfilerVersionDirectory(logger));
 
-        // For .NET (Core) most of the assembblies are different per runtime version, so we
+        // For .NET (Core) most of the assemblies are different per runtime version, so we
         // 1. first start with runtime version folder (e.g., tracer-home/net/net8.0)
         // 2. then check .link file in runtime version folder
         // 3. last fallback to runtime root folder (tracer-home/net)
