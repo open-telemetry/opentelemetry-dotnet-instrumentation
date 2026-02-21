@@ -161,24 +161,41 @@ Find their versions in the following locations:
 - [src/Directory.Packages.props](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/blob/main/src/Directory.Packages.props)
 - [src/OpenTelemetry.AutoInstrumentation.Assemblies/Directory.Packages.props](../src/OpenTelemetry.AutoInstrumentation.Assemblies/Directory.Packages.props)
 
-For non-NuGet installations, the startup scripts automatically configure assembly
-redirection at runtime.
-This behavior can be controlled through the [`OTEL_DOTNET_AUTO_REDIRECT_ENABLED`](./config.md#additional-settings)
+For non-NuGet installations, the startup scripts automatically
+configure assembly redirection at runtime.
+This behavior can be controlled through the
+[`OTEL_DOTNET_AUTO_REDIRECT_ENABLED`](./config.md#additional-settings)
 setting.
+
+> **Important:** For NuGet package deployments,
+> `OTEL_DOTNET_AUTO_REDIRECT_ENABLED` must be set to `false`.
+> See [Assembly Conflict Resolution](./assembly-conflict-resolution.md#disabling-assembly-redirection-for-nuget-deployments)
+> for details.
 
 If the application already ships binding redirection for assemblies
 used by automatic instrumentation this automatic redirection may fail,
 see [#2833](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/issues/2833).
-Check if any existing binding redirect prevent redirection to the versions
-listed at [assembly_redirection_net.h](../src/OpenTelemetry.AutoInstrumentation.Native/assembly_redirection_net.h)
-for .NET application
-and [assembly_redirection_netfx.h](../src/OpenTelemetry.AutoInstrumentation.Native/assembly_redirection_netfx.h)
+Check if any existing binding redirect prevent redirection to the
+versions listed at
+[assembly_redirection_net.h](../src/OpenTelemetry.AutoInstrumentation.Native/assembly_redirection_net.h)
+for .NET application and
+[assembly_redirection_netfx.h](../src/OpenTelemetry.AutoInstrumentation.Native/assembly_redirection_netfx.h)
 for .NET Framework application.
 
-For the automatic redirection above to work there are two specific scenarios that
-require the assemblies used to instrument .NET Framework applications,
-the ones under the `netfx` folder of the installation directory, to be also installed
-into the Global Assembly Cache (GAC):
+For detailed information about .NET Framework assembly resolution
+complexities including GAC requirements, multiple `AppDomain` behavior,
+and `assemblyBinding` configuration, see
+[Assembly Conflict Resolution - .NET Framework-specific complexities](./assembly-conflict-resolution.md#net-framework-specific-complexities).
+
+For troubleshooting GAC installation issues, see
+[issue #1906](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/issues/1906#issuecomment-1376292814).
+For conflicting binding redirects, see
+[issue #2833](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/issues/2833).
+
+For the automatic redirection above to work there are two specific
+scenarios that require the assemblies used to instrument .NET Framework
+applications, the ones under the `netfx` folder of the installation
+directory, to be also installed into the Global Assembly Cache (GAC):
 
 1. [__Monkey patch instrumentation__](https://en.wikipedia.org/wiki/Monkey_patch#:~:text=Monkey%20patching%20is%20a%20technique,Python%2C%20Groovy%2C%20etc.)
 of assemblies loaded as domain-neutral.

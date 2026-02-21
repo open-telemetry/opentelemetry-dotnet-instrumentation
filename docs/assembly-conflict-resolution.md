@@ -31,11 +31,12 @@ callbacks fire for that reference again.
 #### Resolution order
 
 When code triggers an assembly reference, the runtime first checks
-whether the assembly is **already loaded** in the current ALC at the
-requested version or higher. If a match is found, that instance is
-used immediately and no further steps run. If an assembly is missing
-or a same-named assembly is loaded but at a lower version, the match
-fails and resolution continues.
+whether the assembly is **already loaded** in the ALC of the assembly
+that has the `AssemblyRef` being resolved, at the requested version or
+higher. If a match is found, that instance is used immediately and no
+further steps run. If an assembly is missing or a same-named assembly
+is loaded but at a lower version, the match fails and resolution
+continues.
 
 Next, the runtime invokes the current ALC's **`Load()` method**. For the
 Default ALC this performs a TPA list lookup. For a custom ALC this calls
@@ -67,6 +68,10 @@ types**. This means that data shared through static fields (for example,
 `System.Diagnostics.Activity.Current`) must come from a single assembly
 instance — otherwise different parts of the application will see
 different state.
+ 
+Additionally, types loaded from different ALC instances
+of the same assembly cannot be cast to each other, even if they have
+identical signatures.
 
 #### Loading restrictions
 
@@ -79,10 +84,14 @@ different state.
 
 ### .NET Framework
 
-On .NET Framework there is no `AssemblyLoadContext`. Assembly loading
-is scoped to the `AppDomain`. When the runtime cannot resolve an assembly
-the `AppDomain.CurrentDomain.AssemblyResolve` event fires, and handlers
-can supply the assembly via `Assembly.LoadFrom`.
+On .NET Framework there is no `AssemblyLoadContext` API. Assembly
+loading is scoped to the `AppDomain`. While assemblies within a single
+`AppDomain` share the same logical load context, there is no explicit
+API to manage or observe separate contexts as in .NET. The difference
+can only be observed through the behavior of different `Load` methods.
+When the runtime cannot resolve an assembly the
+`AppDomain.CurrentDomain.AssemblyResolve` event fires, and handlers
+can supply the assembly.
 
 ## The problem
 
@@ -112,7 +121,25 @@ version-unification rules guarantee that the highest referenced version
 of each dependency is selected for the output. No special runtime
 conflict resolution is needed in this case.
 
-### 2. Native profiler deployment (.NET and .NET Framework)
+> **Note:** If the application directly references a lower version of a
+> shared dependency than the instrumentation requires, the application's
+> direct reference takes precedence. This will generate a build-time
+> warning and may cause runtime failures if the instrumentation relies
+> on APIs not present in the lower version.
+>
+> **Recommendation:** Ensure that your application's dependencies comply
+> with the instrumentation's minimum version requirements for guaranteed
+> compatibility. Upgrade any conflicting direct references to at least
+> the versions required by the instrumentation.
+
+#### Disabling assembly redirection for NuGet deployments
+
+For NuGet package deployments, `OTEL_DOTNET_AUTO_REDIRECT_ENABLED`
+must be set to `false`. If enabled, the instrumentation will attempt to
+load redirected assembly versions that may not exist in the application's
+output, causing the application to crash.
+
+### 2. Standalone: Native profiler deployment (.NET and .NET Framework)
 
 When deployed via the native profiler, the instrumentation does not
 participate in the build. It is injected into the application at runtime.
@@ -130,7 +157,8 @@ and
 
 After rewriting, the runtime proceeds to resolve the rewritten
 reference. Because the version now matches what the instrumentation
-ships, the resolution follows the pipeline described above.
+ships, the resolution follows the
+[runtime resolution pipeline](#resolution-order).
 
 #### Managed assembly resolver (.NET)
 
@@ -151,14 +179,55 @@ isolated from the Default ALC version.
 Note, that if the TPA already has the same or a higher version, the runtime satisfies
 the reference automatically and the event never fires — no action is needed.
 
+The instrumentation ships the latest versions of its dependencies
+compatible with each target framework (for example, for `net8.0` the
+latest 8.x versions, for `net9.0` the latest 9.x versions). Exception:
+`System.Diagnostics.DiagnosticSource` always ships the latest version
+across all target frameworks.
+
 #### Managed assembly resolver (.NET Framework)
 
 On .NET Framework, the instrumentation subscribes to
 `AppDomain.CurrentDomain.AssemblyResolve` and loads the required
 assemblies from the instrumentation's home directory using
-`Assembly.LoadFrom`.
+`Assembly.LoadFrom`. The instrumentation ships the latest supported
+versions of its dependencies and the profiler's IL rewriting forces the
+application to use these versions.
 
-### 3. StartupHook-only deployment (.NET only)
+#### .NET Framework-specific complexities
+
+.NET Framework has additional assembly resolution behaviors that can
+affect the instrumentation:
+
+**Multiple AppDomains:** If the application creates multiple
+`AppDomain` instances, each `AppDomain` has its own assembly resolution
+context. The instrumentation's `AssemblyResolve` handler is registered
+per-`AppDomain`, so assemblies must be resolved independently in each
+one.
+
+**Global Assembly Cache (GAC) override:** Assemblies in the GAC take
+precedence over other resolution mechanisms. If a conflicting version
+exists in the GAC, it will be loaded instead of the instrumentation's
+version, regardless of IL rewriting or `AssemblyResolve` handlers.
+
+For automatic redirection to work, there are two specific scenarios
+that require the instrumentation's .NET Framework assemblies (in the
+`netfx` folder) to also be installed into the GAC:
+
+1. Bytecode instrumentation of assemblies loaded as domain-neutral
+2. Assembly redirection for strong-named applications that also ship
+   different versions of assemblies included in the `netfx` folder
+
+**`assemblyBinding` redirect configuration:** Application or machine
+configuration files (`app.config`, `web.config`, `machine.config`) can
+contain `<assemblyBinding>` redirects. These redirects take precedence
+over the instrumentation's runtime handlers. If the application has
+existing binding redirects that conflict with the instrumentation's
+requirements, automatic redirection may fail. Check that no existing
+binding redirects prevent redirection to the versions listed in
+[`assembly_redirection_netfx.h`](../src/OpenTelemetry.AutoInstrumentation.Native/assembly_redirection_netfx.h).
+
+### 3. Standalone: StartupHook-only deployment (.NET only)
 
 When the native profiler is not attached, the instrumentation relies
 solely on the .NET [startup hook](https://github.com/dotnet/runtime/blob/main/docs/design/features/host-startup-hook.md).
@@ -205,8 +274,11 @@ prevent or override that load.
 - **Native profiler deployment:** This is less of a problem in practice.
   Because the profiler has already rewritten all `AssemblyRef` entries to
   point to the instrumentation's versions, the explicitly loaded assembly
-  will typically not be referenced by any rewritten code. There is no
-  shared-state drift, but the unused assembly remains loaded in memory.
+  will typically not be referenced by any rewritten code. However, if
+  reflection code is called after the load from the explicitly loaded
+  assembly, issues may arise as there are now multiple types from the
+  same-named assembly. In most cases there is no shared-state drift, but
+  the unused assembly remains loaded in memory.
 - **StartupHook-only deployment:** This is more impactful. The
   application and instrumentation run inside the isolated ALC, but an
   explicit load into the Default ALC creates a second copy of the
@@ -234,6 +306,11 @@ that appear earlier in the list — are already in the Default ALC.
 Additionally, assemblies that *must* remain in the Default ALC (such as
 `System.Private.CoreLib`) always load there. These assemblies cannot be
 controlled by the isolated context.
+
+Note: If the instrumentation is the only startup hook, this is not
+typically a problem as the configuration has been specifically tested
+for safety. However, if there are additional startup hooks, conflicts
+may arise.
 
 ### Custom `AssemblyResolve` / `Resolving` handlers in application code
 

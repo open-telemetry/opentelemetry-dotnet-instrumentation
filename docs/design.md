@@ -217,25 +217,20 @@ conflicts can lead to:
 1. APIs required by the OpenTelemetry SDK being unavailable
 2. Multiple versions of the same assembly loaded in the process
 
-#### Deployment-specific resolution strategies
-
 The approach to resolving conflicts differs by deployment mode:
 
-- **NuGet package deployment**: Versions are resolved at build time by
-  NuGet's dependency resolution. The
-  `OTEL_DOTNET_AUTO_REDIRECT_ENABLED` environment variable has no effect
-  and should be disabled to avoid unnecessary overhead.
+- **NuGet package deployment (.NET and .NET Framework)**: Versions are
+  resolved at build time by NuGet's dependency resolution.
+  `OTEL_DOTNET_AUTO_REDIRECT_ENABLED` must be set to `false`.
 
-- **Native Profiler deployment**: The CLR Profiler redirects assembly
-  references to the instrumentation's versions if they are higher (enabled
-  by default, but can be disabled by setting
-  `OTEL_DOTNET_AUTO_REDIRECT_ENABLED = false` if needed). The **Loader**
-  then handles runtime resolution using `AssemblyLoadContext` (.NET) or
-  `AppDomain.AssemblyResolve` (.NET Framework) to resolve assembly
-  conflicts.
+- **Standalone: Native profiler deployment (.NET and .NET Framework)**:
+  The CLR Profiler redirects assembly references to the
+  instrumentation's versions if they are higher. The **Loader** then
+  handles runtime resolution using `AssemblyLoadContext` (.NET) or
+  `AppDomain.AssemblyResolve` (.NET Framework).
 
-- **StartupHook-only deployment** (.NET only): A full isolation of
-  application in custom `AssemblyLoadContext`.
+- **Standalone: StartupHook-only deployment (.NET only)**: Full
+  isolation of the application in a custom `AssemblyLoadContext`.
 
 **For a comprehensive explanation of how the .NET runtime resolves
 assemblies and the resolution strategies for each deployment mode, see
