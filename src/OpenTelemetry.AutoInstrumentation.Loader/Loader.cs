@@ -22,13 +22,25 @@ internal class Loader
     /// </summary>
     static Loader()
     {
-        try
+        // TODO: For NuGet-based deployment, skip AssemblyResolver or adjust it to
+        // assemblies layout in application output without /net or /netfx subdirectories
+#if NET
+        // For .Net (Core) if we run in isolated context (set up by StartupHook's IsolatedAssemblyResolver),
+        // skip AssemblyResolver. The isolated AssemblyLoadContext already handles all assembly resolution.
+        var currentContext = System.Runtime.Loader.AssemblyLoadContext.CurrentContextualReflectionContext;
+        var isNotIsolated = currentContext == null || currentContext == System.Runtime.Loader.AssemblyLoadContext.Default;
+
+        if (isNotIsolated)
+#endif
         {
-            AppDomain.CurrentDomain.AssemblyResolve += new AssemblyResolver(Logger).AssemblyResolve_ManagedProfilerDependencies;
-        }
-        catch (Exception ex)
-        {
-            Logger.Error(ex, "Unable to register a callback to the CurrentDomain.AssemblyResolve event.");
+            try
+            {
+                new AssemblyResolver(Logger).RegisterAssemblyResolving();
+            }
+            catch (Exception ex)
+            {
+                Logger.Error(ex, "Unable to register assembly resolving");
+            }
         }
 
         TryLoadManagedAssembly();
