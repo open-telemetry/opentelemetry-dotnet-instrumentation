@@ -96,5 +96,7 @@
              Link="Util\ManagedProfilerLocationHelper.Net.cs"
              DependentUpon="ManagedProfilerLocationHelper.cs"
              Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp'" />
+    <Compile Include="..\OpenTelemetry.AutoInstrumentation.StartupHook\StartupHookConstants.cs"
+             Link="StartupHookConstants.cs" />
   </ItemGroup>
 </Project>

@@ -23,14 +23,14 @@ internal class Loader
     static Loader()
     {
         // TODO: For NuGet-based deployment, skip AssemblyResolver or adjust it to
-        // assemblies layout in application output without /net or /netfx subdirectories
+        // assemblies layout in application output without /net or /netfx subdirectories (if we ship those assemblies)
 #if NET
-        // For .Net (Core) if we run in isolated context (set up by StartupHook's IsolatedAssemblyResolver),
+        // For .Net (Core) if we run in isolated context (set up by StartupHook's IsolatedAssemblyLoadContext),
         // skip AssemblyResolver. The isolated AssemblyLoadContext already handles all assembly resolution.
         var currentContext = System.Runtime.Loader.AssemblyLoadContext.CurrentContextualReflectionContext;
-        var isNotIsolated = currentContext == null || currentContext == System.Runtime.Loader.AssemblyLoadContext.Default;
+        var isIsolated = currentContext?.Name == StartupHookConstants.IsolatedAssemblyLoadContextName;
 
-        if (isNotIsolated)
+        if (!isIsolated)
 #endif
         {
             try

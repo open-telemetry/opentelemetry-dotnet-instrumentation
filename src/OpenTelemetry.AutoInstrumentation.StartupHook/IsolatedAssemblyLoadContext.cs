@@ -12,7 +12,7 @@ namespace OpenTelemetry.AutoInstrumentation;
 /// Loads both customer and agent assemblies, picking higher versions.
 /// </summary>
 internal class IsolatedAssemblyLoadContext()
-    : AssemblyLoadContext("OpenTelemetry.AutoInstrumentation.IsolatedAssemblyLoadContext", isCollectible: false)
+    : AssemblyLoadContext(StartupHookConstants.IsolatedAssemblyLoadContextName, isCollectible: false)
 {
     // TODO we may want to define variables for Exlude and Include list (exclude supplements to default excludes, includes overrides)
     // TODO which will give flexibility for the customer if they know what they are doing;
