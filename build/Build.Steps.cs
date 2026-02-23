@@ -46,14 +46,6 @@ partial class Build
        TargetFramework.NET462,
     ];
 
-    private static readonly IEnumerable<TargetFramework> TargetFrameworksForNetFxPacking =
-    [
-        TargetFramework.NET462,
-        TargetFramework.NET47,
-        TargetFramework.NET471,
-        TargetFramework.NET472,
-    ];
-
     private static readonly IEnumerable<TargetFramework> TargetFrameworksForPublish =
     [
         TargetFramework.NET462,

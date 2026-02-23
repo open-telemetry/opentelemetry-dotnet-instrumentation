@@ -1,3 +1,4 @@
+using Extensions;
 using Nuke.Common;
 using Nuke.Common.IO;
 using Nuke.Common.ProjectModel;
@@ -251,7 +252,7 @@ partial class Build
         }
 
         // We assume that dev machine running test has .Net Framework not older than TargetFrameworksNetFx.Last()
-        var lastFramework = TargetFrameworksForNetFxPacking.Last();
+        var lastFramework = TargetFrameworksForPublish.ExceptNet().Last();
         var netFxCommonAssembliesFolder = TracerHomeDirectory / lastFramework.OutputFolder;
         var netFxAssembliesFolder = TracerHomeDirectory / lastFramework.OutputFolder / lastFramework;
         var installTool = Solution.GetProjectByName(Projects.Tools.GacInstallTool);
