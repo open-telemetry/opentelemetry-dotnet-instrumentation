@@ -11,7 +11,7 @@ namespace OpenTelemetry.AutoInstrumentation.Loader;
 /// <summary>
 /// A class that attempts to load the OpenTelemetry.AutoInstrumentation .NET assembly.
 /// </summary>
-internal partial class AssemblyResolver(IOtelLogger logger)
+internal class AssemblyResolver(IOtelLogger logger)
 {
     internal static AssemblyLoadContext DependencyLoadContext { get; } = new AssemblyLoadContext("OpenTelemetry.AutoInstrumentation.Loader.AssemblyResolver", false);
 
