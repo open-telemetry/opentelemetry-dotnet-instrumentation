@@ -146,10 +146,13 @@ internal class NoCodeSettings : Settings
 
             var activityKind = ParseActivityKind(noCodeEntry.Span.Kind);
             var attributes = noCodeEntry.Span.ParseAttributes();
+            var dynamicAttributes = noCodeEntry.Span.ParseDynamicAttributes();
+            var statusRules = noCodeEntry.Span.ParseStatusRules();
+            var dynamicSpanName = noCodeEntry.Span.ParseDynamicSpanName();
 
             Log.Debug($"NoCode adding instrumentation for assembly: '{noCodeTarget.Assembly.Name}', type: '{noCodeTarget.Type}', method: '{noCodeTarget.Method}' with signature: '{string.Join(",", targetSignatureTypes)}'");
 
-            instrumentedMethods.Add(new NoCodeInstrumentedMethod(definition, targetSignatureTypes, noCodeEntry.Span.Name, activityKind, attributes));
+            instrumentedMethods.Add(new NoCodeInstrumentedMethod(definition, targetSignatureTypes, noCodeEntry.Span.Name, activityKind, attributes, dynamicAttributes, statusRules, dynamicSpanName));
         }
 
         if (instrumentedMethods.Count > 0)

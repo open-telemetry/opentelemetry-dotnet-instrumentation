@@ -19,10 +19,17 @@ internal class YamlAttribute
     public string? Name { get; set; }
 
     /// <summary>
-    /// Gets or sets the value of the resource attribute.
+    /// Gets or sets the value of the resource attribute (for static attributes).
     /// </summary>
     [YamlMember(Alias = "value")]
     public object? Value { get; set; }
+
+    /// <summary>
+    /// Gets or sets the expression source for dynamic attributes (e.g., "$arg1", "$arg2.Property", "$instance.Name").
+    /// When specified, the attribute value is extracted from the method context at runtime.
+    /// </summary>
+    [YamlMember(Alias = "source")]
+    public string? Source { get; set; }
 
     /// <summary>
     /// Gets or sets the type of the resource attribute.
