@@ -83,6 +83,8 @@
     </Compile>
     <Compile Include="..\OpenTelemetry.AutoInstrumentation\Constants.cs"
              Link="Constants.cs" />
+    <Compile Include="..\OpenTelemetry.AutoInstrumentation\Configurations\ConfigurationKeys.TracerHome.cs"
+             Link="Configurations\ConfigurationKeys.TracerHome.cs" />
     <Compile Include="..\OpenTelemetry.AutoInstrumentation\Util\TrustedPlatformAssembliesHelper.Net.cs"
              Link="Util\TrustedPlatformAssembliesHelper.cs"
              Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp'" />

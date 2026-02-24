@@ -69,6 +69,8 @@
     <Compile Include="..\OpenTelemetry.AutoInstrumentation\Configurations\ConfigurationKeys.FailFast.cs">
       <Link>Configurations\ConfigurationKeys.FailFast.cs</Link>
     </Compile>
+    <Compile Include="..\OpenTelemetry.AutoInstrumentation\Configurations\ConfigurationKeys.TracerHome.cs"
+             Link="Configurations\ConfigurationKeys.TracerHome.cs"/>
     <Compile Include="..\OpenTelemetry.AutoInstrumentation\Constants.cs"
              Link="Constants.cs" />
     <Compile Include="..\OpenTelemetry.AutoInstrumentation\Util\TrustedPlatformAssembliesHelper.Net.cs"

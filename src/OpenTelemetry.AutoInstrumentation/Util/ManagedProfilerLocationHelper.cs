@@ -1,6 +1,7 @@
 // Copyright The OpenTelemetry Authors
 // SPDX-License-Identifier: Apache-2.0
 
+using OpenTelemetry.AutoInstrumentation.Configurations;
 using OpenTelemetry.AutoInstrumentation.Logging;
 
 namespace OpenTelemetry.AutoInstrumentation.Util;
@@ -10,7 +11,7 @@ internal static partial class ManagedProfilerLocationHelper
     private static string? _managedProfilerVersionDirectory;
 
     public static string TracerHomeDirectory { get; } =
-        ReadEnvironmentVariable(Constants.EnvironmentVariables.OtelDotnetAutoHome) ?? string.Empty;
+        ReadEnvironmentVariable(ConfigurationKeys.TracerHome) ?? string.Empty;
 
     private static string? ReadEnvironmentVariable(string key)
     {
