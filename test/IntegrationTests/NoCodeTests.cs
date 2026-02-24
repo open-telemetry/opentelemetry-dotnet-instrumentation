@@ -103,6 +103,81 @@ public class NoCodeTests : TestHelper
         collector.ExpectAsyncNoCode("Span-GenericTestMethodAsync");
         collector.ExpectNoCode("Span-GenericTestMethodWithParameters");
 
+        // Dynamic attribute tests - extracting values from method parameters
+        List<KeyValue> processOrderAttributes =
+        [
+            new() { Key = "order.id", Value = new AnyValue { StringValue = "ORD-12345" } },
+            new() { Key = "order.quantity", Value = new AnyValue { IntValue = 5 } },
+        ];
+        collector.ExpectNoCode("Span-ProcessOrder", Span.Types.SpanKind.Internal, processOrderAttributes);
+
+        List<KeyValue> processCustomerAttributes =
+        [
+            new() { Key = "customer.id", Value = new AnyValue { StringValue = "CUST-001" } },
+            new() { Key = "customer.name", Value = new AnyValue { StringValue = "John Doe" } },
+            new() { Key = "customer.email", Value = new AnyValue { StringValue = "john@example.com" } },
+            new() { Key = "customer.city", Value = new AnyValue { StringValue = "Seattle" } },
+            new() { Key = "customer.country", Value = new AnyValue { StringValue = "USA" } },
+        ];
+        collector.ExpectNoCode("Span-ProcessCustomer", Span.Types.SpanKind.Internal, processCustomerAttributes);
+
+        List<KeyValue> auditActionAttributes =
+        [
+            new() { Key = "action", Value = new AnyValue { StringValue = "user_login" } },
+            new() { Key = "service.name", Value = new AnyValue { StringValue = "TestService" } },
+            new() { Key = "merchant.id", Value = new AnyValue { IntValue = 12345 } },
+        ];
+        collector.ExpectNoCode("Span-AuditAction", Span.Types.SpanKind.Internal, auditActionAttributes);
+
+        List<KeyValue> createResourceAttributes =
+        [
+            new() { Key = "resource.full_id", Value = new AnyValue { StringValue = "database/db-prod-001" } },
+        ];
+        collector.ExpectNoCode("Span-CreateResource", Span.Types.SpanKind.Internal, createResourceAttributes);
+
+        List<KeyValue> processWithDefaultAttributes =
+        [
+            new() { Key = "value", Value = new AnyValue { StringValue = "default_value" } },
+        ];
+        collector.ExpectNoCode("Span-ProcessWithDefault", Span.Types.SpanKind.Internal, processWithDefaultAttributes);
+
+        List<KeyValue> operationWithMetadataAttributes =
+        [
+            new() { Key = "method.name", Value = new AnyValue { StringValue = "OperationWithMetadata" } },
+            new() { Key = "type.name", Value = new AnyValue { StringValue = "TestApplication.NoCode.DynamicAttributeTestingClass" } },
+            new() { Key = "operation.full_name", Value = new AnyValue { StringValue = "TestApplication.NoCode.DynamicAttributeTestingClass.OperationWithMetadata" } },
+        ];
+        collector.ExpectNoCode("Span-OperationWithMetadata", Span.Types.SpanKind.Internal, operationWithMetadataAttributes);
+
+        List<KeyValue> processOrderAsyncAttributes =
+        [
+            new() { Key = "order.id", Value = new AnyValue { StringValue = "ORD-99999" } },
+            new() { Key = "order.amount", Value = new AnyValue { DoubleValue = 199.99 } },
+            new() { Key = "order.currency", Value = new AnyValue { StringValue = "USD" } },
+        ];
+        collector.ExpectAsyncNoCode("Span-ProcessOrderAsync", Span.Types.SpanKind.Internal, processOrderAsyncAttributes);
+
+        List<KeyValue> completeOrderAttributes =
+        [
+            new() { Key = "order.id", Value = new AnyValue { StringValue = "ORD-COMPLETE" } },
+        ];
+        collector.ExpectNoCode("Span-CompleteOrder", Span.Types.SpanKind.Internal, completeOrderAttributes);
+
+        // Dynamic span name tests
+        List<KeyValue> processTransactionAttributes =
+        [
+            new() { Key = "transaction.id", Value = new AnyValue { StringValue = "TXN-12345" } },
+            new() { Key = "transaction.type", Value = new AnyValue { StringValue = "payment" } },
+        ];
+        collector.ExpectNoCode("Transaction-payment-TXN-12345", Span.Types.SpanKind.Internal, processTransactionAttributes);
+
+        List<KeyValue> executeQueryAttributes =
+        [
+            new() { Key = "db.name", Value = new AnyValue { StringValue = "ProductionDB" } },
+            new() { Key = "db.table", Value = new AnyValue { StringValue = "users" } },
+        ];
+        collector.ExpectNoCode("Query.ProductionDB.users", Span.Types.SpanKind.Internal, executeQueryAttributes);
+
         RunTestApplication();
 
         collector.AssertExpectations();

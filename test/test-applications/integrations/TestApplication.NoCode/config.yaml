@@ -664,3 +664,205 @@ instrumentation/development:
                 - '!1'
           span:
              name: Span-GenericTestMethodWithParameters
+        # Dynamic attribute tests - extracting values from method parameters
+        - target:
+            assembly:
+              name: TestApplication.NoCode
+            type: TestApplication.NoCode.DynamicAttributeTestingClass
+            method: ProcessOrder
+            signature:
+              return_type: System.Void
+              parameter_types:
+                - System.String
+                - System.Int32
+          span:
+             name: Span-ProcessOrder
+             attributes:
+               - name: order.id
+                 source: $arg1
+                 type: string
+               - name: order.quantity
+                 source: $arg2
+                 type: int
+        - target:
+            assembly:
+              name: TestApplication.NoCode
+            type: TestApplication.NoCode.DynamicAttributeTestingClass
+            method: ProcessCustomer
+            signature:
+              return_type: System.Void
+              parameter_types:
+                - TestApplication.NoCode.Customer
+          span:
+             name: Span-ProcessCustomer
+             attributes:
+               - name: customer.id
+                 source: $arg1.Id
+                 type: string
+               - name: customer.name
+                 source: $arg1.Name
+                 type: string
+               - name: customer.email
+                 source: $arg1.Email
+                 type: string
+               - name: customer.city
+                 source: $arg1.Address.City
+                 type: string
+               - name: customer.country
+                 source: $arg1.Address.Country
+                 type: string
+        - target:
+            assembly:
+              name: TestApplication.NoCode
+            type: TestApplication.NoCode.DynamicAttributeTestingClass
+            method: AuditAction
+            signature:
+              return_type: System.Void
+              parameter_types:
+                - System.String
+          span:
+             name: Span-AuditAction
+             attributes:
+               - name: action
+                 source: $arg1
+                 type: string
+               - name: service.name
+                 source: $instance.ServiceName
+                 type: string
+               - name: merchant.id
+                 source: $instance.MerchantId
+                 type: int
+        - target:
+            assembly:
+              name: TestApplication.NoCode
+            type: TestApplication.NoCode.DynamicAttributeTestingClass
+            method: CreateResource
+            signature:
+              return_type: System.Void
+              parameter_types:
+                - System.String
+                - System.String
+          span:
+             name: Span-CreateResource
+             attributes:
+               - name: resource.full_id
+                 source: concat($arg1, "/", $arg2)
+                 type: string
+        - target:
+            assembly:
+              name: TestApplication.NoCode
+            type: TestApplication.NoCode.DynamicAttributeTestingClass
+            method: ProcessWithDefault
+            signature:
+              return_type: System.Void
+              parameter_types:
+                - System.String
+          span:
+             name: Span-ProcessWithDefault
+             attributes:
+               - name: value
+                 source: coalesce($arg1, "default_value")
+                 type: string
+        - target:
+            assembly:
+              name: TestApplication.NoCode
+            type: TestApplication.NoCode.DynamicAttributeTestingClass
+            method: OperationWithMetadata
+            signature:
+              return_type: System.Void
+              parameter_types:
+          span:
+             name: Span-OperationWithMetadata
+             attributes:
+               - name: method.name
+                 source: $method
+                 type: string
+               - name: type.name
+                 source: $type
+                 type: string
+               - name: operation.full_name
+                 source: concat($type, ".", $method)
+                 type: string
+        - target:
+            assembly:
+              name: TestApplication.NoCode
+            type: TestApplication.NoCode.DynamicAttributeTestingClass
+            method: ProcessOrderAsync
+            signature:
+              return_type: System.Threading.Tasks.Task`1[TestApplication.NoCode.OrderResult]
+              parameter_types:
+                - TestApplication.NoCode.Order
+          span:
+             name: Span-ProcessOrderAsync
+             attributes:
+               - name: order.id
+                 source: $arg1.Id
+                 type: string
+               - name: order.amount
+                 source: $arg1.Amount
+                 type: double
+               - name: order.currency
+                 source: $arg1.Currency
+                 type: string
+        - target:
+            assembly:
+              name: TestApplication.NoCode
+            type: TestApplication.NoCode.DynamicAttributeTestingClass
+            method: CompleteOrder
+            signature:
+              return_type: TestApplication.NoCode.OrderResult
+              parameter_types:
+                - System.String
+          span:
+             name: Span-CompleteOrder
+             attributes:
+               - name: order.id
+                 source: $arg1
+                 type: string
+             status:
+               rules:
+                 - condition: equals($return.Success, true)
+                   code: ok
+                 - condition: equals($return.Success, false)
+                   code: error
+                   description: Order processing failed
+        - target:
+            assembly:
+              name: TestApplication.NoCode
+            type: TestApplication.NoCode.DynamicAttributeTestingClass
+            method: ProcessTransaction
+            signature:
+              return_type: System.Void
+              parameter_types:
+                - System.String
+                - System.String
+          span:
+             name: DefaultTransaction
+             name_source: concat("Transaction-", $arg2, "-", $arg1)
+             attributes:
+               - name: transaction.id
+                 source: $arg1
+                 type: string
+               - name: transaction.type
+                 source: $arg2
+                 type: string
+        - target:
+            assembly:
+              name: TestApplication.NoCode
+            type: TestApplication.NoCode.DynamicAttributeTestingClass
+            method: ExecuteQuery
+            signature:
+              return_type: System.Void
+              parameter_types:
+                - System.String
+                - System.String
+          span:
+             name: DefaultQuery
+             name_source: concat("Query.", $arg1, ".", $arg2)
+             attributes:
+               - name: db.name
+                 source: $arg1
+                 type: string
+               - name: db.table
+                 source: $arg2
+                 type: string

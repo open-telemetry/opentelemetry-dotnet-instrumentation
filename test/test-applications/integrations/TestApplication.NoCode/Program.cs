@@ -13,6 +13,7 @@ internal static class Program
 
         var noCodeTestingClass = new NoCodeTestingClass();
         var genericNoCodeTestingClass = new GenericNoCodeTestingClass<int, long>();
+        var dynamicAttrTestingClass = new DynamicAttributeTestingClass();
 
 #pragma warning disable CA1849 // Call async methods when in an async method
         noCodeTestingClass.TestMethod();
@@ -73,5 +74,25 @@ internal static class Program
 #pragma warning restore CA1849 // Call async methods when in an async method
         _ = await noCodeTestingClass.GenericTestMethodAsync<int>().ConfigureAwait(false);
         _ = genericNoCodeTestingClass.GenericTestMethod(string.Empty, new object(), 123, 456L);
+
+        // Dynamic attribute tests - extracting values from method parameters
+        dynamicAttrTestingClass.ProcessOrder("ORD-12345", 5);
+        dynamicAttrTestingClass.ProcessCustomer(new Customer
+        {
+            Id = "CUST-001",
+            Name = "John Doe",
+            Email = "john@example.com",
+            Address = new Address { City = "Seattle", Country = "USA" }
+        });
+        dynamicAttrTestingClass.AuditAction("user_login");
+        dynamicAttrTestingClass.CreateResource("database", "db-prod-001");
+        dynamicAttrTestingClass.ProcessWithDefault(null);
+        dynamicAttrTestingClass.OperationWithMetadata();
+        _ = await dynamicAttrTestingClass.ProcessOrderAsync(new Order { Id = "ORD-99999", Amount = 199.99m, Currency = "USD" }).ConfigureAwait(false);
+        _ = dynamicAttrTestingClass.CompleteOrder("ORD-COMPLETE");
+
+        // Dynamic span name tests
+        dynamicAttrTestingClass.ProcessTransaction("TXN-12345", "payment");
+        dynamicAttrTestingClass.ExecuteQuery("ProductionDB", "users");
     }
 }
