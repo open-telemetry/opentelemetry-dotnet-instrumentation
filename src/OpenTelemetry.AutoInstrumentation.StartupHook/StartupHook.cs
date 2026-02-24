@@ -6,6 +6,7 @@ using OpenTelemetry.AutoInstrumentation;
 using OpenTelemetry.AutoInstrumentation.Configurations;
 using OpenTelemetry.AutoInstrumentation.Logging;
 using OpenTelemetry.AutoInstrumentation.RulesEngine;
+using OpenTelemetry.AutoInstrumentation.StartupHook.Util;
 
 /// <summary>
 /// Dotnet StartupHook
@@ -27,7 +28,8 @@ internal class StartupHook
     /// </summary>
     public static void Initialize()
     {
-        _ = bool.TryParse(Environment.GetEnvironmentVariable(ConfigurationKeys.FailFast), out var failFast);
+        var failFast = bool.ParseOrDefault(Environment.GetEnvironmentVariable(ConfigurationKeys.FailFast), false);
+        var redirectEnabled = bool.ParseOrDefault(Environment.GetEnvironmentVariable(ConfigurationKeys.RedirectEnabled), true);
 
         try
         {
@@ -42,7 +44,7 @@ internal class StartupHook
 
             Logger.Information("Initialization.");
 
-            if (IsStartupHookOnlyMode())
+            if (IsStartupHookOnlyMode() && redirectEnabled)
             {
                 // ASSEMBLY RESOLUTION STRATEGY
                 //
