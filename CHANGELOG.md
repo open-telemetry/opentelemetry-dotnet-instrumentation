@@ -26,6 +26,10 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 ### Fixed
 
 - Fixed configuration based instrumentation for some .NET Framework methods.
+- When both `ENTITYFRAMEWORKCORE` and `NPGSQL` traces instrumentations are enabled,
+  Entity Framework Core instrumentation now skips the
+  `Npgsql.EntityFrameworkCore.PostgreSQL` provider so both instrumentations can
+  stay enabled without conflicting spans.
 
 ## [1.14.1](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/tag/v1.14.1)
 

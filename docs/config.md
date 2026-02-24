@@ -155,6 +155,11 @@ due to lack of stable semantic convention.
 | `WCFCORE`             | [CoreWCF.Primitives](https://www.nuget.org/packages/CoreWCF.Primitives) **Not supported on .NET Framework**                                                                                                               | ≥1.8.0                 | source                   | [Experimental](https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/versioning-and-stability.md) |
 | `WCFSERVICE`          | WCF **Not supported on .NET**.                                                                                                                                                                                            | *                      | source & bytecode        | [Experimental](https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/versioning-and-stability.md) |
 
+When both `ENTITYFRAMEWORKCORE` and `NPGSQL` traces instrumentations are enabled,
+Entity Framework Core instrumentation automatically skips operations for the
+`Npgsql.EntityFrameworkCore.PostgreSQL` provider. This prevents conflicting spans
+while preserving Npgsql spans for PostgreSQL calls.
+
 \[1\]: Only integrated pipeline mode is supported.
 
 \[2\]: `ASP.NET (.NET Framework) MVC / WebApi` is not supported on ARM64.
