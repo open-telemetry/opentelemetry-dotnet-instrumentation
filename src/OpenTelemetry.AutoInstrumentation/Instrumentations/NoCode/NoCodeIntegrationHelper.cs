@@ -215,14 +215,15 @@ internal static class NoCodeIntegrationHelper
 
     private static bool IsCompilerGeneratedType(Type type)
     {
-        // Compiler-generated types have '<' in their name, e.g.:
-        // - <Main>d__0 (async state machine)
-        // - <>c__DisplayClass0_0 (closure/lambda)
+        // Per Microsoft naming conventions: Identifiers shouldn't contain two consecutive underscore (_) characters.
+        // Those names are reserved for compiler-generated identifiers.
+        // This covers async state machines (e.g., <Main>d__0), closures (e.g., <>c__DisplayClass0_0), etc.
+        // https://learn.microsoft.com/en-us/dotnet/csharp/fundamentals/coding-style/identifier-names#naming-conventions
         var typeName = type.Name;
 #if NET
-        if (typeName.Contains('<', StringComparison.Ordinal))
+        if (typeName.Contains("__", StringComparison.Ordinal))
 #else
-        if (typeName.IndexOf('<') >= 0)
+        if (typeName.IndexOf("__", StringComparison.Ordinal) >= 0)
 #endif
         {
             return true;
