@@ -25,6 +25,8 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 
 ### Fixed
 
+- Fixed configuration based instrumentation for some .NET Framework methods.
+
 ## [1.14.1](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/tag/v1.14.1)
 
 ### Changed
