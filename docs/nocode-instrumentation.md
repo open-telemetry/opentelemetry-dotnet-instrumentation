@@ -65,8 +65,11 @@ instrumentation/development:
             kind: internal                                    # (Optional) Span kind: internal, server, client, producer, consumer (defaults to internal)
             attributes:                                       # Array of custom attributes to add to the span
               - name: custom.attribute                        # Attribute name
-                value: "attribute_value"                      # Attribute value
+                value: "attribute_value"                      # Static attribute value
                 type: string                                  # Attribute type (see Attribute Types section below)
+              - name: dynamic.attribute                       # Dynamic attribute name
+                source: $arg1                                 # Expression to extract value from method context (see Dynamic Attributes section)
+                type: string
 ```
 
 ### Attribute Types
@@ -87,6 +90,273 @@ Supported attribute types and their formats:
 > Ensure attribute types match the supported formats above to avoid data loss.
 
 For more information about attributes, see the [OpenTelemetry Attribute specification](https://opentelemetry.io/docs/specs/otel/common/#attribute).
+
+### Dynamic Attributes
+
+Dynamic attributes allow you to extract attribute values from the method context
+at runtime. Use the `source` property instead of `value` to specify an expression.
+
+#### Expression Syntax
+
+| Expression               | Description                                |
+|--------------------------|--------------------------------------------|
+| `$arg1`                  | Value of the first method argument         |
+| `$arg2`                  | Value of the second method argument        |
+| `$arg1.PropertyName`     | Property value from the first argument     |
+| `$arg1.Nested.Property`  | Nested property access                     |
+| `$instance`              | The instance object (for instance methods) |
+| `$instance.PropertyName` | Property of the instance object            |
+| `$method`                | Method name                                |
+| `$type`                  | Declaring type name                        |
+
+> [!NOTE]  
+>
+> - Arguments are 1-indexed (`$arg1` to `$arg9`)
+> - Property access uses reflection and only works with public properties
+> - If an expression evaluates to `null`, the attribute is omitted
+> - Invalid expressions or property paths are silently skipped (logged at debug
+>   level)
+
+#### Dynamic Attribute Examples
+
+Extract method argument values:
+
+```yaml
+attributes:
+  - name: order.id
+    source: $arg1              # First argument value
+    type: int
+  - name: customer.id
+    source: $arg2              # Second argument value
+    type: string
+```
+
+Extract property values from arguments:
+
+```yaml
+attributes:
+  - name: request.url
+    source: $arg1.RequestUri.AbsoluteUri
+    type: string
+  - name: user.email
+    source: $arg1.User.Email
+    type: string
+```
+
+Extract values from the instance:
+
+```yaml
+attributes:
+  - name: service.name
+    source: $instance.ServiceName
+    type: string
+  - name: merchant.id
+    source: $instance.MerchantId
+    type: string
+```
+
+### Function Expressions
+
+Function expressions allow you to transform and combine values. Use them in the
+`source` property for attributes, in status rule conditions, or in the
+`name_source` property for dynamic span names.
+
+#### Supported Functions
+
+| Function                          | Description                                | Example                           |
+|-----------------------------------|--------------------------------------------|-----------------------------------|
+| `concat(...)`                     | Concatenates values into a string          | `concat($arg1, "-", $arg2)`       |
+| `coalesce(...)`                   | Returns the first non-null/non-empty value | `coalesce($arg1.Name, "unknown")` |
+| `substring(str, start, [length])` | Extracts a substring                       | `substring($arg1, 0, 10)`         |
+| `tostring(value)`                 | Converts value to string                   | `tostring($arg1.Id)`              |
+| `isnull(value)`                   | Returns true if value is null/empty        | `isnull($return)`                 |
+| `isnotnull(value)`                | Returns true if value is not null          | `isnotnull($return.Data)`         |
+| `equals(a, b)`                    | Returns true if values are equal           | `equals($return.Status, "error")` |
+| `notequals(a, b)`                 | Returns true if values are not equal       | `notequals($arg1, 0)`             |
+
+#### Function Expression Examples
+
+Concatenate values:
+
+```yaml
+attributes:
+  - name: operation.id
+    source: concat($type, ".", $method)
+    type: string
+  - name: order.key
+    source: concat($arg1.CustomerId, "-", $arg1.OrderId)
+    type: string
+```
+
+Use coalesce for defaults:
+
+```yaml
+attributes:
+  - name: user.name
+    source: coalesce($arg1.DisplayName, $arg1.Email, "anonymous")
+    type: string
+```
+
+### Dynamic Span Names
+
+Dynamic span names allow you to construct span names at runtime based on method
+context. This is useful for creating meaningful, contextual span names that
+include parameter values or other runtime information.
+
+> [!IMPORTANT]
+> Span names should be low-cardinality to avoid performance issues and storage
+> overhead. Avoid including high-cardinality values like unique identifiers,
+> timestamps, or user-specific data directly in span names. Use span attributes
+> for high-cardinality data instead. See the [OpenTelemetry Span specification](https://github.com/open-telemetry/opentelemetry-specification/blob/v1.54.0/specification/trace/api.md#span)
+> for guidance on span name best practices.
+
+Use the `name_source` property with a function expression to specify the dynamic
+span name. The `name` property is still required as a fallback if the dynamic
+expression fails to evaluate.
+
+> [!NOTE]  
+> Only function expressions are supported for dynamic span names (not simple
+> expressions like `$arg1`). This ensures the result is always a string.
+
+#### Dynamic Span Name Examples
+
+Create span names from argument values:
+
+```yaml
+span:
+  name: DefaultTransaction                              # Fallback name
+  name_source: concat("Transaction-", $arg1)            # Dynamic name using first argument
+```
+
+Combine multiple values:
+
+```yaml
+span:
+  name: DefaultQuery                                    # Fallback name
+  name_source: concat("Query.", $arg1, ".", $arg2)      # e.g., "Query.ProductionDB.users"
+```
+
+Include method context:
+
+```yaml
+span:
+  name: DefaultOperation                                 # Fallback name
+  name_source: concat($method, "-", $arg1.OperationType) # e.g., "ProcessOrder-Express"
+```
+
+Use with nested properties:
+
+```yaml
+span:
+  name: DefaultRequest                                   # Fallback name
+  name_source: concat($arg1.HttpMethod, " ", $arg1.Path) # e.g., "GET /api/users"
+```
+
+### Status Configuration
+
+You can configure span status based on return values or other conditions using
+status rules. Rules are evaluated in order, and the first matching rule sets
+the status.
+
+#### Status Rule Syntax
+
+```yaml
+span:
+  name: my-span
+  status:
+    rules:
+      - condition: <expression>    # Expression that evaluates to boolean
+        code: <status_code>        # ok, error, or unset
+        description: <text>        # Optional description (useful for errors)
+```
+
+#### Status Codes
+
+- **`ok`**: The operation completed successfully
+- **`error`**: The operation failed
+- **`unset`**: No status set (default)
+
+#### Status Rule Examples
+
+Set error status when return value indicates failure:
+
+```yaml
+span:
+  name: process-order
+  status:
+    rules:
+      - condition: isnull($return)
+        code: error
+        description: "Order processing returned null"
+      - condition: equals($return.Success, false)
+        code: error
+        description: "Order processing failed"
+      - condition: isnotnull($return)
+        code: ok
+```
+
+Set status based on return value properties:
+
+```yaml
+span:
+  name: http-request
+  status:
+    rules:
+      - condition: equals($return.StatusCode, 500)
+        code: error
+        description: "Internal server error"
+      - condition: equals($return.StatusCode, 404)
+        code: error
+        description: "Not found"
+      - condition: isnotnull($return)
+        code: ok
+```
+
+#### Complete example
+
+Complete example with dynamic attributes and status:
+
+```yaml
+instrumentation/development:
+  dotnet:
+    no_code:
+      targets:
+        - target:
+            assembly:
+              name: MyApp.Services
+            type: MyApp.Services.OrderService
+            method: ProcessOrder
+            signature:
+              return_type: MyApp.Models.OrderResult
+              parameter_types:
+                - MyApp.Models.OrderRequest
+          span:
+            name: process-order
+            kind: internal
+            attributes:
+              - name: order.id
+                source: $arg1.OrderId
+                type: string
+              - name: customer.id
+                source: $arg1.CustomerId
+                type: string
+              - name: order.total
+                source: $arg1.TotalAmount
+                type: double
+              - name: operation.name
+                source: concat("ProcessOrder-", $arg1.OrderType)
+                type: string
+            status:
+              rules:
+                - condition: isnull($return)
+                  code: error
+                  description: "Null result returned"
+                - condition: equals($return.Status, "Failed")
+                  code: error
+                  description: "Order processing failed"
+                - condition: equals($return.Status, "Completed")
+                  code: ok
+```
 
 ## Examples
 
