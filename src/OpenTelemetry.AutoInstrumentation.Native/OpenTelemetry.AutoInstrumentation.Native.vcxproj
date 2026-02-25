@@ -223,6 +223,7 @@
     <ClInclude Include="signature_builder.h" />
     <ClInclude Include="stack_capture_strategy.h" />
     <ClInclude Include="stack_capture_strategy_factory.h" />
+    <ClInclude Include="standalone_deployment_detection.h" />
     <ClInclude Include="startup_hook.h" />
     <ClInclude Include="stats.h" />
     <ClInclude Include="string_utils.h" />
@@ -254,6 +255,7 @@
     <ClCompile Include="rejit_preprocessor.cpp" />
     <ClCompile Include="rejit_work_offloader.cpp" />
     <ClCompile Include="stack_capture_strategy_factory.cpp" />
+    <ClInclude Include="standalone_deployment_detection.cpp" />
     <ClCompile Include="string_utils.cpp" />
     <ClCompile Include="stub_generator.cpp" />
     <ClCompile Include="tracer_tokens.cpp" />

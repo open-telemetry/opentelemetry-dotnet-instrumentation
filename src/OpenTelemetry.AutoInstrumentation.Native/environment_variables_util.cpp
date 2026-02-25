@@ -4,9 +4,31 @@
  */
 
 #include "environment_variables_util.h"
+#include "standalone_deployment_detection.h"
 
 namespace trace
 {
+
+namespace
+{
+// Resolves the assembly redirection env variable, falling back to the
+// legacy .NET Framework variable on Windows when the primary is unset.
+WSTRING GetAssemblyRedirectionRawValue()
+{
+    auto value = GetEnvironmentValue(environment::assembly_redirection_enabled);
+
+#ifdef _WIN32
+    // For .NET Framework, if the primary variable is NOT set (neither True nor False),
+    // check the legacy fallback variable.
+    if (!TrueCondition(value) && !FalseCondition(value))
+    {
+        value = GetEnvironmentValue(environment::assembly_redirection_enabled_netfx_legacy);
+    }
+#endif
+
+    return value;
+}
+} // namespace
 
 bool DisableOptimizations()
 {
@@ -40,18 +62,9 @@ bool IsFailFastEnabled()
 
 bool IsAssemblyRedirectionEnabled()
 {
-    auto assemblyRedirectEnvValue = GetEnvironmentValue(environment::assembly_redirection_enabled);
-
-#ifdef _WIN32
-    // For .Net Framework if the primary variable is NOT set (neither True nor False),
-    // then we consider it "unset" and check the legacy fallback.
-    if (!TrueCondition(assemblyRedirectEnvValue) && !FalseCondition(assemblyRedirectEnvValue))
-    {
-        assemblyRedirectEnvValue = GetEnvironmentValue(environment::assembly_redirection_enabled_netfx_legacy);
-    }
-#endif
-
-    ToBooleanWithDefault(assemblyRedirectEnvValue, true);
+    // Default is true for standalone deployment (needs runtime redirection)
+    // and false for non-standalone deployments (e.g., NuGet-based, where build-time resolution handles it).
+    ToBooleanWithDefault(GetAssemblyRedirectionRawValue(), IsStandaloneDeployment());
 }
 
 } // namespace trace

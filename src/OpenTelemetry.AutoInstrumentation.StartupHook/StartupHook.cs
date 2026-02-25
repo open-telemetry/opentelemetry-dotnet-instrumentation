@@ -6,7 +6,6 @@ using OpenTelemetry.AutoInstrumentation;
 using OpenTelemetry.AutoInstrumentation.Configurations;
 using OpenTelemetry.AutoInstrumentation.Logging;
 using OpenTelemetry.AutoInstrumentation.RulesEngine;
-using OpenTelemetry.AutoInstrumentation.StartupHook.Util;
 
 /// <summary>
 /// Dotnet StartupHook
@@ -28,8 +27,8 @@ internal class StartupHook
     /// </summary>
     public static void Initialize()
     {
-        var failFast = bool.ParseOrDefault(Environment.GetEnvironmentVariable(ConfigurationKeys.FailFast), false);
-        var redirectEnabled = bool.ParseOrDefault(Environment.GetEnvironmentVariable(ConfigurationKeys.RedirectEnabled), true);
+        _ = bool.TryParse(Environment.GetEnvironmentVariable(ConfigurationKeys.FailFast), out var failFast);
+        var redirectEnabled = GetRedirectEnabled();
 
         try
         {
@@ -113,6 +112,31 @@ internal class StartupHook
     private static bool IsStartupHookOnlyMode()
     {
         return Environment.GetEnvironmentVariable(Constants.EnvironmentVariables.ProfilerEnabledVariable) != "1";
+    }
+
+    private static bool GetRedirectEnabled()
+    {
+        var envValue = Environment.GetEnvironmentVariable(ConfigurationKeys.RedirectEnabled);
+        if (bool.TryParse(envValue, out var redirectEnabled))
+        {
+            Logger.Information($"Redirect explicitly set via environment variable to: {redirectEnabled}");
+            return redirectEnabled;
+        }
+
+        // Not explicitly set: default based on deployment type - true for standalone, false otherwise.
+        // For standalone deployment we need to enable assembly redirection,
+        // for non-standalone deployments, assembly resolution is handled at build time,
+        // so isolation is not needed.
+        redirectEnabled = DeploymentDetector.IsStandaloneDeployment();
+
+        if (redirectEnabled)
+        {
+            Logger.Information("Detected standalone deployment. Redirect enabled by default.");
+            return redirectEnabled;
+        }
+
+        Logger.Information("Detected non-standalone deployment (e.g., NuGet-based, assembly found in TPA). Redirect disabled by default.");
+        return redirectEnabled;
     }
 
     private static void GetTargetApp(out string appPath, out Assembly? entryAssembly)
