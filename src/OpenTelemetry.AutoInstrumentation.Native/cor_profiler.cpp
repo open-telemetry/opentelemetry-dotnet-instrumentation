@@ -10,6 +10,7 @@
 
 #include "assembly_redirection.h"
 #include "clr_helpers.h"
+#include "deployment_detection.h"
 #include "dllmain.h"
 #include "environment_variables.h"
 #include "environment_variables_util.h"
@@ -135,7 +136,16 @@ HRESULT STDMETHODCALLTYPE CorProfiler::Initialize(IUnknown* cor_profiler_info_un
         FailProfiler(Warn, "Failed to attach profiler: Not supported .NET version (lower than 6.0).")
     }
 
-    if (IsAssemblyRedirectionEnabled())
+    if (runtime_information_.is_core())
+    {
+        home_path = GetEnvironmentValue(environment::profiler_home_path);
+    }
+
+    // if assembly redirection is not set through env variable, we will enable it for standalone deployments,
+    // and disable it for non-standalone deployments (e.g., NuGet-based) where we don't ship our dependencies
+    assembly_redirection_enabled_ =
+        IsAssemblyRedirectionEnabled().value_or(IsStandaloneDeployment(GetCurrentModuleFileName(), home_path));
+    if (assembly_redirection_enabled_)
     {
         InitAssemblyRedirectsMap();
         DetectFrameworkVersionTableForRedirectsMap();
@@ -158,7 +168,6 @@ HRESULT STDMETHODCALLTYPE CorProfiler::Initialize(IUnknown* cor_profiler_info_un
         // and the necessary dependencies are not available yet.
 
         // Ensure that OTel StartupHook is listed.
-        home_path                = GetEnvironmentValue(environment::profiler_home_path);
         const auto startup_hooks = GetEnvironmentValues(environment::dotnet_startup_hooks, ENV_VAR_PATH_SEPARATOR);
         if (!IsStartupHookValid(startup_hooks, home_path))
         {
@@ -754,7 +763,7 @@ HRESULT STDMETHODCALLTYPE CorProfiler::ModuleLoadFinished(ModuleID module_id, HR
     }
 
     // It is not safe to skip assemblies if applying redirection
-    if (!IsAssemblyRedirectionEnabled())
+    if (!assembly_redirection_enabled_)
     {
         // If assembly redirection is disabled, check if the assembly can be skipped.
         for (auto&& skip_assembly : skip_assemblies)
@@ -777,7 +786,7 @@ HRESULT STDMETHODCALLTYPE CorProfiler::ModuleLoadFinished(ModuleID module_id, HR
         }
     }
 
-    const bool perform_redirect = IsAssemblyRedirectionEnabled();
+    const bool perform_redirect = assembly_redirection_enabled_;
 
     if (perform_redirect || module_info.assembly.name == managed_profiler_name)
     {

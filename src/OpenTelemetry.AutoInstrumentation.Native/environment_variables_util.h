@@ -11,6 +11,8 @@
 #include "string_utils.h"
 #include "util.h"
 
+#include <optional>
+
 #define CheckIfTrue(EXPR)                                  \
   static int sValue = -1;                                  \
   if (sValue == -1) {                                      \
@@ -36,10 +38,12 @@
     } else if (FalseCondition(envValue)) {  \
       sValue = 0;                           \
     } else {                                \
-      sValue = DEFAULT;                     \
+      sValue = 2;                           \
     }                                       \
   }                                         \
-  return sValue == 1;
+  if (sValue == 1) return true;             \
+  if (sValue == 0) return false;            \
+  return DEFAULT;
 
 namespace trace {
 
@@ -49,7 +53,7 @@ bool IsNGENEnabled();
 bool IsDumpILRewriteEnabled();
 bool IsAzureAppServices();
 bool IsFailFastEnabled();
-bool IsAssemblyRedirectionEnabled();
+std::optional<bool> IsAssemblyRedirectionEnabled();
 
 }  // namespace trace
 

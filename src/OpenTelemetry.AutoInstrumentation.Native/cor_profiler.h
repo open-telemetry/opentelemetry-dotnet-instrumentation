@@ -54,6 +54,7 @@ private:
 
     // Startup helper variables
     WSTRING home_path;
+    bool assembly_redirection_enabled_ = false;
     bool first_jit_compilation_completed = false;
     bool startup_fix_required = false;
 

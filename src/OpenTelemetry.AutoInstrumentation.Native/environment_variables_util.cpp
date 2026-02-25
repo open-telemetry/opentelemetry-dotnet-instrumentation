@@ -1,34 +1,7 @@
-/*
- * Copyright The OpenTelemetry Authors
- * SPDX-License-Identifier: Apache-2.0
- */
-
 #include "environment_variables_util.h"
-#include "standalone_deployment_detection.h"
 
 namespace trace
 {
-
-namespace
-{
-// Resolves the assembly redirection env variable, falling back to the
-// legacy .NET Framework variable on Windows when the primary is unset.
-WSTRING GetAssemblyRedirectionRawValue()
-{
-    auto value = GetEnvironmentValue(environment::assembly_redirection_enabled);
-
-#ifdef _WIN32
-    // For .NET Framework, if the primary variable is NOT set (neither True nor False),
-    // check the legacy fallback variable.
-    if (!TrueCondition(value) && !FalseCondition(value))
-    {
-        value = GetEnvironmentValue(environment::assembly_redirection_enabled_netfx_legacy);
-    }
-#endif
-
-    return value;
-}
-} // namespace
 
 bool DisableOptimizations()
 {
@@ -60,11 +33,25 @@ bool IsFailFastEnabled()
     CheckIfTrue(GetEnvironmentValue(environment::fail_fast_enabled));
 }
 
-bool IsAssemblyRedirectionEnabled()
+std::optional<bool> IsAssemblyRedirectionEnabled()
 {
-    // Default is true for standalone deployment (needs runtime redirection)
-    // and false for non-standalone deployments (e.g., NuGet-based, where build-time resolution handles it).
-    ToBooleanWithDefault(GetAssemblyRedirectionRawValue(), IsStandaloneDeployment());
+    // 1. Get the primary assembly redirection variable
+    auto assemblyRedirection = []() -> std::optional<bool>
+    { ToBooleanWithDefault(GetEnvironmentValue(environment::assembly_redirection_enabled), std::nullopt); }();
+
+#ifdef _WIN32
+    // 2. For .NET Framework, fallback to legacy variable if primary is not set
+    if (!assemblyRedirection)
+    {
+        assemblyRedirection = []() -> std::optional<bool>
+        {
+            ToBooleanWithDefault(GetEnvironmentValue(environment::assembly_redirection_enabled_netfx_legacy),
+                                 std::nullopt);
+        }();
+    }
+#endif
+
+    return assemblyRedirection;
 }
 
 } // namespace trace
