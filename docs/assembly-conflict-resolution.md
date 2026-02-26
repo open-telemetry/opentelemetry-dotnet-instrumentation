@@ -363,7 +363,7 @@ instrumentation. This can occur when:
 - A third-party library explicitly requests a specific version via reflection
 
 When this happens, the instrumentation skips the request rather than loading an
-older, potentially incompatible assembly. The behavior differs by deployment mode:
+older, potentially incompatible assembly.
 
 - **Native profiler deployment:** The resolver skips the request and logs an
   informational message. The profiler rewrites all metadata `AssemblyRef` tokens,
@@ -372,15 +372,15 @@ older, potentially incompatible assembly. The behavior differs by deployment mod
   there is no IL rewriting in this mode, such requests are more likely to occur
   from the scenarios mentioned above.
 
-**Recommendation:** If you encounter assembly resolution failures
-caused by this scenario, the issue lies with application code
-requesting a version that is not available. Ensure that the required
-version is available to the application — for example, by adding or
-upgrading the dependency so that its version is at least what the
-requesting code expects. When the required version is available
-(either in the TPA list or shipped by the instrumentation), the
-resolver will be able to satisfy the request. If that is not possible,
-consider the
+**Recommendation:** If you encounter such failures, and the assembly loading
+code is within your control, aligning it with the loading context and
+resolution mechanics described in this document can help avoid unintended
+interactions. If that is not feasible — for example, when the loading
+originates from a third-party component — ensure the required assembly
+version is available to the application by adding or upgrading the
+dependency. When the required version is present (either in the TPA list
+or shipped by the instrumentation), the resolver will be able to satisfy
+the request. As a last resort, consider the
 [`DOTNET_ADDITIONAL_DEPS` approach](#last-resort-dotnet_additional_deps-and-the-runtime-store)
 to supply the required version to the runtime before the application
 starts.
