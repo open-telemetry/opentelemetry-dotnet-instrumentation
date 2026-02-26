@@ -679,10 +679,10 @@ instrumentation/development:
              name: Span-ProcessOrder
              attributes:
                - name: order.id
-                 source: $arg1
+                 source: arguments[0]
                  type: string
                - name: order.quantity
-                 source: $arg2
+                 source: arguments[1]
                  type: int
         - target:
             assembly:
@@ -697,19 +697,19 @@ instrumentation/development:
              name: Span-ProcessCustomer
              attributes:
                - name: customer.id
-                 source: $arg1.Id
+                 source: arguments[0].Id
                  type: string
                - name: customer.name
-                 source: $arg1.Name
+                 source: arguments[0].Name
                  type: string
                - name: customer.email
-                 source: $arg1.Email
+                 source: arguments[0].Email
                  type: string
                - name: customer.city
-                 source: $arg1.Address.City
+                 source: arguments[0].Address.City
                  type: string
                - name: customer.country
-                 source: $arg1.Address.Country
+                 source: arguments[0].Address.Country
                  type: string
         - target:
             assembly:
@@ -724,13 +724,13 @@ instrumentation/development:
              name: Span-AuditAction
              attributes:
                - name: action
-                 source: $arg1
+                 source: arguments[0]
                  type: string
                - name: service.name
-                 source: $instance.ServiceName
+                 source: instance.ServiceName
                  type: string
                - name: merchant.id
-                 source: $instance.MerchantId
+                 source: instance.MerchantId
                  type: int
         - target:
             assembly:
@@ -746,7 +746,7 @@ instrumentation/development:
              name: Span-CreateResource
              attributes:
                - name: resource.full_id
-                 source: concat($arg1, "/", $arg2)
+                 source: concat(arguments[0], "/", arguments[1])
                  type: string
         - target:
             assembly:
@@ -761,7 +761,7 @@ instrumentation/development:
              name: Span-ProcessWithDefault
              attributes:
                - name: value
-                 source: coalesce($arg1, "default_value")
+                 source: coalesce(arguments[0], "default_value")
                  type: string
         - target:
             assembly:
@@ -775,13 +775,13 @@ instrumentation/development:
              name: Span-OperationWithMetadata
              attributes:
                - name: method.name
-                 source: $method
+                 source: method
                  type: string
                - name: type.name
-                 source: $type
+                 source: type
                  type: string
                - name: operation.full_name
-                 source: concat($type, ".", $method)
+                 source: concat(type, ".", method)
                  type: string
         - target:
             assembly:
@@ -796,13 +796,13 @@ instrumentation/development:
              name: Span-ProcessOrderAsync
              attributes:
                - name: order.id
-                 source: $arg1.Id
+                 source: arguments[0].Id
                  type: string
                - name: order.amount
-                 source: $arg1.Amount
+                 source: arguments[0].Amount
                  type: double
                - name: order.currency
-                 source: $arg1.Currency
+                 source: arguments[0].Currency
                  type: string
         - target:
             assembly:
@@ -817,13 +817,13 @@ instrumentation/development:
              name: Span-CompleteOrder
              attributes:
                - name: order.id
-                 source: $arg1
+                 source: arguments[0]
                  type: string
              status:
                rules:
-                 - condition: equals($return.Success, true)
+                 - condition: return.Success == true
                    code: ok
-                 - condition: equals($return.Success, false)
+                 - condition: return.Success == false
                    code: error
                    description: Order processing failed
         - target:
@@ -838,13 +838,13 @@ instrumentation/development:
                 - System.String
           span:
              name: DefaultTransaction
-             name_source: concat("Transaction-", $arg2, "-", $arg1)
+             name_source: concat("Transaction-", arguments[1], "-", arguments[0])
              attributes:
                - name: transaction.id
-                 source: $arg1
+                 source: arguments[0]
                  type: string
                - name: transaction.type
-                 source: $arg2
+                 source: arguments[1]
                  type: string
         - target:
             assembly:
@@ -858,11 +858,11 @@ instrumentation/development:
                 - System.String
           span:
              name: DefaultQuery
-             name_source: concat("Query.", $arg1, ".", $arg2)
+             name_source: concat("Query.", arguments[0], ".", arguments[1])
              attributes:
                - name: db.name
-                 source: $arg1
+                 source: arguments[0]
                  type: string
                - name: db.table
-                 source: $arg2
+                 source: arguments[1]
                  type: string

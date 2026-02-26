@@ -2,15 +2,16 @@
 // SPDX-License-Identifier: Apache-2.0
 
 using System.Diagnostics;
+using OpenTelemetry.AutoInstrumentation.Instrumentations.NoCode.Cel;
 
 namespace OpenTelemetry.AutoInstrumentation.Instrumentations.NoCode;
 
 /// <summary>
-/// Represents a rule for setting span status based on a condition expression.
+/// Represents a rule for setting span status based on a CEL condition expression.
 /// </summary>
 internal class NoCodeStatusRule
 {
-    public NoCodeStatusRule(object condition, ActivityStatusCode statusCode, string? description)
+    public NoCodeStatusRule(CelExpression condition, ActivityStatusCode statusCode, string? description)
     {
         Condition = condition;
         StatusCode = statusCode;
@@ -18,10 +19,10 @@ internal class NoCodeStatusRule
     }
 
     /// <summary>
-    /// Gets the condition expression (NoCodeExpression or NoCodeFunctionExpression).
+    /// Gets the CEL condition expression.
     /// The condition should evaluate to a boolean value.
     /// </summary>
-    public object Condition { get; }
+    public CelExpression Condition { get; }
 
     /// <summary>
     /// Gets the status code to set when the condition is true.
@@ -40,12 +41,7 @@ internal class NoCodeStatusRule
     /// <returns>True if the condition is met, false otherwise.</returns>
     public bool EvaluateCondition(NoCodeExpressionContext context)
     {
-        object? result = Condition switch
-        {
-            NoCodeExpression expr => expr.Evaluate(context),
-            NoCodeFunctionExpression func => func.Evaluate(context),
-            _ => null
-        };
+        object? result = Condition.Evaluate(context);
 
         // Convert result to boolean
         return result switch

@@ -3,6 +3,7 @@
 
 using System.Diagnostics;
 using OpenTelemetry.AutoInstrumentation.Instrumentations.NoCode;
+using OpenTelemetry.AutoInstrumentation.Instrumentations.NoCode.Cel;
 
 namespace OpenTelemetry.AutoInstrumentation.Configurations;
 
@@ -16,7 +17,7 @@ internal class NoCodeInstrumentedMethod
         TagList attributes,
         List<NoCodeDynamicAttribute>? dynamicAttributes = null,
         List<NoCodeStatusRule>? statusRules = null,
-        NoCodeFunctionExpression? dynamicSpanName = null)
+        CelExpression? dynamicSpanName = null)
     {
         Definition = definition;
         SignatureTypes = signatureTypes;
@@ -43,7 +44,7 @@ internal class NoCodeInstrumentedMethod
     public TagList Attributes { get; }
 
     /// <summary>
-    /// Gets the dynamic attributes (with values extracted from method arguments at runtime).
+    /// Gets the dynamic attributes (with values extracted from method arguments at runtime using CEL expressions).
     /// </summary>
     public List<NoCodeDynamicAttribute> DynamicAttributes { get; }
 
@@ -53,8 +54,8 @@ internal class NoCodeInstrumentedMethod
     public List<NoCodeStatusRule> StatusRules { get; }
 
     /// <summary>
-    /// Gets the dynamic span name expression (if configured), which evaluates to the span name at runtime.
+    /// Gets the dynamic span name CEL expression (if configured), which evaluates to the span name at runtime.
     /// If null, the static SpanName property is used.
     /// </summary>
-    public NoCodeFunctionExpression? DynamicSpanName { get; }
+    public CelExpression? DynamicSpanName { get; }
 }
