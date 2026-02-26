@@ -161,16 +161,14 @@ Find their versions in the following locations:
 - [src/Directory.Packages.props](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/blob/main/src/Directory.Packages.props)
 - [src/OpenTelemetry.AutoInstrumentation.Assemblies/Directory.Packages.props](../src/OpenTelemetry.AutoInstrumentation.Assemblies/Directory.Packages.props)
 
-For non-NuGet installations, the startup scripts automatically
-configure assembly redirection at runtime.
-This behavior can be controlled through the
-[`OTEL_DOTNET_AUTO_REDIRECT_ENABLED`](./config.md#additional-settings)
-setting.
-
-> **Important:** For NuGet package deployments,
-> `OTEL_DOTNET_AUTO_REDIRECT_ENABLED` must be set to `false`.
-> See [Assembly Conflict Resolution](./assembly-conflict-resolution.md#disabling-assembly-redirection-for-nuget-deployments)
-> for details.
+If you are using a non-standalone deployment (for example, a NuGet
+package deployment) and experiencing assembly loading failures, check
+whether [`OTEL_DOTNET_AUTO_REDIRECT_ENABLED`](./config.md#additional-settings)
+has been inadvertently set to `true`. Assembly redirection must not be
+enabled for non-standalone deployments — the instrumentation would
+attempt to load assembly versions that do not exist in the application's
+output. See [Assembly Conflict Resolution](./assembly-conflict-resolution.md#assembly-redirection-for-non-standalone-deployments)
+for details.
 
 If the application already ships binding redirection for assemblies
 used by automatic instrumentation this automatic redirection may fail,

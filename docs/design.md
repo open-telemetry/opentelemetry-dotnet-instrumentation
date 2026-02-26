@@ -220,8 +220,8 @@ conflicts can lead to:
 The approach to resolving conflicts differs by deployment mode:
 
 - **NuGet package deployment (.NET and .NET Framework)**: Versions are
-  resolved at build time by NuGet's dependency resolution.
-  `OTEL_DOTNET_AUTO_REDIRECT_ENABLED` must be set to `false`.
+  resolved at build time by NuGet's dependency resolution. No runtime
+  assembly conflict resolution is implemented.
 
 - **Standalone: Native profiler deployment (.NET and .NET Framework)**:
   The CLR Profiler redirects assembly references to the

@@ -115,13 +115,13 @@ instance** to avoid shared-state drift.
 
 ## Resolution strategies by deployment mode
 
-### 1. NuGet package deployment (.NET and .NET Framework)
+### 1. NuGet package deployments (.NET and .NET Framework)
 
 When the instrumentation is added as a NuGet package, the .NET SDK
 resolves assembly versions at **build time**. The standard NuGet
 version-unification rules guarantee that the highest referenced version
 of each dependency is selected for the output. No special runtime
-conflict resolution is needed in this case.
+conflict resolution is implemented in this case.
 
 > **Note:** If the application directly references a lower version of a
 > shared dependency than the instrumentation requires, the application's
@@ -134,12 +134,19 @@ conflict resolution is needed in this case.
 > compatibility. Upgrade any conflicting direct references to at least
 > the versions required by the instrumentation.
 
-#### Disabling assembly redirection for NuGet deployments
+#### Assembly redirection for NuGet package deployments
 
-For NuGet package deployments, `OTEL_DOTNET_AUTO_REDIRECT_ENABLED`
-must be set to `false`. If enabled, the instrumentation will attempt to
-load redirected assembly versions that may not exist in the application's
-output, causing the application to crash.
+For non-standalone deployments (for example, NuGet package deployments),
+assembly redirection is **disabled by default**. Build-time dependency
+resolution handles version conflicts, and the instrumentation does not
+ship its own assembly copies alongside the application.
+
+If you choose not to use the instrumentation scripts shipped with the
+NuGet package, ensure `OTEL_DOTNET_AUTO_REDIRECT_ENABLED` is either
+unset or explicitly set to `false`. Enabling it in a non-standalone
+deployment may cause the instrumentation to attempt loading assembly
+versions that do not exist in the application's output, leading to a
+crash.
 
 ### 2. Standalone: Native profiler deployment (.NET and .NET Framework)
 
