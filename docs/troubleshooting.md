@@ -190,19 +190,10 @@ For troubleshooting GAC installation issues, see
 For conflicting binding redirects, see
 [issue #2833](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/issues/2833).
 
-For the automatic redirection above to work there are two specific
-scenarios that require the assemblies used to instrument .NET Framework
-applications, the ones under the `netfx` folder of the installation
-directory, to be also installed into the Global Assembly Cache (GAC):
-
-1. [Monkey patch instrumentation](https://en.wikipedia.org/wiki/Monkey_patch#:~:text=Monkey%20patching%20is%20a%20technique,Python%2C%20Groovy%2C%20etc.)
-of assemblies loaded as domain-neutral.
-2. Assembly redirection for strong-named applications if the app also ships
-different versions of some assemblies also shipped in the `netfx` folder.
-
-If you are having problems in one of the scenarios above run again the
-`Install-OpenTelemetryCore` command from the PowerShell installation module
-`OpenTelemetry.DotNet.Auto.psm1` to ensure that the required GAC installations
+If you are experiencing issues in one of the two GAC-required scenarios described in
+[Assembly Conflict Resolution - .NET Framework-specific complexities](./assembly-conflict-resolution.md#net-framework-specific-complexities),
+run the `Install-OpenTelemetryCore` command from the PowerShell installation module
+`OpenTelemetry.DotNet.Auto.psm1` again to ensure that the required GAC installations
 are updated.
 
 For more information about the GAC usage by the automatic instrumentation,

@@ -86,11 +86,7 @@ types**, with key practical consequences:
 
 ### .NET Framework
 
-On .NET Framework there is no `AssemblyLoadContext` API. Assembly
-loading is scoped to the `AppDomain`. While assemblies within a single
-`AppDomain` share the same logical load context, there is no explicit
-API to manage or observe separate contexts as in .NET. The difference
-can only be observed through the behavior of different `Load` methods.
+On .NET Framework, assembly loading is scoped to the `AppDomain`.
 When the runtime cannot resolve an assembly the
 `AppDomain.CurrentDomain.AssemblyResolve` event fires, and handlers
 can supply the assembly.
@@ -126,8 +122,8 @@ conflict resolution is implemented in this case.
 > **Note:** If the application directly references a lower version of a
 > shared dependency than the instrumentation requires, the application's
 > direct reference takes precedence. This will generate a build-time
-> warning and may cause runtime failures if the instrumentation relies
-> on APIs not present in the lower version.
+> warning and runtime failure when instrumentation tries to resolve
+> the assembly.
 >
 > **Recommendation:** Ensure that your application's dependencies comply
 > with the instrumentation's minimum version requirements for guaranteed
@@ -219,12 +215,6 @@ application to use these versions.
 
 .NET Framework has additional assembly resolution behaviors that can
 affect the instrumentation:
-
-**Multiple AppDomains:** If the application creates multiple
-`AppDomain` instances, each `AppDomain` has its own assembly resolution
-context. The instrumentation's `AssemblyResolve` handler is registered
-per-`AppDomain`, so assemblies must be resolved independently in each
-one.
 
 **Global Assembly Cache (GAC) override:** Assemblies in the GAC take
 precedence over other resolution mechanisms. If a conflicting version
