@@ -6,7 +6,7 @@
 #ifndef OTEL_CLR_PROFILER_STARTUP_HOOK_H_
 #define OTEL_CLR_PROFILER_STARTUP_HOOK_H_
 
-#include "string_utils.h"  // NOLINT
+#include "string_utils.h" // NOLINT
 #include "managed_profiler_location_helper.h"
 #include "pal.h"
 #include "logger.h"
@@ -24,8 +24,8 @@ inline bool IsStartupHookValid(const std::vector<WSTRING>& startup_hooks, const 
         return false;
     }
 
-    const auto expected_startuphook_path = FindManagedAssembly(
-        opentelemetry_autoinstrumentation_startuphook_filename, EmptyWStr, home_path);
+    const auto expected_startuphook_path =
+        FindManagedAssembly(opentelemetry_autoinstrumentation_startuphook_filename, EmptyWStr, home_path);
     if (expected_startuphook_path.empty())
     {
         return false;
@@ -33,15 +33,15 @@ inline bool IsStartupHookValid(const std::vector<WSTRING>& startup_hooks, const 
 
     for (auto startup_hook = startup_hooks.begin(); startup_hook != startup_hooks.end(); startup_hook++)
     {
-        const auto startup_hook_path_candidate = std::filesystem::path(*startup_hook);
+        const auto      startup_hook_path_candidate = std::filesystem::path(*startup_hook);
         std::error_code ec;
-        const auto equivalent = std::filesystem::equivalent(expected_startuphook_path, startup_hook_path_candidate, ec);
+        const auto      equivalent =
+            std::filesystem::equivalent(expected_startuphook_path.path, startup_hook_path_candidate, ec);
         if (ec)
         {
             Logger::Debug("Failed to compare StartupHook path '",
-                         ToString(PATH_TO_WSTRING(expected_startuphook_path)),
-                         "' with '", ToString(PATH_TO_WSTRING(startup_hook_path_candidate)),
-                         "': ", ec.message());
+                          ToString(PATH_TO_WSTRING(expected_startuphook_path.path)), "' with '",
+                          ToString(PATH_TO_WSTRING(startup_hook_path_candidate)), "': ", ec.message());
             continue;
         }
 
@@ -53,7 +53,6 @@ inline bool IsStartupHookValid(const std::vector<WSTRING>& startup_hooks, const 
     return false;
 }
 
-
 inline WSTRING GetStartupHookPath(const WSTRING& profiler_path, const WSTRING& home_path)
 {
     if (profiler_path == EmptyWStr)
@@ -61,11 +60,11 @@ inline WSTRING GetStartupHookPath(const WSTRING& profiler_path, const WSTRING& h
         return EmptyWStr;
     }
 
-    const auto found = FindManagedAssembly(
-        opentelemetry_autoinstrumentation_startuphook_filename, profiler_path, home_path);
-    return found.empty() ? EmptyWStr : PATH_TO_WSTRING(found);
+    const auto found =
+        FindManagedAssembly(opentelemetry_autoinstrumentation_startuphook_filename, profiler_path, home_path);
+    return found.empty() ? EmptyWStr : PATH_TO_WSTRING(found.path);
 }
 
-}  // namespace trace
+} // namespace trace
 
-#endif  // OTEL_CLR_PROFILER_STARTUP_HOOK_H_
+#endif // OTEL_CLR_PROFILER_STARTUP_HOOK_H_

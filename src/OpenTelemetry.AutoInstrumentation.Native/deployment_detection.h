@@ -12,9 +12,7 @@
 namespace trace
 {
 
-// Filename of the OpenTelemetry managed profiler assembly. Used as the anchor to detect
-// deployment type: if this assembly is found under net/ or netfx/ subdirectories, the
-// deployment is standalone; otherwise it's non-standalone (e.g., NuGet-based).
+// Filename of the OpenTelemetry managed profiler assembly used as the anchor for deployment detection.
 const WSTRING otel_instrumentation_assembly_filename = WStr("OpenTelemetry.AutoInstrumentation.dll");
 
 inline bool IsStandaloneDeployment(const WSTRING& profiler_path, const WSTRING& tracer_home)
@@ -31,28 +29,19 @@ inline bool IsStandaloneDeployment(const WSTRING& profiler_path, const WSTRING& 
         return false;
     }
 
-    // In a standalone deployment the managed profiler lives inside a net/ or netfx/ subdirectory.
-    // In a NuGet deployment it sits directly alongside the native profiler
-    // or at the tracer_home root, so its immediate parent is not one of those subdirectories.
-    const auto  parent_dir_name = found.parent_path().filename();
-    const bool  isStandalone    = parent_dir_name == standalone_net_subdir
-#ifdef _WIN32
-        || parent_dir_name == standalone_netfx_subdir
-#endif
-        ;
-
-    if (isStandalone)
+    if (found.is_standalone)
     {
-        Logger::Info("IsStandaloneDeployment: Detected standalone deployment: ",
-                     otel_instrumentation_assembly_filename, " found at '", ToString(PATH_TO_WSTRING(found)), "'.");
+        Logger::Info("IsStandaloneDeployment: Detected standalone deployment: ", otel_instrumentation_assembly_filename,
+                     " found at '", ToString(PATH_TO_WSTRING(found.path)), "'.");
     }
     else
     {
         Logger::Info("IsStandaloneDeployment: Detected non-standalone (e.g., NuGet-based) deployment: ",
-                     otel_instrumentation_assembly_filename, " found at '", ToString(PATH_TO_WSTRING(found)), "'.");
+                     otel_instrumentation_assembly_filename, " found at '", ToString(PATH_TO_WSTRING(found.path)),
+                     "'.");
     }
 
-    return isStandalone;
+    return found.is_standalone;
 }
 
 } // namespace trace
