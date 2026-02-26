@@ -22,8 +22,9 @@ internal class AssemblyResolver(IOtelLogger logger)
         // ASSEMBLY RESOLUTION STRATEGY
         //
         // === NATIVE PROFILER DEPLOYMENT ===
-        // The native profiler already redirected (IL rewriting) all references to our versions.
-        // The Resolving event fires when runtime cannot find the assembly in two cases:
+        // The native profiler already redirected (IL rewriting) all conflicting AssemblyRef to our versions.
+        // In most cases the Resolving event fires because of this redirection and we know exactly
+        // what to do - just decide which context to load the assembly into:
         //
         // Case 1: Assembly NOT in TrustedPlatformAssembly list (our dependencies; e.g., OpenTelemetry.dll)
         //   -> Runtime has no default location for this assembly
@@ -37,6 +38,12 @@ internal class AssemblyResolver(IOtelLogger logger)
         //   -> We load to Custom ALC for isolation (loading to Default ALC will fail)
         //   -> NOTE: If TPA has same/higher version, runtime successfully auto-loads to Default ALC;
         //            event never fires (accepted)
+        //
+        // However, other situations may also trigger the Resolving event for an assembly we ship
+        // (e.g., programmatic Assembly.Load with an explicit version). To avoid accidentally
+        // satisfying a request that is not ours or one we cannot fulfill, we validate versions
+        // before loading: if our version >= requested, we proceed (backward compatible); if the
+        // requested version is higher than ours, we skip the request.
 
         // ASSEMBLY RESOLUTION TIMING
         //
@@ -68,13 +75,32 @@ internal class AssemblyResolver(IOtelLogger logger)
             return null;
         }
 
-        // TODO we may want to cache assembly paths for assemblies loading to custom ALC to avoid repeated file system calls on every resolution,
-        // or simply check if the assembly is already loaded into custom ALC but that require rewriting the logic a bit
+        // TODO we may want to cache assembly paths for assemblies loading to custom ALC to avoid repeated file system calls
+        // on every resolution, or simply check if the assembly is already loaded into custom ALC
         var assemblyPath = ManagedProfilerLocationHelper.GetAssemblyPath(assemblyName.Name, logger);
         if (assemblyPath is null)
         {
             logger.Debug($"Skip resolving unexpected assembly: ({assemblyName})");
             return null;
+        }
+
+        // Version check: verify this is a request we can satisfy.
+        // See ASSEMBLY RESOLUTION STRATEGY comment in RegisterAssemblyResolving for details.
+        if (assemblyName.Version != null)
+        {
+            try
+            {
+                var ourVersion = AssemblyName.GetAssemblyName(assemblyPath).Version;
+                if (ourVersion != null && ourVersion < assemblyName.Version)
+                {
+                    logger.Information($"Skip resolving assembly ({assemblyName}): requested version {assemblyName.Version} is higher than our version {ourVersion}");
+                    return null;
+                }
+            }
+            catch (Exception ex)
+            {
+                logger.Debug($"Failed to read version from \"{assemblyPath}\", proceeding with load: {ex.Message}");
+            }
         }
 
         // Load conflicting library into a custom ALC

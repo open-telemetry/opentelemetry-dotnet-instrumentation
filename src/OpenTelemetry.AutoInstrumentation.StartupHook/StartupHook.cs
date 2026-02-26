@@ -48,22 +48,26 @@ internal class StartupHook
                 // ASSEMBLY RESOLUTION STRATEGY
                 //
                 // === STARTUP HOOK ONLY ===
-                // Lacks:
-                //   - Native profiler's IL rewriting capabilities
-                //   - Build-time version resolution (when deployed as NuGet package)
-                // This means customer aseembly and its dependencies load to Default ALC automatically.
-                // We cannot override versions in Default ALC or prevent customer dependencies from loading there.
-                // Loading our dependencies to a separate custom ALC risks shared state drift
-                // (e.g., ActivitySpan from DiagnosticSource).
-                // Solution: Hijack customer application, load it into custom ALC, execute it there
-                // alongside our dependencies, then exit to prevent runtime from re-executing it in Default ALC.
-                // If setup fails, cleanup and let it run normally (or fail fast if configured).
-
-                // ASSEMBLY RESOLUTION TIMING
+                // Without the native profiler's IL rewriting and NuGet's build-time resolution,
+                // the customer application and its dependencies automatically load into the
+                // Default ALC. The instrumentation cannot override versions there or prevent
+                // customer code from loading first. To solve this, we hijack the application:
+                // load its entry assembly into an isolated ALC alongside our dependencies,
+                // execute customer entrypoint in the isolated ALC,
+                // then exit to prevent the Default ALC copy from running.
                 //
-                // When customer assembly loads into a custom ALC, all its dependencies
-                // go through the custom context's Load() method first (before Default ALC fallback).
+                // When the customer application loads into the isolated ALC, all its dependencies
+                // trigger the isolated ALC's Load() method first (before Default ALC fallback).
                 // This is our single control point for version resolution.
+                // For each dependency, the isolated ALC compares the TPA version against the
+                // instrumentation version and picks the higher one. Before loading, it validates
+                // that the selected version >= the requested version. If the best available
+                // version is still lower than requested, the isolated ALC skips the request
+                // rather than loading an incompatible assembly.
+                //
+                // If isolation setup fails, the using statement reverts the context and control
+                // returns to the .NET runtime, which falls back to normal execution (or fail-fast
+                // if configured).
 
                 Logger.Information("Starting isolated AssemblyLoadContext mode");
                 GetTargetApp(out var targetAppPath, out var entryAssembly);

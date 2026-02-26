@@ -9,7 +9,8 @@ namespace OpenTelemetry.AutoInstrumentation;
 
 /// <summary>
 /// Custom AssemblyLoadContext for isolated mode.
-/// Loads both customer and agent assemblies, picking higher versions.
+/// Loads both customer and agent assemblies, picking higher versions,
+/// but skipping if the best available version is lower than the requested version.
 /// </summary>
 internal class IsolatedAssemblyLoadContext()
     : AssemblyLoadContext(StartupHookConstants.IsolatedAssemblyLoadContextName, isCollectible: false)
@@ -31,14 +32,10 @@ internal class IsolatedAssemblyLoadContext()
             return null;
         }
 
-        // Already loaded in this context?
-        // Return any loaded assembly with matching name, regardless of version
-        // (we enforce single version per name in this context)
-        var cached = Assemblies.FirstOrDefault(a => a.GetName().Name == name);
-        if (cached != null)
-        {
-            return cached;
-        }
+        // TODO: caching - the .NET runtime performs name-based unification within an ALC and
+        // should not call Load() again for an already-loaded assembly name (Default ALC also never
+        // triggers this Load()). But if there is a risk identified where Load() is re-entered
+        // for the same name, add a cache check here. Bundle with Loader AssemblyResolver caching work.
 
         // Find in TPA (customer/runtime assemblies)
         _tpaAssemblies.TryGetValue(name, out var tpaPath);
@@ -48,8 +45,35 @@ internal class IsolatedAssemblyLoadContext()
 
         // Pick higher version (agent wins only if strictly higher)
         var selected = PickHigherVersion(tpaPath, managedProfilerPath);
+        if (selected == null)
+        {
+            // TODO: log debug once logging is safe here.
+            // This is unexpected assembly so include assebly name an dversion
+            return null;
+        }
 
-        return selected != null ? LoadFromAssemblyPath(selected) : null;
+        // Verify that the selected assembly satisfies the requested version.
+        // If the best available version is still lower than requested, skip
+        // rather than loading a version that's too old.
+        if (assemblyName.Version != null)
+        {
+            try
+            {
+                var selectedVersion = AssemblyName.GetAssemblyName(selected).Version;
+                if (selectedVersion != null && selectedVersion < assemblyName.Version)
+                {
+                    // TODO: log warning once logging is safe here.
+                    // The warning should include: assembly name, requested version, and best available version.
+                    return null;
+                }
+            }
+            catch
+            {
+                // On error reading version, fall through and attempt to load
+            }
+        }
+
+        return LoadFromAssemblyPath(selected);
     }
 
     private static Dictionary<string, string> ParseTrustedPlatformAssemblies()

@@ -64,14 +64,15 @@ subscribing to it may not always be reliable.
 #### Key property: type isolation
 
 The same assembly loaded into two different ALCs produces **distinct
-types**. This means that data shared through static fields (for example,
-`System.Diagnostics.Activity.Current`) must come from a single assembly
-instance — otherwise different parts of the application will see
-different state.
- 
-Additionally, types loaded from different ALC instances
-of the same assembly cannot be cast to each other, even if they have
-identical signatures.
+types**, with key practical consequences:
+
+- **Shared-state drift**: Static fields are per-instance. Data shared
+  through static fields (for example, `System.Diagnostics.Activity.Current`)
+  must come from a single assembly instance — otherwise different parts
+  of the application will see different state.
+- **Cast failures**: Types loaded from different ALC instances of the
+  same assembly cannot be cast to each other, even if they have
+  identical signatures.
 
 #### Loading restrictions
 
@@ -160,13 +161,21 @@ reference. Because the version now matches what the instrumentation
 ships, the resolution follows the
 [runtime resolution pipeline](#resolution-order).
 
+The instrumentation ships the latest versions of its dependencies
+compatible with each target framework (for example, for `net8.0` the
+latest 8.x versions, for `net9.0` the latest 9.x versions). Exception:
+`System.Diagnostics.DiagnosticSource` always ships the latest version
+across all target frameworks.
+
 #### Managed assembly resolver (.NET)
 
 On .NET, the instrumentation subscribes to
 `AssemblyLoadContext.Default.Resolving` — the earliest event-based callback in the
 [resolution order](#resolution-order) — to reliably supply an assembly before
-any other handler runs. Because assembly references have already
-been rewritten by the native profiler, this event fires in two situations:
+any other handler runs. Because assembly references have already been rewritten by
+the native profiler, this event normally fires with the instrumentation's exact version.
+In the standard case, the resolver knows exactly what to do — decide which context
+to load the assembly into:
 
 | Situation | Why it fires | Where we load the assembly |
 | --- | --- | --- |
@@ -174,16 +183,17 @@ been rewritten by the native profiler, this event fires in two situations:
 | Assembly **is** in the TPA list but with a **lower** version | The profiler rewrote the reference to a higher version that the TPA cannot satisfy | **Custom ALC** — loading into the Default ALC would fail because the TPA already provides a lower version |
 
 When a TPA-conflicting assembly is loaded into a custom ALC it is
-isolated from the Default ALC version.
+isolated from the Default ALC version. Note that if the TPA already
+has the same or a higher version, the runtime satisfies the reference
+automatically and the event never fires — no action is needed.
 
-Note, that if the TPA already has the same or a higher version, the runtime satisfies
-the reference automatically and the event never fires — no action is needed.
-
-The instrumentation ships the latest versions of its dependencies
-compatible with each target framework (for example, for `net8.0` the
-latest 8.x versions, for `net9.0` the latest 9.x versions). Exception:
-`System.Diagnostics.DiagnosticSource` always ships the latest version
-across all target frameworks.
+However, other situations may also trigger the Resolving event for an assembly
+the instrumentation ships (e.g., programmatic Assembly.Load with an explicit version).
+To avoid accidentally satisfying a request that is not ours or one we cannot fulfill,
+the resolver validates versions before loading: it only proceeds if the instrumentation's
+assembly version is **equal to or higher than** the requested version.
+If the requested version is higher than what the instrumentation
+ships, the resolver skips the request and lets other handlers or the runtime deal with it.
 
 #### Managed assembly resolver (.NET Framework)
 
@@ -249,7 +259,11 @@ isolated ALC and:
 4. For every dependency requested by either the application or the
    instrumentation, the isolated ALC's `Load` method compares the
    version available in the TPA list against the version shipped by
-   the instrumentation and **picks the higher one**.
+   the instrumentation and **picks the higher one**. Before loading,
+   it also validates that the selected version is **equal to or higher
+   than** the requested version. If the best available version is still
+   lower than what was requested, the instrumentation skips the request
+   rather than loading an incompatible version.
 5. Invokes the customer's `Main` entry point via reflection, then calls
    `Environment.Exit` to prevent the runtime from re-executing the
    application in the Default ALC.
@@ -290,12 +304,12 @@ prevent or override that load.
 ### StartupHook-only: the customer application is loaded twice
 
 In isolated mode the startup hook loads the customer's entry assembly
-into the isolated ALC. However, the .NET runtime
-has already loaded the same entry assembly into the Default ALC before
-the startup hook runs. This means the entry assembly exists in both
-contexts. The startup hook calls `Environment.Exit` after the isolated
-execution completes to prevent the runtime from executing the Default-ALC
-copy, but the duplicate load itself is unavoidable.
+into the isolated ALC. However, the .NET runtime has already loaded the
+same entry assembly into the Default ALC before the startup hook runs.
+This means the entry assembly exists in both contexts. The startup hook
+calls `Environment.Exit` after the isolated execution completes to
+prevent the runtime from executing the Default-ALC copy, but the
+duplicate load itself is unavoidable.
 
 ### StartupHook-only: inevitable assembly leakage to the Default ALC
 
@@ -308,9 +322,9 @@ Additionally, assemblies that *must* remain in the Default ALC (such as
 controlled by the isolated context.
 
 Note: If the instrumentation is the only startup hook, this is not
-typically a problem as the configuration has been specifically tested
-for safety. However, if there are additional startup hooks, conflicts
-may arise.
+typically a problem — the startup hook assembly and its own dependencies
+are known and have been validated to be safe in the isolated context.
+However, if there are additional startup hooks, conflicts may arise.
 
 ### Custom `AssemblyResolve` / `Resolving` handlers in application code
 
@@ -337,6 +351,37 @@ and a later module references a **higher** version than the
 instrumentation ships, the profiler cannot reconcile the two. This is
 logged as an error. In practice this is rare because the instrumentation
 ships the latest versions of its dependencies.
+
+### Unexpected resolution request for a higher version than available
+
+The instrumentation's assembly resolver may receive a resolution request for a
+version of a shared dependency that is higher than what is available — either in
+the TPA list or shipped by the instrumentation. This can occur when:
+
+- Application code programmatically loads an assembly with an explicit version
+  (for example, `Assembly.Load(new AssemblyName("..., Version=X.Y.Z.W"))`)
+- A plugin loaded by the application has different version requirements
+- A third-party library explicitly requests a specific version via reflection
+
+When this happens, the instrumentation skips the request rather than loading an
+older, potentially incompatible assembly. The behavior differs by deployment mode:
+
+- **Native profiler deployment:** The resolver skips the request and logs an
+  informational message. The profiler rewrites all metadata `AssemblyRef` tokens,
+  so requests that bypass IL rewriting should be quite rare.
+- **StartupHook-only deployment:** The isolated ALC skips the request. Because
+  there is no IL rewriting in this mode, such requests are more likely to occur
+  from the scenarios mentioned above.
+
+**Recommendation:** If you encounter assembly resolution failures caused by this
+scenario, the issue lies with application code requesting a version that is not
+available. Ensure that the required version is available to the application — for
+example, by adding or upgrading the dependency so that its version is at least what
+the requesting code expects. When the required version is available (either in the
+TPA list or shipped by the instrumentation), the resolver will be able to satisfy
+the request. If that is not possible, consider the
+[`DOTNET_ADDITIONAL_DEPS` approach](#last-resort-dotnet_additional_deps-and-the-runtime-store)
+to supply the required version to the runtime before the application starts.
 
 ## Troubleshooting
 
