@@ -57,7 +57,8 @@ internal class StartupHook
                 // then exit to prevent the Default ALC copy from running.
                 //
                 // When the customer application loads into the isolated ALC, all its dependencies
-                // trigger the isolated ALC's Load() method first (before Default ALC fallback).
+                // are automatically tried to be loaded to the same ALC.
+                // In this process the first place we can hook in is the isolated ALC's Load() method.
                 // This is our single control point for version resolution.
                 // For each dependency, the isolated ALC compares the TPA version against the
                 // instrumentation version and picks the higher one. Before loading, it validates

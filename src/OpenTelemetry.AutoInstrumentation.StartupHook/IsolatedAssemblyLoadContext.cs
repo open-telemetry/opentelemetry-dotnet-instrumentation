@@ -32,19 +32,22 @@ internal class IsolatedAssemblyLoadContext()
             return null;
         }
 
-        // TODO: caching - the .NET runtime performs name-based unification within an ALC and
-        // should not call Load() again for an already-loaded assembly name (Default ALC also never
-        // triggers this Load()). But if there is a risk identified where Load() is re-entered
-        // for the same name, add a cache check here. Bundle with Loader AssemblyResolver caching work.
+        // TODO: caching - .NET has an optimization within an ALC and do not call Load() if an assembly
+        // has a match is the ALC (with the same or higher version).
+        // However, other situations may trigger the Load() again for an assembly we already loaded
+        // (e.g., programmatic Assembly.Load with an explicit version) which can happen only if the requesting
+        // assembly version is higher than what we already loaded.
+        // In this case caching will help to avoid unnecessary I/O when checking if the reqyest assembly version
+        // satisfies our best available version.
 
         // Find in TPA (customer/runtime assemblies)
         _tpaAssemblies.TryGetValue(name, out var tpaPath);
 
         // Find in agent assemblies
-        var managedProfilerPath = ManagedProfilerLocationHelper.GetAssemblyPath(name);
+        var agentPath = ManagedProfilerLocationHelper.GetAssemblyPath(name);
 
         // Pick higher version (agent wins only if strictly higher)
-        var selected = PickHigherVersion(tpaPath, managedProfilerPath);
+        var selected = PickHigherVersion(tpaPath, agentPath);
         if (selected == null)
         {
             // TODO: log debug once logging is safe here.
@@ -59,7 +62,7 @@ internal class IsolatedAssemblyLoadContext()
         {
             try
             {
-                var selectedVersion = AssemblyName.GetAssemblyName(selected).Version;
+                var selectedVersion = AssemblyUtils.GetAssemblyVersionSafe(selected);
                 if (selectedVersion != null && selectedVersion < assemblyName.Version)
                 {
                     // TODO: log warning once logging is safe here.
@@ -85,25 +88,25 @@ internal class IsolatedAssemblyLoadContext()
             .ToDictionary(x => x.Name, x => x.Path, StringComparer.OrdinalIgnoreCase);
     }
 
-    private static string? PickHigherVersion(string? tpaPath, string? managedProfilerPath)
+    private static string? PickHigherVersion(string? tpaPath, string? agentPath)
     {
-        if (managedProfilerPath == null)
+        if (agentPath == null)
         {
             return tpaPath;
         }
 
         if (tpaPath == null)
         {
-            return managedProfilerPath;
+            return agentPath;
         }
 
         try
         {
-            var tpaVersion = AssemblyName.GetAssemblyName(tpaPath).Version;
-            var agentVersion = AssemblyName.GetAssemblyName(managedProfilerPath).Version;
+            var tpaVersion = AssemblyUtils.GetAssemblyVersionSafe(tpaPath);
+            var agentVersion = AssemblyUtils.GetAssemblyVersionSafe(agentPath);
 
             // Agent wins ONLY if strictly higher
-            return agentVersion > tpaVersion ? managedProfilerPath : tpaPath;
+            return agentVersion > tpaVersion ? agentPath : tpaPath;
         }
         catch
         {

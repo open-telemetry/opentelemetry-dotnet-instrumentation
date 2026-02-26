@@ -90,7 +90,7 @@ internal class AssemblyResolver(IOtelLogger logger)
         {
             try
             {
-                var ourVersion = AssemblyName.GetAssemblyName(assemblyPath).Version;
+                var ourVersion = AssemblyUtils.GetAssemblyVersionSafe(assemblyPath);
                 if (ourVersion != null && ourVersion < assemblyName.Version)
                 {
                     logger.Information($"Skip resolving assembly ({assemblyName}): requested version {assemblyName.Version} is higher than our version {ourVersion}");

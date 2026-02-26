@@ -100,5 +100,8 @@
              Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp'" />
     <Compile Include="..\OpenTelemetry.AutoInstrumentation.StartupHook\StartupHookConstants.cs"
              Link="StartupHookConstants.cs" />
+    <Compile Include="..\OpenTelemetry.AutoInstrumentation\Util\AssemblyUtils.Net.cs"
+             Link="Util\AssemblyUtils.cs"
+             Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp'" />
   </ItemGroup>
 </Project>

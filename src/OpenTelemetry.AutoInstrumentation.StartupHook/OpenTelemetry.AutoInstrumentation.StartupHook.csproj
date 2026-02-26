@@ -84,6 +84,8 @@
              DependentUpon="ManagedProfilerLocationHelper.cs" />
     <Compile Include="..\OpenTelemetry.AutoInstrumentation\Util\DeploymentDetector.Net.cs"
              Link="Util\DeploymentDetector.cs" />
+    <Compile Include="..\OpenTelemetry.AutoInstrumentation\Util\AssemblyUtils.Net.cs"
+             Link="Util\AssemblyUtils.cs" />
   </ItemGroup>
 
 </Project>
