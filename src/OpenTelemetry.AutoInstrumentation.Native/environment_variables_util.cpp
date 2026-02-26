@@ -43,8 +43,7 @@ std::optional<bool> IsAssemblyRedirectionEnabled()
     // 2. For .NET Framework, fallback to legacy variable if primary is not set
     if (!assemblyRedirection)
     {
-        assemblyRedirection = []() -> std::optional<bool>
-        {
+        assemblyRedirection = []() -> std::optional<bool> {
             ToBooleanWithDefault(GetEnvironmentValue(environment::assembly_redirection_enabled_netfx_legacy),
                                  std::nullopt);
         }();
