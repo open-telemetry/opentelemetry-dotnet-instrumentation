@@ -107,7 +107,7 @@ instrumentation work correctly.
 
 The goal is to **ensure the highest version wins** while keeping both
 the application and the instrumentation using the **same assembly
-instance** to avoid shared-state drift.
+instance** to avoid shared-state drift or type cast failres.
 
 ## Resolution strategies by deployment mode
 
@@ -125,17 +125,17 @@ conflict resolution is implemented in this case.
 > warning and runtime failure when instrumentation tries to resolve
 > the assembly.
 >
-> **Recommendation:** Ensure that your application's dependencies comply
-> with the instrumentation's minimum version requirements for guaranteed
-> compatibility. Upgrade any conflicting direct references to at least
-> the versions required by the instrumentation.
+> **Recommendation:** Ensure that your application's direct dependencies
+> comply with the instrumentation's minimum version requirements
+> for guaranteed compatibility. Upgrade any conflicting direct references
+> to at least the versions required by the instrumentation.
 
 #### Assembly redirection for NuGet package deployments
 
-For non-standalone deployments (for example, NuGet package deployments),
-assembly redirection is **disabled by default**. Build-time dependency
-resolution handles version conflicts, and the instrumentation does not
-ship its own assembly copies alongside the application.
+For non-standalone deployments, assembly redirection is
+**disabled by default**. Build-time dependency resolution
+handles version conflicts, and the instrumentation does not
+ship its dependencies alongside the application.
 
 If you choose not to use the instrumentation scripts shipped with the
 NuGet package, ensure `OTEL_DOTNET_AUTO_REDIRECT_ENABLED` is either
@@ -160,16 +160,13 @@ controlled by a version map compiled into the native profiler (see
 and
 [`assembly_redirection_netfx.h`](../src/OpenTelemetry.AutoInstrumentation.Native/assembly_redirection_netfx.h)).
 
-After rewriting, the runtime proceeds to resolve the rewritten
-reference. Because the version now matches what the instrumentation
-ships, the resolution follows the
-[runtime resolution pipeline](#resolution-order).
+> **NOTE**: On .NET, the instrumentation ships the baseline versions of its
+> dependencies for each target framework (for example, for `net8.0` the
+> 8.0.0 versions, for `net9.0` - 9.0.0, etc.) unless known issues
+> (such as vulnerabilities) exist.
 
-The instrumentation ships the latest versions of its dependencies
-compatible with each target framework (for example, for `net8.0` the
-latest 8.x versions, for `net9.0` the latest 9.x versions). Exception:
-`System.Diagnostics.DiagnosticSource` always ships the latest version
-across all target frameworks.
+After rewriting, the runtime proceeds to resolve the rewritten
+reference and follows the [runtime resolution pipeline](#resolution-order).
 
 #### Managed assembly resolver (.NET)
 
@@ -178,8 +175,8 @@ On .NET, the instrumentation subscribes to
 callback in the [resolution order](#resolution-order) — to reliably
 supply an assembly before any other handler runs. Because assembly
 references have already been rewritten by the native profiler, this
-event normally fires with the instrumentation's exact version. In the
-standard case, the resolver knows exactly what to do — decide which
+event normally fires with the instrumentation's exact version,
+in which case the resolver knows exactly what to do — decide which
 context to load the assembly into:
 
 | Situation | Why it fires | Where we load the assembly |
@@ -192,15 +189,14 @@ isolated from the Default ALC version. Note that if the TPA already
 has the same or a higher version, the runtime satisfies the reference
 automatically and the event never fires — no action is needed.
 
-However, other situations may also trigger the Resolving event for
+However, other situations may also trigger the `Resolving` event for
 an assembly the instrumentation ships (e.g., programmatic
-Assembly.Load with an explicit version). To avoid accidentally
+`Assembly.Load` with an explicit version). To avoid accidentally
 satisfying a request that is not ours or one we cannot fulfill, the
 resolver validates versions before loading: it only proceeds if the
 instrumentation's assembly version is **equal to or higher than**
-the requested version. If the requested version is higher than what
-the instrumentation ships, the resolver skips the request and lets
-other handlers or the runtime deal with it.
+the requested version. Otherwise, the resolver skips the request
+and lets other handlers or the runtime deal with it.
 
 #### Managed assembly resolver (.NET Framework)
 

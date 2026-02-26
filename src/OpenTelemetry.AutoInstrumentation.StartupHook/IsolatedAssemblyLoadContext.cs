@@ -32,13 +32,11 @@ internal class IsolatedAssemblyLoadContext()
             return null;
         }
 
-        // TODO: caching - .NET has an optimization within an ALC and do not call Load() if an assembly
-        // has a match is the ALC (with the same or higher version).
-        // However, other situations may trigger the Load() again for an assembly we already loaded
-        // (e.g., programmatic Assembly.Load with an explicit version) which can happen only if the requesting
-        // assembly version is higher than what we already loaded.
-        // In this case caching will help to avoid unnecessary I/O when checking if the reqyest assembly version
-        // satisfies our best available version.
+        // TODO: caching - .NET has an optimization within an ALC and do not call Load() method
+        // if a match (same or higher version) is already loaded in current ALC.
+        // However, other situations may trigger the Load() for an assembly that is already loaded
+        // when a higher version is requested (e.g., programmatic Assembly.Load with an explicit version).
+        // In this case caching will help avoiding unnecessary I/O for version check.
 
         // Find in TPA (customer/runtime assemblies)
         _tpaAssemblies.TryGetValue(name, out var tpaPath);
