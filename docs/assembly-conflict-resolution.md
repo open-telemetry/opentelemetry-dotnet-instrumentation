@@ -53,13 +53,14 @@ If the assembly is still not found, the following events fire in order:
    Default ALC)
 3. **`AppDomain.CurrentDomain.AssemblyResolve`**
 
-This order is important for the assembly conflict resolution strategies:
-the custom ALC's `Load()` method provides the earliest opportunity to supply an
-assembly when loading to a custom context, while `Default.Resolving` is the
-earliest event-based callback for the Default ALC. Note that
-`AppDomain.CurrentDomain.AssemblyResolve` also receives a built-in handler that
-automatically resolves co-located dependencies from the same directory — so
-subscribing to it may not always be reliable.
+This order is important for the assembly conflict resolution
+strategies: the custom ALC's `Load()` method provides the earliest
+opportunity to supply an assembly when loading to a custom context,
+while `Default.Resolving` is the earliest event-based callback for
+the Default ALC. Note that
+`AppDomain.CurrentDomain.AssemblyResolve` also receives a built-in
+handler that automatically resolves co-located dependencies from the
+same directory — so subscribing to it may not always be reliable.
 
 #### Key property: type isolation
 
@@ -170,12 +171,13 @@ across all target frameworks.
 #### Managed assembly resolver (.NET)
 
 On .NET, the instrumentation subscribes to
-`AssemblyLoadContext.Default.Resolving` — the earliest event-based callback in the
-[resolution order](#resolution-order) — to reliably supply an assembly before
-any other handler runs. Because assembly references have already been rewritten by
-the native profiler, this event normally fires with the instrumentation's exact version.
-In the standard case, the resolver knows exactly what to do — decide which context
-to load the assembly into:
+`AssemblyLoadContext.Default.Resolving` — the earliest event-based
+callback in the [resolution order](#resolution-order) — to reliably
+supply an assembly before any other handler runs. Because assembly
+references have already been rewritten by the native profiler, this
+event normally fires with the instrumentation's exact version. In the
+standard case, the resolver knows exactly what to do — decide which
+context to load the assembly into:
 
 | Situation | Why it fires | Where we load the assembly |
 | --- | --- | --- |
@@ -187,13 +189,15 @@ isolated from the Default ALC version. Note that if the TPA already
 has the same or a higher version, the runtime satisfies the reference
 automatically and the event never fires — no action is needed.
 
-However, other situations may also trigger the Resolving event for an assembly
-the instrumentation ships (e.g., programmatic Assembly.Load with an explicit version).
-To avoid accidentally satisfying a request that is not ours or one we cannot fulfill,
-the resolver validates versions before loading: it only proceeds if the instrumentation's
-assembly version is **equal to or higher than** the requested version.
-If the requested version is higher than what the instrumentation
-ships, the resolver skips the request and lets other handlers or the runtime deal with it.
+However, other situations may also trigger the Resolving event for
+an assembly the instrumentation ships (e.g., programmatic
+Assembly.Load with an explicit version). To avoid accidentally
+satisfying a request that is not ours or one we cannot fulfill, the
+resolver validates versions before loading: it only proceeds if the
+instrumentation's assembly version is **equal to or higher than**
+the requested version. If the requested version is higher than what
+the instrumentation ships, the resolver skips the request and lets
+other handlers or the runtime deal with it.
 
 #### Managed assembly resolver (.NET Framework)
 
@@ -240,7 +244,8 @@ binding redirects prevent redirection to the versions listed in
 ### 3. Standalone: StartupHook-only deployment (.NET only)
 
 When the native profiler is not attached, the instrumentation relies
-solely on the .NET [startup hook](https://github.com/dotnet/runtime/blob/main/docs/design/features/host-startup-hook.md).
+solely on the .NET
+[startup hook](https://github.com/dotnet/runtime/blob/main/docs/design/features/host-startup-hook.md).
 Without the native profiler there is no IL rewriting, and without a
 NuGet package there is no build-time version resolution.
 
@@ -354,9 +359,10 @@ ships the latest versions of its dependencies.
 
 ### Unexpected resolution request for a higher version than available
 
-The instrumentation's assembly resolver may receive a resolution request for a
-version of a shared dependency that is higher than what is available — either in
-the TPA list or shipped by the instrumentation. This can occur when:
+The instrumentation's assembly resolver may receive a resolution
+request for a version of a shared dependency that is higher than what
+is available — either in the TPA list or shipped by the
+instrumentation. This can occur when:
 
 - Application code programmatically loads an assembly with an explicit version
   (for example, `Assembly.Load(new AssemblyName("..., Version=X.Y.Z.W"))`)
@@ -373,15 +379,18 @@ older, potentially incompatible assembly. The behavior differs by deployment mod
   there is no IL rewriting in this mode, such requests are more likely to occur
   from the scenarios mentioned above.
 
-**Recommendation:** If you encounter assembly resolution failures caused by this
-scenario, the issue lies with application code requesting a version that is not
-available. Ensure that the required version is available to the application — for
-example, by adding or upgrading the dependency so that its version is at least what
-the requesting code expects. When the required version is available (either in the
-TPA list or shipped by the instrumentation), the resolver will be able to satisfy
-the request. If that is not possible, consider the
+**Recommendation:** If you encounter assembly resolution failures
+caused by this scenario, the issue lies with application code
+requesting a version that is not available. Ensure that the required
+version is available to the application — for example, by adding or
+upgrading the dependency so that its version is at least what the
+requesting code expects. When the required version is available
+(either in the TPA list or shipped by the instrumentation), the
+resolver will be able to satisfy the request. If that is not possible,
+consider the
 [`DOTNET_ADDITIONAL_DEPS` approach](#last-resort-dotnet_additional_deps-and-the-runtime-store)
-to supply the required version to the runtime before the application starts.
+to supply the required version to the runtime before the application
+starts.
 
 ## Troubleshooting
 
@@ -398,16 +407,17 @@ to supply the required version to the runtime before the application starts.
 ### Last resort: `DOTNET_ADDITIONAL_DEPS` and the runtime store
 
 If the above strategies do not resolve a conflict — for example, the
-application uses a framework-level assembly that cannot be redirected —
-you can configure the .NET host to include additional dependencies at
-startup using
+application uses a framework-level assembly that cannot be redirected
+— you can configure the .NET host to include additional dependencies
+at startup using
 [`DOTNET_ADDITIONAL_DEPS`](https://learn.microsoft.com/dotnet/core/dependency-loading/understanding-assemblyloadcontext#additional-deps)
 and
 [`DOTNET_SHARED_STORE`](https://learn.microsoft.com/dotnet/core/deploying/runtime-store)
 environment variables. This approach makes the runtime aware of the
 instrumentation's assemblies before the application starts, avoiding
 version conflicts entirely. However, it requires preparing a
-`.deps.json` file and potentially a shared store layout — a significant
-effort compared to the other deployment options. Consult the
+`.deps.json` file and potentially a shared store layout — a
+significant effort compared to the other deployment options. Consult
+the
 [.NET documentation](https://learn.microsoft.com/dotnet/core/dependency-loading/understanding-assemblyloadcontext)
 for details.
