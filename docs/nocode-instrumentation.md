@@ -33,6 +33,9 @@ collection for specified methods through YAML configuration.
 - **Span Customization**: Configure span names, kinds, and custom attributes
 - **Method Overload Support**: Target specific method overloads using precise
   signature matching
+- **Dynamic Expressions**: Use [CEL](https://cel.dev/) (Common Expression
+  Language with) with custom extensions for dynamic attributes, span names,
+  and conditional logic
 
 ## Limitations
 
@@ -68,7 +71,7 @@ instrumentation/development:
                 value: "attribute_value"                      # Static attribute value
                 type: string                                  # Attribute type (see Attribute Types section below)
               - name: dynamic.attribute                       # Dynamic attribute name
-                source: $arg1                                 # Expression to extract value from method context (see Dynamic Attributes section)
+                source: arguments[0]                          # CEL expression to extract value from method context (see Dynamic Attributes section)
                 type: string
 ```
 
@@ -94,28 +97,57 @@ For more information about attributes, see the [OpenTelemetry Attribute specific
 ### Dynamic Attributes
 
 Dynamic attributes allow you to extract attribute values from the method context
-at runtime. Use the `source` property instead of `value` to specify an expression.
+at runtime using CEL (Common Expression Language) expressions. Use the `source`
+property instead of `value` to specify a CEL expression.
 
-#### Expression Syntax
+#### CEL Expression Syntax
 
-| Expression               | Description                                |
-|--------------------------|--------------------------------------------|
-| `$arg1`                  | Value of the first method argument         |
-| `$arg2`                  | Value of the second method argument        |
-| `$arg1.PropertyName`     | Property value from the first argument     |
-| `$arg1.Nested.Property`  | Nested property access                     |
-| `$instance`              | The instance object (for instance methods) |
-| `$instance.PropertyName` | Property of the instance object            |
-| `$method`                | Method name                                |
-| `$type`                  | Declaring type name                        |
+CEL expressions provide a standardized way to access method context.
+The implementation supports standard CEL features plus instrumentation-specific
+extensions.
+
+**Identifiers** - Access method execution context:
+
+| Identifier  | Description                                | Example                |
+|-------------|--------------------------------------------|------------------------|
+| `arguments` | Array of method arguments (zero-indexed)   | `arguments[0]`         |
+| `instance`  | The instance object (for instance methods) | `instance.ServiceName` |
+| `return`    | Method return value (in OnMethodEnd)       | `return.StatusCode`    |
+| `method`    | Method name                                | `method`               |
+| `type`      | Declaring type name                        | `type`                 |
+
+**Member Access** - Access properties and array elements:
+
+| Expression                     | Description                 |
+|--------------------------------|-----------------------------|
+| `arguments[0]`                 | First method argument       |
+| `arguments[1]`                 | Second method argument      |
+| `arguments[0].PropertyName`    | Property of first argument  |
+| `arguments[0].Nested.Property` | Nested property access      |
+| `instance.PropertyName`        | Property of instance object |
+| `return.Result`                | Property of return value    |
+
+**Operators** - Compare and combine values:
+
+| Operator   | Description         | Example                                  |
+|------------|---------------------|------------------------------------------|
+| `==`       | Equality            | `arguments[0] == "expected"`             |
+| `!=`       | Inequality          | `return.StatusCode != 200`               |
+| `<`, `>`   | Comparison          | `arguments[0].Age > 18`                  |
+| `<=`, `>=` | Comparison          | `return.Score >= 50`                     |
+| `&&`       | Logical AND         | `arguments[0] != null && return.Success` |
+| `\|\|`     | Logical OR          | `return.Success \|\| return.Retryable`   |
+| `!`        | Logical NOT         | `!return.HasError`                       |
+| `? :`      | Ternary conditional | `return.Success ? "ok" : "failed"`       |
 
 > [!NOTE]  
 >
-> - Arguments are 1-indexed (`$arg1` to `$arg9`)
+> - Arguments are zero-indexed (`arguments[0]` to `arguments[8]`)
 > - Property access uses reflection and only works with public properties
 > - If an expression evaluates to `null`, the attribute is omitted
 > - Invalid expressions or property paths are silently skipped (logged at debug
 >   level)
+> - CEL expressions are parsed and validated at configuration load time
 
 #### Dynamic Attribute Examples
 
@@ -124,10 +156,10 @@ Extract method argument values:
 ```yaml
 attributes:
   - name: order.id
-    source: $arg1              # First argument value
+    source: arguments[0]              # First argument value
     type: int
   - name: customer.id
-    source: $arg2              # Second argument value
+    source: arguments[1]              # Second argument value
     type: string
 ```
 
@@ -136,10 +168,10 @@ Extract property values from arguments:
 ```yaml
 attributes:
   - name: request.url
-    source: $arg1.RequestUri.AbsoluteUri
+    source: arguments[0].RequestUri.AbsoluteUri
     type: string
   - name: user.email
-    source: $arg1.User.Email
+    source: arguments[0].User.Email
     type: string
 ```
 
@@ -148,60 +180,121 @@ Extract values from the instance:
 ```yaml
 attributes:
   - name: service.name
-    source: $instance.ServiceName
+    source: instance.ServiceName
     type: string
   - name: merchant.id
-    source: $instance.MerchantId
+    source: instance.MerchantId
     type: string
 ```
 
-### Function Expressions
+Use conditional expressions:
 
-Function expressions allow you to transform and combine values. Use them in the
-`source` property for attributes, in status rule conditions, or in the
-`name_source` property for dynamic span names.
+```yaml
+attributes:
+  - name: user.type
+    source: arguments[0].Age >= 18 ? "adult" : "minor"
+    type: string
+  - name: status
+    source: return.Success ? "ok" : "failed"
+    type: string
+```
+
+### CEL Functions
+
+CEL functions allow you to transform and combine values in expressions. Functions
+can be used in the `source` property for attributes, in status rule conditions,
+or in the `name_source` property for dynamic span names.
+
+#### Function Categories
+
+CEL functions are divided into two categories:
+
+- **[Standard]** - Part of the CEL specification, portable to other CEL implementations
+- **[Extension]** - Custom functions added for instrumentation scenarios
 
 #### Supported Functions
 
-| Function                          | Description                                | Example                           |
-|-----------------------------------|--------------------------------------------|-----------------------------------|
-| `concat(...)`                     | Concatenates values into a string          | `concat($arg1, "-", $arg2)`       |
-| `coalesce(...)`                   | Returns the first non-null/non-empty value | `coalesce($arg1.Name, "unknown")` |
-| `substring(str, start, [length])` | Extracts a substring                       | `substring($arg1, 0, 10)`         |
-| `tostring(value)`                 | Converts value to string                   | `tostring($arg1.Id)`              |
-| `isnull(value)`                   | Returns true if value is null/empty        | `isnull($return)`                 |
-| `isnotnull(value)`                | Returns true if value is not null          | `isnotnull($return.Data)`         |
-| `equals(a, b)`                    | Returns true if values are equal           | `equals($return.Status, "error")` |
-| `notequals(a, b)`                 | Returns true if values are not equal       | `notequals($arg1, 0)`             |
+| Function                          | Type      | Description                              | Example                                    |
+|-----------------------------------|-----------|------------------------------------------|--------------------------------------------|
+| `concat(...)`                     | Extension | Concatenate values into a string         | `concat(type, ".", method)`                |
+| `coalesce(...)`                   | Extension | Return first non-null value              | `coalesce(arguments[0].Name, "unknown")`   |
+| `substring(str, start, [length])` | Extension | Extract substring                        | `substring(arguments[0], 0, 10)`           |
+| `string(value)`                   | Standard  | Convert value to string                  | `string(arguments[0].Id)`                  |
+| `size(value)`                     | Standard  | Get length/count of string, list, or map | `size(arguments[0].Items)`                 |
+| `startsWith(str, prefix)`         | Standard  | Check if string starts with prefix       | `startsWith(arguments[0].Path, "/api/")`   |
+| `endsWith(str, suffix)`           | Standard  | Check if string ends with suffix         | `endsWith(arguments[0].FileName, ".json")` |
+| `contains(str, substring)`        | Standard  | Check if string contains substring       | `contains(arguments[0].Message, "error")`  |
+
+> [!NOTE]  
+> Extension functions are custom additions specific to OpenTelemetry
+> instrumentation  and are not portable to other CEL implementations.
+> Standard functions follow the
+> [CEL specification](https://github.com/google/cel-spec/blob/master/doc/langdef.md).
 
 #### Function Expression Examples
 
-Concatenate values:
+**Concatenate values:**
 
 ```yaml
 attributes:
   - name: operation.id
-    source: concat($type, ".", $method)
+    source: concat(type, ".", method)
     type: string
   - name: order.key
-    source: concat($arg1.CustomerId, "-", $arg1.OrderId)
+    source: concat(arguments[0].CustomerId, "-", arguments[0].OrderId)
     type: string
 ```
 
-Use coalesce for defaults:
+**Use coalesce for defaults:**
 
 ```yaml
 attributes:
   - name: user.name
-    source: coalesce($arg1.DisplayName, $arg1.Email, "anonymous")
+    source: coalesce(arguments[0].DisplayName, arguments[0].Email, "anonymous")
     type: string
+```
+
+**Extract substrings:**
+
+```yaml
+attributes:
+  - name: transaction.id.short
+    source: substring(arguments[0].TransactionId, 0, 8)
+    type: string
+```
+
+**String operations:**
+
+```yaml
+attributes:
+  - name: is.api.request
+    source: startsWith(arguments[0].Path, "/api/")
+    type: bool
+  - name: is.json.file
+    source: endsWith(arguments[0].FileName, ".json")
+    type: bool
+  - name: has.error
+    source: contains(return.Message, "error")
+    type: bool
+```
+
+**Convert and measure:**
+
+```yaml
+attributes:
+  - name: item.count.string
+    source: string(size(arguments[0].Items))
+    type: string
+  - name: name.length
+    source: size(arguments[0].Name)
+    type: int
 ```
 
 ### Dynamic Span Names
 
 Dynamic span names allow you to construct span names at runtime based on method
-context. This is useful for creating meaningful, contextual span names that
-include parameter values or other runtime information.
+context using CEL expressions. This is useful for creating meaningful, contextual
+span names that include parameter values or other runtime information.
 
 > [!IMPORTANT]
 > Span names should be low-cardinality to avoid performance issues and storage
@@ -210,13 +303,14 @@ include parameter values or other runtime information.
 > for high-cardinality data instead. See the [OpenTelemetry Span specification](https://github.com/open-telemetry/opentelemetry-specification/blob/v1.54.0/specification/trace/api.md#span)
 > for guidance on span name best practices.
 
-Use the `name_source` property with a function expression to specify the dynamic
+Use the `name_source` property with a CEL expression to specify the dynamic
 span name. The `name` property is still required as a fallback if the dynamic
 expression fails to evaluate.
 
 > [!NOTE]  
-> Only function expressions are supported for dynamic span names (not simple
-> expressions like `$arg1`). This ensures the result is always a string.
+> CEL expressions for span names typically use functions like `concat()` to
+> combine values into a meaningful string. This ensures the result is always
+> a string type.
 
 #### Dynamic Span Name Examples
 
@@ -225,7 +319,7 @@ Create span names from argument values:
 ```yaml
 span:
   name: DefaultTransaction                              # Fallback name
-  name_source: concat("Transaction-", $arg1)            # Dynamic name using first argument
+  name_source: concat("Transaction-", arguments[0])     # Dynamic name using first argument
 ```
 
 Combine multiple values:
@@ -233,7 +327,7 @@ Combine multiple values:
 ```yaml
 span:
   name: DefaultQuery                                    # Fallback name
-  name_source: concat("Query.", $arg1, ".", $arg2)      # e.g., "Query.ProductionDB.users"
+  name_source: concat("Query.", arguments[0], ".", arguments[1])  # e.g., "Query.ProductionDB.users"
 ```
 
 Include method context:
@@ -241,7 +335,7 @@ Include method context:
 ```yaml
 span:
   name: DefaultOperation                                 # Fallback name
-  name_source: concat($method, "-", $arg1.OperationType) # e.g., "ProcessOrder-Express"
+  name_source: concat(method, "-", arguments[0].OperationType)  # e.g., "ProcessOrder-Express"
 ```
 
 Use with nested properties:
@@ -249,14 +343,22 @@ Use with nested properties:
 ```yaml
 span:
   name: DefaultRequest                                   # Fallback name
-  name_source: concat($arg1.HttpMethod, " ", $arg1.Path) # e.g., "GET /api/users"
+  name_source: concat(arguments[0].HttpMethod, " ", arguments[0].Path)  # e.g., "GET /api/users"
+```
+
+Use conditional expressions:
+
+```yaml
+span:
+  name: DefaultOrder                                     # Fallback name
+  name_source: arguments[0].Amount > 1000 ? concat("LargeOrder-", arguments[0].Id) : concat("Order-", arguments[0].Id)
 ```
 
 ### Status Configuration
 
 You can configure span status based on return values or other conditions using
-status rules. Rules are evaluated in order, and the first matching rule sets
-the status.
+CEL expressions in status rules. Rules are evaluated in order, and the first
+matching rule sets the status.
 
 #### Status Rule Syntax
 
@@ -265,9 +367,9 @@ span:
   name: my-span
   status:
     rules:
-      - condition: <expression>    # Expression that evaluates to boolean
-        code: <status_code>        # ok, error, or unset
-        description: <text>        # Optional description (useful for errors)
+      - condition: <cel_expression>    # CEL expression that evaluates to boolean
+        code: <status_code>            # ok, error, or unset
+        description: <text>            # Optional description (useful for errors)
 ```
 
 #### Status Codes
@@ -285,13 +387,13 @@ span:
   name: process-order
   status:
     rules:
-      - condition: isnull($return)
+      - condition: return == null
         code: error
         description: "Order processing returned null"
-      - condition: equals($return.Success, false)
+      - condition: return.Success == false
         code: error
         description: "Order processing failed"
-      - condition: isnotnull($return)
+      - condition: return != null
         code: ok
 ```
 
@@ -302,13 +404,30 @@ span:
   name: http-request
   status:
     rules:
-      - condition: equals($return.StatusCode, 500)
+      - condition: return.StatusCode == 500
         code: error
         description: "Internal server error"
-      - condition: equals($return.StatusCode, 404)
+      - condition: return.StatusCode == 404
         code: error
         description: "Not found"
-      - condition: isnotnull($return)
+      - condition: return.StatusCode >= 200 && return.StatusCode < 300
+        code: ok
+```
+
+Use string functions for pattern matching:
+
+```yaml
+span:
+  name: process-message
+  status:
+    rules:
+      - condition: contains(return.Message, "error")
+        code: error
+        description: concat("Error: ", return.Message)
+      - condition: startsWith(return.Status, "FAIL")
+        code: error
+        description: "Operation failed"
+      - condition: return.Success
         code: ok
 ```
 
@@ -335,26 +454,26 @@ instrumentation/development:
             kind: internal
             attributes:
               - name: order.id
-                source: $arg1.OrderId
+                source: arguments[0].OrderId
                 type: string
               - name: customer.id
-                source: $arg1.CustomerId
+                source: arguments[0].CustomerId
                 type: string
               - name: order.total
-                source: $arg1.TotalAmount
+                source: arguments[0].TotalAmount
                 type: double
               - name: operation.name
-                source: concat("ProcessOrder-", $arg1.OrderType)
+                source: concat("ProcessOrder-", arguments[0].OrderType)
                 type: string
             status:
               rules:
-                - condition: isnull($return)
+                - condition: return == null
                   code: error
                   description: "Null result returned"
-                - condition: equals($return.Status, "Failed")
+                - condition: return.Status == "Failed"
                   code: error
                   description: "Order processing failed"
-                - condition: equals($return.Status, "Completed")
+                - condition: return.Status == "Completed"
                   code: ok
 ```
 
@@ -830,7 +949,15 @@ The test application demonstrates instrumentation of:
   generic methods
 - **Performance Issues**: Consider the frequency of method calls and whether
   instrumentation is necessary for high-throughput methods
+- **CEL Expression Errors**: Check for syntax errors in CEL expressions.
+  Expressions are validated at configuration load time. Enable debug logging
+  to see detailed parsing errors
+- **Null Attribute Values**: If an attribute is not appearing in spans, check
+  that the CEL expression is not evaluating to null. Use `coalesce()` to provide
+  default values
+- **Wrong Argument Index**: Remember that CEL uses zero-based indexing
+  (`arguments[0]` is the first argument), unlike the older `$arg1` syntax
 - **Debug Logs**: Enable debug logging (see [Global settings](config.md#global-settings))
-  and search for log messages prefixed with `No code` to find information
+  and search for log messages prefixed with `No code` or `CEL` to find information
   specific to no-code instrumentation, including configuration parsing, method
-  targeting, and instrumentation application details.
+  targeting, instrumentation application details, and expression evaluation.

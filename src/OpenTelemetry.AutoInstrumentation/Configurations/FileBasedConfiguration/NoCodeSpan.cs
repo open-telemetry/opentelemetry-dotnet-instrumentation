@@ -3,6 +3,7 @@
 
 using System.Diagnostics;
 using OpenTelemetry.AutoInstrumentation.Instrumentations.NoCode;
+using OpenTelemetry.AutoInstrumentation.Instrumentations.NoCode.Cel;
 using OpenTelemetry.AutoInstrumentation.Logging;
 using Vendors.YamlDotNet.Serialization;
 
@@ -67,23 +68,15 @@ internal class NoCodeSpan
                 continue;
             }
 
-            // Try to parse as function expression first
-            var funcExpression = NoCodeFunctionExpression.Parse(attribute.Source);
-            if (funcExpression != null)
-            {
-                dynamicAttributes.Add(new NoCodeDynamicAttribute(attribute.Name!, funcExpression, attribute.Type));
-                continue;
-            }
-
-            // Fall back to simple expression
-            var expression = NoCodeExpression.Parse(attribute.Source);
-            if (expression == null)
+            // Parse using CEL expression
+            var celExpression = CelExpression.Parse(attribute.Source);
+            if (celExpression == null)
             {
                 Log.Debug("Failed to parse dynamic attribute expression '{0}' for attribute '{1}'. Skipping.", attribute.Source, attribute.Name);
                 continue;
             }
 
-            dynamicAttributes.Add(new NoCodeDynamicAttribute(attribute.Name!, expression, attribute.Type));
+            dynamicAttributes.Add(new NoCodeDynamicAttribute(attribute.Name!, celExpression, attribute.Type));
         }
 
         return dynamicAttributes;
@@ -116,19 +109,11 @@ internal class NoCodeSpan
                 _ => ActivityStatusCode.Unset
             };
 
-            // Try to parse condition as function expression
-            var funcCondition = NoCodeFunctionExpression.Parse(rule.Condition);
-            if (funcCondition != null)
+            // Parse condition using CEL expression
+            var celCondition = CelExpression.Parse(rule.Condition);
+            if (celCondition != null)
             {
-                statusRules.Add(new NoCodeStatusRule(funcCondition, statusCode, rule.Description));
-                continue;
-            }
-
-            // Try to parse as simple expression (boolean result expected)
-            var simpleCondition = NoCodeExpression.Parse(rule.Condition);
-            if (simpleCondition != null)
-            {
-                statusRules.Add(new NoCodeStatusRule(simpleCondition, statusCode, rule.Description));
+                statusRules.Add(new NoCodeStatusRule(celCondition, statusCode, rule.Description));
                 continue;
             }
 
@@ -141,23 +126,21 @@ internal class NoCodeSpan
     /// <summary>
     /// Parses dynamic span name expression from configuration.
     /// </summary>
-    public NoCodeFunctionExpression? ParseDynamicSpanName()
+    public CelExpression? ParseDynamicSpanName()
     {
         if (string.IsNullOrEmpty(NameSource))
         {
             return null;
         }
 
-        // Try to parse as function expression
-        var funcExpression = NoCodeFunctionExpression.Parse(NameSource);
-        if (funcExpression != null)
+        // Parse using CEL expression
+        var celExpression = CelExpression.Parse(NameSource);
+        if (celExpression != null)
         {
-            return funcExpression;
+            return celExpression;
         }
 
-        // For span names, we only support function expressions (not simple expressions)
-        // because span names should always be strings
-        Log.Debug("Failed to parse dynamic span name expression '{0}'. Only function expressions are supported for span names.", NameSource);
+        Log.Debug("Failed to parse dynamic span name expression '{0}'.", NameSource);
         return null;
     }
 }

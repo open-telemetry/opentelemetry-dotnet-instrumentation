@@ -1,14 +1,16 @@
 // Copyright The OpenTelemetry Authors
 // SPDX-License-Identifier: Apache-2.0
 
+using OpenTelemetry.AutoInstrumentation.Instrumentations.NoCode.Cel;
+
 namespace OpenTelemetry.AutoInstrumentation.Instrumentations.NoCode;
 
 /// <summary>
-/// Represents a dynamic attribute that extracts its value from method context using an expression.
+/// Represents a dynamic attribute that extracts its value from method context using a CEL expression.
 /// </summary>
 internal class NoCodeDynamicAttribute
 {
-    public NoCodeDynamicAttribute(string name, object expression, string type)
+    public NoCodeDynamicAttribute(string name, CelExpression expression, string type)
     {
         Name = name;
         Expression = expression;
@@ -21,10 +23,9 @@ internal class NoCodeDynamicAttribute
     public string Name { get; }
 
     /// <summary>
-    /// Gets the expression used to extract the attribute value.
-    /// Can be NoCodeExpression or NoCodeFunctionExpression.
+    /// Gets the CEL expression used to extract the attribute value.
     /// </summary>
-    public object Expression { get; }
+    public CelExpression Expression { get; }
 
     /// <summary>
     /// Gets the expected type of the attribute value (string, int, double, bool, etc.).
@@ -38,11 +39,6 @@ internal class NoCodeDynamicAttribute
     /// <returns>The evaluated value, or null if evaluation fails.</returns>
     public object? Evaluate(NoCodeExpressionContext context)
     {
-        return Expression switch
-        {
-            NoCodeExpression expr => expr.Evaluate(context),
-            NoCodeFunctionExpression func => func.Evaluate(context),
-            _ => null
-        };
+        return Expression.Evaluate(context);
     }
 }
