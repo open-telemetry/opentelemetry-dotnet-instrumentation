@@ -190,7 +190,7 @@ For troubleshooting GAC installation issues, see
 For conflicting binding redirects, see
 [issue #2833](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/issues/2833).
 
-If you are experiencing issues in one of the two GAC-required scenarios described in
+If you experience issues in one of the two GAC-required scenarios described in
 [Assembly Conflict Resolution - .NET Framework-specific complexities](./assembly-conflict-resolution.md#net-framework-specific-complexities),
 run the `Install-OpenTelemetryCore` command from the PowerShell installation module
 `OpenTelemetry.DotNet.Auto.psm1` again to ensure that the required GAC installations
