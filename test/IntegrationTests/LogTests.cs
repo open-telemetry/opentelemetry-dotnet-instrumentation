@@ -62,7 +62,7 @@ public class LogTests : TestHelper
     {
         using var collector = new MockLogsCollector(Output);
         SetFileBasedExporter(collector);
-        EnableFileBasedConfigWithDefaultPath();
+        EnableFileBasedConfig();
 
         // When includeFormattedMessage is set to false
         // LogRecord is not parsed and body will not have data.
