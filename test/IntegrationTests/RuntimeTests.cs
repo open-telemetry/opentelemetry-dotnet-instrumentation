@@ -44,7 +44,7 @@ public class RuntimeTests : TestHelper
     {
         using var collector = new MockMetricsCollector(Output);
         SetFileBasedExporter(collector);
-        EnableFileBasedConfigWithDefaultPath();
+        EnableFileBasedConfig();
 #if NET9_0_OR_GREATER
         collector.Expect("System.Runtime");
 #else

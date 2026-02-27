@@ -12,7 +12,7 @@ public static class NoCodeIntegration6
 {
     internal static CallTargetState OnMethodBegin<TTarget, TArg1, TArg2, TArg3, TArg4, TArg5, TArg6>(TTarget instance, TArg1 arg1, TArg2 arg2, TArg3 arg3, TArg4 arg4, TArg5 arg5, TArg6 arg6)
     {
-        return NoCodeIntegrationHelper.OnMethodBegin();
+        return NoCodeIntegrationHelper.OnMethodBegin(instance, [arg1, arg2, arg3, arg4, arg5, arg6]);
     }
 
     internal static CallTargetReturn OnMethodEnd<TTarget>(TTarget instance, Exception? exception, in CallTargetState state)

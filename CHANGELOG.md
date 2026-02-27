@@ -9,6 +9,11 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 
 ### Added
 
+- Configuration based instrumentation support dynamic evaluation for
+  - span names,
+  - attribute values,
+  - statuses.
+
 ### Changed
 
 - MongoDB instrumentation is updated to comply with v1.39.0 Semantic Convention
