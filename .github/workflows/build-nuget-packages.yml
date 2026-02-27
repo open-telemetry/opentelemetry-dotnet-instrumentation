@@ -45,37 +45,37 @@ jobs:
           path: ${{ env.NUGET_PACKAGES }}
 
       - name: Download Windows Artifacts from build job
-        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # tag: v7.0.0
+        uses: actions/download-artifact@70fc10c6e5e1ce46ad2ea6f2b72d43f7d47b13c3 # tag: v8.0.0
         with:
           name: bin-windows-2022
           path: bin/ci-artifacts/bin-windows-2022
 
       - name: Download Ubuntu x64 Artifacts from build job
-        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # tag: v7.0.0
+        uses: actions/download-artifact@70fc10c6e5e1ce46ad2ea6f2b72d43f7d47b13c3 # tag: v8.0.0
         with:
           name: bin-ubuntu-22.04
           path: bin/ci-artifacts/bin-ubuntu-22.04
 
       - name: Download Ubuntu arm64 Artifacts from build job
-        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # tag: v7.0.0
+        uses: actions/download-artifact@70fc10c6e5e1ce46ad2ea6f2b72d43f7d47b13c3 # tag: v8.0.0
         with:
           name: bin-ubuntu-22.04-arm
           path: bin/ci-artifacts/bin-ubuntu-22.04-arm
 
       - name: Download Alpine x64 Artifacts from build job
-        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # tag: v7.0.0
+        uses: actions/download-artifact@70fc10c6e5e1ce46ad2ea6f2b72d43f7d47b13c3 # tag: v8.0.0
         with:
           name: bin-alpine-x64
           path: bin/ci-artifacts/bin-alpine-x64
 
       - name: Download Alpine arm64 Artifacts from build job
-        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # tag: v7.0.0
+        uses: actions/download-artifact@70fc10c6e5e1ce46ad2ea6f2b72d43f7d47b13c3 # tag: v8.0.0
         with:
           name: bin-alpine-arm64
           path: bin/ci-artifacts/bin-alpine-arm64
 
       - name: Download Mac-OS Artifacts from build job
-        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # tag: v7.0.0
+        uses: actions/download-artifact@70fc10c6e5e1ce46ad2ea6f2b72d43f7d47b13c3 # tag: v8.0.0
         with:
           name: bin-macos-14
           path: bin/ci-artifacts/bin-macos-14

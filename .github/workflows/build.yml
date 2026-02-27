@@ -64,7 +64,7 @@ jobs:
 
       - name: Download native Ubuntu 16.04 Artifacts from build job
         if: ${{ matrix.machine == 'ubuntu-22.04' }}
-        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # tag: v7.0.0
+        uses: actions/download-artifact@70fc10c6e5e1ce46ad2ea6f2b72d43f7d47b13c3 # tag: v8.0.0
         with:
           name: bin-ubuntu1604-native
           path: bin/ci-artifacts/bin-ubuntu1604-native
