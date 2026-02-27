@@ -183,6 +183,9 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="assembly_redirection.h" />
+    <ClInclude Include="assembly_redirection_net.h" />
+    <ClInclude Include="assembly_redirection_netfx.h" />
     <ClInclude Include="calltarget_tokens.h" />
     <ClInclude Include="class_factory.h" />
     <ClInclude Include="com_ptr.h" />
@@ -191,6 +194,7 @@
     <ClInclude Include="continuous_profiler.h" />
     <ClInclude Include="cor_profiler.h" />
     <ClInclude Include="cor_profiler_base.h" />
+    <ClInclude Include="deployment_detection.h" />
     <ClInclude Include="dot_net_stack_capture_strategy.h" />
     <ClInclude Include="environment_variables.h" />
     <ClInclude Include="environment_variables_parser.h" />
@@ -203,13 +207,13 @@
     <ClInclude Include="logger.h" />
     <ClInclude Include="logger_impl.h" />
     <ClInclude Include="macros.h" />
+    <ClInclude Include="managed_profiler_location_helper.h" />
     <ClInclude Include="member_resolver.h" />
     <ClInclude Include="metadata_builder.h" />
     <ClInclude Include="method_rewriter.h" />
     <ClInclude Include="miniutf.hpp" />
     <ClInclude Include="miniutfdata.h" />
     <ClInclude Include="module_metadata.h" />
-    <ClInclude Include="netfx_assembly_redirection.h" />
     <ClInclude Include="netfx_stack_capture_strategy_x64.h" />
     <ClInclude Include="otel_profiler_constants.h" />
     <ClInclude Include="pal.h" />

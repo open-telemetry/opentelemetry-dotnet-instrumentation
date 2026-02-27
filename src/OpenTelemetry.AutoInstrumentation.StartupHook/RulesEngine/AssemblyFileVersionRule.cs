@@ -5,6 +5,7 @@ using System.Diagnostics;
 using System.Reflection;
 using System.Text.Json;
 using OpenTelemetry.AutoInstrumentation.Logging;
+using OpenTelemetry.AutoInstrumentation.Util;
 
 namespace OpenTelemetry.AutoInstrumentation.RulesEngine;
 
@@ -43,8 +44,14 @@ internal class AssemblyFileVersionRule : Rule
                 {
                     var autoInstrumentationFileVersion = new Version(ruleFileInfo.FileVersion);
 
-                    var appInstrumentationAssembly = Assembly.Load(referencedAssembly);
-                    var appInstrumentationFileVersionInfo = FileVersionInfo.GetVersionInfo(appInstrumentationAssembly.Location);
+                    var appInstrumentationAssemblyPath = TrustedPlatformAssembliesHelper.TpaPaths.FirstOrDefault(path => Path.GetFileNameWithoutExtension(path).Equals(referencedAssembly.Name, StringComparison.OrdinalIgnoreCase));
+                    if (appInstrumentationAssemblyPath == null)
+                    {
+                        Logger.Warning($"Rule Engine: Could not find assembly {ruleFileInfo.FileName} in TPA list. Skipping file version validation for this assembly.");
+                        continue;
+                    }
+
+                    var appInstrumentationFileVersionInfo = FileVersionInfo.GetVersionInfo(appInstrumentationAssemblyPath);
                     var appInstrumentationFileVersion = new Version(appInstrumentationFileVersionInfo.FileVersion);
 
                     if (appInstrumentationFileVersion < autoInstrumentationFileVersion)

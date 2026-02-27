@@ -206,64 +206,35 @@ to access objects from the APIs being instrumented.
 
 ### Assembly conflict resolution
 
-The injection of the OpenTelemetry .NET SDK and any source instrumentation brings
-the risk of assembly version conflicts. This issue is more likely with the
-[NuGet package System.Diagnostic.DiagnosticSource](https://www.nuget.org/packages/System.Diagnostics.DiagnosticSource/)
-and its dependencies, because it contains the [Activity type](https://docs.microsoft.com/en-us/dotnet/api/system.diagnostics.activity?view=net-5.0)
-used by the OpenTelemetry .NET API to represent a span. This package, previously
-released by Microsoft, is already used by various applications.
+The injection of the OpenTelemetry .NET SDK and any source instrumentation
+brings the risk of assembly version conflicts. This issue is more likely with
+packages like
+[`System.Diagnostics.DiagnosticSource`](https://www.nuget.org/packages/System.Diagnostics.DiagnosticSource/)
+which contains the [`Activity` type](https://docs.microsoft.com/en-us/dotnet/api/system.diagnostics.activity?view=net-5.0)
+used by the OpenTelemetry .NET API to represent a span. If not handled,
+conflicts can lead to:
 
-Two issues might arise from incorrect versioning:
+1. APIs required by the OpenTelemetry SDK being unavailable
+2. Multiple versions of the same assembly loaded in the process
 
-1. Version required by the OpenTelemetry .NET SDK or the instrumentations
-   is not met.
-2. Multiple versions of the assembly in the same process,
-   as the runtime treats them independently.
+The approach to resolving conflicts differs by deployment mode:
 
-On the .NET Framework, by default, the CLR Profiler redirects any
-assembly references to the versions shipped with the Managed Profiler.
+- **NuGet package deployments (.NET and .NET Framework)**: Versions are
+  resolved at build time by NuGet's dependency resolution. No runtime
+  assembly conflict resolution is implemented.
 
-#### Configuration resolution
+- **Standalone: Native profiler deployment (.NET and .NET Framework)**:
+  The CLR Profiler redirects assembly references to the
+  instrumentation's versions if they are higher. The **Loader** then
+  handles runtime resolution using `AssemblyLoadContext` (.NET) or
+  `AppDomain.AssemblyResolve` (.NET Framework).
 
-.NET [Framework-dependent deployment](https://docs.microsoft.com/en-us/dotnet/core/deploying/deploy-with-cli#framework-dependent-deployment)
-applications might use [DOTNET_ADDITIONAL_DEPS](https://github.com/dotnet/runtime/blob/main/docs/design/features/additional-deps.md)
-and [DOTNET_SHARED_STORE](https://docs.microsoft.com/en-us/dotnet/core/deploying/runtime-store)
-from OpenTelemetry .NET Automatic Instrumentation installation location
-to resolve assembly conflicts.
+- **Standalone: StartupHook-only deployment (.NET only)**: Full
+  isolation of the application in a custom `AssemblyLoadContext`.
 
-#### Build time resolution
-
-Currently, the path to resolving such conflicts is to add or update any package
-reference used by the application to the versions required by
-the OpenTelemetry .NET SDK and the instrumentations.
-Even if the application itself doesn't directly reference a conflicting
-dependency, this might still be necessary due to conflicts created by
-any indirect dependency.
-
-Adding or updating package references works because of the way
-[NuGet Package Dependency Resolution](https://docs.microsoft.com/en-us/nuget/concepts/dependency-resolution)
-is implemented. Conflicts are resolved by having explicit package references
-to the correct package versions.
-
-To simplify this process, we plan to create a NuGet package that installs
-the CLR Profiler and its managed dependencies.
-
-#### Runtime time resolution
-
-If you can't change the application build to add or update the necessary package
-versions, you can still address conflicts using the methods described in
-[Handling of Assembly version Conflicts](./troubleshooting.md#handling-of-assembly-version-conflicts).
-
-### `System.Diagnostics.DiagnosticSource` versions
-
-The version of `System.Diagnostics.DiagnosticSource` used by the instrumentation
-differs depending on the .NET version:
-
-- .NET Framework is referencing the latest supported version.
-  Automatic redirection is forcing this version
-  if instrumented application bring own copy.
-- .NET is referencing the lowest supported version.
-  The version can be upgraded by the instrumented application.
+**For a comprehensive explanation of how the .NET runtime resolves
+assemblies and the resolution strategies for each deployment mode, see
+[Assembly Conflict Resolution](./assembly-conflict-resolution.md).**
 
 ## Further reading
 

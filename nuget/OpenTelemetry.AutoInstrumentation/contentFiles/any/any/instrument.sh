@@ -55,6 +55,13 @@ fi
 
 export CORECLR_PROFILER_PATH
 
+# Automatic assembly redirection MUST be disabled. This is necessary
+# because the NuGet package doesn't bring the pre-defined versions
+# of the transitive dependencies used in the automatic redirection.
+# Instead the transitive dependencies versions are determined by
+# the NuGet version resolution algorithm when building the application.
+export OTEL_DOTNET_AUTO_REDIRECT_ENABLED=false
+
 # Settings for .NET
 export ASPNETCORE_HOSTINGSTARTUPASSEMBLIES=OpenTelemetry.AutoInstrumentation.AspNetCoreBootstrapper
 export CORECLR_ENABLE_PROFILING=1

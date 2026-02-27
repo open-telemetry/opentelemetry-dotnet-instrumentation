@@ -8,61 +8,100 @@
     <!-- Do not catch general exception types. Typically, we need to handle all Exception to do not break application. -->
     <NoWarn>$(NoWarn);CA1031</NoWarn>
   </PropertyGroup>
-<ItemGroup>
-  <Compile Include="..\OpenTelemetry.AutoInstrumentation\Logging\InternalLogger.cs">
-    <Link>Logging\InternalLogger.cs</Link>
-  </Compile>
-  <Compile Include="..\OpenTelemetry.AutoInstrumentation\Logging\NoopLogger.cs">
-    <Link>Logging\NoopLogger.cs</Link>
-  </Compile>
-  <Compile Include="..\OpenTelemetry.AutoInstrumentation\Logging\ConsoleSink.cs">
-    <Link>Logging\ConsoleSink.cs</Link>
-  </Compile>
-  <Compile Include="..\OpenTelemetry.AutoInstrumentation\Logging\FileSink.cs">
-    <Link>Logging\FileSink.cs</Link>
-  </Compile>
-  <Compile Include="..\OpenTelemetry.AutoInstrumentation\Logging\RollingFileSink.cs">
-    <Link>Logging\RollingFileSink.cs</Link>
-  </Compile>
-  <Compile Include="..\OpenTelemetry.AutoInstrumentation\Logging\PeriodicFlushToDiskSink.cs">
-    <Link>Logging\PeriodicFlushToDiskSink.cs</Link>
-  </Compile>
-  <Compile Include="..\OpenTelemetry.AutoInstrumentation\Logging\RollingInterval.cs">
-    <Link>Logging\RollingInterval.cs</Link>
-  </Compile>
-  <Compile Include="..\OpenTelemetry.AutoInstrumentation\Logging\PathRoller.cs">
-    <Link>Logging\PathRoller.cs</Link>
-  </Compile>
-  <Compile Include="..\OpenTelemetry.AutoInstrumentation\Logging\RollingLogFile.cs">
-    <Link>Logging\RollingLogFile.cs</Link>
-  </Compile>
-  <Compile Include="..\OpenTelemetry.AutoInstrumentation\Logging\RollingIntervalExtensions.cs">
-    <Link>Logging\RollingIntervalExtensions.cs</Link>
-  </Compile>
-  <Compile Include="..\OpenTelemetry.AutoInstrumentation\Logging\IOtelLogger.cs">
-    <Link>Logging\IOtelLogger.cs</Link>
-  </Compile>
-  <Compile Include="..\OpenTelemetry.AutoInstrumentation\Logging\ISink.cs">
-    <Link>Logging\ISink.cs</Link>
-  </Compile>
-  <Compile Include="..\OpenTelemetry.AutoInstrumentation\Logging\LogLevel.cs">
-    <Link>Logging\LogLevel.cs</Link>
-  </Compile>
-  <Compile Include="..\OpenTelemetry.AutoInstrumentation\Logging\LogSink.cs">
-    <Link>Logging\LogSink.cs</Link>
-  </Compile>
-  <Compile Include="..\OpenTelemetry.AutoInstrumentation\Logging\NoopSink.cs">
-    <Link>Logging\NoopSink.cs</Link>
-  </Compile>
-  <Compile Include="..\OpenTelemetry.AutoInstrumentation\Logging\OtelLogging.cs">
-    <Link>Logging\OtelLogging.cs</Link>
-  </Compile>
-  <Compile Include="..\OpenTelemetry.AutoInstrumentation\Logging\WriteCountingStream.cs">
-    <Link>Logging\WriteCountingStream.cs</Link>
-  </Compile>
-  <Compile Include="..\OpenTelemetry.AutoInstrumentation\AutoInstrumentationEventSource.cs">
-    <Link>AutoInstrumentationEventSource.cs</Link>
-  </Compile>
-  <Compile Include="..\OpenTelemetry.AutoInstrumentation\Constants.cs" Link="Constants.cs" />
+
+  <ItemGroup>
+    <!-- 1. Exclude platform-specific files from the default compilation -->
+    <Compile Remove="**\*.Net.cs" />
+    <Compile Remove="**\*.NetFramework.cs" />
+
+    <!-- 2. Keep both visible in the Solution Explorer as 'None' items (non-compiled) -->
+    <None Include="**\*.Net.cs" />
+    <None Include="**\*.NetFramework.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- 3. Include NetFramework version files -->
+    <Compile Include="**\*.NetFramework.cs" Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'" />
+    <!-- 4. Include .Net version files -->
+    <Compile Include="**\*.Net.cs" Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp'" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Include="..\OpenTelemetry.AutoInstrumentation\Logging\InternalLogger.cs">
+      <Link>Logging\InternalLogger.cs</Link>
+    </Compile>
+    <Compile Include="..\OpenTelemetry.AutoInstrumentation\Logging\NoopLogger.cs">
+      <Link>Logging\NoopLogger.cs</Link>
+    </Compile>
+    <Compile Include="..\OpenTelemetry.AutoInstrumentation\Logging\ConsoleSink.cs">
+      <Link>Logging\ConsoleSink.cs</Link>
+    </Compile>
+    <Compile Include="..\OpenTelemetry.AutoInstrumentation\Logging\FileSink.cs">
+      <Link>Logging\FileSink.cs</Link>
+    </Compile>
+    <Compile Include="..\OpenTelemetry.AutoInstrumentation\Logging\RollingFileSink.cs">
+      <Link>Logging\RollingFileSink.cs</Link>
+    </Compile>
+    <Compile Include="..\OpenTelemetry.AutoInstrumentation\Logging\PeriodicFlushToDiskSink.cs">
+      <Link>Logging\PeriodicFlushToDiskSink.cs</Link>
+    </Compile>
+    <Compile Include="..\OpenTelemetry.AutoInstrumentation\Logging\RollingInterval.cs">
+      <Link>Logging\RollingInterval.cs</Link>
+    </Compile>
+    <Compile Include="..\OpenTelemetry.AutoInstrumentation\Logging\PathRoller.cs">
+      <Link>Logging\PathRoller.cs</Link>
+    </Compile>
+    <Compile Include="..\OpenTelemetry.AutoInstrumentation\Logging\RollingLogFile.cs">
+      <Link>Logging\RollingLogFile.cs</Link>
+    </Compile>
+    <Compile Include="..\OpenTelemetry.AutoInstrumentation\Logging\RollingIntervalExtensions.cs">
+      <Link>Logging\RollingIntervalExtensions.cs</Link>
+    </Compile>
+    <Compile Include="..\OpenTelemetry.AutoInstrumentation\Logging\IOtelLogger.cs">
+      <Link>Logging\IOtelLogger.cs</Link>
+    </Compile>
+    <Compile Include="..\OpenTelemetry.AutoInstrumentation\Logging\ISink.cs">
+      <Link>Logging\ISink.cs</Link>
+    </Compile>
+    <Compile Include="..\OpenTelemetry.AutoInstrumentation\Logging\LogLevel.cs">
+      <Link>Logging\LogLevel.cs</Link>
+    </Compile>
+    <Compile Include="..\OpenTelemetry.AutoInstrumentation\Logging\LogSink.cs">
+      <Link>Logging\LogSink.cs</Link>
+    </Compile>
+    <Compile Include="..\OpenTelemetry.AutoInstrumentation\Logging\NoopSink.cs">
+      <Link>Logging\NoopSink.cs</Link>
+    </Compile>
+    <Compile Include="..\OpenTelemetry.AutoInstrumentation\Logging\OtelLogging.cs">
+      <Link>Logging\OtelLogging.cs</Link>
+    </Compile>
+    <Compile Include="..\OpenTelemetry.AutoInstrumentation\Logging\WriteCountingStream.cs">
+      <Link>Logging\WriteCountingStream.cs</Link>
+    </Compile>
+    <Compile Include="..\OpenTelemetry.AutoInstrumentation\AutoInstrumentationEventSource.cs">
+      <Link>AutoInstrumentationEventSource.cs</Link>
+    </Compile>
+    <Compile Include="..\OpenTelemetry.AutoInstrumentation\Constants.cs"
+             Link="Constants.cs" />
+    <Compile Include="..\OpenTelemetry.AutoInstrumentation\Configurations\ConfigurationKeys.TracerHome.cs"
+             Link="Configurations\ConfigurationKeys.TracerHome.cs" />
+    <Compile Include="..\OpenTelemetry.AutoInstrumentation\Util\TrustedPlatformAssembliesHelper.Net.cs"
+             Link="Util\TrustedPlatformAssembliesHelper.cs"
+             Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp'" />
+    <Compile Include="..\OpenTelemetry.AutoInstrumentation\Util\ManagedProfilerLocationHelper.cs"
+             Link="Util\ManagedProfilerLocationHelper.cs" />
+    <Compile Include="..\OpenTelemetry.AutoInstrumentation\Util\ManagedProfilerLocationHelper.NetFramework.cs"
+             Link="Util\ManagedProfilerLocationHelper.NetFramework.cs"
+             DependentUpon="ManagedProfilerLocationHelper.cs"
+             Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'" />
+    <Compile Include="..\OpenTelemetry.AutoInstrumentation\Util\ManagedProfilerLocationHelper.Net.cs"
+             Link="Util\ManagedProfilerLocationHelper.Net.cs"
+             DependentUpon="ManagedProfilerLocationHelper.cs"
+             Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp'" />
+    <Compile Include="..\OpenTelemetry.AutoInstrumentation.StartupHook\StartupHookConstants.cs"
+             Link="StartupHookConstants.cs" />
+    <Compile Include="..\OpenTelemetry.AutoInstrumentation\Util\AssemblyUtils.Net.cs"
+             Link="Util\AssemblyUtils.cs"
+             Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp'" />
   </ItemGroup>
 </Project>

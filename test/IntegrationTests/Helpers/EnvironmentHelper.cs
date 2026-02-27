@@ -256,32 +256,20 @@ internal sealed class EnvironmentHelper
         return $"net{_major}{_minor}{_patch ?? string.Empty}";
     }
 
-    private static string GetStartupHookOutputPath()
+    private string GetStartupHookOutputPath()
     {
         string startupHookOutputPath = Path.Combine(
             GetNukeBuildOutput(),
             "net",
             "OpenTelemetry.AutoInstrumentation.StartupHook.dll");
 
-        return startupHookOutputPath;
-    }
+        if (File.Exists(startupHookOutputPath))
+        {
+            _output?.WriteLine($"Found startup hook at {startupHookOutputPath}.");
+            return startupHookOutputPath;
+        }
 
-    private static string GetSharedStorePath()
-    {
-        string storePath = Path.Combine(
-            GetNukeBuildOutput(),
-            "store");
-
-        return storePath;
-    }
-
-    private static string GetAdditionalDepsPath()
-    {
-        string additionalDeps = Path.Combine(
-            GetNukeBuildOutput(),
-            "AdditionalDeps");
-
-        return additionalDeps;
+        throw new InvalidOperationException($"Unable to find startup hook at: {startupHookOutputPath}");
     }
 
     private void SetDefaultEnvironmentVariables()
@@ -289,8 +277,6 @@ internal sealed class EnvironmentHelper
         string profilerPath = GetProfilerPath();
 
         CustomEnvironmentVariables["DOTNET_STARTUP_HOOKS"] = GetStartupHookOutputPath();
-        CustomEnvironmentVariables["DOTNET_SHARED_STORE"] = GetSharedStorePath();
-        CustomEnvironmentVariables["DOTNET_ADDITIONAL_DEPS"] = GetAdditionalDepsPath();
 
         // call TestHelper.EnableBytecodeInstrumentation() to enable CoreCLR Profiler when bytecode instrumentation is needed
         // it is not enabled by default to make sure that the instrumentations that do not require CoreCLR Profiler are working without it

@@ -50,7 +50,7 @@ file-based configuration to include these parameters.
 | `OTEL_DOTNET_AUTO_HOME`                              | Installation location.                                                                                                    |
 | `OTEL_DOTNET_AUTO_EXCLUDE_PROCESSES`                 | Names of the executable files that the profiler cannot instrument.                                                        |
 | `OTEL_DOTNET_AUTO_OPENTRACING_ENABLED`               | Enables OpenTracing tracer.                                                                                               |
-| `OTEL_DOTNET_AUTO_NETFX_REDIRECT_ENABLED`            | Enables automatic redirection of the assemblies used by the automatic instrumentation on the .NET Framework.              |
+| `OTEL_DOTNET_AUTO_REDIRECT_ENABLED`                  | Enables automatic redirection of the assemblies used by the automatic instrumentation.                                    |
 
 ---
 
@@ -106,8 +106,6 @@ file-based configuration to include these parameters.
 | Environment variable     | Description                                          |
 |--------------------------|------------------------------------------------------|
 | `DOTNET_STARTUP_HOOKS`   | Specifies managed assemblies to load during startup. |
-| `DOTNET_ADDITIONAL_DEPS` | Additional .deps.json files to include.              |
-| `DOTNET_SHARED_STORE`    | Path to additional shared assemblies.                |
 
 ---
 
