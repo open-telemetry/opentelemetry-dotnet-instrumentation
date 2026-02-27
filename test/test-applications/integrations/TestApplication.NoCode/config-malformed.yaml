@@ -1,0 +1,186 @@
+file_format: "1.0-rc.1"
+
+tracer_provider:
+  processors:
+    - batch:
+        exporter:
+          otlp_http:
+            endpoint: ${OTEL_EXPORTER_OTLP_TRACES_ENDPOINT}
+
+instrumentation/development:
+  dotnet:
+    no_code:
+      targets:
+        # Invalid: Missing assembly name - should be skipped
+        - target:
+            assembly:
+              name:
+            type: TestApplication.NoCode.NoCodeTestingClass
+            method: TestMethod
+            signature:
+              return_type: System.Void
+              parameter_types:
+          span:
+             name: Span-Invalid-MissingAssembly
+             kind: internal
+
+        # Invalid: Missing type - should be skipped
+        - target:
+            assembly:
+              name: TestApplication.NoCode
+            type:
+            method: TestMethod
+            signature:
+              return_type: System.Void
+              parameter_types:
+          span:
+             name: Span-Invalid-MissingType
+             kind: internal
+
+        # Invalid: Missing method - should be skipped
+        - target:
+            assembly:
+              name: TestApplication.NoCode
+            type: TestApplication.NoCode.NoCodeTestingClass
+            method:
+            signature:
+              return_type: System.Void
+              parameter_types:
+          span:
+             name: Span-Invalid-MissingMethod
+             kind: internal
+
+        # Invalid: Missing return type - should be skipped
+        - target:
+            assembly:
+              name: TestApplication.NoCode
+            type: TestApplication.NoCode.NoCodeTestingClass
+            method: TestMethod
+            signature:
+              return_type:
+              parameter_types:
+          span:
+             name: Span-Invalid-MissingReturnType
+             kind: internal
+
+        # Invalid: Missing span name - should be skipped
+        - target:
+            assembly:
+              name: TestApplication.NoCode
+            type: TestApplication.NoCode.NoCodeTestingClass
+            method: TestMethodA
+            signature:
+              return_type: System.Void
+              parameter_types:
+          span:
+             name:
+             kind: internal
+
+        # Invalid: Too many parameters (> 9) - should be skipped
+        - target:
+            assembly:
+              name: TestApplication.NoCode
+            type: TestApplication.NoCode.NoCodeTestingClass
+            method: TestMethod
+            signature:
+              return_type: System.Void
+              parameter_types:
+                - System.String
+                - System.String
+                - System.String
+                - System.String
+                - System.String
+                - System.String
+                - System.String
+                - System.String
+                - System.String
+                - System.String
+          span:
+             name: Span-Invalid-TooManyParameters
+             kind: internal
+
+        # Valid: Basic span - should work
+        - target:
+            assembly:
+              name: TestApplication.NoCode
+            type: TestApplication.NoCode.NoCodeTestingClass
+            method: TestMethod
+            signature:
+              return_type: System.Void
+              parameter_types:
+          span:
+             name: Span-Valid-Basic
+             kind: client
+
+        # Valid: With invalid dynamic attribute expression - span should work, invalid attribute skipped
+        - target:
+            assembly:
+              name: TestApplication.NoCode
+            type: TestApplication.NoCode.NoCodeTestingClass
+            method: TestMethod
+            signature:
+              return_type: System.Void
+              parameter_types:
+                - System.String
+          span:
+             name: Span-Valid-WithInvalidDynamicAttribute
+             kind: internal
+             attributes:
+               - name: valid_static_attr
+                 value: "static_value"
+                 type: string
+               - name: invalid_dynamic_attr
+                 source: "this is not valid @#$%^"
+                 type: string
+
+        # Valid: With invalid status rule - span should work, invalid rule skipped
+        - target:
+            assembly:
+              name: TestApplication.NoCode
+            type: TestApplication.NoCode.NoCodeTestingClass
+            method: TestMethod
+            signature:
+              return_type: System.Void
+              parameter_types:
+                - System.Int32
+          span:
+             name: Span-Valid-WithInvalidStatusRule
+             kind: server
+             status:
+               rules:
+                 - condition: "invalid @#$%"
+                   code: ERROR
+                   description: "This should be skipped"
+
+        # Valid: With invalid span name source - should fall back to static name
+        - target:
+            assembly:
+              name: TestApplication.NoCode
+            type: TestApplication.NoCode.NoCodeTestingClass
+            method: TestMethod
+            signature:
+              return_type: System.Void
+              parameter_types:
+                - System.String
+                - System.String
+          span:
+             name: Span-Valid-StaticNameFallback
+             name_source: "invalid expression @#$%"
+             kind: producer
+
+        # Valid: Static method - should work
+        - target:
+            assembly:
+              name: TestApplication.NoCode
+            type: TestApplication.NoCode.NoCodeTestingClass
+            method: TestMethodStatic
+            signature:
+              return_type: System.Void
+              parameter_types:
+          span:
+             name: Span-Valid-Static
+             kind: internal
+             attributes:
+               - name: test_marker
+                 value: "malformed_test"
+                 type: string

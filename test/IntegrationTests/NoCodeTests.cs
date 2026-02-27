@@ -20,7 +20,7 @@ public class NoCodeTests : TestHelper
     public void SubmitsTraces()
     {
         EnableBytecodeInstrumentation();
-        EnableFileBasedConfigWithDefaultPath();
+        EnableFileBasedConfig();
         using var collector = new MockSpansCollector(Output);
         SetFileBasedExporter(collector);
 
@@ -181,6 +181,40 @@ public class NoCodeTests : TestHelper
         RunTestApplication();
 
         collector.AssertExpectations();
+    }
+
+    [Fact]
+    [Trait("Category", "EndToEnd")]
+    public void MalformedConfiguration_ComprehensiveTest()
+    {
+        EnableBytecodeInstrumentation();
+        EnableFileBasedConfig("config-malformed.yaml");
+        using var collector = new MockSpansCollector(Output);
+        SetFileBasedExporter(collector);
+
+        collector.ExpectNoCode("Span-Valid-Basic", Span.Types.SpanKind.Client);
+
+        List<KeyValue> validWithInvalidDynamicAttr =
+        [
+            new() { Key = "valid_static_attr", Value = new AnyValue { StringValue = "static_value" } },
+        ];
+        collector.ExpectNoCode("Span-Valid-WithInvalidDynamicAttribute", Span.Types.SpanKind.Internal, validWithInvalidDynamicAttr);
+
+        collector.ExpectNoCode("Span-Valid-WithInvalidStatusRule", Span.Types.SpanKind.Server);
+
+        collector.ExpectNoCode("Span-Valid-StaticNameFallback", Span.Types.SpanKind.Producer);
+
+        List<KeyValue> validStaticSpanAttr =
+        [
+            new() { Key = "test_marker", Value = new AnyValue { StringValue = "malformed_test" } },
+        ];
+        collector.ExpectNoCode("Span-Valid-Static", Span.Types.SpanKind.Internal, validStaticSpanAttr);
+
+        RunTestApplication();
+
+        collector.AssertExpectations();
+        // All invalid configurations should be silently skipped. It means that there is no more spans.
+        collector.AssertEmpty();
     }
 }
 

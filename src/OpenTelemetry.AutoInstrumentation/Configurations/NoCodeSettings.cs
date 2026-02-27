@@ -67,21 +67,21 @@ internal class NoCodeSettings : Settings
                 continue;
             }
 
-            if (noCodeTarget.Assembly.Name == null)
+            if (string.IsNullOrEmpty(noCodeTarget.Assembly.Name))
             {
-                Log.Debug("No code target assembly name is null. Skipping this entry.");
+                Log.Debug("No code target assembly name is null or empty. Skipping this entry.");
                 continue;
             }
 
-            if (noCodeTarget.Method == null)
+            if (string.IsNullOrEmpty(noCodeTarget.Method))
             {
-                Log.Debug("No code target method is null. Skipping this entry.");
+                Log.Debug("No code target method is null or empty. Skipping this entry.");
                 continue;
             }
 
-            if (noCodeTarget.Type == null)
+            if (string.IsNullOrEmpty(noCodeTarget.Type))
             {
-                Log.Debug("No code target type is null. Skipping this entry.");
+                Log.Debug("No code target type is null or empty. Skipping this entry.");
                 continue;
             }
 
@@ -91,9 +91,9 @@ internal class NoCodeSettings : Settings
                 continue;
             }
 
-            if (noCodeTarget.Signature.ReturnType == null)
+            if (string.IsNullOrEmpty(noCodeTarget.Signature.ReturnType))
             {
-                Log.Debug("No code target signature return type is null. Skipping this entry.");
+                Log.Debug("No code target signature return type is null or empty. Skipping this entry.");
                 continue;
             }
 
@@ -109,9 +109,9 @@ internal class NoCodeSettings : Settings
                 continue;
             }
 
-            if (noCodeEntry.Span.Name == null)
+            if (string.IsNullOrEmpty(noCodeEntry.Span.Name))
             {
-                Log.Debug("No code span name is null. Skipping this entry.");
+                Log.Debug("No code span name is null or empty. Skipping this entry.");
                 continue;
             }
 
@@ -119,21 +119,21 @@ internal class NoCodeSettings : Settings
             int parametersCount;
             if (noCodeTarget.Signature.ParameterTypes == null || noCodeTarget.Signature.ParameterTypes.Length == 0)
             {
-                targetSignatureTypes = [noCodeTarget.Signature.ReturnType];
+                targetSignatureTypes = [noCodeTarget.Signature.ReturnType!];
                 parametersCount = 0;
             }
             else
             {
                 targetSignatureTypes = new string[noCodeTarget.Signature.ParameterTypes.Length + 1];
-                targetSignatureTypes[0] = noCodeTarget.Signature.ReturnType;
+                targetSignatureTypes[0] = noCodeTarget.Signature.ReturnType!;
                 parametersCount = noCodeTarget.Signature.ParameterTypes.Length;
                 Array.Copy(noCodeTarget.Signature.ParameterTypes, 0, targetSignatureTypes, 1, noCodeTarget.Signature.ParameterTypes.Length);
             }
 
             var definition = new NativeCallTargetDefinition(
-                noCodeTarget.Assembly.Name,
-                noCodeTarget.Type,
-                noCodeTarget.Method,
+                noCodeTarget.Assembly.Name!,
+                noCodeTarget.Type!,
+                noCodeTarget.Method!,
                 targetSignatureTypes,
                 0,
                 0,
@@ -152,7 +152,7 @@ internal class NoCodeSettings : Settings
 
             Log.Debug($"NoCode adding instrumentation for assembly: '{noCodeTarget.Assembly.Name}', type: '{noCodeTarget.Type}', method: '{noCodeTarget.Method}' with signature: '{string.Join(",", targetSignatureTypes)}'");
 
-            instrumentedMethods.Add(new NoCodeInstrumentedMethod(definition, targetSignatureTypes, noCodeEntry.Span.Name, activityKind, attributes, dynamicAttributes, statusRules, dynamicSpanName));
+            instrumentedMethods.Add(new NoCodeInstrumentedMethod(definition, targetSignatureTypes, noCodeEntry.Span.Name!, activityKind, attributes, dynamicAttributes, statusRules, dynamicSpanName));
         }
 
         if (instrumentedMethods.Count > 0)
