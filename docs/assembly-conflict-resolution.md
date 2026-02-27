@@ -107,7 +107,7 @@ instrumentation work correctly.
 
 The goal is to **ensure the highest version wins** while keeping both
 the application and the instrumentation using the **same assembly
-instance** to avoid shared-state drift or type cast failres.
+instance** to avoid shared-state drift or type cast failures.
 
 ## Resolution strategies by deployment mode
 
