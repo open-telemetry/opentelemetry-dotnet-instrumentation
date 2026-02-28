@@ -331,6 +331,21 @@ public sealed class SettingsTests : IDisposable
         Assert.Equal([expectedTracerInstrumentation], settings.EnabledInstrumentations);
     }
 
+#if NET
+    [Fact]
+    internal void TracerSettings_Instrumentations_EntityFrameworkCoreAndNpgsqlCanBeEnabledTogether()
+    {
+        Environment.SetEnvironmentVariable(ConfigurationKeys.Traces.TracesInstrumentationEnabled, "false");
+        Environment.SetEnvironmentVariable(string.Format(CultureInfo.InvariantCulture, ConfigurationKeys.Traces.EnabledTracesInstrumentationTemplate, "ENTITYFRAMEWORKCORE"), "true");
+        Environment.SetEnvironmentVariable(string.Format(CultureInfo.InvariantCulture, ConfigurationKeys.Traces.EnabledTracesInstrumentationTemplate, "NPGSQL"), "true");
+
+        var settings = Settings.FromDefaultSources<TracerSettings>(false);
+
+        Assert.Contains(TracerInstrumentation.EntityFrameworkCore, settings.EnabledInstrumentations);
+        Assert.Contains(TracerInstrumentation.Npgsql, settings.EnabledInstrumentations);
+    }
+#endif
+
     [Theory]
 #if NETFRAMEWORK
     [InlineData("ASPNET", MetricInstrumentation.AspNet)]

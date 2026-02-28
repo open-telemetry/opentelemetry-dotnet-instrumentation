@@ -258,6 +258,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpenTelemetry.AutoInstrumen
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestApplication.Wcf.Core", "test\test-applications\integrations\TestApplication.Wcf.Core\TestApplication.Wcf.Core.csproj", "{0F864722-CE44-4D99-9B67-CF0ED1893FF1}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestApplication.EntityFrameworkCore.Npgsql", "test\test-applications\integrations\TestApplication.EntityFrameworkCore.Npgsql\TestApplication.EntityFrameworkCore.Npgsql.csproj", "{0E2E77E0-E2FF-4E0E-A132-46E0E187F53C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -1638,6 +1640,22 @@ Global
 		{0F864722-CE44-4D99-9B67-CF0ED1893FF1}.Release|x64.Build.0 = Release|Any CPU
 		{0F864722-CE44-4D99-9B67-CF0ED1893FF1}.Release|x86.ActiveCfg = Release|Any CPU
 		{0F864722-CE44-4D99-9B67-CF0ED1893FF1}.Release|x86.Build.0 = Release|Any CPU
+		{0E2E77E0-E2FF-4E0E-A132-46E0E187F53C}.Debug|Any CPU.ActiveCfg = Debug|x64
+		{0E2E77E0-E2FF-4E0E-A132-46E0E187F53C}.Debug|Any CPU.Build.0 = Debug|x64
+		{0E2E77E0-E2FF-4E0E-A132-46E0E187F53C}.Debug|ARM64.ActiveCfg = Debug|x64
+		{0E2E77E0-E2FF-4E0E-A132-46E0E187F53C}.Debug|ARM64.Build.0 = Debug|x64
+		{0E2E77E0-E2FF-4E0E-A132-46E0E187F53C}.Debug|x64.ActiveCfg = Debug|x64
+		{0E2E77E0-E2FF-4E0E-A132-46E0E187F53C}.Debug|x64.Build.0 = Debug|x64
+		{0E2E77E0-E2FF-4E0E-A132-46E0E187F53C}.Debug|x86.ActiveCfg = Debug|x86
+		{0E2E77E0-E2FF-4E0E-A132-46E0E187F53C}.Debug|x86.Build.0 = Debug|x86
+		{0E2E77E0-E2FF-4E0E-A132-46E0E187F53C}.Release|Any CPU.ActiveCfg = Release|x64
+		{0E2E77E0-E2FF-4E0E-A132-46E0E187F53C}.Release|Any CPU.Build.0 = Release|x64
+		{0E2E77E0-E2FF-4E0E-A132-46E0E187F53C}.Release|ARM64.ActiveCfg = Release|x64
+		{0E2E77E0-E2FF-4E0E-A132-46E0E187F53C}.Release|ARM64.Build.0 = Release|x64
+		{0E2E77E0-E2FF-4E0E-A132-46E0E187F53C}.Release|x64.ActiveCfg = Release|x64
+		{0E2E77E0-E2FF-4E0E-A132-46E0E187F53C}.Release|x64.Build.0 = Release|x64
+		{0E2E77E0-E2FF-4E0E-A132-46E0E187F53C}.Release|x86.ActiveCfg = Release|x86
+		{0E2E77E0-E2FF-4E0E-A132-46E0E187F53C}.Release|x86.Build.0 = Release|x86
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -1734,6 +1752,7 @@ Global
 		{500BF40F-EECB-4F6A-377B-EDBDFFDE09BE} = {E409ADD3-9574-465C-AB09-4324D205CC7C}
 		{B69564D4-7D5B-7147-6CBA-233BB8A33C50} = {9E5F0022-0A50-40BF-AC6A-C3078585ECAB}
 		{0F864722-CE44-4D99-9B67-CF0ED1893FF1} = {E409ADD3-9574-465C-AB09-4324D205CC7C}
+		{0E2E77E0-E2FF-4E0E-A132-46E0E187F53C} = {E409ADD3-9574-465C-AB09-4324D205CC7C}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {160A1D00-1F5B-40F8-A155-621B4459D78F}
