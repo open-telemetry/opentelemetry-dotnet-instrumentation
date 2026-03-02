@@ -9,6 +9,11 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 
 ### Added
 
+- Added support for file-based configuration file format version `1.0`.
+- Added support for `OTEL_CONFIG_FILE` environment variable for file-based configuration.
+  This variable takes precedence over the deprecated
+  `OTEL_EXPERIMENTAL_CONFIG_FILE` environment variable.
+
 ### Changed
 
 - MongoDB instrumentation is updated to comply with v1.39.0 Semantic Convention
@@ -16,8 +21,6 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
   - Added `db.operation.batch.size` attribute,
   - Added the `db.response.status_code` and `error.type` attributes to error spans,
   - Removed the `network.peer.address` and `network.peer.port` attributes.
-
-- File-based configuration file format is updated to version `1.0`.
 
 #### Dependency updates
 
