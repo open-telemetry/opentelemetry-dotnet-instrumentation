@@ -1,4 +1,2 @@
-file_format: "1.0"
-
 propagator:
   composite_list: ${OTEL_PROPAGATORS}
