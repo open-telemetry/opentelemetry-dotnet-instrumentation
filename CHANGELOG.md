@@ -9,8 +9,8 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 
 ### Added
 
-- Added support for file-based configuration file format version `1.0`.
-- Added support for `OTEL_CONFIG_FILE` environment variable for file-based configuration.
+- Add support for file-based configuration file format version `1.0`.
+- Add support for `OTEL_CONFIG_FILE` environment variable for file-based configuration.
   This variable takes precedence over the deprecated
   `OTEL_EXPERIMENTAL_CONFIG_FILE` environment variable.
 
