@@ -64,15 +64,17 @@ internal abstract class Settings
 
         var configFile = Environment.GetEnvironmentVariable(ConfigurationKeys.FileBasedConfiguration.FileName);
 
-        if (!string.IsNullOrEmpty(experimentalConfigFile) && !string.IsNullOrEmpty(configFile))
+        if (!string.IsNullOrEmpty(configFile))
         {
-            Logger.Warning("Both OTEL_EXPERIMENTAL_CONFIG_FILE (deprecated) and OTEL_CONFIG_FILE are set. " +
-                "Using OTEL_CONFIG_FILE and ignoring the deprecated variable.");
+            if (!string.IsNullOrEmpty(experimentalConfigFile))
+            {
+                Logger.Warning("Both OTEL_EXPERIMENTAL_CONFIG_FILE (deprecated) and OTEL_CONFIG_FILE are set. " +
+                    "Using OTEL_CONFIG_FILE and ignoring the deprecated variable.");
+            }
         }
         else if (!string.IsNullOrEmpty(experimentalConfigFile))
         {
             Logger.Warning("OTEL_EXPERIMENTAL_CONFIG_FILE is deprecated. Please use OTEL_CONFIG_FILE instead.");
-
             configFile = experimentalConfigFile;
         }
         else
