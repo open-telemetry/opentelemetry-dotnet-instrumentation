@@ -17,7 +17,7 @@ By default, the value is false.
 You can also specify the configuration file path (default: `config.yaml`):
 
 ```bash
-OTEL_EXPERIMENTAL_CONFIG_FILE=/path/to/config.yaml
+OTEL_CONFIG_FILE=/path/to/config.yaml
 ```
 
 In your config file you can use environment variables in the format `${ENVIRONMENT_VARIABLE}`
