@@ -17,9 +17,14 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
   - Added the `db.response.status_code` and `error.type` attributes to error spans,
   - Removed the `network.peer.address` and `network.peer.port` attributes.
 
+- File-based configuration file format is updated to version `1.0`.
+
 #### Dependency updates
 
 ### Deprecated
+
+- `OTEL_EXPERIMENTAL_CONFIG_FILE` environment variable for file-based
+  configuration is deprecated. Use `OTEL_CONFIG_FILE` instead.
 
 ### Removed
 
