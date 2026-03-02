@@ -1,3 +1,5 @@
+file_format: "1.0"
+
 propagator:
   composite:
     tracecontext:
