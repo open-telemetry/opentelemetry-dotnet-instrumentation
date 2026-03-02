@@ -79,10 +79,16 @@ internal partial class ConfigurationKeys
         public const string Enabled = "OTEL_EXPERIMENTAL_FILE_BASED_CONFIGURATION_ENABLED";
 
         /// <summary>
+        /// Configuration key for the deprecated path to the configuration file.
+        /// Default is <c>"config.yaml"</c>.
+        /// </summary>
+        public const string ExperimentalFileName = "OTEL_EXPERIMENTAL_CONFIG_FILE";
+
+        /// <summary>
         /// Configuration key for the path to the configuration file.
         /// Default is <c>"config.yaml"</c>.
         /// </summary>
-        public const string FileName = "OTEL_EXPERIMENTAL_CONFIG_FILE";
+        public const string FileName = "OTEL_CONFIG_FILE";
     }
 
     /// <summary>
