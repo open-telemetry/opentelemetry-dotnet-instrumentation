@@ -146,26 +146,34 @@ internal sealed class CelExpression
 
     internal static object? GetIndexValue(object target, int index)
     {
-        if (target is Array array)
+        try
         {
-            if (index < 0 || index >= array.Length)
+            if (target is Array array)
             {
-                return null;
+                if (index < 0 || index >= array.Length)
+                {
+                    return null;
+                }
+
+                return array.GetValue(index);
             }
 
-            return array.GetValue(index);
-        }
-
-        if (target is System.Collections.IList list)
-        {
-            if (index < 0 || index >= list.Count)
+            if (target is System.Collections.IList list)
             {
-                return null;
+                if (index < 0 || index >= list.Count)
+                {
+                    return null;
+                }
+
+                return list[index];
             }
 
-            return list[index];
+            return null;
         }
-
-        return null;
+        catch (Exception ex)
+        {
+            Log.Debug("Failed to get index '{0}' value: {1}", index, ex.Message);
+            return null;
+        }
     }
 }

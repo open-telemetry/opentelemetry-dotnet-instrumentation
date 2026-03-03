@@ -1,6 +1,7 @@
 // Copyright The OpenTelemetry Authors
 // SPDX-License-Identifier: Apache-2.0
 
+using System.Collections;
 using OpenTelemetry.AutoInstrumentation.Instrumentations.NoCode;
 using OpenTelemetry.AutoInstrumentation.Instrumentations.NoCode.Cel;
 using Xunit;
@@ -1092,6 +1093,19 @@ public class CelExpressionTests
     }
 
     [Fact]
+    public void Evaluate_GetIndexValue_WithException_ReturnsNull()
+    {
+        var throwingList = new ThrowingIndexerList();
+        var arguments = new object[] { throwingList };
+        var expr = CelExpression.Parse("arguments[0][0]");
+        var context = new NoCodeExpressionContext(null, arguments, null, null, null);
+
+        var result = expr!.Evaluate(context);
+
+        Assert.Null(result);
+    }
+
+    [Fact]
     public void Evaluate_WithExceptionInExpression_ReturnsNull()
     {
         // This should trigger the catch block in CelExpression.Evaluate
@@ -1181,6 +1195,43 @@ public class CelExpressionTests
 #pragma warning disable CA1822 // Mark members as static. Needed for tests.
         public string ThrowingProperty => throw new InvalidOperationException("Property access failed");
 #pragma warning restore CA1822 // Mark members as static. Needed for tests.
+    }
+
+    private sealed class ThrowingIndexerList : System.Collections.IList
+    {
+        public int Count => 1;
+
+        public bool IsReadOnly => true;
+
+        public bool IsFixedSize => true;
+
+        public bool IsSynchronized => false;
+
+        public object SyncRoot => this;
+
+        public object? this[int index]
+        {
+            get => throw new InvalidOperationException("Indexer access failed");
+            set => throw new InvalidOperationException("Indexer access failed");
+        }
+
+        public int Add(object? value) => throw new NotSupportedException();
+
+        public void Clear() => throw new NotSupportedException();
+
+        public bool Contains(object? value) => false;
+
+        public void CopyTo(Array array, int index) => throw new NotSupportedException();
+
+        public IEnumerator GetEnumerator() => throw new NotSupportedException();
+
+        public int IndexOf(object? value) => -1;
+
+        public void Insert(int index, object? value) => throw new NotSupportedException();
+
+        public void Remove(object? value) => throw new NotSupportedException();
+
+        public void RemoveAt(int index) => throw new NotSupportedException();
     }
 
     // Test classes for property inheritance scenarios
