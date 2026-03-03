@@ -101,8 +101,28 @@ internal sealed class CelExpression
             var getMethod = prop.GetGetMethod();
             if (getMethod == null)
             {
-                Log.Debug("Property '{0}' on type '{1}' has no getter", key.Item2, key.Item1.FullName);
-                return null;
+                // If the derived class overrides only the setter, try to find the getter in the base class
+                var baseType = key.Item1.BaseType;
+                while (baseType != null && getMethod == null)
+                {
+                    var baseProp = baseType.GetProperty(key.Item2, BindingFlags.Public | BindingFlags.Instance | BindingFlags.IgnoreCase);
+                    if (baseProp != null)
+                    {
+                        getMethod = baseProp.GetGetMethod();
+                        if (getMethod != null)
+                        {
+                            break;
+                        }
+                    }
+
+                    baseType = baseType.BaseType;
+                }
+
+                if (getMethod == null)
+                {
+                    Log.Debug("Property '{0}' on type '{1}' has no getter", key.Item2, key.Item1.FullName);
+                    return null;
+                }
             }
 
             return (Func<object, object?>)(obj => getMethod.Invoke(obj, null));

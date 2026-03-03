@@ -1105,6 +1105,47 @@ public class CelExpressionTests
         Assert.Null(result);
     }
 
+    [Fact]
+    public void Evaluate_PropertyAccess_WithSetterOnlyOverride_ReturnsBaseClassValue()
+    {
+        // Tests the scenario where a derived class overrides only the setter of a property,
+        // leaving the getter implementation in the base class. The reflection logic should
+        // find the getter in the base class and successfully retrieve the value.
+        var expr = CelExpression.Parse("instance.Status");
+        var instance = new DerivedClassWithSetterOnlyOverride { Status = 42 };
+        var context = CreateContext(instance: instance);
+
+        var result = expr!.Evaluate(context);
+
+        Assert.Equal(42, result);
+    }
+
+    [Fact]
+    public void Evaluate_PropertyAccess_WithSetterOnlyOverride_MultipleInheritanceLevels()
+    {
+        // Tests that the base class getter lookup works through multiple inheritance levels
+        var expr = CelExpression.Parse("instance.Value");
+        var instance = new GrandchildClassWithSetterOnlyOverride();
+        var context = CreateContext(instance: instance);
+
+        var result = expr!.Evaluate(context);
+
+        Assert.Equal(100, result);
+    }
+
+    [Fact]
+    public void Evaluate_PropertyAccess_WithBothGetterAndSetterOverride_UsesOverriddenGetter()
+    {
+        // Ensures that when both getter and setter are overridden, the derived getter is used
+        var expr = CelExpression.Parse("instance.FullName");
+        var instance = new DerivedWithBothAccessors { FirstName = "John", LastName = "Doe" };
+        var context = CreateContext(instance: instance);
+
+        var result = expr!.Evaluate(context);
+
+        Assert.Equal("John Doe", result);
+    }
+
     private static NoCodeExpressionContext CreateContext(
             object? instance = null,
             object?[]? arguments = null,
@@ -1140,5 +1181,83 @@ public class CelExpressionTests
 #pragma warning disable CA1822 // Mark members as static. Needed for tests.
         public string ThrowingProperty => throw new InvalidOperationException("Property access failed");
 #pragma warning restore CA1822 // Mark members as static. Needed for tests.
+    }
+
+    // Test classes for property inheritance scenarios
+
+    // Base class with full property implementation
+    private class BaseClassWithProperty
+    {
+        private int _status;
+
+        public virtual int Status
+        {
+            get => _status;
+            set => _status = value;
+        }
+    }
+
+    // Derived class that only overrides the setter
+    private sealed class DerivedClassWithSetterOnlyOverride : BaseClassWithProperty
+    {
+        public override int Status
+        {
+            set => base.Status = value;
+        }
+    }
+
+    // Multi-level inheritance test classes
+    private class GrandparentClass
+    {
+        public virtual int Value
+        {
+            get => 100;
+            set { }
+        }
+    }
+
+    private class ParentClass : GrandparentClass
+    {
+        public override int Value
+        {
+            set => base.Value = value;
+        }
+    }
+
+    private sealed class GrandchildClassWithSetterOnlyOverride : ParentClass
+    {
+        // Inherits setter-only override from ParentClass
+        // Should still be able to access getter from GrandparentClass
+    }
+
+    // Class with both getter and setter overridden (control test)
+    private class BaseWithFullName
+    {
+        public virtual string FullName
+        {
+            get => "Base Name";
+            set { }
+        }
+    }
+
+    private sealed class DerivedWithBothAccessors : BaseWithFullName
+    {
+        public string? FirstName { get; set; }
+
+        public string? LastName { get; set; }
+
+        public override string FullName
+        {
+            get => $"{FirstName} {LastName}";
+            set
+            {
+                var parts = value?.Split(' ');
+                if (parts?.Length >= 2)
+                {
+                    FirstName = parts[0];
+                    LastName = parts[1];
+                }
+            }
+        }
     }
 }
