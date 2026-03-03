@@ -1137,8 +1137,8 @@ public class CelExpressionTests
 
     private sealed class TestClassWithThrowingProperty
     {
-#pragma warning disable CA1822 // Narj nenbers as static. Needed for tests.
+#pragma warning disable CA1822 // Mark members as static. Needed for tests.
         public string ThrowingProperty => throw new InvalidOperationException("Property access failed");
-#pragma warning restore CA1822 // Narj nenbers as static. Needed for tests.
+#pragma warning restore CA1822 // Mark members as static. Needed for tests.
     }
 }
