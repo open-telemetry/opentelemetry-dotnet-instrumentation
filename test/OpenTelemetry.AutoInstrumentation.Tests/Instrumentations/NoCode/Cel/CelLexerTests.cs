@@ -188,4 +188,48 @@ public class CelLexerTests
     {
         Assert.Throws<InvalidOperationException>(() => CelLexer.Tokenize("\"unterminated"));
     }
+
+    [Theory]
+    [InlineData("-5", 2)] // Negative number: -5, EOF
+    [InlineData("(-5)", 4)] // Left paren, negative number, right paren, EOF
+    [InlineData("10-5", 4)] // 10, minus operator, 5, EOF
+    [InlineData("10 - 5", 4)] // 10, minus operator, 5, EOF
+    [InlineData("x--5", 4)] // x, minus operator, negative number, EOF
+    [InlineData("x- -5", 4)] // x, minus operator, negative number, EOF
+    [InlineData("5+-3", 4)] // 5, plus operator, negative number, EOF
+    [InlineData("5*-3", 4)] // 5, multiply operator, negative number, EOF
+    public void Tokenize_NegativeNumberVsMinusOperator_ReturnsCorrectTokenCount(string input, int expectedCount)
+    {
+        var tokens = CelLexer.Tokenize(input);
+
+        Assert.Equal(expectedCount, tokens.Count);
+    }
+
+    [Fact]
+    public void Tokenize_NegativeNumberAfterOperator_ParsesAsNegativeNumber()
+    {
+        var tokens = CelLexer.Tokenize("x+-5");
+
+        Assert.Equal(4, tokens.Count);
+        Assert.Equal("x", tokens[0].Value);
+        Assert.Equal(CelTokenType.Identifier, tokens[0].Type);
+        Assert.Equal("+", tokens[1].Value);
+        Assert.Equal(CelTokenType.Plus, tokens[1].Type);
+        Assert.Equal("-5", tokens[2].Value);
+        Assert.Equal(CelTokenType.Number, tokens[2].Type);
+    }
+
+    [Fact]
+    public void Tokenize_MinusOperatorBetweenNumbers_ParsesAsOperator()
+    {
+        var tokens = CelLexer.Tokenize("10-5");
+
+        Assert.Equal(4, tokens.Count);
+        Assert.Equal("10", tokens[0].Value);
+        Assert.Equal(CelTokenType.Number, tokens[0].Type);
+        Assert.Equal("-", tokens[1].Value);
+        Assert.Equal(CelTokenType.Minus, tokens[1].Type);
+        Assert.Equal("5", tokens[2].Value);
+        Assert.Equal(CelTokenType.Number, tokens[2].Type);
+    }
 }

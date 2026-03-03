@@ -535,7 +535,9 @@ public class CelExpressionTests
 
     [Theory]
     [InlineData("5 + 3", 8)]
+    [InlineData("5+3", 8)]
     [InlineData("10.5 + 5.5", 16.0)]
+    [InlineData("10.5+5.5", 16.0)]
     public void Evaluate_AddOperator_WithNumericTypes_ReturnsSum(string expression, double expected)
     {
         var expr = CelExpression.Parse(expression);
@@ -570,10 +572,18 @@ public class CelExpressionTests
 
     [Theory]
     [InlineData("10 - 5", 5)]
+    [InlineData("10-5", 5)]
     [InlineData("100 - 50", 50)]
+    [InlineData("100-50", 50)]
     [InlineData("0 - 10", -10)]
+    [InlineData("0-10", -10)]
     [InlineData("5 - 5", 0)]
+    [InlineData("5-5", 0)]
     [InlineData("20 - 10 - 5", 5)]
+    [InlineData("20-10-5", 5)]
+    [InlineData("20-10- 5", 5)]
+    [InlineData("20-10 -5", 5)]
+    [InlineData("20-10 - 5", 5)]
     public void Evaluate_SubtractOperator_WithIntegers_ReturnsCorrectResult(string expression, int expected)
     {
         var expr = CelExpression.Parse(expression);

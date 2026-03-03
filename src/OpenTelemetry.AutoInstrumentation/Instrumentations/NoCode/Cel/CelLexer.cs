@@ -33,8 +33,36 @@ internal static class CelLexer
                 continue;
             }
 
-            // Numbers
-            if (char.IsDigit(c) || (c == '-' && position + 1 < input.Length && char.IsDigit(input[position + 1])))
+            // Numbers (including negative numbers)
+            // Treat '-' as part of a negative number only if:
+            // - It's at the start of the expression, OR
+            // - The previous token is an operator (not a value like Number, Identifier, or RightParen/RightBracket)
+            var canBeNegativeNumber = c == '-' && position + 1 < input.Length && char.IsDigit(input[position + 1]);
+            if (canBeNegativeNumber)
+            {
+                CelTokenType? lastToken = tokens.Count > 0 ? tokens[tokens.Count - 1].Type : null;
+                canBeNegativeNumber = lastToken is null
+                    or CelTokenType.LeftParen
+                    or CelTokenType.LeftBracket
+                    or CelTokenType.Comma
+                    or CelTokenType.Question
+                    or CelTokenType.Colon
+                    or CelTokenType.Equal
+                    or CelTokenType.NotEqual
+                    or CelTokenType.LessThan
+                    or CelTokenType.LessThanOrEqual
+                    or CelTokenType.GreaterThan
+                    or CelTokenType.GreaterThanOrEqual
+                    or CelTokenType.And
+                    or CelTokenType.Or
+                    or CelTokenType.Plus
+                    or CelTokenType.Minus
+                    or CelTokenType.Multiply
+                    or CelTokenType.Divide
+                    or CelTokenType.Modulo;
+            }
+
+            if (char.IsDigit(c) || canBeNegativeNumber)
             {
                 tokens.Add(ReadNumber(input, ref position));
                 continue;
