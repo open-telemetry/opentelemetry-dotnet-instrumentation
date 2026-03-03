@@ -1031,9 +1031,9 @@ public class CelExpressionTests
     [Fact]
     public void Evaluate_GetIndexValue_WithIList_ReturnsCorrectValue()
     {
-        var listArguments = new System.Collections.Generic.List<string> { "first", "second" };
-        var arguments = listArguments.ToArray();
-        var expr = CelExpression.Parse("arguments[1]");
+        var listArguments = new List<string> { "first", "second" };
+        var arguments = new object?[] { listArguments };
+        var expr = CelExpression.Parse("arguments[0][1]");
         var context = new NoCodeExpressionContext(null, arguments, null, null, null);
 
         var result = expr!.Evaluate(context);
@@ -1068,7 +1068,7 @@ public class CelExpressionTests
     [Fact]
     public void Evaluate_GetIndexValue_WithIListNegativeIndex_ReturnsNull()
     {
-        var list = new System.Collections.Generic.List<string> { "a", "b", "c" };
+        var list = new List<string> { "a", "b", "c" };
         var arguments = new object[] { list };
         var expr = CelExpression.Parse("arguments[0][-1]");
         var context = new NoCodeExpressionContext(null, arguments, null, null, null);
@@ -1081,7 +1081,7 @@ public class CelExpressionTests
     [Fact]
     public void Evaluate_GetIndexValue_WithIListOutOfBounds_ReturnsNull()
     {
-        var list = new System.Collections.Generic.List<string> { "a", "b" };
+        var list = new List<string> { "a", "b" };
         var arguments = new object[] { list };
         var expr = CelExpression.Parse("arguments[0][10]");
         var context = new NoCodeExpressionContext(null, arguments, null, null, null);
