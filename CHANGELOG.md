@@ -9,6 +9,11 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 
 ### Added
 
+- Add support for file-based configuration file format version `1.0`.
+- Add support for `OTEL_CONFIG_FILE` environment variable for file-based configuration.
+  This variable takes precedence over the deprecated
+  `OTEL_EXPERIMENTAL_CONFIG_FILE` environment variable.
+
 ### Changed
 
 - MongoDB instrumentation is updated to comply with v1.39.0 Semantic Convention
@@ -20,6 +25,9 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 #### Dependency updates
 
 ### Deprecated
+
+- `OTEL_EXPERIMENTAL_CONFIG_FILE` environment variable for file-based
+  configuration is deprecated. Use `OTEL_CONFIG_FILE` instead.
 
 ### Removed
 

@@ -3,6 +3,7 @@
 
 using OpenTelemetry.AutoInstrumentation.Configurations.FileBasedConfiguration;
 using OpenTelemetry.AutoInstrumentation.Configurations.FileBasedConfiguration.Parser;
+using OpenTelemetry.AutoInstrumentation.Logging;
 
 namespace OpenTelemetry.AutoInstrumentation.Configurations;
 
@@ -13,6 +14,7 @@ internal abstract class Settings
 {
     private static readonly bool IsYamlConfigEnabled = Environment.GetEnvironmentVariable(ConfigurationKeys.FileBasedConfiguration.Enabled) == "true";
     private static readonly Lazy<YamlConfiguration> YamlConfiguration = new(ReadYamlConfiguration);
+    private static readonly IOtelLogger Logger = OtelLogging.GetLogger();
 
     public static T FromDefaultSources<T>(bool failFast)
         where T : Settings, new()
@@ -58,7 +60,28 @@ internal abstract class Settings
 
     private static YamlConfiguration ReadYamlConfiguration()
     {
-        var configFile = Environment.GetEnvironmentVariable(ConfigurationKeys.FileBasedConfiguration.FileName) ?? "config.yaml";
+        var experimentalConfigFile = Environment.GetEnvironmentVariable(ConfigurationKeys.FileBasedConfiguration.ExperimentalFileName);
+
+        var configFile = Environment.GetEnvironmentVariable(ConfigurationKeys.FileBasedConfiguration.FileName);
+
+        if (!string.IsNullOrEmpty(configFile))
+        {
+            if (!string.IsNullOrEmpty(experimentalConfigFile))
+            {
+                Logger.Warning("Both OTEL_EXPERIMENTAL_CONFIG_FILE (deprecated) and OTEL_CONFIG_FILE are set. " +
+                    "Using OTEL_CONFIG_FILE and ignoring the deprecated variable.");
+            }
+        }
+        else if (!string.IsNullOrEmpty(experimentalConfigFile))
+        {
+            Logger.Warning("OTEL_EXPERIMENTAL_CONFIG_FILE is deprecated. Please use OTEL_CONFIG_FILE instead.");
+            configFile = experimentalConfigFile;
+        }
+        else
+        {
+            configFile = "config.yaml";
+        }
+
         // TODO validate file existence
 
         var config = Parser.ParseYaml<YamlConfiguration>(configFile);

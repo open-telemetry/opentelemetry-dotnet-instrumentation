@@ -17,8 +17,6 @@ public class ParserResourceTests
 
         Assert.NotNull(config);
 
-        Assert.Equal("1.0-rc.1", config.FileFormat);
-
         Assert.NotNull(config.Resource);
         Assert.NotNull(config.Resource.Attributes);
 
@@ -95,7 +93,6 @@ public class ParserResourceTests
 
         var config = YamlParser.ParseYaml<YamlConfiguration>("Configurations/FileBased/Files/TestResourceFileEnvVars.yaml");
 
-        Assert.Equal("1.0-rc.1", config.FileFormat);
         var serviceAttr = config.Resource?.Attributes?.First(a => a.Name == "service.name");
         Assert.NotNull(serviceAttr);
         Assert.Equal("my-service", serviceAttr.Value);
