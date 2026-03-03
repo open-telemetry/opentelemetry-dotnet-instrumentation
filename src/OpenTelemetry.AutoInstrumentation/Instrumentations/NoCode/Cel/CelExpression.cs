@@ -24,7 +24,7 @@ namespace OpenTelemetry.AutoInstrumentation.Instrumentations.NoCode.Cel;
 internal sealed class CelExpression
 {
     private static readonly IOtelLogger Log = OtelLogging.GetLogger();
-    private static readonly ConcurrentDictionary<(Type, string), PropertyInfo?> PropertyCache = new();
+    private static readonly ConcurrentDictionary<(Type, string), Func<object, object?>?> PropertyGetterCache = new();
 
     private readonly CelNode _root;
     private readonly string _rawExpression;
@@ -89,25 +89,33 @@ internal sealed class CelExpression
         var targetType = target.GetType();
         var cacheKey = (targetType, propertyName);
 
-        var property = PropertyCache.GetOrAdd(cacheKey, key =>
+        var propertyGetter = PropertyGetterCache.GetOrAdd(cacheKey, key =>
         {
             var prop = key.Item1.GetProperty(key.Item2, BindingFlags.Public | BindingFlags.Instance | BindingFlags.IgnoreCase);
             if (prop == null)
             {
                 Log.Debug("Property '{0}' not found on type '{1}'", key.Item2, key.Item1.FullName);
+                return null;
             }
 
-            return prop;
+            var getMethod = prop.GetGetMethod();
+            if (getMethod == null)
+            {
+                Log.Debug("Property '{0}' on type '{1}' has no getter", key.Item2, key.Item1.FullName);
+                return null;
+            }
+
+            return (Func<object, object?>)(obj => getMethod.Invoke(obj, null));
         });
 
-        if (property == null)
+        if (propertyGetter == null)
         {
             return null;
         }
 
         try
         {
-            return property.GetValue(target);
+            return propertyGetter(target);
         }
         catch (Exception ex)
         {
