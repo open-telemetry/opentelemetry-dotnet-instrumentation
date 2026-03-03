@@ -1040,6 +1040,18 @@ public class CelExpressionTests
     }
 
     [Fact]
+    public void Evaluate_PropertyAccess_WithIndexer_ReturnsNull()
+    {
+        var instance = new TestClassWithIndexer();
+        var expr = CelExpression.Parse("instance.Item");
+        var context = new NoCodeExpressionContext(instance, null, null, null, null);
+
+        var result = expr!.Evaluate(context);
+
+        Assert.Null(result);
+    }
+
+    [Fact]
     public void Evaluate_GetIndexValue_WithIList_ReturnsCorrectValue()
     {
         var listArguments = new List<string> { "first", "second" };
@@ -1205,6 +1217,21 @@ public class CelExpressionTests
 #pragma warning disable CA1822 // Mark members as static. Needed for tests.
         public string ThrowingProperty => throw new InvalidOperationException("Property access failed");
 #pragma warning restore CA1822 // Mark members as static. Needed for tests.
+    }
+
+    private sealed class TestClassWithIndexer
+    {
+        private readonly Dictionary<string, string> _data = new()
+        {
+            { "key1", "value1" },
+            { "key2", "value2" }
+        };
+
+        public string this[string key]
+        {
+            get => _data.TryGetValue(key, out var value) ? value : string.Empty;
+            set => _data[key] = value;
+        }
     }
 
     private sealed class ThrowingIndexerList : System.Collections.IList

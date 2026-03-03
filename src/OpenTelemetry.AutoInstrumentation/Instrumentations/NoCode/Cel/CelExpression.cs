@@ -125,6 +125,13 @@ internal sealed class CelExpression
                 }
             }
 
+            // Verify the getter has no parameters (i.e., it's not an indexer)
+            if (getMethod.GetParameters().Length > 0)
+            {
+                Log.Debug("Property '{0}' on type '{1}' is an indexer and cannot be accessed without parameters", key.Item2, key.Item1.FullName);
+                return null;
+            }
+
             return (Func<object, object?>)(obj => getMethod.Invoke(obj, null));
         });
 
