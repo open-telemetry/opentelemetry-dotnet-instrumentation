@@ -6,6 +6,7 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 using OpenTelemetry.AutoInstrumentation.CallTarget;
 using OpenTelemetry.AutoInstrumentation.Configurations;
+using OpenTelemetry.AutoInstrumentation.Logging;
 using OpenTelemetry.AutoInstrumentation.Util;
 
 namespace OpenTelemetry.AutoInstrumentation.Instrumentations.NoCode;
@@ -15,21 +16,19 @@ internal static class NoCodeIntegrationHelper
     private static readonly ActivitySource Source = new("OpenTelemetry.AutoInstrumentation.NoCode", AutoInstrumentationVersion.Version);
     private static readonly string[] GenericParameterClassNames = ["!0", "!1", "!2", "!3", "!4", "!5", "!6", "!7", "!8", "!9"];
     private static readonly string[] GenericParameterMethodNames = ["!!0", "!!1", "!!2", "!!3", "!!4", "!!5", "!!6", "!!7", "!!8", "!!9"];
+    private static readonly IOtelLogger Log = OtelLogging.GetLogger();
 
     internal static List<NoCodeInstrumentedMethod> NoCodeEntries { get; set; } = [];
 
     internal static CallTargetState OnMethodBegin()
     {
-        var method = GetFirstNonOtelAutoMethod();
-        var methodName = method?.Name;
-        var typeName = method?.DeclaringType?.FullName;
-        var assemblyName = method?.DeclaringType?.Assembly.GetName().Name;
-        var parameters = method?.GetParameters()!;
-        var noCodeEntry = NoCodeEntries.Single(x =>
-            x.Definition.TargetType == typeName &&
-            x.Definition.TargetMethod == methodName &&
-            x.Definition.TargetAssembly == assemblyName &&
-            CheckParameters(x.SignatureTypes, parameters));
+        var noCodeEntry = GetInstrumentedMethod();
+
+        if (noCodeEntry == null)
+        {
+            Log.Warning("NoCode OnMethodBegin: Could not find valid method in stack trace from NoCodeEntries list");
+            return CallTargetState.GetDefault();
+        }
 
         // TODO Consider execute some dynamic code to build name/span/attributes based on config and taking data from method parameters
         var activity = Source.StartActivity(name: noCodeEntry.SpanName, kind: noCodeEntry.ActivityKind, tags: noCodeEntry.Attributes);
@@ -155,21 +154,81 @@ internal static class NoCodeIntegrationHelper
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static MethodBase? GetFirstNonOtelAutoMethod()
+    private static NoCodeInstrumentedMethod? GetInstrumentedMethod()
     {
-        // Typically, the first method outside OpenTelemetry.AutoInstrumentation assembly is at skipFrames = 3
+        // Typically, the first method outside OpenTelemetry.AutoInstrumentation assembly is at skipFrames = 2 or 3
         // For some cases, compiler does not inline all OpenTelemetry.AutoInstrumentation methods, so we check up to skipFrames = 10
 
-        for (var skipFrames = 3; skipFrames < 10; skipFrames++)
+        for (var skipFrames = 2; skipFrames < 10; skipFrames++)
         {
             var method = new StackFrame(skipFrames).GetMethod();
-            var assemblyName = method?.DeclaringType?.Assembly.GetName().Name;
-            if (assemblyName != null && !assemblyName.Equals("OpenTelemetry.AutoInstrumentation", StringComparison.Ordinal))
+            if (method == null)
             {
-                return method;
+                // End of stack trace reached, no more frames to analyze
+                return null;
             }
+
+            var declaringType = method.DeclaringType;
+            var assemblyName = declaringType?.Assembly.GetName().Name;
+            var typeName = declaringType?.FullName;
+            var methodName = method.Name;
+
+            // Skip methods with no declaring type or assembly (dynamically generated methods, like <unknown>.NoCodeIntegration0.OnMethodBegin)
+            if (declaringType == null || string.IsNullOrEmpty(assemblyName))
+            {
+                continue;
+            }
+
+            if (assemblyName!.Equals("OpenTelemetry.AutoInstrumentation", StringComparison.Ordinal))
+            {
+                continue;
+            }
+
+            // Skip compiler-generated types (async state machines like Program+<Main>d__0,
+            // iterators, closures like <>c__DisplayClass0_0).
+            // In Release mode on .NET Framework, async state machine MoveNext methods
+            // appear in the stack instead of the original user method.
+            if (IsCompilerGeneratedType(declaringType))
+            {
+                continue;
+            }
+
+            var parameters = method.GetParameters();
+
+            // Only accept methods that exist in NoCodeEntries list
+            var noCodeEntry = NoCodeEntries.SingleOrDefault(x =>
+                x.Definition.TargetType == typeName &&
+                x.Definition.TargetMethod == methodName &&
+                x.Definition.TargetAssembly == assemblyName &&
+                CheckParameters(x.SignatureTypes, parameters));
+
+            if (noCodeEntry == null)
+            {
+                continue;
+            }
+
+            return noCodeEntry;
         }
 
         return null;
+    }
+
+    private static bool IsCompilerGeneratedType(Type type)
+    {
+        // Per Microsoft naming conventions: Identifiers shouldn't contain two consecutive underscore (_) characters.
+        // Those names are reserved for compiler-generated identifiers.
+        // This covers async state machines (e.g., <Main>d__0), closures (e.g., <>c__DisplayClass0_0), etc.
+        // https://learn.microsoft.com/en-us/dotnet/csharp/fundamentals/coding-style/identifier-names#naming-conventions
+        var typeName = type.Name;
+#if NET
+        if (typeName.Contains("__", StringComparison.Ordinal))
+#else
+        if (typeName.IndexOf("__", StringComparison.Ordinal) >= 0)
+#endif
+        {
+            return true;
+        }
+
+        return type.IsDefined(typeof(CompilerGeneratedAttribute), false);
     }
 }
