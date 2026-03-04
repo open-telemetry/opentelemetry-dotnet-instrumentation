@@ -57,6 +57,12 @@ internal sealed class CelBinaryOperatorNode : CelNode
             return false;
         }
 
+        // Boolean comparison
+        if (left is bool leftBool && right is bool rightBool)
+        {
+            return leftBool == rightBool;
+        }
+
         // Numeric comparison
         if (IsNumeric(left) && IsNumeric(right))
         {

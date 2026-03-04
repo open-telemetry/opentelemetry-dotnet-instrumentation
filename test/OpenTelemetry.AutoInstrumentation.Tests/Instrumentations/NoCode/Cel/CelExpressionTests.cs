@@ -183,6 +183,11 @@ public class CelExpressionTests
     [InlineData("1 == 2", false)]
     [InlineData("\"a\" == \"a\"", true)]
     [InlineData("\"a\" == \"b\"", false)]
+    [InlineData("true == true", true)]
+    [InlineData("true == false", false)]
+    [InlineData("false == false", true)]
+    [InlineData("true != false", true)]
+    [InlineData("true != true", false)]
     public void Evaluate_Equality_ReturnsCorrectResult(string expression, bool expected)
     {
         var expr = CelExpression.Parse(expression);
@@ -191,6 +196,21 @@ public class CelExpressionTests
         var result = expr!.Evaluate(context);
 
         Assert.Equal(expected, result);
+    }
+
+    [Fact]
+    public void Evaluate_Equality_BooleanWithContext_ReturnsCorrectResult()
+    {
+        var returnValue = new TestClassWithSuccess { Success = true };
+        var expr1 = CelExpression.Parse("return.Success == true");
+        var expr2 = CelExpression.Parse("return.Success == false");
+        var context = CreateContext(returnValue: returnValue);
+
+        var result1 = expr1!.Evaluate(context);
+        var result2 = expr2!.Evaluate(context);
+
+        Assert.Equal(true, result1);
+        Assert.Equal(false, result2);
     }
 
     [Theory]
