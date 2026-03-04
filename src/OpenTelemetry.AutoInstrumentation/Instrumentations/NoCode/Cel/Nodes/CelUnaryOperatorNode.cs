@@ -23,22 +23,9 @@ internal sealed class CelUnaryOperatorNode : CelNode
 
         return _operator switch
         {
-            "!" => !IsTrue(operand),
+            "!" => !CelHelpers.IsTrue(operand),
             "-" => Negate(operand),
             _ => null
-        };
-    }
-
-    private static bool IsTrue(object? value)
-    {
-        return value switch
-        {
-            bool b => b,
-            string s => !string.IsNullOrEmpty(s),
-            int i => i != 0,
-            long l => l != 0,
-            null => false,
-            _ => true
         };
     }
 

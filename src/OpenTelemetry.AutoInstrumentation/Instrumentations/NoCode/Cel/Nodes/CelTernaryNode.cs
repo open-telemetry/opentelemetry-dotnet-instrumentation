@@ -22,15 +22,7 @@ internal sealed class CelTernaryNode : CelNode
     public override object? Evaluate(NoCodeExpressionContext context)
     {
         var condition = _condition.Evaluate(context);
-        var isTrue = condition switch
-        {
-            bool b => b,
-            string s => !string.IsNullOrEmpty(s),
-            int i => i != 0,
-            long l => l != 0,
-            null => false,
-            _ => true
-        };
+        var isTrue = CelHelpers.IsTrue(condition);
 
         return isTrue ? _trueValue.Evaluate(context) : _falseValue.Evaluate(context);
     }

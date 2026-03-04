@@ -34,8 +34,8 @@ internal sealed class CelBinaryOperatorNode : CelNode
             ">" => CompareGreaterThan(left, right),
             "<=" => !CompareGreaterThan(left, right),
             ">=" => !CompareLessThan(left, right),
-            "&&" => IsTrue(left) && IsTrue(right),
-            "||" => IsTrue(left) || IsTrue(right),
+            "&&" => CelHelpers.IsTrue(left) && CelHelpers.IsTrue(right),
+            "||" => CelHelpers.IsTrue(left) || CelHelpers.IsTrue(right),
             "+" => Add(left, right),
             "-" => Subtract(left, right),
             "*" => Multiply(left, right),
@@ -121,21 +121,6 @@ internal sealed class CelBinaryOperatorNode : CelNode
     private static bool IsNumeric(object value)
     {
         return value is int or long or float or double or decimal or byte or short or uint or ulong or ushort or sbyte;
-    }
-
-    private static bool IsTrue(object? value)
-    {
-        return value switch
-        {
-            bool b => b,
-            string s => !string.IsNullOrEmpty(s),
-            int i => i != 0,
-            long l => l != 0,
-            double d => Math.Abs(d) > double.Epsilon,
-            float f => Math.Abs(f) > float.Epsilon,
-            null => false,
-            _ => true
-        };
     }
 
     private static object? Add(object? left, object? right)
