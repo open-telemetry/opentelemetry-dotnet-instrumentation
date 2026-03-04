@@ -214,6 +214,21 @@ public class CelExpressionTests
     }
 
     [Theory]
+    [InlineData("false <= false == false", false)]
+    [InlineData("true >= true == true", true)]
+    [InlineData("1 < 2 == true", true)]
+    [InlineData("5 > 3 != false", true)]
+    public void Evaluate_MixedRelationOperators_SamePrecedence_ReturnsCorrectResult(string expression, bool expected)
+    {
+        var expr = CelExpression.Parse(expression);
+        var context = CreateContext();
+
+        var result = expr!.Evaluate(context);
+
+        Assert.Equal(expected, result);
+    }
+
+    [Theory]
     [InlineData("1 < 2", true)]
     [InlineData("2 < 1", false)]
     [InlineData("1 <= 1", true)]

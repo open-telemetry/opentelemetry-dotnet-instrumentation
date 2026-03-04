@@ -89,37 +89,23 @@ internal sealed class CelParser
 
     private CelNode ParseLogicalAnd()
     {
-        var left = ParseEquality();
+        var left = ParseRelation();
 
         while (Match(CelTokenType.And))
         {
             var op = Consume();
-            var right = ParseEquality();
+            var right = ParseRelation();
             left = new CelBinaryOperatorNode(left, op.Value, right);
         }
 
         return left;
     }
 
-    private CelNode ParseEquality()
-    {
-        var left = ParseRelational();
-
-        while (Match(CelTokenType.Equal, CelTokenType.NotEqual))
-        {
-            var op = Consume();
-            var right = ParseRelational();
-            left = new CelBinaryOperatorNode(left, op.Value, right);
-        }
-
-        return left;
-    }
-
-    private CelNode ParseRelational()
+    private CelNode ParseRelation()
     {
         var left = ParseAdditive();
 
-        while (Match(CelTokenType.LessThan, CelTokenType.LessThanOrEqual, CelTokenType.GreaterThan, CelTokenType.GreaterThanOrEqual))
+        while (Match(CelTokenType.LessThan, CelTokenType.LessThanOrEqual, CelTokenType.GreaterThan, CelTokenType.GreaterThanOrEqual, CelTokenType.Equal, CelTokenType.NotEqual))
         {
             var op = Consume();
             var right = ParseAdditive();
