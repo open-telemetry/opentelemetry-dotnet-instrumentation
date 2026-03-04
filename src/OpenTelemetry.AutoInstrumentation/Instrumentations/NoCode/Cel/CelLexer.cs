@@ -107,8 +107,13 @@ internal static class CelLexer
                 return new CelToken(CelTokenType.String, sb.ToString(), startPos);
             }
 
-            if (c == '\\' && position + 1 < input.Length)
+            if (c == '\\')
             {
+                if (position + 1 >= input.Length)
+                {
+                    throw new InvalidOperationException($"Invalid escape sequence at end of string at position {position}");
+                }
+
                 position++;
                 var next = input[position];
                 sb.Append(next switch
@@ -119,7 +124,7 @@ internal static class CelLexer
                     '\\' => '\\',
                     '"' => '"',
                     '\'' => '\'',
-                    _ => next
+                    _ => throw new InvalidOperationException($"Invalid escape sequence '\\{next}' at position {position}")
                 });
                 position++;
             }

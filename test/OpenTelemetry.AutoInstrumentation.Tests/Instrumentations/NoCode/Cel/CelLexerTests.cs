@@ -30,9 +30,12 @@ public class CelLexerTests
     [InlineData("'world'", "world")]
     [InlineData("\"hello world\"", "hello world")]
     [InlineData("\"with\\\"quotes\"", "with\"quotes")]
+    [InlineData("'with\\'quotes'", "with'quotes")]
     [InlineData("\"with\\nnewline\"", "with\nnewline")]
+    [InlineData("\"with\\rcarriage\"", "with\rcarriage")]
     [InlineData("\"with\\ttab\"", "with\ttab")]
     [InlineData("\"with\\\\backslash\"", "with\\backslash")]
+    [InlineData("\"all\\n\\r\\t\\\\\\'\\\"escapes\"", "all\n\r\t\\'\"escapes")]
     public void Tokenize_StringLiterals_ReturnsCorrectValues(string input, string expectedValue)
     {
         var tokens = CelLexer.Tokenize(input);
@@ -231,5 +234,27 @@ public class CelLexerTests
         Assert.Equal(CelTokenType.Minus, tokens[1].Type);
         Assert.Equal("5", tokens[2].Value);
         Assert.Equal(CelTokenType.Number, tokens[2].Type);
+    }
+
+    [Theory]
+    [InlineData("\"invalid\\s\"", "Invalid escape sequence '\\s'")]
+    [InlineData("\"invalid\\x\"", "Invalid escape sequence '\\x'")]
+    [InlineData("\"invalid\\z\"", "Invalid escape sequence '\\z'")]
+    [InlineData("\"invalid\\a\"", "Invalid escape sequence '\\a'")]
+    [InlineData("\"invalid\\b\"", "Invalid escape sequence '\\b'")]
+    [InlineData("'invalid\\s'", "Invalid escape sequence '\\s'")]
+    public void Tokenize_InvalidEscapeSequence_ThrowsException(string input, string expectedMessageFragment)
+    {
+        var exception = Assert.Throws<InvalidOperationException>(() => CelLexer.Tokenize(input));
+        Assert.Contains(expectedMessageFragment, exception.Message, StringComparison.Ordinal);
+    }
+
+    [Theory]
+    [InlineData("\"trailing\\")]
+    [InlineData("'trailing\\")]
+    public void Tokenize_BackslashAtEndOfString_ThrowsException(string input)
+    {
+        var exception = Assert.Throws<InvalidOperationException>(() => CelLexer.Tokenize(input));
+        Assert.Contains("Invalid escape sequence at end of string", exception.Message, StringComparison.Ordinal);
     }
 }
