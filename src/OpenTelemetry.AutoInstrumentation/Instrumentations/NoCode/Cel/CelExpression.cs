@@ -2,9 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 using System.Collections.Concurrent;
-using System.Globalization;
 using System.Reflection;
-using System.Text;
 using OpenTelemetry.AutoInstrumentation.Logging;
 
 namespace OpenTelemetry.AutoInstrumentation.Instrumentations.NoCode.Cel;
