@@ -392,6 +392,7 @@ For more information about the maintainer role, see the [community repository](h
 
 ### Approvers
 
+- [Igor Kiselev](https://github.com/iskiselev), AppDynamics
 - [Mateusz &#x141;ach](https://github.com/lachmatt), Splunk
 - [Rasmus Kuusmann](https://github.com/RassK), Splunk
 
