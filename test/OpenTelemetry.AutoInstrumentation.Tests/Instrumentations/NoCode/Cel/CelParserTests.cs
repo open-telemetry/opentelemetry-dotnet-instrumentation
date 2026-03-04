@@ -109,6 +109,28 @@ public class CelParserTests
         var node = parser.Parse();
 
         Assert.NotNull(node);
+        Assert.IsType<CelTernaryNode>(node);
+    }
+
+    [Fact]
+    public void Parse_TernaryWithParenthesesInTrueBranch_ParsesCorrectly()
+    {
+        var tokens = CelLexer.Tokenize("a ? (b ? c : d) : e");
+        var parser = new CelParser(tokens);
+
+        var node = parser.Parse();
+
+        Assert.NotNull(node);
+        Assert.IsType<CelTernaryNode>(node);
+    }
+
+    [Fact]
+    public void Parse_NestedTernaryInTrueBranchWithoutParentheses_ThrowsException()
+    {
+        var tokens = CelLexer.Tokenize("true ? true ? 1 : 3 : 2");
+        var parser = new CelParser(tokens);
+
+        Assert.Throws<InvalidOperationException>(() => parser.Parse());
     }
 
     [Fact]

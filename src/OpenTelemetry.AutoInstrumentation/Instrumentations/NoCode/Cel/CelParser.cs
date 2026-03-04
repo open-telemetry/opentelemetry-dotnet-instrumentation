@@ -64,7 +64,7 @@ internal sealed class CelParser
         if (Match(CelTokenType.Question))
         {
             Consume();
-            var trueExpr = ParseTernary();
+            var trueExpr = ParseLogicalOr();
             Consume(CelTokenType.Colon);
             var falseExpr = ParseTernary();
             return new CelTernaryNode(expr, trueExpr, falseExpr);
