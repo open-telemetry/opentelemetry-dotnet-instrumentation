@@ -41,7 +41,7 @@ internal class NoCodeStatusRule
     /// <returns>True if the condition is met, false otherwise.</returns>
     public bool EvaluateCondition(NoCodeExpressionContext context)
     {
-        object? result = Condition.Evaluate(context);
+        var result = Condition.Evaluate(context);
 
         // Convert result to boolean
         return result switch
