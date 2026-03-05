@@ -299,28 +299,6 @@ public class CelExpressionTests
     }
 
     [Fact]
-    public void Evaluate_Concat_ConcatenatesStrings()
-    {
-        var expr = CelExpression.Parse("concat(\"hello\", \" \", \"world\")");
-        var context = CreateContext();
-
-        var result = expr!.Evaluate(context);
-
-        Assert.Equal("hello world", result);
-    }
-
-    [Fact]
-    public void Evaluate_Coalesce_ReturnsFirstNonNull()
-    {
-        var expr = CelExpression.Parse("coalesce(null, null, \"found\", \"ignored\")");
-        var context = CreateContext();
-
-        var result = expr!.Evaluate(context);
-
-        Assert.Equal("found", result);
-    }
-
-    [Fact]
     public void Evaluate_Substring_ReturnsSubstring()
     {
         var expr = CelExpression.Parse("substring(\"hello world\", 6)");
@@ -401,13 +379,13 @@ public class CelExpressionTests
     [Fact]
     public void Evaluate_ComplexExpression_WithFunctions()
     {
-        var expr = CelExpression.Parse("concat(\"Status: \", return.Success ? \"OK\" : \"Failed\")");
-        var returnValue = new TestClassWithSuccess { Success = true };
+        var expr = CelExpression.Parse("size(return.Name) > 3 && startsWith(return.Name, \"Test\")");
+        var returnValue = new TestClass { Name = "TestValue" };
         var context = CreateContext(returnValue: returnValue);
 
         var result = expr!.Evaluate(context);
 
-        Assert.Equal("Status: OK", result);
+        Assert.Equal(true, result);
     }
 
     [Theory]
@@ -871,19 +849,6 @@ public class CelExpressionTests
         var result = expr!.Evaluate(context);
 
         Assert.Equal(string.Empty, result);
-    }
-
-    [Theory]
-    [InlineData("coalesce(null, null, \"default\")", "default")]
-    [InlineData("coalesce()", null)]
-    public void Evaluate_CoalesceFunction_WithMultipleNulls_ReturnsFirstNonNull(string expression, object? expected)
-    {
-        var expr = CelExpression.Parse(expression);
-        var context = new NoCodeExpressionContext(null, null, null, null, null);
-
-        var result = expr!.Evaluate(context);
-
-        Assert.Equal(expected, result);
     }
 
     [Fact]

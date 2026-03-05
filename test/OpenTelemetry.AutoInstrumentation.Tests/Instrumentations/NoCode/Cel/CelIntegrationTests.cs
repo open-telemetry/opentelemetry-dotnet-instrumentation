@@ -27,7 +27,7 @@ public class CelIntegrationTests
     [Fact]
     public void Scenario_BuildSpanNameFromArguments()
     {
-        var expr = CelExpression.Parse("concat(\"ProcessOrder.\", arguments[0].OrderId)");
+        var expr = CelExpression.Parse("\"ProcessOrder.\" + arguments[0].OrderId");
         var order = new Order { OrderId = "ORD-12345" };
         var context = CreateContext(arguments: [order]);
 
@@ -67,7 +67,7 @@ public class CelIntegrationTests
     [Fact]
     public void Scenario_CoalesceCustomerNameWithDefault()
     {
-        var expr = CelExpression.Parse("coalesce(arguments[0].Customer.Name, \"Anonymous\")");
+        var expr = CelExpression.Parse("arguments[0].Customer.Name != null ? arguments[0].Customer.Name : \"Anonymous\"");
         var order = new Order { OrderId = "ORD-12345", Customer = null };
         var context = CreateContext(arguments: [order]);
 
@@ -103,7 +103,7 @@ public class CelIntegrationTests
     [Fact]
     public void Scenario_BuildResourceIdentifier()
     {
-        var expr = CelExpression.Parse("concat(\"Order-\", arguments[0].OrderId, \"-\", arguments[1])");
+        var expr = CelExpression.Parse("\"Order-\" + arguments[0].OrderId + \"-\" + arguments[1]");
         var order = new Order { OrderId = "12345" };
         var context = CreateContext(arguments: [order, "Payment"]);
 
@@ -139,7 +139,7 @@ public class CelIntegrationTests
     [Fact]
     public void Scenario_ExtractMethodAndTypeName()
     {
-        var expr = CelExpression.Parse("concat(type, \".\", method)");
+        var expr = CelExpression.Parse("type + \".\" + method");
         var context = CreateContext(methodName: "ProcessOrder", typeName: "OrderService");
 
         var result = expr!.Evaluate(context);

@@ -60,7 +60,7 @@ public class CelParserTests
     [Fact]
     public void Parse_FunctionCall_ReturnsFunctionCallNode()
     {
-        var tokens = CelLexer.Tokenize("concat(\"a\", \"b\")");
+        var tokens = CelLexer.Tokenize("substring(\"a\", 0, 1)");
         var parser = new CelParser(tokens);
 
         var node = parser.Parse();

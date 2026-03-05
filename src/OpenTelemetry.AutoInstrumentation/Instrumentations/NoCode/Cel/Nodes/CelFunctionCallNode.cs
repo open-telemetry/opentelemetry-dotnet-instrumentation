@@ -6,7 +6,7 @@ using System.Text;
 namespace OpenTelemetry.AutoInstrumentation.Instrumentations.NoCode.Cel;
 
 /// <summary>
-/// Represents a function call (e.g., concat("a", "b")).
+/// Represents a function call (e.g., substring("a", 0, 4)).
 /// </summary>
 internal sealed class CelFunctionCallNode : CelNode
 {
@@ -23,8 +23,6 @@ internal sealed class CelFunctionCallNode : CelNode
     {
         return _functionName switch
         {
-            "concat" => EvaluateConcat(context),
-            "coalesce" => EvaluateCoalesce(context),
             "substring" => EvaluateSubstring(context),
             "string" => EvaluateString(context),
             "size" => EvaluateSize(context),
@@ -33,35 +31,6 @@ internal sealed class CelFunctionCallNode : CelNode
             "contains" => EvaluateContains(context),
             _ => null
         };
-    }
-
-    private string EvaluateConcat(NoCodeExpressionContext context)
-    {
-        var sb = new StringBuilder();
-        foreach (var arg in _arguments)
-        {
-            var value = arg.Evaluate(context);
-            if (value != null)
-            {
-                sb.Append(value);
-            }
-        }
-
-        return sb.ToString();
-    }
-
-    private object? EvaluateCoalesce(NoCodeExpressionContext context)
-    {
-        foreach (var arg in _arguments)
-        {
-            var value = arg.Evaluate(context);
-            if (value != null)
-            {
-                return value;
-            }
-        }
-
-        return null;
     }
 
     private string EvaluateSubstring(NoCodeExpressionContext context)

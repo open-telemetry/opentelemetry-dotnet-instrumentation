@@ -119,10 +119,10 @@ public class CelLexerTests
     [Fact]
     public void Tokenize_FunctionCall_ReturnsCorrectTokens()
     {
-        var tokens = CelLexer.Tokenize("concat(\"hello\", \"world\")");
+        var tokens = CelLexer.Tokenize("startsWith(\"hello\", \"world\")");
 
-        Assert.Equal(7, tokens.Count); // concat ( "hello" , "world" ) EOF
-        Assert.Equal("concat", tokens[0].Value);
+        Assert.Equal(7, tokens.Count); // startsWith ( "hello" , "world" ) EOF
+        Assert.Equal("startsWith", tokens[0].Value);
         Assert.Equal("hello", tokens[2].Value);
         Assert.Equal("world", tokens[4].Value);
     }
