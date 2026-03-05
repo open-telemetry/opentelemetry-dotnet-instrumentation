@@ -114,7 +114,7 @@ public class CelOperatorPrecedenceTests
     {
         var expr = CelExpression.Parse("arguments[0].Value > 10 && arguments[0].Value < 20");
         var obj = new TestClass { Value = 15 };
-        var context = CreateContext(arguments: new object?[] { obj });
+        var context = CreateContext(arguments: [obj]);
 
         var result = expr!.Evaluate(context);
 
@@ -126,7 +126,7 @@ public class CelOperatorPrecedenceTests
     {
         var expr = CelExpression.Parse("size(arguments[0]) > 2");
         var array = new[] { "a", "b", "c", "d" };
-        var context = CreateContext(arguments: new object?[] { array });
+        var context = CreateContext(arguments: [array]);
 
         var result = expr!.Evaluate(context);
 

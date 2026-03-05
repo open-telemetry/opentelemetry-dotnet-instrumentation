@@ -35,7 +35,7 @@ public class CelErrorHandlingTests
     public void Evaluate_IndexOutOfRange_ReturnsNull()
     {
         var expr = CelExpression.Parse("arguments[100]");
-        var context = CreateContext(arguments: new object?[] { "a", "b" });
+        var context = CreateContext(arguments: ["a", "b"]);
 
         var result = expr!.Evaluate(context);
 
@@ -46,7 +46,7 @@ public class CelErrorHandlingTests
     public void Evaluate_NegativeIndex_ReturnsNull()
     {
         var expr = CelExpression.Parse("arguments[-1]");
-        var context = CreateContext(arguments: new object?[] { "a", "b", "c" });
+        var context = CreateContext(arguments: ["a", "b", "c"]);
 
         var result = expr!.Evaluate(context);
 
@@ -70,7 +70,7 @@ public class CelErrorHandlingTests
     {
         var expr = CelExpression.Parse("arguments[0].Nested.Value");
         var obj = new TestClass { Nested = null };
-        var context = CreateContext(arguments: new object?[] { obj });
+        var context = CreateContext(arguments: [obj]);
 
         var result = expr!.Evaluate(context);
 
@@ -81,7 +81,7 @@ public class CelErrorHandlingTests
     public void Evaluate_NullComparison_HandlesCorrectly()
     {
         var expr = CelExpression.Parse("arguments[0] == null");
-        var context = CreateContext(arguments: new object?[] { null });
+        var context = CreateContext(arguments: [null]);
 
         var result = expr!.Evaluate(context);
 

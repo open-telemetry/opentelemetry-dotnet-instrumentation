@@ -146,7 +146,7 @@ public class CelExpressionTests
     public void Evaluate_IndexAccess_ReturnsElement()
     {
         var expr = CelExpression.Parse("arguments[1]");
-        var context = CreateContext(arguments: new object?[] { "a", "b", "c" });
+        var context = CreateContext(arguments: ["a", "b", "c"]);
 
         var result = expr!.Evaluate(context);
 
@@ -171,7 +171,7 @@ public class CelExpressionTests
         var expr = CelExpression.Parse("arguments[0].Nested.Name");
         var nested = new TestClass { Name = "NestedValue" };
         var obj = new TestClassWithNested { Nested = nested };
-        var context = CreateContext(arguments: new object?[] { obj });
+        var context = CreateContext(arguments: [obj]);
 
         var result = expr!.Evaluate(context);
 
@@ -391,7 +391,7 @@ public class CelExpressionTests
     {
         var expr = CelExpression.Parse("arguments[0] != null && arguments[0].Value > 10");
         var obj = new TestClassWithValue { Value = 15 };
-        var context = CreateContext(arguments: new object?[] { obj });
+        var context = CreateContext(arguments: [obj]);
 
         var result = expr!.Evaluate(context);
 
@@ -838,7 +838,7 @@ public class CelExpressionTests
     {
         // CEL is case-sensitive; function names must be lowercase
         var expr = CelExpression.Parse(expression);
-        var context = CreateContext(arguments: new object[] { "test" });
+        var context = CreateContext(arguments: ["test"]);
 
         var result = expr!.Evaluate(context);
 

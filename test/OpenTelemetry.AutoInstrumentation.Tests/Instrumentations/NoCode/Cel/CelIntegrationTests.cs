@@ -17,7 +17,7 @@ public class CelIntegrationTests
     {
         var expr = CelExpression.Parse("arguments[0].OrderId");
         var order = new Order { OrderId = "ORD-12345", Amount = 99.99m };
-        var context = CreateContext(arguments: new object?[] { order });
+        var context = CreateContext(arguments: [order]);
 
         var result = expr!.Evaluate(context);
 
@@ -29,7 +29,7 @@ public class CelIntegrationTests
     {
         var expr = CelExpression.Parse("concat(\"ProcessOrder.\", arguments[0].OrderId)");
         var order = new Order { OrderId = "ORD-12345" };
-        var context = CreateContext(arguments: new object?[] { order });
+        var context = CreateContext(arguments: [order]);
 
         var result = expr!.Evaluate(context);
 
@@ -57,7 +57,7 @@ public class CelIntegrationTests
             OrderId = "ORD-12345",
             Customer = new Customer { Name = "John Doe", Email = "john@example.com" }
         };
-        var context = CreateContext(arguments: new object?[] { order });
+        var context = CreateContext(arguments: [order]);
 
         var result = expr!.Evaluate(context);
 
@@ -69,7 +69,7 @@ public class CelIntegrationTests
     {
         var expr = CelExpression.Parse("coalesce(arguments[0].Customer.Name, \"Anonymous\")");
         var order = new Order { OrderId = "ORD-12345", Customer = null };
-        var context = CreateContext(arguments: new object?[] { order });
+        var context = CreateContext(arguments: [order]);
 
         var result = expr!.Evaluate(context);
 
@@ -81,7 +81,7 @@ public class CelIntegrationTests
     {
         var expr = CelExpression.Parse("arguments[0].Amount > 100 ? \"high\" : \"normal\"");
         var order = new Order { OrderId = "ORD-12345", Amount = 150.00m };
-        var context = CreateContext(arguments: new object?[] { order });
+        var context = CreateContext(arguments: [order]);
 
         var result = expr!.Evaluate(context);
 
@@ -105,7 +105,7 @@ public class CelIntegrationTests
     {
         var expr = CelExpression.Parse("concat(\"Order-\", arguments[0].OrderId, \"-\", arguments[1])");
         var order = new Order { OrderId = "12345" };
-        var context = CreateContext(arguments: new object?[] { order, "Payment" });
+        var context = CreateContext(arguments: [order, "Payment"]);
 
         var result = expr!.Evaluate(context);
 
@@ -129,7 +129,7 @@ public class CelIntegrationTests
     {
         var expr = CelExpression.Parse("startsWith(arguments[0].Path, \"/api/v1/\")");
         var request = new ApiRequest { Path = "/api/v1/orders", Method = "GET" };
-        var context = CreateContext(arguments: new object?[] { request });
+        var context = CreateContext(arguments: [request]);
 
         var result = expr!.Evaluate(context);
 
@@ -160,7 +160,7 @@ public class CelIntegrationTests
             Amount = 1500.00m,
             Customer = new Customer { Name = "John Doe", IsPremium = true }
         };
-        var context = CreateContext(arguments: new object?[] { order });
+        var context = CreateContext(arguments: [order]);
 
         var result = expr!.Evaluate(context);
 
