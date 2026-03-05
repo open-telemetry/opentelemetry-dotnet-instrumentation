@@ -15,7 +15,7 @@ namespace OpenTelemetry.AutoInstrumentation;
 internal class IsolatedAssemblyLoadContext()
     : AssemblyLoadContext(StartupHookConstants.IsolatedAssemblyLoadContextName, isCollectible: false)
 {
-    // TODO we may want to define variables for Exlude and Include list (exclude supplements to default excludes, includes overrides)
+    // TODO we may want to define variables for Exclude and Include list (exclude supplements to default excludes, includes overrides)
     // TODO which will give flexibility for the customer if they know what they are doing;
     // TODO also we can automtically add to excludes, if an assembly failed to load in custom ALC so we won't fail it over and over
     private static readonly HashSet<string> MustUseDefaultAlc = new(StringComparer.OrdinalIgnoreCase) { "System.Private.CoreLib" };

@@ -46,9 +46,9 @@ internal static partial class ManagedProfilerLocationHelper
 
         // Framework Order: 1. RuntimeDir -> 2. VersionDir -> 3. Link (in VersionDir)
         // For .NET Framework most of the assembblies are common, so we
-        // 3. first start with runtime root folder (tracer-home/netfx)
-        // 1. then check runtime version folder (e.g., tracer-home/netfx/net462)
-        // 2. last fallback to .link file in runtime version folder
+        // 1. first start with runtime root folder (tracer-home/netfx)
+        // 2. then check runtime version folder (e.g., tracer-home/netfx/net462)
+        // 3. last fallback to .link file in runtime version folder
         return Probe(runtimeDir, assemblyName) ??
                Probe(_managedProfilerVersionDirectory!, assemblyName) ??
                CheckLinkFile(_managedProfilerVersionDirectory!, runtimeDir, assemblyName, logger);
