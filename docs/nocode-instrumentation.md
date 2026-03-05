@@ -206,30 +206,15 @@ The expression DSL supports functions for transforming and combining values.
 Functions can be used in the `source` property for attributes, in status rule
 conditions, or in the `name_source` property for dynamic span names.
 
-#### Function Categories
-
-Functions are divided into two categories:
-
-- **[Standard]** - Implemented from the CEL specification for compatibility
-- **[Extension]** - Custom functions added specifically for instrumentation scenarios
-
 #### Supported Functions
 
-| Function                          | Type      | Description                              | Example                                    |
-|-----------------------------------|-----------|------------------------------------------|--------------------------------------------|
-| `substring(str, start, [length])` | Extension | Extract substring                        | `substring(arguments[0], 0, 10)`           |
-| `string(value)`                   | Standard  | Convert value to string                  | `string(arguments[0].Id)`                  |
-| `size(value)`                     | Standard  | Get length/count of string, list, or map | `size(arguments[0].Items)`                 |
-| `startsWith(str, prefix)`         | Standard  | Check if string starts with prefix       | `startsWith(arguments[0].Path, "/api/")`   |
-| `endsWith(str, suffix)`           | Standard  | Check if string ends with suffix         | `endsWith(arguments[0].FileName, ".json")` |
-| `contains(str, substring)`        | Standard  | Check if string contains substring       | `contains(arguments[0].Message, "error")`  |
-
-> [!NOTE]  
-> Extension functions are custom additions specific to OpenTelemetry
-> instrumentation and are not portable to other CEL implementations.
-> Standard functions are implemented from the CEL specification for compatibility,
-> but this DSL only implements a subset of CEL - not all CEL standard functions
-> are available.
+| Function                   | Description                              | Example                                    |
+|----------------------------|------------------------------------------|--------------------------------------------|
+| `string(value)`            | Convert value to string                  | `string(arguments[0].Id)`                  |
+| `size(value)`              | Get length/count of string, list, or map | `size(arguments[0].Items)`                 |
+| `startsWith(str, prefix)`  | Check if string starts with prefix       | `startsWith(arguments[0].Path, "/api/")`   |
+| `endsWith(str, suffix)`    | Check if string ends with suffix         | `endsWith(arguments[0].FileName, ".json")` |
+| `contains(str, substring)` | Check if string contains substring       | `contains(arguments[0].Message, "error")`  |
 
 #### Function Expression Examples
 
@@ -251,15 +236,6 @@ attributes:
 attributes:
   - name: user.name
     source: arguments[0].DisplayName != null ? arguments[0].DisplayName : "anonymous"
-    type: string
-```
-
-**Extract substrings:**
-
-```yaml
-attributes:
-  - name: transaction.id.short
-    source: substring(arguments[0].TransactionId, 0, 8)
     type: string
 ```
 

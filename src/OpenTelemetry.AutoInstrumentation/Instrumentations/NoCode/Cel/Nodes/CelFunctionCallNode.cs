@@ -23,7 +23,6 @@ internal sealed class CelFunctionCallNode : CelNode
     {
         return _functionName switch
         {
-            "substring" => EvaluateSubstring(context),
             "string" => EvaluateString(context),
             "size" => EvaluateSize(context),
             "startsWith" => EvaluateStartsWith(context),
@@ -31,59 +30,6 @@ internal sealed class CelFunctionCallNode : CelNode
             "contains" => EvaluateContains(context),
             _ => null
         };
-    }
-
-    private string EvaluateSubstring(NoCodeExpressionContext context)
-    {
-        if (_arguments.Length < 2 || _arguments.Length > 3)
-        {
-            return string.Empty;
-        }
-
-        var str = _arguments[0].Evaluate(context)?.ToString();
-        if (string.IsNullOrEmpty(str))
-        {
-            return string.Empty;
-        }
-
-        var startObj = _arguments[1].Evaluate(context);
-        if (startObj is not int start)
-        {
-            return string.Empty;
-        }
-
-        // Handle out of range start index
-        if (start < 0)
-        {
-            return string.Empty;
-        }
-
-        if (start >= str!.Length)
-        {
-            return string.Empty;
-        }
-
-        if (_arguments.Length == 3)
-        {
-            var lengthObj = _arguments[2].Evaluate(context);
-            if (lengthObj is not int length)
-            {
-                return string.Empty;
-            }
-
-            if (length < 0)
-            {
-                return string.Empty;
-            }
-
-            // Clamp length to not exceed string bounds
-            var maxLength = str.Length - start;
-            var actualLength = Math.Min(length, maxLength);
-
-            return str.Substring(start, actualLength);
-        }
-
-        return str.Substring(start);
     }
 
     private string EvaluateString(NoCodeExpressionContext context)

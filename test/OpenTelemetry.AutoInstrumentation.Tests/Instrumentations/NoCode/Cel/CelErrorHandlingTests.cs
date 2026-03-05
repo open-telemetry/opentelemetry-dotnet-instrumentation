@@ -89,17 +89,6 @@ public class CelErrorHandlingTests
     }
 
     [Fact]
-    public void Evaluate_SubstringOutOfRange_ReturnsEmpty()
-    {
-        var expr = CelExpression.Parse("substring(\"hello\", 100)");
-        var context = CreateContext();
-
-        var result = expr!.Evaluate(context);
-
-        Assert.Equal(string.Empty, result);
-    }
-
-    [Fact]
     public void Evaluate_SizeOnNull_ReturnsNull()
     {
         var expr = CelExpression.Parse("size(null)");
