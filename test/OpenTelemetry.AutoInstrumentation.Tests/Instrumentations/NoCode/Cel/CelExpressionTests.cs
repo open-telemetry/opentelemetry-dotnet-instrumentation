@@ -830,6 +830,22 @@ public class CelExpressionTests
     }
 
     [Theory]
+    [InlineData("SIZE(arguments)")]
+    [InlineData("sizE(arguments)")]
+    [InlineData("StartsWith(\"hello\", \"h\")")]
+    [InlineData("SUBSTRING(\"hello\", 0, 2)")]
+    public void Evaluate_FunctionWithWrongCase_ReturnsNull(string expression)
+    {
+        // CEL is case-sensitive; function names must be lowercase
+        var expr = CelExpression.Parse(expression);
+        var context = CreateContext(arguments: new object[] { "test" });
+
+        var result = expr!.Evaluate(context);
+
+        Assert.Null(result);
+    }
+
+    [Theory]
     [InlineData("\"hello\\nworld\"", "hello\nworld")]
     [InlineData("\"tab\\there\"", "tab\there")]
     [InlineData("\"quote\\\"test\"", "quote\"test")]

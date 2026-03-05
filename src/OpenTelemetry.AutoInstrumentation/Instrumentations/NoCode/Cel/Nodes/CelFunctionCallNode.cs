@@ -21,16 +21,16 @@ internal sealed class CelFunctionCallNode : CelNode
 
     public override object? Evaluate(NoCodeExpressionContext context)
     {
-        return _functionName.ToUpperInvariant() switch
+        return _functionName switch
         {
-            "CONCAT" => EvaluateConcat(context),
-            "COALESCE" => EvaluateCoalesce(context),
-            "SUBSTRING" => EvaluateSubstring(context),
-            "STRING" => EvaluateString(context),
-            "SIZE" => EvaluateSize(context),
-            "STARTSWITH" => EvaluateStartsWith(context),
-            "ENDSWITH" => EvaluateEndsWith(context),
-            "CONTAINS" => EvaluateContains(context),
+            "concat" => EvaluateConcat(context),
+            "coalesce" => EvaluateCoalesce(context),
+            "substring" => EvaluateSubstring(context),
+            "string" => EvaluateString(context),
+            "size" => EvaluateSize(context),
+            "startsWith" => EvaluateStartsWith(context),
+            "endsWith" => EvaluateEndsWith(context),
+            "contains" => EvaluateContains(context),
             _ => null
         };
     }
