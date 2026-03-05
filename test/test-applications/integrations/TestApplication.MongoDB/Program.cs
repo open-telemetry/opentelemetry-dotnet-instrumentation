@@ -16,7 +16,9 @@ internal static class Program
         var mongoPort = GetMongoPort(args);
         var mongoDatabase = GetMongoDbName(args);
         var mongoCollection = GetMongoCollectionName(args);
+#if !MONGODB_3_7_0_OR_GREATER
         var shouldTriggerError = ShouldTriggerError(args);
+#endif
         var newDocument = new BsonDocument
         {
             { "name", "MongoDB" },
@@ -33,7 +35,7 @@ internal static class Program
 
         var connectionString = $"mongodb://{Host()}:{mongoPort}";
 
-#if MONGODB_3_OR_GREATER
+#if MONGODB_3_0_0_OR_GREATER
         using var client = new MongoClient(connectionString);
 #else
         var client = new MongoClient(connectionString);
@@ -41,6 +43,9 @@ internal static class Program
         var database = client.GetDatabase(mongoDatabase);
         var collection = database.GetCollection<BsonDocument>(mongoCollection);
 
+#if MONGODB_3_7_0_OR_GREATER
+        RunAsync(collection, newDocument).Wait();
+#else
         if (shouldTriggerError)
         {
             RunWithError(collection, newDocument);
@@ -50,8 +55,10 @@ internal static class Program
             Run(collection, newDocument);
             RunAsync(collection, newDocument).Wait();
         }
+#endif
     }
 
+#if !MONGODB_3_7_0_OR_GREATER
     public static void RunWithError(IMongoCollection<BsonDocument> collection, BsonDocument newDocument)
     {
         try
@@ -102,6 +109,12 @@ internal static class Program
         }
     }
 
+    private static bool ShouldTriggerError(string[] args)
+    {
+        return args.Any(arg => arg.Equals("--trigger-error", StringComparison.OrdinalIgnoreCase));
+    }
+#endif
+
     public static async Task RunAsync(IMongoCollection<BsonDocument> collection, BsonDocument newDocument)
     {
         var allFilter = new BsonDocument();
@@ -151,10 +164,5 @@ internal static class Program
         }
 
         return "employees";
-    }
-
-    private static bool ShouldTriggerError(string[] args)
-    {
-        return args.Any(arg => arg.Equals("--trigger-error", StringComparison.OrdinalIgnoreCase));
     }
 }

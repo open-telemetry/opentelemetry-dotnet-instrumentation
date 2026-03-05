@@ -7,9 +7,9 @@ internal static class MongoDBConstants
 {
     public const string IntegrationName = "MongoDB";
 
-    // 3.5.0 - 3.x.x
+    // 3.5.0 - 3.6.x
     public const string MinimumVersion35 = "3.5.0";
-    public const string MaximumVersion35 = "3.*.*";
+    public const string MaximumVersion35 = "3.6.*";
 
     // 3.0.0 - 3.4.x
     public const string AssemblyName3 = "MongoDB.Driver";

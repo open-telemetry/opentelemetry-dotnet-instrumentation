@@ -167,6 +167,7 @@ internal static class PackageVersionDefinitions
                 new("2.30.0", supportedTargetFrameworks: ["net10.0", "net9.0", "net8.0", "net462"], supportedExecutionFrameworks: ["net10.0", "net9.0", "net8.0", "net462"]),
                 new("3.0.0", supportedTargetFrameworks: ["net10.0", "net9.0", "net8.0", "net472"], supportedExecutionFrameworks: ["net10.0", "net9.0", "net8.0", "net462"]),
                 new("3.5.0", supportedTargetFrameworks: ["net10.0", "net9.0", "net8.0", "net472"], supportedExecutionFrameworks: ["net10.0", "net9.0", "net8.0", "net462"]),
+                new("3.7.0", supportedTargetFrameworks: ["net10.0", "net9.0", "net8.0", "net472"], supportedExecutionFrameworks: ["net10.0", "net9.0", "net8.0", "net462"]), // first version with native OTel support
                 new("*", supportedTargetFrameworks: ["net10.0", "net9.0", "net8.0", "net472"], supportedExecutionFrameworks: ["net10.0", "net9.0", "net8.0", "net462"])
             ]
         },
