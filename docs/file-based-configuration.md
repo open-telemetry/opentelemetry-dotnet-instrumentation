@@ -45,12 +45,13 @@ file-based configuration to include these parameters.
 
 ### General
 
-| Environment variable                                 | Description                                                                                                               |
-| ---------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
-| `OTEL_DOTNET_AUTO_HOME`                              | Installation location.                                                                                                    |
-| `OTEL_DOTNET_AUTO_EXCLUDE_PROCESSES`                 | Names of the executable files that the profiler cannot instrument.                                                        |
-| `OTEL_DOTNET_AUTO_OPENTRACING_ENABLED`               | Enables OpenTracing tracer.                                                                                               |
-| `OTEL_DOTNET_AUTO_REDIRECT_ENABLED`                  | Enables automatic redirection of the assemblies used by the automatic instrumentation.                                    |
+| Environment variable                                 | Description                                                                                                                                                                |
+| ---------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `OTEL_DOTNET_AUTO_HOME`                              | Installation location.                                                                                                                                                     |
+| `OTEL_DOTNET_AUTO_EXCLUDE_PROCESSES`                 | Names of the executable files that the profiler cannot instrument.                                                                                                         |
+| `OTEL_DOTNET_AUTO_OPENTRACING_ENABLED`               | Enables OpenTracing tracer.                                                                                                                                                |
+| `OTEL_DOTNET_AUTO_NETFX_REDIRECT_ENABLED`            | **Obsolete. .NET Framework only.** Fallback for `OTEL_DOTNET_AUTO_REDIRECT_ENABLED` when the primary variable is not set. Use `OTEL_DOTNET_AUTO_REDIRECT_ENABLED` instead. |
+| `OTEL_DOTNET_AUTO_REDIRECT_ENABLED`                  | Enables redirection of assembly references to versions not lower than those used by the automatic instrumentation                                                          |
 
 ---
 
