@@ -746,7 +746,7 @@ instrumentation/development:
              name: Span-CreateResource
              attributes:
                - name: resource.full_id
-                 source: concat(arguments[0], "/", arguments[1])
+                 source: "arguments[0] + \"/\" + arguments[1]"
                  type: string
         - target:
             assembly:
@@ -761,7 +761,7 @@ instrumentation/development:
              name: Span-ProcessWithDefault
              attributes:
                - name: value
-                 source: coalesce(arguments[0], "default_value")
+                 source: "arguments[0] != null ? arguments[0] : \"default_value\""
                  type: string
         - target:
             assembly:
@@ -781,7 +781,7 @@ instrumentation/development:
                  source: type
                  type: string
                - name: operation.full_name
-                 source: concat(type, ".", method)
+                 source: "type + \".\" + method"
                  type: string
         - target:
             assembly:
@@ -838,7 +838,7 @@ instrumentation/development:
                 - System.String
           span:
              name: DefaultTransaction
-             name_source: concat("Transaction-", arguments[1], "-", arguments[0])
+             name_source: "\"Transaction-\" + arguments[1] + \"-\" + arguments[0]"
              attributes:
                - name: transaction.id
                  source: arguments[0]
@@ -858,7 +858,7 @@ instrumentation/development:
                 - System.String
           span:
              name: DefaultQuery
-             name_source: concat("Query.", arguments[0], ".", arguments[1])
+             name_source: "\"Query.\" + arguments[0] + \".\" + arguments[1]"
              attributes:
                - name: db.name
                  source: arguments[0]

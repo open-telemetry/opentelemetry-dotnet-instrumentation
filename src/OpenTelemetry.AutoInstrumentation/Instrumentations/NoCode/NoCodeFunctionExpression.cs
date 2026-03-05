@@ -8,7 +8,7 @@ namespace OpenTelemetry.AutoInstrumentation.Instrumentations.NoCode;
 
 /// <summary>
 /// Represents a function expression that can combine multiple expressions.
-/// Supports: concat(...), coalesce(...), substring(...), tostring(...)
+/// Supports: substring(...), tostring(...)
 /// </summary>
 internal sealed class NoCodeFunctionExpression
 {
@@ -16,7 +16,7 @@ internal sealed class NoCodeFunctionExpression
 
     // Pattern to match function calls: functionName(args)
     private static readonly Regex FunctionPattern = new(
-        @"^(?<func>concat|coalesce|substring|tostring|isnull|isnotnull|equals|notequals)\s*\(\s*(?<args>.*)\s*\)$",
+        @"^(?<func>substring|tostring|isnull|isnotnull|equals|notequals)\s*\(\s*(?<args>.*)\s*\)$",
         RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
     private NoCodeFunctionExpression(string functionName, object[] arguments, string rawExpression)
@@ -58,7 +58,7 @@ internal sealed class NoCodeFunctionExpression
             return null;
         }
 
-        var functionName = match.Groups["func"].Value.ToUpperInvariant();
+        var functionName = match.Groups["func"].Value;
         var argsString = match.Groups["args"].Value;
 
         var arguments = ParseArguments(argsString);
@@ -78,14 +78,12 @@ internal sealed class NoCodeFunctionExpression
     {
         return FunctionName switch
         {
-            "CONCAT" => EvaluateConcat(context),
-            "COALESCE" => EvaluateCoalesce(context),
-            "SUBSTRING" => EvaluateSubstring(context),
-            "TOSTRING" => EvaluateToString(context),
-            "ISNULL" => EvaluateIsNull(context),
-            "ISNOTNULL" => EvaluateIsNotNull(context),
-            "EQUALS" => EvaluateEquals(context),
-            "NOTEQUALS" => EvaluateNotEquals(context),
+            "substring" => EvaluateSubstring(context),
+            "tostring" => EvaluateToString(context),
+            "isnull" => EvaluateIsNull(context),
+            "isnotnull" => EvaluateIsNotNull(context),
+            "equals" => EvaluateEquals(context),
+            "notequals" => EvaluateNotEquals(context),
             _ => null
         };
     }
@@ -233,43 +231,6 @@ internal sealed class NoCodeFunctionExpression
             NoCodeFunctionExpression func => func.Evaluate(context),
             _ => arg
         };
-    }
-
-    private string? EvaluateConcat(NoCodeExpressionContext context)
-    {
-        var parts = new List<string>();
-        foreach (var arg in Arguments)
-        {
-            var value = EvaluateArgument(arg, context);
-            if (value != null)
-            {
-                parts.Add(value.ToString() ?? string.Empty);
-            }
-        }
-
-        return string.Concat(parts);
-    }
-
-    private object? EvaluateCoalesce(NoCodeExpressionContext context)
-    {
-        foreach (var arg in Arguments)
-        {
-            var value = EvaluateArgument(arg, context);
-            if (value != null)
-            {
-                if (value is string str && !string.IsNullOrEmpty(str))
-                {
-                    return value;
-                }
-
-                if (value is not string)
-                {
-                    return value;
-                }
-            }
-        }
-
-        return null;
     }
 
     private string? EvaluateSubstring(NoCodeExpressionContext context)

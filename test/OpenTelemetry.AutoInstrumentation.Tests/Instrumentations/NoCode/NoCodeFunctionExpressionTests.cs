@@ -9,32 +9,12 @@ namespace OpenTelemetry.AutoInstrumentation.Tests.Instrumentations.NoCode;
 public class NoCodeFunctionExpressionTests
 {
     [Fact]
-    public void Parse_ConcatFunction_ReturnsValidExpression()
-    {
-        var result = NoCodeFunctionExpression.Parse("concat($arg1, \"-\", $arg2)");
-
-        Assert.NotNull(result);
-        Assert.Equal("CONCAT", result.FunctionName);
-        Assert.Equal(3, result.Arguments.Length);
-    }
-
-    [Fact]
-    public void Parse_CoalesceFunction_ReturnsValidExpression()
-    {
-        var result = NoCodeFunctionExpression.Parse("coalesce($arg1.Name, \"default\")");
-
-        Assert.NotNull(result);
-        Assert.Equal("COALESCE", result.FunctionName);
-        Assert.Equal(2, result.Arguments.Length);
-    }
-
-    [Fact]
     public void Parse_IsNullFunction_ReturnsValidExpression()
     {
         var result = NoCodeFunctionExpression.Parse("isnull($return)");
 
         Assert.NotNull(result);
-        Assert.Equal("ISNULL", result.FunctionName);
+        Assert.Equal("isnull", result.FunctionName);
         Assert.Single(result.Arguments);
     }
 
@@ -44,7 +24,7 @@ public class NoCodeFunctionExpressionTests
         var result = NoCodeFunctionExpression.Parse("equals($return.Status, \"error\")");
 
         Assert.NotNull(result);
-        Assert.Equal("EQUALS", result.FunctionName);
+        Assert.Equal("equals", result.FunctionName);
         Assert.Equal(2, result.Arguments.Length);
     }
 
@@ -62,70 +42,6 @@ public class NoCodeFunctionExpressionTests
         var result = NoCodeFunctionExpression.Parse("$arg1.Property");
 
         Assert.Null(result);
-    }
-
-    [Fact]
-    public void Evaluate_Concat_CombinesStrings()
-    {
-        var expr = NoCodeFunctionExpression.Parse("concat($arg1, \"-\", $arg2)");
-        var context = new NoCodeExpressionContext(
-            instance: null,
-            arguments: ["hello", "world"],
-            returnValue: null,
-            methodName: null,
-            typeName: null);
-
-        var result = expr!.Evaluate(context);
-
-        Assert.Equal("hello-world", result);
-    }
-
-    [Fact]
-    public void Evaluate_Concat_WithProperties()
-    {
-        var expr = NoCodeFunctionExpression.Parse("concat($arg1.Name, \":\", $arg1.Value)");
-        var context = new NoCodeExpressionContext(
-            instance: null,
-            arguments: [new TestClass { Name = "key", Value = "data" }],
-            returnValue: null,
-            methodName: null,
-            typeName: null);
-
-        var result = expr!.Evaluate(context);
-
-        Assert.Equal("key:data", result);
-    }
-
-    [Fact]
-    public void Evaluate_Coalesce_ReturnsFirstNonNull()
-    {
-        var expr = NoCodeFunctionExpression.Parse("coalesce($arg1, $arg2, \"default\")");
-        var context = new NoCodeExpressionContext(
-            instance: null,
-            arguments: [null, "second"],
-            returnValue: null,
-            methodName: null,
-            typeName: null);
-
-        var result = expr!.Evaluate(context);
-
-        Assert.Equal("second", result);
-    }
-
-    [Fact]
-    public void Evaluate_Coalesce_ReturnsDefault()
-    {
-        var expr = NoCodeFunctionExpression.Parse("coalesce($arg1, $arg2, \"default\")");
-        var context = new NoCodeExpressionContext(
-            instance: null,
-            arguments: [null, null],
-            returnValue: null,
-            methodName: null,
-            typeName: null);
-
-        var result = expr!.Evaluate(context);
-
-        Assert.Equal("default", result);
     }
 
     [Fact]
@@ -259,23 +175,16 @@ public class NoCodeFunctionExpressionTests
     [Fact]
     public void Evaluate_NestedFunctions()
     {
-        var expr = NoCodeFunctionExpression.Parse("concat(tostring($arg1), \"-\", coalesce($arg2, \"none\"))");
+        var expr = NoCodeFunctionExpression.Parse("substring(tostring($arg1), 0, 2)");
         var context = new NoCodeExpressionContext(
             instance: null,
-            arguments: [123, null],
+            arguments: [12345],
             returnValue: null,
             methodName: null,
             typeName: null);
 
         var result = expr!.Evaluate(context);
 
-        Assert.Equal("123-none", result);
-    }
-
-    private sealed class TestClass
-    {
-        public string? Name { get; set; }
-
-        public string? Value { get; set; }
+        Assert.Equal("12", result);
     }
 }

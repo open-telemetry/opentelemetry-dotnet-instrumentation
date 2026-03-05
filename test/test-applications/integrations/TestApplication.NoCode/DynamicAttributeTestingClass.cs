@@ -52,7 +52,7 @@ internal sealed class DynamicAttributeTestingClass
     }
 
     /// <summary>
-    /// Method to test coalesce function with nullable arguments.
+    /// Method to test coalesce by ternary operator with nullable arguments.
     /// </summary>
     [MethodImpl(MethodImplOptions.NoInlining)]
     public void ProcessWithDefault(string? value)
