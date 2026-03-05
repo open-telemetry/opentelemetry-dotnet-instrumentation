@@ -8,8 +8,4 @@
     <Reference Include="System.ServiceModel" />
   </ItemGroup>
 
-  <ItemGroup>
-    <PackageReference Include="System.Diagnostics.DiagnosticSource" />
-  </ItemGroup>
-
 </Project>

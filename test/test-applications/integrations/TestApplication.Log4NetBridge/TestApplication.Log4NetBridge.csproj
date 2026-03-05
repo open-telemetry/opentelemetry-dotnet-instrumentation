@@ -1,9 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <ItemGroup>
       <PackageReference Include="log4net" VersionOverride="$(LibraryVersion)" />
-      <PackageReference Include="Microsoft.Extensions.Logging"/>
-      <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" />
-      <PackageReference Include="System.Diagnostics.DiagnosticSource" />
+      <PackageReference Include="Microsoft.Extensions.Logging" />
     </ItemGroup>
     <ItemGroup>
       <None Include="App.config" />
