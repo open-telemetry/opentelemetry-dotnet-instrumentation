@@ -31,7 +31,7 @@
 # The yaml format is documented at
 # <https://github.com/open-telemetry/opentelemetry-configuration/tree/main/schema>
 # By default, the latest version is used.
-file_format: "1.0-rc.1"
+file_format: "1.0"
 # Configure if the SDK is disabled or not.
 # If omitted or null, false is used
 # This setting is inverted (if OTEL_DOTNET_AUTO_SETUP_SDK is true, the SDK is disabled)

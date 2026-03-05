@@ -45,7 +45,7 @@ The no-code instrumentation configuration is defined under the
 `no_code/development` section in your YAML configuration file:
 
 ```yaml
-file_format: "1.0-rc.1"
+file_format: "1.0"
 
 instrumentation/development:
   dotnet:
