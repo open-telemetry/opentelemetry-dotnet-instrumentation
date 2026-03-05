@@ -86,8 +86,5 @@ internal static class Constants
         public const string Profiler32BitPathVariable = "CORECLR_PROFILER_PATH_32";
         public const string Profiler64BitPathVariable = "CORECLR_PROFILER_PATH_64";
         public const string ProfilerId = "{918728DD-259F-4A6A-AC2B-B85E1B658318}";
-
-        // Trausted Platform Assemblies environment variables
-        public const string TrustedPlatformAssemblies = "TRUSTED_PLATFORM_ASSEMBLIES";
     }
 }

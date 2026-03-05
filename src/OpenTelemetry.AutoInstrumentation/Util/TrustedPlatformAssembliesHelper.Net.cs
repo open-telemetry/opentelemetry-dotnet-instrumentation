@@ -10,6 +10,9 @@ namespace OpenTelemetry.AutoInstrumentation.Util;
 /// </summary>
 internal static class TrustedPlatformAssembliesHelper
 {
+    // Trusted Platform Assemblies runtime configuration property
+    private const string TrustedPlatformAssembliesPropertyName = "TRUSTED_PLATFORM_ASSEMBLIES";
+
     /// <summary>
     /// Gets the array of TPA paths. This value is computed once during type initialization.
     /// </summary>
@@ -19,7 +22,7 @@ internal static class TrustedPlatformAssembliesHelper
     {
         try
         {
-            return (AppContext.GetData(Constants.EnvironmentVariables.TrustedPlatformAssemblies) as string)?
+            return (AppContext.GetData(TrustedPlatformAssembliesPropertyName) as string)?
                 .Split(Path.PathSeparator)
                 .Where(path => !string.IsNullOrWhiteSpace(path))
                 .ToArray() ?? [];
