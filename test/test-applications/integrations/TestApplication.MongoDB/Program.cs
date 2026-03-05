@@ -9,7 +9,7 @@ namespace TestApplication.MongoDB;
 
 internal static class Program
 {
-    public static void Main(string[] args)
+    public static async Task Main(string[] args)
     {
         ConsoleHelper.WriteSplashScreen(args);
 
@@ -44,7 +44,7 @@ internal static class Program
         var collection = database.GetCollection<BsonDocument>(mongoCollection);
 
 #if MONGODB_3_7_0_OR_GREATER
-        RunAsync(collection, newDocument).Wait();
+        await RunAsync(collection, newDocument).ConfigureAwait(false);
 #else
         if (shouldTriggerError)
         {
@@ -52,8 +52,10 @@ internal static class Program
         }
         else
         {
+#pragma warning disable CA1849 // Call async methods when in an async method. Intentionally calling both sync and async versions of the method to ensure both are properly traced.
             Run(collection, newDocument);
-            RunAsync(collection, newDocument).Wait();
+#pragma warning restore CA1849 // Call async methods when in an async method. Intentionally calling both sync and async versions of the method to ensure both are properly traced.
+            await RunAsync(collection, newDocument).ConfigureAwait(false);
         }
 #endif
     }
