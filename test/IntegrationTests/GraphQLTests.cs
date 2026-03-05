@@ -70,10 +70,6 @@ public class GraphQLTests : TestHelper
         SetEnvironmentVariable("OTEL_DOTNET_AUTO_TRACES_GRAPHQL_INSTRUMENTATION_ENABLED", "true");
         SetEnvironmentVariable("OTEL_DOTNET_AUTO_TRACES_ASPNETCORE_INSTRUMENTATION_ENABLED", "true"); // AspNetCore Instrumentation enables propagation used in this test
         SetEnvironmentVariable("OTEL_TRACES_SAMPLER", "always_on");
-        // TODO unexpected side effect: if 1) no native profiler is setup and 2) OTEL_DOTNET_AUTO_REDIRECT_ENABLED was set to false (why?)
-        //  we end up skipping isolation in StartupHook (env variable is false) and the Loader tries to use AssemblyResolver but without Native Profiler it doesn't properly work;
-        //  Temporarily leave it commented out to not to forget to discuss this use case before removing this setting for good
-        // SetEnvironmentVariable("OTEL_DOTNET_AUTO_REDIRECT_ENABLED", "false");
 
         int aspNetCorePort = TcpPortProvider.GetOpenPort();
         SetEnvironmentVariable("ASPNETCORE_URLS", $"http://127.0.0.1:{aspNetCorePort}/");
