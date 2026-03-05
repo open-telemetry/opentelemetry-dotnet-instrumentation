@@ -494,10 +494,26 @@ public class CelExpressionTests
         Assert.Equal(expected, Convert.ToDouble(result, System.Globalization.CultureInfo.InvariantCulture), 5);
     }
 
-    [Fact]
-    public void Evaluate_AddOperator_WithNonNumericTypes_ReturnsNull()
+    [Theory]
+    [InlineData("\"hello\" + \"world\"", "helloworld")]
+    [InlineData("\"hello\" + \" \" + \"world\"", "hello world")]
+    [InlineData("\"\" + \"test\"", "test")]
+    [InlineData("\"test\" + \"\"", "test")]
+    [InlineData("'single' + 'quotes'", "singlequotes")]
+    public void Evaluate_AddOperator_WithStrings_ReturnsConcatenation(string expression, string expected)
     {
-        var expr = CelExpression.Parse("\"hello\" + \"world\"");
+        var expr = CelExpression.Parse(expression);
+        var context = new NoCodeExpressionContext(null, null, null, null, null);
+
+        var result = expr!.Evaluate(context);
+
+        Assert.Equal(expected, result);
+    }
+
+    [Fact]
+    public void Evaluate_AddOperator_WithMixedTypes_ReturnsNull()
+    {
+        var expr = CelExpression.Parse("\"hello\" + 123");
         var context = new NoCodeExpressionContext(null, null, null, null, null);
 
         var result = expr!.Evaluate(context);

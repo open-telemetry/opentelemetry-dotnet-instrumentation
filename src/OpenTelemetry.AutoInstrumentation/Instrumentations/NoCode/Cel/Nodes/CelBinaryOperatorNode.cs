@@ -130,6 +130,11 @@ internal sealed class CelBinaryOperatorNode : CelNode
             return null;
         }
 
+        if (left is string leftStr && right is string rightStr)
+        {
+            return leftStr + rightStr;
+        }
+
         if (IsNumeric(left) && IsNumeric(right))
         {
             var leftNum = Convert.ToDouble(left, CultureInfo.InvariantCulture);
