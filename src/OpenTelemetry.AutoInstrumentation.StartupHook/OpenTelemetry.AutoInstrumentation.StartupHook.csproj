@@ -76,16 +76,16 @@
     <Compile Include="..\OpenTelemetry.AutoInstrumentation\Constants.cs"
              Link="Constants.cs" />
     <Compile Include="..\OpenTelemetry.AutoInstrumentation\Util\TrustedPlatformAssembliesHelper.Net.cs"
-             Link="Util\TrustedPlatformAssembliesHelper.cs" />
+             Link="Util\TrustedPlatformAssembliesHelper.Net.cs" />
     <Compile Include="..\OpenTelemetry.AutoInstrumentation\Util\ManagedProfilerLocationHelper.cs"
              Link="Util\ManagedProfilerLocationHelper.cs" />
     <Compile Include="..\OpenTelemetry.AutoInstrumentation\Util\ManagedProfilerLocationHelper.Net.cs"
              Link="Util\ManagedProfilerLocationHelper.Net.cs"
              DependentUpon="ManagedProfilerLocationHelper.cs" />
     <Compile Include="..\OpenTelemetry.AutoInstrumentation\Util\DeploymentDetector.Net.cs"
-             Link="Util\DeploymentDetector.cs" />
+             Link="Util\DeploymentDetector.Net.cs" />
     <Compile Include="..\OpenTelemetry.AutoInstrumentation\Util\AssemblyUtils.Net.cs"
-             Link="Util\AssemblyUtils.cs" />
+             Link="Util\AssemblyUtils.Net.cs" />
   </ItemGroup>
 
 </Project>

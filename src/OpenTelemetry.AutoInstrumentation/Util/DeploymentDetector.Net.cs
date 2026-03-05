@@ -1,6 +1,7 @@
 // Copyright The OpenTelemetry Authors
 // SPDX-License-Identifier: Apache-2.0
 
+#if NET || NETCOREAPP
 using OpenTelemetry.AutoInstrumentation.Util;
 
 namespace OpenTelemetry.AutoInstrumentation;
@@ -22,3 +23,4 @@ internal static class DeploymentDetector
                 AutoInstrumentationAssemblyName,
                 StringComparison.OrdinalIgnoreCase));
 }
+#endif

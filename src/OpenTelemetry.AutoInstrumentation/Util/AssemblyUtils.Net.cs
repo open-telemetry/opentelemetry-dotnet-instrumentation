@@ -1,6 +1,7 @@
 // Copyright The OpenTelemetry Authors
 // SPDX-License-Identifier: Apache-2.0
 
+#if NET || NETCOREAPP
 using System.Reflection.Metadata;
 using System.Reflection.PortableExecutable;
 
@@ -44,3 +45,4 @@ internal static class AssemblyUtils
         }
     }
 }
+#endif

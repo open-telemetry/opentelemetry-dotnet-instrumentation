@@ -1,6 +1,7 @@
 // Copyright The OpenTelemetry Authors
 // SPDX-License-Identifier: Apache-2.0
 
+#if NETFRAMEWORK
 using System.Runtime.InteropServices;
 using OpenTelemetry.AutoInstrumentation.Logging;
 
@@ -57,3 +58,4 @@ internal static partial class ManagedProfilerLocationHelper
     [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
     private static extern int GetNetFrameworkRedirectionVersion();
 }
+#endif

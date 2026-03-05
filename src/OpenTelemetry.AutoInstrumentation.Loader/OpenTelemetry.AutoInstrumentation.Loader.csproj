@@ -10,23 +10,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <!-- 1. Exclude platform-specific files from the default compilation -->
-    <Compile Remove="**\*.Net.cs" />
-    <Compile Remove="**\*.NetFramework.cs" />
-
-    <!-- 2. Keep both visible in the Solution Explorer as 'None' items (non-compiled) -->
-    <None Include="**\*.Net.cs" />
-    <None Include="**\*.NetFramework.cs" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <!-- 3. Include NetFramework version files -->
-    <Compile Include="**\*.NetFramework.cs" Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'" />
-    <!-- 4. Include .Net version files -->
-    <Compile Include="**\*.Net.cs" Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp'" />
-  </ItemGroup>
-
-  <ItemGroup>
     <Compile Include="..\OpenTelemetry.AutoInstrumentation\Logging\InternalLogger.cs">
       <Link>Logging\InternalLogger.cs</Link>
     </Compile>
@@ -86,7 +69,7 @@
     <Compile Include="..\OpenTelemetry.AutoInstrumentation\Configurations\ConfigurationKeys.TracerHome.cs"
              Link="Configurations\ConfigurationKeys.TracerHome.cs" />
     <Compile Include="..\OpenTelemetry.AutoInstrumentation\Util\TrustedPlatformAssembliesHelper.Net.cs"
-             Link="Util\TrustedPlatformAssembliesHelper.cs"
+             Link="Util\TrustedPlatformAssembliesHelper.Net.cs"
              Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp'" />
     <Compile Include="..\OpenTelemetry.AutoInstrumentation\Util\ManagedProfilerLocationHelper.cs"
              Link="Util\ManagedProfilerLocationHelper.cs" />
@@ -101,7 +84,7 @@
     <Compile Include="..\OpenTelemetry.AutoInstrumentation.StartupHook\StartupHookConstants.cs"
              Link="StartupHookConstants.cs" />
     <Compile Include="..\OpenTelemetry.AutoInstrumentation\Util\AssemblyUtils.Net.cs"
-             Link="Util\AssemblyUtils.cs"
+             Link="Util\AssemblyUtils.Net.cs"
              Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp'" />
   </ItemGroup>
 </Project>

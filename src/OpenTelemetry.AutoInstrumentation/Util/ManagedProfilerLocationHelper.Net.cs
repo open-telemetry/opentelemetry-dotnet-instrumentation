@@ -1,6 +1,7 @@
 // Copyright The OpenTelemetry Authors
 // SPDX-License-Identifier: Apache-2.0
 
+#if NET || NETCOREAPP
 using OpenTelemetry.AutoInstrumentation.Logging;
 
 namespace OpenTelemetry.AutoInstrumentation.Util;
@@ -32,3 +33,4 @@ internal static partial class ManagedProfilerLocationHelper
                Probe(runtimeDir, assemblyName);
     }
 }
+#endif

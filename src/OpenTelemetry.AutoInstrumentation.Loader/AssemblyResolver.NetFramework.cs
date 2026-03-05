@@ -1,6 +1,7 @@
 // Copyright The OpenTelemetry Authors
 // SPDX-License-Identifier: Apache-2.0
 
+#if NETFRAMEWORK
 using System.Reflection;
 using OpenTelemetry.AutoInstrumentation.Logging;
 using OpenTelemetry.AutoInstrumentation.Util;
@@ -55,3 +56,4 @@ internal class AssemblyResolver(IOtelLogger logger)
         return null;
     }
 }
+#endif
