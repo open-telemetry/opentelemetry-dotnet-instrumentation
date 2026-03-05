@@ -58,6 +58,22 @@ internal static class Program
 #endif
     }
 
+    public static async Task RunAsync(IMongoCollection<BsonDocument> collection, BsonDocument newDocument)
+    {
+        var allFilter = new BsonDocument();
+
+        await collection.DeleteManyAsync(allFilter).ConfigureAwait(false);
+        await collection.InsertOneAsync(newDocument).ConfigureAwait(false);
+
+        var count = await collection.CountDocumentsAsync(new BsonDocument()).ConfigureAwait(false);
+
+        Console.WriteLine($"Documents: {count}");
+
+        var find = await collection.FindAsync(allFilter).ConfigureAwait(false);
+        var allDocuments = await find.ToListAsync().ConfigureAwait(false);
+        Console.WriteLine(allDocuments.FirstOrDefault());
+    }
+
 #if !MONGODB_3_7_0_OR_GREATER
     public static void RunWithError(IMongoCollection<BsonDocument> collection, BsonDocument newDocument)
     {
@@ -114,22 +130,6 @@ internal static class Program
         return args.Any(arg => arg.Equals("--trigger-error", StringComparison.OrdinalIgnoreCase));
     }
 #endif
-
-    public static async Task RunAsync(IMongoCollection<BsonDocument> collection, BsonDocument newDocument)
-    {
-        var allFilter = new BsonDocument();
-
-        await collection.DeleteManyAsync(allFilter).ConfigureAwait(false);
-        await collection.InsertOneAsync(newDocument).ConfigureAwait(false);
-
-        var count = await collection.CountDocumentsAsync(new BsonDocument()).ConfigureAwait(false);
-
-        Console.WriteLine($"Documents: {count}");
-
-        var find = await collection.FindAsync(allFilter).ConfigureAwait(false);
-        var allDocuments = await find.ToListAsync().ConfigureAwait(false);
-        Console.WriteLine(allDocuments.FirstOrDefault());
-    }
 
     private static string Host()
     {
