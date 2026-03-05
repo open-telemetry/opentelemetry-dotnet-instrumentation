@@ -216,8 +216,6 @@ CEL functions are divided into two categories:
 
 | Function                          | Type      | Description                              | Example                                    |
 |-----------------------------------|-----------|------------------------------------------|--------------------------------------------|
-| `concat(...)`                     | Extension | Concatenate values into a string         | `concat(type, ".", method)`                |
-| `coalesce(...)`                   | Extension | Return first non-null value              | `coalesce(arguments[0].Name, "unknown")`   |
 | `substring(str, start, [length])` | Extension | Extract substring                        | `substring(arguments[0], 0, 10)`           |
 | `string(value)`                   | Standard  | Convert value to string                  | `string(arguments[0].Id)`                  |
 | `size(value)`                     | Standard  | Get length/count of string, list, or map | `size(arguments[0].Items)`                 |
@@ -238,19 +236,19 @@ CEL functions are divided into two categories:
 ```yaml
 attributes:
   - name: operation.id
-    source: concat(type, ".", method)
+    source: type + "." + method)
     type: string
   - name: order.key
-    source: concat(arguments[0].CustomerId, "-", arguments[0].OrderId)
+    source: arguments[0].CustomerId + "-" + arguments[0].OrderId)
     type: string
 ```
 
-**Use coalesce for defaults:**
+**Use ternary operator for defaults:**
 
 ```yaml
 attributes:
   - name: user.name
-    source: coalesce(arguments[0].DisplayName, arguments[0].Email, "anonymous")
+    source: arguments[0].DisplayName != null ? arguments[0].DisplayName : "anonymous"
     type: string
 ```
 
@@ -308,7 +306,7 @@ span name. The `name` property is still required as a fallback if the dynamic
 expression fails to evaluate.
 
 > [!NOTE]  
-> CEL expressions for span names typically use functions like `concat()` to
+> CEL expressions for span names typically use `+` operator to
 > combine values into a meaningful string. This ensures the result is always
 > a string type.
 
@@ -318,16 +316,16 @@ Create span names from argument values:
 
 ```yaml
 span:
-  name: DefaultTransaction                              # Fallback name
-  name_source: concat("Transaction-", arguments[0])     # Dynamic name using first argument
+  name: DefaultTransaction                   # Fallback name
+  name_source: "Transaction-" + arguments[0] # Dynamic name using first argument
 ```
 
 Combine multiple values:
 
 ```yaml
 span:
-  name: DefaultQuery                                    # Fallback name
-  name_source: concat("Query.", arguments[0], ".", arguments[1])  # e.g., "Query.ProductionDB.users"
+  name: DefaultQuery                                        # Fallback name
+  name_source: "Query." + arguments[0] + "." + arguments[1] # e.g., "Query.ProductionDB.users"
 ```
 
 Include method context:
@@ -335,15 +333,15 @@ Include method context:
 ```yaml
 span:
   name: DefaultOperation                                 # Fallback name
-  name_source: concat(method, "-", arguments[0].OperationType)  # e.g., "ProcessOrder-Express"
+  name_source: method + "-" + arguments[0].OperationType # e.g., "ProcessOrder-Express"
 ```
 
 Use with nested properties:
 
 ```yaml
 span:
-  name: DefaultRequest                                   # Fallback name
-  name_source: concat(arguments[0].HttpMethod, " ", arguments[0].Path)  # e.g., "GET /api/users"
+  name: DefaultRequest                                            # Fallback name
+  name_source: arguments[0].HttpMethod + " " + arguments[0].Path) # e.g., "GET /api/users"
 ```
 
 Use conditional expressions:
@@ -351,7 +349,7 @@ Use conditional expressions:
 ```yaml
 span:
   name: DefaultOrder                                     # Fallback name
-  name_source: arguments[0].Amount > 1000 ? concat("LargeOrder-", arguments[0].Id) : concat("Order-", arguments[0].Id)
+  name_source: arguments[0].Amount > 1000 ? ("LargeOrder-" + arguments[0].Id) : ("Order-" + arguments[0].Id)
 ```
 
 ### Status Configuration
@@ -423,7 +421,7 @@ span:
     rules:
       - condition: contains(return.Message, "error")
         code: error
-        description: concat("Error: ", return.Message)
+        description: "Error: " + return.Message
       - condition: startsWith(return.Status, "FAIL")
         code: error
         description: "Operation failed"
@@ -463,7 +461,7 @@ instrumentation/development:
                 source: arguments[0].TotalAmount
                 type: double
               - name: operation.name
-                source: concat("ProcessOrder-", arguments[0].OrderType)
+                source: "ProcessOrder-" + arguments[0].OrderType
                 type: string
             status:
               rules:
@@ -953,7 +951,7 @@ The test application demonstrates instrumentation of:
   Expressions are validated at configuration load time. Enable debug logging
   to see detailed parsing errors
 - **Null Attribute Values**: If an attribute is not appearing in spans, check
-  that the CEL expression is not evaluating to null. Use `coalesce()` to provide
+  that the CEL expression is not evaluating to null. Use ternary operator to provide
   default values
 - **Wrong Argument Index**: Remember that CEL uses zero-based indexing
   (`arguments[0]` is the first argument), unlike the older `$arg1` syntax
