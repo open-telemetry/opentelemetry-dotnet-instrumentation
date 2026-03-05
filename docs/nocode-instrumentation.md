@@ -33,9 +33,9 @@ collection for specified methods through YAML configuration.
 - **Span Customization**: Configure span names, kinds, and custom attributes
 - **Method Overload Support**: Target specific method overloads using precise
   signature matching
-- **Dynamic Expressions**: Use [CEL](https://cel.dev/) (Common Expression
-  Language with) with custom extensions for dynamic attributes, span names,
-  and conditional logic
+- **Dynamic Expressions**: Use a domain-specific language (DSL) based on
+  [CEL](https://cel.dev/) (Common Expression Language) for dynamic attributes,
+  span names, and conditional logic
 
 ## Limitations
 
@@ -97,14 +97,14 @@ For more information about attributes, see the [OpenTelemetry Attribute specific
 ### Dynamic Attributes
 
 Dynamic attributes allow you to extract attribute values from the method context
-at runtime using CEL (Common Expression Language) expressions. Use the `source`
-property instead of `value` to specify a CEL expression.
+at runtime using expression syntax based on CEL (Common Expression Language).
+Use the `source` property instead of `value` to specify an expression.
 
-#### CEL Expression Syntax
+#### Expression Syntax
 
-CEL expressions provide a standardized way to access method context.
-The implementation supports standard CEL features plus instrumentation-specific
-extensions.
+The expression syntax is a domain-specific language (DSL) based on CEL that
+provides a way to access method context at runtime. It implements a subset of
+the CEL specification with instrumentation-specific extensions.
 
 **Identifiers** - Access method execution context:
 
@@ -147,7 +147,8 @@ extensions.
 > - If an expression evaluates to `null`, the attribute is omitted
 > - Invalid expressions or property paths are silently skipped (logged at debug
 >   level)
-> - CEL expressions are parsed and validated at configuration load time
+> - Expressions are parsed and validated at configuration load time
+> - This DSL implements a subset of CEL; not all CEL features are supported
 
 #### Dynamic Attribute Examples
 
@@ -199,18 +200,18 @@ attributes:
     type: string
 ```
 
-### CEL Functions
+### Functions
 
-CEL functions allow you to transform and combine values in expressions. Functions
-can be used in the `source` property for attributes, in status rule conditions,
-or in the `name_source` property for dynamic span names.
+The expression DSL supports functions for transforming and combining values.
+Functions can be used in the `source` property for attributes, in status rule
+conditions, or in the `name_source` property for dynamic span names.
 
 #### Function Categories
 
-CEL functions are divided into two categories:
+Functions are divided into two categories:
 
-- **[Standard]** - Part of the CEL specification, portable to other CEL implementations
-- **[Extension]** - Custom functions added for instrumentation scenarios
+- **[Standard]** - Implemented from the CEL specification for compatibility
+- **[Extension]** - Custom functions added specifically for instrumentation scenarios
 
 #### Supported Functions
 
@@ -225,9 +226,10 @@ CEL functions are divided into two categories:
 
 > [!NOTE]  
 > Extension functions are custom additions specific to OpenTelemetry
-> instrumentation  and are not portable to other CEL implementations.
-> Standard functions follow the
-> [CEL specification](https://github.com/google/cel-spec/blob/master/doc/langdef.md).
+> instrumentation and are not portable to other CEL implementations.
+> Standard functions are implemented from the CEL specification for compatibility,
+> but this DSL only implements a subset of CEL - not all CEL standard functions
+> are available.
 
 #### Function Expression Examples
 
@@ -291,7 +293,7 @@ attributes:
 ### Dynamic Span Names
 
 Dynamic span names allow you to construct span names at runtime based on method
-context using CEL expressions. This is useful for creating meaningful, contextual
+context using expressions. This is useful for creating meaningful, contextual
 span names that include parameter values or other runtime information.
 
 > [!IMPORTANT]
@@ -301,12 +303,12 @@ span names that include parameter values or other runtime information.
 > for high-cardinality data instead. See the [OpenTelemetry Span specification](https://github.com/open-telemetry/opentelemetry-specification/blob/v1.54.0/specification/trace/api.md#span)
 > for guidance on span name best practices.
 
-Use the `name_source` property with a CEL expression to specify the dynamic
+Use the `name_source` property with an expression to specify the dynamic
 span name. The `name` property is still required as a fallback if the dynamic
 expression fails to evaluate.
 
 > [!NOTE]  
-> CEL expressions for span names typically use `+` operator to
+> Expressions for span names typically use the `+` operator to
 > combine values into a meaningful string. This ensures the result is always
 > a string type.
 
@@ -355,7 +357,7 @@ span:
 ### Status Configuration
 
 You can configure span status based on return values or other conditions using
-CEL expressions in status rules. Rules are evaluated in order, and the first
+expressions in status rules. Rules are evaluated in order, and the first
 matching rule sets the status.
 
 #### Status Rule Syntax
@@ -365,9 +367,9 @@ span:
   name: my-span
   status:
     rules:
-      - condition: <cel_expression>    # CEL expression that evaluates to boolean
-        code: <status_code>            # ok, error, or unset
-        description: <text>            # Optional description (useful for errors)
+      - condition: <expression>    # Expression that evaluates to boolean
+        code: <status_code>        # ok, error, or unset
+        description: <text>        # Optional description (useful for errors)
 ```
 
 #### Status Codes
@@ -947,14 +949,14 @@ The test application demonstrates instrumentation of:
   generic methods
 - **Performance Issues**: Consider the frequency of method calls and whether
   instrumentation is necessary for high-throughput methods
-- **CEL Expression Errors**: Check for syntax errors in CEL expressions.
+- **Expression Errors**: Check for syntax errors in expressions.
   Expressions are validated at configuration load time. Enable debug logging
   to see detailed parsing errors
 - **Null Attribute Values**: If an attribute is not appearing in spans, check
-  that the CEL expression is not evaluating to null. Use ternary operator to provide
+  that the expression is not evaluating to null. Use the ternary operator to provide
   default values
-- **Wrong Argument Index**: Remember that CEL uses zero-based indexing
-  (`arguments[0]` is the first argument), unlike the older `$arg1` syntax
+- **Wrong Argument Index**: Remember that expressions use zero-based indexing
+  (`arguments[0]` is the first argument)
 - **Debug Logs**: Enable debug logging (see [Global settings](config.md#global-settings))
   and search for log messages prefixed with `No code` or `CEL` to find information
   specific to no-code instrumentation, including configuration parsing, method
