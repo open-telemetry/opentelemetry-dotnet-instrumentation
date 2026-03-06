@@ -105,6 +105,45 @@ internal sealed class DynamicAttributeTestingClass
     {
         // This method is intentionally left empty.
     }
+
+    /// <summary>
+    /// Non-async method returning completed Task (synchronous Task.FromResult).
+    /// Tests that continuation logic handles already-completed tasks correctly.
+    /// </summary>
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    public Task SyncCompletedTask(string taskId)
+    {
+        return Task.CompletedTask;
+    }
+
+    /// <summary>
+    /// Non-async method returning completed Task&lt;T&gt; (synchronous Task.FromResult).
+    /// Tests that continuation logic handles already-completed tasks with results correctly.
+    /// </summary>
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    public Task<OrderResult> SyncCompletedTaskWithResult(string orderId)
+    {
+        return Task.FromResult(new OrderResult { Success = true, OrderId = orderId });
+    }
+
+    /// <summary>
+    /// Non-async method returning pending Task (synchronous Task.Delay without await).
+    /// Tests that continuation logic handles not-yet-completed tasks correctly.
+    /// </summary>
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    public Task SyncPendingTask(int delayMs)
+    {
+        return Task.Delay(delayMs);
+    }
+
+    /// <summary>
+    /// Non-async method returning pending Task&lt;T&gt; with continuation.
+    /// Tests that continuation logic handles not-yet-completed tasks with results correctly.
+    /// </summary>
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    public Task<OrderResult> SyncPendingTaskWithResult(string orderId, int delayMs)
+    {
+        return Task.Delay(delayMs).ContinueWith(_ => new OrderResult { Success = true, OrderId = orderId }, TaskScheduler.Default);
+    }
 }
 #pragma warning restore CA1822 // Mark members as static
-

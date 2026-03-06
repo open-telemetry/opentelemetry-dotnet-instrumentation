@@ -94,5 +94,11 @@ internal static class Program
         // Dynamic span name tests
         dynamicAttrTestingClass.ProcessTransaction("TXN-12345", "payment");
         dynamicAttrTestingClass.ExecuteQuery("ProductionDB", "users");
+
+        // Non-async Task-returning methods tests
+        await dynamicAttrTestingClass.SyncCompletedTask("TASK-001").ConfigureAwait(false);
+        _ = await dynamicAttrTestingClass.SyncCompletedTaskWithResult("ORD-SYNC-001").ConfigureAwait(false);
+        await dynamicAttrTestingClass.SyncPendingTask(100).ConfigureAwait(false);
+        _ = await dynamicAttrTestingClass.SyncPendingTaskWithResult("ORD-SYNC-002", 100).ConfigureAwait(false);
     }
 }

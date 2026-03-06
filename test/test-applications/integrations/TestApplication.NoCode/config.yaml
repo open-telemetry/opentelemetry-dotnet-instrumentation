@@ -698,17 +698,17 @@ instrumentation/development:
              attributes:
                - name: customer.id
                  value_source: arguments[0].Id
-                 type: int
-               - name: user.name
+                 type: string
+               - name: customer.name
                  value_source: arguments[0].Name
                  type: string
-               - name: user.email
+               - name: customer.email
                  value_source: arguments[0].Email
                  type: string
-               - name: user.city
+               - name: customer.city
                  value_source: arguments[0].Address.City
                  type: string
-               - name: user.country
+               - name: customer.country
                  value_source: arguments[0].Address.Country
                  type: string
         - target:
@@ -780,7 +780,7 @@ instrumentation/development:
                - name: type.name
                  value_source: type
                  type: string
-               - name: operation.name
+               - name: operation.full_name
                  value_source: "type + \".\" + method"
                  type: string
         - target:
@@ -798,10 +798,10 @@ instrumentation/development:
                - name: order.id
                  value_source: arguments[0].Id
                  type: string
-               - name: payment.amount
+               - name: order.amount
                  value_source: arguments[0].Amount
                  type: double
-               - name: payment.currency
+               - name: order.currency
                  value_source: arguments[0].Currency
                  type: string
         - target:
@@ -863,6 +863,67 @@ instrumentation/development:
                - name: db.name
                  value_source: arguments[0]
                  type: string
-               - name: table.name
+               - name: db.table
                  value_source: arguments[1]
+                 type: string
+        - target:
+            assembly:
+              name: TestApplication.NoCode
+            type: TestApplication.NoCode.DynamicAttributeTestingClass
+            method: SyncCompletedTask
+            signature:
+              return_type: System.Threading.Tasks.Task
+              parameter_types:
+                - System.String
+          span:
+             name: Span-SyncCompletedTask
+             attributes:
+               - name: task.id
+                 value_source: arguments[0]
+                 type: string
+        - target:
+            assembly:
+              name: TestApplication.NoCode
+            type: TestApplication.NoCode.DynamicAttributeTestingClass
+            method: SyncCompletedTaskWithResult
+            signature:
+              return_type: System.Threading.Tasks.Task`1[TestApplication.NoCode.OrderResult]
+              parameter_types:
+                - System.String
+          span:
+             name: Span-SyncCompletedTaskWithResult
+             attributes:
+               - name: order.id
+                 value_source: arguments[0]
+                 type: string
+        - target:
+            assembly:
+              name: TestApplication.NoCode
+            type: TestApplication.NoCode.DynamicAttributeTestingClass
+            method: SyncPendingTask
+            signature:
+              return_type: System.Threading.Tasks.Task
+              parameter_types:
+                - System.Int32
+          span:
+             name: Span-SyncPendingTask
+             attributes:
+               - name: delay.ms
+                 value_source: arguments[0]
+                 type: int
+        - target:
+            assembly:
+              name: TestApplication.NoCode
+            type: TestApplication.NoCode.DynamicAttributeTestingClass
+            method: SyncPendingTaskWithResult
+            signature:
+              return_type: System.Threading.Tasks.Task`1[TestApplication.NoCode.OrderResult]
+              parameter_types:
+                - System.String
+                - System.Int32
+          span:
+             name: Span-SyncPendingTaskWithResult
+             attributes:
+               - name: order.id
+                 value_source: arguments[0]
                  type: string

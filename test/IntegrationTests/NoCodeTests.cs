@@ -178,6 +178,32 @@ public class NoCodeTests : TestHelper
         ];
         collector.ExpectNoCode("Query.ProductionDB.users", Span.Types.SpanKind.Internal, executeQueryAttributes);
 
+        // Non-async Task-returning methods tests
+        // These test the important edge case where methods return Task/Task<T> without using async/await
+        List<KeyValue> syncCompletedTaskAttributes =
+        [
+            new() { Key = "task.id", Value = new AnyValue { StringValue = "TASK-001" } },
+        ];
+        collector.ExpectNoCode("Span-SyncCompletedTask", Span.Types.SpanKind.Internal, syncCompletedTaskAttributes);
+
+        List<KeyValue> syncCompletedTaskWithResultAttributes =
+        [
+            new() { Key = "order.id", Value = new AnyValue { StringValue = "ORD-SYNC-001" } },
+        ];
+        collector.ExpectNoCode("Span-SyncCompletedTaskWithResult", Span.Types.SpanKind.Internal, syncCompletedTaskWithResultAttributes);
+
+        List<KeyValue> syncPendingTaskAttributes =
+        [
+            new() { Key = "delay.ms", Value = new AnyValue { IntValue = 100 } },
+        ];
+        collector.ExpectAsyncNoCode("Span-SyncPendingTask", Span.Types.SpanKind.Internal, syncPendingTaskAttributes);
+
+        List<KeyValue> syncPendingTaskWithResultAttributes =
+        [
+            new() { Key = "order.id", Value = new AnyValue { StringValue = "ORD-SYNC-002" } },
+        ];
+        collector.ExpectAsyncNoCode("Span-SyncPendingTaskWithResult", Span.Types.SpanKind.Internal, syncPendingTaskWithResultAttributes);
+
         RunTestApplication();
 
         collector.AssertExpectations();
