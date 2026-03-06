@@ -71,7 +71,7 @@ instrumentation/development:
                 value: "attribute_value"                      # Static attribute value
                 type: string                                  # Attribute type (see Attribute Types section below)
               - name: dynamic.attribute                       # Dynamic attribute name
-                source: arguments[0]                          # CEL expression to extract value from method context (see Dynamic Attributes section)
+                source: "arguments[0]"                        # CEL expression to extract value from method context (see Dynamic Attributes section)
                 type: string
 ```
 
@@ -157,10 +157,10 @@ Extract method argument values:
 ```yaml
 attributes:
   - name: order.id
-    source: arguments[0]              # First argument value
+    source: "arguments[0]"            # First argument value
     type: int
   - name: customer.id
-    source: arguments[1]              # Second argument value
+    source: "arguments[1]"            # Second argument value
     type: string
 ```
 
@@ -169,10 +169,10 @@ Extract property values from arguments:
 ```yaml
 attributes:
   - name: request.url
-    source: arguments[0].RequestUri.AbsoluteUri
+    source: "arguments[0].RequestUri.AbsoluteUri"
     type: string
   - name: user.email
-    source: arguments[0].User.Email
+    source: "arguments[0].User.Email"
     type: string
 ```
 
@@ -181,10 +181,10 @@ Extract values from the instance:
 ```yaml
 attributes:
   - name: service.name
-    source: instance.ServiceName
+    source: "instance.ServiceName"
     type: string
   - name: merchant.id
-    source: instance.MerchantId
+    source: "instance.MerchantId"
     type: string
 ```
 
@@ -193,10 +193,10 @@ Use conditional expressions:
 ```yaml
 attributes:
   - name: user.type
-    source: arguments[0].Age >= 18 ? "adult" : "minor"
+    source: "arguments[0].Age >= 18 ? \"adult\" : \"minor\""
     type: string
   - name: status
-    source: return.Success ? "ok" : "failed"
+    source: "return.Success ? \"ok\" : \"failed\""
     type: string
 ```
 
@@ -223,10 +223,10 @@ conditions, or in the `name_source` property for dynamic span names.
 ```yaml
 attributes:
   - name: operation.id
-    source: type + "." + method
+    source: "type + \".\" + method"
     type: string
   - name: order.key
-    source: arguments[0].CustomerId + "-" + arguments[0].OrderId
+    source: "arguments[0].CustomerId + \"-\" + arguments[0].OrderId"
     type: string
 ```
 
@@ -235,7 +235,7 @@ attributes:
 ```yaml
 attributes:
   - name: user.name
-    source: arguments[0].DisplayName != null ? arguments[0].DisplayName : "anonymous"
+    source: "arguments[0].DisplayName != null ? arguments[0].DisplayName : \"anonymous\""
     type: string
 ```
 
@@ -244,13 +244,13 @@ attributes:
 ```yaml
 attributes:
   - name: is.api.request
-    source: startsWith(arguments[0].Path, "/api/")
+    source: "startsWith(arguments[0].Path, \"/api/\")"
     type: bool
   - name: is.json.file
-    source: endsWith(arguments[0].FileName, ".json")
+    source: "endsWith(arguments[0].FileName, \".json\")"
     type: bool
   - name: has.error
-    source: contains(return.Message, "error")
+    source: "contains(return.Message, \"error\")"
     type: bool
 ```
 
@@ -259,10 +259,10 @@ attributes:
 ```yaml
 attributes:
   - name: item.count.string
-    source: string(size(arguments[0].Items))
+    source: "string(size(arguments[0].Items))"
     type: string
   - name: name.length
-    source: size(arguments[0].Name)
+    source: "size(arguments[0].Name)"
     type: int
 ```
 
@@ -294,40 +294,40 @@ Create span names from argument values:
 
 ```yaml
 span:
-  name: DefaultTransaction                   # Fallback name
-  name_source: "Transaction-" + arguments[0] # Dynamic name using first argument
+  name: DefaultTransaction                       # Fallback name
+  name_source: "\"Transaction-\" + arguments[0]"  # Dynamic name using first argument
 ```
 
 Combine multiple values:
 
 ```yaml
 span:
-  name: DefaultQuery                                        # Fallback name
-  name_source: "Query." + arguments[0] + "." + arguments[1] # e.g., "Query.ProductionDB.users"
+  name: DefaultQuery                                              # Fallback name
+  name_source: "\"Query.\" + arguments[0] + \".\" + arguments[1]" # e.g., "Query.ProductionDB.users"
 ```
 
 Include method context:
 
 ```yaml
 span:
-  name: DefaultOperation                                 # Fallback name
-  name_source: method + "-" + arguments[0].OperationType # e.g., "ProcessOrder-Express"
+  name: DefaultOperation                                     # Fallback name
+  name_source: "method + \"-\" + arguments[0].OperationType" # e.g., "ProcessOrder-Express"
 ```
 
 Use with nested properties:
 
 ```yaml
 span:
-  name: DefaultRequest                                           # Fallback name
-  name_source: arguments[0].HttpMethod + " " + arguments[0].Path # e.g., "GET /api/users"
+  name: DefaultRequest                                               # Fallback name
+  name_source: "arguments[0].HttpMethod + \" \" + arguments[0].Path" # e.g., "GET /api/users"
 ```
 
 Use conditional expressions:
 
 ```yaml
 span:
-  name: DefaultOrder                                     # Fallback name
-  name_source: arguments[0].Amount > 1000 ? "LargeOrder" : "Order"
+  name: DefaultOrder                                                     # Fallback name
+  name_source: "arguments[0].Amount > 1000 ? \"LargeOrder\" : \"Order\""
 ```
 
 ### Status Configuration
@@ -363,13 +363,13 @@ span:
   name: process-order
   status:
     rules:
-      - condition: return == null
+      - condition: "return == null"
         code: error
         description: "Order processing returned null"
-      - condition: return.Success == false
+      - condition: "return.Success == false"
         code: error
         description: "Order processing failed"
-      - condition: return != null
+      - condition: "return != null"
         code: ok
 ```
 
@@ -380,13 +380,13 @@ span:
   name: http-request
   status:
     rules:
-      - condition: return.StatusCode == 500
+      - condition: "return.StatusCode == 500"
         code: error
         description: "Internal server error"
-      - condition: return.StatusCode == 404
+      - condition: "return.StatusCode == 404"
         code: error
         description: "Not found"
-      - condition: return.StatusCode >= 200 && return.StatusCode < 300
+      - condition: "return.StatusCode >= 200 && return.StatusCode < 300"
         code: ok
 ```
 
@@ -397,13 +397,13 @@ span:
   name: process-message
   status:
     rules:
-      - condition: contains(return.Message, "error")
+      - condition: "contains(return.Message, \"error\")"
         code: error
-        description: "Error: " + return.Message
-      - condition: startsWith(return.Status, "FAIL")
+        description: "\"Error: \" + return.Message"
+      - condition: "startsWith(return.Status, \"FAIL\")"
         code: error
         description: "Operation failed"
-      - condition: return.Success
+      - condition: "return.Success"
         code: ok
 ```
 
@@ -430,26 +430,26 @@ instrumentation/development:
             kind: internal
             attributes:
               - name: order.id
-                source: arguments[0].OrderId
+                source: "arguments[0].OrderId"
                 type: string
               - name: customer.id
-                source: arguments[0].CustomerId
+                source: "arguments[0].CustomerId"
                 type: string
               - name: order.total
-                source: arguments[0].TotalAmount
+                source: "arguments[0].TotalAmount"
                 type: double
               - name: operation.name
-                source: "ProcessOrder-" + arguments[0].OrderType
+                source: "\"ProcessOrder-\" + arguments[0].OrderType"
                 type: string
             status:
               rules:
-                - condition: return == null
+                - condition: "return == null"
                   code: error
                   description: "Null result returned"
-                - condition: return.Status == "Failed"
+                - condition: "return.Status == \"Failed\""
                   code: error
                   description: "Order processing failed"
-                - condition: return.Status == "Completed"
+                - condition: "return.Status == \"Completed\""
                   code: ok
 ```
 
