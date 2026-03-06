@@ -299,17 +299,6 @@ public class CelExpressionTests
     }
 
     [Fact]
-    public void Evaluate_Substring_ReturnsSubstring()
-    {
-        var expr = CelExpression.Parse("substring(\"hello world\", 6)");
-        var context = CreateContext();
-
-        var result = expr!.Evaluate(context);
-
-        Assert.Equal("world", result);
-    }
-
-    [Fact]
     public void Evaluate_String_ConvertsToString()
     {
         var expr = CelExpression.Parse("string(123)");
@@ -649,21 +638,6 @@ public class CelExpressionTests
     }
 
     [Theory]
-    [InlineData("substring(\"hello\", 0, 10)", "hello")]
-    [InlineData("substring(\"hello\", 5, 10)", "")]
-    [InlineData("substring(\"hello\", 1)", "ello")]
-    [InlineData("substring(\"hello\", 10)", "")]
-    public void Evaluate_SubstringFunction_WithEdgeCases_ReturnsCorrectResult(string expression, string expected)
-    {
-        var expr = CelExpression.Parse(expression);
-        var context = new NoCodeExpressionContext(null, null, null, null, null);
-
-        var result = expr!.Evaluate(context);
-
-        Assert.Equal(expected, result);
-    }
-
-    [Theory]
     [InlineData("contains(\"hello\", null)", false)]
     [InlineData("startsWith(\"hello\", null)", false)]
     [InlineData("endsWith(\"hello\", null)", false)]
@@ -705,61 +679,6 @@ public class CelExpressionTests
     public void Evaluate_StringFunction_WithInvalidArgumentCount_ReturnsEmptyString()
     {
         var expr = CelExpression.Parse("string()");
-        var context = new NoCodeExpressionContext(null, null, null, null, null);
-
-        var result = expr!.Evaluate(context);
-
-        Assert.Equal(string.Empty, result);
-    }
-
-    [Fact]
-    public void Evaluate_SubstringFunction_WithInvalidArgumentCount_ReturnsEmptyString()
-    {
-        var expr = CelExpression.Parse("substring(\"hello\")");
-        var context = new NoCodeExpressionContext(null, null, null, null, null);
-
-        var result = expr!.Evaluate(context);
-
-        Assert.Equal(string.Empty, result);
-    }
-
-    [Fact]
-    public void Evaluate_SubstringFunction_WithNegativeStart_ReturnsEmptyString()
-    {
-        var expr = CelExpression.Parse("substring(\"hello\", -1)");
-        var context = new NoCodeExpressionContext(null, null, null, null, null);
-
-        var result = expr!.Evaluate(context);
-
-        Assert.Equal(string.Empty, result);
-    }
-
-    [Fact]
-    public void Evaluate_SubstringFunction_WithNegativeLength_ReturnsEmptyString()
-    {
-        var expr = CelExpression.Parse("substring(\"hello\", 1, -1)");
-        var context = new NoCodeExpressionContext(null, null, null, null, null);
-
-        var result = expr!.Evaluate(context);
-
-        Assert.Equal(string.Empty, result);
-    }
-
-    [Fact]
-    public void Evaluate_SubstringFunction_WithNonIntStart_ReturnsEmptyString()
-    {
-        var expr = CelExpression.Parse("substring(\"hello\", \"not an int\")");
-        var context = new NoCodeExpressionContext(null, null, null, null, null);
-
-        var result = expr!.Evaluate(context);
-
-        Assert.Equal(string.Empty, result);
-    }
-
-    [Fact]
-    public void Evaluate_SubstringFunction_WithNonIntLength_ReturnsEmptyString()
-    {
-        var expr = CelExpression.Parse("substring(\"hello\", 1, \"not an int\")");
         var context = new NoCodeExpressionContext(null, null, null, null, null);
 
         var result = expr!.Evaluate(context);
@@ -827,7 +746,7 @@ public class CelExpressionTests
     [InlineData("SIZE(arguments)")]
     [InlineData("sizE(arguments)")]
     [InlineData("StartsWith(\"hello\", \"h\")")]
-    [InlineData("SUBSTRING(\"hello\", 0, 2)")]
+    [InlineData("STARTSWITH(\"hello\", \"h\")")]
     public void Evaluate_FunctionWithWrongCase_ReturnsNull(string expression)
     {
         // CEL is case-sensitive; function names must be lowercase

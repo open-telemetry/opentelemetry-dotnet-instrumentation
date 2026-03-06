@@ -33,6 +33,9 @@ collection for specified methods through YAML configuration.
 - **Span Customization**: Configure span names, kinds, and custom attributes
 - **Method Overload Support**: Target specific method overloads using precise
   signature matching
+- **Dynamic Expressions**: Use a domain-specific language (DSL) based on
+  [CEL](https://cel.dev/) (Common Expression Language) for dynamic attributes,
+  span names, and conditional logic
 
 ## Limitations
 
@@ -65,8 +68,11 @@ instrumentation/development:
             kind: internal                                    # (Optional) Span kind: internal, server, client, producer, consumer (defaults to internal)
             attributes:                                       # Array of custom attributes to add to the span
               - name: custom.attribute                        # Attribute name
-                value: "attribute_value"                      # Attribute value
+                value: "attribute_value"                      # Static attribute value
                 type: string                                  # Attribute type (see Attribute Types section below)
+              - name: dynamic.attribute                       # Dynamic attribute name
+                value_source: "arguments[0]"                  # CEL expression to extract value from method context (see Dynamic Attributes section)
+                type: string
 ```
 
 ### Attribute Types
@@ -87,6 +93,365 @@ Supported attribute types and their formats:
 > Ensure attribute types match the supported formats above to avoid data loss.
 
 For more information about attributes, see the [OpenTelemetry Attribute specification](https://opentelemetry.io/docs/specs/otel/common/#attribute).
+
+### Dynamic Attributes
+
+Dynamic attributes allow you to extract attribute values from the method context
+at runtime using expression syntax based on CEL (Common Expression Language).
+Use the `value_source` property instead of `value` to specify an expression.
+
+#### Expression Syntax
+
+The expression syntax is a domain-specific language (DSL) based on CEL that
+provides a way to access method context at runtime. It implements a subset of
+the CEL specification with instrumentation-specific extensions.
+
+**Identifiers** - Access method execution context:
+
+| Identifier  | Description                                | Example                |
+|-------------|--------------------------------------------|------------------------|
+| `arguments` | Array of method arguments (zero-indexed)   | `arguments[0]`         |
+| `instance`  | The instance object (for instance methods) | `instance.ServiceName` |
+| `return`    | Method return value (in OnMethodEnd)       | `return.StatusCode`    |
+| `method`    | Method name                                | `method`               |
+| `type`      | Declaring type name                        | `type`                 |
+
+**Member Access** - Access properties and array elements:
+
+| Expression                     | Description                 |
+|--------------------------------|-----------------------------|
+| `arguments[0]`                 | First method argument       |
+| `arguments[1]`                 | Second method argument      |
+| `arguments[0].PropertyName`    | Property of first argument  |
+| `arguments[0].Nested.Property` | Nested property access      |
+| `instance.PropertyName`        | Property of instance object |
+| `return.ResultProperty`        | Property of return value    |
+
+**Operators** - Compare and combine values:
+
+| Operator   | Description         | Example                                  |
+|------------|---------------------|------------------------------------------|
+| `==`       | Equality            | `arguments[0] == "expected"`             |
+| `!=`       | Inequality          | `return.StatusCode != 200`               |
+| `<`, `>`   | Comparison          | `arguments[0].Age > 18`                  |
+| `<=`, `>=` | Comparison          | `return.Score >= 50`                     |
+| `&&`       | Logical AND         | `arguments[0] != null && return.Success` |
+| `\|\|`     | Logical OR          | `return.Success \|\| return.Retryable`   |
+| `!`        | Logical NOT         | `!return.HasError`                       |
+| `? :`      | Ternary conditional | `return.Success ? "ok" : "failed"`       |
+
+> [!NOTE]  
+>
+> - Arguments are zero-indexed (`arguments[0]` to `arguments[8]`)
+> - Property access uses reflection and only works with public properties
+> - If an expression evaluates to `null`, the attribute is omitted
+> - Invalid expressions or property paths are silently skipped (logged at debug
+>   level)
+> - Expressions are parsed and validated at configuration load time
+> - This DSL implements a subset of CEL; not all CEL features are supported
+
+#### Dynamic Attribute Examples
+
+Extract method argument values:
+
+```yaml
+attributes:
+  - name: order.id
+    value_source: "arguments[0]"      # First argument value
+    type: int
+  - name: customer.id
+    value_source: "arguments[1]"      # Second argument value
+    type: string
+```
+
+Extract property values from arguments:
+
+```yaml
+attributes:
+  - name: request.url
+    value_source: "arguments[0].RequestUri.AbsoluteUri"
+    type: string
+  - name: user.email
+    value_source: "arguments[0].User.Email"
+    type: string
+```
+
+Extract values from the instance:
+
+```yaml
+attributes:
+  - name: service.name
+    value_source: "instance.ServiceName"
+    type: string
+  - name: merchant.id
+    value_source: "instance.MerchantId"
+    type: string
+```
+
+Use conditional expressions:
+
+```yaml
+attributes:
+  - name: user.type
+    value_source: "arguments[0].Age >= 18 ? \"adult\" : \"minor\""
+    type: string
+  - name: status
+    value_source: "return.Success ? \"ok\" : \"failed\""
+    type: string
+```
+
+### Functions
+
+The expression DSL supports functions for transforming and combining values.
+Functions can be used in the `value_source` property for attributes, in status rule
+conditions, or in the `name_source` property for dynamic span names.
+
+#### Supported Functions
+
+| Function                   | Description                              | Example                                    |
+|----------------------------|------------------------------------------|--------------------------------------------|
+| `string(value)`            | Convert value to string                  | `string(arguments[0].Id)`                  |
+| `size(value)`              | Get length/count of string, list, or map | `size(arguments[0].Items)`                 |
+| `startsWith(str, prefix)`  | Check if string starts with prefix       | `startsWith(arguments[0].Path, "/api/")`   |
+| `endsWith(str, suffix)`    | Check if string ends with suffix         | `endsWith(arguments[0].FileName, ".json")` |
+| `contains(str, substring)` | Check if string contains substring       | `contains(arguments[0].Message, "error")`  |
+
+#### Function Expression Examples
+
+**Concatenate values:**
+
+```yaml
+attributes:
+  - name: operation.id
+    value_source: "type + \".\" + method"
+    type: string
+  - name: order.key
+    value_source: "arguments[0].CustomerId + \"-\" + arguments[0].OrderId"
+    type: string
+```
+
+**Use ternary operator for defaults:**
+
+```yaml
+attributes:
+  - name: user.name
+    value_source: "arguments[0].DisplayName != null ? arguments[0].DisplayName : \"anonymous\""
+    type: string
+```
+
+**String operations:**
+
+```yaml
+attributes:
+  - name: is.api.request
+    value_source: "startsWith(arguments[0].Path, \"/api/\")"
+    type: bool
+  - name: is.json.file
+    value_source: "endsWith(arguments[0].FileName, \".json\")"
+    type: bool
+  - name: has.error
+    value_source: "contains(return.Message, \"error\")"
+    type: bool
+```
+
+**Convert and measure:**
+
+```yaml
+attributes:
+  - name: item.count.string
+    value_source: "string(size(arguments[0].Items))"
+    type: string
+  - name: name.length
+    value_source: "size(arguments[0].Name)"
+    type: int
+```
+
+### Dynamic Span Names
+
+Dynamic span names allow you to construct span names at runtime based on method
+context using expressions. This is useful for creating meaningful, contextual
+span names that include parameter values or other runtime information.
+
+> [!IMPORTANT]
+> Span names should be low-cardinality to avoid performance issues and storage
+> overhead. Avoid including high-cardinality values like unique identifiers,
+> timestamps, or user-specific data directly in span names. Use span attributes
+> for high-cardinality data instead. See the [OpenTelemetry Span specification](https://github.com/open-telemetry/opentelemetry-specification/blob/v1.54.0/specification/trace/api.md#span)
+> for guidance on span name best practices.
+
+Use the `name_source` property with an expression to specify the dynamic
+span name. The `name` property is still required as a fallback if the dynamic
+expression fails to evaluate.
+
+> [!NOTE]  
+> Expressions for span names typically use the `+` operator to
+> combine values into a meaningful string. This ensures the result is always
+> a string type.
+
+#### Dynamic Span Name Examples
+
+Create span names from argument values:
+
+```yaml
+span:
+  name: DefaultTransaction                       # Fallback name
+  name_source: "\"Transaction-\" + arguments[0]"  # Dynamic name using first argument
+```
+
+Combine multiple values:
+
+```yaml
+span:
+  name: DefaultQuery                                              # Fallback name
+  name_source: "\"Query.\" + arguments[0] + \".\" + arguments[1]" # e.g., "Query.ProductionDB.users"
+```
+
+Include method context:
+
+```yaml
+span:
+  name: DefaultOperation                                     # Fallback name
+  name_source: "method + \"-\" + arguments[0].OperationType" # e.g., "ProcessOrder-Express"
+```
+
+Use with nested properties:
+
+```yaml
+span:
+  name: DefaultRequest                                               # Fallback name
+  name_source: "arguments[0].HttpMethod + \" \" + arguments[0].Path" # e.g., "GET /api/users"
+```
+
+Use conditional expressions:
+
+```yaml
+span:
+  name: DefaultOrder                                                     # Fallback name
+  name_source: "arguments[0].Amount > 1000 ? \"LargeOrder\" : \"Order\""
+```
+
+### Status Configuration
+
+You can configure span status based on return values or other conditions using
+expressions in status rules. Rules are evaluated in order, and the first
+matching rule sets the status.
+
+#### Status Rule Syntax
+
+```yaml
+span:
+  name: my-span
+  status:
+    rules:
+      - condition: <expression>    # Expression that evaluates to boolean
+        code: <status_code>        # ok, error, or unset
+        description: <text>        # Optional static description (useful for errors)
+```
+
+#### Status Codes
+
+- **`ok`**: The operation completed successfully
+- **`error`**: The operation failed
+- **`unset`**: No status set (default)
+
+#### Status Rule Examples
+
+Set error status when return value indicates failure:
+
+```yaml
+span:
+  name: process-order
+  status:
+    rules:
+      - condition: "return == null"
+        code: error
+        description: "Order processing returned null"
+      - condition: "return.Success == false"
+        code: error
+        description: "Order processing failed"
+      - condition: "return != null"
+        code: ok
+```
+
+Set status based on return value properties:
+
+```yaml
+span:
+  name: http-request
+  status:
+    rules:
+      - condition: "return.StatusCode == 500"
+        code: error
+        description: "Internal server error"
+      - condition: "return.StatusCode == 404"
+        code: error
+        description: "Not found"
+      - condition: "return.StatusCode >= 200 && return.StatusCode < 300"
+        code: ok
+```
+
+Use string functions for pattern matching:
+
+```yaml
+span:
+  name: process-message
+  status:
+    rules:
+      - condition: "contains(return.Message, \"error\")"
+        code: error
+        description: "Message contains error"
+      - condition: "startsWith(return.Status, \"FAIL\")"
+        code: error
+        description: "Operation failed"
+      - condition: "return.Success"
+        code: ok
+```
+
+#### Complete example
+
+Complete example with dynamic attributes and status:
+
+```yaml
+instrumentation/development:
+  dotnet:
+    no_code:
+      targets:
+        - target:
+            assembly:
+              name: MyApp.Services
+            type: MyApp.Services.OrderService
+            method: ProcessOrder
+            signature:
+              return_type: MyApp.Models.OrderResult
+              parameter_types:
+                - MyApp.Models.OrderRequest
+          span:
+            name: process-order
+            kind: internal
+            attributes:
+              - name: order.id
+                value_source: "arguments[0].OrderId"
+                type: string
+              - name: customer.id
+                value_source: "arguments[0].CustomerId"
+                type: string
+              - name: order.total
+                value_source: "arguments[0].TotalAmount"
+                type: double
+              - name: operation.name
+                value_source: "\"ProcessOrder-\" + arguments[0].OrderType"
+                type: string
+            status:
+              rules:
+                - condition: "return == null"
+                  code: error
+                  description: "Null result returned"
+                - condition: "return.Status == \"Failed\""
+                  code: error
+                  description: "Order processing failed"
+                - condition: "return.Status == \"Completed\""
+                  code: ok
+```
 
 ## Examples
 
@@ -560,7 +925,15 @@ The test application demonstrates instrumentation of:
   generic methods
 - **Performance Issues**: Consider the frequency of method calls and whether
   instrumentation is necessary for high-throughput methods
+- **Expression Errors**: Check for syntax errors in expressions.
+  Expressions are validated at configuration load time. Enable debug logging
+  to see detailed parsing errors
+- **Null Attribute Values**: If an attribute is not appearing in spans, check
+  that the expression is not evaluating to null. Use the ternary operator to provide
+  default values
+- **Wrong Argument Index**: Remember that expressions use zero-based indexing
+  (`arguments[0]` is the first argument)
 - **Debug Logs**: Enable debug logging (see [Global settings](config.md#global-settings))
-  and search for log messages prefixed with `No code` to find information
+  and search for log messages prefixed with `No code` or `CEL` to find information
   specific to no-code instrumentation, including configuration parsing, method
-  targeting, and instrumentation application details.
+  targeting, instrumentation application details, and expression evaluation.

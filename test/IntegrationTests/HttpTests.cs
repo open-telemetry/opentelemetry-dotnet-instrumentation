@@ -73,7 +73,7 @@ public class HttpTests : TestHelper
     {
         using var collector = new MockSpansCollector(Output);
         SetFileBasedExporter(collector);
-        EnableFileBasedConfigWithDefaultPath();
+        EnableFileBasedConfig();
 
         Span? clientSpan = null;
         collector.Expect("System.Net.Http", span =>
