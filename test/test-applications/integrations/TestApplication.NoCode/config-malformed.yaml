@@ -130,7 +130,7 @@ instrumentation/development:
                  value: "static_value"
                  type: string
                - name: invalid_dynamic_attr
-                 source: "this is not valid @#$%^"
+                 value_source: "this is not valid @#$%^"
                  type: string
 
         # Valid: With invalid status rule - span should work, invalid rule skipped

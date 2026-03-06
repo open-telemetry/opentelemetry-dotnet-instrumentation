@@ -679,10 +679,10 @@ instrumentation/development:
              name: Span-ProcessOrder
              attributes:
                - name: order.id
-                 source: arguments[0]
+                 value_source: arguments[0]
                  type: string
                - name: order.quantity
-                 source: arguments[1]
+                 value_source: arguments[1]
                  type: int
         - target:
             assembly:
@@ -697,19 +697,19 @@ instrumentation/development:
              name: Span-ProcessCustomer
              attributes:
                - name: customer.id
-                 source: arguments[0].Id
+                 value_source: arguments[0].Id
+                 type: int
+               - name: user.name
+                 value_source: arguments[0].Name
                  type: string
-               - name: customer.name
-                 source: arguments[0].Name
+               - name: user.email
+                 value_source: arguments[0].Email
                  type: string
-               - name: customer.email
-                 source: arguments[0].Email
+               - name: user.city
+                 value_source: arguments[0].Address.City
                  type: string
-               - name: customer.city
-                 source: arguments[0].Address.City
-                 type: string
-               - name: customer.country
-                 source: arguments[0].Address.Country
+               - name: user.country
+                 value_source: arguments[0].Address.Country
                  type: string
         - target:
             assembly:
@@ -724,13 +724,13 @@ instrumentation/development:
              name: Span-AuditAction
              attributes:
                - name: action
-                 source: arguments[0]
+                 value_source: arguments[0]
                  type: string
                - name: service.name
-                 source: instance.ServiceName
+                 value_source: instance.ServiceName
                  type: string
                - name: merchant.id
-                 source: instance.MerchantId
+                 value_source: instance.MerchantId
                  type: int
         - target:
             assembly:
@@ -746,7 +746,7 @@ instrumentation/development:
              name: Span-CreateResource
              attributes:
                - name: resource.full_id
-                 source: "arguments[0] + \"/\" + arguments[1]"
+                 value_source: "arguments[0] + \"/\" + arguments[1]"
                  type: string
         - target:
             assembly:
@@ -761,7 +761,7 @@ instrumentation/development:
              name: Span-ProcessWithDefault
              attributes:
                - name: value
-                 source: "arguments[0] != null ? arguments[0] : \"default_value\""
+                 value_source: "arguments[0] != null ? arguments[0] : \"default_value\""
                  type: string
         - target:
             assembly:
@@ -775,13 +775,13 @@ instrumentation/development:
              name: Span-OperationWithMetadata
              attributes:
                - name: method.name
-                 source: method
+                 value_source: method
                  type: string
                - name: type.name
-                 source: type
+                 value_source: type
                  type: string
-               - name: operation.full_name
-                 source: "type + \".\" + method"
+               - name: operation.name
+                 value_source: "type + \".\" + method"
                  type: string
         - target:
             assembly:
@@ -796,13 +796,13 @@ instrumentation/development:
              name: Span-ProcessOrderAsync
              attributes:
                - name: order.id
-                 source: arguments[0].Id
+                 value_source: arguments[0].Id
                  type: string
-               - name: order.amount
-                 source: arguments[0].Amount
+               - name: payment.amount
+                 value_source: arguments[0].Amount
                  type: double
-               - name: order.currency
-                 source: arguments[0].Currency
+               - name: payment.currency
+                 value_source: arguments[0].Currency
                  type: string
         - target:
             assembly:
@@ -817,7 +817,7 @@ instrumentation/development:
              name: Span-CompleteOrder
              attributes:
                - name: order.id
-                 source: arguments[0]
+                 value_source: arguments[0]
                  type: string
              status:
                rules:
@@ -841,10 +841,10 @@ instrumentation/development:
              name_source: "\"Transaction-\" + arguments[1] + \"-\" + arguments[0]"
              attributes:
                - name: transaction.id
-                 source: arguments[0]
+                 value_source: arguments[0]
                  type: string
                - name: transaction.type
-                 source: arguments[1]
+                 value_source: arguments[1]
                  type: string
         - target:
             assembly:
@@ -861,8 +861,8 @@ instrumentation/development:
              name_source: "\"Query.\" + arguments[0] + \".\" + arguments[1]"
              attributes:
                - name: db.name
-                 source: arguments[0]
+                 value_source: arguments[0]
                  type: string
-               - name: db.table
-                 source: arguments[1]
+               - name: table.name
+                 value_source: arguments[1]
                  type: string

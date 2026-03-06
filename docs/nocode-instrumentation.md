@@ -71,7 +71,7 @@ instrumentation/development:
                 value: "attribute_value"                      # Static attribute value
                 type: string                                  # Attribute type (see Attribute Types section below)
               - name: dynamic.attribute                       # Dynamic attribute name
-                source: "arguments[0]"                        # CEL expression to extract value from method context (see Dynamic Attributes section)
+                value_source: "arguments[0]"                  # CEL expression to extract value from method context (see Dynamic Attributes section)
                 type: string
 ```
 
@@ -98,7 +98,7 @@ For more information about attributes, see the [OpenTelemetry Attribute specific
 
 Dynamic attributes allow you to extract attribute values from the method context
 at runtime using expression syntax based on CEL (Common Expression Language).
-Use the `source` property instead of `value` to specify an expression.
+Use the `value_source` property instead of `value` to specify an expression.
 
 #### Expression Syntax
 
@@ -157,10 +157,10 @@ Extract method argument values:
 ```yaml
 attributes:
   - name: order.id
-    source: "arguments[0]"            # First argument value
+    value_source: "arguments[0]"      # First argument value
     type: int
   - name: customer.id
-    source: "arguments[1]"            # Second argument value
+    value_source: "arguments[1]"      # Second argument value
     type: string
 ```
 
@@ -169,10 +169,10 @@ Extract property values from arguments:
 ```yaml
 attributes:
   - name: request.url
-    source: "arguments[0].RequestUri.AbsoluteUri"
+    value_source: "arguments[0].RequestUri.AbsoluteUri"
     type: string
   - name: user.email
-    source: "arguments[0].User.Email"
+    value_source: "arguments[0].User.Email"
     type: string
 ```
 
@@ -181,10 +181,10 @@ Extract values from the instance:
 ```yaml
 attributes:
   - name: service.name
-    source: "instance.ServiceName"
+    value_source: "instance.ServiceName"
     type: string
   - name: merchant.id
-    source: "instance.MerchantId"
+    value_source: "instance.MerchantId"
     type: string
 ```
 
@@ -193,17 +193,17 @@ Use conditional expressions:
 ```yaml
 attributes:
   - name: user.type
-    source: "arguments[0].Age >= 18 ? \"adult\" : \"minor\""
+    value_source: "arguments[0].Age >= 18 ? \"adult\" : \"minor\""
     type: string
   - name: status
-    source: "return.Success ? \"ok\" : \"failed\""
+    value_source: "return.Success ? \"ok\" : \"failed\""
     type: string
 ```
 
 ### Functions
 
 The expression DSL supports functions for transforming and combining values.
-Functions can be used in the `source` property for attributes, in status rule
+Functions can be used in the `value_source` property for attributes, in status rule
 conditions, or in the `name_source` property for dynamic span names.
 
 #### Supported Functions
@@ -223,10 +223,10 @@ conditions, or in the `name_source` property for dynamic span names.
 ```yaml
 attributes:
   - name: operation.id
-    source: "type + \".\" + method"
+    value_source: "type + \".\" + method"
     type: string
   - name: order.key
-    source: "arguments[0].CustomerId + \"-\" + arguments[0].OrderId"
+    value_source: "arguments[0].CustomerId + \"-\" + arguments[0].OrderId"
     type: string
 ```
 
@@ -235,7 +235,7 @@ attributes:
 ```yaml
 attributes:
   - name: user.name
-    source: "arguments[0].DisplayName != null ? arguments[0].DisplayName : \"anonymous\""
+    value_source: "arguments[0].DisplayName != null ? arguments[0].DisplayName : \"anonymous\""
     type: string
 ```
 
@@ -244,13 +244,13 @@ attributes:
 ```yaml
 attributes:
   - name: is.api.request
-    source: "startsWith(arguments[0].Path, \"/api/\")"
+    value_source: "startsWith(arguments[0].Path, \"/api/\")"
     type: bool
   - name: is.json.file
-    source: "endsWith(arguments[0].FileName, \".json\")"
+    value_source: "endsWith(arguments[0].FileName, \".json\")"
     type: bool
   - name: has.error
-    source: "contains(return.Message, \"error\")"
+    value_source: "contains(return.Message, \"error\")"
     type: bool
 ```
 
@@ -259,10 +259,10 @@ attributes:
 ```yaml
 attributes:
   - name: item.count.string
-    source: "string(size(arguments[0].Items))"
+    value_source: "string(size(arguments[0].Items))"
     type: string
   - name: name.length
-    source: "size(arguments[0].Name)"
+    value_source: "size(arguments[0].Name)"
     type: int
 ```
 
@@ -430,16 +430,16 @@ instrumentation/development:
             kind: internal
             attributes:
               - name: order.id
-                source: "arguments[0].OrderId"
+                value_source: "arguments[0].OrderId"
                 type: string
               - name: customer.id
-                source: "arguments[0].CustomerId"
+                value_source: "arguments[0].CustomerId"
                 type: string
               - name: order.total
-                source: "arguments[0].TotalAmount"
+                value_source: "arguments[0].TotalAmount"
                 type: double
               - name: operation.name
-                source: "\"ProcessOrder-\" + arguments[0].OrderType"
+                value_source: "\"ProcessOrder-\" + arguments[0].OrderType"
                 type: string
             status:
               rules:

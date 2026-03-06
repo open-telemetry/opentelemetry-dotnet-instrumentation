@@ -39,7 +39,7 @@ internal class NoCodeSpan
         }
 
         // Only parse attributes with Value (static attributes)
-        var staticAttributes = Attributes.Where(a => a.Value != null && string.IsNullOrEmpty(a.Source)).ToList();
+        var staticAttributes = Attributes.Where(a => a.Value != null && string.IsNullOrEmpty(a.ValueSource)).ToList();
         return YamlAttribute.ParseAttributes(staticAttributes);
     }
 
@@ -57,7 +57,7 @@ internal class NoCodeSpan
 
         foreach (var attribute in Attributes)
         {
-            if (string.IsNullOrEmpty(attribute.Source))
+            if (string.IsNullOrEmpty(attribute.ValueSource))
             {
                 continue;
             }
@@ -69,10 +69,10 @@ internal class NoCodeSpan
             }
 
             // Parse using CEL expression
-            var celExpression = CelExpression.Parse(attribute.Source);
+            var celExpression = CelExpression.Parse(attribute.ValueSource);
             if (celExpression == null)
             {
-                Log.Debug("Failed to parse dynamic attribute expression '{0}' for attribute '{1}'. Skipping.", attribute.Source, attribute.Name);
+                Log.Debug("Failed to parse dynamic attribute expression '{0}' for attribute '{1}'. Skipping.", attribute.ValueSource, attribute.Name);
                 continue;
             }
 

@@ -28,8 +28,8 @@ internal class YamlAttribute
     /// Gets or sets the expression source for dynamic attributes (e.g., "$arg1", "$arg2.Property", "$instance.Name").
     /// When specified, the attribute value is extracted from the method context at runtime.
     /// </summary>
-    [YamlMember(Alias = "source")]
-    public string? Source { get; set; }
+    [YamlMember(Alias = "value_source")]
+    public string? ValueSource { get; set; }
 
     /// <summary>
     /// Gets or sets the type of the resource attribute.
