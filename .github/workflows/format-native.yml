@@ -55,7 +55,7 @@ jobs:
       - name: Verify all native files have license headers
         shell: bash
         run: |
-          go install github.com/google/addlicense@v1.1.1
+          go install github.com/google/addlicense@v1.2.0
           addlicense -v -y "" -l "apache" -c "The OpenTelemetry Authors" -s=only -ignore **/lib/** src/OpenTelemetry.AutoInstrumentation.Native/
           git status
           git diff
