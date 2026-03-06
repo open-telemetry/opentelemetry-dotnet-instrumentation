@@ -17,7 +17,7 @@ By default, the value is false.
 You can also specify the configuration file path (default: `config.yaml`):
 
 ```bash
-OTEL_EXPERIMENTAL_CONFIG_FILE=/path/to/config.yaml
+OTEL_CONFIG_FILE=/path/to/config.yaml
 ```
 
 In your config file you can use environment variables in the format `${ENVIRONMENT_VARIABLE}`
@@ -139,7 +139,7 @@ file-based configuration to include these parameters.
 # The yaml format is documented at
 # <https://github.com/open-telemetry/opentelemetry-configuration/tree/main/schema>
 # By default, the latest version is used.
-file_format: "1.0-rc.1"
+file_format: "1.0"
 # Configure if the SDK is disabled or not.
 # If omitted or null, false is used
 disabled: false

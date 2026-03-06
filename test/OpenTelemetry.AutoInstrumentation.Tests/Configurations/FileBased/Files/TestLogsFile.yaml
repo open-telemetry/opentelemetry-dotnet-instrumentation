@@ -1,3 +1,5 @@
+file_format: "1.0"
+
 logs_include_formatted_message: true
 
 logger_provider:

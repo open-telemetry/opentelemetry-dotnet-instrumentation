@@ -9,14 +9,16 @@ namespace TestApplication.MongoDB;
 
 internal static class Program
 {
-    public static void Main(string[] args)
+    public static async Task Main(string[] args)
     {
         ConsoleHelper.WriteSplashScreen(args);
 
         var mongoPort = GetMongoPort(args);
         var mongoDatabase = GetMongoDbName(args);
         var mongoCollection = GetMongoCollectionName(args);
+#if !MONGODB_3_7_0_OR_GREATER
         var shouldTriggerError = ShouldTriggerError(args);
+#endif
         var newDocument = new BsonDocument
         {
             { "name", "MongoDB" },
@@ -33,7 +35,7 @@ internal static class Program
 
         var connectionString = $"mongodb://{Host()}:{mongoPort}";
 
-#if MONGODB_3_OR_GREATER
+#if MONGODB_3_0_0_OR_GREATER
         using var client = new MongoClient(connectionString);
 #else
         var client = new MongoClient(connectionString);
@@ -41,17 +43,40 @@ internal static class Program
         var database = client.GetDatabase(mongoDatabase);
         var collection = database.GetCollection<BsonDocument>(mongoCollection);
 
+#if MONGODB_3_7_0_OR_GREATER
+        await RunAsync(collection, newDocument).ConfigureAwait(false);
+#else
         if (shouldTriggerError)
         {
             RunWithError(collection, newDocument);
         }
         else
         {
+#pragma warning disable CA1849 // Call async methods when in an async method. Intentionally calling both sync and async versions of the method to ensure both are properly traced.
             Run(collection, newDocument);
-            RunAsync(collection, newDocument).Wait();
+#pragma warning restore CA1849 // Call async methods when in an async method. Intentionally calling both sync and async versions of the method to ensure both are properly traced.
+            await RunAsync(collection, newDocument).ConfigureAwait(false);
         }
+#endif
     }
 
+    public static async Task RunAsync(IMongoCollection<BsonDocument> collection, BsonDocument newDocument)
+    {
+        var allFilter = new BsonDocument();
+
+        await collection.DeleteManyAsync(allFilter).ConfigureAwait(false);
+        await collection.InsertOneAsync(newDocument).ConfigureAwait(false);
+
+        var count = await collection.CountDocumentsAsync(new BsonDocument()).ConfigureAwait(false);
+
+        Console.WriteLine($"Documents: {count}");
+
+        var find = await collection.FindAsync(allFilter).ConfigureAwait(false);
+        var allDocuments = await find.ToListAsync().ConfigureAwait(false);
+        Console.WriteLine(allDocuments.FirstOrDefault());
+    }
+
+#if !MONGODB_3_7_0_OR_GREATER
     public static void RunWithError(IMongoCollection<BsonDocument> collection, BsonDocument newDocument)
     {
         try
@@ -102,21 +127,11 @@ internal static class Program
         }
     }
 
-    public static async Task RunAsync(IMongoCollection<BsonDocument> collection, BsonDocument newDocument)
+    private static bool ShouldTriggerError(string[] args)
     {
-        var allFilter = new BsonDocument();
-
-        await collection.DeleteManyAsync(allFilter).ConfigureAwait(false);
-        await collection.InsertOneAsync(newDocument).ConfigureAwait(false);
-
-        var count = await collection.CountDocumentsAsync(new BsonDocument()).ConfigureAwait(false);
-
-        Console.WriteLine($"Documents: {count}");
-
-        var find = await collection.FindAsync(allFilter).ConfigureAwait(false);
-        var allDocuments = await find.ToListAsync().ConfigureAwait(false);
-        Console.WriteLine(allDocuments.FirstOrDefault());
+        return args.Any(arg => arg.Equals("--trigger-error", StringComparison.OrdinalIgnoreCase));
     }
+#endif
 
     private static string Host()
     {
@@ -151,10 +166,5 @@ internal static class Program
         }
 
         return "employees";
-    }
-
-    private static bool ShouldTriggerError(string[] args)
-    {
-        return args.Any(arg => arg.Equals("--trigger-error", StringComparison.OrdinalIgnoreCase));
     }
 }

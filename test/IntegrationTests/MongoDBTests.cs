@@ -42,35 +42,23 @@ public class MongoDBTests : TestHelper
     [MemberData(nameof(LibraryVersion.MongoDB), MemberType = typeof(LibraryVersion))]
     public void SubmitsTraces(string packageVersion)
     {
-        using var collector = new MockSpansCollector(Output);
-        SetExporter(collector);
-        const int spanCount = 3;
-        for (var i = 0; i < spanCount; i++)
+        if (MongoDb37Plus(packageVersion))
         {
-            collector.Expect(MongoDBInstrumentationScopeName, VersionHelper.AutoInstrumentationVersion);
+            TestMongoDb37Plus(packageVersion);
         }
-
-        collector.Expect(MongoDBInstrumentationScopeName, VersionHelper.AutoInstrumentationVersion, ValidateSpan, schemaUrl: "https://opentelemetry.io/schemas/1.39.0");
-
-        EnableBytecodeInstrumentation();
-        RunTestApplication(new()
+        else
         {
-#if NET462
-            Framework = string.IsNullOrEmpty(packageVersion) || new Version(packageVersion) >= new Version(3, 0, 0) ? "net472" : "net462",
-#endif
-            Arguments = $"--mongo-db {_mongoDB.Port} {MongoDbNamespace} {MongoDbCollectionName}",
-            PackageVersion = packageVersion
-        });
-
-        collector.AssertExpectations();
+            TestMongoDbLegacy(packageVersion);
+        }
     }
 
-    [Theory]
+    [SkippableTheory]
     [Trait("Category", "EndToEnd")]
     [Trait("Containers", "Any")]
     [MemberData(nameof(LibraryVersion.MongoDB), MemberType = typeof(LibraryVersion))]
     public void SubmitsTracesWithErrorDetails(string packageVersion)
     {
+        SkipIfMongoDb37Plus(packageVersion);
         using var collector = new MockSpansCollector(Output);
         SetExporter(collector);
 
@@ -88,6 +76,19 @@ public class MongoDBTests : TestHelper
         });
 
         collector.AssertExpectations();
+    }
+
+    private static void SkipIfMongoDb37Plus(string packageVersion)
+    {
+        if (MongoDb37Plus(packageVersion))
+        {
+            throw new SkipException("MongoDB >= 3.7.0. No need to verify legacy behavior.");
+        }
+    }
+
+    private static bool MongoDb37Plus(string packageVersion)
+    {
+        return string.IsNullOrEmpty(packageVersion) || Version.Parse(packageVersion) >= new Version(3, 7, 0);
     }
 
     private static bool ValidateDatabaseAttributes(IReadOnlyCollection<KeyValue> spanAttributes)
@@ -128,6 +129,49 @@ public class MongoDBTests : TestHelper
         }
 
         return true;
+    }
+
+    private void TestMongoDb37Plus(string packageVersion)
+    {
+        using var collector = new MockSpansCollector(Output);
+        SetExporter(collector);
+
+        collector.Expect("MongoDB.Driver");
+
+        RunMongoDbTestApplication(packageVersion);
+
+        collector.AssertExpectations();
+    }
+
+    private void TestMongoDbLegacy(string packageVersion)
+    {
+        using var collector = new MockSpansCollector(Output);
+        SetExporter(collector);
+
+        const int spanCount = 3;
+        for (var i = 0; i < spanCount; i++)
+        {
+            collector.Expect(MongoDBInstrumentationScopeName, VersionHelper.AutoInstrumentationVersion);
+        }
+
+        collector.Expect(MongoDBInstrumentationScopeName, VersionHelper.AutoInstrumentationVersion, ValidateSpan, schemaUrl: "https://opentelemetry.io/schemas/1.39.0");
+
+        EnableBytecodeInstrumentation();
+        RunMongoDbTestApplication(packageVersion);
+
+        collector.AssertExpectations();
+    }
+
+    private void RunMongoDbTestApplication(string packageVersion)
+    {
+        RunTestApplication(new()
+        {
+#if NET462
+            Framework = string.IsNullOrEmpty(packageVersion) || new Version(packageVersion) >= new Version(3, 0, 0) ? "net472" : "net462",
+#endif
+            Arguments = $"--mongo-db {_mongoDB.Port} {MongoDbNamespace} {MongoDbCollectionName}",
+            PackageVersion = packageVersion
+        });
     }
 
     private bool ValidateSpan(Span span)
