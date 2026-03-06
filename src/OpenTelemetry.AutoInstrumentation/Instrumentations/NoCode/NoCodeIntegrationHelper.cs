@@ -136,7 +136,7 @@ internal static class NoCodeIntegrationHelper
 #endif
         }
 
-        HandleActivity(returnValue, exception, activity, state.State as NoCodeCallTargetState);
+        StopActivity(returnValue, exception, activity, state.State as NoCodeCallTargetState);
 
         return new CallTargetReturn<TReturn>(returnValue);
     }
@@ -149,7 +149,7 @@ internal static class NoCodeIntegrationHelper
             return returnValue;
         }
 
-        HandleActivity(returnValue, exception, activity, state.State as NoCodeCallTargetState);
+        StopActivity(returnValue, exception, activity, state.State as NoCodeCallTargetState);
 
         return returnValue;
     }
@@ -162,12 +162,12 @@ internal static class NoCodeIntegrationHelper
             return CallTargetReturn.GetDefault();
         }
 
-        HandleActivity<object>(null, exception, activity, state.State as NoCodeCallTargetState);
+        StopActivity<object>(null, exception, activity, state.State as NoCodeCallTargetState);
 
         return CallTargetReturn.GetDefault();
     }
 
-    private static void HandleActivity<TReturn>(TReturn? returnValue, Exception? exception, Activity activity, NoCodeCallTargetState? noCodeState)
+    private static void StopActivity<TReturn>(TReturn? returnValue, Exception? exception, Activity activity, NoCodeCallTargetState? noCodeState)
     {
         // Handle exception first
         if (exception is not null)
