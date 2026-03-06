@@ -104,7 +104,6 @@ internal static class NoCodeIntegrationHelper
         var returnType = typeof(TReturn);
         if (returnType.IsGenericType)
         {
-            var genericReturnType = returnType.GetGenericTypeDefinition();
             if (typeof(Task).IsAssignableFrom(returnType))
             {
                 // The type is a Task<>
@@ -112,6 +111,7 @@ internal static class NoCodeIntegrationHelper
             }
 #if NET
 
+            var genericReturnType = returnType.GetGenericTypeDefinition();
             if (genericReturnType == typeof(ValueTask<>))
             {
                 // The type is a ValueTask<>
