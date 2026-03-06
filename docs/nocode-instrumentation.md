@@ -345,7 +345,7 @@ span:
     rules:
       - condition: <expression>    # Expression that evaluates to boolean
         code: <status_code>        # ok, error, or unset
-        description: <text>        # Optional description (useful for errors)
+        description: <text>        # Optional static description (useful for errors)
 ```
 
 #### Status Codes
@@ -399,7 +399,7 @@ span:
     rules:
       - condition: "contains(return.Message, \"error\")"
         code: error
-        description: "\"Error: \" + return.Message"
+        description: "Message contains error"
       - condition: "startsWith(return.Status, \"FAIL\")"
         code: error
         description: "Operation failed"
