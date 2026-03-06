@@ -125,7 +125,7 @@ the CEL specification with instrumentation-specific extensions.
 | `arguments[0].PropertyName`    | Property of first argument  |
 | `arguments[0].Nested.Property` | Nested property access      |
 | `instance.PropertyName`        | Property of instance object |
-| `return.Result`                | Property of return value    |
+| `return.ResultProperty`        | Property of return value    |
 
 **Operators** - Compare and combine values:
 
@@ -223,10 +223,10 @@ conditions, or in the `name_source` property for dynamic span names.
 ```yaml
 attributes:
   - name: operation.id
-    source: type + "." + method)
+    source: type + "." + method
     type: string
   - name: order.key
-    source: arguments[0].CustomerId + "-" + arguments[0].OrderId)
+    source: arguments[0].CustomerId + "-" + arguments[0].OrderId
     type: string
 ```
 
@@ -318,8 +318,8 @@ Use with nested properties:
 
 ```yaml
 span:
-  name: DefaultRequest                                            # Fallback name
-  name_source: arguments[0].HttpMethod + " " + arguments[0].Path) # e.g., "GET /api/users"
+  name: DefaultRequest                                           # Fallback name
+  name_source: arguments[0].HttpMethod + " " + arguments[0].Path # e.g., "GET /api/users"
 ```
 
 Use conditional expressions:
@@ -327,7 +327,7 @@ Use conditional expressions:
 ```yaml
 span:
   name: DefaultOrder                                     # Fallback name
-  name_source: arguments[0].Amount > 1000 ? ("LargeOrder-" + arguments[0].Id) : ("Order-" + arguments[0].Id)
+  name_source: arguments[0].Amount > 1000 ? "LargeOrder" : "Order"
 ```
 
 ### Status Configuration
