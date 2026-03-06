@@ -192,6 +192,11 @@ jobs:
           name: bin-${{ matrix.artifact-name }}
           path: bin/tracer-home
 
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f # tag: v3.12.0
+        with:
+          driver: docker
+
       - name: Build artifacts required for the test (no native tests)
         run: ./build.cmd --skip RunManagedTests --target ManagedTests --containers ${{ matrix.containers }}
 
