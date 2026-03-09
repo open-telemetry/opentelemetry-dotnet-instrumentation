@@ -7,6 +7,11 @@
     <Nullable>disable</Nullable>
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>$(MSBuildThisFileDirectory)..\..\test\test-keypair.snk</AssemblyOriginatorKeyFile>
+    <!-- 
+        LangVersion needs to be 13.0 as it is dependency on _builds.csrpoj. 
+        It can be udated when .NET8/.NET9 supportf will be dropped.
+    -->
+    <LangVersion>13.0</LangVersion>
   </PropertyGroup>
 
   <ItemGroup>

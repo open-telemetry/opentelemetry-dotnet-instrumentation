@@ -9,6 +9,8 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 
 ### Added
 
+- Support for [MongoDB.Driver](https://www.nuget.org/packages/MongoDB.Driver/)
+  traces instrumentation for versions `3.7.0`+.
 - Add support for file-based configuration file format version `1.0`.
 - Add support for `OTEL_CONFIG_FILE` environment variable for file-based configuration.
   This variable takes precedence over the deprecated
@@ -16,7 +18,8 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 
 ### Changed
 
-- MongoDB instrumentation is updated to comply with v1.39.0 Semantic Convention
+- MongoDB instrumentation for versions `3.7.0` is updated to comply with v1.39.0
+  Semantic Convention
   - Renamed the `db.system` attribute to `db.system.name`,
   - Added `db.operation.batch.size` attribute,
   - Added the `db.response.status_code` and `error.type` attributes to error spans,
@@ -34,6 +37,10 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 ### Fixed
 
 - Fixed configuration based instrumentation for some .NET Framework methods.
+- When both `ENTITYFRAMEWORKCORE` and `NPGSQL` traces instrumentations are enabled,
+  Entity Framework Core instrumentation now skips the
+  `Npgsql.EntityFrameworkCore.PostgreSQL` provider so both instrumentations can
+  stay enabled without conflicting spans.
 
 ## [1.14.1](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/tag/v1.14.1)
 
