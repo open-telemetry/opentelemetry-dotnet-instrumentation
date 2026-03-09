@@ -1,7 +1,9 @@
 // Copyright The OpenTelemetry Authors
 // SPDX-License-Identifier: Apache-2.0
 
+using System.Diagnostics;
 using System.Reflection;
+using System.Reflection.Metadata;
 using System.Runtime.Loader;
 using OpenTelemetry.AutoInstrumentation.Util;
 
@@ -70,7 +72,14 @@ internal class IsolatedAssemblyLoadContext()
             }
             catch
             {
-                // On error reading version, fall through and attempt to load
+                // On error reading version, fall through and attempt to load:
+                // by now we have the assembly, located by name in TPA or the agent directory;
+                // the only missing piece is a confirmed version.
+                // Version mismatches in a correctly built standalone app are not a typical scenario,
+                // so skipping here converts a lower-probability uncertainty into a certain fallback
+                // to Default ALC, which carries a higher risk of type and state drift than the alternative
+                // of loading an assembly at a potentially mismatched version in a scenario
+                // that is already documented as unsupported and not typical to reach.
             }
         }
 
