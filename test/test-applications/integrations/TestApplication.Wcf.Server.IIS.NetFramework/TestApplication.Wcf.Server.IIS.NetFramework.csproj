@@ -23,6 +23,10 @@
     <IISExpressWindowsAuthentication />
     <IISExpressUseClassicPipelineMode />
     <UseGlobalApplicationHostFile />
+    <!-- 
+        LangVersion needs to be 13.0 as it is dependency on Windows 2022 without VS2026.
+    -->
+    <LangVersion>13.0</LangVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
