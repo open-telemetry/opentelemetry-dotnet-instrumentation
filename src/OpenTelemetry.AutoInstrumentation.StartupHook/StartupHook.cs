@@ -28,7 +28,6 @@ internal class StartupHook
     public static void Initialize()
     {
         _ = bool.TryParse(Environment.GetEnvironmentVariable(ConfigurationKeys.FailFast), out var failFast);
-        var redirectEnabled = GetRedirectEnabled();
 
         try
         {
@@ -43,7 +42,7 @@ internal class StartupHook
 
             Logger.Information("Initialization.");
 
-            if (IsStartupHookOnlyMode() && redirectEnabled)
+            if (IsStartupHookOnlyMode() && IsRedirectEnabled())
             {
                 // ASSEMBLY RESOLUTION STRATEGY
                 //
@@ -119,7 +118,7 @@ internal class StartupHook
         return Environment.GetEnvironmentVariable(Constants.EnvironmentVariables.ProfilerEnabledVariable) != "1";
     }
 
-    private static bool GetRedirectEnabled()
+    private static bool IsRedirectEnabled()
     {
         var envValue = Environment.GetEnvironmentVariable(ConfigurationKeys.RedirectEnabled);
         if (bool.TryParse(envValue, out var redirectEnabled))
@@ -129,9 +128,8 @@ internal class StartupHook
         }
 
         // Not explicitly set: default based on deployment type - true for standalone, false otherwise.
-        // For standalone deployment we need to enable assembly redirection,
-        // for non-standalone deployments, assembly resolution is handled at build time,
-        // so isolation is not needed.
+        // For non-standalone deployments, assembly resolution is handled at build time,
+        // so assembly redirection is not considered.
         redirectEnabled = DeploymentDetector.IsStandaloneDeployment();
 
         if (redirectEnabled)
@@ -140,7 +138,7 @@ internal class StartupHook
             return redirectEnabled;
         }
 
-        Logger.Information("Detected non-standalone deployment (e.g., NuGet-based, assembly found in TPA). Redirect disabled by default.");
+        Logger.Information("Detected non-standalone deployment (e.g., NuGet-based). Redirect disabled by default.");
         return redirectEnabled;
     }
 
