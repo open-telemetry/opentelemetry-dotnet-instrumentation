@@ -20,22 +20,22 @@ internal class AssemblyResolver(IOtelLogger logger)
 
     private Assembly? AssemblyResolve_ManagedProfilerDependencies(object sender, ResolveEventArgs args)
     {
-        var assemblyName = new AssemblyName(args.Name).Name;
+        var assemblyName = new AssemblyName(args.Name);
         logger.Debug($"Check assembly {assemblyName}");
 
         // On .NET Framework, having a non-US locale can cause mscorlib
         // to enter the AssemblyResolve event when searching for resources
         // in its satellite assemblies. Exit early so we don't cause
         // infinite recursion.
-        if (string.Equals(assemblyName, "mscorlib.resources", StringComparison.OrdinalIgnoreCase) ||
-            string.Equals(assemblyName, "System.Net.Http", StringComparison.OrdinalIgnoreCase))
+        if (string.Equals(assemblyName.Name, "mscorlib.resources", StringComparison.OrdinalIgnoreCase) ||
+            string.Equals(assemblyName.Name, "System.Net.Http", StringComparison.OrdinalIgnoreCase))
         {
             return null;
         }
 
         logger.Debug("Requester [{0}] requested [{1}]", args.RequestingAssembly?.FullName ?? "<null>", args.Name ?? "<null>");
 
-        var assemblyPath = ManagedProfilerLocationHelper.GetAssemblyPath(assemblyName, logger);
+        var assemblyPath = ManagedProfilerLocationHelper.GetAssemblyPath(assemblyName.Name, logger);
         if (assemblyPath is null)
         {
             logger.Debug($"Skip resolving unexpected assembly: ({assemblyName})");
