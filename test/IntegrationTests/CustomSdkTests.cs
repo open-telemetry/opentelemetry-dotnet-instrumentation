@@ -73,7 +73,7 @@ public class CustomSdkTests : TestHelper
         SetEnvironmentVariable("LONG_RUNNING", "true");
         SetEnvironmentVariable("OTEL_METRIC_EXPORT_INTERVAL", "100");
 
-        using var process = StartTestApplication(new()
+        var process = StartTestApplication(new()
         {
             Arguments = $"--redis-port {_redis.Port} --test-server-port {testServer.Port}"
         });
