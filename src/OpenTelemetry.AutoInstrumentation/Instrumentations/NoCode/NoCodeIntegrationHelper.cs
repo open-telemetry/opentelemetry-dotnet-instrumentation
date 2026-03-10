@@ -389,6 +389,64 @@ internal static class NoCodeIntegrationHelper
 
                     break;
 
+                case "string_array":
+                    if (value is string[] stringArray)
+                    {
+                        tags.Add(name, stringArray);
+                    }
+                    else
+                    {
+                        Log.Debug("Expected string[] for attribute '{0}' but got {1}", name, value.GetType().Name);
+                    }
+
+                    break;
+
+                case "int_array":
+                    if (value is long[] longArray)
+                    {
+                        tags.Add(name, longArray);
+                    }
+                    else if (value is int[] intArray)
+                    {
+                        // Convert int[] to long[] since TagList expects long[]
+                        tags.Add(name, Array.ConvertAll(intArray, x => (long)x));
+                    }
+                    else
+                    {
+                        Log.Debug("Expected long[] or int[] for attribute '{0}' but got {1}", name, value.GetType().Name);
+                    }
+
+                    break;
+
+                case "double_array":
+                    if (value is double[] doubleArray)
+                    {
+                        tags.Add(name, doubleArray);
+                    }
+                    else if (value is float[] floatArray)
+                    {
+                        // Convert float[] to double[] since TagList expects double[]
+                        tags.Add(name, Array.ConvertAll(floatArray, x => (double)x));
+                    }
+                    else
+                    {
+                        Log.Debug("Expected double[] or float[] for attribute '{0}' but got {1}", name, value.GetType().Name);
+                    }
+
+                    break;
+
+                case "bool_array":
+                    if (value is bool[] boolArray)
+                    {
+                        tags.Add(name, boolArray);
+                    }
+                    else
+                    {
+                        Log.Debug("Expected bool[] for attribute '{0}' but got {1}", name, value.GetType().Name);
+                    }
+
+                    break;
+
                 default:
                     // Default to string representation
                     tags.Add(name, value.ToString());

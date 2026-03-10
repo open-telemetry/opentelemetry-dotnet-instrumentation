@@ -204,6 +204,18 @@ public class NoCodeTests : TestHelper
         ];
         collector.ExpectAsyncNoCode("Span-SyncPendingTaskWithResult", Span.Types.SpanKind.Internal, syncPendingTaskWithResultAttributes);
 
+        // Dynamic array attributes test - extracting arrays from method parameters
+        // Tests both int[] to long[] conversion (batch.ids) and direct long[] handling (batch.codes)
+        List<KeyValue> processBatchDataAttributes =
+        [
+            new() { Key = "batch.tags", Value = new AnyValue { ArrayValue = new ArrayValue { Values = { new AnyValue { StringValue = "tag1" }, new AnyValue { StringValue = "tag2" }, new AnyValue { StringValue = "tag3" } } } } },
+            new() { Key = "batch.ids", Value = new AnyValue { ArrayValue = new ArrayValue { Values = { new AnyValue { IntValue = 100 }, new AnyValue { IntValue = 200 }, new AnyValue { IntValue = 300 } } } } },
+            new() { Key = "batch.codes", Value = new AnyValue { ArrayValue = new ArrayValue { Values = { new AnyValue { IntValue = 1000000000000L }, new AnyValue { IntValue = 2000000000000L }, new AnyValue { IntValue = 3000000000000L } } } } },
+            new() { Key = "batch.prices", Value = new AnyValue { ArrayValue = new ArrayValue { Values = { new AnyValue { DoubleValue = 10.5 }, new AnyValue { DoubleValue = 20.75 }, new AnyValue { DoubleValue = 30.99 } } } } },
+            new() { Key = "batch.flags", Value = new AnyValue { ArrayValue = new ArrayValue { Values = { new AnyValue { BoolValue = true }, new AnyValue { BoolValue = false }, new AnyValue { BoolValue = true } } } } },
+        ];
+        collector.ExpectNoCode("Span-ProcessBatchData", Span.Types.SpanKind.Internal, processBatchDataAttributes);
+
         RunTestApplication();
 
         collector.AssertExpectations();

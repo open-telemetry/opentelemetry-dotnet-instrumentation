@@ -100,5 +100,13 @@ internal static class Program
         _ = await dynamicAttrTestingClass.SyncCompletedTaskWithResult("ORD-SYNC-001").ConfigureAwait(false);
         await dynamicAttrTestingClass.SyncPendingTask(100).ConfigureAwait(false);
         _ = await dynamicAttrTestingClass.SyncPendingTaskWithResult("ORD-SYNC-002", 100).ConfigureAwait(false);
+
+        // Dynamic array attributes test
+        dynamicAttrTestingClass.ProcessBatchData(
+            ["tag1", "tag2", "tag3"],
+            [100, 200, 300],
+            [1000000000000L, 2000000000000L, 3000000000000L],
+            [10.5, 20.75, 30.99],
+            [true, false, true]);
     }
 }

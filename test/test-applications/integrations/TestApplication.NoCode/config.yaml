@@ -927,3 +927,34 @@ instrumentation/development:
                - name: order.id
                  value_source: arguments[0]
                  type: string
+        - target:
+            assembly:
+              name: TestApplication.NoCode
+            type: TestApplication.NoCode.DynamicAttributeTestingClass
+            method: ProcessBatchData
+            signature:
+              return_type: System.Void
+              parameter_types:
+                - System.String[]
+                - System.Int32[]
+                - System.Int64[]
+                - System.Double[]
+                - System.Boolean[]
+          span:
+             name: Span-ProcessBatchData
+             attributes:
+               - name: batch.tags
+                 value_source: arguments[0]
+                 type: string_array
+               - name: batch.ids
+                 value_source: arguments[1]
+                 type: int_array
+               - name: batch.codes
+                 value_source: arguments[2]
+                 type: int_array
+               - name: batch.prices
+                 value_source: arguments[3]
+                 type: double_array
+               - name: batch.flags
+                 value_source: arguments[4]
+                 type: bool_array

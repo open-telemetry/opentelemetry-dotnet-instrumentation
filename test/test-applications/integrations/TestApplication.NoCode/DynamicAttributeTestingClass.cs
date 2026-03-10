@@ -145,5 +145,16 @@ internal sealed class DynamicAttributeTestingClass
     {
         return Task.Delay(delayMs).ContinueWith(_ => new OrderResult { Success = true, OrderId = orderId }, TaskScheduler.Default);
     }
+
+    /// <summary>
+    /// Method to test dynamic array attributes extraction from method parameters.
+    /// Tests all supported array types: string[], int[], long[], double[], bool[].
+    /// This tests both int[] to long[] conversion (ids) and direct long[] handling (codes).
+    /// </summary>
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    public void ProcessBatchData(string[] tags, int[] ids, long[] codes, double[] prices, bool[] flags)
+    {
+        // This method is intentionally left empty.
+    }
 }
 #pragma warning restore CA1822 // Mark members as static
