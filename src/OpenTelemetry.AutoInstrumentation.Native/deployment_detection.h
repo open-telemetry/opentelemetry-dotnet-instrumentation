@@ -15,9 +15,9 @@ namespace trace
 // Filename of the OpenTelemetry managed profiler assembly used as the anchor for deployment detection.
 const WSTRING otel_instrumentation_assembly_filename = WStr("OpenTelemetry.AutoInstrumentation.dll");
 
-inline bool IsStandaloneDeployment(const WSTRING& profiler_path, const WSTRING& tracer_home)
+inline bool IsStandaloneDeployment(const WSTRING& profiler_path, const WSTRING& tracer_home, bool is_netfx)
 {
-    const auto found = FindManagedAssembly(otel_instrumentation_assembly_filename, profiler_path, tracer_home);
+    const auto found = FindManagedAssembly(otel_instrumentation_assembly_filename, profiler_path, tracer_home, is_netfx);
     if (found.empty())
     {
         // The managed profiler assembly was not found at any expected location.

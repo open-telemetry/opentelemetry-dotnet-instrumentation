@@ -144,7 +144,7 @@ HRESULT STDMETHODCALLTYPE CorProfiler::Initialize(IUnknown* cor_profiler_info_un
     // if assembly redirection is not set through env variable, we will enable it for standalone deployments,
     // and disable it for non-standalone deployments (e.g., NuGet-based) where we don't ship our dependencies
     assembly_redirection_enabled_ =
-        IsAssemblyRedirectionEnabled().value_or(IsStandaloneDeployment(GetCurrentModuleFileName(), home_path));
+        IsAssemblyRedirectionEnabled().value_or(IsStandaloneDeployment(GetCurrentModuleFileName(), home_path, runtime_information_.is_desktop()));
     if (assembly_redirection_enabled_)
     {
         InitAssemblyRedirectsMap();

@@ -25,7 +25,7 @@ inline bool IsStartupHookValid(const std::vector<WSTRING>& startup_hooks, const 
     }
 
     const auto expected_startuphook_path =
-        FindManagedAssembly(opentelemetry_autoinstrumentation_startuphook_filename, EmptyWStr, home_path);
+        FindManagedAssembly(opentelemetry_autoinstrumentation_startuphook_filename, EmptyWStr, home_path, false);
     if (expected_startuphook_path.empty())
     {
         return false;
@@ -61,7 +61,7 @@ inline WSTRING GetStartupHookPath(const WSTRING& profiler_path, const WSTRING& h
     }
 
     const auto found =
-        FindManagedAssembly(opentelemetry_autoinstrumentation_startuphook_filename, profiler_path, home_path);
+        FindManagedAssembly(opentelemetry_autoinstrumentation_startuphook_filename, profiler_path, home_path, false);
     return found.empty() ? EmptyWStr : PATH_TO_WSTRING(found.path);
 }
 
