@@ -78,7 +78,7 @@ internal static class NoCodeIntegrationHelper
 
                 if (!string.IsNullOrEmpty(dynamicName))
                 {
-                    spanName = dynamicName;
+                    spanName = dynamicName!;
                 }
                 else
                 {
