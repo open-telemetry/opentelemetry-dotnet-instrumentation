@@ -264,6 +264,10 @@ conditions, or in the `name_source` property for dynamic span names.
 | `endsWith(str, suffix)`    | Check if string ends with suffix         | `endsWith(arguments[0].FileName, ".json")` |
 | `contains(str, substring)` | Check if string contains substring       | `contains(arguments[0].Message, "error")`  |
 
+> **Note:** String comparison functions (`startsWith`, `endsWith`, `contains`)
+> use ordinal comparison (case-sensitive), equivalent to
+> `StringComparison.Ordinal` in C#.
+
 #### Function Expression Examples
 
 **Concatenate values:**
