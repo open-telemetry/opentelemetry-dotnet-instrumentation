@@ -500,6 +500,11 @@ public class CelExpressionTests
     [InlineData("\"\" + \"test\"", "test")]
     [InlineData("\"test\" + \"\"", "test")]
     [InlineData("'single' + 'quotes'", "singlequotes")]
+    [InlineData("\"Count: \" + 123", "Count: 123")]
+    [InlineData("123 + \" items\"", "123 items")]
+    [InlineData("\"Value: \" + 45.67", "Value: 45.67")]
+    [InlineData("true + \" condition\"", "True condition")]
+    [InlineData("\"Result: \" + false", "Result: False")]
     public void Evaluate_AddOperator_WithStrings_ReturnsConcatenation(string expression, string expected)
     {
         var expr = CelExpression.Parse(expression);
@@ -511,14 +516,16 @@ public class CelExpressionTests
     }
 
     [Fact]
-    public void Evaluate_AddOperator_WithMixedTypes_ReturnsNull()
+    public void Evaluate_AddOperator_WithMixedTypes_InContext_ConcatenatesAsStrings()
     {
-        var expr = CelExpression.Parse("\"hello\" + 123");
-        var context = new NoCodeExpressionContext(null, null, null, null, null);
+        // Test the real-world scenario: CustomerId + "-" + OrderId
+        var instance = new { CustomerId = 12345, OrderId = 67890 };
+        var expr = CelExpression.Parse("instance.CustomerId + \"-\" + instance.OrderId");
+        var context = new NoCodeExpressionContext(instance, null, null, null, null);
 
         var result = expr!.Evaluate(context);
 
-        Assert.Null(result);
+        Assert.Equal("12345-67890", result);
     }
 
     [Fact]

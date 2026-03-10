@@ -142,6 +142,13 @@ internal sealed class CelBinaryOperatorNode : CelNode
             return leftNum + rightNum;
         }
 
+        if (left is string || right is string)
+        {
+            var leftString = left is string s1 ? s1 : Convert.ToString(left, CultureInfo.InvariantCulture);
+            var rightString = right is string s2 ? s2 : Convert.ToString(right, CultureInfo.InvariantCulture);
+            return leftString + rightString;
+        }
+
         return null;
     }
 
