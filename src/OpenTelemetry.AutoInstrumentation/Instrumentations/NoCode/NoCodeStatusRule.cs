@@ -43,15 +43,6 @@ internal class NoCodeStatusRule
     {
         var result = Condition.Evaluate(context);
 
-        // Convert result to boolean
-        return result switch
-        {
-            bool b => b,
-            string s => !string.IsNullOrEmpty(s) && !s.Equals("false", StringComparison.OrdinalIgnoreCase),
-            int i => i != 0,
-            long l => l != 0,
-            null => false,
-            _ => true
-        };
+        return CelHelpers.IsTrue(result);
     }
 }

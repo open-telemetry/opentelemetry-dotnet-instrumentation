@@ -150,6 +150,54 @@ the CEL specification with instrumentation-specific extensions.
 > - Expressions are parsed and validated at configuration load time
 > - This DSL implements a subset of CEL; not all CEL features are supported
 
+#### Truthy Values
+
+In boolean contexts (such as conditions in status rules, ternary operators, and
+logical operators), values are evaluated for truthiness according to their type.
+
+| Type          | Truthy Condition            | Examples                                             |
+|---------------|-----------------------------|------------------------------------------------------|
+| `bool`        | The value itself            | `true` is truthy, `false` is falsy                   |
+| `string`      | Non-null and non-empty      | `"text"` is truthy, `""` is falsy                    |
+| `int`         | Non-zero                    | `1` is truthy, `0` is falsy                          |
+| `long`        | Non-zero                    | `100L` is truthy, `0L` is falsy                      |
+| `double`      | Absolute value > 0          | `1.23` is truthy, `0.0` is falsy                     |
+| `float`       | Absolute value > 0          | `1.23f` is truthy, `0.0f` is falsy                   |
+| `null`        | Always falsy                | Always treated as false                              |
+| Other objects | Non-null objects are truthy | Custom objects are truthy if not null, falsy if null |
+
+This is useful when using objects directly in conditions or ternary expressions.
+The following example demonstrates truthy values in both attributes and status rules:
+
+```yaml
+span:
+  name: process-data
+  attributes:
+    # Using ternary for safe defaults
+    - name: user.name
+      value_source: "arguments[0].Name ? arguments[0].Name : \"unknown\""
+      type: string
+  
+  status:
+    rules:
+      # Return value is truthy (non-null, non-empty, non-zero)
+      - condition: "return"
+        code: ok
+      
+      # Return value is falsy
+      - condition: "!return"
+        code: error
+      
+      # String property is non-empty
+      - condition: "return.ErrorMessage"
+        code: error
+        description: "Error message present"
+      
+      # Numeric property is non-zero
+      - condition: "return.StatusCode"
+        code: ok
+```
+
 #### Dynamic Attribute Examples
 
 Extract method argument values:
