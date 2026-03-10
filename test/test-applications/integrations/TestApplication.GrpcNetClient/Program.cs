@@ -43,14 +43,15 @@ var app = builder.Build();
 // Configure the HTTP request pipeline.
 app.MapGrpcService<GreeterService>();
 
-await app.StartAsync();
+await app.StartAsync().ConfigureAwait(false);
 #endif
 
 var uri = $"http://localhost:{port}";
 #if NETFRAMEWORK
+using var httpClientHandler = new HttpClientHandler();
 var channel = GrpcChannel.ForAddress(uri, new GrpcChannelOptions
 {
-    HttpHandler = new GrpcWebHandler(new HttpClientHandler())
+    HttpHandler = new GrpcWebHandler(httpClientHandler)
 });
 #else
 var channel = GrpcChannel.ForAddress(uri);

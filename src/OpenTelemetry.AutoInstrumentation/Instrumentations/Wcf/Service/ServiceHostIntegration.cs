@@ -13,7 +13,7 @@ namespace OpenTelemetry.AutoInstrumentation.Instrumentations.Wcf.Service;
     typeName: WcfServiceConstants.ServiceHostBaseTypeName,
     methodName: WcfServiceConstants.InitializeDescriptionMethodName,
     returnTypeName: ClrNames.Void,
-    parameterTypeNames: new[] { WcfServiceConstants.UriSchemeKeyedCollectionTypeName },
+    parameterTypeNames: [WcfServiceConstants.UriSchemeKeyedCollectionTypeName],
     minimumVersion: WcfCommonConstants.Min4Version,
     maximumVersion: WcfCommonConstants.Max4Version,
     integrationName: WcfServiceConstants.IntegrationName,

@@ -9,7 +9,6 @@ using Xunit.Abstractions;
 
 namespace IntegrationTests;
 
-[UsesVerify]
 public class ModuleTests : TestHelper
 {
     public ModuleTests(ITestOutputHelper output)
@@ -30,7 +29,7 @@ public class ModuleTests : TestHelper
         $"{nameof(ModuleTests)}.{nameof(Default)}.NetCore";
 #endif
 
-        await RunTests(verifyTestName);
+        await RunTests(verifyTestName).ConfigureAwait(true);
     }
 
     [Fact]
@@ -50,7 +49,7 @@ public class ModuleTests : TestHelper
         $"{nameof(ModuleTests)}.{nameof(DefaultNoExporters)}.NetCore";
 #endif
 
-        await RunTests(verifyTestName);
+        await RunTests(verifyTestName).ConfigureAwait(true);
     }
 
     [Fact]
@@ -70,7 +69,7 @@ public class ModuleTests : TestHelper
         $"{nameof(ModuleTests)}.{nameof(Minimal)}.NetCore";
 #endif
 
-        await RunTests(verifyTestName);
+        await RunTests(verifyTestName).ConfigureAwait(true);
     }
 
     private async Task RunTests(string verifyName)
@@ -89,7 +88,11 @@ public class ModuleTests : TestHelper
                 Assert.Fail("Could not find modules report file.");
             }
 
+#if NET
+            var json = await File.ReadAllTextAsync(tempPath).ConfigureAwait(false);
+#else
             var json = File.ReadAllText(tempPath);
+#endif
             var modules = JsonConvert.DeserializeObject<string[]>(json);
 
             await Verifier.Verify(modules)

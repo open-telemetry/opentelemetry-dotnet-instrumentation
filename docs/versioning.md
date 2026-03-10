@@ -5,7 +5,8 @@ the OpenTelemetry .NET Automatic Instrumentation,
 along with the rules and procedures for meeting those guarantees.
 
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
-with one exception described [here](#compatibility-with-opentelemetry-net-and-other-dependencies).
+with one exception described under [Compatibility with OpenTelemetry .NET and
+other dependencies](#compatibility-with-opentelemetry-net-and-other-dependencies).
 
 ## Release candidates
 
@@ -33,7 +34,7 @@ would be an overkill.
 
 ## Semantic Conventions stability
 
-See [here](https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/versioning-and-stability.md#semantic-conventions-stability).
+See [Semantic Conventions page](https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/versioning-and-stability.md#semantic-conventions-stability).
 
 ## Major version bump
 

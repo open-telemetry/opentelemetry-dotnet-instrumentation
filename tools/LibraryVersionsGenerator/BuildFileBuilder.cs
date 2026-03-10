@@ -1,6 +1,7 @@
 // Copyright The OpenTelemetry Authors
 // SPDX-License-Identifier: Apache-2.0
 
+using System.Globalization;
 using System.Text;
 
 namespace LibraryVersionsGenerator;
@@ -29,10 +30,11 @@ internal sealed class BuildFileBuilder : CSharpFileBuilder
 
     public override CSharpFileBuilder BeginTestPackage(string testApplicationName, string integrationName)
     {
-        Builder.AppendLine(
-            @$"        {{
+        var beginTestPackageTemplate = @$"        {{
             ""{testApplicationName}"",
-            [");
+            [";
+
+        Builder.AppendLine(beginTestPackageTemplate);
 
         return this;
     }
@@ -48,7 +50,7 @@ internal sealed class BuildFileBuilder : CSharpFileBuilder
     {
         AddVersion(version, supportedFrameworks, supportedPlatforms, appendEnd: false);
 
-        Builder.AppendLine($", additionalMetaData: {SerializeDictionary(dependencies)}),");
+        Builder.AppendLine(CultureInfo.InvariantCulture, $", additionalMetaData: {SerializeDictionary(dependencies)}),");
         return this;
     }
 
@@ -68,7 +70,7 @@ internal sealed class BuildFileBuilder : CSharpFileBuilder
         {
             var dependency = dictionary.ElementAt(i);
 
-            dictionarySb.Append($"{{ \"{dependency.Key}\", \"{dependency.Value}\" }}");
+            dictionarySb.Append(CultureInfo.InvariantCulture, $"{{ \"{dependency.Key}\", \"{dependency.Value}\" }}");
 
             if (i != dictionary.Count - 1)
             {
@@ -93,7 +95,7 @@ internal sealed class BuildFileBuilder : CSharpFileBuilder
 
         for (var i = 0; i < array.Length; i++)
         {
-            arraySb.Append($"\"{array[i]}\"");
+            arraySb.Append(CultureInfo.InvariantCulture, $"\"{array[i]}\"");
 
             if (i != array.Length - 1)
             {
@@ -106,23 +108,23 @@ internal sealed class BuildFileBuilder : CSharpFileBuilder
         return arraySb.ToString();
     }
 
-    private CSharpFileBuilder AddVersion(string version, string[] supportedFrameworks, string[] supportedPlatforms, bool appendEnd)
+    private BuildFileBuilder AddVersion(string version, string[] supportedFrameworks, string[] supportedPlatforms, bool appendEnd)
     {
-        Builder.Append($"                new(\"{version}\"");
+        Builder.Append(CultureInfo.InvariantCulture, $"                new(\"{version}\"");
 
         if (supportedFrameworks.Length > 0)
         {
-            Builder.Append($", supportedFrameworks: {SerializeArray(supportedFrameworks)}");
+            Builder.Append(CultureInfo.InvariantCulture, $", supportedFrameworks: {SerializeArray(supportedFrameworks)}");
         }
 
         if (supportedPlatforms.Length > 0)
         {
-            Builder.Append($", supportedPlatforms: {SerializeArray(supportedPlatforms)}");
+            Builder.Append(CultureInfo.InvariantCulture, $", supportedPlatforms: {SerializeArray(supportedPlatforms)}");
         }
 
         if (appendEnd)
         {
-            Builder.AppendLine($"),");
+            Builder.AppendLine("),");
         }
 
         return this;

@@ -1,6 +1,6 @@
 ﻿#include "pch.h"
 
-#include "../../src/OpenTelemetry.AutoInstrumentation.Native/string.h"
+#include "../../src/OpenTelemetry.AutoInstrumentation.Native/string_utils.h"
 #include "../../src/OpenTelemetry.AutoInstrumentation.Native/environment_variables_parser.h"
 
 using namespace trace;

@@ -7,9 +7,9 @@ namespace DependencyListGenerator.DotNetOutdated.Services;
 /// <remarks>
 /// Credit for the stuff happening in here goes to the https://github.com/jaredcnance/dotnet-status project
 /// </remarks>
-public class DotNetRunner
+public static class DotNetRunner
 {
-    public RunStatus Run(string workingDirectory, string[] arguments)
+    public static RunStatus Run(string workingDirectory, string[] arguments)
     {
         var psi = new ProcessStartInfo(DotNetExe.FullPathOrDefault(), string.Join(" ", arguments))
         {

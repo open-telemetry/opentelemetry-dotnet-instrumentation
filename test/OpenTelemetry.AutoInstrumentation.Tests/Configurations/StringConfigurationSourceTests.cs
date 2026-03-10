@@ -32,7 +32,7 @@ public class StringConfigurationSourceTests
         Assert.Throws<FormatException>(() => stringConfigurationSource.GetInt32("anyKey"));
     }
 
-    private class StringConfigurationSourceImplementation : StringConfigurationSource
+    private sealed class StringConfigurationSourceImplementation : StringConfigurationSource
     {
         private readonly string _returnedValue;
 

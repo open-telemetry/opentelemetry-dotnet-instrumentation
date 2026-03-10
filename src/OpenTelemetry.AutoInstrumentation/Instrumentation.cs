@@ -1,15 +1,11 @@
 // Copyright The OpenTelemetry Authors
 // SPDX-License-Identifier: Apache-2.0
 
-#if NET
-using System.Diagnostics;
-#endif
 using System.Reflection;
 using OpenTelemetry.AutoInstrumentation.Configurations;
-#if NET
 using OpenTelemetry.AutoInstrumentation.ContinuousProfiler;
-#endif
 using OpenTelemetry.AutoInstrumentation.Diagnostics;
+using OpenTelemetry.AutoInstrumentation.Instrumentations.NoCode;
 using OpenTelemetry.AutoInstrumentation.Loading;
 using OpenTelemetry.AutoInstrumentation.Logging;
 using OpenTelemetry.AutoInstrumentation.Plugins;
@@ -38,8 +34,11 @@ internal static class Instrumentation
 
     private static PluginManager? _pluginManager;
 
-#if NET
-    private static ContinuousProfilerProcessor? _profilerProcessor;
+    private static SampleExporter? _sampleExporter;
+    private static SampleExporterBuilder? _sampleExporterBuilder;
+
+#if NETFRAMEWORK
+    private static CanaryThreadManager? _canaryThreadManager;
 #endif
 
     internal static LoggerProvider? LoggerProvider
@@ -55,6 +54,8 @@ internal static class Instrumentation
 
     internal static Lazy<GeneralSettings> GeneralSettings { get; } = new(() => Settings.FromDefaultSources<GeneralSettings>(FailFastSettings.Value.FailFast));
 
+    internal static Lazy<ResourceSettings> ResourceSettings { get; } = new(() => Settings.FromDefaultSources<ResourceSettings>(FailFastSettings.Value.FailFast));
+
     internal static Lazy<TracerSettings> TracerSettings { get; } = new(() => Settings.FromDefaultSources<TracerSettings>(FailFastSettings.Value.FailFast));
 
     internal static Lazy<MetricSettings> MetricSettings { get; } = new(() => Settings.FromDefaultSources<MetricSettings>(FailFastSettings.Value.FailFast));
@@ -62,6 +63,10 @@ internal static class Instrumentation
     internal static Lazy<LogSettings> LogSettings { get; } = new(() => Settings.FromDefaultSources<LogSettings>(FailFastSettings.Value.FailFast));
 
     internal static Lazy<SdkSettings> SdkSettings { get; } = new(() => Settings.FromDefaultSources<SdkSettings>(FailFastSettings.Value.FailFast));
+
+    internal static Lazy<NoCodeSettings> NoCodeSettings { get; } = new(() => Settings.FromDefaultSources<NoCodeSettings>(FailFastSettings.Value.FailFast));
+
+    internal static Lazy<PluginsSettings> PluginsSettings { get; } = new(() => Settings.FromDefaultSources<PluginsSettings>(FailFastSettings.Value.FailFast));
 
     /// <summary>
     /// Initialize the OpenTelemetry SDK with a pre-defined set of exporters, shims, and
@@ -96,34 +101,26 @@ internal static class Instrumentation
             // Initialize SdkSelfDiagnosticsEventListener to create an EventListener for the OpenTelemetry SDK
             _sdkEventListener = new(Logger);
 
-            _pluginManager = new PluginManager(GeneralSettings.Value);
+            _pluginManager = new PluginManager(PluginsSettings.Value);
             _pluginManager.Initializing();
 
-#if NET
+            // Register to shutdown events
+            AppDomain.CurrentDomain.ProcessExit += OnExit;
+            AppDomain.CurrentDomain.DomainUnload += OnExit;
+
             var profilerEnabled = GeneralSettings.Value.ProfilerEnabled;
 
             if (profilerEnabled)
             {
-                var (threadSamplingEnabled, threadSamplingInterval, allocationSamplingEnabled, maxMemorySamplesPerMinute, exportInterval, exportTimeout, continuousProfilerExporter) = _pluginManager.GetFirstContinuousConfiguration();
-                Logger.Debug($"Continuous profiling configuration: Thread sampling enabled: {threadSamplingEnabled}, thread sampling interval: {threadSamplingInterval}, allocation sampling enabled: {allocationSamplingEnabled}, max memory samples per minute: {maxMemorySamplesPerMinute}, export interval: {exportInterval}, export timeout: {exportTimeout}, continuous profiler exporter: {continuousProfilerExporter.GetType()}");
-
-                if (threadSamplingEnabled || allocationSamplingEnabled)
-                {
-                    InitializeContinuousProfiling(continuousProfilerExporter, threadSamplingEnabled, allocationSamplingEnabled, threadSamplingInterval, maxMemorySamplesPerMinute, exportInterval, exportTimeout);
-                }
+                TryInitializeContinuousProfiling();
             }
             else
             {
                 Logger.Information("CLR Profiler is not enabled. Continuous Profiler will be not started even if configured correctly.");
             }
-#endif
 
             if (TracerSettings.Value.TracesEnabled || MetricSettings.Value.MetricsEnabled)
             {
-                // Register to shutdown events
-                AppDomain.CurrentDomain.ProcessExit += OnExit;
-                AppDomain.CurrentDomain.DomainUnload += OnExit;
-
                 if (GeneralSettings.Value.FlushOnUnhandledException)
                 {
                     AppDomain.CurrentDomain.UnhandledException += OnUnhandledException;
@@ -134,12 +131,18 @@ internal static class Instrumentation
 
             if (TracerSettings.Value.TracesEnabled)
             {
+#if NETFRAMEWORK
+                if (TracerSettings.Value.InstrumentationOptions.SqlClientNetFxIlRewriteEnabled)
+                {
+                    NativeMethods.SetSqlClientNetFxILRewriteEnabled(true);
+                }
+#endif
                 if (GeneralSettings.Value.SetupSdk)
                 {
                     var builder = Sdk
                         .CreateTracerProviderBuilder()
                         .InvokePluginsBefore(_pluginManager)
-                        .SetResourceBuilder(ResourceConfigurator.CreateResourceBuilder(GeneralSettings.Value.EnabledResourceDetectors))
+                        .SetResourceBuilder(ResourceConfigurator.CreateResourceBuilder(ResourceSettings.Value))
                         .UseEnvironmentVariables(LazyInstrumentationLoader, TracerSettings.Value, _pluginManager)
                         .InvokePluginsAfter(_pluginManager);
 
@@ -161,7 +164,7 @@ internal static class Instrumentation
                     var builder = Sdk
                         .CreateMeterProviderBuilder()
                         .InvokePluginsBefore(_pluginManager)
-                        .SetResourceBuilder(ResourceConfigurator.CreateResourceBuilder(GeneralSettings.Value.EnabledResourceDetectors))
+                        .SetResourceBuilder(ResourceConfigurator.CreateResourceBuilder(ResourceSettings.Value))
                         .UseEnvironmentVariables(LazyInstrumentationLoader, MetricSettings.Value, _pluginManager)
                         .InvokePluginsAfter(_pluginManager);
 
@@ -185,13 +188,18 @@ internal static class Instrumentation
 
         if (GeneralSettings.Value.ProfilerEnabled)
         {
-            RegisterBytecodeInstrumentations(InstrumentationDefinitions.GetAllDefinitions());
+            RegisterDirectBytecodeInstrumentations(InstrumentationDefinitions.GetAllDefinitions());
+            if (NoCodeSettings.Value.Enabled)
+            {
+                NoCodeIntegrationHelper.NoCodeEntries = NoCodeSettings.Value.InstrumentedMethods;
+                RegisterBytecodeInstrumentations(NoCodeSettings.Value.GetDirectPayload(), "direct, no-code", NativeMethods.AddInstrumentations);
+            }
 
             try
             {
                 foreach (var payload in _pluginManager.GetAllDefinitionsPayloads())
                 {
-                    RegisterBytecodeInstrumentations(payload);
+                    RegisterDirectBytecodeInstrumentations(payload);
                 }
             }
             catch (Exception ex)
@@ -199,22 +207,7 @@ internal static class Instrumentation
                 Logger.Error(ex, "Exception occurred while registering instrumentations from plugins.");
             }
 
-            try
-            {
-                Logger.Debug("Sending CallTarget derived integration definitions to native library.");
-                var payload = InstrumentationDefinitions.GetDerivedDefinitions();
-                NativeMethods.AddDerivedInstrumentations(payload.DefinitionsId, payload.Definitions);
-                foreach (var def in payload.Definitions)
-                {
-                    def.Dispose();
-                }
-
-                Logger.Information("The profiler has been initialized with {0} derived definitions.", payload.Definitions.Length);
-            }
-            catch (Exception ex)
-            {
-                Logger.Error(ex, ex.Message);
-            }
+            RegisterBytecodeDerivedInstrumentations(InstrumentationDefinitions.GetDerivedDefinitions());
         }
         else
         {
@@ -227,36 +220,120 @@ internal static class Instrumentation
         }
     }
 
-    private static LoggerProvider? InitializeLoggerProvider()
+    private static void TryInitializeContinuousProfiling()
     {
-        // ILogger bridge is initialized using ILogger-specific extension methods in LoggerInitializer class.
-        // That extension methods sets up its own LogProvider.
-        if (LogSettings.Value.EnableLog4NetBridge && LogSettings.Value.LogsEnabled && LogSettings.Value.EnabledInstrumentations.Contains(LogInstrumentation.Log4Net))
+        try
         {
-            // TODO: Replace reflection usage when Logs Api is made public in non-rc builds.
-            // Sdk.CreateLoggerProviderBuilder()
-            var createLoggerProviderBuilderMethod = typeof(Sdk).GetMethod("CreateLoggerProviderBuilder", BindingFlags.Static | BindingFlags.NonPublic)!;
-            var loggerProviderBuilder = createLoggerProviderBuilderMethod.Invoke(null, null) as LoggerProviderBuilder;
-
-            // TODO: plugins support
-            var loggerProvider = loggerProviderBuilder!
-                .SetResourceBuilder(ResourceConfigurator.CreateResourceBuilder(GeneralSettings.Value.EnabledResourceDetectors))
-                .UseEnvironmentVariables(LazyInstrumentationLoader, LogSettings.Value, _pluginManager!)
-                .Build();
-            Logger.Information("OpenTelemetry logger provider initialized.");
-            return loggerProvider;
+            InitializeSampling();
         }
-
-        return null;
+        catch (Exception ex)
+        {
+            Logger.Error(ex, "Failed to initialize continuous profiling.");
+        }
     }
 
+    private static void InitializeSampling()
+    {
+        var (threadSamplingEnabled, threadSamplingInterval, allocationSamplingEnabled, maxMemorySamplesPerMinute, exportInterval, exportTimeout, continuousProfilerExporter) = _pluginManager!.GetFirstContinuousConfiguration();
+        Logger.Debug($"Continuous profiling configuration: Thread sampling enabled: {threadSamplingEnabled}, thread sampling interval: {threadSamplingInterval}, allocation sampling enabled: {allocationSamplingEnabled}, max memory samples per minute: {maxMemorySamplesPerMinute}, export interval: {exportInterval}, export timeout: {exportTimeout}, continuous profiler exporter: {continuousProfilerExporter.GetType()}");
+
+        if (threadSamplingEnabled || allocationSamplingEnabled)
+        {
+            if (!TryInitializeContinuousSamplingExport(continuousProfilerExporter, threadSamplingEnabled, allocationSamplingEnabled, exportInterval, exportTimeout))
+            {
+                return;
+            }
+        }
+
+        uint selectiveSamplingInterval = 0;
+        var selectiveSamplingConfig = _pluginManager.GetFirstSelectiveSamplingConfiguration();
+        if (selectiveSamplingConfig.HasValue)
+        {
+            var (configuredSamplingInterval, configuredExportInterval, configuredExportTimeout, exporter) = selectiveSamplingConfig.Value;
+            if (configuredSamplingInterval == 0 || configuredExportInterval <= TimeSpan.Zero || configuredExportTimeout <= TimeSpan.Zero || exporter == null)
+            {
+                Logger.Warning("Invalid selective sampling configuration. Feature will not be enabled.");
+            }
+            else
+            {
+                Logger.Debug(
+                    $"Selective sampling configuration: sampling interval: {configuredSamplingInterval}, export interval: {configuredExportInterval}, export timeout: {configuredExportTimeout}, samples exporter: {exporter.GetType()}");
+                selectiveSamplingInterval = configuredSamplingInterval;
+                if (!TryInitializeSelectedThreadSamplingExport(exporter, configuredExportInterval, configuredExportTimeout))
+                {
+                    return;
+                }
+            }
+        }
+
+        if (!threadSamplingEnabled && !allocationSamplingEnabled && !selectiveSamplingConfig.HasValue)
+        {
+            // No sampling requested.
+            return;
+        }
+
+        var selectiveSamplingEnabled = selectiveSamplingInterval != 0;
+
+        if (threadSamplingEnabled && selectiveSamplingEnabled)
+        {
+            if (threadSamplingInterval <= selectiveSamplingInterval)
+            {
+                Logger.Warning($"Continuous sampling interval must be higher than selective sampling interval. Selective sampling interval: {selectiveSamplingInterval}, continuous sampling interval: {threadSamplingInterval}");
+                return;
+            }
+
+            if (threadSamplingInterval % selectiveSamplingInterval != 0)
+            {
+                Logger.Warning($"Continuous sampling interval must be a multiple of selective sampling interval. Selective sampling interval: {selectiveSamplingInterval}, continuous sampling interval: {threadSamplingInterval}");
+                return;
+            }
+        }
+
+        NativeMethods.ConfigureNativeContinuousProfiler(threadSamplingEnabled, threadSamplingInterval, allocationSamplingEnabled, maxMemorySamplesPerMinute, selectiveSamplingInterval);
+#if NETFRAMEWORK
+        // On .NET Framework, we need a dedicated canary thread for seeded stack walking
+        _canaryThreadManager = new CanaryThreadManager();
+        if (!_canaryThreadManager.Start(TimeSpan.FromSeconds(5)))
+        {
+            Logger.Error("Failed to start canary thread. Continuous profiling will not be enabled.");
+            _canaryThreadManager.Dispose();
+            _canaryThreadManager = null;
+            return;
+        }
+
+        Logger.Information("Canary thread started successfully for .NET Framework profiling.");
+#endif
+        _sampleExporter = _sampleExporterBuilder?.Build();
+    }
+
+    private static bool TryInitializeSelectedThreadSamplingExport(
+        object? exporter,
+        TimeSpan exportInterval,
+        TimeSpan exportTimeout)
+    {
+        var selectiveSampleExportMethod = exporter?.GetType().GetMethod("ExportSelectedThreadSamples");
+
+        if (selectiveSampleExportMethod == null)
+        {
+            Logger.Warning("Exporter does not have ExportSelectedThreadSamples method. Selective sampler initialization failed.");
+            return false;
+        }
+
+        InitializeBufferProcessing(exportInterval, exportTimeout);
+
 #if NET
-    private static void InitializeContinuousProfiling(
+        var handler = selectiveSampleExportMethod.CreateDelegate<Action<byte[], int, CancellationToken>>(exporter!);
+#else
+        var handler = (Action<byte[], int, CancellationToken>)selectiveSampleExportMethod.CreateDelegate(typeof(Action<byte[], int, CancellationToken>), exporter!);
+#endif
+        _sampleExporterBuilder?.AddHandler(SampleType.SelectedThreads, handler, exportTimeout);
+        return true;
+    }
+
+    private static bool TryInitializeContinuousSamplingExport(
         object continuousProfilerExporter,
         bool threadSamplingEnabled,
         bool allocationSamplingEnabled,
-        uint threadSamplingInterval,
-        uint maxMemorySamplesPerMinute,
         TimeSpan exportInterval,
         TimeSpan exportTimeout)
     {
@@ -266,38 +343,104 @@ internal static class Instrumentation
         if (exportThreadSamplesMethod == null)
         {
             Logger.Warning("Exporter does not have ExportThreadSamples method. Continuous Profiler initialization failed.");
-            return;
+            return false;
         }
 
         var exportAllocationSamplesMethod = continuousProfilerExporterType.GetMethod("ExportAllocationSamples");
         if (exportAllocationSamplesMethod == null)
         {
             Logger.Warning("Exporter does not have ExportAllocationSamples method. Continuous Profiler initialization failed.");
-            return;
+            return false;
         }
 
-        NativeMethods.ConfigureNativeContinuousProfiler(threadSamplingEnabled, threadSamplingInterval, allocationSamplingEnabled, maxMemorySamplesPerMinute);
+#if NET
         var threadSamplesMethod = exportThreadSamplesMethod.CreateDelegate<Action<byte[], int, CancellationToken>>(continuousProfilerExporter);
         var allocationSamplesMethod = exportAllocationSamplesMethod.CreateDelegate<Action<byte[], int, CancellationToken>>(continuousProfilerExporter);
-
-        var bufferProcessor = new BufferProcessor(threadSamplingEnabled, allocationSamplingEnabled, threadSamplesMethod, allocationSamplesMethod, exportTimeout);
-        _profilerProcessor = new ContinuousProfilerProcessor(bufferProcessor, exportInterval, exportTimeout);
-        Activity.CurrentChanged += _profilerProcessor.Activity_CurrentChanged;
-    }
+#else
+        var threadSamplesMethod = (Action<byte[], int, CancellationToken>)exportThreadSamplesMethod.CreateDelegate(typeof(Action<byte[], int, CancellationToken>), continuousProfilerExporter);
+        var allocationSamplesMethod = (Action<byte[], int, CancellationToken>)exportAllocationSamplesMethod.CreateDelegate(typeof(Action<byte[], int, CancellationToken>), continuousProfilerExporter);
 #endif
 
-    private static void RegisterBytecodeInstrumentations(InstrumentationDefinitions.Payload payload)
+        InitializeBufferProcessing(exportInterval, exportTimeout);
+
+        if (threadSamplingEnabled)
+        {
+            _sampleExporterBuilder?.AddHandler(SampleType.Continuous, threadSamplesMethod, exportTimeout);
+        }
+
+        if (allocationSamplingEnabled)
+        {
+            _sampleExporterBuilder?.AddHandler(SampleType.Allocation, allocationSamplesMethod, exportTimeout);
+        }
+
+        return true;
+    }
+
+    private static void InitializeBufferProcessing(TimeSpan exportInterval, TimeSpan exportTimeout)
+    {
+        _sampleExporterBuilder ??= new SampleExporterBuilder();
+
+        _sampleExporterBuilder
+            .SetExportInterval(exportInterval)
+            .SetExportTimeout(exportTimeout);
+    }
+
+    private static LoggerProvider? InitializeLoggerProvider()
+    {
+        // ILogger bridge is initialized using ILogger-specific extension methods in LoggerInitializer class.
+        // That extension methods sets up its own LogProvider.
+
+        Logger.Debug($"InitializeLoggerProvider called. LogsEnabled={LogSettings.Value.LogsEnabled}, EnableLog4NetBridge={LogSettings.Value.EnableLog4NetBridge}, EnableNLogBridge={LogSettings.Value.EnableNLogBridge}");
+        Logger.Debug($"EnabledInstrumentations: {string.Join(", ", LogSettings.Value.EnabledInstrumentations)}");
+
+        // Initialize logger provider if any bridge is enabled
+        var shouldInitialize = LogSettings.Value.LogsEnabled && (
+            (LogSettings.Value.EnableLog4NetBridge && LogSettings.Value.EnabledInstrumentations.Contains(LogInstrumentation.Log4Net)) ||
+            (LogSettings.Value.EnableNLogBridge && LogSettings.Value.EnabledInstrumentations.Contains(LogInstrumentation.NLog)));
+
+        Logger.Debug($"ShouldInitialize logger provider: {shouldInitialize}");
+
+        if (shouldInitialize)
+        {
+            // TODO: Replace reflection usage when Logs Api is made public in non-rc builds.
+            // Sdk.CreateLoggerProviderBuilder()
+            var createLoggerProviderBuilderMethod = typeof(Sdk).GetMethod("CreateLoggerProviderBuilder", BindingFlags.Static | BindingFlags.NonPublic)!;
+            var loggerProviderBuilder = createLoggerProviderBuilderMethod.Invoke(null, null) as LoggerProviderBuilder;
+
+            // TODO: plugins support
+            var loggerProvider = loggerProviderBuilder!
+                .SetResourceBuilder(ResourceConfigurator.CreateResourceBuilder(ResourceSettings.Value))
+                .UseEnvironmentVariables(LazyInstrumentationLoader, LogSettings.Value, _pluginManager!)
+                .Build();
+            Logger.Information("OpenTelemetry logger provider initialized.");
+            return loggerProvider;
+        }
+
+        return null;
+    }
+
+    private static void RegisterDirectBytecodeInstrumentations(InstrumentationDefinitions.Payload payload)
+    {
+        RegisterBytecodeInstrumentations(payload, "direct", NativeMethods.AddInstrumentations);
+    }
+
+    private static void RegisterBytecodeDerivedInstrumentations(InstrumentationDefinitions.Payload payload)
+    {
+        RegisterBytecodeInstrumentations(payload, "derived", NativeMethods.AddDerivedInstrumentations);
+    }
+
+    private static void RegisterBytecodeInstrumentations(InstrumentationDefinitions.Payload payload, string type, Action<string, NativeCallTargetDefinition[]> register)
     {
         try
         {
-            Logger.Debug("Sending CallTarget integration definitions to native library for {0}.", payload.DefinitionsId);
-            NativeMethods.AddInstrumentations(payload.DefinitionsId, payload.Definitions);
+            Logger.Debug($"Sending CallTarget {type} integration definitions to native library.");
+            register(payload.DefinitionsId, payload.Definitions);
             foreach (var def in payload.Definitions)
             {
                 def.Dispose();
             }
 
-            Logger.Information("The profiler has been initialized with {0} definitions for {1}.", payload.Definitions.Length, payload.DefinitionsId);
+            Logger.Information("The profiler has been initialized with {0} {1} definitions for {2}.", payload.Definitions.Length, type, payload.DefinitionsId);
         }
         catch (Exception ex)
         {
@@ -327,8 +470,10 @@ internal static class Instrumentation
                     break;
                 case MetricInstrumentation.Process:
                     break;
+#if NET
                 case MetricInstrumentation.Npgsql:
                     break;
+#endif
                 case MetricInstrumentation.NServiceBus:
                     break;
                 case MetricInstrumentation.SqlClient:
@@ -366,7 +511,9 @@ internal static class Instrumentation
                     DelayedInitialization.Traces.AddGrpcClient(lazyInstrumentationLoader, pluginManager, tracerSettings);
                     break;
                 case TracerInstrumentation.SqlClient:
-                    DelayedInitialization.Traces.AddSqlClient(lazyInstrumentationLoader, pluginManager, tracerSettings);
+                    DelayedInitialization.Traces.AddSqlClient(lazyInstrumentationLoader, pluginManager);
+                    break;
+                case TracerInstrumentation.StackExchangeRedis:
                     break;
                 case TracerInstrumentation.Quartz:
                     DelayedInitialization.Traces.AddQuartz(lazyInstrumentationLoader, pluginManager);
@@ -382,12 +529,12 @@ internal static class Instrumentation
                 case TracerInstrumentation.EntityFrameworkCore:
                     DelayedInitialization.Traces.AddEntityFrameworkCore(LazyInstrumentationLoader, pluginManager, tracerSettings);
                     break;
-                case TracerInstrumentation.StackExchangeRedis:
-                    break;
                 case TracerInstrumentation.MassTransit:
                     break;
                 case TracerInstrumentation.GraphQL:
                     DelayedInitialization.Traces.AddGraphQL(LazyInstrumentationLoader, pluginManager, tracerSettings);
+                    break;
+                case TracerInstrumentation.WcfCore:
                     break;
 #endif
                 case TracerInstrumentation.Azure:
@@ -432,15 +579,13 @@ internal static class Instrumentation
 
         try
         {
-#if NET
             LazyInstrumentationLoader?.Dispose();
-            if (_profilerProcessor != null)
-            {
-                Activity.CurrentChanged -= _profilerProcessor.Activity_CurrentChanged;
-                _profilerProcessor.Dispose();
-            }
+            _sampleExporter?.Dispose();
 
+#if NETFRAMEWORK
+            _canaryThreadManager?.Dispose();
 #endif
+
             _tracerProvider?.Dispose();
             _meterProvider?.Dispose();
             if (LoggerProviderFactory.IsValueCreated)
@@ -458,11 +603,15 @@ internal static class Instrumentation
             {
                 Logger.Error(ex, "An error occurred while attempting to exit.");
             }
-            catch
+            catch (Exception)
             {
                 // If we encounter an error while logging there is nothing else we can do
                 // with the exception.
             }
+        }
+        finally
+        {
+            OtelLogging.CloseLogger("Managed", Logger);
         }
     }
 
@@ -476,17 +625,9 @@ internal static class Instrumentation
                 OnExit(sender, args);
             }
         }
-        catch (Exception ex)
+        catch (Exception)
         {
-            try
-            {
-                Logger.Error(ex, "An exception occurred while processing an unhandled exception.");
-            }
-            catch
-            {
-                // If we encounter an error while logging there is nothing else we can do
-                // with the exception.
-            }
+            // Logger was already shutdown.
         }
     }
 }

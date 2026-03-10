@@ -54,8 +54,7 @@ outlined in [Configuring API Key
 Authentication](https://github.com/dotnet/dotnet-monitor/blob/main/documentation/api-key-setup.md#configuring-api-key-authentication).
 If your use case is limited to a test environment, you might opt to bypass API
 key configuration by using the `--no-auth` switch when running dotnet-monitor.
-Learn more about dotnet-monitor authentication
-[here](https://github.com/dotnet/dotnet-monitor/blob/1beca4d497da1e60985394fe7d1195c0663f7095/documentation/authentication.md?plain=1#L115).
+Learn more about [dotnet-monitor authentication](https://github.com/dotnet/dotnet-monitor/blob/1beca4d497da1e60985394fe7d1195c0663f7095/documentation/authentication.md?plain=1#L115).
 
 2. **Set a default process and customize metrics collection**: To monitor a
    specific local process and capture custom metrics, use a settings.json file.
@@ -190,22 +189,21 @@ powerful visualizations for the metrics.
 
 ### Explore metrics using Grafana
 
-[Install Grafana](https://grafana.com/docs/grafana/latest/installation/).
+[Install Grafana](https://grafana.com/docs/grafana/latest/setup-grafana/installation/).
 
 Start the standalone Grafana server (`grafana-server.exe` or
 `./bin/grafana-server`, depending on the operating system). Then, use the
 browser to navigate to [http://localhost:3000/](http://localhost:3000/).
 
 Follow the instructions in the Grafana getting started
-[doc](https://grafana.com/docs/grafana/latest/getting-started/getting-started/#step-2-log-in)
+[doc](https://grafana.com/docs/grafana/latest/fundamentals/getting-started/first-dashboards/#sign-in-to-grafana)
 to log in.
 
 After successfully logging in, click on the explore option on the left panel of
 the website - we should be able to write some queries to explore our metrics
 now!
 
-Feel free to find some handy PromQL
-[here](https://promlabs.com/promql-cheat-sheet/).
+Feel free to find some [handy PromQL](https://promlabs.com/promql-cheat-sheet/).
 
 In the below example, the query targets to find out what is the per-second rate
 of increase of myFruitCounter over the past 5 minutes:
@@ -215,7 +213,6 @@ of increase of myFruitCounter over the past 5 minutes:
 ## Learn more
 
 - [What is Prometheus?](https://prometheus.io/docs/introduction/overview/)
-- [Prometheus now supports OpenTelemetry
-  Metrics](https://horovits.medium.com/prometheus-now-supports-opentelemetry-metrics-83f85878e46a)
+- [Using Prometheus as your OpenTelemetry backend](https://prometheus.io/docs/guides/opentelemetry/)
 - [Grafana support for
   Prometheus](https://prometheus.io/docs/visualization/grafana/#creating-a-prometheus-graph)

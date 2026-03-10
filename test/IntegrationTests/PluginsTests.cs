@@ -21,7 +21,7 @@ public class PluginsTests : TestHelper
 
         var (standardOutput, _, _) = RunTestApplication();
 
-        Assert.Contains("Plugin.Initializing() invoked.", standardOutput);
+        Assert.Contains("Plugin.Initializing() invoked.", standardOutput, StringComparison.Ordinal);
     }
 
     [Fact]
@@ -41,7 +41,7 @@ public class PluginsTests : TestHelper
         var (standardOutput, _, _) = RunTestApplication();
 
         collector.AssertExpectations();
-        Assert.Contains("Plugin.ConfigureTracesOptions(OtlpExporterOptions options) invoked.", standardOutput);
+        Assert.Contains("Plugin.ConfigureTracesOptions(OtlpExporterOptions options) invoked.", standardOutput, StringComparison.Ordinal);
     }
 
     [Fact]
@@ -57,6 +57,6 @@ public class PluginsTests : TestHelper
         var (standardOutput, _, _) = RunTestApplication();
 
         collector.AssertExpectations();
-        Assert.Contains("Plugin.ConfigureMetricsOptions(OtlpExporterOptions options) invoked.", standardOutput);
+        Assert.Contains("Plugin.ConfigureMetricsOptions(OtlpExporterOptions options) invoked.", standardOutput, StringComparison.Ordinal);
     }
 }

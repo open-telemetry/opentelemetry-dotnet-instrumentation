@@ -3,48 +3,58 @@
 
 #if NET
 
+using System.Globalization;
 using System.Net;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Hosting.Server;
 using Microsoft.AspNetCore.Hosting.Server.Features;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using Xunit.Abstractions;
 
 namespace IntegrationTests.Helpers;
 
-public class TestHttpServer : IDisposable
+internal sealed class TestHttpServer : IDisposable
 {
     private readonly ITestOutputHelper _output;
     private readonly string _name;
-    private readonly IWebHost _listener;
+    private readonly IHost _listener;
 
     public TestHttpServer(ITestOutputHelper output, string name, params PathHandler[] pathHandlers)
     {
         _output = output;
         _name = name;
 
-        _listener = new WebHostBuilder()
-            .UseKestrel(options =>
-                options.Listen(IPAddress.Loopback, 0)) // dynamic port
-            .Configure(x =>
+        _listener = new HostBuilder()
+            .ConfigureWebHost(webHostBuilder =>
             {
-                foreach (var pathHandler in pathHandlers)
-                {
-                    x.Map(pathHandler.Path, x =>
+                webHostBuilder
+                    .UseKestrel(options =>
+                        options.Listen(IPAddress.Loopback, 0)) // dynamic port
+                    .Configure(x =>
                     {
-                        x.Run(pathHandler.Delegate);
-                    });
-                }
+                        foreach (var pathHandler in pathHandlers)
+                        {
+                            x.Map(pathHandler.Path, x =>
+                            {
+                                x.Run(pathHandler.Delegate);
+                            });
+                        }
+                    })
+                    .UseShutdownTimeout(TimeSpan.FromSeconds(5));
             })
             .Build();
 
         _listener.Start();
 
-        var address = _listener.ServerFeatures!
+        var server = _listener.Services.GetRequiredService<IServer>();
+        var address = server.Features
                 .Get<IServerAddressesFeature>()!
                 .Addresses
                 .First();
-        Port = int.Parse(address.Split(':').Last());
+        Port = int.Parse(address.Split(':').Last(), CultureInfo.InvariantCulture);
         WriteOutput($"Listening on: {string.Join(',', pathHandlers.Select(handler => $"{address}{handler.Path}"))}");
     }
 
@@ -60,7 +70,8 @@ public class TestHttpServer : IDisposable
 
     public void Dispose()
     {
-        WriteOutput($"Shutting down");
+        WriteOutput("Shutting down");
+        _listener.StopAsync().GetAwaiter().GetResult();
         _listener.Dispose();
     }
 

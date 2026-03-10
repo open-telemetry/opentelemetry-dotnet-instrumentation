@@ -13,7 +13,7 @@ assemblyName: "NServiceBus.Core",
 typeName: "NServiceBus.EndpointConfiguration",
 methodName: ".ctor",
 returnTypeName: ClrNames.Void,
-parameterTypeNames: new[] { ClrNames.String },
+parameterTypeNames: [ClrNames.String],
 minimumVersion: "8.0.0",
 #if NETFRAMEWORK
 maximumVersion: "8.65535.65535",
@@ -27,7 +27,7 @@ assemblyName: "NServiceBus.Core",
 typeName: "NServiceBus.EndpointConfiguration",
 methodName: ".ctor",
 returnTypeName: ClrNames.Void,
-parameterTypeNames: new[] { ClrNames.String },
+parameterTypeNames: [ClrNames.String],
 minimumVersion: "8.0.0",
 #if NETFRAMEWORK
 maximumVersion: "8.65535.65535",
@@ -43,7 +43,7 @@ public static class EndpointConfigurationIntegration
         var openTelemetryConfigurationExtensionsType = Type.GetType("NServiceBus.OpenTelemetryConfigurationExtensions, NServiceBus.Core");
         var enableOpenTelemetryMethodInfo = openTelemetryConfigurationExtensionsType?.GetMethod("EnableOpenTelemetry");
 
-        enableOpenTelemetryMethodInfo?.Invoke(null, new object?[] { instance });
+        enableOpenTelemetryMethodInfo?.Invoke(null, [instance]);
 
         return CallTargetReturn.GetDefault();
     }

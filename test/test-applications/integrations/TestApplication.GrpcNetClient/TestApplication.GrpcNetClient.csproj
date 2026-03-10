@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <ItemGroup>
-    <PackageReference Include="Google.Protobuf" Condition="'$(TargetFramework)' == 'net462' or ( '$(LibraryVersion)' != '' and '$(LibraryVersion)' &lt;= '2.54.0' )" />
+    <PackageReference Include="Google.Protobuf" Condition="'$(TargetFramework)' == 'net462' or ( '$(LibraryVersion)' != '' and $([MSBuild]::VersionLessThanOrEquals('$(LibraryVersion)', '2.54.0')) )" />
     <PackageReference Include="Grpc.AspNetCore" Condition="'$(TargetFramework)' != 'net462'" VersionOverride="$(LibraryVersion)" />
     <PackageReference Include="Grpc.Net.Client" VersionOverride="$(LibraryVersion)" />
     <PackageReference Include="Grpc.Net.Client.Web" Condition="'$(TargetFramework)' == 'net462'" VersionOverride="$(LibraryVersion)" />

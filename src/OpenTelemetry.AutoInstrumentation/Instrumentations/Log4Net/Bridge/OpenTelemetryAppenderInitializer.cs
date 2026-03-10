@@ -7,15 +7,9 @@ namespace OpenTelemetry.AutoInstrumentation.Instrumentations.Log4Net.Bridge;
 
 internal static class OpenTelemetryAppenderInitializer<TAppenderArray>
 {
-    // ReSharper disable StaticMemberInGenericType
-    private static readonly Type AppenderType;
+    private static readonly Type AppenderType = typeof(TAppenderArray).GetElementType()!;
 
     private static object? _otelAppender;
-
-    static OpenTelemetryAppenderInitializer()
-    {
-        AppenderType = typeof(TAppenderArray).GetElementType()!;
-    }
 
     public static TAppenderArray Initialize(Array initial)
     {

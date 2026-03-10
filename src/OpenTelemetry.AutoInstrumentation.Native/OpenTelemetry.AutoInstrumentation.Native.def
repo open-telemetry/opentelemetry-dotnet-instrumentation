@@ -1,4 +1,4 @@
-LIBRARY "OpenTelemetry.AutoInstrumentation.Native.dll"
+﻿LIBRARY "OpenTelemetry.AutoInstrumentation.Native.dll"
 
 EXPORTS
     DllCanUnloadNow PRIVATE
@@ -7,7 +7,14 @@ EXPORTS
     IsProfilerAttached
     AddInstrumentations
     AddDerivedInstrumentations
+    SetSqlClientNetFxILRewriteEnabled
+    InitializeTraceMethods
     ConfigureContinuousProfiler
     ContinuousProfilerReadThreadSamples
     ContinuousProfilerReadAllocationSamples
+    SelectiveSamplerReadThreadSamples
     ContinuousProfilerSetNativeContext
+    ContinuousProfilerNotifySpanStopped
+    SelectiveSamplingStart
+    SelectiveSamplingStop
+    GetNetFrameworkRedirectionVersion

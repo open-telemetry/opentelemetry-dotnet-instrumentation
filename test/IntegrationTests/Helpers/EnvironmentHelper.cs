@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 using System.Collections.Specialized;
+using System.Globalization;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
@@ -9,9 +10,11 @@ using Xunit.Abstractions;
 
 namespace IntegrationTests.Helpers;
 
-public class EnvironmentHelper
+internal sealed class EnvironmentHelper
 {
-    private static readonly string RuntimeFrameworkDescription = RuntimeInformation.FrameworkDescription.ToLower();
+#pragma warning disable CA1308 // Normalize strings to uppercase
+    private static readonly string RuntimeFrameworkDescription = RuntimeInformation.FrameworkDescription.ToLowerInvariant();
+#pragma warning restore CA1308 // Normalize strings to uppercase
 
     private readonly ITestOutputHelper _output;
     private readonly int _major;
@@ -41,11 +44,15 @@ public class EnvironmentHelper
 
         var parts = _targetFramework.FrameworkName.Split(',');
         _runtime = parts[0];
-        _isCoreClr = _runtime.Equals(EnvironmentTools.CoreFramework);
+        _isCoreClr = _runtime.Equals(EnvironmentTools.CoreFramework, StringComparison.Ordinal);
 
+#if NET
+        var versionParts = parts[1].Replace("Version=v", string.Empty, StringComparison.Ordinal).Split('.');
+#else
         var versionParts = parts[1].Replace("Version=v", string.Empty).Split('.');
-        _major = int.Parse(versionParts[0]);
-        _minor = int.Parse(versionParts[1]);
+#endif
+        _major = int.Parse(versionParts[0], CultureInfo.InvariantCulture);
+        _minor = int.Parse(versionParts[1], CultureInfo.InvariantCulture);
 
         if (versionParts.Length == 3)
         {
@@ -77,7 +84,13 @@ public class EnvironmentHelper
 
     public static bool IsCoreClr()
     {
-        return RuntimeFrameworkDescription.Contains("core") || Environment.Version.Major >= 5;
+        return
+#if NET
+            RuntimeFrameworkDescription.Contains("core", StringComparison.Ordinal)
+#else
+            RuntimeFrameworkDescription.Contains("core")
+#endif
+            || Environment.Version.Major >= 5;
     }
 
     public static string GetNukeBuildOutput()
@@ -92,7 +105,7 @@ public class EnvironmentHelper
             return nukeOutputPath;
         }
 
-        throw new Exception($"Unable to find Nuke output at: {nukeOutputPath}. Ensure Nuke has run first.");
+        throw new InvalidOperationException($"Unable to find Nuke output at: {nukeOutputPath}. Ensure Nuke has run first.");
     }
 
     public static bool IsRunningOnCI()
@@ -138,14 +151,20 @@ public class EnvironmentHelper
             return _profilerFileLocation;
         }
 
-        throw new Exception($"Unable to find profiler at: {profilerPath}");
+        throw new InvalidOperationException($"Unable to find profiler at: {profilerPath}");
     }
 
     public string GetTestApplicationPath(string packageVersion = "", string framework = "", TestAppStartupMode startupMode = TestAppStartupMode.Auto)
     {
         var extension = startupMode switch
         {
-            TestAppStartupMode.Auto => IsCoreClr() || _testApplicationDirectory.Contains("aspnet") ? ".dll" : GetExecutableExtension(),
+            TestAppStartupMode.Auto => IsCoreClr() ||
+#if NET
+            _testApplicationDirectory.Contains("aspnet", StringComparison.Ordinal)
+#else
+            _testApplicationDirectory.Contains("aspnet")
+#endif
+            ? ".dll" : GetExecutableExtension(),
             TestAppStartupMode.DotnetCLI => ".dll",
             TestAppStartupMode.Exe => GetExecutableExtension(),
             _ => throw new InvalidOperationException($"Unknown startup mode '{startupMode}'")
@@ -165,7 +184,11 @@ public class EnvironmentHelper
     {
         string executor;
 
+#if NET
+        if (_testApplicationDirectory.Contains("aspnet", StringComparison.Ordinal))
+#else
         if (_testApplicationDirectory.Contains("aspnet"))
+#endif
         {
             executor = $"C:\\Program Files{(Environment.Is64BitProcess ? string.Empty : " (x86)")}\\IIS Express\\iisexpress.exe";
         }
@@ -180,7 +203,7 @@ public class EnvironmentHelper
 
             if (!File.Exists(executor))
             {
-                throw new Exception($"Unable to find executing assembly at {executor}");
+                throw new InvalidOperationException($"Unable to find executing assembly at {executor}");
             }
         }
 
@@ -203,7 +226,11 @@ public class EnvironmentHelper
         var targetFramework = string.IsNullOrEmpty(framework) ? GetTargetFramework() : framework;
         var baseBinDirectory = GetTestApplicationBaseBinDirectory();
 
+#if NET
+        if (_testApplicationDirectory.Contains("aspnet", StringComparison.Ordinal))
+#else
         if (_testApplicationDirectory.Contains("aspnet"))
+#endif
         {
             return Path.Combine(
                 baseBinDirectory,

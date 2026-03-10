@@ -12,27 +12,25 @@ env:
 
 jobs:
   build-ubuntu1604-native-container:
-    strategy:
-      fail-fast: false
     runs-on: ubuntu-22.04
     timeout-minutes: 60
     steps:
 
     - name: Checkout
-      uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # tag: v4.2.2
+      uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # tag: v6.0.2
       with:
         fetch-depth: 0 # fetching all, needed to correctly calculate version
 
     - name: Build native library in Docker container
       run: |
         set -e
-        docker build -t mybuildimage -f "./docker/ubuntu1604.dockerfile" ./docker
+        docker build -t mybuildimage -f "./docker/ubuntu1604.dockerfile" .
         docker run -e OS_TYPE=linux-glibc --rm --mount type=bind,source="${GITHUB_WORKSPACE}",target=/project mybuildimage \
           /bin/sh -c 'export PATH="$PATH:/usr/share/dotnet" && git config --global --add safe.directory /project && ./build.sh BuildNativeWorkflow'
 
     - name: Publish native library Linux build
-      if: (${{ job.status }} != 'cancelled')
-      uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # tag: v4.6.2
+      if: ${{ !cancelled() }}
+      uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # tag: v7.0.0
       with:
         name: bin-ubuntu1604-native
         path: bin/tracer-home

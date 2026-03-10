@@ -34,11 +34,11 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        test-tfm: [ net9.0, net8.0, net462 ]
-        machine: [ windows-2022, ubuntu-22.04, macos-13, ubuntu-22.04-arm ]
+        test-tfm: [ net10.0, net9.0, net8.0, net462 ]
+        machine: [ windows-2022, windows-2025, ubuntu-22.04, macos-14, ubuntu-22.04-arm ]
         exclude:
           - test-tfm: net462
-            machine: macos-13
+            machine: macos-14
           - test-tfm: net462
             machine: ubuntu-22.04
           - test-tfm: net462
@@ -46,43 +46,51 @@ jobs:
         include:
           - machine: windows-2022
             containers: none
+            artifact-name: windows-2022
+          - machine: windows-2025
+            containers: none
+            artifact-name: windows-2022
           - machine: ubuntu-22.04
             containers: linux
-          - machine: macos-13
+            artifact-name: ubuntu-22.04
+          - machine: macos-14
             containers: none
+            artifact-name: macos-14
           - machine: ubuntu-22.04-arm
             containers: linux
+            artifact-name: ubuntu-22.04-arm
     runs-on: ${{ matrix.machine }}
     steps:
 
       - name: Checkout
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # tag: v4.2.2
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # tag: v6.0.2
         with:
           fetch-depth: 0 # fetching all, needed to correctly calculate version
 
       - name: Setup .NET
-        uses: actions/setup-dotnet@67a3573c9a986a3f9c594539f4ab511d57bb3ce9 # tag: v4.3.1
+        uses: actions/setup-dotnet@c2fa09f4bde5ebb9d1777cf28262a3eb3db3ced7 # tag: v5.2.0
         with:
           dotnet-version: | 
-            8.0.408
-            9.0.203
+            8.0.418
+            9.0.311
+            10.0.103
 
       - name: Check for NuGet packages cache
-        uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684 # tag: v4.2.3
+        uses: actions/cache@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # tag: v5.0.3
         id: nuget-cache
         with:
           key: ${{ hashFiles('**/Directory.packages.props', './build/LibraryVersions.g.cs', '**/packages.config' ) }}
           path: ${{ env.NUGET_PACKAGES }}
 
       - name: Download Artifacts from build job
-        uses: actions/download-artifact@95815c38cf2ff2164869cbab79da8d1f422bc89e # tag: v4.2.1
+        uses: actions/download-artifact@70fc10c6e5e1ce46ad2ea6f2b72d43f7d47b13c3 # tag: v8.0.0
         with:
-          name: bin-${{ matrix.machine }}
+          name: bin-${{ matrix.artifact-name }}
           path: bin/tracer-home
 
       - name: Install SQL Server (localdb)
         if: ${{ runner.os == 'Windows' }}
-        uses: potatoqualitee/mssqlsuite@605af2310e2e22978ebf2c74d5995ba102094b8a # tag: v1.8
+        uses: potatoqualitee/mssqlsuite@2291d923e83859edd871679c05b379037376761f # tag: v1.12
         with: 
           install: localdb
 
@@ -91,7 +99,7 @@ jobs:
 
       - name: Upload test logs
         if: always()
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # tag: v4.6.2
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # tag: v7.0.0
         with:
           name: test-logs-${{ matrix.machine }}-${{ matrix.test-tfm }}-containers-${{ matrix.containers }}
           path: test-artifacts/
@@ -106,33 +114,38 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        machine: [ windows-2022 ]
+        include:
+          - machine: windows-2022
+            artifact-name: windows-2022
+          - machine: windows-2025
+            artifact-name: windows-2022
     runs-on: ${{ matrix.machine }}
     steps:
 
       - name: Checkout
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # tag: v4.2.2
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # tag: v6.0.2
         with:
           fetch-depth: 0 # fetching all, needed to correctly calculate version
 
       - name: Setup .NET
-        uses: actions/setup-dotnet@67a3573c9a986a3f9c594539f4ab511d57bb3ce9 # tag: v4.3.1
+        uses: actions/setup-dotnet@c2fa09f4bde5ebb9d1777cf28262a3eb3db3ced7 # tag: v5.2.0
         with:
           dotnet-version: | 
-            8.0.408
-            9.0.203
+            8.0.418
+            9.0.311
+            10.0.103
 
       - name: Check for NuGet packages cache
-        uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684 # tag: v4.2.3
+        uses: actions/cache@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # tag: v5.0.3
         id: nuget-cache
         with:
           key: ${{ hashFiles('**/Directory.packages.props', './build/LibraryVersions.g.cs', '**/packages.config' ) }}
           path: ${{ env.NUGET_PACKAGES }}
 
       - name: Download Artifacts from build job
-        uses: actions/download-artifact@95815c38cf2ff2164869cbab79da8d1f422bc89e # tag: v4.2.1
+        uses: actions/download-artifact@70fc10c6e5e1ce46ad2ea6f2b72d43f7d47b13c3 # tag: v8.0.0
         with:
-          name: bin-${{ matrix.machine }}
+          name: bin-${{ matrix.artifact-name }}
           path: bin/tracer-home
 
       - name: Run NativeTests
@@ -146,32 +159,37 @@ jobs:
         include:
           - machine: windows-2022
             containers: windows-only
+            artifact-name: windows-2022
+          - machine: windows-2025
+            containers: windows-only
+            artifact-name: windows-2022
     runs-on: ${{ matrix.machine }}
     steps:
 
       - name: Checkout
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # tag: v4.2.2
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # tag: v6.0.2
         with:
           fetch-depth: 0 # fetching all, needed to correctly calculate version
 
       - name: Setup .NET
-        uses: actions/setup-dotnet@67a3573c9a986a3f9c594539f4ab511d57bb3ce9 # tag: v4.3.1
+        uses: actions/setup-dotnet@c2fa09f4bde5ebb9d1777cf28262a3eb3db3ced7 # tag: v5.2.0
         with:
           dotnet-version: | 
-            8.0.408
-            9.0.203
+            8.0.418
+            9.0.311
+            10.0.103
 
       - name: Check for NuGet packages cache
-        uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684 # tag: v4.2.3
+        uses: actions/cache@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # tag: v5.0.3
         id: nuget-cache
         with:
           key: ${{ hashFiles('**/Directory.packages.props', './build/LibraryVersions.g.cs', '**/packages.config' ) }}
           path: ${{ env.NUGET_PACKAGES }}
 
       - name: Download Artifacts from build job
-        uses: actions/download-artifact@95815c38cf2ff2164869cbab79da8d1f422bc89e # tag: v4.2.1
+        uses: actions/download-artifact@70fc10c6e5e1ce46ad2ea6f2b72d43f7d47b13c3 # tag: v8.0.0
         with:
-          name: bin-${{ matrix.machine }}
+          name: bin-${{ matrix.artifact-name }}
           path: bin/tracer-home
 
       - name: Build artifacts required for the test (no native tests)
@@ -182,7 +200,7 @@ jobs:
 
       - name: Upload test logs
         if: always()
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # tag: v4.6.2
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # tag: v7.0.0
         with:
           name: test-logs-${{ matrix.machine }}-containers-${{ matrix.containers }}
           path: test-artifacts/
@@ -218,12 +236,12 @@ jobs:
     steps:
 
     - name: Checkout
-      uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # tag: v4.2.2
+      uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # tag: v6.0.2
       with:
         fetch-depth: 0 # fetching all, needed to correctly calculate version
 
     - name: Download Artifacts from build job
-      uses: actions/download-artifact@95815c38cf2ff2164869cbab79da8d1f422bc89e # tag: v4.2.1
+      uses: actions/download-artifact@70fc10c6e5e1ce46ad2ea6f2b72d43f7d47b13c3 # tag: v8.0.0
       with:
         name: bin-${{ matrix.build-source }}
         path: bin/tracer-home
@@ -231,9 +249,16 @@ jobs:
     - name: Build in Docker container
       run: |
         set -e
-        docker build -t mybuildimage -f "./docker/${{ matrix.base-image }}.dockerfile" ./docker
+        docker build -t mybuildimage -f "./docker/${{ matrix.base-image }}.dockerfile" .
         docker run -e OS_TYPE=${{ matrix.os-type }} --rm --mount type=bind,source="${GITHUB_WORKSPACE}",target=/project mybuildimage \
           /bin/sh -c 'git config --global --add safe.directory /project && ./build.sh TestWorkflow --containers none'
+
+    - name: Upload test logs
+      if: always()
+      uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # tag: v7.0.0
+      with:
+        name: test-logs-container-${{ matrix.machine }}-${{ matrix.base-image }}
+        path: test-artifacts/
 
   test-nuget-packages:
     needs: build-nuget-packages
@@ -242,33 +267,35 @@ jobs:
       matrix:
         include:
           - machine: ubuntu-22.04
-          - machine: macos-13
+          - machine: macos-14
           - machine: windows-2022
+          - machine: windows-2025
           - machine: ubuntu-22.04-arm
     runs-on: ${{ matrix.machine }}
     steps:
       
       - name: Checkout
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # tag: v4.2.2
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # tag: v6.0.2
         with:
           fetch-depth: 0 # fetching all, needed to correctly calculate version
 
       - name: Setup .NET
-        uses: actions/setup-dotnet@67a3573c9a986a3f9c594539f4ab511d57bb3ce9 # tag: v4.3.1
+        uses: actions/setup-dotnet@c2fa09f4bde5ebb9d1777cf28262a3eb3db3ced7 # tag: v5.2.0
         with:
           dotnet-version: | 
-            8.0.408
-            9.0.203
+            8.0.418
+            9.0.311
+            10.0.103
 
       - name: Check for NuGet packages cache
-        uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684 # tag: v4.2.3
+        uses: actions/cache@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # tag: v5.0.3
         id: nuget-cache
         with:
           key: ${{ hashFiles('**/Directory.packages.props', './build/LibraryVersions.g.cs', '**/packages.config' ) }}
           path: ${{ env.NUGET_PACKAGES }}
 
       - name: Download NuGet Artifacts from build-nuget-packages job
-        uses: actions/download-artifact@95815c38cf2ff2164869cbab79da8d1f422bc89e # tag: v4.2.1
+        uses: actions/download-artifact@70fc10c6e5e1ce46ad2ea6f2b72d43f7d47b13c3 # tag: v8.0.0
         with:
           name: bin-nuget-packages
           path: bin/nuget-artifacts/
@@ -278,7 +305,7 @@ jobs:
 
       - name: Upload test logs
         if: always()
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # tag: v4.6.2
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # tag: v7.0.0
         with:
           name: test-logs-nuget-packages-${{ matrix.machine }}
           path: test-artifacts/

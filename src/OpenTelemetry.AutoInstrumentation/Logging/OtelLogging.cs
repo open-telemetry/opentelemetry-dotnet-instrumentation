@@ -43,11 +43,31 @@ internal static class OtelLogging
         return OtelLoggers.GetOrAdd(suffix, CreateLogger);
     }
 
+    public static void CloseLogger(string suffix, IOtelLogger otelLogger)
+    {
+        try
+        {
+            // Update logger associated with the key, so that future calls to GetLogger
+            // return NoopLogger.
+            if (OtelLoggers.TryUpdate(suffix, NoopLogger.Instance, otelLogger))
+            {
+                otelLogger.Close();
+            }
+        }
+#pragma warning disable CA1031 // Do not catch general exception
+        catch (Exception)
+#pragma warning restore CA1031 // Do not catch general exception
+        {
+            // intentionally empty
+        }
+    }
+
     // Helper method for testing
     internal static void Reset()
     {
         _configuredLogLevel = GetConfiguredLogLevel();
         _configuredLogSink = GetConfiguredLogSink();
+        OtelLoggers.Clear();
     }
 
     internal static LogLevel? GetConfiguredLogLevel()
@@ -67,7 +87,9 @@ internal static class OtelLogging
                 _ => logLevel
             };
         }
+#pragma warning disable CA1031 // Do not catch general exception
         catch (Exception)
+#pragma warning restore CA1031 // Do not catch general exception
         {
             // theoretically, can happen when process has no privileges to check env
         }
@@ -92,7 +114,9 @@ internal static class OtelLogging
                 _ => logSink
             };
         }
+#pragma warning disable CA1031 // Do not catch general exception
         catch (Exception)
+#pragma warning restore CA1031 // Do not catch general exception
         {
             // theoretically, can happen when process has no privileges to check env
         }
@@ -114,7 +138,9 @@ internal static class OtelLogging
 
             return long.TryParse(configuredFileSizeLimit, out var limit) && limit > 0 ? limit : defaultFileSizeLimitBytes;
         }
+#pragma warning disable CA1031 // Do not catch general exception
         catch (Exception)
+#pragma warning restore CA1031 // Do not catch general exception
         {
             // theoretically, can happen when process has no privileges to check env
             return defaultFileSizeLimitBytes;
@@ -136,9 +162,9 @@ internal static class OtelLogging
     private static ISink CreateSink(string suffix)
     {
         // Uses ISink? here, sink creation can fail so we specify default fallback at the end.
-        var sink = _configuredLogSink switch
+        ISink? sink = _configuredLogSink switch
         {
-            LogSink.NoOp => new NoopSink(),
+            LogSink.NoOp => NoopSink.Instance,
             LogSink.Console => new ConsoleSink(suffix),
             LogSink.File => CreateFileSink(suffix),
             // default to null, then default value is specified only at the end.
@@ -147,10 +173,10 @@ internal static class OtelLogging
 
         return sink ??
             // Default to NoopSink
-            new NoopSink();
+            NoopSink.Instance;
     }
 
-    private static ISink? CreateFileSink(string suffix)
+    private static PeriodicFlushToDiskSink? CreateFileSink(string suffix)
     {
         try
         {
@@ -160,16 +186,19 @@ internal static class OtelLogging
                 var fileName = GetLogFileName(suffix);
                 var logPath = Path.Combine(logDirectory, fileName);
 
-                return new RollingFileSink(
+                var rollingFileSink = new RollingFileSink(
                     path: logPath,
                     fileSizeLimitBytes: FileSizeLimitBytes,
                     retainedFileCountLimit: 10,
                     rollingInterval: RollingInterval.Day,
                     rollOnFileSizeLimit: true,
                     retainedFileTimeLimit: null);
+                return new PeriodicFlushToDiskSink(rollingFileSink, TimeSpan.FromSeconds(5));
             }
         }
+#pragma warning disable CA1031 // Do not catch general exception
         catch (Exception)
+#pragma warning restore CA1031 // Do not catch general exception
         {
             // unable to configure logging to a file
         }
@@ -189,7 +218,9 @@ internal static class OtelLogging
                 ? $"otel-dotnet-auto-{process.Id}-{appDomainName}-.log"
                 : $"otel-dotnet-auto-{process.Id}-{appDomainName}-{suffix}-.log";
         }
-        catch
+#pragma warning disable CA1031 // Do not catch general exception
+        catch (Exception)
+#pragma warning restore CA1031 // Do not catch general exception
         {
             // We can't get the process info
             return string.IsNullOrEmpty(suffix)
@@ -231,7 +262,9 @@ internal static class OtelLogging
 
             logDirectory = CreateDirectoryIfMissing(logDirectory) ?? Path.GetTempPath();
         }
-        catch
+#pragma warning disable CA1031 // Do not catch general exception
+        catch (Exception)
+#pragma warning restore CA1031 // Do not catch general exception
         {
             // The try block may throw a SecurityException if not granted the System.Security.Permissions.FileIOPermission
             // because of the following API calls
@@ -253,7 +286,9 @@ internal static class OtelLogging
             Directory.CreateDirectory(pathToCreate);
             return pathToCreate;
         }
-        catch
+#pragma warning disable CA1031 // Do not catch general exception
+        catch (Exception)
+#pragma warning restore CA1031 // Do not catch general exception
         {
             // Unable to create the directory meaning that the user will have to create it on their own.
             // It is unsafe to log here, so return null to defer deciding what the path is

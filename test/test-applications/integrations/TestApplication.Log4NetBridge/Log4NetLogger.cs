@@ -2,12 +2,11 @@
 // SPDX-License-Identifier: Apache-2.0
 
 using log4net;
-using log4net.Config;
 using Microsoft.Extensions.Logging;
 
 namespace TestApplication.Log4NetBridge;
 
-internal class Log4NetLogger : ILogger
+internal sealed class Log4NetLogger : ILogger
 {
     private readonly ILog _log;
 

@@ -5,6 +5,8 @@
     <TargetFrameworks Condition="'$(OS)' == 'Windows_NT'">$(TargetFrameworks);net462</TargetFrameworks>
     <Description>Loader used by the OpenTelemetry.AutoInstrumentation project.</Description>
     <OutputPath>..\bin\ProfilerResources\</OutputPath>
+    <!-- Do not catch general exception types. Typically, we need to handle all Exception to do not break application. -->
+    <NoWarn>$(NoWarn);CA1031</NoWarn>
   </PropertyGroup>
 <ItemGroup>
   <Compile Include="..\OpenTelemetry.AutoInstrumentation\Logging\InternalLogger.cs">
@@ -21,6 +23,9 @@
   </Compile>
   <Compile Include="..\OpenTelemetry.AutoInstrumentation\Logging\RollingFileSink.cs">
     <Link>Logging\RollingFileSink.cs</Link>
+  </Compile>
+  <Compile Include="..\OpenTelemetry.AutoInstrumentation\Logging\PeriodicFlushToDiskSink.cs">
+    <Link>Logging\PeriodicFlushToDiskSink.cs</Link>
   </Compile>
   <Compile Include="..\OpenTelemetry.AutoInstrumentation\Logging\RollingInterval.cs">
     <Link>Logging\RollingInterval.cs</Link>

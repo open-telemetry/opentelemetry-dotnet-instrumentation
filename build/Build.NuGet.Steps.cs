@@ -2,6 +2,9 @@ using System.Runtime.InteropServices;
 using Extensions;
 using Nuke.Common;
 using Nuke.Common.IO;
+#if NET10_0
+using Nuke.Common.ProjectModel;
+#endif
 using Nuke.Common.Tools.DotNet;
 using Nuke.Common.Tools.NuGet;
 using Nuke.Common.Utilities.Collections;
@@ -30,7 +33,7 @@ partial class Build
         .Description("Build the NuGet packages that are generated directly from src/**/*.csproj files")
         .Executes(() =>
         {
-            foreach (var project in Solution.GetManagedSrcProjects().Where(p => !p.Name.EndsWith("AdditionalDeps")))
+            foreach (var project in Solution.GetManagedSrcProjects().Where(p => !p.Name.EndsWith("AdditionalDeps") && !p.Name.Contains("Assemblies")))
             {
                 DotNetPack(x => x
                     .SetProject(project)
@@ -53,7 +56,7 @@ partial class Build
                 "bin-alpine-arm64/linux-musl-arm64",
                 "bin-ubuntu-22.04/linux-x64",
                 "bin-ubuntu-22.04-arm/linux-arm64",
-                "bin-macos-13/osx-x64",
+                "bin-macos-14/osx-arm64",
                 "bin-windows-2022/win-x64",
                 "bin-windows-2022/win-x86"
             };
@@ -125,7 +128,11 @@ partial class Build
             var nuspecSolutionFolder = Solution.GetSolutionFolder("nuget")
                 ?? throw new InvalidOperationException("Couldn't find the expected \"nuget\" solution folder.");
 
-            var nuspecProjects = nuspecSolutionFolder.Items.Keys.ToArray();
+#if NET9_0
+            throw new InvalidOperationException("NuSpec packaging requires .NET 10 or greater to run.");
+#else
+            var nuspecProjects = nuspecSolutionFolder.GetModel().Files!;
+
             foreach (var nuspecProject in nuspecProjects)
             {
                 NuGetTasks.NuGetPack(s => s
@@ -134,6 +141,8 @@ partial class Build
                     .SetProperties(nuspecCommonProperties)
                     .SetOutputDirectory(NuGetArtifactsDirectory));
             }
+#endif
+
         });
 
     Target BuildNuGetPackagesTests => _ => _

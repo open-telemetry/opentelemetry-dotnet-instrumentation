@@ -9,7 +9,9 @@ namespace OpenTelemetry.AutoInstrumentation.CallTarget;
 /// <summary>
 /// Call target execution state
 /// </summary>
+#pragma warning disable CA1815 // Override equals and operator equals on value types
 public readonly struct CallTargetState
+#pragma warning restore CA1815 // Override equals and operator equals on value types
 {
     private readonly Activity? _previousActivity;
     private readonly Activity? _activity;
@@ -85,7 +87,9 @@ public readonly struct CallTargetState
     /// </summary>
     /// <returns>Default call target state</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
+#pragma warning disable CA1024 // Use properties where appropriate
     public static CallTargetState GetDefault()
+#pragma warning restore CA1024 // Use properties where appropriate
     {
         return default;
     }

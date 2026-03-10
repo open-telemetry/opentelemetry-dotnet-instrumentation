@@ -24,7 +24,7 @@ internal static class Program
 
             case "--modify" when args.Length == 4:
                 {
-                    var requestedSdkVersions = new DotnetSdkVersion(args[2], args[3]);
+                    var requestedSdkVersions = new DotnetSdkVersion(args[2], args[3], args[4]);
                     ModifyDotnetSdkVersions(directoryRoot, requestedSdkVersions);
                     return 0;
                 }

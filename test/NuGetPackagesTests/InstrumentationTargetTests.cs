@@ -9,7 +9,7 @@ using Xunit.Abstractions;
 namespace IntegrationTests;
 
 [Trait("Category", "EndToEnd")]
-public sealed class InstrumentationTargetTests : TestHelper
+public class InstrumentationTargetTests : TestHelper
 {
     private const string DotNetCli = "dotnet";
     private const string TargetAppName = "InstrumentationTargetTest";
@@ -91,6 +91,39 @@ public sealed class InstrumentationTargetTests : TestHelper
         });
     }
 
+    private static void ChangeDefaultProgramToHelloWorld()
+    {
+        const string programContent = """
+
+                                      public static class Program
+                                      {
+                                          public static void Main()
+                                          {
+                                              System.Console.WriteLine("Hello World!");
+                                          }
+                                      }
+
+                                      """;
+
+        File.WriteAllText("Program.cs", programContent);
+    }
+
+    private static void ChangeProjectDefaultsAndTargetFramework(string tfm)
+    {
+        var projectFile = $"{TargetAppName}.csproj";
+        var projectText = File.ReadAllText(projectFile);
+#if NET
+        projectText = projectText.Replace("<TargetFramework>net8.0</TargetFramework>", $"<TargetFramework>{tfm}</TargetFramework>", StringComparison.Ordinal);
+        projectText = projectText.Replace("<ImplicitUsings>enable</ImplicitUsings>", $"<ImplicitUsings>disable</ImplicitUsings>", StringComparison.Ordinal);
+        projectText = projectText.Replace("<Nullable>enable</Nullable>", $"<Nullable>disable</Nullable>", StringComparison.Ordinal);
+#else
+        projectText = projectText.Replace("<TargetFramework>net8.0</TargetFramework>", $"<TargetFramework>{tfm}</TargetFramework>");
+        projectText = projectText.Replace("<ImplicitUsings>enable</ImplicitUsings>", $"<ImplicitUsings>disable</ImplicitUsings>");
+        projectText = projectText.Replace("<Nullable>enable</Nullable>", $"<Nullable>disable</Nullable>");
+#endif
+        File.WriteAllText(projectFile, projectText);
+    }
+
     private static void RunInTempDir(Action action)
     {
         string? prevWorkingDir = null;
@@ -124,18 +157,18 @@ public sealed class InstrumentationTargetTests : TestHelper
     {
         const string warningMessage = "RuntimeIdentifier (RID) is not set." +
                                       " Consider setting it to avoid copying native libraries for all of the platforms supported by the OpenTelemetry.AutoInstrumentation package." +
-                                      " See the docs at https://opentelemetry.io/docs/zero-code/net/nuget-packages/#using-the-nuget-packages for details." +
+                                      " See the docs at https://opentelemetry.io/docs/zero-code/dotnet/nuget-packages/#using-the-nuget-packages for details." +
                                       " In order to suppress this warning, set DisableAutoInstrumentationCheckForRuntimeIdentifier property to true.";
 
         var (exitCode, standardOutput) = RunDotnetCliAndWaitForCompletion($"publish {arguments}");
         Assert.Equal(0, exitCode);
         if (expectWarning)
         {
-            Assert.Contains(warningMessage, standardOutput);
+            Assert.Contains(warningMessage, standardOutput, StringComparison.Ordinal);
         }
         else
         {
-            Assert.DoesNotContain(warningMessage, standardOutput);
+            Assert.DoesNotContain(warningMessage, standardOutput, StringComparison.Ordinal);
         }
     }
 #endif
@@ -164,36 +197,9 @@ public sealed class InstrumentationTargetTests : TestHelper
         Assert.Equal(0, RunDotNetCli(
             $"nuget add source \"{nugetArtifactsDir}\" --name nuget-artifacts --configfile nuget.config"));
         Assert.Equal(0, RunDotNetCli(
-            $"add package OpenTelemetry.AutoInstrumentation --prerelease"));
+            "add package OpenTelemetry.AutoInstrumentation --prerelease"));
 
         Assert.Equal(0, RunDotNetCli("build"));
-    }
-
-    private void ChangeDefaultProgramToHelloWorld()
-    {
-        const string programContent = """
-
-                                      public static class Program
-                                      {
-                                          public static void Main()
-                                          {
-                                              System.Console.WriteLine("Hello World!");
-                                          }
-                                      }
-
-                                      """;
-
-        File.WriteAllText("Program.cs", programContent);
-    }
-
-    private void ChangeProjectDefaultsAndTargetFramework(string tfm)
-    {
-        var projectFile = $"{TargetAppName}.csproj";
-        var projectText = File.ReadAllText(projectFile);
-        projectText = projectText.Replace("<TargetFramework>net8.0</TargetFramework>", $"<TargetFramework>{tfm}</TargetFramework>");
-        projectText = projectText.Replace("<ImplicitUsings>enable</ImplicitUsings>", $"<ImplicitUsings>disable</ImplicitUsings>");
-        projectText = projectText.Replace("<Nullable>enable</Nullable>", $"<Nullable>disable</Nullable>");
-        File.WriteAllText(projectFile, projectText);
     }
 
     private int RunDotNetCli(string arguments, string? expectedOutputFragment = null)
@@ -201,7 +207,7 @@ public sealed class InstrumentationTargetTests : TestHelper
         var (exitCode, standardOutput) = RunDotnetCliAndWaitForCompletion(arguments);
         if (expectedOutputFragment is not null)
         {
-            Assert.Contains(expectedOutputFragment, standardOutput);
+            Assert.Contains(expectedOutputFragment, standardOutput, StringComparison.Ordinal);
         }
 
         return exitCode;
@@ -216,7 +222,7 @@ public sealed class InstrumentationTargetTests : TestHelper
 
         Assert.NotNull(process);
 
-        bool processTimeout = !process!.WaitForExit((int)TestTimeout.ProcessExit.TotalMilliseconds);
+        var processTimeout = !process!.WaitForExit((int)TestTimeout.ProcessExit.TotalMilliseconds);
         if (processTimeout)
         {
             process.Kill();

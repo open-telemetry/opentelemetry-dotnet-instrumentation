@@ -6,6 +6,8 @@ using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 #pragma warning disable SA1649 // File name must match first type name
 #pragma warning disable SA1402 // File may only contain a single class
+#pragma warning disable CA1032 // Implement standard exception constructors
+#pragma warning disable CA1064 // Exceptions should be public. Exceptions are intended for internal use only.
 
 namespace OpenTelemetry.AutoInstrumentation.DuckTyping;
 
@@ -45,7 +47,7 @@ internal class DuckTypeException : Exception
 internal class DuckTypeProxyTypeDefinitionIsNull : DuckTypeException
 {
     private DuckTypeProxyTypeDefinitionIsNull()
-        : base($"The proxy type definition is null.")
+        : base("The proxy type definition is null.")
     {
     }
 
@@ -63,7 +65,7 @@ internal class DuckTypeProxyTypeDefinitionIsNull : DuckTypeException
 internal class DuckTypeTargetObjectInstanceIsNull : DuckTypeException
 {
     private DuckTypeTargetObjectInstanceIsNull()
-        : base($"The target object instance is null.")
+        : base("The target object instance is null.")
     {
     }
 

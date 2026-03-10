@@ -3,6 +3,7 @@
 
 using System.Diagnostics;
 using System.Diagnostics.Metrics;
+using Examples.Service;
 using Microsoft.Data.SqlClient;
 
 // .NET Diagnostics: create the span factory
@@ -20,17 +21,19 @@ app.Run();
 
 async Task<string> Handler(ILogger<Program> logger)
 {
-    await ExecuteSql("SELECT 1");
+    await ExecuteSql("SELECT 1").ConfigureAwait(false);
 
     // .NET Diagnostics: create a manual span
     using (var activity = activitySource.StartActivity("SayHello"))
     {
         activity?.SetTag("foo", 1);
         activity?.SetTag("bar", "Hello, World!");
-        activity?.SetTag("baz", new int[] { 1, 2, 3 });
+        activity?.SetTag("baz", (int[])[1, 2, 3]);
 
+#pragma warning disable CA5394 // Do not use insecure randomness. Not related to security, just a demo.
         var waitTime = Random.Shared.NextDouble(); // max 1 seconds
-        await Task.Delay(TimeSpan.FromSeconds(waitTime));
+#pragma warning restore CA5394 // Do not use insecure randomness. Not related to security, just a demo.
+        await Task.Delay(TimeSpan.FromSeconds(waitTime)).ConfigureAwait(false);
 
         activity?.SetStatus(ActivityStatusCode.Ok);
 
@@ -39,7 +42,7 @@ async Task<string> Handler(ILogger<Program> logger)
     }
 
     // .NET ILogger: create a log
-    logger.LogInformation("Success! Today is: {Date:MMMM dd, yyyy}", DateTimeOffset.UtcNow);
+    logger.Success(DateTimeOffset.UtcNow);
 
     return "Hello there";
 }
@@ -47,7 +50,9 @@ async Task<string> Handler(ILogger<Program> logger)
 async Task ExecuteSql(string sql)
 {
     using var connection = new SqlConnection(connectionString);
-    await connection.OpenAsync();
+    await connection.OpenAsync().ConfigureAwait(false);
+#pragma warning disable CA2100 // Review SQL queries for security vulnerabilities. It is static SQL for demo purposes.
     using var command = new SqlCommand(sql, connection);
-    using var reader = await command.ExecuteReaderAsync();
+#pragma warning restore CA2100 // Review SQL queries for security vulnerabilities. It is static SQL for demo purposes.
+    using var reader = await command.ExecuteReaderAsync().ConfigureAwait(false);
 }

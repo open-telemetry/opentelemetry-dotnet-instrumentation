@@ -5,6 +5,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Compile Include="..\IntegrationTests\Helpers\EnvironmentTools.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
     <!-- Packages referenced by the BuildTasks are not transferred to the test library so add them here so it can be used by the tests. -->
     <PackageReference Include="Microsoft.Build.Utilities.Core" />
     <PackageReference Include="Newtonsoft.Json" />

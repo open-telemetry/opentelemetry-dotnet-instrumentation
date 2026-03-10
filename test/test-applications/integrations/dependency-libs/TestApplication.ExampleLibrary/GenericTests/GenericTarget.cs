@@ -5,12 +5,12 @@ namespace TestApplication.ExampleLibrary.GenericTests;
 
 public class GenericTarget<T1, T2>
 {
-    public M1 ReturnM1<M1, M2>(M1 input1, M2 input2)
+    public TMethod1 ReturnM1<TMethod1, TMethod2>(TMethod1 input1, TMethod2 input2)
     {
         return input1;
     }
 
-    public M2 ReturnM2<M1, M2>(M1 input1, M2 input2)
+    public TMethod2 ReturnM2<TMethod1, TMethod2>(TMethod1 input1, TMethod2 input2)
     {
         return input2;
     }

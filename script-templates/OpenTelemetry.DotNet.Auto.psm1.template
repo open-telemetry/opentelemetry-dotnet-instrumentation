@@ -250,7 +250,6 @@ function Get-OpenTelemetry-Archive([string] $Version, [string] $LocalPath) {
 
 function Test-AssemblyNotForGAC([string] $Name) {
     switch ($Name) {
-        "netstandard.dll" { return $true }
         "grpc_csharp_ext.x64.dll" { return $true }
         "grpc_csharp_ext.x86.dll" { return $true }
     }
@@ -297,6 +296,63 @@ function Is-Greater-Version($v1, $v2) {
 
 <#
     .SYNOPSIS
+    Installs OpenTelemetry .NET Assemblies in GAC.
+    .PARAMETER InstallDir
+    Default: <auto> - the default path is Program Files dir.
+    Install path of the OpenTelemetry .NET Automatic Instrumentation
+    Possible values: <auto>, (Custom path)
+#>
+function Register-AssembliesInGAC() {
+    $installDir = Get-Current-InstallDir
+
+    # Register .NET Framework dlls in GAC
+    [System.Reflection.Assembly]::Load("System.EnterpriseServices, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a") | Out-Null
+    $publish = New-Object System.EnterpriseServices.Internal.Publish
+
+    $dlls = @()
+
+    $release = Get-ItemPropertyValue -LiteralPath 'HKLM:SOFTWARE\Microsoft\NET Framework Setup\NDP\v4\Full' -Name Release
+    switch ($release) {
+        { $_ -ge 533320 } { $fxversion = 'net472'; break } # net481 or later, pin to 4.7.2
+        { $_ -ge 528040 } { $fxversion = 'net472'; break } # net48, pin to 4.7.2
+        { $_ -ge 461808 } { $fxversion = 'net472'; break }
+        { $_ -ge 461308 } { $fxversion = 'net471'; break }
+        { $_ -ge 460798 } { $fxversion = 'net47'; break }
+        { $_ -ge 394802 } { $fxversion = 'net462'; break }
+        default { $version = $null; break }
+    }
+    if (-not $fxversion) {
+        Write-Error ".NET Framework bellow 4.6.2 is not supported"
+        return 
+    }
+
+    $dlls = @()
+    $dlls = $dlls + (Get-ChildItem -Path $installDir\netfx\ -Filter *.dll -File)
+    $dlls = $dlls + (Get-ChildItem -Path $installDir\netfx\$fxversion\ -Filter *.dll -File)
+
+    $linkedDlls = Get-ChildItem -Path $installDir\netfx\$fxversion\ -Filter *.dll.link -File
+    foreach($link in $linkedDlls) {
+      $linkTarget = Get-Content $($link.FullName)
+      $dlls = $dlls + (Get-ChildItem -Path $installDir\netfx\$linkTarget\$($link.Basename) -File)
+    }
+
+    for ($i = 0; $i -lt $dlls.Count; $i++) {
+        $percentageComplete = $i / $dlls.Count * 100
+        Write-Progress -Activity "Registering .NET Framework dlls in GAC" `
+            -Status "Module $($i+1) out of $($dlls.Count). Installing $($dlls[$i].Name):" `
+            -PercentComplete $percentageComplete
+
+        if (Test-AssemblyNotForGAC $dlls[$i].Name) {
+            continue
+        }
+
+        $publish.GacInstall($dlls[$i].FullName)
+    }
+    Write-Progress -Activity "Registering .NET Framework dlls in GAC" -Status "Ready" -Completed
+}
+
+<#
+    .SYNOPSIS
     Installs OpenTelemetry .NET Automatic Instrumentation.
     .PARAMETER InstallDir
     Default: <auto> - the default path is Program Files dir.
@@ -308,7 +364,9 @@ function Install-OpenTelemetryCore() {
         [Parameter(Mandatory = $false)]
         [string]$InstallDir = "<auto>",
         [Parameter(Mandatory = $false)]
-        [string]$LocalPath
+        [string]$LocalPath,
+        [Parameter(Mandatory = $false)]
+        [bool]$RegisterAssembliesInGAC = $true
     )
 
     $version = "v{{VERSION}}"
@@ -332,23 +390,9 @@ function Install-OpenTelemetryCore() {
         # OpenTelemetry service locator
         [System.Environment]::SetEnvironmentVariable($ServiceLocatorVariable, $installDir, [System.EnvironmentVariableTarget]::Machine)
 
-        # Register .NET Framework dlls in GAC
-        [System.Reflection.Assembly]::Load("System.EnterpriseServices, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a") | Out-Null
-        $publish = New-Object System.EnterpriseServices.Internal.Publish 
-        $dlls = Get-ChildItem -Path $installDir\netfx\ -Filter *.dll -File
-        for ($i = 0; $i -lt $dlls.Count; $i++) {
-            $percentageComplete = $i / $dlls.Count * 100
-            Write-Progress -Activity "Registering .NET Framework dlls in GAC" `
-                -Status "Module $($i+1) out of $($dlls.Count). Installing $($dlls[$i].Name):" `
-                -PercentComplete $percentageComplete
-
-            if (Test-AssemblyNotForGAC $dlls[$i].Name) {
-                continue
-            }
-
-            $publish.GacInstall($dlls[$i].FullName)
+        if ($RegisterAssembliesInGAC){
+            Register-AssembliesInGAC $installDir
         }
-        Write-Progress -Activity "Registering .NET Framework dlls in GAC" -Status "Ready" -Completed
     } 
     catch {
         $message = $_
@@ -376,7 +420,7 @@ function Uninstall-OpenTelemetryCore() {
     # Unregister .NET Framwework dlls from GAC
     [System.Reflection.Assembly]::Load("System.EnterpriseServices, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a") | Out-Null
     $publish = New-Object System.EnterpriseServices.Internal.Publish 
-    $dlls = Get-ChildItem -Path $installDir\netfx\ -Filter *.dll -File
+    $dlls = Get-ChildItem -Path $installDir\netfx\ -Recurse -Filter *.dll -File
     for ($i = 0; $i -lt $dlls.Count; $i++) {
         $percentageComplete = $i / $dlls.Count * 100
         Write-Progress -Activity "Unregistering .NET Framework dlls from GAC" `
@@ -406,7 +450,9 @@ function Uninstall-OpenTelemetryCore() {
 function Update-OpenTelemetryCore() {
     param(
         [Parameter(Mandatory = $false)]
-        [bool]$RegisterIIS = $false
+        [bool]$RegisterIIS = $false,
+        [Parameter(Mandatory = $false)]
+        [bool]$RegisterAssembliesInGAC = $true
     )
 
     $currentInstallVersion = Get-OpenTelemetryInstallVersion
@@ -427,7 +473,7 @@ function Update-OpenTelemetryCore() {
 
     Uninstall-OpenTelemetryCore
     if ($RegisterIIS) {
-        Unregister-OpenTelemetryForIIS -NoReset $true
+        Unregister-OpenTelemetryForIIS -NoReset
     }
 
     $tempDir = Get-Temp-Directory
@@ -436,7 +482,7 @@ function Update-OpenTelemetryCore() {
     Remove-Module OpenTelemetry.Dotnet.Auto
     Import-Module $modulePath
 
-    Install-OpenTelemetryCore -InstallDir $installDir
+    Install-OpenTelemetryCore -InstallDir $installDir -RegisterAssembliesInGAC $RegisterAssembliesInGAC
     if ($RegisterIIS) {
         Register-OpenTelemetryForIIS
     }
@@ -476,9 +522,15 @@ function Register-OpenTelemetryForCurrentSession() {
 <#
     .SYNOPSIS
     Setups IIS environment variables to enable automatic instrumentation.
-    Performs IIS reset after registration.
+    Performs IIS reset after registration by default.
+    .PARAMETER NoReset
+    Does not perform IIS reset.
 #>
 function Register-OpenTelemetryForIIS() {
+    param(
+        [switch]$NoReset
+    )
+
     $installDir = Get-Current-InstallDir
 
     if (-not $installDir) {
@@ -492,7 +544,9 @@ function Register-OpenTelemetryForIIS() {
     Setup-Windows-Service -InstallDir $installDir -WindowsServiceName "W3SVC"
     Setup-Windows-Service -InstallDir $installDir -WindowsServiceName "WAS"
 
-    Reset-IIS
+    if (-not $NoReset) {
+        Reset-IIS
+    }
 }
 
 <#
@@ -503,13 +557,16 @@ function Register-OpenTelemetryForIIS() {
     Actual Windows service name in registry.
     .PARAMETER OTelServiceName
     Specifies OpenTelemetry service name to identify your service.
+    .PARAMETER NoReset
+    Does not perform service restart.
 #>
 function Register-OpenTelemetryForWindowsService() {
     param(
         [Parameter(Mandatory = $true)]
         [string]$WindowsServiceName,
         [Parameter(Mandatory = $true)]
-        [string]$OTelServiceName
+        [string]$OTelServiceName,
+        [switch]$NoReset
     )
 
     $installDir = Get-Current-InstallDir
@@ -519,7 +576,10 @@ function Register-OpenTelemetryForWindowsService() {
     }
 
     Setup-Windows-Service -InstallDir $installDir -WindowsServiceName $WindowsServiceName -OTelServiceName $OTelServiceName
-    Restart-Service -Name $WindowsServiceName -Force
+    
+    if (-not $NoReset) {
+        Restart-Service -Name $WindowsServiceName -Force
+    }
 }
 
 <#
@@ -560,8 +620,7 @@ function Unregister-OpenTelemetryForCurrentSession() {
 #>
 function Unregister-OpenTelemetryForIIS() {
     param(
-        [Parameter(Mandatory = $false)]
-        [bool]$NoReset = $false
+        [switch]$NoReset
     )
 
     Cleanup-Environment-Variables -WindowsServiceName "W3SVC"
@@ -578,15 +637,21 @@ function Unregister-OpenTelemetryForIIS() {
     Performs service restart after removal.
     .PARAMETER WindowsServiceName
     Actual Windows service Name in registry.
+    .PARAMETER NoReset
+    Does not perform service restart.
 #>
 function Unregister-OpenTelemetryForWindowsService() {
     param(
         [Parameter(Mandatory = $true)]
-        [string]$WindowsServiceName
+        [string]$WindowsServiceName,
+        [switch]$NoReset
     )  
 
     Cleanup-Environment-Variables -WindowsServiceName $WindowsServiceName
-    Restart-Service -Name $WindowsServiceName -Force
+    
+    if (-not $NoReset) {
+        Restart-Service -Name $WindowsServiceName -Force
+    }
 }
 
 <#
@@ -660,3 +725,4 @@ Export-ModuleMember -Function Get-OpenTelemetryInstallDirectory
 Export-ModuleMember -Function Get-OpenTelemetryInstallVersion
 Export-ModuleMember -Function Enable-OpenTelemetryForIISAppPool
 Export-ModuleMember -Function Disable-OpenTelemetryForIISAppPool
+Export-ModuleMember -Function Register-AssembliesInGAC

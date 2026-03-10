@@ -181,7 +181,7 @@ internal class NoopLogger : IOtelLogger
     {
     }
 
-    public void Dispose()
+    public void Close()
     {
     }
 }

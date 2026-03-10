@@ -10,8 +10,8 @@ Use the NuGet package in the following scenarios:
   applications.
 3. Facilitate developer experimentation with automatic instrumentation through
   NuGet packages.
-4. Solve version conflicts between the dependencies used by the application and the
-  automatic instrumentation.
+4. Solve version conflicts between the dependencies used by the application and
+  the automatic instrumentation.
 
 ## Limitations
 

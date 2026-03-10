@@ -12,7 +12,7 @@ internal static class EnvironmentConfigurationSdkHelper
         SetSdkTextMapPropagator(settings.Propagators);
     }
 
-    private static void SetSdkTextMapPropagator(IList<Propagator> settingsPropagators)
+    private static void SetSdkTextMapPropagator(IReadOnlyList<Propagator> settingsPropagators)
     {
         if (settingsPropagators.Count == 0)
         {
@@ -43,18 +43,13 @@ internal static class EnvironmentConfigurationSdkHelper
 
     private static TextMapPropagator GetTextMapPropagator(Propagator propagator)
     {
-        switch (propagator)
+        return propagator switch
         {
-            case Propagator.W3CTraceContext:
-                return new TraceContextPropagator();
-            case Propagator.W3CBaggage:
-                return new BaggagePropagator();
-            case Propagator.B3Multi:
-                return new Extensions.Propagators.B3Propagator(singleHeader: false);
-            case Propagator.B3Single:
-                return new Extensions.Propagators.B3Propagator(singleHeader: true);
-        }
-
-        throw new ArgumentOutOfRangeException(nameof(propagator), propagator, "Propagator has an unexpected value.");
+            Propagator.W3CTraceContext => new TraceContextPropagator(),
+            Propagator.W3CBaggage => new BaggagePropagator(),
+            Propagator.B3Multi => new Extensions.Propagators.B3Propagator(singleHeader: false),
+            Propagator.B3Single => new Extensions.Propagators.B3Propagator(singleHeader: true),
+            _ => throw new ArgumentOutOfRangeException(nameof(propagator), propagator, "Propagator has an unexpected value."),
+        };
     }
 }

@@ -1,13 +1,13 @@
 // Copyright The OpenTelemetry Authors
 // SPDX-License-Identifier: Apache-2.0
 
-using System.Threading.Tasks;
-using NServiceBus;
 using NServiceBus.Logging;
 
 namespace TestApplication.NServiceBus;
 
-public class TestMessageHandler : IHandleMessages<TestMessage>
+#pragma warning disable CA1812 // Avoid uninstantiated internal classes. This class is instantiated by NServiceBus.
+internal sealed class TestMessageHandler : IHandleMessages<TestMessage>
+#pragma warning restore CA1812 // Avoid uninstantiated internal classes. This class is instantiated by NServiceBus.
 {
     private static readonly ILog Log = LogManager.GetLogger<TestMessageHandler>();
 

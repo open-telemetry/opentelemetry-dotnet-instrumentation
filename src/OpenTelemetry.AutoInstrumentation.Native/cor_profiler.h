@@ -1,4 +1,4 @@
-/*
+﻿/*
  * Copyright The OpenTelemetry Authors
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -23,6 +23,7 @@
 #include "rejit_handler.h"
 #include <unordered_set>
 #include "clr_helpers.h"
+#include "stack_capture_strategy.h"
 
 // Forward declaration
 namespace continuous_profiler
@@ -32,6 +33,14 @@ class ContinuousProfiler;
 
 namespace trace
 {
+struct ContinuousProfilerParams
+{
+    bool         threadSamplingEnabled;
+    unsigned int threadSamplingInterval;
+    bool         allocationSamplingEnabled;
+    unsigned int maxMemorySamplesPerMinute;
+    unsigned int selectedThreadsSamplingInterval;
+};
 
 class CorProfiler : public CorProfilerBase
 {
@@ -44,7 +53,9 @@ private:
     std::mutex definitions_ids_lock_;
 
     // Startup helper variables
+    WSTRING home_path;
     bool first_jit_compilation_completed = false;
+    bool startup_fix_required = false;
 
     bool corlib_module_loaded = false;
     AppDomainID corlib_app_domain_id = 0;
@@ -55,6 +66,9 @@ private:
     bool is_desktop_iis = false;
 
     continuous_profiler::ContinuousProfiler* continuousProfiler;
+    std::unique_ptr<continuous_profiler::IStackCaptureStrategy> stack_capture_strategy_;
+    std::once_flag sampling_init_flag_;
+    HRESULT STDMETHODCALLTYPE ThreadAssignedToOSThread(ThreadID managedThreadId, DWORD osThreadId) override;
 
 
     //
@@ -95,7 +109,10 @@ private:
     //
     // Assembly redirect private members.
     //
-    std::unordered_map<WSTRING, AssemblyVersionRedirection> assembly_version_redirect_map_;
+    std::unordered_map<int, std::unordered_map<WSTRING, AssemblyVersionRedirection>> assembly_version_redirect_map_;
+    std::unordered_map<WSTRING, AssemblyVersionRedirection>* assembly_version_redirect_map_current_framework_;
+    int                                                      assembly_version_redirect_map_current_framework_key_ = 0;
+
     void InitNetFxAssemblyRedirectsMap();
     void RedirectAssemblyReferences(
         const ComPtr<IMetaDataAssemblyImport>& assembly_import,
@@ -106,7 +123,13 @@ private:
     //
     HRESULT RunAutoInstrumentationLoader(const ComPtr<IMetaDataEmit2>&, const ModuleID module_id, const mdToken function_token, const FunctionInfo& caller, const ModuleMetadata& module_metadata);
     HRESULT GenerateLoaderMethod(const ModuleID module_id, mdMethodDef* ret_method_token);
+    HRESULT GenerateLoaderType(const ModuleID module_id,
+                               mdTypeDef*     loader_type,
+                               mdMethodDef*   init_method,
+                               mdMethodDef*   patch_app_domain_setup_method);
+    HRESULT ModifyAppDomainCreate(const ModuleID module_id, mdMethodDef patch_app_domain_setup_method);
     HRESULT AddIISPreStartInitFlags(const ModuleID module_id, const mdToken function_token);
+    void DetectFrameworkVersionTableForRedirectsMap();
 #endif
 
     //
@@ -116,13 +139,13 @@ private:
     bool GetIntegrationTypeRef(ModuleMetadata& module_metadata, ModuleID module_id,
                                const IntegrationDefinition& integration_definition, mdTypeRef& integration_type_ref);
     bool ProfilerAssemblyIsLoadedIntoAppDomain(AppDomainID app_domain_id);
-    std::string GetILCodes(const std::string& title, ILRewriter* rewriter, const FunctionInfo& caller,
-                           const ComPtr<IMetaDataImport2>& metadata_import);
 
     //
     // Initialization methods
     //
     void InternalAddInstrumentation(WCHAR* id, CallTargetDefinition* items, int size, bool isDerived);
+    bool InitThreadSampler();
+    void ConfigureContinuousProfilerInternal(const ContinuousProfilerParams& params);
 
 public:
     CorProfiler() = default;
@@ -135,7 +158,17 @@ public:
     // GetAssemblyAndSymbolsBytes is used when injecting the Loader into a .NET Framework application.
     void GetAssemblyAndSymbolsBytes(BYTE** pAssemblyArray, int* assemblySize, BYTE** pSymbolsArray,
                                     int* symbolsSize) const;
+
+    // Return redirection table used in runtime
+    // that will match TFM folder to load assemblies.
+    // It may not be actual .NET Framework version.
+    int  GetNetFrameworkRedirectionVersion() const;
 #endif
+
+    std::string GetILCodes(const std::string&              title,
+                           ILRewriter*                     rewriter,
+                           const FunctionInfo&             caller,
+                           const ComPtr<IMetaDataImport2>& metadata_import);
 
     //
     // ICorProfilerCallback methods
@@ -208,11 +241,19 @@ public:
     //
     void AddInstrumentations(WCHAR* id, CallTargetDefinition* items, int size);
     void AddDerivedInstrumentations(WCHAR* id, CallTargetDefinition* items, int size);
-
+    void InitializeTraceMethods(WCHAR* id,
+                                WCHAR* integration_assembly_name_ptr,
+                                WCHAR* integration_type_name_ptr,
+                                WCHAR* configuration_string_ptr);
     //
     // Continuous Profiler methods
     //
-    void ConfigureContinuousProfiler(bool threadSamplingEnabled, unsigned int threadSamplingInterval, bool allocationSamplingEnabled, unsigned int maxMemorySamplesPerMinute);
+    void ConfigureContinuousProfiler(bool threadSamplingEnabled, unsigned int threadSamplingInterval, bool allocationSamplingEnabled, unsigned int maxMemorySamplesPerMinute, unsigned int selectedThreadsSamplingInterval);
+
+    //
+    // IL Rewriting methods
+    //
+    HRESULT RewriteILSystemDataCommandText(const ModuleID module_id);
 
     friend class TracerMethodRewriter;
 };

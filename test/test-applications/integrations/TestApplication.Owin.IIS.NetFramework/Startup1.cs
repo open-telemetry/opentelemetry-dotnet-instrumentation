@@ -5,6 +5,7 @@ using Owin;
 [assembly: OwinStartup(typeof(TestApplication.Owin.IIS.Startup1))]
 
 namespace TestApplication.Owin.IIS;
+
 public class Startup1
 {
     public void Configuration(IAppBuilder app)

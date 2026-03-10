@@ -8,6 +8,7 @@ namespace TestLibrary.InstrumentationTarget;
 public class Command
 {
     [MethodImpl(MethodImplOptions.NoInlining)]
+#pragma warning disable CA1822 // Mark members as static
     public void Execute()
     {
         Thread.Yield(); // Just to have some call to outside code.
@@ -21,5 +22,6 @@ public class Command
     public void InstrumentationTargetMissingBytecodeInstrumentationMethod()
     {
         Thread.Yield(); // Just to have some call to outside code.
+#pragma warning restore CA1822 // Mark members as static
     }
 }

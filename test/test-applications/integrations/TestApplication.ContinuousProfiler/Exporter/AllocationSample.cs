@@ -3,7 +3,7 @@
 
 namespace TestApplication.ContinuousProfiler;
 
-internal class AllocationSample
+internal sealed class AllocationSample
 {
     public AllocationSample(long allocationSizeBytes, string allocationTypeName, ThreadSample threadSample)
     {

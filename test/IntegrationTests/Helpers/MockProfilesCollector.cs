@@ -1,18 +1,22 @@
 // Copyright The OpenTelemetry Authors
 // SPDX-License-Identifier: Apache-2.0
 
-#if NET
-
 using System.Collections.Concurrent;
+using System.Globalization;
 using System.Text;
-using Microsoft.AspNetCore.Http;
 using OpenTelemetry.Proto.Collector.Profiles.V1Development;
 using OpenTelemetry.Proto.Profiles.V1Development;
 using Xunit.Abstractions;
 
+#if NETFRAMEWORK
+using System.Net;
+#else
+using Microsoft.AspNetCore.Http;
+#endif
+
 namespace IntegrationTests.Helpers;
 
-public class MockProfilesCollector : IDisposable
+internal sealed class MockProfilesCollector : IDisposable
 {
     private readonly ITestOutputHelper _output;
     private readonly TestHttpServer _listener;
@@ -21,10 +25,14 @@ public class MockProfilesCollector : IDisposable
     private readonly BlockingCollection<Collected> _profilesSnapshots = new(10); // bounded to avoid memory leak; contains protobuf type
     private CollectedExpectation? _collectedExpectation;
 
-    public MockProfilesCollector(ITestOutputHelper output)
+    public MockProfilesCollector(ITestOutputHelper output, string host = "localhost")
     {
         _output = output;
+#if NETFRAMEWORK
+        _listener = new(output, HandleHttpRequests, host, "/v1development/profiles/");
+#else
         _listener = new(output, nameof(MockProfilesCollector), new PathHandler(HandleHttpRequests, "/v1development/profiles"));
+#endif
     }
 
     /// <summary>
@@ -125,6 +133,32 @@ public class MockProfilesCollector : IDisposable
         }
     }
 
+    public void AssertEmpty(TimeSpan? timeout = null)
+    {
+        timeout ??= TestTimeout.Expectation;
+
+        if (_profilesSnapshots.TryTake(out var collected, timeout.Value))
+        {
+            var message = new StringBuilder();
+            message.AppendLine("Expected no profiles to be collected, but found:");
+            message.AppendLine(CultureInfo.InvariantCulture, $"  \"{collected}\"");
+
+            // Drain any additional items
+            var additionalCount = 0;
+            while (_profilesSnapshots.TryTake(out _, TimeSpan.Zero))
+            {
+                additionalCount++;
+            }
+
+            if (additionalCount > 0)
+            {
+                message.AppendLine(CultureInfo.InvariantCulture, $"  ... and {additionalCount} more profile batch(es)");
+            }
+
+            Assert.Fail(message.ToString());
+        }
+    }
+
     private static void FailExpectations(
         List<Expectation> missingExpectations,
         List<Collected> expectationsMet,
@@ -136,19 +170,19 @@ public class MockProfilesCollector : IDisposable
         message.AppendLine("Missing expectations:");
         foreach (var logline in missingExpectations)
         {
-            message.AppendLine($"  - \"{logline.Description}\"");
+            message.AppendLine(CultureInfo.InvariantCulture, $"  - \"{logline.Description}\"");
         }
 
         message.AppendLine("Entries meeting expectations:");
         foreach (var logline in expectationsMet)
         {
-            message.AppendLine($"    \"{logline}\"");
+            message.AppendLine(CultureInfo.InvariantCulture, $"    \"{logline}\"");
         }
 
         message.AppendLine("Additional entries:");
         foreach (var logline in additionalEntries)
         {
-            message.AppendLine($"  + \"{logline}\"");
+            message.AppendLine(CultureInfo.InvariantCulture, $"  + \"{logline}\"");
         }
 
         Assert.Fail(message.ToString());
@@ -157,24 +191,34 @@ public class MockProfilesCollector : IDisposable
     private static void FailCollectedExpectation(string? collectedExpectationDescription, ExportProfilesServiceRequest[] collectedExportProfilesServiceRequests)
     {
         var message = new StringBuilder();
-        message.AppendLine($"Collected profiles expectation failed: {collectedExpectationDescription}");
+        message.AppendLine(CultureInfo.InvariantCulture, $"Collected profiles expectation failed: {collectedExpectationDescription}");
         message.AppendLine("Collected profiles:");
         foreach (var logRecord in collectedExportProfilesServiceRequests)
         {
-            message.AppendLine($"    \"{logRecord}\"");
+            message.AppendLine(CultureInfo.InvariantCulture, $"    \"{logRecord}\"");
         }
 
         Assert.Fail(message.ToString());
     }
 
+#if NETFRAMEWORK
+    private void HandleHttpRequests(HttpListenerContext ctx)
+    {
+        var profilesMessage = ExportProfilesServiceRequest.Parser.ParseFrom(ctx.Request.InputStream);
+        HandleProfilesMessage(profilesMessage);
+
+        ctx.GenerateEmptyProtobufResponse<ExportProfilesServiceResponse>();
+    }
+#else
     private async Task HandleHttpRequests(HttpContext ctx)
     {
-        using var bodyStream = await ctx.ReadBodyToMemoryAsync();
+        using var bodyStream = await ctx.ReadBodyToMemoryAsync().ConfigureAwait(false);
         var profilesMessage = ExportProfilesServiceRequest.Parser.ParseFrom(bodyStream);
         HandleProfilesMessage(profilesMessage);
 
-        await ctx.GenerateEmptyProtobufResponseAsync<ExportProfilesServiceResponse>();
+        await ctx.GenerateEmptyProtobufResponseAsync<ExportProfilesServiceResponse>().ConfigureAwait(false);
     }
+#endif
 
     private void HandleProfilesMessage(ExportProfilesServiceRequest profileMessage)
     {
@@ -192,7 +236,7 @@ public class MockProfilesCollector : IDisposable
         _output.WriteLine($"[{name}]: {msg}");
     }
 
-    public class Collected
+    internal sealed class Collected
     {
         public Collected(ExportProfilesServiceRequest exportProfilesServiceRequest)
         {
@@ -207,7 +251,7 @@ public class MockProfilesCollector : IDisposable
         }
     }
 
-    private class Expectation
+    private sealed class Expectation
     {
         public Expectation(Func<ExportProfilesServiceRequest, bool> predicate, string? description)
         {
@@ -220,7 +264,7 @@ public class MockProfilesCollector : IDisposable
         public string? Description { get; }
     }
 
-    private class CollectedExpectation
+    private sealed class CollectedExpectation
     {
         public CollectedExpectation(Func<ICollection<ExportProfilesServiceRequest>, bool> predicate, string? description)
         {
@@ -233,5 +277,3 @@ public class MockProfilesCollector : IDisposable
         public string? Description { get; }
     }
 }
-
-#endif

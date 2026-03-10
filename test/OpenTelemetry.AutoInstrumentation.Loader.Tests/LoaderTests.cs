@@ -45,7 +45,7 @@ public class LoaderTests
 
         var openTelemetryAutoInstrumentationAssembly = AppDomain.CurrentDomain.GetAssemblies()
             .Select(a => a.FullName)
-            .FirstOrDefault(n => n != null && n.StartsWith("OpenTelemetry.AutoInstrumentation,"));
+            .FirstOrDefault(n => n != null && n.StartsWith("OpenTelemetry.AutoInstrumentation,", StringComparison.Ordinal));
 
         Assert.NotNull(openTelemetryAutoInstrumentationAssembly);
     }

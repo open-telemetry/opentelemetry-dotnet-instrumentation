@@ -3,6 +3,7 @@
   <ItemGroup>
     <PackageReference Include="Npgsql" VersionOverride="$(LibraryVersion)" Condition=" '$(LibraryVersion)' != '' or '$(TargetFramework)' != 'net462' " />
     <PackageReference Include="Npgsql" VersionOverride="8.0.5" Condition=" '$(LibraryVersion)' == '' and '$(TargetFramework)' == 'net462' " />
+    <PackageReference Include="System.Diagnostics.DiagnosticSource" Condition=" ('$(LibraryVersion)' == '' or $([MSBuild]::VersionGreaterThanOrEquals('$(LibraryVersion)', '10.0.0'))) and '$(TargetFramework)' == 'net8.0' " />
   </ItemGroup>
 
 </Project>

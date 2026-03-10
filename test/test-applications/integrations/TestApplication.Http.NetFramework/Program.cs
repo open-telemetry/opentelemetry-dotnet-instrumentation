@@ -3,17 +3,19 @@
 
 using System.Net;
 using System.Text;
+using TestApplication.Shared;
 
 namespace TestApplication.Http.NetFramework;
 
-public class Program
+internal static class Program
 {
     public static void Main(string[] args)
     {
+        ConsoleHelper.WriteSplashScreen(args);
         using var listener = new TestServer("/test/");
         var address = $"http://localhost:{listener.Port}";
 
-        var request = (HttpWebRequest)WebRequest.Create($"{address}/test");
+        var request = (HttpWebRequest)WebRequest.Create(new Uri($"{address}/test"));
         request.Method = "POST";
         request.ContentType = "text/plain";
         request.Headers.Add("Custom-Request-Test-Header1", "Test-Value1");
@@ -29,11 +31,9 @@ public class Program
 
         var response = request.GetResponse();
 
-        using (var responseStream = response.GetResponseStream())
-        using (var responseReader = new StreamReader(responseStream))
-        {
-            var text = responseReader.ReadToEnd();
-            Console.WriteLine("[CLIENT] Received: {0}", text);
-        }
+        using var responseStream = response.GetResponseStream();
+        using var responseReader = new StreamReader(responseStream);
+        var text = responseReader.ReadToEnd();
+        Console.WriteLine("[CLIENT] Received: {0}", text);
     }
 }

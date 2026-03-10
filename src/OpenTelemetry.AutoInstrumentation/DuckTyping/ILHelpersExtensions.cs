@@ -12,7 +12,7 @@ namespace OpenTelemetry.AutoInstrumentation.DuckTyping;
 // ReSharper disable once InconsistentNaming
 internal static class ILHelpersExtensions
 {
-    private static readonly List<DynamicMethod> DynamicMethods = new();
+    private static readonly List<DynamicMethod> DynamicMethods = [];
 
     internal static DynamicMethod GetDynamicMethodForIndex(int index)
     {
@@ -24,23 +24,23 @@ internal static class ILHelpersExtensions
 
     internal static void CreateDelegateTypeFor(TypeBuilder proxyType, DynamicMethod dynamicMethod, out Type delType, out MethodInfo invokeMethod)
     {
-        ModuleBuilder modBuilder = (ModuleBuilder)proxyType.Module;
-        TypeBuilder delegateType = modBuilder.DefineType($"{dynamicMethod.Name}Delegate_" + Guid.NewGuid().ToString("N"), TypeAttributes.Class | TypeAttributes.Public | TypeAttributes.Sealed | TypeAttributes.AnsiClass | TypeAttributes.AutoClass, typeof(MulticastDelegate));
+        var modBuilder = (ModuleBuilder)proxyType.Module;
+        var delegateType = modBuilder.DefineType($"{dynamicMethod.Name}Delegate_" + Guid.NewGuid().ToString("N"), TypeAttributes.Class | TypeAttributes.Public | TypeAttributes.Sealed | TypeAttributes.AnsiClass | TypeAttributes.AutoClass, typeof(MulticastDelegate));
 
         // Delegate .ctor
-        ConstructorBuilder constructorBuilder = delegateType.DefineConstructor(MethodAttributes.RTSpecialName | MethodAttributes.HideBySig | MethodAttributes.Public, CallingConventions.Standard, new Type[] { typeof(object), typeof(IntPtr) });
+        var constructorBuilder = delegateType.DefineConstructor(MethodAttributes.RTSpecialName | MethodAttributes.HideBySig | MethodAttributes.Public, CallingConventions.Standard, [typeof(object), typeof(IntPtr)]);
         constructorBuilder.SetImplementationFlags(MethodImplAttributes.Runtime | MethodImplAttributes.Managed);
 
         // Define the Invoke method for the delegate
-        ParameterInfo[] parameters = dynamicMethod.GetParameters();
-        Type[] paramTypes = new Type[parameters.Length];
-        for (int i = 0; i < parameters.Length; i++)
+        var parameters = dynamicMethod.GetParameters();
+        var paramTypes = new Type[parameters.Length];
+        for (var i = 0; i < parameters.Length; i++)
         {
             paramTypes[i] = parameters[i].ParameterType;
         }
 
-        MethodBuilder methodBuilder = delegateType.DefineMethod("Invoke", MethodAttributes.Public | MethodAttributes.HideBySig | MethodAttributes.NewSlot | MethodAttributes.Virtual, dynamicMethod.ReturnType, paramTypes);
-        for (int i = 0; i < parameters.Length; i++)
+        var methodBuilder = delegateType.DefineMethod("Invoke", MethodAttributes.Public | MethodAttributes.HideBySig | MethodAttributes.NewSlot | MethodAttributes.Virtual, dynamicMethod.ReturnType, paramTypes);
+        for (var i = 0; i < parameters.Length; i++)
         {
             methodBuilder.DefineParameter(i + 1, parameters[i].Attributes, parameters[i].Name);
         }
@@ -317,7 +317,7 @@ internal static class ILHelpersExtensions
                      *      return ([expectedType])value;
                      * }
                      */
-                    Label lblIsExpected = il.DefineLabel();
+                    var lblIsExpected = il.DefineLabel();
 
                     il.Emit(OpCodes.Dup);
                     il.Emit(OpCodes.Isinst, expectedType);
@@ -392,7 +392,7 @@ internal static class ILHelpersExtensions
             OpCodes.Calli,
             method.CallingConvention,
             method.ReturnType,
-            method.GetParameters().Select(p => p.ParameterType).ToArray(),
+            [.. method.GetParameters().Select(p => p.ParameterType)],
             null!);
     }
 
@@ -410,7 +410,7 @@ internal static class ILHelpersExtensions
         }
 
         // We create a custom delegate inside the module builder
-        CreateDelegateTypeFor(proxyType, dynamicMethod, out Type delegateType, out MethodInfo invokeMethod);
+        CreateDelegateTypeFor(proxyType, dynamicMethod, out var delegateType, out var invokeMethod);
         int index;
         lock (DynamicMethods)
         {
@@ -420,10 +420,10 @@ internal static class ILHelpersExtensions
 
         // We fill the DelegateCache<> for that custom type with the delegate instance
         var delegateCacheType = typeof(DuckType.DelegateCache<>).MakeGenericType(delegateType);
-        MethodInfo fillDelegateMethodInfo = delegateCacheType.GetMethod("FillDelegate", BindingFlags.NonPublic | BindingFlags.Static)!;
-        fillDelegateMethodInfo?.Invoke(null, new object[] { index });
+        var fillDelegateMethodInfo = delegateCacheType.GetMethod("FillDelegate", BindingFlags.NonPublic | BindingFlags.Static)!;
+        fillDelegateMethodInfo?.Invoke(null, [index]);
 
-        // We get the delegate instance and load it in to the stack before the parameters (at the begining of the IL body)
+        // We get the delegate instance and load it in to the stack before the parameters (at the beginning of the IL body)
         il.SetOffset(0);
         il.EmitCall(OpCodes.Call, delegateCacheType.GetMethod("GetDelegate")!, null!);
         il.ResetOffset();

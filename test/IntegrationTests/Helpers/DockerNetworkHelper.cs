@@ -21,8 +21,9 @@ internal static class DockerNetworkHelper
     /// <returns>Docker network name</returns>
     internal static async Task<string> SetupIntegrationTestsNetworkAsync()
     {
-        var client = new DockerClientConfiguration().CreateClient();
-        var networks = await client.Networks.ListNetworksAsync();
+        using var clientConfiguration = new DockerClientConfiguration();
+        var client = clientConfiguration.CreateClient();
+        var networks = await client.Networks.ListNetworksAsync().ConfigureAwait(false);
         var network = networks.FirstOrDefault(x => x.Name == IntegrationTestsNetworkName);
 
         if (network != null)
@@ -33,7 +34,7 @@ internal static class DockerNetworkHelper
             }
             else
             {
-                await client.Networks.DeleteNetworkAsync(network.ID);
+                await client.Networks.DeleteNetworkAsync(network.ID).ConfigureAwait(false);
             }
         }
 
@@ -53,10 +54,10 @@ internal static class DockerNetworkHelper
             Subnet = "10.1.1.0/24"
         });
 
-        var result = await client.Networks.CreateNetworkAsync(networkParams);
+        var result = await client.Networks.CreateNetworkAsync(networkParams).ConfigureAwait(false);
         if (string.IsNullOrWhiteSpace(result.ID))
         {
-            throw new Exception("Could not create docker network");
+            throw new InvalidOperationException("Could not create docker network");
         }
 
         return IntegrationTestsNetworkName;

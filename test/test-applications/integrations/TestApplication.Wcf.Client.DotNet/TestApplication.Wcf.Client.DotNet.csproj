@@ -1,12 +1,18 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net9.0;net8.0</TargetFrameworks>
+    <TargetFrameworks>net10.0;net9.0;net8.0</TargetFrameworks>
   </PropertyGroup>
 
-  <ItemGroup>
+  <ItemGroup Condition=" '$(LibraryVersion)' != '' or '$(TargetFramework)' == 'net10.0' " >
     <PackageReference Include="System.ServiceModel.Http" VersionOverride="$(LibraryVersion)" />
     <PackageReference Include="System.ServiceModel.NetTcp" VersionOverride="$(LibraryVersion)" />
+  </ItemGroup>
+  <ItemGroup Condition=" '$(LibraryVersion)' == '' and '$(TargetFramework)' != 'net10.0' " >
+    <PackageReference Include="System.ServiceModel.Http" VersionOverride="8.1.2" />
+    <PackageReference Include="System.ServiceModel.NetTcp" VersionOverride="8.1.2" />
+  </ItemGroup>
+  <ItemGroup>
     <PackageReference Include="System.Security.Cryptography.Pkcs" />
   </ItemGroup>
 </Project>

@@ -7,7 +7,8 @@
       "launchUrl": "test",
       "applicationUrl": "http://localhost:8097",
       "environmentVariables": {
-        "ASPNETCORE_ENVIRONMENT": "Development"
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "OTEL_EXPERIMENTAL_FILE_BASED_CONFIGURATION_ENABLED": "true"
       }
     }
   }

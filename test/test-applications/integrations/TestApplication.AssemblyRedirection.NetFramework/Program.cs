@@ -9,7 +9,7 @@ Console.WriteLine($"Running {Assembly.GetExecutingAssembly()?.Location}");
 var loadedAssemblyNames = new HashSet<string>();
 var hasMultipleInstancesOfSingleAssembly = false;
 var assemblies = AppDomain.CurrentDomain.GetAssemblies();
-Array.Sort<Assembly>(assemblies, (l, r) => l.FullName?.CompareTo(r.FullName) ?? -1);
+Array.Sort<Assembly>(assemblies, static (l, r) => string.CompareOrdinal(l.FullName, r.FullName));
 Console.WriteLine("Loaded assemblies:");
 foreach (var assembly in assemblies)
 {

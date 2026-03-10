@@ -13,19 +13,20 @@ jobs:
     steps:
 
       - name: Setup .NET
-        uses: actions/setup-dotnet@67a3573c9a986a3f9c594539f4ab511d57bb3ce9 # tag: v4.3.1
+        uses: actions/setup-dotnet@c2fa09f4bde5ebb9d1777cf28262a3eb3db3ced7 # tag: v5.2.0
         with:
           dotnet-version: | 
-            8.0.408
-            9.0.203
-            
+            8.0.418
+            9.0.311
+            10.0.103
+
       - name: Test the PowerShell module instructions from README.md
         shell: powershell
         run: |
           mkdir testapp
           cd testapp
           dotnet new console
-          dotnet publish -f net9.0 -c Release
+          dotnet publish -f net10.0 -c Release
           $module_url = "https://github.com/${{ github.repository }}/releases/download/${{ github.event.release.tag_name }}/OpenTelemetry.DotNet.Auto.psm1"
           $dl_path = Join-Path $env:temp "OpenTelemetry.DotNet.Auto.psm1"
           $log_path = "C:\ProgramData\OpenTelemetry .NET AutoInstrumentation\logs\*"
@@ -34,12 +35,12 @@ jobs:
           Install-OpenTelemetryCore
           $install_dir = Get-OpenTelemetryInstallDirectory
           Register-OpenTelemetryForCurrentSession -OTelServiceName "MyServiceDisplayName"
-          ./bin/Release/net9.0/publish/testapp
+          ./bin/Release/net10.0/publish/testapp
           if (-not $?) { throw "dotnet help returned exit code: $LASTEXITCODE" }
           if (-not (Test-Path $log_path)) { throw "Log file does not exist. Instrumentation test failed." }
           Remove-Item $log_path
           Unregister-OpenTelemetryForCurrentSession
-          ./bin/Release/net9.0/publish/testapp
+          ./bin/Release/net10.0/publish/testapp
           if (-not $?) { throw "dotnet help returned exit code: $LASTEXITCODE" }
           if (Test-Path $log_path) { throw "Log file exists. Instrumentation unregister failed." }
           Uninstall-OpenTelemetryCore
@@ -52,9 +53,11 @@ jobs:
         include:
           - machine: windows-2022
             log-dir: "/c/ProgramData/OpenTelemetry .NET AutoInstrumentation/logs"
+          - machine: windows-2025
+            log-dir: "/c/ProgramData/OpenTelemetry .NET AutoInstrumentation/logs"
           - machine: ubuntu-22.04
             log-dir: "/var/log/opentelemetry/dotnet"
-          - machine: macos-13
+          - machine: macos-14
             log-dir: "/var/log/opentelemetry/dotnet"
           - machine: ubuntu-22.04-arm
             log-dir: "/var/log/opentelemetry/dotnet"
@@ -62,11 +65,12 @@ jobs:
     steps:
 
       - name: Setup .NET
-        uses: actions/setup-dotnet@67a3573c9a986a3f9c594539f4ab511d57bb3ce9 # tag: v4.3.1
+        uses: actions/setup-dotnet@c2fa09f4bde5ebb9d1777cf28262a3eb3db3ced7 # tag: v5.2.0
         with:
           dotnet-version: | 
-            8.0.408
-            9.0.203
+            8.0.418
+            9.0.311
+            10.0.103
 
       - name: Install MacOS CoreUtils
         if: ${{ runner.os == 'macOS' }}
@@ -83,13 +87,13 @@ jobs:
           mkdir testapp
           cd testapp
           dotnet new console
-          dotnet publish -f net9.0 -c Release
+          dotnet publish -f net10.0 -c Release
           curl -sSfL https://github.com/${{ github.repository }}/releases/download/${{ github.event.release.tag_name }}/otel-dotnet-auto-install.sh -O
           sh ./otel-dotnet-auto-install.sh
             test "$(ls -A "$HOME/.otel-dotnet-auto")"
           curl -sSfL https://raw.githubusercontent.com/${{ github.repository }}/${{ github.sha }}/instrument.sh -O
           . ./instrument.sh
-          ./bin/Release/net9.0/publish/testapp
+          ./bin/Release/net10.0/publish/testapp
             test "$(ls -A '${{ matrix.log-dir }}' )"
 
   shell-scripts-container:
@@ -99,20 +103,20 @@ jobs:
         include:
           - machine: ubuntu-22.04
             base-image: alpine
-            net-version: net9.0
+            net-version: net10.0
           - machine: ubuntu-22.04-arm
             base-image: alpine
-            net-version: net9.0
+            net-version: net10.0
     runs-on: ${{ matrix.machine }}
     steps:
 
       - name: Checkout
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # tag: v4.2.2
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # tag: v6.0.2
 
       - name: Test the Shell scripts from README.md in Docker container
         run: |
           set -e
-          docker build -t mybuildimage -f "./docker/${{ matrix.base-image }}.dockerfile" ./docker
+          docker build -t mybuildimage -f "./docker/${{ matrix.base-image }}.dockerfile" .
           docker run --rm mybuildimage /bin/sh -c '
             set -e
             mkdir testapp

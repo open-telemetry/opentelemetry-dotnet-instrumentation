@@ -6,7 +6,7 @@ using Xunit.Abstractions;
 
 namespace IntegrationTests;
 
-[Collection(PostgresCollection.Name)]
+[Collection(PostgresCollectionFixture.Name)]
 public class NpqsqlTests : TestHelper
 {
     private readonly PostgresFixture _postgres;
@@ -36,6 +36,7 @@ public class NpqsqlTests : TestHelper
         collector.AssertExpectations();
     }
 
+#if NET
     [Theory]
     [Trait("Category", "EndToEnd")]
     [Trait("Containers", "Linux")]
@@ -54,4 +55,5 @@ public class NpqsqlTests : TestHelper
 
         collector.AssertExpectations();
     }
+#endif
 }

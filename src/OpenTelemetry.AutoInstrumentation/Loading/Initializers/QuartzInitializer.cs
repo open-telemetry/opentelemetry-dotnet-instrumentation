@@ -10,7 +10,7 @@ internal class QuartzInitializer : InstrumentationInitializer
     private readonly PluginManager _pluginManager;
 
     public QuartzInitializer(PluginManager pluginManager)
-        : base("Quartz")
+        : base("Quartz", nameof(QuartzInitializer))
     {
         _pluginManager = pluginManager;
     }

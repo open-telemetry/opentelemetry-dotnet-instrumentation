@@ -41,11 +41,8 @@ internal struct InstrumentationTarget
     {
         get
         {
-            if (_targetNuGetPackageVersionRange is null)
-            {
-                _targetNuGetPackageVersionRange = ReadAndParseMetadata<VersionRange>(
-                    "TargetNuGetPackageVersionRange", VersionRange.TryParse);
-            }
+            _targetNuGetPackageVersionRange ??= ReadAndParseMetadata<VersionRange>(
+                "TargetNuGetPackageVersionRange", VersionRange.TryParse);
 
             return _targetNuGetPackageVersionRange;
         }
@@ -55,16 +52,13 @@ internal struct InstrumentationTarget
     {
         get
         {
-            if (_instrumentationNuGetPackageId is null)
-            {
-                _instrumentationNuGetPackageId = ReadAndParseMetadata(
-                    "InstrumentationNuGetPackageId",
-                    (string value, out string parsedValue) =>
-                    {
-                        parsedValue = value;
-                        return true;
-                    });
-            }
+            _instrumentationNuGetPackageId ??= ReadAndParseMetadata(
+                "InstrumentationNuGetPackageId",
+                (string value, out string parsedValue) =>
+                {
+                    parsedValue = value;
+                    return true;
+                });
 
             return _instrumentationNuGetPackageId;
         }
@@ -74,11 +68,8 @@ internal struct InstrumentationTarget
     {
         get
         {
-            if (_instrumentationNuGetPackageVersion is null)
-            {
-                _instrumentationNuGetPackageVersion = ReadAndParseMetadata<NuGetVersion>(
-                    "InstrumentationNuGetPackageVersion", NuGetVersion.TryParse);
-            }
+            _instrumentationNuGetPackageVersion ??= ReadAndParseMetadata<NuGetVersion>(
+                "InstrumentationNuGetPackageVersion", NuGetVersion.TryParse);
 
             return _instrumentationNuGetPackageVersion;
         }

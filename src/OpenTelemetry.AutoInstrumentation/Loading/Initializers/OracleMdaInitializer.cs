@@ -11,7 +11,7 @@ internal class OracleMdaInitializer : InstrumentationInitializer
     private readonly TracerSettings _tracerSettings;
 
     public OracleMdaInitializer(TracerSettings tracerSettings)
-        : base("Oracle.ManagedDataAccess")
+        : base("Oracle.ManagedDataAccess", nameof(OracleMdaInitializer))
     {
         _tracerSettings = tracerSettings;
     }

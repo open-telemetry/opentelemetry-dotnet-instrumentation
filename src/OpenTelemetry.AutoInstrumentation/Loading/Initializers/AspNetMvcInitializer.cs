@@ -9,8 +9,8 @@ internal class AspNetMvcInitializer : InstrumentationInitializer
 {
     private readonly Action<ILifespanManager> _initialize;
 
-    public AspNetMvcInitializer(Action<ILifespanManager> initialize)
-        : base("System.Web.Mvc")
+    public AspNetMvcInitializer(Action<ILifespanManager> initialize, string initializerName)
+        : base("System.Web.Mvc", initializerName)
     {
         _initialize = initialize;
     }

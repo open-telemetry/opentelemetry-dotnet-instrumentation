@@ -2,21 +2,23 @@
 // SPDX-License-Identifier: Apache-2.0
 
 using System.Diagnostics;
+using TestApplication.Shared;
 
 namespace TestApplication.ContinuousProfiler.ContextTracking;
 
-internal class Program
+internal static class Program
 {
-    private static readonly ActivitySource Source = new ActivitySource("TestApplication.ContinuousProfiler.ContextTracking");
+    private static readonly ActivitySource Source = new("TestApplication.ContinuousProfiler.ContextTracking");
 
     public static async Task Main(string[] args)
     {
+        ConsoleHelper.WriteSplashScreen(args);
         Thread.CurrentThread.Name = "TestName";
         // Start an activity that remains active until async operation completes,
         // and verify that trace context flows properly between threads that carry out parts of the async operation.
         using var activity = Source.StartActivity();
 
-        await DoSomethingAsync();
+        await DoSomethingAsync().ConfigureAwait(false);
     }
 
     private static async Task DoSomethingAsync()

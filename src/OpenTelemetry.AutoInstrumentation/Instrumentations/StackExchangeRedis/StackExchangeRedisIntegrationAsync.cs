@@ -1,8 +1,6 @@
 // Copyright The OpenTelemetry Authors
 // SPDX-License-Identifier: Apache-2.0
 
-#if NET
-
 using OpenTelemetry.AutoInstrumentation.CallTarget;
 
 namespace OpenTelemetry.AutoInstrumentation.Instrumentations.StackExchangeRedis;
@@ -15,7 +13,7 @@ namespace OpenTelemetry.AutoInstrumentation.Instrumentations.StackExchangeRedis;
     typeName: StackExchangeRedisConstants.ConnectionMultiplexerTypeName,
     methodName: StackExchangeRedisConstants.ConnectImplAsyncMethodName,
     returnTypeName: StackExchangeRedisConstants.TaskConnectionMultiplexerTypeName,
-    parameterTypeNames: new[] { StackExchangeRedisConstants.ConfigurationOptionsTypeName, StackExchangeRedisConstants.TextWriterTypeName, StackExchangeRedisConstants.NullableServerTypeTypeName },
+    parameterTypeNames: [StackExchangeRedisConstants.ConfigurationOptionsTypeName, StackExchangeRedisConstants.TextWriterTypeName, StackExchangeRedisConstants.NullableServerTypeTypeName],
     minimumVersion: StackExchangeRedisConstants.MinimumVersion,
     maximumVersion: StackExchangeRedisConstants.MaximumVersion,
     integrationName: StackExchangeRedisConstants.IntegrationName,
@@ -42,4 +40,3 @@ public static class StackExchangeRedisIntegrationAsync
         return returnValue;
     }
 }
-#endif

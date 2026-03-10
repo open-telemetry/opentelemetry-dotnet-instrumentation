@@ -10,9 +10,9 @@ there are steps that can help you understand the issue.
 Detailed debug logs can help you troubleshoot instrumentation issues, and can be
 attached to issues in this project to facilitate investigation.
 
-To get the detailed logs from the OpenTelemetry .NET Automatic Instrumentation, set
-the [`OTEL_LOG_LEVEL`](./config.md#internal-logs) environment variable to `debug`
-before the instrumented process starts.
+To get the detailed logs from the OpenTelemetry .NET Automatic Instrumentation,
+set the [`OTEL_LOG_LEVEL`](./config.md#internal-logs) environment variable to
+`debug` before the instrumented process starts.
 
 By default, the library writes the log files under predefined [locations](./config.md#internal-logs).
 If needed, change the default location by updating the `OTEL_DOTNET_AUTO_LOG_DIRECTORY`
@@ -43,7 +43,8 @@ Then restart the application to collect the logs.
 #### Symptoms
 
 There is no telemetry generated.
-There are no logs in OpenTelemetry .NET Automatic Instrumentation internal logs [location](./config.md#internal-logs).
+There are no logs in OpenTelemetry .NET Automatic Instrumentation [internal logs
+location](./config.md#internal-logs).
 
 It might occur that the .NET Profiler is unable to attach
 and therefore no logs would be emitted.
@@ -188,7 +189,7 @@ If you are having problems in one of the scenarios above run again the
 are updated.
 
 For more information about the GAC usage by the automatic instrumentation,
-see [here](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/issues/1906#issuecomment-1376292814).
+see issue [#1906](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/issues/1906#issuecomment-1376292814).
 
 ### Assembly in AdditionalDeps was not found
 
@@ -232,23 +233,3 @@ Sample Diagnostic Output:
 For resolving runtime store assembly version conflicts, follow the same solution
 as outlined for [Assembly version conflicts](#assembly-version-conflicts) in
 this document.
-
-### IIS - Loading this assembly would produce a different grant set from other instances
-
-#### Symptoms
-
-.NET Framework, IIS hosted application crashes and you get an event similar to
-the following:
-
-```log
-Exception: System.IO.FileLoadException
-
-Message: Loading this assembly would produce a different grant set from other instances.
-```
-
-#### Solution
-
-Create a new `DWORD` value called `LoaderOptimization` and give it the value `1`
-under the `HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\.NETFramework`.
-It will allows to load different versions of the same application to different domains.
-It might increase CPU and memory usage.

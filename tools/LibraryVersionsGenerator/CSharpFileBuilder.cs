@@ -1,13 +1,14 @@
 // Copyright The OpenTelemetry Authors
 // SPDX-License-Identifier: Apache-2.0
 
+using System.Globalization;
 using System.Text;
 
 namespace LibraryVersionsGenerator;
 
 internal abstract class CSharpFileBuilder
 {
-    private bool _hasUsings = false;
+    private bool _hasUsings;
 
     internal StringBuilder Builder { get; } = new();
 
@@ -31,7 +32,7 @@ internal abstract class CSharpFileBuilder
     {
         _hasUsings = true;
 
-        Builder.AppendLine($"using {usingNamespace};");
+        Builder.AppendLine(CultureInfo.InvariantCulture, $"using {usingNamespace};");
 
         return this;
     }
@@ -45,7 +46,7 @@ internal abstract class CSharpFileBuilder
 
         if (!string.IsNullOrEmpty(classNamespace))
         {
-            Builder.AppendLine($"namespace {classNamespace};");
+            Builder.AppendLine(CultureInfo.InvariantCulture, $"namespace {classNamespace};");
             Builder.AppendLine();
         }
 

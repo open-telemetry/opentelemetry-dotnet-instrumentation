@@ -1,4 +1,4 @@
-// Copyright The OpenTelemetry Authors
+﻿// Copyright The OpenTelemetry Authors
 // SPDX-License-Identifier: Apache-2.0
 
 #include "cor_profiler.h"
@@ -7,29 +7,31 @@
 #include <corprof.h>
 #include <string>
 #include <typeinfo>
-#ifdef _WIN32
-#include <regex>
-#else
-#include <re2/re2.h>
-#endif
 
 #include "clr_helpers.h"
 #include "dllmain.h"
 #include "environment_variables.h"
 #include "environment_variables_util.h"
+#include "configuration.h"
 #include "il_rewriter.h"
 #include "il_rewriter_wrapper.h"
+#include "stub_generator.h"
+#include "integration.h"
 #include "logger.h"
 #include "metadata_builder.h"
 #include "module_metadata.h"
 #include "otel_profiler_constants.h"
 #include "pal.h"
+#include "regex_utils.h"
 #include "resource.h"
+#include "signature_builder.h"
 #include "startup_hook.h"
 #include "stats.h"
 #include "util.h"
 #include "version.h"
 #include "continuous_profiler.h"
+#include "member_resolver.h"
+#include "stack_capture_strategy_factory.h"
 
 #ifdef MACOS
 #include <mach-o/dyld.h>
@@ -74,20 +76,9 @@ HRESULT STDMETHODCALLTYPE CorProfiler::Initialize(IUnknown* cor_profiler_info_un
         Logger::Debug("Environment variables:");
 
         // Update the list also in SmokeTests.NativeLogsHaveNoSensitiveData
-        const auto secrets_pattern = "(?:^|_)(API|TOKEN|SECRET|KEY|PASSWORD|PASS|PWD|HEADER|CREDENTIALS)(?:_|$)";
-#ifdef _WIN32
-        const std::regex secrets_regex(secrets_pattern, std::regex_constants::ECMAScript | std::regex_constants::icase);
-#else
-        static re2::RE2 re(secrets_pattern, RE2::Quiet);
-#endif
-
         for (const auto& env_variable : env_variables)
         {
-#ifdef _WIN32
-            if (!std::regex_search(ToString(env_variable), secrets_regex))
-#else
-            if (!re2::RE2::PartialMatch(ToString(env_variable), re))
-#endif
+            if (!MatchesSecretsPattern(ToString(env_variable)))
             {
                 Logger::Debug("  ", env_variable);
             }
@@ -122,6 +113,7 @@ HRESULT STDMETHODCALLTYPE CorProfiler::Initialize(IUnknown* cor_profiler_info_un
 
     // code is ready to get runtime information
     runtime_information_ = GetRuntimeInformation(this->info_);
+
     if (Logger::IsDebugEnabled())
     {
         if (runtime_information_.is_desktop())
@@ -150,6 +142,7 @@ HRESULT STDMETHODCALLTYPE CorProfiler::Initialize(IUnknown* cor_profiler_info_un
     if (runtime_information_.is_desktop() && IsNetFxAssemblyRedirectionEnabled())
     {
         InitNetFxAssemblyRedirectsMap();
+        DetectFrameworkVersionTableForRedirectsMap();
     }
 #endif
 
@@ -170,11 +163,12 @@ HRESULT STDMETHODCALLTYPE CorProfiler::Initialize(IUnknown* cor_profiler_info_un
         // and the necessary dependencies are not available yet.
 
         // Ensure that OTel StartupHook is listed.
-        const auto home_path     = GetEnvironmentValue(environment::profiler_home_path);
+        home_path                = GetEnvironmentValue(environment::profiler_home_path);
         const auto startup_hooks = GetEnvironmentValues(environment::dotnet_startup_hooks, ENV_VAR_PATH_SEPARATOR);
         if (!IsStartupHookValid(startup_hooks, home_path))
         {
-            FailProfiler(Error, "The required StartupHook was not configured correctly. No telemetry will be captured.")
+            Logger::Info("The StartupHook was not configured. Will patch ProcessStartupHooks.");
+            startup_fix_required = true;
         }
     }
 
@@ -284,6 +278,10 @@ HRESULT STDMETHODCALLTYPE CorProfiler::Initialize(IUnknown* cor_profiler_info_un
     this->info_->AddRef();
     is_attached_.store(true);
     profiler = this;
+
+    stack_capture_strategy_ =
+        continuous_profiler::StackCaptureStrategyFactory::Create(this->info_, runtime_information_);
+
     return S_OK;
 }
 
@@ -366,6 +364,11 @@ HRESULT STDMETHODCALLTYPE CorProfiler::AssemblyLoadFinished(AssemblyID assembly_
 void CorProfiler::RedirectAssemblyReferences(const ComPtr<IMetaDataAssemblyImport>& assembly_import,
                                              const ComPtr<IMetaDataAssemblyEmit>&   assembly_emit)
 {
+    if (!assembly_version_redirect_map_current_framework_)
+    {
+        return;
+    }
+
     HRESULT       hr               = S_FALSE;
     HCORENUM      core_enum_handle = NULL;
     const ULONG   assembly_refs_sz = 16;
@@ -413,8 +416,8 @@ void CorProfiler::RedirectAssemblyReferences(const ComPtr<IMetaDataAssemblyImpor
                               "] version=", AssemblyVersionStr(assembly_metadata));
             }
 
-            const auto found_redirect = assembly_version_redirect_map_.find(wsz_name);
-            if (found_redirect == assembly_version_redirect_map_.end())
+            const auto found_redirect = assembly_version_redirect_map_current_framework_->find(wsz_name);
+            if (found_redirect == assembly_version_redirect_map_current_framework_->end())
             {
                 // No redirection to be applied here.
                 continue;
@@ -618,6 +621,14 @@ HRESULT STDMETHODCALLTYPE CorProfiler::ModuleLoadFinished(ModuleID module_id, HR
                       " | IsResource = ", module_info.IsResource(), std::noboolalpha);
     }
 
+#ifdef _WIN32
+    if (runtime_information_.is_desktop() && module_info.assembly.name == WStr("System.Data") &&
+        IsSqlClientNetFxILRewriteEnabled())
+    {
+        RewriteILSystemDataCommandText(module_id);
+    }
+#endif
+
     if (module_info.IsNGEN())
     {
         // We check if the Module contains NGEN images and added to the
@@ -663,6 +674,51 @@ HRESULT STDMETHODCALLTYPE CorProfiler::ModuleLoadFinished(ModuleID module_id, HR
         if (rejit_handler != nullptr)
         {
             rejit_handler->SetCorAssemblyProfiler(&corAssemblyProperty);
+        }
+
+#ifdef _WIN32
+        if (runtime_information_.is_desktop())
+        {
+            mdTypeDef   loader_type                   = mdTokenNil;
+            mdMethodDef init_method                   = mdTokenNil;
+            mdMethodDef patch_app_domain_setup_method = mdTokenNil;
+            hr = GenerateLoaderType(module_id, &loader_type, &init_method, &patch_app_domain_setup_method);
+
+            if (FAILED(hr))
+            {
+                Logger::Error("Failed to inject loader type in mscorlib, module id ", module_id, ", result ", hr);
+            }
+            else
+            {
+                hr = ModifyAppDomainCreate(module_id, patch_app_domain_setup_method);
+
+                if (FAILED(hr))
+                {
+                    Logger::Warn("Failed to patch AppDomain creation, module id ", module_id, ", result ", hr);
+                }
+            }
+        }
+#endif
+
+        if (module_info.assembly.name == system_private_corelib_assemblyName && startup_fix_required)
+        {
+            WSTRING startup_hook_assembly_path = GetStartupHookPath(GetCurrentModuleFileName(), home_path);
+            if (startup_hook_assembly_path == EmptyWStr)
+            {
+                FailProfiler(
+                    Error,
+                    "The required StartupHook assembly path could not be determined. No telemetry will be captured.");
+            }
+
+            Logger::Info("Patching ProcessStartupHooks with StartupHook assembly path: ", startup_hook_assembly_path);
+            StubGenerator stubGenerator(this, this->info_, corAssemblyProperty);
+            hr = stubGenerator.PatchProcessStartupHooks(module_id, startup_hook_assembly_path);
+
+            if (FAILED(hr))
+            {
+                FailProfiler(Error,
+                             "The required StartupHook was not configured correctly. No telemetry will be captured.");
+            }
         }
 
         return S_OK;
@@ -823,22 +879,6 @@ HRESULT STDMETHODCALLTYPE CorProfiler::ModuleUnloadStarted(ModuleID module_id)
     {
         return S_OK;
     }
-
-    if (Logger::IsDebugEnabled())
-    {
-        const auto module_info = GetModuleInfo(this->info_, module_id);
-
-        if (module_info.IsValid())
-        {
-            Logger::Debug("ModuleUnloadStarted: ", module_id, " ", module_info.assembly.name, " AppDomain ",
-                          module_info.assembly.app_domain_id, " [", module_info.assembly.app_domain_name, "]");
-        }
-        else
-        {
-            Logger::Debug("ModuleUnloadStarted: ", module_id);
-        }
-    }
-
     // take this lock so we block until the
     // module metadata is not longer being used
     std::lock_guard<std::mutex> guard(module_ids_lock_);
@@ -849,24 +889,25 @@ HRESULT STDMETHODCALLTYPE CorProfiler::ModuleUnloadStarted(ModuleID module_id)
         return S_OK;
     }
 
-    const auto& moduleInfo = GetModuleInfo(this->info_, module_id);
-
-    if (moduleInfo.IsValid())
+    if (rejit_handler != nullptr)
     {
-        if (Logger::IsDebugEnabled())
-        {
-            Logger::Debug("ModuleUnloadStarted: ", module_id, " ", moduleInfo.assembly.name, " AppDomain ",
-                          moduleInfo.assembly.app_domain_id, " ", moduleInfo.assembly.app_domain_name);
-        }
+        rejit_handler->RemoveModule(module_id);
     }
-    else
+
+    const auto& moduleInfo = GetModuleInfo(this->info_, module_id);
+    if (!moduleInfo.IsValid())
     {
         Logger::Debug("ModuleUnloadStarted: ", module_id);
         return S_OK;
     }
 
-    const auto is_instrumentation_assembly = moduleInfo.assembly.name == managed_profiler_name;
+    if (Logger::IsDebugEnabled())
+    {
+        Logger::Debug("ModuleUnloadStarted: ", module_id, " ", moduleInfo.assembly.name, " AppDomain ",
+                      moduleInfo.assembly.app_domain_id, " ", moduleInfo.assembly.app_domain_name);
+    }
 
+    const auto is_instrumentation_assembly = moduleInfo.assembly.name == managed_profiler_name;
     if (is_instrumentation_assembly)
     {
         const auto appDomainId = moduleInfo.assembly.app_domain_id;
@@ -878,16 +919,16 @@ HRESULT STDMETHODCALLTYPE CorProfiler::ModuleUnloadStarted(ModuleID module_id)
         }
     }
 
-    if (rejit_handler != nullptr)
-    {
-        rejit_handler->RemoveModule(module_id);
-    }
-
     return S_OK;
 }
 
 HRESULT STDMETHODCALLTYPE CorProfiler::Shutdown()
 {
+    if (continuousProfiler != nullptr)
+    {
+        continuousProfiler->Shutdown();
+    }
+
     is_attached_.store(false);
 
     CorProfilerBase::Shutdown();
@@ -901,6 +942,7 @@ HRESULT STDMETHODCALLTYPE CorProfiler::Shutdown()
         rejit_handler->Shutdown();
         rejit_handler = nullptr;
     }
+
     Logger::Info("Exiting...");
     Logger::Debug("   ModuleIds: ", module_ids_.size());
     Logger::Debug("   IntegrationDefinitions: ", integration_definitions_.size());
@@ -908,7 +950,6 @@ HRESULT STDMETHODCALLTYPE CorProfiler::Shutdown()
     Logger::Debug("   ManagedProfilerLoadedAppDomains: ", managed_profiler_loaded_app_domains.size());
     Logger::Debug("   FirstJitCompilationAppDomains: ", first_jit_compilation_app_domains.size());
     Logger::Info("Stats: ", Stats::Instance()->ToString());
-    Logger::Shutdown();
     return S_OK;
 }
 
@@ -1090,7 +1131,7 @@ void CorProfiler::InternalAddInstrumentation(WCHAR* id, CallTargetDefinition* it
             const auto& integration =
                 IntegrationDefinition(MethodReference(targetAssembly, targetType, targetMethod, minVersion, maxVersion,
                                                       signatureTypes),
-                                      TypeReference(integrationAssembly, integrationType, {}, {}), isDerived);
+                                      TypeReference(integrationAssembly, integrationType, {}, {}), isDerived, true);
 
             if (Logger::IsDebugEnabled())
             {
@@ -1143,52 +1184,155 @@ void CorProfiler::InternalAddInstrumentation(WCHAR* id, CallTargetDefinition* it
     }
 }
 
-void CorProfiler::ConfigureContinuousProfiler(bool         threadSamplingEnabled,
-                                              unsigned int threadSamplingInterval,
-                                              bool         allocationSamplingEnabled,
-                                              unsigned int maxMemorySamplesPerMinute)
+bool CorProfiler::InitThreadSampler()
 {
-    Logger::Info("ConfigureContinuousProfiler: thread sampling enabled: ", threadSamplingEnabled,
-                 ", thread sampling interval: ", threadSamplingInterval,
-                 ", allocationSamplingEnabled: ", allocationSamplingEnabled,
-                 ", max memory samples per minute: ", maxMemorySamplesPerMinute);
-
-    if (!threadSamplingEnabled && !allocationSamplingEnabled)
+#if defined(_WIN32) && defined(_M_AMD64)
+    // for net fx, the native thread ID is needed by stack capture
+    // the profiler callback, ThreadAssignedToOSThread is not invoked for main thread
+    // for the following machinery to work,
+    // 1 The thread needs to have executed managed code first
+    // 2. InitThreadSampler must must be executing in context of main thread
+    // InitThreadSampler is called from managed code
+    // And more importantly, the main thread calls InitThreadSampler
+    ThreadID mainThreadId = 0;
+    if (auto hr = info_->GetCurrentThreadID(&mainThreadId); SUCCEEDED(hr))
     {
-        Logger::Debug("ConfigureContinuousProfiler: Thread sampling and allocations sampling disabled.");
-        return;
+        ThreadAssignedToOSThread(mainThreadId, ::GetCurrentThreadId());
     }
+#endif
 
     DWORD pdvEventsLow;
     DWORD pdvEventsHigh;
-    auto  hr = this->info12_->GetEventMask2(&pdvEventsLow, &pdvEventsHigh);
+    auto  hr = this->info_->GetEventMask2(&pdvEventsLow, &pdvEventsHigh);
     if (FAILED(hr))
     {
         Logger::Warn("ConfigureContinuousProfiler: Failed to take event masks for continuous profiler.");
-        return;
+        return false;
     }
 
     pdvEventsLow |= COR_PRF_MONITOR_THREADS | COR_PRF_ENABLE_STACK_SNAPSHOT;
 
-    hr = this->info12_->SetEventMask2(pdvEventsLow, pdvEventsHigh);
+    hr = this->info_->SetEventMask2(pdvEventsLow, pdvEventsHigh);
     if (FAILED(hr))
     {
         Logger::Warn("ConfigureContinuousProfiler: Failed to set event masks for continuous profiler.");
-        return;
+        return false;
     }
 
     this->continuousProfiler = new continuous_profiler::ContinuousProfiler();
     this->continuousProfiler->SetGlobalInfo12(this->info12_);
+    this->continuousProfiler->SetGlobalInfo7(this->info_);
+    this->continuousProfiler->SetStackCaptureStrategy(stack_capture_strategy_.get());
     Logger::Info("ConfigureContinuousProfiler: Events masks configured for continuous profiler");
+    return true;
+}
 
-    if (threadSamplingEnabled)
+void CorProfiler::ConfigureContinuousProfiler(bool         threadSamplingEnabled,
+                                              unsigned int threadSamplingInterval,
+                                              bool         allocationSamplingEnabled,
+                                              unsigned int maxMemorySamplesPerMinute,
+                                              unsigned int selectedThreadsSamplingInterval)
+{
+    ContinuousProfilerParams params{threadSamplingEnabled, threadSamplingInterval, allocationSamplingEnabled,
+                                    maxMemorySamplesPerMinute, selectedThreadsSamplingInterval};
+    // Guard against multiple initialization: In .NET Framework, this method may be called
+    // once per AppDomain, but the continuous profiler is a process-level singleton.
+    // std::call_once ensures thread-safe one-time initialization across all AppDomains.
+    std::call_once(sampling_init_flag_, [this, &params]() { ConfigureContinuousProfilerInternal(params); });
+}
+
+void CorProfiler::ConfigureContinuousProfilerInternal(const ContinuousProfilerParams& params)
+{
+    Logger::Info("ConfigureContinuousProfiler: thread sampling enabled: ", params.threadSamplingEnabled,
+                 ", thread sampling interval: ", params.threadSamplingInterval,
+                 ", allocationSamplingEnabled: ", params.allocationSamplingEnabled,
+                 ", max memory samples per minute: ", params.maxMemorySamplesPerMinute,
+                 ", selected threads sampling interval: ", params.selectedThreadsSamplingInterval);
+
+    const bool selectiveSamplingConfigured = params.selectedThreadsSamplingInterval != 0;
+
+    if (!params.threadSamplingEnabled && !params.allocationSamplingEnabled && !selectiveSamplingConfigured)
     {
-        this->continuousProfiler->StartThreadSampling(threadSamplingInterval);
+        Logger::Debug("ConfigureContinuousProfiler: no sampling type configured.");
+        return;
     }
 
-    if (allocationSamplingEnabled)
+    if (!InitThreadSampler())
     {
-        this->continuousProfiler->StartAllocationSampling(maxMemorySamplesPerMinute);
+        Logger::Warn("ContinuousProfiler: unable to init sampler.");
+        return;
+    }
+
+    if (params.threadSamplingEnabled)
+    {
+        this->continuousProfiler->threadSamplingInterval = params.threadSamplingInterval;
+    }
+    if (selectiveSamplingConfigured)
+    {
+        this->continuousProfiler->selectedThreadsSamplingInterval = params.selectedThreadsSamplingInterval;
+        this->continuousProfiler->nextOutdatedEntriesScan         = std::chrono::steady_clock::now();
+        continuous_profiler::ContinuousProfiler::InitSelectiveSamplingBuffer();
+    }
+
+    if (params.threadSamplingEnabled || selectiveSamplingConfigured)
+    {
+        Logger::Info("ContinuousProfiler::StartThreadSampling");
+        this->continuousProfiler->StartThreadSampling();
+    }
+
+    if (params.allocationSamplingEnabled)
+    {
+        this->continuousProfiler->StartAllocationSampling(params.maxMemorySamplesPerMinute);
+    }
+}
+
+void CorProfiler::InitializeTraceMethods(WCHAR* id,
+                                         WCHAR* integration_assembly_name_ptr,
+                                         WCHAR* integration_type_name_ptr,
+                                         WCHAR* configuration_string_ptr)
+{
+    WSTRING                      definitionsId = WSTRING(id);
+    std::scoped_lock<std::mutex> definitionsLock(definitions_ids_lock_);
+
+    if (definitions_ids_.find(definitionsId) != definitions_ids_.end())
+    {
+        Logger::Info("InitializeTraceMethods: Id already processed.");
+        return;
+    }
+
+    // TODO we do a handful of string splits here. We could probably do this with indexOf operations instead, but I'm
+    // gonna first make sure this works
+    if (rejit_handler != nullptr)
+    {
+        WSTRING integration_assembly_name = WSTRING(integration_assembly_name_ptr);
+        WSTRING integration_type_name     = WSTRING(integration_type_name_ptr);
+        WSTRING configuration_string      = WSTRING(configuration_string_ptr);
+
+        std::vector<IntegrationDefinition> integrationDefinitions =
+            GetIntegrationsFromTraceMethodsConfiguration(integration_assembly_name, integration_type_name,
+                                                         configuration_string);
+        std::scoped_lock<std::mutex> moduleLock(module_ids_lock_);
+
+        Logger::Info("InitializeTraceMethods: Total number of modules to analyze: ", module_ids_.size());
+        if (rejit_handler != nullptr)
+        {
+            auto               promise = std::make_shared<std::promise<ULONG>>();
+            std::future<ULONG> future  = promise->get_future();
+            tracer_integration_preprocessor->EnqueueRequestRejitForLoadedModules(module_ids_, integrationDefinitions,
+                                                                                 promise);
+
+            // wait and get the value from the future<int>
+            const auto& numReJITs = future.get();
+            Logger::Debug("Total number of ReJIT Requested: ", numReJITs);
+        }
+
+        integration_definitions_.reserve(integration_definitions_.size() + integrationDefinitions.size());
+        for (const auto& integration : integrationDefinitions)
+        {
+            integration_definitions_.push_back(integration);
+        }
+
+        Logger::Info("InitializeTraceMethods: Total integrations in profiler: ", integration_definitions_.size());
     }
 }
 
@@ -1291,7 +1435,7 @@ HRESULT STDMETHODCALLTYPE CorProfiler::GetAssemblyReferences(const WCHAR*       
     }
 
     Logger::Debug("GetAssemblyReferences extending assembly closure for ", assembly_name, " to include ",
-                  asmRefInfo.szName, ". Path=", wszAssemblyPath);
+                  WSTRING(asmRefInfo.szName), ". Path=", WSTRING(wszAssemblyPath));
 
     return S_OK;
 }
@@ -1368,6 +1512,16 @@ HRESULT STDMETHODCALLTYPE CorProfiler::JITCompilationStartedOnNetFramework(Funct
     {
         Logger::Debug("JITCompilationStarted: function_id=", function_id, " token=", function_token,
                       " name=", caller.type.name, ".", caller.name, "()");
+    }
+
+    // In NETFx, NInject creates a temporary appdomain where the tracer can be laoded
+    // If Runtime metrics are enabled, we can encounter a CannotUnloadAppDomainException
+    // certainly because we are initializing perf counters at that time.
+    // As there are no use case where we would like to load the tracer in that appdomain, just don't
+    if (module_info.assembly.app_domain_name == WStr("NinjectModuleLoader") && !runtime_information_.is_core())
+    {
+        Logger::Info("JITCompilationStarted: NInjectModuleLoader appdomain detected. Not registering startup hook.");
+        return S_OK;
     }
 
     // IIS: Ensure that the OpenTelemetry.AutoInstrumentation assembly is inserted into
@@ -1770,6 +1924,1510 @@ HRESULT CorProfiler::RunAutoInstrumentationLoader(const ComPtr<IMetaDataEmit2>& 
     return S_OK;
 }
 
+// Add at the start of System.AppDomain::CreateDomain(string,System.Security.Policy.Evidence,System.AppDomainSetup)
+// and System.AppDomainManager::CreateDomainHelper(string,System.Security.Policy.Evidence,System.AppDomainSetup)
+// call to __DDVoidMethodType__::__DDPatchAppDomainSetup__ passing AppDomainSetup argument by ref there.
+// If AppDomainSetup is null, it will be created. Resulting AppDomainSetup will be passed to
+// OpenTelemetry.AutoInstrumentation.Loader.AppConfigUpdater::ModifyConfig(System.AppDomainSetup appDomainSetup)
+HRESULT CorProfiler::ModifyAppDomainCreate(const ModuleID module_id, mdMethodDef patch_app_domain_setup_method)
+{
+    // Expects to be called on mscorlib only
+    // patch_app_domain_setup_method should be pre-injected in mscorlib
+    ComPtr<IUnknown> metadata_interfaces;
+    auto             hr = this->info_->GetModuleMetaData(module_id, ofRead | ofWrite, IID_IMetaDataImport2,
+                                                         metadata_interfaces.GetAddressOf());
+    if (FAILED(hr))
+    {
+        Logger::Warn("ModifyAppDomainCreate: failed to get metadata interface for ", module_id);
+        return hr;
+    }
+
+    const auto& metadata_import = metadata_interfaces.As<IMetaDataImport2>(IID_IMetaDataImport);
+
+    mdTypeDef system_app_domain_token;
+    {
+        hr = metadata_import->FindTypeDefByName(WStr("System.AppDomain"), mdTokenNil, &system_app_domain_token);
+        if (FAILED(hr))
+        {
+            Logger::Warn("ModifyAppDomainCreate: FindTypeDefByName System.AppDomain failed");
+            return hr;
+        }
+    }
+
+    mdTypeDef system_app_domain_manager_token;
+    {
+        hr = metadata_import->FindTypeDefByName(WStr("System.AppDomainManager"), mdTokenNil,
+                                                &system_app_domain_manager_token);
+        if (FAILED(hr))
+        {
+            Logger::Warn("ModifyAppDomainCreate: FindTypeDefByName System.AppDomainManager failed");
+            return hr;
+        }
+    }
+
+    mdTypeDef system_security_policy_evidence_token;
+    {
+        hr = metadata_import->FindTypeDefByName(WStr("System.Security.Policy.Evidence"), mdTokenNil,
+                                                &system_security_policy_evidence_token);
+        if (FAILED(hr))
+        {
+            Logger::Warn("ModifyAppDomainCreate: FindTypeDefByName System.Security.Policy.Evidence failed");
+            return hr;
+        }
+    }
+
+    mdTypeDef system_app_domain_setup_token;
+    {
+        hr = metadata_import->FindTypeDefByName(WStr("System.AppDomainSetup"), mdTokenNil,
+                                                &system_app_domain_setup_token);
+        if (FAILED(hr))
+        {
+            Logger::Warn("ModifyAppDomainCreate: FindTypeDefByName System.AppDomainSetup failed");
+            return hr;
+        }
+    }
+
+    mdMethodDef system_app_domain_create_domain_token;
+    {
+        SignatureBuilder::StaticMethod
+            system_app_domain_create_domain_signature{SignatureBuilder::Class(system_app_domain_token),
+                                                      {SignatureBuilder::BuiltIn::String,
+                                                       SignatureBuilder::Class(system_security_policy_evidence_token),
+                                                       SignatureBuilder::Class(system_app_domain_setup_token)}};
+
+        hr = metadata_import->FindMethod(system_app_domain_token, WStr("CreateDomain"),
+                                         system_app_domain_create_domain_signature.Head(),
+                                         system_app_domain_create_domain_signature.Size(),
+                                         &system_app_domain_create_domain_token);
+        if (FAILED(hr))
+        {
+            Logger::Warn("ModifyAppDomainCreate: FindMethod System.AppDomain::CreateDomain failed");
+            return hr;
+        }
+
+        ILRewriter rewriter(this->info_, nullptr, module_id, system_app_domain_create_domain_token);
+        hr = rewriter.Import();
+
+        if (FAILED(hr))
+        {
+            Logger::Warn("ModifyAppDomainCreate: ILRewriter.Import System.AppDomain::CreateDomain failed");
+            return hr;
+        }
+
+        ILInstr* pFirstInstr = rewriter.GetILList()->m_pNext;
+        ILInstr* pNewInstr   = NULL;
+
+        pNewInstr           = rewriter.NewILInstr();
+        pNewInstr->m_opcode = CEE_LDARGA_S;
+        pNewInstr->m_Arg8   = 2;
+        rewriter.InsertBefore(pFirstInstr, pNewInstr);
+
+        pNewInstr           = rewriter.NewILInstr();
+        pNewInstr->m_opcode = CEE_CALL;
+        pNewInstr->m_Arg32  = patch_app_domain_setup_method;
+        rewriter.InsertBefore(pFirstInstr, pNewInstr);
+
+        hr = rewriter.Export();
+
+        if (FAILED(hr))
+        {
+            Logger::Warn("ModifyAppDomainCreate: ILRewriter.Export System.AppDomain::CreateDomain failed");
+            return hr;
+        }
+
+        if (IsDumpILRewriteEnabled())
+        {
+            mdToken      token = 0;
+            TypeInfo     typeInfo{};
+            WSTRING      methodName = WStr("CreateDomain");
+            FunctionInfo caller(token, methodName, typeInfo, MethodSignature(), FunctionMethodSignature());
+            Logger::Info(GetILCodes("*** ModifyAppDomainCreate: Modified Code: ", &rewriter, caller, metadata_import));
+        }
+    }
+
+    mdMethodDef system_app_domain_manager_create_domain_helper_token;
+    {
+        SignatureBuilder::StaticMethod system_app_domain_manager_create_domain_helper_signature{
+            SignatureBuilder::Class(system_app_domain_token),
+            {SignatureBuilder::BuiltIn::String, SignatureBuilder::Class(system_security_policy_evidence_token),
+             SignatureBuilder::Class(system_app_domain_setup_token)}};
+
+        hr = metadata_import->FindMethod(system_app_domain_manager_token, WStr("CreateDomainHelper"),
+                                         system_app_domain_manager_create_domain_helper_signature.Head(),
+                                         system_app_domain_manager_create_domain_helper_signature.Size(),
+                                         &system_app_domain_manager_create_domain_helper_token);
+        if (FAILED(hr))
+        {
+            Logger::Warn("ModifyAppDomainCreate: FindMethod System.AppDomainManager::CreateDomainHelper failed");
+            return hr;
+        }
+
+        ILRewriter rewriter(this->info_, nullptr, module_id, system_app_domain_manager_create_domain_helper_token);
+        hr = rewriter.Import();
+
+        if (FAILED(hr))
+        {
+            Logger::Warn("ModifyAppDomainCreate: ILRewriter.Import System.AppDomainManager::CreateDomainHelper failed");
+            return hr;
+        }
+
+        ILInstr* pFirstInstr = rewriter.GetILList()->m_pNext;
+        ILInstr* pNewInstr   = NULL;
+
+        pNewInstr           = rewriter.NewILInstr();
+        pNewInstr->m_opcode = CEE_LDARGA_S;
+        pNewInstr->m_Arg8   = 2;
+        rewriter.InsertBefore(pFirstInstr, pNewInstr);
+
+        pNewInstr           = rewriter.NewILInstr();
+        pNewInstr->m_opcode = CEE_CALL;
+        pNewInstr->m_Arg32  = patch_app_domain_setup_method;
+        rewriter.InsertBefore(pFirstInstr, pNewInstr);
+
+        hr = rewriter.Export();
+
+        if (FAILED(hr))
+        {
+            Logger::Warn("ModifyAppDomainCreate: ILRewriter.Export System.AppDomainManager::CreateDomainHelper failed");
+            return hr;
+        }
+
+        if (IsDumpILRewriteEnabled())
+        {
+            mdToken      token = 0;
+            TypeInfo     typeInfo{};
+            WSTRING      methodName = WStr("CreateDomainHelper");
+            FunctionInfo caller(token, methodName, typeInfo, MethodSignature(), FunctionMethodSignature());
+            Logger::Info(GetILCodes("*** ModifyAppDomainCreate: Modified Code: ", &rewriter, caller, metadata_import));
+        }
+    }
+
+    return S_OK;
+}
+
+// clang-format off
+// This method will generate new type __DDVoidMethodType__ in target module.
+// C# code for created class:
+// public static class __DDVoidMethodType__
+// {
+//     private static System.Reflection.Assembly _assembly;
+//     private static System.Action<System.AppDomainSetup> _assemblyFixer;
+//     private static int _isAssemblyLoaded;
+// 
+//     static __DDVoidMethodType__()
+//     {
+//         GetAssemblyAndSymbolsBytes(out nint assemblyPtr, out int assemblySize, out nint symbolsPtr,
+//             out int symbolsSize);
+//         System.Byte[] assemblyBytes = new byte[assemblySize];
+//         System.Runtime.InteropServices.Marshal.Copy(assemblyPtr, assemblyBytes, 0, assemblySize);
+//         System.Byte[] symbolsBytes = new byte[symbolsSize];
+//         System.Runtime.InteropServices.Marshal.Copy(symbolsPtr, symbolsBytes, 0, symbolsSize);
+//         _assembly = System.Reflection.Assembly.Load(assemblyBytes, symbolsBytes);
+//         _assemblyFixer = (System.Action<System.AppDomainSetup>)_assembly
+//             .GetType("OpenTelemetry.AutoInstrumentation.Loader.AppConfigUpdater")
+//             .GetMethod("ModifyConfig")
+//             .CreateDelegate(typeof(System.Action<System.AppDomainSetup>));
+//     }
+// 
+//     public static void __DDVoidMethodCall__()
+//     {
+//         if (IsAlreadyLoaded())
+//         {
+//             return;
+//         }
+// 
+//         _assembly.CreateInstance("OpenTelemetry.AutoInstrumentation.Loader.Loader");
+//     }
+// 
+//     public static void __DDPatchAppDomainSetup__(ref System.AppDomainSetup setup)
+//     {
+//         if (setup is null)
+//         {
+//             setup = new AppDomainSetup();
+//         }
+// 
+//         _assemblyFixer(setup);
+//     }
+// 
+//     private static bool IsAlreadyLoaded()
+//     {
+//         return System.Threading.Interlocked.CompareExchange(ref _isAssemblyLoaded, 1, 0) == 1;
+//     }
+// 
+//     [System.Runtime.InteropServices.DllImport("OpenTelemetry.AutoInstrumentation.Native.dll", PreserveSig = true)]
+//     private static extern void GetAssemblyAndSymbolsBytes(out nint assemblyPtr, out int assemblySize, out nint symbolsPtr, out int symbolsSize);
+// }
+// clang-format on
+HRESULT CorProfiler::GenerateLoaderType(const ModuleID module_id,
+                                        mdTypeDef*     loader_type,
+                                        mdMethodDef*   init_method,
+                                        mdMethodDef*   patch_app_domain_setup_method)
+{
+
+    const auto& module_info = GetModuleInfo(this->info_, module_id);
+    if (!module_info.IsValid())
+    {
+        Logger::Warn("GenerateLoaderType: failed to get module info ", module_id);
+
+        return E_FAIL;
+    }
+
+    ComPtr<IUnknown> metadata_interfaces;
+    auto             hr = this->info_->GetModuleMetaData(module_id, ofRead | ofWrite, IID_IMetaDataImport2,
+                                                         metadata_interfaces.GetAddressOf());
+    if (FAILED(hr))
+    {
+        Logger::Warn("GenerateLoaderType: failed to get metadata interface for ", module_id);
+        return hr;
+    }
+
+    const auto& metadata_import = metadata_interfaces.As<IMetaDataImport2>(IID_IMetaDataImport);
+    const auto& metadata_emit   = metadata_interfaces.As<IMetaDataEmit2>(IID_IMetaDataEmit);
+    const auto& assembly_emit   = metadata_interfaces.As<IMetaDataAssemblyEmit>(IID_IMetaDataAssemblyEmit);
+
+    MemberResolver resolver(metadata_import, metadata_emit);
+
+    mdAssemblyRef corlib_ref = mdTokenNil;
+    // We need assemblyRef only when we generate type outside of mscorlib
+    // resolver will handle if we need to use typeRef/methodRef for other mscorlib-defined types
+    // (if corlib_ref != mdTokenNil), or typeDef/methodDef can be used otherwise
+    if (module_info.assembly.name != mscorlib_assemblyName)
+    {
+        mdAssemblyRef corlib_ref;
+        hr = GetCorLibAssemblyRef(assembly_emit, corAssemblyProperty, &corlib_ref);
+
+        if (FAILED(hr))
+        {
+            Logger::Warn("GenerateLoaderType: failed to define AssemblyRef to mscorlib");
+            return hr;
+        }
+    }
+
+    // TypeDef/TypeRef for System.Object
+    mdToken system_object_token;
+    {
+        hr = resolver.GetTypeRefOrDefByName(corlib_ref, WStr("System.Object"), &system_object_token);
+        if (FAILED(hr))
+        {
+            Logger::Warn("GenerateLoaderType: GetTypeRefOrDefByName System.Object failed");
+            return hr;
+        }
+    }
+
+    // .class public abstract auto ansi sealed __DDVoidMethodType__
+    //        extends[mscorlib] System.Object
+    {
+        hr = metadata_emit->DefineTypeDef(WStr("__DDVoidMethodType__"), tdAbstract | tdSealed | tdPublic,
+                                          system_object_token, NULL, loader_type);
+        if (FAILED(hr))
+        {
+            Logger::Warn("GenerateLoaderType: DefineTypeDef __DDVoidMethodType__ failed");
+            return hr;
+        }
+    }
+
+    // TypeDef/TypeRef for System.Reflection.Assembly
+    mdToken system_reflection_assembly_token;
+    {
+        hr = resolver.GetTypeRefOrDefByName(corlib_ref, WStr("System.Reflection.Assembly"),
+                                            &system_reflection_assembly_token);
+        if (FAILED(hr))
+        {
+            Logger::Warn("GenerateLoaderType: GetTypeRefOrDefByName System.Reflection.Assembly failed");
+            return hr;
+        }
+    }
+
+    // .field private static class [mscorlib]System.Reflection.Assembly _assembly
+    mdFieldDef assembly_field_token = mdFieldDefNil;
+    {
+        SignatureBuilder::Field assembly_field_signature{SignatureBuilder::Class{system_reflection_assembly_token}};
+        hr = metadata_emit->DefineField(*loader_type, WStr("_assembly"), fdStatic | fdPrivate,
+                                        assembly_field_signature.Head(), assembly_field_signature.Size(), 0, nullptr, 0,
+                                        &assembly_field_token);
+        if (FAILED(hr))
+        {
+            Logger::Warn("GenerateLoaderType: Failed to define _assembly field");
+            return hr;
+        }
+    }
+
+    // TypeDef/TypeRef for System.Action`1
+    mdToken system_action_token;
+    {
+        hr = resolver.GetTypeRefOrDefByName(corlib_ref, WStr("System.Action`1"), &system_action_token);
+        if (FAILED(hr))
+        {
+            Logger::Warn("GenerateLoaderType: GetTypeRefOrDefByName System.Action`1 failed");
+            return hr;
+        }
+    }
+
+    // TypeDef/TypeRef for System.AppDomainSetup
+    mdToken system_app_domain_setup_token;
+    {
+        hr = resolver.GetTypeRefOrDefByName(corlib_ref, WStr("System.AppDomainSetup"), &system_app_domain_setup_token);
+        if (FAILED(hr))
+        {
+            Logger::Warn("GenerateLoaderType: GetTypeRefOrDefByName System.AppDomainSetup failed");
+            return hr;
+        }
+    }
+
+    // .field private static class [mscorlib]System.Action`1<class [mscorlib]System.AppDomainSetup> _assemblyFixer
+    mdFieldDef app_domain_setup_fixer_field_token = mdFieldDefNil;
+    {
+        SignatureBuilder::Field app_domain_setup_fixer_signature{
+            SignatureBuilder::GenericInstance{SignatureBuilder::Class{system_action_token},
+                                              {SignatureBuilder::Class{system_app_domain_setup_token}}}};
+
+        hr =
+            metadata_emit->DefineField(*loader_type, WStr("_assemblyFixer"), fdStatic | fdPrivate,
+                                       app_domain_setup_fixer_signature.Head(), app_domain_setup_fixer_signature.Size(),
+                                       0, nullptr, 0, &app_domain_setup_fixer_field_token);
+        if (FAILED(hr))
+        {
+            Logger::Warn("GenerateLoaderType: Failed to define _assemblyFixer field");
+            return hr;
+        }
+    }
+
+    // .field private static int32 _isAssemblyLoaded
+    mdFieldDef isAssemblyLoadedFieldToken = mdFieldDefNil;
+    {
+        BYTE field_signature[] = {IMAGE_CEE_CS_CALLCONV_FIELD, ELEMENT_TYPE_I4};
+        hr = metadata_emit->DefineField(*loader_type, WStr("_isAssemblyLoaded"), fdStatic | fdPrivate, field_signature,
+                                        sizeof(field_signature), 0, nullptr, 0, &isAssemblyLoadedFieldToken);
+        if (FAILED(hr))
+        {
+            Logger::Warn("GenerateLoaderType: DefineField _isAssemblyLoaded failed");
+            return hr;
+        }
+    }
+
+    // .method private hidebysig specialname rtspecialname static
+    //         void .cctor() cil managed
+    mdMethodDef cctor_token;
+    {
+        BYTE cctor_signature[] = {
+            IMAGE_CEE_CS_CALLCONV_DEFAULT, // Calling convention
+            0,                             // Number of parameters
+            ELEMENT_TYPE_VOID,             // Return type
+        };
+        hr = metadata_emit->DefineMethod(*loader_type, WStr(".cctor"),
+                                         mdPrivate | mdHideBySig | mdSpecialName | mdRTSpecialName | mdStatic,
+                                         cctor_signature, sizeof(cctor_signature), 0, 0, &cctor_token);
+        if (FAILED(hr))
+        {
+            Logger::Warn("GenerateLoaderType: DefineMethod .cctor failed");
+            return hr;
+        }
+    }
+
+    // .method private hidebysig static bool IsAlreadyLoaded() cil managed
+    mdMethodDef already_loaded_method_token;
+    {
+        BYTE already_loaded_signature[] = {
+            IMAGE_CEE_CS_CALLCONV_DEFAULT,
+            0,
+            ELEMENT_TYPE_BOOLEAN,
+        };
+        hr = metadata_emit->DefineMethod(*loader_type, WStr("IsAlreadyLoaded"), mdPrivate | mdHideBySig | mdStatic,
+                                         already_loaded_signature, sizeof(already_loaded_signature), 0, 0,
+                                         &already_loaded_method_token);
+        if (FAILED(hr))
+        {
+            Logger::Warn("GenerateLoaderType: DefineMethod IsAlreadyLoaded failed");
+            return hr;
+        }
+    }
+
+    // .method public hidebysig static void  __DDVoidMethodCall__() cil managed
+    {
+        BYTE initialize_signature[] = {
+            IMAGE_CEE_CS_CALLCONV_DEFAULT, // Calling convention
+            0,                             // Number of parameters
+            ELEMENT_TYPE_VOID,             // Return type
+        };
+        hr = metadata_emit->DefineMethod(*loader_type, WStr("__DDVoidMethodCall__"), mdPublic | mdHideBySig | mdStatic,
+                                         initialize_signature, sizeof(initialize_signature), 0, 0, init_method);
+        if (FAILED(hr))
+        {
+            Logger::Warn("GenerateLoaderType: DefineMethod __DDVoidMethodCall__ failed");
+            return hr;
+        }
+    }
+
+    // .method public hidebysig static void  __DDPatchAppDomainSetup__(class [mscorlib]System.AppDomainSetup& setup) cil
+    // managed
+    {
+        SignatureBuilder::StaticMethod
+            app_domain_setup_fixer_method_signature{SignatureBuilder::BuiltIn::Void,
+                                                    {SignatureBuilder::ByRef{
+                                                        SignatureBuilder::Class{system_app_domain_setup_token}}}};
+
+        hr = metadata_emit->DefineMethod(*loader_type, WStr("__DDPatchAppDomainSetup__"),
+                                         mdPublic | mdHideBySig | mdStatic,
+                                         app_domain_setup_fixer_method_signature.Head(),
+                                         app_domain_setup_fixer_method_signature.Size(), 0, 0,
+                                         patch_app_domain_setup_method);
+        if (FAILED(hr))
+        {
+            Logger::Warn("GenerateLoaderType: DefineMethod __DDPatchAppDomainSetup__ failed");
+            return hr;
+        }
+    }
+
+    // TypeSpec for System.Action<System.AppDomainSetup>
+    mdTypeSpec system_action_of_system_app_domain_setup_token;
+    {
+        SignatureBuilder::GenericInstance
+            system_action_of_system_app_domain_setup_signature{SignatureBuilder::Class{system_action_token},
+                                                               {SignatureBuilder::Class{
+                                                                   system_app_domain_setup_token}}};
+        hr = metadata_emit->GetTokenFromTypeSpec(system_action_of_system_app_domain_setup_signature.Head(),
+                                                 system_action_of_system_app_domain_setup_signature.Size(),
+                                                 &system_action_of_system_app_domain_setup_token);
+
+        if (FAILED(hr))
+        {
+            Logger::Warn("GenerateLoaderType: GetTokenFromTypeSpec System.Action`1<class "
+                         "[mscorlib]System.AppDomainSetup> failed");
+            return hr;
+        }
+    }
+
+    // Define a method on the managed side that will PInvoke into the profiler method:
+    // C++: void GetAssemblyAndSymbolsBytes(BYTE** pAssemblyArray, int* assemblySize, BYTE** pSymbolsArray, int*
+    // symbolsSize)
+    // C#: static extern void GetAssemblyAndSymbolsBytes(out IntPtr assemblyPtr, out int assemblySize, out
+    // IntPtr symbolsPtr, out int symbolsSize)
+    //
+    // .method private hidebysig static pinvokeimpl("OpenTelemetry.AutoInstrumentation.Native.dll" winapi)
+    //    void GetAssemblyAndSymbolsBytes([out] native int& assemblyPtr,
+    //                                    [out] int32& assemblySize,
+    //                                    [out] native int& symbolsPtr,
+    //                                    [out] int32& symbolsSize)
+    //    cil managed preservesig
+    mdMethodDef pinvoke_method_def;
+    {
+        COR_SIGNATURE get_assembly_bytes_signature[] = {
+            IMAGE_CEE_CS_CALLCONV_DEFAULT, // Calling convention
+            4,                             // Number of parameters
+            ELEMENT_TYPE_VOID,             // Return type
+            ELEMENT_TYPE_BYREF,            // List of parameter types
+            ELEMENT_TYPE_I,
+            ELEMENT_TYPE_BYREF,
+            ELEMENT_TYPE_I4,
+            ELEMENT_TYPE_BYREF,
+            ELEMENT_TYPE_I,
+            ELEMENT_TYPE_BYREF,
+            ELEMENT_TYPE_I4,
+        };
+        hr = metadata_emit->DefineMethod(*loader_type, WStr("GetAssemblyAndSymbolsBytes"),
+                                         mdPrivate | mdHideBySig | mdStatic | mdPinvokeImpl,
+                                         get_assembly_bytes_signature, sizeof(get_assembly_bytes_signature), 0, 0,
+                                         &pinvoke_method_def);
+        if (FAILED(hr))
+        {
+            Logger::Warn("GenerateLoaderType: DefineMethod GetAssemblyAndSymbolsBytes failed");
+            return hr;
+        }
+
+        metadata_emit->SetMethodImplFlags(pinvoke_method_def, miPreserveSig);
+        if (FAILED(hr))
+        {
+            Logger::Warn("GenerateLoaderType: SetMethodImplFlags failed");
+            return hr;
+        }
+
+        WSTRING native_profiler_file = GetCurrentModuleFileName();
+        Logger::Debug("GenerateLoaderType: Setting the PInvoke native profiler library path to ", native_profiler_file);
+
+        mdModuleRef profiler_ref;
+        hr = metadata_emit->DefineModuleRef(native_profiler_file.c_str(), &profiler_ref);
+        if (FAILED(hr))
+        {
+            Logger::Warn("GenerateLoaderType: DefineModuleRef failed");
+            return hr;
+        }
+
+        hr = metadata_emit->DefinePinvokeMap(pinvoke_method_def, 0, WStr("GetAssemblyAndSymbolsBytes"), profiler_ref);
+        if (FAILED(hr))
+        {
+            Logger::Warn("GenerateLoaderType: DefinePinvokeMap failed");
+            return hr;
+        }
+    }
+
+    // Add IL instructions into .cctor
+    {
+        // TypeRef/TypeDef for System.Byte
+        mdToken byte_type_token;
+        {
+            hr = resolver.GetTypeRefOrDefByName(corlib_ref, WStr("System.Byte"), &byte_type_token);
+            if (FAILED(hr))
+            {
+                Logger::Warn("GenerateLoaderType: GetTypeRefOrDefByName System.Byte failed");
+                return hr;
+            }
+        }
+
+        // MethodRef/MethodDef for
+        // void [mscorlib]System.Runtime.InteropServices.Marshal::Copy(native int, uint8[], int32, int32)
+        mdToken marshal_copy_token;
+        {
+            // TypeRef/TypeDef for [mscorlib]System.Runtime.InteropServices.Marshal
+            mdTypeRef marshal_type_token;
+            hr = resolver.GetTypeRefOrDefByName(corlib_ref, WStr("System.Runtime.InteropServices.Marshal"),
+                                                &marshal_type_token);
+            if (FAILED(hr))
+            {
+                Logger::Warn("GenerateLoaderType: DefineTypeRefByName failed");
+                return hr;
+            }
+
+            COR_SIGNATURE marshal_copy_signature[] = {IMAGE_CEE_CS_CALLCONV_DEFAULT, // Calling convention
+                                                      4,                             // Number of parameters
+                                                      ELEMENT_TYPE_VOID,             // Return type
+                                                      ELEMENT_TYPE_I,                // List of parameter types
+                                                      ELEMENT_TYPE_SZARRAY,
+                                                      ELEMENT_TYPE_U1,
+                                                      ELEMENT_TYPE_I4,
+                                                      ELEMENT_TYPE_I4};
+            hr = resolver.GetMemberRefOrDef(marshal_type_token, WStr("Copy"), marshal_copy_signature,
+                                            sizeof(marshal_copy_signature), &marshal_copy_token);
+            if (FAILED(hr))
+            {
+                Logger::Warn(
+                    "GenerateLoaderType: GetMemberRefOrDef System.Runtime.InteropServices.Marshal::Copy failed");
+                return hr;
+            }
+        }
+
+        // MethodRef/MethodDef for
+        // class [mscorlib]System.Reflection.Assembly [mscorlib]System.Reflection.Assembly::Load(uint8[], uint8[])
+        mdToken system_reflection_assembly_load_token;
+        {
+            SignatureBuilder::StaticMethod
+                system_reflection_assembly_load_signature{SignatureBuilder::Class{system_reflection_assembly_token},
+                                                          {SignatureBuilder::Array{SignatureBuilder::BuiltIn::Byte},
+                                                           SignatureBuilder::Array{SignatureBuilder::BuiltIn::Byte}}};
+
+            hr = resolver.GetMemberRefOrDef(system_reflection_assembly_token, WStr("Load"),
+                                            system_reflection_assembly_load_signature.Head(),
+                                            system_reflection_assembly_load_signature.Size(),
+                                            &system_reflection_assembly_load_token);
+            if (FAILED(hr))
+            {
+                Logger::Warn("GenerateLoaderType: GetMemberRefOrDef System.Reflection.Assembly::Load failed");
+                return hr;
+            }
+        }
+
+        // TypeRef/TypeDef for System.Type
+        mdToken system_type_token;
+        {
+            hr = resolver.GetTypeRefOrDefByName(corlib_ref, WStr("System.Type"), &system_type_token);
+            if (FAILED(hr))
+            {
+                Logger::Warn("GenerateLoaderType: GetTypeRefOrDefByName System.Type failed");
+                return hr;
+            }
+        }
+
+        // MethodRef/MethodDef for
+        // instance class [mscorlib]System.Type [mscorlib]System.Reflection.Assembly::GetType(string)
+        mdToken system_reflection_assembly_get_type_token;
+        {
+            SignatureBuilder::InstanceMethod
+                system_reflection_assembly_get_type_signature{SignatureBuilder::Class{system_type_token},
+                                                              {SignatureBuilder::BuiltIn::String}};
+
+            hr = resolver.GetMemberRefOrDef(system_reflection_assembly_token, WStr("GetType"),
+                                            system_reflection_assembly_get_type_signature.Head(),
+                                            system_reflection_assembly_get_type_signature.Size(),
+                                            &system_reflection_assembly_get_type_token);
+            if (FAILED(hr))
+            {
+                Logger::Warn("GenerateLoaderType: GetMemberRefOrDef System.Reflection.Assembly::GetType failed");
+                return hr;
+            }
+        }
+
+        // TypeRef/TypeDef for System.Reflection.MethodInfo
+        mdToken system_reflection_method_info_token;
+        {
+            hr = resolver.GetTypeRefOrDefByName(corlib_ref, WStr("System.Reflection.MethodInfo"),
+                                                &system_reflection_method_info_token);
+            if (FAILED(hr))
+            {
+                Logger::Warn("GenerateLoaderType: GetTypeRefOrDefByName System.Reflection.MethodInfo failed");
+                return hr;
+            }
+        }
+
+        // MethodRef/MethodDef for
+        // instance class [mscorlib]System.Reflection.MethodInfo [mscorlib]System.Type::GetMethod(string)
+        mdToken system_type_get_method_token;
+        {
+            SignatureBuilder::InstanceMethod system_type_get_method_signature =
+                {SignatureBuilder::Class{system_reflection_method_info_token}, {SignatureBuilder::BuiltIn::String}};
+
+            hr = resolver.GetMemberRefOrDef(system_type_token, WStr("GetMethod"),
+                                            system_type_get_method_signature.Head(),
+                                            system_type_get_method_signature.Size(), &system_type_get_method_token);
+            if (FAILED(hr))
+            {
+                Logger::Warn("GenerateLoaderType: GetMemberRefOrDef System.Type::GetMethod(string) failed");
+                return hr;
+            }
+        }
+
+        // TypeRef/TypeDef for System.RuntimeTypeHandle
+        mdToken system_runtime_type_handle_token;
+        {
+            hr = resolver.GetTypeRefOrDefByName(corlib_ref, WStr("System.RuntimeTypeHandle"),
+                                                &system_runtime_type_handle_token);
+            if (FAILED(hr))
+            {
+                Logger::Warn("GenerateLoaderType: GetTypeRefOrDefByName System.RuntimeTypeHandle failed");
+                return hr;
+            }
+        }
+
+        // MethodRef/MethodDef for
+        // class [mscorlib]System.Type [mscorlib]System.Type::GetTypeFromHandle(
+        //   valuetype [mscorlib]System.RuntimeTypeHandle)
+        mdMemberRef system_type_get_type_from_handle_token;
+        {
+            SignatureBuilder::StaticMethod
+                system_type_get_type_from_handle_signature{SignatureBuilder::Class{system_type_token},
+                                                           {SignatureBuilder::ValueType{
+                                                               system_runtime_type_handle_token}}};
+
+            hr = resolver.GetMemberRefOrDef(system_type_token, WStr("GetTypeFromHandle"),
+                                            system_type_get_type_from_handle_signature.Head(),
+                                            system_type_get_type_from_handle_signature.Size(),
+                                            &system_type_get_type_from_handle_token);
+            if (FAILED(hr))
+            {
+                Logger::Warn("GenerateLoaderType: GetMemberRefOrDef System.Type::GetTypeFromHandle failed");
+                return hr;
+            }
+        }
+
+        // TypeRef/TypeDef for System.Delegate
+        mdTypeRef system_delegate_token;
+        {
+            hr = resolver.GetTypeRefOrDefByName(corlib_ref, WStr("System.Delegate"), &system_delegate_token);
+            if (FAILED(hr))
+            {
+                Logger::Warn("GenerateLoaderType: GetTypeRefOrDefByName System.Delegate failed");
+                return hr;
+            }
+        }
+
+        // MethodRef/MethodDef for
+        // instance class [mscorlib]System.Delegate [mscorlib]System.Reflection.MethodInfo::CreateDelegate(
+        //   class [mscorlib]System.Type)
+        mdMemberRef system_reflection_method_info_create_delegate_token;
+        {
+            SignatureBuilder::InstanceMethod
+                system_reflection_method_info_create_delegate_signature{SignatureBuilder::Class{system_delegate_token},
+                                                                        {SignatureBuilder::Class{system_type_token}}};
+
+            hr = resolver.GetMemberRefOrDef(system_reflection_method_info_token, WStr("CreateDelegate"),
+                                            system_reflection_method_info_create_delegate_signature.Head(),
+                                            system_reflection_method_info_create_delegate_signature.Size(),
+                                            &system_reflection_method_info_create_delegate_token);
+            if (FAILED(hr))
+            {
+                Logger::Warn(
+                    "GenerateLoaderType: GetMemberRefOrDef System.Reflection.MethodInfo::CreateDelegate failed");
+                return hr;
+            }
+        }
+
+        // Create a string representing "OpenTelemetry.AutoInstrumentation.Loader.AppConfigUpdater"
+        mdString config_updater_class_name_token;
+        {
+            LPCWSTR config_updater_class_name_str      = L"OpenTelemetry.AutoInstrumentation.Loader.AppConfigUpdater";
+            auto    config_updater_class_name_str_size = wcslen(config_updater_class_name_str);
+
+            hr = metadata_emit->DefineUserString(config_updater_class_name_str,
+                                                 (ULONG)config_updater_class_name_str_size,
+                                                 &config_updater_class_name_token);
+            if (FAILED(hr))
+            {
+                Logger::Warn("GenerateLoaderType: DefineUserString "
+                             "OpenTelemetry.AutoInstrumentation.Loader.AppConfigUpdater failed");
+                return hr;
+            }
+        }
+
+        // Create a string representing "ModifyConfig"
+        mdString config_updater_method_name_token;
+        {
+            LPCWSTR config_updater_method_name_str      = L"ModifyConfig";
+            auto    config_updater_method_name_str_size = wcslen(config_updater_method_name_str);
+
+            hr = metadata_emit->DefineUserString(config_updater_method_name_str,
+                                                 (ULONG)config_updater_method_name_str_size,
+                                                 &config_updater_method_name_token);
+            if (FAILED(hr))
+            {
+                Logger::Warn("GenerateLoaderType: DefineUserString ModifyConfig failed");
+                return hr;
+            }
+        }
+
+        // Add IL instructions into .cctor
+        // clang-format off
+        // .locals init (
+        //   [0] native int assemblyPtr,
+        //   [1] int32 assemblySize,
+        //   [2] native int symbolsPtr,
+        //   [3] int32 symbolsSize,
+        //   [4] unsigned int8[] assemblyBytes,
+        //   [5] unsigned int8[] symbolsBytes
+        // )
+        // 
+        // IL_0000: ldloca.s     assemblyPtr
+        // IL_0002: ldloca.s     assemblySize
+        // IL_0004: ldloca.s     symbolsPtr
+        // IL_0006: ldloca.s     symbolsSize
+        // IL_0008: call         void __DDVoidMethodType__::GetAssemblyAndSymbolsBytes(native int&, int32&, native int&, int32&)
+        // 
+        // IL_000d: ldloc.1      // assemblySize
+        // IL_000e: newarr       [mscorlib]System.Byte
+        // IL_0013: stloc.s      assemblyBytes
+        // 
+        // IL_0015: ldloc.0      // assemblyPtr
+        // IL_0016: ldloc.s      assemblyBytes
+        // IL_0018: ldc.i4.0
+        // IL_0019: ldloc.1      // assemblySize
+        // IL_001a: call         void [mscorlib]System.Runtime.InteropServices.Marshal::Copy(native int, unsigned int8[], int32, int32)
+        // 
+        // IL_001f: ldloc.3      // symbolsSize
+        // IL_0020: newarr       [mscorlib]System.Byte
+        // IL_0025: stloc.s      symbolsBytes
+        // 
+        // IL_0027: ldloc.2      // symbolsPtr
+        // IL_0028: ldloc.s      symbolsBytes
+        // IL_002a: ldc.i4.0
+        // IL_002b: ldloc.3      // symbolsSize
+        // IL_002c: call         void [mscorlib]System.Runtime.InteropServices.Marshal::Copy(native int, unsigned int8[], int32, int32)
+        // 
+        // IL_0031: ldloc.s      assemblyBytes
+        // IL_0033: ldloc.s      symbolsBytes
+        // IL_0035: call         class [mscorlib]System.Reflection.Assembly [mscorlib]System.Reflection.Assembly::Load(unsigned int8[], unsigned int8[])
+        // IL_003a: stsfld       class [mscorlib]System.Reflection.Assembly __DDVoidMethodType__::_assembly
+        // 
+        // IL_003f: ldsfld       class [mscorlib]System.Reflection.Assembly __DDVoidMethodType__::_assembly
+        // IL_0044: ldstr        "OpenTelemetry.AutoInstrumentation.Loader.AppConfigUpdater"
+        // IL_0049: callvirt     instance class [mscorlib]System.Type [mscorlib]System.Reflection.Assembly::GetType(string)
+        // IL_004e: ldstr        "ModifyConfig"
+        // IL_0053: callvirt     instance class [mscorlib]System.Reflection.MethodInfo [mscorlib]System.Type::GetMethod(string)
+        // IL_0058: ldtoken      class [mscorlib]System.Action`1<class [mscorlib]System.AppDomainSetup>
+        // IL_005d: call         class [mscorlib]System.Type [mscorlib]System.Type::GetTypeFromHandle(valuetype [mscorlib]System.RuntimeTypeHandle)
+        // IL_0062: callvirt     instance class [mscorlib]System.Delegate [mscorlib]System.Reflection.MethodInfo::CreateDelegate(class [mscorlib]System.Type)
+        // IL_0067: castclass    class [mscorlib]System.Action`1<class [mscorlib]System.AppDomainSetup>
+        // IL_006c: stsfld       class [mscorlib]System.Action`1<class [mscorlib]System.AppDomainSetup> __DDVoidMethodType__::_assemblyFixer
+        // 
+        // IL_0071: ret
+        // clang-format on
+        ILRewriter rewriter_void(this->info_, nullptr, module_id, cctor_token);
+        rewriter_void.InitializeTiny();
+        mdSignature locals_signature_token;
+        {
+            COR_SIGNATURE locals_signature[] = {IMAGE_CEE_CS_CALLCONV_LOCAL_SIG, // Calling convention
+                                                6,                               // Number of variables
+                                                ELEMENT_TYPE_I,                  // List of variable types
+                                                ELEMENT_TYPE_I4,
+                                                ELEMENT_TYPE_I,
+                                                ELEMENT_TYPE_I4,
+                                                ELEMENT_TYPE_SZARRAY,
+                                                ELEMENT_TYPE_U1,
+                                                ELEMENT_TYPE_SZARRAY,
+                                                ELEMENT_TYPE_U1};
+            hr = metadata_emit->GetTokenFromSig(locals_signature, sizeof(locals_signature), &locals_signature_token);
+            if (FAILED(hr))
+            {
+                Logger::Warn("GenerateLoaderType: Unable to generate locals signature. ModuleID=", module_id);
+                return hr;
+            }
+        }
+
+        rewriter_void.SetTkLocalVarSig(locals_signature_token);
+
+        ILInstr* pFirstInstr = rewriter_void.GetILList()->m_pNext;
+        ILInstr* pNewInstr   = NULL;
+
+        pNewInstr           = rewriter_void.NewILInstr();
+        pNewInstr->m_opcode = CEE_LDLOCA_S;
+        pNewInstr->m_Arg32  = 0;
+        rewriter_void.InsertBefore(pFirstInstr, pNewInstr);
+
+        pNewInstr           = rewriter_void.NewILInstr();
+        pNewInstr->m_opcode = CEE_LDLOCA_S;
+        pNewInstr->m_Arg32  = 1;
+        rewriter_void.InsertBefore(pFirstInstr, pNewInstr);
+
+        pNewInstr           = rewriter_void.NewILInstr();
+        pNewInstr->m_opcode = CEE_LDLOCA_S;
+        pNewInstr->m_Arg32  = 2;
+        rewriter_void.InsertBefore(pFirstInstr, pNewInstr);
+
+        pNewInstr           = rewriter_void.NewILInstr();
+        pNewInstr->m_opcode = CEE_LDLOCA_S;
+        pNewInstr->m_Arg32  = 3;
+        rewriter_void.InsertBefore(pFirstInstr, pNewInstr);
+
+        pNewInstr           = rewriter_void.NewILInstr();
+        pNewInstr->m_opcode = CEE_CALL;
+        pNewInstr->m_Arg32  = pinvoke_method_def;
+        rewriter_void.InsertBefore(pFirstInstr, pNewInstr);
+
+        pNewInstr           = rewriter_void.NewILInstr();
+        pNewInstr->m_opcode = CEE_LDLOC_1;
+        rewriter_void.InsertBefore(pFirstInstr, pNewInstr);
+
+        pNewInstr           = rewriter_void.NewILInstr();
+        pNewInstr->m_opcode = CEE_NEWARR;
+        pNewInstr->m_Arg32  = byte_type_token;
+        rewriter_void.InsertBefore(pFirstInstr, pNewInstr);
+
+        pNewInstr           = rewriter_void.NewILInstr();
+        pNewInstr->m_opcode = CEE_STLOC_S;
+        pNewInstr->m_Arg8   = 4;
+        rewriter_void.InsertBefore(pFirstInstr, pNewInstr);
+
+        pNewInstr           = rewriter_void.NewILInstr();
+        pNewInstr->m_opcode = CEE_LDLOC_0;
+        rewriter_void.InsertBefore(pFirstInstr, pNewInstr);
+
+        pNewInstr           = rewriter_void.NewILInstr();
+        pNewInstr->m_opcode = CEE_LDLOC_S;
+        pNewInstr->m_Arg8   = 4;
+        rewriter_void.InsertBefore(pFirstInstr, pNewInstr);
+
+        pNewInstr           = rewriter_void.NewILInstr();
+        pNewInstr->m_opcode = CEE_LDC_I4_0;
+        rewriter_void.InsertBefore(pFirstInstr, pNewInstr);
+
+        pNewInstr           = rewriter_void.NewILInstr();
+        pNewInstr->m_opcode = CEE_LDLOC_1;
+        rewriter_void.InsertBefore(pFirstInstr, pNewInstr);
+
+        pNewInstr           = rewriter_void.NewILInstr();
+        pNewInstr->m_opcode = CEE_CALL;
+        pNewInstr->m_Arg32  = marshal_copy_token;
+        rewriter_void.InsertBefore(pFirstInstr, pNewInstr);
+
+        pNewInstr           = rewriter_void.NewILInstr();
+        pNewInstr->m_opcode = CEE_LDLOC_3;
+        rewriter_void.InsertBefore(pFirstInstr, pNewInstr);
+
+        pNewInstr           = rewriter_void.NewILInstr();
+        pNewInstr->m_opcode = CEE_NEWARR;
+        pNewInstr->m_Arg32  = byte_type_token;
+        rewriter_void.InsertBefore(pFirstInstr, pNewInstr);
+
+        pNewInstr           = rewriter_void.NewILInstr();
+        pNewInstr->m_opcode = CEE_STLOC_S;
+        pNewInstr->m_Arg8   = 5;
+        rewriter_void.InsertBefore(pFirstInstr, pNewInstr);
+
+        pNewInstr           = rewriter_void.NewILInstr();
+        pNewInstr->m_opcode = CEE_LDLOC_2;
+        rewriter_void.InsertBefore(pFirstInstr, pNewInstr);
+
+        pNewInstr           = rewriter_void.NewILInstr();
+        pNewInstr->m_opcode = CEE_LDLOC_S;
+        pNewInstr->m_Arg8   = 5;
+        rewriter_void.InsertBefore(pFirstInstr, pNewInstr);
+
+        pNewInstr           = rewriter_void.NewILInstr();
+        pNewInstr->m_opcode = CEE_LDC_I4_0;
+        rewriter_void.InsertBefore(pFirstInstr, pNewInstr);
+
+        pNewInstr           = rewriter_void.NewILInstr();
+        pNewInstr->m_opcode = CEE_LDLOC_3;
+        rewriter_void.InsertBefore(pFirstInstr, pNewInstr);
+
+        pNewInstr           = rewriter_void.NewILInstr();
+        pNewInstr->m_opcode = CEE_CALL;
+        pNewInstr->m_Arg32  = marshal_copy_token;
+        rewriter_void.InsertBefore(pFirstInstr, pNewInstr);
+
+        pNewInstr           = rewriter_void.NewILInstr();
+        pNewInstr->m_opcode = CEE_LDLOC_S;
+        pNewInstr->m_Arg8   = 4;
+        rewriter_void.InsertBefore(pFirstInstr, pNewInstr);
+
+        pNewInstr           = rewriter_void.NewILInstr();
+        pNewInstr->m_opcode = CEE_LDLOC_S;
+        pNewInstr->m_Arg8   = 5;
+        rewriter_void.InsertBefore(pFirstInstr, pNewInstr);
+
+        pNewInstr           = rewriter_void.NewILInstr();
+        pNewInstr->m_opcode = CEE_CALL;
+        pNewInstr->m_Arg32  = system_reflection_assembly_load_token;
+        rewriter_void.InsertBefore(pFirstInstr, pNewInstr);
+
+        pNewInstr           = rewriter_void.NewILInstr();
+        pNewInstr->m_opcode = CEE_STSFLD;
+        pNewInstr->m_Arg32  = assembly_field_token;
+        rewriter_void.InsertBefore(pFirstInstr, pNewInstr);
+
+        pNewInstr           = rewriter_void.NewILInstr();
+        pNewInstr->m_opcode = CEE_LDSFLD;
+        pNewInstr->m_Arg32  = assembly_field_token;
+        rewriter_void.InsertBefore(pFirstInstr, pNewInstr);
+
+        pNewInstr           = rewriter_void.NewILInstr();
+        pNewInstr->m_opcode = CEE_LDSTR;
+        pNewInstr->m_Arg32  = config_updater_class_name_token;
+        rewriter_void.InsertBefore(pFirstInstr, pNewInstr);
+
+        pNewInstr           = rewriter_void.NewILInstr();
+        pNewInstr->m_opcode = CEE_CALLVIRT;
+        pNewInstr->m_Arg32  = system_reflection_assembly_get_type_token;
+        rewriter_void.InsertBefore(pFirstInstr, pNewInstr);
+
+        pNewInstr           = rewriter_void.NewILInstr();
+        pNewInstr->m_opcode = CEE_LDSTR;
+        pNewInstr->m_Arg32  = config_updater_method_name_token;
+        rewriter_void.InsertBefore(pFirstInstr, pNewInstr);
+
+        pNewInstr           = rewriter_void.NewILInstr();
+        pNewInstr->m_opcode = CEE_CALLVIRT;
+        pNewInstr->m_Arg32  = system_type_get_method_token;
+        rewriter_void.InsertBefore(pFirstInstr, pNewInstr);
+
+        pNewInstr           = rewriter_void.NewILInstr();
+        pNewInstr->m_opcode = CEE_LDTOKEN;
+        pNewInstr->m_Arg32  = system_action_of_system_app_domain_setup_token;
+        rewriter_void.InsertBefore(pFirstInstr, pNewInstr);
+
+        pNewInstr           = rewriter_void.NewILInstr();
+        pNewInstr->m_opcode = CEE_CALL;
+        pNewInstr->m_Arg32  = system_type_get_type_from_handle_token;
+        rewriter_void.InsertBefore(pFirstInstr, pNewInstr);
+
+        pNewInstr           = rewriter_void.NewILInstr();
+        pNewInstr->m_opcode = CEE_CALLVIRT;
+        pNewInstr->m_Arg32  = system_reflection_method_info_create_delegate_token;
+        rewriter_void.InsertBefore(pFirstInstr, pNewInstr);
+
+        pNewInstr           = rewriter_void.NewILInstr();
+        pNewInstr->m_opcode = CEE_CASTCLASS;
+        pNewInstr->m_Arg32  = system_action_of_system_app_domain_setup_token;
+        rewriter_void.InsertBefore(pFirstInstr, pNewInstr);
+
+        pNewInstr           = rewriter_void.NewILInstr();
+        pNewInstr->m_opcode = CEE_STSFLD;
+        pNewInstr->m_Arg32  = app_domain_setup_fixer_field_token;
+        rewriter_void.InsertBefore(pFirstInstr, pNewInstr);
+
+        pNewInstr           = rewriter_void.NewILInstr();
+        pNewInstr->m_opcode = CEE_RET;
+        rewriter_void.InsertBefore(pFirstInstr, pNewInstr);
+
+        if (IsDumpILRewriteEnabled())
+        {
+            mdToken      token = 0;
+            TypeInfo     typeInfo{};
+            WSTRING      methodName = WStr(".cctor");
+            FunctionInfo caller(token, methodName, typeInfo, MethodSignature(), FunctionMethodSignature());
+            Logger::Info(
+                GetILCodes("*** GenerateLoaderType: Modified Code: ", &rewriter_void, caller, metadata_import));
+        }
+
+        hr = rewriter_void.Export();
+        if (FAILED(hr))
+        {
+            Logger::Warn("GenerateLoaderType: Call to ILRewriter.Export() failed for ModuleID=", module_id);
+            return hr;
+        }
+    }
+
+    // Add IL instructions into the IsAlreadyLoaded method
+    {
+        // MethodRef/MethodDef for
+        // int32 [mscorlib]System.Threading.Interlocked::CompareExchange(int32&, int32, int32)
+        mdMemberRef interlocked_compare_member_ref;
+        {
+            // TypeRef/TypeDef for System.Threading.Interlocked
+            mdTypeRef interlocked_type_ref;
+            {
+                hr = resolver.GetTypeRefOrDefByName(corlib_ref, WStr("System.Threading.Interlocked"),
+                                                    &interlocked_type_ref);
+                if (FAILED(hr))
+                {
+                    Logger::Warn("GenerateLoaderType: GetTypeRefOrDefByName iSystem.Threading.Interlocked failed");
+                    return hr;
+                }
+            }
+
+            COR_SIGNATURE interlocked_compare_exchange_signature[] = {IMAGE_CEE_CS_CALLCONV_DEFAULT,
+                                                                      3,
+                                                                      ELEMENT_TYPE_I4,
+                                                                      ELEMENT_TYPE_BYREF,
+                                                                      ELEMENT_TYPE_I4,
+                                                                      ELEMENT_TYPE_I4,
+                                                                      ELEMENT_TYPE_I4};
+
+            hr = resolver.GetMemberRefOrDef(interlocked_type_ref, WStr("CompareExchange"),
+                                            interlocked_compare_exchange_signature,
+                                            sizeof(interlocked_compare_exchange_signature),
+                                            &interlocked_compare_member_ref);
+            if (FAILED(hr))
+            {
+                Logger::Warn("GenerateLoaderType: DefineMemberRef CompareExchange failed");
+                return hr;
+            }
+        }
+
+        // clang-format off
+        // IL_0000: ldsflda      int32 __DDVoidMethodType__::_isAssemblyLoaded
+        // IL_0005: ldc.i4.1
+        // IL_0006: ldc.i4.0
+        // IL_0007: call         int32 [mscorlib]System.Threading.Interlocked::CompareExchange(int32&, int32, int32)
+        // IL_000c: ldc.i4.1
+        // IL_000d: ceq
+        // IL_000f: ret
+        // clang-format on
+        ILRewriter rewriter_already_loaded(this->info_, nullptr, module_id, already_loaded_method_token);
+        rewriter_already_loaded.InitializeTiny();
+
+        ILInstr* pALFirstInstr = rewriter_already_loaded.GetILList()->m_pNext;
+        ILInstr* pALNewInstr   = NULL;
+
+        // ldsflda _isAssemblyLoaded : Load the address of the "_isAssemblyLoaded" static var
+        pALNewInstr           = rewriter_already_loaded.NewILInstr();
+        pALNewInstr->m_opcode = CEE_LDSFLDA;
+        pALNewInstr->m_Arg32  = isAssemblyLoadedFieldToken;
+        rewriter_already_loaded.InsertBefore(pALFirstInstr, pALNewInstr);
+
+        // ldc.i4.1 : Load the constant 1 (int) to the stack
+        pALNewInstr           = rewriter_already_loaded.NewILInstr();
+        pALNewInstr->m_opcode = CEE_LDC_I4_1;
+        rewriter_already_loaded.InsertBefore(pALFirstInstr, pALNewInstr);
+
+        // ldc.i4.0 : Load the constant 0 (int) to the stack
+        pALNewInstr           = rewriter_already_loaded.NewILInstr();
+        pALNewInstr->m_opcode = CEE_LDC_I4_0;
+        rewriter_already_loaded.InsertBefore(pALFirstInstr, pALNewInstr);
+
+        // call int Interlocked.CompareExchange(ref int, int, int) method
+        pALNewInstr           = rewriter_already_loaded.NewILInstr();
+        pALNewInstr->m_opcode = CEE_CALL;
+        pALNewInstr->m_Arg32  = interlocked_compare_member_ref;
+        rewriter_already_loaded.InsertBefore(pALFirstInstr, pALNewInstr);
+
+        // ldc.i4.1 : Load the constant 1 (int) to the stack
+        pALNewInstr           = rewriter_already_loaded.NewILInstr();
+        pALNewInstr->m_opcode = CEE_LDC_I4_1;
+        rewriter_already_loaded.InsertBefore(pALFirstInstr, pALNewInstr);
+
+        // ceq : Compare equality from two values from the stack
+        pALNewInstr           = rewriter_already_loaded.NewILInstr();
+        pALNewInstr->m_opcode = CEE_CEQ;
+        rewriter_already_loaded.InsertBefore(pALFirstInstr, pALNewInstr);
+
+        // ret : Return the value of the comparison
+        pALNewInstr           = rewriter_already_loaded.NewILInstr();
+        pALNewInstr->m_opcode = CEE_RET;
+        rewriter_already_loaded.InsertBefore(pALFirstInstr, pALNewInstr);
+
+        hr = rewriter_already_loaded.Export();
+        if (FAILED(hr))
+        {
+            Logger::Warn("GenerateLoaderType: Call to ILRewriter.Export() failed for ModuleID=", module_id);
+            return hr;
+        }
+    }
+
+    // Add IL instructions into __DDVoidMethodCall__
+    {
+        // MethodRef/MethodDef for
+        // instance object [mscorlib]System.Reflection.Assembly::CreateInstance(string)
+        mdToken assembly_create_instance_member_ref;
+        {
+            COR_SIGNATURE assembly_create_instance_signature[] = {IMAGE_CEE_CS_CALLCONV_HASTHIS, 1, ELEMENT_TYPE_OBJECT,
+                                                                  ELEMENT_TYPE_STRING};
+
+            hr = resolver.GetMemberRefOrDef(system_reflection_assembly_token, WStr("CreateInstance"),
+                                            assembly_create_instance_signature,
+                                            sizeof(assembly_create_instance_signature),
+                                            &assembly_create_instance_member_ref);
+            if (FAILED(hr))
+            {
+                Logger::Warn("GenerateLoaderType: GetMemberRefOrDef System.Reflection.Assembly::CreateInstance failed");
+                return hr;
+            }
+        }
+
+        // Create a string representing "OpenTelemetry.AutoInstrumentation.Loader.Loader"
+        mdString load_helper_token;
+        {
+            LPCWSTR load_helper_str      = L"OpenTelemetry.AutoInstrumentation.Loader.Loader";
+            auto    load_helper_str_size = wcslen(load_helper_str);
+
+            hr = metadata_emit->DefineUserString(load_helper_str, (ULONG)load_helper_str_size, &load_helper_token);
+            if (FAILED(hr))
+            {
+                Logger::Warn("GenerateLoaderType: DefineUserString failed");
+                return hr;
+            }
+        }
+
+        // clang-format off
+        // IL_0000: call         bool __DDVoidMethodType__::IsAlreadyLoaded()
+        // IL_0005: brfalse.s    IL_0008
+        // 
+        // IL_0007: ret
+        // 
+        // IL_0008: ldsfld       class [mscorlib]System.Reflection.Assembly __DDVoidMethodType__::_assembly
+        // IL_000d: ldstr        "OpenTelemetry.AutoInstrumentation.Loader.Loader"
+        // IL_0012: callvirt     instance object [mscorlib]System.Reflection.Assembly::CreateInstance(string)
+        // IL_0017: pop
+        // 
+        // IL_0018: ret
+        // clang-format on
+        ILRewriter rewriter_void(this->info_, nullptr, module_id, *init_method);
+        rewriter_void.InitializeTiny();
+
+        ILInstr* pFirstInstr = rewriter_void.GetILList()->m_pNext;
+        ILInstr* pNewInstr   = NULL;
+
+        pNewInstr           = rewriter_void.NewILInstr();
+        pNewInstr->m_opcode = CEE_CALL;
+        pNewInstr->m_Arg32  = already_loaded_method_token;
+        rewriter_void.InsertBefore(pFirstInstr, pNewInstr);
+
+        pNewInstr           = rewriter_void.NewILInstr();
+        pNewInstr->m_opcode = CEE_BRFALSE_S;
+        rewriter_void.InsertBefore(pFirstInstr, pNewInstr);
+        ILInstr* pBranchFalseInstr = pNewInstr;
+
+        pNewInstr           = rewriter_void.NewILInstr();
+        pNewInstr->m_opcode = CEE_RET;
+        rewriter_void.InsertBefore(pFirstInstr, pNewInstr);
+
+        pNewInstr           = rewriter_void.NewILInstr();
+        pNewInstr->m_opcode = CEE_LDSFLD;
+        pNewInstr->m_Arg32  = assembly_field_token;
+        rewriter_void.InsertBefore(pFirstInstr, pNewInstr);
+        pBranchFalseInstr->m_pTarget = pNewInstr;
+
+        pNewInstr           = rewriter_void.NewILInstr();
+        pNewInstr->m_opcode = CEE_LDSTR;
+        pNewInstr->m_Arg32  = load_helper_token;
+        rewriter_void.InsertBefore(pFirstInstr, pNewInstr);
+
+        pNewInstr           = rewriter_void.NewILInstr();
+        pNewInstr->m_opcode = CEE_CALLVIRT;
+        pNewInstr->m_Arg32  = assembly_create_instance_member_ref;
+        rewriter_void.InsertBefore(pFirstInstr, pNewInstr);
+
+        pNewInstr           = rewriter_void.NewILInstr();
+        pNewInstr->m_opcode = CEE_POP;
+        rewriter_void.InsertBefore(pFirstInstr, pNewInstr);
+
+        pNewInstr           = rewriter_void.NewILInstr();
+        pNewInstr->m_opcode = CEE_RET;
+        rewriter_void.InsertBefore(pFirstInstr, pNewInstr);
+
+        if (IsDumpILRewriteEnabled())
+        {
+            mdToken      token = 0;
+            TypeInfo     typeInfo{};
+            WSTRING      methodName = WStr("__DDVoidMethodCall__");
+            FunctionInfo caller(token, methodName, typeInfo, MethodSignature(), FunctionMethodSignature());
+            Logger::Info(
+                GetILCodes("*** GenerateLoaderType: Modified Code: ", &rewriter_void, caller, metadata_import));
+        }
+
+        hr = rewriter_void.Export();
+        if (FAILED(hr))
+        {
+            Logger::Warn("GenerateLoaderType: Call to ILRewriter.Export() failed for ModuleID=", module_id);
+            return hr;
+        }
+    }
+
+    // Add IL instructions into __DDPatchAppDomainSetup__
+    {
+        // MethodRef/MethodDef for
+        // instance void class [mscorlib]System.Action`1<class [mscorlib]System.AppDomainSetup>::Invoke(!0)
+        mdToken system_action_of_system_app_domain_setup_invoke_token;
+        {
+            COR_SIGNATURE system_action_of_system_app_domain_setup_signature[] = {IMAGE_CEE_CS_CALLCONV_HASTHIS, 1,
+                                                                                  ELEMENT_TYPE_VOID, ELEMENT_TYPE_VAR,
+                                                                                  0};
+
+            hr = resolver.GetMemberRefOrDef(system_action_of_system_app_domain_setup_token, WStr("Invoke"),
+                                            system_action_of_system_app_domain_setup_signature,
+                                            sizeof(system_action_of_system_app_domain_setup_signature),
+                                            &system_action_of_system_app_domain_setup_invoke_token);
+            if (FAILED(hr))
+            {
+                Logger::Warn(
+                    "GenerateLoaderType: GetMemberRefOrDef System.Action<System.AppDomainSetup>::Invoke failed");
+                return hr;
+            }
+        }
+
+        // MethodRef/MethodDef for
+        // instance void [mscorlib]System.AppDomainSetup::.ctor()
+        mdToken system_app_domain_setup_ctor_token;
+        {
+            COR_SIGNATURE system_app_domain_setup_ctor_signature[] = {IMAGE_CEE_CS_CALLCONV_HASTHIS, 0,
+                                                                      ELEMENT_TYPE_VOID};
+
+            hr = resolver.GetMemberRefOrDef(system_app_domain_setup_token, WStr(".ctor"),
+                                            system_app_domain_setup_ctor_signature,
+                                            sizeof(system_app_domain_setup_ctor_signature),
+                                            &system_app_domain_setup_ctor_token);
+            if (FAILED(hr))
+            {
+                Logger::Warn("GenerateLoaderType: GetMemberRefOrDef System.AppDomainSetup::.ctor failed");
+                return hr;
+            }
+        }
+
+        // clang-format off
+        // IL_0000: ldarg.0      // setup
+        // IL_0001: ldind.ref
+        // IL_0002: brtrue.s     IL_000b
+        // 
+        // IL_0004: ldarg.0      // setup
+        // IL_0005: newobj       instance void [mscorlib]System.AppDomainSetup::.ctor()
+        // IL_000a: stind.ref
+        // 
+        // IL_000b: ldsfld       class [mscorlib]System.Action`1<class [mscorlib]System.AppDomainSetup> __DDVoidMethodType__::_assemblyFixer
+        // IL_0010: ldarg.0      // setup
+        // IL_0011: ldind.ref
+        // IL_0012: callvirt     instance void class [mscorlib]System.Action`1<class [mscorlib]System.AppDomainSetup>::Invoke(!0/*class [mscorlib]System.AppDomainSetup*/)
+        // 
+        // IL_0017: ret
+        // clang-format on
+        ILRewriter rewriter_void(this->info_, nullptr, module_id, *patch_app_domain_setup_method);
+        rewriter_void.InitializeTiny();
+
+        ILInstr* pFirstInstr = rewriter_void.GetILList()->m_pNext;
+        ILInstr* pNewInstr   = NULL;
+
+        pNewInstr           = rewriter_void.NewILInstr();
+        pNewInstr->m_opcode = CEE_LDARG_0;
+        rewriter_void.InsertBefore(pFirstInstr, pNewInstr);
+
+        pNewInstr           = rewriter_void.NewILInstr();
+        pNewInstr->m_opcode = CEE_LDIND_REF;
+        rewriter_void.InsertBefore(pFirstInstr, pNewInstr);
+
+        pNewInstr           = rewriter_void.NewILInstr();
+        pNewInstr->m_opcode = CEE_BRTRUE_S;
+        rewriter_void.InsertBefore(pFirstInstr, pNewInstr);
+        ILInstr* branch_source = pNewInstr;
+
+        pNewInstr           = rewriter_void.NewILInstr();
+        pNewInstr->m_opcode = CEE_LDARG_0;
+        rewriter_void.InsertBefore(pFirstInstr, pNewInstr);
+
+        pNewInstr           = rewriter_void.NewILInstr();
+        pNewInstr->m_opcode = CEE_NEWOBJ;
+        pNewInstr->m_Arg32  = system_app_domain_setup_ctor_token;
+        rewriter_void.InsertBefore(pFirstInstr, pNewInstr);
+
+        pNewInstr           = rewriter_void.NewILInstr();
+        pNewInstr->m_opcode = CEE_STIND_REF;
+        rewriter_void.InsertBefore(pFirstInstr, pNewInstr);
+
+        pNewInstr           = rewriter_void.NewILInstr();
+        pNewInstr->m_opcode = CEE_LDSFLD;
+        pNewInstr->m_Arg32  = app_domain_setup_fixer_field_token;
+        rewriter_void.InsertBefore(pFirstInstr, pNewInstr);
+        branch_source->m_pTarget = pNewInstr;
+
+        pNewInstr           = rewriter_void.NewILInstr();
+        pNewInstr->m_opcode = CEE_LDARG_0;
+        rewriter_void.InsertBefore(pFirstInstr, pNewInstr);
+
+        pNewInstr           = rewriter_void.NewILInstr();
+        pNewInstr->m_opcode = CEE_LDIND_REF;
+        rewriter_void.InsertBefore(pFirstInstr, pNewInstr);
+
+        pNewInstr           = rewriter_void.NewILInstr();
+        pNewInstr->m_opcode = CEE_CALLVIRT;
+        pNewInstr->m_Arg32  = system_action_of_system_app_domain_setup_invoke_token;
+        rewriter_void.InsertBefore(pFirstInstr, pNewInstr);
+
+        pNewInstr           = rewriter_void.NewILInstr();
+        pNewInstr->m_opcode = CEE_RET;
+        rewriter_void.InsertBefore(pFirstInstr, pNewInstr);
+
+        if (IsDumpILRewriteEnabled())
+        {
+            mdToken      token = 0;
+            TypeInfo     typeInfo{};
+            WSTRING      methodName = WStr("__DDPatchAppDomainSetup__");
+            FunctionInfo caller(token, methodName, typeInfo, MethodSignature(), FunctionMethodSignature());
+            Logger::Info(
+                GetILCodes("*** GenerateLoaderType: Modified Code: ", &rewriter_void, caller, metadata_import));
+        }
+
+        hr = rewriter_void.Export();
+        if (FAILED(hr))
+        {
+            Logger::Warn("GenerateLoaderType: Call to ILRewriter.Export() failed for ModuleID=", module_id);
+            return hr;
+        }
+    }
+
+    return S_OK;
+}
+
+// This method rewrites the IL of System.Data.SqlClient.SqlCommand.WriteBeginExecuteEvent
+// to ensure that the CommandText property is passed to the BeginExecute method. Previously,
+// the CommandText was not passed, except when executing a stored procedure, which limited
+// the usefulness of the telemetry data available for SQL instrumentation.
+HRESULT CorProfiler::RewriteILSystemDataCommandText(const ModuleID module_id)
+{
+    if (Logger::IsDebugEnabled())
+    {
+        Logger::Debug("RewriteILSystemDataCommandText: Attempting IL rewrite for System.Data");
+    }
+
+    ComPtr<IUnknown> metadata_interfaces;
+    auto             hr = this->info_->GetModuleMetaData(module_id, ofRead | ofWrite, IID_IMetaDataImport2,
+                                                         metadata_interfaces.GetAddressOf());
+
+    if (FAILED(hr))
+    {
+        Logger::Warn("RewriteILSystemDataCommandText: Failed to get metadata interface for ", module_id);
+        return hr;
+    }
+
+    const auto& metadata_import = metadata_interfaces.As<IMetaDataImport2>(IID_IMetaDataImport);
+    const auto& metadata_emit   = metadata_interfaces.As<IMetaDataEmit2>(IID_IMetaDataEmit);
+
+    // Find the type definition for System.Data.SqlClient.SqlCommand
+    mdTypeDef system_data_sqlclient_sqlcommand;
+    hr = metadata_import->FindTypeDefByName(WStr("System.Data.SqlClient.SqlCommand"), mdTokenNil,
+                                            &system_data_sqlclient_sqlcommand);
+
+    if (FAILED(hr))
+    {
+        Logger::Warn("RewriteILSystemDataCommandText: FindTypeDefByName System.Data.SqlClient.SqlCommand failed");
+        return hr;
+    }
+
+    SignatureBuilder::InstanceMethod write_begin_execute_event_signature{{SignatureBuilder::BuiltIn::Void}, {}};
+
+    // Find the method definition for WriteBeginExecuteEvent
+    mdMethodDef write_begin_execute_event_token;
+    hr = metadata_import->FindMethod(system_data_sqlclient_sqlcommand, WStr("WriteBeginExecuteEvent"),
+                                     write_begin_execute_event_signature.Head(),
+                                     write_begin_execute_event_signature.Size(), &write_begin_execute_event_token);
+
+    if (FAILED(hr))
+    {
+        Logger::Warn("RewriteILSystemDataCommandText: FindMethod "
+                     "System.Data.SqlClient.SqlCommand::WriteBeginExecuteEvent failed");
+        return hr;
+    }
+
+    ILRewriter rewriter(this->info_, nullptr, module_id, write_begin_execute_event_token);
+    hr = rewriter.Import();
+
+    if (FAILED(hr))
+    {
+        Logger::Warn("RewriteILSystemDataCommandText: ILRewriter.Import failed");
+        return hr;
+    }
+
+    // 1. Find the last callvirt instruction (BeginExecute)
+    // callvirt instance void System.Data.SqlEventSource::BeginExecute(int32, string, string, string)
+    ILInstr* lastInstr      = rewriter.GetILList()->m_pPrev;
+    ILInstr* targetCallvirt = nullptr;
+    for (ILInstr* instr = lastInstr; instr != rewriter.GetILList(); instr = instr->m_pPrev)
+    {
+        if (instr->m_opcode == CEE_CALLVIRT)
+        {
+            targetCallvirt = instr;
+            break;
+        }
+    }
+
+    if (!targetCallvirt)
+    {
+        Logger::Warn("RewriteILSystemDataCommandText: Could not find callvirt instruction for BeginExecute");
+        return E_FAIL;
+    }
+
+    // 2. Insert pop before the callvirt (remove last argument)
+    ILInstr* popInstr  = rewriter.NewILInstr();
+    popInstr->m_opcode = CEE_POP;
+    rewriter.InsertBefore(targetCallvirt, popInstr);
+
+    // 3. Insert ldarg.0 after pop (load 'this')
+    ILInstr* ldarg0Instr  = rewriter.NewILInstr();
+    ldarg0Instr->m_opcode = CEE_LDARG_0;
+    rewriter.InsertAfter(popInstr, ldarg0Instr);
+
+    // 4. Insert callvirt to get_CommandText after ldarg.0
+
+    SignatureBuilder::InstanceMethod get_command_text_signature{{SignatureBuilder::BuiltIn::String}, {}};
+
+    mdTypeRef dbCommandTypeRef;
+    hr = metadata_emit->DefineTypeRefByName(mdTokenNil, WStr("System.Data.Common.DbCommand"), &dbCommandTypeRef);
+
+    if (FAILED(hr))
+    {
+        Logger::Warn("RewriteILSystemDataCommandText: DefineTypeRefByName System.Data.Common.DbCommand failed");
+        return hr;
+    }
+
+    mdMemberRef getCommandTextMemberRef;
+    hr = metadata_emit->DefineMemberRef(dbCommandTypeRef, WStr("get_CommandText"), get_command_text_signature.Head(),
+                                        get_command_text_signature.Size(), &getCommandTextMemberRef);
+
+    if (FAILED(hr))
+    {
+        Logger::Warn("RewriteILSystemDataCommandText: DefineMemberRef get_CommandText failed");
+        return hr;
+    }
+
+    ILInstr* callvirtGetCommandTextInstr  = rewriter.NewILInstr();
+    callvirtGetCommandTextInstr->m_opcode = CEE_CALLVIRT;
+    callvirtGetCommandTextInstr->m_Arg32  = getCommandTextMemberRef;
+    rewriter.InsertAfter(ldarg0Instr, callvirtGetCommandTextInstr);
+
+    if (IsDumpILRewriteEnabled())
+    {
+        mdToken      token = 0;
+        TypeInfo     typeInfo{};
+        WSTRING      methodName = WStr("WriteBeginExecuteEvent");
+        FunctionInfo caller(token, methodName, typeInfo, MethodSignature(), FunctionMethodSignature());
+        Logger::Info(
+            GetILCodes("*** ModifyWriteBeginExecuteEvent: Modified Code: ", &rewriter, caller, metadata_import));
+    }
+
+    hr = rewriter.Export();
+
+    if (FAILED(hr))
+    {
+        Logger::Warn("RewriteILSystemDataCommandText: Call to ILRewriter.Export() failed for ModuleID=", module_id);
+        return hr;
+    }
+
+    return hr;
+}
+
 HRESULT CorProfiler::GenerateLoaderMethod(const ModuleID module_id, mdMethodDef* ret_method_token)
 {
     ComPtr<IUnknown> metadata_interfaces;
@@ -1795,590 +3453,30 @@ HRESULT CorProfiler::GenerateLoaderMethod(const ModuleID module_id, mdMethodDef*
         return hr;
     }
 
-    // Define a TypeRef for System.Object
-    mdTypeRef object_type_ref;
-    hr = metadata_emit->DefineTypeRefByName(corlib_ref, WStr("System.Object"), &object_type_ref);
+    // Define a TypeRef for Init Type
+    mdTypeRef init_type_ref;
+    hr = metadata_emit->DefineTypeRefByName(corlib_ref, WStr("__DDVoidMethodType__"), &init_type_ref);
     if (FAILED(hr))
     {
-        Logger::Warn("GenerateLoaderMethod: DefineTypeRefByName failed");
+        Logger::Warn("GenerateLoaderMethod: DefineTypeRefByName __DDVoidMethodType__ failed");
         return hr;
     }
 
-    // Define a new TypeDef __DDVoidMethodType__ that extends System.Object
-    mdTypeDef new_type_def;
-    hr = metadata_emit->DefineTypeDef(WStr("__DDVoidMethodType__"), tdAbstract | tdSealed, object_type_ref, NULL,
-                                      &new_type_def);
-    if (FAILED(hr))
     {
-        Logger::Warn("GenerateLoaderMethod: DefineTypeDef failed");
-        return hr;
-    }
-
-    // Define a new static method __DDVoidMethodCall__ on the new type that has a void return type and takes no
-    // arguments
-    BYTE initialize_signature[] = {
-        IMAGE_CEE_CS_CALLCONV_DEFAULT, // Calling convention
-        0,                             // Number of parameters
-        ELEMENT_TYPE_VOID,             // Return type
-    };
-    hr = metadata_emit->DefineMethod(new_type_def, WStr("__DDVoidMethodCall__"), mdStatic, initialize_signature,
-                                     sizeof(initialize_signature), 0, 0, ret_method_token);
-    if (FAILED(hr))
-    {
-        Logger::Warn("GenerateLoaderMethod: DefineMethod failed");
-        return hr;
-    }
-
-    /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    // Define IsAlreadyLoaded() method
-    //
-
-    //
-    // Define a new static method IsAlreadyLoaded on the new type that has a bool return type and takes no arguments;
-    //
-    mdMethodDef alreadyLoadedMethodToken;
-    BYTE        already_loaded_signature[] = {
-        IMAGE_CEE_CS_CALLCONV_DEFAULT,
-        0,
-        ELEMENT_TYPE_BOOLEAN,
-    };
-    hr = metadata_emit->DefineMethod(new_type_def, WStr("IsAlreadyLoaded"), mdStatic | mdPrivate,
-                                     already_loaded_signature, sizeof(already_loaded_signature), 0, 0,
-                                     &alreadyLoadedMethodToken);
-    if (FAILED(hr))
-    {
-        Logger::Warn("GenerateLoaderMethod: DefineMethod IsAlreadyLoaded failed");
-        return hr;
-    }
-
-    // Define a new static int field _isAssemblyLoaded on the new type.
-    mdFieldDef isAssemblyLoadedFieldToken = mdFieldDefNil;
-    BYTE       field_signature[]          = {IMAGE_CEE_CS_CALLCONV_FIELD, ELEMENT_TYPE_I4};
-    hr = metadata_emit->DefineField(new_type_def, WStr("_isAssemblyLoaded"), fdStatic | fdPrivate, field_signature,
-                                    sizeof(field_signature), 0, nullptr, 0, &isAssemblyLoadedFieldToken);
-    if (FAILED(hr))
-    {
-        Logger::Warn("GenerateLoaderMethod: DefineField _isAssemblyLoaded failed");
-        return hr;
-    }
-
-    // Get a TypeRef for System.Threading.Interlocked
-    mdTypeRef interlocked_type_ref;
-    hr = metadata_emit->DefineTypeRefByName(corlib_ref, WStr("System.Threading.Interlocked"), &interlocked_type_ref);
-    if (FAILED(hr))
-    {
-        Logger::Warn("GenerateLoaderMethod: DefineTypeRefByName interlocked_type_ref failed");
-        return hr;
-    }
-
-    // Create method signature for System.Threading.Interlocked::CompareExchange(int32&, int32, int32)
-    COR_SIGNATURE interlocked_compare_exchange_signature[] = {IMAGE_CEE_CS_CALLCONV_DEFAULT,
-                                                              3,
-                                                              ELEMENT_TYPE_I4,
-                                                              ELEMENT_TYPE_BYREF,
-                                                              ELEMENT_TYPE_I4,
-                                                              ELEMENT_TYPE_I4,
-                                                              ELEMENT_TYPE_I4};
-
-    mdMemberRef interlocked_compare_member_ref;
-    hr =
-        metadata_emit->DefineMemberRef(interlocked_type_ref, WStr("CompareExchange"),
-                                       interlocked_compare_exchange_signature,
-                                       sizeof(interlocked_compare_exchange_signature), &interlocked_compare_member_ref);
-    if (FAILED(hr))
-    {
-        Logger::Warn("GenerateLoaderMethod: DefineMemberRef CompareExchange failed");
-        return hr;
-    }
-
-    /////////////////////////////////////////////
-    // Add IL instructions into the IsAlreadyLoaded method
-    //
-    //  static int _isAssemblyLoaded = 0;
-    //
-    //  public static bool IsAlreadyLoaded() {
-    //      return Interlocked.CompareExchange(ref _isAssemblyLoaded, 1, 0) == 1;
-    //  }
-    //
-    ILRewriter rewriter_already_loaded(this->info_, nullptr, module_id, alreadyLoadedMethodToken);
-    rewriter_already_loaded.InitializeTiny();
-
-    ILInstr* pALFirstInstr = rewriter_already_loaded.GetILList()->m_pNext;
-    ILInstr* pALNewInstr   = NULL;
-
-    // ldsflda _isAssemblyLoaded : Load the address of the "_isAssemblyLoaded" static var
-    pALNewInstr           = rewriter_already_loaded.NewILInstr();
-    pALNewInstr->m_opcode = CEE_LDSFLDA;
-    pALNewInstr->m_Arg32  = isAssemblyLoadedFieldToken;
-    rewriter_already_loaded.InsertBefore(pALFirstInstr, pALNewInstr);
-
-    // ldc.i4.1 : Load the constant 1 (int) to the stack
-    pALNewInstr           = rewriter_already_loaded.NewILInstr();
-    pALNewInstr->m_opcode = CEE_LDC_I4_1;
-    rewriter_already_loaded.InsertBefore(pALFirstInstr, pALNewInstr);
-
-    // ldc.i4.0 : Load the constant 0 (int) to the stack
-    pALNewInstr           = rewriter_already_loaded.NewILInstr();
-    pALNewInstr->m_opcode = CEE_LDC_I4_0;
-    rewriter_already_loaded.InsertBefore(pALFirstInstr, pALNewInstr);
-
-    // call int Interlocked.CompareExchange(ref int, int, int) method
-    pALNewInstr           = rewriter_already_loaded.NewILInstr();
-    pALNewInstr->m_opcode = CEE_CALL;
-    pALNewInstr->m_Arg32  = interlocked_compare_member_ref;
-    rewriter_already_loaded.InsertBefore(pALFirstInstr, pALNewInstr);
-
-    // ldc.i4.1 : Load the constant 1 (int) to the stack
-    pALNewInstr           = rewriter_already_loaded.NewILInstr();
-    pALNewInstr->m_opcode = CEE_LDC_I4_1;
-    rewriter_already_loaded.InsertBefore(pALFirstInstr, pALNewInstr);
-
-    // ceq : Compare equality from two values from the stack
-    pALNewInstr           = rewriter_already_loaded.NewILInstr();
-    pALNewInstr->m_opcode = CEE_CEQ;
-    rewriter_already_loaded.InsertBefore(pALFirstInstr, pALNewInstr);
-
-    // ret : Return the value of the comparison
-    pALNewInstr           = rewriter_already_loaded.NewILInstr();
-    pALNewInstr->m_opcode = CEE_RET;
-    rewriter_already_loaded.InsertBefore(pALFirstInstr, pALNewInstr);
-
-    hr = rewriter_already_loaded.Export();
-    if (FAILED(hr))
-    {
-        Logger::Warn("GenerateLoaderMethod: Call to ILRewriter.Export() failed for ModuleID=", module_id);
-        return hr;
-    }
-
-    // Define a method on the managed side that will PInvoke into the profiler method:
-    // C++: void GetAssemblyAndSymbolsBytes(BYTE** pAssemblyArray, int* assemblySize, BYTE** pSymbolsArray, int*
-    // symbolsSize) C#: static extern void GetAssemblyAndSymbolsBytes(out IntPtr assemblyPtr, out int assemblySize, out
-    // IntPtr symbolsPtr, out int symbolsSize)
-    mdMethodDef   pinvoke_method_def;
-    COR_SIGNATURE get_assembly_bytes_signature[] = {
-        IMAGE_CEE_CS_CALLCONV_DEFAULT, // Calling convention
-        4,                             // Number of parameters
-        ELEMENT_TYPE_VOID,             // Return type
-        ELEMENT_TYPE_BYREF,            // List of parameter types
-        ELEMENT_TYPE_I,
-        ELEMENT_TYPE_BYREF,
-        ELEMENT_TYPE_I4,
-        ELEMENT_TYPE_BYREF,
-        ELEMENT_TYPE_I,
-        ELEMENT_TYPE_BYREF,
-        ELEMENT_TYPE_I4,
-    };
-    hr = metadata_emit->DefineMethod(new_type_def, WStr("GetAssemblyAndSymbolsBytes"),
-                                     mdStatic | mdPinvokeImpl | mdHideBySig, get_assembly_bytes_signature,
-                                     sizeof(get_assembly_bytes_signature), 0, 0, &pinvoke_method_def);
-    if (FAILED(hr))
-    {
-        Logger::Warn("GenerateLoaderMethod: DefineMethod failed");
-        return hr;
-    }
-
-    metadata_emit->SetMethodImplFlags(pinvoke_method_def, miPreserveSig);
-    if (FAILED(hr))
-    {
-        Logger::Warn("GenerateLoaderMethod: SetMethodImplFlags failed");
-        return hr;
-    }
-
-    WSTRING native_profiler_file = GetCurrentModuleFileName();
-    Logger::Debug("GenerateVoidILStartupMethod: Setting the PInvoke native profiler library path to ",
-                  native_profiler_file);
-
-    mdModuleRef profiler_ref;
-    hr = metadata_emit->DefineModuleRef(native_profiler_file.c_str(), &profiler_ref);
-    if (FAILED(hr))
-    {
-        Logger::Warn("GenerateLoaderMethod: DefineModuleRef failed");
-        return hr;
-    }
-
-    hr = metadata_emit->DefinePinvokeMap(pinvoke_method_def, 0, WStr("GetAssemblyAndSymbolsBytes"), profiler_ref);
-    if (FAILED(hr))
-    {
-        Logger::Warn("GenerateLoaderMethod: DefinePinvokeMap failed");
-        return hr;
-    }
-
-    // Get a TypeRef for System.Byte
-    mdTypeRef byte_type_ref;
-    hr = metadata_emit->DefineTypeRefByName(corlib_ref, WStr("System.Byte"), &byte_type_ref);
-    if (FAILED(hr))
-    {
-        Logger::Warn("GenerateLoaderMethod: DefineTypeRefByName failed");
-        return hr;
-    }
-
-    // Get a TypeRef for System.Runtime.InteropServices.Marshal
-    mdTypeRef marshal_type_ref;
-    hr = metadata_emit->DefineTypeRefByName(corlib_ref, WStr("System.Runtime.InteropServices.Marshal"),
-                                            &marshal_type_ref);
-    if (FAILED(hr))
-    {
-        Logger::Warn("GenerateLoaderMethod: DefineTypeRefByName failed");
-        return hr;
-    }
-
-    // Get a MemberRef for System.Runtime.InteropServices.Marshal.Copy(IntPtr, Byte[], int, int)
-    mdMemberRef   marshal_copy_member_ref;
-    COR_SIGNATURE marshal_copy_signature[] = {IMAGE_CEE_CS_CALLCONV_DEFAULT, // Calling convention
-                                              4,                             // Number of parameters
-                                              ELEMENT_TYPE_VOID,             // Return type
-                                              ELEMENT_TYPE_I,                // List of parameter types
-                                              ELEMENT_TYPE_SZARRAY,
-                                              ELEMENT_TYPE_U1,
-                                              ELEMENT_TYPE_I4,
-                                              ELEMENT_TYPE_I4};
-    hr = metadata_emit->DefineMemberRef(marshal_type_ref, WStr("Copy"), marshal_copy_signature,
-                                        sizeof(marshal_copy_signature), &marshal_copy_member_ref);
-    if (FAILED(hr))
-    {
-        Logger::Warn("GenerateLoaderMethod: DefineMemberRef failed");
-        return hr;
-    }
-
-    // Get a TypeRef for System.Reflection.Assembly
-    mdTypeRef system_reflection_assembly_type_ref;
-    hr = metadata_emit->DefineTypeRefByName(corlib_ref, WStr("System.Reflection.Assembly"),
-                                            &system_reflection_assembly_type_ref);
-    if (FAILED(hr))
-    {
-        Logger::Warn("GenerateLoaderMethod: DefineTypeRefByName failed");
-        return hr;
-    }
-
-    // Get a MemberRef for System.Object.ToString()
-    mdTypeRef system_object_type_ref;
-    hr = metadata_emit->DefineTypeRefByName(corlib_ref, WStr("System.Object"), &system_object_type_ref);
-    if (FAILED(hr))
-    {
-        Logger::Warn("GenerateLoaderMethod: DefineTypeRefByName failed");
-        return hr;
-    }
-
-    // Create method signature for System.Reflection.Assembly.Load(byte[], byte[])
-    COR_SIGNATURE appdomain_load_signature_start[] = {
-        IMAGE_CEE_CS_CALLCONV_DEFAULT, 2,
-        ELEMENT_TYPE_CLASS // ret = System.Reflection.Assembly
-        // insert compressed token for System.Reflection.Assembly TypeRef here
-    };
-    COR_SIGNATURE appdomain_load_signature_end[] = {ELEMENT_TYPE_SZARRAY, ELEMENT_TYPE_U1, ELEMENT_TYPE_SZARRAY,
-                                                    ELEMENT_TYPE_U1};
-    ULONG         start_length                   = sizeof(appdomain_load_signature_start);
-    ULONG         end_length                     = sizeof(appdomain_load_signature_end);
-
-    BYTE  system_reflection_assembly_type_ref_compressed_token[4];
-    ULONG token_length =
-        CorSigCompressToken(system_reflection_assembly_type_ref, system_reflection_assembly_type_ref_compressed_token);
-
-    const auto    appdomain_load_signature_length = start_length + token_length + end_length;
-    COR_SIGNATURE appdomain_load_signature[250];
-    memcpy(appdomain_load_signature, appdomain_load_signature_start, start_length);
-    memcpy(&appdomain_load_signature[start_length], system_reflection_assembly_type_ref_compressed_token, token_length);
-    memcpy(&appdomain_load_signature[start_length + token_length], appdomain_load_signature_end, end_length);
-
-    mdMemberRef appdomain_load_member_ref;
-    hr = metadata_emit->DefineMemberRef(system_reflection_assembly_type_ref, WStr("Load"), appdomain_load_signature,
-                                        appdomain_load_signature_length, &appdomain_load_member_ref);
-    if (FAILED(hr))
-    {
-        Logger::Warn("GenerateLoaderMethod: DefineMemberRef failed");
-        return hr;
-    }
-
-    // Create method signature for Assembly.CreateInstance(string)
-    COR_SIGNATURE assembly_create_instance_signature[] = {IMAGE_CEE_CS_CALLCONV_HASTHIS, 1,
-                                                          ELEMENT_TYPE_OBJECT, // ret = System.Object
-                                                          ELEMENT_TYPE_STRING};
-
-    mdMemberRef assembly_create_instance_member_ref;
-    hr = metadata_emit->DefineMemberRef(system_reflection_assembly_type_ref, WStr("CreateInstance"),
-                                        assembly_create_instance_signature, sizeof(assembly_create_instance_signature),
-                                        &assembly_create_instance_member_ref);
-    if (FAILED(hr))
-    {
-        Logger::Warn("GenerateLoaderMethod: DefineMemberRef failed");
-        return hr;
-    }
-
-    // Create a string representing "OpenTelemetry.AutoInstrumentation.Loader.Loader"
-    LPCWSTR load_helper_str      = L"OpenTelemetry.AutoInstrumentation.Loader.Loader";
-    auto    load_helper_str_size = wcslen(load_helper_str);
-
-    mdString load_helper_token;
-    hr = metadata_emit->DefineUserString(load_helper_str, (ULONG)load_helper_str_size, &load_helper_token);
-    if (FAILED(hr))
-    {
-        Logger::Warn("GenerateLoaderMethod: DefineUserString failed");
-        return hr;
-    }
-
-    // Generate a locals signature defined in the following way:
-    //   [0] System.IntPtr ("assemblyPtr" - address of assembly bytes)
-    //   [1] System.Int32  ("assemblySize" - size of assembly bytes)
-    //   [2] System.IntPtr ("symbolsPtr" - address of symbols bytes)
-    //   [3] System.Int32  ("symbolsSize" - size of symbols bytes)
-    //   [4] System.Byte[] ("assemblyBytes" - managed byte array for assembly)
-    //   [5] System.Byte[] ("symbolsBytes" - managed byte array for symbols)
-    //   [6] class System.Reflection.Assembly ("loadedAssembly" - assembly instance to save loaded assembly)
-    mdSignature   locals_signature_token;
-    COR_SIGNATURE locals_signature[15] = {
-        IMAGE_CEE_CS_CALLCONV_LOCAL_SIG, // Calling convention
-        7,                               // Number of variables
-        ELEMENT_TYPE_I,                  // List of variable types
-        ELEMENT_TYPE_I4,
-        ELEMENT_TYPE_I,
-        ELEMENT_TYPE_I4,
-        ELEMENT_TYPE_SZARRAY,
-        ELEMENT_TYPE_U1,
-        ELEMENT_TYPE_SZARRAY,
-        ELEMENT_TYPE_U1,
-        ELEMENT_TYPE_CLASS
-        // insert compressed token for System.Reflection.Assembly TypeRef here
-    };
-    CorSigCompressToken(system_reflection_assembly_type_ref, &locals_signature[11]);
-    hr = metadata_emit->GetTokenFromSig(locals_signature, sizeof(locals_signature), &locals_signature_token);
-    if (FAILED(hr))
-    {
-        Logger::Warn("GenerateLoaderMethod: Unable to generate locals signature. ModuleID=", module_id);
-        return hr;
-    }
-
-    /////////////////////////////////////////////
-    // Add IL instructions into the void method
-    ILRewriter rewriter_void(this->info_, nullptr, module_id, *ret_method_token);
-    rewriter_void.InitializeTiny();
-    rewriter_void.SetTkLocalVarSig(locals_signature_token);
-
-    ILInstr* pFirstInstr = rewriter_void.GetILList()->m_pNext;
-    ILInstr* pNewInstr   = NULL;
-
-    // Step 0) Check if the assembly was already loaded
-
-    // call bool IsAlreadyLoaded()
-    pNewInstr           = rewriter_void.NewILInstr();
-    pNewInstr->m_opcode = CEE_CALL;
-    pNewInstr->m_Arg32  = alreadyLoadedMethodToken;
-    rewriter_void.InsertBefore(pFirstInstr, pNewInstr);
-
-    // check if the return of the method call is true or false
-    pNewInstr           = rewriter_void.NewILInstr();
-    pNewInstr->m_opcode = CEE_BRFALSE_S;
-    rewriter_void.InsertBefore(pFirstInstr, pNewInstr);
-    ILInstr* pBranchFalseInstr = pNewInstr;
-
-    // return if IsAlreadyLoaded is true
-    pNewInstr           = rewriter_void.NewILInstr();
-    pNewInstr->m_opcode = CEE_RET;
-    rewriter_void.InsertBefore(pFirstInstr, pNewInstr);
-
-    // Step 1) Call void GetAssemblyAndSymbolsBytes(out IntPtr assemblyPtr, out int assemblySize, out IntPtr symbolsPtr,
-    // out int symbolsSize)
-
-    // ldloca.s 0 : Load the address of the "assemblyPtr" variable (locals index 0)
-    pNewInstr           = rewriter_void.NewILInstr();
-    pNewInstr->m_opcode = CEE_LDLOCA_S;
-    pNewInstr->m_Arg32  = 0;
-    rewriter_void.InsertBefore(pFirstInstr, pNewInstr);
-
-    // Set the false branch target
-    pBranchFalseInstr->m_pTarget = pNewInstr;
-
-    // ldloca.s 1 : Load the address of the "assemblySize" variable (locals index 1)
-    pNewInstr           = rewriter_void.NewILInstr();
-    pNewInstr->m_opcode = CEE_LDLOCA_S;
-    pNewInstr->m_Arg32  = 1;
-    rewriter_void.InsertBefore(pFirstInstr, pNewInstr);
-
-    // ldloca.s 2 : Load the address of the "symbolsPtr" variable (locals index 2)
-    pNewInstr           = rewriter_void.NewILInstr();
-    pNewInstr->m_opcode = CEE_LDLOCA_S;
-    pNewInstr->m_Arg32  = 2;
-    rewriter_void.InsertBefore(pFirstInstr, pNewInstr);
-
-    // ldloca.s 3 : Load the address of the "symbolsSize" variable (locals index 3)
-    pNewInstr           = rewriter_void.NewILInstr();
-    pNewInstr->m_opcode = CEE_LDLOCA_S;
-    pNewInstr->m_Arg32  = 3;
-    rewriter_void.InsertBefore(pFirstInstr, pNewInstr);
-
-    // call void GetAssemblyAndSymbolsBytes(out IntPtr assemblyPtr, out int assemblySize, out IntPtr symbolsPtr, out int
-    // symbolsSize)
-    pNewInstr           = rewriter_void.NewILInstr();
-    pNewInstr->m_opcode = CEE_CALL;
-    pNewInstr->m_Arg32  = pinvoke_method_def;
-    rewriter_void.InsertBefore(pFirstInstr, pNewInstr);
-
-    // Step 2) Call void Marshal.Copy(IntPtr source, byte[] destination, int startIndex, int length) to populate the
-    // managed assembly bytes
-
-    // ldloc.1 : Load the "assemblySize" variable (locals index 1)
-    pNewInstr           = rewriter_void.NewILInstr();
-    pNewInstr->m_opcode = CEE_LDLOC_1;
-    rewriter_void.InsertBefore(pFirstInstr, pNewInstr);
-
-    // newarr System.Byte : Create a new Byte[] to hold a managed copy of the assembly data
-    pNewInstr           = rewriter_void.NewILInstr();
-    pNewInstr->m_opcode = CEE_NEWARR;
-    pNewInstr->m_Arg32  = byte_type_ref;
-    rewriter_void.InsertBefore(pFirstInstr, pNewInstr);
-
-    // stloc.s 4 : Assign the Byte[] to the "assemblyBytes" variable (locals index 4)
-    pNewInstr           = rewriter_void.NewILInstr();
-    pNewInstr->m_opcode = CEE_STLOC_S;
-    pNewInstr->m_Arg8   = 4;
-    rewriter_void.InsertBefore(pFirstInstr, pNewInstr);
-
-    // ldloc.0 : Load the "assemblyPtr" variable (locals index 0)
-    pNewInstr           = rewriter_void.NewILInstr();
-    pNewInstr->m_opcode = CEE_LDLOC_0;
-    rewriter_void.InsertBefore(pFirstInstr, pNewInstr);
-
-    // ldloc.s 4 : Load the "assemblyBytes" variable (locals index 4)
-    pNewInstr           = rewriter_void.NewILInstr();
-    pNewInstr->m_opcode = CEE_LDLOC_S;
-    pNewInstr->m_Arg8   = 4;
-    rewriter_void.InsertBefore(pFirstInstr, pNewInstr);
-
-    // ldc.i4.0 : Load the integer 0 for the Marshal.Copy startIndex parameter
-    pNewInstr           = rewriter_void.NewILInstr();
-    pNewInstr->m_opcode = CEE_LDC_I4_0;
-    rewriter_void.InsertBefore(pFirstInstr, pNewInstr);
-
-    // ldloc.1 : Load the "assemblySize" variable (locals index 1) for the Marshal.Copy length parameter
-    pNewInstr           = rewriter_void.NewILInstr();
-    pNewInstr->m_opcode = CEE_LDLOC_1;
-    rewriter_void.InsertBefore(pFirstInstr, pNewInstr);
-
-    // call Marshal.Copy(IntPtr source, byte[] destination, int startIndex, int length)
-    pNewInstr           = rewriter_void.NewILInstr();
-    pNewInstr->m_opcode = CEE_CALL;
-    pNewInstr->m_Arg32  = marshal_copy_member_ref;
-    rewriter_void.InsertBefore(pFirstInstr, pNewInstr);
-
-    // Step 3) Call void Marshal.Copy(IntPtr source, byte[] destination, int startIndex, int length) to populate the
-    // symbols bytes
-
-    // ldloc.3 : Load the "symbolsSize" variable (locals index 3)
-    pNewInstr           = rewriter_void.NewILInstr();
-    pNewInstr->m_opcode = CEE_LDLOC_3;
-    rewriter_void.InsertBefore(pFirstInstr, pNewInstr);
-
-    // newarr System.Byte : Create a new Byte[] to hold a managed copy of the symbols data
-    pNewInstr           = rewriter_void.NewILInstr();
-    pNewInstr->m_opcode = CEE_NEWARR;
-    pNewInstr->m_Arg32  = byte_type_ref;
-    rewriter_void.InsertBefore(pFirstInstr, pNewInstr);
-
-    // stloc.s 5 : Assign the Byte[] to the "symbolsBytes" variable (locals index 5)
-    pNewInstr           = rewriter_void.NewILInstr();
-    pNewInstr->m_opcode = CEE_STLOC_S;
-    pNewInstr->m_Arg8   = 5;
-    rewriter_void.InsertBefore(pFirstInstr, pNewInstr);
-
-    // ldloc.2 : Load the "symbolsPtr" variables (locals index 2)
-    pNewInstr           = rewriter_void.NewILInstr();
-    pNewInstr->m_opcode = CEE_LDLOC_2;
-    rewriter_void.InsertBefore(pFirstInstr, pNewInstr);
-
-    // ldloc.s 5 : Load the "symbolsBytes" variable (locals index 5)
-    pNewInstr           = rewriter_void.NewILInstr();
-    pNewInstr->m_opcode = CEE_LDLOC_S;
-    pNewInstr->m_Arg8   = 5;
-    rewriter_void.InsertBefore(pFirstInstr, pNewInstr);
-
-    // ldc.i4.0 : Load the integer 0 for the Marshal.Copy startIndex parameter
-    pNewInstr           = rewriter_void.NewILInstr();
-    pNewInstr->m_opcode = CEE_LDC_I4_0;
-    rewriter_void.InsertBefore(pFirstInstr, pNewInstr);
-
-    // ldloc.3 : Load the "symbolsSize" variable (locals index 3) for the Marshal.Copy length parameter
-    pNewInstr           = rewriter_void.NewILInstr();
-    pNewInstr->m_opcode = CEE_LDLOC_3;
-    rewriter_void.InsertBefore(pFirstInstr, pNewInstr);
-
-    // call void Marshal.Copy(IntPtr source, byte[] destination, int startIndex, int length)
-    pNewInstr           = rewriter_void.NewILInstr();
-    pNewInstr->m_opcode = CEE_CALL;
-    pNewInstr->m_Arg32  = marshal_copy_member_ref;
-    rewriter_void.InsertBefore(pFirstInstr, pNewInstr);
-
-    // Step 4) Call System.Reflection.Assembly System.Reflection.Assembly.Load(byte[], byte[]))
-
-    // ldloc.s 4 : Load the "assemblyBytes" variable (locals index 4) for the first byte[] parameter of
-    // AppDomain.Load(byte[], byte[])
-    pNewInstr           = rewriter_void.NewILInstr();
-    pNewInstr->m_opcode = CEE_LDLOC_S;
-    pNewInstr->m_Arg8   = 4;
-    rewriter_void.InsertBefore(pFirstInstr, pNewInstr);
-
-    // ldloc.s 5 : Load the "symbolsBytes" variable (locals index 5) for the second byte[] parameter of
-    // AppDomain.Load(byte[], byte[])
-    pNewInstr           = rewriter_void.NewILInstr();
-    pNewInstr->m_opcode = CEE_LDLOC_S;
-    pNewInstr->m_Arg8   = 5;
-    rewriter_void.InsertBefore(pFirstInstr, pNewInstr);
-
-    // call System.Reflection.Assembly System.Reflection.Assembly.Load(uint8[], uint8[])
-    pNewInstr           = rewriter_void.NewILInstr();
-    pNewInstr->m_opcode = CEE_CALL;
-    pNewInstr->m_Arg32  = appdomain_load_member_ref;
-    rewriter_void.InsertBefore(pFirstInstr, pNewInstr);
-
-    // stloc.s 6 : Assign the System.Reflection.Assembly object to the "loadedAssembly" variable (locals index 6)
-    pNewInstr           = rewriter_void.NewILInstr();
-    pNewInstr->m_opcode = CEE_STLOC_S;
-    pNewInstr->m_Arg8   = 6;
-    rewriter_void.InsertBefore(pFirstInstr, pNewInstr);
-
-    // Step 4) Call instance method Assembly.CreateInstance("OpenTelemetry.AutoInstrumentation.Loader.Loader")
-
-    // ldloc.s 6 : Load the "loadedAssembly" variable (locals index 6) to call Assembly.CreateInstance
-    pNewInstr           = rewriter_void.NewILInstr();
-    pNewInstr->m_opcode = CEE_LDLOC_S;
-    pNewInstr->m_Arg8   = 6;
-    rewriter_void.InsertBefore(pFirstInstr, pNewInstr);
-
-    // ldstr "OpenTelemetry.AutoInstrumentation.Loader.Loader"
-    pNewInstr           = rewriter_void.NewILInstr();
-    pNewInstr->m_opcode = CEE_LDSTR;
-    pNewInstr->m_Arg32  = load_helper_token;
-    rewriter_void.InsertBefore(pFirstInstr, pNewInstr);
-
-    // callvirt System.Object System.Reflection.Assembly.CreateInstance(string)
-    pNewInstr           = rewriter_void.NewILInstr();
-    pNewInstr->m_opcode = CEE_CALLVIRT;
-    pNewInstr->m_Arg32  = assembly_create_instance_member_ref;
-    rewriter_void.InsertBefore(pFirstInstr, pNewInstr);
-
-    // pop the returned object
-    pNewInstr           = rewriter_void.NewILInstr();
-    pNewInstr->m_opcode = CEE_POP;
-    rewriter_void.InsertBefore(pFirstInstr, pNewInstr);
-
-    // return
-    pNewInstr           = rewriter_void.NewILInstr();
-    pNewInstr->m_opcode = CEE_RET;
-    rewriter_void.InsertBefore(pFirstInstr, pNewInstr);
-
-    if (IsDumpILRewriteEnabled())
-    {
-        mdToken      token = 0;
-        TypeInfo     typeInfo{};
-        WSTRING      methodName = WStr("__DDVoidMethodCall__");
-        FunctionInfo caller(token, methodName, typeInfo, MethodSignature(), FunctionMethodSignature());
-        Logger::Info(
-            GetILCodes("*** GenerateLoaderMethod(): Modified Code: ", &rewriter_void, caller, metadata_import));
-    }
-
-    hr = rewriter_void.Export();
-    if (FAILED(hr))
-    {
-        Logger::Warn("GenerateLoaderMethod: Call to ILRewriter.Export() failed for ModuleID=", module_id);
-        return hr;
+        // Define a new static method __DDVoidMethodCall__ on the new type that has a void return type and takes no
+        // arguments
+        BYTE initialize_signature[] = {
+            IMAGE_CEE_CS_CALLCONV_DEFAULT, // Calling convention
+            0,                             // Number of parameters
+            ELEMENT_TYPE_VOID,             // Return type
+        };
+        hr = metadata_emit->DefineMemberRef(init_type_ref, WStr("__DDVoidMethodCall__"), initialize_signature,
+                                            sizeof(initialize_signature), ret_method_token);
+        if (FAILED(hr))
+        {
+            Logger::Warn("GenerateLoaderMethod: DefineMemberRef __DDVoidMethodCall__ failed");
+            return hr;
+        }
     }
 
     return S_OK;
@@ -2700,6 +3798,11 @@ HRESULT STDMETHODCALLTYPE CorProfiler::ThreadCreated(ThreadID threadId)
     {
         continuousProfiler->ThreadCreated(threadId);
     }
+
+    if (stack_capture_strategy_)
+    {
+        stack_capture_strategy_->OnThreadCreated(threadId);
+    }
     return S_OK;
 }
 HRESULT STDMETHODCALLTYPE CorProfiler::ThreadDestroyed(ThreadID threadId)
@@ -2708,6 +3811,12 @@ HRESULT STDMETHODCALLTYPE CorProfiler::ThreadDestroyed(ThreadID threadId)
     {
         continuousProfiler->ThreadDestroyed(threadId);
     }
+
+    if (stack_capture_strategy_)
+    {
+        stack_capture_strategy_->OnThreadDestroyed(threadId);
+    }
+
     return S_OK;
 }
 HRESULT STDMETHODCALLTYPE CorProfiler::ThreadNameChanged(ThreadID threadId, ULONG cchName, WCHAR name[])
@@ -2715,6 +3824,20 @@ HRESULT STDMETHODCALLTYPE CorProfiler::ThreadNameChanged(ThreadID threadId, ULON
     if (continuousProfiler != nullptr)
     {
         continuousProfiler->ThreadNameChanged(threadId, cchName, name);
+    }
+
+    if (stack_capture_strategy_)
+    {
+        stack_capture_strategy_->OnThreadNameChanged(threadId, cchName, name);
+    }
+
+    return S_OK;
+}
+HRESULT STDMETHODCALLTYPE CorProfiler::ThreadAssignedToOSThread(ThreadID managedThreadId, DWORD osThreadId)
+{
+    if (stack_capture_strategy_)
+    {
+        stack_capture_strategy_->OnThreadAssignedToOSThread(managedThreadId, osThreadId);
     }
     return S_OK;
 }
@@ -2738,5 +3861,110 @@ HRESULT STDMETHODCALLTYPE CorProfiler::EventPipeEventDelivered(EVENTPIPE_PROVIDE
     }
     return S_OK;
 }
+
+#ifdef _WIN32
+void CorProfiler::DetectFrameworkVersionTableForRedirectsMap()
+{
+    // Default to 4.6.2 (462) if detection fails
+    int frameworkVersion = 462;
+
+    // Check for 4.7.2 first
+    // If we ever need to detect higher versions, we should use
+    // the registry method below directly (adding detection for 4.7.2 and up)
+    // or find another option
+    ICorProfilerInfo8* info8 = nullptr;
+    HRESULT            hr    = this->info_->QueryInterface(__uuidof(ICorProfilerInfo8), (void**)&info8);
+    if (SUCCEEDED(hr))
+    {
+        info8->Release();
+        info8            = nullptr;
+        frameworkVersion = 472;
+
+        Logger::Debug("DetectFrameworkVersionTableForRedirectsMap: Detected .NET Framework 4.7.2 (ICorProfilerInfo8)");
+    }
+    else
+    {
+
+        HKEY hKey   = nullptr;
+        LONG result = RegOpenKeyExW(HKEY_LOCAL_MACHINE, L"SOFTWARE\\Microsoft\\NET Framework Setup\\NDP\\v4\\Full\\", 0,
+                                    KEY_READ, &hKey);
+
+        if (result != ERROR_SUCCESS)
+        {
+            Logger::Warn("DetectFrameworkVersionTableForRedirectsMap: Failed to open registry key, using default "
+                         "version 462");
+        }
+        else
+        {
+            DWORD releaseValue = 0;
+            DWORD dataSize     = sizeof(DWORD);
+            DWORD valueType    = REG_DWORD;
+
+            result = RegQueryValueExW(hKey, L"Release", nullptr, &valueType, reinterpret_cast<LPBYTE>(&releaseValue),
+                                      &dataSize);
+
+            RegCloseKey(hKey);
+
+            if (result != ERROR_SUCCESS || valueType != REG_DWORD)
+            {
+                Logger::Warn("DetectFrameworkVersionTableForRedirectsMap: Failed to read Release value, using "
+                             "default version 462");
+            }
+            else
+            {
+                // Map release numbers to framework versions
+                // Based on Microsoft documentation:
+                // https://docs.microsoft.com/en-us/dotnet/framework/migration-guide/how-to-determine-which-versions-are-installed
+                if (releaseValue >= 461308)
+                {
+                    frameworkVersion = 471; // 4.7.1
+                }
+                else if (releaseValue >= 460798)
+                {
+                    frameworkVersion = 470; // 4.7
+                }
+                else if (releaseValue >= 394802)
+                {
+                    frameworkVersion = 462; // 4.6.2
+                }
+                else
+                {
+                    Logger::Warn("DetectFrameworkVersionTableForRedirectsMap: Old .NET Framework detected, use 462 "
+                                 "as fallback");
+                }
+            }
+
+            Logger::Debug("DetectFrameworkVersionTableForRedirectsMap: Detected .NET Framework version ",
+                          frameworkVersion, " (Release: ", releaseValue, ")");
+        }
+    }
+
+    assembly_version_redirect_map_current_framework_key_ = 0;
+    for (auto& [key, values] : assembly_version_redirect_map_)
+    {
+        if (key <= frameworkVersion && key > assembly_version_redirect_map_current_framework_key_)
+        {
+            assembly_version_redirect_map_current_framework_key_ = key;
+            assembly_version_redirect_map_current_framework_     = &values;
+        }
+    }
+
+    if (assembly_version_redirect_map_current_framework_key_ != 0)
+    {
+        Logger::Debug("DetectFrameworkVersionTableForRedirectsMap: Use assembly redirection table for ",
+                      assembly_version_redirect_map_current_framework_key_);
+    }
+    else
+    {
+        Logger::Warn("DetectFrameworkVersionTableForRedirectsMap: No assembly redirection tables found. Assembly "
+                     "version redirecting will be disabled.");
+    }
+}
+
+int CorProfiler::GetNetFrameworkRedirectionVersion() const
+{
+    return assembly_version_redirect_map_current_framework_key_;
+}
+#endif
 
 } // namespace trace

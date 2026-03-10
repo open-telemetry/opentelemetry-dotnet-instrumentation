@@ -6,7 +6,7 @@ using TestLibrary.InstrumentationTarget.StrongNamedValidation;
 
 namespace TestLibrary.InstrumentationTarget;
 
-internal class Plugin
+public class Plugin
 {
     public void Initializing()
     {
@@ -19,11 +19,11 @@ internal class Plugin
         var payload = new InstrumentationDefinitions.Payload
         {
             DefinitionsId = "AA83654D58B24C67A4D35ED9E6716271",
-            Definitions = new NativeCallTargetDefinition[]
-            {
+            Definitions =
+            [
                 // Trace - StrongNameValidation
-                new("TestLibrary.InstrumentationTarget", "TestLibrary.InstrumentationTarget.Command", "Execute",  new[] { "System.Void" }, 1, 0, 0, 1, 65535, 65535, typeof(Validation).Assembly.FullName!, "TestLibrary.InstrumentationTarget.StrongNamedValidation.Validation"),
-            }
+                new("TestLibrary.InstrumentationTarget", "TestLibrary.InstrumentationTarget.Command", "Execute",  ["System.Void"], 1, 0, 0, 1, 65535, 65535, typeof(Validator).Assembly.FullName!, "TestLibrary.InstrumentationTarget.StrongNamedValidation.Validator"),
+            ]
         };
 
         return payload;

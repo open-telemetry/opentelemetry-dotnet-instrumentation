@@ -6,39 +6,48 @@ using Xunit;
 
 namespace OpenTelemetry.AutoInstrumentation.Tests.Configurations;
 
+[Collection("Non-Parallel Collection")]
 public class ServiceNameConfiguratorTests
 {
+    private const string ServiceInstanceId = "service.instance.id";
     private const string ServiceName = "service.name";
     private const string OtelServiceVariable = "OTEL_SERVICE_NAME";
+    private const string OtelResourceAttributeVariable = "OTEL_RESOURCE_ATTRIBUTES";
 
     [Fact]
     public void GetFallbackServiceName()
     {
-        var resourceBuilder = ResourceConfigurator.CreateResourceBuilder(new List<ResourceDetector>());
+        var resourceBuilder = ResourceConfigurator.CreateResourceBuilder(new ResourceSettings());
         var resource = resourceBuilder.Build();
 
         var serviceName = resource.Attributes.FirstOrDefault(a => a.Key == ServiceName).Value as string;
-        Assert.Equal("testhost", serviceName);
+        Assert.Matches("testhost|ReSharperTestRunner", serviceName);
     }
 
-    [Fact]
-    public void ServiceName_Retained_EnvVarSet()
+    [Theory]
+    [InlineData(ServiceName, OtelServiceVariable, "TestApplication", "TestApplication")]
+    [InlineData(ServiceName, OtelResourceAttributeVariable, $"{ServiceName}=TestApplication", "TestApplication")]
+    [InlineData(ServiceInstanceId, OtelResourceAttributeVariable, $"{ServiceInstanceId}=c8de43ab-0121-4a4a-84ff-2177e1613304", "c8de43ab-0121-4a4a-84ff-2177e1613304")]
+    public void Environment_Variable_Not_Overwritten(
+        string attributeName,
+        string variableName,
+        string variableValue,
+        string expectedValue)
     {
-        const string setServiceName = "TestApplication";
         try
         {
-            Environment.SetEnvironmentVariable(OtelServiceVariable, setServiceName);
+            Environment.SetEnvironmentVariable(variableName, variableValue);
 
-            var resourceBuilder = ResourceConfigurator.CreateResourceBuilder(Array.Empty<ResourceDetector>());
+            var resourceBuilder = ResourceConfigurator.CreateResourceBuilder(new ResourceSettings());
             var resource = resourceBuilder.Build();
 
-            var serviceName = resource.Attributes.FirstOrDefault(a => a.Key == ServiceName).Value as string;
+            var actualValue = resource.Attributes.FirstOrDefault(a => a.Key == attributeName).Value as string;
 
-            Assert.Equal(setServiceName, serviceName);
+            Assert.Equal(expectedValue, actualValue);
         }
         finally
         {
-            Environment.SetEnvironmentVariable(OtelServiceVariable, null);
+            Environment.SetEnvironmentVariable(variableName, null);
         }
     }
 }

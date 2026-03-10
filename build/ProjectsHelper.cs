@@ -26,7 +26,8 @@ public static class ProjectsHelper
                 // Should contain in the src directory
                 SrcDirectory.Contains(x.Directory) &&
                 // Should not be native projects
-                !x.Name.Contains(NativeProjectMarker));
+                !x.Name.Contains(NativeProjectMarker)
+                && (!x.Name.EndsWith(NetFrameworkMarker) || EnvironmentInfo.IsWin));
     }
 
     public static IEnumerable<Project> GetNativeSrcProjects(this Solution solution)

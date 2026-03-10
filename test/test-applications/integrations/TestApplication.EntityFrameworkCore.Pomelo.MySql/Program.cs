@@ -11,21 +11,25 @@ var mySqlPort = GetMySqlPort(args);
 
 var connectionString = $@"Server=127.0.0.1;Port={mySqlPort};Uid=root;Database=TestDatabase";
 
+#if POMELO_9_0_OR_GREATER
+var serverVersion = await ServerVersion.AutoDetectAsync(connectionString).ConfigureAwait(false);
+#else
 var serverVersion = ServerVersion.AutoDetect(connectionString);
+#endif
 
 var contextOptions = new DbContextOptionsBuilder<TestDbContext>()
     .UseMySql(connectionString, serverVersion)
     .Options;
 
-await using (var context = new TestDbContext(contextOptions))
+using (var context = new TestDbContext(contextOptions))
 {
-    await context.Database.EnsureDeletedAsync();
-    await context.Database.EnsureCreatedAsync();
-    await context.AddAsync(new TestItem { Name = "TestItem" });
-    await context.SaveChangesAsync();
+    await context.Database.EnsureDeletedAsync().ConfigureAwait(false);
+    await context.Database.EnsureCreatedAsync().ConfigureAwait(false);
+    await context.AddAsync(new TestItem { Name = "TestItem" }).ConfigureAwait(false);
+    await context.SaveChangesAsync().ConfigureAwait(false);
 }
 
-await using (var context = new TestDbContext(contextOptions))
+using (var context = new TestDbContext(contextOptions))
 {
     foreach (var testItem in context.Set<TestItem>())
     {

@@ -13,7 +13,7 @@ namespace OpenTelemetry.AutoInstrumentation.Instrumentations.Kafka.Integrations;
     typeName: IntegrationConstants.ConsumerTypeName,
     methodName: IntegrationConstants.DisposeMethodName,
     returnTypeName: ClrNames.Void,
-    parameterTypeNames: new string[0],
+    parameterTypeNames: [],
     minimumVersion: IntegrationConstants.MinVersion,
     maximumVersion: IntegrationConstants.MaxVersion,
     integrationName: IntegrationConstants.IntegrationName,

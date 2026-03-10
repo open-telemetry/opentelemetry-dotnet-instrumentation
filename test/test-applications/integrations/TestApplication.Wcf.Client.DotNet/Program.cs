@@ -2,9 +2,11 @@
 // SPDX-License-Identifier: Apache-2.0
 
 using System.Diagnostics;
+using System.Globalization;
 using System.Reflection;
 using System.ServiceModel;
 using System.ServiceModel.Channels;
+using TestApplication.Shared;
 
 namespace TestApplication.Wcf.Client.DotNet;
 
@@ -14,8 +16,13 @@ internal static class Program
 
     public static async Task Main(string[] args)
     {
-        var netTcpAddress = "net.tcp://127.0.0.1:9090/Telemetry";
-        var httpAddress = "http://127.0.0.1:9009/Telemetry";
+        ConsoleHelper.WriteSplashScreen(args);
+
+        var tcpPort = GetTcpPort(args);
+        var httpPort = GetHttpPort(args);
+
+        var netTcpAddress = $"net.tcp://127.0.0.1:{tcpPort}/Telemetry";
+        var httpAddress = $"http://127.0.0.1:{httpPort}/Telemetry";
 
         using var parent = Source.StartActivity("Parent");
         try
@@ -38,7 +45,7 @@ internal static class Program
         // Note: Best practice is to re-use your client/channel instances.
         // This code is not meant to illustrate best practices, only the
         // instrumentation.
-        var client = new StatusServiceClient(binding, new EndpointAddress(new Uri(address)));
+        using var client = new StatusServiceClient(binding, new EndpointAddress(new Uri(address)));
         await client.OpenAsync().ConfigureAwait(false);
 
         try
@@ -70,9 +77,29 @@ internal static class Program
                     await client.CloseAsync().ConfigureAwait(false);
                 }
             }
-            catch
+            catch (Exception)
             {
             }
         }
+    }
+
+    private static int GetTcpPort(string[] args)
+    {
+        if (args.Length > 1)
+        {
+            return int.Parse(args[1], CultureInfo.InvariantCulture);
+        }
+
+        return 9090;
+    }
+
+    private static int GetHttpPort(string[] args)
+    {
+        if (args.Length > 3)
+        {
+            return int.Parse(args[3], CultureInfo.InvariantCulture);
+        }
+
+        return 9009;
     }
 }

@@ -1,0 +1,38 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+    <PropertyGroup>
+        <TargetFrameworks>net10.0;net9.0;net8.0;</TargetFrameworks>
+    </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="OpenTelemetry" />
+  </ItemGroup>
+
+    <ItemGroup>
+      <Compile Include="..\TestApplication.ContinuousProfiler\Exporter\AllocationSample.cs">
+        <Link>AllocationSample.cs</Link>
+      </Compile>
+      <Compile Include="..\TestApplication.ContinuousProfiler\Exporter\SampleNativeFormatParser.cs">
+        <Link>SampleNativeFormatParser.cs</Link>
+      </Compile>
+      <Compile Include="..\TestApplication.ContinuousProfiler\Exporter\ThreadSample.cs">
+        <Link>ThreadSample.cs</Link>
+      </Compile>
+      <Compile Include="..\TestApplication.SelectiveSampler\Plugins\JsonConsoleExporter.cs">
+        <Link>Plugins\JsonConsoleExporter.cs</Link>
+      </Compile>
+      <Compile Include="..\TestApplication.SelectiveSampler\Plugins\MixedModeSamplingPlugin.cs">
+        <Link>Plugins\MixedModeSamplingPlugin.cs</Link>
+      </Compile>
+      <Compile Include="..\TestApplication.SelectiveSampler\Plugins\SelectiveSamplerPlugin.cs">
+        <Link>Plugins\SelectiveSamplerPlugin.cs</Link>
+      </Compile>
+      <Compile Include="..\TestApplication.SelectiveSampler\Plugins\SelectiveSamplerPluginHelper.cs">
+        <Link>Plugins\SelectiveSamplerPluginHelper.cs</Link>
+      </Compile>
+      <Compile Include="..\TestApplication.SelectiveSampler\Plugins\FrequentSamplingProcessor.cs">
+        <Link>FrequentSamplingProcessor.cs</Link>
+      </Compile>
+    </ItemGroup>
+
+</Project>

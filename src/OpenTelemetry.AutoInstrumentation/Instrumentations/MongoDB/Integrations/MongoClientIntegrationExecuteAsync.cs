@@ -3,7 +3,6 @@
 
 using OpenTelemetry.AutoInstrumentation.CallTarget;
 using OpenTelemetry.AutoInstrumentation.Instrumentations.MongoDB.DuckTypes;
-using OpenTelemetry.AutoInstrumentation.Util;
 
 namespace OpenTelemetry.AutoInstrumentation.Instrumentations.MongoDB.Integrations;
 
@@ -15,7 +14,7 @@ namespace OpenTelemetry.AutoInstrumentation.Instrumentations.MongoDB.Integration
     typeName: "MongoDB.Driver.Core.WireProtocol.CommandUsingQueryMessageWireProtocol`1",
     methodName: "ExecuteAsync",
     returnTypeName: ClrNames.GenericTaskWithGenericClassParameter,
-    parameterTypeNames: new[] { "MongoDB.Driver.Core.Connections.IConnection", ClrNames.CancellationToken },
+    parameterTypeNames: ["MongoDB.Driver.Core.Connections.IConnection", ClrNames.CancellationToken],
     minimumVersion: MongoDBConstants.MinimumVersion3,
     maximumVersion: MongoDBConstants.MaximumVersion3,
     integrationName: MongoDBConstants.IntegrationName,
@@ -25,7 +24,7 @@ namespace OpenTelemetry.AutoInstrumentation.Instrumentations.MongoDB.Integration
     typeName: "MongoDB.Driver.Core.WireProtocol.CommandUsingCommandMessageWireProtocol`1",
     methodName: "ExecuteAsync",
     returnTypeName: ClrNames.GenericTaskWithGenericClassParameter,
-    parameterTypeNames: new[] { "MongoDB.Driver.Core.Connections.IConnection", ClrNames.CancellationToken },
+    parameterTypeNames: ["MongoDB.Driver.Core.Connections.IConnection", ClrNames.CancellationToken],
     minimumVersion: MongoDBConstants.MinimumVersion3,
     maximumVersion: MongoDBConstants.MaximumVersion3,
     integrationName: MongoDBConstants.IntegrationName,
@@ -35,7 +34,7 @@ namespace OpenTelemetry.AutoInstrumentation.Instrumentations.MongoDB.Integration
     typeName: "MongoDB.Driver.Core.WireProtocol.QueryWireProtocol`1",
     methodName: "ExecuteAsync",
     returnTypeName: ClrNames.GenericTaskWithGenericClassParameter,
-    parameterTypeNames: new[] { "MongoDB.Driver.Core.Connections.IConnection", ClrNames.CancellationToken },
+    parameterTypeNames: ["MongoDB.Driver.Core.Connections.IConnection", ClrNames.CancellationToken],
     minimumVersion: MongoDBConstants.MinimumVersion3,
     maximumVersion: MongoDBConstants.MaximumVersion3,
     integrationName: MongoDBConstants.IntegrationName,
@@ -45,7 +44,7 @@ namespace OpenTelemetry.AutoInstrumentation.Instrumentations.MongoDB.Integration
     typeName: "MongoDB.Driver.Core.WireProtocol.WriteWireProtocolBase`1",
     methodName: "ExecuteAsync",
     returnTypeName: ClrNames.GenericTaskWithGenericClassParameter,
-    parameterTypeNames: new[] { "MongoDB.Driver.Core.Connections.IConnection", ClrNames.CancellationToken },
+    parameterTypeNames: ["MongoDB.Driver.Core.Connections.IConnection", ClrNames.CancellationToken],
     minimumVersion: MongoDBConstants.MinimumVersion3,
     maximumVersion: MongoDBConstants.MaximumVersion3,
     integrationName: MongoDBConstants.IntegrationName,
@@ -55,7 +54,7 @@ namespace OpenTelemetry.AutoInstrumentation.Instrumentations.MongoDB.Integration
     typeName: "MongoDB.Driver.Core.WireProtocol.CommandUsingQueryMessageWireProtocol`1",
     methodName: "ExecuteAsync",
     returnTypeName: ClrNames.GenericTaskWithGenericClassParameter,
-    parameterTypeNames: new[] { "MongoDB.Driver.Core.Connections.IConnection", ClrNames.CancellationToken },
+    parameterTypeNames: ["MongoDB.Driver.Core.Connections.IConnection", ClrNames.CancellationToken],
     minimumVersion: MongoDBConstants.MinimumVersion,
     maximumVersion: MongoDBConstants.MaximumVersion,
     integrationName: MongoDBConstants.IntegrationName,
@@ -65,7 +64,7 @@ namespace OpenTelemetry.AutoInstrumentation.Instrumentations.MongoDB.Integration
     typeName: "MongoDB.Driver.Core.WireProtocol.CommandUsingCommandMessageWireProtocol`1",
     methodName: "ExecuteAsync",
     returnTypeName: ClrNames.GenericTaskWithGenericClassParameter,
-    parameterTypeNames: new[] { "MongoDB.Driver.Core.Connections.IConnection", ClrNames.CancellationToken },
+    parameterTypeNames: ["MongoDB.Driver.Core.Connections.IConnection", ClrNames.CancellationToken],
     minimumVersion: MongoDBConstants.MinimumVersion,
     maximumVersion: MongoDBConstants.MaximumVersion,
     integrationName: MongoDBConstants.IntegrationName,
@@ -75,7 +74,7 @@ namespace OpenTelemetry.AutoInstrumentation.Instrumentations.MongoDB.Integration
     typeName: "MongoDB.Driver.Core.WireProtocol.QueryWireProtocol`1",
     methodName: "ExecuteAsync",
     returnTypeName: ClrNames.GenericTaskWithGenericClassParameter,
-    parameterTypeNames: new[] { "MongoDB.Driver.Core.Connections.IConnection", ClrNames.CancellationToken },
+    parameterTypeNames: ["MongoDB.Driver.Core.Connections.IConnection", ClrNames.CancellationToken],
     minimumVersion: MongoDBConstants.MinimumVersion,
     maximumVersion: MongoDBConstants.MaximumVersion,
     integrationName: MongoDBConstants.IntegrationName,
@@ -85,7 +84,7 @@ namespace OpenTelemetry.AutoInstrumentation.Instrumentations.MongoDB.Integration
     typeName: "MongoDB.Driver.Core.WireProtocol.WriteWireProtocolBase`1",
     methodName: "ExecuteAsync",
     returnTypeName: ClrNames.GenericTaskWithGenericClassParameter,
-    parameterTypeNames: new[] { "MongoDB.Driver.Core.Connections.IConnection", ClrNames.CancellationToken },
+    parameterTypeNames: ["MongoDB.Driver.Core.Connections.IConnection", ClrNames.CancellationToken],
     minimumVersion: MongoDBConstants.MinimumVersion,
     maximumVersion: MongoDBConstants.MaximumVersion,
     integrationName: MongoDBConstants.IntegrationName,
@@ -110,7 +109,7 @@ public static class MongoClientIntegrationExecuteAsync
 
         if (exception is not null)
         {
-            activity.SetException(exception);
+            MongoDBInstrumentation.OnError(activity, exception);
         }
 
         activity.Stop();

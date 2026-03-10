@@ -14,7 +14,7 @@ using OpenTelemetry.Proto.Resource.V1;
 
 namespace TestApplication.ContinuousProfiler;
 
-public class OtlpOverHttpExporter
+internal sealed class OtlpOverHttpExporter : IDisposable
 {
     private const string MediaContentType = "application/x-protobuf";
 
@@ -22,14 +22,21 @@ public class OtlpOverHttpExporter
     private readonly HttpClient _httpClient = new();
     private readonly long cpuPeriod;
 
-    public OtlpOverHttpExporter(TimeSpan cpuPeriod)
+    private readonly SampleNativeFormatParser _parser;
+
+    public OtlpOverHttpExporter(TimeSpan cpuPeriod, SampleNativeFormatParser parser)
     {
+        _parser = parser;
+#if NET
         this.cpuPeriod = (long)cpuPeriod.TotalNanoseconds;
+#else
+        this.cpuPeriod = cpuPeriod.Ticks * 100L; // convert to nanoseconds
+#endif
     }
 
     public void ExportThreadSamples(byte[] buffer, int read, CancellationToken cancellationToken)
     {
-        var threadSamples = SampleNativeFormatParser.ParseThreadSamples(buffer, read);
+        var threadSamples = _parser.ParseThreadSamples(buffer, read);
 
         if (threadSamples == null || threadSamples.Count == 0)
         {
@@ -74,7 +81,7 @@ public class OtlpOverHttpExporter
 
     public void ExportAllocationSamples(byte[] buffer, int read, CancellationToken cancellationToken)
     {
-        var allocationSamples = SampleNativeFormatParser.ParseAllocationSamples(buffer, read);
+        var allocationSamples = _parser.ParseAllocationSamples(buffer, read);
         if (allocationSamples.Count == 0)
         {
             return;
@@ -123,6 +130,11 @@ public class OtlpOverHttpExporter
         }
     }
 
+    public void Dispose()
+    {
+        _httpClient.Dispose();
+    }
+
     private static SampleBuilder CreateSampleBuilder(ThreadSample threadSample, ExtendedPprofBuilder extendedPprofBuilder)
     {
         var sampleBuilder = new SampleBuilder();
@@ -145,7 +157,7 @@ public class OtlpOverHttpExporter
 
         if (!string.IsNullOrEmpty(threadSample.ThreadName))
         {
-            extendedPprofBuilder.AddAttribute(sampleBuilder, "thread.name", threadSample.ThreadName);
+            extendedPprofBuilder.AddAttribute(sampleBuilder, "thread.name", threadSample.ThreadName!);
         }
 
         return sampleBuilder;
@@ -238,11 +250,13 @@ public class OtlpOverHttpExporter
 
     private static ScopeProfiles CreateScopeProfiles()
     {
-        var scopeProfiles = new ScopeProfiles();
-        scopeProfiles.Scope = new InstrumentationScope
+        var scopeProfiles = new ScopeProfiles
         {
-            Name = "OpenTelemetry.AutoInstrumentation",
-            // TODO consider setting Version here
+            Scope = new InstrumentationScope
+            {
+                Name = "OpenTelemetry.AutoInstrumentation",
+                // TODO consider setting Version here
+            }
         };
 
         // TODO handle schema Url scopeProfiles.SchemaUrl
@@ -250,14 +264,18 @@ public class OtlpOverHttpExporter
         return scopeProfiles;
     }
 
-    private HttpResponseMessage SendHttpRequest(HttpRequestMessage request, CancellationToken cancellationToken)
-    {
-        return _httpClient.Send(request, cancellationToken);
-    }
-
-    private HttpContent CreateHttpContent(ExportProfilesServiceRequest exportRequest)
+    private static ExportRequestContent CreateHttpContent(ExportProfilesServiceRequest exportRequest)
     {
         return new ExportRequestContent(exportRequest);
+    }
+
+    private HttpResponseMessage SendHttpRequest(HttpRequestMessage request, CancellationToken cancellationToken)
+    {
+#if NET
+        return _httpClient.Send(request, cancellationToken);
+#else
+        return _httpClient.SendAsync(request, cancellationToken).GetAwaiter().GetResult();
+#endif
     }
 
     private HttpRequestMessage CreateHttpRequest(ExportProfilesServiceRequest exportRequest)
@@ -287,10 +305,12 @@ public class OtlpOverHttpExporter
             Headers.ContentType = ProtobufMediaTypeHeader;
         }
 
+#if NET
         protected override void SerializeToStream(Stream stream, TransportContext? context, CancellationToken cancellationToken)
         {
             SerializeToStreamInternal(stream);
         }
+#endif
 
         protected override Task SerializeToStreamAsync(Stream stream, TransportContext? context)
         {

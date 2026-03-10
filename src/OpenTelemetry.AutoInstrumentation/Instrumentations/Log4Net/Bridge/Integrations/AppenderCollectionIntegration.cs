@@ -17,15 +17,15 @@ assemblyName: "log4net",
 typeName: "log4net.Appender.AppenderCollection",
 methodName: "ToArray",
 returnTypeName: "log4net.Appender.IAppender[]",
-parameterTypeNames: new string[0],
+parameterTypeNames: [],
 minimumVersion: "2.0.13",
 maximumVersion: "3.*.*",
 integrationName: "Log4Net",
 type: InstrumentationType.Log)]
 public static class AppenderCollectionIntegration
 {
-    private static readonly IOtelLogger Logger = OtelLogging.GetLogger();
 #if NET
+    private static readonly IOtelLogger Logger = OtelLogging.GetLogger();
     private static int _warningLogged;
 #endif
 

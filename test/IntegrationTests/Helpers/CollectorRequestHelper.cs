@@ -21,7 +21,7 @@ internal static class CollectorRequestHelper
         ctx.Request.Body.Position = 0;
 
         var inMemory = new MemoryStream();
-        await ctx.Request.Body.CopyToAsync(inMemory);
+        await ctx.Request.Body.CopyToAsync(inMemory).ConfigureAwait(false);
 
         inMemory.Position = 0;
 

@@ -16,7 +16,6 @@
 
 using System.Net;
 using System.Net.Http;
-using System.Text;
 using System.Web.Http;
 
 namespace TestApplication.AspNet.NetFramework.Controllers;

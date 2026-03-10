@@ -24,7 +24,9 @@ internal enum DuckKind
 /// <summary>
 /// Duck attribute
 /// </summary>
+#pragma warning disable CA1813 // Avoid unsealed attributes
 internal class DuckAttribute : DuckAttributeBase
+#pragma warning restore CA1813 // Avoid unsealed attributes
 {
     /// <summary>
     /// Default BindingFlags

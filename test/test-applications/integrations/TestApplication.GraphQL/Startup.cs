@@ -7,9 +7,11 @@ using StarWars;
 
 namespace TestApplication.GraphQL;
 
-public class Startup
+#pragma warning disable CA1812 // Avoid uninstantiated internal classes. This class is instantiated by app builder.
+internal sealed class Startup
+#pragma warning restore CA1812 // Avoid uninstantiated internal classes. This class is instantiated by app builder.
 {
-    public void ConfigureServices(IServiceCollection services)
+    public static void ConfigureServices(IServiceCollection services)
     {
         services.AddSingleton<StarWarsData>();
         services.AddGraphQL(b => b
@@ -19,7 +21,7 @@ public class Startup
             .AddGraphTypes(typeof(StarWarsSchema).Assembly));
     }
 
-    public void Configure(IApplicationBuilder app)
+    public static void Configure(IApplicationBuilder app)
     {
         app.UseMiddleware<CsrfMiddleware>();
         app.UseDeveloperExceptionPage();

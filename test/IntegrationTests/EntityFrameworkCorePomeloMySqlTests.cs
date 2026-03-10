@@ -8,7 +8,7 @@ using Xunit.Abstractions;
 
 namespace IntegrationTests;
 
-[Collection(MySqlCollection.Name)]
+[Collection(MySqlCollectionFixture.Name)]
 public class EntityFrameworkCorePomeloMySqlTests : TestHelper
 {
     private readonly MySqlFixture _mySql;

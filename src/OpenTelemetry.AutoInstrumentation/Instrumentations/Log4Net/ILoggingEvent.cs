@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: Apache-2.0
 
 using System.Collections;
-using System.Diagnostics.CodeAnalysis;
 using OpenTelemetry.AutoInstrumentation.DuckTyping;
 #pragma warning disable CS0649 // Field is never assigned to, and will always have its default value
 

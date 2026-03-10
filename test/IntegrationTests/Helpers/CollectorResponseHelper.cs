@@ -53,14 +53,14 @@ internal static class CollectorResponseHelper
         using var outMemory = new MemoryStream();
         responseMessage.WriteTo(outMemory);
 
-        await ctx.Response.Body.WriteAsync(outMemory.GetBuffer(), 0, (int)outMemory.Length);
-        await ctx.Response.CompleteAsync();
+        await ctx.Response.Body.WriteAsync(outMemory.GetBuffer().AsMemory(0, (int)outMemory.Length)).ConfigureAwait(false);
+        await ctx.Response.CompleteAsync().ConfigureAwait(false);
     }
 
     public static async Task GenerateEmptyJsonResponseAsync(this HttpContext ctx)
     {
         ctx.Response.ContentType = "application/json";
-        await ctx.Response.WriteAsync("{}");
+        await ctx.Response.WriteAsync("{}").ConfigureAwait(false);
     }
 #endif
 }

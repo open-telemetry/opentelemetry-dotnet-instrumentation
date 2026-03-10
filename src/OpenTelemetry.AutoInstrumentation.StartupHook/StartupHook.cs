@@ -11,7 +11,8 @@ using OpenTelemetry.AutoInstrumentation.RulesEngine;
 /// </summary>
 internal class StartupHook
 {
-    private static readonly IOtelLogger Logger = OtelLogging.GetLogger("StartupHook");
+    private const string StartuphookLoggerSuffix = "StartupHook";
+    private static readonly IOtelLogger Logger = OtelLogging.GetLogger(StartuphookLoggerSuffix);
 
     // This property must be initialized before any rule is evaluated since it may be used during rule evaluation.
     internal static string? LoaderAssemblyLocation { get; set; }
@@ -22,7 +23,7 @@ internal class StartupHook
     /// </summary>
     public static void Initialize()
     {
-        bool.TryParse(Environment.GetEnvironmentVariable(ConfigurationKeys.FailFast), out var failFast);
+        _ = bool.TryParse(Environment.GetEnvironmentVariable(ConfigurationKeys.FailFast), out var failFast);
 
         try
         {
@@ -31,7 +32,8 @@ internal class StartupHook
             var ruleEngine = new RuleEngine();
             if (!ruleEngine.ValidateRules())
             {
-                throw new Exception("Rule Engine Failure: One or more rules failed validation. Automatic Instrumentation won't be loaded.");
+                throw new InvalidOperationException(
+                    "Rule Engine Failure: One or more rules failed validation. Automatic Instrumentation won't be loaded.");
             }
 
             Logger.Information("Initialization.");
@@ -45,7 +47,7 @@ internal class StartupHook
             {
                 if (failFast)
                 {
-                    throw new Exception("StartupHook failed to create an instance of the Loader");
+                    throw new InvalidOperationException("StartupHook failed to create an instance of the Loader");
                 }
             }
             else
@@ -61,6 +63,10 @@ internal class StartupHook
                 throw;
             }
         }
+        finally
+        {
+            OtelLogging.CloseLogger(StartuphookLoggerSuffix, Logger);
+        }
     }
 
     private static string GetLoaderAssemblyLocation()
@@ -68,7 +74,7 @@ internal class StartupHook
         try
         {
             var startupAssemblyFilePath = Assembly.GetExecutingAssembly().Location;
-            if (startupAssemblyFilePath.StartsWith(@"\\?\"))
+            if (startupAssemblyFilePath.StartsWith(@"\\?\", StringComparison.Ordinal))
             {
                 // This will only be used in case the local path exceeds max_path size limit
                 startupAssemblyFilePath = startupAssemblyFilePath.Substring(4);
@@ -76,7 +82,7 @@ internal class StartupHook
 
             // StartupHook and Loader assemblies are in the same path
             var startupAssemblyDirectoryPath = Path.GetDirectoryName(startupAssemblyFilePath) ??
-                                               throw new NullReferenceException("StartupAssemblyFilePath is NULL");
+                                               throw new InvalidOperationException("StartupAssemblyFilePath is NULL");
             return startupAssemblyDirectoryPath;
         }
         catch (Exception ex)

@@ -6,7 +6,7 @@ using Xunit.Abstractions;
 
 namespace IntegrationTests;
 
-[Collection(AzureCollection.Name)]
+[Collection(AzureCollectionFixture.Name)]
 public class AzureTests : TestHelper
 {
     private readonly AzureFixture _azure;

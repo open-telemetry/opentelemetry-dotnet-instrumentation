@@ -9,11 +9,12 @@ namespace OpenTelemetry.AutoInstrumentation.Loader;
 /// <summary>
 /// A class that attempts to load the OpenTelemetry.AutoInstrumentation .NET assembly.
 /// </summary>
-internal partial class Loader
+internal class Loader
 {
-    private static readonly string ManagedProfilerDirectory;
+    private const string LoaderLoggerSuffix = "Loader";
+    private static readonly IOtelLogger Logger = OtelLogging.GetLogger(LoaderLoggerSuffix);
 
-    private static readonly IOtelLogger Logger = OtelLogging.GetLogger("Loader");
+    private static int _isExiting;
 
     /// <summary>
     /// Initializes static members of the <see cref="Loader"/> class.
@@ -21,11 +22,9 @@ internal partial class Loader
     /// </summary>
     static Loader()
     {
-        ManagedProfilerDirectory = ResolveManagedProfilerDirectory();
-
         try
         {
-            AppDomain.CurrentDomain.AssemblyResolve += AssemblyResolve_ManagedProfilerDependencies;
+            AppDomain.CurrentDomain.AssemblyResolve += new AssemblyResolver(Logger).AssemblyResolve_ManagedProfilerDependencies;
         }
         catch (Exception ex)
         {
@@ -33,6 +32,29 @@ internal partial class Loader
         }
 
         TryLoadManagedAssembly();
+
+        // AssemblyResolve_ManagedProfilerDependencies logs only if Debug enabled.
+        // If Debug is not enabled, logger won't be needed anymore.
+        if (Logger.IsEnabled(LogLevel.Debug))
+        {
+            // Register shutdown on exit
+            AppDomain.CurrentDomain.ProcessExit += OnExit;
+        }
+        else
+        {
+            OtelLogging.CloseLogger(LoaderLoggerSuffix, Logger);
+        }
+    }
+
+    private static void OnExit(object? sender, EventArgs e)
+    {
+        if (Interlocked.Exchange(ref _isExiting, value: 1) != 0)
+        {
+            // OnExit() was already called before
+            return;
+        }
+
+        OtelLogging.CloseLogger(LoaderLoggerSuffix, Logger);
     }
 
     private static void TryLoadManagedAssembly()
@@ -66,19 +88,5 @@ internal partial class Loader
             Logger.Error(ex, "Error when loading managed assemblies. {0}", ex.Message);
             throw;
         }
-    }
-
-    private static string? ReadEnvironmentVariable(string key)
-    {
-        try
-        {
-            return Environment.GetEnvironmentVariable(key);
-        }
-        catch (Exception ex)
-        {
-            Logger.Error(ex, "Error while loading environment variable {0}", key);
-        }
-
-        return null;
     }
 }

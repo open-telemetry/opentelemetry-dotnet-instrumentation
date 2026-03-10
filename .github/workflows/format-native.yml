@@ -12,15 +12,24 @@ permissions:
 
 jobs:
   check-native-format:
+    name: ${{ matrix.step-name }}
+    runs-on: ${{ matrix.runner }}
+
     strategy:
       fail-fast: false
       matrix:
-        machine: [ windows-2022, ubuntu-22.04, macos-13-xlarge ]
-    runs-on: ${{ matrix.machine }}
+        include:
+          - step-name: native-format-macos
+            runner: macos-14-xlarge
+          - step-name: native-format-linux
+            runner: ubuntu-22.04
+          - step-name: native-format-windows
+            runner: windows-2022
+
     steps:
 
     - name: Checkout
-      uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # tag: v4.2.2
+      uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # tag: v6.0.2
 
     - name: Install Clang tools
       shell: bash
@@ -35,10 +44,10 @@ jobs:
     steps:
 
       - name: Checkout
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # tag: v4.2.2
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # tag: v6.0.2
 
       - name: Setup Go
-        uses: actions/setup-go@0aaccfd150d50ccaeb58ebd88d36e91967a5f35b # tag: v5.4.0
+        uses: actions/setup-go@4b73464bb391d4059bd26b0524d20df3927bd417 # tag: v6.3.0
         with:
           go-version: '1.23.5'
           cache: false # Suppress a warning given that there are no go.sum files in the repo
@@ -46,7 +55,7 @@ jobs:
       - name: Verify all native files have license headers
         shell: bash
         run: |
-          go install github.com/google/addlicense@v1.1.1
+          go install github.com/google/addlicense@v1.2.0
           addlicense -v -y "" -l "apache" -c "The OpenTelemetry Authors" -s=only -ignore **/lib/** src/OpenTelemetry.AutoInstrumentation.Native/
           git status
           git diff

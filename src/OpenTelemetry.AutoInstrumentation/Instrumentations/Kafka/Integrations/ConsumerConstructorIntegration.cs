@@ -16,7 +16,7 @@ namespace OpenTelemetry.AutoInstrumentation.Instrumentations.Kafka.Integrations;
     typeName: IntegrationConstants.ConsumerTypeName,
     methodName: ".ctor",
     returnTypeName: ClrNames.Void,
-    parameterTypeNames: new[] { IntegrationConstants.ConsumerBuilderTypeName },
+    parameterTypeNames: [IntegrationConstants.ConsumerBuilderTypeName],
     minimumVersion: IntegrationConstants.MinVersion,
     maximumVersion: IntegrationConstants.MaxVersion,
     integrationName: IntegrationConstants.IntegrationName,

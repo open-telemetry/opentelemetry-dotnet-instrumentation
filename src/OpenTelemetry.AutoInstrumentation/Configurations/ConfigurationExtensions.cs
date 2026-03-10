@@ -2,15 +2,26 @@
 // SPDX-License-Identifier: Apache-2.0
 
 using System.Globalization;
+#if NET
+using System.Text;
+#endif
 
 namespace OpenTelemetry.AutoInstrumentation.Configurations;
 
 internal static class ConfigurationExtensions
 {
+#if NET
+    public static IReadOnlyList<TEnum> ParseEnabledEnumList<TEnum>(this Configuration source, bool enabledByDefault, CompositeFormat enabledConfigurationTemplate)
+#else
     public static IReadOnlyList<TEnum> ParseEnabledEnumList<TEnum>(this Configuration source, bool enabledByDefault, string enabledConfigurationTemplate)
+#endif
         where TEnum : struct, Enum, IConvertible
     {
+#if NET
+        var allConfigurations = Enum.GetValues<TEnum>();
+#else
         var allConfigurations = Enum.GetValues(typeof(TEnum)).Cast<TEnum>().ToArray();
+#endif
         var enabledConfigurations = new List<TEnum>(allConfigurations.Length);
 
         foreach (var configuration in allConfigurations)
@@ -32,9 +43,9 @@ internal static class ConfigurationExtensions
 
         if (string.IsNullOrWhiteSpace(values))
         {
-            return Array.Empty<string>();
+            return [];
         }
 
-        return values!.Split(new[] { valueSeparator }, StringSplitOptions.RemoveEmptyEntries);
+        return values!.Split([valueSeparator], StringSplitOptions.RemoveEmptyEntries);
     }
 }

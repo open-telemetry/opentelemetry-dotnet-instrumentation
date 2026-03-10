@@ -41,7 +41,7 @@ internal static partial class DuckType
 
         if (type.IsGenericType && !type.IsGenericTypeDefinition)
         {
-            foreach (Type t in type.GetGenericArguments())
+            foreach (var t in type.GetGenericArguments())
             {
                 if (!t.IsVisible)
                 {
@@ -74,13 +74,13 @@ internal static partial class DuckType
             {
                 if (!IgnoresAccessChecksToAssembliesSetDictionary.TryGetValue(builder, out var hashSet))
                 {
-                    hashSet = new HashSet<string>();
+                    hashSet = [];
                     IgnoresAccessChecksToAssembliesSetDictionary[builder] = hashSet;
                 }
 
                 if (hashSet.Add(assemblyName))
                 {
-                    ((AssemblyBuilder)builder.Assembly).SetCustomAttribute(new CustomAttributeBuilder(IgnoresAccessChecksToAttributeCtor, new object[] { assemblyName }));
+                    ((AssemblyBuilder)builder.Assembly).SetCustomAttribute(new CustomAttributeBuilder(IgnoresAccessChecksToAttributeCtor, [assemblyName]));
                 }
             }
         }

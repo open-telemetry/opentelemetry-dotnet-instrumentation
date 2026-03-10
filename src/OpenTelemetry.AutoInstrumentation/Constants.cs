@@ -24,6 +24,12 @@ internal static class Constants
         public const string AttributeHttpResponseHeaderPrefix = "http.response.header";
     }
 
+    public static class ResourceAttributes
+    {
+        public const string AttributeServiceName = "service.name";
+        public const string AttributeServiceInstanceId = "service.instance.id";
+    }
+
     public static class ConfigurationValues
     {
         public const string None = "none";

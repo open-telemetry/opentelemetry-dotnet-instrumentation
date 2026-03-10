@@ -1,15 +1,8 @@
-using NuGet.Frameworks;
-
 namespace DependencyListGenerator.DotNetOutdated.Models;
 
-public class TargetFramework
+public class TargetFramework(string name, IList<Dependency> dependencies)
 {
-    public TargetFramework(NuGetFramework name)
-    {
-        Name = name;
-    }
+    public IList<Dependency> Dependencies { get; } = dependencies;
 
-    public IList<Dependency> Dependencies { get; } = new List<Dependency>();
-
-    public NuGetFramework Name { get; set; }
+    public string Name { get; set; } = name;
 }

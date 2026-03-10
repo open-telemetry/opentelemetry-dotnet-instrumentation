@@ -15,7 +15,7 @@ namespace StarWars;
 ///   }
 /// }.
 /// </example>
-public class StarWarsMutation : ObjectGraphType
+internal sealed class StarWarsMutation : ObjectGraphType
 {
     public StarWarsMutation(StarWarsData data)
     {

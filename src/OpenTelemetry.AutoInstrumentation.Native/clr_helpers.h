@@ -622,9 +622,10 @@ ModuleInfo GetModuleInfo(ICorProfilerInfo7* info, const ModuleID& module_id);
 
 TypeInfo GetTypeInfo(const ComPtr<IMetaDataImport2>& metadata_import, const mdToken& token);
 
-mdAssemblyRef FindAssemblyRef(const ComPtr<IMetaDataAssemblyImport>& assembly_import, const WSTRING& assembly_name);
+mdAssemblyRef FindAssemblyRef(const ComPtr<IMetaDataAssemblyImport>& assembly_import,
+                              const WSTRING& assembly_name, const Version& version);
 
-HRESULT GetCorLibAssemblyRef(const ComPtr<IMetaDataAssemblyEmit>& assembly_emit, AssemblyProperty& corAssemblyProperty,
+HRESULT GetCorLibAssemblyRef(const ComPtr<IMetaDataAssemblyEmit>& assembly_emit, const AssemblyProperty& corAssemblyProperty,
                              mdAssemblyRef* corlib_ref);
 
 bool FindTypeDefByName(const trace::WSTRING instrumentationTargetMethodTypeName, const trace::WSTRING assemblyName,

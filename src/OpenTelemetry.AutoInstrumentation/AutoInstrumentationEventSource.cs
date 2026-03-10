@@ -40,7 +40,7 @@ internal partial class AutoInstrumentationEventSource : EventSource
         WriteEvent(4, message);
     }
 
-    /// <summary>Logs as Warning level message.</summary>
+    /// <summary>Logs as Verbose level message.</summary>
     /// <param name="message">Message to log.</param>
     [Event(5, Message = "{0}", Level = EventLevel.Verbose)]
     public void Verbose(string message)

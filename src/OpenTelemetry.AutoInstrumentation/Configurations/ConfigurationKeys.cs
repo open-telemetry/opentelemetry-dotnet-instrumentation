@@ -3,6 +3,9 @@
 
 using System.Diagnostics;
 using System.Diagnostics.Metrics;
+#if NET
+using System.Text;
+#endif
 using OpenTelemetry.Logs;
 
 namespace OpenTelemetry.AutoInstrumentation.Configurations;
@@ -47,9 +50,46 @@ internal partial class ConfigurationKeys
     public const string ResourceDetectorEnabled = "OTEL_DOTNET_AUTO_RESOURCE_DETECTOR_ENABLED";
 
     /// <summary>
+    /// Configuration key for resource attributes.
+    /// </summary>
+    public const string ResourceAttributes = "OTEL_RESOURCE_ATTRIBUTES";
+
+    /// <summary>
+    /// Configuration key for setting the service name.
+    /// </summary>
+    public const string ServiceName = "OTEL_SERVICE_NAME";
+
+    /// <summary>
     /// Configuration key template for enabling resource detectors.
     /// </summary>
+#if NET
+    public static readonly CompositeFormat EnabledResourceDetectorTemplate = CompositeFormat.Parse("OTEL_DOTNET_AUTO_{0}_RESOURCE_DETECTOR_ENABLED");
+#else
     public const string EnabledResourceDetectorTemplate = "OTEL_DOTNET_AUTO_{0}_RESOURCE_DETECTOR_ENABLED";
+#endif
+
+    /// <summary>
+    /// Configuration keys for file based configuration.
+    /// </summary>
+    public static class FileBasedConfiguration
+    {
+        /// <summary>
+        /// Configuration key for enabling file based configuration.
+        /// </summary>
+        public const string Enabled = "OTEL_EXPERIMENTAL_FILE_BASED_CONFIGURATION_ENABLED";
+
+        /// <summary>
+        /// Configuration key for the deprecated path to the configuration file.
+        /// Default is <c>"config.yaml"</c>.
+        /// </summary>
+        public const string ExperimentalFileName = "OTEL_EXPERIMENTAL_CONFIG_FILE";
+
+        /// <summary>
+        /// Configuration key for the path to the configuration file.
+        /// Default is <c>"config.yaml"</c>.
+        /// </summary>
+        public const string FileName = "OTEL_CONFIG_FILE";
+    }
 
     /// <summary>
     /// Configuration keys for traces.
@@ -78,11 +118,6 @@ internal partial class ConfigurationKeys
         public const string TracesInstrumentationEnabled = "OTEL_DOTNET_AUTO_TRACES_INSTRUMENTATION_ENABLED";
 
         /// <summary>
-        /// Configuration key template for disabled trace instrumentations.
-        /// </summary>
-        public const string EnabledTracesInstrumentationTemplate = "OTEL_DOTNET_AUTO_TRACES_{0}_INSTRUMENTATION_ENABLED";
-
-        /// <summary>
         /// Configuration key for additional <see cref="ActivitySource"/> names to be added to the tracer at the startup.
         /// </summary>
         public const string AdditionalSources = "OTEL_DOTNET_AUTO_TRACES_ADDITIONAL_SOURCES";
@@ -91,6 +126,15 @@ internal partial class ConfigurationKeys
         /// Configuration key for additional legacy source names to be added to the tracer at the startup.
         /// </summary>
         public const string AdditionalLegacySources = "OTEL_DOTNET_AUTO_TRACES_ADDITIONAL_LEGACY_SOURCES";
+
+        /// <summary>
+        /// Configuration key template for disabled trace instrumentations.
+        /// </summary>
+#if NET
+        public static readonly CompositeFormat EnabledTracesInstrumentationTemplate = CompositeFormat.Parse("OTEL_DOTNET_AUTO_TRACES_{0}_INSTRUMENTATION_ENABLED");
+#else
+        public const string EnabledTracesInstrumentationTemplate = "OTEL_DOTNET_AUTO_TRACES_{0}_INSTRUMENTATION_ENABLED";
+#endif
 
         /// <summary>
         /// Configuration keys for instrumentation options.
@@ -121,15 +165,10 @@ internal partial class ConfigurationKeys
             public const string AspNetCoreInstrumentationCaptureResponseHeaders = "OTEL_DOTNET_AUTO_TRACES_ASPNETCORE_INSTRUMENTATION_CAPTURE_RESPONSE_HEADERS";
 
             /// <summary>
-            /// Configuration key for Entity Framework Core instrumentation to enable passing text query as a db.statement attribute.
-            /// </summary>
-            public const string EntityFrameworkCoreSetDbStatementForText = "OTEL_DOTNET_AUTO_ENTITYFRAMEWORKCORE_SET_DBSTATEMENT_FOR_TEXT";
-#endif
-
-            /// <summary>
             /// Configuration key for GraphQL instrumentation to enable passing query as a document attribute.
             /// </summary>
             public const string GraphQLSetDocument = "OTEL_DOTNET_AUTO_GRAPHQL_SET_DOCUMENT";
+#endif
 
             /// <summary>
             /// Configuration key for GrpcNetClient instrumentation to enable capturing request metadata as span tags.
@@ -157,9 +196,9 @@ internal partial class ConfigurationKeys
             public const string OracleMdaSetDbStatementForText = "OTEL_DOTNET_AUTO_ORACLEMDA_SET_DBSTATEMENT_FOR_TEXT";
 
             /// <summary>
-            /// Configuration key for SQL Client instrumentation to enable passing text query as a db.statement attribute.
+            /// Configuration key for enabling IL rewriting of SqlClient on .NET Framework to ensure CommandText is available.
             /// </summary>
-            public const string SqlClientSetDbStatementForText = "OTEL_DOTNET_AUTO_SQLCLIENT_SET_DBSTATEMENT_FOR_TEXT";
+            public const string SqlClientNetFxILRewriteEnabled = "OTEL_DOTNET_AUTO_SQLCLIENT_NETFX_ILREWRITE_ENABLED";
         }
     }
 
@@ -185,14 +224,18 @@ internal partial class ConfigurationKeys
         public const string MetricsInstrumentationEnabled = "OTEL_DOTNET_AUTO_METRICS_INSTRUMENTATION_ENABLED";
 
         /// <summary>
-        /// Configuration key template for enabled metric instrumentations.
-        /// </summary>
-        public const string EnabledMetricsInstrumentationTemplate = "OTEL_DOTNET_AUTO_METRICS_{0}_INSTRUMENTATION_ENABLED";
-
-        /// <summary>
         /// Configuration key for additional <see cref="Meter"/> names to be added to the meter at the startup.
         /// </summary>
         public const string AdditionalSources = "OTEL_DOTNET_AUTO_METRICS_ADDITIONAL_SOURCES";
+
+        /// <summary>
+        /// Configuration key template for enabled metric instrumentations.
+        /// </summary>
+#if NET
+        public static readonly CompositeFormat EnabledMetricsInstrumentationTemplate = CompositeFormat.Parse("OTEL_DOTNET_AUTO_METRICS_{0}_INSTRUMENTATION_ENABLED");
+#else
+        public const string EnabledMetricsInstrumentationTemplate = "OTEL_DOTNET_AUTO_METRICS_{0}_INSTRUMENTATION_ENABLED";
+#endif
     }
 
     /// <summary>
@@ -224,6 +267,12 @@ internal partial class ConfigurationKeys
         public const string EnableLog4NetBridge = "OTEL_DOTNET_AUTO_LOGS_ENABLE_LOG4NET_BRIDGE";
 
         /// <summary>
+        /// Configuration key for whether or not experimental NLog bridge
+        /// should be enabled.
+        /// </summary>
+        public const string EnableNLogBridge = "OTEL_DOTNET_AUTO_LOGS_ENABLE_NLOG_BRIDGE";
+
+        /// <summary>
         /// Configuration key for disabling all log instrumentations.
         /// </summary>
         public const string LogsInstrumentationEnabled = "OTEL_DOTNET_AUTO_LOGS_INSTRUMENTATION_ENABLED";
@@ -231,7 +280,11 @@ internal partial class ConfigurationKeys
         /// <summary>
         /// Configuration key template for enabled log instrumentations.
         /// </summary>
+#if NET
+        public static readonly CompositeFormat EnabledLogsInstrumentationTemplate = CompositeFormat.Parse("OTEL_DOTNET_AUTO_LOGS_{0}_INSTRUMENTATION_ENABLED");
+#else
         public const string EnabledLogsInstrumentationTemplate = "OTEL_DOTNET_AUTO_LOGS_{0}_INSTRUMENTATION_ENABLED";
+#endif
     }
 
     /// <summary>
