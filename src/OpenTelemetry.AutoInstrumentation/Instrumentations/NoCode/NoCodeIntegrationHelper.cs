@@ -74,22 +74,15 @@ internal static class NoCodeIntegrationHelper
                     methodName: noCodeEntry.Definition.TargetMethod,
                     typeName: noCodeEntry.Definition.TargetType);
 
-                var dynamicNameValue = noCodeEntry.DynamicSpanName.Evaluate(context);
-                if (dynamicNameValue != null)
+                var dynamicName = noCodeEntry.DynamicSpanName.Evaluate(context)?.ToString();
+
+                if (!string.IsNullOrEmpty(dynamicName))
                 {
-                    var dynamicNameString = dynamicNameValue.ToString();
-                    if (dynamicNameString != null)
-                    {
-                        spanName = dynamicNameString;
-                    }
-                    else
-                    {
-                        Log.Debug("Dynamic span name ToString() returned null, using static name '{0}'", noCodeEntry.SpanName);
-                    }
+                    spanName = dynamicName;
                 }
                 else
                 {
-                    Log.Debug("Dynamic span name evaluation returned null, using static name '{0}'", noCodeEntry.SpanName);
+                    Log.Debug("Dynamic span name evaluation returned null or empty, using static name '{0}'", noCodeEntry.SpanName);
                 }
             }
             catch (Exception ex)
