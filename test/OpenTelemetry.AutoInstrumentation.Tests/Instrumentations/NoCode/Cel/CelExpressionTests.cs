@@ -964,6 +964,55 @@ public class CelExpressionTests
         Assert.Equal("John Doe", result);
     }
 
+    [Theory]
+    [InlineData("true && true", true)]
+    [InlineData("true && false", false)]
+    [InlineData("false && true", false)]
+    [InlineData("false && false", false)]
+    [InlineData("true || true", true)]
+    [InlineData("true || false", true)]
+    [InlineData("false || true", true)]
+    [InlineData("false || false", false)]
+    public void Evaluate_BinaryOperator_ReturnsCorrectResult(string expression, bool expected)
+    {
+        var expr = CelExpression.Parse(expression);
+        var context = CreateContext();
+
+        var result = expr!.Evaluate(context);
+
+        Assert.Equal(expected, result);
+    }
+
+    [Fact]
+    public void Evaluate_AndOperator_WithFalseLeft_DoesNotEvaluateRight()
+    {
+        // Arrange: Create an expression where the right side would throw if evaluated
+        var expr = CelExpression.Parse("false && instance.ThrowingProperty");
+        var instance = new TestClassWithThrowingProperty();
+        var context = CreateContext(instance: instance);
+
+        // Act: The right side should NOT be evaluated, so no exception should be thrown
+        var result = expr!.Evaluate(context);
+
+        // Assert: Result should be false and no exception should have been thrown
+        Assert.Equal(false, result);
+    }
+
+    [Fact]
+    public void Evaluate_OrOperator_WithTrueLeft_DoesNotEvaluateRight()
+    {
+        // Arrange: Create an expression where the right side would throw if evaluated
+        var expr = CelExpression.Parse("true || instance.ThrowingProperty");
+        var instance = new TestClassWithThrowingProperty();
+        var context = CreateContext(instance: instance);
+
+        // Act: The right side should NOT be evaluated, so no exception should be thrown
+        var result = expr!.Evaluate(context);
+
+        // Assert: Result should be true and no exception should have been thrown
+        Assert.Equal(true, result);
+    }
+
     private static NoCodeExpressionContext CreateContext(
             object? instance = null,
             object?[]? arguments = null,
