@@ -37,12 +37,17 @@ public class PluginsTests : TestHelper
         // Use escape for space as it is not easy to count spaces in the string visually.
         // So, we make sure that plugin with multiple spaces still loads correctly once (type was resolved)
         // But we block second loading of it, even with different original string representation for a type
+#if NETFRAMEWORK
+        var pluginNameDoubleSpace = pluginName.Replace("\x20", "\x20\x20");
+        var pluginNameTripleSpace = pluginName.Replace("\x20", "\x20\x20\x20");
+#else
         var pluginNameDoubleSpace = pluginName.Replace("\x20", "\x20\x20", StringComparison.Ordinal);
         var pluginNameTripleSpace = pluginName.Replace("\x20", "\x20\x20\x20", StringComparison.Ordinal);
+#endif
 
         SetEnvironmentVariable(
             "OTEL_DOTNET_AUTO_PLUGINS",
-            $"{pluginName.Replace("\x20", "\x20\x20", StringComparison.InvariantCulture)} : {pluginName.Replace("\x20", "\x20\x20\x20", StringComparison.InvariantCulture)}");
+            $"{pluginNameDoubleSpace} : {pluginNameTripleSpace}");
 
         var (standardOutput, _, _) = RunTestApplication();
         var firstIndex = standardOutput.IndexOf(PluginInitPattern, StringComparison.Ordinal);
