@@ -731,6 +731,19 @@ public class CelExpressionTests
     }
 
     [Fact]
+    public void Evaluate_SizeFunction_WithHashSet_ReturnsCount()
+    {
+        var hashSet = new HashSet<int> { 1, 2, 3, 4, 5 };
+        var arguments = new object[] { hashSet };
+        var expr = CelExpression.Parse("size(arguments[0])");
+        var context = new NoCodeExpressionContext(null, arguments, null, null, null);
+
+        var result = expr!.Evaluate(context);
+
+        Assert.Equal(5, result);
+    }
+
+    [Fact]
     public void Evaluate_UnknownFunction_ReturnsNull()
     {
         // This tests the default case in CelFunctionCallNode.Evaluate
