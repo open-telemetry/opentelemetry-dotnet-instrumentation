@@ -33,7 +33,6 @@ for further details.
 > Remember to restart IIS after making configuration changes.
 > You can do it by executing `iisreset.exe`.
 
-
 > [!WARNING]
 > When multiple ASP.NET (.NET Framework) applications share the same
 > Application Pool, they run inside a single `w3wp.exe` process. `OTEL_*`
