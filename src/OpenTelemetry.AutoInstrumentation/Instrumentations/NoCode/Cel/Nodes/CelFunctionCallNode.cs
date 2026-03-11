@@ -1,6 +1,9 @@
 // Copyright The OpenTelemetry Authors
 // SPDX-License-Identifier: Apache-2.0
 
+using OpenTelemetry.AutoInstrumentation.DuckTyping;
+using OpenTelemetry.AutoInstrumentation.Instrumentations.NoCode.Cel.DuckTypes;
+
 namespace OpenTelemetry.AutoInstrumentation.Instrumentations.NoCode.Cel;
 
 /// <summary>
@@ -41,7 +44,7 @@ internal sealed class CelFunctionCallNode : CelNode
         return value?.ToString() ?? string.Empty;
     }
 
-    private object? EvaluateSize(NoCodeExpressionContext context)
+    private int? EvaluateSize(NoCodeExpressionContext context)
     {
         if (_arguments.Length != 1)
         {
@@ -49,13 +52,32 @@ internal sealed class CelFunctionCallNode : CelNode
         }
 
         var value = _arguments[0].Evaluate(context);
-        return value switch
+        if (value == null)
         {
-            string s => s.Length,
-            Array a => a.Length,
-            System.Collections.ICollection c => c.Count,
-            _ => null
-        };
+            return null;
+        }
+
+        switch (value)
+        {
+            case string s:
+                return s.Length;
+            case Array a:
+                return a.Length;
+            case System.Collections.ICollection c:
+                return c.Count;
+            default:
+                if (value.TryDuckCast<IHasCount>(out var hasCount))
+                {
+                    return hasCount.Count;
+                }
+
+                if (value.TryDuckCast<IHasLength>(out var hasLength))
+                {
+                    return hasLength.Length;
+                }
+
+                return null;
+        }
     }
 
     private bool EvaluateStartsWith(NoCodeExpressionContext context)

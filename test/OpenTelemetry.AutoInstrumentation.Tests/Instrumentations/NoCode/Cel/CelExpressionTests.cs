@@ -10,6 +10,23 @@ namespace OpenTelemetry.AutoInstrumentation.Tests.Instrumentations.NoCode.Cel;
 
 public class CelExpressionTests
 {
+    public static TheoryData<object?, string, int> SizeFunctionTestCases()
+    {
+        return new TheoryData<object?, string, int>
+        {
+            { null, "size(\"hello\")", 5 },
+            { new object[] { "a", "b", "c", "d" }, "size(arguments[0])", 4 },
+            { new List<string> { "first", "second", "third" }, "size(arguments[0])", 3 },
+            { new HashSet<int> { 1, 2, 3, 4, 5 }, "size(arguments[0])", 5 },
+            { new Dictionary<string, int> { { "a", 1 }, { "b", 2 }, { "c", 3 } }, "size(arguments[0])", 3 },
+            { new List<string> { "a", "b", "c", "d" }.AsReadOnly(), "size(arguments[0])", 4 },
+            { new ArrayList { "a", "b", "c" }, "size(arguments[0])", 3 },
+            { new Queue<string>(["a", "b", "c"]), "size(arguments[0])", 3 },
+            { new Stack<string>(["a", "b"]), "size(arguments[0])", 2 },
+            { new LinkedList<string>(["a", "b", "c", "d"]), "size(arguments[0])", 4 }
+        };
+    }
+
     [Theory]
     [InlineData("instance")]
     [InlineData("arguments")]
@@ -309,15 +326,17 @@ public class CelExpressionTests
         Assert.Equal("123", result);
     }
 
-    [Fact]
-    public void Evaluate_Size_StringLength_ReturnsLength()
+    [Theory]
+    [MemberData(nameof(SizeFunctionTestCases))]
+    public void Evaluate_SizeFunction_WithVariousTypes_ReturnsCorrectCount(object? collectionValue, string expression, int expectedCount)
     {
-        var expr = CelExpression.Parse("size(\"hello\")");
-        var context = CreateContext();
+        var expr = CelExpression.Parse(expression);
+        var arguments = collectionValue != null ? new object[] { collectionValue } : null;
+        var context = new NoCodeExpressionContext(null, arguments, null, null, null);
 
         var result = expr!.Evaluate(context);
 
-        Assert.Equal(5, result);
+        Assert.Equal(expectedCount, result);
     }
 
     [Fact]
@@ -661,18 +680,6 @@ public class CelExpressionTests
         var result = expr!.Evaluate(context);
 
         Assert.Null(result);
-    }
-
-    [Fact]
-    public void Evaluate_SizeFunction_WithArray_ReturnsLength()
-    {
-        var args = new object[] { "a", "b", "c", "d" };
-        var expr = CelExpression.Parse("size(arguments)");
-        var context = new NoCodeExpressionContext(null, args, null, null, null);
-
-        var result = expr!.Evaluate(context);
-
-        Assert.Equal(4, result);
     }
 
     [Fact]
