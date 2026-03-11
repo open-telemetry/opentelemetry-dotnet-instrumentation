@@ -28,7 +28,7 @@ An example of this type of instrumentation is a library such as `Npgsql`, which 
 code. An end user, or auto instrumentation does not need to bring in additional dependencies to make the instrumentation available. The maintenance of this
 code is outside of the scope of auto instrumentation. The ability to control which version of the instrumentation is used, is also outside of the control
 of auto instrumentation. For example, if an end user is using `Npgsql` version 6 in their application, they will be tied to the semantic conventions
-produced by that version of the library. Auto instrumentation will should not upgrade or download the `Npgsql` version just to enforce that a specific 
+produced by that version of the library. Auto instrumentation will not upgrade or download the `Npgsql` version just to enforce that a specific 
 semantic convention version is used between minor releases of auto instrumentation.
 
 Auto instrumentation does not need to test for semantic convention compliance for natively instrumented code. Semantic convention compliance is defined 
