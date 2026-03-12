@@ -110,6 +110,9 @@ internal class IsolatedAssemblyLoadContext()
             var tpaVersion = AssemblyUtils.GetAssemblyVersionSafe(tpaPath);
             var agentVersion = AssemblyUtils.GetAssemblyVersionSafe(agentPath);
 
+            // TODO we should also check the file version when the assembly versions are the same
+            //  e.g. System.Diagnostics.DiagnosticSource from package 10.0.0 and 10.0.2 have the same assembly version
+
             // Agent wins ONLY if strictly higher
             return agentVersion > tpaVersion ? agentPath : tpaPath;
         }

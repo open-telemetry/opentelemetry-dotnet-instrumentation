@@ -80,6 +80,7 @@ internal class StartupHook
                 catch (TargetInvocationException ex)
                 {
                     Logger.Error(ex.InnerException ?? ex, "Target entrypoint threw exception");
+                    // TODO this exits the process but hides the error
                     Environment.Exit(-1);
                 }
 
