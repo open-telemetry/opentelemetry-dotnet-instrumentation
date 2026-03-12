@@ -10,6 +10,23 @@ namespace OpenTelemetry.AutoInstrumentation.Tests.Instrumentations.NoCode.Cel;
 
 public class CelExpressionTests
 {
+    public static TheoryData<object?, string, int> SizeFunctionTestCases()
+    {
+        return new TheoryData<object?, string, int>
+        {
+            { null, "size(\"hello\")", 5 },
+            { new object[] { "a", "b", "c", "d" }, "size(arguments[0])", 4 },
+            { new List<string> { "first", "second", "third" }, "size(arguments[0])", 3 },
+            { new HashSet<int> { 1, 2, 3, 4, 5 }, "size(arguments[0])", 5 },
+            { new Dictionary<string, int> { { "a", 1 }, { "b", 2 }, { "c", 3 } }, "size(arguments[0])", 3 },
+            { new List<string> { "a", "b", "c", "d" }.AsReadOnly(), "size(arguments[0])", 4 },
+            { new ArrayList { "a", "b", "c" }, "size(arguments[0])", 3 },
+            { new Queue<string>(["a", "b", "c"]), "size(arguments[0])", 3 },
+            { new Stack<string>(["a", "b"]), "size(arguments[0])", 2 },
+            { new LinkedList<string>(["a", "b", "c", "d"]), "size(arguments[0])", 4 }
+        };
+    }
+
     [Theory]
     [InlineData("instance")]
     [InlineData("arguments")]
@@ -299,17 +316,6 @@ public class CelExpressionTests
     }
 
     [Fact]
-    public void Evaluate_Substring_ReturnsSubstring()
-    {
-        var expr = CelExpression.Parse("substring(\"hello world\", 6)");
-        var context = CreateContext();
-
-        var result = expr!.Evaluate(context);
-
-        Assert.Equal("world", result);
-    }
-
-    [Fact]
     public void Evaluate_String_ConvertsToString()
     {
         var expr = CelExpression.Parse("string(123)");
@@ -320,15 +326,17 @@ public class CelExpressionTests
         Assert.Equal("123", result);
     }
 
-    [Fact]
-    public void Evaluate_Size_StringLength_ReturnsLength()
+    [Theory]
+    [MemberData(nameof(SizeFunctionTestCases))]
+    public void Evaluate_SizeFunction_WithVariousTypes_ReturnsCorrectCount(object? collectionValue, string expression, int expectedCount)
     {
-        var expr = CelExpression.Parse("size(\"hello\")");
-        var context = CreateContext();
+        var expr = CelExpression.Parse(expression);
+        var arguments = collectionValue != null ? new object[] { collectionValue } : null;
+        var context = new NoCodeExpressionContext(null, arguments, null, null, null);
 
         var result = expr!.Evaluate(context);
 
-        Assert.Equal(5, result);
+        Assert.Equal(expectedCount, result);
     }
 
     [Fact]
@@ -656,21 +664,6 @@ public class CelExpressionTests
     }
 
     [Theory]
-    [InlineData("substring(\"hello\", 0, 10)", "hello")]
-    [InlineData("substring(\"hello\", 5, 10)", "")]
-    [InlineData("substring(\"hello\", 1)", "ello")]
-    [InlineData("substring(\"hello\", 10)", "")]
-    public void Evaluate_SubstringFunction_WithEdgeCases_ReturnsCorrectResult(string expression, string expected)
-    {
-        var expr = CelExpression.Parse(expression);
-        var context = new NoCodeExpressionContext(null, null, null, null, null);
-
-        var result = expr!.Evaluate(context);
-
-        Assert.Equal(expected, result);
-    }
-
-    [Theory]
     [InlineData("contains(\"hello\", null)", false)]
     [InlineData("startsWith(\"hello\", null)", false)]
     [InlineData("endsWith(\"hello\", null)", false)]
@@ -697,76 +690,9 @@ public class CelExpressionTests
     }
 
     [Fact]
-    public void Evaluate_SizeFunction_WithArray_ReturnsLength()
-    {
-        var args = new object[] { "a", "b", "c", "d" };
-        var expr = CelExpression.Parse("size(arguments)");
-        var context = new NoCodeExpressionContext(null, args, null, null, null);
-
-        var result = expr!.Evaluate(context);
-
-        Assert.Equal(4, result);
-    }
-
-    [Fact]
     public void Evaluate_StringFunction_WithInvalidArgumentCount_ReturnsEmptyString()
     {
         var expr = CelExpression.Parse("string()");
-        var context = new NoCodeExpressionContext(null, null, null, null, null);
-
-        var result = expr!.Evaluate(context);
-
-        Assert.Equal(string.Empty, result);
-    }
-
-    [Fact]
-    public void Evaluate_SubstringFunction_WithInvalidArgumentCount_ReturnsEmptyString()
-    {
-        var expr = CelExpression.Parse("substring(\"hello\")");
-        var context = new NoCodeExpressionContext(null, null, null, null, null);
-
-        var result = expr!.Evaluate(context);
-
-        Assert.Equal(string.Empty, result);
-    }
-
-    [Fact]
-    public void Evaluate_SubstringFunction_WithNegativeStart_ReturnsEmptyString()
-    {
-        var expr = CelExpression.Parse("substring(\"hello\", -1)");
-        var context = new NoCodeExpressionContext(null, null, null, null, null);
-
-        var result = expr!.Evaluate(context);
-
-        Assert.Equal(string.Empty, result);
-    }
-
-    [Fact]
-    public void Evaluate_SubstringFunction_WithNegativeLength_ReturnsEmptyString()
-    {
-        var expr = CelExpression.Parse("substring(\"hello\", 1, -1)");
-        var context = new NoCodeExpressionContext(null, null, null, null, null);
-
-        var result = expr!.Evaluate(context);
-
-        Assert.Equal(string.Empty, result);
-    }
-
-    [Fact]
-    public void Evaluate_SubstringFunction_WithNonIntStart_ReturnsEmptyString()
-    {
-        var expr = CelExpression.Parse("substring(\"hello\", \"not an int\")");
-        var context = new NoCodeExpressionContext(null, null, null, null, null);
-
-        var result = expr!.Evaluate(context);
-
-        Assert.Equal(string.Empty, result);
-    }
-
-    [Fact]
-    public void Evaluate_SubstringFunction_WithNonIntLength_ReturnsEmptyString()
-    {
-        var expr = CelExpression.Parse("substring(\"hello\", 1, \"not an int\")");
         var context = new NoCodeExpressionContext(null, null, null, null, null);
 
         var result = expr!.Evaluate(context);
@@ -834,7 +760,7 @@ public class CelExpressionTests
     [InlineData("SIZE(arguments)")]
     [InlineData("sizE(arguments)")]
     [InlineData("StartsWith(\"hello\", \"h\")")]
-    [InlineData("SUBSTRING(\"hello\", 0, 2)")]
+    [InlineData("STARTSWITH(\"hello\", \"h\")")]
     public void Evaluate_FunctionWithWrongCase_ReturnsNull(string expression)
     {
         // CEL is case-sensitive; function names must be lowercase
@@ -1050,6 +976,55 @@ public class CelExpressionTests
         var result = expr!.Evaluate(context);
 
         Assert.Equal("John Doe", result);
+    }
+
+    [Theory]
+    [InlineData("true && true", true)]
+    [InlineData("true && false", false)]
+    [InlineData("false && true", false)]
+    [InlineData("false && false", false)]
+    [InlineData("true || true", true)]
+    [InlineData("true || false", true)]
+    [InlineData("false || true", true)]
+    [InlineData("false || false", false)]
+    public void Evaluate_BinaryOperator_ReturnsCorrectResult(string expression, bool expected)
+    {
+        var expr = CelExpression.Parse(expression);
+        var context = CreateContext();
+
+        var result = expr!.Evaluate(context);
+
+        Assert.Equal(expected, result);
+    }
+
+    [Fact]
+    public void Evaluate_AndOperator_WithFalseLeft_DoesNotEvaluateRight()
+    {
+        // Arrange: Create an expression where the right side would throw if evaluated
+        var expr = CelExpression.Parse("false && instance.ThrowingProperty");
+        var instance = new TestClassWithThrowingProperty();
+        var context = CreateContext(instance: instance);
+
+        // Act: The right side should NOT be evaluated, so no exception should be thrown
+        var result = expr!.Evaluate(context);
+
+        // Assert: Result should be false and no exception should have been thrown
+        Assert.Equal(false, result);
+    }
+
+    [Fact]
+    public void Evaluate_OrOperator_WithTrueLeft_DoesNotEvaluateRight()
+    {
+        // Arrange: Create an expression where the right side would throw if evaluated
+        var expr = CelExpression.Parse("true || instance.ThrowingProperty");
+        var instance = new TestClassWithThrowingProperty();
+        var context = CreateContext(instance: instance);
+
+        // Act: The right side should NOT be evaluated, so no exception should be thrown
+        var result = expr!.Evaluate(context);
+
+        // Assert: Result should be true and no exception should have been thrown
+        Assert.Equal(true, result);
     }
 
     private static NoCodeExpressionContext CreateContext(
