@@ -33,6 +33,18 @@ for further details.
 > Remember to restart IIS after making configuration changes.
 > You can do it by executing `iisreset.exe`.
 
+For ASP.NET application you can configure the most common `OTEL_` settings
+(like `OTEL_SERVICE_NAME`) via `appSettings` in `Web.config`.
+
+If a service name is not explicitly configured, one will be generated for you.
+If the application is hosted on IIS in .NET Framework this will use
+`SiteName\VirtualDirectoryPath` ex: `MySite\MyApp`
+
+For ASP.NET Core application you can use
+the [`<environmentVariable>`](https://docs.microsoft.com/en-us/aspnet/core/host-and-deploy/iis/web-config#set-environment-variables)
+elements inside the `<aspNetCore>` block of your `Web.config` file
+to set configuration via environment variables.
+
 > [!WARNING]
 > When multiple ASP.NET (.NET Framework) applications share the same
 > Application Pool, they run inside a single `w3wp.exe` process. `OTEL_*`
@@ -45,18 +57,6 @@ for further details.
 > (`SiteName\VirtualPath`): because the OTel SDK is initialized only once
 > per process, all applications in the pool share the service name of the
 > first application to start.
-
-For ASP.NET application you can configure the most common `OTEL_` settings
-(like `OTEL_SERVICE_NAME`) via `appSettings` in `Web.config`.
-
-If a service name is not explicitly configured, one will be generated for you.
-If the application is hosted on IIS in .NET Framework this will use
-`SiteName\VirtualDirectoryPath` ex: `MySite\MyApp`
-
-For ASP.NET Core application you can use
-the [`<environmentVariable>`](https://docs.microsoft.com/en-us/aspnet/core/host-and-deploy/iis/web-config#set-environment-variables)
-elements inside the `<aspNetCore>` block of your `Web.config` file
-to set configuration via environment variables.
 
 ### Advanced configuration
 
