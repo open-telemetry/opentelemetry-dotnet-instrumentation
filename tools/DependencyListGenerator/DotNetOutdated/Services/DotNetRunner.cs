@@ -18,7 +18,8 @@ public static class DotNetRunner
         // 2. Check if the file actually exists. If not, just use "dotnet"
         // and let the OS find it in the PATH.
         // on Linux DotNetExe.FullPathOrDefault() may wrongly return "/usr/local/share/dotnet/dotnet"
-        if (dotnetPath == null || !File.Exists(dotnetPath))
+        // https://github.com/natemcmaster/CommandLineUtils/issues/600
+        if (!File.Exists(dotnetPath))
         {
             dotnetPath = "dotnet";
         }

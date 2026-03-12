@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 using System.Diagnostics;
+using System.Globalization;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using OpenTelemetry.AutoInstrumentation.CallTarget;
@@ -20,7 +21,7 @@ internal static class NoCodeIntegrationHelper
 
     internal static List<NoCodeInstrumentedMethod> NoCodeEntries { get; set; } = [];
 
-    internal static CallTargetState OnMethodBegin()
+    internal static CallTargetState OnMethodBegin<TInstance>(TInstance? instance, object?[]? arguments)
     {
         var noCodeEntry = GetInstrumentedMethod();
 
@@ -30,9 +31,71 @@ internal static class NoCodeIntegrationHelper
             return CallTargetState.GetDefault();
         }
 
-        // TODO Consider execute some dynamic code to build name/span/attributes based on config and taking data from method parameters
-        var activity = Source.StartActivity(name: noCodeEntry.SpanName, kind: noCodeEntry.ActivityKind, tags: noCodeEntry.Attributes);
-        return new CallTargetState(activity, null);
+        // Start with static attributes
+        var tags = noCodeEntry.Attributes;
+
+        // Evaluate and add dynamic attributes
+        if (noCodeEntry.DynamicAttributes.Count > 0)
+        {
+            var context = new NoCodeExpressionContext(
+                instance: instance,
+                arguments: arguments,
+                returnValue: null,
+                methodName: noCodeEntry.Definition.TargetMethod,
+                typeName: noCodeEntry.Definition.TargetType);
+
+            foreach (var dynamicAttr in noCodeEntry.DynamicAttributes)
+            {
+                try
+                {
+                    var value = dynamicAttr.Evaluate(context);
+                    if (value != null)
+                    {
+                        AddTagValue(ref tags, dynamicAttr.Name, value, dynamicAttr.Type);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Log.Debug("Failed to evaluate dynamic attribute '{0}': {1}", dynamicAttr.Name, ex.Message);
+                }
+            }
+        }
+
+        // Evaluate dynamic span name if configured
+        var spanName = noCodeEntry.SpanName;
+        if (noCodeEntry.DynamicSpanName != null)
+        {
+            try
+            {
+                var context = new NoCodeExpressionContext(
+                    instance: instance,
+                    arguments: arguments,
+                    returnValue: null,
+                    methodName: noCodeEntry.Definition.TargetMethod,
+                    typeName: noCodeEntry.Definition.TargetType);
+
+                var dynamicName = noCodeEntry.DynamicSpanName.Evaluate(context)?.ToString();
+
+                if (!string.IsNullOrEmpty(dynamicName))
+                {
+                    spanName = dynamicName!;
+                }
+                else
+                {
+                    Log.Debug("Dynamic span name evaluation returned null or empty, using static name '{0}'", noCodeEntry.SpanName);
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.Debug("Failed to evaluate dynamic span name, using static name '{0}'. Error: {1}", noCodeEntry.SpanName, ex.Message);
+            }
+        }
+
+        var activity = Source.StartActivity(name: spanName, kind: noCodeEntry.ActivityKind, tags: tags);
+
+        // Store state for OnMethodEnd (needed for status rules evaluation)
+        var noCodeState = new NoCodeCallTargetState(noCodeEntry, instance, arguments, noCodeEntry.Definition.TargetMethod, noCodeEntry.Definition.TargetType);
+        return new CallTargetState(activity, noCodeState);
     }
 
     internal static CallTargetReturn<TReturn> OnMethodEnd<TReturn>(TReturn returnValue, Exception? exception, in CallTargetState state)
@@ -46,7 +109,6 @@ internal static class NoCodeIntegrationHelper
         var returnType = typeof(TReturn);
         if (returnType.IsGenericType)
         {
-            var genericReturnType = returnType.GetGenericTypeDefinition();
             if (typeof(Task).IsAssignableFrom(returnType))
             {
                 // The type is a Task<>
@@ -54,6 +116,7 @@ internal static class NoCodeIntegrationHelper
             }
 #if NET
 
+            var genericReturnType = returnType.GetGenericTypeDefinition();
             if (genericReturnType == typeof(ValueTask<>))
             {
                 // The type is a ValueTask<>
@@ -78,7 +141,7 @@ internal static class NoCodeIntegrationHelper
 #endif
         }
 
-        HandleActivity(exception, activity);
+        StopActivity(returnValue, exception, activity, state.State as NoCodeCallTargetState);
 
         return new CallTargetReturn<TReturn>(returnValue);
     }
@@ -91,7 +154,7 @@ internal static class NoCodeIntegrationHelper
             return returnValue;
         }
 
-        HandleActivity(exception, activity);
+        StopActivity(returnValue, exception, activity, state.State as NoCodeCallTargetState);
 
         return returnValue;
     }
@@ -104,16 +167,45 @@ internal static class NoCodeIntegrationHelper
             return CallTargetReturn.GetDefault();
         }
 
-        HandleActivity(exception, activity);
+        StopActivity<object>(null, exception, activity, state.State as NoCodeCallTargetState);
 
         return CallTargetReturn.GetDefault();
     }
 
-    private static void HandleActivity(Exception? exception, Activity activity)
+    private static void StopActivity<TReturn>(TReturn? returnValue, Exception? exception, Activity activity, NoCodeCallTargetState? noCodeState)
     {
+        // Handle exception first
         if (exception is not null)
         {
             activity.SetException(exception);
+            activity.SetStatus(ActivityStatusCode.Error, exception.Message);
+        }
+
+        // Apply status rules if configured
+        if (noCodeState?.Entry.StatusRules.Count > 0)
+        {
+            var context = new NoCodeExpressionContext(
+                instance: noCodeState.Instance,
+                arguments: noCodeState.Arguments,
+                returnValue: returnValue,
+                methodName: noCodeState.MethodName,
+                typeName: noCodeState.TypeName);
+
+            foreach (var rule in noCodeState.Entry.StatusRules)
+            {
+                try
+                {
+                    if (rule.EvaluateCondition(context))
+                    {
+                        activity.SetStatus(rule.StatusCode, rule.Description);
+                        break; // First matching rule wins
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Log.Debug("Failed to evaluate status rule: {0}", ex.Message);
+                }
+            }
         }
 
         activity.Stop();
@@ -230,5 +322,145 @@ internal static class NoCodeIntegrationHelper
         }
 
         return type.IsDefined(typeof(CompilerGeneratedAttribute), false);
+    }
+
+    private static void AddTagValue(ref TagList tags, string name, object value, string type)
+    {
+        try
+        {
+            switch (type)
+            {
+                case "string":
+                    tags.Add(name, value.ToString());
+                    break;
+
+                case "int":
+                    if (value is long longValue)
+                    {
+                        tags.Add(name, longValue);
+                    }
+                    else if (value is int intValue)
+                    {
+                        tags.Add(name, (long)intValue);
+                    }
+                    else if (long.TryParse(value.ToString(), NumberStyles.Integer, CultureInfo.InvariantCulture, out var parsedLong))
+                    {
+                        tags.Add(name, parsedLong);
+                    }
+                    else
+                    {
+                        Log.Debug("Cannot convert value to int for attribute '{0}': {1}", name, value);
+                    }
+
+                    break;
+
+                case "double":
+                    if (value is double doubleValue)
+                    {
+                        tags.Add(name, doubleValue);
+                    }
+                    else if (value is float floatValue)
+                    {
+                        tags.Add(name, (double)floatValue);
+                    }
+                    else if (value is decimal decimalValue)
+                    {
+                        tags.Add(name, (double)decimalValue);
+                    }
+                    else if (double.TryParse(value.ToString(), NumberStyles.Float, CultureInfo.InvariantCulture, out var parsedDouble))
+                    {
+                        tags.Add(name, parsedDouble);
+                    }
+                    else
+                    {
+                        Log.Debug("Cannot convert value to double for attribute '{0}': {1}", name, value);
+                    }
+
+                    break;
+
+                case "bool":
+                    if (value is bool boolValue)
+                    {
+                        tags.Add(name, boolValue);
+                    }
+                    else if (bool.TryParse(value.ToString(), out var parsedBool))
+                    {
+                        tags.Add(name, parsedBool);
+                    }
+                    else
+                    {
+                        Log.Debug("Cannot convert value to bool for attribute '{0}': {1}", name, value);
+                    }
+
+                    break;
+
+                case "string_array":
+                    if (value is string[] stringArray)
+                    {
+                        tags.Add(name, stringArray);
+                    }
+                    else
+                    {
+                        Log.Debug("Expected string[] for attribute '{0}' but got {1}", name, value.GetType().Name);
+                    }
+
+                    break;
+
+                case "int_array":
+                    if (value is long[] longArray)
+                    {
+                        tags.Add(name, longArray);
+                    }
+                    else if (value is int[] intArray)
+                    {
+                        // Convert int[] to long[] since TagList expects long[]
+                        tags.Add(name, Array.ConvertAll(intArray, x => (long)x));
+                    }
+                    else
+                    {
+                        Log.Debug("Expected long[] or int[] for attribute '{0}' but got {1}", name, value.GetType().Name);
+                    }
+
+                    break;
+
+                case "double_array":
+                    if (value is double[] doubleArray)
+                    {
+                        tags.Add(name, doubleArray);
+                    }
+                    else if (value is float[] floatArray)
+                    {
+                        // Convert float[] to double[] since TagList expects double[]
+                        tags.Add(name, Array.ConvertAll(floatArray, x => (double)x));
+                    }
+                    else
+                    {
+                        Log.Debug("Expected double[] or float[] for attribute '{0}' but got {1}", name, value.GetType().Name);
+                    }
+
+                    break;
+
+                case "bool_array":
+                    if (value is bool[] boolArray)
+                    {
+                        tags.Add(name, boolArray);
+                    }
+                    else
+                    {
+                        Log.Debug("Expected bool[] for attribute '{0}' but got {1}", name, value.GetType().Name);
+                    }
+
+                    break;
+
+                default:
+                    // Default to string representation
+                    tags.Add(name, value.ToString());
+                    break;
+            }
+        }
+        catch (Exception ex)
+        {
+            Log.Debug("Failed to add tag value for attribute '{0}': {1}", name, ex.Message);
+        }
     }
 }

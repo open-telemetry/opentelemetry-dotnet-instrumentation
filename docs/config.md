@@ -39,6 +39,15 @@ with environment variables taking precedence over `App.config` or `Web.config` f
     </configuration>
     ```
 
+    > [!NOTE]
+    > On .NET Framework, `OTEL_*` values from `Web.config` or `App.config` are
+    > promoted to process-level environment variables at startup, and the OTel
+    > SDK is initialized only once per process. In IIS, where multiple
+    > applications can share a single worker process (Application Pool), this
+    > means the first application to start determines the configuration for all
+    > applications in that pool.
+    > See [IIS instrumentation](iis-instrumentation.md) for details.
+
 3. Service name automatic detection
 
    If no service name is explicitly configured one will be generated for you.

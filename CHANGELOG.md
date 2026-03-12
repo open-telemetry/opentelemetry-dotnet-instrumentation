@@ -15,6 +15,10 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 - Add support for `OTEL_CONFIG_FILE` environment variable for file-based configuration.
   This variable takes precedence over the deprecated
   `OTEL_EXPERIMENTAL_CONFIG_FILE` environment variable.
+- Configuration based instrumentation support dynamic evaluation for
+  - span names,
+  - attribute values,
+  - statuses.
 
 ### Changed
 
@@ -24,6 +28,7 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
   - Added `db.operation.batch.size` attribute,
   - Added the `db.response.status_code` and `error.type` attributes to error spans,
   - Removed the `network.peer.address` and `network.peer.port` attributes.
+- Plugins limited to one instance per type.
 
 #### Dependency updates
 
