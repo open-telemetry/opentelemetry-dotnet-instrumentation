@@ -33,6 +33,19 @@ for further details.
 > Remember to restart IIS after making configuration changes.
 > You can do it by executing `iisreset.exe`.
 
+> [!WARNING]
+> When multiple ASP.NET (.NET Framework) applications share the same
+> Application Pool, they run inside a single `w3wp.exe` process. `OTEL_*`
+> settings read from each application's `Web.config` are promoted to
+> **process-level** environment variables at startup. Because process-level
+> variables can only be set once, the first application to initialize in the
+> pool establishes the configuration for **all** applications in that pool.
+> Any `Web.config` `OTEL_*` overrides in applications that start later will
+> be silently ignored. This includes the automatic service name detection
+> (`SiteName\VirtualPath`): because the OTel SDK is initialized only once
+> per process, all applications in the pool share the service name of the
+> first application to start.
+
 For ASP.NET application you can configure the most common `OTEL_` settings
 (like `OTEL_SERVICE_NAME`) via `appSettings` in `Web.config`.
 
