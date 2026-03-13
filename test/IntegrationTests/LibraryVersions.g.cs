@@ -427,6 +427,35 @@ public static partial class LibraryVersion
             return theoryData;
         }
     }
+    public static TheoryData<string> AssemblyRedirection
+    {
+        get
+        {
+            TheoryData<string> theoryData =
+            [
+#if DEFAULT_TEST_PACKAGE_VERSIONS
+                string.Empty,
+#else
+#if NET8_0
+                "8.0.0",
+#endif
+#if NET9_0
+                "9.0.0",
+#endif
+#if NET462
+                "6.0.0",
+#endif
+#if NET8_0 || NET9_0
+                "10.0.0",
+#endif
+#if NET462 || NET10_0
+                "10.0.2",
+#endif
+#endif
+            ];
+            return theoryData;
+        }
+    }
     public static TheoryData<string> WCFCoreServer
     {
         get
@@ -469,6 +498,7 @@ public static partial class LibraryVersion
        { "StackExchangeRedis", StackExchangeRedis },
        { "WCFCoreClient", WCFCoreClient },
        { "Kafka", Kafka },
+       { "AssemblyRedirection", AssemblyRedirection },
        { "WCFCoreServer", WCFCoreServer },
     };
 }
