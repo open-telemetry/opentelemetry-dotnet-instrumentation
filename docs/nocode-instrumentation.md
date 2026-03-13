@@ -159,10 +159,17 @@ logical operators), values are evaluated for truthiness according to their type.
 |---------------|-----------------------------|------------------------------------------------------|
 | `bool`        | The value itself            | `true` is truthy, `false` is falsy                   |
 | `string`      | Non-null and non-empty      | `"text"` is truthy, `""` is falsy                    |
+| `byte`        | Non-zero                    | `1` is truthy, `0` is falsy                          |
+| `sbyte`       | Non-zero                    | `1` is truthy, `0` is falsy                          |
+| `short`       | Non-zero                    | `1` is truthy, `0` is falsy                          |
+| `ushort`      | Non-zero                    | `1` is truthy, `0` is falsy                          |
 | `int`         | Non-zero                    | `1` is truthy, `0` is falsy                          |
-| `long`        | Non-zero                    | `100L` is truthy, `0L` is falsy                      |
-| `double`      | Absolute value > 0          | `1.23` is truthy, `0.0` is falsy                     |
+| `uint`        | Non-zero                    | `1u` is truthy, `0u` is falsy                        |
+| `long`        | Non-zero                    | `1L` is truthy, `0L` is falsy                        |
+| `ulong`       | Non-zero                    | `1UL` is truthy, `0UL` is falsy                      |
 | `float`       | Absolute value > 0          | `1.23f` is truthy, `0.0f` is falsy                   |
+| `double`      | Absolute value > 0          | `1.23` is truthy, `0.0` is falsy                     |
+| `decimal`     | Non-zero                    | `1.5m` is truthy, `0m` is falsy                      |
 | `null`        | Always falsy                | Always treated as false                              |
 | Other objects | Non-null objects are truthy | Custom objects are truthy if not null, falsy if null |
 

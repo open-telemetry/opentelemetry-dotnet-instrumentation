@@ -19,6 +19,7 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
   - span names,
   - attribute values,
   - statuses.
+- Add file existence validation for file-based configuration.
 
 ### Changed
 

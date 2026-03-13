@@ -8,6 +8,18 @@ namespace OpenTelemetry.AutoInstrumentation.Tests.Instrumentations.NoCode.Cel;
 
 public class CelHelpersTests
 {
+    public static TheoryData<decimal, bool> DecimalTestCases() =>
+        new()
+        {
+            { 0m, false },
+            { 1m, true },
+            { -1m, true },
+            { 0.1m, true },
+            { -0.1m, true },
+            { decimal.MaxValue, true },
+            { decimal.MinValue, true }
+        };
+
     [Theory]
     [InlineData(true, true)]
     [InlineData(false, false)]
@@ -110,6 +122,83 @@ public class CelHelpersTests
     [InlineData(0.0000001f, true)]
     [InlineData(-0.0000001f, true)]
     public void IsTrue_WithFloatCloseToZero_ReturnsTrue(float value, bool expected)
+    {
+        var result = CelHelpers.IsTrue(value);
+
+        Assert.Equal(expected, result);
+    }
+
+    [Theory]
+    [InlineData((byte)0, false)]
+    [InlineData((byte)1, true)]
+    [InlineData((byte)255, true)]
+    public void IsTrue_WithByte_ReturnsCorrectValue(byte value, bool expected)
+    {
+        var result = CelHelpers.IsTrue(value);
+
+        Assert.Equal(expected, result);
+    }
+
+    [Theory]
+    [InlineData((sbyte)0, false)]
+    [InlineData((sbyte)1, true)]
+    [InlineData((sbyte)-1, true)]
+    [InlineData((sbyte)127, true)]
+    public void IsTrue_WithSByte_ReturnsCorrectValue(sbyte value, bool expected)
+    {
+        var result = CelHelpers.IsTrue(value);
+
+        Assert.Equal(expected, result);
+    }
+
+    [Theory]
+    [InlineData((short)0, false)]
+    [InlineData((short)1, true)]
+    [InlineData((short)-1, true)]
+    [InlineData((short)100, true)]
+    public void IsTrue_WithShort_ReturnsCorrectValue(short value, bool expected)
+    {
+        var result = CelHelpers.IsTrue(value);
+
+        Assert.Equal(expected, result);
+    }
+
+    [Theory]
+    [InlineData((ushort)0, false)]
+    [InlineData((ushort)1, true)]
+    [InlineData((ushort)100, true)]
+    public void IsTrue_WithUShort_ReturnsCorrectValue(ushort value, bool expected)
+    {
+        var result = CelHelpers.IsTrue(value);
+
+        Assert.Equal(expected, result);
+    }
+
+    [Theory]
+    [InlineData(0u, false)]
+    [InlineData(1u, true)]
+    [InlineData(100u, true)]
+    public void IsTrue_WithUInt_ReturnsCorrectValue(uint value, bool expected)
+    {
+        var result = CelHelpers.IsTrue(value);
+
+        Assert.Equal(expected, result);
+    }
+
+    [Theory]
+    [InlineData(0ul, false)]
+    [InlineData(1ul, true)]
+    [InlineData(100ul, true)]
+    public void IsTrue_WithULong_ReturnsCorrectValue(ulong value, bool expected)
+    {
+        var result = CelHelpers.IsTrue(value);
+
+        Assert.Equal(expected, result);
+    }
+
+    [Theory]
+    [MemberData(nameof(DecimalTestCases))]
+    public void IsTrue_WithDecimal_ReturnsCorrectValue(decimal value, bool expected)
     {
         var result = CelHelpers.IsTrue(value);
 
