@@ -82,7 +82,11 @@ internal abstract class Settings
             configFile = "config.yaml";
         }
 
-        // TODO validate file existence
+        if (!File.Exists(configFile))
+        {
+            Logger.Error($"Configuration file '{configFile}' was not found.");
+            return new YamlConfiguration();
+        }
 
         var config = Parser.ParseYaml<YamlConfiguration>(configFile);
 
