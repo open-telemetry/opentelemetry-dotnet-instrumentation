@@ -3,9 +3,7 @@
 
 #include "stack_capture_strategy_factory.h"
 #include "dot_net_stack_capture_strategy.h"
-#if defined(_WIN32) && defined(_M_AMD64)
-#include "netfx_stack_capture_strategy_x64.h"
-#endif
+#include "netfx_stack_capture_strategy.h"
 
 namespace continuous_profiler
 {
@@ -16,11 +14,11 @@ std::unique_ptr<IStackCaptureStrategy> StackCaptureStrategyFactory::Create(ICorP
 
     if (runtimeInfo.is_desktop())
     {
-#if defined(_WIN32) && defined(_M_AMD64)
-        trace::Logger::Info("StackCaptureStrategyFactory: Creating NetFxStackCaptureStrategyX64");
-        return std::make_unique<NetFxStackCaptureStrategyX64>(profilerInfo);
+#if defined(_WIN32) && (defined(_M_AMD64) || defined(_M_IX86))
+        trace::Logger::Info("StackCaptureStrategyFactory: Creating NetFxStackCaptureStrategy");
+        return std::make_unique<NetFxStackCaptureStrategy>(profilerInfo);
 #else
-        trace::Logger::Error("StackCaptureStrategyFactory: .NET Framework profiling not supported outside AMD64");
+        trace::Logger::Error("StackCaptureStrategyFactory: .NET Framework profiling is only supported on x86 and x64");
         return nullptr;
 #endif
     }

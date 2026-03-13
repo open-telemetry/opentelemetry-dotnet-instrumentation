@@ -3,8 +3,9 @@
 
 #ifndef OTEL_PROFILER_NETFX_STACK_CAPTURE_STRATEGY_H_
 #define OTEL_PROFILER_NETFX_STACK_CAPTURE_STRATEGY_H_
-
-#if defined(_WIN32) && defined(_M_AMD64)
+// only Windows desktop CLR supports thread suspension and the associated stack capture strategy, so this entire file is
+// ifdef'd out on unsupported platforms
+#if defined(_WIN32) && (defined(_M_AMD64) || defined(_M_IX86))
 
 #include "stack_capture_strategy.h"
 #include "profiler_stack_capture.h"
@@ -12,13 +13,15 @@
 namespace continuous_profiler {
 
 /// @brief Stack capture strategy for .NET Framework
-/// @details Uses thread suspension + seeded DoStackSnapshot via StackCaptureEngine
-class NetFxStackCaptureStrategyX64 : public IStackCaptureStrategy {
+/// @details Uses thread suspension + DoStackSnapshot via StackCaptureEngine.
+///          On x64, falls back to seeded snapshot after native stack walk when unseeded fails.
+///          On x86, attempts unseeded snapshot only.
+class NetFxStackCaptureStrategy : public IStackCaptureStrategy {
 public:
-    explicit NetFxStackCaptureStrategyX64(ICorProfilerInfo2* profilerInfo)
+    explicit NetFxStackCaptureStrategy(ICorProfilerInfo2* profilerInfo)
         : engine_(std::make_unique<ProfilerStackCapture::StackCaptureEngine>(
               std::make_unique<ProfilerStackCapture::ProfilerApiAdapter>(profilerInfo))) {
-        trace::Logger::Info("Initialized NetFxStackCaptureStrategyX64 (per-thread suspension)");
+        trace::Logger::Info("Initialized NetFxStackCaptureStrategy (per-thread suspension)");
     }
     
     HRESULT CaptureStacks(
@@ -61,5 +64,5 @@ private:
 
 } // namespace continuous_profiler
 
-#endif // defined(_WIN32) && defined(_M_AMD64)
+#endif // defined(_WIN32) && (defined(_M_AMD64) || defined(_M_IX86))
 #endif // OTEL_PROFILER_NETFX_STACK_CAPTURE_STRATEGY_H_
