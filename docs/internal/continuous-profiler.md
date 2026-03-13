@@ -33,20 +33,40 @@ sampler uses two independent buffers to store samples alternatively.
 ### Requirements
 
 * .NET 6.0 or higher, OR
-* .NET Framework 4.6.2 or higher (x64 only)
+* .NET Framework 4.6.2 or higher (Windows x64 and x86)
 
 ### .NET Framework support
 
-Thread sampling is supported on .NET Framework 4.6.2+ running on Windows x64.
-No additional configuration is required beyond implementing and configuring
-the custom plugin in exactly the same manner as you would for .NET (Core).
-Behind the scenes, the samples are captured and exported in the same format
-as they would be in .NET.
+Thread sampling is supported on .NET Framework 4.6.2+ running on Windows
+(both x64 and x86). No additional configuration is required beyond
+implementing and configuring the custom plugin in exactly the same manner
+as you would for .NET (Core). Behind the scenes, the samples are captured
+and exported in the same format as they would be in .NET.
 
 > [!NOTE]  
 > .NET Framework support uses a different native stack walking strategy
 > optimized for the .NET Framework runtime, but the exported data format
 > remains identical to .NET (Core).
+
+#### Native frame resolution
+
+On .NET Framework, threads that are executing native (non-managed) code
+will have their native frames resolved to human-readable symbol names
+using the Windows DbgHelp API (`SymFromAddr`). Native frames appear in
+stack traces in the format `module!FunctionName+0xOffset` (e.g.,
+`ntdll.dll!NtWaitForSingleObject+0x14`). When full symbol data is not
+available, the profiler falls back to `module!0x<offset>` or
+`Native_0x<ip>`.
+
+This native symbol resolution applies only to the .NET Framework stack
+capture strategy and is not used on .NET Core/5+.
+
+#### Architecture-specific behavior
+
+| Architecture | Stack capture strategy |
+| ------------ | ---------------------- |
+| x64 | Per-thread suspension with unseeded `DoStackSnapshot`. Falls back to native stack walk via `RtlVirtualUnwind` + seeded `DoStackSnapshot` when unseeded fails (captures mixed native/managed stacks). |
+| x86 | Per-thread suspension with unseeded `DoStackSnapshot`. No native stack walk fallback (threads stuck in native code may be skipped). |
 
 ### Enable the profiler
 
@@ -117,11 +137,10 @@ If you see these log messages, check the exporter implementation.
 For thread sampling, you need either:
 
 * .NET 6.0 or higher, OR
-* .NET Framework 4.6.2 or higher (Windows x64 only)
+* .NET Framework 4.6.2 or higher (Windows x64 or x86)
 
-If you're on an unsupported version (e.g., .NET Core 3.1, .NET 5.0, or
-.NET Framework on non-x64 platforms), you'll need to upgrade to a supported
-runtime version.
+If you're on an unsupported version (e.g., .NET Core 3.1 or .NET 5.0),
+you'll need to upgrade to a supported runtime version.
 
 #### Can I tell the sampler to ignore some threads?
 
@@ -180,7 +199,7 @@ when it returns to managed code.
 
 If you don't see `[StackCapture] Canary thread ready` in the logs:
 
-1. Verify that the application is running on Windows x64
+1. Verify that the application is running on Windows (x64 or x86)
 2. Ensure thread sampling is enabled in the plugin configuration
 3. Check that the profiler is successfully attached (look for
    `ContinuousProfiler::StartThreadSampling` in the logs)
@@ -283,10 +302,11 @@ allocation sampling.
 
 ## Feature support matrix
 
-| Feature             | .NET 6.0+    | .NET Framework 4.6.2+           |
-| ------------------- | ------------ | ------------------------------- |
-| Thread sampling     | ✅ Supported | ✅ Supported (Windows x64 only) |
-| Allocation sampling | ✅ Supported | ❌ Not supported                |
+| Feature             | .NET 6.0+    | .NET Framework 4.6.2+                  |
+| ------------------- | ------------ | -------------------------------------- |
+| Thread sampling     | ✅ Supported | ✅ Supported (Windows x64 and x86)     |
+| Native frame names  | N/A          | ✅ Resolved via DbgHelp (Windows only) |
+| Allocation sampling | ✅ Supported | ❌ Not supported                       |
 
 ## Plugin
 
