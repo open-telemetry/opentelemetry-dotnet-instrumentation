@@ -15,7 +15,121 @@
 #include <codecvt>
 #endif
 
+#ifdef _WIN32
+#include <dbghelp.h>
+#pragma comment(lib, "dbghelp.lib")
+#endif
+
 constexpr auto kMaxStringLength = 512UL;
+
+#ifdef _WIN32
+static std::once_flag s_symResolveInitOnce;
+
+static void EnsureSymbolResolutionInitialized()
+{
+    SymSetOptions(SYMOPT_UNDNAME | SYMOPT_DEFERRED_LOADS | SYMOPT_NO_PROMPTS);
+    BOOL result = SymInitialize(GetCurrentProcess(), NULL, TRUE);
+    if (!result)
+    {
+        DWORD err = GetLastError();
+        // ERROR_INVALID_PARAMETER (87) typically means already initialized by the host
+        trace::Logger::Debug("[ContinuousProfiler] SymInitialize returned false. Error=", err,
+                             " (may already be initialized by host or profiler_stack_capture)");
+    }
+    else
+    {
+        trace::Logger::Info("[ContinuousProfiler] SymInitialize succeeded for native symbol resolution");
+    }
+}
+
+/// @brief Resolves a module name from an instruction pointer using thread-safe Win32 APIs.
+///        Uses GetModuleHandleExW (FROM_ADDRESS) + GetModuleFileNameW + path stripping.
+///        Returns true and fills moduleName/moduleBase on success.
+static bool GetModuleInfoFromAddress(uint64_t ip, WCHAR* moduleName, size_t moduleNameLen, uint64_t& moduleBase)
+{
+    HMODULE hModule = nullptr;
+    // Cast through uintptr_t to safely narrow uint64_t to pointer width on x86.
+    if (!GetModuleHandleExW(
+            GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS | GET_MODULE_HANDLE_EX_FLAG_UNCHANGED_REFCOUNT,
+            reinterpret_cast<LPCWSTR>(static_cast<uintptr_t>(ip)),
+            &hModule))
+    {
+        return false;
+    }
+
+    moduleBase = static_cast<uint64_t>(reinterpret_cast<uintptr_t>(hModule));
+
+    WCHAR fullPath[MAX_PATH]{};
+    if (GetModuleFileNameW(hModule, fullPath, MAX_PATH) == 0)
+    {
+        return false;
+    }
+
+    const WCHAR* baseName = wcsrchr(fullPath, L'\\');
+    baseName = baseName != nullptr ? baseName + 1 : fullPath;
+    wcsncpy_s(moduleName, moduleNameLen, baseName, _TRUNCATE);
+    return true;
+}
+
+/// @brief Resolves a native instruction pointer to a human-readable symbol name.
+///        Uses DbgHelp SymFromAddr for symbol lookup.
+///        Falls back to "ModuleName!0x<offset>" or "Native_0x<ip>" when symbol data is unavailable.
+static void ResolveNativeSymbolName(uint64_t ip, trace::WSTRING& result)
+{
+    std::call_once(s_symResolveInitOnce, EnsureSymbolResolutionInitialized);
+
+    // Resolve module name using thread-safe Win32 API (not DbgHelp)
+    WCHAR    wModuleName[256]{};
+    uint64_t moduleBase = 0;
+    bool     hasModule  = GetModuleInfoFromAddress(ip, wModuleName, 256, moduleBase);
+
+    // Try symbol resolution via DbgHelp
+    alignas(SYMBOL_INFO) char symbolBuffer[sizeof(SYMBOL_INFO) + MAX_SYM_NAME * sizeof(TCHAR)];
+    PSYMBOL_INFO pSymbol    = reinterpret_cast<PSYMBOL_INFO>(symbolBuffer);
+    pSymbol->SizeOfStruct   = sizeof(SYMBOL_INFO);
+    pSymbol->MaxNameLen     = MAX_SYM_NAME;
+
+    DWORD64 displacement = 0;
+    if (SymFromAddr(GetCurrentProcess(), static_cast<DWORD64>(ip), &displacement, pSymbol))
+    {
+        // Full resolution: "module!FunctionName+0xOffset" or just "FunctionName+0xOffset"
+        if (hasModule)
+        {
+            result.append(wModuleName);
+            result.append(WStr("!"));
+        }
+
+        WCHAR wSymName[MAX_SYM_NAME]{};
+        MultiByteToWideChar(CP_ACP, 0, pSymbol->Name, -1, wSymName, MAX_SYM_NAME);
+        result.append(wSymName);
+
+        if (displacement != 0)
+        {
+            WCHAR offsetBuf[24]{};
+            swprintf(offsetBuf, sizeof(offsetBuf) / sizeof(WCHAR), WStr("+0x%llx"), displacement);
+            result.append(offsetBuf);
+        }
+    }
+    else if (hasModule)
+    {
+        // No symbol but have module: "module!0x<offset from module base>"
+        result.append(wModuleName);
+
+        WCHAR offsetBuf[24]{};
+        swprintf(offsetBuf, sizeof(offsetBuf) / sizeof(WCHAR), WStr("!0x%llx"), ip - moduleBase);
+        result.append(offsetBuf);
+    }
+    else
+    {
+        // No symbol, no module: fall back to raw IP
+        constexpr auto native_prefix = WStr("Native_0x");
+        result.append(native_prefix);
+        WCHAR hex_buf[20]{};
+        swprintf(hex_buf, sizeof(hex_buf) / sizeof(WCHAR), WStr("%llx"), ip);
+        result.append(hex_buf);
+    }
+}
+#endif // _WIN32
 
 constexpr auto kMaxCodesPerBuffer = 10 * 1000;
 
@@ -287,7 +401,7 @@ constexpr auto kSelectedThreadsEndBatch   = 0x0B;
 
 constexpr auto kCurrentThreadSamplesBufferVersion = 1;
 
-constexpr FunctionIdentifier DefaultFunctionIdentifier = {0, 0, false};
+constexpr FunctionIdentifier DefaultFunctionIdentifier = {FrameType::Managed, false, 0, 0, 0};
 
 ThreadSamplesBuffer::ThreadSamplesBuffer(std::vector<unsigned char>* buf) : buffer_(buf) {}
 ThreadSamplesBuffer::~ThreadSamplesBuffer()
@@ -538,28 +652,23 @@ void NamingHelper::ClearFunctionIdentifierCache()
     function_identifier_cache_.Clear();
 }
 
-[[nodiscard]] FunctionIdentifier NamingHelper::GetFunctionIdentifier(const FunctionID         func_id,
-                                                                     const COR_PRF_FRAME_INFO frame_info) const
+[[nodiscard]] FunctionIdentifier NamingHelper::ResolveManagedFunctionIdentifier(const FunctionID         func_id,
+                                                                                const COR_PRF_FRAME_INFO frame_info) const
 {
-    if (func_id == 0)
-    {
-        constexpr auto zero_valid_function_identifier = FunctionIdentifier{0, 0, true};
-        return zero_valid_function_identifier;
-    }
-
+    // Resolve a managed FunctionID to a FunctionIdentifier with function token and module id.
+    // This method is only called for managed frames (func_id != 0); native frames are handled
+    // directly in FrameCallback before reaching this path.
     ModuleID module_id      = 0;
     mdToken  function_token = 0;
-    // theoretically there is a possibility to use GetFunctionInfo method, but it does not support generic methods
     const HRESULT hr =
         info7_->GetFunctionInfo2(func_id, frame_info, nullptr, &module_id, &function_token, 0, nullptr, nullptr);
     if (FAILED(hr))
     {
         trace::Logger::Debug("GetFunctionInfo2 failed. HRESULT=0x", std::setfill('0'), std::setw(8), std::hex, hr);
-        constexpr auto zero_invalid_function_identifier = FunctionIdentifier{0, 0, false};
-        return zero_invalid_function_identifier;
+        return FunctionIdentifier::ManagedInvalid();
     }
 
-    return FunctionIdentifier{function_token, module_id, true};
+    return FunctionIdentifier::Managed(function_token, module_id, true);
 }
 
 void NamingHelper::GetFunctionName(FunctionIdentifier function_identifier, trace::WSTRING& result) const
@@ -572,7 +681,16 @@ void NamingHelper::GetFunctionName(FunctionIdentifier function_identifier, trace
         result.append(unknown_function_name);
         return;
     }
-
+#ifdef _WIN32
+    if (function_identifier.frame_type == FrameType::Native)
+    {
+        // Native frames only originate from the NetFx stack capture strategy (Windows-only).
+        // DoStackSnapshot on .NET Core/5+ always returns non-zero func_id, and the NetFx
+        // native stack walk never emits zero IPs, so this path is Windows-only.
+        ResolveNativeSymbolName(function_identifier.instruction_pointer, result);
+        return;
+    }
+#endif
     if (function_identifier.function_token == 0)
     {
         constexpr auto unknown_native_function_name = WStr("Unknown_Native_Function(unknown)");
@@ -705,7 +823,7 @@ trace::WSTRING* NamingHelper::Lookup(const FunctionIdentifier& function_identifi
     return answer;
 }
 
-FunctionIdentifier NamingHelper::Lookup(const FunctionID functionId, const COR_PRF_FRAME_INFO frameInfo)
+FunctionIdentifier NamingHelper::LookupManagedFunction(const FunctionID functionId, const COR_PRF_FRAME_INFO frameInfo)
 {
     const FunctionIdentifierResolveArgs cacheKey         = {functionId};
     const auto                          cachedIdentifier = function_identifier_cache_.Get(cacheKey);
@@ -713,7 +831,7 @@ FunctionIdentifier NamingHelper::Lookup(const FunctionID functionId, const COR_P
     {
         return cachedIdentifier;
     }
-    const auto resolvedIdentifier = this->GetFunctionIdentifier(cacheKey.function_id, frameInfo);
+    const auto resolvedIdentifier = this->ResolveManagedFunctionIdentifier(cacheKey.function_id, frameInfo);
     function_identifier_cache_.Put(cacheKey, resolvedIdentifier);
     return resolvedIdentifier;
 }
@@ -739,15 +857,22 @@ static HRESULT __stdcall FrameCallback(_In_ FunctionID         func_id,
     const auto params = static_cast<DoStackSnapshotParams*>(client_data);
     params->prof->stats_.total_frames++;
 
-    // Use '0' as a frame_info value.
-    // It is documented to be equivalent to using value provided in frame_info parameter.
-    // See
-    // https://github.com/dotnet/runtime/blob/988296b080776c885ee0725b481db4ae4d4360ed/src/coreclr/inc/corprof.idl#L3167-L3172
-    // and
-    // https://github.com/dotnet/runtime/blob/bda571bfc728369cc2bbd33f2c161ea73c762b8d/docs/design/coreclr/profiling/davbr-blog-archive/Generics%20and%20Your%20Profiler.md?plain=1#L82-L101
-    // for details.
-
-    const auto identifier = params->prof->helper.Lookup(func_id, 0);
+    // When func_id == 0, the frame is native (or unresolvable). Handle it directly here
+    // rather than routing through the managed resolution path. This covers:
+    //   - DSS-reported native frames (NetFx x64 table-based unwinding)
+    //   - Manually emitted native frames from CaptureStackSeeded (RtlVirtualUnwind walk)
+    //   - Any future platform where DSS reports func_id == 0
+#ifdef _WIN32
+    if (func_id == 0)
+    {
+        params->buffer->push_back(ip != 0
+            ? FunctionIdentifier::NativeFrame(static_cast<uint64_t>(ip))
+            : FunctionIdentifier::ManagedInvalid());
+        return S_OK;
+    }
+#endif
+    // Managed frame: resolve FunctionID to token + module via GetFunctionInfo2.
+    const auto identifier = params->prof->helper.LookupManagedFunction(func_id, 0);
     params->buffer->push_back(identifier);
 
     return S_OK;

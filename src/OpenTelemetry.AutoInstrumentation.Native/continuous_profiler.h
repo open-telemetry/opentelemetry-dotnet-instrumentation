@@ -40,15 +40,42 @@ extern "C"
 
 namespace continuous_profiler
 {
+enum class FrameType : uint8_t { Managed = 0, Native = 1 };
+
 struct FunctionIdentifier
 {
+    FrameType frame_type;
+    bool      is_valid;
+
+    // Managed frame data
     mdToken  function_token;
     ModuleID module_id;
-    bool     is_valid;
+
+    // Native frame data (instruction pointer for SymFromAddr)
+    uint64_t instruction_pointer;
+
+    static FunctionIdentifier Managed(mdToken token, ModuleID mod, bool valid)
+    {
+        return {FrameType::Managed, valid, token, mod, 0};
+    }
+
+    static FunctionIdentifier ManagedInvalid()
+    {
+        return {FrameType::Managed, false, 0, 0, 0};
+    }
+
+    static FunctionIdentifier NativeFrame(uint64_t ip)
+    {
+        return {FrameType::Native, true, 0, 0, ip};
+    }
 
     bool operator==(const FunctionIdentifier& p) const
     {
-        return function_token == p.function_token && module_id == p.module_id && is_valid == p.is_valid;
+        if (frame_type != p.frame_type || is_valid != p.is_valid)
+            return false;
+        if (frame_type == FrameType::Managed)
+            return function_token == p.function_token && module_id == p.module_id;
+        return instruction_pointer == p.instruction_pointer;
     }
 };
 
@@ -136,7 +163,9 @@ struct std::hash<continuous_profiler::FunctionIdentifier>
 {
     std::size_t operator()(const continuous_profiler::FunctionIdentifier& k) const noexcept
     {
-        return hash_combine(k.function_token, k.module_id, k.is_valid);
+        if (k.frame_type == continuous_profiler::FrameType::Managed)
+            return hash_combine(static_cast<uint8_t>(k.frame_type), k.function_token, k.module_id, k.is_valid);
+        return hash_combine(static_cast<uint8_t>(k.frame_type), k.instruction_pointer, k.is_valid);
     }
 };
 
@@ -277,11 +306,10 @@ public:
     NamingHelper();
     void ClearFunctionIdentifierCache();
     trace::WSTRING* Lookup(const FunctionIdentifier& function_identifier, SamplingStatistics & stats);
-    // TODO: rename
-    FunctionIdentifier Lookup(const FunctionID functionId, const COR_PRF_FRAME_INFO frameInfo);
+    FunctionIdentifier LookupManagedFunction(FunctionID functionId, COR_PRF_FRAME_INFO frameInfo);
 
-    [[nodiscard]] FunctionIdentifier GetFunctionIdentifier(const FunctionID func_id,
-                                                           const COR_PRF_FRAME_INFO frame_info) const;
+    [[nodiscard]] FunctionIdentifier ResolveManagedFunctionIdentifier(FunctionID func_id,
+                                                                     COR_PRF_FRAME_INFO frame_info) const;
 private:
     NameCache<FunctionIdentifier, trace::WSTRING*> function_name_cache_;
     NameCache<FunctionIdentifierResolveArgs, FunctionIdentifier> function_identifier_cache_;
