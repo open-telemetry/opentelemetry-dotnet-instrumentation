@@ -15,7 +15,7 @@ namespace OpenTelemetry.AutoInstrumentation.Instrumentations.NoCode.Cel;
 /// Supported features:
 /// - Member access: instance.property, arguments[0].field
 /// - Operators: ==, !=, &gt;, &lt;, &gt;=, &lt;=, &amp;&amp;, ||, !
-/// - Functions: substring(), string(), size()
+/// - Functions: string(), size()
 /// - Literals: strings ("value", 'value'), numbers (123, 123.45), booleans (true, false), null
 /// - Ternary: condition ? trueValue : falseValue
 /// </remarks>
