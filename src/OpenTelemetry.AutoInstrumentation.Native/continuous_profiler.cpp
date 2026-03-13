@@ -49,10 +49,8 @@ static bool GetModuleInfoFromAddress(uint64_t ip, WCHAR* moduleName, size_t modu
 {
     HMODULE hModule = nullptr;
     // Cast through uintptr_t to safely narrow uint64_t to pointer width on x86.
-    if (!GetModuleHandleExW(
-            GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS | GET_MODULE_HANDLE_EX_FLAG_UNCHANGED_REFCOUNT,
-            reinterpret_cast<LPCWSTR>(static_cast<uintptr_t>(ip)),
-            &hModule))
+    if (!GetModuleHandleExW(GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS | GET_MODULE_HANDLE_EX_FLAG_UNCHANGED_REFCOUNT,
+                            reinterpret_cast<LPCWSTR>(static_cast<uintptr_t>(ip)), &hModule))
     {
         return false;
     }
@@ -66,7 +64,7 @@ static bool GetModuleInfoFromAddress(uint64_t ip, WCHAR* moduleName, size_t modu
     }
 
     const WCHAR* baseName = wcsrchr(fullPath, L'\\');
-    baseName = baseName != nullptr ? baseName + 1 : fullPath;
+    baseName              = baseName != nullptr ? baseName + 1 : fullPath;
     wcsncpy_s(moduleName, moduleNameLen, baseName, _TRUNCATE);
     return true;
 }
@@ -85,9 +83,9 @@ static void ResolveNativeSymbolName(uint64_t ip, trace::WSTRING& result)
 
     // Try symbol resolution via DbgHelp
     alignas(SYMBOL_INFO) char symbolBuffer[sizeof(SYMBOL_INFO) + MAX_SYM_NAME * sizeof(TCHAR)];
-    PSYMBOL_INFO pSymbol    = reinterpret_cast<PSYMBOL_INFO>(symbolBuffer);
-    pSymbol->SizeOfStruct   = sizeof(SYMBOL_INFO);
-    pSymbol->MaxNameLen     = MAX_SYM_NAME;
+    PSYMBOL_INFO              pSymbol = reinterpret_cast<PSYMBOL_INFO>(symbolBuffer);
+    pSymbol->SizeOfStruct             = sizeof(SYMBOL_INFO);
+    pSymbol->MaxNameLen               = MAX_SYM_NAME;
 
     DWORD64 displacement = 0;
     if (SymFromAddr(GetCurrentProcess(), static_cast<DWORD64>(ip), &displacement, pSymbol))
@@ -652,14 +650,14 @@ void NamingHelper::ClearFunctionIdentifierCache()
     function_identifier_cache_.Clear();
 }
 
-[[nodiscard]] FunctionIdentifier NamingHelper::ResolveManagedFunctionIdentifier(const FunctionID         func_id,
-                                                                                const COR_PRF_FRAME_INFO frame_info) const
+[[nodiscard]] FunctionIdentifier NamingHelper::ResolveManagedFunctionIdentifier(
+    const FunctionID func_id, const COR_PRF_FRAME_INFO frame_info) const
 {
     // Resolve a managed FunctionID to a FunctionIdentifier with function token and module id.
     // This method is only called for managed frames (func_id != 0); native frames are handled
     // directly in FrameCallback before reaching this path.
-    ModuleID module_id      = 0;
-    mdToken  function_token = 0;
+    ModuleID      module_id      = 0;
+    mdToken       function_token = 0;
     const HRESULT hr =
         info7_->GetFunctionInfo2(func_id, frame_info, nullptr, &module_id, &function_token, 0, nullptr, nullptr);
     if (FAILED(hr))
@@ -865,9 +863,8 @@ static HRESULT __stdcall FrameCallback(_In_ FunctionID         func_id,
 #ifdef _WIN32
     if (func_id == 0)
     {
-        params->buffer->push_back(ip != 0
-            ? FunctionIdentifier::NativeFrame(static_cast<uint64_t>(ip))
-            : FunctionIdentifier::ManagedInvalid());
+        params->buffer->push_back(ip != 0 ? FunctionIdentifier::NativeFrame(static_cast<uint64_t>(ip))
+                                          : FunctionIdentifier::ManagedInvalid());
         return S_OK;
     }
 #endif

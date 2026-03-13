@@ -122,7 +122,8 @@ static HRESULT ExecuteProbeOperations(IProfilerApi* profilerApi, ThreadID canary
         trace::Logger::Debug("[StackCapture] ExecuteProbeOperations - Exception during safety tests. ExceptionCode=0x",
                              std::hex, exceptionCode, std::dec
 #if defined(_M_AMD64)
-                             , ", RIP=0x", canaryCtx.Rip
+                             ,
+                             ", RIP=0x", canaryCtx.Rip
 #endif
         );
         if (testAlloc)
@@ -469,8 +470,7 @@ bool StackCaptureEngine::SafetyProbe(const CanaryThreadInfo& canaryInfo)
     return true;
 }
 
-HRESULT StackCaptureEngine::CaptureStackUnseeded(ThreadID             managedThreadId,
-                                                  StackCaptureContext* stackCaptureContext)
+HRESULT StackCaptureEngine::CaptureStackUnseeded(ThreadID managedThreadId, StackCaptureContext* stackCaptureContext)
 {
     stackCaptureContext->clientParams->threadId = managedThreadId;
     return profilerApi_->DoStackSnapshotUnseeded(managedThreadId, stackCaptureContext->clientParams);
@@ -493,12 +493,12 @@ HRESULT StackCaptureEngine::CaptureStackSeeded(ThreadID             managedThrea
 
     if (!GetThreadContext(threadHandle, &context))
     {
-        trace::Logger::Debug("[StackCapture] CaptureStackSeeded - GetThreadContext failed. ThreadID=",
-                             managedThreadId, ", Error=", GetLastError());
+        trace::Logger::Debug("[StackCapture] CaptureStackSeeded - GetThreadContext failed. ThreadID=", managedThreadId,
+                             ", Error=", GetLastError());
         return E_FAIL;
     }
 
-    auto* callbackContext = stackCaptureContext->clientParams;
+    auto* callbackContext     = stackCaptureContext->clientParams;
     callbackContext->threadId = managedThreadId;
 
     // Quick check: if the top of stack is already managed, seed DSS directly (no native frames to emit).
@@ -509,9 +509,9 @@ HRESULT StackCaptureEngine::CaptureStackSeeded(ThreadID             managedThrea
         return profilerApi_->DoStackSnapshotSeeded(managedThreadId, callbackContext, context);
     }
 
-    const int MAX_FRAMES     = 512;
-    int       nativeEmitted  = 0;
-    DWORD64   prevRsp        = 0;
+    const int MAX_FRAMES    = 512;
+    int       nativeEmitted = 0;
+    DWORD64   prevRsp       = 0;
 
     for (int i = 0; i < MAX_FRAMES; ++i)
     {
@@ -565,12 +565,12 @@ HRESULT StackCaptureEngine::CaptureStackSeeded(ThreadID             managedThrea
         if (SUCCEEDED(hr) && fid != 0)
         {
             // Found managed code. Seed DSS from here - it will produce all remaining managed frames.
-            context.Rip = nextIp;
+            context.Rip   = nextIp;
             HRESULT dssHr = profilerApi_->DoStackSnapshotSeeded(managedThreadId, callbackContext, context);
 
             trace::Logger::Debug("[StackCapture] CaptureStackSeeded - Emitted ", nativeEmitted,
-                                 " native frames, then seeded DSS. ThreadID=", managedThreadId,
-                                 ", DSS HRESULT=0x", std::hex, dssHr);
+                                 " native frames, then seeded DSS. ThreadID=", managedThreadId, ", DSS HRESULT=0x",
+                                 std::hex, dssHr);
             // Even if seeded DSS fails, the native frames we already emitted are valuable.
             return S_OK;
         }
