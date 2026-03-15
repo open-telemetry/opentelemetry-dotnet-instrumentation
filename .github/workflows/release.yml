@@ -116,6 +116,41 @@ jobs:
             ./OpenTelemetry.DotNet.Auto.psm1
             ./checksums.txt
 
+      - name: Attest Linux musl x64 package files
+        uses: actions/attest@59d89421af93a897026c735860bf21b6eb4f7b26 # v4.1.0
+        with:
+          subject-path: ./bin-alpine-x64/**/*
+
+      - name: Attest Linux musl arm64 package files
+        uses: actions/attest@59d89421af93a897026c735860bf21b6eb4f7b26 # v4.1.0
+        with:
+          subject-path: ./bin-alpine-arm64/**/*
+
+      - name: Attest Linux glibc x64 package files
+        uses: actions/attest@59d89421af93a897026c735860bf21b6eb4f7b26 # v4.1.0
+        with:
+          subject-path: ./bin-ubuntu-22.04/**/*
+
+      - name: Attest Linux glibc arm64 package files
+        uses: actions/attest@59d89421af93a897026c735860bf21b6eb4f7b26 # v4.1.0
+        with:
+          subject-path: ./bin-ubuntu-22.04-arm/**/*
+
+      - name: Attest Windows package files
+        uses: actions/attest@59d89421af93a897026c735860bf21b6eb4f7b26 # v4.1.0
+        with:
+          subject-path: ./bin-windows-2022/**/*
+
+      - name: Attest macOS package files
+        uses: actions/attest@59d89421af93a897026c735860bf21b6eb4f7b26 # v4.1.0
+        with:
+          subject-path: ./bin-macos-14/**/*
+
+      - name: Attest NuGet packages files
+        uses: actions/attest@59d89421af93a897026c735860bf21b6eb4f7b26 # v4.1.0
+        with:
+          subject-path: ./bin-nuget-packages/**/*
+
       - name: Create Release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
