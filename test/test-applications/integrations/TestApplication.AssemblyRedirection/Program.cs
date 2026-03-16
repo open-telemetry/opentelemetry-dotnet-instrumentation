@@ -31,7 +31,7 @@ Console.WriteLine("Configuration:");
 Console.WriteLine($"  Expected Assembly Name: \"{expectedAssemblyName}\"");
 Console.WriteLine($"  Expected Assembly Version: {expectedAssemblyVersion}");
 Console.WriteLine($"  Expected Assembly File Version: {expectedFileVersion}");
-Console.WriteLine($"  Duplicate check patterns (empty means 'all'): [{string.Join(",", duplicateCheckPatterns)}]");
+Console.WriteLine($"  Duplicate check assembly name patterns (empty means 'all'): [{string.Join(",", duplicateCheckPatterns)}]");
 Console.WriteLine();
 
 using var activitySource = new ActivitySource("AssemblyRedirection.ActivitySource");
@@ -47,23 +47,12 @@ var assemblyLookup = AppDomain.CurrentDomain.GetAssemblies()
     .ToLookup(it => it.GetName().Name, StringComparer.OrdinalIgnoreCase);
 
 // Check 1: Verify no assembly matching the patterns is loaded more than once.
-// Separate patterns into includes and excludes, validate wildcards
-var includes = duplicateCheckPatterns
-    .Where(it => !it.StartsWith('-'.ToString(), StringComparison.Ordinal))
-    .ToArray();
-var excludes = duplicateCheckPatterns
-    .Where(it => it.StartsWith('-'.ToString(), StringComparison.Ordinal))
-    .Select(it => it.EndsWith('*'.ToString(), StringComparison.Ordinal)
-                    ? it.Substring(1)
-                    : throw new ArgumentException($"Invalid pattern '{it}': wildcards are only allowed at the end."))
-    .ToArray();
+var duplicateCheckAssemblyNames = GetMatchingAssemblyNames(assemblyLookup.Select(it => it.Key).OfType<string>(), duplicateCheckPatterns);
+Console.WriteLine($"Assemblies matching duplicate check patterns: [{string.Join(",", duplicateCheckAssemblyNames)}]");
 
 var duplicates = assemblyLookup
     .Where(it => it.Count() != 1)
-    // filter out excludes
-    .Where(it => it.Key is null || excludes.Length == 0 || !MatchPatterns(it.Key, excludes))
-    // filter in includes
-    .Where(it => it.Key is null || includes.Length == 0 || MatchPatterns(it.Key, includes))
+    .Where(it => it.Key is null || duplicateCheckAssemblyNames.Contains(it.Key))
     .Select(it => it.Aggregate($"\"{it.Key}\" loaded multiple times: [{it.Count()}]", (current, next) => $"{current}\n - {Describe(next)}"))
     .ToArray();
 
@@ -90,6 +79,8 @@ Console.WriteLine($"  Assembly Version: {assemblyVersion}");
 Console.WriteLine();
 
 // Check 3: Expected assembly file must be loaded at the expected file version.
+// TODO disabled until a better expected assembly is picked up (less fluctuating to .net runtime version)
+/*
 var fileVersionInfo = FileVersionInfo.GetVersionInfo(assembly.Location);
 Console.WriteLine("Check 3: Assembly File Version");
 Console.WriteLine($"  Assembly File Info:\n{fileVersionInfo}");
@@ -100,9 +91,37 @@ if (fileVersionInfo.FileVersion is null || Version.Parse(fileVersionInfo.FileVer
 
 Console.WriteLine($"  File Version: {fileVersionInfo.FileVersion}");
 Console.WriteLine();
+*/
 
 Console.WriteLine("Result: All checks passed.");
 return 0;
+
+static string[] GetMatchingAssemblyNames(IEnumerable<string> assemblyNames, string[] patterns)
+{
+    // Separate patterns into includes and excludes, validate wildcards
+    var includes = patterns
+        .Where(it => !it.StartsWith('-'.ToString(), StringComparison.Ordinal))
+        .ToArray();
+    var excludes = patterns
+        .Where(it => it.StartsWith('-'.ToString(), StringComparison.Ordinal))
+        .ToArray();
+
+    // Get assembly names matching the provided patterns
+    var matchingAssemblyNames = assemblyNames
+        .Where(it => includes.Length == 0 || MatchPatterns(it, includes))
+        .Where(it => excludes.Length == 0 || !MatchPatterns(it, excludes))
+        .ToArray();
+
+    // Fail if matching list is smaller that the include list
+    // each included entry should manifest an assembly or a set of assemblies,
+    // exclude entry should lower a set of assemblies manifested by an inlclude entry wildcard
+    if (matchingAssemblyNames.Length < includes.Length)
+    {
+        throw new InvalidOperationException($"Not all provided patterns manifest an assembly. Found assemblies: [{string.Join(",", matchingAssemblyNames)}]");
+    }
+
+    return matchingAssemblyNames;
+}
 
 static bool MatchPatterns(string name, string[] patterns)
 {

@@ -33,8 +33,11 @@ public class AssemblyRedirectionTests(ITestOutputHelper output) : TestHelper("As
 #elif NET10_0
     // Case 1: Lower version is not possible for DiagnosticSource on .NET 10, the msbuild will ignore a version of this package since SDK contains a higher
     // Case 2: Equal version, should NOT be redirected with/without native profiler
-    [InlineData("10.0.2", AssemblyName, "10.0.0.0", "10.0.225.61305", true)]
-    [InlineData("10.0.2", AssemblyName, "10.0.0.0", "10.0.225.61305", false)]
+    // TODO currently different test jobs use different versions of .net runtime:
+    //   - test-build-container (ubuntu-22.04, alpine, alpine-x64, linux-musl): DS file version 10.0.426.12010
+    //   - test-build-managed (net10.0, windows-2022): DS file version 10.0.225.61305
+    [InlineData("10.0.2", AssemblyName, "10.0.0.0", "10.0.526.15411", true)]
+    [InlineData("10.0.2", AssemblyName, "10.0.0.0", "10.0.526.15411", false)]
     // Case 3: Higher version is not possible for DiagnosticSource on .NET 10, the instrumentation tool is already using the highest possible version
 #elif NETFRAMEWORK
     // Case 1: Lower version should be redirected (native profiler mandatory)
@@ -57,9 +60,9 @@ public class AssemblyRedirectionTests(ITestOutputHelper output) : TestHelper("As
 
         // on .NET (Core) Assembly Redirection without Native Profiler
         // cannot guarantee full isolation, so there will be packages
-        // in both Default and Isolated ALC, e.g. TestApplication library and others
-        // so we should check that the important libraries are loaded once
-        var duplicateCheckPatterns = !enableNativeProfiler ? string.Join(',', [expectedAssemblyName, "OpenTelemetry*"]) : string.Empty;
+        // in both Default and Isolated ALC, e.g. TestApplication library itself, and possibly other core libraries
+        // so we should check that the important libraries are not loaded twice
+        var duplicateCheckPatterns = !enableNativeProfiler ? string.Join(',', ["System.Diagnostics.DiagnosticSource", "OpenTelemetry*"]) : string.Empty;
 #endif
         // Arrange
         using var collector = new MockSpansCollector(Output);
