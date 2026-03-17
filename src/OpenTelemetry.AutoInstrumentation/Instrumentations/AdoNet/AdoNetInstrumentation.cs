@@ -24,10 +24,13 @@ internal static class AdoNetInstrumentation
             return null;
         }
 
+        var systemName = AdoNetDbSystemMapper.GetSystemName(instance.GetType());
+
         var sqlStatementInfo = SqlProcessor.GetSanitizedSql(dbCommand.CommandText);
 
         TagList tags = new()
         {
+            { DatabaseAttributes.Keys.DbSystemName, systemName },
             { DatabaseAttributes.Keys.DbQuerySummary, sqlStatementInfo.DbQuerySummary },
             { DatabaseAttributes.Keys.DbQueryText, sqlStatementInfo.SanitizedSql },
         };
