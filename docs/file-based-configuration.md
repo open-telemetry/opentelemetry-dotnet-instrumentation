@@ -505,6 +505,7 @@ To disable a instrumentation, comment out or remove its corresponding entry.
 instrumentation/development:
   dotnet:
     traces:
+      adonet:              # ADO.NET
       aspnet:              # ASP.NET
       aspnetcore:          # ASP.NET Core
       azure:               # Azure SDK

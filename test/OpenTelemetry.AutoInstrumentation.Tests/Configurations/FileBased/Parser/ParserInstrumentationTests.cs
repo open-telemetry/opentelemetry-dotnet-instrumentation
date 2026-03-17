@@ -21,6 +21,7 @@ public class ParserInstrumentationTests
 
         string[] expectedTraces =
         [
+            "adonet",
 #if NETFRAMEWORK
             "aspnet",
 #else

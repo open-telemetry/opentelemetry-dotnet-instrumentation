@@ -32,6 +32,12 @@ internal class DotNetTraces
     [YamlMember(Alias = "additional_legacy_sources_list")]
     public string? AdditionalLegacySourcesList { get; set; }
 
+    /// <summary>
+    /// Gets or sets the ADO.NET traces instrumentation configuration.
+    /// </summary>
+    [YamlMember(Alias = "adonet")]
+    public CaptureHeadersConfiguration? AdoNet { get; set; }
+
 #if NETFRAMEWORK
     /// <summary>
     /// Gets or sets the ASP.NET traces instrumentation configuration.
