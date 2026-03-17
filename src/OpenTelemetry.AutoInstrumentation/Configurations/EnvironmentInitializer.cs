@@ -28,6 +28,13 @@ internal class EnvironmentInitializer
                 continue;
             }
 
+            if (setting == ConfigurationKeys.ServiceName
+                || setting == ConfigurationKeys.ResourceAttributes)
+            {
+                // don't copy resource attributes incl. service name to env vars
+                continue;
+            }
+
             if (!string.IsNullOrEmpty(Environment.GetEnvironmentVariable(setting)))
             {
                 // already set via env var - to not override

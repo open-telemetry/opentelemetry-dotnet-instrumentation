@@ -1,6 +1,9 @@
 // Copyright The OpenTelemetry Authors
 // SPDX-License-Identifier: Apache-2.0
 
+#if NETFRAMEWORK
+using System.Configuration;
+#endif
 using OpenTelemetry.AutoInstrumentation.Configurations.FileBasedConfiguration;
 using OpenTelemetry.AutoInstrumentation.Configurations.FileBasedConfiguration.Parser;
 using OpenTelemetry.AutoInstrumentation.Logging;
@@ -27,7 +30,13 @@ internal abstract class Settings
         }
         else
         {
-            var configuration = new Configuration(failFast, new EnvironmentConfigurationSource(failFast));
+            List<IConfigurationSource> sources = [new EnvironmentConfigurationSource(failFast)];
+
+#if NETFRAMEWORK
+            sources.Add(new AppSettingsConfigurationSource(failFast, ConfigurationManager.AppSettings));
+#endif
+
+            var configuration = new Configuration(failFast, [.. sources]);
             var settings = new T();
             settings.LoadEnvVar(configuration);
             return settings;
