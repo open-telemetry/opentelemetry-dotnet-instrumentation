@@ -1,8 +1,10 @@
 // Copyright The OpenTelemetry Authors
 // SPDX-License-Identifier: Apache-2.0
 
+using System.Data;
 using System.Diagnostics;
 using OpenTelemetry.AutoInstrumentation.Util;
+using OpenTelemetry.Instrumentation;
 
 namespace OpenTelemetry.AutoInstrumentation.Instrumentations.AdoNet;
 
@@ -12,12 +14,25 @@ internal static class AdoNetInstrumentation
         new(new ActivitySourceOptions("OpenTelemetry.AutoInstrumentation.AdoNet")
         {
             Version = AutoInstrumentationVersion.Version,
-            TelemetrySchemaUrl = "https://opentelemetry.io/schemas/1.40.0"
+            TelemetrySchemaUrl = GenericAttributes.SchemaUrl1400
         });
 
     public static Activity? StartActivity<TTarget>(TTarget instance, string methodName)
     {
-        return Source.StartActivity("TODO-SpanName", ActivityKind.Client);
+        if (instance is not IDbCommand dbCommand)
+        {
+            return null;
+        }
+
+        var sqlStatementInfo = SqlProcessor.GetSanitizedSql(dbCommand.CommandText);
+
+        TagList tags = new()
+        {
+            { DatabaseAttributes.Keys.DbQuerySummary, sqlStatementInfo.DbQuerySummary },
+            { DatabaseAttributes.Keys.DbQueryText, sqlStatementInfo.SanitizedSql },
+        };
+
+        return Source.StartActivity(sqlStatementInfo.DbQuerySummary, ActivityKind.Client, default(ActivityContext), tags);
     }
 
     public static void StopActivity(Activity? activity, Exception? exception)
