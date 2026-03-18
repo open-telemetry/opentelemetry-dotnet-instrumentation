@@ -14,9 +14,9 @@ namespace OpenTelemetry.AutoInstrumentation.Loader;
 /// </summary>
 internal class AssemblyResolver(IOtelLogger logger)
 {
-    internal static AssemblyLoadContext DependencyLoadContext { get; } = new AssemblyLoadContext("OpenTelemetry.AutoInstrumentation.Loader.AssemblyResolver", false);
-
     internal static string[] TrustedPlatformAssemblyNames { get; } = GetTrustedPlatformAssemblyNames();
+
+    internal AssemblyLoadContext DependencyLoadContext { get; } = new ManagedProfilerAssemblyLoadContext(logger);
 
     internal void RegisterAssemblyResolving()
     {
@@ -28,7 +28,7 @@ internal class AssemblyResolver(IOtelLogger logger)
         // what to do - just decide which context to load the assembly into:
         //
         // Case 1: Assembly NOT in TrustedPlatformAssembly list (our dependencies; e.g., OpenTelemetry.dll)
-        //   -> Runtime has no default location for this assembly
+        //   -> Runtime has no knowledge about this assembly
         //   -> Resolving event fires
         //   -> We load to Default AssemblyLoadContext (no version conflict risk)
         //
@@ -41,10 +41,10 @@ internal class AssemblyResolver(IOtelLogger logger)
         //            event never fires (accepted)
         //
         // However, other situations may also trigger the Resolving event for an assembly we ship
-        // (e.g., programmatic Assembly.Load with an explicit version). To avoid accidentally
-        // satisfying a request that is not ours or one we cannot fulfill, we validate versions
-        // before loading: if our version >= requested, we proceed (backward compatible); if the
-        // requested version is higher than ours, we skip the request.
+        // (e.g., programmatic Assembly.Load with an explicit version that .net runtime cannot satisfy).
+        // To avoid accidentally satisfying a request that is not ours or one we cannot fulfill,
+        // we validate versions before loading: if our version >= requested, we proceed (backward compatible);
+        // if the requested version is higher than ours, we skip the request.
 
         // ASSEMBLY RESOLUTION TIMING
         //
@@ -58,7 +58,18 @@ internal class AssemblyResolver(IOtelLogger logger)
         // into the Default context via Assembly.LoadFrom, causing loading failure if the customer application
         // has the same dependency but to a lower version (in the example above, DiagnosticSource dll)
 
+        // ASSEMBLY REDIRECTION AND REFLECTION
+        //
+        // Native Assembly Redirection (IL rewriting) only works for assemblies that are being loaded,
+        // so we must ensure that reflection-triggered loads are also intercepted.
+        // GetType / Load(AssemblyName) calls bypass IL rewriting entirely —
+        // the runtime resolves them directly from TPA without firing Default.Resolving.
+        // To fix this, we set DependencyLoadContext as the contextual reflection ALC via
+        // EnterContextualReflection(), so those calls route through Load(AssemblyName) first
+        // and TPA conflicts can be intercepted before the runtime silently loads the wrong version.
+
         AssemblyLoadContext.Default.Resolving += Resolving_ManagedProfilerDependencies;
+        DependencyLoadContext.EnterContextualReflection();
     }
 
     private static string[] GetTrustedPlatformAssemblyNames()
@@ -68,7 +79,7 @@ internal class AssemblyResolver(IOtelLogger logger)
 
     private Assembly? Resolving_ManagedProfilerDependencies(AssemblyLoadContext context, AssemblyName assemblyName)
     {
-        logger.Debug($"Check assembly: ({assemblyName})");
+        logger.Debug($"Check resolving assembly: ({assemblyName})");
 
         if (assemblyName.Name is null)
         {
@@ -94,7 +105,7 @@ internal class AssemblyResolver(IOtelLogger logger)
                 var ourVersion = AssemblyUtils.GetAssemblyVersionSafe(assemblyPath);
                 if (ourVersion != null && ourVersion < assemblyName.Version)
                 {
-                    logger.Information($"Skip resolving assembly ({assemblyName}): requested version {assemblyName.Version} is higher than our version {ourVersion}");
+                    logger.Debug($"Skip resolving assembly ({assemblyName}): requested version {assemblyName.Version} is higher than our version {ourVersion}");
                     return null;
                 }
             }
@@ -116,4 +127,5 @@ internal class AssemblyResolver(IOtelLogger logger)
         return AssemblyLoadContext.Default.LoadFromAssemblyPath(assemblyPath);
     }
 }
+
 #endif
