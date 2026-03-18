@@ -7,10 +7,9 @@ using System.Reflection;
 // args[0]: expected assembly name (e.g. "System.Diagnostics.DiagnosticSource").
 // args[1]: expected assembly version (e.g. "10.0.0.0").
 // args[2]: expected assembly file version (e.g. "10.0.0.0")
-// args[3]: comma-separated assembly name patterns to check for duplicates
-//          (e.g. "System.Diagnostics.DiagnosticSource,OpenTelemetry.*").
+// args[3]: comma-separated assembly names to exclude from duplicate check
+//          (e.g. "TestApplication.AssemblyRedirection").
 //          Empty or missing means check all assemblies.
-//          '-' prefix means exclude pattern (e.g. "-TestApplication.AssemblyRedirection" means check all except TestApplication.AssemblyRedirection).
 var expectedAssemblyName = args.Length > 0
     ? args[0]
     : throw new ArgumentException("Missing Expected Assembly Name", nameof(args));
@@ -23,15 +22,15 @@ var expectedFileVersion = args.Length > 2
     ? Version.Parse(args[2])
     : throw new ArgumentException($"Missing Expected Assembly File Version", nameof(args));
 
-var duplicateCheckPatterns = args.Length > 3
+var excludedNames = args.Length > 3
     ? args[3].Split([',', ' '], StringSplitOptions.RemoveEmptyEntries)
-    : []; // null = check all
+    : []; // empty = check all assemblies
 
 Console.WriteLine("Configuration:");
 Console.WriteLine($"  Expected Assembly Name: \"{expectedAssemblyName}\"");
 Console.WriteLine($"  Expected Assembly Version: {expectedAssemblyVersion}");
 Console.WriteLine($"  Expected Assembly File Version: {expectedFileVersion}");
-Console.WriteLine($"  Duplicate check assembly name patterns (empty means 'all'): [{string.Join(",", duplicateCheckPatterns)}]");
+Console.WriteLine($"  Excluded Assemblies (empty means 'check all'): [{string.Join(",", excludedNames)}]");
 Console.WriteLine();
 
 using var activitySource = new ActivitySource("AssemblyRedirection.ActivitySource");
@@ -46,13 +45,10 @@ var assemblyLookup = AppDomain.CurrentDomain.GetAssemblies()
     .OrderBy(it => it.GetName().Name, StringComparer.OrdinalIgnoreCase)
     .ToLookup(it => it.GetName().Name, StringComparer.OrdinalIgnoreCase);
 
-// Check 1: Verify no assembly matching the patterns is loaded more than once.
-var duplicateCheckAssemblyNames = GetMatchingAssemblyNames(assemblyLookup.Select(it => it.Key).OfType<string>(), duplicateCheckPatterns);
-Console.WriteLine($"Assemblies matching duplicate check patterns: [{string.Join(",", duplicateCheckAssemblyNames)}]");
-
+// Check 1: Verify the assemblies are not loaded twice (use assembly exclude list here).
 var duplicates = assemblyLookup
-    .Where(it => it.Count() != 1)
-    .Where(it => it.Key is null || duplicateCheckAssemblyNames.Contains(it.Key))
+    .Where(it => it.Count() > 1)
+    .Where(it => !excludedNames.Contains(it.Key, StringComparer.OrdinalIgnoreCase))
     .Select(it => it.Aggregate($"\"{it.Key}\" loaded multiple times: [{it.Count()}]", (current, next) => $"{current}\n - {Describe(next)}"))
     .ToArray();
 
@@ -95,40 +91,6 @@ Console.WriteLine();
 
 Console.WriteLine("Result: All checks passed.");
 return 0;
-
-static string[] GetMatchingAssemblyNames(IEnumerable<string> assemblyNames, string[] patterns)
-{
-    // Separate patterns into includes and excludes, validate wildcards
-    var includes = patterns
-        .Where(it => !it.StartsWith('-'.ToString(), StringComparison.Ordinal))
-        .ToArray();
-    var excludes = patterns
-        .Where(it => it.StartsWith('-'.ToString(), StringComparison.Ordinal))
-        .ToArray();
-
-    // Get assembly names matching the provided patterns
-    var matchingAssemblyNames = assemblyNames
-        .Where(it => includes.Length == 0 || MatchPatterns(it, includes))
-        .Where(it => excludes.Length == 0 || !MatchPatterns(it, excludes))
-        .ToArray();
-
-    // Fail if matching list is smaller that the include list
-    // each included entry should manifest an assembly or a set of assemblies,
-    // exclude entry should lower a set of assemblies manifested by an inlclude entry wildcard
-    if (matchingAssemblyNames.Length < includes.Length)
-    {
-        throw new InvalidOperationException($"Not all provided patterns manifest an assembly. Found assemblies: [{string.Join(",", matchingAssemblyNames)}]");
-    }
-
-    return matchingAssemblyNames;
-}
-
-static bool MatchPatterns(string name, string[] patterns)
-{
-    return patterns.Any(it => it.EndsWith('*'.ToString(), StringComparison.Ordinal)
-            ? name.StartsWith(it.Substring(0, it.Length - 1), StringComparison.OrdinalIgnoreCase)
-            : name.Equals(it, StringComparison.OrdinalIgnoreCase));
-}
 
 static string Describe(Assembly assembly)
 {

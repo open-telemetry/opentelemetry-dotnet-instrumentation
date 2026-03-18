@@ -31,7 +31,8 @@ public class AssemblyRedirectionTests(ITestOutputHelper output) : TestHelper("As
     // Case 3: Higher version should NOT be redirected with/without native profiler
     // TODO even LibraryVersion=10.0.2 loads assembly 10.0.0.0, making it identical to case 2 from the loaded assembly perspective
 #elif NET10_0
-    // Case 1: Lower version is not possible for DiagnosticSource on .NET 10, the msbuild will ignore a version of this package since SDK contains a higher
+    // Case 1: Lower version is not possible for DiagnosticSource on .NET 10,
+    //         msbuild will ignore a lower version of this package since it's part of .NET 10 SDK
     // Case 2: Equal version, should NOT be redirected with/without native profiler
     // TODO currently different test jobs use different versions of .net runtime:
     //   - test-build-container (ubuntu-22.04, alpine, alpine-x64, linux-musl): DS file version 10.0.426.12010
@@ -55,14 +56,13 @@ public class AssemblyRedirectionTests(ITestOutputHelper output) : TestHelper("As
     {
 #if NETFRAMEWORK
         Assert.True(enableNativeProfiler, "Native profiler is required for assembly redirection on .NET Framework");
-        var duplicateCheckPatterns = string.Empty;
+        var excludedNames = string.Empty;
 #else
 
         // on .NET (Core) Assembly Redirection without Native Profiler
-        // cannot guarantee full isolation, so there will be packages
-        // in both Default and Isolated ALC, e.g. TestApplication library itself, and possibly other core libraries
-        // so we should check that the important libraries are not loaded twice
-        var duplicateCheckPatterns = !enableNativeProfiler ? string.Join(',', ["System.Diagnostics.DiagnosticSource", "OpenTelemetry*"]) : string.Empty;
+        // will have test application loaded twice (Default ALC by runtime and isolated ALC by us),
+        // the assembly will run from isolated ALC but we have to exclude it from no-duplicate load check
+        var excludedNames = !enableNativeProfiler ? "TestApplication.AssemblyRedirection" : string.Empty;
 #endif
         // Arrange
         using var collector = new MockSpansCollector(Output);
@@ -80,7 +80,7 @@ public class AssemblyRedirectionTests(ITestOutputHelper output) : TestHelper("As
         RunTestApplication(new TestSettings
         {
             PackageVersion = libraryVersion,
-            Arguments = $"{expectedAssemblyName} {expectedAssemblyVersion} {expectedAssemblyFileVersion} {duplicateCheckPatterns}"
+            Arguments = $"{expectedAssemblyName} {expectedAssemblyVersion} {expectedAssemblyFileVersion} {excludedNames}"
         });
 
         // Assert

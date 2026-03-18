@@ -15,10 +15,212 @@ namespace OpenTelemetry.AutoInstrumentation;
 internal class IsolatedAssemblyLoadContext()
     : AssemblyLoadContext(StartupHookConstants.IsolatedAssemblyLoadContextName, isCollectible: false)
 {
-    // TODO we may want to define variables for Exclude and Include list (exclude supplements to default excludes, includes overrides)
-    // TODO which will give flexibility for the customer if they know what they are doing;
+    // TODO in future we may want to have a configuration for this list which will give flexibility for the customer if they know what they are doing;
     // TODO also we can automtically add to excludes, if an assembly failed to load in custom ALC so we won't fail it over and over
-    private static readonly HashSet<string> MustUseDefaultAlc = new(StringComparer.OrdinalIgnoreCase) { "System.Private.CoreLib" };
+    private static readonly Dictionary<int, HashSet<string>> MustUseDefaultAlc = new()
+    {
+        {
+            10,
+            new(StringComparer.OrdinalIgnoreCase)
+            {
+                "Accessibility",
+                "Microsoft.Win32.Primitives",
+                "Microsoft.Win32.Registry",
+                "Microsoft.Win32.SystemEvents",
+                "System.Collections",
+                "System.Collections.Concurrent",
+                "System.Collections.Immutable",
+                "System.Collections.NonGeneric",
+                "System.Collections.Specialized",
+                "System.ComponentModel",
+                "System.ComponentModel.Annotations",
+                "System.ComponentModel.EventBasedAsync",
+                "System.ComponentModel.Primitives",
+                "System.ComponentModel.TypeConverter",
+                "System.Configuration.ConfigurationManager",
+                "System.Console",
+                "System.Diagnostics.Debug",
+                "System.Diagnostics.DiagnosticSource",
+                "System.Diagnostics.EventLog",
+                "System.Diagnostics.FileVersionInfo",
+                "System.Diagnostics.Process",
+                "System.Diagnostics.StackTrace",
+                "System.Diagnostics.TextWriterTraceListener",
+                "System.Diagnostics.TraceSource",
+                "System.Diagnostics.Tracing",
+                "System.Drawing.Common",
+                "System.Drawing.Primitives",
+                "System.Formats.Asn1",
+                "System.Formats.Nrbf",
+                "System.IO.Compression",
+                "System.IO.Compression.Brotli",
+                "System.IO.FileSystem",
+                "System.IO.MemoryMappedFiles",
+                "System.IO.Pipelines",
+                "System.Linq",
+                "System.Linq.Expressions",
+                "System.Memory",
+                "System.Net.Http",
+                "System.Net.NameResolution",
+                "System.Net.NetworkInformation",
+                "System.Net.Primitives",
+                "System.Net.Quic",
+                "System.Net.Requests",
+                "System.Net.Security",
+                "System.Net.Sockets",
+                "System.Net.WebClient",
+                "System.Net.WebHeaderCollection",
+                "System.Numerics.Vectors",
+                "System.ObjectModel",
+                "System.Private.CoreLib",
+                "System.Private.Uri",
+                "System.Private.Windows.Core",
+                "System.Private.Windows.GdiPlus",
+                "System.Private.Xml",
+                "System.Private.Xml.Linq",
+                "System.Reflection.Emit",
+                "System.Reflection.Emit.ILGeneration",
+                "System.Reflection.Emit.Lightweight",
+                "System.Reflection.Metadata",
+                "System.Reflection.Primitives",
+                "System.Resources.Writer",
+                "System.Runtime",
+                "System.Runtime.Extensions",
+                "System.Runtime.InteropServices",
+                "System.Runtime.InteropServices.RuntimeInformation",
+                "System.Runtime.Intrinsics",
+                "System.Runtime.Loader",
+                "System.Runtime.Numerics",
+                "System.Runtime.Serialization.Formatters",
+                "System.Security.AccessControl",
+                "System.Security.Claims",
+                "System.Security.Cryptography",
+                "System.Security.Cryptography.ProtectedData",
+                "System.Security.Principal.Windows",
+                "System.Text.Encoding.CodePages",
+                "System.Text.Encoding.Extensions",
+                "System.Text.Encodings.Web",
+                "System.Text.Json",
+                "System.Text.RegularExpressions",
+                "System.Threading",
+                "System.Threading.AccessControl",
+                "System.Threading.Channels",
+                "System.Threading.Overlapped",
+                "System.Threading.Thread",
+                "System.Threading.ThreadPool",
+                "System.Threading.Timer",
+                "System.Web.HttpUtility",
+                "System.Windows.Extensions",
+                "System.Windows.Forms",
+                "System.Windows.Forms.Primitives",
+                "System.Xml.ReaderWriter",
+                "System.Xml.XDocument",
+                "System.Xml.XmlSerializer"
+            }
+        },
+        {
+            9,
+            new(StringComparer.OrdinalIgnoreCase)
+            {
+                "Microsoft.Win32.Primitives",
+                "Microsoft.Win32.Registry",
+                "System.Collections",
+                "System.Collections.Concurrent",
+                "System.Collections.Immutable",
+                "System.Collections.NonGeneric",
+                "System.Collections.Specialized",
+                "System.ComponentModel",
+                "System.ComponentModel.Primitives",
+                "System.Console",
+                "System.Diagnostics.Debug",
+                "System.Diagnostics.FileVersionInfo",
+                "System.Diagnostics.Process",
+                "System.Diagnostics.Tracing",
+                "System.IO.Compression",
+                "System.IO.FileSystem",
+                "System.IO.MemoryMappedFiles",
+                "System.IO.Pipelines",
+                "System.Linq",
+                "System.Memory",
+                "System.Numerics.Vectors",
+                "System.ObjectModel",
+                "System.Private.CoreLib",
+                "System.Private.Uri",
+                "System.Reflection.Emit.ILGeneration",
+                "System.Reflection.Emit.Lightweight",
+                "System.Reflection.Metadata",
+                "System.Reflection.Primitives",
+                "System.Runtime",
+                "System.Runtime.Extensions",
+                "System.Runtime.InteropServices",
+                "System.Runtime.Intrinsics",
+                "System.Runtime.Loader",
+                "System.Security.AccessControl",
+                "System.Security.Claims",
+                "System.Security.Principal.Windows",
+                "System.Text.Encoding.Extensions",
+                "System.Text.Encodings.Web",
+                "System.Text.Json",
+                "System.Text.RegularExpressions",
+                "System.Threading",
+                "System.Threading.Thread",
+                "System.Threading.ThreadPool",
+                "System.Threading.Timer"
+            }
+        },
+        {
+            8,
+            new(StringComparer.OrdinalIgnoreCase)
+            {
+                "Microsoft.Win32.Primitives",
+                "Microsoft.Win32.Registry",
+                "System.Collections",
+                "System.Collections.Concurrent",
+                "System.Collections.Immutable",
+                "System.Collections.NonGeneric",
+                "System.Collections.Specialized",
+                "System.ComponentModel",
+                "System.ComponentModel.Primitives",
+                "System.Console",
+                "System.Diagnostics.Debug",
+                "System.Diagnostics.FileVersionInfo",
+                "System.Diagnostics.Process",
+                "System.Diagnostics.Tracing",
+                "System.IO.Compression",
+                "System.IO.FileSystem",
+                "System.IO.MemoryMappedFiles",
+                "System.IO.Pipelines",
+                "System.Linq",
+                "System.Memory",
+                "System.Numerics.Vectors",
+                "System.ObjectModel",
+                "System.Private.CoreLib",
+                "System.Private.Uri",
+                "System.Reflection.Emit.ILGeneration",
+                "System.Reflection.Emit.Lightweight",
+                "System.Reflection.Metadata",
+                "System.Reflection.Primitives",
+                "System.Runtime",
+                "System.Runtime.Extensions",
+                "System.Runtime.InteropServices",
+                "System.Runtime.Intrinsics",
+                "System.Runtime.Loader",
+                "System.Security.AccessControl",
+                "System.Security.Claims",
+                "System.Security.Principal.Windows",
+                "System.Text.Encoding.Extensions",
+                "System.Text.Encodings.Web",
+                "System.Text.Json",
+                "System.Text.RegularExpressions",
+                "System.Threading",
+                "System.Threading.Thread",
+                "System.Threading.ThreadPool",
+                "System.Threading.Timer"
+            }
+        }
+    };
+
+    private static readonly int CurrentRuntimeMajorVersion = GetRuntimeMajorVersion();
 
     private readonly Dictionary<string, string> _tpaAssemblies = ParseTrustedPlatformAssemblies();
 
@@ -27,7 +229,7 @@ internal class IsolatedAssemblyLoadContext()
         // TODO: temporary no logging here! Logging triggers assembly loads -> infinite recursion.
 
         var name = assemblyName.Name;
-        if (string.IsNullOrEmpty(name) || MustUseDefaultAlc.Contains(name))
+        if (string.IsNullOrEmpty(name) || MustUseDefaultAlc[CurrentRuntimeMajorVersion].Contains(name))
         {
             return null;
         }
@@ -82,6 +284,16 @@ internal class IsolatedAssemblyLoadContext()
         }
 
         return LoadFromAssemblyPath(selected);
+    }
+
+    private static int GetRuntimeMajorVersion()
+    {
+        var coreLibAssembly = typeof(object).Assembly;
+        var version = coreLibAssembly.GetName().Version
+            ?? throw new InvalidOperationException("Unable to determine runtime version");
+        return MustUseDefaultAlc.TryAdd(version.Major, [])
+            ? throw new InvalidOperationException($"Unsupported runtime version: {version}. No configuration for Default ALC assemblies")
+            : version.Major;
     }
 
     private static Dictionary<string, string> ParseTrustedPlatformAssemblies()
