@@ -28,7 +28,10 @@ internal class StartupHook
     public static void Initialize()
     {
         _ = bool.TryParse(Environment.GetEnvironmentVariable(ConfigurationKeys.FailFast), out var failFast);
+        IsolationSetup? isolationSetup = null;
 
+        // all unhandled exceptions in StartupHook are terminal and should be handled where needed
+        // https://github.com/dotnet/runtime/blob/main/docs/design/features/host-startup-hook.md#error-handling-details
         try
         {
             LoaderAssemblyLocation = GetLoaderAssemblyLocation();
@@ -40,8 +43,6 @@ internal class StartupHook
                     "Rule Engine Failure: One or more rules failed validation. Automatic Instrumentation won't be loaded.");
             }
 
-            Logger.Information("Initialization.");
-
             if (IsStartupHookOnlyMode() && IsRedirectEnabled())
             {
                 // ASSEMBLY RESOLUTION STRATEGY
@@ -52,8 +53,8 @@ internal class StartupHook
                 // Default ALC. The instrumentation cannot override versions there or prevent
                 // customer code from loading first. To solve this, we hijack the application:
                 // load its entry assembly into an isolated ALC alongside our dependencies,
-                // execute customer entrypoint in the isolated ALC,
-                // then exit to prevent the Default ALC copy from running.
+                // execute customer entrypoint in the isolated ALC, then exit to prevent
+                // the Default ALC copy from running.
                 //
                 // When the customer application loads into the isolated ALC, all its dependencies
                 // are automatically tried to be loaded to the same ALC.
@@ -65,52 +66,52 @@ internal class StartupHook
                 // version is still lower than requested, the isolated ALC skips the request
                 // rather than loading an incompatible assembly.
                 //
-                // If isolation setup fails, the using statement reverts the context and control
-                // returns to the .NET runtime, which falls back to normal execution (or fail-fast
+                // If isolation setup fails, we revert the context and control returns to
+                // the .NET runtime, which falls back to normal execution (or fail-fast
                 // if configured).
 
-                Logger.Information("Starting isolated AssemblyLoadContext mode");
+                Logger.Information("Isolation Initialization.");
                 GetTargetApp(out var targetAppPath, out var entryAssembly);
-                using var resolver = new IsolatedAssemblyResolver(targetAppPath, entryAssembly, Logger);
-                try
-                {
-                    var exitCode = resolver.Run();
-                    Environment.Exit(exitCode);
-                }
-                catch (TargetInvocationException ex)
-                {
-                    Logger.Error(ex.InnerException ?? ex, "Target entrypoint threw exception");
-                    // TODO this exits the process but hides the error
-                    Environment.Exit(-1);
-                }
-
-                // Other exceptions: the using statement cleans up and reverts to the Default ALC.
-                // The exception then propagates to Initialize()'s catch block, where failFast controls the behavior:
-                // - If failFast = true: exception is re-thrown (fail fast)
-                // - If failFast = false: exception is suppressed, and control returns to the .NET runtime
-                //   to execute the customer's entrypoint normally (graceful degradation)
+                isolationSetup = new IsolationSetup(targetAppPath, entryAssembly, Logger);
+                isolationSetup.Setup();
             }
+            else
+            {
+                Logger.Information("Initialization.");
 
-            // If we run normally with Native profiler, we load the Loader,
-            // create an instance of OpenTelemetry.AutoInstrumentation.Loader.Loader
-            // which will setup assembly resolution and initialize Instrumentation
-            var loaderFilePath = Path.Combine(LoaderAssemblyLocation, $"{LoaderAssemblyName}.dll");
-            var loaderAssembly = Assembly.LoadFrom(loaderFilePath)
-                ?? throw new InvalidOperationException("Failed to load Loader assembly");
-            var loaderInstance = loaderAssembly.CreateInstance(LoaderTypeName)
-                ?? throw new InvalidOperationException("Failed to create an instance of the Loader");
+                // With Native profiler, we load the Loader,
+                // create an instance of OpenTelemetry.AutoInstrumentation.Loader.Loader
+                // which will setup assembly resolution and initialize Instrumentation
+                var loaderFilePath = Path.Combine(LoaderAssemblyLocation, $"{LoaderAssemblyName}.dll");
+                var loaderAssembly = Assembly.LoadFrom(loaderFilePath)
+                    ?? throw new InvalidOperationException("Failed to load Loader assembly");
+                var loaderInstance = loaderAssembly.CreateInstance(LoaderTypeName)
+                    ?? throw new InvalidOperationException("Failed to create an instance of the Loader");
+            }
         }
         catch (Exception ex)
         {
+            isolationSetup?.Revert();
             Logger.Error(ex, $"Error in StartupHook initialization: LoaderFolderLocation: {LoaderAssemblyLocation}");
             if (failFast)
             {
                 throw;
             }
+
+            return;
         }
         finally
         {
             OtelLogging.CloseLogger(StartuphookLoggerSuffix, Logger);
+        }
+
+        // We deliberately do not handle exceptions from the customer entrypoint.
+        // Customer application failures are not an instrumentation concern and should
+        // propagate as unhandled exceptions, terminating the process naturally.
+        if (isolationSetup != null)
+        {
+            var exitCode = isolationSetup.InvokeEntryPoint();
+            Environment.Exit(exitCode);
         }
     }
 

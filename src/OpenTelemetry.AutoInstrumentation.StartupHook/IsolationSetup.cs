@@ -9,21 +9,23 @@ using OpenTelemetry.AutoInstrumentation.Util;
 namespace OpenTelemetry.AutoInstrumentation;
 
 /// <summary>
-/// Provides assembly resolution for StartupHook-only deployment (no native profiler).
-/// Creates an isolated AssemblyLoadContext that loads both customer and agent assemblies,
+/// Orchestrates isolation setup for StartupHook-only deployment (no native profiler).
+/// Creates an isolated AssemblyLoadContext, loads customer and agent assemblies into it,
+/// and initializes instrumentation. Can revert the setup if initialization fails.
 /// </summary>
-internal sealed class IsolatedAssemblyResolver(string targetAppPath, Assembly? originalEntryAssembly, IOtelLogger logger) : IDisposable
+internal sealed class IsolationSetup(string targetAppPath, Assembly? originalEntryAssembly, IOtelLogger logger)
 {
     private AssemblyLoadContext.ContextualReflectionScope? _contextualReflectionScope;
-    private Assembly? _isolatedEntryAssembly;
     private IsolatedAssemblyLoadContext? _isolatedContext;
+    private MethodInfo? _entryPoint;
+    private object[]? _entryPointParameters;
 
     /// <summary>
-    /// Sets up an isolated AssemblyLoadContext, initializes instrumentation,
-    /// and executes the customer application entrypoint.
+    /// Sets up an isolated AssemblyLoadContext and initializes instrumentation.
+    /// If this method throws, call <see cref="Revert"/> to undo the isolation setup
+    /// and allow the runtime to fall back to normal execution.
     /// </summary>
-    /// <returns>The exit code from the customer's Main method, or 0 if void.</returns>
-    public int Run()
+    public void Setup()
     {
         logger.Debug($"Isolation mode - Target app path: {targetAppPath}");
         logger.Debug($"Isolation mode - Target entry assembly: {originalEntryAssembly}");
@@ -34,11 +36,11 @@ internal sealed class IsolatedAssemblyResolver(string targetAppPath, Assembly? o
 
         // 2. Enable contextual reflection (helps with Assembly.Load(string), Type.GetType)
         _contextualReflectionScope = _isolatedContext.EnterContextualReflection();
-        logger.Debug("Contextual Reflection is set to isolated context");
+        logger.Debug("Set isolated context as CurrentContextualReflectionContext");
 
         // 3. Load customer entry assembly into isolated context
-        _isolatedEntryAssembly = _isolatedContext.LoadFromAssemblyPath(targetAppPath);
-        logger.Debug($"Loaded target entry assembly to isolated context: {_isolatedEntryAssembly.FullName}");
+        var isolatedEntryAssembly = _isolatedContext.LoadFromAssemblyPath(targetAppPath);
+        logger.Debug($"Loaded target entry assembly to isolated context: {isolatedEntryAssembly.FullName}");
 
         // 4. Initialize instrumentation loader (contextual reflection is active)
         var loaderAssembly = Assembly.Load(StartupHook.LoaderAssemblyName)
@@ -47,24 +49,33 @@ internal sealed class IsolatedAssemblyResolver(string targetAppPath, Assembly? o
             ?? throw new InvalidOperationException("Failed to create an instance of the Loader");
 
         // 5. Set entry assembly for frameworks and third-party that depends on it
-        Assembly.SetEntryAssembly(_isolatedEntryAssembly);
-        logger.Debug("Set entry assembly to target assembly loaded in isolated context");
+        Assembly.SetEntryAssembly(isolatedEntryAssembly);
+        logger.Debug("Set assembly loaded in isolated context as entry assembly");
 
-        // 6. Execute customer entrypoint
-        var entryPoint = _isolatedEntryAssembly.EntryPoint
+        // 6. Resolve entrypoint
+        _entryPoint = isolatedEntryAssembly.EntryPoint
             ?? throw new InvalidOperationException("Entry assembly has no entrypoint");
-
         var args = Environment.GetCommandLineArgs().Skip(1).ToArray();
-        var parameters = entryPoint.GetParameters().Length > 0 ? new object[] { args } : null;
-
-        return entryPoint.Invoke(null, parameters) as int? ?? 0;
+        _entryPointParameters = _entryPoint.GetParameters().Length > 0 ? [args] : null;
+        logger.Debug("Ready to execute entry assembly EntryPoint in isolated context");
     }
 
     /// <summary>
-    /// Reverts the isolation setup. Called automatically if an exception occurs during setup
-    /// (before customer entrypoint is invoked), allowing the runtime to fall back to normal execution.
+    /// Executes the customer application entrypoint in the isolated context.
+    /// Must be called after <see cref="Setup"/> succeeds.
     /// </summary>
-    public void Dispose()
+    /// <returns>The exit code from the customer's Main method, or 0 if void.</returns>
+    public int InvokeEntryPoint()
+    {
+        // use DoNotWrapExceptions to preserve the original exception type and stack trace if the entrypoint throws
+        return _entryPoint!.Invoke(null, BindingFlags.DoNotWrapExceptions, null, _entryPointParameters, null) as int? ?? 0;
+    }
+
+    /// <summary>
+    /// Reverts the isolation setup. Should be called if <see cref="Setup"/> fails,
+    /// allowing the runtime to fall back to normal execution.
+    /// </summary>
+    public void Revert()
     {
         // Revert contextual reflection
         _contextualReflectionScope?.Dispose();
