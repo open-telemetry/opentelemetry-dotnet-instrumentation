@@ -24,6 +24,8 @@ internal static class AdoNetInstrumentation
             return null;
         }
 
+        var databaseName = dbCommand.Connection?.Database;
+
         var systemName = AdoNetDbSystemMapper.GetSystemName(instance.GetType());
 
         var sqlStatementInfo = SqlProcessor.GetSanitizedSql(dbCommand.CommandText);
@@ -34,6 +36,11 @@ internal static class AdoNetInstrumentation
             { DatabaseAttributes.Keys.DbQuerySummary, sqlStatementInfo.DbQuerySummary },
             { DatabaseAttributes.Keys.DbQueryText, sqlStatementInfo.SanitizedSql },
         };
+
+        if (!string.IsNullOrEmpty(databaseName))
+        {
+            tags.Add(DatabaseAttributes.Keys.DbNamespace, databaseName);
+        }
 
         return Source.StartActivity(sqlStatementInfo.DbQuerySummary, ActivityKind.Client, default(ActivityContext), tags);
     }

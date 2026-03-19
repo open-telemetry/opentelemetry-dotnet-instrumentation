@@ -24,6 +24,7 @@ public class AdoNetStubTests(ITestOutputHelper output) : TestHelper("AdoNetStub"
             "INSERT FakeTable",
             [
 
+                new() { Key = "db.namespace", Value = new AnyValue { StringValue = "FakeDatabase" } },
                 new() { Key = "db.system.name", Value = new AnyValue { StringValue = "other_sql" } },
                 new() { Key = "db.query.summary", Value = new AnyValue { StringValue = "INSERT FakeTable" } },
                 new() { Key = "db.query.text", Value = new AnyValue { StringValue = "INSERT INTO FakeTable VALUES (?, ?)" } }
@@ -31,6 +32,7 @@ public class AdoNetStubTests(ITestOutputHelper output) : TestHelper("AdoNetStub"
         collector.ExpectAdoNet(
             "SELECT FakeTable",
             [
+                new() { Key = "db.namespace", Value = new AnyValue { StringValue = "FakeDatabase" } },
                 new() { Key = "db.system.name", Value = new AnyValue { StringValue = "other_sql" } },
                 new() { Key = "db.query.summary", Value = new AnyValue { StringValue = "SELECT FakeTable" } },
                 new() { Key = "db.query.text", Value = new AnyValue { StringValue = "SELECT COUNT(*) FROM FakeTable" } }
@@ -38,6 +40,7 @@ public class AdoNetStubTests(ITestOutputHelper output) : TestHelper("AdoNetStub"
         collector.ExpectAdoNet(
             "SELECT FakeTable",
             [
+                new() { Key = "db.namespace", Value = new AnyValue { StringValue = "FakeDatabase" } },
                 new() { Key = "db.system.name", Value = new AnyValue { StringValue = "other_sql" } },
                 new() { Key = "db.query.summary", Value = new AnyValue { StringValue = "SELECT FakeTable" } },
                 new() { Key = "db.query.text", Value = new AnyValue { StringValue = "SELECT * FROM FakeTable" } }
@@ -45,6 +48,7 @@ public class AdoNetStubTests(ITestOutputHelper output) : TestHelper("AdoNetStub"
         collector.ExpectAdoNet(
             "INSERT FakeTable",
             [
+                new() { Key = "db.namespace", Value = new AnyValue { StringValue = "FakeDatabase" } },
                 new() { Key = "db.system.name", Value = new AnyValue { StringValue = "other_sql" } },
                 new() { Key = "db.query.summary", Value = new AnyValue { StringValue = "INSERT FakeTable" } },
                 new() { Key = "db.query.text", Value = new AnyValue { StringValue = "INSERT INTO FakeTable VALUES (?, ?)" } }
@@ -52,6 +56,7 @@ public class AdoNetStubTests(ITestOutputHelper output) : TestHelper("AdoNetStub"
         collector.ExpectAdoNet(
             "SELECT FakeTable",
             [
+                new() { Key = "db.namespace", Value = new AnyValue { StringValue = "FakeDatabase" } },
                 new() { Key = "db.system.name", Value = new AnyValue { StringValue = "other_sql" } },
                 new() { Key = "db.query.summary", Value = new AnyValue { StringValue = "SELECT FakeTable" } },
                 new() { Key = "db.query.text", Value = new AnyValue { StringValue = "SELECT COUNT(*) FROM FakeTable" } }
@@ -59,6 +64,7 @@ public class AdoNetStubTests(ITestOutputHelper output) : TestHelper("AdoNetStub"
         collector.ExpectAdoNet(
             "SELECT FakeTable",
             [
+                new() { Key = "db.namespace", Value = new AnyValue { StringValue = "FakeDatabase" } },
                 new() { Key = "db.system.name", Value = new AnyValue { StringValue = "other_sql" } },
                 new() { Key = "db.query.summary", Value = new AnyValue { StringValue = "SELECT FakeTable" } },
                 new() { Key = "db.query.text", Value = new AnyValue { StringValue = "SELECT * FROM FakeTable" } }
