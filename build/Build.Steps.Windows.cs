@@ -203,6 +203,7 @@ partial class Build
                         .SetBuildArg($"configuration={BuildConfiguration}")
                         .EnableRm()
                         .SetProcessWorkingDirectory(project.Directory)
+                        .SetProcessEnvironmentVariable("DOCKER_BUILDKIT", "1")
                         .SetTag($"{Path.GetFileNameWithoutExtension(project).Replace(".", "-")}-{target}".ToLowerInvariant())
                         .SetTarget(target)
                     );
@@ -216,6 +217,7 @@ partial class Build
                     .SetBuildArg($"configuration={BuildConfiguration}")
                     .EnableRm()
                     .SetProcessWorkingDirectory(project.Directory)
+                    .SetProcessEnvironmentVariable("DOCKER_BUILDKIT", "1")
                     .SetTag(Path.GetFileNameWithoutExtension(project).Replace(".", "-").ToLowerInvariant())
                 );
             }
