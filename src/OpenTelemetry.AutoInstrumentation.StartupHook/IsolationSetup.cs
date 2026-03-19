@@ -57,7 +57,7 @@ internal sealed class IsolationSetup(string targetAppPath, Assembly? originalEnt
             ?? throw new InvalidOperationException("Entry assembly has no entrypoint");
         var args = Environment.GetCommandLineArgs().Skip(1).ToArray();
         _entryPointParameters = _entryPoint.GetParameters().Length > 0 ? [args] : null;
-        logger.Debug("Ready to execute entry assembly EntryPoint in isolated context");
+        logger.Debug("Ready to execute entry assembly in isolated context");
     }
 
     /// <summary>

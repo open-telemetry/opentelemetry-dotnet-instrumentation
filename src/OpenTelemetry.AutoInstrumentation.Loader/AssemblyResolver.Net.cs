@@ -69,6 +69,8 @@ internal class AssemblyResolver(IOtelLogger logger)
         // and TPA conflicts can be intercepted before the runtime silently loads the wrong version.
 
         AssemblyLoadContext.Default.Resolving += Resolving_ManagedProfilerDependencies;
+        // TODO with setting DependencyLoadContext as contextual reflection context, the need of caching
+        //  is becoming more important because for unknown assemblies we will be hitting file system twice
         DependencyLoadContext.EnterContextualReflection();
     }
 
