@@ -1,6 +1,4 @@
-using System;
-using System.Collections.Generic;
-using System.IO;
+using Extensions;
 using Nuke.Common;
 using Nuke.Common.IO;
 using Nuke.Common.ProjectModel;
@@ -19,7 +17,7 @@ partial class Build
     Target CompileNativeSrcWindows => _ => _
         .Unlisted()
         .After(CompileManagedSrc)
-        .After(GenerateNetFxAssemblyRedirectionSource)
+        .After(GenerateAssemblyRedirectionSource)
         .OnlyWhenStatic(() => IsWin)
         .Executes(() =>
         {
@@ -74,7 +72,7 @@ partial class Build
     Target CompileNativeDependenciesForManagedTestsWindows => _ => _
         .Unlisted()
         .After(CompileManagedSrc)
-        .After(GenerateNetFxAssemblyRedirectionSource)
+        .After(GenerateAssemblyRedirectionSource)
         .OnlyWhenStatic(() => IsWin)
         .Executes(() =>
         {
@@ -228,31 +226,6 @@ partial class Build
         }
     }
 
-    Target GenerateNetFxTransientDependencies => _ => _
-        .Unlisted()
-        .After(Restore)
-        .OnlyWhenStatic(() => IsWin)
-        .Executes(() =>
-        {
-            // The target project needs to have its NuGet packages restored prior to running the tool.
-            var targetProject = Solution.GetProjectByName(Projects.AutoInstrumentationNetFxAssemblies);
-            DotNetRestore(s => s.SetProjectFile(targetProject));
-
-            TransientDependenciesGenerator.Run(targetProject);
-        });
-
-    Target GenerateNetFxAssemblyRedirectionSource => _ => _
-        .Unlisted()
-        .After(PublishManagedProfiler)
-        .OnlyWhenStatic(() => IsWin)
-        .Executes(() =>
-        {
-            var netFxAssembliesFolder = TracerHomeDirectory / MapToFolderOutput(TargetFramework.NET462);
-            var generatedSourceFile = SourceDirectory / Projects.AutoInstrumentationNative / "netfx_assembly_redirection.h";
-
-            AssemblyRedirectionSourceGenerator.Generate(netFxAssembliesFolder, generatedSourceFile);
-        });
-
     Target InstallNetFxAssembliesGAC => _ => _
         .Unlisted()
         .After(BuildTracer)
@@ -279,8 +252,9 @@ partial class Build
         }
 
         // We assume that dev machine running test has .Net Framework not older than TargetFrameworksNetFx.Last()
-        var netFxCommonAssembliesFolder = TracerHomeDirectory / MapToFolderOutput(TargetFrameworksForNetFxPacking.Last());
-        var netFxAssembliesFolder = TracerHomeDirectory / MapToFolderOutputNetFx(TargetFrameworksForNetFxPacking.Last());
+        var lastFramework = TargetFrameworksForPublish.ExceptNet().Last();
+        var netFxCommonAssembliesFolder = TracerHomeDirectory / lastFramework.OutputFolder;
+        var netFxAssembliesFolder = TracerHomeDirectory / lastFramework.OutputFolder / lastFramework;
         var installTool = Solution.GetProjectByName(Projects.Tools.GacInstallTool);
 
         DotNetRun(s => s
