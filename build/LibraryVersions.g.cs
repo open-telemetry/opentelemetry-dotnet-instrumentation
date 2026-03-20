@@ -26,7 +26,7 @@ public static partial class LibraryVersion
             "TestApplication.Elasticsearch",
             [
                 new("8.15.10"),
-                new("9.2.2"),
+                new("9.3.3"),
             ]
         },
         {
@@ -53,7 +53,7 @@ public static partial class LibraryVersion
             [
                 new("7.5.0", additionalMetaData: new() { { "GraphQLMicrosoftDI", "7.5.0" }, { "GraphQLServerTransportsAspNetCore", "7.5.0" }, { "GraphQLServerUIPGraphiQL", "7.5.0" } }),
                 new("8.0.2", additionalMetaData: new() { { "GraphQLMicrosoftDI", "8.0.2" }, { "GraphQLServerTransportsAspNetCore", "8.0.2" }, { "GraphQLServerUIPGraphiQL", "8.0.2" } }),
-                new("8.8.3", additionalMetaData: new() { { "GraphQLMicrosoftDI", "8.8.3" }, { "GraphQLServerTransportsAspNetCore", "8.3.3" }, { "GraphQLServerUIPGraphiQL", "8.3.3" } }),
+                new("8.8.3", additionalMetaData: new() { { "GraphQLMicrosoftDI", "8.8.4" }, { "GraphQLServerTransportsAspNetCore", "8.3.3" }, { "GraphQLServerUIPGraphiQL", "8.3.3" } }),
             ]
         },
         {
@@ -67,7 +67,7 @@ public static partial class LibraryVersion
             "TestApplication.Log4NetBridge",
             [
                 new("2.0.13"),
-                new("3.2.0"),
+                new("3.3.0"),
             ]
         },
         {
@@ -83,14 +83,14 @@ public static partial class LibraryVersion
             "TestApplication.MassTransit",
             [
                 new("8.3.0"),
-                new("8.5.7"),
+                new("9.0.1"),
             ]
         },
         {
             "TestApplication.SqlClient.Microsoft",
             [
                 new("5.2.2"),
-                new("6.1.4"),
+                new("7.0.0"),
             ]
         },
         {
@@ -191,7 +191,7 @@ public static partial class LibraryVersion
             [
                 new("1.8.2"),
                 new("1.9.2"),
-                new("2.13.0"),
+                new("2.13.2"),
             ]
         },
         {
