@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 using System.Data;
+using System.Data.Common;
 using System.Diagnostics;
 using OpenTelemetry.AutoInstrumentation.Util;
 using OpenTelemetry.Instrumentation;
@@ -19,16 +20,16 @@ internal static class AdoNetInstrumentation
 
     public static Activity? StartActivity<TTarget>(TTarget instance, string methodName)
     {
-        if (instance is not IDbCommand dbCommand)
+        if (instance is not IDbCommand iDbCommand)
         {
             return null;
         }
 
-        var databaseName = dbCommand.Connection?.Database;
+        var databaseName = iDbCommand.Connection?.Database;
 
         var systemName = AdoNetDbSystemMapper.GetSystemName(instance.GetType());
 
-        var sqlStatementInfo = SqlProcessor.GetSanitizedSql(dbCommand.CommandText);
+        var sqlStatementInfo = SqlProcessor.GetSanitizedSql(iDbCommand.CommandText);
 
         TagList tags = new()
         {
@@ -40,6 +41,26 @@ internal static class AdoNetInstrumentation
         if (!string.IsNullOrEmpty(databaseName))
         {
             tags.Add(DatabaseAttributes.Keys.DbNamespace, databaseName);
+        }
+
+        if (iDbCommand is DbCommand dbCommand)
+        {
+            var dataSource = dbCommand.Connection?.DataSource;
+            if (!string.IsNullOrEmpty(dataSource))
+            {
+                var connectionDetails = SqlConnectionDetails.ParseFromDataSource(dataSource!);
+                var serverAddress = connectionDetails.ServerHostName ?? connectionDetails.ServerIpAddress;
+
+                if (!string.IsNullOrEmpty(serverAddress))
+                {
+                    tags.Add(NetworkAttributes.Keys.ServerAddress, serverAddress);
+
+                    if (connectionDetails.Port.HasValue)
+                    {
+                        tags.Add(NetworkAttributes.Keys.ServerPort, connectionDetails.Port.Value);
+                    }
+                }
+            }
         }
 
         return Source.StartActivity(sqlStatementInfo.DbQuerySummary, ActivityKind.Client, default(ActivityContext), tags);

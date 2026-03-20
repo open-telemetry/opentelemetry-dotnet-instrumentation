@@ -24,50 +24,62 @@ public class AdoNetStubTests(ITestOutputHelper output) : TestHelper("AdoNetStub"
             "INSERT FakeTable",
             [
 
-                new() { Key = "db.namespace", Value = new AnyValue { StringValue = "FakeDatabase" } },
                 new() { Key = "db.system.name", Value = new AnyValue { StringValue = "other_sql" } },
                 new() { Key = "db.query.summary", Value = new AnyValue { StringValue = "INSERT FakeTable" } },
-                new() { Key = "db.query.text", Value = new AnyValue { StringValue = "INSERT INTO FakeTable VALUES (?, ?)" } }
+                new() { Key = "db.query.text", Value = new AnyValue { StringValue = "INSERT INTO FakeTable VALUES (?, ?)" } },
+                new() { Key = "db.namespace", Value = new AnyValue { StringValue = "FakeDatabase" } },
+                new() { Key = "server.address", Value = new AnyValue { StringValue = "FakeServer" } },
+                new() { Key = "server.port", Value = new AnyValue { IntValue = 5433 } }
             ]);
         collector.ExpectAdoNet(
             "SELECT FakeTable",
             [
-                new() { Key = "db.namespace", Value = new AnyValue { StringValue = "FakeDatabase" } },
                 new() { Key = "db.system.name", Value = new AnyValue { StringValue = "other_sql" } },
                 new() { Key = "db.query.summary", Value = new AnyValue { StringValue = "SELECT FakeTable" } },
-                new() { Key = "db.query.text", Value = new AnyValue { StringValue = "SELECT COUNT(*) FROM FakeTable" } }
+                new() { Key = "db.query.text", Value = new AnyValue { StringValue = "SELECT COUNT(*) FROM FakeTable" } },
+                new() { Key = "db.namespace", Value = new AnyValue { StringValue = "FakeDatabase" } },
+                new() { Key = "server.address", Value = new AnyValue { StringValue = "FakeServer" } },
+                new() { Key = "server.port", Value = new AnyValue { IntValue = 5433 } }
                 ]);
         collector.ExpectAdoNet(
             "SELECT FakeTable",
             [
-                new() { Key = "db.namespace", Value = new AnyValue { StringValue = "FakeDatabase" } },
                 new() { Key = "db.system.name", Value = new AnyValue { StringValue = "other_sql" } },
                 new() { Key = "db.query.summary", Value = new AnyValue { StringValue = "SELECT FakeTable" } },
-                new() { Key = "db.query.text", Value = new AnyValue { StringValue = "SELECT * FROM FakeTable" } }
+                new() { Key = "db.query.text", Value = new AnyValue { StringValue = "SELECT * FROM FakeTable" } },
+                new() { Key = "db.namespace", Value = new AnyValue { StringValue = "FakeDatabase" } },
+                new() { Key = "server.address", Value = new AnyValue { StringValue = "FakeServer" } },
+                new() { Key = "server.port", Value = new AnyValue { IntValue = 5433 } }
                 ]);
         collector.ExpectAdoNet(
             "INSERT FakeTable",
             [
-                new() { Key = "db.namespace", Value = new AnyValue { StringValue = "FakeDatabase" } },
                 new() { Key = "db.system.name", Value = new AnyValue { StringValue = "other_sql" } },
                 new() { Key = "db.query.summary", Value = new AnyValue { StringValue = "INSERT FakeTable" } },
-                new() { Key = "db.query.text", Value = new AnyValue { StringValue = "INSERT INTO FakeTable VALUES (?, ?)" } }
+                new() { Key = "db.query.text", Value = new AnyValue { StringValue = "INSERT INTO FakeTable VALUES (?, ?)" } },
+                new() { Key = "db.namespace", Value = new AnyValue { StringValue = "FakeDatabase" } },
+                new() { Key = "server.address", Value = new AnyValue { StringValue = "FakeServer" } },
+                new() { Key = "server.port", Value = new AnyValue { IntValue = 5433 } }
                 ]);
         collector.ExpectAdoNet(
             "SELECT FakeTable",
             [
-                new() { Key = "db.namespace", Value = new AnyValue { StringValue = "FakeDatabase" } },
                 new() { Key = "db.system.name", Value = new AnyValue { StringValue = "other_sql" } },
                 new() { Key = "db.query.summary", Value = new AnyValue { StringValue = "SELECT FakeTable" } },
-                new() { Key = "db.query.text", Value = new AnyValue { StringValue = "SELECT COUNT(*) FROM FakeTable" } }
+                new() { Key = "db.query.text", Value = new AnyValue { StringValue = "SELECT COUNT(*) FROM FakeTable" } },
+                new() { Key = "db.namespace", Value = new AnyValue { StringValue = "FakeDatabase" } },
+                new() { Key = "server.address", Value = new AnyValue { StringValue = "FakeServer" } },
+                new() { Key = "server.port", Value = new AnyValue { IntValue = 5433 } }
                 ]);
         collector.ExpectAdoNet(
             "SELECT FakeTable",
             [
-                new() { Key = "db.namespace", Value = new AnyValue { StringValue = "FakeDatabase" } },
                 new() { Key = "db.system.name", Value = new AnyValue { StringValue = "other_sql" } },
                 new() { Key = "db.query.summary", Value = new AnyValue { StringValue = "SELECT FakeTable" } },
-                new() { Key = "db.query.text", Value = new AnyValue { StringValue = "SELECT * FROM FakeTable" } }
+                new() { Key = "db.query.text", Value = new AnyValue { StringValue = "SELECT * FROM FakeTable" } },
+                new() { Key = "db.namespace", Value = new AnyValue { StringValue = "FakeDatabase" } },
+                new() { Key = "server.address", Value = new AnyValue { StringValue = "FakeServer" } },
+                new() { Key = "server.port", Value = new AnyValue { IntValue = 5433 } }
                 ]);
 
         RunTestApplication(new() { });

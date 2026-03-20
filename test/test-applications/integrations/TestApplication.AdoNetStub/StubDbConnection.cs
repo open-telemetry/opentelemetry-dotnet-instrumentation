@@ -16,11 +16,11 @@ internal sealed class StubDbConnection : DbConnection
 #if NET
     [AllowNull]
 #endif
-    public override string ConnectionString { get; set; } = string.Empty;
+    public override string ConnectionString { get; set; } = "Server=tcp:FakeServer\\FakeInstance,5433;Database=FakeDatabase;User Id=FakeUser;Password=FakePassword;";
 
     public override string Database => "FakeDatabase";
 
-    public override string DataSource => "FakeDataSource";
+    public override string DataSource => "tcp:FakeServer\\FakeInstance,5433";
 
     public override string ServerVersion => "1.0.0";
 
