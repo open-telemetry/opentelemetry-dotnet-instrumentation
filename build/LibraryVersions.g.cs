@@ -36,7 +36,7 @@ public static partial class LibraryVersion
                 new("8.0.23"),
                 new("9.0.12"),
                 new("10.0.0", supportedFrameworks: [ "net10.0" ]),
-                new("10.0.2", supportedFrameworks: [ "net10.0" ]),
+                new("10.0.5", supportedFrameworks: [ "net10.0" ]),
             ]
         },
         {
@@ -53,7 +53,7 @@ public static partial class LibraryVersion
             [
                 new("7.5.0", additionalMetaData: new() { { "GraphQLMicrosoftDI", "7.5.0" }, { "GraphQLServerTransportsAspNetCore", "7.5.0" }, { "GraphQLServerUIPGraphiQL", "7.5.0" } }),
                 new("8.0.2", additionalMetaData: new() { { "GraphQLMicrosoftDI", "8.0.2" }, { "GraphQLServerTransportsAspNetCore", "8.0.2" }, { "GraphQLServerUIPGraphiQL", "8.0.2" } }),
-                new("8.8.3", additionalMetaData: new() { { "GraphQLMicrosoftDI", "8.8.4" }, { "GraphQLServerTransportsAspNetCore", "8.3.3" }, { "GraphQLServerUIPGraphiQL", "8.3.3" } }),
+                new("8.8.4", additionalMetaData: new() { { "GraphQLMicrosoftDI", "8.8.4" }, { "GraphQLServerTransportsAspNetCore", "8.3.3" }, { "GraphQLServerUIPGraphiQL", "8.3.3" } }),
             ]
         },
         {
@@ -76,14 +76,14 @@ public static partial class LibraryVersion
                 new("5.0.0", additionalMetaData: new() { { "NLogExtensionsLogging", "5.0.0" } }),
                 new("5.3.4", additionalMetaData: new() { { "NLogExtensionsLogging", "5.3.15" } }),
                 new("6.0.0", additionalMetaData: new() { { "NLogExtensionsLogging", "6.0.0" } }),
-                new("6.0.7", additionalMetaData: new() { { "NLogExtensionsLogging", "6.1.0" } }),
+                new("6.1.1", additionalMetaData: new() { { "NLogExtensionsLogging", "6.1.2" } }),
             ]
         },
         {
             "TestApplication.MassTransit",
             [
                 new("8.3.0"),
-                new("9.0.1"),
+                new("8.5.8"),
             ]
         },
         {
@@ -97,7 +97,7 @@ public static partial class LibraryVersion
             "TestApplication.SqlClient.System",
             [
                 new("4.8.6"),
-                new("4.9.0"),
+                new("4.9.1"),
             ]
         },
         {
@@ -108,6 +108,7 @@ public static partial class LibraryVersion
                 new("3.0.0", supportedFrameworks: [ "net10.0", "net9.0", "net8.0", "net472" ]),
                 new("3.5.0", supportedFrameworks: [ "net10.0", "net9.0", "net8.0", "net472" ]),
                 new("3.7.0", supportedFrameworks: [ "net10.0", "net9.0", "net8.0", "net472" ]),
+                new("3.7.1", supportedFrameworks: [ "net10.0", "net9.0", "net8.0", "net472" ]),
             ]
         },
         {
@@ -121,7 +122,7 @@ public static partial class LibraryVersion
             "TestApplication.MySqlData",
             [
                 new("9.0.0"),
-                new("9.5.0"),
+                new("9.6.0"),
             ]
         },
         {
@@ -129,7 +130,7 @@ public static partial class LibraryVersion
             [
                 new("8.0.8"),
                 new("9.0.4", supportedFrameworks: [ "net10.0", "net9.0", "net8.0" ]),
-                new("10.0.1", supportedFrameworks: [ "net10.0", "net9.0", "net8.0" ]),
+                new("10.0.2", supportedFrameworks: [ "net10.0", "net9.0", "net8.0" ]),
             ]
         },
         {
@@ -137,28 +138,28 @@ public static partial class LibraryVersion
             [
                 new("8.2.5"),
                 new("9.1.0", supportedFrameworks: [ "net10.0", "net9.0", "net8.0" ]),
-                new("9.2.8", supportedFrameworks: [ "net10.0", "net9.0", "net8.0" ]),
+                new("10.1.0", supportedFrameworks: [ "net10.0", "net9.0", "net8.0" ]),
             ]
         },
         {
             "TestApplication.OracleMda.NetFramework",
             [
                 new("23.5.1", supportedFrameworks: [ "net472" ]),
-                new("23.26.0", supportedFrameworks: [ "net472" ]),
+                new("23.26.100", supportedFrameworks: [ "net472" ]),
             ]
         },
         {
             "TestApplication.OracleMda.Core",
             [
                 new("23.5.1"),
-                new("23.26.0"),
+                new("23.26.100"),
             ]
         },
         {
             "TestApplication.Quartz",
             [
                 new("3.6.0"),
-                new("3.15.1"),
+                new("3.16.1"),
             ]
         },
         {
@@ -167,14 +168,14 @@ public static partial class LibraryVersion
                 new("5.1.2"),
                 new("6.8.1"),
                 new("7.0.0"),
-                new("7.2.0"),
+                new("7.2.1"),
             ]
         },
         {
             "TestApplication.StackExchangeRedis",
             [
                 new("2.6.122"),
-                new("2.10.1"),
+                new("2.12.4"),
             ]
         },
         {
