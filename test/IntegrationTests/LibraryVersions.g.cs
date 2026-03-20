@@ -299,7 +299,7 @@ public static partial class LibraryVersion
 #if NET10_0 || NET9_0 || NET8_0
                 "9.1.0",
 #endif
-#if NET10_0 || NET9_0 || NET8_0
+#if NET10_0
                 "10.1.0",
 #endif
 #endif
