@@ -41,6 +41,17 @@ namespace OpenTelemetry.AutoInstrumentation.Instrumentations.AdoNet.Integrations
     integrationName: AdoNetConstants.IntegrationName,
     type: InstrumentationType.Trace,
     kind: IntegrationKind.Derived)]
+[InstrumentMethod(
+    assemblyName: AdoNetConstants.Devart.Oracle.AssemblyName,
+    typeName: AdoNetConstants.Devart.Oracle.CommandTypeName,
+    methodName: AdoNetConstants.ExecuteNonQueryMethodName,
+    returnTypeName: ClrNames.Int32,
+    parameterTypeNames: [],
+    minimumVersion: AdoNetConstants.Devart.Oracle.MinVersion,
+    maximumVersion: AdoNetConstants.Devart.Oracle.MaxVersion,
+    integrationName: AdoNetConstants.IntegrationName,
+    type: InstrumentationType.Trace,
+    kind: IntegrationKind.Direct)]
 public static class CommandExecuteNonQueryIntegration
 {
     internal static CallTargetState OnMethodBegin<TTarget>(TTarget instance)

@@ -40,4 +40,15 @@ internal static class AdoNetConstants
     public const string CommandBehaviorTypeName = "System.Data.CommandBehavior";
     public const string DbDataReaderTypeName = "System.Data.Common.DbDataReader";
     public const string DbDataReaderTaskTypeName = "System.Threading.Tasks.Task`1[System.Data.Common.DbDataReader]";
+
+    internal static class Devart
+    {
+        internal static class Oracle
+        {
+            public const string AssemblyName = "Devart.Data.Oracle";
+            public const string CommandTypeName = "Devart.Data.Oracle.OracleCommand";
+            public const string MinVersion = "9.0.0";
+            public const string MaxVersion = "11.*.*";
+        }
+    }
 }

@@ -17,11 +17,17 @@ internal static partial class InstrumentationDefinitions
 {
     private static NativeCallTargetDefinition[] GetDefinitionsArray()
     {
-        var nativeCallTargetDefinitions = new List<NativeCallTargetDefinition>(51);
+        var nativeCallTargetDefinitions = new List<NativeCallTargetDefinition>(52);
         // Traces
         var tracerSettings = Instrumentation.TracerSettings.Value;
         if (tracerSettings.TracesEnabled)
         {
+            // AdoNet
+            if (tracerSettings.EnabledInstrumentations.Contains(TracerInstrumentation.AdoNet))
+            {
+                nativeCallTargetDefinitions.Add(new("Devart.Data.Oracle", "Devart.Data.Oracle.OracleCommand", "ExecuteNonQuery", ["System.Int32"], 9, 0, 0, 11, 65535, 65535, AssemblyFullName, "OpenTelemetry.AutoInstrumentation.Instrumentations.AdoNet.Integrations.CommandExecuteNonQueryIntegration"));
+            }
+
             // Kafka
             if (tracerSettings.EnabledInstrumentations.Contains(TracerInstrumentation.Kafka))
             {
