@@ -25,6 +25,12 @@ internal static class AdoNetInstrumentation
             return null;
         }
 
+        // Suppress nested AdoNet spans (e.g., ExecuteDbDataReader called internally by ExecuteScalar)
+        if (Activity.Current?.Source.Name == Source.Name)
+        {
+            return null;
+        }
+
         var databaseName = iDbCommand.Connection?.Database;
 
         var systemName = AdoNetDbSystemMapper.GetSystemName(instance.GetType());
