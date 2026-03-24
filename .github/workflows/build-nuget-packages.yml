@@ -35,10 +35,10 @@ jobs:
           dotnet-version: | 
             8.0.419
             9.0.312
-            10.0.200
+            10.0.201
 
       - name: Check for NuGet packages cache
-        uses: actions/cache@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # tag: v5.0.3
+        uses: actions/cache@668228422ae6a00e4ad889ee87cd7109ec5666a7 # tag: v5.0.4
         id: nuget-cache
         with:
           key: ${{ hashFiles('**/Directory.packages.props', './build/LibraryVersions.g.cs', '**/packages.config' ) }}
