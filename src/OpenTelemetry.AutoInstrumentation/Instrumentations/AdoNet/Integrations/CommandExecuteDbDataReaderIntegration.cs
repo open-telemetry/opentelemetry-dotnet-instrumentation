@@ -42,6 +42,17 @@ namespace OpenTelemetry.AutoInstrumentation.Instrumentations.AdoNet.Integrations
     integrationName: AdoNetConstants.IntegrationName,
     type: InstrumentationType.Trace,
     kind: IntegrationKind.Derived)]
+[InstrumentMethod(
+    assemblyName: AdoNetConstants.SqliteMicrosoft.AssemblyName,
+    typeName: AdoNetConstants.SqliteMicrosoft.CommandTypeName,
+    methodName: AdoNetConstants.ExecuteReaderMethodName,
+    returnTypeName: AdoNetConstants.SqliteMicrosoft.DataReaderTypeName,
+    parameterTypeNames: [AdoNetConstants.CommandBehaviorTypeName],
+    minimumVersion: AdoNetConstants.SqliteMicrosoft.MinVersion,
+    maximumVersion: AdoNetConstants.SqliteMicrosoft.MaxVersion,
+    integrationName: AdoNetConstants.SqliteMicrosoft.SqliteIntegrationName,
+    type: InstrumentationType.Trace,
+    kind: IntegrationKind.Direct)]
 public static class CommandExecuteDbDataReaderIntegration
 {
     internal static CallTargetState OnMethodBegin<TTarget>(TTarget instance, CommandBehavior behavior)

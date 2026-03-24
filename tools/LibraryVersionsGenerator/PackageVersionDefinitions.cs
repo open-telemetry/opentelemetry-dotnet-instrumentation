@@ -272,6 +272,19 @@ internal static class PackageVersionDefinitions
         },
         new()
         {
+            IntegrationName = "SqliteMicrosoft",
+            NugetPackageName = "Microsoft.Data.Sqlite",
+            TestApplicationName = "TestApplication.Sqlite.Microsoft",
+            Versions =
+            [
+                new("8.0.0"),
+                new("9.0.0"),
+                new("10.0.0"),
+                new("*")
+            ]
+        },
+        new()
+        {
             IntegrationName = "StackExchangeRedis",
             NugetPackageName = "StackExchange.Redis",
             TestApplicationName = "TestApplication.StackExchangeRedis",

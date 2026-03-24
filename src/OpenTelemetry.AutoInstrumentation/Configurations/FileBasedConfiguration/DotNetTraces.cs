@@ -177,6 +177,12 @@ internal class DotNetTraces
     public SqlClientConfiguration? SqlClient { get; set; }
 
     /// <summary>
+    /// Gets or sets the SQLite traces instrumentation configuration.
+    /// </summary>
+    [YamlMember(Alias = "sqlite")]
+    public object? Sqlite { get; set; }
+
+    /// <summary>
     /// Gets or sets the WCF client traces instrumentation configuration.
     /// </summary>
     [YamlMember(Alias = "wcfclient")]

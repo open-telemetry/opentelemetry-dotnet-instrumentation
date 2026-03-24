@@ -145,5 +145,10 @@ internal enum TracerInstrumentation
     /// <summary>
     /// ADO.NET instrumentation.
     /// </summary>
-    AdoNet = 24
+    AdoNet = 24,
+
+    /// <summary>
+    /// SQLite instrumentation.
+    /// </summary>
+    Sqlite = 25
 }

@@ -17,11 +17,18 @@ internal static partial class InstrumentationDefinitions
 {
     private static NativeCallTargetDefinition[] GetDefinitionsArray()
     {
-        var nativeCallTargetDefinitions = new List<NativeCallTargetDefinition>(52);
+        var nativeCallTargetDefinitions = new List<NativeCallTargetDefinition>(54);
         // Traces
         var tracerSettings = Instrumentation.TracerSettings.Value;
         if (tracerSettings.TracesEnabled)
         {
+            // Sqlite
+            if (tracerSettings.EnabledInstrumentations.Contains(TracerInstrumentation.Sqlite))
+            {
+                nativeCallTargetDefinitions.Add(new("Microsoft.Data.Sqlite", "Microsoft.Data.Sqlite.SqliteCommand", "ExecuteReaderAsync", ["System.Threading.Tasks.Task`1[Microsoft.Data.Sqlite.SqliteDataReader]", "System.Data.CommandBehavior", "System.Threading.CancellationToken"], 8, 0, 0, 10, 65535, 65535, AssemblyFullName, "OpenTelemetry.AutoInstrumentation.Instrumentations.AdoNet.Integrations.CommandExecuteDbDataReaderAsyncIntegration"));
+                nativeCallTargetDefinitions.Add(new("Microsoft.Data.Sqlite", "Microsoft.Data.Sqlite.SqliteCommand", "ExecuteReader", ["Microsoft.Data.Sqlite.SqliteDataReader", "System.Data.CommandBehavior"], 8, 0, 0, 10, 65535, 65535, AssemblyFullName, "OpenTelemetry.AutoInstrumentation.Instrumentations.AdoNet.Integrations.CommandExecuteDbDataReaderIntegration"));
+            }
+
             // AdoNet
             if (tracerSettings.EnabledInstrumentations.Contains(TracerInstrumentation.AdoNet))
             {

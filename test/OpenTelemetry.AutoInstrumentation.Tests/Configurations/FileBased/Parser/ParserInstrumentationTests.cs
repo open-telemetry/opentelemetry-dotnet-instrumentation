@@ -51,6 +51,7 @@ public class ParserInstrumentationTests
             "rabbitmq",
             "quartz",
             "sqlclient",
+            "sqlite",
             "stackexchangeredis",
             "wcfclient",
 #if NET

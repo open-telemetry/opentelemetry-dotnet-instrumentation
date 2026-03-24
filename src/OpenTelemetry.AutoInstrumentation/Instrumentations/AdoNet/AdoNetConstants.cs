@@ -33,6 +33,8 @@ internal static class AdoNetConstants
     public const string ExecuteNonQueryAsyncMethodName = "ExecuteNonQueryAsync";
     public const string ExecuteScalarMethodName = "ExecuteScalar";
     public const string ExecuteScalarAsyncMethodName = "ExecuteScalarAsync";
+    public const string ExecuteReaderMethodName = "ExecuteReader";
+    public const string ExecuteReaderAsyncMethodName = "ExecuteReaderAsync";
     public const string ExecuteDbDataReaderMethodName = "ExecuteDbDataReader";
     public const string ExecuteDbDataReaderAsyncMethodName = "ExecuteDbDataReaderAsync";
 
@@ -40,6 +42,17 @@ internal static class AdoNetConstants
     public const string CommandBehaviorTypeName = "System.Data.CommandBehavior";
     public const string DbDataReaderTypeName = "System.Data.Common.DbDataReader";
     public const string DbDataReaderTaskTypeName = "System.Threading.Tasks.Task`1[System.Data.Common.DbDataReader]";
+
+    internal static class SqliteMicrosoft
+    {
+        public const string SqliteIntegrationName = "Sqlite";
+        public const string AssemblyName = "Microsoft.Data.Sqlite";
+        public const string CommandTypeName = "Microsoft.Data.Sqlite.SqliteCommand";
+        public const string DataReaderTypeName = "Microsoft.Data.Sqlite.SqliteDataReader";
+        public const string DataReaderTaskTypeName = "System.Threading.Tasks.Task`1[Microsoft.Data.Sqlite.SqliteDataReader]";
+        public const string MinVersion = "8.0.0";
+        public const string MaxVersion = "10.*.*";
+    }
 
     internal static class Devart
     {

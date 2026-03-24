@@ -30,6 +30,7 @@ instrumentation/development:
       rabbitmq:
       quartz:
       sqlclient:
+      sqlite:
       stackexchangeredis:
       wcfclient:
       wcfcore:
