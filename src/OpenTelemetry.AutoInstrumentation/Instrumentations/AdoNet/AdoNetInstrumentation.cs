@@ -31,9 +31,12 @@ internal static class AdoNetInstrumentation
             return null;
         }
 
-        var databaseName = iDbCommand.Connection?.Database;
+        var (enabled, systemName) = AdoNetDbSystemMapper.GetInstrumentationDetails(instance.GetType());
 
-        var systemName = AdoNetDbSystemMapper.GetSystemName(instance.GetType());
+        if (!enabled)
+        {
+            return null;
+        }
 
         var sqlStatementInfo = SqlProcessor.GetSanitizedSql(iDbCommand.CommandText);
 
@@ -44,6 +47,7 @@ internal static class AdoNetInstrumentation
             { DatabaseAttributes.Keys.DbQueryText, sqlStatementInfo.SanitizedSql },
         };
 
+        var databaseName = iDbCommand.Connection?.Database;
         if (!string.IsNullOrEmpty(databaseName))
         {
             tags.Add(DatabaseAttributes.Keys.DbNamespace, databaseName);

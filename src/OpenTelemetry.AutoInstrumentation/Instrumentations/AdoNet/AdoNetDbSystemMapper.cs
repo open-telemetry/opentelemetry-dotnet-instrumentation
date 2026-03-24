@@ -7,17 +7,23 @@ namespace OpenTelemetry.AutoInstrumentation.Instrumentations.AdoNet;
 
 internal static class AdoNetDbSystemMapper
 {
-    private static readonly ConcurrentDictionary<Type, string> Cache = new();
+    private static readonly ConcurrentDictionary<Type, (bool Enabled, string SystemName)> Cache = new();
 
-    public static string GetSystemName(Type commandType)
+    public static (bool Enabled, string SystemName) GetInstrumentationDetails(Type commandType)
     {
         return Cache.GetOrAdd(commandType, static t => t.FullName switch
         {
-            // TODO add here more mappings for other ADO.NET providers
-            "Devart.Data.Oracle.OracleCommand" => "oracle",
-            "Devart.Data.MySql.MySqlCommand" => "mysql",
-            "Devart.Data.PostgreSql.PgSqlCommand" => "postgresql",
-            _ => "other_sql"
+            "Devart.Data.Oracle.OracleCommand" => (true, "oracle"),
+            "Devart.Data.MySql.MySqlCommand" => (true, "mysql"),
+            "Devart.Data.PostgreSql.PgSqlCommand" => (true, "postgresql"),
+            "Microsoft.Data.SqlClient.SqlCommand" => (false, "microsoft.sql_server"),
+            "Microsoft.Data.Sqlite.SqliteCommand" => (true, "sqlite"),
+            "MySqlConnector.MySqlCommand" => (false, "mysql"),
+            "MySql.Data.MySqlClient.MySqlCommand" => (false, "mysql"),
+            "Npgsql.NpgsqlCommand" => (false, "postgresql"),
+            "Oracle.ManagedDataAccess.Client" => (false, "oracle.db"),
+            "System.Data.SqlClient.SqlCommand" => (false, "microsoft.sql_server"),
+            _ => (true, "other_sql")
         });
     }
 }
