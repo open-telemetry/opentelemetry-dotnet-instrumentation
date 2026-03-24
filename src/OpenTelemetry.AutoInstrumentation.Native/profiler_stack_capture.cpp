@@ -18,9 +18,9 @@
 #if defined(_M_AMD64)
 extern "C"
 {
-    DECLSPEC_IMPORT PRUNTIME_FUNCTION NTAPI  RtlLookupFunctionEntry(DWORD64               ControlPc,
-                                                                    PDWORD64              ImageBase,
-                                                                    PUNWIND_HISTORY_TABLE HistoryTable);
+    DECLSPEC_IMPORT PRUNTIME_FUNCTION NTAPI RtlLookupFunctionEntry(DWORD64               ControlPc,
+                                                                   PDWORD64              ImageBase,
+                                                                   PUNWIND_HISTORY_TABLE HistoryTable);
 }
 #endif // defined(_M_AMD64)
 
