@@ -30,7 +30,7 @@ constexpr auto kSelectiveSamplingMaxAgeMinutes = 15;
 constexpr auto kDefaultSamplePeriod = 10000;
 constexpr auto kMinimumSamplePeriod = 1000;
 
-constexpr auto kDefaultMaxAllocsPerMinute = 200;
+constexpr auto kDefaultMaxAllocsPerMinute    = 200;
 constexpr auto kStartupAllocationPacedCycles = 10;
 
 // FIXME make configurable (hidden)?
