@@ -17,10 +17,17 @@ internal static class DeploymentDetector
     /// When present in TPA, it was automatically added (e.g., NuGet-based deployment).
     /// </summary>
     public static bool IsStandaloneDeployment()
-        => !TrustedPlatformAssembliesHelper.TpaPaths.Any(it =>
-            string.Equals(
-                Path.GetFileNameWithoutExtension(it),
-                AutoInstrumentationAssemblyName,
-                StringComparison.OrdinalIgnoreCase));
+    {
+        foreach (var path in TrustedPlatformAssembliesHelper.TpaPaths)
+        {
+            var assemblyName = Path.GetFileNameWithoutExtension(path);
+            if (assemblyName.Equals(AutoInstrumentationAssemblyName, StringComparison.OrdinalIgnoreCase))
+            {
+                return false;
+            }
+        }
+
+        return true;
+    }
 }
 #endif

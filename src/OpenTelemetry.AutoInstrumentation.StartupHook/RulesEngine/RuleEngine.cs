@@ -9,17 +9,17 @@ internal class RuleEngine
 {
     private static readonly IOtelLogger Logger = OtelLogging.GetLogger("StartupHook");
 
-    private readonly List<Rule> _mandatoryRules = new()
-    {
+    private readonly List<Rule> _mandatoryRules =
+    [
         new ApplicationInExcludeListRule(),
         new MinSupportedFrameworkRule(),
         new EndOfSupportRule()
-    };
+    ];
 
     private readonly Lazy<List<Rule>> _optionalRules;
 
-    internal RuleEngine()
-        : this(new Lazy<List<Rule>>(CreateDefaultOptionalRules))
+    internal RuleEngine(string instrumentationHomePath)
+        : this(new Lazy<List<Rule>>(() => CreateDefaultOptionalRules(instrumentationHomePath)))
     {
     }
 
@@ -78,13 +78,13 @@ internal class RuleEngine
         return true;
     }
 
-    private static List<Rule> CreateDefaultOptionalRules()
+    private static List<Rule> CreateDefaultOptionalRules(string instrumentationHomePath)
     {
-        return new()
-        {
-            new OpenTelemetrySdkMinimumVersionRule(),
-            new AssemblyFileVersionRule(),
+        return
+        [
+            new OpenTelemetrySdkMinimumVersionRule(instrumentationHomePath),
+            new AssemblyFileVersionRule(instrumentationHomePath),
             new NativeProfilerDiagnosticsRule()
-        };
+        ];
     }
 }

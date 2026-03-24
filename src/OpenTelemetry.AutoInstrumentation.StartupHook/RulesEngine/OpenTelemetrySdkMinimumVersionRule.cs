@@ -12,15 +12,18 @@ internal class OpenTelemetrySdkMinimumVersionRule : Rule
     private const string OpenTelemetryAssemblyFileName = "OpenTelemetry.dll";
     private static IOtelLogger logger = OtelLogging.GetLogger("StartupHook");
 
-    public OpenTelemetrySdkMinimumVersionRule()
+    private readonly string _instrumentationHomePath;
+
+    public OpenTelemetrySdkMinimumVersionRule(string instrumentationHomePath)
     {
+        _instrumentationHomePath = instrumentationHomePath;
         Name = "OpenTelemetry SDK Validator";
         Description = "Ensure that the OpenTelemetry SDK version is not older than the version used by the Automatic Instrumentation";
     }
 
     // This constructor is used for test purpose.
     protected OpenTelemetrySdkMinimumVersionRule(IOtelLogger otelLogger)
-        : this()
+        : this(string.Empty)
     {
         logger = otelLogger;
     }
@@ -67,7 +70,7 @@ internal class OpenTelemetrySdkMinimumVersionRule : Rule
 
     protected virtual Version? GetVersionFromAutoInstrumentation()
     {
-        var openTelemetryLocation = Path.Combine(StartupHook.LoaderAssemblyLocation ?? string.Empty, OpenTelemetryAssemblyFileName);
+        var openTelemetryLocation = Path.Combine(_instrumentationHomePath, OpenTelemetryAssemblyFileName);
         var openTelemetryFileVersionInfo = FileVersionInfo.GetVersionInfo(openTelemetryLocation);
         var openTelemetryFileVersion = new Version(openTelemetryFileVersionInfo.FileVersion);
 

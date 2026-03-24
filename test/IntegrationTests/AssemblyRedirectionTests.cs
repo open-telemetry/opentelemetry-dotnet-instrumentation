@@ -59,10 +59,9 @@ public class AssemblyRedirectionTests(ITestOutputHelper output) : TestHelper("As
         var excludedNames = string.Empty;
 #else
 
-        // on .NET (Core) Assembly Redirection without Native Profiler
-        // will have test application loaded twice (Default ALC by runtime and isolated ALC by us),
-        // the assembly will run from isolated ALC but we have to exclude it from no-duplicate load check
-        var excludedNames = !enableNativeProfiler ? "TestApplication.AssemblyRedirection" : string.Empty;
+        // on .NET (Core) Assembly Redirection without Native Profiler will load test application
+        // and the startup hook twice, so we should exclude both from validation of no-duplicate loads
+        var excludedNames = !enableNativeProfiler ? "TestApplication.AssemblyRedirection,OpenTelemetry.AutoInstrumentation.StartupHook" : string.Empty;
 #endif
         // Arrange
         using var collector = new MockSpansCollector(Output);

@@ -49,12 +49,16 @@ var assemblyLookup = AppDomain.CurrentDomain.GetAssemblies()
 var duplicates = assemblyLookup
     .Where(it => it.Count() > 1)
     .Where(it => !excludedNames.Contains(it.Key, StringComparer.OrdinalIgnoreCase))
-    .Select(it => it.Aggregate($"\"{it.Key}\" loaded multiple times: [{it.Count()}]", (current, next) => $"{current}\n - {Describe(next)}"))
+    .OrderBy(it => it.Key, StringComparer.OrdinalIgnoreCase)
+    .Select(it => it.Aggregate(
+        $"* \"{it.Key}\" loaded [{it.Count()}] times:",
+        (current, next) => $"{current}\n    ** {Describe(next)}"))
     .ToArray();
 
 if (duplicates.Length > 0)
 {
-    throw new InvalidOperationException(string.Join("\n", duplicates));
+    throw new InvalidOperationException(
+        $"Found [{duplicates.Length}] assemblies loaded > 1:\n{string.Join("\n", duplicates)}");
 }
 
 Console.WriteLine("Check 1: Duplicate Assemblies");

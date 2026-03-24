@@ -2,117 +2,96 @@
 // SPDX-License-Identifier: Apache-2.0
 
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using OpenTelemetry.AutoInstrumentation;
 using OpenTelemetry.AutoInstrumentation.Configurations;
-using OpenTelemetry.AutoInstrumentation.Logging;
-using OpenTelemetry.AutoInstrumentation.RulesEngine;
 
 /// <summary>
 /// Dotnet StartupHook
 /// </summary>
 internal class StartupHook
 {
-    internal const string LoaderAssemblyName = "OpenTelemetry.AutoInstrumentation.Loader";
-    internal const string LoaderTypeName = "OpenTelemetry.AutoInstrumentation.Loader.Loader";
-
-    private const string StartuphookLoggerSuffix = "StartupHook";
-    private static readonly IOtelLogger Logger = OtelLogging.GetLogger(StartuphookLoggerSuffix);
-
-    // This property must be initialized before any rule is evaluated since it may be used during rule evaluation.
-    internal static string? LoaderAssemblyLocation { get; set; }
-
     /// <summary>
     /// Load and initialize OpenTelemetry.AutoInstrumentation assembly to bring OpenTelemetry SDK
     /// with a pre-defined set of exporters, shims, and instrumentations.
     /// </summary>
     public static void Initialize()
     {
-        _ = bool.TryParse(Environment.GetEnvironmentVariable(ConfigurationKeys.FailFast), out var failFast);
-        IsolationSetup? isolationSetup = null;
-
-        // all unhandled exceptions in StartupHook are terminal and should be handled where needed
-        // https://github.com/dotnet/runtime/blob/main/docs/design/features/host-startup-hook.md#error-handling-details
-        try
+        // ASSEMBLY RESOLUTION STRATEGY
+        //
+        // === STARTUP HOOK ONLY ===
+        // Without the native profiler's IL rewriting and NuGet's build-time resolution,
+        // the customer application and its dependencies automatically load into the
+        // Default ALC. The instrumentation cannot override versions there or prevent
+        // customer code from loading first. To solve this, we hijack the application:
+        // load its entry assembly into an isolated ALC alongside our dependencies,
+        // execute customer entrypoint in the isolated ALC, then exit to prevent
+        // the Default ALC copy from running.
+        //
+        // When the customer application loads into the isolated ALC, all its dependencies
+        // are automatically tried to be loaded to the same ALC.
+        // In this process the first place we can hook in is the isolated ALC's Load() method.
+        // This is our single control point for version resolution.
+        // For each dependency, the isolated ALC compares the TPA version against the
+        // instrumentation version and picks the higher one. Before loading, it validates
+        // that the selected version >= the requested version. If the best available
+        // version is still lower than requested, the isolated ALC skips the request
+        // rather than loading an incompatible assembly.
+        //
+        // === AGGRESSIVE ISOLATION (TRAMPOLINE) ===
+        // To keep the Default ALC free of agent dependencies (logging, rules, Loader),
+        // the isolation decision is made with minimal type references, and the rest
+        // of the setup is performed in isolated ALC to guarantee that the type sresolution
+        // starts from there.
+        //
+        // If isolation setup fails, we revert the context and control returns to
+        // the .NET runtime, which falls back to normal execution (or fail-fast
+        // if configured).
+        //
+        // NoInlining on each branch prevents the JIT from pulling type references from the
+        // "other" branch into Initialize(). Without it, the JIT could resolve types like
+        // OtelLogging or IsolatedAssemblyLoadContext when Initialize() is compiled, defeating
+        // the lazy loading boundary.
+        //
+        // Logging is intentionally deferred until inside InitializationSetup.Run() for the
+        // same reason — it triggers assembly loads that must happen in the correct ALC.
+        if (IsStartupHookOnlyMode() && IsRedirectEnabled())
         {
-            LoaderAssemblyLocation = GetLoaderAssemblyLocation();
-
-            var ruleEngine = new RuleEngine();
-            if (!ruleEngine.ValidateRules())
-            {
-                throw new InvalidOperationException(
-                    "Rule Engine Failure: One or more rules failed validation. Automatic Instrumentation won't be loaded.");
-            }
-
-            if (IsStartupHookOnlyMode() && IsRedirectEnabled())
-            {
-                // ASSEMBLY RESOLUTION STRATEGY
-                //
-                // === STARTUP HOOK ONLY ===
-                // Without the native profiler's IL rewriting and NuGet's build-time resolution,
-                // the customer application and its dependencies automatically load into the
-                // Default ALC. The instrumentation cannot override versions there or prevent
-                // customer code from loading first. To solve this, we hijack the application:
-                // load its entry assembly into an isolated ALC alongside our dependencies,
-                // execute customer entrypoint in the isolated ALC, then exit to prevent
-                // the Default ALC copy from running.
-                //
-                // When the customer application loads into the isolated ALC, all its dependencies
-                // are automatically tried to be loaded to the same ALC.
-                // In this process the first place we can hook in is the isolated ALC's Load() method.
-                // This is our single control point for version resolution.
-                // For each dependency, the isolated ALC compares the TPA version against the
-                // instrumentation version and picks the higher one. Before loading, it validates
-                // that the selected version >= the requested version. If the best available
-                // version is still lower than requested, the isolated ALC skips the request
-                // rather than loading an incompatible assembly.
-                //
-                // If isolation setup fails, we revert the context and control returns to
-                // the .NET runtime, which falls back to normal execution (or fail-fast
-                // if configured).
-
-                Logger.Information("Isolation Initialization.");
-                GetTargetApp(out var targetAppPath, out var entryAssembly);
-                isolationSetup = new IsolationSetup(targetAppPath, entryAssembly, Logger);
-                isolationSetup.Setup();
-            }
-            else
-            {
-                Logger.Information("Initialization.");
-
-                // With Native profiler, we load the Loader,
-                // create an instance of OpenTelemetry.AutoInstrumentation.Loader.Loader
-                // which will setup assembly resolution and initialize Instrumentation
-                var loaderFilePath = Path.Combine(LoaderAssemblyLocation, $"{LoaderAssemblyName}.dll");
-                var loaderAssembly = Assembly.LoadFrom(loaderFilePath)
-                    ?? throw new InvalidOperationException("Failed to load Loader assembly");
-                var loaderInstance = loaderAssembly.CreateInstance(LoaderTypeName)
-                    ?? throw new InvalidOperationException("Failed to create an instance of the Loader");
-            }
+            BootstrapIsolation();
         }
-        catch (Exception ex)
+        else
         {
-            isolationSetup?.Revert();
-            Logger.Error(ex, $"Error in StartupHook initialization: LoaderFolderLocation: {LoaderAssemblyLocation}");
-            if (failFast)
-            {
-                throw;
-            }
+            BootstrapNormal();
+        }
+    }
 
-            return;
-        }
-        finally
-        {
-            OtelLogging.CloseLogger(StartuphookLoggerSuffix, Logger);
-        }
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    private static void BootstrapNormal()
+    {
+        new NormalSetup().Run();
+    }
 
-        // We deliberately do not handle exceptions from the customer entrypoint.
-        // Customer application failures are not an instrumentation concern and should
-        // propagate as unhandled exceptions, terminating the process naturally.
-        if (isolationSetup != null)
-        {
-            var exitCode = isolationSetup.InvokeEntryPoint();
-            Environment.Exit(exitCode);
-        }
+    /// <summary>
+    /// Trampoline into isolated execution: create the isolated ALC, load a second copy
+    /// of this StartupHook assembly into it, and invoke IsolatedSetup.Run() via reflection.
+    /// From that point forward, all type resolution happens through the isolated ALC.
+    /// </summary>
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    private static void BootstrapIsolation()
+    {
+        // create isolated ALC, switch contextual reflection to it right away
+        // everything that should be resolved from TPA will immediately be resolved within the isolated ALC
+        var isolatedContext = new IsolatedAssemblyLoadContext();
+        // TODO forgot why I had to set this up so early but there was a reason, check and update the comment
+        var contextualReflectionScope = isolatedContext.EnterContextualReflection();
+
+        // execute the rest of setup within the isolated ALC
+        var setupType = isolatedContext.IsolatedAssembly.GetType(typeof(IsolatedSetup).FullName!)!;
+        var setup = Activator.CreateInstance(setupType, [isolatedContext, contextualReflectionScope]);
+        var runMethod = setupType.GetMethod(nameof(IsolatedSetup.Run), BindingFlags.Instance | BindingFlags.Public)!;
+        // DoNotWrapExceptions preserves original exception types from both
+        // instrumentation failures (fail-fast) and customer application entrypoint failures.
+        runMethod.Invoke(setup, BindingFlags.DoNotWrapExceptions, null, null, null);
     }
 
     private static bool IsStartupHookOnlyMode()
@@ -125,73 +104,12 @@ internal class StartupHook
         var envValue = Environment.GetEnvironmentVariable(ConfigurationKeys.RedirectEnabled);
         if (bool.TryParse(envValue, out var redirectEnabled))
         {
-            Logger.Information($"Redirect explicitly set via environment variable to: {redirectEnabled}");
             return redirectEnabled;
         }
 
         // Not explicitly set: default based on deployment type - true for standalone, false otherwise.
         // For non-standalone deployments, assembly resolution is handled at build time,
         // so assembly redirection is not considered.
-        redirectEnabled = DeploymentDetector.IsStandaloneDeployment();
-
-        if (redirectEnabled)
-        {
-            Logger.Information("Detected standalone deployment. Redirect enabled by default.");
-            return redirectEnabled;
-        }
-
-        Logger.Information("Detected non-standalone deployment (e.g., NuGet-based). Redirect disabled by default.");
-        return redirectEnabled;
-    }
-
-    private static void GetTargetApp(out string appPath, out Assembly? entryAssembly)
-    {
-        // Try entry assembly first (should already be loaded in Default ALC)
-        entryAssembly = Assembly.GetEntryAssembly();
-        if (!string.IsNullOrEmpty(entryAssembly?.Location))
-        {
-            appPath = entryAssembly.Location;
-            return;
-        }
-
-        // Fallback: try command line args
-        Logger.Warning("Entry assembly location is unavailable, falling back to command line parsing. This may indicate an unexpected runtime scenario.");
-
-        var args = Environment.GetCommandLineArgs();
-        if (args.Length > 0 &&
-            (args[0].EndsWith(".dll", StringComparison.OrdinalIgnoreCase) ||
-             args[0].EndsWith(".exe", StringComparison.OrdinalIgnoreCase)) &&
-            File.Exists(args[0]))
-        {
-            appPath = Path.GetFullPath(args[0]);
-            return;
-        }
-
-        throw new InvalidOperationException(
-            "Cannot determine target application path. " +
-            "GetEntryAssembly().Location is empty and GetCommandLineArgs()[0] is not a valid assembly.");
-    }
-
-    private static string GetLoaderAssemblyLocation()
-    {
-        try
-        {
-            var startupAssemblyFilePath = Assembly.GetExecutingAssembly().Location;
-            if (startupAssemblyFilePath.StartsWith(@"\\?\", StringComparison.Ordinal))
-            {
-                // This will only be used in case the local path exceeds max_path size limit
-                startupAssemblyFilePath = startupAssemblyFilePath[4..];
-            }
-
-            // StartupHook and Loader assemblies are in the same path
-            var startupAssemblyDirectoryPath = Path.GetDirectoryName(startupAssemblyFilePath)
-                ?? throw new InvalidOperationException("StartupAssemblyFilePath is NULL");
-            return startupAssemblyDirectoryPath;
-        }
-        catch (Exception ex)
-        {
-            Logger.Error(ex, "Error getting loader directory location");
-            throw;
-        }
+        return DeploymentDetector.IsStandaloneDeployment();
     }
 }

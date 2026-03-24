@@ -18,14 +18,25 @@ internal static class TrustedPlatformAssembliesHelper
     /// </summary>
     public static string[] TpaPaths { get; } = ParseTpaPaths();
 
+    public static string? GetAssemblyPath(string assemblyName)
+    {
+        foreach (var it in TpaPaths)
+        {
+            if (Path.GetFileNameWithoutExtension(it).Equals(assemblyName, StringComparison.OrdinalIgnoreCase))
+            {
+                return it;
+            }
+        }
+
+        return null;
+    }
+
     private static string[] ParseTpaPaths()
     {
         try
         {
-            return (AppContext.GetData(TrustedPlatformAssembliesPropertyName) as string)?
-                .Split(Path.PathSeparator)
-                .Where(path => !string.IsNullOrWhiteSpace(path))
-                .ToArray() ?? [];
+            return ((string)AppContext.GetData(TrustedPlatformAssembliesPropertyName)!)
+                .Split(Path.PathSeparator, StringSplitOptions.RemoveEmptyEntries);
         }
         catch
         {

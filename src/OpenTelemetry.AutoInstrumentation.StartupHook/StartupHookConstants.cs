@@ -13,5 +13,5 @@ internal static class StartupHookConstants
     /// <summary>
     /// Name of the isolated AssemblyLoadContext used by startup hook.
     /// </summary>
-    public const string IsolatedAssemblyLoadContextName = "OpenTelemetry.AutoInstrumentation.IsolatedAssemblyLoadContext";
+    public const string IsolatedAssemblyLoadContextName = "OpenTelemetry.AutoInstrumentation.StartupHook.IsolatedAssemblyLoadContext";
 }

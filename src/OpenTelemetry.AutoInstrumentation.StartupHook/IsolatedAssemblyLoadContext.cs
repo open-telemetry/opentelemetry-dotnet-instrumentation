@@ -9,328 +9,200 @@ namespace OpenTelemetry.AutoInstrumentation;
 
 /// <summary>
 /// Custom AssemblyLoadContext for isolated mode.
-/// Loads both customer and agent assemblies, picking higher versions,
-/// but skipping if the best available version is lower than the requested version.
+/// This class should use only primitive types from the list of assemblies that are loaded to Default ALC.
+/// More complex logic is delegated to AssemblyLoad which will be suplemented at a later stage
 /// </summary>
-internal class IsolatedAssemblyLoadContext()
-    : AssemblyLoadContext(StartupHookConstants.IsolatedAssemblyLoadContextName, isCollectible: false)
+internal class IsolatedAssemblyLoadContext : AssemblyLoadContext
 {
     // TODO in future we may want to have a configuration for this list which will give flexibility for the customer if they know what they are doing;
-    // TODO also we can automtically add to excludes, if an assembly failed to load in custom ALC so we won't fail it over and over
-    private static readonly Dictionary<int, HashSet<string>> MustUseDefaultAlc = new()
+    // TODO also we can automatically add to excludes, if an assembly failed to load in custom ALC so we won't fail it over and over
+
+    // Assemblies that must be loaded in Default ALC to avoid type identity issues.
+    // This minimal set contains only core runtime assemblies that are unavoidable
+    // during StartupHook bootstrap before setting up isolation.
+    // TODO do we want to raise a warning if we are loading a dll to isolated ALC and it is already loaded to default ALC?
+    private static readonly string[] MustUseDefaultAlc = GetRuntimeMajorVersion() switch
     {
-        {
-            10,
-            new(StringComparer.OrdinalIgnoreCase)
-            {
-                "Accessibility",
-                "Microsoft.Win32.Primitives",
-                "Microsoft.Win32.Registry",
-                "Microsoft.Win32.SystemEvents",
-                "System.Collections",
-                "System.Collections.Concurrent",
-                "System.Collections.Immutable",
-                "System.Collections.NonGeneric",
-                "System.Collections.Specialized",
-                "System.ComponentModel",
-                "System.ComponentModel.Annotations",
-                "System.ComponentModel.EventBasedAsync",
-                "System.ComponentModel.Primitives",
-                "System.ComponentModel.TypeConverter",
-                "System.Configuration.ConfigurationManager",
-                "System.Console",
-                "System.Diagnostics.Debug",
-                "System.Diagnostics.DiagnosticSource",
-                "System.Diagnostics.EventLog",
-                "System.Diagnostics.FileVersionInfo",
-                "System.Diagnostics.Process",
-                "System.Diagnostics.StackTrace",
-                "System.Diagnostics.TextWriterTraceListener",
-                "System.Diagnostics.TraceSource",
-                "System.Diagnostics.Tracing",
-                "System.Drawing.Common",
-                "System.Drawing.Primitives",
-                "System.Formats.Asn1",
-                "System.Formats.Nrbf",
-                "System.IO.Compression",
-                "System.IO.Compression.Brotli",
-                "System.IO.FileSystem",
-                "System.IO.MemoryMappedFiles",
-                "System.IO.Pipelines",
-                "System.Linq",
-                "System.Linq.Expressions",
-                "System.Memory",
-                "System.Net.Http",
-                "System.Net.NameResolution",
-                "System.Net.NetworkInformation",
-                "System.Net.Primitives",
-                "System.Net.Quic",
-                "System.Net.Requests",
-                "System.Net.Security",
-                "System.Net.Sockets",
-                "System.Net.WebClient",
-                "System.Net.WebHeaderCollection",
-                "System.Numerics.Vectors",
-                "System.ObjectModel",
-                "System.Private.CoreLib",
-                "System.Private.Uri",
-                "System.Private.Windows.Core",
-                "System.Private.Windows.GdiPlus",
-                "System.Private.Xml",
-                "System.Private.Xml.Linq",
-                "System.Reflection.Emit",
-                "System.Reflection.Emit.ILGeneration",
-                "System.Reflection.Emit.Lightweight",
-                "System.Reflection.Metadata",
-                "System.Reflection.Primitives",
-                "System.Resources.Writer",
-                "System.Runtime",
-                "System.Runtime.Extensions",
-                "System.Runtime.InteropServices",
-                "System.Runtime.InteropServices.RuntimeInformation",
-                "System.Runtime.Intrinsics",
-                "System.Runtime.Loader",
-                "System.Runtime.Numerics",
-                "System.Runtime.Serialization.Formatters",
-                "System.Security.AccessControl",
-                "System.Security.Claims",
-                "System.Security.Cryptography",
-                "System.Security.Cryptography.ProtectedData",
-                "System.Security.Principal.Windows",
-                "System.Text.Encoding.CodePages",
-                "System.Text.Encoding.Extensions",
-                "System.Text.Encodings.Web",
-                "System.Text.Json",
-                "System.Text.RegularExpressions",
-                "System.Threading",
-                "System.Threading.AccessControl",
-                "System.Threading.Channels",
-                "System.Threading.Overlapped",
-                "System.Threading.Thread",
-                "System.Threading.ThreadPool",
-                "System.Threading.Timer",
-                "System.Web.HttpUtility",
-                "System.Windows.Extensions",
-                "System.Windows.Forms",
-                "System.Windows.Forms.Primitives",
-                "System.Xml.ReaderWriter",
-                "System.Xml.XDocument",
-                "System.Xml.XmlSerializer"
-            }
-        },
-        {
-            9,
-            new(StringComparer.OrdinalIgnoreCase)
-            {
-                "Microsoft.Win32.Primitives",
-                "Microsoft.Win32.Registry",
-                "System.Collections",
-                "System.Collections.Concurrent",
-                "System.Collections.Immutable",
-                "System.Collections.NonGeneric",
-                "System.Collections.Specialized",
-                "System.ComponentModel",
-                "System.ComponentModel.Primitives",
-                "System.Console",
-                "System.Diagnostics.Debug",
-                "System.Diagnostics.FileVersionInfo",
-                "System.Diagnostics.Process",
-                "System.Diagnostics.Tracing",
-                "System.IO.Compression",
-                "System.IO.FileSystem",
-                "System.IO.MemoryMappedFiles",
-                "System.IO.Pipelines",
-                "System.Linq",
-                "System.Memory",
-                "System.Numerics.Vectors",
-                "System.ObjectModel",
-                "System.Private.CoreLib",
-                "System.Private.Uri",
-                "System.Reflection.Emit.ILGeneration",
-                "System.Reflection.Emit.Lightweight",
-                "System.Reflection.Metadata",
-                "System.Reflection.Primitives",
-                "System.Runtime",
-                "System.Runtime.Extensions",
-                "System.Runtime.InteropServices",
-                "System.Runtime.Intrinsics",
-                "System.Runtime.Loader",
-                "System.Security.AccessControl",
-                "System.Security.Claims",
-                "System.Security.Principal.Windows",
-                "System.Text.Encoding.Extensions",
-                "System.Text.Encodings.Web",
-                "System.Text.Json",
-                "System.Text.RegularExpressions",
-                "System.Threading",
-                "System.Threading.Thread",
-                "System.Threading.ThreadPool",
-                "System.Threading.Timer"
-            }
-        },
-        {
-            8,
-            new(StringComparer.OrdinalIgnoreCase)
-            {
-                "Microsoft.Win32.Primitives",
-                "Microsoft.Win32.Registry",
-                "System.Collections",
-                "System.Collections.Concurrent",
-                "System.Collections.Immutable",
-                "System.Collections.NonGeneric",
-                "System.Collections.Specialized",
-                "System.ComponentModel",
-                "System.ComponentModel.Primitives",
-                "System.Console",
-                "System.Diagnostics.Debug",
-                "System.Diagnostics.FileVersionInfo",
-                "System.Diagnostics.Process",
-                "System.Diagnostics.Tracing",
-                "System.IO.Compression",
-                "System.IO.FileSystem",
-                "System.IO.MemoryMappedFiles",
-                "System.IO.Pipelines",
-                "System.Linq",
-                "System.Memory",
-                "System.Numerics.Vectors",
-                "System.ObjectModel",
-                "System.Private.CoreLib",
-                "System.Private.Uri",
-                "System.Reflection.Emit.ILGeneration",
-                "System.Reflection.Emit.Lightweight",
-                "System.Reflection.Metadata",
-                "System.Reflection.Primitives",
-                "System.Runtime",
-                "System.Runtime.Extensions",
-                "System.Runtime.InteropServices",
-                "System.Runtime.Intrinsics",
-                "System.Runtime.Loader",
-                "System.Security.AccessControl",
-                "System.Security.Claims",
-                "System.Security.Principal.Windows",
-                "System.Text.Encoding.Extensions",
-                "System.Text.Encodings.Web",
-                "System.Text.Json",
-                "System.Text.RegularExpressions",
-                "System.Threading",
-                "System.Threading.Thread",
-                "System.Threading.ThreadPool",
-                "System.Threading.Timer"
-            }
-        }
+        // for .Net 8 and 9 we can allow more aggressive isolation
+        < 10 => [
+            "System.Private.CoreLib",
+            "System.Private.Uri",
+            "System.Runtime",
+            "System.Runtime.Extensions", // <- TrustedPlatformAssembliesHelper needs Path to look through TPA
+            "System.Runtime.Loader" // <- required to instantiate AssemblyLoadContext
+        ],
+        // for .net 10 we have to let TPA System.Diagnostics.DiagnosticSource to be loaded to Default ALC, so this list is larger
+        // https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/issues/4924
+        >= 10 => [
+            // some assemblies has been resolved only on specific platforms
+            // but it's not gonna harm to include them, since we don't expect them to exist on other platforms
+            "Accessibility", // [only in: win-arm64; win-x64; win-x86]
+            "Microsoft.Win32.Primitives",
+            "Microsoft.Win32.Registry",
+            "Microsoft.Win32.SystemEvents", // [only in: win-arm64; win-x64; win-x86]
+            "System.Collections",
+            "System.Collections.Concurrent",
+            "System.Collections.Immutable",
+            "System.Collections.NonGeneric",
+            "System.Collections.Specialized",
+            "System.ComponentModel",
+            "System.ComponentModel.Annotations",
+            "System.ComponentModel.EventBasedAsync",
+            "System.ComponentModel.Primitives",
+            "System.ComponentModel.TypeConverter",
+            "System.Configuration.ConfigurationManager", // [only in: win-arm64; win-x64; win-x86]
+            "System.Console",
+            "System.Diagnostics.DiagnosticSource",
+            "System.Diagnostics.EventLog", // [only in: win-arm64; win-x64; win-x86]
+            "System.Diagnostics.FileVersionInfo",
+            "System.Diagnostics.Process",
+            "System.Diagnostics.StackTrace",
+            "System.Diagnostics.TextWriterTraceListener",
+            "System.Diagnostics.TraceSource",
+            "System.Diagnostics.Tracing",
+            "System.Drawing.Common", // [only in: win-arm64; win-x64; win-x86]
+            "System.Drawing.Primitives",
+            "System.Formats.Asn1",
+            "System.Formats.Nrbf", // [only in: win-arm64; win-x64; win-x86]
+            "System.IO.Compression",
+            "System.IO.Compression.Brotli",
+            "System.IO.MemoryMappedFiles",
+            "System.IO.Pipelines",
+            "System.IO.Pipes",
+            "System.Linq",
+            "System.Linq.Expressions",
+            "System.Memory",
+            "System.Net.Http",
+            "System.Net.NameResolution",
+            "System.Net.NetworkInformation",
+            "System.Net.Primitives",
+            "System.Net.Quic",
+            "System.Net.Requests",
+            "System.Net.Security",
+            "System.Net.Sockets",
+            "System.Net.WebClient",
+            "System.Net.WebHeaderCollection",
+            "System.Numerics.Vectors",
+            "System.ObjectModel",
+            "System.Private.CoreLib",
+            "System.Private.Uri",
+            "System.Private.Windows.Core", // [only in: win-arm64; win-x64; win-x86]
+            "System.Private.Windows.GdiPlus", // [only in: win-arm64; win-x64; win-x86]
+            "System.Private.Xml",
+            "System.Private.Xml.Linq",
+            "System.Reflection.Emit",
+            "System.Reflection.Emit.ILGeneration",
+            "System.Reflection.Emit.Lightweight",
+            "System.Reflection.Metadata",
+            "System.Reflection.Primitives",
+            "System.Resources.Writer",
+            "System.Runtime",
+            "System.Runtime.Extensions", // <- TrustedPlatformAssembliesHelper needs Path.PathSeparator to look through TPA
+            "System.Runtime.InteropServices",
+            "System.Runtime.Intrinsics",
+            "System.Runtime.Loader", // <- required to instantiate AssemblyLoadContext
+            "System.Runtime.Numerics",
+            "System.Runtime.Serialization.Formatters",
+            "System.Security.AccessControl",
+            "System.Security.Claims",
+            "System.Security.Cryptography",
+            "System.Security.Cryptography.ProtectedData", // [only in: win-arm64; win-x64; win-x86]
+            "System.Security.Principal.Windows",
+            "System.Text.Encoding.CodePages",
+            "System.Text.Encoding.Extensions",
+            "System.Text.Encodings.Web",
+            "System.Text.Json",
+            "System.Text.RegularExpressions",
+            "System.Threading",
+            "System.Threading.AccessControl",
+            "System.Threading.Channels",
+            "System.Threading.Overlapped",
+            "System.Threading.Thread",
+            "System.Threading.ThreadPool",
+            "System.Web.HttpUtility",
+            "System.Windows.Extensions", // [only in: win-arm64; win-x64; win-x86]
+            "System.Windows.Forms", // [only in: win-arm64; win-x64; win-x86]
+            "System.Windows.Forms.Primitives", // [only in: win-arm64; win-x64; win-x86]
+            "System.Xml.ReaderWriter",
+            "System.Xml.XDocument",
+            "System.Xml.XmlSerializer"
+        ]
     };
 
-    private static readonly int CurrentRuntimeMajorVersion = GetRuntimeMajorVersion();
+    [ThreadStatic]
+    private static AssemblyName? _isLoadingAssemblyName;
 
-    private readonly Dictionary<string, string> _tpaAssemblies = ParseTrustedPlatformAssemblies();
+    private readonly Func<AssemblyLoadContext, AssemblyName, Assembly?> _assemblyLoad;
+
+    public IsolatedAssemblyLoadContext()
+        : base(StartupHookConstants.IsolatedAssemblyLoadContextName, isCollectible: false)
+    {
+        // load a copy of this assembly to this context to isolate the types
+        IsolatedAssembly = LoadFromAssemblyPath(Assembly.GetExecutingAssembly().Location);
+        // load the isolated ALC load helper from isolated ALC and pass it to isolated ALC:
+        //  - helper implements the logic of searching both TPA and agent paths and validating compatibility
+        //  - init helper through reflection will allow resolving all its dependencies within isolated conetxt
+        var isolatedHelperType = IsolatedAssembly.GetType(typeof(IsolatedAssemblyLoadContextHelper).FullName!)!;
+        var isolatedHelperDelegateMethod = isolatedHelperType.GetMethod(nameof(IsolatedAssemblyLoadContextHelper.Load), BindingFlags.Static | BindingFlags.Public)!;
+        var isolatedHelperDelegate = isolatedHelperDelegateMethod.CreateDelegate<Func<AssemblyLoadContext, AssemblyName, Assembly?>>()!;
+        _assemblyLoad = isolatedHelperDelegate;
+    }
+
+    public Assembly IsolatedAssembly { get; }
 
     protected override Assembly? Load(AssemblyName assemblyName)
     {
-        // TODO: temporary no logging here! Logging triggers assembly loads -> infinite recursion.
-
-        var name = assemblyName.Name;
-        if (string.IsNullOrEmpty(name) || MustUseDefaultAlc[CurrentRuntimeMajorVersion].Contains(name))
+        // nothing we can do
+        if (string.IsNullOrEmpty(assemblyName.Name))
         {
             return null;
         }
 
-        // TODO: caching - .NET has an optimization within an ALC and do not call Load() method
-        // if a match (same or higher version) is already loaded in current ALC.
-        // However, other situations may trigger the Load() for an assembly that is already loaded
-        // when a higher version is requested (e.g., programmatic Assembly.Load with an explicit version).
-        // In this case caching will help avoiding unnecessary I/O for version check.
-
-        // Find in TPA (customer/runtime assemblies)
-        _tpaAssemblies.TryGetValue(name, out var tpaPath);
-
-        // Find in agent assemblies
-        var agentPath = ManagedProfilerLocationHelper.GetAssemblyPath(name);
-
-        // Pick higher version (agent wins only if strictly higher)
-        var selected = PickHigherVersion(tpaPath, agentPath);
-        if (selected == null)
+        // skip assemblies that should be loaded to Default ALC
+        foreach (var it in MustUseDefaultAlc)
         {
-            // TODO: log debug once logging is safe here.
-            // This is unexpected assembly so include assebly name an dversion
-            return null;
+            if (it.Equals(assemblyName.Name, StringComparison.OrdinalIgnoreCase))
+            {
+                return null;
+            }
         }
 
-        // Verify that the selected assembly satisfies the requested version.
-        // If the best available version is still lower than requested, skip
-        // rather than loading a version that's too old.
-        if (assemblyName.Version != null)
+        // delegate loading to the provided AssemblyLoad delegate,
+        // if we are not already in the middle of loading an assembly to avoid recursion
+        // TODO think about recursion a little bit more
+        // TODO think about the fact that ALC should return the same assembly for the same request and how no-recursion logic may affect this
+        if (_assemblyLoad is not null && _isLoadingAssemblyName?.Name != assemblyName.Name)
         {
             try
             {
-                var selectedVersion = AssemblyUtils.GetAssemblyVersionSafe(selected);
-                if (selectedVersion != null && selectedVersion < assemblyName.Version)
-                {
-                    // TODO: log warning once logging is safe here.
-                    // The warning should include: assembly name, requested version, and best available version.
-                    return null;
-                }
+                _isLoadingAssemblyName = assemblyName;
+                return _assemblyLoad(this, assemblyName);
             }
-            catch
+            finally
             {
-                // On error reading version, fall through and attempt to load:
-                // by now we have the assembly, located by name in TPA or the agent directory;
-                // the only missing piece is a confirmed version.
-                // Version mismatches in a correctly built standalone app are not a typical scenario,
-                // so skipping here converts a lower-probability uncertainty into a certain fallback
-                // to Default ALC, which carries a higher risk of type and state drift than the alternative
-                // of loading an assembly at a potentially mismatched version in a scenario
-                // that is already documented as unsupported and not typical to reach.
+                _isLoadingAssemblyName = null;
             }
         }
 
-        return LoadFromAssemblyPath(selected);
+        // If we are in a middle of setting up, the requesting assembly can only be
+        // a system dependency of the isolation setup and it cannot conflict
+        // with agent dependencies, so we just load it from TPA.
+        // This fork also covers a recursion of system dependencies
+        var tpaPath = TrustedPlatformAssembliesHelper.GetAssemblyPath(assemblyName.Name);
+
+        if (tpaPath is not null)
+        {
+            return LoadFromAssemblyPath(tpaPath);
+        }
+
+        return null;
     }
 
     private static int GetRuntimeMajorVersion()
     {
         var coreLibAssembly = typeof(object).Assembly;
-        var version = coreLibAssembly.GetName().Version
+        var runtimeVersion = coreLibAssembly.GetName().Version
             ?? throw new InvalidOperationException("Unable to determine runtime version");
-        return MustUseDefaultAlc.TryAdd(version.Major, [])
-            ? throw new InvalidOperationException($"Unsupported runtime version: {version}. No configuration for Default ALC assemblies")
-            : version.Major;
-    }
-
-    private static Dictionary<string, string> ParseTrustedPlatformAssemblies()
-    {
-        return TrustedPlatformAssembliesHelper.TpaPaths
-            .Select(path => new { Name = Path.GetFileNameWithoutExtension(path), Path = path })
-            .Where(x => !string.IsNullOrEmpty(x.Name))
-            .DistinctBy(x => x.Name, StringComparer.OrdinalIgnoreCase)
-            .ToDictionary(x => x.Name, x => x.Path, StringComparer.OrdinalIgnoreCase);
-    }
-
-    private static string? PickHigherVersion(string? tpaPath, string? agentPath)
-    {
-        if (agentPath == null)
-        {
-            return tpaPath;
-        }
-
-        if (tpaPath == null)
-        {
-            return agentPath;
-        }
-
-        try
-        {
-            var tpaVersion = AssemblyUtils.GetAssemblyVersionSafe(tpaPath);
-            var agentVersion = AssemblyUtils.GetAssemblyVersionSafe(agentPath);
-
-            // TODO we should also check the file version when the assembly versions are the same
-            //  e.g. System.Diagnostics.DiagnosticSource from package 10.0.0 and 10.0.2 have the same assembly version
-
-            // Agent wins ONLY if strictly higher
-            return agentVersion > tpaVersion ? agentPath : tpaPath;
-        }
-        catch
-        {
-            return tpaPath; // On error, prefer TPA
-        }
+        return runtimeVersion.Major;
     }
 }

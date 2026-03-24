@@ -13,8 +13,11 @@ internal class AssemblyFileVersionRule : Rule
 {
     private static readonly IOtelLogger Logger = OtelLogging.GetLogger("StartupHook");
 
-    public AssemblyFileVersionRule()
+    private readonly string _instrumentationHomePath;
+
+    public AssemblyFileVersionRule(string instrumentationHomePath)
     {
+        _instrumentationHomePath = instrumentationHomePath;
         Name = "Assembly File Version Validator";
         Description = "Ensure that the version of key assemblies is not older than the version used by Automatic Instrumentation.";
     }
@@ -25,7 +28,7 @@ internal class AssemblyFileVersionRule : Rule
 
         try
         {
-            var ruleEngineFileLocation = Path.Combine(StartupHook.LoaderAssemblyLocation ?? string.Empty, "ruleEngine.json");
+            var ruleEngineFileLocation = Path.Combine(_instrumentationHomePath, "ruleEngine.json");
             var ruleEngineContent = File.ReadAllText(ruleEngineFileLocation);
             var ruleFileInfoList = JsonSerializer.Deserialize<List<RuleFileInfo>>(ruleEngineContent);
             var entryAssembly = Assembly.GetEntryAssembly();
