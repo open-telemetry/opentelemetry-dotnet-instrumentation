@@ -48,13 +48,6 @@ and exported in the same format as they would be in .NET.
 > optimized for the .NET Framework runtime, but the exported data format
 > remains identical to .NET (Core).
 
-#### Architecture-specific behavior
-
-| Architecture | Stack capture strategy |
-| ------------ | ---------------------- |
-| x64 | Per-thread suspension with unseeded `DoStackSnapshot`. Threads stuck in native code may be skipped. |
-| x86 | Per-thread suspension with unseeded `DoStackSnapshot`. Threads stuck in native code may be skipped. |
-
 ### Enable the profiler
 
 Implement custom plugin. See plugin section.
