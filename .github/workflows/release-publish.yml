@@ -13,12 +13,12 @@ jobs:
     steps:
 
       - name: Setup .NET
-        uses: actions/setup-dotnet@baa11fbfe1d6520db94683bd5c7a3818018e4309 # tag: v5.1.0
+        uses: actions/setup-dotnet@c2fa09f4bde5ebb9d1777cf28262a3eb3db3ced7 # tag: v5.2.0
         with:
           dotnet-version: | 
-            8.0.418
-            9.0.311
-            10.0.103
+            8.0.419
+            9.0.312
+            10.0.201
 
       - name: Test the PowerShell module instructions from README.md
         shell: powershell
@@ -65,12 +65,12 @@ jobs:
     steps:
 
       - name: Setup .NET
-        uses: actions/setup-dotnet@baa11fbfe1d6520db94683bd5c7a3818018e4309 # tag: v5.1.0
+        uses: actions/setup-dotnet@c2fa09f4bde5ebb9d1777cf28262a3eb3db3ced7 # tag: v5.2.0
         with:
           dotnet-version: | 
-            8.0.418
-            9.0.311
-            10.0.103
+            8.0.419
+            9.0.312
+            10.0.201
 
       - name: Install MacOS CoreUtils
         if: ${{ runner.os == 'macOS' }}

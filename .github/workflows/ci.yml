@@ -68,22 +68,22 @@ jobs:
           fetch-depth: 0 # fetching all, needed to correctly calculate version
 
       - name: Setup .NET
-        uses: actions/setup-dotnet@baa11fbfe1d6520db94683bd5c7a3818018e4309 # tag: v5.1.0
+        uses: actions/setup-dotnet@c2fa09f4bde5ebb9d1777cf28262a3eb3db3ced7 # tag: v5.2.0
         with:
           dotnet-version: | 
-            8.0.418
-            9.0.311
-            10.0.103
+            8.0.419
+            9.0.312
+            10.0.201
 
       - name: Check for NuGet packages cache
-        uses: actions/cache@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # tag: v5.0.3
+        uses: actions/cache@668228422ae6a00e4ad889ee87cd7109ec5666a7 # tag: v5.0.4
         id: nuget-cache
         with:
           key: ${{ hashFiles('**/Directory.packages.props', './build/LibraryVersions.g.cs', '**/packages.config' ) }}
           path: ${{ env.NUGET_PACKAGES }}
 
       - name: Download Artifacts from build job
-        uses: actions/download-artifact@70fc10c6e5e1ce46ad2ea6f2b72d43f7d47b13c3 # tag: v8.0.0
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # tag: v8.0.1
         with:
           name: bin-${{ matrix.artifact-name }}
           path: bin/tracer-home
@@ -128,22 +128,22 @@ jobs:
           fetch-depth: 0 # fetching all, needed to correctly calculate version
 
       - name: Setup .NET
-        uses: actions/setup-dotnet@baa11fbfe1d6520db94683bd5c7a3818018e4309 # tag: v5.1.0
+        uses: actions/setup-dotnet@c2fa09f4bde5ebb9d1777cf28262a3eb3db3ced7 # tag: v5.2.0
         with:
           dotnet-version: | 
-            8.0.418
-            9.0.311
-            10.0.103
+            8.0.419
+            9.0.312
+            10.0.201
 
       - name: Check for NuGet packages cache
-        uses: actions/cache@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # tag: v5.0.3
+        uses: actions/cache@668228422ae6a00e4ad889ee87cd7109ec5666a7 # tag: v5.0.4
         id: nuget-cache
         with:
           key: ${{ hashFiles('**/Directory.packages.props', './build/LibraryVersions.g.cs', '**/packages.config' ) }}
           path: ${{ env.NUGET_PACKAGES }}
 
       - name: Download Artifacts from build job
-        uses: actions/download-artifact@70fc10c6e5e1ce46ad2ea6f2b72d43f7d47b13c3 # tag: v8.0.0
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # tag: v8.0.1
         with:
           name: bin-${{ matrix.artifact-name }}
           path: bin/tracer-home
@@ -172,22 +172,22 @@ jobs:
           fetch-depth: 0 # fetching all, needed to correctly calculate version
 
       - name: Setup .NET
-        uses: actions/setup-dotnet@baa11fbfe1d6520db94683bd5c7a3818018e4309 # tag: v5.1.0
+        uses: actions/setup-dotnet@c2fa09f4bde5ebb9d1777cf28262a3eb3db3ced7 # tag: v5.2.0
         with:
           dotnet-version: | 
-            8.0.418
-            9.0.311
-            10.0.103
+            8.0.419
+            9.0.312
+            10.0.201
 
       - name: Check for NuGet packages cache
-        uses: actions/cache@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # tag: v5.0.3
+        uses: actions/cache@668228422ae6a00e4ad889ee87cd7109ec5666a7 # tag: v5.0.4
         id: nuget-cache
         with:
           key: ${{ hashFiles('**/Directory.packages.props', './build/LibraryVersions.g.cs', '**/packages.config' ) }}
           path: ${{ env.NUGET_PACKAGES }}
 
       - name: Download Artifacts from build job
-        uses: actions/download-artifact@70fc10c6e5e1ce46ad2ea6f2b72d43f7d47b13c3 # tag: v8.0.0
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # tag: v8.0.1
         with:
           name: bin-${{ matrix.artifact-name }}
           path: bin/tracer-home
@@ -241,7 +241,7 @@ jobs:
         fetch-depth: 0 # fetching all, needed to correctly calculate version
 
     - name: Download Artifacts from build job
-      uses: actions/download-artifact@70fc10c6e5e1ce46ad2ea6f2b72d43f7d47b13c3 # tag: v8.0.0
+      uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # tag: v8.0.1
       with:
         name: bin-${{ matrix.build-source }}
         path: bin/tracer-home
@@ -280,22 +280,22 @@ jobs:
           fetch-depth: 0 # fetching all, needed to correctly calculate version
 
       - name: Setup .NET
-        uses: actions/setup-dotnet@baa11fbfe1d6520db94683bd5c7a3818018e4309 # tag: v5.1.0
+        uses: actions/setup-dotnet@c2fa09f4bde5ebb9d1777cf28262a3eb3db3ced7 # tag: v5.2.0
         with:
           dotnet-version: | 
-            8.0.418
-            9.0.311
-            10.0.103
+            8.0.419
+            9.0.312
+            10.0.201
 
       - name: Check for NuGet packages cache
-        uses: actions/cache@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # tag: v5.0.3
+        uses: actions/cache@668228422ae6a00e4ad889ee87cd7109ec5666a7 # tag: v5.0.4
         id: nuget-cache
         with:
           key: ${{ hashFiles('**/Directory.packages.props', './build/LibraryVersions.g.cs', '**/packages.config' ) }}
           path: ${{ env.NUGET_PACKAGES }}
 
       - name: Download NuGet Artifacts from build-nuget-packages job
-        uses: actions/download-artifact@70fc10c6e5e1ce46ad2ea6f2b72d43f7d47b13c3 # tag: v8.0.0
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # tag: v8.0.1
         with:
           name: bin-nuget-packages
           path: bin/nuget-artifacts/

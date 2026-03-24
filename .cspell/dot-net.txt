@@ -35,6 +35,7 @@ NGEN
 nullptr
 nupkg
 popq
+sbyte
 SIGUSR
 snupkg
 stdlibc

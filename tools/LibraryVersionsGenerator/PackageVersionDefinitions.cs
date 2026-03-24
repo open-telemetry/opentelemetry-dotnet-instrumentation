@@ -167,6 +167,7 @@ internal static class PackageVersionDefinitions
                 new("2.30.0", supportedTargetFrameworks: ["net10.0", "net9.0", "net8.0", "net462"], supportedExecutionFrameworks: ["net10.0", "net9.0", "net8.0", "net462"]),
                 new("3.0.0", supportedTargetFrameworks: ["net10.0", "net9.0", "net8.0", "net472"], supportedExecutionFrameworks: ["net10.0", "net9.0", "net8.0", "net462"]),
                 new("3.5.0", supportedTargetFrameworks: ["net10.0", "net9.0", "net8.0", "net472"], supportedExecutionFrameworks: ["net10.0", "net9.0", "net8.0", "net462"]),
+                new("3.7.0", supportedTargetFrameworks: ["net10.0", "net9.0", "net8.0", "net472"], supportedExecutionFrameworks: ["net10.0", "net9.0", "net8.0", "net462"]), // first version with native OTel support
                 new("*", supportedTargetFrameworks: ["net10.0", "net9.0", "net8.0", "net472"], supportedExecutionFrameworks: ["net10.0", "net9.0", "net8.0", "net462"])
             ]
         },
@@ -217,7 +218,7 @@ internal static class PackageVersionDefinitions
                 // new("8.0.0"), - transitive vulnerabilities https://github.com/advisories/GHSA-8g4q-xg66-9fp4, <=8.2.3
                 new("8.2.5"),
                 new("9.1.0", supportedTargetFrameworks: ["net10.0", "net9.0", "net8.0"], supportedExecutionFrameworks: ["net10.0", "net9.0", "net8.0"]), // breaking change, new Meter name
-                new("*", supportedTargetFrameworks: ["net10.0", "net9.0", "net8.0"], supportedExecutionFrameworks: ["net10.0", "net9.0", "net8.0"])
+                new("*", supportedTargetFrameworks: ["net10.0"], supportedExecutionFrameworks: ["net10.0"])
             ]
         },
         new()
