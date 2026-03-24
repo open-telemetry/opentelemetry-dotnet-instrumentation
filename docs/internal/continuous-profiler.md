@@ -48,13 +48,6 @@ and exported in the same format as they would be in .NET.
 > optimized for the .NET Framework runtime, but the exported data format
 > remains identical to .NET (Core).
 
-### Enable the profiler
-
-Implement custom plugin. See plugin section.
-
-### Configuration defaults
-
-* `threadSamplingEnabled = true;`: Enables thread sampling.
 * `var threadSamplingInterval = 10000u;`: Sampling interval, in milliseconds.
   Lowest recommended value is 1000.
 * `var exportInterval = TimeSpan.FromMilliseconds(500);`: Interval for reading
