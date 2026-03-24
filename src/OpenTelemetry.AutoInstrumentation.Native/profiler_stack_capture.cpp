@@ -21,71 +21,11 @@ extern "C"
     DECLSPEC_IMPORT PRUNTIME_FUNCTION NTAPI  RtlLookupFunctionEntry(DWORD64               ControlPc,
                                                                     PDWORD64              ImageBase,
                                                                     PUNWIND_HISTORY_TABLE HistoryTable);
-    DECLSPEC_IMPORT PEXCEPTION_ROUTINE NTAPI RtlVirtualUnwind(DWORD                          HandlerType,
-                                                              DWORD64                        ImageBase,
-                                                              DWORD64                        ControlPc,
-                                                              PRUNTIME_FUNCTION              FunctionEntry,
-                                                              PCONTEXT                       ContextRecord,
-                                                              PVOID*                         HandlerData,
-                                                              PDWORD64                       EstablisherFrame,
-                                                              PKNONVOLATILE_CONTEXT_POINTERS ContextPointers);
 }
 #endif // defined(_M_AMD64)
 
 namespace ProfilerStackCapture
 {
-
-// ========================================================================================
-// SEH-Protected Helper Functions (x64 only - require RtlVirtualUnwind / RtlLookupFunctionEntry)
-// ========================================================================================
-#if defined(_M_AMD64)
-
-/// @brief Helper function for reading return address (SEH-protected, no C++ objects)
-static bool ReadReturnAddressFromStack(DWORD64 rsp, DWORD64* pReturnAddress)
-{
-    __try
-    {
-        *pReturnAddress = *reinterpret_cast<PULONG64>(rsp);
-        return true;
-    }
-    __except (EXCEPTION_EXECUTE_HANDLER)
-    {
-        trace::Logger::Debug("[StackCapture] ReadReturnAddressFromStack - Access violation reading RSP=0x", std::hex,
-                             rsp, std::dec, ", ExceptionCode=0x", std::hex, GetExceptionCode(), std::dec);
-        return false;
-    }
-}
-
-/// @brief Helper function for RtlVirtualUnwind (SEH-protected, no C++ objects)
-static bool SafeRtlVirtualUnwind(DWORD64           imageBase,
-                                 DWORD64           controlPc,
-                                 PRUNTIME_FUNCTION runtimeFunction,
-                                 PCONTEXT          context,
-                                 PULONG64          pEstablisherFrame)
-{
-    __try
-    {
-        PVOID   handlerData = nullptr;
-        ULONG64 eFrame      = 0;
-        RtlVirtualUnwind(0, imageBase, controlPc, runtimeFunction, context, &handlerData, &eFrame, nullptr);
-
-        if (pEstablisherFrame)
-        {
-            *pEstablisherFrame = eFrame;
-        }
-
-        return true;
-    }
-    __except (EXCEPTION_EXECUTE_HANDLER)
-    {
-        trace::Logger::Debug("[StackCapture] SafeRtlVirtualUnwind - RtlVirtualUnwind failed. ImageBase=0x", std::hex,
-                             imageBase, ", ControlPC=0x", controlPc, std::dec, ", ExceptionCode=0x", std::hex,
-                             GetExceptionCode(), std::dec);
-        return false;
-    }
-}
-
-#endif // defined(_M_AMD64)
 
 /// @brief Helper for safety probe worker (SEH-protected, no std::unique_ptr)
 static HRESULT ExecuteProbeOperations(IProfilerApi* profilerApi, ThreadID canaryManagedId, const CONTEXT& canaryCtx)
@@ -476,139 +416,23 @@ HRESULT StackCaptureEngine::CaptureStackUnseeded(ThreadID managedThreadId, Stack
     return profilerApi_->DoStackSnapshotUnseeded(managedThreadId, stackCaptureContext->clientParams);
 }
 
-#if defined(_M_AMD64)
-// ========================================================================================
-// Merged native walk + seeded DSS (x64 only)
-// Walks native frames via RtlVirtualUnwind, emitting each as a native frame.
-// When a managed frame is found, seeds DoStackSnapshot from that point to capture the
-// remaining managed stack. If no managed frame is found, the native frames already
-// emitted provide the best available stack trace.
-// ========================================================================================
-HRESULT StackCaptureEngine::CaptureStackSeeded(ThreadID             managedThreadId,
-                                               HANDLE               threadHandle,
-                                               StackCaptureContext* stackCaptureContext)
-{
-    CONTEXT context      = {};
-    context.ContextFlags = CONTEXT_FULL;
-
-    if (!GetThreadContext(threadHandle, &context))
-    {
-        trace::Logger::Debug("[StackCapture] CaptureStackSeeded - GetThreadContext failed. ThreadID=", managedThreadId,
-                             ", Error=", GetLastError());
-        return E_FAIL;
-    }
-
-    auto* callbackContext     = stackCaptureContext->clientParams;
-    callbackContext->threadId = managedThreadId;
-
-    // Quick check: if the top of stack is already managed, seed DSS directly (no native frames to emit).
-    FunctionID fid = 0;
-    HRESULT    hr  = profilerApi_->GetFunctionFromIP(reinterpret_cast<LPCBYTE>(context.Rip), &fid);
-    if (SUCCEEDED(hr) && fid != 0)
-    {
-        return profilerApi_->DoStackSnapshotSeeded(managedThreadId, callbackContext, context);
-    }
-
-    const int MAX_FRAMES    = 512;
-    int       nativeEmitted = 0;
-    DWORD64   prevRsp       = 0;
-
-    for (int i = 0; i < MAX_FRAMES; ++i)
-    {
-        if (stackCaptureContext->stopRequested && stackCaptureContext->stopRequested->load())
-            return E_ABORT;
-
-        if (context.Rip == 0)
-            break;
-
-        // Check for stack progress
-        if (prevRsp != 0 && context.Rsp <= prevRsp)
-            break;
-        prevRsp = context.Rsp;
-
-        // Current frame is native (we checked managed above / below). Emit it.
-        callbackContext->functionId         = 0;
-        callbackContext->instructionPointer = static_cast<UINT_PTR>(context.Rip);
-        callbackContext->frameInfo          = 0;
-        callbackContext->contextSize        = 0;
-        callbackContext->context            = nullptr;
-        callbackContext->callback(callbackContext);
-        ++nativeEmitted;
-
-        // Unwind to the next frame
-        UNWIND_HISTORY_TABLE historyTable    = {};
-        DWORD64              imageBase       = 0;
-        PRUNTIME_FUNCTION    runtimeFunction = RtlLookupFunctionEntry(context.Rip, &imageBase, &historyTable);
-
-        DWORD64 nextIp;
-
-        if (!runtimeFunction)
-        {
-            // Leaf function - read return address from stack
-            DWORD64 returnAddress = 0;
-            if (!ReadReturnAddressFromStack(context.Rsp, &returnAddress))
-                break;
-            context.Rip = returnAddress;
-            context.Rsp += sizeof(DWORD64);
-            nextIp = returnAddress;
-        }
-        else
-        {
-            // Has unwind info - capture function begin (critical for CLR detection)
-            nextIp = imageBase + runtimeFunction->BeginAddress;
-            if (!SafeRtlVirtualUnwind(imageBase, context.Rip, runtimeFunction, &context, nullptr))
-                break;
-        }
-
-        // Check if the next frame is managed code
-        hr = profilerApi_->GetFunctionFromIP(reinterpret_cast<LPCBYTE>(nextIp), &fid);
-        if (SUCCEEDED(hr) && fid != 0)
-        {
-            // Found managed code. Seed DSS from here - it will produce all remaining managed frames.
-            context.Rip   = nextIp;
-            HRESULT dssHr = profilerApi_->DoStackSnapshotSeeded(managedThreadId, callbackContext, context);
-
-            trace::Logger::Debug("[StackCapture] CaptureStackSeeded - Emitted ", nativeEmitted,
-                                 " native frames, then seeded DSS. ThreadID=", managedThreadId, ", DSS HRESULT=0x",
-                                 std::hex, dssHr);
-            // Even if seeded DSS fails, the native frames we already emitted are valuable.
-            return S_OK;
-        }
-    }
-
-    trace::Logger::Debug("[StackCapture] CaptureStackSeeded - Emitted ", nativeEmitted,
-                         " native-only frames (no managed code found). ThreadID=", managedThreadId);
-    return nativeEmitted > 0 ? S_OK : E_FAIL;
-}
-#endif // defined(_M_AMD64)
-
 HRESULT StackCaptureEngine::CaptureStack(ThreadID             managedThreadId,
                                          HANDLE               threadHandle,
                                          StackCaptureContext* stackCaptureContext)
 {
-    // ==================== Tier 1: Unseeded DoStackSnapshot ====================
+    // Unseeded DoStackSnapshot: works when the thread is in managed code.
+    // Threads stuck in native code will fail and be skipped.
     HRESULT hr = CaptureStackUnseeded(managedThreadId, stackCaptureContext);
 
     if (SUCCEEDED(hr))
     {
         trace::Logger::Debug("[StackCapture] Unseeded capture succeeded. ThreadID=", managedThreadId);
-        return hr;
     }
-
-    trace::Logger::Debug("[StackCapture] Unseeded capture failed (0x", std::hex, hr, std::dec,
-                         "). ThreadID=", managedThreadId);
-
-#if defined(_M_AMD64)
-    // ==================== Tier 2 (x64): Native walk + seeded DSS ====================
-    // Walk native frames via RtlVirtualUnwind (emitting each), and seed DSS from the
-    // first managed frame found. If no managed frame exists, the native frames are kept.
-    hr = CaptureStackSeeded(managedThreadId, threadHandle, stackCaptureContext);
-#else
-    // x86: No reliable native stack walk available (no RtlVirtualUnwind, DbgHelp is not thread-safe).
-    // Unseeded DSS is the only safe option; threads stuck in native code will be skipped.
-    trace::Logger::Debug("[StackCapture] x86 - No fallback available after unseeded failure. ThreadID=",
-                         managedThreadId);
-#endif // defined(_M_AMD64)
+    else
+    {
+        trace::Logger::Debug("[StackCapture] Unseeded capture failed (0x", std::hex, hr, std::dec,
+                             "). ThreadID=", managedThreadId);
+    }
 
     return hr;
 }

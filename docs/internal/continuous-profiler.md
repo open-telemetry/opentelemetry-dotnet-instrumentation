@@ -48,25 +48,12 @@ and exported in the same format as they would be in .NET.
 > optimized for the .NET Framework runtime, but the exported data format
 > remains identical to .NET (Core).
 
-#### Native frame resolution
-
-On .NET Framework, threads that are executing native (non-managed) code
-will have their native frames resolved to human-readable symbol names
-using the Windows DbgHelp API (`SymFromAddr`). Native frames appear in
-stack traces in the format `module!FunctionName+0xOffset` (e.g.,
-`ntdll.dll!NtWaitForSingleObject+0x14`). When full symbol data is not
-available, the profiler falls back to `module!0x<offset>` or
-`Native_0x<ip>`.
-
-This native symbol resolution applies only to the .NET Framework stack
-capture strategy and is not used on .NET Core/5+.
-
 #### Architecture-specific behavior
 
 | Architecture | Stack capture strategy |
 | ------------ | ---------------------- |
-| x64 | Per-thread suspension with unseeded `DoStackSnapshot`. Falls back to native stack walk via `RtlVirtualUnwind` + seeded `DoStackSnapshot` when unseeded fails (captures mixed native/managed stacks). |
-| x86 | Per-thread suspension with unseeded `DoStackSnapshot`. No native stack walk fallback (threads stuck in native code may be skipped). |
+| x64 | Per-thread suspension with unseeded `DoStackSnapshot`. Threads stuck in native code may be skipped. |
+| x86 | Per-thread suspension with unseeded `DoStackSnapshot`. Threads stuck in native code may be skipped. |
 
 ### Enable the profiler
 
@@ -305,7 +292,6 @@ allocation sampling.
 | Feature             | .NET 6.0+    | .NET Framework 4.6.2+                  |
 | ------------------- | ------------ | -------------------------------------- |
 | Thread sampling     | ✅ Supported | ✅ Supported (Windows x64 and x86)     |
-| Native frame names  | N/A          | ✅ Resolved via DbgHelp (Windows only) |
 | Allocation sampling | ✅ Supported | ❌ Not supported                       |
 
 ## Plugin

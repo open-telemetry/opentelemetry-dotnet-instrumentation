@@ -14,8 +14,6 @@ namespace continuous_profiler {
 
 /// @brief Stack capture strategy for .NET Framework
 /// @details Uses thread suspension + DoStackSnapshot via StackCaptureEngine.
-///          On x64, falls back to seeded snapshot after native stack walk when unseeded fails.
-///          On x86, attempts unseeded snapshot only.
 class NetFxStackCaptureStrategy : public IStackCaptureStrategy {
 public:
     explicit NetFxStackCaptureStrategy(ICorProfilerInfo2* profilerInfo)

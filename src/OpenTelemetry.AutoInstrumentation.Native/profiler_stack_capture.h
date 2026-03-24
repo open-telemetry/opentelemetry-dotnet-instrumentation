@@ -165,9 +165,6 @@ namespace ProfilerStackCapture {
     private:
         HRESULT CaptureStack(ThreadID managedThreadId, HANDLE threadHandle, StackCaptureContext* stackCaptureContext);
         HRESULT CaptureStackUnseeded(ThreadID managedThreadId, StackCaptureContext* stackCaptureContext);
-#if defined(_M_AMD64)
-        HRESULT CaptureStackSeeded(ThreadID managedThreadId, HANDLE threadHandle, StackCaptureContext* stackCaptureContext);
-#endif
         bool SafetyProbe(const CanaryThreadInfo& canaryInfo);
         
         std::unique_ptr<IProfilerApi> profilerApi_;
