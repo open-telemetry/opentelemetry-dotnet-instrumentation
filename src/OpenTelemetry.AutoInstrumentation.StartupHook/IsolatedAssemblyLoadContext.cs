@@ -137,6 +137,9 @@ internal class IsolatedAssemblyLoadContext : AssemblyLoadContext
     public IsolatedAssemblyLoadContext()
         : base(StartupHookConstants.IsolatedAssemblyLoadContextName, isCollectible: false)
     {
+        // switch contextual reflection right away, so that everything that uses reflection
+        // during the isolated setup will be redirected and resolved within the isolated ALC
+        IsolatedReflectionScope = EnterContextualReflection();
         // load a copy of this assembly to this context to isolate the types
         IsolatedAssembly = LoadFromAssemblyPath(Assembly.GetExecutingAssembly().Location);
         // load the isolated ALC load helper from isolated ALC and pass it to isolated ALC:
@@ -149,6 +152,8 @@ internal class IsolatedAssemblyLoadContext : AssemblyLoadContext
     }
 
     public Assembly IsolatedAssembly { get; }
+
+    public ContextualReflectionScope IsolatedReflectionScope { get; }
 
     protected override Assembly? Load(AssemblyName assemblyName)
     {

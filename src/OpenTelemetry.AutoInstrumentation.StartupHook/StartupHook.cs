@@ -79,15 +79,12 @@ internal class StartupHook
     [MethodImpl(MethodImplOptions.NoInlining)]
     private static void BootstrapIsolation()
     {
-        // create isolated ALC, switch contextual reflection to it right away
-        // everything that should be resolved from TPA will immediately be resolved within the isolated ALC
+        // create isolated ALC
         var isolatedContext = new IsolatedAssemblyLoadContext();
-        // TODO forgot why I had to set this up so early but there was a reason, check and update the comment
-        var contextualReflectionScope = isolatedContext.EnterContextualReflection();
 
         // execute the rest of setup within the isolated ALC
         var setupType = isolatedContext.IsolatedAssembly.GetType(typeof(IsolatedSetup).FullName!)!;
-        var setup = Activator.CreateInstance(setupType, [isolatedContext, contextualReflectionScope]);
+        var setup = Activator.CreateInstance(setupType, [isolatedContext, isolatedContext.IsolatedReflectionScope]);
         var runMethod = setupType.GetMethod(nameof(IsolatedSetup.Run), BindingFlags.Instance | BindingFlags.Public)!;
         // DoNotWrapExceptions preserves original exception types from both
         // instrumentation failures (fail-fast) and customer application entrypoint failures.
