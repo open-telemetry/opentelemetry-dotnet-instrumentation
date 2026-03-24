@@ -32,6 +32,7 @@ movq
 MSVC
 netcoreapp
 NETFX
+netstandard
 NGEN
 nullptr
 nupkg
