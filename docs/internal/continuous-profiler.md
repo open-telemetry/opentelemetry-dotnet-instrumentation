@@ -109,7 +109,7 @@ If you see these log messages, check the exporter implementation.
 
 For thread sampling, you need either:
 
-* .NET 6.0 or higher, OR
+* .NET 8.0 or higher, OR
 * .NET Framework 4.6.2 or higher (Windows x64 or x86)
 
 If you're on an unsupported version (e.g., .NET Core 3.1 or .NET 5.0),
