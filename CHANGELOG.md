@@ -9,20 +9,34 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 
 ### Added
 
+- Support for [MongoDB.Driver](https://www.nuget.org/packages/MongoDB.Driver/)
+  traces instrumentation for versions `3.7.0`+.
 - Add support for file-based configuration file format version `1.0`.
 - Add support for `OTEL_CONFIG_FILE` environment variable for file-based configuration.
   This variable takes precedence over the deprecated
   `OTEL_EXPERIMENTAL_CONFIG_FILE` environment variable.
+- Configuration based instrumentation support dynamic evaluation for
+  - span names,
+  - attribute values,
+  - statuses.
+- Add file existence validation for file-based configuration.
 
 ### Changed
 
-- MongoDB instrumentation is updated to comply with v1.39.0 Semantic Convention
+- MongoDB instrumentation for versions `3.7.0` is updated to comply with v1.39.0
+  Semantic Convention
   - Renamed the `db.system` attribute to `db.system.name`,
   - Added `db.operation.batch.size` attribute,
   - Added the `db.response.status_code` and `error.type` attributes to error spans,
   - Removed the `network.peer.address` and `network.peer.port` attributes.
+- Plugins limited to one instance per type.
 
 #### Dependency updates
+
+- Following packages updated
+  - `OpenTelemetry.Instrumentation.SqlClient` from `1.15.0` to `1.15.1`.
+- .NET only, following packages updated
+  - `OpenTelemetry.Instrumentation.AspNetCore` from `1.15.0` to `1.15.1`.
 
 ### Deprecated
 
@@ -34,6 +48,10 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 ### Fixed
 
 - Fixed configuration based instrumentation for some .NET Framework methods.
+- When both `ENTITYFRAMEWORKCORE` and `NPGSQL` traces instrumentations are enabled,
+  Entity Framework Core instrumentation now skips the
+  `Npgsql.EntityFrameworkCore.PostgreSQL` provider so both instrumentations can
+  stay enabled without conflicting spans.
 - Fixes a buffer overflow in the allocation sampler at startup.
 
 ## [1.14.1](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/tag/v1.14.1)

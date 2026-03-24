@@ -10,6 +10,10 @@
     <NukeScriptDirectory>..\</NukeScriptDirectory>
     <NukeTelemetryVersion>1</NukeTelemetryVersion>
     <ImplicitUsings>enable</ImplicitUsings>
+    <!-- 
+        LangVersion needs to be 13.0 as it is used to build native code on Ubuntu16.
+        It can be udated when .NET8/.NET9 supportf will be dropped.
+    -->
     <LangVersion>13.0</LangVersion>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <NuGetAudit>true</NuGetAudit>
