@@ -43,9 +43,23 @@ internal static class AdoNetInstrumentation
         TagList tags = new()
         {
             { DatabaseAttributes.Keys.DbSystemName, systemName },
-            { DatabaseAttributes.Keys.DbQuerySummary, sqlStatementInfo.DbQuerySummary },
-            { DatabaseAttributes.Keys.DbQueryText, sqlStatementInfo.SanitizedSql },
         };
+
+        string activityName;
+        if (string.IsNullOrEmpty(sqlStatementInfo.DbQuerySummary))
+        {
+            activityName = systemName;
+        }
+        else
+        {
+            activityName = sqlStatementInfo.DbQuerySummary;
+            tags.Add(DatabaseAttributes.Keys.DbQuerySummary, sqlStatementInfo.DbQuerySummary);
+        }
+
+        if (!string.IsNullOrEmpty(sqlStatementInfo.SanitizedSql))
+        {
+            tags.Add(DatabaseAttributes.Keys.DbQueryText, sqlStatementInfo.SanitizedSql);
+        }
 
         var databaseName = iDbCommand.Connection?.Database;
         if (!string.IsNullOrEmpty(databaseName))
@@ -73,7 +87,7 @@ internal static class AdoNetInstrumentation
             }
         }
 
-        return Source.StartActivity(sqlStatementInfo.DbQuerySummary, ActivityKind.Client, default(ActivityContext), tags);
+        return Source.StartActivity(activityName, ActivityKind.Client, default(ActivityContext), tags);
     }
 
     public static void StopActivity(Activity? activity, Exception? exception)
