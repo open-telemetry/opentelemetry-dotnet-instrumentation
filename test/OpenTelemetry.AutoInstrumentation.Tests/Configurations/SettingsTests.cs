@@ -524,7 +524,27 @@ public sealed class SettingsTests : IDisposable
     }
 
     [Fact]
-    internal void ResourceSettings_LoadEnvVar_ConfigOverridesEnvVar()
+    internal void ResourceSettings_LoadEnvVar_ReadsServiceNameFromConfigurationSource()
+    {
+        const string appSettingsValue = "service-name-from-app-settings";
+
+        var configuration = new Configuration(
+            false,
+            new NameValueConfigurationSource(false, new NameValueCollection
+            {
+                { ConfigurationKeys.ServiceName, appSettingsValue }
+            }));
+        var settings = new ResourceSettings();
+
+        settings.LoadEnvVar(configuration);
+
+        var resource = Assert.Single(settings.Resources);
+        Assert.Equal(Constants.ResourceAttributes.AttributeServiceName, resource.Key);
+        Assert.Equal(appSettingsValue, resource.Value);
+    }
+
+    [Fact]
+    internal void ResourceSettings_LoadEnvVar_AppSettingsSourceTakesPriorityOverEnvVarSource()
     {
         const string envVarValue = "service-name-from-env-var";
         const string appSettingsValue = "service-name-from-app-settings";
@@ -533,11 +553,12 @@ public sealed class SettingsTests : IDisposable
         {
             Environment.SetEnvironmentVariable(ConfigurationKeys.ServiceName, envVarValue);
             var configuration = new Configuration(
-            false,
-            new NameValueConfigurationSource(false, new NameValueCollection
-            {
-                { ConfigurationKeys.ServiceName, appSettingsValue }
-            }));
+                false,
+                new NameValueConfigurationSource(false, new NameValueCollection
+                {
+                    { ConfigurationKeys.ServiceName, appSettingsValue }
+                }),
+                new EnvironmentConfigurationSource(false));
             var settings = new ResourceSettings();
 
             settings.LoadEnvVar(configuration);
@@ -609,6 +630,28 @@ public sealed class SettingsTests : IDisposable
         Assert.Equal("service.namespace", resource.Key);
         Assert.Equal("payments/api", resource.Value);
     }
+
+#if NETFRAMEWORK
+    [Fact]
+    internal void AppSettingsConfigurationSource_ReturnsValueForPresentKey()
+    {
+        var appSettings = new NameValueCollection
+        {
+            { ConfigurationKeys.ServiceName, "my-service" }
+        };
+        var source = new AppSettingsConfigurationSource(false, appSettings);
+
+        Assert.Equal("my-service", source.GetString(ConfigurationKeys.ServiceName));
+    }
+
+    [Fact]
+    internal void AppSettingsConfigurationSource_ReturnsNullForAbsentKey()
+    {
+        var source = new AppSettingsConfigurationSource(false, []);
+
+        Assert.Null(source.GetString(ConfigurationKeys.ServiceName));
+    }
+#endif
 
     private static void ClearEnvVars()
     {

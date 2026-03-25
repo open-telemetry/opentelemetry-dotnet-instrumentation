@@ -30,11 +30,13 @@ internal abstract class Settings
         }
         else
         {
-            List<IConfigurationSource> sources = [new EnvironmentConfigurationSource(failFast)];
+            List<IConfigurationSource> sources = [];
 
 #if NETFRAMEWORK
             sources.Add(new AppSettingsConfigurationSource(failFast, ConfigurationManager.AppSettings));
 #endif
+
+            sources.Add(new EnvironmentConfigurationSource(failFast));
 
             var configuration = new Configuration(failFast, [.. sources]);
             var settings = new T();
