@@ -10,6 +10,13 @@
 #define STR(Z1) #Z1
 #define AUTO_MAJOR STR(OTEL_AUTO_VERSION_MAJOR) 
 
+// Macro to handle cross-platform UTF-16 string literals
+#ifdef _WIN32
+#define _W(s) L##s
+#else
+#define _W(s) u##s
+#endif
+
 namespace trace
 {
 void CorProfiler::InitAssemblyRedirectsMap()
