@@ -3,7 +3,7 @@
 
 using System.Data;
 using System.Data.Common;
-#if true
+#if NET
 using System.Diagnostics.CodeAnalysis;
 #endif
 

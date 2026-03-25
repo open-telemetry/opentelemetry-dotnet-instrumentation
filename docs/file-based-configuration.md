@@ -526,7 +526,7 @@ instrumentation/development:
       rabbitmq:            # RabbitMQ.Client
       quartz:              # Quartz
       sqlclient:           # Microsoft.Data.SqlClient & System.Data.SqlClient
-      sqlite:              # Microsoft.Data.Sqlite & System.Data.SQLite
+      sqlite:              # Microsoft.Data.Sqlite
       stackexchangeredis:  # StackExchange.Redis
       wcfclient:           # WCF Client
       wcfcore:             # CoreWCF.Primitives

@@ -36,7 +36,7 @@ internal class DotNetTraces
     /// Gets or sets the ADO.NET traces instrumentation configuration.
     /// </summary>
     [YamlMember(Alias = "adonet")]
-    public CaptureHeadersConfiguration? AdoNet { get; set; }
+    public object? AdoNet { get; set; }
 
 #if NETFRAMEWORK
     /// <summary>

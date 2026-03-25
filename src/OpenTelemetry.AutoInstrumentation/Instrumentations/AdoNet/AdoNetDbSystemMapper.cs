@@ -22,7 +22,7 @@ internal static class AdoNetDbSystemMapper
             "MySqlConnector.MySqlCommand" => (false, "mysql"),
             "MySql.Data.MySqlClient.MySqlCommand" => (false, "mysql"),
             "Npgsql.NpgsqlCommand" => (false, "postgresql"),
-            "Oracle.ManagedDataAccess.Client" => (false, "oracle.db"),
+            "Oracle.ManagedDataAccess.Client.OracleCommand" => (false, "oracle.db"),
             "System.Data.SqlClient.SqlCommand" => (false, "microsoft.sql_server"),
             "System.Data.SQLite.SQLiteCommand" => (false, "sqlite"),
             _ => (true, "other_sql")
