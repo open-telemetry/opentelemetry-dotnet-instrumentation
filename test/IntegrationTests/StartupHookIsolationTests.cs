@@ -96,7 +96,7 @@ public class StartupHookIsolationTests(ITestOutputHelper output) : TestHelper("S
         // ApplicationInExcludeListRule will fail when process is excluded
         // Exclude dotnet executable on both Unix and Windows platforms
         SetEnvironmentVariable("OTEL_DOTNET_AUTO_EXCLUDE_PROCESSES", "dotnet,dotnet.exe");
-        // Setup FailFast to mke sure isolation respects it
+        // Setup FailFast to make sure isolation respects it
         SetEnvironmentVariable("OTEL_DOTNET_AUTO_FAIL_FAST_ENABLED", "true");
         // make sure Otel spans are flushed even when application throws unhandled exception
         SetEnvironmentVariable("OTEL_DOTNET_AUTO_FLUSH_ON_UNHANDLEDEXCEPTION", "true");
@@ -104,7 +104,7 @@ public class StartupHookIsolationTests(ITestOutputHelper output) : TestHelper("S
 
         // Run test application normally and expect that it crashes.
         // This serves as a validation that when a rule validation fails and failFast is set to true,
-        // the islation respects the flag and the application exits prematurely
+        // the isolation respects the flag and the application exits prematurely
         var (standardOutput, errorOutput, processId) = RunTestApplication(expectedExitCode: 0, assertExitCode: Assert.NotEqual);
 
         // Assert

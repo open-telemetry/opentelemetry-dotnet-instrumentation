@@ -143,9 +143,9 @@ public abstract class TestHelper
 
         // TODO I would ideally extend xunit to something like:
         // `Assert.That(process.ExitCode, Is.EqualTo(expectedExitCode))`.
-        // WIth this it would be so much easier to pass expectations:
+        // With this it would be so much easier to pass expectations:
         // e.g. `constraint: Is.EqualTo(0)`, `constraint: Is.EqualTo(99)`, `constraint: Is.Not.EqualTo(0)`
-        // and then just use it as follow: `Assert.That(process.ExitCode, constraint)`
+        // and then just use it as follows: `Assert.That(process.ExitCode, constraint)`
         assertExitCode ??= Assert.Equal;
         assertExitCode(expectedExitCode, process.ExitCode);
 
