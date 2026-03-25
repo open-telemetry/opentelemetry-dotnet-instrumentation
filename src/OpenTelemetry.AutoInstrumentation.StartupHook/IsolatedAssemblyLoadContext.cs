@@ -15,12 +15,10 @@ namespace OpenTelemetry.AutoInstrumentation;
 internal class IsolatedAssemblyLoadContext : AssemblyLoadContext
 {
     // TODO in future we may want to have a configuration for this list which will give flexibility for the customer if they know what they are doing;
-    // TODO also we can automatically add to excludes, if an assembly failed to load in custom ALC so we won't fail it over and over
 
     // Assemblies that must be loaded in Default ALC to avoid type identity issues.
     // This minimal set contains only core runtime assemblies that are unavoidable
     // during StartupHook bootstrap before setting up isolation.
-    // TODO do we want to raise a warning if we are loading a dll to isolated ALC and it is already loaded to default ALC?
     private static readonly string[] MustUseDefaultAlc = GetRuntimeMajorVersion() switch
     {
         // for .Net 8 and 9 we can allow more aggressive isolation
@@ -31,7 +29,8 @@ internal class IsolatedAssemblyLoadContext : AssemblyLoadContext
             "System.Runtime.Extensions", // <- TrustedPlatformAssembliesHelper needs Path to look through TPA
             "System.Runtime.Loader" // <- required to instantiate AssemblyLoadContext
         ],
-        // for .net 10 we have to let TPA System.Diagnostics.DiagnosticSource to be loaded to Default ALC, so this list is larger
+        // for .net 10 we have to let System.Diagnostics.DiagnosticSource v10 from TPA to be loaded to Default ALC,
+        // and therefore the list is larger. More on the issue:
         // https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/issues/4924
         >= 10 => [
             // some assemblies has been resolved only on specific platforms
@@ -137,14 +136,13 @@ internal class IsolatedAssemblyLoadContext : AssemblyLoadContext
     public IsolatedAssemblyLoadContext()
         : base(StartupHookConstants.IsolatedAssemblyLoadContextName, isCollectible: false)
     {
-        // switch contextual reflection right away, so that everything that uses reflection
-        // during the isolated setup will be redirected and resolved within the isolated ALC
+        // Load the helper assembly from the isolated ALC to enable full assembly resolution logic.
+        // The helper's dependencies will be automatically resolved within the isolated context.
+        // During setup, system assemblies are resolved through simple TPA lookups.
+        // First thing switch contextual reflection, so that everything that uses reflection
+        // will be redirected and resolved within the isolated ALC
         IsolatedReflectionScope = EnterContextualReflection();
-        // load a copy of this assembly to this context to isolate the types
         IsolatedAssembly = LoadFromAssemblyPath(Assembly.GetExecutingAssembly().Location);
-        // load the isolated ALC load helper from isolated ALC and pass it to isolated ALC:
-        //  - helper implements the logic of searching both TPA and agent paths and validating compatibility
-        //  - init helper through reflection will allow resolving all its dependencies within isolated conetxt
         var isolatedHelperType = IsolatedAssembly.GetType(typeof(IsolatedAssemblyLoadContextHelper).FullName!)!;
         var isolatedHelperDelegateMethod = isolatedHelperType.GetMethod(nameof(IsolatedAssemblyLoadContextHelper.Load), BindingFlags.Static | BindingFlags.Public)!;
         var isolatedHelperDelegate = isolatedHelperDelegateMethod.CreateDelegate<Func<AssemblyLoadContext, AssemblyName, Assembly?>>()!;
@@ -174,8 +172,8 @@ internal class IsolatedAssemblyLoadContext : AssemblyLoadContext
 
         // delegate loading to the provided AssemblyLoad delegate,
         // if we are not already in the middle of loading an assembly to avoid recursion
-        // TODO think about recursion a little bit more
-        // TODO think about the fact that ALC should return the same assembly for the same request and how no-recursion logic may affect this
+        // TODO think about recursion a little bit more, maybe we need a hashset
+        // TODO think about the fact that ALC should return the same assembly for the same request and how no-recursion logic may affect it
         if (_assemblyLoad is not null && _isLoadingAssemblyName?.Name != assemblyName.Name)
         {
             try

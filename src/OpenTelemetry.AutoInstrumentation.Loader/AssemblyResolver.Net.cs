@@ -40,7 +40,7 @@ internal class AssemblyResolver(IOtelLogger logger)
         //   -> NOTE: If TPA has same/higher version, runtime successfully auto-loads to Default ALC;
         //            event never fires (accepted)
         //
-        // However, other situations may also trigger the Resolving event for an assembly we ship
+        // Note: However, other situations may also trigger the Resolving event for an assembly we ship
         // (e.g., programmatic Assembly.Load with an explicit version that .net runtime cannot satisfy).
         // To avoid accidentally satisfying a request that is not ours or one we cannot fulfill,
         // we validate versions before loading: if our version >= requested, we proceed (backward compatible);
@@ -63,14 +63,16 @@ internal class AssemblyResolver(IOtelLogger logger)
         // Native Assembly Redirection (IL rewriting) only works for assemblies that are being loaded,
         // so we must ensure that reflection-triggered loads are also intercepted.
         // GetType / Load(AssemblyName) calls bypass IL rewriting entirely —
-        // the runtime resolves them directly from TPA without firing Default.Resolving.
+        // so the assemblies from TPA will be automatically loaded to Default ALC by by-passing Default.Resolving
+        // and may potentially cause a drift if our version of the assembly is higher that the TPA.
         // To fix this, we set DependencyLoadContext as the contextual reflection ALC via
         // EnterContextualReflection(), so those calls route through Load(AssemblyName) first
         // and TPA conflicts can be intercepted before the runtime silently loads the wrong version.
 
         AssemblyLoadContext.Default.Resolving += Resolving_ManagedProfilerDependencies;
-        // TODO with setting DependencyLoadContext as contextual reflection context, the need of caching
-        //  is becoming more important because for unknown assemblies we will be hitting file system twice
+        // TODO with setting DependencyLoadContext as contextual reflection context, these become more important:
+        //  - need of caching, because for unknown assemblies we will be hitting file system many times
+        //  - for unknown assemblies we'll be hitting both DependencyLoadContext.Load and this event handler
         DependencyLoadContext.EnterContextualReflection();
     }
 
@@ -83,6 +85,7 @@ internal class AssemblyResolver(IOtelLogger logger)
     {
         logger.Debug($"Check resolving assembly: ({assemblyName})");
 
+        // 1. Early exit: assembly must have a name
         if (assemblyName.Name is null)
         {
             logger.Debug($"Skip resolving assembly with null name");
@@ -91,42 +94,47 @@ internal class AssemblyResolver(IOtelLogger logger)
 
         // TODO we may want to cache assembly paths for assemblies loading to custom ALC to avoid repeated file system calls
         // on every resolution, or simply check if the assembly is already loaded into custom ALC
+
+        // 2. Early exit: assembly must be in our agent files
         var assemblyPath = ManagedProfilerLocationHelper.GetAssemblyPath(assemblyName.Name, logger);
         if (assemblyPath is null)
         {
-            logger.Debug($"Skip resolving unexpected assembly: ({assemblyName})");
+            logger.Debug("Skip resolving unexpected assembly");
             return null;
         }
 
-        // Version check: verify this is a request we can satisfy.
-        // See ASSEMBLY RESOLUTION STRATEGY comment in RegisterAssemblyResolving for details.
-        if (assemblyName.Version != null)
+        // 3. Early exit: our assembly must satisfy the requested version
+        // See ASSEMBLY RESOLUTION STRATEGY Note comment in RegisterAssemblyResolving for details.
+        if (assemblyName.Version is not null)
         {
-            try
+            var assemblyVersion = AssemblyUtils.GetAssemblyVersionSafe(assemblyPath);
+            if (assemblyVersion is not null && assemblyVersion < assemblyName.Version)
             {
-                var ourVersion = AssemblyUtils.GetAssemblyVersionSafe(assemblyPath);
-                if (ourVersion != null && ourVersion < assemblyName.Version)
-                {
-                    logger.Debug($"Skip resolving assembly ({assemblyName}): requested version {assemblyName.Version} is higher than our version {ourVersion}");
-                    return null;
-                }
+                logger.Debug($"Skip resolving assembly ({assemblyName}): requested version [v{assemblyName.Version}] is higher than our version [v{assemblyVersion}]");
+                return null;
             }
-            catch (Exception ex)
+
+            // Exception: If we can't determine the version, we still attempt to load the assembly.
+            // Rationale:
+            // - We've already located assembly by name in the agent directory
+            // - The only uncertainty is the version
+            // - Version mismatches with native AssemblyRef redirection are not typical
+            // - Rejecting a valid agent dependency creates a higher risk of
+            //     1) loading an assembly from TPA at a lower version or
+            //     2) not loading the agent dependency at all,
+            //   in a scenario that is already documented as unsupported
+            if (assemblyVersion is null)
             {
-                logger.Debug($"Failed to read version from \"{assemblyPath}\", proceeding with load: {ex.Message}");
+                logger.Debug($"Failed to read version from \"{assemblyPath}\", proceeding with resolving");
             }
         }
 
-        // Load conflicting library into a custom ALC
-        if (TrustedPlatformAssemblyNames.Contains(assemblyName.Name))
-        {
-            logger.Debug($"Loading \"{assemblyPath}\" with DependencyLoadContext.LoadFromAssemblyPath");
-            return DependencyLoadContext.LoadFromAssemblyPath(assemblyPath);
-        }
-
-        // else load into default ALC
-        logger.Debug($"Loading \"{assemblyPath}\" with AssemblyLoadContext.Default.LoadFromAssemblyPath");
-        return AssemblyLoadContext.Default.LoadFromAssemblyPath(assemblyPath);
+        // 4. Load conflicting assembly into custom ALC, otherwise into Default ALC
+        var loadContext = TrustedPlatformAssemblyNames.Contains(assemblyName.Name)
+            ? DependencyLoadContext
+            : AssemblyLoadContext.Default;
+        logger.Debug($"Loading \"{assemblyPath}\" with {loadContext.Name}.LoadFromAssemblyPath");
+        return loadContext.LoadFromAssemblyPath(assemblyPath);
     }
 }
 

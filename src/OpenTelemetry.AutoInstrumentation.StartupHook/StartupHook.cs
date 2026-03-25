@@ -41,7 +41,7 @@ internal class StartupHook
         // === AGGRESSIVE ISOLATION (TRAMPOLINE) ===
         // To keep the Default ALC free of agent dependencies (logging, rules, Loader),
         // the isolation decision is made with minimal type references, and the rest
-        // of the setup is performed in isolated ALC to guarantee that the type sresolution
+        // of the setup is performed in isolated ALC to guarantee that the type resolution
         // starts from there.
         //
         // If isolation setup fails, we revert the context and control returns to
@@ -50,11 +50,10 @@ internal class StartupHook
         //
         // NoInlining on each branch prevents the JIT from pulling type references from the
         // "other" branch into Initialize(). Without it, the JIT could resolve types like
-        // OtelLogging or IsolatedAssemblyLoadContext when Initialize() is compiled, defeating
-        // the lazy loading boundary.
+        // OtelLogging when Initialize() is compiled, defeating the lazy loading boundary.
         //
         // Logging is intentionally deferred until inside InitializationSetup.Run() for the
-        // same reason — it triggers assembly loads that must happen in the correct ALC.
+        // same reason - it triggers assembly loads that must happen in the correct ALC.
         if (IsStartupHookOnlyMode() && IsRedirectEnabled())
         {
             BootstrapIsolation();

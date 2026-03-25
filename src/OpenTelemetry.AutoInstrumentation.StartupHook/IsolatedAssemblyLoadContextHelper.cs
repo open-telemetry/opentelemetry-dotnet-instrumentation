@@ -18,7 +18,11 @@ internal static class IsolatedAssemblyLoadContextHelper
     {
         // TODO: temporary no logging here! Logging triggers assembly loads -> infinite recursion.
 
-        var name = assemblyName.Name!;
+        // 1. Early exit: assembly must have a name
+        if (assemblyName.Name is null)
+        {
+            return null;
+        }
 
         // TODO: caching - .NET has an optimization within an ALC and do not call Load() method
         // if a match (same or higher version) is already loaded in current ALC.
@@ -27,79 +31,71 @@ internal static class IsolatedAssemblyLoadContextHelper
         // In this case caching will help avoiding unnecessary I/O for version check.
 
         // Find in TPA (customer/runtime assemblies)
-        var tpaPath = TrustedPlatformAssembliesHelper.GetAssemblyPath(name);
+        var tpaAssemblyPath = TrustedPlatformAssembliesHelper.GetAssemblyPath(assemblyName.Name);
 
         // Find in agent assemblies
-        var agentPath = ManagedProfilerLocationHelper.GetAssemblyPath(name);
+        var agentAssemblyPath = ManagedProfilerLocationHelper.GetAssemblyPath(assemblyName.Name);
 
-        // StartupHook.SaveAssemblyNames($"Isolated-{assemblyName.Name}+{tpaPath is not null}+{agentPath is not null}");
-
-        // Pick higher version (agent wins only if strictly higher)
-        var selected = PickHigherVersion(tpaPath, agentPath);
-        if (selected == null)
+        // 2. Early exit: assembly must be in TPA or in our agent files
+        var (assemblyPath, assemblyVersion) = PickHigherVersion(tpaAssemblyPath, agentAssemblyPath);
+        if (assemblyPath is null)
         {
             // TODO: log debug once logging is safe here.
             // This is unexpected assembly so include assebly name an dversion
             return null;
         }
 
-        // Verify that the selected assembly satisfies the requested version.
+        // 3. Early exit: selected assembly must satisfy the requested version
         // If the best available version is still lower than requested, skip
         // rather than loading a version that's too old.
-        if (assemblyName.Version != null)
+        if (assemblyName.Version is not null)
         {
-            try
+            assemblyVersion ??= AssemblyUtils.GetAssemblyVersionSafe(assemblyPath);
+            if (assemblyVersion is not null && assemblyVersion < assemblyName.Version)
             {
-                var selectedVersion = AssemblyUtils.GetAssemblyVersionSafe(selected);
-                if (selectedVersion != null && selectedVersion < assemblyName.Version)
-                {
-                    // TODO: log warning once logging is safe here.
-                    // The warning should include: assembly name, requested version, and best available version.
-                    return null;
-                }
+                // TODO: log warning once logging is safe here.
+                // The warning should include: assembly name, requested version, and best available version.
+                return null;
             }
-            catch
-            {
-                // On error reading version, fall through and attempt to load:
-                // by now we have the assembly, located by name in TPA or the agent directory;
-                // the only missing piece is a confirmed version.
-                // Version mismatches in a correctly built standalone app are not a typical scenario,
-                // so skipping here converts a lower-probability uncertainty into a certain fallback
-                // to Default ALC, which carries a higher risk of type and state drift than the alternative
-                // of loading an assembly at a potentially mismatched version in a scenario
-                // that is already documented as unsupported and not typical to reach.
-            }
+
+            // Exception: If we can't determine the version, we still attempt to load the assembly.
+            // Rationale:
+            // - We've already located a valid assembly by name in TPA or in the agent directory
+            // - The only uncertainty is its version
+            // - Version mismatches in correctly built applications are not typical
+            // - Rejecting a valid assembly and falling back to the Default ALC creates a higher risk
+            //   of type and state drift in a scenario that is already documented as unsupported
         }
 
-        return context.LoadFromAssemblyPath(selected);
+        // 4. Load conflicting assembly into a given ALC
+        return context.LoadFromAssemblyPath(assemblyPath);
     }
 
-    private static string? PickHigherVersion(string? tpaPath, string? agentPath)
+    private static (string? Path, Version? Version) PickHigherVersion(string? tpaPath, string? agentPath)
     {
         if (agentPath is null)
         {
-            return tpaPath;
+            return (tpaPath, null);
         }
 
         if (tpaPath is null)
         {
-            return agentPath;
+            return (agentPath, null);
         }
 
-        try
+        var tpaVersion = AssemblyUtils.GetAssemblyVersionSafe(tpaPath);
+        var agentVersion = AssemblyUtils.GetAssemblyVersionSafe(agentPath);
+
+        if (tpaVersion is null || agentVersion is null)
         {
-            var tpaVersion = AssemblyUtils.GetAssemblyVersionSafe(tpaPath);
-            var agentVersion = AssemblyUtils.GetAssemblyVersionSafe(agentPath);
-
-            // TODO we should also check the file version when the assembly versions are the same
-            //  e.g. System.Diagnostics.DiagnosticSource from package 10.0.0 and 10.0.2 have the same assembly version
-
-            // Agent wins ONLY if strictly higher
-            return agentVersion > tpaVersion ? agentPath : tpaPath;
+            // On error reading version prefer TPA
+            return (tpaPath, tpaVersion);
         }
-        catch
-        {
-            return tpaPath; // On error, prefer TPA
-        }
+
+        // TODO we should also check the file version when the assembly versions are the same
+        //  e.g. System.Diagnostics.DiagnosticSource from package 10.0.0 and 10.0.2 have the same assembly version
+
+        // Agent wins ONLY if strictly higher
+        return agentVersion > tpaVersion ? (agentPath, agentVersion) : (tpaPath, tpaVersion);
     }
 }
