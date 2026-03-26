@@ -541,9 +541,6 @@ void NamingHelper::ClearFunctionIdentifierCache()
 [[nodiscard]] FunctionIdentifier NamingHelper::ResolveManagedFunctionIdentifier(
     const FunctionID func_id, const COR_PRF_FRAME_INFO frame_info) const
 {
-    // Resolve a managed FunctionID to a FunctionIdentifier with function token and module id.
-    // This method is only called for managed frames (func_id != 0); native frames are handled
-    // directly in FrameCallback before reaching this path.
     ModuleID      module_id      = 0;
     mdToken       function_token = 0;
     const HRESULT hr =
@@ -730,6 +727,10 @@ static HRESULT __stdcall FrameCallback(_In_ FunctionID         func_id,
                                        _In_ void*              client_data)
 {
 
+    if (func_id == 0)
+    {
+        return S_OK;
+    }
     const auto params = static_cast<DoStackSnapshotParams*>(client_data);
     params->prof->stats_.total_frames++;
 

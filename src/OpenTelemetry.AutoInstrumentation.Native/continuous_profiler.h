@@ -42,15 +42,13 @@ namespace continuous_profiler
 {
 struct FunctionIdentifier
 {
-    bool     is_valid;
-
     // Managed frame data
     mdToken  function_token;
     ModuleID module_id;
-
+    bool     is_valid;
     static FunctionIdentifier Managed(mdToken token, ModuleID mod, bool valid)
     {
-        return {valid, token, mod};
+        return {token, mod, valid};
     }
 
     static FunctionIdentifier ManagedInvalid()

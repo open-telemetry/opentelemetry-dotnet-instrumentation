@@ -32,8 +32,8 @@ sampler uses two independent buffers to store samples alternatively.
 
 ### Requirements
 
-* .NET 6.0 or higher, OR
-* .NET Framework 4.6.2 or higher (Windows x64 and x86)
+* .NET 8.0 or higher, OR
+* .NET Framework 4.6.2 or higher (Windows x64 or x86)
 
 ### .NET Framework support
 
@@ -47,6 +47,11 @@ and exported in the same format as they would be in .NET.
 > .NET Framework support uses a different native stack walking strategy
 > optimized for the .NET Framework runtime, but the exported data format
 > remains identical to .NET (Core).
+### Enable the profiler
+
+Implement custom plugin. See plugin section.
+
+### Configuration defaults
 
 * `var threadSamplingInterval = 10000u;`: Sampling interval, in milliseconds.
   Lowest recommended value is 1000.
@@ -199,7 +204,7 @@ and exports in the way defined by the plugin..
 
 ### Requirements
 
-* .NET 6.0 or higher (`ICorProfilerInfo12` available in runtime)
+* .NET 8.0 or higher (`ICorProfilerInfo12` available in runtime)
 
 > [!NOTE]  
 > Allocation sampling is **not supported** on .NET Framework. The required
@@ -268,10 +273,9 @@ between your process and the Collector.
 
 #### What if I'm on an unsupported .NET version?
 
-Allocation sampling requires .NET 6.0 or higher. It is not available on
+Allocation sampling requires .NET 8.0 or higher. It is not available on
 .NET Framework due to missing `ICorProfilerInfo10`/`ICorProfilerInfo12` APIs
-for allocation tick events. You'll need to use .NET 6.0+ if you require
-allocation sampling.
+for allocation tick events.
 
 ## Feature support matrix
 
