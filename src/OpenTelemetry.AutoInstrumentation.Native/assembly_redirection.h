@@ -3,6 +3,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+#ifndef ASSEMBLY_REDIRECTION_H
+#define ASSEMBLY_REDIRECTION_H
+
 #include "assembly_redirection_netfx.h"
 #include "assembly_redirection_net.h"
 #include "cor_profiler.h"
@@ -19,7 +22,7 @@
 
 namespace trace
 {
-void CorProfiler::InitAssemblyRedirectsMap()
+inline void CorProfiler::InitAssemblyRedirectsMap()
 {
     const USHORT auto_major = atoi(AUTO_MAJOR);
 
@@ -28,4 +31,6 @@ void CorProfiler::InitAssemblyRedirectsMap()
         ASSEMBLY_REDIRECTION_NET
     });
 }
-}
+} // namespace trace
+
+#endif // ASSEMBLY_REDIRECTION_H
