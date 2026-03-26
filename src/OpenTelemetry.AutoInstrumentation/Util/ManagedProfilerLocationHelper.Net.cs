@@ -14,23 +14,26 @@ internal static partial class ManagedProfilerLocationHelper
     {
         var commonLanguageRuntimeVersionDirectory = $"net{Environment.Version.Major}.{Environment.Version.Minor}";
 
-        logger?.Debug($"Using .NET folder: {commonLanguageRuntimeVersionDirectory}");
+        logger?.Debug($"Managed Profiler Runtime Directory: {ManagedProfilerRuntimeDirectory}");
+        logger?.Debug($"Managed Profiler .NET Version Directory: {commonLanguageRuntimeVersionDirectory}");
 
         return Path.Combine(ManagedProfilerRuntimeDirectory, commonLanguageRuntimeVersionDirectory);
     }
 
-    public static string? GetAssemblyPath(string assemblyName, IOtelLogger? logger = null)
+    public static AssemblyLocation? FindAssembly(string assemblyName, IOtelLogger? logger = null)
     {
         var runtimeDir = ManagedProfilerRuntimeDirectory;
         LazyInitializer.EnsureInitialized(ref _managedProfilerVersionDirectory, () => ResolveManagedProfilerVersionDirectory(logger));
 
         // For .NET (Core) most of the assemblies are different per runtime version, so we
-        // 1. first start with runtime version folder (e.g., tracer-home/net/net8.0)
-        // 2. then check .link file in runtime version folder
-        // 3. last fallback to runtime root folder (tracer-home/net)
-        return Probe(_managedProfilerVersionDirectory, assemblyName) ??
-               CheckLinkFile(_managedProfilerVersionDirectory, runtimeDir, assemblyName, logger) ??
-               Probe(runtimeDir, assemblyName);
+        // 1. first start with runtime version folder           (standalone) -> e.g. tracer-home/net/net8.0/assembly-name.dll
+        // 2. then check .link file in runtime version folder   (standalone) -> e.g. tracer-home/net/net8.0/assembly-name.dll.link
+        // 3. then check runtime root folder                    (standalone) ->      tracer-home/net/assembly-name.dll
+        // 4. last fallback to tracer-home folder               (NuGet)      ->      tracer-home/assembly-name.dll
+        return Probe(_managedProfilerVersionDirectory, assemblyName, isStandalone: true) ??
+               CheckLinkFile(_managedProfilerVersionDirectory, runtimeDir, assemblyName, isStandalone: true, logger) ??
+               Probe(runtimeDir, assemblyName, isStandalone: true) ??
+               Probe(TracerHomeDirectory, assemblyName, isStandalone: false);
     }
 }
 #endif

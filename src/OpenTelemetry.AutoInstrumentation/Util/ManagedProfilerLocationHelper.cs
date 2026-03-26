@@ -25,13 +25,13 @@ internal static partial class ManagedProfilerLocationHelper
         }
     }
 
-    private static string? Probe(string dir, string name)
+    private static AssemblyLocation? Probe(string dir, string name, bool isStandalone)
     {
         var path = Path.Combine(dir, $"{name}.dll");
-        return File.Exists(path) ? path : null;
+        return File.Exists(path) ? new AssemblyLocation { Path = path, IsStandalone = isStandalone } : null;
     }
 
-    private static string? CheckLinkFile(string versionDir, string runtimeDir, string name, IOtelLogger? logger = null)
+    private static AssemblyLocation? CheckLinkFile(string versionDir, string runtimeDir, string name, bool isStandalone, IOtelLogger? logger = null)
     {
         var linkFile = Path.Combine(versionDir, $"{name}.dll.link");
         if (File.Exists(linkFile))
@@ -40,14 +40,13 @@ internal static partial class ManagedProfilerLocationHelper
             {
                 var targetDirName = File.ReadAllText(linkFile).Trim();
                 var targetDirPath = Path.Combine(runtimeDir, targetDirName);
-                var path = Probe(targetDirPath, name);
-                if (path == null)
+                var location = Probe(targetDirPath, name, isStandalone);
+                if (location == null)
                 {
                     logger?.Error($"Linked assembly path \"{Path.Combine(targetDirPath, $"{name}.dll")}\" does not exist");
-                    return null;
                 }
 
-                return path;
+                return location;
             }
             catch (Exception ex)
             {
@@ -56,5 +55,12 @@ internal static partial class ManagedProfilerLocationHelper
         }
 
         return null;
+    }
+
+    /// <summary>
+    /// Represents the result of a managed assembly search.
+    /// </summary>
+    internal record struct AssemblyLocation(string Path, bool IsStandalone)
+    {
     }
 }

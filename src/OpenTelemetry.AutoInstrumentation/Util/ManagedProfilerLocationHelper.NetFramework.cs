@@ -34,24 +34,26 @@ internal static partial class ManagedProfilerLocationHelper
             logger.Warning(ex, $"Error getting .NET Framework version from native profiler. Fallback to {frameworkDirectoryName}.");
         }
 
-        logger.Debug($"Using .NET Framework folder: {frameworkDirectoryName}");
+        logger.Debug($"Managed Profiler Runtime Directory: {ManagedProfilerRuntimeDirectory}");
+        logger.Debug($"Managed Profiler .NET Framework Version Directory: {frameworkDirectoryName}");
 
         return Path.Combine(ManagedProfilerRuntimeDirectory, frameworkDirectoryName);
     }
 
-    public static string? GetAssemblyPath(string assemblyName, IOtelLogger logger)
+    public static AssemblyLocation? FindAssembly(string assemblyName, IOtelLogger logger)
     {
         var runtimeDir = ManagedProfilerRuntimeDirectory;
         LazyInitializer.EnsureInitialized(ref _managedProfilerVersionDirectory, () => ResolveManagedProfilerVersionDirectory(logger));
 
-        // Framework Order: 1. RuntimeDir -> 2. VersionDir -> 3. Link (in VersionDir)
         // For .NET Framework most of the assembblies are common, so we
-        // 1. first start with runtime root folder (tracer-home/netfx)
-        // 2. then check runtime version folder (e.g., tracer-home/netfx/net462)
-        // 3. last fallback to .link file in runtime version folder
-        return Probe(runtimeDir, assemblyName) ??
-               Probe(_managedProfilerVersionDirectory!, assemblyName) ??
-               CheckLinkFile(_managedProfilerVersionDirectory!, runtimeDir, assemblyName, logger);
+        // 1. first start with runtime root folder                      (standalone) ->      tracer-home/netfx/assembly-name.dll
+        // 2. then check tracer-home folder                             (NuGet)      ->      tracer-home/assembly-name.dll
+        // 3. then check runtime version folder                         (standalone) -> e.g. tracer-home/netfx/net462/assembly-name.dll
+        // 4. last fallback to .link file in runtime version folder     (standalone) -> e.g. tracer-home/netfx/net462/assembly-name.dll.link
+        return Probe(runtimeDir, assemblyName, isStandalone: true) ??
+               Probe(TracerHomeDirectory, assemblyName, isStandalone: false) ??
+               Probe(_managedProfilerVersionDirectory!, assemblyName, isStandalone: true) ??
+               CheckLinkFile(_managedProfilerVersionDirectory!, runtimeDir, assemblyName, isStandalone: true, logger);
     }
 
     [DllImport("OpenTelemetry.AutoInstrumentation.Native.dll")]
