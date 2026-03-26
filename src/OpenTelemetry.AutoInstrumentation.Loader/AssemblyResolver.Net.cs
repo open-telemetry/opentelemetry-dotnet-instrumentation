@@ -14,7 +14,7 @@ namespace OpenTelemetry.AutoInstrumentation.Loader;
 /// </summary>
 internal class AssemblyResolver(IOtelLogger logger)
 {
-    internal static string[] TrustedPlatformAssemblyNames { get; } = GetTrustedPlatformAssemblyNames();
+    internal static HashSet<string> TrustedPlatformAssemblyNames { get; } = new(GetTrustedPlatformAssemblyNames(), StringComparer.OrdinalIgnoreCase);
 
     internal AssemblyLoadContext DependencyLoadContext { get; } = new ManagedProfilerAssemblyLoadContext(logger);
 
