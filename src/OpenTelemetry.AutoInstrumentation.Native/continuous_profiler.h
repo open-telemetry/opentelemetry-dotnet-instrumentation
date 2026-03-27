@@ -53,7 +53,7 @@ struct FunctionIdentifier
 
     static FunctionIdentifier ManagedInvalid()
     {
-        return {false, 0, 0};
+        return {0, 0, false};
     }
 
     bool operator==(const FunctionIdentifier& p) const

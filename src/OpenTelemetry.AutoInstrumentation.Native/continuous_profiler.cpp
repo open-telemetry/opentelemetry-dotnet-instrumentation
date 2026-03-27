@@ -287,7 +287,7 @@ constexpr auto kSelectedThreadsEndBatch   = 0x0B;
 
 constexpr auto kCurrentThreadSamplesBufferVersion = 1;
 
-constexpr FunctionIdentifier DefaultFunctionIdentifier = {false, 0, 0};
+constexpr FunctionIdentifier DefaultFunctionIdentifier = {0, 0, false};
 
 ThreadSamplesBuffer::ThreadSamplesBuffer(std::vector<unsigned char>* buf) : buffer_(buf) {}
 ThreadSamplesBuffer::~ThreadSamplesBuffer()
@@ -727,14 +727,14 @@ static HRESULT __stdcall FrameCallback(_In_ FunctionID         func_id,
                                        _In_ void*              client_data)
 {
 
-    if (func_id == 0)
-    {
-        return S_OK;
-    }
+    // if func ID is zero, it is a frame we can't get info for (e.g., external/native code); we still want to record it,
+    // in that case the ID will map to a default "unknown" entry in the name cache, so we can just continue on as normal
+    // in next PR we will attempt to resolve the "unknown" frames a bit better (e.g., using IP to get native symbol
+    // info) but for now this is sufficient to avoid losing all stack info for frames we can't resolve
+
     const auto params = static_cast<DoStackSnapshotParams*>(client_data);
     params->prof->stats_.total_frames++;
 
-    // Managed frame: resolve FunctionID to token + module via GetFunctionInfo2.
     const auto identifier = params->prof->helper.LookupManagedFunction(func_id, 0);
     params->buffer->push_back(identifier);
 
