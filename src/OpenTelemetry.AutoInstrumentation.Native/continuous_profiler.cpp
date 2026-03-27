@@ -1335,7 +1335,7 @@ bool AllocationSubSampler::ShouldSample()
     // During the first startup cycles, avoid a burst where the first targetPerCycle allocations
     // are sampled almost immediately. Keeping minimum spacing between accepted samples prevents early
     // buffer pressure while preserving the target upper bound for the cycle.
-    if (startupCyclesRemaining > 0 && now < startupNextSampleAllowedAtMillis)
+    if (startupCyclesRemaining > 0 && std::chrono::steady_clock::now() < startupNextSampleAllowedAtMillis)
     {
         return false;
     }
@@ -1349,7 +1349,7 @@ bool AllocationSubSampler::ShouldSample()
         sampledThisCycle++;
         if (startupCyclesRemaining > 0 && startupMinSampleSpacingMillis.count() > 0)
         {
-            startupNextSampleAllowedAtMillis = now + startupMinSampleSpacingMillis;
+            startupNextSampleAllowedAtMillis = std::chrono::steady_clock::now() + startupMinSampleSpacingMillis;
         }
     }
     return sample;
