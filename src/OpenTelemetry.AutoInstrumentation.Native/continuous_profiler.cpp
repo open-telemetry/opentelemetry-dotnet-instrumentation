@@ -1281,9 +1281,8 @@ AllocationSubSampler::AllocationSubSampler(uint32_t targetPerCycle_, uint32_t se
     , seenLastCycle(0)
     , startupCyclesRemaining(kStartupAllocationPacedCycles)
     , startupMinSampleSpacingMillis(
-          targetPerCycle > 0
-          ? std::chrono::milliseconds(std::chrono::seconds(secondsPerCycle)) / targetPerCycle
-          : std::chrono::milliseconds(0))
+          targetPerCycle > 0 ? std::chrono::milliseconds(std::chrono::seconds(secondsPerCycle)) / targetPerCycle
+                             : std::chrono::milliseconds(0))
     , startupNextSampleAllowedAtMillis(
           std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()))
     , nextCycleStartMillis(
