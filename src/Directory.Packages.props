@@ -12,10 +12,10 @@
   </ItemGroup>
   <!-- Versions from OpenTelemetry.AutoInstrumentation.csproj and OTEL transitive dependencies-->
   <ItemGroup>
-    <PackageVersion Include="OpenTelemetry.Api.ProviderBuilderExtensions" Version="1.15.0" />
-    <PackageVersion Include="OpenTelemetry.Exporter.Prometheus.HttpListener" Version="1.15.0-beta.1" />
-    <PackageVersion Include="OpenTelemetry.Exporter.Zipkin" Version="1.15.0" />
-    <PackageVersion Include="OpenTelemetry.Extensions.Propagators" Version="1.15.0" />
+    <PackageVersion Include="OpenTelemetry.Api.ProviderBuilderExtensions" Version="1.15.1" />
+    <PackageVersion Include="OpenTelemetry.Exporter.Prometheus.HttpListener" Version="1.15.1-beta.1" />
+    <PackageVersion Include="OpenTelemetry.Exporter.Zipkin" Version="1.15.1" />
+    <PackageVersion Include="OpenTelemetry.Extensions.Propagators" Version="1.15.1" />
     <PackageVersion Include="OpenTelemetry.Instrumentation.AspNet" Version="1.15.1" />
     <PackageVersion Include="OpenTelemetry.Instrumentation.AspNet.TelemetryHttpModule" Version="1.15.1" />
     <PackageVersion Include="OpenTelemetry.Instrumentation.AspNetCore" Version="1.15.1" />
@@ -26,7 +26,7 @@
     <PackageVersion Include="OpenTelemetry.Instrumentation.Runtime" Version="1.15.0" />
     <PackageVersion Include="OpenTelemetry.Instrumentation.SqlClient" Version="1.15.1" />
     <PackageVersion Include="OpenTelemetry.Instrumentation.StackExchangeRedis" Version="1.15.0-beta.1" />
-    <PackageVersion Include="OpenTelemetry.Shims.OpenTracing" Version="1.15.0-beta.1" />
+    <PackageVersion Include="OpenTelemetry.Shims.OpenTracing" Version="1.15.1-beta.1" />
     <PackageVersion Include="OpenTelemetry.Resources.Azure" Version="1.15.0-beta.1" />
     <PackageVersion Include="OpenTelemetry.Resources.Container" Version="1.15.0-beta.1" />
     <PackageVersion Include="OpenTelemetry.Resources.Host" Version="1.15.0-beta.2" />

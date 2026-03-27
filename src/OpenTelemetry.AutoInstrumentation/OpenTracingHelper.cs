@@ -25,7 +25,9 @@ internal static class OpenTracingHelper
             {
                 // Instantiate the OpenTracing shim. The underlying OpenTelemetry tracer will create
                 // spans using the opentracing-shim source.
+#pragma warning disable CS0618 // Type or member is obsolete
                 var openTracingShim = new TracerShim(tracerProvider);
+#pragma warning restore CS0618 // Type or member is obsolete
 
                 // This registration must occur prior to any reference to the OpenTracing tracer:
                 // otherwise the no-op tracer is going to be used by OpenTracing instead.
