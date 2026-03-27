@@ -30,6 +30,7 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
   - Added the `db.response.status_code` and `error.type` attributes to error spans,
   - Removed the `network.peer.address` and `network.peer.port` attributes.
 - Plugins limited to one instance per type.
+- Improves allocation sampling behavior at startup for a more even distribution of samples.
 
 #### Dependency updates
 
@@ -52,7 +53,6 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
   Entity Framework Core instrumentation now skips the
   `Npgsql.EntityFrameworkCore.PostgreSQL` provider so both instrumentations can
   stay enabled without conflicting spans.
-- Fixes a buffer overflow in the allocation sampler at startup.
 
 ## [1.14.1](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/tag/v1.14.1)
 
