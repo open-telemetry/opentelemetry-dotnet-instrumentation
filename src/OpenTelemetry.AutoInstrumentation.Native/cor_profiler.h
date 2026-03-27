@@ -54,6 +54,7 @@ private:
 
     // Startup helper variables
     WSTRING home_path;
+    bool assembly_redirection_enabled_ = false;
     bool first_jit_compilation_completed = false;
     bool startup_fix_required = false;
 
@@ -107,18 +108,6 @@ private:
     HRESULT STDMETHODCALLTYPE JITCompilationStartedOnNetFramework(FunctionID function_id, BOOL is_safe_to_block);
 
     //
-    // Assembly redirect private members.
-    //
-    std::unordered_map<int, std::unordered_map<WSTRING, AssemblyVersionRedirection>> assembly_version_redirect_map_;
-    std::unordered_map<WSTRING, AssemblyVersionRedirection>* assembly_version_redirect_map_current_framework_;
-    int                                                      assembly_version_redirect_map_current_framework_key_ = 0;
-
-    void InitNetFxAssemblyRedirectsMap();
-    void RedirectAssemblyReferences(
-        const ComPtr<IMetaDataAssemblyImport>& assembly_import,
-        const ComPtr<IMetaDataAssemblyEmit>& assembly_emit);
-
-    //
     // Loader methods. These are only used on the .NET Framework.
     //
     HRESULT RunAutoInstrumentationLoader(const ComPtr<IMetaDataEmit2>&, const ModuleID module_id, const mdToken function_token, const FunctionInfo& caller, const ModuleMetadata& module_metadata);
@@ -129,8 +118,19 @@ private:
                                mdMethodDef*   patch_app_domain_setup_method);
     HRESULT ModifyAppDomainCreate(const ModuleID module_id, mdMethodDef patch_app_domain_setup_method);
     HRESULT AddIISPreStartInitFlags(const ModuleID module_id, const mdToken function_token);
-    void DetectFrameworkVersionTableForRedirectsMap();
 #endif
+
+    //
+    // Assembly redirect private members.
+    //
+    std::unordered_map<int, std::unordered_map<WSTRING, AssemblyVersionRedirection>> assembly_version_redirect_map_;
+    std::unordered_map<WSTRING, AssemblyVersionRedirection>* assembly_version_redirect_map_current_framework_;
+    int                                                      assembly_version_redirect_map_current_framework_key_ = 0;
+
+    void InitAssemblyRedirectsMap();
+    void RedirectAssemblyReferences(const ComPtr<IMetaDataAssemblyImport>& assembly_import,
+                                    const ComPtr<IMetaDataAssemblyEmit>&   assembly_emit);
+    void DetectFrameworkVersionTableForRedirectsMap();
 
     //
     // Helper methods

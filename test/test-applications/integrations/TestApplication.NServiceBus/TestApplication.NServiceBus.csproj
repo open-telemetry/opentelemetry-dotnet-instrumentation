@@ -11,7 +11,6 @@
     <PackageReference Include="NServiceBus" VersionOverride="$(LibraryVersion)" Condition=" '$(LibraryVersion)' != '' or ('$(TargetFramework)' != 'net472' and '$(TargetFramework)' != 'net9.0' and '$(TargetFramework)' != 'net8.0' ) " />
     <PackageReference Include="NServiceBus" VersionOverride="9.2.9" Condition=" '$(LibraryVersion)' == '' and ( '$(TargetFramework)' == 'net9.0' or '$(TargetFramework)' == 'net8.0' ) " />
     <PackageReference Include="NServiceBus" VersionOverride="8.2.5" Condition=" '$(LibraryVersion)' == '' and '$(TargetFramework)' == 'net472' " />
-    <PackageReference Include="System.Diagnostics.DiagnosticSource" Condition=" '$(TargetFramework)' == 'net472' or '$(TargetFramework)' == 'net9.0' or '$(TargetFramework)' == 'net8.0' " />
   </ItemGroup>
 
 </Project>
