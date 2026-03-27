@@ -1643,4 +1643,3 @@ extern "C"
         selective_sampling_trace_map.erase(context);
     }
 }
-
