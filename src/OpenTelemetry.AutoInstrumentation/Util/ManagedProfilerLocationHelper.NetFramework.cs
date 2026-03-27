@@ -40,18 +40,20 @@ internal static partial class ManagedProfilerLocationHelper
         return Path.Combine(ManagedProfilerRuntimeDirectory, frameworkDirectoryName);
     }
 
-    public static string? GetAssemblyPath(string assemblyName, IOtelLogger logger)
+    public static AssemblyLocation? FindAssembly(string assemblyName, IOtelLogger logger)
     {
         var runtimeDir = ManagedProfilerRuntimeDirectory;
         LazyInitializer.EnsureInitialized(ref _managedProfilerVersionDirectory, () => ResolveManagedProfilerVersionDirectory(logger));
 
         // For .NET Framework most of the assembblies are common, so we
-        // 1. first start with runtime root folder                      ->      tracer-home/netfx/assembly-name.dll
-        // 2. then check runtime version folder                         -> e.g. tracer-home/netfx/net462/assembly-name.dll
-        // 3. last fallback to .link file in runtime version folder     -> e.g. tracer-home/netfx/net462/assembly-name.dll.link
-        return Probe(runtimeDir, assemblyName) ??
-               Probe(_managedProfilerVersionDirectory!, assemblyName) ??
-               CheckLinkFile(_managedProfilerVersionDirectory!, runtimeDir, assemblyName, logger);
+        // 1. first start with runtime root folder                      (standalone) ->      tracer-home/netfx/assembly-name.dll
+        // 2. then check tracer-home folder                             (NuGet)      ->      tracer-home/assembly-name.dll
+        // 3. then check runtime version folder                         (standalone) -> e.g. tracer-home/netfx/net462/assembly-name.dll
+        // 4. last fallback to .link file in runtime version folder     (standalone) -> e.g. tracer-home/netfx/net462/assembly-name.dll.link
+        return Probe(runtimeDir, assemblyName, isStandalone: true) ??
+               Probe(TracerHomeDirectory, assemblyName, isStandalone: false) ??
+               Probe(_managedProfilerVersionDirectory!, assemblyName, isStandalone: true) ??
+               CheckLinkFile(_managedProfilerVersionDirectory!, runtimeDir, assemblyName, isStandalone: true, logger);
     }
 
     [DllImport("OpenTelemetry.AutoInstrumentation.Native.dll")]
