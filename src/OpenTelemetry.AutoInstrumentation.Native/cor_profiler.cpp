@@ -32,6 +32,7 @@
 #include "continuous_profiler.h"
 #include "member_resolver.h"
 #include "stack_capture_strategy_factory.h"
+#include "unsafe_accessor_type_attribute_updater.h"
 
 #ifdef MACOS
 #include <mach-o/dyld.h>
@@ -819,6 +820,9 @@ HRESULT STDMETHODCALLTYPE CorProfiler::ModuleLoadFinished(ModuleID module_id, HR
             // On the .NET Framework redirect any assembly reference to the versions required by
             // OpenTelemetry.AutoInstrumentation assembly, the ones under netfx/ folder.
             RedirectAssemblyReferences(assembly_import, assembly_emit);
+            // Redirect any type name in UnsafeAccessorTypeAttribute
+            // TODO check if it is even needed: check if type UnsafeAccessorTypeAttribute exists - if not we are on older .net where the problem did not exsist
+            UpdateUnsafeAccessorTypeAttributes(module_metadata);
         }
 #endif // _WIN32
 
