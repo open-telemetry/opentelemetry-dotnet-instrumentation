@@ -11,6 +11,9 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 
 - Support for [MongoDB.Driver](https://www.nuget.org/packages/MongoDB.Driver/)
   traces instrumentation for versions `3.7.0`+.
+- Support for generic ADO.NET traces instrumentation.
+- Support for [Microsoft.Data.Sqlite](https://www.nuget.org/packages/Microsoft.Data.Sqlite)
+  `8.0.0+` traces instrumentation.
 - Add support for file-based configuration file format version `1.0`.
 - Add support for `OTEL_CONFIG_FILE` environment variable for file-based configuration.
   This variable takes precedence over the deprecated

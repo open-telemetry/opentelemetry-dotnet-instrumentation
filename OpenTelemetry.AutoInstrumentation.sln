@@ -1,5 +1,4 @@
-﻿
-Microsoft Visual Studio Solution File, Format Version 12.00
+﻿Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.0.32112.339
 MinimumVisualStudioVersion = 15.0.26124.0
@@ -259,6 +258,10 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestApplication.Wcf.Core", "test\test-applications\integrations\TestApplication.Wcf.Core\TestApplication.Wcf.Core.csproj", "{0F864722-CE44-4D99-9B67-CF0ED1893FF1}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestApplication.EntityFrameworkCore.Npgsql", "test\test-applications\integrations\TestApplication.EntityFrameworkCore.Npgsql\TestApplication.EntityFrameworkCore.Npgsql.csproj", "{0E2E77E0-E2FF-4E0E-A132-46E0E187F53C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestApplication.AdoNetStub", "test\test-applications\integrations\TestApplication.AdoNetStub\TestApplication.AdoNetStub.csproj", "{859E5A38-D2DD-7B4F-27F2-66887FFD8208}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestApplication.Sqlite.Microsoft", "test\test-applications\integrations\TestApplication.Sqlite.Microsoft\TestApplication.Sqlite.Microsoft.csproj", "{8D74F5D8-FCD8-4763-936C-B849967A93DA}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -1656,6 +1659,38 @@ Global
 		{0E2E77E0-E2FF-4E0E-A132-46E0E187F53C}.Release|x64.Build.0 = Release|x64
 		{0E2E77E0-E2FF-4E0E-A132-46E0E187F53C}.Release|x86.ActiveCfg = Release|x86
 		{0E2E77E0-E2FF-4E0E-A132-46E0E187F53C}.Release|x86.Build.0 = Release|x86
+		{859E5A38-D2DD-7B4F-27F2-66887FFD8208}.Debug|Any CPU.ActiveCfg = Debug|x64
+		{859E5A38-D2DD-7B4F-27F2-66887FFD8208}.Debug|Any CPU.Build.0 = Debug|x64
+		{859E5A38-D2DD-7B4F-27F2-66887FFD8208}.Debug|ARM64.ActiveCfg = Debug|x64
+		{859E5A38-D2DD-7B4F-27F2-66887FFD8208}.Debug|ARM64.Build.0 = Debug|x64
+		{859E5A38-D2DD-7B4F-27F2-66887FFD8208}.Debug|x64.ActiveCfg = Debug|x64
+		{859E5A38-D2DD-7B4F-27F2-66887FFD8208}.Debug|x64.Build.0 = Debug|x64
+		{859E5A38-D2DD-7B4F-27F2-66887FFD8208}.Debug|x86.ActiveCfg = Debug|x86
+		{859E5A38-D2DD-7B4F-27F2-66887FFD8208}.Debug|x86.Build.0 = Debug|x86
+		{859E5A38-D2DD-7B4F-27F2-66887FFD8208}.Release|Any CPU.ActiveCfg = Release|x64
+		{859E5A38-D2DD-7B4F-27F2-66887FFD8208}.Release|Any CPU.Build.0 = Release|x64
+		{859E5A38-D2DD-7B4F-27F2-66887FFD8208}.Release|ARM64.ActiveCfg = Release|x64
+		{859E5A38-D2DD-7B4F-27F2-66887FFD8208}.Release|ARM64.Build.0 = Release|x64
+		{859E5A38-D2DD-7B4F-27F2-66887FFD8208}.Release|x64.ActiveCfg = Release|x64
+		{859E5A38-D2DD-7B4F-27F2-66887FFD8208}.Release|x64.Build.0 = Release|x64
+		{859E5A38-D2DD-7B4F-27F2-66887FFD8208}.Release|x86.ActiveCfg = Release|x86
+		{859E5A38-D2DD-7B4F-27F2-66887FFD8208}.Release|x86.Build.0 = Release|x86
+		{8D74F5D8-FCD8-4763-936C-B849967A93DA}.Debug|Any CPU.ActiveCfg = Debug|x64
+		{8D74F5D8-FCD8-4763-936C-B849967A93DA}.Debug|Any CPU.Build.0 = Debug|x64
+		{8D74F5D8-FCD8-4763-936C-B849967A93DA}.Debug|ARM64.ActiveCfg = Debug|x64
+		{8D74F5D8-FCD8-4763-936C-B849967A93DA}.Debug|ARM64.Build.0 = Debug|x64
+		{8D74F5D8-FCD8-4763-936C-B849967A93DA}.Debug|x64.ActiveCfg = Debug|x64
+		{8D74F5D8-FCD8-4763-936C-B849967A93DA}.Debug|x64.Build.0 = Debug|x64
+		{8D74F5D8-FCD8-4763-936C-B849967A93DA}.Debug|x86.ActiveCfg = Debug|x86
+		{8D74F5D8-FCD8-4763-936C-B849967A93DA}.Debug|x86.Build.0 = Debug|x86
+		{8D74F5D8-FCD8-4763-936C-B849967A93DA}.Release|Any CPU.ActiveCfg = Release|x64
+		{8D74F5D8-FCD8-4763-936C-B849967A93DA}.Release|Any CPU.Build.0 = Release|x64
+		{8D74F5D8-FCD8-4763-936C-B849967A93DA}.Release|ARM64.ActiveCfg = Release|x64
+		{8D74F5D8-FCD8-4763-936C-B849967A93DA}.Release|ARM64.Build.0 = Release|x64
+		{8D74F5D8-FCD8-4763-936C-B849967A93DA}.Release|x64.ActiveCfg = Release|x64
+		{8D74F5D8-FCD8-4763-936C-B849967A93DA}.Release|x64.Build.0 = Release|x64
+		{8D74F5D8-FCD8-4763-936C-B849967A93DA}.Release|x86.ActiveCfg = Release|x86
+		{8D74F5D8-FCD8-4763-936C-B849967A93DA}.Release|x86.Build.0 = Release|x86
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -1753,6 +1788,8 @@ Global
 		{B69564D4-7D5B-7147-6CBA-233BB8A33C50} = {9E5F0022-0A50-40BF-AC6A-C3078585ECAB}
 		{0F864722-CE44-4D99-9B67-CF0ED1893FF1} = {E409ADD3-9574-465C-AB09-4324D205CC7C}
 		{0E2E77E0-E2FF-4E0E-A132-46E0E187F53C} = {E409ADD3-9574-465C-AB09-4324D205CC7C}
+		{859E5A38-D2DD-7B4F-27F2-66887FFD8208} = {E409ADD3-9574-465C-AB09-4324D205CC7C}
+		{8D74F5D8-FCD8-4763-936C-B849967A93DA} = {E409ADD3-9574-465C-AB09-4324D205CC7C}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {160A1D00-1F5B-40F8-A155-621B4459D78F}

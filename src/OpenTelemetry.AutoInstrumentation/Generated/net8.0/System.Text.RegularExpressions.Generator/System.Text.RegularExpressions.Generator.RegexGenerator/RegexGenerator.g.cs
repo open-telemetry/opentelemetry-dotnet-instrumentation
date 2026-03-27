@@ -30,6 +30,67 @@ namespace OpenTelemetry.AutoInstrumentation.Configurations.FileBasedConfiguratio
     }
 }
 
+namespace OpenTelemetry.Instrumentation
+{
+    partial class SqlConnectionDetails
+    {
+        /// <remarks>
+        /// Pattern:<br/>
+        /// <code>^([^[]*\\s*:\\s*\\\\{0,2})?(.*?)\\s*(?:[\\\\,]|$)\\s*(.*?)\\s*(?:,|$)\\s*(.*)$</code><br/>
+        /// Explanation:<br/>
+        /// <code>
+        /// ○ Match if at the beginning of the string.<br/>
+        /// ○ Optional (greedy).<br/>
+        ///     ○ 1st capture group.<br/>
+        ///         ○ Match a character other than '[' greedily any number of times.<br/>
+        ///         ○ Match a whitespace character atomically any number of times.<br/>
+        ///         ○ Match ':'.<br/>
+        ///         ○ Match a whitespace character greedily any number of times.<br/>
+        ///         ○ Match '\\' greedily at most 2 times.<br/>
+        /// ○ 2nd capture group.<br/>
+        ///     ○ Match a character other than '\n' lazily any number of times.<br/>
+        /// ○ Match a whitespace character greedily any number of times.<br/>
+        /// ○ Match with 2 alternative expressions.<br/>
+        ///     ○ Match a character in the set [,\\].<br/>
+        ///     ○ Match if at the end of the string or if before an ending newline.<br/>
+        /// ○ Match a whitespace character greedily any number of times.<br/>
+        /// ○ 3rd capture group.<br/>
+        ///     ○ Match a character other than '\n' lazily any number of times.<br/>
+        /// ○ Match a whitespace character greedily any number of times.<br/>
+        /// ○ Match with 2 alternative expressions.<br/>
+        ///     ○ Match ','.<br/>
+        ///     ○ Match if at the end of the string or if before an ending newline.<br/>
+        /// ○ Match a whitespace character greedily any number of times.<br/>
+        /// ○ 4th capture group.<br/>
+        ///     ○ Match a character other than '\n' greedily any number of times.<br/>
+        /// ○ Match if at the end of the string or if before an ending newline.<br/>
+        /// </code>
+        /// </remarks>
+        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Text.RegularExpressions.Generator", "8.0.14.11203")]
+        private static partial global::System.Text.RegularExpressions.Regex DataSourceRegex() => global::System.Text.RegularExpressions.Generated.DataSourceRegex_1.Instance;
+    }
+}
+
+namespace OpenTelemetry.Instrumentation
+{
+    partial class SqlConnectionDetails
+    {
+        /// <remarks>
+        /// Pattern:<br/>
+        /// <code>pipe\\\\MSSQL\\$(.*?)\\\\</code><br/>
+        /// Explanation:<br/>
+        /// <code>
+        /// ○ Match the string "pipe\\MSSQL$".<br/>
+        /// ○ 1st capture group.<br/>
+        ///     ○ Match a character other than '\n' lazily any number of times.<br/>
+        /// ○ Match '\\'.<br/>
+        /// </code>
+        /// </remarks>
+        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Text.RegularExpressions.Generator", "8.0.14.11203")]
+        private static partial global::System.Text.RegularExpressions.Regex NamedPipeRegex() => global::System.Text.RegularExpressions.Generated.NamedPipeRegex_2.Instance;
+    }
+}
+
 namespace System.Text.RegularExpressions.Generated
 {
     using System;
@@ -300,6 +361,864 @@ namespace System.Text.RegularExpressions.Generated
                     if (slice.IsEmpty || slice[0] != '}')
                     {
                         goto LoopBacktrack;
+                    }
+                    
+                    // The input matched.
+                    pos++;
+                    base.runtextpos = pos;
+                    base.Capture(0, matchStart, pos);
+                    return true;
+                    
+                    // <summary>Undo captures until it reaches the specified capture position.</summary>
+                    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+                    void UncaptureUntil(int capturePosition)
+                    {
+                        while (base.Crawlpos() > capturePosition)
+                        {
+                            base.Uncapture();
+                        }
+                    }
+                }
+            }
+        }
+
+    }
+    
+    /// <summary>Custom <see cref="Regex"/>-derived type for the DataSourceRegex method.</summary>
+    [GeneratedCodeAttribute("System.Text.RegularExpressions.Generator", "8.0.14.11203")]
+    file sealed class DataSourceRegex_1 : Regex
+    {
+        /// <summary>Cached, thread-safe singleton instance.</summary>
+        internal static readonly DataSourceRegex_1 Instance = new();
+    
+        /// <summary>Initializes the instance.</summary>
+        private DataSourceRegex_1()
+        {
+            base.pattern = "^([^[]*\\s*:\\s*\\\\{0,2})?(.*?)\\s*(?:[\\\\,]|$)\\s*(.*?)\\s*(?:,|$)\\s*(.*)$";
+            base.roptions = RegexOptions.None;
+            ValidateMatchTimeout(Utilities.s_defaultTimeout);
+            base.internalMatchTimeout = Utilities.s_defaultTimeout;
+            base.factory = new RunnerFactory();
+            base.capsize = 5;
+        }
+            
+        /// <summary>Provides a factory for creating <see cref="RegexRunner"/> instances to be used by methods on <see cref="Regex"/>.</summary>
+        private sealed class RunnerFactory : RegexRunnerFactory
+        {
+            /// <summary>Creates an instance of a <see cref="RegexRunner"/> used by methods on <see cref="Regex"/>.</summary>
+            protected override RegexRunner CreateInstance() => new Runner();
+        
+            /// <summary>Provides the runner that contains the custom logic implementing the specified regular expression.</summary>
+            private sealed class Runner : RegexRunner
+            {
+                /// <summary>Scan the <paramref name="inputSpan"/> starting from base.runtextstart for the next match.</summary>
+                /// <param name="inputSpan">The text being scanned by the regular expression.</param>
+                protected override void Scan(ReadOnlySpan<char> inputSpan)
+                {
+                    // The pattern is anchored.  Validate the current position and try to match at it only.
+                    if (TryFindNextPossibleStartingPosition(inputSpan) && !TryMatchAtCurrentPosition(inputSpan))
+                    {
+                        base.runtextpos = inputSpan.Length;
+                    }
+                }
+        
+                /// <summary>Search <paramref name="inputSpan"/> starting from base.runtextpos for the next location a match could possibly start.</summary>
+                /// <param name="inputSpan">The text being scanned by the regular expression.</param>
+                /// <returns>true if a possible match was found; false if no more matches are possible.</returns>
+                private bool TryFindNextPossibleStartingPosition(ReadOnlySpan<char> inputSpan)
+                {
+                    int pos = base.runtextpos;
+                    
+                    // The pattern leads with a beginning (\A) anchor.
+                    if (pos == 0)
+                    {
+                        return true;
+                    }
+                    
+                    // No match found.
+                    base.runtextpos = inputSpan.Length;
+                    return false;
+                }
+        
+                /// <summary>Determine whether <paramref name="inputSpan"/> at base.runtextpos is a match for the regular expression.</summary>
+                /// <param name="inputSpan">The text being scanned by the regular expression.</param>
+                /// <returns>true if the regular expression matches at the current position; otherwise, false.</returns>
+                private bool TryMatchAtCurrentPosition(ReadOnlySpan<char> inputSpan)
+                {
+                    int pos = base.runtextpos;
+                    int matchStart = pos;
+                    char ch;
+                    int alternation_branch = 0;
+                    int alternation_branch1 = 0;
+                    int alternation_starting_capturepos = 0;
+                    int alternation_starting_capturepos1 = 0;
+                    int alternation_starting_pos = 0;
+                    int alternation_starting_pos1 = 0;
+                    int capture_starting_pos1 = 0;
+                    int capture_starting_pos2 = 0;
+                    int capture_starting_pos3 = 0;
+                    int charloop_capture_pos = 0;
+                    int charloop_capture_pos1 = 0;
+                    int charloop_capture_pos2 = 0;
+                    int charloop_capture_pos3 = 0;
+                    int charloop_capture_pos4 = 0;
+                    int charloop_starting_pos = 0, charloop_ending_pos = 0;
+                    int charloop_starting_pos1 = 0, charloop_ending_pos1 = 0;
+                    int charloop_starting_pos2 = 0, charloop_ending_pos2 = 0;
+                    int charloop_starting_pos3 = 0, charloop_ending_pos3 = 0;
+                    int charloop_starting_pos4 = 0, charloop_ending_pos4 = 0;
+                    int charloop_starting_pos5 = 0, charloop_ending_pos5 = 0;
+                    int charloop_starting_pos6 = 0, charloop_ending_pos6 = 0;
+                    int charloop_starting_pos7 = 0, charloop_ending_pos7 = 0;
+                    int lazyloop_capturepos = 0;
+                    int lazyloop_capturepos1 = 0;
+                    int lazyloop_pos = 0;
+                    int lazyloop_pos1 = 0;
+                    int loop_iteration = 0;
+                    int stackpos = 0;
+                    ReadOnlySpan<char> slice = inputSpan.Slice(pos);
+                    
+                    // Match if at the beginning of the string.
+                    if (pos != 0)
+                    {
+                        UncaptureUntil(0);
+                        return false; // The input didn't match.
+                    }
+                    
+                    // Optional (greedy).
+                    //{
+                        loop_iteration = 0;
+                        
+                        LoopBody:
+                        Utilities.StackPush(ref base.runstack!, ref stackpos, base.Crawlpos(), pos);
+                        
+                        loop_iteration++;
+                        
+                        // 1st capture group.
+                        //{
+                            int capture_starting_pos = pos;
+                            
+                            // Match a character other than '[' greedily any number of times.
+                            //{
+                                charloop_starting_pos = pos;
+                                
+                                int iteration = slice.IndexOf('[');
+                                if (iteration < 0)
+                                {
+                                    iteration = slice.Length;
+                                }
+                                
+                                slice = slice.Slice(iteration);
+                                pos += iteration;
+                                
+                                charloop_ending_pos = pos;
+                                goto CharLoopEnd;
+                                
+                                CharLoopBacktrack:
+                                UncaptureUntil(base.runstack![--stackpos]);
+                                Utilities.StackPop(base.runstack!, ref stackpos, out charloop_ending_pos, out charloop_starting_pos);
+                                
+                                if (Utilities.s_hasTimeout)
+                                {
+                                    base.CheckTimeout();
+                                }
+                                
+                                if (charloop_starting_pos >= charloop_ending_pos)
+                                {
+                                    goto LoopIterationNoMatch;
+                                }
+                                pos = --charloop_ending_pos;
+                                slice = inputSpan.Slice(pos);
+                                
+                                CharLoopEnd:
+                                Utilities.StackPush(ref base.runstack!, ref stackpos, charloop_starting_pos, charloop_ending_pos, base.Crawlpos());
+                            //}
+                            
+                            // Match a whitespace character atomically any number of times.
+                            {
+                                int iteration1 = 0;
+                                while ((uint)iteration1 < (uint)slice.Length && char.IsWhiteSpace(slice[iteration1]))
+                                {
+                                    iteration1++;
+                                }
+                                
+                                slice = slice.Slice(iteration1);
+                                pos += iteration1;
+                            }
+                            
+                            // Match ':'.
+                            if (slice.IsEmpty || slice[0] != ':')
+                            {
+                                goto CharLoopBacktrack;
+                            }
+                            
+                            // Match a whitespace character greedily any number of times.
+                            //{
+                                pos++;
+                                slice = inputSpan.Slice(pos);
+                                charloop_starting_pos1 = pos;
+                                
+                                int iteration2 = 0;
+                                while ((uint)iteration2 < (uint)slice.Length && char.IsWhiteSpace(slice[iteration2]))
+                                {
+                                    iteration2++;
+                                }
+                                
+                                slice = slice.Slice(iteration2);
+                                pos += iteration2;
+                                
+                                charloop_ending_pos1 = pos;
+                                goto CharLoopEnd1;
+                                
+                                CharLoopBacktrack1:
+                                UncaptureUntil(base.runstack![--stackpos]);
+                                Utilities.StackPop(base.runstack!, ref stackpos, out charloop_ending_pos1, out charloop_starting_pos1);
+                                
+                                if (Utilities.s_hasTimeout)
+                                {
+                                    base.CheckTimeout();
+                                }
+                                
+                                if (charloop_starting_pos1 >= charloop_ending_pos1)
+                                {
+                                    goto CharLoopBacktrack;
+                                }
+                                pos = --charloop_ending_pos1;
+                                slice = inputSpan.Slice(pos);
+                                
+                                CharLoopEnd1:
+                                Utilities.StackPush(ref base.runstack!, ref stackpos, charloop_starting_pos1, charloop_ending_pos1, base.Crawlpos());
+                            //}
+                            
+                            // Match '\\' greedily at most 2 times.
+                            //{
+                                charloop_starting_pos2 = pos;
+                                
+                                int iteration3 = 0;
+                                while (iteration3 < 2 && (uint)iteration3 < (uint)slice.Length && slice[iteration3] == '\\')
+                                {
+                                    iteration3++;
+                                }
+                                
+                                slice = slice.Slice(iteration3);
+                                pos += iteration3;
+                                
+                                charloop_ending_pos2 = pos;
+                                goto CharLoopEnd2;
+                                
+                                CharLoopBacktrack2:
+                                UncaptureUntil(base.runstack![--stackpos]);
+                                Utilities.StackPop(base.runstack!, ref stackpos, out charloop_ending_pos2, out charloop_starting_pos2);
+                                
+                                if (Utilities.s_hasTimeout)
+                                {
+                                    base.CheckTimeout();
+                                }
+                                
+                                if (charloop_starting_pos2 >= charloop_ending_pos2)
+                                {
+                                    goto CharLoopBacktrack1;
+                                }
+                                pos = --charloop_ending_pos2;
+                                slice = inputSpan.Slice(pos);
+                                
+                                CharLoopEnd2:
+                                Utilities.StackPush(ref base.runstack!, ref stackpos, charloop_starting_pos2, charloop_ending_pos2, base.Crawlpos());
+                            //}
+                            
+                            base.Capture(1, capture_starting_pos, pos);
+                            
+                            Utilities.StackPush(ref base.runstack!, ref stackpos, capture_starting_pos);
+                            goto CaptureSkipBacktrack;
+                            
+                            CaptureBacktrack:
+                            capture_starting_pos = base.runstack![--stackpos];
+                            goto CharLoopBacktrack2;
+                            
+                            CaptureSkipBacktrack:;
+                        //}
+                        
+                        
+                        // The loop has an upper bound of 1. Continue iterating greedily if it hasn't yet been reached.
+                        if (loop_iteration == 0)
+                        {
+                            goto LoopBody;
+                        }
+                        goto LoopEnd;
+                        
+                        // The loop iteration failed. Put state back to the way it was before the iteration.
+                        LoopIterationNoMatch:
+                        if (--loop_iteration < 0)
+                        {
+                            // Unable to match the remainder of the expression after exhausting the loop.
+                            UncaptureUntil(0);
+                            return false; // The input didn't match.
+                        }
+                        pos = base.runstack![--stackpos];
+                        UncaptureUntil(base.runstack![--stackpos]);
+                        slice = inputSpan.Slice(pos);
+                        goto LoopEnd;
+                        
+                        LoopBacktrack:
+                        if (Utilities.s_hasTimeout)
+                        {
+                            base.CheckTimeout();
+                        }
+                        
+                        if (loop_iteration == 0)
+                        {
+                            // No iterations of the loop remain to backtrack into. Fail the loop.
+                            UncaptureUntil(0);
+                            return false; // The input didn't match.
+                        }
+                        goto CaptureBacktrack;
+                        LoopEnd:;
+                    //}
+                    
+                    // 2nd capture group.
+                    //{
+                        capture_starting_pos1 = pos;
+                        
+                        // Match a character other than '\n' lazily any number of times.
+                        //{
+                            lazyloop_pos = pos;
+                            goto LazyLoopEnd;
+                            
+                            LazyLoopBacktrack:
+                            UncaptureUntil(lazyloop_capturepos);
+                            if (Utilities.s_hasTimeout)
+                            {
+                                base.CheckTimeout();
+                            }
+                            
+                            pos = lazyloop_pos;
+                            slice = inputSpan.Slice(pos);
+                            if (slice.IsEmpty || slice[0] == '\n')
+                            {
+                                goto LoopBacktrack;
+                            }
+                            pos++;
+                            slice = inputSpan.Slice(pos);
+                            lazyloop_pos = pos;
+                            
+                            LazyLoopEnd:
+                            lazyloop_capturepos = base.Crawlpos();
+                        //}
+                        
+                        base.Capture(2, capture_starting_pos1, pos);
+                        
+                        goto CaptureSkipBacktrack1;
+                        
+                        CaptureBacktrack1:
+                        goto LazyLoopBacktrack;
+                        
+                        CaptureSkipBacktrack1:;
+                    //}
+                    
+                    // Match a whitespace character greedily any number of times.
+                    //{
+                        charloop_starting_pos3 = pos;
+                        
+                        int iteration4 = 0;
+                        while ((uint)iteration4 < (uint)slice.Length && char.IsWhiteSpace(slice[iteration4]))
+                        {
+                            iteration4++;
+                        }
+                        
+                        slice = slice.Slice(iteration4);
+                        pos += iteration4;
+                        
+                        charloop_ending_pos3 = pos;
+                        goto CharLoopEnd3;
+                        
+                        CharLoopBacktrack3:
+                        UncaptureUntil(charloop_capture_pos);
+                        
+                        if (Utilities.s_hasTimeout)
+                        {
+                            base.CheckTimeout();
+                        }
+                        
+                        if (charloop_starting_pos3 >= charloop_ending_pos3)
+                        {
+                            goto CaptureBacktrack1;
+                        }
+                        pos = --charloop_ending_pos3;
+                        slice = inputSpan.Slice(pos);
+                        
+                        CharLoopEnd3:
+                        charloop_capture_pos = base.Crawlpos();
+                    //}
+                    
+                    // Match with 2 alternative expressions.
+                    //{
+                        alternation_starting_pos = pos;
+                        alternation_starting_capturepos = base.Crawlpos();
+                        
+                        // Branch 0
+                        //{
+                            // Match a character in the set [,\\].
+                            if (slice.IsEmpty || (((ch = slice[0]) != ',') & (ch != '\\')))
+                            {
+                                goto AlternationBranch;
+                            }
+                            
+                            alternation_branch = 0;
+                            pos++;
+                            slice = inputSpan.Slice(pos);
+                            goto AlternationMatch;
+                            
+                            AlternationBranch:
+                            pos = alternation_starting_pos;
+                            slice = inputSpan.Slice(pos);
+                            UncaptureUntil(alternation_starting_capturepos);
+                        //}
+                        
+                        // Branch 1
+                        //{
+                            // Match if at the end of the string or if before an ending newline.
+                            if (pos < inputSpan.Length - 1 || ((uint)pos < (uint)inputSpan.Length && inputSpan[pos] != '\n'))
+                            {
+                                goto CharLoopBacktrack3;
+                            }
+                            
+                            alternation_branch = 1;
+                            goto AlternationMatch;
+                        //}
+                        
+                        AlternationBacktrack:
+                        if (Utilities.s_hasTimeout)
+                        {
+                            base.CheckTimeout();
+                        }
+                        
+                        switch (alternation_branch)
+                        {
+                            case 0:
+                                goto AlternationBranch;
+                            case 1:
+                                goto CharLoopBacktrack3;
+                        }
+                        
+                        AlternationMatch:;
+                    //}
+                    
+                    // Match a whitespace character greedily any number of times.
+                    //{
+                        charloop_starting_pos4 = pos;
+                        
+                        int iteration5 = 0;
+                        while ((uint)iteration5 < (uint)slice.Length && char.IsWhiteSpace(slice[iteration5]))
+                        {
+                            iteration5++;
+                        }
+                        
+                        slice = slice.Slice(iteration5);
+                        pos += iteration5;
+                        
+                        charloop_ending_pos4 = pos;
+                        goto CharLoopEnd4;
+                        
+                        CharLoopBacktrack4:
+                        UncaptureUntil(charloop_capture_pos1);
+                        
+                        if (Utilities.s_hasTimeout)
+                        {
+                            base.CheckTimeout();
+                        }
+                        
+                        if (charloop_starting_pos4 >= charloop_ending_pos4)
+                        {
+                            goto AlternationBacktrack;
+                        }
+                        pos = --charloop_ending_pos4;
+                        slice = inputSpan.Slice(pos);
+                        
+                        CharLoopEnd4:
+                        charloop_capture_pos1 = base.Crawlpos();
+                    //}
+                    
+                    // 3rd capture group.
+                    //{
+                        capture_starting_pos2 = pos;
+                        
+                        // Match a character other than '\n' lazily any number of times.
+                        //{
+                            lazyloop_pos1 = pos;
+                            goto LazyLoopEnd1;
+                            
+                            LazyLoopBacktrack1:
+                            UncaptureUntil(lazyloop_capturepos1);
+                            if (Utilities.s_hasTimeout)
+                            {
+                                base.CheckTimeout();
+                            }
+                            
+                            pos = lazyloop_pos1;
+                            slice = inputSpan.Slice(pos);
+                            if (slice.IsEmpty || slice[0] == '\n')
+                            {
+                                goto CharLoopBacktrack4;
+                            }
+                            pos++;
+                            slice = inputSpan.Slice(pos);
+                            lazyloop_pos1 = pos;
+                            
+                            LazyLoopEnd1:
+                            lazyloop_capturepos1 = base.Crawlpos();
+                        //}
+                        
+                        base.Capture(3, capture_starting_pos2, pos);
+                        
+                        goto CaptureSkipBacktrack2;
+                        
+                        CaptureBacktrack2:
+                        goto LazyLoopBacktrack1;
+                        
+                        CaptureSkipBacktrack2:;
+                    //}
+                    
+                    // Match a whitespace character greedily any number of times.
+                    //{
+                        charloop_starting_pos5 = pos;
+                        
+                        int iteration6 = 0;
+                        while ((uint)iteration6 < (uint)slice.Length && char.IsWhiteSpace(slice[iteration6]))
+                        {
+                            iteration6++;
+                        }
+                        
+                        slice = slice.Slice(iteration6);
+                        pos += iteration6;
+                        
+                        charloop_ending_pos5 = pos;
+                        goto CharLoopEnd5;
+                        
+                        CharLoopBacktrack5:
+                        UncaptureUntil(charloop_capture_pos2);
+                        
+                        if (Utilities.s_hasTimeout)
+                        {
+                            base.CheckTimeout();
+                        }
+                        
+                        if (charloop_starting_pos5 >= charloop_ending_pos5)
+                        {
+                            goto CaptureBacktrack2;
+                        }
+                        pos = --charloop_ending_pos5;
+                        slice = inputSpan.Slice(pos);
+                        
+                        CharLoopEnd5:
+                        charloop_capture_pos2 = base.Crawlpos();
+                    //}
+                    
+                    // Match with 2 alternative expressions.
+                    //{
+                        alternation_starting_pos1 = pos;
+                        alternation_starting_capturepos1 = base.Crawlpos();
+                        
+                        // Branch 0
+                        //{
+                            // Match ','.
+                            if (slice.IsEmpty || slice[0] != ',')
+                            {
+                                goto AlternationBranch1;
+                            }
+                            
+                            alternation_branch1 = 0;
+                            pos++;
+                            slice = inputSpan.Slice(pos);
+                            goto AlternationMatch1;
+                            
+                            AlternationBranch1:
+                            pos = alternation_starting_pos1;
+                            slice = inputSpan.Slice(pos);
+                            UncaptureUntil(alternation_starting_capturepos1);
+                        //}
+                        
+                        // Branch 1
+                        //{
+                            // Match if at the end of the string or if before an ending newline.
+                            if (pos < inputSpan.Length - 1 || ((uint)pos < (uint)inputSpan.Length && inputSpan[pos] != '\n'))
+                            {
+                                goto CharLoopBacktrack5;
+                            }
+                            
+                            alternation_branch1 = 1;
+                            goto AlternationMatch1;
+                        //}
+                        
+                        AlternationBacktrack1:
+                        if (Utilities.s_hasTimeout)
+                        {
+                            base.CheckTimeout();
+                        }
+                        
+                        switch (alternation_branch1)
+                        {
+                            case 0:
+                                goto AlternationBranch1;
+                            case 1:
+                                goto CharLoopBacktrack5;
+                        }
+                        
+                        AlternationMatch1:;
+                    //}
+                    
+                    // Match a whitespace character greedily any number of times.
+                    //{
+                        charloop_starting_pos6 = pos;
+                        
+                        int iteration7 = 0;
+                        while ((uint)iteration7 < (uint)slice.Length && char.IsWhiteSpace(slice[iteration7]))
+                        {
+                            iteration7++;
+                        }
+                        
+                        slice = slice.Slice(iteration7);
+                        pos += iteration7;
+                        
+                        charloop_ending_pos6 = pos;
+                        goto CharLoopEnd6;
+                        
+                        CharLoopBacktrack6:
+                        UncaptureUntil(charloop_capture_pos3);
+                        
+                        if (Utilities.s_hasTimeout)
+                        {
+                            base.CheckTimeout();
+                        }
+                        
+                        if (charloop_starting_pos6 >= charloop_ending_pos6)
+                        {
+                            goto AlternationBacktrack1;
+                        }
+                        pos = --charloop_ending_pos6;
+                        slice = inputSpan.Slice(pos);
+                        
+                        CharLoopEnd6:
+                        charloop_capture_pos3 = base.Crawlpos();
+                    //}
+                    
+                    // 4th capture group.
+                    //{
+                        capture_starting_pos3 = pos;
+                        
+                        // Match a character other than '\n' greedily any number of times.
+                        //{
+                            charloop_starting_pos7 = pos;
+                            
+                            int iteration8 = slice.IndexOf('\n');
+                            if (iteration8 < 0)
+                            {
+                                iteration8 = slice.Length;
+                            }
+                            
+                            slice = slice.Slice(iteration8);
+                            pos += iteration8;
+                            
+                            charloop_ending_pos7 = pos;
+                            goto CharLoopEnd7;
+                            
+                            CharLoopBacktrack7:
+                            UncaptureUntil(charloop_capture_pos4);
+                            
+                            if (Utilities.s_hasTimeout)
+                            {
+                                base.CheckTimeout();
+                            }
+                            
+                            if (charloop_starting_pos7 >= charloop_ending_pos7)
+                            {
+                                goto CharLoopBacktrack6;
+                            }
+                            pos = --charloop_ending_pos7;
+                            slice = inputSpan.Slice(pos);
+                            
+                            CharLoopEnd7:
+                            charloop_capture_pos4 = base.Crawlpos();
+                        //}
+                        
+                        base.Capture(4, capture_starting_pos3, pos);
+                        
+                        goto CaptureSkipBacktrack3;
+                        
+                        CaptureBacktrack3:
+                        goto CharLoopBacktrack7;
+                        
+                        CaptureSkipBacktrack3:;
+                    //}
+                    
+                    // Match if at the end of the string or if before an ending newline.
+                    if (pos < inputSpan.Length - 1 || ((uint)pos < (uint)inputSpan.Length && inputSpan[pos] != '\n'))
+                    {
+                        goto CaptureBacktrack3;
+                    }
+                    
+                    // The input matched.
+                    base.runtextpos = pos;
+                    base.Capture(0, matchStart, pos);
+                    return true;
+                    
+                    // <summary>Undo captures until it reaches the specified capture position.</summary>
+                    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+                    void UncaptureUntil(int capturePosition)
+                    {
+                        while (base.Crawlpos() > capturePosition)
+                        {
+                            base.Uncapture();
+                        }
+                    }
+                }
+            }
+        }
+
+    }
+    
+    /// <summary>Custom <see cref="Regex"/>-derived type for the NamedPipeRegex method.</summary>
+    [GeneratedCodeAttribute("System.Text.RegularExpressions.Generator", "8.0.14.11203")]
+    file sealed class NamedPipeRegex_2 : Regex
+    {
+        /// <summary>Cached, thread-safe singleton instance.</summary>
+        internal static readonly NamedPipeRegex_2 Instance = new();
+    
+        /// <summary>Initializes the instance.</summary>
+        private NamedPipeRegex_2()
+        {
+            base.pattern = "pipe\\\\MSSQL\\$(.*?)\\\\";
+            base.roptions = RegexOptions.None;
+            ValidateMatchTimeout(Utilities.s_defaultTimeout);
+            base.internalMatchTimeout = Utilities.s_defaultTimeout;
+            base.factory = new RunnerFactory();
+            base.capsize = 2;
+        }
+            
+        /// <summary>Provides a factory for creating <see cref="RegexRunner"/> instances to be used by methods on <see cref="Regex"/>.</summary>
+        private sealed class RunnerFactory : RegexRunnerFactory
+        {
+            /// <summary>Creates an instance of a <see cref="RegexRunner"/> used by methods on <see cref="Regex"/>.</summary>
+            protected override RegexRunner CreateInstance() => new Runner();
+        
+            /// <summary>Provides the runner that contains the custom logic implementing the specified regular expression.</summary>
+            private sealed class Runner : RegexRunner
+            {
+                /// <summary>Scan the <paramref name="inputSpan"/> starting from base.runtextstart for the next match.</summary>
+                /// <param name="inputSpan">The text being scanned by the regular expression.</param>
+                protected override void Scan(ReadOnlySpan<char> inputSpan)
+                {
+                    // Search until we can't find a valid starting position, we find a match, or we reach the end of the input.
+                    while (TryFindNextPossibleStartingPosition(inputSpan) &&
+                           !TryMatchAtCurrentPosition(inputSpan) &&
+                           base.runtextpos != inputSpan.Length)
+                    {
+                        base.runtextpos++;
+                        if (Utilities.s_hasTimeout)
+                        {
+                            base.CheckTimeout();
+                        }
+                    }
+                }
+        
+                /// <summary>Search <paramref name="inputSpan"/> starting from base.runtextpos for the next location a match could possibly start.</summary>
+                /// <param name="inputSpan">The text being scanned by the regular expression.</param>
+                /// <returns>true if a possible match was found; false if no more matches are possible.</returns>
+                private bool TryFindNextPossibleStartingPosition(ReadOnlySpan<char> inputSpan)
+                {
+                    int pos = base.runtextpos;
+                    
+                    // Any possible match is at least 12 characters.
+                    if (pos <= inputSpan.Length - 12)
+                    {
+                        // The pattern has the literal "pipe\\MSSQL$" at the beginning of the pattern. Find the next occurrence.
+                        // If it can't be found, there's no match.
+                        int i = inputSpan.Slice(pos).IndexOf("pipe\\MSSQL$");
+                        if (i >= 0)
+                        {
+                            base.runtextpos = pos + i;
+                            return true;
+                        }
+                    }
+                    
+                    // No match found.
+                    base.runtextpos = inputSpan.Length;
+                    return false;
+                }
+        
+                /// <summary>Determine whether <paramref name="inputSpan"/> at base.runtextpos is a match for the regular expression.</summary>
+                /// <param name="inputSpan">The text being scanned by the regular expression.</param>
+                /// <returns>true if the regular expression matches at the current position; otherwise, false.</returns>
+                private bool TryMatchAtCurrentPosition(ReadOnlySpan<char> inputSpan)
+                {
+                    int pos = base.runtextpos;
+                    int matchStart = pos;
+                    int capture_starting_pos = 0;
+                    int lazyloop_capturepos = 0;
+                    int lazyloop_pos = 0;
+                    ReadOnlySpan<char> slice = inputSpan.Slice(pos);
+                    
+                    // Match the string "pipe\\MSSQL$".
+                    if (!slice.StartsWith("pipe\\MSSQL$"))
+                    {
+                        UncaptureUntil(0);
+                        return false; // The input didn't match.
+                    }
+                    
+                    // 1st capture group.
+                    //{
+                        pos += 11;
+                        slice = inputSpan.Slice(pos);
+                        capture_starting_pos = pos;
+                        
+                        // Match a character other than '\n' lazily any number of times.
+                        //{
+                            lazyloop_pos = pos;
+                            goto LazyLoopEnd;
+                            
+                            LazyLoopBacktrack:
+                            UncaptureUntil(lazyloop_capturepos);
+                            if (Utilities.s_hasTimeout)
+                            {
+                                base.CheckTimeout();
+                            }
+                            
+                            pos = lazyloop_pos;
+                            slice = inputSpan.Slice(pos);
+                            if (slice.IsEmpty || slice[0] == '\n')
+                            {
+                                UncaptureUntil(0);
+                                return false; // The input didn't match.
+                            }
+                            pos++;
+                            slice = inputSpan.Slice(pos);
+                            lazyloop_pos = slice.IndexOfAny('\n', '\\');
+                            if ((uint)lazyloop_pos >= (uint)slice.Length || slice[lazyloop_pos] == '\n')
+                            {
+                                UncaptureUntil(0);
+                                return false; // The input didn't match.
+                            }
+                            pos += lazyloop_pos;
+                            slice = inputSpan.Slice(pos);
+                            lazyloop_pos = pos;
+                            
+                            LazyLoopEnd:
+                            lazyloop_capturepos = base.Crawlpos();
+                        //}
+                        
+                        base.Capture(1, capture_starting_pos, pos);
+                        
+                        goto CaptureSkipBacktrack;
+                        
+                        CaptureBacktrack:
+                        goto LazyLoopBacktrack;
+                        
+                        CaptureSkipBacktrack:;
+                    //}
+                    
+                    // Match '\\'.
+                    if (slice.IsEmpty || slice[0] != '\\')
+                    {
+                        goto CaptureBacktrack;
                     }
                     
                     // The input matched.

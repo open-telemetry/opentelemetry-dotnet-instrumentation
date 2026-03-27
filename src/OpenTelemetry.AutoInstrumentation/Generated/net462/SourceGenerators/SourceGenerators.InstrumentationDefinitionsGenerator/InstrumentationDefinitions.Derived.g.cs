@@ -17,11 +17,34 @@ internal static partial class InstrumentationDefinitions
 {
     private static NativeCallTargetDefinition[] GetDerivedDefinitionsArray()
     {
-        var nativeCallTargetDefinitions = new List<NativeCallTargetDefinition>(4);
+        var nativeCallTargetDefinitions = new List<NativeCallTargetDefinition>(22);
         // Traces
         var tracerSettings = Instrumentation.TracerSettings.Value;
         if (tracerSettings.TracesEnabled)
         {
+            // AdoNet
+            if (tracerSettings.EnabledInstrumentations.Contains(TracerInstrumentation.AdoNet))
+            {
+                nativeCallTargetDefinitions.Add(new("System.Data.Common", "System.Data.Common.DbCommand", "ExecuteDbDataReaderAsync", ["System.Threading.Tasks.Task`1[System.Data.Common.DbDataReader]", "System.Data.CommandBehavior", "System.Threading.CancellationToken"], 4, 0, 0, 10, 65535, 65535, AssemblyFullName, "OpenTelemetry.AutoInstrumentation.Instrumentations.AdoNet.Integrations.CommandExecuteDbDataReaderAsyncIntegration"));
+                nativeCallTargetDefinitions.Add(new("System.Data", "System.Data.Common.DbCommand", "ExecuteDbDataReaderAsync", ["System.Threading.Tasks.Task`1[System.Data.Common.DbDataReader]", "System.Data.CommandBehavior", "System.Threading.CancellationToken"], 4, 0, 0, 4, 65535, 65535, AssemblyFullName, "OpenTelemetry.AutoInstrumentation.Instrumentations.AdoNet.Integrations.CommandExecuteDbDataReaderAsyncIntegration"));
+                nativeCallTargetDefinitions.Add(new("netstandard", "System.Data.Common.DbCommand", "ExecuteDbDataReaderAsync", ["System.Threading.Tasks.Task`1[System.Data.Common.DbDataReader]", "System.Data.CommandBehavior", "System.Threading.CancellationToken"], 2, 0, 0, 2, 65535, 65535, AssemblyFullName, "OpenTelemetry.AutoInstrumentation.Instrumentations.AdoNet.Integrations.CommandExecuteDbDataReaderAsyncIntegration"));
+                nativeCallTargetDefinitions.Add(new("System.Data.Common", "System.Data.Common.DbCommand", "ExecuteDbDataReader", ["System.Data.Common.DbDataReader", "System.Data.CommandBehavior"], 4, 0, 0, 10, 65535, 65535, AssemblyFullName, "OpenTelemetry.AutoInstrumentation.Instrumentations.AdoNet.Integrations.CommandExecuteDbDataReaderIntegration"));
+                nativeCallTargetDefinitions.Add(new("System.Data", "System.Data.Common.DbCommand", "ExecuteDbDataReader", ["System.Data.Common.DbDataReader", "System.Data.CommandBehavior"], 2, 0, 0, 4, 65535, 65535, AssemblyFullName, "OpenTelemetry.AutoInstrumentation.Instrumentations.AdoNet.Integrations.CommandExecuteDbDataReaderIntegration"));
+                nativeCallTargetDefinitions.Add(new("netstandard", "System.Data.Common.DbCommand", "ExecuteDbDataReader", ["System.Data.Common.DbDataReader", "System.Data.CommandBehavior"], 2, 0, 0, 2, 65535, 65535, AssemblyFullName, "OpenTelemetry.AutoInstrumentation.Instrumentations.AdoNet.Integrations.CommandExecuteDbDataReaderIntegration"));
+                nativeCallTargetDefinitions.Add(new("System.Data.Common", "System.Data.Common.DbCommand", "ExecuteNonQueryAsync", ["System.Threading.Tasks.Task`1<System.Int32>", "System.Threading.CancellationToken"], 4, 0, 0, 10, 65535, 65535, AssemblyFullName, "OpenTelemetry.AutoInstrumentation.Instrumentations.AdoNet.Integrations.CommandExecuteNonQueryAsyncIntegration"));
+                nativeCallTargetDefinitions.Add(new("System.Data", "System.Data.Common.DbCommand", "ExecuteNonQueryAsync", ["System.Threading.Tasks.Task`1<System.Int32>", "System.Threading.CancellationToken"], 4, 0, 0, 4, 65535, 65535, AssemblyFullName, "OpenTelemetry.AutoInstrumentation.Instrumentations.AdoNet.Integrations.CommandExecuteNonQueryAsyncIntegration"));
+                nativeCallTargetDefinitions.Add(new("netstandard", "System.Data.Common.DbCommand", "ExecuteNonQueryAsync", ["System.Threading.Tasks.Task`1<System.Int32>", "System.Threading.CancellationToken"], 2, 0, 0, 2, 65535, 65535, AssemblyFullName, "OpenTelemetry.AutoInstrumentation.Instrumentations.AdoNet.Integrations.CommandExecuteNonQueryAsyncIntegration"));
+                nativeCallTargetDefinitions.Add(new("System.Data.Common", "System.Data.Common.DbCommand", "ExecuteNonQuery", ["System.Int32"], 4, 0, 0, 10, 65535, 65535, AssemblyFullName, "OpenTelemetry.AutoInstrumentation.Instrumentations.AdoNet.Integrations.CommandExecuteNonQueryIntegration"));
+                nativeCallTargetDefinitions.Add(new("System.Data", "System.Data.Common.DbCommand", "ExecuteNonQuery", ["System.Int32"], 2, 0, 0, 4, 65535, 65535, AssemblyFullName, "OpenTelemetry.AutoInstrumentation.Instrumentations.AdoNet.Integrations.CommandExecuteNonQueryIntegration"));
+                nativeCallTargetDefinitions.Add(new("netstandard", "System.Data.Common.DbCommand", "ExecuteNonQuery", ["System.Int32"], 2, 0, 0, 2, 65535, 65535, AssemblyFullName, "OpenTelemetry.AutoInstrumentation.Instrumentations.AdoNet.Integrations.CommandExecuteNonQueryIntegration"));
+                nativeCallTargetDefinitions.Add(new("System.Data.Common", "System.Data.Common.DbCommand", "ExecuteScalarAsync", ["System.Threading.Tasks.Task`1<System.Object>", "System.Threading.CancellationToken"], 4, 0, 0, 10, 65535, 65535, AssemblyFullName, "OpenTelemetry.AutoInstrumentation.Instrumentations.AdoNet.Integrations.CommandExecuteScalarAsyncIntegration"));
+                nativeCallTargetDefinitions.Add(new("System.Data", "System.Data.Common.DbCommand", "ExecuteScalarAsync", ["System.Threading.Tasks.Task`1<System.Object>", "System.Threading.CancellationToken"], 4, 0, 0, 4, 65535, 65535, AssemblyFullName, "OpenTelemetry.AutoInstrumentation.Instrumentations.AdoNet.Integrations.CommandExecuteScalarAsyncIntegration"));
+                nativeCallTargetDefinitions.Add(new("netstandard", "System.Data.Common.DbCommand", "ExecuteScalarAsync", ["System.Threading.Tasks.Task`1<System.Object>", "System.Threading.CancellationToken"], 2, 0, 0, 2, 65535, 65535, AssemblyFullName, "OpenTelemetry.AutoInstrumentation.Instrumentations.AdoNet.Integrations.CommandExecuteScalarAsyncIntegration"));
+                nativeCallTargetDefinitions.Add(new("System.Data.Common", "System.Data.Common.DbCommand", "ExecuteScalar", ["System.Object"], 4, 0, 0, 10, 65535, 65535, AssemblyFullName, "OpenTelemetry.AutoInstrumentation.Instrumentations.AdoNet.Integrations.CommandExecuteScalarIntegration"));
+                nativeCallTargetDefinitions.Add(new("System.Data", "System.Data.Common.DbCommand", "ExecuteScalar", ["System.Object"], 2, 0, 0, 4, 65535, 65535, AssemblyFullName, "OpenTelemetry.AutoInstrumentation.Instrumentations.AdoNet.Integrations.CommandExecuteScalarIntegration"));
+                nativeCallTargetDefinitions.Add(new("netstandard", "System.Data.Common.DbCommand", "ExecuteScalar", ["System.Object"], 2, 0, 0, 2, 65535, 65535, AssemblyFullName, "OpenTelemetry.AutoInstrumentation.Instrumentations.AdoNet.Integrations.CommandExecuteScalarIntegration"));
+            }
+
             // RabbitMq
             if (tracerSettings.EnabledInstrumentations.Contains(TracerInstrumentation.RabbitMq))
             {

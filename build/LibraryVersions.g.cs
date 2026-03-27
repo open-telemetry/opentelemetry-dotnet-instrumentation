@@ -172,6 +172,15 @@ public static partial class LibraryVersion
             ]
         },
         {
+            "TestApplication.Sqlite.Microsoft",
+            [
+                new("8.0.0"),
+                new("9.0.0"),
+                new("10.0.0"),
+                new("10.0.5"),
+            ]
+        },
+        {
             "TestApplication.StackExchangeRedis",
             [
                 new("2.6.122"),

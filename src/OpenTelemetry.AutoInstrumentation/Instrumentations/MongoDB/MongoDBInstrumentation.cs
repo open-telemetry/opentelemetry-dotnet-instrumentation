@@ -15,7 +15,7 @@ internal static class MongoDBInstrumentation
         new ActivitySourceOptions("OpenTelemetry.AutoInstrumentation.MongoDB")
         {
             Version = AutoInstrumentationVersion.Version,
-            TelemetrySchemaUrl = DatabaseAttributes.SchemaUrl
+            TelemetrySchemaUrl = GenericAttributes.SchemaUrl1390
         });
 
     public static Activity? StartDatabaseActivity(
