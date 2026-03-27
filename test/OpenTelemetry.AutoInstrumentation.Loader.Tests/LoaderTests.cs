@@ -6,21 +6,14 @@ using Xunit.Abstractions;
 
 namespace OpenTelemetry.AutoInstrumentation.Loader.Tests;
 
-public class LoaderTests
+public class LoaderTests(ITestOutputHelper testOutput)
 {
-    private readonly ITestOutputHelper _testOutput;
-
-    public LoaderTests(ITestOutputHelper testOutput)
-    {
-        _testOutput = testOutput;
-    }
-
     [Fact]
     public void Ctor_LoadsManagedAssembly()
     {
         var directory = Directory.GetCurrentDirectory();
         var profilerDirectory = Path.Combine(directory, "..", "Profiler");
-        _testOutput.WriteLine($"profilerDirectory={profilerDirectory}");
+        testOutput.WriteLine($"profilerDirectory={profilerDirectory}");
 
 #if NETFRAMEWORK
         var srcDir = Path.Combine(profilerDirectory, "net462");
@@ -38,15 +31,13 @@ public class LoaderTests
         Environment.SetEnvironmentVariable("OTEL_LOG_LEVEL", "debug");
         Environment.SetEnvironmentVariable("OTEL_DOTNET_AUTO_HOME", profilerDirectory);
 
-        var exception = Record.Exception(() => new AutoInstrumentation.Loader.Loader());
+        var exception = Record.Exception(() => new Loader());
 
         // That means the assembly was loaded successfully and Initialize method was called.
         Assert.Null(exception);
 
-        var openTelemetryAutoInstrumentationAssembly = AppDomain.CurrentDomain.GetAssemblies()
-            .Select(a => a.FullName)
-            .FirstOrDefault(n => n != null && n.StartsWith("OpenTelemetry.AutoInstrumentation,", StringComparison.Ordinal));
-
-        Assert.NotNull(openTelemetryAutoInstrumentationAssembly);
+        Assert.Contains(
+            AppDomain.CurrentDomain.GetAssemblies(),
+            it => it.FullName?.StartsWith("OpenTelemetry.AutoInstrumentation,", StringComparison.Ordinal) == true);
     }
 }

@@ -79,6 +79,7 @@ internal static class Constants
 
     public static class EnvironmentVariables
     {
+        // Profiler related environment variables
         public const string ProfilerEnabledVariable = "CORECLR_ENABLE_PROFILING";
         public const string ProfilerIdVariable = "CORECLR_PROFILER";
         public const string ProfilerPathVariable = "CORECLR_PROFILER_PATH";
