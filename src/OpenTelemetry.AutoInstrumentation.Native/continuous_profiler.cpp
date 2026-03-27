@@ -1283,8 +1283,7 @@ AllocationSubSampler::AllocationSubSampler(uint32_t targetPerCycle_, uint32_t se
     , startupMinSampleSpacingMillis(
           targetPerCycle > 0 ? std::chrono::milliseconds(std::chrono::seconds(secondsPerCycle)) / targetPerCycle
                              : std::chrono::milliseconds(0))
-    , startupNextSampleAllowedAtMillis(
-          std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()))
+    , startupNextSampleAllowedAtMillis(std::chrono::steady_clock::now())
     , nextCycleStartMillis(
           std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()))
     , sampleLock()
@@ -1320,6 +1319,7 @@ bool AllocationSubSampler::ShouldSample()
 
     auto now =
         std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch());
+    auto steadyNow = std::chrono::steady_clock::now();
     if (now > nextCycleStartMillis)
     {
         AdvanceCycle(now);
@@ -1333,7 +1333,7 @@ bool AllocationSubSampler::ShouldSample()
     // During the first startup cycles, avoid a burst where the first targetPerCycle allocations
     // are sampled almost immediately. Keeping minimum spacing between accepted samples prevents early
     // buffer pressure while preserving the target upper bound for the cycle.
-    if (startupCyclesRemaining > 0 && std::chrono::steady_clock::now() < startupNextSampleAllowedAtMillis)
+    if (startupCyclesRemaining > 0 && steadyNow < startupNextSampleAllowedAtMillis)
     {
         return false;
     }
@@ -1347,7 +1347,7 @@ bool AllocationSubSampler::ShouldSample()
         sampledThisCycle++;
         if (startupCyclesRemaining > 0 && startupMinSampleSpacingMillis.count() > 0)
         {
-            startupNextSampleAllowedAtMillis = std::chrono::steady_clock::now() + startupMinSampleSpacingMillis;
+            startupNextSampleAllowedAtMillis = steadyNow + startupMinSampleSpacingMillis;
         }
     }
     return sample;
@@ -1643,3 +1643,4 @@ extern "C"
         selective_sampling_trace_map.erase(context);
     }
 }
+
