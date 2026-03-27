@@ -1301,7 +1301,7 @@ void AllocationSubSampler::AdvanceCycle(std::chrono::milliseconds now)
     sampledThisCycle     = 0;
     if (startupCyclesRemaining > 0)
     {
-        startupCyclesRemaining--;
+        --startupCyclesRemaining;
     }
 }
 
