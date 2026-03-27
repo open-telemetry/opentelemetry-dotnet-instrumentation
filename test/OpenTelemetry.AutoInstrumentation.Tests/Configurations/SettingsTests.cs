@@ -1,6 +1,7 @@
 // Copyright The OpenTelemetry Authors
 // SPDX-License-Identifier: Apache-2.0
 
+using System.Collections.Specialized;
 using System.Globalization;
 using System.Reflection;
 using OpenTelemetry.AutoInstrumentation.Configurations;
@@ -522,6 +523,136 @@ public sealed class SettingsTests : IDisposable
         Assert.Equal([expectedResourceDetector], settings.EnabledDetectors);
     }
 
+    [Fact]
+    internal void ResourceSettings_LoadEnvVar_ReadsServiceNameFromConfigurationSource()
+    {
+        const string appSettingsValue = "service-name-from-app-settings";
+
+        var configuration = new Configuration(
+            false,
+            new NameValueConfigurationSource(false, new NameValueCollection
+            {
+                { ConfigurationKeys.ServiceName, appSettingsValue }
+            }));
+        var settings = new ResourceSettings();
+
+        settings.LoadEnvVar(configuration);
+
+        var resource = Assert.Single(settings.Resources);
+        Assert.Equal(Constants.ResourceAttributes.AttributeServiceName, resource.Key);
+        Assert.Equal(appSettingsValue, resource.Value);
+    }
+
+    [Fact]
+    internal void ResourceSettings_LoadEnvVar_AppSettingsSourceTakesPriorityOverEnvVarSource()
+    {
+        const string envVarValue = "service-name-from-env-var";
+        const string appSettingsValue = "service-name-from-app-settings";
+
+        try
+        {
+            Environment.SetEnvironmentVariable(ConfigurationKeys.ServiceName, envVarValue);
+            var configuration = new Configuration(
+                false,
+                new NameValueConfigurationSource(false, new NameValueCollection
+                {
+                    { ConfigurationKeys.ServiceName, appSettingsValue }
+                }),
+                new EnvironmentConfigurationSource(false));
+            var settings = new ResourceSettings();
+
+            settings.LoadEnvVar(configuration);
+
+            var resource = Assert.Single(settings.Resources);
+            Assert.Equal(Constants.ResourceAttributes.AttributeServiceName, resource.Key);
+            Assert.Equal(appSettingsValue, resource.Value);
+        }
+        finally
+        {
+            Environment.SetEnvironmentVariable(ConfigurationKeys.ServiceName, null);
+        }
+    }
+
+    [Fact]
+    internal void ResourceSettings_LoadEnvVar_ServiceNameFallsBackToLaterSource()
+    {
+        var configuration = new Configuration(
+            false,
+            new NameValueConfigurationSource(false, []),
+            new NameValueConfigurationSource(false, new NameValueCollection
+            {
+                { ConfigurationKeys.ServiceName, "service-name-from-fallback-source" }
+            }));
+        var settings = new ResourceSettings();
+
+        settings.LoadEnvVar(configuration);
+
+        var resource = Assert.Single(settings.Resources);
+        Assert.Equal(Constants.ResourceAttributes.AttributeServiceName, resource.Key);
+        Assert.Equal("service-name-from-fallback-source", resource.Value);
+    }
+
+    [Fact]
+    internal void ResourceSettings_LoadEnvVar_ServiceNameOverridesServiceNameInResourceAttributes()
+    {
+        var configuration = new Configuration(
+            false,
+            new NameValueConfigurationSource(false, new NameValueCollection
+            {
+                { ConfigurationKeys.ResourceAttributes, "service.name=resource-attributes,deployment.environment=prod" },
+                { ConfigurationKeys.ServiceName, "service-name-setting" }
+            }));
+        var settings = new ResourceSettings();
+
+        settings.LoadEnvVar(configuration);
+
+        var resources = settings.Resources.ToDictionary(kv => kv.Key, kv => kv.Value);
+
+        Assert.Equal("service-name-setting", resources[Constants.ResourceAttributes.AttributeServiceName]);
+        Assert.Equal("prod", resources["deployment.environment"]);
+        Assert.Equal(2, resources.Count);
+    }
+
+    [Fact]
+    internal void ResourceSettings_LoadEnvVar_DecodesUrlEncodedResourceAttributeValues()
+    {
+        var configuration = new Configuration(
+            false,
+            new NameValueConfigurationSource(false, new NameValueCollection
+            {
+                { ConfigurationKeys.ResourceAttributes, "service.namespace=payments%2Fapi" }
+            }));
+        var settings = new ResourceSettings();
+
+        settings.LoadEnvVar(configuration);
+
+        var resource = Assert.Single(settings.Resources);
+        Assert.Equal("service.namespace", resource.Key);
+        Assert.Equal("payments/api", resource.Value);
+    }
+
+#if NETFRAMEWORK
+    [Fact]
+    internal void AppSettingsConfigurationSource_ReturnsValueForPresentKey()
+    {
+        var appSettings = new NameValueCollection
+        {
+            { ConfigurationKeys.ServiceName, "my-service" }
+        };
+        var source = new AppSettingsConfigurationSource(false, appSettings);
+
+        Assert.Equal("my-service", source.GetString(ConfigurationKeys.ServiceName));
+    }
+
+    [Fact]
+    internal void AppSettingsConfigurationSource_ReturnsNullForAbsentKey()
+    {
+        var source = new AppSettingsConfigurationSource(false, []);
+
+        Assert.Null(source.GetString(ConfigurationKeys.ServiceName));
+    }
+#endif
+
     private static void ClearEnvVars()
     {
         Environment.SetEnvironmentVariable(ConfigurationKeys.Logs.LogsInstrumentationEnabled, null);
@@ -548,6 +679,7 @@ public sealed class SettingsTests : IDisposable
         }
 
         Environment.SetEnvironmentVariable(ConfigurationKeys.Metrics.Exporter, null);
+        Environment.SetEnvironmentVariable(ConfigurationKeys.Metrics.AdditionalSources, null);
         Environment.SetEnvironmentVariable(ConfigurationKeys.Traces.TracesInstrumentationEnabled, null);
 #if NET
         foreach (var tracerInstrumentation in Enum.GetValues<TracerInstrumentation>())
@@ -559,9 +691,12 @@ public sealed class SettingsTests : IDisposable
         }
 
         Environment.SetEnvironmentVariable(ConfigurationKeys.Traces.Exporter, null);
+        Environment.SetEnvironmentVariable(ConfigurationKeys.Traces.AdditionalLegacySources, null);
+        Environment.SetEnvironmentVariable(ConfigurationKeys.Traces.AdditionalSources, null);
         Environment.SetEnvironmentVariable(AutoOtlpDefinitions.DefaultProtocolEnvVarName, null);
         Environment.SetEnvironmentVariable(ConfigurationKeys.FlushOnUnhandledException, null);
         Environment.SetEnvironmentVariable(ConfigurationKeys.ResourceDetectorEnabled, null);
+        Environment.SetEnvironmentVariable(ConfigurationKeys.ProviderPlugins, null);
 
         Environment.SetEnvironmentVariable(ConfigurationKeys.ResourceDetectorEnabled, null);
 #if NET
