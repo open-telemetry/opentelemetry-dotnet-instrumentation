@@ -541,6 +541,11 @@ void NamingHelper::ClearFunctionIdentifierCache()
 [[nodiscard]] FunctionIdentifier NamingHelper::ResolveManagedFunctionIdentifier(
     const FunctionID func_id, const COR_PRF_FRAME_INFO frame_info) const
 {
+    if (func_id == 0)
+    {
+        constexpr auto zero_valid_function_identifier = FunctionIdentifier{0, 0, true};
+        return zero_valid_function_identifier;
+    }
     ModuleID      module_id      = 0;
     mdToken       function_token = 0;
     const HRESULT hr =
