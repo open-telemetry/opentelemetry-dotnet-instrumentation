@@ -3,7 +3,7 @@
 #ifndef OTEL_PROFILER_STACK_CAPTURE_H_
 #define OTEL_PROFILER_STACK_CAPTURE_H_
 
-#if defined(_WIN32) && defined(_M_AMD64)
+#if defined(_WIN32) && (defined(_M_AMD64) || defined(_M_IX86))
 
 #include <functional>
 #include <memory>
@@ -51,6 +51,22 @@ namespace ProfilerStackCapture {
             void* clientData,
             BYTE* context,
             ULONG contextSize) = 0;
+
+        HRESULT DoStackSnapshotUnseeded(ThreadID threadId, void* clientData)
+        {
+            return DoStackSnapshot(threadId,
+                continuous_profiler::IStackCaptureStrategy::StackSnapshotCallbackDefault,
+                COR_PRF_SNAPSHOT_DEFAULT, clientData, nullptr, 0);
+        }
+
+        HRESULT DoStackSnapshotSeeded(ThreadID threadId, void* clientData, CONTEXT& seedContext)
+        {
+            return DoStackSnapshot(threadId,
+                continuous_profiler::IStackCaptureStrategy::StackSnapshotCallbackDefault,
+                COR_PRF_SNAPSHOT_DEFAULT, clientData,
+                reinterpret_cast<BYTE*>(&seedContext), sizeof(CONTEXT));
+        }
+
         virtual HRESULT GetFunctionFromIP(LPCBYTE ip, FunctionID* functionId) = 0;
     };
 
@@ -147,7 +163,8 @@ namespace ProfilerStackCapture {
         HRESULT STDMETHODCALLTYPE ThreadNameChanged(ThreadID threadId, ULONG cchName, WCHAR name[]) override;
         
     private:
-        HRESULT CaptureStackSeeded(ThreadID managedThreadId, HANDLE threadHandle, StackCaptureContext* stackCaptureContext);
+        HRESULT CaptureStack(ThreadID managedThreadId, HANDLE threadHandle, StackCaptureContext* stackCaptureContext);
+        HRESULT CaptureStackUnseeded(ThreadID managedThreadId, StackCaptureContext* stackCaptureContext);
         bool SafetyProbe(const CanaryThreadInfo& canaryInfo);
         
         std::unique_ptr<IProfilerApi> profilerApi_;
@@ -166,5 +183,5 @@ namespace ProfilerStackCapture {
 
 } // namespace ProfilerStackCapture
 
-#endif // defined(_WIN32) && defined(_M_AMD64)
+#endif // defined(_WIN32) && (defined(_M_AMD64) || defined(_M_IX86))
 #endif // OTEL_PROFILER_STACK_CAPTURE_H_

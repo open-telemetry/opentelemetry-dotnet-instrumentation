@@ -1,13 +1,12 @@
 // Copyright The OpenTelemetry Authors
 // SPDX-License-Identifier: Apache-2.0
 
-#if defined(_WIN32) && defined(_M_AMD64)
+#if defined(_WIN32) && (defined(_M_AMD64) || defined(_M_IX86))
 #include "profiler_stack_capture.h"
 
 #include <stdexcept>
 #include <algorithm>
 #include <cassert>
-#include <dbghelp.h>
 #include <atlbase.h>
 #include <atlcom.h>
 #include "logger.h"
@@ -16,72 +15,17 @@
 #define DECLSPEC_IMPORT __declspec(dllimport)
 #endif
 
+#if defined(_M_AMD64)
 extern "C"
 {
-    DECLSPEC_IMPORT PRUNTIME_FUNCTION NTAPI  RtlLookupFunctionEntry(DWORD64               ControlPc,
-                                                                    PDWORD64              ImageBase,
-                                                                    PUNWIND_HISTORY_TABLE HistoryTable);
-    DECLSPEC_IMPORT PEXCEPTION_ROUTINE NTAPI RtlVirtualUnwind(DWORD                          HandlerType,
-                                                              DWORD64                        ImageBase,
-                                                              DWORD64                        ControlPc,
-                                                              PRUNTIME_FUNCTION              FunctionEntry,
-                                                              PCONTEXT                       ContextRecord,
-                                                              PVOID*                         HandlerData,
-                                                              PDWORD64                       EstablisherFrame,
-                                                              PKNONVOLATILE_CONTEXT_POINTERS ContextPointers);
+    DECLSPEC_IMPORT PRUNTIME_FUNCTION NTAPI RtlLookupFunctionEntry(DWORD64               ControlPc,
+                                                                   PDWORD64              ImageBase,
+                                                                   PUNWIND_HISTORY_TABLE HistoryTable);
 }
+#endif // defined(_M_AMD64)
 
 namespace ProfilerStackCapture
 {
-
-// ========================================================================================
-// SEH-Protected Helper Functions
-// ========================================================================================
-
-/// @brief Helper function for reading return address (SEH-protected, no C++ objects)
-static bool ReadReturnAddressFromStack(DWORD64 rsp, DWORD64* pReturnAddress)
-{
-    __try
-    {
-        *pReturnAddress = *reinterpret_cast<PULONG64>(rsp);
-        return true;
-    }
-    __except (EXCEPTION_EXECUTE_HANDLER)
-    {
-        trace::Logger::Debug("[StackCapture] ReadReturnAddressFromStack - Access violation reading RSP=0x", std::hex,
-                             rsp, std::dec, ", ExceptionCode=0x", std::hex, GetExceptionCode(), std::dec);
-        return false;
-    }
-}
-
-/// @brief Helper function for RtlVirtualUnwind (SEH-protected, no C++ objects)
-static bool SafeRtlVirtualUnwind(DWORD64           imageBase,
-                                 DWORD64           controlPc,
-                                 PRUNTIME_FUNCTION runtimeFunction,
-                                 PCONTEXT          context,
-                                 PULONG64          pEstablisherFrame)
-{
-    __try
-    {
-        PVOID   handlerData = nullptr;
-        ULONG64 eFrame      = 0;
-        RtlVirtualUnwind(0, imageBase, controlPc, runtimeFunction, context, &handlerData, &eFrame, nullptr);
-
-        if (pEstablisherFrame)
-        {
-            *pEstablisherFrame = eFrame;
-        }
-
-        return true;
-    }
-    __except (EXCEPTION_EXECUTE_HANDLER)
-    {
-        trace::Logger::Debug("[StackCapture] SafeRtlVirtualUnwind - RtlVirtualUnwind failed. ImageBase=0x", std::hex,
-                             imageBase, ", ControlPC=0x", controlPc, std::dec, ", ExceptionCode=0x", std::hex,
-                             GetExceptionCode(), std::dec);
-        return false;
-    }
-}
 
 /// @brief Helper for safety probe worker (SEH-protected, no std::unique_ptr)
 static HRESULT ExecuteProbeOperations(IProfilerApi* profilerApi, ThreadID canaryManagedId, const CONTEXT& canaryCtx)
@@ -98,10 +42,12 @@ static HRESULT ExecuteProbeOperations(IProfilerApi* profilerApi, ThreadID canary
             delete testAlloc;
             testAlloc = nullptr;
         }
+#if defined(_M_AMD64)
         // Test 2: RTL function lookup
         UNWIND_HISTORY_TABLE historyTable = {};
         DWORD64              imageBase    = 0;
         RtlLookupFunctionEntry(canaryCtx.Rip, &imageBase, &historyTable);
+#endif // defined(_M_AMD64)
 
         // Test 3: DoStackSnapshot
         auto probeCallback = [](FunctionID, UINT_PTR, COR_PRF_FRAME_INFO, ULONG32, BYTE[], void*) -> HRESULT
@@ -114,7 +60,12 @@ static HRESULT ExecuteProbeOperations(IProfilerApi* profilerApi, ThreadID canary
     {
         DWORD exceptionCode = GetExceptionCode();
         trace::Logger::Debug("[StackCapture] ExecuteProbeOperations - Exception during safety tests. ExceptionCode=0x",
-                             std::hex, exceptionCode, std::dec, ", RIP=0x", canaryCtx.Rip);
+                             std::hex, exceptionCode, std::dec
+#if defined(_M_AMD64)
+                             ,
+                             ", RIP=0x", canaryCtx.Rip
+#endif
+        );
         if (testAlloc)
         {
             delete testAlloc;
@@ -125,104 +76,6 @@ static HRESULT ExecuteProbeOperations(IProfilerApi* profilerApi, ThreadID canary
     // If stack snapshot was aborted, treat as success for probe purposes, as we explicitly
     // short-circuited it from the callback, prompting CORPROF_E_STACKSNAPSHOT_ABORTED
     return result == CORPROF_E_STACKSNAPSHOT_ABORTED ? S_OK : result;
-}
-
-// PrepareContextForSnapshot - walks native stack to find managed frame and prepares context for DoStackSnapshot
-static HRESULT PrepareContextForSnapshot(ThreadID           managedThreadId,
-                                         HANDLE             threadHandle,
-                                         CONTEXT*           pContext,
-                                         IProfilerApi*      profilerApi,
-                                         std::atomic<bool>* pStopRequested)
-{
-    const int MAX_WALK_EVER = 10000;
-    DWORD64   origRSP       = 0;
-
-    // Quick check: are we already at managed code?
-    FunctionID fid = 0;
-    HRESULT    hr  = profilerApi->GetFunctionFromIP(reinterpret_cast<LPCBYTE>(pContext->Rip), &fid);
-    if (SUCCEEDED(hr) && fid != 0)
-    {
-        return S_OK;
-    }
-
-    // Walk native frames to find managed code
-    for (int walkCount = 0; walkCount < MAX_WALK_EVER; ++walkCount)
-    {
-        if (pStopRequested && pStopRequested->load())
-        {
-            return E_ABORT;
-        }
-
-        // Check for stack progress
-        if (origRSP != 0 && pContext->Rsp <= origRSP)
-        {
-            break;
-        }
-        origRSP = pContext->Rsp;
-
-        // Check for end of stack
-        if (pContext->Rip == 0)
-        {
-            break;
-        }
-
-        // Try to find runtime function for current RIP
-        UNWIND_HISTORY_TABLE historyTable    = {};
-        DWORD64              imageBase       = 0;
-        PRUNTIME_FUNCTION    runtimeFunction = RtlLookupFunctionEntry(pContext->Rip, &imageBase, &historyTable);
-
-        DWORD64 instructionPointer;
-
-        if (!runtimeFunction)
-        {
-            // Leaf function - read return address from stack
-            DWORD64 returnAddress = 0;
-            if (!ReadReturnAddressFromStack(pContext->Rsp, &returnAddress))
-            {
-                return E_FAIL;
-            }
-            // no runtime function,  manually unwind to previous frame, adjust the RIP and RSP fields
-            pContext->Rip = returnAddress;
-            pContext->Rsp += sizeof(DWORD64);
-            instructionPointer = returnAddress;
-        }
-        else
-        {
-            // Has unwind info - use function begin address (critical for CLR detection)
-            instructionPointer = imageBase + runtimeFunction->BeginAddress;
-
-            // Unwind to previous frame, updates Rip and Rsp fields, we have runtimeFunction to guide us
-            if (!SafeRtlVirtualUnwind(imageBase, pContext->Rip, runtimeFunction, pContext, nullptr))
-            {
-                return E_FAIL;
-            }
-        }
-        // Virtual unwind traverses frames, so after unwind, RIP points to caller's instruction
-        // For leaf functions, we manually set RIP to return address
-        // Illustration: we use virtual unwind or manual stack read to move from:
-        // SleepEx() -> CLR transition stub -> YourApp.DoWork()
-        // Before:
-        // kernel32.dll!SleepEx ->RIP might point to this (native code)
-        // |_CLR transition stub
-        //   |_YourApp.DoWork() -> We want to start HERE in managed code, not in SleepEx or the transition stub
-        // After: RIP is adjusted to point to the managed frame - YourApp.DoWork()
-
-        // Check if this instruction pointer is managed
-        hr = profilerApi->GetFunctionFromIP(reinterpret_cast<LPCBYTE>(instructionPointer), &fid);
-        if (SUCCEEDED(hr) && fid != 0)
-        {
-            // Update context to point to this managed frame's beginning
-            pContext->Rip = instructionPointer; // this is the seed for DoStackSnapshot
-            return S_OK;
-        }
-    }
-
-    // Exhausted all frames without finding managed code, let us log at debug level to avoid noise
-    // failure to find managed frame is expected in some scenarios (e.g., native threads)
-    trace::Logger::Debug(
-        "[StackCapture] PrepareContextForSnapshot - Unable to locate managed frame in stack walk for ThreadID=",
-        managedThreadId);
-    return E_FAIL;
 }
 
 // InvocationQueue implementation
@@ -557,53 +410,28 @@ bool StackCaptureEngine::SafetyProbe(const CanaryThreadInfo& canaryInfo)
     return true;
 }
 
-HRESULT StackCaptureEngine::CaptureStackSeeded(ThreadID             managedThreadId,
-                                               HANDLE               threadHandle,
-                                               StackCaptureContext* stackCaptureContext)
+HRESULT StackCaptureEngine::CaptureStackUnseeded(ThreadID managedThreadId, StackCaptureContext* stackCaptureContext)
 {
-    // Try unseeded first - fast path for threads already in managed code
     stackCaptureContext->clientParams->threadId = managedThreadId;
-    HRESULT hr                                  = profilerApi_->DoStackSnapshot(managedThreadId,
-                                                                                continuous_profiler::IStackCaptureStrategy::StackSnapshotCallbackDefault,
-                                                                                COR_PRF_SNAPSHOT_DEFAULT, stackCaptureContext->clientParams,
-                                                                                nullptr, // No seed
-                                                                                0);
+    return profilerApi_->DoStackSnapshotUnseeded(managedThreadId, stackCaptureContext->clientParams);
+}
+
+HRESULT StackCaptureEngine::CaptureStack(ThreadID             managedThreadId,
+                                         HANDLE               threadHandle,
+                                         StackCaptureContext* stackCaptureContext)
+{
+    // Unseeded DoStackSnapshot: works when the thread is in managed code.
+    // Threads stuck in native code will fail and be skipped.
+    HRESULT hr = CaptureStackUnseeded(managedThreadId, stackCaptureContext);
 
     if (SUCCEEDED(hr))
     {
         trace::Logger::Debug("[StackCapture] Unseeded capture succeeded. ThreadID=", managedThreadId);
-        return hr;
-    }
-
-    trace::Logger::Debug("[StackCapture] Unseeded failed (0x", std::hex, hr, "), attempting seeded capture...");
-
-    // Fallback: PrepareContext will check if we're at managed code before walking
-    CONTEXT context      = {};
-    context.ContextFlags = CONTEXT_FULL;
-
-    if (!GetThreadContext(threadHandle, &context))
-    {
-        return E_FAIL;
-    }
-    hr = PrepareContextForSnapshot(managedThreadId, threadHandle, &context, profilerApi_.get(), &stopRequested_);
-    if (FAILED(hr))
-    {
-        return hr;
-    }
-
-    hr = profilerApi_->DoStackSnapshot(managedThreadId,
-                                       continuous_profiler::IStackCaptureStrategy::StackSnapshotCallbackDefault,
-                                       COR_PRF_SNAPSHOT_DEFAULT, stackCaptureContext->clientParams,
-                                       reinterpret_cast<BYTE*>(&context), sizeof(CONTEXT));
-
-    if (FAILED(hr))
-    {
-        trace::Logger::Debug("[StackCapture] Seeded capture failed. HRESULT=0x", std::hex, hr,
-                             ", ThreadID=", managedThreadId);
     }
     else
     {
-        trace::Logger::Debug("[StackCapture] Seeded capture succeeded. ThreadID=", managedThreadId);
+        trace::Logger::Debug("[StackCapture] Unseeded capture failed (0x", std::hex, hr, std::dec,
+                             "). ThreadID=", managedThreadId);
     }
 
     return hr;
@@ -669,7 +497,7 @@ HRESULT StackCaptureEngine::CaptureStacks(std::unordered_set<ThreadID> const&   
             }
             clientData->threadId = managedId;
             StackCaptureContext stackCaptureContext{0, &stopRequested_, clientData};
-            CaptureStackSeeded(managedId, targetThread.GetHandle(), &stackCaptureContext);
+            CaptureStack(managedId, targetThread.GetHandle(), &stackCaptureContext);
         }
         catch (const std::exception& ex)
         {
@@ -681,4 +509,4 @@ HRESULT StackCaptureEngine::CaptureStacks(std::unordered_set<ThreadID> const&   
 }
 
 } // namespace ProfilerStackCapture
-#endif // defined(_WIN32) && defined(_M_AMD64)
+#endif // defined(_WIN32) && (defined(_M_AMD64) || defined(_M_IX86))
