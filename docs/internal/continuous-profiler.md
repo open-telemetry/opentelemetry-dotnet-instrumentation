@@ -4,7 +4,9 @@
 > Continuous profiler is an experimental feature. It will be subject to change,
 > when <https://github.com/open-telemetry/oteps/pull/239> or <https://github.com/open-telemetry/oteps/pull/237>
 > are merged.
-> When this doc refers to .NET Framework supportability, it refers to Windows x86 and x64; ARM64 is not supported by otel.
+> When this doc refers to .NET Framework supportability, it refers
+> to Windows x86 and x64; ARM64 is not supported by
+> OpenTelemetry .NET Automatic Instrumentation.
 
 The continuous profiler collects stack traces from the processes for two types of
 events:
@@ -34,16 +36,15 @@ sampler uses two independent buffers to store samples alternately.
 ### Requirements
 
 * .NET 8.0 or higher, OR
-* .NET Framework 4.6.2 or higher (Windows)
+* .NET Framework 4.6.2 or higher
 
 ### .NET Framework support
 
-
-Thread sampling works on .NET Framework 4.6.2+ (Windows) and requires no extra plugin configuration 
-beyond the normal plugin contract. Allocation sampling is not supported on .NET Framework. 
-Internally the native stack-walking strategy differs on .NET Framework, but exported data format 
-and plugin contract remain the same.
-
+Thread sampling works on .NET Framework 4.6.2+ (Windows) and requires no extra
+plugin configuration beyond the normal plugin contract. Allocation sampling is
+not supported on .NET Framework. Internally the native stack-walking strategy
+differs on .NET Framework, but exported data format and plugin contract remain
+the same.
 
 ### Enable the profiler
 
@@ -108,7 +109,6 @@ You can also look for:
 ```
 
 If you see these log messages, check the exporter implementation.
-
 
 #### Can I tell the sampler to ignore some threads?
 
@@ -196,9 +196,11 @@ and exports in the way defined by the plugin.
 * .NET 8.0 or higher
 
 > [!NOTE]
-> Allocation sampling is not supported on .NET Framework. The runtime does not include the low-level profiling 
-> APIs needed to observe individual memory allocations. The settings related to allocation sampling in the plugin configuration
-> will be ignored when running on .NET Framework, but the same plugin can be used for both .NET and .NET Framework without modification.
+> Allocation sampling is not supported on .NET Framework. The runtime does not
+> include the low-level profiling APIs needed to observe individual memory
+> allocations. The settings related to allocation sampling in the plugin configuration
+> will be ignored when running on .NET Framework, but the same plugin can be
+> used for both .NET and .NET Framework without modification.
 
 ### Enable the profiler
 
@@ -260,13 +262,12 @@ If the escape hatch activates, it logs the following message:
 If you see these log messages, check the configuration and communication layer
 between your process and the Collector.
 
-
 ## Feature support matrix
 
-| Feature             | .NET 8.0+    | .NET Framework 4.6.2+                  |
-| ------------------- | ------------ | -------------------------------------- |
-| Thread sampling     | ✅ Supported | ✅ Supported (Windows)     |
-| Allocation sampling | ✅ Supported | ❌ Not supported                       |
+| Feature             | .NET 8.0+ | .NET Framework 4.6.2+ |
+|---------------------|-----------|-----------------------|
+| Thread sampling     | Supported | Supported             |
+| Allocation sampling | Supported | Not supported         |
 
 ## Plugin
 

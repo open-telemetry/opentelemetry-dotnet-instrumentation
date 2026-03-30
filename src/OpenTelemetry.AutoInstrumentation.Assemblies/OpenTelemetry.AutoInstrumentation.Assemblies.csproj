@@ -1,0 +1,36 @@
+﻿<Project>
+  <Import Project="Sdk.props" Sdk="Microsoft.NET.Sdk" />
+  <Import Project="..\CommonExcludedAssets.props" />
+
+  <PropertyGroup>
+    <TargetFrameworks>net8.0;net9.0;net10.0</TargetFrameworks>
+    <TargetFrameworks Condition="'$(OS)' == 'Windows_NT'">$(TargetFrameworks);net462;net47;net471;net472</TargetFrameworks>
+    <DebugType>none</DebugType>
+    <CopyBuildOutputToOutputDirectory>false</CopyBuildOutputToOutputDirectory>
+    <AccelerateBuildsInVisualStudio>false</AccelerateBuildsInVisualStudio>
+    <DisableFastUpToDateCheck>true</DisableFastUpToDateCheck>
+    <CopyBuildOutputToPublishDirectory>false</CopyBuildOutputToPublishDirectory>
+    <PublishDocumentationFile>false</PublishDocumentationFile>
+
+    <DisableTransitiveFrameworkReferences
+      Label="Includes direct dependencies in publish output that would otherwise
+             be excluded if they are part of other dependencies' framework references
+             (e.g., OpenTelemetry => 'Microsoft.Extensions.Configuration',
+                    also in AspNetCoreBootstrapper [FrameworkReference]=> 'Microsoft.AspNetCore.App').
+             Maintaining complete dependency list is crucial for assembly
+             redirection in applications that share these direct dependencies
+             (e.g., Standalone app => 'Microsoft.Extensions.Configuration',
+                    not via [FrameworkReference] 'Microsoft.AspNetCore.App').">true</DisableTransitiveFrameworkReferences>
+
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\OpenTelemetry.AutoInstrumentation\OpenTelemetry.AutoInstrumentation.csproj" />
+  </ItemGroup>
+  <ItemGroup Condition=" '$(TargetFrameworkIdentifier)' != '.NETFramework' ">
+    <ProjectReference Include="..\OpenTelemetry.AutoInstrumentation.Loader\OpenTelemetry.AutoInstrumentation.Loader.csproj" />
+    <ProjectReference Include="..\OpenTelemetry.AutoInstrumentation.AspNetCoreBootstrapper\OpenTelemetry.AutoInstrumentation.AspNetCoreBootstrapper.csproj" />
+    <ProjectReference Include="..\OpenTelemetry.AutoInstrumentation.StartupHook\OpenTelemetry.AutoInstrumentation.StartupHook.csproj" />
+  </ItemGroup>
+  <Import Project="Sdk.targets" Sdk="Microsoft.NET.Sdk" />
+  <Target Name="Compile" />
+</Project>
