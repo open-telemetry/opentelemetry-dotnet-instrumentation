@@ -30,7 +30,8 @@ constexpr auto kSelectiveSamplingMaxAgeMinutes = 15;
 constexpr auto kDefaultSamplePeriod = 10000;
 constexpr auto kMinimumSamplePeriod = 1000;
 
-constexpr auto kDefaultMaxAllocsPerMinute = 200;
+constexpr auto kDefaultMaxAllocsPerMinute    = 200;
+constexpr auto kStartupAllocationPacedCycles = 10;
 
 // FIXME make configurable (hidden)?
 // These numbers were chosen to keep total overhead under 1 MB of RAM in typical cases (name lengths being the biggest
@@ -1278,6 +1279,11 @@ AllocationSubSampler::AllocationSubSampler(uint32_t targetPerCycle_, uint32_t se
     , seenThisCycle(0)
     , sampledThisCycle(0)
     , seenLastCycle(0)
+    , startupCyclesRemaining(kStartupAllocationPacedCycles)
+    , startupMinSampleSpacingMillis(
+          targetPerCycle > 0 ? std::chrono::milliseconds(std::chrono::seconds(secondsPerCycle)) / targetPerCycle
+                             : std::chrono::milliseconds(0))
+    , startupNextSampleAllowedAt(std::chrono::steady_clock::now())
     , nextCycleStartMillis(
           std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()))
     , sampleLock()
@@ -1290,6 +1296,10 @@ void AllocationSubSampler::AdvanceCycle(std::chrono::milliseconds now)
     seenLastCycle        = seenThisCycle;
     seenThisCycle        = 0;
     sampledThisCycle     = 0;
+    if (startupCyclesRemaining > 0)
+    {
+        --startupCyclesRemaining;
+    }
 }
 
 // We want to sample T items out of N per unit time, where N is unknown and may be < T or may be orders
@@ -1309,6 +1319,7 @@ bool AllocationSubSampler::ShouldSample()
 
     auto now =
         std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch());
+    auto steadyNow = std::chrono::steady_clock::now();
     if (now > nextCycleStartMillis)
     {
         AdvanceCycle(now);
@@ -1318,6 +1329,15 @@ bool AllocationSubSampler::ShouldSample()
     {
         return false;
     }
+
+    // During the first startup cycles, avoid a burst where the first targetPerCycle allocations
+    // are sampled almost immediately. Keeping minimum spacing between accepted samples prevents early
+    // buffer pressure while preserving the target upper bound for the cycle.
+    if (startupCyclesRemaining > 0 && steadyNow < startupNextSampleAllowedAt)
+    {
+        return false;
+    }
+
     // roll a [1,lastCycle] die, and if it comes up <= targetPerCycle, it wins
     // But lastCycle could be 0, so normalize that to 1.
     std::uniform_int_distribution<uint32_t> rando(1, std::max(seenLastCycle, (uint32_t)1));
@@ -1325,6 +1345,10 @@ bool AllocationSubSampler::ShouldSample()
     if (sample)
     {
         sampledThisCycle++;
+        if (startupCyclesRemaining > 0 && startupMinSampleSpacingMillis.count() > 0)
+        {
+            startupNextSampleAllowedAt = steadyNow + startupMinSampleSpacingMillis;
+        }
     }
     return sample;
 }
