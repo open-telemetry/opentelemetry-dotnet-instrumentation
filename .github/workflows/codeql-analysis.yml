@@ -63,7 +63,7 @@ jobs:
 
     # Initializes the CodeQL tools for scanning.
     - name: Initialize CodeQL
-      uses: github/codeql-action/init@0d579ffd059c29b07949a3cce3983f0780820c98 # tag: v4.32.6
+      uses: github/codeql-action/init@b8bb9f28b8d3f992092362369c57161b755dea45 # tag: v4.35.0
       with:
         languages: ${{ matrix.language }}
         build-mode: ${{ matrix.build-mode }}
@@ -80,7 +80,7 @@ jobs:
         dotnet-version: | 
           8.0.419
           9.0.312
-          10.0.200
+          10.0.201
 
     # If the analyze step fails for one of the languages you are analyzing with
     # "We were unable to automatically build your code", modify the matrix above
@@ -93,6 +93,6 @@ jobs:
       run: ./build.cmd BuildTracer
 
     - name: Perform CodeQL Analysis
-      uses: github/codeql-action/analyze@0d579ffd059c29b07949a3cce3983f0780820c98 # tag: v4.32.6
+      uses: github/codeql-action/analyze@b8bb9f28b8d3f992092362369c57161b755dea45 # tag: v4.35.0
       with:
         category: "/language:${{matrix.language}}"
