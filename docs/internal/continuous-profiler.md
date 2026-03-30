@@ -51,6 +51,7 @@ Implement custom plugin. See plugin section.
 
 ### Configuration defaults
 
+* `threadSamplingEnabled = true;`: Enables thread sampling.
 * `var threadSamplingInterval = 10000u;`: Sampling interval, in milliseconds.
   Lowest recommended value is 1000.
 * `var exportInterval = TimeSpan.FromMilliseconds(500);`: Interval for reading
@@ -147,7 +148,7 @@ This indicates that stack samples are being successfully captured for threads.
 You may see messages like:
 
 ```text
-[debug] [StackCapture] PrepareContextForSnapshot - Unable to locate managed frame in stack walk for ThreadID=...
+[debug] [StackCapture] [debug] [StackCapture] Unseeded capture failed (0x80004005). ThreadID=...
 ```
 
 **This is normal and expected behavior.** This message appears when a thread is

@@ -3,7 +3,7 @@
 #ifndef OTEL_PROFILER_STACK_CAPTURE_H_
 #define OTEL_PROFILER_STACK_CAPTURE_H_
 
-#if defined(_WIN32) && (defined(_M_AMD64) || defined(_M_IX86))
+#if defined(_WIN32)
 
 #include <functional>
 #include <memory>
@@ -57,14 +57,6 @@ namespace ProfilerStackCapture {
             return DoStackSnapshot(threadId,
                 continuous_profiler::IStackCaptureStrategy::StackSnapshotCallbackDefault,
                 COR_PRF_SNAPSHOT_DEFAULT, clientData, nullptr, 0);
-        }
-
-        HRESULT DoStackSnapshotSeeded(ThreadID threadId, void* clientData, CONTEXT& seedContext)
-        {
-            return DoStackSnapshot(threadId,
-                continuous_profiler::IStackCaptureStrategy::StackSnapshotCallbackDefault,
-                COR_PRF_SNAPSHOT_DEFAULT, clientData,
-                reinterpret_cast<BYTE*>(&seedContext), sizeof(CONTEXT));
         }
 
         virtual HRESULT GetFunctionFromIP(LPCBYTE ip, FunctionID* functionId) = 0;
@@ -183,5 +175,5 @@ namespace ProfilerStackCapture {
 
 } // namespace ProfilerStackCapture
 
-#endif // defined(_WIN32) && (defined(_M_AMD64) || defined(_M_IX86))
+#endif // defined(_WIN32)
 #endif // OTEL_PROFILER_STACK_CAPTURE_H_

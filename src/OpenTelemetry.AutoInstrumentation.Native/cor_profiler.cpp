@@ -1186,7 +1186,7 @@ void CorProfiler::InternalAddInstrumentation(WCHAR* id, CallTargetDefinition* it
 
 bool CorProfiler::InitThreadSampler()
 {
-#if defined(_WIN32) && (defined(_M_AMD64) || defined(_M_IX86))
+#if defined(_WIN32)
     // for net fx, the native thread ID is needed by stack capture
     // the profiler callback, ThreadAssignedToOSThread is not invoked for main thread
     // for the following machinery to work,

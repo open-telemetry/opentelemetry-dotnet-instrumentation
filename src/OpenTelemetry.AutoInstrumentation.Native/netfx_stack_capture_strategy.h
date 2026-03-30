@@ -5,7 +5,7 @@
 #define OTEL_PROFILER_NETFX_STACK_CAPTURE_STRATEGY_H_
 // only Windows desktop CLR supports thread suspension and the associated stack capture strategy, so this entire file is
 // ifdef'd out on unsupported platforms
-#if defined(_WIN32) && (defined(_M_AMD64) || defined(_M_IX86))
+#if defined(_WIN32)
 
 #include "stack_capture_strategy.h"
 #include "profiler_stack_capture.h"
@@ -62,5 +62,5 @@ private:
 
 } // namespace continuous_profiler
 
-#endif // defined(_WIN32) && (defined(_M_AMD64) || defined(_M_IX86))
+#endif // defined(_WIN32)
 #endif // OTEL_PROFILER_NETFX_STACK_CAPTURE_STRATEGY_H_

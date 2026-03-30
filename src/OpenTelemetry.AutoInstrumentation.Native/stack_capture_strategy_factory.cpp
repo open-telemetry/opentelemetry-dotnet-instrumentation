@@ -14,11 +14,11 @@ std::unique_ptr<IStackCaptureStrategy> StackCaptureStrategyFactory::Create(ICorP
 
     if (runtimeInfo.is_desktop())
     {
-#if defined(_WIN32) && (defined(_M_AMD64) || defined(_M_IX86))
+#if defined(_WIN32)
         trace::Logger::Info("StackCaptureStrategyFactory: Creating NetFxStackCaptureStrategy");
         return std::make_unique<NetFxStackCaptureStrategy>(profilerInfo);
 #else
-        trace::Logger::Error("StackCaptureStrategyFactory: .NET Framework profiling is only supported on x86 and x64");
+        trace::Logger::Error("StackCaptureStrategyFactory: .NET Framework profiling is only supported Windows");
         return nullptr;
 #endif
     }
