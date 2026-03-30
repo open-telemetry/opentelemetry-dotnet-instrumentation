@@ -113,10 +113,13 @@ public abstract class TestHelper
         SetEnvironmentVariable("OTEL_CONFIG_FILE", Path.Combine(EnvironmentHelper.GetTestApplicationApplicationOutputDirectory(packageVersion), configFileName));
     }
 
-    internal (string StandardOutput, string ErrorOutput, int ProcessId) RunTestApplication(TestSettings? testSettings = null)
+    internal (string StandardOutput, string ErrorOutput, int ProcessId) RunTestApplication(
+        TestSettings? testSettings = null,
+        int expectedExitCode = 0,
+        Action<int, int>? assertExitCode = null)
     {
         // RunTestApplication starts the test application, wait up to DefaultProcessTimeout.
-        // Assertion exceptions are thrown if it timed out or the exit code is non-zero.
+        // Assertion exceptions are thrown if it timed out or the exit code doesn't match expectedExitCode.
         testSettings ??= new();
         using var process = StartTestApplication(testSettings);
         Output.WriteLine($"ProcessName: " + process?.ProcessName);
@@ -137,7 +140,14 @@ public abstract class TestHelper
         Output.WriteResult(helper);
 
         Assert.False(processTimeout, "Test application timed out");
-        Assert.Equal(0, process.ExitCode);
+
+        // TODO I would ideally extend xunit to something like:
+        // `Assert.That(process.ExitCode, Is.EqualTo(expectedExitCode))`.
+        // With this it would be so much easier to pass expectations:
+        // e.g. `constraint: Is.EqualTo(0)`, `constraint: Is.EqualTo(99)`, `constraint: Is.Not.EqualTo(0)`
+        // and then just use it as follows: `Assert.That(process.ExitCode, constraint)`
+        assertExitCode ??= Assert.Equal;
+        assertExitCode(expectedExitCode, process.ExitCode);
 
         return (helper.StandardOutput, helper.ErrorOutput, processId);
     }

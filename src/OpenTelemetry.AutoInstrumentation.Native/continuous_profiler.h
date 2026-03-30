@@ -317,6 +317,9 @@ private:
     uint32_t seenThisCycle;
     uint32_t sampledThisCycle;
     uint32_t seenLastCycle;
+    uint32_t                   startupCyclesRemaining;
+    std::chrono::milliseconds  startupMinSampleSpacingMillis;
+    std::chrono::steady_clock::time_point startupNextSampleAllowedAt;
     std::chrono::milliseconds nextCycleStartMillis;
     std::mutex sampleLock;
     std::default_random_engine rand;
