@@ -33,9 +33,13 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
   - Added the `db.response.status_code` and `error.type` attributes to error spans,
   - Removed the `network.peer.address` and `network.peer.port` attributes.
 - Plugins limited to one instance per type.
+- Improves allocation sampling behavior at startup for
+  a more even distribution of samples.
 
 #### Dependency updates
 
+- Updated [Core components](https://github.com/open-telemetry/opentelemetry-dotnet/blob/main/VERSIONING.md#core-components):
+  [`1.15.1`](https://github.com/open-telemetry/opentelemetry-dotnet/releases/tag/core-1.15.1).
 - Following packages updated
   - `OpenTelemetry.Instrumentation.SqlClient` from `1.15.0` to `1.15.1`.
 - .NET only, following packages updated

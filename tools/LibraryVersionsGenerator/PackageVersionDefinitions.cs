@@ -323,6 +323,30 @@ internal static class PackageVersionDefinitions
         },
         new()
         {
+            IntegrationName = "AssemblyRedirection",
+            NugetPackageName = "System.Diagnostics.DiagnosticSource",
+            TestApplicationName = "TestApplication.AssemblyRedirection",
+            Versions =
+            [
+                // Use case 1: Lower version than instrumentation tool ships
+                // net8.0: 8.0.0 (instrumentation redirects to 10.0.0)
+                // net9.0: 9.0.0 (instrumentation redirects to 10.0.0)
+                // net462: 6.0.0 (instrumentation redirects to 10.0.2)
+                new("8.0.0", supportedTargetFrameworks: ["net8.0"], supportedExecutionFrameworks: ["net8.0"]),
+                new("9.0.0", supportedTargetFrameworks: ["net9.0"], supportedExecutionFrameworks: ["net9.0"]),
+                new("6.0.0", supportedTargetFrameworks: ["net462"], supportedExecutionFrameworks: ["net462"]),
+
+                // Use case 2: Equal to instrumentation tool version
+                // net8.0: 10.0.0 (equal to instrumentation 10.0.0)
+                // net9.0: 10.0.0 (equal to instrumentation 10.0.0)
+                // net462: 10.0.2 (equal to instrumentation 10.0.2)
+                // net10.0: 10.0.2 (framework override to 10.0.0, validates build parameter was respected)
+                new("10.0.0", supportedTargetFrameworks: ["net8.0", "net9.0"], supportedExecutionFrameworks: ["net8.0", "net9.0"]),
+                new("10.0.2", supportedTargetFrameworks: ["net462", "net10.0"], supportedExecutionFrameworks: ["net462", "net10.0"]),
+            ]
+        },
+        new()
+        {
             IntegrationName = "WCFCoreServer",
             NugetPackageName = "CoreWCF.Primitives",
             TestApplicationName = "TestApplication.Wcf.Core",

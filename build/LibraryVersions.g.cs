@@ -205,6 +205,16 @@ public static partial class LibraryVersion
             ]
         },
         {
+            "TestApplication.AssemblyRedirection",
+            [
+                new("8.0.0", supportedFrameworks: [ "net8.0" ]),
+                new("9.0.0", supportedFrameworks: [ "net9.0" ]),
+                new("6.0.0", supportedFrameworks: [ "net462" ]),
+                new("10.0.0", supportedFrameworks: [ "net8.0", "net9.0" ]),
+                new("10.0.2", supportedFrameworks: [ "net462", "net10.0" ]),
+            ]
+        },
+        {
             "TestApplication.Wcf.Core",
             [
                 new("1.8.0", supportedFrameworks: [ "net10.0", "net9.0", "net8.0" ]),
