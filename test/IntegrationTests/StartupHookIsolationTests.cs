@@ -46,7 +46,7 @@ public class StartupHookIsolationTests(ITestOutputHelper output) : TestHelper("S
     [Theory]
     [Trait("Category", "EndToEnd")]
     [MemberData(nameof(IsolationTestData))]
-    public void IsolationRedirects(
+    public void IsolationRedirectsExitCode(
         string entryPointType,
         string arguments,
         int expectedExitCode,
