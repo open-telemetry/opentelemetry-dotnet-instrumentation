@@ -64,7 +64,7 @@ static HRESULT ExecuteProbeOperations(IProfilerApi* profilerApi, ThreadID canary
 #if defined(_M_AMD64)
                              ,
                              ", RIP=0x", canaryCtx.Rip
-#endif
+#endif //_M_AMD64
         );
         if (testAlloc)
         {
