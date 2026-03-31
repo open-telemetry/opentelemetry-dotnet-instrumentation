@@ -115,6 +115,13 @@ jobs:
             ./otel-dotnet-auto-install.sh
             ./OpenTelemetry.DotNet.Auto.psm1
             ./checksums.txt
+            ./bin-alpine-x64/**/*
+            ./bin-alpine-arm64/**/*
+            ./bin-ubuntu-22.04/**/*
+            ./bin-ubuntu-22.04-arm/**/*
+            ./bin-windows-2022/**/*
+            ./bin-macos-14/**/*
+            ./bin-nuget-packages/**/*
 
       - name: Create Release
         env:
