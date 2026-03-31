@@ -4,7 +4,7 @@ header:
   last-updated: '2026-03-31'
   last-reviewed: '2026-03-31'
   project-url: https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation
-  changelog: https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases
+  changelog: https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/blob/main/CHANGELOG.md
   license: https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/blob/main/LICENSE
 
 project-lifecycle:
@@ -21,7 +21,7 @@ contribution-policy:
   accepts-pull-requests: true
   accepts-automated-pull-requests: true
   contributing-policy: https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/blob/main/docs/CONTRIBUTING.md
-  code-of-conduct: https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/blob/main/docs/CODE_OF_CONDUCT.md
+  code-of-conduct: https://github.com/open-telemetry/community/blob/main/code-of-conduct.md
   automated-tools-list:
     - automated-tool: dependabot
       action: allowed
