@@ -1,0 +1,108 @@
+header:
+  schema-version: '1.0.0'
+  expiration-date: '2027-03-31T00:00:00.000Z'
+  last-updated: '2026-03-31'
+  last-reviewed: '2026-03-31'
+  project-url: https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation
+  changelog: https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases
+  license: https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/blob/main/LICENSE
+
+project-lifecycle:
+  status: active
+  bug-fixes-only: false
+  core-maintainers:
+    - https://github.com/nrcventura
+    - https://github.com/Kielek
+    - https://github.com/rajkumar-rangaraj
+    - https://github.com/pellared
+    - https://github.com/zacharycmontoya
+
+contribution-policy:
+  accepts-pull-requests: true
+  accepts-automated-pull-requests: true
+  contributing-policy: https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/blob/main/docs/CONTRIBUTING.md
+  code-of-conduct: https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/blob/main/docs/CODE_OF_CONDUCT.md
+  automated-tools-list:
+    - automated-tool: dependabot
+      action: allowed
+      comment: Automated dependency updates are accepted.
+
+documentation:
+  - https://opentelemetry.io/docs/zero-code/dotnet/
+
+distribution-points:
+  - pkg:nuget/OpenTelemetry.AutoInstrumentation
+  - pkg:nuget/OpenTelemetry.AutoInstrumentation.AspNetCoreBootstrapper
+  - pkg:nuget/OpenTelemetry.AutoInstrumentation.BuildTasks
+  - pkg:nuget/OpenTelemetry.AutoInstrumentation.Loader
+  - pkg:nuget/OpenTelemetry.AutoInstrumentation.Runtime.Managed
+  - pkg:nuget/OpenTelemetry.AutoInstrumentation.Runtime.Native
+  - pkg:nuget/OpenTelemetry.AutoInstrumentation.StartupHook
+
+security-artifacts:
+  threat-model:
+    threat-model-created: false
+    comment: |
+      No formal threat model created yet.
+  self-assessment:
+    self-assessment-created: false
+    comment: |
+      No formal self-assessment yet.
+
+security-contacts:
+  - type: website
+    value: https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/security
+    primary: true
+  - type: email
+    value: security@opentelemetry.io
+    primary: false
+  - type: email
+    value: cncf-opentelemetry-security@lists.cncf.io
+    primary: false
+
+security-testing:
+  - tool-type: sca
+    tool-name: Dependabot
+    tool-version: latest
+    tool-url: https://docs.github.com/en/code-security/dependabot
+    tool-rulesets:
+      - default
+    integration:
+      ad-hoc: false
+      ci: true
+      before-release: true
+    comment: |
+      Automated dependency updates.
+  - tool-type: sast
+    tool-name: CodeQL
+    tool-version: latest
+    tool-url: https://github.com/github/codeql
+    tool-rulesets:
+      - default
+    integration:
+      ad-hoc: false
+      ci: true
+      before-release: true
+    comment: |
+      CodeQL static analysis is run in CI for all commits and pull requests to detect security vulnerabilities.
+
+vulnerability-reporting:
+  accepts-vulnerability-reports: true
+  email-contact: security@opentelemetry.io
+  security-policy: https://opentelemetry.io/docs/security/security-response/
+  bug-bounty-available: false
+  comment: |
+    Report security vulnerabilities via https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/security.
+
+dependencies:
+  third-party-packages: true
+  dependencies-lists:
+    - https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/blob/main/Directory.Packages.props
+  dependencies-lifecycle:
+    policy-url: https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/blob/main/.github/dependabot.yml
+    comment: |
+      Dependencies are kept up to date by Dependabot.
+  env-dependencies-policy:
+    policy-url: https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/blob/main/.github/dependabot.yml
+    comment: |
+      Dependencies are kept up to date by Dependabot.
