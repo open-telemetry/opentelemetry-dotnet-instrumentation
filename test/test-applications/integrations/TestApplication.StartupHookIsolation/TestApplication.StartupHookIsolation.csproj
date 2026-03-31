@@ -1,6 +1,16 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <!-- StartupHook isolation is only supported on .NET (Core), not .NET Framework -->
     <TargetFrameworks>net10.0;net9.0;net8.0</TargetFrameworks>
+
+    <!-- Map DefineConstants for entry point selection -->
+    <DefineConstants Condition="'$(LibraryVersion)'=='Void'">VOID_MAIN</DefineConstants>
+    <DefineConstants Condition="'$(LibraryVersion)'=='Int'">INT_MAIN</DefineConstants>
+    <DefineConstants Condition="'$(LibraryVersion)'=='Task'">TASK_MAIN</DefineConstants>
+    <DefineConstants Condition="'$(LibraryVersion)'=='TaskInt'">TASK_INT_MAIN</DefineConstants>
+    <DefineConstants Condition="'$(LibraryVersion)'=='AsyncTask'">ASYNC_TASK_MAIN</DefineConstants>
+    <DefineConstants Condition="'$(LibraryVersion)'=='AsyncTaskInt'">ASYNC_TASK_INT_MAIN</DefineConstants>
+    <!-- Default if not provided -->
+    <DefineConstants Condition="'$(LibraryVersion)'==''">INT_MAIN</DefineConstants>
   </PropertyGroup>
 </Project>

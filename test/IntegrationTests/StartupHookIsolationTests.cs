@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 #if !NETFRAMEWORK
+using System.Reflection;
 using System.Security.Cryptography;
 using IntegrationTests.Helpers;
 using OpenTelemetry.AutoInstrumentation;
@@ -11,60 +12,89 @@ namespace IntegrationTests;
 
 public class StartupHookIsolationTests(ITestOutputHelper output) : TestHelper("StartupHookIsolation", output)
 {
-    [Fact]
-    [Trait("Category", "EndToEnd")]
-    public void IsolationRedirectsExitCode_Success()
+    public static TheoryData<string, string, int, Action<int, int>, string?, string?> IsolationTestData()
     {
-        // Arrange
-        using var collector = new MockSpansCollector(Output);
-        SetExporter(collector);
-        SetEnvironmentVariable("OTEL_DOTNET_AUTO_TRACES_ADDITIONAL_SOURCES", "StartupHookIsolation.ActivitySource");
-        // Test application sends a span with the name of the AssemblyLoadContext where the executing assembly is loaded.
-        // This serves as a validation of successful isolation
-        collector.Expect("StartupHookIsolation.ActivitySource", span => span.Name == StartupHookConstants.IsolatedAssemblyLoadContextName);
+        Type[] exceptionTypes = [.. typeof(Exception).Assembly.GetTypes()
+            .Where(typeof(Exception).IsAssignableFrom)
+            .Where(t => !t.IsAbstract && t.IsPublic)
+            .Where(t => t.GetConstructor(BindingFlags.Instance | BindingFlags.Public | BindingFlags.ExactBinding, [typeof(string)]) != null)];
 
-        // Run test application and pass expected exit code and expect that the application exits with the same code.
-        // We use random exit code (within expected range [1, 99]) as a validation that isolation do not alter original exit call.
-        // The application should not crash as a validation that the entrypoint is not executed twice
-        var exitCode = RandomNumberGenerator.GetInt32(1, 100);
-        var (standardOutput, _, _) = RunTestApplication(
-            new TestSettings { Arguments = $"{exitCode}" },
-            expectedExitCode: exitCode);
+        string[] entryPoints = ["Void", "Int", "Task", "TaskInt", "AsyncTask", "AsyncTaskInt"];
 
-        // Assert
-        collector.AssertExpectations();
+        var data = new TheoryData<string, string, int, Action<int, int>, string?, string?>();
+        foreach (var it in entryPoints)
+        {
+            // Success case: random exit code for int-returning methods, no args for void-returning methods
+            // We use random exit code (within expected range [1, 99]) as a validation that isolation do not alter original exit call.
+            // For non int-returning entry points, we set exit code to 0 which serves as a validation that the application run in isolated ALC
+            int? exitCode = (it is "Int" or "TaskInt" or "AsyncTaskInt")
+                ? RandomNumberGenerator.GetInt32(1, 100)
+                : null;
+            data.Add(it, $"{exitCode}", exitCode ?? 0, Assert.Equal, null, null);
+
+            // Exception case: randomize exception type from System.Private.CoreLib for better coverage
+            // Expect the same exception to be thrown as a validation that isolation do not hide the original exception
+            // and the application did not crash for other reasosns (e.g. wrong parameters or entrypoint executed twice)
+            var exceptionType = exceptionTypes[RandomNumberGenerator.GetInt32(exceptionTypes.Length)].FullName!;
+            var exceptionMessage = "Test Exception";
+            data.Add(it, $"throw {exceptionType} {exceptionMessage}", 0, Assert.NotEqual, exceptionType, exceptionMessage);
+        }
+
+        return data;
     }
 
-    [Fact]
+    [Theory]
     [Trait("Category", "EndToEnd")]
-    public void IsolationRedirectsExitCode_Throw()
+    [MemberData(nameof(IsolationTestData))]
+    public void IsolationRedirects(
+        string entryPointType,
+        string arguments,
+        int expectedExitCode,
+        Action<int, int> exitCodeAssertion,
+        string? exceptionType,
+        string? exceptionMessage)
     {
         // Arrange
         using var collector = new MockSpansCollector(Output);
         SetExporter(collector);
-        // make sure Otel spans are flushed even when application throws unhandled exception
-        SetEnvironmentVariable("OTEL_DOTNET_AUTO_FLUSH_ON_UNHANDLEDEXCEPTION", "true");
         SetEnvironmentVariable("OTEL_DOTNET_AUTO_TRACES_ADDITIONAL_SOURCES", "StartupHookIsolation.ActivitySource");
+
+        var expectException = exceptionType is not null && exceptionMessage is not null;
+        if (expectException)
+        {
+            // make sure Otel spans are flushed even when application throws unhandled exception
+            SetEnvironmentVariable("OTEL_DOTNET_AUTO_FLUSH_ON_UNHANDLEDEXCEPTION", "true");
+        }
+
         // Test application sends a span with the name of the AssemblyLoadContext where the executing assembly is loaded.
         // This serves as a validation of successful isolation
         collector.Expect("StartupHookIsolation.ActivitySource", span => span.Name == StartupHookConstants.IsolatedAssemblyLoadContextName);
 
-        // Run test application and pass expected exception to be thrown (type and message)
-        // and expect the same exception to be thrown as a validation that isolation do not hide the original exception.
-        // The application should not crash with another exception that serves as a validation that the entry point is not executed twice
+        // Act
         var (standardOutput, errorOutput, _) = RunTestApplication(
-            new TestSettings { Arguments = "throw System.Exception Expected test exception" },
-            expectedExitCode: 0,
-            assertExitCode: Assert.NotEqual);
+            new TestSettings
+            {
+                PackageVersion = entryPointType,
+                Arguments = arguments
+            },
+            expectedExitCode: expectedExitCode,
+            assertExitCode: exitCodeAssertion);
 
         // Assert
         collector.AssertExpectations();
-        Assert.Contains("System.Exception: Expected test exception", errorOutput, StringComparison.CurrentCulture);
+
+        if (expectException)
+        {
+            Assert.Contains(
+                errorOutput.Split(['\r', '\n'], StringSplitOptions.RemoveEmptyEntries),
+                line => line.Contains(exceptionType!, StringComparison.CurrentCulture) &&
+                        line.Contains(exceptionMessage!, StringComparison.CurrentCulture));
+        }
     }
 
     [Fact]
     [Trait("Category", "EndToEnd")]
-    public void NoIsolationWhenRuleValidationFails_NoFailFast()
+    internal void NoIsolationWhenRuleValidationFails_NoFailFast()
     {
         // Arrange
         using var collector = new MockSpansCollector(Output);
@@ -75,11 +105,13 @@ public class StartupHookIsolationTests(ITestOutputHelper output) : TestHelper("S
         SetEnvironmentVariable("OTEL_DOTNET_AUTO_EXCLUDE_PROCESSES", "dotnet,dotnet.exe");
         SetEnvironmentVariable("OTEL_DOTNET_AUTO_TRACES_ADDITIONAL_SOURCES", "StartupHookIsolation.ActivitySource");
 
-        // Run test application normally and expect normal exit code 0 which serves as a validation,
+        // Run test application normally and expect exit code 999 which serves as a validation,
         // that when a rule fails and we don't configure failFast, the isolation do not interfere
         // with normal run and the application runs in Default AssemblyLoadContext.
-        // The application should not crash as a validation that the entrypoint is not executed twice
-        var (standardOutput, errorOutput, processId) = RunTestApplication(expectedExitCode: 0);
+        // Not crashing application should also serves as a validation that the entrypoint is not executed twice
+        var (standardOutput, errorOutput, processId) = RunTestApplication(
+            new TestSettings { PackageVersion = "Int" },
+            expectedExitCode: 999);
 
         // Assert
         collector.AssertEmpty();
@@ -87,7 +119,7 @@ public class StartupHookIsolationTests(ITestOutputHelper output) : TestHelper("S
 
     [Fact]
     [Trait("Category", "EndToEnd")]
-    public void NoIsolationWhenRuleValidationFails_FailFast()
+    internal void NoIsolationWhenRuleValidationFails_FailFast()
     {
         // Arrange
         using var collector = new MockSpansCollector(Output);
@@ -105,10 +137,15 @@ public class StartupHookIsolationTests(ITestOutputHelper output) : TestHelper("S
         // Run test application normally and expect that it crashes.
         // This serves as a validation that when a rule validation fails and failFast is set to true,
         // the isolation respects the flag and the application exits prematurely
-        var (standardOutput, errorOutput, processId) = RunTestApplication(expectedExitCode: 0, assertExitCode: Assert.NotEqual);
+        // TODO should i check error output? otherwise it may mean that the application exited in defult alc
+        var (standardOutput, errorOutput, processId) = RunTestApplication(
+            new TestSettings { PackageVersion = "Int" },
+            expectedExitCode: 0,
+            assertExitCode: Assert.NotEqual);
 
         // Assert
         collector.AssertEmpty();
+        Assert.NotEmpty(errorOutput);
     }
 }
 #endif
