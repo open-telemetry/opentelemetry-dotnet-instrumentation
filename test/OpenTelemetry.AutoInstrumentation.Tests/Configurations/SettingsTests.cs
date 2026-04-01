@@ -321,6 +321,8 @@ public sealed class SettingsTests : IDisposable
 #if NET
     [InlineData("WCFCORE", TracerInstrumentation.WcfCore)]
 #endif
+    [InlineData("ADONET", TracerInstrumentation.AdoNet)]
+    [InlineData("SQLITE", TracerInstrumentation.Sqlite)]
     internal void TracerSettings_Instrumentations_SupportedValues(string tracerInstrumentation, TracerInstrumentation expectedTracerInstrumentation)
     {
         Environment.SetEnvironmentVariable(ConfigurationKeys.Traces.TracesInstrumentationEnabled, "false");

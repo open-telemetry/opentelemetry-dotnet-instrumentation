@@ -1,0 +1,67 @@
+// Copyright The OpenTelemetry Authors
+// SPDX-License-Identifier: Apache-2.0
+
+namespace OpenTelemetry.AutoInstrumentation.Instrumentations.AdoNet;
+
+internal static class AdoNetConstants
+{
+    public const string IntegrationName = "AdoNet";
+    public const string DbCommandTypeName = "System.Data.Common.DbCommand";
+
+    // Assembly names
+    public const string SystemDataCommonAssemblyName = "System.Data.Common";
+    public const string SystemDataAssemblyName = "System.Data";
+    public const string NetStandardAssemblyName = "netstandard";
+
+    // Version ranges for System.Data.Common (.NET)
+    public const string SystemDataCommonMinVersion = "4.0.0";
+    public const string SystemDataCommonMaxVersion = "10.*.*";
+
+    // Version ranges for System.Data (.NET Framework)
+    public const string SystemDataMinVersion = "2.0.0";
+    public const string SystemDataMaxVersion = "4.*.*";
+
+    // Async methods on System.Data start from v4.0.0
+    public const string SystemDataAsyncMinVersion = "4.0.0";
+
+    // Version ranges for netstandard
+    public const string NetStandardMinVersion = "2.0.0";
+    public const string NetStandardMaxVersion = "2.*.*";
+
+    // Method names
+    public const string ExecuteNonQueryMethodName = "ExecuteNonQuery";
+    public const string ExecuteNonQueryAsyncMethodName = "ExecuteNonQueryAsync";
+    public const string ExecuteScalarMethodName = "ExecuteScalar";
+    public const string ExecuteScalarAsyncMethodName = "ExecuteScalarAsync";
+    public const string ExecuteReaderMethodName = "ExecuteReader";
+    public const string ExecuteReaderAsyncMethodName = "ExecuteReaderAsync";
+    public const string ExecuteDbDataReaderMethodName = "ExecuteDbDataReader";
+    public const string ExecuteDbDataReaderAsyncMethodName = "ExecuteDbDataReaderAsync";
+
+    // Type names for return values and parameters
+    public const string CommandBehaviorTypeName = "System.Data.CommandBehavior";
+    public const string DbDataReaderTypeName = "System.Data.Common.DbDataReader";
+    public const string DbDataReaderTaskTypeName = "System.Threading.Tasks.Task`1[System.Data.Common.DbDataReader]";
+
+    internal static class SqliteMicrosoft
+    {
+        public const string SqliteIntegrationName = "Sqlite";
+        public const string AssemblyName = "Microsoft.Data.Sqlite";
+        public const string CommandTypeName = "Microsoft.Data.Sqlite.SqliteCommand";
+        public const string DataReaderTypeName = "Microsoft.Data.Sqlite.SqliteDataReader";
+        public const string DataReaderTaskTypeName = "System.Threading.Tasks.Task`1[Microsoft.Data.Sqlite.SqliteDataReader]";
+        public const string MinVersion = "8.0.0";
+        public const string MaxVersion = "10.*.*";
+    }
+
+    internal static class Devart
+    {
+        internal static class Oracle
+        {
+            public const string AssemblyName = "Devart.Data.Oracle";
+            public const string CommandTypeName = "Devart.Data.Oracle.OracleCommand";
+            public const string MinVersion = "9.0.0";
+            public const string MaxVersion = "11.*.*";
+        }
+    }
+}

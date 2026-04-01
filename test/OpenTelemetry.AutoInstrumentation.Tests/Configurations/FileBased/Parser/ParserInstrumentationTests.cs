@@ -21,6 +21,7 @@ public class ParserInstrumentationTests
 
         string[] expectedTraces =
         [
+            "adonet",
 #if NETFRAMEWORK
             "aspnet",
 #else
@@ -50,6 +51,7 @@ public class ParserInstrumentationTests
             "rabbitmq",
             "quartz",
             "sqlclient",
+            "sqlite",
             "stackexchangeredis",
             "wcfclient",
 #if NET

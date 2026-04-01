@@ -9,6 +9,7 @@ instrumentation/development:
       additional_legacy_sources: 
         - "Some.Additional.Legacy.Source1"
         - "Some.Additional.Legacy.Source2"
+      adonet:
       aspnet:
       aspnetcore:
       azure:
@@ -29,6 +30,7 @@ instrumentation/development:
       rabbitmq:
       quartz:
       sqlclient:
+      sqlite:
       stackexchangeredis:
       wcfclient:
       wcfcore:
