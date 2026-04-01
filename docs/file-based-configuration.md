@@ -504,6 +504,7 @@ To disable a instrumentation, comment out or remove its corresponding entry.
 instrumentation/development:
   dotnet:
     traces:
+      adonet:              # ADO.NET
       aspnet:              # ASP.NET
       aspnetcore:          # ASP.NET Core
       azure:               # Azure SDK
@@ -524,6 +525,7 @@ instrumentation/development:
       rabbitmq:            # RabbitMQ.Client
       quartz:              # Quartz
       sqlclient:           # Microsoft.Data.SqlClient & System.Data.SqlClient
+      sqlite:              # Microsoft.Data.Sqlite
       stackexchangeredis:  # StackExchange.Redis
       wcfclient:           # WCF Client
       wcfcore:             # CoreWCF.Primitives

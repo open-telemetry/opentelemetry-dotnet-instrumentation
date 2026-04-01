@@ -184,10 +184,9 @@ context to load the assembly into:
 | Assembly is **not** in the TPA list (for example, `OpenTelemetry.dll`) | The runtime has no default location for it | **Default ALC** — no conflict risk |
 | Assembly **is** in the TPA list but with a **lower** version | The profiler rewrote the reference to a higher version that the TPA cannot satisfy | **Custom ALC** — loading into the Default ALC would fail because the TPA already provides a lower version |
 
-When a TPA-conflicting assembly is loaded into a custom ALC it is
-isolated from the Default ALC version. Note that if the TPA already
-has the same or a higher version, the runtime satisfies the reference
-automatically and the event never fires — no action is needed.
+Note that if the TPA already has the same or a higher version, the runtime
+satisfies the reference automatically and the event never fires —
+no action is needed.
 
 However, other situations may also trigger the `Resolving` event for
 an assembly the instrumentation ships (e.g., programmatic
@@ -197,6 +196,10 @@ resolver validates versions before loading: it only proceeds if the
 instrumentation's assembly version is **equal to or higher than**
 the requested version. Otherwise, the resolver skips the request
 and lets other handlers or the runtime deal with it.
+
+The resolver also sets the custom ALC as the contextual reflection context,
+ensuring that reflection-based operations (such as `Assembly.Load` without
+an explicit context) use the custom ALC when appropriate.
 
 #### Managed assembly resolver (.NET Framework)
 
@@ -277,27 +280,25 @@ but there are scenarios where they cannot fully control assembly loading.
 
 ### Explicit loading into the Default ALC
 
-If application code explicitly calls
-`AssemblyLoadContext.Default.LoadFromAssemblyPath` (or
-`Assembly.LoadFrom`, which loads into the Default ALC) for an assembly
-that the instrumentation also depends on, the instrumentation cannot
-prevent or override that load.
+When code directly uses types from assemblies loaded in the Default ALC,
+and those assemblies conflict with versions the instrumentation depends on,
+the instrumentation cannot prevent or override that load. As a result, two
+copies of the same assembly may be loaded into two different ALCs. Code that
+crosses the ALC boundary may encounter type mismatches or shared-state drift
+(for example, `System.Diagnostics.Activity.Current` seen from two different
+`DiagnosticSource` instances).
 
-- **Native profiler deployment:** This is less of a problem in practice.
-  Because the profiler has already rewritten all `AssemblyRef` entries to
-  point to the instrumentation's versions, the explicitly loaded assembly
-  will typically not be referenced by any rewritten code. However, if
-  reflection code is called after the load from the explicitly loaded
-  assembly, issues may arise as there are now multiple types from the
-  same-named assembly. In most cases there is no shared-state drift, but
-  the unused assembly remains loaded in memory.
-- **StartupHook-only deployment:** This is more impactful. The
-  application and instrumentation run inside the isolated ALC, but an
-  explicit load into the Default ALC creates a second copy of the
-  assembly. Code that crosses the ALC boundary may encounter type
-  mismatches or shared-state drift (for example,
-  `System.Diagnostics.Activity.Current` seen from two different
-  `DiagnosticSource` instances).
+This can happen in the following scenarios:
+
+- **Explicit `LoadFromAssemblyPath` or `LoadFrom`**: Code explicitly calls
+  `AssemblyLoadContext.Default.LoadFromAssemblyPath` or `Assembly.LoadFrom`
+  to load an assembly into the Default ALC.
+
+- **`UnsafeAccessorType` reflection (.NET 10+)**: Code uses
+  `UnsafeAccessorType` attributes in assemblies loaded in the Default ALC;
+  in this case, types bind to the requesting assembly's load context.
+  Once the runtime resolves a type for an `UnsafeAccessor` method in the
+  Default ALC, it cannot interact with a different version loaded elsewhere.
 
 ### StartupHook-only: the customer application is loaded twice
 
