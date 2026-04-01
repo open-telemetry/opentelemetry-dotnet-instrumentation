@@ -139,6 +139,16 @@ internal enum TracerInstrumentation
     /// <summary>
     /// CoreWCF instrumentation.
     /// </summary>
-    WcfCore = 23
+    WcfCore = 23,
 #endif
+
+    /// <summary>
+    /// ADO.NET instrumentation.
+    /// </summary>
+    AdoNet = 24,
+
+    /// <summary>
+    /// SQLite instrumentation.
+    /// </summary>
+    Sqlite = 25
 }

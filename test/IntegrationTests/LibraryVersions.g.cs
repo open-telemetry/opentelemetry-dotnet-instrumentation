@@ -377,6 +377,24 @@ public static partial class LibraryVersion
             return theoryData;
         }
     }
+    public static TheoryData<string> SqliteMicrosoft
+    {
+        get
+        {
+            TheoryData<string> theoryData =
+            [
+#if DEFAULT_TEST_PACKAGE_VERSIONS
+                string.Empty,
+#else
+                "8.0.0",
+                "9.0.0",
+                "10.0.0",
+                "10.0.5",
+#endif
+            ];
+            return theoryData;
+        }
+    }
     public static TheoryData<string> StackExchangeRedis
     {
         get
@@ -498,6 +516,7 @@ public static partial class LibraryVersion
        { "OracleMdaCore", OracleMdaCore },
        { "Quartz", Quartz },
        { "RabbitMq", RabbitMq },
+       { "SqliteMicrosoft", SqliteMicrosoft },
        { "StackExchangeRedis", StackExchangeRedis },
        { "WCFCoreClient", WCFCoreClient },
        { "Kafka", Kafka },
