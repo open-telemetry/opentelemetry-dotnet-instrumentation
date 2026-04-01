@@ -539,28 +539,25 @@ void NamingHelper::ClearFunctionIdentifierCache()
     function_identifier_cache_.Clear();
 }
 
-[[nodiscard]] FunctionIdentifier NamingHelper::GetFunctionIdentifier(const FunctionID         func_id,
-                                                                     const COR_PRF_FRAME_INFO frame_info) const
+[[nodiscard]] FunctionIdentifier NamingHelper::ResolveManagedFunctionIdentifier(
+    const FunctionID func_id, const COR_PRF_FRAME_INFO frame_info) const
 {
     if (func_id == 0)
     {
         constexpr auto zero_valid_function_identifier = FunctionIdentifier{0, 0, true};
         return zero_valid_function_identifier;
     }
-
-    ModuleID module_id      = 0;
-    mdToken  function_token = 0;
-    // theoretically there is a possibility to use GetFunctionInfo method, but it does not support generic methods
+    ModuleID      module_id      = 0;
+    mdToken       function_token = 0;
     const HRESULT hr =
         info7_->GetFunctionInfo2(func_id, frame_info, nullptr, &module_id, &function_token, 0, nullptr, nullptr);
     if (FAILED(hr))
     {
         trace::Logger::Debug("GetFunctionInfo2 failed. HRESULT=0x", std::setfill('0'), std::setw(8), std::hex, hr);
-        constexpr auto zero_invalid_function_identifier = FunctionIdentifier{0, 0, false};
-        return zero_invalid_function_identifier;
+        return FunctionIdentifier::ManagedInvalid();
     }
 
-    return FunctionIdentifier{function_token, module_id, true};
+    return FunctionIdentifier::Managed(function_token, module_id, true);
 }
 
 void NamingHelper::GetFunctionName(FunctionIdentifier function_identifier, trace::WSTRING& result) const
@@ -573,7 +570,6 @@ void NamingHelper::GetFunctionName(FunctionIdentifier function_identifier, trace
         result.append(unknown_function_name);
         return;
     }
-
     if (function_identifier.function_token == 0)
     {
         constexpr auto unknown_native_function_name = WStr("Unknown_Native_Function(unknown)");
@@ -706,7 +702,7 @@ trace::WSTRING* NamingHelper::Lookup(const FunctionIdentifier& function_identifi
     return answer;
 }
 
-FunctionIdentifier NamingHelper::Lookup(const FunctionID functionId, const COR_PRF_FRAME_INFO frameInfo)
+FunctionIdentifier NamingHelper::LookupManagedFunction(const FunctionID functionId, const COR_PRF_FRAME_INFO frameInfo)
 {
     const FunctionIdentifierResolveArgs cacheKey         = {functionId};
     const auto                          cachedIdentifier = function_identifier_cache_.Get(cacheKey);
@@ -714,7 +710,7 @@ FunctionIdentifier NamingHelper::Lookup(const FunctionID functionId, const COR_P
     {
         return cachedIdentifier;
     }
-    const auto resolvedIdentifier = this->GetFunctionIdentifier(cacheKey.function_id, frameInfo);
+    const auto resolvedIdentifier = this->ResolveManagedFunctionIdentifier(cacheKey.function_id, frameInfo);
     function_identifier_cache_.Put(cacheKey, resolvedIdentifier);
     return resolvedIdentifier;
 }
@@ -737,18 +733,15 @@ static HRESULT __stdcall FrameCallback(_In_ FunctionID         func_id,
                                        _In_ void*              client_data)
 {
 
+    // if func ID is zero, it is a frame we can't get info for (e.g., external/native code); we still want to record it,
+    // in that case the ID will map to a default "unknown" entry in the name cache, so we can just continue on as normal
+    // in next PR we will attempt to resolve the "unknown" frames a bit better (e.g., using IP to get native symbol
+    // info) but for now this is sufficient to avoid losing all stack info for frames we can't resolve
+
     const auto params = static_cast<DoStackSnapshotParams*>(client_data);
     params->prof->stats_.total_frames++;
 
-    // Use '0' as a frame_info value.
-    // It is documented to be equivalent to using value provided in frame_info parameter.
-    // See
-    // https://github.com/dotnet/runtime/blob/988296b080776c885ee0725b481db4ae4d4360ed/src/coreclr/inc/corprof.idl#L3167-L3172
-    // and
-    // https://github.com/dotnet/runtime/blob/bda571bfc728369cc2bbd33f2c161ea73c762b8d/docs/design/coreclr/profiling/davbr-blog-archive/Generics%20and%20Your%20Profiler.md?plain=1#L82-L101
-    // for details.
-
-    const auto identifier = params->prof->helper.Lookup(func_id, 0);
+    const auto identifier = params->prof->helper.LookupManagedFunction(func_id, 0);
     params->buffer->push_back(identifier);
 
     return S_OK;
