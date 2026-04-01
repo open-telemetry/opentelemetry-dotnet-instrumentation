@@ -14,7 +14,7 @@ internal static class AdoNetDbSystemMapper
     {
         return Cache.GetOrAdd(commandType, static t => t.FullName switch
         {
-            "Devart.Data.Oracle.OracleCommand" => (true, "oracle"),
+            "Devart.Data.Oracle.OracleCommand" => (true, "oracle.db"),
             "Devart.Data.MySql.MySqlCommand" => (true, "mysql"),
             "Devart.Data.PostgreSql.PgSqlCommand" => (true, "postgresql"),
             "Microsoft.Data.SqlClient.SqlCommand" => (false, "microsoft.sql_server"),
