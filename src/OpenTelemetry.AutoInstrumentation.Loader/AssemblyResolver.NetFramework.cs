@@ -35,7 +35,7 @@ internal class AssemblyResolver(IOtelLogger logger)
 
         logger.Debug("Requester [{0}] requested [{1}]", args.RequestingAssembly?.FullName ?? "<null>", args.Name ?? "<null>");
 
-        var assemblyPath = ManagedProfilerLocationHelper.FindAssembly(assemblyName.Name, logger)?.Path;
+        var assemblyPath = ManagedProfilerLocationHelper.GetAssemblyPath(assemblyName.Name, logger);
         if (assemblyPath is null)
         {
             logger.Debug($"Skip resolving unexpected assembly: ({assemblyName})");

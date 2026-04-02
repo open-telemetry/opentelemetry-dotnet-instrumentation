@@ -34,7 +34,7 @@ internal static class IsolatedAssemblyLoadContextHelper
         var tpaAssemblyPath = TrustedPlatformAssembliesHelper.GetAssemblyPath(assemblyName.Name);
 
         // Find in agent assemblies
-        var agentAssemblyPath = ManagedProfilerLocationHelper.FindAssembly(assemblyName.Name)?.Path;
+        var agentAssemblyPath = ManagedProfilerLocationHelper.GetAssemblyPath(assemblyName.Name);
 
         // 2. Early exit: assembly must be in TPA or in our agent files
         var (assemblyPath, assemblyVersion) = PickHigherVersion(tpaAssemblyPath, agentAssemblyPath);

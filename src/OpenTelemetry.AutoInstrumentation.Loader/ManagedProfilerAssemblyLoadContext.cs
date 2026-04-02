@@ -26,7 +26,7 @@ internal class ManagedProfilerAssemblyLoadContext(IOtelLogger logger) : Assembly
         // on every resolution, or simply check if the assembly is already loaded into custom ALC
 
         // 2. Early exit: assembly must be in our agent files
-        var agentAssemblyPath = ManagedProfilerLocationHelper.FindAssembly(assemblyName.Name, logger)?.Path;
+        var agentAssemblyPath = ManagedProfilerLocationHelper.GetAssemblyPath(assemblyName.Name, logger);
         if (agentAssemblyPath is null)
         {
             logger.Debug("Skip loading unexpected assembly");

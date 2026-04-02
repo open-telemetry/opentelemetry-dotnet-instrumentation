@@ -13,20 +13,19 @@ internal static class DeploymentDetector
 
     /// <summary>
     /// Detects whether the current deployment is standalone or not by checking the location
-    /// of the OpenTelemetry.AutoInstrumentation assembly.
+    /// of the OpenTelemetry.AutoInstrumentation assembly in all expected locations.
     /// </summary>
     public static bool IsStandaloneDeployment(IOtelLogger logger)
     {
-        var location = ManagedProfilerLocationHelper.FindAssembly(AutoInstrumentationAssemblyName, logger);
-
-        if (location == null)
+        var path = ManagedProfilerLocationHelper.GetAssemblyPath(AutoInstrumentationAssemblyName, logger);
+        if (path == null)
         {
-            logger.Information($"{AutoInstrumentationAssemblyName} not found at any expected location, treating as non-standalone.");
+            logger.Information($"Detected Non-Standalone Deployment. {AutoInstrumentationAssemblyName} not found at any expected location.");
             return false;
         }
 
-        logger.Information($"Detected IsStandaloneDeployment: {location.Value.IsStandalone}. {AutoInstrumentationAssemblyName} found at \"{location.Value.Path}\"");
-        return location.Value.IsStandalone;
+        logger.Information($"Detected Standalone Deployment.{AutoInstrumentationAssemblyName} found at \"{path}\"");
+        return true;
     }
 }
 #endif

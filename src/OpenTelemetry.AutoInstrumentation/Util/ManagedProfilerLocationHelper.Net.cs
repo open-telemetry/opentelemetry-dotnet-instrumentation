@@ -20,20 +20,18 @@ internal static partial class ManagedProfilerLocationHelper
         return Path.Combine(ManagedProfilerRuntimeDirectory, commonLanguageRuntimeVersionDirectory);
     }
 
-    public static AssemblyLocation? FindAssembly(string assemblyName, IOtelLogger? logger = null)
+    public static string? GetAssemblyPath(string assemblyName, IOtelLogger? logger = null)
     {
         var runtimeDir = ManagedProfilerRuntimeDirectory;
         LazyInitializer.EnsureInitialized(ref _managedProfilerVersionDirectory, () => ResolveManagedProfilerVersionDirectory(logger));
 
         // For .NET (Core) most of the assemblies are different per runtime version, so we
-        // 1. first start with runtime version folder           (standalone) -> e.g. tracer-home/net/net8.0/assembly-name.dll
-        // 2. then check .link file in runtime version folder   (standalone) -> e.g. tracer-home/net/net8.0/assembly-name.dll.link
-        // 3. then check runtime root folder                    (standalone) ->      tracer-home/net/assembly-name.dll
-        // 4. last fallback to tracer-home folder               (NuGet)      ->      tracer-home/assembly-name.dll
-        return Probe(_managedProfilerVersionDirectory, assemblyName, isStandalone: true) ??
-               CheckLinkFile(_managedProfilerVersionDirectory, runtimeDir, assemblyName, isStandalone: true, logger) ??
-               Probe(runtimeDir, assemblyName, isStandalone: true) ??
-               Probe(TracerHomeDirectory, assemblyName, isStandalone: false);
+        // 1. first start with runtime version folder           -> e.g. tracer-home/net/net8.0/assembly-name.dll
+        // 2. then check .link file in runtime version folder   -> e.g. tracer-home/net/net8.0/assembly-name.dll.link
+        // 3. then check runtime root folder                    ->      tracer-home/net/assembly-name.dll
+        return Probe(_managedProfilerVersionDirectory, assemblyName) ??
+               CheckLinkFile(_managedProfilerVersionDirectory, runtimeDir, assemblyName, logger) ??
+               Probe(runtimeDir, assemblyName);
     }
 }
 #endif
