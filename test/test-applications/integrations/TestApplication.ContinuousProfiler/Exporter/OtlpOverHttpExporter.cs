@@ -55,7 +55,7 @@ internal sealed class OtlpOverHttpExporter : IDisposable
                 var sampleBuilder = CreateSampleBuilder(threadSample, extendedPprofBuilder);
                 sampleBuilder.SetValue(1);
 
-                extendedPprofBuilder.Profile.Sample.Add(sampleBuilder.Build());
+                extendedPprofBuilder.Profile.Samples.Add(sampleBuilder.Build());
             }
 
             var scopeProfiles = CreateScopeProfiles();
@@ -63,9 +63,7 @@ internal sealed class OtlpOverHttpExporter : IDisposable
 
             var resourceProfiles = CreateResourceProfiles(scopeProfiles);
 
-            var profilesData = CreateProfilesData(resourceProfiles);
-
-            var request = CreateExportProfilesServiceRequest(profilesData);
+            var request = CreateExportProfilesServiceRequest(resourceProfiles, extendedPprofBuilder.Dictionary);
 
             using var httpRequest = CreateHttpRequest(request);
 
@@ -109,14 +107,12 @@ internal sealed class OtlpOverHttpExporter : IDisposable
                 var sampleBuilder = CreateSampleBuilder(allocationSample.ThreadSample, extendedPprofBuilder);
 
                 sampleBuilder.SetValue(allocationSample.AllocationSizeBytes);
-                extendedPprofBuilder.Profile.Sample.Add(sampleBuilder.Build());
+                extendedPprofBuilder.Profile.Samples.Add(sampleBuilder.Build());
             }
 
             var resourceProfiles = CreateResourceProfiles(scopeProfiles);
 
-            var profilesData = CreateProfilesData(resourceProfiles);
-
-            var request = CreateExportProfilesServiceRequest(profilesData);
+            var request = CreateExportProfilesServiceRequest(resourceProfiles, extendedPprofBuilder.Dictionary);
 
             using var httpRequest = CreateHttpRequest(request);
 
@@ -144,15 +140,10 @@ internal sealed class OtlpOverHttpExporter : IDisposable
             extendedPprofBuilder.AddLink(sampleBuilder, threadSample.SpanId, threadSample.TraceIdHigh, threadSample.TraceIdLow);
         }
 
-        for (var index = 0; index < threadSample.Frames.Count; index++)
+        if (threadSample.Frames.Count > 0)
         {
-            var methodName = threadSample.Frames[index];
-            var locationId = extendedPprofBuilder.AddLocationId(methodName);
-
-            if (index == 0)
-            {
-                sampleBuilder.SetLocationRange(locationId, threadSample.Frames.Count);
-            }
+            var stackIndex = extendedPprofBuilder.AddStack(threadSample.Frames);
+            sampleBuilder.SetStackIndex(stackIndex);
         }
 
         if (!string.IsNullOrEmpty(threadSample.ThreadName))
@@ -163,22 +154,14 @@ internal sealed class OtlpOverHttpExporter : IDisposable
         return sampleBuilder;
     }
 
-    private static ExportProfilesServiceRequest CreateExportProfilesServiceRequest(ProfilesData profilesData)
+    private static ExportProfilesServiceRequest CreateExportProfilesServiceRequest(ResourceProfiles resourceProfiles, ProfilesDictionary dictionary)
     {
         var request = new ExportProfilesServiceRequest();
 
-        request.ResourceProfiles.Add(profilesData.ResourceProfiles);
+        request.ResourceProfiles.Add(resourceProfiles);
+        request.Dictionary = dictionary;
 
         return request;
-    }
-
-    private static ProfilesData CreateProfilesData(ResourceProfiles resourceProfiles)
-    {
-        var profilesData = new ProfilesData();
-
-        profilesData.ResourceProfiles.Add(resourceProfiles);
-
-        return profilesData;
     }
 
     private static ResourceProfiles CreateResourceProfiles(ScopeProfiles scopeProfiles)
