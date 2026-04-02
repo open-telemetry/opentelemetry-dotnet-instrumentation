@@ -1,11 +1,13 @@
 // Copyright The OpenTelemetry Authors
 // SPDX-License-Identifier: Apache-2.0
 
+using System.Globalization;
+
 namespace OpenTelemetry.AutoInstrumentation.Logging;
 
 internal class InternalLogger : IOtelLogger
 {
-    private static readonly object[] NoPropertyValues = Array.Empty<object>();
+    private static readonly object[] NoPropertyValues = [];
 
     private ISink _sink;
 
@@ -178,7 +180,7 @@ internal class InternalLogger : IOtelLogger
         // Avoid boxing + array allocation if disabled
         if (IsEnabled(level))
         {
-            WriteImpl(level, exception, messageTemplate, new object?[] { property }, writeToEventLog);
+            WriteImpl(level, exception, messageTemplate, [property], writeToEventLog);
         }
     }
 
@@ -187,7 +189,7 @@ internal class InternalLogger : IOtelLogger
         // Avoid boxing + array allocation if disabled
         if (IsEnabled(level))
         {
-            WriteImpl(level, exception, messageTemplate, new object?[] { property0, property1 }, writeToEventLog);
+            WriteImpl(level, exception, messageTemplate, [property0, property1], writeToEventLog);
         }
     }
 
@@ -196,7 +198,7 @@ internal class InternalLogger : IOtelLogger
         // Avoid boxing + array allocation if disabled
         if (IsEnabled(level))
         {
-            WriteImpl(level, exception, messageTemplate, new object?[] { property0, property1, property2 }, writeToEventLog);
+            WriteImpl(level, exception, messageTemplate, [property0, property1, property2], writeToEventLog);
         }
     }
 
@@ -214,7 +216,7 @@ internal class InternalLogger : IOtelLogger
         try
         {
             // Use template if no arguments provided, otherwise format the template with provided arguments.
-            var rawMessage = args == NoPropertyValues ? messageTemplate : string.Format(messageTemplate, args);
+            var rawMessage = args == NoPropertyValues ? messageTemplate : string.Format(CultureInfo.InvariantCulture, messageTemplate, args);
             if (exception != null)
             {
                 rawMessage += $"{Environment.NewLine}Exception: {exception.Message}{Environment.NewLine}{exception}";
@@ -226,7 +228,9 @@ internal class InternalLogger : IOtelLogger
                 WriteEventSourceLog(level, rawMessage);
             }
         }
-        catch
+#pragma warning disable CA1031 // Do not catch general exception
+        catch (Exception)
+#pragma warning restore CA1031 // Do not catch general exception
         {
             try
             {
@@ -236,7 +240,9 @@ internal class InternalLogger : IOtelLogger
                     : "; " + string.Join(", ", args);
                 Console.Error.WriteLine($"{messageTemplate}{properties}{ex}");
             }
-            catch
+#pragma warning disable CA1031 // Do not catch general exception
+            catch (Exception)
+#pragma warning restore CA1031 // Do not catch general exception
             {
                 // ignore
             }

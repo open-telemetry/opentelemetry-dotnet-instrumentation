@@ -13,8 +13,10 @@ public class LazyInstrumentationLoaderTests
     [Fact]
     public void InitializesOnAssemblyLoad()
     {
+#pragma warning disable CA2000 // Dispose objects before losing scope. It should be handled by LazyInstrumentationLoader.
         var initializer1 = new DummyInitializer();
         var initializer2 = new DummyInitializer();
+#pragma warning restore CA2000 // Dispose objects before losing scope. It should be handled by LazyInstrumentationLoader.
         using (var loader = new LazyInstrumentationLoader())
         {
             loader.Add(initializer1); // Before loading the assembly
@@ -38,7 +40,7 @@ public class LazyInstrumentationLoaderTests
         assemblyBuilder.DefineDynamicModule(assemblyName.Name!);
     }
 
-    private class DummyInitializer : InstrumentationInitializer, IDisposable
+    private sealed class DummyInitializer : InstrumentationInitializer, IDisposable
     {
         public const string DummyAssemblyName = "Dummy.Assembly";
 

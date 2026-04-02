@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: Apache-2.0
 
 using System.Runtime.CompilerServices;
-using OpenTelemetry;
 using OpenTelemetry.AutoInstrumentation.Configurations.FileBasedConfiguration;
 using OpenTelemetry.AutoInstrumentation.Configurations.Otlp;
 using OpenTelemetry.AutoInstrumentation.Loading;

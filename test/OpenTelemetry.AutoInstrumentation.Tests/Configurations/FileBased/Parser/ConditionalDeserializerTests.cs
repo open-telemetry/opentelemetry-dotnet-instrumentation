@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: Apache-2.0
 
 using OpenTelemetry.AutoInstrumentation.Configurations.FileBasedConfiguration.Parser;
-using OpenTelemetry.AutoInstrumentation.Tests.Configurations.FileBased;
 using Vendors.YamlDotNet.Core;
 using Vendors.YamlDotNet.Serialization;
 using Xunit;
@@ -79,7 +78,7 @@ public class ConditionalDeserializerTests
         Assert.False(inner.Called);
     }
 
-    private class DummyDeserializer : INodeDeserializer
+    private sealed class DummyDeserializer : INodeDeserializer
     {
         public bool Called { get; private set; }
 
@@ -99,11 +98,13 @@ public class ConditionalDeserializerTests
     }
 
     [EmptyObjectOnEmptyYaml]
-    private class MarkedClass
+#pragma warning disable CA1812 //  Avoid uninstantiated internal classes. Used in tests by Yaml deserializer.
+    private sealed class MarkedClass
+#pragma warning restore CA1812 //  Avoid uninstantiated internal classes. Used in tests by Yaml deserializer.
     {
     }
 
-    private class UnmarkedClass
+    private sealed class UnmarkedClass
     {
     }
 }

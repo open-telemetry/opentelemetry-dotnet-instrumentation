@@ -1,13 +1,7 @@
 // Copyright The OpenTelemetry Authors
 // SPDX-License-Identifier: Apache-2.0
 
-using System;
 using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
-using System.Threading;
-using System.Threading.Tasks;
 using Examples.AspNetCoreMvc.Shared;
 using Microsoft.AspNetCore.Mvc;
 
@@ -28,7 +22,7 @@ public class HomeController : Controller
                       from prefix in prefixes
                       let key = (envVar.Key as string)?.ToUpperInvariant()
                       let value = envVar.Value as string
-                      where key.StartsWith(prefix)
+                      where key.StartsWith(prefix, StringComparison.Ordinal)
                       orderby key
                       select new KeyValuePair<string, string>(key, value);
 
@@ -47,14 +41,14 @@ public class HomeController : Controller
     public async Task<IActionResult> DelayAsync(int seconds)
     {
         ViewBag.StackTrace = StackTraceHelper.GetUsefulStack();
-        await Task.Delay(TimeSpan.FromSeconds(seconds));
+        await Task.Delay(TimeSpan.FromSeconds(seconds)).ConfigureAwait(false);
         return View("Delay", seconds);
     }
 
     [Route("bad-request")]
     public IActionResult ThrowException()
     {
-        throw new Exception("This was a bad request.");
+        throw new InvalidOperationException("This was a bad request.");
     }
 
     [Route("status-code/{statusCode}")]

@@ -8,10 +8,13 @@
 #include <string>
 #include <typeinfo>
 
+#include "assembly_redirection.h"
 #include "clr_helpers.h"
+#include "deployment_detection.h"
 #include "dllmain.h"
 #include "environment_variables.h"
 #include "environment_variables_util.h"
+#include "configuration.h"
 #include "il_rewriter.h"
 #include "il_rewriter_wrapper.h"
 #include "stub_generator.h"
@@ -30,14 +33,11 @@
 #include "version.h"
 #include "continuous_profiler.h"
 #include "member_resolver.h"
+#include "stack_capture_strategy_factory.h"
 
 #ifdef MACOS
 #include <mach-o/dyld.h>
 #include <mach-o/getsect.h>
-#endif
-
-#ifdef _WIN32
-#include "netfx_assembly_redirection.h"
 #endif
 
 #define FailProfiler(LEVEL, MESSAGE)                                                                                   \
@@ -136,13 +136,20 @@ HRESULT STDMETHODCALLTYPE CorProfiler::Initialize(IUnknown* cor_profiler_info_un
         FailProfiler(Warn, "Failed to attach profiler: Not supported .NET version (lower than 6.0).")
     }
 
-#ifdef _WIN32
-    if (runtime_information_.is_desktop() && IsNetFxAssemblyRedirectionEnabled())
+    if (runtime_information_.is_core())
     {
-        InitNetFxAssemblyRedirectsMap();
+        home_path = GetEnvironmentValue(environment::profiler_home_path);
+    }
+
+    // if assembly redirection is not set through env variable, we will enable it for standalone deployments,
+    // and disable it for non-standalone deployments (e.g., NuGet-based) where we don't ship our dependencies
+    assembly_redirection_enabled_ = IsAssemblyRedirectionEnabled().value_or(
+        IsStandaloneDeployment(GetCurrentModuleFileName(), home_path, runtime_information_.is_desktop()));
+    if (assembly_redirection_enabled_)
+    {
+        InitAssemblyRedirectsMap();
         DetectFrameworkVersionTableForRedirectsMap();
     }
-#endif
 
     const auto& process_name          = GetCurrentProcessName();
     const auto& exclude_process_names = GetEnvironmentValues(environment::exclude_process_names);
@@ -161,7 +168,6 @@ HRESULT STDMETHODCALLTYPE CorProfiler::Initialize(IUnknown* cor_profiler_info_un
         // and the necessary dependencies are not available yet.
 
         // Ensure that OTel StartupHook is listed.
-        home_path                = GetEnvironmentValue(environment::profiler_home_path);
         const auto startup_hooks = GetEnvironmentValues(environment::dotnet_startup_hooks, ENV_VAR_PATH_SEPARATOR);
         if (!IsStartupHookValid(startup_hooks, home_path))
         {
@@ -276,6 +282,10 @@ HRESULT STDMETHODCALLTYPE CorProfiler::Initialize(IUnknown* cor_profiler_info_un
     this->info_->AddRef();
     is_attached_.store(true);
     profiler = this;
+
+    stack_capture_strategy_ =
+        continuous_profiler::StackCaptureStrategyFactory::Create(this->info_, runtime_information_);
+
     return S_OK;
 }
 
@@ -354,7 +364,6 @@ HRESULT STDMETHODCALLTYPE CorProfiler::AssemblyLoadFinished(AssemblyID assembly_
     return S_OK;
 }
 
-#ifdef _WIN32
 void CorProfiler::RedirectAssemblyReferences(const ComPtr<IMetaDataAssemblyImport>& assembly_import,
                                              const ComPtr<IMetaDataAssemblyEmit>&   assembly_emit)
 {
@@ -486,7 +495,6 @@ void CorProfiler::RedirectAssemblyReferences(const ComPtr<IMetaDataAssemblyImpor
         }
     }
 }
-#endif
 
 void CorProfiler::RewritingPInvokeMaps(const ModuleMetadata& module_metadata, const WSTRING& nativemethods_type_name)
 {
@@ -754,11 +762,10 @@ HRESULT STDMETHODCALLTYPE CorProfiler::ModuleLoadFinished(ModuleID module_id, HR
         return S_OK;
     }
 
-    // It is not safe to skip assemblies if applying redirection on .NET Framework
-    if (!runtime_information_.is_desktop() || !IsNetFxAssemblyRedirectionEnabled())
+    // It is not safe to skip assemblies if applying redirection
+    if (!assembly_redirection_enabled_)
     {
-        // Not .NET Framework or assembly redirection is disabled, check if the
-        // assembly can be skipped.
+        // If assembly redirection is disabled, check if the assembly can be skipped.
         for (auto&& skip_assembly : skip_assemblies)
         {
             if (module_info.assembly.name == skip_assembly)
@@ -779,13 +786,9 @@ HRESULT STDMETHODCALLTYPE CorProfiler::ModuleLoadFinished(ModuleID module_id, HR
         }
     }
 
-#ifdef _WIN32
-    const bool perform_netfx_redirect = runtime_information_.is_desktop() && IsNetFxAssemblyRedirectionEnabled();
-#else
-    const bool perform_netfx_redirect = false;
-#endif // _WIN32
+    const bool perform_redirect = assembly_redirection_enabled_;
 
-    if (perform_netfx_redirect || module_info.assembly.name == managed_profiler_name)
+    if (perform_redirect || module_info.assembly.name == managed_profiler_name)
     {
         ComPtr<IUnknown> metadata_interfaces;
         auto             hr = this->info_->GetModuleMetaData(module_id, ofRead | ofWrite, IID_IMetaDataImport2,
@@ -807,14 +810,14 @@ HRESULT STDMETHODCALLTYPE CorProfiler::ModuleLoadFinished(ModuleID module_id, HR
             ModuleMetadata(metadata_import, metadata_emit, assembly_import, assembly_emit, module_info.assembly.name,
                            module_info.assembly.app_domain_id, &corAssemblyProperty);
 
-#ifdef _WIN32
-        if (perform_netfx_redirect)
+        if (perform_redirect)
         {
-            // On the .NET Framework redirect any assembly reference to the versions required by
-            // OpenTelemetry.AutoInstrumentation assembly, the ones under netfx/ folder.
+            // Redirect any assembly reference to the versions required by
+            // OpenTelemetry.AutoInstrumentation assembly:
+            //  - for .NET Frameworks - the ones under netfx/ folder
+            //  - for .NET (Core) - the ones under net/ folder
             RedirectAssemblyReferences(assembly_import, assembly_emit);
         }
-#endif // _WIN32
 
         if (module_info.assembly.name == managed_profiler_name)
         {
@@ -1180,9 +1183,24 @@ void CorProfiler::InternalAddInstrumentation(WCHAR* id, CallTargetDefinition* it
 
 bool CorProfiler::InitThreadSampler()
 {
+#if defined(_WIN32)
+    // for net fx, the native thread ID is needed by stack capture
+    // the profiler callback, ThreadAssignedToOSThread is not invoked for main thread
+    // for the following machinery to work,
+    // 1 The thread needs to have executed managed code first
+    // 2. InitThreadSampler must must be executing in context of main thread
+    // InitThreadSampler is called from managed code
+    // And more importantly, the main thread calls InitThreadSampler
+    ThreadID mainThreadId = 0;
+    if (auto hr = info_->GetCurrentThreadID(&mainThreadId); SUCCEEDED(hr))
+    {
+        ThreadAssignedToOSThread(mainThreadId, ::GetCurrentThreadId());
+    }
+#endif
+
     DWORD pdvEventsLow;
     DWORD pdvEventsHigh;
-    auto  hr = this->info12_->GetEventMask2(&pdvEventsLow, &pdvEventsHigh);
+    auto  hr = this->info_->GetEventMask2(&pdvEventsLow, &pdvEventsHigh);
     if (FAILED(hr))
     {
         Logger::Warn("ConfigureContinuousProfiler: Failed to take event masks for continuous profiler.");
@@ -1191,7 +1209,7 @@ bool CorProfiler::InitThreadSampler()
 
     pdvEventsLow |= COR_PRF_MONITOR_THREADS | COR_PRF_ENABLE_STACK_SNAPSHOT;
 
-    hr = this->info12_->SetEventMask2(pdvEventsLow, pdvEventsHigh);
+    hr = this->info_->SetEventMask2(pdvEventsLow, pdvEventsHigh);
     if (FAILED(hr))
     {
         Logger::Warn("ConfigureContinuousProfiler: Failed to set event masks for continuous profiler.");
@@ -1200,6 +1218,8 @@ bool CorProfiler::InitThreadSampler()
 
     this->continuousProfiler = new continuous_profiler::ContinuousProfiler();
     this->continuousProfiler->SetGlobalInfo12(this->info12_);
+    this->continuousProfiler->SetGlobalInfo7(this->info_);
+    this->continuousProfiler->SetStackCaptureStrategy(stack_capture_strategy_.get());
     Logger::Info("ConfigureContinuousProfiler: Events masks configured for continuous profiler");
     return true;
 }
@@ -1210,15 +1230,25 @@ void CorProfiler::ConfigureContinuousProfiler(bool         threadSamplingEnabled
                                               unsigned int maxMemorySamplesPerMinute,
                                               unsigned int selectedThreadsSamplingInterval)
 {
-    Logger::Info("ConfigureContinuousProfiler: thread sampling enabled: ", threadSamplingEnabled,
-                 ", thread sampling interval: ", threadSamplingInterval,
-                 ", allocationSamplingEnabled: ", allocationSamplingEnabled,
-                 ", max memory samples per minute: ", maxMemorySamplesPerMinute,
-                 ", selected threads sampling interval: ", selectedThreadsSamplingInterval);
+    ContinuousProfilerParams params{threadSamplingEnabled, threadSamplingInterval, allocationSamplingEnabled,
+                                    maxMemorySamplesPerMinute, selectedThreadsSamplingInterval};
+    // Guard against multiple initialization: In .NET Framework, this method may be called
+    // once per AppDomain, but the continuous profiler is a process-level singleton.
+    // std::call_once ensures thread-safe one-time initialization across all AppDomains.
+    std::call_once(sampling_init_flag_, [this, &params]() { ConfigureContinuousProfilerInternal(params); });
+}
 
-    const bool selectiveSamplingConfigured = selectedThreadsSamplingInterval != 0;
+void CorProfiler::ConfigureContinuousProfilerInternal(const ContinuousProfilerParams& params)
+{
+    Logger::Info("ConfigureContinuousProfiler: thread sampling enabled: ", params.threadSamplingEnabled,
+                 ", thread sampling interval: ", params.threadSamplingInterval,
+                 ", allocationSamplingEnabled: ", params.allocationSamplingEnabled,
+                 ", max memory samples per minute: ", params.maxMemorySamplesPerMinute,
+                 ", selected threads sampling interval: ", params.selectedThreadsSamplingInterval);
 
-    if (!threadSamplingEnabled && !allocationSamplingEnabled && !selectiveSamplingConfigured)
+    const bool selectiveSamplingConfigured = params.selectedThreadsSamplingInterval != 0;
+
+    if (!params.threadSamplingEnabled && !params.allocationSamplingEnabled && !selectiveSamplingConfigured)
     {
         Logger::Debug("ConfigureContinuousProfiler: no sampling type configured.");
         return;
@@ -1230,26 +1260,26 @@ void CorProfiler::ConfigureContinuousProfiler(bool         threadSamplingEnabled
         return;
     }
 
-    if (threadSamplingEnabled)
+    if (params.threadSamplingEnabled)
     {
-        this->continuousProfiler->threadSamplingInterval = threadSamplingInterval;
+        this->continuousProfiler->threadSamplingInterval = params.threadSamplingInterval;
     }
     if (selectiveSamplingConfigured)
     {
-        this->continuousProfiler->selectedThreadsSamplingInterval = selectedThreadsSamplingInterval;
+        this->continuousProfiler->selectedThreadsSamplingInterval = params.selectedThreadsSamplingInterval;
         this->continuousProfiler->nextOutdatedEntriesScan         = std::chrono::steady_clock::now();
         continuous_profiler::ContinuousProfiler::InitSelectiveSamplingBuffer();
     }
 
-    if (threadSamplingEnabled || selectiveSamplingConfigured)
+    if (params.threadSamplingEnabled || selectiveSamplingConfigured)
     {
         Logger::Info("ContinuousProfiler::StartThreadSampling");
         this->continuousProfiler->StartThreadSampling();
     }
 
-    if (allocationSamplingEnabled)
+    if (params.allocationSamplingEnabled)
     {
-        this->continuousProfiler->StartAllocationSampling(maxMemorySamplesPerMinute);
+        this->continuousProfiler->StartAllocationSampling(params.maxMemorySamplesPerMinute);
     }
 }
 
@@ -3765,6 +3795,11 @@ HRESULT STDMETHODCALLTYPE CorProfiler::ThreadCreated(ThreadID threadId)
     {
         continuousProfiler->ThreadCreated(threadId);
     }
+
+    if (stack_capture_strategy_)
+    {
+        stack_capture_strategy_->OnThreadCreated(threadId);
+    }
     return S_OK;
 }
 HRESULT STDMETHODCALLTYPE CorProfiler::ThreadDestroyed(ThreadID threadId)
@@ -3773,6 +3808,12 @@ HRESULT STDMETHODCALLTYPE CorProfiler::ThreadDestroyed(ThreadID threadId)
     {
         continuousProfiler->ThreadDestroyed(threadId);
     }
+
+    if (stack_capture_strategy_)
+    {
+        stack_capture_strategy_->OnThreadDestroyed(threadId);
+    }
+
     return S_OK;
 }
 HRESULT STDMETHODCALLTYPE CorProfiler::ThreadNameChanged(ThreadID threadId, ULONG cchName, WCHAR name[])
@@ -3780,6 +3821,20 @@ HRESULT STDMETHODCALLTYPE CorProfiler::ThreadNameChanged(ThreadID threadId, ULON
     if (continuousProfiler != nullptr)
     {
         continuousProfiler->ThreadNameChanged(threadId, cchName, name);
+    }
+
+    if (stack_capture_strategy_)
+    {
+        stack_capture_strategy_->OnThreadNameChanged(threadId, cchName, name);
+    }
+
+    return S_OK;
+}
+HRESULT STDMETHODCALLTYPE CorProfiler::ThreadAssignedToOSThread(ThreadID managedThreadId, DWORD osThreadId)
+{
+    if (stack_capture_strategy_)
+    {
+        stack_capture_strategy_->OnThreadAssignedToOSThread(managedThreadId, osThreadId);
     }
     return S_OK;
 }
@@ -3804,83 +3859,114 @@ HRESULT STDMETHODCALLTYPE CorProfiler::EventPipeEventDelivered(EVENTPIPE_PROVIDE
     return S_OK;
 }
 
-#ifdef _WIN32
 void CorProfiler::DetectFrameworkVersionTableForRedirectsMap()
 {
-    // Default to 4.6.2 (462) if detection fails
-    int frameworkVersion = 462;
+    int frameworkVersion = 0;
 
-    // Check for 4.7.2 first
-    // If we ever need to detect higher versions, we should use
-    // the registry method below directly (adding detection for 4.7.2 and up)
-    // or find another option
-    ICorProfilerInfo8* info8 = nullptr;
-    HRESULT            hr    = this->info_->QueryInterface(__uuidof(ICorProfilerInfo8), (void**)&info8);
-    if (SUCCEEDED(hr))
+    // TODO ugly ifdef to separate .NET Framework and .NET (Core) detection
+#ifdef _WIN32
+    if (runtime_information_.is_desktop())
     {
-        info8->Release();
-        info8            = nullptr;
-        frameworkVersion = 472;
+        // .NET Framework detection
+        // Default to 4.6.2 (462) if detection fails
+        frameworkVersion = 462;
 
-        Logger::Debug("DetectFrameworkVersionTableForRedirectsMap: Detected .NET Framework 4.7.2 (ICorProfilerInfo8)");
-    }
-    else
-    {
-
-        HKEY hKey   = nullptr;
-        LONG result = RegOpenKeyExW(HKEY_LOCAL_MACHINE, L"SOFTWARE\\Microsoft\\NET Framework Setup\\NDP\\v4\\Full\\", 0,
-                                    KEY_READ, &hKey);
-
-        if (result != ERROR_SUCCESS)
+        // Check for 4.7.2 first
+        ICorProfilerInfo8* info8 = nullptr;
+        HRESULT            hr    = this->info_->QueryInterface(__uuidof(ICorProfilerInfo8), (void**)&info8);
+        if (SUCCEEDED(hr))
         {
-            Logger::Warn("DetectFrameworkVersionTableForRedirectsMap: Failed to open registry key, using default "
-                         "version 462");
+            info8->Release();
+            info8            = nullptr;
+            frameworkVersion = 472;
+
+            Logger::Debug(
+                "DetectFrameworkVersionTableForRedirectsMap: Detected .NET Framework 4.7.2 (ICorProfilerInfo8)");
         }
         else
         {
-            DWORD releaseValue = 0;
-            DWORD dataSize     = sizeof(DWORD);
-            DWORD valueType    = REG_DWORD;
+            HKEY hKey = nullptr;
+            LONG result =
+                RegOpenKeyExW(HKEY_LOCAL_MACHINE, L"SOFTWARE\\Microsoft\\NET Framework Setup\\NDP\\v4\\Full\\", 0,
+                              KEY_READ, &hKey);
 
-            result = RegQueryValueExW(hKey, L"Release", nullptr, &valueType, reinterpret_cast<LPBYTE>(&releaseValue),
-                                      &dataSize);
-
-            RegCloseKey(hKey);
-
-            if (result != ERROR_SUCCESS || valueType != REG_DWORD)
+            if (result != ERROR_SUCCESS)
             {
-                Logger::Warn("DetectFrameworkVersionTableForRedirectsMap: Failed to read Release value, using "
-                             "default version 462");
+                Logger::Warn("DetectFrameworkVersionTableForRedirectsMap: Failed to open registry key, using default "
+                             "version 462");
             }
             else
             {
-                // Map release numbers to framework versions
-                // Based on Microsoft documentation:
-                // https://docs.microsoft.com/en-us/dotnet/framework/migration-guide/how-to-determine-which-versions-are-installed
-                if (releaseValue >= 461308)
+                DWORD releaseValue = 0;
+                DWORD dataSize     = sizeof(DWORD);
+                DWORD valueType    = REG_DWORD;
+
+                result = RegQueryValueExW(hKey, L"Release", nullptr, &valueType,
+                                          reinterpret_cast<LPBYTE>(&releaseValue), &dataSize);
+
+                RegCloseKey(hKey);
+
+                if (result != ERROR_SUCCESS || valueType != REG_DWORD)
                 {
-                    frameworkVersion = 471; // 4.7.1
-                }
-                else if (releaseValue >= 460798)
-                {
-                    frameworkVersion = 470; // 4.7
-                }
-                else if (releaseValue >= 394802)
-                {
-                    frameworkVersion = 462; // 4.6.2
+                    Logger::Warn("DetectFrameworkVersionTableForRedirectsMap: Failed to read Release value, using "
+                                 "default version 462");
                 }
                 else
                 {
-                    Logger::Warn("DetectFrameworkVersionTableForRedirectsMap: Old .NET Framework detected, use 462 "
-                                 "as fallback");
+                    // Map release numbers to framework versions
+                    // Based on Microsoft documentation:
+                    // https://docs.microsoft.com/en-us/dotnet/framework/migration-guide/how-to-determine-which-versions-are-installed
+                    if (releaseValue >= 461308)
+                    {
+                        frameworkVersion = 471; // 4.7.1
+                    }
+                    else if (releaseValue >= 460798)
+                    {
+                        frameworkVersion = 470; // 4.7
+                    }
+                    else if (releaseValue >= 394802)
+                    {
+                        frameworkVersion = 462; // 4.6.2
+                    }
+                    else
+                    {
+                        Logger::Warn("DetectFrameworkVersionTableForRedirectsMap: Old .NET Framework detected, use 462 "
+                                     "as fallback");
+                    }
                 }
-            }
 
-            Logger::Debug("DetectFrameworkVersionTableForRedirectsMap: Detected .NET Framework version ",
-                          frameworkVersion, " (Release: ", releaseValue, ")");
+                Logger::Debug("DetectFrameworkVersionTableForRedirectsMap: Detected .NET Framework version ",
+                              frameworkVersion, " (Release: ", releaseValue, ")");
+            }
+        }
+    }
+    else
+#endif
+    {
+        // .NET (Core) detection
+        // Map major.minor version to framework version key to match generator: net8.0 -> 80, net9.0 -> 90, etc
+        int majorVersion = runtime_information_.major_version;
+        int minorVersion = runtime_information_.minor_version;
+
+        if (majorVersion >= 6)
+        {
+            // Calculate key the same way as AssemblyRedirectionSourceGenerator:
+            frameworkVersion = (majorVersion * 10 + minorVersion);
+
+            Logger::Debug("DetectFrameworkVersionTableForRedirectsMap: Detected .NET ", majorVersion, ".", minorVersion,
+                          " (framework key: ", frameworkVersion, ")");
+        }
+        else
+        {
+            // Default to .NET 8.0 if version detection fails or unsupported version
+            frameworkVersion = 80;
+            Logger::Warn("DetectFrameworkVersionTableForRedirectsMap: Unsupported or undetected .NET (Core) version ",
+                         majorVersion, ".", minorVersion, ", using default version 80");
         }
     }
 
+    // Find the best matching framework version in the map
+    // by selecting the highest available version that is <= detected version
     assembly_version_redirect_map_current_framework_key_ = 0;
     for (auto& [key, values] : assembly_version_redirect_map_)
     {
@@ -3903,6 +3989,10 @@ void CorProfiler::DetectFrameworkVersionTableForRedirectsMap()
     }
 }
 
+#ifdef _WIN32
+// even though this method looks at the current framework of redirection map
+// which is supported on any platform, we only use this method for .NET Framework
+// in Loader AssemblyResolver.NetFramework
 int CorProfiler::GetNetFrameworkRedirectionVersion() const
 {
     return assembly_version_redirect_map_current_framework_key_;

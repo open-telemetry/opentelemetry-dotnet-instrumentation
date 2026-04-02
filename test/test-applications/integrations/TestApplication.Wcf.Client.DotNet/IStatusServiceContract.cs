@@ -2,12 +2,11 @@
 // SPDX-License-Identifier: Apache-2.0
 
 using System.ServiceModel;
-using System.Threading.Tasks;
 
 namespace TestApplication.Wcf.Client.DotNet;
 
 [ServiceContract(Namespace = "http://opentelemetry.io/", Name = "StatusService", SessionMode = SessionMode.Allowed)]
-public interface IStatusServiceContract
+internal interface IStatusServiceContract
 {
     [OperationContract]
     Task<StatusResponse> PingAsync(StatusRequest request);

@@ -8,7 +8,7 @@ using Xunit.Abstractions;
 namespace IntegrationTests;
 
 [Trait("Category", "EndToEnd")]
-public sealed class NugetSampleTests : TestHelper
+public class NugetSampleTests : TestHelper
 {
     private readonly string _ridSpecificAppDir;
     private readonly string _baseAppDir;
@@ -95,8 +95,13 @@ public sealed class NugetSampleTests : TestHelper
         RunAndAssertHttpSpans(() =>
         {
             using var testServer = TestHttpServer.CreateDefaultTestServer(Output);
+#if NET
+            var dllName = EnvironmentHelper.FullTestApplicationName.EndsWith(".exe", StringComparison.Ordinal)
+                ? EnvironmentHelper.FullTestApplicationName.Replace(".exe", ".dll", StringComparison.Ordinal)
+#else
             var dllName = EnvironmentHelper.FullTestApplicationName.EndsWith(".exe")
                 ? EnvironmentHelper.FullTestApplicationName.Replace(".exe", ".dll")
+#endif
                 : EnvironmentHelper.FullTestApplicationName + ".dll";
             var dllPath = Path.Combine(appDir, dllName);
             RunInstrumentationTarget($"dotnet {dllPath} --test-server-port {testServer.Port}", appDir);

@@ -6,7 +6,7 @@ using Xunit.Abstractions;
 
 namespace IntegrationTests;
 
-[Collection(PostgresCollection.Name)]
+[Collection(PostgresCollectionFixture.Name)]
 public class NpqsqlTests : TestHelper
 {
     private readonly PostgresFixture _postgres;

@@ -9,7 +9,7 @@ namespace IntegrationTests.Helpers;
 /// <summary>
 /// General use utility methods for all tests and tools.
 /// </summary>
-public static class EnvironmentTools
+internal static class EnvironmentTools
 {
     public const string ProfilerClsId = "{918728DD-259F-4A6A-AC2B-B85E1B658318}";
     public const string DotNetFramework = ".NETFramework";
@@ -34,7 +34,7 @@ public static class EnvironmentTools
 
             if (currentDirectory == null || !currentDirectory.Exists)
             {
-                throw new Exception($"Unable to find solution directory from: {startDirectory}");
+                throw new InvalidOperationException($"Unable to find solution directory from: {startDirectory}");
             }
         }
 
@@ -90,7 +90,9 @@ public static class EnvironmentTools
 
     public static string GetPlatform()
     {
+#pragma warning disable CA1308 // Normalize strings to uppercase
         return RuntimeInformation.ProcessArchitecture.ToString().ToLowerInvariant();
+#pragma warning restore CA1308 // Normalize strings to uppercase
     }
 
     public static bool IsX64()
@@ -125,7 +127,9 @@ public static class EnvironmentTools
 
     public static string GetClrProfilerDirectoryName()
     {
+#pragma warning disable CA1308 // Normalize strings to uppercase
         return $"{GetClrProfilerOSDirectoryName()}-{GetPlatformDir().ToLowerInvariant()}";
+#pragma warning restore CA1308 // Normalize strings to uppercase
     }
 
     private static string? GetClrProfilerOSDirectoryName()

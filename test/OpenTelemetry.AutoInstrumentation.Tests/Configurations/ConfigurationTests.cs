@@ -2,6 +2,9 @@
 // SPDX-License-Identifier: Apache-2.0
 
 using System.Collections.Specialized;
+#if NET
+using System.Text;
+#endif
 using NSubstitute;
 using OpenTelemetry.AutoInstrumentation.Configurations;
 using Xunit;
@@ -10,6 +13,12 @@ namespace OpenTelemetry.AutoInstrumentation.Tests.Configurations;
 
 public class ConfigurationTests
 {
+#if NET
+    private static readonly CompositeFormat TestConfigurationTemplate = CompositeFormat.Parse("TEST_CONFIGURATION_{0}_ENABLED");
+#else
+    private const string TestConfigurationTemplate = "TEST_CONFIGURATION_{0}_ENABLED";
+#endif
+
     private enum TestEnum
     {
         Test1,
@@ -20,11 +29,11 @@ public class ConfigurationTests
     [Fact]
     public void ParseEnabledEnumList_Default_Enabled()
     {
-        var source = new Configuration(false, new NameValueConfigurationSource(false, new NameValueCollection()));
+        var source = new Configuration(false, new NameValueConfigurationSource(false, []));
 
         var list = source.ParseEnabledEnumList<TestEnum>(
             enabledByDefault: true,
-            enabledConfigurationTemplate: "TEST_CONFIGURATION_{0}_ENABLED");
+            enabledConfigurationTemplate: TestConfigurationTemplate);
 
         Assert.Equal([TestEnum.Test1, TestEnum.Test2, TestEnum.Test3], list);
     }
@@ -32,11 +41,11 @@ public class ConfigurationTests
     [Fact]
     public void ParseEnabledEnumList_Default_Disabled()
     {
-        var source = new Configuration(false, new NameValueConfigurationSource(false, new NameValueCollection()));
+        var source = new Configuration(false, new NameValueConfigurationSource(false, []));
 
         var list = source.ParseEnabledEnumList<TestEnum>(
             enabledByDefault: false,
-            enabledConfigurationTemplate: "TEST_CONFIGURATION_{0}_ENABLED");
+            enabledConfigurationTemplate: TestConfigurationTemplate);
 
         Assert.Empty(list);
     }
@@ -52,7 +61,7 @@ public class ConfigurationTests
 
         var list = source.ParseEnabledEnumList<TestEnum>(
             enabledByDefault: false,
-            enabledConfigurationTemplate: "TEST_CONFIGURATION_{0}_ENABLED");
+            enabledConfigurationTemplate: TestConfigurationTemplate);
 
         Assert.Equal([TestEnum.Test1, TestEnum.Test3], list);
     }
@@ -67,7 +76,7 @@ public class ConfigurationTests
 
         var list = source.ParseEnabledEnumList<TestEnum>(
             enabledByDefault: true,
-            enabledConfigurationTemplate: "TEST_CONFIGURATION_{0}_ENABLED");
+            enabledConfigurationTemplate: TestConfigurationTemplate);
 
         Assert.Equal([TestEnum.Test1, TestEnum.Test3], list);
     }
@@ -82,7 +91,7 @@ public class ConfigurationTests
 
         var list = source.ParseEnabledEnumList<TestEnum>(
             enabledByDefault: true,
-            enabledConfigurationTemplate: "TEST_CONFIGURATION_{0}_ENABLED");
+            enabledConfigurationTemplate: TestConfigurationTemplate);
 
         Assert.Equal([TestEnum.Test1, TestEnum.Test2, TestEnum.Test3], list);
     }
@@ -97,7 +106,7 @@ public class ConfigurationTests
 
         Assert.Throws<FormatException>(() => source.ParseEnabledEnumList<TestEnum>(
             enabledByDefault: true,
-            enabledConfigurationTemplate: "TEST_CONFIGURATION_{0}_ENABLED"));
+            enabledConfigurationTemplate: TestConfigurationTemplate));
     }
 
     [Fact]
@@ -154,7 +163,7 @@ public class ConfigurationTests
     [Fact]
     public void ParseList_ParseNullAsEmpty()
     {
-        var source = new Configuration(false, new NameValueConfigurationSource(false, new NameValueCollection()));
+        var source = new Configuration(false, new NameValueConfigurationSource(false, []));
 
         var list = source.ParseList("TEST_LIST", ',');
 

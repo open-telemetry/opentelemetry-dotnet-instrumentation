@@ -3,7 +3,7 @@
 
 namespace TestApplication.SelectiveSampler.Plugins;
 
-public static class SelectiveSamplerPluginHelper
+internal static class SelectiveSamplerPluginHelper
 {
     public static Tuple<uint, TimeSpan, TimeSpan, object> GetTestConfiguration()
     {

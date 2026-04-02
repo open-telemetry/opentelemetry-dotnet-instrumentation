@@ -13,7 +13,9 @@ namespace OpenTelemetry.AutoInstrumentation.AspNetCoreBootstrapper;
 /// <summary>
 /// Add summary.
 /// </summary>
-internal class BootstrapperHostingStartup : IHostingStartup
+#pragma warning disable CA1812 // Avoid uninstantiated internal classes. This class is instantiated by ASP.NET Core via reflection.
+internal sealed class BootstrapperHostingStartup : IHostingStartup
+#pragma warning restore CA1812 // Avoid uninstantiated internal classes. This class is instantiated by ASP.NET Core via reflection.
 {
     private const string BootstrapperLoggerSuffix = "AspNetCoreBootstrapper";
     private static readonly IOtelLogger Logger = OtelLogging.GetLogger(BootstrapperLoggerSuffix);
@@ -29,7 +31,7 @@ internal class BootstrapperHostingStartup : IHostingStartup
     }
 
     /// <summary>
-    /// This method gets called by the runtime to lightup ASP.NET Core OpenTelemetry Logs Collection.
+    /// This method gets called by the runtime to light up ASP.NET Core OpenTelemetry Logs Collection.
     /// </summary>
     /// <param name="builder">The <see cref="IWebHostBuilder"/>.</param>
     public void Configure(IWebHostBuilder builder)
@@ -73,7 +75,9 @@ internal class BootstrapperHostingStartup : IHostingStartup
         {
             return AppDomain.CurrentDomain.FriendlyName;
         }
+#pragma warning disable CA1031 // Do not catch general exception
         catch (Exception ex)
+#pragma warning restore CA1031 // Do not catch general exception
         {
             Logger.Error($"Error getting AppDomain.CurrentDomain.FriendlyName: {ex}");
             return string.Empty;

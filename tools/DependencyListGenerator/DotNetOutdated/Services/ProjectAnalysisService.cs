@@ -22,7 +22,7 @@ public class ProjectAnalysisService
         _fileSystem = fileSystem;
     }
 
-    public List<Project> AnalyzeProject(string projectPath, bool runRestore)
+    public IReadOnlyCollection<Project> AnalyzeProject(string projectPath, bool runRestore)
     {
         if (runRestore)
         {

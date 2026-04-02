@@ -3,7 +3,6 @@
 
 using System.Diagnostics;
 using OpenTelemetry.AutoInstrumentation.Logging;
-using OpenTelemetry.AutoInstrumentation.Tagging;
 
 namespace OpenTelemetry.AutoInstrumentation.Util;
 
@@ -31,29 +30,5 @@ internal static class ActivityHelper
 
         activity.SetStatus(ActivityStatusCode.Error, exception.Message);
         activity.AddException(exception);
-    }
-
-    public static Activity? StartActivityWithTags(this ActivitySource? activitySource, string operationName, ActivityKind kind, ITags tags)
-    {
-        if (activitySource == null)
-        {
-            Log.Debug("Trying to start activity on null activity source.");
-            return null;
-        }
-
-        var activity = activitySource.StartActivity(operationName, kind);
-
-        if (activity == null)
-        {
-            return activity;
-        }
-
-        // Apply tags
-        foreach (var entry in tags.GetAllTags())
-        {
-            activity.SetTag(entry.Key, entry.Value);
-        }
-
-        return activity;
     }
 }

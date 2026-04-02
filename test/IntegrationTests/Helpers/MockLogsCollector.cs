@@ -2,11 +2,11 @@
 // SPDX-License-Identifier: Apache-2.0
 
 using System.Collections.Concurrent;
+using System.Globalization;
 using System.Text;
 using OpenTelemetry.Proto.Collector.Logs.V1;
 using OpenTelemetry.Proto.Logs.V1;
 using Xunit.Abstractions;
-
 #if NETFRAMEWORK
 using System.Net;
 #else
@@ -15,12 +15,13 @@ using Microsoft.AspNetCore.Http;
 
 namespace IntegrationTests.Helpers;
 
-public class MockLogsCollector : IDisposable
+internal sealed class MockLogsCollector : IDisposable
 {
     private readonly ITestOutputHelper _output;
     private readonly TestHttpServer _listener;
     private readonly BlockingCollection<LogRecord> _logs = new(100); // bounded to avoid memory leak
     private readonly List<Expectation> _expectations = new();
+    private int _logsReceived;
 
     private CollectedExpectation? _collectedExpectation;
 
@@ -44,10 +45,10 @@ public class MockLogsCollector : IDisposable
 
     public void Dispose()
     {
-        WriteOutput($"Shutting down. Total logs requests received: '{_logs.Count}'");
+        _listener.Dispose();
+        WriteOutput($"Shutting down. Total logs received: '{_logsReceived}'");
         ResourceExpector.Dispose();
         _logs.Dispose();
-        _listener.Dispose();
     }
 
     public void Expect(Func<LogRecord, bool> predicate, string? description = null)
@@ -146,11 +147,11 @@ public class MockLogsCollector : IDisposable
     private static void FailCollectedExpectation(string? collectedExpectationDescription, LogRecord[] collectedLogRecords)
     {
         var message = new StringBuilder();
-        message.AppendLine($"Collected logs expectation failed: {collectedExpectationDescription}");
+        message.AppendLine(CultureInfo.InvariantCulture, $"Collected logs expectation failed: {collectedExpectationDescription}");
         message.AppendLine("Collected logs:");
         foreach (var logRecord in collectedLogRecords)
         {
-            message.AppendLine($"    \"{logRecord}\"");
+            message.AppendLine(CultureInfo.InvariantCulture, $"    \"{logRecord}\"");
         }
 
         Assert.Fail(message.ToString());
@@ -167,19 +168,19 @@ public class MockLogsCollector : IDisposable
         message.AppendLine("Missing expectations:");
         foreach (var logline in missingExpectations)
         {
-            message.AppendLine($"  - \"{logline.Description}\"");
+            message.AppendLine(CultureInfo.InvariantCulture, $"  - \"{logline.Description}\"");
         }
 
         message.AppendLine("Entries meeting expectations:");
         foreach (var logline in expectationsMet)
         {
-            message.AppendLine($"    \"{logline}\"");
+            message.AppendLine(CultureInfo.InvariantCulture, $"    \"{logline}\"");
         }
 
         message.AppendLine("Additional entries:");
         foreach (var logline in additionalEntries)
         {
-            message.AppendLine($"  + \"{logline}\"");
+            message.AppendLine(CultureInfo.InvariantCulture, $"  + \"{logline}\"");
         }
 
         Assert.Fail(message.ToString());
@@ -196,11 +197,11 @@ public class MockLogsCollector : IDisposable
 #else
     private async Task HandleHttpRequests(HttpContext ctx)
     {
-        using var bodyStream = await ctx.ReadBodyToMemoryAsync();
+        using var bodyStream = await ctx.ReadBodyToMemoryAsync().ConfigureAwait(false);
         var metricsMessage = ExportLogsServiceRequest.Parser.ParseFrom(bodyStream);
         HandleLogsMessage(metricsMessage);
 
-        await ctx.GenerateEmptyProtobufResponseAsync<ExportLogsServiceResponse>();
+        await ctx.GenerateEmptyProtobufResponseAsync<ExportLogsServiceResponse>().ConfigureAwait(false);
     }
 #endif
 
@@ -213,6 +214,7 @@ public class MockLogsCollector : IDisposable
             {
                 foreach (var logRecord in scopeLogs.LogRecords ?? Enumerable.Empty<LogRecord>())
                 {
+                    Interlocked.Increment(ref _logsReceived);
                     _logs.Add(logRecord);
                 }
             }
@@ -225,7 +227,7 @@ public class MockLogsCollector : IDisposable
         _output.WriteLine($"[{name}]: {msg}");
     }
 
-    private class Expectation
+    private sealed class Expectation
     {
         public Expectation(Func<LogRecord, bool> predicate, string? description)
         {
@@ -238,7 +240,7 @@ public class MockLogsCollector : IDisposable
         public string? Description { get; }
     }
 
-    private class CollectedExpectation
+    private sealed class CollectedExpectation
     {
         public CollectedExpectation(Func<ICollection<LogRecord>, bool> predicate, string? description)
         {

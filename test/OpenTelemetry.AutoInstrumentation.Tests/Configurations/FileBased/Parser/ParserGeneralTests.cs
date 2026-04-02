@@ -17,7 +17,7 @@ public class ParserGeneralTests
 
         Assert.NotNull(config);
 
-        Assert.Equal("1.0-rc.1", config.FileFormat);
+        Assert.Equal("1.0", config.FileFormat);
         Assert.False(config.Disabled);
         Assert.False(config.FailFast);
         Assert.False(config.FlushOnUnhandledException);
@@ -34,7 +34,7 @@ public class ParserGeneralTests
 
         Assert.NotNull(config);
 
-        Assert.Equal("1.0-rc.1", config.FileFormat);
+        Assert.Equal("1.0", config.FileFormat);
         Assert.True(config.Disabled);
         Assert.True(config.FailFast);
         Assert.False(config.FlushOnUnhandledException);

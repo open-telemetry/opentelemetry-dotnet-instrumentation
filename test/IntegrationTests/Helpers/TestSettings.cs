@@ -3,9 +3,9 @@
 
 namespace IntegrationTests.Helpers;
 
-public class TestSettings
+internal sealed class TestSettings
 {
-    public string? Arguments { get; set; } = null;
+    public string? Arguments { get; set; }
 
     public string PackageVersion { get; set; } = string.Empty;
 

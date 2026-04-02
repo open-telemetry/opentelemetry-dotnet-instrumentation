@@ -32,6 +32,12 @@ internal class DotNetTraces
     [YamlMember(Alias = "additional_legacy_sources_list")]
     public string? AdditionalLegacySourcesList { get; set; }
 
+    /// <summary>
+    /// Gets or sets the ADO.NET traces instrumentation configuration.
+    /// </summary>
+    [YamlMember(Alias = "adonet")]
+    public object? AdoNet { get; set; }
+
 #if NETFRAMEWORK
     /// <summary>
     /// Gets or sets the ASP.NET traces instrumentation configuration.
@@ -52,6 +58,7 @@ internal class DotNetTraces
     /// </summary>
     [YamlMember(Alias = "aspnetcore")]
     public CaptureHeadersConfiguration? AspNetCore { get; set; }
+#endif
 
     /// <summary>
     /// Gets or sets the StackExchange.Redis traces instrumentation configuration.
@@ -59,6 +66,7 @@ internal class DotNetTraces
     [YamlMember(Alias = "stackexchangeredis")]
     public object? StackExchangeRedis { get; set; }
 
+#if NET
     /// <summary>
     /// Gets or sets the Entity Framework Core traces instrumentation configuration.
     /// </summary>
@@ -166,13 +174,27 @@ internal class DotNetTraces
     /// Gets or sets the SqlClient traces instrumentation configuration.
     /// </summary>
     [YamlMember(Alias = "sqlclient")]
-    public object? SqlClient { get; set; }
+    public SqlClientConfiguration? SqlClient { get; set; }
+
+    /// <summary>
+    /// Gets or sets the SQLite traces instrumentation configuration.
+    /// </summary>
+    [YamlMember(Alias = "sqlite")]
+    public object? Sqlite { get; set; }
 
     /// <summary>
     /// Gets or sets the WCF client traces instrumentation configuration.
     /// </summary>
     [YamlMember(Alias = "wcfclient")]
     public object? WcfClient { get; set; }
+
+#if NET
+    /// <summary>
+    /// Gets or sets the CoreWCF traces instrumentation configuration.
+    /// </summary>
+    [YamlMember(Alias = "wcfcore")]
+    public object? WcfCore { get; set; }
+#endif
 
     /// <summary>
     /// Returns the list of enabled traces instrumentations.

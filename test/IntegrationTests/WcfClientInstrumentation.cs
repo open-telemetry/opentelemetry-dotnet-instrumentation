@@ -10,14 +10,14 @@ internal static class WcfClientInstrumentation
     public static bool ValidateExpectedSpanHierarchy(ICollection<MockSpansCollector.Collected> assertedSpans)
     {
         var customParent = assertedSpans.Single(collected =>
-            collected.InstrumentationScopeName.StartsWith("TestApplication.Wcf.Client") &&
+            collected.Scope.Name.StartsWith("TestApplication.Wcf.Client", StringComparison.Ordinal) &&
             collected.Span.Name == "Parent");
         var customSibling = assertedSpans.Single(collected =>
-            collected.InstrumentationScopeName.StartsWith("TestApplication.Wcf.Client") &&
+            collected.Scope.Name.StartsWith("TestApplication.Wcf.Client", StringComparison.Ordinal) &&
             collected.Span.Name == "Sibling");
         var wcfClientSpans = assertedSpans.Where(collected =>
             collected.Span.Kind == Span.Types.SpanKind.Client &&
-            collected.InstrumentationScopeName == "OpenTelemetry.Instrumentation.Wcf");
+            collected.Scope.Name == "OpenTelemetry.Instrumentation.Wcf");
 
         return wcfClientSpans.All(span => span.Span.ParentSpanId == customParent.Span.SpanId) &&
                customSibling.Span.ParentSpanId == customParent.Span.SpanId;

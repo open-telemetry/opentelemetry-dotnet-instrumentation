@@ -15,17 +15,19 @@ internal partial class PluginManager
 
     public PluginManager(PluginsSettings settings)
     {
-        var plugins = new List<(Type, object)>();
+        var plugins = new Dictionary<Type, object>();
 
         foreach (var assemblyQualifiedName in settings.Plugins)
         {
             var type = Type.GetType(assemblyQualifiedName, throwOnError: true)!;
-            var instance = Activator.CreateInstance(type)!;
-
-            plugins.Add((type, instance));
+            if (!plugins.ContainsKey(type))
+            {
+                var instance = Activator.CreateInstance(type)!;
+                plugins.Add(type, instance);
+            }
         }
 
-        _plugins = plugins;
+        _plugins = plugins.Select(it => (it.Key, it.Value)).ToList();
     }
 
     // Created for testing purposes.

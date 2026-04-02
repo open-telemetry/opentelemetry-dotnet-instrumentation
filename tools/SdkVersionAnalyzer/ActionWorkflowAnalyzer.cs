@@ -132,7 +132,7 @@ internal static class ActionWorkflowAnalyzer
             foreach (var step in (YamlSequenceNode)stepsNode)
             {
                 var jobStepNode = (YamlMappingNode)step;
-                if (jobStepNode.Children.TryGetValue(new YamlScalarNode("uses"), out var usesNode) && usesNode.ToString().StartsWith("actions/setup-dotnet"))
+                if (jobStepNode.Children.TryGetValue(new YamlScalarNode("uses"), out var usesNode) && usesNode.ToString().StartsWith("actions/setup-dotnet", StringComparison.Ordinal))
                 {
                     var withNode = (YamlMappingNode)jobStepNode.Children[new YamlScalarNode("with")];
                     var dotnetVersionNode = (YamlScalarNode)withNode.Children[new YamlScalarNode("dotnet-version")];

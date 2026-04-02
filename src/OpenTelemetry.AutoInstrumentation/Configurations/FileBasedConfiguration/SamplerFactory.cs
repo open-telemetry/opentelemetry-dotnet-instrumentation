@@ -94,7 +94,7 @@ internal static class SamplerFactory
         return configuredSampler;
     }
 
-    private static Sampler? CreateTraceIdRatioSampler(TraceIdRatioSamplerConfig config, bool failFast, string path)
+    private static TraceIdRatioBasedSampler? CreateTraceIdRatioSampler(TraceIdRatioSamplerConfig config, bool failFast, string path)
     {
         if (!config.Ratio.HasValue)
         {
@@ -126,7 +126,7 @@ internal static class SamplerFactory
         return new TraceIdRatioBasedSampler(ratio);
     }
 
-    private static Sampler CreateParentBasedSampler(ParentBasedSamplerConfig config, bool failFast, string path)
+    private static ParentBasedSampler CreateParentBasedSampler(ParentBasedSamplerConfig config, bool failFast, string path)
     {
         var rootSampler = GetSamplerOrDefault(config.Root, new AlwaysOnSampler(), failFast, path + ".root", "always_on");
         var remoteParentSampled = GetSamplerOrDefault(config.RemoteParentSampled, new AlwaysOnSampler(), failFast, path + ".remote_parent_sampled", "always_on");

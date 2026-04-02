@@ -1,15 +1,15 @@
 // Copyright The OpenTelemetry Authors
 // SPDX-License-Identifier: Apache-2.0
 
-using System.Collections;
 using TestApplication.Shared;
 
 namespace TestApplication.GraphQL;
 
-public class Program
+internal sealed class Program
 {
     public static void Main(string[] args)
     {
+        ConsoleHelper.WriteSplashScreen(args);
         var directory = Directory.GetCurrentDirectory();
 
         var host = new HostBuilder()
@@ -31,7 +31,7 @@ public class Program
 
         foreach (var kvp in envVars)
         {
-            logger.LogInformation($"{kvp.Key} = {kvp.Value}");
+            logger.LogEnvironmentVariable(kvp.Key, kvp.Value);
         }
 
         host.Run();

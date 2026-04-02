@@ -33,7 +33,7 @@ internal abstract class StringConfigurationSource : IConfigurationSource
 
         if (_failFast)
         {
-            return int.Parse(value);
+            return int.Parse(value, CultureInfo.InvariantCulture);
         }
 
         return int.TryParse(value, out var result)

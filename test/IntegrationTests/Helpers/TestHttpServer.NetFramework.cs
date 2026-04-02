@@ -8,7 +8,7 @@ using Xunit.Abstractions;
 
 namespace IntegrationTests.Helpers;
 
-public class TestHttpServer : IDisposable
+internal sealed class TestHttpServer : IDisposable
 {
     private readonly ITestOutputHelper _output;
     private readonly Action<HttpListenerContext> _requestHandler;
@@ -80,13 +80,15 @@ public class TestHttpServer : IDisposable
                 // this can occur when setting Response.ContentLength64, with the framework claiming that the response has already been submitted
                 // for now ignore, and we'll see if this introduces downstream issues
             }
+#pragma warning disable CA1031 // Do not catch general exception types
             catch (Exception) when (!_listener.IsListening)
             {
                 // we don't care about any exception when listener is stopped
             }
             catch (Exception ex)
+#pragma warning restore CA1031 // Do not catch general exception types
             {
-                // somethig unexpected happened
+                // something unexpected happened
                 // log instead of crashing the thread
                 WriteOutput(ex.ToString());
             }

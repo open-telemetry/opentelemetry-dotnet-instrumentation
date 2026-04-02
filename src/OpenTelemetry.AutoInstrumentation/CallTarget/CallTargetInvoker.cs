@@ -318,7 +318,9 @@ public static class CallTargetInvoker
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static void LogException<TIntegration, TTarget>(Exception exception)
     {
+#pragma warning disable CA1062 // Validate arguments of public methods. The method in intended to use only with our internal code.
         IntegrationOptions<TIntegration, TTarget>.LogException(exception);
+#pragma warning restore CA1062 // Validate arguments of public methods. The method in intended to use only with our internal code.
     }
 
     /// <summary>

@@ -33,7 +33,7 @@ public class OpenTelemetrySdkMinimumVersionRuleTests
         Assert.Equal(result, ruleResult);
     }
 
-    private class OpenTelemetrySdkMinimumVersionTestRule : OpenTelemetrySdkMinimumVersionRule
+    private sealed class OpenTelemetrySdkMinimumVersionTestRule : OpenTelemetrySdkMinimumVersionRule
     {
         private readonly Version? _appVersion;
         private readonly Version? _autoInstrumentationVersion;

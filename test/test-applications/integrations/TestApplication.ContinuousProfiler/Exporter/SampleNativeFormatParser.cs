@@ -8,7 +8,7 @@ namespace TestApplication.ContinuousProfiler;
 /// <summary>
 /// Parser the native code's pause-time-optimized format.
 /// </summary>
-public class SampleNativeFormatParser
+internal sealed class SampleNativeFormatParser
 {
     // TODO use value from ContinuousProfilerProcessor.BackgroundThreadName when it will be moved to main project
     public const string BackgroundThreadName = "OpenTelemetry Continuous Profiler Thread";
@@ -93,6 +93,7 @@ public class SampleNativeFormatParser
                         traceIdLow,
                         spanId,
                         threadName,
+                        "continuous-profiler",
                         threadIndex,
                         selectedForFrequentSampling);
 
@@ -150,7 +151,9 @@ public class SampleNativeFormatParser
     /// </summary>
     /// <param name="buffer">byte array containing native allocation samples format data</param>
     /// <param name="read">how much of the buffer is actually used</param>
+#pragma warning disable CA1822 // Mark members as static. Needed for AutoInstrumentation plugins.
     internal List<AllocationSample> ParseAllocationSamples(byte[] buffer, int read)
+#pragma warning restore CA1822 // Mark members as static. Needed for AutoInstrumentation plugins.
     {
         var allocationSamples = new List<AllocationSample>();
         var position = 0;
@@ -176,7 +179,8 @@ public class SampleNativeFormatParser
                         traceIdHigh,
                         traceIdLow,
                         spanId,
-                        threadName);
+                        threadName,
+                        "allocation");
 
                     var code = ReadShort(buffer, ref position);
 
@@ -211,7 +215,9 @@ public class SampleNativeFormatParser
         return allocationSamples;
     }
 
+#pragma warning disable CA1822 // Mark members as static. Needed for AutoInstrumentation plugins.
     internal List<ThreadSample> ParseSelectiveSamplerSamples(byte[] buffer, int read)
+#pragma warning restore CA1822 // Mark members as static. Needed for AutoInstrumentation plugins.
     {
         var selectiveSamplerSamples = new List<ThreadSample>();
         var position = 0;
@@ -245,6 +251,7 @@ public class SampleNativeFormatParser
                         traceIdLow,
                         spanId,
                         threadName,
+                        "selective-sampler",
                         threadIndex++,
                         true);
 

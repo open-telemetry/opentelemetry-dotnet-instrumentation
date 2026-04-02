@@ -16,6 +16,7 @@ internal static class NativeMethods
         NativeLibrary.SetDllImportResolver(typeof(NativeMethods).Assembly, ImportResolver);
     }
 
+    [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
     [DllImport("OpenTelemetry.AutoInstrumentation.Native")]
     public static extern bool IsProfilerAttached();
 

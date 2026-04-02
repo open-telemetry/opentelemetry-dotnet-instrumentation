@@ -5,6 +5,7 @@ using System.Diagnostics;
 using System.Reflection;
 using System.Text.Json;
 using OpenTelemetry.AutoInstrumentation.Logging;
+using OpenTelemetry.AutoInstrumentation.Util;
 
 namespace OpenTelemetry.AutoInstrumentation.RulesEngine;
 
@@ -12,8 +13,11 @@ internal class AssemblyFileVersionRule : Rule
 {
     private static readonly IOtelLogger Logger = OtelLogging.GetLogger("StartupHook");
 
-    public AssemblyFileVersionRule()
+    private readonly string _instrumentationHomePath;
+
+    public AssemblyFileVersionRule(string instrumentationHomePath)
     {
+        _instrumentationHomePath = instrumentationHomePath;
         Name = "Assembly File Version Validator";
         Description = "Ensure that the version of key assemblies is not older than the version used by Automatic Instrumentation.";
     }
@@ -24,7 +28,7 @@ internal class AssemblyFileVersionRule : Rule
 
         try
         {
-            var ruleEngineFileLocation = Path.Combine(StartupHook.LoaderAssemblyLocation ?? string.Empty, "ruleEngine.json");
+            var ruleEngineFileLocation = Path.Combine(_instrumentationHomePath, "ruleEngine.json");
             var ruleEngineContent = File.ReadAllText(ruleEngineFileLocation);
             var ruleFileInfoList = JsonSerializer.Deserialize<List<RuleFileInfo>>(ruleEngineContent);
             var entryAssembly = Assembly.GetEntryAssembly();
@@ -43,8 +47,14 @@ internal class AssemblyFileVersionRule : Rule
                 {
                     var autoInstrumentationFileVersion = new Version(ruleFileInfo.FileVersion);
 
-                    var appInstrumentationAssembly = Assembly.Load(referencedAssembly);
-                    var appInstrumentationFileVersionInfo = FileVersionInfo.GetVersionInfo(appInstrumentationAssembly.Location);
+                    var appInstrumentationAssemblyPath = TrustedPlatformAssembliesHelper.TpaPaths.FirstOrDefault(path => Path.GetFileNameWithoutExtension(path).Equals(referencedAssembly.Name, StringComparison.OrdinalIgnoreCase));
+                    if (appInstrumentationAssemblyPath == null)
+                    {
+                        Logger.Warning($"Rule Engine: Could not find assembly {ruleFileInfo.FileName} in TPA list. Skipping file version validation for this assembly.");
+                        continue;
+                    }
+
+                    var appInstrumentationFileVersionInfo = FileVersionInfo.GetVersionInfo(appInstrumentationAssemblyPath);
                     var appInstrumentationFileVersion = new Version(appInstrumentationFileVersionInfo.FileVersion);
 
                     if (appInstrumentationFileVersion < autoInstrumentationFileVersion)
@@ -61,7 +71,7 @@ internal class AssemblyFileVersionRule : Rule
         }
         catch (Exception ex)
         {
-            // Exception in rule evaluation should not impact the result of the rule.
+            // An exception in rule evaluation should not impact the result of the rule.
             Logger.Warning($"Rule Engine: Couldn't evaluate assembly reference file version. Exception: {ex}");
         }
 

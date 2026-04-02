@@ -1,16 +1,16 @@
-FROM mcr.microsoft.com/dotnet/sdk:10.0.100-alpine3.22@sha256:7d98d5883675c6bca25b1db91f393b24b85125b5b00b405e55404fd6b8d2aead
+FROM mcr.microsoft.com/dotnet/sdk:10.0.201-alpine3.23@sha256:a65df8d9ad0661a1a785a4f26188b3a2826540d448df317ac69cfb6e801e1592
 RUN apk update \
     && apk upgrade \
     && apk add --no-cache --update \
-        clang=20.1.8-r0 \
-        cmake=3.31.7-r1 \
+        clang21=21.1.2-r2 \
+        cmake=4.1.3-r0 \
         make=4.4.1-r3 \
-        bash=5.2.37-r0 \
+        bash=5.3.3-r1 \
         alpine-sdk=1.1-r0 \
-        protobuf=29.4-r0 \
-        protobuf-dev=29.4-r0 \
-        grpc=1.72.0-r0 \
-        grpc-plugins=1.72.0-r0
+        protobuf=31.1-r1 \
+        protobuf-dev=31.1-r1 \
+        grpc=1.76.0-r2 \
+        grpc-plugins=1.76.0-r2
 
 ENV IsAlpine=true
 ENV PROTOBUF_PROTOC=/usr/bin/protoc
@@ -20,8 +20,8 @@ COPY ./scripts/dotnet-install.sh ./dotnet-install.sh
 
 # Install older SDKs using the install script
 RUN chmod +x ./dotnet-install.sh \
-    && ./dotnet-install.sh -v 9.0.308 --install-dir /usr/share/dotnet --no-path \
-    && ./dotnet-install.sh -v 8.0.416 --install-dir /usr/share/dotnet --no-path \
+    && ./dotnet-install.sh -v 9.0.312 --install-dir /usr/share/dotnet --no-path \
+    && ./dotnet-install.sh -v 8.0.419 --install-dir /usr/share/dotnet --no-path \
     && rm dotnet-install.sh
 
 WORKDIR /project

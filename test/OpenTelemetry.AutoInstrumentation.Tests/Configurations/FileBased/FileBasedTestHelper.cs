@@ -29,4 +29,15 @@ internal static class FileBasedTestHelper
         var value = prop.GetValue(obj);
         Assert.NotNull(value);
     }
+
+    public static void AssertCountOfAliasProperties<T>(T obj, int expectedCount)
+    {
+        Assert.NotNull(obj);
+
+        var props = typeof(T).GetProperties()
+                            .Where(p => p.GetCustomAttribute<YamlMemberAttribute>()?.Alias != null)
+                            .ToList();
+
+        Assert.Equal(expectedCount, props.Count);
+    }
 }

@@ -13,11 +13,13 @@
 
     <IsPackable>false</IsPackable>
     <GenerateDocumentationFile>false</GenerateDocumentationFile>
-    <LangVersion>13.0</LangVersion>
+    <LangVersion>14.0</LangVersion>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
 
     <!-- Keep the same base output path to simplify re-use of test helpers -->
     <BaseOutputPath>..\bin\$(MSBuildProjectName)\</BaseOutputPath>
+    <!-- CA1031: Do not catch general exception types -->
+    <NoWarn>$(NoWarn);CA1031</NoWarn>
   </PropertyGroup>
 
 </Project>

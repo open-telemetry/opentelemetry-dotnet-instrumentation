@@ -8,14 +8,19 @@ using Xunit.Abstractions;
 
 namespace IntegrationTests;
 
-public class AspNetTests
+public class AspNetTests(ITestOutputHelper output)
 {
     private const string ServiceName = "TestApplication.AspNet.NetFramework";
 
-    public AspNetTests(ITestOutputHelper output)
+    private static readonly HttpClient Client = new()
     {
-        Output = output;
-    }
+        DefaultRequestHeaders =
+        {
+            { "Custom-Request-Test-Header1", "Test-Value1" },
+            { "Custom-Request-Test-Header2", "Test-Value2" },
+            { "Custom-Request-Test-Header3", "Test-Value3" }
+        }
+    };
 
     public enum Gac
     {
@@ -43,9 +48,9 @@ public class AspNetTests
         Integrated
     }
 
-    private ITestOutputHelper Output { get; }
+    private ITestOutputHelper Output { get; } = output;
 
-    [Theory]
+    [WindowsAdministratorTheory]
     [Trait("Category", "EndToEnd")]
     [Trait("Containers", "Windows")]
     [InlineData(AppPoolMode.Classic, Gac.UseGac)]
@@ -54,8 +59,6 @@ public class AspNetTests
     [InlineData(AppPoolMode.Integrated, Gac.UseLocal)]
     public async Task SubmitsTraces(AppPoolMode appPoolMode, Gac useGac)
     {
-        Assert.True(EnvironmentTools.IsWindowsAdministrator(), "This test requires Windows Administrator privileges.");
-
         // Using "*" as host requires Administrator. This is needed to make the mock collector endpoint
         // accessible to the Windows docker container where the test application is executed by binding
         // the endpoint to all network interfaces. In order to do that it is necessary to open the port
@@ -72,13 +75,16 @@ public class AspNetTests
         };
         var webPort = TcpPortProvider.GetOpenPort();
         var imageName = GetTestImageName(appPoolMode, useGac);
+#pragma warning disable CA2007 // Do not directly await a Task. https://github.com/dotnet/roslyn-analyzers/issues/7185
+        // TODO remove pragma when https://github.com/dotnet/roslyn-analyzers/issues/7185 is fixed
         await using var container = await IISContainerTestHelper.StartContainerAsync(imageName, webPort, environmentVariables, Output);
-        await CallTestApplicationEndpoint(webPort);
+#pragma warning restore CA2007 // Do not directly await a Task. https://github.com/dotnet/roslyn-analyzers/issues/7185
+        await CallTestApplicationEndpoint(webPort).ConfigureAwait(true);
 
         collector.AssertExpectations();
     }
 
-    [Theory]
+    [WindowsAdministratorTheory]
     [Trait("Category", "EndToEnd")]
     [Trait("Containers", "Windows")]
     [InlineData(AppPoolMode.Classic, Gac.UseGac)]
@@ -87,8 +93,6 @@ public class AspNetTests
     [InlineData(AppPoolMode.Integrated, Gac.UseLocal)]
     public async Task SubmitTracesCapturesHttpHeaders(AppPoolMode appPoolMode, Gac useGac)
     {
-        Assert.True(EnvironmentTools.IsWindowsAdministrator(), "This test requires Windows Administrator privileges.");
-
         // Using "*" as host requires Administrator. This is needed to make the mock collector endpoint
         // accessible to the Windows docker container where the test application is executed by binding
         // the endpoint to all network interfaces. In order to do that it is necessary to open the port
@@ -144,27 +148,29 @@ public class AspNetTests
         };
         var webPort = TcpPortProvider.GetOpenPort();
         var imageName = GetTestImageName(appPoolMode, useGac);
+#pragma warning disable CA2007 // Do not directly await a Task. https://github.com/dotnet/roslyn-analyzers/issues/7185
+        // TODO remove pragma when https://github.com/dotnet/roslyn-analyzers/issues/7185 is fixed
         await using var container = await IISContainerTestHelper.StartContainerAsync(imageName, webPort, environmentVariables, Output);
-        await CallTestApplicationEndpoint(webPort);
+#pragma warning restore CA2007 // Do not directly await a Task. https://github.com/dotnet/roslyn-analyzers/issues/7185
+        await CallTestApplicationEndpoint(webPort).ConfigureAwait(true);
 
         collector.AssertExpectations();
     }
 
-    [Fact]
+    [WindowsAdministratorFact]
     [Trait("Category", "EndToEnd")]
     [Trait("Containers", "Windows")]
     public async Task TracesResource()
     {
-        Assert.True(EnvironmentTools.IsWindowsAdministrator(), "This test requires Windows Administrator privileges.");
-
         // Using "*" as host requires Administrator. This is needed to make the mock collector endpoint
         // accessible to the Windows docker container where the test application is executed by binding
         // the endpoint to all network interfaces. In order to do that it is necessary to open the port
         // on the firewall.
         using var collector = new MockSpansCollector(Output, host: "*");
         using var fwPort = FirewallHelper.OpenWinPort(collector.Port, Output);
-        collector.ResourceExpector.Expect("service.name", ServiceName); // this is set via env var in Dockerfile and Wep.config, but env var has precedence
-        collector.ResourceExpector.Expect("deployment.environment.name", "test"); // this is set via Wep.config
+        collector.ResourceExpector.Expect("service.name", ServiceName); // this is set via env var in Dockerfile and Web.config, but env var has precedence
+        collector.ResourceExpector.Expect("deployment.environment.name", "test"); // this is set via Web.config
+        collector.ResourceExpector.Matches("service.instance.id", "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"); // automatically generated
 
         var collectorUrl = $"http://{DockerNetworkHelper.IntegrationTestsGateway}:{collector.Port}";
 
@@ -176,19 +182,20 @@ public class AspNetTests
         };
 
         var webPort = TcpPortProvider.GetOpenPort();
+#pragma warning disable CA2007 // Do not directly await a Task. https://github.com/dotnet/roslyn-analyzers/issues/7185
+        // TODO remove pragma when https://github.com/dotnet/roslyn-analyzers/issues/7185 is fixed
         await using var container = await IISContainerTestHelper.StartContainerAsync("testapplication-aspnet-netframework-integrated", webPort, environmentVariables, Output);
-        await CallTestApplicationEndpoint(webPort);
+#pragma warning restore CA2007 // Do not directly await a Task. https://github.com/dotnet/roslyn-analyzers/issues/7185
+        await CallTestApplicationEndpoint(webPort).ConfigureAwait(true);
 
         collector.ResourceExpector.AssertExpectations();
     }
 
-    [Fact]
+    [WindowsAdministratorFact]
     [Trait("Category", "EndToEnd")]
     [Trait("Containers", "Windows")]
     public async Task SubmitMetrics()
     {
-        Assert.True(EnvironmentTools.IsWindowsAdministrator(), "This test requires Windows Administrator privileges.");
-
         // Using "*" as host requires Administrator. This is needed to make the mock collector endpoint
         // accessible to the Windows docker container where the test application is executed by binding
         // the endpoint to all network interfaces. In order to do that it is necessary to open the port
@@ -205,8 +212,11 @@ public class AspNetTests
             ["OTEL_DOTNET_AUTO_METRICS_ASPNET_INSTRUMENTATION_ENABLED"] = "true" // Helps to reduce noise by enabling only AspNet metrics.
         };
         var webPort = TcpPortProvider.GetOpenPort();
+#pragma warning disable CA2007 // Do not directly await a Task. https://github.com/dotnet/roslyn-analyzers/issues/7185
+        // TODO remove pragma when https://github.com/dotnet/roslyn-analyzers/issues/7185 is fixed
         await using var container = await IISContainerTestHelper.StartContainerAsync("testapplication-aspnet-netframework-integrated", webPort, environmentVariables, Output);
-        await CallTestApplicationEndpoint(webPort);
+#pragma warning restore CA2007 // Do not directly await a Task. https://github.com/dotnet/roslyn-analyzers/issues/7185
+        await CallTestApplicationEndpoint(webPort).ConfigureAwait(true);
 
         collector.AssertExpectations();
     }
@@ -219,25 +229,19 @@ public class AspNetTests
             (AppPoolMode.Classic, Gac.UseLocal) => "testapplication-aspnet-netframework-classic-nogac",
             (AppPoolMode.Integrated, Gac.UseGac) => "testapplication-aspnet-netframework-integrated",
             (AppPoolMode.Integrated, Gac.UseLocal) => "testapplication-aspnet-netframework-integrated-nogac",
-            _ => throw new ArgumentOutOfRangeException()
+            _ => throw new ArgumentOutOfRangeException(nameof(appPoolMode), $"Pair of {appPoolMode} and {useGac} is not supported.")
         };
     }
 
     private async Task CallTestApplicationEndpoint(int webPort)
     {
-        var client = new HttpClient();
-
-        client.DefaultRequestHeaders.Add("Custom-Request-Test-Header1", "Test-Value1");
-        client.DefaultRequestHeaders.Add("Custom-Request-Test-Header2", "Test-Value2");
-        client.DefaultRequestHeaders.Add("Custom-Request-Test-Header3", "Test-Value3");
-
-        var response = await client.GetAsync($"http://localhost:{webPort}");
-        var content = await response.Content.ReadAsStringAsync();
+        var response = await Client.GetAsync(new Uri($"http://localhost:{webPort}")).ConfigureAwait(false);
+        var content = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
         Output.WriteLine("MVC Response:");
         Output.WriteLine(content);
 
-        response = await client.GetAsync($"http://localhost:{webPort}/api/values");
-        content = await response.Content.ReadAsStringAsync();
+        response = await Client.GetAsync(new Uri($"http://localhost:{webPort}/api/values")).ConfigureAwait(false);
+        content = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
         Output.WriteLine("WebApi Response:");
         Output.WriteLine(content);
     }

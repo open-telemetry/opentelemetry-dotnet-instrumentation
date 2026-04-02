@@ -127,6 +127,10 @@ public class FilebasedInstrumentationSettingsTests
                 {
                     BridgeEnabled = true
                 },
+                NLog = new()
+                {
+                    BridgeEnabled = true
+                }
             }
         };
 
@@ -145,7 +149,9 @@ public class FilebasedInstrumentationSettingsTests
         Assert.NotNull(settings.EnabledInstrumentations);
         Assert.Contains(LogInstrumentation.ILogger, settings.EnabledInstrumentations);
         Assert.Contains(LogInstrumentation.Log4Net, settings.EnabledInstrumentations);
+        Assert.Contains(LogInstrumentation.NLog, settings.EnabledInstrumentations);
         Assert.True(settings.EnableLog4NetBridge);
+        Assert.True(settings.EnableNLogBridge);
     }
 
     [Fact]
@@ -324,4 +330,32 @@ public class FilebasedInstrumentationSettingsTests
         Assert.Contains("Some.Additional.Source2", settings.Meters);
         Assert.Contains("Some.Additional.Source3", settings.Meters);
     }
+
+#if NETFRAMEWORK
+    [Fact]
+    public void LoadFile_SetsSqlClientNetFxIlRewriteEnvironmentVariable()
+    {
+        var instrumentation = new DotNetInstrumentation
+        {
+            Traces = new DotNetTraces
+            {
+                SqlClient = new SqlClientConfiguration
+                {
+                    NetFxIlRewriteEnabled = true
+                }
+            }
+        };
+        var conf = new YamlConfiguration
+        {
+            InstrumentationDevelopment = new InstrumentationDevelopment
+            {
+                DotNet = instrumentation
+            }
+        };
+        var settings = new TracerSettings();
+        settings.LoadFile(conf);
+
+        Assert.True(settings.InstrumentationOptions.SqlClientNetFxIlRewriteEnabled);
+    }
+#endif
 }

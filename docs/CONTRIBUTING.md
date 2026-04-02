@@ -12,7 +12,7 @@ Meeting notes are available as a public [Google
 doc](https://docs.google.com/document/d/1dYdwRQVE3zu0vlp_lqGctNm0dCQUkDo2LfScUJzpuT8/edit?usp=sharing).
 
 Get in touch on [Slack](https://cloud-native.slack.com/archives/C01NR1YLSE7).
-If you are new, you can create a CNCF Slack account [here](http://slack.cncf.io/).
+If you are new, you can create a [CNCF Slack account](http://slack.cncf.io/).
 
 ## Give feedback
 

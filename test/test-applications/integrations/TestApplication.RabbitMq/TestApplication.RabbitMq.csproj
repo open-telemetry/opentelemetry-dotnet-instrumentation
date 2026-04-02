@@ -1,8 +1,8 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <DefineConstants Condition="'$(LibraryVersion)'=='' or '$(LibraryVersion)'>='7.0.0'">$(DefineConstants);RABBITMQ_7_0_0_OR_GREATER</DefineConstants>
-    <DefineConstants Condition="'$(LibraryVersion)'=='' or '$(LibraryVersion)'>='6.0.0'">$(DefineConstants);RABBITMQ_6_0_0_OR_GREATER</DefineConstants>
+    <DefineConstants Condition="'$(LibraryVersion)'=='' or $([MSBuild]::VersionGreaterThanOrEquals('$(LibraryVersion)', '7.0.0'))">$(DefineConstants);RABBITMQ_7_0_0_OR_GREATER</DefineConstants>
+    <DefineConstants Condition="'$(LibraryVersion)'=='' or $([MSBuild]::VersionGreaterThanOrEquals('$(LibraryVersion)', '6.0.0'))">$(DefineConstants);RABBITMQ_6_0_0_OR_GREATER</DefineConstants>
   </PropertyGroup>
 
   <ItemGroup>

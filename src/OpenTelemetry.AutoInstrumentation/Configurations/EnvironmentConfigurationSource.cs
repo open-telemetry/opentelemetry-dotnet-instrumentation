@@ -20,7 +20,7 @@ internal class EnvironmentConfigurationSource : StringConfigurationSource
         {
             return Environment.GetEnvironmentVariable(key);
         }
-        catch
+        catch (Exception)
         {
             // We should not add a dependency from the Configuration system to the Logger system,
             // so do nothing

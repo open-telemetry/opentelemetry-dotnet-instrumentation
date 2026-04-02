@@ -29,7 +29,7 @@ if (args.Length != 2)
 try
 {
     var testServerPort = int.Parse(args[1], CultureInfo.InvariantCulture);
-    var response = await httpClient.GetAsync($"http://localhost:{testServerPort}/test/");
+    var response = await httpClient.GetAsync(new Uri($"http://localhost:{testServerPort}/test/")).ConfigureAwait(false);
     Console.WriteLine(response.StatusCode);
 }
 catch (Exception e)

@@ -16,7 +16,7 @@ namespace OpenTelemetry.AutoInstrumentation.Instrumentations.RabbitMqLegacy.Inte
     typeName: IntegrationConstants.ModelBaseTypeName,
     methodName: IntegrationConstants.BasicGetMethodName,
     returnTypeName: IntegrationConstants.BasicGetResultTypeName,
-    parameterTypeNames: new[] { ClrNames.String, ClrNames.Bool },
+    parameterTypeNames: [ClrNames.String, ClrNames.Bool],
     minimumVersion: IntegrationConstants.Min5SupportedVersion,
     maximumVersion: IntegrationConstants.Max6SupportedVersion,
     integrationName: IntegrationConstants.RabbitMqByteCodeIntegrationName,

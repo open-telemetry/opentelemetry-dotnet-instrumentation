@@ -31,7 +31,7 @@
 # The yaml format is documented at
 # <https://github.com/open-telemetry/opentelemetry-configuration/tree/main/schema>
 # By default, the latest version is used.
-file_format: "1.0-rc.1"
+file_format: "1.0"
 # Configure if the SDK is disabled or not.
 # If omitted or null, false is used
 # This setting is inverted (if OTEL_DOTNET_AUTO_SETUP_SDK is true, the SDK is disabled)
@@ -236,8 +236,12 @@ instrumentation/development:
       rabbitmq:            # RabbitMQ.Client
       quartz:              # Quartz
       sqlclient:           # Microsoft.Data.SqlClient & System.Data.SqlClient
+        # Enables IL rewriting of SqlCommand on .NET Framework to ensure CommandText is available for instrumentation.
+        # If omitted false is used.
+        netfx_ilrewrite_enabled: ${OTEL_DOTNET_AUTO_SQLCLIENT_NETFX_ILREWRITE_ENABLED:-false}
       stackexchangeredis:  # StackExchange.Redis
       wcfclient:           # WCF Client
+      wcfcore:             # CoreWCF.Primitives
       wcfservice:          # WCF Service
     metrics:
       # List of additional System.Diagnostics.Metrics.Meter names to be added to the meter at the startup.
@@ -253,4 +257,5 @@ instrumentation/development:
     logs:
       ilogger:             # Microsoft.Extensions.Logging
       log4net:             # Log4Net
+      nlog:                # NLog
         

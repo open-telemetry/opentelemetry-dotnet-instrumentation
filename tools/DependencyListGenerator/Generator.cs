@@ -10,15 +10,14 @@ public static class Generator
 {
     public static Dictionary<string, TransientDependency[]> EnumerateDependencies(string projectPath)
     {
-        var dotNetRunner = new DotNetRunner();
         var fileSystem = new FileSystem();
 
         var analysisService = new ProjectAnalysisService(
-            dotNetRestoreService: new DotNetRestoreService(dotNetRunner, fileSystem),
-            packageListService: new DotNetPackageListService(dotNetRunner, fileSystem),
+            dotNetRestoreService: new DotNetRestoreService(fileSystem),
+            packageListService: new DotNetPackageListService(fileSystem),
             fileSystem: fileSystem);
 
-        var result = analysisService.AnalyzeProject(projectPath, true)[0];
+        var result = analysisService.AnalyzeProject(projectPath, runRestore: true).Single();
         return result.TargetFrameworks.ToDictionary(
             it => it.Name,
             it => it.Dependencies.OrderBy(x => x.Name)

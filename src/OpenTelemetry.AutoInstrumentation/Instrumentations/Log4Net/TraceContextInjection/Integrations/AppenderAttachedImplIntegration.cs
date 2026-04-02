@@ -14,7 +14,7 @@ namespace OpenTelemetry.AutoInstrumentation.Instrumentations.Log4Net.TraceContex
     typeName: "log4net.Util.AppenderAttachedImpl",
     methodName: "AppendLoopOnAppenders",
     returnTypeName: ClrNames.Int32,
-    parameterTypeNames: new[] { "log4net.Core.LoggingEvent" },
+    parameterTypeNames: ["log4net.Core.LoggingEvent"],
     minimumVersion: "2.0.13",
     maximumVersion: "3.*.*",
     integrationName: "Log4Net",

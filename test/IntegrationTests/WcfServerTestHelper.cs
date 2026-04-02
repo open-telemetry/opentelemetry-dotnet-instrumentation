@@ -1,22 +1,26 @@
 // Copyright The OpenTelemetry Authors
 // SPDX-License-Identifier: Apache-2.0
 
+#if _WINDOWS
+
 using IntegrationTests.Helpers;
 using Xunit.Abstractions;
 
 namespace IntegrationTests;
 
-internal class WcfServerTestHelper : TestHelper
+#pragma warning disable CA1812 // Mark members as static. There is some issue in dotnet format.
+// TODO remove pragma when dotnet format issue is fixed
+internal sealed class WcfServerTestHelper : WcfServerTestHelperBase
+#pragma warning restore CA1812 // Mark members as static. There is some issue in dotnet format.
 {
-    private const string ServiceName = "TestApplication.Wcf.Server.NetFramework";
-
     public WcfServerTestHelper(ITestOutputHelper output)
-        : base("Wcf.Server.NetFramework", output)
+        : base("Wcf.Server.NetFramework", output, "TestApplication.Wcf.Server.NetFramework")
     {
-        SetEnvironmentVariable("OTEL_SERVICE_NAME", ServiceName);
     }
 
-    public ProcessHelper RunWcfServer(MockSpansCollector collector)
+    internal override string ServerInstrumentationScopeName { get => "OpenTelemetry.Instrumentation.Wcf"; }
+
+    internal override (ProcessHelper ProcessHelper, int TcpPort, int HttpPort) RunWcfServer(MockSpansCollector collector)
     {
         var baseBinDirectory = EnvironmentHelper.GetTestApplicationBaseBinDirectory();
         var exeFileName = $"{EnvironmentHelper.FullTestApplicationName}.exe";
@@ -24,11 +28,17 @@ internal class WcfServerTestHelper : TestHelper
 
         if (!File.Exists(testApplicationPath))
         {
-            throw new Exception($"Unable to find executing assembly at {testApplicationPath}");
+            throw new InvalidOperationException($"Unable to find executing assembly at {testApplicationPath}");
         }
 
+        var httpPort = TcpPortProvider.GetOpenPort();
+        var tcpPort = TcpPortProvider.GetOpenPort();
+
         SetExporter(collector);
-        var process = InstrumentedProcessHelper.Start(testApplicationPath, null, EnvironmentHelper);
-        return new ProcessHelper(process);
+#pragma warning disable CA2000 // Dispose objects before losing scope.
+        var process = InstrumentedProcessHelper.Start(testApplicationPath, $"--tcpPort {tcpPort} --httpPort {httpPort}", EnvironmentHelper);
+        return (new ProcessHelper(process), tcpPort, httpPort);
+#pragma warning restore CA2000 // Dispose objects before losing scope.
     }
 }
+#endif

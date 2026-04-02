@@ -7,11 +7,13 @@ using Xunit.Abstractions;
 
 namespace IntegrationTests.Helpers;
 
+#pragma warning disable CA1515 //  // Consider making public types internal. Needed for xunit tests.
 public abstract class TestHelper
+#pragma warning restore CA1515 //  // Consider making public types internal. Needed for xunit tests.
 {
     protected TestHelper(string testApplicationName, ITestOutputHelper output, string testApplicationType = "integrations")
     {
-        Output = output;
+        Output = output ?? throw new ArgumentNullException(nameof(output));
         EnvironmentHelper = new EnvironmentHelper(testApplicationName, typeof(TestHelper), output, testApplicationType: testApplicationType);
 
         output.WriteLine($"Platform: {EnvironmentTools.GetPlatform()}");
@@ -24,11 +26,11 @@ public abstract class TestHelper
         }
     }
 
-    protected EnvironmentHelper EnvironmentHelper { get; }
+    internal EnvironmentHelper EnvironmentHelper { get; }
 
     protected ITestOutputHelper Output { get; }
 
-    public string GetTestAssemblyPath()
+    public static string GetTestAssemblyPath()
     {
         // Gets the path for the test assembly, not the shadow copy created by xunit.
 #if NETFRAMEWORK
@@ -53,66 +55,71 @@ public abstract class TestHelper
         EnvironmentHelper.CustomEnvironmentVariables.Remove(key);
     }
 
-    public void SetExporter(MockSpansCollector collector)
+    internal void SetExporter(MockSpansCollector collector)
     {
         SetEnvironmentVariable("OTEL_TRACES_EXPORTER", "otlp");
         SetEnvironmentVariable("OTEL_EXPORTER_OTLP_ENDPOINT", $"http://localhost:{collector.Port}");
     }
 
-    public void SetFileBasedExporter(MockSpansCollector collector)
+    internal void SetFileBasedExporter(MockSpansCollector collector)
     {
         SetEnvironmentVariable("OTEL_EXPORTER_OTLP_TRACES_ENDPOINT", $"http://localhost:{collector.Port}/v1/traces");
     }
 
-    public void SetExporter(MockMetricsCollector collector)
+#if !NUGET_PACKAGE_TESTS
+    internal void SetExporter(MockMetricsCollector collector)
     {
         SetEnvironmentVariable("OTEL_METRICS_EXPORTER", "otlp");
         SetEnvironmentVariable("OTEL_EXPORTER_OTLP_ENDPOINT", $"http://localhost:{collector.Port}");
     }
 
-    public void SetFileBasedExporter(MockMetricsCollector collector)
+    internal void SetFileBasedExporter(MockMetricsCollector collector)
     {
         SetEnvironmentVariable("OTEL_EXPORTER_OTLP_METRICS_ENDPOINT", $"http://localhost:{collector.Port}/v1/metrics");
     }
 
-    public void SetExporter(MockLogsCollector collector)
+    internal void SetExporter(MockLogsCollector collector)
     {
         SetEnvironmentVariable("OTEL_LOGS_EXPORTER", "otlp");
         SetEnvironmentVariable("OTEL_EXPORTER_OTLP_ENDPOINT", $"http://localhost:{collector.Port}");
     }
 
-    public void SetFileBasedExporter(MockLogsCollector collector)
+    internal void SetFileBasedExporter(MockLogsCollector collector)
     {
         SetEnvironmentVariable("OTEL_EXPORTER_OTLP_LOGS_ENDPOINT", $"http://localhost:{collector.Port}/v1/logs");
     }
 
-    public void SetExporter(MockProfilesCollector collector)
+    internal void SetExporter(MockProfilesCollector collector)
     {
         SetEnvironmentVariable("OTEL_EXPORTER_OTLP_ENDPOINT", $"http://localhost:{collector.Port}");
     }
+#endif
 
-    public void EnableBytecodeInstrumentation()
+    internal void EnableBytecodeInstrumentation()
     {
         SetEnvironmentVariable("CORECLR_ENABLE_PROFILING", "1");
     }
 
-    public void EnableDefaultExporters()
+    internal void EnableDefaultExporters()
     {
         RemoveEnvironmentVariable("OTEL_TRACES_EXPORTER");
         RemoveEnvironmentVariable("OTEL_METRICS_EXPORTER");
         RemoveEnvironmentVariable("OTEL_LOGS_EXPORTER");
     }
 
-    public void EnableFileBasedConfigWithDefaultPath()
+    internal void EnableFileBasedConfig(string configFileName = "config.yaml", string packageVersion = "")
     {
         SetEnvironmentVariable("OTEL_EXPERIMENTAL_FILE_BASED_CONFIGURATION_ENABLED", "true");
-        SetEnvironmentVariable("OTEL_EXPERIMENTAL_CONFIG_FILE", Path.Combine(EnvironmentHelper.GetTestApplicationApplicationOutputDirectory(), "config.yaml"));
+        SetEnvironmentVariable("OTEL_CONFIG_FILE", Path.Combine(EnvironmentHelper.GetTestApplicationApplicationOutputDirectory(packageVersion), configFileName));
     }
 
-    public (string StandardOutput, string ErrorOutput, int ProcessId) RunTestApplication(TestSettings? testSettings = null)
+    internal (string StandardOutput, string ErrorOutput, int ProcessId) RunTestApplication(
+        TestSettings? testSettings = null,
+        int expectedExitCode = 0,
+        Action<int, int>? assertExitCode = null)
     {
         // RunTestApplication starts the test application, wait up to DefaultProcessTimeout.
-        // Assertion exceptions are thrown if it timed out or the exit code is non-zero.
+        // Assertion exceptions are thrown if it timed out or the exit code doesn't match expectedExitCode.
         testSettings ??= new();
         using var process = StartTestApplication(testSettings);
         Output.WriteLine($"ProcessName: " + process?.ProcessName);
@@ -133,12 +140,19 @@ public abstract class TestHelper
         Output.WriteResult(helper);
 
         Assert.False(processTimeout, "Test application timed out");
-        Assert.Equal(0, process.ExitCode);
+
+        // TODO I would ideally extend xunit to something like:
+        // `Assert.That(process.ExitCode, Is.EqualTo(expectedExitCode))`.
+        // With this it would be so much easier to pass expectations:
+        // e.g. `constraint: Is.EqualTo(0)`, `constraint: Is.EqualTo(99)`, `constraint: Is.Not.EqualTo(0)`
+        // and then just use it as follows: `Assert.That(process.ExitCode, constraint)`
+        assertExitCode ??= Assert.Equal;
+        assertExitCode(expectedExitCode, process.ExitCode);
 
         return (helper.StandardOutput, helper.ErrorOutput, processId);
     }
 
-    public Process? StartTestApplication(TestSettings? testSettings = null)
+    internal Process? StartTestApplication(TestSettings? testSettings = null)
     {
         // StartTestApplication starts the test application
         // and returns the Process instance for further interaction.
@@ -154,7 +168,7 @@ public abstract class TestHelper
         var testApplicationPath = EnvironmentHelper.GetTestApplicationPath(testSettings.PackageVersion, testSettings.Framework, startupMode);
         if (!File.Exists(testApplicationPath))
         {
-            throw new Exception($"application not found: {testApplicationPath}");
+            throw new InvalidOperationException($"application not found: {testApplicationPath}");
         }
 
         if (startupMode == TestAppStartupMode.DotnetCLI)

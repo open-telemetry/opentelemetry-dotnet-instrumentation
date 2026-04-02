@@ -1,6 +1,8 @@
 // Copyright The OpenTelemetry Authors
 // SPDX-License-Identifier: Apache-2.0
 
+using System.Globalization;
+
 namespace OpenTelemetry.AutoInstrumentation.Instrumentations;
 
 /// <summary>
@@ -51,17 +53,17 @@ internal class IntegrationVersionRange
             var parts = value.Split('.');
             if (parts.Length > 0 && parts[0] != "*")
             {
-                MinimumMajor = ushort.Parse(parts[0]);
+                MinimumMajor = ushort.Parse(parts[0], CultureInfo.InvariantCulture);
             }
 
             if (parts.Length > 1 && parts[1] != "*")
             {
-                MinimumMinor = ushort.Parse(parts[1]);
+                MinimumMinor = ushort.Parse(parts[1], CultureInfo.InvariantCulture);
             }
 
             if (parts.Length > 2 && parts[2] != "*")
             {
-                MinimumPatch = ushort.Parse(parts[2]);
+                MinimumPatch = ushort.Parse(parts[2], CultureInfo.InvariantCulture);
             }
         }
     }
@@ -79,17 +81,17 @@ internal class IntegrationVersionRange
             var parts = value.Split('.');
             if (parts.Length > 0 && parts[0] != "*")
             {
-                MaximumMajor = ushort.Parse(parts[0]);
+                MaximumMajor = ushort.Parse(parts[0], CultureInfo.InvariantCulture);
             }
 
             if (parts.Length > 1 && parts[1] != "*")
             {
-                MaximumMinor = ushort.Parse(parts[1]);
+                MaximumMinor = ushort.Parse(parts[1], CultureInfo.InvariantCulture);
             }
 
             if (parts.Length > 2 && parts[2] != "*")
             {
-                MaximumPatch = ushort.Parse(parts[2]);
+                MaximumPatch = ushort.Parse(parts[2], CultureInfo.InvariantCulture);
             }
         }
     }

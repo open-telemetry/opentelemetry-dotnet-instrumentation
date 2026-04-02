@@ -7,7 +7,7 @@ using System.Collections.Concurrent;
 
 namespace IntegrationTests.Helpers.Compatibility;
 
-public static class DictionaryExtensions
+internal static class DictionaryExtensions
 {
     public static TValue? GetValueOrDefault<TKey, TValue>(this IDictionary<TKey, TValue> dictionary, TKey key)
     {
@@ -48,7 +48,9 @@ public static class DictionaryExtensions
             // if a key is not found, but let's use try/catch to be defensive against misbehaving implementations
             valueObj = dictionary[key];
         }
-        catch
+#pragma warning disable CA1031 // Do not catch general exception types
+        catch (Exception)
+#pragma warning restore CA1031 // Do not catch general exception types
         {
             valueObj = null;
         }

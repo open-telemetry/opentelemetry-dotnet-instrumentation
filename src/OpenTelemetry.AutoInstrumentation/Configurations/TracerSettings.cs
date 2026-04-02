@@ -62,7 +62,7 @@ internal class TracerSettings : Settings
     /// For environment variable configuration, this must be null,
     /// and the configuration will be handled by TracesExporters
     /// </summary>
-    public IReadOnlyList<ProcessorConfig>? Processors { get; private set; } = null;
+    public IReadOnlyList<ProcessorConfig>? Processors { get; private set; }
 
     /// <summary>
     /// Gets the sampler configured via file-based configuration.

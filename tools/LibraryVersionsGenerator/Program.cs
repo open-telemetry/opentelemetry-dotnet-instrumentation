@@ -9,9 +9,9 @@ using Microsoft.Build.Evaluation;
 
 namespace LibraryVersionsGenerator;
 
-public class Program
+internal static class Program
 {
-    private static Dictionary<string, string> _packageVersions = new Dictionary<string, string>();
+    private static Dictionary<string, string> _packageVersions = [];
 
     public static async Task Main()
     {
@@ -49,18 +49,19 @@ public class Program
                     var isPlatformSpecific = false;
 
                     // Collects versions with platform specific flag
-                    if (version.SupportedPlatforms.Any())
+                    if (version.SupportedPlatforms.Length != 0)
                     {
                         isPlatformSpecific = true;
 
                         foreach (var platform in version.SupportedPlatforms)
                         {
-                            if (!platformVersions.ContainsKey(platform))
+                            if (!platformVersions.TryGetValue(platform, out var value))
                             {
-                                platformVersions.Add(platform, new List<string>());
+                                value = [];
+                                platformVersions.Add(platform, value);
                             }
 
-                            platformVersions[platform].Add(calculatedVersion);
+                            value.Add(calculatedVersion);
                         }
                     }
 
@@ -91,7 +92,7 @@ public class Program
             buildFileStringBuilder.EndTestPackage();
 
             // Generates platform specific entry
-            if (platformVersions.Any())
+            if (platformVersions.Count != 0)
             {
                 foreach (var platform in platformVersions)
                 {
@@ -102,7 +103,7 @@ public class Program
 
                     foreach (var version in platform.Value)
                     {
-                        xUnitFileStringBuilder.AddVersion(version, Array.Empty<string>());
+                        xUnitFileStringBuilder.AddVersion(version, []);
                     }
 
                     xUnitFileStringBuilder.EndTestPackage();
@@ -119,8 +120,8 @@ public class Program
         var xUnitFilePath = Path.Combine(solutionFolder, "test", "IntegrationTests", "LibraryVersions.g.cs");
         var buildFilePath = Path.Combine(solutionFolder, "build", "LibraryVersions.g.cs");
 
-        await File.WriteAllTextAsync(xUnitFilePath, xUnitFileStringBuilder.ToString());
-        await File.WriteAllTextAsync(buildFilePath, buildFileStringBuilder.ToString());
+        await File.WriteAllTextAsync(xUnitFilePath, xUnitFileStringBuilder.ToString()).ConfigureAwait(ConfigureAwaitOptions.None);
+        await File.WriteAllTextAsync(buildFilePath, buildFileStringBuilder.ToString()).ConfigureAwait(ConfigureAwaitOptions.None);
     }
 
     private static string GetSourceFilePathName([CallerFilePath] string? callerFilePath = null)

@@ -8,7 +8,7 @@ using Xunit;
 namespace OpenTelemetry.AutoInstrumentation.Tests;
 
 [Collection("Non-Parallel Collection")]
-public class OtelLoggingTests : IDisposable
+public sealed class OtelLoggingTests : IDisposable
 {
     public OtelLoggingTests()
     {
@@ -133,7 +133,7 @@ public class OtelLoggingTests : IDisposable
 
             var content = File.ReadAllText(file.FullName);
 
-            Assert.Contains(logLine, content);
+            Assert.Contains(logLine, content, StringComparison.Ordinal);
         }
         finally
         {
@@ -147,7 +147,7 @@ public class OtelLoggingTests : IDisposable
         Environment.SetEnvironmentVariable("OTEL_LOG_LEVEL", "debug");
         Environment.SetEnvironmentVariable("OTEL_DOTNET_AUTO_LOGGER", "console");
 
-        var currentWritter = Console.Out;
+        var currentWriter = Console.Out;
 
         using var ms = new MemoryStream();
         using var tw = new StreamWriter(ms);
@@ -170,11 +170,11 @@ public class OtelLoggingTests : IDisposable
             ms.Position = 0; // reset reading position
             var content = reader.ReadToEnd();
 
-            Assert.Contains(logLine, content);
+            Assert.Contains(logLine, content, StringComparison.Ordinal);
         }
         finally
         {
-            Console.SetOut(currentWritter);
+            Console.SetOut(currentWriter);
         }
     }
 
@@ -184,7 +184,7 @@ public class OtelLoggingTests : IDisposable
         Environment.SetEnvironmentVariable("OTEL_LOG_LEVEL", "debug");
         Environment.SetEnvironmentVariable("OTEL_DOTNET_AUTO_LOGGER", "console");
 
-        var currentWritter = Console.Out;
+        var currentWriter = Console.Out;
 
         using var ms = new MemoryStream();
         using var tw = new StreamWriter(ms);
@@ -205,7 +205,7 @@ public class OtelLoggingTests : IDisposable
             using var streamReader = new StreamReader(ms);
 
             var content = ReadWrittenContent(ms, streamReader);
-            Assert.Contains(expectedLogContent, content);
+            Assert.Contains(expectedLogContent, content, StringComparison.Ordinal);
 
             // Reset
             ms.SetLength(0);
@@ -219,7 +219,7 @@ public class OtelLoggingTests : IDisposable
         }
         finally
         {
-            Console.SetOut(currentWritter);
+            Console.SetOut(currentWriter);
         }
     }
 
@@ -229,7 +229,7 @@ public class OtelLoggingTests : IDisposable
         Environment.SetEnvironmentVariable("OTEL_LOG_LEVEL", "debug");
         Environment.SetEnvironmentVariable("OTEL_DOTNET_AUTO_LOGGER", "console");
 
-        var currentWritter = Console.Out;
+        var currentWriter = Console.Out;
 
         using var ms = new MemoryStream();
         using var tw = new StreamWriter(ms);
@@ -250,7 +250,7 @@ public class OtelLoggingTests : IDisposable
             using var streamReader = new StreamReader(ms);
 
             var content = ReadWrittenContent(ms, streamReader);
-            Assert.Contains(expectedLogContent, content);
+            Assert.Contains(expectedLogContent, content, StringComparison.Ordinal);
 
             // Reset
             ms.SetLength(0);
@@ -265,7 +265,7 @@ public class OtelLoggingTests : IDisposable
         }
         finally
         {
-            Console.SetOut(currentWritter);
+            Console.SetOut(currentWriter);
         }
     }
 

@@ -3,7 +3,7 @@
 
 namespace GacInstallTool;
 
-internal class Program
+internal sealed class Program
 {
     private const string InstallFlag = "-i";
     private const string UninstallFlag = "-u";

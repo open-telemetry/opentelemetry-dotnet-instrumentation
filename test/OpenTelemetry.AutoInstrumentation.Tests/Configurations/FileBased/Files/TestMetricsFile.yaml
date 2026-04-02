@@ -1,3 +1,5 @@
+file_format: "1.0"
+
 meter_provider:
   readers:
     - periodic:
@@ -17,6 +19,7 @@ meter_provider:
     - periodic:
         exporter:
           console:
+            temporality_preference: delta
     - pull:
         exporter:
           prometheus:

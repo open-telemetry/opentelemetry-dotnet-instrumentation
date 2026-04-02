@@ -6,7 +6,6 @@
   - [Running dotnet-monitor](#running-dotnet-monitor)
   - [Running the application](#running-the-application)
   - [Validate the logs](#validate-the-logs)
-- [Learn More](#learn-more)
 
 ## Produce logs from the application
 
@@ -61,8 +60,7 @@ to download the dotnet-monitor.
   Authentication](https://github.com/dotnet/dotnet-monitor/blob/main/documentation/api-key-setup.md#configuring-api-key-authentication).
   If your use case is limited to a test environment, you might opt to bypass API
   key configuration by using the `--no-auth` switch when running dotnet-monitor.
-  Learn more about dotnet-monitor authentication
-  [here](https://github.com/dotnet/dotnet-monitor/blob/1beca4d497da1e60985394fe7d1195c0663f7095/documentation/authentication.md?plain=1#L115).
+  Learn more about [dotnet-monitor authentication](https://github.com/dotnet/dotnet-monitor/blob/1beca4d497da1e60985394fe7d1195c0663f7095/documentation/authentication.md?plain=1#L115).
 
 2. **Configure Egress for Logs Collection**:  Define egress settings in a
    `settings.json` file to specify where logs should be stored, such as a local
@@ -155,8 +153,3 @@ diagnostics.
 
 Check the logs in the specified artifacts folder in your settings.json file to
 validate the log collection.
-
-## Learn more
-
-- [Dotnet Monitor Collection
-  Rules](https://horovits.medium.com/prometheus-now-supports-opentelemetry-metrics-83f85878e46a)

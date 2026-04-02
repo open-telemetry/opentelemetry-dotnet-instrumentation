@@ -1,12 +1,9 @@
 // Copyright The OpenTelemetry Authors
 // SPDX-License-Identifier: Apache-2.0
 
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.Extensions.Hosting;
-
 namespace Examples.AspNetCoreMvc;
 
-public class Program
+internal static class Program
 {
     public static void Main(string[] args)
     {

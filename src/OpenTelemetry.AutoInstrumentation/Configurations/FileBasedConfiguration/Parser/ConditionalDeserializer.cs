@@ -23,7 +23,7 @@ internal class ConditionalDeserializer : INodeDeserializer
          out object? value,
          ObjectDeserializer rootDeserializer)
     {
-        var isEmptyObjectOnEmptyYamlAttribute = expectedType.CustomAttributes.Any(a => string.Equals(a.AttributeType.Name, "EmptyObjectOnEmptyYamlAttribute", StringComparison.InvariantCulture));
+        var isEmptyObjectOnEmptyYamlAttribute = expectedType.CustomAttributes.Any(a => string.Equals(a.AttributeType.Name, "EmptyObjectOnEmptyYamlAttribute", StringComparison.Ordinal));
 
         if (!isEmptyObjectOnEmptyYamlAttribute)
         {

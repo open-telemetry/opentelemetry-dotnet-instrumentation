@@ -30,7 +30,8 @@ constexpr auto kSelectiveSamplingMaxAgeMinutes = 15;
 constexpr auto kDefaultSamplePeriod = 10000;
 constexpr auto kMinimumSamplePeriod = 1000;
 
-constexpr auto kDefaultMaxAllocsPerMinute = 200;
+constexpr auto kDefaultMaxAllocsPerMinute    = 200;
+constexpr auto kStartupAllocationPacedCycles = 10;
 
 // FIXME make configurable (hidden)?
 // These numbers were chosen to keep total overhead under 1 MB of RAM in typical cases (name lengths being the biggest
@@ -98,8 +99,8 @@ static std::mutex name_cache_lock = std::mutex();
 
 static std::shared_mutex profiling_lock = std::shared_mutex();
 
-static ICorProfilerInfo12* profiler_info; // After feature sets settle down, perhaps this should be refactored and have
-                                          // a single static instance of ThreadSampler
+static ICorProfilerInfo7* profiler_info; // After feature sets settle down, perhaps this should be refactored and have
+                                         // a single static instance of ThreadSampler
 
 // Dirt-simple back pressure system to save overhead if managed code is not reading fast enough
 bool ThreadSamplingShouldProduceThreadSample()
@@ -330,9 +331,7 @@ void ThreadSamplesBuffer::WriteSpanContext(const thread_span_context& span_conte
     WriteUInt64(span_context.span_id_);
 }
 
-void ThreadSamplesBuffer::StartSample(ThreadID                   id,
-                                      const ThreadState*         state,
-                                      const thread_span_context& span_context) const
+void ThreadSamplesBuffer::StartSample(const ThreadState* state, const thread_span_context& span_context) const
 {
     CHECK_SAMPLES_BUFFER_LENGTH()
     WriteByte(kThreadSamplesStartSample);
@@ -540,28 +539,25 @@ void NamingHelper::ClearFunctionIdentifierCache()
     function_identifier_cache_.Clear();
 }
 
-[[nodiscard]] FunctionIdentifier NamingHelper::GetFunctionIdentifier(const FunctionID         func_id,
-                                                                     const COR_PRF_FRAME_INFO frame_info) const
+[[nodiscard]] FunctionIdentifier NamingHelper::ResolveManagedFunctionIdentifier(
+    const FunctionID func_id, const COR_PRF_FRAME_INFO frame_info) const
 {
     if (func_id == 0)
     {
         constexpr auto zero_valid_function_identifier = FunctionIdentifier{0, 0, true};
         return zero_valid_function_identifier;
     }
-
-    ModuleID module_id      = 0;
-    mdToken  function_token = 0;
-    // theoretically there is a possibility to use GetFunctionInfo method, but it does not support generic methods
+    ModuleID      module_id      = 0;
+    mdToken       function_token = 0;
     const HRESULT hr =
-        info12_->GetFunctionInfo2(func_id, frame_info, nullptr, &module_id, &function_token, 0, nullptr, nullptr);
+        info7_->GetFunctionInfo2(func_id, frame_info, nullptr, &module_id, &function_token, 0, nullptr, nullptr);
     if (FAILED(hr))
     {
         trace::Logger::Debug("GetFunctionInfo2 failed. HRESULT=0x", std::setfill('0'), std::setw(8), std::hex, hr);
-        constexpr auto zero_invalid_function_identifier = FunctionIdentifier{0, 0, false};
-        return zero_invalid_function_identifier;
+        return FunctionIdentifier::ManagedInvalid();
     }
 
-    return FunctionIdentifier{function_token, module_id, true};
+    return FunctionIdentifier::Managed(function_token, module_id, true);
 }
 
 void NamingHelper::GetFunctionName(FunctionIdentifier function_identifier, trace::WSTRING& result) const
@@ -574,7 +570,6 @@ void NamingHelper::GetFunctionName(FunctionIdentifier function_identifier, trace
         result.append(unknown_function_name);
         return;
     }
-
     if (function_identifier.function_token == 0)
     {
         constexpr auto unknown_native_function_name = WStr("Unknown_Native_Function(unknown)");
@@ -583,8 +578,8 @@ void NamingHelper::GetFunctionName(FunctionIdentifier function_identifier, trace
     }
 
     ComPtr<IMetaDataImport2> metadata_import;
-    HRESULT hr = info12_->GetModuleMetaData(function_identifier.module_id, ofRead, IID_IMetaDataImport2,
-                                            reinterpret_cast<IUnknown**>(&metadata_import));
+    HRESULT                  hr = info7_->GetModuleMetaData(function_identifier.module_id, ofRead, IID_IMetaDataImport2,
+                                                            reinterpret_cast<IUnknown**>(&metadata_import));
     if (FAILED(hr))
     {
         trace::Logger::Debug("GetModuleMetaData failed. HRESULT=0x", std::setfill('0'), std::setw(8), std::hex, hr);
@@ -707,7 +702,7 @@ trace::WSTRING* NamingHelper::Lookup(const FunctionIdentifier& function_identifi
     return answer;
 }
 
-FunctionIdentifier NamingHelper::Lookup(const FunctionID functionId, const COR_PRF_FRAME_INFO frameInfo)
+FunctionIdentifier NamingHelper::LookupManagedFunction(const FunctionID functionId, const COR_PRF_FRAME_INFO frameInfo)
 {
     const FunctionIdentifierResolveArgs cacheKey         = {functionId};
     const auto                          cachedIdentifier = function_identifier_cache_.Get(cacheKey);
@@ -715,7 +710,7 @@ FunctionIdentifier NamingHelper::Lookup(const FunctionID functionId, const COR_P
     {
         return cachedIdentifier;
     }
-    const auto resolvedIdentifier = this->GetFunctionIdentifier(cacheKey.function_id, frameInfo);
+    const auto resolvedIdentifier = this->ResolveManagedFunctionIdentifier(cacheKey.function_id, frameInfo);
     function_identifier_cache_.Put(cacheKey, resolvedIdentifier);
     return resolvedIdentifier;
 }
@@ -738,18 +733,15 @@ static HRESULT __stdcall FrameCallback(_In_ FunctionID         func_id,
                                        _In_ void*              client_data)
 {
 
+    // if func ID is zero, it is a frame we can't get info for (e.g., external/native code); we still want to record it,
+    // in that case the ID will map to a default "unknown" entry in the name cache, so we can just continue on as normal
+    // in next PR we will attempt to resolve the "unknown" frames a bit better (e.g., using IP to get native symbol
+    // info) but for now this is sufficient to avoid losing all stack info for frames we can't resolve
+
     const auto params = static_cast<DoStackSnapshotParams*>(client_data);
     params->prof->stats_.total_frames++;
 
-    // Use '0' as a frame_info value.
-    // It is documented to be equivalent to using value provided in frame_info parameter.
-    // See
-    // https://github.com/dotnet/runtime/blob/988296b080776c885ee0725b481db4ae4d4360ed/src/coreclr/inc/corprof.idl#L3167-L3172
-    // and
-    // https://github.com/dotnet/runtime/blob/bda571bfc728369cc2bbd33f2c161ea73c762b8d/docs/design/coreclr/profiling/davbr-blog-archive/Generics%20and%20Your%20Profiler.md?plain=1#L82-L101
-    // for details.
-
-    const auto identifier = params->prof->helper.Lookup(func_id, 0);
+    const auto identifier = params->prof->helper.LookupManagedFunction(func_id, 0);
     params->buffer->push_back(identifier);
 
     return S_OK;
@@ -783,30 +775,35 @@ static HRESULT __stdcall FrameCallback(_In_ FunctionID         func_id,
 
 static void CaptureFunctionIdentifiersForThreads(
     ContinuousProfiler*                                            prof,
-    ICorProfilerInfo12*                                            info12,
+    ICorProfilerInfo7*                                             info7,
     const std::unordered_set<ThreadID>&                            selectedThreads,
     std::unordered_map<ThreadID, std::vector<FunctionIdentifier>>& threadStacksBuffer)
 {
     prof->helper.ClearFunctionIdentifierCache();
-    for (auto threadId : selectedThreads)
+
+    if (auto stackCaptureStrategy = prof->GetStackCaptureStrategy(); stackCaptureStrategy != nullptr)
     {
-        DoStackSnapshotParams doStackSnapshotParams(prof, &threadStacksBuffer[threadId]);
-        HRESULT               snapshotHr = info12->DoStackSnapshot(threadId, &FrameCallback, COR_PRF_SNAPSHOT_DEFAULT,
-                                                                   &doStackSnapshotParams, nullptr, 0);
-        if (FAILED(snapshotHr))
+        auto frameProcessor = [&threadStacksBuffer, prof](StackSnapshotCallbackContext* snapshot_context) -> HRESULT
         {
-            trace::Logger::Debug("DoStackSnapshot failed. HRESULT=0x", std::setfill('0'), std::setw(8), std::hex,
-                                 snapshotHr);
-        }
+            auto                  thread = snapshot_context->threadId;
+            DoStackSnapshotParams doStackSnapshotParams{prof, &threadStacksBuffer[thread]};
+            FrameCallback(snapshot_context->functionId, snapshot_context->instructionPointer,
+                          snapshot_context->frameInfo, snapshot_context->contextSize, snapshot_context->context,
+                          &doStackSnapshotParams);
+            return S_OK;
+        };
+
+        StackSnapshotCallbackContext context{frameProcessor};
+        stackCaptureStrategy->CaptureStacks(selectedThreads, &context);
     }
 }
 
-static std::unordered_set<ThreadID> EnumerateThreads(ICorProfilerInfo12* info12)
+static std::unordered_set<ThreadID> EnumerateThreads(ICorProfilerInfo7* info7)
 {
     std::unordered_set<ThreadID> threads;
 
     ICorProfilerThreadEnum* thread_enum = nullptr;
-    HRESULT                 hr          = info12->EnumThreads(&thread_enum);
+    HRESULT                 hr          = info7->EnumThreads(&thread_enum);
     if (FAILED(hr))
     {
         trace::Logger::Debug("Could not EnumThreads. HRESULT=0x", std::setfill('0'), std::setw(8), std::hex, hr);
@@ -826,7 +823,7 @@ static void ResolveFrames(ContinuousProfiler*                    prof,
                           const std::vector<FunctionIdentifier>& threadStack,
                           ThreadSamplesBuffer&                   buffer)
 {
-    for (auto functionIdentifier : threadStack)
+    for (const auto& functionIdentifier : threadStack)
     {
         const trace::WSTRING* name = prof->helper.Lookup(functionIdentifier, prof->stats_);
         // This is where line numbers could be calculated
@@ -867,7 +864,7 @@ static void ResolveSymbolsAndPublishBufferForAllThreads(
         thread_span_context spanContext = GetContext(threadId);
         const auto          threadState = GetThreadState(prof->managed_tid_to_state_, threadId);
 
-        prof->cur_cpu_writer_->StartSample(threadId, threadState, spanContext);
+        prof->cur_cpu_writer_->StartSample(threadState, spanContext);
 
         if (prof->selectedThreadsSamplingInterval.has_value())
         {
@@ -949,7 +946,7 @@ static void RemoveOutdatedEntries(std::unordered_map<trace_context, long long>& 
 }
 
 static void PauseClrAndCaptureSamples(ContinuousProfiler*                                            prof,
-                                      ICorProfilerInfo12*                                            info12,
+                                      ICorProfilerInfo7*                                             info7,
                                       const SamplingType                                             samplingType,
                                       std::unordered_map<ThreadID, std::vector<FunctionIdentifier>>& threadStacksBuffer)
 {
@@ -1010,51 +1007,32 @@ static void PauseClrAndCaptureSamples(ContinuousProfiler*                       
 
     const auto start = std::chrono::steady_clock::now();
 
-    HRESULT hr = info12->SuspendRuntime();
-
-    if (FAILED(hr))
+    try
     {
-        trace::Logger::Warn("Could not suspend runtime to sample threads. HRESULT=0x", std::setfill('0'), std::setw(8),
-                            std::hex, hr);
-    }
-    else
-    {
-        try
-        {
 
-            if (samplingType == SamplingType::Continuous)
-            {
-                auto allThreads = EnumerateThreads(info12);
-                CaptureFunctionIdentifiersForThreads(prof, info12, allThreads, threadStacksBuffer);
-            }
-            else if (samplingType == SamplingType::SelectedThreads)
-            {
-                CaptureFunctionIdentifiersForThreads(prof, info12, selective_sampling_thread_buffer,
-                                                     threadStacksBuffer);
-            }
-        }
-        catch (const std::exception& e)
+        if (samplingType == SamplingType::Continuous)
         {
-            trace::Logger::Warn("Could not capture thread samples: ", e.what());
+            auto allThreads = EnumerateThreads(info7);
+            CaptureFunctionIdentifiersForThreads(prof, info7, allThreads, threadStacksBuffer);
         }
-        catch (...)
+        else if (samplingType == SamplingType::SelectedThreads)
         {
-            trace::Logger::Warn("Could not capture thread sample for unknown reasons");
+            CaptureFunctionIdentifiersForThreads(prof, info7, selective_sampling_thread_buffer, threadStacksBuffer);
         }
     }
-    // I don't have any proof but I sure hope that if suspending fails then it's still ok to ask to resume, with no
-    // ill effects
-    hr = info12->ResumeRuntime();
+    catch (const std::exception& e)
+    {
+        trace::Logger::Warn("Could not capture thread samples: ", e.what());
+    }
+    catch (...)
+    {
+        trace::Logger::Warn("Could not capture thread sample for unknown reasons");
+    }
 
     const auto end            = std::chrono::steady_clock::now();
     const auto elapsed_micros = std::chrono::duration_cast<std::chrono::microseconds>(end - start).count();
 
     prof->stats_.micros_suspended = static_cast<int>(elapsed_micros);
-
-    if (FAILED(hr))
-    {
-        trace::Logger::Error("Could not resume runtime? HRESULT=0x", std::setfill('0'), std::setw(8), std::hex, hr);
-    }
 
     const size_t nonEmptyCount = std::count_if(threadStacksBuffer.begin(), threadStacksBuffer.end(),
                                                [](const std::pair<const ThreadID, std::vector<FunctionIdentifier>>& v)
@@ -1118,9 +1096,9 @@ static bool ShouldTrackIterations(const ContinuousProfiler* const prof)
 
 static void SamplingThreadMain(ContinuousProfiler* prof)
 {
-    ICorProfilerInfo12* info12 = prof->info12;
+    ICorProfilerInfo7* info7 = prof->info7;
 
-    info12->InitializeCurrentThread();
+    info7->InitializeCurrentThread();
 
     std::unordered_map<ThreadID, std::vector<FunctionIdentifier>> threadStacksBuffer;
     unsigned int                                                  iteration = 0;
@@ -1159,7 +1137,7 @@ static void SamplingThreadMain(ContinuousProfiler* prof)
             iteration = 0;
         }
 
-        PauseClrAndCaptureSamples(prof, info12, samplingType, threadStacksBuffer);
+        PauseClrAndCaptureSamples(prof, info7, samplingType, threadStacksBuffer);
 
         if (prof->IsShutdownRequested())
         {
@@ -1185,11 +1163,28 @@ static void SamplingThreadMain(ContinuousProfiler* prof)
     }
 }
 
+void ContinuousProfiler::SetGlobalInfo7(ICorProfilerInfo7* cor_profiler_info7)
+{
+    info7               = cor_profiler_info7;
+    this->helper.info7_ = cor_profiler_info7;
+    profiler_info       = cor_profiler_info7;
+}
+
 void ContinuousProfiler::SetGlobalInfo12(ICorProfilerInfo12* cor_profiler_info12)
 {
-    profiler_info        = cor_profiler_info12;
-    this->info12         = cor_profiler_info12;
-    this->helper.info12_ = cor_profiler_info12;
+    // ICorProfilerInfo12 derives from ICorProfilerInfo7, so we can use it as ICorProfilerInfo7
+    SetGlobalInfo7(cor_profiler_info12);
+    info12 = cor_profiler_info12;
+}
+
+void ContinuousProfiler::SetStackCaptureStrategy(IStackCaptureStrategy* stack_capture_strategy)
+{
+    stack_capture_strategy_ = stack_capture_strategy;
+}
+
+IStackCaptureStrategy* ContinuousProfiler::GetStackCaptureStrategy() const
+{
+    return stack_capture_strategy_;
 }
 
 void ContinuousProfiler::InitSelectiveSamplingBuffer()
@@ -1263,8 +1258,8 @@ constexpr auto AllocationTickV4SizeWithoutTypeName    = 4 + 4 + 2 + 8 + EtwPoint
 static void CaptureAllocationStack(ContinuousProfiler* prof, std::vector<FunctionIdentifier>& threadStack)
 {
     DoStackSnapshotParams doStackSnapshotParams(prof, &threadStack);
-    HRESULT               hr = prof->info12->DoStackSnapshot((ThreadID)NULL, &FrameCallback, COR_PRF_SNAPSHOT_DEFAULT,
-                                                             &doStackSnapshotParams, nullptr, 0);
+    HRESULT               hr = prof->info7->DoStackSnapshot((ThreadID)NULL, &FrameCallback, COR_PRF_SNAPSHOT_DEFAULT,
+                                                            &doStackSnapshotParams, nullptr, 0);
     if (FAILED(hr))
     {
         trace::Logger::Debug("DoStackSnapshot failed. HRESULT=0x", std::setfill('0'), std::setw(8), std::hex, hr);
@@ -1277,6 +1272,11 @@ AllocationSubSampler::AllocationSubSampler(uint32_t targetPerCycle_, uint32_t se
     , seenThisCycle(0)
     , sampledThisCycle(0)
     , seenLastCycle(0)
+    , startupCyclesRemaining(kStartupAllocationPacedCycles)
+    , startupMinSampleSpacingMillis(
+          targetPerCycle > 0 ? std::chrono::milliseconds(std::chrono::seconds(secondsPerCycle)) / targetPerCycle
+                             : std::chrono::milliseconds(0))
+    , startupNextSampleAllowedAt(std::chrono::steady_clock::now())
     , nextCycleStartMillis(
           std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()))
     , sampleLock()
@@ -1289,6 +1289,10 @@ void AllocationSubSampler::AdvanceCycle(std::chrono::milliseconds now)
     seenLastCycle        = seenThisCycle;
     seenThisCycle        = 0;
     sampledThisCycle     = 0;
+    if (startupCyclesRemaining > 0)
+    {
+        --startupCyclesRemaining;
+    }
 }
 
 // We want to sample T items out of N per unit time, where N is unknown and may be < T or may be orders
@@ -1308,6 +1312,7 @@ bool AllocationSubSampler::ShouldSample()
 
     auto now =
         std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch());
+    auto steadyNow = std::chrono::steady_clock::now();
     if (now > nextCycleStartMillis)
     {
         AdvanceCycle(now);
@@ -1317,6 +1322,15 @@ bool AllocationSubSampler::ShouldSample()
     {
         return false;
     }
+
+    // During the first startup cycles, avoid a burst where the first targetPerCycle allocations
+    // are sampled almost immediately. Keeping minimum spacing between accepted samples prevents early
+    // buffer pressure while preserving the target upper bound for the cycle.
+    if (startupCyclesRemaining > 0 && steadyNow < startupNextSampleAllowedAt)
+    {
+        return false;
+    }
+
     // roll a [1,lastCycle] die, and if it comes up <= targetPerCycle, it wins
     // But lastCycle could be 0, so normalize that to 1.
     std::uniform_int_distribution<uint32_t> rando(1, std::max(seenLastCycle, (uint32_t)1));
@@ -1324,6 +1338,10 @@ bool AllocationSubSampler::ShouldSample()
     if (sample)
     {
         sampledThisCycle++;
+        if (startupCyclesRemaining > 0 && startupMinSampleSpacingMillis.count() > 0)
+        {
+            startupNextSampleAllowedAt = steadyNow + startupMinSampleSpacingMillis;
+        }
     }
     return sample;
 }
@@ -1362,7 +1380,7 @@ void ContinuousProfiler::AllocationTick(ULONG dataLen, LPCBYTE data)
     size_t typeNameCharLen = (dataLen - AllocationTickV4SizeWithoutTypeName) / 2 - 1;
 
     ThreadID      threadId;
-    const HRESULT hr = info12->GetCurrentThreadID(&threadId);
+    const HRESULT hr = info7->GetCurrentThreadID(&threadId);
     if (FAILED(hr))
     {
         trace::Logger::Debug("GetCurrentThreadId failed, ", hr);
@@ -1405,6 +1423,11 @@ void ContinuousProfiler::AllocationTick(ULONG dataLen, LPCBYTE data)
 
 void ContinuousProfiler::StartAllocationSampling(const unsigned int maxMemorySamplesPerMinute)
 {
+    if (!info12) // no info12 - we are on .Net Fx - ignore allocation sampling request
+    {
+        trace::Logger::Warn("Ignore Allocation Sampling request, it is not supported for .Net Framework applications");
+        return;
+    }
     this->allocationSubSampler = std::make_unique<AllocationSubSampler>(maxMemorySamplesPerMinute, 60);
 
     COR_PRF_EVENTPIPE_PROVIDER_CONFIG sessionConfig[] = {{WStr("Microsoft-Windows-DotNETRuntime"),
@@ -1422,6 +1445,10 @@ void ContinuousProfiler::StartAllocationSampling(const unsigned int maxMemorySam
 
 void ContinuousProfiler::StopAllocationSampling()
 {
+    if (!info12) // no info12 - we are on .Net Fx - ignore allocation sampling stop request
+    {
+        return;
+    }
     if (session_ == 0)
     {
         return;

@@ -1,0 +1,6 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <!-- StartupHook isolation is only supported on .NET (Core), not .NET Framework -->
+    <TargetFrameworks>net10.0;net9.0;net8.0</TargetFrameworks>
+  </PropertyGroup>
+</Project>

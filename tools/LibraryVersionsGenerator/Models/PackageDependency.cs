@@ -4,7 +4,7 @@
 namespace LibraryVersionsGenerator.Models;
 
 [AttributeUsage(AttributeTargets.Property, AllowMultiple = false)]
-internal class PackageDependency : Attribute
+internal sealed class PackageDependency : Attribute
 {
     public PackageDependency(string packageName, string variableName)
     {
@@ -12,7 +12,7 @@ internal class PackageDependency : Attribute
         VariableName = variableName;
     }
 
-    public string PackageName { get; set; }
+    public string PackageName { get; }
 
-    public string VariableName { get; set; }
+    public string VariableName { get; }
 }

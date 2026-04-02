@@ -39,7 +39,7 @@ public static partial class LibraryVersion
                 string.Empty,
 #else
                 "8.15.10",
-                "9.2.1",
+                "9.3.3",
 #endif
             ];
             return theoryData;
@@ -54,9 +54,15 @@ public static partial class LibraryVersion
 #if DEFAULT_TEST_PACKAGE_VERSIONS
                 string.Empty,
 #else
-                "6.0.35",
-                "8.0.10",
-                "9.0.11",
+                "6.0.36",
+                "8.0.23",
+                "9.0.12",
+#if NET10_0
+                "10.0.0",
+#endif
+#if NET10_0
+                "10.0.5",
+#endif
 #endif
             ];
             return theoryData;
@@ -73,7 +79,7 @@ public static partial class LibraryVersion
 #else
                 "6.0.3",
                 "7.0.0",
-                "8.0.0",
+                "8.0.3",
                 "9.0.0",
 #endif
             ];
@@ -91,7 +97,7 @@ public static partial class LibraryVersion
 #else
                 "7.5.0",
                 "8.0.2",
-                "8.7.0",
+                "8.8.4",
 #endif
             ];
             return theoryData;
@@ -123,7 +129,25 @@ public static partial class LibraryVersion
                 string.Empty,
 #else
                 "2.0.13",
-                "3.2.0",
+                "3.3.0",
+#endif
+            ];
+            return theoryData;
+        }
+    }
+    public static TheoryData<string> NLog
+    {
+        get
+        {
+            TheoryData<string> theoryData =
+            [
+#if DEFAULT_TEST_PACKAGE_VERSIONS
+                string.Empty,
+#else
+                "5.0.0",
+                "5.3.4",
+                "6.0.0",
+                "6.1.1",
 #endif
             ];
             return theoryData;
@@ -139,7 +163,7 @@ public static partial class LibraryVersion
                 string.Empty,
 #else
                 "8.3.0",
-                "8.5.5",
+                "8.5.8",
 #endif
             ];
             return theoryData;
@@ -155,7 +179,7 @@ public static partial class LibraryVersion
                 string.Empty,
 #else
                 "5.2.2",
-                "6.1.3",
+                "7.0.0",
 #endif
             ];
             return theoryData;
@@ -171,7 +195,7 @@ public static partial class LibraryVersion
                 string.Empty,
 #else
                 "4.8.6",
-                "4.9.0",
+                "4.9.1",
 #endif
             ];
             return theoryData;
@@ -196,7 +220,13 @@ public static partial class LibraryVersion
                 "3.0.0",
 #endif
 #if NET10_0 || NET9_0 || NET8_0 || NET462
-                "3.4.3",
+                "3.5.0",
+#endif
+#if NET10_0 || NET9_0 || NET8_0 || NET462
+                "3.7.0",
+#endif
+#if NET10_0 || NET9_0 || NET8_0 || NET462
+                "3.7.1",
 #endif
 #endif
             ];
@@ -229,7 +259,7 @@ public static partial class LibraryVersion
                 string.Empty,
 #else
                 "9.0.0",
-                "9.5.0",
+                "9.6.0",
 #endif
             ];
             return theoryData;
@@ -244,9 +274,12 @@ public static partial class LibraryVersion
 #if DEFAULT_TEST_PACKAGE_VERSIONS
                 string.Empty,
 #else
-                "8.0.5",
+                "8.0.8",
 #if NET10_0 || NET9_0 || NET8_0
                 "9.0.4",
+#endif
+#if NET10_0 || NET9_0 || NET8_0
+                "10.0.2",
 #endif
 #endif
             ];
@@ -266,8 +299,8 @@ public static partial class LibraryVersion
 #if NET10_0 || NET9_0 || NET8_0
                 "9.1.0",
 #endif
-#if NET10_0 || NET9_0 || NET8_0
-                "9.2.7",
+#if NET10_0
+                "10.1.0",
 #endif
 #endif
             ];
@@ -287,7 +320,7 @@ public static partial class LibraryVersion
                 "23.5.1",
 #endif
 #if NET462
-                "23.26.0",
+                "23.26.100",
 #endif
 #endif
             ];
@@ -304,7 +337,7 @@ public static partial class LibraryVersion
                 string.Empty,
 #else
                 "23.5.1",
-                "23.26.0",
+                "23.26.100",
 #endif
             ];
             return theoryData;
@@ -320,7 +353,7 @@ public static partial class LibraryVersion
                 string.Empty,
 #else
                 "3.6.0",
-                "3.15.1",
+                "3.16.1",
 #endif
             ];
             return theoryData;
@@ -338,7 +371,25 @@ public static partial class LibraryVersion
                 "5.1.2",
                 "6.8.1",
                 "7.0.0",
-                "7.2.0",
+                "7.2.1",
+#endif
+            ];
+            return theoryData;
+        }
+    }
+    public static TheoryData<string> SqliteMicrosoft
+    {
+        get
+        {
+            TheoryData<string> theoryData =
+            [
+#if DEFAULT_TEST_PACKAGE_VERSIONS
+                string.Empty,
+#else
+                "8.0.0",
+                "9.0.0",
+                "10.0.0",
+                "10.0.5",
 #endif
             ];
             return theoryData;
@@ -354,7 +405,7 @@ public static partial class LibraryVersion
                 string.Empty,
 #else
                 "2.6.122",
-                "2.9.32",
+                "2.12.4",
 #endif
             ];
             return theoryData;
@@ -391,7 +442,53 @@ public static partial class LibraryVersion
 #else
                 "1.8.2",
                 "1.9.2",
-                "2.12.0",
+                "2.13.2",
+#endif
+            ];
+            return theoryData;
+        }
+    }
+    public static TheoryData<string> AssemblyRedirection
+    {
+        get
+        {
+            TheoryData<string> theoryData =
+            [
+#if DEFAULT_TEST_PACKAGE_VERSIONS
+                string.Empty,
+#else
+#if NET8_0
+                "8.0.0",
+#endif
+#if NET9_0
+                "9.0.0",
+#endif
+#if NET462
+                "6.0.0",
+#endif
+#if NET8_0 || NET9_0
+                "10.0.0",
+#endif
+#if NET462 || NET10_0
+                "10.0.2",
+#endif
+#endif
+            ];
+            return theoryData;
+        }
+    }
+    public static TheoryData<string> WCFCoreServer
+    {
+        get
+        {
+            TheoryData<string> theoryData =
+            [
+#if DEFAULT_TEST_PACKAGE_VERSIONS
+                string.Empty,
+#else
+#if NET10_0 || NET9_0 || NET8_0
+                "1.8.0",
+#endif
 #endif
             ];
             return theoryData;
@@ -406,6 +503,7 @@ public static partial class LibraryVersion
        { "GraphQL", GraphQL },
        { "GrpcNetClient", GrpcNetClient },
        { "log4net", log4net },
+       { "NLog", NLog },
        { "MassTransit", MassTransit },
        { "SqlClientMicrosoft", SqlClientMicrosoft },
        { "SqlClientSystem", SqlClientSystem },
@@ -418,8 +516,11 @@ public static partial class LibraryVersion
        { "OracleMdaCore", OracleMdaCore },
        { "Quartz", Quartz },
        { "RabbitMq", RabbitMq },
+       { "SqliteMicrosoft", SqliteMicrosoft },
        { "StackExchangeRedis", StackExchangeRedis },
        { "WCFCoreClient", WCFCoreClient },
        { "Kafka", Kafka },
+       { "AssemblyRedirection", AssemblyRedirection },
+       { "WCFCoreServer", WCFCoreServer },
     };
 }

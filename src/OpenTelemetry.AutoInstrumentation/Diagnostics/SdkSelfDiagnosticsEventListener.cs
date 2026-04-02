@@ -4,6 +4,7 @@
 // Source originated from https://github.com/open-telemetry/opentelemetry-dotnet/blob/23609730ddd73c860553de847e67c9b2226cff94/src/OpenTelemetry/Internal/SelfDiagnosticsEventListener.cs
 
 using System.Diagnostics.Tracing;
+using System.Globalization;
 using OpenTelemetry.AutoInstrumentation.Logging;
 
 namespace OpenTelemetry.AutoInstrumentation.Diagnostics;
@@ -19,7 +20,7 @@ internal class SdkSelfDiagnosticsEventListener : EventListener
     private readonly object lockObj = new();
     private readonly EventLevel logLevel;
     private readonly IOtelLogger log;
-    private readonly List<EventSource>? eventSourcesBeforeConstructor = new();
+    private readonly List<EventSource>? eventSourcesBeforeConstructor = [];
 
     public SdkSelfDiagnosticsEventListener(IOtelLogger logger)
     {
@@ -29,7 +30,7 @@ internal class SdkSelfDiagnosticsEventListener : EventListener
         List<EventSource>? eventSources;
         lock (lockObj)
         {
-            eventSources = this.eventSourcesBeforeConstructor;
+            eventSources = eventSourcesBeforeConstructor;
             eventSourcesBeforeConstructor = null;
         }
 
@@ -89,10 +90,10 @@ internal class SdkSelfDiagnosticsEventListener : EventListener
         }
         else
         {
-            payloadArray = Array.Empty<object>();
+            payloadArray = [];
         }
 
-        var message = eventData.Message != null ? string.Format(eventData.Message ?? string.Empty, payloadArray) : string.Empty;
+        var message = eventData.Message != null ? string.Format(CultureInfo.InvariantCulture, eventData.Message, payloadArray) : string.Empty;
 
         switch (eventData.Level)
         {

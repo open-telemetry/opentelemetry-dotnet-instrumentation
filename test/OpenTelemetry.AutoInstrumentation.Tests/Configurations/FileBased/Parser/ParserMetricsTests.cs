@@ -44,6 +44,7 @@ public class ParserMetricsTests
         Assert.NotNull(consoleReader);
         Assert.NotNull(consoleReader.Exporter);
         Assert.NotNull(consoleReader.Exporter!.Console);
+        Assert.Equal("delta", consoleReader.Exporter.Console.TemporalityPreference);
 
         var prometheusReader = config.MeterProvider.Readers[3].Pull;
         Assert.NotNull(prometheusReader);

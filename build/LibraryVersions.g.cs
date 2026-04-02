@@ -26,15 +26,17 @@ public static partial class LibraryVersion
             "TestApplication.Elasticsearch",
             [
                 new("8.15.10"),
-                new("9.2.1"),
+                new("9.3.3"),
             ]
         },
         {
             "TestApplication.EntityFrameworkCore",
             [
-                new("6.0.35"),
-                new("8.0.10"),
-                new("9.0.11"),
+                new("6.0.36"),
+                new("8.0.23"),
+                new("9.0.12"),
+                new("10.0.0", supportedFrameworks: [ "net10.0" ]),
+                new("10.0.5", supportedFrameworks: [ "net10.0" ]),
             ]
         },
         {
@@ -42,7 +44,7 @@ public static partial class LibraryVersion
             [
                 new("6.0.3"),
                 new("7.0.0"),
-                new("8.0.0"),
+                new("8.0.3"),
                 new("9.0.0"),
             ]
         },
@@ -51,7 +53,7 @@ public static partial class LibraryVersion
             [
                 new("7.5.0", additionalMetaData: new() { { "GraphQLMicrosoftDI", "7.5.0" }, { "GraphQLServerTransportsAspNetCore", "7.5.0" }, { "GraphQLServerUIPGraphiQL", "7.5.0" } }),
                 new("8.0.2", additionalMetaData: new() { { "GraphQLMicrosoftDI", "8.0.2" }, { "GraphQLServerTransportsAspNetCore", "8.0.2" }, { "GraphQLServerUIPGraphiQL", "8.0.2" } }),
-                new("8.7.0", additionalMetaData: new() { { "GraphQLMicrosoftDI", "8.7.0" }, { "GraphQLServerTransportsAspNetCore", "8.3.2" }, { "GraphQLServerUIPGraphiQL", "8.3.2" } }),
+                new("8.8.4", additionalMetaData: new() { { "GraphQLMicrosoftDI", "8.8.4" }, { "GraphQLServerTransportsAspNetCore", "8.3.3" }, { "GraphQLServerUIPGraphiQL", "8.3.3" } }),
             ]
         },
         {
@@ -65,28 +67,37 @@ public static partial class LibraryVersion
             "TestApplication.Log4NetBridge",
             [
                 new("2.0.13"),
-                new("3.2.0"),
+                new("3.3.0"),
+            ]
+        },
+        {
+            "TestApplication.NLogBridge",
+            [
+                new("5.0.0", additionalMetaData: new() { { "NLogExtensionsLogging", "5.0.0" } }),
+                new("5.3.4", additionalMetaData: new() { { "NLogExtensionsLogging", "5.3.15" } }),
+                new("6.0.0", additionalMetaData: new() { { "NLogExtensionsLogging", "6.0.0" } }),
+                new("6.1.1", additionalMetaData: new() { { "NLogExtensionsLogging", "6.1.2" } }),
             ]
         },
         {
             "TestApplication.MassTransit",
             [
                 new("8.3.0"),
-                new("8.5.5"),
+                new("8.5.8"),
             ]
         },
         {
             "TestApplication.SqlClient.Microsoft",
             [
                 new("5.2.2"),
-                new("6.1.3"),
+                new("7.0.0"),
             ]
         },
         {
             "TestApplication.SqlClient.System",
             [
                 new("4.8.6"),
-                new("4.9.0"),
+                new("4.9.1"),
             ]
         },
         {
@@ -95,7 +106,9 @@ public static partial class LibraryVersion
                 new("2.19.0", supportedFrameworks: [ "net10.0", "net9.0", "net8.0", "net462" ]),
                 new("2.30.0", supportedFrameworks: [ "net10.0", "net9.0", "net8.0", "net462" ]),
                 new("3.0.0", supportedFrameworks: [ "net10.0", "net9.0", "net8.0", "net472" ]),
-                new("3.4.3", supportedFrameworks: [ "net10.0", "net9.0", "net8.0", "net472" ]),
+                new("3.5.0", supportedFrameworks: [ "net10.0", "net9.0", "net8.0", "net472" ]),
+                new("3.7.0", supportedFrameworks: [ "net10.0", "net9.0", "net8.0", "net472" ]),
+                new("3.7.1", supportedFrameworks: [ "net10.0", "net9.0", "net8.0", "net472" ]),
             ]
         },
         {
@@ -109,14 +122,15 @@ public static partial class LibraryVersion
             "TestApplication.MySqlData",
             [
                 new("9.0.0"),
-                new("9.5.0"),
+                new("9.6.0"),
             ]
         },
         {
             "TestApplication.Npgsql",
             [
-                new("8.0.5"),
+                new("8.0.8"),
                 new("9.0.4", supportedFrameworks: [ "net10.0", "net9.0", "net8.0" ]),
+                new("10.0.2", supportedFrameworks: [ "net10.0", "net9.0", "net8.0" ]),
             ]
         },
         {
@@ -124,28 +138,28 @@ public static partial class LibraryVersion
             [
                 new("8.2.5"),
                 new("9.1.0", supportedFrameworks: [ "net10.0", "net9.0", "net8.0" ]),
-                new("9.2.7", supportedFrameworks: [ "net10.0", "net9.0", "net8.0" ]),
+                new("10.1.0", supportedFrameworks: [ "net10.0" ]),
             ]
         },
         {
             "TestApplication.OracleMda.NetFramework",
             [
                 new("23.5.1", supportedFrameworks: [ "net472" ]),
-                new("23.26.0", supportedFrameworks: [ "net472" ]),
+                new("23.26.100", supportedFrameworks: [ "net472" ]),
             ]
         },
         {
             "TestApplication.OracleMda.Core",
             [
                 new("23.5.1"),
-                new("23.26.0"),
+                new("23.26.100"),
             ]
         },
         {
             "TestApplication.Quartz",
             [
                 new("3.6.0"),
-                new("3.15.1"),
+                new("3.16.1"),
             ]
         },
         {
@@ -154,14 +168,23 @@ public static partial class LibraryVersion
                 new("5.1.2"),
                 new("6.8.1"),
                 new("7.0.0"),
-                new("7.2.0"),
+                new("7.2.1"),
+            ]
+        },
+        {
+            "TestApplication.Sqlite.Microsoft",
+            [
+                new("8.0.0"),
+                new("9.0.0"),
+                new("10.0.0"),
+                new("10.0.5"),
             ]
         },
         {
             "TestApplication.StackExchangeRedis",
             [
                 new("2.6.122"),
-                new("2.9.32"),
+                new("2.12.4"),
             ]
         },
         {
@@ -178,7 +201,23 @@ public static partial class LibraryVersion
             [
                 new("1.8.2"),
                 new("1.9.2"),
-                new("2.12.0"),
+                new("2.13.2"),
+            ]
+        },
+        {
+            "TestApplication.AssemblyRedirection",
+            [
+                new("8.0.0", supportedFrameworks: [ "net8.0" ]),
+                new("9.0.0", supportedFrameworks: [ "net9.0" ]),
+                new("6.0.0", supportedFrameworks: [ "net462" ]),
+                new("10.0.0", supportedFrameworks: [ "net8.0", "net9.0" ]),
+                new("10.0.2", supportedFrameworks: [ "net462", "net10.0" ]),
+            ]
+        },
+        {
+            "TestApplication.Wcf.Core",
+            [
+                new("1.8.0", supportedFrameworks: [ "net10.0", "net9.0", "net8.0" ]),
             ]
         },
     };

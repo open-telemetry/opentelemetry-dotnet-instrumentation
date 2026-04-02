@@ -1,9 +1,6 @@
 // Copyright The OpenTelemetry Authors
 // SPDX-License-Identifier: Apache-2.0
 
-using System;
-using System.Threading;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Examples.AspNetCoreMvc.Controllers;
@@ -23,7 +20,7 @@ public class ApiController : ControllerBase
     [Route("delay-async/{seconds}")]
     public async Task<ActionResult> DelayAsync(int seconds)
     {
-        await Task.Delay(TimeSpan.FromSeconds(seconds));
+        await Task.Delay(TimeSpan.FromSeconds(seconds)).ConfigureAwait(false);
         return Ok(seconds);
     }
 }

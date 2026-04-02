@@ -3,11 +3,10 @@
 
 using System.ServiceModel;
 using System.ServiceModel.Channels;
-using System.Threading.Tasks;
 
 namespace TestApplication.Wcf.Client.DotNet;
 
-public class StatusServiceClient : ClientBase<IStatusServiceContract>, IStatusServiceContract
+internal sealed class StatusServiceClient : ClientBase<IStatusServiceContract>, IStatusServiceContract
 {
     public StatusServiceClient(Binding binding, EndpointAddress remoteAddress)
         : base(binding, remoteAddress)
@@ -16,7 +15,7 @@ public class StatusServiceClient : ClientBase<IStatusServiceContract>, IStatusSe
 
     public Task<StatusResponse> PingAsync(StatusRequest request)
     {
-        return this.Channel.PingAsync(request);
+        return Channel.PingAsync(request);
     }
 
     public Task OpenAsync()

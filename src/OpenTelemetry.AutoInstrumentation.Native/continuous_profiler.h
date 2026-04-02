@@ -7,6 +7,7 @@
 #define OTEL_CONTINUOUS_PROFILER_H_
 
 #include "continuous_profiler_clr_helpers.h"
+#include "stack_capture_strategy.h"
 
 #include <mutex>
 #include <cinttypes>
@@ -41,13 +42,25 @@ namespace continuous_profiler
 {
 struct FunctionIdentifier
 {
+    // Managed frame data
     mdToken  function_token;
     ModuleID module_id;
     bool     is_valid;
+    static FunctionIdentifier Managed(mdToken token, ModuleID mod, bool valid)
+    {
+        return {token, mod, valid};
+    }
+
+    static FunctionIdentifier ManagedInvalid()
+    {
+        return {0, 0, false};
+    }
 
     bool operator==(const FunctionIdentifier& p) const
     {
-        return function_token == p.function_token && module_id == p.module_id && is_valid == p.is_valid;
+        if (is_valid != p.is_valid)
+            return false;
+        return function_token == p.function_token && module_id == p.module_id;
     }
 };
 
@@ -210,8 +223,9 @@ public:
     void StartSelectedThreadsBatch() const;
     void EndSelectedThreadsBatch() const;
     void WriteSpanContext(const thread_span_context& span_context) const;
-    void StartSample(ThreadID id, const ThreadState* state, const thread_span_context& span_context) const;
-    void StartSampleForSelectedThread(const ThreadState* state, const thread_span_context& span_context) const;
+    void StartSample(const ThreadState* state, const thread_span_context& span_context) const;
+    void StartSampleForSelectedThread(const ThreadState*         state,
+                                      const thread_span_context& span_context) const;
     void MarkSelectedForFrequentSampling(bool value) const;
     void RecordFrame(const FunctionIdentifier& fid, const trace::WSTRING& frame);
     void EndSample() const;
@@ -270,16 +284,15 @@ class NamingHelper
 {
 public:
     // These are permanent parts of the helper object
-    ICorProfilerInfo12* info12_ = nullptr;
+    ICorProfilerInfo7* info7_ = nullptr;
 
     NamingHelper();
     void ClearFunctionIdentifierCache();
     trace::WSTRING* Lookup(const FunctionIdentifier& function_identifier, SamplingStatistics & stats);
-    // TODO: rename
-    FunctionIdentifier Lookup(const FunctionID functionId, const COR_PRF_FRAME_INFO frameInfo);
+    FunctionIdentifier LookupManagedFunction(FunctionID functionId, COR_PRF_FRAME_INFO frameInfo);
 
-    [[nodiscard]] FunctionIdentifier GetFunctionIdentifier(const FunctionID func_id,
-                                                           const COR_PRF_FRAME_INFO frame_info) const;
+    [[nodiscard]] FunctionIdentifier ResolveManagedFunctionIdentifier(FunctionID func_id,
+                                                                     COR_PRF_FRAME_INFO frame_info) const;
 private:
     NameCache<FunctionIdentifier, trace::WSTRING*> function_name_cache_;
     NameCache<FunctionIdentifierResolveArgs, FunctionIdentifier> function_identifier_cache_;
@@ -304,6 +317,9 @@ private:
     uint32_t seenThisCycle;
     uint32_t sampledThisCycle;
     uint32_t seenLastCycle;
+    uint32_t                   startupCyclesRemaining;
+    std::chrono::milliseconds  startupMinSampleSpacingMillis;
+    std::chrono::steady_clock::time_point startupNextSampleAllowedAt;
     std::chrono::milliseconds nextCycleStartMillis;
     std::mutex sampleLock;
     std::default_random_engine rand;
@@ -314,23 +330,27 @@ enum class SamplingType : int32_t { Continuous = 1, SelectedThreads = 2 };
 class ContinuousProfiler
 {
 public:
-    std::optional<unsigned int>                        threadSamplingInterval;
-    std::optional<unsigned int>                        selectedThreadsSamplingInterval;
+    std::optional<unsigned int> threadSamplingInterval;
+    std::optional<unsigned int> selectedThreadsSamplingInterval;
     std::chrono::time_point<std::chrono::steady_clock> nextOutdatedEntriesScan;
-    void                                               StartThreadSampling();
-    void                                               Shutdown();
-    bool                                               IsShutdownRequested() const;
-    static void                                        InitSelectiveSamplingBuffer();
-    unsigned int                                       maxMemorySamplesPerMinute;
-    void                                               StartAllocationSampling(unsigned int maxMemorySamplesPerMinute);
-    void                                               StopAllocationSampling();
-    void                                               AllocationTick(ULONG dataLen, LPCBYTE data);
-    ICorProfilerInfo12*                                info12;
-    static void                                        ThreadCreated(ThreadID thread_id);
-    void                                               ThreadDestroyed(ThreadID thread_id);
-    void                                               ThreadNameChanged(ThreadID thread_id, ULONG cch_name, WCHAR name[]);
+    void                        StartThreadSampling();
+    void                        Shutdown();
+    bool                        IsShutdownRequested() const;
+    static void                 InitSelectiveSamplingBuffer();
+    unsigned int                maxMemorySamplesPerMinute;
+    void                        StartAllocationSampling(unsigned int maxMemorySamplesPerMinute);
+    void                        StopAllocationSampling();
+    void                        AllocationTick(ULONG dataLen, LPCBYTE data);
+    ICorProfilerInfo12*         info12 = nullptr;
+    ICorProfilerInfo7*          info7 = nullptr;
+    static void                 ThreadCreated(ThreadID thread_id);
+    void                        ThreadDestroyed(ThreadID thread_id);
+    void                        ThreadNameChanged(ThreadID thread_id, ULONG cch_name, WCHAR name[]);
 
     void SetGlobalInfo12(ICorProfilerInfo12* info12);
+    void SetGlobalInfo7(ICorProfilerInfo7* cor_profiler_info7);
+    void SetStackCaptureStrategy(IStackCaptureStrategy* strategy);
+    IStackCaptureStrategy* GetStackCaptureStrategy() const;
     ThreadState* GetCurrentThreadState(ThreadID tid);
 
     std::unordered_map<ThreadID, ThreadState*> managed_tid_to_state_;
@@ -350,6 +370,7 @@ private:
     std::atomic_bool             shutdown_requested_{ false };
     std::unique_ptr<std::thread> thread_sampling_thread_;
     EVENTPIPE_SESSION            session_ = 0;
+    IStackCaptureStrategy*       stack_capture_strategy_ = nullptr; // Non-owning pointer
 };
 
 } // namespace continuous_profiler

@@ -345,6 +345,15 @@ public class FilebasedTracesSettingsTests
     [MemberData(nameof(LoadMethod_SkipWrongExporterConfiguration_Data))]
     public void LoadMethod_SkipWrongExporterConfiguration(SkipConfigurationTestCase skipConfigurationTestCase)
     {
+#if NET
+        ArgumentNullException.ThrowIfNull(skipConfigurationTestCase);
+#else
+        if (skipConfigurationTestCase == null)
+        {
+            throw new ArgumentNullException(nameof(skipConfigurationTestCase));
+        }
+#endif
+
         var settings = new TracerSettings();
 
         settings.LoadFile(skipConfigurationTestCase.Configuration);
@@ -539,10 +548,14 @@ public class FilebasedTracesSettingsTests
 
     private static SamplingParameters CreateSamplingParameters(ActivityContext parentContext)
     {
-        return new SamplingParameters(parentContext, ActivityTraceId.CreateRandom(), "span", ActivityKind.Internal, default(TagList), new ActivityLink[] { });
+        return new SamplingParameters(parentContext, ActivityTraceId.CreateRandom(), "span", ActivityKind.Internal, default(TagList), []);
     }
 
+#pragma warning disable CA1515 // Consider making public types internal. Needed for xunit test purposes test cases.
+#pragma warning disable CA1034 // Nested types should not be visible. It is used only for test purposes.
     public class SkipConfigurationTestCase
+#pragma warning restore CA1034 // Nested types should not be visible. It is used only for test purposes.
+#pragma warning restore CA1515 // Consider making public types internal. Needed for xunit test purposes test cases.
     {
         internal SkipConfigurationTestCase(YamlConfiguration configuration)
         {

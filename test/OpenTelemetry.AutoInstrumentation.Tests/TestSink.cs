@@ -5,7 +5,7 @@ using OpenTelemetry.AutoInstrumentation.Logging;
 
 namespace OpenTelemetry.AutoInstrumentation.Tests;
 
-internal class TestSink : ISink
+internal sealed class TestSink : ISink
 {
     public IList<string> Messages { get; } = new List<string>();
 

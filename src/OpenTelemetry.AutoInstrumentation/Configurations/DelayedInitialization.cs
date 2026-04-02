@@ -16,7 +16,7 @@ internal static class DelayedInitialization
         [MethodImpl(MethodImplOptions.NoInlining)]
         public static void AddAspNet(LazyInstrumentationLoader lazyInstrumentationLoader, PluginManager pluginManager, TracerSettings tracerSettings)
         {
-            new AspNetInitializer(lazyInstrumentationLoader, pluginManager, tracerSettings);
+            _ = new AspNetInitializer(lazyInstrumentationLoader, pluginManager, tracerSettings);
         }
 #endif
 
@@ -31,7 +31,7 @@ internal static class DelayedInitialization
         [MethodImpl(MethodImplOptions.NoInlining)]
         public static void AddHttpClient(LazyInstrumentationLoader lazyInstrumentationLoader, PluginManager pluginManager, TracerSettings tracerSettings)
         {
-            new HttpClientInitializer(lazyInstrumentationLoader, pluginManager, tracerSettings);
+            _ = new HttpClientInitializer(lazyInstrumentationLoader, pluginManager, tracerSettings);
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]
@@ -43,7 +43,7 @@ internal static class DelayedInitialization
         [MethodImpl(MethodImplOptions.NoInlining)]
         public static void AddSqlClient(LazyInstrumentationLoader lazyInstrumentationLoader, PluginManager pluginManager)
         {
-            new SqlClientTracerInitializer(lazyInstrumentationLoader, pluginManager);
+            _ = new SqlClientTracerInitializer(lazyInstrumentationLoader, pluginManager);
         }
 
 #if NET
@@ -80,20 +80,20 @@ internal static class DelayedInitialization
         [MethodImpl(MethodImplOptions.NoInlining)]
         public static void AddAspNet(LazyInstrumentationLoader lazyInstrumentationLoader, PluginManager pluginManager)
         {
-            new AspNetMetricsInitializer(lazyInstrumentationLoader, pluginManager);
+            _ = new AspNetMetricsInitializer(lazyInstrumentationLoader, pluginManager);
         }
 #endif
 
         [MethodImpl(MethodImplOptions.NoInlining)]
         public static void AddHttpClient(LazyInstrumentationLoader lazyInstrumentationLoader)
         {
-            new HttpClientMetricsInitializer(lazyInstrumentationLoader);
+            _ = new HttpClientMetricsInitializer(lazyInstrumentationLoader);
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]
         public static void AddSqlClient(LazyInstrumentationLoader lazyInstrumentationLoader, PluginManager pluginManager)
         {
-            new SqlClientMetricsInitializer(lazyInstrumentationLoader, pluginManager);
+            _ = new SqlClientMetricsInitializer(lazyInstrumentationLoader, pluginManager);
         }
     }
 }

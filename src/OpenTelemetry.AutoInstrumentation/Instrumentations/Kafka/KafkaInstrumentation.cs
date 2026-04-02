@@ -13,7 +13,7 @@ namespace OpenTelemetry.AutoInstrumentation.Instrumentations.Kafka;
 
 internal static class KafkaInstrumentation
 {
-    private static readonly ActivitySource Source = new("OpenTelemetry.AutoInstrumentation.Kafka");
+    private static readonly ActivitySource Source = new("OpenTelemetry.AutoInstrumentation.Kafka", AutoInstrumentationVersion.Version);
 
     public static Activity? StartConsumerActivity(object consumer)
     {
