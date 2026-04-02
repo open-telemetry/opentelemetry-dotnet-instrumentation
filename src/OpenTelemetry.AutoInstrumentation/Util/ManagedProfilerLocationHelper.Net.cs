@@ -28,7 +28,7 @@ internal static partial class ManagedProfilerLocationHelper
         // For .NET (Core) most of the assemblies are different per runtime version, so we
         // 1. first start with runtime version folder           -> e.g. tracer-home/net/net8.0/assembly-name.dll
         // 2. then check .link file in runtime version folder   -> e.g. tracer-home/net/net8.0/assembly-name.dll.link
-        // 3. then check runtime root folder                    ->      tracer-home/net/assembly-name.dll
+        // 3. last fallback to runtime root folder              ->      tracer-home/net/assembly-name.dll
         return Probe(_managedProfilerVersionDirectory, assemblyName) ??
                CheckLinkFile(_managedProfilerVersionDirectory, runtimeDir, assemblyName, logger) ??
                Probe(runtimeDir, assemblyName);
