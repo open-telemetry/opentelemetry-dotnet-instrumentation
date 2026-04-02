@@ -1,6 +1,7 @@
 // Copyright The OpenTelemetry Authors
 // SPDX-License-Identifier: Apache-2.0
 
+using System.Globalization;
 using OpenTelemetry.AutoInstrumentation.Configurations.FileBasedConfiguration;
 using OpenTelemetry.AutoInstrumentation.Logging;
 
@@ -73,11 +74,13 @@ internal class OpAmpSettings : Settings
             return null;
         }
 
-        var isValid = configurationValue!.ToLower() is "http" or "websocket";
+#pragma warning disable CA1308 // Normalize strings to uppercase
+        var isValid = configurationValue!.ToLower(CultureInfo.InvariantCulture) is "http" or "websocket";
         if (isValid)
         {
-            return configurationValue!.ToLower();
+            return configurationValue.ToLower(CultureInfo.InvariantCulture);
         }
+#pragma warning restore CA1308 // Normalize strings to uppercase
 
         var unsupportedMessage = $"OpAMP connection type configuration has an invalid value: '{configurationValue}'.";
         Logger.Error(unsupportedMessage);

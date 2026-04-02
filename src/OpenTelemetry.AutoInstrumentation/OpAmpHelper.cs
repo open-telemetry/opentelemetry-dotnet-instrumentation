@@ -30,7 +30,7 @@ internal static class OpAmpHelper
             {
                 try
                 {
-                    await _client.StartAsync(_cts.Token);
+                    await _client.StartAsync(_cts.Token).ConfigureAwait(false);
 
                     IsRunning = true;
                 }
