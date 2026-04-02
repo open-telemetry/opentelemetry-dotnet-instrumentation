@@ -4,6 +4,7 @@
 #if NET
 using System.Reflection;
 using System.Runtime.Loader;
+using OpenTelemetry.AutoInstrumentation.Configurations;
 using OpenTelemetry.AutoInstrumentation.Logging;
 using OpenTelemetry.AutoInstrumentation.Util;
 
@@ -70,10 +71,21 @@ internal class AssemblyResolver(IOtelLogger logger)
         // and TPA conflicts can be intercepted before the runtime silently loads the wrong version.
 
         AssemblyLoadContext.Default.Resolving += Resolving_ManagedProfilerDependencies;
-        // TODO with setting DependencyLoadContext as contextual reflection context, these become more important:
-        //  - need of caching, because for unknown assemblies we will be hitting file system many times
-        //  - for unknown assemblies we'll be hitting both DependencyLoadContext.Load and this event handler
-        DependencyLoadContext.EnterContextualReflection();
+        // If Assembly Redirection is disabled via env variable, then we don't have Native IL rewriting
+        // so AssemblyResolver will not be used to resolve conflicts but will only handle our dependencies
+        // that are not referenced directly in customer application (by loading them to Default ALC);
+        // this configuation serves as an indication that the customer choose to handle conflicts on their own
+        // (for example by referencing our versions directly or via other means).
+        // In this case we don't need to support redirection for reflection-triggered loads neither;
+        // this will effectively avoid triggering our custom ALC Load method for file searches and checks
+        // in the use case where it's unnecessary
+        if (IsRedirectEnabled())
+        {
+            // TODO with setting DependencyLoadContext as contextual reflection context, these become more important:
+            //  - need of caching, because for unknown assemblies we will be hitting file system many times
+            //  - for unknown assemblies we'll be hitting both DependencyLoadContext.Load and this event handler
+            DependencyLoadContext.EnterContextualReflection();
+        }
     }
 
     private static string[] GetTrustedPlatformAssemblyNames()
@@ -135,6 +147,19 @@ internal class AssemblyResolver(IOtelLogger logger)
             : AssemblyLoadContext.Default;
         logger.Debug($"Loading \"{assemblyPath}\" with {loadContext.Name}.LoadFromAssemblyPath");
         return loadContext.LoadFromAssemblyPath(assemblyPath);
+    }
+
+    private bool IsRedirectEnabled()
+    {
+        var envValue = Environment.GetEnvironmentVariable(ConfigurationKeys.RedirectEnabled);
+        if (bool.TryParse(envValue, out var redirectEnabled))
+        {
+            logger.Information($"Redirect explicitly set via environment variable {ConfigurationKeys.RedirectEnabled} to: {redirectEnabled}");
+            return redirectEnabled;
+        }
+
+        logger.Information($"Redirect not explicitly set via environment variable {ConfigurationKeys.RedirectEnabled}, defaulting to: true");
+        return true;
     }
 }
 

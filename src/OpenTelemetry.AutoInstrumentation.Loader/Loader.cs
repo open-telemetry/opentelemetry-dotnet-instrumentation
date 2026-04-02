@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: Apache-2.0
 
 using System.Reflection;
-using OpenTelemetry.AutoInstrumentation.Configurations;
 using OpenTelemetry.AutoInstrumentation.Logging;
 
 namespace OpenTelemetry.AutoInstrumentation.Loader;
@@ -23,18 +22,10 @@ internal class Loader
     /// </summary>
     static Loader()
     {
-#if NET
-        // For .Net (Core) if we run in isolated context (set up by StartupHook's IsolatedAssemblyLoadContext),
-        // skip AssemblyResolver. The isolated AssemblyLoadContext already handles all assembly resolution.
-        // Otherwise check if assembly redirection is enabled via env variable or implicitly based on the deployment
-        var currentContext = System.Runtime.Loader.AssemblyLoadContext.CurrentContextualReflectionContext;
-        var isIsolated = currentContext?.Name == StartupHookConstants.IsolatedAssemblyLoadContextName;
-        Logger.Information($"Loader Run in Isolated Context: {isIsolated}");
-        if (!isIsolated && IsRedirectEnabled())
-#else
-        // For .Net Framework, check if assembly redirection is enabled via env variable or implicitly based on the deployment
-        if (IsRedirectEnabled())
-#endif
+        // Check if we should or should not skip setting up AssemblyResolver
+        var skipResolver = SkipAssemblyResolver();
+        Logger.Information($"Skip AssemblyResolver: {skipResolver}");
+        if (!skipResolver)
         {
             try
             {
@@ -61,19 +52,24 @@ internal class Loader
         }
     }
 
-    private static bool IsRedirectEnabled()
+    private static bool SkipAssemblyResolver()
     {
-        var envValue = Environment.GetEnvironmentVariable(ConfigurationKeys.RedirectEnabled);
-        if (bool.TryParse(envValue, out var redirectEnabled))
+#if NET
+        // For .Net (Core) if we run in isolated context (set up by StartupHook's IsolatedAssemblyLoadContext),
+        // skip AssemblyResolver. The isolated AssemblyLoadContext already handles all assembly resolution.
+        var currentContext = System.Runtime.Loader.AssemblyLoadContext.CurrentContextualReflectionContext;
+        var isIsolated = currentContext?.Name == StartupHookConstants.IsolatedAssemblyLoadContextName;
+        Logger.Information($"Loader Current Context [{currentContext}] is Isolated: {isIsolated}");
+        if (isIsolated)
         {
-            Logger.Information($"Redirect explicitly set via environment variable to: {redirectEnabled}");
-            return redirectEnabled;
+            return true;
         }
+#endif
 
-        // Not explicitly set: default based on deployment type - true for standalone, false otherwise.
-        // For non-standalone deployments, assembly resolution is handled at build time,
-        // so assembly redirection is not considered.
-        return DeploymentDetector.IsStandaloneDeployment(Logger);
+        // Check if AssemblyResolver should be implicitly skipped for non standalone deployment where
+        // the anticipated folder structure of our dependency files is not guaraneteed (e.g. on NuGet
+        // deployment our dependencies are either flat in the application output or in the runtime folders)
+        return !DeploymentDetector.IsStandaloneDeployment(Logger);
     }
 
     private static void OnExit(object? sender, EventArgs e)
