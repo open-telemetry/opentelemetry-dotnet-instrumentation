@@ -58,6 +58,202 @@ namespace trace
 
 CorProfiler* profiler = nullptr;
 
+#ifdef _WIN32
+namespace
+{
+HRESULT CopyMethodBody(ICorProfilerInfo* info,
+                       const ModuleID    module_id,
+                       const mdMethodDef source_method_token,
+                       const mdMethodDef target_method_token)
+{
+    LPCBYTE source_method_body      = nullptr;
+    ULONG   source_method_body_size = 0;
+    auto    hr = info->GetILFunctionBody(module_id, source_method_token, &source_method_body, &source_method_body_size);
+    if (FAILED(hr))
+    {
+        return hr;
+    }
+
+    ComPtr<IMethodMalloc> method_malloc;
+    hr = info->GetILFunctionBodyAllocator(module_id, method_malloc.GetAddressOf());
+    if (FAILED(hr))
+    {
+        return hr;
+    }
+
+    auto* copied_method_body = static_cast<BYTE*>(method_malloc->Alloc(source_method_body_size));
+    if (copied_method_body == nullptr)
+    {
+        return E_OUTOFMEMORY;
+    }
+
+    memcpy(copied_method_body, source_method_body, source_method_body_size);
+    return info->SetILFunctionBody(module_id, target_method_token, copied_method_body);
+}
+
+void AppendToken(std::vector<BYTE>& method_body, const mdToken token)
+{
+    method_body.push_back(static_cast<BYTE>(token & 0xff));
+    method_body.push_back(static_cast<BYTE>((token >> 8) & 0xff));
+    method_body.push_back(static_cast<BYTE>((token >> 16) & 0xff));
+    method_body.push_back(static_cast<BYTE>((token >> 24) & 0xff));
+}
+
+void AppendLoadArgument(std::vector<BYTE>& method_body, const ULONG argument_index)
+{
+    switch (argument_index)
+    {
+        case 0:
+            method_body.push_back(static_cast<BYTE>(CEE_LDARG_0));
+            return;
+        case 1:
+            method_body.push_back(static_cast<BYTE>(CEE_LDARG_1));
+            return;
+        case 2:
+            method_body.push_back(static_cast<BYTE>(CEE_LDARG_2));
+            return;
+        case 3:
+            method_body.push_back(static_cast<BYTE>(CEE_LDARG_3));
+            return;
+        default:
+            break;
+    }
+
+    if (argument_index <= 0xff)
+    {
+        method_body.push_back(static_cast<BYTE>(CEE_LDARG_S));
+        method_body.push_back(static_cast<BYTE>(argument_index));
+        return;
+    }
+
+    method_body.push_back(static_cast<BYTE>(CEE_PREFIX1));
+    method_body.push_back(static_cast<BYTE>(CEE_LDARG & 0xff));
+    method_body.push_back(static_cast<BYTE>(argument_index & 0xff));
+    method_body.push_back(static_cast<BYTE>((argument_index >> 8) & 0xff));
+}
+
+HRESULT ReplaceMethodWithTrampoline(ICorProfilerInfo* info,
+                                    const ModuleID    module_id,
+                                    const mdMethodDef method_token,
+                                    const mdToken     loader_method_token,
+                                    const mdMethodDef target_method_token,
+                                    const ULONG       total_argument_count)
+{
+    std::vector<BYTE> method_body;
+    method_body.reserve(11 + (total_argument_count * 4));
+
+    method_body.push_back(static_cast<BYTE>(CEE_CALL));
+    AppendToken(method_body, loader_method_token);
+
+    for (ULONG argument_index = 0; argument_index < total_argument_count; argument_index++)
+    {
+        AppendLoadArgument(method_body, argument_index);
+    }
+
+    method_body.push_back(static_cast<BYTE>(CEE_CALL));
+    AppendToken(method_body, target_method_token);
+    method_body.push_back(static_cast<BYTE>(CEE_RET));
+
+    COR_ILMETHOD_FAT header{};
+    header.SetFlags(0);
+    header.SetSize(sizeof(COR_ILMETHOD_FAT) / 4);
+    header.SetMaxStack(total_argument_count == 0 ? 1 : total_argument_count);
+    header.SetCodeSize(static_cast<DWORD>(method_body.size()));
+    header.SetLocalVarSigTok(mdSignatureNil);
+
+    const auto header_size = COR_ILMETHOD::Size(&header, false);
+
+    ComPtr<IMethodMalloc> method_malloc;
+    auto                  hr = info->GetILFunctionBodyAllocator(module_id, method_malloc.GetAddressOf());
+    if (FAILED(hr))
+    {
+        return hr;
+    }
+
+    const auto total_size      = header_size + static_cast<ULONG>(method_body.size());
+    auto*      new_method_body = static_cast<BYTE*>(method_malloc->Alloc(total_size));
+    if (new_method_body == nullptr)
+    {
+        return E_OUTOFMEMORY;
+    }
+
+    COR_ILMETHOD::Emit(header_size, &header, false, new_method_body);
+    memcpy(new_method_body + header_size, method_body.data(), method_body.size());
+    return info->SetILFunctionBody(module_id, method_token, new_method_body);
+}
+
+HRESULT TryCreateLoaderTrampoline(ICorProfilerInfo*               info,
+                                  const ModuleID                  module_id,
+                                  const ComPtr<IMetaDataImport2>& metadata_import,
+                                  const ComPtr<IMetaDataEmit2>&   metadata_emit,
+                                  const FunctionInfo&             caller,
+                                  const mdMethodDef               method_token,
+                                  const mdToken                   loader_method_token)
+{
+    if (caller.name == WStr(".ctor"))
+    {
+        return E_NOTIMPL;
+    }
+
+    mdTypeDef       parent_type_token       = mdTypeDefNil;
+    DWORD           method_attributes       = 0;
+    PCCOR_SIGNATURE method_signature        = nullptr;
+    ULONG           method_signature_length = 0;
+    DWORD           method_impl_flags       = 0;
+    const auto      method_props_hr =
+        metadata_import->GetMethodProps(method_token, &parent_type_token, nullptr, 0, nullptr, &method_attributes,
+                                        &method_signature, &method_signature_length, nullptr, &method_impl_flags);
+    if (FAILED(method_props_hr))
+    {
+        return method_props_hr;
+    }
+
+    auto parsed_method_signature = caller.method_signature;
+    auto hr                      = parsed_method_signature.TryParse();
+    if (FAILED(hr))
+    {
+        return hr;
+    }
+
+    if (parsed_method_signature.NumberOfTypeArguments() != 0)
+    {
+        return E_NOTIMPL;
+    }
+
+    const auto trampoline_method_name = WStr("__DDOriginalMethod_") + std::to_wstring(method_token);
+    const auto trampoline_method_attributes =
+        static_cast<DWORD>((method_attributes & mdStatic) | mdHideBySig | mdPrivate);
+
+    mdMethodDef trampoline_method_token = mdMethodDefNil;
+    hr = metadata_emit->DefineMethod(parent_type_token, trampoline_method_name.c_str(), trampoline_method_attributes,
+                                     method_signature, method_signature_length, 0, 0, &trampoline_method_token);
+    if (FAILED(hr))
+    {
+        return hr;
+    }
+
+    const auto trampoline_method_impl_flags =
+        static_cast<DWORD>((method_impl_flags | miNoInlining) & ~miAggressiveInlining & ~miSynchronized);
+    hr = metadata_emit->SetMethodImplFlags(trampoline_method_token, trampoline_method_impl_flags);
+    if (FAILED(hr))
+    {
+        return hr;
+    }
+
+    hr = CopyMethodBody(info, module_id, method_token, trampoline_method_token);
+    if (FAILED(hr))
+    {
+        return hr;
+    }
+
+    const auto total_argument_count =
+        parsed_method_signature.NumberOfArguments() + ((method_attributes & mdStatic) == 0 ? 1UL : 0UL);
+    return ReplaceMethodWithTrampoline(info, module_id, method_token, loader_method_token, trampoline_method_token,
+                                       total_argument_count);
+}
+} // namespace
+#endif
+
 //
 // ICorProfilerCallback methods
 //
@@ -1884,6 +2080,8 @@ HRESULT CorProfiler::RunAutoInstrumentationLoader(const ComPtr<IMetaDataEmit2>& 
                                                   const FunctionInfo&           caller,
                                                   const ModuleMetadata&         module_metadata)
 {
+    (void)module_metadata;
+
     mdMethodDef ret_method_token;
     auto        hr = GenerateLoaderMethod(module_id, &ret_method_token);
 
@@ -1892,6 +2090,30 @@ HRESULT CorProfiler::RunAutoInstrumentationLoader(const ComPtr<IMetaDataEmit2>& 
         Logger::Warn("RunAutoInstrumentationLoader: Call to GenerateLoaderMethod failed for ", module_id);
         return hr;
     }
+
+    ComPtr<IUnknown> metadata_interfaces;
+    hr = this->info_->GetModuleMetaData(module_id, ofRead | ofWrite, IID_IMetaDataImport2,
+                                        metadata_interfaces.GetAddressOf());
+    if (FAILED(hr))
+    {
+        Logger::Warn("RunAutoInstrumentationLoader: failed to get metadata interface for ", module_id, " ",
+                     function_token);
+        return hr;
+    }
+
+    const auto& metadata_import = metadata_interfaces.As<IMetaDataImport2>(IID_IMetaDataImport);
+
+    hr = TryCreateLoaderTrampoline(this->info_, module_id, metadata_import, metadata_emit, caller, function_token,
+                                   ret_method_token);
+    if (SUCCEEDED(hr))
+    {
+        Logger::Debug("RunAutoInstrumentationLoader: loader trampoline created for ", caller.type.name, ".",
+                      caller.name, "()");
+        return S_OK;
+    }
+
+    Logger::Info("RunAutoInstrumentationLoader: failed to create loader trampoline for ", caller.type.name, ".",
+                 caller.name, "(), HRESULT=", HResultStr(hr), ". Falling back to prolog injection.");
 
     ILRewriter rewriter(this->info_, nullptr, module_id, function_token);
     hr = rewriter.Import();
@@ -3526,7 +3748,8 @@ HRESULT CorProfiler::AddIISPreStartInitFlags(const ModuleID module_id, const mdT
 
     // Get a MemberRef for System.AppDomain.get_CurrentDomain()
     COR_SIGNATURE appdomain_get_current_domain_signature_start[] = {
-        IMAGE_CEE_CS_CALLCONV_DEFAULT, 0,
+        IMAGE_CEE_CS_CALLCONV_DEFAULT,
+        0,
         ELEMENT_TYPE_CLASS, // ret = System.AppDomain
         // insert compressed token for System.AppDomain TypeRef here
     };
