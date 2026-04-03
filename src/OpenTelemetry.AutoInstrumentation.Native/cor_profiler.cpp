@@ -3748,8 +3748,7 @@ HRESULT CorProfiler::AddIISPreStartInitFlags(const ModuleID module_id, const mdT
 
     // Get a MemberRef for System.AppDomain.get_CurrentDomain()
     COR_SIGNATURE appdomain_get_current_domain_signature_start[] = {
-        IMAGE_CEE_CS_CALLCONV_DEFAULT,
-        0,
+        IMAGE_CEE_CS_CALLCONV_DEFAULT, 0,
         ELEMENT_TYPE_CLASS, // ret = System.AppDomain
         // insert compressed token for System.AppDomain TypeRef here
     };
