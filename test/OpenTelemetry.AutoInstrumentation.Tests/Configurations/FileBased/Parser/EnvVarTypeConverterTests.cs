@@ -15,7 +15,7 @@ public class EnvVarTypeConverterTests
     [Fact]
     public void ReadYaml_StringWithEnvVar_ReplacesCorrectly()
     {
-        using var envScope = new EnvironmentScope(new()
+        using var envScope = new EnvironmentScope(new Dictionary<string, string?>()
         {
             { "YAMLPARSER_TESTS_TEST_ENV", "HelloWorld" }
         });
@@ -42,7 +42,7 @@ public class EnvVarTypeConverterTests
     [Fact]
     public void ReadYaml_WithEnvVarPresent_IgnoresFallback()
     {
-        using var envScope = new EnvironmentScope(new()
+        using var envScope = new EnvironmentScope(new Dictionary<string, string?>()
         {
             { "YAMLPARSER_TESTS_MY_ENV", "RealValue" }
         });

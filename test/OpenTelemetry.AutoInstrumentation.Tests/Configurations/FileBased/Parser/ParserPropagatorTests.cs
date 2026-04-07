@@ -35,7 +35,7 @@ public class ParserPropagatorTests
     [Fact]
     public void Parse_EnvVarYaml_ShouldPopulateModelCompletely()
     {
-        using var envScope = new EnvironmentScope(new()
+        using var envScope = new EnvironmentScope(new Dictionary<string, string?>()
         {
             { "OTEL_PROPAGATORS", "tracecontext,baggage,b3,b3multi" },
         });

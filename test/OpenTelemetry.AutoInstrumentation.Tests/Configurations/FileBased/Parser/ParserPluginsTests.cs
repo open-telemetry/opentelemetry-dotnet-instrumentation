@@ -29,7 +29,7 @@ public class ParserPluginsTests
     [Fact]
     public void Parse_EnvVarYaml_ShouldPopulateModelCompletely()
     {
-        using var envScope = new EnvironmentScope(new()
+        using var envScope = new EnvironmentScope(new Dictionary<string, string?>()
         {
             { "OTEL_DOTNET_AUTO_PLUGINS", "Test.Plugins.Plugin, Test.Plugins" },
         });

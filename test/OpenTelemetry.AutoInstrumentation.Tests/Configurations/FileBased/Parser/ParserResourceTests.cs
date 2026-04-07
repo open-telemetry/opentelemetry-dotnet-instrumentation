@@ -88,7 +88,7 @@ public class ParserResourceTests
     [Fact]
     public void Parse_EnvVarYaml_ShouldPopulateModelCompletely()
     {
-        using var envScope = new EnvironmentScope(new()
+        using var envScope = new EnvironmentScope(new Dictionary<string, string?>()
         {
             { "OTEL_SDK_DISABLED", "true" },
             { "OTEL_SERVICE_NAME", "my-service" },

@@ -35,7 +35,7 @@ public class ServiceNameConfiguratorTests
         string variableValue,
         string expectedValue)
     {
-        using var envScope = new EnvironmentScope(new()
+        using var envScope = new EnvironmentScope(new Dictionary<string, string?>()
         {
             { variableName, variableValue }
         });

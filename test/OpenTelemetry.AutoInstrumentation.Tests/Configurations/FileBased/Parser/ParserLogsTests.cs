@@ -62,7 +62,7 @@ public class ParserLogsTests
     [Fact]
     public void Parse_EnvVarYaml_ShouldPopulateModelCompletely()
     {
-        using var envScope = new EnvironmentScope(new()
+        using var envScope = new EnvironmentScope(new Dictionary<string, string?>()
         {
             { "OTEL_BSP_SCHEDULE_DELAY", "7000" },
             { "OTEL_BSP_EXPORT_TIMEOUT", "35000" },

@@ -27,7 +27,7 @@ public class ParserGeneralTests
     [Fact]
     public void Parse_EnvVarYaml_ShouldPopulateModelCompletely()
     {
-        using var envScope = new EnvironmentScope(new()
+        using var envScope = new EnvironmentScope(new Dictionary<string, string?>()
         {
             { "OTEL_SDK_DISABLED", "true" },
             { "OTEL_DOTNET_AUTO_FAIL_FAST_ENABLED", "true" },

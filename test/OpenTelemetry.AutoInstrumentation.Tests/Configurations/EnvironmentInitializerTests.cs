@@ -17,7 +17,7 @@ public class EnvironmentInitializerTests
     [Fact]
     public void SetsOTelEnvironmentVariable_WhenItWasEmpty()
     {
-        using var envScope = new EnvironmentScope(new()
+        using var envScope = new EnvironmentScope(new Dictionary<string, string?>()
         {
             { OtelVariableName, null },
         });
@@ -34,7 +34,7 @@ public class EnvironmentInitializerTests
     [Fact]
     public void Noop_WhenEnvironmentVariableWasAlreadySet()
     {
-        using var envScope = new EnvironmentScope(new()
+        using var envScope = new EnvironmentScope(new Dictionary<string, string?>()
         {
             { OtelVariableName, SomeValue },
         });
@@ -51,7 +51,7 @@ public class EnvironmentInitializerTests
     [Fact]
     public void Noop_WhenSettingIsNonOTel()
     {
-        using var envScope = new EnvironmentScope(new()
+        using var envScope = new EnvironmentScope(new Dictionary<string, string?>()
         {
             { NonOtelVariableName, null },
         });

@@ -20,7 +20,7 @@ public sealed class OtelLoggingTests
     [Fact]
     public void WhenValidFileSizeIsConfigured_Then_ItIsUsed()
     {
-        using var envScope = new EnvironmentScope(new()
+        using var envScope = new EnvironmentScope(new Dictionary<string, string?>()
         {
             { "OTEL_DOTNET_AUTO_LOG_FILE_SIZE", "1024" }
         });
@@ -31,7 +31,7 @@ public sealed class OtelLoggingTests
     [Fact]
     public void WhenInvalidFileSizeIsConfigured_Then_DefaultIsUsed()
     {
-        using var envScope = new EnvironmentScope(new()
+        using var envScope = new EnvironmentScope(new Dictionary<string, string?>()
         {
             { "OTEL_DOTNET_AUTO_LOG_FILE_SIZE", "-1" }
         });
@@ -42,7 +42,7 @@ public sealed class OtelLoggingTests
     [Fact]
     public void WhenLogLevelIsNotConfigured_Then_DefaultIsUsed()
     {
-        using var envScope = new EnvironmentScope(new()
+        using var envScope = new EnvironmentScope(new Dictionary<string, string?>()
         {
             { "OTEL_LOG_LEVEL", null }
         });
@@ -53,7 +53,7 @@ public sealed class OtelLoggingTests
     [Fact]
     public void WhenInvalidLogLevelIsConfigured_Then_DefaultIsUsed()
     {
-        using var envScope = new EnvironmentScope(new()
+        using var envScope = new EnvironmentScope(new Dictionary<string, string?>()
         {
             { "OTEL_LOG_LEVEL", "invalid" }
         });
@@ -64,7 +64,7 @@ public sealed class OtelLoggingTests
     [Fact]
     public void WhenValidLogLevelIsConfigured_Then_ItIsUsed()
     {
-        using var envScope = new EnvironmentScope(new()
+        using var envScope = new EnvironmentScope(new Dictionary<string, string?>()
         {
             { "OTEL_LOG_LEVEL", "warn" }
         });
@@ -75,7 +75,7 @@ public sealed class OtelLoggingTests
     [Fact]
     public void WhenNoLoggingIsConfigured_Then_LogLevelHasNoValue()
     {
-        using var envScope = new EnvironmentScope(new()
+        using var envScope = new EnvironmentScope(new Dictionary<string, string?>()
         {
             { "OTEL_LOG_LEVEL", "none" }
         });
@@ -86,7 +86,7 @@ public sealed class OtelLoggingTests
     [Fact]
     public void WhenLogSinkIsNotConfigured_Then_DefaultIsUsed()
     {
-        using var envScope = new EnvironmentScope(new()
+        using var envScope = new EnvironmentScope(new Dictionary<string, string?>()
         {
             { "OTEL_DOTNET_AUTO_LOGGER", null }
         });
@@ -97,7 +97,7 @@ public sealed class OtelLoggingTests
     [Fact]
     public void WhenInvalidLogSinkIsConfigured_Then_DefaultIsUsed()
     {
-        using var envScope = new EnvironmentScope(new()
+        using var envScope = new EnvironmentScope(new Dictionary<string, string?>()
         {
             { "OTEL_DOTNET_AUTO_LOGGER", "invalid" }
         });
@@ -108,7 +108,7 @@ public sealed class OtelLoggingTests
     [Fact]
     public void WhenValidLogSinkIsConfigured_Then_ItIsUsed()
     {
-        using var envScope = new EnvironmentScope(new()
+        using var envScope = new EnvironmentScope(new Dictionary<string, string?>()
         {
             { "OTEL_DOTNET_AUTO_LOGGER", "console" }
         });
@@ -119,7 +119,7 @@ public sealed class OtelLoggingTests
     [Fact]
     public void WhenNoLogSinkIsConfigured_Then_NoOpSinkIsUsed()
     {
-        using var envScope = new EnvironmentScope(new()
+        using var envScope = new EnvironmentScope(new Dictionary<string, string?>()
         {
             { "OTEL_DOTNET_AUTO_LOGGER", "none" }
         });
@@ -132,7 +132,7 @@ public sealed class OtelLoggingTests
     {
         var tempLogsDirectory = DirectoryHelpers.CreateTempDirectory();
 
-        using var envScope = new EnvironmentScope(new()
+        using var envScope = new EnvironmentScope(new Dictionary<string, string?>()
         {
             { "OTEL_LOG_LEVEL", "debug" },
             { "OTEL_DOTNET_AUTO_LOGGER", "file" },
@@ -167,7 +167,7 @@ public sealed class OtelLoggingTests
     [Fact]
     public void WhenConsoleSinkIsUsed_Then_ConsoleContentIsDetected()
     {
-        using var envScope = new EnvironmentScope(new()
+        using var envScope = new EnvironmentScope(new Dictionary<string, string?>()
         {
             { "OTEL_LOG_LEVEL", "debug" },
             { "OTEL_DOTNET_AUTO_LOGGER", "console" },
@@ -207,7 +207,7 @@ public sealed class OtelLoggingTests
     [Fact]
     public void AfterLoggerIsClosed_ConsecutiveLogCallsWithTheSameLoggerAreNotWrittenToConfiguredSink()
     {
-        using var envScope = new EnvironmentScope(new()
+        using var envScope = new EnvironmentScope(new Dictionary<string, string?>()
         {
             { "OTEL_LOG_LEVEL", "debug" },
             { "OTEL_DOTNET_AUTO_LOGGER", "console" },
@@ -255,7 +255,7 @@ public sealed class OtelLoggingTests
     [Fact]
     public void AfterLoggerIsClosed_ConsecutiveCallsToGetLoggerReturnNoopLogger()
     {
-        using var envScope = new EnvironmentScope(new()
+        using var envScope = new EnvironmentScope(new Dictionary<string, string?>()
         {
             { "OTEL_LOG_LEVEL", "debug" },
             { "OTEL_DOTNET_AUTO_LOGGER", "console" },

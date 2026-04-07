@@ -56,7 +56,7 @@ public class ParserMetricsTests
     [Fact]
     public void Parse_EnvVarYaml_ShouldPopulateModelCompletely()
     {
-        using var envScope = new EnvironmentScope(new()
+        using var envScope = new EnvironmentScope(new Dictionary<string, string?>()
         {
             { "OTEL_METRIC_EXPORT_INTERVAL", "70000" },
             { "OTEL_METRIC_EXPORT_TIMEOUT", "35000" },

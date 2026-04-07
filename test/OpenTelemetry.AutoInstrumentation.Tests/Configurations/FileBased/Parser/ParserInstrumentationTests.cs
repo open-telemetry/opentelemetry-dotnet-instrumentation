@@ -179,7 +179,7 @@ public class ParserInstrumentationTests
     [Fact]
     public void Parse_EnvVarYaml_ShouldPopulateModelCompletely()
     {
-        using var envScope = new EnvironmentScope(new()
+        using var envScope = new EnvironmentScope(new Dictionary<string, string?>()
         {
             { "OTEL_DOTNET_AUTO_TRACES_ADDITIONAL_SOURCES", "Some.Additional.Source1,Some.Additional.Source2" },
             { "OTEL_DOTNET_AUTO_TRACES_ADDITIONAL_LEGACY_SOURCES", "Some.Additional.Legacy.Source1,Some.Additional.Legacy.Source2" },
