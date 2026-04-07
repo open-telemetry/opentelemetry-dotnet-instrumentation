@@ -10,7 +10,7 @@ internal sealed class EnvironmentScope : IDisposable
 #else
     private static readonly object GlobalLock = new();
 #endif
-    private static bool isGlobalScopeAсquired;
+    private static bool isGlobalScopeAcquired;
     private readonly Dictionary<string, string?> originalValues = [];
 
     private int disposedState;
@@ -19,13 +19,13 @@ internal sealed class EnvironmentScope : IDisposable
     {
         lock (GlobalLock)
         {
-            if (isGlobalScopeAсquired)
+            if (isGlobalScopeAcquired)
             {
                 throw new InvalidOperationException(
                     "Another test is currently modifying environment variables. Parallel environment manipulation is not allowed.");
             }
 
-            isGlobalScopeAсquired = true;
+            isGlobalScopeAcquired = true;
         }
 
         try
@@ -67,7 +67,7 @@ internal sealed class EnvironmentScope : IDisposable
     {
         lock (GlobalLock)
         {
-            isGlobalScopeAсquired = false;
+            isGlobalScopeAcquired = false;
         }
     }
 }
