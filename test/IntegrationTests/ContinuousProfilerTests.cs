@@ -77,21 +77,29 @@ public class ContinuousProfilerTests : TestHelper
     {
         foreach (var request in c)
         {
-            var scopeProfiles = request.ResourceProfiles
-                .SelectMany(rp => rp.ScopeProfiles).ToList();
-
-            Assert.All(scopeProfiles, sp => Assert.Equal("OpenTelemetry.AutoInstrumentation", sp.Scope.Name));
+            foreach (var resourceProfile in request.ResourceProfiles)
+            {
+                foreach (var scopeProfile in resourceProfile.ScopeProfiles)
+                {
+                    Assert.Equal("OpenTelemetry.AutoInstrumentation", scopeProfile.Scope.Name);
+                }
+            }
 
             var dictionary = request.Dictionary;
             var locationTable = dictionary.LocationTable;
 
-            foreach (var location in locationTable.Skip(1))
+            // skip zero-value entry at index 0
+            for (var i = 1; i < locationTable.Count; i++)
             {
-                // skip zero-value entry at index 0
-                var attributeIndices = location.AttributeIndices;
-                if (!attributeIndices.All(index => dictionary.AttributeTable[index] is { } attr && dictionary.StringTable[attr.KeyStrindex] == "profile.frame.type"))
+                var location = locationTable[i];
+
+                foreach (var index in location.AttributeIndices)
                 {
-                    return false;
+                    var attr = dictionary.AttributeTable[index];
+                    if (attr == null || dictionary.StringTable[attr.KeyStrindex] != "profile.frame.type")
+                    {
+                        return false;
+                    }
                 }
             }
         }
@@ -153,19 +161,56 @@ public class ContinuousProfilerTests : TestHelper
 
     private static bool ContainStackTraceForClassHierarchy(Profile profile, ProfilesDictionary dictionary, string expectedStackTrace)
     {
-        var frames = dictionary.LocationTable
-            .Skip(1) // skip zero-value entry at index 0
-            .SelectMany(location => location.Lines)
-            .Select(line => line.FunctionIndex)
-            .Select(functionId => dictionary.FunctionTable[functionId])
-            .Select(function => dictionary.StringTable[function.NameStrindex]);
+        foreach (var sample in profile.Samples)
+        {
+            var stackIndex = sample.StackIndex;
+            if (stackIndex <= 0 || stackIndex >= dictionary.StackTable.Count)
+            {
+                continue;
+            }
 
-        var stackTrace = string.Join("\n", frames);
+            var stack = dictionary.StackTable[stackIndex];
+            var frames = GetFrameNames(stack, dictionary);
+            var stackTrace = string.Join("\n", frames);
 
 #if NET
-        return stackTrace.Contains(expectedStackTrace, StringComparison.Ordinal);
+            if (stackTrace.Contains(expectedStackTrace, StringComparison.Ordinal))
 #else
-        return stackTrace.Contains(expectedStackTrace);
+            if (stackTrace.Contains(expectedStackTrace))
 #endif
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private static IEnumerable<string> GetFrameNames(Stack stack, ProfilesDictionary dictionary)
+    {
+        foreach (var locationIndex in stack.LocationIndices)
+        {
+            if (locationIndex <= 0 || locationIndex >= dictionary.LocationTable.Count)
+            {
+                continue;
+            }
+
+            var location = dictionary.LocationTable[locationIndex];
+
+            foreach (var line in location.Lines)
+            {
+                var functionIndex = line.FunctionIndex;
+                if (functionIndex <= 0 || functionIndex >= dictionary.FunctionTable.Count)
+                {
+                    continue;
+                }
+
+                var function = dictionary.FunctionTable[functionIndex];
+                if (function.NameStrindex >= 0 && function.NameStrindex < dictionary.StringTable.Count)
+                {
+                    yield return dictionary.StringTable[function.NameStrindex];
+                }
+            }
+        }
     }
 }
