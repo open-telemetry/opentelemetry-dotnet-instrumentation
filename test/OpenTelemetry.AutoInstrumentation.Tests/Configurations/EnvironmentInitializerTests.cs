@@ -8,6 +8,7 @@ using Xunit;
 
 namespace OpenTelemetry.AutoInstrumentation.Tests.Configurations;
 
+[Collection("Non-Parallel Collection")]
 public class EnvironmentInitializerTests
 {
     private const string OtelVariableName = "OTEL_SETTING";

@@ -8,6 +8,7 @@ using YamlParser = Vendors.YamlDotNet.Core.Parser;
 
 namespace OpenTelemetry.AutoInstrumentation.Tests.Configurations.FileBased.Parser;
 
+[Collection("Non-Parallel Collection")]
 public class EnvVarTypeConverterTests
 {
     private readonly EnvVarTypeConverter _converter = new();
