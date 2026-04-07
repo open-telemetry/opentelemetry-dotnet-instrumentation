@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 using OpenTelemetry.AutoInstrumentation.Configurations;
+using OpenTelemetry.AutoInstrumentation.Tests.Util;
 using Xunit;
 
 namespace OpenTelemetry.AutoInstrumentation.Tests.Configurations;
@@ -34,20 +35,16 @@ public class ServiceNameConfiguratorTests
         string variableValue,
         string expectedValue)
     {
-        try
+        using var envScope = new EnvironmentScope(new()
         {
-            Environment.SetEnvironmentVariable(variableName, variableValue);
+            { variableName, variableValue }
+        });
 
-            var resourceBuilder = ResourceConfigurator.CreateResourceBuilder(new ResourceSettings());
-            var resource = resourceBuilder.Build();
+        var resourceBuilder = ResourceConfigurator.CreateResourceBuilder(new ResourceSettings());
+        var resource = resourceBuilder.Build();
 
-            var actualValue = resource.Attributes.FirstOrDefault(a => a.Key == attributeName).Value as string;
+        var actualValue = resource.Attributes.FirstOrDefault(a => a.Key == attributeName).Value as string;
 
-            Assert.Equal(expectedValue, actualValue);
-        }
-        finally
-        {
-            Environment.SetEnvironmentVariable(variableName, null);
-        }
+        Assert.Equal(expectedValue, actualValue);
     }
 }

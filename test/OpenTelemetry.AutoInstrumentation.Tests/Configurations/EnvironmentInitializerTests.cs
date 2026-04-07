@@ -3,6 +3,7 @@
 
 using System.Collections.Specialized;
 using OpenTelemetry.AutoInstrumentation.Configurations;
+using OpenTelemetry.AutoInstrumentation.Tests.Util;
 using Xunit;
 
 namespace OpenTelemetry.AutoInstrumentation.Tests.Configurations;
@@ -16,63 +17,51 @@ public class EnvironmentInitializerTests
     [Fact]
     public void SetsOTelEnvironmentVariable_WhenItWasEmpty()
     {
-        try
+        using var envScope = new EnvironmentScope(new()
         {
-            Environment.SetEnvironmentVariable(OtelVariableName, null);
+            { OtelVariableName, null },
+        });
 
-            EnvironmentInitializer.Initialize(new NameValueCollection
-            {
-                { OtelVariableName, SomeValue }
-            });
-            var actual = Environment.GetEnvironmentVariable(OtelVariableName);
-
-            Assert.Equal(SomeValue, actual);
-        }
-        finally
+        EnvironmentInitializer.Initialize(new NameValueCollection
         {
-            Environment.SetEnvironmentVariable(OtelVariableName, null);
-        }
+            { OtelVariableName, SomeValue }
+        });
+
+        var actual = Environment.GetEnvironmentVariable(OtelVariableName);
+        Assert.Equal(SomeValue, actual);
     }
 
     [Fact]
     public void Noop_WhenEnvironmentVariableWasAlreadySet()
     {
-        try
+        using var envScope = new EnvironmentScope(new()
         {
-            Environment.SetEnvironmentVariable(OtelVariableName, SomeValue);
+            { OtelVariableName, SomeValue },
+        });
 
-            EnvironmentInitializer.Initialize(new NameValueCollection
-            {
-                { OtelVariableName, "different" }
-            });
-            var actual = Environment.GetEnvironmentVariable(OtelVariableName);
-
-            Assert.Equal(SomeValue, actual);
-        }
-        finally
+        EnvironmentInitializer.Initialize(new NameValueCollection
         {
-            Environment.SetEnvironmentVariable(OtelVariableName, null);
-        }
+            { OtelVariableName, "different" }
+        });
+
+        var actual = Environment.GetEnvironmentVariable(OtelVariableName);
+        Assert.Equal(SomeValue, actual);
     }
 
     [Fact]
     public void Noop_WhenSettingIsNonOTel()
     {
-        try
+        using var envScope = new EnvironmentScope(new()
         {
-            Environment.SetEnvironmentVariable(NonOtelVariableName, null);
+            { NonOtelVariableName, null },
+        });
 
-            EnvironmentInitializer.Initialize(new NameValueCollection
-            {
-                { NonOtelVariableName, SomeValue }
-            });
-            var actual = Environment.GetEnvironmentVariable(NonOtelVariableName);
-
-            Assert.True(string.IsNullOrEmpty(actual), "initializer should ignore variables non starting from OTEL_");
-        }
-        finally
+        EnvironmentInitializer.Initialize(new NameValueCollection
         {
-            Environment.SetEnvironmentVariable(NonOtelVariableName, null);
-        }
+            { NonOtelVariableName, SomeValue }
+        });
+
+        var actual = Environment.GetEnvironmentVariable(NonOtelVariableName);
+        Assert.True(string.IsNullOrEmpty(actual), "initializer should ignore variables non starting from OTEL_");
     }
 }
