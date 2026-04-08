@@ -9,6 +9,8 @@ namespace OpenTelemetry.AutoInstrumentation.Tests.Configurations;
 
 public class EnvironmentInitializerTests
 {
+    private const string OtelResourceAttributesVariableName = "OTEL_RESOURCE_ATTRIBUTES";
+    private const string OtelServiceVariableName = "OTEL_SERVICE_NAME";
     private const string OtelVariableName = "OTEL_SETTING";
     private const string NonOtelVariableName = "OTHER_SETTING";
     private const string SomeValue = "val";
@@ -73,6 +75,28 @@ public class EnvironmentInitializerTests
         finally
         {
             Environment.SetEnvironmentVariable(NonOtelVariableName, null);
+        }
+    }
+
+    [Theory]
+    [InlineData(OtelServiceVariableName)]
+    [InlineData(OtelResourceAttributesVariableName)]
+    public void Noop_WhenSettingResources(string variableName)
+    {
+        try
+        {
+            Environment.SetEnvironmentVariable(variableName, null);
+            EnvironmentInitializer.Initialize(new NameValueCollection
+            {
+                { variableName, SomeValue }
+            });
+            var actual = Environment.GetEnvironmentVariable(variableName);
+
+            Assert.True(string.IsNullOrEmpty(actual), $"initializer should ignore {variableName} resource variable");
+        }
+        finally
+        {
+            Environment.SetEnvironmentVariable(variableName, null);
         }
     }
 }
