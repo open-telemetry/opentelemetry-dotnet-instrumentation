@@ -55,6 +55,8 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 ### Fixed
 
 - Fixed configuration based instrumentation for some .NET Framework methods.
+- Fixed .NET Framework assembly redirection startup by registering the loader
+  before the application's entry point executes.
 - When both `ENTITYFRAMEWORKCORE` and `NPGSQL` traces instrumentations are enabled,
   Entity Framework Core instrumentation now skips the
   `Npgsql.EntityFrameworkCore.PostgreSQL` provider so both instrumentations can
