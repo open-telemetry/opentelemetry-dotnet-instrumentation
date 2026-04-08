@@ -20,11 +20,11 @@ internal static class OpAmpHelper
 
     public static bool IsRunning { get; private set; }
 
-    public static void EnableOpAmpClient(Resource resources, OpAmpSettings opAmpSettins)
+    public static void EnableOpAmpClient(Resource resources, OpAmpSettings opAmpSettings)
     {
         try
         {
-            _client = new OpAmpClient(settings => ConfigureClient(settings, opAmpSettins, resources));
+            _client = new OpAmpClient(settings => ConfigureClient(settings, opAmpSettings, resources));
 
             _clientRunningTask = Task.Run(async () =>
             {
