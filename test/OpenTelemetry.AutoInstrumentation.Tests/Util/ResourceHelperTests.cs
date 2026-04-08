@@ -12,7 +12,7 @@ namespace OpenTelemetry.AutoInstrumentation.Tests.Util;
 public class ResourceHelperTests
 {
     [Fact]
-    public void AggregateResources_AllProvidersNull_ReturnsEmptyResource()
+    public void ResourceHelper_AggregateResources()
     {
         var attributes1 = new Dictionary<string, object>
         {
