@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 using OpenTelemetry.AutoInstrumentation.Configurations.FileBasedConfiguration;
+using OpenTelemetry.AutoInstrumentation.Tests.Util;
 using Xunit;
 using YamlParser = OpenTelemetry.AutoInstrumentation.Configurations.FileBasedConfiguration.Parser.Parser;
 
@@ -28,7 +29,10 @@ public class ParserPluginsTests
     [Fact]
     public void Parse_EnvVarYaml_ShouldPopulateModelCompletely()
     {
-        Environment.SetEnvironmentVariable("OTEL_DOTNET_AUTO_PLUGINS", "Test.Plugins.Plugin, Test.Plugins");
+        using var envScope = new EnvironmentScope(new Dictionary<string, string?>()
+        {
+            { "OTEL_DOTNET_AUTO_PLUGINS", "Test.Plugins.Plugin, Test.Plugins" },
+        });
 
         var config = YamlParser.ParseYaml<YamlConfiguration>("Configurations/FileBased/Files/TestPluginsFileEnvVars.yaml");
 
