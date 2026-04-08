@@ -61,6 +61,9 @@ CorProfiler* profiler = nullptr;
 #ifdef _WIN32
 namespace
 {
+// Patch System.AppDomain::nExecuteAssembly so the loader runs after the executable assembly is loaded
+// but before its entry point executes. That gives assembly redirects a chance to register before any
+// JIT-time assembly resolution happens in user code.
 HRESULT ModifyAppDomainExecuteAssembly(ICorProfilerInfo* info,
                                        const ModuleID    module_id,
                                        const mdMethodDef loader_method_token)
@@ -113,6 +116,7 @@ HRESULT ModifyAppDomainExecuteAssembly(ICorProfilerInfo* info,
 
     ILRewriterWrapper rewriter_wrapper(&rewriter);
     ILInstr*          p_instr = rewriter.GetILList()->m_pNext;
+    // Insert the loader call at the beginning of nExecuteAssembly and leave the rest of the method intact.
     rewriter_wrapper.SetILPosition(p_instr);
     rewriter_wrapper.CallMember(loader_method_token, false);
 
