@@ -8,18 +8,8 @@ using Xunit;
 namespace OpenTelemetry.AutoInstrumentation.Tests;
 
 [Collection("Non-Parallel Collection")]
-public sealed class OtelLoggingTests : IDisposable
+public sealed class OtelLoggingTests
 {
-    public OtelLoggingTests()
-    {
-        UnsetLoggingEnvVars();
-    }
-
-    public void Dispose()
-    {
-        UnsetLoggingEnvVars();
-    }
-
     [Fact]
     public void WhenNoFileSizeIsConfigured_Then_DefaultIsUsed()
     {
@@ -30,7 +20,10 @@ public sealed class OtelLoggingTests : IDisposable
     [Fact]
     public void WhenValidFileSizeIsConfigured_Then_ItIsUsed()
     {
-        Environment.SetEnvironmentVariable("OTEL_DOTNET_AUTO_LOG_FILE_SIZE", "1024");
+        using var envScope = new EnvironmentScope(new Dictionary<string, string?>()
+        {
+            { "OTEL_DOTNET_AUTO_LOG_FILE_SIZE", "1024" }
+        });
 
         Assert.Equal(1024, OtelLogging.GetConfiguredFileSizeLimitBytes());
     }
@@ -38,7 +31,10 @@ public sealed class OtelLoggingTests : IDisposable
     [Fact]
     public void WhenInvalidFileSizeIsConfigured_Then_DefaultIsUsed()
     {
-        Environment.SetEnvironmentVariable("OTEL_DOTNET_AUTO_LOG_FILE_SIZE", "-1");
+        using var envScope = new EnvironmentScope(new Dictionary<string, string?>()
+        {
+            { "OTEL_DOTNET_AUTO_LOG_FILE_SIZE", "-1" }
+        });
 
         Assert.Equal(10 * 1024 * 1024, OtelLogging.GetConfiguredFileSizeLimitBytes());
     }
@@ -46,7 +42,10 @@ public sealed class OtelLoggingTests : IDisposable
     [Fact]
     public void WhenLogLevelIsNotConfigured_Then_DefaultIsUsed()
     {
-        Environment.SetEnvironmentVariable("OTEL_LOG_LEVEL", null);
+        using var envScope = new EnvironmentScope(new Dictionary<string, string?>()
+        {
+            { "OTEL_LOG_LEVEL", null }
+        });
 
         Assert.Equal(LogLevel.Information, OtelLogging.GetConfiguredLogLevel());
     }
@@ -54,7 +53,10 @@ public sealed class OtelLoggingTests : IDisposable
     [Fact]
     public void WhenInvalidLogLevelIsConfigured_Then_DefaultIsUsed()
     {
-        Environment.SetEnvironmentVariable("OTEL_LOG_LEVEL", "invalid");
+        using var envScope = new EnvironmentScope(new Dictionary<string, string?>()
+        {
+            { "OTEL_LOG_LEVEL", "invalid" }
+        });
 
         Assert.Equal(LogLevel.Information, OtelLogging.GetConfiguredLogLevel());
     }
@@ -62,7 +64,10 @@ public sealed class OtelLoggingTests : IDisposable
     [Fact]
     public void WhenValidLogLevelIsConfigured_Then_ItIsUsed()
     {
-        Environment.SetEnvironmentVariable("OTEL_LOG_LEVEL", "warn");
+        using var envScope = new EnvironmentScope(new Dictionary<string, string?>()
+        {
+            { "OTEL_LOG_LEVEL", "warn" }
+        });
 
         Assert.Equal(LogLevel.Warning, OtelLogging.GetConfiguredLogLevel());
     }
@@ -70,7 +75,10 @@ public sealed class OtelLoggingTests : IDisposable
     [Fact]
     public void WhenNoLoggingIsConfigured_Then_LogLevelHasNoValue()
     {
-        Environment.SetEnvironmentVariable("OTEL_LOG_LEVEL", "none");
+        using var envScope = new EnvironmentScope(new Dictionary<string, string?>()
+        {
+            { "OTEL_LOG_LEVEL", "none" }
+        });
 
         Assert.Null(OtelLogging.GetConfiguredLogLevel());
     }
@@ -78,7 +86,10 @@ public sealed class OtelLoggingTests : IDisposable
     [Fact]
     public void WhenLogSinkIsNotConfigured_Then_DefaultIsUsed()
     {
-        Environment.SetEnvironmentVariable("OTEL_DOTNET_AUTO_LOGGER", null);
+        using var envScope = new EnvironmentScope(new Dictionary<string, string?>()
+        {
+            { "OTEL_DOTNET_AUTO_LOGGER", null }
+        });
 
         Assert.Equal(LogSink.File, OtelLogging.GetConfiguredLogSink());
     }
@@ -86,7 +97,10 @@ public sealed class OtelLoggingTests : IDisposable
     [Fact]
     public void WhenInvalidLogSinkIsConfigured_Then_DefaultIsUsed()
     {
-        Environment.SetEnvironmentVariable("OTEL_DOTNET_AUTO_LOGGER", "invalid");
+        using var envScope = new EnvironmentScope(new Dictionary<string, string?>()
+        {
+            { "OTEL_DOTNET_AUTO_LOGGER", "invalid" }
+        });
 
         Assert.Equal(LogSink.File, OtelLogging.GetConfiguredLogSink());
     }
@@ -94,7 +108,10 @@ public sealed class OtelLoggingTests : IDisposable
     [Fact]
     public void WhenValidLogSinkIsConfigured_Then_ItIsUsed()
     {
-        Environment.SetEnvironmentVariable("OTEL_DOTNET_AUTO_LOGGER", "console");
+        using var envScope = new EnvironmentScope(new Dictionary<string, string?>()
+        {
+            { "OTEL_DOTNET_AUTO_LOGGER", "console" }
+        });
 
         Assert.Equal(LogSink.Console, OtelLogging.GetConfiguredLogSink());
     }
@@ -102,7 +119,10 @@ public sealed class OtelLoggingTests : IDisposable
     [Fact]
     public void WhenNoLogSinkIsConfigured_Then_NoOpSinkIsUsed()
     {
-        Environment.SetEnvironmentVariable("OTEL_DOTNET_AUTO_LOGGER", "none");
+        using var envScope = new EnvironmentScope(new Dictionary<string, string?>()
+        {
+            { "OTEL_DOTNET_AUTO_LOGGER", "none" }
+        });
 
         Assert.Equal(LogSink.NoOp, OtelLogging.GetConfiguredLogSink());
     }
@@ -110,11 +130,14 @@ public sealed class OtelLoggingTests : IDisposable
     [Fact]
     public void WhenFileSinkIsUsed_Then_FileContentIsDetected()
     {
-        Environment.SetEnvironmentVariable("OTEL_LOG_LEVEL", "debug");
-        Environment.SetEnvironmentVariable("OTEL_DOTNET_AUTO_LOGGER", "file");
-
         var tempLogsDirectory = DirectoryHelpers.CreateTempDirectory();
-        Environment.SetEnvironmentVariable("OTEL_DOTNET_AUTO_LOG_DIRECTORY", tempLogsDirectory.FullName);
+
+        using var envScope = new EnvironmentScope(new Dictionary<string, string?>()
+        {
+            { "OTEL_LOG_LEVEL", "debug" },
+            { "OTEL_DOTNET_AUTO_LOGGER", "file" },
+            { "OTEL_DOTNET_AUTO_LOG_DIRECTORY", tempLogsDirectory.FullName },
+        });
 
         try
         {
@@ -144,8 +167,11 @@ public sealed class OtelLoggingTests : IDisposable
     [Fact]
     public void WhenConsoleSinkIsUsed_Then_ConsoleContentIsDetected()
     {
-        Environment.SetEnvironmentVariable("OTEL_LOG_LEVEL", "debug");
-        Environment.SetEnvironmentVariable("OTEL_DOTNET_AUTO_LOGGER", "console");
+        using var envScope = new EnvironmentScope(new Dictionary<string, string?>()
+        {
+            { "OTEL_LOG_LEVEL", "debug" },
+            { "OTEL_DOTNET_AUTO_LOGGER", "console" },
+        });
 
         var currentWriter = Console.Out;
 
@@ -181,8 +207,11 @@ public sealed class OtelLoggingTests : IDisposable
     [Fact]
     public void AfterLoggerIsClosed_ConsecutiveLogCallsWithTheSameLoggerAreNotWrittenToConfiguredSink()
     {
-        Environment.SetEnvironmentVariable("OTEL_LOG_LEVEL", "debug");
-        Environment.SetEnvironmentVariable("OTEL_DOTNET_AUTO_LOGGER", "console");
+        using var envScope = new EnvironmentScope(new Dictionary<string, string?>()
+        {
+            { "OTEL_LOG_LEVEL", "debug" },
+            { "OTEL_DOTNET_AUTO_LOGGER", "console" },
+        });
 
         var currentWriter = Console.Out;
 
@@ -226,8 +255,11 @@ public sealed class OtelLoggingTests : IDisposable
     [Fact]
     public void AfterLoggerIsClosed_ConsecutiveCallsToGetLoggerReturnNoopLogger()
     {
-        Environment.SetEnvironmentVariable("OTEL_LOG_LEVEL", "debug");
-        Environment.SetEnvironmentVariable("OTEL_DOTNET_AUTO_LOGGER", "console");
+        using var envScope = new EnvironmentScope(new Dictionary<string, string?>()
+        {
+            { "OTEL_LOG_LEVEL", "debug" },
+            { "OTEL_DOTNET_AUTO_LOGGER", "console" },
+        });
 
         var currentWriter = Console.Out;
 
@@ -279,12 +311,5 @@ public sealed class OtelLoggingTests : IDisposable
     {
         ms.Position = 0; // reset reading position
         return streamReader.ReadToEnd();
-    }
-
-    private static void UnsetLoggingEnvVars()
-    {
-        Environment.SetEnvironmentVariable("OTEL_LOG_LEVEL", null);
-        Environment.SetEnvironmentVariable("OTEL_DOTNET_AUTO_LOG_FILE_SIZE", null);
-        Environment.SetEnvironmentVariable("OTEL_DOTNET_AUTO_LOGGER", null);
     }
 }

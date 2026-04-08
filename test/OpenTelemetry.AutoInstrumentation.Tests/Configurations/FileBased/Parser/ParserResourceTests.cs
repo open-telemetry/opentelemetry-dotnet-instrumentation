@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 using OpenTelemetry.AutoInstrumentation.Configurations.FileBasedConfiguration;
+using OpenTelemetry.AutoInstrumentation.Tests.Util;
 using Xunit;
 using YamlParser = OpenTelemetry.AutoInstrumentation.Configurations.FileBasedConfiguration.Parser.Parser;
 
@@ -87,9 +88,12 @@ public class ParserResourceTests
     [Fact]
     public void Parse_EnvVarYaml_ShouldPopulateModelCompletely()
     {
-        Environment.SetEnvironmentVariable("OTEL_SDK_DISABLED", "true");
-        Environment.SetEnvironmentVariable("OTEL_SERVICE_NAME", "my-service");
-        Environment.SetEnvironmentVariable("OTEL_RESOURCE_ATTRIBUTES", "key=value");
+        using var envScope = new EnvironmentScope(new Dictionary<string, string?>()
+        {
+            { "OTEL_SDK_DISABLED", "true" },
+            { "OTEL_SERVICE_NAME", "my-service" },
+            { "OTEL_RESOURCE_ATTRIBUTES", "key=value" }
+        });
 
         var config = YamlParser.ParseYaml<YamlConfiguration>("Configurations/FileBased/Files/TestResourceFileEnvVars.yaml");
 
