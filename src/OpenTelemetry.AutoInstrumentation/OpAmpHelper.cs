@@ -79,19 +79,14 @@ internal static class OpAmpHelper
 
     private static void ConfigureClient(OpAmpClientSettings settings, OpAmpSettings opAmpSettings, Resource resources)
     {
-        // Configure connection type.
         // Late parse ensures that OpenTelemetry.OpAmp.Client.dll is loaded only when OpAmp is enabled.
-        var connectionType = ParseConnectionType(opAmpSettings.ConnectionType);
-        if (connectionType.HasValue)
-        {
-            settings.ConnectionType = connectionType.Value;
-        }
 
         // Configure server URL.
         var serverUrl = opAmpSettings.ServerUrl;
         if (serverUrl != null)
         {
             settings.ServerUrl = serverUrl;
+            settings.ConnectionType = GetConnectionType(serverUrl);
         }
 
         // Configure resource attributes for identification.
@@ -119,13 +114,13 @@ internal static class OpAmpHelper
         settings.Identification.AddNonIdentifyingAttribute("opamp.version", GetOpAmpVersion());
     }
 
-    private static ConnectionType? ParseConnectionType(string? connectionType)
+    private static ConnectionType GetConnectionType(Uri serverUrl)
     {
-        return connectionType switch
+        return serverUrl.Scheme switch
         {
-            "http" => ConnectionType.Http,
-            "websocket" => ConnectionType.WebSocket,
-            _ => null,
+            "http" or "https" => ConnectionType.Http,
+            "ws" or "wss" => ConnectionType.WebSocket,
+            _ => throw new NotSupportedException($"Connection type '{serverUrl.Scheme}' is not supported."),
         };
     }
 

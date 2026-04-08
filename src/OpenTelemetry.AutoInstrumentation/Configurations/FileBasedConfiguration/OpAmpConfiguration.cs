@@ -18,10 +18,4 @@ internal class OpAmpConfiguration
     /// </summary>
     [YamlMember(Alias = "server_url")]
     public string? ServerUrl { get; set; }
-
-    /// <summary>
-    /// Gets or sets the type of connection used for communication.
-    /// </summary>
-    [YamlMember(Alias = "connection_type")]
-    public string? ConnectionType { get; set; }
 }

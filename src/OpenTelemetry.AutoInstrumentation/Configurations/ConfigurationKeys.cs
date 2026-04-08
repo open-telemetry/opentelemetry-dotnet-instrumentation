@@ -50,11 +50,6 @@ internal partial class ConfigurationKeys
     public const string OpAmpServerUrl = "OTEL_DOTNET_AUTO_OPAMP_SERVER_URL";
 
     /// <summary>
-    /// Configuration key for OpAmp server connection type.
-    /// </summary>
-    public const string OpAmpConnectionType = "OTEL_DOTNET_AUTO_OPAMP_CONNECTION_TYPE";
-
-    /// <summary>
     /// Configuration key for enabling all instrumentations.
     /// </summary>
     public const string InstrumentationEnabled = "OTEL_DOTNET_AUTO_INSTRUMENTATION_ENABLED";
