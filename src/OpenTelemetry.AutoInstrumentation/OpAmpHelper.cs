@@ -100,18 +100,12 @@ internal static class OpAmpHelper
             var value = resourceAttribute.Value.ToString();
             if (!string.IsNullOrWhiteSpace(value))
             {
-                if (resourceAttribute.Key == "service.name")
-                {
-                    settings.Identification.AddIdentifyingAttribute(resourceAttribute.Key, value);
-                }
-                else
-                {
-                    settings.Identification.AddNonIdentifyingAttribute(resourceAttribute.Key, value);
-                }
+                // OTel language agents must map everything to identifying attributes.
+                settings.Identification.AddIdentifyingAttribute(resourceAttribute.Key, value);
             }
         }
 
-        settings.Identification.AddNonIdentifyingAttribute("opamp.version", GetOpAmpVersion());
+        settings.Identification.AddIdentifyingAttribute("opamp.version", GetOpAmpVersion());
     }
 
     private static ConnectionType GetConnectionType(Uri serverUrl)

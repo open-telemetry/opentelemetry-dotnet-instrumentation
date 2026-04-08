@@ -19,7 +19,7 @@ public class OpAmpTests : TestHelper
     }
 
     [Fact]
-    public void ConnectOpAmp()
+    public void OpAmpClient_CanConnect()
     {
         using var server = new MockOpAmpServer(Output);
 
@@ -47,6 +47,6 @@ public class OpAmpTests : TestHelper
         server.AssertExpectations();
 
         Assert.NotNull(agentDescriptionFrame);
-        Assert.Contains(agentDescriptionFrame.NonIdentifyingAttributes, a => a.Key == "opamp.test");
+        Assert.Contains(agentDescriptionFrame.IdentifyingAttributes, a => a.Key == "opamp.test");
     }
 }
