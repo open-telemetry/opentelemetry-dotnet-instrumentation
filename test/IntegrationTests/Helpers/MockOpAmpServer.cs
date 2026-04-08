@@ -29,7 +29,7 @@ internal sealed class MockOpAmpServer : IDisposable
     {
         _output = output;
 #if NETFRAMEWORK
-        _listener = new TestHttpServer(output, HandleHttpRequests, host, "/api/v2/spans/");
+        _listener = new TestHttpServer(output, HandleHttpRequests, host, "/v1/opamp/");
 #else
         _listener = new TestHttpServer(output, nameof(MockZipkinCollector), new PathHandler(HandleHttpRequests, "/v1/opamp"));
 #endif
@@ -235,7 +235,7 @@ internal sealed class MockOpAmpServer : IDisposable
 
     private void WriteOutput(string msg)
     {
-        const string name = nameof(MockSpansCollector);
+        const string name = nameof(MockOpAmpServer);
         _output.WriteLine($"[{name}]: {msg}");
     }
 
