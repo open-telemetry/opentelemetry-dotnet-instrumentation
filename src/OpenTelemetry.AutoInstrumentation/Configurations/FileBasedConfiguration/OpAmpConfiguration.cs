@@ -11,7 +11,7 @@ internal class OpAmpConfiguration
     /// Gets or sets a value indicating whether the OpAmp client is enabled.
     /// </summary>
     [YamlMember(Alias = "enabled")]
-    public bool? Enabled { get; set; }
+    public bool Enabled { get; set; }
 
     /// <summary>
     /// Gets or sets the URL of the server to which the application connects.
