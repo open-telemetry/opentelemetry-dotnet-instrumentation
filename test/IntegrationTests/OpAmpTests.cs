@@ -37,10 +37,7 @@ public class OpAmpTests : TestHelper
             },
             "Has AgentDescription frame");
 
-        // TODO: No agent disconnect in case of .NET Framework?
-#if NET
         server.Expect(f => f.AgentDisconnect != null, "Has AgentDisconnect frame");
-#endif
 
         RunTestApplication();
 
