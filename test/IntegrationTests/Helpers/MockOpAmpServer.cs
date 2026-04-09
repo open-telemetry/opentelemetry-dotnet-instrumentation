@@ -190,9 +190,29 @@ internal sealed class MockOpAmpServer : IDisposable
         ctx.Response.OutputStream.Close();
     }
 #else
+    private static async Task<AgentToServer?> ProcessReceiveAsync(HttpRequest request)
+    {
+        // Read the body using the PipeReader
+        var result = await request.BodyReader.ReadAsync().ConfigureAwait(false);
+        var buffer = result.Buffer;
+
+        var frame = AgentToServer.Parser.ParseFrom(buffer);
+
+        // Tell the PipeReader how much we consumed
+        request.BodyReader.AdvanceTo(buffer.End);
+
+        return frame;
+    }
+
     private async Task HandleHttpRequests(HttpContext ctx)
     {
-        var frame = AgentToServer.Parser.ParseFrom(ctx.Request.Body);
+        var frame = await ProcessReceiveAsync(ctx.Request).ConfigureAwait(false);
+        if (frame == null)
+        {
+            // No suitable frame found.
+            return;
+        }
+
         _frames.Add(frame);
 
         var headersCopy = new NameValueCollection();
