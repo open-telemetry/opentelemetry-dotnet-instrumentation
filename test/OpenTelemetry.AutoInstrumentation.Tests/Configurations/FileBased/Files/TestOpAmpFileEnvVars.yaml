@@ -1,0 +1,5 @@
+file_format: "1.0"
+
+opamp/development:
+  enabled: ${OTEL_DOTNET_AUTO_OPAMP_ENABLED}
+  server_url: ${OTEL_DOTNET_AUTO_OPAMP_SERVER_URL}
