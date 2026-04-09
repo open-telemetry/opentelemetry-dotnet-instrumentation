@@ -55,7 +55,7 @@ internal class OpAmpSettings : Settings
             return null;
         }
 
-        // Verify suppoerted url schemes
+        // Verify supported url schemes
         if (serverUrl.Scheme != UriSchemes.Http &&
             serverUrl.Scheme != UriSchemes.Https &&
             serverUrl.Scheme != UriSchemes.Ws &&
