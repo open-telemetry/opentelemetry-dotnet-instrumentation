@@ -115,9 +115,9 @@ public class MyPlugin
 
 | Options type                                                                              | NuGet package                                     | NuGet version |
 |-------------------------------------------------------------------------------------------|---------------------------------------------------|---------------|
-| OpenTelemetry.Exporter.ConsoleExporterOptions                                             | OpenTelemetry.Exporter.Console                    | 1.15.1        |
-| OpenTelemetry.Exporter.ZipkinExporterOptions  **Deprecated**                              | OpenTelemetry.Exporter.Zipkin                     | 1.15.1        |
-| OpenTelemetry.Exporter.OtlpExporterOptions                                                | OpenTelemetry.Exporter.OpenTelemetryProtocol      | 1.15.1        |
+| OpenTelemetry.Exporter.ConsoleExporterOptions                                             | OpenTelemetry.Exporter.Console                    | 1.15.2        |
+| OpenTelemetry.Exporter.ZipkinExporterOptions  **Deprecated**                              | OpenTelemetry.Exporter.Zipkin                     | 1.15.2        |
+| OpenTelemetry.Exporter.OtlpExporterOptions                                                | OpenTelemetry.Exporter.OpenTelemetryProtocol      | 1.15.2        |
 | OpenTelemetry.Instrumentation.AspNet.AspNetTraceInstrumentationOptions                    | OpenTelemetry.Instrumentation.AspNet              | 1.15.0        |
 | OpenTelemetry.Instrumentation.AspNetCore.AspNetCoreTraceInstrumentationOptions            | OpenTelemetry.Instrumentation.AspNetCore          | 1.15.1        |
 | OpenTelemetry.Instrumentation.EntityFrameworkCore.EntityFrameworkInstrumentationOptions   | OpenTelemetry.Instrumentation.EntityFrameworkCore | 1.15.0-beta.1 |
@@ -132,10 +132,10 @@ public class MyPlugin
 
 | Options type                                                             | NuGet package                                  | NuGet version |
 |--------------------------------------------------------------------------|------------------------------------------------|---------------|
-| OpenTelemetry.Metrics.MetricReaderOptions                                | OpenTelemetry                                  | 1.15.1        |
-| OpenTelemetry.Exporter.ConsoleExporterOptions                            | OpenTelemetry.Exporter.Console                 | 1.15.1        |
-| OpenTelemetry.Exporter.PrometheusExporterOptions                         | OpenTelemetry.Exporter.Prometheus.HttpListener | 1.15.1-beta.1 |
-| OpenTelemetry.Exporter.OtlpExporterOptions                               | OpenTelemetry.Exporter.OpenTelemetryProtocol   | 1.15.1        |
+| OpenTelemetry.Metrics.MetricReaderOptions                                | OpenTelemetry                                  | 1.15.2        |
+| OpenTelemetry.Exporter.ConsoleExporterOptions                            | OpenTelemetry.Exporter.Console                 | 1.15.2        |
+| OpenTelemetry.Exporter.PrometheusExporterOptions                         | OpenTelemetry.Exporter.Prometheus.HttpListener | 1.15.2-beta.1 |
+| OpenTelemetry.Exporter.OtlpExporterOptions                               | OpenTelemetry.Exporter.OpenTelemetryProtocol   | 1.15.2        |
 | OpenTelemetry.Instrumentation.AspNet.AspNetMetricsInstrumentationOptions | OpenTelemetry.Instrumentation.AspNet           | 1.15.1        |
 | OpenTelemetry.Instrumentation.Runtime.RuntimeInstrumentationOptions      | OpenTelemetry.Instrumentation.Runtime          | 1.15.0        |
 
@@ -143,9 +143,9 @@ public class MyPlugin
 
 | Options type                                  | NuGet package                                | NuGet version |
 |-----------------------------------------------|----------------------------------------------|---------------|
-| OpenTelemetry.Logs.OpenTelemetryLoggerOptions | OpenTelemetry                                | 1.15.1        |
-| OpenTelemetry.Exporter.ConsoleExporterOptions | OpenTelemetry.Exporter.Console               | 1.15.1        |
-| OpenTelemetry.Exporter.OtlpExporterOptions    | OpenTelemetry.Exporter.OpenTelemetryProtocol | 1.15.1        |
+| OpenTelemetry.Logs.OpenTelemetryLoggerOptions | OpenTelemetry                                | 1.15.2        |
+| OpenTelemetry.Exporter.ConsoleExporterOptions | OpenTelemetry.Exporter.Console               | 1.15.2        |
+| OpenTelemetry.Exporter.OtlpExporterOptions    | OpenTelemetry.Exporter.OpenTelemetryProtocol | 1.15.2        |
 
 ## Requirements
 
