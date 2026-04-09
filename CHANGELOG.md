@@ -39,7 +39,7 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 #### Dependency updates
 
 - Updated [Core components](https://github.com/open-telemetry/opentelemetry-dotnet/blob/main/VERSIONING.md#core-components):
-  [`1.15.1`](https://github.com/open-telemetry/opentelemetry-dotnet/releases/tag/core-1.15.1).
+  [`1.15.2`](https://github.com/open-telemetry/opentelemetry-dotnet/releases/tag/core-1.15.2).
 - Following packages updated
   - `OpenTelemetry.Instrumentation.SqlClient` from `1.15.0` to `1.15.1`.
 - .NET only, following packages updated
