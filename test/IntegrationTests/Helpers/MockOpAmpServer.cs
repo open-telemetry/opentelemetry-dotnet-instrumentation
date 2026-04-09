@@ -31,7 +31,7 @@ internal sealed class MockOpAmpServer : IDisposable
 #if NETFRAMEWORK
         _listener = new TestHttpServer(output, HandleHttpRequests, host, "/v1/opamp/");
 #else
-        _listener = new TestHttpServer(output, nameof(MockZipkinCollector), new PathHandler(HandleHttpRequests, "/v1/opamp"));
+        _listener = new TestHttpServer(output, nameof(MockOpAmpServer), new PathHandler(HandleHttpRequests, "/v1/opamp"));
 #endif
     }
 
@@ -164,23 +164,13 @@ internal sealed class MockOpAmpServer : IDisposable
             },
         };
 
-        return frame.ToByteArray();
+        return responseFrame.ToByteArray();
     }
 
 #if NETFRAMEWORK
-    private static AgentToServer ProcessReceive(HttpListenerRequest request)
-    {
-        var buffer = new byte[request.ContentLength64];
-        _ = request.InputStream.Read(buffer, 0, buffer.Length);
-
-        var frame = AgentToServer.Parser.ParseFrom(buffer);
-
-        return frame;
-    }
-
     private void HandleHttpRequests(HttpListenerContext ctx)
     {
-        var frame = ProcessReceive(ctx.Request);
+        var frame = AgentToServer.Parser.ParseFrom(ctx.Request.InputStream);
         _frames.Add(frame);
 
         var headersCopy = new NameValueCollection();
@@ -200,19 +190,9 @@ internal sealed class MockOpAmpServer : IDisposable
         ctx.Response.OutputStream.Close();
     }
 #else
-    private static async Task<AgentToServer> ProcessReceiveAsync(HttpRequest request)
-    {
-        var buffer = new byte[request.ContentLength ?? 0];
-        _ = await request.Body.ReadAsync(buffer).ConfigureAwait(false);
-
-        var frame = AgentToServer.Parser.ParseFrom(buffer);
-
-        return frame;
-    }
-
     private async Task HandleHttpRequests(HttpContext ctx)
     {
-        var frame = await ProcessReceiveAsync(ctx.Request).ConfigureAwait(false);
+        var frame = AgentToServer.Parser.ParseFrom(ctx.Request.Body);
         _frames.Add(frame);
 
         var headersCopy = new NameValueCollection();

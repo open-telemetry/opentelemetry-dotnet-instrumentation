@@ -4,6 +4,7 @@
 using System.Reflection;
 using OpenTelemetry.AutoInstrumentation.Configurations;
 using OpenTelemetry.AutoInstrumentation.Logging;
+using OpenTelemetry.AutoInstrumentation.Util;
 using OpenTelemetry.OpAmp.Client;
 using OpenTelemetry.OpAmp.Client.Settings;
 using OpenTelemetry.Resources;
@@ -30,15 +31,15 @@ internal static class OpAmpHelper
             {
                 try
                 {
-                    await _client.StartAsync(_cts.Token).ConfigureAwait(false);
-
                     IsRunning = true;
+
+                    await _client.StartAsync(_cts.Token).ConfigureAwait(false);
                 }
                 catch (Exception ex)
                 {
-                    Logger.Warning(ex, "OpAmp client stopped unexpectedly.");
-
                     IsRunning = false;
+
+                    Logger.Warning(ex, "OpAmp client stopped unexpectedly.");
                 }
             });
         }
@@ -110,12 +111,19 @@ internal static class OpAmpHelper
 
     private static ConnectionType GetConnectionType(Uri serverUrl)
     {
-        return serverUrl.Scheme switch
+        if (serverUrl.Scheme == UriSchemes.Http ||
+            serverUrl.Scheme == UriSchemes.Https)
         {
-            "http" or "https" => ConnectionType.Http,
-            "ws" or "wss" => ConnectionType.WebSocket,
-            _ => throw new NotSupportedException($"Connection type '{serverUrl.Scheme}' is not supported."),
-        };
+            return ConnectionType.Http;
+        }
+
+        if (serverUrl.Scheme == UriSchemes.Ws ||
+            serverUrl.Scheme == UriSchemes.Wss)
+        {
+            return ConnectionType.WebSocket;
+        }
+
+        throw new NotSupportedException($"Connection type '{serverUrl.Scheme}' is not supported.");
     }
 
     private static string GetOpAmpVersion()

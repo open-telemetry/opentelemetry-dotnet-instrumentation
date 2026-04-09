@@ -627,10 +627,7 @@ opamp:
   # If omitted or null, the client is disabled.
   enabled: false
   # Configure the server endpoint. If not explicitly set, a default
-  # URL is returned based on the connection_type.
-  # connection_type:
-  # • connection_type: http -> https://localhost:4318/v1/opamp
-  # • connection_type: websocket -> wss://localhost:4318/v1/opamp
+  # URL is used: https://localhost:4318/v1/opamp.
   server_url: https://localhost:4318/v1/opamp
 ```
 

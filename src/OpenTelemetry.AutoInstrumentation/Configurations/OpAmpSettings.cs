@@ -3,6 +3,7 @@
 
 using OpenTelemetry.AutoInstrumentation.Configurations.FileBasedConfiguration;
 using OpenTelemetry.AutoInstrumentation.Logging;
+using OpenTelemetry.AutoInstrumentation.Util;
 
 namespace OpenTelemetry.AutoInstrumentation.Configurations;
 
@@ -40,21 +41,37 @@ internal class OpAmpSettings : Settings
             return null;
         }
 
-        try
+        // Try build an absolute url.
+        if (!Uri.TryCreate(configurationValue, UriKind.Absolute, out var serverUrl))
         {
-            return new Uri(configurationValue);
-        }
-        catch (Exception ex)
-        {
-            var errorMessage = $"OpAMP server URL configuration has an invalid value: '{configurationValue}'.";
-            Logger.Error(ex, errorMessage);
+            var errorMessage = $"OpAMP server URL configuration has an invalid value: '{configurationValue}'. The value must be an absolute URI.";
+            Logger.Error(errorMessage);
 
             if (failFast)
             {
-                throw new InvalidOperationException(errorMessage, ex);
+                throw new InvalidOperationException(errorMessage);
             }
 
             return null;
         }
+
+        // Verify suppoerted url schemes
+        if (serverUrl.Scheme != UriSchemes.Http &&
+            serverUrl.Scheme != UriSchemes.Https &&
+            serverUrl.Scheme != UriSchemes.Ws &&
+            serverUrl.Scheme != UriSchemes.Wss)
+        {
+            var errorMessage = $"OpAMP server URL configuration has an invalid value: '{configurationValue}'. Supported URI schemes are http, https, ws, and wss.";
+            Logger.Error(errorMessage);
+
+            if (failFast)
+            {
+                throw new InvalidOperationException(errorMessage);
+            }
+
+            return null;
+        }
+
+        return serverUrl;
     }
 }

@@ -46,22 +46,12 @@ public class ResourceHelperTests
 
         var resource = ResourceHelper.AggregateResources(tracerProvider, meterProvider);
 
-        Assert.Collection(
-            resource.Attributes,
-            attribute =>
-            {
-                Assert.Equal("service.name", attribute.Key);
-                Assert.Equal("my-service-2", attribute.Value);
-            },
-            attribute =>
-            {
-                Assert.Equal("service.namespace", attribute.Key);
-                Assert.Equal("my-namespace", attribute.Value);
-            },
-            attribute =>
-            {
-                Assert.Equal("service.version", attribute.Key);
-                Assert.Equal("1.0.0", attribute.Value);
-            });
+        // Convert attributes to a dictionary to ensure order-independent assertions
+        var actualAttributes = resource.Attributes.ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
+
+        Assert.Equal(3, actualAttributes.Count);
+        Assert.Equal("my-service-2", actualAttributes["service.name"]);
+        Assert.Equal("my-namespace", actualAttributes["service.namespace"]);
+        Assert.Equal("1.0.0", actualAttributes["service.version"]);
     }
 }
