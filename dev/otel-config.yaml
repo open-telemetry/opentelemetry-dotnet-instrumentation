@@ -7,11 +7,9 @@ receivers:
   otlp:
     protocols:
       grpc:
+        endpoint: 0.0.0.0:4317
       http:
-  jaeger:
-    protocols:
-      thrift_compact:
-      thrift_http:
+        endpoint: 0.0.0.0:4318
   zipkin:
 
 processors:
@@ -26,6 +24,8 @@ exporters:
     path: /log/otel/metrics.log
   file/logs:
     path: /log/otel/logs.log
+  file/profiles:
+    path: /log/otel/profiles.log
   otlp:
     endpoint: "${JAEGER_ENDPOINT}"
     tls:
@@ -41,7 +41,7 @@ service:
         - zipkin
       processors: [batch]
       exporters:
-        - debug 
+        - debug
         - file/traces
         - otlp
     metrics:
@@ -59,6 +59,12 @@ service:
       exporters:
         - debug 
         - file/logs
+    profiles:
+      receivers:
+        - otlp
+      exporters:
+        - debug
+        # - file/profiles # commented out for now, as it is in development state and leads to issues in the output of the collector. Ref: https://github.com/open-telemetry/opentelemetry-collector/issues/15080
   extensions:
     - health_check
     - zpages
