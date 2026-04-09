@@ -622,7 +622,7 @@ instrumentation/development:
 ### OpAMP
 
 ``` yaml
-opamp:
+opamp/development:
   # Configure if OpAMP client is enabled.
   # If omitted or null, the client is disabled.
   enabled: false
