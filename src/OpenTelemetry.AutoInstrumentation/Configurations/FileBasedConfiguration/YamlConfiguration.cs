@@ -99,6 +99,6 @@ internal class YamlConfiguration
     /// <summary>
     /// Gets or sets the OpAMP settings.
     /// </summary>
-    [YamlMember(Alias = "opamp")]
+    [YamlMember(Alias = "opamp/development")]
     public OpAmpConfiguration? OpAmp { get; set; }
 }
