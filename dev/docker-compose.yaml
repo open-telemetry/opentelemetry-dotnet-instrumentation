@@ -5,7 +5,7 @@ services:
     volumes:
       - ./otel-config.yaml:/etc/otel/config.yaml
       - ./log:/log/otel
-    command: --config /etc/otel/config.yaml
+    command: --config /etc/otel/config.yaml --feature-gates=service.profilesSupport
     environment:
       - JAEGER_ENDPOINT=jaeger:4317
     ports:
