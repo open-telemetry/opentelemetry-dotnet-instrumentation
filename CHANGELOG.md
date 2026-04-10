@@ -40,14 +40,14 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 - Plugins limited to one instance per type.
 - Improves allocation sampling behavior at startup for
   a more even distribution of samples.
-- Assembly conflict resoluton startegy for .NET (See
+- Assembly conflict resolution strategy for .NET (See
  [docs/assembly-conflict-resolution.md](./docs/assembly-conflict-resolution.md))
   - Extend IL rewriting of assembly references for Native Profiler
     deployment on .NET
   - Implement isolation for StartupHook-only deployment (.NET only)
   - Assembly conflict resolution strategy for .NET Framework is not changed
   - Automatically enable assembly redirection depending on deployment for .NET
-    and .NET Franmework: yes for Standalone deployment, no for NuGet deployment
+    and .NET Framework: yes for Standalone deployment, no for NuGet deployment
 
 #### Dependency updates
 
