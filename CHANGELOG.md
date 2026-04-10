@@ -32,7 +32,7 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 - Add support for `OTEL_CONFIG_FILE` environment variable for file-based configuration.
   This variable takes precedence over the deprecated
   `OTEL_EXPERIMENTAL_CONFIG_FILE` environment variable.
-- Configuration based instrumentation support dynamic evaluation for
+- Configuration based instrumentation supports dynamic evaluation for
   - span names,
   - attribute values,
   - statuses.
@@ -47,7 +47,7 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
   - Added the `db.response.status_code` and `error.type` attributes to error spans,
   - Removed the `network.peer.address` and `network.peer.port` attributes.
 - Plugins limited to one instance per type.
-- Improves allocation sampling behavior at startup for
+- Improve allocation sampling behavior at startup for
   a more even distribution of samples.
 
 #### Dependency updates
@@ -66,10 +66,10 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 
 ### Fixed
 
-- Fixed configuration based instrumentation for some .NET Framework methods.
-- Fixed .NET Framework assembly redirection startup by registering the loader
+- Fix configuration based instrumentation for some .NET Framework methods.
+- Fix .NET Framework assembly redirection startup by registering the loader
   before the application's entry point executes.
-- Fixed various assembly resolution conflicts.
+- Fix various assembly resolution conflicts.
 - When both `ENTITYFRAMEWORKCORE` and `NPGSQL` traces instrumentations are enabled,
   Entity Framework Core instrumentation now skips the
   `Npgsql.EntityFrameworkCore.PostgreSQL` provider so both instrumentations can
