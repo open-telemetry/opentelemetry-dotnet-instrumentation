@@ -27,7 +27,7 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
   to unify control of assembly redirection on .NET and .NET Framework.
   This variable takes precedence over the deprecated
   `OTEL_DOTNET_AUTO_NETFX_REDIRECT_ENABLED` environment variable for
-  .NET Framework
+  .NET Framework.
 
 ### Changed
 
@@ -43,11 +43,12 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 - Assembly conflict resolution strategy for .NET (See
  [docs/assembly-conflict-resolution.md](./docs/assembly-conflict-resolution.md))
   - Extend IL rewriting of assembly references for Native Profiler
-    deployment on .NET
-  - Implement isolation for StartupHook-only deployment (.NET only)
+    deployment on .NET,
+  - Implement isolation for StartupHook-only deployment (.NET only),
   - Assembly conflict resolution strategy for .NET Framework is not changed
   - Automatically enable assembly redirection depending on deployment for .NET
-    and .NET Framework: yes for Standalone deployment, no for NuGet deployment
+    and .NET Framework. Enabled for Standalone deployment,
+    and disabled for NuGet deployment.
 
 #### Dependency updates
 
@@ -64,13 +65,14 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
   configuration is deprecated. Use `OTEL_CONFIG_FILE` instead.
 - `OTEL_DOTNET_AUTO_NETFX_REDIRECT_ENABLED` environment variable to control
   assembly redirection on .NET Framework. Use
-  `OTEL_DOTNET_AUTO_REDIRECT_ENABLED` instead
+  `OTEL_DOTNET_AUTO_REDIRECT_ENABLED` instead.
 
 ### Removed
+
 - Support of Additional Dependencies workaround for assembly conflict
   resolution via environment variables
   `DOTNET_ADDITIONAL_DEPS`/`DOTNET_SHARED_STORE`
-  - no recommendation to remove those variables from end user environments yet
+  - no recommendation to remove those variables from end user environments yet.
 
 ### Fixed
 
