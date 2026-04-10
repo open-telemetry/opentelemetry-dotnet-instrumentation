@@ -5,7 +5,21 @@ All notable changes to this component are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/compare/v1.14.1..HEAD)
+## [Unreleased](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/compare/v1.15.0-beta.1..HEAD)
+
+### Added
+
+### Changed
+
+#### Dependency updates
+
+### Deprecated
+
+### Removed
+
+### Fixed
+
+## [v1.15.0-beta.1](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/tag/v1.15.0-beta.1)
 
 ### Added
 
@@ -50,13 +64,12 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 - `OTEL_EXPERIMENTAL_CONFIG_FILE` environment variable for file-based
   configuration is deprecated. Use `OTEL_CONFIG_FILE` instead.
 
-### Removed
-
 ### Fixed
 
 - Fixed configuration based instrumentation for some .NET Framework methods.
 - Fixed .NET Framework assembly redirection startup by registering the loader
   before the application's entry point executes.
+- Fixed various assembly resolution conflicts.
 - When both `ENTITYFRAMEWORKCORE` and `NPGSQL` traces instrumentations are enabled,
   Entity Framework Core instrumentation now skips the
   `Npgsql.EntityFrameworkCore.PostgreSQL` provider so both instrumentations can
