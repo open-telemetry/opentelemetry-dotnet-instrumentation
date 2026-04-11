@@ -72,7 +72,11 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 - Support of Additional Dependencies workaround for assembly conflict
   resolution via environment variables
   `DOTNET_ADDITIONAL_DEPS`/`DOTNET_SHARED_STORE`
-  - no recommendation to remove those variables from end user environments yet.
+  - These environment variables are no longer required to resolve assembly
+    version conflicts for the majority of use cases. However, there is no
+    operational harm in keeping them from your previous installation.
+    Removing them is not yet recommended, as re-implementation of this
+    workaround may be necessary for future configurations.
 
 ### Fixed
 
