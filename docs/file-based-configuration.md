@@ -619,6 +619,18 @@ instrumentation/development:
       additional_sources_list: ${OTEL_DOTNET_AUTO_METRICS_ADDITIONAL_SOURCES}
 ```
 
+### OpAMP
+
+``` yaml
+opamp/development:
+  # Configure if OpAMP client is enabled.
+  # If omitted or null, the client is disabled.
+  enabled: false
+  # Configure the server endpoint. If not explicitly set, a default
+  # URL is used: https://localhost:4318/v1/opamp.
+  server_url: https://localhost:4318/v1/opamp
+```
+
 ### Configuration based instrumentation
 
 Documentation for configuration based instrumentation can be found in [nocode-instrumentation.md](nocode-instrumentation.md).

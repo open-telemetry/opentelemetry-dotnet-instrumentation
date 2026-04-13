@@ -16,6 +16,12 @@
     <None Update="Configurations\FileBased\Files\TestInstrumentationConfigurationFile.yaml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Update="Configurations\FileBased\Files\TestOpAmpFileEnvVars.yaml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Configurations\FileBased\Files\TestOpAmpFile.yaml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Update="Configurations\FileBased\Files\TestInstrumentationFileEnvVars.yaml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>

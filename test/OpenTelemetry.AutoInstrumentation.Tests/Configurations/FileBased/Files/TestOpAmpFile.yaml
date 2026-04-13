@@ -1,0 +1,5 @@
+file_format: "1.0"
+
+opamp/development:
+  enabled: true
+  server_url: "wss://localhost:4318/v1/opamp"
