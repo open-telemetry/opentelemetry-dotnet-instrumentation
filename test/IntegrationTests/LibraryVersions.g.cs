@@ -494,6 +494,26 @@ public static partial class LibraryVersion
             return theoryData;
         }
     }
+    public static TheoryData<string> StartupHookIsolation
+    {
+        get
+        {
+            TheoryData<string> theoryData =
+            [
+#if DEFAULT_TEST_PACKAGE_VERSIONS
+                string.Empty,
+#else
+                "Void",
+                "Int",
+                "Task",
+                "TaskInt",
+                "AsyncTask",
+                "AsyncTaskInt",
+#endif
+            ];
+            return theoryData;
+        }
+    }
     public static readonly IReadOnlyDictionary<string, TheoryData<string>> LookupMap = new Dictionary<string, TheoryData<string>>
     {
        { "Azure", Azure },
@@ -522,5 +542,6 @@ public static partial class LibraryVersion
        { "Kafka", Kafka },
        { "AssemblyRedirection", AssemblyRedirection },
        { "WCFCoreServer", WCFCoreServer },
+       { "StartupHookIsolation", StartupHookIsolation },
     };
 }
