@@ -1,6 +1,10 @@
 // Copyright The OpenTelemetry Authors
 // SPDX-License-Identifier: Apache-2.0
 
+#if NETFRAMEWORK
+using System.Diagnostics;
+using System.Text;
+#endif
 using IntegrationTests.Helpers;
 using Xunit.Abstractions;
 
@@ -8,8 +12,14 @@ namespace IntegrationTests;
 
 public class AssemblyRedirectionTests(ITestOutputHelper output) : TestHelper("AssemblyRedirection", output)
 {
+#if NETFRAMEWORK
+    [WindowsAdministratorTheory]
+    [Trait("Category", "EndToEnd")]
+    [Trait("Containers", "Windows")]
+#else
     [Theory]
     [Trait("Category", "EndToEnd")]
+#endif
 #if NET8_0
     // Case 1: Lower version should be redirected with/without native profiler
     [InlineData("8.0.0", "System.Diagnostics.DiagnosticSource", "10.0.0.0", "10.0.25.52411", true)]
@@ -45,7 +55,7 @@ public class AssemblyRedirectionTests(ITestOutputHelper output) : TestHelper("As
     [InlineData("10.0.2", "Microsoft.Extensions.Logging.Abstractions", "10.0.0.2", "10.0.225.61305")]
     // Case 3: Higher version is not possible for DiagnosticSource on .NET 10, the instrumentation tool is already using the highest possible version
 #endif
-    public void SubmitsTraces(
+    public Task SubmitsTraces(
         string libraryVersion,
         string expectedAssemblyName,
         string expectedAssemblyVersion,
@@ -54,13 +64,28 @@ public class AssemblyRedirectionTests(ITestOutputHelper output) : TestHelper("As
     {
 #if NETFRAMEWORK
         Assert.True(enableNativeProfiler, "Native profiler is required for assembly redirection on .NET Framework");
-        var excludedNames = string.Empty;
+
+        using var collector = new MockSpansCollector(Output, host: "*");
+        using var fwPort = FirewallHelper.OpenWinPort(collector.Port, Output);
+        collector.Expect("AssemblyRedirection.ActivitySource");
+
+        var collectorUrl = $"http://{DockerNetworkHelper.IntegrationTestsGateway}:{collector.Port}";
+        var environmentVariables = new Dictionary<string, string>
+        {
+            ["OTEL_EXPORTER_OTLP_ENDPOINT"] = collectorUrl,
+            ["OTEL_DOTNET_AUTO_TRACES_ADDITIONAL_SOURCES"] = "AssemblyRedirection.ActivitySource",
+            ["EXPECTED_ASSEMBLY_NAME"] = expectedAssemblyName,
+            ["EXPECTED_ASSEMBLY_VERSION"] = expectedAssemblyVersion,
+            ["EXPECTED_ASSEMBLY_FILE_VERSION"] = expectedAssemblyFileVersion
+        };
+
+        return AssertContainerizedTracesAsync(libraryVersion, environmentVariables, collector);
 #else
 
         // on .NET (Core) Assembly Redirection without Native Profiler will load test application
         // and the startup hook twice, so we should exclude both from validation of no-duplicate loads
         var excludedNames = !enableNativeProfiler ? "TestApplication.AssemblyRedirection,OpenTelemetry.AutoInstrumentation.StartupHook" : string.Empty;
-#endif
+
         // Arrange
         using var collector = new MockSpansCollector(Output);
         SetExporter(collector);
@@ -82,5 +107,60 @@ public class AssemblyRedirectionTests(ITestOutputHelper output) : TestHelper("As
 
         // Assert
         collector.AssertExpectations();
+        return Task.CompletedTask;
+#endif
     }
+
+#if NETFRAMEWORK
+    private async Task AssertContainerizedTracesAsync(
+        string libraryVersion,
+        IReadOnlyDictionary<string, string> environmentVariables,
+        MockSpansCollector collector)
+    {
+        await RunContainerizedTestApplicationAsync(libraryVersion, environmentVariables).ConfigureAwait(false);
+        collector.AssertExpectations();
+    }
+
+    private async Task RunContainerizedTestApplicationAsync(string libraryVersion, IReadOnlyDictionary<string, string> environmentVariables)
+    {
+        var networkName = await DockerNetworkHelper.SetupIntegrationTestsNetworkAsync().ConfigureAwait(false);
+        var imageName = GetNetFxDockerImageName(libraryVersion);
+        var containerName = $"{imageName}-{Guid.NewGuid():N}";
+
+        var arguments = new StringBuilder($"run --rm --name {containerName} --network {networkName}");
+        foreach (var environmentVariable in environmentVariables)
+        {
+            arguments.Append($" -e {environmentVariable.Key}={environmentVariable.Value}");
+        }
+
+        arguments.Append($" {imageName}");
+
+        using var process = Process.Start(new ProcessStartInfo("docker", arguments.ToString())
+        {
+            UseShellExecute = false,
+            CreateNoWindow = true,
+            RedirectStandardOutput = true,
+            RedirectStandardError = true,
+            RedirectStandardInput = false
+        });
+        Assert.NotNull(process);
+        using var helper = new ProcessHelper(process);
+
+        var processTimeout = !process!.WaitForExit((int)TestTimeout.ProcessExit.TotalMilliseconds);
+        if (processTimeout)
+        {
+            process.Kill();
+        }
+
+        Output.WriteResult(helper);
+
+        Assert.False(processTimeout, "Containerized test application timed out");
+        Assert.Equal(0, process.ExitCode);
+    }
+
+    private static string GetNetFxDockerImageName(string libraryVersion)
+    {
+        return $"testapplication-assemblyredirection-netframework-nogac-{libraryVersion.Replace('.', '-')}";
+    }
+#endif
 }
