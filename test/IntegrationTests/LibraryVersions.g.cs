@@ -128,7 +128,6 @@ public static partial class LibraryVersion
 #if DEFAULT_TEST_PACKAGE_VERSIONS
                 string.Empty,
 #else
-                "2.0.13",
                 "3.3.0",
 #endif
             ];
