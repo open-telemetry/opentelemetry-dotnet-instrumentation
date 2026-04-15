@@ -66,7 +66,6 @@ public static partial class LibraryVersion
         {
             "TestApplication.Log4NetBridge",
             [
-                new("2.0.13"),
                 new("3.3.0"),
             ]
         },

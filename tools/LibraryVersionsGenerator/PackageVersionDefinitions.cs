@@ -98,7 +98,8 @@ internal static class PackageVersionDefinitions
             [
                 // versions below 2.0.10 have critical vulnerabilities
                 // versions below 2.0.13 have known bugs e.g. https://issues.apache.org/jira/browse/LOG4NET-652
-                new("2.0.13"),
+                // versions below 3.3.0 have known security vulnerabilities https://github.com/advisories/GHSA-4f7c-pmjv-c25w
+                new("3.3.0"),
                 new("*")
             ]
         },
