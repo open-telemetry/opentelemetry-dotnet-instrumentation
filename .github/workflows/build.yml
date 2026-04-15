@@ -41,7 +41,7 @@ jobs:
             10.0.201
 
       - name: Check for NuGet packages cache
-        uses: actions/cache@668228422ae6a00e4ad889ee87cd7109ec5666a7 # tag: v5.0.4
+        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # tag: v5.0.5
         id: nuget-cache
         with:
           key: ${{ hashFiles('**/Directory.packages.props', './build/LibraryVersions.g.cs', '**/packages.config' ) }}
@@ -54,7 +54,7 @@ jobs:
 
       - name: Cache NuGet packages
         if: ${{ steps.nuget-cache.outputs.cache-hit != 'true' }}
-        uses: actions/cache/save@668228422ae6a00e4ad889ee87cd7109ec5666a7 # tag: v5.0.4
+        uses: actions/cache/save@27d5ce7f107fe9357f9df03efb73ab90386fccae # tag: v5.0.5
         with:
           key: ${{ hashFiles('**/Directory.packages.props', './build/LibraryVersions.g.cs', '**/packages.config' ) }}
           path: ${{ env.NUGET_PACKAGES }}
