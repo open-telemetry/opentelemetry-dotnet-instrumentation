@@ -98,7 +98,8 @@ internal static class PackageVersionDefinitions
             [
                 // versions below 2.0.10 have critical vulnerabilities
                 // versions below 2.0.13 have known bugs e.g. https://issues.apache.org/jira/browse/LOG4NET-652
-                new("2.0.13"),
+                // versions below 3.3.0 have known security vulnerabilities https://github.com/advisories/GHSA-4f7c-pmjv-c25w
+                new("3.3.0"),
                 new("*")
             ]
         },
@@ -216,8 +217,11 @@ internal static class PackageVersionDefinitions
             Versions =
             [
                 // new("8.0.0"), - transitive vulnerabilities https://github.com/advisories/GHSA-8g4q-xg66-9fp4, <=8.2.3
-                new("8.2.5"),
-                new("9.1.0", supportedTargetFrameworks: ["net10.0", "net9.0", "net8.0"], supportedExecutionFrameworks: ["net10.0", "net9.0", "net8.0"]), // breaking change, new Meter name
+                new("8.2.6"),
+                // new("9.1.0", supportedTargetFrameworks: ["net10.0", "net9.0", "net8.0"], supportedExecutionFrameworks: ["net10.0", "net9.0", "net8.0"]), // breaking change, new Meter name - transitive vulnerabilities <= 9.2.9
+                new("9.2.10", supportedTargetFrameworks: ["net10.0", "net9.0", "net8.0"], supportedExecutionFrameworks: ["net10.0", "net9.0", "net8.0"]),
+                // new("10.0.0", supportedTargetFrameworks: ["net10.0"], supportedExecutionFrameworks: ["net10.0"]), // transitive vulnerabilities <= 10.1.2
+                new("10.1.3", supportedTargetFrameworks: ["net10.0"], supportedExecutionFrameworks: ["net10.0"]),
                 new("*", supportedTargetFrameworks: ["net10.0"], supportedExecutionFrameworks: ["net10.0"])
             ]
         },

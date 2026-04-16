@@ -66,7 +66,6 @@ public static partial class LibraryVersion
         {
             "TestApplication.Log4NetBridge",
             [
-                new("2.0.13"),
                 new("3.3.0"),
             ]
         },
@@ -136,9 +135,9 @@ public static partial class LibraryVersion
         {
             "TestApplication.NServiceBus",
             [
-                new("8.2.5"),
-                new("9.1.0", supportedFrameworks: [ "net10.0", "net9.0", "net8.0" ]),
-                new("10.1.0", supportedFrameworks: [ "net10.0" ]),
+                new("8.2.6"),
+                new("9.2.10", supportedFrameworks: [ "net10.0", "net9.0", "net8.0" ]),
+                new("10.1.3", supportedFrameworks: [ "net10.0" ]),
             ]
         },
         {

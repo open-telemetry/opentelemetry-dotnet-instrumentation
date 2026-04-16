@@ -5,7 +5,21 @@ All notable changes to this component are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/compare/v1.14.1..HEAD)
+## [Unreleased](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/compare/v1.15.0-beta.1..HEAD)
+
+### Added
+
+### Changed
+
+#### Dependency updates
+
+### Deprecated
+
+### Removed
+
+### Fixed
+
+## [v1.15.0-beta.1](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/tag/v1.15.0-beta.1)
 
 ### Added
 
@@ -18,11 +32,16 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 - Add support for `OTEL_CONFIG_FILE` environment variable for file-based configuration.
   This variable takes precedence over the deprecated
   `OTEL_EXPERIMENTAL_CONFIG_FILE` environment variable.
-- Configuration based instrumentation support dynamic evaluation for
+- Configuration based instrumentation supports dynamic evaluation for
   - span names,
   - attribute values,
   - statuses.
 - Add file existence validation for file-based configuration.
+- Add environment variable `OTEL_DOTNET_AUTO_REDIRECT_ENABLED`
+  to unify control of assembly redirection on .NET and .NET Framework.
+  This variable takes precedence over the deprecated
+  `OTEL_DOTNET_AUTO_NETFX_REDIRECT_ENABLED` environment variable for
+  .NET Framework.
 
 ### Changed
 
@@ -33,8 +52,17 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
   - Added the `db.response.status_code` and `error.type` attributes to error spans,
   - Removed the `network.peer.address` and `network.peer.port` attributes.
 - Plugins limited to one instance per type.
-- Improves allocation sampling behavior at startup for
+- Improve allocation sampling behavior at startup for
   a more even distribution of samples.
+- Assembly conflict resolution strategy for .NET (See
+ [docs/assembly-conflict-resolution.md](./docs/assembly-conflict-resolution.md))
+  - Extend IL rewriting of assembly references for Native Profiler
+    deployment on .NET,
+  - Implement isolation for StartupHook-only deployment (.NET only),
+  - Assembly conflict resolution strategy for .NET Framework is not changed
+  - Automatically enable assembly redirection depending on deployment for .NET
+    and .NET Framework. Enabled for Standalone deployment,
+    and disabled for NuGet deployment.
 
 #### Dependency updates
 
@@ -49,13 +77,25 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 
 - `OTEL_EXPERIMENTAL_CONFIG_FILE` environment variable for file-based
   configuration is deprecated. Use `OTEL_CONFIG_FILE` instead.
+- `OTEL_DOTNET_AUTO_NETFX_REDIRECT_ENABLED` environment variable to control
+  assembly redirection on .NET Framework. Use
+  `OTEL_DOTNET_AUTO_REDIRECT_ENABLED` instead.
 
 ### Removed
 
+- Support of Additional Dependencies workaround for assembly conflict
+  resolution via environment variables
+  `DOTNET_ADDITIONAL_DEPS`/`DOTNET_SHARED_STORE`
+  - These environment variables are no longer required to resolve assembly
+    version conflicts for the majority of use cases. However, there is no
+    operational harm in keeping them from your previous installation.
+    Removing them is not yet recommended, as re-implementation of this
+    workaround may be necessary for future configurations.
+
 ### Fixed
 
-- Fixed configuration based instrumentation for some .NET Framework methods.
-- Fixed .NET Framework assembly redirection startup by registering the loader
+- Fix configuration based instrumentation for some .NET Framework methods.
+- Fix .NET Framework assembly redirection startup by registering the loader
   before the application's entry point executes.
 - When both `ENTITYFRAMEWORKCORE` and `NPGSQL` traces instrumentations are enabled,
   Entity Framework Core instrumentation now skips the
