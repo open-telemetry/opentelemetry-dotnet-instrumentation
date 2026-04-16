@@ -296,7 +296,7 @@ public static partial class LibraryVersion
 #else
                 "8.2.6",
 #if NET10_0 || NET9_0 || NET8_0
-                "9.2.3",
+                "9.2.10",
 #endif
 #if NET10_0
                 "10.1.3",
