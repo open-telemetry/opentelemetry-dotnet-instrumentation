@@ -1,5 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <ItemGroup>
-    <PackageReference Include="System.Diagnostics.DiagnosticSource" VersionOverride="$(LibraryVersion)" />
+    <PackageReference Include="System.Diagnostics.DiagnosticSource" VersionOverride="$(LibraryVersion)" Condition=" '$(LibraryVersion)' != '' " />
+    <PackageReference Include="System.Diagnostics.DiagnosticSource" VersionOverride="10.0.6" Condition=" '$(LibraryVersion)' == '' and '$(TargetFramework)' == 'net462' " />
   </ItemGroup>
 </Project>

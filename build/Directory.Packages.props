@@ -4,7 +4,9 @@
   <ItemGroup>
     <PackageVersion Include="Mono.Cecil" Version="0.11.6" />
     <PackageVersion Include="Nuke.Common" Version="10.1.0" />
-    <PackageVersion Include="Nuget.CommandLine" Version="7.3.0" />
+    <PackageVersion Include="Nuget.CommandLine" Version="7.3.1" />
+    <!-- Microsoft.System.Security.Cryptography.Xml is an indirect reference from Nuke.Common. Fixes https://github.com/advisories/GHSA-w3x6-4m5h-cxqf -->
+    <PackageVersion Include="System.Security.Cryptography.Xml" Version="10.0.6" />
   </ItemGroup>
   
   <ItemGroup Condition=" '$(IsLegacyUbuntu)' != '' " >
