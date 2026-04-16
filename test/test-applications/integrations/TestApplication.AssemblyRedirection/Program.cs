@@ -37,12 +37,8 @@ Console.WriteLine($"  Excluded Assemblies (empty means 'check all'): [{string.Jo
 Console.WriteLine();
 
 #if NETFRAMEWORK
-// Force an entrypoint dependency that also exists in the auto-instrumentation payload.
-var entrypointAssembly = NullLogger.Instance.GetType().Assembly;
-Console.WriteLine("Check 0: Entrypoint Assembly");
-Console.WriteLine($"  Loaded Assembly: {Describe(entrypointAssembly)}");
-Console.WriteLine($"  Assembly Version: {entrypointAssembly.GetName().Version}");
-Console.WriteLine();
+// Force the expected dependency to load before the activity starts.
+_ = NullLogger.Instance;
 #endif
 
 using var activitySource = new ActivitySource("AssemblyRedirection.ActivitySource");
