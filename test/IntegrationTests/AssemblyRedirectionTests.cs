@@ -88,7 +88,7 @@ public class AssemblyRedirectionTests(ITestOutputHelper output) : TestHelper("As
     [InlineData("6.0.0", "Microsoft.Extensions.Logging.Abstractions", "10.0.0.2", "10.0.225.61305")]
     // Case 2: Equal version should keep loading the expected assembly.
     [InlineData("10.0.2", "Microsoft.Extensions.Logging.Abstractions", "10.0.0.2", "10.0.225.61305")]
-    public Task SubmitsTracesOnNetFramework(
+    public async Task SubmitsTracesOnNetFramework(
         string libraryVersion,
         string expectedAssemblyName,
         string expectedAssemblyVersion,
@@ -108,7 +108,7 @@ public class AssemblyRedirectionTests(ITestOutputHelper output) : TestHelper("As
             ["EXPECTED_ASSEMBLY_FILE_VERSION"] = expectedAssemblyFileVersion
         };
 
-        return AssertContainerizedTracesAsync(libraryVersion, environmentVariables, collector);
+        await AssertContainerizedTracesAsync(libraryVersion, environmentVariables, collector).ConfigureAwait(false);
     }
 
     private async Task AssertContainerizedTracesAsync(

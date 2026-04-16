@@ -25,6 +25,7 @@
     <PackageReference Include="Mono.Cecil" />
     <PackageReference Include="Nuke.Common" />
     <PackageReference Include="Nuget.CommandLine" ExcludeAssets="all" />
+    <PackageReference Include="System.Security.Cryptography.Xml" />
   </ItemGroup>
   <ItemGroup Condition=" '$(IsLegacyUbuntu)' != '' "  >
     <!-- Microsoft.Build is an indirect reference from Nuke.Common. Fixes https://github.com/advisories/GHSA-w3q9-fxm7-j8fq -->
