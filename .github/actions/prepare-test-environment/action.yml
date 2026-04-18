@@ -1,0 +1,53 @@
+name: Prepare Test Environment
+description: Prepare test prerequisites on the host or inside an existing Docker container.
+
+inputs:
+  environment-type:
+    description: Build environment type. Use `host` for direct runner builds or `container` for Docker-based builds.
+    required: true
+  container-name:
+    description: Running Docker container name when environment-type is container.
+    required: false
+    default: ""
+  log-directory:
+    description: Log directory expected to contain profiler output after the smoke test.
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - name: Validate test environment inputs
+      shell: pwsh
+      run: |
+        $environmentType = '${{ inputs.environment-type }}'.Trim().ToLowerInvariant()
+        $containerName = '${{ inputs.container-name }}'.Trim()
+
+        if ($environmentType -notin @('host', 'container')) {
+          throw "environment-type must be either 'host' or 'container'."
+        }
+
+        if ($environmentType -eq 'container' -and [string]::IsNullOrWhiteSpace($containerName)) {
+          throw 'container-name input is required when environment-type is container.'
+        }
+
+    - name: Install macOS CoreUtils
+      if: ${{ inputs.environment-type != 'container' && runner.os == 'macOS' }}
+      shell: bash
+      run: brew install coreutils
+
+    - name: Create test directory on host
+      if: ${{ inputs.environment-type != 'container' && runner.os != 'Windows' }}
+      shell: bash
+      run: |
+        sudo mkdir -p '${{ inputs.log-directory }}'
+        sudo chmod a+rwx '${{ inputs.log-directory }}'
+
+    - name: Create test directory in container
+      if: ${{ inputs.environment-type == 'container' }}
+      uses: ./.github/actions/run-command-in-environment
+      with:
+        container-name: ${{ inputs.container-name }}
+        container-user: "0"
+        run: |
+          mkdir -p '${{ inputs.log-directory }}'
+          chmod a+rwx '${{ inputs.log-directory }}'

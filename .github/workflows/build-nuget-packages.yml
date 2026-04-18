@@ -17,8 +17,8 @@ env:
 
 jobs:
   build-nuget-packages:
-    # In principle this job "needs: [ build, build-container ]", however, that would cause the build and build-container
-    # jobs to run twice, which is not what we want. Instead, we let the "caller" job handle the dependencies.
+    # In principle this job needs the build outputs, however that would cause the upstream reusable workflow
+    # to run twice. Instead, we let the caller workflow handle the dependencies.
     outputs:
       nuget-version-suffix: ${{ steps.set-nuget-version-suffix.outputs.suffix }}
     runs-on: windows-2022

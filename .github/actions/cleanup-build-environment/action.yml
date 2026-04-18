@@ -1,0 +1,35 @@
+name: Cleanup Build Environment
+description: Cleanup the build environment on the host or inside a Docker container.
+
+inputs:
+  environment-type:
+    description: Either `host` or `container`.
+    required: true
+  container-name:
+    description: Running Docker container name when environment-type is container.
+    required: false
+    default: ""
+
+runs:
+  using: composite
+  steps:
+    - name: Validate cleanup inputs
+      shell: pwsh
+      run: |
+        $environmentType = '${{ inputs.environment-type }}'.Trim().ToLowerInvariant()
+        $containerName = '${{ inputs.container-name }}'.Trim()
+
+        if ($environmentType -notin @('host', 'container')) {
+          throw "environment-type must be either 'host' or 'container'."
+        }
+
+        if ($environmentType -eq 'container' -and [string]::IsNullOrWhiteSpace($containerName)) {
+          throw 'container-name input is required when environment-type is container.'
+        }
+
+    - name: Stop build container
+      if: ${{ inputs.environment-type == 'container' && inputs.container-name != '' }}
+      shell: bash
+      run: |
+        set -u
+        docker rm -f "${{ inputs.container-name }}"

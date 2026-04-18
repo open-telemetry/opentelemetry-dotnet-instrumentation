@@ -13,24 +13,24 @@ env:
   DOTNET_CLI_TELEMETRY_OPTOUT: 1
 
 jobs:
-  build-container:
-    uses: ./.github/workflows/build-container.yml
-
   build-ubuntu1604-native:
     uses: ./.github/workflows/build-ubuntu1604-native-container.yml
 
+  build-windows:
+    uses: ./.github/workflows/build-windows.yml
+
   build:
-    needs: build-ubuntu1604-native
+    needs: [ build-windows, build-ubuntu1604-native ]
     uses: ./.github/workflows/build.yml
 
   build-nuget-packages:
-    needs: [ build, build-container ]
+    needs: [ build-windows, build ]
     uses: ./.github/workflows/build-nuget-packages.yml
 
   create-release:
     name: Create GitHub release
     runs-on: ubuntu-22.04
-    needs: [ build, build-container, build-nuget-packages ]
+    needs: [ build-windows, build, build-nuget-packages ]
     permissions:
       attestations: write
       contents: write
