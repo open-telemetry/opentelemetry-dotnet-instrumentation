@@ -20,23 +20,32 @@ jobs:
             runner: ubuntu-22.04
             environment-type: host
             replace-artifacts: |
+              bin-windows-2022!net
               bin-ubuntu1604-native!linux-x64
           - artifact-name: ubuntu-22.04-arm
             runner: ubuntu-22.04-arm
             environment-type: host
+            replace-artifacts: |
+              bin-windows-2022!net
           - artifact-name: macos-14
             runner: macos-14
             environment-type: host
+            replace-artifacts: |
+              bin-windows-2022!net
           - artifact-name: alpine-x64
             runner: ubuntu-22.04
             environment-type: container
             dockerfile: ./docker/alpine.dockerfile
             os-type: linux-musl
+            replace-artifacts: |
+              bin-windows-2022!net
           - artifact-name: alpine-arm64
             runner: ubuntu-22.04-arm
             environment-type: container
             dockerfile: ./docker/alpine.dockerfile
             os-type: linux-musl
+            replace-artifacts: |
+              bin-windows-2022!net
     uses: ./.github/workflows/_build.yml
     with:
       artifact-name: ${{ matrix.artifact-name }}
