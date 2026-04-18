@@ -8,13 +8,6 @@ inputs:
   environment-type:
     description: Either `host` or `container`.
     required: true
-  dotnet-version:
-    description: Multiline list of .NET SDK versions to install for host builds.
-    required: false
-    default: |
-      8.0.420
-      9.0.313
-      10.0.202
   dockerfile:
     description: Path to the Dockerfile used for container execution.
     required: false
@@ -45,9 +38,7 @@ runs:
 
     - name: Setup .NET
       if: ${{ inputs.environment-type == 'host' }}
-      uses: actions/setup-dotnet@c2fa09f4bde5ebb9d1777cf28262a3eb3db3ced7 # tag: v5.2.0
-      with:
-        dotnet-version: ${{ inputs.dotnet-version }}
+      uses: ./.github/actions/setup-dotnet
 
     - name: Set up Docker Buildx
       if: ${{ inputs.environment-type == 'container' }}
