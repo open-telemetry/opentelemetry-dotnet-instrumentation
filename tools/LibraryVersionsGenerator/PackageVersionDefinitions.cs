@@ -73,9 +73,9 @@ internal static class PackageVersionDefinitions
             TestApplicationName = "TestApplication.GraphQL",
             Versions =
             [
-                new GraphQLVersion("7.5.0") { MicrosoftDIVersion = "7.5.0", ServerTransportsAspNetCoreVersion = "7.5.0", ServerUIGraphiQL = "7.5.0" },
-                new GraphQLVersion("8.0.2") { MicrosoftDIVersion = "8.0.2", ServerTransportsAspNetCoreVersion = "8.0.2", ServerUIGraphiQL = "8.0.2" },
-                new GraphQLVersion("*") { MicrosoftDIVersion = "*", ServerTransportsAspNetCoreVersion = "*", ServerUIGraphiQL = "*" },
+                new GraphQLVersion("7.5.0") { MicrosoftDIVersion = "7.5.0", ServerTransportsAspNetCoreVersion = "7.5.0", ServerUIGraphiQLVersion = "7.5.0" },
+                new GraphQLVersion("8.0.2") { MicrosoftDIVersion = "8.0.2", ServerTransportsAspNetCoreVersion = "8.0.2", ServerUIGraphiQLVersion = "8.0.2" },
+                new GraphQLVersion("*") { MicrosoftDIVersion = "*", ServerTransportsAspNetCoreVersion = "*", ServerUIGraphiQLVersion = "*" },
             ]
         },
         new()
