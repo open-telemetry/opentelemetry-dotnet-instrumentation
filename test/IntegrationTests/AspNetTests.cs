@@ -48,8 +48,6 @@ public class AspNetTests(ITestOutputHelper output)
         Integrated
     }
 
-    private ITestOutputHelper Output { get; } = output;
-
     public enum AppDomainWorkaround
     {
 #pragma warning disable SA1602
@@ -59,6 +57,7 @@ public class AspNetTests(ITestOutputHelper output)
 #pragma warning restore SA1602
     }
 
+    private ITestOutputHelper Output { get; } = output;
 
     // Currently when assemblies registered in GAC, AppDomain workaround is not required to load the assemblies in additional AppDomains.
     // But it resulted in app crash with "Loading this assembly would produce a different grant set from other instances" with OTEL 1.13.0
