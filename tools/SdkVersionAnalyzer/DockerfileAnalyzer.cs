@@ -26,7 +26,7 @@ internal static partial class DockerfileAnalyzer
         var dockerfile = Dockerfile.Parse(content);
         var runInstruction = GetDotnetInstallingInstruction(dockerfile);
 
-        if (runInstruction is not null)
+        if (runInstruction?.Command is not null)
         {
             runInstruction.Command = GetModifiedInstallCommand(runInstruction.Command, requestedDotnetSdkVersion);
         }
