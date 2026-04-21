@@ -39,7 +39,7 @@ public static partial class LibraryVersion
                 string.Empty,
 #else
                 "8.15.10",
-                "9.3.3",
+                "9.3.4",
 #endif
             ];
             return theoryData;
@@ -61,7 +61,7 @@ public static partial class LibraryVersion
                 "10.0.0",
 #endif
 #if NET10_0
-                "10.0.5",
+                "10.0.6",
 #endif
 #endif
             ];
@@ -129,6 +129,7 @@ public static partial class LibraryVersion
                 string.Empty,
 #else
                 "3.3.0",
+                "3.3.1",
 #endif
             ];
             return theoryData;
@@ -146,7 +147,7 @@ public static partial class LibraryVersion
                 "5.0.0",
                 "5.3.4",
                 "6.0.0",
-                "6.1.1",
+                "6.1.2",
 #endif
             ];
             return theoryData;
@@ -162,7 +163,7 @@ public static partial class LibraryVersion
                 string.Empty,
 #else
                 "8.3.0",
-                "8.5.8",
+                "8.5.9",
 #endif
             ];
             return theoryData;
@@ -225,7 +226,7 @@ public static partial class LibraryVersion
                 "3.7.0",
 #endif
 #if NET10_0 || NET9_0 || NET8_0 || NET462
-                "3.7.1",
+                "3.8.0",
 #endif
 #endif
             ];
@@ -319,7 +320,7 @@ public static partial class LibraryVersion
                 "23.5.1",
 #endif
 #if NET462
-                "23.26.100",
+                "23.26.200",
 #endif
 #endif
             ];
@@ -336,7 +337,7 @@ public static partial class LibraryVersion
                 string.Empty,
 #else
                 "23.5.1",
-                "23.26.100",
+                "23.26.200",
 #endif
             ];
             return theoryData;
@@ -352,7 +353,7 @@ public static partial class LibraryVersion
                 string.Empty,
 #else
                 "3.6.0",
-                "3.16.1",
+                "3.18.0",
 #endif
             ];
             return theoryData;
@@ -388,7 +389,7 @@ public static partial class LibraryVersion
                 "8.0.0",
                 "9.0.0",
                 "10.0.0",
-                "10.0.5",
+                "10.0.6",
 #endif
             ];
             return theoryData;
@@ -404,7 +405,7 @@ public static partial class LibraryVersion
                 string.Empty,
 #else
                 "2.6.122",
-                "2.12.4",
+                "2.12.14",
 #endif
             ];
             return theoryData;
@@ -441,7 +442,7 @@ public static partial class LibraryVersion
 #else
                 "1.8.2",
                 "1.9.2",
-                "2.13.2",
+                "2.14.0",
 #endif
             ];
             return theoryData;
