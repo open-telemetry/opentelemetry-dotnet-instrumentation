@@ -20,22 +20,34 @@
 // SOFTWARE.
 
 using System;
-using Vendors.YamlDotNet.Serialization;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using Vendors.YamlDotNet.Core;
+using Vendors.YamlDotNet.Serialization.Utilities;
 
-namespace Vendors.YamlDotNet.Helpers
+namespace Vendors.YamlDotNet.Serialization.ValueDeserializers;
+
+internal sealed class MaximumRecursionValueDeserializer : IValueDeserializer
 {
-    internal static class FsharpHelper
+    private readonly IValueDeserializer innerDeserializer;
+    private readonly int maximumRecursion;
+
+    public MaximumRecursionValueDeserializer(IValueDeserializer innerDeserializer, int maximumRecursion)
     {
-        public static IFsharpHelper? Instance { get; set; }
+        this.innerDeserializer = innerDeserializer ?? throw new ArgumentNullException(nameof(innerDeserializer));
+        this.maximumRecursion = maximumRecursion;
+    }
 
-        public static bool IsOptionType(Type t) => Instance?.IsOptionType(t) ?? false;
+    public object? DeserializeValue(IParser parser, Type expectedType, SerializerState state, IValueDeserializer nestedObjectDeserializer)
+    {
+        var counter = state.Get(() => new RecursionLevel(maximumRecursion));
 
-        public static Type? GetOptionUnderlyingType(Type t) => Instance?.GetOptionUnderlyingType(t);
+        counter.Increment(parser.Current.Start, parser.Current.End);
+        var result = innerDeserializer.DeserializeValue(parser, expectedType, state, nestedObjectDeserializer);
+        counter.Decrement();
 
-        public static object? GetValue(IObjectDescriptor objectDescriptor) => Instance?.GetValue(objectDescriptor);
-
-        public static bool IsFsharpListType(Type t) => Instance?.IsFsharpListType(t) ?? false;
-
-        public static object? CreateFsharpListFromArray(Type t, Type itemsType, Array arr) => Instance?.CreateFsharpListFromArray(t, itemsType, arr);
+        return result;
     }
 }
