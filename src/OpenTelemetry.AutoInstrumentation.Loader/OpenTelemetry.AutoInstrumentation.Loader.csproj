@@ -64,16 +64,36 @@
     <Compile Include="..\OpenTelemetry.AutoInstrumentation\AutoInstrumentationEventSource.cs">
       <Link>AutoInstrumentationEventSource.cs</Link>
     </Compile>
-    <Compile Include="..\OpenTelemetry.AutoInstrumentation\Constants.cs" Link="Constants.cs" />
-    <Compile Include="..\OpenTelemetry.AutoInstrumentation\Configurations\ConfigurationKeys.RedirectEnabled.cs" Link="Configurations\ConfigurationKeys.RedirectEnabled.cs" />
-    <Compile Include="..\OpenTelemetry.AutoInstrumentation\Configurations\ConfigurationKeys.TracerHome.cs" Link="Configurations\ConfigurationKeys.TracerHome.cs" />
-    <Compile Include="..\OpenTelemetry.AutoInstrumentation\Util\TrustedPlatformAssembliesHelper.Net.cs" Link="Util\TrustedPlatformAssembliesHelper.Net.cs" Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp'" />
-    <Compile Include="..\OpenTelemetry.AutoInstrumentation\Util\ManagedProfilerLocationHelper.cs" Link="Util\ManagedProfilerLocationHelper.cs" />
-    <Compile Include="..\OpenTelemetry.AutoInstrumentation\Util\ManagedProfilerLocationHelper.NetFramework.cs" Link="Util\ManagedProfilerLocationHelper.NetFramework.cs" DependentUpon="ManagedProfilerLocationHelper.cs" Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'" />
-    <Compile Include="..\OpenTelemetry.AutoInstrumentation\Util\ManagedProfilerLocationHelper.Net.cs" Link="Util\ManagedProfilerLocationHelper.Net.cs" DependentUpon="ManagedProfilerLocationHelper.cs" Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp'" />
-    <Compile Include="..\OpenTelemetry.AutoInstrumentation.StartupHook\StartupHookConstants.cs" Link="StartupHookConstants.cs" Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp'" />
-    <Compile Include="..\OpenTelemetry.AutoInstrumentation\Util\AssemblyUtils.Net.cs" Link="Util\AssemblyUtils.Net.cs" Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp'" />
-    <Compile Include="..\OpenTelemetry.AutoInstrumentation\Util\DeploymentDetector.NetFramework.cs" Link="Util\DeploymentDetector.NetFramework.cs" Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'" />
-    <Compile Include="..\OpenTelemetry.AutoInstrumentation\Util\DeploymentDetector.Net.cs" Link="Util\DeploymentDetector.Net.cs" Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp'" />
+    <Compile Include="..\OpenTelemetry.AutoInstrumentation\Constants.cs"
+             Link="Constants.cs" />
+    <Compile Include="..\OpenTelemetry.AutoInstrumentation\Configurations\ConfigurationKeys.RedirectEnabled.cs"
+             Link="Configurations\ConfigurationKeys.RedirectEnabled.cs"/>
+    <Compile Include="..\OpenTelemetry.AutoInstrumentation\Configurations\ConfigurationKeys.TracerHome.cs"
+             Link="Configurations\ConfigurationKeys.TracerHome.cs" />
+    <Compile Include="..\OpenTelemetry.AutoInstrumentation\Util\TrustedPlatformAssembliesHelper.Net.cs"
+             Link="Util\TrustedPlatformAssembliesHelper.Net.cs"
+             Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp'" />
+    <Compile Include="..\OpenTelemetry.AutoInstrumentation\Util\ManagedProfilerLocationHelper.cs"
+             Link="Util\ManagedProfilerLocationHelper.cs" />
+    <Compile Include="..\OpenTelemetry.AutoInstrumentation\Util\ManagedProfilerLocationHelper.NetFramework.cs"
+             Link="Util\ManagedProfilerLocationHelper.NetFramework.cs"
+             DependentUpon="ManagedProfilerLocationHelper.cs"
+             Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'" />
+    <Compile Include="..\OpenTelemetry.AutoInstrumentation\Util\ManagedProfilerLocationHelper.Net.cs"
+             Link="Util\ManagedProfilerLocationHelper.Net.cs"
+             DependentUpon="ManagedProfilerLocationHelper.cs"
+             Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp'" />
+    <Compile Include="..\OpenTelemetry.AutoInstrumentation.StartupHook\StartupHookConstants.cs"
+             Link="StartupHookConstants.cs"
+             Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp'" />
+    <Compile Include="..\OpenTelemetry.AutoInstrumentation\Util\AssemblyUtils.Net.cs"
+             Link="Util\AssemblyUtils.Net.cs"
+             Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp'" />
+    <Compile Include="..\OpenTelemetry.AutoInstrumentation\Util\DeploymentDetector.NetFramework.cs"
+             Link="Util\DeploymentDetector.NetFramework.cs"
+             Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'" />
+    <Compile Include="..\OpenTelemetry.AutoInstrumentation\Util\DeploymentDetector.Net.cs"
+             Link="Util\DeploymentDetector.Net.cs"
+             Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp'" />
   </ItemGroup>
 </Project>
