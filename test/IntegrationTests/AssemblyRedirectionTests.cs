@@ -1,10 +1,6 @@
 // Copyright The OpenTelemetry Authors
 // SPDX-License-Identifier: Apache-2.0
 
-#if NETFRAMEWORK
-using System.Diagnostics;
-using System.Text;
-#endif
 using IntegrationTests.Helpers;
 using Xunit.Abstractions;
 
@@ -116,45 +112,8 @@ public class AssemblyRedirectionTests(ITestOutputHelper output) : TestHelper("As
         IReadOnlyDictionary<string, string> environmentVariables,
         MockSpansCollector collector)
     {
-        await RunContainerizedTestApplicationAsync(libraryVersion, environmentVariables).ConfigureAwait(false);
+        await IISContainerTestHelper.RunContainerAsync(GetNetFxDockerImageName(libraryVersion), environmentVariables, Output).ConfigureAwait(false);
         collector.AssertExpectations();
-    }
-
-    private async Task RunContainerizedTestApplicationAsync(string libraryVersion, IReadOnlyDictionary<string, string> environmentVariables)
-    {
-        var networkName = await DockerNetworkHelper.SetupIntegrationTestsNetworkAsync().ConfigureAwait(false);
-        var imageName = GetNetFxDockerImageName(libraryVersion);
-        var containerName = $"{imageName}-{Guid.NewGuid():N}";
-
-        var arguments = new StringBuilder($"run --rm --name {containerName} --network {networkName}");
-        foreach (var environmentVariable in environmentVariables)
-        {
-            arguments.Append($" -e {environmentVariable.Key}={environmentVariable.Value}");
-        }
-
-        arguments.Append($" {imageName}");
-
-        using var process = Process.Start(new ProcessStartInfo("docker", arguments.ToString())
-        {
-            UseShellExecute = false,
-            CreateNoWindow = true,
-            RedirectStandardOutput = true,
-            RedirectStandardError = true,
-            RedirectStandardInput = false
-        });
-        Assert.NotNull(process);
-        using var helper = new ProcessHelper(process);
-
-        var processTimeout = !process!.WaitForExit((int)TestTimeout.ProcessExit.TotalMilliseconds);
-        if (processTimeout)
-        {
-            process.Kill();
-        }
-
-        Output.WriteResult(helper);
-
-        Assert.False(processTimeout, "Containerized test application timed out");
-        Assert.Equal(0, process.ExitCode);
     }
 
     private static string GetNetFxDockerImageName(string libraryVersion)

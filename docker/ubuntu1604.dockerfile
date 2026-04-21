@@ -20,7 +20,7 @@ RUN apt-add-repository "deb http://apt.llvm.org/xenial/ llvm-toolchain-xenial-5.
     update-alternatives --config clang++
 
 # Install newer g++
-RUN for i in 1 2 3; do add-apt-repository ppa:ubuntu-toolchain-r/test -y && break || sleep 10; done && \
+RUN add-apt-repository ppa:ubuntu-toolchain-r/test -y && \
     apt-get update && \
     apt-get install -y g++-9 && \
     update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-9 60 --slave /usr/bin/g++ g++ /usr/bin/g++-9
