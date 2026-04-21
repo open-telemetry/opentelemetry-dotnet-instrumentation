@@ -16,14 +16,14 @@ runs:
     - name: Validate cleanup inputs
       shell: pwsh
       run: |
-        $environmentType = '${{ inputs.environment-type }}'.Trim().ToLowerInvariant()
-        $containerName = '${{ inputs.container-name }}'.Trim()
+        $environmentType = '${{ inputs.environment-type }}'
+        $containerName = '${{ inputs.container-name }}'
 
         if ($environmentType -notin @('host', 'container')) {
           throw "environment-type must be either 'host' or 'container'."
         }
 
-        if ($environmentType -eq 'container' -and [string]::IsNullOrWhiteSpace($containerName)) {
+        if ($environmentType -eq 'container' -and [string]::IsNullOrEmpty($containerName)) {
           throw 'container-name input is required when environment-type is container.'
         }
 
