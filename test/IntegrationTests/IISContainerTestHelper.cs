@@ -121,7 +121,7 @@ internal static class IISContainerTestHelper
     private static string ReadStream(MemoryStream stream)
     {
         stream.Position = 0;
-        using var reader = new StreamReader(stream, Encoding.UTF8, detectEncodingFromByteOrderMarks: true, leaveOpen: true);
+        using var reader = new StreamReader(stream, Encoding.UTF8, detectEncodingFromByteOrderMarks: true, bufferSize: 1024, leaveOpen: true);
         return reader.ReadToEnd();
     }
 }

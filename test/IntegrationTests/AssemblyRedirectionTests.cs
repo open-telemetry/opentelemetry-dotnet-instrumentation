@@ -77,6 +77,11 @@ public class AssemblyRedirectionTests(ITestOutputHelper output) : TestHelper("As
 #endif
 
 #if NETFRAMEWORK
+    private static string GetNetFxDockerImageName(string libraryVersion)
+    {
+        return $"testapplication-assemblyredirection-netframework-nogac-{libraryVersion.Replace('.', '-')}";
+    }
+
     [WindowsAdministratorTheory]
     [Trait("Category", "EndToEnd")]
     [Trait("Containers", "Windows")]
@@ -114,11 +119,6 @@ public class AssemblyRedirectionTests(ITestOutputHelper output) : TestHelper("As
     {
         await IISContainerTestHelper.RunContainerAsync(GetNetFxDockerImageName(libraryVersion), environmentVariables, Output).ConfigureAwait(false);
         collector.AssertExpectations();
-    }
-
-    private static string GetNetFxDockerImageName(string libraryVersion)
-    {
-        return $"testapplication-assemblyredirection-netframework-nogac-{libraryVersion.Replace('.', '-')}";
     }
 #endif
 }
