@@ -1,4 +1,4 @@
-﻿// This file is part of YamlDotNet - A .NET library for YAML.
+// This file is part of YamlDotNet - A .NET library for YAML.
 // Copyright (c) Antoine Aubry and contributors
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy of
@@ -26,41 +26,38 @@ using Vendors.YamlDotNet.Core.Events;
 namespace Vendors.YamlDotNet.Serialization.Converters
 {
     /// <summary>
-    /// Converter for System.Guid.
+    /// Base class for YAML type converters that handle a single scalar type.
+    /// Provides common functionality for type acceptance, scalar consumption, and emission.
     /// </summary>
-    internal class GuidConverter : IYamlTypeConverter
+    /// <typeparam name="T">The type this converter handles.</typeparam>
+    internal abstract class ScalarConverterBase<T> : IYamlTypeConverter
     {
-        private readonly bool jsonCompatible;
-
-        public GuidConverter(bool jsonCompatible)
-        {
-            this.jsonCompatible = jsonCompatible;
-        }
-
+        /// <inheritdoc/>
         public bool Accepts(Type type)
         {
-            return type == typeof(Guid) || type == typeof(Guid?);
+            return type == typeof(T) || Nullable.GetUnderlyingType(type) == typeof(T);
         }
 
-        public object ReadYaml(IParser parser, Type type, ObjectDeserializer rootDeserializer)
+        /// <inheritdoc/>
+        public abstract object ReadYaml(IParser parser, Type type, ObjectDeserializer rootDeserializer);
+
+        /// <inheritdoc/>
+        public abstract void WriteYaml(IEmitter emitter, object? value, Type type, ObjectSerializer serializer);
+
+        /// <summary>
+        /// Consumes and returns the scalar value from the parser.
+        /// </summary>
+        protected static string ConsumeScalarValue(IParser parser)
         {
-            var value = parser.Consume<Scalar>().Value;
-            if (string.IsNullOrEmpty(value))
-            {
-                return null!;
-            }
-            return new Guid(value);
+            return parser.Consume<Scalar>().Value;
         }
 
-        public void WriteYaml(IEmitter emitter, object? value, Type type, ObjectSerializer serializer)
+        /// <summary>
+        /// Emits a scalar value with the specified style.
+        /// </summary>
+        protected static void EmitScalar(IEmitter emitter, string formatted, ScalarStyle style)
         {
-            if (value == null)
-            {
-                emitter.Emit(new Scalar(AnchorName.Empty, TagName.Empty, "", ScalarStyle.Plain, true, false));
-                return;
-            }
-            var guid = (Guid)value;
-            emitter.Emit(new Scalar(AnchorName.Empty, TagName.Empty, guid.ToString("D"), jsonCompatible ? ScalarStyle.DoubleQuoted : ScalarStyle.Any, true, false));
+            emitter.Emit(new Scalar(AnchorName.Empty, TagName.Empty, formatted, style, true, false));
         }
     }
 }
