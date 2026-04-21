@@ -9,7 +9,7 @@ using Xunit.Abstractions;
 
 namespace IntegrationTests;
 
-[Collection(RedisCollection.Name)]
+[Collection(RedisCollectionFixture.Name)]
 public class CustomSdkTests : TestHelper
 {
     private readonly RedisFixture _redis;

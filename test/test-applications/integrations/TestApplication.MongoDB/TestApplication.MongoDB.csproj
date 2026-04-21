@@ -1,16 +1,12 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFrameworks>net10.0;net9.0;net8.0</TargetFrameworks>
-    <TargetFrameworks Condition="'$(OS)' == 'Windows_NT' and ('$(LibraryVersion)' == '' or '$(LibraryVersion)' &gt;= '3.0.0')">$(TargetFrameworks);net472</TargetFrameworks>
-    <TargetFrameworks Condition="'$(OS)' == 'Windows_NT' and '$(LibraryVersion)' != '' and '$(LibraryVersion)' &lt; '3.0.0'">$(TargetFrameworks);net462</TargetFrameworks>
-  </PropertyGroup>
-
-  <PropertyGroup>
-    <!-- Required to build multiple projects with the same Configuration|Platform -->
-    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
-    <GenerateTargetFrameworkAttribute>false</GenerateTargetFrameworkAttribute>
+    <TargetFrameworks Condition="'$(OS)' == 'Windows_NT' and ('$(LibraryVersion)' == '' or $([MSBuild]::VersionGreaterThanOrEquals('$(LibraryVersion)', '3.0.0')))">$(TargetFrameworks);net472</TargetFrameworks>
+    <TargetFrameworks Condition="'$(OS)' == 'Windows_NT' and '$(LibraryVersion)' != '' and $([MSBuild]::VersionLessThan('$(LibraryVersion)', '3.0.0'))">$(TargetFrameworks);net462</TargetFrameworks>
+    <DefineConstants Condition="'$(LibraryVersion)'=='' or $([MSBuild]::VersionGreaterThanOrEquals('$(LibraryVersion)', '3.7.0'))">$(DefineConstants);MONGODB_3_7_0_OR_GREATER</DefineConstants>
+    <DefineConstants Condition="'$(LibraryVersion)' == '' or $([MSBuild]::VersionGreaterThanOrEquals('$(LibraryVersion)', '3.0.0'))">$(DefineConstants);MONGODB_3_0_0_OR_GREATER</DefineConstants>
   </PropertyGroup>
 
   <ItemGroup>
@@ -18,7 +14,6 @@
     <!-- Workaround! Microsoft.Extensions.Logging.Abstractions v8.0.0 is minimal version supported by auto instrumentation.
     MongoDB.Driver 2.18+ references older version. It prevents to load required version from Additional Dependencies store-->
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" VersionOverride="8.0.0" />
-    <PackageReference Include="System.Diagnostics.DiagnosticSource" Condition=" '$(TargetFramework)' == 'net8.0' " />
   </ItemGroup>
 
 </Project>

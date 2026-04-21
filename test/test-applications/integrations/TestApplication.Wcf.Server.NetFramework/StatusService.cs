@@ -11,7 +11,9 @@ namespace TestApplication.Wcf.Server.NetFramework;
     InstanceContextMode = InstanceContextMode.Single,
     UseSynchronizationContext = false,
     Name = "StatusService")]
-public class StatusService : IStatusServiceContract
+#pragma warning disable CA1812 // Avoid uninstantiated internal classes. This class is instantiated by WCF.
+internal sealed class StatusService : IStatusServiceContract
+#pragma warning restore CA1812 // Avoid uninstantiated internal classes. This class is instantiated by WCF.
 {
     public Task<StatusResponse> PingAsync(StatusRequest request)
     {

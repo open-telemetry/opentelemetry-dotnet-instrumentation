@@ -9,7 +9,9 @@ namespace TestApplication.GraphQL;
 /// CSRF checks for GET requests. This middleware adds the header to ensure
 /// that GET requests are not blocked due to missing CSRF tokens.
 /// </summary>
-public class CsrfMiddleware
+#pragma warning disable CA1812 // Avoid uninstantiated internal classes. This class is instantiated by app builder.
+internal sealed class CsrfMiddleware
+#pragma warning restore CA1812 // Avoid uninstantiated internal classes. This class is instantiated by app builder.
 {
     private readonly RequestDelegate _next;
 
@@ -20,8 +22,10 @@ public class CsrfMiddleware
 
     public async Task InvokeAsync(HttpContext context)
     {
+        ArgumentNullException.ThrowIfNull(context);
+
         context.Request.Headers["GraphQL-Require-Preflight"] = "1";
 
-        await _next(context);
+        await _next(context).ConfigureAwait(false);
     }
 }

@@ -1,4 +1,4 @@
-file_format: "1.0-rc.1"
+file_format: "1.0"
 
 tracer_provider:
   processors:
@@ -650,3 +650,311 @@ instrumentation/development:
               parameter_types:
           span:
              name: Span-GenericTestMethodAsync
+        - target:
+            assembly:
+              name: TestApplication.NoCode
+            type: TestApplication.NoCode.GenericNoCodeTestingClass`2
+            method: GenericTestMethod
+            signature:
+              return_type: '!!0'
+              parameter_types:
+                - '!!0'
+                - '!!1'
+                - '!0'
+                - '!1'
+          span:
+             name: Span-GenericTestMethodWithParameters
+        # Dynamic attribute tests - extracting values from method parameters
+        - target:
+            assembly:
+              name: TestApplication.NoCode
+            type: TestApplication.NoCode.DynamicAttributeTestingClass
+            method: ProcessOrder
+            signature:
+              return_type: System.Void
+              parameter_types:
+                - System.String
+                - System.Int32
+          span:
+             name: Span-ProcessOrder
+             attributes:
+               - name: order.id
+                 value_source: arguments[0]
+                 type: string
+               - name: order.quantity
+                 value_source: arguments[1]
+                 type: int
+        - target:
+            assembly:
+              name: TestApplication.NoCode
+            type: TestApplication.NoCode.DynamicAttributeTestingClass
+            method: ProcessCustomer
+            signature:
+              return_type: System.Void
+              parameter_types:
+                - TestApplication.NoCode.Customer
+          span:
+             name: Span-ProcessCustomer
+             attributes:
+               - name: customer.id
+                 value_source: arguments[0].Id
+                 type: string
+               - name: customer.name
+                 value_source: arguments[0].Name
+                 type: string
+               - name: customer.email
+                 value_source: arguments[0].Email
+                 type: string
+               - name: customer.city
+                 value_source: arguments[0].Address.City
+                 type: string
+               - name: customer.country
+                 value_source: arguments[0].Address.Country
+                 type: string
+        - target:
+            assembly:
+              name: TestApplication.NoCode
+            type: TestApplication.NoCode.DynamicAttributeTestingClass
+            method: AuditAction
+            signature:
+              return_type: System.Void
+              parameter_types:
+                - System.String
+          span:
+             name: Span-AuditAction
+             attributes:
+               - name: action
+                 value_source: arguments[0]
+                 type: string
+               - name: service.name
+                 value_source: instance.ServiceName
+                 type: string
+               - name: merchant.id
+                 value_source: instance.MerchantId
+                 type: int
+        - target:
+            assembly:
+              name: TestApplication.NoCode
+            type: TestApplication.NoCode.DynamicAttributeTestingClass
+            method: CreateResource
+            signature:
+              return_type: System.Void
+              parameter_types:
+                - System.String
+                - System.String
+          span:
+             name: Span-CreateResource
+             attributes:
+               - name: resource.full_id
+                 value_source: "arguments[0] + \"/\" + arguments[1]"
+                 type: string
+        - target:
+            assembly:
+              name: TestApplication.NoCode
+            type: TestApplication.NoCode.DynamicAttributeTestingClass
+            method: ProcessWithDefault
+            signature:
+              return_type: System.Void
+              parameter_types:
+                - System.String
+          span:
+             name: Span-ProcessWithDefault
+             attributes:
+               - name: value
+                 value_source: "arguments[0] != null ? arguments[0] : \"default_value\""
+                 type: string
+        - target:
+            assembly:
+              name: TestApplication.NoCode
+            type: TestApplication.NoCode.DynamicAttributeTestingClass
+            method: OperationWithMetadata
+            signature:
+              return_type: System.Void
+              parameter_types:
+          span:
+             name: Span-OperationWithMetadata
+             attributes:
+               - name: method.name
+                 value_source: method
+                 type: string
+               - name: type.name
+                 value_source: type
+                 type: string
+               - name: operation.full_name
+                 value_source: "type + \".\" + method"
+                 type: string
+        - target:
+            assembly:
+              name: TestApplication.NoCode
+            type: TestApplication.NoCode.DynamicAttributeTestingClass
+            method: ProcessOrderAsync
+            signature:
+              return_type: System.Threading.Tasks.Task`1[TestApplication.NoCode.OrderResult]
+              parameter_types:
+                - TestApplication.NoCode.Order
+          span:
+             name: Span-ProcessOrderAsync
+             attributes:
+               - name: order.id
+                 value_source: arguments[0].Id
+                 type: string
+               - name: order.amount
+                 value_source: arguments[0].Amount
+                 type: double
+               - name: order.currency
+                 value_source: arguments[0].Currency
+                 type: string
+        - target:
+            assembly:
+              name: TestApplication.NoCode
+            type: TestApplication.NoCode.DynamicAttributeTestingClass
+            method: CompleteOrder
+            signature:
+              return_type: TestApplication.NoCode.OrderResult
+              parameter_types:
+                - System.String
+          span:
+             name: Span-CompleteOrder
+             attributes:
+               - name: order.id
+                 value_source: arguments[0]
+                 type: string
+             status:
+               rules:
+                 - condition: return.Success == true
+                   code: ok
+                 - condition: return.Success == false
+                   code: error
+                   description: Order processing failed
+        - target:
+            assembly:
+              name: TestApplication.NoCode
+            type: TestApplication.NoCode.DynamicAttributeTestingClass
+            method: ProcessTransaction
+            signature:
+              return_type: System.Void
+              parameter_types:
+                - System.String
+                - System.String
+          span:
+             name: DefaultTransaction
+             name_source: "\"Transaction-\" + arguments[1] + \"-\" + arguments[0]"
+             attributes:
+               - name: transaction.id
+                 value_source: arguments[0]
+                 type: string
+               - name: transaction.type
+                 value_source: arguments[1]
+                 type: string
+        - target:
+            assembly:
+              name: TestApplication.NoCode
+            type: TestApplication.NoCode.DynamicAttributeTestingClass
+            method: ExecuteQuery
+            signature:
+              return_type: System.Void
+              parameter_types:
+                - System.String
+                - System.String
+          span:
+             name: DefaultQuery
+             name_source: "\"Query.\" + arguments[0] + \".\" + arguments[1]"
+             attributes:
+               - name: db.name
+                 value_source: arguments[0]
+                 type: string
+               - name: db.table
+                 value_source: arguments[1]
+                 type: string
+        - target:
+            assembly:
+              name: TestApplication.NoCode
+            type: TestApplication.NoCode.DynamicAttributeTestingClass
+            method: SyncCompletedTask
+            signature:
+              return_type: System.Threading.Tasks.Task
+              parameter_types:
+                - System.String
+          span:
+             name: Span-SyncCompletedTask
+             attributes:
+               - name: task.id
+                 value_source: arguments[0]
+                 type: string
+        - target:
+            assembly:
+              name: TestApplication.NoCode
+            type: TestApplication.NoCode.DynamicAttributeTestingClass
+            method: SyncCompletedTaskWithResult
+            signature:
+              return_type: System.Threading.Tasks.Task`1[TestApplication.NoCode.OrderResult]
+              parameter_types:
+                - System.String
+          span:
+             name: Span-SyncCompletedTaskWithResult
+             attributes:
+               - name: order.id
+                 value_source: arguments[0]
+                 type: string
+        - target:
+            assembly:
+              name: TestApplication.NoCode
+            type: TestApplication.NoCode.DynamicAttributeTestingClass
+            method: SyncPendingTask
+            signature:
+              return_type: System.Threading.Tasks.Task
+              parameter_types:
+                - System.Int32
+          span:
+             name: Span-SyncPendingTask
+             attributes:
+               - name: delay.ms
+                 value_source: arguments[0]
+                 type: int
+        - target:
+            assembly:
+              name: TestApplication.NoCode
+            type: TestApplication.NoCode.DynamicAttributeTestingClass
+            method: SyncPendingTaskWithResult
+            signature:
+              return_type: System.Threading.Tasks.Task`1[TestApplication.NoCode.OrderResult]
+              parameter_types:
+                - System.String
+                - System.Int32
+          span:
+             name: Span-SyncPendingTaskWithResult
+             attributes:
+               - name: order.id
+                 value_source: arguments[0]
+                 type: string
+        - target:
+            assembly:
+              name: TestApplication.NoCode
+            type: TestApplication.NoCode.DynamicAttributeTestingClass
+            method: ProcessBatchData
+            signature:
+              return_type: System.Void
+              parameter_types:
+                - System.String[]
+                - System.Int32[]
+                - System.Int64[]
+                - System.Double[]
+                - System.Boolean[]
+          span:
+             name: Span-ProcessBatchData
+             attributes:
+               - name: batch.tags
+                 value_source: arguments[0]
+                 type: string_array
+               - name: batch.ids
+                 value_source: arguments[1]
+                 type: int_array
+               - name: batch.codes
+                 value_source: arguments[2]
+                 type: int_array
+               - name: batch.prices
+                 value_source: arguments[3]
+                 type: double_array
+               - name: batch.flags
+                 value_source: arguments[4]
+                 type: bool_array

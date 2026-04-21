@@ -1,6 +1,7 @@
 // Copyright The OpenTelemetry Authors
 // SPDX-License-Identifier: Apache-2.0
 
+using System.Globalization;
 using System.Text.RegularExpressions;
 using Google.Protobuf;
 using IntegrationTests.Helpers;
@@ -37,7 +38,7 @@ public class Log4NetBridgeTests : TestHelper
         // Logged with exception
         collector.Expect(
             logRecord =>
-            VerifyBody(logRecord, "Exception occured") &&
+            VerifyBody(logRecord, "Exception occurred") &&
             logRecord is { SeverityText: "ERROR", SeverityNumber: SeverityNumber.Error } &&
             VerifyExceptionAttributes(logRecord) &&
             logRecord.Attributes.Count == 4,
@@ -69,7 +70,7 @@ public class Log4NetBridgeTests : TestHelper
         // Logged in scope of an activity
         collector.Expect(
             logRecord =>
-            VerifyBody(logRecord, "{0}, {1} at {2:t}!") &&
+            VerifyBody(logRecord, "{hello}, {world} at {time:t}!") &&
             VerifyTraceContext(logRecord) &&
             logRecord is { SeverityText: "Information", SeverityNumber: SeverityNumber.Info } &&
             // 0 : "Hello"
@@ -81,7 +82,7 @@ public class Log4NetBridgeTests : TestHelper
         // Logged with exception
         collector.Expect(
             logRecord =>
-            VerifyBody(logRecord, "Exception occured") &&
+            VerifyBody(logRecord, "Exception occurred") &&
             // OtlpLogExporter adds exception related attributes (ConsoleExporter doesn't show them)
             logRecord is { SeverityText: "Error", SeverityNumber: SeverityNumber.Error } &&
             VerifyExceptionAttributes(logRecord) &&
@@ -124,7 +125,7 @@ public class Log4NetBridgeTests : TestHelper
         AssertStandardOutputExpectations(standardOutput);
 
         // wait for fixed amount of time for logs to be collected before asserting
-        await Task.Delay(TimeSpan.FromSeconds(5));
+        await Task.Delay(TimeSpan.FromSeconds(5)).ConfigureAwait(true);
 
         collector.AssertCollected();
     }
@@ -148,7 +149,7 @@ public class Log4NetBridgeTests : TestHelper
         var regex = new Regex(@"INFO  TestApplication\.Log4NetBridge\.Program - Hello, world at \d{2}\:\d{2}\! span_id=[a-f0-9]{16} trace_id=[a-f0-9]{32} trace_flags=01");
         var output = standardOutput;
         Assert.Matches(regex, output);
-        Assert.Contains("ERROR TestApplication.Log4NetBridge.Program - Exception occured span_id=(null) trace_id=(null) trace_flags=(null)", output);
+        Assert.Contains("ERROR TestApplication.Log4NetBridge.Program - Exception occurred span_id=(null) trace_id=(null) trace_flags=(null)", output, StringComparison.Ordinal);
     }
 
     private static bool VerifyAttributes(LogRecord logRecord)
@@ -171,13 +172,13 @@ public class Log4NetBridgeTests : TestHelper
 
     private static void AssertStandardOutputExpectations(string standardOutput)
     {
-        Assert.Contains("INFO  TestApplication.Log4NetBridge.Program - Hello, world at", standardOutput);
-        Assert.Contains("ERROR TestApplication.Log4NetBridge.Program - Exception occured", standardOutput);
+        Assert.Contains("INFO  TestApplication.Log4NetBridge.Program - Hello, world at", standardOutput, StringComparison.Ordinal);
+        Assert.Contains("ERROR TestApplication.Log4NetBridge.Program - Exception occurred", standardOutput, StringComparison.Ordinal);
     }
 
     private static bool VerifyBody(LogRecord logRecord, string expectedBody)
     {
-        return Convert.ToString(logRecord.Body) == $"{{ \"stringValue\": \"{expectedBody}\" }}";
+        return Convert.ToString(logRecord.Body, CultureInfo.InvariantCulture) == $"{{ \"stringValue\": \"{expectedBody}\" }}";
     }
 
     private static bool VerifyExceptionAttributes(LogRecord logRecord)

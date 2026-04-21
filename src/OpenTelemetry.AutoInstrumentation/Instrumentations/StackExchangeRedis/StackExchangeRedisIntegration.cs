@@ -1,8 +1,6 @@
 // Copyright The OpenTelemetry Authors
 // SPDX-License-Identifier: Apache-2.0
 
-#if NET
-
 using OpenTelemetry.AutoInstrumentation.CallTarget;
 using OpenTelemetry.AutoInstrumentation.Configurations;
 
@@ -42,4 +40,3 @@ public static class StackExchangeRedisIntegration
         return new CallTargetReturn<TReturn>(returnValue);
     }
 }
-#endif

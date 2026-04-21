@@ -17,12 +17,12 @@
     <Compile Remove="$(GeneratedFolder)/*/**/*.cs" />
   </ItemGroup>
 
-  <!-- Separate dependencies are to be shipped in the distribution but not on the NuGet package -->
+  <!-- Separate dependencies are to be shipped in the distribution but not in the NuGet package -->
   <ItemGroup Condition="$(_IsPacking) != true">
-    <!-- Dependencies below are shipped on the distribution folder, but not included in the NuGet package. -->
+    <!-- Dependencies below are shipped in the distribution folder, but not included in the NuGet package. -->
     <!-- If necessary these packages are flagged by custom build tasks and manually added to the targeted  -->
     <!-- projects that are using the NuGet package. -->
-    <PackageReference Include="OpenTelemetry.Instrumentation.StackExchangeRedis" Condition=" '$(TargetFramework)' == 'net8.0' " />
+    <PackageReference Include="OpenTelemetry.Instrumentation.StackExchangeRedis" />
   </ItemGroup>
 
   <ItemGroup>

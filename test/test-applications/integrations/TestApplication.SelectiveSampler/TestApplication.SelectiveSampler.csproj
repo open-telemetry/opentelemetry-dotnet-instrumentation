@@ -1,15 +1,11 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <ItemGroup>
     <PackageReference Include="OpenTelemetry" />
-    <PackageReference Include="System.Diagnostics.DiagnosticSource" />
     <PackageReference Include="System.Text.Json" Condition="'$(TargetFramework)' == 'net462'" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="..\TestApplication.ContinuousProfiler\Exporter\AllocationSample.cs">
       <Link>AllocationSample.cs</Link>
-    </Compile>
-    <Compile Include="..\TestApplication.ContinuousProfiler\Exporter\ResourcesProvider.cs">
-      <Link>ResourcesProvider.cs</Link>
     </Compile>
     <Compile Include="..\TestApplication.ContinuousProfiler\Exporter\SampleNativeFormatParser.cs">
       <Link>SampleNativeFormatParser.cs</Link>

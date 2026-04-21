@@ -1,7 +1,6 @@
 // Copyright The OpenTelemetry Authors
 // SPDX-License-Identifier: Apache-2.0
 
-using System.Diagnostics;
 using Google.Protobuf;
 using OpenTelemetry.Proto.Common.V1;
 using OpenTelemetry.Proto.Profiles.V1Development;
@@ -9,36 +8,45 @@ using ValueType = OpenTelemetry.Proto.Profiles.V1Development.ValueType;
 
 namespace TestApplication.ContinuousProfiler;
 
-internal class ExtendedPprofBuilder
+internal sealed class ExtendedPprofBuilder
 {
     private readonly LocationCache _locationCache;
     private readonly LinkCache _linkCache;
     private readonly AttributeCache _attributeCache;
+    private readonly StringCache _stringCache;
 
     public ExtendedPprofBuilder(string sampleType, string sampleUnit, string? periodType, string? periodUnit, long? period, long timestampNanoseconds)
     {
-        var profileByteId = new byte[16];
-        ActivityTraceId.CreateRandom().CopyTo(profileByteId);
+        Dictionary = new ProfilesDictionary();
+
+        // All dictionary tables must have a zero-value entry at index 0
+        Dictionary.MappingTable.Add(new Mapping());
+        Dictionary.LocationTable.Add(new Location());
+        Dictionary.FunctionTable.Add(new Function());
+        Dictionary.LinkTable.Add(new Link());
+        Dictionary.StringTable.Add(string.Empty);
+        Dictionary.AttributeTable.Add(new KeyValueAndUnit());
+        Dictionary.StackTable.Add(new Stack());
+
         Profile = new Profile
         {
-            ProfileId = ByteString.CopyFrom(profileByteId),
-            TimeNanos = timestampNanoseconds,
+            TimeUnixNano = (ulong)timestampNanoseconds,
         };
 
-        var stringCache = new StringCache(Profile);
+        _stringCache = new StringCache(Dictionary);
 
-        Profile.SampleType.Add(new ValueType
+        Profile.SampleType = new ValueType
         {
-            TypeStrindex = stringCache.GetOrAdd(sampleType),
-            UnitStrindex = stringCache.GetOrAdd(sampleUnit)
-        });
+            TypeStrindex = _stringCache.GetOrAdd(sampleType),
+            UnitStrindex = _stringCache.GetOrAdd(sampleUnit)
+        };
 
         if (periodType != null && periodUnit != null)
         {
             Profile.PeriodType = new ValueType
             {
-                TypeStrindex = stringCache.GetOrAdd(periodType),
-                UnitStrindex = stringCache.GetOrAdd(periodUnit)
+                TypeStrindex = _stringCache.GetOrAdd(periodType),
+                UnitStrindex = _stringCache.GetOrAdd(periodUnit)
             };
         }
 
@@ -47,17 +55,30 @@ internal class ExtendedPprofBuilder
             Profile.Period = period.Value;
         }
 
-        var functionCache = new FunctionCache(Profile, stringCache);
-        _linkCache = new LinkCache(Profile);
-        _attributeCache = new AttributeCache(Profile);
+        var functionCache = new FunctionCache(Dictionary, _stringCache);
+        _linkCache = new LinkCache(Dictionary);
+        _attributeCache = new AttributeCache(Dictionary, _stringCache);
         var profileFrameTypeAttributeId = _attributeCache.GetOrAdd("profile.frame.type", value => value.StringValue = "dotnet");
 
-        _locationCache = new LocationCache(Profile, functionCache, profileFrameTypeAttributeId);
+        _locationCache = new LocationCache(Dictionary, functionCache, profileFrameTypeAttributeId);
     }
 
     public Profile Profile { get; }
 
-    public int AddLocationId(string function) => _locationCache.Add(function);
+    public ProfilesDictionary Dictionary { get; }
+
+    public int AddStack(IList<string> frames)
+    {
+        var stack = new Stack();
+
+        for (var i = 0; i < frames.Count; i++)
+        {
+            stack.LocationIndices.Add(_locationCache.GetOrAdd(frames[i]));
+        }
+
+        Dictionary.StackTable.Add(stack);
+        return Dictionary.StackTable.Count - 1;
+    }
 
     public void AddLink(SampleBuilder sampleBuilder, long spanId, long traceIdHigh, long traceIdLow)
     {
@@ -82,16 +103,18 @@ internal class ExtendedPprofBuilder
         sampleBuilder.AddAttribute(attributeId);
     }
 
-    private class StringCache
+    private sealed class StringCache
     {
-        private readonly Profile _profile;
-        private readonly Dictionary<string, int> _table = new();
+        private readonly ProfilesDictionary _dictionary;
+        private readonly Dictionary<string, int> _table = [];
         private int _index;
 
-        public StringCache(Profile profile)
+        public StringCache(ProfilesDictionary dictionary)
         {
-            _profile = profile;
-            GetOrAdd(string.Empty); // 0 is reserved for the empty string
+            _dictionary = dictionary;
+            // Index 0 is already the empty string added during dictionary initialization
+            _table[string.Empty] = 0;
+            _index = 1;
         }
 
         public int GetOrAdd(string str)
@@ -101,23 +124,25 @@ internal class ExtendedPprofBuilder
                 return value;
             }
 
-            _profile.StringTable.Add(str);
+            _dictionary.StringTable.Add(str);
             _table[str] = _index;
             return _index++;
         }
     }
 
-    private class FunctionCache
+    private sealed class FunctionCache
     {
-        private readonly Profile _profile;
+        private readonly ProfilesDictionary _dictionary;
         private readonly StringCache _stringCache;
-        private readonly Dictionary<string, int> _table = new();
+        private readonly Dictionary<string, int> _table = [];
         private int _index;
 
-        public FunctionCache(Profile profile, StringCache stringCache)
+        public FunctionCache(ProfilesDictionary dictionary, StringCache stringCache)
         {
-            _profile = profile;
+            _dictionary = dictionary;
             _stringCache = stringCache;
+            // Index 0 is the zero-value entry added during dictionary initialization
+            _index = 1;
         }
 
         public int GetOrAdd(string functionName)
@@ -127,57 +152,63 @@ internal class ExtendedPprofBuilder
                 return value;
             }
 
-            // TODO There is a plan to make SystemName, FileName and StartLine number optional, as all of them are not always available.
-            // TODO keeping a note here to double-check before going to production
             var function = new Function
             {
-                // SystemNameStrindex = _stringCache.GetOrAdd("TODO How to handle SystemName in .NET?"),
-                // FilenameStrindex = _stringCache.GetOrAdd("unknown"),
-                // StartLine = 0,
                 NameStrindex = _stringCache.GetOrAdd(functionName),
-            }; // for now, we don't support file name
+            };
 
-            _profile.FunctionTable.Add(function);
+            _dictionary.FunctionTable.Add(function);
             _table[functionName] = _index;
             return _index++;
         }
     }
 
-    private class LocationCache
+    private sealed class LocationCache
     {
-        private readonly Profile _profile;
+        private readonly ProfilesDictionary _dictionary;
         private readonly FunctionCache _functionCache;
         private readonly int _profileFrameTypeAttributeId;
+        private readonly Dictionary<string, int> _table = [];
         private int _index;
 
-        public LocationCache(Profile profile, FunctionCache functionCache, int profileFrameTypeAttributeId)
+        public LocationCache(ProfilesDictionary dictionary, FunctionCache functionCache, int profileFrameTypeAttributeId)
         {
-            _profile = profile;
+            _dictionary = dictionary;
             _functionCache = functionCache;
             _profileFrameTypeAttributeId = profileFrameTypeAttributeId;
+            // Index 0 is the zero-value entry added during dictionary initialization
+            _index = 1;
         }
 
-        public int Add(string function)
+        public int GetOrAdd(string function)
         {
+            if (_table.TryGetValue(function, out var value))
+            {
+                return value;
+            }
+
             var location = new Location();
             location.AttributeIndices.Add(_profileFrameTypeAttributeId);
-            location.Line.Add(new Line { FunctionIndex = _functionCache.GetOrAdd(function), Line_ = 0, Column = 0 }); // for now, we don't support line nor column number
+            location.Lines.Add(new Line { FunctionIndex = _functionCache.GetOrAdd(function), Line_ = 0, Column = 0 });
 
-            _profile.LocationTable.Add(location);
+            _dictionary.LocationTable.Add(location);
+            _table[function] = _index;
 
             return _index++;
         }
     }
 
-    private class LinkCache
+    private sealed class LinkCache
     {
-        private readonly Profile _profile;
-        private readonly Dictionary<Tuple<long, long, long>, int> _table = new();
+        private readonly ProfilesDictionary _dictionary;
+        private readonly Dictionary<Tuple<long, long, long>, int> _table = [];
         private int _index;
 
-        public LinkCache(Profile profile)
+        public LinkCache(ProfilesDictionary dictionary)
         {
-            _profile = profile;
+            _dictionary = dictionary;
+            // Index 0 is the zero-value entry added during dictionary initialization
+            _index = 1;
         }
 
         public int GetOrAdd(long spanId, long traceIdHigh, long traceIdLow)
@@ -203,42 +234,49 @@ internal class ExtendedPprofBuilder
                 TraceId = UnsafeByteOperations.UnsafeWrap(traceIdBytes)
             };
 
-            _profile.LinkTable.Add(link);
+            _dictionary.LinkTable.Add(link);
             _table[key] = _index;
 
             return _index++;
         }
     }
 
-    private class AttributeCache
+    private sealed class AttributeCache
     {
-        private readonly Profile _profile;
-        private readonly Dictionary<KeyValue, int> _table = new();
+        private readonly ProfilesDictionary _dictionary;
+        private readonly StringCache _stringCache;
+        private readonly Dictionary<(string Name, string ValueStr), int> _table = [];
         private int _index;
 
-        public AttributeCache(Profile profile)
+        public AttributeCache(ProfilesDictionary dictionary, StringCache stringCache)
         {
-            _profile = profile;
+            _dictionary = dictionary;
+            _stringCache = stringCache;
+            // Index 0 is the zero-value entry added during dictionary initialization
+            _index = 1;
         }
 
         public int GetOrAdd(string name, Action<AnyValue> setValue)
         {
-            var keyValue = new KeyValue
-            {
-                Key = name,
-                Value = new AnyValue()
-            };
+            var anyValue = new AnyValue();
+            setValue(anyValue);
 
-            setValue(keyValue.Value);
+            var cacheKey = (name, anyValue.ToString());
 
-            if (_table.TryGetValue(keyValue, out var index))
+            if (_table.TryGetValue(cacheKey, out var index))
             {
                 return index;
             }
 
-            _table[keyValue] = _index;
+            var entry = new KeyValueAndUnit
+            {
+                KeyStrindex = _stringCache.GetOrAdd(name),
+                Value = anyValue
+            };
 
-            _profile.AttributeTable.Add(keyValue);
+            _dictionary.AttributeTable.Add(entry);
+
+            _table[cacheKey] = _index;
 
             return _index++;
         }

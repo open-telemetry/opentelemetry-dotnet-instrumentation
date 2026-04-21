@@ -139,7 +139,7 @@ internal static class EnvironmentConfigurationMetricHelper
                         }
                         else if (exporter.Console != null)
                         {
-                            builder = Wrappers.AddConsoleExporter(builder, pluginManager);
+                            builder = Wrappers.AddConsoleExporter(builder, pluginManager, exporter.Console);
                         }
                     }
 
@@ -244,6 +244,17 @@ internal static class EnvironmentConfigurationMetricHelper
         {
             return builder.AddConsoleExporter((consoleExporterOptions, metricReaderOptions) =>
             {
+                pluginManager.ConfigureMetricsOptions(consoleExporterOptions);
+                pluginManager.ConfigureMetricsOptions(metricReaderOptions);
+            });
+        }
+
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        public static MeterProviderBuilder AddConsoleExporter(MeterProviderBuilder builder, PluginManager pluginManager, ConsoleExporterConfig consoleExporterConfig)
+        {
+            return builder.AddConsoleExporter((consoleExporterOptions, metricReaderOptions) =>
+            {
+                metricReaderOptions.TemporalityPreference = consoleExporterConfig.GetTemporalityPreference();
                 pluginManager.ConfigureMetricsOptions(consoleExporterOptions);
                 pluginManager.ConfigureMetricsOptions(metricReaderOptions);
             });

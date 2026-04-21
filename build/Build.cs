@@ -105,15 +105,16 @@ partial class Build : NukeBuild
         .After(Restore)
         .DependsOn(CreateRequiredDirectories)
         .DependsOn(BuildInstallationScripts)
-        .DependsOn(GenerateNetFxTransientDependencies)
+        .DependsOn(GenerateTransientDependencies)
         .DependsOn(CompileManagedSrc)
         .DependsOn(PublishManagedProfiler)
         .DependsOn(PublishRuleEngineJson)
-        .DependsOn(GenerateNetFxAssemblyRedirectionSource)
+        .DependsOn(GenerateAssemblyRedirectionSource)
         .DependsOn(CompileNativeSrc)
         .DependsOn(PublishNativeProfiler)
         .DependsOn(CopyInstrumentScripts)
-        .DependsOn(CopyLegalFiles);
+        .DependsOn(CopyLegalFiles)
+        .DependsOn(CreateVersionFile);
 
     Target NativeTests => _ => _
         .Description("Builds the native unit tests and runs them")

@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 using System.Diagnostics;
+using System.Globalization;
 using IntegrationTests.Helpers;
 using Xunit.Abstractions;
 
@@ -213,7 +214,7 @@ public class SmokeTests : TestHelper
         }
         finally
         {
-            if (helper?.Process != null && !helper.Process.HasExited)
+            if (helper.Process != null && !helper.Process.HasExited)
             {
                 helper.Process.Kill();
                 helper.Process.WaitForExit();
@@ -254,7 +255,7 @@ public class SmokeTests : TestHelper
         }
         finally
         {
-            if (helper?.Process != null && !helper.Process.HasExited)
+            if (helper.Process != null && !helper.Process.HasExited)
             {
                 helper.Process.Kill();
                 helper.Process.WaitForExit();
@@ -285,16 +286,16 @@ public class SmokeTests : TestHelper
             var assert = async () =>
             {
                 var httpClient = new HttpClient { Timeout = TimeSpan.FromSeconds(5) };
-                var response = await httpClient.GetAsync(defaultPrometheusMetricsEndpoint);
+                var response = await httpClient.GetAsync(new Uri(defaultPrometheusMetricsEndpoint)).ConfigureAwait(false);
                 Assert.Equal(HttpStatusCode.OK, response.StatusCode);
 
-                var content = await response.Content.ReadAsStringAsync();
+                var content = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
                 Output.WriteLine("Raw metrics from Prometheus:");
                 Output.WriteLine(content);
-                Assert.Contains("TYPE ", content); // should export any metric
+                Assert.Contains("TYPE ", content, StringComparison.Ordinal); // should export any metric
             };
 
-            await AssertRepeatingExecutionDoesNotThrow(assert, TimeSpan.FromSeconds(1), TimeSpan.FromMinutes(1));
+            await AssertRepeatingExecutionDoesNotThrow(assert, TimeSpan.FromSeconds(1), TimeSpan.FromMinutes(1)).ConfigureAwait(true);
             var exception = await Record.ExceptionAsync(() => assert());
             Assert.Null(exception);
         }
@@ -332,20 +333,20 @@ public class SmokeTests : TestHelper
 
         try
         {
-            var assert = async () =>
+            async Task Assert()
             {
                 var httpClient = new HttpClient { Timeout = TimeSpan.FromSeconds(5) };
-                var response = await httpClient.GetAsync(defaultPrometheusMetricsEndpoint);
-                Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+                var response = await httpClient.GetAsync(new Uri(defaultPrometheusMetricsEndpoint)).ConfigureAwait(false);
+                Xunit.Assert.Equal(HttpStatusCode.OK, response.StatusCode);
 
-                var content = await response.Content.ReadAsStringAsync();
+                var content = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
                 Output.WriteLine("Raw metrics from Prometheus:");
                 Output.WriteLine(content);
-                Assert.Contains("TYPE ", content); // should export any metric
-                await Task.Delay(TimeSpan.FromSeconds(1));
-            };
+                Xunit.Assert.Contains("TYPE ", content, StringComparison.Ordinal); // should export any metric
+                await Task.Delay(TimeSpan.FromSeconds(1)).ConfigureAwait(false);
+            }
 
-            await AssertRepeatingExecutionDoesNotThrow(assert, TimeSpan.FromSeconds(1), TimeSpan.FromMinutes(1));
+            await AssertRepeatingExecutionDoesNotThrow(Assert, TimeSpan.FromSeconds(1), TimeSpan.FromMinutes(1)).ConfigureAwait(true);
         }
         finally
         {
@@ -369,7 +370,7 @@ public class SmokeTests : TestHelper
     {
         using var collector = new MockLogsCollector(Output);
         SetExporter(collector);
-        collector.Expect(logRecord => Convert.ToString(logRecord.Body) == "{ \"stringValue\": \"Example log message\" }");
+        collector.Expect(logRecord => Convert.ToString(logRecord.Body, CultureInfo.InvariantCulture) == "{ \"stringValue\": \"Example log message\" }");
 
         EnableOnlyHttpClientTraceInstrumentation();
         SetEnvironmentVariable("OTEL_DOTNET_AUTO_LOGS_INCLUDE_FORMATTED_MESSAGE", "true");
@@ -395,8 +396,8 @@ public class SmokeTests : TestHelper
         EnableBytecodeInstrumentation();
         RunTestApplication();
 
-        collector.ExpectSpan(collectedSpan => collectedSpan.InstrumentationScopeName == "MyCompany.MyProduct.MyLibrary");
-        collector.ExpectLogRecord(record => Convert.ToString(record.Body) == "{ \"stringValue\": \"Example log message\" }");
+        collector.ExpectSpan(collectedSpan => collectedSpan.Scope.Name == "MyCompany.MyProduct.MyLibrary");
+        collector.ExpectLogRecord(record => Convert.ToString(record.Body, CultureInfo.InvariantCulture) == "{ \"stringValue\": \"Example log message\" }");
 
         collector.AssertCorrelation();
     }
@@ -537,7 +538,9 @@ public class SmokeTests : TestHelper
 
             if (!EnvironmentTools.IsWindows())
             {
+#pragma warning disable CA1308 // Normalize strings to uppercase. Needed to be lowercased.
                 SetEnvironmentVariable($"otel_{item.ToLowerInvariant()}_value2", "this is secret!");
+#pragma warning restore CA1308 // Normalize strings to uppercase. Needed to be lowercased.
             }
         }
 
@@ -553,7 +556,11 @@ public class SmokeTests : TestHelper
             Assert.NotEmpty(environmentVariables);
 
             var secretVariables = environmentVariables
+#if NET
+                .Where(item => secretIdentificators.Any(i => item.Key.Contains(i, StringComparison.Ordinal)))
+#else
                 .Where(item => secretIdentificators.Any(i => item.Key.Contains(i)))
+#endif
                 .ToList();
 
             Assert.NotEmpty(secretVariables);
@@ -567,13 +574,14 @@ public class SmokeTests : TestHelper
 
     private static ICollection<KeyValuePair<string, string>> ParseEnvironmentVariablesLog(string log)
     {
-        var lines = log.Split(new[] { Environment.NewLine }, StringSplitOptions.None);
+        var lines = log.Split([Environment.NewLine], StringSplitOptions.None);
         var variables = lines
-            .SkipWhile(x => !x.Contains("Environment variables:"))
 #if NETFRAMEWORK
+            .SkipWhile(x => !x.Contains("Environment variables:"))
             .TakeWhile(x => !x.Contains(".NET Runtime: .NET Framework"))
 #else
-            .TakeWhile(x => !x.Contains("Interface ICorProfilerInfo12 found."))
+            .SkipWhile(x => !x.Contains("Environment variables:", StringComparison.Ordinal))
+            .TakeWhile(x => !x.Contains("Interface ICorProfilerInfo12 found.", StringComparison.Ordinal))
 #endif
             .Skip(1)
             .Select(ParseEnvironmentVariableLogEntry)
@@ -585,7 +593,7 @@ public class SmokeTests : TestHelper
     private static string ParseEnvironmentVariableLogEntry(string entry)
     {
         const string startMarker = "[debug]";
-        var startIndex = entry.IndexOf("[debug]") + startMarker.Length;
+        var startIndex = entry.IndexOf("[debug]", StringComparison.Ordinal) + startMarker.Length;
 
         return entry.AsSpan().Slice(startIndex).Trim().ToString();
     }
@@ -597,9 +605,9 @@ public class SmokeTests : TestHelper
 
         while (stopwatch.Elapsed < pollInterval)
         {
-            var exception = await Record.ExceptionAsync(() => assert());
+            var exception = await Record.ExceptionAsync(() => assert()).ConfigureAwait(false);
             Assert.Null(exception);
-            await Task.Delay(waitInterval);
+            await Task.Delay(waitInterval).ConfigureAwait(false);
         }
     }
 #endif

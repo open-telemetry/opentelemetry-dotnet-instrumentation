@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 using OpenTelemetry.AutoInstrumentation.Configurations.FileBasedConfiguration;
+using OpenTelemetry.AutoInstrumentation.Tests.Util;
 using Xunit;
 using YamlParser = OpenTelemetry.AutoInstrumentation.Configurations.FileBasedConfiguration.Parser.Parser;
 
@@ -44,6 +45,7 @@ public class ParserMetricsTests
         Assert.NotNull(consoleReader);
         Assert.NotNull(consoleReader.Exporter);
         Assert.NotNull(consoleReader.Exporter!.Console);
+        Assert.Equal("delta", consoleReader.Exporter.Console.TemporalityPreference);
 
         var prometheusReader = config.MeterProvider.Readers[3].Pull;
         Assert.NotNull(prometheusReader);
@@ -54,11 +56,14 @@ public class ParserMetricsTests
     [Fact]
     public void Parse_EnvVarYaml_ShouldPopulateModelCompletely()
     {
-        Environment.SetEnvironmentVariable("OTEL_METRIC_EXPORT_INTERVAL", "70000");
-        Environment.SetEnvironmentVariable("OTEL_METRIC_EXPORT_TIMEOUT", "35000");
-        Environment.SetEnvironmentVariable("OTEL_EXPORTER_OTLP_METRICS_ENDPOINT", "http://collector:4318/v1/metrics");
-        Environment.SetEnvironmentVariable("OTEL_EXPORTER_OTLP_METRICS_TIMEOUT", "15000");
-        Environment.SetEnvironmentVariable("OTEL_EXPORTER_OTLP_METRICS_HEADERS", "header1=value1,header2=value2");
+        using var envScope = new EnvironmentScope(new Dictionary<string, string?>()
+        {
+            { "OTEL_METRIC_EXPORT_INTERVAL", "70000" },
+            { "OTEL_METRIC_EXPORT_TIMEOUT", "35000" },
+            { "OTEL_EXPORTER_OTLP_METRICS_ENDPOINT", "http://collector:4318/v1/metrics" },
+            { "OTEL_EXPORTER_OTLP_METRICS_TIMEOUT", "15000" },
+            { "OTEL_EXPORTER_OTLP_METRICS_HEADERS", "header1=value1,header2=value2" },
+        });
 
         var config = YamlParser.ParseYaml<YamlConfiguration>("Configurations/FileBased/Files/TestMetricsFileEnvVars.yaml");
         Assert.NotNull(config);

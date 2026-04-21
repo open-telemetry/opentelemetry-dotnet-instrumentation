@@ -3,12 +3,12 @@
 
 namespace Examples.AspNetCoreMvc.Shared;
 
-public static class StackTraceHelper
+internal static class StackTraceHelper
 {
     public static string[] GetUsefulStack()
     {
         var stackTrace = Environment.StackTrace;
-        string[] methods = stackTrace.Split(new[] { " at " }, StringSplitOptions.None);
+        var methods = stackTrace.Split([" at "], StringSplitOptions.None);
         return methods;
     }
 }

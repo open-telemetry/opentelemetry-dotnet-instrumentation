@@ -48,6 +48,12 @@ internal static class ResourceConfigurator
             resourceBuilder.AddAttributes([new(Constants.ResourceAttributes.AttributeServiceName, ServiceNameConfigurator.GetFallbackServiceName())]);
         }
 
+        if (resource.Attributes.All(kvp => kvp.Key != Constants.ResourceAttributes.AttributeServiceInstanceId))
+        {
+            // service.instance.id was not configured yet use the fallback.
+            resourceBuilder.AddAttributes([new(Constants.ResourceAttributes.AttributeServiceInstanceId, Guid.NewGuid().ToString())]);
+        }
+
         var pluginManager = Instrumentation.PluginManager;
         if (pluginManager != null)
         {

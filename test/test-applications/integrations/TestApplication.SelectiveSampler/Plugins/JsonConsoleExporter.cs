@@ -6,7 +6,7 @@ using TestApplication.ContinuousProfiler;
 
 namespace TestApplication.SelectiveSampler.Plugins;
 
-internal class JsonConsoleExporter
+internal sealed class JsonConsoleExporter
 {
     private readonly SampleNativeFormatParser _sampleNativeFormatParser;
 
@@ -15,7 +15,7 @@ internal class JsonConsoleExporter
         _sampleNativeFormatParser = sampleNativeFormatParser;
     }
 
-    public static JsonConsoleExporter Instance { get; } = new JsonConsoleExporter(new SampleNativeFormatParser(true));
+    public static JsonConsoleExporter Instance { get; } = new(new SampleNativeFormatParser(true));
 
     public void ExportSelectedThreadSamples(byte[] buffer, int read, CancellationToken cancellationToken)
     {
@@ -29,7 +29,9 @@ internal class JsonConsoleExporter
         WriteToConsole(samples ?? []);
     }
 
+#pragma warning disable CA1822 // Mark members as static. Needed for AutoInstrumentation plugin loading.
     public void ExportAllocationSamples(byte[] buffer, int read, CancellationToken cancellationToken)
+#pragma warning restore CA1822 // Mark members as static. Needed for AutoInstrumentation plugin loading.
     {
     }
 

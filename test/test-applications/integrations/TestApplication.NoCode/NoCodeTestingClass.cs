@@ -5,7 +5,7 @@ using System.Runtime.CompilerServices;
 
 namespace TestApplication.NoCode;
 
-internal class NoCodeTestingClass
+internal sealed class NoCodeTestingClass
 {
     [MethodImpl(MethodImplOptions.NoInlining)]
     public static void TestMethodStatic()
@@ -14,6 +14,7 @@ internal class NoCodeTestingClass
     }
 
     [MethodImpl(MethodImplOptions.NoInlining)]
+#pragma warning disable CA1822 // Mark members as static
     public void TestMethod()
     {
         // This method is intentionally left empty.
@@ -176,85 +177,85 @@ internal class NoCodeTestingClass
     public static async Task TestMethodStaticAsync()
 #pragma warning restore SA1204 // Static elements should appear before instance elements
     {
-        await Task.Delay(TimeSpan.FromMilliseconds(100));
+        await Task.Delay(TimeSpan.FromMilliseconds(100)).ConfigureAwait(false);
     }
 
     [MethodImpl(MethodImplOptions.NoInlining)]
     public async Task TestMethodAsync()
     {
-        await Task.Delay(TimeSpan.FromMilliseconds(100));
+        await Task.Delay(TimeSpan.FromMilliseconds(100)).ConfigureAwait(false);
     }
 
     [MethodImpl(MethodImplOptions.NoInlining)]
     public async Task TestMethodAAsync()
     {
-        await Task.Delay(TimeSpan.FromMilliseconds(100));
+        await Task.Delay(TimeSpan.FromMilliseconds(100)).ConfigureAwait(false);
     }
 
     [MethodImpl(MethodImplOptions.NoInlining)]
     public async Task TestMethodAsync(string param1)
     {
-        await Task.Delay(TimeSpan.FromMilliseconds(100));
+        await Task.Delay(TimeSpan.FromMilliseconds(100)).ConfigureAwait(false);
     }
 
     [MethodImpl(MethodImplOptions.NoInlining)]
     public async Task TestMethodAsync(int param1)
     {
-        await Task.Delay(TimeSpan.FromMilliseconds(100));
+        await Task.Delay(TimeSpan.FromMilliseconds(100)).ConfigureAwait(false);
     }
 
     [MethodImpl(MethodImplOptions.NoInlining)]
     public async Task TestMethodAsync(string param1, string param2)
     {
-        await Task.Delay(TimeSpan.FromMilliseconds(100));
+        await Task.Delay(TimeSpan.FromMilliseconds(100)).ConfigureAwait(false);
     }
 
     [MethodImpl(MethodImplOptions.NoInlining)]
     public async Task TestMethodAsync(string param1, string param2, string param3)
     {
-        await Task.Delay(TimeSpan.FromMilliseconds(100));
+        await Task.Delay(TimeSpan.FromMilliseconds(100)).ConfigureAwait(false);
     }
 
     [MethodImpl(MethodImplOptions.NoInlining)]
     public async Task TestMethodAsync(string param1, string param2, string param3, string param4)
     {
-        await Task.Delay(TimeSpan.FromMilliseconds(100));
+        await Task.Delay(TimeSpan.FromMilliseconds(100)).ConfigureAwait(false);
     }
 
     [MethodImpl(MethodImplOptions.NoInlining)]
     public async Task TestMethodAsync(string param1, string param2, string param3, string param4, string param5)
     {
-        await Task.Delay(TimeSpan.FromMilliseconds(100));
+        await Task.Delay(TimeSpan.FromMilliseconds(100)).ConfigureAwait(false);
     }
 
     [MethodImpl(MethodImplOptions.NoInlining)]
     public async Task TestMethodAsync(string param1, string param2, string param3, string param4, string param5, string param6)
     {
-        await Task.Delay(TimeSpan.FromMilliseconds(100));
+        await Task.Delay(TimeSpan.FromMilliseconds(100)).ConfigureAwait(false);
     }
 
     [MethodImpl(MethodImplOptions.NoInlining)]
     public async Task TestMethodAsync(string param1, string param2, string param3, string param4, string param5, string param6, string param7)
     {
-        await Task.Delay(TimeSpan.FromMilliseconds(100));
+        await Task.Delay(TimeSpan.FromMilliseconds(100)).ConfigureAwait(false);
     }
 
     [MethodImpl(MethodImplOptions.NoInlining)]
     public async Task TestMethodAsync(string param1, string param2, string param3, string param4, string param5, string param6, string param7, string param8)
     {
-        await Task.Delay(TimeSpan.FromMilliseconds(100));
+        await Task.Delay(TimeSpan.FromMilliseconds(100)).ConfigureAwait(false);
     }
 
     [MethodImpl(MethodImplOptions.NoInlining)]
     public async Task TestMethodAsync(string param1, string param2, string param3, string param4, string param5, string param6, string param7, string param8, string param9)
     {
-        await Task.Delay(TimeSpan.FromMilliseconds(100));
+        await Task.Delay(TimeSpan.FromMilliseconds(100)).ConfigureAwait(false);
     }
 
     [MethodImpl(MethodImplOptions.NoInlining)]
     public async Task<int> IntTaskTestMethodAsync()
     {
-        await Task.Delay(TimeSpan.FromMilliseconds(100));
+        await Task.Delay(TimeSpan.FromMilliseconds(100)).ConfigureAwait(false);
         return 0;
     }
 
@@ -262,13 +263,13 @@ internal class NoCodeTestingClass
     [MethodImpl(MethodImplOptions.NoInlining)]
     public async ValueTask ValueTaskTestMethodAsync()
     {
-        await Task.Delay(TimeSpan.FromMilliseconds(100));
+        await Task.Delay(TimeSpan.FromMilliseconds(100)).ConfigureAwait(false);
     }
 
     [MethodImpl(MethodImplOptions.NoInlining)]
     public async ValueTask<int> IntValueTaskTestMethodAsync()
     {
-        await Task.Delay(TimeSpan.FromMilliseconds(100));
+        await Task.Delay(TimeSpan.FromMilliseconds(100)).ConfigureAwait(false);
         return 0;
     }
 #endif
@@ -282,7 +283,8 @@ internal class NoCodeTestingClass
     [MethodImpl(MethodImplOptions.NoInlining)]
     public async Task<T?> GenericTestMethodAsync<T>()
     {
-        await Task.Delay(TimeSpan.FromMilliseconds(100));
+        await Task.Delay(TimeSpan.FromMilliseconds(100)).ConfigureAwait(false);
         return default;
     }
+#pragma warning restore CA1822 // Mark members as static
 }

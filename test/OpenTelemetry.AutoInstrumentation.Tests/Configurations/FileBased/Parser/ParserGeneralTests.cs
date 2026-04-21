@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 using OpenTelemetry.AutoInstrumentation.Configurations.FileBasedConfiguration;
+using OpenTelemetry.AutoInstrumentation.Tests.Util;
 using Xunit;
 using YamlParser = OpenTelemetry.AutoInstrumentation.Configurations.FileBasedConfiguration.Parser.Parser;
 
@@ -17,7 +18,7 @@ public class ParserGeneralTests
 
         Assert.NotNull(config);
 
-        Assert.Equal("1.0-rc.1", config.FileFormat);
+        Assert.Equal("1.0", config.FileFormat);
         Assert.False(config.Disabled);
         Assert.False(config.FailFast);
         Assert.False(config.FlushOnUnhandledException);
@@ -26,15 +27,18 @@ public class ParserGeneralTests
     [Fact]
     public void Parse_EnvVarYaml_ShouldPopulateModelCompletely()
     {
-        Environment.SetEnvironmentVariable("OTEL_SDK_DISABLED", "true");
-        Environment.SetEnvironmentVariable("OTEL_DOTNET_AUTO_FAIL_FAST_ENABLED", "true");
-        Environment.SetEnvironmentVariable("OTEL_DOTNET_AUTO_FLUSH_ON_UNHANDLEDEXCEPTION", "false");
+        using var envScope = new EnvironmentScope(new Dictionary<string, string?>()
+        {
+            { "OTEL_SDK_DISABLED", "true" },
+            { "OTEL_DOTNET_AUTO_FAIL_FAST_ENABLED", "true" },
+            { "OTEL_DOTNET_AUTO_FLUSH_ON_UNHANDLEDEXCEPTION", "false" },
+        });
 
         var config = YamlParser.ParseYaml<YamlConfiguration>("Configurations/FileBased/Files/TestGeneralFileEnvVars.yaml");
 
         Assert.NotNull(config);
 
-        Assert.Equal("1.0-rc.1", config.FileFormat);
+        Assert.Equal("1.0", config.FileFormat);
         Assert.True(config.Disabled);
         Assert.True(config.FailFast);
         Assert.False(config.FlushOnUnhandledException);

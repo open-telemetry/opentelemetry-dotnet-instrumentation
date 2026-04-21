@@ -20,7 +20,7 @@ public class NoCodeTests : TestHelper
     public void SubmitsTraces()
     {
         EnableBytecodeInstrumentation();
-        EnableFileBasedConfigWithDefaultPath();
+        EnableFileBasedConfig();
         using var collector = new MockSpansCollector(Output);
         SetFileBasedExporter(collector);
 
@@ -101,10 +101,158 @@ public class NoCodeTests : TestHelper
 
         collector.ExpectNoCode("Span-GenericTestMethod");
         collector.ExpectAsyncNoCode("Span-GenericTestMethodAsync");
+        collector.ExpectNoCode("Span-GenericTestMethodWithParameters");
+
+        // Dynamic attribute tests - extracting values from method parameters
+        List<KeyValue> processOrderAttributes =
+        [
+            new() { Key = "order.id", Value = new AnyValue { StringValue = "ORD-12345" } },
+            new() { Key = "order.quantity", Value = new AnyValue { IntValue = 5 } },
+        ];
+        collector.ExpectNoCode("Span-ProcessOrder", Span.Types.SpanKind.Internal, processOrderAttributes);
+
+        List<KeyValue> processCustomerAttributes =
+        [
+            new() { Key = "customer.id", Value = new AnyValue { StringValue = "CUST-001" } },
+            new() { Key = "customer.name", Value = new AnyValue { StringValue = "John Doe" } },
+            new() { Key = "customer.email", Value = new AnyValue { StringValue = "john@example.com" } },
+            new() { Key = "customer.city", Value = new AnyValue { StringValue = "Seattle" } },
+            new() { Key = "customer.country", Value = new AnyValue { StringValue = "USA" } },
+        ];
+        collector.ExpectNoCode("Span-ProcessCustomer", Span.Types.SpanKind.Internal, processCustomerAttributes);
+
+        List<KeyValue> auditActionAttributes =
+        [
+            new() { Key = "action", Value = new AnyValue { StringValue = "user_login" } },
+            new() { Key = "service.name", Value = new AnyValue { StringValue = "TestService" } },
+            new() { Key = "merchant.id", Value = new AnyValue { IntValue = 12345 } },
+        ];
+        collector.ExpectNoCode("Span-AuditAction", Span.Types.SpanKind.Internal, auditActionAttributes);
+
+        List<KeyValue> createResourceAttributes =
+        [
+            new() { Key = "resource.full_id", Value = new AnyValue { StringValue = "database/db-prod-001" } },
+        ];
+        collector.ExpectNoCode("Span-CreateResource", Span.Types.SpanKind.Internal, createResourceAttributes);
+
+        List<KeyValue> processWithDefaultAttributes =
+        [
+            new() { Key = "value", Value = new AnyValue { StringValue = "default_value" } },
+        ];
+        collector.ExpectNoCode("Span-ProcessWithDefault", Span.Types.SpanKind.Internal, processWithDefaultAttributes);
+
+        List<KeyValue> operationWithMetadataAttributes =
+        [
+            new() { Key = "method.name", Value = new AnyValue { StringValue = "OperationWithMetadata" } },
+            new() { Key = "type.name", Value = new AnyValue { StringValue = "TestApplication.NoCode.DynamicAttributeTestingClass" } },
+            new() { Key = "operation.full_name", Value = new AnyValue { StringValue = "TestApplication.NoCode.DynamicAttributeTestingClass.OperationWithMetadata" } },
+        ];
+        collector.ExpectNoCode("Span-OperationWithMetadata", Span.Types.SpanKind.Internal, operationWithMetadataAttributes);
+
+        List<KeyValue> processOrderAsyncAttributes =
+        [
+            new() { Key = "order.id", Value = new AnyValue { StringValue = "ORD-99999" } },
+            new() { Key = "order.amount", Value = new AnyValue { DoubleValue = 199.99 } },
+            new() { Key = "order.currency", Value = new AnyValue { StringValue = "USD" } },
+        ];
+        collector.ExpectAsyncNoCode("Span-ProcessOrderAsync", Span.Types.SpanKind.Internal, processOrderAsyncAttributes);
+
+        List<KeyValue> completeOrderAttributes =
+        [
+            new() { Key = "order.id", Value = new AnyValue { StringValue = "ORD-COMPLETE" } },
+        ];
+        collector.ExpectNoCode("Span-CompleteOrder", Span.Types.SpanKind.Internal, completeOrderAttributes);
+
+        // Dynamic span name tests
+        List<KeyValue> processTransactionAttributes =
+        [
+            new() { Key = "transaction.id", Value = new AnyValue { StringValue = "TXN-12345" } },
+            new() { Key = "transaction.type", Value = new AnyValue { StringValue = "payment" } },
+        ];
+        collector.ExpectNoCode("Transaction-payment-TXN-12345", Span.Types.SpanKind.Internal, processTransactionAttributes);
+
+        List<KeyValue> executeQueryAttributes =
+        [
+            new() { Key = "db.name", Value = new AnyValue { StringValue = "ProductionDB" } },
+            new() { Key = "db.table", Value = new AnyValue { StringValue = "users" } },
+        ];
+        collector.ExpectNoCode("Query.ProductionDB.users", Span.Types.SpanKind.Internal, executeQueryAttributes);
+
+        // Non-async Task-returning methods tests
+        // These test the important edge case where methods return Task/Task<T> without using async/await
+        List<KeyValue> syncCompletedTaskAttributes =
+        [
+            new() { Key = "task.id", Value = new AnyValue { StringValue = "TASK-001" } },
+        ];
+        collector.ExpectNoCode("Span-SyncCompletedTask", Span.Types.SpanKind.Internal, syncCompletedTaskAttributes);
+
+        List<KeyValue> syncCompletedTaskWithResultAttributes =
+        [
+            new() { Key = "order.id", Value = new AnyValue { StringValue = "ORD-SYNC-001" } },
+        ];
+        collector.ExpectNoCode("Span-SyncCompletedTaskWithResult", Span.Types.SpanKind.Internal, syncCompletedTaskWithResultAttributes);
+
+        List<KeyValue> syncPendingTaskAttributes =
+        [
+            new() { Key = "delay.ms", Value = new AnyValue { IntValue = 100 } },
+        ];
+        collector.ExpectAsyncNoCode("Span-SyncPendingTask", Span.Types.SpanKind.Internal, syncPendingTaskAttributes);
+
+        List<KeyValue> syncPendingTaskWithResultAttributes =
+        [
+            new() { Key = "order.id", Value = new AnyValue { StringValue = "ORD-SYNC-002" } },
+        ];
+        collector.ExpectAsyncNoCode("Span-SyncPendingTaskWithResult", Span.Types.SpanKind.Internal, syncPendingTaskWithResultAttributes);
+
+        // Dynamic array attributes test - extracting arrays from method parameters
+        // Tests both int[] to long[] conversion (batch.ids) and direct long[] handling (batch.codes)
+        List<KeyValue> processBatchDataAttributes =
+        [
+            new() { Key = "batch.tags", Value = new AnyValue { ArrayValue = new ArrayValue { Values = { new AnyValue { StringValue = "tag1" }, new AnyValue { StringValue = "tag2" }, new AnyValue { StringValue = "tag3" } } } } },
+            new() { Key = "batch.ids", Value = new AnyValue { ArrayValue = new ArrayValue { Values = { new AnyValue { IntValue = 100 }, new AnyValue { IntValue = 200 }, new AnyValue { IntValue = 300 } } } } },
+            new() { Key = "batch.codes", Value = new AnyValue { ArrayValue = new ArrayValue { Values = { new AnyValue { IntValue = 1000000000000L }, new AnyValue { IntValue = 2000000000000L }, new AnyValue { IntValue = 3000000000000L } } } } },
+            new() { Key = "batch.prices", Value = new AnyValue { ArrayValue = new ArrayValue { Values = { new AnyValue { DoubleValue = 10.5 }, new AnyValue { DoubleValue = 20.75 }, new AnyValue { DoubleValue = 30.99 } } } } },
+            new() { Key = "batch.flags", Value = new AnyValue { ArrayValue = new ArrayValue { Values = { new AnyValue { BoolValue = true }, new AnyValue { BoolValue = false }, new AnyValue { BoolValue = true } } } } },
+        ];
+        collector.ExpectNoCode("Span-ProcessBatchData", Span.Types.SpanKind.Internal, processBatchDataAttributes);
 
         RunTestApplication();
 
         collector.AssertExpectations();
+    }
+
+    [Fact]
+    [Trait("Category", "EndToEnd")]
+    public void MalformedConfiguration_ComprehensiveTest()
+    {
+        EnableBytecodeInstrumentation();
+        EnableFileBasedConfig("config-malformed.yaml");
+        using var collector = new MockSpansCollector(Output);
+        SetFileBasedExporter(collector);
+
+        collector.ExpectNoCode("Span-Valid-Basic", Span.Types.SpanKind.Client);
+
+        List<KeyValue> validWithInvalidDynamicAttr =
+        [
+            new() { Key = "valid_static_attr", Value = new AnyValue { StringValue = "static_value" } },
+        ];
+        collector.ExpectNoCode("Span-Valid-WithInvalidDynamicAttribute", Span.Types.SpanKind.Internal, validWithInvalidDynamicAttr);
+
+        collector.ExpectNoCode("Span-Valid-WithInvalidStatusRule", Span.Types.SpanKind.Server);
+
+        collector.ExpectNoCode("Span-Valid-StaticNameFallback", Span.Types.SpanKind.Producer);
+
+        List<KeyValue> validStaticSpanAttr =
+        [
+            new() { Key = "test_marker", Value = new AnyValue { StringValue = "malformed_test" } },
+        ];
+        collector.ExpectNoCode("Span-Valid-Static", Span.Types.SpanKind.Internal, validStaticSpanAttr);
+
+        RunTestApplication();
+
+        collector.AssertExpectations();
+        // All invalid configurations should be silently skipped. It means that there is no more spans.
+        collector.AssertEmpty();
     }
 }
 
@@ -122,7 +270,7 @@ file static class NoCodeMockSpansCollectorExtensions
 
     private static void ExpectNoCode(this MockSpansCollector collector, Func<Span, string, Span.Types.SpanKind, List<KeyValue>?, bool> assert, string expectedSpanName, Span.Types.SpanKind expectedSpanKind, List<KeyValue>? expectedAttributes)
     {
-        collector.Expect("OpenTelemetry.AutoInstrumentation.NoCode", x => assert(x, expectedSpanName, expectedSpanKind, expectedAttributes), GetSpanDescription(expectedSpanName, expectedSpanKind, expectedAttributes));
+        collector.Expect("OpenTelemetry.AutoInstrumentation.NoCode", VersionHelper.AutoInstrumentationVersion, x => assert(x, expectedSpanName, expectedSpanKind, expectedAttributes), GetSpanDescription(expectedSpanName, expectedSpanKind, expectedAttributes));
     }
 
     private static string GetSpanDescription(string expectedSpanName, Span.Types.SpanKind expectedSpanKind, List<KeyValue>? expectedAttributes)
@@ -148,6 +296,8 @@ file static class NoCodeMockSpansCollectorExtensions
 
         var duration = TimeSpan.FromTicks(ticks);
 
-        return duration > TimeSpan.FromMilliseconds(98); // all async methods have a 100ms delay, need to be a bit lower (due to timer resolution)
+        // All async methods have a 100ms delay, need to be a bit lower (due to timer resolution).
+        // Decrease by a margin of a default timer resolution on Windows (~16ms) to avoid flaky tests.
+        return duration > TimeSpan.FromMilliseconds(84);
     }
 }

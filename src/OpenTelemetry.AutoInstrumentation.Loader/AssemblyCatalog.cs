@@ -3,28 +3,29 @@
 
 #if NETFRAMEWORK
 using System.Reflection;
+using OpenTelemetry.AutoInstrumentation.Logging;
+using OpenTelemetry.AutoInstrumentation.Util;
 
 namespace OpenTelemetry.AutoInstrumentation.Loader;
 
 internal class AssemblyCatalog
 {
-    private static readonly Dictionary<string, AssemblyInfo> Assemblies = new(StringComparer.OrdinalIgnoreCase);
+    private readonly Dictionary<string, AssemblyInfo> _assemblies = new(StringComparer.OrdinalIgnoreCase);
 
-    static AssemblyCatalog()
+    public AssemblyCatalog(IOtelLogger logger)
     {
-        static void BuildFromFolder()
+        void BuildFromFolder()
         {
-            var sharedFrameworkPath = Path.GetDirectoryName(EnvironmentHelper.ManagedProfilerDirectory)!;
+            var frameworkPath = ManagedProfilerLocationHelper.ResolveManagedProfilerVersionDirectory(logger);
+            var sharedFrameworkPath = ManagedProfilerLocationHelper.ManagedProfilerRuntimeDirectory;
 
-            var files =
-                Directory.GetFiles(sharedFrameworkPath, "*.dll")
-                    .Concat(
-                        Directory.GetFiles(EnvironmentHelper.ManagedProfilerDirectory, "*.dll"))
-                    .Concat(Directory.GetFiles(EnvironmentHelper.ManagedProfilerDirectory, "*.link").Select(link =>
-                    {
-                        var linkPath = File.ReadAllText(link).Trim();
-                        return Path.Combine(sharedFrameworkPath, linkPath, Path.GetFileNameWithoutExtension(link));
-                    }));
+            var files = Directory.GetFiles(frameworkPath, "*.dll")
+                    .Concat(Directory
+                        .GetFiles(frameworkPath, "*.link")
+                        .Select(
+                            link => ManagedProfilerLocationHelper.ResolveAssemblyLink(link, sharedFrameworkPath, logger))
+                        .OfType<string>())
+                    .Concat(Directory.GetFiles(sharedFrameworkPath, "*.dll"));
 
             foreach (var file in files)
             {
@@ -35,7 +36,7 @@ internal class AssemblyCatalog
                     if (assemblyName.Name == null || keyToken == null || keyToken.Length == 0 ||
                         assemblyName.Version == null)
                     {
-                        EnvironmentHelper.Logger.Warning($"No strong name for {file} ({assemblyName}), skipping it");
+                        logger.Warning($"No strong name for {file} ({assemblyName}), skipping it");
                         continue;
                     }
 
@@ -43,33 +44,33 @@ internal class AssemblyCatalog
                     var token = BitConverter.ToString(keyToken).ToLowerInvariant().Replace("-", string.Empty);
 #pragma warning restore CA1308
 
-                    if (Assemblies.TryGetValue(assemblyName.Name, out var info))
+                    if (_assemblies.TryGetValue(assemblyName.Name, out var info))
                     {
                         if (!string.Equals(info.Token, token, StringComparison.OrdinalIgnoreCase))
                         {
-                            EnvironmentHelper.Logger.Error(
-                                $"Multiple files for {assemblyName.Name} with different tokens. Using {file}");
+                            logger.Error(
+                                $"Multiple files for {assemblyName.Name} with different tokens. Using {info.Path}");
                             continue;
                         }
 
                         if (info.Version < assemblyName.Version)
                         {
-                            EnvironmentHelper.Logger.Warning(
+                            logger.Warning(
                                 $"Multiple files for {assemblyName.Name}, using ${assemblyName.Version} from {file}");
                         }
                         else
                         {
-                            EnvironmentHelper.Logger.Warning(
+                            logger.Warning(
                                 $"Multiple files  for {assemblyName.Name}, using ${info.Version} from {info.Path}");
                             continue;
                         }
                     }
 
-                    Assemblies[assemblyName.Name] = new AssemblyInfo(token, assemblyName.Version, assemblyName, file);
+                    _assemblies[assemblyName.Name] = new AssemblyInfo(token, assemblyName.Version, assemblyName, file);
                 }
                 catch (Exception ex)
                 {
-                    EnvironmentHelper.Logger.Error(ex, $"Failed to resolve assembly name for {file}, skipping it");
+                    logger.Error(ex, $"Failed to resolve assembly name for {file}, skipping it");
                 }
             }
         }
@@ -77,9 +78,9 @@ internal class AssemblyCatalog
         BuildFromFolder();
     }
 
-    internal static AssemblyInfo? GetAssemblyInfo(string shortName)
+    internal AssemblyInfo? GetAssemblyInfo(string shortName)
     {
-        if (Assemblies.TryGetValue(shortName, out var info))
+        if (_assemblies.TryGetValue(shortName, out var info))
         {
             return info;
         }
@@ -87,8 +88,8 @@ internal class AssemblyCatalog
         return null;
     }
 
-    internal static IEnumerable<AssemblyInfo> GetAssemblies()
-        => Assemblies.Values;
+    internal IEnumerable<AssemblyInfo> GetAssemblies()
+        => _assemblies.Values;
 
     internal sealed class AssemblyInfo(string token, Version version, AssemblyName fullName, string path)
     {

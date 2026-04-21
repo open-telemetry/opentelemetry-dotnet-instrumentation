@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 using OpenTelemetry.AutoInstrumentation.Configurations.FileBasedConfiguration;
+using OpenTelemetry.AutoInstrumentation.Tests.Util;
 using Xunit;
 using YamlParser = OpenTelemetry.AutoInstrumentation.Configurations.FileBasedConfiguration.Parser.Parser;
 
@@ -19,26 +20,54 @@ public class ParserInstrumentationTests
         Assert.NotNull(config.InstrumentationDevelopment);
         Assert.NotNull(config.InstrumentationDevelopment.DotNet);
 
+        string[] expectedTraces =
+        [
+            "adonet",
+#if NETFRAMEWORK
+            "aspnet",
+#else
+            "aspnetcore",
+#endif
+            "azure",
+            "elasticsearch",
+            "elastictransport",
 #if NET
-        string[] expectedTraces = [
-                    "aspnetcore", "azure", "elasticsearch", "elastictransport",
-                    "entityframeworkcore", "graphql", "grpcnetclient", "httpclient",
-                    "kafka", "masstransit", "mongodb", "mysqlconnector",
-                    "mysqldata", "npgsql", "nservicebus", "oraclemda", "rabbitmq",
-                    "quartz", "sqlclient", "stackexchangeredis", "wcfclient"
-                ];
+            "entityframeworkcore",
+            "graphql",
+#endif
+            "grpcnetclient",
+            "httpclient",
+            "kafka",
+#if NET
+            "masstransit",
+#endif
+            "mongodb",
+            "mysqlconnector",
+#if NET
+            "mysqldata",
+#endif
+            "npgsql",
+            "nservicebus",
+            "oraclemda",
+            "rabbitmq",
+            "quartz",
+            "sqlclient",
+            "sqlite",
+            "stackexchangeredis",
+            "wcfclient",
+#if NET
+            "wcfcore"
 #endif
 #if NETFRAMEWORK
-        string[] expectedTraces = [
-                    "aspnet", "azure", "elasticsearch", "elastictransport",
-                    "grpcnetclient", "httpclient", "kafka", "mongodb",
-                    "mysqlconnector", "npgsql", "nservicebus", "oraclemda",
-                    "rabbitmq", "quartz", "sqlclient", "wcfclient", "wcfservice"
-                ];
+            "wcfservice",
 #endif
+        ];
 
         var traces = config.InstrumentationDevelopment.DotNet.Traces;
         Assert.NotNull(traces);
+
+        const int countOfNonTracesProperties = 4;
+        FileBasedTestHelper.AssertCountOfAliasProperties(traces, expectedTraces.Length + countOfNonTracesProperties);
 
         foreach (var alias in expectedTraces)
         {
@@ -53,20 +82,19 @@ public class ParserInstrumentationTests
         Assert.Contains("Some.Additional.Legacy.Source1", traces.AdditionalLegacySources);
         Assert.Contains("Some.Additional.Legacy.Source2", traces.AdditionalLegacySources);
 
-#if NET
         string[] expectedMetrics =
         [
-            "aspnetcore", "httpclient", "netruntime",
-            "nservicebus", "process", "sqlclient"
-        ];
-#endif
 #if NETFRAMEWORK
-        string[] expectedMetrics =
-        [
-            "aspnet", "httpclient", "netruntime",
-            "nservicebus", "process", "sqlclient"
-        ];
+            "aspnet",
+#else
+            "aspnetcore",
 #endif
+            "httpclient",
+            "netruntime",
+            "nservicebus",
+            "process",
+            "sqlclient",
+        ];
 
         var metrics = config.InstrumentationDevelopment.DotNet.Metrics;
         Assert.NotNull(metrics);
@@ -100,16 +128,19 @@ public class ParserInstrumentationTests
         Assert.NotNull(config.InstrumentationDevelopment);
         Assert.NotNull(config.InstrumentationDevelopment.DotNet);
 
-#if NET
-        string[] expectedTraces = [
-                    "aspnetcore", "graphql", "grpcnetclient", "httpclient", "oraclemda"
-                ];
-#endif
+        string[] expectedTraces =
+        [
 #if NETFRAMEWORK
-        string[] expectedTraces = [
-                    "aspnet", "httpclient", "oraclemda", "grpcnetclient"
-                ];
+            "aspnet",
+#else
+            "aspnetcore",
+            "graphql",
 #endif
+            "grpcnetclient",
+            "httpclient",
+            "oraclemda",
+            "sqlclient",
+        ];
 
         var traces = config.InstrumentationDevelopment.DotNet.Traces;
         Assert.NotNull(traces);
@@ -139,16 +170,21 @@ public class ParserInstrumentationTests
 #if NETFRAMEWORK
         Assert.Equal("X-Key,X-Custom-Header,X-Header-Example", traces.AspNet!.CaptureRequestHeaders);
         Assert.Equal("X-Key,X-Custom-Header,X-Header-Example", traces.AspNet!.CaptureResponseHeaders);
+        Assert.True(traces.SqlClient!.NetFxIlRewriteEnabled);
 #endif
+
         Assert.True(logs.Log4Net.BridgeEnabled);
     }
 
     [Fact]
     public void Parse_EnvVarYaml_ShouldPopulateModelCompletely()
     {
-        Environment.SetEnvironmentVariable("OTEL_DOTNET_AUTO_TRACES_ADDITIONAL_SOURCES", "Some.Additional.Source1,Some.Additional.Source2");
-        Environment.SetEnvironmentVariable("OTEL_DOTNET_AUTO_TRACES_ADDITIONAL_LEGACY_SOURCES", "Some.Additional.Legacy.Source1,Some.Additional.Legacy.Source2");
-        Environment.SetEnvironmentVariable("OTEL_DOTNET_AUTO_METRICS_ADDITIONAL_SOURCES", "Some.Additional.Source1,Some.Additional.Source2");
+        using var envScope = new EnvironmentScope(new Dictionary<string, string?>()
+        {
+            { "OTEL_DOTNET_AUTO_TRACES_ADDITIONAL_SOURCES", "Some.Additional.Source1,Some.Additional.Source2" },
+            { "OTEL_DOTNET_AUTO_TRACES_ADDITIONAL_LEGACY_SOURCES", "Some.Additional.Legacy.Source1,Some.Additional.Legacy.Source2" },
+            { "OTEL_DOTNET_AUTO_METRICS_ADDITIONAL_SOURCES", "Some.Additional.Source1,Some.Additional.Source2" },
+        });
 
         var config = YamlParser.ParseYaml<YamlConfiguration>("Configurations/FileBased/Files/TestInstrumentationFileEnvVars.yaml");
 

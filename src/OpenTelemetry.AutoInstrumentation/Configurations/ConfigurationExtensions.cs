@@ -2,12 +2,19 @@
 // SPDX-License-Identifier: Apache-2.0
 
 using System.Globalization;
+#if NET
+using System.Text;
+#endif
 
 namespace OpenTelemetry.AutoInstrumentation.Configurations;
 
 internal static class ConfigurationExtensions
 {
+#if NET
+    public static IReadOnlyList<TEnum> ParseEnabledEnumList<TEnum>(this Configuration source, bool enabledByDefault, CompositeFormat enabledConfigurationTemplate)
+#else
     public static IReadOnlyList<TEnum> ParseEnabledEnumList<TEnum>(this Configuration source, bool enabledByDefault, string enabledConfigurationTemplate)
+#endif
         where TEnum : struct, Enum, IConvertible
     {
 #if NET

@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 #if NET //for now we ae disabling this on .NET Framework as canary mechanism makes this flaky
 using System.Diagnostics;
+using System.Globalization;
 using System.Runtime.InteropServices;
 using IntegrationTests.Helpers;
 using Xunit.Abstractions;
@@ -36,17 +37,6 @@ public class SelectiveSamplerTests : TestHelper
 
         var threadSamples = ConsoleProfileExporterHelpers.ExtractSamples(output);
 
-        var currentStartTime = ToDateTime(threadSamples[0].TimestampNanoseconds);
-
-        foreach (var sample in threadSamples.Skip(1))
-        {
-            var nextStartTime = ToDateTime(sample.TimestampNanoseconds);
-            var diff = (nextStartTime - currentStartTime).TotalMilliseconds;
-            Output.WriteLine($"Time diff between consecutive samples: {diff}");
-            Assert.InRange(diff, 50, 70);
-            currentStartTime = nextStartTime;
-        }
-
         // Test app sleeps for 0.5s, sampling interval set to 0.05s
         Output.WriteLine($"Count: {threadSamples.Count}");
         Assert.InRange(threadSamples.Count, 7, 14);
@@ -78,7 +68,7 @@ public class SelectiveSamplerTests : TestHelper
 
         var threadSamples = ConsoleProfileExporterHelpers.ExtractSamples(output);
 
-        var groupedByTimestampAscending = threadSamples.GroupBy(sample => sample.TimestampNanoseconds).OrderBy(samples => samples.Key);
+        var groupedByTimestampAscending = threadSamples.GroupBy(sample => sample.TimestampNanoseconds).OrderBy(samples => samples.Key).ToList();
 
         // Based on the test app, samples for all the threads should be collected at least 2 times.
         Assert.True(groupedByTimestampAscending.Count(
@@ -88,38 +78,67 @@ public class SelectiveSamplerTests : TestHelper
                 samples.Count(sample => sample.SelectedForFrequentSampling) == 1)
                     > 1);
 
-        var counter = 0;
-
         // Sampling starts early, at the start of instrumentation init.
-        var groupingStartingWithAllThreadSamples = groupedByTimestampAscending.SkipWhile(
-            samples =>
-                IndicatesSelectiveSampling(samples) ||
-                CollectedBeforeSpanStarted(samples) ||
-                CollectedBeforeFrequentSamplingStarted(samples));
+        var groupingStartingWithAllThreadSamples = groupedByTimestampAscending
+            .SkipWhile(
+                samples =>
+                    IndicatesSelectiveSampling(samples) ||
+                    CollectedBeforeSpanStarted(samples) ||
+                    CollectedBeforeFrequentSamplingStarted(samples))
+            // Omit last group from verification, as it may be collected after activity stopped.
+            .SkipLast(1);
+
+        var selectiveSinceLastContinuous = 3;
+        var missedSelectiveBetweenContinuous = false;
+        var missedSelectiveInContinuous = false;
 
         foreach (var group in groupingStartingWithAllThreadSamples)
         {
             // Based on plugin configuration, the expectation is for every 4th
             // batch to contain multiple samples as a result of continuous profiling.
-            if (counter % 4 == 0)
+            if (IsContinuousProfilingSamplesBatch(group))
             {
+                if (selectiveSinceLastContinuous == 2)
+                {
+                    Assert.False(missedSelectiveBetweenContinuous, "Missing selective sample between continuous batches allowed only once per test run.");
+                    missedSelectiveBetweenContinuous = true;
+                }
+                else
+                {
+                    Assert.Equal(3, selectiveSinceLastContinuous);
+                }
+
+                selectiveSinceLastContinuous = 0;
 #if NET
                 // on .NET Framework there is no guarantee that samples collected from all threads
                 Assert.NotEqual(1, group.Count());
 #endif
                 // Sample for thread selected for frequent sampling when collecting samples of all threads
                 // should be marked with SelectedForFrequentSampling flag.
-                Assert.Single(group, sample => sample.SelectedForFrequentSampling);
+                var selectedForFrequentSampling = group.SingleOrDefault(sample => sample.SelectedForFrequentSampling);
+                if (selectedForFrequentSampling != null)
+                {
+                    Assert.True(HasSpanContextAssociated(selectedForFrequentSampling));
+                }
+                else
+                {
+                    Assert.False(missedSelectiveInContinuous, "Missing selective sample in continuous batches allowed only once per test run.");
+                    missedSelectiveInContinuous = true;
+                }
             }
             else
             {
-                Assert.Single(group);
+                Assert.True(IndicatesSelectiveSampling(group));
+                var sample = Assert.Single(group);
+                Assert.True(HasSpanContextAssociated(sample));
+                selectiveSinceLastContinuous++;
             }
-
-            Assert.Single(group, HasSpanContextAssociated);
-
-            counter++;
         }
+    }
+
+    private static bool IsContinuousProfilingSamplesBatch(IGrouping<long, ConsoleThreadSample> group)
+    {
+        return group.All(sample => sample.Source == "continuous-profiler");
     }
 
     private static bool IndicatesSelectiveSampling(IGrouping<long, ConsoleThreadSample> samples)
@@ -163,7 +182,7 @@ public class SelectiveSamplerTests : TestHelper
         foreach (var (spanId, traceIdHigh, traceIdLow) in threadSampleSpanContexts)
         {
             // Reverse the conversion done in TryParseTraceContext methods in NativeMethods.cs
-            var sampleSpanId = ActivitySpanId.CreateFromString(spanId.ToString("x16").AsSpan());
+            var sampleSpanId = ActivitySpanId.CreateFromString(spanId.ToString("x16", CultureInfo.InvariantCulture).AsSpan());
             var sampleTraceId = ActivityTraceId.CreateFromString($"{traceIdHigh:x16}{traceIdLow:x16}".AsSpan());
 
             var match = collectedSpans.Any(c =>

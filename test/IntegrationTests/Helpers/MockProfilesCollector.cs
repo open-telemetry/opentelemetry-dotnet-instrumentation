@@ -141,7 +141,7 @@ internal sealed class MockProfilesCollector : IDisposable
         {
             var message = new StringBuilder();
             message.AppendLine("Expected no profiles to be collected, but found:");
-            message.AppendLine($"  \"{collected}\"");
+            message.AppendLine(CultureInfo.InvariantCulture, $"  \"{collected}\"");
 
             // Drain any additional items
             var additionalCount = 0;
@@ -152,7 +152,7 @@ internal sealed class MockProfilesCollector : IDisposable
 
             if (additionalCount > 0)
             {
-                message.AppendLine($"  ... and {additionalCount} more profile batch(es)");
+                message.AppendLine(CultureInfo.InvariantCulture, $"  ... and {additionalCount} more profile batch(es)");
             }
 
             Assert.Fail(message.ToString());

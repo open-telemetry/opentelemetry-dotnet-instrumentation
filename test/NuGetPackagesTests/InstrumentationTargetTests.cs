@@ -197,7 +197,7 @@ public class InstrumentationTargetTests : TestHelper
         Assert.Equal(0, RunDotNetCli(
             $"nuget add source \"{nugetArtifactsDir}\" --name nuget-artifacts --configfile nuget.config"));
         Assert.Equal(0, RunDotNetCli(
-            $"add package OpenTelemetry.AutoInstrumentation --prerelease"));
+            "add package OpenTelemetry.AutoInstrumentation --prerelease"));
 
         Assert.Equal(0, RunDotNetCli("build"));
     }
@@ -222,7 +222,7 @@ public class InstrumentationTargetTests : TestHelper
 
         Assert.NotNull(process);
 
-        bool processTimeout = !process!.WaitForExit((int)TestTimeout.ProcessExit.TotalMilliseconds);
+        var processTimeout = !process!.WaitForExit((int)TestTimeout.ProcessExit.TotalMilliseconds);
         if (processTimeout)
         {
             process.Kill();

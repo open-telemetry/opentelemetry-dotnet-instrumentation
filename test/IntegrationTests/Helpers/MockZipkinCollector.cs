@@ -177,7 +177,9 @@ internal sealed class MockZipkinCollector : IDisposable
     }
 
     [DebuggerDisplay("TraceId={TraceId}, SpanId={SpanId}, Service={Service}, Name={Name}")]
+#pragma warning disable CA1812 // Avoid uninstantiated internal classes. This class is instantiated by deserializer.
     internal sealed class ZSpanMock
+#pragma warning restore CA1812 // Avoid uninstantiated internal classes. This class is instantiated by deserializer.
     {
         [JsonExtensionData]
         private Dictionary<string, JToken> _zipkinData;

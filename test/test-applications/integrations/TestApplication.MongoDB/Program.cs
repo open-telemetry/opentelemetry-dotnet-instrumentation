@@ -7,15 +7,18 @@ using TestApplication.Shared;
 
 namespace TestApplication.MongoDB;
 
-public static class Program
+internal static class Program
 {
-    public static void Main(string[] args)
+    public static async Task Main(string[] args)
     {
         ConsoleHelper.WriteSplashScreen(args);
 
         var mongoPort = GetMongoPort(args);
         var mongoDatabase = GetMongoDbName(args);
         var mongoCollection = GetMongoCollectionName(args);
+#if !MONGODB_3_7_0_OR_GREATER
+        var shouldTriggerError = ShouldTriggerError(args);
+#endif
         var newDocument = new BsonDocument
         {
             { "name", "MongoDB" },
@@ -32,12 +35,68 @@ public static class Program
 
         var connectionString = $"mongodb://{Host()}:{mongoPort}";
 
+#if MONGODB_3_0_0_OR_GREATER
+        using var client = new MongoClient(connectionString);
+#else
         var client = new MongoClient(connectionString);
+#endif
         var database = client.GetDatabase(mongoDatabase);
         var collection = database.GetCollection<BsonDocument>(mongoCollection);
 
-        Run(collection, newDocument);
-        RunAsync(collection, newDocument).Wait();
+#if MONGODB_3_7_0_OR_GREATER
+        await RunAsync(collection, newDocument).ConfigureAwait(false);
+#else
+        if (shouldTriggerError)
+        {
+            RunWithError(collection, newDocument);
+        }
+        else
+        {
+#pragma warning disable CA1849 // Call async methods when in an async method. Intentionally calling both sync and async versions of the method to ensure both are properly traced.
+            Run(collection, newDocument);
+#pragma warning restore CA1849 // Call async methods when in an async method. Intentionally calling both sync and async versions of the method to ensure both are properly traced.
+            await RunAsync(collection, newDocument).ConfigureAwait(false);
+        }
+#endif
+    }
+
+    public static async Task RunAsync(IMongoCollection<BsonDocument> collection, BsonDocument newDocument)
+    {
+        var allFilter = new BsonDocument();
+
+        await collection.DeleteManyAsync(allFilter).ConfigureAwait(false);
+        await collection.InsertOneAsync(newDocument).ConfigureAwait(false);
+
+        var count = await collection.CountDocumentsAsync(new BsonDocument()).ConfigureAwait(false);
+
+        Console.WriteLine($"Documents: {count}");
+
+        var find = await collection.FindAsync(allFilter).ConfigureAwait(false);
+        var allDocuments = await find.ToListAsync().ConfigureAwait(false);
+        Console.WriteLine(allDocuments.FirstOrDefault());
+    }
+
+#if !MONGODB_3_7_0_OR_GREATER
+    public static void RunWithError(IMongoCollection<BsonDocument> collection, BsonDocument newDocument)
+    {
+        try
+        {
+            // Trigger an error by trying to create an index with invalid options
+            // This will cause a MongoCommandException
+            var keys = Builders<BsonDocument>.IndexKeys.Ascending("invalid_field");
+            var options = new CreateIndexOptions
+            {
+                Unique = true,
+                Name = string.Empty // Empty name will cause an error
+            };
+            var indexModel = new CreateIndexModel<BsonDocument>(keys, options);
+            collection.Indexes.CreateOne(indexModel);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Expected error occurred: {ex.GetType().Name}");
+            // Error should be captured in traces
+        }
     }
 
     public static void Run(IMongoCollection<BsonDocument> collection, BsonDocument newDocument)
@@ -68,21 +127,11 @@ public static class Program
         }
     }
 
-    public static async Task RunAsync(IMongoCollection<BsonDocument> collection, BsonDocument newDocument)
+    private static bool ShouldTriggerError(string[] args)
     {
-        var allFilter = new BsonDocument();
-
-        await collection.DeleteManyAsync(allFilter);
-        await collection.InsertOneAsync(newDocument);
-
-        var count = await collection.CountDocumentsAsync(new BsonDocument());
-
-        Console.WriteLine($"Documents: {count}");
-
-        var find = await collection.FindAsync(allFilter);
-        var allDocuments = await find.ToListAsync();
-        Console.WriteLine(allDocuments.FirstOrDefault());
+        return args.Any(arg => arg.Equals("--trigger-error", StringComparison.OrdinalIgnoreCase));
     }
+#endif
 
     private static string Host()
     {

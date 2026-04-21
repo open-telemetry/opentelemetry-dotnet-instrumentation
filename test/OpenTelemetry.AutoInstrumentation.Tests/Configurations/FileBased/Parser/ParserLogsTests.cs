@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 using OpenTelemetry.AutoInstrumentation.Configurations.FileBasedConfiguration;
+using OpenTelemetry.AutoInstrumentation.Tests.Util;
 using Xunit;
 using YamlParser = OpenTelemetry.AutoInstrumentation.Configurations.FileBasedConfiguration.Parser.Parser;
 
@@ -61,13 +62,16 @@ public class ParserLogsTests
     [Fact]
     public void Parse_EnvVarYaml_ShouldPopulateModelCompletely()
     {
-        Environment.SetEnvironmentVariable("OTEL_BSP_SCHEDULE_DELAY", "7000");
-        Environment.SetEnvironmentVariable("OTEL_BSP_EXPORT_TIMEOUT", "35000");
-        Environment.SetEnvironmentVariable("OTEL_BSP_MAX_QUEUE_SIZE", "4096");
-        Environment.SetEnvironmentVariable("OTEL_BSP_MAX_EXPORT_BATCH_SIZE", "1024");
-        Environment.SetEnvironmentVariable("OTEL_EXPORTER_OTLP_LOGS_ENDPOINT", "http://collector:4318/v1/logs");
-        Environment.SetEnvironmentVariable("OTEL_EXPORTER_OTLP_LOGS_TIMEOUT", "15000");
-        Environment.SetEnvironmentVariable("OTEL_EXPORTER_OTLP_LOGS_HEADERS", "header1=value1,header2=value2");
+        using var envScope = new EnvironmentScope(new Dictionary<string, string?>()
+        {
+            { "OTEL_BSP_SCHEDULE_DELAY", "7000" },
+            { "OTEL_BSP_EXPORT_TIMEOUT", "35000" },
+            { "OTEL_BSP_MAX_QUEUE_SIZE", "4096" },
+            { "OTEL_BSP_MAX_EXPORT_BATCH_SIZE", "1024" },
+            { "OTEL_EXPORTER_OTLP_LOGS_ENDPOINT", "http://collector:4318/v1/logs" },
+            { "OTEL_EXPORTER_OTLP_LOGS_TIMEOUT", "15000" },
+            { "OTEL_EXPORTER_OTLP_LOGS_HEADERS", "header1=value1,header2=value2" },
+        });
 
         var config = YamlParser.ParseYaml<YamlConfiguration>("Configurations/FileBased/Files/TestLogsFileEnvVars.yaml");
         Assert.NotNull(config);

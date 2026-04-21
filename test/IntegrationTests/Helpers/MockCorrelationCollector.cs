@@ -94,7 +94,7 @@ internal sealed class MockCorrelationCollector : IDisposable
             {
                 foreach (var span in scopeSpans.Spans ?? Enumerable.Empty<Span>())
                 {
-                    _spans.Add(new MockSpansCollector.Collected(scopeSpans.Scope.Name, span));
+                    _spans.Add(new MockSpansCollector.Collected(scopeSpans.Scope, span, scopeSpans.SchemaUrl));
                 }
             }
         }

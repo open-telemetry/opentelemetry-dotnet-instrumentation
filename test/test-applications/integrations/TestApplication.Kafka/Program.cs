@@ -3,6 +3,7 @@
 
 using Confluent.Kafka;
 using Confluent.Kafka.Admin;
+using TestApplication.Shared;
 
 namespace TestApplication.Kafka;
 
@@ -13,6 +14,8 @@ internal static class Program
 
     public static async Task<int> Main(string[] args)
     {
+        ConsoleHelper.WriteSplashScreen(args);
+
         if (args.Length < 4)
         {
             throw new ArgumentException("Required parameters not provided.");
@@ -25,12 +28,12 @@ internal static class Program
 
         if (args.Length == 5 && args[4] == "--consume-only")
         {
-            return await ConsumeOnly(topicName);
+            return await ConsumeOnly(topicName).ConfigureAwait(false);
         }
 
         if (args.Length == 4)
         {
-            return await ProduceAndConsume(topicName);
+            return await ProduceAndConsume(topicName).ConfigureAwait(false);
         }
 
         throw new ArgumentException("Invalid parameters.");
@@ -38,7 +41,7 @@ internal static class Program
 
     private static async Task<int> ConsumeOnly(string topicName)
     {
-        await CreateTopic(_bootstrapServers, topicName);
+        await CreateTopic(_bootstrapServers, topicName).ConfigureAwait(false);
 
         using var consumer = BuildConsumer(topicName, _bootstrapServers);
         consumer.Subscribe(topicName);
@@ -73,7 +76,7 @@ internal static class Program
                 $"Delivery report received, message offset: {report.Offset.Value}, error: {report.Error.IsError}.");
             waitEvent.Set();
         });
-        await TryProduceAsync(producer, topicName);
+        await TryProduceAsync(producer, topicName).ConfigureAwait(false);
         TryProduceSync(producer, topicName);
 
         using var consumer = BuildConsumer(topicName, _bootstrapServers);
@@ -90,7 +93,7 @@ internal static class Program
 
         Console.WriteLine("Delivery handler completed.");
 
-        await CreateTopic(_bootstrapServers, topicName);
+        await CreateTopic(_bootstrapServers, topicName).ConfigureAwait(false);
         Console.WriteLine("Topic creation completed.");
 
         using var cts = new CancellationTokenSource(TimeSpan.FromMinutes(1));
@@ -98,8 +101,9 @@ internal static class Program
         // Required as first few Produce attempts may still fail
         // with "unknown topic" error
         // after topic creation completed.
-        await WaitForSuccessfulProduceAsync(producer, topicName, cts.Token);
+        await WaitForSuccessfulProduceAsync(producer, topicName, cts.Token).ConfigureAwait(false);
 
+#pragma warning disable CA1849 // Call async methods when in an async method. Needed for bytecode compatibility testing.
         producer.Produce(topicName, CreateTestMessage());
         producer.Produce(
             topicName,
@@ -119,6 +123,7 @@ internal static class Program
 
         // Produce a tombstone.
         producer.Produce(topicName, new Message<string, string> { Key = MessageKey, Value = null! });
+#pragma warning restore CA1849 // Call async methods when in an async method. Needed for bytecode compatibility testing.
         return 0;
     }
 
@@ -154,7 +159,7 @@ internal static class Program
             token.ThrowIfCancellationRequested();
             try
             {
-                await producer.ProduceAsync(topicName, CreateTestMessage(), token);
+                await producer.ProduceAsync(topicName, CreateTestMessage(), token).ConfigureAwait(false);
                 return;
             }
             catch (ProduceException<string, string> ex)
@@ -162,7 +167,7 @@ internal static class Program
                 Console.WriteLine($"ProduceAsync exception: {ex.Error.Reason}");
             }
 
-            await Task.Delay(TimeSpan.FromSeconds(1), token);
+            await Task.Delay(TimeSpan.FromSeconds(1), token).ConfigureAwait(false);
         }
     }
 
@@ -197,7 +202,7 @@ internal static class Program
     {
         try
         {
-            await producer.ProduceAsync(topicName, CreateTestMessage());
+            await producer.ProduceAsync(topicName, CreateTestMessage()).ConfigureAwait(false);
         }
         catch (ProduceException<string, string> ex)
         {
@@ -233,9 +238,8 @@ internal static class Program
         };
 
         using var adminClient = new AdminClientBuilder(adminClientConfig).Build();
-        await adminClient.CreateTopicsAsync(new[]
-        {
+        await adminClient.CreateTopicsAsync([
             new TopicSpecification { Name = topic, ReplicationFactor = 1, NumPartitions = 1 }
-        });
+        ]).ConfigureAwait(false);
     }
 }

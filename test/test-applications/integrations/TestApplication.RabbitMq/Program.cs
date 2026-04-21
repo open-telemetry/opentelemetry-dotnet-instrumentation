@@ -4,6 +4,7 @@
 #if !RABBITMQ_7_0_0_OR_GREATER
 using System.Reflection;
 #endif
+using System.Globalization;
 using System.Text;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
@@ -18,9 +19,9 @@ internal static class Program
     {
         ConsoleHelper.WriteSplashScreen(args);
 
-        var factory = new ConnectionFactory { HostName = "localhost", Port = int.Parse(GetRabbitMqPort(args)) };
-        await using var connection = await factory.CreateConnectionAsync();
-        await using var channel = await connection.CreateChannelAsync();
+        var factory = new ConnectionFactory { HostName = "localhost", Port = int.Parse(GetRabbitMqPort(args), CultureInfo.InvariantCulture) };
+        using var connection = await factory.CreateConnectionAsync().ConfigureAwait(false);
+        using var channel = await connection.CreateChannelAsync().ConfigureAwait(false);
 
         Console.WriteLine(channel.GetType().FullName);
 
@@ -29,7 +30,7 @@ internal static class Program
             durable: false,
             exclusive: false,
             autoDelete: false,
-            arguments: null);
+            arguments: null).ConfigureAwait(false);
 
         const string message = "Hello World!";
         ReadOnlyMemory<byte> body = Encoding.UTF8.GetBytes(message);
@@ -38,7 +39,7 @@ internal static class Program
             exchange: string.Empty,
             routingKey: "hello",
             body: body,
-            mandatory: false);
+            mandatory: false).ConfigureAwait(false);
         Console.WriteLine($"Sent: {message}");
 
         var consumer = new AsyncEventingBasicConsumer(channel);
@@ -54,7 +55,7 @@ internal static class Program
             return Task.CompletedTask;
         };
 
-        await channel.BasicConsumeAsync(queue: "hello", autoAck: true, consumer);
+        await channel.BasicConsumeAsync(queue: "hello", autoAck: true, consumer).ConfigureAwait(false);
 
         resetEvent.Wait(TimeSpan.FromSeconds(5));
     }
@@ -90,7 +91,7 @@ internal static class Program
 
     private static int PublishAndConsumeWithSyncDispatcher(string[] args)
     {
-        var syncConsumersConnectionFactory = new ConnectionFactory { HostName = "localhost", Port = int.Parse(GetRabbitMqPort(args)) };
+        var syncConsumersConnectionFactory = new ConnectionFactory { HostName = "localhost", Port = int.Parse(GetRabbitMqPort(args), CultureInfo.InvariantCulture) };
         using var syncConsumersConnection = syncConsumersConnectionFactory.CreateConnection();
         using var syncConsumersModel = syncConsumersConnection.CreateModel();
 
@@ -144,7 +145,7 @@ internal static class Program
         var asyncConsumersConnectionFactory = new ConnectionFactory
         {
             HostName = "localhost",
-            Port = int.Parse(GetRabbitMqPort(args)),
+            Port = int.Parse(GetRabbitMqPort(args), CultureInfo.InvariantCulture),
             DispatchConsumersAsync = true
         };
         using var asyncConsumersConnection = asyncConsumersConnectionFactory.CreateConnection();
@@ -245,7 +246,7 @@ internal static class Program
 
     // Custom consumer classes, with implementation (simplified) based on EventingBasicConsumer/AsyncEventingBasicConsumer
     // from the library.
-    private class TestAsyncConsumer : AsyncDefaultBasicConsumer
+    private sealed class TestAsyncConsumer : AsyncDefaultBasicConsumer
     {
         public TestAsyncConsumer(IModel model)
             : base(model)
@@ -280,7 +281,7 @@ internal static class Program
         }
     }
 
-    private class TestSyncConsumer : DefaultBasicConsumer
+    private sealed class TestSyncConsumer : DefaultBasicConsumer
     {
         public TestSyncConsumer(IModel model)
             : base(model)

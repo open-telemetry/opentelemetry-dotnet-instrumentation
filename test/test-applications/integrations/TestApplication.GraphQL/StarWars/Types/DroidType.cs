@@ -3,7 +3,7 @@ using StarWars.Extensions;
 
 namespace StarWars.Types;
 
-public class DroidType : ObjectGraphType<Droid>
+internal sealed class DroidType : ObjectGraphType<Droid>
 {
     public DroidType(StarWarsData data)
     {
@@ -31,7 +31,7 @@ public class DroidType : ObjectGraphType<Droid>
             .Bidirectional()
             .Resolve(context => context.GetPagedResults<Droid, StarWarsCharacter>(data, context.Source.Friends));
 
-        Field<ListGraphType<EpisodeEnum>>("appearsIn")
+        Field<ListGraphType<Episodes>>("appearsIn")
             .Description("Which movie they appear in.");
 
         Field(d => d.PrimaryFunction, nullable: true)

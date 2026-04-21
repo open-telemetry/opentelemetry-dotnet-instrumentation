@@ -30,7 +30,6 @@
     <NoWarn>$(NoWarn);NU5104</NoWarn>
 
     <EmbedUntrackedSources Condition=" '$(TargetFramework)' == 'net462' ">true</EmbedUntrackedSources>
-    <AnalysisLevel>latest-All</AnalysisLevel>
   </PropertyGroup>
 
   <ItemGroup>

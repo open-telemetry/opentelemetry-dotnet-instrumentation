@@ -5,7 +5,7 @@ using Microsoft.Extensions.Logging;
 
 namespace TestApplication.Log4NetBridge;
 
-public class Log4NetLoggerProvider : ILoggerProvider
+internal sealed class Log4NetLoggerProvider : ILoggerProvider
 {
     public ILogger CreateLogger(string categoryName)
     {

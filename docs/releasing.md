@@ -64,7 +64,7 @@
 1. For a stable release, update the version in:
 
    - [`examples/demo/Dockerfile`](../examples/demo/Dockerfile)
-   - [OpenTelemetry Operator](https://github.com/open-telemetry/opentelemetry-operator/blob/main/autoinstrumentation/dotnet/version.txt)
+   - [`test/test-applications/nuget-packages/TestApplication.NugetSample/TestApplication.NugetSample.csproj`](../test/test-applications/nuget-packages/TestApplication.NugetSample/TestApplication.NugetSample.csproj)
    - [OpenTelemetry Demo](https://github.com/open-telemetry/opentelemetry-demo/blob/main/src/accounting/Accounting.csproj#L20)
 
 1. For a stable release, update documentation under [opentelemetry.io](https://github.com/open-telemetry/opentelemetry.io/tree/main/content/en/docs/zero-code/dotnet).

@@ -9,10 +9,12 @@ namespace TestApplication.Http;
 /// <summary>
 /// In-memory user store for testing Identity metrics
 /// </summary>
-public class InMemoryUserStore : IUserStore<TestUser>, IUserPasswordStore<TestUser>
+#pragma warning disable CA1812 // Avoid uninstantiated internal classes. This class is instantiated by Identity.
+internal sealed class InMemoryUserStore : IUserPasswordStore<TestUser>
+#pragma warning restore CA1812 // Avoid uninstantiated internal classes. This class is instantiated by Identity.
 {
-    private readonly Dictionary<string, TestUser> _users = new();
-    private readonly Dictionary<string, string> _passwords = new();
+    private readonly Dictionary<string, TestUser> _users = [];
+    private readonly Dictionary<string, string> _passwords = [];
 
     public Task<IdentityResult> CreateAsync(TestUser user, CancellationToken cancellationToken)
     {

@@ -3,7 +3,9 @@
 
 namespace IntegrationTests;
 
-internal class ConsoleThreadSample
+#pragma warning disable CA1812 // Avoid uninstantiated internal classes. This class is instantiated by deserializer.
+internal sealed class ConsoleThreadSample
+#pragma warning disable CA1812 // Avoid uninstantiated internal classes. This class is instantiated by deserializer.
 {
     public long TimestampNanoseconds { get; set; }
 

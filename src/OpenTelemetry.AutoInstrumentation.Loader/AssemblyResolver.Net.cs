@@ -3,94 +3,164 @@
 
 #if NET
 using System.Reflection;
-using System.Runtime.InteropServices;
+using System.Runtime.Loader;
+using OpenTelemetry.AutoInstrumentation.Configurations;
+using OpenTelemetry.AutoInstrumentation.Logging;
+using OpenTelemetry.AutoInstrumentation.Util;
 
 namespace OpenTelemetry.AutoInstrumentation.Loader;
 
 /// <summary>
 /// A class that attempts to load the OpenTelemetry.AutoInstrumentation .NET assembly.
 /// </summary>
-internal partial class AssemblyResolver
+internal class AssemblyResolver(IOtelLogger logger)
 {
-    internal static System.Runtime.Loader.AssemblyLoadContext DependencyLoadContext { get; } = new ManagedProfilerAssemblyLoadContext();
+    internal static HashSet<string> TrustedPlatformAssemblyNames { get; } = new(GetTrustedPlatformAssemblyNames(), StringComparer.OrdinalIgnoreCase);
 
-    internal static string[]? StoreFiles { get; } = GetStoreFiles();
+    internal AssemblyLoadContext DependencyLoadContext { get; } = new ManagedProfilerAssemblyLoadContext(logger);
 
-    internal Assembly? AssemblyResolve_ManagedProfilerDependencies(object? sender, ResolveEventArgs args)
+    internal void RegisterAssemblyResolving()
     {
-        var assemblyName = new AssemblyName(args.Name);
-        _logger.Debug($"Check assembly {assemblyName}");
+        // ASSEMBLY RESOLUTION STRATEGY
+        //
+        // === NATIVE PROFILER DEPLOYMENT ===
+        // The native profiler already redirected (IL rewriting) all conflicting AssemblyRef to our versions.
+        // In most cases the Resolving event fires because of this redirection and we know exactly
+        // what to do - just decide which context to load the assembly into:
+        //
+        // Case 1: Assembly NOT in TrustedPlatformAssembly list (our dependencies; e.g., OpenTelemetry.dll)
+        //   -> Runtime has no knowledge about this assembly
+        //   -> Resolving event fires
+        //   -> We load to Default AssemblyLoadContext (no version conflict risk)
+        //
+        // Case 2: Assembly IN TPA with lower version (conflict)
+        //   -> Customer's TPA has lower version, profiler redirects to higher version
+        //   -> Runtime cannot satisfy higher version due to TPA conflict
+        //   -> Resolving event fires
+        //   -> We load to Custom ALC for isolation (loading to Default ALC will fail)
+        //   -> NOTE: If TPA has same/higher version, runtime successfully auto-loads to Default ALC;
+        //            event never fires (accepted)
+        //
+        // Note: However, other situations may also trigger the Resolving event for an assembly we ship
+        // (e.g., programmatic Assembly.Load with an explicit version that .net runtime cannot satisfy).
+        // To avoid accidentally satisfying a request that is not ours or one we cannot fulfill,
+        // we validate versions before loading: if our version >= requested, we proceed (backward compatible);
+        // if the requested version is higher than ours, we skip the request.
 
-        // On .NET Framework, having a non-US locale can cause mscorlib
-        // to enter the AssemblyResolve event when searching for resources
-        // in its satellite assemblies. This seems to have been fixed in
-        // .NET Core in the 2.0 servicing branch, so we should not see this
-        // occur, but guard against it anyways. If we do see it, exit early
-        // so we don't cause infinite recursion.
-        if (string.Equals(assemblyName.Name, "System.Private.CoreLib.resources", StringComparison.OrdinalIgnoreCase) ||
-            string.Equals(assemblyName.Name, "System.Net.Http", StringComparison.OrdinalIgnoreCase))
-        {
-            return null;
-        }
+        // ASSEMBLY RESOLUTION TIMING
+        //
+        // When the runtime cannot find an assembly, AssemblyLoadContext.Default.Resolving fires before
+        // AppDomain.CurrentDomain.AssemblyResolve, so we subscribe to the former for guaranteed control.
+        //
+        // While we could subscribe to AppDomain.CurrentDomain.AssemblyResolve, the timing of this
+        // subscription relative to the built-in handler (Assembly.LoadFromResolveHandler) subscription is
+        // unpredictable and fragile to code changes. If the built-in handler runs first, it loads co-located
+        // assemblies (our layout - OpenTelemetry.dll library and its dependency System.Diagnostics.DiagnosticSource.dll)
+        // into the Default context via Assembly.LoadFrom, causing loading failure if the customer application
+        // has the same dependency but to a lower version (in the example above, DiagnosticSource dll)
 
-        var path = Path.Combine(_managedProfilerDirectory, $"{assemblyName.Name}.dll");
+        // ASSEMBLY REDIRECTION AND REFLECTION
+        //
+        // Native Assembly Redirection (IL rewriting) only works for assemblies that are being loaded,
+        // so we must ensure that reflection-triggered loads are also intercepted.
+        // GetType / Load(AssemblyName) calls bypass IL rewriting entirely —
+        // so the assemblies from TPA will be automatically loaded to Default ALC by by-passing Default.Resolving
+        // and may potentially cause a drift if our version of the assembly is higher that the TPA.
+        // To fix this, we set DependencyLoadContext as the contextual reflection ALC via
+        // EnterContextualReflection(), so those calls route through Load(AssemblyName) first
+        // and TPA conflicts can be intercepted before the runtime silently loads the wrong version.
 
-        // Only load the main profiler into the default Assembly Load Context.
-        // If OpenTelemetry.AutoInstrumentation or other libraries are provided by the NuGet package their loads are handled in the following two ways.
-        // 1) The AssemblyVersion is greater than or equal to the version used by OpenTelemetry.AutoInstrumentation, the assembly
-        //    will load successfully and will not invoke this resolve event.
-        // 2) The AssemblyVersion is lower than the version used by OpenTelemetry.AutoInstrumentation, the assembly will fail to load
-        //    and invoke this resolve event. It must be loaded in a separate AssemblyLoadContext since the application will only
-        //    load the originally referenced version
-        if (assemblyName.Name != null && assemblyName.Name.StartsWith("OpenTelemetry.AutoInstrumentation", StringComparison.OrdinalIgnoreCase) && File.Exists(path))
+        AssemblyLoadContext.Default.Resolving += Resolving_ManagedProfilerDependencies;
+        // If Assembly Redirection is disabled via env variable, then we don't have Native IL rewriting
+        // so AssemblyResolver will not be used to resolve conflicts but will only handle our dependencies
+        // that are not referenced directly in customer application (by loading them to Default ALC);
+        // this configuation serves as an indication that the customer choose to handle conflicts on their own
+        // (for example by referencing our versions directly or via other means).
+        // In this case we don't need to support redirection for reflection-triggered loads neither;
+        // this will effectively avoid triggering our custom ALC Load method for file searches and checks
+        // in the use case where it's unnecessary
+        if (IsRedirectEnabled())
         {
-            _logger.Debug("Loading {0} with Assembly.LoadFrom", path);
-            return Assembly.LoadFrom(path);
-        }
-        else if (File.Exists(path))
-        {
-            _logger.Debug("Loading {0} with DependencyLoadContext.LoadFromAssemblyPath", path);
-            return DependencyLoadContext.LoadFromAssemblyPath(path); // Load unresolved framework and third-party dependencies into a custom Assembly Load Context
-        }
-        else
-        {
-            var entry = StoreFiles?.FirstOrDefault(e => e.EndsWith($"{assemblyName.Name}.dll", StringComparison.Ordinal));
-            if (entry != null)
-            {
-                return DependencyLoadContext.LoadFromAssemblyPath(entry);
-            }
-
-            return null;
+            // TODO with setting DependencyLoadContext as contextual reflection context, these become more important:
+            //  - need of caching, because for unknown assemblies we will be hitting file system many times
+            //  - for unknown assemblies we'll be hitting both DependencyLoadContext.Load and this event handler
+            DependencyLoadContext.EnterContextualReflection();
         }
     }
 
-    private static string[]? GetStoreFiles()
+    private static string[] GetTrustedPlatformAssemblyNames()
     {
-        try
+        return [.. TrustedPlatformAssembliesHelper.TpaPaths.Select(Path.GetFileNameWithoutExtension).OfType<string>()];
+    }
+
+    private Assembly? Resolving_ManagedProfilerDependencies(AssemblyLoadContext context, AssemblyName assemblyName)
+    {
+        logger.Debug($"Check resolving assembly: ({assemblyName})");
+
+        // 1. Early exit: assembly must have a name
+        if (assemblyName.Name is null)
         {
-            var storeDirectory = Environment.GetEnvironmentVariable("DOTNET_SHARED_STORE");
-            if (storeDirectory == null || !Directory.Exists(storeDirectory))
+            logger.Debug($"Skip resolving assembly with null name");
+            return null;
+        }
+
+        // TODO we may want to cache assembly paths for assemblies loading to custom ALC to avoid repeated file system calls
+        // on every resolution, or simply check if the assembly is already loaded into custom ALC
+
+        // 2. Early exit: assembly must be in our agent files
+        var assemblyPath = ManagedProfilerLocationHelper.GetAssemblyPath(assemblyName.Name, logger);
+        if (assemblyPath is null)
+        {
+            logger.Debug("Skip resolving unexpected assembly");
+            return null;
+        }
+
+        // 3. Early exit: our assembly must satisfy the requested version
+        // See ASSEMBLY RESOLUTION STRATEGY Note comment in RegisterAssemblyResolving for details.
+        if (assemblyName.Version is not null)
+        {
+            var assemblyVersion = AssemblyUtils.GetAssemblyVersionSafe(assemblyPath);
+            if (assemblyVersion is not null && assemblyVersion < assemblyName.Version)
             {
+                logger.Debug($"Skip resolving assembly ({assemblyName}): requested version [v{assemblyName.Version}] is higher than our version [v{assemblyVersion}]");
                 return null;
             }
 
-            var architecture = RuntimeInformation.ProcessArchitecture switch
+            // Exception: If we can't determine the version, we still attempt to load the assembly.
+            // Rationale:
+            // - We've already located assembly by name in the agent directory
+            // - The only uncertainty is the version
+            // - Version mismatches with native AssemblyRef redirection are not typical
+            // - Rejecting a valid agent dependency creates a higher risk of
+            //     1) loading an assembly from TPA at a lower version or
+            //     2) not loading the agent dependency at all,
+            //   in a scenario that is already documented as unsupported
+            if (assemblyVersion is null)
             {
-                Architecture.X86 => "x86",
-                Architecture.Arm64 => "arm64",
-                _ => "x64" // Default to x64 for architectures not explicitly handled
-            };
-
-            var targetFramework = $"net{Environment.Version.Major}.{Environment.Version.Minor}";
-            var finalPath = Path.Combine(storeDirectory, architecture, targetFramework);
-
-            var storeFiles = Directory.GetFiles(finalPath, "Microsoft.Extensions*.dll", SearchOption.AllDirectories);
-            return storeFiles;
+                logger.Debug($"Failed to read version from \"{assemblyPath}\", proceeding with resolving");
+            }
         }
-        catch
+
+        // 4. Load conflicting assembly into custom ALC, otherwise into Default ALC
+        var loadContext = TrustedPlatformAssemblyNames.Contains(assemblyName.Name)
+            ? DependencyLoadContext
+            : AssemblyLoadContext.Default;
+        logger.Debug($"Loading \"{assemblyPath}\" with {loadContext.Name}.LoadFromAssemblyPath");
+        return loadContext.LoadFromAssemblyPath(assemblyPath);
+    }
+
+    private bool IsRedirectEnabled()
+    {
+        var envValue = Environment.GetEnvironmentVariable(ConfigurationKeys.RedirectEnabled);
+        if (bool.TryParse(envValue, out var redirectEnabled))
         {
-            return null;
+            logger.Information($"Redirect explicitly set via environment variable {ConfigurationKeys.RedirectEnabled} to: {redirectEnabled}");
+            return redirectEnabled;
         }
+
+        logger.Information($"Redirect not explicitly set via environment variable {ConfigurationKeys.RedirectEnabled}, defaulting to: true");
+        return true;
     }
 }
+
 #endif

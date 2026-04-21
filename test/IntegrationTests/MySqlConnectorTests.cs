@@ -6,7 +6,7 @@ using Xunit.Abstractions;
 
 namespace IntegrationTests;
 
-[Collection(MySqlCollection.Name)]
+[Collection(MySqlCollectionFixture.Name)]
 public class MySqlConnectorTests : TestHelper
 {
     private readonly MySqlFixture _mySql;

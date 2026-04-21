@@ -11,7 +11,7 @@ namespace IntegrationTests.Helpers;
 
 internal static class HealthzHelper
 {
-    private static readonly HttpClient HttpClient = new();
+    private static readonly HttpClient Client = new();
 
     public static async Task TestAsync(string healthzUrl, ITestOutputHelper output)
     {
@@ -24,7 +24,7 @@ internal static class HealthzHelper
         {
             try
             {
-                var response = await HttpClient.GetAsync(new Uri(healthzUrl)).ConfigureAwait(false);
+                var response = await Client.GetAsync(new Uri(healthzUrl)).ConfigureAwait(false);
                 if (response.StatusCode == HttpStatusCode.OK)
                 {
                     return;

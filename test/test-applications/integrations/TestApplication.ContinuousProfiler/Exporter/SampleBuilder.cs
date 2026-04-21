@@ -5,7 +5,7 @@ using OpenTelemetry.Proto.Profiles.V1Development;
 
 namespace TestApplication.ContinuousProfiler;
 
-internal class SampleBuilder
+internal sealed class SampleBuilder
 {
     private readonly Sample _sample = new();
     private long? _value;
@@ -22,10 +22,9 @@ internal class SampleBuilder
         return this;
     }
 
-    public SampleBuilder SetLocationRange(int locationsStartIndex, int locationsLength)
+    public SampleBuilder SetStackIndex(int stackIndex)
     {
-        _sample.LocationsStartIndex = locationsStartIndex;
-        _sample.LocationsLength = locationsLength;
+        _sample.StackIndex = stackIndex;
         return this;
     }
 
@@ -39,7 +38,7 @@ internal class SampleBuilder
     {
         if (_value.HasValue)
         {
-            _sample.Value.Add(_value.Value);
+            _sample.Values.Add(_value.Value);
         }
 
         return _sample;

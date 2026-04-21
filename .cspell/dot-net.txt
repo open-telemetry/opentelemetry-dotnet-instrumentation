@@ -1,3 +1,4 @@
+adonet
 aspnet
 ASPNETCORE
 ASSERTE
@@ -31,14 +32,17 @@ movq
 MSVC
 netcoreapp
 NETFX
+netstandard
 NGEN
 nullptr
 nupkg
 popq
+sbyte
 SIGUSR
 snupkg
 stdlibc
 struct
 TRACEFILE
 typeof
+WCFCORE
 Xunit

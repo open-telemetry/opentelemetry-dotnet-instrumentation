@@ -27,7 +27,7 @@ var builder = Host.CreateDefaultBuilder()
     }).Build();
 
 var schedulerFactory = builder.Services.GetRequiredService<ISchedulerFactory>();
-var scheduler = await schedulerFactory.GetScheduler();
+var scheduler = await schedulerFactory.GetScheduler().ConfigureAwait(false);
 
 var job = JobBuilder.Create<TestJob>()
     .WithIdentity("testJob", "group1")
@@ -40,7 +40,7 @@ var trigger = TriggerBuilder.Create()
         .WithRepeatCount(0))
     .Build();
 
-await scheduler.ScheduleJob(job, trigger);
+await scheduler.ScheduleJob(job, trigger).ConfigureAwait(false);
 
 using var cancellationTokenSource = new CancellationTokenSource(TimeSpan.FromSeconds(5));
-await builder.RunAsync(cancellationTokenSource.Token);
+await builder.RunAsync(cancellationTokenSource.Token).ConfigureAwait(false);

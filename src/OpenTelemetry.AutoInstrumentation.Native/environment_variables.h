@@ -63,14 +63,14 @@ const WSTRING clr_enable_inlining = WStr("OTEL_DOTNET_AUTO_CLR_ENABLE_INLINING")
 // Sets whether to enable NGEN images.
 const WSTRING clr_enable_ngen = WStr("OTEL_DOTNET_AUTO_CLR_ENABLE_NGEN");
 
-// Enable the assembly version redirection when running on the .NET Framework.
-const WSTRING netfx_assembly_redirection_enabled = WStr("OTEL_DOTNET_AUTO_NETFX_REDIRECT_ENABLED");
+// Enable the assembly version redirection.
+const WSTRING assembly_redirection_enabled = WStr("OTEL_DOTNET_AUTO_REDIRECT_ENABLED");
+
+// (Legacy variable) Enable the assembly version redirection for .NET Framework assemblies.
+const WSTRING assembly_redirection_enabled_netfx_legacy = WStr("OTEL_DOTNET_AUTO_NETFX_REDIRECT_ENABLED");
 
 // Enable the fail fast mode.
 const WSTRING fail_fast_enabled = WStr("OTEL_DOTNET_AUTO_FAIL_FAST_ENABLED");
-
-// Enable the IL rewrite of SqlClient instrumentation for .NET Framework applications to capture command text.
-const WSTRING sqlclient_netfx_ilrewrite_enabled = WStr("OTEL_DOTNET_AUTO_SQLCLIENT_NETFX_ILREWRITE_ENABLED");
 
 // The list of startup hooks defined for .NET Core 3.1+ applications.
 // This is a .NET runtime environment variable. 

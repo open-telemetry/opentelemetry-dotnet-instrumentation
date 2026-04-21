@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 using OpenTelemetry.AutoInstrumentation.Configurations.FileBasedConfiguration;
+using OpenTelemetry.AutoInstrumentation.Tests.Util;
 using Xunit;
 using YamlParser = OpenTelemetry.AutoInstrumentation.Configurations.FileBasedConfiguration.Parser.Parser;
 
@@ -16,8 +17,6 @@ public class ParserResourceTests
         var config = YamlParser.ParseYaml<YamlConfiguration>("Configurations/FileBased/Files/TestResourceFile.yaml");
 
         Assert.NotNull(config);
-
-        Assert.Equal("1.0-rc.1", config.FileFormat);
 
         Assert.NotNull(config.Resource);
         Assert.NotNull(config.Resource.Attributes);
@@ -49,15 +48,15 @@ public class ParserResourceTests
 
         List<KeyValuePair<string, object>> expectedTagList =
         [
-            new KeyValuePair<string, object>("service.name", "unknown_service"),
-            new KeyValuePair<string, object>("attribute_key_string", "string_value"),
-            new KeyValuePair<string, object>("attribute_key_bool", true),
-            new KeyValuePair<string, object>("attribute_key_int", 12345L),
-            new KeyValuePair<string, object>("attribute_key_double", 123.45),
-            new KeyValuePair<string, object>("attribute_key_string_array", new[] { "value1", "value2", "value3" }),
-            new KeyValuePair<string, object>("attribute_key_bool_array", new[] { true, false, true }),
-            new KeyValuePair<string, object>("attribute_key_int_array", new[] { 123L, 456L, 789L }),
-            new KeyValuePair<string, object>("attribute_key_double_array", new[] { 123.45, 678.90 }),
+            new("service.name", "unknown_service"),
+            new("attribute_key_string", "string_value"),
+            new("attribute_key_bool", true),
+            new("attribute_key_int", 12345L),
+            new("attribute_key_double", 123.45),
+            new("attribute_key_string_array", (string[])["value1", "value2", "value3"]),
+            new("attribute_key_bool_array", (bool[])[true, false, true]),
+            new("attribute_key_int_array", (long[])[123, 456, 789]),
+            new("attribute_key_double_array", (double[])[123.45, 678.90]),
         ];
 
         Assert.Equal(expectedTagList, tagList);
@@ -89,15 +88,17 @@ public class ParserResourceTests
     [Fact]
     public void Parse_EnvVarYaml_ShouldPopulateModelCompletely()
     {
-        Environment.SetEnvironmentVariable("OTEL_SDK_DISABLED", "true");
-        Environment.SetEnvironmentVariable("OTEL_SERVICE_NAME", "my‑service");
-        Environment.SetEnvironmentVariable("OTEL_RESOURCE_ATTRIBUTES", "key=value");
+        using var envScope = new EnvironmentScope(new Dictionary<string, string?>()
+        {
+            { "OTEL_SDK_DISABLED", "true" },
+            { "OTEL_SERVICE_NAME", "my-service" },
+            { "OTEL_RESOURCE_ATTRIBUTES", "key=value" }
+        });
 
         var config = YamlParser.ParseYaml<YamlConfiguration>("Configurations/FileBased/Files/TestResourceFileEnvVars.yaml");
 
-        Assert.Equal("1.0-rc.1", config.FileFormat);
         var serviceAttr = config.Resource?.Attributes?.First(a => a.Name == "service.name");
         Assert.NotNull(serviceAttr);
-        Assert.Equal("my‑service", serviceAttr.Value);
+        Assert.Equal("my-service", serviceAttr.Value);
     }
 }

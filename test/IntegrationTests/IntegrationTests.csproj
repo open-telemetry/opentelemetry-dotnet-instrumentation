@@ -4,6 +4,11 @@
     <DefineConstants>$(DefineConstants);_WINDOWS</DefineConstants>
   </PropertyGroup>
 
+  <PropertyGroup>
+    <!-- CA1515: Consider making public types internal. Needed mostly for Fixture classes. -->
+    <NoWarn>$(NoWarn);CA1515</NoWarn>
+  </PropertyGroup>
+
   <ItemGroup>
     <Reference Include="System.EnterpriseServices" Condition="$(TargetFramework.StartsWith('net4'))" />
   </ItemGroup>
@@ -40,5 +45,11 @@
   <ItemGroup>
     <!-- GrpcServices is 'none' so that we do not need to depend on the grpc nuget package, and we only need protobuf support. -->
     <Protobuf Include="opentelemetry\**\*.proto" GrpcServices="none" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Include="..\..\src\OpenTelemetry.AutoInstrumentation.StartupHook\StartupHookConstants.cs"
+             Link="StartupHookConstants.cs"
+             Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp'" />
   </ItemGroup>
 </Project>

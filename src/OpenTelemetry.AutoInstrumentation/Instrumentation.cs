@@ -131,6 +131,12 @@ internal static class Instrumentation
 
             if (TracerSettings.Value.TracesEnabled)
             {
+#if NETFRAMEWORK
+                if (TracerSettings.Value.InstrumentationOptions.SqlClientNetFxIlRewriteEnabled)
+                {
+                    NativeMethods.SetSqlClientNetFxILRewriteEnabled(true);
+                }
+#endif
                 if (GeneralSettings.Value.SetupSdk)
                 {
                     var builder = Sdk
@@ -507,6 +513,8 @@ internal static class Instrumentation
                 case TracerInstrumentation.SqlClient:
                     DelayedInitialization.Traces.AddSqlClient(lazyInstrumentationLoader, pluginManager);
                     break;
+                case TracerInstrumentation.StackExchangeRedis:
+                    break;
                 case TracerInstrumentation.Quartz:
                     DelayedInitialization.Traces.AddQuartz(lazyInstrumentationLoader, pluginManager);
                     break;
@@ -521,12 +529,12 @@ internal static class Instrumentation
                 case TracerInstrumentation.EntityFrameworkCore:
                     DelayedInitialization.Traces.AddEntityFrameworkCore(LazyInstrumentationLoader, pluginManager, tracerSettings);
                     break;
-                case TracerInstrumentation.StackExchangeRedis:
-                    break;
                 case TracerInstrumentation.MassTransit:
                     break;
                 case TracerInstrumentation.GraphQL:
                     DelayedInitialization.Traces.AddGraphQL(LazyInstrumentationLoader, pluginManager, tracerSettings);
+                    break;
+                case TracerInstrumentation.WcfCore:
                     break;
 #endif
                 case TracerInstrumentation.Azure:
@@ -548,6 +556,10 @@ internal static class Instrumentation
                 case TracerInstrumentation.OracleMda:
                     break;
                 case TracerInstrumentation.RabbitMq:
+                    break;
+                case TracerInstrumentation.AdoNet:
+                    break;
+                case TracerInstrumentation.Sqlite:
                     break;
                 default:
                     Logger.Warning($"Configured trace instrumentation type is not supported: {instrumentation}");

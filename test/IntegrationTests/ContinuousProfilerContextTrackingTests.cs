@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 using IntegrationTests.Helpers;
 using OpenTelemetry.Proto.Collector.Profiles.V1Development;
+using OpenTelemetry.Proto.Profiles.V1Development;
 using Xunit.Abstractions;
 
 namespace IntegrationTests;
@@ -30,7 +31,7 @@ public class ContinuousProfilerContextTrackingTests : TestHelper
         collector.AssertCollected();
     }
 
-    private bool AssertAllProfiles(ICollection<ExportProfilesServiceRequest> profilesServiceRequests)
+    private static bool AssertAllProfiles(ICollection<ExportProfilesServiceRequest> profilesServiceRequests)
     {
         var totalSamplesWithTraceContextCount = 0;
         var managedThreadsWithTraceContext = new HashSet<string>();
@@ -38,17 +39,19 @@ public class ContinuousProfilerContextTrackingTests : TestHelper
         foreach (var batch in profilesServiceRequests)
         {
             var profile = batch.ResourceProfiles.Single().ScopeProfiles.Single().Profiles.Single();
+            var dictionary = batch.Dictionary;
 
-            var samplesInBatch = profile.Sample;
+            var samplesInBatch = profile.Samples;
 
-            var samplesWithTraceContext = samplesInBatch.Where(s => s.HasLinkIndex).ToList();
+            // LinkIndex == 0 means no link (zero-value entry), non-zero means link is set
+            var samplesWithTraceContext = samplesInBatch.Where(s => s.LinkIndex != 0).ToList();
 #if NET
             Assert.True(samplesWithTraceContext.Count <= 1, "at most one sample in a batch should have trace context associated.");
 #endif
             totalSamplesWithTraceContextCount += samplesWithTraceContext.Count;
             if (samplesWithTraceContext.FirstOrDefault() is { } sampleWithTraceContext)
             {
-                var threadId = GetThreadName(profile, sampleWithTraceContext);
+                var threadId = GetThreadName(dictionary, sampleWithTraceContext);
                 managedThreadsWithTraceContext.Add(threadId!);
             }
         }
@@ -65,14 +68,14 @@ public class ContinuousProfilerContextTrackingTests : TestHelper
         return true;
     }
 
-    private string GetThreadName(OpenTelemetry.Proto.Profiles.V1Development.Profile profile, OpenTelemetry.Proto.Profiles.V1Development.Sample sample)
+    private static string GetThreadName(ProfilesDictionary dictionary, Sample sample)
     {
         foreach (var attrIndex in sample.AttributeIndices)
         {
-            if (attrIndex < profile.AttributeTable.Count)
+            if (attrIndex < dictionary.AttributeTable.Count)
             {
-                var attribute = profile.AttributeTable[(int)attrIndex];
-                var key = attribute.Key;
+                var attribute = dictionary.AttributeTable[attrIndex];
+                var key = dictionary.StringTable[attribute.KeyStrindex];
 
                 // Look for thread.name attribute
                 if (key == "thread.name" && attribute.Value.HasStringValue)

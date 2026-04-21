@@ -10,6 +10,7 @@
 //---------------------------------------------------------------------------------------
 
 #include "cor_profiler.h"
+#include "configuration.h"
 
 #ifndef _WIN32
 #include <dlfcn.h>
@@ -39,6 +40,11 @@ EXTERN_C VOID STDAPICALLTYPE AddInstrumentations(WCHAR* id, trace::CallTargetDef
 EXTERN_C VOID STDAPICALLTYPE AddDerivedInstrumentations(WCHAR* id, trace::CallTargetDefinition* items, int size)
 {
     return trace::profiler->AddDerivedInstrumentations(id, items, size);
+}
+
+EXTERN_C VOID STDAPICALLTYPE SetSqlClientNetFxILRewriteEnabled(bool enabled)
+{
+    return trace::SetSqlClientNetFxILRewriteEnabled(enabled);
 }
 
 EXTERN_C VOID STDAPICALLTYPE ConfigureContinuousProfiler(bool         threadSamplingEnabled,

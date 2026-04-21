@@ -17,7 +17,7 @@ By default, the value is false.
 You can also specify the configuration file path (default: `config.yaml`):
 
 ```bash
-OTEL_EXPERIMENTAL_CONFIG_FILE=/path/to/config.yaml
+OTEL_CONFIG_FILE=/path/to/config.yaml
 ```
 
 In your config file you can use environment variables in the format `${ENVIRONMENT_VARIABLE}`
@@ -45,13 +45,13 @@ file-based configuration to include these parameters.
 
 ### General
 
-| Environment variable                                 | Description                                                                                                               |
-| ---------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
-| `OTEL_DOTNET_AUTO_HOME`                              | Installation location.                                                                                                    |
-| `OTEL_DOTNET_AUTO_EXCLUDE_PROCESSES`                 | Names of the executable files that the profiler cannot instrument.                                                        |
-| `OTEL_DOTNET_AUTO_OPENTRACING_ENABLED`               | Enables OpenTracing tracer.                                                                                               |
-| `OTEL_DOTNET_AUTO_NETFX_REDIRECT_ENABLED`            | Enables automatic redirection of the assemblies used by the automatic instrumentation on the .NET Framework.              |
-| `OTEL_DOTNET_AUTO_SQLCLIENT_NETFX_ILREWRITE_ENABLED` | Enables IL rewriting of `SqlCommand` on .NET Framework to ensure `CommandText` is present for `SqlClient` instrumentation |
+| Environment variable                                 | Description                                                                                                                                                                |
+| ---------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `OTEL_DOTNET_AUTO_HOME`                              | Installation location.                                                                                                                                                     |
+| `OTEL_DOTNET_AUTO_EXCLUDE_PROCESSES`                 | Names of the executable files that the profiler cannot instrument.                                                                                                         |
+| `OTEL_DOTNET_AUTO_OPENTRACING_ENABLED`               | Enables OpenTracing tracer.                                                                                                                                                |
+| `OTEL_DOTNET_AUTO_NETFX_REDIRECT_ENABLED`            | **Obsolete. .NET Framework only.** Fallback for `OTEL_DOTNET_AUTO_REDIRECT_ENABLED` when the primary variable is not set. Use `OTEL_DOTNET_AUTO_REDIRECT_ENABLED` instead. |
+| `OTEL_DOTNET_AUTO_REDIRECT_ENABLED`                  | Enables redirection of assembly references to versions not lower than those used by the automatic instrumentation                                                          |
 
 ---
 
@@ -92,13 +92,21 @@ file-based configuration to include these parameters.
 
 ---
 
+### OTLP
+
+| Environment variable                    | Description                                                                               |
+| --------------------------------------- | ----------------------------------------------------------------------------------------- |
+| `OTEL_EXPORTER_OTLP_CERTIFICATE`        | Path to the CA certificate file (PEM format) used to verify the server's TLS certificate. |
+| `OTEL_EXPORTER_OTLP_CLIENT_CERTIFICATE` | Path to the client certificate file (PEM format) for mTLS authentication.                 |
+| `OTEL_EXPORTER_OTLP_CLIENT_KEY`         | Path to the client private key file (PEM format) for mTLS authentication.                 |
+
+---
+
 ### .NET Runtime
 
 | Environment variable     | Description                                          |
 |--------------------------|------------------------------------------------------|
 | `DOTNET_STARTUP_HOOKS`   | Specifies managed assemblies to load during startup. |
-| `DOTNET_ADDITIONAL_DEPS` | Additional .deps.json files to include.              |
-| `DOTNET_SHARED_STORE`    | Path to additional shared assemblies.                |
 
 ---
 
@@ -130,7 +138,7 @@ file-based configuration to include these parameters.
 # The yaml format is documented at
 # <https://github.com/open-telemetry/opentelemetry-configuration/tree/main/schema>
 # By default, the latest version is used.
-file_format: "1.0-rc.1"
+file_format: "1.0"
 # Configure if the SDK is disabled or not.
 # If omitted or null, false is used
 disabled: false
@@ -265,6 +273,10 @@ meter_provider:
         exporter:
           # Configure exporter to be console.
           console:
+            # Configure temporality preference.
+            # Values include: cumulative, delta.
+            # If omitted or null, cumulative is used.
+            temporality_preference: cumulative
 
     # Pull reader for Prometheus
     - pull:
@@ -492,6 +504,7 @@ To disable a instrumentation, comment out or remove its corresponding entry.
 instrumentation/development:
   dotnet:
     traces:
+      adonet:              # ADO.NET
       aspnet:              # ASP.NET
       aspnetcore:          # ASP.NET Core
       azure:               # Azure SDK
@@ -512,8 +525,10 @@ instrumentation/development:
       rabbitmq:            # RabbitMQ.Client
       quartz:              # Quartz
       sqlclient:           # Microsoft.Data.SqlClient & System.Data.SqlClient
+      sqlite:              # Microsoft.Data.Sqlite
       stackexchangeredis:  # StackExchange.Redis
       wcfclient:           # WCF Client
+      wcfcore:             # CoreWCF.Primitives
       wcfservice:          # WCF Service
     metrics:
       aspnet:              # ASP.NET metrics
@@ -543,6 +558,10 @@ instrumentation/development:
         # Whether the Oracle Client instrumentation can pass SQL statements through the db.statement attribute. Queries might contain sensitive information. If set to false, db.statement is recorded only for executing stored procedures.
         # Default is false
         set_db_statement_for_text: false
+      sqlclient:
+        # Enables IL rewriting of SqlCommand on .NET Framework to ensure CommandText is available for instrumentation.
+        # Default is false
+        netfx_ilrewrite_enabled: false
       aspnet:
         # A comma-separated list of HTTP header names. ASP.NET instrumentations will capture HTTP request header values for all configured header names.
         capture_request_headers: "X-Key,X-Custom-Header,X-Header-Example"

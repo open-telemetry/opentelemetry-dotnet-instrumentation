@@ -7,6 +7,7 @@
     <NuGetAudit>true</NuGetAudit>
     <NuGetAuditMode>all</NuGetAuditMode>
     <NuGetAuditLevel>low</NuGetAuditLevel>
+    <AnalysisLevel>latest-All</AnalysisLevel>
   </PropertyGroup>
 
   <!-- StyleCop -->

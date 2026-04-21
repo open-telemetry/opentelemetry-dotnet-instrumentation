@@ -15,7 +15,7 @@ using TestApplication.Shared;
 
 namespace TestApplication.CustomSdk;
 
-public static class Program
+internal static class Program
 {
     private static readonly ActivitySource ActivitySource = new(
         "TestApplication.CustomSdk");
@@ -66,22 +66,22 @@ public static class Program
         endpointConfiguration.UseTransport(learningTransport);
 
         using var cancellation = new CancellationTokenSource();
-        var endpointInstance = await Endpoint.Start(endpointConfiguration, cancellation.Token);
+        var endpointInstance = await Endpoint.Start(endpointConfiguration, cancellation.Token).ConfigureAwait(false);
 
         try
         {
-            await endpointInstance.SendLocal(new TestMessage(), cancellation.Token);
+            await endpointInstance.SendLocal(new TestMessage(), cancellation.Token).ConfigureAwait(false);
 
             Counter.Add(1);
 
             using (var activity = ActivitySource.StartActivity("Manual"))
             {
-                await PingRedis(args);
+                await PingRedis(args).ConfigureAwait(false);
 
                 using var client = new HttpClient();
                 client.Timeout = TimeSpan.FromSeconds(5);
                 var port = int.Parse(args[3], CultureInfo.InvariantCulture);
-                await client.GetStringAsync($"http://localhost:{port}/test", cancellation.Token);
+                await client.GetStringAsync(new Uri($"http://localhost:{port}/test"), cancellation.Token).ConfigureAwait(false);
             }
 
             // The "LONG_RUNNING" environment variable is used by tests that access/receive
@@ -93,12 +93,12 @@ public static class Program
                 // be ensured. Anyway, tests that set "LONG_RUNNING" env var to true are expected
                 // to kill the process directly.
                 Console.WriteLine("LONG_RUNNING is true, waiting for process to be killed...");
-                await Process.GetCurrentProcess().WaitForExitAsync(cancellation.Token);
+                await Process.GetCurrentProcess().WaitForExitAsync(cancellation.Token).ConfigureAwait(false);
             }
         }
         finally
         {
-            await endpointInstance.Stop(cancellation.Token);
+            await endpointInstance.Stop(cancellation.Token).ConfigureAwait(false);
         }
     }
 
@@ -116,7 +116,7 @@ public static class Program
             .AddSource("TestApplication.CustomSdk")
             .AddSource("NServiceBus.Core")
             .ConfigureResource(builder =>
-                builder.AddAttributes(new[] { new KeyValuePair<string, object>("test_attr", "added_manually") }))
+                builder.AddAttributes([new KeyValuePair<string, object>("test_attr", "added_manually")]))
             .AddOtlpExporter()
             .Build();
     }
@@ -136,7 +136,7 @@ public static class Program
             // custom metric
             .AddMeter("TestApplication.CustomSdk")
             .ConfigureResource(builder =>
-                builder.AddAttributes(new[] { new KeyValuePair<string, object>("test_attr", "added_manually") }))
+                builder.AddAttributes([new KeyValuePair<string, object>("test_attr", "added_manually")]))
             .AddOtlpExporter()
             .Build();
     }
@@ -147,10 +147,10 @@ public static class Program
 
         var connectionString = $"127.0.0.1:{redisPort}";
 
-        using var connection = await ConnectionMultiplexer.ConnectAsync(connectionString);
+        using var connection = await ConnectionMultiplexer.ConnectAsync(connectionString).ConfigureAwait(false);
         var db = connection.GetDatabase();
 
-        db.Ping();
+        await db.PingAsync().ConfigureAwait(false);
     }
 
     private static string GetRedisPort(string[] args)

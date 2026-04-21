@@ -4,6 +4,7 @@
 using System.Diagnostics;
 using log4net;
 using Microsoft.Extensions.Logging;
+using TestApplication.Shared;
 
 [assembly: log4net.Config.XmlConfigurator(Watch = true)]
 
@@ -15,6 +16,8 @@ internal static class Program
 
     private static void Main(string[] args)
     {
+        ConsoleHelper.WriteSplashScreen(args);
+
         if (args.Length == 2)
         {
             log4net.GlobalContext.Properties["test_key"] = "test_value";
@@ -47,10 +50,10 @@ internal static class Program
         });
         var logger = loggerFactory.CreateLogger(typeof(Program));
 
-        LogInsideActiveScope(() => logger.LogInformation("{0}, {1} at {2:t}!", "Hello", "world", DateTime.Now));
+        LogInsideActiveScope(() => logger.LogHelloWorld("Hello", "world", DateTime.Now));
 
-        var (message, ex) = GetException();
-        logger.LogError(ex, message);
+        var exception = GetException();
+        logger.LogExceptionOccurred(exception);
     }
 
     private static void LogInsideActiveScope(Action action)
@@ -64,12 +67,14 @@ internal static class Program
         var log = log4net.LogManager.GetLogger(typeof(Program));
         LogInsideActiveScope(() => log.InfoFormat("{0}, {1} at {2:t}!", "Hello", "world", DateTime.Now));
 
-        var (message, ex) = GetException();
-        log.Error(message, ex);
+        var exception = GetException();
+        log.Error("Exception occurred", exception);
     }
 
-    private static (string Message, Exception Exception) GetException()
+    private static Exception GetException()
     {
-        return ("Exception occured", new Exception());
+#pragma warning disable CA2201 // Do not raise reserved exception types
+        return new Exception();
+#pragma warning restore CA2201 // Do not raise reserved exception types
     }
 }

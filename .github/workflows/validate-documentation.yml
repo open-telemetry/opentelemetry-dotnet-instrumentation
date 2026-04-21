@@ -25,10 +25,10 @@ jobs:
     steps:
 
     - name: Checkout
-      uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # tag: v6.0.1
+      uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # tag: v6.0.2
 
     - name: Restore lychee cache
-      uses: actions/cache/restore@9255dc7a253b0ccc959486e2bca901246202afeb # tag: v5.0.1
+      uses: actions/cache/restore@27d5ce7f107fe9357f9df03efb73ab90386fccae # tag: v5.0.5
       id: cache-restore
       with:
         path: .lycheecache
@@ -37,25 +37,25 @@ jobs:
 
     - name: Run markdown links checks
       if: ${{ !contains(github.event.pull_request.labels.*.name, 'release PR') }}
-      uses: lycheeverse/lychee-action@a8c4c7cb88f0c7386610c35eb25108e448569cb0 # tag: v2.7.0
+      uses: lycheeverse/lychee-action@8646ba30535128ac92d33dfc9133794bfdd9b411 # tag: v2.8.0
       with:
         fail: true
         args: "--cache --max-cache-age 1d --threads 1 --max-concurrency 1 --verbose --retry-wait-time 5 --max-retries 3 --timeout 60 --no-progress './**/*.md' './**/*.html'"
 
     - name: Run markdownlint
-      uses: streetsidesoftware/cspell-action@e5a858a18b7e0b56e0342b1dcad796308b7341a2 # tag: v8.1.1
+      uses: streetsidesoftware/cspell-action@de2a73e963e7443969755b648a1008f77033c5b2 # tag: v8.4.0
       with:
         files: '**/*.md'
 
     - name: Run cspell
-      uses: DavidAnson/markdownlint-cli2-action@07035fd053f7be764496c0f8d8f9f41f98305101 # tag: v22.0.0
+      uses: DavidAnson/markdownlint-cli2-action@ce4853d43830c74c1753b39f3cf40f71c2031eb9 # tag: v23.0.0
       with:
         globs: '**/*.md;!.github/**;!lychee/out.md'
         separator: ';'
 
     - name: Save lychee cache
       if: always()
-      uses: actions/cache/save@9255dc7a253b0ccc959486e2bca901246202afeb # tag: v5.0.1
+      uses: actions/cache/save@27d5ce7f107fe9357f9df03efb73ab90386fccae # tag: v5.0.5
       with:
         path: .lycheecache
         key: ${{ steps.cache-restore.outputs.cache-primary-key }}
