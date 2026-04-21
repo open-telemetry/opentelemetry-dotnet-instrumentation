@@ -24,14 +24,14 @@ runs:
     - name: Validate environment inputs
       shell: pwsh
       run: |
-        $environmentType = '${{ inputs.environment-type }}'.Trim().ToLowerInvariant()
+        $environmentType = '${{ inputs.environment-type }}'
 
         if ($environmentType -notin @('host', 'container')) {
           throw "environment-type must be either 'host' or 'container'."
         }
 
         if ($environmentType -eq 'container') {
-          if ([string]::IsNullOrWhiteSpace('${{ inputs.dockerfile }}')) {
+          if ([string]::IsNullOrEmpty('${{ inputs.dockerfile }}')) {
             throw 'dockerfile input is required when environment-type is container.'
           }
         }

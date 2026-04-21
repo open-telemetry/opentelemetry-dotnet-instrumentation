@@ -28,19 +28,19 @@ runs:
     - name: Validate execution inputs
       shell: pwsh
       run: |
-        $executionMode = '${{ inputs.execution-mode }}'.Trim()
-        $containerName = '${{ inputs.container-name }}'.Trim()
-        $containerUser = '${{ inputs.container-user }}'.Trim()
+        $executionMode = '${{ inputs.execution-mode }}'
+        $containerName = '${{ inputs.container-name }}'
+        $containerUser = '${{ inputs.container-user }}'
 
-        if ($executionMode -eq 'container' -and [string]::IsNullOrWhiteSpace($containerName)) {
+        if ($executionMode -eq 'container' -and [string]::IsNullOrEmpty($containerName)) {
           throw 'container-name input is required when execution-mode is container.'
         }
 
-        if (-not [string]::IsNullOrWhiteSpace($containerName) -and -not [string]::IsNullOrWhiteSpace($executionMode) -and $executionMode -ne 'container') {
+        if (-not [string]::IsNullOrEmpty($containerName) -and -not [string]::IsNullOrEmpty($executionMode) -and $executionMode -ne 'container') {
           throw 'container-name cannot be combined with a non-container execution-mode.'
         }
 
-        if (-not [string]::IsNullOrWhiteSpace($containerUser) -and [string]::IsNullOrWhiteSpace($containerName) -and $executionMode -ne 'container') {
+        if (-not [string]::IsNullOrEmpty($containerUser) -and [string]::IsNullOrEmpty($containerName) -and $executionMode -ne 'container') {
           throw 'container-user requires container execution.'
         }
 
