@@ -1,4 +1,4 @@
-﻿// This file is part of YamlDotNet - A .NET library for YAML.
+// This file is part of YamlDotNet - A .NET library for YAML.
 // Copyright (c) Antoine Aubry and contributors
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy of
@@ -26,20 +26,20 @@ using Vendors.YamlDotNet.Core.Events;
 namespace Vendors.YamlDotNet.Serialization.Converters
 {
     /// <summary>
-    /// Converter for System.Guid.
+    /// Converter for <see cref="Uri"/>.
     /// </summary>
-    internal class GuidConverter : IYamlTypeConverter
+    internal class UriConverter : IYamlTypeConverter
     {
         private readonly bool jsonCompatible;
 
-        public GuidConverter(bool jsonCompatible)
+        public UriConverter(bool jsonCompatible = false)
         {
             this.jsonCompatible = jsonCompatible;
         }
 
         public bool Accepts(Type type)
         {
-            return type == typeof(Guid) || type == typeof(Guid?);
+            return type == typeof(Uri);
         }
 
         public object ReadYaml(IParser parser, Type type, ObjectDeserializer rootDeserializer)
@@ -49,7 +49,7 @@ namespace Vendors.YamlDotNet.Serialization.Converters
             {
                 return null!;
             }
-            return new Guid(value);
+            return new Uri(value, UriKind.RelativeOrAbsolute);
         }
 
         public void WriteYaml(IEmitter emitter, object? value, Type type, ObjectSerializer serializer)
@@ -59,8 +59,8 @@ namespace Vendors.YamlDotNet.Serialization.Converters
                 emitter.Emit(new Scalar(AnchorName.Empty, TagName.Empty, "", ScalarStyle.Plain, true, false));
                 return;
             }
-            var guid = (Guid)value;
-            emitter.Emit(new Scalar(AnchorName.Empty, TagName.Empty, guid.ToString("D"), jsonCompatible ? ScalarStyle.DoubleQuoted : ScalarStyle.Any, true, false));
+            var uri = (Uri)value;
+            emitter.Emit(new Scalar(AnchorName.Empty, TagName.Empty, uri.OriginalString, jsonCompatible ? ScalarStyle.DoubleQuoted : ScalarStyle.Any, true, false));
         }
     }
 }

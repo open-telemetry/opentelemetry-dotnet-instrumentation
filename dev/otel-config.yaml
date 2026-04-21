@@ -64,7 +64,7 @@ service:
         - otlp
       exporters:
         - debug
-        # - file/profiles # commented out for now, as it is in development state and leads to issues in the output of the collector. Ref: https://github.com/open-telemetry/opentelemetry-collector/issues/15080
+        - file/profiles
   extensions:
     - health_check
     - zpages
