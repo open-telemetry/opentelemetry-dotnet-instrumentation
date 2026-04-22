@@ -36,7 +36,7 @@ public static partial class LibraryVersion
                 new("8.0.23"),
                 new("9.0.12"),
                 new("10.0.0", supportedFrameworks: [ "net10.0" ]),
-                new("10.0.6", supportedFrameworks: [ "net10.0" ]),
+                new("10.0.7", supportedFrameworks: [ "net10.0" ]),
             ]
         },
         {
@@ -122,7 +122,7 @@ public static partial class LibraryVersion
             "TestApplication.MySqlData",
             [
                 new("9.0.0"),
-                new("9.6.0"),
+                new("9.7.0"),
             ]
         },
         {
@@ -177,7 +177,7 @@ public static partial class LibraryVersion
                 new("8.0.0"),
                 new("9.0.0"),
                 new("10.0.0"),
-                new("10.0.6"),
+                new("10.0.7"),
             ]
         },
         {
