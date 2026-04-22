@@ -32,7 +32,8 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
   - `OpenTelemetry.Resources.ProcessRuntime` from `1.15.0-beta.1` to `1.15.1-beta.1`.
 - .NET only, following packages updated
   - `OpenTelemetry.Instrumentation.AspNetCore` from `1.15.1` to `1.15.2`,
-  - `OpenTelemetry.Instrumentation.EntityFrameworkCore` from `1.15.0-beta.1` to `1.15.1-beta.1`.
+  - `OpenTelemetry.Instrumentation.EntityFrameworkCore`
+    from `1.15.0-beta.1` to `1.15.1-beta.1`.
 - .NET Framework only, following packages updated
   - `OpenTelemetry.Instrumentation.AspNet` from `1.15.1` to `1.15.2`.
 
