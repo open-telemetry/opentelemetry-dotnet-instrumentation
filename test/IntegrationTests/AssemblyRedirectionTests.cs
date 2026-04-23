@@ -77,11 +77,6 @@ public class AssemblyRedirectionTests(ITestOutputHelper output) : TestHelper("As
 #endif
 
 #if NETFRAMEWORK
-    private static string GetNetFxDockerImageName(string libraryVersion)
-    {
-        return $"testapplication-assemblyredirection-netframework-nogac-{libraryVersion.Replace('.', '-')}";
-    }
-
     [WindowsAdministratorTheory]
     [Trait("Category", "EndToEnd")]
     [Trait("Containers", "Windows")]
@@ -117,7 +112,10 @@ public class AssemblyRedirectionTests(ITestOutputHelper output) : TestHelper("As
         IReadOnlyDictionary<string, string> environmentVariables,
         MockSpansCollector collector)
     {
-        await IISContainerTestHelper.RunContainerAsync(GetNetFxDockerImageName(libraryVersion), environmentVariables, Output).ConfigureAwait(false);
+        await IISContainerTestHelper.RunContainerAsync(
+            $"testapplication-assemblyredirection-netframework-nogac-{libraryVersion.Replace('.', '-')}",
+            environmentVariables,
+            Output).ConfigureAwait(false);
         collector.AssertExpectations();
     }
 #endif
