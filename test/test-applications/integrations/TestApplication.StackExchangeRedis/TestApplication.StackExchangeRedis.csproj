@@ -2,9 +2,6 @@
 
   <ItemGroup>
     <PackageReference Include="StackExchange.Redis" VersionOverride="$(LibraryVersion)" />
-    <!-- Keep a direct reference so older StackExchange.Redis versions do not pin a lower logging abstraction
-    than the Additional Dependencies store provides, while 3.0.2-preview can still resolve its higher floor. -->
-    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" />
   </ItemGroup>
 
   <ItemGroup Condition=" '$(TargetFramework)' == 'net462' and ( '$(LibraryVersion)' == '' or $([MSBuild]::VersionGreaterThanOrEquals('$(LibraryVersion)', '2.10.1')) ) ">
