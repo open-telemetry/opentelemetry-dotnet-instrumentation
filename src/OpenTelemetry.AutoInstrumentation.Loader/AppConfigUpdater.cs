@@ -29,7 +29,7 @@ internal static class AppConfigUpdater
             patchMode = PatchMode.LoaderOptimizationSingleDomain;
         }
 
-        Logger.Debug($"Use {mode} strategy for multiple app domains");
+        Logger.Debug($"Use {patchMode} strategy for multiple app domains");
 
         switch (patchMode)
         {
