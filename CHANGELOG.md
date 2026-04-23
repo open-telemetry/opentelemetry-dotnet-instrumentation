@@ -11,6 +11,9 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 
 ### Changed
 
+- Support for [StackExchange.Redis](https://www.nuget.org/packages/StackExchange.Redis) 
+  traces instrumentation for versions `3.x.x`+.
+
 #### Dependency updates
 
 ### Deprecated
