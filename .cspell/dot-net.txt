@@ -46,3 +46,4 @@ TRACEFILE
 typeof
 WCFCORE
 Xunit
+appdomain
