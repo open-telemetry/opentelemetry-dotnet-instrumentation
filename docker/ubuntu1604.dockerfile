@@ -11,9 +11,10 @@ RUN apt-get update && \
     libicu-dev
 
 # Install newer clang
-RUN apt-add-repository "deb http://apt.llvm.org/xenial/ llvm-toolchain-xenial-5.0 main" && \
+RUN curl -fsSL https://apt.llvm.org/llvm-snapshot.gpg.key | gpg --dearmor -o /usr/share/keyrings/llvm-archive-keyring.gpg && \
+    echo 'deb [signed-by=/usr/share/keyrings/llvm-archive-keyring.gpg] https://apt.llvm.org/xenial/ llvm-toolchain-xenial-5.0 main' | tee /etc/apt/sources.list.d/llvm.list >/dev/null && \
     apt-get update && \
-    apt-get install -y --allow-unauthenticated clang-5.0 && \
+    apt-get install -y clang-5.0 && \
     update-alternatives --install /usr/bin/clang++ clang++ /usr/bin/clang++-5.0 1000 && \
     update-alternatives --install /usr/bin/clang clang /usr/bin/clang-5.0 1000 && \
     update-alternatives --config clang && \
@@ -26,10 +27,10 @@ RUN add-apt-repository ppa:ubuntu-toolchain-r/test -y && \
     update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-9 60 --slave /usr/bin/g++ g++ /usr/bin/g++-9
 
 # Install newer cmake, based on https://apt.kitware.com/
-RUN wget -O - https://apt.kitware.com/keys/kitware-archive-latest.asc 2>/dev/null | gpg --dearmor - | tee /etc/apt/trusted.gpg.d/kitware.gpg >/dev/null && \
+RUN curl -fsSL https://apt.kitware.com/keys/kitware-archive-latest.asc | gpg --dearmor -o /usr/share/keyrings/kitware-archive-keyring.gpg && \
     echo 'deb [signed-by=/usr/share/keyrings/kitware-archive-keyring.gpg] https://apt.kitware.com/ubuntu/ xenial main' | tee /etc/apt/sources.list.d/kitware.list >/dev/null && \
     apt-get update && \
-    apt-get install -y --allow-unauthenticated cmake
+    apt-get install -y cmake
 
 COPY ./scripts/dotnet-install.sh ./dotnet-install.sh
 
