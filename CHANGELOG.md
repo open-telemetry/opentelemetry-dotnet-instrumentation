@@ -18,6 +18,8 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
     assembly versions;
   - `None` - do not use any special strategy for non-default application
     domains.
+  See [docs/netfx-appdomain-strategy.md](./docs/netfx-appdomain-strategy.md)
+  for details.
 
 ### Changed
 
