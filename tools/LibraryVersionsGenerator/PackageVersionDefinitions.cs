@@ -296,7 +296,7 @@ internal static class PackageVersionDefinitions
             [
                 new("2.6.122"),
                 new("2.12.14"),
-                new("3.0.2-preview")
+                new("*")
             ]
         },
         new()
