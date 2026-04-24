@@ -5,7 +5,7 @@ All notable changes to this component are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/compare/v1.15.0-beta.1..HEAD)
+## [Unreleased](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/compare/v1.15.0..HEAD)
 
 ### Added
 
@@ -30,6 +30,59 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 ### Removed
 
 ### Fixed
+
+## [v1.15.0](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/tag/v1.15.0)
+
+This release include all changes from [1.15.0-beta.1](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/tag/v1.15.0-beta.1)
+release.
+
+### Changed
+
+#### Dependency updates
+
+- Updated [Core components](https://github.com/open-telemetry/opentelemetry-dotnet/blob/main/VERSIONING.md#core-components):
+  [`1.15.3`](https://github.com/open-telemetry/opentelemetry-dotnet/releases/tag/core-1.15.3).
+- Following packages updated
+  - `OpenTelemetry.Instrumentation.GrpcNetClient` from `1.15.0-beta.1` to `1.15.1-beta.1`,
+  - `OpenTelemetry.Instrumentation.Http` from `1.15.0` to `1.15.1`,
+  - `OpenTelemetry.Instrumentation.Process` from `1.15.0-beta.1` to `1.15.1-beta.1`,
+  - `OpenTelemetry.Instrumentation.Quartz` from `1.15.0-beta.1` to `1.15.1-beta.1`,
+  - `OpenTelemetry.Instrumentation.Runtime` from `1.15.0` to `1.15.1`,
+  - `OpenTelemetry.Instrumentation.SqlClient` from `1.15.1` to `1.15.2`,
+  - `OpenTelemetry.Instrumentation.StackExchangeRedis` from `1.15.0-beta.1` to `1.15.1-beta.1`,
+  - `OpenTelemetry.Instrumentation.Wcf` from `1.15.0-beta.1` to `1.15.1-beta.2`,
+  - `OpenTelemetry.Resources.Azure` from `1.15.0-beta.1` to `1.15.1-beta.1`,
+  - `OpenTelemetry.Resources.Container` from `1.15.0-beta.1` to `1.15.1-beta.1`,
+  - `OpenTelemetry.Resources.Host` from `1.15.0-beta.2` to `1.15.1-beta.1`,
+  - `OpenTelemetry.Resources.OperatingSystem` from `1.15.0-beta.1` to `1.15.1-beta.1`,
+  - `OpenTelemetry.Resources.Process` from `1.15.0-beta.1` to `1.15.1-beta.1`,
+  - `OpenTelemetry.Resources.ProcessRuntime` from `1.15.0-beta.1` to `1.15.1-beta.1`.
+- .NET only, following packages updated
+  - `OpenTelemetry.Instrumentation.AspNetCore` from `1.15.1` to `1.15.2`,
+  - `OpenTelemetry.Instrumentation.EntityFrameworkCore`
+    from `1.15.0-beta.1` to `1.15.1-beta.1`.
+- .NET Framework only, following packages updated
+  - `Microsoft.Bcl.AsyncInterfaces` from `10.0.2` to `10.0.7`,
+  - `Microsoft.Extensions.Configuration` from `10.0.2` to `10.0.7`,
+  - `Microsoft.Extensions.Configuration.Abstractions` from `10.0.2` to `10.0.7`,
+  - `Microsoft.Extensions.Configuration.Binder` from `10.0.2` to `10.0.7`,
+  - `Microsoft.Extensions.DependencyInjection` from `10.0.2` to `10.0.7`,
+  - `Microsoft.Extensions.DependencyInjection.Abstractions`
+    from `10.0.2` to `10.0.7`,
+  - `Microsoft.Extensions.Diagnostics.Abstractions` from `10.0.2` to `10.0.7`,
+  - `Microsoft.Extensions.Logging` from `10.0.2` to `10.0.7`,
+  - `Microsoft.Extensions.Logging.Abstractions` from `10.0.2` to `10.0.7`,
+  - `Microsoft.Extensions.Logging.Configuration` from `10.0.2` to `10.0.7`,
+  - `Microsoft.Extensions.Options` from `10.0.2` to `10.0.7`,
+  - `Microsoft.Extensions.Options.ConfigurationExtensions`
+    from `10.0.2` to `10.0.7`,
+  - `Microsoft.Extensions.Primitives` from `10.0.2` to `10.0.7`,
+  - `OpenTelemetry.Instrumentation.AspNet` from `1.15.1` to `1.15.2`,
+  - `System.Diagnostics.DiagnosticSource` from `10.0.2` to `10.0.7`,
+  - `System.IO.Pipelines` from `10.0.2` to `10.0.7`,
+  - `System.Text.Encodings.Web` from `10.0.2` to `10.0.7`,
+  - `System.Text.Json` from `10.0.2` to `10.0.7`,
+  - `System.ValueTuple` from `4.6.1` to `4.6.2`.
 
 ## [v1.15.0-beta.1](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/tag/v1.15.0-beta.1)
 
