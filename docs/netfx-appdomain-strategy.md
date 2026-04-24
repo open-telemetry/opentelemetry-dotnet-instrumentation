@@ -73,11 +73,11 @@ One concrete failure seen in simple ASP.NET applications is:
 
 ## The available strategies
 
-| Strategy | What OpenTelemetry changes | Main effect |
-| --- | --- | --- |
-| `None` | No workaround for secondary domains | Lowest intervention, but secondary multi-domain resolution may block or break instrumentation |
-| `LoaderOptimizationSingleDomain` | Forces new non-default domains to use `LoaderOptimization.SingleDomain` | Avoids domain-neutral sharing for those new domains |
-| `AssemblyRedirect` | Modifies config for new non-default domains to add binding redirects and `codeBase` information | Tries to keep CLR resolution consistent enough for instrumentation to work |
+| Strategy                        | What OpenTelemetry changes                                                                      | Main effect                                                                                   |
+|---------------------------------|-------------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------|
+| `None`                          | No workaround for secondary domains                                                             | Lowest intervention, but secondary multi-domain resolution may block or break instrumentation |
+| `LoaderOptimizationSingleDomain`| Forces new non-default domains to use `LoaderOptimization.SingleDomain`                         | Avoids domain-neutral sharing for those new domains                                           |
+| `AssemblyRedirect`              | Modifies config for new non-default domains to add binding redirects and `codeBase` information | Tries to keep CLR resolution consistent enough for instrumentation to work                    |
 
 ## Strategy: `None`
 
@@ -234,11 +234,11 @@ If OpenTelemetry assemblies are installed in the GAC:
 
 The simplest redirected ASP.NET shape looks like this:
 
-| Assembly | Possible result |
-| --- | --- |
-| `OpenTelemetry.AutoInstrumentation` and its GAC-available dependencies | One domain-neutral instance |
-| `System.Web` for domains without redirect | One domain-neutral instance serving the unredirected graph |
-| `System.Web` for domains with redirect | Another domain-neutral instance serving the redirected graph |
+| Assembly                                                               | Possible result                                              |
+|------------------------------------------------------------------------|--------------------------------------------------------------|
+| `OpenTelemetry.AutoInstrumentation` and its GAC-available dependencies | One domain-neutral instance                                  |
+| `System.Web` for domains without redirect                              | One domain-neutral instance serving the default domain       |
+| `System.Web` for domains with redirect                                 | Another domain-neutral instance serving the redirected graph |
 
 So even with GAC installation, `AssemblyRedirect` does not mean
 "everything becomes one shared copy." It means the CLR gets enough
