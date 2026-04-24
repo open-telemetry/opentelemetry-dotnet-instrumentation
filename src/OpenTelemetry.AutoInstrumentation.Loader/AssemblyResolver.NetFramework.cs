@@ -45,7 +45,7 @@ internal class AssemblyResolver(IOtelLogger logger)
         try
         {
             var loadedAssembly = Assembly.LoadFrom(assemblyPath);
-            logger.Debug<string, bool>("Assembly.LoadFrom(\"{0}\") succeeded={1}", assemblyPath, loadedAssembly != null);
+            logger.Debug<string, string, bool>("Assembly.LoadFrom(\"{0}\") loaded={1}, GAC={2}", assemblyPath, loadedAssembly.FullName, loadedAssembly.GlobalAssemblyCache);
             return loadedAssembly;
         }
         catch (Exception ex)

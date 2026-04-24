@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 #if NETFRAMEWORK
+using System.Diagnostics;
 using System.Reflection;
 using OpenTelemetry.AutoInstrumentation.Logging;
 using OpenTelemetry.AutoInstrumentation.Util;
@@ -66,7 +67,7 @@ internal class AssemblyCatalog
                         }
                     }
 
-                    _assemblies[assemblyName.Name] = new AssemblyInfo(token, assemblyName.Version, assemblyName, file);
+                    _assemblies[assemblyName.Name] = new AssemblyInfo(token, assemblyName.Version, ReadFileVersion(file), assemblyName, file);
                 }
                 catch (Exception ex)
                 {
@@ -76,6 +77,14 @@ internal class AssemblyCatalog
         }
 
         BuildFromFolder();
+    }
+
+    internal AssemblyCatalog(IEnumerable<AssemblyInfo> assemblies)
+    {
+        foreach (var assembly in assemblies)
+        {
+            _assemblies[assembly.FullName.Name!] = assembly;
+        }
     }
 
     internal AssemblyInfo? GetAssemblyInfo(string shortName)
@@ -91,11 +100,26 @@ internal class AssemblyCatalog
     internal IEnumerable<AssemblyInfo> GetAssemblies()
         => _assemblies.Values;
 
-    internal sealed class AssemblyInfo(string token, Version version, AssemblyName fullName, string path)
+    private static Version? ReadFileVersion(string path)
+    {
+        try
+        {
+            var fileVersion = FileVersionInfo.GetVersionInfo(path).FileVersion;
+            return string.IsNullOrWhiteSpace(fileVersion) ? null : new Version(fileVersion);
+        }
+        catch (Exception)
+        {
+            return null;
+        }
+    }
+
+    internal sealed class AssemblyInfo(string token, Version version, Version? fileVersion, AssemblyName fullName, string path)
     {
         public string Token { get; } = token;
 
         public Version Version { get; } = version;
+
+        public Version? FileVersion { get; } = fileVersion;
 
         public AssemblyName FullName { get; } = fullName;
 
