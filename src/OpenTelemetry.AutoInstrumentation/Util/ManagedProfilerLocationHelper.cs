@@ -39,7 +39,7 @@ internal static partial class ManagedProfilerLocationHelper
             var path = Probe(targetDirPath, assemblyName);
             if (path == null)
             {
-                logger?.Error($"Linked assembly path \"{Path.Combine(targetDirPath, $"{assemblyFileName}.dll")}\" does not exist");
+                logger?.Error($"Linked assembly path \"{Path.Combine(targetDirPath, $"{assemblyFileName}")}\" does not exist");
             }
 
             return path;

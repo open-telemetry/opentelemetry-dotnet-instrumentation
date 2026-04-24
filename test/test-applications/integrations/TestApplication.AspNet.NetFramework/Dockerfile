@@ -12,7 +12,7 @@ RUN Import-Module .\OpenTelemetry.DotNet.Auto.psm1 -Verbose; `
     Install-OpenTelemetryCore -LocalPath .\tracer.zip -RegisterAssembliesInGAC $false; `
     Register-OpenTelemetryForIIS;
 ENV OTEL_DOTNET_AUTO_LOG_DIRECTORY=C:\inetpub\wwwroot\logs `
-    OTEL_LOG_LEVEL=debug 
+    OTEL_LOG_LEVEL=debug
 WORKDIR /inetpub/wwwroot
 COPY bin/${configuration}/app.publish .
 

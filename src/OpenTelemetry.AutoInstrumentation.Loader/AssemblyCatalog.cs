@@ -57,12 +57,12 @@ internal class AssemblyCatalog
                         if (info.Version < assemblyName.Version)
                         {
                             logger.Warning(
-                                $"Multiple files for {assemblyName.Name}, using ${assemblyName.Version} from {file}");
+                                $"Multiple files for {assemblyName.Name}, using {assemblyName.Version} from {file}");
                         }
                         else
                         {
                             logger.Warning(
-                                $"Multiple files  for {assemblyName.Name}, using ${info.Version} from {info.Path}");
+                                $"Multiple files  for {assemblyName.Name}, using {info.Version} from {info.Path}");
                             continue;
                         }
                     }

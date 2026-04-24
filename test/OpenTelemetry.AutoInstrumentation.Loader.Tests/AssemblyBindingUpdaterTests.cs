@@ -29,7 +29,7 @@ public sealed class AssemblyBindingUpdaterTests : IDisposable
     }
 
     [Fact]
-    public void ModifyAssemblyRedirectConfig_UsesProfilerAssembly_WhenNoCustomerCandidateExists()
+    public void ModifyAssemblyRedirectConfig_UsesProfilerAssembly_WhenNoClientCandidateExists()
     {
         var profilerAssembly = CreateAssembly(TestAssemblyName, DefaultProfilerAssemblyVersion, DefaultProfilerFileVersion, ProfilerDirectoryName);
         var logger = new TestLogger();

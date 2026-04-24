@@ -353,6 +353,8 @@ internal class AssemblyBindingUpdater(IOtelLogger logger, AssemblyCatalog assemb
 
                 logger.Debug($"Discovered probing candidate for {assemblyInfo.FullName.Name}: {candidatePath}");
 
+                // Match .NET Framework probing: once a file exists at a probed path, the bind
+                // does not continue to later paths if that file has the wrong identity or cannot be inspected.
                 try
                 {
                     var assemblyName = AssemblyName.GetAssemblyName(candidatePath);
