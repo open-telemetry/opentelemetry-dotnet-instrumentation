@@ -41,7 +41,7 @@
     <PackageReference Include="OpenTelemetry.Instrumentation.Wcf" />
   </ItemGroup>
 
-  <ItemGroup Condition="$(_IsPacking) != true">
+  <ItemGroup Condition="$(_IsPacking) == true">
     <!-- Dependencies below are shipped in the distribution folder, but not included in the NuGet package. -->
     <!-- If necessary these packages are flagged by custom build tasks and manually added to the targeted  -->
     <!-- projects that are using the NuGet package. -->
@@ -62,7 +62,7 @@
     <PackageReference Include="OpenTelemetry.Resources.Container" />
   </ItemGroup>
 
-  <ItemGroup Condition=" $(_IsPacking) != true And '$(TargetFramework)' == 'net8.0' ">
+  <ItemGroup Condition=" $(_IsPacking) == true And '$(TargetFramework)' == 'net8.0' ">
     <!-- Dependencies below are shipped in the distribution folder, but not included in the NuGet package. -->
     <!-- If necessary these packages are flagged by custom build tasks and manually added to the targeted  -->
     <!-- projects that are using the NuGet package. -->
