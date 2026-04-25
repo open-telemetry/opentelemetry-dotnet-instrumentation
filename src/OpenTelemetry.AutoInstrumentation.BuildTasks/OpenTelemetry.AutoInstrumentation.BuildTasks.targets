@@ -28,8 +28,8 @@
     <ItemGroup>
       <OtelValidatePackages Include="@(RuntimeCopyLocalItems)" />
       <OtelValidatePackages Include="@(RuntimeFramework)"
-                            NuGetPackageId="%(FrameworkName)"
-                            NuGetPackageVersion="%(Version)" />
+                            NuGetPackageId="%(RuntimeFramework.FrameworkName)"
+                            NuGetPackageVersion="%(RuntimeFramework.Version)" />
     </ItemGroup>
 
     <CheckForInstrumentationPackages
