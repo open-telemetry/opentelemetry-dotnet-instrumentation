@@ -8,6 +8,12 @@
         TargetNuGetPackageVersionRange="[2.6.122, 3.0.0)"
         InstrumentationNuGetPackageId="OpenTelemetry.Instrumentation.StackExchangeRedis"
         InstrumentationNuGetPackageVersion="1.15.1-beta.1" />
+      <InstrumentationTarget
+        Include="Microsoft.AspNetCore.App"
+        Condition="!$(SkippedInstrumentations.Contains('Microsoft.AspNetCore.App'))"
+        TargetNuGetPackageVersionRange="*"
+        InstrumentationNuGetPackageId="OpenTelemetry.Instrumentation.AspNetCore"
+        InstrumentationNuGetPackageVersion="1.15.2" />
 
     </ItemGroup>
 
@@ -19,9 +25,16 @@
     Name="CheckForInstrumentationPackagesTarget"
     AfterTargets="ResolvePackageAssets">
 
+    <ItemGroup>
+      <OtelValidatePackages Include="@(RuntimeCopyLocalItems)" />
+      <OtelValidatePackages Include="@(RuntimeFramework)"
+                            NuGetPackageId="%(FrameworkName)"
+                            NuGetPackageVersion="%(Version)" />
+    </ItemGroup>
+
     <CheckForInstrumentationPackages
       InstrumentationTargetItems="@(InstrumentationTarget)"
-      RuntimeCopyLocalItems="@(RuntimeCopyLocalItems)"
+      RuntimeCopyLocalItems="@(OtelValidatePackages)"
       UseVerboseLog="$(UseVerboseLog)" />
   </Target>
 
