@@ -156,4 +156,12 @@ if [ "$ENABLE_PROFILING" = "true" ]; then
   fi
 fi
 
-exec "$@"
+# Launch the target app only when this script is executed directly.
+# When sourced, positional parameters belong to the caller and must not be executed.
+case "$0" in
+  */instrument.sh|instrument.sh)
+    if [ "$#" -gt 0 ]; then
+      exec "$@"
+    fi
+    ;;
+esac
