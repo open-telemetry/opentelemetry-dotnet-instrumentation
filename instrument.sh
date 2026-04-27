@@ -164,4 +164,9 @@ case "$0" in
       exec "$@"
     fi
     ;;
+  *)
+    if [ "$#" -gt 0 ]; then
+      echo "Arguments were provided, but instrument.sh was sourced. Execute ./instrument.sh <application_executable> to launch the application." >&2
+    fi
+    ;;
 esac
