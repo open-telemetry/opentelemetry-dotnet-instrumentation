@@ -295,6 +295,7 @@ internal static class PackageVersionDefinitions
             Versions =
             [
                 new("2.6.122"),
+                new("2.12.14"),
                 new("*")
             ]
         },
