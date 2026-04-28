@@ -17,8 +17,8 @@ env:
 
 jobs:
   build-nuget-packages:
-    # In principle this job "needs: [ build, build-container ]", however, that would cause the build and build-container
-    # jobs to run twice, which is not what we want. Instead, we let the "caller" job handle the dependencies.
+    # In principle this job needs the build outputs, however that would cause the upstream reusable workflow
+    # to run twice. Instead, we let the caller workflow handle the dependencies.
     outputs:
       nuget-version-suffix: ${{ steps.set-nuget-version-suffix.outputs.suffix }}
     runs-on: windows-2022
@@ -30,15 +30,10 @@ jobs:
           fetch-depth: 0 # fetching all, needed to correctly calculate version
 
       - name: Setup .NET
-        uses: actions/setup-dotnet@c2fa09f4bde5ebb9d1777cf28262a3eb3db3ced7 # tag: v5.2.0
-        with:
-          dotnet-version: | 
-            8.0.419
-            9.0.312
-            10.0.201
+        uses: ./.github/actions/setup-dotnet
 
       - name: Check for NuGet packages cache
-        uses: actions/cache@668228422ae6a00e4ad889ee87cd7109ec5666a7 # tag: v5.0.4
+        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # tag: v5.0.5
         id: nuget-cache
         with:
           key: ${{ hashFiles('**/Directory.packages.props', './build/LibraryVersions.g.cs', '**/packages.config' ) }}
@@ -104,7 +99,7 @@ jobs:
           }
         
       - name: Upload NuGet Artifacts
-        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # tag: v7.0.0
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # tag: v7.0.1
         with:
           name: bin-nuget-packages
           path: bin/nuget-artifacts/

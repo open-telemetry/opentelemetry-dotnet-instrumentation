@@ -1,5 +1,5 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <ItemGroup>
-    <PackageReference Include="Microsoft.Data.Sqlite"  VersionOverride="9.0.0" />
+    <PackageReference Include="Microsoft.Data.Sqlite"  VersionOverride="$(LibraryVersion)" />
   </ItemGroup>
 </Project>

@@ -73,9 +73,9 @@ internal static class PackageVersionDefinitions
             TestApplicationName = "TestApplication.GraphQL",
             Versions =
             [
-                new GraphQLVersion("7.5.0") { MicrosoftDIVersion = "7.5.0", ServerTransportsAspNetCoreVersion = "7.5.0", ServerUIGraphiQL = "7.5.0" },
-                new GraphQLVersion("8.0.2") { MicrosoftDIVersion = "8.0.2", ServerTransportsAspNetCoreVersion = "8.0.2", ServerUIGraphiQL = "8.0.2" },
-                new GraphQLVersion("*") { MicrosoftDIVersion = "*", ServerTransportsAspNetCoreVersion = "*", ServerUIGraphiQL = "*" },
+                new GraphQLVersion("7.5.0") { MicrosoftDIVersion = "7.5.0", ServerTransportsAspNetCoreVersion = "7.5.0", ServerUIGraphiQLVersion = "7.5.0" },
+                new GraphQLVersion("8.0.2") { MicrosoftDIVersion = "8.0.2", ServerTransportsAspNetCoreVersion = "8.0.2", ServerUIGraphiQLVersion = "8.0.2" },
+                new GraphQLVersion("*") { MicrosoftDIVersion = "*", ServerTransportsAspNetCoreVersion = "*", ServerUIGraphiQLVersion = "*" },
             ]
         },
         new()
@@ -98,7 +98,8 @@ internal static class PackageVersionDefinitions
             [
                 // versions below 2.0.10 have critical vulnerabilities
                 // versions below 2.0.13 have known bugs e.g. https://issues.apache.org/jira/browse/LOG4NET-652
-                new("2.0.13"),
+                // versions below 3.3.0 have known security vulnerabilities https://github.com/advisories/GHSA-4f7c-pmjv-c25w
+                new("3.3.0"),
                 new("*")
             ]
         },
@@ -216,8 +217,11 @@ internal static class PackageVersionDefinitions
             Versions =
             [
                 // new("8.0.0"), - transitive vulnerabilities https://github.com/advisories/GHSA-8g4q-xg66-9fp4, <=8.2.3
-                new("8.2.5"),
-                new("9.1.0", supportedTargetFrameworks: ["net10.0", "net9.0", "net8.0"], supportedExecutionFrameworks: ["net10.0", "net9.0", "net8.0"]), // breaking change, new Meter name
+                new("8.2.6"),
+                // new("9.1.0", supportedTargetFrameworks: ["net10.0", "net9.0", "net8.0"], supportedExecutionFrameworks: ["net10.0", "net9.0", "net8.0"]), // breaking change, new Meter name - transitive vulnerabilities <= 9.2.9
+                new("9.2.10", supportedTargetFrameworks: ["net10.0", "net9.0", "net8.0"], supportedExecutionFrameworks: ["net10.0", "net9.0", "net8.0"]),
+                // new("10.0.0", supportedTargetFrameworks: ["net10.0"], supportedExecutionFrameworks: ["net10.0"]), // transitive vulnerabilities <= 10.1.2
+                new("10.1.3", supportedTargetFrameworks: ["net10.0"], supportedExecutionFrameworks: ["net10.0"]),
                 new("*", supportedTargetFrameworks: ["net10.0"], supportedExecutionFrameworks: ["net10.0"])
             ]
         },
@@ -291,6 +295,7 @@ internal static class PackageVersionDefinitions
             Versions =
             [
                 new("2.6.122"),
+                new("2.12.14"),
                 new("*")
             ]
         },
@@ -339,10 +344,10 @@ internal static class PackageVersionDefinitions
                 // Use case 2: Equal to instrumentation tool version
                 // net8.0: 10.0.0 (equal to instrumentation 10.0.0)
                 // net9.0: 10.0.0 (equal to instrumentation 10.0.0)
-                // net462: 10.0.2 (equal to instrumentation 10.0.2)
-                // net10.0: 10.0.2 (framework override to 10.0.0, validates build parameter was respected)
+                // net462: 10.0.7 (equal to instrumentation 10.0.7)
+                // net10.0: 10.0.7 (framework override to 10.0.0, validates build parameter was respected)
                 new("10.0.0", supportedTargetFrameworks: ["net8.0", "net9.0"], supportedExecutionFrameworks: ["net8.0", "net9.0"]),
-                new("10.0.2", supportedTargetFrameworks: ["net462", "net10.0"], supportedExecutionFrameworks: ["net462", "net10.0"]),
+                new("10.0.7", supportedTargetFrameworks: ["net462", "net10.0"], supportedExecutionFrameworks: ["net462", "net10.0"]),
             ]
         },
         new()

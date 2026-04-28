@@ -7,9 +7,9 @@ RUN dnf install -y \
 COPY ./scripts/dotnet-install.sh ./dotnet-install.sh
 
 RUN chmod +x ./dotnet-install.sh \
-    && ./dotnet-install.sh -v 10.0.201 --install-dir /usr/share/dotnet --no-path \
-    && ./dotnet-install.sh -v 9.0.312 --install-dir /usr/share/dotnet --no-path \
-    && ./dotnet-install.sh -v 8.0.419 --install-dir /usr/share/dotnet --no-path \
+    && ./dotnet-install.sh -v 10.0.202 --install-dir /usr/share/dotnet --no-path \
+    && ./dotnet-install.sh -v 9.0.313 --install-dir /usr/share/dotnet --no-path \
+    && ./dotnet-install.sh -v 8.0.420 --install-dir /usr/share/dotnet --no-path \
     && rm dotnet-install.sh
 
 ENV PATH="$PATH:/usr/share/dotnet"
