@@ -17,7 +17,6 @@ public class FileBasedOpAmpSettingsTests
         {
             OpAmp = new OpAmpConfiguration()
             {
-                Enabled = true,
                 ServerUrl = serverUrl
             }
         };

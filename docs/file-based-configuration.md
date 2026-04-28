@@ -623,9 +623,6 @@ instrumentation/development:
 
 ``` yaml
 opamp/development:
-  # Configure if OpAMP client is enabled.
-  # If omitted or null, the client is disabled.
-  enabled: false
   # Configure the server endpoint. If not explicitly set, a default
   # URL is used: https://localhost:4318/v1/opamp.
   server_url: https://localhost:4318/v1/opamp

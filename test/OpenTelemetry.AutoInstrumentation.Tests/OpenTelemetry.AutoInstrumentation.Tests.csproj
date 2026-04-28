@@ -28,6 +28,9 @@
     <None Update="Configurations\FileBased\Files\TestInstrumentationFile.yaml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Update="Configurations\FileBased\Files\TestEmptyFile.yaml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Update="Configurations\FileBased\Files\TestTracesFile.yaml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>

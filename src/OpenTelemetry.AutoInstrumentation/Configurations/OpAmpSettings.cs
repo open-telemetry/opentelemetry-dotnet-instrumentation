@@ -29,7 +29,7 @@ internal class OpAmpSettings : Settings
 
     protected override void OnLoadFile(YamlConfiguration configuration)
     {
-        OpAmpClientEnabled = configuration.OpAmp?.Enabled ?? false;
+        OpAmpClientEnabled = configuration.OpAmp != null;
         ServerUrl = GetServerUrl(configuration.OpAmp?.ServerUrl, configuration.FailFast);
     }
 

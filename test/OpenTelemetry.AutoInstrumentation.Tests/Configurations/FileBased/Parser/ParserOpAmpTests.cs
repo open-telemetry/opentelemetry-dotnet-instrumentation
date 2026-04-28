@@ -19,8 +19,21 @@ public class ParserOpAmpTests
         Assert.NotNull(config);
 
         Assert.Equal("1.0", config.FileFormat);
-        Assert.True(config.OpAmp?.Enabled);
+        Assert.NotNull(config.OpAmp);
         Assert.Equal("wss://localhost:4318/v1/opamp", config.OpAmp?.ServerUrl);
+    }
+
+    [Fact]
+    public void Parse_EmptyConfigYaml_ShouldPopulateDefaultsCorrectly()
+    {
+        var config = YamlParser.ParseYaml<YamlConfiguration>("Configurations/FileBased/Files/TestEmptyFile.yaml");
+
+        Assert.NotNull(config);
+
+        Assert.Equal("1.0", config.FileFormat);
+
+        // By default opamp is disabled
+        Assert.Null(config.OpAmp);
     }
 
     [Fact]
@@ -28,7 +41,6 @@ public class ParserOpAmpTests
     {
         using var envScope = new EnvironmentScope(new Dictionary<string, string?>()
         {
-            { "OTEL_DOTNET_AUTO_OPAMP_ENABLED", "true" },
             { "OTEL_DOTNET_AUTO_OPAMP_SERVER_URL", "wss://localhost:4318/v1/opamp" }
         });
 
@@ -37,7 +49,7 @@ public class ParserOpAmpTests
         Assert.NotNull(config);
 
         Assert.Equal("1.0", config.FileFormat);
-        Assert.True(config.OpAmp?.Enabled);
+        Assert.NotNull(config.OpAmp);
         Assert.Equal("wss://localhost:4318/v1/opamp", config.OpAmp?.ServerUrl);
     }
 }
