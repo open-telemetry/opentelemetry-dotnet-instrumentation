@@ -44,6 +44,6 @@ public class OpAmpTests : TestHelper
         server.AssertExpectations();
 
         Assert.NotNull(agentDescriptionFrame);
-        Assert.Contains(agentDescriptionFrame.IdentifyingAttributes, a => a.Key == "opamp.test");
+        Assert.Contains(agentDescriptionFrame.NonIdentifyingAttributes, a => a.Key == "opamp.test");
     }
 }

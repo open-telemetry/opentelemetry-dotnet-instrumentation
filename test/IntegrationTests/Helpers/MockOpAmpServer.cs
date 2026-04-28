@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 #if NET
+using System.Buffers;
 using Microsoft.AspNetCore.Http;
 #endif
 
@@ -192,14 +193,34 @@ internal sealed class MockOpAmpServer : IDisposable
 #else
     private static async Task<AgentToServer?> ProcessReceiveAsync(HttpRequest request)
     {
-        // Read the body using the PipeReader
-        var result = await request.BodyReader.ReadAsync().ConfigureAwait(false);
-        var buffer = result.Buffer;
+        var reader = request.BodyReader;
+        var messageBuffer = new ArrayBufferWriter<byte>();
 
-        var frame = AgentToServer.Parser.ParseFrom(buffer);
+        while (true)
+        {
+            var result = await reader.ReadAsync().ConfigureAwait(false);
+            var buffer = result.Buffer;
 
-        // Tell the PipeReader how much we consumed
-        request.BodyReader.AdvanceTo(buffer.End);
+            if (result.IsCanceled)
+            {
+                reader.AdvanceTo(buffer.End);
+                return null;
+            }
+
+            foreach (var segment in buffer)
+            {
+                messageBuffer.Write(segment.Span);
+            }
+
+            reader.AdvanceTo(buffer.End);
+
+            if (result.IsCompleted)
+            {
+                break;
+            }
+        }
+
+        var frame = AgentToServer.Parser.ParseFrom(messageBuffer.WrittenSpan);
 
         return frame;
     }

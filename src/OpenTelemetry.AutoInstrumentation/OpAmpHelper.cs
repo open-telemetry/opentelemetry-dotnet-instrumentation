@@ -37,9 +37,11 @@ internal static class OpAmpHelper
                 }
                 catch (Exception ex)
                 {
-                    IsRunning = false;
-
                     Logger.Warning(ex, "OpAmp client stopped unexpectedly.");
+                }
+                finally
+                {
+                    IsRunning = false;
                 }
             });
         }
