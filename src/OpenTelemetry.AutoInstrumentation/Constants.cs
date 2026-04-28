@@ -28,6 +28,7 @@ internal static class Constants
     {
         public const string AttributeServiceName = "service.name";
         public const string AttributeServiceInstanceId = "service.instance.id";
+        public const string AttributeServiceNamespaceName = "service.namespace.name";
     }
 
     public static class ConfigurationValues

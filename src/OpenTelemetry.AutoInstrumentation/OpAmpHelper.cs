@@ -93,20 +93,29 @@ internal static class OpAmpHelper
         // Configure resource attributes for identification.
         foreach (var resourceAttribute in resources.Attributes)
         {
-            if (resourceAttribute.Value == null)
+            if (resourceAttribute.Key == null ||
+                resourceAttribute.Value == null)
             {
                 continue;
             }
 
             var value = resourceAttribute.Value.ToString();
-            if (!string.IsNullOrWhiteSpace(value))
+            if (string.IsNullOrWhiteSpace(value))
             {
-                // OTel language agents must map everything to identifying attributes.
+                continue;
+            }
+
+            if (IsIdentifyingAttribute(resourceAttribute.Key))
+            {
                 settings.Identification.AddIdentifyingAttribute(resourceAttribute.Key, value);
+            }
+            else
+            {
+                settings.Identification.AddNonIdentifyingAttribute(resourceAttribute.Key, value);
             }
         }
 
-        settings.Identification.AddIdentifyingAttribute("opamp.version", GetOpAmpVersion());
+        settings.Identification.AddNonIdentifyingAttribute("opamp.version", GetOpAmpVersion());
     }
 
     private static ConnectionType GetConnectionType(Uri serverUrl)
@@ -133,5 +142,13 @@ internal static class OpAmpHelper
         return assembly
             .GetCustomAttribute<AssemblyInformationalVersionAttribute>()?
             .InformationalVersion?.Split(['+'], 2)[0] ?? "unknown";
+    }
+
+    private static bool IsIdentifyingAttribute(string attributeName)
+    {
+        return attributeName
+            is Constants.ResourceAttributes.AttributeServiceName
+            or Constants.ResourceAttributes.AttributeServiceInstanceId
+            or Constants.ResourceAttributes.AttributeServiceNamespaceName;
     }
 }
