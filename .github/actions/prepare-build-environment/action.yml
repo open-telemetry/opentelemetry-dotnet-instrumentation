@@ -1,0 +1,86 @@
+name: Prepare Build Environment
+description: Prepare the build environment on the host or inside a Docker container and publish common execution details.
+
+inputs:
+  artifact-name:
+    description: Artifact suffix for uploaded outputs.
+    required: true
+  environment-type:
+    description: Either `host` or `container`.
+    required: true
+  dockerfile:
+    description: Path to the Dockerfile used for container execution.
+    required: false
+    default: ""
+
+outputs:
+  container-name:
+    description: Running Docker container name when environment-type is container.
+    value: ${{ steps.start-build-container.outputs.container_name }}
+
+runs:
+  using: composite
+  steps:
+    - name: Validate environment inputs
+      shell: pwsh
+      run: |
+        $environmentType = '${{ inputs.environment-type }}'
+
+        if ($environmentType -notin @('host', 'container')) {
+          throw "environment-type must be either 'host' or 'container'."
+        }
+
+        if ($environmentType -eq 'container') {
+          if ([string]::IsNullOrEmpty('${{ inputs.dockerfile }}')) {
+            throw 'dockerfile input is required when environment-type is container.'
+          }
+        }
+
+    - name: Setup .NET
+      if: ${{ inputs.environment-type == 'host' }}
+      uses: ./.github/actions/setup-dotnet
+
+    - name: Set up Docker Buildx
+      if: ${{ inputs.environment-type == 'container' }}
+      uses: docker/setup-buildx-action@4d04d5d9486b7bd6fa91e7baf45bbb4f8b9deedd # tag: v4.0.0
+
+    - name: Resolve image name
+      if: ${{ inputs.environment-type == 'container' }}
+      id: resolve-image-name
+      shell: pwsh
+      run: |
+        $artifactName = '${{ inputs.artifact-name }}'.Trim().ToLowerInvariant()
+        $sanitizedArtifactName = [regex]::Replace($artifactName, '[^a-z0-9._-]', '-')
+        $imageName = "otel-dotnet-auto-build-$sanitizedArtifactName"
+        "image_name=$imageName" >> $env:GITHUB_OUTPUT
+
+    - name: Build Docker image
+      if: ${{ inputs.environment-type == 'container' }}
+      uses: docker/build-push-action@bcafcacb16a39f128d818304e6c9c0c18556b85f # tag: v7.1.0
+      with:
+        context: .
+        file: ${{ inputs.dockerfile }}
+        load: true
+        tags: ${{ steps.resolve-image-name.outputs.image_name }}
+
+    - name: Start build container
+      if: ${{ inputs.environment-type == 'container' }}
+      id: start-build-container
+      shell: bash
+      run: |
+        set -u
+        sanitized_name="$(echo "${{ steps.resolve-image-name.outputs.image_name }}" | tr '[:upper:]' '[:lower:]' | tr -c 'a-z0-9' '-')"
+        container_name="${sanitized_name}-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+
+        docker_args=(
+          --detach
+          --name "${container_name}"
+          --user "$(id -u):$(id -g)"
+          --mount "type=bind,source=${GITHUB_WORKSPACE},target=/project"
+          --workdir /project
+          -e "HOME=/tmp"
+          -e "NUGET_PACKAGES=/project/packages"
+        )
+
+        docker run "${docker_args[@]}" "${{ steps.resolve-image-name.outputs.image_name }}" /bin/sh -c 'git config --global --add safe.directory /project && trap "exit 0" TERM INT; while true; do sleep 3600; done'
+        echo "container_name=${container_name}" >> "$GITHUB_OUTPUT"

@@ -15,22 +15,22 @@ permissions:
   contents: read
 
 jobs:
-  build-container:
-    uses: ./.github/workflows/build-container.yml
-
   build-ubuntu1604-native:
     uses: ./.github/workflows/build-ubuntu1604-native-container.yml
 
+  build-windows:
+    uses: ./.github/workflows/build-windows.yml
+
   build:
-    needs: build-ubuntu1604-native
+    needs: [ build-windows, build-ubuntu1604-native ]
     uses: ./.github/workflows/build.yml
 
   build-nuget-packages:
-    needs: [ build, build-container ]
+    needs: [ build-windows, build ]
     uses: ./.github/workflows/build-nuget-packages.yml
 
   test-build-managed:
-    needs: build
+    needs: [ build-windows, build ]
     strategy:
       fail-fast: false
       matrix:
@@ -68,12 +68,7 @@ jobs:
           fetch-depth: 0 # fetching all, needed to correctly calculate version
 
       - name: Setup .NET
-        uses: actions/setup-dotnet@c2fa09f4bde5ebb9d1777cf28262a3eb3db3ced7 # tag: v5.2.0
-        with:
-          dotnet-version: | 
-            8.0.419
-            9.0.312
-            10.0.201
+        uses: ./.github/actions/setup-dotnet
 
       - name: Check for NuGet packages cache
         uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # tag: v5.0.5
@@ -110,7 +105,7 @@ jobs:
         run: rm SqlLocalDB.msi
 
   test-build-native:
-    needs: build
+    needs: build-windows
     strategy:
       fail-fast: false
       matrix:
@@ -128,12 +123,7 @@ jobs:
           fetch-depth: 0 # fetching all, needed to correctly calculate version
 
       - name: Setup .NET
-        uses: actions/setup-dotnet@c2fa09f4bde5ebb9d1777cf28262a3eb3db3ced7 # tag: v5.2.0
-        with:
-          dotnet-version: | 
-            8.0.419
-            9.0.312
-            10.0.201
+        uses: ./.github/actions/setup-dotnet
 
       - name: Check for NuGet packages cache
         uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # tag: v5.0.5
@@ -152,7 +142,7 @@ jobs:
         run: ./build.cmd NativeTests
 
   test-build-windows-container-tests:
-    needs: build
+    needs: build-windows
     strategy:
       fail-fast: false
       matrix:
@@ -172,12 +162,7 @@ jobs:
           fetch-depth: 0 # fetching all, needed to correctly calculate version
 
       - name: Setup .NET
-        uses: actions/setup-dotnet@c2fa09f4bde5ebb9d1777cf28262a3eb3db3ced7 # tag: v5.2.0
-        with:
-          dotnet-version: | 
-            8.0.419
-            9.0.312
-            10.0.201
+        uses: ./.github/actions/setup-dotnet
 
       - name: Check for NuGet packages cache
         uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # tag: v5.0.5
@@ -206,7 +191,7 @@ jobs:
           path: test-artifacts/
 
   test-build-container:
-    needs: [build, build-container]
+    needs: build
     strategy:
       fail-fast: false
       matrix:
@@ -250,7 +235,7 @@ jobs:
       run: |
         set -e
         docker build -t mybuildimage -f "./docker/${{ matrix.base-image }}.dockerfile" .
-        docker run -e OS_TYPE=${{ matrix.os-type }} --rm --mount type=bind,source="${GITHUB_WORKSPACE}",target=/project mybuildimage \
+        docker run -e HOME=/tmp -e OS_TYPE=${{ matrix.os-type }} --user "$(id -u):$(id -g)" --rm --mount type=bind,source="${GITHUB_WORKSPACE}",target=/project mybuildimage \
           /bin/sh -c 'git config --global --add safe.directory /project && ./build.sh TestWorkflow --containers none'
 
     - name: Upload test logs
@@ -280,12 +265,7 @@ jobs:
           fetch-depth: 0 # fetching all, needed to correctly calculate version
 
       - name: Setup .NET
-        uses: actions/setup-dotnet@c2fa09f4bde5ebb9d1777cf28262a3eb3db3ced7 # tag: v5.2.0
-        with:
-          dotnet-version: | 
-            8.0.419
-            9.0.312
-            10.0.201
+        uses: ./.github/actions/setup-dotnet
 
       - name: Check for NuGet packages cache
         uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # tag: v5.0.5

@@ -75,12 +75,7 @@ jobs:
         # queries: security-extended,security-and-quality
 
     - name: Setup dotnet
-      uses: actions/setup-dotnet@c2fa09f4bde5ebb9d1777cf28262a3eb3db3ced7 # tag: v5.2.0
-      with:
-        dotnet-version: | 
-          8.0.419
-          9.0.312
-          10.0.201
+      uses: ./.github/actions/setup-dotnet
 
     # If the analyze step fails for one of the languages you are analyzing with
     # "We were unable to automatically build your code", modify the matrix above

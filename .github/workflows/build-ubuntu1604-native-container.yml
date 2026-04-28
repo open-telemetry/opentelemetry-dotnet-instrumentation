@@ -15,23 +15,41 @@ jobs:
     runs-on: ubuntu-22.04
     timeout-minutes: 60
     steps:
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # tag: v6.0.2
+        with:
+          fetch-depth: 0 # fetching all, needed to correctly calculate version
 
-    - name: Checkout
-      uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # tag: v6.0.2
-      with:
-        fetch-depth: 0 # fetching all, needed to correctly calculate version
+      - name: Prepare build environment
+        id: prepare-build-environment
+        uses: ./.github/actions/prepare-build-environment
+        with:
+          artifact-name: ubuntu1604-native
+          environment-type: container
+          dockerfile: ./docker/ubuntu1604.dockerfile
 
-    - name: Build native library in Docker container
-      run: |
-        set -e
-        docker build -t mybuildimage -f "./docker/ubuntu1604.dockerfile" .
-        docker run -e OS_TYPE=linux-glibc --rm --mount type=bind,source="${GITHUB_WORKSPACE}",target=/project mybuildimage \
-          /bin/sh -c 'export PATH="$PATH:/usr/share/dotnet" && git config --global --add safe.directory /project && ./build.sh BuildNativeWorkflow'
+      - name: Build native library in Docker container
+        env:
+          OS_TYPE: linux-glibc
+        uses: ./.github/actions/run-command-in-environment
+        with:
+          container-name: ${{ steps.prepare-build-environment.outputs.container-name }}
+          container-publish-env: OS_TYPE
+          run: |
+            export PATH="$PATH:/usr/share/dotnet"
+            ./build.sh BuildNativeWorkflow
 
-    - name: Publish native library Linux build
-      if: ${{ !cancelled() }}
-      uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # tag: v7.0.1
-      with:
-        name: bin-ubuntu1604-native
-        path: bin/tracer-home
-      continue-on-error: true
+      - name: Publish native library Linux build
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # tag: v7.0.1
+        with:
+          name: bin-ubuntu1604-native
+          path: bin/tracer-home
+        continue-on-error: true
+
+      - name: Cleanup build environment
+        if: ${{ always() }}
+        uses: ./.github/actions/cleanup-build-environment
+        with:
+          environment-type: ${{ steps.prepare-build-environment.outputs.container-name != '' && 'container' || 'host' }}
+          container-name: ${{ steps.prepare-build-environment.outputs.container-name }}

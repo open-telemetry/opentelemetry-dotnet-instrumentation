@@ -3,7 +3,7 @@
 ## Source
 
 Files under this folder were copied from:
-<https://github.com/open-telemetry/opentelemetry-dotnet-contrib/tree/Instrumentation.SqlClient-1.15.1/src/Shared>
+<https://github.com/open-telemetry/opentelemetry-dotnet-contrib/tree/Instrumentation.SqlClient-1.15.2/src/Shared>
 
 ## Usage
 
