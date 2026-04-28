@@ -17,7 +17,7 @@ internal static class OpAmpHelper
     private static readonly IOtelLogger Logger = OtelLogging.GetLogger();
 
     private static OpAmpClient? _client;
-    private static Task? _clientRunningTask;
+    private static Task? _clientStartupTask;
 
     public static bool IsRunning { get; private set; }
 
@@ -27,7 +27,8 @@ internal static class OpAmpHelper
         {
             _client = new OpAmpClient(settings => ConfigureClient(settings, opAmpSettings, resources));
 
-            _clientRunningTask = Task.Run(async () =>
+            // Initializes a client's transport and sends hello frame
+            _clientStartupTask = Task.Run(async () =>
             {
                 try
                 {
@@ -60,10 +61,10 @@ internal static class OpAmpHelper
         {
             _client?.StopAsync().GetAwaiter().GetResult();
 
-            if (_clientRunningTask != null)
+            if (_clientStartupTask != null)
             {
                 _cts.Cancel();
-                _clientRunningTask.GetAwaiter().GetResult();
+                _clientStartupTask.GetAwaiter().GetResult();
             }
 
             _client?.Dispose();
