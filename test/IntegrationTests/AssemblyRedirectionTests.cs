@@ -8,26 +8,25 @@ namespace IntegrationTests;
 
 public class AssemblyRedirectionTests(ITestOutputHelper output) : TestHelper("AssemblyRedirection", output)
 {
-    private const string AssemblyName = "System.Diagnostics.DiagnosticSource";
-
+#if !NETFRAMEWORK
     [Theory]
     [Trait("Category", "EndToEnd")]
 #if NET8_0
     // Case 1: Lower version should be redirected with/without native profiler
-    [InlineData("8.0.0", AssemblyName, "10.0.0.0", "10.0.25.52411", true)]
-    [InlineData("8.0.0", AssemblyName, "10.0.0.0", "10.0.25.52411", false)]
+    [InlineData("8.0.0", "System.Diagnostics.DiagnosticSource", "10.0.0.0", "10.0.25.52411", true)]
+    [InlineData("8.0.0", "System.Diagnostics.DiagnosticSource", "10.0.0.0", "10.0.25.52411", false)]
     // Case 2: Equal version, should NOT be redirected with/without native profiler
-    [InlineData("10.0.0", AssemblyName, "10.0.0.0", "10.0.25.52411", true)]
-    [InlineData("10.0.0", AssemblyName, "10.0.0.0", "10.0.25.52411", false)]
+    [InlineData("10.0.0", "System.Diagnostics.DiagnosticSource", "10.0.0.0", "10.0.25.52411", true)]
+    [InlineData("10.0.0", "System.Diagnostics.DiagnosticSource", "10.0.0.0", "10.0.25.52411", false)]
     // Case 3: Higher version should NOT be redirected with/without native profiler
     // TODO even LibraryVersion=10.0.2 loads assembly 10.0.0.0, making it identical to case 2 from the loaded assembly perspective
 #elif NET9_0
     // Case 1: Lower version should be redirected with/without native profiler
-    [InlineData("9.0.0", AssemblyName, "10.0.0.0", "10.0.25.52411", true)]
-    [InlineData("9.0.0", AssemblyName, "10.0.0.0", "10.0.25.52411", false)]
+    [InlineData("9.0.0", "System.Diagnostics.DiagnosticSource", "10.0.0.0", "10.0.25.52411", true)]
+    [InlineData("9.0.0", "System.Diagnostics.DiagnosticSource", "10.0.0.0", "10.0.25.52411", false)]
     // Case 2: Equal version, should NOT be redirected with/without native profiler
-    [InlineData("10.0.0", AssemblyName, "10.0.0.0", "10.0.25.52411", true)]
-    [InlineData("10.0.0", AssemblyName, "10.0.0.0", "10.0.25.52411", false)]
+    [InlineData("10.0.0", "System.Diagnostics.DiagnosticSource", "10.0.0.0", "10.0.25.52411", true)]
+    [InlineData("10.0.0", "System.Diagnostics.DiagnosticSource", "10.0.0.0", "10.0.25.52411", false)]
     // Case 3: Higher version should NOT be redirected with/without native profiler
     // TODO even LibraryVersion=10.0.2 loads assembly 10.0.0.0, making it identical to case 2 from the loaded assembly perspective
 #elif NET10_0
@@ -37,32 +36,21 @@ public class AssemblyRedirectionTests(ITestOutputHelper output) : TestHelper("As
     // TODO currently different test jobs use different versions of .net runtime:
     //   - test-build-container (ubuntu-22.04, alpine, alpine-x64, linux-musl): DS file version 10.0.426.12010
     //   - test-build-managed (net10.0, windows-2022): DS file version 10.0.726.21808
-    [InlineData("10.0.7", AssemblyName, "10.0.0.0", "10.0.726.21808", true)]
-    [InlineData("10.0.7", AssemblyName, "10.0.0.0", "10.0.726.21808", false)]
-    // Case 3: Higher version is not possible for DiagnosticSource on .NET 10, the instrumentation tool is already using the highest possible version
-#elif NETFRAMEWORK
-    // Case 1: Lower version should be redirected (native profiler mandatory)
-    [InlineData("6.0.0", AssemblyName, "10.0.0.7", "10.0.726.21808")]
-    // Case 2: Equal version, should NOT be redirected (native profiler mandatory)
-    [InlineData("10.0.7", AssemblyName, "10.0.0.7", "10.0.726.21808")]
+    [InlineData("10.0.7", "System.Diagnostics.DiagnosticSource", "10.0.0.0", "10.0.726.21808", true)]
+    [InlineData("10.0.7", "System.Diagnostics.DiagnosticSource", "10.0.0.0", "10.0.726.21808", false)]
     // Case 3: Higher version is not possible for DiagnosticSource on .NET 10, the instrumentation tool is already using the highest possible version
 #endif
-    public void SubmitsTraces(
+    public Task SubmitsTracesOnDotNet(
         string libraryVersion,
         string expectedAssemblyName,
         string expectedAssemblyVersion,
         string expectedAssemblyFileVersion,
-        bool enableNativeProfiler = true)
+        bool enableNativeProfiler)
     {
-#if NETFRAMEWORK
-        Assert.True(enableNativeProfiler, "Native profiler is required for assembly redirection on .NET Framework");
-        var excludedNames = string.Empty;
-#else
-
         // on .NET (Core) Assembly Redirection without Native Profiler will load test application
         // and the startup hook twice, so we should exclude both from validation of no-duplicate loads
         var excludedNames = !enableNativeProfiler ? "TestApplication.AssemblyRedirection,OpenTelemetry.AutoInstrumentation.StartupHook" : string.Empty;
-#endif
+
         // Arrange
         using var collector = new MockSpansCollector(Output);
         SetExporter(collector);
@@ -84,5 +72,51 @@ public class AssemblyRedirectionTests(ITestOutputHelper output) : TestHelper("As
 
         // Assert
         collector.AssertExpectations();
+        return Task.CompletedTask;
     }
+#endif
+
+#if NETFRAMEWORK
+    [WindowsAdministratorTheory]
+    [Trait("Category", "EndToEnd")]
+    [Trait("Containers", "Windows")]
+    // Case 1: Lower version should be redirected before the expected assembly is used.
+    [InlineData("6.0.0", "Microsoft.Extensions.Logging.Abstractions", "10.0.0.7", "10.0.726.21808")]
+    // Case 2: Equal version should keep loading the expected assembly.
+    [InlineData("10.0.7", "Microsoft.Extensions.Logging.Abstractions", "10.0.0.7", "10.0.726.21808")]
+    public async Task SubmitsTracesOnNetFramework(
+        string libraryVersion,
+        string expectedAssemblyName,
+        string expectedAssemblyVersion,
+        string expectedAssemblyFileVersion)
+    {
+        using var collector = new MockSpansCollector(Output, host: "*");
+        using var fwPort = FirewallHelper.OpenWinPort(collector.Port, Output);
+        collector.Expect("AssemblyRedirection.ActivitySource");
+
+        var collectorUrl = $"http://{DockerNetworkHelper.IntegrationTestsGateway}:{collector.Port}";
+        var environmentVariables = new Dictionary<string, string>
+        {
+            ["OTEL_EXPORTER_OTLP_ENDPOINT"] = collectorUrl,
+            ["OTEL_DOTNET_AUTO_TRACES_ADDITIONAL_SOURCES"] = "AssemblyRedirection.ActivitySource",
+            ["EXPECTED_ASSEMBLY_NAME"] = expectedAssemblyName,
+            ["EXPECTED_ASSEMBLY_VERSION"] = expectedAssemblyVersion,
+            ["EXPECTED_ASSEMBLY_FILE_VERSION"] = expectedAssemblyFileVersion
+        };
+
+        await AssertContainerizedTracesAsync(libraryVersion, environmentVariables, collector).ConfigureAwait(false);
+    }
+
+    private async Task AssertContainerizedTracesAsync(
+        string libraryVersion,
+        IReadOnlyDictionary<string, string> environmentVariables,
+        MockSpansCollector collector)
+    {
+        await IISContainerTestHelper.RunContainerAsync(
+            $"testapplication-assemblyredirection-netframework-nogac-{libraryVersion.Replace('.', '-')}",
+            environmentVariables,
+            Output).ConfigureAwait(false);
+        collector.AssertExpectations();
+    }
+#endif
 }

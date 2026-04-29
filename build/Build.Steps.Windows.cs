@@ -159,6 +159,9 @@ partial class Build
         .OnlyWhenStatic(() => IsWin && (Containers == ContainersWindows || Containers == ContainersWindowsOnly))
         .Executes(() =>
         {
+            var assemblyRedirectionProject = Solution.GetProjectByName(Projects.Tests.Applications.AssemblyRedirection);
+            BuildNetFxDockerImages(assemblyRedirectionProject);
+
             var aspNetProject = Solution.GetProjectByName(Projects.Tests.Applications.AspNet);
             BuildDockerImage(aspNetProject, "integrated-nogac", "classic-nogac", "integrated", "classic");
 
@@ -168,6 +171,51 @@ partial class Build
             var owinProject = Solution.GetProjectByName(Projects.Tests.Applications.OwinIis);
             BuildDockerImage(owinProject);
         });
+
+    void BuildNetFxDockerImages(Project project)
+    {
+        const string moduleName = "OpenTelemetry.DotNet.Auto.psm1";
+        var sourceModulePath = InstallationScriptsDirectory / moduleName;
+        var localBinDirectory = project.Directory / "bin";
+        var localTracerZip = localBinDirectory / "tracer.zip";
+
+        try
+        {
+            sourceModulePath.CopyToDirectory(localBinDirectory);
+            TracerHomeDirectory.ZipTo(localTracerZip);
+
+            if (!LibraryVersion.TryGetVersions(project.Name, Platform, out var libraryVersions))
+            {
+                throw new InvalidOperationException($"Expected library versions for {project.Name}.");
+            }
+
+            foreach (var libraryVersion in libraryVersions
+                         .Where(x => x.SupportedFrameworks.Contains(TargetFramework.NET462, StringComparer.OrdinalIgnoreCase))
+                         .Select(x => x.LibraryVersion))
+            {
+                DockerBuild(x => x
+                    .SetPath(".")
+                    .SetBuildArg($"configuration={BuildConfiguration}")
+                    .SetBuildArg($"platform={Platform}")
+                    .SetBuildArg($"libraryVersion={libraryVersion}")
+                    .EnableRm()
+                    .SetProcessWorkingDirectory(project.Directory)
+                    .SetTag(GetNetFxDockerImageName(project, libraryVersion)));
+            }
+        }
+        finally
+        {
+            localTracerZip.DeleteFile();
+            var localModulePath = localBinDirectory / moduleName;
+            localModulePath.DeleteFile();
+        }
+    }
+
+    static string GetNetFxDockerImageName(Project project, string libraryVersion)
+    {
+        return $"{Path.GetFileNameWithoutExtension(project).Replace(".", "-")}-netframework-nogac-{libraryVersion.Replace(".", "-", StringComparison.Ordinal)}"
+            .ToLowerInvariant();
+    }
 
     void BuildDockerImage(Project project, params string[] targets)
     {

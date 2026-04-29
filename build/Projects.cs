@@ -24,6 +24,7 @@ public static class Projects
 
         public static class Applications
         {
+            public const string AssemblyRedirection = "TestApplication.AssemblyRedirection";
             public const string AspNet = "TestApplication.AspNet.NetFramework";
             public const string ContinuousProfilerNativeDep = "TestApplication.ContinuousProfiler.NativeDep";
             public const string OwinIis = "TestApplication.Owin.IIS.NetFramework";
