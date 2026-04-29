@@ -9,6 +9,18 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 
 ### Added
 
+- Configuration `OTEL_DOTNET_AUTO_APP_DOMAIN_STRATEGY` added with ability to
+  use:
+  - `LoaderOptimizationSingleDomain` - all non-default application domains
+     will be forced to load with `LoaderOptimization.SingleDomain`, preventing
+     their assemblies loading as domain neutral;
+  - `AssemblyRedirect` - modify app config binding redirects to load required
+    assembly versions;
+  - `None` - do not use any special strategy for non-default application
+    domains.
+  See [docs/netfx-appdomain-strategy.md](./docs/netfx-appdomain-strategy.md)
+  for details.
+
 ### Changed
 
 - Support for [StackExchange.Redis](https://www.nuget.org/packages/StackExchange.Redis)

@@ -215,10 +215,18 @@ application to use these versions.
 .NET Framework has additional assembly resolution behaviors that can
 affect the instrumentation:
 
-**Global Assembly Cache (GAC) override:** Assemblies in the GAC take
-precedence over other resolution mechanisms. If a conflicting version
-exists in the GAC, it will be loaded instead of the instrumentation's
-version, regardless of IL rewriting or `AssemblyResolve` handlers.
+For a focused explanation of the secondary `AppDomain` problem solved by
+`OTEL_DOTNET_AUTO_APP_DOMAIN_STRATEGY`, see
+[.NET Framework AppDomain Strategy](./netfx-appdomain-strategy.md).
+
+**Global Assembly Cache (GAC) precedence:** For strong-named assemblies,
+.NET Framework first determines the final binding identity (after
+applying redirects and other policy), then checks the GAC before
+`codeBase`, probing, or `AssemblyResolve`. If that resolved identity is
+present in the GAC, the runtime loads the GAC copy and the
+instrumentation cannot override it. A different version in the GAC does
+not by itself take precedence unless the bind was redirected to that
+version (for example, by config or IL rewriting).
 
 For automatic redirection to work, there are two specific scenarios
 that require the instrumentation's .NET Framework assemblies (in the

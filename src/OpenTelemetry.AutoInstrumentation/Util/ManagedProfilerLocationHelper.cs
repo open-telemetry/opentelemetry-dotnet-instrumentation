@@ -13,6 +13,44 @@ internal static partial class ManagedProfilerLocationHelper
     public static string TracerHomeDirectory { get; } =
         ReadEnvironmentVariable(ConfigurationKeys.TracerHome) ?? string.Empty;
 
+    internal static string? ResolveAssemblyLink(string linkPath, string runtimeDir, IOtelLogger? logger = null)
+    {
+        try
+        {
+            var targetDirName = File.ReadAllText(linkPath).Trim();
+#if NETFRAMEWORK
+            if (!targetDirName.StartsWith("net", StringComparison.Ordinal)
+                || targetDirName.Contains(Path.DirectorySeparatorChar)
+                || targetDirName.Contains(Path.AltDirectorySeparatorChar))
+#else
+            if (!targetDirName.StartsWith("net", StringComparison.Ordinal)
+                || targetDirName.Contains(Path.DirectorySeparatorChar, StringComparison.Ordinal)
+                || targetDirName.Contains(Path.AltDirectorySeparatorChar, StringComparison.Ordinal))
+#endif
+            {
+                logger?.Error($"Invalid content in .link file \"{linkPath}\". Expected a single directory name starting with 'net', but got: \"{targetDirName}\"");
+                return null;
+            }
+
+            var targetDirPath = Path.Combine(runtimeDir, targetDirName);
+            var assemblyFileName = Path.GetFileNameWithoutExtension(linkPath);
+            var assemblyName = Path.GetFileNameWithoutExtension(assemblyFileName);
+
+            var path = Probe(targetDirPath, assemblyName);
+            if (path == null)
+            {
+                logger?.Error($"Linked assembly path \"{Path.Combine(targetDirPath, $"{assemblyFileName}")}\" does not exist");
+            }
+
+            return path;
+        }
+        catch (Exception e)
+        {
+            logger?.Debug(e, "Error reading .link file {0}", linkPath);
+            return null;
+        }
+    }
+
     private static string? ReadEnvironmentVariable(string key)
     {
         try
@@ -36,22 +74,7 @@ internal static partial class ManagedProfilerLocationHelper
         var linkFile = Path.Combine(versionDir, $"{name}.dll.link");
         if (File.Exists(linkFile))
         {
-            try
-            {
-                var targetDirName = File.ReadAllText(linkFile).Trim();
-                var targetDirPath = Path.Combine(runtimeDir, targetDirName);
-                var path = Probe(targetDirPath, name);
-                if (path == null)
-                {
-                    logger?.Error($"Linked assembly path \"{Path.Combine(targetDirPath, $"{name}.dll")}\" does not exist");
-                }
-
-                return path;
-            }
-            catch (Exception ex)
-            {
-                logger?.Debug(ex, "Error reading .link file {0}", linkFile);
-            }
+            return ResolveAssemblyLink(linkFile, runtimeDir, logger);
         }
 
         return null;
