@@ -4,10 +4,15 @@
 #ifndef OTEL_PROFILER_DOTNET_STACK_CAPTURE_STRATEGY_H_
 #define OTEL_PROFILER_DOTNET_STACK_CAPTURE_STRATEGY_H_
 
-#include "stack_capture_strategy.h"
-
-#include "logger.h"
 #include <sstream>
+#include "stack_capture_strategy.h"
+#include "profiler_api.h"
+#include "logger.h"
+#include "native_stack_walker.h"
+
+#if defined(_M_AMD64) && defined(_WIN32)
+#include "rtl_stack_walk.h"
+#endif
 
 namespace continuous_profiler {
 
@@ -15,14 +20,16 @@ namespace continuous_profiler {
 /// @details Uses SuspendRuntime/ResumeRuntime to pause entire CLR
 class DotNetStackCaptureStrategy : public IStackCaptureStrategy {
 public:
-    explicit DotNetStackCaptureStrategy(ICorProfilerInfo12* profilerInfo)
-        : profilerInfo_(profilerInfo) {
+    explicit DotNetStackCaptureStrategy(ICorProfilerInfo2* profilerInfo)
+        : profilerApi_(std::make_unique<ProfilerStackCapture::ProfilerApiAdapter>(profilerInfo)), 
+        nativeWalker_(ProfilerStackCapture::CreateNativeStackWalker())
+    {
         trace::Logger::Info("Initialized DotNetStackCaptureStrategy (CLR suspension)");
     }
     
     HRESULT CaptureStacks(
         const std::unordered_set<ThreadID>& threads,
-        StackSnapshotCallbackContext* clientData) override {
+        void* clientData) override {
         
         if (threads.empty()) {
             return S_OK;
@@ -30,23 +37,21 @@ public:
         try
         {
             // RAII guard - suspends CLR in constructor, resumes in destructor
-            RuntimeSuspensionGuard suspensionGuard(profilerInfo_);
+            RuntimeSuspensionGuard suspensionGuard(profilerApi_.get());
             // With CLR suspended, capture stacks for requested threads
             HRESULT captureResult = S_OK;
             for (ThreadID tid : threads) {
-                clientData->threadId = tid;
-                HRESULT frameHr = profilerInfo_->DoStackSnapshot(
-                    tid,
-                    continuous_profiler::IStackCaptureStrategy::StackSnapshotCallbackDefault,
-                    COR_PRF_SNAPSHOT_DEFAULT,
-                    clientData,
-                    nullptr,
-                    0);
+                static_cast<ProfilerStackCapture::StackSnapshotCallbackContext*>(clientData)->threadId = tid;
+                HRESULT frameHr =
+                    profilerApi_
+                        ->DoStackSnapshotUnseeded(tid, clientData);
 
                 if (FAILED(frameHr)) {
-                    //trace::Logger::Debug("DoStackSnapshot failed for thread ", tid,
-                    //    " HRESULT=", trace::HResultStr(frameHr));
-                    if (SUCCEEDED(captureResult)) {
+                    frameHr =
+                        nativeWalker_->WalkThread(profilerApi_.get(), tid,
+                                                  static_cast<ProfilerStackCapture::StackSnapshotCallbackContext*>(
+                                                      clientData));
+                    if (FAILED(frameHr) && SUCCEEDED(captureResult)) {
                         captureResult = frameHr; // Remember first error
                     }
                 }
@@ -65,19 +70,29 @@ public:
             return E_FAIL;
         }
     }
+
+    HRESULT ResolveNativeSymbolName(UINT_PTR instructionPointer, trace::WSTRING& outName) override
+    {
+#if defined(_M_AMD64) && defined(_WIN32)
+        return ProfilerStackCapture::ResolveNativeSymbolName(instructionPointer, outName) ? S_OK : S_FALSE;
+#else
+        return E_NOTIMPL;
+#endif
+    }
     
     // No thread tracking needed - CLR suspension is global
     
 private:
-    ICorProfilerInfo12* profilerInfo_;
+    std::unique_ptr<ProfilerStackCapture::IProfilerApi> profilerApi_;
+    std::unique_ptr<ProfilerStackCapture::INativeStackWalker> nativeWalker_;
     
     /// @brief RAII guard for CLR runtime suspension/resumption
     class RuntimeSuspensionGuard {
     public:
-        explicit RuntimeSuspensionGuard(ICorProfilerInfo12* profilerInfo)
-            : profilerInfo_(profilerInfo) {  // Initialize member
+        explicit RuntimeSuspensionGuard(ProfilerStackCapture::IProfilerApi* profilerApi) : profilerApi_(profilerApi)
+        { // Initialize member
             
-            if (auto suspendResult = profilerInfo_->SuspendRuntime(); FAILED(suspendResult))
+            if (auto suspendResult = profilerApi_->SuspendRuntime(); FAILED(suspendResult))
             {
                 auto errorString = "SuspendRuntime failed with HRESULT=" + std::to_string(suspendResult);
                 throw std::runtime_error(errorString);
@@ -86,7 +101,8 @@ private:
 
         ~RuntimeSuspensionGuard() {
             
-            if (HRESULT resumeHr = profilerInfo_->ResumeRuntime(); FAILED(resumeHr)) {
+            if (HRESULT resumeHr = profilerApi_->ResumeRuntime(); FAILED(resumeHr))
+            {
                 trace::Logger::Error("DotNetStackCaptureStrategy: ResumeRuntime FAILED! HRESULT=", 
                                     trace::HResultStr(resumeHr));
             }
@@ -99,7 +115,8 @@ private:
         RuntimeSuspensionGuard& operator=(RuntimeSuspensionGuard&&) = delete;
         
     private:
-        ICorProfilerInfo12* profilerInfo_;
+        ProfilerStackCapture::IProfilerApi* profilerApi_;
+        
     };
 };
 

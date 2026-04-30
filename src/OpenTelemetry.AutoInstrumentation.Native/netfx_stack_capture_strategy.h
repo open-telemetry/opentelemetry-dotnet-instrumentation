@@ -9,6 +9,10 @@
 
 #include "stack_capture_strategy.h"
 #include "profiler_stack_capture.h"
+#include "native_stack_walker.h"
+#if defined(_M_AMD64)
+#include "rtl_stack_walk.h"
+#endif
 
 namespace continuous_profiler {
 
@@ -18,20 +22,31 @@ class NetFxStackCaptureStrategy : public IStackCaptureStrategy {
 public:
     explicit NetFxStackCaptureStrategy(ICorProfilerInfo2* profilerInfo)
         : engine_(std::make_unique<ProfilerStackCapture::StackCaptureEngine>(
-              std::make_unique<ProfilerStackCapture::ProfilerApiAdapter>(profilerInfo))) {
+              std::make_unique<ProfilerStackCapture::ProfilerApiAdapter>(profilerInfo), 
+            ProfilerStackCapture::CaptureOptions{},
+              ProfilerStackCapture::CreateNativeStackWalker()
+        )) {
         trace::Logger::Info("Initialized NetFxStackCaptureStrategy (per-thread suspension)");
     }
     
     HRESULT CaptureStacks(
         const std::unordered_set<ThreadID>& threads,
-        StackSnapshotCallbackContext* clientData) override {
+        void* clientData) override {
         // StackCaptureEngine handles:
         // - Per-thread suspension via ScopedThreadSuspend
         // - Safety probes with canary thread
         // - Seeded DoStackSnapshot with PrepareContextForSnapshot
         return engine_->CaptureStacks(threads, clientData);
     }
-    
+    HRESULT ResolveNativeSymbolName(UINT_PTR instructionPointer, trace::WSTRING& outName) override
+    {
+#ifdef _M_AMD64
+        return ProfilerStackCapture::ResolveNativeSymbolName(instructionPointer, outName)
+            ? S_OK : S_FALSE;
+#else
+        return E_NOTIMPL;
+#endif
+    }
     // Forward lifecycle events to StackCaptureEngine
     void OnThreadCreated(ThreadID threadId) override {
         if (engine_) {

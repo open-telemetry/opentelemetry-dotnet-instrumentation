@@ -8,7 +8,7 @@
 
 #include "continuous_profiler_clr_helpers.h"
 #include "stack_capture_strategy.h"
-
+#include "profiler_api.h"
 #include <mutex>
 #include <cinttypes>
 #include <future>
@@ -46,21 +46,33 @@ struct FunctionIdentifier
     mdToken  function_token;
     ModuleID module_id;
     bool     is_valid;
+    UINT_PTR native_ip;
+
     static FunctionIdentifier Managed(mdToken token, ModuleID mod, bool valid)
     {
-        return {token, mod, valid};
+        return {token, mod, valid, 0};
     }
-
+    static FunctionIdentifier Native(UINT_PTR ip)
+    {
+        return {0, 0, true, ip};
+    }
     static FunctionIdentifier ManagedInvalid()
     {
-        return {0, 0, false};
+        return {0, 0, false, 0};
     }
-
+    static FunctionIdentifier UnknownNativeSentinel()
+    {
+        return {0, 0, true, static_cast<UINT_PTR>(~static_cast<UINT_PTR>(0))};
+    }
+    bool IsNative() const
+    {
+        return is_valid && function_token == 0 && native_ip != 0;
+    }
     bool operator==(const FunctionIdentifier& p) const
     {
         if (is_valid != p.is_valid)
             return false;
-        return function_token == p.function_token && module_id == p.module_id;
+        return function_token == p.function_token && module_id == p.module_id && native_ip == p.native_ip;
     }
 };
 
@@ -148,7 +160,7 @@ struct std::hash<continuous_profiler::FunctionIdentifier>
 {
     std::size_t operator()(const continuous_profiler::FunctionIdentifier& k) const noexcept
     {
-        return hash_combine(k.function_token, k.module_id, k.is_valid);
+        return hash_combine(k.function_token, k.module_id, k.is_valid, k.native_ip);
     }
 };
 
@@ -285,7 +297,7 @@ class NamingHelper
 public:
     // These are permanent parts of the helper object
     ICorProfilerInfo7* info7_ = nullptr;
-
+    continuous_profiler::IStackCaptureStrategy* stack_capture_strategy_ = nullptr;
     NamingHelper();
     void ClearFunctionIdentifierCache();
     trace::WSTRING* Lookup(const FunctionIdentifier& function_identifier, SamplingStatistics & stats);
@@ -293,6 +305,8 @@ public:
 
     [[nodiscard]] FunctionIdentifier ResolveManagedFunctionIdentifier(FunctionID func_id,
                                                                      COR_PRF_FRAME_INFO frame_info) const;
+    trace::WSTRING*                  GetOrCreateUnknownNativeSentinel();
+
 private:
     NameCache<FunctionIdentifier, trace::WSTRING*> function_name_cache_;
     NameCache<FunctionIdentifierResolveArgs, FunctionIdentifier> function_identifier_cache_;
