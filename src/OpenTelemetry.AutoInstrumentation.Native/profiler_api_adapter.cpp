@@ -64,6 +64,13 @@ HRESULT ProfilerApiAdapter::GetThreadInfo(ThreadID managedThreadId, DWORD* osThr
     return pImpl_->profilerInfo->GetThreadInfo(managedThreadId, osThreadId);
 }
 
+HRESULT ProfilerApiAdapter::GetFunctionFromIP(LPCBYTE ip, FunctionID* pFunctionId)
+{
+    if (!pImpl_->profilerInfo || !ip || !pFunctionId)
+        return E_INVALIDARG;
+    return pImpl_->profilerInfo->GetFunctionFromIP(ip, pFunctionId);
+}
+
 HRESULT ProfilerApiAdapter::SuspendRuntime()
 {
     if (!pImpl_->profilerInfo10)

@@ -73,13 +73,27 @@ HRESULT WalkNativeStack(void* suspendedThread, NativeWalkContext* ctx)
                 frameIp = static_cast<UINT_PTR>(threadCtx.Rip);
             }
 
-            // Emit native frame - functionId=0, ip identifies the function.
-            clientParams->functionId         = 0;
-            clientParams->instructionPointer = frameIp;
+            // Attempt to resolve IP as a JIT-compiled managed function.
+            FunctionID managedFuncId  = 0;
+            bool       isManagedFrame = false;
+            if (ctx->profilerApi != nullptr)
+            {
+                HRESULT fnHr =
+                    ctx->profilerApi->GetFunctionFromIP(reinterpret_cast<LPCBYTE>(threadCtx.Rip), &managedFuncId);
+                if (SUCCEEDED(fnHr) && managedFuncId != 0)
+                {
+                    isManagedFrame = true;
+                }
+            }
+
+            // Emit frame - if managed, pass the FunctionID so caller can resolve it
+            // via the normal managed name resolution path.
+            clientParams->functionId         = isManagedFrame ? managedFuncId : 0;
+            clientParams->instructionPointer = isManagedFrame ? static_cast<UINT_PTR>(threadCtx.Rip) : frameIp;
             clientParams->frameInfo          = 0;
             clientParams->contextSize        = 0;
             clientParams->context            = nullptr;
-            clientParams->isNativeWalkFrame  = true;
+            clientParams->isNativeWalkFrame  = !isManagedFrame;
 
             cbResult = clientParams->callback(clientParams);
             if (cbResult != S_OK)
@@ -373,7 +387,7 @@ HRESULT WalkNativeStackForThread(IProfilerApi*                                  
     if (FAILED(hr))
         return hr;
 
-    NativeWalkContext   nativeCtx{clientData, nullptr, 512};
+    NativeWalkContext   nativeCtx{clientData, nullptr, profilerApi};
     ScopedThreadSuspend suspendedThread(osThreadId);
     return WalkNativeStack(suspendedThread.GetHandle(), &nativeCtx);
 }

@@ -21,6 +21,7 @@ struct NativeWalkContext
 {
     StackSnapshotCallbackContext* clientParams  = nullptr;
     std::atomic<bool>*                                stopRequested = nullptr;
+    IProfilerApi*                 profilerApi   = nullptr;
     DWORD                                             maxDepth      = 512;
 };
 

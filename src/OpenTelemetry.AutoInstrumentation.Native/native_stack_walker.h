@@ -34,28 +34,14 @@ public:
                                ThreadID                                          managedThreadId,
                                ProfilerStackCapture::StackSnapshotCallbackContext* clientData)         = 0;
     virtual HRESULT WalkSuspendedThread(void*                                               suspendedThread,
+                                        IProfilerApi*                                       profilerApi,
                                         ProfilerStackCapture::StackSnapshotCallbackContext* clientData)
     = 0;
 
 };
 
-/// @brief No-op implementation for platforms without native stack walk support.
-class NullNativeStackWalker : public INativeStackWalker
-{
-public:
-    HRESULT WalkThread(IProfilerApi*,
-                       ThreadID, ProfilerStackCapture::StackSnapshotCallbackContext*) override
-    {
-        return E_NOTIMPL;
-    }
-    HRESULT WalkSuspendedThread(void*, ProfilerStackCapture::StackSnapshotCallbackContext*) override
-    {
-        return E_NOTIMPL;
-    }
-};
-
 /// @brief Creates the platform-appropriate native stack walker.
-/// Win x64 -> RtlNativeStackWalker; everything else -> NullNativeStackWalker.
+/// Win x64 -> RtlNativeStackWalker; everything else -> returns nullptr.
 std::unique_ptr<INativeStackWalker> CreateNativeStackWalker();
 
 } // namespace ProfilerStackCapture

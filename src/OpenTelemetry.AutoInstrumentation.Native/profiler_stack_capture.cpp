@@ -479,12 +479,12 @@ HRESULT StackCaptureEngine::CaptureStacks(std::unordered_set<ThreadID> const&   
             static_cast<ProfilerStackCapture::StackSnapshotCallbackContext*>(clientData)->threadId = managedId;
             StackCaptureContext stackCaptureContext{0, &stopRequested_, clientData};
             auto hr = CaptureStack(managedId, &stackCaptureContext);
-            if (FAILED(hr))
+            if (FAILED(hr) && nativeWalker_)
             {
-                if (nativeWalker_)
-                {
-                    nativeWalker_->WalkSuspendedThread(targetThread.GetHandle(), clientData);
-                }
+                trace::Logger::Debug("[StackCapture] CaptureStacks - Falling back to native stack walk for thread. Error from DSS - HRESULT=",
+                    hr);
+                hr = nativeWalker_->WalkSuspendedThread(targetThread.GetHandle(), profilerApi_.get(),clientData);
+                trace::Logger::Debug("[StackCapture] CaptureStacks - Native stack walk completed with HRESULT=", hr);
             }
         }
         catch (const std::exception& ex)

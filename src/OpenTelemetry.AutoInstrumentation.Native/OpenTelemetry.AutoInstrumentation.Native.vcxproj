@@ -233,6 +233,7 @@
     <ClInclude Include="stats.h" />
     <ClInclude Include="string_utils.h" />
     <ClInclude Include="stub_generator.h" />
+    <ClInclude Include="thread_suspend.h" />
     <ClInclude Include="tracer_tokens.h" />
     <ClInclude Include="util.h" />
     <ClInclude Include="version.h" />

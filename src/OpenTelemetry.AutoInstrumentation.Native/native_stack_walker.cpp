@@ -26,9 +26,10 @@ public:
         return WalkNativeStackForThread(profilerApi, managedThreadId, clientData);
     }
     HRESULT WalkSuspendedThread(void*                                               suspendedThread,
+                                IProfilerApi*                                       profilerApi,
                                 ProfilerStackCapture::StackSnapshotCallbackContext* clientData) override
     {
-        NativeWalkContext ctx{clientData, nullptr, 512};
+        NativeWalkContext ctx{clientData, nullptr, profilerApi};
         return WalkNativeStack(suspendedThread, &ctx);
     }
 };
@@ -42,7 +43,7 @@ std::unique_ptr<INativeStackWalker> CreateNativeStackWalker()
     return std::make_unique<RtlNativeStackWalker>();
 #else
     trace::Logger::Debug("[NativeStackWalker] Native stack walking not available on this platform");
-    return std::make_unique<NullNativeStackWalker>();
+    return nullptr;
 #endif
 }
 

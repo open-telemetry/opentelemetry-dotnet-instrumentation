@@ -42,18 +42,17 @@ public:
             HRESULT captureResult = S_OK;
             for (ThreadID tid : threads) {
                 static_cast<ProfilerStackCapture::StackSnapshotCallbackContext*>(clientData)->threadId = tid;
-                HRESULT frameHr =
-                    profilerApi_
-                        ->DoStackSnapshotUnseeded(tid, clientData);
+                HRESULT frameHr = profilerApi_->DoStackSnapshotUnseeded(tid, clientData);
 
-                if (FAILED(frameHr)) {
-                    frameHr =
-                        nativeWalker_->WalkThread(profilerApi_.get(), tid,
-                                                  static_cast<ProfilerStackCapture::StackSnapshotCallbackContext*>(
-                                                      clientData));
-                    if (FAILED(frameHr) && SUCCEEDED(captureResult)) {
-                        captureResult = frameHr; // Remember first error
-                    }
+                if (FAILED(frameHr) && nativeWalker_)
+                {
+                    frameHr = nativeWalker_->WalkThread(
+                        profilerApi_.get(), tid,
+                        static_cast<ProfilerStackCapture::StackSnapshotCallbackContext*>(clientData));
+                }
+
+                if (FAILED(frameHr) && SUCCEEDED(captureResult)) {
+                    captureResult = frameHr;
                 }
             }
 

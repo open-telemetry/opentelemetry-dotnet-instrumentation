@@ -834,9 +834,9 @@ static void CaptureFunctionIdentifiersForThreads(
 static std::unordered_set<ThreadID> EnumerateThreads(ICorProfilerInfo7* info7)
 {
     std::unordered_set<ThreadID> threads;
-
-    ICorProfilerThreadEnum* thread_enum = nullptr;
-    HRESULT                 hr          = info7->EnumThreads(&thread_enum);
+    // discovered pre-existing memory leak in ICorProfilerThreadEnum if we fail to call Release
+    ComPtr<ICorProfilerThreadEnum> thread_enum;
+    HRESULT                        hr = info7->EnumThreads(reinterpret_cast<ICorProfilerThreadEnum**>(&thread_enum));
     if (FAILED(hr))
     {
         trace::Logger::Debug("Could not EnumThreads. HRESULT=0x", std::setfill('0'), std::setw(8), std::hex, hr);
@@ -849,8 +849,6 @@ static std::unordered_set<ThreadID> EnumerateThreads(ICorProfilerInfo7* info7)
     {
         threads.insert(thread_id);
     }
-    // discovered pre-existing memory leak in ICorProfilerThreadEnum if we fail to call Release
-    thread_enum->Release();
     return threads;
 }
 
