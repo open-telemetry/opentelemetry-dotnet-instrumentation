@@ -709,7 +709,7 @@ trace::WSTRING* NamingHelper::Lookup(const FunctionIdentifier& function_identifi
         this->GetFunctionName(function_identifier, *owned);
     }
 
-    trace::WSTRING*                 raw = owned.release();
+    trace::WSTRING* raw = owned.release();
     owned.reset(function_name_cache_.Put(function_identifier, raw));
     // owned's destructor deletes the evicted entry (or no-ops if null)
     return raw;
@@ -737,7 +737,7 @@ trace::WSTRING* NamingHelper::GetOrCreateUnknownNativeSentinel()
         return sentinel;
     }
 
-    sentinel             = new trace::WSTRING(WStr("Unknown_Native_Function(unknown)"));
+    sentinel = new trace::WSTRING(WStr("Unknown_Native_Function(unknown)"));
     std::unique_ptr<trace::WSTRING> old_value{function_name_cache_.Put(sentinel_key, sentinel)};
     return sentinel;
 }
@@ -1212,7 +1212,7 @@ void ContinuousProfiler::SetGlobalInfo12(ICorProfilerInfo12* cor_profiler_info12
 
 void ContinuousProfiler::SetStackCaptureStrategy(IStackCaptureStrategy* stack_capture_strategy)
 {
-    stack_capture_strategy_ = stack_capture_strategy;
+    stack_capture_strategy_        = stack_capture_strategy;
     helper.stack_capture_strategy_ = stack_capture_strategy;
 }
 

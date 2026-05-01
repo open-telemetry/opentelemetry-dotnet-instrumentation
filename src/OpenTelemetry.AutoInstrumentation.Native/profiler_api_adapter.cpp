@@ -41,8 +41,7 @@ struct ProfilerApiAdapter::Impl
 
 // -- Public API delegates to Impl ---------------------------------------------
 
-ProfilerApiAdapter::ProfilerApiAdapter(ICorProfilerInfo2* profilerInfo)
-    : pImpl_(std::make_unique<Impl>(profilerInfo))
+ProfilerApiAdapter::ProfilerApiAdapter(ICorProfilerInfo2* profilerInfo) : pImpl_(std::make_unique<Impl>(profilerInfo))
 {
 }
 
@@ -55,8 +54,7 @@ HRESULT ProfilerApiAdapter::DoStackSnapshot(ThreadID              threadId,
                                             BYTE*                 context,
                                             ULONG                 contextSize)
 {
-    return pImpl_->profilerInfo->DoStackSnapshot(threadId, callback, infoFlags,
-                                                  clientData, context, contextSize);
+    return pImpl_->profilerInfo->DoStackSnapshot(threadId, callback, infoFlags, clientData, context, contextSize);
 }
 
 HRESULT ProfilerApiAdapter::GetThreadInfo(ThreadID managedThreadId, DWORD* osThreadId)

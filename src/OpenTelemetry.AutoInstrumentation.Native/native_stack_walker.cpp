@@ -19,8 +19,8 @@ namespace ProfilerStackCapture
 class RtlNativeStackWalker : public INativeStackWalker
 {
 public:
-    HRESULT WalkThread(IProfilerApi*                                     profilerApi,
-                       ThreadID                                          managedThreadId,
+    HRESULT WalkThread(IProfilerApi*                                       profilerApi,
+                       ThreadID                                            managedThreadId,
                        ProfilerStackCapture::StackSnapshotCallbackContext* clientData) override
     {
         return WalkNativeStackForThread(profilerApi, managedThreadId, clientData);

@@ -197,7 +197,8 @@ ScopedThreadSuspend& ScopedThreadSuspend::operator=(ScopedThreadSuspend&& other)
 }
 
 // StackCaptureEngine
-StackCaptureEngine::StackCaptureEngine(std::unique_ptr<IProfilerApi> profilerApi, const CaptureOptions& options,
+StackCaptureEngine::StackCaptureEngine(std::unique_ptr<IProfilerApi>       profilerApi,
+                                       const CaptureOptions&               options,
                                        std::unique_ptr<INativeStackWalker> nativeWalker)
     : profilerApi_(std::move(profilerApi)), options_(options), nativeWalker_(std::move(nativeWalker))
 {
@@ -397,8 +398,7 @@ HRESULT StackCaptureEngine::CaptureStackUnseeded(ThreadID managedThreadId, Stack
     return profilerApi_->DoStackSnapshotUnseeded(managedThreadId, stackCaptureContext->clientParams);
 }
 
-HRESULT StackCaptureEngine::CaptureStack(ThreadID             managedThreadId,
-                                         StackCaptureContext* stackCaptureContext)
+HRESULT StackCaptureEngine::CaptureStack(ThreadID managedThreadId, StackCaptureContext* stackCaptureContext)
 {
     // Unseeded DoStackSnapshot: works when the thread is in managed code.
     // Threads stuck in native code will fail and be skipped.
@@ -441,11 +441,10 @@ CanaryThreadInfo StackCaptureEngine::WaitForCanaryThread(std::chrono::millisecon
     return canary;
 }
 
-HRESULT StackCaptureEngine::CaptureStacks(std::unordered_set<ThreadID> const&                threads,
-                                          void* params)
+HRESULT StackCaptureEngine::CaptureStacks(std::unordered_set<ThreadID> const& threads, void* params)
 {
     auto clientData = static_cast<ProfilerStackCapture::StackSnapshotCallbackContext*>(params);
-    auto canary = WaitForCanaryThread();
+    auto canary     = WaitForCanaryThread();
 
     if (!canary.isValid())
         return E_FAIL;
@@ -478,12 +477,13 @@ HRESULT StackCaptureEngine::CaptureStacks(std::unordered_set<ThreadID> const&   
             }
             static_cast<ProfilerStackCapture::StackSnapshotCallbackContext*>(clientData)->threadId = managedId;
             StackCaptureContext stackCaptureContext{0, &stopRequested_, clientData};
-            auto hr = CaptureStack(managedId, &stackCaptureContext);
+            auto                hr = CaptureStack(managedId, &stackCaptureContext);
             if (FAILED(hr) && nativeWalker_)
             {
-                trace::Logger::Debug("[StackCapture] CaptureStacks - Falling back to native stack walk for thread. Error from DSS - HRESULT=",
-                    hr);
-                hr = nativeWalker_->WalkSuspendedThread(targetThread.GetHandle(), profilerApi_.get(),clientData);
+                trace::Logger::Debug("[StackCapture] CaptureStacks - Falling back to native stack walk for thread. "
+                                     "Error from DSS - HRESULT=",
+                                     hr);
+                hr = nativeWalker_->WalkSuspendedThread(targetThread.GetHandle(), profilerApi_.get(), clientData);
                 trace::Logger::Debug("[StackCapture] CaptureStacks - Native stack walk completed with HRESULT=", hr);
             }
         }

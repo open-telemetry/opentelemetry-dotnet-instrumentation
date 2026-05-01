@@ -4,7 +4,7 @@
 #if defined(_WIN32) && defined(_M_AMD64)
 
 #include "rtl_stack_walk.h"
-#include "thread_suspend.h"  // ScopedThreadSuspend full definition
+#include "thread_suspend.h" // ScopedThreadSuspend full definition
 #include "logger.h"
 #include <algorithm>
 
@@ -63,9 +63,8 @@ HRESULT WalkNativeStack(void* suspendedThread, NativeWalkContext* ctx)
                 {
                     // System DLL or unknown module: keep function-level granularity
                     // so export table RVA walk can resolve distinct symbols.
-                    frameIp = (rtFunc != nullptr)
-                                  ? static_cast<UINT_PTR>(imageBase + rtFunc->BeginAddress)
-                                  : static_cast<UINT_PTR>(threadCtx.Rip);
+                    frameIp = (rtFunc != nullptr) ? static_cast<UINT_PTR>(imageBase + rtFunc->BeginAddress)
+                                                  : static_cast<UINT_PTR>(threadCtx.Rip);
                 }
             }
             else
@@ -307,7 +306,7 @@ UINT_PTR NativeSymbolResolver::GetImageBaseForIp(UINT_PTR ip)
     {
         HMODULE hMod = nullptr;
         if (GetModuleHandleExW(GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS | GET_MODULE_HANDLE_EX_FLAG_UNCHANGED_REFCOUNT,
-                                reinterpret_cast<LPCWSTR>(ip), &hMod) &&
+                               reinterpret_cast<LPCWSTR>(ip), &hMod) &&
             hMod != nullptr)
         {
             imageBase = reinterpret_cast<DWORD64>(hMod);
@@ -317,8 +316,10 @@ UINT_PTR NativeSymbolResolver::GetImageBaseForIp(UINT_PTR ip)
     return static_cast<UINT_PTR>(imageBase);
 }
 
-bool NativeSymbolResolver::ResolveViaExports(UINT_PTR ip, UINT_PTR imageBase, const ModuleInfo& mod,
-                                             trace::WSTRING& outName)
+bool NativeSymbolResolver::ResolveViaExports(UINT_PTR          ip,
+                                             UINT_PTR          imageBase,
+                                             const ModuleInfo& mod,
+                                             trace::WSTRING&   outName)
 {
     const DWORD rva = static_cast<DWORD>(ip - imageBase);
 
@@ -378,8 +379,8 @@ bool NativeSymbolResolver::Resolve(UINT_PTR ip, trace::WSTRING& outName)
 // WalkNativeStackForThread
 // ============================================================================
 
-HRESULT WalkNativeStackForThread(IProfilerApi*                                      profilerApi,
-                                 ThreadID                                           managedThreadId,
+HRESULT WalkNativeStackForThread(IProfilerApi*                 profilerApi,
+                                 ThreadID                      managedThreadId,
                                  StackSnapshotCallbackContext* clientData)
 {
     DWORD   osThreadId = 0;
@@ -394,4 +395,3 @@ HRESULT WalkNativeStackForThread(IProfilerApi*                                  
 
 } // namespace ProfilerStackCapture
 #endif // defined(_WIN32) && defined(_M_AMD64)
-
