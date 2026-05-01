@@ -31,8 +31,9 @@ internal static class NoCodeIntegrationHelper
             return CallTargetState.GetDefault();
         }
 
-        // Start with static attributes
-        var tags = noCodeEntry.Attributes;
+        // Start with static attributes. We need an invocation-local copy because TagList is mutable
+        // and a struct copy alone would still share backing storage.
+        var tags = CloneTags(noCodeEntry.Attributes);
 
         // Evaluate and add dynamic attributes
         if (noCodeEntry.DynamicAttributes.Count > 0)
@@ -170,6 +171,19 @@ internal static class NoCodeIntegrationHelper
         StopActivity<object>(null, exception, activity, state.State as NoCodeCallTargetState);
 
         return CallTargetReturn.GetDefault();
+    }
+
+    private static TagList CloneTags(in TagList source)
+    {
+        TagList copy = default;
+        var count = source.Count;
+        for (var i = 0; i < count; i++)
+        {
+            var tag = source[i];
+            copy.Add(tag.Key, tag.Value);
+        }
+
+        return copy;
     }
 
     private static void StopActivity<TReturn>(TReturn? returnValue, Exception? exception, Activity activity, NoCodeCallTargetState? noCodeState)

@@ -13,24 +13,24 @@ env:
   DOTNET_CLI_TELEMETRY_OPTOUT: 1
 
 jobs:
-  build-container:
-    uses: ./.github/workflows/build-container.yml
-
   build-ubuntu1604-native:
     uses: ./.github/workflows/build-ubuntu1604-native-container.yml
 
+  build-windows:
+    uses: ./.github/workflows/build-windows.yml
+
   build:
-    needs: build-ubuntu1604-native
+    needs: [ build-windows, build-ubuntu1604-native ]
     uses: ./.github/workflows/build.yml
 
   build-nuget-packages:
-    needs: [ build, build-container ]
+    needs: [ build-windows, build ]
     uses: ./.github/workflows/build-nuget-packages.yml
 
   create-release:
     name: Create GitHub release
     runs-on: ubuntu-22.04
-    needs: [ build, build-container, build-nuget-packages ]
+    needs: [ build-windows, build, build-nuget-packages ]
     permissions:
       attestations: write
       contents: write
@@ -107,7 +107,9 @@ jobs:
           echo "Verifying checksums"
           sha256sum "./checksums.txt" --check || exit 1
 
-      - name: Attest artifacts
+      # actions/attest has a hard limit of 1024 subjects per step (no override).
+      # Keep attestations split into small batches to stay under this cap.
+      - name: Attest release files
         uses: actions/attest@59d89421af93a897026c735860bf21b6eb4f7b26 # v4.1.0
         with:
           subject-path: |
@@ -115,13 +117,41 @@ jobs:
             ./otel-dotnet-auto-install.sh
             ./OpenTelemetry.DotNet.Auto.psm1
             ./checksums.txt
-            ./bin-alpine-x64/**/*
-            ./bin-alpine-arm64/**/*
-            ./bin-ubuntu-22.04/**/*
-            ./bin-ubuntu-22.04-arm/**/*
-            ./bin-windows-2022/**/*
-            ./bin-macos-14/**/*
-            ./bin-nuget-packages/**/*
+
+      - name: Attest bin-alpine-x64
+        uses: actions/attest@59d89421af93a897026c735860bf21b6eb4f7b26 # v4.1.0
+        with:
+          subject-path: ./bin-alpine-x64/**/*
+
+      - name: Attest bin-alpine-arm64
+        uses: actions/attest@59d89421af93a897026c735860bf21b6eb4f7b26 # v4.1.0
+        with:
+          subject-path: ./bin-alpine-arm64/**/*
+
+      - name: Attest bin-ubuntu-22.04
+        uses: actions/attest@59d89421af93a897026c735860bf21b6eb4f7b26 # v4.1.0
+        with:
+          subject-path: ./bin-ubuntu-22.04/**/*
+
+      - name: Attest bin-ubuntu-22.04-arm
+        uses: actions/attest@59d89421af93a897026c735860bf21b6eb4f7b26 # v4.1.0
+        with:
+          subject-path: ./bin-ubuntu-22.04-arm/**/*
+
+      - name: Attest bin-windows-2022
+        uses: actions/attest@59d89421af93a897026c735860bf21b6eb4f7b26 # v4.1.0
+        with:
+          subject-path: ./bin-windows-2022/**/*
+
+      - name: Attest bin-macos-14
+        uses: actions/attest@59d89421af93a897026c735860bf21b6eb4f7b26 # v4.1.0
+        with:
+          subject-path: ./bin-macos-14/**/*
+
+      - name: Attest bin-nuget-packages
+        uses: actions/attest@59d89421af93a897026c735860bf21b6eb4f7b26 # v4.1.0
+        with:
+          subject-path: ./bin-nuget-packages/**/*
 
       - name: Create Release
         env:

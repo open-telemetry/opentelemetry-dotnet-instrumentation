@@ -1,0 +1,13 @@
+name: Setup .NET
+description: Install the repository-standard .NET SDK versions.
+
+runs:
+  using: composite
+  steps:
+    - name: Setup .NET
+      uses: actions/setup-dotnet@c2fa09f4bde5ebb9d1777cf28262a3eb3db3ced7 # tag: v5.2.0
+      with:
+        dotnet-version: |
+          8.0.420
+          9.0.313
+          10.0.202

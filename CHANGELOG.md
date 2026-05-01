@@ -5,7 +5,84 @@ All notable changes to this component are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/compare/v1.14.1..HEAD)
+## [Unreleased](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/compare/v1.15.0..HEAD)
+
+### Added
+
+### Changed
+
+- Support for [StackExchange.Redis](https://www.nuget.org/packages/StackExchange.Redis)
+  traces instrumentation for versions `3.x.x`+.
+
+#### Dependency updates
+
+### Deprecated
+
+### Removed
+
+- `instrument.sh` no longer supports launching an application when the script
+  is sourced (for example, `. ./instrument.sh <command>`). To launch an
+  application, execute the script directly:
+  `./instrument.sh <application_executable>`.
+
+### Fixed
+
+- Fix dynamic configuration based attributes leak across calls.
+
+## [v1.15.0](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/tag/v1.15.0)
+
+This release include all changes from [1.15.0-beta.1](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/tag/v1.15.0-beta.1)
+release.
+
+### Changed
+
+#### Dependency updates
+
+- Updated [Core components](https://github.com/open-telemetry/opentelemetry-dotnet/blob/main/VERSIONING.md#core-components):
+  [`1.15.3`](https://github.com/open-telemetry/opentelemetry-dotnet/releases/tag/core-1.15.3).
+- Following packages updated
+  - `OpenTelemetry.Instrumentation.GrpcNetClient` from `1.15.0-beta.1` to `1.15.1-beta.1`,
+  - `OpenTelemetry.Instrumentation.Http` from `1.15.0` to `1.15.1`,
+  - `OpenTelemetry.Instrumentation.Process` from `1.15.0-beta.1` to `1.15.1-beta.1`,
+  - `OpenTelemetry.Instrumentation.Quartz` from `1.15.0-beta.1` to `1.15.1-beta.1`,
+  - `OpenTelemetry.Instrumentation.Runtime` from `1.15.0` to `1.15.1`,
+  - `OpenTelemetry.Instrumentation.SqlClient` from `1.15.1` to `1.15.2`,
+  - `OpenTelemetry.Instrumentation.StackExchangeRedis` from `1.15.0-beta.1` to `1.15.1-beta.1`,
+  - `OpenTelemetry.Instrumentation.Wcf` from `1.15.0-beta.1` to `1.15.1-beta.2`,
+  - `OpenTelemetry.Resources.Azure` from `1.15.0-beta.1` to `1.15.1-beta.1`,
+  - `OpenTelemetry.Resources.Container` from `1.15.0-beta.1` to `1.15.1-beta.1`,
+  - `OpenTelemetry.Resources.Host` from `1.15.0-beta.2` to `1.15.1-beta.1`,
+  - `OpenTelemetry.Resources.OperatingSystem` from `1.15.0-beta.1` to `1.15.1-beta.1`,
+  - `OpenTelemetry.Resources.Process` from `1.15.0-beta.1` to `1.15.1-beta.1`,
+  - `OpenTelemetry.Resources.ProcessRuntime` from `1.15.0-beta.1` to `1.15.1-beta.1`.
+- .NET only, following packages updated
+  - `OpenTelemetry.Instrumentation.AspNetCore` from `1.15.1` to `1.15.2`,
+  - `OpenTelemetry.Instrumentation.EntityFrameworkCore`
+    from `1.15.0-beta.1` to `1.15.1-beta.1`.
+- .NET Framework only, following packages updated
+  - `Microsoft.Bcl.AsyncInterfaces` from `10.0.2` to `10.0.7`,
+  - `Microsoft.Extensions.Configuration` from `10.0.2` to `10.0.7`,
+  - `Microsoft.Extensions.Configuration.Abstractions` from `10.0.2` to `10.0.7`,
+  - `Microsoft.Extensions.Configuration.Binder` from `10.0.2` to `10.0.7`,
+  - `Microsoft.Extensions.DependencyInjection` from `10.0.2` to `10.0.7`,
+  - `Microsoft.Extensions.DependencyInjection.Abstractions`
+    from `10.0.2` to `10.0.7`,
+  - `Microsoft.Extensions.Diagnostics.Abstractions` from `10.0.2` to `10.0.7`,
+  - `Microsoft.Extensions.Logging` from `10.0.2` to `10.0.7`,
+  - `Microsoft.Extensions.Logging.Abstractions` from `10.0.2` to `10.0.7`,
+  - `Microsoft.Extensions.Logging.Configuration` from `10.0.2` to `10.0.7`,
+  - `Microsoft.Extensions.Options` from `10.0.2` to `10.0.7`,
+  - `Microsoft.Extensions.Options.ConfigurationExtensions`
+    from `10.0.2` to `10.0.7`,
+  - `Microsoft.Extensions.Primitives` from `10.0.2` to `10.0.7`,
+  - `OpenTelemetry.Instrumentation.AspNet` from `1.15.1` to `1.15.2`,
+  - `System.Diagnostics.DiagnosticSource` from `10.0.2` to `10.0.7`,
+  - `System.IO.Pipelines` from `10.0.2` to `10.0.7`,
+  - `System.Text.Encodings.Web` from `10.0.2` to `10.0.7`,
+  - `System.Text.Json` from `10.0.2` to `10.0.7`,
+  - `System.ValueTuple` from `4.6.1` to `4.6.2`.
+
+## [v1.15.0-beta.1](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/tag/v1.15.0-beta.1)
 
 ### Added
 
@@ -18,11 +95,16 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 - Add support for `OTEL_CONFIG_FILE` environment variable for file-based configuration.
   This variable takes precedence over the deprecated
   `OTEL_EXPERIMENTAL_CONFIG_FILE` environment variable.
-- Configuration based instrumentation support dynamic evaluation for
+- Configuration based instrumentation supports dynamic evaluation for
   - span names,
   - attribute values,
   - statuses.
 - Add file existence validation for file-based configuration.
+- Add environment variable `OTEL_DOTNET_AUTO_REDIRECT_ENABLED`
+  to unify control of assembly redirection on .NET and .NET Framework.
+  This variable takes precedence over the deprecated
+  `OTEL_DOTNET_AUTO_NETFX_REDIRECT_ENABLED` environment variable for
+  .NET Framework.
 
 ### Changed
 
@@ -33,13 +115,22 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
   - Added the `db.response.status_code` and `error.type` attributes to error spans,
   - Removed the `network.peer.address` and `network.peer.port` attributes.
 - Plugins limited to one instance per type.
-- Improves allocation sampling behavior at startup for
+- Improve allocation sampling behavior at startup for
   a more even distribution of samples.
+- Assembly conflict resolution strategy for .NET (See
+ [docs/assembly-conflict-resolution.md](./docs/assembly-conflict-resolution.md))
+  - Extend IL rewriting of assembly references for Native Profiler
+    deployment on .NET,
+  - Implement isolation for StartupHook-only deployment (.NET only),
+  - Assembly conflict resolution strategy for .NET Framework is not changed
+  - Automatically enable assembly redirection depending on deployment for .NET
+    and .NET Framework. Enabled for Standalone deployment,
+    and disabled for NuGet deployment.
 
 #### Dependency updates
 
 - Updated [Core components](https://github.com/open-telemetry/opentelemetry-dotnet/blob/main/VERSIONING.md#core-components):
-  [`1.15.1`](https://github.com/open-telemetry/opentelemetry-dotnet/releases/tag/core-1.15.1).
+  [`1.15.2`](https://github.com/open-telemetry/opentelemetry-dotnet/releases/tag/core-1.15.2).
 - Following packages updated
   - `OpenTelemetry.Instrumentation.SqlClient` from `1.15.0` to `1.15.1`.
 - .NET only, following packages updated
@@ -49,12 +140,26 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 
 - `OTEL_EXPERIMENTAL_CONFIG_FILE` environment variable for file-based
   configuration is deprecated. Use `OTEL_CONFIG_FILE` instead.
+- `OTEL_DOTNET_AUTO_NETFX_REDIRECT_ENABLED` environment variable to control
+  assembly redirection on .NET Framework. Use
+  `OTEL_DOTNET_AUTO_REDIRECT_ENABLED` instead.
 
 ### Removed
 
+- Support of Additional Dependencies workaround for assembly conflict
+  resolution via environment variables
+  `DOTNET_ADDITIONAL_DEPS`/`DOTNET_SHARED_STORE`
+  - These environment variables are no longer required to resolve assembly
+    version conflicts for the majority of use cases. However, there is no
+    operational harm in keeping them from your previous installation.
+    Removing them is not yet recommended, as re-implementation of this
+    workaround may be necessary for future configurations.
+
 ### Fixed
 
-- Fixed configuration based instrumentation for some .NET Framework methods.
+- Fix configuration based instrumentation for some .NET Framework methods.
+- Fix .NET Framework assembly redirection startup by registering the loader
+  before the application's entry point executes.
 - When both `ENTITYFRAMEWORKCORE` and `NPGSQL` traces instrumentations are enabled,
   Entity Framework Core instrumentation now skips the
   `Npgsql.EntityFrameworkCore.PostgreSQL` provider so both instrumentations can

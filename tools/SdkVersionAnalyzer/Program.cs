@@ -22,7 +22,7 @@ internal static class Program
                     return VerifyDotnetSdkVersions(directoryRoot);
                 }
 
-            case "--modify" when args.Length == 4:
+            case "--modify" when args.Length == 5:
                 {
                     var requestedSdkVersions = new DotnetSdkVersion(args[2], args[3], args[4]);
                     ModifyDotnetSdkVersions(directoryRoot, requestedSdkVersions);
@@ -45,20 +45,20 @@ internal static class Program
 
     private static int VerifyDotnetSdkVersions(string directoryRoot)
     {
-        // Set expected dotnet SDK versions based on sample workflow.
+        // Set expected dotnet SDK versions based on the shared setup action.
         // This set of versions will be expected to be used consistently
-        // in GitHub actions workflows and dockerfiles.
-        var expectedVersion = ActionWorkflowAnalyzer.GetExpectedSdkVersionFromSampleWorkflow(directoryRoot);
+        // in GitHub actions definitions and dockerfiles.
+        var expectedVersion = ActionWorkflowAnalyzer.GetExpectedSdkVersionFromSetupDotnetAction(directoryRoot);
         if (expectedVersion is null)
         {
-            Console.WriteLine("Unable to extract expected SDK version from sample workflow file.");
+            Console.WriteLine("Unable to extract expected SDK version from setup-dotnet action file.");
             return 1;
         }
 
         Console.WriteLine($"Expected SDK versions: {expectedVersion}");
         if (!ActionWorkflowAnalyzer.VerifyVersions(directoryRoot, expectedVersion))
         {
-            Console.WriteLine("Invalid SDK versions in GitHub actions workflows.");
+            Console.WriteLine("Invalid SDK versions in GitHub workflow or action definitions.");
             return 1;
         }
 
