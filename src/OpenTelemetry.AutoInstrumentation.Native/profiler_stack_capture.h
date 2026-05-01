@@ -20,6 +20,8 @@
 #include <corhlpr.h>
 #include <corprof.h>
 #include "stack_capture_strategy.h"
+#include "profiler_api.h"
+#include "native_stack_walker.h"
 
 namespace ProfilerStackCapture {
 
@@ -41,36 +43,6 @@ namespace ProfilerStackCapture {
         }
     };
 
-    class IProfilerApi {
-    public:
-        virtual ~IProfilerApi() = default;
-        virtual HRESULT DoStackSnapshot(
-            ThreadID threadId,
-            StackSnapshotCallback callback,
-            DWORD infoFlags,
-            void* clientData,
-            BYTE* context,
-            ULONG contextSize) = 0;
-
-        HRESULT DoStackSnapshotUnseeded(ThreadID threadId, void* clientData)
-        {
-            return DoStackSnapshot(threadId,
-                continuous_profiler::IStackCaptureStrategy::StackSnapshotCallbackDefault,
-                COR_PRF_SNAPSHOT_DEFAULT, clientData, nullptr, 0);
-        }
-
-        virtual HRESULT GetFunctionFromIP(LPCBYTE ip, FunctionID* functionId) = 0;
-    };
-
-    class ProfilerApiAdapter : public IProfilerApi {
-    private:
-        ICorProfilerInfo2* profilerInfo_;
-    public:
-        explicit ProfilerApiAdapter(ICorProfilerInfo2* profilerInfo) : profilerInfo_(profilerInfo) {}
-        HRESULT DoStackSnapshot(ThreadID threadId, StackSnapshotCallback callback, DWORD infoFlags, void* clientData, BYTE* context, ULONG contextSize) override;
-        HRESULT GetFunctionFromIP(LPCBYTE ip, FunctionID* functionId) override;
-    };
-
     struct ThreadJoinerOnDelete { 
         void operator()(std::thread* t) const { 
             if (t) { 
@@ -80,21 +52,6 @@ namespace ProfilerStackCapture {
                 delete t; 
             } 
         } 
-    };
-
-    class ScopedThreadSuspend {
-    public:
-        explicit ScopedThreadSuspend(DWORD nativeThreadId);
-        ~ScopedThreadSuspend();
-        ScopedThreadSuspend(const ScopedThreadSuspend&) = delete;
-        ScopedThreadSuspend& operator=(const ScopedThreadSuspend&) = delete;
-        ScopedThreadSuspend(ScopedThreadSuspend&& other) noexcept;
-        ScopedThreadSuspend& operator=(ScopedThreadSuspend&& other) noexcept;
-        HANDLE GetHandle() const { return threadHandle_; }
-        bool IsValid() const { return threadHandle_ != INVALID_HANDLE_VALUE; }
-    private:
-        HANDLE threadHandle_;
-        bool suspended_;
     };
 
     enum class InvocationStatus { Invoked, TimedOut };
@@ -138,15 +95,17 @@ namespace ProfilerStackCapture {
     {
         size_t                   maxDepth;
         std::atomic<bool>* stopRequested;
-        continuous_profiler::StackSnapshotCallbackContext* clientParams = nullptr;
+        void* clientParams = nullptr;
     };
 
     class StackCaptureEngine : public IThreadActivityListener {
     public:
-        explicit StackCaptureEngine(std::unique_ptr<IProfilerApi> profilerApi, const CaptureOptions& options = {});
+        explicit StackCaptureEngine(std::unique_ptr<ProfilerStackCapture::IProfilerApi> profilerApi,
+                                    const CaptureOptions&                             options = {},
+                                    std::unique_ptr<INativeStackWalker>                 nativeWalker = nullptr);
         ~StackCaptureEngine();
         CanaryThreadInfo    WaitForCanaryThread(std::chrono::milliseconds timeout = std::chrono::milliseconds(0));
-        HRESULT CaptureStacks(const std::unordered_set<ThreadID> &threads, continuous_profiler::StackSnapshotCallbackContext* clientData);
+        HRESULT CaptureStacks(const std::unordered_set<ThreadID> &threads, void* clientData);
         void Stop();
         
         HRESULT STDMETHODCALLTYPE ThreadCreated(ThreadID threadId) override { return S_OK; }
@@ -155,7 +114,7 @@ namespace ProfilerStackCapture {
         HRESULT STDMETHODCALLTYPE ThreadNameChanged(ThreadID threadId, ULONG cchName, WCHAR name[]) override;
         
     private:
-        HRESULT CaptureStack(ThreadID managedThreadId, HANDLE threadHandle, StackCaptureContext* stackCaptureContext);
+        HRESULT CaptureStack(ThreadID managedThreadId, StackCaptureContext* stackCaptureContext);
         HRESULT CaptureStackUnseeded(ThreadID managedThreadId, StackCaptureContext* stackCaptureContext);
         bool SafetyProbe(const CanaryThreadInfo& canaryInfo);
         
@@ -171,6 +130,7 @@ namespace ProfilerStackCapture {
         
         std::condition_variable captureCondVar_;
         std::unique_ptr<InvocationQueue> invocationQueue_;
+        std::unique_ptr<INativeStackWalker> nativeWalker_;
     };
 
 } // namespace ProfilerStackCapture

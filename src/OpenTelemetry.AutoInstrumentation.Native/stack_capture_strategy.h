@@ -5,27 +5,16 @@
 #include <corhlpr.h>
 #include <corprof.h>
 #include <unordered_set>
+#include "string_utils.h"
+
 namespace continuous_profiler {
 
-/// <summary>
+    /// <summary>
 /// Platform-agnostic interface for capturing thread stacks.
 /// Different implementations handle platform-specific suspension mechanisms:
 /// - .NET Core/5+: CLR suspension (SuspendRuntime/ResumeRuntime)
 /// - .NET Framework: Per-thread suspension + seeded DoStackSnapshot
 /// </summary>
-struct StackSnapshotCallbackContext;
-using StackFrameCallback = std::function<HRESULT(StackSnapshotCallbackContext* clientData)>;
-
-struct StackSnapshotCallbackContext
-{
-    StackFrameCallback       callback;
-    FunctionID               functionId         = 0;
-    UINT_PTR                 instructionPointer = 0;
-    COR_PRF_FRAME_INFO       frameInfo          = 0;
-    ULONG32                  contextSize        = 0;
-    BYTE*                    context            = nullptr;
-    ThreadID                 threadId           = 0;
-};
     class IStackCaptureStrategy {
 public:
     virtual ~IStackCaptureStrategy() = default;
@@ -52,8 +41,12 @@ public:
     /// - Exception safety: Implementation MUST guarantee resume even on errors
     virtual HRESULT CaptureStacks(
         const std::unordered_set<ThreadID>& threads,
-                                  StackSnapshotCallbackContext*       clientData) = 0;
-    
+                                  void*       clientData) = 0;
+    virtual HRESULT ResolveNativeSymbolName(UINT_PTR instructionPointer, trace::WSTRING& outName)
+    {
+        // Default: Native symbol resolution not available
+        return S_FALSE;
+    }
     // Optional lifecycle hooks (default no-op implementations)
     // Only .NET Framework strategy needs these for canary thread tracking
     virtual void OnThreadCreated(ThreadID threadId) {}
@@ -61,23 +54,7 @@ public:
     virtual void OnThreadNameChanged(ThreadID threadId, ULONG cchName, WCHAR name[]) {}
     virtual void OnThreadAssignedToOSThread(ThreadID managedThreadId, DWORD osThreadId) {}
 
-    static HRESULT __stdcall StackSnapshotCallbackDefault(
-        FunctionID funcId,
-        UINT_PTR ip,
-        COR_PRF_FRAME_INFO frameInfo,
-        ULONG32 contextSize,
-        BYTE context[],
-        void* clientData)
-    {
-        auto* callbackData               = static_cast<StackSnapshotCallbackContext*>(clientData);
-        callbackData->functionId   = funcId;
-        callbackData->instructionPointer = ip;
-        callbackData->frameInfo          = frameInfo;
-        callbackData->contextSize        = contextSize;
-        callbackData->context            = context;
-
-        return callbackData->callback(callbackData);
-    }
+    
 };
 
 } // namespace continuous_profiler

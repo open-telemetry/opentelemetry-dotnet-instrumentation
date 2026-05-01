@@ -693,13 +693,26 @@ trace::WSTRING* NamingHelper::Lookup(const FunctionIdentifier& function_identifi
         return answer;
     }
     stats.name_cache_misses++;
-    answer = new trace::WSTRING();
-    this->GetFunctionName(function_identifier, *answer);
+    auto owned = std::make_unique<trace::WSTRING>();
 
-    const auto old_value = function_name_cache_.Put(function_identifier, answer);
-    delete old_value;
+    if (stack_capture_strategy_ && function_identifier.IsNative())
+    {
+        if (auto hr = stack_capture_strategy_->ResolveNativeSymbolName(function_identifier.native_ip, *owned);
+            hr != S_OK)
+        {
+            // owned's destructor deletes the string
+            return GetOrCreateUnknownNativeSentinel();
+        }
+    }
+    else
+    {
+        this->GetFunctionName(function_identifier, *owned);
+    }
 
-    return answer;
+    trace::WSTRING* raw = owned.release();
+    owned.reset(function_name_cache_.Put(function_identifier, raw));
+    // owned's destructor deletes the evicted entry (or no-ops if null)
+    return raw;
 }
 
 FunctionIdentifier NamingHelper::LookupManagedFunction(const FunctionID functionId, const COR_PRF_FRAME_INFO frameInfo)
@@ -713,6 +726,20 @@ FunctionIdentifier NamingHelper::LookupManagedFunction(const FunctionID function
     const auto resolvedIdentifier = this->ResolveManagedFunctionIdentifier(cacheKey.function_id, frameInfo);
     function_identifier_cache_.Put(cacheKey, resolvedIdentifier);
     return resolvedIdentifier;
+}
+
+trace::WSTRING* NamingHelper::GetOrCreateUnknownNativeSentinel()
+{
+    const auto      sentinel_key = FunctionIdentifier::UnknownNativeSentinel();
+    trace::WSTRING* sentinel     = function_name_cache_.Get(sentinel_key);
+    if (sentinel != nullptr)
+    {
+        return sentinel;
+    }
+
+    sentinel = new trace::WSTRING(WStr("Unknown_Native_Function(unknown)"));
+    std::unique_ptr<trace::WSTRING> old_value{function_name_cache_.Put(sentinel_key, sentinel)};
+    return sentinel;
 }
 
 // This is slightly messy since we an only pass one parameter to the FrameCallback
@@ -733,17 +760,11 @@ static HRESULT __stdcall FrameCallback(_In_ FunctionID         func_id,
                                        _In_ void*              client_data)
 {
 
-    // if func ID is zero, it is a frame we can't get info for (e.g., external/native code); we still want to record it,
-    // in that case the ID will map to a default "unknown" entry in the name cache, so we can just continue on as normal
-    // in next PR we will attempt to resolve the "unknown" frames a bit better (e.g., using IP to get native symbol
-    // info) but for now this is sufficient to avoid losing all stack info for frames we can't resolve
-
     const auto params = static_cast<DoStackSnapshotParams*>(client_data);
     params->prof->stats_.total_frames++;
 
     const auto identifier = params->prof->helper.LookupManagedFunction(func_id, 0);
     params->buffer->push_back(identifier);
-
     return S_OK;
 }
 
@@ -783,17 +804,29 @@ static void CaptureFunctionIdentifiersForThreads(
 
     if (auto stackCaptureStrategy = prof->GetStackCaptureStrategy(); stackCaptureStrategy != nullptr)
     {
-        auto frameProcessor = [&threadStacksBuffer, prof](StackSnapshotCallbackContext* snapshot_context) -> HRESULT
+        auto frameProcessor = [&threadStacksBuffer,
+                               prof](ProfilerStackCapture::StackSnapshotCallbackContext* snapshot_context) -> HRESULT
         {
             auto                  thread = snapshot_context->threadId;
             DoStackSnapshotParams doStackSnapshotParams{prof, &threadStacksBuffer[thread]};
+
+            if (snapshot_context->isNativeWalkFrame && snapshot_context->functionId == 0 &&
+                snapshot_context->instructionPointer != 0)
+            {
+                // RTL-originated native frame - record with IP for symbol resolution
+                doStackSnapshotParams.prof->stats_.total_frames++;
+                doStackSnapshotParams.buffer->push_back(
+                    FunctionIdentifier::Native(snapshot_context->instructionPointer));
+                return S_OK;
+            }
+
             FrameCallback(snapshot_context->functionId, snapshot_context->instructionPointer,
                           snapshot_context->frameInfo, snapshot_context->contextSize, snapshot_context->context,
                           &doStackSnapshotParams);
             return S_OK;
         };
 
-        StackSnapshotCallbackContext context{frameProcessor};
+        ProfilerStackCapture::StackSnapshotCallbackContext context{frameProcessor};
         stackCaptureStrategy->CaptureStacks(selectedThreads, &context);
     }
 }
@@ -801,9 +834,9 @@ static void CaptureFunctionIdentifiersForThreads(
 static std::unordered_set<ThreadID> EnumerateThreads(ICorProfilerInfo7* info7)
 {
     std::unordered_set<ThreadID> threads;
-
-    ICorProfilerThreadEnum* thread_enum = nullptr;
-    HRESULT                 hr          = info7->EnumThreads(&thread_enum);
+    // discovered pre-existing memory leak in ICorProfilerThreadEnum if we fail to call Release
+    ComPtr<ICorProfilerThreadEnum> thread_enum;
+    HRESULT                        hr = info7->EnumThreads(reinterpret_cast<ICorProfilerThreadEnum**>(&thread_enum));
     if (FAILED(hr))
     {
         trace::Logger::Debug("Could not EnumThreads. HRESULT=0x", std::setfill('0'), std::setw(8), std::hex, hr);
@@ -1179,7 +1212,8 @@ void ContinuousProfiler::SetGlobalInfo12(ICorProfilerInfo12* cor_profiler_info12
 
 void ContinuousProfiler::SetStackCaptureStrategy(IStackCaptureStrategy* stack_capture_strategy)
 {
-    stack_capture_strategy_ = stack_capture_strategy;
+    stack_capture_strategy_        = stack_capture_strategy;
+    helper.stack_capture_strategy_ = stack_capture_strategy;
 }
 
 IStackCaptureStrategy* ContinuousProfiler::GetStackCaptureStrategy() const

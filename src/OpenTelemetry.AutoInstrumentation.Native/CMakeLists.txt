@@ -217,6 +217,8 @@ add_library("OpenTelemetry.AutoInstrumentation.Native.static" STATIC
         metadata_builder.cpp
         miniutf.cpp
         stack_capture_strategy_factory.cpp
+        native_stack_walker.cpp
+        profiler_api_adapter.cpp
         regex_utils.cpp
         string_utils.cpp
         util.cpp

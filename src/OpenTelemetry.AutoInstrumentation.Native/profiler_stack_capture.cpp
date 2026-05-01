@@ -10,6 +10,7 @@
 #include <atlbase.h>
 #include <atlcom.h>
 #include "logger.h"
+#include "thread_suspend.h"
 
 #ifndef DECLSPEC_IMPORT
 #define DECLSPEC_IMPORT __declspec(dllimport)
@@ -94,11 +95,6 @@ void InvocationQueue::Stop()
     {
         condVar_.notify_all();
     }
-    else
-    {
-        stop_ = true;
-        condVar_.notify_all();
-    }
 }
 InvocationStatus InvocationQueue::Invoke(const std::function<void()>& fn, std::chrono::milliseconds timeout)
 {
@@ -141,21 +137,6 @@ void InvocationQueue::WorkerLoop()
         }
         item->completedPromise.set_value();
     }
-}
-
-// ProfilerApiAdapter
-HRESULT ProfilerApiAdapter::DoStackSnapshot(ThreadID              threadId,
-                                            StackSnapshotCallback callback,
-                                            DWORD                 infoFlags,
-                                            void*                 clientData,
-                                            BYTE*                 context,
-                                            ULONG                 contextSize)
-{
-    return profilerInfo_->DoStackSnapshot(threadId, callback, infoFlags, clientData, context, contextSize);
-}
-HRESULT ProfilerApiAdapter::GetFunctionFromIP(LPCBYTE ip, FunctionID* functionId)
-{
-    return profilerInfo_->GetFunctionFromIP(ip, functionId);
 }
 
 // ScopedThreadSuspend
@@ -216,8 +197,10 @@ ScopedThreadSuspend& ScopedThreadSuspend::operator=(ScopedThreadSuspend&& other)
 }
 
 // StackCaptureEngine
-StackCaptureEngine::StackCaptureEngine(std::unique_ptr<IProfilerApi> profilerApi, const CaptureOptions& options)
-    : profilerApi_(std::move(profilerApi)), options_(options)
+StackCaptureEngine::StackCaptureEngine(std::unique_ptr<IProfilerApi>       profilerApi,
+                                       const CaptureOptions&               options,
+                                       std::unique_ptr<INativeStackWalker> nativeWalker)
+    : profilerApi_(std::move(profilerApi)), options_(options), nativeWalker_(std::move(nativeWalker))
 {
     invocationQueue_ = std::make_unique<InvocationQueue>();
     trace::Logger::Info(L"[StackCapture] Engine initialized with canary prefix: ", options_.canaryThreadName);
@@ -412,13 +395,10 @@ bool StackCaptureEngine::SafetyProbe(const CanaryThreadInfo& canaryInfo)
 
 HRESULT StackCaptureEngine::CaptureStackUnseeded(ThreadID managedThreadId, StackCaptureContext* stackCaptureContext)
 {
-    stackCaptureContext->clientParams->threadId = managedThreadId;
     return profilerApi_->DoStackSnapshotUnseeded(managedThreadId, stackCaptureContext->clientParams);
 }
 
-HRESULT StackCaptureEngine::CaptureStack(ThreadID             managedThreadId,
-                                         HANDLE               threadHandle,
-                                         StackCaptureContext* stackCaptureContext)
+HRESULT StackCaptureEngine::CaptureStack(ThreadID managedThreadId, StackCaptureContext* stackCaptureContext)
 {
     // Unseeded DoStackSnapshot: works when the thread is in managed code.
     // Threads stuck in native code will fail and be skipped.
@@ -461,10 +441,10 @@ CanaryThreadInfo StackCaptureEngine::WaitForCanaryThread(std::chrono::millisecon
     return canary;
 }
 
-HRESULT StackCaptureEngine::CaptureStacks(std::unordered_set<ThreadID> const&                threads,
-                                          continuous_profiler::StackSnapshotCallbackContext* clientData)
+HRESULT StackCaptureEngine::CaptureStacks(std::unordered_set<ThreadID> const& threads, void* params)
 {
-    auto canary = WaitForCanaryThread();
+    auto clientData = static_cast<ProfilerStackCapture::StackSnapshotCallbackContext*>(params);
+    auto canary     = WaitForCanaryThread();
 
     if (!canary.isValid())
         return E_FAIL;
@@ -495,9 +475,17 @@ HRESULT StackCaptureEngine::CaptureStacks(std::unordered_set<ThreadID> const&   
                     ", NativeID=", nativeId);
                 continue;
             }
-            clientData->threadId = managedId;
+            static_cast<ProfilerStackCapture::StackSnapshotCallbackContext*>(clientData)->threadId = managedId;
             StackCaptureContext stackCaptureContext{0, &stopRequested_, clientData};
-            CaptureStack(managedId, targetThread.GetHandle(), &stackCaptureContext);
+            auto                hr = CaptureStack(managedId, &stackCaptureContext);
+            if (FAILED(hr) && nativeWalker_)
+            {
+                trace::Logger::Debug("[StackCapture] CaptureStacks - Falling back to native stack walk for thread. "
+                                     "Error from DSS - HRESULT=",
+                                     hr);
+                hr = nativeWalker_->WalkSuspendedThread(targetThread.GetHandle(), profilerApi_.get(), clientData);
+                trace::Logger::Debug("[StackCapture] CaptureStacks - Native stack walk completed with HRESULT=", hr);
+            }
         }
         catch (const std::exception& ex)
         {
