@@ -7,6 +7,7 @@
 
 #define ASSEMBLY_REDIRECTION_NETFX \
     { 462, { \
+        { _W("Google.Protobuf"), {3, 31, 1, 0} }, \
         { _W("Microsoft.Bcl.AsyncInterfaces"), {10, 0, 0, 7} }, \
         { _W("Microsoft.Extensions.Configuration"), {10, 0, 0, 7} }, \
         { _W("Microsoft.Extensions.Configuration.Abstractions"), {10, 0, 0, 7} }, \
@@ -40,6 +41,7 @@
         { _W("OpenTelemetry.Instrumentation.SqlClient"), {1, 15, 2, 1033} }, \
         { _W("OpenTelemetry.Instrumentation.StackExchangeRedis"), {1, 15, 1, 1032} }, \
         { _W("OpenTelemetry.Instrumentation.Wcf"), {1, 15, 1, 1049} }, \
+        { _W("OpenTelemetry.OpAmp.Client"), {0, 3, 0, 1059} }, \
         { _W("OpenTelemetry.Resources.Azure"), {1, 15, 1, 1031} }, \
         { _W("OpenTelemetry.Resources.Host"), {1, 15, 1, 1036} }, \
         { _W("OpenTelemetry.Resources.OperatingSystem"), {1, 15, 1, 1039} }, \
@@ -152,6 +154,7 @@
         { _W("System.Xml.XPath.XDocument"), {4, 1, 0, 0} }, \
     }}, \
     { 470, { \
+        { _W("Google.Protobuf"), {3, 31, 1, 0} }, \
         { _W("Microsoft.Bcl.AsyncInterfaces"), {10, 0, 0, 7} }, \
         { _W("Microsoft.Extensions.Configuration"), {10, 0, 0, 7} }, \
         { _W("Microsoft.Extensions.Configuration.Abstractions"), {10, 0, 0, 7} }, \
@@ -185,6 +188,7 @@
         { _W("OpenTelemetry.Instrumentation.SqlClient"), {1, 15, 2, 1033} }, \
         { _W("OpenTelemetry.Instrumentation.StackExchangeRedis"), {1, 15, 1, 1032} }, \
         { _W("OpenTelemetry.Instrumentation.Wcf"), {1, 15, 1, 1049} }, \
+        { _W("OpenTelemetry.OpAmp.Client"), {0, 3, 0, 1059} }, \
         { _W("OpenTelemetry.Resources.Azure"), {1, 15, 1, 1031} }, \
         { _W("OpenTelemetry.Resources.Host"), {1, 15, 1, 1036} }, \
         { _W("OpenTelemetry.Resources.OperatingSystem"), {1, 15, 1, 1039} }, \
@@ -297,6 +301,7 @@
         { _W("System.Xml.XPath.XDocument"), {4, 1, 0, 0} }, \
     }}, \
     { 471, { \
+        { _W("Google.Protobuf"), {3, 31, 1, 0} }, \
         { _W("Microsoft.Bcl.AsyncInterfaces"), {10, 0, 0, 7} }, \
         { _W("Microsoft.Extensions.Configuration"), {10, 0, 0, 7} }, \
         { _W("Microsoft.Extensions.Configuration.Abstractions"), {10, 0, 0, 7} }, \
@@ -329,6 +334,7 @@
         { _W("OpenTelemetry.Instrumentation.SqlClient"), {1, 15, 2, 1033} }, \
         { _W("OpenTelemetry.Instrumentation.StackExchangeRedis"), {1, 15, 1, 1032} }, \
         { _W("OpenTelemetry.Instrumentation.Wcf"), {1, 15, 1, 1049} }, \
+        { _W("OpenTelemetry.OpAmp.Client"), {0, 3, 0, 1059} }, \
         { _W("OpenTelemetry.Resources.Azure"), {1, 15, 1, 1031} }, \
         { _W("OpenTelemetry.Resources.Host"), {1, 15, 1, 1036} }, \
         { _W("OpenTelemetry.Resources.OperatingSystem"), {1, 15, 1, 1039} }, \
@@ -359,6 +365,7 @@
         { _W("System.Xml.XPath.XDocument"), {4, 1, 0, 0} }, \
     }}, \
     { 472, { \
+        { _W("Google.Protobuf"), {3, 31, 1, 0} }, \
         { _W("Microsoft.Bcl.AsyncInterfaces"), {10, 0, 0, 7} }, \
         { _W("Microsoft.Extensions.Configuration"), {10, 0, 0, 7} }, \
         { _W("Microsoft.Extensions.Configuration.Abstractions"), {10, 0, 0, 7} }, \
@@ -391,6 +398,7 @@
         { _W("OpenTelemetry.Instrumentation.SqlClient"), {1, 15, 2, 1033} }, \
         { _W("OpenTelemetry.Instrumentation.StackExchangeRedis"), {1, 15, 1, 1032} }, \
         { _W("OpenTelemetry.Instrumentation.Wcf"), {1, 15, 1, 1049} }, \
+        { _W("OpenTelemetry.OpAmp.Client"), {0, 3, 0, 1059} }, \
         { _W("OpenTelemetry.Resources.Azure"), {1, 15, 1, 1031} }, \
         { _W("OpenTelemetry.Resources.Host"), {1, 15, 1, 1036} }, \
         { _W("OpenTelemetry.Resources.OperatingSystem"), {1, 15, 1, 1039} }, \
