@@ -100,23 +100,49 @@ internal static class OpAmpHelper
                 continue;
             }
 
-            var value = resourceAttribute.Value.ToString();
-            if (string.IsNullOrWhiteSpace(value))
-            {
-                continue;
-            }
-
-            if (IsIdentifyingAttribute(resourceAttribute.Key))
-            {
-                settings.Identification.AddIdentifyingAttribute(resourceAttribute.Key, value);
-            }
-            else
-            {
-                settings.Identification.AddNonIdentifyingAttribute(resourceAttribute.Key, value);
-            }
+            AddAttribute(settings.Identification, resourceAttribute.Key, resourceAttribute.Value);
         }
 
         settings.Identification.AddNonIdentifyingAttribute("opamp.version", GetOpAmpVersion());
+    }
+
+    private static void AddAttribute(IdentificationSettings settings, string key, object value)
+    {
+        void AddTypedAttribute<T>(T val, Action<string, T> identifying, Action<string, T> nonIdentifying)
+        {
+            if (IsIdentifyingAttribute(key))
+            {
+                identifying(key, val);
+            }
+            else
+            {
+                nonIdentifying(key, val);
+            }
+        }
+
+        switch (value)
+        {
+            case string s:
+                AddTypedAttribute(s, settings.AddIdentifyingAttribute, settings.AddNonIdentifyingAttribute);
+                break;
+            case int i:
+                AddTypedAttribute(i, settings.AddIdentifyingAttribute, settings.AddNonIdentifyingAttribute);
+                break;
+            case double d:
+                AddTypedAttribute(d, settings.AddIdentifyingAttribute, settings.AddNonIdentifyingAttribute);
+                break;
+            case bool b:
+                AddTypedAttribute(b, settings.AddIdentifyingAttribute, settings.AddNonIdentifyingAttribute);
+                break;
+            default:
+                var stringValue = value.ToString();
+                if (!string.IsNullOrWhiteSpace(stringValue))
+                {
+                    AddTypedAttribute(stringValue, settings.AddIdentifyingAttribute, settings.AddNonIdentifyingAttribute);
+                }
+
+                break;
+        }
     }
 
     private static ConnectionType GetConnectionType(Uri serverUrl)
