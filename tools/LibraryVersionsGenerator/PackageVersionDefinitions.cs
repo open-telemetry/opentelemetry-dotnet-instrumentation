@@ -360,6 +360,23 @@ internal static class PackageVersionDefinitions
                 new("1.8.0", supportedTargetFrameworks: ["net10.0", "net9.0", "net8.0"], supportedExecutionFrameworks: ["net10.0", "net9.0", "net8.0"]),
                 new("*", supportedTargetFrameworks: ["net10.0", "net9.0", "net8.0"], supportedExecutionFrameworks: ["net10.0", "net9.0", "net8.0"])
             ]
+        },
+        new()
+        {
+            IntegrationName = "StartupHookIsolation",
+            NugetPackageName = string.Empty,
+            TestApplicationName = "TestApplication.StartupHookIsolation",
+            Versions =
+            [
+                // TODO: These "versions" represent different entry point signatures, not package versions.
+                // This is a workaround using LibraryVersion. Consider extending build automation.
+                new("Void"),
+                new("Int"),
+                new("Task"),
+                new("TaskInt"),
+                new("AsyncTask"),
+                new("AsyncTaskInt")
+            ]
         }
     ];
 

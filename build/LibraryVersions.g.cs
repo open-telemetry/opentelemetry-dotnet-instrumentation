@@ -221,5 +221,16 @@ public static partial class LibraryVersion
                 new("1.8.0", supportedFrameworks: [ "net10.0", "net9.0", "net8.0" ]),
             ]
         },
+        {
+            "TestApplication.StartupHookIsolation",
+            [
+                new("Void"),
+                new("Int"),
+                new("Task"),
+                new("TaskInt"),
+                new("AsyncTask"),
+                new("AsyncTaskInt"),
+            ]
+        },
     };
 }
