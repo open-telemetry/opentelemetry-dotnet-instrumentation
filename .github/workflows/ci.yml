@@ -232,10 +232,13 @@ jobs:
         path: bin/tracer-home
 
     - name: Build in Docker container
+      env:
+        BASE_IMAGE: ${{ matrix.base-image }}
+        OS_TYPE: ${{ matrix.os-type }}
       run: |
         set -e
-        docker build -t mybuildimage -f "./docker/${{ matrix.base-image }}.dockerfile" .
-        docker run -e HOME=/tmp -e OS_TYPE=${{ matrix.os-type }} --user "$(id -u):$(id -g)" --rm --mount type=bind,source="${GITHUB_WORKSPACE}",target=/project mybuildimage \
+        docker build -t mybuildimage -f "./docker/${BASE_IMAGE}.dockerfile" .
+        docker run -e HOME=/tmp -e "OS_TYPE=${OS_TYPE}" --user "$(id -u):$(id -g)" --rm --mount type=bind,source="${GITHUB_WORKSPACE}",target=/project mybuildimage \
           /bin/sh -c 'git config --global --add safe.directory /project && ./build.sh TestWorkflow --containers none'
 
     - name: Upload test logs

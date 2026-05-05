@@ -26,7 +26,9 @@ function Get-SafeFullPath {
     throw 'Replacement path must not be empty.'
   }
 
-  if ($RelativePath -match '^[\\/]' -or $RelativePath -match '^[A-Za-z]:') {
+  # The artifacts can be used on Windows even when this runs on Linux, so reject
+  # Windows drive-qualified paths explicitly in addition to the current OS rules.
+  if ([System.IO.Path]::IsPathRooted($RelativePath) -or $RelativePath -match '^[A-Za-z]:') {
     throw "Replacement path '$RelativePath' must be relative."
   }
 
