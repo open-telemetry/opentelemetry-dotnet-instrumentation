@@ -14,6 +14,20 @@ instrumentation either incomplete or unstable unless we intervene.
 For the broader assembly version-conflict background, see
 [Assembly Conflict Resolution](./assembly-conflict-resolution.md).
 
+## Scope of this document
+
+This document explains the problem `OTEL_DOTNET_AUTO_APP_DOMAIN_STRATEGY`
+is meant to solve for secondary `AppDomain` creation on .NET Framework.
+It intentionally focuses on the high-level runtime behavior rather than
+every CLR binding detail.
+
+In particular, the same family of issues appears with both
+`MultiDomainHost` and `MultiDomain`. The exact shape depends on GAC
+installation, redirects, probing, and which versions exist in the
+application's dependency tree, but the root issue is the same:
+secondary domains can cause the CLR to share or split strong-named
+assemblies in ways that affect instrumentation correctness.
+
 ## Why secondary AppDomains are special
 
 On .NET Framework, assemblies are normally loaded per `AppDomain`.
@@ -279,17 +293,3 @@ Use this rule of thumb:
   other options are not suitable or introduce unacceptable issues for
   the application. In that mode you accept the risk that secondary
   `AppDomain` creation may make instrumentation incomplete or unstable.
-
-## Scope of this document
-
-This document explains the problem `OTEL_DOTNET_AUTO_APP_DOMAIN_STRATEGY`
-is meant to solve for secondary `AppDomain` creation on .NET Framework.
-It intentionally focuses on the high-level runtime behavior rather than
-every CLR binding detail.
-
-In particular, the same family of issues appears with both
-`MultiDomainHost` and `MultiDomain`. The exact shape depends on GAC
-installation, redirects, probing, and which versions exist in the
-application's dependency tree, but the root issue is the same:
-secondary domains can cause the CLR to share or split strong-named
-assemblies in ways that affect instrumentation correctness.

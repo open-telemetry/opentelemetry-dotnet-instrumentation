@@ -11,10 +11,13 @@ using OpenTelemetry.AutoInstrumentation.Logging;
 
 namespace OpenTelemetry.AutoInstrumentation.Loader;
 
-internal class AssemblyBindingUpdater(IOtelLogger logger, AssemblyCatalog assemblyCatalog)
+internal partial class AssemblyBindingUpdater(IOtelLogger logger, AssemblyCatalog assemblyCatalog)
 {
     /// <summary>
-    /// Modify assembly bindings in appDomainSetup
+    /// Ensures the AppDomain setup contains the assembly binding policy required for profiler dependencies
+    /// and writes the updated configuration back before the AppDomain starts binding. This mirrors the
+    /// configuration stage described in
+    /// <see href="https://learn.microsoft.com/en-us/dotnet/framework/deployment/how-the-runtime-locates-assemblies">How the Runtime Locates Assemblies</see>.
     /// </summary>
     /// <param name="appDomainSetup">appDomainSetup to be updated</param>
     internal void ModifyAssemblyRedirectConfig(AppDomainSetup appDomainSetup)
@@ -100,6 +103,29 @@ internal class AssemblyBindingUpdater(IOtelLogger logger, AssemblyCatalog assemb
         }
     }
 
+    // This method is made virtual to allow overriding in tests
+    protected virtual Version? ReadFileVersion(string path)
+    {
+        try
+        {
+            return TryParseVersion(FileVersionInfo.GetVersionInfo(path).FileVersion);
+        }
+        catch (Exception)
+        {
+            return null;
+        }
+    }
+
+    // This method is made virtual to allow overriding in tests
+    protected virtual string? GetCreatorApplicationBase()
+        => AppDomain.CurrentDomain.BaseDirectory;
+
+    /// <summary>
+    /// Reconciles existing binding policy with profiler dependencies. The success path generates one effective
+    /// bindingRedirect per assembly with a codeBase hint when possible; when redirects are disabled or existing
+    /// policy is ambiguous, only location hints are added. See
+    /// <see href="https://learn.microsoft.com/en-us/dotnet/framework/configure-apps/redirect-assembly-versions">Redirecting Assembly Versions</see>.
+    /// </summary>
     private void ModifyAssemblyBinding(XElement assemblyBinding, AppDomainSetup appDomainSetup)
     {
         static bool MatchesAssembly(XElement dependentAssembly, AssemblyCatalog.AssemblyInfo assemblyInfo)
@@ -157,6 +183,11 @@ internal class AssemblyBindingUpdater(IOtelLogger logger, AssemblyCatalog assemb
         }
     }
 
+    /// <summary>
+    /// Builds the candidate set of assemblies the application may bind to for one dependency. Candidates include
+    /// assemblies shipped in the OpenTelemetry auto-instrumentation package, existing codeBase entries,
+    /// the first matching assembly from Fusion probing locations, and any unambiguous existing redirect target.
+    /// </summary>
     private List<AssemblyCandidate> CollectCandidates(
         AssemblyCatalog.AssemblyInfo assemblyInfo,
         List<XElement> matchingAssemblies,
@@ -208,6 +239,11 @@ internal class AssemblyBindingUpdater(IOtelLogger logger, AssemblyCatalog assemb
     }
 
 #pragma warning disable SA1204
+    /// <summary>
+    /// Adds missing codeBase hints for candidates with known locations while leaving version policy unchanged.
+    /// This is used when bindingRedirect policy cannot or should not be rewritten.
+    /// See <see href="https://learn.microsoft.com/en-us/dotnet/framework/configure-apps/file-schema/runtime/codebase-element">&lt;codeBase&gt; Element</see>.
+    /// </summary>
     private static void EnsureCandidateCodeBases(
         XElement assemblyBinding,
         List<XElement> matchingAssemblies,
@@ -246,6 +282,11 @@ internal class AssemblyBindingUpdater(IOtelLogger logger, AssemblyCatalog assemb
         }
     }
 
+    /// <summary>
+    /// Chooses the target used for the rewritten bindingRedirect. Existing redirects to higher versions are
+    /// preserved; otherwise the highest available assembly version wins. When candidates share that version,
+    /// explicit codeBase policy is preferred, then profiler package and probing candidates are compared.
+    /// </summary>
     private AssemblyCandidate SelectCandidate(AssemblyCatalog.AssemblyInfo assemblyInfo, List<AssemblyCandidate> candidates)
     {
         var existingRedirect = candidates
@@ -301,6 +342,12 @@ internal class AssemblyBindingUpdater(IOtelLogger logger, AssemblyCatalog assemb
         throw new InvalidOperationException($"No selectable candidate found for {assemblyInfo.FullName.Name}. We should never reach this point because at least the profiler candidate should always be present.");
     }
 
+    /// <summary>
+    /// Replaces all matching dependentAssembly entries with one normalized policy entry. The entry redirects all
+    /// earlier versions to the selected version and includes a codeBase hint when the selected assembly has a
+    /// fixed location outside normal probing.
+    /// See <see href="https://learn.microsoft.com/en-us/dotnet/framework/configure-apps/file-schema/runtime/bindingredirect-element">&lt;bindingRedirect&gt; Element</see>.
+    /// </summary>
     private static void RewriteDependentAssembly(
         XElement assemblyBinding,
         List<XElement> matchingAssemblies,
@@ -331,6 +378,12 @@ internal class AssemblyBindingUpdater(IOtelLogger logger, AssemblyCatalog assemb
         assemblyBinding.Add(rewrittenDependentAssembly);
     }
 
+    /// <summary>
+    /// Resolves the probing candidate for one dependency using Fusion-style first-hit behavior: the first file
+    /// found at a probed path controls the result, even when its identity does not match.
+    /// This follows the probing behavior documented in
+    /// <see href="https://learn.microsoft.com/en-us/dotnet/framework/deployment/how-the-runtime-locates-assemblies">How the Runtime Locates Assemblies</see>.
+    /// </summary>
     private AssemblyCandidate? TryResolveProbingCandidate(List<string> probeDirectories, AssemblyCatalog.AssemblyInfo assemblyInfo)
     {
         static IEnumerable<string> EnumerateProbeCandidatePaths(string probeDirectory, string assemblyName)
@@ -385,8 +438,21 @@ internal class AssemblyBindingUpdater(IOtelLogger logger, AssemblyCatalog assemb
         return null;
     }
 
+    /// <summary>
+    /// Replicates Fusion's probe directory order for culture-neutral private assemblies.
+    /// <list type="number">
+    /// <item><description>Returns no directories when AppDomainSetup.DisallowApplicationBaseProbing is set.</description></item>
+    /// <item><description>Resolves AppDomainSetup.ApplicationBase, falling back to the creator AppDomain base when needed.</description></item>
+    /// <item><description>Adds the application base unless AppDomainSetup.PrivateBinPathProbe disables application-base probing.</description></item>
+    /// <item><description>Adds the ASP.NET bin directory for web.config applications.</description></item>
+    /// <item><description>Adds PrivateBinPath and configuration probing paths, keeping rooted paths only when they stay under ApplicationBase.</description></item>
+    /// <item><description>Returns distinct full paths using case-insensitive comparison.</description></item>
+    /// </list>
+    /// See <see href="https://learn.microsoft.com/en-us/dotnet/framework/configure-apps/file-schema/runtime/probing-element">&lt;probing&gt; Element</see>.
+    /// </summary>
     private List<string> GetProbeDirectories(XElement assemblyBinding, AppDomainSetup appDomainSetup)
     {
+        // This is a best-effort heuristic for ASP.NET applications based on the AppDomain configuration file name.
         static bool IsWebApplication(AppDomainSetup appDomainSetup)
             => string.Equals(Path.GetFileName(appDomainSetup.ConfigurationFile), "web.config", StringComparison.OrdinalIgnoreCase);
 
@@ -561,20 +627,11 @@ internal class AssemblyBindingUpdater(IOtelLogger logger, AssemblyCatalog assemb
         return resolvedDirectories;
     }
 
-#pragma warning disable SA1202
-    protected virtual string? GetCreatorApplicationBase()
-        => AppDomain.CurrentDomain.BaseDirectory;
-#pragma warning restore SA1202
-
-    private static XElement CreateDependentAssembly(AssemblyCatalog.AssemblyInfo assemblyInfo)
-        => new(
-            Names.DependentAssembly,
-            new XElement(
-                Names.AssemblyIdentity,
-                new XAttribute(Names.Name, assemblyInfo.FullName.Name),
-                new XAttribute(Names.PublicKeyToken, assemblyInfo.Token),
-                new XAttribute(Names.Culture, Names.NeutralCulture)));
-
+    /// <summary>
+    /// Reduces existing bindingRedirect entries to one effective target version when their policy is unambiguous,
+    /// so compatible user policy can participate in candidate selection. Ambiguous or unparsable policy is left
+    /// untouched by the redirect rewrite path.
+    /// </summary>
     private Version? TryResolveEffectiveRedirectVersion(List<XElement> existingRedirects, AssemblyCatalog.AssemblyInfo assemblyInfo)
     {
         if (existingRedirects.Count == 0)
@@ -608,107 +665,5 @@ internal class AssemblyBindingUpdater(IOtelLogger logger, AssemblyCatalog assemb
 
         return null;
     }
-
-#pragma warning disable SA1202
-    protected virtual Version? ReadFileVersion(string path)
-    {
-        try
-        {
-            return TryParseVersion(FileVersionInfo.GetVersionInfo(path).FileVersion);
-        }
-        catch (Exception)
-        {
-            return null;
-        }
-    }
-#pragma warning restore SA1202
-
-    private static Version? TryParseVersion(string? versionString)
-    {
-        if (string.IsNullOrWhiteSpace(versionString))
-        {
-            return null;
-        }
-
-        try
-        {
-            return new Version(versionString);
-        }
-        catch (Exception)
-        {
-            return null;
-        }
-    }
-
-    private static string ToPublicKeyTokenString(AssemblyName assemblyName)
-    {
-        var tokenBytes = assemblyName.GetPublicKeyToken();
-        if (tokenBytes == null || tokenBytes.Length == 0)
-        {
-            return string.Empty;
-        }
-
-#pragma warning disable CA1308
-        return BitConverter.ToString(tokenBytes).ToLowerInvariant().Replace("-", string.Empty);
-#pragma warning restore CA1308
-    }
-
-#pragma warning disable SA1201
-    private enum CandidateSource
-    {
-        Profiler,
-        CodeBase,
-        Probe,
-        ExistingRedirect,
-    }
-
-    private sealed class AssemblyCandidate
-    {
-        internal AssemblyCandidate(
-            CandidateSource source,
-            Version assemblyVersion,
-            Version? fileVersion = null,
-            string? codeBaseUri = null)
-        {
-            Source = source;
-            AssemblyVersion = assemblyVersion;
-            FileVersion = fileVersion;
-            CodeBaseUri = codeBaseUri;
-        }
-
-        public CandidateSource Source { get; }
-
-        public Version AssemblyVersion { get; }
-
-        public Version? FileVersion { get; }
-
-        public string? CodeBaseUri { get; }
-
-        public bool HasCodeBase => !string.IsNullOrWhiteSpace(CodeBaseUri);
-    }
-
-    private static class Names
-    {
-        public const string NeutralCulture = "neutral";
-        public static readonly XName Configuration = XName.Get("configuration");
-        public static readonly XName Runtime = XName.Get("runtime");
-        public static readonly XName AssemblyBinding = XName.Get("assemblyBinding", AsmNs);
-        public static readonly XName AssemblyIdentity = XName.Get("assemblyIdentity", AsmNs);
-        public static readonly XName BindingRedirect = XName.Get("bindingRedirect", AsmNs);
-        public static readonly XName DependentAssembly = XName.Get("dependentAssembly", AsmNs);
-        public static readonly XName CodeBase = XName.Get("codeBase", AsmNs);
-        public static readonly XName Name = XName.Get("name");
-        public static readonly XName PublicKeyToken = XName.Get("publicKeyToken");
-        public static readonly XName NewVersion = XName.Get("newVersion");
-        public static readonly XName OldVersion = XName.Get("oldVersion");
-        public static readonly XName Culture = XName.Get("culture");
-        public static readonly XName Version = XName.Get("version");
-        public static readonly XName Href = XName.Get("href");
-        public static readonly XName Probing = XName.Get("probing", AsmNs);
-        public static readonly XName PrivatePath = XName.Get("privatePath");
-        private const string AsmNs = "urn:schemas-microsoft-com:asm.v1";
-    }
-#pragma warning restore SA1204
-#pragma warning restore SA1201
 }
 #endif
