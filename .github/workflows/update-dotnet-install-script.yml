@@ -16,6 +16,7 @@ jobs:
       DOTNET_INSTALL_SCRIPT_URL: 'https://dot.net/v1/dotnet-install.sh'
       DOTNET_INSTALL_SCRIPT_GPG_KEY_URL: 'https://dot.net/v1/dotnet-install.asc'
       DOTNET_INSTALL_SCRIPT_SIGNATURE_URL: 'https://dot.net/v1/dotnet-install.sig'
+      DOTNET_INSTALL_SCRIPT_GPG_KEY_FINGERPRINT: '2B930AB1228D11D5D7F6B6ACB9CF1A51FC7D3ACF'
       GIT_COMMIT_USER_EMAIL: '197425009+otelbot[bot]@users.noreply.github.com'
       GIT_COMMIT_USER_NAME: 'otelbot[bot]'
       UPDATE_BRANCH_NAME: 'update-dotnet-install-script'
@@ -26,7 +27,7 @@ jobs:
       id: otelbot-token
       uses: actions/create-github-app-token@1b10c78c7865c340bc4f6099eb2f838309f1e8c3 # v3.1.1
       with:
-        app-id: ${{ vars.OTELBOT_DOTNET_INSTRUMENTATION_APP_ID }}
+        client-id: ${{ vars.OTELBOT_DOTNET_INSTRUMENTATION_APP_ID }}
         permission-contents: write
         permission-pull-requests: write
         private-key: ${{ secrets.OTELBOT_DOTNET_INSTRUMENTATION_PRIVATE_KEY }}
@@ -65,6 +66,16 @@ jobs:
 
         Invoke-WebRequest -Uri ${env:DOTNET_INSTALL_SCRIPT_GPG_KEY_URL} -MaximumRetryCount 5 -OutFile $KeyFileName | Out-Null
         Invoke-WebRequest -Uri ${env:DOTNET_INSTALL_SCRIPT_SIGNATURE_URL} -MaximumRetryCount 5 -OutFile $SignatureFileName | Out-Null
+
+        $ExpectedKeyFingerprint = ${env:DOTNET_INSTALL_SCRIPT_GPG_KEY_FINGERPRINT}.ToUpperInvariant()
+        $KeyFingerprints = @(gpg --show-keys --with-colons $KeyFileName |
+          Where-Object { $_.StartsWith("fpr:") } |
+          ForEach-Object { ($_ -split ":")[9].ToUpperInvariant() } |
+          Select-Object -Unique)
+
+        if ($KeyFingerprints.Count -ne 1 -or $KeyFingerprints[0] -ne $ExpectedKeyFingerprint) {
+          throw "Unexpected GPG key fingerprint in ${KeyFileName}. Expected ${ExpectedKeyFingerprint}, found $($KeyFingerprints -join ', ')."
+        }
 
         gpg --import $KeyFileName || throw "Failed to import GPG key."
         gpg --verify $SignatureFileName $InstallScriptFileName || throw "Failed to verify GPG signature."

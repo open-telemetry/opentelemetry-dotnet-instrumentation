@@ -406,6 +406,7 @@ public static partial class LibraryVersion
 #else
                 "2.6.122",
                 "2.12.14",
+                "3.0.2-preview",
 #endif
             ];
             return theoryData;

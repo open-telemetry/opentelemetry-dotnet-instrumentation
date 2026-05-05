@@ -185,6 +185,7 @@ public static partial class LibraryVersion
             [
                 new("2.6.122"),
                 new("2.12.14"),
+                new("3.0.2-preview"),
             ]
         },
         {
