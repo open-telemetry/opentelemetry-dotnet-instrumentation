@@ -1,6 +1,9 @@
 // Copyright The OpenTelemetry Authors
 // SPDX-License-Identifier: Apache-2.0
 
+#if NETFRAMEWORK
+using System.Configuration;
+#endif
 using System.Net;
 using OpenTelemetry.AutoInstrumentation.Configurations.FileBasedConfiguration;
 
@@ -51,6 +54,15 @@ internal class ResourceSettings : Settings
         return resourceAttributes;
     }
 
+    protected override void LoadFromDefaultSources(Configuration configuration, bool failFast)
+    {
+        OnLoadEnvVar(new Configuration(failFast, new EnvironmentConfigurationSource(failFast)));
+
+#if NETFRAMEWORK
+        MergeResourceAttributes(new Configuration(failFast, new AppSettingsConfigurationSource(failFast, ConfigurationManager.AppSettings)));
+#endif
+    }
+
     protected override void OnLoadEnvVar(Configuration configuration)
     {
         var resourceDetectorsEnabledByDefault = configuration.GetBool(ConfigurationKeys.ResourceDetectorEnabled) ?? true;
@@ -76,5 +88,25 @@ internal class ResourceSettings : Settings
         Resources = configuration.Resource?.ParseAttributes() ?? [];
 
         EnabledDetectors = configuration.Resource?.DetectionDevelopment?.Detectors?.GetEnabledResourceDetectors() ?? [];
+    }
+
+    private void MergeResourceAttributes(Configuration configuration)
+    {
+        var attributes = Resources.ToList();
+
+        foreach (var attribute in ParseResourceAttributes(configuration))
+        {
+            attributes.RemoveAll(existingAttribute => existingAttribute.Key == attribute.Key);
+            attributes.Add(attribute);
+        }
+
+        var serviceName = configuration.GetString(ConfigurationKeys.ServiceName);
+        if (!string.IsNullOrWhiteSpace(serviceName))
+        {
+            attributes.RemoveAll(attribute => attribute.Key == Constants.ResourceAttributes.AttributeServiceName);
+            attributes.Add(new(Constants.ResourceAttributes.AttributeServiceName, serviceName!));
+        }
+
+        Resources = attributes;
     }
 }
