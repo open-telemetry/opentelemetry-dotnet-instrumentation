@@ -59,11 +59,11 @@ public class AspNetTests(ITestOutputHelper output)
 
     private ITestOutputHelper Output { get; } = output;
 
-    // The test application does not reproduce issues with 
+    // The test application does not reproduce issues with
     // AppDomainWorkaround.None when assemblies are registered in GAC.
-    // More complex applications can still fail with "Loading this assembly 
+    // More complex applications can still fail with "Loading this assembly
     // would produce a different grant set from other instances".
-    // Switching between integrated and classic app pool 
+    // Switching between integrated and classic app pool
     // modes is not expected to affect assembly loading,
     // so integrated mode is checked once to save test execution time.
     [WindowsAdministratorTheory]
