@@ -21,7 +21,7 @@ The mode avoids adding `OpenTelemetry.AutoInstrumentation` references to rewritt
 
 - Rewritten target methods emit only `mscorlib` TypeRefs/TypeSpecs/MethodSpecs and skip `GetIntegrationTypeRef()`.
 - Target calls are MethodSpecs on `__OTelCallTargetTrampoline__`; the first generic argument is `TMapIntegration` instead of the direct-mode `TIntegration`.
-- Trampoline mode uses the normal CallTarget rewriter control-flow implementation; only local/token setup and Begin/End/LogException/GetReturnValue call emission differ.
+- Trampoline mode uses the normal CallTarget rewriter control-flow implementation through a rewrite-token strategy; only local/token setup and Begin/End/LogException/GetReturnValue call emission differ.
 - Fast Begin supports 0..8 arguments and passes every argument by reference, matching direct CallTarget fast-path shape.
 - Slow Begin supports 9+ arguments via `object[]`; slow-path by-ref arguments remain unsupported.
 - End keeps the direct CallTarget shape: store a mscorlib `CallTargetReturn` vessel, call `GetReturnValue()` for non-void methods, and store the resulting return local.
