@@ -509,13 +509,10 @@ HRESULT CallTargetTokens::ModifyLocalSig(ILRewriter*    reWriter,
     mdToken newLocalVarSig;
     if (Logger::IsDebugEnabled())
     {
-        Logger::Debug("CallTargetTokens::ModifyLocalSig: originalLocalVarSig=",
-                      HexStr(&localVarSig, sizeof(mdToken)),
-                      " originalSignatureSize=", originalSignatureSize,
-                      " originalSignature=",
+        Logger::Debug("CallTargetTokens::ModifyLocalSig: originalLocalVarSig=", HexStr(&localVarSig, sizeof(mdToken)),
+                      " originalSignatureSize=", originalSignatureSize, " originalSignature=",
                       originalSignature == nullptr ? WStr("<nil>") : HexStr(originalSignature, originalSignatureSize),
-                      " newLocalsCount=", newLocalsCount,
-                      " newSignatureSize=", newSignatureSize,
+                      " newLocalsCount=", newLocalsCount, " newSignatureSize=", newSignatureSize,
                       " newSignatureOffset=", newSignatureOffset,
                       " newSignature=", HexStr(newSignatureBuffer, newSignatureOffset),
                       " exceptionToken=", HexStr(&exTypeRef, sizeof(mdToken)),
@@ -533,8 +530,7 @@ HRESULT CallTargetTokens::ModifyLocalSig(ILRewriter*    reWriter,
     reWriter->SetTkLocalVarSig(newLocalVarSig);
     if (Logger::IsDebugEnabled())
     {
-        Logger::Debug("CallTargetTokens::ModifyLocalSig: newLocalVarSig=",
-                      HexStr(&newLocalVarSig, sizeof(mdToken)));
+        Logger::Debug("CallTargetTokens::ModifyLocalSig: newLocalVarSig=", HexStr(&newLocalVarSig, sizeof(mdToken)));
     }
 
     *callTargetStateToken  = callTargetStateTypeRef;

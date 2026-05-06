@@ -112,7 +112,7 @@ HRESULT STDMETHODCALLTYPE CorProfiler::Initialize(IUnknown* cor_profiler_info_un
     }
 
     // code is ready to get runtime information
-    runtime_information_ = GetRuntimeInformation(this->info_);
+    runtime_information_           = GetRuntimeInformation(this->info_);
     calltarget_trampoline_enabled_ = runtime_information_.is_desktop() && trace::IsCallTargetTrampolineEnabled();
 
     if (Logger::IsDebugEnabled())
@@ -1095,8 +1095,8 @@ ICorProfilerInfo7* CorProfiler::GetCorProfilerInfo() const
 int CorProfiler::GetCallTargetTrampolineIntegrationIndex(const IntegrationDefinition& integration_definition)
 {
     std::scoped_lock<std::mutex> lock(calltarget_trampoline_integration_map_lock_);
-    const auto& key = integration_definition.integration_type.get_cache_key();
-    auto existing = calltarget_trampoline_integration_indexes_.find(key);
+    const auto&                  key      = integration_definition.integration_type.get_cache_key();
+    auto                         existing = calltarget_trampoline_integration_indexes_.find(key);
     if (existing != calltarget_trampoline_integration_indexes_.end())
     {
         return existing->second;
@@ -1112,8 +1112,7 @@ int CorProfiler::GetCallTargetTrampolineIntegrationIndex(const IntegrationDefini
 const WCHAR* CorProfiler::GetCallTargetTrampolineIntegrationAssembly(int integration_index)
 {
     std::scoped_lock<std::mutex> lock(calltarget_trampoline_integration_map_lock_);
-    if (integration_index < 0 ||
-        static_cast<size_t>(integration_index) >= calltarget_trampoline_integrations_.size())
+    if (integration_index < 0 || static_cast<size_t>(integration_index) >= calltarget_trampoline_integrations_.size())
     {
         Logger::Warn("GetCallTargetTrampolineIntegrationAssembly: invalid integration index ", integration_index);
         return nullptr;
@@ -1125,8 +1124,7 @@ const WCHAR* CorProfiler::GetCallTargetTrampolineIntegrationAssembly(int integra
 const WCHAR* CorProfiler::GetCallTargetTrampolineIntegrationType(int integration_index)
 {
     std::scoped_lock<std::mutex> lock(calltarget_trampoline_integration_map_lock_);
-    if (integration_index < 0 ||
-        static_cast<size_t>(integration_index) >= calltarget_trampoline_integrations_.size())
+    if (integration_index < 0 || static_cast<size_t>(integration_index) >= calltarget_trampoline_integrations_.size())
     {
         Logger::Warn("GetCallTargetTrampolineIntegrationType: invalid integration index ", integration_index);
         return nullptr;

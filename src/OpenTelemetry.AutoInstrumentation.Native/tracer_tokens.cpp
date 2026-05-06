@@ -38,17 +38,17 @@ static const WSTRING managed_profiler_calltarget_logexception_name = WStr("LogEx
  * PRIVATE
  **/
 
-HRESULT GetTypeArgumentSignature(ModuleMetadata* module_metadata,
-                                 mdToken         typeToken,
-                                 bool            isValueType,
+HRESULT GetTypeArgumentSignature(ModuleMetadata*             module_metadata,
+                                 mdToken                     typeToken,
+                                 bool                        isValueType,
                                  std::vector<COR_SIGNATURE>& signature)
 {
     if (TypeFromToken(typeToken) == mdtTypeSpec)
     {
-        PCCOR_SIGNATURE typeSpecSignature = nullptr;
+        PCCOR_SIGNATURE typeSpecSignature     = nullptr;
         ULONG           typeSpecSignatureSize = 0;
-        auto hr = module_metadata->metadata_import->GetTypeSpecFromToken(typeToken, &typeSpecSignature,
-                                                                         &typeSpecSignatureSize);
+        auto            hr = module_metadata->metadata_import->GetTypeSpecFromToken(typeToken, &typeSpecSignature,
+                                                                                    &typeSpecSignatureSize);
         if (FAILED(hr))
         {
             Logger::Warn("GetTypeArgumentSignature: failed to read TypeSpec token ",
@@ -131,8 +131,7 @@ HRESULT TracerTokens::WriteBeginMethodWithArgumentsArray(void*           rewrite
     std::vector<COR_SIGNATURE> currentTypeSignature;
     IfFailRet(GetTypeArgumentSignature(module_metadata, currentTypeRef, isValueType, currentTypeSignature));
 
-    auto          signatureLength = static_cast<ULONG>(2 + integrationTypeSignature.size() +
-                                                       currentTypeSignature.size());
+    auto signatureLength = static_cast<ULONG>(2 + integrationTypeSignature.size() + currentTypeSignature.size());
     COR_SIGNATURE signature[signatureBufferSize];
     unsigned      offset = 0;
     signature[offset++]  = IMAGE_CEE_CS_CALLCONV_GENERICINST;
@@ -231,9 +230,8 @@ HRESULT TracerTokens::WriteBeginMethod(void*                             rewrite
         unsigned callTargetStateBuffer;
         auto     callTargetStateSize = CorSigCompressToken(callTargetStateTypeRef, &callTargetStateBuffer);
 
-        const bool shouldLoadArgumentsByRef = ShouldLoadArgumentsByRef(ignoreByRefInstrumentation);
-        unsigned long signatureLength =
-            6 + (numArguments * (shouldLoadArgumentsByRef ? 3 : 2)) + callTargetStateSize;
+        const bool    shouldLoadArgumentsByRef = ShouldLoadArgumentsByRef(ignoreByRefInstrumentation);
+        unsigned long signatureLength = 6 + (numArguments * (shouldLoadArgumentsByRef ? 3 : 2)) + callTargetStateSize;
         COR_SIGNATURE signature[signatureBufferSize];
         unsigned      offset = 0;
 
@@ -271,8 +269,7 @@ HRESULT TracerTokens::WriteBeginMethod(void*                             rewrite
                           " shouldLoadArgumentsByRef=", shouldLoadArgumentsByRef,
                           " callTargetTypeRef=", HexStr(&callTargetTypeRef, sizeof(mdToken)),
                           " callTargetStateTypeRef=", HexStr(&callTargetStateTypeRef, sizeof(mdToken)),
-                          " signatureLength=", signatureLength,
-                          " signature=", HexStr(signature, offset));
+                          " signatureLength=", signatureLength, " signature=", HexStr(signature, offset));
         }
 
         auto hr = module_metadata->metadata_emit->DefineMemberRef(callTargetTypeRef,
@@ -365,9 +362,7 @@ HRESULT TracerTokens::WriteBeginMethod(void*                             rewrite
                       HexStr(&beginMethodFastPathRef, sizeof(mdMemberRef)),
                       " integrationTypeRef=", HexStr(&integrationTypeRef, sizeof(mdToken)),
                       " currentTypeRef=", HexStr(&currentTypeRef, sizeof(mdToken)),
-                      " currentTypeIsValueType=", isValueType,
-                      " signatureLength=", signatureLength,
-                      " offset=", offset,
+                      " currentTypeIsValueType=", isValueType, " signatureLength=", signatureLength, " offset=", offset,
                       " signature=", HexStr(signature, offset));
     }
 
@@ -474,8 +469,7 @@ HRESULT TracerTokens::WriteEndVoidReturnMemberRef(void*           rewriterWrappe
     std::vector<COR_SIGNATURE> currentTypeSignature;
     IfFailRet(GetTypeArgumentSignature(module_metadata, currentTypeRef, isValueType, currentTypeSignature));
 
-    auto          signatureLength = static_cast<ULONG>(2 + integrationTypeSignature.size() +
-                                                       currentTypeSignature.size());
+    auto signatureLength = static_cast<ULONG>(2 + integrationTypeSignature.size() + currentTypeSignature.size());
     COR_SIGNATURE signature[signatureBufferSize];
     unsigned      offset = 0;
     signature[offset++]  = IMAGE_CEE_CS_CALLCONV_GENERICINST;
@@ -589,9 +583,9 @@ HRESULT TracerTokens::WriteEndReturnMemberRef(void*           rewriterWrapperPtr
     PCCOR_SIGNATURE returnSignatureBuffer;
     auto            returnSignatureLength = returnArgument->GetSignature(returnSignatureBuffer);
 
-    signatureLength = static_cast<ULONG>(2 + integrationTypeSignature.size() + currentTypeSignature.size() +
-                                         returnSignatureLength);
-    offset          = 0;
+    signatureLength =
+        static_cast<ULONG>(2 + integrationTypeSignature.size() + currentTypeSignature.size() + returnSignatureLength);
+    offset = 0;
 
     signature[offset++] = IMAGE_CEE_CS_CALLCONV_GENERICINST;
     signature[offset++] = 0x03;
@@ -667,8 +661,7 @@ HRESULT TracerTokens::WriteLogException(void*           rewriterWrapperPtr,
     std::vector<COR_SIGNATURE> currentTypeSignature;
     IfFailRet(GetTypeArgumentSignature(module_metadata, currentTypeRef, isValueType, currentTypeSignature));
 
-    auto          signatureLength = static_cast<ULONG>(2 + integrationTypeSignature.size() +
-                                                       currentTypeSignature.size());
+    auto signatureLength = static_cast<ULONG>(2 + integrationTypeSignature.size() + currentTypeSignature.size());
     COR_SIGNATURE signature[signatureBufferSize];
     unsigned      offset = 0;
     signature[offset++]  = IMAGE_CEE_CS_CALLCONV_GENERICINST;

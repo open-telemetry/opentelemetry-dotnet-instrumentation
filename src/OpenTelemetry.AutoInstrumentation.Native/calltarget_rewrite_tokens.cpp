@@ -15,10 +15,10 @@
 namespace trace
 {
 
-const WSTRING calltarget_trampoline_type_name = WStr("__OTelCallTargetTrampoline__");
-const WSTRING calltarget_trampoline_indexer_type_name = WStr("__OTelCallTargetIndexer`1");
-const WSTRING calltarget_trampoline_state_type_name = WStr("__OTelCallTargetState__");
-const WSTRING calltarget_trampoline_return_type_name = WStr("__OTelCallTargetReturn__");
+const WSTRING calltarget_trampoline_type_name                = WStr("__OTelCallTargetTrampoline__");
+const WSTRING calltarget_trampoline_indexer_type_name        = WStr("__OTelCallTargetIndexer`1");
+const WSTRING calltarget_trampoline_state_type_name          = WStr("__OTelCallTargetState__");
+const WSTRING calltarget_trampoline_return_type_name         = WStr("__OTelCallTargetReturn__");
 const WSTRING calltarget_trampoline_return_generic_type_name = WStr("__OTelCallTargetReturn__`1");
 
 namespace
@@ -58,10 +58,7 @@ HRESULT BuildIndexerMapTypeSpec(ModuleMetadata& moduleMetadata,
     for (int i = 0; i <= integrationIndex; i++)
     {
         SignatureBuilder next;
-        next.PushRawByte(ELEMENT_TYPE_GENERICINST)
-            .Push(indexerType)
-            .PushCompressedData(1)
-            .Push(current);
+        next.PushRawByte(ELEMENT_TYPE_GENERICINST).Push(indexerType).PushCompressedData(1).Push(current);
         current = next;
     }
 
@@ -80,9 +77,9 @@ HRESULT BuildIndexerMapTypeSpec(ModuleMetadata& moduleMetadata,
 
 } // namespace
 
-CallTargetTrampolineTokens::CallTargetTrampolineTokens(ModuleMetadata*         moduleMetadata,
-                                                       IntegrationDefinition* integrationDefinitionPtr) :
-    TracerTokens(moduleMetadata), integrationDefinition(integrationDefinitionPtr)
+CallTargetTrampolineTokens::CallTargetTrampolineTokens(ModuleMetadata*        moduleMetadata,
+                                                       IntegrationDefinition* integrationDefinitionPtr)
+    : TracerTokens(moduleMetadata), integrationDefinition(integrationDefinitionPtr)
 {
 }
 
@@ -99,9 +96,8 @@ HRESULT CallTargetTrampolineTokens::Initialize()
     }
 
     auto moduleMetadata = GetMetadata();
-    corLibAssemblyRef = FindExistingCorLibRef(*moduleMetadata);
-    if (corLibAssemblyRef == mdAssemblyRefNil &&
-        moduleMetadata->assemblyName != mscorlib_assemblyName &&
+    corLibAssemblyRef   = FindExistingCorLibRef(*moduleMetadata);
+    if (corLibAssemblyRef == mdAssemblyRefNil && moduleMetadata->assemblyName != mscorlib_assemblyName &&
         moduleMetadata->assemblyName != system_private_corelib_assemblyName)
     {
         Logger::Warn("CallTargetTrampolineTokens: skipping module without existing corlib AssemblyRef: ",
@@ -112,7 +108,8 @@ HRESULT CallTargetTrampolineTokens::Initialize()
     MemberResolver resolver(moduleMetadata->metadata_import, moduleMetadata->metadata_emit);
     HRESULT        hr = S_OK;
 
-    auto get_type = [&](LPCWSTR name, mdToken* token) -> HRESULT {
+    auto get_type = [&](LPCWSTR name, mdToken* token) -> HRESULT
+    {
         hr = resolver.GetTypeRefOrDefByName(corLibAssemblyRef, name, token);
         if (FAILED(hr))
         {
@@ -130,8 +127,8 @@ HRESULT CallTargetTrampolineTokens::Initialize()
     IfFailRet(get_type(calltarget_trampoline_type_name.c_str(), &callTargetTypeRef));
 
     const int integrationIndex = trace::profiler->GetCallTargetTrampolineIntegrationIndex(*integrationDefinition);
-    hr = BuildIndexerMapTypeSpec(*moduleMetadata, indexerTypeRef, objectTypeRef, integrationIndex,
-                                 &integrationTypeSpec);
+    hr =
+        BuildIndexerMapTypeSpec(*moduleMetadata, indexerTypeRef, objectTypeRef, integrationIndex, &integrationTypeSpec);
     if (FAILED(hr))
     {
         return hr;

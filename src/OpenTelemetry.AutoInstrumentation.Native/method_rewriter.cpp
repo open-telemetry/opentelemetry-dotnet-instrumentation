@@ -104,8 +104,8 @@ HRESULT TracerMethodRewriter::Rewrite(RejitHandlerModule* moduleHandler, RejitHa
     IntegrationDefinition* integration_definition = tracerMethodHandler->GetIntegrationDefinition();
     bool                   is_integration_method =
         integration_definition->target_method.type.assembly.name != tracemethodintegration_assemblyname;
-    bool use_trampoline = corProfiler->IsCallTargetTrampolineEnabled() && is_integration_method;
-    bool ignoreByRefInstrumentation               = !is_integration_method;
+    bool use_trampoline             = corProfiler->IsCallTargetTrampolineEnabled() && is_integration_method;
+    bool ignoreByRefInstrumentation = !is_integration_method;
     const auto [retFuncElementType, retTypeFlags] = retFuncArg.GetElementTypeAndFlags();
     bool isVoid                                   = (retTypeFlags & TypeFlagVoid) > 0;
     bool isStatic = !(caller->method_signature.CallingConvention() & IMAGE_CEE_CS_CALLCONV_HASTHIS);
@@ -121,7 +121,7 @@ HRESULT TracerMethodRewriter::Rewrite(RejitHandlerModule* moduleHandler, RejitHa
     // TODO: Trampoline mode is hidden behind TracerTokens here to keep this rewrite close to upstream.
     // A later cleanup can move the remaining token-selection setup into a small factory/helper.
     // *** Get reference to the integration type or trampoline map
-    mdTypeRef integration_type_ref = mdTypeRefNil;
+    mdTypeRef                  integration_type_ref = mdTypeRefNil;
     CallTargetTrampolineTokens trampolineTokens(&module_metadata, integration_definition);
     if (use_trampoline)
     {
@@ -132,10 +132,10 @@ HRESULT TracerMethodRewriter::Rewrite(RejitHandlerModule* moduleHandler, RejitHa
         }
 
         integration_type_ref = trampolineTokens.GetIntegrationTypeRef();
-        tracerTokens = &trampolineTokens;
+        tracerTokens         = &trampolineTokens;
     }
     else if (!corProfiler->GetIntegrationTypeRef(module_metadata, module_id, *integration_definition,
-                                                integration_type_ref))
+                                                 integration_type_ref))
     {
         Logger::Warn("*** CallTarget_RewriterCallback() skipping method: Integration Type Ref cannot be found for ",
                      " token=", function_token, " caller_name=", caller->type.name, ".", caller->name, "()");
@@ -145,9 +145,9 @@ HRESULT TracerMethodRewriter::Rewrite(RejitHandlerModule* moduleHandler, RejitHa
     if (Logger::IsDebugEnabled())
     {
         Logger::Debug("*** CallTarget_RewriterCallback() Start: ", caller->type.name, ".", caller->name,
-                      "() [IsVoid=", isVoid, ", IsStatic=", isStatic,
-                      ", Trampoline=", use_trampoline, ", IntegrationType=",
-                      integration_definition->integration_type.name, ", Arguments=", numArgs, "]");
+                      "() [IsVoid=", isVoid, ", IsStatic=", isStatic, ", Trampoline=", use_trampoline,
+                      ", IntegrationType=", integration_definition->integration_type.name, ", Arguments=", numArgs,
+                      "]");
     }
 
     // First we check if the managed profiler has not been loaded yet
@@ -636,8 +636,8 @@ HRESULT TracerMethodRewriter::Rewrite(RejitHandlerModule* moduleHandler, RejitHa
     hr = corProfiler->GetCorProfilerInfo()->ApplyMetaData(module_id);
     if (FAILED(hr))
     {
-        Logger::Warn("*** CallTarget_RewriterCallback(): Call to ApplyMetaData() failed for ModuleID=", module_id,
-                     " ", function_token);
+        Logger::Warn("*** CallTarget_RewriterCallback(): Call to ApplyMetaData() failed for ModuleID=", module_id, " ",
+                     function_token);
         return S_FALSE;
     }
     else if (Logger::IsDebugEnabled())
