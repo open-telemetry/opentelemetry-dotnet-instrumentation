@@ -88,11 +88,12 @@ for more details.
 
 ### Resource attributes
 
-On .NET Framework, `OTEL_RESOURCE_ATTRIBUTES` and `OTEL_SERVICE_NAME` may be supplied
-through environment variables or `App.config`/`Web.config` `appSettings`. When
-`appSettings` entries are present they override the environment-variable values for
-resource settings. When they are absent, a valid resource is still built from the
-remaining environment values, enabled detectors, and built-in fallback defaults.
+On .NET Framework, `OTEL_RESOURCE_ATTRIBUTES` and `OTEL_SERVICE_NAME` may be
+supplied through environment variables or `App.config`/`Web.config` `appSettings`.
+When `appSettings` entries are present they override the environment-variable
+values for resource settings. When they are absent, a valid resource is still
+built from the remaining environment values, enabled detectors, and
+built-in fallback defaults.
 
 | Environment variable       | Description                                                                                                                                                                                                                                                                  | Default value                                                                                                                                                                                  | Status                                                                                                                      |
 |----------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------|
@@ -100,8 +101,8 @@ remaining environment values, enabled detectors, and built-in fallback defaults.
 | `OTEL_SERVICE_NAME`        | Sets the value of the [`service.name`](https://github.com/open-telemetry/semantic-conventions/blob/main/docs/resource/README.md#service) resource attribute. If `service.name` is provided in `OTEL_RESOURCE_ATTRIBUTES`, the value of `OTEL_SERVICE_NAME` takes precedence. | See [Service name automatic detection](#configuration-methods) under Configuration method section.                                                                                             | [Stable](https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/versioning-and-stability.md) |
 
 If no explicit `service.name` is provided, automatic fallback naming still applies.
-If no explicit `service.instance.id` is provided, the instrumentation generates one
-automatically when building the resource.
+If no explicit `service.instance.id` is provided, the instrumentation generates
+one automatically when building the resource.
 
 ### Resource detectors
 
