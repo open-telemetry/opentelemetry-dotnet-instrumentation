@@ -12,6 +12,7 @@
 #include "otel_profiler_constants.h"
 #include "signature_builder.h"
 #include "stats.h"
+#include "util.h"
 #include "version.h"
 #include "environment_variables_util.h"
 
@@ -20,23 +21,31 @@ namespace trace
 
 namespace
 {
-const WSTRING calltarget_trampoline_type_name = WStr("__OTelCallTargetTrampoline__");
+const WSTRING calltarget_trampoline_indexer_type_name = WStr("__OTelCallTargetIndexer`1");
+const WSTRING calltarget_trampoline_state_type_name = WStr("__OTelCallTargetState__");
+const WSTRING calltarget_trampoline_return_type_name = WStr("__OTelCallTargetReturn__");
+const WSTRING calltarget_trampoline_return_generic_type_name = WStr("__OTelCallTargetReturn__`1");
+const WSTRING calltarget_trampoline_begin_type_name = WStr("__OTelCallTargetTrampolineBegin__");
+const WSTRING calltarget_trampoline_begin_slow_type_name = WStr("__OTelCallTargetTrampolineBeginSlow__`2");
+const WSTRING calltarget_trampoline_end_type_name = WStr("__OTelCallTargetTrampolineEnd__`3");
+const WSTRING calltarget_trampoline_end_void_type_name = WStr("__OTelCallTargetTrampolineEndVoid__`2");
+const WSTRING calltarget_trampoline_log_exception_type_name = WStr("__OTelCallTargetTrampolineLogException__`2");
 
 struct CallTargetTrampolineTokens
 {
     mdAssemblyRef corlibRef = mdAssemblyRefNil;
     mdToken objectType = mdTokenNil;
     mdToken exceptionType = mdTokenNil;
-    mdToken stringType = mdTokenNil;
-    mdToken runtimeMethodHandleType = mdTokenNil;
-    mdToken runtimeTypeHandleType = mdTokenNil;
-    mdToken trampolineType = mdTokenNil;
-    mdMemberRef beginMethod = mdMemberRefNil;
-    mdMemberRef endMethod = mdMemberRefNil;
-    mdMemberRef endVoidMethod = mdMemberRefNil;
-    mdMemberRef logExceptionMethod = mdMemberRefNil;
-    mdString integrationAssemblyString = mdStringNil;
-    mdString integrationTypeString = mdStringNil;
+    mdToken stateType = mdTokenNil;
+    mdToken returnVoidType = mdTokenNil;
+    mdToken returnGenericType = mdTokenNil;
+    mdToken indexerType = mdTokenNil;
+    mdToken beginTypes[FASTPATH_COUNT]{};
+    mdToken beginSlowType = mdTokenNil;
+    mdToken endType = mdTokenNil;
+    mdToken endVoidType = mdTokenNil;
+    mdToken logExceptionType = mdTokenNil;
+    int integrationIndex = -1;
 };
 
 mdAssemblyRef FindExistingCorLibRef(ModuleMetadata& moduleMetadata)
@@ -86,102 +95,21 @@ HRESULT BuildCallTargetTrampolineTokens(ModuleMetadata&        moduleMetadata,
 
     IfFailRet(get_type(SystemObject, &tokens.objectType));
     IfFailRet(get_type(SystemException, &tokens.exceptionType));
-    IfFailRet(get_type(SystemString, &tokens.stringType));
-    IfFailRet(get_type(RuntimeMethodHandleTypeName, &tokens.runtimeMethodHandleType));
-    IfFailRet(get_type(RuntimeTypeHandleTypeName, &tokens.runtimeTypeHandleType));
-    IfFailRet(get_type(calltarget_trampoline_type_name.c_str(), &tokens.trampolineType));
-
-    SignatureBuilder::Type objectType{SignatureBuilder::BuiltIn::Object};
-    SignatureBuilder::Class objectClass{tokens.objectType};
-    SignatureBuilder::Class exceptionClass{tokens.exceptionType};
-    SignatureBuilder::Class stringClass{tokens.stringType};
-    SignatureBuilder::ValueType runtimeMethodHandleValue{tokens.runtimeMethodHandleType};
-    SignatureBuilder::ValueType runtimeTypeHandleValue{tokens.runtimeTypeHandleType};
-    SignatureBuilder::Array objectArray{objectType};
-
+    IfFailRet(get_type(calltarget_trampoline_state_type_name.c_str(), &tokens.stateType));
+    IfFailRet(get_type(calltarget_trampoline_return_type_name.c_str(), &tokens.returnVoidType));
+    IfFailRet(get_type(calltarget_trampoline_return_generic_type_name.c_str(), &tokens.returnGenericType));
+    IfFailRet(get_type(calltarget_trampoline_indexer_type_name.c_str(), &tokens.indexerType));
+    for (int i = 0; i < FASTPATH_COUNT; i++)
     {
-        SignatureBuilder::StaticMethod signature{objectType,
-                                                 {runtimeMethodHandleValue, runtimeTypeHandleValue, stringClass,
-                                                  stringClass, objectClass, objectArray}};
-        hr = resolver.GetMemberRefOrDef(tokens.trampolineType, WStr("Begin"), signature.Head(), signature.Size(),
-                                        &tokens.beginMethod);
-        if (FAILED(hr))
-        {
-            Logger::Warn("BuildCallTargetTrampolineTokens: failed to define Begin member ref");
-            return hr;
-        }
+        const auto beginTypeName = calltarget_trampoline_begin_type_name + WStr("`") + ToWSTRING(i + 2);
+        IfFailRet(get_type(beginTypeName.c_str(), &tokens.beginTypes[i]));
     }
+    IfFailRet(get_type(calltarget_trampoline_begin_slow_type_name.c_str(), &tokens.beginSlowType));
+    IfFailRet(get_type(calltarget_trampoline_end_type_name.c_str(), &tokens.endType));
+    IfFailRet(get_type(calltarget_trampoline_end_void_type_name.c_str(), &tokens.endVoidType));
+    IfFailRet(get_type(calltarget_trampoline_log_exception_type_name.c_str(), &tokens.logExceptionType));
 
-    {
-        SignatureBuilder signature;
-        signature.PushRawByte(IMAGE_CEE_CS_CALLCONV_GENERIC)
-            .PushCompressedData(1)
-            .PushCompressedData(8)
-            .PushRawByte(ELEMENT_TYPE_MVAR)
-            .PushCompressedData(0)
-            .Push(runtimeMethodHandleValue)
-            .Push(runtimeTypeHandleValue)
-            .Push(stringClass)
-            .Push(stringClass)
-            .Push(objectClass)
-            .PushRawByte(ELEMENT_TYPE_MVAR)
-            .PushCompressedData(0)
-            .Push(exceptionClass)
-            .Push(objectClass);
-        hr = resolver.GetMemberRefOrDef(tokens.trampolineType, WStr("End"), signature.Head(), signature.Size(),
-                                        &tokens.endMethod);
-        if (FAILED(hr))
-        {
-            Logger::Warn("BuildCallTargetTrampolineTokens: failed to define End member ref");
-            return hr;
-        }
-    }
-
-    {
-        SignatureBuilder::StaticMethod signature{SignatureBuilder::Type{SignatureBuilder::BuiltIn::Void},
-                                                 {runtimeMethodHandleValue, runtimeTypeHandleValue, stringClass,
-                                                  stringClass, objectClass, exceptionClass, objectClass}};
-        hr = resolver.GetMemberRefOrDef(tokens.trampolineType, WStr("EndVoid"), signature.Head(), signature.Size(),
-                                        &tokens.endVoidMethod);
-        if (FAILED(hr))
-        {
-            Logger::Warn("BuildCallTargetTrampolineTokens: failed to define EndVoid member ref");
-            return hr;
-        }
-    }
-
-    {
-        SignatureBuilder::StaticMethod signature{SignatureBuilder::Type{SignatureBuilder::BuiltIn::Void},
-                                                 {runtimeMethodHandleValue, runtimeTypeHandleValue, stringClass,
-                                                  stringClass, exceptionClass}};
-        hr = resolver.GetMemberRefOrDef(tokens.trampolineType, WStr("LogException"), signature.Head(),
-                                        signature.Size(), &tokens.logExceptionMethod);
-        if (FAILED(hr))
-        {
-            Logger::Warn("BuildCallTargetTrampolineTokens: failed to define LogException member ref");
-            return hr;
-        }
-    }
-
-    const WSTRING integrationAssemblyName = integrationDefinition->integration_type.assembly.str();
-    hr = moduleMetadata.metadata_emit->DefineUserString(integrationAssemblyName.c_str(),
-                                                        static_cast<ULONG>(integrationAssemblyName.size()),
-                                                        &tokens.integrationAssemblyString);
-    if (FAILED(hr))
-    {
-        Logger::Warn("BuildCallTargetTrampolineTokens: failed to define integration assembly string");
-        return hr;
-    }
-
-    const WSTRING integrationTypeName = integrationDefinition->integration_type.name;
-    hr = moduleMetadata.metadata_emit->DefineUserString(integrationTypeName.c_str(),
-                                                        static_cast<ULONG>(integrationTypeName.size()),
-                                                        &tokens.integrationTypeString);
-    if (FAILED(hr))
-    {
-        Logger::Warn("BuildCallTargetTrampolineTokens: failed to define integration type string");
-        return hr;
-    }
+    tokens.integrationIndex = trace::profiler->GetCallTargetTrampolineIntegrationIndex(*integrationDefinition);
 
     return S_OK;
 }
@@ -200,18 +128,137 @@ void AppendCompressedToken(std::vector<COR_SIGNATURE>& signature, mdToken token)
     signature.insert(signature.end(), buffer, buffer + size);
 }
 
+void AppendTypeToken(std::vector<COR_SIGNATURE>& signature, mdToken token, bool isValueType)
+{
+    signature.push_back(isValueType ? ELEMENT_TYPE_VALUETYPE : ELEMENT_TYPE_CLASS);
+    AppendCompressedToken(signature, token);
+}
+
+void AppendTypeVariable(std::vector<COR_SIGNATURE>& signature, ULONG index, bool byRef = false)
+{
+    if (byRef)
+    {
+        signature.push_back(ELEMENT_TYPE_BYREF);
+    }
+
+    signature.push_back(ELEMENT_TYPE_VAR);
+    AppendCompressedData(signature, index);
+}
+
+void AppendTypeSignature(std::vector<COR_SIGNATURE>& signature, const TypeSignature& typeSignature, bool stripByRef)
+{
+    PCCOR_SIGNATURE rawSignature = nullptr;
+    ULONG           rawSignatureLength = typeSignature.GetSignature(rawSignature);
+    if (stripByRef && rawSignatureLength > 0 && rawSignature[0] == ELEMENT_TYPE_BYREF)
+    {
+        rawSignature++;
+        rawSignatureLength--;
+    }
+
+    signature.insert(signature.end(), rawSignature, rawSignature + rawSignatureLength);
+}
+
+std::vector<COR_SIGNATURE> GetCurrentTypeSignature(const TypeInfo* currentType,
+                                                   const CallTargetTrampolineTokens& tokens)
+{
+    bool    isValueType = currentType->valueType;
+    mdToken typeToken   = currentType->type_spec;
+    if (typeToken == mdTypeSpecNil)
+    {
+        const TypeInfo* cType = currentType;
+        while (!cType->isGeneric)
+        {
+            if (cType->parent_type == nullptr)
+            {
+                typeToken = cType->id;
+                break;
+            }
+
+            cType = cType->parent_type.get();
+        }
+
+        if (typeToken == mdTypeSpecNil)
+        {
+            typeToken   = tokens.objectType;
+            isValueType = false;
+        }
+    }
+
+    std::vector<COR_SIGNATURE> signature;
+    AppendTypeToken(signature, typeToken, isValueType);
+    return signature;
+}
+
+std::vector<COR_SIGNATURE> BuildIndexerMapSignature(const CallTargetTrampolineTokens& tokens)
+{
+    std::vector<COR_SIGNATURE> current{ELEMENT_TYPE_OBJECT};
+    for (int i = 0; i <= tokens.integrationIndex; i++)
+    {
+        std::vector<COR_SIGNATURE> next;
+        next.push_back(ELEMENT_TYPE_GENERICINST);
+        AppendTypeToken(next, tokens.indexerType, false);
+        AppendCompressedData(next, 1);
+        next.insert(next.end(), current.begin(), current.end());
+        current = next;
+    }
+
+    return current;
+}
+
+HRESULT GetTypeSpecFromSignature(ModuleMetadata& moduleMetadata,
+                                 const std::vector<COR_SIGNATURE>& signature,
+                                 mdTypeSpec* typeSpec)
+{
+    return moduleMetadata.metadata_emit->GetTokenFromTypeSpec(signature.data(), static_cast<ULONG>(signature.size()),
+                                                             typeSpec);
+}
+
+HRESULT BuildGenericHolderTypeSpec(ModuleMetadata& moduleMetadata,
+                                   mdToken openGenericType,
+                                   bool isValueType,
+                                   const std::vector<std::vector<COR_SIGNATURE>>& genericArguments,
+                                   mdTypeSpec* typeSpec)
+{
+    std::vector<COR_SIGNATURE> signature;
+    signature.push_back(ELEMENT_TYPE_GENERICINST);
+    AppendTypeToken(signature, openGenericType, isValueType);
+    AppendCompressedData(signature, static_cast<ULONG>(genericArguments.size()));
+    for (const auto& argument : genericArguments)
+    {
+        signature.insert(signature.end(), argument.begin(), argument.end());
+    }
+
+    return GetTypeSpecFromSignature(moduleMetadata, signature, typeSpec);
+}
+
+HRESULT BuildCallTargetReturnTypeSpec(ModuleMetadata& moduleMetadata,
+                                      const CallTargetTrampolineTokens& tokens,
+                                      const std::vector<COR_SIGNATURE>& returnSignature,
+                                      mdTypeSpec* returnTypeSpec)
+{
+    std::vector<COR_SIGNATURE> signature;
+    signature.push_back(ELEMENT_TYPE_GENERICINST);
+    AppendTypeToken(signature, tokens.returnGenericType, true);
+    AppendCompressedData(signature, 1);
+    signature.insert(signature.end(), returnSignature.begin(), returnSignature.end());
+    return GetTypeSpecFromSignature(moduleMetadata, signature, returnTypeSpec);
+}
+
 // Extends the target method local signature and emits the trampoline prologue:
 //
 // TReturn otelReturnValue = default; // only for non-void methods
 // Exception otelException = null;
-// object otelState = null;
+// __OTelCallTargetReturn__[<TReturn>] otelReturn = default;
+// __OTelCallTargetState__ otelState = default;
 HRESULT ModifyLocalSigAndInitializeForTrampoline(ILRewriterWrapper&            reWriterWrapper,
                                                  ModuleMetadata&               moduleMetadata,
                                                  FunctionInfo*                 functionInfo,
                                                  CallTargetTrampolineTokens&   tokens,
                                                  ULONG*                        exceptionIndex,
                                                  ULONG*                        stateIndex,
+                                                 ULONG*                        callTargetReturnIndex,
                                                  ULONG*                        returnValueIndex,
+                                                 mdToken*                      callTargetReturnToken,
                                                  ILInstr**                     firstInstruction)
 {
     ILRewriter* rewriter = reWriterWrapper.GetILRewriter();
@@ -234,7 +281,7 @@ HRESULT ModifyLocalSigAndInitializeForTrampoline(ILRewriterWrapper&            r
     const auto [retFuncElementType, retTypeFlags] = returnFunctionMethod.GetElementTypeAndFlags();
     const bool isVoid = (retTypeFlags & TypeFlagVoid) > 0;
 
-    ULONG newLocalsToAdd = isVoid ? 2 : 3;
+    ULONG newLocalsToAdd = isVoid ? 3 : 4;
     ULONG newLocalsCount = oldLocalsCount + newLocalsToAdd;
 
     std::vector<COR_SIGNATURE> newSignature;
@@ -260,7 +307,26 @@ HRESULT ModifyLocalSigAndInitializeForTrampoline(ILRewriterWrapper&            r
     newSignature.push_back(ELEMENT_TYPE_CLASS);
     AppendCompressedToken(newSignature, tokens.exceptionType);
 
-    newSignature.push_back(ELEMENT_TYPE_OBJECT);
+    if (!isVoid)
+    {
+        std::vector<COR_SIGNATURE> returnSignature(returnSignatureType, returnSignatureType + returnSignatureTypeSize);
+        mdTypeSpec returnTypeSpec = mdTypeSpecNil;
+        IfFailRet(BuildCallTargetReturnTypeSpec(moduleMetadata, tokens, returnSignature, &returnTypeSpec));
+        PCCOR_SIGNATURE returnTypeSpecSignature = nullptr;
+        ULONG returnTypeSpecSignatureSize = 0;
+        IfFailRet(moduleMetadata.metadata_import->GetTypeSpecFromToken(returnTypeSpec, &returnTypeSpecSignature,
+                                                                       &returnTypeSpecSignatureSize));
+        newSignature.insert(newSignature.end(), returnTypeSpecSignature,
+                            returnTypeSpecSignature + returnTypeSpecSignatureSize);
+        *callTargetReturnToken = returnTypeSpec;
+    }
+    else
+    {
+        AppendTypeToken(newSignature, tokens.returnVoidType, true);
+        *callTargetReturnToken = tokens.returnVoidType;
+    }
+
+    AppendTypeToken(newSignature, tokens.stateType, true);
 
     mdToken newLocalVarSig;
     hr = moduleMetadata.metadata_emit->GetTokenFromSig(newSignature.data(), static_cast<ULONG>(newSignature.size()),
@@ -275,15 +341,16 @@ HRESULT ModifyLocalSigAndInitializeForTrampoline(ILRewriterWrapper&            r
 
     if (!isVoid)
     {
-        *returnValueIndex = newLocalsCount - 3;
+        *returnValueIndex = newLocalsCount - 4;
     }
     else
     {
         *returnValueIndex = static_cast<ULONG>(ULONG_MAX);
     }
 
-    *exceptionIndex = newLocalsCount - 2;
-    *stateIndex     = newLocalsCount - 1;
+    *exceptionIndex        = newLocalsCount - 3;
+    *callTargetReturnIndex = newLocalsCount - 2;
+    *stateIndex            = newLocalsCount - 1;
 
     if (!isVoid)
     {
@@ -313,17 +380,20 @@ HRESULT ModifyLocalSigAndInitializeForTrampoline(ILRewriterWrapper&            r
         *firstInstruction = loadExceptionNull;
     }
     reWriterWrapper.StLocal(*exceptionIndex);
-    reWriterWrapper.LoadNull();
-    reWriterWrapper.StLocal(*stateIndex);
+    reWriterWrapper.LoadLocalAddress(*callTargetReturnIndex);
+    reWriterWrapper.InitObj(*callTargetReturnToken);
+    reWriterWrapper.LoadLocalAddress(*stateIndex);
+    reWriterWrapper.InitObj(tokens.stateType);
     return S_OK;
 }
 
-// Emits the instance argument for the public trampoline methods:
+// Emits the instance argument for the generated generic trampoline methods:
 //
-// object instance = isStatic ? null : (object)this;
+// TTarget instance = isStatic ? default : this;
 //
-// Value-type instances are loaded from the by-ref this pointer, copied, and boxed.
-bool LoadInstanceAsObject(ILRewriterWrapper& reWriterWrapper, FunctionInfo* caller, bool isStatic, ILInstr** firstInstruction)
+// Value-type instances are loaded from the by-ref this pointer and passed as TTarget,
+// matching the direct CallTarget stack shape.
+bool LoadInstanceForTrampoline(ILRewriterWrapper& reWriterWrapper, FunctionInfo* caller, bool isStatic, ILInstr** firstInstruction)
 {
     if (isStatic)
     {
@@ -358,81 +428,214 @@ bool LoadInstanceAsObject(ILRewriterWrapper& reWriterWrapper, FunctionInfo* call
         }
 
         reWriterWrapper.LoadObj(valueTypeToken);
-        reWriterWrapper.Box(valueTypeToken);
     }
 
     return true;
 }
 
-// Emits the identity arguments that let mscorlib resolve the target/integration pair:
+// Emits a call equivalent to:
 //
-// RuntimeMethodHandle targetMethod = methodof(CurrentMethod).MethodHandle;
-// RuntimeTypeHandle targetType = typeof(CurrentRuntimeType).TypeHandle;
-// string integrationAssembly = "...";
-// string integrationType = "...";
-ILInstr* LoadTrampolineIdentity(ILRewriterWrapper& reWriterWrapper,
-                                FunctionInfo* caller,
-                                const CallTargetTrampolineTokens& tokens)
+// __OTelCallTargetTrampolineBegin__<TMapIntegration, TTarget, ...TArgs>
+//     .BeginMethod(instance, ref arg1, ..., ref argN)
+//
+// or, for the slow path:
+//
+// __OTelCallTargetTrampolineBeginSlow__<TMapIntegration, TTarget>
+//     .BeginMethod(instance, args)
+HRESULT WriteTrampolineBeginMethod(ILRewriterWrapper&                  reWriterWrapper,
+                                   ModuleMetadata&                     moduleMetadata,
+                                   CallTargetTrampolineTokens&         tokens,
+                                   const TypeInfo*                     currentType,
+                                   const std::vector<TypeSignature>&   methodArguments,
+                                   ILInstr**                           instruction)
 {
-    ILInstr* firstInstruction = reWriterWrapper.LoadToken(caller->id);
+    HRESULT hr = S_OK;
+    const auto numArguments = static_cast<int>(methodArguments.size());
+    const bool slowPath = numArguments >= FASTPATH_COUNT;
+    mdTypeSpec holderTypeSpec = mdTypeSpecNil;
+    auto mapSignature = BuildIndexerMapSignature(tokens);
+    auto targetSignature = GetCurrentTypeSignature(currentType, tokens);
 
-    mdToken targetTypeToken = caller->type.type_spec;
-    if (targetTypeToken == mdTypeSpecNil)
+    if (slowPath)
     {
-        const TypeInfo* currentType = &caller->type;
-        while (!currentType->isGeneric)
-        {
-            if (currentType->parent_type == nullptr)
-            {
-                targetTypeToken = currentType->id;
-                break;
-            }
+        IfFailRet(BuildGenericHolderTypeSpec(moduleMetadata, tokens.beginSlowType, false,
+                                             {mapSignature, targetSignature}, &holderTypeSpec));
 
-            currentType = currentType->parent_type.get();
-        }
+        std::vector<COR_SIGNATURE> signature;
+        signature.push_back(IMAGE_CEE_CS_CALLCONV_DEFAULT);
+        AppendCompressedData(signature, 2);
+        AppendTypeToken(signature, tokens.stateType, true);
+        AppendTypeVariable(signature, 1);
+        signature.push_back(ELEMENT_TYPE_SZARRAY);
+        signature.push_back(ELEMENT_TYPE_OBJECT);
 
-        if (targetTypeToken == mdTypeSpecNil)
-        {
-            targetTypeToken = tokens.objectType;
-        }
+        mdMemberRef beginMethodRef = mdMemberRefNil;
+        IfFailRet(moduleMetadata.metadata_emit->DefineMemberRef(holderTypeSpec, WStr("BeginMethod"), signature.data(),
+                                                                static_cast<ULONG>(signature.size()),
+                                                                &beginMethodRef));
+        *instruction = reWriterWrapper.CallMember(beginMethodRef, false);
+        return S_OK;
     }
 
-    reWriterWrapper.LoadToken(targetTypeToken);
-    reWriterWrapper.LoadString(tokens.integrationAssemblyString);
-    reWriterWrapper.LoadString(tokens.integrationTypeString);
-    return firstInstruction;
+    std::vector<std::vector<COR_SIGNATURE>> holderArgs{mapSignature, targetSignature};
+    for (const auto& methodArgument : methodArguments)
+    {
+        std::vector<COR_SIGNATURE> argumentSignature;
+        const auto [elementType, argTypeFlags] = methodArgument.GetElementTypeAndFlags();
+        AppendTypeSignature(argumentSignature, methodArgument, (argTypeFlags & TypeFlagByRef) > 0);
+        holderArgs.push_back(argumentSignature);
+    }
+
+    IfFailRet(BuildGenericHolderTypeSpec(moduleMetadata, tokens.beginTypes[numArguments], false, holderArgs,
+                                         &holderTypeSpec));
+
+    std::vector<COR_SIGNATURE> signature;
+    signature.push_back(IMAGE_CEE_CS_CALLCONV_DEFAULT);
+    AppendCompressedData(signature, static_cast<ULONG>(1 + numArguments));
+    AppendTypeToken(signature, tokens.stateType, true);
+    AppendTypeVariable(signature, 1);
+    for (int i = 0; i < numArguments; i++)
+    {
+        AppendTypeVariable(signature, static_cast<ULONG>(2 + i), true);
+    }
+
+    mdMemberRef beginMethodRef = mdMemberRefNil;
+    IfFailRet(moduleMetadata.metadata_emit->DefineMemberRef(holderTypeSpec, WStr("BeginMethod"), signature.data(),
+                                                            static_cast<ULONG>(signature.size()), &beginMethodRef));
+    *instruction = reWriterWrapper.CallMember(beginMethodRef, false);
+    return S_OK;
 }
 
-// Emits the generic non-void End call after the caller has already pushed the shared arguments:
+// Emits a call equivalent to:
 //
-// otelReturnValue = __OTelCallTargetTrampoline__.End<TReturn>(
-//     targetMethod, targetType, integrationAssembly, integrationType,
-//     instance, otelReturnValue, otelException, otelState);
+// __OTelCallTargetTrampolineEndVoid__<TMapIntegration, TTarget>
+//     .EndMethod(instance, exception, ref state)
+HRESULT WriteTrampolineEndVoidMethod(ILRewriterWrapper&          reWriterWrapper,
+                                     ModuleMetadata&             moduleMetadata,
+                                     CallTargetTrampolineTokens& tokens,
+                                     const TypeInfo*             currentType,
+                                     ILInstr**                   instruction)
+{
+    HRESULT hr = S_OK;
+    auto mapSignature = BuildIndexerMapSignature(tokens);
+    auto targetSignature = GetCurrentTypeSignature(currentType, tokens);
+    mdTypeSpec holderTypeSpec = mdTypeSpecNil;
+    IfFailRet(BuildGenericHolderTypeSpec(moduleMetadata, tokens.endVoidType, false,
+                                         {mapSignature, targetSignature}, &holderTypeSpec));
+
+    std::vector<COR_SIGNATURE> signature;
+    signature.push_back(IMAGE_CEE_CS_CALLCONV_DEFAULT);
+    AppendCompressedData(signature, 3);
+    AppendTypeToken(signature, tokens.returnVoidType, true);
+    AppendTypeVariable(signature, 1);
+    AppendTypeToken(signature, tokens.exceptionType, false);
+    signature.push_back(ELEMENT_TYPE_BYREF);
+    AppendTypeToken(signature, tokens.stateType, true);
+    mdMemberRef endMethodRef = mdMemberRefNil;
+    IfFailRet(moduleMetadata.metadata_emit->DefineMemberRef(holderTypeSpec, WStr("EndMethod"), signature.data(),
+                                                            static_cast<ULONG>(signature.size()), &endMethodRef));
+    *instruction = reWriterWrapper.CallMember(endMethodRef, false);
+    return S_OK;
+}
+
+// Emits a call equivalent to:
+//
+// __OTelCallTargetTrampolineEnd__<TMapIntegration, TTarget, TReturn>
+//     .EndMethod(instance, returnValue, exception, ref state)
 HRESULT WriteTrampolineEndMethod(ILRewriterWrapper&          reWriterWrapper,
                                  ModuleMetadata&             moduleMetadata,
                                  CallTargetTrampolineTokens& tokens,
+                                 const TypeInfo*             currentType,
                                  TypeSignature*              returnArgument,
                                  ILInstr**                   instruction)
 {
-    PCCOR_SIGNATURE returnSignature = nullptr;
-    ULONG           returnSignatureLength = returnArgument->GetSignature(returnSignature);
+    HRESULT hr = S_OK;
+    auto mapSignature = BuildIndexerMapSignature(tokens);
+    auto targetSignature = GetCurrentTypeSignature(currentType, tokens);
+    std::vector<COR_SIGNATURE> returnSignature;
+    AppendTypeSignature(returnSignature, *returnArgument, false);
 
-    SignatureBuilder methodSpecSignature;
-    methodSpecSignature.PushRawByte(IMAGE_CEE_CS_CALLCONV_GENERICINST).PushCompressedData(1).PushRawBytes(
-        returnSignature, returnSignature + returnSignatureLength);
+    mdTypeSpec holderTypeSpec = mdTypeSpecNil;
+    IfFailRet(BuildGenericHolderTypeSpec(moduleMetadata, tokens.endType, false,
+                                         {mapSignature, targetSignature, returnSignature}, &holderTypeSpec));
 
-    mdMethodSpec endMethodSpec = mdMethodSpecNil;
-    auto hr = moduleMetadata.metadata_emit->DefineMethodSpec(tokens.endMethod, methodSpecSignature.Head(),
-                                                             methodSpecSignature.Size(), &endMethodSpec);
-    if (FAILED(hr))
-    {
-        Logger::Warn("WriteTrampolineEndMethod: failed to define End<TReturn> method spec");
-        return hr;
-    }
+    mdTypeSpec returnTypeSpec = mdTypeSpecNil;
+    IfFailRet(BuildCallTargetReturnTypeSpec(moduleMetadata, tokens, returnSignature, &returnTypeSpec));
 
-    *instruction = reWriterWrapper.CallMember(endMethodSpec, false);
+    std::vector<COR_SIGNATURE> signature;
+    signature.push_back(IMAGE_CEE_CS_CALLCONV_DEFAULT);
+    AppendCompressedData(signature, 4);
+    PCCOR_SIGNATURE returnTypeSpecSignature = nullptr;
+    ULONG           returnTypeSpecSignatureSize = 0;
+    IfFailRet(moduleMetadata.metadata_import->GetTypeSpecFromToken(returnTypeSpec, &returnTypeSpecSignature,
+                                                                   &returnTypeSpecSignatureSize));
+    signature.insert(signature.end(), returnTypeSpecSignature, returnTypeSpecSignature + returnTypeSpecSignatureSize);
+    AppendTypeVariable(signature, 1);
+    AppendTypeVariable(signature, 2);
+    AppendTypeToken(signature, tokens.exceptionType, false);
+    signature.push_back(ELEMENT_TYPE_BYREF);
+    AppendTypeToken(signature, tokens.stateType, true);
+
+    mdMemberRef endMethodRef = mdMemberRefNil;
+    IfFailRet(moduleMetadata.metadata_emit->DefineMemberRef(holderTypeSpec, WStr("EndMethod"), signature.data(),
+                                                            static_cast<ULONG>(signature.size()), &endMethodRef));
+    *instruction = reWriterWrapper.CallMember(endMethodRef, false);
     return S_OK;
 }
+
+// Emits a call equivalent to:
+//
+// callTargetReturn.GetReturnValue()
+HRESULT WriteTrampolineReturnGetReturnValue(ILRewriterWrapper&          reWriterWrapper,
+                                            ModuleMetadata&             moduleMetadata,
+                                            TypeSignature*              returnArgument,
+                                            mdTypeSpec                  callTargetReturnTypeSpec,
+                                            ILInstr**                   instruction)
+{
+    HRESULT hr = S_OK;
+    std::vector<COR_SIGNATURE> signature;
+    signature.push_back(IMAGE_CEE_CS_CALLCONV_DEFAULT | IMAGE_CEE_CS_CALLCONV_HASTHIS);
+    AppendCompressedData(signature, 0);
+    AppendTypeVariable(signature, 0);
+
+    mdMemberRef getReturnValueRef = mdMemberRefNil;
+    IfFailRet(moduleMetadata.metadata_emit->DefineMemberRef(callTargetReturnTypeSpec, WStr("GetReturnValue"),
+                                                            signature.data(), static_cast<ULONG>(signature.size()),
+                                                            &getReturnValueRef));
+    *instruction = reWriterWrapper.CallMember(getReturnValueRef, false);
+    return S_OK;
+}
+
+// Emits a call equivalent to:
+//
+// __OTelCallTargetTrampolineLogException__<TMapIntegration, TTarget>
+//     .LogException(exception)
+HRESULT WriteTrampolineLogException(ILRewriterWrapper&          reWriterWrapper,
+                                    ModuleMetadata&             moduleMetadata,
+                                    CallTargetTrampolineTokens& tokens,
+                                    const TypeInfo*             currentType,
+                                    ILInstr**                   instruction)
+{
+    HRESULT hr = S_OK;
+    auto mapSignature = BuildIndexerMapSignature(tokens);
+    auto targetSignature = GetCurrentTypeSignature(currentType, tokens);
+    mdTypeSpec holderTypeSpec = mdTypeSpecNil;
+    IfFailRet(BuildGenericHolderTypeSpec(moduleMetadata, tokens.logExceptionType, false,
+                                         {mapSignature, targetSignature}, &holderTypeSpec));
+
+    std::vector<COR_SIGNATURE> signature;
+    signature.push_back(IMAGE_CEE_CS_CALLCONV_DEFAULT);
+    AppendCompressedData(signature, 1);
+    signature.push_back(ELEMENT_TYPE_VOID);
+    AppendTypeToken(signature, tokens.exceptionType, false);
+
+    mdMemberRef logExceptionRef = mdMemberRefNil;
+    IfFailRet(moduleMetadata.metadata_emit->DefineMemberRef(holderTypeSpec, WStr("LogException"), signature.data(),
+                                                            static_cast<ULONG>(signature.size()), &logExceptionRef));
+    *instruction = reWriterWrapper.CallMember(logExceptionRef, false);
+    return S_OK;
+}
+
 
 // clang-format off
 // Rewrites the target method body into this conceptual C# shape. "OriginalBody" means the original
@@ -442,28 +645,25 @@ HRESULT WriteTrampolineEndMethod(ILRewriterWrapper&          reWriterWrapper,
 // {
 //     TReturn otelReturnValue = default; // omitted for void
 //     Exception otelException = null;
-//     object otelState = null;
+//     __OTelCallTargetState__ otelState = default;
+//     __OTelCallTargetReturn__<TReturn> otelReturn = default; // __OTelCallTargetReturn__ for void
 //
 //     try
 //     {
 //         try
 //         {
-//             otelState = __OTelCallTargetTrampoline__.Begin(
-//                 methodof(TargetMethod).MethodHandle,
-//                 typeof(CurrentRuntimeType).TypeHandle,
-//                 integrationAssembly,
-//                 integrationType,
-//                 instance,
-//                 new object[] { boxedArgs });
+//             otelState =
+//                 __OTelCallTargetTrampolineBegin__<TMapIntegration, TTarget, ...TArgs>
+//                     .BeginMethod(instance, ref arg1, ..., ref argN);
+//
+//             // Slow path for 9+ arguments:
+//             // otelState =
+//             //     __OTelCallTargetTrampolineBeginSlow__<TMapIntegration, TTarget>
+//             //         .BeginMethod(instance, new object[] { boxedArgs });
 //         }
 //         catch (Exception ex)
 //         {
-//             __OTelCallTargetTrampoline__.LogException(
-//                 methodof(TargetMethod).MethodHandle,
-//                 typeof(CurrentRuntimeType).TypeHandle,
-//                 integrationAssembly,
-//                 integrationType,
-//                 ex);
+//             __OTelCallTargetTrampolineLogException__<TMapIntegration, TTarget>.LogException(ex);
 //             otelException = null;
 //         }
 //
@@ -480,37 +680,21 @@ HRESULT WriteTrampolineEndMethod(ILRewriterWrapper&          reWriterWrapper,
 //         {
 //             if (voidMethod)
 //             {
-//                 __OTelCallTargetTrampoline__.EndVoid(
-//                     methodof(TargetMethod).MethodHandle,
-//                     typeof(CurrentRuntimeType).TypeHandle,
-//                     integrationAssembly,
-//                     integrationType,
-//                     instance,
-//                     otelException,
-//                     otelState);
+//                 __OTelCallTargetTrampolineEndVoid__<TMapIntegration, TTarget>
+//                     .EndMethod(instance, otelException, ref otelState);
 //             }
 //             else
 //             {
-//                 otelReturnValue = __OTelCallTargetTrampoline__.End<TReturn>(
-//                     methodof(TargetMethod).MethodHandle,
-//                     typeof(CurrentRuntimeType).TypeHandle,
-//                     integrationAssembly,
-//                     integrationType,
-//                     instance,
-//                     otelReturnValue,
-//                     otelException,
-//                     otelState);
+//                 otelReturn =
+//                     __OTelCallTargetTrampolineEnd__<TMapIntegration, TTarget, TReturn>
+//                         .EndMethod(instance, otelReturnValue, otelException, ref otelState);
+//                 otelReturnValue = otelReturn.GetReturnValue();
 //             }
 //         }
 //         catch (Exception ex)
 //         {
 //             otelException = ex;
-//             __OTelCallTargetTrampoline__.LogException(
-//                 methodof(TargetMethod).MethodHandle,
-//                 typeof(CurrentRuntimeType).TypeHandle,
-//                 integrationAssembly,
-//                 integrationType,
-//                 ex);
+//             __OTelCallTargetTrampolineLogException__<TMapIntegration, TTarget>.LogException(ex);
 //         }
 //     }
 //
@@ -543,24 +727,6 @@ HRESULT RewriteWithCallTargetTrampoline(RejitHandlerModule* moduleHandler, Rejit
         Logger::Warn("*** CallTarget_Trampoline_RewriterCallback() skipping trace-method instrumentation for ",
                      caller->type.name, ".", caller->name, "().");
         return S_FALSE;
-    }
-
-    if ((retTypeFlags & TypeFlagByRef) > 0)
-    {
-        Logger::Warn("*** CallTarget_Trampoline_RewriterCallback(): Methods with by-ref returns cannot be "
-                     "instrumented. ");
-        return S_FALSE;
-    }
-
-    for (int i = 0; i < numArgs; i++)
-    {
-        const auto [elementType, argTypeFlags] = methodArguments[i].GetElementTypeAndFlags();
-        if ((argTypeFlags & TypeFlagByRef) > 0)
-        {
-            Logger::Warn("*** CallTarget_Trampoline_RewriterCallback(): Methods with ref parameters cannot be "
-                         "instrumented. ");
-            return S_FALSE;
-        }
     }
 
     if (!corProfiler->IsProfilerAssemblyLoadedIntoAppDomain(module_metadata.app_domain_id))
@@ -609,50 +775,86 @@ HRESULT RewriteWithCallTargetTrampoline(RejitHandlerModule* moduleHandler, Rejit
 
     ULONG    exceptionIndex   = static_cast<ULONG>(ULONG_MAX);
     ULONG    stateIndex       = static_cast<ULONG>(ULONG_MAX);
+    ULONG    callTargetReturnIndex = static_cast<ULONG>(ULONG_MAX);
     ULONG    returnValueIndex = static_cast<ULONG>(ULONG_MAX);
+    mdToken  callTargetReturnToken = mdTokenNil;
     ILInstr* firstInstruction = nullptr;
 
     hr = ModifyLocalSigAndInitializeForTrampoline(reWriterWrapper, module_metadata, caller, trampolineTokens,
-                                                  &exceptionIndex, &stateIndex, &returnValueIndex, &firstInstruction);
+                                                  &exceptionIndex, &stateIndex, &callTargetReturnIndex,
+                                                  &returnValueIndex, &callTargetReturnToken, &firstInstruction);
     if (FAILED(hr))
     {
         return S_FALSE;
     }
 
-    LoadTrampolineIdentity(reWriterWrapper, caller, trampolineTokens);
-
     ILInstr* instanceLoadInstruction = nullptr;
-    if (!LoadInstanceAsObject(reWriterWrapper, caller, isStatic, &instanceLoadInstruction))
+    if (!LoadInstanceForTrampoline(reWriterWrapper, caller, isStatic, &instanceLoadInstruction))
     {
         return S_FALSE;
     }
 
-    reWriterWrapper.CreateArray(trampolineTokens.objectType, numArgs);
-    for (int i = 0; i < numArgs; i++)
+    if (numArgs >= FASTPATH_COUNT)
     {
-        reWriterWrapper.BeginLoadValueIntoArray(i);
-        reWriterWrapper.LoadArgument(i + (isStatic ? 0 : 1));
-        const auto [elementType, argTypeFlags] = methodArguments[i].GetElementTypeAndFlags();
-        if ((argTypeFlags & TypeFlagBoxedType) > 0)
+        reWriterWrapper.CreateArray(trampolineTokens.objectType, numArgs);
+        for (int i = 0; i < numArgs; i++)
         {
-            const auto& tok = methodArguments[i].GetTypeTok(metaEmit, trampolineTokens.corlibRef);
-            if (tok == mdTokenNil)
+            reWriterWrapper.BeginLoadValueIntoArray(i);
+            reWriterWrapper.LoadArgument(i + (isStatic ? 0 : 1));
+            const auto [elementType, argTypeFlags] = methodArguments[i].GetElementTypeAndFlags();
+            if ((argTypeFlags & TypeFlagByRef) > 0)
             {
+                Logger::Warn("*** CallTarget_Trampoline_RewriterCallback(): Slow-path methods with ref parameters "
+                             "cannot be instrumented. ");
                 return S_FALSE;
             }
-            reWriterWrapper.Box(tok);
+            if ((argTypeFlags & TypeFlagBoxedType) > 0)
+            {
+                const auto& tok = methodArguments[i].GetTypeTok(metaEmit, trampolineTokens.corlibRef);
+                if (tok == mdTokenNil)
+                {
+                    return S_FALSE;
+                }
+                reWriterWrapper.Box(tok);
+            }
+            reWriterWrapper.EndLoadValueIntoArray();
         }
-        reWriterWrapper.EndLoadValueIntoArray();
+    }
+    else
+    {
+        for (int i = 0; i < numArgs; i++)
+        {
+            const auto [elementType, argTypeFlags] = methodArguments[i].GetElementTypeAndFlags();
+            if ((argTypeFlags & TypeFlagByRef) > 0)
+            {
+                reWriterWrapper.LoadArgument(i + (isStatic ? 0 : 1));
+            }
+            else
+            {
+                reWriterWrapper.LoadArgumentRef(i + (isStatic ? 0 : 1));
+            }
+        }
     }
 
-    reWriterWrapper.CallMember(trampolineTokens.beginMethod, false);
+    ILInstr* beginCallInstruction = nullptr;
+    hr = WriteTrampolineBeginMethod(reWriterWrapper, module_metadata, trampolineTokens, &caller->type, methodArguments,
+                                    &beginCallInstruction);
+    if (FAILED(hr))
+    {
+        return S_FALSE;
+    }
     reWriterWrapper.StLocal(stateIndex);
     ILInstr* pStateLeaveToBeginOriginalMethodInstr = reWriterWrapper.CreateInstr(CEE_LEAVE_S);
 
     ILInstr* beginMethodCatchFirstInstr = reWriterWrapper.StLocal(exceptionIndex);
-    LoadTrampolineIdentity(reWriterWrapper, caller, trampolineTokens);
     reWriterWrapper.LoadLocal(exceptionIndex);
-    reWriterWrapper.CallMember(trampolineTokens.logExceptionMethod, false);
+    ILInstr* beginLogExceptionInstr = nullptr;
+    hr = WriteTrampolineLogException(reWriterWrapper, module_metadata, trampolineTokens, &caller->type,
+                                     &beginLogExceptionInstr);
+    if (FAILED(hr))
+    {
+        return S_FALSE;
+    }
     reWriterWrapper.LoadNull();
     reWriterWrapper.StLocal(exceptionIndex);
     ILInstr* beginMethodCatchLeaveInstr = reWriterWrapper.CreateInstr(CEE_LEAVE_S);
@@ -678,12 +880,12 @@ HRESULT RewriteWithCallTargetTrampoline(RejitHandlerModule* moduleHandler, Rejit
     reWriterWrapper.SetILPosition(methodReturnInstr);
     ILInstr* rethrowInstr = reWriterWrapper.Rethrow();
 
-    ILInstr* endMethodTryStartInstr = LoadTrampolineIdentity(reWriterWrapper, caller, trampolineTokens);
     ILInstr* endMethodInstanceLoadInstr = nullptr;
-    if (!LoadInstanceAsObject(reWriterWrapper, caller, isStatic, &endMethodInstanceLoadInstr))
+    if (!LoadInstanceForTrampoline(reWriterWrapper, caller, isStatic, &endMethodInstanceLoadInstr))
     {
         return S_FALSE;
     }
+    ILInstr* endMethodTryStartInstr = endMethodInstanceLoadInstr;
 
     if (!isVoid)
     {
@@ -691,17 +893,35 @@ HRESULT RewriteWithCallTargetTrampoline(RejitHandlerModule* moduleHandler, Rejit
     }
 
     reWriterWrapper.LoadLocal(exceptionIndex);
-    reWriterWrapper.LoadLocal(stateIndex);
+    reWriterWrapper.LoadLocalAddress(stateIndex);
 
     ILInstr* endMethodCallInstr;
     if (isVoid)
     {
-        endMethodCallInstr = reWriterWrapper.CallMember(trampolineTokens.endVoidMethod, false);
+        hr = WriteTrampolineEndVoidMethod(reWriterWrapper, module_metadata, trampolineTokens, &caller->type,
+                                          &endMethodCallInstr);
+        if (FAILED(hr))
+        {
+            return S_FALSE;
+        }
     }
     else
     {
-        hr = WriteTrampolineEndMethod(reWriterWrapper, module_metadata, trampolineTokens, &retFuncArg,
+        hr = WriteTrampolineEndMethod(reWriterWrapper, module_metadata, trampolineTokens, &caller->type, &retFuncArg,
                                       &endMethodCallInstr);
+        if (FAILED(hr))
+        {
+            return S_FALSE;
+        }
+    }
+    reWriterWrapper.StLocal(callTargetReturnIndex);
+
+    if (!isVoid)
+    {
+        ILInstr* getReturnInstruction = nullptr;
+        reWriterWrapper.LoadLocalAddress(callTargetReturnIndex);
+        hr = WriteTrampolineReturnGetReturnValue(reWriterWrapper, module_metadata, &retFuncArg,
+                                                 static_cast<mdTypeSpec>(callTargetReturnToken), &getReturnInstruction);
         if (FAILED(hr))
         {
             return S_FALSE;
@@ -712,9 +932,14 @@ HRESULT RewriteWithCallTargetTrampoline(RejitHandlerModule* moduleHandler, Rejit
     ILInstr* endMethodTryLeave = reWriterWrapper.CreateInstr(CEE_LEAVE_S);
 
     ILInstr* endMethodCatchFirstInstr = reWriterWrapper.StLocal(exceptionIndex);
-    LoadTrampolineIdentity(reWriterWrapper, caller, trampolineTokens);
     reWriterWrapper.LoadLocal(exceptionIndex);
-    reWriterWrapper.CallMember(trampolineTokens.logExceptionMethod, false);
+    ILInstr* endLogExceptionInstr = nullptr;
+    hr = WriteTrampolineLogException(reWriterWrapper, module_metadata, trampolineTokens, &caller->type,
+                                     &endLogExceptionInstr);
+    if (FAILED(hr))
+    {
+        return S_FALSE;
+    }
     ILInstr* endMethodCatchLeaveInstr = reWriterWrapper.CreateInstr(CEE_LEAVE_S);
 
     EHClause endMethodExClause{};
@@ -910,7 +1135,7 @@ HRESULT TracerMethodRewriter::Rewrite(RejitHandlerModule* moduleHandler, RejitHa
     auto                              metaEmit   = module_metadata.metadata_emit;
     auto                              metaImport = module_metadata.metadata_import;
 
-    if (corProfiler->IsCallTargetTrampolineEnabled())
+    if (corProfiler->IsCallTargetTrampolineEnabled() && is_integration_method)
     {
         return RewriteWithCallTargetTrampoline(moduleHandler, methodHandler);
     }

@@ -17,11 +17,16 @@ internal static class Program
         var command = new Command();
         command.Execute();
 
-        // Instrumentation assembly is expected to be already loaded from the GAC at this point.
+        // Direct CallTarget mode needs the instrumentation assembly to be loadable from the GAC for this
+        // domain-neutral scenario. Trampoline mode intentionally avoids that direct target-assembly closure.
         var instrumentationAssembly = Assembly.Load("OpenTelemetry.AutoInstrumentation") ?? throw new InvalidOperationException("Instrumentation assembly was not loaded.");
+        var callTargetTrampolineEnabled = string.Equals(
+            Environment.GetEnvironmentVariable("OTEL_DOTNET_AUTO_CALLTARGET_TRAMPOLINE_ENABLED"),
+            bool.TrueString,
+            StringComparison.OrdinalIgnoreCase);
 
 #if NETFRAMEWORK
-        if (!instrumentationAssembly.GlobalAssemblyCache)
+        if (!callTargetTrampolineEnabled && !instrumentationAssembly.GlobalAssemblyCache)
         {
             throw new InvalidOperationException("Instrumentation assembly was not loaded from the GAC");
         }

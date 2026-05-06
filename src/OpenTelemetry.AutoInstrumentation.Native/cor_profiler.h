@@ -9,6 +9,7 @@
 #include "cor.h"
 #include "corprof.h"
 #include <atomic>
+#include <deque>
 #include <mutex>
 #include <string>
 #include <unordered_map>
@@ -83,6 +84,9 @@ private:
     bool enable_by_ref_instrumentation = true;
     bool enable_calltarget_state_by_ref = true;
     std::unique_ptr<TracerRejitPreprocessor> tracer_integration_preprocessor = nullptr;
+    std::mutex calltarget_trampoline_integration_map_lock_;
+    std::unordered_map<WSTRING, int> calltarget_trampoline_integration_indexes_;
+    std::deque<std::pair<WSTRING, WSTRING>> calltarget_trampoline_integrations_;
 
     // Cor assembly properties
     AssemblyProperty corAssemblyProperty{};
@@ -156,6 +160,9 @@ public:
     bool IsCallTargetTrampolineEnabled() const;
     bool IsProfilerAssemblyLoadedIntoAppDomain(AppDomainID app_domain_id);
     ICorProfilerInfo7* GetCorProfilerInfo() const;
+    int GetCallTargetTrampolineIntegrationIndex(const IntegrationDefinition& integration_definition);
+    const WCHAR* GetCallTargetTrampolineIntegrationAssembly(int integration_index);
+    const WCHAR* GetCallTargetTrampolineIntegrationType(int integration_index);
 
     WSTRING GetBytecodeInstrumentationAssembly() const;
 
