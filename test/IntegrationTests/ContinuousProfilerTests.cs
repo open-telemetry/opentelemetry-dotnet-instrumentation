@@ -26,7 +26,7 @@ public class ContinuousProfilerTests : TestHelper
         SetEnvironmentVariable("OTEL_DOTNET_AUTO_TRACES_ADDITIONAL_SOURCES", "TestApplication.ContinuousProfiler");
         var (_, _, processId) = RunTestApplication();
 
-        collector.Expect(profileData => profileData.ResourceProfiles.Any(resourceProfiles => resourceProfiles.ScopeProfiles.Any(scopeProfile => scopeProfile.Profiles.Any(profile => ContainSampleType(profile, "allocations", "bytes") && profile.Sample[0].Value[0] != 0.0))));
+        collector.Expect(profileData => profileData.ResourceProfiles.Any(resourceProfiles => resourceProfiles.ScopeProfiles.Any(scopeProfile => scopeProfile.Profiles.Any(profile => ContainSampleType(profile, profileData.Dictionary, "allocations", "bytes") && profile.Samples[0].Values[0] != 0.0))));
         collector.ResourceExpector.ExpectStandardResources(processId, "TestApplication.ContinuousProfiler");
 
         collector.AssertExpectations();
@@ -62,7 +62,7 @@ public class ContinuousProfilerTests : TestHelper
         var expectedStackTrace = string.Join("\n", CreateExpectedStackTrace());
 
         collector.ExpectCollected(ExpectCollected, "Expect Collected failed");
-        collector.Expect(profileData => profileData.ResourceProfiles.Any(resourceProfiles => resourceProfiles.ScopeProfiles.Any(scopeProfile => scopeProfile.Profiles.Any(profile => ContainStackTraceForClassHierarchy(profile, expectedStackTrace) && ContainSampleType(profile, "samples", "count") && ContainPeriod(profile, "cpu", "nanoseconds", 1_000_000_000) && profile.Sample[0].Value[0] == 1))));
+        collector.Expect(profileData => profileData.ResourceProfiles.Any(resourceProfiles => resourceProfiles.ScopeProfiles.Any(scopeProfile => scopeProfile.Profiles.Any(profile => ContainStackTraceForClassHierarchy(profile, profileData.Dictionary, expectedStackTrace) && ContainSampleType(profile, profileData.Dictionary, "samples", "count") && ContainPeriod(profile, profileData.Dictionary, "cpu", "nanoseconds", 1_000_000_000) && profile.Samples[0].Values[0] == 1))));
 
         var (_, _, processId) = RunTestApplication();
 
@@ -75,38 +75,49 @@ public class ContinuousProfilerTests : TestHelper
 
     private static bool ExpectCollected(ICollection<ExportProfilesServiceRequest> c)
     {
-        var scopeProfiles = c.SelectMany(r => r.ResourceProfiles)
-            .SelectMany(rp => rp.ScopeProfiles).ToList();
-
-        Assert.All(scopeProfiles, sp => Assert.Equal("OpenTelemetry.AutoInstrumentation", sp.Scope.Name));
-
-        var profiles = scopeProfiles.SelectMany(sp => sp.Profiles).ToList();
-
-        foreach (var profile in profiles)
+        foreach (var request in c)
         {
-            var attributeTable = profile.AttributeTable;
-
-            var attributeIndices = profiles.SelectMany(p => p.LocationTable).Select(l => l.AttributeIndices.Single());
-            if (!attributeIndices.All(index => attributeTable[index] is { Key: "profile.frame.type" }))
+            foreach (var resourceProfile in request.ResourceProfiles)
             {
-                return false;
+                foreach (var scopeProfile in resourceProfile.ScopeProfiles)
+                {
+                    Assert.Equal("OpenTelemetry.AutoInstrumentation", scopeProfile.Scope.Name);
+                }
+            }
+
+            var dictionary = request.Dictionary;
+            var locationTable = dictionary.LocationTable;
+
+            // skip zero-value entry at index 0
+            for (var i = 1; i < locationTable.Count; i++)
+            {
+                var location = locationTable[i];
+
+                foreach (var index in location.AttributeIndices)
+                {
+                    var attr = dictionary.AttributeTable[index];
+                    if (attr == null || dictionary.StringTable[attr.KeyStrindex] != "profile.frame.type")
+                    {
+                        return false;
+                    }
+                }
             }
         }
 
         return true;
     }
 
-    private static bool ContainSampleType(Profile profile, string profilingSampleType, string profilingSampleUnit)
+    private static bool ContainSampleType(Profile profile, ProfilesDictionary dictionary, string profilingSampleType, string profilingSampleUnit)
     {
-        return profile.SampleType.Any(vt =>
-            profile.StringTable[vt.TypeStrindex] == profilingSampleType &&
-            profile.StringTable[vt.UnitStrindex] == profilingSampleUnit);
+        var vt = profile.SampleType;
+        return dictionary.StringTable[vt.TypeStrindex] == profilingSampleType &&
+            dictionary.StringTable[vt.UnitStrindex] == profilingSampleUnit;
     }
 
-    private static bool ContainPeriod(Profile profile, string profilingSampleType, string profilingSampleUnit, long period)
+    private static bool ContainPeriod(Profile profile, ProfilesDictionary dictionary, string profilingSampleType, string profilingSampleUnit, long period)
     {
-        return profile.StringTable[profile.PeriodType.TypeStrindex] == profilingSampleType &&
-            profile.StringTable[profile.PeriodType.UnitStrindex] == profilingSampleUnit &&
+        return dictionary.StringTable[profile.PeriodType.TypeStrindex] == profilingSampleType &&
+            dictionary.StringTable[profile.PeriodType.UnitStrindex] == profilingSampleUnit &&
             profile.Period == period;
     }
 
@@ -148,20 +159,58 @@ public class ContinuousProfilerTests : TestHelper
         return stackTrace;
     }
 
-    private static bool ContainStackTraceForClassHierarchy(Profile profile, string expectedStackTrace)
+    private static bool ContainStackTraceForClassHierarchy(Profile profile, ProfilesDictionary dictionary, string expectedStackTrace)
     {
-        var frames = profile.LocationTable
-            .SelectMany(location => location.Line)
-            .Select(line => line.FunctionIndex)
-            .Select(functionId => profile.FunctionTable[functionId])
-            .Select(function => profile.StringTable[function.NameStrindex]);
+        foreach (var sample in profile.Samples)
+        {
+            var stackIndex = sample.StackIndex;
+            if (stackIndex <= 0 || stackIndex >= dictionary.StackTable.Count)
+            {
+                continue;
+            }
 
-        var stackTrace = string.Join("\n", frames);
+            var stack = dictionary.StackTable[stackIndex];
+            var frames = GetFrameNames(stack, dictionary);
+            var stackTrace = string.Join("\n", frames);
 
 #if NET
-        return stackTrace.Contains(expectedStackTrace, StringComparison.Ordinal);
+            if (stackTrace.Contains(expectedStackTrace, StringComparison.Ordinal))
 #else
-        return stackTrace.Contains(expectedStackTrace);
+            if (stackTrace.Contains(expectedStackTrace))
 #endif
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private static IEnumerable<string> GetFrameNames(Stack stack, ProfilesDictionary dictionary)
+    {
+        foreach (var locationIndex in stack.LocationIndices)
+        {
+            if (locationIndex <= 0 || locationIndex >= dictionary.LocationTable.Count)
+            {
+                continue;
+            }
+
+            var location = dictionary.LocationTable[locationIndex];
+
+            foreach (var line in location.Lines)
+            {
+                var functionIndex = line.FunctionIndex;
+                if (functionIndex <= 0 || functionIndex >= dictionary.FunctionTable.Count)
+                {
+                    continue;
+                }
+
+                var function = dictionary.FunctionTable[functionIndex];
+                if (function.NameStrindex >= 0 && function.NameStrindex < dictionary.StringTable.Count)
+                {
+                    yield return dictionary.StringTable[function.NameStrindex];
+                }
+            }
+        }
     }
 }

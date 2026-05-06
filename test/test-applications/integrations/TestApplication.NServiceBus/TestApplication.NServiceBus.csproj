@@ -9,8 +9,9 @@
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" />
     <PackageReference Include="NServiceBus" VersionOverride="$(LibraryVersion)" Condition=" '$(LibraryVersion)' != '' or ('$(TargetFramework)' != 'net472' and '$(TargetFramework)' != 'net9.0' and '$(TargetFramework)' != 'net8.0' ) " />
-    <PackageReference Include="NServiceBus" VersionOverride="9.2.9" Condition=" '$(LibraryVersion)' == '' and ( '$(TargetFramework)' == 'net9.0' or '$(TargetFramework)' == 'net8.0' ) " />
-    <PackageReference Include="NServiceBus" VersionOverride="8.2.5" Condition=" '$(LibraryVersion)' == '' and '$(TargetFramework)' == 'net472' " />
+    <PackageReference Include="NServiceBus" VersionOverride="9.2.10" Condition=" '$(LibraryVersion)' == '' and ( '$(TargetFramework)' == 'net9.0' or '$(TargetFramework)' == 'net8.0' ) " />
+    <PackageReference Include="NServiceBus" VersionOverride="8.2.6" Condition=" '$(LibraryVersion)' == '' and '$(TargetFramework)' == 'net472' " />
+    <PackageReference Include="System.Security.Cryptography.Xml" Condition=" '$(TargetFramework)' == 'net472' or ( '$(LibraryVersion)' != '' and  '$(LibraryVersion)' &lt;= '9.0.0' )" />
   </ItemGroup>
 
 </Project>

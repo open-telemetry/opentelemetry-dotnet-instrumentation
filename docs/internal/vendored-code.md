@@ -21,6 +21,6 @@ To make vendored code fully internal, apply the following changes:
 `YamlDotNet` is needed for file-based configuration.
 
 * Source: <https://github.com/aaubry/YamlDotNet>
-* Version: `16.3.0`
+* Version: `17.1.0`
 * Content: Only the `YamlDotNet` folder is added to
   `src\OpenTelemetry.AutoInstrumentation\Vendors\YamlDotNet`.

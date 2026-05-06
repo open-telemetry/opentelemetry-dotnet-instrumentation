@@ -35,7 +35,7 @@ internal sealed class AspNetMetricsInitializer
 
         if (metricsOptionsPropertyInfo?.GetValue(instance) is OpenTelemetry.Instrumentation.AspNet.AspNetMetricsInstrumentationOptions options)
         {
-            _pluginManager.ConfigureTracesOptions(options);
+            _pluginManager.ConfigureMetricsOptions(options);
         }
 
         var handleManagerType = Type.GetType("OpenTelemetry.Instrumentation.InstrumentationHandleManager, OpenTelemetry.Instrumentation.AspNet");

@@ -2,11 +2,13 @@
 // SPDX-License-Identifier: Apache-2.0
 
 using OpenTelemetry.AutoInstrumentation.Configurations.FileBasedConfiguration.Parser;
+using OpenTelemetry.AutoInstrumentation.Tests.Util;
 using Xunit;
 using YamlParser = Vendors.YamlDotNet.Core.Parser;
 
 namespace OpenTelemetry.AutoInstrumentation.Tests.Configurations.FileBased.Parser;
 
+[Collection("Non-Parallel Collection")]
 public class EnvVarTypeConverterTests
 {
     private readonly EnvVarTypeConverter _converter = new();
@@ -14,21 +16,17 @@ public class EnvVarTypeConverterTests
     [Fact]
     public void ReadYaml_StringWithEnvVar_ReplacesCorrectly()
     {
-        try
+        using var envScope = new EnvironmentScope(new Dictionary<string, string?>()
         {
-            Environment.SetEnvironmentVariable("YAMLPARSER_TESTS_TEST_ENV", "HelloWorld");
+            { "YAMLPARSER_TESTS_TEST_ENV", "HelloWorld" }
+        });
 
-            var parser = new YamlParser(new StringReader("${YAMLPARSER_TESTS_TEST_ENV}"));
-            FileBasedTestHelper.MoveParserToScalar(parser);
+        var parser = new YamlParser(new StringReader("${YAMLPARSER_TESTS_TEST_ENV}"));
+        FileBasedTestHelper.MoveParserToScalar(parser);
 
-            var result = _converter.ReadYaml(parser, typeof(string), _ => null);
+        var result = _converter.ReadYaml(parser, typeof(string), _ => null);
 
-            Assert.Equal("HelloWorld", result);
-        }
-        finally
-        {
-            Environment.SetEnvironmentVariable("YAMLPARSER_TESTS_TEST_ENV", null);
-        }
+        Assert.Equal("HelloWorld", result);
     }
 
     [Fact]
@@ -45,21 +43,17 @@ public class EnvVarTypeConverterTests
     [Fact]
     public void ReadYaml_WithEnvVarPresent_IgnoresFallback()
     {
-        try
+        using var envScope = new EnvironmentScope(new Dictionary<string, string?>()
         {
-            Environment.SetEnvironmentVariable("YAMLPARSER_TESTS_MY_ENV", "RealValue");
+            { "YAMLPARSER_TESTS_MY_ENV", "RealValue" }
+        });
 
-            var parser = new YamlParser(new StringReader("${YAMLPARSER_TESTS_MY_ENV:-FallbackValue}"));
-            FileBasedTestHelper.MoveParserToScalar(parser);
+        var parser = new YamlParser(new StringReader("${YAMLPARSER_TESTS_MY_ENV:-FallbackValue}"));
+        FileBasedTestHelper.MoveParserToScalar(parser);
 
-            var result = _converter.ReadYaml(parser, typeof(string), _ => null);
+        var result = _converter.ReadYaml(parser, typeof(string), _ => null);
 
-            Assert.Equal("RealValue", result);
-        }
-        finally
-        {
-            Environment.SetEnvironmentVariable("YAMLPARSER_TESTS_MY_ENV", null);
-        }
+        Assert.Equal("RealValue", result);
     }
 
     [Fact]

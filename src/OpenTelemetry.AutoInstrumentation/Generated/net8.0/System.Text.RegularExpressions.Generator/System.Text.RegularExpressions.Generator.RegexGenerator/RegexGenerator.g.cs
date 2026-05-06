@@ -25,7 +25,7 @@ namespace OpenTelemetry.AutoInstrumentation.Configurations.FileBasedConfiguratio
         /// ○ Match '}'.<br/>
         /// </code>
         /// </remarks>
-        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Text.RegularExpressions.Generator", "8.0.14.11203")]
+        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Text.RegularExpressions.Generator", "8.0.14.16921")]
         private static partial global::System.Text.RegularExpressions.Regex GetEnvVarRegex() => global::System.Text.RegularExpressions.Generated.GetEnvVarRegex_0.Instance;
     }
 }
@@ -36,37 +36,37 @@ namespace OpenTelemetry.Instrumentation
     {
         /// <remarks>
         /// Pattern:<br/>
-        /// <code>^([^[]*\\s*:\\s*\\\\{0,2})?(.*?)\\s*(?:[\\\\,]|$)\\s*(.*?)\\s*(?:,|$)\\s*(.*)$</code><br/>
+        /// <code>^(?&lt;protocol&gt;[^[]*\\s*:\\s*\\\\{0,2})?(?&lt;host&gt;.*?)\\s*(?:[\\\\,]|$)\\s*(?&lt;nameOrPort&gt;.*?)\\s*(?:,|$)\\s*(?&lt;port&gt;.*)$</code><br/>
         /// Explanation:<br/>
         /// <code>
         /// ○ Match if at the beginning of the string.<br/>
         /// ○ Optional (greedy).<br/>
-        ///     ○ 1st capture group.<br/>
+        ///     ○ "protocol" capture group.<br/>
         ///         ○ Match a character other than '[' greedily any number of times.<br/>
         ///         ○ Match a whitespace character atomically any number of times.<br/>
         ///         ○ Match ':'.<br/>
         ///         ○ Match a whitespace character greedily any number of times.<br/>
         ///         ○ Match '\\' greedily at most 2 times.<br/>
-        /// ○ 2nd capture group.<br/>
+        /// ○ "host" capture group.<br/>
         ///     ○ Match a character other than '\n' lazily any number of times.<br/>
         /// ○ Match a whitespace character greedily any number of times.<br/>
         /// ○ Match with 2 alternative expressions.<br/>
         ///     ○ Match a character in the set [,\\].<br/>
         ///     ○ Match if at the end of the string or if before an ending newline.<br/>
         /// ○ Match a whitespace character greedily any number of times.<br/>
-        /// ○ 3rd capture group.<br/>
+        /// ○ "nameOrPort" capture group.<br/>
         ///     ○ Match a character other than '\n' lazily any number of times.<br/>
         /// ○ Match a whitespace character greedily any number of times.<br/>
         /// ○ Match with 2 alternative expressions.<br/>
         ///     ○ Match ','.<br/>
         ///     ○ Match if at the end of the string or if before an ending newline.<br/>
         /// ○ Match a whitespace character greedily any number of times.<br/>
-        /// ○ 4th capture group.<br/>
+        /// ○ "port" capture group.<br/>
         ///     ○ Match a character other than '\n' greedily any number of times.<br/>
         /// ○ Match if at the end of the string or if before an ending newline.<br/>
         /// </code>
         /// </remarks>
-        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Text.RegularExpressions.Generator", "8.0.14.11203")]
+        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Text.RegularExpressions.Generator", "8.0.14.16921")]
         private static partial global::System.Text.RegularExpressions.Regex DataSourceRegex() => global::System.Text.RegularExpressions.Generated.DataSourceRegex_1.Instance;
     }
 }
@@ -77,16 +77,16 @@ namespace OpenTelemetry.Instrumentation
     {
         /// <remarks>
         /// Pattern:<br/>
-        /// <code>pipe\\\\MSSQL\\$(.*?)\\\\</code><br/>
+        /// <code>pipe\\\\MSSQL\\$(?&lt;instanceName&gt;.*?)\\\\</code><br/>
         /// Explanation:<br/>
         /// <code>
         /// ○ Match the string "pipe\\MSSQL$".<br/>
-        /// ○ 1st capture group.<br/>
+        /// ○ "instanceName" capture group.<br/>
         ///     ○ Match a character other than '\n' lazily any number of times.<br/>
         /// ○ Match '\\'.<br/>
         /// </code>
         /// </remarks>
-        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Text.RegularExpressions.Generator", "8.0.14.11203")]
+        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Text.RegularExpressions.Generator", "8.0.14.16921")]
         private static partial global::System.Text.RegularExpressions.Regex NamedPipeRegex() => global::System.Text.RegularExpressions.Generated.NamedPipeRegex_2.Instance;
     }
 }
@@ -104,7 +104,7 @@ namespace System.Text.RegularExpressions.Generated
     using System.Threading;
 
     /// <summary>Custom <see cref="Regex"/>-derived type for the GetEnvVarRegex method.</summary>
-    [GeneratedCodeAttribute("System.Text.RegularExpressions.Generator", "8.0.14.11203")]
+    [GeneratedCodeAttribute("System.Text.RegularExpressions.Generator", "8.0.14.16921")]
     file sealed class GetEnvVarRegex_0 : Regex
     {
         /// <summary>Cached, thread-safe singleton instance.</summary>
@@ -385,7 +385,7 @@ namespace System.Text.RegularExpressions.Generated
     }
     
     /// <summary>Custom <see cref="Regex"/>-derived type for the DataSourceRegex method.</summary>
-    [GeneratedCodeAttribute("System.Text.RegularExpressions.Generator", "8.0.14.11203")]
+    [GeneratedCodeAttribute("System.Text.RegularExpressions.Generator", "8.0.14.16921")]
     file sealed class DataSourceRegex_1 : Regex
     {
         /// <summary>Cached, thread-safe singleton instance.</summary>
@@ -394,11 +394,12 @@ namespace System.Text.RegularExpressions.Generated
         /// <summary>Initializes the instance.</summary>
         private DataSourceRegex_1()
         {
-            base.pattern = "^([^[]*\\s*:\\s*\\\\{0,2})?(.*?)\\s*(?:[\\\\,]|$)\\s*(.*?)\\s*(?:,|$)\\s*(.*)$";
+            base.pattern = "^(?<protocol>[^[]*\\s*:\\s*\\\\{0,2})?(?<host>.*?)\\s*(?:[\\\\,]|$)\\s*(?<nameOrPort>.*?)\\s*(?:,|$)\\s*(?<port>.*)$";
             base.roptions = RegexOptions.None;
-            ValidateMatchTimeout(Utilities.s_defaultTimeout);
-            base.internalMatchTimeout = Utilities.s_defaultTimeout;
+            base.internalMatchTimeout = TimeSpan.FromMilliseconds(1000);
             base.factory = new RunnerFactory();
+            base.CapNames = new Hashtable { { "0", 0 } ,  { "host", 2 } ,  { "nameOrPort", 3 } ,  { "port", 4 } ,  { "protocol", 1 }  };
+            base.capslist = new string[] {"0", "protocol", "host", "nameOrPort", "port" };
             base.capsize = 5;
         }
             
@@ -494,7 +495,7 @@ namespace System.Text.RegularExpressions.Generated
                         
                         loop_iteration++;
                         
-                        // 1st capture group.
+                        // "protocol" capture group.
                         //{
                             int capture_starting_pos = pos;
                             
@@ -518,10 +519,7 @@ namespace System.Text.RegularExpressions.Generated
                                 UncaptureUntil(base.runstack![--stackpos]);
                                 Utilities.StackPop(base.runstack!, ref stackpos, out charloop_ending_pos, out charloop_starting_pos);
                                 
-                                if (Utilities.s_hasTimeout)
-                                {
-                                    base.CheckTimeout();
-                                }
+                                base.CheckTimeout();
                                 
                                 if (charloop_starting_pos >= charloop_ending_pos)
                                 {
@@ -574,10 +572,7 @@ namespace System.Text.RegularExpressions.Generated
                                 UncaptureUntil(base.runstack![--stackpos]);
                                 Utilities.StackPop(base.runstack!, ref stackpos, out charloop_ending_pos1, out charloop_starting_pos1);
                                 
-                                if (Utilities.s_hasTimeout)
-                                {
-                                    base.CheckTimeout();
-                                }
+                                base.CheckTimeout();
                                 
                                 if (charloop_starting_pos1 >= charloop_ending_pos1)
                                 {
@@ -610,10 +605,7 @@ namespace System.Text.RegularExpressions.Generated
                                 UncaptureUntil(base.runstack![--stackpos]);
                                 Utilities.StackPop(base.runstack!, ref stackpos, out charloop_ending_pos2, out charloop_starting_pos2);
                                 
-                                if (Utilities.s_hasTimeout)
-                                {
-                                    base.CheckTimeout();
-                                }
+                                base.CheckTimeout();
                                 
                                 if (charloop_starting_pos2 >= charloop_ending_pos2)
                                 {
@@ -660,10 +652,7 @@ namespace System.Text.RegularExpressions.Generated
                         goto LoopEnd;
                         
                         LoopBacktrack:
-                        if (Utilities.s_hasTimeout)
-                        {
-                            base.CheckTimeout();
-                        }
+                        base.CheckTimeout();
                         
                         if (loop_iteration == 0)
                         {
@@ -675,7 +664,7 @@ namespace System.Text.RegularExpressions.Generated
                         LoopEnd:;
                     //}
                     
-                    // 2nd capture group.
+                    // "host" capture group.
                     //{
                         capture_starting_pos1 = pos;
                         
@@ -686,10 +675,7 @@ namespace System.Text.RegularExpressions.Generated
                             
                             LazyLoopBacktrack:
                             UncaptureUntil(lazyloop_capturepos);
-                            if (Utilities.s_hasTimeout)
-                            {
-                                base.CheckTimeout();
-                            }
+                            base.CheckTimeout();
                             
                             pos = lazyloop_pos;
                             slice = inputSpan.Slice(pos);
@@ -734,10 +720,7 @@ namespace System.Text.RegularExpressions.Generated
                         CharLoopBacktrack3:
                         UncaptureUntil(charloop_capture_pos);
                         
-                        if (Utilities.s_hasTimeout)
-                        {
-                            base.CheckTimeout();
-                        }
+                        base.CheckTimeout();
                         
                         if (charloop_starting_pos3 >= charloop_ending_pos3)
                         {
@@ -787,10 +770,7 @@ namespace System.Text.RegularExpressions.Generated
                         //}
                         
                         AlternationBacktrack:
-                        if (Utilities.s_hasTimeout)
-                        {
-                            base.CheckTimeout();
-                        }
+                        base.CheckTimeout();
                         
                         switch (alternation_branch)
                         {
@@ -822,10 +802,7 @@ namespace System.Text.RegularExpressions.Generated
                         CharLoopBacktrack4:
                         UncaptureUntil(charloop_capture_pos1);
                         
-                        if (Utilities.s_hasTimeout)
-                        {
-                            base.CheckTimeout();
-                        }
+                        base.CheckTimeout();
                         
                         if (charloop_starting_pos4 >= charloop_ending_pos4)
                         {
@@ -838,7 +815,7 @@ namespace System.Text.RegularExpressions.Generated
                         charloop_capture_pos1 = base.Crawlpos();
                     //}
                     
-                    // 3rd capture group.
+                    // "nameOrPort" capture group.
                     //{
                         capture_starting_pos2 = pos;
                         
@@ -849,10 +826,7 @@ namespace System.Text.RegularExpressions.Generated
                             
                             LazyLoopBacktrack1:
                             UncaptureUntil(lazyloop_capturepos1);
-                            if (Utilities.s_hasTimeout)
-                            {
-                                base.CheckTimeout();
-                            }
+                            base.CheckTimeout();
                             
                             pos = lazyloop_pos1;
                             slice = inputSpan.Slice(pos);
@@ -897,10 +871,7 @@ namespace System.Text.RegularExpressions.Generated
                         CharLoopBacktrack5:
                         UncaptureUntil(charloop_capture_pos2);
                         
-                        if (Utilities.s_hasTimeout)
-                        {
-                            base.CheckTimeout();
-                        }
+                        base.CheckTimeout();
                         
                         if (charloop_starting_pos5 >= charloop_ending_pos5)
                         {
@@ -950,10 +921,7 @@ namespace System.Text.RegularExpressions.Generated
                         //}
                         
                         AlternationBacktrack1:
-                        if (Utilities.s_hasTimeout)
-                        {
-                            base.CheckTimeout();
-                        }
+                        base.CheckTimeout();
                         
                         switch (alternation_branch1)
                         {
@@ -985,10 +953,7 @@ namespace System.Text.RegularExpressions.Generated
                         CharLoopBacktrack6:
                         UncaptureUntil(charloop_capture_pos3);
                         
-                        if (Utilities.s_hasTimeout)
-                        {
-                            base.CheckTimeout();
-                        }
+                        base.CheckTimeout();
                         
                         if (charloop_starting_pos6 >= charloop_ending_pos6)
                         {
@@ -1001,7 +966,7 @@ namespace System.Text.RegularExpressions.Generated
                         charloop_capture_pos3 = base.Crawlpos();
                     //}
                     
-                    // 4th capture group.
+                    // "port" capture group.
                     //{
                         capture_starting_pos3 = pos;
                         
@@ -1024,10 +989,7 @@ namespace System.Text.RegularExpressions.Generated
                             CharLoopBacktrack7:
                             UncaptureUntil(charloop_capture_pos4);
                             
-                            if (Utilities.s_hasTimeout)
-                            {
-                                base.CheckTimeout();
-                            }
+                            base.CheckTimeout();
                             
                             if (charloop_starting_pos7 >= charloop_ending_pos7)
                             {
@@ -1077,7 +1039,7 @@ namespace System.Text.RegularExpressions.Generated
     }
     
     /// <summary>Custom <see cref="Regex"/>-derived type for the NamedPipeRegex method.</summary>
-    [GeneratedCodeAttribute("System.Text.RegularExpressions.Generator", "8.0.14.11203")]
+    [GeneratedCodeAttribute("System.Text.RegularExpressions.Generator", "8.0.14.16921")]
     file sealed class NamedPipeRegex_2 : Regex
     {
         /// <summary>Cached, thread-safe singleton instance.</summary>
@@ -1086,11 +1048,12 @@ namespace System.Text.RegularExpressions.Generated
         /// <summary>Initializes the instance.</summary>
         private NamedPipeRegex_2()
         {
-            base.pattern = "pipe\\\\MSSQL\\$(.*?)\\\\";
+            base.pattern = "pipe\\\\MSSQL\\$(?<instanceName>.*?)\\\\";
             base.roptions = RegexOptions.None;
-            ValidateMatchTimeout(Utilities.s_defaultTimeout);
-            base.internalMatchTimeout = Utilities.s_defaultTimeout;
+            base.internalMatchTimeout = TimeSpan.FromMilliseconds(1000);
             base.factory = new RunnerFactory();
+            base.CapNames = new Hashtable { { "0", 0 } ,  { "instanceName", 1 }  };
+            base.capslist = new string[] {"0", "instanceName" };
             base.capsize = 2;
         }
             
@@ -1113,10 +1076,7 @@ namespace System.Text.RegularExpressions.Generated
                            base.runtextpos != inputSpan.Length)
                     {
                         base.runtextpos++;
-                        if (Utilities.s_hasTimeout)
-                        {
-                            base.CheckTimeout();
-                        }
+                        base.CheckTimeout();
                     }
                 }
         
@@ -1164,7 +1124,7 @@ namespace System.Text.RegularExpressions.Generated
                         return false; // The input didn't match.
                     }
                     
-                    // 1st capture group.
+                    // "instanceName" capture group.
                     //{
                         pos += 11;
                         slice = inputSpan.Slice(pos);
@@ -1177,10 +1137,7 @@ namespace System.Text.RegularExpressions.Generated
                             
                             LazyLoopBacktrack:
                             UncaptureUntil(lazyloop_capturepos);
-                            if (Utilities.s_hasTimeout)
-                            {
-                                base.CheckTimeout();
-                            }
+                            base.CheckTimeout();
                             
                             pos = lazyloop_pos;
                             slice = inputSpan.Slice(pos);
@@ -1243,7 +1200,7 @@ namespace System.Text.RegularExpressions.Generated
     }
     
     /// <summary>Helper methods used by generated <see cref="Regex"/>-derived implementations.</summary>
-    [GeneratedCodeAttribute("System.Text.RegularExpressions.Generator", "8.0.14.11203")]
+    [GeneratedCodeAttribute("System.Text.RegularExpressions.Generator", "8.0.14.16921")]
     file static class Utilities
     {
         /// <summary>Default timeout value set in <see cref="AppContext"/>, or <see cref="Regex.InfiniteMatchTimeout"/> if none was set.</summary>
