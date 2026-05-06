@@ -4,13 +4,16 @@
 using System.Collections.Specialized;
 using System.Globalization;
 using System.Reflection;
-using SystemConfigurationManager = System.Configuration.ConfigurationManager;
 using OpenTelemetry.AutoInstrumentation.Configurations;
 using OpenTelemetry.AutoInstrumentation.Tests.Util;
 using OpenTelemetry.Exporter;
 using Xunit;
 
 using AutoOtlpDefinitions = OpenTelemetry.AutoInstrumentation.Configurations.Otlp.OtlpSpecConfigDefinitions;
+
+#if NETFRAMEWORK
+using SystemConfigurationManager = System.Configuration.ConfigurationManager;
+#endif
 
 namespace OpenTelemetry.AutoInstrumentation.Tests.Configurations;
 
