@@ -49,7 +49,7 @@ public class DomainNeutralTests : TestHelper
         SetExporter(collector);
         collector.Expect("ByteCode.Plugin.StrongNamedValidation");
 
-        SetEnvironmentVariable("OTEL_DOTNET_AUTO_CALLTARGET_TRAMPOLINE_ENABLED", "true");
+        SetEnvironmentVariable("OTEL_DOTNET_AUTO_TRAMPOLINE_ENABLED", "true");
         SetEnvironmentVariable("OTEL_DOTNET_AUTO_TRACES_ADDITIONAL_SOURCES", "ByteCode.Plugin.StrongNamedValidation");
         SetEnvironmentVariable("OTEL_DOTNET_AUTO_PLUGINS", "TestLibrary.InstrumentationTarget.Plugin, TestLibrary.InstrumentationTarget, Version=1.0.0.0, Culture=neutral, PublicKeyToken=c0db600a13f60b51");
         RunTestApplication();

@@ -70,7 +70,7 @@ const WSTRING assembly_redirection_enabled = WStr("OTEL_DOTNET_AUTO_REDIRECT_ENA
 const WSTRING assembly_redirection_enabled_netfx_legacy = WStr("OTEL_DOTNET_AUTO_NETFX_REDIRECT_ENABLED");
 
 // Enables the .NET Framework CallTarget trampoline rewrite mode.
-const WSTRING calltarget_trampoline_enabled = WStr("OTEL_DOTNET_AUTO_CALLTARGET_TRAMPOLINE_ENABLED");
+const WSTRING calltarget_trampoline_enabled = WStr("OTEL_DOTNET_AUTO_TRAMPOLINE_ENABLED");
 
 // Enable the fail fast mode.
 const WSTRING fail_fast_enabled = WStr("OTEL_DOTNET_AUTO_FAIL_FAST_ENABLED");
