@@ -687,7 +687,10 @@ public sealed class SettingsTests
     internal void FromDefaultSources_NonResourceSettingsStillPreferEnvironmentVariablesOverAppSettings()
     {
         using var overrideScope = OverrideAppSettings((ConfigurationKeys.Traces.Exporter, "zipkin"));
-        Environment.SetEnvironmentVariable(ConfigurationKeys.Traces.Exporter, "console");
+        using var envScope = new EnvironmentScope(new Dictionary<string, string?>()
+        {
+            { ConfigurationKeys.Traces.Exporter, "console" }
+        });
 
         var settings = Settings.FromDefaultSources<TracerSettings>(false);
 
@@ -700,8 +703,11 @@ public sealed class SettingsTests
         using var overrideScope = OverrideAppSettings(
             (ConfigurationKeys.ResourceAttributes, "deployment.environment=staging"),
             (ConfigurationKeys.ServiceName, "app-settings-service"));
-        Environment.SetEnvironmentVariable(ConfigurationKeys.ResourceAttributes, "deployment.environment=prod,service.namespace=checkout");
-        Environment.SetEnvironmentVariable(ConfigurationKeys.ServiceName, "env-service");
+        using var envScope = new EnvironmentScope(new Dictionary<string, string?>()
+        {
+            { ConfigurationKeys.ResourceAttributes, "deployment.environment=prod,service.namespace=checkout" },
+            { ConfigurationKeys.ServiceName, "env-service" }
+        });
 
         var settings = Settings.FromDefaultSources<ResourceSettings>(false);
         var resources = settings.Resources.ToDictionary(kv => kv.Key, kv => kv.Value);
