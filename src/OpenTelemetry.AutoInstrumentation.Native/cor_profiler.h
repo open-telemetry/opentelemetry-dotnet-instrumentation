@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Copyright The OpenTelemetry Authors
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -121,7 +121,6 @@ private:
                                mdTypeDef*     loader_type,
                                mdMethodDef*   init_method,
                                mdMethodDef*   patch_app_domain_setup_method);
-    HRESULT GenerateCallTargetTrampolineType(const ModuleID module_id);
     HRESULT ModifyAppDomainCreate(const ModuleID module_id, mdMethodDef patch_app_domain_setup_method);
     HRESULT AddIISPreStartInitFlags(const ModuleID module_id, const mdToken function_token);
 #endif
