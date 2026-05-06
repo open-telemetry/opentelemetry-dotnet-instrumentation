@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: Apache-2.0
 
 using System;
-using System.Collections.Concurrent;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Linq;
@@ -22,10 +21,25 @@ internal static class CallTargetTrampolineInvoker
 {
     private const string IndexerTypeFullName = "__OTelCallTargetIndexer`1";
 
-    private static readonly MethodInfo CopyStateToTrampolineMethod = typeof(CallTargetTrampolineInvoker).GetMethod(nameof(CopyStateToTrampoline), BindingFlags.NonPublic | BindingFlags.Static)!;
-    private static readonly MethodInfo CopyStateFromTrampolineMethod = typeof(CallTargetTrampolineInvoker).GetMethod(nameof(CopyStateFromTrampoline), BindingFlags.NonPublic | BindingFlags.Static)!;
-    private static readonly MethodInfo CopyReturnToTrampolineMethod = typeof(CallTargetTrampolineInvoker).GetMethod(nameof(CopyReturnToTrampoline), BindingFlags.NonPublic | BindingFlags.Static)!;
-    private static readonly ConcurrentDictionary<Type, StateFields> StateFieldCache = new();
+    private static readonly ConstructorInfo CallTargetStateConstructor = typeof(CallTargetState).GetConstructor([typeof(Activity), typeof(object), typeof(DateTimeOffset?)])!;
+
+    private static readonly ConstructorInfo CallTargetStateWithPreviousActivityConstructor = typeof(CallTargetState).GetConstructor(
+        BindingFlags.Instance | BindingFlags.NonPublic,
+        binder: null,
+        types: [typeof(Activity), typeof(CallTargetState)],
+        modifiers: null)!;
+
+    private static readonly ConstructorInfo NullableDateTimeOffsetConstructor = typeof(DateTimeOffset?).GetConstructor([typeof(DateTimeOffset)])!;
+
+    private static readonly MethodInfo CallTargetStatePreviousActivityGetter = typeof(CallTargetState).GetProperty(
+        nameof(CallTargetState.PreviousActivity),
+        BindingFlags.Instance | BindingFlags.NonPublic)!.GetGetMethod(nonPublic: true)!;
+
+    private static readonly MethodInfo CallTargetStateActivityGetter = typeof(CallTargetState).GetProperty(nameof(CallTargetState.Activity))!.GetGetMethod()!;
+
+    private static readonly MethodInfo CallTargetStateStateGetter = typeof(CallTargetState).GetProperty(nameof(CallTargetState.State))!.GetGetMethod()!;
+
+    private static readonly MethodInfo CallTargetStateStartTimeGetter = typeof(CallTargetState).GetProperty(nameof(CallTargetState.StartTime))!.GetGetMethod()!;
 
     private enum TrampolineDelegateKind
     {
@@ -145,6 +159,7 @@ internal static class CallTargetTrampolineInvoker
                          m.GetGenericArguments().Length == genericTypes.Length &&
                          m.GetParameters().Length == parameterTypes.Length)
             .MakeGenericMethod(genericTypes);
+        var stateFields = new StateFields(trampolineStateType);
 
         var dynamicMethod = new DynamicMethod(
             "OTelCallTargetTrampolineBegin",
@@ -159,10 +174,10 @@ internal static class CallTargetTrampolineInvoker
             il.EmitLdarg(i);
         }
 
+        var stateLocal = il.DeclareLocal(typeof(CallTargetState));
         il.Emit(OpCodes.Call, beginMethod);
-        EmitLoadType(il, trampolineStateType);
-        il.Emit(OpCodes.Call, CopyStateToTrampolineMethod);
-        il.Emit(OpCodes.Unbox_Any, trampolineStateType);
+        il.Emit(OpCodes.Stloc, stateLocal);
+        EmitLoadTrampolineState(il, trampolineStateType, stateFields, stateLocal);
         il.Emit(OpCodes.Ret);
         return dynamicMethod.CreateDelegate(delegateType);
     }
@@ -180,6 +195,10 @@ internal static class CallTargetTrampolineInvoker
                          m.IsGenericMethodDefinition &&
                          m.GetGenericArguments().Length == 3)
             .MakeGenericMethod(integrationType, targetType, returnType);
+        var stateFields = new StateFields(trampolineStateType);
+        var callTargetReturnType = typeof(CallTargetReturn<>).MakeGenericType(returnType);
+        var callTargetReturnGetValue = callTargetReturnType.GetMethod(nameof(CallTargetReturn<object>.GetReturnValue), BindingFlags.Instance | BindingFlags.Public)!;
+        var trampolineReturnConstructor = trampolineReturnType.GetConstructor([returnType])!;
 
         var dynamicMethod = new DynamicMethod(
             "OTelCallTargetTrampolineEnd",
@@ -190,11 +209,9 @@ internal static class CallTargetTrampolineInvoker
 
         var il = dynamicMethod.GetILGenerator();
         var stateLocal = il.DeclareLocal(typeof(CallTargetState));
+        var returnLocal = il.DeclareLocal(callTargetReturnType);
 
-        il.EmitLdarg(3);
-        il.Emit(OpCodes.Ldobj, trampolineStateType);
-        il.Emit(OpCodes.Box, trampolineStateType);
-        il.Emit(OpCodes.Call, CopyStateFromTrampolineMethod);
+        EmitLoadCallTargetState(il, stateFields, stateArgumentIndex: 3);
         il.Emit(OpCodes.Stloc, stateLocal);
 
         il.EmitLdarg(0);
@@ -202,9 +219,10 @@ internal static class CallTargetTrampolineInvoker
         il.EmitLdarg(2);
         il.Emit(OpCodes.Ldloca, stateLocal);
         il.Emit(OpCodes.Call, endMethod);
-        EmitLoadType(il, trampolineReturnType);
-        il.Emit(OpCodes.Call, CopyReturnToTrampolineMethod.MakeGenericMethod(returnType));
-        il.Emit(OpCodes.Unbox_Any, trampolineReturnType);
+        il.Emit(OpCodes.Stloc, returnLocal);
+        il.Emit(OpCodes.Ldloca, returnLocal);
+        il.Emit(OpCodes.Call, callTargetReturnGetValue);
+        il.Emit(OpCodes.Newobj, trampolineReturnConstructor);
         il.Emit(OpCodes.Ret);
         return dynamicMethod.CreateDelegate(delegateType);
     }
@@ -222,6 +240,7 @@ internal static class CallTargetTrampolineInvoker
                          m.IsGenericMethodDefinition &&
                          m.GetGenericArguments().Length == 2)
             .MakeGenericMethod(integrationType, targetType);
+        var stateFields = new StateFields(trampolineStateType);
 
         var dynamicMethod = new DynamicMethod(
             "OTelCallTargetTrampolineEndVoid",
@@ -234,10 +253,7 @@ internal static class CallTargetTrampolineInvoker
         var stateLocal = il.DeclareLocal(typeof(CallTargetState));
         var returnLocal = il.DeclareLocal(trampolineReturnType);
 
-        il.EmitLdarg(2);
-        il.Emit(OpCodes.Ldobj, trampolineStateType);
-        il.Emit(OpCodes.Box, trampolineStateType);
-        il.Emit(OpCodes.Call, CopyStateFromTrampolineMethod);
+        EmitLoadCallTargetState(il, stateFields, stateArgumentIndex: 2);
         il.Emit(OpCodes.Stloc, stateLocal);
 
         il.EmitLdarg(0);
@@ -313,39 +329,6 @@ internal static class CallTargetTrampolineInvoker
         return dynamicMethod.CreateDelegate(delegateType);
     }
 
-    private static object CopyStateToTrampoline(CallTargetState state, Type trampolineStateType)
-    {
-        var fields = StateFieldCache.GetOrAdd(trampolineStateType, static type => new StateFields(type));
-        var boxedState = Activator.CreateInstance(trampolineStateType)!;
-        fields.PreviousActivity.SetValue(boxedState, state.PreviousActivity);
-        fields.Activity.SetValue(boxedState, state.Activity);
-        fields.State.SetValue(boxedState, state.State);
-        fields.StartTime.SetValue(boxedState, state.StartTime);
-        return boxedState;
-    }
-
-    private static CallTargetState CopyStateFromTrampoline(object? boxedState)
-    {
-        if (boxedState is null)
-        {
-            return default;
-        }
-
-        var fields = StateFieldCache.GetOrAdd(boxedState.GetType(), static type => new StateFields(type));
-        var activity = fields.Activity.GetValue(boxedState) as Activity;
-        var customState = fields.State.GetValue(boxedState);
-        var startTimeValue = fields.StartTime.GetValue(boxedState);
-        var startTime = startTimeValue is DateTimeOffset dateTimeOffset ? dateTimeOffset : (DateTimeOffset?)null;
-        var callTargetState = new CallTargetState(activity, customState, startTime);
-        var previousActivity = fields.PreviousActivity.GetValue(boxedState) as Activity;
-        return previousActivity is null ? callTargetState : new CallTargetState(previousActivity, callTargetState);
-    }
-
-    private static object CopyReturnToTrampoline<TReturn>(CallTargetReturn<TReturn?> returnValue, Type trampolineReturnType)
-    {
-        return Activator.CreateInstance(trampolineReturnType, returnValue.GetReturnValue())!;
-    }
-
     private static Type ResolveIntegrationType(Type mapType)
     {
         var integrationIndex = GetIntegrationIndex(mapType);
@@ -379,10 +362,97 @@ internal static class CallTargetTrampolineInvoker
         return depth - 1;
     }
 
-    private static void EmitLoadType(ILGenerator il, Type type)
+    private static void EmitLoadTrampolineState(ILGenerator il, Type trampolineStateType, StateFields fields, LocalBuilder stateLocal)
     {
-        il.Emit(OpCodes.Ldtoken, type);
-        il.Emit(OpCodes.Call, typeof(Type).GetMethod(nameof(Type.GetTypeFromHandle))!);
+        var trampolineStateLocal = il.DeclareLocal(trampolineStateType);
+        il.Emit(OpCodes.Ldloca, trampolineStateLocal);
+        il.Emit(OpCodes.Initobj, trampolineStateType);
+
+        EmitStoreTrampolineStateField(il, trampolineStateLocal, stateLocal, fields.PreviousActivity, CallTargetStatePreviousActivityGetter);
+        EmitStoreTrampolineStateField(il, trampolineStateLocal, stateLocal, fields.Activity, CallTargetStateActivityGetter);
+        EmitStoreTrampolineStateField(il, trampolineStateLocal, stateLocal, fields.State, CallTargetStateStateGetter);
+        EmitStoreTrampolineStateField(il, trampolineStateLocal, stateLocal, fields.StartTime, CallTargetStateStartTimeGetter);
+
+        il.Emit(OpCodes.Ldloc, trampolineStateLocal);
+    }
+
+    private static void EmitStoreTrampolineStateField(
+        ILGenerator il,
+        LocalBuilder trampolineStateLocal,
+        LocalBuilder stateLocal,
+        FieldInfo field,
+        MethodInfo getter)
+    {
+        il.Emit(OpCodes.Ldloca, trampolineStateLocal);
+        il.Emit(OpCodes.Ldloca, stateLocal);
+        il.Emit(OpCodes.Call, getter);
+        if (getter.ReturnType.IsValueType)
+        {
+            il.Emit(OpCodes.Box, getter.ReturnType);
+        }
+
+        il.Emit(OpCodes.Stfld, field);
+    }
+
+    private static void EmitLoadCallTargetState(ILGenerator il, StateFields fields, int stateArgumentIndex)
+    {
+        var activityLocal = il.DeclareLocal(typeof(Activity));
+        var customStateLocal = il.DeclareLocal(typeof(object));
+        var startTimeLocal = il.DeclareLocal(typeof(DateTimeOffset?));
+        var boxedStartTimeLocal = il.DeclareLocal(typeof(object));
+        var callTargetStateLocal = il.DeclareLocal(typeof(CallTargetState));
+        var previousActivityLocal = il.DeclareLocal(typeof(Activity));
+
+        il.Emit(OpCodes.Ldloca, startTimeLocal);
+        il.Emit(OpCodes.Initobj, typeof(DateTimeOffset?));
+
+        EmitLoadTrampolineStateField(il, stateArgumentIndex, fields.Activity);
+        il.Emit(OpCodes.Isinst, typeof(Activity));
+        il.Emit(OpCodes.Stloc, activityLocal);
+
+        EmitLoadTrampolineStateField(il, stateArgumentIndex, fields.State);
+        il.Emit(OpCodes.Stloc, customStateLocal);
+
+        EmitLoadTrampolineStateField(il, stateArgumentIndex, fields.StartTime);
+        il.Emit(OpCodes.Isinst, typeof(DateTimeOffset));
+        il.Emit(OpCodes.Stloc, boxedStartTimeLocal);
+
+        var noStartTime = il.DefineLabel();
+        il.Emit(OpCodes.Ldloc, boxedStartTimeLocal);
+        il.Emit(OpCodes.Brfalse, noStartTime);
+        il.Emit(OpCodes.Ldloc, boxedStartTimeLocal);
+        il.Emit(OpCodes.Unbox_Any, typeof(DateTimeOffset));
+        il.Emit(OpCodes.Newobj, NullableDateTimeOffsetConstructor);
+        il.Emit(OpCodes.Stloc, startTimeLocal);
+        il.MarkLabel(noStartTime);
+
+        il.Emit(OpCodes.Ldloc, activityLocal);
+        il.Emit(OpCodes.Ldloc, customStateLocal);
+        il.Emit(OpCodes.Ldloc, startTimeLocal);
+        il.Emit(OpCodes.Newobj, CallTargetStateConstructor);
+        il.Emit(OpCodes.Stloc, callTargetStateLocal);
+
+        EmitLoadTrampolineStateField(il, stateArgumentIndex, fields.PreviousActivity);
+        il.Emit(OpCodes.Isinst, typeof(Activity));
+        il.Emit(OpCodes.Stloc, previousActivityLocal);
+
+        var noPreviousActivity = il.DefineLabel();
+        var done = il.DefineLabel();
+        il.Emit(OpCodes.Ldloc, previousActivityLocal);
+        il.Emit(OpCodes.Brfalse, noPreviousActivity);
+        il.Emit(OpCodes.Ldloc, previousActivityLocal);
+        il.Emit(OpCodes.Ldloc, callTargetStateLocal);
+        il.Emit(OpCodes.Newobj, CallTargetStateWithPreviousActivityConstructor);
+        il.Emit(OpCodes.Br, done);
+        il.MarkLabel(noPreviousActivity);
+        il.Emit(OpCodes.Ldloc, callTargetStateLocal);
+        il.MarkLabel(done);
+    }
+
+    private static void EmitLoadTrampolineStateField(ILGenerator il, int stateArgumentIndex, FieldInfo field)
+    {
+        il.EmitLdarg(stateArgumentIndex);
+        il.Emit(OpCodes.Ldfld, field);
     }
 
     private static void EmitLdarg(this ILGenerator il, int index)
