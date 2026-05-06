@@ -21,15 +21,11 @@ namespace trace
 
 namespace
 {
+const WSTRING calltarget_trampoline_type_name = WStr("__OTelCallTargetTrampoline__");
 const WSTRING calltarget_trampoline_indexer_type_name = WStr("__OTelCallTargetIndexer`1");
 const WSTRING calltarget_trampoline_state_type_name = WStr("__OTelCallTargetState__");
 const WSTRING calltarget_trampoline_return_type_name = WStr("__OTelCallTargetReturn__");
 const WSTRING calltarget_trampoline_return_generic_type_name = WStr("__OTelCallTargetReturn__`1");
-const WSTRING calltarget_trampoline_begin_type_name = WStr("__OTelCallTargetTrampolineBegin__");
-const WSTRING calltarget_trampoline_begin_slow_type_name = WStr("__OTelCallTargetTrampolineBeginSlow__`2");
-const WSTRING calltarget_trampoline_end_type_name = WStr("__OTelCallTargetTrampolineEnd__`3");
-const WSTRING calltarget_trampoline_end_void_type_name = WStr("__OTelCallTargetTrampolineEndVoid__`2");
-const WSTRING calltarget_trampoline_log_exception_type_name = WStr("__OTelCallTargetTrampolineLogException__`2");
 
 struct CallTargetTrampolineTokens
 {
@@ -40,11 +36,7 @@ struct CallTargetTrampolineTokens
     mdToken returnVoidType = mdTokenNil;
     mdToken returnGenericType = mdTokenNil;
     mdToken indexerType = mdTokenNil;
-    mdToken beginTypes[FASTPATH_COUNT]{};
-    mdToken beginSlowType = mdTokenNil;
-    mdToken endType = mdTokenNil;
-    mdToken endVoidType = mdTokenNil;
-    mdToken logExceptionType = mdTokenNil;
+    mdToken trampolineType = mdTokenNil;
     int integrationIndex = -1;
 };
 
@@ -99,15 +91,7 @@ HRESULT BuildCallTargetTrampolineTokens(ModuleMetadata&        moduleMetadata,
     IfFailRet(get_type(calltarget_trampoline_return_type_name.c_str(), &tokens.returnVoidType));
     IfFailRet(get_type(calltarget_trampoline_return_generic_type_name.c_str(), &tokens.returnGenericType));
     IfFailRet(get_type(calltarget_trampoline_indexer_type_name.c_str(), &tokens.indexerType));
-    for (int i = 0; i < FASTPATH_COUNT; i++)
-    {
-        const auto beginTypeName = calltarget_trampoline_begin_type_name + WStr("`") + ToWSTRING(i + 2);
-        IfFailRet(get_type(beginTypeName.c_str(), &tokens.beginTypes[i]));
-    }
-    IfFailRet(get_type(calltarget_trampoline_begin_slow_type_name.c_str(), &tokens.beginSlowType));
-    IfFailRet(get_type(calltarget_trampoline_end_type_name.c_str(), &tokens.endType));
-    IfFailRet(get_type(calltarget_trampoline_end_void_type_name.c_str(), &tokens.endVoidType));
-    IfFailRet(get_type(calltarget_trampoline_log_exception_type_name.c_str(), &tokens.logExceptionType));
+    IfFailRet(get_type(calltarget_trampoline_type_name.c_str(), &tokens.trampolineType));
 
     tokens.integrationIndex = trace::profiler->GetCallTargetTrampolineIntegrationIndex(*integrationDefinition);
 
@@ -142,6 +126,17 @@ void AppendTypeVariable(std::vector<COR_SIGNATURE>& signature, ULONG index, bool
     }
 
     signature.push_back(ELEMENT_TYPE_VAR);
+    AppendCompressedData(signature, index);
+}
+
+void AppendMethodVariable(std::vector<COR_SIGNATURE>& signature, ULONG index, bool byRef = false)
+{
+    if (byRef)
+    {
+        signature.push_back(ELEMENT_TYPE_BYREF);
+    }
+
+    signature.push_back(ELEMENT_TYPE_MVAR);
     AppendCompressedData(signature, index);
 }
 
@@ -213,11 +208,9 @@ HRESULT GetTypeSpecFromSignature(ModuleMetadata& moduleMetadata,
                                                              typeSpec);
 }
 
-HRESULT BuildGenericHolderTypeSpec(ModuleMetadata& moduleMetadata,
-                                   mdToken openGenericType,
-                                   bool isValueType,
-                                   const std::vector<std::vector<COR_SIGNATURE>>& genericArguments,
-                                   mdTypeSpec* typeSpec)
+std::vector<COR_SIGNATURE> BuildGenericInstanceSignature(mdToken openGenericType,
+                                                         bool isValueType,
+                                                         const std::vector<std::vector<COR_SIGNATURE>>& genericArguments)
 {
     std::vector<COR_SIGNATURE> signature;
     signature.push_back(ELEMENT_TYPE_GENERICINST);
@@ -228,7 +221,32 @@ HRESULT BuildGenericHolderTypeSpec(ModuleMetadata& moduleMetadata,
         signature.insert(signature.end(), argument.begin(), argument.end());
     }
 
-    return GetTypeSpecFromSignature(moduleMetadata, signature, typeSpec);
+    return signature;
+}
+
+HRESULT BuildGenericMethodSpec(ModuleMetadata& moduleMetadata,
+                               mdMemberRef methodRef,
+                               const std::vector<std::vector<COR_SIGNATURE>>& genericArguments,
+                               mdMethodSpec* methodSpec)
+{
+    std::vector<COR_SIGNATURE> signature;
+    signature.push_back(IMAGE_CEE_CS_CALLCONV_GENERICINST);
+    AppendCompressedData(signature, static_cast<ULONG>(genericArguments.size()));
+    for (const auto& argument : genericArguments)
+    {
+        signature.insert(signature.end(), argument.begin(), argument.end());
+    }
+
+    return moduleMetadata.metadata_emit->DefineMethodSpec(methodRef, signature.data(),
+                                                          static_cast<ULONG>(signature.size()), methodSpec);
+}
+
+HRESULT BuildTrampolineReturnSignature(const CallTargetTrampolineTokens& tokens,
+                                       const std::vector<COR_SIGNATURE>& returnSignature,
+                                       std::vector<COR_SIGNATURE>& returnVesselSignature)
+{
+    returnVesselSignature = BuildGenericInstanceSignature(tokens.returnGenericType, true, {returnSignature});
+    return S_OK;
 }
 
 HRESULT BuildCallTargetReturnTypeSpec(ModuleMetadata& moduleMetadata,
@@ -236,11 +254,9 @@ HRESULT BuildCallTargetReturnTypeSpec(ModuleMetadata& moduleMetadata,
                                       const std::vector<COR_SIGNATURE>& returnSignature,
                                       mdTypeSpec* returnTypeSpec)
 {
+    HRESULT hr = S_OK;
     std::vector<COR_SIGNATURE> signature;
-    signature.push_back(ELEMENT_TYPE_GENERICINST);
-    AppendTypeToken(signature, tokens.returnGenericType, true);
-    AppendCompressedData(signature, 1);
-    signature.insert(signature.end(), returnSignature.begin(), returnSignature.end());
+    IfFailRet(BuildTrampolineReturnSignature(tokens, returnSignature, signature));
     return GetTypeSpecFromSignature(moduleMetadata, signature, returnTypeSpec);
 }
 
@@ -387,20 +403,24 @@ HRESULT ModifyLocalSigAndInitializeForTrampoline(ILRewriterWrapper&            r
     return S_OK;
 }
 
-// Emits the instance argument for the generated generic trampoline methods:
+// Emits the instance argument for CallTarget methods:
 //
 // TTarget instance = isStatic ? default : this;
 //
 // Value-type instances are loaded from the by-ref this pointer and passed as TTarget,
 // matching the direct CallTarget stack shape.
-bool LoadInstanceForTrampoline(ILRewriterWrapper& reWriterWrapper, FunctionInfo* caller, bool isStatic, ILInstr** firstInstruction)
+bool LoadInstanceForCallTarget(ILRewriterWrapper& reWriterWrapper,
+                               FunctionInfo* caller,
+                               bool isStatic,
+                               const char* operationName,
+                               ILInstr** firstInstruction)
 {
     if (isStatic)
     {
         if (caller->type.valueType)
         {
-            Logger::Warn("*** CallTarget_Trampoline_RewriterCallback(): Static methods in a ValueType cannot be "
-                         "instrumented. ");
+            Logger::Warn("*** ", operationName,
+                         "(): Static methods in a ValueType cannot be instrumented. ");
             return false;
         }
 
@@ -422,8 +442,7 @@ bool LoadInstanceForTrampoline(ILRewriterWrapper& reWriterWrapper, FunctionInfo*
         }
         else
         {
-            Logger::Warn("*** CallTarget_Trampoline_RewriterCallback(): Generic struct instrumentation is not "
-                         "supported. ");
+            Logger::Warn("*** ", operationName, "(): Generic struct instrumentation is not supported. ");
             return false;
         }
 
@@ -433,15 +452,45 @@ bool LoadInstanceForTrampoline(ILRewriterWrapper& reWriterWrapper, FunctionInfo*
     return true;
 }
 
+void BuildGenericMethodSignature(std::vector<COR_SIGNATURE>& signature,
+                                 ULONG genericArgumentCount,
+                                 ULONG parameterCount,
+                                 const std::vector<COR_SIGNATURE>& returnSignature)
+{
+    signature.push_back(IMAGE_CEE_CS_CALLCONV_GENERIC);
+    AppendCompressedData(signature, genericArgumentCount);
+    AppendCompressedData(signature, parameterCount);
+    signature.insert(signature.end(), returnSignature.begin(), returnSignature.end());
+}
+
+HRESULT WriteTrampolineMethodSpecCall(ILRewriterWrapper&                            reWriterWrapper,
+                                      ModuleMetadata&                               moduleMetadata,
+                                      CallTargetTrampolineTokens&                   tokens,
+                                      const WSTRING&                                methodName,
+                                      const std::vector<COR_SIGNATURE>&             memberSignature,
+                                      const std::vector<std::vector<COR_SIGNATURE>>& genericArguments,
+                                      ILInstr**                                     instruction)
+{
+    HRESULT hr = S_OK;
+    mdMemberRef methodRef = mdMemberRefNil;
+    IfFailRet(moduleMetadata.metadata_emit->DefineMemberRef(tokens.trampolineType, methodName.c_str(),
+                                                            memberSignature.data(),
+                                                            static_cast<ULONG>(memberSignature.size()), &methodRef));
+
+    mdMethodSpec methodSpec = mdMethodSpecNil;
+    IfFailRet(BuildGenericMethodSpec(moduleMetadata, methodRef, genericArguments, &methodSpec));
+    *instruction = reWriterWrapper.CallMember(methodSpec, false);
+    return S_OK;
+}
+
 // Emits a call equivalent to:
 //
-// __OTelCallTargetTrampolineBegin__<TMapIntegration, TTarget, ...TArgs>
-//     .BeginMethod(instance, ref arg1, ..., ref argN)
+// __OTelCallTargetTrampoline__.BeginMethod<TMapIntegration, TTarget, ...TArgs>(
+//     instance, ref arg1, ..., ref argN)
 //
 // or, for the slow path:
 //
-// __OTelCallTargetTrampolineBeginSlow__<TMapIntegration, TTarget>
-//     .BeginMethod(instance, args)
+// __OTelCallTargetTrampoline__.BeginMethod<TMapIntegration, TTarget>(instance, args)
 HRESULT WriteTrampolineBeginMethod(ILRewriterWrapper&                  reWriterWrapper,
                                    ModuleMetadata&                     moduleMetadata,
                                    CallTargetTrampolineTokens&         tokens,
@@ -452,64 +501,51 @@ HRESULT WriteTrampolineBeginMethod(ILRewriterWrapper&                  reWriterW
     HRESULT hr = S_OK;
     const auto numArguments = static_cast<int>(methodArguments.size());
     const bool slowPath = numArguments >= FASTPATH_COUNT;
-    mdTypeSpec holderTypeSpec = mdTypeSpecNil;
     auto mapSignature = BuildIndexerMapSignature(tokens);
     auto targetSignature = GetCurrentTypeSignature(currentType, tokens);
 
     if (slowPath)
     {
-        IfFailRet(BuildGenericHolderTypeSpec(moduleMetadata, tokens.beginSlowType, false,
-                                             {mapSignature, targetSignature}, &holderTypeSpec));
-
         std::vector<COR_SIGNATURE> signature;
-        signature.push_back(IMAGE_CEE_CS_CALLCONV_DEFAULT);
-        AppendCompressedData(signature, 2);
-        AppendTypeToken(signature, tokens.stateType, true);
-        AppendTypeVariable(signature, 1);
+        std::vector<COR_SIGNATURE> stateSignature;
+        AppendTypeToken(stateSignature, tokens.stateType, true);
+        BuildGenericMethodSignature(signature, 2, 2, stateSignature);
+        AppendMethodVariable(signature, 1);
         signature.push_back(ELEMENT_TYPE_SZARRAY);
         signature.push_back(ELEMENT_TYPE_OBJECT);
 
-        mdMemberRef beginMethodRef = mdMemberRefNil;
-        IfFailRet(moduleMetadata.metadata_emit->DefineMemberRef(holderTypeSpec, WStr("BeginMethod"), signature.data(),
-                                                                static_cast<ULONG>(signature.size()),
-                                                                &beginMethodRef));
-        *instruction = reWriterWrapper.CallMember(beginMethodRef, false);
-        return S_OK;
+        return WriteTrampolineMethodSpecCall(reWriterWrapper, moduleMetadata, tokens, WStr("BeginMethod"), signature,
+                                             {mapSignature, targetSignature}, instruction);
     }
 
-    std::vector<std::vector<COR_SIGNATURE>> holderArgs{mapSignature, targetSignature};
+    std::vector<std::vector<COR_SIGNATURE>> genericArguments{mapSignature, targetSignature};
     for (const auto& methodArgument : methodArguments)
     {
         std::vector<COR_SIGNATURE> argumentSignature;
         const auto [elementType, argTypeFlags] = methodArgument.GetElementTypeAndFlags();
         AppendTypeSignature(argumentSignature, methodArgument, (argTypeFlags & TypeFlagByRef) > 0);
-        holderArgs.push_back(argumentSignature);
+        genericArguments.push_back(argumentSignature);
     }
-
-    IfFailRet(BuildGenericHolderTypeSpec(moduleMetadata, tokens.beginTypes[numArguments], false, holderArgs,
-                                         &holderTypeSpec));
 
     std::vector<COR_SIGNATURE> signature;
-    signature.push_back(IMAGE_CEE_CS_CALLCONV_DEFAULT);
-    AppendCompressedData(signature, static_cast<ULONG>(1 + numArguments));
-    AppendTypeToken(signature, tokens.stateType, true);
-    AppendTypeVariable(signature, 1);
+    std::vector<COR_SIGNATURE> stateSignature;
+    AppendTypeToken(stateSignature, tokens.stateType, true);
+    BuildGenericMethodSignature(signature, static_cast<ULONG>(2 + numArguments), static_cast<ULONG>(1 + numArguments),
+                                stateSignature);
+    AppendMethodVariable(signature, 1);
     for (int i = 0; i < numArguments; i++)
     {
-        AppendTypeVariable(signature, static_cast<ULONG>(2 + i), true);
+        AppendMethodVariable(signature, static_cast<ULONG>(2 + i), true);
     }
 
-    mdMemberRef beginMethodRef = mdMemberRefNil;
-    IfFailRet(moduleMetadata.metadata_emit->DefineMemberRef(holderTypeSpec, WStr("BeginMethod"), signature.data(),
-                                                            static_cast<ULONG>(signature.size()), &beginMethodRef));
-    *instruction = reWriterWrapper.CallMember(beginMethodRef, false);
-    return S_OK;
+    return WriteTrampolineMethodSpecCall(reWriterWrapper, moduleMetadata, tokens, WStr("BeginMethod"), signature,
+                                         genericArguments, instruction);
 }
 
 // Emits a call equivalent to:
 //
-// __OTelCallTargetTrampolineEndVoid__<TMapIntegration, TTarget>
-//     .EndMethod(instance, exception, ref state)
+// __OTelCallTargetTrampoline__.EndMethod<TMapIntegration, TTarget>(
+//     instance, exception, ref state)
 HRESULT WriteTrampolineEndVoidMethod(ILRewriterWrapper&          reWriterWrapper,
                                      ModuleMetadata&             moduleMetadata,
                                      CallTargetTrampolineTokens& tokens,
@@ -519,29 +555,24 @@ HRESULT WriteTrampolineEndVoidMethod(ILRewriterWrapper&          reWriterWrapper
     HRESULT hr = S_OK;
     auto mapSignature = BuildIndexerMapSignature(tokens);
     auto targetSignature = GetCurrentTypeSignature(currentType, tokens);
-    mdTypeSpec holderTypeSpec = mdTypeSpecNil;
-    IfFailRet(BuildGenericHolderTypeSpec(moduleMetadata, tokens.endVoidType, false,
-                                         {mapSignature, targetSignature}, &holderTypeSpec));
 
     std::vector<COR_SIGNATURE> signature;
-    signature.push_back(IMAGE_CEE_CS_CALLCONV_DEFAULT);
-    AppendCompressedData(signature, 3);
-    AppendTypeToken(signature, tokens.returnVoidType, true);
-    AppendTypeVariable(signature, 1);
+    std::vector<COR_SIGNATURE> returnSignature;
+    AppendTypeToken(returnSignature, tokens.returnVoidType, true);
+    BuildGenericMethodSignature(signature, 2, 3, returnSignature);
+    AppendMethodVariable(signature, 1);
     AppendTypeToken(signature, tokens.exceptionType, false);
     signature.push_back(ELEMENT_TYPE_BYREF);
     AppendTypeToken(signature, tokens.stateType, true);
-    mdMemberRef endMethodRef = mdMemberRefNil;
-    IfFailRet(moduleMetadata.metadata_emit->DefineMemberRef(holderTypeSpec, WStr("EndMethod"), signature.data(),
-                                                            static_cast<ULONG>(signature.size()), &endMethodRef));
-    *instruction = reWriterWrapper.CallMember(endMethodRef, false);
-    return S_OK;
+
+    return WriteTrampolineMethodSpecCall(reWriterWrapper, moduleMetadata, tokens, WStr("EndMethod"), signature,
+                                         {mapSignature, targetSignature}, instruction);
 }
 
 // Emits a call equivalent to:
 //
-// __OTelCallTargetTrampolineEnd__<TMapIntegration, TTarget, TReturn>
-//     .EndMethod(instance, returnValue, exception, ref state)
+// __OTelCallTargetTrampoline__.EndMethod<TMapIntegration, TTarget, TReturn>(
+//     instance, returnValue, exception, ref state)
 HRESULT WriteTrampolineEndMethod(ILRewriterWrapper&          reWriterWrapper,
                                  ModuleMetadata&             moduleMetadata,
                                  CallTargetTrampolineTokens& tokens,
@@ -555,32 +586,20 @@ HRESULT WriteTrampolineEndMethod(ILRewriterWrapper&          reWriterWrapper,
     std::vector<COR_SIGNATURE> returnSignature;
     AppendTypeSignature(returnSignature, *returnArgument, false);
 
-    mdTypeSpec holderTypeSpec = mdTypeSpecNil;
-    IfFailRet(BuildGenericHolderTypeSpec(moduleMetadata, tokens.endType, false,
-                                         {mapSignature, targetSignature, returnSignature}, &holderTypeSpec));
-
-    mdTypeSpec returnTypeSpec = mdTypeSpecNil;
-    IfFailRet(BuildCallTargetReturnTypeSpec(moduleMetadata, tokens, returnSignature, &returnTypeSpec));
-
     std::vector<COR_SIGNATURE> signature;
-    signature.push_back(IMAGE_CEE_CS_CALLCONV_DEFAULT);
-    AppendCompressedData(signature, 4);
-    PCCOR_SIGNATURE returnTypeSpecSignature = nullptr;
-    ULONG           returnTypeSpecSignatureSize = 0;
-    IfFailRet(moduleMetadata.metadata_import->GetTypeSpecFromToken(returnTypeSpec, &returnTypeSpecSignature,
-                                                                   &returnTypeSpecSignatureSize));
-    signature.insert(signature.end(), returnTypeSpecSignature, returnTypeSpecSignature + returnTypeSpecSignatureSize);
-    AppendTypeVariable(signature, 1);
-    AppendTypeVariable(signature, 2);
+    std::vector<COR_SIGNATURE> returnMethodVariableSignature;
+    AppendMethodVariable(returnMethodVariableSignature, 2);
+    std::vector<COR_SIGNATURE> returnVesselSignature;
+    IfFailRet(BuildTrampolineReturnSignature(tokens, returnMethodVariableSignature, returnVesselSignature));
+    BuildGenericMethodSignature(signature, 3, 4, returnVesselSignature);
+    AppendMethodVariable(signature, 1);
+    AppendMethodVariable(signature, 2);
     AppendTypeToken(signature, tokens.exceptionType, false);
     signature.push_back(ELEMENT_TYPE_BYREF);
     AppendTypeToken(signature, tokens.stateType, true);
 
-    mdMemberRef endMethodRef = mdMemberRefNil;
-    IfFailRet(moduleMetadata.metadata_emit->DefineMemberRef(holderTypeSpec, WStr("EndMethod"), signature.data(),
-                                                            static_cast<ULONG>(signature.size()), &endMethodRef));
-    *instruction = reWriterWrapper.CallMember(endMethodRef, false);
-    return S_OK;
+    return WriteTrampolineMethodSpecCall(reWriterWrapper, moduleMetadata, tokens, WStr("EndMethod"), signature,
+                                         {mapSignature, targetSignature, returnSignature}, instruction);
 }
 
 // Emits a call equivalent to:
@@ -608,8 +627,7 @@ HRESULT WriteTrampolineReturnGetReturnValue(ILRewriterWrapper&          reWriter
 
 // Emits a call equivalent to:
 //
-// __OTelCallTargetTrampolineLogException__<TMapIntegration, TTarget>
-//     .LogException(exception)
+// __OTelCallTargetTrampoline__.LogException<TMapIntegration, TTarget>(exception)
 HRESULT WriteTrampolineLogException(ILRewriterWrapper&          reWriterWrapper,
                                     ModuleMetadata&             moduleMetadata,
                                     CallTargetTrampolineTokens& tokens,
@@ -619,420 +637,17 @@ HRESULT WriteTrampolineLogException(ILRewriterWrapper&          reWriterWrapper,
     HRESULT hr = S_OK;
     auto mapSignature = BuildIndexerMapSignature(tokens);
     auto targetSignature = GetCurrentTypeSignature(currentType, tokens);
-    mdTypeSpec holderTypeSpec = mdTypeSpecNil;
-    IfFailRet(BuildGenericHolderTypeSpec(moduleMetadata, tokens.logExceptionType, false,
-                                         {mapSignature, targetSignature}, &holderTypeSpec));
 
     std::vector<COR_SIGNATURE> signature;
-    signature.push_back(IMAGE_CEE_CS_CALLCONV_DEFAULT);
-    AppendCompressedData(signature, 1);
-    signature.push_back(ELEMENT_TYPE_VOID);
+    std::vector<COR_SIGNATURE> voidSignature{ELEMENT_TYPE_VOID};
+    BuildGenericMethodSignature(signature, 2, 1, voidSignature);
     AppendTypeToken(signature, tokens.exceptionType, false);
 
-    mdMemberRef logExceptionRef = mdMemberRefNil;
-    IfFailRet(moduleMetadata.metadata_emit->DefineMemberRef(holderTypeSpec, WStr("LogException"), signature.data(),
-                                                            static_cast<ULONG>(signature.size()), &logExceptionRef));
-    *instruction = reWriterWrapper.CallMember(logExceptionRef, false);
-    return S_OK;
+    return WriteTrampolineMethodSpecCall(reWriterWrapper, moduleMetadata, tokens, WStr("LogException"), signature,
+                                         {mapSignature, targetSignature}, instruction);
 }
 
 
-// clang-format off
-// Rewrites the target method body into this conceptual C# shape. "OriginalBody" means the original
-// IL instructions are kept in place; their ret instructions are replaced with leave instructions.
-//
-// TReturn TargetMethod(args)
-// {
-//     TReturn otelReturnValue = default; // omitted for void
-//     Exception otelException = null;
-//     __OTelCallTargetState__ otelState = default;
-//     __OTelCallTargetReturn__<TReturn> otelReturn = default; // __OTelCallTargetReturn__ for void
-//
-//     try
-//     {
-//         try
-//         {
-//             otelState =
-//                 __OTelCallTargetTrampolineBegin__<TMapIntegration, TTarget, ...TArgs>
-//                     .BeginMethod(instance, ref arg1, ..., ref argN);
-//
-//             // Slow path for 9+ arguments:
-//             // otelState =
-//             //     __OTelCallTargetTrampolineBeginSlow__<TMapIntegration, TTarget>
-//             //         .BeginMethod(instance, new object[] { boxedArgs });
-//         }
-//         catch (Exception ex)
-//         {
-//             __OTelCallTargetTrampolineLogException__<TMapIntegration, TTarget>.LogException(ex);
-//             otelException = null;
-//         }
-//
-//         otelReturnValue = OriginalBody(args); // for non-void; void just runs OriginalBody(args)
-//     }
-//     catch (Exception ex)
-//     {
-//         otelException = ex;
-//         throw;
-//     }
-//     finally
-//     {
-//         try
-//         {
-//             if (voidMethod)
-//             {
-//                 __OTelCallTargetTrampolineEndVoid__<TMapIntegration, TTarget>
-//                     .EndMethod(instance, otelException, ref otelState);
-//             }
-//             else
-//             {
-//                 otelReturn =
-//                     __OTelCallTargetTrampolineEnd__<TMapIntegration, TTarget, TReturn>
-//                         .EndMethod(instance, otelReturnValue, otelException, ref otelState);
-//                 otelReturnValue = otelReturn.GetReturnValue();
-//             }
-//         }
-//         catch (Exception ex)
-//         {
-//             otelException = ex;
-//             __OTelCallTargetTrampolineLogException__<TMapIntegration, TTarget>.LogException(ex);
-//         }
-//     }
-//
-//     return otelReturnValue; // omitted for void
-// }
-// clang-format on
-HRESULT RewriteWithCallTargetTrampoline(RejitHandlerModule* moduleHandler, RejitHandlerModuleMethod* methodHandler)
-{
-    auto tracerMethodHandler = static_cast<TracerRejitHandlerModuleMethod*>(methodHandler);
-
-    auto corProfiler = trace::profiler;
-
-    ModuleID               module_id              = moduleHandler->GetModuleId();
-    ModuleMetadata&        module_metadata        = *moduleHandler->GetModuleMetadata();
-    FunctionInfo*          caller                 = methodHandler->GetFunctionInfo();
-    mdToken                function_token         = caller->id;
-    TypeSignature          retFuncArg             = caller->method_signature.GetReturnValue();
-    IntegrationDefinition* integration_definition = tracerMethodHandler->GetIntegrationDefinition();
-    bool                   is_integration_method =
-        integration_definition->target_method.type.assembly.name != tracemethodintegration_assemblyname;
-    const auto [retFuncElementType, retTypeFlags] = retFuncArg.GetElementTypeAndFlags();
-    bool isVoid                                   = (retTypeFlags & TypeFlagVoid) > 0;
-    bool isStatic = !(caller->method_signature.CallingConvention() & IMAGE_CEE_CS_CALLCONV_HASTHIS);
-    std::vector<trace::TypeSignature> methodArguments = caller->method_signature.GetMethodArguments();
-    int                               numArgs    = caller->method_signature.NumberOfArguments();
-    auto                              metaEmit   = module_metadata.metadata_emit;
-
-    if (!is_integration_method)
-    {
-        Logger::Warn("*** CallTarget_Trampoline_RewriterCallback() skipping trace-method instrumentation for ",
-                     caller->type.name, ".", caller->name, "().");
-        return S_FALSE;
-    }
-
-    if (!corProfiler->IsProfilerAssemblyLoadedIntoAppDomain(module_metadata.app_domain_id))
-    {
-        Logger::Warn("*** CallTarget_Trampoline_RewriterCallback() skipping method: Method replacement found but the "
-                     "managed profiler has not yet been loaded into AppDomain with id=",
-                     module_metadata.app_domain_id, " token=", function_token, " caller_name=", caller->type.name, ".",
-                     caller->name, "()");
-        return S_FALSE;
-    }
-
-    CallTargetTrampolineTokens trampolineTokens;
-    auto hr = BuildCallTargetTrampolineTokens(module_metadata, integration_definition, trampolineTokens);
-    if (FAILED(hr))
-    {
-        return S_FALSE;
-    }
-
-    if (Logger::IsDebugEnabled())
-    {
-        Logger::Debug("*** CallTarget_Trampoline_RewriterCallback() Start: ", caller->type.name, ".", caller->name,
-                      "() [IsVoid=", isVoid, ", IsStatic=", isStatic,
-                      ", IntegrationType=", integration_definition->integration_type.name, ", Arguments=", numArgs,
-                      "]");
-    }
-
-    ILRewriter rewriter(corProfiler->GetCorProfilerInfo(), methodHandler->GetFunctionControl(), module_id,
-                        function_token);
-    hr = rewriter.Import();
-    if (FAILED(hr))
-    {
-        Logger::Warn("*** CallTarget_Trampoline_RewriterCallback(): Call to ILRewriter.Import() failed for ",
-                     module_id, " ", function_token);
-        return S_FALSE;
-    }
-
-    std::string original_code;
-    if (IsDumpILRewriteEnabled())
-    {
-        original_code = corProfiler->GetILCodes("*** CallTarget_Trampoline_RewriterCallback(): Original Code: ",
-                                                &rewriter, *caller, module_metadata.metadata_import);
-    }
-
-    ILRewriterWrapper reWriterWrapper(&rewriter);
-    reWriterWrapper.SetILPosition(rewriter.GetILList()->m_pNext);
-
-    ULONG    exceptionIndex   = static_cast<ULONG>(ULONG_MAX);
-    ULONG    stateIndex       = static_cast<ULONG>(ULONG_MAX);
-    ULONG    callTargetReturnIndex = static_cast<ULONG>(ULONG_MAX);
-    ULONG    returnValueIndex = static_cast<ULONG>(ULONG_MAX);
-    mdToken  callTargetReturnToken = mdTokenNil;
-    ILInstr* firstInstruction = nullptr;
-
-    hr = ModifyLocalSigAndInitializeForTrampoline(reWriterWrapper, module_metadata, caller, trampolineTokens,
-                                                  &exceptionIndex, &stateIndex, &callTargetReturnIndex,
-                                                  &returnValueIndex, &callTargetReturnToken, &firstInstruction);
-    if (FAILED(hr))
-    {
-        return S_FALSE;
-    }
-
-    ILInstr* instanceLoadInstruction = nullptr;
-    if (!LoadInstanceForTrampoline(reWriterWrapper, caller, isStatic, &instanceLoadInstruction))
-    {
-        return S_FALSE;
-    }
-
-    if (numArgs >= FASTPATH_COUNT)
-    {
-        reWriterWrapper.CreateArray(trampolineTokens.objectType, numArgs);
-        for (int i = 0; i < numArgs; i++)
-        {
-            reWriterWrapper.BeginLoadValueIntoArray(i);
-            reWriterWrapper.LoadArgument(i + (isStatic ? 0 : 1));
-            const auto [elementType, argTypeFlags] = methodArguments[i].GetElementTypeAndFlags();
-            if ((argTypeFlags & TypeFlagByRef) > 0)
-            {
-                Logger::Warn("*** CallTarget_Trampoline_RewriterCallback(): Slow-path methods with ref parameters "
-                             "cannot be instrumented. ");
-                return S_FALSE;
-            }
-            if ((argTypeFlags & TypeFlagBoxedType) > 0)
-            {
-                const auto& tok = methodArguments[i].GetTypeTok(metaEmit, trampolineTokens.corlibRef);
-                if (tok == mdTokenNil)
-                {
-                    return S_FALSE;
-                }
-                reWriterWrapper.Box(tok);
-            }
-            reWriterWrapper.EndLoadValueIntoArray();
-        }
-    }
-    else
-    {
-        for (int i = 0; i < numArgs; i++)
-        {
-            const auto [elementType, argTypeFlags] = methodArguments[i].GetElementTypeAndFlags();
-            if ((argTypeFlags & TypeFlagByRef) > 0)
-            {
-                reWriterWrapper.LoadArgument(i + (isStatic ? 0 : 1));
-            }
-            else
-            {
-                reWriterWrapper.LoadArgumentRef(i + (isStatic ? 0 : 1));
-            }
-        }
-    }
-
-    ILInstr* beginCallInstruction = nullptr;
-    hr = WriteTrampolineBeginMethod(reWriterWrapper, module_metadata, trampolineTokens, &caller->type, methodArguments,
-                                    &beginCallInstruction);
-    if (FAILED(hr))
-    {
-        return S_FALSE;
-    }
-    reWriterWrapper.StLocal(stateIndex);
-    ILInstr* pStateLeaveToBeginOriginalMethodInstr = reWriterWrapper.CreateInstr(CEE_LEAVE_S);
-
-    ILInstr* beginMethodCatchFirstInstr = reWriterWrapper.StLocal(exceptionIndex);
-    reWriterWrapper.LoadLocal(exceptionIndex);
-    ILInstr* beginLogExceptionInstr = nullptr;
-    hr = WriteTrampolineLogException(reWriterWrapper, module_metadata, trampolineTokens, &caller->type,
-                                     &beginLogExceptionInstr);
-    if (FAILED(hr))
-    {
-        return S_FALSE;
-    }
-    reWriterWrapper.LoadNull();
-    reWriterWrapper.StLocal(exceptionIndex);
-    ILInstr* beginMethodCatchLeaveInstr = reWriterWrapper.CreateInstr(CEE_LEAVE_S);
-
-    EHClause beginMethodExClause{};
-    beginMethodExClause.m_Flags         = COR_ILEXCEPTION_CLAUSE_NONE;
-    beginMethodExClause.m_pTryBegin     = firstInstruction;
-    beginMethodExClause.m_pTryEnd       = beginMethodCatchFirstInstr;
-    beginMethodExClause.m_pHandlerBegin = beginMethodCatchFirstInstr;
-    beginMethodExClause.m_pHandlerEnd   = beginMethodCatchLeaveInstr;
-    beginMethodExClause.m_ClassToken    = trampolineTokens.exceptionType;
-
-    ILInstr* beginOriginalMethodInstr                = reWriterWrapper.GetCurrentILInstr();
-    pStateLeaveToBeginOriginalMethodInstr->m_pTarget = beginOriginalMethodInstr;
-    beginMethodCatchLeaveInstr->m_pTarget            = beginOriginalMethodInstr;
-
-    ILInstr* methodReturnInstr  = rewriter.NewILInstr();
-    methodReturnInstr->m_opcode = CEE_RET;
-    rewriter.InsertAfter(rewriter.GetILList()->m_pPrev, methodReturnInstr);
-    reWriterWrapper.SetILPosition(methodReturnInstr);
-
-    ILInstr* startExceptionCatch = reWriterWrapper.StLocal(exceptionIndex);
-    reWriterWrapper.SetILPosition(methodReturnInstr);
-    ILInstr* rethrowInstr = reWriterWrapper.Rethrow();
-
-    ILInstr* endMethodInstanceLoadInstr = nullptr;
-    if (!LoadInstanceForTrampoline(reWriterWrapper, caller, isStatic, &endMethodInstanceLoadInstr))
-    {
-        return S_FALSE;
-    }
-    ILInstr* endMethodTryStartInstr = endMethodInstanceLoadInstr;
-
-    if (!isVoid)
-    {
-        reWriterWrapper.LoadLocal(returnValueIndex);
-    }
-
-    reWriterWrapper.LoadLocal(exceptionIndex);
-    reWriterWrapper.LoadLocalAddress(stateIndex);
-
-    ILInstr* endMethodCallInstr;
-    if (isVoid)
-    {
-        hr = WriteTrampolineEndVoidMethod(reWriterWrapper, module_metadata, trampolineTokens, &caller->type,
-                                          &endMethodCallInstr);
-        if (FAILED(hr))
-        {
-            return S_FALSE;
-        }
-    }
-    else
-    {
-        hr = WriteTrampolineEndMethod(reWriterWrapper, module_metadata, trampolineTokens, &caller->type, &retFuncArg,
-                                      &endMethodCallInstr);
-        if (FAILED(hr))
-        {
-            return S_FALSE;
-        }
-    }
-    reWriterWrapper.StLocal(callTargetReturnIndex);
-
-    if (!isVoid)
-    {
-        ILInstr* getReturnInstruction = nullptr;
-        reWriterWrapper.LoadLocalAddress(callTargetReturnIndex);
-        hr = WriteTrampolineReturnGetReturnValue(reWriterWrapper, module_metadata, &retFuncArg,
-                                                 static_cast<mdTypeSpec>(callTargetReturnToken), &getReturnInstruction);
-        if (FAILED(hr))
-        {
-            return S_FALSE;
-        }
-        reWriterWrapper.StLocal(returnValueIndex);
-    }
-
-    ILInstr* endMethodTryLeave = reWriterWrapper.CreateInstr(CEE_LEAVE_S);
-
-    ILInstr* endMethodCatchFirstInstr = reWriterWrapper.StLocal(exceptionIndex);
-    reWriterWrapper.LoadLocal(exceptionIndex);
-    ILInstr* endLogExceptionInstr = nullptr;
-    hr = WriteTrampolineLogException(reWriterWrapper, module_metadata, trampolineTokens, &caller->type,
-                                     &endLogExceptionInstr);
-    if (FAILED(hr))
-    {
-        return S_FALSE;
-    }
-    ILInstr* endMethodCatchLeaveInstr = reWriterWrapper.CreateInstr(CEE_LEAVE_S);
-
-    EHClause endMethodExClause{};
-    endMethodExClause.m_Flags         = COR_ILEXCEPTION_CLAUSE_NONE;
-    endMethodExClause.m_pTryBegin     = endMethodTryStartInstr;
-    endMethodExClause.m_pTryEnd       = endMethodCatchFirstInstr;
-    endMethodExClause.m_pHandlerBegin = endMethodCatchFirstInstr;
-    endMethodExClause.m_pHandlerEnd   = endMethodCatchLeaveInstr;
-    endMethodExClause.m_ClassToken    = trampolineTokens.exceptionType;
-
-    ILInstr* endFinallyInstr            = reWriterWrapper.EndFinally();
-    endMethodTryLeave->m_pTarget        = endFinallyInstr;
-    endMethodCatchLeaveInstr->m_pTarget = endFinallyInstr;
-
-    if (!isVoid)
-    {
-        reWriterWrapper.LoadLocal(returnValueIndex);
-    }
-
-    for (ILInstr* pInstr = rewriter.GetILList()->m_pNext; pInstr != rewriter.GetILList(); pInstr = pInstr->m_pNext)
-    {
-        switch (pInstr->m_opcode)
-        {
-            case CEE_RET:
-            {
-                if (pInstr != methodReturnInstr)
-                {
-                    if (!isVoid)
-                    {
-                        reWriterWrapper.SetILPosition(pInstr);
-                        reWriterWrapper.StLocal(returnValueIndex);
-                    }
-                    pInstr->m_opcode  = CEE_LEAVE_S;
-                    pInstr->m_pTarget = endFinallyInstr->m_pNext;
-                }
-                break;
-            }
-            default:
-                break;
-        }
-    }
-
-    EHClause exClause{};
-    exClause.m_Flags         = COR_ILEXCEPTION_CLAUSE_NONE;
-    exClause.m_pTryBegin     = firstInstruction;
-    exClause.m_pTryEnd       = startExceptionCatch;
-    exClause.m_pHandlerBegin = startExceptionCatch;
-    exClause.m_pHandlerEnd   = rethrowInstr;
-    exClause.m_ClassToken    = trampolineTokens.exceptionType;
-
-    EHClause finallyClause{};
-    finallyClause.m_Flags         = COR_ILEXCEPTION_CLAUSE_FINALLY;
-    finallyClause.m_pTryBegin     = firstInstruction;
-    finallyClause.m_pTryEnd       = rethrowInstr->m_pNext;
-    finallyClause.m_pHandlerBegin = rethrowInstr->m_pNext;
-    finallyClause.m_pHandlerEnd   = endFinallyInstr;
-
-    auto ehCount      = rewriter.GetEHCount();
-    auto ehPointer    = rewriter.GetEHPointer();
-    auto newEHClauses = new EHClause[ehCount + 4];
-    for (unsigned i = 0; i < ehCount; i++)
-    {
-        newEHClauses[i] = ehPointer[i];
-    }
-
-    ehCount += 4;
-    newEHClauses[ehCount - 4] = beginMethodExClause;
-    newEHClauses[ehCount - 3] = endMethodExClause;
-    newEHClauses[ehCount - 2] = exClause;
-    newEHClauses[ehCount - 1] = finallyClause;
-    rewriter.SetEHClause(newEHClauses, ehCount);
-
-    if (IsDumpILRewriteEnabled())
-    {
-        Logger::Info(original_code);
-        Logger::Info(corProfiler->GetILCodes("*** CallTarget_Trampoline_RewriterCallback(): Modified Code: ",
-                                             &rewriter, *caller, module_metadata.metadata_import));
-    }
-
-    hr = rewriter.Export();
-
-    if (FAILED(hr))
-    {
-        Logger::Warn("*** CallTarget_Trampoline_RewriterCallback(): Call to ILRewriter.Export() failed for ModuleID=",
-                     module_id, " ", function_token);
-        return S_FALSE;
-    }
-
-    Logger::Info("*** CallTarget_Trampoline_RewriterCallback() Finished: ", caller->type.name, ".", caller->name,
-                 "() [IsVoid=", isVoid, ", IsStatic=", isStatic,
-                 ", IntegrationType=", integration_definition->integration_type.name, ", Arguments=", numArgs, "]");
-    return S_OK;
-}
 } // namespace
 
 /// <summary>
@@ -1123,6 +738,8 @@ HRESULT TracerMethodRewriter::Rewrite(RejitHandlerModule* moduleHandler, RejitHa
     IntegrationDefinition* integration_definition = tracerMethodHandler->GetIntegrationDefinition();
     bool                   is_integration_method =
         integration_definition->target_method.type.assembly.name != tracemethodintegration_assemblyname;
+    bool                   use_trampoline =
+        corProfiler->IsCallTargetTrampolineEnabled() && is_integration_method;
     bool ignoreByRefInstrumentation               = !is_integration_method;
     const auto [retFuncElementType, retTypeFlags] = retFuncArg.GetElementTypeAndFlags();
     bool isVoid                                   = (retTypeFlags & TypeFlagVoid) > 0;
@@ -1133,16 +750,23 @@ HRESULT TracerMethodRewriter::Rewrite(RejitHandlerModule* moduleHandler, RejitHa
     COR_SIGNATURE                     runtimeTypeHandleBuffer[10];
     int                               numArgs    = caller->method_signature.NumberOfArguments();
     auto                              metaEmit   = module_metadata.metadata_emit;
-    auto                              metaImport = module_metadata.metadata_import;
-
-    if (corProfiler->IsCallTargetTrampolineEnabled() && is_integration_method)
-    {
-        return RewriteWithCallTargetTrampoline(moduleHandler, methodHandler);
-    }
+    auto                              hr         = S_OK;
+    const char*                       logPrefix  = use_trampoline ? "CallTarget_Trampoline_RewriterCallback"
+                                                                  : "CallTarget_RewriterCallback";
 
     // *** Get reference to the integration type
     mdTypeRef integration_type_ref = mdTypeRefNil;
-    if (!corProfiler->GetIntegrationTypeRef(module_metadata, module_id, *integration_definition, integration_type_ref))
+    CallTargetTrampolineTokens trampolineTokens;
+    if (use_trampoline)
+    {
+        hr = BuildCallTargetTrampolineTokens(module_metadata, integration_definition, trampolineTokens);
+        if (FAILED(hr))
+        {
+            return S_FALSE;
+        }
+    }
+    else if (!corProfiler->GetIntegrationTypeRef(module_metadata, module_id, *integration_definition,
+                                                integration_type_ref))
     {
         Logger::Warn("*** CallTarget_RewriterCallback() skipping method: Integration Type Ref cannot be found for ",
                      " token=", function_token, " caller_name=", caller->type.name, ".", caller->name, "()");
@@ -1151,8 +775,8 @@ HRESULT TracerMethodRewriter::Rewrite(RejitHandlerModule* moduleHandler, RejitHa
 
     if (Logger::IsDebugEnabled())
     {
-        Logger::Debug("*** CallTarget_RewriterCallback() Start: ", caller->type.name, ".", caller->name,
-                      "() [IsVoid=", isVoid, ", IsStatic=", isStatic,
+        Logger::Debug("*** ", logPrefix, "() Start: ", caller->type.name, ".", caller->name,
+                      "() [IsVoid=", isVoid, ", IsStatic=", isStatic, ", Trampoline=", use_trampoline,
                       ", IntegrationType=", integration_definition->integration_type.name, ", Arguments=", numArgs,
                       "]");
     }
@@ -1161,7 +785,7 @@ HRESULT TracerMethodRewriter::Rewrite(RejitHandlerModule* moduleHandler, RejitHa
     if (!corProfiler->ProfilerAssemblyIsLoadedIntoAppDomain(module_metadata.app_domain_id))
     {
         Logger::Warn(
-            "*** CallTarget_RewriterCallback() skipping method: Method replacement found but the managed profiler has "
+            "*** ", logPrefix, "() skipping method: Method replacement found but the managed profiler has "
             "not yet been loaded into AppDomain with id=",
             module_metadata.app_domain_id, " token=", function_token, " caller_name=", caller->type.name, ".",
             caller->name, "()");
@@ -1170,11 +794,10 @@ HRESULT TracerMethodRewriter::Rewrite(RejitHandlerModule* moduleHandler, RejitHa
 
     // *** Create rewriter
     ILRewriter rewriter(corProfiler->info_, methodHandler->GetFunctionControl(), module_id, function_token);
-    bool       modified = false;
-    auto       hr       = rewriter.Import();
+    hr = rewriter.Import();
     if (FAILED(hr))
     {
-        Logger::Warn("*** CallTarget_RewriterCallback(): Call to ILRewriter.Import() failed for ", module_id, " ",
+        Logger::Warn("*** ", logPrefix, "(): Call to ILRewriter.Import() failed for ", module_id, " ",
                      function_token);
         return S_FALSE;
     }
@@ -1183,7 +806,10 @@ HRESULT TracerMethodRewriter::Rewrite(RejitHandlerModule* moduleHandler, RejitHa
     std::string original_code;
     if (IsDumpILRewriteEnabled())
     {
-        original_code = corProfiler->GetILCodes("*** CallTarget_RewriterCallback(): Original Code: ", &rewriter,
+        original_code = corProfiler->GetILCodes(use_trampoline
+                                                    ? "*** CallTarget_Trampoline_RewriterCallback(): Original Code: "
+                                                    : "*** CallTarget_RewriterCallback(): Original Code: ",
+                                                &rewriter,
                                                 *caller, module_metadata.metadata_import);
     }
 
@@ -1200,57 +826,35 @@ HRESULT TracerMethodRewriter::Rewrite(RejitHandlerModule* moduleHandler, RejitHa
     mdToken  exceptionToken        = mdTokenNil;
     mdToken  callTargetReturnToken = mdTokenNil;
     ILInstr* firstInstruction      = nullptr;
-    tracerTokens->ModifyLocalSigAndInitialize(&reWriterWrapper, caller, &callTargetStateIndex, &exceptionIndex,
-                                              &callTargetReturnIndex, &returnValueIndex, &callTargetStateToken,
-                                              &exceptionToken, &callTargetReturnToken, &firstInstruction);
+    if (use_trampoline)
+    {
+        hr = ModifyLocalSigAndInitializeForTrampoline(reWriterWrapper, module_metadata, caller, trampolineTokens,
+                                                      &exceptionIndex, &callTargetStateIndex, &callTargetReturnIndex,
+                                                      &returnValueIndex, &callTargetReturnToken, &firstInstruction);
+        callTargetStateToken = trampolineTokens.stateType;
+        exceptionToken = trampolineTokens.exceptionType;
+    }
+    else
+    {
+        hr = tracerTokens->ModifyLocalSigAndInitialize(&reWriterWrapper, caller, &callTargetStateIndex,
+                                                       &exceptionIndex, &callTargetReturnIndex, &returnValueIndex,
+                                                       &callTargetStateToken, &exceptionToken, &callTargetReturnToken,
+                                                       &firstInstruction);
+    }
+    if (FAILED(hr))
+    {
+        return S_FALSE;
+    }
 
     // ***
     // BEGIN METHOD PART
     // ***
 
     // *** Load instance into the stack (if not static)
-    if (isStatic)
+    ILInstr* beginInstanceLoadInstruction = nullptr;
+    if (!LoadInstanceForCallTarget(reWriterWrapper, caller, isStatic, logPrefix, &beginInstanceLoadInstruction))
     {
-        if (caller->type.valueType)
-        {
-            // Static methods in a ValueType can't be instrumented.
-            // In the future this can be supported by adding a local for the valuetype and initialize it to the default
-            // value. After the signature modification we need to emit the following IL to initialize and load into the
-            // stack.
-            //    ldloca.s [localIndex]
-            //    initobj [valueType]
-            //    ldloc.s [localIndex]
-            Logger::Warn("*** CallTarget_RewriterCallback(): Static methods in a ValueType cannot be instrumented. ");
-            return S_FALSE;
-        }
-        reWriterWrapper.LoadNull();
-    }
-    else
-    {
-        reWriterWrapper.LoadArgument(0);
-        if (caller->type.valueType)
-        {
-            if (caller->type.type_spec != mdTypeSpecNil)
-            {
-                reWriterWrapper.LoadObj(caller->type.type_spec);
-            }
-            else if (!caller->type.isGeneric)
-            {
-                reWriterWrapper.LoadObj(caller->type.id);
-            }
-            else
-            {
-                // Generic struct instrumentation is not supported
-                // IMetaDataImport::GetMemberProps and IMetaDataImport::GetMemberRefProps returns
-                // The parent token as mdTypeDef and not as a mdTypeSpec
-                // that's because the method definition is stored in the mdTypeDef
-                // The problem is that we don't have the exact Spec of that generic
-                // We can't emit LoadObj or Box because that would result in an invalid IL.
-                // This problem doesn't occur on a class type because we can always relay in the
-                // object type.
-                return S_FALSE;
-            }
-        }
+        return S_FALSE;
     }
 
     // *** Load the method arguments to the stack
@@ -1262,7 +866,7 @@ HRESULT TracerMethodRewriter::Rewrite(RejitHandlerModule* moduleHandler, RejitHa
             for (int i = 0; i < numArgs; i++)
             {
                 const auto [elementType, argTypeFlags] = methodArguments[i].GetElementTypeAndFlags();
-                if (corProfiler->enable_by_ref_instrumentation)
+                if (use_trampoline || corProfiler->enable_by_ref_instrumentation)
                 {
                     if (argTypeFlags & TypeFlagByRef)
                     {
@@ -1278,7 +882,7 @@ HRESULT TracerMethodRewriter::Rewrite(RejitHandlerModule* moduleHandler, RejitHa
                     reWriterWrapper.LoadArgument(i + (isStatic ? 0 : 1));
                     if (argTypeFlags & TypeFlagByRef)
                     {
-                        Logger::Warn("*** CallTarget_RewriterCallback(): Methods with ref parameters "
+                        Logger::Warn("*** ", logPrefix, "(): Methods with ref parameters "
                                      "cannot be instrumented. ");
                         return S_FALSE;
                     }
@@ -1288,7 +892,8 @@ HRESULT TracerMethodRewriter::Rewrite(RejitHandlerModule* moduleHandler, RejitHa
         else
         {
             // Load the arguments inside an object array (SlowPath)
-            reWriterWrapper.CreateArray(tracerTokens->GetObjectTypeRef(), numArgs);
+            reWriterWrapper.CreateArray(use_trampoline ? trampolineTokens.objectType : tracerTokens->GetObjectTypeRef(),
+                                        numArgs);
             for (int i = 0; i < numArgs; i++)
             {
                 reWriterWrapper.BeginLoadValueIntoArray(i);
@@ -1296,13 +901,15 @@ HRESULT TracerMethodRewriter::Rewrite(RejitHandlerModule* moduleHandler, RejitHa
                 const auto [elementType, argTypeFlags] = methodArguments[i].GetElementTypeAndFlags();
                 if (argTypeFlags & TypeFlagByRef)
                 {
-                    Logger::Warn("*** CallTarget_RewriterCallback(): Methods with ref parameters "
+                    Logger::Warn("*** ", logPrefix, "(): Methods with ref parameters "
                                  "cannot be instrumented. ");
                     return S_FALSE;
                 }
                 if (argTypeFlags & TypeFlagBoxedType)
                 {
-                    const auto& tok = methodArguments[i].GetTypeTok(metaEmit, tracerTokens->GetCorLibAssemblyRef());
+                    const auto corLibRef = use_trampoline ? trampolineTokens.corlibRef
+                                                          : tracerTokens->GetCorLibAssemblyRef();
+                    const auto& tok = methodArguments[i].GetTypeTok(metaEmit, corLibRef);
                     if (tok == mdTokenNil)
                     {
                         return S_FALSE;
@@ -1381,8 +988,16 @@ HRESULT TracerMethodRewriter::Rewrite(RejitHandlerModule* moduleHandler, RejitHa
     }
 
     ILInstr* beginCallInstruction;
-    hr = tracerTokens->WriteBeginMethod(&reWriterWrapper, integration_type_ref, &caller->type, methodArguments,
-                                        ignoreByRefInstrumentation, &beginCallInstruction);
+    if (use_trampoline)
+    {
+        hr = WriteTrampolineBeginMethod(reWriterWrapper, module_metadata, trampolineTokens, &caller->type,
+                                        methodArguments, &beginCallInstruction);
+    }
+    else
+    {
+        hr = tracerTokens->WriteBeginMethod(&reWriterWrapper, integration_type_ref, &caller->type, methodArguments,
+                                            ignoreByRefInstrumentation, &beginCallInstruction);
+    }
     if (FAILED(hr))
     {
         // Error message is written to the log in WriteBeginMethod.
@@ -1393,7 +1008,20 @@ HRESULT TracerMethodRewriter::Rewrite(RejitHandlerModule* moduleHandler, RejitHa
 
     // *** BeginMethod call catch
     ILInstr* beginMethodCatchFirstInstr = nullptr;
-    tracerTokens->WriteLogException(&reWriterWrapper, integration_type_ref, &caller->type, &beginMethodCatchFirstInstr);
+    if (use_trampoline)
+    {
+        hr = WriteTrampolineLogException(reWriterWrapper, module_metadata, trampolineTokens, &caller->type,
+                                         &beginMethodCatchFirstInstr);
+    }
+    else
+    {
+        hr = tracerTokens->WriteLogException(&reWriterWrapper, integration_type_ref, &caller->type,
+                                             &beginMethodCatchFirstInstr);
+    }
+    if (FAILED(hr))
+    {
+        return S_FALSE;
+    }
     ILInstr* beginMethodCatchLeaveInstr = reWriterWrapper.CreateInstr(CEE_LEAVE_S);
 
     // *** BeginMethod exception handling clause
@@ -1403,7 +1031,7 @@ HRESULT TracerMethodRewriter::Rewrite(RejitHandlerModule* moduleHandler, RejitHa
     beginMethodExClause.m_pTryEnd       = beginMethodCatchFirstInstr;
     beginMethodExClause.m_pHandlerBegin = beginMethodCatchFirstInstr;
     beginMethodExClause.m_pHandlerEnd   = beginMethodCatchLeaveInstr;
-    beginMethodExClause.m_ClassToken    = tracerTokens->GetExceptionTypeRef();
+    beginMethodExClause.m_ClassToken    = exceptionToken;
 
     // ***
     // METHOD EXECUTION
@@ -1432,53 +1060,12 @@ HRESULT TracerMethodRewriter::Rewrite(RejitHandlerModule* moduleHandler, RejitHa
     // ***
     // EXCEPTION FINALLY / END METHOD PART
     // ***
-    ILInstr* endMethodTryStartInstr;
+    ILInstr* endMethodTryStartInstr = nullptr;
 
     // *** Load instance into the stack (if not static)
-    if (isStatic)
+    if (!LoadInstanceForCallTarget(reWriterWrapper, caller, isStatic, logPrefix, &endMethodTryStartInstr))
     {
-        if (caller->type.valueType)
-        {
-            // Static methods in a ValueType can't be instrumented.
-            // In the future this can be supported by adding a local for the valuetype
-            // and initialize it to the default value. After the signature
-            // modification we need to emit the following IL to initialize and load
-            // into the stack.
-            //    ldloca.s [localIndex]
-            //    initobj [valueType]
-            //    ldloc.s [localIndex]
-            Logger::Warn("CallTarget_RewriterCallback: Static methods in a ValueType cannot "
-                         "be instrumented. ");
-            return S_FALSE;
-        }
-        endMethodTryStartInstr = reWriterWrapper.LoadNull();
-    }
-    else
-    {
-        endMethodTryStartInstr = reWriterWrapper.LoadArgument(0);
-        if (caller->type.valueType)
-        {
-            if (caller->type.type_spec != mdTypeSpecNil)
-            {
-                reWriterWrapper.LoadObj(caller->type.type_spec);
-            }
-            else if (!caller->type.isGeneric)
-            {
-                reWriterWrapper.LoadObj(caller->type.id);
-            }
-            else
-            {
-                // Generic struct instrumentation is not supported
-                // IMetaDataImport::GetMemberProps and IMetaDataImport::GetMemberRefProps returns
-                // The parent token as mdTypeDef and not as a mdTypeSpec
-                // that's because the method definition is stored in the mdTypeDef
-                // The problem is that we don't have the exact Spec of that generic
-                // We can't emit LoadObj or Box because that would result in an invalid IL.
-                // This problem doesn't occur on a class type because we can always relay in the
-                // object type.
-                return S_FALSE;
-            }
-        }
+        return S_FALSE;
     }
 
     // *** Load the return value is is not void
@@ -1488,7 +1075,7 @@ HRESULT TracerMethodRewriter::Rewrite(RejitHandlerModule* moduleHandler, RejitHa
     }
 
     reWriterWrapper.LoadLocal(exceptionIndex);
-    if (corProfiler->enable_calltarget_state_by_ref)
+    if (use_trampoline || corProfiler->enable_calltarget_state_by_ref)
     {
         reWriterWrapper.LoadLocalAddress(callTargetStateIndex);
     }
@@ -1500,13 +1087,33 @@ HRESULT TracerMethodRewriter::Rewrite(RejitHandlerModule* moduleHandler, RejitHa
     ILInstr* endMethodCallInstr;
     if (isVoid)
     {
-        tracerTokens->WriteEndVoidReturnMemberRef(&reWriterWrapper, integration_type_ref, &caller->type,
-                                                  &endMethodCallInstr);
+        if (use_trampoline)
+        {
+            hr = WriteTrampolineEndVoidMethod(reWriterWrapper, module_metadata, trampolineTokens, &caller->type,
+                                              &endMethodCallInstr);
+        }
+        else
+        {
+            hr = tracerTokens->WriteEndVoidReturnMemberRef(&reWriterWrapper, integration_type_ref, &caller->type,
+                                                           &endMethodCallInstr);
+        }
     }
     else
     {
-        tracerTokens->WriteEndReturnMemberRef(&reWriterWrapper, integration_type_ref, &caller->type, &retFuncArg,
-                                              &endMethodCallInstr);
+        if (use_trampoline)
+        {
+            hr = WriteTrampolineEndMethod(reWriterWrapper, module_metadata, trampolineTokens, &caller->type,
+                                          &retFuncArg, &endMethodCallInstr);
+        }
+        else
+        {
+            hr = tracerTokens->WriteEndReturnMemberRef(&reWriterWrapper, integration_type_ref, &caller->type,
+                                                       &retFuncArg, &endMethodCallInstr);
+        }
+    }
+    if (FAILED(hr))
+    {
+        return S_FALSE;
     }
     reWriterWrapper.StLocal(callTargetReturnIndex);
 
@@ -1514,8 +1121,22 @@ HRESULT TracerMethodRewriter::Rewrite(RejitHandlerModule* moduleHandler, RejitHa
     {
         ILInstr* callTargetReturnGetReturnInstr;
         reWriterWrapper.LoadLocalAddress(callTargetReturnIndex);
-        tracerTokens->WriteCallTargetReturnGetReturnValue(&reWriterWrapper, callTargetReturnToken,
-                                                          &callTargetReturnGetReturnInstr);
+        if (use_trampoline)
+        {
+            hr = WriteTrampolineReturnGetReturnValue(reWriterWrapper, module_metadata, &retFuncArg,
+                                                     static_cast<mdTypeSpec>(callTargetReturnToken),
+                                                     &callTargetReturnGetReturnInstr);
+        }
+        else
+        {
+            hr = tracerTokens->WriteCallTargetReturnGetReturnValue(&reWriterWrapper,
+                                                                   static_cast<mdTypeSpec>(callTargetReturnToken),
+                                                                   &callTargetReturnGetReturnInstr);
+        }
+        if (FAILED(hr))
+        {
+            return S_FALSE;
+        }
         reWriterWrapper.StLocal(returnValueIndex);
     }
 
@@ -1523,7 +1144,20 @@ HRESULT TracerMethodRewriter::Rewrite(RejitHandlerModule* moduleHandler, RejitHa
 
     // *** EndMethod call catch
     ILInstr* endMethodCatchFirstInstr = nullptr;
-    tracerTokens->WriteLogException(&reWriterWrapper, integration_type_ref, &caller->type, &endMethodCatchFirstInstr);
+    if (use_trampoline)
+    {
+        hr = WriteTrampolineLogException(reWriterWrapper, module_metadata, trampolineTokens, &caller->type,
+                                         &endMethodCatchFirstInstr);
+    }
+    else
+    {
+        hr = tracerTokens->WriteLogException(&reWriterWrapper, integration_type_ref, &caller->type,
+                                             &endMethodCatchFirstInstr);
+    }
+    if (FAILED(hr))
+    {
+        return S_FALSE;
+    }
     ILInstr* endMethodCatchLeaveInstr = reWriterWrapper.CreateInstr(CEE_LEAVE_S);
 
     // *** EndMethod exception handling clause
@@ -1533,7 +1167,7 @@ HRESULT TracerMethodRewriter::Rewrite(RejitHandlerModule* moduleHandler, RejitHa
     endMethodExClause.m_pTryEnd       = endMethodCatchFirstInstr;
     endMethodExClause.m_pHandlerBegin = endMethodCatchFirstInstr;
     endMethodExClause.m_pHandlerEnd   = endMethodCatchLeaveInstr;
-    endMethodExClause.m_ClassToken    = tracerTokens->GetExceptionTypeRef();
+    endMethodExClause.m_ClassToken    = exceptionToken;
 
     // *** EndMethod leave to finally
     ILInstr* endFinallyInstr            = reWriterWrapper.EndFinally();
@@ -1581,7 +1215,7 @@ HRESULT TracerMethodRewriter::Rewrite(RejitHandlerModule* moduleHandler, RejitHa
     exClause.m_pTryEnd       = startExceptionCatch;
     exClause.m_pHandlerBegin = startExceptionCatch;
     exClause.m_pHandlerEnd   = rethrowInstr;
-    exClause.m_ClassToken    = tracerTokens->GetExceptionTypeRef();
+    exClause.m_ClassToken    = exceptionToken;
 
     EHClause finallyClause{};
     finallyClause.m_Flags         = COR_ILEXCEPTION_CLAUSE_FINALLY;
@@ -1612,7 +1246,10 @@ HRESULT TracerMethodRewriter::Rewrite(RejitHandlerModule* moduleHandler, RejitHa
     if (IsDumpILRewriteEnabled())
     {
         Logger::Info(original_code);
-        Logger::Info(corProfiler->GetILCodes("*** Rewriter(): Modified Code: ", &rewriter, *caller,
+        Logger::Info(corProfiler->GetILCodes(use_trampoline
+                                                 ? "*** CallTarget_Trampoline_RewriterCallback(): Modified Code: "
+                                                 : "*** Rewriter(): Modified Code: ",
+                                             &rewriter, *caller,
                                              module_metadata.metadata_import));
     }
 
@@ -1620,14 +1257,14 @@ HRESULT TracerMethodRewriter::Rewrite(RejitHandlerModule* moduleHandler, RejitHa
 
     if (FAILED(hr))
     {
-        Logger::Warn("*** CallTarget_RewriterCallback(): Call to ILRewriter.Export() failed for "
+        Logger::Warn("*** ", logPrefix, "(): Call to ILRewriter.Export() failed for "
                      "ModuleID=",
                      module_id, " ", function_token);
         return S_FALSE;
     }
 
-    Logger::Info("*** CallTarget_RewriterCallback() Finished: ", caller->type.name, ".", caller->name,
-                 "() [IsVoid=", isVoid, ", IsStatic=", isStatic,
+    Logger::Info("*** ", logPrefix, "() Finished: ", caller->type.name, ".", caller->name,
+                 "() [IsVoid=", isVoid, ", IsStatic=", isStatic, ", Trampoline=", use_trampoline,
                  ", IntegrationType=", integration_definition->integration_type.name, ", Arguments=", numArgs, "]");
     return S_OK;
 }

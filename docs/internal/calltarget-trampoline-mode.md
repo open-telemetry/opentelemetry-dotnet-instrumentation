@@ -4,7 +4,7 @@
 
 CallTarget trampoline mode is an opt-in .NET Framework-only rewrite mode for bytecode instrumentation. It is enabled with `OTEL_DOTNET_AUTO_CALLTARGET_TRAMPOLINE_ENABLED=true`.
 
-The mode avoids adding `OpenTelemetry.AutoInstrumentation` references to rewritten target assemblies and to `mscorlib`. Target methods call generated generic trampoline holder types in `mscorlib`; each closed generic holder initializes a static delegate once and then invokes that delegate directly.
+The mode avoids adding `OpenTelemetry.AutoInstrumentation` references to rewritten target assemblies and to `mscorlib`. Target methods call generic static methods on a generated non-generic `mscorlib` trampoline type. Those methods forward to generated closed generic holder types, where each holder initializes a static delegate once and then invokes that delegate directly.
 
 ## V2 Design
 
@@ -12,13 +12,16 @@ The mode avoids adding `OpenTelemetry.AutoInstrumentation` references to rewritt
 - Keep generated `mscorlib` metadata limited to `mscorlib` types. Do not emit an `OpenTelemetry.AutoInstrumentation` `AssemblyRef` or `TypeRef`.
 - Generate `__OTelCallTargetIndexer__<T>` and use nested `Indexer<...<object>>` shapes as global integration map keys.
 - Generate mscorlib vessel structs: `__OTelCallTargetState__`, `__OTelCallTargetReturn__`, and `__OTelCallTargetReturn__<TReturn>`.
-- Generate Begin holders for fast arities 0 through 8, a slow `object[]` Begin holder, End/EndVoid holders, LogException holders, and matching delegate types.
+- Generate a non-generic `__OTelCallTargetTrampoline__` facade whose generic static method shape mirrors direct CallTarget instrumentation.
+- Generate Begin cache holders for fast arities 0 through 8, a slow `object[]` Begin holder, End/EndVoid holders, LogException holders, and matching delegate types.
 - Put delegate creation in the managed profiler assembly. Generated `mscorlib` static constructors only locate `CallTargetTrampolineInvoker` by reflection and call a public factory method once.
 - The managed factory resolves the global map key through native P/Invoke, creates typed dynamic-method delegates, and converts between mscorlib vessels and real CallTarget state/return structs.
 
 ## Rewrite Rules
 
 - Rewritten target methods emit only `mscorlib` TypeRefs/TypeSpecs/MethodSpecs and skip `GetIntegrationTypeRef()`.
+- Target calls are MethodSpecs on `__OTelCallTargetTrampoline__`; the first generic argument is `TMapIntegration` instead of the direct-mode `TIntegration`.
+- Trampoline mode uses the normal CallTarget rewriter control-flow implementation; only local/token setup and Begin/End/LogException/GetReturnValue call emission differ.
 - Fast Begin supports 0..8 arguments and passes every argument by reference, matching direct CallTarget fast-path shape.
 - Slow Begin supports 9+ arguments via `object[]`; slow-path by-ref arguments remain unsupported.
 - End keeps the direct CallTarget shape: store a mscorlib `CallTargetReturn` vessel, call `GetReturnValue()` for non-void methods, and store the resulting return local.
