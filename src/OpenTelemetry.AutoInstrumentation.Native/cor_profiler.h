@@ -55,6 +55,7 @@ private:
     // Startup helper variables
     WSTRING home_path;
     bool assembly_redirection_enabled_ = false;
+    bool calltarget_trampoline_enabled_ = false;
     bool first_jit_compilation_completed = false;
     bool startup_fix_required = false;
 
@@ -116,6 +117,7 @@ private:
                                mdTypeDef*     loader_type,
                                mdMethodDef*   init_method,
                                mdMethodDef*   patch_app_domain_setup_method);
+    HRESULT GenerateCallTargetTrampolineType(const ModuleID module_id);
     HRESULT ModifyAppDomainCreate(const ModuleID module_id, mdMethodDef patch_app_domain_setup_method);
     HRESULT AddIISPreStartInitFlags(const ModuleID module_id, const mdToken function_token);
 #endif
@@ -151,6 +153,9 @@ public:
     CorProfiler() = default;
 
     bool IsAttached() const;
+    bool IsCallTargetTrampolineEnabled() const;
+    bool IsProfilerAssemblyLoadedIntoAppDomain(AppDomainID app_domain_id);
+    ICorProfilerInfo7* GetCorProfilerInfo() const;
 
     WSTRING GetBytecodeInstrumentationAssembly() const;
 

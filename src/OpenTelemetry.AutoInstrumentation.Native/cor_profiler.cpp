@@ -111,6 +111,7 @@ HRESULT STDMETHODCALLTYPE CorProfiler::Initialize(IUnknown* cor_profiler_info_un
 
     // code is ready to get runtime information
     runtime_information_ = GetRuntimeInformation(this->info_);
+    calltarget_trampoline_enabled_ = runtime_information_.is_desktop() && trace::IsCallTargetTrampolineEnabled();
 
     if (Logger::IsDebugEnabled())
     {
@@ -226,6 +227,11 @@ HRESULT STDMETHODCALLTYPE CorProfiler::Initialize(IUnknown* cor_profiler_info_un
     else
     {
         Logger::Info("JIT Inlining is enabled.");
+    }
+
+    if (calltarget_trampoline_enabled_)
+    {
+        Logger::Info("CallTarget trampoline mode is enabled.");
     }
 
     if (DisableOptimizations())
@@ -699,6 +705,17 @@ HRESULT STDMETHODCALLTYPE CorProfiler::ModuleLoadFinished(ModuleID module_id, HR
                     Logger::Warn("Failed to patch AppDomain creation, module id ", module_id, ", result ", hr);
                 }
             }
+
+            if (calltarget_trampoline_enabled_)
+            {
+                hr = GenerateCallTargetTrampolineType(module_id);
+                if (FAILED(hr))
+                {
+                    Logger::Error("Failed to inject CallTarget trampoline type in mscorlib, module id ", module_id,
+                                  ", result ", hr);
+                    calltarget_trampoline_enabled_ = false;
+                }
+            }
         }
 #endif
 
@@ -1058,6 +1075,21 @@ bool CorProfiler::IsAttached() const
     return is_attached_;
 }
 
+bool CorProfiler::IsCallTargetTrampolineEnabled() const
+{
+    return calltarget_trampoline_enabled_;
+}
+
+bool CorProfiler::IsProfilerAssemblyLoadedIntoAppDomain(AppDomainID app_domain_id)
+{
+    return ProfilerAssemblyIsLoadedIntoAppDomain(app_domain_id);
+}
+
+ICorProfilerInfo7* CorProfiler::GetCorProfilerInfo() const
+{
+    return info_;
+}
+
 void CorProfiler::AddInstrumentations(WCHAR* id, CallTargetDefinition* items, int size)
 {
     auto    _             = trace::Stats::Instance()->InitializeProfilerMeasure();
@@ -1339,6 +1371,14 @@ void CorProfiler::InitializeTraceMethods(WCHAR* id,
 HRESULT STDMETHODCALLTYPE CorProfiler::GetAssemblyReferences(const WCHAR*                           wszAssemblyPath,
                                                              ICorProfilerAssemblyReferenceProvider* pAsmRefProvider)
 {
+    if (calltarget_trampoline_enabled_)
+    {
+        Logger::Debug("GetAssemblyReferences skipping managed profiler assembly closure in CallTarget trampoline mode. "
+                      "AssemblyPath=",
+                      wszAssemblyPath);
+        return S_OK;
+    }
+
     if (IsAzureAppServices())
     {
         Logger::Debug(
@@ -2099,6 +2139,369 @@ HRESULT CorProfiler::ModifyAppDomainCreate(const ModuleID module_id, mdMethodDef
         }
     }
 
+    return S_OK;
+}
+
+// clang-format off
+// Generates this conceptual C# shape into mscorlib:
+//
+// public static class __OTelCallTargetTrampoline__
+// {
+//     public static object Begin(RuntimeMethodHandle targetMethod, RuntimeTypeHandle targetType,
+//         string integrationAssembly, string integrationType, object instance, object[] args)
+//     {
+//         Type integration = Assembly.Load(integrationAssembly).GetType(integrationType, throwOnError: true);
+//         Type target = Type.GetTypeFromHandle(targetType);
+//         Type invoker = Assembly.Load(integrationAssembly).GetType(
+//             "OpenTelemetry.AutoInstrumentation.CallTarget.CallTargetTrampolineInvoker",
+//             throwOnError: true);
+//         MethodInfo begin = invoker.GetMethod("Begin", BindingFlags.Public | BindingFlags.Static);
+//         return begin.Invoke(null, new object[] { integration, target, instance, args });
+//     }
+//
+//     public static TReturn End<TReturn>(RuntimeMethodHandle targetMethod, RuntimeTypeHandle targetType,
+//         string integrationAssembly, string integrationType, object instance, TReturn returnValue,
+//         Exception exception, object state)
+//     {
+//         Type integration = Assembly.Load(integrationAssembly).GetType(integrationType, throwOnError: true);
+//         Type target = Type.GetTypeFromHandle(targetType);
+//         Type invoker = Assembly.Load(integrationAssembly).GetType(
+//             "OpenTelemetry.AutoInstrumentation.CallTarget.CallTargetTrampolineInvoker",
+//             throwOnError: true);
+//         MethodInfo end = invoker.GetMethod("End", BindingFlags.Public | BindingFlags.Static);
+//         return (TReturn)end.Invoke(
+//             null, new object[] { integration, target, typeof(TReturn), instance, returnValue, exception, state });
+//     }
+//
+//     public static void EndVoid(RuntimeMethodHandle targetMethod, RuntimeTypeHandle targetType,
+//         string integrationAssembly, string integrationType, object instance, Exception exception, object state)
+//     {
+//         Type integration = Assembly.Load(integrationAssembly).GetType(integrationType, throwOnError: true);
+//         Type target = Type.GetTypeFromHandle(targetType);
+//         Type invoker = Assembly.Load(integrationAssembly).GetType(
+//             "OpenTelemetry.AutoInstrumentation.CallTarget.CallTargetTrampolineInvoker",
+//             throwOnError: true);
+//         MethodInfo end = invoker.GetMethod("EndVoid", BindingFlags.Public | BindingFlags.Static);
+//         end.Invoke(null, new object[] { integration, target, instance, exception, state });
+//     }
+//
+//     public static void LogException(RuntimeMethodHandle targetMethod, RuntimeTypeHandle targetType,
+//         string integrationAssembly, string integrationType, Exception exception)
+//     {
+//         Type integration = Assembly.Load(integrationAssembly).GetType(integrationType, throwOnError: true);
+//         Type target = Type.GetTypeFromHandle(targetType);
+//         Type invoker = Assembly.Load(integrationAssembly).GetType(
+//             "OpenTelemetry.AutoInstrumentation.CallTarget.CallTargetTrampolineInvoker",
+//             throwOnError: true);
+//         MethodInfo log = invoker.GetMethod("LogException", BindingFlags.Public | BindingFlags.Static);
+//         log.Invoke(null, new object[] { integration, target, exception });
+//     }
+// }
+// clang-format on
+HRESULT CorProfiler::GenerateCallTargetTrampolineType(const ModuleID module_id)
+{
+    const auto& module_info = GetModuleInfo(this->info_, module_id);
+    if (!module_info.IsValid())
+    {
+        Logger::Warn("GenerateCallTargetTrampolineType: failed to get module info ", module_id);
+        return E_FAIL;
+    }
+
+    ComPtr<IUnknown> metadata_interfaces;
+    auto             hr = this->info_->GetModuleMetaData(module_id, ofRead | ofWrite, IID_IMetaDataImport2,
+                                                         metadata_interfaces.GetAddressOf());
+    if (FAILED(hr))
+    {
+        Logger::Warn("GenerateCallTargetTrampolineType: failed to get metadata interface for ", module_id);
+        return hr;
+    }
+
+    const auto& metadata_import = metadata_interfaces.As<IMetaDataImport2>(IID_IMetaDataImport);
+    const auto& metadata_emit   = metadata_interfaces.As<IMetaDataEmit2>(IID_IMetaDataEmit);
+    MemberResolver resolver(metadata_import, metadata_emit);
+
+    const mdAssemblyRef corlib_ref = mdTokenNil;
+    auto get_corlib_type = [&](LPCWSTR name, mdToken* token) -> HRESULT {
+        hr = resolver.GetTypeRefOrDefByName(corlib_ref, name, token);
+        if (FAILED(hr))
+        {
+            Logger::Warn("GenerateCallTargetTrampolineType: failed to resolve ", WSTRING(name));
+        }
+        return hr;
+    };
+
+    mdToken system_object_token, system_string_token, system_exception_token, system_type_token;
+    mdToken system_assembly_token, system_method_info_token, system_method_base_token, system_binding_flags_token;
+    mdToken runtime_method_handle_token, runtime_type_handle_token;
+    IfFailRet(get_corlib_type(SystemObject, &system_object_token));
+    IfFailRet(get_corlib_type(SystemString, &system_string_token));
+    IfFailRet(get_corlib_type(SystemException, &system_exception_token));
+    IfFailRet(get_corlib_type(SystemTypeName, &system_type_token));
+    IfFailRet(get_corlib_type(WStr("System.Reflection.Assembly"), &system_assembly_token));
+    IfFailRet(get_corlib_type(WStr("System.Reflection.MethodInfo"), &system_method_info_token));
+    IfFailRet(get_corlib_type(WStr("System.Reflection.MethodBase"), &system_method_base_token));
+    IfFailRet(get_corlib_type(WStr("System.Reflection.BindingFlags"), &system_binding_flags_token));
+    IfFailRet(get_corlib_type(RuntimeMethodHandleTypeName, &runtime_method_handle_token));
+    IfFailRet(get_corlib_type(RuntimeTypeHandleTypeName, &runtime_type_handle_token));
+
+    SignatureBuilder::Type object_type{SignatureBuilder::BuiltIn::Object};
+    SignatureBuilder::Class object_class{system_object_token};
+    SignatureBuilder::Class string_class{system_string_token};
+    SignatureBuilder::Class exception_class{system_exception_token};
+    SignatureBuilder::Class type_class{system_type_token};
+    SignatureBuilder::Array object_array{object_type};
+    SignatureBuilder::ValueType runtime_method_handle_value{runtime_method_handle_token};
+    SignatureBuilder::ValueType runtime_type_handle_value{runtime_type_handle_token};
+    SignatureBuilder::ValueType binding_flags_value{system_binding_flags_token};
+
+    mdTypeDef trampoline_type;
+    hr = metadata_emit->DefineTypeDef(WStr("__OTelCallTargetTrampoline__"), tdAbstract | tdSealed | tdPublic,
+                                      system_object_token, NULL, &trampoline_type);
+    if (FAILED(hr))
+    {
+        Logger::Warn("GenerateCallTargetTrampolineType: DefineTypeDef __OTelCallTargetTrampoline__ failed");
+        return hr;
+    }
+
+    auto define_generic_params = [&](mdMethodDef method, const std::vector<WSTRING>& names) -> HRESULT {
+        for (ULONG i = 0; i < names.size(); i++)
+        {
+            mdGenericParam generic_param;
+            hr = metadata_emit->DefineGenericParam(method, i, gpNonVariant, names[i].c_str(), 0, nullptr,
+                                                   &generic_param);
+            if (FAILED(hr))
+            {
+                Logger::Warn("GenerateCallTargetTrampolineType: DefineGenericParam failed for ", names[i]);
+                return hr;
+            }
+        }
+        return S_OK;
+    };
+
+    auto make_mvar_type_spec = [&](ULONG index, mdTypeSpec* token) -> HRESULT {
+        SignatureBuilder signature;
+        signature.PushRawByte(ELEMENT_TYPE_MVAR).PushCompressedData(index);
+        return metadata_emit->GetTokenFromTypeSpec(signature.Head(), signature.Size(), token);
+    };
+
+    mdTypeSpec mvar0_type_spec;
+    IfFailRet(make_mvar_type_spec(0, &mvar0_type_spec));
+
+    mdMethodDef begin_method, end_method, end_void_method, log_exception_method;
+    {
+        SignatureBuilder::StaticMethod signature{
+            object_type,
+            {runtime_method_handle_value, runtime_type_handle_value, string_class, string_class, object_type,
+             object_array}};
+        IfFailRet(metadata_emit->DefineMethod(trampoline_type, WStr("Begin"), mdPublic | mdHideBySig | mdStatic,
+                                              signature.Head(), signature.Size(), 0, 0, &begin_method));
+    }
+    {
+        SignatureBuilder signature;
+        signature.PushRawByte(IMAGE_CEE_CS_CALLCONV_GENERIC)
+            .PushCompressedData(1)
+            .PushCompressedData(8)
+            .PushRawByte(ELEMENT_TYPE_MVAR)
+            .PushCompressedData(0)
+            .Push(runtime_method_handle_value)
+            .Push(runtime_type_handle_value)
+            .Push(string_class)
+            .Push(string_class)
+            .Push(object_type)
+            .PushRawByte(ELEMENT_TYPE_MVAR)
+            .PushCompressedData(0)
+            .Push(exception_class)
+            .Push(object_type);
+        IfFailRet(metadata_emit->DefineMethod(trampoline_type, WStr("End"), mdPublic | mdHideBySig | mdStatic,
+                                              signature.Head(), signature.Size(), 0, 0, &end_method));
+        IfFailRet(define_generic_params(end_method, {WStr("TReturn")}));
+    }
+    {
+        SignatureBuilder::StaticMethod signature{
+            SignatureBuilder::Type{SignatureBuilder::BuiltIn::Void},
+            {runtime_method_handle_value, runtime_type_handle_value, string_class, string_class, object_type,
+             exception_class, object_type}};
+        IfFailRet(metadata_emit->DefineMethod(trampoline_type, WStr("EndVoid"), mdPublic | mdHideBySig | mdStatic,
+                                              signature.Head(), signature.Size(), 0, 0, &end_void_method));
+    }
+    {
+        SignatureBuilder::StaticMethod signature{
+            SignatureBuilder::Type{SignatureBuilder::BuiltIn::Void},
+            {runtime_method_handle_value, runtime_type_handle_value, string_class, string_class, exception_class}};
+        IfFailRet(metadata_emit->DefineMethod(trampoline_type, WStr("LogException"), mdPublic | mdHideBySig | mdStatic,
+                                              signature.Head(), signature.Size(), 0, 0, &log_exception_method));
+    }
+
+    mdMemberRef type_get_type_from_handle, assembly_load, assembly_get_type, type_get_method;
+    mdMemberRef method_base_invoke;
+    {
+        SignatureBuilder::StaticMethod signature{type_class, {runtime_type_handle_value}};
+        IfFailRet(resolver.GetMemberRefOrDef(system_type_token, GetTypeFromHandleMethodName, signature.Head(),
+                                             signature.Size(), &type_get_type_from_handle));
+    }
+    {
+        SignatureBuilder::StaticMethod signature{SignatureBuilder::Class{system_assembly_token}, {string_class}};
+        IfFailRet(resolver.GetMemberRefOrDef(system_assembly_token, WStr("Load"), signature.Head(), signature.Size(),
+                                             &assembly_load));
+    }
+    {
+        SignatureBuilder::InstanceMethod signature{type_class, {string_class, SignatureBuilder::BuiltIn::Boolean}};
+        IfFailRet(resolver.GetMemberRefOrDef(system_assembly_token, WStr("GetType"), signature.Head(),
+                                             signature.Size(), &assembly_get_type));
+    }
+    {
+        SignatureBuilder::InstanceMethod signature{SignatureBuilder::Class{system_method_info_token},
+                                                   {string_class, binding_flags_value}};
+        IfFailRet(resolver.GetMemberRefOrDef(system_type_token, WStr("GetMethod"), signature.Head(),
+                                             signature.Size(), &type_get_method));
+    }
+    {
+        SignatureBuilder::InstanceMethod signature{object_type, {object_type, object_array}};
+        IfFailRet(resolver.GetMemberRefOrDef(system_method_base_token, WStr("Invoke"), signature.Head(),
+                                             signature.Size(), &method_base_invoke));
+    }
+
+    auto emit_arg = [](ILRewriter& rewriter, ILInstr* position, UINT16 index) {
+        static const std::vector<OPCODE> opcodes = {CEE_LDARG_0, CEE_LDARG_1, CEE_LDARG_2, CEE_LDARG_3};
+        ILInstr* instr = rewriter.NewILInstr();
+        if (index <= 3) { instr->m_opcode = opcodes[index]; }
+        else { instr->m_opcode = CEE_LDARG_S; instr->m_Arg8 = static_cast<UINT8>(index); }
+        rewriter.InsertBefore(position, instr);
+        return instr;
+    };
+    auto emit_i4 = [](ILRewriter& rewriter, ILInstr* position, INT32 value) {
+        static const std::vector<OPCODE> opcodes = {CEE_LDC_I4_0, CEE_LDC_I4_1, CEE_LDC_I4_2, CEE_LDC_I4_3,
+                                                    CEE_LDC_I4_4, CEE_LDC_I4_5, CEE_LDC_I4_6, CEE_LDC_I4_7,
+                                                    CEE_LDC_I4_8};
+        ILInstr* instr = rewriter.NewILInstr();
+        if (value >= 0 && value <= 8) { instr->m_opcode = opcodes[value]; }
+        else { instr->m_opcode = CEE_LDC_I4_S; instr->m_Arg8 = static_cast<INT8>(value); }
+        rewriter.InsertBefore(position, instr);
+        return instr;
+    };
+    auto emit_token = [](ILRewriter& rewriter, ILInstr* position, OPCODE op_code, mdToken token) {
+        ILInstr* instr = rewriter.NewILInstr(); instr->m_opcode = op_code; instr->m_Arg32 = token;
+        rewriter.InsertBefore(position, instr); return instr;
+    };
+    auto emit_simple = [](ILRewriter& rewriter, ILInstr* position, OPCODE op_code) {
+        ILInstr* instr = rewriter.NewILInstr(); instr->m_opcode = op_code;
+        rewriter.InsertBefore(position, instr); return instr;
+    };
+    auto emit_string = [&](ILRewriter& rewriter, ILInstr* position, const WSTRING& value) {
+        mdString token;
+        metadata_emit->DefineUserString(value.c_str(), static_cast<ULONG>(value.size()), &token);
+        return emit_token(rewriter, position, CEE_LDSTR, token);
+    };
+    auto emit_load_integration_type = [&](ILRewriter& rewriter, ILInstr* position) {
+        emit_arg(rewriter, position, 2);
+        emit_token(rewriter, position, CEE_CALL, assembly_load);
+        emit_arg(rewriter, position, 3);
+        emit_i4(rewriter, position, 1);
+        emit_token(rewriter, position, CEE_CALLVIRT, assembly_get_type);
+    };
+    auto emit_load_target_type = [&](ILRewriter& rewriter, ILInstr* position) {
+        emit_arg(rewriter, position, 1);
+        emit_token(rewriter, position, CEE_CALL, type_get_type_from_handle);
+    };
+    auto emit_load_return_type = [&](ILRewriter& rewriter, ILInstr* position) {
+        emit_token(rewriter, position, CEE_LDTOKEN, mvar0_type_spec);
+        emit_token(rewriter, position, CEE_CALL, type_get_type_from_handle);
+    };
+    auto emit_get_dispatcher_method = [&](ILRewriter& rewriter, ILInstr* position, const WSTRING& name) {
+        emit_arg(rewriter, position, 2);
+        emit_token(rewriter, position, CEE_CALL, assembly_load);
+        emit_string(rewriter, position, WStr("OpenTelemetry.AutoInstrumentation.CallTarget.CallTargetTrampolineInvoker"));
+        emit_i4(rewriter, position, 1);
+        emit_token(rewriter, position, CEE_CALLVIRT, assembly_get_type);
+        emit_string(rewriter, position, name);
+        emit_i4(rewriter, position, 24);
+        emit_token(rewriter, position, CEE_CALLVIRT, type_get_method);
+    };
+    auto emit_begin_array_item = [&](ILRewriter& rewriter, ILInstr* position, INT32 index) {
+        emit_simple(rewriter, position, CEE_DUP);
+        emit_i4(rewriter, position, index);
+    };
+    auto emit_end_array_item = [&](ILRewriter& rewriter, ILInstr* position) {
+        emit_simple(rewriter, position, CEE_STELEM_REF);
+    };
+    auto export_method = [&](mdMethodDef method, ILRewriter& rewriter) -> HRESULT {
+        hr = rewriter.Export();
+        if (FAILED(hr)) { Logger::Warn("GenerateCallTargetTrampolineType: ILRewriter.Export failed for method ", method); }
+        return hr;
+    };
+
+    {
+        ILRewriter rewriter(this->info_, nullptr, module_id, begin_method);
+        rewriter.InitializeTiny();
+        ILInstr* p = rewriter.GetILList()->m_pNext;
+        emit_get_dispatcher_method(rewriter, p, WStr("Begin"));
+        emit_simple(rewriter, p, CEE_LDNULL);
+        emit_i4(rewriter, p, 4);
+        emit_token(rewriter, p, CEE_NEWARR, system_object_token);
+        emit_begin_array_item(rewriter, p, 0); emit_load_integration_type(rewriter, p); emit_end_array_item(rewriter, p);
+        emit_begin_array_item(rewriter, p, 1); emit_load_target_type(rewriter, p); emit_end_array_item(rewriter, p);
+        emit_begin_array_item(rewriter, p, 2); emit_arg(rewriter, p, 4); emit_end_array_item(rewriter, p);
+        emit_begin_array_item(rewriter, p, 3); emit_arg(rewriter, p, 5); emit_end_array_item(rewriter, p);
+        emit_token(rewriter, p, CEE_CALLVIRT, method_base_invoke);
+        emit_simple(rewriter, p, CEE_RET);
+        IfFailRet(export_method(begin_method, rewriter));
+    }
+    {
+        ILRewriter rewriter(this->info_, nullptr, module_id, end_method);
+        rewriter.InitializeTiny();
+        ILInstr* p = rewriter.GetILList()->m_pNext;
+        emit_get_dispatcher_method(rewriter, p, WStr("End"));
+        emit_simple(rewriter, p, CEE_LDNULL);
+        emit_i4(rewriter, p, 7);
+        emit_token(rewriter, p, CEE_NEWARR, system_object_token);
+        emit_begin_array_item(rewriter, p, 0); emit_load_integration_type(rewriter, p); emit_end_array_item(rewriter, p);
+        emit_begin_array_item(rewriter, p, 1); emit_load_target_type(rewriter, p); emit_end_array_item(rewriter, p);
+        emit_begin_array_item(rewriter, p, 2); emit_load_return_type(rewriter, p); emit_end_array_item(rewriter, p);
+        emit_begin_array_item(rewriter, p, 3); emit_arg(rewriter, p, 4); emit_end_array_item(rewriter, p);
+        emit_begin_array_item(rewriter, p, 4); emit_arg(rewriter, p, 5); emit_token(rewriter, p, CEE_BOX, mvar0_type_spec); emit_end_array_item(rewriter, p);
+        emit_begin_array_item(rewriter, p, 5); emit_arg(rewriter, p, 6); emit_end_array_item(rewriter, p);
+        emit_begin_array_item(rewriter, p, 6); emit_arg(rewriter, p, 7); emit_end_array_item(rewriter, p);
+        emit_token(rewriter, p, CEE_CALLVIRT, method_base_invoke);
+        emit_token(rewriter, p, CEE_UNBOX_ANY, mvar0_type_spec);
+        emit_simple(rewriter, p, CEE_RET);
+        IfFailRet(export_method(end_method, rewriter));
+    }
+    {
+        ILRewriter rewriter(this->info_, nullptr, module_id, end_void_method);
+        rewriter.InitializeTiny();
+        ILInstr* p = rewriter.GetILList()->m_pNext;
+        emit_get_dispatcher_method(rewriter, p, WStr("EndVoid"));
+        emit_simple(rewriter, p, CEE_LDNULL);
+        emit_i4(rewriter, p, 5);
+        emit_token(rewriter, p, CEE_NEWARR, system_object_token);
+        emit_begin_array_item(rewriter, p, 0); emit_load_integration_type(rewriter, p); emit_end_array_item(rewriter, p);
+        emit_begin_array_item(rewriter, p, 1); emit_load_target_type(rewriter, p); emit_end_array_item(rewriter, p);
+        emit_begin_array_item(rewriter, p, 2); emit_arg(rewriter, p, 4); emit_end_array_item(rewriter, p);
+        emit_begin_array_item(rewriter, p, 3); emit_arg(rewriter, p, 5); emit_end_array_item(rewriter, p);
+        emit_begin_array_item(rewriter, p, 4); emit_arg(rewriter, p, 6); emit_end_array_item(rewriter, p);
+        emit_token(rewriter, p, CEE_CALLVIRT, method_base_invoke);
+        emit_simple(rewriter, p, CEE_POP);
+        emit_simple(rewriter, p, CEE_RET);
+        IfFailRet(export_method(end_void_method, rewriter));
+    }
+    {
+        ILRewriter rewriter(this->info_, nullptr, module_id, log_exception_method);
+        rewriter.InitializeTiny();
+        ILInstr* p = rewriter.GetILList()->m_pNext;
+        emit_get_dispatcher_method(rewriter, p, WStr("LogException"));
+        emit_simple(rewriter, p, CEE_LDNULL);
+        emit_i4(rewriter, p, 3);
+        emit_token(rewriter, p, CEE_NEWARR, system_object_token);
+        emit_begin_array_item(rewriter, p, 0); emit_load_integration_type(rewriter, p); emit_end_array_item(rewriter, p);
+        emit_begin_array_item(rewriter, p, 1); emit_load_target_type(rewriter, p); emit_end_array_item(rewriter, p);
+        emit_begin_array_item(rewriter, p, 2); emit_arg(rewriter, p, 4); emit_end_array_item(rewriter, p);
+        emit_token(rewriter, p, CEE_CALLVIRT, method_base_invoke);
+        emit_simple(rewriter, p, CEE_POP);
+        emit_simple(rewriter, p, CEE_RET);
+        IfFailRet(export_method(log_exception_method, rewriter));
+    }
+
+    Logger::Info("GenerateCallTargetTrampolineType: __OTelCallTargetTrampoline__ injected into mscorlib.");
     return S_OK;
 }
 
