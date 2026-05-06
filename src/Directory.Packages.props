@@ -23,6 +23,7 @@
     <PackageVersion Include="OpenTelemetry.Instrumentation.Runtime" Version="1.15.1" />
     <PackageVersion Include="OpenTelemetry.Instrumentation.SqlClient" Version="1.15.2" />
     <PackageVersion Include="OpenTelemetry.Instrumentation.StackExchangeRedis" Version="1.15.1-beta.1" />
+    <PackageVersion Include="OpenTelemetry.OpAmp.Client" Version="0.3.0-alpha.1" />
     <PackageVersion Include="OpenTelemetry.Shims.OpenTracing" Version="1.15.3-beta.1" />
     <PackageVersion Include="OpenTelemetry.Resources.Azure" Version="1.15.1-beta.1" />
     <PackageVersion Include="OpenTelemetry.Resources.Container" Version="1.15.1-beta.1" />
