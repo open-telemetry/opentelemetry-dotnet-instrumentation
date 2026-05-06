@@ -579,7 +579,7 @@ void NamingHelper::GetFunctionName(FunctionIdentifier function_identifier, trace
 
     ComPtr<IMetaDataImport2> metadata_import;
     HRESULT                  hr = info7_->GetModuleMetaData(function_identifier.module_id, ofRead, IID_IMetaDataImport2,
-                                                            reinterpret_cast<IUnknown**>(&metadata_import));
+                                                            reinterpret_cast<IUnknown**>(metadata_import.GetAddressOf()));
     if (FAILED(hr))
     {
         trace::Logger::Debug("GetModuleMetaData failed. HRESULT=0x", std::setfill('0'), std::setw(8), std::hex, hr);
@@ -802,8 +802,8 @@ static std::unordered_set<ThreadID> EnumerateThreads(ICorProfilerInfo7* info7)
 {
     std::unordered_set<ThreadID> threads;
 
-    ICorProfilerThreadEnum* thread_enum = nullptr;
-    HRESULT                 hr          = info7->EnumThreads(&thread_enum);
+    ComPtr<ICorProfilerThreadEnum> thread_enum;
+    HRESULT                        hr = info7->EnumThreads(thread_enum.GetAddressOf());
     if (FAILED(hr))
     {
         trace::Logger::Debug("Could not EnumThreads. HRESULT=0x", std::setfill('0'), std::setw(8), std::hex, hr);
