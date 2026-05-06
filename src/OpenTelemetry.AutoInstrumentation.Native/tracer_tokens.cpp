@@ -162,21 +162,6 @@ TracerTokens::TracerTokens(ModuleMetadata* module_metadata_ptr) : CallTargetToke
     }
 }
 
-mdTypeRef TracerTokens::GetObjectTypeRef()
-{
-    return CallTargetTokens::GetObjectTypeRef();
-}
-
-mdTypeRef TracerTokens::GetExceptionTypeRef()
-{
-    return CallTargetTokens::GetExceptionTypeRef();
-}
-
-mdAssemblyRef TracerTokens::GetCorLibAssemblyRef()
-{
-    return CallTargetTokens::GetCorLibAssemblyRef();
-}
-
 bool TracerTokens::ShouldLoadArgumentsByRef(const bool ignoreByRefInstrumentation)
 {
     return !ignoreByRefInstrumentation && enable_by_ref_instrumentation;
@@ -185,23 +170,6 @@ bool TracerTokens::ShouldLoadArgumentsByRef(const bool ignoreByRefInstrumentatio
 bool TracerTokens::ShouldLoadCallTargetStateByRef()
 {
     return enable_calltarget_state_by_ref;
-}
-
-HRESULT TracerTokens::ModifyLocalSigAndInitialize(void*         rewriterWrapperPtr,
-                                                  FunctionInfo* functionInfo,
-                                                  ULONG*        callTargetStateIndex,
-                                                  ULONG*        exceptionIndex,
-                                                  ULONG*        callTargetReturnIndex,
-                                                  ULONG*        returnValueIndex,
-                                                  mdToken*      callTargetStateToken,
-                                                  mdToken*      exceptionToken,
-                                                  mdToken*      callTargetReturnToken,
-                                                  ILInstr**     firstInstruction)
-{
-    return CallTargetTokens::ModifyLocalSigAndInitialize(rewriterWrapperPtr, functionInfo, callTargetStateIndex,
-                                                         exceptionIndex, callTargetReturnIndex, returnValueIndex,
-                                                         callTargetStateToken, exceptionToken, callTargetReturnToken,
-                                                         firstInstruction);
 }
 
 HRESULT TracerTokens::WriteBeginMethod(void*                             rewriterWrapperPtr,
@@ -610,14 +578,6 @@ HRESULT TracerTokens::WriteEndReturnMemberRef(void*           rewriterWrapperPtr
 
     *instruction = rewriterWrapper->CallMember(endMethodSpec, false);
     return S_OK;
-}
-
-HRESULT TracerTokens::WriteCallTargetReturnGetReturnValue(void*      rewriterWrapperPtr,
-                                                          mdTypeSpec callTargetReturnTypeSpec,
-                                                          ILInstr**  instruction)
-{
-    return CallTargetTokens::WriteCallTargetReturnGetReturnValue(rewriterWrapperPtr, callTargetReturnTypeSpec,
-                                                                 instruction);
 }
 
 // write log exception

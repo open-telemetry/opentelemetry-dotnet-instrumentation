@@ -131,6 +131,7 @@ HRESULT TracerMethodRewriter::Rewrite(RejitHandlerModule* moduleHandler, RejitHa
             return S_FALSE;
         }
 
+        integration_type_ref = trampolineTokens.GetIntegrationTypeRef();
         tracerTokens = &trampolineTokens;
     }
     else if (!corProfiler->GetIntegrationTypeRef(module_metadata, module_id, *integration_definition,

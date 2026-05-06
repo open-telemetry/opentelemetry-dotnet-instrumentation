@@ -32,14 +32,19 @@ namespace trace
 //     public object Activity;
 //     public object State;
 //     public object StartTime;
+//     public static __OTelCallTargetState__ GetDefault() => default;
 // }
 //
-// public struct __OTelCallTargetReturn__ { }
+// public struct __OTelCallTargetReturn__
+// {
+//     public static __OTelCallTargetReturn__ GetDefault() => default;
+// }
 //
 // public struct __OTelCallTargetReturn__<TReturn>
 // {
 //     private TReturn ReturnValue;
 //     public __OTelCallTargetReturn__(TReturn returnValue) { ReturnValue = returnValue; }
+//     public static __OTelCallTargetReturn__<TReturn> GetDefault() => default;
 //     public TReturn GetReturnValue() => ReturnValue;
 // }
 //
@@ -55,6 +60,8 @@ namespace trace
 //
 // public static class __OTelCallTargetTrampoline__
 // {
+//     public static T GetDefaultValue<T>() => default;
+//
 //     public static __OTelCallTargetState__ BeginMethod<TMapIntegration, TTarget, ...TArgs>(
 //         TTarget instance, ref TArg1 arg1, ..., ref TArgN argN) =>
 //         __OTelCallTargetTrampolineBegin__<TMapIntegration, TTarget, ...TArgs>
@@ -250,11 +257,29 @@ HRESULT GenerateCallTargetTrampolineType(ICorProfilerInfo7* profilerInfo,
         return get_type_spec(signature, token);
     };
 
+    auto make_mvar_type_spec = [&](ULONG index, mdTypeSpec* token) -> HRESULT {
+        std::vector<COR_SIGNATURE> signature;
+        append_mvar(signature, index);
+        return get_type_spec(signature, token);
+    };
+
     auto make_generic_type_spec = [&](mdToken open_type, bool is_value_type,
                                       const std::vector<std::vector<COR_SIGNATURE>>& args,
                                       mdTypeSpec* token) -> HRESULT {
         auto signature = generic_instance_signature(open_type, is_value_type, args);
         return get_type_spec(signature, token);
+    };
+
+    auto set_single_local_sig = [&](ILRewriter& rewriter, const std::vector<COR_SIGNATURE>& local_type) -> HRESULT {
+        std::vector<COR_SIGNATURE> signature{IMAGE_CEE_CS_CALLCONV_LOCAL_SIG};
+        append_compressed_data(signature, 1);
+        signature.insert(signature.end(), local_type.begin(), local_type.end());
+
+        mdSignature localSignatureToken;
+        IfFailRet(metadata_emit->GetTokenFromSig(signature.data(), static_cast<ULONG>(signature.size()),
+                                                 &localSignatureToken));
+        rewriter.SetTkLocalVarSig(localSignatureToken);
+        return S_OK;
     };
 
     std::vector<COR_SIGNATURE> void_sig{ELEMENT_TYPE_VOID};
@@ -344,6 +369,27 @@ HRESULT GenerateCallTargetTrampolineType(ICorProfilerInfo7* profilerInfo,
         return hr;
     };
 
+    auto define_static_default_method = [&](mdTypeDef type,
+                                            const WSTRING& methodName,
+                                            const std::vector<COR_SIGNATURE>& returnType,
+                                            mdToken initObjToken) -> HRESULT {
+        auto methodSig = static_method_signature(returnType, {});
+        mdMethodDef method;
+        IfFailRet(metadata_emit->DefineMethod(type, methodName.c_str(), mdPublic | mdHideBySig | mdStatic,
+                                              methodSig.data(), static_cast<ULONG>(methodSig.size()), 0, 0, &method));
+
+        ILRewriter rewriter(profilerInfo, nullptr, module_id, method);
+        rewriter.InitializeTiny();
+        IfFailRet(set_single_local_sig(rewriter, returnType));
+
+        ILInstr* p = rewriter.GetILList()->m_pNext;
+        emit_simple(rewriter, p, CEE_LDLOCA_S)->m_Arg8 = 0;
+        emit_token(rewriter, p, CEE_INITOBJ, initObjToken);
+        emit_simple(rewriter, p, CEE_LDLOC_0);
+        emit_simple(rewriter, p, CEE_RET);
+        return export_method(method, rewriter);
+    };
+
     const WSTRING factoryTypeName = WStr("OpenTelemetry.AutoInstrumentation.CallTarget.CallTargetTrampolineInvoker");
     auto emit_factory_call = [&](ILRewriter& rewriter,
                                  ILInstr* position,
@@ -390,10 +436,20 @@ HRESULT GenerateCallTargetTrampolineType(ICorProfilerInfo7* profilerInfo,
         IfFailRet(metadata_emit->DefineField(state_type, WStr("StartTime"), fdPublic, objectFieldSig.data(),
                                              static_cast<ULONG>(objectFieldSig.size()), 0, nullptr, 0, &field));
     }
+    {
+        std::vector<COR_SIGNATURE> stateReturnSig;
+        append_type_token(stateReturnSig, state_type, true);
+        IfFailRet(define_static_default_method(state_type, WStr("GetDefault"), stateReturnSig, state_type));
+    }
 
     mdTypeDef return_void_type;
     IfFailRet(metadata_emit->DefineTypeDef(WStr("__OTelCallTargetReturn__"), tdPublic | tdSequentialLayout | tdSealed,
                                            system_value_type_token, nullptr, &return_void_type));
+    {
+        std::vector<COR_SIGNATURE> returnVoidSig;
+        append_type_token(returnVoidSig, return_void_type, true);
+        IfFailRet(define_static_default_method(return_void_type, WStr("GetDefault"), returnVoidSig, return_void_type));
+    }
 
     mdTypeDef return_generic_type;
     mdFieldDef return_value_field;
@@ -408,17 +464,35 @@ HRESULT GenerateCallTargetTrampolineType(ICorProfilerInfo7* profilerInfo,
         IfFailRet(metadata_emit->DefineField(return_generic_type, WStr("ReturnValue"), fdPrivate, fieldSig.data(),
                                              static_cast<ULONG>(fieldSig.size()), 0, nullptr, 0, &return_value_field));
     }
-    mdMethodDef return_ctor, get_return_value_method;
+    mdMethodDef return_ctor, return_generic_get_default, get_return_value_method;
     {
         std::vector<COR_SIGNATURE> returnVar;
         append_var(returnVar, 0);
+        auto returnGenericSig = generic_instance_signature(return_generic_type, true, {returnVar});
+        mdTypeSpec returnGenericTypeSpec;
+        IfFailRet(make_generic_type_spec(return_generic_type, true, {returnVar}, &returnGenericTypeSpec));
+
+        auto getDefaultSig = static_method_signature(returnGenericSig, {});
+        IfFailRet(metadata_emit->DefineMethod(return_generic_type, WStr("GetDefault"), mdPublic | mdHideBySig | mdStatic,
+                                              getDefaultSig.data(), static_cast<ULONG>(getDefaultSig.size()), 0, 0,
+                                              &return_generic_get_default));
+        ILRewriter defaultRewriter(profilerInfo, nullptr, module_id, return_generic_get_default);
+        defaultRewriter.InitializeTiny();
+        IfFailRet(set_single_local_sig(defaultRewriter, returnGenericSig));
+        ILInstr* p = defaultRewriter.GetILList()->m_pNext;
+        emit_simple(defaultRewriter, p, CEE_LDLOCA_S)->m_Arg8 = 0;
+        emit_token(defaultRewriter, p, CEE_INITOBJ, returnGenericTypeSpec);
+        emit_simple(defaultRewriter, p, CEE_LDLOC_0);
+        emit_simple(defaultRewriter, p, CEE_RET);
+        IfFailRet(export_method(return_generic_get_default, defaultRewriter));
+
         auto ctorSig = instance_method_signature(void_sig, {returnVar});
         IfFailRet(metadata_emit->DefineMethod(return_generic_type, WStr(".ctor"),
                                               mdPublic | mdHideBySig | mdSpecialName | mdRTSpecialName, ctorSig.data(),
                                               static_cast<ULONG>(ctorSig.size()), 0, 0, &return_ctor));
         ILRewriter rewriter(profilerInfo, nullptr, module_id, return_ctor);
         rewriter.InitializeTiny();
-        ILInstr* p = rewriter.GetILList()->m_pNext;
+        p = rewriter.GetILList()->m_pNext;
         emit_arg(rewriter, p, 0);
         emit_arg(rewriter, p, 1);
         emit_token(rewriter, p, CEE_STFLD, return_value_field);
@@ -447,6 +521,30 @@ HRESULT GenerateCallTargetTrampolineType(ICorProfilerInfo7* profilerInfo,
     IfFailRet(metadata_emit->DefineTypeDef(WStr("__OTelCallTargetTrampoline__"),
                                            tdPublic | tdAbstract | tdSealed, system_object_token, nullptr,
                                            &trampoline_type));
+    {
+        std::vector<COR_SIGNATURE> returnMethodVar;
+        append_mvar(returnMethodVar, 0);
+        auto getDefaultValueSig = generic_static_method_signature(1, returnMethodVar, {});
+        mdMethodDef getDefaultValueMethod;
+        IfFailRet(metadata_emit->DefineMethod(trampoline_type, WStr("GetDefaultValue"),
+                                              mdPublic | mdHideBySig | mdStatic, getDefaultValueSig.data(),
+                                              static_cast<ULONG>(getDefaultValueSig.size()), 0, 0,
+                                              &getDefaultValueMethod));
+        IfFailRet(define_generic_params(getDefaultValueMethod, {WStr("T")}));
+
+        mdTypeSpec returnMethodVarTypeSpec;
+        IfFailRet(make_mvar_type_spec(0, &returnMethodVarTypeSpec));
+
+        ILRewriter rewriter(profilerInfo, nullptr, module_id, getDefaultValueMethod);
+        rewriter.InitializeTiny();
+        IfFailRet(set_single_local_sig(rewriter, returnMethodVar));
+        ILInstr* p = rewriter.GetILList()->m_pNext;
+        emit_simple(rewriter, p, CEE_LDLOCA_S)->m_Arg8 = 0;
+        emit_token(rewriter, p, CEE_INITOBJ, returnMethodVarTypeSpec);
+        emit_simple(rewriter, p, CEE_LDLOC_0);
+        emit_simple(rewriter, p, CEE_RET);
+        IfFailRet(export_method(getDefaultValueMethod, rewriter));
+    }
 
     auto define_delegate_type = [&](const WSTRING& name,
                                     const std::vector<WSTRING>& genericNames,
