@@ -576,18 +576,17 @@ void NamingHelper::GetFunctionName(FunctionIdentifier function_identifier, trace
         result.append(unknown_native_function_name);
         return;
     }
-
-    ComPtr<IMetaDataImport2> metadata_import;
-    HRESULT                  hr = info7_->GetModuleMetaData(function_identifier.module_id, ofRead, IID_IMetaDataImport2,
-                                                            reinterpret_cast<IUnknown**>(metadata_import.GetAddressOf()));
+    ComPtr<IUnknown> metadata_import_unknown;
+    HRESULT          hr = info7_->GetModuleMetaData(function_identifier.module_id, ofRead, IID_IMetaDataImport2,
+                                                    metadata_import_unknown.GetAddressOf());
     if (FAILED(hr))
     {
         trace::Logger::Debug("GetModuleMetaData failed. HRESULT=0x", std::setfill('0'), std::setw(8), std::hex, hr);
         result.append(unknown_function_name);
         return;
     }
-
-    const auto function_info = GetFunctionInfo(metadata_import, function_identifier.function_token);
+    auto       metadata_import = metadata_import_unknown.As<IMetaDataImport2>(IID_IMetaDataImport2);
+    const auto function_info   = GetFunctionInfo(metadata_import, function_identifier.function_token);
 
     if (!function_info.IsValid())
     {
