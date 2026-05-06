@@ -1,0 +1,29 @@
+name: Replace Build Artifacts
+description: Replace files or directories in a target tree using paths taken from downloaded build artifacts.
+
+inputs:
+  replace-artifacts:
+    description: Multiline list of replacements in the form <artifact_name>!<path>.
+    required: false
+    default: ""
+  target-root:
+    description: Root directory whose matching paths should be replaced.
+    required: false
+    default: bin/tracer-home
+
+runs:
+  using: composite
+  steps:
+    - name: Download replacement artifacts
+      if: ${{ inputs.replace-artifacts != '' }}
+      uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # tag: v8.0.1
+      with:
+        path: bin/ci-artifacts/replacements
+
+    - name: Replace target paths from artifacts
+      if: ${{ inputs.replace-artifacts != '' }}
+      shell: pwsh
+      run: '& "${{ github.action_path }}/replace-build-artifacts.ps1"'
+      env:
+        REPLACE_ARTIFACTS: ${{ inputs.replace-artifacts }}
+        TARGET_ROOT: ${{ inputs.target-root }}

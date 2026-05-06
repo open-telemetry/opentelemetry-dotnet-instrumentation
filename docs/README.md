@@ -16,9 +16,9 @@ to .NET applications without having to modify their source code.
 > [!WARNING]
 > The following documentation refers to the in-development version
 of OpenTelemetry .NET Automatic Instrumentation. Docs for the latest version
-([1.14.1](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/latest))
+([1.15.0](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/latest))
 can be found in [opentelemetry.io](https://opentelemetry.io/docs/zero-code/dotnet/)
-or [versioned README](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/blob/v1.14.1/docs/README.md).
+or [versioned README](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/blob/v1.15.0/docs/README.md).
 
 ---
 
@@ -54,7 +54,7 @@ OpenTelemetry .NET Automatic Instrumentation is built on top of
 [OpenTelemetry .NET](https://github.com/open-telemetry/opentelemetry-dotnet):
 
 - [Core components](https://github.com/open-telemetry/opentelemetry-dotnet/blob/main/VERSIONING.md#core-components):
-[`1.15.1`](https://github.com/open-telemetry/opentelemetry-dotnet/releases/tag/core-1.15.1)
+[`1.15.3`](https://github.com/open-telemetry/opentelemetry-dotnet/releases/tag/core-1.15.3)
 - `System.Diagnostics.DiagnosticSource`: [`10.0.0`](https://www.nuget.org/packages/System.Diagnostics.DiagnosticSource/10.0.0)
   referencing `System.Runtime.CompilerServices.Unsafe`: [`6.1.2`](https://www.nuget.org/packages/System.Runtime.CompilerServices.Unsafe/6.1.2)
 
@@ -207,17 +207,17 @@ OTEL_SERVICE_NAME=myapp OTEL_RESOURCE_ATTRIBUTES=deployment.environment.name=sta
 ```
 
 NOTE: for air-gapped environments you can provide either the installation
-archive directly with:
+file directly with:
 
 ```sh
-LOCAL_PATH=<PATH_TO_ARCHIVE> sh ./otel-dotnet-auto-install.sh
+LOCAL_PATH=<PATH_TO_INSTALLER> sh ./otel-dotnet-auto-install.sh
 ```
 
-or the folder with the archives, this has the added benefit that the install
-script will determine the correct archive to choose.
+or the folder with the files, this has the added benefit that the install
+script will determine the correct file to choose.
 
 ```sh
-DOWNLOAD_DIR=<PATH_TO_FOLDER_WITH_ARCHIVES> sh ./otel-dotnet-auto-install.sh
+DOWNLOAD_DIR=<PATH_TO_FOLDER_WITH_FILES> sh ./otel-dotnet-auto-install.sh
 ```
 
 `otel-dotnet-auto-install.sh` script
@@ -231,7 +231,7 @@ uses environment variables as parameters:
 | `TMPDIR`                | (deprecated) prefer `DOWNLOAD_DIR`                                              | No       | `$(mktemp -d)`              |
 | `DOWNLOAD_DIR`          | Folder to download the archive to. Will use local archive if it already exists  | No       | `$TMPDIR` or `$(mktemp -d)` |
 | `LOCAL_PATH`            | Full path the archive to use for installation. (ideal for air-gapped scenarios) | No       | *Calculated*                |
-| `VERSION`               | Version to download                                                             | No       | `1.14.1`                    |
+| `VERSION`               | Version to download                                                             | No       | `1.15.0`                    |
 
 [instrument.sh](../instrument.sh) script
 uses environment variables as parameters:
@@ -259,7 +259,7 @@ Example usage (run as administrator):
 #Requires -PSEdition Desktop
 
 # Download the module
-$module_url = "https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/download/v1.14.1/OpenTelemetry.DotNet.Auto.psm1"
+$module_url = "https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/download/v1.15.0/OpenTelemetry.DotNet.Auto.psm1"
 $download_path = Join-Path $env:temp "OpenTelemetry.DotNet.Auto.psm1"
 Invoke-WebRequest -Uri $module_url -OutFile $download_path -UseBasicParsing
 

@@ -26,7 +26,7 @@ internal static partial class DockerfileAnalyzer
         var dockerfile = Dockerfile.Parse(content);
         var runInstruction = GetDotnetInstallingInstruction(dockerfile);
 
-        if (runInstruction is not null)
+        if (runInstruction?.Command is not null)
         {
             runInstruction.Command = GetModifiedInstallCommand(runInstruction.Command, requestedDotnetSdkVersion);
         }
@@ -108,8 +108,8 @@ internal static partial class DockerfileAnalyzer
 
     private static string GetModifiedImageName(DotnetSdkVersion requestedDotnetSdkVersion, ImageName imageName)
     {
-        var (_, suffix) = GetSdkVersionAndSuffix(imageName);
-        var modifiedTag = $"{requestedDotnetSdkVersion.Net8SdkVersion}-{suffix}";
+        var (sdkVersion, suffix) = GetSdkVersionAndSuffix(imageName);
+        var modifiedTag = $"{GetNewVersion(sdkVersion, requestedDotnetSdkVersion)}-{suffix}";
 
         return ImageName.FormatImageName(imageName.Repository, imageName.Registry, modifiedTag, null);
     }

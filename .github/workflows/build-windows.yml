@@ -1,0 +1,20 @@
+name: Build on Windows Runner
+
+on:
+  workflow_call:
+
+env:
+  NUGET_PACKAGES: ${{ github.workspace }}/packages
+  DOTNET_CLI_TELEMETRY_OPTOUT: 1
+
+permissions:
+  contents: read
+
+jobs:
+  build-windows:
+    uses: ./.github/workflows/_build.yml
+    with:
+      artifact-name: windows-2022
+      runner: windows-2022
+      environment-type: host
+      log-directory: /c/ProgramData/OpenTelemetry .NET AutoInstrumentation/logs

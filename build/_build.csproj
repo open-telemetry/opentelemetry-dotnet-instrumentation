@@ -33,6 +33,8 @@
     <PackageReference Include="Microsoft.Build.Tasks.Core" />
   </ItemGroup>
   <ItemGroup>
+    <!-- Microsoft.System.Security.Cryptography.Xml is an indirect reference from Nuke.Common. Fixes https://github.com/advisories/GHSA-w3x6-4m5h-cxqf -->
+    <PackageReference Include="System.Security.Cryptography.Xml" />
     <PackageReference Include="DotNet.ReproducibleBuilds">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>

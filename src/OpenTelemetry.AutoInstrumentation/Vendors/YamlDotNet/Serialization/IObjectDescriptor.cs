@@ -1,4 +1,4 @@
-// This file is part of YamlDotNet - A .NET library for YAML.
+﻿// This file is part of YamlDotNet - A .NET library for YAML.
 // Copyright (c) Antoine Aubry and contributors
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy of
@@ -61,7 +61,7 @@ namespace Vendors.YamlDotNet.Serialization
         /// <returns></returns>
         public static object NonNullValue(this IObjectDescriptor objectDescriptor)
         {
-            return objectDescriptor.Value ?? throw new InvalidOperationException($"Attempted to use a IObjectDescriptor of type '{objectDescriptor.Type.FullName}' whose Value is null at a point whete it is invalid to do so. This may indicate a bug in YamlDotNet.");
+            return objectDescriptor.Value ?? throw new InvalidOperationException($"Attempted to use a IObjectDescriptor of type '{objectDescriptor.Type.FullName}' whose Value is null at a point where it is invalid to do so. This may indicate a bug in YamlDotNet.");
         }
     }
 }

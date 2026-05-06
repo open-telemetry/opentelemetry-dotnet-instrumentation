@@ -22,16 +22,10 @@ internal class Loader
     /// </summary>
     static Loader()
     {
-        // TODO: For Non-Standalone deployment (e.g. NuGet-based), we may skip AssemblyResolver or adjust it to
-        // assemblies layout in application output without /net or /netfx subdirectories (if we decide to ship all those assemblies)
-#if NET
-        // For .Net (Core) if we run in isolated context (set up by StartupHook's IsolatedAssemblyLoadContext),
-        // skip AssemblyResolver. The isolated AssemblyLoadContext already handles all assembly resolution.
-        var currentContext = System.Runtime.Loader.AssemblyLoadContext.CurrentContextualReflectionContext;
-        var isIsolated = currentContext?.Name == StartupHookConstants.IsolatedAssemblyLoadContextName;
-
-        if (!isIsolated)
-#endif
+        // Check if we should or should not skip setting up AssemblyResolver
+        var skipResolver = SkipAssemblyResolver();
+        Logger.Information($"Skip AssemblyResolver: {skipResolver}");
+        if (!skipResolver)
         {
             try
             {
@@ -56,6 +50,26 @@ internal class Loader
         {
             OtelLogging.CloseLogger(LoaderLoggerSuffix, Logger);
         }
+    }
+
+    private static bool SkipAssemblyResolver()
+    {
+#if NET
+        // For .Net (Core) if we run in isolated context (set up by StartupHook's IsolatedAssemblyLoadContext),
+        // skip AssemblyResolver. The isolated AssemblyLoadContext already handles all assembly resolution.
+        var currentContext = System.Runtime.Loader.AssemblyLoadContext.CurrentContextualReflectionContext;
+        var isIsolated = currentContext?.Name == StartupHookConstants.IsolatedAssemblyLoadContextName;
+        Logger.Information($"Loader Current Context [{currentContext}] is Isolated: {isIsolated}");
+        if (isIsolated)
+        {
+            return true;
+        }
+#endif
+
+        // Check if AssemblyResolver should be implicitly skipped for non standalone deployment where
+        // the anticipated folder structure of our dependency files is not guaraneteed (e.g. on NuGet
+        // deployment our dependencies are either flat in the application output or in the runtime folders)
+        return !DeploymentDetector.IsStandaloneDeployment(Logger);
     }
 
     private static void OnExit(object? sender, EventArgs e)
