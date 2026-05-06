@@ -33,18 +33,36 @@ protected:
 public:
     TracerTokens(ModuleMetadata* module_metadata_ptr);
 
-    HRESULT WriteBeginMethod(void* rewriterWrapperPtr, mdTypeRef integrationTypeRef, const TypeInfo* currentType,
-                             const std::vector<TypeSignature>& methodArguments,
-                             const bool ignoreByRefInstrumentation, ILInstr** instruction);
+    virtual mdTypeRef GetObjectTypeRef();
+    virtual mdTypeRef GetExceptionTypeRef();
+    virtual mdAssemblyRef GetCorLibAssemblyRef();
 
-    HRESULT WriteEndVoidReturnMemberRef(void* rewriterWrapperPtr, mdTypeRef integrationTypeRef,
-                                        const TypeInfo* currentType, ILInstr** instruction);
+    virtual bool ShouldLoadArgumentsByRef(const bool ignoreByRefInstrumentation);
+    virtual bool ShouldLoadCallTargetStateByRef();
 
-    HRESULT WriteEndReturnMemberRef(void* rewriterWrapperPtr, mdTypeRef integrationTypeRef, const TypeInfo* currentType,
-                                    TypeSignature* returnArgument, ILInstr** instruction);
+    virtual HRESULT ModifyLocalSigAndInitialize(void* rewriterWrapperPtr, FunctionInfo* functionInfo,
+                                                ULONG* callTargetStateIndex, ULONG* exceptionIndex,
+                                                ULONG* callTargetReturnIndex, ULONG* returnValueIndex,
+                                                mdToken* callTargetStateToken, mdToken* exceptionToken,
+                                                mdToken* callTargetReturnToken, ILInstr** firstInstruction);
 
-    HRESULT WriteLogException(void* rewriterWrapperPtr, mdTypeRef integrationTypeRef, const TypeInfo* currentType,
-                              ILInstr** instruction);
+    virtual HRESULT WriteBeginMethod(void* rewriterWrapperPtr, mdTypeRef integrationTypeRef,
+                                     const TypeInfo* currentType,
+                                     const std::vector<TypeSignature>& methodArguments,
+                                     const bool ignoreByRefInstrumentation, ILInstr** instruction);
+
+    virtual HRESULT WriteEndVoidReturnMemberRef(void* rewriterWrapperPtr, mdTypeRef integrationTypeRef,
+                                                const TypeInfo* currentType, ILInstr** instruction);
+
+    virtual HRESULT WriteEndReturnMemberRef(void* rewriterWrapperPtr, mdTypeRef integrationTypeRef,
+                                            const TypeInfo* currentType, TypeSignature* returnArgument,
+                                            ILInstr** instruction);
+
+    virtual HRESULT WriteCallTargetReturnGetReturnValue(void* rewriterWrapperPtr, mdTypeSpec callTargetReturnTypeSpec,
+                                                        ILInstr** instruction);
+
+    virtual HRESULT WriteLogException(void* rewriterWrapperPtr, mdTypeRef integrationTypeRef,
+                                      const TypeInfo* currentType, ILInstr** instruction);
 };
 
 } // namespace trace

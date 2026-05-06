@@ -118,20 +118,20 @@ HRESULT TracerMethodRewriter::Rewrite(RejitHandlerModule* moduleHandler, RejitHa
     auto                              metaImport = module_metadata.metadata_import;
     auto                              hr         = S_OK;
 
-    // TODO: The trampoline and direct branches below only differ in token/local setup and
-    // Begin/End/LogException/GetReturnValue call emission. Keep this rewrite close to upstream
-    // for review now; extract those differences into a focused helper separately so future
-    // CallTarget flow changes stay aligned between direct and trampoline modes.
+    // TODO: Trampoline mode is hidden behind TracerTokens here to keep this rewrite close to upstream.
+    // A later cleanup can move the remaining token-selection setup into a small factory/helper.
     // *** Get reference to the integration type or trampoline map
     mdTypeRef integration_type_ref = mdTypeRefNil;
-    CallTargetTrampolineTokens trampolineTokens;
+    CallTargetTrampolineTokens trampolineTokens(&module_metadata, integration_definition);
     if (use_trampoline)
     {
-        hr = BuildCallTargetTrampolineTokens(module_metadata, integration_definition, trampolineTokens);
+        hr = trampolineTokens.Initialize();
         if (FAILED(hr))
         {
             return S_FALSE;
         }
+
+        tracerTokens = &trampolineTokens;
     }
     else if (!corProfiler->GetIntegrationTypeRef(module_metadata, module_id, *integration_definition,
                                                 integration_type_ref))
@@ -192,21 +192,9 @@ HRESULT TracerMethodRewriter::Rewrite(RejitHandlerModule* moduleHandler, RejitHa
     mdToken  exceptionToken        = mdTokenNil;
     mdToken  callTargetReturnToken = mdTokenNil;
     ILInstr* firstInstruction      = nullptr;
-    if (use_trampoline)
-    {
-        hr = ModifyLocalSigAndInitializeForTrampoline(reWriterWrapper, module_metadata, caller, trampolineTokens,
-                                                      &exceptionIndex, &callTargetStateIndex, &callTargetReturnIndex,
-                                                      &returnValueIndex, &callTargetReturnToken, &firstInstruction);
-        callTargetStateToken = trampolineTokens.stateType;
-        exceptionToken       = trampolineTokens.exceptionType;
-    }
-    else
-    {
-        hr = tracerTokens->ModifyLocalSigAndInitialize(&reWriterWrapper, caller, &callTargetStateIndex,
-                                                       &exceptionIndex, &callTargetReturnIndex, &returnValueIndex,
-                                                       &callTargetStateToken, &exceptionToken, &callTargetReturnToken,
-                                                       &firstInstruction);
-    }
+    hr = tracerTokens->ModifyLocalSigAndInitialize(&reWriterWrapper, caller, &callTargetStateIndex, &exceptionIndex,
+                                                   &callTargetReturnIndex, &returnValueIndex, &callTargetStateToken,
+                                                   &exceptionToken, &callTargetReturnToken, &firstInstruction);
     if (FAILED(hr))
     {
         return S_FALSE;
@@ -270,7 +258,7 @@ HRESULT TracerMethodRewriter::Rewrite(RejitHandlerModule* moduleHandler, RejitHa
             for (int i = 0; i < numArgs; i++)
             {
                 const auto [elementType, argTypeFlags] = methodArguments[i].GetElementTypeAndFlags();
-                if (use_trampoline || corProfiler->enable_by_ref_instrumentation)
+                if (tracerTokens->ShouldLoadArgumentsByRef(ignoreByRefInstrumentation))
                 {
                     if (argTypeFlags & TypeFlagByRef)
                     {
@@ -296,8 +284,7 @@ HRESULT TracerMethodRewriter::Rewrite(RejitHandlerModule* moduleHandler, RejitHa
         else
         {
             // Load the arguments inside an object array (SlowPath)
-            reWriterWrapper.CreateArray(use_trampoline ? trampolineTokens.objectType : tracerTokens->GetObjectTypeRef(),
-                                        numArgs);
+            reWriterWrapper.CreateArray(tracerTokens->GetObjectTypeRef(), numArgs);
             for (int i = 0; i < numArgs; i++)
             {
                 reWriterWrapper.BeginLoadValueIntoArray(i);
@@ -311,9 +298,7 @@ HRESULT TracerMethodRewriter::Rewrite(RejitHandlerModule* moduleHandler, RejitHa
                 }
                 if (argTypeFlags & TypeFlagBoxedType)
                 {
-                    const auto corLibRef = use_trampoline ? trampolineTokens.corlibRef
-                                                          : tracerTokens->GetCorLibAssemblyRef();
-                    const auto& tok = methodArguments[i].GetTypeTok(metaEmit, corLibRef);
+                    const auto& tok = methodArguments[i].GetTypeTok(metaEmit, tracerTokens->GetCorLibAssemblyRef());
                     if (tok == mdTokenNil)
                     {
                         return S_FALSE;
@@ -392,16 +377,8 @@ HRESULT TracerMethodRewriter::Rewrite(RejitHandlerModule* moduleHandler, RejitHa
     }
 
     ILInstr* beginCallInstruction;
-    if (use_trampoline)
-    {
-        hr = WriteTrampolineBeginMethod(reWriterWrapper, module_metadata, trampolineTokens, &caller->type,
-                                        methodArguments, &beginCallInstruction);
-    }
-    else
-    {
-        hr = tracerTokens->WriteBeginMethod(&reWriterWrapper, integration_type_ref, &caller->type, methodArguments,
-                                            ignoreByRefInstrumentation, &beginCallInstruction);
-    }
+    hr = tracerTokens->WriteBeginMethod(&reWriterWrapper, integration_type_ref, &caller->type, methodArguments,
+                                        ignoreByRefInstrumentation, &beginCallInstruction);
     if (FAILED(hr))
     {
         // Error message is written to the log in WriteBeginMethod.
@@ -412,16 +389,8 @@ HRESULT TracerMethodRewriter::Rewrite(RejitHandlerModule* moduleHandler, RejitHa
 
     // *** BeginMethod call catch
     ILInstr* beginMethodCatchFirstInstr = nullptr;
-    if (use_trampoline)
-    {
-        hr = WriteTrampolineLogException(reWriterWrapper, module_metadata, trampolineTokens, &caller->type,
+    hr = tracerTokens->WriteLogException(&reWriterWrapper, integration_type_ref, &caller->type,
                                          &beginMethodCatchFirstInstr);
-    }
-    else
-    {
-        hr = tracerTokens->WriteLogException(&reWriterWrapper, integration_type_ref, &caller->type,
-                                             &beginMethodCatchFirstInstr);
-    }
     if (FAILED(hr))
     {
         return S_FALSE;
@@ -520,7 +489,7 @@ HRESULT TracerMethodRewriter::Rewrite(RejitHandlerModule* moduleHandler, RejitHa
     }
 
     reWriterWrapper.LoadLocal(exceptionIndex);
-    if (use_trampoline || corProfiler->enable_calltarget_state_by_ref)
+    if (tracerTokens->ShouldLoadCallTargetStateByRef())
     {
         reWriterWrapper.LoadLocalAddress(callTargetStateIndex);
     }
@@ -532,29 +501,13 @@ HRESULT TracerMethodRewriter::Rewrite(RejitHandlerModule* moduleHandler, RejitHa
     ILInstr* endMethodCallInstr;
     if (isVoid)
     {
-        if (use_trampoline)
-        {
-            hr = WriteTrampolineEndVoidMethod(reWriterWrapper, module_metadata, trampolineTokens, &caller->type,
-                                              &endMethodCallInstr);
-        }
-        else
-        {
-            hr = tracerTokens->WriteEndVoidReturnMemberRef(&reWriterWrapper, integration_type_ref, &caller->type,
-                                                           &endMethodCallInstr);
-        }
+        hr = tracerTokens->WriteEndVoidReturnMemberRef(&reWriterWrapper, integration_type_ref, &caller->type,
+                                                       &endMethodCallInstr);
     }
     else
     {
-        if (use_trampoline)
-        {
-            hr = WriteTrampolineEndMethod(reWriterWrapper, module_metadata, trampolineTokens, &caller->type,
-                                          &retFuncArg, &endMethodCallInstr);
-        }
-        else
-        {
-            hr = tracerTokens->WriteEndReturnMemberRef(&reWriterWrapper, integration_type_ref, &caller->type,
-                                                       &retFuncArg, &endMethodCallInstr);
-        }
+        hr = tracerTokens->WriteEndReturnMemberRef(&reWriterWrapper, integration_type_ref, &caller->type, &retFuncArg,
+                                                   &endMethodCallInstr);
     }
     if (FAILED(hr))
     {
@@ -566,17 +519,9 @@ HRESULT TracerMethodRewriter::Rewrite(RejitHandlerModule* moduleHandler, RejitHa
     {
         ILInstr* callTargetReturnGetReturnInstr;
         reWriterWrapper.LoadLocalAddress(callTargetReturnIndex);
-        if (use_trampoline)
-        {
-            hr = WriteTrampolineReturnGetReturnValue(reWriterWrapper, module_metadata, &retFuncArg,
-                                                     static_cast<mdTypeSpec>(callTargetReturnToken),
-                                                     &callTargetReturnGetReturnInstr);
-        }
-        else
-        {
-            hr = tracerTokens->WriteCallTargetReturnGetReturnValue(&reWriterWrapper, callTargetReturnToken,
-                                                                   &callTargetReturnGetReturnInstr);
-        }
+        hr = tracerTokens->WriteCallTargetReturnGetReturnValue(&reWriterWrapper,
+                                                               static_cast<mdTypeSpec>(callTargetReturnToken),
+                                                               &callTargetReturnGetReturnInstr);
         if (FAILED(hr))
         {
             return S_FALSE;
@@ -588,16 +533,8 @@ HRESULT TracerMethodRewriter::Rewrite(RejitHandlerModule* moduleHandler, RejitHa
 
     // *** EndMethod call catch
     ILInstr* endMethodCatchFirstInstr = nullptr;
-    if (use_trampoline)
-    {
-        hr = WriteTrampolineLogException(reWriterWrapper, module_metadata, trampolineTokens, &caller->type,
+    hr = tracerTokens->WriteLogException(&reWriterWrapper, integration_type_ref, &caller->type,
                                          &endMethodCatchFirstInstr);
-    }
-    else
-    {
-        hr = tracerTokens->WriteLogException(&reWriterWrapper, integration_type_ref, &caller->type,
-                                             &endMethodCatchFirstInstr);
-    }
     if (FAILED(hr))
     {
         return S_FALSE;

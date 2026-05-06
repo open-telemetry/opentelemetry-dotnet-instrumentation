@@ -18,7 +18,7 @@ class ILRewriterWrapper;
 namespace trace
 {
 
-struct CallTargetTrampolineTokens
+struct CallTargetTrampolineTokenRefs
 {
     mdAssemblyRef corlibRef = mdAssemblyRefNil;
     mdToken objectType = mdTokenNil;
@@ -31,52 +31,47 @@ struct CallTargetTrampolineTokens
     int integrationIndex = -1;
 };
 
-HRESULT BuildCallTargetTrampolineTokens(ModuleMetadata& moduleMetadata,
-                                        IntegrationDefinition* integrationDefinition,
-                                        CallTargetTrampolineTokens& tokens);
+class CallTargetTrampolineTokens final : public TracerTokens
+{
+private:
+    IntegrationDefinition* integrationDefinition;
+    CallTargetTrampolineTokenRefs tokens;
 
-HRESULT ModifyLocalSigAndInitializeForTrampoline(ILRewriterWrapper& reWriterWrapper,
-                                                 ModuleMetadata& moduleMetadata,
-                                                 FunctionInfo* functionInfo,
-                                                 CallTargetTrampolineTokens& tokens,
-                                                 ULONG* exceptionIndex,
-                                                 ULONG* stateIndex,
-                                                 ULONG* callTargetReturnIndex,
-                                                 ULONG* returnValueIndex,
-                                                 mdToken* callTargetReturnToken,
-                                                 ILInstr** firstInstruction);
+public:
+    CallTargetTrampolineTokens(ModuleMetadata* moduleMetadata, IntegrationDefinition* integrationDefinition);
 
-HRESULT WriteTrampolineBeginMethod(ILRewriterWrapper& reWriterWrapper,
-                                   ModuleMetadata& moduleMetadata,
-                                   CallTargetTrampolineTokens& tokens,
-                                   const TypeInfo* currentType,
-                                   const std::vector<TypeSignature>& methodArguments,
-                                   ILInstr** instruction);
+    HRESULT Initialize();
 
-HRESULT WriteTrampolineEndVoidMethod(ILRewriterWrapper& reWriterWrapper,
-                                     ModuleMetadata& moduleMetadata,
-                                     CallTargetTrampolineTokens& tokens,
-                                     const TypeInfo* currentType,
-                                     ILInstr** instruction);
+    mdTypeRef GetObjectTypeRef() override;
+    mdTypeRef GetExceptionTypeRef() override;
+    mdAssemblyRef GetCorLibAssemblyRef() override;
 
-HRESULT WriteTrampolineEndMethod(ILRewriterWrapper& reWriterWrapper,
-                                 ModuleMetadata& moduleMetadata,
-                                 CallTargetTrampolineTokens& tokens,
-                                 const TypeInfo* currentType,
-                                 TypeSignature* returnArgument,
-                                 ILInstr** instruction);
+    bool ShouldLoadArgumentsByRef(const bool ignoreByRefInstrumentation) override;
+    bool ShouldLoadCallTargetStateByRef() override;
 
-HRESULT WriteTrampolineReturnGetReturnValue(ILRewriterWrapper& reWriterWrapper,
-                                            ModuleMetadata& moduleMetadata,
-                                            TypeSignature* returnArgument,
-                                            mdTypeSpec callTargetReturnTypeSpec,
-                                            ILInstr** instruction);
+    HRESULT ModifyLocalSigAndInitialize(void* rewriterWrapperPtr, FunctionInfo* functionInfo,
+                                        ULONG* callTargetStateIndex, ULONG* exceptionIndex,
+                                        ULONG* callTargetReturnIndex, ULONG* returnValueIndex,
+                                        mdToken* callTargetStateToken, mdToken* exceptionToken,
+                                        mdToken* callTargetReturnToken, ILInstr** firstInstruction) override;
 
-HRESULT WriteTrampolineLogException(ILRewriterWrapper& reWriterWrapper,
-                                    ModuleMetadata& moduleMetadata,
-                                    CallTargetTrampolineTokens& tokens,
-                                    const TypeInfo* currentType,
-                                    ILInstr** instruction);
+    HRESULT WriteBeginMethod(void* rewriterWrapperPtr, mdTypeRef integrationTypeRef, const TypeInfo* currentType,
+                             const std::vector<TypeSignature>& methodArguments,
+                             const bool ignoreByRefInstrumentation, ILInstr** instruction) override;
+
+    HRESULT WriteEndVoidReturnMemberRef(void* rewriterWrapperPtr, mdTypeRef integrationTypeRef,
+                                        const TypeInfo* currentType, ILInstr** instruction) override;
+
+    HRESULT WriteEndReturnMemberRef(void* rewriterWrapperPtr, mdTypeRef integrationTypeRef,
+                                    const TypeInfo* currentType, TypeSignature* returnArgument,
+                                    ILInstr** instruction) override;
+
+    HRESULT WriteCallTargetReturnGetReturnValue(void* rewriterWrapperPtr, mdTypeSpec callTargetReturnTypeSpec,
+                                                ILInstr** instruction) override;
+
+    HRESULT WriteLogException(void* rewriterWrapperPtr, mdTypeRef integrationTypeRef, const TypeInfo* currentType,
+                              ILInstr** instruction) override;
+};
 
 } // namespace trace
 

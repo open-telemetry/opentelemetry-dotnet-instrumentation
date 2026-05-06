@@ -41,7 +41,7 @@ mdAssemblyRef FindExistingCorLibRef(ModuleMetadata& moduleMetadata)
 
 HRESULT BuildCallTargetTrampolineTokens(ModuleMetadata&        moduleMetadata,
                                         IntegrationDefinition* integrationDefinition,
-                                        CallTargetTrampolineTokens& tokens)
+                                        CallTargetTrampolineTokenRefs& tokens)
 {
     tokens.corlibRef = FindExistingCorLibRef(moduleMetadata);
     if (tokens.corlibRef == mdAssemblyRefNil &&
@@ -134,7 +134,7 @@ void AppendTypeSignature(std::vector<COR_SIGNATURE>& signature, const TypeSignat
 }
 
 std::vector<COR_SIGNATURE> GetCurrentTypeSignature(const TypeInfo* currentType,
-                                                   const CallTargetTrampolineTokens& tokens)
+                                                   const CallTargetTrampolineTokenRefs& tokens)
 {
     bool    isValueType = currentType->valueType;
     mdToken typeToken   = currentType->type_spec;
@@ -164,7 +164,7 @@ std::vector<COR_SIGNATURE> GetCurrentTypeSignature(const TypeInfo* currentType,
     return signature;
 }
 
-std::vector<COR_SIGNATURE> BuildIndexerMapSignature(const CallTargetTrampolineTokens& tokens)
+std::vector<COR_SIGNATURE> BuildIndexerMapSignature(const CallTargetTrampolineTokenRefs& tokens)
 {
     std::vector<COR_SIGNATURE> current{ELEMENT_TYPE_OBJECT};
     for (int i = 0; i <= tokens.integrationIndex; i++)
@@ -221,7 +221,7 @@ HRESULT BuildGenericMethodSpec(ModuleMetadata& moduleMetadata,
                                                           static_cast<ULONG>(signature.size()), methodSpec);
 }
 
-HRESULT BuildTrampolineReturnSignature(const CallTargetTrampolineTokens& tokens,
+HRESULT BuildTrampolineReturnSignature(const CallTargetTrampolineTokenRefs& tokens,
                                        const std::vector<COR_SIGNATURE>& returnSignature,
                                        std::vector<COR_SIGNATURE>& returnVesselSignature)
 {
@@ -230,7 +230,7 @@ HRESULT BuildTrampolineReturnSignature(const CallTargetTrampolineTokens& tokens,
 }
 
 HRESULT BuildCallTargetReturnTypeSpec(ModuleMetadata& moduleMetadata,
-                                      const CallTargetTrampolineTokens& tokens,
+                                      const CallTargetTrampolineTokenRefs& tokens,
                                       const std::vector<COR_SIGNATURE>& returnSignature,
                                       mdTypeSpec* returnTypeSpec)
 {
@@ -249,7 +249,7 @@ HRESULT BuildCallTargetReturnTypeSpec(ModuleMetadata& moduleMetadata,
 HRESULT ModifyLocalSigAndInitializeForTrampoline(ILRewriterWrapper&            reWriterWrapper,
                                                  ModuleMetadata&               moduleMetadata,
                                                  FunctionInfo*                 functionInfo,
-                                                 CallTargetTrampolineTokens&   tokens,
+                                                 CallTargetTrampolineTokenRefs& tokens,
                                                  ULONG*                        exceptionIndex,
                                                  ULONG*                        stateIndex,
                                                  ULONG*                        callTargetReturnIndex,
@@ -396,7 +396,7 @@ void BuildGenericMethodSignature(std::vector<COR_SIGNATURE>& signature,
 
 HRESULT WriteTrampolineMethodSpecCall(ILRewriterWrapper&                            reWriterWrapper,
                                       ModuleMetadata&                               moduleMetadata,
-                                      CallTargetTrampolineTokens&                   tokens,
+                                      CallTargetTrampolineTokenRefs&                tokens,
                                       const WSTRING&                                methodName,
                                       const std::vector<COR_SIGNATURE>&             memberSignature,
                                       const std::vector<std::vector<COR_SIGNATURE>>& genericArguments,
@@ -424,7 +424,7 @@ HRESULT WriteTrampolineMethodSpecCall(ILRewriterWrapper&                        
 // __OTelCallTargetTrampoline__.BeginMethod<TMapIntegration, TTarget>(instance, args)
 HRESULT WriteTrampolineBeginMethod(ILRewriterWrapper&                  reWriterWrapper,
                                    ModuleMetadata&                     moduleMetadata,
-                                   CallTargetTrampolineTokens&         tokens,
+                                   CallTargetTrampolineTokenRefs&      tokens,
                                    const TypeInfo*                     currentType,
                                    const std::vector<TypeSignature>&   methodArguments,
                                    ILInstr**                           instruction)
@@ -479,7 +479,7 @@ HRESULT WriteTrampolineBeginMethod(ILRewriterWrapper&                  reWriterW
 //     instance, exception, ref state)
 HRESULT WriteTrampolineEndVoidMethod(ILRewriterWrapper&          reWriterWrapper,
                                      ModuleMetadata&             moduleMetadata,
-                                     CallTargetTrampolineTokens& tokens,
+                                     CallTargetTrampolineTokenRefs& tokens,
                                      const TypeInfo*             currentType,
                                      ILInstr**                   instruction)
 {
@@ -506,7 +506,7 @@ HRESULT WriteTrampolineEndVoidMethod(ILRewriterWrapper&          reWriterWrapper
 //     instance, returnValue, exception, ref state)
 HRESULT WriteTrampolineEndMethod(ILRewriterWrapper&          reWriterWrapper,
                                  ModuleMetadata&             moduleMetadata,
-                                 CallTargetTrampolineTokens& tokens,
+                                 CallTargetTrampolineTokenRefs& tokens,
                                  const TypeInfo*             currentType,
                                  TypeSignature*              returnArgument,
                                  ILInstr**                   instruction)
@@ -561,7 +561,7 @@ HRESULT WriteTrampolineReturnGetReturnValue(ILRewriterWrapper&          reWriter
 // __OTelCallTargetTrampoline__.LogException<TMapIntegration, TTarget>(exception)
 HRESULT WriteTrampolineLogException(ILRewriterWrapper&          reWriterWrapper,
                                     ModuleMetadata&             moduleMetadata,
-                                    CallTargetTrampolineTokens& tokens,
+                                    CallTargetTrampolineTokenRefs& tokens,
                                     const TypeInfo*             currentType,
                                     ILInstr**                   instruction)
 {
@@ -576,6 +576,120 @@ HRESULT WriteTrampolineLogException(ILRewriterWrapper&          reWriterWrapper,
 
     return WriteTrampolineMethodSpecCall(reWriterWrapper, moduleMetadata, tokens, WStr("LogException"), signature,
                                          {mapSignature, targetSignature}, instruction);
+}
+
+CallTargetTrampolineTokens::CallTargetTrampolineTokens(ModuleMetadata*         moduleMetadata,
+                                                       IntegrationDefinition* integrationDefinitionPtr) :
+    TracerTokens(moduleMetadata), integrationDefinition(integrationDefinitionPtr)
+{
+}
+
+HRESULT CallTargetTrampolineTokens::Initialize()
+{
+    if (integrationDefinition == nullptr)
+    {
+        return E_FAIL;
+    }
+
+    return BuildCallTargetTrampolineTokens(*GetMetadata(), integrationDefinition, tokens);
+}
+
+mdTypeRef CallTargetTrampolineTokens::GetObjectTypeRef()
+{
+    return static_cast<mdTypeRef>(tokens.objectType);
+}
+
+mdTypeRef CallTargetTrampolineTokens::GetExceptionTypeRef()
+{
+    return static_cast<mdTypeRef>(tokens.exceptionType);
+}
+
+mdAssemblyRef CallTargetTrampolineTokens::GetCorLibAssemblyRef()
+{
+    return tokens.corlibRef;
+}
+
+bool CallTargetTrampolineTokens::ShouldLoadArgumentsByRef(const bool)
+{
+    return true;
+}
+
+bool CallTargetTrampolineTokens::ShouldLoadCallTargetStateByRef()
+{
+    return true;
+}
+
+HRESULT CallTargetTrampolineTokens::ModifyLocalSigAndInitialize(void*         rewriterWrapperPtr,
+                                                                FunctionInfo* functionInfo,
+                                                                ULONG*        callTargetStateIndex,
+                                                                ULONG*        exceptionIndex,
+                                                                ULONG*        callTargetReturnIndex,
+                                                                ULONG*        returnValueIndex,
+                                                                mdToken*      callTargetStateToken,
+                                                                mdToken*      exceptionToken,
+                                                                mdToken*      callTargetReturnToken,
+                                                                ILInstr**     firstInstruction)
+{
+    auto rewriterWrapper = (ILRewriterWrapper*) rewriterWrapperPtr;
+    HRESULT hr = ModifyLocalSigAndInitializeForTrampoline(*rewriterWrapper, *GetMetadata(), functionInfo, tokens,
+                                                          exceptionIndex, callTargetStateIndex, callTargetReturnIndex,
+                                                          returnValueIndex, callTargetReturnToken, firstInstruction);
+    if (SUCCEEDED(hr))
+    {
+        *callTargetStateToken = tokens.stateType;
+        *exceptionToken       = tokens.exceptionType;
+    }
+
+    return hr;
+}
+
+HRESULT CallTargetTrampolineTokens::WriteBeginMethod(void*                             rewriterWrapperPtr,
+                                                     mdTypeRef,
+                                                     const TypeInfo*                   currentType,
+                                                     const std::vector<TypeSignature>& methodArguments,
+                                                     const bool,
+                                                     ILInstr**                         instruction)
+{
+    auto rewriterWrapper = (ILRewriterWrapper*) rewriterWrapperPtr;
+    return WriteTrampolineBeginMethod(*rewriterWrapper, *GetMetadata(), tokens, currentType, methodArguments,
+                                      instruction);
+}
+
+HRESULT CallTargetTrampolineTokens::WriteEndVoidReturnMemberRef(void*           rewriterWrapperPtr,
+                                                                mdTypeRef,
+                                                                const TypeInfo* currentType,
+                                                                ILInstr**       instruction)
+{
+    auto rewriterWrapper = (ILRewriterWrapper*) rewriterWrapperPtr;
+    return WriteTrampolineEndVoidMethod(*rewriterWrapper, *GetMetadata(), tokens, currentType, instruction);
+}
+
+HRESULT CallTargetTrampolineTokens::WriteEndReturnMemberRef(void*           rewriterWrapperPtr,
+                                                            mdTypeRef,
+                                                            const TypeInfo* currentType,
+                                                            TypeSignature*  returnArgument,
+                                                            ILInstr**       instruction)
+{
+    auto rewriterWrapper = (ILRewriterWrapper*) rewriterWrapperPtr;
+    return WriteTrampolineEndMethod(*rewriterWrapper, *GetMetadata(), tokens, currentType, returnArgument, instruction);
+}
+
+HRESULT CallTargetTrampolineTokens::WriteCallTargetReturnGetReturnValue(void*      rewriterWrapperPtr,
+                                                                        mdTypeSpec callTargetReturnTypeSpec,
+                                                                        ILInstr**  instruction)
+{
+    auto rewriterWrapper = (ILRewriterWrapper*) rewriterWrapperPtr;
+    return WriteTrampolineReturnGetReturnValue(*rewriterWrapper, *GetMetadata(), nullptr, callTargetReturnTypeSpec,
+                                               instruction);
+}
+
+HRESULT CallTargetTrampolineTokens::WriteLogException(void*           rewriterWrapperPtr,
+                                                      mdTypeRef,
+                                                      const TypeInfo* currentType,
+                                                      ILInstr**       instruction)
+{
+    auto rewriterWrapper = (ILRewriterWrapper*) rewriterWrapperPtr;
+    return WriteTrampolineLogException(*rewriterWrapper, *GetMetadata(), tokens, currentType, instruction);
 }
 
 } // namespace trace
