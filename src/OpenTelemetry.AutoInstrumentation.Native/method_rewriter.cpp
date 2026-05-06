@@ -151,7 +151,8 @@ HRESULT TracerMethodRewriter::Rewrite(RejitHandlerModule* moduleHandler, RejitHa
     }
 
     // First we check if the managed profiler has not been loaded yet
-    if (!corProfiler->ProfilerAssemblyIsLoadedIntoAppDomain(module_metadata.app_domain_id))
+    // TODO: trampoline and neutral domain may have beeter option
+    if (!use_trampoline && !corProfiler->ProfilerAssemblyIsLoadedIntoAppDomain(module_metadata.app_domain_id))
     {
         Logger::Warn(
             "*** CallTarget_RewriterCallback() skipping method: Method replacement found but the managed profiler has "
@@ -630,6 +631,19 @@ HRESULT TracerMethodRewriter::Rewrite(RejitHandlerModule* moduleHandler, RejitHa
         Logger::Info(original_code);
         Logger::Info(corProfiler->GetILCodes("*** Rewriter(): Modified Code: ", &rewriter, *caller,
                                              module_metadata.metadata_import));
+    }
+
+    hr = corProfiler->GetCorProfilerInfo()->ApplyMetaData(module_id);
+    if (FAILED(hr))
+    {
+        Logger::Warn("*** CallTarget_RewriterCallback(): Call to ApplyMetaData() failed for ModuleID=", module_id,
+                     " ", function_token);
+        return S_FALSE;
+    }
+    else if (Logger::IsDebugEnabled())
+    {
+        Logger::Debug("*** CallTarget_RewriterCallback(): ApplyMetaData() succeeded for ModuleID=", module_id, " ",
+                      function_token);
     }
 
     hr = rewriter.Export();

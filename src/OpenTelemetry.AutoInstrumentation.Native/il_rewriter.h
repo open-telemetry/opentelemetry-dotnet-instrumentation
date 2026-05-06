@@ -90,6 +90,7 @@ public:
     ~ILRewriter();
 
     void InitializeTiny();
+    void InitializeFat();
 
     mdToken GetTkLocalVarSig();
 

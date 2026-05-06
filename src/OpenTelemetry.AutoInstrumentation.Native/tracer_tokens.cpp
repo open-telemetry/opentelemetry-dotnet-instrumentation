@@ -5,10 +5,13 @@
 
 #include "tracer_tokens.h"
 
+#include <vector>
+
 #include "otel_profiler_constants.h"
 #include "il_rewriter_wrapper.h"
 #include "logger.h"
 #include "module_metadata.h"
+#include "util.h"
 
 namespace trace
 {
@@ -34,6 +37,41 @@ static const WSTRING managed_profiler_calltarget_logexception_name = WStr("LogEx
 /**
  * PRIVATE
  **/
+
+HRESULT GetTypeArgumentSignature(ModuleMetadata* module_metadata,
+                                 mdToken         typeToken,
+                                 bool            isValueType,
+                                 std::vector<COR_SIGNATURE>& signature)
+{
+    if (TypeFromToken(typeToken) == mdtTypeSpec)
+    {
+        PCCOR_SIGNATURE typeSpecSignature = nullptr;
+        ULONG           typeSpecSignatureSize = 0;
+        auto hr = module_metadata->metadata_import->GetTypeSpecFromToken(typeToken, &typeSpecSignature,
+                                                                         &typeSpecSignatureSize);
+        if (FAILED(hr))
+        {
+            Logger::Warn("GetTypeArgumentSignature: failed to read TypeSpec token ",
+                         HexStr(&typeToken, sizeof(mdToken)));
+            return hr;
+        }
+
+        signature.insert(signature.end(), typeSpecSignature, typeSpecSignature + typeSpecSignatureSize);
+        return S_OK;
+    }
+
+    COR_SIGNATURE tokenBuffer[sizeof(mdToken)];
+    ULONG         tokenSize = CorSigCompressToken(typeToken, tokenBuffer);
+    signature.push_back(isValueType ? ELEMENT_TYPE_VALUETYPE : ELEMENT_TYPE_CLASS);
+    signature.insert(signature.end(), tokenBuffer, tokenBuffer + tokenSize);
+    return S_OK;
+}
+
+void AppendSignature(COR_SIGNATURE* signature, unsigned& offset, const std::vector<COR_SIGNATURE>& typeSignature)
+{
+    memcpy(&signature[offset], typeSignature.data(), typeSignature.size());
+    offset += static_cast<unsigned>(typeSignature.size());
+}
 
 // slowpath BeginMethod
 HRESULT TracerTokens::WriteBeginMethodWithArgumentsArray(void*           rewriterWrapperPtr,
@@ -84,35 +122,24 @@ HRESULT TracerTokens::WriteBeginMethodWithArgumentsArray(void*           rewrite
 
     mdMethodSpec beginArrayMethodSpec = mdMethodSpecNil;
 
-    unsigned integrationTypeBuffer;
-    ULONG    integrationTypeSize = CorSigCompressToken(integrationTypeRef, &integrationTypeBuffer);
+    std::vector<COR_SIGNATURE> integrationTypeSignature;
+    IfFailRet(GetTypeArgumentSignature(module_metadata, integrationTypeRef, false, integrationTypeSignature));
 
     bool    isValueType    = currentType->valueType;
     mdToken currentTypeRef = GetCurrentTypeRef(currentType, isValueType);
 
-    unsigned currentTypeBuffer;
-    ULONG    currentTypeSize = CorSigCompressToken(currentTypeRef, &currentTypeBuffer);
+    std::vector<COR_SIGNATURE> currentTypeSignature;
+    IfFailRet(GetTypeArgumentSignature(module_metadata, currentTypeRef, isValueType, currentTypeSignature));
 
-    auto          signatureLength = 4 + integrationTypeSize + currentTypeSize;
+    auto          signatureLength = static_cast<ULONG>(2 + integrationTypeSignature.size() +
+                                                       currentTypeSignature.size());
     COR_SIGNATURE signature[signatureBufferSize];
     unsigned      offset = 0;
     signature[offset++]  = IMAGE_CEE_CS_CALLCONV_GENERICINST;
     signature[offset++]  = 0x02;
 
-    signature[offset++] = ELEMENT_TYPE_CLASS;
-    memcpy(&signature[offset], &integrationTypeBuffer, integrationTypeSize);
-    offset += integrationTypeSize;
-
-    if (isValueType)
-    {
-        signature[offset++] = ELEMENT_TYPE_VALUETYPE;
-    }
-    else
-    {
-        signature[offset++] = ELEMENT_TYPE_CLASS;
-    }
-    memcpy(&signature[offset], &currentTypeBuffer, currentTypeSize);
-    offset += currentTypeSize;
+    AppendSignature(signature, offset, integrationTypeSignature);
+    AppendSignature(signature, offset, currentTypeSignature);
 
     hr = module_metadata->metadata_emit->DefineMethodSpec(beginArrayMemberRef, signature, signatureLength,
                                                           &beginArrayMethodSpec);
@@ -204,15 +231,9 @@ HRESULT TracerTokens::WriteBeginMethod(void*                             rewrite
         unsigned callTargetStateBuffer;
         auto     callTargetStateSize = CorSigCompressToken(callTargetStateTypeRef, &callTargetStateBuffer);
 
-        unsigned long signatureLength;
-        if (enable_by_ref_instrumentation)
-        {
-            signatureLength = 6 + (numArguments * 3) + callTargetStateSize;
-        }
-        else
-        {
-            signatureLength = 6 + (numArguments * 2) + callTargetStateSize;
-        }
+        const bool shouldLoadArgumentsByRef = ShouldLoadArgumentsByRef(ignoreByRefInstrumentation);
+        unsigned long signatureLength =
+            6 + (numArguments * (shouldLoadArgumentsByRef ? 3 : 2)) + callTargetStateSize;
         COR_SIGNATURE signature[signatureBufferSize];
         unsigned      offset = 0;
 
@@ -229,12 +250,29 @@ HRESULT TracerTokens::WriteBeginMethod(void*                             rewrite
 
         for (auto i = 0; i < numArguments; i++)
         {
-            if (!ignoreByRefInstrumentation && enable_by_ref_instrumentation)
+            if (shouldLoadArgumentsByRef)
             {
                 signature[offset++] = ELEMENT_TYPE_BYREF;
             }
             signature[offset++] = ELEMENT_TYPE_MVAR;
             signature[offset++] = 0x01 + (i + 1);
+        }
+
+        if (offset != signatureLength)
+        {
+            Logger::Warn("Wrapper beginMethod signature length mismatch for ", numArguments, " arguments.");
+            return E_FAIL;
+        }
+
+        if (Logger::IsDebugEnabled())
+        {
+            Logger::Debug("TracerTokens::WriteBeginMethod: DefineMemberRef BeginMethod numArguments=", numArguments,
+                          " ignoreByRefInstrumentation=", ignoreByRefInstrumentation,
+                          " shouldLoadArgumentsByRef=", shouldLoadArgumentsByRef,
+                          " callTargetTypeRef=", HexStr(&callTargetTypeRef, sizeof(mdToken)),
+                          " callTargetStateTypeRef=", HexStr(&callTargetStateTypeRef, sizeof(mdToken)),
+                          " signatureLength=", signatureLength,
+                          " signature=", HexStr(signature, offset));
         }
 
         auto hr = module_metadata->metadata_emit->DefineMemberRef(callTargetTypeRef,
@@ -244,6 +282,12 @@ HRESULT TracerTokens::WriteBeginMethod(void*                             rewrite
         {
             Logger::Warn("Wrapper beginMethod for ", numArguments, " arguments could not be defined.");
             return hr;
+        }
+
+        if (Logger::IsDebugEnabled())
+        {
+            Logger::Debug("TracerTokens::WriteBeginMethod: beginMethodFastPathRef=",
+                          HexStr(&beginMethodFastPathRef, sizeof(mdMemberRef)));
         }
 
         if (!ignoreByRefInstrumentation)
@@ -258,16 +302,16 @@ HRESULT TracerTokens::WriteBeginMethod(void*                             rewrite
 
     mdMethodSpec beginMethodSpec = mdMethodSpecNil;
 
-    unsigned integrationTypeBuffer;
-    ULONG    integrationTypeSize = CorSigCompressToken(integrationTypeRef, &integrationTypeBuffer);
+    std::vector<COR_SIGNATURE> integrationTypeSignature;
+    IfFailRet(GetTypeArgumentSignature(module_metadata, integrationTypeRef, false, integrationTypeSignature));
 
     bool    isValueType    = currentType->valueType;
     mdToken currentTypeRef = GetCurrentTypeRef(currentType, isValueType);
 
-    unsigned currentTypeBuffer;
-    ULONG    currentTypeSize = CorSigCompressToken(currentTypeRef, &currentTypeBuffer);
+    std::vector<COR_SIGNATURE> currentTypeSignature;
+    IfFailRet(GetTypeArgumentSignature(module_metadata, currentTypeRef, isValueType, currentTypeSignature));
 
-    auto signatureLength = 4 + integrationTypeSize + currentTypeSize;
+    auto signatureLength = static_cast<ULONG>(2 + integrationTypeSignature.size() + currentTypeSignature.size());
 
     PCCOR_SIGNATURE argumentsSignatureBuffer[FASTPATH_COUNT];
     ULONG           argumentsSignatureSize[FASTPATH_COUNT];
@@ -306,25 +350,31 @@ HRESULT TracerTokens::WriteBeginMethod(void*                             rewrite
     signature[offset++] = IMAGE_CEE_CS_CALLCONV_GENERICINST;
     signature[offset++] = 0x02 + numArguments;
 
-    signature[offset++] = ELEMENT_TYPE_CLASS;
-    memcpy(&signature[offset], &integrationTypeBuffer, integrationTypeSize);
-    offset += integrationTypeSize;
-
-    if (isValueType)
-    {
-        signature[offset++] = ELEMENT_TYPE_VALUETYPE;
-    }
-    else
-    {
-        signature[offset++] = ELEMENT_TYPE_CLASS;
-    }
-    memcpy(&signature[offset], &currentTypeBuffer, currentTypeSize);
-    offset += currentTypeSize;
+    AppendSignature(signature, offset, integrationTypeSignature);
+    AppendSignature(signature, offset, currentTypeSignature);
 
     for (auto i = 0; i < numArguments; i++)
     {
         memcpy(&signature[offset], argumentsSignatureBuffer[i], argumentsSignatureSize[i]);
         offset += argumentsSignatureSize[i];
+    }
+
+    if (Logger::IsDebugEnabled())
+    {
+        Logger::Debug("TracerTokens::WriteBeginMethod: DefineMethodSpec BeginMethod beginMethodFastPathRef=",
+                      HexStr(&beginMethodFastPathRef, sizeof(mdMemberRef)),
+                      " integrationTypeRef=", HexStr(&integrationTypeRef, sizeof(mdToken)),
+                      " currentTypeRef=", HexStr(&currentTypeRef, sizeof(mdToken)),
+                      " currentTypeIsValueType=", isValueType,
+                      " signatureLength=", signatureLength,
+                      " offset=", offset,
+                      " signature=", HexStr(signature, offset));
+    }
+
+    if (offset != signatureLength)
+    {
+        Logger::Warn("Wrapper beginMethod method spec signature length mismatch for ", numArguments, " arguments.");
+        return E_FAIL;
     }
 
     hr = module_metadata->metadata_emit->DefineMethodSpec(beginMethodFastPathRef, signature, signatureLength,
@@ -333,6 +383,12 @@ HRESULT TracerTokens::WriteBeginMethod(void*                             rewrite
     {
         Logger::Warn("Error creating begin method spec.");
         return hr;
+    }
+
+    if (Logger::IsDebugEnabled())
+    {
+        Logger::Debug("TracerTokens::WriteBeginMethod: beginMethodSpec=",
+                      HexStr(&beginMethodSpec, sizeof(mdMethodSpec)));
     }
 
     *instruction = rewriterWrapper->CallMember(beginMethodSpec, false);
@@ -409,35 +465,24 @@ HRESULT TracerTokens::WriteEndVoidReturnMemberRef(void*           rewriterWrappe
 
     mdMethodSpec endVoidMethodSpec = mdMethodSpecNil;
 
-    unsigned integrationTypeBuffer;
-    ULONG    integrationTypeSize = CorSigCompressToken(integrationTypeRef, &integrationTypeBuffer);
+    std::vector<COR_SIGNATURE> integrationTypeSignature;
+    IfFailRet(GetTypeArgumentSignature(module_metadata, integrationTypeRef, false, integrationTypeSignature));
 
     bool    isValueType    = currentType->valueType;
     mdToken currentTypeRef = GetCurrentTypeRef(currentType, isValueType);
 
-    unsigned currentTypeBuffer;
-    ULONG    currentTypeSize = CorSigCompressToken(currentTypeRef, &currentTypeBuffer);
+    std::vector<COR_SIGNATURE> currentTypeSignature;
+    IfFailRet(GetTypeArgumentSignature(module_metadata, currentTypeRef, isValueType, currentTypeSignature));
 
-    auto          signatureLength = 4 + integrationTypeSize + currentTypeSize;
+    auto          signatureLength = static_cast<ULONG>(2 + integrationTypeSignature.size() +
+                                                       currentTypeSignature.size());
     COR_SIGNATURE signature[signatureBufferSize];
     unsigned      offset = 0;
     signature[offset++]  = IMAGE_CEE_CS_CALLCONV_GENERICINST;
     signature[offset++]  = 0x02;
 
-    signature[offset++] = ELEMENT_TYPE_CLASS;
-    memcpy(&signature[offset], &integrationTypeBuffer, integrationTypeSize);
-    offset += integrationTypeSize;
-
-    if (isValueType)
-    {
-        signature[offset++] = ELEMENT_TYPE_VALUETYPE;
-    }
-    else
-    {
-        signature[offset++] = ELEMENT_TYPE_CLASS;
-    }
-    memcpy(&signature[offset], &currentTypeBuffer, currentTypeSize);
-    offset += currentTypeSize;
+    AppendSignature(signature, offset, integrationTypeSignature);
+    AppendSignature(signature, offset, currentTypeSignature);
 
     hr = module_metadata->metadata_emit->DefineMethodSpec(endVoidMemberRef, signature, signatureLength,
                                                           &endVoidMethodSpec);
@@ -532,38 +577,27 @@ HRESULT TracerTokens::WriteEndReturnMemberRef(void*           rewriterWrapperPtr
 
     mdMethodSpec endMethodSpec = mdMethodSpecNil;
 
-    unsigned integrationTypeBuffer;
-    ULONG    integrationTypeSize = CorSigCompressToken(integrationTypeRef, &integrationTypeBuffer);
+    std::vector<COR_SIGNATURE> integrationTypeSignature;
+    IfFailRet(GetTypeArgumentSignature(module_metadata, integrationTypeRef, false, integrationTypeSignature));
 
     bool    isValueType    = currentType->valueType;
     mdToken currentTypeRef = GetCurrentTypeRef(currentType, isValueType);
 
-    unsigned currentTypeBuffer;
-    ULONG    currentTypeSize = CorSigCompressToken(currentTypeRef, &currentTypeBuffer);
+    std::vector<COR_SIGNATURE> currentTypeSignature;
+    IfFailRet(GetTypeArgumentSignature(module_metadata, currentTypeRef, isValueType, currentTypeSignature));
 
     PCCOR_SIGNATURE returnSignatureBuffer;
     auto            returnSignatureLength = returnArgument->GetSignature(returnSignatureBuffer);
 
-    signatureLength = 4 + integrationTypeSize + currentTypeSize + returnSignatureLength;
+    signatureLength = static_cast<ULONG>(2 + integrationTypeSignature.size() + currentTypeSignature.size() +
+                                         returnSignatureLength);
     offset          = 0;
 
     signature[offset++] = IMAGE_CEE_CS_CALLCONV_GENERICINST;
     signature[offset++] = 0x03;
 
-    signature[offset++] = ELEMENT_TYPE_CLASS;
-    memcpy(&signature[offset], &integrationTypeBuffer, integrationTypeSize);
-    offset += integrationTypeSize;
-
-    if (isValueType)
-    {
-        signature[offset++] = ELEMENT_TYPE_VALUETYPE;
-    }
-    else
-    {
-        signature[offset++] = ELEMENT_TYPE_CLASS;
-    }
-    memcpy(&signature[offset], &currentTypeBuffer, currentTypeSize);
-    offset += currentTypeSize;
+    AppendSignature(signature, offset, integrationTypeSignature);
+    AppendSignature(signature, offset, currentTypeSignature);
 
     memcpy(&signature[offset], returnSignatureBuffer, returnSignatureLength);
     offset += returnSignatureLength;
@@ -624,35 +658,24 @@ HRESULT TracerTokens::WriteLogException(void*           rewriterWrapperPtr,
 
     mdMethodSpec logExceptionMethodSpec = mdMethodSpecNil;
 
-    unsigned integrationTypeBuffer;
-    ULONG    integrationTypeSize = CorSigCompressToken(integrationTypeRef, &integrationTypeBuffer);
+    std::vector<COR_SIGNATURE> integrationTypeSignature;
+    IfFailRet(GetTypeArgumentSignature(module_metadata, integrationTypeRef, false, integrationTypeSignature));
 
     bool    isValueType    = currentType->valueType;
     mdToken currentTypeRef = GetCurrentTypeRef(currentType, isValueType);
 
-    unsigned currentTypeBuffer;
-    ULONG    currentTypeSize = CorSigCompressToken(currentTypeRef, &currentTypeBuffer);
+    std::vector<COR_SIGNATURE> currentTypeSignature;
+    IfFailRet(GetTypeArgumentSignature(module_metadata, currentTypeRef, isValueType, currentTypeSignature));
 
-    auto          signatureLength = 4 + integrationTypeSize + currentTypeSize;
+    auto          signatureLength = static_cast<ULONG>(2 + integrationTypeSignature.size() +
+                                                       currentTypeSignature.size());
     COR_SIGNATURE signature[signatureBufferSize];
     unsigned      offset = 0;
     signature[offset++]  = IMAGE_CEE_CS_CALLCONV_GENERICINST;
     signature[offset++]  = 0x02;
 
-    signature[offset++] = ELEMENT_TYPE_CLASS;
-    memcpy(&signature[offset], &integrationTypeBuffer, integrationTypeSize);
-    offset += integrationTypeSize;
-
-    if (isValueType)
-    {
-        signature[offset++] = ELEMENT_TYPE_VALUETYPE;
-    }
-    else
-    {
-        signature[offset++] = ELEMENT_TYPE_CLASS;
-    }
-    memcpy(&signature[offset], &currentTypeBuffer, currentTypeSize);
-    offset += currentTypeSize;
+    AppendSignature(signature, offset, integrationTypeSignature);
+    AppendSignature(signature, offset, currentTypeSignature);
 
     hr = module_metadata->metadata_emit->DefineMethodSpec(logExceptionRef, signature, signatureLength,
                                                           &logExceptionMethodSpec);

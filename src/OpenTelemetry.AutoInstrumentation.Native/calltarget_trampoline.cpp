@@ -142,13 +142,12 @@ HRESULT GenerateCallTargetTrampolineType(ICorProfilerInfo7* profilerInfo,
         return hr;
     };
 
-    mdToken system_object_token, system_exception_token, system_type_token, system_delegate_token;
+    mdToken system_object_token, system_exception_token, system_type_token;
     mdToken system_multicast_delegate_token, system_assembly_token, system_method_info_token, system_method_base_token;
     mdToken system_binding_flags_token, system_int32_token, system_value_type_token;
     IfFailRet(get_corlib_type(SystemObject, &system_object_token));
     IfFailRet(get_corlib_type(SystemException, &system_exception_token));
     IfFailRet(get_corlib_type(SystemTypeName, &system_type_token));
-    IfFailRet(get_corlib_type(WStr("System.Delegate"), &system_delegate_token));
     IfFailRet(get_corlib_type(WStr("System.MulticastDelegate"), &system_multicast_delegate_token));
     IfFailRet(get_corlib_type(WStr("System.Reflection.Assembly"), &system_assembly_token));
     IfFailRet(get_corlib_type(WStr("System.Reflection.MethodInfo"), &system_method_info_token));
@@ -242,7 +241,7 @@ HRESULT GenerateCallTargetTrampolineType(ICorProfilerInfo7* profilerInfo,
         return metadata_emit->GetTokenFromTypeSpec(signature.data(), static_cast<ULONG>(signature.size()), token);
     };
     auto define_generic_params = [&](mdToken owner, const std::vector<WSTRING>& names) -> HRESULT {
-        for (ULONG i = 0; i < names.size(); i++)
+        for (ULONG i = 0; i < static_cast<ULONG>(names.size()); i++)
         {
             mdGenericParam generic_param;
             IfFailRet(metadata_emit->DefineGenericParam(owner, i, gpNonVariant, names[i].c_str(), 0, nullptr,
@@ -250,16 +249,19 @@ HRESULT GenerateCallTargetTrampolineType(ICorProfilerInfo7* profilerInfo,
         }
         return S_OK;
     };
+    auto define_type = [&](const WSTRING& name, const DWORD flags, const mdToken extends,
+                           mdTypeDef* type) -> HRESULT {
+        return metadata_emit->DefineTypeDef(name.c_str(), flags, extends, nullptr, type);
+    };
+    auto define_field = [&](const mdTypeDef type, const WSTRING& name, const DWORD flags,
+                            const std::vector<COR_SIGNATURE>& signature, mdFieldDef* field) -> HRESULT {
+        return metadata_emit->DefineField(type, name.c_str(), flags, signature.data(),
+                                          static_cast<ULONG>(signature.size()), 0, nullptr, 0, field);
+    };
 
     auto make_var_type_spec = [&](ULONG index, mdTypeSpec* token) -> HRESULT {
         std::vector<COR_SIGNATURE> signature;
         append_var(signature, index);
-        return get_type_spec(signature, token);
-    };
-
-    auto make_mvar_type_spec = [&](ULONG index, mdTypeSpec* token) -> HRESULT {
-        std::vector<COR_SIGNATURE> signature;
-        append_mvar(signature, index);
         return get_type_spec(signature, token);
     };
 
@@ -269,17 +271,26 @@ HRESULT GenerateCallTargetTrampolineType(ICorProfilerInfo7* profilerInfo,
         auto signature = generic_instance_signature(open_type, is_value_type, args);
         return get_type_spec(signature, token);
     };
+    auto make_open_generic_type_spec = [&](mdToken open_type, bool is_value_type, ULONG arity,
+                                           mdTypeSpec* token) -> HRESULT {
+        std::vector<std::vector<COR_SIGNATURE>> args;
+        for (ULONG i = 0; i < arity; i++)
+        {
+            std::vector<COR_SIGNATURE> arg;
+            append_var(arg, i);
+            args.push_back(arg);
+        }
 
-    auto set_single_local_sig = [&](ILRewriter& rewriter, const std::vector<COR_SIGNATURE>& local_type) -> HRESULT {
-        std::vector<COR_SIGNATURE> signature{IMAGE_CEE_CS_CALLCONV_LOCAL_SIG};
-        append_compressed_data(signature, 1);
-        signature.insert(signature.end(), local_type.begin(), local_type.end());
-
-        mdSignature localSignatureToken;
-        IfFailRet(metadata_emit->GetTokenFromSig(signature.data(), static_cast<ULONG>(signature.size()),
-                                                 &localSignatureToken));
-        rewriter.SetTkLocalVarSig(localSignatureToken);
-        return S_OK;
+        return make_generic_type_spec(open_type, is_value_type, args, token);
+    };
+    auto make_open_generic_field_ref = [&](mdTypeDef open_type, bool is_value_type, ULONG arity,
+                                           const WSTRING& field_name,
+                                           const std::vector<COR_SIGNATURE>& field_sig,
+                                           mdMemberRef* field_ref) -> HRESULT {
+        mdTypeSpec type_spec;
+        IfFailRet(make_open_generic_type_spec(open_type, is_value_type, arity, &type_spec));
+        return metadata_emit->DefineMemberRef(type_spec, field_name.c_str(), field_sig.data(),
+                                              static_cast<ULONG>(field_sig.size()), field_ref);
     };
 
     std::vector<COR_SIGNATURE> void_sig{ELEMENT_TYPE_VOID};
@@ -288,8 +299,6 @@ HRESULT GenerateCallTargetTrampolineType(ICorProfilerInfo7* profilerInfo,
     append_type_token(exception_sig, system_exception_token, false);
     std::vector<COR_SIGNATURE> type_sig;
     append_type_token(type_sig, system_type_token, false);
-    std::vector<COR_SIGNATURE> delegate_sig;
-    append_type_token(delegate_sig, system_delegate_token, false);
 
     mdMemberRef type_get_type_from_handle, assembly_load, assembly_get_type, type_get_method, method_base_invoke;
     {
@@ -365,27 +374,39 @@ HRESULT GenerateCallTargetTrampolineType(ICorProfilerInfo7* profilerInfo,
     };
     auto export_method = [&](mdMethodDef method, ILRewriter& rewriter) -> HRESULT {
         hr = rewriter.Export();
-        if (FAILED(hr)) { Logger::Warn("GenerateCallTargetTrampolineType: ILRewriter.Export failed for method ", method); }
+        if (FAILED(hr))
+        {
+            WCHAR methodName[1024]{};
+            ULONG methodNameLen = 0;
+            mdTypeDef ownerType = mdTypeDefNil;
+            metadata_import->GetMethodProps(method, &ownerType, methodName, 1024, &methodNameLen, nullptr, nullptr,
+                                            nullptr, nullptr, nullptr);
+
+            WCHAR typeName[1024]{};
+            ULONG typeNameLen = 0;
+            metadata_import->GetTypeDefProps(ownerType, typeName, 1024, &typeNameLen, nullptr, nullptr);
+
+            Logger::Warn("GenerateCallTargetTrampolineType: ILRewriter.Export failed for method ", method, " ",
+                         WSTRING(typeName), ".", WSTRING(methodName), ", result ", hr);
+        }
         return hr;
     };
 
-    auto define_static_default_method = [&](mdTypeDef type,
-                                            const WSTRING& methodName,
-                                            const std::vector<COR_SIGNATURE>& returnType,
-                                            mdToken initObjToken) -> HRESULT {
+    auto define_static_default_field_method = [&](mdTypeDef type,
+                                                  const WSTRING& methodName,
+                                                  const std::vector<COR_SIGNATURE>& returnType) -> HRESULT {
+        auto fieldSig = field_signature(returnType);
+        mdFieldDef defaultField;
+        IfFailRet(define_field(type, WStr("_default"), fdPrivate | fdStatic, fieldSig, &defaultField));
+
         auto methodSig = static_method_signature(returnType, {});
         mdMethodDef method;
         IfFailRet(metadata_emit->DefineMethod(type, methodName.c_str(), mdPublic | mdHideBySig | mdStatic,
                                               methodSig.data(), static_cast<ULONG>(methodSig.size()), 0, 0, &method));
-
         ILRewriter rewriter(profilerInfo, nullptr, module_id, method);
         rewriter.InitializeTiny();
-        IfFailRet(set_single_local_sig(rewriter, returnType));
-
         ILInstr* p = rewriter.GetILList()->m_pNext;
-        emit_simple(rewriter, p, CEE_LDLOCA_S)->m_Arg8 = 0;
-        emit_token(rewriter, p, CEE_INITOBJ, initObjToken);
-        emit_simple(rewriter, p, CEE_LDLOC_0);
+        emit_token(rewriter, p, CEE_LDSFLD, defaultField);
         emit_simple(rewriter, p, CEE_RET);
         return export_method(method, rewriter);
     };
@@ -416,61 +437,61 @@ HRESULT GenerateCallTargetTrampolineType(ICorProfilerInfo7* profilerInfo,
     };
 
     mdTypeDef indexer_type;
-    IfFailRet(metadata_emit->DefineTypeDef(WStr("__OTelCallTargetIndexer`1"), tdPublic, system_object_token, nullptr,
-                                           &indexer_type));
+    IfFailRet(define_type(WStr("__OTelCallTargetIndexer`1"), tdPublic, system_object_token, &indexer_type));
     IfFailRet(define_generic_params(indexer_type, {WStr("T")}));
 
     mdTypeDef state_type;
-    IfFailRet(metadata_emit->DefineTypeDef(WStr("__OTelCallTargetState__"),
-                                           tdPublic | tdSequentialLayout | tdSealed, system_value_type_token, nullptr,
-                                           &state_type));
+    IfFailRet(define_type(WStr("__OTelCallTargetState__"),
+                          tdPublic | tdSequentialLayout | tdSealed, system_value_type_token, &state_type));
     {
         auto objectFieldSig = field_signature(object_sig);
         mdFieldDef field;
-        IfFailRet(metadata_emit->DefineField(state_type, WStr("PreviousActivity"), fdPublic, objectFieldSig.data(),
-                                             static_cast<ULONG>(objectFieldSig.size()), 0, nullptr, 0, &field));
-        IfFailRet(metadata_emit->DefineField(state_type, WStr("Activity"), fdPublic, objectFieldSig.data(),
-                                             static_cast<ULONG>(objectFieldSig.size()), 0, nullptr, 0, &field));
-        IfFailRet(metadata_emit->DefineField(state_type, WStr("State"), fdPublic, objectFieldSig.data(),
-                                             static_cast<ULONG>(objectFieldSig.size()), 0, nullptr, 0, &field));
-        IfFailRet(metadata_emit->DefineField(state_type, WStr("StartTime"), fdPublic, objectFieldSig.data(),
-                                             static_cast<ULONG>(objectFieldSig.size()), 0, nullptr, 0, &field));
+        IfFailRet(define_field(state_type, WStr("PreviousActivity"), fdPublic, objectFieldSig, &field));
+        IfFailRet(define_field(state_type, WStr("Activity"), fdPublic, objectFieldSig, &field));
+        IfFailRet(define_field(state_type, WStr("State"), fdPublic, objectFieldSig, &field));
+        IfFailRet(define_field(state_type, WStr("StartTime"), fdPublic, objectFieldSig, &field));
     }
     {
         std::vector<COR_SIGNATURE> stateReturnSig;
         append_type_token(stateReturnSig, state_type, true);
-        IfFailRet(define_static_default_method(state_type, WStr("GetDefault"), stateReturnSig, state_type));
+        IfFailRet(define_static_default_field_method(state_type, WStr("GetDefault"), stateReturnSig));
     }
 
     mdTypeDef return_void_type;
-    IfFailRet(metadata_emit->DefineTypeDef(WStr("__OTelCallTargetReturn__"), tdPublic | tdSequentialLayout | tdSealed,
-                                           system_value_type_token, nullptr, &return_void_type));
+    IfFailRet(define_type(WStr("__OTelCallTargetReturn__"), tdPublic | tdSequentialLayout | tdSealed,
+                          system_value_type_token, &return_void_type));
     {
         std::vector<COR_SIGNATURE> returnVoidSig;
         append_type_token(returnVoidSig, return_void_type, true);
-        IfFailRet(define_static_default_method(return_void_type, WStr("GetDefault"), returnVoidSig, return_void_type));
+        IfFailRet(define_static_default_field_method(return_void_type, WStr("GetDefault"), returnVoidSig));
     }
 
     mdTypeDef return_generic_type;
     mdFieldDef return_value_field;
-    IfFailRet(metadata_emit->DefineTypeDef(WStr("__OTelCallTargetReturn__`1"),
-                                           tdPublic | tdSequentialLayout | tdSealed, system_value_type_token, nullptr,
-                                           &return_generic_type));
+    IfFailRet(define_type(WStr("__OTelCallTargetReturn__`1"),
+                          tdPublic | tdSequentialLayout | tdSealed, system_value_type_token,
+                          &return_generic_type));
     IfFailRet(define_generic_params(return_generic_type, {WStr("TReturn")}));
     {
         std::vector<COR_SIGNATURE> returnValueSig;
         append_var(returnValueSig, 0);
         auto fieldSig = field_signature(returnValueSig);
-        IfFailRet(metadata_emit->DefineField(return_generic_type, WStr("ReturnValue"), fdPrivate, fieldSig.data(),
-                                             static_cast<ULONG>(fieldSig.size()), 0, nullptr, 0, &return_value_field));
+        IfFailRet(define_field(return_generic_type, WStr("ReturnValue"), fdPrivate, fieldSig,
+                               &return_value_field));
     }
     mdMethodDef return_ctor, return_generic_get_default, get_return_value_method;
     {
         std::vector<COR_SIGNATURE> returnVar;
         append_var(returnVar, 0);
         auto returnGenericSig = generic_instance_signature(return_generic_type, true, {returnVar});
-        mdTypeSpec returnGenericTypeSpec;
-        IfFailRet(make_generic_type_spec(return_generic_type, true, {returnVar}, &returnGenericTypeSpec));
+
+        auto defaultFieldSig = field_signature(returnGenericSig);
+        mdFieldDef defaultField;
+        IfFailRet(define_field(return_generic_type, WStr("_default"), fdPrivate | fdStatic, defaultFieldSig,
+                               &defaultField));
+        mdMemberRef defaultFieldRef;
+        IfFailRet(make_open_generic_field_ref(return_generic_type, true, 1, WStr("_default"), defaultFieldSig,
+                                             &defaultFieldRef));
 
         auto getDefaultSig = static_method_signature(returnGenericSig, {});
         IfFailRet(metadata_emit->DefineMethod(return_generic_type, WStr("GetDefault"), mdPublic | mdHideBySig | mdStatic,
@@ -478,11 +499,8 @@ HRESULT GenerateCallTargetTrampolineType(ICorProfilerInfo7* profilerInfo,
                                               &return_generic_get_default));
         ILRewriter defaultRewriter(profilerInfo, nullptr, module_id, return_generic_get_default);
         defaultRewriter.InitializeTiny();
-        IfFailRet(set_single_local_sig(defaultRewriter, returnGenericSig));
         ILInstr* p = defaultRewriter.GetILList()->m_pNext;
-        emit_simple(defaultRewriter, p, CEE_LDLOCA_S)->m_Arg8 = 0;
-        emit_token(defaultRewriter, p, CEE_INITOBJ, returnGenericTypeSpec);
-        emit_simple(defaultRewriter, p, CEE_LDLOC_0);
+        emit_token(defaultRewriter, p, CEE_LDSFLD, defaultFieldRef);
         emit_simple(defaultRewriter, p, CEE_RET);
         IfFailRet(export_method(return_generic_get_default, defaultRewriter));
 
@@ -518,9 +536,38 @@ HRESULT GenerateCallTargetTrampolineType(ICorProfilerInfo7* profilerInfo,
     append_type_token(return_void_sig, return_void_type, true);
 
     mdTypeDef trampoline_type;
-    IfFailRet(metadata_emit->DefineTypeDef(WStr("__OTelCallTargetTrampoline__"),
-                                           tdPublic | tdAbstract | tdSealed, system_object_token, nullptr,
-                                           &trampoline_type));
+    IfFailRet(define_type(WStr("__OTelCallTargetTrampoline__"),
+                          tdPublic | tdAbstract | tdSealed, system_object_token, &trampoline_type));
+
+    mdTypeDef default_value_holder_type;
+    IfFailRet(define_type(WStr("__OTelCallTargetTrampolineDefaultValue__`1"),
+                          tdPublic | tdAbstract | tdSealed, system_object_token, &default_value_holder_type));
+    IfFailRet(define_generic_params(default_value_holder_type, {WStr("T")}));
+    {
+        std::vector<COR_SIGNATURE> returnVar;
+        append_var(returnVar, 0);
+
+        auto fieldSig = field_signature(returnVar);
+        mdFieldDef defaultField;
+        IfFailRet(define_field(default_value_holder_type, WStr("_default"), fdPrivate | fdStatic, fieldSig,
+                               &defaultField));
+        mdMemberRef defaultFieldRef;
+        IfFailRet(make_open_generic_field_ref(default_value_holder_type, false, 1, WStr("_default"), fieldSig,
+                                             &defaultFieldRef));
+
+        auto getDefaultValueSig = static_method_signature(returnVar, {});
+        mdMethodDef getDefaultValueMethod;
+        IfFailRet(metadata_emit->DefineMethod(default_value_holder_type, WStr("GetDefaultValue"),
+                                              mdPublic | mdHideBySig | mdStatic, getDefaultValueSig.data(),
+                                              static_cast<ULONG>(getDefaultValueSig.size()), 0, 0,
+                                              &getDefaultValueMethod));
+        ILRewriter rewriter(profilerInfo, nullptr, module_id, getDefaultValueMethod);
+        rewriter.InitializeTiny();
+        ILInstr* p = rewriter.GetILList()->m_pNext;
+        emit_token(rewriter, p, CEE_LDSFLD, defaultFieldRef);
+        emit_simple(rewriter, p, CEE_RET);
+        IfFailRet(export_method(getDefaultValueMethod, rewriter));
+    }
     {
         std::vector<COR_SIGNATURE> returnMethodVar;
         append_mvar(returnMethodVar, 0);
@@ -532,16 +579,20 @@ HRESULT GenerateCallTargetTrampolineType(ICorProfilerInfo7* profilerInfo,
                                               &getDefaultValueMethod));
         IfFailRet(define_generic_params(getDefaultValueMethod, {WStr("T")}));
 
-        mdTypeSpec returnMethodVarTypeSpec;
-        IfFailRet(make_mvar_type_spec(0, &returnMethodVarTypeSpec));
+        mdTypeSpec holderTypeSpec;
+        IfFailRet(make_generic_type_spec(default_value_holder_type, false, {returnMethodVar}, &holderTypeSpec));
+
+        std::vector<COR_SIGNATURE> holderReturnVar;
+        append_var(holderReturnVar, 0);
+        auto holderMethodSig = static_method_signature(holderReturnVar, {});
+        mdMemberRef holderMethodRef;
+        IfFailRet(metadata_emit->DefineMemberRef(holderTypeSpec, WStr("GetDefaultValue"), holderMethodSig.data(),
+                                                 static_cast<ULONG>(holderMethodSig.size()), &holderMethodRef));
 
         ILRewriter rewriter(profilerInfo, nullptr, module_id, getDefaultValueMethod);
         rewriter.InitializeTiny();
-        IfFailRet(set_single_local_sig(rewriter, returnMethodVar));
         ILInstr* p = rewriter.GetILList()->m_pNext;
-        emit_simple(rewriter, p, CEE_LDLOCA_S)->m_Arg8 = 0;
-        emit_token(rewriter, p, CEE_INITOBJ, returnMethodVarTypeSpec);
-        emit_simple(rewriter, p, CEE_LDLOC_0);
+        emit_token(rewriter, p, CEE_CALL, holderMethodRef);
         emit_simple(rewriter, p, CEE_RET);
         IfFailRet(export_method(getDefaultValueMethod, rewriter));
     }
@@ -551,8 +602,7 @@ HRESULT GenerateCallTargetTrampolineType(ICorProfilerInfo7* profilerInfo,
                                     const std::vector<COR_SIGNATURE>& returnType,
                                     const std::vector<std::vector<COR_SIGNATURE>>& parameters,
                                     mdTypeDef* delegateType) -> HRESULT {
-        IfFailRet(metadata_emit->DefineTypeDef(name.c_str(), tdPublic | tdSealed, system_multicast_delegate_token,
-                                               nullptr, delegateType));
+        IfFailRet(define_type(name, tdPublic | tdSealed, system_multicast_delegate_token, delegateType));
         IfFailRet(define_generic_params(*delegateType, genericNames));
 
         auto ctorSig = instance_method_signature(void_sig, {object_sig, {ELEMENT_TYPE_I}});
@@ -626,28 +676,31 @@ HRESULT GenerateCallTargetTrampolineType(ICorProfilerInfo7* profilerInfo,
     auto define_holder_type = [&](const WSTRING& name,
                                   const std::vector<WSTRING>& genericNames,
                                   mdTypeDef* holderType) -> HRESULT {
-        IfFailRet(metadata_emit->DefineTypeDef(name.c_str(), tdPublic | tdAbstract | tdSealed, system_object_token,
-                                               nullptr, holderType));
+        IfFailRet(define_type(name, tdPublic | tdAbstract | tdSealed, system_object_token, holderType));
         return define_generic_params(*holderType, genericNames);
     };
 
     auto define_static_delegate_field = [&](mdTypeDef holderType,
+                                            ULONG holderGenericArity,
                                             mdToken delegateType,
                                             const std::vector<std::vector<COR_SIGNATURE>>& delegateArgs,
-                                            mdFieldDef* field,
+                                            mdMemberRef* fieldRef,
                                             mdTypeSpec* delegateTypeSpec) -> HRESULT {
         IfFailRet(make_generic_type_spec(delegateType, false, delegateArgs, delegateTypeSpec));
         PCCOR_SIGNATURE delegateSig = nullptr;
         ULONG delegateSigSize = 0;
         IfFailRet(metadata_import->GetTypeSpecFromToken(*delegateTypeSpec, &delegateSig, &delegateSigSize));
-        std::vector<COR_SIGNATURE> fieldSig{IMAGE_CEE_CS_CALLCONV_FIELD};
-        fieldSig.insert(fieldSig.end(), delegateSig, delegateSig + delegateSigSize);
-        return metadata_emit->DefineField(holderType, WStr("_delegate"), fdPrivate | fdStatic, fieldSig.data(),
-                                          static_cast<ULONG>(fieldSig.size()), 0, nullptr, 0, field);
+        std::vector<COR_SIGNATURE> delegateFieldType(delegateSig, delegateSig + delegateSigSize);
+        auto fieldSig = field_signature(delegateFieldType);
+        mdFieldDef field;
+        auto hr = define_field(holderType, WStr("_delegate"), fdPrivate | fdStatic, fieldSig, &field);
+        IfFailRet(hr);
+        return make_open_generic_field_ref(holderType, false, holderGenericArity, WStr("_delegate"), fieldSig,
+                                           fieldRef);
     };
 
     auto define_holder_cctor = [&](mdTypeDef holderType,
-                                   mdFieldDef field,
+                                   mdMemberRef field,
                                    mdTypeSpec delegateTypeSpec,
                                    const WSTRING& factoryMethod,
                                    const std::vector<mdToken>& typeTokens,
@@ -658,8 +711,10 @@ HRESULT GenerateCallTargetTrampolineType(ICorProfilerInfo7* profilerInfo,
                                               mdPrivate | mdHideBySig | mdSpecialName | mdRTSpecialName | mdStatic,
                                               cctorSig.data(), static_cast<ULONG>(cctorSig.size()), 0, 0, &cctor));
         ILRewriter rewriter(profilerInfo, nullptr, module_id, cctor);
-        rewriter.InitializeTiny();
+        // The reflection-based factory lookup is larger than a tiny method body.
+        rewriter.InitializeFat();
         ILInstr* p = rewriter.GetILList()->m_pNext;
+
         std::vector<std::function<void()>> args;
         for (auto token : typeTokens)
         {
@@ -672,6 +727,7 @@ HRESULT GenerateCallTargetTrampolineType(ICorProfilerInfo7* profilerInfo,
                 emit_token(rewriter, p, CEE_BOX, system_int32_token);
             });
         }
+
         emit_factory_call(rewriter, p, factoryMethod, args);
         emit_token(rewriter, p, CEE_CASTCLASS, delegateTypeSpec);
         emit_token(rewriter, p, CEE_STSFLD, field);
@@ -680,22 +736,25 @@ HRESULT GenerateCallTargetTrampolineType(ICorProfilerInfo7* profilerInfo,
     };
 
     auto define_holder_method = [&](mdTypeDef holderType,
-                                    mdFieldDef field,
+                                    mdMemberRef field,
                                     mdTypeSpec delegateTypeSpec,
                                     const WSTRING& methodName,
                                     const std::vector<COR_SIGNATURE>& returnType,
-                                    const std::vector<std::vector<COR_SIGNATURE>>& parameters) -> HRESULT {
+                                    const std::vector<std::vector<COR_SIGNATURE>>& parameters,
+                                    const std::vector<COR_SIGNATURE>& invokeReturnType,
+                                    const std::vector<std::vector<COR_SIGNATURE>>& invokeParameters) -> HRESULT {
         auto methodSig = static_method_signature(returnType, parameters);
         mdMethodDef method;
         IfFailRet(metadata_emit->DefineMethod(holderType, methodName.c_str(), mdPublic | mdHideBySig | mdStatic,
                                               methodSig.data(), static_cast<ULONG>(methodSig.size()), 0, 0, &method));
-        auto invokeSig = instance_method_signature(returnType, parameters);
+        auto invokeSig = instance_method_signature(invokeReturnType, invokeParameters);
         mdMemberRef invokeRef;
         IfFailRet(metadata_emit->DefineMemberRef(delegateTypeSpec, WStr("Invoke"), invokeSig.data(),
                                                  static_cast<ULONG>(invokeSig.size()), &invokeRef));
         ILRewriter rewriter(profilerInfo, nullptr, module_id, method);
         rewriter.InitializeTiny();
         ILInstr* p = rewriter.GetILList()->m_pNext;
+
         emit_token(rewriter, p, CEE_LDSFLD, field);
         for (UINT16 i = 0; i < parameters.size(); i++)
         {
@@ -772,6 +831,9 @@ HRESULT GenerateCallTargetTrampolineType(ICorProfilerInfo7* profilerInfo,
         std::vector<COR_SIGNATURE> targetArg;
         append_var(targetArg, 1);
         parameters.push_back(targetArg);
+        std::vector<COR_SIGNATURE> invokeTargetArg;
+        append_var(invokeTargetArg, 0);
+        std::vector<std::vector<COR_SIGNATURE>> invokeParameters{invokeTargetArg};
         std::vector<std::vector<COR_SIGNATURE>> delegateArgs{targetArg};
         for (int i = 0; i < arity; i++)
         {
@@ -782,21 +844,24 @@ HRESULT GenerateCallTargetTrampolineType(ICorProfilerInfo7* profilerInfo,
             std::vector<COR_SIGNATURE> delegateArg;
             append_var(delegateArg, static_cast<ULONG>(i + 2));
             delegateArgs.push_back(delegateArg);
+            std::vector<COR_SIGNATURE> invokeArg;
+            append_var(invokeArg, static_cast<ULONG>(i + 1), true);
+            invokeParameters.push_back(invokeArg);
         }
 
         mdTypeDef holderType;
         const auto holderName = WStr("__OTelCallTargetTrampolineBegin__`") + ToWSTRING(arity + 2);
         IfFailRet(define_holder_type(holderName, genericNames, &holderType));
         begin_holder_types[arity] = holderType;
-        mdFieldDef field;
+        mdMemberRef field;
         mdTypeSpec delegateTypeSpec;
-        IfFailRet(define_static_delegate_field(holderType, begin_delegate_types[arity], delegateArgs, &field,
-                                               &delegateTypeSpec));
+        IfFailRet(define_static_delegate_field(holderType, static_cast<ULONG>(genericNames.size()),
+                                               begin_delegate_types[arity], delegateArgs, &field, &delegateTypeSpec));
         std::vector<mdToken> cctorTypes{var0, var1, delegateTypeSpec};
         IfFailRet(define_holder_cctor(holderType, field, delegateTypeSpec, WStr("CreateBeginDelegate"), cctorTypes,
                                       arity));
         IfFailRet(define_holder_method(holderType, field, delegateTypeSpec, WStr("BeginMethod"), state_sig,
-                                       parameters));
+                                       parameters, state_sig, invokeParameters));
     }
 
     {
@@ -806,15 +871,16 @@ HRESULT GenerateCallTargetTrampolineType(ICorProfilerInfo7* profilerInfo,
         begin_slow_holder_type = holderType;
         std::vector<COR_SIGNATURE> targetArg;
         append_var(targetArg, 1);
-        mdFieldDef field;
+        mdMemberRef field;
         mdTypeSpec delegateTypeSpec;
-        IfFailRet(define_static_delegate_field(holderType, begin_slow_delegate_type, {targetArg}, &field,
+        IfFailRet(define_static_delegate_field(holderType, 2, begin_slow_delegate_type, {targetArg}, &field,
                                                &delegateTypeSpec));
         IfFailRet(define_holder_cctor(holderType, field, delegateTypeSpec, WStr("CreateSlowBeginDelegate"),
                                       {var0, var1, delegateTypeSpec}, -1));
         std::vector<COR_SIGNATURE> objectArrayArg{ELEMENT_TYPE_SZARRAY, ELEMENT_TYPE_OBJECT};
         IfFailRet(define_holder_method(holderType, field, delegateTypeSpec, WStr("BeginMethod"), state_sig,
-                                       {targetArg, objectArrayArg}));
+                                       {targetArg, objectArrayArg}, state_sig,
+                                       {var_signature(0), objectArrayArg}));
     }
 
     {
@@ -827,16 +893,18 @@ HRESULT GenerateCallTargetTrampolineType(ICorProfilerInfo7* profilerInfo,
         std::vector<COR_SIGNATURE> returnArg;
         append_var(returnArg, 2);
         auto returnType = generic_instance_signature(return_generic_type, true, {returnArg});
-        mdFieldDef field;
+        mdMemberRef field;
         mdTypeSpec delegateTypeSpec;
-        IfFailRet(define_static_delegate_field(holderType, end_delegate_type, {targetArg, returnArg}, &field,
+        IfFailRet(define_static_delegate_field(holderType, 3, end_delegate_type, {targetArg, returnArg}, &field,
                                                &delegateTypeSpec));
         IfFailRet(define_holder_cctor(holderType, field, delegateTypeSpec, WStr("CreateEndDelegate"),
                                       {var0, var1, var2, delegateTypeSpec}, -1));
         std::vector<COR_SIGNATURE> stateByRef = state_sig;
         stateByRef.insert(stateByRef.begin(), ELEMENT_TYPE_BYREF);
+        auto invokeReturnType = generic_instance_signature(return_generic_type, true, {var_signature(1)});
         IfFailRet(define_holder_method(holderType, field, delegateTypeSpec, WStr("EndMethod"), returnType,
-                                       {targetArg, returnArg, exception_sig, stateByRef}));
+                                       {targetArg, returnArg, exception_sig, stateByRef}, invokeReturnType,
+                                       {var_signature(0), var_signature(1), exception_sig, stateByRef}));
     }
 
     {
@@ -846,16 +914,17 @@ HRESULT GenerateCallTargetTrampolineType(ICorProfilerInfo7* profilerInfo,
         end_void_holder_type = holderType;
         std::vector<COR_SIGNATURE> targetArg;
         append_var(targetArg, 1);
-        mdFieldDef field;
+        mdMemberRef field;
         mdTypeSpec delegateTypeSpec;
-        IfFailRet(define_static_delegate_field(holderType, end_void_delegate_type, {targetArg}, &field,
+        IfFailRet(define_static_delegate_field(holderType, 2, end_void_delegate_type, {targetArg}, &field,
                                                &delegateTypeSpec));
         IfFailRet(define_holder_cctor(holderType, field, delegateTypeSpec, WStr("CreateEndVoidDelegate"),
                                       {var0, var1, delegateTypeSpec}, -1));
         std::vector<COR_SIGNATURE> stateByRef = state_sig;
         stateByRef.insert(stateByRef.begin(), ELEMENT_TYPE_BYREF);
         IfFailRet(define_holder_method(holderType, field, delegateTypeSpec, WStr("EndMethod"), return_void_sig,
-                                       {targetArg, exception_sig, stateByRef}));
+                                       {targetArg, exception_sig, stateByRef}, return_void_sig,
+                                       {var_signature(0), exception_sig, stateByRef}));
     }
 
     {
@@ -863,17 +932,18 @@ HRESULT GenerateCallTargetTrampolineType(ICorProfilerInfo7* profilerInfo,
         IfFailRet(define_holder_type(WStr("__OTelCallTargetTrampolineLogException__`2"),
                                      {WStr("TMapIntegration"), WStr("TTarget")}, &holderType));
         log_exception_holder_type = holderType;
-        mdFieldDef field;
+        mdMemberRef field;
         mdTypeSpec delegateTypeSpec = log_exception_delegate_type;
-        std::vector<COR_SIGNATURE> fieldSig;
-        append_type_token(fieldSig, log_exception_delegate_type, false);
-        auto finalFieldSig = field_signature(fieldSig);
-        IfFailRet(metadata_emit->DefineField(holderType, WStr("_delegate"), fdPrivate | fdStatic, finalFieldSig.data(),
-                                             static_cast<ULONG>(finalFieldSig.size()), 0, nullptr, 0, &field));
+        std::vector<COR_SIGNATURE> logExceptionDelegateSig;
+        append_type_token(logExceptionDelegateSig, log_exception_delegate_type, false);
+        auto finalFieldSig = field_signature(logExceptionDelegateSig);
+        mdFieldDef fieldDef;
+        IfFailRet(define_field(holderType, WStr("_delegate"), fdPrivate | fdStatic, finalFieldSig, &fieldDef));
+        IfFailRet(make_open_generic_field_ref(holderType, false, 2, WStr("_delegate"), finalFieldSig, &field));
         IfFailRet(define_holder_cctor(holderType, field, delegateTypeSpec, WStr("CreateLogExceptionDelegate"),
                                       {var0, var1, delegateTypeSpec}, -1));
         IfFailRet(define_holder_method(holderType, field, delegateTypeSpec, WStr("LogException"), void_sig,
-                                       {exception_sig}));
+                                       {exception_sig}, void_sig, {exception_sig}));
     }
 
     for (int arity = 0; arity < FASTPATH_COUNT; arity++)

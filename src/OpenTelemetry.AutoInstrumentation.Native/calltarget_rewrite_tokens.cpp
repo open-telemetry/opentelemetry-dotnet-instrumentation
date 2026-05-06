@@ -5,12 +5,12 @@
 
 #include "calltarget_rewrite_tokens.h"
 
-#include <vector>
-
 #include "cor_profiler.h"
 #include "logger.h"
 #include "member_resolver.h"
 #include "otel_profiler_constants.h"
+#include "signature_builder.h"
+#include "util.h"
 
 namespace trace
 {
@@ -45,44 +45,37 @@ mdAssemblyRef FindExistingCorLibRef(ModuleMetadata& moduleMetadata)
     return mdAssemblyRefNil;
 }
 
-void AppendCompressedData(std::vector<COR_SIGNATURE>& signature, ULONG value)
-{
-    COR_SIGNATURE buffer[sizeof(ULONG)];
-    ULONG         size = CorSigCompressData(value, buffer);
-    signature.insert(signature.end(), buffer, buffer + size);
-}
-
-void AppendCompressedToken(std::vector<COR_SIGNATURE>& signature, mdToken token)
-{
-    COR_SIGNATURE buffer[sizeof(mdToken)];
-    ULONG         size = CorSigCompressToken(token, buffer);
-    signature.insert(signature.end(), buffer, buffer + size);
-}
-
-void AppendTypeToken(std::vector<COR_SIGNATURE>& signature, mdToken token, bool isValueType)
-{
-    signature.push_back(isValueType ? ELEMENT_TYPE_VALUETYPE : ELEMENT_TYPE_CLASS);
-    AppendCompressedToken(signature, token);
-}
-
 HRESULT BuildIndexerMapTypeSpec(ModuleMetadata& moduleMetadata,
                                 mdTypeRef       indexerTypeRef,
+                                mdToken         objectTypeRef,
                                 int             integrationIndex,
                                 mdTypeSpec*     integrationTypeSpec)
 {
-    std::vector<COR_SIGNATURE> current{ELEMENT_TYPE_OBJECT};
+    SignatureBuilder current;
+    current.PushRawByte(ELEMENT_TYPE_OBJECT);
+
+    SignatureBuilder::Class indexerType{indexerTypeRef};
     for (int i = 0; i <= integrationIndex; i++)
     {
-        std::vector<COR_SIGNATURE> next;
-        next.push_back(ELEMENT_TYPE_GENERICINST);
-        AppendTypeToken(next, indexerTypeRef, false);
-        AppendCompressedData(next, 1);
-        next.insert(next.end(), current.begin(), current.end());
+        SignatureBuilder next;
+        next.PushRawByte(ELEMENT_TYPE_GENERICINST)
+            .Push(indexerType)
+            .PushCompressedData(1)
+            .Push(current);
         current = next;
     }
 
-    return moduleMetadata.metadata_emit->GetTokenFromTypeSpec(current.data(), static_cast<ULONG>(current.size()),
-                                                              integrationTypeSpec);
+    auto hr = moduleMetadata.metadata_emit->GetTokenFromTypeSpec(current.Head(), current.Size(), integrationTypeSpec);
+    if (SUCCEEDED(hr) && Logger::IsDebugEnabled())
+    {
+        Logger::Debug("BuildIndexerMapTypeSpec: indexerTypeRef=", HexStr(&indexerTypeRef, sizeof(mdTypeRef)),
+                      " objectTypeRef=", HexStr(&objectTypeRef, sizeof(mdToken)),
+                      " integrationIndex=", integrationIndex,
+                      " integrationTypeSpec=", HexStr(integrationTypeSpec, sizeof(mdTypeSpec)),
+                      " signature=", HexStr(current.Head(), static_cast<int>(current.Size())));
+    }
+
+    return hr;
 }
 
 } // namespace
@@ -137,7 +130,29 @@ HRESULT CallTargetTrampolineTokens::Initialize()
     IfFailRet(get_type(calltarget_trampoline_type_name.c_str(), &callTargetTypeRef));
 
     const int integrationIndex = trace::profiler->GetCallTargetTrampolineIntegrationIndex(*integrationDefinition);
-    return BuildIndexerMapTypeSpec(*moduleMetadata, indexerTypeRef, integrationIndex, &integrationTypeSpec);
+    hr = BuildIndexerMapTypeSpec(*moduleMetadata, indexerTypeRef, objectTypeRef, integrationIndex,
+                                 &integrationTypeSpec);
+    if (FAILED(hr))
+    {
+        return hr;
+    }
+
+    if (Logger::IsDebugEnabled())
+    {
+        Logger::Debug("CallTargetTrampolineTokens::Initialize: assembly=", moduleMetadata->assemblyName,
+                      " corLibAssemblyRef=", HexStr(&corLibAssemblyRef, sizeof(mdAssemblyRef)),
+                      " objectTypeRef=", HexStr(&objectTypeRef, sizeof(mdToken)),
+                      " exceptionTypeRef=", HexStr(&exTypeRef, sizeof(mdToken)),
+                      " stateTypeRef=", HexStr(&callTargetStateTypeRef, sizeof(mdToken)),
+                      " returnVoidTypeRef=", HexStr(&callTargetReturnVoidTypeRef, sizeof(mdToken)),
+                      " returnGenericTypeRef=", HexStr(&callTargetReturnTypeRef, sizeof(mdToken)),
+                      " indexerTypeRef=", HexStr(&indexerTypeRef, sizeof(mdToken)),
+                      " trampolineTypeRef=", HexStr(&callTargetTypeRef, sizeof(mdToken)),
+                      " integrationIndex=", integrationIndex,
+                      " integrationTypeSpec=", HexStr(&integrationTypeSpec, sizeof(mdTypeSpec)));
+    }
+
+    return S_OK;
 }
 
 mdTypeRef CallTargetTrampolineTokens::GetIntegrationTypeRef() const

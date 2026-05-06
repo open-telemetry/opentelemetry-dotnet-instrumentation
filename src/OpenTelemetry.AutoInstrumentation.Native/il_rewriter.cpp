@@ -155,6 +155,16 @@ void ILRewriter::InitializeTiny()
     m_fGenerateTinyHeader = true;
 }
 
+void ILRewriter::InitializeFat()
+{
+    m_tkLocalVarSig       = 0;
+    m_maxStack            = 8;
+    m_flags               = 0;
+    m_CodeSize            = 0;
+    m_nEH                 = 0;
+    m_fGenerateTinyHeader = false;
+}
+
 mdToken ILRewriter::GetTkLocalVarSig()
 {
     return m_tkLocalVarSig;
