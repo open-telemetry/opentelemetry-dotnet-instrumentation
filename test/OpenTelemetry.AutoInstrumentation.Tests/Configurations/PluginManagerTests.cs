@@ -100,6 +100,7 @@ public class PluginManagerTests
         Assert.Null(Record.Exception(() => pluginManager.Initializing()));
         Assert.Null(Record.Exception(() => pluginManager.InitializedProvider(tracerProviderMock)));
         Assert.Null(Record.Exception(() => pluginManager.InitializedProvider(meterProviderMock)));
+        Assert.Null(Record.Exception(() => pluginManager.Initialized()));
 
         var plugin = pluginManager.Plugins
             .Single(x => x.Type.IsAssignableFrom(typeof(MockPlugin)))
@@ -110,6 +111,7 @@ public class PluginManagerTests
         Assert.True(plugin.IsInitializingCalled);
         Assert.True(plugin.IsTracerProviderInitializedCalled);
         Assert.True(plugin.IsMeterProviderInitializedCalled);
+        Assert.True(plugin.IsInitializedCalled);
     }
 
     [Fact]
@@ -170,6 +172,8 @@ public class PluginManagerTests
     {
         public bool IsInitializingCalled { get; private set; }
 
+        public bool IsInitializedCalled { get; private set; }
+
         public bool IsTracerProviderInitializedCalled { get; private set; }
 
         public bool IsMeterProviderInitializedCalled { get; private set; }
@@ -182,6 +186,16 @@ public class PluginManagerTests
             }
 
             IsInitializingCalled = true;
+        }
+
+        public void Initialized()
+        {
+            if (IsInitializedCalled)
+            {
+                throw new InvalidOperationException("Already called");
+            }
+
+            IsInitializedCalled = true;
         }
 
         public void TracerProviderInitialized(TracerProvider tracerProvider)

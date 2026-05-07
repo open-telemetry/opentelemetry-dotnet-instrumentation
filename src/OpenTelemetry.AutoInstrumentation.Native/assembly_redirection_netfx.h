@@ -45,7 +45,7 @@
         { _W("OpenTelemetry.Resources.Azure"), {1, 15, 1, 1031} }, \
         { _W("OpenTelemetry.Resources.Host"), {1, 15, 1, 1036} }, \
         { _W("OpenTelemetry.Resources.OperatingSystem"), {1, 15, 1, 1039} }, \
-        { _W("OpenTelemetry.Resources.Process"), {1, 15, 1, 1037} }, \
+        { _W("OpenTelemetry.Resources.Process"), {1, 15, 1, 1069} }, \
         { _W("OpenTelemetry.Resources.ProcessRuntime"), {1, 15, 1, 1040} }, \
         { _W("OpenTelemetry.Shims.OpenTracing"), {1, 0, 0, 0} }, \
         { _W("OpenTracing"), {0, 12, 1, 0} }, \
@@ -192,7 +192,7 @@
         { _W("OpenTelemetry.Resources.Azure"), {1, 15, 1, 1031} }, \
         { _W("OpenTelemetry.Resources.Host"), {1, 15, 1, 1036} }, \
         { _W("OpenTelemetry.Resources.OperatingSystem"), {1, 15, 1, 1039} }, \
-        { _W("OpenTelemetry.Resources.Process"), {1, 15, 1, 1037} }, \
+        { _W("OpenTelemetry.Resources.Process"), {1, 15, 1, 1069} }, \
         { _W("OpenTelemetry.Resources.ProcessRuntime"), {1, 15, 1, 1040} }, \
         { _W("OpenTelemetry.Shims.OpenTracing"), {1, 0, 0, 0} }, \
         { _W("OpenTracing"), {0, 12, 1, 0} }, \
@@ -338,7 +338,7 @@
         { _W("OpenTelemetry.Resources.Azure"), {1, 15, 1, 1031} }, \
         { _W("OpenTelemetry.Resources.Host"), {1, 15, 1, 1036} }, \
         { _W("OpenTelemetry.Resources.OperatingSystem"), {1, 15, 1, 1039} }, \
-        { _W("OpenTelemetry.Resources.Process"), {1, 15, 1, 1037} }, \
+        { _W("OpenTelemetry.Resources.Process"), {1, 15, 1, 1069} }, \
         { _W("OpenTelemetry.Resources.ProcessRuntime"), {1, 15, 1, 1040} }, \
         { _W("OpenTelemetry.Shims.OpenTracing"), {1, 0, 0, 0} }, \
         { _W("OpenTracing"), {0, 12, 1, 0} }, \
@@ -402,7 +402,7 @@
         { _W("OpenTelemetry.Resources.Azure"), {1, 15, 1, 1031} }, \
         { _W("OpenTelemetry.Resources.Host"), {1, 15, 1, 1036} }, \
         { _W("OpenTelemetry.Resources.OperatingSystem"), {1, 15, 1, 1039} }, \
-        { _W("OpenTelemetry.Resources.Process"), {1, 15, 1, 1037} }, \
+        { _W("OpenTelemetry.Resources.Process"), {1, 15, 1, 1069} }, \
         { _W("OpenTelemetry.Resources.ProcessRuntime"), {1, 15, 1, 1040} }, \
         { _W("OpenTelemetry.Shims.OpenTracing"), {1, 0, 0, 0} }, \
         { _W("OpenTracing"), {0, 12, 1, 0} }, \

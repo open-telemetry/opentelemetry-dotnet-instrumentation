@@ -1,7 +1,8 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <ItemGroup>
-    <PackageReference Include="StackExchange.Redis" VersionOverride="$(LibraryVersion)" />
+    <PackageReference Include="StackExchange.Redis" VersionOverride="$(LibraryVersion)" Condition=" '$(LibraryVersion)' != '' or '$(TargetFramework)' != 'net462' " />
+    <PackageReference Include="StackExchange.Redis" VersionOverride="2.12.14" Condition=" '$(LibraryVersion)' == '' and '$(TargetFramework)' == 'net462' "/>
   </ItemGroup>
 
   <ItemGroup Condition=" '$(TargetFramework)' == 'net462' and ( '$(LibraryVersion)' == '' or $([MSBuild]::VersionGreaterThanOrEquals('$(LibraryVersion)', '2.10.1')) ) ">

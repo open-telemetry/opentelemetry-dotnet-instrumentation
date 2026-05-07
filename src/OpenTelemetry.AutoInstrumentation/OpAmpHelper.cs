@@ -4,6 +4,7 @@
 using System.Reflection;
 using OpenTelemetry.AutoInstrumentation.Configurations;
 using OpenTelemetry.AutoInstrumentation.Logging;
+using OpenTelemetry.AutoInstrumentation.Plugins;
 using OpenTelemetry.AutoInstrumentation.Util;
 using OpenTelemetry.OpAmp.Client;
 using OpenTelemetry.OpAmp.Client.Settings;
@@ -21,11 +22,11 @@ internal static class OpAmpHelper
 
     public static bool IsRunning { get; private set; }
 
-    public static void EnableOpAmpClient(Resource resources, OpAmpSettings opAmpSettings)
+    public static void EnableOpAmpClient(Resource resources, OpAmpSettings opAmpSettings, PluginManager pluginManager)
     {
         try
         {
-            _client = new OpAmpClient(settings => ConfigureClient(settings, opAmpSettings, resources));
+            _client = new OpAmpClient(settings => ConfigureClient(settings, opAmpSettings, resources, pluginManager));
 
             // Initializes a client's transport and sends hello frame
             _clientStartupTask = Task.Run(async () =>
@@ -35,6 +36,9 @@ internal static class OpAmpHelper
                     IsRunning = true;
 
                     await _client.StartAsync(_cts.Token).ConfigureAwait(false);
+
+                    // Notify plugins that OpAmp client is available
+                    pluginManager.AfterOpAmpClientStarted(_client);
                 }
                 catch (Exception ex)
                 {
@@ -50,12 +54,14 @@ internal static class OpAmpHelper
         }
     }
 
-    public static void StopOpAmpClientIfRunning()
+    public static void StopOpAmpClientIfRunning(PluginManager? pluginManager)
     {
         if (!IsRunning)
         {
             return;
         }
+
+        pluginManager?.BeforeOpAmpClientStopped();
 
         try
         {
@@ -79,7 +85,7 @@ internal static class OpAmpHelper
         }
     }
 
-    private static void ConfigureClient(OpAmpClientSettings settings, OpAmpSettings opAmpSettings, Resource resources)
+    private static void ConfigureClient(OpAmpClientSettings settings, OpAmpSettings opAmpSettings, Resource resources, PluginManager pluginManager)
     {
         // Late parse ensures that OpenTelemetry.OpAmp.Client.dll is loaded only when OpAmp is enabled.
 
@@ -104,6 +110,9 @@ internal static class OpAmpHelper
         }
 
         settings.Identification.AddNonIdentifyingAttribute("opamp.version", GetOpAmpVersion());
+
+        // Add possibility for plugins to override settings
+        pluginManager.ConfigureOpAmpOptions(settings);
     }
 
     private static void AddAttribute(IdentificationSettings settings, string key, object value)
