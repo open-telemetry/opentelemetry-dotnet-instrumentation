@@ -16,6 +16,9 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 
 #### Dependency updates
 
+- Following packages updated
+  - `OpenTelemetry.Resources.Process` from `1.15.1-beta.1` to `1.15.1-beta.2`.
+
 ### Deprecated
 
 ### Removed
