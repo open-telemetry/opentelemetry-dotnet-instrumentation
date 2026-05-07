@@ -409,7 +409,9 @@ public static partial class LibraryVersion
 #else
                 "2.6.122",
                 "2.12.14",
+#if NET10_0 || NET9_0 || NET8_0
                 "3.0.2-preview",
+#endif
 #endif
             ];
             return theoryData;

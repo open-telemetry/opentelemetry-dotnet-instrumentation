@@ -296,7 +296,7 @@ internal static class PackageVersionDefinitions
             [
                 new("2.6.122"),
                 new("2.12.14"),
-                new("*")
+                new("*", supportedTargetFrameworks: ["net10.0", "net9.0", "net8.0"], supportedExecutionFrameworks: ["net10.0", "net9.0", "net8.0"])
             ]
         },
         new()
