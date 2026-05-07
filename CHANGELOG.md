@@ -19,6 +19,12 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 
 ### Fixed
 
+- On .NET Framework, `OTEL_SERVICE_NAME` and `OTEL_RESOURCE_ATTRIBUTES`
+  from `App.config`/`Web.config` are no longer promoted to process
+  environment variables. This change allows services in a shared IIS
+  Application Pool to have service-specific resource attributes instead
+  of inheriting the same values for all services.
+
 ## [v1.16.0-beta.1](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/tag/v1.16.0-beta.1)
 
 ### Added
