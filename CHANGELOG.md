@@ -9,6 +9,7 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 
 ### Added
 
+- OpAMP extension points for plugins.
 - Configuration `OTEL_DOTNET_AUTO_APP_DOMAIN_STRATEGY` added with ability to
   use:
   - `LoaderOptimizationSingleDomain` - all non-default application domains
@@ -27,6 +28,9 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
   traces instrumentation for versions `3.x.x`+.
 
 #### Dependency updates
+
+- Following packages updated
+  - `OpenTelemetry.Resources.Process` from `1.15.1-beta.1` to `1.15.1-beta.2`.
 
 ### Deprecated
 
@@ -288,6 +292,7 @@ release.
   available for [SqlClient instrumentation](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/issues/4343).
   This is disabled by default and can be enabled via the
   `OTEL_DOTNET_AUTO_SQLCLIENT_NETFX_ILREWRITE_ENABLED` environment variable.
+- Experimental support for OpAMP (by default the client is disabled).
 
 ### Changed
 

@@ -19,6 +19,12 @@ public class MyPlugin
         // My custom logic here
     }
 
+    // To configure plugin, after auto instrumentation is initialized.
+    public void Initialized()
+    {
+        // My custom logic here
+    }
+
     // To access TracerProvider right after TracerProviderBuilder.Build() is executed.
     public void TracerProviderInitialized(TracerProvider tracerProvider)
     {
@@ -103,6 +109,30 @@ public class MyPlugin
 }
 ```
 
+```csharp
+public class MyOpAmpPlugin 
+{
+    // To configure OpAMP client
+    public void ConfigureOpAmpOptions(OpenTelemetry.OpAmp.Client.Settings.OpAmpClientSettings options)
+    {
+        // My custom logic here
+    }
+
+    // To get the OpAMP client instance after client is created and started
+    public void AfterOpAmpClientStarted(OpenTelemetry.OpAmp.Client.OpAmpClient client)
+    {
+        // My custom logic here
+    }
+
+    // To get the final callback before OpAMP client shuts down
+    public void BeforeOpAmpClientStopped()
+    {
+        // My custom logic here
+        // WARNING: This is already in application OnExit() cycle, do not add long running tasks.
+    }
+}
+```
+
 > [!NOTE]
 > Automatic Instrumentation can configure particular properties before calling
 > `Configure{Signal}Options`. It is plugin responsibility to not override this behavior.
@@ -146,6 +176,12 @@ public class MyPlugin
 | OpenTelemetry.Logs.OpenTelemetryLoggerOptions | OpenTelemetry                                | 1.15.3        |
 | OpenTelemetry.Exporter.ConsoleExporterOptions | OpenTelemetry.Exporter.Console               | 1.15.3        |
 | OpenTelemetry.Exporter.OtlpExporterOptions    | OpenTelemetry.Exporter.OpenTelemetryProtocol | 1.15.3        |
+
+### OpAMP
+
+| Settings type                                           | NuGet package              | NuGet version |
+|---------------------------------------------------------|----------------------------|---------------|
+| OpenTelemetry.OpAmp.Client.Settings.OpAmpClientSettings | OpenTelemetry.OpAmp.Client | 0.3.0-alpha.1 |
 
 ## Requirements
 
