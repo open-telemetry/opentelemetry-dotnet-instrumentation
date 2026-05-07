@@ -28,7 +28,7 @@
     <PackageVersion Include="OpenTelemetry.Resources.Container" Version="1.15.1-beta.1" />
     <PackageVersion Include="OpenTelemetry.Resources.Host" Version="1.15.1-beta.1" />
     <PackageVersion Include="OpenTelemetry.Resources.OperatingSystem" Version="1.15.1-beta.1" />
-    <PackageVersion Include="OpenTelemetry.Resources.Process" Version="1.15.1-beta.1" />
+    <PackageVersion Include="OpenTelemetry.Resources.Process" Version="1.15.1-beta.2" />
     <PackageVersion Include="OpenTelemetry.Resources.ProcessRuntime" Version="1.15.1-beta.1" />
     <PackageVersion Include="OpenTracing" Version="0.12.1" />
   </ItemGroup>

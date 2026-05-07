@@ -48,16 +48,34 @@ public class AspNetTests(ITestOutputHelper output)
         Integrated
     }
 
+    public enum AppDomainWorkaround
+    {
+#pragma warning disable SA1602
+        None,
+        AssemblyRedirect,
+        LoaderOptimizationSingleDomain
+#pragma warning restore SA1602
+    }
+
     private ITestOutputHelper Output { get; } = output;
 
+    // The test application does not reproduce issues with
+    // AppDomainWorkaround.None when assemblies are registered in GAC.
+    // More complex applications can still fail with "Loading this assembly
+    // would produce a different grant set from other instances".
+    // Switching between integrated and classic app pool
+    // modes is not expected to affect assembly loading,
+    // so integrated mode is checked once to save test execution time.
     [WindowsAdministratorTheory]
     [Trait("Category", "EndToEnd")]
     [Trait("Containers", "Windows")]
-    [InlineData(AppPoolMode.Classic, Gac.UseGac)]
-    [InlineData(AppPoolMode.Classic, Gac.UseLocal)]
-    [InlineData(AppPoolMode.Integrated, Gac.UseGac)]
-    [InlineData(AppPoolMode.Integrated, Gac.UseLocal)]
-    public async Task SubmitsTraces(AppPoolMode appPoolMode, Gac useGac)
+    [InlineData(AppPoolMode.Integrated, Gac.UseGac, AppDomainWorkaround.LoaderOptimizationSingleDomain)]
+    [InlineData(AppPoolMode.Classic, Gac.UseGac, AppDomainWorkaround.LoaderOptimizationSingleDomain)]
+    [InlineData(AppPoolMode.Classic, Gac.UseGac, AppDomainWorkaround.AssemblyRedirect)]
+    [InlineData(AppPoolMode.Classic, Gac.UseGac, AppDomainWorkaround.None)]
+    [InlineData(AppPoolMode.Classic, Gac.UseLocal, AppDomainWorkaround.LoaderOptimizationSingleDomain)]
+    [InlineData(AppPoolMode.Classic, Gac.UseLocal, AppDomainWorkaround.AssemblyRedirect)]
+    public async Task SubmitsTraces(AppPoolMode appPoolMode, Gac useGac, AppDomainWorkaround appDomain)
     {
         // Using "*" as host requires Administrator. This is needed to make the mock collector endpoint
         // accessible to the Windows docker container where the test application is executed by binding
@@ -71,7 +89,8 @@ public class AspNetTests(ITestOutputHelper output)
         var collectorUrl = $"http://{DockerNetworkHelper.IntegrationTestsGateway}:{collector.Port}";
         Dictionary<string, string> environmentVariables = new()
         {
-            ["OTEL_EXPORTER_OTLP_ENDPOINT"] = collectorUrl
+            ["OTEL_EXPORTER_OTLP_ENDPOINT"] = collectorUrl,
+            ["OTEL_DOTNET_AUTO_APP_DOMAIN_STRATEGY"] = appDomain.ToString()
         };
         var webPort = TcpPortProvider.GetOpenPort();
         var imageName = GetTestImageName(appPoolMode, useGac);
