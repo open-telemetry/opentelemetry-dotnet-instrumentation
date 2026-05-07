@@ -2,7 +2,7 @@
 
 ## Summary
 
-CallTarget trampoline mode is an opt-in .NET Framework-only rewrite mode for bytecode instrumentation. It is enabled with `OTEL_DOTNET_AUTO_CALLTARGET_TRAMPOLINE_ENABLED=true`.
+CallTarget trampoline mode is an opt-in .NET Framework-only rewrite mode for bytecode instrumentation. It is enabled with `OTEL_DOTNET_AUTO_TRAMPOLINE_ENABLED=true`.
 
 The mode avoids adding `OpenTelemetry.AutoInstrumentation` references to rewritten target assemblies and to `mscorlib`. Target methods call generic static methods on a generated non-generic `mscorlib` trampoline type. Those methods forward to generated closed generic holder types, where each holder initializes a static delegate once and then invokes that delegate directly.
 

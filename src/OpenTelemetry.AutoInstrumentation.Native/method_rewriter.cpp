@@ -151,7 +151,7 @@ HRESULT TracerMethodRewriter::Rewrite(RejitHandlerModule* moduleHandler, RejitHa
     }
 
     // First we check if the managed profiler has not been loaded yet
-    // TODO: trampoline and neutral domain may have beeter option
+    // TODO: trampoline and neutral domain may have better option
     if (!use_trampoline && !corProfiler->ProfilerAssemblyIsLoadedIntoAppDomain(module_metadata.app_domain_id))
     {
         Logger::Warn(
