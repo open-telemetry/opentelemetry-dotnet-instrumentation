@@ -5,18 +5,46 @@ All notable changes to this component are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/compare/v1.15.0..HEAD)
+## [Unreleased](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/compare/v1.16.0-beta.1..HEAD)
 
 ### Added
 
 ### Changed
 
-- Support for [StackExchange.Redis](https://www.nuget.org/packages/StackExchange.Redis)
-  traces instrumentation for versions `3.x.x`+.
-
 #### Dependency updates
 
 ### Deprecated
+
+### Removed
+
+### Fixed
+
+## [v1.16.0-beta.1](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/tag/v1.16.0-beta.1)
+
+### Added
+
+- OpAMP extension points for plugins.
+- Configuration `OTEL_DOTNET_AUTO_APP_DOMAIN_STRATEGY` added with ability to
+  use:
+  - `LoaderOptimizationSingleDomain` - all non-default application domains
+     will be forced to load with `LoaderOptimization.SingleDomain`, preventing
+     their assemblies loading as domain neutral;
+  - `AssemblyRedirect` - modify app config binding redirects to load required
+    assembly versions;
+  - `None` - do not use any special strategy for non-default application
+    domains.
+  See [docs/netfx-appdomain-strategy.md](./docs/netfx-appdomain-strategy.md)
+  for details.
+
+### Changed
+
+- Support for [StackExchange.Redis](https://www.nuget.org/packages/StackExchange.Redis)
+  traces instrumentation for versions `3.x.x`+ on .NET.
+
+#### Dependency updates
+
+- Following packages updated
+  - `OpenTelemetry.Resources.Process` from `1.15.1-beta.1` to `1.15.1-beta.2`.
 
 ### Removed
 
@@ -26,6 +54,8 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
   `./instrument.sh <application_executable>`.
 
 ### Fixed
+
+- Fix dynamic configuration based attributes leak across calls.
 
 ## [v1.15.0](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/tag/v1.15.0)
 
@@ -274,6 +304,7 @@ release.
   available for [SqlClient instrumentation](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/issues/4343).
   This is disabled by default and can be enabled via the
   `OTEL_DOTNET_AUTO_SQLCLIENT_NETFX_ILREWRITE_ENABLED` environment variable.
+- Experimental support for OpAMP (by default the client is disabled).
 
 ### Changed
 

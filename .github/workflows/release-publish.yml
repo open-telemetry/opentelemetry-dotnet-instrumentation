@@ -83,7 +83,7 @@ jobs:
           set -e
           mkdir testapp
           cd testapp
-          echo '<Project />' > Directory.Build.props
+          echo "<Project />" > Directory.Build.props
           dotnet new console
           dotnet publish -f net10.0 -c Release
           curl -sSfL https://github.com/${{ github.repository }}/releases/download/${{ github.event.release.tag_name }}/otel-dotnet-auto-install.sh -O

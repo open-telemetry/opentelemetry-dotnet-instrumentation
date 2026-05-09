@@ -79,11 +79,8 @@ namespace Vendors.YamlDotNet.Core.Events
         public Scalar(AnchorName anchor, TagName tag, string value, ScalarStyle style, bool isPlainImplicit, bool isQuotedImplicit, Mark start, Mark end, bool isKey = false)
             : base(anchor, tag, start, end)
         {
-            // In a real client program, keys are likely to be
-            // interned already. Thus, IsInterned might work
-            // much better, but you can't really benchmark that.
             this.Value = isKey ?
-                    string.Intern(value) :
+                    string.IsInterned(value) ?? value :
                     value;
             this.Style = style;
             this.IsPlainImplicit = isPlainImplicit;

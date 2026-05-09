@@ -58,79 +58,6 @@ namespace trace
 
 CorProfiler* profiler = nullptr;
 
-#ifdef _WIN32
-namespace
-{
-// Patch System.AppDomain::nExecuteAssembly so the loader runs after the executable assembly is loaded
-// but before its entry point executes. That gives assembly redirects a chance to register before any
-// JIT-time assembly resolution happens in user code.
-HRESULT ModifyAppDomainExecuteAssembly(ICorProfilerInfo* info,
-                                       const ModuleID    module_id,
-                                       const mdMethodDef loader_method_token)
-{
-    ComPtr<IUnknown> metadata_interfaces;
-    auto             hr =
-        info->GetModuleMetaData(module_id, ofRead | ofWrite, IID_IMetaDataImport2, metadata_interfaces.GetAddressOf());
-    if (FAILED(hr))
-    {
-        return hr;
-    }
-
-    const auto& metadata_import = metadata_interfaces.As<IMetaDataImport2>(IID_IMetaDataImport);
-
-    mdTypeDef system_app_domain_token = mdTokenNil;
-    hr = metadata_import->FindTypeDefByName(WStr("System.AppDomain"), mdTokenNil, &system_app_domain_token);
-    if (FAILED(hr))
-    {
-        return hr;
-    }
-
-    mdTypeDef runtime_assembly_token = mdTokenNil;
-    hr = metadata_import->FindTypeDefByName(WStr("System.Reflection.RuntimeAssembly"), mdTokenNil,
-                                            &runtime_assembly_token);
-    if (FAILED(hr))
-    {
-        return hr;
-    }
-
-    SignatureBuilder::InstanceMethod n_execute_assembly_signature{SignatureBuilder::BuiltIn::Int32,
-                                                                  {SignatureBuilder::Class{runtime_assembly_token},
-                                                                   SignatureBuilder::Array{
-                                                                       SignatureBuilder::BuiltIn::String}}};
-
-    mdMethodDef n_execute_assembly_token = mdTokenNil;
-    hr = metadata_import->FindMethod(system_app_domain_token, WStr("nExecuteAssembly"),
-                                     n_execute_assembly_signature.Head(), n_execute_assembly_signature.Size(),
-                                     &n_execute_assembly_token);
-    if (FAILED(hr))
-    {
-        return hr;
-    }
-
-    ILRewriter rewriter(info, nullptr, module_id, n_execute_assembly_token);
-    hr = rewriter.Import();
-    if (FAILED(hr))
-    {
-        return hr;
-    }
-
-    ILRewriterWrapper rewriter_wrapper(&rewriter);
-    ILInstr*          p_instr = rewriter.GetILList()->m_pNext;
-    // Insert the loader call at the beginning of nExecuteAssembly and leave the rest of the method intact.
-    rewriter_wrapper.SetILPosition(p_instr);
-    rewriter_wrapper.CallMember(loader_method_token, false);
-
-    hr = rewriter.Export();
-    if (FAILED(hr))
-    {
-        return hr;
-    }
-
-    return S_OK;
-}
-} // namespace
-#endif
-
 //
 // ICorProfilerCallback methods
 //
@@ -770,13 +697,6 @@ HRESULT STDMETHODCALLTYPE CorProfiler::ModuleLoadFinished(ModuleID module_id, HR
                 if (FAILED(hr))
                 {
                     Logger::Warn("Failed to patch AppDomain creation, module id ", module_id, ", result ", hr);
-                }
-
-                hr = ModifyAppDomainExecuteAssembly(this->info_, module_id, init_method);
-
-                if (FAILED(hr))
-                {
-                    Logger::Warn("Failed to patch AppDomain execute assembly, module id ", module_id, ", result ", hr);
                 }
             }
         }
@@ -1964,9 +1884,6 @@ HRESULT CorProfiler::RunAutoInstrumentationLoader(const ComPtr<IMetaDataEmit2>& 
                                                   const FunctionInfo&           caller,
                                                   const ModuleMetadata&         module_metadata)
 {
-    (void)caller;
-    (void)module_metadata;
-
     mdMethodDef ret_method_token;
     auto        hr = GenerateLoaderMethod(module_id, &ret_method_token);
 

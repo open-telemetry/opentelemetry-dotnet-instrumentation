@@ -50,7 +50,7 @@ namespace Vendors.YamlDotNet.Core
                                             $"disallowed characters: []{{}},\nThe value was '{value}'.", nameof(value));
             }
 
-            this.value = string.Intern(value);
+            this.value = string.IsInterned(value) ?? value;
         }
 
         public override string ToString() => value ?? "[empty]";
