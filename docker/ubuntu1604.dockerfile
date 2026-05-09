@@ -26,11 +26,11 @@ RUN add-apt-repository ppa:ubuntu-toolchain-r/test -y && \
     apt-get install -y g++-9 && \
     update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-9 60 --slave /usr/bin/g++ g++ /usr/bin/g++-9
 
-# Install newer cmake, based on https://apt.kitware.com/
-RUN curl -fsSL https://apt.kitware.com/keys/kitware-archive-latest.asc | gpg --dearmor -o /usr/share/keyrings/kitware-archive-keyring.gpg && \
-    echo 'deb [signed-by=/usr/share/keyrings/kitware-archive-keyring.gpg] https://apt.kitware.com/ubuntu/ xenial main' | tee /etc/apt/sources.list.d/kitware.list >/dev/null && \
-    apt-get update && \
-    apt-get install -y cmake
+# Install cmake 3.20.5 directly from GitHub releases (Kitware Xenial apt repo no longer serves cmake)
+RUN curl -fsSL -o cmake.sh https://github.com/Kitware/CMake/releases/download/v3.20.5/cmake-3.20.5-linux-x86_64.sh && \
+    echo "f582e02696ceee81818dc3378531804b2213ed41c2a8bc566253d16d894cefab  cmake.sh" | sha256sum -c - && \
+    sh cmake.sh --skip-license --prefix=/usr/local && \
+    rm cmake.sh
 
 COPY ./scripts/dotnet-install.sh ./dotnet-install.sh
 

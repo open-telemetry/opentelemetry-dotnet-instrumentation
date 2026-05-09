@@ -9,6 +9,7 @@ using OpenTelemetry.AutoInstrumentation.Instrumentations.NoCode;
 using OpenTelemetry.AutoInstrumentation.Loading;
 using OpenTelemetry.AutoInstrumentation.Logging;
 using OpenTelemetry.AutoInstrumentation.Plugins;
+using OpenTelemetry.AutoInstrumentation.Util;
 using OpenTelemetry.Logs;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Trace;
@@ -67,6 +68,8 @@ internal static class Instrumentation
     internal static Lazy<NoCodeSettings> NoCodeSettings { get; } = new(() => Settings.FromDefaultSources<NoCodeSettings>(FailFastSettings.Value.FailFast));
 
     internal static Lazy<PluginsSettings> PluginsSettings { get; } = new(() => Settings.FromDefaultSources<PluginsSettings>(FailFastSettings.Value.FailFast));
+
+    internal static Lazy<OpAmpSettings> OpAmpSettings { get; } = new(() => Settings.FromDefaultSources<OpAmpSettings>(FailFastSettings.Value.FailFast));
 
     /// <summary>
     /// Initialize the OpenTelemetry SDK with a pre-defined set of exporters, shims, and
@@ -218,6 +221,16 @@ internal static class Instrumentation
         {
             OpenTracingHelper.EnableOpenTracing(_tracerProvider);
         }
+
+        if (OpAmpSettings.Value.OpAmpClientEnabled)
+        {
+            var resources = ResourceHelper.AggregateResources(_tracerProvider, _meterProvider, LoggerProvider);
+
+            OpAmpHelper.EnableOpAmpClient(resources, OpAmpSettings.Value, _pluginManager);
+        }
+
+        // Notify plugins all initialization is done
+        _pluginManager.Initialized();
     }
 
     private static void TryInitializeContinuousProfiling()
@@ -583,6 +596,8 @@ internal static class Instrumentation
 
         try
         {
+            OpAmpHelper.StopOpAmpClientIfRunning(_pluginManager);
+
             LazyInstrumentationLoader?.Dispose();
             _sampleExporter?.Dispose();
 

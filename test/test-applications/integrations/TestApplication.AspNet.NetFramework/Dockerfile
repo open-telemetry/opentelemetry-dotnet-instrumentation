@@ -17,10 +17,14 @@ WORKDIR /inetpub/wwwroot
 COPY bin/${configuration}/app.publish .
 
 FROM integrated-base AS integrated-nogac
+RUN Start-IISCommitDelay;`
+    (Get-IISAppPool -Name DefaultAppPool).ProcessModel.LoadUserProfile = $true;`
+    Stop-IISCommitDelay -Commit $True
 
 FROM integrated-nogac AS classic-nogac
 RUN Start-IISCommitDelay;`
     (Get-IISAppPool -Name DefaultAppPool).ManagedPipelineMode = 'Classic';`
+    (Get-IISAppPool -Name DefaultAppPool).ProcessModel.LoadUserProfile = $true;`
     Stop-IISCommitDelay -Commit $True
 
 FROM integrated-base AS integrated
