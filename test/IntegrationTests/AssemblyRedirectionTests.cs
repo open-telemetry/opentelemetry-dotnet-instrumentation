@@ -90,6 +90,26 @@ public class AssemblyRedirectionTests(ITestOutputHelper output) : TestHelper("As
         string expectedAssemblyVersion,
         string expectedAssemblyFileVersion)
     {
+        if (libraryVersion is null)
+        {
+            throw new ArgumentNullException(nameof(libraryVersion));
+        }
+
+        if (expectedAssemblyName is null)
+        {
+            throw new ArgumentNullException(nameof(expectedAssemblyName));
+        }
+
+        if (expectedAssemblyVersion is null)
+        {
+            throw new ArgumentNullException(nameof(expectedAssemblyVersion));
+        }
+
+        if (expectedAssemblyFileVersion is null)
+        {
+            throw new ArgumentNullException(nameof(expectedAssemblyFileVersion));
+        }
+
         using var collector = new MockSpansCollector(Output, host: "*");
         using var fwPort = FirewallHelper.OpenWinPort(collector.Port, Output);
         collector.Expect("AssemblyRedirection.ActivitySource");
