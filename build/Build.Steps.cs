@@ -615,6 +615,7 @@ partial class Build
     Target RunManagedIntegrationTests => _ => _
         .Unlisted()
         .After(InstallNetFxAssembliesGAC)
+        .DependsOn(PublishIisTestApplications)
         .After(RunManagedUnitTests)
         .Executes(() =>
         {
