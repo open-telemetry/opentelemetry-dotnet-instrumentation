@@ -2,7 +2,7 @@ using System.Runtime.InteropServices;
 using Extensions;
 using Nuke.Common;
 using Nuke.Common.IO;
-#if NET10_0
+#if NET11_0
 using Nuke.Common.ProjectModel;
 #endif
 using Nuke.Common.Tools.DotNet;

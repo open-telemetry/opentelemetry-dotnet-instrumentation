@@ -54,14 +54,16 @@ partial class Build
         TargetFramework.NET472,
         TargetFramework.NET8_0,
         TargetFramework.NET9_0,
-        TargetFramework.NET10_0
+        TargetFramework.NET10_0,
+        TargetFramework.NET11_0
     ];
 
     private static readonly IEnumerable<TargetFramework> TestFrameworks =
     [
         ..TargetFrameworks,
         TargetFramework.NET9_0,
-        TargetFramework.NET10_0
+        TargetFramework.NET10_0,
+        TargetFramework.NET11_0
     ];
 
     Target CreateRequiredDirectories => _ => _
