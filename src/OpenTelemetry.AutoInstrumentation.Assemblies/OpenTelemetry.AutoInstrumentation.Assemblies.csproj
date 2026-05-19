@@ -3,7 +3,7 @@
   <Import Project="..\CommonExcludedAssets.props" />
 
   <PropertyGroup>
-    <TargetFrameworks>net8.0;net9.0;net10.0</TargetFrameworks>
+    <TargetFrameworks>net8.0;net9.0;net10.0;net11.0</TargetFrameworks>
     <TargetFrameworks Condition="'$(OS)' == 'Windows_NT'">$(TargetFrameworks);net462;net47;net471;net472</TargetFrameworks>
     <DebugType>none</DebugType>
     <CopyBuildOutputToOutputDirectory>false</CopyBuildOutputToOutputDirectory>
