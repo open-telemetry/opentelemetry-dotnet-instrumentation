@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework Condition=" '$(IsLegacyUbuntu)' == '' " >net10.0</TargetFramework>
+    <TargetFramework Condition=" '$(IsLegacyUbuntu)' == '' " >net11.0</TargetFramework>
     <TargetFramework Condition=" '$(IsLegacyUbuntu)' != '' " >net9.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>disable</Nullable>
