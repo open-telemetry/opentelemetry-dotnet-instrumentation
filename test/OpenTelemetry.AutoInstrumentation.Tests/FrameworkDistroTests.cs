@@ -3,7 +3,7 @@
 
 // This test is setup to run on .NET because the 'DependencyListGenerator' tool is written in .NET
 // The actual test is testing both .NET and .NET Framework context.
-#if NET10_0
+#if NET11_0
 
 using System.Reflection;
 using System.Runtime.InteropServices;
