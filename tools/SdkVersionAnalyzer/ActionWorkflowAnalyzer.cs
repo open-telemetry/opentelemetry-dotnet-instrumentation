@@ -77,9 +77,9 @@ internal static class ActionWorkflowAnalyzer
             newline,
             [
                 "|",
-                $"{indentation}{newDotnetSdkVersion.Net8SdkVersion!}",
-                $"{indentation}{newDotnetSdkVersion.Net9SdkVersion!}",
-                $"{indentation}{newDotnetSdkVersion.Net10SdkVersion!}",
+                $"{indentation}{newDotnetSdkVersion.Net8SdkVersion}",
+                $"{indentation}{newDotnetSdkVersion.Net9SdkVersion}",
+                $"{indentation}{newDotnetSdkVersion.Net10SdkVersion}",
             ]);
 
         var originalValue = content[checked((int)valueScalar.Start.Index)..checked((int)valueScalar.End.Index)];
