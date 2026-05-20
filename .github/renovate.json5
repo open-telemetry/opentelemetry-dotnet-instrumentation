@@ -15,9 +15,6 @@
       "/\\.(?:props|targets)$/",
       "/(^|/)dotnet-tools\\.json$/",
       "/(^|/)global\\.json$/",
-
-      // Additional files used in this repository.
-      "/\\.slnx$/",
     ],
   },
 }
