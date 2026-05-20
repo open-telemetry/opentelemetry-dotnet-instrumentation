@@ -3,4 +3,4 @@
 
 namespace SdkVersionAnalyzer;
 
-internal sealed record DotnetSdkVersion(string? Net8SdkVersion, string? Net9SdkVersion, string? Net10SdkVersion);
+internal sealed record DotnetSdkVersion(string? Net10SdkVersion, string? Net11SdkVersion);
