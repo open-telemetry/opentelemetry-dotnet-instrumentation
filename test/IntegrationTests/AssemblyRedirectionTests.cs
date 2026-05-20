@@ -39,6 +39,18 @@ public class AssemblyRedirectionTests(ITestOutputHelper output) : TestHelper("As
     [InlineData("10.0.8", AssemblyName, "10.0.0.0", "10.0.826.23019", true)]
     [InlineData("10.0.8", AssemblyName, "10.0.0.0", "10.0.826.23019", false)]
     // Case 3: Higher version is not possible for DiagnosticSource on .NET 10, the instrumentation tool is already using the highest possible version
+    // TODO NET11TODO put here a test w S.D.DS 11.*
+#elif NET11_0
+    // Case 1: Lower version is not possible for DiagnosticSource on .NET 11,
+    //         msbuild will ignore a lower version of this package since it's part of .NET 11 SDK
+    // Case 2: Equal version, should NOT be redirected with/without native profiler
+    // TODO currently different test jobs use different versions of .net runtime:
+    //   - test-build-container (ubuntu-22.04, alpine, alpine-x64, linux-musl): DS file version 11.0.426.12010
+    //   - test-build-managed (net11.0, windows-2022): DS file version 11.0.726.21808
+    [InlineData("11.0.0-preview.4.26230.115", AssemblyName, "11.0.0.0", "11.0.726.21808", true)]
+    [InlineData("11.0.0-preview.4.26230.115", AssemblyName, "11.0.0.0", "11.0.726.21808", false)]
+    // TODO NET11TODO adjust expectedAssemblyFileVersion to the final .NET 11 release version
+    // Case 3: Higher version is not possible for DiagnosticSource on .NET 11, the instrumentation tool is already using the highest possible version
 #elif NETFRAMEWORK
     // Case 1: Lower version should be redirected (native profiler mandatory)
     [InlineData("6.0.0", AssemblyName, "10.0.0.8", "10.0.826.23019")]
