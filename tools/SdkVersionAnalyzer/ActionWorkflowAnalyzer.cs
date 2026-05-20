@@ -102,7 +102,7 @@ internal static class ActionWorkflowAnalyzer
     {
         var workflows = Directory.GetFiles(GetWorkflowsDirectory(root), "*.yml");
         var actions = Directory.GetFiles(GetActionsDirectory(root), "action.yml", SearchOption.AllDirectories);
-        return workflows.Concat(actions).ToArray();
+        return [.. workflows, .. actions];
     }
 
     private static string GetWorkflowsDirectory(string root)
