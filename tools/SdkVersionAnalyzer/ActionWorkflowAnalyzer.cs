@@ -60,13 +60,13 @@ internal static class ActionWorkflowAnalyzer
 
         foreach (var (start, end, replacement) in replacements.OrderBy(r => r.Start))
         {
-            stringBuilder.Append(content, currentPosition, start - currentPosition);
-            stringBuilder.Append(replacement);
+            stringBuilder = stringBuilder
+                .Append(content, currentPosition, start - currentPosition)
+                .Append(replacement);
             currentPosition = end;
         }
 
-        stringBuilder.Append(content, currentPosition, content.Length - currentPosition);
-        return stringBuilder.ToString();
+        return stringBuilder.Append(content, currentPosition, content.Length - currentPosition).ToString();
     }
 
     private static string GetNewDotnetVersionScalar(string content, Scalar keyScalar, Scalar valueScalar, DotnetSdkVersion newDotnetSdkVersion)
