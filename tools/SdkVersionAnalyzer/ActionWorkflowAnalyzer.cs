@@ -77,9 +77,8 @@ internal static class ActionWorkflowAnalyzer
             newline,
             [
                 "|",
-                $"{indentation}{newDotnetSdkVersion.Net8SdkVersion}",
-                $"{indentation}{newDotnetSdkVersion.Net9SdkVersion}",
                 $"{indentation}{newDotnetSdkVersion.Net10SdkVersion}",
+                $"{indentation}{newDotnetSdkVersion.Net11SdkVersion}",
             ]);
 
         var originalValue = content[checked((int)valueScalar.Start.Index)..checked((int)valueScalar.End.Index)];
@@ -93,7 +92,7 @@ internal static class ActionWorkflowAnalyzer
 
     private static string GetLineIndentation(string content, int index)
     {
-        var lineStart = content.LastIndexOf('\n', Math.Max(index - 1, 0));
+        var lineStart = content.LastIndexOf('\n', Math.Max(index - 1, 0), StringComparison.Ordinal);
         lineStart = lineStart == -1 ? 0 : lineStart + 1;
         return content[lineStart..index];
     }
@@ -182,33 +181,26 @@ internal static class ActionWorkflowAnalyzer
     {
         // Extract versions from the node value e.g.:
         // dotnet-version: |
-        //   8.0.404
-        //   9.0.100
         //   10.0.100
+        //   11.0.100
 
-        string? sdk8Version = null;
-        string? sdk9Version = null;
         string? sdk10Version = null;
+        string? sdk11Version = null;
 
         foreach (var version in dotnetVersionNode.ToString().Split())
         {
-            if (VersionComparer.IsNet8Version(version))
-            {
-                sdk8Version = version;
-            }
-
-            if (VersionComparer.IsNet9Version(version))
-            {
-                sdk9Version = version;
-            }
-
             if (VersionComparer.IsNet10Version(version))
             {
                 sdk10Version = version;
             }
+
+            if (VersionComparer.IsNet11Version(version))
+            {
+                sdk11Version = version;
+            }
         }
 
-        return sdk8Version is not null || sdk9Version is not null ? new DotnetSdkVersion(sdk8Version, sdk9Version, sdk10Version) : null;
+        return sdk10Version is not null || sdk11Version is not null ? new DotnetSdkVersion(sdk10Version, sdk11Version) : null;
     }
 
     private static IEnumerable<YamlSequenceNode> ExtractStepGroups(YamlStream yaml)
