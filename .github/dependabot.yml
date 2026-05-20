@@ -1,24 +1,12 @@
+# This file is retained solely for automated tooling to see we do automated
+# dependency updates as not all such scanners recognize the use of Renovate.
+# It also works around a limitation that Automatic dependency submission does
+# not automatically detect .slnx files to signify the use of .NET in a repo.
 version: 2
 updates:
-
-  - package-ecosystem: github-actions
-    directory: /
+  - package-ecosystem: "nuget"
+    directory: "/"
     schedule:
-      interval: "daily"
-
-  # Maintain dependencies for Dockerfiles used in build pipeline
-  - package-ecosystem: docker
-    directory: /docker
-    schedule:
-      interval: "daily"
-
-  - package-ecosystem: docker
-    directory: /test/IntegrationTests/docker
-    schedule:
-      interval: "daily"
-
-  - package-ecosystem: nuget
-    directory: /
-    schedule:
-      interval: "daily"
-    open-pull-requests-limit: 20
+      interval: yearly
+    labels:
+      - "infra"

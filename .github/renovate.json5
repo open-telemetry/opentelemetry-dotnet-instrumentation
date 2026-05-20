@@ -1,0 +1,23 @@
+{
+  $schema: "https://docs.renovatebot.com/renovate-schema.json",
+  additionalBranchPrefix: "{{manager}}/",
+  automerge: false,
+  commitBodyTable: true,
+  commitMessageAction: "Bump",
+  dependencyDashboard: false,
+  extends: ["config:best-practices"],
+  labels: ["dependencies"],
+  prConcurrentLimit: 20,
+  nuget: {
+    managerFilePatterns: [
+      // Default values from: https://docs.renovatebot.com/modules/manager/nuget/#default-config
+      "/\\.(?:cs|fs|vb)proj$/",
+      "/\\.(?:props|targets)$/",
+      "/(^|/)dotnet-tools\\.json$/",
+      "/(^|/)global\\.json$/",
+
+      // Additional files used in this repository.
+      "/\\.slnx$/",
+    ],
+  },
+}
