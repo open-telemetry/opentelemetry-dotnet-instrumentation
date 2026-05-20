@@ -9,7 +9,7 @@ namespace DependencyListGenerator.DotNetOutdated.Services;
 /// </remarks>
 public static class DotNetRunner
 {
-    private const int CommandTimeoutMilliseconds = 20_000;
+    private const int CommandTimeoutMilliseconds = 200_000;
     private const int OutputDrainTimeoutMilliseconds = 5_000;
 
     public static RunStatus Run(string workingDirectory, string[] arguments)
