@@ -9,4 +9,4 @@ updates:
     schedule:
       interval: yearly
     labels:
-      - "infra"
+      - "dependencies"
