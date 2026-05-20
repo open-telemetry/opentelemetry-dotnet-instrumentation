@@ -214,6 +214,7 @@ public static partial class LibraryVersion
                 new("6.0.0", supportedFrameworks: [ "net462" ]),
                 new("10.0.0", supportedFrameworks: [ "net8.0", "net9.0" ]),
                 new("10.0.8", supportedFrameworks: [ "net462", "net11.0", "net10.0" ]),
+                new("11.0.0-preview.4.26230.115", supportedFrameworks: [ "net462", "net11.0", "net10.0" ]),
             ]
         },
         {
