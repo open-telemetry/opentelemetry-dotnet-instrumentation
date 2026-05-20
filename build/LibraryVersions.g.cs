@@ -35,8 +35,8 @@ public static partial class LibraryVersion
                 new("6.0.36"),
                 new("8.0.23"),
                 new("9.0.12"),
-                new("10.0.0", supportedFrameworks: [ "net10.0" ]),
-                new("10.0.8", supportedFrameworks: [ "net10.0" ]),
+                new("10.0.0", supportedFrameworks: [ "net11.0", "net10.0" ]),
+                new("10.0.8", supportedFrameworks: [ "net11.0", "net10.0" ]),
             ]
         },
         {
@@ -103,12 +103,12 @@ public static partial class LibraryVersion
         {
             "TestApplication.MongoDB",
             [
-                new("2.19.0", supportedFrameworks: [ "net10.0", "net9.0", "net8.0", "net462" ]),
-                new("2.30.0", supportedFrameworks: [ "net10.0", "net9.0", "net8.0", "net462" ]),
-                new("3.0.0", supportedFrameworks: [ "net10.0", "net9.0", "net8.0", "net472" ]),
-                new("3.5.0", supportedFrameworks: [ "net10.0", "net9.0", "net8.0", "net472" ]),
-                new("3.7.0", supportedFrameworks: [ "net10.0", "net9.0", "net8.0", "net472" ]),
-                new("3.9.0", supportedFrameworks: [ "net10.0", "net9.0", "net8.0", "net472" ]),
+                new("2.19.0", supportedFrameworks: [ "net11.0", "net10.0", "net9.0", "net8.0", "net462" ]),
+                new("2.30.0", supportedFrameworks: [ "net11.0", "net10.0", "net9.0", "net8.0", "net462" ]),
+                new("3.0.0", supportedFrameworks: [ "net11.0", "net10.0", "net9.0", "net8.0", "net472" ]),
+                new("3.5.0", supportedFrameworks: [ "net11.0", "net10.0", "net9.0", "net8.0", "net472" ]),
+                new("3.7.0", supportedFrameworks: [ "net11.0", "net10.0", "net9.0", "net8.0", "net472" ]),
+                new("3.9.0", supportedFrameworks: [ "net11.0", "net10.0", "net9.0", "net8.0", "net472" ]),
             ]
         },
         {
@@ -129,17 +129,17 @@ public static partial class LibraryVersion
             "TestApplication.Npgsql",
             [
                 new("8.0.9"),
-                new("9.0.4", supportedFrameworks: [ "net10.0", "net9.0", "net8.0" ]),
-                new("10.0.3", supportedFrameworks: [ "net10.0", "net9.0", "net8.0" ]),
+                new("9.0.4", supportedFrameworks: [ "net11.0", "net10.0", "net9.0", "net8.0" ]),
+                new("10.0.3", supportedFrameworks: [ "net11.0", "net10.0", "net9.0", "net8.0" ]),
             ]
         },
         {
             "TestApplication.NServiceBus",
             [
                 new("8.2.6"),
-                new("9.2.10", supportedFrameworks: [ "net10.0", "net9.0", "net8.0" ]),
-                new("10.1.3", supportedFrameworks: [ "net10.0" ]),
-                new("10.2.0", supportedFrameworks: [ "net10.0" ]),
+                new("9.2.10", supportedFrameworks: [ "net11.0", "net10.0", "net9.0", "net8.0" ]),
+                new("10.1.3", supportedFrameworks: [ "net11.0", "net10.0" ]),
+                new("10.2.0", supportedFrameworks: [ "net11.0", "net10.0" ]),
             ]
         },
         {
@@ -186,7 +186,7 @@ public static partial class LibraryVersion
             [
                 new("2.6.122"),
                 new("2.12.14"),
-                new("3.0.47-preview", supportedFrameworks: [ "net10.0", "net9.0", "net8.0" ]),
+                new("3.0.47-preview", supportedFrameworks: [ "net11.0", "net10.0", "net9.0", "net8.0" ]),
             ]
         },
         {
@@ -195,7 +195,7 @@ public static partial class LibraryVersion
                 new("4.10.2"),
                 new("6.2.0"),
                 new("8.1.2"),
-                new("10.0.652802", supportedFrameworks: [ "net10.0" ]),
+                new("10.0.652802", supportedFrameworks: [ "net11.0", "net10.0" ]),
             ]
         },
         {
@@ -213,14 +213,14 @@ public static partial class LibraryVersion
                 new("9.0.0", supportedFrameworks: [ "net9.0" ]),
                 new("6.0.0", supportedFrameworks: [ "net462" ]),
                 new("10.0.0", supportedFrameworks: [ "net8.0", "net9.0" ]),
-                new("10.0.8", supportedFrameworks: [ "net462", "net10.0" ]),
+                new("10.0.8", supportedFrameworks: [ "net462", "net11.0", "net10.0" ]),
             ]
         },
         {
             "TestApplication.Wcf.Core",
             [
-                new("1.8.0", supportedFrameworks: [ "net10.0", "net9.0", "net8.0" ]),
-                new("1.9.0", supportedFrameworks: [ "net10.0", "net9.0", "net8.0" ]),
+                new("1.8.0", supportedFrameworks: [ "net11.0", "net10.0", "net9.0", "net8.0" ]),
+                new("1.9.0", supportedFrameworks: [ "net11.0", "net10.0", "net9.0", "net8.0" ]),
             ]
         },
     };
