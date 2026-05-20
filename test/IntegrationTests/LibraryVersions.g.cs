@@ -485,6 +485,9 @@ public static partial class LibraryVersion
 #if NET462 || NET11_0 || NET10_0
                 "10.0.10",
 #endif
+#if NET462 || NET11_0 || NET10_0
+                "11.0.0-preview.4.26230.115",
+#endif
 #endif
             ];
             return theoryData;
