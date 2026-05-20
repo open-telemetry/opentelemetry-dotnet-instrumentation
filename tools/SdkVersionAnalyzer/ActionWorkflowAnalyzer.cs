@@ -218,8 +218,7 @@ internal static class ActionWorkflowAnalyzer
 
     private static IEnumerable<YamlSequenceNode> ExtractStepGroups(YamlStream yaml)
     {
-        var rootNode = yaml.Documents[0].RootNode as YamlMappingNode;
-        if (rootNode is null)
+        if (yaml.Documents[0].RootNode is not YamlMappingNode rootNode)
         {
             yield break;
         }
