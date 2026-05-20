@@ -208,12 +208,7 @@ internal static class ActionWorkflowAnalyzer
             }
         }
 
-        if (sdk8Version is not null || sdk9Version is not null)
-        {
-            return new DotnetSdkVersion(sdk8Version, sdk9Version, sdk10Version);
-        }
-
-        return null;
+        return sdk8Version is not null || sdk9Version is not null ? new DotnetSdkVersion(sdk8Version, sdk9Version, sdk10Version) : null;
     }
 
     private static IEnumerable<YamlSequenceNode> ExtractStepGroups(YamlStream yaml)
