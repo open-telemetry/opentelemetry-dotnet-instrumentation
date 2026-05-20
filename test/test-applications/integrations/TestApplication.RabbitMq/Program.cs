@@ -27,7 +27,7 @@ internal static class Program
 
         await channel.QueueDeclareAsync(
             queue: "hello",
-            durable: false,
+            durable: true,
             exclusive: false,
             autoDelete: false,
             arguments: null).ConfigureAwait(false);
@@ -97,7 +97,7 @@ internal static class Program
 
         syncConsumersModel.QueueDeclare(
             queue: RoutingKey,
-            durable: false,
+            durable: true,
             exclusive: false,
             autoDelete: false,
             arguments: null);
