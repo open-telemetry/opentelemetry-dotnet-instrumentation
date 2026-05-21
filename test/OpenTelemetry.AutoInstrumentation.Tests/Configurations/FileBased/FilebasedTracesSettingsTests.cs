@@ -14,8 +14,8 @@ public class FilebasedTracesSettingsTests
 {
     public static TheoryData<SkipConfigurationTestCase> LoadMethod_SkipWrongExporterConfiguration_Data()
     {
-        return
-        [
+        return new TheoryData<SkipConfigurationTestCase>
+        {
             new(new YamlConfiguration
             {
                 TracerProvider = new TracerProviderConfiguration
@@ -224,7 +224,7 @@ public class FilebasedTracesSettingsTests
                     ]
                 }
             }),
-        ];
+        };
     }
 
     [Fact]

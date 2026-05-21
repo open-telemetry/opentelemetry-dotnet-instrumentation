@@ -226,7 +226,7 @@ public static partial class LibraryVersion
                 "3.7.0",
 #endif
 #if NET10_0 || NET9_0 || NET8_0 || NET462
-                "3.8.0",
+                "3.8.1",
 #endif
 #endif
             ];
