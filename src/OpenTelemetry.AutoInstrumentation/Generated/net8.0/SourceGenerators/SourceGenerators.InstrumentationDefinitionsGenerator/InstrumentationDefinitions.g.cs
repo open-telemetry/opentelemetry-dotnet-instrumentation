@@ -121,7 +121,7 @@ internal static partial class InstrumentationDefinitions
             // ILogger
             if (logSettings.EnabledInstrumentations.Contains(LogInstrumentation.ILogger))
             {
-                nativeCallTargetDefinitions.Add(new("Microsoft.Extensions.Logging", "Microsoft.Extensions.Logging.LoggingBuilder", ".ctor", ["System.Void", "Microsoft.Extensions.DependencyInjection.IServiceCollection"], 8, 0, 0, 10, 65535, 65535, AssemblyFullName, "OpenTelemetry.AutoInstrumentation.Instrumentations.Logger.LoggingBuilderIntegration"));
+                nativeCallTargetDefinitions.Add(new("Microsoft.Extensions.Logging", "Microsoft.Extensions.Logging.LoggingBuilder", ".ctor", ["System.Void", "Microsoft.Extensions.DependencyInjection.IServiceCollection"], 8, 0, 0, 11, 65535, 65535, AssemblyFullName, "OpenTelemetry.AutoInstrumentation.Instrumentations.Logger.LoggingBuilderIntegration"));
             }
 
             // NLog
