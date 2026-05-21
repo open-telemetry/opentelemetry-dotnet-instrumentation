@@ -1,6 +1,6 @@
 # escape=`
 
-FROM mcr.microsoft.com/dotnet/framework/aspnet:4.8-windowsservercore-ltsc2022@sha256:84079c734ab5aec702409ef7967ec47af9468c56ff4046882239cabacda78097 AS integrated-base
+FROM mcr.microsoft.com/dotnet/framework/aspnet:4.8-windowsservercore-ltsc2022@sha256:ec04e733695f49a0dc9132184f6b06704866b34f422004093c1972512c86259e AS integrated-base
 ARG configuration=Debug
 ARG platform=x64
 WORKDIR /opentelemetry
