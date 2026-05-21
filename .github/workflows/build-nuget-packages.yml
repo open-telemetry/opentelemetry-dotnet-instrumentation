@@ -2,11 +2,6 @@ name: Build NuGet Packages
 
 on:
   workflow_call:
-    outputs:
-      # Output the NuGet version suffix so that the caller workflow can have the correct package version.
-      nuget-version-suffix:
-        description: "The NuGet version suffix to build the packages"
-        value: ${{ jobs.build-nuget-packages.outputs.nuget-version-suffix }}
 
 permissions:
   contents: read
@@ -19,8 +14,6 @@ jobs:
   build-nuget-packages:
     # In principle this job needs the build outputs, however that would cause the upstream reusable workflow
     # to run twice. Instead, we let the caller workflow handle the dependencies.
-    outputs:
-      nuget-version-suffix: ${{ steps.set-nuget-version-suffix.outputs.suffix }}
     runs-on: windows-2022
     steps:
 
