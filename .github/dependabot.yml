@@ -2,22 +2,30 @@ version: 2
 updates:
 
   - package-ecosystem: github-actions
+    cooldown:
+      default-days: 3
     directory: /
     schedule:
       interval: "daily"
 
   # Maintain dependencies for Dockerfiles used in build pipeline
   - package-ecosystem: docker
+    cooldown:
+      default-days: 3
     directory: /docker
     schedule:
       interval: "daily"
 
   - package-ecosystem: docker
+    cooldown:
+      default-days: 3
     directory: /test/IntegrationTests/docker
     schedule:
       interval: "daily"
 
   - package-ecosystem: nuget
+    cooldown:
+      default-days: 3
     directory: /
     schedule:
       interval: "daily"
