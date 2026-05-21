@@ -4,16 +4,23 @@ on:
   release:
     types: [published]
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+
 permissions:
   contents: read
 
 jobs:
   powershell-script:
+    name: powershell-script
     runs-on: windows-2022
     steps:
 
       - name: Checkout
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # tag: v6.0.2
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
 
       - name: Setup .NET
         uses: ./.github/actions/setup-dotnet
@@ -49,6 +56,7 @@ jobs:
           if (Test-Path $install_dir) { throw "Core files exist. Core uninstall failed." }
 
   shell-scripts:
+    name: shell-scripts
     strategy:
       fail-fast: false
       matrix:
@@ -67,7 +75,9 @@ jobs:
     steps:
 
       - name: Checkout
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # tag: v6.0.2
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
 
       - name: Setup .NET
         uses: ./.github/actions/setup-dotnet
@@ -105,6 +115,7 @@ jobs:
             test "$(ls -A "${LOG_DIRECTORY}" )"
 
   shell-scripts-container:
+    name: shell-scripts-container
     strategy:
       fail-fast: false
       matrix:
@@ -119,7 +130,9 @@ jobs:
     steps:
 
       - name: Checkout
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # tag: v6.0.2
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
 
       - name: Test the Shell scripts from README.md in Docker container
         env:
