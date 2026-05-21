@@ -20,13 +20,16 @@ jobs:
 
       - name: Test the PowerShell module instructions from README.md
         shell: powershell
+        env:
+          GITHUB_REPOSITORY_NAME: ${{ github.repository }}
+          RELEASE_TAG_NAME: ${{ github.event.release.tag_name }}
         run: |
           mkdir testapp
           cd testapp
           Set-Content Directory.Build.props '<Project />'
           dotnet new console
           dotnet publish -f net10.0 -c Release
-          $module_url = "https://github.com/${{ github.repository }}/releases/download/${{ github.event.release.tag_name }}/OpenTelemetry.DotNet.Auto.psm1"
+          $module_url = "https://github.com/$env:GITHUB_REPOSITORY_NAME/releases/download/$env:RELEASE_TAG_NAME/OpenTelemetry.DotNet.Auto.psm1"
           $dl_path = Join-Path $env:temp "OpenTelemetry.DotNet.Auto.psm1"
           $log_path = "C:\ProgramData\OpenTelemetry .NET AutoInstrumentation\logs\*"
           Invoke-WebRequest -Uri $module_url -OutFile $dl_path
@@ -75,10 +78,17 @@ jobs:
 
       - name: Create test directory
         if: ${{ runner.os != 'Windows' }}
-        run: sudo mkdir -p ${{ matrix.log-dir }} && sudo chmod a+rwx ${{ matrix.log-dir }}  # the instrumented process has no permissions to create log dir
+        run: sudo mkdir -p "${LOG_DIRECTORY}" && sudo chmod a+rwx "${LOG_DIRECTORY}"  # the instrumented process has no permissions to create log dir
+        env:
+          LOG_DIRECTORY: ${{ matrix.log-dir }}
 
       - name: Test the Shell scripts from README.md
         shell: bash
+        env:
+          GITHUB_REPOSITORY_NAME: ${{ github.repository }}
+          RELEASE_TAG_NAME: ${{ github.event.release.tag_name }}
+          GITHUB_COMMIT_SHA: ${{ github.sha }}
+          LOG_DIRECTORY: ${{ matrix.log-dir }}
         run: |
           set -e
           mkdir testapp
@@ -86,13 +96,13 @@ jobs:
           echo "<Project />" > Directory.Build.props
           dotnet new console
           dotnet publish -f net10.0 -c Release
-          curl -sSfL https://github.com/${{ github.repository }}/releases/download/${{ github.event.release.tag_name }}/otel-dotnet-auto-install.sh -O
+          curl -sSfL "https://github.com/${GITHUB_REPOSITORY_NAME}/releases/download/${RELEASE_TAG_NAME}/otel-dotnet-auto-install.sh" -O
           sh ./otel-dotnet-auto-install.sh
             test "$(ls -A "$HOME/.otel-dotnet-auto")"
-          curl -sSfL https://raw.githubusercontent.com/${{ github.repository }}/${{ github.sha }}/instrument.sh -O
+          curl -sSfL "https://raw.githubusercontent.com/${GITHUB_REPOSITORY_NAME}/${GITHUB_COMMIT_SHA}/instrument.sh" -O
           . ./instrument.sh
           ./bin/Release/net10.0/publish/testapp
-            test "$(ls -A '${{ matrix.log-dir }}' )"
+            test "$(ls -A "${LOG_DIRECTORY}" )"
 
   shell-scripts-container:
     strategy:
@@ -112,21 +122,32 @@ jobs:
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # tag: v6.0.2
 
       - name: Test the Shell scripts from README.md in Docker container
+        env:
+          BASE_IMAGE: ${{ matrix.base-image }}
+          NET_VERSION: ${{ matrix.net-version }}
+          GITHUB_REPOSITORY_NAME: ${{ github.repository }}
+          RELEASE_TAG_NAME: ${{ github.event.release.tag_name }}
+          GITHUB_COMMIT_SHA: ${{ github.sha }}
         run: |
           set -e
-          docker build -t mybuildimage -f "./docker/${{ matrix.base-image }}.dockerfile" .
-          docker run --rm mybuildimage /bin/sh -c '
+          docker build -t mybuildimage -f "./docker/${BASE_IMAGE}.dockerfile" .
+          docker run --rm \
+            -e "NET_VERSION=${NET_VERSION}" \
+            -e "GITHUB_REPOSITORY_NAME=${GITHUB_REPOSITORY_NAME}" \
+            -e "RELEASE_TAG_NAME=${RELEASE_TAG_NAME}" \
+            -e "GITHUB_COMMIT_SHA=${GITHUB_COMMIT_SHA}" \
+            -i mybuildimage /bin/sh <<'EOF'
             set -e
             mkdir testapp
             cd testapp
             echo '<Project />' > Directory.Build.props
             dotnet new console
-            dotnet publish -f ${{ matrix.net-version }} -c Release
-            curl -sSfL https://github.com/${{ github.repository }}/releases/download/${{ github.event.release.tag_name }}/otel-dotnet-auto-install.sh -O
+            dotnet publish -f "${NET_VERSION}" -c Release
+            curl -sSfL "https://github.com/${GITHUB_REPOSITORY_NAME}/releases/download/${RELEASE_TAG_NAME}/otel-dotnet-auto-install.sh" -O
             sh ./otel-dotnet-auto-install.sh
               test "$(ls -A "$HOME/.otel-dotnet-auto")"
-            curl -sSfL https://raw.githubusercontent.com/${{ github.repository }}/${{ github.sha }}/instrument.sh -O
+            curl -sSfL "https://raw.githubusercontent.com/${GITHUB_REPOSITORY_NAME}/${GITHUB_COMMIT_SHA}/instrument.sh" -O
             . ./instrument.sh
-            ./bin/Release/${{ matrix.net-version }}/publish/testapp
+            ./bin/Release/${NET_VERSION}/publish/testapp
               test "$(ls -A /var/log/opentelemetry/dotnet )"
-          '
+          EOF

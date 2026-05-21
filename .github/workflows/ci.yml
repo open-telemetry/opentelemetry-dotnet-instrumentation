@@ -232,10 +232,13 @@ jobs:
         path: bin/tracer-home
 
     - name: Build in Docker container
+      env:
+        BASE_IMAGE: ${{ matrix.base-image }}
+        OS_TYPE: ${{ matrix.os-type }}
       run: |
         set -e
-        docker build -t mybuildimage -f "./docker/${{ matrix.base-image }}.dockerfile" .
-        docker run -e HOME=/tmp -e OS_TYPE=${{ matrix.os-type }} --user "$(id -u):$(id -g)" --rm --mount type=bind,source="${GITHUB_WORKSPACE}",target=/project mybuildimage \
+        docker build -t mybuildimage -f "./docker/${BASE_IMAGE}.dockerfile" .
+        docker run -e HOME=/tmp -e "OS_TYPE=${OS_TYPE}" --user "$(id -u):$(id -g)" --rm --mount type=bind,source="${GITHUB_WORKSPACE}",target=/project mybuildimage \
           /bin/sh -c 'git config --global --add safe.directory /project && ./build.sh TestWorkflow --containers none'
 
     - name: Upload test logs
@@ -301,14 +304,20 @@ jobs:
     steps:
       
       - name: Test if test jobs passed
+        env:
+          TEST_BUILD_MANAGED_RESULT: ${{ needs.test-build-managed.result }}
+          TEST_BUILD_NATIVE_RESULT: ${{ needs.test-build-native.result }}
+          TEST_BUILD_CONTAINER_RESULT: ${{ needs.test-build-container.result }}
+          TEST_NUGET_PACKAGES_RESULT: ${{ needs.test-nuget-packages.result }}
+          TEST_BUILD_WINDOWS_CONTAINER_TESTS_RESULT: ${{ needs.test-build-windows-container-tests.result }}
         run: |
-          echo ${{ needs.test-build-managed.result }}
-          test ${{ needs.test-build-managed.result }} == "success"
-          echo ${{ needs.test-build-native.result }}
-          test ${{ needs.test-build-native.result }} == "success"
-          echo ${{ needs.test-build-container.result }}
-          test ${{ needs.test-build-container.result }} == "success"
-          echo ${{ needs.test-nuget-packages.result }}
-          test ${{ needs.test-nuget-packages.result }} == "success"
-          echo ${{ needs.test-build-windows-container-tests.result }}
-          test ${{ needs.test-build-windows-container-tests.result }} == "success"
+          echo "${TEST_BUILD_MANAGED_RESULT}"
+          test "${TEST_BUILD_MANAGED_RESULT}" == "success"
+          echo "${TEST_BUILD_NATIVE_RESULT}"
+          test "${TEST_BUILD_NATIVE_RESULT}" == "success"
+          echo "${TEST_BUILD_CONTAINER_RESULT}"
+          test "${TEST_BUILD_CONTAINER_RESULT}" == "success"
+          echo "${TEST_NUGET_PACKAGES_RESULT}"
+          test "${TEST_NUGET_PACKAGES_RESULT}" == "success"
+          echo "${TEST_BUILD_WINDOWS_CONTAINER_TESTS_RESULT}"
+          test "${TEST_BUILD_WINDOWS_CONTAINER_TESTS_RESULT}" == "success"
