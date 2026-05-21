@@ -14,9 +14,7 @@
 #if defined(_M_AMD64)
 extern "C"
 {
-    DECLSPEC_IMPORT PRUNTIME_FUNCTION NTAPI RtlLookupFunctionEntry(DWORD64,
-                                                                   PDWORD64,
-                                                                   PUNWIND_HISTORY_TABLE);
+    DECLSPEC_IMPORT PRUNTIME_FUNCTION NTAPI RtlLookupFunctionEntry(DWORD64, PDWORD64, PUNWIND_HISTORY_TABLE);
 }
 #endif
 
@@ -24,9 +22,9 @@ namespace ProfilerStackCapture
 {
 
 // SEH cannot coexist with C++ object unwinding in the same function.
-static HRESULT ExecuteProbeOperationsSEH(ProbeFlags flags,
-                                         ThreadID   canaryManagedId,
-                                         DWORD64    probeRip,
+static HRESULT ExecuteProbeOperationsSEH(ProbeFlags    flags,
+                                         ThreadID      canaryManagedId,
+                                         DWORD64       probeRip,
                                          IProfilerApi* profilerApi)
 {
     HRESULT result    = S_OK;
@@ -57,16 +55,15 @@ static HRESULT ExecuteProbeOperationsSEH(ProbeFlags flags,
         {
             auto cb = [](FunctionID, UINT_PTR, COR_PRF_FRAME_INFO, ULONG32, BYTE[], void*) -> HRESULT
             { return S_FALSE; };
-            result = profilerApi->DoStackSnapshot(canaryManagedId, cb, COR_PRF_SNAPSHOT_DEFAULT,
-                                                  nullptr, nullptr, 0);
+            result = profilerApi->DoStackSnapshot(canaryManagedId, cb, COR_PRF_SNAPSHOT_DEFAULT, nullptr, nullptr, 0);
         }
     }
     __except (EXCEPTION_EXECUTE_HANDLER)
     {
         DWORD exCode = GetExceptionCode();
-        trace::Logger::Debug("[StackSafetyProbe] SEH exception in probe worker. Code=0x",
-                             std::hex, exCode, std::dec);
-        if (testAlloc) std::free(testAlloc);
+        trace::Logger::Debug("[StackSafetyProbe] SEH exception in probe worker. Code=0x", std::hex, exCode, std::dec);
+        if (testAlloc)
+            std::free(testAlloc);
         return E_FAIL;
     }
 
@@ -96,12 +93,10 @@ bool StackSafetyProbe::Run(ThreadID canaryManagedId, DWORD64 probeRip)
     auto profilerApi = profilerApi_;
     auto flags       = flags_;
 
-    auto status = queue_->Invoke(
-        [flags, canaryManagedId, probeRip, profilerApi, probeHr]()
-        {
-            probeHr->store(ExecuteProbeOperationsSEH(flags, canaryManagedId, probeRip, profilerApi));
-        },
-        probeTimeout_);
+    auto status =
+        queue_->Invoke([flags, canaryManagedId, probeRip, profilerApi, probeHr]()
+                       { probeHr->store(ExecuteProbeOperationsSEH(flags, canaryManagedId, probeRip, profilerApi)); },
+                       probeTimeout_);
 
     if (status != InvocationStatus::Invoked)
     {

@@ -10,9 +10,7 @@
 namespace ProfilerStackCapture
 {
 
-ScopedThreadSuspend::ScopedThreadSuspend(DWORD nativeThreadId)
-    : threadHandle_(INVALID_HANDLE_VALUE),
-      suspended_(false)
+ScopedThreadSuspend::ScopedThreadSuspend(DWORD nativeThreadId) : threadHandle_(INVALID_HANDLE_VALUE), suspended_(false)
 {
     threadHandle_ = OpenThread(THREAD_GET_CONTEXT | THREAD_SUSPEND_RESUME, FALSE, nativeThreadId);
     if (threadHandle_ == NULL)
@@ -45,11 +43,10 @@ ScopedThreadSuspend::~ScopedThreadSuspend()
 }
 
 ScopedThreadSuspend::ScopedThreadSuspend(ScopedThreadSuspend&& other) noexcept
-    : threadHandle_(other.threadHandle_),
-      suspended_(other.suspended_)
+    : threadHandle_(other.threadHandle_), suspended_(other.suspended_)
 {
     other.threadHandle_ = INVALID_HANDLE_VALUE;
-    other.suspended_ = false;
+    other.suspended_    = false;
 }
 
 ScopedThreadSuspend& ScopedThreadSuspend::operator=(ScopedThreadSuspend&& other) noexcept
@@ -66,10 +63,10 @@ ScopedThreadSuspend& ScopedThreadSuspend::operator=(ScopedThreadSuspend&& other)
             CloseHandle(threadHandle_);
         }
 
-        threadHandle_ = other.threadHandle_;
-        suspended_ = other.suspended_;
+        threadHandle_       = other.threadHandle_;
+        suspended_          = other.suspended_;
         other.threadHandle_ = INVALID_HANDLE_VALUE;
-        other.suspended_ = false;
+        other.suspended_    = false;
     }
 
     return *this;

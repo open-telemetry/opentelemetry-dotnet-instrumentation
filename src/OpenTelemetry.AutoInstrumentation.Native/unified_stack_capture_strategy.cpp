@@ -1,17 +1,13 @@
 // Copyright The OpenTelemetry Authors
 // SPDX-License-Identifier: Apache-2.0
 
-
 #include "unified_stack_capture_strategy.h"
 
 namespace continuous_profiler
 {
 
-UnifiedStackCaptureStrategy::BatchSuspensionGuard::BatchSuspensionGuard(
-    ProfilerStackCapture::ISuspensionPolicy* policy)
-    : policy_(policy),
-      hr_(policy_->BeginBatch()),
-      active_(SUCCEEDED(hr_))
+UnifiedStackCaptureStrategy::BatchSuspensionGuard::BatchSuspensionGuard(ProfilerStackCapture::ISuspensionPolicy* policy)
+    : policy_(policy), hr_(policy_->BeginBatch()), active_(SUCCEEDED(hr_))
 {
 }
 
@@ -37,8 +33,7 @@ UnifiedStackCaptureStrategy::UnifiedStackCaptureStrategy(
     , suspensionPolicy_(std::move(suspensionPolicy))
 {
 #if defined(_WIN32) && defined(_M_AMD64)
-    nativeWalkService_ =
-        std::make_unique<ProfilerStackCapture::SafeNativeWalkService>(profilerApi_.get());
+    nativeWalkService_ = std::make_unique<ProfilerStackCapture::SafeNativeWalkService>(profilerApi_.get());
 #endif
 }
 
@@ -54,8 +49,7 @@ UnifiedStackCaptureStrategy::~UnifiedStackCaptureStrategy()
         invocationQueue_->Stop();
 }
 
-HRESULT UnifiedStackCaptureStrategy::CaptureStacks(const std::unordered_set<ThreadID>& threads,
-                                                   void* clientData)
+HRESULT UnifiedStackCaptureStrategy::CaptureStacks(const std::unordered_set<ThreadID>& threads, void* clientData)
 {
     if (threads.empty())
     {
@@ -115,8 +109,9 @@ HRESULT UnifiedStackCaptureStrategy::CaptureStacks(const std::unordered_set<Thre
 
             if (!suspensionPolicy_->BeforeStackSnapshot())
             {
-                trace::Logger::Debug("[UnifiedStackCaptureStrategy] Skipping thread due to safety probe failure. ManagedID=",
-                                     managedThreadId, ", NativeID=", osThreadId);
+                trace::Logger::Debug(
+                    "[UnifiedStackCaptureStrategy] Skipping thread due to safety probe failure. ManagedID=",
+                    managedThreadId, ", NativeID=", osThreadId);
                 continue;
             }
 
@@ -143,30 +138,28 @@ HRESULT UnifiedStackCaptureStrategy::CaptureStacks(const std::unordered_set<Thre
     }
 }
 
-HRESULT UnifiedStackCaptureStrategy::CaptureStack(
-    ThreadID managedThreadId,
-    ProfilerStackCapture::StackSnapshotCallbackContext* clientData)
+HRESULT UnifiedStackCaptureStrategy::CaptureStack(ThreadID                                            managedThreadId,
+                                                  ProfilerStackCapture::StackSnapshotCallbackContext* clientData)
 {
     HRESULT hr = profilerApi_->DoStackSnapshotUnseeded(managedThreadId, clientData);
 
     if (SUCCEEDED(hr))
     {
-        trace::Logger::Debug("[UnifiedStackCaptureStrategy] Unseeded capture succeeded. ThreadID=",
-                             managedThreadId);
+        trace::Logger::Debug("[UnifiedStackCaptureStrategy] Unseeded capture succeeded. ThreadID=", managedThreadId);
     }
     else
     {
-        trace::Logger::Debug("[UnifiedStackCaptureStrategy] Unseeded capture failed (0x",
-                             std::hex, hr, std::dec, "). ThreadID=", managedThreadId);
+        trace::Logger::Debug("[UnifiedStackCaptureStrategy] Unseeded capture failed (0x", std::hex, hr, std::dec,
+                             "). ThreadID=", managedThreadId);
     }
 
     return hr;
 }
 
 HRESULT UnifiedStackCaptureStrategy::TryNativeWalkAndSeed(
-    ThreadID managedThreadId,
-    DWORD osThreadId,
-    ProfilerStackCapture::IThreadCaptureScope* threadScope,
+    ThreadID                                            managedThreadId,
+    DWORD                                               osThreadId,
+    ProfilerStackCapture::IThreadCaptureScope*          threadScope,
     ProfilerStackCapture::StackSnapshotCallbackContext* clientData)
 {
 #if defined(_WIN32) && defined(_M_AMD64)
@@ -178,8 +171,7 @@ HRESULT UnifiedStackCaptureStrategy::TryNativeWalkAndSeed(
     if (threadScope && threadScope->HasSuspendedThreadHandle())
     {
         // OsThreadSuspensionPolicy: thread already OS-suspended, reuse handle directly.
-        return nativeWalkService_->CaptureSuspendedThread(
-            threadScope->GetThreadHandle(), managedThreadId, clientData);
+        return nativeWalkService_->CaptureSuspendedThread(threadScope->GetThreadHandle(), managedThreadId, clientData);
     }
     // ClrRuntimeSuspensionPolicy: runtime is suspended but no OS handle held.
     // osThreadId was not fetched upfront (RequiresOsThreadIdForManagedSnapshot = false),
@@ -204,8 +196,7 @@ HRESULT UnifiedStackCaptureStrategy::TryNativeWalkAndSeed(
 #endif
 }
 
-HRESULT UnifiedStackCaptureStrategy::ResolveNativeSymbolName(UINT_PTR instructionPointer,
-                                                             trace::WSTRING& outName)
+HRESULT UnifiedStackCaptureStrategy::ResolveNativeSymbolName(UINT_PTR instructionPointer, trace::WSTRING& outName)
 {
 #if defined(_WIN32) && defined(_M_AMD64)
     if (nativeWalkService_)
@@ -240,5 +231,3 @@ void UnifiedStackCaptureStrategy::OnThreadAssignedToOSThread(ThreadID managedThr
 }
 
 } // namespace continuous_profiler
-
-

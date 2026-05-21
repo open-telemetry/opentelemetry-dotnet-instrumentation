@@ -281,7 +281,7 @@ HRESULT STDMETHODCALLTYPE CorProfiler::Initialize(IUnknown* cor_profiler_info_un
     this->info_->AddRef();
     is_attached_.store(true);
     profiler = this;
-    
+
     return S_OK;
 }
 
@@ -1216,10 +1216,10 @@ bool CorProfiler::InitThreadSampler()
     this->continuousProfiler->SetGlobalInfo12(this->info12_);
     this->continuousProfiler->SetGlobalInfo7(this->info_);
     using continuous_profiler::RuntimeType;
-    RuntimeType runtime = runtime_information_.is_desktop() ? RuntimeType::DotNetFramework 
-        : runtime_information_.is_core()  ? 
-        RuntimeType::DotNetCore : RuntimeType::Unknown;
-    stack_walker_impl_ = std::make_unique<continuous_profiler::StackWalkerImpl>(this->info_, runtime);
+    RuntimeType runtime = runtime_information_.is_desktop() ? RuntimeType::DotNetFramework
+                          : runtime_information_.is_core()  ? RuntimeType::DotNetCore
+                                                            : RuntimeType::Unknown;
+    stack_walker_impl_  = std::make_unique<continuous_profiler::StackWalkerImpl>(this->info_, runtime);
     this->continuousProfiler->SetStackWalker(stack_walker_impl_.get());
     Logger::Info("ConfigureContinuousProfiler: Events masks configured for continuous profiler");
     return true;

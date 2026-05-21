@@ -11,15 +11,9 @@
 namespace ProfilerStackCapture
 {
 
-SafeNativeWalkService::SafeNativeWalkService(IProfilerApi*   profilerApi)
-    : profilerApi_(profilerApi)
-{
-}
+SafeNativeWalkService::SafeNativeWalkService(IProfilerApi* profilerApi) : profilerApi_(profilerApi) {}
 
-SafeNativeWalkService::~SafeNativeWalkService()
-{
-}
-
+SafeNativeWalkService::~SafeNativeWalkService() {}
 
 INativeSymbolResolver& SafeNativeWalkService::GetSymbolResolver()
 {
@@ -27,8 +21,8 @@ INativeSymbolResolver& SafeNativeWalkService::GetSymbolResolver()
 }
 
 HRESULT SafeNativeWalkService::CaptureRunningThread(DWORD                         osThreadId,
-                                             ThreadID                      managedThreadId,
-                                             StackSnapshotCallbackContext* clientData)
+                                                    ThreadID                      managedThreadId,
+                                                    StackSnapshotCallbackContext* clientData)
 {
     try
     {
@@ -38,15 +32,14 @@ HRESULT SafeNativeWalkService::CaptureRunningThread(DWORD                       
     }
     catch (const std::exception& ex)
     {
-        trace::Logger::Debug("[SafeNativeWalkService] Failed to suspend/capture thread ",
-                             osThreadId, ": ", ex.what());
+        trace::Logger::Debug("[SafeNativeWalkService] Failed to suspend/capture thread ", osThreadId, ": ", ex.what());
         return E_FAIL;
     }
 }
 
 HRESULT SafeNativeWalkService::CaptureSuspendedThread(HANDLE                        threadHandle,
-                                                             ThreadID                      managedThreadId,
-                                                             StackSnapshotCallbackContext*  clientData)
+                                                      ThreadID                      managedThreadId,
+                                                      StackSnapshotCallbackContext* clientData)
 {
     return ProbeWalkAndSeed(threadHandle, managedThreadId, clientData);
 }
@@ -75,13 +68,10 @@ HRESULT SafeNativeWalkService::ProbeWalkAndSeed(HANDLE                        th
     //    and produces superior managed frames compared to RTL unwind.
     if (walkResult.hasSeed)
     {
-        HRESULT hr = profilerApi_->DoStackSnapshot(
-            managedThreadId,
-            StackSnapshotCallbackDefault,
-            COR_PRF_SNAPSHOT_DEFAULT,
-            clientData,
-            reinterpret_cast<BYTE*>(&walkResult.seedCtx),
-            sizeof(walkResult.seedCtx));
+        HRESULT hr =
+            profilerApi_->DoStackSnapshot(managedThreadId, StackSnapshotCallbackDefault, COR_PRF_SNAPSHOT_DEFAULT,
+                                          clientData, reinterpret_cast<BYTE*>(&walkResult.seedCtx),
+                                          sizeof(walkResult.seedCtx));
 
         // CORPROF_E_STACKSNAPSHOT_ABORTED means callback returned S_FALSE - acceptable
         if (hr == CORPROF_E_STACKSNAPSHOT_ABORTED)
@@ -89,8 +79,7 @@ HRESULT SafeNativeWalkService::ProbeWalkAndSeed(HANDLE                        th
 
         if (FAILED(hr))
         {
-            trace::Logger::Debug("[SafeNativeWalkService] Seeded DSS failed. HRESULT=0x",
-                                 std::hex, hr, std::dec);
+            trace::Logger::Debug("[SafeNativeWalkService] Seeded DSS failed. HRESULT=0x", std::hex, hr, std::dec);
             // We still captured native frames, so partial success
         }
     }
@@ -99,14 +88,14 @@ HRESULT SafeNativeWalkService::ProbeWalkAndSeed(HANDLE                        th
 }
 
 NativeWalkResult SafeNativeWalkService::WalkNativeUntilManaged(const CONTEXT&                initialCtx,
-                                                               StackSnapshotCallbackContext*  clientData)
+                                                               StackSnapshotCallbackContext* clientData)
 {
     NativeWalkResult result;
-    result.hr = E_FAIL;
+    result.hr                  = E_FAIL;
     CONTEXT         threadCtx  = initialCtx;
-    auto& resolver   = NativeSymbolResolver::Instance();
-    DWORD frameCount = 0;
-    constexpr DWORD kMaxDepth = 512;
+    auto&           resolver   = NativeSymbolResolver::Instance();
+    DWORD           frameCount = 0;
+    constexpr DWORD kMaxDepth  = 512;
 
     __try
     {
@@ -114,8 +103,7 @@ NativeWalkResult SafeNativeWalkService::WalkNativeUntilManaged(const CONTEXT&   
         {
             // Check if this IP belongs to a managed (JIT-compiled) function
             FunctionID managedFuncId = 0;
-            HRESULT    fnHr = profilerApi_->GetFunctionFromIP(
-                reinterpret_cast<LPCBYTE>(threadCtx.Rip), &managedFuncId);
+            HRESULT    fnHr = profilerApi_->GetFunctionFromIP(reinterpret_cast<LPCBYTE>(threadCtx.Rip), &managedFuncId);
 
             if (SUCCEEDED(fnHr) && managedFuncId != 0)
             {
@@ -143,9 +131,8 @@ NativeWalkResult SafeNativeWalkService::WalkNativeUntilManaged(const CONTEXT&   
                 }
                 else
                 {
-                    frameIp = (rtFunc != nullptr)
-                        ? static_cast<UINT_PTR>(imageBase + rtFunc->BeginAddress)
-                        : static_cast<UINT_PTR>(threadCtx.Rip);
+                    frameIp = (rtFunc != nullptr) ? static_cast<UINT_PTR>(imageBase + rtFunc->BeginAddress)
+                                                  : static_cast<UINT_PTR>(threadCtx.Rip);
                 }
             }
             else
@@ -182,8 +169,8 @@ NativeWalkResult SafeNativeWalkService::WalkNativeUntilManaged(const CONTEXT&   
             {
                 void*   handlerData      = nullptr;
                 DWORD64 establisherFrame = 0;
-                RtlVirtualUnwind(UNW_FLAG_NHANDLER, imageBase, threadCtx.Rip, rtFunc,
-                                 &threadCtx, &handlerData, &establisherFrame, nullptr);
+                RtlVirtualUnwind(UNW_FLAG_NHANDLER, imageBase, threadCtx.Rip, rtFunc, &threadCtx, &handlerData,
+                                 &establisherFrame, nullptr);
             }
 
             // Guard against corrupt unwind data
@@ -194,8 +181,8 @@ NativeWalkResult SafeNativeWalkService::WalkNativeUntilManaged(const CONTEXT&   
     __except (EXCEPTION_EXECUTE_HANDLER)
     {
         DWORD exCode = GetExceptionCode();
-        trace::Logger::Debug("[SafeNativeWalkService] Exception during native walk. Code=0x",
-                             std::hex, exCode, std::dec, ", Frames=", frameCount);
+        trace::Logger::Debug("[SafeNativeWalkService] Exception during native walk. Code=0x", std::hex, exCode,
+                             std::dec, ", Frames=", frameCount);
         result.hr = (frameCount > 0) ? S_OK : E_FAIL;
     }
 

@@ -1,7 +1,6 @@
 // Copyright The OpenTelemetry Authors
 // SPDX-License-Identifier: Apache-2.0
 
-
 #include "invocation_queue.h"
 
 namespace ProfilerStackCapture
@@ -29,16 +28,15 @@ InvocationStatus InvocationQueue::Invoke(const std::function<void()>& fn, std::c
     if (stop_.load())
         return InvocationStatus::TimedOut;
 
-    auto item  = std::make_shared<QueuedInvocation>();
-    item->fn   = fn;
-    auto fut   = item->completedPromise.get_future();
+    auto item = std::make_shared<QueuedInvocation>();
+    item->fn  = fn;
+    auto fut  = item->completedPromise.get_future();
     {
         std::lock_guard<std::mutex> lock(mutex_);
         queue_.push_back(item);
     }
     condVar_.notify_one();
-    return fut.wait_for(timeout) == std::future_status::ready ? InvocationStatus::Invoked
-                                                              : InvocationStatus::TimedOut;
+    return fut.wait_for(timeout) == std::future_status::ready ? InvocationStatus::Invoked : InvocationStatus::TimedOut;
 }
 
 void InvocationQueue::WorkerLoop()
@@ -59,8 +57,13 @@ void InvocationQueue::WorkerLoop()
             else
                 continue;
         }
-        try   { item->fn(); }
-        catch (...) {}
+        try
+        {
+            item->fn();
+        }
+        catch (...)
+        {
+        }
         item->completedPromise.set_value();
     }
 }
