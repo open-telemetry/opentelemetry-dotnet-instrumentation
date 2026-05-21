@@ -16,7 +16,7 @@ permissions:
 
 jobs:
   check-sdk-versions:
-    name: Check .NET SDK versions
+    name: check-sdk-versions # Matches required status check
     runs-on: windows-latest
     steps:
 
