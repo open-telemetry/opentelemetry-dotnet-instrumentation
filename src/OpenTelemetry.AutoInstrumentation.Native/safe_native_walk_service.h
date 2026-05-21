@@ -11,7 +11,6 @@
 #include "profiler_api.h"
 #include "stack_safety_probe.h"
 #include "native_symbol_resolver.h"
-#include "native_walk_result.h"
 
 namespace ProfilerStackCapture
 {

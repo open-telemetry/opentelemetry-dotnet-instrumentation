@@ -213,11 +213,12 @@ add_library("OpenTelemetry.AutoInstrumentation.Native.static" STATIC
         il_rewriter_wrapper.cpp
         il_rewriter.cpp
         integration.cpp
+        invocation_queue.cpp
         member_resolver.cpp
         metadata_builder.cpp
         miniutf.cpp
         stack_capture_strategy_factory.cpp
-        native_stack_walker.cpp
+        unified_stack_capture_strategy.cpp
         profiler_api_adapter.cpp
         regex_utils.cpp
         string_utils.cpp
