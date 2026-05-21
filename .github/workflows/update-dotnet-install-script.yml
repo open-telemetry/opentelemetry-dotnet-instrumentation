@@ -41,15 +41,13 @@ jobs:
       uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
       with:
         filter: 'tree:0'
-        persist-credentials: false
+        persist-credentials: true # zizmor: ignore[artipacked] Needed to push commits
         show-progress: false
         token: ${{ steps.otelbot-token.outputs.token }}
 
     - name: Update .NET installation script
       id: update-script
       shell: pwsh
-      env:
-        GH_TOKEN: ${{ steps.otelbot-token.outputs.token }}
       run: |
         $ErrorActionPreference = "Stop"
         $ProgressPreference = "SilentlyContinue"
@@ -90,12 +88,10 @@ jobs:
 
         # Configure Git and check whether the branch already exists
         $BranchName = ${env:UPDATE_BRANCH_NAME}
-        $TokenBytes = [System.Text.Encoding]::ASCII.GetBytes("x-access-token:${env:GH_TOKEN}")
-        $AuthorizationHeader = [Convert]::ToBase64String($TokenBytes)
 
         git config user.email "${env:GIT_COMMIT_USER_EMAIL}" | Out-Null
         git config user.name "${env:GIT_COMMIT_USER_NAME}" | Out-Null
-        git -c "http.https://github.com/.extraheader=AUTHORIZATION: basic ${AuthorizationHeader}" fetch origin --no-tags | Out-Null
+        git fetch origin --no-tags | Out-Null
         git rev-parse --verify --quiet "remotes/origin/${BranchName}" | Out-Null
 
         if ($LASTEXITCODE -eq 0) {
@@ -107,7 +103,7 @@ jobs:
         git checkout -b $BranchName
         git add $InstallScriptFileName
         git commit -m "Update .NET Installation Script`n`nUpdate .NET installation script from ${InstallScriptUrl}." -s
-        git -c "http.https://github.com/.extraheader=AUTHORIZATION: basic ${AuthorizationHeader}" push -u origin $BranchName
+        git push -u origin $BranchName
 
         "updated-script=true" >> ${env:GITHUB_OUTPUT}
 
