@@ -6,7 +6,6 @@
 
 // RAII Win32 thread suspension used by both native stack walking (RTL) and
 // the .NET Framework per-thread stack capture strategy.
-// Windows x64 only.
 
 #if defined(_WIN32)
 

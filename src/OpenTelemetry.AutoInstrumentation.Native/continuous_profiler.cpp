@@ -4,6 +4,7 @@
 // We want to use std::min, not the windows.h macro
 #define NOMINMAX
 #include "continuous_profiler.h"
+#include "captured_frame.h"
 #include "logger.h"
 #include <chrono>
 #include <map>
@@ -694,9 +695,9 @@ trace::WSTRING* NamingHelper::Lookup(const FunctionIdentifier& function_identifi
     stats.name_cache_misses++;
     auto owned = std::make_unique<trace::WSTRING>();
 
-    if (stack_capture_strategy_ && function_identifier.IsNative())
+    if (stackWalker_ && function_identifier.IsNative())
     {
-        if (auto hr = stack_capture_strategy_->ResolveNativeSymbolName(function_identifier.native_ip, *owned);
+        if (auto hr = stackWalker_->ResolveNativeSymbolName(function_identifier.native_ip, *owned);
             hr != S_OK)
         {
             // owned's destructor deletes the string
@@ -751,7 +752,7 @@ struct DoStackSnapshotParams
     DoStackSnapshotParams(ContinuousProfiler* p, std::vector<FunctionIdentifier>* b) : prof(p), buffer(b) {}
 };
 
-static HRESULT __stdcall FrameCallback(_In_ FunctionID         func_id,
+static HRESULT __stdcall HandleStackFrame(_In_ FunctionID         func_id,
                                        _In_ UINT_PTR           ip,
                                        _In_ COR_PRF_FRAME_INFO frame_info,
                                        _In_ ULONG32            context_size,
@@ -801,32 +802,32 @@ static void CaptureFunctionIdentifiersForThreads(
 {
     prof->helper.ClearFunctionIdentifierCache();
 
-    if (auto stackCaptureStrategy = prof->GetStackCaptureStrategy(); stackCaptureStrategy != nullptr)
+    if (auto stackWalker = prof->GetStackWalker())
     {
         auto frameProcessor = [&threadStacksBuffer,
-                               prof](ProfilerStackCapture::StackSnapshotCallbackContext* snapshot_context) -> HRESULT
+                               prof](continuous_profiler::CapturedFrame* frame) -> HRESULT
         {
-            auto                  thread = snapshot_context->threadId;
+            auto                  thread = frame->threadId;
             DoStackSnapshotParams doStackSnapshotParams{prof, &threadStacksBuffer[thread]};
 
-            if (snapshot_context->isNativeWalkFrame && snapshot_context->functionId == 0 &&
-                snapshot_context->instructionPointer != 0)
+            if (frame->isNativeWalkFrame && frame->functionId == 0 &&
+                frame->instructionPointer != 0)
             {
                 // RTL-originated native frame - record with IP for symbol resolution
                 doStackSnapshotParams.prof->stats_.total_frames++;
                 doStackSnapshotParams.buffer->push_back(
-                    FunctionIdentifier::Native(snapshot_context->instructionPointer));
+                    FunctionIdentifier::Native(frame->instructionPointer));
                 return S_OK;
             }
 
-            FrameCallback(snapshot_context->functionId, snapshot_context->instructionPointer,
-                          snapshot_context->frameInfo, snapshot_context->contextSize, snapshot_context->context,
+            HandleStackFrame(frame->functionId, frame->instructionPointer,
+                          frame->frameInfo, frame->contextSize, frame->context,
                           &doStackSnapshotParams);
             return S_OK;
         };
 
-        ProfilerStackCapture::StackSnapshotCallbackContext context{frameProcessor};
-        stackCaptureStrategy->CaptureStacks(selectedThreads, &context);
+        continuous_profiler::StackCaptureRequest request{frameProcessor};
+        stackWalker->CaptureStacks(selectedThreads, &request);
     }
 }
 
@@ -1209,15 +1210,15 @@ void ContinuousProfiler::SetGlobalInfo12(ICorProfilerInfo12* cor_profiler_info12
     info12 = cor_profiler_info12;
 }
 
-void ContinuousProfiler::SetStackCaptureStrategy(IStackCaptureStrategy* stack_capture_strategy)
+void ContinuousProfiler::SetStackWalker(IStackWalker* walker)
 {
-    stack_capture_strategy_        = stack_capture_strategy;
-    helper.stack_capture_strategy_ = stack_capture_strategy;
+    stackWalker_                   = walker;
+    helper.stackWalker_ = walker;
 }
 
-IStackCaptureStrategy* ContinuousProfiler::GetStackCaptureStrategy() const
+IStackWalker* ContinuousProfiler::GetStackWalker() const
 {
-    return stack_capture_strategy_;
+    return stackWalker_;
 }
 
 void ContinuousProfiler::InitSelectiveSamplingBuffer()
@@ -1291,7 +1292,7 @@ constexpr auto AllocationTickV4SizeWithoutTypeName    = 4 + 4 + 2 + 8 + EtwPoint
 static void CaptureAllocationStack(ContinuousProfiler* prof, std::vector<FunctionIdentifier>& threadStack)
 {
     DoStackSnapshotParams doStackSnapshotParams(prof, &threadStack);
-    HRESULT               hr = prof->info7->DoStackSnapshot((ThreadID)NULL, &FrameCallback, COR_PRF_SNAPSHOT_DEFAULT,
+    HRESULT               hr = prof->info7->DoStackSnapshot((ThreadID)NULL, &HandleStackFrame, COR_PRF_SNAPSHOT_DEFAULT,
                                                             &doStackSnapshotParams, nullptr, 0);
     if (FAILED(hr))
     {

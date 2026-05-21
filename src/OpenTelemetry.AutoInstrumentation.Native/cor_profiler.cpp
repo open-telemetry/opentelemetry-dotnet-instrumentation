@@ -33,7 +33,6 @@
 #include "version.h"
 #include "continuous_profiler.h"
 #include "member_resolver.h"
-#include "stack_capture_strategy_factory.h"
 
 #ifdef MACOS
 #include <mach-o/dyld.h>
@@ -282,10 +281,7 @@ HRESULT STDMETHODCALLTYPE CorProfiler::Initialize(IUnknown* cor_profiler_info_un
     this->info_->AddRef();
     is_attached_.store(true);
     profiler = this;
-
-    stack_capture_strategy_ =
-        continuous_profiler::StackCaptureStrategyFactory::Create(this->info_, runtime_information_);
-
+    
     return S_OK;
 }
 
@@ -1219,7 +1215,12 @@ bool CorProfiler::InitThreadSampler()
     this->continuousProfiler = new continuous_profiler::ContinuousProfiler();
     this->continuousProfiler->SetGlobalInfo12(this->info12_);
     this->continuousProfiler->SetGlobalInfo7(this->info_);
-    this->continuousProfiler->SetStackCaptureStrategy(stack_capture_strategy_.get());
+    using continuous_profiler::RuntimeType;
+    RuntimeType runtime = runtime_information_.is_desktop() ? RuntimeType::DotNetFramework 
+        : runtime_information_.is_core()  ? 
+        RuntimeType::DotNetCore : RuntimeType::Unknown;
+    stack_walker_impl_ = std::make_unique<continuous_profiler::StackWalkerImpl>(this->info_, runtime);
+    this->continuousProfiler->SetStackWalker(stack_walker_impl_.get());
     Logger::Info("ConfigureContinuousProfiler: Events masks configured for continuous profiler");
     return true;
 }
@@ -3796,9 +3797,9 @@ HRESULT STDMETHODCALLTYPE CorProfiler::ThreadCreated(ThreadID threadId)
         continuousProfiler->ThreadCreated(threadId);
     }
 
-    if (stack_capture_strategy_)
+    if (stack_walker_impl_)
     {
-        stack_capture_strategy_->OnThreadCreated(threadId);
+        stack_walker_impl_->OnThreadCreated(threadId);
     }
     return S_OK;
 }
@@ -3809,9 +3810,9 @@ HRESULT STDMETHODCALLTYPE CorProfiler::ThreadDestroyed(ThreadID threadId)
         continuousProfiler->ThreadDestroyed(threadId);
     }
 
-    if (stack_capture_strategy_)
+    if (stack_walker_impl_)
     {
-        stack_capture_strategy_->OnThreadDestroyed(threadId);
+        stack_walker_impl_->OnThreadDestroyed(threadId);
     }
 
     return S_OK;
@@ -3823,18 +3824,18 @@ HRESULT STDMETHODCALLTYPE CorProfiler::ThreadNameChanged(ThreadID threadId, ULON
         continuousProfiler->ThreadNameChanged(threadId, cchName, name);
     }
 
-    if (stack_capture_strategy_)
+    if (stack_walker_impl_)
     {
-        stack_capture_strategy_->OnThreadNameChanged(threadId, cchName, name);
+        stack_walker_impl_->OnThreadNameChanged(threadId, cchName, name);
     }
 
     return S_OK;
 }
 HRESULT STDMETHODCALLTYPE CorProfiler::ThreadAssignedToOSThread(ThreadID managedThreadId, DWORD osThreadId)
 {
-    if (stack_capture_strategy_)
+    if (stack_walker_impl_)
     {
-        stack_capture_strategy_->OnThreadAssignedToOSThread(managedThreadId, osThreadId);
+        stack_walker_impl_->OnThreadAssignedToOSThread(managedThreadId, osThreadId);
     }
     return S_OK;
 }

@@ -13,6 +13,7 @@
 #include "string_utils.h"
 #include "thread_suspend.h"
 #include "profiler_api.h"
+#include "native_symbol_resolver.h"
 
 namespace ProfilerStackCapture
 {
@@ -35,7 +36,7 @@ HRESULT WalkNativeStackForThread(IProfilerApi*                 profilerApi,
 // Symbol resolver - caches the system directory and per-module metadata to
 // avoid repeated kernel calls. System DLLs get full export table RVA walk;
 // non-system modules get a modulename fallback.
-class NativeSymbolResolver
+class NativeSymbolResolver : public INativeSymbolResolver
 {
 public:
     NativeSymbolResolver();
@@ -83,6 +84,12 @@ inline bool ResolveNativeSymbolName(UINT_PTR ip, trace::WSTRING& outName)
 {
     return NativeSymbolResolver::Instance().Resolve(ip, outName);
 }
+
+enum class NativeWalkMode
+{
+    Full,          // Walk all frames (current behavior)
+    StopAtManaged  // Emit native frames, stop and return seed when managed hit
+};
 
 } // namespace ProfilerStackCapture
 

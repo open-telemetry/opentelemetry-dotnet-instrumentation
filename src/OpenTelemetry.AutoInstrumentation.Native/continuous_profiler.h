@@ -7,8 +7,7 @@
 #define OTEL_CONTINUOUS_PROFILER_H_
 
 #include "continuous_profiler_clr_helpers.h"
-#include "stack_capture_strategy.h"
-#include "profiler_api.h"
+#include "stack_walker.h"
 #include <mutex>
 #include <cinttypes>
 #include <future>
@@ -297,7 +296,7 @@ class NamingHelper
 public:
     // These are permanent parts of the helper object
     ICorProfilerInfo7* info7_ = nullptr;
-    continuous_profiler::IStackCaptureStrategy* stack_capture_strategy_ = nullptr;
+    IStackWalker*      stackWalker_ = nullptr;
     NamingHelper();
     void ClearFunctionIdentifierCache();
     trace::WSTRING* Lookup(const FunctionIdentifier& function_identifier, SamplingStatistics & stats);
@@ -363,8 +362,8 @@ public:
 
     void SetGlobalInfo12(ICorProfilerInfo12* info12);
     void SetGlobalInfo7(ICorProfilerInfo7* cor_profiler_info7);
-    void SetStackCaptureStrategy(IStackCaptureStrategy* strategy);
-    IStackCaptureStrategy* GetStackCaptureStrategy() const;
+    void                   SetStackWalker(IStackWalker* walker);
+    IStackWalker* GetStackWalker() const;
     ThreadState* GetCurrentThreadState(ThreadID tid);
 
     std::unordered_map<ThreadID, ThreadState*> managed_tid_to_state_;
@@ -384,7 +383,7 @@ private:
     std::atomic_bool             shutdown_requested_{ false };
     std::unique_ptr<std::thread> thread_sampling_thread_;
     EVENTPIPE_SESSION            session_ = 0;
-    IStackCaptureStrategy*       stack_capture_strategy_ = nullptr; // Non-owning pointer
+    IStackWalker*                stackWalker_ = nullptr;
 };
 
 } // namespace continuous_profiler

@@ -8,17 +8,21 @@
 #include "stack_capture_strategy.h"
 
 namespace continuous_profiler {
-
+    enum class RuntimeType
+    {
+        Unknown,
+        DotNetFramework,
+        DotNetCore
+};
 /// @brief Factory for creating platform-specific stack capture strategies
 class StackCaptureStrategyFactory {
 public:
     /// @brief Creates appropriate strategy based on runtime information
     /// @param profilerInfo CLR profiler API (ICorProfilerInfo12 for .NET Core, ICorProfilerInfo7* for .NET FW)
-    /// @param runtimeInfo Runtime platform information
+    /// @param isDeskTop Runtime platform information
     /// @return Heap-allocated strategy (caller owns), or nullptr on unsupported platform
     static std::unique_ptr<IStackCaptureStrategy> Create(
-        ICorProfilerInfo2* profilerInfo,
-        const trace::RuntimeInformation& runtimeInfo);
+        ICorProfilerInfo2* profilerInfo, RuntimeType runtimeType);
 
 };
 

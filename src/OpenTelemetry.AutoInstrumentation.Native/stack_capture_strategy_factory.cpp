@@ -2,32 +2,50 @@
 // SPDX-License-Identifier: Apache-2.0
 
 #include "stack_capture_strategy_factory.h"
-#include "dot_net_stack_capture_strategy.h"
-#include "netfx_stack_capture_strategy.h"
+#include "suspension_policy.h"
+#include "unified_stack_capture_strategy.h"
 
 namespace continuous_profiler
 {
 
 std::unique_ptr<IStackCaptureStrategy> StackCaptureStrategyFactory::Create(ICorProfilerInfo2* profilerInfo,
-                                                                           const trace::RuntimeInformation& runtimeInfo)
+                                                                           RuntimeType        runtimeType)
 {
+    auto  profilerApi    = std::make_unique<ProfilerStackCapture::ProfilerApiAdapter>(profilerInfo);
+    auto* profilerApiRaw = profilerApi.get();
 
-    if (runtimeInfo.is_desktop())
+#if defined(_WIN32)
+    auto  invocationQueue    = std::make_unique<ProfilerStackCapture::InvocationQueue>();
+    auto* invocationQueueRaw = invocationQueue.get();
+#else
+    std::unique_ptr<ProfilerStackCapture::InvocationQueue> invocationQueue; // unused on POSIX
+#endif
+
+    if (runtimeType == RuntimeType::DotNetCore)
+    {
+        auto policy = std::make_unique<ProfilerStackCapture::ClrRuntimeSuspensionPolicy>(profilerApiRaw
+#if defined(_WIN32)
+                                                                                         ,
+                                                                                         invocationQueueRaw
+#endif
+        );
+        return std::make_unique<UnifiedStackCaptureStrategy>(std::move(profilerApi), std::move(invocationQueue),
+                                                             std::move(policy));
+    }
+
+    if (runtimeType == RuntimeType::DotNetFramework)
     {
 #if defined(_WIN32)
-        trace::Logger::Info("StackCaptureStrategyFactory: Creating NetFxStackCaptureStrategy");
-        return std::make_unique<NetFxStackCaptureStrategy>(profilerInfo);
+        auto policy =
+            std::make_unique<ProfilerStackCapture::OsThreadSuspensionPolicy>(profilerApiRaw, invocationQueueRaw);
+        return std::make_unique<UnifiedStackCaptureStrategy>(std::move(profilerApi), std::move(invocationQueue),
+                                                             std::move(policy));
 #else
-        trace::Logger::Error("StackCaptureStrategyFactory: .NET Framework profiling is only supported Windows");
+        trace::Logger::Error("StackCaptureStrategyFactory: NetFx requires Windows");
         return nullptr;
 #endif
     }
-    else
-    {
-        trace::Logger::Info("StackCaptureStrategyFactory: Creating DotNetStackCaptureStrategy");
-        //  Safe cast - we only get here if runtime is .NET Core 6+, which has ICorProfilerInfo12, comments above
-        return std::make_unique<DotNetStackCaptureStrategy>(profilerInfo);
-    }
+    return nullptr;
 }
 
 } // namespace continuous_profiler

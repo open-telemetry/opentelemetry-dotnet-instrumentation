@@ -4,39 +4,36 @@
 #ifndef OTEL_PROFILER_API_H_
 #define OTEL_PROFILER_API_H_
 
-//#include "stack_capture_strategy.h"
 #include <memory>
 #include <corhlpr.h>
 #include <corprof.h>
 #include <functional>
+#include "captured_frame.h"
 
 namespace ProfilerStackCapture
 {
 struct StackSnapshotCallbackContext;
 using StackFrameCallback = std::function<HRESULT(StackSnapshotCallbackContext* clientData)>;
 
+/// @brief Strategy-internal callback context.
+/// Embeds the public CapturedFrame so the bridge in StackWalkerImpl can
+/// pass a pointer to the embedded frame without copying any fields.
 struct StackSnapshotCallbackContext
 {
-    StackFrameCallback callback;
-    FunctionID         functionId         = 0;
-    UINT_PTR           instructionPointer = 0;
-    COR_PRF_FRAME_INFO frameInfo          = 0;
-    ULONG32            contextSize        = 0;
-    BYTE*              context            = nullptr;
-    ThreadID           threadId           = 0;
-    bool               isNativeWalkFrame  = false; // Set by RTL walker only
+    StackFrameCallback                   callback;
+    continuous_profiler::CapturedFrame   frame;
 };
 
 inline HRESULT __stdcall StackSnapshotCallbackDefault(
     FunctionID funcId, UINT_PTR ip, COR_PRF_FRAME_INFO frameInfo, ULONG32 contextSize, BYTE context[], void* clientData)
 {
-    auto* callbackData               = static_cast<StackSnapshotCallbackContext*>(clientData);
-    callbackData->functionId         = funcId;
-    callbackData->instructionPointer = ip;
-    callbackData->frameInfo          = frameInfo;
-    callbackData->contextSize        = contextSize;
-    callbackData->context            = context;
-    callbackData->isNativeWalkFrame  = false; // DSS frames are never meaningful native frames
+    auto* callbackData                     = static_cast<StackSnapshotCallbackContext*>(clientData);
+    callbackData->frame.functionId         = funcId;
+    callbackData->frame.instructionPointer = ip;
+    callbackData->frame.frameInfo          = frameInfo;
+    callbackData->frame.contextSize        = contextSize;
+    callbackData->frame.context            = context;
+    callbackData->frame.isNativeWalkFrame  = false; // DSS frames are never meaningful native frames
 
     return callbackData->callback(callbackData);
 }
@@ -64,11 +61,6 @@ public:
     virtual HRESULT ResumeRuntime()   { return E_NOTIMPL; }
 };
 
-/// @brief Adapts ICorProfilerInfo2/10 to IProfilerApi using PIMPL.
-///
-/// Cross-platform. COM details (ICorProfilerInfo10 QI, Release) are hidden
-/// in profiler_api_adapter.cpp. On .NET Framework, SuspendRuntime/ResumeRuntime
-/// gracefully return E_NOTIMPL since ICorProfilerInfo10 is unavailable.
 class ProfilerApiAdapter : public IProfilerApi
 {
 public:
