@@ -32,7 +32,7 @@ jobs:
 
     steps:
 
-    - name: Checkout
+    - name: Checkout code
       uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
       with:
         persist-credentials: false
@@ -46,11 +46,11 @@ jobs:
       run: ./scripts/format-native.sh
 
   check-native-headers:
-    name: check-native-headers
+    name: check-native-headers # Matches required status check
     runs-on: ubuntu-22.04
     steps:
 
-      - name: Checkout
+      - name: Checkout code
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           persist-credentials: false

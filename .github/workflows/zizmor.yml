@@ -14,7 +14,7 @@ env:
 
 jobs:
   zizmor:
-    name: zizmor
+    name: Scan with zizmor
     runs-on: ubuntu-24.04
 
     concurrency:

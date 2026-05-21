@@ -13,7 +13,7 @@ permissions: {}
 
 jobs:
   update-dotnet-install-script:
-    name: update-dotnet-install-script
+    name: Update .NET installation script
     runs-on: ubuntu-latest
     if: github.event.repository.fork == false
 

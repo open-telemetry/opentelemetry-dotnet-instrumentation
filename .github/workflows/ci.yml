@@ -20,25 +20,25 @@ permissions:
 
 jobs:
   build-ubuntu1604-native:
-    name: build-ubuntu1604-native
+    name: Build native on Ubuntu 16.04 container
     uses: ./.github/workflows/build-ubuntu1604-native-container.yml
 
   build-windows:
-    name: build-windows
+    name: Build on Windows
     uses: ./.github/workflows/build-windows.yml
 
   build:
-    name: build
+    name: Build
     needs: [ build-windows, build-ubuntu1604-native ]
     uses: ./.github/workflows/build.yml
 
   build-nuget-packages:
-    name: build-nuget-packages
+    name: Build NuGet packages
     needs: [ build-windows, build ]
     uses: ./.github/workflows/build-nuget-packages.yml
 
   test-build-managed:
-    name: test-build-managed
+    name: Test ${{ matrix.test-tfm }} on ${{ matrix.machine }} (managed)
     needs: [ build-windows, build ]
     strategy:
       fail-fast: false
@@ -71,7 +71,7 @@ jobs:
     runs-on: ${{ matrix.machine }}
     steps:
 
-      - name: Checkout
+      - name: Checkout code
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           fetch-depth: 0 # fetching all, needed to correctly calculate version
@@ -119,7 +119,7 @@ jobs:
         run: rm SqlLocalDB.msi
 
   test-build-native:
-    name: test-build-native
+    name: Test on ${{ matrix.machine }} (native)
     needs: build-windows
     strategy:
       fail-fast: false
@@ -132,7 +132,7 @@ jobs:
     runs-on: ${{ matrix.machine }}
     steps:
 
-      - name: Checkout
+      - name: Checkout code
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           fetch-depth: 0 # fetching all, needed to correctly calculate version
@@ -158,7 +158,7 @@ jobs:
         run: ./build.cmd NativeTests
 
   test-build-windows-container-tests:
-    name: test-build-windows-container-tests
+    name: Test Windows container on ${{ matrix.machine }}
     needs: build-windows
     strategy:
       fail-fast: false
@@ -173,7 +173,7 @@ jobs:
     runs-on: ${{ matrix.machine }}
     steps:
 
-      - name: Checkout
+      - name: Checkout code
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           fetch-depth: 0 # fetching all, needed to correctly calculate version
@@ -215,7 +215,7 @@ jobs:
           path: test-artifacts/
 
   test-build-container:
-    name: test-build-container
+    name: Test in container on ${{ matrix.machine }} (${{ matrix.os-type }}) with ${{ matrix.base-image }}
     needs: build
     strategy:
       fail-fast: false
@@ -245,7 +245,7 @@ jobs:
     timeout-minutes: 60
     steps:
 
-    - name: Checkout
+    - name: Checkout code
       uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
       with:
         fetch-depth: 0 # fetching all, needed to correctly calculate version
@@ -275,7 +275,7 @@ jobs:
         path: test-artifacts/
 
   test-nuget-packages:
-    name: test-nuget-packages
+    name: Test NuGet packages on ${{ matrix.machine }}
     needs: build-nuget-packages
     strategy:
       fail-fast: false
@@ -289,7 +289,7 @@ jobs:
     runs-on: ${{ matrix.machine }}
     steps:
       
-      - name: Checkout
+      - name: Checkout code
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           fetch-depth: 0 # fetching all, needed to correctly calculate version
@@ -322,7 +322,7 @@ jobs:
           path: test-artifacts/
 
   test-jobs:
-    name: test-jobs
+    name: test-jobs # Matches required status check
     runs-on: ubuntu-22.04
     needs:
       - test-build-managed

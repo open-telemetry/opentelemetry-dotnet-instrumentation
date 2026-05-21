@@ -57,7 +57,7 @@ jobs:
         maximum-size: 32GB
         disk-root: "D:"
 
-    - name: Checkout repository
+    - name: Checkout code
       uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
       with:
         filter: 'tree:0'
@@ -76,7 +76,7 @@ jobs:
         # For more details on CodeQL's query packs, refer to: https://docs.github.com/en/code-security/code-scanning/automatically-scanning-your-code-for-vulnerabilities-and-errors/configuring-code-scanning#using-queries-in-ql-packs
         # queries: security-extended,security-and-quality
 
-    - name: Setup dotnet
+    - name: Setup .NET
       uses: ./.github/actions/setup-dotnet
       if: matrix.language == 'csharp'
 
@@ -96,7 +96,7 @@ jobs:
         category: "/language:${{matrix.language}}"
 
   results:
-    name: results
+    name: results # Matches required status check
     if: ${{ !cancelled() }}
     needs: [ analyze ]
     runs-on: ubuntu-latest

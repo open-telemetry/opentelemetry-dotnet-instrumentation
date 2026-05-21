@@ -12,11 +12,11 @@ env:
 
 jobs:
   build-ubuntu1604-native-container:
-    name: build-ubuntu1604-native-container
+    name: Build native container on Ubuntu 16.04
     runs-on: ubuntu-22.04
     timeout-minutes: 60
     steps:
-      - name: Checkout
+      - name: Checkout code
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           fetch-depth: 0 # fetching all, needed to correctly calculate version
