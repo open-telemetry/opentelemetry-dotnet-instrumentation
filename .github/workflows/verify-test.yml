@@ -32,10 +32,10 @@ jobs:
             containers: windows
           - machine: ubuntu-22.04
             containers: linux
-          - machine: macos-14
-            containers: none
           - machine: ubuntu-22.04-arm
             containers: linux
+          - machine: macos-14
+            containers: none
     runs-on: ${{ matrix.machine }}
     steps:
       

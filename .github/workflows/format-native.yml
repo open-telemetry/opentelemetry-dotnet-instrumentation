@@ -24,10 +24,13 @@ jobs:
       matrix:
         include:
           - step-name: native-format-macos
+            # renovate: datasource=github-runners depType=github-runner
             runner: macos-14-xlarge
           - step-name: native-format-linux
+            # renovate: datasource=github-runners depType=github-runner
             runner: ubuntu-22.04
           - step-name: native-format-windows
+            # renovate: datasource=github-runners depType=github-runner
             runner: windows-2022
 
     steps:

@@ -24,7 +24,9 @@ jobs:
     strategy:
       matrix:
         os:
-          - ubuntu-latest
+          # renovate: datasource=github-runners depType=github-runner
+          - ubuntu-24.04
+          # renovate: datasource=github-runners depType=github-runner
           - ubuntu-24.04-arm
     runs-on: ${{ matrix.os }}
     steps:

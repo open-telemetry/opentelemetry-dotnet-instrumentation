@@ -24,7 +24,7 @@ permissions:
 jobs:
   check-format:
     name: dotnet format
-    runs-on: windows-latest
+    runs-on: windows-2025
     steps:
       
     - name: Checkout code

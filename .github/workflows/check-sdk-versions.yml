@@ -17,7 +17,7 @@ permissions:
 jobs:
   check-sdk-versions:
     name: check-sdk-versions # Matches required status check
-    runs-on: windows-latest
+    runs-on: windows-2025
     steps:
 
       - name: Checkout code

@@ -44,7 +44,12 @@ jobs:
       fail-fast: false
       matrix:
         test-tfm: [ net10.0, net9.0, net8.0, net462 ]
-        machine: [ windows-2022, windows-2025, ubuntu-22.04, macos-14, ubuntu-22.04-arm ]
+        machine:
+        - windows-2022
+        - windows-2025
+        - macos-14
+        - ubuntu-22.04
+        - ubuntu-22.04-arm
         exclude:
           - test-tfm: net462
             machine: macos-14
@@ -282,10 +287,10 @@ jobs:
       matrix:
         include:
           - machine: ubuntu-22.04
+          - machine: ubuntu-22.04-arm
           - machine: macos-14
           - machine: windows-2022
           - machine: windows-2025
-          - machine: ubuntu-22.04-arm
     runs-on: ${{ matrix.machine }}
     steps:
       

@@ -22,12 +22,7 @@ permissions: {}
 jobs:
   analyze:
     name: Analyze (${{ matrix.language }})
-    # Runner size impacts CodeQL analysis time. To learn more, please see:
-    #   - https://gh.io/recommended-hardware-resources-for-running-codeql
-    #   - https://gh.io/supported-runners-and-hardware-resources
-    #   - https://gh.io/using-larger-runners (GitHub.com only)
-    # Consider using larger runners or machines with greater resources for possible analysis time improvements.
-    runs-on: ${{ (matrix.language == 'csharp' && 'windows-latest') || 'ubuntu-latest' }}
+    runs-on: ${{ matrix.machine }}
     permissions:
       actions: read  # for github/codeql-action/init to get workflow details
       contents: read  # for actions/checkout to fetch code
@@ -38,8 +33,12 @@ jobs:
       matrix:
         include:
         - language: actions
+          # renovate: datasource=github-runners depType=github-runner
+          machine: ubuntu-24.04
         - language: csharp
           build-mode: manual
+          # renovate: datasource=github-runners depType=github-runner
+          machine: windows-2025
         # CodeQL supports the following values keywords for 'language': 'actions', 'c-cpp', 'csharp', 'go', 'java-kotlin', 'javascript-typescript', 'python', 'ruby', 'rust', 'swift'
         # Use `c-cpp` to analyze code written in C, C++ or both
         # Use 'java-kotlin' to analyze code written in Java, Kotlin or both
@@ -99,7 +98,7 @@ jobs:
     name: results # Matches required status check
     if: ${{ !cancelled() }}
     needs: [ analyze ]
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
 
     steps:
       - name: Report status
