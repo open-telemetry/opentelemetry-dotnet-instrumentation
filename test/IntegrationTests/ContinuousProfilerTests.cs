@@ -189,13 +189,13 @@ public class ContinuousProfilerTests : TestHelper
         // Second CLR transition between GenericMethodCFromGenericClass(T) and MethodB.
         // Windows x64: resolved to clr.dll (NetFx) or absent (coreclr does not emit a stub frame here).
         // Other platforms / DEBUG: DSS emits Unknown_Native_Function.
-#if NETFRAMEWORK
-        stackTrace.Add(
+#if NET11_0_OR_GREATER
+        stackTrace.Add("My.Custom.Test.Namespace.ClassA.OTelAutoCallbackTest(My.Custom.Test.Namespace.ClassA.Callback, System.Int32)");
+#elif NETFRAMEWORK || DEBUG
+      stackTrace.Add(
             Environment.OSVersion.Platform == PlatformID.Win32NT && Environment.Is64BitProcess
                 ? "clr.dll"
                 : "Unknown_Native_Function(unknown)");
-#elif DEBUG
-        stackTrace.Add("Unknown_Native_Function(unknown)");
 #else
         if (Environment.OSVersion.Platform != PlatformID.Win32NT)
         {
