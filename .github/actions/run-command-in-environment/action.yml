@@ -28,9 +28,9 @@ runs:
     - name: Validate execution inputs
       shell: pwsh
       run: |
-        $executionMode = '${{ inputs.execution-mode }}'
-        $containerName = '${{ inputs.container-name }}'
-        $containerUser = '${{ inputs.container-user }}'
+        $executionMode = $env:EXECUTION_MODE
+        $containerName = $env:CONTAINER_NAME
+        $containerUser = $env:CONTAINER_USER
 
         if ($executionMode -eq 'container' -and [string]::IsNullOrEmpty($containerName)) {
           throw 'container-name input is required when execution-mode is container.'
@@ -43,32 +43,36 @@ runs:
         if (-not [string]::IsNullOrEmpty($containerUser) -and [string]::IsNullOrEmpty($containerName) -and $executionMode -ne 'container') {
           throw 'container-user requires container execution.'
         }
+      env:
+        EXECUTION_MODE: ${{ inputs.execution-mode }}
+        CONTAINER_NAME: ${{ inputs.container-name }}
+        CONTAINER_USER: ${{ inputs.container-user }}
 
     - name: Run on host with default Windows shell
-      if: ${{ inputs.execution-mode == '' && inputs.container-name == '' && runner.os == 'Windows' }}
+      if: inputs.execution-mode == '' && inputs.container-name == '' && runner.os == 'Windows'
       shell: pwsh
       run: ${{ inputs.run }}
 
     - name: Run on host with default non-Windows shell
-      if: ${{ inputs.execution-mode == '' && inputs.container-name == '' && runner.os != 'Windows' }}
+      if: inputs.execution-mode == '' && inputs.container-name == '' && runner.os != 'Windows'
       shell: bash
       run: ${{ inputs.run }}
 
     - name: Run on host with explicit shell
-      if: ${{ inputs.execution-mode != '' && inputs.execution-mode != 'container' }}
+      if: inputs.execution-mode != '' && inputs.execution-mode != 'container'
       shell: ${{ inputs.execution-mode }}
       run: ${{ inputs.run }}
 
     - name: Run in container
-      if: ${{ inputs.execution-mode == 'container' || (inputs.execution-mode == '' && inputs.container-name != '') }}
+      if: inputs.execution-mode == 'container' || (inputs.execution-mode == '' && inputs.container-name != '')
       shell: bash
       run: |
         set -u
 
         docker_args=(exec -i)
 
-        if [[ -n '${{ inputs.container-user }}' ]]; then
-          docker_args+=(-u '${{ inputs.container-user }}')
+        if [[ -n "${CONTAINER_USER}" ]]; then
+          docker_args+=(-u "${CONTAINER_USER}")
         fi
 
         while IFS= read -r environment_name; do
@@ -81,13 +85,16 @@ runs:
           fi
 
           docker_args+=(-e "${environment_name}")
-        done <<'EOF'
-        ${{ inputs.container-publish-env }}
-        EOF
+        done < <(printf '%s\n' "${CONTAINER_PUBLISH_ENV}")
 
-        docker_args+=("${{ inputs.container-name }}" /bin/sh)
+        docker_args+=("${CONTAINER_NAME}" /bin/sh)
 
-        docker "${docker_args[@]}" <<'__RUN_COMMAND__'
-        set -e
-        ${{ inputs.run }}
-        __RUN_COMMAND__
+        {
+          printf '%s\n' 'set -e'
+          printf '%s\n' "${RUN_COMMAND}"
+        } | docker "${docker_args[@]}"
+      env:
+        CONTAINER_NAME: ${{ inputs.container-name }}
+        CONTAINER_USER: ${{ inputs.container-user }}
+        CONTAINER_PUBLISH_ENV: ${{ inputs.container-publish-env }}
+        RUN_COMMAND: ${{ inputs.run }}
