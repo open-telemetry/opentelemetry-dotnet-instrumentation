@@ -41,14 +41,14 @@ Run:
 
 ## Build
 
-This repository uses [Nuke](https://nuke.build/) for build automation.
+This repository uses [Nuke](https://github.com/nuke-build/nuke) for build automation.
 
 Support plugins are available for:
 
-- JetBrains ReSharper        <https://nuke.build/docs/ide/resharper/>
-- JetBrains Rider            <https://nuke.build/docs/ide/rider/>
-- Microsoft VisualStudio     <https://nuke.build/docs/ide/visual-studio>
-- Microsoft VSCode           <https://nuke.build/docs/ide/vscode/>
+- JetBrains ReSharper        <https://github.com/nuke-build/nuke/blob/develop/docs/07-ide/resharper.md>
+- JetBrains Rider            <https://github.com/nuke-build/nuke/blob/develop/docs/07-ide/rider.md>
+- Microsoft VisualStudio     <https://github.com/nuke-build/nuke/blob/develop/docs/07-ide/visual-studio.md>
+- Microsoft VSCode           <https://github.com/nuke-build/nuke/blob/develop/docs/07-ide/vscode.md>
 
 Restore dotnet tools to prepare build tools for solution.
 This installs the dotnet `nuke` tool locally.
