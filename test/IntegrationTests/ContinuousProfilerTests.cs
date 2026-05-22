@@ -138,7 +138,9 @@ public class ContinuousProfilerTests : TestHelper
             "My.Custom.Test.Namespace.GenericClassC`1.GenericMethodCFromGenericClass(T)"
         ];
 
-#if NETFRAMEWORK || DEBUG
+#if NET11_0_OR_GREATER
+        stackTrace.Add("My.Custom.Test.Namespace.ClassA.OTelAutoCallbackTest(My.Custom.Test.Namespace.ClassA.Callback, System.Int32)");
+#elif NETFRAMEWORK || DEBUG
         stackTrace.Add("Unknown_Native_Function(unknown)");
 #else
         if (Environment.OSVersion.Platform != PlatformID.Win32NT)
