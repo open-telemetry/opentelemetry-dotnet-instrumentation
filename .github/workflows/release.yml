@@ -17,14 +17,14 @@ env:
   DOTNET_CLI_TELEMETRY_OPTOUT: 1
 
 jobs:
-  build-ubuntu1604-native:
-    uses: ./.github/workflows/build-ubuntu1604-native-container.yml
+  build-ubuntu1804-native:
+    uses: ./.github/workflows/build-ubuntu1804-native-container.yml
 
   build-windows:
     uses: ./.github/workflows/build-windows.yml
 
   build:
-    needs: [ build-windows, build-ubuntu1604-native ]
+    needs: [ build-windows, build-ubuntu1804-native ]
     uses: ./.github/workflows/build.yml
 
   build-nuget-packages:
