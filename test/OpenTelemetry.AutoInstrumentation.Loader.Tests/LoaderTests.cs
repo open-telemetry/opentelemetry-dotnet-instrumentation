@@ -16,7 +16,7 @@ public class LoaderTests(ITestOutputHelper testOutput)
         var srcDir = Path.Combine(profilerDirectory, "net462");
         var dstDir = Path.Combine(profilerDirectory, "netfx");
 #else
-        var srcDir = Path.Combine(profilerDirectory, "net8.0");
+        var srcDir = Path.Combine(profilerDirectory, "net10.0");
         var dstDir = Path.Combine(profilerDirectory, "net");
 #endif
 
