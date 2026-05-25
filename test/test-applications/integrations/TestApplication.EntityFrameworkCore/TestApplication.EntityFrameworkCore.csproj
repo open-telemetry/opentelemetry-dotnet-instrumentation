@@ -1,12 +1,11 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net11.0;net10.0;net9.0;net8.0</TargetFrameworks>
+    <TargetFrameworks>net11.0;net10.0</TargetFrameworks>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" VersionOverride="$(LibraryVersion)" Condition=" '$(LibraryVersion)' != '' or '$(TargetFramework)' == 'net11.0' or '$(TargetFramework)' == 'net10.0' "  />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" VersionOverride="9.0.16" Condition=" '$(LibraryVersion)' == '' and ('$(TargetFramework)' == 'net9.0' or '$(TargetFramework)' == 'net8.0' ) " />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" VersionOverride="$(LibraryVersion)"  />
     <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" />
   </ItemGroup>
 </Project>

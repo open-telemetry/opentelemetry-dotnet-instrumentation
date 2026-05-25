@@ -197,7 +197,7 @@ internal static class EnvironmentConfigurationMetricHelper
         public static MeterProviderBuilder AddHttpClientInstrumentation(MeterProviderBuilder builder, LazyInstrumentationLoader lazyInstrumentationLoader)
         {
 #if NET
-            // HTTP has build in support for metrics in .NET8. Executing OpenTelemetry.Instrumentation.Http in this case leads to duplicated metrics.
+            // HTTP has build in support for metrics in .NET8+. Executing OpenTelemetry.Instrumentation.Http in this case leads to duplicated metrics.
             return builder
                 .AddMeter("System.Net.Http")
                 .AddMeter("System.Net.NameResolution");

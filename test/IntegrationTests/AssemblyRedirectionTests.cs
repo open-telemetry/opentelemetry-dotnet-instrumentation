@@ -11,25 +11,7 @@ public class AssemblyRedirectionTests(ITestOutputHelper output) : TestHelper("As
 
     [Theory]
     [Trait("Category", "EndToEnd")]
-#if NET8_0
-    // Case 1: Lower version should be redirected with/without native profiler
-    [InlineData("8.0.0", AssemblyName, "10.0.0.0", "10.0.25.52411", true)]
-    [InlineData("8.0.0", AssemblyName, "10.0.0.0", "10.0.25.52411", false)]
-    // Case 2: Equal version, should NOT be redirected with/without native profiler
-    [InlineData("10.0.0", AssemblyName, "10.0.0.0", "10.0.25.52411", true)]
-    [InlineData("10.0.0", AssemblyName, "10.0.0.0", "10.0.25.52411", false)]
-    // Case 3: Higher version should NOT be redirected with/without native profiler
-    // TODO even LibraryVersion=10.0.2 loads assembly 10.0.0.0, making it identical to case 2 from the loaded assembly perspective
-#elif NET9_0
-    // Case 1: Lower version should be redirected with/without native profiler
-    [InlineData("9.0.0", AssemblyName, "10.0.0.0", "10.0.25.52411", true)]
-    [InlineData("9.0.0", AssemblyName, "10.0.0.0", "10.0.25.52411", false)]
-    // Case 2: Equal version, should NOT be redirected with/without native profiler
-    [InlineData("10.0.0", AssemblyName, "10.0.0.0", "10.0.25.52411", true)]
-    [InlineData("10.0.0", AssemblyName, "10.0.0.0", "10.0.25.52411", false)]
-    // Case 3: Higher version should NOT be redirected with/without native profiler
-    // TODO even LibraryVersion=10.0.2 loads assembly 10.0.0.0, making it identical to case 2 from the loaded assembly perspective
-#elif NET10_0
+#if NET10_0
     // Case 1: Lower version is not possible for DiagnosticSource on .NET 10,
     //         msbuild will ignore a lower version of this package since it's part of .NET 10 SDK
     // Case 2: Equal version, should NOT be redirected with/without native profiler

@@ -161,8 +161,8 @@ and
 [`assembly_redirection_netfx.h`](../src/OpenTelemetry.AutoInstrumentation.Native/assembly_redirection_netfx.h)).
 
 > **NOTE**: On .NET, the instrumentation ships the baseline versions of its
-> dependencies for each target framework (for example, for `net8.0` the
-> 8.0.0 versions, for `net9.0` - 9.0.0, etc.) unless known issues
+> dependencies for each target framework (for example, for `net10.0` the
+> 10.0.0 versions, for `net11.0` - 11.0.0, etc.) unless known issues
 > (such as vulnerabilities) exist.
 
 After rewriting, the runtime proceeds to resolve the rewritten

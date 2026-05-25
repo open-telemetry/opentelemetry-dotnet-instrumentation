@@ -210,22 +210,22 @@ public static partial class LibraryVersion
 #if DEFAULT_TEST_PACKAGE_VERSIONS
                 string.Empty,
 #else
-#if NET11_0 || NET10_0 || NET9_0 || NET8_0 || NET462
+#if NET11_0 || NET10_0 || NET462
                 "2.19.0",
 #endif
-#if NET11_0 || NET10_0 || NET9_0 || NET8_0 || NET462
+#if NET11_0 || NET10_0 || NET462
                 "2.30.0",
 #endif
-#if NET11_0 || NET10_0 || NET9_0 || NET8_0 || NET462
+#if NET11_0 || NET10_0 || NET462
                 "3.0.0",
 #endif
-#if NET11_0 || NET10_0 || NET9_0 || NET8_0 || NET462
+#if NET11_0 || NET10_0 || NET462
                 "3.5.0",
 #endif
-#if NET11_0 || NET10_0 || NET9_0 || NET8_0 || NET462
+#if NET11_0 || NET10_0 || NET462
                 "3.7.0",
 #endif
-#if NET11_0 || NET10_0 || NET9_0 || NET8_0 || NET462
+#if NET11_0 || NET10_0 || NET462
                 "3.9.0",
 #endif
 #endif
@@ -275,10 +275,10 @@ public static partial class LibraryVersion
                 string.Empty,
 #else
                 "8.0.9",
-#if NET11_0 || NET10_0 || NET9_0 || NET8_0
+#if NET11_0 || NET10_0
                 "9.0.4",
 #endif
-#if NET11_0 || NET10_0 || NET9_0 || NET8_0
+#if NET11_0 || NET10_0
                 "10.0.3",
 #endif
 #endif
@@ -296,7 +296,7 @@ public static partial class LibraryVersion
                 string.Empty,
 #else
                 "8.2.6",
-#if NET11_0 || NET10_0 || NET9_0 || NET8_0
+#if NET11_0 || NET10_0
                 "9.2.10",
 #endif
 #if NET11_0 || NET10_0
@@ -409,7 +409,7 @@ public static partial class LibraryVersion
 #else
                 "2.6.122",
                 "2.12.14",
-#if NET11_0 || NET10_0 || NET9_0 || NET8_0
+#if NET11_0 || NET10_0
                 "3.0.47-preview",
 #endif
 #endif
@@ -463,17 +463,8 @@ public static partial class LibraryVersion
 #if DEFAULT_TEST_PACKAGE_VERSIONS
                 string.Empty,
 #else
-#if NET8_0
-                "8.0.0",
-#endif
-#if NET9_0
-                "9.0.0",
-#endif
 #if NET462
                 "6.0.0",
-#endif
-#if NET8_0 || NET9_0
-                "10.0.0",
 #endif
 #if NET462 || NET11_0 || NET10_0
                 "10.0.8",
@@ -495,10 +486,10 @@ public static partial class LibraryVersion
 #if DEFAULT_TEST_PACKAGE_VERSIONS
                 string.Empty,
 #else
-#if NET11_0 || NET10_0 || NET9_0 || NET8_0
+#if NET11_0 || NET10_0
                 "1.8.0",
 #endif
-#if NET11_0 || NET10_0 || NET9_0 || NET8_0
+#if NET11_0 || NET10_0
                 "1.9.0",
 #endif
 #endif

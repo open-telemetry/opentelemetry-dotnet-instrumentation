@@ -3944,7 +3944,7 @@ void CorProfiler::DetectFrameworkVersionTableForRedirectsMap()
 #endif
     {
         // .NET (Core) detection
-        // Map major.minor version to framework version key to match generator: net8.0 -> 80, net9.0 -> 90, etc
+        // Map major.minor version to framework version key to match generator: net10.0 -> 100, net11.0 -> 110, etc
         int majorVersion = runtime_information_.major_version;
         int minorVersion = runtime_information_.minor_version;
 
