@@ -3,7 +3,7 @@ description: Run a shell command on the host or inside an existing Docker contai
 
 inputs:
   execution-mode:
-    description: Either `container` or a shell name. If empty, defaults to `container` when container-name is set, otherwise uses `pwsh` on Windows and `bash` on non-Windows runners.
+    description: Either `container`, `bash`, `sh`, `pwsh`, or `powershell`. If empty, defaults to `container` when container-name is set, otherwise uses `pwsh` on Windows and `bash` on non-Windows runners.
     required: false
     default: ""
   container-name:
@@ -36,6 +36,10 @@ runs:
           throw 'container-name input is required when execution-mode is container.'
         }
 
+        if (-not [string]::IsNullOrEmpty($executionMode) -and $executionMode -notin @('container', 'bash', 'sh', 'pwsh', 'powershell')) {
+          throw "execution-mode must be empty or one of 'container', 'bash', 'sh', 'pwsh', or 'powershell'."
+        }
+
         if (-not [string]::IsNullOrEmpty($containerName) -and -not [string]::IsNullOrEmpty($executionMode) -and $executionMode -ne 'container') {
           throw 'container-name cannot be combined with a non-container execution-mode.'
         }
@@ -48,20 +52,44 @@ runs:
         CONTAINER_NAME: ${{ inputs.container-name }}
         CONTAINER_USER: ${{ inputs.container-user }}
 
-    - name: Run on host with default Windows shell
-      if: inputs.execution-mode == '' && inputs.container-name == '' && runner.os == 'Windows'
+    - name: Run on host
+      if: inputs.execution-mode != 'container' && inputs.container-name == ''
       shell: pwsh
-      run: ${{ inputs.run }}
+      run: |
+        $executionMode = $env:EXECUTION_MODE
 
-    - name: Run on host with default non-Windows shell
-      if: inputs.execution-mode == '' && inputs.container-name == '' && runner.os != 'Windows'
-      shell: bash
-      run: ${{ inputs.run }}
+        if ([string]::IsNullOrEmpty($executionMode)) {
+          $executionMode = if ($env:RUNNER_OS -eq 'Windows') { 'pwsh' } else { 'bash' }
+        }
 
-    - name: Run on host with explicit shell
-      if: inputs.execution-mode != '' && inputs.execution-mode != 'container'
-      shell: ${{ inputs.execution-mode }}
-      run: ${{ inputs.run }}
+        switch ($executionMode) {
+          'pwsh' {
+            $scriptPath = Join-Path $env:RUNNER_TEMP 'run-command-in-environment.ps1'
+            Set-Content -Path $scriptPath -Value $env:RUN_COMMAND -NoNewline
+            & pwsh -NoLogo -NoProfile -NonInteractive -File $scriptPath
+          }
+          'powershell' {
+            $scriptPath = Join-Path $env:RUNNER_TEMP 'run-command-in-environment.ps1'
+            Set-Content -Path $scriptPath -Value $env:RUN_COMMAND -NoNewline
+            & powershell -NoLogo -NoProfile -NonInteractive -ExecutionPolicy Bypass -File $scriptPath
+          }
+          'bash' {
+            $scriptPath = Join-Path $env:RUNNER_TEMP 'run-command-in-environment.sh'
+            Set-Content -Path $scriptPath -Value $env:RUN_COMMAND -NoNewline
+            & bash $scriptPath
+          }
+          'sh' {
+            $scriptPath = Join-Path $env:RUNNER_TEMP 'run-command-in-environment.sh'
+            Set-Content -Path $scriptPath -Value $env:RUN_COMMAND -NoNewline
+            & sh $scriptPath
+          }
+          default {
+            throw "Unsupported execution-mode '$executionMode'."
+          }
+        }
+      env:
+        EXECUTION_MODE: ${{ inputs.execution-mode }}
+        RUN_COMMAND: ${{ inputs.run }}
 
     - name: Run in container
       if: inputs.execution-mode == 'container' || (inputs.execution-mode == '' && inputs.container-name != '')

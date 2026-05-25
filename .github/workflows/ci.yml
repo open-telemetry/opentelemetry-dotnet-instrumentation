@@ -7,6 +7,10 @@ on:
   merge_group:
   workflow_dispatch:
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.sha }}
+  cancel-in-progress: false
+
 env:
   NUGET_PACKAGES: ${{ github.workspace }}/packages
   DOTNET_CLI_TELEMETRY_OPTOUT: 1
@@ -16,26 +20,36 @@ permissions:
 
 jobs:
   build-ubuntu1604-native:
+    name: Build native on Ubuntu 16.04 container
     uses: ./.github/workflows/build-ubuntu1604-native-container.yml
 
   build-windows:
+    name: Build on Windows
     uses: ./.github/workflows/build-windows.yml
 
   build:
+    name: Build
     needs: [ build-windows, build-ubuntu1604-native ]
     uses: ./.github/workflows/build.yml
 
   build-nuget-packages:
+    name: Build NuGet packages
     needs: [ build-windows, build ]
     uses: ./.github/workflows/build-nuget-packages.yml
 
   test-build-managed:
+    name: Test ${{ matrix.test-tfm }} on ${{ matrix.machine }} (managed)
     needs: [ build-windows, build ]
     strategy:
       fail-fast: false
       matrix:
         test-tfm: [ net10.0, net9.0, net8.0, net462 ]
-        machine: [ windows-2022, windows-2025, ubuntu-22.04, macos-14, ubuntu-22.04-arm ]
+        machine:
+        - windows-2022
+        - windows-2025
+        - macos-14
+        - ubuntu-22.04
+        - ubuntu-22.04-arm
         exclude:
           - test-tfm: net462
             machine: macos-14
@@ -62,39 +76,44 @@ jobs:
     runs-on: ${{ matrix.machine }}
     steps:
 
-      - name: Checkout
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # tag: v6.0.2
+      - name: Checkout code
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           fetch-depth: 0 # fetching all, needed to correctly calculate version
+          persist-credentials: false
 
       - name: Setup .NET
         uses: ./.github/actions/setup-dotnet
 
       - name: Check for NuGet packages cache
-        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # tag: v5.0.5
+        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
         id: nuget-cache
         with:
           key: ${{ hashFiles('**/Directory.packages.props', './build/LibraryVersions.g.cs', '**/packages.config' ) }}
           path: ${{ env.NUGET_PACKAGES }}
 
       - name: Download Artifacts from build job
-        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # tag: v8.0.1
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
           name: bin-${{ matrix.artifact-name }}
           path: bin/tracer-home
 
       - name: Install SQL Server (localdb)
         if: ${{ runner.os == 'Windows' }}
-        uses: potatoqualitee/mssqlsuite@2291d923e83859edd871679c05b379037376761f # tag: v1.12
+        uses: potatoqualitee/mssqlsuite@2291d923e83859edd871679c05b379037376761f # v1.12
         with: 
           install: localdb
 
       - name: Run TestWorkflow
-        run: ./build.cmd --skip NativeTests --target TestWorkflow --test-target-framework ${{ matrix.test-tfm }} --containers ${{ matrix.containers }}
+        shell: bash
+        env:
+          CONTAINERS: ${{ matrix.containers }}
+          TEST_TARGET_FRAMEWORK: ${{ matrix.test-tfm }}
+        run: ./build.cmd --skip NativeTests --target TestWorkflow --test-target-framework "${TEST_TARGET_FRAMEWORK}" --containers "${CONTAINERS}"
 
       - name: Upload test logs
         if: always()
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # tag: v7.0.1
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: test-logs-${{ matrix.machine }}-${{ matrix.test-tfm }}-containers-${{ matrix.containers }}
           path: test-artifacts/
@@ -105,6 +124,7 @@ jobs:
         run: rm SqlLocalDB.msi
 
   test-build-native:
+    name: Test on ${{ matrix.machine }} (native)
     needs: build-windows
     strategy:
       fail-fast: false
@@ -117,23 +137,24 @@ jobs:
     runs-on: ${{ matrix.machine }}
     steps:
 
-      - name: Checkout
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # tag: v6.0.2
+      - name: Checkout code
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           fetch-depth: 0 # fetching all, needed to correctly calculate version
+          persist-credentials: false
 
       - name: Setup .NET
         uses: ./.github/actions/setup-dotnet
 
       - name: Check for NuGet packages cache
-        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # tag: v5.0.5
+        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
         id: nuget-cache
         with:
           key: ${{ hashFiles('**/Directory.packages.props', './build/LibraryVersions.g.cs', '**/packages.config' ) }}
           path: ${{ env.NUGET_PACKAGES }}
 
       - name: Download Artifacts from build job
-        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # tag: v8.0.1
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
           name: bin-${{ matrix.artifact-name }}
           path: bin/tracer-home
@@ -142,6 +163,7 @@ jobs:
         run: ./build.cmd NativeTests
 
   test-build-windows-container-tests:
+    name: Test Windows container on ${{ matrix.machine }}
     needs: build-windows
     strategy:
       fail-fast: false
@@ -156,41 +178,49 @@ jobs:
     runs-on: ${{ matrix.machine }}
     steps:
 
-      - name: Checkout
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # tag: v6.0.2
+      - name: Checkout code
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           fetch-depth: 0 # fetching all, needed to correctly calculate version
+          persist-credentials: false
 
       - name: Setup .NET
         uses: ./.github/actions/setup-dotnet
 
       - name: Check for NuGet packages cache
-        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # tag: v5.0.5
+        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
         id: nuget-cache
         with:
           key: ${{ hashFiles('**/Directory.packages.props', './build/LibraryVersions.g.cs', '**/packages.config' ) }}
           path: ${{ env.NUGET_PACKAGES }}
 
       - name: Download Artifacts from build job
-        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # tag: v8.0.1
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
           name: bin-${{ matrix.artifact-name }}
           path: bin/tracer-home
 
       - name: Build artifacts required for the test (no native tests)
-        run: ./build.cmd --skip RunManagedTests --target ManagedTests --containers ${{ matrix.containers }}
+        shell: bash
+        env:
+          CONTAINERS: ${{ matrix.containers }}
+        run: ./build.cmd --skip RunManagedTests --target ManagedTests --containers "${CONTAINERS}"
 
       - name: Run the integration tests
-        run: ./build.cmd --target RunManagedIntegrationTests --containers ${{ matrix.containers }} --test-target-framework net462
+        shell: bash
+        env:
+          CONTAINERS: ${{ matrix.containers }}
+        run: ./build.cmd --target RunManagedIntegrationTests --containers "${CONTAINERS}" --test-target-framework net462
 
       - name: Upload test logs
         if: always()
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # tag: v7.0.1
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: test-logs-${{ matrix.machine }}-containers-${{ matrix.containers }}
           path: test-artifacts/
 
   test-build-container:
+    name: Test in container on ${{ matrix.machine }} (${{ matrix.os-type }}) with ${{ matrix.base-image }}
     needs: build
     strategy:
       fail-fast: false
@@ -220,13 +250,14 @@ jobs:
     timeout-minutes: 60
     steps:
 
-    - name: Checkout
-      uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # tag: v6.0.2
+    - name: Checkout code
+      uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
       with:
         fetch-depth: 0 # fetching all, needed to correctly calculate version
+        persist-credentials: false
 
     - name: Download Artifacts from build job
-      uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # tag: v8.0.1
+      uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
       with:
         name: bin-${{ matrix.build-source }}
         path: bin/tracer-home
@@ -243,42 +274,44 @@ jobs:
 
     - name: Upload test logs
       if: always()
-      uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # tag: v7.0.1
+      uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
       with:
         name: test-logs-container-${{ matrix.machine }}-${{ matrix.base-image }}
         path: test-artifacts/
 
   test-nuget-packages:
+    name: Test NuGet packages on ${{ matrix.machine }}
     needs: build-nuget-packages
     strategy:
       fail-fast: false
       matrix:
         include:
           - machine: ubuntu-22.04
+          - machine: ubuntu-22.04-arm
           - machine: macos-14
           - machine: windows-2022
           - machine: windows-2025
-          - machine: ubuntu-22.04-arm
     runs-on: ${{ matrix.machine }}
     steps:
       
-      - name: Checkout
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # tag: v6.0.2
+      - name: Checkout code
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           fetch-depth: 0 # fetching all, needed to correctly calculate version
+          persist-credentials: false
 
       - name: Setup .NET
         uses: ./.github/actions/setup-dotnet
 
       - name: Check for NuGet packages cache
-        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # tag: v5.0.5
+        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
         id: nuget-cache
         with:
           key: ${{ hashFiles('**/Directory.packages.props', './build/LibraryVersions.g.cs', '**/packages.config' ) }}
           path: ${{ env.NUGET_PACKAGES }}
 
       - name: Download NuGet Artifacts from build-nuget-packages job
-        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # tag: v8.0.1
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
           name: bin-nuget-packages
           path: bin/nuget-artifacts/
@@ -288,12 +321,13 @@ jobs:
 
       - name: Upload test logs
         if: always()
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # tag: v7.0.1
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: test-logs-nuget-packages-${{ matrix.machine }}
           path: test-artifacts/
 
   test-jobs:
+    name: test-jobs # Matches required status check
     runs-on: ubuntu-22.04
     needs:
       - test-build-managed
