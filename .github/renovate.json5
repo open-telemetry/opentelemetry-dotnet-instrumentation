@@ -15,9 +15,34 @@
         "# renovate:\\s*datasource=(?<datasource>github-runners)(?:\\s+[A-Za-z][A-Za-z0-9_-]*=[^\\s]+)*?(?:\\s+versioning=(?<versioning>[^\\s]+))?(?:\\s+[A-Za-z][A-Za-z0-9_-]*=[^\\s]+)*\\s*\\r?\\n\\s*(?:-\\s*)?(?:[A-Za-z0-9_-]+:\\s*)?['\"]?(?<depName>[a-zA-Z]+)-(?<currentValue>[A-Za-z0-9._-]+)['\"]?",
       ],
     },
+    {
+      customType: "regex",
+      description: ["Update Debian package versions pinned in Dockerfiles"],
+      managerFilePatterns: ["/(^|/)docker/.+\\.dockerfile$/"],
+      matchStrings: [
+        "# renovate:\\s*datasource=(?<datasource>deb)\\s+depName=(?<depName>[^\\s]+)\\s*\\r?\\n\\s*ARG\\s+[A-Z0-9_]+_VERSION=(?<currentValue>[^\\s]+)",
+      ],
+      versioningTemplate: "deb",
+    },
   ],
   dependencyDashboard: false,
   extends: ["config:best-practices"],
   labels: ["dependencies"],
+  packageRules: [
+    {
+      matchDatasources: ["deb"],
+      matchPackageNames: ["cmake", "clang", "make"],
+      registryUrls: [
+        "https://deb.debian.org/debian?suite=bookworm&components=main&binaryArch=amd64",
+      ],
+    },
+    {
+      matchDatasources: ["deb"],
+      matchPackageNames: ["dotnet-sdk-10.0", "dotnet-sdk-8.0"],
+      registryUrls: [
+        "https://packages.microsoft.com/debian/12/prod?suite=bookworm&components=main&binaryArch=amd64",
+      ],
+    },
+  ],
   prConcurrentLimit: 20,
 }
