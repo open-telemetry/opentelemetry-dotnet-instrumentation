@@ -19,9 +19,9 @@ permissions:
   contents: read
 
 jobs:
-  build-ubuntu1604-native:
-    name: Build native on Ubuntu 16.04 container
-    uses: ./.github/workflows/build-ubuntu1604-native-container.yml
+  build-ubuntu1804-native:
+    name: Build native on Ubuntu 18.04 container
+    uses: ./.github/workflows/build-ubuntu1804-native-container.yml
 
   build-windows:
     name: Build on Windows
@@ -29,7 +29,7 @@ jobs:
 
   build:
     name: Build
-    needs: [ build-windows, build-ubuntu1604-native ]
+    needs: [ build-windows, build-ubuntu1804-native ]
     uses: ./.github/workflows/build.yml
 
   build-nuget-packages:
