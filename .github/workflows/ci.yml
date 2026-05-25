@@ -43,7 +43,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        test-tfm: [ net11.0, net10.0, net9.0, net8.0, net462 ]
+        test-tfm: [ net11.0, net10.0, net462 ]
         machine:
         - windows-2022
         - windows-2025
