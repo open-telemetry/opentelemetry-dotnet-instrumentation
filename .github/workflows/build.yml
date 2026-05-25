@@ -21,7 +21,7 @@ jobs:
             environment-type: host
             replace-artifacts: |
               bin-windows-2022!net
-              bin-ubuntu1604-native!linux-x64
+              bin-ubuntu1804-native!linux-x64
           - artifact-name: ubuntu-22.04-arm
             runner: ubuntu-22.04-arm
             environment-type: host
