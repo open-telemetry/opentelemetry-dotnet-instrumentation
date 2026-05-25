@@ -1,25 +1,27 @@
-FROM mcr.microsoft.com/dotnet/sdk:9.0.317-bookworm-slim@sha256:35048e3a81e6a07c316e7bbbd80d80d2ba705fe5f23a8ed42b6638c8f4c20d30
-# There is no official base image for .NET SDK 10+ on Debian, so install .NET10 via dotnet-install
+FROM debian:bookworm-slim@sha256:0104b334637a5f19aa9c983a91b54c89887c0984081f2068983107a6f6c21eeb
 
-# renovate: datasource=deb depName=cmake
-ARG CMAKE_VERSION=3.25.1-1
-# renovate: datasource=deb depName=clang
-ARG CLANG_VERSION=1:14.0-55.7~deb12u1
-# renovate: datasource=deb depName=make
-ARG MAKE_VERSION=4.3-4.1
+#TODO NET11TODO put here exact versions as arguments as in other docker images
 
 RUN apt-get update && \
     apt-get install -y \
-        cmake="${CMAKE_VERSION}" \
-        clang="${CLANG_VERSION}" \
-        make="${MAKE_VERSION}"
+        bash \
+        ca-certificates \
+        clang \
+        cmake \
+        curl \
+        git \
+        libgssapi-krb5-2 \
+        libicu72 \
+        libssl3 \
+        libstdc++6 \
+        make \
+        zlib1g
 
 COPY ./scripts/dotnet-install.sh ./dotnet-install.sh
 
-# Install older SDKs using the install script as there are no arm64 SDK packages.
 RUN chmod +x ./dotnet-install.sh \
+    && ./dotnet-install.sh -v 11.0.100-preview.5 --install-dir /usr/share/dotnet --no-path \
     && ./dotnet-install.sh -v 10.0.400 --install-dir /usr/share/dotnet --no-path \
-    && ./dotnet-install.sh -v 8.0.424 --install-dir /usr/share/dotnet --no-path \
     && rm dotnet-install.sh
 
 WORKDIR /project
