@@ -1,4 +1,4 @@
-FROM mcr.microsoft.com/dotnet/sdk:10.0.203-alpine3.23@sha256:0191ff386e93923edf795d363ea0ae0669ce467ada4010b370644b670fa495c1
+FROM mcr.microsoft.com/dotnet/sdk:10.0.300-alpine3.23@sha256:5c559aa5d99337e400d39ab4fa1f6979d126c29b20939d53658ed38300571e74
 RUN apk update \
     && apk upgrade \
     && apk add --no-cache --update \
@@ -20,8 +20,8 @@ COPY ./scripts/dotnet-install.sh ./dotnet-install.sh
 
 # Install older SDKs using the install script
 RUN chmod +x ./dotnet-install.sh \
-    && ./dotnet-install.sh -v 9.0.313 --install-dir /usr/share/dotnet --no-path \
-    && ./dotnet-install.sh -v 8.0.420 --install-dir /usr/share/dotnet --no-path \
+    && ./dotnet-install.sh -v 9.0.314 --install-dir /usr/share/dotnet --no-path \
+    && ./dotnet-install.sh -v 8.0.421 --install-dir /usr/share/dotnet --no-path \
     && rm dotnet-install.sh
 
 WORKDIR /project
