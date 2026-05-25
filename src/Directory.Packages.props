@@ -49,9 +49,7 @@
   <!-- TODO: should be discussed or a ticket should be filed: bring additional assemblies previously not in the output -->
   <ItemGroup Label="Versions from CommonExcludedAssets.props: Packages requiring filtering re-evaluation">
     <PackageVersion Include="Microsoft.NETCore.Platforms" Version="3.1.4" Condition=" '$(TargetFrameworkIdentifier)' == '.NETCoreApp' " Label="Legacy transitive dependencies likely not bringing any libraries to output: likely should be excluded" />
-    <PackageVersion Include="System.IO.Pipelines" Version="5.0.1" Condition=" '$(TargetFramework)' == 'net10.0' " Label="Transient dependencies of OpenTelemetry.Instrumentation.StackExchangeRedis: likely should be excluded" />
-    <PackageVersion Include="System.Security.Cryptography.Cng" Version="4.7.0" Condition=" '$(TargetFrameworkIdentifier)' == '.NETCoreApp' " Label="Transient dependencies of OpenTelemetry.Instrumentation.Wcf: likely should be excluded" />
     <PackageVersion Include="System.Security.Cryptography.Pkcs" Version="4.7.0" Condition=" '$(TargetFrameworkIdentifier)' == '.NETCoreApp' " Label="Transient dependencies of OpenTelemetry.Instrumentation.Wcf: likely should be excluded" />
-    <PackageVersion Include="System.Security.Cryptography.Xml" Version="4.7.1" Condition=" '$(TargetFrameworkIdentifier)' == '.NETCoreApp' " Label="Transient dependencies of OpenTelemetry.Instrumentation.Wcf: likely should be excluded" />
+    <PackageVersion Include="System.Security.Cryptography.Xml" Version="4.7.1" Condition=" '$(TargetFrameworkIdentifier)' == '.NETCoreApp' and '$(MSBuildProjectName)' != 'OpenTelemetry.AutoInstrumentation.AspNetCoreBootstrapper' " Label="Transient dependencies of OpenTelemetry.Instrumentation.Wcf: likely should be excluded" />
   </ItemGroup>
 </Project>
