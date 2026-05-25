@@ -124,7 +124,7 @@ public class FrameworkDistroTests
         var dependencies = Generator.EnumerateDependencies(projectPath).SelectMany(it => it.Value).ToHashSet();
         var packagesFolder = SettingsUtility.GetGlobalPackagesFolder(Settings.LoadDefaultSettings(root: codeDir));
 
-        string[] supportedCoreTfmPrefixes = ["netcoreapp", "netstandard", "net5", "net6", "net7", "net8", "net9", "net10"];
+        string[] supportedCoreTfmPrefixes = ["netcoreapp", "netstandard", "net5", "net6", "net7", "net8", "net9", "net10", "net11"];
 
         // We may need add new TFM in OpenTelemetry.AutoInstrumentation.Assemblies
         // (and build infrastructure, readme) if referenced dependencies has a custom build for that TFM.
@@ -135,8 +135,8 @@ public class FrameworkDistroTests
             // Check .NET Core+ TFMs (netcoreapp*, netstandard*, net5.0+)
             var netCoreAppFiles = Directory.EnumerateDirectories(packageFolder, "netcoreapp*", SearchOption.AllDirectories);
             var netStandardFiles = Directory.EnumerateDirectories(packageFolder, "netstandard*", SearchOption.AllDirectories);
-            // Range(5, 6) generates versions 5 through 10 (start=5, count=6)
-            var net5PlusFiles = Enumerable.Range(5, 6)
+            // Range(5, 7) generates versions 5 through 11 (start=5, count=7)
+            var net5PlusFiles = Enumerable.Range(5, 7)
                 .SelectMany(version => Directory.EnumerateDirectories(packageFolder, $"net{version}.*", SearchOption.AllDirectories));
 
             var netCoreFiles = netCoreAppFiles
