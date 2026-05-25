@@ -15,6 +15,10 @@ internal static class Program
 {
     public static void Main(string[] args)
     {
+#if NET11_0_OR_GREATER
+        // TODO NET11TODO consider removing this when https://github.com/dotnet/aspnetcore/issues/66822 is solved. For now, tests detected breaking change between .NET10 and .NET11
+        AppContext.SetSwitch("System.Diagnostics.Metrics.Meter.IsSupported", true);
+#endif
         ConsoleHelper.WriteSplashScreen(args);
         var disableDistributedContextPropagator = Environment.GetEnvironmentVariable("DISABLE_DistributedContextPropagator") == "true";
         if (disableDistributedContextPropagator)
