@@ -5,25 +5,51 @@ cmake_minimum_required (VERSION 3.13..3.20)
 cmake_policy(SET CMP0015 NEW)
 
 # ******************************************************
+# Environment detection
+# ******************************************************
+
+# Detect target operating system early enough to select compilers before project().
+if (CMAKE_SYSTEM_NAME MATCHES "Linux" OR (NOT CMAKE_SYSTEM_NAME AND CMAKE_HOST_SYSTEM_NAME MATCHES "Linux"))
+    SET(ISLINUX true)
+elseif (CMAKE_SYSTEM_NAME MATCHES "Windows" OR (NOT CMAKE_SYSTEM_NAME AND CMAKE_HOST_SYSTEM_NAME MATCHES "Windows"))
+    SET(ISWINDOWS true)
+elseif (CMAKE_SYSTEM_NAME MATCHES "Darwin" OR (NOT CMAKE_SYSTEM_NAME AND CMAKE_HOST_SYSTEM_NAME MATCHES "Darwin"))
+    SET(ISMACOS true)
+endif()
+
+# Select Linux compilers before project() so compiler feature checks use the same compiler as the build.
+if (ISLINUX)
+    find_program(FOUND_CLANG clang)
+    if(NOT FOUND_CLANG)
+        message(FATAL_ERROR "CLANG is required to build the project")
+    endif()
+
+    find_program(FOUND_CLANGPP clang++)
+    if(NOT FOUND_CLANGPP)
+        message(FATAL_ERROR "CLANG++ is required to build the project")
+    endif()
+
+    SET (CMAKE_C_COMPILER   ${FOUND_CLANG})
+    SET (CMAKE_CXX_COMPILER ${FOUND_CLANGPP})
+endif()
+
+# ******************************************************
 # Project definition
 # ******************************************************
 
 project("TestApplication.ContinuousProfiler.NativeDep" VERSION 0.0.1)
 
 # ******************************************************
-# Environment detection
+# Environment report
 # ******************************************************
 
-# Detect operating system
-if (CMAKE_SYSTEM_NAME MATCHES "Windows")
+# Report operating system
+if (ISWINDOWS)
     message(FATAL_ERROR "Windows builds are not supported using CMAKE. Please use Visual Studio")
-    SET(ISWINDOWS true)
-elseif (CMAKE_SYSTEM_NAME MATCHES "Linux")
+elseif (ISLINUX)
     message(STATUS "Preparing Linux build")
-    SET(ISLINUX true)
-elseif (CMAKE_SYSTEM_NAME MATCHES "Darwin")
+elseif (ISMACOS)
     message(STATUS "Preparing macOS build")
-    SET(ISMACOS true)
 endif()
 
 # Detect bitness of the build
@@ -64,14 +90,18 @@ else()
     message(STATUS "GCC found: ${FOUND_GCC}")
 endif()
 
-find_program(FOUND_CLANG clang)
+if(NOT FOUND_CLANG)
+    find_program(FOUND_CLANG clang)
+endif()
 if(NOT FOUND_CLANG)
     message(FATAL_ERROR "CLANG is required to build the project")
 else()
     message(STATUS "CLANG found: ${FOUND_CLANG}")
 endif()
 
-find_program(FOUND_CLANGPP clang++)
+if(NOT FOUND_CLANGPP)
+    find_program(FOUND_CLANGPP clang++)
+endif()
 if(NOT FOUND_CLANGPP)
     message(FATAL_ERROR "CLANG++ is required to build the project")
 else()
@@ -99,12 +129,6 @@ SET(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${OUTPUT_BIN_DIR})
 # ******************************************************
 # Compiler options
 # ******************************************************
-
-# Sets the compiler
-if(ISLINUX)
-    SET (CMAKE_C_COMPILER   ${FOUND_CLANG})
-    SET (CMAKE_CXX_COMPILER ${FOUND_CLANGPP})
-endif()
 
 # Sets compiler options
 add_compile_options(-std=c++17 -fPIC -fms-extensions)
