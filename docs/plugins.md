@@ -181,7 +181,7 @@ public class MyOpAmpPlugin
 
 | Settings type                                           | NuGet package              | NuGet version |
 |---------------------------------------------------------|----------------------------|---------------|
-| OpenTelemetry.OpAmp.Client.Settings.OpAmpClientSettings | OpenTelemetry.OpAmp.Client | 0.3.0-alpha.1 |
+| OpenTelemetry.OpAmp.Client.Settings.OpAmpClientSettings | OpenTelemetry.OpAmp.Client | 0.4.0-alpha.1 |
 
 ## Requirements
 

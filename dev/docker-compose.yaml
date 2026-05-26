@@ -1,7 +1,7 @@
 version: "2"
 services:
   otel-collector:
-    image: otel/opentelemetry-collector-contrib:0.150.1
+    image: otel/opentelemetry-collector-contrib:0.152.1@sha256:fa1f6ea8dabd3042fabf4411eed7fa52f253edd8940140bec89a573e62a24eb7
     volumes:
       - ./otel-config.yaml:/etc/otel/config.yaml
       - ./log:/log/otel
@@ -20,6 +20,6 @@ services:
       - jaeger
 
   jaeger:
-    image: jaegertracing/all-in-one:1.76.0
+    image: jaegertracing/all-in-one:1.76.0@sha256:ab6f1a1f0fb49ea08bcd19f6b84f6081d0d44b364b6de148e1798eb5816bacac
     ports:
       - "16686:16686"
