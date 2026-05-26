@@ -9,4 +9,4 @@ runs:
       with:
         dotnet-version: |
           10.0.301
-          11.0.0-preview.5
+          11.0.100-preview.5.26302.115

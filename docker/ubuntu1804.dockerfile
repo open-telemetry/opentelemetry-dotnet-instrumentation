@@ -22,7 +22,7 @@ RUN add-apt-repository ppa:ubuntu-toolchain-r/test -y && \
 COPY ./scripts/dotnet-install.sh ./dotnet-install.sh
 
 RUN chmod +x ./dotnet-install.sh \
-    && ./dotnet-install.sh -v 10.0.300 --install-dir /usr/share/dotnet --no-path \
+    && ./dotnet-install.sh -v 11.0.100-preview.5.26302.115 --install-dir /usr/share/dotnet --no-path \
     && rm dotnet-install.sh
 
 WORKDIR /project
