@@ -6,7 +6,6 @@ RUN apt-get update && \
     build-essential \
     ca-certificates \
     clang \
-    cmake \
     curl \
     git \
     gnupg \
@@ -18,6 +17,12 @@ RUN add-apt-repository ppa:ubuntu-toolchain-r/test -y && \
     apt-get update && \
     apt-get install -y g++-9 && \
     update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-9 60 --slave /usr/bin/g++ g++ /usr/bin/g++-9
+
+# Install newer CMake. Ubuntu 18.04 provides CMake 3.10, but the native build uses newer commands.
+RUN curl -fsSL -o cmake.sh https://github.com/Kitware/CMake/releases/download/v3.20.5/cmake-3.20.5-linux-x86_64.sh && \
+    echo "f582e02696ceee81818dc3378531804b2213ed41c2a8bc566253d16d894cefab  cmake.sh" | sha256sum -c - && \
+    sh cmake.sh --skip-license --prefix=/usr/local && \
+    rm cmake.sh
 
 COPY ./scripts/dotnet-install.sh ./dotnet-install.sh
 
