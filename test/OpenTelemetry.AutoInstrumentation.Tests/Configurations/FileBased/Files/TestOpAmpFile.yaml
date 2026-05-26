@@ -1,4 +1,4 @@
 file_format: "1.0"
 
 opamp/development:
-  server_url: "wss://localhost:4318/v1/opamp"
+  server_url: "wss://localhost:4320/v1/opamp"

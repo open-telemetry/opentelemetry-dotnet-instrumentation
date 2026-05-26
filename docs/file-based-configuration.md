@@ -624,8 +624,8 @@ instrumentation/development:
 ``` yaml
 opamp/development:
   # Configure the server endpoint. If not explicitly set, a default
-  # URL is used: https://localhost:4318/v1/opamp.
-  server_url: https://localhost:4318/v1/opamp
+  # URL is used: https://localhost:4320/v1/opamp.
+  server_url: https://localhost:4320/v1/opamp
 ```
 
 ### Configuration based instrumentation
