@@ -15,7 +15,7 @@ jobs:
     name: Build NuGet packages
     # In principle this job needs the build outputs, however that would cause the upstream reusable workflow
     # to run twice. Instead, we let the caller workflow handle the dependencies.
-    runs-on: windows-2022
+    runs-on: windows-2025
     steps:
 
       - name: Checkout code
