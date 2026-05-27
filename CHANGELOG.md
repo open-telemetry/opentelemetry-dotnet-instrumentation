@@ -49,6 +49,7 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 #### Dependency updates
 
 - Following packages updated
+  - `OpenTelemetry.Instrumentation.StackExchangeRedis` from `1.15.0-beta.1` to `1.15.0-beta.2`,
   - `OpenTelemetry.Resources.Process` from `1.15.1-beta.1` to `1.15.1-beta.2`.
 
 ### Removed
