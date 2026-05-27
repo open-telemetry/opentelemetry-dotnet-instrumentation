@@ -68,7 +68,7 @@
       matchStrings: [
         "# renovate:\\s*datasource=(?<datasource>deb)\\s+depName=(?<depName>clang-5\\.0)\\s*\\r?\\n\\s*ARG\\s+[A-Z0-9_]+_VERSION=(?<currentValue>[^\\s]+)",
       ],
-      registryUrlTemplate: "http://archive.ubuntu.com/ubuntu?suite=xenial-updates&components=universe&binaryArch=amd64",
+      registryUrlTemplate: "https://apt.llvm.org/xenial?suite=llvm-toolchain-xenial-5.0&components=main&binaryArch=amd64",
       versioningTemplate: "deb",
     },
     {

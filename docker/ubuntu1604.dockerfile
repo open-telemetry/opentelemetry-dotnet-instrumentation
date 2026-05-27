@@ -1,7 +1,7 @@
 FROM ubuntu:16.04@sha256:1f1a2d56de1d604801a9671f301190704c25d604a416f59e03c04f5c6ffee0d6
 
 # renovate: datasource=deb depName=clang-5.0
-ARG CLANG_5_VERSION=1:5.0-3~16.04.1
+ARG CLANG_5_VERSION=1:5.0.2~svn328729-1~exp1~20180509124008.99
 # renovate: datasource=deb depName=g++-9
 ARG GXX_9_VERSION=9.4.0-1ubuntu1~16.04
 # renovate: datasource=github-releases depName=Kitware/CMake
