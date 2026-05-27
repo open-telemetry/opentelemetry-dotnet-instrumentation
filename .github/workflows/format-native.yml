@@ -31,7 +31,7 @@ jobs:
             runner: ubuntu-22.04
           - step-name: native-format-windows
             # renovate: datasource=github-runners depType=github-runner
-            runner: windows-2022
+            runner: windows-2025
 
     steps:
 
