@@ -17,7 +17,7 @@ public class AssemblyRedirectionTests(ITestOutputHelper output) : TestHelper("As
     // Case 2: Equal version, should NOT be redirected with/without native profiler
     // TODO currently different test jobs use different versions of .net runtime:
     //   - test-build-container (ubuntu-22.04, alpine, alpine-x64, linux-musl): DS file version 10.0.426.12010
-    //   - test-build-managed (net10.0, windows-2022): DS file version 10.0.826.23019
+    //   - test-build-managed (net10.0, windows-2025-vs2026): DS file version 10.0.726.21808
     [InlineData("10.0.8", AssemblyName, "10.0.0.0", "10.0.826.23019", true)]
     [InlineData("10.0.8", AssemblyName, "10.0.0.0", "10.0.826.23019", false)]
     // Case 3: Higher version is not possible for DiagnosticSource on .NET 10, the instrumentation tool is already using the highest possible version
@@ -28,7 +28,7 @@ public class AssemblyRedirectionTests(ITestOutputHelper output) : TestHelper("As
     // Case 2: Equal version, should NOT be redirected with/without native profiler
     // TODO currently different test jobs use different versions of .net runtime:
     //   - test-build-container (ubuntu-22.04, alpine, alpine-x64, linux-musl): DS file version 11.0.426.12010
-    //   - test-build-managed (net11.0, windows-2022): DS file version 11.0.726.21808
+    //   - test-build-managed (net11.0, windows-2025-vs2026): DS file version 11.0.726.21808
     [InlineData("11.0.0-preview.4.26230.115", AssemblyName, "11.0.0.0", "11.0.26.23115", true)]
     [InlineData("11.0.0-preview.4.26230.115", AssemblyName, "11.0.0.0", "11.0.26.23115", false)]
     // TODO NET11TODO adjust expectedAssemblyFileVersion to the final .NET 11 release version

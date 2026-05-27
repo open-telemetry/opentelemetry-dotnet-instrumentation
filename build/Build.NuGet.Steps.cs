@@ -57,8 +57,8 @@ partial class Build
                 "bin-ubuntu-22.04/linux-x64",
                 "bin-ubuntu-22.04-arm/linux-arm64",
                 "bin-macos-14/osx-arm64",
-                "bin-windows-2022/win-x64",
-                "bin-windows-2022/win-x86"
+                "bin-windows-2025-vs2026/win-x64",
+                "bin-windows-2025-vs2026/win-x86"
             };
 
             foreach (var artifactFolder in requiredArtifacts)

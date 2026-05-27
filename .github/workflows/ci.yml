@@ -45,8 +45,7 @@ jobs:
       matrix:
         test-tfm: [ net11.0, net10.0, net462 ]
         machine:
-        - windows-2022
-        - windows-2025
+        - windows-2025-vs2026
         - macos-14
         - ubuntu-22.04
         - ubuntu-22.04-arm
@@ -58,12 +57,9 @@ jobs:
           - test-tfm: net462
             machine: ubuntu-22.04-arm
         include:
-          - machine: windows-2022
+          - machine: windows-2025-vs2026
             containers: none
-            artifact-name: windows-2022
-          - machine: windows-2025
-            containers: none
-            artifact-name: windows-2022
+            artifact-name: windows-2025-vs2026
           - machine: ubuntu-22.04
             containers: linux
             artifact-name: ubuntu-22.04
@@ -131,7 +127,7 @@ jobs:
       matrix:
         include:
           - machine: windows-2025-vs2026
-            artifact-name: windows-2022
+            artifact-name: windows-2025-vs2026
     runs-on: ${{ matrix.machine }}
     steps:
 
@@ -167,12 +163,9 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - machine: windows-2022
+          - machine: windows-2025-vs2026
             containers: windows-only
-            artifact-name: windows-2022
-          - machine: windows-2025
-            containers: windows-only
-            artifact-name: windows-2022
+            artifact-name: windows-2025-vs2026
     runs-on: ${{ matrix.machine }}
     steps:
 
@@ -287,8 +280,7 @@ jobs:
           - machine: ubuntu-22.04
           - machine: ubuntu-22.04-arm
           - machine: macos-14
-          - machine: windows-2022
-          - machine: windows-2025
+          - machine: windows-2025-vs2026
     runs-on: ${{ matrix.machine }}
     steps:
       
