@@ -46,6 +46,12 @@ internal partial class PluginManager
                 continue;
             }
 
+            if (!HasDefaultConstructor(type))
+            {
+                Logger.Warning($"Type '{type.FullName}' cannot be instantiated. No Default constructor.");
+                continue;
+            }
+
             var instance = Activator.CreateInstance(type);
 
             if (instance is not IPlugin plugin)
@@ -192,6 +198,12 @@ internal partial class PluginManager
         }
 
         return CallPlugins<ITelemetryPlugin, ResourceBuilder>(plugin => plugin.ConfigureResource(builder));
+    }
+
+    private static bool HasDefaultConstructor(Type type)
+    {
+        // GetConstructor returns null if a matching constructor isn't found
+        return type.GetConstructor(Type.EmptyTypes) != null;
     }
 
     private static bool HasTelemetryPlugins(List<(Type Type, IPlugin Instance)> plugins)

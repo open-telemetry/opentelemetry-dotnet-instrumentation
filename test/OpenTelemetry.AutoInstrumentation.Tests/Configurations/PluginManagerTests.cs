@@ -5,6 +5,8 @@ using System.Collections.Specialized;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
 using OpenTelemetry.AutoInstrumentation.Configurations;
+using OpenTelemetry.AutoInstrumentation.PluginApi;
+using OpenTelemetry.AutoInstrumentation.PluginApi.Telemetry;
 using OpenTelemetry.AutoInstrumentation.Plugins;
 using OpenTelemetry.Logs;
 using OpenTelemetry.Metrics;
@@ -40,7 +42,7 @@ public class PluginManagerTests
         var pluginAssemblyQualifiedName = typeof(PluginWithoutDefaultConstructor).AssemblyQualifiedName!;
         var settings = GetSettings(pluginAssemblyQualifiedName);
 
-        Assert.Throws<MissingMethodException>(() => new PluginManager(settings));
+        Assert.Null(Record.Exception(() => new PluginManager(settings)));
     }
 
     [Fact]
@@ -63,7 +65,7 @@ public class PluginManagerTests
         var pluginAssemblyQualifiedName = typeof(MockPluginMissingDefaultConstructor).AssemblyQualifiedName!;
         var settings = GetSettings(pluginAssemblyQualifiedName);
 
-        Assert.Throws<MissingMethodException>(() => new PluginManager(settings));
+        Assert.Null(Record.Exception(() => new PluginManager(settings)));
     }
 
     [Fact]
@@ -166,7 +168,9 @@ public class PluginManagerTests
 
 #pragma warning disable CA1515 // Consider making public types internal. Needed for plugin purposes.
 #pragma warning disable CA1034 // Nested types should not be visible. It is used only for test purposes.
-    public class MockPlugin
+    public class MockPlugin : IPlugin,
+        ITelemetryPlugin,
+        IConfigureLogsOptions<OpenTelemetryLoggerOptions>
 #pragma warning restore CA1034 // Nested types should not be visible. It is used only for test purposes.
 #pragma warning restore CA1515 // Consider making public types internal. Needed for plugin purposes.
     {
@@ -313,7 +317,7 @@ public class PluginManagerTests
 
 #pragma warning disable CA1515 // Consider making public types internal. Needed for plugin purposes.
 #pragma warning disable CA1034 // Nested types should not be visible. It is used only for test purposes.
-    public class PluginWithoutDefaultConstructor
+    public class PluginWithoutDefaultConstructor : IPlugin
 #pragma warning restore CA1034 // Nested types should not be visible. It is used only for test purposes.
 #pragma warning restore CA1515 // Consider making public types internal. Needed for plugin purposes.
     {
@@ -338,6 +342,14 @@ public class PluginManagerTests
             builder.AddSource(_dummyParameter);
 
             return builder;
+        }
+
+        public void Initialized()
+        {
+        }
+
+        public void Initializing()
+        {
         }
     }
 
