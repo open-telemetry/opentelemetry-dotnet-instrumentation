@@ -1,6 +1,8 @@
 // Copyright The OpenTelemetry Authors
 // SPDX-License-Identifier: Apache-2.0
 
+using OpenTelemetry.AutoInstrumentation.Plugins;
+
 namespace OpenTelemetry.AutoInstrumentation.Instrumentations.StackExchangeRedis;
 
 internal static class StackExchangeRedisInitializer
@@ -12,10 +14,21 @@ internal static class StackExchangeRedisInitializer
 
         var options = Activator.CreateInstance(optionsInstrumentationType)!;
 
-        Instrumentation.PluginManager?.ConfigureTracesOptions(options);
+        InvokeConfigureOptions(optionsInstrumentationType, options);
 
         var instrumentation = Activator.CreateInstance(instrumentationType, connection, string.Empty, options)!;
 
         Instrumentation.LifespanManager.Track(instrumentation);
+    }
+
+    private static void InvokeConfigureOptions(Type optionsType, object options)
+    {
+        var method = typeof(PluginManager)
+            .GetMethod(nameof(PluginManager.ConfigureTracesOptions))!
+            .MakeGenericMethod(optionsType);
+
+        method.Invoke(
+            Instrumentation.PluginManager,
+            [options]);
     }
 }

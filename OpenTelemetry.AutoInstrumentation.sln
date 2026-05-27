@@ -263,6 +263,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestApplication.Sqlite.Micr
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestApplication.StartupHookIsolation", "test\test-applications\integrations\TestApplication.StartupHookIsolation\TestApplication.StartupHookIsolation.csproj", "{5A1944CD-8C7A-6D02-5B28-E053B78130CD}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpenTelemetry.AutoInstrumentation.PluginApi", "src\OpenTelemetry.AutoInstrumentation.PluginApi\OpenTelemetry.AutoInstrumentation.PluginApi.csproj", "{C4634F73-077F-41EE-A42E-F2218AE4BD3E}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -1691,6 +1693,22 @@ Global
 		{5A1944CD-8C7A-6D02-5B28-E053B78130CD}.Release|x64.Build.0 = Release|x64
 		{5A1944CD-8C7A-6D02-5B28-E053B78130CD}.Release|x86.ActiveCfg = Release|x86
 		{5A1944CD-8C7A-6D02-5B28-E053B78130CD}.Release|x86.Build.0 = Release|x86
+		{C4634F73-077F-41EE-A42E-F2218AE4BD3E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C4634F73-077F-41EE-A42E-F2218AE4BD3E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C4634F73-077F-41EE-A42E-F2218AE4BD3E}.Debug|ARM64.ActiveCfg = Debug|Any CPU
+		{C4634F73-077F-41EE-A42E-F2218AE4BD3E}.Debug|ARM64.Build.0 = Debug|Any CPU
+		{C4634F73-077F-41EE-A42E-F2218AE4BD3E}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{C4634F73-077F-41EE-A42E-F2218AE4BD3E}.Debug|x64.Build.0 = Debug|Any CPU
+		{C4634F73-077F-41EE-A42E-F2218AE4BD3E}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{C4634F73-077F-41EE-A42E-F2218AE4BD3E}.Debug|x86.Build.0 = Debug|Any CPU
+		{C4634F73-077F-41EE-A42E-F2218AE4BD3E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C4634F73-077F-41EE-A42E-F2218AE4BD3E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C4634F73-077F-41EE-A42E-F2218AE4BD3E}.Release|ARM64.ActiveCfg = Release|Any CPU
+		{C4634F73-077F-41EE-A42E-F2218AE4BD3E}.Release|ARM64.Build.0 = Release|Any CPU
+		{C4634F73-077F-41EE-A42E-F2218AE4BD3E}.Release|x64.ActiveCfg = Release|Any CPU
+		{C4634F73-077F-41EE-A42E-F2218AE4BD3E}.Release|x64.Build.0 = Release|Any CPU
+		{C4634F73-077F-41EE-A42E-F2218AE4BD3E}.Release|x86.ActiveCfg = Release|Any CPU
+		{C4634F73-077F-41EE-A42E-F2218AE4BD3E}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -1790,6 +1808,7 @@ Global
 		{859E5A38-D2DD-7B4F-27F2-66887FFD8208} = {E409ADD3-9574-465C-AB09-4324D205CC7C}
 		{8D74F5D8-FCD8-4763-936C-B849967A93DA} = {E409ADD3-9574-465C-AB09-4324D205CC7C}
 		{5A1944CD-8C7A-6D02-5B28-E053B78130CD} = {E409ADD3-9574-465C-AB09-4324D205CC7C}
+		{C4634F73-077F-41EE-A42E-F2218AE4BD3E} = {9E5F0022-0A50-40BF-AC6A-C3078585ECAB}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {160A1D00-1F5B-40F8-A155-621B4459D78F}

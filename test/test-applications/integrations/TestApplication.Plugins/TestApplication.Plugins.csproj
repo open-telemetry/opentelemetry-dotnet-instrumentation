@@ -15,4 +15,8 @@
     <Compile Include="..\TestApplication.Smoke\SmokeLoggingExtensions.cs" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\..\src\OpenTelemetry.AutoInstrumentation.PluginApi\OpenTelemetry.AutoInstrumentation.PluginApi.csproj" />
+  </ItemGroup>
+
 </Project>

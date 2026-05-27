@@ -3,6 +3,8 @@
 
 using System.Reflection;
 using OpenTelemetry.AutoInstrumentation.Configurations;
+using OpenTelemetry.AutoInstrumentation.PluginApi;
+using OpenTelemetry.AutoInstrumentation.PluginApi.Telemetry;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
@@ -11,36 +13,63 @@ namespace OpenTelemetry.AutoInstrumentation.Plugins;
 
 internal partial class PluginManager
 {
-    private readonly IReadOnlyList<(Type Type, object Instance)> _plugins;
+    private readonly List<(Type Type, IPlugin Instance)> _plugins;
+
+    private readonly bool _hasTelemetryPlugins;
 
     public PluginManager(PluginsSettings settings)
     {
-        var plugins = new Dictionary<Type, object>();
+        var plugins = new Dictionary<Type, IPlugin>();
 
         foreach (var assemblyQualifiedName in settings.Plugins)
         {
             var type = Type.GetType(assemblyQualifiedName, throwOnError: true)!;
-            if (!plugins.ContainsKey(type))
+
+            // Ensure type implements IPlugin
+            if (!typeof(IPlugin).IsAssignableFrom(type))
             {
-                var instance = Activator.CreateInstance(type)!;
-                plugins.Add(type, instance);
+                throw new InvalidOperationException(
+                    $"Type '{type.FullName}' does not implement {nameof(IPlugin)}.");
             }
+
+            // Ensure type is concrete
+            if (type.IsAbstract || type.IsInterface)
+            {
+                throw new InvalidOperationException(
+                    $"Type '{type.FullName}' cannot be instantiated.");
+            }
+
+            if (plugins.ContainsKey(type))
+            {
+                continue;
+            }
+
+            var instance = Activator.CreateInstance(type);
+
+            if (instance is not IPlugin plugin)
+            {
+                throw new InvalidOperationException(
+                    $"Failed to create plugin '{type.FullName}'.");
+            }
+
+            plugins.Add(type, plugin);
         }
 
-        _plugins = plugins.Select(it => (it.Key, it.Value)).ToList();
+        _plugins = [.. plugins.Select(it => (it.Key, it.Value))];
+        _hasTelemetryPlugins = HasTelemetryPlugins(_plugins);
     }
 
     // Created for testing purposes.
-    internal IReadOnlyList<(Type Type, object Instance)> Plugins => _plugins;
+    internal IReadOnlyList<(Type Type, IPlugin Instance)> Plugins => _plugins;
 
     public void Initializing()
     {
-        CallPlugins("Initializing");
+        CallPlugins<IPlugin>(plugin => plugin.Initializing());
     }
 
     public void Initialized()
     {
-        CallPlugins("Initialized");
+        CallPlugins<IPlugin>(plugin => plugin.Initialized());
     }
 
     /// <summary>
@@ -69,85 +98,134 @@ internal partial class PluginManager
 
     public void InitializedProvider(TracerProvider tracerProvider)
     {
-        CallPlugins("TracerProviderInitialized", (typeof(TracerProvider), tracerProvider));
+        CallPlugins<ITelemetryPlugin>(plugin => plugin.TracerProviderInitialized(tracerProvider));
     }
 
     public void InitializedProvider(MeterProvider meterProvider)
     {
-        CallPlugins("MeterProviderInitialized", (typeof(MeterProvider), meterProvider));
+        CallPlugins<ITelemetryPlugin>(plugin => plugin.MeterProviderInitialized(meterProvider));
     }
 
     public TracerProviderBuilder BeforeConfigureTracerProviderBuilder(TracerProviderBuilder builder)
     {
-        return ConfigureBuilder(builder, "BeforeConfigureTracerProvider");
+        if (!_hasTelemetryPlugins)
+        {
+            return builder;
+        }
+
+        return CallPlugins<ITelemetryPlugin, TracerProviderBuilder>(plugin => plugin.BeforeConfigureTracerProvider(builder));
     }
 
     public MeterProviderBuilder BeforeConfigureMeterProviderBuilder(MeterProviderBuilder builder)
     {
-        return ConfigureBuilder(builder, "BeforeConfigureMeterProvider");
+        if (!_hasTelemetryPlugins)
+        {
+            return builder;
+        }
+
+        return CallPlugins<ITelemetryPlugin, MeterProviderBuilder>(plugin => plugin.BeforeConfigureMeterProvider(builder));
     }
 
     public TracerProviderBuilder AfterConfigureTracerProviderBuilder(TracerProviderBuilder builder)
     {
-        return ConfigureBuilder(builder, "AfterConfigureTracerProvider");
+        if (!_hasTelemetryPlugins)
+        {
+            return builder;
+        }
+
+        return CallPlugins<ITelemetryPlugin, TracerProviderBuilder>(plugin => plugin.AfterConfigureTracerProvider(builder));
     }
 
     public MeterProviderBuilder AfterConfigureMeterProviderBuilder(MeterProviderBuilder builder)
     {
-        return ConfigureBuilder(builder, "AfterConfigureMeterProvider");
+        if (!_hasTelemetryPlugins)
+        {
+            return builder;
+        }
+
+        return CallPlugins<ITelemetryPlugin, MeterProviderBuilder>(plugin => plugin.AfterConfigureMeterProvider(builder));
     }
 
     public void ConfigureMetricsOptions<T>(T options)
         where T : notnull
     {
-        CallPlugins("ConfigureMetricsOptions", (typeof(T), options));
+        foreach (var plugin in _plugins)
+        {
+            if (plugin.Instance is IConfigureMetricsOptions<T> configurator)
+            {
+                configurator.ConfigureMetricsOptions(options);
+            }
+        }
     }
 
     public void ConfigureTracesOptions<T>(T options)
         where T : notnull
     {
-        CallPlugins("ConfigureTracesOptions", (typeof(T), options));
-    }
-
-    public void ConfigureTracesOptions(object options)
-    {
-        CallPlugins("ConfigureTracesOptions", (options.GetType(), options));
+        foreach (var plugin in _plugins)
+        {
+            if (plugin.Instance is IConfigureTracesOptions<T> configurator)
+            {
+                configurator.ConfigureTracesOptions(options);
+            }
+        }
     }
 
     public void ConfigureLogsOptions<T>(T options)
         where T : notnull
     {
-        CallPlugins("ConfigureLogsOptions", (typeof(T), options));
+        foreach (var plugin in _plugins)
+        {
+            if (plugin.Instance is IConfigureLogsOptions<T> configurator)
+            {
+                configurator.ConfigureLogsOptions(options);
+            }
+        }
     }
 
     public ResourceBuilder ConfigureResourceBuilder(ResourceBuilder builder)
     {
-        return ConfigureBuilder(builder, "ConfigureResource");
+        if (!_hasTelemetryPlugins)
+        {
+            return builder;
+        }
+
+        return CallPlugins<ITelemetryPlugin, ResourceBuilder>(plugin => plugin.ConfigureResource(builder));
     }
 
-    private T ConfigureBuilder<T>(T builder, string methodName)
-        where T : notnull
+    private static bool HasTelemetryPlugins(List<(Type Type, IPlugin Instance)> plugins)
     {
-        CallPlugins(methodName, (typeof(T), builder));
+        foreach (var plugin in plugins)
+        {
+            if (plugin.Instance is ITelemetryPlugin)
+            {
+                return true;
+            }
+        }
 
-        return builder;
+        return false;
     }
 
-    private void CallPlugins(string methodName)
+    private void CallPlugins<TPlugin>(Action<TPlugin> action)
     {
         foreach (var plugin in _plugins)
         {
-            var mi = plugin.Type.GetMethod(methodName, Type.EmptyTypes);
-            mi?.Invoke(plugin.Instance, null);
+            if (plugin.Instance is TPlugin tplugin)
+            {
+                action(tplugin);
+            }
         }
     }
 
-    private void CallPlugins(string methodName, (Type Type, object Value) arg)
+    private TReturn CallPlugins<TPlugin, TReturn>(Func<TPlugin, TReturn> action)
     {
         foreach (var plugin in _plugins)
         {
-            var mi = plugin.Type.GetMethod(methodName, [arg.Type]);
-            mi?.Invoke(plugin.Instance, [arg.Value]);
+            if (plugin.Instance is TPlugin tplugin)
+            {
+                return action(tplugin);
+            }
         }
+
+        throw new InvalidOperationException($"No plugins implementing {typeof(TPlugin).Name} registered.");
     }
 }

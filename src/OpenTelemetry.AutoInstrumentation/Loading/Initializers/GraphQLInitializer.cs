@@ -35,10 +35,24 @@ internal class GraphQLInitializer : InstrumentationInitializer
         optionsType?.GetProperty("RecordDocument")?
             .SetValue(optionsInstance, _tracerSettings.InstrumentationOptions.GraphQLSetDocument);
 
-        _pluginManager.ConfigureTracesOptions(optionsInstance);
+        if (optionsType != null)
+        {
+            InvokeConfigureOptions(optionsType, optionsInstance);
+        }
 
         initializerType.GetMethod("EnableAutoInstrumentation", BindingFlags.Public | BindingFlags.Static)!
             .Invoke(null, [optionsInstance]);
+    }
+
+    private static void InvokeConfigureOptions(Type optionsType, object options)
+    {
+        var method = typeof(PluginManager)
+            .GetMethod(nameof(PluginManager.ConfigureTracesOptions))!
+            .MakeGenericMethod(optionsType);
+
+        method.Invoke(
+            Instrumentation.PluginManager,
+            [options]);
     }
 }
 #endif
