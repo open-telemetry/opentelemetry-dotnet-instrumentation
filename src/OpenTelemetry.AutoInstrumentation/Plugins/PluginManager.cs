@@ -3,6 +3,7 @@
 
 using System.Reflection;
 using OpenTelemetry.AutoInstrumentation.Configurations;
+using OpenTelemetry.AutoInstrumentation.Logging;
 using OpenTelemetry.AutoInstrumentation.PluginApi;
 using OpenTelemetry.AutoInstrumentation.PluginApi.Telemetry;
 using OpenTelemetry.Metrics;
@@ -13,6 +14,7 @@ namespace OpenTelemetry.AutoInstrumentation.Plugins;
 
 internal partial class PluginManager
 {
+    private static readonly IOtelLogger Logger = OtelLogging.GetLogger();
     private readonly List<(Type Type, IPlugin Instance)> _plugins;
 
     private readonly bool _hasTelemetryPlugins;
@@ -28,15 +30,15 @@ internal partial class PluginManager
             // Ensure type implements IPlugin
             if (!typeof(IPlugin).IsAssignableFrom(type))
             {
-                throw new InvalidOperationException(
-                    $"Type '{type.FullName}' does not implement {nameof(IPlugin)}.");
+                Logger.Warning($"Type '{type.FullName}' does not implement {nameof(IPlugin)}.");
+                continue;
             }
 
             // Ensure type is concrete
             if (type.IsAbstract || type.IsInterface)
             {
-                throw new InvalidOperationException(
-                    $"Type '{type.FullName}' cannot be instantiated.");
+                Logger.Warning($"Type '{type.FullName}' cannot be instantiated.");
+                continue;
             }
 
             if (plugins.ContainsKey(type))
@@ -48,8 +50,8 @@ internal partial class PluginManager
 
             if (instance is not IPlugin plugin)
             {
-                throw new InvalidOperationException(
-                    $"Failed to create plugin '{type.FullName}'.");
+                Logger.Warning($"Failed to create plugin '{type.FullName}'.");
+                continue;
             }
 
             plugins.Add(type, plugin);
