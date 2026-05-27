@@ -24,4 +24,6 @@ RUN chmod +x ./dotnet-install.sh \
     && ./dotnet-install.sh -v 10.0.302 --install-dir /usr/share/dotnet --no-path \
     && rm dotnet-install.sh
 
+ENV PATH="$PATH:/usr/share/dotnet"
+
 WORKDIR /project
