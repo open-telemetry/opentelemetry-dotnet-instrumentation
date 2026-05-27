@@ -5,9 +5,8 @@
 On all platforms, the minimum requirements are:
 
 - [Docker](https://www.docker.com/products/docker-desktop)
-- [.NET 8.0 SDK](https://dotnet.microsoft.com/download/dotnet/8.0)
-- [.NET 9.0 SDK](https://dotnet.microsoft.com/download/dotnet/9.0)
 - [.NET 10.0 SDK](https://dotnet.microsoft.com/download/dotnet/10.0)
+- [.NET 10.0 SDK](https://dotnet.microsoft.com/download/dotnet/11.0)
 
 ### Windows
 
@@ -95,8 +94,8 @@ $artifacts = @(
     "bin-alpine-arm64",
     "bin-ubuntu-22.04",
     "bin-ubuntu-22.04-arm",
-    "bin-macos-15",
-    "bin-windows-2022"
+    "bin-macos-14",
+    "bin-windows-2025"
 )
 $destFolder = "./bin/ci-artifacts/"
 $zipFilesFolder = "~/Downloads/"
