@@ -128,8 +128,13 @@ public class SelectiveSamplerTests : TestHelper
             else
             {
                 Assert.True(IndicatesSelectiveSampling(group));
-                var sample = Assert.Single(group);
-                Assert.True(HasSpanContextAssociated(sample));
+                Assert.All(
+                    group,
+                    sample =>
+                    {
+                        Assert.True(sample.SelectedForFrequentSampling);
+                        Assert.True(HasSpanContextAssociated(sample));
+                    });
                 selectiveSinceLastContinuous++;
             }
         }
@@ -142,7 +147,7 @@ public class SelectiveSamplerTests : TestHelper
 
     private static bool IndicatesSelectiveSampling(IGrouping<long, ConsoleThreadSample> samples)
     {
-        return samples.Count() == 1 && samples.Single().Source == "selective-sampler";
+        return samples.All(sample => sample.Source == "selective-sampler");
     }
 
     private static bool CollectedBeforeSpanStarted(IGrouping<long, ConsoleThreadSample> samples)
