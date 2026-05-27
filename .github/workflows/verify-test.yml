@@ -26,9 +26,7 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - machine: windows-2022
-            containers: windows
-          - machine: windows-2025
+          - machine: windows-2025-vs2026
             containers: windows
           - machine: ubuntu-22.04
             containers: linux
