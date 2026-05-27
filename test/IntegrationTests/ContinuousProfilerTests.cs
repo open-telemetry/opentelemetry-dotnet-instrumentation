@@ -138,15 +138,16 @@ public class ContinuousProfilerTests : TestHelper
             "My.Custom.Test.Namespace.GenericClassC`1.GenericMethodCFromGenericClass(T)"
         ];
 
-#if NET11_0_OR_GREATER
-        stackTrace.Add("My.Custom.Test.Namespace.ClassA.OTelAutoCallbackTest(My.Custom.Test.Namespace.ClassA.Callback, System.Int32)");
-#elif NETFRAMEWORK || DEBUG
+#if NETFRAMEWORK || DEBUG
         stackTrace.Add("Unknown_Native_Function(unknown)");
 #else
         if (Environment.OSVersion.Platform != PlatformID.Win32NT)
         {
             stackTrace.Add("Unknown_Native_Function(unknown)");
         }
+#endif
+#if NET11_0_OR_GREATER
+        stackTrace.Add("My.Custom.Test.Namespace.ClassA.OTelAutoCallbackTest(My.Custom.Test.Namespace.ClassA.Callback, System.Int32)");
 #endif
         stackTrace.Add("My.Custom.Test.Namespace.ClassA.InternalClassB`2.DoubleInternalClassB.TripleInternalClassB`1.MethodB[T2](System.Int32, T3[], T2, T4, System.Collections.Generic.IList`1[T1], System.Collections.Generic.IList`1[System.String])");
         stackTrace.Add("My.Custom.Test.Namespace.ClassA.<MethodAOthers>g__Action|7_0[T](System.Int32)");
