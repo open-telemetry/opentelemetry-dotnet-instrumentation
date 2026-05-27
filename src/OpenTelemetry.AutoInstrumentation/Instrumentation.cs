@@ -350,12 +350,12 @@ internal static class Instrumentation
 
         if (threadSamplingEnabled)
         {
-            _sampleExporterBuilder?.AddHandler(SampleType.Continuous, exporter.ExportAllocationSamples, exportTimeout);
+            _sampleExporterBuilder?.AddHandler(SampleType.Continuous, exporter.ExportThreadSamples, exportTimeout);
         }
 
         if (allocationSamplingEnabled)
         {
-            _sampleExporterBuilder?.AddHandler(SampleType.Allocation, exporter.ExportThreadSamples, exportTimeout);
+            _sampleExporterBuilder?.AddHandler(SampleType.Allocation, exporter.ExportAllocationSamples, exportTimeout);
         }
 
         return true;
