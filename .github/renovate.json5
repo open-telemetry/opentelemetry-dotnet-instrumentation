@@ -3,6 +3,10 @@
   additionalBranchPrefix: "{{manager}}/",
   commitBodyTable: true,
   commitMessageAction: "Bump",
+  dependencyDashboard: false,
+  extends: ["config:best-practices"],
+  labels: ["dependencies"],
+  prConcurrentLimit: 20,
   customManagers: [
     {
       customType: "regex",
@@ -17,32 +21,79 @@
     },
     {
       customType: "regex",
-      description: ["Update Debian package versions pinned in Dockerfiles"],
-      managerFilePatterns: ["/(^|/)docker/.+\\.dockerfile$/"],
+      description: ["Update Alpine package version ARGs in Dockerfiles"],
+      managerFilePatterns: ["/^docker/alpine\\.dockerfile$/"],
+      matchStrings: [
+        "# renovate:\\s*datasource=(?<datasource>repology)\\s+depName=(?<depName>[^\\s]+)\\s*\\r?\\n\\s*ARG\\s+[A-Z0-9_]+_VERSION=(?<currentValue>[^\\s]+)",
+      ],
+      packageNameTemplate: "alpine_3_23/{{{depName}}}",
+      versioningTemplate: "apk",
+    },
+    {
+      customType: "regex",
+      description: ["Update Debian package version ARGs in Dockerfiles"],
+      managerFilePatterns: ["/^docker/debian\\.dockerfile$/"],
       matchStrings: [
         "# renovate:\\s*datasource=(?<datasource>deb)\\s+depName=(?<depName>[^\\s]+)\\s*\\r?\\n\\s*ARG\\s+[A-Z0-9_]+_VERSION=(?<currentValue>[^\\s]+)",
       ],
+      registryUrlTemplate: "https://deb.debian.org/debian?suite=bookworm&components=main&binaryArch=amd64",
       versioningTemplate: "deb",
     },
-  ],
-  dependencyDashboard: false,
-  extends: ["config:best-practices"],
-  labels: ["dependencies"],
-  packageRules: [
     {
-      matchDatasources: ["deb"],
-      matchPackageNames: ["cmake", "clang", "make"],
-      registryUrls: [
-        "https://deb.debian.org/debian?suite=bookworm&components=main&binaryArch=amd64",
+      customType: "regex",
+      description: ["Update Debian arm64 package version ARGs in Dockerfiles"],
+      managerFilePatterns: ["/^docker/debian-arm64\\.dockerfile$/"],
+      matchStrings: [
+        "# renovate:\\s*datasource=(?<datasource>deb)\\s+depName=(?<depName>[^\\s]+)\\s*\\r?\\n\\s*ARG\\s+[A-Z0-9_]+_VERSION=(?<currentValue>[^\\s]+)",
       ],
+      registryUrlTemplate: "https://deb.debian.org/debian?suite=bookworm&components=main&binaryArch=arm64",
+      versioningTemplate: "deb",
     },
     {
-      matchDatasources: ["deb"],
-      matchPackageNames: ["dotnet-sdk-10.0", "dotnet-sdk-8.0"],
-      registryUrls: [
-        "https://packages.microsoft.com/debian/12/prod?suite=bookworm&components=main&binaryArch=amd64",
+      customType: "regex",
+      description: ["Update CentOS Stream package version ARGs in Dockerfiles"],
+      managerFilePatterns: ["/^docker/centos-stream9\\.dockerfile$/"],
+      matchStrings: [
+        "# renovate:\\s*datasource=(?<datasource>rpm)\\s+depName=(?<depName>[^\\s]+)\\s*\\r?\\n\\s*ARG\\s+[A-Z0-9_]+_VERSION=(?<currentValue>[^\\s]+)",
       ],
+      registryUrlTemplate: "https://mirror.stream.centos.org/9-stream/AppStream/x86_64/os/repodata/",
+      versioningTemplate: "rpm",
+    },
+    {
+      customType: "regex",
+      description: [
+        "Update Ubuntu 16.04 clang package version ARG in Dockerfiles",
+      ],
+      managerFilePatterns: ["/^docker/ubuntu1604\\.dockerfile$/"],
+      matchStrings: [
+        "# renovate:\\s*datasource=(?<datasource>deb)\\s+depName=(?<depName>clang-5\\.0)\\s*\\r?\\n\\s*ARG\\s+[A-Z0-9_]+_VERSION=(?<currentValue>[^\\s]+)",
+      ],
+      registryUrlTemplate: "http://archive.ubuntu.com/ubuntu?suite=xenial-updates&components=universe&binaryArch=amd64",
+      versioningTemplate: "deb",
+    },
+    {
+      customType: "regex",
+      description: [
+        "Update Ubuntu 16.04 g++ package version ARG in Dockerfiles",
+      ],
+      managerFilePatterns: ["/^docker/ubuntu1604\\.dockerfile$/"],
+      matchStrings: [
+        "# renovate:\\s*datasource=(?<datasource>deb)\\s+depName=(?<depName>g\\+\\+-9)\\s*\\r?\\n\\s*ARG\\s+[A-Z0-9_]+_VERSION=(?<currentValue>[^\\s]+)",
+      ],
+      registryUrlTemplate: "https://ppa.launchpadcontent.net/ubuntu-toolchain-r/test/ubuntu?suite=xenial&components=main&binaryArch=amd64",
+      versioningTemplate: "deb",
+    },
+    {
+      customType: "regex",
+      description: [
+        "Update Ubuntu 16.04 CMake binary version ARG in Dockerfiles",
+      ],
+      managerFilePatterns: ["/^docker/ubuntu1604\\.dockerfile$/"],
+      matchStrings: [
+        "# renovate:\\s*datasource=(?<datasource>github-releases)\\s+depName=(?<depName>Kitware/CMake)\\s*\\r?\\n\\s*ARG\\s+CMAKE_VERSION=(?<currentValue>[^\\s]+)",
+      ],
+      extractVersionTemplate: "^v(?<version>\\d+\\.\\d+\\.\\d+)$",
+      versioningTemplate: "semver",
     },
   ],
-  prConcurrentLimit: 20,
 }

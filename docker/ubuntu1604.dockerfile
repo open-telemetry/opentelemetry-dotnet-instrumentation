@@ -1,5 +1,12 @@
 FROM ubuntu:16.04@sha256:1f1a2d56de1d604801a9671f301190704c25d604a416f59e03c04f5c6ffee0d6
 
+# renovate: datasource=deb depName=clang-5.0
+ARG CLANG_5_VERSION=1:5.0-3~16.04.1
+# renovate: datasource=deb depName=g++-9
+ARG GXX_9_VERSION=9.4.0-1ubuntu1~16.04
+# renovate: datasource=github-releases depName=Kitware/CMake
+ARG CMAKE_VERSION=3.20.5
+
 RUN apt-get update && \
     apt-get install -y \
     apt-transport-https \
@@ -14,7 +21,7 @@ RUN apt-get update && \
 RUN curl -fsSL https://apt.llvm.org/llvm-snapshot.gpg.key | gpg --dearmor -o /usr/share/keyrings/llvm-archive-keyring.gpg && \
     echo 'deb [signed-by=/usr/share/keyrings/llvm-archive-keyring.gpg] https://apt.llvm.org/xenial/ llvm-toolchain-xenial-5.0 main' | tee /etc/apt/sources.list.d/llvm.list >/dev/null && \
     apt-get update && \
-    apt-get install -y clang-5.0 && \
+    apt-get install -y clang-5.0="${CLANG_5_VERSION}" && \
     update-alternatives --install /usr/bin/clang++ clang++ /usr/bin/clang++-5.0 1000 && \
     update-alternatives --install /usr/bin/clang clang /usr/bin/clang-5.0 1000 && \
     update-alternatives --config clang && \
@@ -23,14 +30,17 @@ RUN curl -fsSL https://apt.llvm.org/llvm-snapshot.gpg.key | gpg --dearmor -o /us
 # Install newer g++
 RUN add-apt-repository ppa:ubuntu-toolchain-r/test -y && \
     apt-get update && \
-    apt-get install -y g++-9 && \
+    apt-get install -y g++-9="${GXX_9_VERSION}" && \
     update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-9 60 --slave /usr/bin/g++ g++ /usr/bin/g++-9
 
-# Install cmake 3.20.5 directly from GitHub releases (Kitware Xenial apt repo no longer serves cmake)
-RUN curl -fsSL -o cmake.sh https://github.com/Kitware/CMake/releases/download/v3.20.5/cmake-3.20.5-linux-x86_64.sh && \
-    echo "f582e02696ceee81818dc3378531804b2213ed41c2a8bc566253d16d894cefab  cmake.sh" | sha256sum -c - && \
-    sh cmake.sh --skip-license --prefix=/usr/local && \
-    rm cmake.sh
+# Install cmake directly from GitHub releases (Kitware Xenial apt repo no longer serves cmake)
+RUN CMAKE_INSTALLER="cmake-${CMAKE_VERSION}-linux-x86_64.sh" && \
+    CMAKE_SHA256_FILE="cmake-${CMAKE_VERSION}-SHA-256.txt" && \
+    curl -fsSL -O "https://github.com/Kitware/CMake/releases/download/v${CMAKE_VERSION}/${CMAKE_INSTALLER}" && \
+    curl -fsSL -O "https://github.com/Kitware/CMake/releases/download/v${CMAKE_VERSION}/${CMAKE_SHA256_FILE}" && \
+    grep " ${CMAKE_INSTALLER}$" "${CMAKE_SHA256_FILE}" | sha256sum -c - && \
+    sh "${CMAKE_INSTALLER}" --skip-license --prefix=/usr/local && \
+    rm "${CMAKE_INSTALLER}" "${CMAKE_SHA256_FILE}"
 
 COPY ./scripts/dotnet-install.sh ./dotnet-install.sh
 

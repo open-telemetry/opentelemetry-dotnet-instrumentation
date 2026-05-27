@@ -1,10 +1,6 @@
 FROM mcr.microsoft.com/dotnet/sdk:9.0.314-bookworm-slim@sha256:087fc98e5c6ffcea6c3e276c135c4a6717c589d9509a09cc22e7c634830a4db8
 # There is no official base image for .NET SDK 10+ on Debian, so install .NET10 via apt-get
 
-# renovate: datasource=deb depName=dotnet-sdk-10.0
-ARG DOTNET_SDK_10_VERSION=10.0.300
-# renovate: datasource=deb depName=dotnet-sdk-8.0
-ARG DOTNET_SDK_8_VERSION=8.0.420-1
 # renovate: datasource=deb depName=cmake
 ARG CMAKE_VERSION=3.25.1-1
 # renovate: datasource=deb depName=clang
@@ -17,8 +13,8 @@ RUN wget https://packages.microsoft.com/config/debian/12/packages-microsoft-prod
     rm packages-microsoft-prod.deb && \
     apt-get update && \
     apt-get install -y \
-        dotnet-sdk-10.0="${DOTNET_SDK_10_VERSION}" \
-        dotnet-sdk-8.0="${DOTNET_SDK_8_VERSION}" \
+        dotnet-sdk-10.0 \
+        dotnet-sdk-8.0 \
         cmake="${CMAKE_VERSION}" \
         clang="${CLANG_VERSION}" \
         make="${MAKE_VERSION}"
