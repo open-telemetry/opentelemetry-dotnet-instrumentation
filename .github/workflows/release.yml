@@ -5,6 +5,10 @@ on:
     tags: [ v* ]
   workflow_dispatch:
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+
 permissions:
   contents: read
 
@@ -32,23 +36,25 @@ jobs:
     runs-on: ubuntu-22.04
     needs: [ build-windows, build, build-nuget-packages ]
     permissions:
-      attestations: write
-      contents: write
-      id-token: write
-      artifact-metadata: write
+      attestations: write # for actions/attest to create release attestations
+      contents: write # for publishing the GitHub release and its assets
+      id-token: write # for OIDC-based artifact attestations
+      artifact-metadata: write # for artifact metadata required by release attestations
     timeout-minutes: 10
     steps:
 
-      - name: Checkout
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # tag: v6.0.2
+      - name: Checkout code
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
 
       - name: Download artifacts
-        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # tag: v8.0.1
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
           path: .
 
       - name: Install zip
-        uses: montudor/action-zip@0852c26906e00f8a315c704958823928d8018b28 # tag: v1.0.0
+        uses: montudor/action-zip@0852c26906e00f8a315c704958823928d8018b28 # v1.0.0
 
       - name: Create ZIP artifacts
         shell: bash

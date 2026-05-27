@@ -5,11 +5,16 @@ on:
     - cron:  '0 4 1 * *'
   workflow_dispatch:
 
+concurrency:
+  group: ${{ github.workflow }}
+  cancel-in-progress: false
+
 permissions: {}
 
 jobs:
   update-dotnet-install-script:
-    runs-on: ubuntu-latest
+    name: Update .NET installation script
+    runs-on: ubuntu-24.04
     if: github.event.repository.fork == false
 
     env:
@@ -25,7 +30,7 @@ jobs:
 
     - name: Generate GitHub application token
       id: otelbot-token
-      uses: actions/create-github-app-token@1b10c78c7865c340bc4f6099eb2f838309f1e8c3 # v3.1.1
+      uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
       with:
         client-id: ${{ vars.OTELBOT_DOTNET_INSTRUMENTATION_APP_ID }}
         permission-contents: write
@@ -36,6 +41,7 @@ jobs:
       uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
       with:
         filter: 'tree:0'
+        persist-credentials: true # zizmor: ignore[artipacked] Needed to push commits
         show-progress: false
         token: ${{ steps.otelbot-token.outputs.token }}
 

@@ -61,20 +61,23 @@ jobs:
     env:
       SMOKE_TEST_APPLICATION: ./test/test-applications/integrations/bin/TestApplication.Smoke/Release/net10.0/publish/TestApplication.Smoke
     steps:
-      - name: Checkout
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # tag: v6.0.2
+      - name: Checkout code
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           fetch-depth: 0 # fetching all, needed to correctly calculate version
+          persist-credentials: false
 
       - name: Set build script
         shell: pwsh
         run: |
-          if ('${{ runner.os }}' -eq 'Windows') {
+          if ($env:RUNNER_OS -eq 'Windows') {
             'BUILD_SCRIPT=./build.ps1' >> $env:GITHUB_ENV
           }
           else {
             'BUILD_SCRIPT=./build.sh' >> $env:GITHUB_ENV
           }
+        env:
+          RUNNER_OS: ${{ runner.os }}
 
       - name: Prepare build environment
         id: prepare-build-environment
@@ -85,7 +88,7 @@ jobs:
           dockerfile: ${{ inputs.dockerfile }}
 
       - name: Check for NuGet packages cache
-        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # tag: v5.0.5
+        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
         id: nuget-cache
         with:
           key: ${{ hashFiles('**/Directory.packages.props', './build/LibraryVersions.g.cs', '**/packages.config' ) }}
@@ -109,7 +112,7 @@ jobs:
 
       - name: Cache NuGet packages
         if: ${{ steps.nuget-cache.outputs.cache-hit != 'true' }}
-        uses: actions/cache/save@27d5ce7f107fe9357f9df03efb73ab90386fccae # tag: v5.0.5
+        uses: actions/cache/save@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
         with:
           key: ${{ hashFiles('**/Directory.packages.props', './build/LibraryVersions.g.cs', '**/packages.config' ) }}
           path: ${{ env.NUGET_PACKAGES }}
@@ -128,21 +131,26 @@ jobs:
 
       - name: Test the Shell scripts from README.md
         uses: ./.github/actions/run-command-in-environment
+        env:
+          LOG_DIRECTORY: ${{ inputs.log-directory }}
         with:
           execution-mode: ${{ inputs.environment-type == 'host' && 'bash' || 'container' }}
           container-name: ${{ steps.prepare-build-environment.outputs.container-name }}
+          container-publish-env: |
+            LOG_DIRECTORY
+            SMOKE_TEST_APPLICATION
           run: |
             dotnet publish -f net10.0 -c Release ./test/test-applications/integrations/TestApplication.Smoke
             export OTEL_DOTNET_AUTO_HOME="${PWD}/bin/tracer-home"
             . ./instrument.sh
-            "${{ env.SMOKE_TEST_APPLICATION }}"
-            test "$(ls -A '${{ inputs.log-directory }}')"
+            "${SMOKE_TEST_APPLICATION}"
+            test "$(ls -A "${LOG_DIRECTORY}")"
 
       - name: Test the Windows PowerShell module instructions from README.md
         if: ${{ inputs.environment-type == 'host' && runner.os == 'Windows' }}
         shell: powershell
         run: |
-          $logPath = "${{ inputs.powershell-log-path }}"
+          $logPath = $env:POWERSHELL_LOG_PATH
           Import-Module "${PWD}/bin/installation-scripts/OpenTelemetry.DotNet.Auto.psm1"
           [System.Environment]::SetEnvironmentVariable("OTEL_DOTNET_AUTO_INSTALL_DIR", "${PWD}/bin/tracer-home", [System.EnvironmentVariableTarget]::Machine)
           Register-OpenTelemetryForCurrentSession -OTelServiceName "MyServiceDisplayName"
@@ -154,10 +162,12 @@ jobs:
           ./test/test-applications/integrations/bin/TestApplication.Smoke/Release/net10.0/TestApplication.Smoke.exe
           if (-not $?) { throw "dotnet help returned exit code: $LASTEXITCODE" }
           if (Test-Path $logPath) { throw "Log file exists. Instrumentation unregister failed." }
+        env:
+          POWERSHELL_LOG_PATH: ${{ inputs.powershell-log-path }}
 
       - name: Upload binaries
         if: ${{ always() && (inputs.environment-type != 'container' || !cancelled()) }}
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # tag: v7.0.1
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: bin-${{ inputs.artifact-name }}
           path: bin/tracer-home
@@ -165,7 +175,7 @@ jobs:
 
       - name: Upload installation scripts
         if: ${{ always() && inputs.environment-type == 'host' }}
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # tag: v7.0.1
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: installation-scripts-${{ inputs.artifact-name }}
           path: bin/installation-scripts

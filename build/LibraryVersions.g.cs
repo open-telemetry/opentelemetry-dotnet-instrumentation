@@ -26,7 +26,7 @@ public static partial class LibraryVersion
             "TestApplication.Elasticsearch",
             [
                 new("8.15.10"),
-                new("9.4.0"),
+                new("9.4.1"),
             ]
         },
         {
@@ -108,7 +108,7 @@ public static partial class LibraryVersion
                 new("3.0.0", supportedFrameworks: [ "net10.0", "net9.0", "net8.0", "net472" ]),
                 new("3.5.0", supportedFrameworks: [ "net10.0", "net9.0", "net8.0", "net472" ]),
                 new("3.7.0", supportedFrameworks: [ "net10.0", "net9.0", "net8.0", "net472" ]),
-                new("3.8.0", supportedFrameworks: [ "net10.0", "net9.0", "net8.0", "net472" ]),
+                new("3.8.1", supportedFrameworks: [ "net10.0", "net9.0", "net8.0", "net472" ]),
             ]
         },
         {

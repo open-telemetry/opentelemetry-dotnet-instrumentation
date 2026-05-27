@@ -13,7 +13,10 @@
     <PackageReference Include="MongoDB.Driver" VersionOverride="$(LibraryVersion)" />
     <!-- Snappier is transitive dependency of MongoDB.Driver. All versions up to 3.8.0 references v1.0.0
     All versions pruor to 1.3.1 are vulnerable for https://github.com/advisories/GHSA-pggp-6c3x-2xmx -->
-    <PackageReference Include="Snappier" />
+    <PackageReference Include="Snappier"  Condition="'$(LibraryVersion)' != '' and $([MSBuild]::VersionLessThan('$(LibraryVersion)', '3.8.1'))" />
+    <!-- SharpCompress is a transitive dependency of MongoDB.Driver. Version up to 0.47.4 are vulnerable.
+    for https://github.com/advisories/GHSA-6c8g-7p36-r338 -->
+    <PackageReference Include="SharpCompress" />
   </ItemGroup>
 
 </Project>
