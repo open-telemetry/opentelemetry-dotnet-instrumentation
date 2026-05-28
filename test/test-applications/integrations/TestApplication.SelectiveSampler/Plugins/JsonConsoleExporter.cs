@@ -2,11 +2,13 @@
 // SPDX-License-Identifier: Apache-2.0
 
 using System.Text.Json;
+using OpenTelemetry.AutoInstrumentation.PluginApi.ContinuousProfiling;
+using OpenTelemetry.AutoInstrumentation.PluginApi.SelectiveSampling;
 using TestApplication.ContinuousProfiler;
 
 namespace TestApplication.SelectiveSampler.Plugins;
 
-internal sealed class JsonConsoleExporter
+internal sealed class JsonConsoleExporter : ISelectiveSamplerExporter, IContinuousProfilerExporter
 {
     private readonly SampleNativeFormatParser _sampleNativeFormatParser;
 
