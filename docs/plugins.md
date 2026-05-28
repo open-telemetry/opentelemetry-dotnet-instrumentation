@@ -1,143 +1,295 @@
 # Plugins
 
-**Status**: [Experimental](https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/versioning-and-stability.md).
+**Status**:
+[Experimental](https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/versioning-and-stability.md).
 
-You can use `OTEL_DOTNET_AUTO_PLUGINS` environment variable to extend the
-configuration and overwrite options of the OpenTelemetry .NET SDK Tracer, Meter
-or Logs. No more than one instance of each plugin type will be created.
-A plugin must be a non-static, non-abstract class which has a default
-constructor and that implements at least one of the configuration methods below
-showed in an example plugin class:
+Plugins extend OpenTelemetry .NET Automatic Instrumentation by customizing SDK
+setup, signal options, OpAMP, selective sampling, and continuous profiling.
+
+Set `OTEL_DOTNET_AUTO_PLUGINS` to a colon-separated list of plugin type names,
+specified with the
+[assembly-qualified name](https://docs.microsoft.com/en-us/dotnet/api/system.type.assemblyqualifiedname?view=net-6.0#system-type-assemblyqualifiedname).
+This list is colon-separated because type names can contain commas.
+
+Every plugin type is instantiated at most once. A plugin must:
+
+* reference the `OpenTelemetry.AutoInstrumentation.PluginApi` package version
+  that matches the OpenTelemetry .NET Automatic Instrumentation version in use;
+* be a concrete class with a public parameterless constructor;
+* implement `OpenTelemetry.AutoInstrumentation.PluginApi.IPlugin`;
+* optionally implement extension interfaces for additional capabilities.
+
+Convention-based plugin methods are no longer discovered. Implementing `IPlugin`
+is required for a plugin to function.
+
+## Core lifecycle
+
+All plugins implement `IPlugin`. The two lifecycle methods can use empty
+implementations if the plugin only uses other extension points. These lifecycle
+methods are called on every configured plugin.
 
 ```csharp
+using OpenTelemetry.AutoInstrumentation.PluginApi;
 
-public class MyPlugin 
+public class MyPlugin : IPlugin
 {
-    // To configure plugin, before OTel SDK configuration is called.
     public void Initializing()
     {
-        // My custom logic here
+        // Called when auto instrumentation setup begins.
     }
 
-    // To configure plugin, after auto instrumentation is initialized.
     public void Initialized()
     {
-        // My custom logic here
+        // Called after auto instrumentation setup is finalized.
+    }
+}
+```
+
+## Telemetry SDK customization
+
+Implement `ITelemetryPlugin` to customize tracer and meter provider builders,
+access built providers, or customize the resource builder.
+
+```csharp
+using OpenTelemetry.AutoInstrumentation.PluginApi;
+using OpenTelemetry.AutoInstrumentation.PluginApi.Telemetry;
+using OpenTelemetry.Metrics;
+using OpenTelemetry.Resources;
+using OpenTelemetry.Trace;
+
+public class MyTelemetryPlugin : IPlugin, ITelemetryPlugin
+{
+    public void Initializing()
+    {
     }
 
-    // To access TracerProvider right after TracerProviderBuilder.Build() is executed.
+    public void Initialized()
+    {
+    }
+
+    public TracerProviderBuilder BeforeConfigureTracerProvider(TracerProviderBuilder builder)
+    {
+        // Called before automatic instrumentation configures tracing.
+        return builder;
+    }
+
+    public TracerProviderBuilder AfterConfigureTracerProvider(TracerProviderBuilder builder)
+    {
+        // Called after automatic instrumentation configures tracing, before Build().
+        return builder;
+    }
+
     public void TracerProviderInitialized(TracerProvider tracerProvider)
     {
-        // My custom logic here
+        // Called after TracerProviderBuilder.Build().
     }
 
-    // To access MeterProvider right after MeterProviderBuilder.Build() is executed.
+    public MeterProviderBuilder BeforeConfigureMeterProvider(MeterProviderBuilder builder)
+    {
+        // Called before automatic instrumentation configures metrics.
+        return builder;
+    }
+
+    public MeterProviderBuilder AfterConfigureMeterProvider(MeterProviderBuilder builder)
+    {
+        // Called after automatic instrumentation configures metrics, before Build().
+        return builder;
+    }
+
     public void MeterProviderInitialized(MeterProvider meterProvider)
     {
-        // My custom logic here
+        // Called after MeterProviderBuilder.Build().
     }
 
-    // To configure tracing SDK before Auto Instrumentation configured SDK
-    public OpenTelemetry.Trace.TracerProviderBuilder BeforeConfigureTracerProvider(OpenTelemetry.Trace.TracerProviderBuilder builder)
+    public ResourceBuilder ConfigureResource(ResourceBuilder builder)
     {
-        // My custom logic here
-
-        return builder;
-    }
-
-    // To configure tracing SDK after Auto Instrumentation configured SDK
-    public OpenTelemetry.Trace.TracerProviderBuilder AfterConfigureTracerProvider(OpenTelemetry.Trace.TracerProviderBuilder builder)
-    {
-        // My custom logic here
-
-        return builder;
-    }
-        
-    // To configure any traces options used by OpenTelemetry .NET Automatic Instrumentation
-    public void ConfigureTracesOptions(OpenTelemetry.NameSpace.OptionType options)
-    {
-        // My custom logic here
-        // Find supported options below
-    }
-
-    // To configure metrics SDK before Auto Instrumentation configured SDK
-    public OpenTelemetry.Metrics.MeterProviderBuilder BeforeConfigureMeterProvider(OpenTelemetry.Metrics.MeterProviderBuilder builder)
-    {
-        // My custom logic here
-
-        return builder;
-    }
-
-    // To configure metrics SDK after Auto Instrumentation configured SDK
-    public OpenTelemetry.Metrics.MeterProviderBuilder AfterConfigureMeterProvider(OpenTelemetry.Metrics.MeterProviderBuilder builder)
-    {
-        // My custom logic here
-
-        return builder;
-    }
-    
-    // To configure any metrics options used by OpenTelemetry .NET Automatic Instrumentation
-    public void ConfigureMetricsOptions(OpenTelemetry.NameSpace.OptionType options)
-    {
-        // My custom logic here
-        // Find supported options below
-    }
-
-    // To configure logs SDK (the method name is the same as for other logs options)
-    public void ConfigureLogsOptions(OpenTelemetry.Logs.OpenTelemetryLoggerOptions options)
-    {
-        // My custom logic here
-    }
-
-    // To configure any logs options used by OpenTelemetry .NET Automatic Instrumentation
-    public void ConfigureLogsOptions(OpenTelemetry.NameSpace.OptionType options)
-    {
-        // My custom logic here
-        // Find supported options below
-    }
-
-    // To configure Resource
-    public OpenTelemetry.Resources.ResourceBuilder ConfigureResource(OpenTelemetry.Resources.ResourceBuilder builder)
-    {
-        // My custom logic here
-        // Please note this method is common to set the resource for trace, logs and metrics.
-        // This method could be overridden by ConfigureTracesOptions, ConfigureMeterProvider and ConfigureLogsOptions
-        // by calling SetResourceBuilder with new object.
-
+        // Common resource customization for traces, metrics, and logs.
         return builder;
     }
 }
 ```
 
+`BeforeConfigureTracerProvider`, `AfterConfigureTracerProvider`,
+`BeforeConfigureMeterProvider`, `AfterConfigureMeterProvider`, and
+`ConfigureResource` return the builder that automatic instrumentation continues
+to use. Only the first configured plugin implementing `ITelemetryPlugin` is used
+for these builder-returning and resource-returning hooks.
+
+`TracerProviderInitialized` and `MeterProviderInitialized` are called on every
+configured plugin implementing `ITelemetryPlugin`.
+
+## Signal options customization
+
+Implement the generic options interfaces for each supported options type that
+the plugin needs to configure:
+
+* `IConfigureTracesOptions<TOptions>`
+* `IConfigureMetricsOptions<TOptions>`
+* `IConfigureLogsOptions<TOptions>`
+
+The generic `TOptions` type must match one of the supported options types listed
+below. All configured plugins implementing a matching options interface are
+called in configuration order.
+
 ```csharp
-public class MyOpAmpPlugin 
+using OpenTelemetry.AutoInstrumentation.PluginApi;
+using OpenTelemetry.AutoInstrumentation.PluginApi.Telemetry;
+using OpenTelemetry.Exporter;
+using OpenTelemetry.Instrumentation.Http;
+using OpenTelemetry.Logs;
+
+public class MyOptionsPlugin : IPlugin,
+    IConfigureTracesOptions<HttpClientTraceInstrumentationOptions>,
+    IConfigureMetricsOptions<OtlpExporterOptions>,
+    IConfigureLogsOptions<OpenTelemetryLoggerOptions>
 {
-    // To configure OpAMP client
-    public void ConfigureOpAmpOptions(OpenTelemetry.OpAmp.Client.Settings.OpAmpClientSettings options)
+    public void Initializing()
     {
-        // My custom logic here
     }
 
-    // To get the OpAMP client instance after client is created and started
-    public void AfterOpAmpClientStarted(OpenTelemetry.OpAmp.Client.OpAmpClient client)
+    public void Initialized()
     {
-        // My custom logic here
     }
 
-    // To get the final callback before OpAMP client shuts down
-    public void BeforeOpAmpClientStopped()
+    public void ConfigureTracesOptions(HttpClientTraceInstrumentationOptions options)
     {
-        // My custom logic here
-        // WARNING: This is already in application OnExit() cycle, do not add long running tasks.
+        // Configure HTTP client trace instrumentation options.
+    }
+
+    public void ConfigureMetricsOptions(OtlpExporterOptions options)
+    {
+        // Configure OTLP metrics exporter options.
+    }
+
+    public void ConfigureLogsOptions(OpenTelemetryLoggerOptions options)
+    {
+        // Configure OpenTelemetry logger options.
     }
 }
 ```
 
 > [!NOTE]
 > Automatic Instrumentation can configure particular properties before calling
-> `Configure{Signal}Options`. It is plugin responsibility to not override this behavior.
-> Example: `OpenTelemetry.Instrumentation.Http.HttpClientTraceInstrumentationOptions.EnrichWithHttpWebRequest`
+> `Configure{Signal}Options`. It is the plugin's responsibility to not override
+> this behavior.
+> Example:
+> `OpenTelemetry.Instrumentation.Http.HttpClientTraceInstrumentationOptions.EnrichWithHttpWebRequest`
 > is conditionally set by this project.
+
+## OpAMP
+
+Implement `IOpAmpPlugin` to customize the OpAMP client and observe its
+lifecycle.
+OpAMP methods are called on every configured plugin implementing `IOpAmpPlugin`.
+
+```csharp
+using OpenTelemetry.AutoInstrumentation.PluginApi;
+using OpenTelemetry.AutoInstrumentation.PluginApi.OpAmp;
+using OpenTelemetry.OpAmp.Client;
+using OpenTelemetry.OpAmp.Client.Settings;
+
+public class MyOpAmpPlugin : IPlugin, IOpAmpPlugin
+{
+    public void Initializing()
+    {
+    }
+
+    public void Initialized()
+    {
+    }
+
+    public void ConfigureOpAmpOptions(OpAmpClientSettings settings)
+    {
+        // Called before the OpAMP client is created.
+    }
+
+    public void AfterOpAmpClientStarted(OpAmpClient client)
+    {
+        // Called after the OpAMP client is created and started.
+    }
+
+    public void BeforeOpAmpClientStopped()
+    {
+        // Called before the OpAMP client is stopped.
+        // Avoid long-running work during application shutdown.
+    }
+}
+```
+
+## Selective sampling
+
+Implement `ISelectiveSamplerPlugin` to provide selective sampling configuration.
+Only the first configured plugin implementing `ISelectiveSamplerPlugin` is used.
+
+```csharp
+using System;
+using OpenTelemetry.AutoInstrumentation.PluginApi;
+using OpenTelemetry.AutoInstrumentation.PluginApi.SelectiveSampling;
+
+public class MySelectiveSamplerPlugin : IPlugin, ISelectiveSamplerPlugin
+{
+    public void Initializing()
+    {
+    }
+
+    public void Initialized()
+    {
+    }
+
+    public SelectiveSamplerConfiguration? GetFirstSelectiveSamplingConfiguration()
+    {
+        return new SelectiveSamplerConfiguration
+        {
+            SamplingInterval = 200,
+            ExportInterval = TimeSpan.FromMilliseconds(50),
+            ExportTimeout = TimeSpan.FromSeconds(5),
+            Exporter = new MySelectiveSamplerExporter()
+        };
+    }
+}
+```
+
+`Exporter` must implement `ISelectiveSamplerExporter`.
+
+## Continuous profiling
+
+Implement `IContinuousProfilerPlugin` to provide continuous profiler
+configuration. Only the first configured plugin implementing
+`IContinuousProfilerPlugin` is used. If no plugin provides a configuration, the
+default continuous profiler configuration is used.
+
+```csharp
+using System;
+using OpenTelemetry.AutoInstrumentation.PluginApi;
+using OpenTelemetry.AutoInstrumentation.PluginApi.ContinuousProfiling;
+
+public class MyContinuousProfilerPlugin : IPlugin, IContinuousProfilerPlugin
+{
+    public void Initializing()
+    {
+    }
+
+    public void Initialized()
+    {
+    }
+
+    public ContinuousProfilerConfiguration GetFirstContinuousProfilerConfiguration()
+    {
+        return new ContinuousProfilerConfiguration
+        {
+            ThreadSamplingEnabled = true,
+            ThreadSamplingInterval = 1000,
+            AllocationSamplingEnabled = false,
+            MaxMemorySamplesPerMinute = 200,
+            ExportInterval = TimeSpan.FromMilliseconds(500),
+            ExportTimeout = TimeSpan.FromSeconds(5),
+            Exporter = new MyContinuousProfilerExporter()
+        };
+    }
+}
+```
+
+`Exporter` must implement `IContinuousProfilerExporter`.
 
 ## Supported Options
 
@@ -185,7 +337,9 @@ public class MyOpAmpPlugin
 
 ## Requirements
 
-* The plugin must use the same version of the `OpenTelemetry` as the
-OpenTelemetry .NET Automatic Instrumentation.
-* The plugin must use the same options versions as the
-OpenTelemetry .NET Automatic Instrumentation (found in the table above).
+* The plugin must use the same `OpenTelemetry.AutoInstrumentation.PluginApi`
+  version as OpenTelemetry .NET Automatic Instrumentation.
+* The plugin must use the same `OpenTelemetry` version as OpenTelemetry .NET
+  Automatic Instrumentation.
+* The plugin must use the same options versions as OpenTelemetry .NET Automatic
+  Instrumentation (found in the table above).
