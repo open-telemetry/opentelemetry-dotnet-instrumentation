@@ -19,4 +19,10 @@
     <PackageReference Include="SharpCompress" Condition="'$(LibraryVersion)' != '' and $([MSBuild]::VersionLessThan('$(LibraryVersion)', '3.9.0'))" />
   </ItemGroup>
 
+  <ItemGroup>
+    <!-- SharpCompress is a transitive dependency of MongoDB.Driver. GHSA-6c8g-7p36-r338 currently has no patched release,
+    and this test application does not use archive extraction APIs, so keep audit enforcement repo-wide and suppress only here. -->
+    <NuGetAuditSuppress Include="https://github.com/advisories/GHSA-6c8g-7p36-r338" />
+  </ItemGroup>
+
 </Project>

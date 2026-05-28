@@ -3,6 +3,9 @@
 
 using System.Diagnostics;
 using System.Reflection;
+#if NETFRAMEWORK
+using Microsoft.Extensions.Logging.Abstractions;
+#endif
 
 // args[0]: expected assembly name (e.g. "System.Diagnostics.DiagnosticSource").
 // args[1]: expected assembly version (e.g. "10.0.0.0").
@@ -32,6 +35,11 @@ Console.WriteLine($"  Expected Assembly Version: {expectedAssemblyVersion}");
 Console.WriteLine($"  Expected Assembly File Version: {expectedFileVersion}");
 Console.WriteLine($"  Excluded Assemblies (empty means 'check all'): [{string.Join(",", excludedNames)}]");
 Console.WriteLine();
+
+#if NETFRAMEWORK
+// Force the expected dependency to load before the activity starts.
+_ = NullLogger.Instance;
+#endif
 
 using var activitySource = new ActivitySource("AssemblyRedirection.ActivitySource");
 using var activity = activitySource.StartActivity("AssemblyRedirection.Activity");
