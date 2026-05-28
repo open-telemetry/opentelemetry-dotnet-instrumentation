@@ -139,7 +139,7 @@ public static partial class LibraryVersion
                 new("8.2.6"),
                 new("9.2.10", supportedFrameworks: [ "net10.0", "net9.0", "net8.0" ]),
                 new("10.1.3", supportedFrameworks: [ "net10.0" ]),
-                new("10.1.4", supportedFrameworks: [ "net10.0" ]),
+                new("10.2.0", supportedFrameworks: [ "net10.0" ]),
             ]
         },
         {
