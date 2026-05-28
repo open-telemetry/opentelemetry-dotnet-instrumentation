@@ -5,7 +5,6 @@
 using System.Net.Http;
 using Google.Protobuf;
 using IntegrationTests.Helpers;
-using Xunit.Abstractions;
 
 namespace IntegrationTests;
 

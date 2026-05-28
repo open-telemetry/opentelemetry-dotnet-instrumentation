@@ -6,7 +6,6 @@
 using System.Globalization;
 using IntegrationTests.Helpers;
 using OpenTelemetry.Proto.Logs.V1;
-using Xunit.Abstractions;
 
 namespace IntegrationTests;
 

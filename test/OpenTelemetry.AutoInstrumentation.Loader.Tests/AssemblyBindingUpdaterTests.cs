@@ -9,7 +9,6 @@ using System.Text;
 using System.Xml.Linq;
 using Microsoft.CSharp;
 using OpenTelemetry.AutoInstrumentation.Logging;
-using Xunit;
 
 namespace OpenTelemetry.AutoInstrumentation.Loader.Tests;
 

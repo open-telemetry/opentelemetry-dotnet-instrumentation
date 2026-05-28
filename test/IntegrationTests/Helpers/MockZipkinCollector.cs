@@ -8,7 +8,6 @@ using System.Runtime.Serialization;
 using System.Text;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using Xunit.Abstractions;
 
 #if NETFRAMEWORK
 using System.Net;
