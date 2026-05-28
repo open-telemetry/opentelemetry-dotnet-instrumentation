@@ -3,7 +3,6 @@
 
 using OpenTelemetry.AutoInstrumentation.Logging;
 using OpenTelemetry.AutoInstrumentation.RulesEngine;
-using Xunit;
 
 namespace OpenTelemetry.AutoInstrumentation.StartupHook.Tests;
 

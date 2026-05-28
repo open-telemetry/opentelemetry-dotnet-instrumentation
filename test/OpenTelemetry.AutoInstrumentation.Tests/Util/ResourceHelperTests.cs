@@ -5,7 +5,6 @@ using OpenTelemetry.AutoInstrumentation.Util;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
-using Xunit;
 
 namespace OpenTelemetry.AutoInstrumentation.Tests.Util;
 

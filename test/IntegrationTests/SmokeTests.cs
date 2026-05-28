@@ -4,7 +4,6 @@
 using System.Diagnostics;
 using System.Globalization;
 using IntegrationTests.Helpers;
-using Xunit.Abstractions;
 
 #if NETFRAMEWORK
 using System.Net;

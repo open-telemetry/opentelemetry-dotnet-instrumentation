@@ -8,10 +8,10 @@ using System.Reflection;
 using OpenTelemetry.AutoInstrumentation.DuckTyping;
 using OpenTelemetry.AutoInstrumentation.Instrumentations.NLog.TraceContextInjection;
 using OpenTelemetry.AutoInstrumentation.Logging;
+using OpenTelemetry.Logs;
 #if NET
 using OpenTelemetry.AutoInstrumentation.Logger;  // Only needed for LoggerInitializer
 #endif
-using OpenTelemetry.Logs;
 using Exception = System.Exception;
 
 namespace OpenTelemetry.AutoInstrumentation.Instrumentations.NLog.Bridge;

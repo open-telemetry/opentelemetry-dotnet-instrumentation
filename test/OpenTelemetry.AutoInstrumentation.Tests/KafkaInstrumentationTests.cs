@@ -3,7 +3,6 @@
 
 using System.Globalization;
 using OpenTelemetry.AutoInstrumentation.Instrumentations.Kafka;
-using Xunit;
 
 namespace OpenTelemetry.AutoInstrumentation.Tests;
 

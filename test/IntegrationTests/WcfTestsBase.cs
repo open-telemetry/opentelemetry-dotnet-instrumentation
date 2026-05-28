@@ -3,7 +3,6 @@
 
 using System.Net.Sockets;
 using IntegrationTests.Helpers;
-using Xunit.Abstractions;
 using static OpenTelemetry.Proto.Trace.V1.Span.Types;
 
 namespace IntegrationTests;
