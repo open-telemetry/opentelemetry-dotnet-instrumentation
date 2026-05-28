@@ -476,7 +476,7 @@ public static partial class LibraryVersion
                 "10.0.0",
 #endif
 #if NET462 || NET10_0
-                "10.0.7",
+                "10.0.8",
 #endif
 #endif
             ];
