@@ -2,8 +2,6 @@
 // SPDX-License-Identifier: Apache-2.0
 
 #if NET
-using Xunit.Abstractions;
-
 namespace IntegrationTests;
 
 public class WcfDotNetTests : WcfTestsBase

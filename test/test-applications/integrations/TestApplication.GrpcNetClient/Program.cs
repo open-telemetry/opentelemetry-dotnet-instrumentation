@@ -1,8 +1,11 @@
 // Copyright The OpenTelemetry Authors
 // SPDX-License-Identifier: Apache-2.0
 
+#if NET
 using System.Net;
+#else
 using System.Net.Http;
+#endif
 using Greet;
 using Grpc.Core;
 using Grpc.Net.Client;
@@ -12,8 +15,8 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.Extensions.DependencyInjection;
-#endif
 using TestApplication.GrpcNetClient;
+#endif
 #if NETFRAMEWORK
 using Grpc.Net.Client.Web;
 #endif

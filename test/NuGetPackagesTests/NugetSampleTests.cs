@@ -3,7 +3,6 @@
 
 using System.Runtime.InteropServices;
 using IntegrationTests.Helpers;
-using Xunit.Abstractions;
 
 namespace IntegrationTests;
 
