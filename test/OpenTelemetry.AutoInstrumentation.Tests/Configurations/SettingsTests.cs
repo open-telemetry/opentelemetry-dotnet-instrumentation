@@ -5,8 +5,6 @@ using System.Globalization;
 using OpenTelemetry.AutoInstrumentation.Configurations;
 using OpenTelemetry.AutoInstrumentation.Tests.Util;
 using OpenTelemetry.Exporter;
-using Xunit;
-
 using AutoOtlpDefinitions = OpenTelemetry.AutoInstrumentation.Configurations.Otlp.OtlpSpecConfigDefinitions;
 
 namespace OpenTelemetry.AutoInstrumentation.Tests.Configurations;

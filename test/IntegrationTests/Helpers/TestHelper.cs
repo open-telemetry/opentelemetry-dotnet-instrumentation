@@ -3,7 +3,6 @@
 
 using System.Diagnostics;
 using System.Reflection;
-using Xunit.Abstractions;
 
 namespace IntegrationTests.Helpers;
 

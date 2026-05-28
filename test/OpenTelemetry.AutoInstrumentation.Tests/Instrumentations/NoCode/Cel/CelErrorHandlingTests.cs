@@ -3,7 +3,6 @@
 
 using OpenTelemetry.AutoInstrumentation.Instrumentations.NoCode;
 using OpenTelemetry.AutoInstrumentation.Instrumentations.NoCode.Cel;
-using Xunit;
 
 namespace OpenTelemetry.AutoInstrumentation.Tests.Instrumentations.NoCode.Cel;
 

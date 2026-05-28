@@ -4,7 +4,6 @@
 #if NETFRAMEWORK
 
 using System.Net;
-using Xunit.Abstractions;
 
 namespace IntegrationTests.Helpers;
 

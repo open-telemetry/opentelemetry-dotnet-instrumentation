@@ -1,8 +1,6 @@
 // Copyright The OpenTelemetry Authors
 // SPDX-License-Identifier: Apache-2.0
 
-using Xunit.Abstractions;
-
 namespace IntegrationTests.Helpers;
 
 internal static class FirewallHelper

@@ -1,9 +1,6 @@
 // Copyright The OpenTelemetry Authors
 // SPDX-License-Identifier: Apache-2.0
 
-using Xunit;
-using Xunit.Abstractions;
-
 namespace OpenTelemetry.AutoInstrumentation.Loader.Tests;
 
 public class LoaderTests(ITestOutputHelper testOutput)

@@ -3,7 +3,6 @@
 
 using IntegrationTests.Helpers;
 using OpAmp.Proto.V1;
-using Xunit.Abstractions;
 
 namespace IntegrationTests;
 

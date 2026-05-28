@@ -4,7 +4,6 @@
 #if NETFRAMEWORK
 using IntegrationTests.Helpers;
 using OpenTelemetry.AutoInstrumentation.Configurations;
-using Xunit.Abstractions;
 
 namespace IntegrationTests;
 
