@@ -5,7 +5,6 @@
 using System.Reflection;
 #endif
 using IntegrationTests.Helpers;
-using Xunit.Abstractions;
 
 namespace IntegrationTests;
 

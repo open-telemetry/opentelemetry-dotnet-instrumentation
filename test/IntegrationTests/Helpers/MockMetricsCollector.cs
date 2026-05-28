@@ -6,7 +6,6 @@ using System.Globalization;
 using System.Text;
 using OpenTelemetry.Proto.Collector.Metrics.V1;
 using OpenTelemetry.Proto.Metrics.V1;
-using Xunit.Abstractions;
 
 #if NETFRAMEWORK
 using System.Net;

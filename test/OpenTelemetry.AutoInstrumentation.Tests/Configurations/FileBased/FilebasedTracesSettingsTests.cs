@@ -6,7 +6,6 @@ using System.Reflection;
 using OpenTelemetry.AutoInstrumentation.Configurations;
 using OpenTelemetry.AutoInstrumentation.Configurations.FileBasedConfiguration;
 using OpenTelemetry.Trace;
-using Xunit;
 
 namespace OpenTelemetry.AutoInstrumentation.Tests.Configurations.FileBased;
 

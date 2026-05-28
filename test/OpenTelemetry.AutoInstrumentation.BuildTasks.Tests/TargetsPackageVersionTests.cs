@@ -3,7 +3,6 @@
 
 using System.Xml.Linq;
 using IntegrationTests.Helpers;
-using Xunit;
 
 namespace OpenTelemetry.AutoInstrumentation.BuildTasks.Tests;
 
