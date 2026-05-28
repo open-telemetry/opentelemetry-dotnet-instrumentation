@@ -19,6 +19,26 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 
 - Following packages updated
   - `OpenTelemetry.OpAmp.Client` from `0.3.0-alpha.1` to `0.4.0-alpha.1`.
+- .NET Framework only, following packages updated
+  - `Microsoft.Bcl.AsyncInterfaces` from `10.0.7` to `10.0.8`,
+  - `Microsoft.Extensions.Configuration` from `10.0.7` to `10.0.8`,
+  - `Microsoft.Extensions.Configuration.Abstractions` from `10.0.7` to `10.0.8`,
+  - `Microsoft.Extensions.Configuration.Binder` from `10.0.7` to `10.0.8`,
+  - `Microsoft.Extensions.DependencyInjection` from `10.0.7` to `10.0.8`,
+  - `Microsoft.Extensions.DependencyInjection.Abstractions`
+    from `10.0.7` to `10.0.8`,
+  - `Microsoft.Extensions.Diagnostics.Abstractions` from `10.0.7` to `10.0.8`,
+  - `Microsoft.Extensions.Logging` from `10.0.7` to `10.0.8`,
+  - `Microsoft.Extensions.Logging.Abstractions` from `10.0.7` to `10.0.8`,
+  - `Microsoft.Extensions.Logging.Configuration` from `10.0.7` to `10.0.8`,
+  - `Microsoft.Extensions.Options` from `10.0.7` to `10.0.8`,
+  - `Microsoft.Extensions.Options.ConfigurationExtensions`
+    from `10.0.7` to `10.0.8`,
+  - `Microsoft.Extensions.Primitives` from `10.0.7` to `10.0.8`,
+  - `System.Diagnostics.DiagnosticSource` from `10.0.7` to `10.0.8`,
+  - `System.IO.Pipelines` from `10.0.7` to `10.0.8`,
+  - `System.Text.Encodings.Web` from `10.0.7` to `10.0.8`,
+  - `System.Text.Json` from `10.0.7` to `10.0.8`.
 
 ### Deprecated
 
