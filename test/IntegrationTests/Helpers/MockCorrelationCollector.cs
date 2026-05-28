@@ -8,7 +8,6 @@ using OpenTelemetry.Proto.Collector.Logs.V1;
 using OpenTelemetry.Proto.Collector.Trace.V1;
 using OpenTelemetry.Proto.Logs.V1;
 using OpenTelemetry.Proto.Trace.V1;
-using Xunit.Abstractions;
 
 namespace IntegrationTests.Helpers;
 

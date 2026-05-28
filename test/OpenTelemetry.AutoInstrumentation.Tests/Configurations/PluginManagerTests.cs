@@ -10,7 +10,6 @@ using OpenTelemetry.Logs;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
-using Xunit;
 
 namespace OpenTelemetry.AutoInstrumentation.Tests.Configurations;
 

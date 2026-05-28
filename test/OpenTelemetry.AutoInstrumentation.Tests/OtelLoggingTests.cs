@@ -3,7 +3,6 @@
 
 using OpenTelemetry.AutoInstrumentation.Logging;
 using OpenTelemetry.AutoInstrumentation.Tests.Util;
-using Xunit;
 
 namespace OpenTelemetry.AutoInstrumentation.Tests;
 

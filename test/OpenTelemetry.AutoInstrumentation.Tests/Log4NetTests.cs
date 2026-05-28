@@ -4,7 +4,6 @@
 using log4net.Core;
 using OpenTelemetry.AutoInstrumentation.Instrumentations.Log4Net.Bridge;
 using OpenTelemetry.Trace;
-using Xunit;
 
 namespace OpenTelemetry.AutoInstrumentation.Tests;
 
