@@ -31,9 +31,7 @@ internal sealed class JsonConsoleExporter : ISelectiveSamplerExporter, IContinuo
         WriteToConsole(samples ?? []);
     }
 
-#pragma warning disable CA1822 // Mark members as static. Needed for AutoInstrumentation plugin loading.
     public void ExportAllocationSamples(byte[] buffer, int read, CancellationToken cancellationToken)
-#pragma warning restore CA1822 // Mark members as static. Needed for AutoInstrumentation plugin loading.
     {
     }
 
