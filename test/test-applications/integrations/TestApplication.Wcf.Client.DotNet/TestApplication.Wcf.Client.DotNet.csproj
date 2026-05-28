@@ -9,8 +9,8 @@
     <PackageReference Include="System.ServiceModel.NetTcp" VersionOverride="$(LibraryVersion)" />
   </ItemGroup>
   <ItemGroup Condition=" '$(LibraryVersion)' == '' and '$(TargetFramework)' != 'net10.0' " >
-    <PackageReference Include="System.ServiceModel.Http" VersionOverride="8.1.2" />
-    <PackageReference Include="System.ServiceModel.NetTcp" VersionOverride="8.1.2" />
+    <PackageReference Include="System.ServiceModel.Http" VersionOverride="10.0.652802" />
+    <PackageReference Include="System.ServiceModel.NetTcp" VersionOverride="10.0.652802" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="System.Security.Cryptography.Pkcs" />
