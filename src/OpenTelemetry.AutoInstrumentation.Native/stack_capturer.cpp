@@ -30,10 +30,8 @@ class StackCaptureImpl final : public IStackCapturer
     using StackSnapshotCallbackContext = ProfilerStackCapture::StackSnapshotCallbackContext;
 
 public:
-    StackCaptureImpl(std::unique_ptr<IProfilerApi>    profilerApi,
-                     std::unique_ptr<IRuntimeCapture> runtime)
-        : profilerApi_(std::move(profilerApi))
-        , runtime_(std::move(runtime))
+    StackCaptureImpl(std::unique_ptr<IProfilerApi> profilerApi, std::unique_ptr<IRuntimeCapture> runtime)
+        : profilerApi_(std::move(profilerApi)), runtime_(std::move(runtime))
     {
     }
 
@@ -140,31 +138,31 @@ private:
 // ============================================================================
 
 std::unique_ptr<IStackCapturer> CreateStackCapturer(ICorProfilerInfo2*               profilerInfo,
-                                                   continuous_profiler::RuntimeType runtimeType)
+                                                    continuous_profiler::RuntimeType runtimeType)
 {
     auto profilerApi = std::make_unique<ProfilerApiAdapter>(profilerInfo);
 
     std::unique_ptr<IRuntimeCapture> runtime;
     switch (runtimeType)
     {
-    case continuous_profiler::RuntimeType::DotNetCore:
-        trace::Logger::Info("[CreateStackCapturer] Initializing for .NET Core runtime.");
-        runtime = std::make_unique<ClrRuntimeCapture>(profilerApi.get());
-        break;
+        case continuous_profiler::RuntimeType::DotNetCore:
+            trace::Logger::Info("[CreateStackCapturer] Initializing for .NET Core runtime.");
+            runtime = std::make_unique<ClrRuntimeCapture>(profilerApi.get());
+            break;
 
-    case continuous_profiler::RuntimeType::DotNetFramework:
+        case continuous_profiler::RuntimeType::DotNetFramework:
 #if defined(_WIN32)
-        trace::Logger::Info("[CreateStackCapturer] Initializing for .NET Framework runtime.");
-        runtime = std::make_unique<NetFxRuntimeCapture>(profilerApi.get());
-        break;
+            trace::Logger::Info("[CreateStackCapturer] Initializing for .NET Framework runtime.");
+            runtime = std::make_unique<NetFxRuntimeCapture>(profilerApi.get());
+            break;
 #else
-        trace::Logger::Error("[CreateStackCapturer] .NET Framework runtime is only supported on Windows.");
-        return nullptr;
+            trace::Logger::Error("[CreateStackCapturer] .NET Framework runtime is only supported on Windows.");
+            return nullptr;
 #endif
 
-    default:
-        trace::Logger::Error("[CreateStackCapturer] Unknown runtime type.");
-        return nullptr;
+        default:
+            trace::Logger::Error("[CreateStackCapturer] Unknown runtime type.");
+            return nullptr;
     }
 
     if (runtime == nullptr)

@@ -10,12 +10,10 @@
 namespace ProfilerStackCapture
 {
 
-ClrRuntimeCapture::ClrRuntimeCapture(IProfilerApi*             profilerApi,
-                                     std::chrono::milliseconds probeTimeout)
+ClrRuntimeCapture::ClrRuntimeCapture(IProfilerApi* profilerApi, std::chrono::milliseconds probeTimeout)
     : profilerApi_(profilerApi)
 #if defined(_WIN32) && defined(_M_AMD64)
-    , stackWalkGuard_(std::make_unique<StackWalkGuard>(profilerApi, probeTimeout, 
-        probeTimeout))
+    , stackWalkGuard_(std::make_unique<StackWalkGuard>(profilerApi, probeTimeout, probeTimeout))
     , nativeWalk_(std::make_unique<SafeNativeWalkService>(profilerApi))
 #endif
 {
@@ -53,8 +51,7 @@ void ClrRuntimeCapture::ResumeRuntime() noexcept
     }
 }
 
-HRESULT ClrRuntimeCapture::CaptureStack(ThreadID                      managedThreadId,
-                                        StackSnapshotCallbackContext* clientData)
+HRESULT ClrRuntimeCapture::CaptureStack(ThreadID managedThreadId, StackSnapshotCallbackContext* clientData)
 {
     if (clientData == nullptr)
     {
@@ -84,14 +81,14 @@ HRESULT ClrRuntimeCapture::CaptureStack(ThreadID                      managedThr
     ThreadGuard target(osThreadId);
     if (!target.IsAcquired())
     {
-        trace::Logger::Debug("[ClrRuntimeCapture] Failed to suspend target for native walk. ManagedID=", managedThreadId,
-                             ", OsID=", osThreadId);
+        trace::Logger::Debug("[ClrRuntimeCapture] Failed to suspend target for native walk. ManagedID=",
+                             managedThreadId, ", OsID=", osThreadId);
         return hr;
     }
     // We are leaving CLR's safety envelope (going to RtlVirtualUnwind).
     // Gate the native walk on HeapLock + Rtl probes for THIS target's
     // lock state.  No CanaryDSS - DSS itself is still CLR-shielded.
-    if (!stackWalkGuard_->ScheduleProbe(kClrNativeWalkProbes,0))
+    if (!stackWalkGuard_->ScheduleProbe(kClrNativeWalkProbes, 0))
     {
         trace::Logger::Debug("[ClrRuntimeCapture] Native walk probes failed. ManagedID=", managedThreadId);
         return hr;
@@ -101,7 +98,7 @@ HRESULT ClrRuntimeCapture::CaptureStack(ThreadID                      managedThr
         trace::Logger::Debug("[ClrRuntimeCapture] Native walk probes failed (abandoned). ManagedID=", managedThreadId);
         return hr;
     }
-    
+
     return nativeWalk_->CaptureNativeThenSeededDss(target.GetHandle(), managedThreadId, clientData);
 #else
     return hr;

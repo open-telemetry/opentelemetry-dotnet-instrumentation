@@ -8,8 +8,7 @@
 namespace ProfilerStackCapture
 {
 
-RuntimeGuard::RuntimeGuard(IRuntimeCapture* runtime)
-    : runtime_(runtime), active_(false)
+RuntimeGuard::RuntimeGuard(IRuntimeCapture* runtime) : runtime_(runtime), active_(false)
 {
     if (runtime_ != nullptr)
     {

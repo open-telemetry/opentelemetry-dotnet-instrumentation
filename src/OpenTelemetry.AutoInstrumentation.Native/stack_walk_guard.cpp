@@ -15,22 +15,20 @@ namespace ProfilerStackCapture
 
 namespace
 {
-    // Anchor used by the RTL lookup probe. noinline + side effect forces
-    // the compiler to emit a real function (and thus a .pdata entry on
-    // x64) that RtlLookupFunctionEntry can resolve.
-    __declspec(noinline) void RtlLookupAnchor() noexcept
-    {
-        static volatile int sink = 0;
-        ++sink;
-    }
+// Anchor used by the RTL lookup probe. noinline + side effect forces
+// the compiler to emit a real function (and thus a .pdata entry on
+// x64) that RtlLookupFunctionEntry can resolve.
+__declspec(noinline) void RtlLookupAnchor() noexcept
+{
+    static volatile int sink = 0;
+    ++sink;
+}
 } // namespace
 
 StackWalkGuard::StackWalkGuard(IProfilerApi*             profilerApi,
                                std::chrono::milliseconds park_timeout,
                                std::chrono::milliseconds probe_timeout)
-    : api_(profilerApi)
-    , park_timeout_(park_timeout)
-    , probe_timeout_(probe_timeout)
+    : api_(profilerApi), park_timeout_(park_timeout), probe_timeout_(probe_timeout)
 {
     worker_ = std::make_unique<std::thread>([this]() { WorkerLoop(); });
 }
@@ -42,7 +40,8 @@ StackWalkGuard::~StackWalkGuard()
         state_ = State::Stopping;
     }
     cv_.notify_all();
-    if (worker_ && worker_->joinable()) worker_->join();
+    if (worker_ && worker_->joinable())
+        worker_->join();
     worker_.reset();
 }
 
@@ -68,10 +67,8 @@ bool StackWalkGuard::ScheduleProbe(ProbeKind flags, ThreadID canary)
     // below. If the worker is still Running (e.g., draining an abandoned
     // previous round whose in-flight check has not returned yet), park
     // until it reaches Idle or park_timeout_ elapses.
-    const bool ready = cv_.wait_for(lk, park_timeout_, [this]
-    {
-        return state_ == State::Idle || state_ == State::Stopping;
-    });
+    const bool ready =
+        cv_.wait_for(lk, park_timeout_, [this] { return state_ == State::Idle || state_ == State::Stopping; });
 
     if (!ready || state_ == State::Stopping)
     {
@@ -99,10 +96,8 @@ bool StackWalkGuard::AwaitProbeResult()
     // for shutdown. Note: when AwaitProbeResult() is entered, state_ is
     // one of {Scheduled, Running, Idle} - Idle here means the worker
     // raced ahead and already published, which we accept immediately.
-    const bool done = cv_.wait_for(lk, probe_timeout_, [this]
-    {
-        return state_ == State::Idle || state_ == State::Stopping;
-    });
+    const bool done =
+        cv_.wait_for(lk, probe_timeout_, [this] { return state_ == State::Idle || state_ == State::Stopping; });
 
     if (!done || state_ == State::Stopping)
     {
@@ -111,9 +106,8 @@ bool StackWalkGuard::AwaitProbeResult()
         // returns from the in-flight check; the next ScheduleProbe()
         // will block (up to park_timeout) for it to reach Idle.
         abandon_ = true;
-        trace::Logger::Warn(
-            "[StackWalkGuard] AwaitProbeResult: composite probe timed out after ",
-            probe_timeout_.count(), "ms");
+        trace::Logger::Warn("[StackWalkGuard] AwaitProbeResult: composite probe timed out after ",
+                            probe_timeout_.count(), "ms");
         return false;
     }
 
@@ -137,12 +131,10 @@ void StackWalkGuard::WorkerLoop()
         // Wait for a new request (or shutdown).
         {
             std::unique_lock<std::mutex> lk(mutex_);
-            cv_.wait(lk, [this]
-            {
-                return state_ == State::Scheduled || state_ == State::Stopping;
-            });
+            cv_.wait(lk, [this] { return state_ == State::Scheduled || state_ == State::Stopping; });
 
-            if (state_ == State::Stopping) break;
+            if (state_ == State::Stopping)
+                break;
 
             flags    = req_flags_;
             canary   = req_canary_;
@@ -155,13 +147,14 @@ void StackWalkGuard::WorkerLoop()
         // (a malloc on a held heap CS will block until the heap is
         // released).
         std::atomic<bool> abandoned_view{false};
-        const bool ok = RunChecks(flags, canary, &abandoned_view);
+        const bool        ok = RunChecks(flags, canary, &abandoned_view);
 
         // Publish verdict and return to Idle. If the caller abandoned us,
         // publish false regardless of what the checks said.
         {
             std::lock_guard<std::mutex> lk(mutex_);
-            if (state_ == State::Stopping) break;
+            if (state_ == State::Stopping)
+                break;
             result_ = ok && !abandon_;
             state_  = State::Idle;
         }
@@ -175,8 +168,7 @@ void StackWalkGuard::WorkerLoop()
     trace::Logger::Info("StackWalkGuard worker exiting");
 }
 
-bool StackWalkGuard::RunChecks(ProbeKind flags, ThreadID canary,
-                               const std::atomic<bool>* /*unused*/) noexcept
+bool StackWalkGuard::RunChecks(ProbeKind flags, ThreadID canary, const std::atomic<bool>* /*unused*/) noexcept
 {
     // Snapshot abandon flag between checks. We re-read under the lock
     // because the worker thread is the only consumer and contention is
@@ -192,12 +184,14 @@ bool StackWalkGuard::RunChecks(ProbeKind flags, ThreadID canary,
     if (HasProbe(flags, ProbeKind::HeapLock))
     {
         void* p = std::malloc(64);
-        if (!p) return false;
+        if (!p)
+            return false;
         std::free(p);
         {
             std::vector<int> v{1, 2, 3}; // also covers STL debug iterators' CS usage
         }
-        if (abandoned()) return false;
+        if (abandoned())
+            return false;
     }
 
 #if defined(_M_AMD64)
@@ -210,7 +204,8 @@ bool StackWalkGuard::RunChecks(ProbeKind flags, ThreadID canary,
         PRUNTIME_FUNCTION e          = ::RtlLookupFunctionEntry(pc, &image_base, nullptr);
         (void)e;
         (void)image_base;
-        if (abandoned()) return false;
+        if (abandoned())
+            return false;
     }
 #endif
 
@@ -225,7 +220,7 @@ bool StackWalkGuard::RunChecks(ProbeKind flags, ThreadID canary,
     {
         StackSnapshotCallbackContext sink{};
         bool                         callback_fired = false;
-        sink.callback         = [&callback_fired](StackSnapshotCallbackContext* ctx) -> HRESULT
+        sink.callback                               = [&callback_fired](StackSnapshotCallbackContext* ctx) -> HRESULT
         {
             // Short-circuit: we only need proof that DSS got far enough to
             // invoke the callback for frame 0. Any non-S_OK return aborts.

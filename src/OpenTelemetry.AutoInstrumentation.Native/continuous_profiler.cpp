@@ -808,7 +808,7 @@ static void CaptureFunctionIdentifiersForThreads(
             auto                  thread = frame->threadId;
             DoStackSnapshotParams doStackSnapshotParams{prof, &threadStacksBuffer[thread]};
 
-            if (frame->isUnmanagedFrame  && frame->functionId == 0 && frame->instructionPointer != 0)
+            if (frame->isUnmanagedFrame && frame->functionId == 0 && frame->instructionPointer != 0)
             {
                 // RTL-originated native frame - record with IP for symbol resolution
                 doStackSnapshotParams.prof->stats_.total_frames++;
@@ -973,12 +973,12 @@ static void RemoveOutdatedEntries(std::unordered_map<trace_context, long long>& 
     prof->nextOutdatedEntriesScan = nextScan;
 }
 
-// The implementation will suspend CLR for 
+// The implementation will suspend CLR for
 // .net and use thread suspension for netfx
 static void CaptureSamples(ContinuousProfiler*                                            prof,
-                                      ICorProfilerInfo7*                                             info7,
-                                      const SamplingType                                             samplingType,
-                                      std::unordered_map<ThreadID, std::vector<FunctionIdentifier>>& threadStacksBuffer)
+                           ICorProfilerInfo7*                                             info7,
+                           const SamplingType                                             samplingType,
+                           std::unordered_map<ThreadID, std::vector<FunctionIdentifier>>& threadStacksBuffer)
 {
     // before trying to suspend the runtime, acquire exclusive lock
     // it's not safe to try to suspend the runtime after other locks are acquired

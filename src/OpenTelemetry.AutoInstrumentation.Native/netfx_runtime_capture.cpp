@@ -12,13 +12,10 @@
 namespace ProfilerStackCapture
 {
 
-NetFxRuntimeCapture::NetFxRuntimeCapture(IProfilerApi*              profilerApi,
-                                         const NetFxCaptureOptions& options)
+NetFxRuntimeCapture::NetFxRuntimeCapture(IProfilerApi* profilerApi, const NetFxCaptureOptions& options)
     : profilerApi_(profilerApi)
     , options_(options)
-    , stackWalkGuard_(std::make_unique<StackWalkGuard>(profilerApi, options.probeTimeout, 
-        options.probeTimeout
-    ))
+    , stackWalkGuard_(std::make_unique<StackWalkGuard>(profilerApi, options.probeTimeout, options.probeTimeout))
 #if defined(_M_AMD64)
     , nativeWalk_(std::make_unique<SafeNativeWalkService>(profilerApi))
 #endif
@@ -42,8 +39,7 @@ CanarySnapshot NetFxRuntimeCapture::SnapshotCanary() const
     return canary_;
 }
 
-HRESULT NetFxRuntimeCapture::CaptureStack(ThreadID                      managedThreadId,
-                                          StackSnapshotCallbackContext* clientData)
+HRESULT NetFxRuntimeCapture::CaptureStack(ThreadID managedThreadId, StackSnapshotCallbackContext* clientData)
 {
     if (clientData == nullptr)
     {
@@ -53,8 +49,7 @@ HRESULT NetFxRuntimeCapture::CaptureStack(ThreadID                      managedT
     const CanarySnapshot canary = SnapshotCanary();
     if (!canary.IsValid())
     {
-        trace::Logger::Debug("[NetFxRuntimeCapture] No canary available; skipping. ManagedID=",
-                             managedThreadId);
+        trace::Logger::Debug("[NetFxRuntimeCapture] No canary available; skipping. ManagedID=", managedThreadId);
         return E_FAIL;
     }
     if (canary.managedId == managedThreadId)
@@ -62,8 +57,8 @@ HRESULT NetFxRuntimeCapture::CaptureStack(ThreadID                      managedT
         return S_FALSE; // never walk the canary itself
     }
 
-    DWORD osThreadId = 0;
-    HRESULT hr = profilerApi_->GetThreadInfo(managedThreadId, &osThreadId);
+    DWORD   osThreadId = 0;
+    HRESULT hr         = profilerApi_->GetThreadInfo(managedThreadId, &osThreadId);
     if (FAILED(hr) || osThreadId == 0)
     {
         trace::Logger::Debug("[NetFxRuntimeCapture] GetThreadInfo failed. ManagedID=", managedThreadId,
@@ -96,7 +91,7 @@ HRESULT NetFxRuntimeCapture::CaptureStack(ThreadID                      managedT
     }
 
     clientData->frame.threadId = managedThreadId;
-    hr = profilerApi_->DoStackSnapshotUnseeded(managedThreadId, clientData);
+    hr                         = profilerApi_->DoStackSnapshotUnseeded(managedThreadId, clientData);
     if (SUCCEEDED(hr))
     {
         return hr;
@@ -134,8 +129,7 @@ void NetFxRuntimeCapture::ReelectCanaryLocked()
             continue;
         }
         canary_ = CanarySnapshot{tid, it->second};
-        trace::Logger::Info("[NetFxRuntimeCapture] New canary elected. ManagedID=", tid,
-                            ", OsID=", it->second);
+        trace::Logger::Info("[NetFxRuntimeCapture] New canary elected. ManagedID=", tid, ", OsID=", it->second);
         return;
     }
 }
@@ -163,7 +157,7 @@ void NetFxRuntimeCapture::OnThreadNameChanged(ThreadID threadId, ULONG cchName, 
         return;
     }
 
-    std::wstring threadName(name, cchName);
+    std::wstring                threadName(name, cchName);
     std::lock_guard<std::mutex> lock(mutex_);
 
     threadNames_[threadId] = threadName;
@@ -180,8 +174,8 @@ void NetFxRuntimeCapture::OnThreadNameChanged(ThreadID threadId, ULONG cchName, 
     }
 
     canary_ = CanarySnapshot{threadId, it->second};
-    trace::Logger::Info("[NetFxRuntimeCapture] Canary designated via NameChanged. ManagedID=",
-                        threadId, ", OsID=", it->second, L", Name=", threadName);
+    trace::Logger::Info("[NetFxRuntimeCapture] Canary designated via NameChanged. ManagedID=", threadId,
+                        ", OsID=", it->second, L", Name=", threadName);
 }
 
 void NetFxRuntimeCapture::OnThreadAssignedToOSThread(ThreadID managedThreadId, DWORD osThreadId)
@@ -202,8 +196,8 @@ void NetFxRuntimeCapture::OnThreadAssignedToOSThread(ThreadID managedThreadId, D
     }
 
     canary_ = CanarySnapshot{managedThreadId, osThreadId};
-    trace::Logger::Info("[NetFxRuntimeCapture] Canary designated via AssignedToOSThread. ManagedID=",
-                        managedThreadId, ", OsID=", osThreadId);
+    trace::Logger::Info("[NetFxRuntimeCapture] Canary designated via AssignedToOSThread. ManagedID=", managedThreadId,
+                        ", OsID=", osThreadId);
 }
 
 } // namespace ProfilerStackCapture

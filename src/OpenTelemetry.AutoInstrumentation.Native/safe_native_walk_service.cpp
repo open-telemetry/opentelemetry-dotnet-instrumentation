@@ -21,8 +21,8 @@ INativeSymbolResolver& SafeNativeWalkService::GetSymbolResolver()
 }
 
 HRESULT SafeNativeWalkService::CaptureNativeThenSeededDss(HANDLE                        threadHandle,
-                                                ThreadID                      managedThreadId,
-                                                StackSnapshotCallbackContext* clientData)
+                                                          ThreadID                      managedThreadId,
+                                                          StackSnapshotCallbackContext* clientData)
 {
     // 1. Get thread context - needed for probe (Rip) and walk (full unwind)
     CONTEXT ctx      = {};
@@ -52,10 +52,10 @@ HRESULT SafeNativeWalkService::CaptureNativeThenSeededDss(HANDLE                
         // CORPROF_E_STACKSNAPSHOT_ABORTED means callback returned S_FALSE - acceptable
         if (hr == CORPROF_E_STACKSNAPSHOT_ABORTED)
             hr = S_OK;
-       
     }
-    trace::Logger::Debug("[SafeNativeWalkService] Capture complete. Native frames captured=", walkResult.nativeFrameCount,
-                         ", DSS seed=", walkResult.hasSeed ? "yes" : "no", ", final HRESULT=0x", std::hex, walkResult.hr, std::dec);
+    trace::Logger::Debug("[SafeNativeWalkService] Capture complete. Native frames captured=",
+                         walkResult.nativeFrameCount, ", DSS seed=", walkResult.hasSeed ? "yes" : "no",
+                         ", final HRESULT=0x", std::hex, walkResult.hr, std::dec);
     return S_OK;
 }
 
