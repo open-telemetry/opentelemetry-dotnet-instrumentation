@@ -5,15 +5,7 @@
     <TargetFrameworks Condition="'$(OS)' == 'Windows_NT'">$(TargetFrameworks);net472</TargetFrameworks>
   </PropertyGroup>
 
-  <PropertyGroup Condition=" '$(TargetFramework)' == 'net10.0' and '$(LibraryVersion)' == '' ">
-    <UseNServiceBusHostedEndpoint>true</UseNServiceBusHostedEndpoint>
-  </PropertyGroup>
-
-  <PropertyGroup Condition=" '$(TargetFramework)' == 'net10.0' and '$(LibraryVersion)' != '' and '$(LibraryVersion)' &gt;= '10.2.0' ">
-    <UseNServiceBusHostedEndpoint>true</UseNServiceBusHostedEndpoint>
-  </PropertyGroup>
-
-  <PropertyGroup Condition=" '$(UseNServiceBusHostedEndpoint)' == 'true' ">
+  <PropertyGroup Condition=" '$(TargetFramework)' != 'net472' and ( '$(LibraryVersion)' == '' or ( '$(LibraryVersion)' != '' and '$(LibraryVersion)' &gt;= '10.2.0' ) ) ">
     <DefineConstants>$(DefineConstants);NSERVICEBUS_HOSTED_ENDPOINT</DefineConstants>
   </PropertyGroup>
 
