@@ -973,7 +973,9 @@ static void RemoveOutdatedEntries(std::unordered_map<trace_context, long long>& 
     prof->nextOutdatedEntriesScan = nextScan;
 }
 
-static void PauseClrAndCaptureSamples(ContinuousProfiler*                                            prof,
+// The implementation will suspend CLR for 
+// .net and use thread suspension for netfx
+static void CaptureSamples(ContinuousProfiler*                                            prof,
                                       ICorProfilerInfo7*                                             info7,
                                       const SamplingType                                             samplingType,
                                       std::unordered_map<ThreadID, std::vector<FunctionIdentifier>>& threadStacksBuffer)
@@ -1165,7 +1167,7 @@ static void SamplingThreadMain(ContinuousProfiler* prof)
             iteration = 0;
         }
 
-        PauseClrAndCaptureSamples(prof, info7, samplingType, threadStacksBuffer);
+        CaptureSamples(prof, info7, samplingType, threadStacksBuffer);
 
         if (prof->IsShutdownRequested())
         {
@@ -1379,7 +1381,7 @@ void ContinuousProfiler::AllocationTick(ULONG dataLen, LPCBYTE data)
 {
     // try to acquire shared lock without blocking
     // and return early if attempt was unsuccessful -
-    // PauseClrAndCaptureSamples acquired exclusive lock
+    // CaptureSamples acquired exclusive lock
     // and it's not safe to proceed
     std::shared_lock<std::shared_mutex> shared_lock(profiling_lock, std::try_to_lock);
     if (!shared_lock.owns_lock())
