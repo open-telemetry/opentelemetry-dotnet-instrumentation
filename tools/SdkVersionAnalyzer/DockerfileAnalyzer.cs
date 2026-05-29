@@ -21,6 +21,9 @@ internal static partial class DockerfileAnalyzer
     [GeneratedRegex(@"(?:^|-v\s+)(\d+\.\d+\.\d{3}(?:-(?:preview|rc)\.\d+(?:\.\d+)*)?)", RegexOptions.IgnoreCase, "en-US")]
     private static partial Regex VersionRegex();
 
+    [GeneratedRegex(@"^(\d+\.\d+\.\d{3}-(?:preview|rc)\.\d+)(?:\.\d+)+$", RegexOptions.IgnoreCase, "en-US")]
+    private static partial Regex DockerImageVersionRegex();
+
     private static string ModifySdkVersions(string content, DotnetSdkVersion requestedDotnetSdkVersion)
     {
         var dockerfile = Dockerfile.Parse(content);
@@ -103,7 +106,7 @@ internal static partial class DockerfileAnalyzer
     private static string GetModifiedImageName(DotnetSdkVersion requestedDotnetSdkVersion, ImageName imageName)
     {
         var (sdkVersion, suffix) = GetSdkVersionAndSuffix(imageName);
-        var newVersion = GetNewVersion(sdkVersion, requestedDotnetSdkVersion);
+        var newVersion = GetDockerImageVersion(GetNewVersion(sdkVersion, requestedDotnetSdkVersion));
         var modifiedTag = string.IsNullOrEmpty(suffix) ? newVersion : $"{newVersion}-{suffix}";
 
         return ImageName.FormatImageName(imageName.Repository, imageName.Registry, modifiedTag, null);
@@ -159,6 +162,12 @@ internal static partial class DockerfileAnalyzer
         }
 
         return oldVersion;
+    }
+
+    private static string GetDockerImageVersion(string version)
+    {
+        var match = DockerImageVersionRegex().Match(version);
+        return match.Success ? match.Groups[1].Value : version;
     }
 
     private static string[] GetDockerfiles(string root)
