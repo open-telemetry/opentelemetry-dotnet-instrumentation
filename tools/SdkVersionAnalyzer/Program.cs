@@ -41,6 +41,7 @@ internal static class Program
     {
         ActionWorkflowAnalyzer.ModifyVersions(directoryRoot, requestedSdkVersions);
         DockerfileAnalyzer.ModifyVersions(directoryRoot, requestedSdkVersions);
+        GlobalJsonAnalyzer.ModifyVersions(directoryRoot, requestedSdkVersions);
     }
 
     private static int VerifyDotnetSdkVersions(string directoryRoot)
@@ -65,6 +66,12 @@ internal static class Program
         if (!SdkVersionAnalyzer.DockerfileAnalyzer.VerifyVersions(directoryRoot, expectedVersion))
         {
             Console.WriteLine("Invalid SDK versions in dockerfiles.");
+            return 1;
+        }
+
+        if (!GlobalJsonAnalyzer.VerifyVersions(directoryRoot, expectedVersion))
+        {
+            Console.WriteLine("Invalid SDK version in global.json.");
             return 1;
         }
 
