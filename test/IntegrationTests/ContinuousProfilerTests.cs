@@ -9,6 +9,19 @@ namespace IntegrationTests;
 
 public class ContinuousProfilerTests : TestHelper
 {
+    private static readonly string[] NativeFrameMarkers =
+   [
+       "ntdll.dll!NtWaitForSingleObject",
+        "KERNELBASE.dll!WaitForSingleObjectEx",
+#if NETFRAMEWORK
+        "clr.dll",
+#else
+        "coreclr.dll",
+#endif
+        "KERNEL32.DLL!BaseThreadInitThunk",
+        "ntdll.dll!RtlUserThreadStart"
+   ];
+
     public ContinuousProfilerTests(ITestOutputHelper output)
         : base("ContinuousProfiler", output)
     {
@@ -63,6 +76,13 @@ public class ContinuousProfilerTests : TestHelper
 
         collector.ExpectCollected(ExpectCollected, "Expect Collected failed");
         collector.Expect(profileData => profileData.ResourceProfiles.Any(resourceProfiles => resourceProfiles.ScopeProfiles.Any(scopeProfile => scopeProfile.Profiles.Any(profile => ContainStackTraceForClassHierarchy(profile, profileData.Dictionary, expectedStackTrace) && ContainSampleType(profile, profileData.Dictionary, "samples", "count") && ContainPeriod(profile, profileData.Dictionary, "cpu", "nanoseconds", 1_000_000_000) && profile.Samples[0].Values[0] == 1))));
+
+        if (Environment.OSVersion.Platform == PlatformID.Win32NT && Environment.Is64BitProcess)
+        {
+            collector.Expect(
+                profileData => profileData.ResourceProfiles.Any(resourceProfiles => resourceProfiles.ScopeProfiles.Any(scopeProfile => scopeProfile.Profiles.Any(profile => ContainNativeFrame(profile, profileData.Dictionary)))),
+                "Expected at least one native frame in thread samples on Windows x64");
+        }
 
         var (_, _, processId) = RunTestApplication();
 
@@ -212,5 +232,31 @@ public class ContinuousProfilerTests : TestHelper
                 }
             }
         }
+    }
+
+    private static bool ContainNativeFrame(Profile profile, ProfilesDictionary dictionary)
+    {
+        foreach (var sample in profile.Samples)
+        {
+            var stackIndex = sample.StackIndex;
+            if (stackIndex <= 0 || stackIndex >= dictionary.StackTable.Count)
+            {
+                continue;
+            }
+
+            var stack = dictionary.StackTable[stackIndex];
+            foreach (var frameName in GetFrameNames(stack, dictionary))
+            {
+                foreach (var marker in NativeFrameMarkers)
+                {
+                    if (frameName.Contains(marker, StringComparison.OrdinalIgnoreCase))
+                    {
+                        return true;
+                    }
+                }
+            }
+        }
+
+        return false;
     }
 }

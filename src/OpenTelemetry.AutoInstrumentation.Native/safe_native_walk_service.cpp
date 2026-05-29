@@ -20,31 +20,7 @@ INativeSymbolResolver& SafeNativeWalkService::GetSymbolResolver()
     return NativeSymbolResolver::Instance();
 }
 
-HRESULT SafeNativeWalkService::CaptureRunningThread(DWORD                         osThreadId,
-                                                    ThreadID                      managedThreadId,
-                                                    StackSnapshotCallbackContext* clientData)
-{
-    try
-    {
-        ScopedThreadSuspend suspended(osThreadId);
-        return ProbeWalkAndSeed(suspended.GetHandle(), managedThreadId, clientData);
-        // Thread auto-resumes via RAII
-    }
-    catch (const std::exception& ex)
-    {
-        trace::Logger::Debug("[SafeNativeWalkService] Failed to suspend/capture thread ", osThreadId, ": ", ex.what());
-        return E_FAIL;
-    }
-}
-
-HRESULT SafeNativeWalkService::CaptureSuspendedThread(HANDLE                        threadHandle,
-                                                      ThreadID                      managedThreadId,
-                                                      StackSnapshotCallbackContext* clientData)
-{
-    return ProbeWalkAndSeed(threadHandle, managedThreadId, clientData);
-}
-
-HRESULT SafeNativeWalkService::ProbeWalkAndSeed(HANDLE                        threadHandle,
+HRESULT SafeNativeWalkService::CaptureNativeThenSeededDss(HANDLE                        threadHandle,
                                                 ThreadID                      managedThreadId,
                                                 StackSnapshotCallbackContext* clientData)
 {
@@ -76,14 +52,10 @@ HRESULT SafeNativeWalkService::ProbeWalkAndSeed(HANDLE                        th
         // CORPROF_E_STACKSNAPSHOT_ABORTED means callback returned S_FALSE - acceptable
         if (hr == CORPROF_E_STACKSNAPSHOT_ABORTED)
             hr = S_OK;
-
-        if (FAILED(hr))
-        {
-            trace::Logger::Debug("[SafeNativeWalkService] Seeded DSS failed. HRESULT=0x", std::hex, hr, std::dec);
-            // We still captured native frames, so partial success
-        }
+       
     }
-
+    trace::Logger::Debug("[SafeNativeWalkService] Capture complete. Native frames captured=", walkResult.nativeFrameCount,
+                         ", DSS seed=", walkResult.hasSeed ? "yes" : "no", ", final HRESULT=0x", std::hex, walkResult.hr, std::dec);
     return S_OK;
 }
 
@@ -145,7 +117,7 @@ NativeWalkResult SafeNativeWalkService::WalkNativeUntilManaged(const CONTEXT&   
             clientData->frame.frameInfo          = 0;
             clientData->frame.contextSize        = 0;
             clientData->frame.context            = nullptr;
-            clientData->frame.isNativeWalkFrame  = true;
+            clientData->frame.isUnmanagedFrame   = true;
 
             HRESULT cbResult = clientData->callback(clientData);
             if (cbResult != S_OK)

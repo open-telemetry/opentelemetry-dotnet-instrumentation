@@ -4,16 +4,16 @@
 #ifndef OTEL_STACK_WALKER_IMPL_H_
 #define OTEL_STACK_WALKER_IMPL_H_
 
-#include "stack_walker.h"
-#include "captured_frame.h"
-#include "stack_capture_strategy_factory.h"
-#include "profiler_api.h"
 #include <memory>
+#include <unordered_set>
+
+#include "stack_walker.h"
+#include "stack_capturer.h"
 
 namespace continuous_profiler
 {
 
-/// @brief Concrete implementation that owns the strategy and exposes
+/// @brief Concrete implementation that owns the stack capturer and exposes
 /// IStackWalker + IThreadLifecycleListener as separate facets.
 /// Because StackSnapshotCallbackContext embeds CapturedFrame, the bridge
 /// passes the embedded frame by pointer with zero copies.
@@ -21,9 +21,10 @@ class StackWalkerImpl : public IStackWalker, public IThreadLifecycleListener
 {
 public:
     explicit StackWalkerImpl(ICorProfilerInfo2* profilerInfo, RuntimeType runtimeType)
-        : strategy_(StackCaptureStrategyFactory::Create(profilerInfo, runtimeType))
+        : capturer_(ProfilerStackCapture::CreateStackCapturer(profilerInfo, runtimeType))
     {
     }
+
     // -- IStackWalker (consumed by ContinuousProfiler) --
     HRESULT CaptureStacks(const std::unordered_set<ThreadID>& threads,
                           StackCaptureRequest*                request) override
@@ -36,38 +37,39 @@ public:
         };
 
         ProfilerStackCapture::StackSnapshotCallbackContext context{bridgeCallback};
-        return strategy_->CaptureStacks(threads, &context);
+        return capturer_->CaptureStacks(threads, &context);
     }
 
     HRESULT ResolveNativeSymbolName(UINT_PTR        instructionPointer,
                                     trace::WSTRING& outName) override
     {
-        return strategy_->ResolveNativeSymbolName(instructionPointer, outName);
+        return capturer_->ResolveNativeSymbolName(instructionPointer, outName);
     }
 
     // -- IThreadLifecycleListener (consumed by CLR callback layer) --
     void OnThreadCreated(ThreadID threadId) override
     {
-        strategy_->OnThreadCreated(threadId);
+        capturer_->OnThreadCreated(threadId);
     }
 
     void OnThreadDestroyed(ThreadID threadId) override
     {
-        strategy_->OnThreadDestroyed(threadId);
+        capturer_->OnThreadDestroyed(threadId);
     }
 
     void OnThreadNameChanged(ThreadID threadId, ULONG cchName, WCHAR name[]) override
     {
-        strategy_->OnThreadNameChanged(threadId, cchName, name);
+        capturer_->OnThreadNameChanged(threadId, cchName, name);
     }
 
     void OnThreadAssignedToOSThread(ThreadID managedThreadId, DWORD osThreadId) override
     {
-        strategy_->OnThreadAssignedToOSThread(managedThreadId, osThreadId);
+        capturer_->OnThreadAssignedToOSThread(managedThreadId, osThreadId);
     }
 
 private:
-    std::unique_ptr<IStackCaptureStrategy> strategy_;
+    using IStackCapturer = ProfilerStackCapture::IStackCapturer;
+    std::unique_ptr<IStackCapturer> capturer_;
 };
 
 } // namespace continuous_profiler

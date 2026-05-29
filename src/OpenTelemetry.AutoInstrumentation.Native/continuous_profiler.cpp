@@ -4,7 +4,7 @@
 // We want to use std::min, not the windows.h macro
 #define NOMINMAX
 #include "continuous_profiler.h"
-#include "captured_frame.h"
+#include "stack_capture_types.h"
 #include "logger.h"
 #include <chrono>
 #include <map>
@@ -808,7 +808,7 @@ static void CaptureFunctionIdentifiersForThreads(
             auto                  thread = frame->threadId;
             DoStackSnapshotParams doStackSnapshotParams{prof, &threadStacksBuffer[thread]};
 
-            if (frame->isNativeWalkFrame && frame->functionId == 0 && frame->instructionPointer != 0)
+            if (frame->isUnmanagedFrame  && frame->functionId == 0 && frame->instructionPointer != 0)
             {
                 // RTL-originated native frame - record with IP for symbol resolution
                 doStackSnapshotParams.prof->stats_.total_frames++;

@@ -9,7 +9,6 @@
 #include <chrono>
 #include <memory>
 #include "profiler_api.h"
-#include "stack_safety_probe.h"
 #include "native_symbol_resolver.h"
 
 namespace ProfilerStackCapture
@@ -43,15 +42,18 @@ public:
     SafeNativeWalkService(const SafeNativeWalkService&)            = delete;
     SafeNativeWalkService& operator=(const SafeNativeWalkService&) = delete;
 
-    /// @brief Full sequence for a thread not yet suspended at OS level.
-    ///        Suspends, probes, walks native frames, seeds DSS if managed hit, resumes.
-    HRESULT CaptureRunningThread(DWORD                         osThreadId,
-                          ThreadID                      managedThreadId,
-                          StackSnapshotCallbackContext* clientData);
-
-    /// @brief Full sequence for a thread already suspended by caller.
-    ///        Probes, walks native frames, seeds DSS if managed hit.
-    HRESULT CaptureSuspendedThread(HANDLE                        threadHandle,
+   
+    ///Hybrid stack capture: probed native RTL walk until a managed
+    ///        boundary is found, then seeded DoStackSnapshot from that
+    ///        CONTEXT. If no managed frame is reached, the walk terminates
+    ///        with the native frames already emitted (bounded by stack
+    ///        depth). Seed is discovered internally - callers must not
+    ///        attempt to pre-fetch or pass one in.
+    ///  The thread must already be suspended by the caller, and the handle passed in must 
+    ///  be valid (safety of the walk relies on the thread remaining suspended for the duration of the call). This is
+    ///  used by the CLR capture implementation, which performs its own suspension and needs to control the exact point
+    ///  of capture to properly seed DSS.
+    HRESULT CaptureNativeThenSeededDss(HANDLE                        threadHandle,
                                           ThreadID                      managedThreadId,
                                           StackSnapshotCallbackContext* clientData);
 
@@ -61,11 +63,7 @@ public:
 private:
     IProfilerApi*                     profilerApi_;
 
-    /// @brief Core: probe, walk native frames until managed boundary, seed DSS.
-    HRESULT ProbeWalkAndSeed(HANDLE                        threadHandle,
-                             ThreadID                      managedThreadId,
-                             StackSnapshotCallbackContext* clientData);
-
+   
     /// @brief Walk native frames starting from the given context, stopping when
     ///        a managed frame is found. Emits native frames via clientData callback.
     NativeWalkResult WalkNativeUntilManaged(const CONTEXT&                initialCtx,

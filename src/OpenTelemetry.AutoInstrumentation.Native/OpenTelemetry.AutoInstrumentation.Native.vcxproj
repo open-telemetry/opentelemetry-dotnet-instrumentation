@@ -189,6 +189,7 @@
     <ClInclude Include="calltarget_tokens.h" />
     <ClInclude Include="captured_frame.h" />
     <ClInclude Include="class_factory.h" />
+    <ClInclude Include="clr_runtime_capture.h" />
     <ClInclude Include="com_ptr.h" />
     <ClInclude Include="configuration.h" />
     <ClInclude Include="continuous_profiler_clr_helpers.h" />
@@ -204,7 +205,6 @@
     <ClInclude Include="il_rewriter_wrapper.h" />
     <ClInclude Include="integration.h" />
     <ClInclude Include="clr_helpers.h" />
-    <ClInclude Include="invocation_queue.h" />
     <ClInclude Include="logger.h" />
     <ClInclude Include="logger_impl.h" />
     <ClInclude Include="macros.h" />
@@ -216,6 +216,7 @@
     <ClInclude Include="miniutfdata.h" />
     <ClInclude Include="module_metadata.h" />
     <ClInclude Include="native_symbol_resolver.h" />
+    <ClInclude Include="netfx_runtime_capture.h" />
     <ClInclude Include="otel_profiler_constants.h" />
     <ClInclude Include="pal.h" />
     <ClInclude Include="profiler_api.h" />
@@ -225,21 +226,21 @@
     <ClInclude Include="rejit_work_offloader.h" />
     <ClInclude Include="rtl_imports.h" />
     <ClInclude Include="rtl_stack_walk.h" />
+    <ClInclude Include="runtime_capture.h" />
     <ClInclude Include="safe_native_walk_service.h" />
     <ClInclude Include="signature_builder.h" />
-    <ClInclude Include="stack_capture_strategy.h" />
-    <ClInclude Include="stack_capture_strategy_factory.h" />
-    <ClInclude Include="stack_safety_probe.h" />
+    <ClInclude Include="stack_capturer.h" />
+    <ClInclude Include="stack_capture_types.h" />
     <ClInclude Include="stack_walker.h" />
     <ClInclude Include="stack_walker_impl.h" />
+    <ClInclude Include="stack_walk_guard.h" />
     <ClInclude Include="startup_hook.h" />
     <ClInclude Include="stats.h" />
     <ClInclude Include="string_utils.h" />
     <ClInclude Include="stub_generator.h" />
-    <ClInclude Include="suspension_policy.h" />
+    <ClInclude Include="suspension_guards.h" />
     <ClInclude Include="thread_suspend.h" />
     <ClInclude Include="tracer_tokens.h" />
-    <ClInclude Include="unified_stack_capture_strategy.h" />
     <ClInclude Include="util.h" />
     <ClInclude Include="version.h" />
   </ItemGroup>
@@ -247,6 +248,7 @@
     <ClCompile Include="calltarget_tokens.cpp" />
     <ClCompile Include="class_factory.cpp" />
     <ClCompile Include="clr_helpers.cpp" />
+    <ClCompile Include="clr_runtime_capture.cpp" />
     <ClCompile Include="configuration.cpp" />
     <ClCompile Include="continuous_profiler_clr_helpers.cpp" />
     <ClCompile Include="continuous_profiler.cpp" />
@@ -256,11 +258,11 @@
     <ClCompile Include="il_rewriter.cpp" />
     <ClCompile Include="il_rewriter_wrapper.cpp" />
     <ClCompile Include="integration.cpp" />
-    <ClCompile Include="invocation_queue.cpp" />
     <ClCompile Include="member_resolver.cpp" />
     <ClCompile Include="metadata_builder.cpp" />
     <ClCompile Include="method_rewriter.cpp" />
     <ClCompile Include="miniutf.cpp" />
+    <ClCompile Include="netfx_runtime_capture.cpp" />
     <ClCompile Include="profiler_api_adapter.cpp" />
     <ClCompile Include="regex_utils.cpp" />
     <ClCompile Include="rejit_handler.cpp" />
@@ -268,14 +270,13 @@
     <ClCompile Include="rejit_work_offloader.cpp" />
     <ClCompile Include="rtl_stack_walk.cpp" />
     <ClCompile Include="safe_native_walk_service.cpp" />
-    <ClCompile Include="stack_capture_strategy_factory.cpp" />
-    <ClCompile Include="stack_safety_probe.cpp" />
+    <ClCompile Include="stack_capturer.cpp" />
+    <ClCompile Include="stack_walk_guard.cpp" />
     <ClCompile Include="string_utils.cpp" />
     <ClCompile Include="stub_generator.cpp" />
-    <ClCompile Include="suspension_policy.cpp" />
+    <ClCompile Include="suspension_guards.cpp" />
     <ClCompile Include="thread_suspend.cpp" />
     <ClCompile Include="tracer_tokens.cpp" />
-    <ClCompile Include="unified_stack_capture_strategy.cpp" />
     <ClCompile Include="util.cpp" />
   </ItemGroup>
   <ItemGroup>

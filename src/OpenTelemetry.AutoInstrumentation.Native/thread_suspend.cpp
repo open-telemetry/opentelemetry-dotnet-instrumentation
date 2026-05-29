@@ -13,7 +13,7 @@ namespace ProfilerStackCapture
 ScopedThreadSuspend::ScopedThreadSuspend(DWORD nativeThreadId) : threadHandle_(INVALID_HANDLE_VALUE), suspended_(false)
 {
     threadHandle_ = OpenThread(THREAD_GET_CONTEXT | THREAD_SUSPEND_RESUME, FALSE, nativeThreadId);
-    if (threadHandle_ == NULL)
+    if (!IsValidThreadHandle(threadHandle_))
     {
         throw std::runtime_error("Failed to open thread handle");
     }
@@ -31,7 +31,7 @@ ScopedThreadSuspend::ScopedThreadSuspend(DWORD nativeThreadId) : threadHandle_(I
 
 ScopedThreadSuspend::~ScopedThreadSuspend()
 {
-    if (threadHandle_ != INVALID_HANDLE_VALUE)
+    if (IsValidThreadHandle(threadHandle_))
     {
         if (suspended_)
         {

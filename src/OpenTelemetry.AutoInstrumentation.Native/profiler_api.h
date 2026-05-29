@@ -8,7 +8,7 @@
 #include <corhlpr.h>
 #include <corprof.h>
 #include <functional>
-#include "captured_frame.h"
+#include "stack_capture_types.h"
 
 namespace ProfilerStackCapture
 {
@@ -33,7 +33,7 @@ inline HRESULT __stdcall StackSnapshotCallbackDefault(
     callbackData->frame.frameInfo          = frameInfo;
     callbackData->frame.contextSize        = contextSize;
     callbackData->frame.context            = context;
-    callbackData->frame.isNativeWalkFrame  = false; // DSS frames are never meaningful native frames
+    callbackData->frame.isUnmanagedFrame   = funcId == 0; // CLR signals native frames with funcId == 0 and non-null IP
 
     return callbackData->callback(callbackData);
 }

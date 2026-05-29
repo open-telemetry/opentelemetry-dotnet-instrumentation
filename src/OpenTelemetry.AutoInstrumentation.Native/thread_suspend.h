@@ -13,6 +13,18 @@
 
 namespace ProfilerStackCapture
 {
+/// <summary>
+/// Win32 thread handle validity check.
+///
+/// OpenThread / OpenProcess return NULL on failure (not INVALID_HANDLE_VALUE);
+/// CreateFile-family APIs return INVALID_HANDLE_VALUE.  Code that consumes
+/// either family must reject both sentinels to be correct.
+/// </summary>
+inline bool IsValidThreadHandle(HANDLE h) noexcept
+{
+    return h != nullptr && h != INVALID_HANDLE_VALUE;
+}
+
 
 /// @brief RAII guard for Win32 SuspendThread / ResumeThread.
 /// Opens the thread handle, suspends on construction, resumes on destruction.
