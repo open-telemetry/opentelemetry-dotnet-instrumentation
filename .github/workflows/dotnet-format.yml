@@ -35,5 +35,9 @@ jobs:
     - name: Setup .NET
       uses: ./.github/actions/setup-dotnet
 
+    - name: Create local NuGet package source
+      run: New-Item -ItemType Directory -Path .\bin\nuget-artifacts -Force
+      shell: pwsh
+
     - name: dotnet format
-      run: dotnet format .\OpenTelemetry.AutoInstrumentation.sln --no-restore --verify-no-changes
+      run: dotnet format .\OpenTelemetry.AutoInstrumentation.sln --verify-no-changes

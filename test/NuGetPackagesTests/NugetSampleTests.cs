@@ -1,7 +1,9 @@
 // Copyright The OpenTelemetry Authors
 // SPDX-License-Identifier: Apache-2.0
 
+#if NET
 using System.Runtime.InteropServices;
+#endif
 using IntegrationTests.Helpers;
 
 namespace IntegrationTests;
