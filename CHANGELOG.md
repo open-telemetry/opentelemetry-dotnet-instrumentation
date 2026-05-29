@@ -16,6 +16,7 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 #### Dependency updates
 
 - Following packages updated
+  - `Google.Protobuf` updated from `3.31.1` to `3.35.0`,
   - `OpenTelemetry.OpAmp.Client` from `0.3.0-alpha.1` to `0.4.0-alpha.1`.
 - .NET Framework only, following packages updated
   - `Microsoft.Bcl.AsyncInterfaces` from `10.0.7` to `10.0.8`,
