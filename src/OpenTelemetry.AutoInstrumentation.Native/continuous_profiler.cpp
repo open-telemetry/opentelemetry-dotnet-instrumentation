@@ -699,8 +699,12 @@ trace::WSTRING* NamingHelper::Lookup(const FunctionIdentifier& function_identifi
     {
         if (auto hr = stackWalker_->ResolveNativeSymbolName(function_identifier.native_ip, *owned); hr != S_OK)
         {
-            // owned's destructor deletes the string
-            return GetOrCreateUnknownNativeSentinel();
+            // Cache a per-key copy of the unknown sentinel so repeated lookups
+            // of the same unresolved IP are O(1) and avoid re-entering the resolver.
+            owned->assign(WStr("Unknown_Native_Function(unknown)"));
+            trace::WSTRING* raw = owned.release();
+            owned.reset(function_name_cache_.Put(function_identifier, raw));
+            return raw;
         }
     }
     else
@@ -710,7 +714,6 @@ trace::WSTRING* NamingHelper::Lookup(const FunctionIdentifier& function_identifi
 
     trace::WSTRING* raw = owned.release();
     owned.reset(function_name_cache_.Put(function_identifier, raw));
-    // owned's destructor deletes the evicted entry (or no-ops if null)
     return raw;
 }
 

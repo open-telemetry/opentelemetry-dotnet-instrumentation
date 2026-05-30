@@ -9,18 +9,25 @@ namespace IntegrationTests;
 
 public class ContinuousProfilerTests : TestHelper
 {
+    // Common native frame markers present on both runtimes on Windows x64.
     private static readonly string[] NativeFrameMarkers =
-   [
-       "ntdll.dll!NtWaitForSingleObject",
+    [
+        "ntdll.dll!NtWaitForSingleObject",
         "KERNELBASE.dll!WaitForSingleObjectEx",
+        "KERNEL32.dll!BaseThreadInitThunk",
+        "ntdll.dll!RtlUserThreadStart",
 #if NETFRAMEWORK
+        // .NET Framework Windows x64 native walk markers.
         "clr.dll",
+        "ntdll.dll!NtRemoveIoCompletion",
+        "KERNELBASE.dll!GetQueuedCompletionStatus",
 #else
+        // .NET Core Windows x64 native walk markers.
         "coreclr.dll",
+        "ntdll.dll!NtWaitForWorkViaWorkerFactory",
+        "ntdll.dll!RtlSetThreadSubProcessTag",
 #endif
-        "KERNEL32.DLL!BaseThreadInitThunk",
-        "ntdll.dll!RtlUserThreadStart"
-   ];
+    ];
 
     public ContinuousProfilerTests(ITestOutputHelper output)
         : base("ContinuousProfiler", output)
@@ -77,11 +84,28 @@ public class ContinuousProfilerTests : TestHelper
         collector.ExpectCollected(ExpectCollected, "Expect Collected failed");
         collector.Expect(profileData => profileData.ResourceProfiles.Any(resourceProfiles => resourceProfiles.ScopeProfiles.Any(scopeProfile => scopeProfile.Profiles.Any(profile => ContainStackTraceForClassHierarchy(profile, profileData.Dictionary, expectedStackTrace) && ContainSampleType(profile, profileData.Dictionary, "samples", "count") && ContainPeriod(profile, profileData.Dictionary, "cpu", "nanoseconds", 1_000_000_000) && profile.Samples[0].Values[0] == 1))));
 
+        // Native walk is only active on Windows x64 for both .NET Framework and .NET Core.
         if (Environment.OSVersion.Platform == PlatformID.Win32NT && Environment.Is64BitProcess)
         {
             collector.Expect(
                 profileData => profileData.ResourceProfiles.Any(resourceProfiles => resourceProfiles.ScopeProfiles.Any(scopeProfile => scopeProfile.Profiles.Any(profile => ContainNativeFrame(profile, profileData.Dictionary)))),
                 "Expected at least one native frame in thread samples on Windows x64");
+
+#if NETFRAMEWORK
+            // NetFx Windows x64: IO completion port threads are purely native (no managed frames).
+            // Their presence proves the RTL native walk captured threads that DSS would silently skip.
+            collector.Expect(
+                profileData => profileData.ResourceProfiles.Any(resourceProfiles => resourceProfiles.ScopeProfiles.Any(scopeProfile => scopeProfile.Profiles.Any(
+                    profile => ContainPureNativeIoStack(profile, profileData.Dictionary)))),
+                "Expected a purely-native IO completion port stack on Windows x64 .NET Framework");
+#else
+            // .NET Core Windows x64: ThreadPool worker factory threads are purely native (no managed frames).
+            // Their presence proves the RTL native walk captured threads that DSS would silently skip.
+            collector.Expect(
+                profileData => profileData.ResourceProfiles.Any(resourceProfiles => resourceProfiles.ScopeProfiles.Any(scopeProfile => scopeProfile.Profiles.Any(
+                    profile => ContainPureNativeWorkerFactoryStack(profile, profileData.Dictionary)))),
+                "Expected a purely-native ThreadPool worker factory stack on Windows x64 .NET Core");
+#endif
         }
 
         var (_, _, processId) = RunTestApplication();
@@ -151,7 +175,11 @@ public class ContinuousProfilerTests : TestHelper
             "My.Custom.Test.Namespace.TestDynamicClass.TryInvoke(System.Dynamic.InvokeBinder, System.Object[], System.Object\u0026)",
             "System.Dynamic.UpdateDelegates.UpdateAndExecuteVoid3[T0, T1, T2](System.Runtime.CompilerServices.CallSite, T0, T1, T2)",
 #if NETFRAMEWORK
-            "Unknown_Native_Function(unknown)",
+            // On Windows x64 .NET Framework, CLR transition frames resolve to clr.dll via native symbol resolution.
+            // On other architectures native walk is inactive and DSS emits Unknown_Native_Function instead.
+            Environment.OSVersion.Platform == PlatformID.Win32NT && Environment.Is64BitProcess
+                ? "clr.dll"
+                : "Unknown_Native_Function(unknown)",
 #endif
             "My.Custom.Test.Namespace.ClassENonStandardCharacters\u0104\u0118\u00D3\u0141\u017B\u0179\u0106\u0105\u0119\u00F3\u0142\u017C\u017A\u015B\u0107\u011C\u0416\u13F3\u2CC4\u02A4\u01CB\u2093\u06BF\u0B1F\u0D10\u1250\u3023\u203F\u0A6E\u1FAD_\u00601.GenericMethodDFromGenericClass[TMethod, TMethod2](TClass, TMethod, TMethod2)",
             "My.Custom.Test.Namespace.ClassD`21.MethodD(T01, T02, T03, T04, T05, T06, T07, T08, T09, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20, Unknown)",
@@ -159,7 +187,15 @@ public class ContinuousProfilerTests : TestHelper
             "My.Custom.Test.Namespace.GenericClassC`1.GenericMethodCFromGenericClass(T)"
         ];
 
-#if NETFRAMEWORK || DEBUG
+        // Second CLR transition between GenericMethodCFromGenericClass(T) and MethodB.
+        // Windows x64: resolved to clr.dll (NetFx) or absent (coreclr does not emit a stub frame here).
+        // Other platforms / DEBUG: DSS emits Unknown_Native_Function.
+#if NETFRAMEWORK
+        stackTrace.Add(
+            Environment.OSVersion.Platform == PlatformID.Win32NT && Environment.Is64BitProcess
+                ? "clr.dll"
+                : "Unknown_Native_Function(unknown)");
+#elif DEBUG
         stackTrace.Add("Unknown_Native_Function(unknown)");
 #else
         if (Environment.OSVersion.Platform != PlatformID.Win32NT)
@@ -259,4 +295,63 @@ public class ContinuousProfilerTests : TestHelper
 
         return false;
     }
+
+#if NETFRAMEWORK
+    // Called only under the Windows x64 runtime guard in ExportThreadSamples.
+    private static bool ContainPureNativeIoStack(Profile profile, ProfilesDictionary dictionary)
+    {
+        foreach (var sample in profile.Samples)
+        {
+            var stackIndex = sample.StackIndex;
+            if (stackIndex <= 0 || stackIndex >= dictionary.StackTable.Count)
+            {
+                continue;
+            }
+
+            var frames = GetFrameNames(dictionary.StackTable[stackIndex], dictionary).ToList();
+
+            // IO completion port threads park in NtRemoveIoCompletion with no managed frames.
+            // DSS yields nothing for them; their presence proves the RTL native walk is working.
+            // Security/AV DLLs (e.g. Protector64.dll) may also appear between kernel frames.
+            bool hasIoCompletion = frames.Any(f => f.Contains("NtRemoveIoCompletion", StringComparison.OrdinalIgnoreCase));
+            bool hasGetQueued    = frames.Any(f => f.Contains("GetQueuedCompletionStatus", StringComparison.OrdinalIgnoreCase));
+
+            if (hasIoCompletion && hasGetQueued)
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+#else
+    // Called only under the Windows x64 runtime guard in ExportThreadSamples.
+    private static bool ContainPureNativeWorkerFactoryStack(Profile profile, ProfilesDictionary dictionary)
+    {
+        foreach (var sample in profile.Samples)
+        {
+            var stackIndex = sample.StackIndex;
+            if (stackIndex <= 0 || stackIndex >= dictionary.StackTable.Count)
+            {
+                continue;
+            }
+
+            var frames = GetFrameNames(dictionary.StackTable[stackIndex], dictionary).ToList();
+
+            // .NET Core ThreadPool worker threads park in NtWaitForWorkViaWorkerFactory with no managed frames.
+            // DSS yields nothing for them; their presence proves the RTL native walk is working.
+            // RtlSetThreadSubProcessTag appears as a trampoline; security/AV DLLs may also appear.
+            bool hasWorkerFactory = frames.Any(f => f.Contains("NtWaitForWorkViaWorkerFactory", StringComparison.OrdinalIgnoreCase));
+            bool hasThreadStart   = frames.Any(f => f.Contains("RtlUserThreadStart", StringComparison.OrdinalIgnoreCase)
+                                                 || f.Contains("BaseThreadInitThunk", StringComparison.OrdinalIgnoreCase));
+
+            if (hasWorkerFactory && hasThreadStart)
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+#endif
 }
