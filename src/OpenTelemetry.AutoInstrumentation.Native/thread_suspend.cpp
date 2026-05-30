@@ -5,28 +5,23 @@
 
 #include "thread_suspend.h"
 
-#include <stdexcept>
-
 namespace ProfilerStackCapture
 {
 
-ScopedThreadSuspend::ScopedThreadSuspend(DWORD nativeThreadId) : threadHandle_(INVALID_HANDLE_VALUE), suspended_(false)
+ScopedThreadSuspend::ScopedThreadSuspend(DWORD nativeThreadId)
+    : threadHandle_(OpenThread(THREAD_GET_CONTEXT | THREAD_SUSPEND_RESUME, FALSE, nativeThreadId))
 {
-    threadHandle_ = OpenThread(THREAD_GET_CONTEXT | THREAD_SUSPEND_RESUME, FALSE, nativeThreadId);
     if (!IsValidThreadHandle(threadHandle_))
     {
-        throw std::runtime_error("Failed to open thread handle");
+        return;
     }
 
-    DWORD suspendCount = SuspendThread(threadHandle_);
-    if (suspendCount == static_cast<DWORD>(-1))
+    suspended_ = SuspendThread(threadHandle_) != static_cast<DWORD>(-1);
+    if (!suspended_)
     {
         CloseHandle(threadHandle_);
         threadHandle_ = INVALID_HANDLE_VALUE;
-        throw std::runtime_error("Failed to suspend thread");
     }
-
-    suspended_ = true;
 }
 
 ScopedThreadSuspend::~ScopedThreadSuspend()
@@ -53,7 +48,7 @@ ScopedThreadSuspend& ScopedThreadSuspend::operator=(ScopedThreadSuspend&& other)
 {
     if (this != &other)
     {
-        if (threadHandle_ != INVALID_HANDLE_VALUE)
+        if (IsValidThreadHandle(threadHandle_))
         {
             if (suspended_)
             {
@@ -72,6 +67,20 @@ ScopedThreadSuspend& ScopedThreadSuspend::operator=(ScopedThreadSuspend&& other)
     return *this;
 }
 
+bool ScopedThreadSuspend::IsSuspended() const noexcept
+{
+    return suspended_;
+}
+bool ScopedThreadSuspend::GetContext(CONTEXT& ctx) const noexcept
+{
+    if (!suspended_ || !IsValidThreadHandle(threadHandle_))
+    {
+        return false;
+    }
+    ctx.ContextFlags = CONTEXT_FULL;
+
+    return GetThreadContext(threadHandle_, &ctx) != 0;
+}
 } // namespace ProfilerStackCapture
 
 #endif // defined(_WIN32)

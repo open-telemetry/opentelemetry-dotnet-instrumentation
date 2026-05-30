@@ -49,8 +49,10 @@ public:
                                     BYTE*                 context,
                                     ULONG                 contextSize) = 0;
 
-    HRESULT DoStackSnapshotUnseeded(ThreadID threadId, void* clientData)
+    HRESULT DoStackSnapshotUnseeded(ThreadID threadId, StackSnapshotCallbackContext* clientData)
     {
+        clientData->frame.threadId = threadId;
+
         return DoStackSnapshot(threadId, StackSnapshotCallbackDefault,
                                COR_PRF_SNAPSHOT_DEFAULT, clientData, nullptr, 0);
     }

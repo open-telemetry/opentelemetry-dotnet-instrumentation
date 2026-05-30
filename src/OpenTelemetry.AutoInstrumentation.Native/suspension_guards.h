@@ -38,7 +38,7 @@ public:
 
 private:
     IRuntimeCapture* runtime_;
-    bool             active_;
+    bool active_ = false;
 };
 
 #if defined(_WIN32)
@@ -49,12 +49,13 @@ public:
 
     ThreadGuard(const ThreadGuard&)            = delete;
     ThreadGuard& operator=(const ThreadGuard&) = delete;
+    ThreadGuard(ThreadGuard&&)                 = delete;
+    ThreadGuard& operator=(ThreadGuard&&)      = delete;
 
-    bool IsAcquired() const
-    {
-        return IsValidThreadHandle(suspended_.GetHandle());
-    }
-    HANDLE GetHandle() const { return suspended_.GetHandle(); }
+    bool IsAcquired() const { return suspended_.IsSuspended(); }
+
+    // Delegates to ScopedThreadSuspend - safe only while guard is live
+    bool GetContext(CONTEXT& ctx) const noexcept { return suspended_.GetContext(ctx); }
 
 private:
     ScopedThreadSuspend suspended_;

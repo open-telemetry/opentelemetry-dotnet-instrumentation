@@ -29,6 +29,15 @@ public:
     HRESULT CaptureStacks(const std::unordered_set<ThreadID>& threads,
                           StackCaptureRequest*                request) override
     {
+        if (capturer_ == nullptr)
+        {
+            return E_FAIL;
+        }
+        if (request == nullptr || !request->onFrame)
+        {
+            return E_INVALIDARG;
+        }
+
         // Zero-copy bridge: forward the embedded CapturedFrame to the consumer.
         auto bridgeCallback =
             [request](ProfilerStackCapture::StackSnapshotCallbackContext* ctx) -> HRESULT
@@ -43,28 +52,40 @@ public:
     HRESULT ResolveNativeSymbolName(UINT_PTR        instructionPointer,
                                     trace::WSTRING& outName) override
     {
-        return capturer_->ResolveNativeSymbolName(instructionPointer, outName);
+        return capturer_ ? capturer_->ResolveNativeSymbolName(instructionPointer, outName) : E_FAIL;
     }
 
     // -- IThreadLifecycleListener (consumed by CLR callback layer) --
     void OnThreadCreated(ThreadID threadId) override
     {
-        capturer_->OnThreadCreated(threadId);
+        if (capturer_)
+        {
+            capturer_->OnThreadCreated(threadId);
+        }
     }
 
     void OnThreadDestroyed(ThreadID threadId) override
     {
-        capturer_->OnThreadDestroyed(threadId);
+        if (capturer_)
+        {
+            capturer_->OnThreadDestroyed(threadId);
+        }
     }
 
     void OnThreadNameChanged(ThreadID threadId, ULONG cchName, WCHAR name[]) override
     {
-        capturer_->OnThreadNameChanged(threadId, cchName, name);
+        if (capturer_)
+        {
+            capturer_->OnThreadNameChanged(threadId, cchName, name);
+        }
     }
 
     void OnThreadAssignedToOSThread(ThreadID managedThreadId, DWORD osThreadId) override
     {
-        capturer_->OnThreadAssignedToOSThread(managedThreadId, osThreadId);
+        if (capturer_)
+        {
+            capturer_->OnThreadAssignedToOSThread(managedThreadId, osThreadId);
+        }
     }
 
 private:

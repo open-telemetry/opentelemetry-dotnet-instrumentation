@@ -10,6 +10,7 @@
 #include <memory>
 #include "profiler_api.h"
 #include "native_symbol_resolver.h"
+#include "suspension_guards.h"
 
 namespace ProfilerStackCapture
 {
@@ -53,7 +54,7 @@ public:
     ///  be valid (safety of the walk relies on the thread remaining suspended for the duration of the call). This is
     ///  used by the CLR capture implementation, which performs its own suspension and needs to control the exact point
     ///  of capture to properly seed DSS.
-    HRESULT CaptureNativeThenSeededDss(HANDLE                        threadHandle,
+    HRESULT CaptureNativeThenSeededDss(ThreadGuard&                        threadGuard,
                                           ThreadID                      managedThreadId,
                                           StackSnapshotCallbackContext* clientData);
 

@@ -139,7 +139,7 @@ private:
     };
 
     void WorkerLoop();
-    bool RunChecks(ProbeKind flags, ThreadID canary, const std::atomic<bool>*) noexcept;
+    bool RunChecks(ProbeKind flags, ThreadID canary) noexcept;
 
     IProfilerApi*             api_;
     std::chrono::milliseconds park_timeout_;

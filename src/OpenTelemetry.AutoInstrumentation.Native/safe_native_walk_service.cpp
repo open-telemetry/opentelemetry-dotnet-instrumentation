@@ -20,43 +20,42 @@ INativeSymbolResolver& SafeNativeWalkService::GetSymbolResolver()
     return NativeSymbolResolver::Instance();
 }
 
-HRESULT SafeNativeWalkService::CaptureNativeThenSeededDss(HANDLE                        threadHandle,
+HRESULT SafeNativeWalkService::CaptureNativeThenSeededDss(ThreadGuard&                  threadGuard,
                                                           ThreadID                      managedThreadId,
                                                           StackSnapshotCallbackContext* clientData)
 {
-    // 1. Get thread context - needed for probe (Rip) and walk (full unwind)
+    // ThreadGuard is the suspension contract by construction - an intentional
+    // ergonomics choice: the signature itself rejects unsuspended threads at
+    // compile time, no documentation or convention required.
     CONTEXT ctx      = {};
     ctx.ContextFlags = CONTEXT_FULL;
-    if (!GetThreadContext(threadHandle, &ctx))
+    if (!threadGuard.GetContext(ctx))
     {
         trace::Logger::Debug("[SafeNativeWalkService] GetThreadContext failed. Error=", GetLastError());
         return E_FAIL;
     }
 
-    // 2. Walk native frames until we hit managed code
+    // Stage 1: RTL walk - native frames until managed boundary
     NativeWalkResult walkResult = WalkNativeUntilManaged(ctx, clientData);
 
     if (FAILED(walkResult.hr) && walkResult.nativeFrameCount == 0)
         return walkResult.hr;
 
-    // 3. If walk found a managed frame boundary, seed DSS with that context.
-    //    DSS has intimate knowledge of CLR internals (inlining, GC info, etc.)
-    //    and produces superior managed frames compared to RTL unwind.
+    // Stage 2: DSS seeded from boundary - managed frames with CLR accuracy
+    HRESULT hr = walkResult.hr;
     if (walkResult.hasSeed)
     {
-        HRESULT hr =
-            profilerApi_->DoStackSnapshot(managedThreadId, StackSnapshotCallbackDefault, COR_PRF_SNAPSHOT_DEFAULT,
-                                          clientData, reinterpret_cast<BYTE*>(&walkResult.seedCtx),
-                                          sizeof(walkResult.seedCtx));
+        hr = profilerApi_->DoStackSnapshot(managedThreadId, StackSnapshotCallbackDefault, COR_PRF_SNAPSHOT_DEFAULT,
+                                           clientData, reinterpret_cast<BYTE*>(&walkResult.seedCtx),
+                                           sizeof(walkResult.seedCtx));
 
-        // CORPROF_E_STACKSNAPSHOT_ABORTED means callback returned S_FALSE - acceptable
         if (hr == CORPROF_E_STACKSNAPSHOT_ABORTED)
             hr = S_OK;
     }
-    trace::Logger::Debug("[SafeNativeWalkService] Capture complete. Native frames captured=",
-                         walkResult.nativeFrameCount, ", DSS seed=", walkResult.hasSeed ? "yes" : "no",
-                         ", final HRESULT=0x", std::hex, walkResult.hr, std::dec);
-    return S_OK;
+
+    trace::Logger::Debug("[SafeNativeWalkService] Capture complete. Native frames=", walkResult.nativeFrameCount,
+                         ", DSS seed=", walkResult.hasSeed ? "yes" : "no", ", HRESULT=", trace::HResultStr(hr));
+    return hr;
 }
 
 NativeWalkResult SafeNativeWalkService::WalkNativeUntilManaged(const CONTEXT&                initialCtx,
@@ -122,7 +121,9 @@ NativeWalkResult SafeNativeWalkService::WalkNativeUntilManaged(const CONTEXT&   
             HRESULT cbResult = clientData->callback(clientData);
             if (cbResult != S_OK)
             {
-                result.hr = S_OK;
+                // S_FALSE: caller requested early stop - clean termination
+                // E_*: real failure - propagate to caller
+                result.hr = (cbResult == S_FALSE) ? S_OK : cbResult;
                 break;
             }
 

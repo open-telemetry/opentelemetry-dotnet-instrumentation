@@ -58,8 +58,6 @@ HRESULT ClrRuntimeCapture::CaptureStack(ThreadID managedThreadId, StackSnapshotC
         return E_INVALIDARG;
     }
 
-    clientData->frame.threadId = managedThreadId;
-
     HRESULT hr = profilerApi_->DoStackSnapshotUnseeded(managedThreadId, clientData);
     if (SUCCEEDED(hr))
     {
@@ -98,8 +96,10 @@ HRESULT ClrRuntimeCapture::CaptureStack(ThreadID managedThreadId, StackSnapshotC
         trace::Logger::Debug("[ClrRuntimeCapture] Native walk probes failed (abandoned). ManagedID=", managedThreadId);
         return hr;
     }
-
-    return nativeWalk_->CaptureNativeThenSeededDss(target.GetHandle(), managedThreadId, clientData);
+    // ThreadGuard is the suspension contract by construction - an intentional
+    // ergonomics choice: the signature itself rejects unsuspended threads at
+    // compile time, no documentation or convention required.
+    return nativeWalk_->CaptureNativeThenSeededDss(target, managedThreadId, clientData);
 #else
     return hr;
 #endif

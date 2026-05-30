@@ -5,9 +5,8 @@
 
 #if defined(_WIN32)
 
-#include <atomic>
 #include <cstdlib>
-
+#include <vector>
 #include "logger.h"
 
 namespace ProfilerStackCapture
@@ -146,8 +145,7 @@ void StackWalkGuard::WorkerLoop()
         // each check boundary; the in-flight check itself is not preempted
         // (a malloc on a held heap CS will block until the heap is
         // released).
-        std::atomic<bool> abandoned_view{false};
-        const bool        ok = RunChecks(flags, canary, &abandoned_view);
+        const bool ok = RunChecks(flags, canary);
 
         // Publish verdict and return to Idle. If the caller abandoned us,
         // publish false regardless of what the checks said.
@@ -168,7 +166,7 @@ void StackWalkGuard::WorkerLoop()
     trace::Logger::Info("StackWalkGuard worker exiting");
 }
 
-bool StackWalkGuard::RunChecks(ProbeKind flags, ThreadID canary, const std::atomic<bool>* /*unused*/) noexcept
+bool StackWalkGuard::RunChecks(ProbeKind flags, ThreadID canary) noexcept
 {
     // Snapshot abandon flag between checks. We re-read under the lock
     // because the worker thread is the only consumer and contention is

@@ -76,6 +76,12 @@ HRESULT NetFxRuntimeCapture::CaptureStack(ThreadID managedThreadId, StackSnapsho
         return E_FAIL;
     }
     ThreadGuard canaryGuard(canary.osId);
+    if (!canaryGuard.IsAcquired())
+    {
+        trace::Logger::Debug("[NetFxRuntimeCapture] Failed to suspend canary. ManagedID=", managedThreadId,
+                             ", CanaryOsID=", canary.osId);
+        return E_FAIL;
+    }
     // Per-target probe set: HeapLock + CanaryDSS (+ Rtl on x64).
     if (!stackWalkGuard_->ScheduleProbe(kNetFxSeedlessProbes, canary.managedId))
     {
@@ -90,8 +96,7 @@ HRESULT NetFxRuntimeCapture::CaptureStack(ThreadID managedThreadId, StackSnapsho
         return E_FAIL;
     }
 
-    clientData->frame.threadId = managedThreadId;
-    hr                         = profilerApi_->DoStackSnapshotUnseeded(managedThreadId, clientData);
+    hr = profilerApi_->DoStackSnapshotUnseeded(managedThreadId, clientData);
     if (SUCCEEDED(hr))
     {
         return hr;
@@ -104,7 +109,7 @@ HRESULT NetFxRuntimeCapture::CaptureStack(ThreadID managedThreadId, StackSnapsho
     // Probes already certified for this suspended target; no need to re-run.
     if (nativeWalk_)
     {
-        return nativeWalk_->CaptureNativeThenSeededDss(target.GetHandle(), managedThreadId, clientData);
+        return nativeWalk_->CaptureNativeThenSeededDss(target, managedThreadId, clientData);
     }
 #endif
     return hr;

@@ -36,14 +36,20 @@ public:
     ~ScopedThreadSuspend();
     ScopedThreadSuspend(const ScopedThreadSuspend&)            = delete;
     ScopedThreadSuspend& operator=(const ScopedThreadSuspend&) = delete;
-    ScopedThreadSuspend(ScopedThreadSuspend&& other) noexcept;
-    ScopedThreadSuspend& operator=(ScopedThreadSuspend&& other) noexcept;
-    HANDLE GetHandle() const { return threadHandle_; }
-    bool   IsValid() const { return threadHandle_ != INVALID_HANDLE_VALUE; }
+    ScopedThreadSuspend(ScopedThreadSuspend&&) noexcept;
+    ScopedThreadSuspend& operator=(ScopedThreadSuspend&&) noexcept;
+
+    bool IsSuspended() const noexcept;
+
+    // Captures CONTEXT of the suspended thread. Returns false if not suspended
+    // or if GetThreadContext fails. Safe to call only while guard is live.
+    bool GetContext(CONTEXT& ctx) const noexcept;
 
 private:
-    HANDLE threadHandle_;
-    bool   suspended_;
+
+    HANDLE threadHandle_ = nullptr;
+    bool   suspended_    = false;
+    CONTEXT capturedContext_ = {};
 };
 
 } // namespace ProfilerStackCapture

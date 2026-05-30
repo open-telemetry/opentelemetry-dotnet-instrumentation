@@ -54,11 +54,15 @@ HRESULT ProfilerApiAdapter::DoStackSnapshot(ThreadID              threadId,
                                             BYTE*                 context,
                                             ULONG                 contextSize)
 {
+    if (!pImpl_->profilerInfo || !callback)
+        return E_INVALIDARG;
     return pImpl_->profilerInfo->DoStackSnapshot(threadId, callback, infoFlags, clientData, context, contextSize);
 }
 
 HRESULT ProfilerApiAdapter::GetThreadInfo(ThreadID managedThreadId, DWORD* osThreadId)
 {
+    if (!pImpl_->profilerInfo || !osThreadId)
+        return E_INVALIDARG;
     return pImpl_->profilerInfo->GetThreadInfo(managedThreadId, osThreadId);
 }
 
