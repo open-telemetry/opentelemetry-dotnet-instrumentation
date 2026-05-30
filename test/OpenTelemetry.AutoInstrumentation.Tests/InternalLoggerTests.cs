@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: Apache-2.0
 
 using OpenTelemetry.AutoInstrumentation.Logging;
-using Xunit;
 
 namespace OpenTelemetry.AutoInstrumentation.Tests;
 

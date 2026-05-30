@@ -3,7 +3,6 @@
 using IntegrationTests.Helpers;
 using OpenTelemetry.Proto.Collector.Profiles.V1Development;
 using OpenTelemetry.Proto.Profiles.V1Development;
-using Xunit.Abstractions;
 
 namespace IntegrationTests;
 

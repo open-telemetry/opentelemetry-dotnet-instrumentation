@@ -8,6 +8,10 @@ on:
         required: true
         type: string
 
+concurrency:
+  group: ${{ github.workflow }}-${{ inputs.version }}
+  cancel-in-progress: false
+
 permissions:
   contents: read
 
@@ -17,23 +21,25 @@ env:
 
 jobs:
   build-nextgen-forwarder:
+    name: Build NextGen forwarder
     runs-on: windows-2022
     defaults:
       run:
         working-directory: next-gen
     steps:
 
-      - name: Checkout
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # tag: v6.0.2
+      - name: Checkout code
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           fetch-depth: 0
+          persist-credentials: false
           ref: out-of-process-collection
 
       - name: Setup .NET
         uses: ./.github/actions/setup-dotnet
 
       - name: Check for NuGet packages cache
-        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # tag: v5.0.5
+        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
         id: nuget-cache
         with:
           key: ${{ hashFiles('**/Directory.packages.props', '**/packages.config' ) }}
@@ -53,27 +59,31 @@ jobs:
         shell: pwsh
 
       - name: Pack OpenTelemetry.OutOfProcess.Forwarder
+        env:
+          PACKAGE_VERSION: ${{ inputs.version }}
         run: |
           dotnet pack src/OpenTelemetry.OutOfProcess.Forwarder/OpenTelemetry.OutOfProcess.Forwarder.csproj `
             --no-build `
             --configuration Release `
             --output bin/nextgen-nuget-artifacts `
-            /p:PackageVersion=${{ inputs.version }} `
-            /p:AssemblyVersion=${{ inputs.version }} `
-            /p:FileVersion=${{ inputs.version }} `
-            /p:Version=${{ inputs.version }} `
+            /p:PackageVersion=$env:PACKAGE_VERSION `
+            /p:AssemblyVersion=$env:PACKAGE_VERSION `
+            /p:FileVersion=$env:PACKAGE_VERSION `
+            /p:Version=$env:PACKAGE_VERSION `
             /p:ContinuousIntegrationBuild=true
 
       - name: Pack OpenTelemetry.OutOfProcess.Forwarder.Configuration
+        env:
+          PACKAGE_VERSION: ${{ inputs.version }}
         run: |
           dotnet pack src/OpenTelemetry.OutOfProcess.Forwarder.Configuration/OpenTelemetry.OutOfProcess.Forwarder.Configuration.csproj `
             --no-build `
             --configuration Release `
             --output bin/nextgen-nuget-artifacts `
-            /p:PackageVersion=${{ inputs.version }} `
-            /p:AssemblyVersion=${{ inputs.version }} `
-            /p:FileVersion=${{ inputs.version }} `
-            /p:Version=${{ inputs.version }} `
+            /p:PackageVersion=$env:PACKAGE_VERSION `
+            /p:AssemblyVersion=$env:PACKAGE_VERSION `
+            /p:FileVersion=$env:PACKAGE_VERSION `
+            /p:Version=$env:PACKAGE_VERSION `
             /p:ContinuousIntegrationBuild=true
 
       - name: Install dotnet-validate
@@ -99,7 +109,7 @@ jobs:
           }
 
       - name: Upload NuGet Artifacts
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # tag: v7.0.1
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: opentelemetry-nextgen-forwarder-packages
           path: |
@@ -109,11 +119,13 @@ jobs:
 
       - name: Create GitHub Release Summary
         shell: pwsh
+        env:
+          PACKAGE_VERSION: ${{ inputs.version }}
         run: |
           $summary = @"
           ## 📦 Next-Gen Forwarder Packages Built
           
-          **Version:** ${{ inputs.version }}
+          **Version:** $env:PACKAGE_VERSION
           **Branch:** out-of-process-collection
           
           ### Built Packages:
@@ -132,8 +144,8 @@ jobs:
           2. Extract the .nupkg files
           3. Publish manually using:
           ``````
-          dotnet nuget push OpenTelemetry.OutOfProcess.Forwarder.${{ inputs.version }}.nupkg --api-key YOUR_API_KEY --source https://api.nuget.org/v3/index.json
-          dotnet nuget push OpenTelemetry.OutOfProcess.Forwarder.Configuration.${{ inputs.version }}.nupkg --api-key YOUR_API_KEY --source https://api.nuget.org/v3/index.json
+          dotnet nuget push OpenTelemetry.OutOfProcess.Forwarder.${env:PACKAGE_VERSION}.nupkg --api-key YOUR_API_KEY --source https://api.nuget.org/v3/index.json
+          dotnet nuget push OpenTelemetry.OutOfProcess.Forwarder.Configuration.${env:PACKAGE_VERSION}.nupkg --api-key YOUR_API_KEY --source https://api.nuget.org/v3/index.json
           ``````
           "@
           

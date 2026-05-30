@@ -5,9 +5,9 @@ using System.Diagnostics;
 using OpenTelemetry.AutoInstrumentation.CallTarget;
 using OpenTelemetry.AutoInstrumentation.DuckTyping;
 using OpenTelemetry.AutoInstrumentation.Instrumentations.NLog.Bridge;
-using OpenTelemetry.AutoInstrumentation.Logging;
 #if NET
 using OpenTelemetry.AutoInstrumentation.Logger;
+using OpenTelemetry.AutoInstrumentation.Logging;
 #endif
 
 namespace OpenTelemetry.AutoInstrumentation.Instrumentations.NLog.TraceContextInjection.Integrations;

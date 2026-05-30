@@ -12,11 +12,16 @@ on:
         description: 'Test execution count'
         default: '20'
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+
 permissions:
   contents: read
 
 jobs:
   verify-test:
+    name: Verify test
     strategy:
       fail-fast: false
       matrix:
@@ -27,25 +32,33 @@ jobs:
             containers: windows
           - machine: ubuntu-22.04
             containers: linux
-          - machine: macos-14
-            containers: none
           - machine: ubuntu-22.04-arm
             containers: linux
+          - machine: macos-14
+            containers: none
     runs-on: ${{ matrix.machine }}
     steps:
       
-      - name: Checkout
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # tag: v6.0.2
+      - name: Checkout code
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
 
       - name: Setup .NET
         uses: ./.github/actions/setup-dotnet
 
       - name: Run BuildTracer and ManagedTests
-        run: ./build.cmd BuildTracer ManagedTests --containers ${{ matrix.containers }} --test-project "${{ github.event.inputs.testProject }}" --test-name '"${{ github.event.inputs.testName }}"' --test-count ${{ github.event.inputs.count }}
+        shell: bash
+        env:
+          CONTAINERS: ${{ matrix.containers }}
+          TEST_COUNT: ${{ github.event.inputs.count }}
+          TEST_NAME: ${{ github.event.inputs.testName }}
+          TEST_PROJECT: ${{ github.event.inputs.testProject }}
+        run: ./build.cmd BuildTracer ManagedTests --containers "${CONTAINERS}" --test-project "${TEST_PROJECT}" --test-name "\"${TEST_NAME}\"" --test-count "${TEST_COUNT}"
 
       - name: Upload logs
         if: always()
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # tag: v7.0.1
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: logs-${{ matrix.machine }}
           path: test-artifacts/

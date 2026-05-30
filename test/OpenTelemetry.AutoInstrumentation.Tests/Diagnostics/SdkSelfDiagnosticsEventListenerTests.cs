@@ -6,7 +6,6 @@
 using System.Diagnostics.Tracing;
 using OpenTelemetry.AutoInstrumentation.Diagnostics;
 using OpenTelemetry.AutoInstrumentation.Logging;
-using Xunit;
 
 namespace OpenTelemetry.AutoInstrumentation.Tests.Diagnostics;
 

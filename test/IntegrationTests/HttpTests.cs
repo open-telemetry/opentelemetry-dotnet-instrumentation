@@ -4,7 +4,6 @@
 #if NET
 using IntegrationTests.Helpers;
 using OpenTelemetry.Proto.Trace.V1;
-using Xunit.Abstractions;
 
 namespace IntegrationTests;
 

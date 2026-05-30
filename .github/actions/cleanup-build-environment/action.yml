@@ -16,8 +16,8 @@ runs:
     - name: Validate cleanup inputs
       shell: pwsh
       run: |
-        $environmentType = '${{ inputs.environment-type }}'
-        $containerName = '${{ inputs.container-name }}'
+        $environmentType = $env:ENVIRONMENT_TYPE
+        $containerName = $env:CONTAINER_NAME
 
         if ($environmentType -notin @('host', 'container')) {
           throw "environment-type must be either 'host' or 'container'."
@@ -26,10 +26,15 @@ runs:
         if ($environmentType -eq 'container' -and [string]::IsNullOrEmpty($containerName)) {
           throw 'container-name input is required when environment-type is container.'
         }
+      env:
+        ENVIRONMENT_TYPE: ${{ inputs.environment-type }}
+        CONTAINER_NAME: ${{ inputs.container-name }}
 
     - name: Stop build container
-      if: ${{ inputs.environment-type == 'container' && inputs.container-name != '' }}
+      if: inputs.environment-type == 'container' && inputs.container-name != ''
       shell: bash
       run: |
         set -u
-        docker rm -f "${{ inputs.container-name }}"
+        docker rm -f "${CONTAINER_NAME}"
+      env:
+        CONTAINER_NAME: ${{ inputs.container-name }}
