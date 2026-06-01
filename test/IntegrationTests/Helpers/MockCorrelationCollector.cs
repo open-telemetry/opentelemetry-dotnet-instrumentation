@@ -2,7 +2,9 @@
 // SPDX-License-Identifier: Apache-2.0
 #if NET
 using System.Collections.Concurrent;
+#if !NET11_0_OR_GREATER
 using System.Diagnostics;
+#endif
 using Microsoft.AspNetCore.Http;
 using OpenTelemetry.Proto.Collector.Logs.V1;
 using OpenTelemetry.Proto.Collector.Trace.V1;

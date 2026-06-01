@@ -1,8 +1,11 @@
 // Copyright The OpenTelemetry Authors
 // SPDX-License-Identifier: Apache-2.0
 
-using System.Reflection.Emit;
 using System.Runtime.CompilerServices;
+
+#if NETFRAMEWORK
+using System.Reflection.Emit;
+#endif
 
 namespace OpenTelemetry.AutoInstrumentation.CallTarget.Handlers.Continuations;
 

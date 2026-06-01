@@ -35,6 +35,11 @@ jobs:
         - language: actions
           # renovate: datasource=github-runners depType=github-runner
           machine: ubuntu-24.04
+        - language: c-cpp
+          build-mode: autobuild
+          queries: security-extended
+          # renovate: datasource=github-runners depType=github-runner
+          machine: ubuntu-24.04
         - language: csharp
           build-mode: manual
           # renovate: datasource=github-runners depType=github-runner
@@ -68,12 +73,8 @@ jobs:
       with:
         languages: ${{ matrix.language }}
         build-mode: ${{ matrix.build-mode }}
-        # If you wish to specify custom queries, you can do so here or in a config file.
-        # By default, queries listed here will override any specified in a config file.
-        # Prefix the list here with "+" to use these queries and those in the config file.
-
-        # For more details on CodeQL's query packs, refer to: https://docs.github.com/en/code-security/code-scanning/automatically-scanning-your-code-for-vulnerabilities-and-errors/configuring-code-scanning#using-queries-in-ql-packs
-        # queries: security-extended,security-and-quality
+        config-file: ./.github/codeql-config.yml
+        queries: ${{ matrix.queries }}
 
     - name: Setup .NET
       uses: ./.github/actions/setup-dotnet
