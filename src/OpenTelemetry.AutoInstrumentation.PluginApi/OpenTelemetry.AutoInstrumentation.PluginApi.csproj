@@ -3,7 +3,7 @@
   <Import Project="..\CommonExcludedAssets.props" />
 
   <PropertyGroup>
-    <Description>Provides extension points for a OpenTelemetry.AutoInstrumentation plugin</Description>
+    <Description>Provides extension points for an OpenTelemetry.AutoInstrumentation plugin</Description>
   </PropertyGroup>
 
   <ItemGroup>
