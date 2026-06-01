@@ -9,6 +9,11 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 
 ### Added
 
+- Support for `11.*` versions for following libraries:
+  - `Microsoft.Data.Sqlite`,
+  - `Microsoft.Extensions.Logging`,
+  - `System.Data.Common`.
+
 ### Changed
 
 - OpAMP default port changed from 4318 to 4320.
