@@ -6,7 +6,7 @@ namespace OpenTelemetry.AutoInstrumentation.PluginApi.Telemetry;
 /// <summary>
 /// Adds extension point to overwrite any traces options.
 /// </summary>
-/// <typeparam name="TOptions">Tracesd option type.</typeparam>
+/// <typeparam name="TOptions">Traces option type.</typeparam>
 public interface IConfigureTracesOptions<in TOptions>
 {
     /// <summary>

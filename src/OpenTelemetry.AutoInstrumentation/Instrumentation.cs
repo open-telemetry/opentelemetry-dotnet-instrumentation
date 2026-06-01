@@ -249,7 +249,7 @@ internal static class Instrumentation
 
     private static void InitializeSampling()
     {
-        var config = _pluginManager!.GetFirstContinousProfilerConfiguration();
+        var config = _pluginManager!.GetFirstContinuousProfilerConfiguration();
         var threadSamplingEnabled = config.ThreadSamplingEnabled;
         var allocationSamplingEnabled = config.AllocationSamplingEnabled;
         Logger.Debug($"Continuous profiling configuration: Thread sampling enabled: {threadSamplingEnabled}, thread sampling interval: {config.ThreadSamplingInterval}, allocation sampling enabled: {allocationSamplingEnabled}, max memory samples per minute: {config.MaxMemorySamplesPerMinute}, export interval: {config.ExportInterval}, export timeout: {config.ExportTimeout}, continuous profiler exporter: {config.Exporter?.GetType()}");

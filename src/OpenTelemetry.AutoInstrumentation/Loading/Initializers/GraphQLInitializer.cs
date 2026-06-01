@@ -37,21 +37,21 @@ internal class GraphQLInitializer : InstrumentationInitializer
 
         if (optionsType != null)
         {
-            InvokeConfigureOptions(optionsType, optionsInstance);
+            InvokeConfigureOptions(_pluginManager, optionsType, optionsInstance);
         }
 
         initializerType.GetMethod("EnableAutoInstrumentation", BindingFlags.Public | BindingFlags.Static)!
             .Invoke(null, [optionsInstance]);
     }
 
-    private static void InvokeConfigureOptions(Type optionsType, object options)
+    private static void InvokeConfigureOptions(PluginManager pluginManager, Type optionsType, object options)
     {
         var method = typeof(PluginManager)
             .GetMethod(nameof(PluginManager.ConfigureTracesOptions))!
             .MakeGenericMethod(optionsType);
 
         method.Invoke(
-            Instrumentation.PluginManager,
+            pluginManager,
             [options]);
     }
 }

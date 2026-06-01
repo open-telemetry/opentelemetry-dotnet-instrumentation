@@ -48,7 +48,7 @@ internal partial class PluginManager
 
             if (!HasDefaultConstructor(type))
             {
-                Logger.Warning($"Type '{type.FullName}' cannot be instantiated. No Default constructor.");
+                Logger.Warning($"Type '{type.FullName}' cannot be instantiated. No public parameterless constructor.");
                 continue;
             }
 

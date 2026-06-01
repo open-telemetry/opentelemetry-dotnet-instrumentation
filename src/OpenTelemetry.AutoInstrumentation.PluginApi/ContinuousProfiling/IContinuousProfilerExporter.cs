@@ -4,7 +4,7 @@
 namespace OpenTelemetry.AutoInstrumentation.PluginApi.ContinuousProfiling;
 
 /// <summary>
-/// Provides interface for continous profiler exporter.
+/// Provides interface for continuous profiler exporter.
 /// </summary>
 public interface IContinuousProfilerExporter
 {

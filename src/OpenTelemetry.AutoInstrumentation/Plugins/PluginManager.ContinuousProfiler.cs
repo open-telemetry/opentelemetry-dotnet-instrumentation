@@ -7,7 +7,7 @@ namespace OpenTelemetry.AutoInstrumentation.Plugins;
 
 internal partial class PluginManager
 {
-    public ContinuousProfilerConfiguration GetFirstContinousProfilerConfiguration()
+    public ContinuousProfilerConfiguration GetFirstContinuousProfilerConfiguration()
     {
         foreach (var plugin in _plugins)
         {

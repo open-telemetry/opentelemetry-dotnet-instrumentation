@@ -13,22 +13,26 @@ internal static class StackExchangeRedisInitializer
         var optionsInstrumentationType = Type.GetType("OpenTelemetry.Instrumentation.StackExchangeRedis.StackExchangeRedisInstrumentationOptions, OpenTelemetry.Instrumentation.StackExchangeRedis")!;
 
         var options = Activator.CreateInstance(optionsInstrumentationType)!;
+        var pluginManager = Instrumentation.PluginManager;
 
-        InvokeConfigureOptions(optionsInstrumentationType, options);
+        if (pluginManager != null)
+        {
+            InvokeConfigureOptions(pluginManager, optionsInstrumentationType, options);
+        }
 
         var instrumentation = Activator.CreateInstance(instrumentationType, connection, string.Empty, options)!;
 
         Instrumentation.LifespanManager.Track(instrumentation);
     }
 
-    private static void InvokeConfigureOptions(Type optionsType, object options)
+    private static void InvokeConfigureOptions(PluginManager pluginManager, Type optionsType, object options)
     {
         var method = typeof(PluginManager)
             .GetMethod(nameof(PluginManager.ConfigureTracesOptions))!
             .MakeGenericMethod(optionsType);
 
         method.Invoke(
-            Instrumentation.PluginManager,
+            pluginManager,
             [options]);
     }
 }
