@@ -50,7 +50,7 @@ public class ContinuousProfilerConfiguration
     public TimeSpan ExportTimeout { get; set; }
 
     /// <summary>
-    /// Gets or sets continous profiler exporter.
+    /// Gets or sets continuous profiler exporter.
     /// </summary>
     public IContinuousProfilerExporter? Exporter { get; set; }
 }
