@@ -226,8 +226,11 @@ internal static class Instrumentation
         {
             var resources = ResourceHelper.AggregateResources(_tracerProvider, _meterProvider, LoggerProvider);
 
-            OpAmpHelper.EnableOpAmpClient(resources, OpAmpSettings.Value);
+            OpAmpHelper.EnableOpAmpClient(resources, OpAmpSettings.Value, _pluginManager);
         }
+
+        // Notify plugins all initialization is done
+        _pluginManager.Initialized();
     }
 
     private static void TryInitializeContinuousProfiling()
@@ -593,7 +596,7 @@ internal static class Instrumentation
 
         try
         {
-            OpAmpHelper.StopOpAmpClientIfRunning();
+            OpAmpHelper.StopOpAmpClientIfRunning(_pluginManager);
 
             LazyInstrumentationLoader?.Dispose();
             _sampleExporter?.Dispose();

@@ -53,7 +53,6 @@
     <PackageReference Include="Microsoft.Data.SqlClient" />
     <PackageReference Include="Newtonsoft.Json" />
     <PackageReference Include="NuGet.Versioning" />
-    <PackageReference Include="System.Collections.Immutable" />
     <PackageReference Include="Testcontainers" />
     <PackageReference Include="Verify.Xunit" />
   </ItemGroup>

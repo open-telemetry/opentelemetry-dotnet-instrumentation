@@ -26,6 +26,9 @@ function Get-SafeFullPath {
     throw 'Replacement path must not be empty.'
   }
 
+  # Keep path validation OS-independent because Path.IsPathRooted() follows the
+  # current OS rules, but replacement artifacts may be produced on one OS and
+  # applied on another.
   if ($RelativePath -match '^[\\/]' -or $RelativePath -match '^[A-Za-z]:') {
     throw "Replacement path '$RelativePath' must be relative."
   }

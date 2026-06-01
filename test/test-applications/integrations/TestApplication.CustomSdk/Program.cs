@@ -5,6 +5,10 @@ using System.Diagnostics;
 using System.Diagnostics.Metrics;
 using System.Globalization;
 using System.Net.Http;
+#if NET10_0_OR_GREATER
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+#endif
 using OpenTelemetry;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Resources;
@@ -66,11 +70,24 @@ internal static class Program
         endpointConfiguration.UseTransport(learningTransport);
 
         using var cancellation = new CancellationTokenSource();
+#if NET10_0_OR_GREATER
+        var builder = Host.CreateApplicationBuilder(args);
+        builder.Services.AddNServiceBusEndpoint(endpointConfiguration);
+
+        using var host = builder.Build();
+        await host.StartAsync(cancellation.Token).ConfigureAwait(false);
+        var messageSession = host.Services.GetRequiredService<IMessageSession>();
+#else
         var endpointInstance = await Endpoint.Start(endpointConfiguration, cancellation.Token).ConfigureAwait(false);
+#endif
 
         try
         {
+#if NET10_0_OR_GREATER
+            await messageSession.SendLocal(new TestMessage(), cancellation.Token).ConfigureAwait(false);
+#else
             await endpointInstance.SendLocal(new TestMessage(), cancellation.Token).ConfigureAwait(false);
+#endif
 
             Counter.Add(1);
 
@@ -98,7 +115,11 @@ internal static class Program
         }
         finally
         {
+#if NET10_0_OR_GREATER
+            await host.StopAsync(cancellation.Token).ConfigureAwait(false);
+#else
             await endpointInstance.Stop(cancellation.Token).ConfigureAwait(false);
+#endif
         }
     }
 

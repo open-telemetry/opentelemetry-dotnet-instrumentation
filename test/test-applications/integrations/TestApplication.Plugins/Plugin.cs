@@ -5,16 +5,25 @@ using OpenTelemetry.Exporter;
 using OpenTelemetry.Instrumentation.Http;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Trace;
+using TestApplication.Smoke;
 
 namespace TestApplication.Plugins;
 
 #pragma warning disable CA1515 // Consider making public types internal. Needed for AutoInstrumentation plugin loading.
-public class Plugin
+/// <summary>
+/// Core of the plugin.
+/// </summary>
+public partial class Plugin
 #pragma warning restore CA1515 // Consider making public types internal. Needed for AutoInstrumentation plugin loading.
 {
     public void Initializing()
     {
         Console.WriteLine($"{nameof(Plugin)}.{nameof(Initializing)}() invoked.");
+    }
+
+    public void Initialized()
+    {
+        Console.WriteLine($"{nameof(Plugin)}.{nameof(Initialized)}() invoked.");
     }
 
 #pragma warning disable CA1822 // Mark members as static. Needed for AutoInstrumentation plugin loading.
@@ -29,7 +38,7 @@ public class Plugin
         }
 #endif
 
-        return builder.AddSource(TestApplication.Smoke.Program.SourceName);
+        return builder.AddSource(Program.SourceName);
     }
 
     public MeterProviderBuilder BeforeConfigureMeterProvider(MeterProviderBuilder builder)
@@ -43,7 +52,7 @@ public class Plugin
         }
 #endif
 
-        return builder.AddMeter(TestApplication.Smoke.Program.SourceName);
+        return builder.AddMeter(Program.SourceName);
     }
 
     public void ConfigureTracesOptions(HttpClientTraceInstrumentationOptions options)

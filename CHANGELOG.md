@@ -5,18 +5,73 @@ All notable changes to this component are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/compare/v1.15.0..HEAD)
+## [Unreleased](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/compare/v1.16.0-beta.1..HEAD)
 
 ### Added
 
 ### Changed
 
-- Support for [StackExchange.Redis](https://www.nuget.org/packages/StackExchange.Redis)
-  traces instrumentation for versions `3.x.x`+.
+- OpAMP default port changed from 4318 to 4320.
 
 #### Dependency updates
 
+- Following packages updated
+  - `Google.Protobuf` updated from `3.31.1` to `3.35.0`,
+  - `OpenTelemetry.OpAmp.Client` from `0.3.0-alpha.1` to `0.4.0-alpha.1`.
+- .NET Framework only, following packages updated
+  - `Microsoft.Bcl.AsyncInterfaces` from `10.0.7` to `10.0.8`,
+  - `Microsoft.Extensions.Configuration` from `10.0.7` to `10.0.8`,
+  - `Microsoft.Extensions.Configuration.Abstractions` from `10.0.7` to `10.0.8`,
+  - `Microsoft.Extensions.Configuration.Binder` from `10.0.7` to `10.0.8`,
+  - `Microsoft.Extensions.DependencyInjection` from `10.0.7` to `10.0.8`,
+  - `Microsoft.Extensions.DependencyInjection.Abstractions`
+    from `10.0.7` to `10.0.8`,
+  - `Microsoft.Extensions.Diagnostics.Abstractions` from `10.0.7` to `10.0.8`,
+  - `Microsoft.Extensions.Logging` from `10.0.7` to `10.0.8`,
+  - `Microsoft.Extensions.Logging.Abstractions` from `10.0.7` to `10.0.8`,
+  - `Microsoft.Extensions.Logging.Configuration` from `10.0.7` to `10.0.8`,
+  - `Microsoft.Extensions.Options` from `10.0.7` to `10.0.8`,
+  - `Microsoft.Extensions.Options.ConfigurationExtensions`
+    from `10.0.7` to `10.0.8`,
+  - `Microsoft.Extensions.Primitives` from `10.0.7` to `10.0.8`,
+  - `System.Diagnostics.DiagnosticSource` from `10.0.7` to `10.0.8`,
+  - `System.IO.Pipelines` from `10.0.7` to `10.0.8`,
+  - `System.Text.Encodings.Web` from `10.0.7` to `10.0.8`,
+  - `System.Text.Json` from `10.0.7` to `10.0.8`.
+
 ### Deprecated
+
+### Removed
+
+### Fixed
+
+## [v1.16.0-beta.1](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/tag/v1.16.0-beta.1)
+
+### Added
+
+- OpAMP extension points for plugins.
+- Configuration `OTEL_DOTNET_AUTO_APP_DOMAIN_STRATEGY` added with ability to
+  use:
+  - `LoaderOptimizationSingleDomain` - all non-default application domains
+     will be forced to load with `LoaderOptimization.SingleDomain`, preventing
+     their assemblies loading as domain neutral;
+  - `AssemblyRedirect` - modify app config binding redirects to load required
+    assembly versions;
+  - `None` - do not use any special strategy for non-default application
+    domains.
+  See [docs/netfx-appdomain-strategy.md](./docs/netfx-appdomain-strategy.md)
+  for details.
+
+### Changed
+
+- Support for [StackExchange.Redis](https://www.nuget.org/packages/StackExchange.Redis)
+  traces instrumentation for versions `3.x.x`+ on .NET.
+
+#### Dependency updates
+
+- Following packages updated
+  - `OpenTelemetry.Instrumentation.StackExchangeRedis` from `1.15.0-beta.1` to `1.15.0-beta.2`,
+  - `OpenTelemetry.Resources.Process` from `1.15.1-beta.1` to `1.15.1-beta.2`.
 
 ### Removed
 

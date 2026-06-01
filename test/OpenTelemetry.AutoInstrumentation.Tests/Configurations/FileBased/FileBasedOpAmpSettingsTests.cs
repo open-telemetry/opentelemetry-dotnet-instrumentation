@@ -3,7 +3,6 @@
 
 using OpenTelemetry.AutoInstrumentation.Configurations;
 using OpenTelemetry.AutoInstrumentation.Configurations.FileBasedConfiguration;
-using Xunit;
 
 namespace OpenTelemetry.AutoInstrumentation.Tests.Configurations.FileBased;
 
@@ -12,7 +11,7 @@ public class FileBasedOpAmpSettingsTests
     [Fact]
     public void LoadFile_GeneralSettings()
     {
-        var serverUrl = "wss://localhost:4318/v1/opamp";
+        var serverUrl = "wss://localhost:4320/v1/opamp";
         var conf = new YamlConfiguration
         {
             OpAmp = new OpAmpConfiguration()

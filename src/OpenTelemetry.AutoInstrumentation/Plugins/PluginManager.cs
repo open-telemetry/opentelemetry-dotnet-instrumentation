@@ -38,6 +38,11 @@ internal partial class PluginManager
         CallPlugins("Initializing");
     }
 
+    public void Initialized()
+    {
+        CallPlugins("Initialized");
+    }
+
     /// <summary>
     /// This functionality is used for testing purposes. GetAllDefinitionsPayload is not documented on the plugins.md.
     /// The contacts is based on internal classes and InternalsVisibleTo attributes. It should be refactored before supporting it.

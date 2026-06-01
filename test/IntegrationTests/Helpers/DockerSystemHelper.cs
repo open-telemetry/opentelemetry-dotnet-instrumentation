@@ -22,9 +22,6 @@ internal static class DockerSystemHelper
         var dockerEndpointAuthConfig = TestcontainersSettings.OS.DockerEndpointAuthConfig;
         var sessionId = ResourceReaper.DefaultSessionId;
 
-        using (var dockerClientConfiguration = dockerEndpointAuthConfig.GetDockerClientConfiguration(sessionId))
-        {
-            return dockerClientConfiguration.CreateClient();
-        }
+        return dockerEndpointAuthConfig.GetDockerClientBuilder(sessionId).Build();
     }
 }

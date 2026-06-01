@@ -4,7 +4,6 @@
 using OpenTelemetry.AutoInstrumentation.Configurations.FileBasedConfiguration.Parser;
 using Vendors.YamlDotNet.Core;
 using Vendors.YamlDotNet.Serialization;
-using Xunit;
 using YamlParser = Vendors.YamlDotNet.Core.Parser;
 
 namespace OpenTelemetry.AutoInstrumentation.Tests.Configurations.FileBased.Parser;
