@@ -5,7 +5,6 @@
 using System.Security.Cryptography;
 using IntegrationTests.Helpers;
 using OpenTelemetry.AutoInstrumentation;
-using Xunit.Abstractions;
 
 namespace IntegrationTests;
 

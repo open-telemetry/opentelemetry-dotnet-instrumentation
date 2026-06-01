@@ -7,7 +7,6 @@ using System.Text;
 using OpenTelemetry.Proto.Collector.Trace.V1;
 using OpenTelemetry.Proto.Common.V1;
 using OpenTelemetry.Proto.Trace.V1;
-using Xunit.Abstractions;
 
 #if NETFRAMEWORK
 using System.Net;

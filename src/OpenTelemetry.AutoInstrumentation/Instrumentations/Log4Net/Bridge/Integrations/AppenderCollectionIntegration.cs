@@ -2,9 +2,9 @@
 // SPDX-License-Identifier: Apache-2.0
 
 using OpenTelemetry.AutoInstrumentation.CallTarget;
-using OpenTelemetry.AutoInstrumentation.Logging;
 #if NET
 using OpenTelemetry.AutoInstrumentation.Logger;
+using OpenTelemetry.AutoInstrumentation.Logging;
 #endif
 
 namespace OpenTelemetry.AutoInstrumentation.Instrumentations.Log4Net.Bridge.Integrations;

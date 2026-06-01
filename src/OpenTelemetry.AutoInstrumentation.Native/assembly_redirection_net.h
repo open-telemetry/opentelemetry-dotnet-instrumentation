@@ -7,7 +7,7 @@
 
 #define ASSEMBLY_REDIRECTION_NET \
     { 80, { \
-        { _W("Google.Protobuf"), {3, 31, 1, 0} }, \
+        { _W("Google.Protobuf"), {3, 35, 0, 0} }, \
         { _W("Microsoft.Extensions.Configuration"), {8, 0, 0, 0} }, \
         { _W("Microsoft.Extensions.Configuration.Abstractions"), {8, 0, 0, 0} }, \
         { _W("Microsoft.Extensions.Configuration.Binder"), {8, 0, 0, 0} }, \
@@ -40,7 +40,7 @@
         { _W("OpenTelemetry.Instrumentation.Quartz"), {1, 15, 1, 1027} }, \
         { _W("OpenTelemetry.Instrumentation.Runtime"), {1, 15, 1, 1029} }, \
         { _W("OpenTelemetry.Instrumentation.SqlClient"), {1, 15, 2, 1033} }, \
-        { _W("OpenTelemetry.Instrumentation.StackExchangeRedis"), {1, 15, 1, 1032} }, \
+        { _W("OpenTelemetry.Instrumentation.StackExchangeRedis"), {1, 15, 1, 1093} }, \
         { _W("OpenTelemetry.Instrumentation.Wcf"), {1, 15, 1, 1049} }, \
         { _W("OpenTelemetry.OpAmp.Client"), {0, 4, 0, 1087} }, \
         { _W("OpenTelemetry.Resources.Azure"), {1, 15, 1, 1031} }, \
@@ -58,7 +58,7 @@
         { _W("System.ServiceModel.Primitives"), {4, 7, 0, 0} }, \
     }}, \
     { 90, { \
-        { _W("Google.Protobuf"), {3, 31, 1, 0} }, \
+        { _W("Google.Protobuf"), {3, 35, 0, 0} }, \
         { _W("Microsoft.Extensions.Configuration"), {9, 0, 0, 0} }, \
         { _W("Microsoft.Extensions.Configuration.Abstractions"), {9, 0, 0, 0} }, \
         { _W("Microsoft.Extensions.Configuration.Binder"), {9, 0, 0, 0} }, \
@@ -91,7 +91,7 @@
         { _W("OpenTelemetry.Instrumentation.Quartz"), {1, 15, 1, 1027} }, \
         { _W("OpenTelemetry.Instrumentation.Runtime"), {1, 15, 1, 1029} }, \
         { _W("OpenTelemetry.Instrumentation.SqlClient"), {1, 15, 2, 1033} }, \
-        { _W("OpenTelemetry.Instrumentation.StackExchangeRedis"), {1, 15, 1, 1032} }, \
+        { _W("OpenTelemetry.Instrumentation.StackExchangeRedis"), {1, 15, 1, 1093} }, \
         { _W("OpenTelemetry.Instrumentation.Wcf"), {1, 15, 1, 1049} }, \
         { _W("OpenTelemetry.OpAmp.Client"), {0, 4, 0, 1087} }, \
         { _W("OpenTelemetry.Resources.Azure"), {1, 15, 1, 1031} }, \
@@ -109,7 +109,7 @@
         { _W("System.ServiceModel.Primitives"), {4, 7, 0, 0} }, \
     }}, \
     { 100, { \
-        { _W("Google.Protobuf"), {3, 31, 1, 0} }, \
+        { _W("Google.Protobuf"), {3, 35, 0, 0} }, \
         { _W("Microsoft.Extensions.Configuration"), {10, 0, 0, 0} }, \
         { _W("Microsoft.Extensions.Configuration.Abstractions"), {10, 0, 0, 0} }, \
         { _W("Microsoft.Extensions.Configuration.Binder"), {10, 0, 0, 0} }, \
@@ -142,7 +142,7 @@
         { _W("OpenTelemetry.Instrumentation.Quartz"), {1, 15, 1, 1027} }, \
         { _W("OpenTelemetry.Instrumentation.Runtime"), {1, 15, 1, 1029} }, \
         { _W("OpenTelemetry.Instrumentation.SqlClient"), {1, 15, 2, 1033} }, \
-        { _W("OpenTelemetry.Instrumentation.StackExchangeRedis"), {1, 15, 1, 1032} }, \
+        { _W("OpenTelemetry.Instrumentation.StackExchangeRedis"), {1, 15, 1, 1093} }, \
         { _W("OpenTelemetry.Instrumentation.Wcf"), {1, 15, 1, 1049} }, \
         { _W("OpenTelemetry.OpAmp.Client"), {0, 4, 0, 1087} }, \
         { _W("OpenTelemetry.Resources.Azure"), {1, 15, 1, 1031} }, \

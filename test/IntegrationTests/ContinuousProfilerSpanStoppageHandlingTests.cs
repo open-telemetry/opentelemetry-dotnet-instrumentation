@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: Apache-2.0
 #if NET
 using IntegrationTests.Helpers;
-using Xunit.Abstractions;
 
 namespace IntegrationTests;
 
