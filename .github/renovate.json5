@@ -86,7 +86,7 @@
       matchStrings: [
         "# renovate:\\s*datasource=(?<datasource>github-releases)\\s+depName=(?<depName>Kitware/CMake)\\s*\\r?\\n\\s*ARG\\s+CMAKE_VERSION=(?<currentValue>[^\\s]+)",
       ],
-      extractVersionTemplate: "^v(?<version>\\d+\\.\\d+\\.\\d+)$",
+      extractVersionTemplate: "^(?<version>\\d+\\.\\d+\\.\\d+)$",
       versioningTemplate: "semver",
     },
   ],
