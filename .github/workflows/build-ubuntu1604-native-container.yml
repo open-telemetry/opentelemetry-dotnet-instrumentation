@@ -13,7 +13,7 @@ env:
 jobs:
   build-ubuntu1604-native-container:
     name: Build native container on Ubuntu 16.04
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     timeout-minutes: 60
     steps:
       - name: Checkout code
