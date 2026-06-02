@@ -127,11 +127,11 @@ jobs:
       matrix:
         include:
           # renovate: datasource=github-runners depType=github-runner
-          - machine: ubuntu-22.04
+          - machine: ubuntu-24.04
             base-image: alpine
             net-version: net10.0
           # renovate: datasource=github-runners depType=github-runner
-          - machine: ubuntu-22.04-arm
+          - machine: ubuntu-24.04-arm
             base-image: alpine
             net-version: net10.0
     runs-on: ${{ matrix.machine }}
