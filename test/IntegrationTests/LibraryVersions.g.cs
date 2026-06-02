@@ -448,7 +448,7 @@ public static partial class LibraryVersion
 #else
                 "1.8.2",
                 "1.9.2",
-                "2.14.0",
+                "2.14.2",
 #endif
             ];
             return theoryData;

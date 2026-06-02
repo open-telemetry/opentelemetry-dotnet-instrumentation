@@ -203,7 +203,7 @@ public static partial class LibraryVersion
             [
                 new("1.8.2"),
                 new("1.9.2"),
-                new("2.14.0"),
+                new("2.14.2"),
             ]
         },
         {
