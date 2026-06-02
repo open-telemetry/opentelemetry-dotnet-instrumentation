@@ -702,9 +702,6 @@ trace::WSTRING* NamingHelper::Lookup(const FunctionIdentifier& function_identifi
             // Cache a per-key copy of the unknown sentinel so repeated lookups
             // of the same unresolved IP are O(1) and avoid re-entering the resolver.
             owned->assign(WStr("Unknown_Native_Function(unknown)"));
-            trace::WSTRING* raw = owned.release();
-            owned.reset(function_name_cache_.Put(function_identifier, raw));
-            return raw;
         }
     }
     else
@@ -730,19 +727,6 @@ FunctionIdentifier NamingHelper::LookupManagedFunction(const FunctionID function
     return resolvedIdentifier;
 }
 
-trace::WSTRING* NamingHelper::GetOrCreateUnknownNativeSentinel()
-{
-    const auto      sentinel_key = FunctionIdentifier::UnknownNativeSentinel();
-    trace::WSTRING* sentinel     = function_name_cache_.Get(sentinel_key);
-    if (sentinel != nullptr)
-    {
-        return sentinel;
-    }
-
-    sentinel = new trace::WSTRING(WStr("Unknown_Native_Function(unknown)"));
-    std::unique_ptr<trace::WSTRING> old_value{function_name_cache_.Put(sentinel_key, sentinel)};
-    return sentinel;
-}
 
 // This is slightly messy since we an only pass one parameter to the FrameCallback
 // but we have some slightly different use cases (but want to use the same stack capture
@@ -813,7 +797,7 @@ static void CaptureFunctionIdentifiersForThreads(
 
             if (frame->isUnmanagedFrame && frame->functionId == 0 && frame->instructionPointer != 0)
             {
-                // RTL-originated native frame - record with IP for symbol resolution
+                // Record IP for symbol resolution
                 doStackSnapshotParams.prof->stats_.total_frames++;
                 doStackSnapshotParams.buffer->push_back(FunctionIdentifier::Native(frame->instructionPointer));
                 return S_OK;

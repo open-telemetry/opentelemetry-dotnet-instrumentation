@@ -59,10 +59,6 @@ struct FunctionIdentifier
     {
         return {0, 0, false, 0};
     }
-    static FunctionIdentifier UnknownNativeSentinel()
-    {
-        return {0, 0, true, static_cast<UINT_PTR>(~static_cast<UINT_PTR>(0))};
-    }
     bool IsNative() const
     {
         return is_valid && function_token == 0 && native_ip != 0;
@@ -304,8 +300,6 @@ public:
 
     [[nodiscard]] FunctionIdentifier ResolveManagedFunctionIdentifier(FunctionID func_id,
                                                                      COR_PRF_FRAME_INFO frame_info) const;
-    trace::WSTRING*                  GetOrCreateUnknownNativeSentinel();
-
 private:
     NameCache<FunctionIdentifier, trace::WSTRING*> function_name_cache_;
     NameCache<FunctionIdentifierResolveArgs, FunctionIdentifier> function_identifier_cache_;
