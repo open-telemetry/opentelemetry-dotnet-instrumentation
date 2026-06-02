@@ -58,7 +58,7 @@ public static class ConsumerConsumeSyncIntegration
         }
         else
         {
-            activity.ActivityTraceFlags = ActivityTraceFlags.None;
+            activity.ActivityTraceFlags &= ~ActivityTraceFlags.Recorded;
         }
 
         activity.Stop();

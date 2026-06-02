@@ -60,13 +60,13 @@ internal static class ActionWorkflowAnalyzer
 
         foreach (var (start, end, replacement) in replacements.OrderBy(r => r.Start))
         {
-            stringBuilder.Append(content, currentPosition, start - currentPosition);
-            stringBuilder.Append(replacement);
+            stringBuilder = stringBuilder
+                .Append(content, currentPosition, start - currentPosition)
+                .Append(replacement);
             currentPosition = end;
         }
 
-        stringBuilder.Append(content, currentPosition, content.Length - currentPosition);
-        return stringBuilder.ToString();
+        return stringBuilder.Append(content, currentPosition, content.Length - currentPosition).ToString();
     }
 
     private static string GetNewDotnetVersionScalar(string content, Scalar keyScalar, Scalar valueScalar, DotnetSdkVersion newDotnetSdkVersion)
@@ -77,9 +77,9 @@ internal static class ActionWorkflowAnalyzer
             newline,
             [
                 "|",
-                $"{indentation}{newDotnetSdkVersion.Net8SdkVersion!}",
-                $"{indentation}{newDotnetSdkVersion.Net9SdkVersion!}",
-                $"{indentation}{newDotnetSdkVersion.Net10SdkVersion!}",
+                $"{indentation}{newDotnetSdkVersion.Net8SdkVersion}",
+                $"{indentation}{newDotnetSdkVersion.Net9SdkVersion}",
+                $"{indentation}{newDotnetSdkVersion.Net10SdkVersion}",
             ]);
 
         var originalValue = content[checked((int)valueScalar.Start.Index)..checked((int)valueScalar.End.Index)];
@@ -102,7 +102,7 @@ internal static class ActionWorkflowAnalyzer
     {
         var workflows = Directory.GetFiles(GetWorkflowsDirectory(root), "*.yml");
         var actions = Directory.GetFiles(GetActionsDirectory(root), "action.yml", SearchOption.AllDirectories);
-        return workflows.Concat(actions).ToArray();
+        return [.. workflows, .. actions];
     }
 
     private static string GetWorkflowsDirectory(string root)
@@ -208,18 +208,12 @@ internal static class ActionWorkflowAnalyzer
             }
         }
 
-        if (sdk8Version is not null || sdk9Version is not null)
-        {
-            return new DotnetSdkVersion(sdk8Version, sdk9Version, sdk10Version);
-        }
-
-        return null;
+        return sdk8Version is not null || sdk9Version is not null ? new DotnetSdkVersion(sdk8Version, sdk9Version, sdk10Version) : null;
     }
 
     private static IEnumerable<YamlSequenceNode> ExtractStepGroups(YamlStream yaml)
     {
-        var rootNode = yaml.Documents[0].RootNode as YamlMappingNode;
-        if (rootNode is null)
+        if (yaml.Documents[0].RootNode is not YamlMappingNode rootNode)
         {
             yield break;
         }

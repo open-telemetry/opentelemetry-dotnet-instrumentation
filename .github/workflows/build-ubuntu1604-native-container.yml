@@ -12,13 +12,15 @@ env:
 
 jobs:
   build-ubuntu1604-native-container:
-    runs-on: ubuntu-22.04
+    name: Build native container on Ubuntu 16.04
+    runs-on: ubuntu-24.04
     timeout-minutes: 60
     steps:
-      - name: Checkout
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # tag: v6.0.2
+      - name: Checkout code
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           fetch-depth: 0 # fetching all, needed to correctly calculate version
+          persist-credentials: false
 
       - name: Prepare build environment
         id: prepare-build-environment
@@ -41,7 +43,7 @@ jobs:
 
       - name: Publish native library Linux build
         if: ${{ !cancelled() }}
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # tag: v7.0.1
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: bin-ubuntu1604-native
           path: bin/tracer-home

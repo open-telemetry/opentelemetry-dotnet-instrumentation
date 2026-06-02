@@ -4,16 +4,29 @@ on:
   release:
     types: [published]
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+
 permissions:
   contents: read
 
 jobs:
   powershell-script:
-    runs-on: windows-2022
+    name: Run PowerShell script on ${{ matrix.machine }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - machine: windows-2022
+          - machine: windows-2025
+    runs-on: ${{ matrix.machine }}
     steps:
 
-      - name: Checkout
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # tag: v6.0.2
+      - name: Checkout code
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
 
       - name: Setup .NET
         uses: ./.github/actions/setup-dotnet
@@ -49,6 +62,7 @@ jobs:
           if (Test-Path $install_dir) { throw "Core files exist. Core uninstall failed." }
 
   shell-scripts:
+    name: Run shell scripts on ${{ matrix.machine }}
     strategy:
       fail-fast: false
       matrix:
@@ -66,8 +80,10 @@ jobs:
     runs-on: ${{ matrix.machine }}
     steps:
 
-      - name: Checkout
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # tag: v6.0.2
+      - name: Checkout code
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
 
       - name: Setup .NET
         uses: ./.github/actions/setup-dotnet
@@ -105,21 +121,26 @@ jobs:
             test "$(ls -A "${LOG_DIRECTORY}" )"
 
   shell-scripts-container:
+    name: Run shell scripts in Docker container on ${{ matrix.machine }}
     strategy:
       fail-fast: false
       matrix:
         include:
-          - machine: ubuntu-22.04
+          # renovate: datasource=github-runners depType=github-runner
+          - machine: ubuntu-24.04
             base-image: alpine
             net-version: net10.0
-          - machine: ubuntu-22.04-arm
+          # renovate: datasource=github-runners depType=github-runner
+          - machine: ubuntu-24.04-arm
             base-image: alpine
             net-version: net10.0
     runs-on: ${{ matrix.machine }}
     steps:
 
-      - name: Checkout
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # tag: v6.0.2
+      - name: Checkout code
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
 
       - name: Test the Shell scripts from README.md in Docker container
         env:

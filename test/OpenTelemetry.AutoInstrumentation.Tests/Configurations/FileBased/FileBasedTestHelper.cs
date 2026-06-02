@@ -4,7 +4,6 @@
 using System.Reflection;
 using Vendors.YamlDotNet.Core;
 using Vendors.YamlDotNet.Serialization;
-using Xunit;
 
 namespace OpenTelemetry.AutoInstrumentation.Tests.Configurations.FileBased;
 

@@ -13,7 +13,7 @@ internal class OtlpHttpExporterConfig
     /// <summary>
     /// Gets or sets the endpoint for the OTLP HTTP exporter.
     /// Configure endpoint.
-    /// If omitted or null, http://localhost:4318/v1/signal will be is used.
+    /// If omitted or null, http://localhost:4318/v1/signal is used.
     /// </summary>
     [YamlMember(Alias = "endpoint")]
     public string? Endpoint { get; set; }

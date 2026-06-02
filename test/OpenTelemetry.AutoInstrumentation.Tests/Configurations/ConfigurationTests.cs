@@ -7,7 +7,6 @@ using System.Text;
 #endif
 using NSubstitute;
 using OpenTelemetry.AutoInstrumentation.Configurations;
-using Xunit;
 
 namespace OpenTelemetry.AutoInstrumentation.Tests.Configurations;
 

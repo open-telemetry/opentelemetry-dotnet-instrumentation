@@ -32,7 +32,7 @@ public static class AppenderAttachedImplIntegration
 
         loggingEvent.Properties[LogsTraceContextInjectionConstants.SpanIdPropertyName] = current.SpanId.ToHexString();
         loggingEvent.Properties[LogsTraceContextInjectionConstants.TraceIdPropertyName] = current.TraceId.ToHexString();
-        loggingEvent.Properties[LogsTraceContextInjectionConstants.TraceFlagsPropertyName] = (current.Context.TraceFlags & ActivityTraceFlags.Recorded) != 0 ? "01" : "00";
+        loggingEvent.Properties[LogsTraceContextInjectionConstants.TraceFlagsPropertyName] = current.Context.TraceFlags.W3CFormatActivityTraceFlags();
         return CallTargetState.GetDefault();
     }
 }

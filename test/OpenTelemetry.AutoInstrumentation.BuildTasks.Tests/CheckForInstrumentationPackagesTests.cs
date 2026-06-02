@@ -3,7 +3,6 @@
 
 using Microsoft.Build.Framework;
 using NSubstitute;
-using Xunit;
 
 namespace OpenTelemetry.AutoInstrumentation.BuildTasks.Tests;
 
