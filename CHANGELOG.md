@@ -50,6 +50,9 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 
 ### Fixed
 
+- Suppress instrumentation while starting the OpAMP client to prevent internal
+  OpAMP transport calls from being collected as traces.
+
 ## [v1.16.0-beta.1](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/tag/v1.16.0-beta.1)
 
 ### Added
