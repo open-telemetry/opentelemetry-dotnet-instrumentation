@@ -2,7 +2,9 @@
 // SPDX-License-Identifier: Apache-2.0
 
 using OpenTelemetry.AutoInstrumentation.Configurations.FileBasedConfiguration.Parser;
+#if NETFRAMEWORK
 using Vendors.YamlDotNet.Serialization;
+#endif
 
 namespace OpenTelemetry.AutoInstrumentation.Configurations.FileBasedConfiguration;
 

@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: Apache-2.0
 
 using OpenTelemetry.AutoInstrumentation.CallTarget;
-using OpenTelemetry.AutoInstrumentation.Configurations;
 
 namespace OpenTelemetry.AutoInstrumentation.Instrumentations.StackExchangeRedis;
 

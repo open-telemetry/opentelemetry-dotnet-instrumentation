@@ -2,6 +2,10 @@
 // SPDX-License-Identifier: Apache-2.0
 
 using System.Diagnostics;
+#if NSERVICEBUS_HOSTED_ENDPOINT
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+#endif
 using TestApplication.NServiceBus;
 using TestApplication.Shared;
 
@@ -14,11 +18,25 @@ endpointConfiguration.UseTransport(learningTransport);
 endpointConfiguration.UseSerialization<XmlSerializer>();
 
 using var cancellation = new CancellationTokenSource();
+
+#if NSERVICEBUS_HOSTED_ENDPOINT
+var builder = Host.CreateApplicationBuilder(args);
+builder.Services.AddNServiceBusEndpoint(endpointConfiguration);
+
+using var host = builder.Build();
+await host.StartAsync(cancellation.Token).ConfigureAwait(false);
+var messageSession = host.Services.GetRequiredService<IMessageSession>();
+#else
 var endpointInstance = await Endpoint.Start(endpointConfiguration, cancellation.Token).ConfigureAwait(false);
+#endif
 
 try
 {
+#if NSERVICEBUS_HOSTED_ENDPOINT
+    await messageSession.SendLocal(new TestMessage(), cancellation.Token).ConfigureAwait(false);
+#else
     await endpointInstance.SendLocal(new TestMessage(), cancellation.Token).ConfigureAwait(false);
+#endif
 
     // The "LONG_RUNNING" environment variable is used by tests that access/receive
     // data that takes time to be produced.
@@ -40,5 +58,9 @@ try
 }
 finally
 {
+#if NSERVICEBUS_HOSTED_ENDPOINT
+    await host.StopAsync(cancellation.Token).ConfigureAwait(false);
+#else
     await endpointInstance.Stop(cancellation.Token).ConfigureAwait(false);
+#endif
 }

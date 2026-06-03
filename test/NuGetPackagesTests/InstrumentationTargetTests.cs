@@ -4,7 +4,6 @@
 using IntegrationTests.Helpers;
 using Microsoft.Build.Evaluation;
 using NuGet.Versioning;
-using Xunit.Abstractions;
 
 namespace IntegrationTests;
 

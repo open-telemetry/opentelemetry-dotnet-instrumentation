@@ -4,7 +4,6 @@
 using System.Collections.Specialized;
 using OpenTelemetry.AutoInstrumentation.Configurations;
 using OpenTelemetry.AutoInstrumentation.Tests.Util;
-using Xunit;
 
 namespace OpenTelemetry.AutoInstrumentation.Tests.Configurations;
 

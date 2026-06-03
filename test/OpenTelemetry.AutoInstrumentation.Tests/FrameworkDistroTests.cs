@@ -11,7 +11,6 @@ using DependencyListGenerator;
 using Microsoft.Build.Evaluation;
 using NuGet.Configuration;
 using NuGet.Frameworks;
-using Xunit;
 
 namespace OpenTelemetry.AutoInstrumentation.Tests;
 

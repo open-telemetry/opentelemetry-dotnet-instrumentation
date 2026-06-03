@@ -3,7 +3,6 @@
 
 using OpenTelemetry.AutoInstrumentation.Instrumentations.NLog.Bridge;
 using OpenTelemetry.Trace;
-using Xunit;
 
 namespace OpenTelemetry.AutoInstrumentation.Tests;
 

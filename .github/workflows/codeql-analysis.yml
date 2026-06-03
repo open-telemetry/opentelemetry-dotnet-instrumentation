@@ -35,6 +35,11 @@ jobs:
         - language: actions
           # renovate: datasource=github-runners depType=github-runner
           machine: ubuntu-24.04
+        - language: c-cpp
+          build-mode: autobuild
+          queries: security-extended
+          # renovate: datasource=github-runners depType=github-runner
+          machine: ubuntu-24.04
         - language: csharp
           build-mode: manual
           # renovate: datasource=github-runners depType=github-runner
@@ -57,23 +62,19 @@ jobs:
         disk-root: "D:"
 
     - name: Checkout code
-      uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
       with:
         filter: 'tree:0'
         persist-credentials: false
         show-progress: false
 
     - name: Initialize CodeQL
-      uses: github/codeql-action/init@7211b7c8077ea37d8641b6271f6a365a22a5fbfa # v4.36.0
+      uses: github/codeql-action/init@87557b9c84dde89fdd9b10e88954ac2f4248e463 # v4.36.1
       with:
         languages: ${{ matrix.language }}
         build-mode: ${{ matrix.build-mode }}
-        # If you wish to specify custom queries, you can do so here or in a config file.
-        # By default, queries listed here will override any specified in a config file.
-        # Prefix the list here with "+" to use these queries and those in the config file.
-
-        # For more details on CodeQL's query packs, refer to: https://docs.github.com/en/code-security/code-scanning/automatically-scanning-your-code-for-vulnerabilities-and-errors/configuring-code-scanning#using-queries-in-ql-packs
-        # queries: security-extended,security-and-quality
+        config-file: ./.github/codeql-config.yml
+        queries: ${{ matrix.queries }}
 
     - name: Setup .NET
       uses: ./.github/actions/setup-dotnet
@@ -90,7 +91,7 @@ jobs:
       run: ./build.cmd BuildTracer
 
     - name: Perform CodeQL Analysis
-      uses: github/codeql-action/analyze@7211b7c8077ea37d8641b6271f6a365a22a5fbfa # v4.36.0
+      uses: github/codeql-action/analyze@87557b9c84dde89fdd9b10e88954ac2f4248e463 # v4.36.1
       with:
         category: "/language:${{matrix.language}}"
 

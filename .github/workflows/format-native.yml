@@ -28,7 +28,7 @@ jobs:
             runner: macos-26-xlarge
           - step-name: native-format-linux
             # renovate: datasource=github-runners depType=github-runner
-            runner: ubuntu-22.04
+            runner: ubuntu-24.04
           - step-name: native-format-windows
             # renovate: datasource=github-runners depType=github-runner
             runner: windows-2025
@@ -36,7 +36,7 @@ jobs:
     steps:
 
     - name: Checkout code
-      uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
       with:
         persist-credentials: false
 
@@ -50,11 +50,11 @@ jobs:
 
   check-native-headers:
     name: check-native-headers # Matches required status check
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     steps:
 
       - name: Checkout code
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
         with:
           persist-credentials: false
 

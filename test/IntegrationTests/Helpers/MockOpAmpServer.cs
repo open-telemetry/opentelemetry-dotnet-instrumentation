@@ -13,7 +13,6 @@ using System.Net;
 using System.Text;
 using Google.Protobuf;
 using OpAmp.Proto.V1;
-using Xunit.Abstractions;
 
 namespace IntegrationTests.Helpers;
 
