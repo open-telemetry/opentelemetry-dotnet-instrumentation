@@ -1,11 +1,17 @@
 // Copyright The OpenTelemetry Authors
 // SPDX-License-Identifier: Apache-2.0
 
+using System.Collections.Specialized;
 using System.Globalization;
+using System.Reflection;
 using OpenTelemetry.AutoInstrumentation.Configurations;
 using OpenTelemetry.AutoInstrumentation.Tests.Util;
 using OpenTelemetry.Exporter;
 using AutoOtlpDefinitions = OpenTelemetry.AutoInstrumentation.Configurations.Otlp.OtlpSpecConfigDefinitions;
+
+#if NETFRAMEWORK
+using SystemConfigurationManager = System.Configuration.ConfigurationManager;
+#endif
 
 namespace OpenTelemetry.AutoInstrumentation.Tests.Configurations;
 
@@ -568,4 +574,449 @@ public sealed class SettingsTests
 
         Assert.Equal([expectedResourceDetector], settings.EnabledDetectors);
     }
+
+    [Fact]
+    internal void ResourceSettings_LoadEnvVar_ReadsServiceNameFromConfigurationSource()
+    {
+        const string appSettingsValue = "service-name-from-app-settings";
+
+        var configuration = new Configuration(
+            false,
+            new NameValueConfigurationSource(false, new NameValueCollection
+            {
+                { ConfigurationKeys.ServiceName, appSettingsValue }
+            }));
+        var settings = new ResourceSettings();
+
+        settings.LoadEnvVar(configuration);
+
+        var resource = Assert.Single(settings.Resources);
+        Assert.Equal(Constants.ResourceAttributes.AttributeServiceName, resource.Key);
+        Assert.Equal(appSettingsValue, resource.Value);
+    }
+
+    [Fact]
+    internal void ResourceSettings_LoadEnvVar_AppSettingsSourceTakesPriorityOverEnvVarSource()
+    {
+        const string envVarValue = "service-name-from-env-var";
+        const string appSettingsValue = "service-name-from-app-settings";
+
+        try
+        {
+            Environment.SetEnvironmentVariable(ConfigurationKeys.ServiceName, envVarValue);
+            var configuration = new Configuration(
+                false,
+                new NameValueConfigurationSource(false, new NameValueCollection
+                {
+                    { ConfigurationKeys.ServiceName, appSettingsValue }
+                }),
+                new EnvironmentConfigurationSource(false));
+            var settings = new ResourceSettings();
+
+            settings.LoadEnvVar(configuration);
+
+            var resource = Assert.Single(settings.Resources);
+            Assert.Equal(Constants.ResourceAttributes.AttributeServiceName, resource.Key);
+            Assert.Equal(appSettingsValue, resource.Value);
+        }
+        finally
+        {
+            Environment.SetEnvironmentVariable(ConfigurationKeys.ServiceName, null);
+        }
+    }
+
+    [Fact]
+    internal void ResourceSettings_LoadEnvVar_ServiceNameFallsBackToLaterSource()
+    {
+        var configuration = new OpenTelemetry.AutoInstrumentation.Configurations.Configuration(
+            false,
+            new NameValueConfigurationSource(false, []),
+            new NameValueConfigurationSource(false, new NameValueCollection
+            {
+                { ConfigurationKeys.ServiceName, "service-name-from-fallback-source" }
+            }));
+        var settings = new ResourceSettings();
+
+        settings.LoadEnvVar(configuration);
+
+        var resource = Assert.Single(settings.Resources);
+        Assert.Equal(Constants.ResourceAttributes.AttributeServiceName, resource.Key);
+        Assert.Equal("service-name-from-fallback-source", resource.Value);
+    }
+
+    [Fact]
+    internal void ResourceSettings_LoadEnvVar_ServiceNameOverridesServiceNameInResourceAttributes()
+    {
+        var configuration = new Configuration(
+            false,
+            new NameValueConfigurationSource(false, new NameValueCollection
+            {
+                { ConfigurationKeys.ResourceAttributes, "service.name=resource-attributes,deployment.environment=prod" },
+                { ConfigurationKeys.ServiceName, "service-name-setting" }
+            }));
+        var settings = new ResourceSettings();
+
+        settings.LoadEnvVar(configuration);
+
+        var resources = settings.Resources.ToDictionary(kv => kv.Key, kv => kv.Value);
+
+        Assert.Equal("service-name-setting", resources[Constants.ResourceAttributes.AttributeServiceName]);
+        Assert.Equal("prod", resources["deployment.environment"]);
+        Assert.Equal(2, resources.Count);
+    }
+
+    [Fact]
+    internal void ResourceSettings_LoadEnvVar_DecodesUrlEncodedResourceAttributeValues()
+    {
+        var configuration = new Configuration(
+            false,
+            new NameValueConfigurationSource(false, new NameValueCollection
+            {
+                { ConfigurationKeys.ResourceAttributes, "service.namespace=payments%2Fapi" }
+            }));
+        var settings = new ResourceSettings();
+
+        settings.LoadEnvVar(configuration);
+
+        var resource = Assert.Single(settings.Resources);
+        Assert.Equal("service.namespace", resource.Key);
+        Assert.Equal("payments/api", resource.Value);
+    }
+
+#if NETFRAMEWORK
+    [Fact]
+    internal void FromDefaultSources_NonResourceSettingsStillPreferEnvironmentVariablesOverAppSettings()
+    {
+        using var overrideScope = OverrideAppSettings((ConfigurationKeys.Traces.Exporter, "zipkin"));
+        using var envScope = new EnvironmentScope(new Dictionary<string, string?>()
+        {
+            { ConfigurationKeys.Traces.Exporter, "console" }
+        });
+
+        var settings = Settings.FromDefaultSources<TracerSettings>(false);
+
+        Assert.Equal([TracesExporter.Console], settings.TracesExporters);
+    }
+
+    [Fact]
+    internal void FromDefaultSources_ResourceSettingsMergeAppSettingsAfterEnvironmentVariables()
+    {
+        using var overrideScope = OverrideAppSettings(
+            (ConfigurationKeys.ResourceAttributes, "deployment.environment=staging"),
+            (ConfigurationKeys.ServiceName, "app-settings-service"));
+        using var envScope = new EnvironmentScope(new Dictionary<string, string?>()
+        {
+            { ConfigurationKeys.ResourceAttributes, "deployment.environment=prod,service.namespace=checkout" },
+            { ConfigurationKeys.ServiceName, "env-service" }
+        });
+
+        var settings = Settings.FromDefaultSources<ResourceSettings>(false);
+        var resources = settings.Resources.ToDictionary(kv => kv.Key, kv => kv.Value);
+
+        Assert.Equal("staging", resources["deployment.environment"]);
+        Assert.Equal("checkout", resources["service.namespace"]);
+        Assert.Equal("app-settings-service", resources[Constants.ResourceAttributes.AttributeServiceName]);
+        Assert.Equal(3, resources.Count);
+    }
+
+    [Fact]
+    internal void FromDefaultSources_ResourceSettingsUseOnlyYamlWhenFileBasedConfigurationIsEnabled()
+    {
+        var yamlPath = Path.GetTempFileName();
+        var yaml = """
+resource:
+  attributes:
+    - name: deployment.environment
+      value: yaml
+    - name: service.name
+      value: yaml-service
+""";
+
+        try
+        {
+            File.WriteAllText(yamlPath, yaml);
+
+            var appDomainSetup = new AppDomainSetup
+            {
+                ApplicationBase = AppDomain.CurrentDomain.BaseDirectory
+            };
+            var appDomain = AppDomain.CreateDomain(nameof(FromDefaultSources_ResourceSettingsUseOnlyYamlWhenFileBasedConfigurationIsEnabled), null, appDomainSetup);
+
+            try
+            {
+                var runner = (SettingsFromDefaultSourcesNetFxRunner)appDomain.CreateInstanceAndUnwrap(
+                    typeof(SettingsFromDefaultSourcesNetFxRunner).Assembly.FullName,
+                    typeof(SettingsFromDefaultSourcesNetFxRunner).FullName);
+
+                var resources = runner.LoadResourceSettingsFromYaml(yamlPath);
+
+                Assert.Equal("yaml", resources["deployment.environment"]);
+                Assert.Equal("yaml-service", resources[Constants.ResourceAttributes.AttributeServiceName]);
+                Assert.Equal(2, resources.Count);
+            }
+            finally
+            {
+                AppDomain.Unload(appDomain);
+            }
+        }
+        finally
+        {
+            File.Delete(yamlPath);
+        }
+    }
+#endif
+
+#if NETFRAMEWORK
+    [Fact]
+    internal void AppSettingsConfigurationSource_ReturnsValueForPresentKey()
+    {
+        var appSettings = new NameValueCollection
+        {
+            { ConfigurationKeys.ServiceName, "my-service" }
+        };
+        var source = new AppSettingsConfigurationSource(false, appSettings);
+
+        Assert.Equal("my-service", source.GetString(ConfigurationKeys.ServiceName));
+    }
+
+    [Fact]
+    internal void AppSettingsConfigurationSource_ReturnsNullForAbsentKey()
+    {
+        var source = new AppSettingsConfigurationSource(false, []);
+
+        Assert.Null(source.GetString(ConfigurationKeys.ServiceName));
+    }
+#endif
+
+    private static void ClearEnvVars()
+    {
+        Environment.SetEnvironmentVariable(ConfigurationKeys.ServiceName, null);
+        Environment.SetEnvironmentVariable(ConfigurationKeys.ResourceAttributes, null);
+        Environment.SetEnvironmentVariable(ConfigurationKeys.Logs.LogsInstrumentationEnabled, null);
+#if NET
+        foreach (var logInstrumentation in Enum.GetValues<LogInstrumentation>())
+#else
+        foreach (var logInstrumentation in Enum.GetValues(typeof(LogInstrumentation)).Cast<LogInstrumentation>())
+#endif
+        {
+            Environment.SetEnvironmentVariable(string.Format(CultureInfo.InvariantCulture, ConfigurationKeys.Logs.EnabledLogsInstrumentationTemplate, logInstrumentation.ToString().ToUpperInvariant()), null);
+        }
+
+        Environment.SetEnvironmentVariable(ConfigurationKeys.Logs.Exporter, null);
+        Environment.SetEnvironmentVariable(ConfigurationKeys.Logs.IncludeFormattedMessage, null);
+
+        Environment.SetEnvironmentVariable(ConfigurationKeys.Metrics.MetricsInstrumentationEnabled, null);
+#if NET
+        foreach (var metricInstrumentation in Enum.GetValues<MetricInstrumentation>())
+#else
+        foreach (var metricInstrumentation in Enum.GetValues(typeof(MetricInstrumentation)).Cast<MetricInstrumentation>())
+#endif
+        {
+            Environment.SetEnvironmentVariable(string.Format(CultureInfo.InvariantCulture, ConfigurationKeys.Metrics.EnabledMetricsInstrumentationTemplate, metricInstrumentation.ToString().ToUpperInvariant()), null);
+        }
+
+        Environment.SetEnvironmentVariable(ConfigurationKeys.Metrics.Exporter, null);
+        Environment.SetEnvironmentVariable(ConfigurationKeys.Metrics.AdditionalSources, null);
+        Environment.SetEnvironmentVariable(ConfigurationKeys.Traces.TracesInstrumentationEnabled, null);
+#if NET
+        foreach (var tracerInstrumentation in Enum.GetValues<TracerInstrumentation>())
+#else
+        foreach (var tracerInstrumentation in Enum.GetValues(typeof(TracerInstrumentation)).Cast<TracerInstrumentation>())
+#endif
+        {
+            Environment.SetEnvironmentVariable(string.Format(CultureInfo.InvariantCulture, ConfigurationKeys.Traces.EnabledTracesInstrumentationTemplate, tracerInstrumentation.ToString().ToUpperInvariant()), null);
+        }
+
+        Environment.SetEnvironmentVariable(ConfigurationKeys.Traces.Exporter, null);
+        Environment.SetEnvironmentVariable(ConfigurationKeys.Traces.AdditionalLegacySources, null);
+        Environment.SetEnvironmentVariable(ConfigurationKeys.Traces.AdditionalSources, null);
+        Environment.SetEnvironmentVariable(AutoOtlpDefinitions.DefaultProtocolEnvVarName, null);
+        Environment.SetEnvironmentVariable(ConfigurationKeys.FlushOnUnhandledException, null);
+        Environment.SetEnvironmentVariable(ConfigurationKeys.ResourceDetectorEnabled, null);
+        Environment.SetEnvironmentVariable(ConfigurationKeys.ProviderPlugins, null);
+
+        Environment.SetEnvironmentVariable(ConfigurationKeys.ResourceDetectorEnabled, null);
+#if NET
+        foreach (var resourceDetector in Enum.GetValues<ResourceDetector>())
+#else
+        foreach (var resourceDetector in Enum.GetValues(typeof(ResourceDetector)).Cast<ResourceDetector>())
+#endif
+        {
+            Environment.SetEnvironmentVariable(string.Format(CultureInfo.InvariantCulture, ConfigurationKeys.EnabledResourceDetectorTemplate, resourceDetector.ToString().ToUpperInvariant()), null);
+        }
+
+        Environment.SetEnvironmentVariable(ConfigurationKeys.Sdk.Propagators, null);
+
+#if NETFRAMEWORK
+        Environment.SetEnvironmentVariable(ConfigurationKeys.Traces.InstrumentationOptions.AspNetInstrumentationCaptureRequestHeaders, null);
+        Environment.SetEnvironmentVariable(ConfigurationKeys.Traces.InstrumentationOptions.AspNetInstrumentationCaptureResponseHeaders, null);
+#endif
+
+#if NET
+        Environment.SetEnvironmentVariable(ConfigurationKeys.Traces.InstrumentationOptions.AspNetCoreInstrumentationCaptureRequestHeaders, null);
+        Environment.SetEnvironmentVariable(ConfigurationKeys.Traces.InstrumentationOptions.AspNetCoreInstrumentationCaptureResponseHeaders, null);
+        Environment.SetEnvironmentVariable(ConfigurationKeys.Traces.InstrumentationOptions.GraphQLSetDocument, null);
+#endif
+        Environment.SetEnvironmentVariable(ConfigurationKeys.Traces.InstrumentationOptions.GrpcNetClientInstrumentationCaptureRequestMetadata, null);
+        Environment.SetEnvironmentVariable(ConfigurationKeys.Traces.InstrumentationOptions.GrpcNetClientInstrumentationCaptureResponseMetadata, null);
+        Environment.SetEnvironmentVariable(ConfigurationKeys.Traces.InstrumentationOptions.HttpInstrumentationCaptureRequestHeaders, null);
+        Environment.SetEnvironmentVariable(ConfigurationKeys.Traces.InstrumentationOptions.HttpInstrumentationCaptureResponseHeaders, null);
+        Environment.SetEnvironmentVariable(ConfigurationKeys.Traces.InstrumentationOptions.OracleMdaSetDbStatementForText, null);
+        Environment.SetEnvironmentVariable(ConfigurationKeys.Traces.InstrumentationOptions.SqlClientNetFxILRewriteEnabled, null);
+
+        // Cleanup OTLP env vars
+        foreach (var envVar in GetAllOtlpEnvVarNames())
+        {
+            Environment.SetEnvironmentVariable(envVar, null);
+        }
+    }
+
+    private static IEnumerable<string> GetAllOtlpEnvVarNames()
+    {
+        return typeof(AutoOtlpDefinitions)
+            .GetFields(BindingFlags.Public | BindingFlags.Static)
+            .Where(f => f.FieldType == typeof(string))
+            .Select(f => (string)f.GetValue(null)!)
+            .ToList() ?? Enumerable.Empty<string>();
+    }
+
+#if NETFRAMEWORK
+    private static CallbackDisposable OverrideAppSettings(params (string Key, string? Value)[] settings)
+    {
+        var appSettings = SystemConfigurationManager.AppSettings;
+        var originalValues = settings.ToDictionary(setting => setting.Key, setting => appSettings[setting.Key]);
+        var originalReadOnly = SetAppSettingsReadOnly(appSettings, false);
+
+        foreach (var (key, value) in settings)
+        {
+            appSettings[key] = value ?? string.Empty;
+        }
+
+        return new CallbackDisposable(() =>
+        {
+            SetAppSettingsReadOnly(appSettings, false);
+
+            foreach (var originalValue in originalValues)
+            {
+                var key = originalValue.Key;
+                var value = originalValue.Value;
+                appSettings[key] = value ?? string.Empty;
+            }
+
+            SetAppSettingsReadOnly(appSettings, originalReadOnly);
+        });
+    }
+
+    private static bool SetAppSettingsReadOnly(NameValueCollection appSettings, bool readOnly)
+    {
+        var field = typeof(NameObjectCollectionBase).GetField("_readOnly", BindingFlags.Instance | BindingFlags.NonPublic)
+            ?? typeof(NameObjectCollectionBase).GetField("readOnly", BindingFlags.Instance | BindingFlags.NonPublic);
+
+        if (field == null)
+        {
+            throw new InvalidOperationException("Unable to access NameObjectCollectionBase read-only state.");
+        }
+
+        var originalReadOnly = (bool)field.GetValue(appSettings)!;
+        field.SetValue(appSettings, readOnly);
+        return originalReadOnly;
+    }
+
+    private sealed class CallbackDisposable(Action onDispose) : IDisposable
+    {
+        private readonly Action _onDispose = onDispose;
+
+        public void Dispose()
+        {
+            _onDispose();
+        }
+    }
+#endif
 }
+
+#if NETFRAMEWORK
+public sealed class SettingsFromDefaultSourcesNetFxRunner : MarshalByRefObject
+{
+    public Dictionary<string, string> LoadResourceSettingsFromYaml(string yamlPath)
+    {
+        _ = GetType();
+        var originalEnabled = Environment.GetEnvironmentVariable(ConfigurationKeys.FileBasedConfiguration.Enabled);
+        var originalFileName = Environment.GetEnvironmentVariable(ConfigurationKeys.FileBasedConfiguration.FileName);
+        var originalResourceAttributes = Environment.GetEnvironmentVariable(ConfigurationKeys.ResourceAttributes);
+        var originalServiceName = Environment.GetEnvironmentVariable(ConfigurationKeys.ServiceName);
+
+        using var appSettingsScope = OverrideAppSettings(
+            (ConfigurationKeys.ResourceAttributes, "deployment.environment=appsettings"),
+            (ConfigurationKeys.ServiceName, "appsettings-service"));
+
+        try
+        {
+            Environment.SetEnvironmentVariable(ConfigurationKeys.FileBasedConfiguration.Enabled, "true");
+            Environment.SetEnvironmentVariable(ConfigurationKeys.FileBasedConfiguration.FileName, yamlPath);
+            Environment.SetEnvironmentVariable(ConfigurationKeys.ResourceAttributes, "deployment.environment=env,service.namespace=checkout");
+            Environment.SetEnvironmentVariable(ConfigurationKeys.ServiceName, "env-service");
+
+            var settings = Settings.FromDefaultSources<ResourceSettings>(false);
+            return settings.Resources.ToDictionary(kv => kv.Key, kv => kv.Value?.ToString() ?? string.Empty);
+        }
+        finally
+        {
+            Environment.SetEnvironmentVariable(ConfigurationKeys.FileBasedConfiguration.Enabled, originalEnabled);
+            Environment.SetEnvironmentVariable(ConfigurationKeys.FileBasedConfiguration.FileName, originalFileName);
+            Environment.SetEnvironmentVariable(ConfigurationKeys.ResourceAttributes, originalResourceAttributes);
+            Environment.SetEnvironmentVariable(ConfigurationKeys.ServiceName, originalServiceName);
+        }
+    }
+
+    private static CallbackDisposable OverrideAppSettings(params (string Key, string? Value)[] settings)
+    {
+        var appSettings = SystemConfigurationManager.AppSettings;
+        var originalValues = settings.ToDictionary(setting => setting.Key, setting => appSettings[setting.Key]);
+        var originalReadOnly = SetAppSettingsReadOnly(appSettings, false);
+
+        foreach (var (key, value) in settings)
+        {
+            appSettings[key] = value ?? string.Empty;
+        }
+
+        return new CallbackDisposable(() =>
+        {
+            SetAppSettingsReadOnly(appSettings, false);
+
+            foreach (var originalValue in originalValues)
+            {
+                var key = originalValue.Key;
+                var value = originalValue.Value;
+                appSettings[key] = value ?? string.Empty;
+            }
+
+            SetAppSettingsReadOnly(appSettings, originalReadOnly);
+        });
+    }
+
+    private static bool SetAppSettingsReadOnly(NameValueCollection appSettings, bool readOnly)
+    {
+        var field = typeof(NameObjectCollectionBase).GetField("_readOnly", BindingFlags.Instance | BindingFlags.NonPublic)
+            ?? typeof(NameObjectCollectionBase).GetField("readOnly", BindingFlags.Instance | BindingFlags.NonPublic);
+
+        if (field == null)
+        {
+            throw new InvalidOperationException("Unable to access NameObjectCollectionBase read-only state.");
+        }
+
+        var originalReadOnly = (bool)field.GetValue(appSettings)!;
+        field.SetValue(appSettings, readOnly);
+        return originalReadOnly;
+    }
+
+    private sealed class CallbackDisposable(Action onDispose) : IDisposable
+    {
+        private readonly Action _onDispose = onDispose;
+
+        public void Dispose()
+        {
+            _onDispose();
+        }
+    }
+}
+#endif

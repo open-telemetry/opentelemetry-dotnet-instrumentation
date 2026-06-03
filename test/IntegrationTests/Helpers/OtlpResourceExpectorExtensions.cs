@@ -7,10 +7,10 @@ internal static class OtlpResourceExpectorExtensions
 {
     public static void ExpectStandardResources(this OtlpResourceExpector resourceExpector, int processId, string serviceName)
     {
-        resourceExpector.Expect("service.name", serviceName); // this is set via env var and App.config, but env var has precedence
+        resourceExpector.Expect("service.name", serviceName); // this is set via env var
         resourceExpector.Matches("service.instance.id", "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$");
 #if NETFRAMEWORK
-        resourceExpector.Expect("deployment.environment.name", "test"); // this is set via App.config
+        resourceExpector.Expect("deployment.environment.name", "test"); // this resource attribute is set via App.config
 #endif
         resourceExpector.Expect("telemetry.sdk.name", "opentelemetry");
         resourceExpector.Expect("telemetry.sdk.language", "dotnet");

@@ -29,6 +29,8 @@ Register-OpenTelemetryForWindowsService -WindowsServiceName "WindowsServiceName"
 
 For .NET Framework applications you can configure the most common `OTEL_` settings
 (like `OTEL_RESOURCE_ATTRIBUTES`) via `appSettings` in `App.config`.
+Those `appSettings` resource entries are optional; if they are omitted, the normal
+environment-variable, detector, and fallback resource behavior still applies.
 
 The alternative is to set environment variables for the Windows Service
 in the Windows Registry.

@@ -35,6 +35,8 @@ for further details.
 
 For ASP.NET application you can configure the most common `OTEL_` settings
 (like `OTEL_SERVICE_NAME`) via `appSettings` in `Web.config`.
+Those `appSettings` resource entries are optional; if they are omitted, the normal
+environment-variable, detector, and fallback resource behavior still applies.
 
 If a service name is not explicitly configured, one will be generated for you.
 If the application is hosted on IIS in .NET Framework this will use

@@ -24,6 +24,25 @@ public class ServiceNameConfiguratorTests
         Assert.Matches("testhost|ReSharperTestRunner", serviceName);
     }
 
+    [Fact]
+    public void CreateResourceBuilder_WithoutExplicitResourceConfiguration_BuildsFallbackResource()
+    {
+        using var envScope = new EnvironmentScope(new Dictionary<string, string?>()
+        {
+            { OtelServiceVariable, null },
+            { OtelResourceAttributeVariable, null }
+        });
+
+        var resourceBuilder = ResourceConfigurator.CreateResourceBuilder(new ResourceSettings());
+        var resource = resourceBuilder.Build();
+
+        var serviceName = resource.Attributes.FirstOrDefault(a => a.Key == ServiceName).Value as string;
+        var serviceInstanceId = resource.Attributes.FirstOrDefault(a => a.Key == ServiceInstanceId).Value as string;
+
+        Assert.Matches("testhost|ReSharperTestRunner", serviceName);
+        Assert.True(Guid.TryParse(serviceInstanceId, out _));
+    }
+
     [Theory]
     [InlineData(ServiceName, OtelServiceVariable, "TestApplication", "TestApplication")]
     [InlineData(ServiceName, OtelResourceAttributeVariable, $"{ServiceName}=TestApplication", "TestApplication")]

@@ -1,6 +1,9 @@
 // Copyright The OpenTelemetry Authors
 // SPDX-License-Identifier: Apache-2.0
 
+#if NETFRAMEWORK
+using System.Configuration;
+#endif
 using OpenTelemetry.AutoInstrumentation.Configurations.FileBasedConfiguration;
 using OpenTelemetry.AutoInstrumentation.Configurations.FileBasedConfiguration.Parser;
 using OpenTelemetry.AutoInstrumentation.Logging;
@@ -27,9 +30,17 @@ internal abstract class Settings
         }
         else
         {
-            var configuration = new Configuration(failFast, new EnvironmentConfigurationSource(failFast));
+            List<IConfigurationSource> sources = [];
+
+            sources.Add(new EnvironmentConfigurationSource(failFast));
+
+#if NETFRAMEWORK
+            sources.Add(new AppSettingsConfigurationSource(failFast, ConfigurationManager.AppSettings));
+#endif
+
+            var configuration = new Configuration(failFast, [.. sources]);
             var settings = new T();
-            settings.LoadEnvVar(configuration);
+            settings.LoadFromDefaultSources(configuration, failFast);
             return settings;
         }
     }
@@ -57,6 +68,11 @@ internal abstract class Settings
     /// </summary>
     /// <param name="configuration">The <see cref="YamlConfiguration"/> to use when retrieving configuration values.</param>
     protected abstract void OnLoadFile(YamlConfiguration configuration);
+
+    protected virtual void LoadFromDefaultSources(Configuration configuration, bool failFast)
+    {
+        LoadEnvVar(configuration);
+    }
 
     private static YamlConfiguration ReadYamlConfiguration()
     {
