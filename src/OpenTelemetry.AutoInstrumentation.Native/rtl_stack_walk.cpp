@@ -235,16 +235,14 @@ bool NativeSymbolResolver::Resolve(UINT_PTR ip, trace::WSTRING& outName)
     if (mod == nullptr)
         return false;
 
-    if (mod->isSystem)
+    if (mod->isSystem && exportResolutionEnabled_.load(std::memory_order_relaxed))
     {
         // System DLLs: full export symbol resolution via RVA walk.
         return ResolveViaExports(ip, imageBase, *mod, outName);
     }
     else
     {
-        // Non-system DLLs: short-circuit - no export table walk.
-        // The walk already collapsed these frames to imageBase, so just
-        // report the module name.
+        // Non-system DLLs (or export resolution disabled): module name only.
         outName.clear();
         outName.append(mod->baseName);
         return true;

@@ -39,6 +39,7 @@ struct ContinuousProfilerParams
     bool         allocationSamplingEnabled;
     unsigned int maxMemorySamplesPerMinute;
     unsigned int selectedThreadsSamplingInterval;
+    bool         nativeSymbolResolutionEnabled;
 };
 
 class CorProfiler : public CorProfilerBase
@@ -143,7 +144,7 @@ private:
     // Initialization methods
     //
     void InternalAddInstrumentation(WCHAR* id, CallTargetDefinition* items, int size, bool isDerived);
-    bool InitThreadSampler();
+    bool InitThreadSampler(bool nativeSymbolResolutionEnabled);
     void ConfigureContinuousProfilerInternal(const ContinuousProfilerParams& params);
 
 public:
@@ -247,7 +248,9 @@ public:
     //
     // Continuous Profiler methods
     //
-    void ConfigureContinuousProfiler(bool threadSamplingEnabled, unsigned int threadSamplingInterval, bool allocationSamplingEnabled, unsigned int maxMemorySamplesPerMinute, unsigned int selectedThreadsSamplingInterval);
+    void ConfigureContinuousProfiler(bool threadSamplingEnabled, unsigned int threadSamplingInterval, bool allocationSamplingEnabled, unsigned int maxMemorySamplesPerMinute, 
+        unsigned int selectedThreadsSamplingInterval,
+                                     bool         nativeSymbolResolutionEnabled);
 
     //
     // IL Rewriting methods

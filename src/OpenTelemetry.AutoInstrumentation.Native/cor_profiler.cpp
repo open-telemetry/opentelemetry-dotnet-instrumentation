@@ -1177,7 +1177,7 @@ void CorProfiler::InternalAddInstrumentation(WCHAR* id, CallTargetDefinition* it
     }
 }
 
-bool CorProfiler::InitThreadSampler()
+bool CorProfiler::InitThreadSampler(bool nativeSymbolResolutionEnabled)
 {
 #if defined(_WIN32)
     // for net fx, the native thread ID is needed by stack capture
@@ -1219,7 +1219,8 @@ bool CorProfiler::InitThreadSampler()
     RuntimeType runtime = runtime_information_.is_desktop() ? RuntimeType::DotNetFramework
                           : runtime_information_.is_core()  ? RuntimeType::DotNetCore
                                                             : RuntimeType::Unknown;
-    stack_walker_impl_  = std::make_unique<continuous_profiler::StackWalkerImpl>(this->info_, runtime);
+    stack_walker_impl_ =
+        std::make_unique<continuous_profiler::StackWalkerImpl>(this->info_, runtime, nativeSymbolResolutionEnabled);
     this->continuousProfiler->SetStackWalker(stack_walker_impl_.get());
     Logger::Info("ConfigureContinuousProfiler: Events masks configured for continuous profiler");
     return true;
@@ -1229,10 +1230,12 @@ void CorProfiler::ConfigureContinuousProfiler(bool         threadSamplingEnabled
                                               unsigned int threadSamplingInterval,
                                               bool         allocationSamplingEnabled,
                                               unsigned int maxMemorySamplesPerMinute,
-                                              unsigned int selectedThreadsSamplingInterval)
+                                              unsigned int selectedThreadsSamplingInterval,
+                                              bool         nativeSymbolResolutionEnabled)
 {
-    ContinuousProfilerParams params{threadSamplingEnabled, threadSamplingInterval, allocationSamplingEnabled,
-                                    maxMemorySamplesPerMinute, selectedThreadsSamplingInterval};
+    ContinuousProfilerParams params{threadSamplingEnabled,           threadSamplingInterval,
+                                    allocationSamplingEnabled,       maxMemorySamplesPerMinute,
+                                    selectedThreadsSamplingInterval, nativeSymbolResolutionEnabled};
     // Guard against multiple initialization: In .NET Framework, this method may be called
     // once per AppDomain, but the continuous profiler is a process-level singleton.
     // std::call_once ensures thread-safe one-time initialization across all AppDomains.
@@ -1255,7 +1258,7 @@ void CorProfiler::ConfigureContinuousProfilerInternal(const ContinuousProfilerPa
         return;
     }
 
-    if (!InitThreadSampler())
+    if (!InitThreadSampler(params.nativeSymbolResolutionEnabled))
     {
         Logger::Warn("ContinuousProfiler: unable to init sampler.");
         return;

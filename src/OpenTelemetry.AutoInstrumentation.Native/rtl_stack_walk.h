@@ -51,6 +51,14 @@ public:
     // Single entry point for native symbol resolution.
     bool Resolve(UINT_PTR ip, trace::WSTRING& outName);
 
+    // Kill switch: when false, Resolve() returns module-name-only for ALL
+    // modules (system and non-system) and skips the PE export-table walk.
+    // Default true (preserves prior behavior). Safe to toggle at runtime.
+    void SetExportResolutionEnabled(bool enabled)
+    {
+        exportResolutionEnabled_.store(enabled, std::memory_order_relaxed);
+    }
+
     // Cached per-module metadata - looked up once per unique imageBase.
     struct ModuleInfo
     {
@@ -74,6 +82,7 @@ private:
 
     // imageBase -> ModuleInfo, avoids repeated GetModuleFileNameW + lowercase + compare.
     std::unordered_map<UINT_PTR, ModuleInfo> moduleCache_;
+    std::atomic<bool>                        exportResolutionEnabled_{true};
 
     static constexpr size_t kMaxSymbolLen       = 256;
     static constexpr size_t kMaxModuleCacheSize = 256;

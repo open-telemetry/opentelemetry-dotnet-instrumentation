@@ -19,6 +19,7 @@ public:
     /// @brief Resolve a native IP to a symbol name (e.g. "ntdll!RtlUserThreadStart").
     /// @return true if resolved, false if unknown.
     virtual bool Resolve(UINT_PTR ip, trace::WSTRING& outName) = 0;
+    virtual void SetExportResolutionEnabled(bool enabled)      = 0;
 };
 
 } // namespace ProfilerStackCapture

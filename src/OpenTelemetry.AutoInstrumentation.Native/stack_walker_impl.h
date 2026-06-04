@@ -9,7 +9,7 @@
 
 #include "stack_walker.h"
 #include "stack_capturer.h"
-
+#include "rtl_stack_walk.h"
 namespace continuous_profiler
 {
 
@@ -20,9 +20,16 @@ namespace continuous_profiler
 class StackWalkerImpl : public IStackWalker, public IThreadLifecycleListener
 {
 public:
-    explicit StackWalkerImpl(ICorProfilerInfo2* profilerInfo, RuntimeType runtimeType)
+    explicit StackWalkerImpl(ICorProfilerInfo2* profilerInfo,
+                             RuntimeType        runtimeType,
+                             bool               nativeSymbolResolutionEnabled)
         : capturer_(ProfilerStackCapture::CreateStackCapturer(profilerInfo, runtimeType))
+        , nativeSymbolResolutionEnabled(nativeSymbolResolutionEnabled)
     {
+#if defined(_WIN32) && defined(_M_AMD64)
+        ProfilerStackCapture::NativeSymbolResolver::Instance()
+            .SetExportResolutionEnabled(nativeSymbolResolutionEnabled);
+#endif
     }
 
     // -- IStackWalker (consumed by ContinuousProfiler) --
@@ -91,6 +98,7 @@ public:
 private:
     using IStackCapturer = ProfilerStackCapture::IStackCapturer;
     std::unique_ptr<IStackCapturer> capturer_;
+    bool nativeSymbolResolutionEnabled;
 };
 
 } // namespace continuous_profiler
