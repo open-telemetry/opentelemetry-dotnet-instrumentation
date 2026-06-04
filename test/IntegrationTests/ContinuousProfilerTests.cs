@@ -341,7 +341,7 @@ public class ContinuousProfilerTests : TestHelper
             // DSS yields nothing for them; their presence proves the RTL native walk is working.
             // RtlSetThreadSubProcessTag appears as a trampoline; security/AV DLLs may also appear.
             bool hasWorkerFactory = frames.Any(f => f.Contains("NtWaitForWorkViaWorkerFactory", StringComparison.OrdinalIgnoreCase));
-            bool hasThreadStart   = frames.Any(f => f.Contains("RtlUserThreadStart", StringComparison.OrdinalIgnoreCase)
+            bool hasThreadStart = frames.Any(f => f.Contains("RtlUserThreadStart", StringComparison.OrdinalIgnoreCase)
                                                  || f.Contains("BaseThreadInitThunk", StringComparison.OrdinalIgnoreCase));
 
             if (hasWorkerFactory && hasThreadStart)

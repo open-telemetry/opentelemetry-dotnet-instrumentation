@@ -12,7 +12,7 @@
 #endif
 
 #if defined(_WIN32) && defined(_M_AMD64)
-#include "rtl_stack_walk.h" // NativeSymbolResolver::Instance()
+#include "native_symbol_resolver_impl.h" // NativeSymbolResolver::Instance()
 #endif
 
 namespace ProfilerStackCapture

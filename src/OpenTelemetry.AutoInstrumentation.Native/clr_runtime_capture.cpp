@@ -64,10 +64,10 @@ HRESULT ClrRuntimeCapture::CaptureStack(ThreadID managedThreadId, StackSnapshotC
         return hr;
     }
 
+#if defined(_WIN32) && defined(_M_AMD64)
     trace::Logger::Debug("[ClrRuntimeCapture] Seedless DSS failed. ManagedID=", managedThreadId,
                          ", HRESULT=", trace::HResultStr(hr), " - attempting native walk fallback");
 
-#if defined(_WIN32) && defined(_M_AMD64)
     DWORD   osThreadId = 0;
     HRESULT osHr       = profilerApi_->GetThreadInfo(managedThreadId, &osThreadId);
     if (FAILED(osHr) || osThreadId == 0)
@@ -76,30 +76,46 @@ HRESULT ClrRuntimeCapture::CaptureStack(ThreadID managedThreadId, StackSnapshotC
                              ", HRESULT=", trace::HResultStr(osHr));
         return hr;
     }
-    ThreadGuard target(osThreadId);
-    if (!target.IsAcquired())
+
+    // Caller-site contract:
+    //   ThreadGuard RAII lives inside try. On probe failure, throw
+    //   ProbeResult; stack unwinding destroys ThreadGuard (resumes
+    //   target) BEFORE the catch block executes. The catch block is
+    //   then safe to allocate/log because no thread is suspended.
+    try
     {
-        trace::Logger::Debug("[ClrRuntimeCapture] Failed to suspend target for native walk. ManagedID=",
-                             managedThreadId, ", OsID=", osThreadId);
+        ThreadGuard target(osThreadId);
+        if (!target.IsAcquired())
+            throw StackWalkGuard::ProbeResult::Failed;
+
+        // Capture target CONTEXT locally. Hazard-free: GetThreadContext on a
+        // suspended thread acquires no shared CS we care about.
+        CONTEXT ctx{};
+        ctx.ContextFlags = CONTEXT_FULL;
+        if (!target.GetContext(ctx))
+            throw StackWalkGuard::ProbeResult::Failed;
+
+        // RTL frame-0 probe. On hazard, both ctx and frame0 are documented
+        // as stale and MUST NOT be consumed.
+        continuous_profiler::CapturedFrame frame0{};
+        if (!stackWalkGuard_->ScheduleRtlFrame0Probe(&ctx, &frame0))
+            throw StackWalkGuard::ProbeResult::Failed;
+
+        if (auto result = stackWalkGuard_->AwaitRtlFrame0ProbeResult(); result != StackWalkGuard::ProbeResult::Success)
+            throw result;
+
+        // Target remains suspended for the duration of the walk. ThreadGuard
+        // is the suspension contract by construction.
+        return nativeWalk_->ContinueFromProbedFrame0(target, managedThreadId, ctx, frame0, clientData);
+    }
+    catch (StackWalkGuard::ProbeResult result)
+    {
+        // ThreadGuard destroyed by stack unwinding - target resumed.
+        // Safe to allocate and log.
+        trace::Logger::Debug("[ClrRuntimeCapture] Native walk abandoned. ManagedID=", managedThreadId,
+                             ", OsID=", osThreadId, ", Reason=", StackWalkGuard::ProbeResultName(result));
         return hr;
     }
-    // We are leaving CLR's safety envelope (going to RtlVirtualUnwind).
-    // Gate the native walk on HeapLock + Rtl probes for THIS target's
-    // lock state.  No CanaryDSS - DSS itself is still CLR-shielded.
-    if (!stackWalkGuard_->ScheduleProbe(kClrNativeWalkProbes, 0))
-    {
-        trace::Logger::Debug("[ClrRuntimeCapture] Native walk probes failed. ManagedID=", managedThreadId);
-        return hr;
-    }
-    if (!stackWalkGuard_->AwaitProbeResult())
-    {
-        trace::Logger::Debug("[ClrRuntimeCapture] Native walk probes failed (abandoned). ManagedID=", managedThreadId);
-        return hr;
-    }
-    // ThreadGuard is the suspension contract by construction - an intentional
-    // ergonomics choice: the signature itself rejects unsuspended threads at
-    // compile time, no documentation or convention required.
-    return nativeWalk_->CaptureNativeThenSeededDss(target, managedThreadId, clientData);
 #else
     return hr;
 #endif

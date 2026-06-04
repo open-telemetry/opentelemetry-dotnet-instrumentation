@@ -9,7 +9,7 @@
 
 #include "stack_walker.h"
 #include "stack_capturer.h"
-
+#include "native_symbol_resolver_impl.h"
 namespace continuous_profiler
 {
 
@@ -20,7 +20,8 @@ namespace continuous_profiler
 class StackWalkerImpl : public IStackWalker, public IThreadLifecycleListener
 {
 public:
-    explicit StackWalkerImpl(ICorProfilerInfo2* profilerInfo, RuntimeType runtimeType)
+    explicit StackWalkerImpl(ICorProfilerInfo2* profilerInfo,
+                             RuntimeType        runtimeType)
         : capturer_(ProfilerStackCapture::CreateStackCapturer(profilerInfo, runtimeType))
     {
     }

@@ -6,8 +6,6 @@
 
 #if defined(_WIN32) && defined(_M_AMD64)
 
-#include <chrono>
-#include <memory>
 #include "profiler_api.h"
 #include "native_symbol_resolver.h"
 #include "suspension_guards.h"
@@ -23,48 +21,77 @@ struct NativeWalkResult
     DWORD   nativeFrameCount = 0;
 };
 
-/// @brief Unified service for probed native stack walk with DSS seeded handoff.
+/// @brief Post-probe native walk + seeded-DSS handoff. Stateless helper
+///        invoked by IRuntimeCapture orchestrators once the RTL frame-0
+///        probe in StackWalkGuard has succeeded.
 ///
-/// Sequence:
-///   1. Suspend target thread (or accept already-suspended handle)
-///   2. Probe HeapAlloc + RtlUnwind locks
-///   3. Walk native frames via RTL unwind until managed frame hit
-///   4. If managed frame found: DSS seeded with captured CONTEXT
-///   5. Resume thread
+/// Responsibility scope:
+///   - Dispatch the probe verdict (managed seed vs native frame-0).
+///   - Walk native frames until a managed boundary is hit.
+///   - Hand off to seeded DoStackSnapshot at the boundary.
 ///
-/// Owns: StackSafetyProbe, RTL walk internals
-/// Does NOT own: IProfilerApi (borrowed)
+/// Out of scope (owned by the caller):
+///   - Target suspension (ThreadGuard, compile-time contract on every entry).
+///   - Hazard probing (StackWalkGuard, runs before this service is called).
+///   - Resume (ThreadGuard RAII).
+///
+/// Owns: nothing.
+/// Borrows: IProfilerApi, NativeSymbolResolver singleton.
 class SafeNativeWalkService
 {
 public:
-    explicit SafeNativeWalkService(IProfilerApi*             profilerApi);
+    explicit SafeNativeWalkService(IProfilerApi* profilerApi);
     ~SafeNativeWalkService();
 
     SafeNativeWalkService(const SafeNativeWalkService&)            = delete;
     SafeNativeWalkService& operator=(const SafeNativeWalkService&) = delete;
 
-   
-    ///Hybrid stack capture: probed native RTL walk until a managed
-    ///        boundary is found, then seeded DoStackSnapshot from that
-    ///        CONTEXT. If no managed frame is reached, the walk terminates
-    ///        with the native frames already emitted (bounded by stack
-    ///        depth). Seed is discovered internally - callers must not
-    ///        attempt to pre-fetch or pass one in.
-    ///  The thread must already be suspended by the caller, and the handle passed in must 
-    ///  be valid (safety of the walk relies on the thread remaining suspended for the duration of the call). This is
-    ///  used by the CLR capture implementation, which performs its own suspension and needs to control the exact point
-    ///  of capture to properly seed DSS.
-    HRESULT CaptureNativeThenSeededDss(ThreadGuard&                        threadGuard,
-                                          ThreadID                      managedThreadId,
-                                          StackSnapshotCallbackContext* clientData);
+    /// @brief Dispatch a successful RTL frame-0 probe to the appropriate
+    ///        capture path; sole public entry post-probe.
+    ///
+    /// Pre: StackWalkGuard::AwaitRtlFrame0ProbeResult() returned true,
+    /// caller still holds target suspended via ThreadGuard, and ctx /
+    /// frame0 were populated by the probe.
+    ///
+    /// Branches:
+    ///   frame0.isUnmanagedFrame == false (managed seed):
+    ///       ctx is the seed (probe did NOT unwind). Seeded DSS from
+    ///       ctx, skip the native walk entirely.
+    ///   frame0.isUnmanagedFrame == true (native frame-0):
+    ///       Emit frame0 via callback, then walk natively from ctx
+    ///       (which the probe unwound to frame-1). On hitting managed
+    ///       code, switch to seeded DSS from that boundary.
+    ///
+    /// Stamps clientData->frame.threadId in both branches.
+    ///
+    /// @param threadGuard       Compile-time suspension contract; body
+    ///                          relies on caller's RAII for the full
+    ///                          duration. Not otherwise consulted.
+    /// @param managedThreadId   CLR ThreadID for DSS calls and frame
+    ///                          stamping.
+    /// @param ctx               Dual-semantic per frame0.isUnmanagedFrame
+    ///                          (see Branches above).
+    /// @param frame0            Probe-composed frame-0; dispatch selector.
+    /// @param clientData        Caller's callback + frame slot. Mutated.
+    HRESULT ContinueFromProbedFrame0(ThreadGuard&                              threadGuard,
+                                     ThreadID                                  managedThreadId,
+                                     const CONTEXT&                            ctx,
+                                     const continuous_profiler::CapturedFrame& frame0,
+                                     StackSnapshotCallbackContext*             clientData);
 
     /// @brief Access symbol resolver for name lookup during frame rendering.
     INativeSymbolResolver& GetSymbolResolver();
 
 private:
-    IProfilerApi*                     profilerApi_;
+    IProfilerApi* profilerApi_;
 
-   
+    /// @brief Issue seeded DoStackSnapshot and normalize the
+    ///        caller-stopped result (CORPROF_E_STACKSNAPSHOT_ABORTED ->
+    ///        S_OK). Sole place that issues seeded DSS - shared by the
+    ///        managed-frame-0 fast path and the post-walk handoff.
+    HRESULT IssueSeededDss(ThreadID managedThreadId, const CONTEXT& seedCtx,
+                           StackSnapshotCallbackContext* clientData);
+
     /// @brief Walk native frames starting from the given context, stopping when
     ///        a managed frame is found. Emits native frames via clientData callback.
     NativeWalkResult WalkNativeUntilManaged(const CONTEXT&                initialCtx,

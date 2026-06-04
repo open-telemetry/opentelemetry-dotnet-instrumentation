@@ -4,7 +4,7 @@
 #if defined(_WIN32) && defined(_M_AMD64)
 
 #include "safe_native_walk_service.h"
-#include "rtl_stack_walk.h"
+#include "native_symbol_resolver_impl.h"
 #include "thread_suspend.h"
 #include "logger.h"
 
@@ -20,41 +20,78 @@ INativeSymbolResolver& SafeNativeWalkService::GetSymbolResolver()
     return NativeSymbolResolver::Instance();
 }
 
-HRESULT SafeNativeWalkService::CaptureNativeThenSeededDss(ThreadGuard&                  threadGuard,
-                                                          ThreadID                      managedThreadId,
-                                                          StackSnapshotCallbackContext* clientData)
+HRESULT SafeNativeWalkService::ContinueFromProbedFrame0(ThreadGuard&                              threadGuard,
+                                                        ThreadID                                  managedThreadId,
+                                                        const CONTEXT&                            ctx,
+                                                        const continuous_profiler::CapturedFrame& frame0,
+                                                        StackSnapshotCallbackContext*             clientData)
 {
-    // ThreadGuard is the suspension contract by construction - an intentional
-    // ergonomics choice: the signature itself rejects unsuspended threads at
-    // compile time, no documentation or convention required.
-    CONTEXT ctx      = {};
-    ctx.ContextFlags = CONTEXT_FULL;
-    if (!threadGuard.GetContext(ctx))
+    // ThreadGuard kept in the signature as a compile-time suspension
+    // contract. The body relies on the target remaining suspended for
+    // the full duration via the caller's RAII scope.
+    (void)threadGuard;
+
+    // Managed frame-0: ctx is the seed (probe left it unchanged - it did
+    // NOT unwind in the managed branch). Hand straight to seeded DSS;
+    // skip the native walk entirely.
+    if (!frame0.isUnmanagedFrame)
     {
-        trace::Logger::Debug("[SafeNativeWalkService] GetThreadContext failed. Error=", GetLastError());
-        return E_FAIL;
+        clientData->frame.threadId = managedThreadId;
+
+        trace::Logger::Debug("[SafeNativeWalkService] Frame-0 managed; seeded DSS. ManagedID=", managedThreadId);
+
+        return IssueSeededDss(managedThreadId, ctx, clientData);
     }
 
-    // Stage 1: RTL walk - native frames until managed boundary
+    // Native frame-0: emit composed frame, then continue the native walk
+    // from frame-1 on the unwound ctx. The wholesale copy overwrites
+    // threadId with the probe's default-initialized zero, so restamp it
+    // AFTER the copy. The continuation will hit a managed boundary
+    // internally and switch to seeded DSS.
+    trace::Logger::Debug("[SafeNativeWalkService] Frame-0 native; emit + continue. ManagedID=", managedThreadId);
+
+    clientData->frame          = frame0;
+    clientData->frame.threadId = managedThreadId;
+
+    HRESULT cbHr = clientData->callback(clientData);
+    if (cbHr == S_FALSE)
+        return S_OK; // caller requested early stop after frame-0
+    if (FAILED(cbHr))
+        return cbHr;
+
     NativeWalkResult walkResult = WalkNativeUntilManaged(ctx, clientData);
 
     if (FAILED(walkResult.hr) && walkResult.nativeFrameCount == 0)
         return walkResult.hr;
 
-    // Stage 2: DSS seeded from boundary - managed frames with CLR accuracy
+    // Seed DSS from the managed boundary the native walk landed on -
+    // managed frames are then captured with CLR accuracy.
     HRESULT hr = walkResult.hr;
     if (walkResult.hasSeed)
     {
-        hr = profilerApi_->DoStackSnapshot(managedThreadId, StackSnapshotCallbackDefault, COR_PRF_SNAPSHOT_DEFAULT,
-                                           clientData, reinterpret_cast<BYTE*>(&walkResult.seedCtx),
-                                           sizeof(walkResult.seedCtx));
-
-        if (hr == CORPROF_E_STACKSNAPSHOT_ABORTED)
-            hr = S_OK;
+        hr = IssueSeededDss(managedThreadId, walkResult.seedCtx, clientData);
     }
 
     trace::Logger::Debug("[SafeNativeWalkService] Capture complete. Native frames=", walkResult.nativeFrameCount,
                          ", DSS seed=", walkResult.hasSeed ? "yes" : "no", ", HRESULT=", trace::HResultStr(hr));
+    return hr;
+}
+
+HRESULT SafeNativeWalkService::IssueSeededDss(ThreadID                      managedThreadId,
+                                              const CONTEXT&                seedCtx,
+                                              StackSnapshotCallbackContext* clientData)
+{
+    // DoStackSnapshot's seedContext is typed BYTE* (non-const) but is
+    // documented and observed as read-only; const_cast is safe.
+    HRESULT hr = profilerApi_->DoStackSnapshot(managedThreadId, StackSnapshotCallbackDefault, COR_PRF_SNAPSHOT_DEFAULT,
+                                               clientData, reinterpret_cast<BYTE*>(const_cast<CONTEXT*>(&seedCtx)),
+                                               sizeof(CONTEXT));
+
+    // CORPROF_E_STACKSNAPSHOT_ABORTED == callback returned S_FALSE to
+    // terminate the walk cleanly; normalize so callers don't surface a
+    // user-driven early-stop as a failure.
+    if (hr == CORPROF_E_STACKSNAPSHOT_ABORTED)
+        hr = S_OK;
     return hr;
 }
 
@@ -95,8 +132,12 @@ NativeWalkResult SafeNativeWalkService::WalkNativeUntilManaged(const CONTEXT&   
             UINT_PTR frameIp;
             if (imageBase != 0)
             {
-                const auto* mod = resolver.GetModuleInfo(static_cast<UINT_PTR>(imageBase));
-                if (mod != nullptr && !mod->isSystem)
+                // nullopt (GetModuleFileNameW failed) and true (system module)
+                // both fall to the BeginAddress/Rip branch, matching the
+                // pre-SRW behavior where GetModuleInfo returned nullptr or
+                // a system-classified entry.
+                auto sys = resolver.IsSystemModule(static_cast<UINT_PTR>(imageBase));
+                if (sys.has_value() && !*sys)
                 {
                     frameIp = static_cast<UINT_PTR>(imageBase);
                 }

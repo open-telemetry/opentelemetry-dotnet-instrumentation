@@ -727,7 +727,6 @@ FunctionIdentifier NamingHelper::LookupManagedFunction(const FunctionID function
     return resolvedIdentifier;
 }
 
-
 // This is slightly messy since we an only pass one parameter to the FrameCallback
 // but we have some slightly different use cases (but want to use the same stack capture
 // code for allocations and paused thread samples)

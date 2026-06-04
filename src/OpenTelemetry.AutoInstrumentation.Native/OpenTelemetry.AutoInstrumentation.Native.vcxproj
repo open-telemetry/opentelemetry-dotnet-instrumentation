@@ -187,7 +187,6 @@
     <ClInclude Include="assembly_redirection_net.h" />
     <ClInclude Include="assembly_redirection_netfx.h" />
     <ClInclude Include="calltarget_tokens.h" />
-    <ClInclude Include="captured_frame.h" />
     <ClInclude Include="class_factory.h" />
     <ClInclude Include="clr_runtime_capture.h" />
     <ClInclude Include="com_ptr.h" />
@@ -216,6 +215,7 @@
     <ClInclude Include="miniutfdata.h" />
     <ClInclude Include="module_metadata.h" />
     <ClInclude Include="native_symbol_resolver.h" />
+    <ClInclude Include="native_symbol_resolver_impl.h" />
     <ClInclude Include="netfx_runtime_capture.h" />
     <ClInclude Include="otel_profiler_constants.h" />
     <ClInclude Include="pal.h" />
@@ -224,8 +224,6 @@
     <ClInclude Include="rejit_handler.h" />
     <ClInclude Include="rejit_preprocessor.h" />
     <ClInclude Include="rejit_work_offloader.h" />
-    <ClInclude Include="rtl_imports.h" />
-    <ClInclude Include="rtl_stack_walk.h" />
     <ClInclude Include="runtime_capture.h" />
     <ClInclude Include="safe_native_walk_service.h" />
     <ClInclude Include="signature_builder.h" />
@@ -262,13 +260,13 @@
     <ClCompile Include="metadata_builder.cpp" />
     <ClCompile Include="method_rewriter.cpp" />
     <ClCompile Include="miniutf.cpp" />
+    <ClCompile Include="native_symbol_resolver.cpp" />
     <ClCompile Include="netfx_runtime_capture.cpp" />
     <ClCompile Include="profiler_api_adapter.cpp" />
     <ClCompile Include="regex_utils.cpp" />
     <ClCompile Include="rejit_handler.cpp" />
     <ClCompile Include="rejit_preprocessor.cpp" />
     <ClCompile Include="rejit_work_offloader.cpp" />
-    <ClCompile Include="rtl_stack_walk.cpp" />
     <ClCompile Include="safe_native_walk_service.cpp" />
     <ClCompile Include="stack_capturer.cpp" />
     <ClCompile Include="stack_walk_guard.cpp" />

@@ -5,7 +5,7 @@
 #define OTEL_NATIVE_SYMBOL_RESOLVER_H_
 
 #include "string_utils.h"
-
+#include <optional>
 namespace ProfilerStackCapture
 {
 
@@ -19,6 +19,9 @@ public:
     /// @brief Resolve a native IP to a symbol name (e.g. "ntdll!RtlUserThreadStart").
     /// @return true if resolved, false if unknown.
     virtual bool Resolve(UINT_PTR ip, trace::WSTRING& outName) = 0;
+#if defined(_WIN32) && defined(_M_AMD64)
+    virtual std::optional<bool> IsSystemModule(UINT_PTR imageBase) const = 0;
+#endif
 };
 
 } // namespace ProfilerStackCapture

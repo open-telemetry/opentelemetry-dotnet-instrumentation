@@ -3,13 +3,53 @@
 
 #if defined(_WIN32) && defined(_M_AMD64)
 
-#include "rtl_stack_walk.h"
-#include "thread_suspend.h" // ScopedThreadSuspend full definition
+#include "native_symbol_resolver_impl.h"
 #include "logger.h"
 #include <algorithm>
 
 namespace ProfilerStackCapture
 {
+
+namespace
+{
+// RAII guards for SRWLOCK. Local to this TU so we do not pollute the
+// header with helpers no other code needs.
+class SrwSharedLock
+{
+public:
+    explicit SrwSharedLock(SRWLOCK& lk) noexcept : lk_(lk)
+    {
+        AcquireSRWLockShared(&lk_);
+    }
+    ~SrwSharedLock()
+    {
+        ReleaseSRWLockShared(&lk_);
+    }
+    SrwSharedLock(const SrwSharedLock&)            = delete;
+    SrwSharedLock& operator=(const SrwSharedLock&) = delete;
+
+private:
+    SRWLOCK& lk_;
+};
+
+class SrwExclusiveLock
+{
+public:
+    explicit SrwExclusiveLock(SRWLOCK& lk) noexcept : lk_(lk)
+    {
+        AcquireSRWLockExclusive(&lk_);
+    }
+    ~SrwExclusiveLock()
+    {
+        ReleaseSRWLockExclusive(&lk_);
+    }
+    SrwExclusiveLock(const SrwExclusiveLock&)            = delete;
+    SrwExclusiveLock& operator=(const SrwExclusiveLock&) = delete;
+
+private:
+    SRWLOCK& lk_;
+};
+} // namespace
 
 // ============================================================================
 // NativeSymbolResolver
@@ -34,33 +74,41 @@ NativeSymbolResolver::NativeSymbolResolver()
 NativeSymbolResolver::~NativeSymbolResolver() = default;
 
 // ----------------------------------------------------------------------------
-// Module info cache
+// Module info cache (SRW-protected, double-checked)
 // ----------------------------------------------------------------------------
 
-const NativeSymbolResolver::ModuleInfo* NativeSymbolResolver::GetOrCreateModuleInfo(UINT_PTR imageBase)
+bool NativeSymbolResolver::FetchClassification(UINT_PTR imageBase, trace::WSTRING* outBaseName, bool* outIsSystem) const
 {
-    auto it = moduleCache_.find(imageBase);
-    if (it != moduleCache_.end())
-        return &it->second;
-
-    // Evict entire cache if it grows too large (simple reset - these are cheap to rebuild).
-    if (moduleCache_.size() >= kMaxModuleCacheSize)
+    // Phase 1: shared lookup. Hit fast-path stays lock-free for other
+    // readers; we release as soon as we have copies of the fields the
+    // caller asked for.
     {
-        trace::Logger::Debug("[NativeSymbolResolver] Module cache full, clearing ", moduleCache_.size(), " entries");
-        moduleCache_.clear();
+        SrwSharedLock lk(moduleCacheLock_);
+        auto          it = moduleCache_.find(imageBase);
+        if (it != moduleCache_.end())
+        {
+            if (outBaseName != nullptr)
+                *outBaseName = it->second.baseName;
+            if (outIsSystem != nullptr)
+                *outIsSystem = it->second.isSystem;
+            return true;
+        }
     }
 
+    // Phase 2: cache miss. Do the I/O OUTSIDE the lock so a stuck loader
+    // CS on the target thread stalls only this single caller (typically
+    // the StackWalkGuard worker, which the sampler drives via abandon)
+    // and never blocks other readers.
     WCHAR modulePath[MAX_PATH] = {};
     if (GetModuleFileNameW(reinterpret_cast<HMODULE>(imageBase), modulePath, MAX_PATH) == 0)
-        return nullptr;
+    {
+        return false;
+    }
 
-    ModuleInfo info;
-
-    // Extract base name (e.g. "ntdll.dll" from "C:\Windows\System32\ntdll.dll").
+    ModuleInfo   info;
     const WCHAR* slash = wcsrchr(modulePath, L'\\');
     info.baseName      = slash ? (slash + 1) : modulePath;
 
-    // Check if module resides under the system directory.
     info.isSystem = false;
     if (!sysDir_.empty())
     {
@@ -69,14 +117,47 @@ const NativeSymbolResolver::ModuleInfo* NativeSymbolResolver::GetOrCreateModuleI
         info.isSystem = (pathLower.find(sysDir_) == 0);
     }
 
-    auto [inserted, success] = moduleCache_.emplace(imageBase, std::move(info));
-    return &inserted->second;
+    // Phase 3: exclusive emplace with re-check. Another writer may have
+    // raced ahead while we were in GetModuleFileNameW; prefer the
+    // already-cached entry to keep consistency.
+    {
+        SrwExclusiveLock lk(moduleCacheLock_);
+        if (auto it = moduleCache_.find(imageBase); it != moduleCache_.end())
+        {
+            if (outBaseName != nullptr)
+                *outBaseName = it->second.baseName;
+            if (outIsSystem != nullptr)
+                *outIsSystem = it->second.isSystem;
+            return true;
+        }
+
+        if (moduleCache_.size() >= kMaxModuleCacheSize)
+        {
+            trace::Logger::Debug("[NativeSymbolResolver] Module cache full, clearing ", moduleCache_.size(),
+                                 " entries");
+            moduleCache_.clear();
+        }
+
+        // Copy fields BEFORE the move; the moved-from info is unusable.
+        if (outBaseName != nullptr)
+            *outBaseName = info.baseName;
+        if (outIsSystem != nullptr)
+            *outIsSystem = info.isSystem;
+        moduleCache_.emplace(imageBase, std::move(info));
+        return true;
+    }
 }
 
-const NativeSymbolResolver::ModuleInfo* NativeSymbolResolver::GetModuleInfo(UINT_PTR imageBase)
+std::optional<bool> NativeSymbolResolver::IsSystemModule(UINT_PTR imageBase) const
 {
-    return GetOrCreateModuleInfo(imageBase);
+    bool isSystem = false;
+    if (!FetchClassification(imageBase, /*outBaseName=*/nullptr, &isSystem))
+    {
+        return std::nullopt;
+    }
+    return isSystem;
 }
+
 // ----------------------------------------------------------------------------
 // Private helpers
 // ----------------------------------------------------------------------------
@@ -192,10 +273,10 @@ UINT_PTR NativeSymbolResolver::GetImageBaseForIp(UINT_PTR ip)
     return static_cast<UINT_PTR>(imageBase);
 }
 
-bool NativeSymbolResolver::ResolveViaExports(UINT_PTR          ip,
-                                             UINT_PTR          imageBase,
-                                             const ModuleInfo& mod,
-                                             trace::WSTRING&   outName)
+bool NativeSymbolResolver::ResolveViaExports(UINT_PTR              ip,
+                                             UINT_PTR              imageBase,
+                                             const trace::WSTRING& baseName,
+                                             trace::WSTRING&       outName)
 {
     const DWORD rva = static_cast<DWORD>(ip - imageBase);
 
@@ -206,11 +287,11 @@ bool NativeSymbolResolver::ResolveViaExports(UINT_PTR          ip,
         return false;
 
     outName.clear();
-    outName.reserve(mod.baseName.length() + 1 + exportNameLen);
+    outName.reserve(baseName.length() + 1 + exportNameLen);
 
-    if (!mod.baseName.empty())
+    if (!baseName.empty())
     {
-        outName.append(mod.baseName);
+        outName.append(baseName);
         outName += WStr("!");
     }
 
@@ -231,24 +312,24 @@ bool NativeSymbolResolver::Resolve(UINT_PTR ip, trace::WSTRING& outName)
     if (imageBase == 0)
         return false;
 
-    const ModuleInfo* mod = GetOrCreateModuleInfo(imageBase);
-    if (mod == nullptr)
+    // Extract baseName + isSystem to locals under the SRW protocol; the
+    // export walk that follows runs WITHOUT the lock held, so a concurrent
+    // cache eviction cannot dangle our baseName.
+    trace::WSTRING baseName;
+    bool           isSystem = false;
+    if (!FetchClassification(imageBase, &baseName, &isSystem))
         return false;
 
-    if (mod->isSystem)
+    if (isSystem)
     {
         // System DLLs: full export symbol resolution via RVA walk.
-        return ResolveViaExports(ip, imageBase, *mod, outName);
+        return ResolveViaExports(ip, imageBase, baseName, outName);
     }
-    else
-    {
-        // Non-system DLLs: short-circuit - no export table walk.
-        // The walk already collapsed these frames to imageBase, so just
-        // report the module name.
-        outName.clear();
-        outName.append(mod->baseName);
-        return true;
-    }
+
+    // Non-system DLLs (or export resolution disabled): module name only.
+    outName.clear();
+    outName.append(baseName);
+    return true;
 }
 
 } // namespace ProfilerStackCapture

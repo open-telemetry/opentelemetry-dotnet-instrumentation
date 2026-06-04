@@ -7,7 +7,6 @@
 
 #include "logger.h"
 #include "suspension_guards.h"
-#include "stack_walk_guard.h"
 
 namespace ProfilerStackCapture
 {
@@ -66,53 +65,79 @@ HRESULT NetFxRuntimeCapture::CaptureStack(ThreadID managedThreadId, StackSnapsho
         return FAILED(hr) ? hr : E_FAIL;
     }
 
-    // Anchor the lock-state invariant: target stays suspended for the
-    // full probe + DSS + (optional) native walk sequence.
-    ThreadGuard target(osThreadId);
-    if (!target.IsAcquired())
+    // Caller-site contract:
+    //   Both ThreadGuards (target + canary) live inside try. On probe
+    //   failure, throw ProbeResult; stack unwinding destroys both guards
+    //   (resumes both threads) BEFORE the catch block executes. The catch
+    //   block is then safe to allocate/log - no thread is suspended.
+    try
     {
-        trace::Logger::Debug("[NetFxRuntimeCapture] Failed to suspend target. ManagedID=", managedThreadId,
-                             ", OsID=", osThreadId);
-        return E_FAIL;
-    }
-    ThreadGuard canaryGuard(canary.osId);
-    if (!canaryGuard.IsAcquired())
-    {
-        trace::Logger::Debug("[NetFxRuntimeCapture] Failed to suspend canary. ManagedID=", managedThreadId,
-                             ", CanaryOsID=", canary.osId);
-        return E_FAIL;
-    }
-    // Per-target probe set: HeapLock + CanaryDSS (+ Rtl on x64).
-    if (!stackWalkGuard_->ScheduleProbe(kNetFxSeedlessProbes, canary.managedId))
-    {
-        trace::Logger::Debug("[NetFxRuntimeCapture] Failed to prepare probes. ManagedID=", managedThreadId,
-                             ", OsID=", osThreadId);
-        return E_FAIL;
-    }
-    if (!stackWalkGuard_->AwaitProbeResult())
-    {
-        trace::Logger::Debug("[NetFxRuntimeCapture] Probes failed for target. ManagedID=", managedThreadId,
-                             ", OsID=", osThreadId);
-        return E_FAIL;
-    }
+        ThreadGuard target(osThreadId);
+        if (!target.IsAcquired())
+            throw StackWalkGuard::ProbeResult::Failed;
 
-    hr = profilerApi_->DoStackSnapshotUnseeded(managedThreadId, clientData);
-    if (SUCCEEDED(hr))
-    {
-        return hr;
-    }
-
-    trace::Logger::Debug("[NetFxRuntimeCapture] Seedless DSS failed. ManagedID=", managedThreadId,
-                         ", HRESULT=", trace::HResultStr(hr), " - attempting native walk fallback");
+        ThreadGuard canaryGuard(canary.osId);
+        if (!canaryGuard.IsAcquired())
+            throw StackWalkGuard::ProbeResult::Failed;
 
 #if defined(_M_AMD64)
-    // Probes already certified for this suspended target; no need to re-run.
-    if (nativeWalk_)
-    {
-        return nativeWalk_->CaptureNativeThenSeededDss(target, managedThreadId, clientData);
-    }
+        // ----------------------------------------------------------------
+        // x64 path: RTL frame-0 probe drives classification (managed vs
+        // native). Probe IS the seed-discovery step:
+        //   - Managed verdict -> ctx is unchanged and is the DSS seed.
+        //   - Native verdict  -> frame0 holds composed frame-0; ctx has
+        //                        been unwound to frame-1 by the probe.
+        // Canary DSS probe runs AFTER the RTL probe so an RTL hazard
+        // short-circuits without spending a canary round. Canary probe is
+        // still mandatory before any DoStackSnapshot call - NetFx has no
+        // runtime-suspension shield.
+        // ----------------------------------------------------------------
+
+        CONTEXT ctx{};
+        ctx.ContextFlags = CONTEXT_FULL;
+        if (!target.GetContext(ctx))
+            throw StackWalkGuard::ProbeResult::Failed;
+
+        // RTL frame-0 probe.
+        continuous_profiler::CapturedFrame frame0{};
+        if (!stackWalkGuard_->ScheduleRtlFrame0Probe(&ctx, &frame0))
+            throw StackWalkGuard::ProbeResult::Failed;
+
+        if (auto result = stackWalkGuard_->AwaitRtlFrame0ProbeResult(); result != StackWalkGuard::ProbeResult::Success)
+            throw result;
+
+        // Canary DSS probe. Certifies process-wide DSS health before any
+        // DoStackSnapshot call downstream.
+        if (!stackWalkGuard_->ScheduleDssProbe(canary.managedId))
+            throw StackWalkGuard::ProbeResult::Failed;
+
+        if (auto result = stackWalkGuard_->AwaitProbeResult(); result != StackWalkGuard::ProbeResult::Success)
+            throw result;
+
+        return nativeWalk_->ContinueFromProbedFrame0(target, managedThreadId, ctx, frame0, clientData);
+#else
+        // ----------------------------------------------------------------
+        // x86 path: no RTL machinery. Canary DSS probe followed by
+        // seedless DSS is the only safe option.
+        // ----------------------------------------------------------------
+        if (!stackWalkGuard_->ScheduleDssProbe(canary.managedId))
+            throw StackWalkGuard::ProbeResult::Failed;
+
+        if (auto result = stackWalkGuard_->AwaitProbeResult(); result != StackWalkGuard::ProbeResult::Success)
+            throw result;
+
+        return profilerApi_->DoStackSnapshotUnseeded(managedThreadId, clientData);
 #endif
-    return hr;
+    }
+    catch (StackWalkGuard::ProbeResult result)
+    {
+        // Both ThreadGuards destroyed by stack unwinding - target and
+        // canary resumed. Safe to allocate and log.
+        trace::Logger::Debug("[NetFxRuntimeCapture] Probe abandoned. ManagedID=", managedThreadId,
+                             ", OsID=", osThreadId, ", CanaryOsID=", canary.osId,
+                             ", Reason=", StackWalkGuard::ProbeResultName(result));
+        return E_FAIL;
+    }
 }
 
 // ---------------------------------------------------------------------------

@@ -5,6 +5,7 @@
 
 #if defined(_WIN32)
 
+#include <atomic>
 #include <chrono>
 #include <condition_variable>
 #include <cstdint>
@@ -13,43 +14,11 @@
 #include <thread>
 
 #include "profiler_api.h"
+#include "stack_capture_types.h"
 
 namespace ProfilerStackCapture
 {
 
-// What the caller wants validated before performing a stack walk. The guard
-// composes the requested checks into a fixed sequence executed by a single
-// long-lived helper thread.
-enum class ProbeKind : uint32_t
-{
-    None      = 0,
-    HeapLock  = 1u << 0, // malloc(64) + free; covers all STL allocs
-    Rtl       = 1u << 1, // RtlLookupFunctionEntry; x64 only
-    CanaryDSS = 1u << 2, // DoStackSnapshotUnseeded on a canary thread
-};
-
-constexpr ProbeKind operator|(ProbeKind a, ProbeKind b)
-{
-    return static_cast<ProbeKind>(static_cast<uint32_t>(a) | static_cast<uint32_t>(b));
-}
-constexpr ProbeKind operator&(ProbeKind a, ProbeKind b)
-{
-    return static_cast<ProbeKind>(static_cast<uint32_t>(a) & static_cast<uint32_t>(b));
-}
-constexpr inline bool HasProbe(ProbeKind set, ProbeKind one)
-{
-    return (static_cast<uint32_t>(set) & static_cast<uint32_t>(one)) != 0;
-}
-
-// Convenience presets - centralize the matrix.
-#if defined(_M_AMD64)
-inline constexpr ProbeKind kClrNativeWalkProbes = ProbeKind::HeapLock | ProbeKind::Rtl;
-inline constexpr ProbeKind kNetFxSeedlessProbes = ProbeKind::HeapLock | ProbeKind::Rtl | ProbeKind::CanaryDSS;
-#else
-inline constexpr ProbeKind kClrNativeWalkProbes = ProbeKind::None;                            // unused on x86
-inline constexpr ProbeKind kNetFxSeedlessProbes = ProbeKind::HeapLock | ProbeKind::CanaryDSS; // no Rtl on x86
-#endif
-static_assert(!HasProbe(kClrNativeWalkProbes, ProbeKind::CanaryDSS), "CLR native walk must not request CanaryDSS");
 // Park-then-pump safety gate for stack-walk operations, implemented as a
 // fixed state machine with one dedicated worker thread.
 //
@@ -77,26 +46,58 @@ static_assert(!HasProbe(kClrNativeWalkProbes, ProbeKind::CanaryDSS), "CLR native
 //                                |
 //          AwaitProbeResult() reads result while state==Idle
 //
-// Idle has dual semantics: "ready for a new request" and "previous
-// verdict published, waiting to be consumed". This is safe because
-// ScheduleProbe() always precedes AwaitProbeResult(): when the latter
-// runs, the only non-Stopping terminal state is Idle, and result_ is
-// exactly the verdict from the round just scheduled.
+// Footprint scoping by architecture:
+//   - CanaryDss path (STL gate + canary DSS) compiles on ALL Windows
+//     targets (x86 + x64). Used by NetFx on both archs and by CLR's
+//     native-walk preflight on x64 (canary == 0 path).
+//   - RtlFrame0 path (frame-0 RTL composition + loader-lock probe)
+//     compiles ONLY on Windows x64. RtlVirtualUnwind /
+//     RtlLookupFunctionEntry have no x86 equivalent, so the entire RTL
+//     machinery - public API methods, ProbeKind::RtlFrame0 enum value,
+//     ProbeRequest staging fields, RunRtlFrame0Checks - is gated by
+//     `#if defined(_M_AMD64)` so x86 incurs zero footprint and zero
+//     binary weight from a feature it cannot use.
 //
-// On AwaitProbeResult() timeout: abandon_=true, return false. State
-// stays Running until the worker returns from the in-flight check. The
-// worker then transitions Running -> Idle (publishing a false verdict
-// because abandon_ is set). The next ScheduleProbe() sees Idle and
-// proceeds.
+// Probe taxonomy:
+//   The worker ALWAYS runs the STL gate first (compulsory, hardcoded:
+//   heap CS + STL iterator/debug-list CS acquirability). Cooperative -
+//   if abandon_ is set, the worker bails before further work. After the
+//   STL gate passes, the worker dispatches on req.kind:
 //
-// Synchronization primitives are std::mutex + std::condition_variable,
-// which on MSVC/Win10 are SRWLOCK + CONDITION_VARIABLE (WaitOnAddress-based)
-// and perform NO heap allocation, NO _LOCK_DEBUG acquisition, and NO
-// ProcessLocksList CS on the wait path. Safe to use even when another
-// thread in this DLL is suspended holding the CRT heap CS.
+//     CanaryDss  - DoStackSnapshot on a separate "coast clear" thread;
+//                  certifies process-wide DSS health for callers without
+//                  a runtime-suspension shield (NetFx).
+//
+//     RtlFrame0  - (x64 only) Cooperative native frame-0 composition on
+//                  the target thread. Walks RtlLookupFunctionEntry +
+//                  classification + loader-lock probe + (if native)
+//                  RtlVirtualUnwind, checkpointing abandon_ at each
+//                  loader/RTL/CLR CS boundary. On success the worker
+//                  stages the decoded frame and the unwound (frame-1)
+//                  CONTEXT in ProbeRequest; the orchestrator publishes
+//                  them under mutex_ to the caller's *ctx_inout and
+//                  *frame_out iff !abandon_.
 class StackWalkGuard
 {
 public:
+    enum class ProbeResult : uint8_t
+    {
+        Success = 0,
+        Failed,
+        Stopping,
+
+        HeapOrStlLockTimeout,
+        CanaryDssTimeout,
+#if defined(_M_AMD64)
+        RtlLookupTimeout,
+        ClrIpMapTimeout,
+        LoaderLockTimeout,
+        RtlUnwindTimeout,
+#endif
+    };
+
+    static const char* ProbeResultName(ProbeResult result) noexcept;
+
     StackWalkGuard(IProfilerApi*             profilerApi,
                    std::chrono::milliseconds park_timeout,
                    std::chrono::milliseconds probe_timeout);
@@ -105,29 +106,35 @@ public:
     StackWalkGuard(const StackWalkGuard&)            = delete;
     StackWalkGuard& operator=(const StackWalkGuard&) = delete;
 
-    // Phase 1. Stage a new probe request and wake the worker. Blocks up
-    // to park_timeout if the worker is still finishing a previous
-    // (possibly abandoned) probe. Safe to call with target threads
-    // already suspended: this method only acquires mutex_ and signals
-    // cv_ (SRWLOCK + WaitOnAddress on Win10+), and performs no heap or
-    // STL container operations on the caller's thread. Returns false on
-    // park_timeout or shutdown.
-    bool ScheduleProbe(ProbeKind flags, ThreadID canary);
+    // CanaryDss: STL gate + (if canary != 0) DSS on a coast-clear thread.
+    // canary == 0 reduces to STL-only.
+    // Available on all Windows architectures.
+    bool ScheduleDssProbe(ThreadID canary = 0);
 
-    // Phase 2. Wait up to probe_timeout for the worker's verdict.
-    // Returns true iff every requested check completed successfully. On
-    // timeout, sets the abandon flag and returns false; the worker will
-    // exit its probe loop at the next check boundary (after the
-    // currently blocked check, if any, unblocks). Safe to call with
-    // target threads suspended (same rationale as ScheduleProbe: only
-    // mutex_ + cv_ are touched on the caller's thread). The next
-    // ScheduleProbe() may block until the worker fully returns to Idle.
-    bool AwaitProbeResult();
+    // Shared verdict path. Returns Success iff every requested check
+    // completed successfully. On timeout sets the abandon flag and returns
+    // a timeout result mapped from the worker's last published probe stage.
+    ProbeResult AwaitProbeResult();
 
-    // True if the worker is Idle (i.e., ScheduleProbe() would not
-    // block). Optional helper for diagnostics; not required for
-    // correctness.
+    // True if the worker is Idle (diagnostic).
     bool IsIdle() const noexcept;
+
+#if defined(_M_AMD64)
+    // RtlFrame0 probe (x64 only).
+    //
+    // Contract:
+    //   ScheduleRtlFrame0Probe + AwaitRtlFrame0ProbeResult != Success:
+    //       hazard / abandoned / failed. *ctx and *frame are NOT written.
+    //       Caller must abort the round.
+    //   ScheduleRtlFrame0Probe + AwaitRtlFrame0ProbeResult == Success:
+    //       *frame holds decoded frame-0.
+    //       *ctx holds either the managed seed context or the unwound
+    //       frame-1 context for native continuation.
+    bool ScheduleRtlFrame0Probe(CONTEXT* ctx, continuous_profiler::CapturedFrame* frame);
+
+    // Alias for symmetry; identical to AwaitProbeResult().
+    ProbeResult AwaitRtlFrame0ProbeResult();
+#endif // defined(_M_AMD64)
 
 private:
     enum class State : uint8_t
@@ -138,8 +145,83 @@ private:
         Stopping,  // shutdown in progress
     };
 
+    enum class ProbeKind : uint8_t
+    {
+        None,      // no request staged
+        CanaryDss, // STL gate + optional canary DSS
+#if defined(_M_AMD64)
+        RtlFrame0, // STL gate + cooperative RTL frame-0 walk (x64 only)
+#endif
+    };
+
+    // Zero-alloc work item handed from the scheduling thread to the
+    // worker. All members are scalars / PODs / NON-OWNING pointers, so
+    // the latch copy in Schedule() is a trivially-copyable memcpy with
+    // no allocation on the (suspending) caller thread.
+    struct ProbeRequest
+    {
+        ProbeKind kind = ProbeKind::None;
+
+        // CanaryDss payload.
+        ThreadID canary = 0;
+
+#if defined(_M_AMD64)
+        // RtlFrame0 payload (x64 only, borrowed, non-owning).
+        // The worker READS *ctx_inout exactly once at the start of the
+        // probe (caller is blocked in Await throughout, so the read is
+        // race-free). The worker NEVER writes through these pointers.
+        // The orchestrator's publish step writes through them under
+        // mutex_, ONLY when the probe succeeds AND !abandon_, copying
+        // from the staged_* fields below.
+        CONTEXT*                            ctx_inout = nullptr;
+        continuous_profiler::CapturedFrame* frame_out = nullptr;
+
+        // RtlFrame0 worker-owned staging area (x64 only). The worker
+        // copies *ctx_inout into staged_ctx at probe start and operates
+        // on staged_ctx exclusively (RtlVirtualUnwind mutates in place).
+        // The staged_* fields are committed to *ctx_inout / *frame_out
+        // by the orchestrator under mutex_ iff the probe succeeds.
+        CONTEXT                            staged_ctx   = {};
+        continuous_profiler::CapturedFrame staged_frame = {};
+#endif // defined(_M_AMD64)
+    };
+
+    enum class ProbeStage : uint8_t
+    {
+        None,
+        HeapOrStlGate,
+        CanaryDss,
+#if defined(_M_AMD64)
+        RtlLookup,
+        ClrIpMap,
+        LoaderLock,
+        RtlUnwind,
+#endif
+    };
+
+    // Common park-then-latch transport shared by both ScheduleXxx() entry
+    // points. Copies req by value under mutex_; no allocation on the
+    // scheduling (suspending) thread.
+    bool Schedule(const ProbeRequest& req);
+
     void WorkerLoop();
-    bool RunChecks(ProbeKind flags, ThreadID canary) noexcept;
+    bool RunChecks(ProbeRequest& req) noexcept;          // dispatch on req.kind; may stage outputs
+    bool RunCanaryChecks(ThreadID canary) noexcept;      // heap envelope + optional canary DSS
+#if defined(_M_AMD64)
+    bool RunRtlFrame0Checks(ProbeRequest& req) noexcept; // cooperative RTL frame-0 (x64 only)
+#endif
+
+    void SetStage(ProbeStage stage) noexcept
+    {
+        active_stage_.store(stage, std::memory_order_relaxed);
+    }
+
+    ProbeStage GetStage() const noexcept
+    {
+        return active_stage_.load(std::memory_order_relaxed);
+    }
+
+    static ProbeResult TimeoutResultForStage(ProbeStage stage) noexcept;
 
     IProfilerApi*             api_;
     std::chrono::milliseconds park_timeout_;
@@ -149,18 +231,16 @@ private:
     std::condition_variable cv_;
     State                   state_ = State::Idle;
 
-    // Latched request data, valid when state_ >= Scheduled.
-    ProbeKind req_flags_  = ProbeKind::None;
-    ThreadID  req_canary_ = 0;
+    ProbeRequest req_;
 
-    // Caller -> worker abandonment signal. Set when AwaitProbeResult()
-    // times out so the worker won't publish a true verdict for the
-    // abandoned round.
     bool abandon_ = false;
 
-    // Worker -> caller verdict, valid when state_ == Idle following a
-    // Running -> Idle transition.
-    bool result_ = false;
+    // Final verdict. Written under mutex_ by AwaitProbeResult() on timeout
+    // or by WorkerLoop() on normal completion.
+    ProbeResult result_ = ProbeResult::Failed;
+
+    // Worker-stage breadcrumb used only to classify timeout results.
+    std::atomic<ProbeStage> active_stage_{ProbeStage::None};
 
     std::unique_ptr<std::thread> worker_;
 };
