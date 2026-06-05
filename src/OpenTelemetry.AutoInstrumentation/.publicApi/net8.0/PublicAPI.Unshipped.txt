@@ -1,0 +1,1 @@
+OpenTelemetry.AutoInstrumentation.Instrumentations.OracleMda.Integrations.OracleConnectionConstructorIntegration
