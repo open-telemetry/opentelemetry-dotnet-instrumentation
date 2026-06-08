@@ -28,6 +28,7 @@ internal class InstrumentationOptions
         GrpcNetClientInstrumentationCaptureResponseMetadata = configuration.ParseHeaders(ConfigurationKeys.Traces.InstrumentationOptions.GrpcNetClientInstrumentationCaptureResponseMetadata, AdditionalTag.CreateGrpcResponseCache);
         HttpInstrumentationCaptureRequestHeaders = configuration.ParseHeaders(ConfigurationKeys.Traces.InstrumentationOptions.HttpInstrumentationCaptureRequestHeaders, AdditionalTag.CreateHttpRequestCache);
         HttpInstrumentationCaptureResponseHeaders = configuration.ParseHeaders(ConfigurationKeys.Traces.InstrumentationOptions.HttpInstrumentationCaptureResponseHeaders, AdditionalTag.CreateHttpResponseCache);
+        OracleMdaDatabaseOpenTelemetryTracing = configuration.GetBool(ConfigurationKeys.Traces.InstrumentationOptions.OracleMdaDatabaseOpenTelemetryTracing) ?? true;
         OracleMdaSetDbStatementForText = configuration.GetBool(ConfigurationKeys.Traces.InstrumentationOptions.OracleMdaSetDbStatementForText) ?? false;
     }
 
@@ -74,6 +75,7 @@ internal class InstrumentationOptions
 
             if (instrumentationConfiguration.OracleMda != null)
             {
+                OracleMdaDatabaseOpenTelemetryTracing = instrumentationConfiguration.OracleMda.DatabaseOpenTelemetryTracing;
                 OracleMdaSetDbStatementForText = instrumentationConfiguration.OracleMda.SetDbStatementForText;
             }
         }
@@ -133,6 +135,11 @@ internal class InstrumentationOptions
     /// Gets the list of HTTP response headers to be captured as the span tags by HTTP instrumentation.
     /// </summary>
     public IReadOnlyList<AdditionalTag> HttpInstrumentationCaptureResponseHeaders { get; } = [];
+
+    /// <summary>
+    /// Gets a value indicating whether to Oracle Client instrumentation to enable database OpenTelemetry tracing.
+    /// </summary>
+    public bool OracleMdaDatabaseOpenTelemetryTracing { get; }
 
     /// <summary>
     /// Gets a value indicating whether text query in Oracle Client can be passed as a db.statement tag.

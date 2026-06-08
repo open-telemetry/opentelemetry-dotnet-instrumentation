@@ -21,9 +21,9 @@ public class OracleMdaTests : TestHelper
         _oracle = oracle;
     }
 
-    public static TheoryData<string, bool> TestData()
+    public static TheoryData<string, bool, bool> TestData()
     {
-        var theoryData = new TheoryData<string, bool>();
+        var theoryData = new TheoryData<string, bool, bool>();
 
 #if NETFRAMEWORK
         foreach (var version in LibraryVersion.OracleMda)
@@ -31,8 +31,9 @@ public class OracleMdaTests : TestHelper
         foreach (var version in LibraryVersion.GetPlatformVersions(nameof(LibraryVersion.OracleMdaCore)))
 #endif
         {
-            theoryData.Add(version, true);
-            theoryData.Add(version, false);
+            var databaseOpenTelemetryTracingSupported = IsDatabaseOpenTelemetryTracingSupported(version);
+            theoryData.Add(version, true, databaseOpenTelemetryTracingSupported);
+            theoryData.Add(version, false, databaseOpenTelemetryTracingSupported);
         }
 
         return theoryData;
@@ -42,7 +43,7 @@ public class OracleMdaTests : TestHelper
     [Trait("Category", "EndToEnd")]
     [Trait("Containers", "Linux")]
     [MemberData(nameof(TestData))]
-    public async Task SubmitTraces(string packageVersion, bool dbStatementForText)
+    public async Task SubmitTraces(string packageVersion, bool dbStatementForText, bool databaseOpenTelemetryTracingSupported)
     {
         // Skip the test if fixture does not support current platform
         _oracle.SkipIfUnsupportedPlatform();

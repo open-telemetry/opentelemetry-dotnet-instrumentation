@@ -35,7 +35,7 @@ internal class OracleMdaInitializer : InstrumentationInitializer
         }
 
         SetDbStatementForText(oracleActivitySourceType, oracleActivitySourceField, _tracerSettings.InstrumentationOptions.OracleMdaSetDbStatementForText);
-        SetDatabaseOpenTelemetryTracing();
+        SetDatabaseOpenTelemetryTracing(_tracerSettings.InstrumentationOptions.OracleMdaDatabaseOpenTelemetryTracing);
     }
 
     private static void SetDbStatementForText(Type oracleActivitySourceType, object oracleActivitySourceField, bool enabled)
@@ -45,14 +45,14 @@ internal class OracleMdaInitializer : InstrumentationInitializer
         setDbStatementForTextPropertyInfo?.SetValue(oracleActivitySourceField, enabled);
     }
 
-    private static void SetDatabaseOpenTelemetryTracing()
+    private static void SetDatabaseOpenTelemetryTracing(bool enabled)
     {
         var oracleConfigurationType = Type.GetType("Oracle.ManagedDataAccess.Client.OracleConfiguration, Oracle.ManagedDataAccess");
         var databaseOpenTelemetryTracingPropertyInfo = oracleConfigurationType?.GetProperty("DatabaseOpenTelemetryTracing", BindingFlags.Static | BindingFlags.Public);
 
         if (databaseOpenTelemetryTracingPropertyInfo?.PropertyType == typeof(bool))
         {
-            databaseOpenTelemetryTracingPropertyInfo.SetValue(null, true);
+            databaseOpenTelemetryTracingPropertyInfo.SetValue(null, enabled);
         }
     }
 }
