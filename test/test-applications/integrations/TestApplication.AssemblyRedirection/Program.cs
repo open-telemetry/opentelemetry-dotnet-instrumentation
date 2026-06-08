@@ -3,28 +3,13 @@
 
 using System.Diagnostics;
 using System.Reflection;
+using TestApplication.Shared;
 
-// args[0]: expected assembly name (e.g. "System.Diagnostics.DiagnosticSource").
-// args[1]: expected assembly version (e.g. "10.0.0.0").
-// args[2]: expected assembly file version (e.g. "10.0.0.0")
-// args[3]: comma-separated assembly names to exclude from duplicate check
-//          (e.g. "TestApplication.AssemblyRedirection").
-//          Empty or missing means check all assemblies.
-var expectedAssemblyName = args.Length > 0
-    ? args[0]
-    : throw new ArgumentException("Missing Expected Assembly Name", nameof(args));
-
-var expectedAssemblyVersion = args.Length > 1
-    ? Version.Parse(args[1])
-    : throw new ArgumentException($"Missing Expected Assembly Version", nameof(args));
-
-var expectedFileVersion = args.Length > 2
-    ? Version.Parse(args[2])
-    : throw new ArgumentException($"Missing Expected Assembly File Version", nameof(args));
-
-var excludedNames = args.Length > 3
-    ? args[3].Split([',', ' '], StringSplitOptions.RemoveEmptyEntries)
-    : []; // empty = check all assemblies
+var expectedAssemblyName = ArgumentHelper.GetRequiredArgument(args, "--assembly-name");
+var expectedAssemblyVersion = Version.Parse(ArgumentHelper.GetRequiredArgument(args, "--assembly-version"));
+var expectedFileVersion = Version.Parse(ArgumentHelper.GetRequiredArgument(args, "--assembly-file-version"));
+var excludedNamesArgument = ArgumentHelper.GetArgument(args, "--excluded-assemblies", string.Empty);
+var excludedNames = excludedNamesArgument.Split([',', ' '], StringSplitOptions.RemoveEmptyEntries); // empty = check all assemblies
 
 Console.WriteLine("Configuration:");
 Console.WriteLine($"  Expected Assembly Name: \"{expectedAssemblyName}\"");

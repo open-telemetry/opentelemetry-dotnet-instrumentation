@@ -58,7 +58,7 @@ public class WcfIISTests : TestHelper
 
         RunTestApplication(new TestSettings
         {
-            Arguments = $"{netTcpPort} {httpPort}"
+            Arguments = $"--iis --tcpPort {netTcpPort} --httpPort {httpPort}"
         });
 
         collector.AssertExpectations();
