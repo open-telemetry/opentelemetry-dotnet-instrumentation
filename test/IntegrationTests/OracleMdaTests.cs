@@ -53,7 +53,6 @@ public class OracleMdaTests : TestHelper
         EnableBytecodeInstrumentation();
 
         using var collector = new MockSpansCollector(Output);
-        var databaseOpenTelemetryTracingSupported = IsDatabaseOpenTelemetryTracingSupported(packageVersion);
         SetExporter(collector);
 
         if (databaseOpenTelemetryTracingSupported)
