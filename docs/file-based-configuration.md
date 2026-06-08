@@ -555,7 +555,7 @@ instrumentation/development:
         # Default is false
         set_document: false
       oraclemda: 
-        # Whether the Oracle Client instrrumentation can enable database OpenTelemetry tracing and propagate context to the server.
+        # Whether the Oracle Client instrumentation can enable database OpenTelemetry tracing and propagate context to the server.
         database_opentelemetry_tracing: false
         # Whether the Oracle Client instrumentation can pass SQL statements through the db.statement attribute. Queries might contain sensitive information. If set to false, db.statement is recorded only for executing stored procedures.
         # Default is false
