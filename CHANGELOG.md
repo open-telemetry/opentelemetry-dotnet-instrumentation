@@ -13,6 +13,8 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
   - `Microsoft.Data.Sqlite`,
   - `Microsoft.Extensions.Logging`,
   - `System.Data.Common`.
+- Support for Database OpenTelemetry Tracing for [Oracle.ManagedDataAccess.Core](https://www.nuget.org/packages/Oracle.ManagedDataAccess.Core)
+  and [Oracle.ManagedDataAccess](https://www.nuget.org/packages/Oracle.ManagedDataAccess).
 
 ### Changed
 
