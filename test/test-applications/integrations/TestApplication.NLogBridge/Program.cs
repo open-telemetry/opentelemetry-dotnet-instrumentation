@@ -17,24 +17,17 @@ internal static class Program
     {
         ConsoleHelper.WriteSplashScreen(args);
 
-        if (args.Length == 2)
+        var logApiName = ArgumentHelper.GetRequiredArgument(args, "--api");
+        switch (logApiName)
         {
-            var logApiName = args[1];
-            switch (logApiName)
-            {
-                case "nlog":
-                    LogUsingNLogDirectly();
-                    break;
-                case "ILogger":
-                    LogUsingILogger();
-                    break;
-                default:
-                    throw new NotSupportedException($"{logApiName} is not supported.");
-            }
-        }
-        else
-        {
-            throw new ArgumentException("Invalid arguments.");
+            case "nlog":
+                LogUsingNLogDirectly();
+                break;
+            case "ILogger":
+                LogUsingILogger();
+                break;
+            default:
+                throw new NotSupportedException($"{logApiName} is not supported.");
         }
     }
 

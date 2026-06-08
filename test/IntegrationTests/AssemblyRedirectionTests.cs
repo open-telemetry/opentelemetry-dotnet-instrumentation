@@ -78,7 +78,7 @@ public class AssemblyRedirectionTests(ITestOutputHelper output) : TestHelper("As
         RunTestApplication(new TestSettings
         {
             PackageVersion = libraryVersion,
-            Arguments = $"{expectedAssemblyName} {expectedAssemblyVersion} {expectedAssemblyFileVersion} {excludedNames}"
+            Arguments = $"--assembly-name {expectedAssemblyName} --assembly-version {expectedAssemblyVersion} --assembly-file-version {expectedAssemblyFileVersion} --excluded-assemblies {excludedNames}"
         });
 
         // Assert
