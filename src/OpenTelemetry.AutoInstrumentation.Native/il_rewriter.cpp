@@ -4,6 +4,7 @@
 
 #include "il_rewriter.h"
 #include <corhlpr.cpp>
+#include <new>
 
 #undef IfFailRet
 #define IfFailRet(EXPR)                                                                                                \
@@ -213,7 +214,7 @@ HRESULT ILRewriter::Import()
 
 HRESULT ILRewriter::ImportIL(LPCBYTE pIL)
 {
-    m_pOffsetToInstr = new ILInstr*[m_CodeSize + 1];
+    m_pOffsetToInstr = new (std::nothrow) ILInstr*[m_CodeSize + 1];
     IfNullRet(m_pOffsetToInstr);
 
     ZeroMemory(m_pOffsetToInstr, m_CodeSize * sizeof(ILInstr*));
