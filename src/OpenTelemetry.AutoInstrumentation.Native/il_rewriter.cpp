@@ -362,7 +362,7 @@ HRESULT ILRewriter::ImportEH(const COR_ILMETHOD_SECT_EH* pILEH, unsigned nEH)
     if (nEH == 0)
         return S_OK;
 
-    IfNullRet(m_pEH = new EHClause[m_nEH]);
+    IfNullRet(m_pEH = new (std::nothrow) EHClause[m_nEH]);
     for (unsigned iEH = 0; iEH < m_nEH; iEH++)
     {
         // If the EH clause is in tiny form, the call to pILEH->EHClause() below
