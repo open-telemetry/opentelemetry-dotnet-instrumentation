@@ -4,6 +4,7 @@
 // We want to use std::min, not the windows.h macro
 #define NOMINMAX
 #include "continuous_profiler.h"
+#include "stack_capture_types.h"
 #include "logger.h"
 #include <chrono>
 #include <map>
@@ -692,13 +693,25 @@ trace::WSTRING* NamingHelper::Lookup(const FunctionIdentifier& function_identifi
         return answer;
     }
     stats.name_cache_misses++;
-    answer = new trace::WSTRING();
-    this->GetFunctionName(function_identifier, *answer);
+    auto owned = std::make_unique<trace::WSTRING>();
 
-    const auto old_value = function_name_cache_.Put(function_identifier, answer);
-    delete old_value;
+    if (stackWalker_ && function_identifier.IsNative())
+    {
+        if (auto hr = stackWalker_->ResolveNativeSymbolName(function_identifier.native_ip, *owned); hr != S_OK)
+        {
+            // Cache a per-key copy of the unknown sentinel so repeated lookups
+            // of the same unresolved IP are O(1) and avoid re-entering the resolver.
+            owned->assign(WStr("Unknown_Native_Function(unknown)"));
+        }
+    }
+    else
+    {
+        this->GetFunctionName(function_identifier, *owned);
+    }
 
-    return answer;
+    trace::WSTRING* raw = owned.release();
+    owned.reset(function_name_cache_.Put(function_identifier, raw));
+    return raw;
 }
 
 FunctionIdentifier NamingHelper::LookupManagedFunction(const FunctionID functionId, const COR_PRF_FRAME_INFO frameInfo)
@@ -724,25 +737,19 @@ struct DoStackSnapshotParams
     DoStackSnapshotParams(ContinuousProfiler* p, std::vector<FunctionIdentifier>* b) : prof(p), buffer(b) {}
 };
 
-static HRESULT __stdcall FrameCallback(_In_ FunctionID         func_id,
-                                       _In_ UINT_PTR           ip,
-                                       _In_ COR_PRF_FRAME_INFO frame_info,
-                                       _In_ ULONG32            context_size,
-                                       _In_ BYTE               context[],
-                                       _In_ void*              client_data)
+static HRESULT __stdcall HandleStackFrame(_In_ FunctionID         func_id,
+                                          _In_ UINT_PTR           ip,
+                                          _In_ COR_PRF_FRAME_INFO frame_info,
+                                          _In_ ULONG32            context_size,
+                                          _In_ BYTE               context[],
+                                          _In_ void*              client_data)
 {
-
-    // if func ID is zero, it is a frame we can't get info for (e.g., external/native code); we still want to record it,
-    // in that case the ID will map to a default "unknown" entry in the name cache, so we can just continue on as normal
-    // in next PR we will attempt to resolve the "unknown" frames a bit better (e.g., using IP to get native symbol
-    // info) but for now this is sufficient to avoid losing all stack info for frames we can't resolve
 
     const auto params = static_cast<DoStackSnapshotParams*>(client_data);
     params->prof->stats_.total_frames++;
 
     const auto identifier = params->prof->helper.LookupManagedFunction(func_id, 0);
     params->buffer->push_back(identifier);
-
     return S_OK;
 }
 
@@ -780,20 +787,28 @@ static void CaptureFunctionIdentifiersForThreads(
 {
     prof->helper.ClearFunctionIdentifierCache();
 
-    if (auto stackCaptureStrategy = prof->GetStackCaptureStrategy(); stackCaptureStrategy != nullptr)
+    if (auto stackWalker = prof->GetStackWalker())
     {
-        auto frameProcessor = [&threadStacksBuffer, prof](StackSnapshotCallbackContext* snapshot_context) -> HRESULT
+        auto frameProcessor = [&threadStacksBuffer, prof](continuous_profiler::CapturedFrame* frame) -> HRESULT
         {
-            auto                  thread = snapshot_context->threadId;
+            auto                  thread = frame->threadId;
             DoStackSnapshotParams doStackSnapshotParams{prof, &threadStacksBuffer[thread]};
-            FrameCallback(snapshot_context->functionId, snapshot_context->instructionPointer,
-                          snapshot_context->frameInfo, snapshot_context->contextSize, snapshot_context->context,
-                          &doStackSnapshotParams);
+
+            if (frame->isUnmanagedFrame && frame->functionId == 0 && frame->instructionPointer != 0)
+            {
+                // Record IP for symbol resolution
+                doStackSnapshotParams.prof->stats_.total_frames++;
+                doStackSnapshotParams.buffer->push_back(FunctionIdentifier::Native(frame->instructionPointer));
+                return S_OK;
+            }
+
+            HandleStackFrame(frame->functionId, frame->instructionPointer, frame->frameInfo, frame->contextSize,
+                             frame->context, &doStackSnapshotParams);
             return S_OK;
         };
 
-        StackSnapshotCallbackContext context{frameProcessor};
-        stackCaptureStrategy->CaptureStacks(selectedThreads, &context);
+        continuous_profiler::StackCaptureRequest request{frameProcessor};
+        stackWalker->CaptureStacks(selectedThreads, &request);
     }
 }
 
@@ -944,10 +959,12 @@ static void RemoveOutdatedEntries(std::unordered_map<trace_context, long long>& 
     prof->nextOutdatedEntriesScan = nextScan;
 }
 
-static void PauseClrAndCaptureSamples(ContinuousProfiler*                                            prof,
-                                      ICorProfilerInfo7*                                             info7,
-                                      const SamplingType                                             samplingType,
-                                      std::unordered_map<ThreadID, std::vector<FunctionIdentifier>>& threadStacksBuffer)
+// The implementation will suspend CLR for
+// .net and use thread suspension for netfx
+static void CaptureSamples(ContinuousProfiler*                                            prof,
+                           ICorProfilerInfo7*                                             info7,
+                           const SamplingType                                             samplingType,
+                           std::unordered_map<ThreadID, std::vector<FunctionIdentifier>>& threadStacksBuffer)
 {
     // before trying to suspend the runtime, acquire exclusive lock
     // it's not safe to try to suspend the runtime after other locks are acquired
@@ -1136,7 +1153,7 @@ static void SamplingThreadMain(ContinuousProfiler* prof)
             iteration = 0;
         }
 
-        PauseClrAndCaptureSamples(prof, info7, samplingType, threadStacksBuffer);
+        CaptureSamples(prof, info7, samplingType, threadStacksBuffer);
 
         if (prof->IsShutdownRequested())
         {
@@ -1176,14 +1193,15 @@ void ContinuousProfiler::SetGlobalInfo12(ICorProfilerInfo12* cor_profiler_info12
     info12 = cor_profiler_info12;
 }
 
-void ContinuousProfiler::SetStackCaptureStrategy(IStackCaptureStrategy* stack_capture_strategy)
+void ContinuousProfiler::SetStackWalker(IStackWalker* walker)
 {
-    stack_capture_strategy_ = stack_capture_strategy;
+    stackWalker_        = walker;
+    helper.stackWalker_ = walker;
 }
 
-IStackCaptureStrategy* ContinuousProfiler::GetStackCaptureStrategy() const
+IStackWalker* ContinuousProfiler::GetStackWalker() const
 {
-    return stack_capture_strategy_;
+    return stackWalker_;
 }
 
 void ContinuousProfiler::InitSelectiveSamplingBuffer()
@@ -1257,7 +1275,7 @@ constexpr auto AllocationTickV4SizeWithoutTypeName    = 4 + 4 + 2 + 8 + EtwPoint
 static void CaptureAllocationStack(ContinuousProfiler* prof, std::vector<FunctionIdentifier>& threadStack)
 {
     DoStackSnapshotParams doStackSnapshotParams(prof, &threadStack);
-    HRESULT               hr = prof->info7->DoStackSnapshot((ThreadID)NULL, &FrameCallback, COR_PRF_SNAPSHOT_DEFAULT,
+    HRESULT               hr = prof->info7->DoStackSnapshot((ThreadID)NULL, &HandleStackFrame, COR_PRF_SNAPSHOT_DEFAULT,
                                                             &doStackSnapshotParams, nullptr, 0);
     if (FAILED(hr))
     {
@@ -1349,7 +1367,7 @@ void ContinuousProfiler::AllocationTick(ULONG dataLen, LPCBYTE data)
 {
     // try to acquire shared lock without blocking
     // and return early if attempt was unsuccessful -
-    // PauseClrAndCaptureSamples acquired exclusive lock
+    // CaptureSamples acquired exclusive lock
     // and it's not safe to proceed
     std::shared_lock<std::shared_mutex> shared_lock(profiling_lock, std::try_to_lock);
     if (!shared_lock.owns_lock())

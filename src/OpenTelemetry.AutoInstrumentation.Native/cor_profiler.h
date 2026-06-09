@@ -23,8 +23,7 @@
 #include "rejit_handler.h"
 #include <unordered_set>
 #include "clr_helpers.h"
-#include "stack_capture_strategy.h"
-
+#include "stack_walker_impl.h"
 // Forward declaration
 namespace continuous_profiler
 {
@@ -40,6 +39,7 @@ struct ContinuousProfilerParams
     bool         allocationSamplingEnabled;
     unsigned int maxMemorySamplesPerMinute;
     unsigned int selectedThreadsSamplingInterval;
+    bool         nativeSymbolResolutionEnabled;
 };
 
 class CorProfiler : public CorProfilerBase
@@ -67,7 +67,7 @@ private:
     bool is_desktop_iis = false;
 
     continuous_profiler::ContinuousProfiler* continuousProfiler;
-    std::unique_ptr<continuous_profiler::IStackCaptureStrategy> stack_capture_strategy_;
+    std::unique_ptr<continuous_profiler::StackWalkerImpl>       stack_walker_impl_;
     std::once_flag sampling_init_flag_;
     HRESULT STDMETHODCALLTYPE ThreadAssignedToOSThread(ThreadID managedThreadId, DWORD osThreadId) override;
 
@@ -144,7 +144,7 @@ private:
     // Initialization methods
     //
     void InternalAddInstrumentation(WCHAR* id, CallTargetDefinition* items, int size, bool isDerived);
-    bool InitThreadSampler();
+    bool InitThreadSampler(bool nativeSymbolResolutionEnabled);
     void ConfigureContinuousProfilerInternal(const ContinuousProfilerParams& params);
 
 public:
@@ -248,7 +248,9 @@ public:
     //
     // Continuous Profiler methods
     //
-    void ConfigureContinuousProfiler(bool threadSamplingEnabled, unsigned int threadSamplingInterval, bool allocationSamplingEnabled, unsigned int maxMemorySamplesPerMinute, unsigned int selectedThreadsSamplingInterval);
+    void ConfigureContinuousProfiler(bool threadSamplingEnabled, unsigned int threadSamplingInterval, bool allocationSamplingEnabled, unsigned int maxMemorySamplesPerMinute, 
+        unsigned int selectedThreadsSamplingInterval,
+                                     bool         nativeSymbolResolutionEnabled);
 
     //
     // IL Rewriting methods

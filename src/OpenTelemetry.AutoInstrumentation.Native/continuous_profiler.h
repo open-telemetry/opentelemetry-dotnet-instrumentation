@@ -7,8 +7,7 @@
 #define OTEL_CONTINUOUS_PROFILER_H_
 
 #include "continuous_profiler_clr_helpers.h"
-#include "stack_capture_strategy.h"
-
+#include "stack_walker.h"
 #include <mutex>
 #include <cinttypes>
 #include <future>
@@ -46,21 +45,29 @@ struct FunctionIdentifier
     mdToken  function_token;
     ModuleID module_id;
     bool     is_valid;
+    UINT_PTR native_ip;
+
     static FunctionIdentifier Managed(mdToken token, ModuleID mod, bool valid)
     {
-        return {token, mod, valid};
+        return {token, mod, valid, 0};
     }
-
+    static FunctionIdentifier Native(UINT_PTR ip)
+    {
+        return {0, 0, true, ip};
+    }
     static FunctionIdentifier ManagedInvalid()
     {
-        return {0, 0, false};
+        return {0, 0, false, 0};
     }
-
+    bool IsNative() const
+    {
+        return is_valid && function_token == 0 && native_ip != 0;
+    }
     bool operator==(const FunctionIdentifier& p) const
     {
         if (is_valid != p.is_valid)
             return false;
-        return function_token == p.function_token && module_id == p.module_id;
+        return function_token == p.function_token && module_id == p.module_id && native_ip == p.native_ip;
     }
 };
 
@@ -148,7 +155,7 @@ struct std::hash<continuous_profiler::FunctionIdentifier>
 {
     std::size_t operator()(const continuous_profiler::FunctionIdentifier& k) const noexcept
     {
-        return hash_combine(k.function_token, k.module_id, k.is_valid);
+        return hash_combine(k.function_token, k.module_id, k.is_valid, k.native_ip);
     }
 };
 
@@ -285,7 +292,7 @@ class NamingHelper
 public:
     // These are permanent parts of the helper object
     ICorProfilerInfo7* info7_ = nullptr;
-
+    IStackWalker*      stackWalker_ = nullptr;
     NamingHelper();
     void ClearFunctionIdentifierCache();
     trace::WSTRING* Lookup(const FunctionIdentifier& function_identifier, SamplingStatistics & stats);
@@ -349,8 +356,8 @@ public:
 
     void SetGlobalInfo12(ICorProfilerInfo12* info12);
     void SetGlobalInfo7(ICorProfilerInfo7* cor_profiler_info7);
-    void SetStackCaptureStrategy(IStackCaptureStrategy* strategy);
-    IStackCaptureStrategy* GetStackCaptureStrategy() const;
+    void                   SetStackWalker(IStackWalker* walker);
+    IStackWalker* GetStackWalker() const;
     ThreadState* GetCurrentThreadState(ThreadID tid);
 
     std::unordered_map<ThreadID, ThreadState*> managed_tid_to_state_;
@@ -370,7 +377,7 @@ private:
     std::atomic_bool             shutdown_requested_{ false };
     std::unique_ptr<std::thread> thread_sampling_thread_;
     EVENTPIPE_SESSION            session_ = 0;
-    IStackCaptureStrategy*       stack_capture_strategy_ = nullptr; // Non-owning pointer
+    IStackWalker*                stackWalker_ = nullptr;
 };
 
 } // namespace continuous_profiler

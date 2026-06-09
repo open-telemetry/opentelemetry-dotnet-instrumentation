@@ -33,7 +33,6 @@
 #include "version.h"
 #include "continuous_profiler.h"
 #include "member_resolver.h"
-#include "stack_capture_strategy_factory.h"
 
 #ifdef MACOS
 #include <mach-o/dyld.h>
@@ -282,9 +281,6 @@ HRESULT STDMETHODCALLTYPE CorProfiler::Initialize(IUnknown* cor_profiler_info_un
     this->info_->AddRef();
     is_attached_.store(true);
     profiler = this;
-
-    stack_capture_strategy_ =
-        continuous_profiler::StackCaptureStrategyFactory::Create(this->info_, runtime_information_);
 
     return S_OK;
 }
@@ -1181,7 +1177,7 @@ void CorProfiler::InternalAddInstrumentation(WCHAR* id, CallTargetDefinition* it
     }
 }
 
-bool CorProfiler::InitThreadSampler()
+bool CorProfiler::InitThreadSampler(bool nativeSymbolResolutionEnabled)
 {
 #if defined(_WIN32)
     // for net fx, the native thread ID is needed by stack capture
@@ -1219,7 +1215,13 @@ bool CorProfiler::InitThreadSampler()
     this->continuousProfiler = new continuous_profiler::ContinuousProfiler();
     this->continuousProfiler->SetGlobalInfo12(this->info12_);
     this->continuousProfiler->SetGlobalInfo7(this->info_);
-    this->continuousProfiler->SetStackCaptureStrategy(stack_capture_strategy_.get());
+    using continuous_profiler::RuntimeType;
+    RuntimeType runtime = runtime_information_.is_desktop() ? RuntimeType::DotNetFramework
+                          : runtime_information_.is_core()  ? RuntimeType::DotNetCore
+                                                            : RuntimeType::Unknown;
+    stack_walker_impl_ =
+        std::make_unique<continuous_profiler::StackWalkerImpl>(this->info_, runtime, nativeSymbolResolutionEnabled);
+    this->continuousProfiler->SetStackWalker(stack_walker_impl_.get());
     Logger::Info("ConfigureContinuousProfiler: Events masks configured for continuous profiler");
     return true;
 }
@@ -1228,10 +1230,12 @@ void CorProfiler::ConfigureContinuousProfiler(bool         threadSamplingEnabled
                                               unsigned int threadSamplingInterval,
                                               bool         allocationSamplingEnabled,
                                               unsigned int maxMemorySamplesPerMinute,
-                                              unsigned int selectedThreadsSamplingInterval)
+                                              unsigned int selectedThreadsSamplingInterval,
+                                              bool         nativeSymbolResolutionEnabled)
 {
-    ContinuousProfilerParams params{threadSamplingEnabled, threadSamplingInterval, allocationSamplingEnabled,
-                                    maxMemorySamplesPerMinute, selectedThreadsSamplingInterval};
+    ContinuousProfilerParams params{threadSamplingEnabled,           threadSamplingInterval,
+                                    allocationSamplingEnabled,       maxMemorySamplesPerMinute,
+                                    selectedThreadsSamplingInterval, nativeSymbolResolutionEnabled};
     // Guard against multiple initialization: In .NET Framework, this method may be called
     // once per AppDomain, but the continuous profiler is a process-level singleton.
     // std::call_once ensures thread-safe one-time initialization across all AppDomains.
@@ -1254,7 +1258,7 @@ void CorProfiler::ConfigureContinuousProfilerInternal(const ContinuousProfilerPa
         return;
     }
 
-    if (!InitThreadSampler())
+    if (!InitThreadSampler(params.nativeSymbolResolutionEnabled))
     {
         Logger::Warn("ContinuousProfiler: unable to init sampler.");
         return;
@@ -3796,9 +3800,9 @@ HRESULT STDMETHODCALLTYPE CorProfiler::ThreadCreated(ThreadID threadId)
         continuousProfiler->ThreadCreated(threadId);
     }
 
-    if (stack_capture_strategy_)
+    if (stack_walker_impl_)
     {
-        stack_capture_strategy_->OnThreadCreated(threadId);
+        stack_walker_impl_->OnThreadCreated(threadId);
     }
     return S_OK;
 }
@@ -3809,9 +3813,9 @@ HRESULT STDMETHODCALLTYPE CorProfiler::ThreadDestroyed(ThreadID threadId)
         continuousProfiler->ThreadDestroyed(threadId);
     }
 
-    if (stack_capture_strategy_)
+    if (stack_walker_impl_)
     {
-        stack_capture_strategy_->OnThreadDestroyed(threadId);
+        stack_walker_impl_->OnThreadDestroyed(threadId);
     }
 
     return S_OK;
@@ -3823,18 +3827,18 @@ HRESULT STDMETHODCALLTYPE CorProfiler::ThreadNameChanged(ThreadID threadId, ULON
         continuousProfiler->ThreadNameChanged(threadId, cchName, name);
     }
 
-    if (stack_capture_strategy_)
+    if (stack_walker_impl_)
     {
-        stack_capture_strategy_->OnThreadNameChanged(threadId, cchName, name);
+        stack_walker_impl_->OnThreadNameChanged(threadId, cchName, name);
     }
 
     return S_OK;
 }
 HRESULT STDMETHODCALLTYPE CorProfiler::ThreadAssignedToOSThread(ThreadID managedThreadId, DWORD osThreadId)
 {
-    if (stack_capture_strategy_)
+    if (stack_walker_impl_)
     {
-        stack_capture_strategy_->OnThreadAssignedToOSThread(managedThreadId, osThreadId);
+        stack_walker_impl_->OnThreadAssignedToOSThread(managedThreadId, osThreadId);
     }
     return S_OK;
 }
