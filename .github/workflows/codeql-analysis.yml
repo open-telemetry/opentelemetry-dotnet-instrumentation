@@ -36,7 +36,8 @@ jobs:
           # renovate: datasource=github-runners depType=github-runner
           machine: ubuntu-24.04
         - language: c-cpp
-          build-mode: autobuild
+          # Keep this as "none" so paths-ignore in codeql-config.yml excludes vendored native lib files.
+          build-mode: none
           queries: security-extended
           # renovate: datasource=github-runners depType=github-runner
           machine: ubuntu-24.04
