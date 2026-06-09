@@ -8,7 +8,7 @@ It will be updated automatically together with spdlog.
 ## spdlog
 
 * Source: <https://github.com/gabime/spdlog>
-* Version: 1.15.3
+* Version: 1.17.0
 
 ### Setup
 
