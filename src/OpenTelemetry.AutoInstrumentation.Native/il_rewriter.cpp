@@ -463,7 +463,7 @@ HRESULT ILRewriter::Export()
     // which can be 10 bytes for 64-bit. For simplification we just use 10 here.
     unsigned maxSize = m_nInstrs * 10;
 
-    m_pOutputBuffer = new BYTE[maxSize];
+    m_pOutputBuffer = new (std::nothrow) BYTE[maxSize];
     IfNullRet(m_pOutputBuffer);
 
 again:
