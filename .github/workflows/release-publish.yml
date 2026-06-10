@@ -24,7 +24,7 @@ jobs:
     steps:
 
       - name: Checkout code
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
         with:
           persist-credentials: false
 
@@ -81,7 +81,7 @@ jobs:
     steps:
 
       - name: Checkout code
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
         with:
           persist-credentials: false
 
@@ -127,18 +127,18 @@ jobs:
       matrix:
         include:
           # renovate: datasource=github-runners depType=github-runner
-          - machine: ubuntu-22.04
+          - machine: ubuntu-24.04
             base-image: alpine
             net-version: net10.0
           # renovate: datasource=github-runners depType=github-runner
-          - machine: ubuntu-22.04-arm
+          - machine: ubuntu-24.04-arm
             base-image: alpine
             net-version: net10.0
     runs-on: ${{ matrix.machine }}
     steps:
 
       - name: Checkout code
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
         with:
           persist-credentials: false
 

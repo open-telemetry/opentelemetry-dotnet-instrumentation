@@ -16,27 +16,17 @@ internal static class Program
     {
         ConsoleHelper.WriteSplashScreen(args);
 
-        if (args.Length < 4)
-        {
-            throw new ArgumentException("Required parameters not provided.");
-        }
-
-        var port = args[1];
+        var port = ArgumentHelper.GetRequiredArgument(args, "--kafka");
         _bootstrapServers = $"localhost:{port}";
 
-        var topicName = args[3];
+        var topicName = ArgumentHelper.GetRequiredArgument(args, "--topic-name");
 
-        if (args.Length == 5 && args[4] == "--consume-only")
+        if (ArgumentHelper.HasArgument(args, "--consume-only"))
         {
             return await ConsumeOnly(topicName).ConfigureAwait(false);
         }
 
-        if (args.Length == 4)
-        {
-            return await ProduceAndConsume(topicName).ConfigureAwait(false);
-        }
-
-        throw new ArgumentException("Invalid parameters.");
+        return await ProduceAndConsume(topicName).ConfigureAwait(false);
     }
 
     private static async Task<int> ConsumeOnly(string topicName)

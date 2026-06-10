@@ -13,9 +13,9 @@ internal static class Program
     {
         ConsoleHelper.WriteSplashScreen(args);
 
-        var mongoPort = GetMongoPort(args);
-        var mongoDatabase = GetMongoDbName(args);
-        var mongoCollection = GetMongoCollectionName(args);
+        var mongoPort = ArgumentHelper.GetArgument(args, "--mongo-db", "27017");
+        var mongoDatabase = ArgumentHelper.GetArgument(args, "--database", "test-db");
+        var mongoCollection = ArgumentHelper.GetArgument(args, "--collection", "employees");
 #if !MONGODB_3_7_0_OR_GREATER
         var shouldTriggerError = ShouldTriggerError(args);
 #endif
@@ -129,42 +129,12 @@ internal static class Program
 
     private static bool ShouldTriggerError(string[] args)
     {
-        return args.Any(arg => arg.Equals("--trigger-error", StringComparison.OrdinalIgnoreCase));
+        return ArgumentHelper.HasArgument(args, "--trigger-error");
     }
 #endif
 
     private static string Host()
     {
         return Environment.GetEnvironmentVariable("MONGO_HOST") ?? "localhost";
-    }
-
-    private static string GetMongoPort(string[] args)
-    {
-        if (args.Length > 1)
-        {
-            return args[1];
-        }
-
-        return "27017";
-    }
-
-    private static string GetMongoDbName(string[] args)
-    {
-        if (args.Length > 2)
-        {
-            return args[2];
-        }
-
-        return "test-db";
-    }
-
-    private static string GetMongoCollectionName(string[] args)
-    {
-        if (args.Length > 3)
-        {
-            return args[3];
-        }
-
-        return "employees";
     }
 }

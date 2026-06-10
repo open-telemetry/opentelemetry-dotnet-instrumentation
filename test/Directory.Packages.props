@@ -2,11 +2,11 @@
   <Import Project="..\Directory.Packages.props" />
   <ItemGroup>
     <PackageVersion Include="Azure.Storage.Blobs" Version="12.26.0" />
-    <PackageVersion Include="Confluent.Kafka" Version="2.14.0" />
+    <PackageVersion Include="Confluent.Kafka" Version="2.14.2" />
     <PackageVersion Include="CoreWCF.Http" Version="1.9.0" />
     <PackageVersion Include="CoreWCF.NetTcp" Version="1.9.0" />
     <PackageVersion Include="CoreWCF.Primitives" Version="1.9.0" />
-    <PackageVersion Include="Elastic.Clients.Elasticsearch" Version="9.4.1" />
+    <PackageVersion Include="Elastic.Clients.Elasticsearch" Version="9.4.2" />
     <PackageVersion Include="Google.Protobuf" Version="3.35.0" />
     <PackageVersion Include="GraphQL" Version="8.8.4" />
     <PackageVersion Include="GraphQL.MicrosoftDI" Version="8.8.4" />

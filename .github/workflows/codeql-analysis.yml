@@ -36,7 +36,8 @@ jobs:
           # renovate: datasource=github-runners depType=github-runner
           machine: ubuntu-24.04
         - language: c-cpp
-          build-mode: autobuild
+          # Keep this as "none" so paths-ignore in codeql-config.yml excludes vendored native lib files.
+          build-mode: none
           queries: security-extended
           # renovate: datasource=github-runners depType=github-runner
           machine: ubuntu-24.04
@@ -62,14 +63,14 @@ jobs:
         disk-root: "D:"
 
     - name: Checkout code
-      uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
       with:
         filter: 'tree:0'
         persist-credentials: false
         show-progress: false
 
     - name: Initialize CodeQL
-      uses: github/codeql-action/init@7211b7c8077ea37d8641b6271f6a365a22a5fbfa # v4.36.0
+      uses: github/codeql-action/init@8aad20d150bbac5944a9f9d289da16a4b0d87c1e # v4.36.2
       with:
         languages: ${{ matrix.language }}
         build-mode: ${{ matrix.build-mode }}
@@ -91,7 +92,7 @@ jobs:
       run: ./build.cmd BuildTracer
 
     - name: Perform CodeQL Analysis
-      uses: github/codeql-action/analyze@7211b7c8077ea37d8641b6271f6a365a22a5fbfa # v4.36.0
+      uses: github/codeql-action/analyze@8aad20d150bbac5944a9f9d289da16a4b0d87c1e # v4.36.2
       with:
         category: "/language:${{matrix.language}}"
 

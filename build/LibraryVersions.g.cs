@@ -26,7 +26,7 @@ public static partial class LibraryVersion
             "TestApplication.Elasticsearch",
             [
                 new("8.15.10"),
-                new("9.4.1"),
+                new("9.4.2"),
             ]
         },
         {
@@ -203,7 +203,7 @@ public static partial class LibraryVersion
             [
                 new("1.8.2"),
                 new("1.9.2"),
-                new("2.14.0"),
+                new("2.14.2"),
             ]
         },
         {

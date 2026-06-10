@@ -39,7 +39,7 @@ internal static class NLogIntegrationHelper
             {
                 propsEvent.Properties[LogsTraceContextInjectionConstants.TraceIdPropertyName] = current.TraceId.ToHexString();
                 propsEvent.Properties[LogsTraceContextInjectionConstants.SpanIdPropertyName] = current.SpanId.ToHexString();
-                propsEvent.Properties[LogsTraceContextInjectionConstants.TraceFlagsPropertyName] = (current.Context.TraceFlags & ActivityTraceFlags.Recorded) != 0 ? "01" : "00";
+                propsEvent.Properties[LogsTraceContextInjectionConstants.TraceFlagsPropertyName] = current.Context.TraceFlags.W3CFormatActivityTraceFlags();
             }
         }
 
