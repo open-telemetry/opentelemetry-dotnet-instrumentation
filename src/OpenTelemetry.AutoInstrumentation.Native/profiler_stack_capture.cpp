@@ -7,8 +7,6 @@
 #include <stdexcept>
 #include <algorithm>
 #include <cassert>
-#include <atlbase.h>
-#include <atlcom.h>
 #include "logger.h"
 
 #ifndef DECLSPEC_IMPORT
