@@ -37,7 +37,7 @@ public static class ProducerProduceSyncIntegration
             return CallTargetState.GetDefault();
         }
 
-        var activity = KafkaInstrumentation.StartProducerActivity(topicPartition.DuckCast<ITopicPartition>(), message, instance.DuckCast<INamedClient>()!);
+        var activity = KafkaInstrumentation.StartProducerActivity(topicPartition.DuckCast<ITopicPartition>(), message, instance.DuckCast<INamedClient>()!, instance);
         if (activity is not null)
         {
             KafkaInstrumentation.InjectContext<TTopicPartition, TMessage>(message, activity);
