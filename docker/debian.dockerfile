@@ -1,4 +1,4 @@
-FROM mcr.microsoft.com/dotnet/sdk:9.0.315-bookworm-slim@sha256:ff12d25929cad887fb9c83e0be843f3cb56ef961fb90623686cd018a988c3675
+FROM mcr.microsoft.com/dotnet/sdk:9.0.315-bookworm-slim@sha256:9f6264a75f6a36d090fbed4d6f9280f6b7abc4e4cdefeea7fcb1b612b2d90af4
 # There is no official base image for .NET SDK 10+ on Debian, so install .NET10 via apt-get
 
 RUN wget https://packages.microsoft.com/config/debian/12/packages-microsoft-prod.deb -O packages-microsoft-prod.deb && \
