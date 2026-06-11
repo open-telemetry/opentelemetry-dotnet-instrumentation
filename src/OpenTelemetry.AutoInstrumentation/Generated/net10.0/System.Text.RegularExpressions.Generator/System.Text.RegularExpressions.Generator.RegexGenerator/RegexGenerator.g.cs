@@ -23,7 +23,7 @@ namespace OpenTelemetry.AutoInstrumentation.Configurations.FileBasedConfiguratio
         /// ○ Match '}'.<br/>
         /// </code>
         /// </remarks>
-        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Text.RegularExpressions.Generator", "8.0.14.26413")]
+        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Text.RegularExpressions.Generator", "10.0.14.23019")]
         private static partial global::System.Text.RegularExpressions.Regex GetEnvVarRegex() => global::System.Text.RegularExpressions.Generated.GetEnvVarRegex_0.Instance;
     }
 }
@@ -64,7 +64,7 @@ namespace OpenTelemetry.Instrumentation
         /// ○ Match if at the end of the string or if before an ending newline.<br/>
         /// </code>
         /// </remarks>
-        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Text.RegularExpressions.Generator", "8.0.14.26413")]
+        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Text.RegularExpressions.Generator", "10.0.14.23019")]
         private static partial global::System.Text.RegularExpressions.Regex DataSourceRegex() => global::System.Text.RegularExpressions.Generated.DataSourceRegex_1.Instance;
     }
 }
@@ -84,7 +84,7 @@ namespace OpenTelemetry.Instrumentation
         /// ○ Match '\\'.<br/>
         /// </code>
         /// </remarks>
-        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Text.RegularExpressions.Generator", "8.0.14.26413")]
+        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Text.RegularExpressions.Generator", "10.0.14.23019")]
         private static partial global::System.Text.RegularExpressions.Regex NamedPipeRegex() => global::System.Text.RegularExpressions.Generated.NamedPipeRegex_2.Instance;
     }
 }
@@ -102,7 +102,7 @@ namespace System.Text.RegularExpressions.Generated
     using System.Threading;
 
     /// <summary>Custom <see cref="Regex"/>-derived type for the GetEnvVarRegex method.</summary>
-    [GeneratedCodeAttribute("System.Text.RegularExpressions.Generator", "8.0.14.26413")]
+    [GeneratedCodeAttribute("System.Text.RegularExpressions.Generator", "10.0.14.23019")]
     file sealed class GetEnvVarRegex_0 : Regex
     {
         /// <summary>Cached, thread-safe singleton instance.</summary>
@@ -335,7 +335,7 @@ namespace System.Text.RegularExpressions.Generated
     }
     
     /// <summary>Custom <see cref="Regex"/>-derived type for the DataSourceRegex method.</summary>
-    [GeneratedCodeAttribute("System.Text.RegularExpressions.Generator", "8.0.14.26413")]
+    [GeneratedCodeAttribute("System.Text.RegularExpressions.Generator", "10.0.14.23019")]
     file sealed class DataSourceRegex_1 : Regex
     {
         /// <summary>Cached, thread-safe singleton instance.</summary>
@@ -989,7 +989,7 @@ namespace System.Text.RegularExpressions.Generated
     }
     
     /// <summary>Custom <see cref="Regex"/>-derived type for the NamedPipeRegex method.</summary>
-    [GeneratedCodeAttribute("System.Text.RegularExpressions.Generator", "8.0.14.26413")]
+    [GeneratedCodeAttribute("System.Text.RegularExpressions.Generator", "10.0.14.23019")]
     file sealed class NamedPipeRegex_2 : Regex
     {
         /// <summary>Cached, thread-safe singleton instance.</summary>
@@ -1150,7 +1150,7 @@ namespace System.Text.RegularExpressions.Generated
     }
     
     /// <summary>Helper methods used by generated <see cref="Regex"/>-derived implementations.</summary>
-    [GeneratedCodeAttribute("System.Text.RegularExpressions.Generator", "8.0.14.26413")]
+    [GeneratedCodeAttribute("System.Text.RegularExpressions.Generator", "10.0.14.23019")]
     file static class Utilities
     {
         /// <summary>Default timeout value set in <see cref="AppContext"/>, or <see cref="Regex.InfiniteMatchTimeout"/> if none was set.</summary>
