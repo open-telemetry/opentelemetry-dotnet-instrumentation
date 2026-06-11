@@ -29,8 +29,8 @@ public class AssemblyRedirectionTests(ITestOutputHelper output) : TestHelper("As
     // TODO currently different test jobs use different versions of .net runtime:
     //   - test-build-container (ubuntu-22.04, alpine, alpine-x64, linux-musl): DS file version 11.0.426.12010
     //   - test-build-managed (net11.0, windows-2025-vs2026): DS file version 11.0.726.21808
-    [InlineData("11.0.0-preview.4.26230.115", AssemblyName, "11.0.0.0", "11.0.26.23115", true)]
-    [InlineData("11.0.0-preview.4.26230.115", AssemblyName, "11.0.0.0", "11.0.26.23115", false)]
+    [InlineData("11.0.0-preview.5.26302.115", AssemblyName, "11.0.0.0", "11.0.26.23115", true)]
+    [InlineData("11.0.0-preview.5.26302.115", AssemblyName, "11.0.0.0", "11.0.26.23115", false)]
     // TODO NET11TODO adjust expectedAssemblyFileVersion to the final .NET 11 release version
     // Case 3: Higher version is not possible for DiagnosticSource on .NET 11, the instrumentation tool is already using the highest possible version
 #elif NETFRAMEWORK
