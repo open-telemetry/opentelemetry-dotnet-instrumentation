@@ -163,7 +163,7 @@ public static partial class LibraryVersion
                 string.Empty,
 #else
                 "8.3.0",
-                "8.5.9",
+                "8.5.10",
 #endif
             ];
             return theoryData;
