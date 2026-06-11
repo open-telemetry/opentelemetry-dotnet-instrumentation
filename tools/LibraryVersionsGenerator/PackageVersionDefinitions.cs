@@ -341,7 +341,7 @@ internal static class PackageVersionDefinitions
                 // net462: 10.0.7 (equal to instrumentation 10.0.7)
                 // net10.0: 10.0.7 (framework override to 10.0.0, validates build parameter was respected)
                 new("10.0.8", supportedTargetFrameworks: ["net462", "net11.0", "net10.0"], supportedExecutionFrameworks: ["net462", "net11.0", "net10.0"]),
-                new("11.0.0-preview.4.26230.115", supportedTargetFrameworks: ["net462", "net11.0", "net10.0"], supportedExecutionFrameworks: ["net462", "net11.0", "net10.0"]), // TODO NET11TODO adjust to the final .NET 11 release version
+                new("11.0.0-preview.5.26302.115", supportedTargetFrameworks: ["net462", "net11.0", "net10.0"], supportedExecutionFrameworks: ["net462", "net11.0", "net10.0"]), // TODO NET11TODO adjust to the final .NET 11 release version
             ]
         },
         new()
