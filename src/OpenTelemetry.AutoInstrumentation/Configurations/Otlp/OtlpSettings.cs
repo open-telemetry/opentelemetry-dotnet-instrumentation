@@ -1,6 +1,7 @@
 // Copyright The OpenTelemetry Authors
 // SPDX-License-Identifier: Apache-2.0
 
+using System.Net.Http;
 using OpenTelemetry.AutoInstrumentation.Configurations.FileBasedConfiguration;
 using OpenTelemetry.AutoInstrumentation.Logging;
 using OpenTelemetry.Exporter;
@@ -14,6 +15,7 @@ namespace OpenTelemetry.AutoInstrumentation.Configurations.Otlp;
 internal class OtlpSettings
 {
     private static readonly IOtelLogger Logger = OtelLogging.GetLogger();
+    private static readonly Func<HttpClient> DefaultHttpClientFactory = static () => new HttpClient();
 
     public OtlpSettings(OtlpSignalType signalType, Configuration configuration)
     {
@@ -95,6 +97,13 @@ internal class OtlpSettings
         if (TimeoutMilliseconds.HasValue)
         {
             options.TimeoutMilliseconds = TimeoutMilliseconds.Value;
+        }
+
+        if (Protocol == OtlpExportProtocol.HttpProtobuf)
+        {
+            // Avoid the SDK's DI-backed IHttpClientFactory fallback, which can resolve
+            // services after the application IServiceProvider has been disposed.
+            options.HttpClientFactory = DefaultHttpClientFactory;
         }
     }
 
