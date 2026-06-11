@@ -1,15 +1,27 @@
-FROM mcr.microsoft.com/dotnet/sdk:9.0.315-bookworm-slim@sha256:ff12d25929cad887fb9c83e0be843f3cb56ef961fb90623686cd018a988c3675
-# There is no official base image for .NET SDK 10+ on Debian, so install .NET10 via apt-get
+FROM debian:bookworm-slim@sha256:0104b334637a5f19aa9c983a91b54c89887c0984081f2068983107a6f6c21eeb
 
-RUN wget https://packages.microsoft.com/config/debian/12/packages-microsoft-prod.deb -O packages-microsoft-prod.deb && \
-    dpkg -i packages-microsoft-prod.deb && \
-    rm packages-microsoft-prod.deb && \
-    apt-get update && \
+RUN apt-get update && \
     apt-get install -y \
-        dotnet-sdk-10.0 \
-        dotnet-sdk-8.0 \
-        cmake \
+        bash \
+        ca-certificates \
         clang \
-        make
+        cmake \
+        curl \
+        git \
+        libgssapi-krb5-2 \
+        libicu72 \
+        libssl3 \
+        libstdc++6 \
+        make \
+        zlib1g
+
+COPY ./scripts/dotnet-install.sh ./dotnet-install.sh
+
+RUN chmod +x ./dotnet-install.sh \
+    && ./dotnet-install.sh -v 11.0.100-preview.5.26302.115 --install-dir /usr/share/dotnet --no-path \
+    && ./dotnet-install.sh -v 10.0.301 --install-dir /usr/share/dotnet --no-path \
+    && rm dotnet-install.sh
+
+ENV PATH="$PATH:/usr/share/dotnet"
 
 WORKDIR /project

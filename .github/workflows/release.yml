@@ -17,14 +17,14 @@ env:
   DOTNET_CLI_TELEMETRY_OPTOUT: 1
 
 jobs:
-  build-ubuntu1604-native:
-    uses: ./.github/workflows/build-ubuntu1604-native-container.yml
+  build-ubuntu1804-native:
+    uses: ./.github/workflows/build-ubuntu1804-native-container.yml
 
   build-windows:
     uses: ./.github/workflows/build-windows.yml
 
   build:
-    needs: [ build-windows, build-ubuntu1604-native ]
+    needs: [ build-windows, build-ubuntu1804-native ]
     uses: ./.github/workflows/build.yml
 
   build-nuget-packages:
@@ -65,7 +65,7 @@ jobs:
             "alpine-arm64 linux-musl-arm64"
             "ubuntu-22.04 linux-glibc-x64"
             "ubuntu-22.04-arm linux-glibc-arm64"
-            "windows-2022 windows"
+            "windows-2025-vs2026 windows"
             "macos-14 macos"
             "nuget-packages nuget-packages"
           )
@@ -80,7 +80,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          src="./installation-scripts-windows-2022"
+          src="./installation-scripts-windows-2025-vs2026"
           files=(
             "otel-dotnet-auto-install.sh"
             "OpenTelemetry.DotNet.Auto.psm1"
@@ -144,10 +144,10 @@ jobs:
         with:
           subject-path: ./bin-ubuntu-22.04-arm/**/*
 
-      - name: Attest bin-windows-2022
+      - name: Attest bin-windows-2025-vs2026
         uses: actions/attest@59d89421af93a897026c735860bf21b6eb4f7b26 # v4.1.0
         with:
-          subject-path: ./bin-windows-2022/**/*
+          subject-path: ./bin-windows-2025-vs2026/**/*
 
       - name: Attest bin-macos-14
         uses: actions/attest@59d89421af93a897026c735860bf21b6eb4f7b26 # v4.1.0

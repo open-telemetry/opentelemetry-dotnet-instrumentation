@@ -42,7 +42,7 @@ partial class Build
 
     private static readonly IEnumerable<TargetFramework> TargetFrameworks =
     [
-       TargetFramework.NET8_0,
+       TargetFramework.NET10_0,
        TargetFramework.NET462,
     ];
 
@@ -52,16 +52,14 @@ partial class Build
         TargetFramework.NET47,
         TargetFramework.NET471,
         TargetFramework.NET472,
-        TargetFramework.NET8_0,
-        TargetFramework.NET9_0,
-        TargetFramework.NET10_0
+        TargetFramework.NET10_0,
+        TargetFramework.NET11_0
     ];
 
     private static readonly IEnumerable<TargetFramework> TestFrameworks =
     [
         ..TargetFrameworks,
-        TargetFramework.NET9_0,
-        TargetFramework.NET10_0
+        TargetFramework.NET11_0
     ];
 
     Target CreateRequiredDirectories => _ => _
@@ -429,7 +427,7 @@ partial class Build
 
             // Generate .NET (Core) redirects
             // .NET Core version normalization:
-            // net8.0 -> 80, net9.0 -> 90, net10.0 -> 100
+            // net10.0 -> 100, net11.0 -> 110
             AssemblyRedirectionSourceGenerator.Generate(
                 TracerHomeDirectory / TargetFramework.OutputFolderNet,
                 SourceDirectory / Projects.AutoInstrumentationNative / $"assembly_redirection_{TargetFramework.OutputFolderNet}.h",

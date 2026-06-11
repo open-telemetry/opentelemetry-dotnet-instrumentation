@@ -23,11 +23,8 @@ internal class EndOfSupportRule : Rule
         DateTime eosDate;
         switch (netVersion)
         {
-            case 8:
-            case 9:
-                eosDate = new DateTime(2026, 11, 10);
-                break;
             case 10:
+            case 11:
                 eosDate = new DateTime(2028, 11, 14);
                 break;
             default:

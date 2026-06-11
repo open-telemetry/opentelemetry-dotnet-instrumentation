@@ -49,8 +49,8 @@ internal static class PackageVersionDefinitions
                 // new("7.0.20"), all versions contains references to vulnerable packages https://github.com/advisories/GHSA-hh2w-p6rv-4g7w
                 new("8.0.23"),
                 new("9.0.12"),
-                new("10.0.0", supportedTargetFrameworks: ["net10.0"], supportedExecutionFrameworks: ["net10.0"]),
-                new("*", supportedTargetFrameworks: ["net10.0"], supportedExecutionFrameworks: ["net10.0"])
+                new("10.0.0", supportedTargetFrameworks: ["net11.0", "net10.0"], supportedExecutionFrameworks: ["net11.0", "net10.0"]),
+                new("*", supportedTargetFrameworks: ["net11.0", "net10.0"], supportedExecutionFrameworks: ["net11.0", "net10.0"])
             ]
         },
         new()
@@ -139,7 +139,7 @@ internal static class PackageVersionDefinitions
             [
                 // new("1.1.4"), - high vulnerability https://github.com/dotnet/announcements/issues/292, test should be skipped
                 // new("2.1.7"), transitive vulnerabilities https://github.com/advisories/GHSA-rxg9-xrhp-64gj
-                // new("3.1.7", supportedTargetFrameworks: new[] { "net8.0" }, supportedExecutionFrameworks: new[] { "net8.0" }), // 3.1.* is not supported on .NET Framework. For details check: https://github.com/open-telemetry/opentelemetry-dotnet/issues/4243, transitive vulnerabilities https://github.com/advisories/GHSA-rxg9-xrhp-64gj
+                // new("3.1.7", supportedTargetFrameworks: new[] { "net10.0" }, supportedExecutionFrameworks: new[] { "net10.0" }), // 3.1.* is not supported on .NET Framework. For details check: https://github.com/open-telemetry/opentelemetry-dotnet/issues/4243, transitive vulnerabilities https://github.com/advisories/GHSA-rxg9-xrhp-64gj
                 // new("4.0.6"), transitive vulnerabilities https://github.com/advisories/GHSA-rxg9-xrhp-64gj
                 new("5.2.2"),
                 new("*")
@@ -164,12 +164,12 @@ internal static class PackageVersionDefinitions
             Versions =
             [
                 // new("2.7.0"), - high vulnerability https://github.com/advisories/GHSA-7j9m-j397-g4wx, < 2.19.0
-                new("2.19.0", supportedTargetFrameworks: ["net10.0", "net9.0", "net8.0", "net462"], supportedExecutionFrameworks: ["net10.0", "net9.0", "net8.0", "net462"]),
-                new("2.30.0", supportedTargetFrameworks: ["net10.0", "net9.0", "net8.0", "net462"], supportedExecutionFrameworks: ["net10.0", "net9.0", "net8.0", "net462"]),
-                new("3.0.0", supportedTargetFrameworks: ["net10.0", "net9.0", "net8.0", "net472"], supportedExecutionFrameworks: ["net10.0", "net9.0", "net8.0", "net462"]),
-                new("3.5.0", supportedTargetFrameworks: ["net10.0", "net9.0", "net8.0", "net472"], supportedExecutionFrameworks: ["net10.0", "net9.0", "net8.0", "net462"]),
-                new("3.7.0", supportedTargetFrameworks: ["net10.0", "net9.0", "net8.0", "net472"], supportedExecutionFrameworks: ["net10.0", "net9.0", "net8.0", "net462"]), // first version with native OTel support
-                new("*", supportedTargetFrameworks: ["net10.0", "net9.0", "net8.0", "net472"], supportedExecutionFrameworks: ["net10.0", "net9.0", "net8.0", "net462"])
+                new("2.19.0", supportedTargetFrameworks: ["net11.0", "net10.0", "net462"], supportedExecutionFrameworks: ["net11.0", "net10.0",  "net462"]),
+                new("2.30.0", supportedTargetFrameworks: ["net11.0", "net10.0", "net462"], supportedExecutionFrameworks: ["net11.0", "net10.0",  "net462"]),
+                new("3.0.0", supportedTargetFrameworks: ["net11.0", "net10.0", "net472"], supportedExecutionFrameworks: ["net11.0", "net10.0", "net462"]),
+                new("3.5.0", supportedTargetFrameworks: ["net11.0", "net10.0", "net472"], supportedExecutionFrameworks: ["net11.0", "net10.0", "net462"]),
+                new("3.7.0", supportedTargetFrameworks: ["net11.0", "net10.0", "net472"], supportedExecutionFrameworks: ["net11.0", "net10.0", "net462"]), // first version with native OTel support
+                new("*", supportedTargetFrameworks: ["net11.0", "net10.0", "net472"], supportedExecutionFrameworks: ["net11.0", "net10.0", "net462"])
             ]
         },
         new()
@@ -205,8 +205,8 @@ internal static class PackageVersionDefinitions
                 // new("6.0.0"), - high vulnerability https://github.com/advisories/GHSA-x9vc-6hfv-hg8c, <= 6.0.10, <= 7.0.6, and <= 8.0.2 test should be skipped
                 // new("6.0.11"), - transitive vulnerabilities https://github.com/advisories/GHSA-8g4q-xg66-9fp4 <= 6.0.12, <=7.0.8, <=8.0.4 test should be skipped
                 new("8.0.9"),
-                new("9.0.4", supportedTargetFrameworks: ["net10.0", "net9.0", "net8.0"], supportedExecutionFrameworks: ["net10.0", "net9.0", "net8.0"]),
-                new("*", supportedTargetFrameworks: ["net10.0", "net9.0", "net8.0"], supportedExecutionFrameworks: ["net10.0", "net9.0", "net8.0"])
+                new("9.0.4", supportedTargetFrameworks: ["net11.0", "net10.0"], supportedExecutionFrameworks: ["net11.0", "net10.0"]),
+                new("*", supportedTargetFrameworks: ["net11.0", "net10.0"], supportedExecutionFrameworks: ["net11.0", "net10.0"])
             ]
         },
         new()
@@ -218,11 +218,11 @@ internal static class PackageVersionDefinitions
             [
                 // new("8.0.0"), - transitive vulnerabilities https://github.com/advisories/GHSA-8g4q-xg66-9fp4, <=8.2.3
                 new("8.2.6"),
-                // new("9.1.0", supportedTargetFrameworks: ["net10.0", "net9.0", "net8.0"], supportedExecutionFrameworks: ["net10.0", "net9.0", "net8.0"]), // breaking change, new Meter name - transitive vulnerabilities <= 9.2.9
-                new("9.2.10", supportedTargetFrameworks: ["net10.0", "net9.0", "net8.0"], supportedExecutionFrameworks: ["net10.0", "net9.0", "net8.0"]),
+                // new("9.1.0", supportedTargetFrameworks: ["net10.0"], supportedExecutionFrameworks: ["net10.0"]), // breaking change, new Meter name - transitive vulnerabilities <= 9.2.9
+                new("9.2.10", supportedTargetFrameworks: ["net11.0", "net10.0"], supportedExecutionFrameworks: ["net11.0", "net10.0"]),
                 // new("10.0.0", supportedTargetFrameworks: ["net10.0"], supportedExecutionFrameworks: ["net10.0"]), // transitive vulnerabilities <= 10.1.2
-                new("10.1.3", supportedTargetFrameworks: ["net10.0"], supportedExecutionFrameworks: ["net10.0"]),
-                new("*", supportedTargetFrameworks: ["net10.0"], supportedExecutionFrameworks: ["net10.0"])
+                new("10.1.3", supportedTargetFrameworks: ["net11.0", "net10.0"], supportedExecutionFrameworks: ["net11.0", "net10.0"]),
+                new("*", supportedTargetFrameworks: ["net11.0", "net10.0"], supportedExecutionFrameworks: ["net11.0", "net10.0"])
             ]
         },
         new()
@@ -296,7 +296,7 @@ internal static class PackageVersionDefinitions
             [
                 new("2.6.122"),
                 new("2.12.14"),
-                new("*", supportedTargetFrameworks: ["net10.0", "net9.0", "net8.0"], supportedExecutionFrameworks: ["net10.0", "net9.0", "net8.0"])
+                new("*", supportedTargetFrameworks: ["net11.0", "net10.0"], supportedExecutionFrameworks: ["net11.0", "net10.0"])
             ]
         },
         new()
@@ -309,7 +309,7 @@ internal static class PackageVersionDefinitions
                 new("4.10.2"),
                 new("6.2.0"),
                 new("8.1.2"),
-                new("*", supportedTargetFrameworks: ["net10.0"], supportedExecutionFrameworks: ["net10.0"])
+                new("*", supportedTargetFrameworks: ["net11.0", "net10.0"], supportedExecutionFrameworks: ["net11.0", "net10.0"])
             ]
         },
         new()
@@ -334,20 +334,14 @@ internal static class PackageVersionDefinitions
             Versions =
             [
                 // Use case 1: Lower version than instrumentation tool ships
-                // net8.0: 8.0.0 (instrumentation redirects to 10.0.0)
-                // net9.0: 9.0.0 (instrumentation redirects to 10.0.0)
                 // net462: 6.0.0 (instrumentation redirects to 10.0.2)
-                new("8.0.0", supportedTargetFrameworks: ["net8.0"], supportedExecutionFrameworks: ["net8.0"]),
-                new("9.0.0", supportedTargetFrameworks: ["net9.0"], supportedExecutionFrameworks: ["net9.0"]),
                 new("6.0.0", supportedTargetFrameworks: ["net462"], supportedExecutionFrameworks: ["net462"]),
 
                 // Use case 2: Equal to instrumentation tool version
-                // net8.0: 10.0.0 (equal to instrumentation 10.0.0)
-                // net9.0: 10.0.0 (equal to instrumentation 10.0.0)
-                // net462: 10.0.8 (equal to instrumentation 10.0.8)
-                // net10.0: 10.0.8 (framework override to 10.0.0, validates build parameter was respected)
-                new("10.0.0", supportedTargetFrameworks: ["net8.0", "net9.0"], supportedExecutionFrameworks: ["net8.0", "net9.0"]),
-                new("10.0.8", supportedTargetFrameworks: ["net462", "net10.0"], supportedExecutionFrameworks: ["net462", "net10.0"]),
+                // net462: 10.0.7 (equal to instrumentation 10.0.7)
+                // net10.0: 10.0.7 (framework override to 10.0.0, validates build parameter was respected)
+                new("10.0.8", supportedTargetFrameworks: ["net462", "net11.0", "net10.0"], supportedExecutionFrameworks: ["net462", "net11.0", "net10.0"]),
+                new("11.0.0-preview.5.26302.115", supportedTargetFrameworks: ["net462", "net11.0", "net10.0"], supportedExecutionFrameworks: ["net462", "net11.0", "net10.0"]), // TODO NET11TODO adjust to the final .NET 11 release version
             ]
         },
         new()
@@ -357,8 +351,8 @@ internal static class PackageVersionDefinitions
             TestApplicationName = "TestApplication.Wcf.Core",
             Versions =
             [
-                new("1.8.0", supportedTargetFrameworks: ["net10.0", "net9.0", "net8.0"], supportedExecutionFrameworks: ["net10.0", "net9.0", "net8.0"]),
-                new("*", supportedTargetFrameworks: ["net10.0", "net9.0", "net8.0"], supportedExecutionFrameworks: ["net10.0", "net9.0", "net8.0"])
+                new("1.8.0", supportedTargetFrameworks: ["net11.0", "net10.0"], supportedExecutionFrameworks: ["net11.0", "net10.0"]),
+                new("*", supportedTargetFrameworks: ["net11.0", "net10.0"], supportedExecutionFrameworks: ["net11.0", "net10.0"])
             ]
         }
     ];

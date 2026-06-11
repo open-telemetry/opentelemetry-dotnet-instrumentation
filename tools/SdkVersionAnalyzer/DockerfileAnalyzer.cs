@@ -18,8 +18,11 @@ internal static partial class DockerfileAnalyzer
         FileAnalyzer.ModifyMultiple(GetDockerfiles(root), ModifySdkVersions, requestedDotnetSdkVersion);
     }
 
-    [GeneratedRegex(@"-v (\d\.\d\.\d{3})\s", RegexOptions.IgnoreCase, "en-US")]
+    [GeneratedRegex(@"(?:^|-v\s+)(\d+\.\d+\.\d{3}(?:-(?:preview|rc)\.\d+(?:\.\d+)*)?)", RegexOptions.IgnoreCase, "en-US")]
     private static partial Regex VersionRegex();
+
+    [GeneratedRegex(@"^(\d+\.\d+\.\d{3}-(?:preview|rc)\.\d+)(?:\.\d+)+$", RegexOptions.IgnoreCase, "en-US")]
+    private static partial Regex DockerImageVersionRegex();
 
     private static string ModifySdkVersions(string content, DotnetSdkVersion requestedDotnetSdkVersion)
     {
@@ -44,9 +47,8 @@ internal static partial class DockerfileAnalyzer
 
     private static bool VerifySdkVersions(string content, DotnetSdkVersion expectedDotnetSdkVersion)
     {
-        string? net8SdkVersion = null;
-        string? net9SdkVersion = null;
         string? net10SdkVersion = null;
+        string? net11SdkVersion = null;
 
         var dockerfile = Dockerfile.Parse(content);
         var instruction = GetDotnetInstallingInstruction(dockerfile);
@@ -56,9 +58,8 @@ internal static partial class DockerfileAnalyzer
         // && echo "SHA256: $(sha256sum dotnet-install.sh)" \
         //     && echo "de4957e41252191427a8ba0866f640b9f19c98fad62305919de41bd332e9c820  dotnet-install.sh" | sha256sum -c \
         //     && chmod +x ./dotnet-install.sh \
-        //     && ./dotnet-install.sh -v 8.0.404 --install-dir /usr/share/dotnet --no-path \
-        //     && ./dotnet-install.sh -v 9.0.100 --install-dir /usr/share/dotnet --no-path \
         //     && ./dotnet-install.sh -v 10.0.100 --install-dir /usr/share/dotnet --no-path \
+        //     && ./dotnet-install.sh -v 11.0.100 --install-dir /usr/share/dotnet --no-path \
         //     && rm dotnet-install.sh
 
         if (instruction is not null)
@@ -67,23 +68,19 @@ internal static partial class DockerfileAnalyzer
             foreach (Match match in matchCollection)
             {
                 var extractedSdkVersion = match.Groups[1].Value;
-                if (VersionComparer.IsNet8Version(extractedSdkVersion))
-                {
-                    net8SdkVersion = extractedSdkVersion;
-                }
-                else if (VersionComparer.IsNet9Version(extractedSdkVersion))
-                {
-                    net9SdkVersion = extractedSdkVersion;
-                }
-                else if (VersionComparer.IsNet10Version(extractedSdkVersion))
+                if (VersionComparer.IsNet10Version(extractedSdkVersion))
                 {
                     net10SdkVersion = extractedSdkVersion;
+                }
+                else if (VersionComparer.IsNet11Version(extractedSdkVersion))
+                {
+                    net11SdkVersion = extractedSdkVersion;
                 }
             }
         }
 
-        // Extract NET8 SDK version from the base image tag
-        // e.g. FROM mcr.microsoft.com/dotnet/sdk:8.0.403-alpine3.20
+        // Extract NET11 SDK version from the base image tag
+        // e.g. mcr.microsoft.com/dotnet/sdk:11.0.100-preview.4-alpine3.23@sha256:ac4f9f39779acc7af1744324ec24bd50b5ff88fd242325c488df09c7c4579ccf
 
         var fromInstruction = GetFromInstruction(dockerfile);
 
@@ -93,32 +90,39 @@ internal static partial class DockerfileAnalyzer
         {
             var (sdkVersion, _) = GetSdkVersionAndSuffix(imageName);
 
-            if (VersionComparer.IsNet9Version(sdkVersion))
-            {
-                net9SdkVersion = sdkVersion;
-            }
-            else if (VersionComparer.IsNet10Version(sdkVersion))
+            if (VersionComparer.IsNet10Version(sdkVersion))
             {
                 net10SdkVersion = sdkVersion;
             }
+            else if (VersionComparer.IsNet11Version(sdkVersion))
+            {
+                net11SdkVersion = sdkVersion;
+            }
         }
 
-        return VersionComparer.CompareVersions(expectedDotnetSdkVersion, net8SdkVersion, net9SdkVersion, net10SdkVersion);
+        return VersionComparer.CompareVersions(expectedDotnetSdkVersion, net10SdkVersion, net11SdkVersion, allowPrereleasePrefix: true);
     }
 
     private static string GetModifiedImageName(DotnetSdkVersion requestedDotnetSdkVersion, ImageName imageName)
     {
         var (sdkVersion, suffix) = GetSdkVersionAndSuffix(imageName);
-        var modifiedTag = $"{GetNewVersion(sdkVersion, requestedDotnetSdkVersion)}-{suffix}";
+        var newVersion = GetDockerImageVersion(GetNewVersion(sdkVersion, requestedDotnetSdkVersion));
+        var modifiedTag = string.IsNullOrEmpty(suffix) ? newVersion : $"{newVersion}-{suffix}";
 
         return ImageName.FormatImageName(imageName.Repository, imageName.Registry, modifiedTag, null);
     }
 
     private static (string SdkVersion, string Suffix) GetSdkVersionAndSuffix(ImageName imageName)
     {
-        // Extract sdk version and suffix from a tag like '8.0.403-alpine3.20'
-        var parts = imageName.Tag!.Split('-', 2);
-        return (parts[0], parts[1]);
+        // Extract sdk version and suffix from tags like '11.0.100-preview.4-alpine3.23' or '11.0.100-alpine3.23'.
+        var match = VersionRegex().Match(imageName.Tag!);
+        if (!match.Success)
+        {
+            return (imageName.Tag!, string.Empty);
+        }
+
+        var suffix = imageName.Tag![match.Length..].TrimStart('-');
+        return (match.Groups[1].Value, suffix);
     }
 
     private static bool IsDotnetSdkImage(ImageName imageName)
@@ -136,28 +140,34 @@ internal static partial class DockerfileAnalyzer
 
     private static Command GetModifiedInstallCommand(Command command, DotnetSdkVersion requestedDotnetSdkVersion)
     {
-        var newCommandText = VersionRegex().Replace(command.ToString(), match => $"-v {GetNewVersion(match.Groups[1].Value, requestedDotnetSdkVersion)} ");
+        var newCommandText = VersionRegex().Replace(
+            command.ToString(),
+            match => match.Value.Replace(
+                match.Groups[1].Value,
+                GetNewVersion(match.Groups[1].Value, requestedDotnetSdkVersion),
+                StringComparison.Ordinal));
         return command.CommandType == CommandType.ShellForm ? ShellFormCommand.Parse(newCommandText) : ExecFormCommand.Parse(newCommandText);
     }
 
     private static string GetNewVersion(string oldVersion, DotnetSdkVersion requestedDotnetSdkVersion)
     {
-        if (VersionComparer.IsNet8Version(oldVersion))
-        {
-            return requestedDotnetSdkVersion.Net8SdkVersion!;
-        }
-
-        if (VersionComparer.IsNet9Version(oldVersion))
-        {
-            return requestedDotnetSdkVersion.Net9SdkVersion!;
-        }
-
         if (VersionComparer.IsNet10Version(oldVersion))
         {
             return requestedDotnetSdkVersion.Net10SdkVersion!;
         }
 
+        if (VersionComparer.IsNet11Version(oldVersion))
+        {
+            return requestedDotnetSdkVersion.Net11SdkVersion!;
+        }
+
         return oldVersion;
+    }
+
+    private static string GetDockerImageVersion(string version)
+    {
+        var match = DockerImageVersionRegex().Match(version);
+        return match.Success ? match.Groups[1].Value : version;
     }
 
     private static string[] GetDockerfiles(string root)
