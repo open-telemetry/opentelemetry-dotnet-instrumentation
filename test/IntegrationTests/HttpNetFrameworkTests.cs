@@ -3,7 +3,6 @@
 
 #if NETFRAMEWORK
 using IntegrationTests.Helpers;
-using Xunit.Abstractions;
 
 namespace IntegrationTests;
 
@@ -34,7 +33,7 @@ public class HttpNetFrameworkTests : TestHelper
     {
         using var collector = new MockSpansCollector(Output);
         SetFileBasedExporter(collector);
-        EnableFileBasedConfigWithDefaultPath();
+        EnableFileBasedConfig();
 
         collector.Expect("OpenTelemetry.Instrumentation.Http.HttpWebRequest");
 

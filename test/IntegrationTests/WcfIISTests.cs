@@ -7,7 +7,6 @@ using DotNet.Testcontainers.Containers;
 using Google.Protobuf;
 using IntegrationTests.Helpers;
 using OpenTelemetry.Proto.Trace.V1;
-using Xunit.Abstractions;
 
 namespace IntegrationTests;
 
@@ -59,7 +58,7 @@ public class WcfIISTests : TestHelper
 
         RunTestApplication(new TestSettings
         {
-            Arguments = $"{netTcpPort} {httpPort}"
+            Arguments = $"--iis --tcpPort {netTcpPort} --httpPort {httpPort}"
         });
 
         collector.AssertExpectations();

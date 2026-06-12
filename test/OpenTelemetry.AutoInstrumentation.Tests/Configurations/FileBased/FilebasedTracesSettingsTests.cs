@@ -6,7 +6,6 @@ using System.Reflection;
 using OpenTelemetry.AutoInstrumentation.Configurations;
 using OpenTelemetry.AutoInstrumentation.Configurations.FileBasedConfiguration;
 using OpenTelemetry.Trace;
-using Xunit;
 
 namespace OpenTelemetry.AutoInstrumentation.Tests.Configurations.FileBased;
 
@@ -14,8 +13,8 @@ public class FilebasedTracesSettingsTests
 {
     public static TheoryData<SkipConfigurationTestCase> LoadMethod_SkipWrongExporterConfiguration_Data()
     {
-        return
-        [
+        return new TheoryData<SkipConfigurationTestCase>
+        {
             new(new YamlConfiguration
             {
                 TracerProvider = new TracerProviderConfiguration
@@ -224,7 +223,7 @@ public class FilebasedTracesSettingsTests
                     ]
                 }
             }),
-        ];
+        };
     }
 
     [Fact]

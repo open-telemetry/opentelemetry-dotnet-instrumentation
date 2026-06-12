@@ -11,7 +11,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Include="..\OpenTelemetry.AutoInstrumentation\Constants.cs" Link="Constants.cs" />
     <Compile Include="..\OpenTelemetry.AutoInstrumentation\Logging\InternalLogger.cs">
       <Link>Logging\InternalLogger.cs</Link>
     </Compile>
@@ -69,6 +68,23 @@
     <Compile Include="..\OpenTelemetry.AutoInstrumentation\Configurations\ConfigurationKeys.FailFast.cs">
       <Link>Configurations\ConfigurationKeys.FailFast.cs</Link>
     </Compile>
+    <Compile Include="..\OpenTelemetry.AutoInstrumentation\Configurations\ConfigurationKeys.TracerHome.cs"
+             Link="Configurations\ConfigurationKeys.TracerHome.cs"/>
+    <Compile Include="..\OpenTelemetry.AutoInstrumentation\Configurations\ConfigurationKeys.RedirectEnabled.cs"
+             Link="Configurations\ConfigurationKeys.RedirectEnabled.cs"/>
+    <Compile Include="..\OpenTelemetry.AutoInstrumentation\Constants.cs"
+             Link="Constants.cs" />
+    <Compile Include="..\OpenTelemetry.AutoInstrumentation\Util\TrustedPlatformAssembliesHelper.Net.cs"
+             Link="Util\TrustedPlatformAssembliesHelper.Net.cs" />
+    <Compile Include="..\OpenTelemetry.AutoInstrumentation\Util\ManagedProfilerLocationHelper.cs"
+             Link="Util\ManagedProfilerLocationHelper.cs" />
+    <Compile Include="..\OpenTelemetry.AutoInstrumentation\Util\ManagedProfilerLocationHelper.Net.cs"
+             Link="Util\ManagedProfilerLocationHelper.Net.cs"
+             DependentUpon="ManagedProfilerLocationHelper.cs" />
+    <Compile Include="..\OpenTelemetry.AutoInstrumentation\Util\DeploymentDetector.Net.cs"
+             Link="Util\DeploymentDetector.Net.cs" />
+    <Compile Include="..\OpenTelemetry.AutoInstrumentation\Util\AssemblyUtils.Net.cs"
+             Link="Util\AssemblyUtils.Net.cs" />
   </ItemGroup>
 
 </Project>

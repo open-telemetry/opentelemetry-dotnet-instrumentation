@@ -38,9 +38,24 @@ bool IsFailFastEnabled()
     CheckIfTrue(GetEnvironmentValue(environment::fail_fast_enabled));
 }
 
-bool IsNetFxAssemblyRedirectionEnabled()
+std::optional<bool> IsAssemblyRedirectionEnabled()
 {
-    ToBooleanWithDefault(GetEnvironmentValue(environment::netfx_assembly_redirection_enabled), true);
+    // 1. Get the primary assembly redirection variable
+    auto assemblyRedirection = []() -> std::optional<bool>
+    { ToBooleanWithDefault(GetEnvironmentValue(environment::assembly_redirection_enabled), std::nullopt); }();
+
+#ifdef _WIN32
+    // 2. For .NET Framework, fallback to legacy variable if primary is not set
+    if (!assemblyRedirection)
+    {
+        assemblyRedirection = []() -> std::optional<bool> {
+            ToBooleanWithDefault(GetEnvironmentValue(environment::assembly_redirection_enabled_netfx_legacy),
+                                 std::nullopt);
+        }();
+    }
+#endif
+
+    return assemblyRedirection;
 }
 
 } // namespace trace

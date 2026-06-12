@@ -3,7 +3,6 @@
 
 using IntegrationTests.Helpers;
 using OpenTelemetry.AutoInstrumentation.Configurations;
-using Xunit.Abstractions;
 
 namespace IntegrationTests;
 
@@ -51,7 +50,7 @@ public class SqlClientSystemTests : TestHelper
 
         RunTestApplication(new()
         {
-            Arguments = $"{_sqlServerFixture.Password} {_sqlServerFixture.Port}",
+            Arguments = $"--password {_sqlServerFixture.Password} --port {_sqlServerFixture.Port}",
             PackageVersion = packageVersion
         });
 
@@ -73,7 +72,7 @@ public class SqlClientSystemTests : TestHelper
         if (isFileBased)
         {
             SetFileBasedExporter(collector);
-            EnableFileBasedConfigWithDefaultPath(packageVersion);
+            EnableFileBasedConfig(packageVersion: packageVersion);
         }
         else
         {
@@ -91,7 +90,7 @@ public class SqlClientSystemTests : TestHelper
 
         RunTestApplication(new()
         {
-            Arguments = $"{_sqlServerFixture.Password} {_sqlServerFixture.Port}",
+            Arguments = $"--password {_sqlServerFixture.Password} --port {_sqlServerFixture.Port}",
             PackageVersion = packageVersion
         });
 
@@ -119,7 +118,7 @@ public class SqlClientSystemTests : TestHelper
 
         using var process = StartTestApplication(new TestSettings
         {
-            Arguments = $"{_sqlServerFixture.Password} {_sqlServerFixture.Port}",
+            Arguments = $"--password {_sqlServerFixture.Password} --port {_sqlServerFixture.Port}",
             PackageVersion = packageVersion
         });
 

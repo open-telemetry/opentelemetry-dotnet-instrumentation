@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 using OpenTelemetry.AutoInstrumentation.Configurations.FileBasedConfiguration;
-using Xunit;
+using OpenTelemetry.AutoInstrumentation.Tests.Util;
 using YamlParser = OpenTelemetry.AutoInstrumentation.Configurations.FileBasedConfiguration.Parser.Parser;
 
 namespace OpenTelemetry.AutoInstrumentation.Tests.Configurations.FileBased.Parser;
@@ -34,7 +34,10 @@ public class ParserPropagatorTests
     [Fact]
     public void Parse_EnvVarYaml_ShouldPopulateModelCompletely()
     {
-        Environment.SetEnvironmentVariable("OTEL_PROPAGATORS", "tracecontext,baggage,b3,b3multi");
+        using var envScope = new EnvironmentScope(new Dictionary<string, string?>()
+        {
+            { "OTEL_PROPAGATORS", "tracecontext,baggage,b3,b3multi" },
+        });
 
         var config = YamlParser.ParseYaml<YamlConfiguration>("Configurations/FileBased/Files/TestPropagatorFileEnvVars.yaml");
 

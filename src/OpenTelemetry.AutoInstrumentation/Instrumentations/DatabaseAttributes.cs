@@ -5,8 +5,6 @@ namespace OpenTelemetry.AutoInstrumentation.Instrumentations;
 
 internal static class DatabaseAttributes
 {
-    public const string SchemaUrl = "https://opentelemetry.io/schemas/1.39.0";
-
     internal static class Keys
     {
         public const string DbSystemName = "db.system.name";
@@ -14,6 +12,8 @@ internal static class DatabaseAttributes
         public const string DbNamespace = "db.namespace";
         public const string DbOperationName = "db.operation.name";
         public const string DbOperationBatchSize = "db.operation.batch.size";
+        public const string DbQuerySummary = "db.query.summary";
+        public const string DbQueryText = "db.query.text";
         public const string DbResponseStatusCode = "db.response.status_code";
     }
 

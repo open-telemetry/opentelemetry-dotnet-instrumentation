@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: Apache-2.0
 
 using IntegrationTests.Helpers;
-using Xunit.Abstractions;
 
 namespace IntegrationTests;
 
@@ -39,7 +38,7 @@ public class AzureTests : TestHelper
 
         RunTestApplication(new()
         {
-            Arguments = $"{_azure.Port}",
+            Arguments = $"--port {_azure.Port}",
             PackageVersion = packageVersion
         });
 

@@ -3,7 +3,6 @@
 
 using OpenTelemetry.AutoInstrumentation.Instrumentations.NoCode;
 using OpenTelemetry.AutoInstrumentation.Instrumentations.NoCode.Cel;
-using Xunit;
 
 namespace OpenTelemetry.AutoInstrumentation.Tests.Instrumentations.NoCode.Cel;
 
@@ -86,17 +85,6 @@ public class CelErrorHandlingTests
         var result = expr!.Evaluate(context);
 
         Assert.Equal(true, result);
-    }
-
-    [Fact]
-    public void Evaluate_SubstringOutOfRange_ReturnsEmpty()
-    {
-        var expr = CelExpression.Parse("substring(\"hello\", 100)");
-        var context = CreateContext();
-
-        var result = expr!.Evaluate(context);
-
-        Assert.Equal(string.Empty, result);
     }
 
     [Fact]

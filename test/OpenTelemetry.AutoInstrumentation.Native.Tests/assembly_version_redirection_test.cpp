@@ -1,4 +1,3 @@
-#ifdef _WIN32
 #include "pch.h"
 
 #include "../../src/OpenTelemetry.AutoInstrumentation.Native/clr_helpers.h"
@@ -25,4 +24,3 @@ TEST(AssemblyVersionRedirectionTest, CompareToAssemblyVersion_Higher)
     ASSERT_TRUE(AssemblyVersionRedirection(1, 2, 4, 4).CompareToAssemblyVersion(ASSEMBLYMETADATA{1, 2, 3, 4}) > 0);
     ASSERT_TRUE(AssemblyVersionRedirection(1, 2, 3, 5).CompareToAssemblyVersion(ASSEMBLYMETADATA{1, 2, 3, 4}) > 0);
 }
-#endif

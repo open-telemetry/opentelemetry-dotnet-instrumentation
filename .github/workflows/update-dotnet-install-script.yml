@@ -5,17 +5,23 @@ on:
     - cron:  '0 4 1 * *'
   workflow_dispatch:
 
+concurrency:
+  group: ${{ github.workflow }}
+  cancel-in-progress: false
+
 permissions: {}
 
 jobs:
   update-dotnet-install-script:
-    runs-on: ubuntu-latest
+    name: Update .NET installation script
+    runs-on: ubuntu-24.04
     if: github.event.repository.fork == false
 
     env:
       DOTNET_INSTALL_SCRIPT_URL: 'https://dot.net/v1/dotnet-install.sh'
       DOTNET_INSTALL_SCRIPT_GPG_KEY_URL: 'https://dot.net/v1/dotnet-install.asc'
       DOTNET_INSTALL_SCRIPT_SIGNATURE_URL: 'https://dot.net/v1/dotnet-install.sig'
+      DOTNET_INSTALL_SCRIPT_GPG_KEY_FINGERPRINT: '2B930AB1228D11D5D7F6B6ACB9CF1A51FC7D3ACF'
       GIT_COMMIT_USER_EMAIL: '197425009+otelbot[bot]@users.noreply.github.com'
       GIT_COMMIT_USER_NAME: 'otelbot[bot]'
       UPDATE_BRANCH_NAME: 'update-dotnet-install-script'
@@ -24,17 +30,18 @@ jobs:
 
     - name: Generate GitHub application token
       id: otelbot-token
-      uses: actions/create-github-app-token@29824e69f54612133e76f7eaac726eef6c875baf # v2.2.1
+      uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
       with:
-        app-id: ${{ vars.OTELBOT_DOTNET_INSTRUMENTATION_APP_ID }}
+        client-id: ${{ vars.OTELBOT_DOTNET_INSTRUMENTATION_APP_ID }}
         permission-contents: write
         permission-pull-requests: write
         private-key: ${{ secrets.OTELBOT_DOTNET_INSTRUMENTATION_PRIVATE_KEY }}
 
     - name: Checkout code
-      uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
       with:
         filter: 'tree:0'
+        persist-credentials: true # zizmor: ignore[artipacked] Needed to push commits
         show-progress: false
         token: ${{ steps.otelbot-token.outputs.token }}
 
@@ -66,6 +73,16 @@ jobs:
         Invoke-WebRequest -Uri ${env:DOTNET_INSTALL_SCRIPT_GPG_KEY_URL} -MaximumRetryCount 5 -OutFile $KeyFileName | Out-Null
         Invoke-WebRequest -Uri ${env:DOTNET_INSTALL_SCRIPT_SIGNATURE_URL} -MaximumRetryCount 5 -OutFile $SignatureFileName | Out-Null
 
+        $ExpectedKeyFingerprint = ${env:DOTNET_INSTALL_SCRIPT_GPG_KEY_FINGERPRINT}.ToUpperInvariant()
+        $KeyFingerprints = @(gpg --show-keys --with-colons $KeyFileName |
+          Where-Object { $_.StartsWith("fpr:") } |
+          ForEach-Object { ($_ -split ":")[9].ToUpperInvariant() } |
+          Select-Object -Unique)
+
+        if ($KeyFingerprints.Count -ne 1 -or $KeyFingerprints[0] -ne $ExpectedKeyFingerprint) {
+          throw "Unexpected GPG key fingerprint in ${KeyFileName}. Expected ${ExpectedKeyFingerprint}, found $($KeyFingerprints -join ', ')."
+        }
+
         gpg --import $KeyFileName || throw "Failed to import GPG key."
         gpg --verify $SignatureFileName $InstallScriptFileName || throw "Failed to verify GPG signature."
 
@@ -92,7 +109,7 @@ jobs:
 
     - name: Create pull request
       if: steps.update-script.outputs.updated-script == 'true'
-      uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
+      uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
       env:
         DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
       with:

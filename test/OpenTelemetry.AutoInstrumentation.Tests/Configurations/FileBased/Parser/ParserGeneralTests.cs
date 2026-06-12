@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 using OpenTelemetry.AutoInstrumentation.Configurations.FileBasedConfiguration;
-using Xunit;
+using OpenTelemetry.AutoInstrumentation.Tests.Util;
 using YamlParser = OpenTelemetry.AutoInstrumentation.Configurations.FileBasedConfiguration.Parser.Parser;
 
 namespace OpenTelemetry.AutoInstrumentation.Tests.Configurations.FileBased.Parser;
@@ -26,9 +26,12 @@ public class ParserGeneralTests
     [Fact]
     public void Parse_EnvVarYaml_ShouldPopulateModelCompletely()
     {
-        Environment.SetEnvironmentVariable("OTEL_SDK_DISABLED", "true");
-        Environment.SetEnvironmentVariable("OTEL_DOTNET_AUTO_FAIL_FAST_ENABLED", "true");
-        Environment.SetEnvironmentVariable("OTEL_DOTNET_AUTO_FLUSH_ON_UNHANDLEDEXCEPTION", "false");
+        using var envScope = new EnvironmentScope(new Dictionary<string, string?>()
+        {
+            { "OTEL_SDK_DISABLED", "true" },
+            { "OTEL_DOTNET_AUTO_FAIL_FAST_ENABLED", "true" },
+            { "OTEL_DOTNET_AUTO_FLUSH_ON_UNHANDLEDEXCEPTION", "false" },
+        });
 
         var config = YamlParser.ParseYaml<YamlConfiguration>("Configurations/FileBased/Files/TestGeneralFileEnvVars.yaml");
 

@@ -19,10 +19,17 @@ internal static class CelHelpers
         {
             bool b => b,
             string s => !string.IsNullOrEmpty(s),
+            byte by => by != 0,
+            sbyte sb => sb != 0,
+            short sh => sh != 0,
+            ushort us => us != 0,
             int i => i != 0,
+            uint ui => ui != 0,
             long l => l != 0,
-            double d => Math.Abs(d) > double.Epsilon,
+            ulong ul => ul != 0,
             float f => Math.Abs(f) > float.Epsilon,
+            double d => Math.Abs(d) > double.Epsilon,
+            decimal dm => dm != 0m,
             null => false,
             _ => true
         };

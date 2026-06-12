@@ -1,6 +1,4 @@
-using System;
-using System.Collections.Generic;
-using System.IO;
+using Extensions;
 using Nuke.Common;
 using Nuke.Common.IO;
 using Nuke.Common.ProjectModel;
@@ -18,8 +16,9 @@ partial class Build
 {
     Target CompileNativeSrcWindows => _ => _
         .Unlisted()
+        .After(SupportVs2026IfAvailable)
         .After(CompileManagedSrc)
-        .After(GenerateNetFxAssemblyRedirectionSource)
+        .After(GenerateAssemblyRedirectionSource)
         .OnlyWhenStatic(() => IsWin)
         .Executes(() =>
         {
@@ -29,7 +28,6 @@ partial class Build
                 ? new[] { MSBuildTargetPlatform.x64, MSBuildTargetPlatform.x86 }
                 : new[] { MSBuildTargetPlatform.x86 };
 
-            SupportVs2026IfAvailable();
             foreach (var project in Solution.GetNativeSrcProjects())
             {
                 PerformLegacyRestoreIfNeeded(project);
@@ -49,32 +47,36 @@ partial class Build
                     .CombineWith(platforms, (m, platform) => m
                         .SetTargetPlatform(platform)));
             }
+        });
 
-            static void SupportVs2026IfAvailable()
+    Target SupportVs2026IfAvailable => _ => _
+        .Unlisted()
+        .OnlyWhenStatic(() => IsWin)
+        .Executes(() =>
+        {
+            // Typical installation folder: C:\Program Files\Microsoft Visual Studio\18\Enterprise\MSBuild\Current\Bin\amd64
+            // Waiting for official support in Nuke package https://github.com/nuke-build/nuke/pull/1583
+
+            string[] editions = ["Enterprise", "Professional", "Community", "Preview"];
+
+            foreach (var edition in editions)
             {
-                // Typical installation folder: C:\Program Files\Microsoft Visual Studio\18\Enterprise\MSBuild\Current\Bin\amd64
-                // Waiting for official support in Nuke package https://github.com/nuke-build/nuke/pull/1583
+                var msBuildPath = Path.Combine(SpecialFolder(SpecialFolders.ProgramFiles).NotNull(),
+                    $@"Microsoft Visual Studio\18\{edition}\MSBuild\Current\Bin\amd64\MSBuild.exe");
 
-                string[] editions = ["Enterprise", "Professional", "Community", "Preview"];
-
-                foreach (var edition in editions)
+                if (File.Exists(msBuildPath))
                 {
-                    var msBuildPath = Path.Combine(SpecialFolder(SpecialFolders.ProgramFiles).NotNull(),
-                        $@"Microsoft Visual Studio\18\{edition}\MSBuild\Current\Bin\amd64\MSBuild.exe");
-
-                    if (File.Exists(msBuildPath))
-                    {
-                        MSBuildPath = msBuildPath;
-                        return;
-                    }
+                    MSBuildPath = msBuildPath;
+                    return;
                 }
             }
         });
 
     Target CompileNativeDependenciesForManagedTestsWindows => _ => _
         .Unlisted()
+        .After(SupportVs2026IfAvailable)
         .After(CompileManagedSrc)
-        .After(GenerateNetFxAssemblyRedirectionSource)
+        .After(GenerateAssemblyRedirectionSource)
         .OnlyWhenStatic(() => IsWin)
         .Executes(() =>
         {
@@ -91,6 +93,7 @@ partial class Build
 
     Target CompileNativeTestsWindows => _ => _
         .Unlisted()
+        .After(SupportVs2026IfAvailable)
         .After(CompileNativeSrc)
         .OnlyWhenStatic(() => IsWin)
         .Executes(() =>
@@ -228,31 +231,6 @@ partial class Build
         }
     }
 
-    Target GenerateNetFxTransientDependencies => _ => _
-        .Unlisted()
-        .After(Restore)
-        .OnlyWhenStatic(() => IsWin)
-        .Executes(() =>
-        {
-            // The target project needs to have its NuGet packages restored prior to running the tool.
-            var targetProject = Solution.GetProjectByName(Projects.AutoInstrumentationNetFxAssemblies);
-            DotNetRestore(s => s.SetProjectFile(targetProject));
-
-            TransientDependenciesGenerator.Run(targetProject);
-        });
-
-    Target GenerateNetFxAssemblyRedirectionSource => _ => _
-        .Unlisted()
-        .After(PublishManagedProfiler)
-        .OnlyWhenStatic(() => IsWin)
-        .Executes(() =>
-        {
-            var netFxAssembliesFolder = TracerHomeDirectory / MapToFolderOutput(TargetFramework.NET462);
-            var generatedSourceFile = SourceDirectory / Projects.AutoInstrumentationNative / "netfx_assembly_redirection.h";
-
-            AssemblyRedirectionSourceGenerator.Generate(netFxAssembliesFolder, generatedSourceFile);
-        });
-
     Target InstallNetFxAssembliesGAC => _ => _
         .Unlisted()
         .After(BuildTracer)
@@ -279,8 +257,9 @@ partial class Build
         }
 
         // We assume that dev machine running test has .Net Framework not older than TargetFrameworksNetFx.Last()
-        var netFxCommonAssembliesFolder = TracerHomeDirectory / MapToFolderOutput(TargetFrameworksForNetFxPacking.Last());
-        var netFxAssembliesFolder = TracerHomeDirectory / MapToFolderOutputNetFx(TargetFrameworksForNetFxPacking.Last());
+        var lastFramework = TargetFrameworksForPublish.ExceptNet().Last();
+        var netFxCommonAssembliesFolder = TracerHomeDirectory / lastFramework.OutputFolder;
+        var netFxAssembliesFolder = TracerHomeDirectory / lastFramework.OutputFolder / lastFramework;
         var installTool = Solution.GetProjectByName(Projects.Tools.GacInstallTool);
 
         DotNetRun(s => s

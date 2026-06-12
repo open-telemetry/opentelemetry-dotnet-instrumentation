@@ -373,7 +373,7 @@ HRESULT CallTargetTokens::ModifyLocalSig(ILRewriter*    reWriter,
         // should be the callTargetState)
         unsigned   temp = 0;
         const auto len  = CorSigCompressToken(callTargetStateTypeRef, &temp);
-        if (originalSignatureSize - len > 0)
+        if (originalSignatureSize > len)
         {
             if (originalSignature[originalSignatureSize - len - 1] == ELEMENT_TYPE_VALUETYPE)
             {

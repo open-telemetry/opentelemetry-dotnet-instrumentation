@@ -27,7 +27,7 @@ internal static class Program
 
         await channel.QueueDeclareAsync(
             queue: "hello",
-            durable: false,
+            durable: true,
             exclusive: false,
             autoDelete: false,
             arguments: null).ConfigureAwait(false);
@@ -62,12 +62,7 @@ internal static class Program
 
     private static string GetRabbitMqPort(string[] args)
     {
-        if (args.Length > 1)
-        {
-            return args[1];
-        }
-
-        return "5672";
+        return ArgumentHelper.GetArgument(args, "--rabbitmq", "5672");
     }
 #else
     private const string RoutingKey = "hello";
@@ -97,7 +92,7 @@ internal static class Program
 
         syncConsumersModel.QueueDeclare(
             queue: RoutingKey,
-            durable: false,
+            durable: true,
             exclusive: false,
             autoDelete: false,
             arguments: null);
@@ -236,12 +231,7 @@ internal static class Program
 
     private static string GetRabbitMqPort(string[] args)
     {
-        if (args.Length > 1)
-        {
-            return args[1];
-        }
-
-        return "5672";
+        return ArgumentHelper.GetArgument(args, "--rabbitmq", "5672");
     }
 
     // Custom consumer classes, with implementation (simplified) based on EventingBasicConsumer/AsyncEventingBasicConsumer

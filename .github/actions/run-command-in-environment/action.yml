@@ -1,0 +1,128 @@
+name: Run Command in Environment
+description: Run a shell command on the host or inside an existing Docker container.
+
+inputs:
+  execution-mode:
+    description: Either `container`, `bash`, `sh`, `pwsh`, or `powershell`. If empty, defaults to `container` when container-name is set, otherwise uses `pwsh` on Windows and `bash` on non-Windows runners.
+    required: false
+    default: ""
+  container-name:
+    description: Running Docker container name to exec into.
+    required: false
+    default: ""
+  container-user:
+    description: Container user identity to use with `docker exec -u`.
+    required: false
+    default: ""
+  run:
+    description: Shell command to execute.
+    required: true
+  container-publish-env:
+    description: Multiline list of environment variable names to publish into the container process.
+    required: false
+    default: ""
+
+runs:
+  using: composite
+  steps:
+    - name: Validate execution inputs
+      shell: pwsh
+      run: |
+        $executionMode = $env:EXECUTION_MODE
+        $containerName = $env:CONTAINER_NAME
+        $containerUser = $env:CONTAINER_USER
+
+        if ($executionMode -eq 'container' -and [string]::IsNullOrEmpty($containerName)) {
+          throw 'container-name input is required when execution-mode is container.'
+        }
+
+        if (-not [string]::IsNullOrEmpty($executionMode) -and $executionMode -notin @('container', 'bash', 'sh', 'pwsh', 'powershell')) {
+          throw "execution-mode must be empty or one of 'container', 'bash', 'sh', 'pwsh', or 'powershell'."
+        }
+
+        if (-not [string]::IsNullOrEmpty($containerName) -and -not [string]::IsNullOrEmpty($executionMode) -and $executionMode -ne 'container') {
+          throw 'container-name cannot be combined with a non-container execution-mode.'
+        }
+
+        if (-not [string]::IsNullOrEmpty($containerUser) -and [string]::IsNullOrEmpty($containerName) -and $executionMode -ne 'container') {
+          throw 'container-user requires container execution.'
+        }
+      env:
+        EXECUTION_MODE: ${{ inputs.execution-mode }}
+        CONTAINER_NAME: ${{ inputs.container-name }}
+        CONTAINER_USER: ${{ inputs.container-user }}
+
+    - name: Run on host
+      if: inputs.execution-mode != 'container' && inputs.container-name == ''
+      shell: pwsh
+      run: |
+        $executionMode = $env:EXECUTION_MODE
+
+        if ([string]::IsNullOrEmpty($executionMode)) {
+          $executionMode = if ($env:RUNNER_OS -eq 'Windows') { 'pwsh' } else { 'bash' }
+        }
+
+        switch ($executionMode) {
+          'pwsh' {
+            $scriptPath = Join-Path $env:RUNNER_TEMP 'run-command-in-environment.ps1'
+            Set-Content -Path $scriptPath -Value $env:RUN_COMMAND -NoNewline
+            & pwsh -NoLogo -NoProfile -NonInteractive -File $scriptPath
+          }
+          'powershell' {
+            $scriptPath = Join-Path $env:RUNNER_TEMP 'run-command-in-environment.ps1'
+            Set-Content -Path $scriptPath -Value $env:RUN_COMMAND -NoNewline
+            & powershell -NoLogo -NoProfile -NonInteractive -ExecutionPolicy Bypass -File $scriptPath
+          }
+          'bash' {
+            $scriptPath = Join-Path $env:RUNNER_TEMP 'run-command-in-environment.sh'
+            Set-Content -Path $scriptPath -Value $env:RUN_COMMAND -NoNewline
+            & bash $scriptPath
+          }
+          'sh' {
+            $scriptPath = Join-Path $env:RUNNER_TEMP 'run-command-in-environment.sh'
+            Set-Content -Path $scriptPath -Value $env:RUN_COMMAND -NoNewline
+            & sh $scriptPath
+          }
+          default {
+            throw "Unsupported execution-mode '$executionMode'."
+          }
+        }
+      env:
+        EXECUTION_MODE: ${{ inputs.execution-mode }}
+        RUN_COMMAND: ${{ inputs.run }}
+
+    - name: Run in container
+      if: inputs.execution-mode == 'container' || (inputs.execution-mode == '' && inputs.container-name != '')
+      shell: bash
+      run: |
+        set -u
+
+        docker_args=(exec -i)
+
+        if [[ -n "${CONTAINER_USER}" ]]; then
+          docker_args+=(-u "${CONTAINER_USER}")
+        fi
+
+        while IFS= read -r environment_name; do
+          environment_name="$(printf '%s' "${environment_name}" | xargs)"
+          [[ -z "${environment_name}" ]] && continue
+
+          if [[ ! "${environment_name}" =~ ^[A-Za-z_][A-Za-z0-9_]*$ ]]; then
+            echo "Invalid environment variable name: ${environment_name}" >&2
+            exit 1
+          fi
+
+          docker_args+=(-e "${environment_name}")
+        done < <(printf '%s\n' "${CONTAINER_PUBLISH_ENV}")
+
+        docker_args+=("${CONTAINER_NAME}" /bin/sh)
+
+        {
+          printf '%s\n' 'set -e'
+          printf '%s\n' "${RUN_COMMAND}"
+        } | docker "${docker_args[@]}"
+      env:
+        CONTAINER_NAME: ${{ inputs.container-name }}
+        CONTAINER_USER: ${{ inputs.container-user }}
+        CONTAINER_PUBLISH_ENV: ${{ inputs.container-publish-env }}
+        RUN_COMMAND: ${{ inputs.run }}

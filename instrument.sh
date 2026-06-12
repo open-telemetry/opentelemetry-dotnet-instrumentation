@@ -107,20 +107,6 @@ fi
 export OTEL_DOTNET_AUTO_HOME
 
 # Configure .NET Core Runtime
-DOTNET_ADDITIONAL_DEPS=${DOTNET_ADDITIONAL_DEPS:-}
-if [ -z "$DOTNET_ADDITIONAL_DEPS" ]; then
-  export DOTNET_ADDITIONAL_DEPS="${OTEL_DOTNET_AUTO_HOME}/AdditionalDeps"
-else
-  export DOTNET_ADDITIONAL_DEPS="${OTEL_DOTNET_AUTO_HOME}/AdditionalDeps${SEPARATOR}${DOTNET_ADDITIONAL_DEPS}"
-fi
-
-DOTNET_SHARED_STORE=${DOTNET_SHARED_STORE:-}
-if [ -z "$DOTNET_SHARED_STORE" ]; then
-  export DOTNET_SHARED_STORE="${OTEL_DOTNET_AUTO_HOME}/store"
-else
-  export DOTNET_SHARED_STORE="${OTEL_DOTNET_AUTO_HOME}/store${SEPARATOR}${DOTNET_SHARED_STORE}"
-fi
-
 DOTNET_STARTUP_HOOKS=${DOTNET_STARTUP_HOOKS:-}
 if [ -z "$DOTNET_STARTUP_HOOKS" ]; then
   export DOTNET_STARTUP_HOOKS="${OTEL_DOTNET_AUTO_HOME}/net/OpenTelemetry.AutoInstrumentation.StartupHook.dll"
@@ -170,4 +156,17 @@ if [ "$ENABLE_PROFILING" = "true" ]; then
   fi
 fi
 
-exec "$@"
+# Launch the target app only when this script is executed directly.
+# When sourced, positional parameters belong to the caller and must not be executed.
+case "$0" in
+  */instrument.sh|instrument.sh)
+    if [ "$#" -gt 0 ]; then
+      exec "$@"
+    fi
+    ;;
+  *)
+    if [ "$#" -gt 0 ]; then
+      echo "Arguments were provided, but instrument.sh was sourced. Execute ./instrument.sh <application_executable> to launch the application." >&2
+    fi
+    ;;
+esac

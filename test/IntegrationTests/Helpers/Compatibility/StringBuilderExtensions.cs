@@ -15,7 +15,7 @@ internal static class StringBuilderExtensions
 
     public static StringBuilder Append(this StringBuilder stringBuilder, CultureInfo cultureInfo, string value)
     {
-        return stringBuilder.AppendLine(value);
+        return stringBuilder.Append(value);
     }
 }
 #endif

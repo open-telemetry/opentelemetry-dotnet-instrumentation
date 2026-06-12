@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: Apache-2.0
 
 using IntegrationTests.Helpers;
-using Xunit.Abstractions;
 
 namespace IntegrationTests;
 
@@ -44,7 +43,7 @@ public class RuntimeTests : TestHelper
     {
         using var collector = new MockMetricsCollector(Output);
         SetFileBasedExporter(collector);
-        EnableFileBasedConfigWithDefaultPath();
+        EnableFileBasedConfig();
 #if NET9_0_OR_GREATER
         collector.Expect("System.Runtime");
 #else

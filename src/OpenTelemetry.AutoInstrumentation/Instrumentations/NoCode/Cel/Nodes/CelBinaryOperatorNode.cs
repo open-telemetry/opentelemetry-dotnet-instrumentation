@@ -23,24 +23,48 @@ internal sealed class CelBinaryOperatorNode : CelNode
 
     public override object? Evaluate(NoCodeExpressionContext context)
     {
-        var left = _left.Evaluate(context);
-        var right = _right.Evaluate(context);
+        // Handle short-circuit operators before evaluating both operands
+        if (_operator == "&&")
+        {
+            var left = _left.Evaluate(context);
+            if (!CelHelpers.IsTrue(left))
+            {
+                return false;
+            }
+
+            var right = _right.Evaluate(context);
+            return CelHelpers.IsTrue(right);
+        }
+
+        if (_operator == "||")
+        {
+            var left = _left.Evaluate(context);
+            if (CelHelpers.IsTrue(left))
+            {
+                return true;
+            }
+
+            var right = _right.Evaluate(context);
+            return CelHelpers.IsTrue(right);
+        }
+
+        // For all other operators, evaluate both operands
+        var leftValue = _left.Evaluate(context);
+        var rightValue = _right.Evaluate(context);
 
         return _operator switch
         {
-            "==" => AreEqual(left, right),
-            "!=" => !AreEqual(left, right),
-            "<" => CompareLessThan(left, right),
-            ">" => CompareGreaterThan(left, right),
-            "<=" => !CompareGreaterThan(left, right),
-            ">=" => !CompareLessThan(left, right),
-            "&&" => CelHelpers.IsTrue(left) && CelHelpers.IsTrue(right),
-            "||" => CelHelpers.IsTrue(left) || CelHelpers.IsTrue(right),
-            "+" => Add(left, right),
-            "-" => Subtract(left, right),
-            "*" => Multiply(left, right),
-            "/" => Divide(left, right),
-            "%" => Modulo(left, right),
+            "==" => AreEqual(leftValue, rightValue),
+            "!=" => !AreEqual(leftValue, rightValue),
+            "<" => CompareLessThan(leftValue, rightValue),
+            ">" => CompareGreaterThan(leftValue, rightValue),
+            "<=" => !CompareGreaterThan(leftValue, rightValue),
+            ">=" => !CompareLessThan(leftValue, rightValue),
+            "+" => Add(leftValue, rightValue),
+            "-" => Subtract(leftValue, rightValue),
+            "*" => Multiply(leftValue, rightValue),
+            "/" => Divide(leftValue, rightValue),
+            "%" => Modulo(leftValue, rightValue),
             _ => null
         };
     }

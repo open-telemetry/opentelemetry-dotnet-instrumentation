@@ -42,13 +42,25 @@ namespace continuous_profiler
 {
 struct FunctionIdentifier
 {
+    // Managed frame data
     mdToken  function_token;
     ModuleID module_id;
     bool     is_valid;
+    static FunctionIdentifier Managed(mdToken token, ModuleID mod, bool valid)
+    {
+        return {token, mod, valid};
+    }
+
+    static FunctionIdentifier ManagedInvalid()
+    {
+        return {0, 0, false};
+    }
 
     bool operator==(const FunctionIdentifier& p) const
     {
-        return function_token == p.function_token && module_id == p.module_id && is_valid == p.is_valid;
+        if (is_valid != p.is_valid)
+            return false;
+        return function_token == p.function_token && module_id == p.module_id;
     }
 };
 
@@ -277,11 +289,10 @@ public:
     NamingHelper();
     void ClearFunctionIdentifierCache();
     trace::WSTRING* Lookup(const FunctionIdentifier& function_identifier, SamplingStatistics & stats);
-    // TODO: rename
-    FunctionIdentifier Lookup(const FunctionID functionId, const COR_PRF_FRAME_INFO frameInfo);
+    FunctionIdentifier LookupManagedFunction(FunctionID functionId, COR_PRF_FRAME_INFO frameInfo);
 
-    [[nodiscard]] FunctionIdentifier GetFunctionIdentifier(const FunctionID func_id,
-                                                           const COR_PRF_FRAME_INFO frame_info) const;
+    [[nodiscard]] FunctionIdentifier ResolveManagedFunctionIdentifier(FunctionID func_id,
+                                                                     COR_PRF_FRAME_INFO frame_info) const;
 private:
     NameCache<FunctionIdentifier, trace::WSTRING*> function_name_cache_;
     NameCache<FunctionIdentifierResolveArgs, FunctionIdentifier> function_identifier_cache_;
@@ -306,6 +317,9 @@ private:
     uint32_t seenThisCycle;
     uint32_t sampledThisCycle;
     uint32_t seenLastCycle;
+    uint32_t                   startupCyclesRemaining;
+    std::chrono::milliseconds  startupMinSampleSpacingMillis;
+    std::chrono::steady_clock::time_point startupNextSampleAllowedAt;
     std::chrono::milliseconds nextCycleStartMillis;
     std::mutex sampleLock;
     std::default_random_engine rand;

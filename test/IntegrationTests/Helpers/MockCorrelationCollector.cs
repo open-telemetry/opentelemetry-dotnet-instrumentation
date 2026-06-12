@@ -2,13 +2,14 @@
 // SPDX-License-Identifier: Apache-2.0
 #if NET
 using System.Collections.Concurrent;
+#if !NET11_0_OR_GREATER
 using System.Diagnostics;
+#endif
 using Microsoft.AspNetCore.Http;
 using OpenTelemetry.Proto.Collector.Logs.V1;
 using OpenTelemetry.Proto.Collector.Trace.V1;
 using OpenTelemetry.Proto.Logs.V1;
 using OpenTelemetry.Proto.Trace.V1;
-using Xunit.Abstractions;
 
 namespace IntegrationTests.Helpers;
 
@@ -63,7 +64,11 @@ internal sealed class MockCorrelationCollector : IDisposable
 
         Assert.Equal(expectedSpan.Span.SpanId, expectedLogRecord.SpanId);
         Assert.Equal(expectedSpan.Span.TraceId, expectedLogRecord.TraceId);
+#if NET11_0_OR_GREATER
+        Assert.Equal(3u, expectedLogRecord.Flags); // TODO NET11TODO this should be changed to something like ActivityTraceFlags.Recorded | ActivityTraceFlags.RandomTraceId, for all .NET versions, once package S.D.DS will be updated to the 11.0 it should apply to all versions
+#else
         Assert.Equal((uint)ActivityTraceFlags.Recorded, expectedLogRecord.Flags);
+#endif
     }
 
     private async Task HandleLogHttpRequests(HttpContext ctx)

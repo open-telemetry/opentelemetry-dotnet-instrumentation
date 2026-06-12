@@ -4,7 +4,6 @@
 #if NET
 using IntegrationTests.Helpers;
 using OpenTelemetry.Proto.Trace.V1;
-using Xunit.Abstractions;
 
 namespace IntegrationTests;
 
@@ -73,7 +72,7 @@ public class HttpTests : TestHelper
     {
         using var collector = new MockSpansCollector(Output);
         SetFileBasedExporter(collector);
-        EnableFileBasedConfigWithDefaultPath();
+        EnableFileBasedConfig();
 
         Span? clientSpan = null;
         collector.Expect("System.Net.Http", span =>

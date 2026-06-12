@@ -1,7 +1,6 @@
 // Copyright The OpenTelemetry Authors
 // SPDX-License-Identifier: Apache-2.0
 
-using System.Collections;
 using System.Diagnostics;
 using System.Linq.Expressions;
 using System.Reflection;
@@ -92,14 +91,17 @@ internal static class OpenTelemetryLogHelpers
         // var instance = new LogRecordData(activity);
         // if (body != null) instance.Body = body;
         // instance.Timestamp = timestamp;
+        // instance.ObservedTimestamp = DateTime.UtcNow;
         // if (severityText != null) instance.SeverityText = severityText;
         // instance.Severity = (LogRecordSeverity?)severityLevel;
         // return instance;
 
         var timestampSetterMethodInfo = logRecordDataType.GetProperty("Timestamp")!.GetSetMethod()!;
+        var observedTimestampSetterMethodInfo = logRecordDataType.GetProperty("ObservedTimestamp")!.GetSetMethod()!;
         var bodySetterMethodInfo = logRecordDataType.GetProperty("Body")!.GetSetMethod()!;
         var severityTextSetterMethodInfo = logRecordDataType.GetProperty("SeverityText")!.GetSetMethod()!;
         var severityLevelSetterMethodInfo = logRecordDataType.GetProperty("Severity")!.GetSetMethod()!;
+        var utcNowPropertyInfo = typeof(DateTime).GetProperty(nameof(DateTime.UtcNow))!;
 
         var instanceVar = Expression.Variable(bodySetterMethodInfo.DeclaringType!, "instance");
 
@@ -107,6 +109,7 @@ internal static class OpenTelemetryLogHelpers
         var assignInstanceVar = Expression.Assign(instanceVar, Expression.New(constructorInfo, activity));
         var setBody = Expression.IfThen(Expression.NotEqual(body, Expression.Constant(null)), Expression.Call(instanceVar, bodySetterMethodInfo, body));
         var setTimestamp = Expression.Call(instanceVar, timestampSetterMethodInfo, timestamp);
+        var setObservedTimestamp = Expression.Call(instanceVar, observedTimestampSetterMethodInfo, Expression.Property(null, utcNowPropertyInfo));
         var setSeverityText = Expression.IfThen(Expression.NotEqual(severityText, Expression.Constant(null)), Expression.Call(instanceVar, severityTextSetterMethodInfo, severityText));
         var setSeverityLevel = Expression.Call(instanceVar, severityLevelSetterMethodInfo, Expression.Convert(severityLevel, typeof(Nullable<>).MakeGenericType(severityType)));
 
@@ -115,6 +118,7 @@ internal static class OpenTelemetryLogHelpers
             assignInstanceVar,
             setBody,
             setTimestamp,
+            setObservedTimestamp,
             setSeverityText,
             setSeverityLevel,
             instanceVar);

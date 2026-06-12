@@ -94,8 +94,6 @@ function Get-Environment-Variables-Table([string]$InstallDir, [string]$OTelServi
     $CORECLR_PROFILER_PATH_32 = Join-Path $InstallDir "/win-x86/OpenTelemetry.AutoInstrumentation.Native.dll"
     $CORECLR_PROFILER_PATH_64 = Join-Path $InstallDir "/win-x64/OpenTelemetry.AutoInstrumentation.Native.dll"
 
-    $DOTNET_ADDITIONAL_DEPS = Join-Path $InstallDir "AdditionalDeps"
-    $DOTNET_SHARED_STORE = Join-Path $InstallDir "store"
     $DOTNET_STARTUP_HOOKS = Join-Path $InstallDir "net/OpenTelemetry.AutoInstrumentation.StartupHook.dll"
 
     $OTEL_DOTNET_AUTO_HOME = $InstallDir
@@ -114,8 +112,6 @@ function Get-Environment-Variables-Table([string]$InstallDir, [string]$OTelServi
         # ASP.NET Core
         "ASPNETCORE_HOSTINGSTARTUPASSEMBLIES" = "OpenTelemetry.AutoInstrumentation.AspNetCoreBootstrapper";
         # .NET Common
-        "DOTNET_ADDITIONAL_DEPS"              = $DOTNET_ADDITIONAL_DEPS;
-        "DOTNET_SHARED_STORE"                 = $DOTNET_SHARED_STORE;
         "DOTNET_STARTUP_HOOKS"                = $DOTNET_STARTUP_HOOKS;
         # OpenTelemetry
         "OTEL_DOTNET_AUTO_HOME"               = $OTEL_DOTNET_AUTO_HOME;
@@ -163,8 +159,6 @@ function Cleanup-Environment-Variables([string]$WindowsServiceName) {
         # ASP.NET Core
         "ASPNETCORE_HOSTINGSTARTUPASSEMBLIES",
         # .NET Common
-        "DOTNET_ADDITIONAL_DEPS",
-        "DOTNET_SHARED_STORE",
         "DOTNET_STARTUP_HOOKS",
         # OpenTelemetry
         "OTEL_DOTNET_"
@@ -603,8 +597,6 @@ function Unregister-OpenTelemetryForCurrentSession() {
     $env:ASPNETCORE_HOSTINGSTARTUPASSEMBLIES = $null
 
     # .NET Common
-    $env:DOTNET_ADDITIONAL_DEPS = $null
-    $env:DOTNET_SHARED_STORE = $null
     $env:DOTNET_STARTUP_HOOKS = $null
 
     # OpenTelemetry

@@ -5,7 +5,6 @@
 using System.Globalization;
 using IntegrationTests.Helpers;
 using OpenTelemetry.Proto.Logs.V1;
-using Xunit.Abstractions;
 
 namespace IntegrationTests;
 
@@ -62,7 +61,7 @@ public class LogTests : TestHelper
     {
         using var collector = new MockLogsCollector(Output);
         SetFileBasedExporter(collector);
-        EnableFileBasedConfigWithDefaultPath();
+        EnableFileBasedConfig();
 
         // When includeFormattedMessage is set to false
         // LogRecord is not parsed and body will not have data.

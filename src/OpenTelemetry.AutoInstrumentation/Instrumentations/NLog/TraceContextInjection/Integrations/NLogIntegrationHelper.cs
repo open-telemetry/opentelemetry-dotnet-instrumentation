@@ -5,9 +5,9 @@ using System.Diagnostics;
 using OpenTelemetry.AutoInstrumentation.CallTarget;
 using OpenTelemetry.AutoInstrumentation.DuckTyping;
 using OpenTelemetry.AutoInstrumentation.Instrumentations.NLog.Bridge;
-using OpenTelemetry.AutoInstrumentation.Logging;
 #if NET
 using OpenTelemetry.AutoInstrumentation.Logger;
+using OpenTelemetry.AutoInstrumentation.Logging;
 #endif
 
 namespace OpenTelemetry.AutoInstrumentation.Instrumentations.NLog.TraceContextInjection.Integrations;
@@ -39,7 +39,7 @@ internal static class NLogIntegrationHelper
             {
                 propsEvent.Properties[LogsTraceContextInjectionConstants.TraceIdPropertyName] = current.TraceId.ToHexString();
                 propsEvent.Properties[LogsTraceContextInjectionConstants.SpanIdPropertyName] = current.SpanId.ToHexString();
-                propsEvent.Properties[LogsTraceContextInjectionConstants.TraceFlagsPropertyName] = (current.Context.TraceFlags & ActivityTraceFlags.Recorded) != 0 ? "01" : "00";
+                propsEvent.Properties[LogsTraceContextInjectionConstants.TraceFlagsPropertyName] = current.Context.TraceFlags.W3CFormatActivityTraceFlags();
             }
         }
 

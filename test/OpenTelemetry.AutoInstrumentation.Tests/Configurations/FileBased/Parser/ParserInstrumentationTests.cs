@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 using OpenTelemetry.AutoInstrumentation.Configurations.FileBasedConfiguration;
-using Xunit;
+using OpenTelemetry.AutoInstrumentation.Tests.Util;
 using YamlParser = OpenTelemetry.AutoInstrumentation.Configurations.FileBasedConfiguration.Parser.Parser;
 
 namespace OpenTelemetry.AutoInstrumentation.Tests.Configurations.FileBased.Parser;
@@ -21,6 +21,7 @@ public class ParserInstrumentationTests
 
         string[] expectedTraces =
         [
+            "adonet",
 #if NETFRAMEWORK
             "aspnet",
 #else
@@ -50,6 +51,7 @@ public class ParserInstrumentationTests
             "rabbitmq",
             "quartz",
             "sqlclient",
+            "sqlite",
             "stackexchangeredis",
             "wcfclient",
 #if NET
@@ -176,9 +178,12 @@ public class ParserInstrumentationTests
     [Fact]
     public void Parse_EnvVarYaml_ShouldPopulateModelCompletely()
     {
-        Environment.SetEnvironmentVariable("OTEL_DOTNET_AUTO_TRACES_ADDITIONAL_SOURCES", "Some.Additional.Source1,Some.Additional.Source2");
-        Environment.SetEnvironmentVariable("OTEL_DOTNET_AUTO_TRACES_ADDITIONAL_LEGACY_SOURCES", "Some.Additional.Legacy.Source1,Some.Additional.Legacy.Source2");
-        Environment.SetEnvironmentVariable("OTEL_DOTNET_AUTO_METRICS_ADDITIONAL_SOURCES", "Some.Additional.Source1,Some.Additional.Source2");
+        using var envScope = new EnvironmentScope(new Dictionary<string, string?>()
+        {
+            { "OTEL_DOTNET_AUTO_TRACES_ADDITIONAL_SOURCES", "Some.Additional.Source1,Some.Additional.Source2" },
+            { "OTEL_DOTNET_AUTO_TRACES_ADDITIONAL_LEGACY_SOURCES", "Some.Additional.Legacy.Source1,Some.Additional.Legacy.Source2" },
+            { "OTEL_DOTNET_AUTO_METRICS_ADDITIONAL_SOURCES", "Some.Additional.Source1,Some.Additional.Source2" },
+        });
 
         var config = YamlParser.ParseYaml<YamlConfiguration>("Configurations/FileBased/Files/TestInstrumentationFileEnvVars.yaml");
 

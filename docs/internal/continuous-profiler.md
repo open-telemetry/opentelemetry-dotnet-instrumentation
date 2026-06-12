@@ -4,8 +4,11 @@
 > Continuous profiler is an experimental feature. It will be subject to change,
 > when <https://github.com/open-telemetry/oteps/pull/239> or <https://github.com/open-telemetry/oteps/pull/237>
 > are merged.
+> When this doc refers to .NET Framework supportability, it refers
+> to Windows x86 and x64; ARM64 is not supported by
+> OpenTelemetry .NET Automatic Instrumentation.
 
-The continuous profiler collects stack traces from the processes for two type of
+The continuous profiler collects stack traces from the processes for two types of
 events:
 
 * Periodically, for all threads. See [Thread sampling](#thread-sampling).
@@ -23,30 +26,25 @@ can parse dense thread sampling data and export it.
 The profiler uses the
 [.NET profiler](https://docs.microsoft.com/en-us/dotnet/framework/unmanaged-api/profiling/)
 to perform periodic call stack sampling. For every sampling period, the runtime
-suspends execution and the samples for all managed thread are saved in the buffer,
+suspends execution and the samples for all managed threads are saved in the buffer,
 then the runtime resumes.
 
-The separate managed thread processes data from the buffer and exports it
+A separate managed thread processes data from the buffer and exports it
 in the format defined by the plugin. To make the process more efficient, the
-sampler uses two independent buffers to store samples alternatively.
+sampler uses two independent buffers to store samples alternately.
 
 ### Requirements
 
-* .NET 6.0 or higher, OR
-* .NET Framework 4.6.2 or higher (x64 only)
+* .NET 8.0 or higher, OR
+* .NET Framework 4.6.2 or higher
 
 ### .NET Framework support
 
-Thread sampling is supported on .NET Framework 4.6.2+ running on Windows x64.
-No additional configuration is required beyond implementing and configuring
-the custom plugin in exactly the same manner as you would for .NET (Core).
-Behind the scenes, the samples are captured and exported in the same format
-as they would be in .NET.
-
-> [!NOTE]  
-> .NET Framework support uses a different native stack walking strategy
-> optimized for the .NET Framework runtime, but the exported data format
-> remains identical to .NET (Core).
+Thread sampling works on .NET Framework 4.6.2+ (Windows) and requires no extra
+plugin configuration beyond the normal plugin contract. Allocation sampling is
+not supported on .NET Framework. Internally the native stack-walking strategy
+differs on .NET Framework, but exported data format and plugin contract remain
+the same.
 
 ### Enable the profiler
 
@@ -112,17 +110,6 @@ You can also look for:
 
 If you see these log messages, check the exporter implementation.
 
-#### What if I'm on an unsupported .NET version?
-
-For thread sampling, you need either:
-
-* .NET 6.0 or higher, OR
-* .NET Framework 4.6.2 or higher (Windows x64 only)
-
-If you're on an unsupported version (e.g., .NET Core 3.1, .NET 5.0, or
-.NET Framework on non-x64 platforms), you'll need to upgrade to a supported
-runtime version.
-
 #### Can I tell the sampler to ignore some threads?
 
 There is no such functionality. All managed threads are captured by the profiler.
@@ -161,7 +148,7 @@ This indicates that stack samples are being successfully captured for threads.
 You may see messages like:
 
 ```text
-[debug] [StackCapture] PrepareContextForSnapshot - Unable to locate managed frame in stack walk for ThreadID=...
+[debug] [StackCapture] [debug] [StackCapture] Unseeded capture failed (0x80004005). ThreadID=...
 ```
 
 **This is normal and expected behavior.** This message appears when a thread is
@@ -180,9 +167,8 @@ when it returns to managed code.
 
 If you don't see `[StackCapture] Canary thread ready` in the logs:
 
-1. Verify that the application is running on Windows x64
-2. Ensure thread sampling is enabled in the plugin configuration
-3. Check that the profiler is successfully attached (look for
+1. Ensure thread sampling is enabled in the plugin configuration
+2. Check that the profiler is successfully attached (look for
    `ContinuousProfiler::StartThreadSampling` in the logs)
 
 ## Allocation sampling
@@ -203,16 +189,18 @@ the thread that triggered the allocation, and associated span context, are saved
 into buffer.
 
 The managed thread shared with CPU Profiler processes the data from the buffer
-and exports in the way defined by the plugin..
+and exports in the way defined by the plugin.
 
 ### Requirements
 
-* .NET 6.0 or higher (`ICorProfilerInfo12` available in runtime)
+* .NET 8.0 or higher
 
-> [!NOTE]  
-> Allocation sampling is **not supported** on .NET Framework. The required
-> `ICorProfilerInfo10` and `ICorProfilerInfo12` interfaces for allocation tick
-> events are not available in the .NET Framework runtime.
+> [!NOTE]
+> Allocation sampling is not supported on .NET Framework. The runtime does not
+> include the low-level profiling APIs needed to observe individual memory
+> allocations. The settings related to allocation sampling in the plugin configuration
+> will be ignored when running on .NET Framework, but the same plugin can be
+> used for both .NET and .NET Framework without modification.
 
 ### Enable the profiler
 
@@ -274,19 +262,12 @@ If the escape hatch activates, it logs the following message:
 If you see these log messages, check the configuration and communication layer
 between your process and the Collector.
 
-#### What if I'm on an unsupported .NET version?
-
-Allocation sampling requires .NET 6.0 or higher. It is not available on
-.NET Framework due to missing `ICorProfilerInfo10`/`ICorProfilerInfo12` APIs
-for allocation tick events. You'll need to use .NET 6.0+ if you require
-allocation sampling.
-
 ## Feature support matrix
 
-| Feature             | .NET 6.0+    | .NET Framework 4.6.2+           |
-| ------------------- | ------------ | ------------------------------- |
-| Thread sampling     | ✅ Supported | ✅ Supported (Windows x64 only) |
-| Allocation sampling | ✅ Supported | ❌ Not supported                |
+| Feature             | .NET 8.0+ | .NET Framework 4.6.2+ |
+|---------------------|-----------|-----------------------|
+| Thread sampling     | Supported | Supported             |
+| Allocation sampling | Supported | Not supported         |
 
 ## Plugin
 
@@ -313,7 +294,7 @@ and convention.
 public Tuple<bool, uint, bool, uint, TimeSpan, TimeSpan, object> GetContinuousProfilerConfiguration()
 {
     var threadSamplingEnabled = true; // enables thread sampling
-    var threadSamplingInterval = 10000u; // interval to stop CLR runtime and fetch stacks. 10 000ms is Splunk default. 1000ms is the lowest supported value by Splunk. The code does not contains any limitations this. Plugins is responsible for checks.
+    var threadSamplingInterval = 10000u; // interval to stop CLR runtime and fetch stacks. 10 000ms is Splunk default. 1000ms is the lowest supported value by Splunk. The code does not contain any limitations. Plugin is responsible for checks.
     var allocationSamplingEnabled = true; // enables allocation sampling (ignored on .NET Framework)
     var maxMemorySamplesPerMinute = 200u; // max number of samples in minutes. 200 is tested default value by Splunk.
     var exportInterval = TimeSpan.FromMilliseconds(500); // Pause time before next execution of exporting/reading buffer  process

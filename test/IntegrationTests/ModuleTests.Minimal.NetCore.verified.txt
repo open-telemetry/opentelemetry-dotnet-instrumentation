@@ -5,5 +5,6 @@
   OpenTelemetry.AutoInstrumentation,
   OpenTelemetry.AutoInstrumentation.Loader,
   OpenTelemetry.AutoInstrumentation.StartupHook,
+  OpenTelemetry.AutoInstrumentation.StartupHook,
   OpenTelemetry.Exporter.OpenTelemetryProtocol
 ]

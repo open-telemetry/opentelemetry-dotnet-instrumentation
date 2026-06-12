@@ -2,11 +2,10 @@
 // SPDX-License-Identifier: Apache-2.0
 
 using System.Globalization;
-using System.Reflection;
+using System.Net.Http;
 using OpenTelemetry.AutoInstrumentation.Configurations;
+using OpenTelemetry.AutoInstrumentation.Tests.Util;
 using OpenTelemetry.Exporter;
-using Xunit;
-
 using AutoOtlpDefinitions = OpenTelemetry.AutoInstrumentation.Configurations.Otlp.OtlpSpecConfigDefinitions;
 
 namespace OpenTelemetry.AutoInstrumentation.Tests.Configurations;
@@ -15,18 +14,8 @@ namespace OpenTelemetry.AutoInstrumentation.Tests.Configurations;
 // in parallel
 // see https://xunit.net/docs/running-tests-in-parallel
 [Collection("Non-Parallel Collection")]
-public sealed class SettingsTests : IDisposable
+public sealed class SettingsTests
 {
-    public SettingsTests()
-    {
-        ClearEnvVars();
-    }
-
-    public void Dispose()
-    {
-        ClearEnvVars();
-    }
-
     [Fact]
     internal void GeneralSettings_DefaultValues()
     {
@@ -150,7 +139,10 @@ public sealed class SettingsTests : IDisposable
     [InlineData("otlp,,,", new[] { TracesExporter.Otlp })]
     internal void TracesExporters(string tracesExporters, TracesExporter[] expectedTracesExporters)
     {
-        Environment.SetEnvironmentVariable(ConfigurationKeys.Traces.Exporter, tracesExporters);
+        using var envScope = new EnvironmentScope(new Dictionary<string, string?>()
+        {
+            { ConfigurationKeys.Traces.Exporter, tracesExporters }
+        });
 
         var settings = Settings.FromDefaultSources<TracerSettings>(false);
 
@@ -165,7 +157,10 @@ public sealed class SettingsTests : IDisposable
     [InlineData("otlp,,,")]
     internal void TracesExporters_FailFast(string tracesExporters)
     {
-        Environment.SetEnvironmentVariable(ConfigurationKeys.Traces.Exporter, tracesExporters);
+        using var envScope = new EnvironmentScope(new Dictionary<string, string?>()
+        {
+            { ConfigurationKeys.Traces.Exporter, tracesExporters }
+        });
 
         Assert.Throws<NotSupportedException>(() => Settings.FromDefaultSources<TracerSettings>(true));
     }
@@ -188,7 +183,10 @@ public sealed class SettingsTests : IDisposable
     [InlineData("otlp,,,", new[] { MetricsExporter.Otlp })]
     internal void MetricExporters(string metricExporters, MetricsExporter[] expectedMetricsExporters)
     {
-        Environment.SetEnvironmentVariable(ConfigurationKeys.Metrics.Exporter, metricExporters);
+        using var envScope = new EnvironmentScope(new Dictionary<string, string?>()
+        {
+            { ConfigurationKeys.Metrics.Exporter, metricExporters }
+        });
 
         var settings = Settings.FromDefaultSources<MetricSettings>(false);
 
@@ -203,7 +201,10 @@ public sealed class SettingsTests : IDisposable
     [InlineData("otlp,,,")]
     internal void MetricExporters_FailFast(string metricExporters)
     {
-        Environment.SetEnvironmentVariable(ConfigurationKeys.Metrics.Exporter, metricExporters);
+        using var envScope = new EnvironmentScope(new Dictionary<string, string?>()
+        {
+            { ConfigurationKeys.Metrics.Exporter, metricExporters }
+        });
 
         Assert.Throws<NotSupportedException>(() => Settings.FromDefaultSources<MetricSettings>(true));
     }
@@ -225,7 +226,10 @@ public sealed class SettingsTests : IDisposable
     [InlineData("otlp,,,", new[] { LogExporter.Otlp })]
     internal void LogExporters(string logExporters, LogExporter[] expectedLogExporters)
     {
-        Environment.SetEnvironmentVariable(ConfigurationKeys.Logs.Exporter, logExporters);
+        using var envScope = new EnvironmentScope(new Dictionary<string, string?>()
+        {
+            { ConfigurationKeys.Logs.Exporter, logExporters }
+        });
 
         var settings = Settings.FromDefaultSources<LogSettings>(false);
 
@@ -240,7 +244,10 @@ public sealed class SettingsTests : IDisposable
     [InlineData("otlp,,,")]
     internal void LogExporters_FailFast(string logExporters)
     {
-        Environment.SetEnvironmentVariable(ConfigurationKeys.Logs.Exporter, logExporters);
+        using var envScope = new EnvironmentScope(new Dictionary<string, string?>()
+        {
+            { ConfigurationKeys.Logs.Exporter, logExporters }
+        });
 
         Assert.Throws<NotSupportedException>(() => Settings.FromDefaultSources<LogSettings>(true));
     }
@@ -262,7 +269,10 @@ public sealed class SettingsTests : IDisposable
     [InlineData("tracecontext,,,", new[] { Propagator.W3CTraceContext })]
     internal void Propagators(string? propagators, Propagator[] expectedPropagators)
     {
-        Environment.SetEnvironmentVariable(ConfigurationKeys.Sdk.Propagators, propagators);
+        using var envScope = new EnvironmentScope(new Dictionary<string, string?>()
+        {
+            { ConfigurationKeys.Sdk.Propagators, propagators }
+        });
 
         var settings = Settings.FromDefaultSources<SdkSettings>(false);
 
@@ -277,7 +287,10 @@ public sealed class SettingsTests : IDisposable
     [InlineData("tracecontext,,,")]
     internal void Propagators_FailFast(string propagators)
     {
-        Environment.SetEnvironmentVariable(ConfigurationKeys.Sdk.Propagators, propagators);
+        using var envScope = new EnvironmentScope(new Dictionary<string, string?>()
+        {
+            { ConfigurationKeys.Sdk.Propagators, propagators }
+        });
 
         Assert.Throws<NotSupportedException>(() => Settings.FromDefaultSources<SdkSettings>(true));
     }
@@ -321,10 +334,15 @@ public sealed class SettingsTests : IDisposable
 #if NET
     [InlineData("WCFCORE", TracerInstrumentation.WcfCore)]
 #endif
+    [InlineData("ADONET", TracerInstrumentation.AdoNet)]
+    [InlineData("SQLITE", TracerInstrumentation.Sqlite)]
     internal void TracerSettings_Instrumentations_SupportedValues(string tracerInstrumentation, TracerInstrumentation expectedTracerInstrumentation)
     {
-        Environment.SetEnvironmentVariable(ConfigurationKeys.Traces.TracesInstrumentationEnabled, "false");
-        Environment.SetEnvironmentVariable(string.Format(CultureInfo.InvariantCulture, ConfigurationKeys.Traces.EnabledTracesInstrumentationTemplate, tracerInstrumentation), "true");
+        using var envScope = new EnvironmentScope(new Dictionary<string, string?>()
+        {
+            { ConfigurationKeys.Traces.TracesInstrumentationEnabled, "false" },
+            { string.Format(CultureInfo.InvariantCulture, ConfigurationKeys.Traces.EnabledTracesInstrumentationTemplate, tracerInstrumentation), "true" },
+        });
 
         var settings = Settings.FromDefaultSources<TracerSettings>(false);
 
@@ -335,9 +353,12 @@ public sealed class SettingsTests : IDisposable
     [Fact]
     internal void TracerSettings_Instrumentations_EntityFrameworkCoreAndNpgsqlCanBeEnabledTogether()
     {
-        Environment.SetEnvironmentVariable(ConfigurationKeys.Traces.TracesInstrumentationEnabled, "false");
-        Environment.SetEnvironmentVariable(string.Format(CultureInfo.InvariantCulture, ConfigurationKeys.Traces.EnabledTracesInstrumentationTemplate, "ENTITYFRAMEWORKCORE"), "true");
-        Environment.SetEnvironmentVariable(string.Format(CultureInfo.InvariantCulture, ConfigurationKeys.Traces.EnabledTracesInstrumentationTemplate, "NPGSQL"), "true");
+        using var envScope = new EnvironmentScope(new Dictionary<string, string?>()
+        {
+            { ConfigurationKeys.Traces.TracesInstrumentationEnabled, "false" },
+            { string.Format(CultureInfo.InvariantCulture, ConfigurationKeys.Traces.EnabledTracesInstrumentationTemplate, "ENTITYFRAMEWORKCORE"), "true" },
+            { string.Format(CultureInfo.InvariantCulture, ConfigurationKeys.Traces.EnabledTracesInstrumentationTemplate, "NPGSQL"), "true" },
+        });
 
         var settings = Settings.FromDefaultSources<TracerSettings>(false);
 
@@ -363,8 +384,11 @@ public sealed class SettingsTests : IDisposable
     [InlineData("SQLCLIENT", MetricInstrumentation.SqlClient)]
     internal void MeterSettings_Instrumentations_SupportedValues(string meterInstrumentation, MetricInstrumentation expectedMetricInstrumentation)
     {
-        Environment.SetEnvironmentVariable(ConfigurationKeys.Metrics.MetricsInstrumentationEnabled, "false");
-        Environment.SetEnvironmentVariable(string.Format(CultureInfo.InvariantCulture, ConfigurationKeys.Metrics.EnabledMetricsInstrumentationTemplate, meterInstrumentation), "true");
+        using var envScope = new EnvironmentScope(new Dictionary<string, string?>()
+        {
+            { ConfigurationKeys.Metrics.MetricsInstrumentationEnabled, "false" },
+            { string.Format(CultureInfo.InvariantCulture, ConfigurationKeys.Metrics.EnabledMetricsInstrumentationTemplate, meterInstrumentation), "true" }
+        });
 
         var settings = Settings.FromDefaultSources<MetricSettings>(false);
 
@@ -377,8 +401,11 @@ public sealed class SettingsTests : IDisposable
     [InlineData("NLOG", LogInstrumentation.NLog)]
     internal void LogSettings_Instrumentations_SupportedValues(string logInstrumentation, LogInstrumentation expectedLogInstrumentation)
     {
-        Environment.SetEnvironmentVariable(ConfigurationKeys.Logs.LogsInstrumentationEnabled, "false");
-        Environment.SetEnvironmentVariable(string.Format(CultureInfo.InvariantCulture, ConfigurationKeys.Logs.EnabledLogsInstrumentationTemplate, logInstrumentation), "true");
+        using var envScope = new EnvironmentScope(new Dictionary<string, string?>()
+        {
+            { ConfigurationKeys.Logs.LogsInstrumentationEnabled, "false" },
+            { string.Format(CultureInfo.InvariantCulture, ConfigurationKeys.Logs.EnabledLogsInstrumentationTemplate, logInstrumentation), "true" }
+        });
 
         var settings = Settings.FromDefaultSources<LogSettings>(false);
 
@@ -390,7 +417,10 @@ public sealed class SettingsTests : IDisposable
     [InlineData("false", false)]
     internal void IncludeFormattedMessage_DependsOnCorrespondingEnvVariable(string includeFormattedMessage, bool expectedValue)
     {
-        Environment.SetEnvironmentVariable(ConfigurationKeys.Logs.IncludeFormattedMessage, includeFormattedMessage);
+        using var envScope = new EnvironmentScope(new Dictionary<string, string?>()
+        {
+            { ConfigurationKeys.Logs.IncludeFormattedMessage, includeFormattedMessage }
+        });
 
         var settings = Settings.FromDefaultSources<LogSettings>(false);
 
@@ -409,13 +439,47 @@ public sealed class SettingsTests : IDisposable
     [InlineData("nonExistingProtocol", OtlpExportProtocol.HttpProtobuf)]
     internal void OtlpExportProtocol_DependsOnCorrespondingEnvVariable(string? otlpProtocol, OtlpExportProtocol? expectedOtlpExportProtocol)
     {
-        Environment.SetEnvironmentVariable(AutoOtlpDefinitions.DefaultProtocolEnvVarName, otlpProtocol);
+        using var envScope = new EnvironmentScope(new Dictionary<string, string?>()
+        {
+            { AutoOtlpDefinitions.DefaultProtocolEnvVarName, otlpProtocol }
+        });
 
         var settings = Settings.FromDefaultSources<TracerSettings>(false);
 
         // null values for expected data will be handled by OTel .NET SDK
         Assert.NotNull(settings.OtlpSettings);
         Assert.Equal(expectedOtlpExportProtocol, settings.OtlpSettings.Protocol);
+    }
+
+    [Theory]
+    [InlineData("http/protobuf", true)]
+#if NETFRAMEWORK
+    [InlineData("grpc", true)]
+#else
+    [InlineData("grpc", false)]
+#endif
+    internal void OtlpSettings_CopyTo_OverridesHttpClientFactoryForHttpProtobufOnly(string otlpProtocol, bool expectHttpClientFactoryOverride)
+    {
+        using var envScope = new EnvironmentScope(new Dictionary<string, string?>()
+        {
+            { AutoOtlpDefinitions.DefaultProtocolEnvVarName, otlpProtocol }
+        });
+
+        var settings = Settings.FromDefaultSources<TracerSettings>(false).OtlpSettings;
+        var options = new OtlpExporterOptions();
+        Func<HttpClient> originalHttpClientFactory = static () => new HttpClient();
+        options.HttpClientFactory = originalHttpClientFactory;
+
+        settings?.CopyTo(options);
+
+        if (expectHttpClientFactoryOverride)
+        {
+            Assert.NotSame(originalHttpClientFactory, options.HttpClientFactory);
+        }
+        else
+        {
+            Assert.Same(originalHttpClientFactory, options.HttpClientFactory);
+        }
     }
 
     [Theory]
@@ -429,10 +493,13 @@ public sealed class SettingsTests : IDisposable
     internal void OtlpExportProtocol_CheckPriorityEnvIsSet_Traces(string? protocol, string timeout, string headers, OtlpExportProtocol? expectedProtocol, int expectedTimeout)
     {
         var unexpectedProtocolForDistraction = expectedProtocol == OtlpExportProtocol.HttpProtobuf ? "grpc" : "http/protobuf";
-        Environment.SetEnvironmentVariable(AutoOtlpDefinitions.DefaultProtocolEnvVarName, unexpectedProtocolForDistraction); // set a different default to verify priority
-        Environment.SetEnvironmentVariable(AutoOtlpDefinitions.TracesProtocolEnvVarName, protocol);
-        Environment.SetEnvironmentVariable(AutoOtlpDefinitions.TracesTimeoutEnvVarName, timeout);
-        Environment.SetEnvironmentVariable(AutoOtlpDefinitions.TracesHeadersEnvVarName, headers);
+        using var envScope = new EnvironmentScope(new Dictionary<string, string?>()
+        {
+            { AutoOtlpDefinitions.DefaultProtocolEnvVarName, unexpectedProtocolForDistraction }, // set a different default to verify priority
+            { AutoOtlpDefinitions.TracesProtocolEnvVarName, protocol },
+            { AutoOtlpDefinitions.TracesTimeoutEnvVarName, timeout },
+            { AutoOtlpDefinitions.TracesHeadersEnvVarName, headers },
+        });
 
         var settings = Settings.FromDefaultSources<TracerSettings>(false).OtlpSettings;
 
@@ -453,10 +520,13 @@ public sealed class SettingsTests : IDisposable
     internal void OtlpExportProtocol_CheckPriorityEnvIsSet_Metrics(string? protocol, string timeout, string headers, OtlpExportProtocol? expectedProtocol, int expectedTimeout)
     {
         var unexpectedProtocolForDistraction = expectedProtocol == OtlpExportProtocol.HttpProtobuf ? "grpc" : "http/protobuf";
-        Environment.SetEnvironmentVariable(AutoOtlpDefinitions.DefaultProtocolEnvVarName, unexpectedProtocolForDistraction); // set a different default to verify priority
-        Environment.SetEnvironmentVariable(AutoOtlpDefinitions.MetricsProtocolEnvVarName, protocol);
-        Environment.SetEnvironmentVariable(AutoOtlpDefinitions.MetricsTimeoutEnvVarName, timeout);
-        Environment.SetEnvironmentVariable(AutoOtlpDefinitions.MetricsHeadersEnvVarName, headers);
+        using var envScope = new EnvironmentScope(new Dictionary<string, string?>()
+        {
+            { AutoOtlpDefinitions.DefaultProtocolEnvVarName, unexpectedProtocolForDistraction }, // set a different default to verify priority
+            { AutoOtlpDefinitions.MetricsProtocolEnvVarName, protocol },
+            { AutoOtlpDefinitions.MetricsTimeoutEnvVarName, timeout },
+            { AutoOtlpDefinitions.MetricsHeadersEnvVarName, headers },
+        });
 
         var settings = Settings.FromDefaultSources<MetricSettings>(false).OtlpSettings;
 
@@ -477,10 +547,13 @@ public sealed class SettingsTests : IDisposable
     internal void OtlpExportProtocol_CheckPriorityEnvIsSet_Logs(string? protocol, string timeout, string headers, OtlpExportProtocol? expectedProtocol, int expectedTimeout)
     {
         var unexpectedProtocolForDistraction = expectedProtocol == OtlpExportProtocol.HttpProtobuf ? "grpc" : "http/protobuf";
-        Environment.SetEnvironmentVariable(AutoOtlpDefinitions.DefaultProtocolEnvVarName, unexpectedProtocolForDistraction); // set a different default to verify priority
-        Environment.SetEnvironmentVariable(AutoOtlpDefinitions.LogsProtocolEnvVarName, protocol);
-        Environment.SetEnvironmentVariable(AutoOtlpDefinitions.LogsTimeoutEnvVarName, timeout);
-        Environment.SetEnvironmentVariable(AutoOtlpDefinitions.LogsHeadersEnvVarName, headers);
+        using var envScope = new EnvironmentScope(new Dictionary<string, string?>()
+        {
+            { AutoOtlpDefinitions.DefaultProtocolEnvVarName, unexpectedProtocolForDistraction }, // set a different default to verify priority
+            { AutoOtlpDefinitions.LogsProtocolEnvVarName, protocol },
+            { AutoOtlpDefinitions.LogsTimeoutEnvVarName, timeout },
+            { AutoOtlpDefinitions.LogsHeadersEnvVarName, headers },
+        });
 
         var settings = Settings.FromDefaultSources<LogSettings>(false).OtlpSettings;
 
@@ -496,7 +569,10 @@ public sealed class SettingsTests : IDisposable
     [InlineData(null, false)]
     internal void FlushOnUnhandledException_DependsOnCorrespondingEnvVariable(string? flushOnUnhandledException, bool expectedValue)
     {
-        Environment.SetEnvironmentVariable(ConfigurationKeys.FlushOnUnhandledException, flushOnUnhandledException);
+        using var envScope = new EnvironmentScope(new Dictionary<string, string?>()
+        {
+            { ConfigurationKeys.FlushOnUnhandledException, flushOnUnhandledException }
+        });
 
         var settings = Settings.FromDefaultSources<GeneralSettings>(false);
 
@@ -514,97 +590,14 @@ public sealed class SettingsTests : IDisposable
     [InlineData("HOST", ResourceDetector.Host)]
     internal void ResourceSettings_ResourceDetectors_SupportedValues(string resourceDetector, ResourceDetector expectedResourceDetector)
     {
-        Environment.SetEnvironmentVariable(ConfigurationKeys.ResourceDetectorEnabled, "false");
-        Environment.SetEnvironmentVariable(string.Format(CultureInfo.InvariantCulture, ConfigurationKeys.EnabledResourceDetectorTemplate, resourceDetector), "true");
+        using var envScope = new EnvironmentScope(new Dictionary<string, string?>()
+        {
+            { ConfigurationKeys.ResourceDetectorEnabled, "false" },
+            { string.Format(CultureInfo.InvariantCulture, ConfigurationKeys.EnabledResourceDetectorTemplate, resourceDetector), "true" },
+        });
 
         var settings = Settings.FromDefaultSources<ResourceSettings>(false);
 
         Assert.Equal([expectedResourceDetector], settings.EnabledDetectors);
-    }
-
-    private static void ClearEnvVars()
-    {
-        Environment.SetEnvironmentVariable(ConfigurationKeys.Logs.LogsInstrumentationEnabled, null);
-#if NET
-        foreach (var logInstrumentation in Enum.GetValues<LogInstrumentation>())
-#else
-        foreach (var logInstrumentation in Enum.GetValues(typeof(LogInstrumentation)).Cast<LogInstrumentation>())
-#endif
-        {
-            Environment.SetEnvironmentVariable(string.Format(CultureInfo.InvariantCulture, ConfigurationKeys.Logs.EnabledLogsInstrumentationTemplate, logInstrumentation.ToString().ToUpperInvariant()), null);
-        }
-
-        Environment.SetEnvironmentVariable(ConfigurationKeys.Logs.Exporter, null);
-        Environment.SetEnvironmentVariable(ConfigurationKeys.Logs.IncludeFormattedMessage, null);
-
-        Environment.SetEnvironmentVariable(ConfigurationKeys.Metrics.MetricsInstrumentationEnabled, null);
-#if NET
-        foreach (var metricInstrumentation in Enum.GetValues<MetricInstrumentation>())
-#else
-        foreach (var metricInstrumentation in Enum.GetValues(typeof(MetricInstrumentation)).Cast<MetricInstrumentation>())
-#endif
-        {
-            Environment.SetEnvironmentVariable(string.Format(CultureInfo.InvariantCulture, ConfigurationKeys.Metrics.EnabledMetricsInstrumentationTemplate, metricInstrumentation.ToString().ToUpperInvariant()), null);
-        }
-
-        Environment.SetEnvironmentVariable(ConfigurationKeys.Metrics.Exporter, null);
-        Environment.SetEnvironmentVariable(ConfigurationKeys.Traces.TracesInstrumentationEnabled, null);
-#if NET
-        foreach (var tracerInstrumentation in Enum.GetValues<TracerInstrumentation>())
-#else
-        foreach (var tracerInstrumentation in Enum.GetValues(typeof(TracerInstrumentation)).Cast<TracerInstrumentation>())
-#endif
-        {
-            Environment.SetEnvironmentVariable(string.Format(CultureInfo.InvariantCulture, ConfigurationKeys.Traces.EnabledTracesInstrumentationTemplate, tracerInstrumentation.ToString().ToUpperInvariant()), null);
-        }
-
-        Environment.SetEnvironmentVariable(ConfigurationKeys.Traces.Exporter, null);
-        Environment.SetEnvironmentVariable(AutoOtlpDefinitions.DefaultProtocolEnvVarName, null);
-        Environment.SetEnvironmentVariable(ConfigurationKeys.FlushOnUnhandledException, null);
-        Environment.SetEnvironmentVariable(ConfigurationKeys.ResourceDetectorEnabled, null);
-
-        Environment.SetEnvironmentVariable(ConfigurationKeys.ResourceDetectorEnabled, null);
-#if NET
-        foreach (var resourceDetector in Enum.GetValues<ResourceDetector>())
-#else
-        foreach (var resourceDetector in Enum.GetValues(typeof(ResourceDetector)).Cast<ResourceDetector>())
-#endif
-        {
-            Environment.SetEnvironmentVariable(string.Format(CultureInfo.InvariantCulture, ConfigurationKeys.EnabledResourceDetectorTemplate, resourceDetector.ToString().ToUpperInvariant()), null);
-        }
-
-        Environment.SetEnvironmentVariable(ConfigurationKeys.Sdk.Propagators, null);
-
-#if NETFRAMEWORK
-        Environment.SetEnvironmentVariable(ConfigurationKeys.Traces.InstrumentationOptions.AspNetInstrumentationCaptureRequestHeaders, null);
-        Environment.SetEnvironmentVariable(ConfigurationKeys.Traces.InstrumentationOptions.AspNetInstrumentationCaptureResponseHeaders, null);
-#endif
-
-#if NET
-        Environment.SetEnvironmentVariable(ConfigurationKeys.Traces.InstrumentationOptions.AspNetCoreInstrumentationCaptureRequestHeaders, null);
-        Environment.SetEnvironmentVariable(ConfigurationKeys.Traces.InstrumentationOptions.AspNetCoreInstrumentationCaptureResponseHeaders, null);
-        Environment.SetEnvironmentVariable(ConfigurationKeys.Traces.InstrumentationOptions.GraphQLSetDocument, null);
-#endif
-        Environment.SetEnvironmentVariable(ConfigurationKeys.Traces.InstrumentationOptions.GrpcNetClientInstrumentationCaptureRequestMetadata, null);
-        Environment.SetEnvironmentVariable(ConfigurationKeys.Traces.InstrumentationOptions.GrpcNetClientInstrumentationCaptureResponseMetadata, null);
-        Environment.SetEnvironmentVariable(ConfigurationKeys.Traces.InstrumentationOptions.HttpInstrumentationCaptureRequestHeaders, null);
-        Environment.SetEnvironmentVariable(ConfigurationKeys.Traces.InstrumentationOptions.HttpInstrumentationCaptureResponseHeaders, null);
-        Environment.SetEnvironmentVariable(ConfigurationKeys.Traces.InstrumentationOptions.OracleMdaSetDbStatementForText, null);
-        Environment.SetEnvironmentVariable(ConfigurationKeys.Traces.InstrumentationOptions.SqlClientNetFxILRewriteEnabled, null);
-
-        // Cleanup OTLP env vars
-        foreach (var envVar in GetAllOtlpEnvVarNames())
-        {
-            Environment.SetEnvironmentVariable(envVar, null);
-        }
-    }
-
-    private static IEnumerable<string> GetAllOtlpEnvVarNames()
-    {
-        return typeof(AutoOtlpDefinitions)
-            .GetFields(BindingFlags.Public | BindingFlags.Static)
-            .Where(f => f.FieldType == typeof(string))
-            .Select(f => (string)f.GetValue(null)!)
-            .ToList() ?? Enumerable.Empty<string>();
     }
 }

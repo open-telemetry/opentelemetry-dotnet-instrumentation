@@ -32,6 +32,12 @@ internal class DotNetTraces
     [YamlMember(Alias = "additional_legacy_sources_list")]
     public string? AdditionalLegacySourcesList { get; set; }
 
+    /// <summary>
+    /// Gets or sets the ADO.NET traces instrumentation configuration.
+    /// </summary>
+    [YamlMember(Alias = "adonet")]
+    public object? AdoNet { get; set; }
+
 #if NETFRAMEWORK
     /// <summary>
     /// Gets or sets the ASP.NET traces instrumentation configuration.
@@ -169,6 +175,12 @@ internal class DotNetTraces
     /// </summary>
     [YamlMember(Alias = "sqlclient")]
     public SqlClientConfiguration? SqlClient { get; set; }
+
+    /// <summary>
+    /// Gets or sets the SQLite traces instrumentation configuration.
+    /// </summary>
+    [YamlMember(Alias = "sqlite")]
+    public object? Sqlite { get; set; }
 
     /// <summary>
     /// Gets or sets the WCF client traces instrumentation configuration.

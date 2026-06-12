@@ -4,7 +4,6 @@
 using System.Reflection;
 using System.Reflection.Emit;
 using OpenTelemetry.AutoInstrumentation.Loading;
-using Xunit;
 
 namespace OpenTelemetry.AutoInstrumentation.Tests.Loading;
 

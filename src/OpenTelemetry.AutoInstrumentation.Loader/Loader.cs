@@ -22,13 +22,19 @@ internal class Loader
     /// </summary>
     static Loader()
     {
-        try
+        // Check if we should or should not skip setting up AssemblyResolver
+        var skipResolver = SkipAssemblyResolver();
+        Logger.Information($"Skip AssemblyResolver: {skipResolver}");
+        if (!skipResolver)
         {
-            AppDomain.CurrentDomain.AssemblyResolve += new AssemblyResolver(Logger).AssemblyResolve_ManagedProfilerDependencies;
-        }
-        catch (Exception ex)
-        {
-            Logger.Error(ex, "Unable to register a callback to the CurrentDomain.AssemblyResolve event.");
+            try
+            {
+                new AssemblyResolver(Logger).RegisterAssemblyResolving();
+            }
+            catch (Exception ex)
+            {
+                Logger.Error(ex, "Unable to register assembly resolving");
+            }
         }
 
         TryLoadManagedAssembly();
@@ -44,6 +50,26 @@ internal class Loader
         {
             OtelLogging.CloseLogger(LoaderLoggerSuffix, Logger);
         }
+    }
+
+    private static bool SkipAssemblyResolver()
+    {
+#if NET
+        // For .Net (Core) if we run in isolated context (set up by StartupHook's IsolatedAssemblyLoadContext),
+        // skip AssemblyResolver. The isolated AssemblyLoadContext already handles all assembly resolution.
+        var currentContext = System.Runtime.Loader.AssemblyLoadContext.CurrentContextualReflectionContext;
+        var isIsolated = currentContext?.Name == StartupHookConstants.IsolatedAssemblyLoadContextName;
+        Logger.Information($"Loader Current Context [{currentContext}] is Isolated: {isIsolated}");
+        if (isIsolated)
+        {
+            return true;
+        }
+#endif
+
+        // Check if AssemblyResolver should be implicitly skipped for non standalone deployment where
+        // the anticipated folder structure of our dependency files is not guaraneteed (e.g. on NuGet
+        // deployment our dependencies are either flat in the application output or in the runtime folders)
+        return !DeploymentDetector.IsStandaloneDeployment(Logger);
     }
 
     private static void OnExit(object? sender, EventArgs e)

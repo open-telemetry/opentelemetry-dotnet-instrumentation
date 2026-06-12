@@ -45,12 +45,13 @@ file-based configuration to include these parameters.
 
 ### General
 
-| Environment variable                                 | Description                                                                                                               |
-| ---------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
-| `OTEL_DOTNET_AUTO_HOME`                              | Installation location.                                                                                                    |
-| `OTEL_DOTNET_AUTO_EXCLUDE_PROCESSES`                 | Names of the executable files that the profiler cannot instrument.                                                        |
-| `OTEL_DOTNET_AUTO_OPENTRACING_ENABLED`               | Enables OpenTracing tracer.                                                                                               |
-| `OTEL_DOTNET_AUTO_NETFX_REDIRECT_ENABLED`            | Enables automatic redirection of the assemblies used by the automatic instrumentation on the .NET Framework.              |
+| Environment variable                                 | Description                                                                                                                                                                |
+| ---------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `OTEL_DOTNET_AUTO_HOME`                              | Installation location.                                                                                                                                                     |
+| `OTEL_DOTNET_AUTO_EXCLUDE_PROCESSES`                 | Names of the executable files that the profiler cannot instrument.                                                                                                         |
+| `OTEL_DOTNET_AUTO_OPENTRACING_ENABLED`               | Enables OpenTracing tracer.                                                                                                                                                |
+| `OTEL_DOTNET_AUTO_NETFX_REDIRECT_ENABLED`            | **Obsolete. .NET Framework only.** Fallback for `OTEL_DOTNET_AUTO_REDIRECT_ENABLED` when the primary variable is not set. Use `OTEL_DOTNET_AUTO_REDIRECT_ENABLED` instead. |
+| `OTEL_DOTNET_AUTO_REDIRECT_ENABLED`                  | Enables redirection of assembly references to versions not lower than those used by the automatic instrumentation                                                          |
 
 ---
 
@@ -106,8 +107,6 @@ file-based configuration to include these parameters.
 | Environment variable     | Description                                          |
 |--------------------------|------------------------------------------------------|
 | `DOTNET_STARTUP_HOOKS`   | Specifies managed assemblies to load during startup. |
-| `DOTNET_ADDITIONAL_DEPS` | Additional .deps.json files to include.              |
-| `DOTNET_SHARED_STORE`    | Path to additional shared assemblies.                |
 
 ---
 
@@ -505,6 +504,7 @@ To disable a instrumentation, comment out or remove its corresponding entry.
 instrumentation/development:
   dotnet:
     traces:
+      adonet:              # ADO.NET
       aspnet:              # ASP.NET
       aspnetcore:          # ASP.NET Core
       azure:               # Azure SDK
@@ -525,6 +525,7 @@ instrumentation/development:
       rabbitmq:            # RabbitMQ.Client
       quartz:              # Quartz
       sqlclient:           # Microsoft.Data.SqlClient & System.Data.SqlClient
+      sqlite:              # Microsoft.Data.Sqlite
       stackexchangeredis:  # StackExchange.Redis
       wcfclient:           # WCF Client
       wcfcore:             # CoreWCF.Primitives
@@ -616,6 +617,15 @@ instrumentation/development:
         - MyProduct.MyLibrary.Metrics
       # Alternatively, configure via a comma-separated list (same format as OTEL_DOTNET_AUTO_METRICS_ADDITIONAL_SOURCES).
       additional_sources_list: ${OTEL_DOTNET_AUTO_METRICS_ADDITIONAL_SOURCES}
+```
+
+### OpAMP
+
+``` yaml
+opamp/development:
+  # Configure the server endpoint. If not explicitly set, a default
+  # URL is used: https://localhost:4320/v1/opamp.
+  server_url: https://localhost:4320/v1/opamp
 ```
 
 ### Configuration based instrumentation
