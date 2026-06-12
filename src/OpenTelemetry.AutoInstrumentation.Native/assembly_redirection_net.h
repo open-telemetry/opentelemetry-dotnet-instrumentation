@@ -26,6 +26,7 @@
         { _W("OpenTelemetry.AutoInstrumentation"), {auto_major, 0, 0, 0} }, \
         { _W("OpenTelemetry.AutoInstrumentation.AspNetCoreBootstrapper"), {1, 0, 0, 0} }, \
         { _W("OpenTelemetry.AutoInstrumentation.Loader"), {1, 0, 0, 0} }, \
+        { _W("OpenTelemetry.AutoInstrumentation.PluginApi"), {1, 0, 0, 0} }, \
         { _W("OpenTelemetry.AutoInstrumentation.StartupHook"), {1, 0, 0, 0} }, \
         { _W("OpenTelemetry.Exporter.Console"), {1, 0, 0, 0} }, \
         { _W("OpenTelemetry.Exporter.OpenTelemetryProtocol"), {1, 0, 0, 0} }, \
@@ -77,6 +78,7 @@
         { _W("OpenTelemetry.AutoInstrumentation"), {auto_major, 0, 0, 0} }, \
         { _W("OpenTelemetry.AutoInstrumentation.AspNetCoreBootstrapper"), {1, 0, 0, 0} }, \
         { _W("OpenTelemetry.AutoInstrumentation.Loader"), {1, 0, 0, 0} }, \
+        { _W("OpenTelemetry.AutoInstrumentation.PluginApi"), {1, 0, 0, 0} }, \
         { _W("OpenTelemetry.AutoInstrumentation.StartupHook"), {1, 0, 0, 0} }, \
         { _W("OpenTelemetry.Exporter.Console"), {1, 0, 0, 0} }, \
         { _W("OpenTelemetry.Exporter.OpenTelemetryProtocol"), {1, 0, 0, 0} }, \
@@ -128,6 +130,7 @@
         { _W("OpenTelemetry.AutoInstrumentation"), {auto_major, 0, 0, 0} }, \
         { _W("OpenTelemetry.AutoInstrumentation.AspNetCoreBootstrapper"), {1, 0, 0, 0} }, \
         { _W("OpenTelemetry.AutoInstrumentation.Loader"), {1, 0, 0, 0} }, \
+        { _W("OpenTelemetry.AutoInstrumentation.PluginApi"), {1, 0, 0, 0} }, \
         { _W("OpenTelemetry.AutoInstrumentation.StartupHook"), {1, 0, 0, 0} }, \
         { _W("OpenTelemetry.Exporter.Console"), {1, 0, 0, 0} }, \
         { _W("OpenTelemetry.Exporter.OpenTelemetryProtocol"), {1, 0, 0, 0} }, \
