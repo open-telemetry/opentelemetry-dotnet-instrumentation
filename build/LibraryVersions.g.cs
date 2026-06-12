@@ -115,7 +115,7 @@ public static partial class LibraryVersion
             "TestApplication.MySqlConnector",
             [
                 new("2.0.0"),
-                new("2.5.0"),
+                new("2.6.0"),
             ]
         },
         {
