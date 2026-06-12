@@ -8,6 +8,7 @@
 #include "logger.h"
 #include "module_metadata.h"
 #include "otel_profiler_constants.h"
+#include "util.h"
 
 #ifndef _WIN32
 #include <dlfcn.h>
@@ -506,6 +507,19 @@ HRESULT CallTargetTokens::ModifyLocalSig(ILRewriter*    reWriter,
 
     // Get new locals token
     mdToken newLocalVarSig;
+    if (Logger::IsDebugEnabled())
+    {
+        Logger::Debug("CallTargetTokens::ModifyLocalSig: originalLocalVarSig=", HexStr(&localVarSig, sizeof(mdToken)),
+                      " originalSignatureSize=", originalSignatureSize, " originalSignature=",
+                      originalSignature == nullptr ? WStr("<nil>") : HexStr(originalSignature, originalSignatureSize),
+                      " newLocalsCount=", newLocalsCount, " newSignatureSize=", newSignatureSize,
+                      " newSignatureOffset=", newSignatureOffset,
+                      " newSignature=", HexStr(newSignatureBuffer, newSignatureOffset),
+                      " exceptionToken=", HexStr(&exTypeRef, sizeof(mdToken)),
+                      " callTargetReturnToken=", HexStr(&callTargetReturn, sizeof(mdToken)),
+                      " callTargetStateToken=", HexStr(&callTargetStateTypeRef, sizeof(mdToken)));
+    }
+
     hr = module_metadata->metadata_emit->GetTokenFromSig(newSignatureBuffer, newSignatureSize, &newLocalVarSig);
     if (FAILED(hr))
     {
@@ -514,6 +528,11 @@ HRESULT CallTargetTokens::ModifyLocalSig(ILRewriter*    reWriter,
     }
 
     reWriter->SetTkLocalVarSig(newLocalVarSig);
+    if (Logger::IsDebugEnabled())
+    {
+        Logger::Debug("CallTargetTokens::ModifyLocalSig: newLocalVarSig=", HexStr(&newLocalVarSig, sizeof(mdToken)));
+    }
+
     *callTargetStateToken  = callTargetStateTypeRef;
     *exceptionToken        = exTypeRef;
     *callTargetReturnToken = callTargetReturn;

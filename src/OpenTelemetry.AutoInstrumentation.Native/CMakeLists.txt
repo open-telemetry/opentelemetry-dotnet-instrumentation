@@ -220,7 +220,9 @@ add_library("OpenTelemetry.AutoInstrumentation.Native.static" STATIC
         regex_utils.cpp
         string_utils.cpp
         util.cpp
+        calltarget_rewrite_tokens.cpp
         calltarget_tokens.cpp
+        calltarget_trampoline.cpp
         rejit_handler.cpp
         rejit_preprocessor.cpp
         rejit_work_offloader.cpp

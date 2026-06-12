@@ -4,6 +4,7 @@
  */
 
 #include "method_rewriter.h"
+#include "calltarget_rewrite_tokens.h"
 #include "cor_profiler.h"
 #include "il_rewriter_wrapper.h"
 #include "integration.h"
@@ -103,7 +104,8 @@ HRESULT TracerMethodRewriter::Rewrite(RejitHandlerModule* moduleHandler, RejitHa
     IntegrationDefinition* integration_definition = tracerMethodHandler->GetIntegrationDefinition();
     bool                   is_integration_method =
         integration_definition->target_method.type.assembly.name != tracemethodintegration_assemblyname;
-    bool ignoreByRefInstrumentation               = !is_integration_method;
+    bool use_trampoline             = corProfiler->IsCallTargetTrampolineEnabled() && is_integration_method;
+    bool ignoreByRefInstrumentation = !is_integration_method;
     const auto [retFuncElementType, retTypeFlags] = retFuncArg.GetElementTypeAndFlags();
     bool isVoid                                   = (retTypeFlags & TypeFlagVoid) > 0;
     bool isStatic = !(caller->method_signature.CallingConvention() & IMAGE_CEE_CS_CALLCONV_HASTHIS);
@@ -114,10 +116,26 @@ HRESULT TracerMethodRewriter::Rewrite(RejitHandlerModule* moduleHandler, RejitHa
     int                               numArgs    = caller->method_signature.NumberOfArguments();
     auto                              metaEmit   = module_metadata.metadata_emit;
     auto                              metaImport = module_metadata.metadata_import;
+    auto                              hr         = S_OK;
 
-    // *** Get reference to the integration type
-    mdTypeRef integration_type_ref = mdTypeRefNil;
-    if (!corProfiler->GetIntegrationTypeRef(module_metadata, module_id, *integration_definition, integration_type_ref))
+    // TODO: Trampoline mode is hidden behind TracerTokens here to keep this rewrite close to upstream.
+    // A later cleanup can move the remaining token-selection setup into a small factory/helper.
+    // *** Get reference to the integration type or trampoline map
+    mdTypeRef                  integration_type_ref = mdTypeRefNil;
+    CallTargetTrampolineTokens trampolineTokens(&module_metadata, integration_definition);
+    if (use_trampoline)
+    {
+        hr = trampolineTokens.Initialize();
+        if (FAILED(hr))
+        {
+            return S_FALSE;
+        }
+
+        integration_type_ref = trampolineTokens.GetIntegrationTypeRef();
+        tracerTokens         = &trampolineTokens;
+    }
+    else if (!corProfiler->GetIntegrationTypeRef(module_metadata, module_id, *integration_definition,
+                                                 integration_type_ref))
     {
         Logger::Warn("*** CallTarget_RewriterCallback() skipping method: Integration Type Ref cannot be found for ",
                      " token=", function_token, " caller_name=", caller->type.name, ".", caller->name, "()");
@@ -127,13 +145,14 @@ HRESULT TracerMethodRewriter::Rewrite(RejitHandlerModule* moduleHandler, RejitHa
     if (Logger::IsDebugEnabled())
     {
         Logger::Debug("*** CallTarget_RewriterCallback() Start: ", caller->type.name, ".", caller->name,
-                      "() [IsVoid=", isVoid, ", IsStatic=", isStatic,
+                      "() [IsVoid=", isVoid, ", IsStatic=", isStatic, ", Trampoline=", use_trampoline,
                       ", IntegrationType=", integration_definition->integration_type.name, ", Arguments=", numArgs,
                       "]");
     }
 
     // First we check if the managed profiler has not been loaded yet
-    if (!corProfiler->ProfilerAssemblyIsLoadedIntoAppDomain(module_metadata.app_domain_id))
+    // TODO: trampoline and neutral domain may have better option
+    if (!use_trampoline && !corProfiler->ProfilerAssemblyIsLoadedIntoAppDomain(module_metadata.app_domain_id))
     {
         Logger::Warn(
             "*** CallTarget_RewriterCallback() skipping method: Method replacement found but the managed profiler has "
@@ -146,7 +165,7 @@ HRESULT TracerMethodRewriter::Rewrite(RejitHandlerModule* moduleHandler, RejitHa
     // *** Create rewriter
     ILRewriter rewriter(corProfiler->info_, methodHandler->GetFunctionControl(), module_id, function_token);
     bool       modified = false;
-    auto       hr       = rewriter.Import();
+    hr                  = rewriter.Import();
     if (FAILED(hr))
     {
         Logger::Warn("*** CallTarget_RewriterCallback(): Call to ILRewriter.Import() failed for ", module_id, " ",
@@ -175,9 +194,13 @@ HRESULT TracerMethodRewriter::Rewrite(RejitHandlerModule* moduleHandler, RejitHa
     mdToken  exceptionToken        = mdTokenNil;
     mdToken  callTargetReturnToken = mdTokenNil;
     ILInstr* firstInstruction      = nullptr;
-    tracerTokens->ModifyLocalSigAndInitialize(&reWriterWrapper, caller, &callTargetStateIndex, &exceptionIndex,
-                                              &callTargetReturnIndex, &returnValueIndex, &callTargetStateToken,
-                                              &exceptionToken, &callTargetReturnToken, &firstInstruction);
+    hr = tracerTokens->ModifyLocalSigAndInitialize(&reWriterWrapper, caller, &callTargetStateIndex, &exceptionIndex,
+                                                   &callTargetReturnIndex, &returnValueIndex, &callTargetStateToken,
+                                                   &exceptionToken, &callTargetReturnToken, &firstInstruction);
+    if (FAILED(hr))
+    {
+        return S_FALSE;
+    }
 
     // ***
     // BEGIN METHOD PART
@@ -237,7 +260,7 @@ HRESULT TracerMethodRewriter::Rewrite(RejitHandlerModule* moduleHandler, RejitHa
             for (int i = 0; i < numArgs; i++)
             {
                 const auto [elementType, argTypeFlags] = methodArguments[i].GetElementTypeAndFlags();
-                if (corProfiler->enable_by_ref_instrumentation)
+                if (tracerTokens->ShouldLoadArgumentsByRef(ignoreByRefInstrumentation))
                 {
                     if (argTypeFlags & TypeFlagByRef)
                     {
@@ -368,7 +391,12 @@ HRESULT TracerMethodRewriter::Rewrite(RejitHandlerModule* moduleHandler, RejitHa
 
     // *** BeginMethod call catch
     ILInstr* beginMethodCatchFirstInstr = nullptr;
-    tracerTokens->WriteLogException(&reWriterWrapper, integration_type_ref, &caller->type, &beginMethodCatchFirstInstr);
+    hr = tracerTokens->WriteLogException(&reWriterWrapper, integration_type_ref, &caller->type,
+                                         &beginMethodCatchFirstInstr);
+    if (FAILED(hr))
+    {
+        return S_FALSE;
+    }
     ILInstr* beginMethodCatchLeaveInstr = reWriterWrapper.CreateInstr(CEE_LEAVE_S);
 
     // *** BeginMethod exception handling clause
@@ -463,7 +491,7 @@ HRESULT TracerMethodRewriter::Rewrite(RejitHandlerModule* moduleHandler, RejitHa
     }
 
     reWriterWrapper.LoadLocal(exceptionIndex);
-    if (corProfiler->enable_calltarget_state_by_ref)
+    if (tracerTokens->ShouldLoadCallTargetStateByRef())
     {
         reWriterWrapper.LoadLocalAddress(callTargetStateIndex);
     }
@@ -475,13 +503,17 @@ HRESULT TracerMethodRewriter::Rewrite(RejitHandlerModule* moduleHandler, RejitHa
     ILInstr* endMethodCallInstr;
     if (isVoid)
     {
-        tracerTokens->WriteEndVoidReturnMemberRef(&reWriterWrapper, integration_type_ref, &caller->type,
-                                                  &endMethodCallInstr);
+        hr = tracerTokens->WriteEndVoidReturnMemberRef(&reWriterWrapper, integration_type_ref, &caller->type,
+                                                       &endMethodCallInstr);
     }
     else
     {
-        tracerTokens->WriteEndReturnMemberRef(&reWriterWrapper, integration_type_ref, &caller->type, &retFuncArg,
-                                              &endMethodCallInstr);
+        hr = tracerTokens->WriteEndReturnMemberRef(&reWriterWrapper, integration_type_ref, &caller->type, &retFuncArg,
+                                                   &endMethodCallInstr);
+    }
+    if (FAILED(hr))
+    {
+        return S_FALSE;
     }
     reWriterWrapper.StLocal(callTargetReturnIndex);
 
@@ -489,8 +521,13 @@ HRESULT TracerMethodRewriter::Rewrite(RejitHandlerModule* moduleHandler, RejitHa
     {
         ILInstr* callTargetReturnGetReturnInstr;
         reWriterWrapper.LoadLocalAddress(callTargetReturnIndex);
-        tracerTokens->WriteCallTargetReturnGetReturnValue(&reWriterWrapper, callTargetReturnToken,
-                                                          &callTargetReturnGetReturnInstr);
+        hr = tracerTokens->WriteCallTargetReturnGetReturnValue(&reWriterWrapper,
+                                                               static_cast<mdTypeSpec>(callTargetReturnToken),
+                                                               &callTargetReturnGetReturnInstr);
+        if (FAILED(hr))
+        {
+            return S_FALSE;
+        }
         reWriterWrapper.StLocal(returnValueIndex);
     }
 
@@ -498,7 +535,12 @@ HRESULT TracerMethodRewriter::Rewrite(RejitHandlerModule* moduleHandler, RejitHa
 
     // *** EndMethod call catch
     ILInstr* endMethodCatchFirstInstr = nullptr;
-    tracerTokens->WriteLogException(&reWriterWrapper, integration_type_ref, &caller->type, &endMethodCatchFirstInstr);
+    hr = tracerTokens->WriteLogException(&reWriterWrapper, integration_type_ref, &caller->type,
+                                         &endMethodCatchFirstInstr);
+    if (FAILED(hr))
+    {
+        return S_FALSE;
+    }
     ILInstr* endMethodCatchLeaveInstr = reWriterWrapper.CreateInstr(CEE_LEAVE_S);
 
     // *** EndMethod exception handling clause
@@ -591,6 +633,19 @@ HRESULT TracerMethodRewriter::Rewrite(RejitHandlerModule* moduleHandler, RejitHa
                                              module_metadata.metadata_import));
     }
 
+    hr = corProfiler->GetCorProfilerInfo()->ApplyMetaData(module_id);
+    if (FAILED(hr))
+    {
+        Logger::Warn("*** CallTarget_RewriterCallback(): Call to ApplyMetaData() failed for ModuleID=", module_id, " ",
+                     function_token);
+        return S_FALSE;
+    }
+    else if (Logger::IsDebugEnabled())
+    {
+        Logger::Debug("*** CallTarget_RewriterCallback(): ApplyMetaData() succeeded for ModuleID=", module_id, " ",
+                      function_token);
+    }
+
     hr = rewriter.Export();
 
     if (FAILED(hr))
@@ -602,7 +657,7 @@ HRESULT TracerMethodRewriter::Rewrite(RejitHandlerModule* moduleHandler, RejitHa
     }
 
     Logger::Info("*** CallTarget_RewriterCallback() Finished: ", caller->type.name, ".", caller->name,
-                 "() [IsVoid=", isVoid, ", IsStatic=", isStatic,
+                 "() [IsVoid=", isVoid, ", IsStatic=", isStatic, ", Trampoline=", use_trampoline,
                  ", IntegrationType=", integration_definition->integration_type.name, ", Arguments=", numArgs, "]");
     return S_OK;
 }
