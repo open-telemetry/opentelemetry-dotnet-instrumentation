@@ -12,7 +12,7 @@
     <PackageReference Include="OpenTelemetry.Exporter.Console" />
     <PackageReference Include="StackExchange.Redis" />
     <PackageReference Include="NServiceBus" Condition=" '$(TargetFramework)' != 'net9.0' and '$(TargetFramework)' != 'net8.0'  "/>
-    <PackageReference Include="NServiceBus" VersionOverride="9.2.11" Condition=" '$(TargetFramework)' == 'net9.0' or '$(TargetFramework)' == 'net8.0'  " />
+    <PackageReference Include="NServiceBus" VersionOverride="10.2.5" Condition=" '$(TargetFramework)' == 'net9.0' or '$(TargetFramework)' == 'net8.0'  " />
   </ItemGroup>
 
   <ItemGroup>
