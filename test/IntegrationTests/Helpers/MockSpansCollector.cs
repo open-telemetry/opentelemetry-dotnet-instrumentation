@@ -27,6 +27,7 @@ internal sealed class MockSpansCollector : IDisposable
     private readonly BlockingCollection<Collected> _spans = new(100); // bounded to avoid memory leak
     private readonly List<Expectation> _expectations = new();
     private Func<ICollection<Collected>, bool>? _collectedExpectation;
+    private Func<ICollection<Collected>, bool>? _allCollectedExpectation;
 
     public MockSpansCollector(ITestOutputHelper output, string host = "localhost")
     {
@@ -70,6 +71,11 @@ internal sealed class MockSpansCollector : IDisposable
     public void ExpectCollected(Func<ICollection<Collected>, bool> collectedExpectation)
     {
         _collectedExpectation = collectedExpectation;
+    }
+
+    public void ExpectAllCollected(Func<ICollection<Collected>, bool> collectedExpectation)
+    {
+        _allCollectedExpectation = collectedExpectation;
     }
 
     public void AssertExpectations(TimeSpan? timeout = null)
@@ -132,6 +138,17 @@ internal sealed class MockSpansCollector : IDisposable
                     if (_collectedExpectation != null && !_collectedExpectation(expectationsMet))
                     {
                         FailCollectedExpectation(expectationsMet);
+                    }
+
+                    if (_allCollectedExpectation != null)
+                    {
+                        var allCollected = expectationsMet.Concat(additionalEntries).ToList();
+                        DrainAvailable(allCollected);
+
+                        if (!_allCollectedExpectation(allCollected))
+                        {
+                            FailCollectedExpectation(allCollected);
+                        }
                     }
 
                     return;
@@ -199,6 +216,14 @@ internal sealed class MockSpansCollector : IDisposable
         }
 
         Assert.Fail(message.ToString());
+    }
+
+    private void DrainAvailable(List<Collected> collected)
+    {
+        while (_spans.TryTake(out var resourceSpan, TestTimeout.NoExpectation))
+        {
+            collected.Add(resourceSpan);
+        }
     }
 
 #if NETFRAMEWORK

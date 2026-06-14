@@ -33,6 +33,8 @@ internal static class OpAmpHelper
             {
                 try
                 {
+                    using var suppressInstrumentation = SuppressInstrumentationScope.Begin();
+
                     IsRunning = true;
 
                     await _client.StartAsync(_cts.Token).ConfigureAwait(false);
@@ -65,6 +67,8 @@ internal static class OpAmpHelper
 
         try
         {
+            using var suppressInstrumentation = SuppressInstrumentationScope.Begin();
+
             _client?.StopAsync().GetAwaiter().GetResult();
 
             if (_clientStartupTask != null)

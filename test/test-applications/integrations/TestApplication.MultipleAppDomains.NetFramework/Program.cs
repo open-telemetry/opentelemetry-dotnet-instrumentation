@@ -24,7 +24,7 @@ internal static class Program
 
         if (args?.Length > 0)
         {
-            if (args.Length == 1 && args[0] == NoAppDomainsSwitch)
+            if (args.Length == 1 && ArgumentHelper.HasArgument(args, NoAppDomainsSwitch))
             {
                 // Nothing else to do, exit.
                 return;

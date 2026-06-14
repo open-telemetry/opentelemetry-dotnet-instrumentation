@@ -22,4 +22,8 @@
     <NoWarn>$(NoWarn);CA1031</NoWarn>
   </PropertyGroup>
 
+  <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)..\integrations\dependency-libs\TestApplication.Shared\ArgumentHelper.cs" Link="Shared\ArgumentHelper.cs" />
+  </ItemGroup>
+
 </Project>

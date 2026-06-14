@@ -20,6 +20,8 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 
 #### Dependency updates
 
+- Updated [Core components](https://github.com/open-telemetry/opentelemetry-dotnet/blob/main/VERSIONING.md#core-components):
+  [`1.16.0`](https://github.com/open-telemetry/opentelemetry-dotnet/releases/tag/core-1.16.0).
 - Following packages updated
   - `Google.Protobuf` updated from `3.31.1` to `3.35.0`,
   - `OpenTelemetry.OpAmp.Client` from `0.3.0-alpha.1` to `0.4.0-alpha.1`.
@@ -49,6 +51,9 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 ### Removed
 
 ### Fixed
+
+- Suppress instrumentation while starting the OpAMP client to prevent internal
+  OpAMP transport calls from being collected as traces.
 
 ## [v1.16.0-beta.1](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/tag/v1.16.0-beta.1)
 

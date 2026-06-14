@@ -83,7 +83,7 @@ public static partial class LibraryVersion
             "TestApplication.MassTransit",
             [
                 new("8.3.0"),
-                new("8.5.9"),
+                new("8.5.10"),
             ]
         },
         {
@@ -115,7 +115,7 @@ public static partial class LibraryVersion
             "TestApplication.MySqlConnector",
             [
                 new("2.0.0"),
-                new("2.5.0"),
+                new("2.6.0"),
             ]
         },
         {
@@ -203,7 +203,7 @@ public static partial class LibraryVersion
             [
                 new("1.8.2"),
                 new("1.9.2"),
-                new("2.14.0"),
+                new("2.14.2"),
             ]
         },
         {

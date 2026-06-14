@@ -258,18 +258,21 @@ partial class Build
 
     Target CompileNativeDependenciesForManagedTests => _ => _
         .Description("Compiles the native dependencies for testing applications")
+        .DependsOn(SupportVs2026IfAvailable)
         .DependsOn(CompileNativeDependenciesForManagedTestsWindows)
         .DependsOn(CompileNativeDependenciesForManagedTestsLinux)
         .DependsOn(CompileNativeDependenciesForManagedTestsMacOs);
 
     Target CompileNativeSrc => _ => _
         .Description("Compiles the native loader")
+        .DependsOn(SupportVs2026IfAvailable)
         .DependsOn(CompileNativeSrcWindows)
         .DependsOn(CompileNativeSrcLinux)
         .DependsOn(CompileNativeSrcMacOs);
 
     Target CompileNativeTests => _ => _
         .Description("Compiles the native loader unit tests")
+        .DependsOn(SupportVs2026IfAvailable)
         .DependsOn(CompileNativeTestsWindows)
         .DependsOn(CompileNativeTestsLinux);
 

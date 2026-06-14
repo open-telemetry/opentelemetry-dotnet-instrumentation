@@ -62,7 +62,7 @@ jobs:
       SMOKE_TEST_APPLICATION: ./test/test-applications/integrations/bin/TestApplication.Smoke/Release/net10.0/publish/TestApplication.Smoke
     steps:
       - name: Checkout code
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
         with:
           fetch-depth: 0 # fetching all, needed to correctly calculate version
           persist-credentials: false
