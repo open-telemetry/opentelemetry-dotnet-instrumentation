@@ -36,7 +36,7 @@ public static partial class LibraryVersion
                 new("8.0.23"),
                 new("9.0.12"),
                 new("10.0.0", supportedFrameworks: [ "net10.0" ]),
-                new("10.0.8", supportedFrameworks: [ "net10.0" ]),
+                new("10.0.9", supportedFrameworks: [ "net10.0" ]),
             ]
         },
         {
@@ -178,7 +178,7 @@ public static partial class LibraryVersion
                 new("8.0.0"),
                 new("9.0.0"),
                 new("10.0.0"),
-                new("10.0.8"),
+                new("10.0.9"),
             ]
         },
         {
