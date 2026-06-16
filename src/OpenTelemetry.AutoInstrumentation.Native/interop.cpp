@@ -56,7 +56,7 @@ EXTERN_C VOID STDAPICALLTYPE ConfigureContinuousProfiler(bool         threadSamp
 {
     return trace::profiler->ConfigureContinuousProfiler(threadSamplingEnabled, threadSamplingInterval,
                                                         allocationSamplingEnabled, maxMemorySamplesPerMinute,
-                                                        selectedThreadSamplingInterval, nativeSymbolResolutionEnabled);
+                                                        selectedThreadSamplingInterval);
 }
 
 EXTERN_C VOID STDAPICALLTYPE InitializeTraceMethods(WCHAR* id,
