@@ -30,7 +30,7 @@ services:
       - otel-collector
 
   sqlserver:
-    image: mcr.microsoft.com/mssql/server:2022-CU17-ubuntu-22.04
+    image: mcr.microsoft.com/mssql/server:2025-latest@sha256:cee0f4db03b5192de777d37a22455949d1c2c230bb48c0a732b88b0933117a72
     # This image is not available for ARM64 architecture
     platform: linux/amd64
     environment:
