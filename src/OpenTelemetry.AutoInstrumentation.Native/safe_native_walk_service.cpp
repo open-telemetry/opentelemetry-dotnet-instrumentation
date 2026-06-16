@@ -5,7 +5,6 @@
 
 #include "safe_native_walk_service.h"
 #include "native_symbol_resolver_impl.h"
-#include "thread_suspend.h"
 #include "logger.h"
 
 namespace ProfilerStackCapture

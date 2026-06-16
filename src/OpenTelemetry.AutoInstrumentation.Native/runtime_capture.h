@@ -29,7 +29,8 @@ public:
 
     /// <summary>
     /// Bring the runtime to a state where one or more stacks can be walked.
-    /// ClrRuntimeCapture: profiler-API SuspendRuntime + loader-lock probe (x64).
+    /// ClrRuntimeCapture: profiler-API SuspendRuntime (seedless DSS is safe
+    ///   under runtime suspension; probes only run in the native-walk fallback).
     /// NetFxRuntimeCapture: S_OK (suspension is per-thread, done in CaptureStack).
     /// </summary>
     virtual HRESULT SuspendRuntime() = 0;

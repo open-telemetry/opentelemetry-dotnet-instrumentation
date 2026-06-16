@@ -260,7 +260,7 @@ UINT_PTR NativeSymbolResolver::GetImageBaseForIp(UINT_PTR ip)
     if (ip == 0)
         return 0;
 
-    // Cushion against a bad IP (e.g. 0) or a corrupted stack (e.g. 0xCCCCCCCC) via SEH
+    // Cushion against a bad IP or a corrupted stack (e.g. 0xCCCCCCCC) via SEH
     // both RtlLookupFunctionEntry and GetModuleHandleExW can AV on bad input - they read ip
     __try
     {

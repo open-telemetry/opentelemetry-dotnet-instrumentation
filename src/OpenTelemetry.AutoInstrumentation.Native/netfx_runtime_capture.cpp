@@ -22,16 +22,6 @@ NetFxRuntimeCapture::NetFxRuntimeCapture(IProfilerApi* profilerApi, const NetFxC
     trace::Logger::Info(L"[NetFxRuntimeCapture] Initialized with canary prefix: ", options_.canaryNamePrefix);
 }
 
-NetFxRuntimeCapture::~NetFxRuntimeCapture()
-{
-    Stop();
-}
-
-void NetFxRuntimeCapture::Stop()
-{
-    stopRequested_.store(true, std::memory_order_release);
-}
-
 CanarySnapshot NetFxRuntimeCapture::SnapshotCanary() const
 {
     std::lock_guard<std::mutex> lock(mutex_);
@@ -210,7 +200,7 @@ void NetFxRuntimeCapture::OnThreadNameChanged(ThreadID threadId, ULONG cchName, 
 
     canary_ = CanarySnapshot{threadId, it->second};
     trace::Logger::Info("[NetFxRuntimeCapture] Canary designated via NameChanged. ManagedID=", threadId,
-                        ", OsID=", it->second, L", Name=", threadName);
+                        ", OsID=", it->second, ", Name=", threadName);
 }
 
 void NetFxRuntimeCapture::OnThreadAssignedToOSThread(ThreadID managedThreadId, DWORD osThreadId)

@@ -1,8 +1,8 @@
 // Copyright The OpenTelemetry Authors
 // SPDX-License-Identifier: Apache-2.0
 
-#ifndef OTEL_STACK_WALKER_H_
-#define OTEL_STACK_WALKER_H_
+#ifndef OTEL_PROFILER_STACK_WALKER_H_
+#define OTEL_PROFILER_STACK_WALKER_H_
 
 #include <corhlpr.h>
 #include <corprof.h>
@@ -57,4 +57,4 @@ public:
 
 } // namespace continuous_profiler
 
-#endif // OTEL_STACK_WALKER_H_
+#endif // OTEL_PROFILER_STACK_WALKER_H_

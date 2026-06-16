@@ -1,8 +1,8 @@
 // Copyright The OpenTelemetry Authors
 // SPDX-License-Identifier: Apache-2.0
 
-#ifndef OTEL_NATIVE_SYMBOL_RESOLVER_H_
-#define OTEL_NATIVE_SYMBOL_RESOLVER_H_
+#ifndef OTEL_PROFILER_NATIVE_SYMBOL_RESOLVER_H_
+#define OTEL_PROFILER_NATIVE_SYMBOL_RESOLVER_H_
 
 #include "string_utils.h"
 #include <optional>
@@ -26,4 +26,4 @@ public:
 
 } // namespace ProfilerStackCapture
 
-#endif // OTEL_NATIVE_SYMBOL_RESOLVER_H_
+#endif // OTEL_PROFILER_NATIVE_SYMBOL_RESOLVER_H_

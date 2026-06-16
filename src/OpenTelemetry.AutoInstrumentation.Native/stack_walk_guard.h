@@ -1,7 +1,8 @@
 // Copyright The OpenTelemetry Authors
 // SPDX-License-Identifier: Apache-2.0
 
-#pragma once
+#ifndef OTEL_PROFILER_STACK_WALK_GUARD_H_
+#define OTEL_PROFILER_STACK_WALK_GUARD_H_
 
 #if defined(_WIN32)
 
@@ -248,3 +249,4 @@ private:
 } // namespace ProfilerStackCapture
 
 #endif // defined(_WIN32)
+#endif // OTEL_PROFILER_STACK_WALK_GUARD_H_

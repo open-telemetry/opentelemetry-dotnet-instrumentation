@@ -1,8 +1,8 @@
 // Copyright The OpenTelemetry Authors
 // SPDX-License-Identifier: Apache-2.0
 
-#ifndef OTEL_RTL_STACK_WALK_H_
-#define OTEL_RTL_STACK_WALK_H_
+#ifndef OTEL_NATIVE_SYMBOL_RESOLVER_IMPL_H_
+#define OTEL_NATIVE_SYMBOL_RESOLVER_IMPL_H_
 
 #if defined(_WIN32) && defined(_M_AMD64)
 
@@ -96,4 +96,4 @@ private:
 } // namespace ProfilerStackCapture
 
 #endif // defined(_WIN32) && defined(_M_AMD64)
-#endif // OTEL_RTL_STACK_WALK_H_
+#endif // OTEL_NATIVE_SYMBOL_RESOLVER_IMPL_H_

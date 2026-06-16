@@ -24,6 +24,23 @@ namespace ProfilerStackCapture
 /// - .NET Framework (Windows): per-thread suspension, canary-gated probes, x64 native-walk fallback.
 /// All probe and walk machinery is owned by each IRuntimeCapture instance;
 /// this class only orchestrates the batch lifecycle and dispatch.
+///
+/// Shutdown: implicit via member destruction order. runtime_ is declared
+/// after profilerApi_ so it is destroyed first - joining its StackWalkGuard
+/// worker thread before the IProfilerApi it references is destroyed.
+///
+/// Destructor chain:
+///
+///   StackCaptureImpl::~StackCaptureImpl()  (defaulted)
+///   +-- ~runtime_                          (reverse declaration order)
+///   |   +-- NetFxRuntimeCapture::~NetFxRuntimeCapture()  (defaulted)
+///   |       +-- ~nativeWalk_               (stateless, trivial)
+///   |       +-- ~stackWalkGuard_
+///   |           +-- StackWalkGuard::~StackWalkGuard()
+///   |               +-- state_ = Stopping  (under mutex)
+///   |               +-- cv_.notify_all()
+///   |               +-- worker_->join()    (blocks until WorkerLoop breaks)
+///   +-- ~profilerApi_                      (safe - worker already joined)
 /// </summary>
 class StackCaptureImpl final : public IStackCapturer
 {
@@ -35,17 +52,7 @@ public:
     {
     }
 
-    ~StackCaptureImpl() override
-    {
-        // Order matters: runtime_ (and its SafetyProber + worker thread) must
-        // be torn down before profilerApi_ - the prober lambdas reference it.
-        // Member declaration order below guarantees this for the implicit dtor;
-        // we just signal stop early so any wait can unblock promptly.
-        if (runtime_)
-        {
-            runtime_->Stop();
-        }
-    }
+    ~StackCaptureImpl() override = default;
 
     HRESULT CaptureStacks(const std::unordered_set<ThreadID>& threads, void* clientData) override
     {
@@ -126,9 +133,10 @@ public:
     }
 
 private:
-    // Declaration order = destruction order in reverse: runtime_ destroyed first
-    // (joins its SafetyProber worker), then profilerApi_.  This keeps any
-    // in-flight probe lambdas safe.
+    // Declaration order = destruction order in reverse: runtime_ destroyed
+    // first (joins its StackWalkGuard worker), then profilerApi_. This
+    // ensures the worker thread is joined before the API it references is
+    // destroyed.
     std::unique_ptr<IProfilerApi>    profilerApi_;
     std::unique_ptr<IRuntimeCapture> runtime_;
 };

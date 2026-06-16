@@ -1,8 +1,8 @@
 // Copyright The OpenTelemetry Authors
 // SPDX-License-Identifier: Apache-2.0
 
-#ifndef OTEL_THREAD_SUSPEND_H_
-#define OTEL_THREAD_SUSPEND_H_
+#ifndef OTEL_PROFILER_THREAD_SUSPEND_H_
+#define OTEL_PROFILER_THREAD_SUSPEND_H_
 
 // RAII Win32 thread suspension used by both native stack walking (RTL) and
 // the .NET Framework per-thread stack capture strategy.
@@ -55,4 +55,4 @@ private:
 } // namespace ProfilerStackCapture
 
 #endif // defined(_WIN32)
-#endif // OTEL_THREAD_SUSPEND_H_
+#endif // OTEL_PROFILER_THREAD_SUSPEND_H_

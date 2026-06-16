@@ -6,13 +6,18 @@
 
 // Cross-platform CLR (.NET Core / .NET 5+) runtime capture.
 //
-// Suspension is global, driven by the profiler API.  Seedless DSS is
-// shielded by SuspendRuntime - NO probes are required.
+// Suspension is global, driven by the profiler API (SuspendRuntime /
+// ResumeRuntime).  Under runtime suspension, seedless DSS is safe
+// without further probing.
 //
-// On Windows x64 only, when seedless DSS fails we attempt a native-walk
-// fallback that uses RtlVirtualUnwind to walk until a managed IP, then
-// seeded DSS from there.  That path leaves CLR's safety envelope and
-// is gated by HeapLock + Rtl probes via SafetyProber.
+// On Windows x64 only, when seedless DSS fails (e.g. thread in native
+// code with no managed frames on top), we attempt a native-walk
+// fallback: suspend the target via ThreadGuard, run the RTL frame-0
+// probe through StackWalkGuard (heap/STL gate + RtlLookupFunctionEntry +
+// GetFunctionFromIP + loader-lock + RtlVirtualUnwind), then dispatch via
+// SafeNativeWalkService (managed seed -> seeded DSS, or native frame-0 ->
+// walk natively until managed boundary -> seeded DSS from there).
+// No canary DSS is needed: SuspendRuntime already certifies DSS health.
 
 #include <chrono>
 #include <memory>
@@ -32,6 +37,7 @@ class ClrRuntimeCapture final : public IRuntimeCapture
 public:
     explicit ClrRuntimeCapture(IProfilerApi*             profilerApi,
                                std::chrono::milliseconds probeTimeout = std::chrono::milliseconds(250));
+    ~ClrRuntimeCapture() = default;
 
     HRESULT SuspendRuntime() override;
     void    ResumeRuntime() noexcept override;

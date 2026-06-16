@@ -481,9 +481,9 @@ bool StackWalkGuard::RunRtlFrame0Checks(ProbeRequest& req) noexcept
             __try
             {
                 pathLen = GetModuleFileNameW(reinterpret_cast<HMODULE>(imageBase), modulePath, MAX_PATH);
-                // If pathLen < MAX_PATH the buffer is already null-terminated.
-                // When pathLen == MAX_PATH the buffer may lack a NULL terminator;
-                // force-truncate so downstream consumers see a valid C string.
+                // GetModuleFileNameW may not NUL-terminate when the path
+                // fills or exceeds the buffer. Unconditionally force a
+                // terminator.
                 modulePath[MAX_PATH - 1] = L'\0';
             }
             __except (EXCEPTION_EXECUTE_HANDLER)
