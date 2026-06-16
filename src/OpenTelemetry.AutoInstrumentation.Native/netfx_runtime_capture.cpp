@@ -48,6 +48,11 @@ HRESULT NetFxRuntimeCapture::CaptureStack(ThreadID managedThreadId, StackSnapsho
     const CanarySnapshot canary = SnapshotCanary();
     if (!canary.IsValid())
     {
+        // Canary not ready - expected only during startup. In continuous
+        // profiling mode, failing the batch is acceptable; the next cycle
+        // will capture stacks once the canary is elected.
+        // TODO: permanently disable sampling if canary-not-ready persists
+        // for more than 10 consecutive cycles.
         trace::Logger::Debug("[NetFxRuntimeCapture] No canary available; skipping. ManagedID=", managedThreadId);
         return E_FAIL;
     }

@@ -99,12 +99,12 @@ NativeWalkResult SafeNativeWalkService::WalkNativeUntilManaged(const CONTEXT&   
                                                                StackSnapshotCallbackContext* clientData)
 {
     NativeWalkResult result;
-    result.hr                  = E_FAIL;
-    CONTEXT         threadCtx  = initialCtx;
-    auto&           resolver   = NativeSymbolResolver::Instance();
-    DWORD           frameCount = 0;
-    constexpr DWORD kMaxDepth  = 512;
-
+    result.hr                         = E_FAIL;
+    CONTEXT              threadCtx    = initialCtx;
+    auto&                resolver     = NativeSymbolResolver::Instance();
+    DWORD                frameCount   = 0;
+    constexpr DWORD      kMaxDepth    = 512;
+    UNWIND_HISTORY_TABLE historyTable = {};
     __try
     {
         while (threadCtx.Rip != 0 && frameCount < kMaxDepth)
@@ -124,10 +124,9 @@ NativeWalkResult SafeNativeWalkService::WalkNativeUntilManaged(const CONTEXT&   
             }
 
             // Native frame - emit it via callback
-            DWORD64              imageBase    = 0;
-            UNWIND_HISTORY_TABLE historyTable = {};
-            DWORD64              previousRip  = threadCtx.Rip;
-            PRUNTIME_FUNCTION    rtFunc       = RtlLookupFunctionEntry(threadCtx.Rip, &imageBase, &historyTable);
+            DWORD64           imageBase   = 0;
+            DWORD64           previousRip = threadCtx.Rip;
+            PRUNTIME_FUNCTION rtFunc      = RtlLookupFunctionEntry(threadCtx.Rip, &imageBase, &historyTable);
 
             UINT_PTR frameIp;
             if (imageBase != 0)

@@ -481,6 +481,10 @@ bool StackWalkGuard::RunRtlFrame0Checks(ProbeRequest& req) noexcept
             __try
             {
                 pathLen = GetModuleFileNameW(reinterpret_cast<HMODULE>(imageBase), modulePath, MAX_PATH);
+                // If pathLen < MAX_PATH the buffer is already null-terminated.
+                // When pathLen == MAX_PATH the buffer may lack a NULL terminator;
+                // force-truncate so downstream consumers see a valid C string.
+                modulePath[MAX_PATH - 1] = L'\0';
             }
             __except (EXCEPTION_EXECUTE_HANDLER)
             {
@@ -543,10 +547,10 @@ bool StackWalkGuard::RunRtlFrame0Checks(ProbeRequest& req) noexcept
             }
             else
             {
-                // stricty speaking we only need to unwind if we classified as native, but the marginal cost of an extra
-                // unwind on misclassified frames is likely much lower than the cost of a second SEH block, so just
-                // always unwind if we have a function entry. This fortifies our probe - we probe if RtlVirtualUnwind
-                // is safe to be invoked
+                // strictly speaking we only need to unwind if we classified as native, but the marginal cost of an
+                // extra unwind on misclassified frames is likely much lower than the cost of a second SEH block, so
+                // just always unwind if we have a function entry. This fortifies our probe - we probe if
+                // RtlVirtualUnwind is safe to be invoked
                 void*   handlerData      = nullptr;
                 DWORD64 establisherFrame = 0;
                 RtlVirtualUnwind(UNW_FLAG_NHANDLER, imageBase, frame0Rip, rtFunc, &req.staged_ctx, &handlerData,

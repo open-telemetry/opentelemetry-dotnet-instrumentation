@@ -104,7 +104,9 @@ bool NativeSymbolResolver::FetchClassification(UINT_PTR imageBase, trace::WSTRIN
     {
         return false;
     }
-
+    // GetModuleFileNameW may not NUL-terminate when the path fills or
+    // exceeds the buffer. Unconditionally force a terminator.
+    modulePath[MAX_PATH - 1] = L'\0';
     ModuleInfo   info;
     const WCHAR* slash = wcsrchr(modulePath, L'\\');
     info.baseName      = slash ? (slash + 1) : modulePath;
@@ -255,22 +257,35 @@ size_t NativeSymbolResolver::FindExportNameForRva(UINT_PTR imageBase, DWORD rva,
 
 UINT_PTR NativeSymbolResolver::GetImageBaseForIp(UINT_PTR ip)
 {
-    DWORD64              imageBase    = 0;
-    UNWIND_HISTORY_TABLE historyTable = {};
-    RtlLookupFunctionEntry(static_cast<DWORD64>(ip), &imageBase, &historyTable);
+    if (ip == 0)
+        return 0;
 
-    if (imageBase == 0)
+    // Cushion against a bad IP (e.g. 0) or a corrupted stack (e.g. 0xCCCCCCCC) via SEH
+    // both RtlLookupFunctionEntry and GetModuleHandleExW can AV on bad input - they read ip
+    __try
     {
-        HMODULE hMod = nullptr;
-        if (GetModuleHandleExW(GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS | GET_MODULE_HANDLE_EX_FLAG_UNCHANGED_REFCOUNT,
-                               reinterpret_cast<LPCWSTR>(ip), &hMod) &&
-            hMod != nullptr)
-        {
-            imageBase = reinterpret_cast<DWORD64>(hMod);
-        }
-    }
+        DWORD64              imageBase    = 0;
+        UNWIND_HISTORY_TABLE historyTable = {};
+        RtlLookupFunctionEntry(static_cast<DWORD64>(ip), &imageBase, &historyTable);
 
-    return static_cast<UINT_PTR>(imageBase);
+        if (imageBase == 0)
+        {
+            HMODULE hMod = nullptr;
+            if (GetModuleHandleExW(GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS |
+                                       GET_MODULE_HANDLE_EX_FLAG_UNCHANGED_REFCOUNT,
+                                   reinterpret_cast<LPCWSTR>(ip), &hMod) &&
+                hMod != nullptr)
+            {
+                imageBase = reinterpret_cast<DWORD64>(hMod);
+            }
+        }
+
+        return static_cast<UINT_PTR>(imageBase);
+    }
+    __except (EXCEPTION_EXECUTE_HANDLER)
+    {
+        return 0;
+    }
 }
 
 bool NativeSymbolResolver::ResolveViaExports(UINT_PTR              ip,
