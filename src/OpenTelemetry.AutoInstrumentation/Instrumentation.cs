@@ -235,8 +235,7 @@ internal static class Instrumentation
     private static void InitializeSampling()
     {
         var (threadSamplingEnabled, threadSamplingInterval, allocationSamplingEnabled, maxMemorySamplesPerMinute, exportInterval, exportTimeout, continuousProfilerExporter) = _pluginManager!.GetFirstContinuousConfiguration();
-        var nativeExportResolutionEnabled = _pluginManager.GetNativeExportResolutionEnabled(defaultValue: true);
-        Logger.Debug($"Continuous profiling configuration: Thread sampling enabled: {threadSamplingEnabled}, thread sampling interval: {threadSamplingInterval}, allocation sampling enabled: {allocationSamplingEnabled}, max memory samples per minute: {maxMemorySamplesPerMinute}, export interval: {exportInterval}, export timeout: {exportTimeout}, native export resolution enabled: {nativeExportResolutionEnabled}, continuous profiler exporter: {continuousProfilerExporter.GetType()}");
+        Logger.Debug($"Continuous profiling configuration: Thread sampling enabled: {threadSamplingEnabled}, thread sampling interval: {threadSamplingInterval}, allocation sampling enabled: {allocationSamplingEnabled}, max memory samples per minute: {maxMemorySamplesPerMinute}, export interval: {exportInterval}, export timeout: {exportTimeout}, continuous profiler exporter: {continuousProfilerExporter.GetType()}");
 
         if (threadSamplingEnabled || allocationSamplingEnabled)
         {
@@ -290,7 +289,7 @@ internal static class Instrumentation
             }
         }
 
-        NativeMethods.ConfigureNativeContinuousProfiler(threadSamplingEnabled, threadSamplingInterval, allocationSamplingEnabled, maxMemorySamplesPerMinute, selectiveSamplingInterval, nativeExportResolutionEnabled);
+        NativeMethods.ConfigureNativeContinuousProfiler(threadSamplingEnabled, threadSamplingInterval, allocationSamplingEnabled, maxMemorySamplesPerMinute, selectiveSamplingInterval);
 #if NETFRAMEWORK
         // On .NET Framework, we need a dedicated canary thread for seeded stack walking
         _canaryThreadManager = new CanaryThreadManager();
