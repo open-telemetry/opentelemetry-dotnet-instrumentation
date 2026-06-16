@@ -16,6 +16,7 @@ partial class Build
 {
     Target CompileNativeSrcWindows => _ => _
         .Unlisted()
+        .After(SupportVs2026IfAvailable)
         .After(CompileManagedSrc)
         .After(GenerateAssemblyRedirectionSource)
         .OnlyWhenStatic(() => IsWin)
@@ -27,7 +28,6 @@ partial class Build
                 ? new[] { MSBuildTargetPlatform.x64, MSBuildTargetPlatform.x86 }
                 : new[] { MSBuildTargetPlatform.x86 };
 
-            SupportVs2026IfAvailable();
             foreach (var project in Solution.GetNativeSrcProjects())
             {
                 PerformLegacyRestoreIfNeeded(project);
@@ -47,30 +47,34 @@ partial class Build
                     .CombineWith(platforms, (m, platform) => m
                         .SetTargetPlatform(platform)));
             }
+        });
 
-            static void SupportVs2026IfAvailable()
+    Target SupportVs2026IfAvailable => _ => _
+        .Unlisted()
+        .OnlyWhenStatic(() => IsWin)
+        .Executes(() =>
+        {
+            // Typical installation folder: C:\Program Files\Microsoft Visual Studio\18\Enterprise\MSBuild\Current\Bin\amd64
+            // Waiting for official support in Nuke package https://github.com/nuke-build/nuke/pull/1583
+
+            string[] editions = ["Enterprise", "Professional", "Community", "Preview"];
+
+            foreach (var edition in editions)
             {
-                // Typical installation folder: C:\Program Files\Microsoft Visual Studio\18\Enterprise\MSBuild\Current\Bin\amd64
-                // Waiting for official support in Nuke package https://github.com/nuke-build/nuke/pull/1583
+                var msBuildPath = Path.Combine(SpecialFolder(SpecialFolders.ProgramFiles).NotNull(),
+                    $@"Microsoft Visual Studio\18\{edition}\MSBuild\Current\Bin\amd64\MSBuild.exe");
 
-                string[] editions = ["Enterprise", "Professional", "Community", "Preview"];
-
-                foreach (var edition in editions)
+                if (File.Exists(msBuildPath))
                 {
-                    var msBuildPath = Path.Combine(SpecialFolder(SpecialFolders.ProgramFiles).NotNull(),
-                        $@"Microsoft Visual Studio\18\{edition}\MSBuild\Current\Bin\amd64\MSBuild.exe");
-
-                    if (File.Exists(msBuildPath))
-                    {
-                        MSBuildPath = msBuildPath;
-                        return;
-                    }
+                    MSBuildPath = msBuildPath;
+                    return;
                 }
             }
         });
 
     Target CompileNativeDependenciesForManagedTestsWindows => _ => _
         .Unlisted()
+        .After(SupportVs2026IfAvailable)
         .After(CompileManagedSrc)
         .After(GenerateAssemblyRedirectionSource)
         .OnlyWhenStatic(() => IsWin)
@@ -89,6 +93,7 @@ partial class Build
 
     Target CompileNativeTestsWindows => _ => _
         .Unlisted()
+        .After(SupportVs2026IfAvailable)
         .After(CompileNativeSrc)
         .OnlyWhenStatic(() => IsWin)
         .Executes(() =>

@@ -7,7 +7,7 @@ using TestApplication.Shared;
 
 ConsoleHelper.WriteSplashScreen(args);
 
-var mySqlPort = GetMySqlPort(args);
+var mySqlPort = ArgumentHelper.GetArgument(args, "--mysql", "3306");
 
 var connectionString = $@"Server=127.0.0.1;Port={mySqlPort};Uid=root;Database=TestDatabase";
 
@@ -35,14 +35,4 @@ using (var context = new TestDbContext(contextOptions))
     {
         Console.WriteLine($"{testItem.Id} {testItem.Name}");
     }
-}
-
-static string GetMySqlPort(string[] args)
-{
-    if (args.Length > 1)
-    {
-        return args[1];
-    }
-
-    return "3306";
 }

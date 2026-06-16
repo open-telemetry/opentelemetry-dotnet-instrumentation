@@ -12,11 +12,6 @@ internal static class Program
     {
         ConsoleHelper.WriteSplashScreen(args);
 
-        if (args.Length < 2)
-        {
-            throw new ArgumentException("Temp path is not provided. Use '--temp-path /my/path/to/temp_file'");
-        }
-
         var otelLibs = AppDomain.CurrentDomain
             .GetAssemblies()
             .Select(x => x.GetName().Name)
@@ -25,7 +20,7 @@ internal static class Program
             .ToList();
 
         var json = JsonConvert.SerializeObject(otelLibs);
-        var path = args[1];
+        var path = ArgumentHelper.GetRequiredArgument(args, "--temp-path");
 
         File.WriteAllText(path, json);
     }

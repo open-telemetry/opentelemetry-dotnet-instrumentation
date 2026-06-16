@@ -26,7 +26,7 @@ public static partial class LibraryVersion
             "TestApplication.Elasticsearch",
             [
                 new("8.15.10"),
-                new("9.4.1"),
+                new("9.4.2"),
             ]
         },
         {
@@ -36,7 +36,7 @@ public static partial class LibraryVersion
                 new("8.0.23"),
                 new("9.0.12"),
                 new("10.0.0", supportedFrameworks: [ "net10.0" ]),
-                new("10.0.8", supportedFrameworks: [ "net10.0" ]),
+                new("10.0.9", supportedFrameworks: [ "net10.0" ]),
             ]
         },
         {
@@ -83,7 +83,7 @@ public static partial class LibraryVersion
             "TestApplication.MassTransit",
             [
                 new("8.3.0"),
-                new("8.5.9"),
+                new("8.5.10"),
             ]
         },
         {
@@ -115,7 +115,7 @@ public static partial class LibraryVersion
             "TestApplication.MySqlConnector",
             [
                 new("2.0.0"),
-                new("2.5.0"),
+                new("2.6.0"),
             ]
         },
         {
@@ -178,7 +178,7 @@ public static partial class LibraryVersion
                 new("8.0.0"),
                 new("9.0.0"),
                 new("10.0.0"),
-                new("10.0.8"),
+                new("10.0.9"),
             ]
         },
         {
@@ -186,7 +186,7 @@ public static partial class LibraryVersion
             [
                 new("2.6.122"),
                 new("2.12.14"),
-                new("3.0.2-preview", supportedFrameworks: [ "net10.0", "net9.0", "net8.0" ]),
+                new("3.0.47-preview", supportedFrameworks: [ "net10.0", "net9.0", "net8.0" ]),
             ]
         },
         {
@@ -203,7 +203,7 @@ public static partial class LibraryVersion
             [
                 new("1.8.2"),
                 new("1.9.2"),
-                new("2.14.0"),
+                new("2.14.2"),
             ]
         },
         {
@@ -213,7 +213,7 @@ public static partial class LibraryVersion
                 new("9.0.0", supportedFrameworks: [ "net9.0" ]),
                 new("6.0.0", supportedFrameworks: [ "net462" ]),
                 new("10.0.0", supportedFrameworks: [ "net8.0", "net9.0" ]),
-                new("10.0.8", supportedFrameworks: [ "net462", "net10.0" ]),
+                new("10.0.9", supportedFrameworks: [ "net462", "net10.0" ]),
             ]
         },
         {

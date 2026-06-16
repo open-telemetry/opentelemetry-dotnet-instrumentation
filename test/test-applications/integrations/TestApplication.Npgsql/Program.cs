@@ -12,7 +12,7 @@ internal static class Program
     {
         ConsoleHelper.WriteSplashScreen(args);
 
-        var postgresPort = GetNpgsqlPort(args);
+        var postgresPort = ArgumentHelper.GetArgument(args, "--postgres", "5432");
 
         var connString = $"Server=127.0.0.1;Port={postgresPort};User ID=postgres";
 
@@ -25,15 +25,5 @@ internal static class Program
         {
             Console.WriteLine(reader.GetInt32(0));
         }
-    }
-
-    private static string GetNpgsqlPort(string[] args)
-    {
-        if (args.Length > 1)
-        {
-            return args[1];
-        }
-
-        return "5432";
     }
 }

@@ -25,8 +25,8 @@ internal static partial class InstrumentationDefinitions
             // Sqlite
             if (tracerSettings.EnabledInstrumentations.Contains(TracerInstrumentation.Sqlite))
             {
-                nativeCallTargetDefinitions.Add(new("Microsoft.Data.Sqlite", "Microsoft.Data.Sqlite.SqliteCommand", "ExecuteReaderAsync", ["System.Threading.Tasks.Task`1[Microsoft.Data.Sqlite.SqliteDataReader]", "System.Data.CommandBehavior", "System.Threading.CancellationToken"], 8, 0, 0, 10, 65535, 65535, AssemblyFullName, "OpenTelemetry.AutoInstrumentation.Instrumentations.AdoNet.Integrations.CommandExecuteDbDataReaderAsyncIntegration"));
-                nativeCallTargetDefinitions.Add(new("Microsoft.Data.Sqlite", "Microsoft.Data.Sqlite.SqliteCommand", "ExecuteReader", ["Microsoft.Data.Sqlite.SqliteDataReader", "System.Data.CommandBehavior"], 8, 0, 0, 10, 65535, 65535, AssemblyFullName, "OpenTelemetry.AutoInstrumentation.Instrumentations.AdoNet.Integrations.CommandExecuteDbDataReaderIntegration"));
+                nativeCallTargetDefinitions.Add(new("Microsoft.Data.Sqlite", "Microsoft.Data.Sqlite.SqliteCommand", "ExecuteReaderAsync", ["System.Threading.Tasks.Task`1[Microsoft.Data.Sqlite.SqliteDataReader]", "System.Data.CommandBehavior", "System.Threading.CancellationToken"], 8, 0, 0, 11, 65535, 65535, AssemblyFullName, "OpenTelemetry.AutoInstrumentation.Instrumentations.AdoNet.Integrations.CommandExecuteDbDataReaderAsyncIntegration"));
+                nativeCallTargetDefinitions.Add(new("Microsoft.Data.Sqlite", "Microsoft.Data.Sqlite.SqliteCommand", "ExecuteReader", ["Microsoft.Data.Sqlite.SqliteDataReader", "System.Data.CommandBehavior"], 8, 0, 0, 11, 65535, 65535, AssemblyFullName, "OpenTelemetry.AutoInstrumentation.Instrumentations.AdoNet.Integrations.CommandExecuteDbDataReaderIntegration"));
             }
 
             // AdoNet

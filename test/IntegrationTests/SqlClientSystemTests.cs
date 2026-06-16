@@ -50,7 +50,7 @@ public class SqlClientSystemTests : TestHelper
 
         RunTestApplication(new()
         {
-            Arguments = $"{_sqlServerFixture.Password} {_sqlServerFixture.Port}",
+            Arguments = $"--password {_sqlServerFixture.Password} --port {_sqlServerFixture.Port}",
             PackageVersion = packageVersion
         });
 
@@ -90,7 +90,7 @@ public class SqlClientSystemTests : TestHelper
 
         RunTestApplication(new()
         {
-            Arguments = $"{_sqlServerFixture.Password} {_sqlServerFixture.Port}",
+            Arguments = $"--password {_sqlServerFixture.Password} --port {_sqlServerFixture.Port}",
             PackageVersion = packageVersion
         });
 
@@ -118,7 +118,7 @@ public class SqlClientSystemTests : TestHelper
 
         using var process = StartTestApplication(new TestSettings
         {
-            Arguments = $"{_sqlServerFixture.Password} {_sqlServerFixture.Port}",
+            Arguments = $"--password {_sqlServerFixture.Password} --port {_sqlServerFixture.Port}",
             PackageVersion = packageVersion
         });
 
