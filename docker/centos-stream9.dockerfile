@@ -20,7 +20,7 @@ RUN update-crypto-policies --set LEGACY
 # renovate: datasource=rpm depName=cmake
 ARG CMAKE_VERSION=3.31.8-3.el9
 # renovate: datasource=rpm depName=clang
-ARG CLANG_VERSION=21.1.8-2.el9
+ARG CLANG_VERSION=22.1.3-1.el9
 # renovate: datasource=rpm depName=git
 ARG GIT_VERSION=2.52.0-1.el9
 
