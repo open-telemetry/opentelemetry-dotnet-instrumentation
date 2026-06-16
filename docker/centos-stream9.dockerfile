@@ -17,10 +17,17 @@ ENV PATH="$PATH:/usr/share/dotnet"
 # https://github.com/dotnet/runtime/issues/65874
 RUN update-crypto-policies --set LEGACY
 
+# renovate: datasource=rpm depName=cmake
+ARG CMAKE_VERSION=3.31.8-3.el9
+# renovate: datasource=rpm depName=clang
+ARG CLANG_VERSION=21.1.8-2.el9
+# renovate: datasource=rpm depName=git
+ARG GIT_VERSION=2.52.0-1.el9
+
 # Install dependencies
 RUN dnf install -y \
-    cmake-3.31.8-3.el9 \
-    clang-21.1.8-2.el9 \
-    git-2.52.0-1.el9
+    cmake-"${CMAKE_VERSION}" \
+    clang-"${CLANG_VERSION}" \
+    git-"${GIT_VERSION}"
 
 WORKDIR /project
