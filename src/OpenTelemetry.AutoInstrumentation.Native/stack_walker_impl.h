@@ -23,7 +23,12 @@ public:
     explicit StackWalkerImpl(ICorProfilerInfo2* profilerInfo,
                              RuntimeType        runtimeType)
         : capturer_(ProfilerStackCapture::CreateStackCapturer(profilerInfo, runtimeType))
+        , nativeSymbolResolutionEnabled(nativeSymbolResolutionEnabled)
     {
+#if defined(_WIN32) && defined(_M_AMD64)
+        ProfilerStackCapture::NativeSymbolResolver::Instance()
+            .SetExportResolutionEnabled(nativeSymbolResolutionEnabled);
+#endif
     }
 
     // -- IStackWalker (consumed by ContinuousProfiler) --
@@ -92,6 +97,7 @@ public:
 private:
     using IStackCapturer = ProfilerStackCapture::IStackCapturer;
     std::unique_ptr<IStackCapturer> capturer_;
+    bool nativeSymbolResolutionEnabled;
 };
 
 } // namespace continuous_profiler
