@@ -4,6 +4,7 @@
 
 #include "il_rewriter.h"
 #include <corhlpr.cpp>
+#include <new>
 
 #undef IfFailRet
 #define IfFailRet(EXPR)                                                                                                \
@@ -213,7 +214,7 @@ HRESULT ILRewriter::Import()
 
 HRESULT ILRewriter::ImportIL(LPCBYTE pIL)
 {
-    m_pOffsetToInstr = new ILInstr*[m_CodeSize + 1];
+    m_pOffsetToInstr = new (std::nothrow) ILInstr*[m_CodeSize + 1];
     IfNullRet(m_pOffsetToInstr);
 
     ZeroMemory(m_pOffsetToInstr, m_CodeSize * sizeof(ILInstr*));
@@ -361,7 +362,7 @@ HRESULT ILRewriter::ImportEH(const COR_ILMETHOD_SECT_EH* pILEH, unsigned nEH)
     if (nEH == 0)
         return S_OK;
 
-    IfNullRet(m_pEH = new EHClause[m_nEH]);
+    IfNullRet(m_pEH = new (std::nothrow) EHClause[m_nEH]);
     for (unsigned iEH = 0; iEH < m_nEH; iEH++)
     {
         // If the EH clause is in tiny form, the call to pILEH->EHClause() below
@@ -462,7 +463,7 @@ HRESULT ILRewriter::Export()
     // which can be 10 bytes for 64-bit. For simplification we just use 10 here.
     unsigned maxSize = m_nInstrs * 10;
 
-    m_pOutputBuffer = new BYTE[maxSize];
+    m_pOutputBuffer = new (std::nothrow) BYTE[maxSize];
     IfNullRet(m_pOutputBuffer);
 
 again:

@@ -162,7 +162,7 @@ due to lack of stable semantic convention.
 | `RABBITMQ`                  | [RabbitMQ.Client](https://www.nuget.org/packages/RabbitMQ.Client/)                                                                                                                                                         | ≥5.0.0                 | source or bytecode \[10\] | [Experimental](https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/versioning-and-stability.md) |
 | `QUARTZ`                    | [Quartz](https://www.nuget.org/packages/Quartz) **Not supported on .NET Framework 4.7.1 and older**                                                                                                                        | ≥3.4.0                 | source                    | [Experimental](https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/versioning-and-stability.md) |
 | `SQLCLIENT`                 | [Microsoft.Data.SqlClient](https://www.nuget.org/packages/Microsoft.Data.SqlClient), [System.Data.SqlClient](https://www.nuget.org/packages/System.Data.SqlClient) \[11\]  and `System.Data` (shipped with .NET Framework) | * \[12\]               | source                    | [Experimental](https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/versioning-and-stability.md) |
-| `SQLITE`                    | [Microsoft.Data.Sqlite](https://www.nuget.org/packages/Microsoft.Data.Sqlite)                                                                                                                                              | ≥8.0.0 & < 11.0.0      | bytecode                  | [Experimental](https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/versioning-and-stability.md) |
+| `SQLITE`                    | [Microsoft.Data.Sqlite](https://www.nuget.org/packages/Microsoft.Data.Sqlite)                                                                                                                                              | ≥8.0.0 & < 12.0.0      | bytecode                  | [Experimental](https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/versioning-and-stability.md) |
 | `STACKEXCHANGEREDIS`        | [StackExchange.Redis](https://www.nuget.org/packages/StackExchange.Redis)                                                                                                                                                  | \[13\]                 | source & bytecode         | [Experimental](https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/versioning-and-stability.md) |
 | `WCFCLIENT`                 | WCF                                                                                                                                                                                                                        | *                      | source & bytecode         | [Experimental](https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/versioning-and-stability.md) |
 | `WCFCORE`                   | [CoreWCF.Primitives](https://www.nuget.org/packages/CoreWCF.Primitives) **Not supported on .NET Framework**                                                                                                                | ≥1.8.0                 | source                    | [Experimental](https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/versioning-and-stability.md) |
@@ -175,7 +175,7 @@ due to lack of stable semantic convention.
        libraries covered by specific instrumentations such as `SQLCLIENT`,
        `NPGSQL`, `MYSQLDATA`, `MYSQLCONNECTOR`, `ORACLEMDA`, or `SQLITE`.
 
-\[2\]: Supports `System.Data.Common` (≥4.0.0 and <11.0.0),
+\[2\]: Supports `System.Data.Common` (≥4.0.0 and <12.0.0),
        `System.Data` for .NET Framework (≥2.0.0 and <5.0.0),
        and `netstandard` (≥2.0.0 and <3.0.0).
 
@@ -241,7 +241,7 @@ due to lack of stable semantic convention.
 
 | ID        | Instrumented library                                                                                                            | Supported versions | Instrumentation type     | Status                                                                                                                            |
 |-----------|---------------------------------------------------------------------------------------------------------------------------------|--------------------|--------------------------|-----------------------------------------------------------------------------------------------------------------------------------|
-| `ILOGGER` | [Microsoft.Extensions.Logging](https://www.nuget.org/packages/Microsoft.Extensions.Logging) **Not supported on .NET Framework** | ≥8.0.0             | bytecode or source \[1\] | [Experimental](https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/versioning-and-stability.md) |
+| `ILOGGER` | [Microsoft.Extensions.Logging](https://www.nuget.org/packages/Microsoft.Extensions.Logging) **Not supported on .NET Framework** | ≥8.0.0 && < 12.0.0 | bytecode or source \[1\] | [Experimental](https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/versioning-and-stability.md) |
 | `LOG4NET` | [log4net](https://www.nuget.org/packages/log4net) \[2\]                                                                         | ≥2.0.13 && < 4.0.0 | bytecode                 | [Experimental](https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/versioning-and-stability.md) |
 | `NLOG`    | [NLog](https://www.nuget.org/packages/NLog) \[3\]                                                                               | ≥5.0.0 && < 7.0.0  | bytecode                 | [Experimental](https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/versioning-and-stability.md) |
 
@@ -360,7 +360,7 @@ To enable the OTLP exporter, set the `OTEL_TRACES_EXPORTER`/`OTEL_METRICS_EXPORT
 environment variable to `otlp`.
 
 To customize the OTLP exporter using environment variables, see the
-[OTLP exporter documentation](https://github.com/open-telemetry/opentelemetry-dotnet/tree/core-1.15.3/src/OpenTelemetry.Exporter.OpenTelemetryProtocol#environment-variables).
+[OTLP exporter documentation](https://github.com/open-telemetry/opentelemetry-dotnet/tree/core-1.16.0/src/OpenTelemetry.Exporter.OpenTelemetryProtocol#environment-variables).
 Important environment variables include:
 
 | Environment variable                                | Description                                                                                                                                                                                                | Default value                                                                        | Status                                                                                                                      |
@@ -447,7 +447,7 @@ The exporter exposes the metrics HTTP endpoint on `http://localhost:9464/metrics
 and it caches the responses for 300 milliseconds.
 
 See the
-[Prometheus Exporter HttpListener documentation](https://github.com/open-telemetry/opentelemetry-dotnet/tree/coreunstable-1.15.3-beta.1/src/OpenTelemetry.Exporter.Prometheus.HttpListener).
+[Prometheus Exporter HttpListener documentation](https://github.com/open-telemetry/opentelemetry-dotnet/tree/coreunstable-1.16.0-beta.1/src/OpenTelemetry.Exporter.Prometheus.HttpListener).
 to learn more.
 
 ### Zipkin
@@ -458,7 +458,7 @@ To enable the Zipkin exporter, set the `OTEL_TRACES_EXPORTER` environment
 variable to `zipkin`.
 
 To customize the Zipkin exporter using environment variables,
-see the [Zipkin exporter documentation](https://github.com/open-telemetry/opentelemetry-dotnet/tree/core-1.15.3/src/OpenTelemetry.Exporter.Zipkin#configuration-using-environment-variables).
+see the [Zipkin exporter documentation](https://github.com/open-telemetry/opentelemetry-dotnet/tree/core-1.16.0/src/OpenTelemetry.Exporter.Zipkin#configuration-using-environment-variables).
 Important environment variables include:
 
 | Environment variable            | Description | Default value                        | Status                                                                                                                      |

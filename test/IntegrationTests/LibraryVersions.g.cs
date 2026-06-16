@@ -39,7 +39,7 @@ public static partial class LibraryVersion
                 string.Empty,
 #else
                 "8.15.10",
-                "9.4.1",
+                "9.4.2",
 #endif
             ];
             return theoryData;
@@ -61,7 +61,7 @@ public static partial class LibraryVersion
                 "10.0.0",
 #endif
 #if NET10_0
-                "10.0.7",
+                "10.0.9",
 #endif
 #endif
             ];
@@ -163,7 +163,7 @@ public static partial class LibraryVersion
                 string.Empty,
 #else
                 "8.3.0",
-                "8.5.9",
+                "8.5.10",
 #endif
             ];
             return theoryData;
@@ -226,7 +226,7 @@ public static partial class LibraryVersion
                 "3.7.0",
 #endif
 #if NET10_0 || NET9_0 || NET8_0 || NET462
-                "3.8.1",
+                "3.9.0",
 #endif
 #endif
             ];
@@ -243,7 +243,7 @@ public static partial class LibraryVersion
                 string.Empty,
 #else
                 "2.0.0",
-                "2.5.0",
+                "2.6.0",
 #endif
             ];
             return theoryData;
@@ -274,12 +274,12 @@ public static partial class LibraryVersion
 #if DEFAULT_TEST_PACKAGE_VERSIONS
                 string.Empty,
 #else
-                "8.0.8",
+                "8.0.9",
 #if NET10_0 || NET9_0 || NET8_0
                 "9.0.4",
 #endif
 #if NET10_0 || NET9_0 || NET8_0
-                "10.0.2",
+                "10.0.3",
 #endif
 #endif
             ];
@@ -303,7 +303,7 @@ public static partial class LibraryVersion
                 "10.1.3",
 #endif
 #if NET10_0
-                "10.1.4",
+                "10.2.0",
 #endif
 #endif
             ];
@@ -392,7 +392,7 @@ public static partial class LibraryVersion
                 "8.0.0",
                 "9.0.0",
                 "10.0.0",
-                "10.0.7",
+                "10.0.9",
 #endif
             ];
             return theoryData;
@@ -410,7 +410,7 @@ public static partial class LibraryVersion
                 "2.6.122",
                 "2.12.14",
 #if NET10_0 || NET9_0 || NET8_0
-                "3.0.2-preview",
+                "3.0.47-preview",
 #endif
 #endif
             ];
@@ -448,7 +448,7 @@ public static partial class LibraryVersion
 #else
                 "1.8.2",
                 "1.9.2",
-                "2.14.0",
+                "2.14.2",
 #endif
             ];
             return theoryData;
@@ -476,7 +476,7 @@ public static partial class LibraryVersion
                 "10.0.0",
 #endif
 #if NET462 || NET10_0
-                "10.0.7",
+                "10.0.9",
 #endif
 #endif
             ];

@@ -3,7 +3,6 @@
 
 #if NETFRAMEWORK
 using IntegrationTests.Helpers;
-using Xunit.Abstractions;
 
 namespace IntegrationTests;
 

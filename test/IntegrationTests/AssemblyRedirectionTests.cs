@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: Apache-2.0
 
 using IntegrationTests.Helpers;
-using Xunit.Abstractions;
 
 namespace IntegrationTests;
 
@@ -36,15 +35,15 @@ public class AssemblyRedirectionTests(ITestOutputHelper output) : TestHelper("As
     // Case 2: Equal version, should NOT be redirected with/without native profiler
     // TODO currently different test jobs use different versions of .net runtime:
     //   - test-build-container (ubuntu-22.04, alpine, alpine-x64, linux-musl): DS file version 10.0.426.12010
-    //   - test-build-managed (net10.0, windows-2022): DS file version 10.0.726.21808
-    [InlineData("10.0.7", AssemblyName, "10.0.0.0", "10.0.726.21808", true)]
-    [InlineData("10.0.7", AssemblyName, "10.0.0.0", "10.0.726.21808", false)]
+    //   - test-build-managed (net10.0, windows-2022): DS file version 10.0.926.27113
+    [InlineData("10.0.9", AssemblyName, "10.0.0.0", "10.0.926.27113", true)]
+    [InlineData("10.0.9", AssemblyName, "10.0.0.0", "10.0.926.27113", false)]
     // Case 3: Higher version is not possible for DiagnosticSource on .NET 10, the instrumentation tool is already using the highest possible version
 #elif NETFRAMEWORK
     // Case 1: Lower version should be redirected (native profiler mandatory)
-    [InlineData("6.0.0", AssemblyName, "10.0.0.7", "10.0.726.21808")]
+    [InlineData("6.0.0", AssemblyName, "10.0.0.9", "10.0.926.27113")]
     // Case 2: Equal version, should NOT be redirected (native profiler mandatory)
-    [InlineData("10.0.7", AssemblyName, "10.0.0.7", "10.0.726.21808")]
+    [InlineData("10.0.9", AssemblyName, "10.0.0.9", "10.0.926.27113")]
     // Case 3: Higher version is not possible for DiagnosticSource on .NET 10, the instrumentation tool is already using the highest possible version
 #endif
     public void SubmitsTraces(
@@ -79,7 +78,7 @@ public class AssemblyRedirectionTests(ITestOutputHelper output) : TestHelper("As
         RunTestApplication(new TestSettings
         {
             PackageVersion = libraryVersion,
-            Arguments = $"{expectedAssemblyName} {expectedAssemblyVersion} {expectedAssemblyFileVersion} {excludedNames}"
+            Arguments = $"--assembly-name {expectedAssemblyName} --assembly-version {expectedAssemblyVersion} --assembly-file-version {expectedAssemblyFileVersion} --excluded-assemblies {excludedNames}"
         });
 
         // Assert

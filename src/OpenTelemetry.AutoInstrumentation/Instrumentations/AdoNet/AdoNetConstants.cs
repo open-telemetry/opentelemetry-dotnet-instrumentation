@@ -15,7 +15,7 @@ internal static class AdoNetConstants
 
     // Version ranges for System.Data.Common (.NET)
     public const string SystemDataCommonMinVersion = "4.0.0";
-    public const string SystemDataCommonMaxVersion = "10.*.*";
+    public const string SystemDataCommonMaxVersion = "11.*.*";
 
     // Version ranges for System.Data (.NET Framework)
     public const string SystemDataMinVersion = "2.0.0";
@@ -51,7 +51,7 @@ internal static class AdoNetConstants
         public const string DataReaderTypeName = "Microsoft.Data.Sqlite.SqliteDataReader";
         public const string DataReaderTaskTypeName = "System.Threading.Tasks.Task`1[Microsoft.Data.Sqlite.SqliteDataReader]";
         public const string MinVersion = "8.0.0";
-        public const string MaxVersion = "10.*.*";
+        public const string MaxVersion = "11.*.*";
     }
 
     internal static class Devart

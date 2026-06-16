@@ -1,7 +1,7 @@
 version: "2"
 services:
   otel-collector:
-    image: otel/opentelemetry-collector-contrib:0.152.1@sha256:fa1f6ea8dabd3042fabf4411eed7fa52f253edd8940140bec89a573e62a24eb7
+    image: otel/opentelemetry-collector-contrib:0.154.0@sha256:b3079f45e19bdb7326bf49cdddce6cf60dfd865138db39f2733ea48ab17bc4cb
     volumes:
       - ./otel-config.yaml:/etc/otel/config.yaml
       - ./log:/log/otel

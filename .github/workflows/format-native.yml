@@ -28,15 +28,15 @@ jobs:
             runner: macos-26-xlarge
           - step-name: native-format-linux
             # renovate: datasource=github-runners depType=github-runner
-            runner: ubuntu-22.04
+            runner: ubuntu-24.04
           - step-name: native-format-windows
             # renovate: datasource=github-runners depType=github-runner
-            runner: windows-2022
+            runner: windows-2025
 
     steps:
 
     - name: Checkout code
-      uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
       with:
         persist-credentials: false
 
@@ -50,18 +50,18 @@ jobs:
 
   check-native-headers:
     name: check-native-headers # Matches required status check
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     steps:
 
       - name: Checkout code
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
         with:
           persist-credentials: false
 
       - name: Setup Go
         uses: actions/setup-go@4a3601121dd01d1626a1e23e37211e3254c1c06c # v6.4.0
         with:
-          go-version: '1.26.3'
+          go-version: '1.26.4'
           cache: false # Suppress a warning given that there are no go.sum files in the repo
 
       - name: Verify all native files have license headers

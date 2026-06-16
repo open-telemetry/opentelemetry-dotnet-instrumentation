@@ -49,7 +49,7 @@ public static class ModelBaseBasicGetIntegration
         }
         else
         {
-            activity.ActivityTraceFlags = ActivityTraceFlags.None;
+            activity.ActivityTraceFlags &= ~ActivityTraceFlags.Recorded;
         }
 
         activity.Stop();

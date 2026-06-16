@@ -258,18 +258,21 @@ partial class Build
 
     Target CompileNativeDependenciesForManagedTests => _ => _
         .Description("Compiles the native dependencies for testing applications")
+        .DependsOn(SupportVs2026IfAvailable)
         .DependsOn(CompileNativeDependenciesForManagedTestsWindows)
         .DependsOn(CompileNativeDependenciesForManagedTestsLinux)
         .DependsOn(CompileNativeDependenciesForManagedTestsMacOs);
 
     Target CompileNativeSrc => _ => _
         .Description("Compiles the native loader")
+        .DependsOn(SupportVs2026IfAvailable)
         .DependsOn(CompileNativeSrcWindows)
         .DependsOn(CompileNativeSrcLinux)
         .DependsOn(CompileNativeSrcMacOs);
 
     Target CompileNativeTests => _ => _
         .Description("Compiles the native loader unit tests")
+        .DependsOn(SupportVs2026IfAvailable)
         .DependsOn(CompileNativeTestsWindows)
         .DependsOn(CompileNativeTestsLinux);
 
@@ -597,18 +600,37 @@ partial class Build
 
             for (int i = 0; i < TestCount; i++)
             {
-                DotNetTest(config => config
+                DotNetTestSettings ConfigureUnitTest(DotNetTestSettings settings) => settings
                     .SetConfiguration(BuildConfiguration)
                     .SetTargetPlatformAnyCPU()
                     .SetFilter(TestNameFilter())
+                    .SetBlameHangTimeout("5m")
                     .SetNoRestore(NoRestore)
                     .SetProcessEnvironmentVariable("OTEL_DOTNET_AUTO_LOG_DIRECTORY", ProfilerTestLogs)
-                    .EnableNoBuild()
-                    .When(_ => TestTargetFramework != TargetFramework.NOT_SPECIFIED,
-                        x => x.SetFramework(TestTargetFramework))
-                    .CombineWith(unitTestProjects, (s, project) => s
-                        .EnableTrxLogOutput(GetResultsDirectory(project))
-                        .SetProjectFile(project)), degreeOfParallelism: 4);
+                    .EnableNoBuild();
+
+                if (ShouldRunTargetFrameworksSeparately())
+                {
+                    foreach (var project in unitTestProjects)
+                    {
+                        foreach (var targetFramework in project.GetTargetFrameworks())
+                        {
+                            DotNetTest(config => ConfigureUnitTest(config)
+                                .SetFramework(targetFramework)
+                                .EnableTrxLogOutput(GetResultsDirectory(project))
+                                .SetProjectFile(project));
+                        }
+                    }
+                }
+                else
+                {
+                    DotNetTest(config => ConfigureUnitTest(config)
+                        .When(_ => TestTargetFramework != TargetFramework.NOT_SPECIFIED,
+                            x => x.SetFramework(TestTargetFramework))
+                        .CombineWith(unitTestProjects, (s, project) => s
+                            .EnableTrxLogOutput(GetResultsDirectory(project))
+                            .SetProjectFile(project)), degreeOfParallelism: 4);
+                }
             }
         });
 
@@ -626,16 +648,29 @@ partial class Build
 
             for (int i = 0; i < TestCount; i++)
             {
-                DotNetTest(config => config
+                DotNetTestSettings ConfigureIntegrationTest(DotNetTestSettings settings) => settings
                     .SetConfiguration(BuildConfiguration)
                     .SetFilter(AndFilter(TestNameFilter(), ContainersFilter()))
                     .SetBlameHangTimeout("5m")
                     .EnableTrxLogOutput(GetResultsDirectory(project))
                     .SetProjectFile(project)
-                    .SetNoRestore(NoRestore)
-                    .When(_ => TestTargetFramework != TargetFramework.NOT_SPECIFIED,
-                        s => s.SetFramework(TestTargetFramework))
-                );
+                    .SetNoRestore(NoRestore);
+
+                if (ShouldRunTargetFrameworksSeparately())
+                {
+                    foreach (var targetFramework in project.GetTargetFrameworks())
+                    {
+                        DotNetTest(config => ConfigureIntegrationTest(config)
+                            .SetFramework(targetFramework));
+                    }
+                }
+                else
+                {
+                    DotNetTest(config => ConfigureIntegrationTest(config)
+                        .When(_ => TestTargetFramework != TargetFramework.NOT_SPECIFIED,
+                            s => s.SetFramework(TestTargetFramework))
+                    );
+                }
             }
         });
 
@@ -747,10 +782,21 @@ partial class Build
                     .SetProjectFile(project)
                     .SetFilter(AndFilter(TestNameFilter(), testName))
                     .When(_ => TestTargetFramework != TargetFramework.NOT_SPECIFIED, s => s.SetFramework(TestTargetFramework))
+                    .SetBlameHangTimeout("5m")
                     .SetProcessEnvironmentVariable("OTEL_DOTNET_AUTO_LOG_DIRECTORY", ProfilerTestLogs)
                     .SetProcessEnvironmentVariable("BOOSTRAPPING_TESTS", "true"));
             }
         }
+    }
+
+    private bool ShouldRunTargetFrameworksSeparately()
+    {
+        // The hosted linux-musl arm64 runner can hang when several multi-target VSTest hosts run at once.
+        // Keep coverage, but run one TFM at a time on that constrained platform.
+        return TestTargetFramework == TargetFramework.NOT_SPECIFIED
+            && IsLinux
+            && Equals(Platform, Arm64TargetPlatform)
+            && string.Equals(Environment.GetEnvironmentVariable("IsAlpine"), "true", StringComparison.OrdinalIgnoreCase);
     }
 
     private void RestoreLegacyNuGetPackagesConfig(IEnumerable<Project> legacyRestoreProjects)

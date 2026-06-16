@@ -4,7 +4,6 @@
 using OpenTelemetry.AutoInstrumentation.Configurations;
 using OpenTelemetry.AutoInstrumentation.Configurations.FileBasedConfiguration;
 using OpenTelemetry.AutoInstrumentation.HeadersCapture;
-using Xunit;
 
 namespace OpenTelemetry.AutoInstrumentation.Tests.Configurations.FileBased;
 

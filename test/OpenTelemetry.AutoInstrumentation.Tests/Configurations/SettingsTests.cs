@@ -2,11 +2,10 @@
 // SPDX-License-Identifier: Apache-2.0
 
 using System.Globalization;
+using System.Net.Http;
 using OpenTelemetry.AutoInstrumentation.Configurations;
 using OpenTelemetry.AutoInstrumentation.Tests.Util;
 using OpenTelemetry.Exporter;
-using Xunit;
-
 using AutoOtlpDefinitions = OpenTelemetry.AutoInstrumentation.Configurations.Otlp.OtlpSpecConfigDefinitions;
 
 namespace OpenTelemetry.AutoInstrumentation.Tests.Configurations;
@@ -450,6 +449,37 @@ public sealed class SettingsTests
         // null values for expected data will be handled by OTel .NET SDK
         Assert.NotNull(settings.OtlpSettings);
         Assert.Equal(expectedOtlpExportProtocol, settings.OtlpSettings.Protocol);
+    }
+
+    [Theory]
+    [InlineData("http/protobuf", true)]
+#if NETFRAMEWORK
+    [InlineData("grpc", true)]
+#else
+    [InlineData("grpc", false)]
+#endif
+    internal void OtlpSettings_CopyTo_OverridesHttpClientFactoryForHttpProtobufOnly(string otlpProtocol, bool expectHttpClientFactoryOverride)
+    {
+        using var envScope = new EnvironmentScope(new Dictionary<string, string?>()
+        {
+            { AutoOtlpDefinitions.DefaultProtocolEnvVarName, otlpProtocol }
+        });
+
+        var settings = Settings.FromDefaultSources<TracerSettings>(false).OtlpSettings;
+        var options = new OtlpExporterOptions();
+        Func<HttpClient> originalHttpClientFactory = static () => new HttpClient();
+        options.HttpClientFactory = originalHttpClientFactory;
+
+        settings?.CopyTo(options);
+
+        if (expectHttpClientFactoryOverride)
+        {
+            Assert.NotSame(originalHttpClientFactory, options.HttpClientFactory);
+        }
+        else
+        {
+            Assert.Same(originalHttpClientFactory, options.HttpClientFactory);
+        }
     }
 
     [Theory]

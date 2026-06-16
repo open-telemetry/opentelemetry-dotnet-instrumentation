@@ -4,6 +4,7 @@
 
 #include "dllmain.h"
 #include "class_factory.h"
+#include <new>
 
 const IID IID_IUnknown = {0x00000000, 0x0000, 0x0000, {0xC0, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x46}};
 
@@ -29,11 +30,11 @@ extern "C"
             return E_FAIL;
         }
 
-        auto factory = new ClassFactory;
+        auto factory = new (std::nothrow) ClassFactory;
 
         if (factory == NULL)
         {
-            return E_FAIL;
+            return E_OUTOFMEMORY;
         }
 
         return factory->QueryInterface(riid, ppv);

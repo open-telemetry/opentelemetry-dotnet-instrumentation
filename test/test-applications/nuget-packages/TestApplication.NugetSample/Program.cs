@@ -16,19 +16,17 @@
 
 
 using System.Globalization;
+using TestApplication.Shared;
 #if NETFRAMEWORK
 using System.Net.Http;
 #endif
 
 using var httpClient = new HttpClient();
 httpClient.Timeout = TimeSpan.FromSeconds(10);
-if (args.Length != 2)
-{
-    throw new InvalidOperationException("Missing arguments. Provide test server port with --test-server-port <test-server-port>");
-}
+
 try
 {
-    var testServerPort = int.Parse(args[1], CultureInfo.InvariantCulture);
+    var testServerPort = int.Parse(ArgumentHelper.GetRequiredArgument(args, "--test-server-port"), CultureInfo.InvariantCulture);
     var response = await httpClient.GetAsync(new Uri($"http://localhost:{testServerPort}/test/")).ConfigureAwait(false);
     Console.WriteLine(response.StatusCode);
 }

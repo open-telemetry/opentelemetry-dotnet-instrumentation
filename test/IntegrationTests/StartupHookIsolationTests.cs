@@ -5,7 +5,6 @@
 using System.Security.Cryptography;
 using IntegrationTests.Helpers;
 using OpenTelemetry.AutoInstrumentation;
-using Xunit.Abstractions;
 
 namespace IntegrationTests;
 
@@ -28,7 +27,7 @@ public class StartupHookIsolationTests(ITestOutputHelper output) : TestHelper("S
         // The application should not crash as a validation that the entrypoint is not executed twice
         var exitCode = RandomNumberGenerator.GetInt32(1, 100);
         var (standardOutput, _, _) = RunTestApplication(
-            new TestSettings { Arguments = $"{exitCode}" },
+            new TestSettings { Arguments = $"--exit-code {exitCode}" },
             expectedExitCode: exitCode);
 
         // Assert
@@ -53,7 +52,7 @@ public class StartupHookIsolationTests(ITestOutputHelper output) : TestHelper("S
         // and expect the same exception to be thrown as a validation that isolation do not hide the original exception.
         // The application should not crash with another exception that serves as a validation that the entry point is not executed twice
         var (standardOutput, errorOutput, _) = RunTestApplication(
-            new TestSettings { Arguments = "throw System.Exception Expected test exception" },
+            new TestSettings { Arguments = "--throw --exception-type System.Exception --exception-message \"Expected test exception\"" },
             expectedExitCode: 0,
             assertExitCode: Assert.NotEqual);
 
