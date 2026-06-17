@@ -49,7 +49,6 @@ private:
 
     HANDLE threadHandle_ = nullptr;
     bool   suspended_    = false;
-    CONTEXT capturedContext_ = {};
 };
 
 } // namespace ProfilerStackCapture
