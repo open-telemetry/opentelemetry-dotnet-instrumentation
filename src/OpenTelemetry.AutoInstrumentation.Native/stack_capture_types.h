@@ -34,7 +34,7 @@ struct CapturedFrame
     ULONG32            contextSize        = 0;
     BYTE*              context            = nullptr;
     ThreadID           threadId           = 0;
-    bool               isUnmanagedFrame   = false; // Set by RTL walker only
+    bool               isUnmanagedFrame   = false;
 };
 
 } // namespace continuous_profiler

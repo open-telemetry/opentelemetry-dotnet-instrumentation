@@ -49,7 +49,7 @@ public:
     /// @brief Dispatch a successful RTL frame-0 probe to the appropriate
     ///        capture path; sole public entry post-probe.
     ///
-    /// Pre: StackWalkGuard::AwaitRtlFrame0ProbeResult() returned true,
+    /// Pre: StackWalkGuard::AwaitRtlFrame0ProbeResult() returned ProbeResult::Success,
     /// caller still holds target suspended via ThreadGuard, and ctx /
     /// frame0 were populated by the probe.
     ///

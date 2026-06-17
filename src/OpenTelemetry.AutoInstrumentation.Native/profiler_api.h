@@ -33,7 +33,8 @@ inline HRESULT __stdcall StackSnapshotCallbackDefault(
     callbackData->frame.frameInfo          = frameInfo;
     callbackData->frame.contextSize        = contextSize;
     callbackData->frame.context            = context;
-    callbackData->frame.isUnmanagedFrame   = funcId == 0; // CLR signals native frames with funcId == 0 and non-null IP
+    callbackData->frame.isUnmanagedFrame =
+        (funcId == 0 && ip != 0);
 
     return callbackData->callback(callbackData);
 }

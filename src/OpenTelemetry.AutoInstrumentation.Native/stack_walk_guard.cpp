@@ -223,8 +223,20 @@ void StackWalkGuard::WorkerLoop()
         // Cooperative: if the orchestrator abandoned us while we were
         // blocked on the heap CS, bail before dispatching the probe.
         SetStage(ProbeStage::HeapOrStlGate);
+        try
         {
             std::vector<int> v{1, 2, 3};
+        }
+        catch (...)
+        {
+            {
+                std::lock_guard<std::mutex> lk(mutex_);
+                result_ = ProbeResult::Failed;
+                state_  = State::Idle;
+                SetStage(ProbeStage::None);
+            }
+            cv_.notify_all();
+            continue;
         }
 
         bool gateOk;
