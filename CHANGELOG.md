@@ -13,6 +13,9 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
   - `Microsoft.Data.Sqlite`,
   - `Microsoft.Extensions.Logging`,
   - `System.Data.Common`.
+- Support for `SQLCLIENT` context propagation for .NET Framework
+  configurable by `OTEL_DOTNET_EXPERIMENTAL_SQLCLIENT_ENABLE_TRACE_CONTEXT_PROPAGATION`
+  environment variable.
 
 ### Changed
 
