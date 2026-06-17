@@ -25,6 +25,14 @@ internal static class Program
         var (databasePassword, databasePort) = ParseArgs(args);
         var connectionString = GetConnectionString(databasePassword, databasePort);
 
+        using (var scalarCommandConnection = new SqlConnection(connectionString))
+        {
+            if (SqlServerScalarCommandExecutor.TryExecute(scalarCommandConnection, args))
+            {
+                return;
+            }
+        }
+
         using (var connection = new SqlConnection(connectionString))
         {
             ExecuteCommands(connection);

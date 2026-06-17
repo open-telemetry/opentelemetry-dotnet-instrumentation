@@ -23,6 +23,14 @@ internal static class Program
 
         const string connectionString = "Data Source=(localdb)\\MSSQLLocalDB;Integrated Security=True;Connect Timeout=30;TrustServerCertificate=True;";
 
+        using (var scalarCommandConnection = new SqlConnection(connectionString))
+        {
+            if (SqlServerScalarCommandExecutor.TryExecute(scalarCommandConnection, args))
+            {
+                return;
+            }
+        }
+
         using (var connection = new SqlConnection(connectionString))
         {
             ExecuteCommands(connection);
