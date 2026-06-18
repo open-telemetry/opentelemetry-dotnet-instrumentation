@@ -185,6 +185,10 @@ tracer_provider:
           # Value must be non-negative. A value of 0 indicates no limit (infinity).
           # If omitted or null, 10000 is used.
           timeout: 10000
+          # Configure compression.
+          # Values include: gzip, none.
+          # If omitted or null, none is used.
+          compression: gzip
           # Configure headers. Entries have higher priority than entries from .headers_list.
           # If an entry's .value is null, the entry is ignored.
           headers:
@@ -244,6 +248,10 @@ meter_provider:
             # Value must be non-negative. A value of 0 indicates no limit (infinity).
             # If omitted or null, 10000 is used.
             timeout: 10000
+            # Configure compression.
+            # Values include: gzip, none.
+            # If omitted or null, none is used.
+            compression: gzip
             # Configure headers. Entries have higher priority than entries from .headers_list.
             # If an entry's .value is null, the entry is ignored.
             headers:
@@ -327,6 +335,10 @@ logger_provider:
             # Value must be non-negative. A value of 0 indicates no limit (infinity).
             # If omitted or null, 10000 is used.
             timeout: 10000
+            # Configure compression.
+            # Values include: gzip, none.
+            # If omitted or null, none is used.
+            compression: gzip
 
     # Batch processor for OTLP gRPC
     - batch:
