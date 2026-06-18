@@ -89,7 +89,8 @@ public static partial class LibraryVersion
         {
             "TestApplication.SqlClient.Microsoft",
             [
-                new("5.2.2"),
+                new("5.2.3"),
+                new("6.1.5"),
                 new("7.0.1"),
             ]
         },

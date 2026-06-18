@@ -17,7 +17,7 @@ internal static partial class InstrumentationDefinitions
 {
     private static NativeCallTargetDefinition[] GetDefinitionsArray()
     {
-        var nativeCallTargetDefinitions = new List<NativeCallTargetDefinition>(53);
+        var nativeCallTargetDefinitions = new List<NativeCallTargetDefinition>(56);
         // Traces
         var tracerSettings = Instrumentation.TracerSettings.Value;
         if (tracerSettings.TracesEnabled)
@@ -92,6 +92,14 @@ internal static partial class InstrumentationDefinitions
                 nativeCallTargetDefinitions.Add(new("RabbitMQ.Client", "RabbitMQ.Client.Impl.ModelBase", "BasicGet", ["RabbitMQ.Client.BasicGetResult", "System.String", "System.Boolean"], 5, 0, 0, 6, 65535, 65535, AssemblyFullName, "OpenTelemetry.AutoInstrumentation.Instrumentations.RabbitMqLegacy.Integrations.ModelBaseBasicGetIntegration"));
                 nativeCallTargetDefinitions.Add(new("RabbitMQ.Client", "RabbitMQ.Client.Framing.Impl.Model", "_Private_BasicPublish", ["System.Void", "System.String", "System.String", "System.Boolean", "RabbitMQ.Client.IBasicProperties", "System.Byte[]"], 5, 0, 0, 5, 65535, 65535, AssemblyFullName, "OpenTelemetry.AutoInstrumentation.Instrumentations.RabbitMqLegacy.Integrations.ModelBasicPublishIntegration"));
                 nativeCallTargetDefinitions.Add(new("RabbitMQ.Client", "RabbitMQ.Client.Framing.Impl.Model", "_Private_BasicPublish", ["System.Void", "System.String", "System.String", "System.Boolean", "RabbitMQ.Client.IBasicProperties", "System.ReadOnlyMemory`1[System.Byte]"], 6, 0, 0, 6, 65535, 65535, AssemblyFullName, "OpenTelemetry.AutoInstrumentation.Instrumentations.RabbitMqLegacy.Integrations.ModelBasicPublishIntegration"));
+            }
+
+            // SqlClient
+            if (tracerSettings.EnabledInstrumentations.Contains(TracerInstrumentation.SqlClient))
+            {
+                nativeCallTargetDefinitions.Add(new("System.Data", "System.Data.SqlClient.SqlCommand", "WriteBeginExecuteEvent", ["System.Void"], 2, 0, 0, 4, 65535, 65535, AssemblyFullName, "OpenTelemetry.AutoInstrumentation.Instrumentations.SqlClient.Integrations.SqlCommandWriteBeginExecuteEventIntegration"));
+                nativeCallTargetDefinitions.Add(new("System.Data.SqlClient", "System.Data.SqlClient.SqlCommand", "WriteBeginExecuteEvent", ["System.Void"], 4, 0, 0, 5, 65535, 65535, AssemblyFullName, "OpenTelemetry.AutoInstrumentation.Instrumentations.SqlClient.Integrations.SqlCommandWriteBeginExecuteEventIntegration"));
+                nativeCallTargetDefinitions.Add(new("Microsoft.Data.SqlClient", "Microsoft.Data.SqlClient.SqlCommand", "WriteBeginExecuteEvent", ["System.Void"], 1, 0, 0, 7, 65535, 65535, AssemblyFullName, "OpenTelemetry.AutoInstrumentation.Instrumentations.SqlClient.Integrations.SqlCommandWriteBeginExecuteEventIntegration"));
             }
 
             // StackExchangeRedis
