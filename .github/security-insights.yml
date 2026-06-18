@@ -1,0 +1,136 @@
+header:
+  last-reviewed: '2026-06-18'
+  last-updated: '2026-06-18'
+  schema-version: 2.0.0
+  url: https://raw.githubusercontent.com/open-telemetry/opentelemetry-dotnet-instrumentation/main/.github/security-insights.yml
+  comment: |
+    This file contains the minimum information for https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation.
+
+project:
+  name: OpenTelemetry .NET Automatic Instrumentation
+  homepage: https://opentelemetry.io/docs/zero-code/dotnet/
+  administrators:
+    - name: Chris Ventura
+      affiliation: New Relic
+      social: https://github.com/nrcventura
+      primary: true
+    - name: "Piotr Kie\u0142kowicz"
+      affiliation: Splunk
+      social: https://github.com/Kielek
+      primary: false
+    - name: Rajkumar Rangaraj
+      affiliation: Microsoft
+      social: https://github.com/rajkumar-rangaraj
+      primary: false
+    - name: "Robert Paj\u0105k"
+      affiliation: Splunk
+      social: https://github.com/pellared
+      primary: false
+    - name: Zach Montoya
+      affiliation: Datadog
+      social: https://github.com/zacharycmontoya
+      primary: false
+  documentation:
+    code-of-conduct: https://github.com/open-telemetry/community/blob/main/code-of-conduct.md
+    detailed-guide: https://opentelemetry.io/docs/zero-code/dotnet/
+    quickstart-guide: https://opentelemetry.io/docs/zero-code/dotnet/getting-started/
+    release-process: https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/blob/main/docs/releasing.md
+    signature-verification: https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/blob/main/docs/README.md#attestation
+  repositories:
+    - name: opentelemetry-dotnet-instrumentation
+      url: https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation
+      comment: |
+        Active primary OpenTelemetry .NET Automatic Instrumentation repository.
+        It contains the zero-code instrumentation distribution and related
+        NuGet packages for .NET applications.
+  vulnerability-reporting:
+    bug-bounty-available: false
+    reports-accepted: true
+    policy: https://opentelemetry.io/docs/security/security-response/
+    contact:
+      name: The OpenTelemetry security team
+      email: security@opentelemetry.io
+      primary: true
+    comment: |
+      Report security vulnerabilities via https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/security.
+
+repository:
+  url: https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation
+  status: active
+  accepts-automated-change-request: true
+  accepts-change-request: true
+  bug-fixes-only: false
+  no-third-party-packages: false
+  core-team:
+    - name: Chris Ventura
+      affiliation: New Relic
+      social: https://github.com/nrcventura
+      primary: true
+    - name: "Piotr Kie\u0142kowicz"
+      affiliation: Splunk
+      social: https://github.com/Kielek
+      primary: false
+    - name: Rajkumar Rangaraj
+      affiliation: Microsoft
+      social: https://github.com/rajkumar-rangaraj
+      primary: false
+    - name: "Robert Paj\u0105k"
+      affiliation: Splunk
+      social: https://github.com/pellared
+      primary: false
+    - name: Zach Montoya
+      affiliation: Datadog
+      social: https://github.com/zacharycmontoya
+      primary: false
+  documentation:
+    contributing-guide: https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/blob/main/docs/CONTRIBUTING.md
+    dependency-management-policy: https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/blob/main/.github/renovate.json5
+    security-policy: https://opentelemetry.io/docs/security/security-response/
+  license:
+    expression: Apache-2.0
+    url: https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/blob/main/LICENSE
+  release:
+    automated-pipeline: true
+    changelog: https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/blob/main/CHANGELOG.md
+    distribution-points:
+      - uri: https://www.nuget.org/packages/OpenTelemetry.AutoInstrumentation
+        comment: OpenTelemetry.AutoInstrumentation NuGet package distributed from NuGet.org.
+      - uri: https://www.nuget.org/packages/OpenTelemetry.AutoInstrumentation.AspNetCoreBootstrapper
+        comment: OpenTelemetry.AutoInstrumentation.AspNetCoreBootstrapper NuGet package distributed from NuGet.org.
+      - uri: https://www.nuget.org/packages/OpenTelemetry.AutoInstrumentation.BuildTasks
+        comment: OpenTelemetry.AutoInstrumentation.BuildTasks NuGet package distributed from NuGet.org.
+      - uri: https://www.nuget.org/packages/OpenTelemetry.AutoInstrumentation.Loader
+        comment: OpenTelemetry.AutoInstrumentation.Loader NuGet package distributed from NuGet.org.
+      - uri: https://www.nuget.org/packages/OpenTelemetry.AutoInstrumentation.Runtime.Managed
+        comment: OpenTelemetry.AutoInstrumentation.Runtime.Managed NuGet package distributed from NuGet.org.
+      - uri: https://www.nuget.org/packages/OpenTelemetry.AutoInstrumentation.Runtime.Native
+        comment: OpenTelemetry.AutoInstrumentation.Runtime.Native NuGet package distributed from NuGet.org.
+      - uri: https://www.nuget.org/packages/OpenTelemetry.AutoInstrumentation.StartupHook
+        comment: OpenTelemetry.AutoInstrumentation.StartupHook NuGet package distributed from NuGet.org.
+    attestations: []
+
+  security:
+    assessments:
+      self:
+        comment: No formal self-assessment yet.
+    tools:
+      - name: CodeQL
+        comment: |
+          Static code analysis.
+        integration:
+          adhoc: true
+          ci: true
+          release: true
+        rulesets:
+          - https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/blob/main/.github/workflows/codeql-analysis.yml
+        type: SAST
+      - name: Renovate
+        comment: |
+          Automated dependency updates.
+        integration:
+          adhoc: true
+          ci: true
+          release: true
+        rulesets:
+          - https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/blob/main/.github/renovate.json5
+        type: SCA
