@@ -34,6 +34,7 @@ public class ParserTracesTests
 
         Assert.Equal("http://localhost:4318/v1/traces", traceExporter.Endpoint);
         Assert.Equal(10000, traceExporter.Timeout);
+        Assert.Equal("gzip", traceExporter.Compression);
 
         Assert.NotNull(traceExporter.Headers);
         Assert.Single(traceExporter.Headers);
@@ -53,6 +54,7 @@ public class ParserTracesTests
         var grpcExporter = grpcBatch.Exporter.OtlpGrpc;
         Assert.NotNull(grpcExporter);
         Assert.Equal("http://localhost:4317", grpcExporter.Endpoint);
+        Assert.Equal("none", grpcExporter.Compression);
 
         var simpleProcessor = config.TracerProvider.Processors[3].Simple;
         Assert.NotNull(simpleProcessor);

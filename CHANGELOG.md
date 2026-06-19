@@ -16,6 +16,12 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 - Support for `SQLCLIENT` context propagation for .NET Framework
   configurable by `OTEL_DOTNET_EXPERIMENTAL_SQLCLIENT_ENABLE_TRACE_CONTEXT_PROPAGATION`
   environment variable.
+- Support for OTLP exporter `gzip` compression in file-based configuration.
+  Compression can also be configured through the OpenTelemetry .NET SDK
+  environment variables `OTEL_EXPORTER_OTLP_COMPRESSION`,
+  `OTEL_EXPORTER_OTLP_TRACES_COMPRESSION`,
+  `OTEL_EXPORTER_OTLP_METRICS_COMPRESSION` and
+  `OTEL_EXPORTER_OTLP_LOGS_COMPRESSION`.
 
 ### Changed
 
