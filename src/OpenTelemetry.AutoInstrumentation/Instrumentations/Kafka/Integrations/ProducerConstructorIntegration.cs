@@ -36,18 +36,20 @@ public static class ProducerConstructorIntegration
         }
 
         string? bootstrapServers = null;
+        List<KeyValuePair<string, string>>? configList = null;
 
         if (producerBuilder.Config is not null)
         {
+            configList = new List<KeyValuePair<string, string>>();
             foreach (var keyValuePair in producerBuilder.Config)
             {
+                configList.Add(keyValuePair);
                 if (string.Equals(
                         keyValuePair.Key,
                         BootstrapServersConfigKey,
                         StringComparison.OrdinalIgnoreCase))
                 {
                     bootstrapServers = keyValuePair.Value;
-                    break;
                 }
             }
         }
@@ -55,9 +57,9 @@ public static class ProducerConstructorIntegration
         if (!string.IsNullOrEmpty(bootstrapServers))
         {
             // Store the association between producer instance and bootstrap servers from configuration.
-            // Will be used to schedule cluster ID fetch and populate "messaging.kafka.cluster.id" attribute.
+            // Will be used to schedule cluster ID fetch and populate "messaging.cluster.id" attribute.
             BootstrapServersCache.Add(instance!, bootstrapServers!);
-            KafkaClusterIdCache.ScheduleFetch(bootstrapServers!);
+            KafkaClusterIdCache.ScheduleFetch(bootstrapServers!, configList);
         }
 
         return CallTargetState.GetDefault();

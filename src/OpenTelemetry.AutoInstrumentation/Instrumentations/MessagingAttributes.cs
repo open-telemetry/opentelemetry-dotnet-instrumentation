@@ -24,7 +24,9 @@ internal static class MessagingAttributes
             public const string MessageKey = "messaging.kafka.message.key";
             public const string PartitionOffset = "messaging.kafka.message.offset";
             public const string IsTombstone = "messaging.kafka.message.tombstone";
-            public const string ClusterId = "messaging.kafka.cluster.id";
+            // Note: uses the generic "messaging.cluster.id" key (not "messaging.kafka.cluster.id")
+            // per the OpenTelemetry semantic convention spec — the attribute is not Kafka-specific.
+            public const string ClusterId = "messaging.cluster.id";
         }
 
         internal static class RabbitMq

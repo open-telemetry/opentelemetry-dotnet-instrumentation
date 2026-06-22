@@ -1,0 +1,26 @@
+FROM mcr.microsoft.com/dotnet/sdk:8.0-bookworm-slim AS build
+
+WORKDIR /repo
+
+# Root-level build infrastructure
+COPY Common.props Common.targets Directory.Build.props Directory.Packages.props stylecop.json GlobalSuppressions.cs ./
+
+# src-level build infrastructure
+COPY src/CommonExcludedAssets.props ./src/
+COPY src/Directory.Build.props src/Directory.Build.targets src/Directory.Packages.props ./src/
+
+# Source generator (analyzer project)
+COPY src/SourceGenerators/ ./src/SourceGenerators/
+
+# Main managed project
+COPY src/OpenTelemetry.AutoInstrumentation/ ./src/OpenTelemetry.AutoInstrumentation/
+
+# Restore and build only the managed DLL targeting net8.0
+RUN dotnet build \
+    -c Release \
+    -f net8.0 \
+    --no-self-contained \
+    src/OpenTelemetry.AutoInstrumentation/OpenTelemetry.AutoInstrumentation.csproj
+
+FROM scratch AS export
+COPY --from=build /repo/src/OpenTelemetry.AutoInstrumentation/bin/Release/net8.0/OpenTelemetry.AutoInstrumentation.dll /

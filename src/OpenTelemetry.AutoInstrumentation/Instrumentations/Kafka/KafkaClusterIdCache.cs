@@ -15,7 +15,7 @@ internal static class KafkaClusterIdCache
     /// Schedules a background fetch of the cluster ID for the given bootstrap servers string.
     /// No-ops if a fetch is already in-flight or the result is already cached.
     /// </summary>
-    internal static void ScheduleFetch(string bootstrapServers)
+    internal static void ScheduleFetch(string bootstrapServers, IReadOnlyList<KeyValuePair<string, string>>? config = null)
     {
         if (string.IsNullOrEmpty(bootstrapServers))
         {
@@ -28,7 +28,7 @@ internal static class KafkaClusterIdCache
             return;
         }
 
-        _ = Task.Run(() => FetchAndStore(bootstrapServers));
+        _ = Task.Run(() => FetchAndStore(bootstrapServers, config));
     }
 
     /// <summary>
@@ -45,11 +45,11 @@ internal static class KafkaClusterIdCache
         return Cache.TryGetValue(bootstrapServers, out var val) && !string.IsNullOrEmpty(val) ? val : null;
     }
 
-    private static void FetchAndStore(string bootstrapServers)
+    private static void FetchAndStore(string bootstrapServers, IReadOnlyList<KeyValuePair<string, string>>? config)
     {
         try
         {
-            var clusterId = FetchClusterIdViaReflection(bootstrapServers);
+            var clusterId = FetchClusterIdViaReflection(bootstrapServers, config);
             if (!string.IsNullOrEmpty(clusterId))
             {
                 Cache[bootstrapServers] = clusterId!;
@@ -66,7 +66,7 @@ internal static class KafkaClusterIdCache
         }
     }
 
-    private static string? FetchClusterIdViaReflection(string bootstrapServers)
+    private static string? FetchClusterIdViaReflection(string bootstrapServers, IReadOnlyList<KeyValuePair<string, string>>? extraConfig)
     {
         // Confluent.Kafka is the instrumented assembly – it is already loaded in the process.
         var kafkaAssembly = AppDomain.CurrentDomain
@@ -78,7 +78,7 @@ internal static class KafkaClusterIdCache
             return null;
         }
 
-        // Build AdminClientConfig { BootstrapServers = bootstrapServers }
+        // Build AdminClientConfig { BootstrapServers = bootstrapServers, ...extraConfig }
         var adminClientConfigType = kafkaAssembly.GetType("Confluent.Kafka.AdminClientConfig");
         if (adminClientConfigType is null)
         {
@@ -94,6 +94,29 @@ internal static class KafkaClusterIdCache
         var bootstrapServersProp = adminClientConfigType.GetProperty("BootstrapServers", BindingFlags.Public | BindingFlags.Instance);
         bootstrapServersProp?.SetValue(configInstance, bootstrapServers);
 
+        // Apply SSL/SASL and other config entries from the original producer/consumer config.
+        if (extraConfig is not null)
+        {
+            // ClientConfig (parent of AdminClientConfig) exposes Set(string name, string value)
+            // to set any rdkafka config property by name.
+            var setMethod = adminClientConfigType.GetMethod(
+                "Set",
+                BindingFlags.Public | BindingFlags.Instance,
+                null,
+                [typeof(string), typeof(string)],
+                null);
+            if (setMethod is not null)
+            {
+                foreach (var kvp in extraConfig)
+                {
+                    if (!string.Equals(kvp.Key, "bootstrap.servers", StringComparison.OrdinalIgnoreCase))
+                    {
+                        setMethod.Invoke(configInstance, [kvp.Key, kvp.Value]);
+                    }
+                }
+            }
+        }
+
         // new AdminClientBuilder(config).Build()
         var adminClientBuilderType = kafkaAssembly.GetType("Confluent.Kafka.AdminClientBuilder");
         if (adminClientBuilderType is null)
@@ -101,7 +124,7 @@ internal static class KafkaClusterIdCache
             return null;
         }
 
-        var builderCtor = adminClientBuilderType.GetConstructor([adminClientConfigType]);
+        var builderCtor = adminClientBuilderType.GetConstructor([typeof(IEnumerable<KeyValuePair<string, string>>)]);
         if (builderCtor is null)
         {
             return null;
@@ -122,22 +145,58 @@ internal static class KafkaClusterIdCache
 
         try
         {
-            // adminClient.GetMetadata(TimeSpan.FromSeconds(5))
             var adminClientType = adminClientInstance.GetType();
-            var getMetadataMethod = adminClientType.GetMethod("GetMetadata", BindingFlags.Public | BindingFlags.Instance, null, [typeof(TimeSpan)], null);
-            if (getMetadataMethod is null)
+
+            // DescribeClusterAsync(DescribeClusterOptions options) → Task<DescribeClusterResult>
+            // DescribeClusterResult.ClusterId is the correct API in Confluent.Kafka 2.x.
+            // Metadata.ClusterId does NOT exist in 2.x (Metadata only has Brokers/Topics/OriginatingBroker*).
+            var describeClusterOptionsType = kafkaAssembly.GetType("Confluent.Kafka.Admin.DescribeClusterOptions");
+            if (describeClusterOptionsType is not null)
             {
-                return null;
+                var describeClusterMethod = adminClientType.GetMethod(
+                    "DescribeClusterAsync",
+                    BindingFlags.Public | BindingFlags.Instance,
+                    null,
+                    [describeClusterOptionsType],
+                    null);
+                if (describeClusterMethod is not null)
+                {
+                    var taskObj = describeClusterMethod.Invoke(adminClientInstance, [null]);
+                    if (taskObj is Task task)
+                    {
+                        if (!task.Wait(TimeSpan.FromSeconds(10))) return null;
+                        var resultProp = taskObj.GetType().GetProperty("Result");
+                        var describeResult = resultProp?.GetValue(taskObj);
+                        var clusterIdProp = describeResult?.GetType()
+                            .GetProperty("ClusterId", BindingFlags.Public | BindingFlags.Instance);
+                        var clusterId = clusterIdProp?.GetValue(describeResult) as string;
+                        if (!string.IsNullOrEmpty(clusterId))
+                        {
+                            return clusterId;
+                        }
+                    }
+                }
             }
 
-            var metadata = getMetadataMethod.Invoke(adminClientInstance, [TimeSpan.FromSeconds(5)]);
-            if (metadata is null)
+            // Fallback: GetMetadata for versions where Metadata.ClusterId may exist.
+            var getMetadataMethod = adminClientType.GetMethod(
+                "GetMetadata",
+                BindingFlags.Public | BindingFlags.Instance,
+                null,
+                [typeof(TimeSpan)],
+                null);
+            if (getMetadataMethod is not null)
             {
-                return null;
+                var metadata = getMetadataMethod.Invoke(adminClientInstance, [TimeSpan.FromSeconds(5)]);
+                if (metadata is not null)
+                {
+                    var clusterIdProp = metadata.GetType()
+                        .GetProperty("ClusterId", BindingFlags.Public | BindingFlags.Instance);
+                    return clusterIdProp?.GetValue(metadata) as string;
+                }
             }
 
-            var clusterIdProp = metadata.GetType().GetProperty("ClusterId", BindingFlags.Public | BindingFlags.Instance);
-            return clusterIdProp?.GetValue(metadata) as string;
+            return null;
         }
         finally
         {

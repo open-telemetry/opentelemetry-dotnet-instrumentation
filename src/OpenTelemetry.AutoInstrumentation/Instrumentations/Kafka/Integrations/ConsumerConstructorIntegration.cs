@@ -38,11 +38,14 @@ public static class ConsumerConstructorIntegration
 
         string? consumerGroupId = null;
         string? bootstrapServers = null;
+        List<KeyValuePair<string, string>>? configList = null;
 
         if (consumerBuilder.Config is not null)
         {
+            configList = new List<KeyValuePair<string, string>>();
             foreach (var keyValuePair in consumerBuilder.Config)
             {
+                configList.Add(keyValuePair);
                 if (string.Equals(
                         keyValuePair.Key,
                         ConsumerGroupIdConfigKey,
@@ -56,11 +59,6 @@ public static class ConsumerConstructorIntegration
                         StringComparison.OrdinalIgnoreCase))
                 {
                     bootstrapServers = keyValuePair.Value;
-                }
-
-                if (consumerGroupId is not null && bootstrapServers is not null)
-                {
-                    break;
                 }
             }
         }
@@ -76,9 +74,9 @@ public static class ConsumerConstructorIntegration
         if (!string.IsNullOrEmpty(bootstrapServers))
         {
             // Store the association between consumer instance and bootstrap servers from configuration.
-            // Will be used to populate "messaging.kafka.cluster.id" attribute value.
+            // Will be used to populate "messaging.cluster.id" attribute value.
             BootstrapServersCache.Add(instance!, bootstrapServers!);
-            KafkaClusterIdCache.ScheduleFetch(bootstrapServers!);
+            KafkaClusterIdCache.ScheduleFetch(bootstrapServers!, configList);
         }
 
         return CallTargetState.GetDefault();
