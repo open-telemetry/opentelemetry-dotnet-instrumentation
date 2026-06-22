@@ -220,8 +220,8 @@ public static partial class LibraryVersion
         {
             "TestApplication.Wcf.Core",
             [
-                new("1.8.0", supportedFrameworks: [ "net10.0", "net9.0", "net8.0" ]),
-                new("1.9.0", supportedFrameworks: [ "net10.0", "net9.0", "net8.0" ]),
+                new("1.8.1", supportedFrameworks: [ "net10.0", "net9.0", "net8.0" ]),
+                new("1.9.1", supportedFrameworks: [ "net10.0", "net9.0", "net8.0" ]),
             ]
         },
     };
