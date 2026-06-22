@@ -9,6 +9,14 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 
 ### Added
 
+- Add `messaging.cluster.id` span attribute to Confluent.Kafka producer and consumer
+  spans (Confluent.Kafka ≥2.0.0). The cluster UUID is fetched once per unique
+  bootstrap-servers string via a background `AdminClient.DescribeClusterAsync()` call
+  and cached; no overhead on the produce/consume hot path. SASL and SSL client
+  configuration is forwarded to the `AdminClient` so authenticated clusters are
+  supported. If the cluster ID is not yet resolved, the attribute is omitted for
+  that span.
+
 ### Changed
 
 #### Dependency updates

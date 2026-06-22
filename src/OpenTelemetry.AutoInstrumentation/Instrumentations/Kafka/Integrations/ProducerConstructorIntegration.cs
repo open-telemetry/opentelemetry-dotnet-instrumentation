@@ -9,51 +9,42 @@ using OpenTelemetry.AutoInstrumentation.Instrumentations.Kafka.DuckTypes;
 namespace OpenTelemetry.AutoInstrumentation.Instrumentations.Kafka.Integrations;
 
 /// <summary>
-/// Kafka consumer ctor instrumentation
+/// Kafka producer ctor instrumentation
 /// </summary>
 [InstrumentMethod(
     assemblyName: IntegrationConstants.ConfluentKafkaAssemblyName,
-    typeName: IntegrationConstants.ConsumerTypeName,
+    typeName: IntegrationConstants.ProducerTypeName,
     methodName: ".ctor",
     returnTypeName: ClrNames.Void,
-    parameterTypeNames: [IntegrationConstants.ConsumerBuilderTypeName],
+    parameterTypeNames: [IntegrationConstants.ProducerBuilderTypeName],
     minimumVersion: IntegrationConstants.MinVersion,
     maximumVersion: IntegrationConstants.MaxVersion,
     integrationName: IntegrationConstants.IntegrationName,
     type: InstrumentationType.Trace)]
-public static class ConsumerConstructorIntegration
+public static class ProducerConstructorIntegration
 {
-    private const string ConsumerGroupIdConfigKey = "group.id";
     private const string BootstrapServersConfigKey = "bootstrap.servers";
 
-    internal static CallTargetState OnMethodBegin<TTarget, TConsumerBuilder>(TTarget instance, TConsumerBuilder consumerBuilder)
-    where TConsumerBuilder : IConsumerBuilder, IDuckType
+    internal static CallTargetState OnMethodBegin<TTarget, TProducerBuilder>(TTarget instance, TProducerBuilder producerBuilder)
+    where TProducerBuilder : IProducerBuilder, IDuckType
     {
-        // duck type created for consumer builder is a struct
-        if (consumerBuilder.Instance is null)
+        // Duck type created for producer builder is a struct
+        if (producerBuilder.Instance is null)
         {
             // invalid parameters, exit early
             return CallTargetState.GetDefault();
         }
 
-        string? consumerGroupId = null;
         string? bootstrapServers = null;
         List<KeyValuePair<string, string>>? configList = null;
 
-        if (consumerBuilder.Config is not null)
+        if (producerBuilder.Config is not null)
         {
             configList = new List<KeyValuePair<string, string>>();
-            foreach (var keyValuePair in consumerBuilder.Config)
+            foreach (var keyValuePair in producerBuilder.Config)
             {
                 configList.Add(keyValuePair);
                 if (string.Equals(
-                        keyValuePair.Key,
-                        ConsumerGroupIdConfigKey,
-                        StringComparison.OrdinalIgnoreCase))
-                {
-                    consumerGroupId = keyValuePair.Value;
-                }
-                else if (string.Equals(
                         keyValuePair.Key,
                         BootstrapServersConfigKey,
                         StringComparison.OrdinalIgnoreCase))
@@ -63,18 +54,10 @@ public static class ConsumerConstructorIntegration
             }
         }
 
-        // https://github.com/confluentinc/confluent-kafka-dotnet/wiki/Consumer#misc-points states GroupId is required
-        if (consumerGroupId is not null)
-        {
-            // Store the association between consumer instance and "group.id" from configuration,
-            // will be used to populate "messaging.kafka.consumer.group" attribute value
-            ConsumerCache.Add(instance!, consumerGroupId);
-        }
-
         if (!string.IsNullOrEmpty(bootstrapServers))
         {
-            // Store the association between consumer instance and bootstrap servers from configuration.
-            // Will be used to populate "messaging.cluster.id" attribute value.
+            // Store the association between producer instance and bootstrap servers from configuration.
+            // Will be used to schedule cluster ID fetch and populate "messaging.cluster.id" attribute.
             BootstrapServersCache.Add(instance!, bootstrapServers!);
             KafkaClusterIdCache.ScheduleFetch(bootstrapServers!, configList);
         }
@@ -86,7 +69,6 @@ public static class ConsumerConstructorIntegration
     {
         if (exception is not null)
         {
-            ConsumerCache.Remove(instance!);
             BootstrapServersCache.Remove(instance!);
         }
 
