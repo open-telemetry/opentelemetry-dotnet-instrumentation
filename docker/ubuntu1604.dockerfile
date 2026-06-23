@@ -35,12 +35,11 @@ RUN add-apt-repository ppa:ubuntu-toolchain-r/test -y && \
 
 # Install cmake directly from GitHub releases (Kitware Xenial apt repo no longer serves cmake)
 RUN CMAKE_INSTALLER="cmake-${CMAKE_VERSION}-linux-x86_64.sh" && \
-    CMAKE_SHA256_FILE="cmake-${CMAKE_VERSION}-SHA-256.txt" && \
+    CMAKE_INSTALLER_SHA256="f582e02696ceee81818dc3378531804b2213ed41c2a8bc566253d16d894cefab" && \
     curl -fsSL -O "https://github.com/Kitware/CMake/releases/download/v${CMAKE_VERSION}/${CMAKE_INSTALLER}" && \
-    curl -fsSL -O "https://github.com/Kitware/CMake/releases/download/v${CMAKE_VERSION}/${CMAKE_SHA256_FILE}" && \
-    grep " ${CMAKE_INSTALLER}$" "${CMAKE_SHA256_FILE}" | sha256sum -c - && \
+    echo "${CMAKE_INSTALLER_SHA256}  ${CMAKE_INSTALLER}" | sha256sum -c - && \
     sh "${CMAKE_INSTALLER}" --skip-license --prefix=/usr/local && \
-    rm "${CMAKE_INSTALLER}" "${CMAKE_SHA256_FILE}"
+    rm "${CMAKE_INSTALLER}"
 
 COPY ./scripts/dotnet-install.sh ./dotnet-install.sh
 
