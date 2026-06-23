@@ -4,6 +4,7 @@
 using OpenTelemetry.AutoInstrumentation.Configurations;
 using OpenTelemetry.AutoInstrumentation.Configurations.FileBasedConfiguration;
 using OpenTelemetry.AutoInstrumentation.HeadersCapture;
+using OpenTelemetry.AutoInstrumentation.Tests.Util;
 
 namespace OpenTelemetry.AutoInstrumentation.Tests.Configurations.FileBased;
 
@@ -332,8 +333,13 @@ public class FilebasedInstrumentationSettingsTests
 
 #if NETFRAMEWORK
     [Fact]
-    public void LoadFile_SetsSqlClientNetFxIlRewriteEnvironmentVariable()
+    public void LoadFile_SetsSqlClientNetFxOptions()
     {
+        using var envScope = new EnvironmentScope(new Dictionary<string, string?>()
+        {
+            { ConfigurationKeys.Traces.InstrumentationOptions.SqlClientNetFxExperimentalContextPropagation, "true" }
+        });
+
         var instrumentation = new DotNetInstrumentation
         {
             Traces = new DotNetTraces
@@ -355,6 +361,7 @@ public class FilebasedInstrumentationSettingsTests
         settings.LoadFile(conf);
 
         Assert.True(settings.InstrumentationOptions.SqlClientNetFxIlRewriteEnabled);
+        Assert.True(settings.InstrumentationOptions.SqlClientNetFxExperimentalContextPropagation);
     }
 #endif
 }

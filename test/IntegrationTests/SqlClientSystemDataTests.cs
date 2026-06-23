@@ -51,6 +51,33 @@ public class SqlClientSystemDataTests : TestHelper
         collector.AssertExpectations();
     }
 
+    [Theory]
+    [Trait("Category", "EndToEnd")]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void PropagatesTraceContext(bool enableTransaction)
+    {
+        SetEnvironmentVariable(SqlClientTraceContextPropagationTestHelper.ContextPropagationEnvVar, bool.TrueString);
+
+        using var collector = new MockSpansCollector(Output);
+        SetExporter(collector);
+
+        var (standardOutput, _, _) = RunTestApplication(new()
+        {
+            Arguments = SqlClientTraceContextPropagationTestHelper.GetContextInfoCommandArguments(enableTransaction)
+        });
+
+        var contextInfo = SqlClientTraceContextPropagationTestHelper.ExtractContextInfo(standardOutput);
+
+        collector.Expect(
+            SqlClientTraceContextPropagationTestHelper.ScopeName,
+            span => SqlClientTraceContextPropagationTestHelper.MatchesContextInfo(span, contextInfo),
+            "SqlClient span matching propagated CONTEXT_INFO.");
+        collector.ExpectAllCollected(
+            collected => collected.Count(item => item.Scope.Name == SqlClientTraceContextPropagationTestHelper.ScopeName) == 1);
+        collector.AssertExpectations();
+    }
+
     [Fact]
     [Trait("Category", "EndToEnd")]
     public void SubmitMetrics()

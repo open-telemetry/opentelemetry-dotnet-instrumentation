@@ -178,7 +178,8 @@ public static partial class LibraryVersion
 #if DEFAULT_TEST_PACKAGE_VERSIONS
                 string.Empty,
 #else
-                "5.2.2",
+                "5.2.3",
+                "6.1.5",
                 "7.0.1",
 #endif
             ];
@@ -493,10 +494,10 @@ public static partial class LibraryVersion
                 string.Empty,
 #else
 #if NET10_0 || NET9_0 || NET8_0
-                "1.8.0",
+                "1.8.1",
 #endif
 #if NET10_0 || NET9_0 || NET8_0
-                "1.9.0",
+                "1.9.1",
 #endif
 #endif
             ];

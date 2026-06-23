@@ -89,7 +89,8 @@ public static partial class LibraryVersion
         {
             "TestApplication.SqlClient.Microsoft",
             [
-                new("5.2.2"),
+                new("5.2.3"),
+                new("6.1.5"),
                 new("7.0.1"),
             ]
         },
@@ -219,8 +220,8 @@ public static partial class LibraryVersion
         {
             "TestApplication.Wcf.Core",
             [
-                new("1.8.0", supportedFrameworks: [ "net10.0", "net9.0", "net8.0" ]),
-                new("1.9.0", supportedFrameworks: [ "net10.0", "net9.0", "net8.0" ]),
+                new("1.8.1", supportedFrameworks: [ "net10.0", "net9.0", "net8.0" ]),
+                new("1.9.1", supportedFrameworks: [ "net10.0", "net9.0", "net8.0" ]),
             ]
         },
     };

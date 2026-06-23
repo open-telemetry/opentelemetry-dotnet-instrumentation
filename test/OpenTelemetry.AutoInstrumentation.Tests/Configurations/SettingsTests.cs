@@ -4,6 +4,8 @@
 using System.Globalization;
 using System.Net.Http;
 using OpenTelemetry.AutoInstrumentation.Configurations;
+using OpenTelemetry.AutoInstrumentation.Configurations.FileBasedConfiguration;
+using OpenTelemetry.AutoInstrumentation.Configurations.Otlp;
 using OpenTelemetry.AutoInstrumentation.Tests.Util;
 using OpenTelemetry.Exporter;
 using AutoOtlpDefinitions = OpenTelemetry.AutoInstrumentation.Configurations.Otlp.OtlpSpecConfigDefinitions;
@@ -480,6 +482,76 @@ public sealed class SettingsTests
         {
             Assert.Same(originalHttpClientFactory, options.HttpClientFactory);
         }
+    }
+
+    [Theory]
+    [InlineData("gzip", OtlpExportCompression.GZip)]
+    [InlineData("none", OtlpExportCompression.None)]
+    internal void OtlpSettings_FileBasedHttpCompression_CopyTo(string compression, OtlpExportCompression expectedCompression)
+    {
+        var settings = new OtlpSettings(OtlpSignalType.Traces, new OtlpHttpExporterConfig
+        {
+            Compression = compression
+        });
+
+        var options = new OtlpExporterOptions();
+
+        settings.CopyTo(options);
+
+        Assert.Equal(expectedCompression, settings.Compression);
+        Assert.Equal(expectedCompression, options.Compression);
+    }
+
+    [Theory]
+    [InlineData("gzip", OtlpExportCompression.GZip)]
+    [InlineData("none", OtlpExportCompression.None)]
+    internal void OtlpSettings_FileBasedGrpcCompression_CopyTo(string compression, OtlpExportCompression expectedCompression)
+    {
+        var settings = new OtlpSettings(new OtlpGrpcExporterConfig
+        {
+            Compression = compression
+        });
+
+        var options = new OtlpExporterOptions();
+
+        settings.CopyTo(options);
+
+        Assert.Equal(expectedCompression, settings.Compression);
+        Assert.Equal(expectedCompression, options.Compression);
+    }
+
+    [Fact]
+    internal void OtlpSettings_FileBasedCompression_DefaultsToNone()
+    {
+        var settings = new OtlpSettings(OtlpSignalType.Traces, new OtlpHttpExporterConfig());
+        var options = new OtlpExporterOptions
+        {
+            Compression = OtlpExportCompression.GZip
+        };
+
+        settings.CopyTo(options);
+
+        Assert.Equal(OtlpExportCompression.None, settings.Compression);
+        Assert.Equal(OtlpExportCompression.None, options.Compression);
+    }
+
+    [Fact]
+    internal void OtlpSettings_FileBasedCompression_UppercaseGzipDefaultsToNone()
+    {
+        var settings = new OtlpSettings(OtlpSignalType.Traces, new OtlpHttpExporterConfig
+        {
+            Compression = "GZIP"
+        });
+
+        var options = new OtlpExporterOptions
+        {
+            Compression = OtlpExportCompression.GZip
+        };
+
+        settings.CopyTo(options);
+
+        Assert.Equal(OtlpExportCompression.None, settings.Compression);
+        Assert.Equal(OtlpExportCompression.None, options.Compression);
     }
 
     [Theory]
