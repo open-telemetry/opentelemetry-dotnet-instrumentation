@@ -106,9 +106,9 @@ bool NativeSymbolResolver::FetchClassification(UINT_PTR imageBase, trace::WSTRIN
     }
     // GetModuleFileNameW may not NUL-terminate when the path fills or
     // exceeds the buffer. Unconditionally force a terminator.
-    modulePath[MAX_PATH - 1] = L'\0';
+    modulePath[MAX_PATH - 1] = WStr('\0');
     ModuleInfo   info;
-    const WCHAR* slash = wcsrchr(modulePath, L'\\');
+    const WCHAR* slash = wcsrchr(modulePath, WStr('\\'));
     info.baseName      = slash ? (slash + 1) : modulePath;
 
     info.isSystem = false;

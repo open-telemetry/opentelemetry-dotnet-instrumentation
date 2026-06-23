@@ -492,11 +492,15 @@ bool StackWalkGuard::RunRtlFrame0Checks(ProbeRequest& req) noexcept
             DWORD pathLen              = 0;
             __try
             {
+                // The SEH around GetModuleFileNameW in RunRtlFrame0Checks defends against
+                //  orchestrator-timeout-induced RAII resume while the probe is blocked.
+                //  The continuation path has no such hazard because the target cannot be resumed until
+                //  the entire walk completes.
                 pathLen = GetModuleFileNameW(reinterpret_cast<HMODULE>(imageBase), modulePath, MAX_PATH);
                 // GetModuleFileNameW may not NUL-terminate when the path
                 // fills or exceeds the buffer. Unconditionally force a
                 // terminator.
-                modulePath[MAX_PATH - 1] = L'\0';
+                modulePath[MAX_PATH - 1] = WStr('\0');
             }
             __except (EXCEPTION_EXECUTE_HANDLER)
             {

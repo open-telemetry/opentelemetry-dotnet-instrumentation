@@ -708,9 +708,11 @@ trace::WSTRING* NamingHelper::Lookup(const FunctionIdentifier& function_identifi
     {
         this->GetFunctionName(function_identifier, *owned);
     }
-
-    trace::WSTRING* raw = owned.release();
-    owned.reset(function_name_cache_.Put(function_identifier, raw));
+    // Put is not going to return the same pointer if there is an eviction, so we can safely release and delete any
+    // evicted entry without worrying about ownership issues
+    trace::WSTRING* raw     = owned.release();
+    trace::WSTRING* evicted = function_name_cache_.Put(function_identifier, raw);
+    delete evicted; // may be nullptr (no eviction) or a stale LRU entry; never raw
     return raw;
 }
 

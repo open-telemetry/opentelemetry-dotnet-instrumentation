@@ -29,6 +29,8 @@ public:
 
     /// <summary>
     /// Captures stacks for specified threads via seedless DoStackSnapshot.
+    /// And uses RTL based native walk fallback on Windows x64 when DSS fails (e.g. thread in native code with no
+    /// managed frames on top).
     /// </summary>
     /// <param name="threads">Set of managed thread IDs to capture</param>
     /// <param name="clientData">Callback context passed to DoStackSnapshotUnseeded</param>
