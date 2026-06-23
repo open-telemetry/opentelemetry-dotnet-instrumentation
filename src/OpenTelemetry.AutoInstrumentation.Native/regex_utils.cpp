@@ -19,8 +19,8 @@ namespace
 template <typename TString>
 bool TryParseVersionComponent(const TString& component, unsigned short& value)
 {
-    unsigned int parsed_value = 0;
-    constexpr auto max_value  = (std::numeric_limits<unsigned short>::max)();
+    unsigned int   parsed_value = 0;
+    constexpr auto max_value    = (std::numeric_limits<unsigned short>::max)();
 
     if (component.empty())
     {
@@ -49,11 +49,8 @@ bool TryParseVersionComponent(const TString& component, unsigned short& value)
 }
 
 template <typename TMatch>
-bool TryParseVersionMatch(const TMatch& match,
-                          unsigned short& major,
-                          unsigned short& minor,
-                          unsigned short& build,
-                          unsigned short& revision)
+bool TryParseVersionMatch(
+    const TMatch& match, unsigned short& major, unsigned short& minor, unsigned short& build, unsigned short& revision)
 {
     unsigned short parsed_major    = 0;
     unsigned short parsed_minor    = 0;
