@@ -3,6 +3,7 @@
 
 #include "regex_utils.h"
 
+#include <limits>
 #include <regex>
 #include <sstream>
 
@@ -11,6 +12,70 @@
 
 namespace trace
 {
+
+namespace
+{
+
+template <typename TString>
+bool TryParseVersionComponent(const TString& component, unsigned short& value)
+{
+    unsigned int parsed_value = 0;
+    constexpr auto max_value  = (std::numeric_limits<unsigned short>::max)();
+
+    if (component.empty())
+    {
+        return false;
+    }
+
+    for (const auto ch : component)
+    {
+        const auto digit_start = static_cast<typename TString::value_type>('0');
+        const auto digit_end   = static_cast<typename TString::value_type>('9');
+
+        if (ch < digit_start || ch > digit_end)
+        {
+            return false;
+        }
+
+        parsed_value = (parsed_value * 10) + static_cast<unsigned int>(ch - digit_start);
+        if (parsed_value > max_value)
+        {
+            return false;
+        }
+    }
+
+    value = static_cast<unsigned short>(parsed_value);
+    return true;
+}
+
+template <typename TMatch>
+bool TryParseVersionMatch(const TMatch& match,
+                          unsigned short& major,
+                          unsigned short& minor,
+                          unsigned short& build,
+                          unsigned short& revision)
+{
+    unsigned short parsed_major    = 0;
+    unsigned short parsed_minor    = 0;
+    unsigned short parsed_build    = 0;
+    unsigned short parsed_revision = 0;
+
+    if (!TryParseVersionComponent(match.str(1), parsed_major) ||
+        !TryParseVersionComponent(match.str(2), parsed_minor) ||
+        !TryParseVersionComponent(match.str(3), parsed_build) ||
+        !TryParseVersionComponent(match.str(4), parsed_revision))
+    {
+        return false;
+    }
+
+    major    = parsed_major;
+    minor    = parsed_minor;
+    build    = parsed_build;
+    revision = parsed_revision;
+    return true;
+}
+
+} // namespace
 
 bool ExtractVersion(
     const WSTRING& str, unsigned short& major, unsigned short& minor, unsigned short& build, unsigned short& revision)
@@ -26,15 +91,7 @@ bool ExtractVersion(
 
     if (std::regex_search(str, match, re) && match.size() == 5)
     {
-        WSTRINGSTREAM ss1(match.str(1));
-        ss1 >> major;
-        WSTRINGSTREAM ss2(match.str(2));
-        ss2 >> minor;
-        WSTRINGSTREAM ss3(match.str(3));
-        ss3 >> build;
-        WSTRINGSTREAM ss4(match.str(4));
-        ss4 >> revision;
-        return true;
+        return TryParseVersionMatch(match, major, minor, build, revision);
     }
 #else
     // On Linux/MacOS, convert to narrow string for regex
@@ -44,11 +101,7 @@ bool ExtractVersion(
 
     if (std::regex_search(narrow_str, match, re) && match.size() == 5)
     {
-        major    = (unsigned short)std::stoi(match.str(1));
-        minor    = (unsigned short)std::stoi(match.str(2));
-        build    = (unsigned short)std::stoi(match.str(3));
-        revision = (unsigned short)std::stoi(match.str(4));
-        return true;
+        return TryParseVersionMatch(match, major, minor, build, revision);
     }
 #endif
 
