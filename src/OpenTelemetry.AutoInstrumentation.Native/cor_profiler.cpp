@@ -34,6 +34,7 @@
 #include "continuous_profiler.h"
 #include "member_resolver.h"
 #include "stack_capture_strategy_factory.h"
+#include "unsafe_accessor_type_attribute_updater.h"
 
 #ifdef MACOS
 #include <mach-o/dyld.h>
@@ -817,6 +818,9 @@ HRESULT STDMETHODCALLTYPE CorProfiler::ModuleLoadFinished(ModuleID module_id, HR
             //  - for .NET Frameworks - the ones under netfx/ folder
             //  - for .NET (Core) - the ones under net/ folder
             RedirectAssemblyReferences(assembly_import, assembly_emit);
+            // Redirect any type name in UnsafeAccessorTypeAttribute
+            // TODO check if it is even needed: check if type UnsafeAccessorTypeAttribute exists - if not we are on older .net where the problem did not exsist
+            UpdateUnsafeAccessorTypeAttributes(module_metadata);
         }
 
         if (module_info.assembly.name == managed_profiler_name)

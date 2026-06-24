@@ -230,6 +230,7 @@
     <ClInclude Include="string_utils.h" />
     <ClInclude Include="stub_generator.h" />
     <ClInclude Include="tracer_tokens.h" />
+    <ClInclude Include="unsafe_accessor_type_attribute_updater.h" />
     <ClInclude Include="util.h" />
     <ClInclude Include="version.h" />
   </ItemGroup>
