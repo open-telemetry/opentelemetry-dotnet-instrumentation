@@ -73,6 +73,58 @@ NativeSymbolResolver::NativeSymbolResolver()
 
 NativeSymbolResolver::~NativeSymbolResolver() = default;
 
+// Classify + cache from a path the caller already obtained under its own
+// SEH (e.g. the frame-0 probe). No GetModuleFileNameW re-entry here; this
+// is pure string work plus the SRW-guarded emplace.
+bool NativeSymbolResolver::ClassifyAndCache(UINT_PTR        imageBase,
+                                            const WCHAR*    modulePath,
+                                            trace::WSTRING* outBaseName,
+                                            bool*           outIsSystem) const
+{
+    if (modulePath == nullptr || modulePath[0] == WStr('\0'))
+        return false;
+
+    ModuleInfo   info;
+    const WCHAR* slash = wcsrchr(modulePath, WStr('\\'));
+    info.baseName      = slash ? (slash + 1) : modulePath;
+
+    info.isSystem = false;
+    if (!sysDir_.empty())
+    {
+        std::wstring pathLower(modulePath);
+        std::transform(pathLower.begin(), pathLower.end(), pathLower.begin(), ::towlower);
+        info.isSystem = (pathLower.find(sysDir_) == 0);
+    }
+
+    // Cache update under exclusive lock. Eviction here is intentionally
+    // silent: this helper runs on the StackWalkGuard probe path while a
+    // target thread may be suspended, where logging is banned.
+    {
+        SrwExclusiveLock lk(moduleCacheLock_);
+        if (auto it = moduleCache_.find(imageBase); it != moduleCache_.end())
+        {
+            if (outBaseName != nullptr)
+                *outBaseName = it->second.baseName;
+            if (outIsSystem != nullptr)
+                *outIsSystem = it->second.isSystem;
+            return true;
+        }
+
+        if (moduleCache_.size() >= kMaxModuleCacheSize)
+        {
+            moduleCache_.clear();
+        }
+        // Copy fields BEFORE the move; the moved-from info is unusable.
+        if (outBaseName != nullptr)
+            *outBaseName = info.baseName;
+        if (outIsSystem != nullptr)
+            *outIsSystem = info.isSystem;
+        moduleCache_.emplace(imageBase, std::move(info));
+    }
+
+    return true;
+}
+
 // ----------------------------------------------------------------------------
 // Module info cache (SRW-protected, double-checked)
 // ----------------------------------------------------------------------------
@@ -95,10 +147,6 @@ bool NativeSymbolResolver::FetchClassification(UINT_PTR imageBase, trace::WSTRIN
         }
     }
 
-    // Phase 2: cache miss. Do the I/O OUTSIDE the lock so a stuck loader
-    // CS on the target thread stalls only this single caller (typically
-    // the StackWalkGuard worker, which the sampler drives via abandon)
-    // and never blocks other readers.
     WCHAR modulePath[MAX_PATH] = {};
     if (GetModuleFileNameW(reinterpret_cast<HMODULE>(imageBase), modulePath, MAX_PATH) == 0)
     {
@@ -107,47 +155,9 @@ bool NativeSymbolResolver::FetchClassification(UINT_PTR imageBase, trace::WSTRIN
     // GetModuleFileNameW may not NUL-terminate when the path fills or
     // exceeds the buffer. Unconditionally force a terminator.
     modulePath[MAX_PATH - 1] = WStr('\0');
-    ModuleInfo   info;
-    const WCHAR* slash = wcsrchr(modulePath, WStr('\\'));
-    info.baseName      = slash ? (slash + 1) : modulePath;
-
-    info.isSystem = false;
-    if (!sysDir_.empty())
-    {
-        std::wstring pathLower(modulePath);
-        std::transform(pathLower.begin(), pathLower.end(), pathLower.begin(), ::towlower);
-        info.isSystem = (pathLower.find(sysDir_) == 0);
-    }
-
-    // Phase 3: exclusive emplace with re-check. Another writer may have
-    // raced ahead while we were in GetModuleFileNameW; prefer the
-    // already-cached entry to keep consistency.
-    {
-        SrwExclusiveLock lk(moduleCacheLock_);
-        if (auto it = moduleCache_.find(imageBase); it != moduleCache_.end())
-        {
-            if (outBaseName != nullptr)
-                *outBaseName = it->second.baseName;
-            if (outIsSystem != nullptr)
-                *outIsSystem = it->second.isSystem;
-            return true;
-        }
-
-        if (moduleCache_.size() >= kMaxModuleCacheSize)
-        {
-            trace::Logger::Debug("[NativeSymbolResolver] Module cache full, clearing ", moduleCache_.size(),
-                                 " entries");
-            moduleCache_.clear();
-        }
-
-        // Copy fields BEFORE the move; the moved-from info is unusable.
-        if (outBaseName != nullptr)
-            *outBaseName = info.baseName;
-        if (outIsSystem != nullptr)
-            *outIsSystem = info.isSystem;
-        moduleCache_.emplace(imageBase, std::move(info));
-        return true;
-    }
+    // Phase 2: ClassifyAndCache - exclusive cache update. Will re-check the cache in case another
+    // thread beat us to it while we were doing the kernel call.
+    return ClassifyAndCache(imageBase, modulePath, outBaseName, outIsSystem);
 }
 
 std::optional<bool> NativeSymbolResolver::IsSystemModule(UINT_PTR imageBase) const
@@ -157,6 +167,25 @@ std::optional<bool> NativeSymbolResolver::IsSystemModule(UINT_PTR imageBase) con
     {
         return std::nullopt;
     }
+    return isSystem;
+}
+
+std::optional<bool> NativeSymbolResolver::IsSystemModuleFromPath(UINT_PTR imageBase, const WCHAR* modulePath) const
+{
+    if (modulePath == nullptr || modulePath[0] == WStr('\0'))
+        return std::nullopt;
+
+    // Warm cache stays a pure shared-lock copy: no loader call, no alloc.
+    {
+        SrwSharedLock lk(moduleCacheLock_);
+        if (auto it = moduleCache_.find(imageBase); it != moduleCache_.end())
+            return it->second.isSystem;
+    }
+
+    bool isSystem = false;
+    // ClassifyAndCache has no failure return for a non-null/non-empty path (guaranteed by the guard above), so we
+    // ignore its bool.
+    ClassifyAndCache(imageBase, modulePath, /*outBaseName=*/nullptr, &isSystem);
     return isSystem;
 }
 

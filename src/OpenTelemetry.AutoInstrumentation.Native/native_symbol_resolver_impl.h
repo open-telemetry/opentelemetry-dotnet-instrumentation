@@ -56,6 +56,7 @@ public:
     // Safe to call concurrently with Resolve(): both go through the same
     // SRW-protected cache.
     std::optional<bool> IsSystemModule(UINT_PTR imageBase) const override;
+    std::optional<bool> IsSystemModuleFromPath(UINT_PTR imageBase, const WCHAR* modulePath) const;
 
 private:
     // Cached per-module metadata - looked up once per unique imageBase.
@@ -74,7 +75,7 @@ private:
     bool FetchClassification(UINT_PTR        imageBase,
                              trace::WSTRING* outBaseName,
                              bool*           outIsSystem) const;
-
+    bool ClassifyAndCache(UINT_PTR imageBase, const WCHAR* modulePath, trace::WSTRING* outBaseName, bool* outIsSystem) const;
     static UINT_PTR GetImageBaseForIp(UINT_PTR ip);
     static void     AppendNarrow(trace::WSTRING& out, const char* s, size_t sLen);
     static size_t   FindExportNameForRva(UINT_PTR imageBase, DWORD rva, char* nameBuf, size_t nameBufSize);

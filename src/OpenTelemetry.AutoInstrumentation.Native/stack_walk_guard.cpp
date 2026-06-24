@@ -219,7 +219,12 @@ void StackWalkGuard::WorkerLoop()
         //   2) Single source of truth: certifying the heap CS + STL
         //      iterator/debug-list CS once per round (here) eliminates
         //      duplication across CanaryDss (all archs) and RtlFrame0
-        //      (x64 only) paths.
+        //      (x64 only) paths. One certification suffices because this is
+        //      a DURABLE verdict (see "Verdict durability" on
+        //      RunRtlFrame0Checks): heap/STL acquirability stays valid - and
+        //      only gets safer - if the target later resumes, unlike the
+        //      TEMPORAL loader-lock / .pdata verdicts that hold only while
+        //      the target stays suspended.
         // Cooperative: if the orchestrator abandoned us while we were
         // blocked on the heap CS, bail before dispatching the probe.
         SetStage(ProbeStage::HeapOrStlGate);
@@ -374,6 +379,54 @@ bool StackWalkGuard::RunCanaryChecks(ThreadID canary) noexcept
 // Therefore calls to the same APIs on the caller thread for frames 1..N
 // cannot deadlock against the target.
 //
+// Verdict durability: which proofs survive target resumption
+// ----------------------------------------------------------
+// The induction above holds WHILE the target stays suspended. The abandon
+// path (orchestrator timeout -> the caller's ThreadGuard RAII resumes the
+// target) can break that premise mid-probe, so every verdict is classified
+// by how it behaves once the target runs again:
+//
+//   DURABLE - remains valid after resumption, and in fact only gets SAFER.
+//     The heap / STL critical-section acquirability certified by the
+//     HeapOrStlGate is the canonical case: a lock that was acquirable while
+//     its potential holder was frozen is only more available once that
+//     holder can run and release it. We therefore certify it ONCE per round
+//     (in WorkerLoop) and trust it for the whole round, abandon or not. It
+//     is also why the std::wstring / cache-emplace allocation reached via
+//     IsSystemModuleFromPath needs no SEH - it rides a durable verdict.
+//
+//   TEMPORAL - valid ONLY for the lifetime of the suspension. Loader-lock
+//     non-ownership (proved by GetModuleFileNameW) and .pdata validity (the
+//     rtFunc / RUNTIME_FUNCTION dereference) evaporate the instant the target
+//     resumes: a running target can take the loader lock (DllMain,
+//     LoadLibrary/FreeLibrary) or FreeLibrary the module, unmapping the very
+//     .pdata rtFunc points into and the module memory GetModuleFileNameW
+//     reads. Each temporal-verdict access is therefore (a) wrapped in its own
+//     SEH so an abandon/resume mid-call faults cleanly, and (b) read once into
+//     a scalar while still inside that SEH. That is why rtFunc->BeginAddress
+//     is latched as rtFuncBegin under the Step-1 SEH and never re-dereferenced
+//     outside it, and why IsSystemModuleFromPath classifies off the already
+//     captured path instead of re-entering GetModuleFileNameW.
+//
+//   Validity window (the "handle to the blade"): the probe forges a grip on
+//     the hazardous APIs - but the grip is HELD, not welded. It lasts exactly
+//     as long as the suspension lasts, NOT merely for the single probe call. The
+//     target is resumed only by the caller's suspension-guard destructor,
+//     which runs AFTER the continuation walk (frames 1..N) completes. So on
+//     the normal path the probe's one hazardous pass forges a safe grip the
+//     caller keeps for the WHOLE walk: each hazardous API (the "blade") is
+//     safe to call again for frames 1..N because the suspension that made the
+//     verdict true is still in force - this is the same fact the Step-3a SEH
+//     comment states locally ("the target cannot be resumed until the entire
+//     walk completes"). ABANDON is the ONLY event that closes the window early
+//     (timeout -> resume mid-probe); that is precisely why temporal accesses
+//     still carry per-call SEH + read-once + abandon checkpoints the happy
+//     path would not otherwise need.
+//
+// Rule of thumb: a durable verdict is trusted process-wide for the round; a
+// temporal verdict is trusted only under SEH, read-once, between the abandon
+// checkpoints.
+//
 // The staging area (ProbeRequest::staged_ctx / staged_frame) exists precisely
 // because the probe produces real outputs that must survive the mutex-guarded
 // commit step. The orchestrator publishes staged outputs to caller memory
@@ -419,9 +472,20 @@ bool StackWalkGuard::RunRtlFrame0Checks(ProbeRequest& req) noexcept
     DWORD64              imageBase    = 0;
     UNWIND_HISTORY_TABLE historyTable = {};
     PRUNTIME_FUNCTION    rtFunc       = nullptr;
+    // Cache BeginAddress under THIS SEH, immediately after the lookup. The
+    // RUNTIME_FUNCTION lives in the module's .pdata - module-resident memory
+    // that an abandon/resume could unmap (a TEMPORAL verdict; see the
+    // durability note above). Reading the field here (smallest
+    // window, already inside SEH) means the later frameIp math uses a plain
+    // scalar and never re-dereferences rtFunc outside SEH. rtFunc itself is
+    // still handed to RtlVirtualUnwind in Step 4, but that read is covered by
+    // Step 4's own __try.
+    DWORD rtFuncBegin = 0;
     __try
     {
         rtFunc = RtlLookupFunctionEntry(frame0Rip, &imageBase, &historyTable);
+        if (rtFunc != nullptr)
+            rtFuncBegin = rtFunc->BeginAddress;
     }
     __except (EXCEPTION_EXECUTE_HANDLER)
     {
@@ -515,7 +579,8 @@ bool StackWalkGuard::RunRtlFrame0Checks(ProbeRequest& req) noexcept
 
             if (pathLen != 0)
             {
-                auto sysModule = NativeSymbolResolver::Instance().IsSystemModule(imageBase);
+                // IsSystemModuleFromPath does not reenter GetModuleFileNameW; it only reads the path we just got.
+                auto sysModule = NativeSymbolResolver::Instance().IsSystemModuleFromPath(imageBase, modulePath);
                 isSystemModule = sysModule.value_or(false);
                 classified     = sysModule.has_value();
             }
@@ -532,7 +597,7 @@ bool StackWalkGuard::RunRtlFrame0Checks(ProbeRequest& req) noexcept
             }
             else
             {
-                frameIp = (rtFunc != nullptr) ? static_cast<UINT_PTR>(imageBase + rtFunc->BeginAddress)
+                frameIp = (rtFunc != nullptr) ? static_cast<UINT_PTR>(imageBase + rtFuncBegin)
                                               : static_cast<UINT_PTR>(req.staged_ctx.Rip);
             }
         }
@@ -542,7 +607,7 @@ bool StackWalkGuard::RunRtlFrame0Checks(ProbeRequest& req) noexcept
             // sysModule was nullopt) but we still have an image base.
             // Match production walker: prefer function-entry IP over raw
             // Rip so the frame remains symbolizable downstream.
-            frameIp = (rtFunc != nullptr) ? static_cast<UINT_PTR>(imageBase + rtFunc->BeginAddress)
+            frameIp = (rtFunc != nullptr) ? static_cast<UINT_PTR>(imageBase + rtFuncBegin)
                                           : static_cast<UINT_PTR>(req.staged_ctx.Rip);
         }
         // else: imageBase == 0 - frameIp stays as raw Rip set above.
