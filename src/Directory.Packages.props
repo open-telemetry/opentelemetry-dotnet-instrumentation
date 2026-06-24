@@ -5,7 +5,7 @@
     <PackageVersion Include="Microsoft.NETFramework.ReferenceAssemblies" Version="1.0.3" />
   </ItemGroup>
   <ItemGroup Label="Versions from OpenTelemetry.AutoInstrumentation.BuildTasks.csproj">
-    <PackageVersion Include="Microsoft.Build.Utilities.Core" Version="15.9.20" />
+    <PackageVersion Include="Microsoft.Build.Utilities.Core" Version="18.7.1" />
     <PackageVersion Include="NuGet.Versioning" Version="$(NuGetVersioningVersion)" />
   </ItemGroup>
   <ItemGroup Label="Versions from OpenTelemetry.AutoInstrumentation.csproj and OTEL transitive dependencies">
