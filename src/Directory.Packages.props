@@ -37,8 +37,8 @@
     <PackageVersion Include="Microsoft.CodeAnalysis.CSharp" Version="5.3.0" />
   </ItemGroup>
   <ItemGroup Label="Versions from CommonExcludedAssets.props: Transient dependencies of OpenTelemetry.Instrumentation.Wcf">
-    <PackageVersion Include="Microsoft.Win32.SystemEvents" Version="4.7.0" />
-    <PackageVersion Include="System.Drawing.Common" Version="4.7.2" />
+    <PackageVersion Include="Microsoft.Win32.SystemEvents" Version="10.0.9" />
+    <PackageVersion Include="System.Drawing.Common" Version="10.0.9" />
     <PackageVersion Include="System.Windows.Extensions" Version="4.7.0" />
   </ItemGroup>
   <ItemGroup Label="Versions from CommonExcludedAssets.props: Transient dependencies of OpenTelemetry.Instrumentation.StackExchangeRedis">
