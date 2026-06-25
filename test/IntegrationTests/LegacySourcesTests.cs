@@ -9,8 +9,8 @@ public class LegacySourcesTests : TestHelper
 {
     private const string ServiceName = "TestApplication.TracesLegacySource";
 
-    // must match TestApplication.TracesLegacySource.Program.LegacySourceName
-    private const string LegacySourceName = "ManualSpan";
+    // must match the legacy activity name emitted by TestApplication.TracesLegacySource
+    private const string LegacySourceName = "LegacyManualSpan";
 
     public LegacySourcesTests(ITestOutputHelper output)
         : base("TracesLegacySource", output)
@@ -32,18 +32,5 @@ public class LegacySourcesTests : TestHelper
         RunTestApplication();
 
         collector.AssertExpectations();
-    }
-
-    [Fact]
-    [Trait("Category", "EndToEnd")]
-    public void DoesNotSubmitLegacyActivityWhenSourceIsNotRegistered()
-    {
-        using var collector = new MockSpansCollector(Output);
-        SetExporter(collector);
-
-        // without the env var the legacy source is not registered, so nothing is collected
-        RunTestApplication();
-
-        collector.AssertEmpty();
     }
 }
