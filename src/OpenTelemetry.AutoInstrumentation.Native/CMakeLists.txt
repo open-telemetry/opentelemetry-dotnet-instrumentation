@@ -205,6 +205,7 @@ endif()
 add_library("OpenTelemetry.AutoInstrumentation.Native.static" STATIC
         class_factory.cpp
         clr_helpers.cpp
+        clr_runtime_capture.cpp
         configuration.cpp
         continuous_profiler_clr_helpers.cpp
         continuous_profiler.cpp
@@ -216,7 +217,7 @@ add_library("OpenTelemetry.AutoInstrumentation.Native.static" STATIC
         member_resolver.cpp
         metadata_builder.cpp
         miniutf.cpp
-        stack_capture_strategy_factory.cpp
+        profiler_api_adapter.cpp
         regex_utils.cpp
         string_utils.cpp
         util.cpp
@@ -225,7 +226,9 @@ add_library("OpenTelemetry.AutoInstrumentation.Native.static" STATIC
         rejit_preprocessor.cpp
         rejit_work_offloader.cpp
         environment_variables_util.cpp
+        stack_capturer.cpp
         stub_generator.cpp
+        suspension_guards.cpp
         method_rewriter.cpp
         tracer_tokens.cpp
         lib/coreclr/src/pal/prebuilt/idl/corprof_i.cpp
