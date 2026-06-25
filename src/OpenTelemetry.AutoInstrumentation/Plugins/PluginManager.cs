@@ -232,14 +232,21 @@ internal partial class PluginManager
 
     private TReturn CallPlugins<TPlugin, TReturn>(Func<TPlugin, TReturn> action)
     {
+        TReturn? value = default;
+
         foreach (var plugin in _plugins)
         {
             if (plugin.Instance is TPlugin tplugin)
             {
-                return action(tplugin);
+                value = action(tplugin);
             }
         }
 
-        throw new InvalidOperationException($"No plugins implementing {typeof(TPlugin).Name} registered.");
+        if (value == null)
+        {
+            throw new InvalidOperationException($"No plugins returning '{typeof(TReturn).Name}' registered.");
+        }
+
+        return value;
     }
 }
