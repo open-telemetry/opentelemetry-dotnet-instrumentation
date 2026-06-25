@@ -26,20 +26,14 @@ internal sealed class SqlClientTracerInitializer : SqlClientInitializer
         }
 
         var instrumentationType = Type.GetType("OpenTelemetry.Instrumentation.SqlClient.SqlClientInstrumentation, OpenTelemetry.Instrumentation.SqlClient")!;
-        var instanceField = instrumentationType?.GetField("Instance");
+        var instanceField = instrumentationType?.GetField("Instance", System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.NonPublic);
         var instance = instanceField?.GetValue(null);
-        var traceOptionsProperty = instrumentationType?.GetProperty("TraceOptions");
 
-        if (traceOptionsProperty?.GetValue(instance) is OpenTelemetry.Instrumentation.SqlClient.SqlClientTraceInstrumentationOptions options)
-        {
-            _pluginManager.ConfigureTracesOptions(options);
-        }
+        var options = new OpenTelemetry.Instrumentation.SqlClient.SqlClientTraceInstrumentationOptions();
+        _pluginManager.ConfigureTracesOptions(options);
 
-        var handleManagerType = Type.GetType("OpenTelemetry.Instrumentation.InstrumentationHandleManager, OpenTelemetry.Instrumentation.SqlClient");
-        var handleManagerField = instrumentationType?.GetField("HandleManager");
-        var handleManager = handleManagerField?.GetValue(instance);
-        var addTracingHandleMethod = handleManagerType?.GetMethod("AddTracingHandle");
-        var tracingHandle = addTracingHandleMethod?.Invoke(handleManager, []);
+        var addTracingHandleMethod = instrumentationType?.GetMethod("AddTracingHandle", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic);
+        var tracingHandle = addTracingHandleMethod?.Invoke(instance, [options]);
 
         if (tracingHandle != null)
         {
