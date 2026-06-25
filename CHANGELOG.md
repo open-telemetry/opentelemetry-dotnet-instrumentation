@@ -33,7 +33,17 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
   [`1.16.0`](https://github.com/open-telemetry/opentelemetry-dotnet/releases/tag/core-1.16.0).
 - Following packages updated
   - `Google.Protobuf` updated from `3.31.1` to `3.35.0`,
+  - `OpenTelemetry.Instrumentation.GrpcNetClient` from `1.15.1-beta.1` to `1.16.0-beta.1`,
+  - `OpenTelemetry.Instrumentation.Http` from `1.15.1` to `1.16.0`,
+  - `OpenTelemetry.Instrumentation.Process` from `1.15.1-beta.1` to `1.16.0-beta.1`,
+  - `OpenTelemetry.Instrumentation.SqlClient` from `1.15.2` to `1.16.0`,
+  - `OpenTelemetry.Instrumentation.StackExchangeRedis` from `1.15.1-beta.2` to `1.16.0-beta.1`,
+  - `OpenTelemetry.Instrumentation.Wcf` from `1.15.1-beta.2` to `1.16.0-beta.1`,
   - `OpenTelemetry.OpAmp.Client` from `0.3.0-alpha.1` to `0.4.0-alpha.1`.
+- .NET only, following packages updated
+  - `OpenTelemetry.Instrumentation.AspNetCore` from `1.15.2` to `1.16.0`,
+  - `OpenTelemetry.Instrumentation.EntityFrameworkCore`
+    from `1.15.1-beta.1` to `1.16.0-beta.1`.
 - .NET Framework only, following packages updated
   - `Microsoft.Bcl.AsyncInterfaces` from `10.0.7` to `10.0.9`,
   - `Microsoft.Extensions.Configuration` from `10.0.7` to `10.0.9`,
@@ -50,6 +60,8 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
   - `Microsoft.Extensions.Options.ConfigurationExtensions`
     from `10.0.7` to `10.0.9`,
   - `Microsoft.Extensions.Primitives` from `10.0.7` to `10.0.9`,
+  - `OpenTelemetry.Instrumentation.AspNet` from `1.15.2` to `1.16.0`,
+  - `OpenTelemetry.Instrumentation.AspNet.TelemetryHttpModule` from `1.15.2` to `1.16.0`,
   - `System.Diagnostics.DiagnosticSource` from `10.0.7` to `10.0.9`,
   - `System.IO.Pipelines` from `10.0.7` to `10.0.9`,
   - `System.Text.Encodings.Web` from `10.0.7` to `10.0.9`,
