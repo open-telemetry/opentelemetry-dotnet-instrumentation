@@ -61,7 +61,6 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
     from `10.0.7` to `10.0.9`,
   - `Microsoft.Extensions.Primitives` from `10.0.7` to `10.0.9`,
   - `OpenTelemetry.Instrumentation.AspNet` from `1.15.2` to `1.16.0`,
-  - `OpenTelemetry.Instrumentation.AspNet.TelemetryHttpModule` from `1.15.2` to `1.16.0`,
   - `System.Diagnostics.DiagnosticSource` from `10.0.7` to `10.0.9`,
   - `System.IO.Pipelines` from `10.0.7` to `10.0.9`,
   - `System.Text.Encodings.Web` from `10.0.7` to `10.0.9`,
