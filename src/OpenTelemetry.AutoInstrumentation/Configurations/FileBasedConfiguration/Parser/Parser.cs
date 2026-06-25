@@ -10,6 +10,12 @@ internal static class Parser
 {
     public static T ParseYaml<T>(string filePath)
     {
+        var yaml = File.ReadAllText(filePath);
+        return ParseYamlContent<T>(yaml);
+    }
+
+    public static T ParseYamlContent<T>(string yaml)
+    {
         var deserializer = new DeserializerBuilder()
             .WithNodeDeserializer(existing => new ConditionalDeserializer(existing), s => s.InsteadOf<NullNodeDeserializer>())
             .WithTypeConverter(new EnvVarTypeConverter())
@@ -17,7 +23,6 @@ internal static class Parser
             .IgnoreUnmatchedProperties()
             .Build();
 
-        var yaml = File.ReadAllText(filePath);
         var config = deserializer.Deserialize<T>(yaml);
         return config;
     }
