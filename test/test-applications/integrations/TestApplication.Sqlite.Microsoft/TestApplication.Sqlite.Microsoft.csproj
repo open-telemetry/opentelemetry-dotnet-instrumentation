@@ -2,4 +2,8 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.Data.Sqlite"  VersionOverride="$(LibraryVersion)" />
   </ItemGroup>
+  <!-- TODO remove when https://github.com/dotnet/efcore/issues/38257 is fixed by: https://github.com/dotnet/efcore/pull/38402 -->
+  <ItemGroup>
+    <NuGetAuditSuppress Include="https://github.com/advisories/GHSA-2m69-gcr7-jv3q" />
+  </ItemGroup>
 </Project>

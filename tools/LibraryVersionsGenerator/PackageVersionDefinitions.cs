@@ -358,7 +358,7 @@ internal static class PackageVersionDefinitions
             TestApplicationName = "TestApplication.Wcf.Core",
             Versions =
             [
-                new("1.8.0", supportedTargetFrameworks: ["net10.0", "net9.0", "net8.0"], supportedExecutionFrameworks: ["net10.0", "net9.0", "net8.0"]),
+                new("1.8.1", supportedTargetFrameworks: ["net10.0", "net9.0", "net8.0"], supportedExecutionFrameworks: ["net10.0", "net9.0", "net8.0"]),
                 new("*", supportedTargetFrameworks: ["net10.0", "net9.0", "net8.0"], supportedExecutionFrameworks: ["net10.0", "net9.0", "net8.0"])
             ]
         }

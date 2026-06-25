@@ -494,10 +494,10 @@ public static partial class LibraryVersion
                 string.Empty,
 #else
 #if NET10_0 || NET9_0 || NET8_0
-                "1.8.0",
+                "1.8.1",
 #endif
 #if NET10_0 || NET9_0 || NET8_0
-                "1.9.0",
+                "1.9.1",
 #endif
 #endif
             ];
