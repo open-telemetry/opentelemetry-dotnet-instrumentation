@@ -22,6 +22,8 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
   `OTEL_EXPORTER_OTLP_TRACES_COMPRESSION`,
   `OTEL_EXPORTER_OTLP_METRICS_COMPRESSION` and
   `OTEL_EXPORTER_OTLP_LOGS_COMPRESSION`.
+- Support for Database OpenTelemetry Tracing for [Oracle.ManagedDataAccess.Core](https://www.nuget.org/packages/Oracle.ManagedDataAccess.Core)
+  and [Oracle.ManagedDataAccess](https://www.nuget.org/packages/Oracle.ManagedDataAccess).
 
 ### Changed
 
