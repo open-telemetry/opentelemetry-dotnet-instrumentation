@@ -3,16 +3,17 @@
 
 using System.Collections.Concurrent;
 using System.Globalization;
+using System.Net;
+#if NET
+using System.Security.Cryptography.X509Certificates;
+#endif
 using System.Text;
+#if NET
+using Microsoft.AspNetCore.Http;
+#endif
 using OpenTelemetry.Proto.Collector.Trace.V1;
 using OpenTelemetry.Proto.Common.V1;
 using OpenTelemetry.Proto.Trace.V1;
-
-#if NETFRAMEWORK
-using System.Net;
-#else
-using Microsoft.AspNetCore.Http;
-#endif
 
 namespace IntegrationTests.Helpers;
 
@@ -39,6 +40,14 @@ internal sealed class MockSpansCollector : IDisposable
         _listener = new TestHttpServer(output, HandleHttpRequests, host, "/v1/traces/");
 #endif
     }
+
+#if NET
+    public MockSpansCollector(ITestOutputHelper output, X509Certificate2 serverCertificate)
+    {
+        _output = output;
+        _listener = new TestHttpServer(output, nameof(MockSpansCollector), serverCertificate, new PathHandler(HandleHttpRequests, "/v1/traces"));
+    }
+#endif
 
     /// <summary>
     /// Gets the TCP port that this collector is listening on.
