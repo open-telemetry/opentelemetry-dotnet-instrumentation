@@ -32,16 +32,16 @@
         { _W("OpenTelemetry.Exporter.Prometheus.HttpListener"), {1, 0, 0, 0} }, \
         { _W("OpenTelemetry.Exporter.Zipkin"), {1, 0, 0, 0} }, \
         { _W("OpenTelemetry.Extensions.Propagators"), {1, 0, 0, 0} }, \
-        { _W("OpenTelemetry.Instrumentation.AspNet"), {1, 15, 2, 1017} }, \
-        { _W("OpenTelemetry.Instrumentation.AspNet.TelemetryHttpModule"), {1, 15, 2, 1017} }, \
-        { _W("OpenTelemetry.Instrumentation.GrpcNetClient"), {1, 15, 1, 1023} }, \
-        { _W("OpenTelemetry.Instrumentation.Http"), {1, 15, 1, 1025} }, \
-        { _W("OpenTelemetry.Instrumentation.Process"), {1, 15, 1, 1028} }, \
+        { _W("OpenTelemetry.Instrumentation.AspNet"), {1, 16, 0, 1128} }, \
+        { _W("OpenTelemetry.Instrumentation.AspNet.TelemetryHttpModule"), {1, 16, 0, 1128} }, \
+        { _W("OpenTelemetry.Instrumentation.GrpcNetClient"), {1, 16, 0, 1132} }, \
+        { _W("OpenTelemetry.Instrumentation.Http"), {1, 16, 0, 1135} }, \
+        { _W("OpenTelemetry.Instrumentation.Process"), {1, 16, 0, 1136} }, \
         { _W("OpenTelemetry.Instrumentation.Quartz"), {1, 15, 1, 1027} }, \
         { _W("OpenTelemetry.Instrumentation.Runtime"), {1, 15, 1, 1029} }, \
-        { _W("OpenTelemetry.Instrumentation.SqlClient"), {1, 15, 2, 1033} }, \
-        { _W("OpenTelemetry.Instrumentation.StackExchangeRedis"), {1, 15, 1, 1093} }, \
-        { _W("OpenTelemetry.Instrumentation.Wcf"), {1, 15, 1, 1049} }, \
+        { _W("OpenTelemetry.Instrumentation.SqlClient"), {1, 16, 0, 1138} }, \
+        { _W("OpenTelemetry.Instrumentation.StackExchangeRedis"), {1, 16, 0, 1137} }, \
+        { _W("OpenTelemetry.Instrumentation.Wcf"), {1, 16, 0, 1139} }, \
         { _W("OpenTelemetry.OpAmp.Client"), {0, 4, 0, 1087} }, \
         { _W("OpenTelemetry.Resources.Azure"), {1, 15, 1, 1031} }, \
         { _W("OpenTelemetry.Resources.Host"), {1, 15, 1, 1036} }, \
@@ -180,16 +180,16 @@
         { _W("OpenTelemetry.Exporter.Prometheus.HttpListener"), {1, 0, 0, 0} }, \
         { _W("OpenTelemetry.Exporter.Zipkin"), {1, 0, 0, 0} }, \
         { _W("OpenTelemetry.Extensions.Propagators"), {1, 0, 0, 0} }, \
-        { _W("OpenTelemetry.Instrumentation.AspNet"), {1, 15, 2, 1017} }, \
-        { _W("OpenTelemetry.Instrumentation.AspNet.TelemetryHttpModule"), {1, 15, 2, 1017} }, \
-        { _W("OpenTelemetry.Instrumentation.GrpcNetClient"), {1, 15, 1, 1023} }, \
-        { _W("OpenTelemetry.Instrumentation.Http"), {1, 15, 1, 1025} }, \
-        { _W("OpenTelemetry.Instrumentation.Process"), {1, 15, 1, 1028} }, \
+        { _W("OpenTelemetry.Instrumentation.AspNet"), {1, 16, 0, 1128} }, \
+        { _W("OpenTelemetry.Instrumentation.AspNet.TelemetryHttpModule"), {1, 16, 0, 1128} }, \
+        { _W("OpenTelemetry.Instrumentation.GrpcNetClient"), {1, 16, 0, 1132} }, \
+        { _W("OpenTelemetry.Instrumentation.Http"), {1, 16, 0, 1135} }, \
+        { _W("OpenTelemetry.Instrumentation.Process"), {1, 16, 0, 1136} }, \
         { _W("OpenTelemetry.Instrumentation.Quartz"), {1, 15, 1, 1027} }, \
         { _W("OpenTelemetry.Instrumentation.Runtime"), {1, 15, 1, 1029} }, \
-        { _W("OpenTelemetry.Instrumentation.SqlClient"), {1, 15, 2, 1033} }, \
-        { _W("OpenTelemetry.Instrumentation.StackExchangeRedis"), {1, 15, 1, 1093} }, \
-        { _W("OpenTelemetry.Instrumentation.Wcf"), {1, 15, 1, 1049} }, \
+        { _W("OpenTelemetry.Instrumentation.SqlClient"), {1, 16, 0, 1138} }, \
+        { _W("OpenTelemetry.Instrumentation.StackExchangeRedis"), {1, 16, 0, 1137} }, \
+        { _W("OpenTelemetry.Instrumentation.Wcf"), {1, 16, 0, 1139} }, \
         { _W("OpenTelemetry.OpAmp.Client"), {0, 4, 0, 1087} }, \
         { _W("OpenTelemetry.Resources.Azure"), {1, 15, 1, 1031} }, \
         { _W("OpenTelemetry.Resources.Host"), {1, 15, 1, 1036} }, \
@@ -327,16 +327,16 @@
         { _W("OpenTelemetry.Exporter.Prometheus.HttpListener"), {1, 0, 0, 0} }, \
         { _W("OpenTelemetry.Exporter.Zipkin"), {1, 0, 0, 0} }, \
         { _W("OpenTelemetry.Extensions.Propagators"), {1, 0, 0, 0} }, \
-        { _W("OpenTelemetry.Instrumentation.AspNet"), {1, 15, 2, 1017} }, \
-        { _W("OpenTelemetry.Instrumentation.AspNet.TelemetryHttpModule"), {1, 15, 2, 1017} }, \
-        { _W("OpenTelemetry.Instrumentation.GrpcNetClient"), {1, 15, 1, 1023} }, \
-        { _W("OpenTelemetry.Instrumentation.Http"), {1, 15, 1, 1025} }, \
-        { _W("OpenTelemetry.Instrumentation.Process"), {1, 15, 1, 1028} }, \
+        { _W("OpenTelemetry.Instrumentation.AspNet"), {1, 16, 0, 1128} }, \
+        { _W("OpenTelemetry.Instrumentation.AspNet.TelemetryHttpModule"), {1, 16, 0, 1128} }, \
+        { _W("OpenTelemetry.Instrumentation.GrpcNetClient"), {1, 16, 0, 1132} }, \
+        { _W("OpenTelemetry.Instrumentation.Http"), {1, 16, 0, 1135} }, \
+        { _W("OpenTelemetry.Instrumentation.Process"), {1, 16, 0, 1136} }, \
         { _W("OpenTelemetry.Instrumentation.Quartz"), {1, 15, 1, 1027} }, \
         { _W("OpenTelemetry.Instrumentation.Runtime"), {1, 15, 1, 1029} }, \
-        { _W("OpenTelemetry.Instrumentation.SqlClient"), {1, 15, 2, 1033} }, \
-        { _W("OpenTelemetry.Instrumentation.StackExchangeRedis"), {1, 15, 1, 1093} }, \
-        { _W("OpenTelemetry.Instrumentation.Wcf"), {1, 15, 1, 1049} }, \
+        { _W("OpenTelemetry.Instrumentation.SqlClient"), {1, 16, 0, 1138} }, \
+        { _W("OpenTelemetry.Instrumentation.StackExchangeRedis"), {1, 16, 0, 1137} }, \
+        { _W("OpenTelemetry.Instrumentation.Wcf"), {1, 16, 0, 1139} }, \
         { _W("OpenTelemetry.OpAmp.Client"), {0, 4, 0, 1087} }, \
         { _W("OpenTelemetry.Resources.Azure"), {1, 15, 1, 1031} }, \
         { _W("OpenTelemetry.Resources.Host"), {1, 15, 1, 1036} }, \
@@ -392,16 +392,16 @@
         { _W("OpenTelemetry.Exporter.Prometheus.HttpListener"), {1, 0, 0, 0} }, \
         { _W("OpenTelemetry.Exporter.Zipkin"), {1, 0, 0, 0} }, \
         { _W("OpenTelemetry.Extensions.Propagators"), {1, 0, 0, 0} }, \
-        { _W("OpenTelemetry.Instrumentation.AspNet"), {1, 15, 2, 1017} }, \
-        { _W("OpenTelemetry.Instrumentation.AspNet.TelemetryHttpModule"), {1, 15, 2, 1017} }, \
-        { _W("OpenTelemetry.Instrumentation.GrpcNetClient"), {1, 15, 1, 1023} }, \
-        { _W("OpenTelemetry.Instrumentation.Http"), {1, 15, 1, 1025} }, \
-        { _W("OpenTelemetry.Instrumentation.Process"), {1, 15, 1, 1028} }, \
+        { _W("OpenTelemetry.Instrumentation.AspNet"), {1, 16, 0, 1128} }, \
+        { _W("OpenTelemetry.Instrumentation.AspNet.TelemetryHttpModule"), {1, 16, 0, 1128} }, \
+        { _W("OpenTelemetry.Instrumentation.GrpcNetClient"), {1, 16, 0, 1132} }, \
+        { _W("OpenTelemetry.Instrumentation.Http"), {1, 16, 0, 1135} }, \
+        { _W("OpenTelemetry.Instrumentation.Process"), {1, 16, 0, 1136} }, \
         { _W("OpenTelemetry.Instrumentation.Quartz"), {1, 15, 1, 1027} }, \
         { _W("OpenTelemetry.Instrumentation.Runtime"), {1, 15, 1, 1029} }, \
-        { _W("OpenTelemetry.Instrumentation.SqlClient"), {1, 15, 2, 1033} }, \
-        { _W("OpenTelemetry.Instrumentation.StackExchangeRedis"), {1, 15, 1, 1093} }, \
-        { _W("OpenTelemetry.Instrumentation.Wcf"), {1, 15, 1, 1049} }, \
+        { _W("OpenTelemetry.Instrumentation.SqlClient"), {1, 16, 0, 1138} }, \
+        { _W("OpenTelemetry.Instrumentation.StackExchangeRedis"), {1, 16, 0, 1137} }, \
+        { _W("OpenTelemetry.Instrumentation.Wcf"), {1, 16, 0, 1139} }, \
         { _W("OpenTelemetry.OpAmp.Client"), {0, 4, 0, 1087} }, \
         { _W("OpenTelemetry.Resources.Azure"), {1, 15, 1, 1031} }, \
         { _W("OpenTelemetry.Resources.Host"), {1, 15, 1, 1036} }, \

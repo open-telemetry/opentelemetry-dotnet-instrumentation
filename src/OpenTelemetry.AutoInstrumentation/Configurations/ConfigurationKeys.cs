@@ -205,10 +205,18 @@ internal partial class ConfigurationKeys
             /// </summary>
             public const string OracleMdaSetDbStatementForText = "OTEL_DOTNET_AUTO_ORACLEMDA_SET_DBSTATEMENT_FOR_TEXT";
 
+#if NETFRAMEWORK
             /// <summary>
             /// Configuration key for enabling IL rewriting of SqlClient on .NET Framework to ensure CommandText is available.
             /// </summary>
             public const string SqlClientNetFxILRewriteEnabled = "OTEL_DOTNET_AUTO_SQLCLIENT_NETFX_ILREWRITE_ENABLED";
+
+            /// <summary>
+            /// Configuration key for enabling context propagation to the server side.
+            /// <remarks>It should be in sync with the name from https://github.com/open-telemetry/opentelemetry-dotnet-contrib/blob/main/src/OpenTelemetry.Instrumentation.SqlClient/SqlClientTraceInstrumentationOptions.cs</remarks>
+            /// </summary>
+            public const string SqlClientNetFxExperimentalContextPropagation = "OTEL_DOTNET_EXPERIMENTAL_SQLCLIENT_ENABLE_TRACE_CONTEXT_PROPAGATION";
+#endif
         }
     }
 

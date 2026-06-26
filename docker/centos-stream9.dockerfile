@@ -1,4 +1,4 @@
-FROM quay.io/centos/centos:stream9@sha256:b5986e7a0621e45530759a5680deb01190f9c990892b9dd05e6786e9c4107b56
+FROM quay.io/centos/centos:stream9@sha256:5665c076f25172d372d6fb7934f49f9f99b36aa6117afd1935186ccb9fb88cb0
 
 # Install dotnet sdk
 RUN dnf install -y \
@@ -20,7 +20,7 @@ RUN update-crypto-policies --set LEGACY
 # renovate: datasource=rpm depName=cmake
 ARG CMAKE_VERSION=3.31.8-3.el9
 # renovate: datasource=rpm depName=clang
-ARG CLANG_VERSION=21.1.8-2.el9
+ARG CLANG_VERSION=22.1.3-1.el9
 # renovate: datasource=rpm depName=git
 ARG GIT_VERSION=2.52.0-1.el9
 

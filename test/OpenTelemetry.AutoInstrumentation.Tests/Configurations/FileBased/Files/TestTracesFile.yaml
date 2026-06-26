@@ -11,6 +11,7 @@ tracer_provider:
           otlp_http:
             endpoint: http://localhost:4318/v1/traces
             timeout: 10000
+            compression: gzip
             headers:
               - name: header1234
                 value: "1234"
@@ -23,6 +24,7 @@ tracer_provider:
         exporter:
           otlp_grpc:
             endpoint: http://localhost:4317
+            compression: none
     - simple:
         exporter:
           console:

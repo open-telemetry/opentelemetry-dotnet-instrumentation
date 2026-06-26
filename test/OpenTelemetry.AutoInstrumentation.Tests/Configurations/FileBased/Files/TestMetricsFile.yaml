@@ -9,12 +9,14 @@ meter_provider:
           otlp_http:
             endpoint: http://localhost:4318/v1/metrics
             timeout: 10000
+            compression: gzip
             temporality_preference: cumulative
     - periodic:
         exporter:
           otlp_grpc:
             endpoint: http://localhost:4317
             timeout: 8000
+            compression: none
             temporality_preference: delta
     - periodic:
         exporter:

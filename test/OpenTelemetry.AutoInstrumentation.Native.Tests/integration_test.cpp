@@ -48,3 +48,15 @@ TEST(IntegrationTest, AssemblyReferenceInvalidVersion)
     AssemblyReference ref(L"Some.Assembly, Version=xyz");
     EXPECT_EQ(ref.version, Version(0, 0, 0, 0));
 }
+
+TEST(IntegrationTest, AssemblyReferenceVersionRejectsOversizedComponent)
+{
+    AssemblyReference ref(WStr("Some.Assembly, Version=999999999999999999999999.2.3.4"));
+    EXPECT_EQ(ref.version, Version(0, 0, 0, 0));
+}
+
+TEST(IntegrationTest, AssemblyReferenceVersionRejectsPartiallyParsedOversizedComponent)
+{
+    AssemblyReference ref(WStr("Some.Assembly, Version=1.65536.3.4"));
+    EXPECT_EQ(ref.version, Version(0, 0, 0, 0));
+}

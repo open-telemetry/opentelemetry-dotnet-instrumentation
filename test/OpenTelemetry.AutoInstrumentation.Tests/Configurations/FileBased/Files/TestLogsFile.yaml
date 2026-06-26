@@ -17,6 +17,7 @@ logger_provider:
                 value: "1234"
             headers_list: api-key=1234
             timeout: 10000
+            compression: gzip
 
     - batch:
         exporter:
@@ -27,6 +28,7 @@ logger_provider:
                 value: "1234"
             headers_list: api-key=1234
             timeout: 10000
+            compression: none
 
     - simple:
         exporter:
