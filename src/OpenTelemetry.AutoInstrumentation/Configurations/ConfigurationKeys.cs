@@ -201,6 +201,11 @@ internal partial class ConfigurationKeys
             public const string HttpInstrumentationCaptureResponseHeaders = "OTEL_DOTNET_AUTO_TRACES_HTTP_INSTRUMENTATION_CAPTURE_RESPONSE_HEADERS";
 
             /// <summary>
+            /// Configuration key for Oracle Client instrumentation to enable database OpenTelemetry tracing.
+            /// </summary>
+            public const string OracleMdaDatabaseOpenTelemetryTracing = "OTEL_DOTNET_AUTO_ORACLEMDA_DATABASE_OPENTELEMETRY_TRACING";
+
+            /// <summary>
             /// Configuration key for Oracle Client instrumentation to enable passing text query as a db.statement attribute.
             /// </summary>
             public const string OracleMdaSetDbStatementForText = "OTEL_DOTNET_AUTO_ORACLEMDA_SET_DBSTATEMENT_FOR_TEXT";
