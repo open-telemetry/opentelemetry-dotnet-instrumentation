@@ -8,12 +8,19 @@ namespace OpenTelemetry.AutoInstrumentation.Instrumentations.Kafka;
 
 internal static class KafkaClusterIdCache
 {
-    // Sentinel: empty string means a fetch is in-flight; non-empty means resolved UUID.
-    private static readonly ConcurrentDictionary<string, string> Cache = new(StringComparer.Ordinal);
+    private const long TtlMs = 30L * 60 * 1000;
+
+    // Holds the resolved cluster id and the TickCount64 at which it was cached.
+    // InFlight is a sentinel indicating a background fetch is currently running.
+    private record CacheEntry(string Value, long FetchedAt);
+    private static readonly CacheEntry InFlight = new(string.Empty, 0L);
+
+    private static readonly ConcurrentDictionary<string, CacheEntry> Cache = new(StringComparer.Ordinal);
 
     /// <summary>
     /// Schedules a background fetch of the cluster ID for the given bootstrap servers string.
-    /// No-ops if a fetch is already in-flight or the result is already cached.
+    /// No-ops if a fetch is already in-flight or the cached value is still within its TTL.
+    /// Triggers a re-fetch when the cached value has expired.
     /// </summary>
     internal static void ScheduleFetch(string bootstrapServers, IReadOnlyList<KeyValuePair<string, string>>? config = null)
     {
@@ -22,10 +29,30 @@ internal static class KafkaClusterIdCache
             return;
         }
 
-        // TryAdd succeeds only the first time – prevents duplicate fetches.
-        if (!Cache.TryAdd(bootstrapServers, string.Empty))
+        if (Cache.TryGetValue(bootstrapServers, out var existing))
         {
-            return;
+            if (ReferenceEquals(existing, InFlight))
+            {
+                return; // fetch already in progress
+            }
+
+            if (Environment.TickCount64 - existing.FetchedAt <= TtlMs)
+            {
+                return; // still fresh
+            }
+
+            // TTL expired — swap to in-flight so only one re-fetch races
+            if (!Cache.TryUpdate(bootstrapServers, InFlight, existing))
+            {
+                return; // another thread won the race
+            }
+        }
+        else
+        {
+            if (!Cache.TryAdd(bootstrapServers, InFlight))
+            {
+                return; // another thread won the race
+            }
         }
 
         _ = Task.Run(() => FetchAndStore(bootstrapServers, config));
@@ -42,7 +69,9 @@ internal static class KafkaClusterIdCache
             return null;
         }
 
-        return Cache.TryGetValue(bootstrapServers, out var val) && !string.IsNullOrEmpty(val) ? val : null;
+        return Cache.TryGetValue(bootstrapServers, out var entry) && !ReferenceEquals(entry, InFlight)
+            ? entry.Value
+            : null;
     }
 
     private static void FetchAndStore(string bootstrapServers, IReadOnlyList<KeyValuePair<string, string>>? config)
@@ -52,7 +81,7 @@ internal static class KafkaClusterIdCache
             var clusterId = FetchClusterIdViaReflection(bootstrapServers, config);
             if (!string.IsNullOrEmpty(clusterId))
             {
-                Cache[bootstrapServers] = clusterId!;
+                Cache[bootstrapServers] = new CacheEntry(clusterId!, Environment.TickCount64);
             }
             else
             {
