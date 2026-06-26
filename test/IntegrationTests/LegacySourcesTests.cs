@@ -20,7 +20,7 @@ public class LegacySourcesTests : TestHelper
 
     [Fact]
     [Trait("Category", "EndToEnd")]
-    public void SubmitsLegacyActivityWhenSourceIsRegistered()
+    public void SubmitsTraces()
     {
         using var collector = new MockSpansCollector(Output);
         SetExporter(collector);
