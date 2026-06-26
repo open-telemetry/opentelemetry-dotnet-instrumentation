@@ -34,7 +34,7 @@ internal static class KafkaInstrumentation
 
             if (BootstrapServersCache.TryGet(consumer, out var bootstrapServers))
             {
-                var clusterId = KafkaClusterIdCache.GetClusterId(bootstrapServers);
+                var clusterId = KafkaClusterIdCache.GetClusterIdAndScheduleRefresh(bootstrapServers);
                 if (clusterId is not null)
                 {
                     activity.SetTag(MessagingAttributes.Keys.Kafka.ClusterId, clusterId);
@@ -94,7 +94,7 @@ internal static class KafkaInstrumentation
 
             if (rawProducer is not null && BootstrapServersCache.TryGet(rawProducer, out var bootstrapServers))
             {
-                var clusterId = KafkaClusterIdCache.GetClusterId(bootstrapServers);
+                var clusterId = KafkaClusterIdCache.GetClusterIdAndScheduleRefresh(bootstrapServers);
                 if (clusterId is not null)
                 {
                     activity.SetTag(MessagingAttributes.Keys.Kafka.ClusterId, clusterId);

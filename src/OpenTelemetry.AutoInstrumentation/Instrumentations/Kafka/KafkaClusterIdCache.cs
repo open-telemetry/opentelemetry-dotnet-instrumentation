@@ -11,11 +11,16 @@ internal static class KafkaClusterIdCache
     private const long TtlMs = 30L * 60 * 1000;
 
     // Holds the resolved cluster id and the TickCount64 at which it was cached.
-    // InFlight is a sentinel indicating a background fetch is currently running.
     private record CacheEntry(string Value, long FetchedAt);
-    private static readonly CacheEntry InFlight = new(string.Empty, 0L);
 
+    // Only holds successfully resolved entries; no sentinel values.
     private static readonly ConcurrentDictionary<string, CacheEntry> Cache = new(StringComparer.Ordinal);
+
+    // Key presence indicates a background fetch is currently running.
+    private static readonly ConcurrentDictionary<string, byte> _inFlight = new(StringComparer.Ordinal);
+
+    // Auth config from the first constructor call per bootstrapServers; re-used for TTL re-fetches.
+    private static readonly ConcurrentDictionary<string, IReadOnlyList<KeyValuePair<string, string>>?> _configCache = new(StringComparer.Ordinal);
 
     /// <summary>
     /// Schedules a background fetch of the cluster ID for the given bootstrap servers string.
@@ -29,38 +34,33 @@ internal static class KafkaClusterIdCache
             return;
         }
 
-        if (Cache.TryGetValue(bootstrapServers, out var existing))
-        {
-            if (ReferenceEquals(existing, InFlight))
-            {
-                return; // fetch already in progress
-            }
+        // Store the auth config on first call so TTL re-fetches from the hot path can use it.
+        _configCache.TryAdd(bootstrapServers, config);
 
-            if (Environment.TickCount64 - existing.FetchedAt <= TtlMs)
-            {
-                return; // still fresh
-            }
-
-            // TTL expired — swap to in-flight so only one re-fetch races
-            if (!Cache.TryUpdate(bootstrapServers, InFlight, existing))
-            {
-                return; // another thread won the race
-            }
-        }
-        else
+        if (_inFlight.ContainsKey(bootstrapServers))
         {
-            if (!Cache.TryAdd(bootstrapServers, InFlight))
-            {
-                return; // another thread won the race
-            }
+            return; // fetch already in progress
         }
 
-        _ = Task.Run(() => FetchAndStore(bootstrapServers, config));
+        if (Cache.TryGetValue(bootstrapServers, out var existing) &&
+            Environment.TickCount64 - existing.FetchedAt <= TtlMs)
+        {
+            return; // still fresh
+        }
+
+        // TryAdd is the atomic guard; ContainsKey above is an optimistic fast-path only.
+        if (!_inFlight.TryAdd(bootstrapServers, 0))
+        {
+            return; // another thread won the race
+        }
+
+        _configCache.TryGetValue(bootstrapServers, out var cfg);
+        _ = Task.Run(() => FetchAndStore(bootstrapServers, cfg));
     }
 
     /// <summary>
     /// Returns the resolved cluster ID for <paramref name="bootstrapServers"/>,
-    /// or <c>null</c> if the result is not yet available.
+    /// or <c>null</c> if no value has ever been resolved.
     /// </summary>
     internal static string? GetClusterId(string? bootstrapServers)
     {
@@ -69,9 +69,34 @@ internal static class KafkaClusterIdCache
             return null;
         }
 
-        return Cache.TryGetValue(bootstrapServers, out var entry) && !ReferenceEquals(entry, InFlight)
-            ? entry.Value
-            : null;
+        return Cache.TryGetValue(bootstrapServers, out var entry) ? entry.Value : null;
+    }
+
+    /// <summary>
+    /// Returns the resolved cluster ID for <paramref name="bootstrapServers"/> and
+    /// schedules a background re-fetch if the TTL has expired.
+    /// Returns the stale value while the re-fetch is in progress.
+    /// Returns <c>null</c> if no value has ever been resolved.
+    /// </summary>
+    internal static string? GetClusterIdAndScheduleRefresh(string? bootstrapServers)
+    {
+        if (string.IsNullOrEmpty(bootstrapServers))
+        {
+            return null;
+        }
+
+        if (!Cache.TryGetValue(bootstrapServers, out var entry))
+        {
+            return null;
+        }
+
+        // TTL expired — trigger a background re-fetch, return stale value for this span.
+        if (Environment.TickCount64 - entry.FetchedAt > TtlMs)
+        {
+            ScheduleFetch(bootstrapServers);
+        }
+
+        return entry.Value;
     }
 
     private static void FetchAndStore(string bootstrapServers, IReadOnlyList<KeyValuePair<string, string>>? config)
@@ -90,8 +115,12 @@ internal static class KafkaClusterIdCache
         }
         catch
         {
-            // If anything goes wrong, remove the sentinel so a future call can retry.
+            // If anything goes wrong, remove the stale entry so a future call can retry.
             Cache.TryRemove(bootstrapServers, out _);
+        }
+        finally
+        {
+            _inFlight.TryRemove(bootstrapServers, out _);
         }
     }
 
