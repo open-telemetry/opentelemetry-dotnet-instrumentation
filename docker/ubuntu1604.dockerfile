@@ -4,6 +4,7 @@ FROM ubuntu:16.04@sha256:1f1a2d56de1d604801a9671f301190704c25d604a416f59e03c04f5
 ARG CLANG_5_VERSION=1:5.0.2~svn328729-1~exp1~20180509124008.99
 # renovate: datasource=deb depName=g++-9
 ARG GXX_9_VERSION=9.4.0-1ubuntu1~16.04
+ARG UBUNTU_TOOLCHAIN_R_FINGERPRINT=C8EC952E2A0E1FBDC5090F6A2C277A0A352154E5
 # renovate: datasource=github-releases depName=Kitware/CMake
 ARG CMAKE_VERSION=3.20.5
 
@@ -13,7 +14,7 @@ RUN apt-get update && \
     ca-certificates \
     curl \
     git \
-    build-essential software-properties-common \
+    build-essential \
     gnupg \
     libicu-dev
 
@@ -28,7 +29,8 @@ RUN curl -fsSL https://apt.llvm.org/llvm-snapshot.gpg.key | gpg --dearmor -o /us
     update-alternatives --config clang++
 
 # Install newer g++
-RUN add-apt-repository ppa:ubuntu-toolchain-r/test -y && \
+RUN curl -fsSL "https://keyserver.ubuntu.com/pks/lookup?op=get&search=0x${UBUNTU_TOOLCHAIN_R_FINGERPRINT}" | gpg --dearmor -o /usr/share/keyrings/ubuntu-toolchain-r-archive-keyring.gpg && \
+    echo 'deb [signed-by=/usr/share/keyrings/ubuntu-toolchain-r-archive-keyring.gpg] https://ppa.launchpadcontent.net/ubuntu-toolchain-r/test/ubuntu xenial main' > /etc/apt/sources.list.d/ubuntu-toolchain-r.list && \
     apt-get update && \
     apt-get install -y g++-9="${GXX_9_VERSION}" && \
     update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-9 60 --slave /usr/bin/g++ g++ /usr/bin/g++-9
