@@ -8,7 +8,7 @@ namespace OpenTelemetry.AutoInstrumentation.Instrumentations.Kafka;
 
 internal static class KafkaClusterIdCache
 {
-    private const long TtlMs = 30L * 60 * 1000;
+    private const long TtlMs = 60L * 60 * 1000;
 
     // Holds the resolved cluster id and the TickCount64 at which it was cached.
     private record CacheEntry(string Value, long FetchedAt);
