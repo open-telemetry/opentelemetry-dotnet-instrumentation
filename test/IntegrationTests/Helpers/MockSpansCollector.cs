@@ -11,6 +11,7 @@ using System.Text;
 #if NET
 using Microsoft.AspNetCore.Http;
 #endif
+using Google.Protobuf;
 using OpenTelemetry.Proto.Collector.Trace.V1;
 using OpenTelemetry.Proto.Common.V1;
 using OpenTelemetry.Proto.Trace.V1;
@@ -227,6 +228,17 @@ internal sealed class MockSpansCollector : IDisposable
         Assert.Fail(message.ToString());
     }
 
+    private static ExportTraceServiceRequest ParseTraceRequest(Stream bodyStream, string? contentType)
+    {
+        if (contentType?.IndexOf("json", StringComparison.OrdinalIgnoreCase) >= 0)
+        {
+            using var reader = new StreamReader(bodyStream, Encoding.UTF8, detectEncodingFromByteOrderMarks: true, bufferSize: 1024, leaveOpen: true);
+            return JsonParser.Default.Parse<ExportTraceServiceRequest>(reader.ReadToEnd());
+        }
+
+        return ExportTraceServiceRequest.Parser.ParseFrom(bodyStream);
+    }
+
     private void DrainAvailable(List<Collected> collected)
     {
         while (_spans.TryTake(out var resourceSpan, TestTimeout.NoExpectation))
@@ -238,7 +250,7 @@ internal sealed class MockSpansCollector : IDisposable
 #if NETFRAMEWORK
     private void HandleHttpRequests(HttpListenerContext ctx)
     {
-        var traceMessage = ExportTraceServiceRequest.Parser.ParseFrom(ctx.Request.InputStream);
+        var traceMessage = ParseTraceRequest(ctx.Request.InputStream, ctx.Request.ContentType);
         HandleTraceMessage(traceMessage);
 
         ctx.GenerateEmptyProtobufResponse<ExportTraceServiceResponse>();
@@ -247,7 +259,7 @@ internal sealed class MockSpansCollector : IDisposable
     private async Task HandleHttpRequests(HttpContext ctx)
     {
         using var bodyStream = await ctx.ReadBodyToMemoryAsync().ConfigureAwait(false);
-        var traceMessage = ExportTraceServiceRequest.Parser.ParseFrom(bodyStream);
+        var traceMessage = ParseTraceRequest(bodyStream, ctx.Request.ContentType);
         HandleTraceMessage(traceMessage);
 
         await ctx.GenerateEmptyProtobufResponseAsync<ExportTraceServiceResponse>().ConfigureAwait(false);
@@ -263,7 +275,7 @@ internal sealed class MockSpansCollector : IDisposable
             {
                 foreach (var span in scopeSpans.Spans ?? Enumerable.Empty<Span>())
                 {
-                    _spans.Add(new Collected(scopeSpans.Scope, span, scopeSpans.SchemaUrl));
+                    _spans.Add(new Collected(scopeSpans.Scope ?? new InstrumentationScope(), span, scopeSpans.SchemaUrl));
                 }
             }
         }
