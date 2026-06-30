@@ -281,8 +281,7 @@ and [logs bridge](./nlog-bridge.md).
 | `OTEL_DOTNET_AUTO_SQLCLIENT_NETFX_ILREWRITE_ENABLED`                              | \[2\]                                                                                                                                                                                                                                    | `false`       | [Experimental](https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/versioning-and-stability.md) |
 
 \[1\]: This feature is supported only by packages `23.26.200` and newer.
-It also require server Oracle AI Database 26at as a server.
-
+It also requires an Oracle AI Database 26ai server.
 \[2\]: Enables IL rewriting of `SqlCommand` on .NET Framework to ensure
 `CommandText` is present for `SqlClient` instrumentation, which is required for
 `db.query.text` and `db.query.summary` to be populated. Previously, `CommandText`
