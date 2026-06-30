@@ -3,12 +3,80 @@
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
+    <!-- Keep the signing key text-encoded in source control and materialize it only in ignored intermediate output. -->
+    <StrongNameKeyBase64File>$(MSBuildThisFileDirectory)OpenTelemetry.AutoInstrumentation.snk.base64</StrongNameKeyBase64File>
 
     <NuGetAudit>true</NuGetAudit>
     <NuGetAuditMode>all</NuGetAuditMode>
     <NuGetAuditLevel>low</NuGetAuditLevel>
     <AnalysisLevel>latest-All</AnalysisLevel>
   </PropertyGroup>
+
+  <UsingTask
+    TaskName="DecodeBase64File"
+    TaskFactory="RoslynCodeTaskFactory"
+    AssemblyFile="$([System.IO.Path]::Combine('$(MSBuildToolsPath)', 'Microsoft.Build.Tasks.Core.dll'))">
+    <ParameterGroup>
+      <SourceFile ParameterType="System.String" Required="true" />
+      <DestinationFile ParameterType="System.String" Required="true" />
+    </ParameterGroup>
+    <Task>
+      <Using Namespace="System" />
+      <Using Namespace="System.IO" />
+      <Code Type="Fragment" Language="cs"><![CDATA[
+var destinationInfo = new FileInfo(DestinationFile);
+if (destinationInfo.Exists && destinationInfo.Length > 0)
+{
+    return true;
+}
+
+var base64Text = string.Concat(File.ReadAllLines(SourceFile));
+var directory = Path.GetDirectoryName(DestinationFile);
+if (!string.IsNullOrEmpty(directory))
+{
+    Directory.CreateDirectory(directory);
+}
+
+var temporaryFile = DestinationFile + "." + Guid.NewGuid().ToString("N") + ".tmp";
+try
+{
+    File.WriteAllBytes(temporaryFile, Convert.FromBase64String(base64Text));
+
+    try
+    {
+        File.Move(temporaryFile, DestinationFile);
+    }
+    catch (IOException)
+    {
+        destinationInfo.Refresh();
+        if (!destinationInfo.Exists || destinationInfo.Length == 0)
+        {
+            throw;
+        }
+    }
+}
+finally
+{
+    if (File.Exists(temporaryFile))
+    {
+        File.Delete(temporaryFile);
+    }
+}
+      ]]></Code>
+    </Task>
+  </UsingTask>
+
+  <Target Name="GenerateAssemblyOriginatorKeyFile" BeforeTargets="ResolveKeySource" Condition="'$(SignAssembly)' == 'true'">
+    <PropertyGroup>
+      <AssemblyOriginatorKeyFile>$([System.IO.Path]::Combine('$(BaseIntermediateOutputPath)', 'OpenTelemetry.AutoInstrumentation.snk'))</AssemblyOriginatorKeyFile>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <FileWrites Include="$(AssemblyOriginatorKeyFile)" />
+    </ItemGroup>
+
+    <DecodeBase64File SourceFile="$(StrongNameKeyBase64File)" DestinationFile="$(AssemblyOriginatorKeyFile)" />
+  </Target>
 
   <!-- StyleCop -->
   <ItemGroup>
