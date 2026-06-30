@@ -23,14 +23,17 @@
     <Task>
       <Using Namespace="System" />
       <Using Namespace="System.IO" />
+      <Using Namespace="System.Linq" />
       <Code Type="Fragment" Language="cs"><![CDATA[
+var base64Text = string.Concat(File.ReadAllLines(SourceFile));
+var decodedBytes = Convert.FromBase64String(base64Text);
 var destinationInfo = new FileInfo(DestinationFile);
-if (destinationInfo.Exists && destinationInfo.Length > 0)
+if (destinationInfo.Exists && destinationInfo.Length == decodedBytes.Length
+    && File.ReadAllBytes(DestinationFile).SequenceEqual(decodedBytes))
 {
     return true;
 }
 
-var base64Text = string.Concat(File.ReadAllLines(SourceFile));
 var directory = Path.GetDirectoryName(DestinationFile);
 if (!string.IsNullOrEmpty(directory))
 {
@@ -40,16 +43,24 @@ if (!string.IsNullOrEmpty(directory))
 var temporaryFile = DestinationFile + "." + Guid.NewGuid().ToString("N") + ".tmp";
 try
 {
-    File.WriteAllBytes(temporaryFile, Convert.FromBase64String(base64Text));
+    File.WriteAllBytes(temporaryFile, decodedBytes);
 
     try
     {
-        File.Move(temporaryFile, DestinationFile);
+        if (File.Exists(DestinationFile))
+        {
+            File.Replace(temporaryFile, DestinationFile, null);
+        }
+        else
+        {
+            File.Move(temporaryFile, DestinationFile);
+        }
     }
     catch (IOException)
     {
         destinationInfo.Refresh();
-        if (!destinationInfo.Exists || destinationInfo.Length == 0)
+        if (!destinationInfo.Exists || destinationInfo.Length != decodedBytes.Length
+            || !File.ReadAllBytes(DestinationFile).SequenceEqual(decodedBytes))
         {
             throw;
         }
