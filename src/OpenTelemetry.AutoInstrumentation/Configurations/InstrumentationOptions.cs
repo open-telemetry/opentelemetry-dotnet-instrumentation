@@ -145,7 +145,7 @@ internal class InstrumentationOptions
     public IReadOnlyList<AdditionalTag> HttpInstrumentationCaptureResponseHeaders { get; } = [];
 
     /// <summary>
-     /// Gets a value indicating whether the Oracle Client instrumentation should enable database OpenTelemetry tracing.
+    /// Gets a value indicating whether the Oracle Client instrumentation should enable database OpenTelemetry tracing.
     /// </summary>
     public bool OracleMdaDatabaseOpenTelemetryTracing { get; }
 

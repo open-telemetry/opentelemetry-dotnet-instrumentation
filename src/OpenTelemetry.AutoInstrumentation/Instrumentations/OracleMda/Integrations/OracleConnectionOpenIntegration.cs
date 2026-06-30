@@ -1,7 +1,6 @@
 // Copyright The OpenTelemetry Authors
 // SPDX-License-Identifier: Apache-2.0
 
-using System.Threading;
 using OpenTelemetry.AutoInstrumentation.CallTarget;
 
 namespace OpenTelemetry.AutoInstrumentation.Instrumentations.OracleMda.Integrations;
