@@ -1,1 +1,1 @@
-FROM gvenzl/oracle-free:23.26.1-slim@sha256:8f9a8225cc43d28f5b61e4b961734d3d798d4c2f058bed3f21498c03adee6141
+FROM ghcr.io/oracle/adb-free:26.5.4.2-26ai@sha256:bd532de37372b569090ae7e3c8b14d93d57eec8fc74aba2b115f0d39ee91b98e
