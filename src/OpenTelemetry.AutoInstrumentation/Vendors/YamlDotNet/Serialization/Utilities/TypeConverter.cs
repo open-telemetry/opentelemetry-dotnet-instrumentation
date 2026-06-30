@@ -21,7 +21,7 @@
 
 // Remarks: This file is imported from the SixPack library. This is ok because
 // the copyright holder has agreed to redistribute this file under the license
-// used in YamlDotNet.
+// used in Vendors.YamlDotNet.
 
 using System;
 using System.Globalization;
