@@ -10,7 +10,8 @@ internal static class OracleConnectionIntegrationHelper
 {
     public static void SetDatabaseOpenTelemetryTracing(object instance)
     {
-        if (instance.TryDuckCast<IOracleConnection>(out var oracleConnection))
+        if (Instrumentation.TracerSettings.Value.InstrumentationOptions.OracleMdaDatabaseOpenTelemetryTracing &&
+            instance.TryDuckCast<IOracleConnection>(out var oracleConnection))
         {
             oracleConnection.DatabaseOpenTelemetryTracing = true;
         }
