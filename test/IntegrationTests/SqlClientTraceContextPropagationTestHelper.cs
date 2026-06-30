@@ -3,7 +3,6 @@
 
 using System.Diagnostics;
 using OpenTelemetry.Proto.Trace.V1;
-using Xunit;
 
 namespace IntegrationTests;
 
