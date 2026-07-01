@@ -202,8 +202,10 @@ jobs:
 
       - name: Ensure Docker is ready
         shell: pwsh
-        timeout-minutes: 3
+        timeout-minutes: 5
         run: |
+          Get-Command docker -ErrorAction Stop | Out-Null
+
           $service = Get-Service -Name docker -ErrorAction Stop
           if ($service.Status -eq 'Stopped') {
             Write-Host 'Docker service is stopped. Starting it...'
@@ -220,7 +222,7 @@ jobs:
           $deadline = (Get-Date).AddMinutes(2)
           do {
             docker info *> $null
-            if ($LASTEXITCODE -eq 0) {
+            if ($?) {
               Write-Host 'Docker daemon is ready.'
               docker version
               exit 0
