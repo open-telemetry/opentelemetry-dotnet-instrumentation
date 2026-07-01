@@ -116,7 +116,7 @@ jobs:
       # actions/attest has a hard limit of 1024 subjects per step (no override).
       # Keep attestations split into small batches to stay under this cap.
       - name: Attest release files
-        uses: actions/attest@59d89421af93a897026c735860bf21b6eb4f7b26 # v4.1.0
+        uses: actions/attest@a1948c3f048ba23858d222213b7c278aabede763 # v4.1.1
         with:
           subject-path: |
             ./*.zip
@@ -125,37 +125,37 @@ jobs:
             ./checksums.txt
 
       - name: Attest bin-alpine-x64
-        uses: actions/attest@59d89421af93a897026c735860bf21b6eb4f7b26 # v4.1.0
+        uses: actions/attest@a1948c3f048ba23858d222213b7c278aabede763 # v4.1.1
         with:
           subject-path: ./bin-alpine-x64/**/*
 
       - name: Attest bin-alpine-arm64
-        uses: actions/attest@59d89421af93a897026c735860bf21b6eb4f7b26 # v4.1.0
+        uses: actions/attest@a1948c3f048ba23858d222213b7c278aabede763 # v4.1.1
         with:
           subject-path: ./bin-alpine-arm64/**/*
 
       - name: Attest bin-ubuntu-22.04
-        uses: actions/attest@59d89421af93a897026c735860bf21b6eb4f7b26 # v4.1.0
+        uses: actions/attest@a1948c3f048ba23858d222213b7c278aabede763 # v4.1.1
         with:
           subject-path: ./bin-ubuntu-22.04/**/*
 
       - name: Attest bin-ubuntu-22.04-arm
-        uses: actions/attest@59d89421af93a897026c735860bf21b6eb4f7b26 # v4.1.0
+        uses: actions/attest@a1948c3f048ba23858d222213b7c278aabede763 # v4.1.1
         with:
           subject-path: ./bin-ubuntu-22.04-arm/**/*
 
       - name: Attest bin-windows-2022
-        uses: actions/attest@59d89421af93a897026c735860bf21b6eb4f7b26 # v4.1.0
+        uses: actions/attest@a1948c3f048ba23858d222213b7c278aabede763 # v4.1.1
         with:
           subject-path: ./bin-windows-2022/**/*
 
       - name: Attest bin-macos-14
-        uses: actions/attest@59d89421af93a897026c735860bf21b6eb4f7b26 # v4.1.0
+        uses: actions/attest@a1948c3f048ba23858d222213b7c278aabede763 # v4.1.1
         with:
           subject-path: ./bin-macos-14/**/*
 
       - name: Attest bin-nuget-packages
-        uses: actions/attest@59d89421af93a897026c735860bf21b6eb4f7b26 # v4.1.0
+        uses: actions/attest@a1948c3f048ba23858d222213b7c278aabede763 # v4.1.1
         with:
           subject-path: ./bin-nuget-packages/**/*
 
