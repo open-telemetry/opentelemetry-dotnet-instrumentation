@@ -200,6 +200,55 @@ jobs:
           name: bin-${{ matrix.artifact-name }}
           path: bin/tracer-home
 
+      - name: Ensure Docker is ready
+        shell: pwsh
+        timeout-minutes: 3
+        run: |
+          $service = Get-Service -Name docker -ErrorAction Stop
+          if ($service.Status -eq 'Stopped') {
+            Write-Host 'Docker service is stopped. Starting it...'
+            Start-Service -Name docker
+          }
+          elseif ($service.Status -eq 'Paused') {
+            Write-Host 'Docker service is paused. Resuming it...'
+            Resume-Service -Name docker
+          }
+          elseif ($service.Status -ne 'Running') {
+            Write-Host "Docker service is $($service.Status). Waiting for it..."
+          }
+
+          $deadline = (Get-Date).AddMinutes(2)
+          do {
+            docker info *> $null
+            if ($LASTEXITCODE -eq 0) {
+              Write-Host 'Docker daemon is ready.'
+              docker version
+              exit 0
+            }
+
+            $service.Refresh()
+            if ($service.Status -eq 'Stopped') {
+              Write-Warning 'Docker service stopped while waiting for the daemon. Starting it again...'
+              Start-Service -Name docker
+            }
+            elseif ($service.Status -eq 'Paused') {
+              Write-Warning 'Docker service paused while waiting for the daemon. Resuming it...'
+              Resume-Service -Name docker
+            }
+
+            Start-Sleep -Seconds 2
+          } while ((Get-Date) -lt $deadline)
+
+          Get-Service -Name docker | Format-List *
+          Get-Process -Name dockerd -ErrorAction SilentlyContinue | Format-List *
+          Get-PSDrive -Name C | Format-List *
+          Get-WinEvent -FilterHashtable @{ LogName = 'Application'; StartTime = (Get-Date).AddMinutes(-10) } -MaxEvents 100 -ErrorAction SilentlyContinue |
+            Where-Object ProviderName -Match 'docker' |
+            Format-List TimeCreated, ProviderName, Id, LevelDisplayName, Message
+          Get-WinEvent -LogName Microsoft-Windows-Hyper-V-Compute-Admin -MaxEvents 20 -ErrorAction SilentlyContinue |
+            Format-List TimeCreated, ProviderName, Id, LevelDisplayName, Message
+          throw 'Docker daemon did not become ready within 2 minutes.'
+
       - name: Build artifacts required for the test (no native tests)
         shell: bash
         env:
