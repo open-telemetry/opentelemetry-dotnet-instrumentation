@@ -42,6 +42,18 @@ EXTERN_C VOID STDAPICALLTYPE AddDerivedInstrumentations(WCHAR* id, trace::CallTa
     return trace::profiler->AddDerivedInstrumentations(id, items, size);
 }
 
+EXTERN_C const WCHAR* STDAPICALLTYPE GetCallTargetTrampolineIntegrationAssembly(int integrationIndex)
+{
+    return trace::profiler != nullptr ? trace::profiler->GetCallTargetTrampolineIntegrationAssembly(integrationIndex)
+                                      : nullptr;
+}
+
+EXTERN_C const WCHAR* STDAPICALLTYPE GetCallTargetTrampolineIntegrationType(int integrationIndex)
+{
+    return trace::profiler != nullptr ? trace::profiler->GetCallTargetTrampolineIntegrationType(integrationIndex)
+                                      : nullptr;
+}
+
 EXTERN_C VOID STDAPICALLTYPE SetSqlClientNetFxILRewriteEnabled(bool enabled)
 {
     return trace::SetSqlClientNetFxILRewriteEnabled(enabled);

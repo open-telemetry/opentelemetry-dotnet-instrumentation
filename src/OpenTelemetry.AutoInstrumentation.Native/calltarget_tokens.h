@@ -31,8 +31,6 @@ private:
     ModuleMetadata* module_metadata_ptr = nullptr;
 
     // CorLib tokens
-    mdAssemblyRef corLibAssemblyRef = mdAssemblyRefNil;
-    mdTypeRef objectTypeRef = mdTypeRefNil;
     mdTypeRef typeRef = mdTypeRefNil;
     mdTypeRef runtimeTypeHandleRef = mdTypeRefNil;
     mdToken getTypeFromHandleToken = mdTokenNil;
@@ -61,6 +59,9 @@ private:
                                                const TypeInfo* currentType, ILInstr** instruction);
 
 protected:
+    mdAssemblyRef corLibAssemblyRef = mdAssemblyRefNil;
+    mdTypeRef objectTypeRef = mdTypeRefNil;
+
     // The variables 'enable_by_ref_instrumentation' and 'enable_calltarget_state_by_ref' will always be true,
     // but instead of removing them and the conditional branches they affect, we will keep the variables to make
     // future upstream pulls easier.
@@ -73,7 +74,7 @@ protected:
     mdTypeRef  exTypeRef                      = mdTypeRefNil;
 
     ModuleMetadata* GetMetadata();
-    HRESULT         EnsureBaseCalltargetTokens();
+    virtual HRESULT EnsureBaseCalltargetTokens();
     mdTypeSpec      GetTargetReturnValueTypeRef(TypeSignature* returnArgument);
     mdToken         GetCurrentTypeRef(const TypeInfo* currentType, bool& isValueType);
 

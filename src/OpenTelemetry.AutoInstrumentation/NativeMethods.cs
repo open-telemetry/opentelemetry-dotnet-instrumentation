@@ -45,6 +45,20 @@ internal static class NativeMethods
         }
     }
 
+    public static IntPtr GetCallTargetTrampolineIntegrationAssembly(int integrationIndex)
+    {
+        return IsWindows ?
+            Windows.GetCallTargetTrampolineIntegrationAssembly(integrationIndex) :
+            NonWindows.GetCallTargetTrampolineIntegrationAssembly(integrationIndex);
+    }
+
+    public static IntPtr GetCallTargetTrampolineIntegrationType(int integrationIndex)
+    {
+        return IsWindows ?
+            Windows.GetCallTargetTrampolineIntegrationType(integrationIndex) :
+            NonWindows.GetCallTargetTrampolineIntegrationType(integrationIndex);
+    }
+
 #if NETFRAMEWORK
     public static void SetSqlClientNetFxILRewriteEnabled(bool enabled)
     {
@@ -212,6 +226,14 @@ internal static class NativeMethods
         [DllImport("OpenTelemetry.AutoInstrumentation.Native.dll")]
         public static extern void AddDerivedInstrumentations([MarshalAs(UnmanagedType.LPWStr)] string id, [In] NativeCallTargetDefinition[] methodArrays, int size);
 
+        [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
+        [DllImport("OpenTelemetry.AutoInstrumentation.Native.dll")]
+        public static extern IntPtr GetCallTargetTrampolineIntegrationAssembly(int integrationIndex);
+
+        [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
+        [DllImport("OpenTelemetry.AutoInstrumentation.Native.dll")]
+        public static extern IntPtr GetCallTargetTrampolineIntegrationType(int integrationIndex);
+
 #if NETFRAMEWORK
         [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
         [DllImport("OpenTelemetry.AutoInstrumentation.Native.dll")]
@@ -263,6 +285,14 @@ internal static class NativeMethods
         [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
         [DllImport("OpenTelemetry.AutoInstrumentation.Native")]
         public static extern void AddDerivedInstrumentations([MarshalAs(UnmanagedType.LPWStr)] string id, [In] NativeCallTargetDefinition[] methodArrays, int size);
+
+        [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
+        [DllImport("OpenTelemetry.AutoInstrumentation.Native")]
+        public static extern IntPtr GetCallTargetTrampolineIntegrationAssembly(int integrationIndex);
+
+        [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
+        [DllImport("OpenTelemetry.AutoInstrumentation.Native")]
+        public static extern IntPtr GetCallTargetTrampolineIntegrationType(int integrationIndex);
 
 #if NETFRAMEWORK
         [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]

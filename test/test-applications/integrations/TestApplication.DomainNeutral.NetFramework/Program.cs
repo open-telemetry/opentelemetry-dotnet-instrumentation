@@ -1,7 +1,7 @@
 // Copyright The OpenTelemetry Authors
 // SPDX-License-Identifier: Apache-2.0
 
-using System.Reflection;
+using System.Linq;
 using TestApplication.Shared;
 
 namespace TestApplication.DomainNeutral.NetFramework;
@@ -17,14 +17,19 @@ internal static class Program
         var command = new Command();
         command.Execute();
 
-        // Instrumentation assembly is expected to be already loaded from the GAC at this point.
-        var instrumentationAssembly = Assembly.Load("OpenTelemetry.AutoInstrumentation") ?? throw new InvalidOperationException("Instrumentation assembly was not loaded.");
+        // The instrumented call above should have already loaded the instrumentation assembly. Do not call
+        // Assembly.Load here, because that would test the current probing/GAC setup instead of the
+        // assembly load path used by the instrumentation.
+        var instrumentationAssemblyLoaded = AppDomain.CurrentDomain
+            .GetAssemblies()
+            .Any(assembly => string.Equals(
+                assembly.GetName().Name,
+                "OpenTelemetry.AutoInstrumentation",
+                StringComparison.Ordinal));
 
-#if NETFRAMEWORK
-        if (!instrumentationAssembly.GlobalAssemblyCache)
+        if (!instrumentationAssemblyLoaded)
         {
-            throw new InvalidOperationException("Instrumentation assembly was not loaded from the GAC");
+            throw new InvalidOperationException("Instrumentation assembly was not loaded.");
         }
-#endif
     }
 }
