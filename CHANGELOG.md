@@ -28,6 +28,8 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 ### Changed
 
 - OpAMP default port changed from 4318 to 4320.
+- [BREAKING] Plugin architecture overhaul: All plugins must now implement
+  the new API (OpenTelemetry.AutoInstrumentation.PluginApi) to function.
 
 #### Dependency updates
 

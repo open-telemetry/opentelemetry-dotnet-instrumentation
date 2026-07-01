@@ -7,6 +7,7 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Runtime.CompilerServices;
 using Google.Protobuf;
+using OpenTelemetry.AutoInstrumentation.PluginApi.ContinuousProfiling;
 using OpenTelemetry.Proto.Collector.Profiles.V1Development;
 using OpenTelemetry.Proto.Common.V1;
 using OpenTelemetry.Proto.Profiles.V1Development;
@@ -14,7 +15,7 @@ using OpenTelemetry.Proto.Resource.V1;
 
 namespace TestApplication.ContinuousProfiler;
 
-internal sealed class OtlpOverHttpExporter : IDisposable
+internal sealed class OtlpOverHttpExporter : IContinuousProfilerExporter, IDisposable
 {
     private const string MediaContentType = "application/x-protobuf";
 

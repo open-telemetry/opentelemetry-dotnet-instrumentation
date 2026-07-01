@@ -7,6 +7,8 @@
   /net/OpenTelemetry.AutoInstrumentation.AspNetCoreBootstrapper.pdb,
   /net/OpenTelemetry.AutoInstrumentation.Loader.dll,
   /net/OpenTelemetry.AutoInstrumentation.Loader.pdb,
+  /net/OpenTelemetry.AutoInstrumentation.PluginApi.dll,
+  /net/OpenTelemetry.AutoInstrumentation.PluginApi.pdb,
   /net/OpenTelemetry.AutoInstrumentation.StartupHook.dll,
   /net/OpenTelemetry.AutoInstrumentation.StartupHook.pdb,
   /net/OpenTelemetry.AutoInstrumentation.dll,
