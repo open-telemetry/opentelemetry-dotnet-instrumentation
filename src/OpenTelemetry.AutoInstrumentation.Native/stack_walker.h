@@ -39,6 +39,11 @@ public:
     virtual HRESULT CaptureStacks(const std::unordered_set<ThreadID>& threads,
                                   StackCaptureRequest*                request) = 0;
 
+    /// @brief Capture the calling thread's own stack. No suspension or native
+    /// symbol machinery is needed since the thread is already live. Used by
+    /// allocation/contention ticks that run on the thread of interest.
+    virtual HRESULT CaptureCurrentThreadStack(StackCaptureRequest* request) = 0;
+
     /// @brief Resolve a native IP to a human-readable symbol name.
     virtual HRESULT ResolveNativeSymbolName(UINT_PTR        instructionPointer,
                                             trace::WSTRING& outName) = 0;
