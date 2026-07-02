@@ -23,7 +23,7 @@ public:
     explicit StackWalkerImpl(ICorProfilerInfo2* profilerInfo,
                              RuntimeType        runtimeType)
         : capturer_(ProfilerStackCapture::CreateStackCapturer(profilerInfo, runtimeType))
-        
+        , selfWalkApi_(profilerInfo)
     {
     }
 
@@ -55,6 +55,18 @@ public:
                                     trace::WSTRING& outName) override
     {
         return capturer_ ? capturer_->ResolveNativeSymbolName(instructionPointer, outName) : E_FAIL;
+    }
+
+    HRESULT CaptureCurrentThreadStack(StackCaptureRequest* request) override
+    {
+        if (request == nullptr || !request->onFrame)
+        {
+            return E_INVALIDARG;
+        }
+        auto bridge = [request](ProfilerStackCapture::StackSnapshotCallbackContext* ctx) -> HRESULT
+        { return request->onFrame(&ctx->frame); };
+        ProfilerStackCapture::StackSnapshotCallbackContext context{bridge};
+        return selfWalkApi_.GetCurrentThreadStack(&context); // threadId 0 = current thread
     }
 
     // -- IThreadLifecycleListener (consumed by CLR callback layer) --
@@ -93,6 +105,7 @@ public:
 private:
     using IStackCapturer = ProfilerStackCapture::IStackCapturer;
     std::unique_ptr<IStackCapturer> capturer_;
+    ProfilerStackCapture::ProfilerApiAdapter selfWalkApi_;
 };
 
 } // namespace continuous_profiler

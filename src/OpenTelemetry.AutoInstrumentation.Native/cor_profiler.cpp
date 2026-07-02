@@ -10,6 +10,7 @@
 
 #include "assembly_redirection.h"
 #include "clr_helpers.h"
+#include "contention_event_payloads.h"
 #include "deployment_detection.h"
 #include "dllmain.h"
 #include "environment_variables.h"
@@ -1221,6 +1222,8 @@ bool CorProfiler::InitThreadSampler()
                                                             : RuntimeType::Unknown;
     stack_walker_impl_  = std::make_unique<continuous_profiler::StackWalkerImpl>(this->info_, runtime);
     this->continuousProfiler->SetStackWalker(stack_walker_impl_.get());
+    this->contention_monitor_ = std::make_unique<continuous_profiler::ContentionMonitor>();
+    this->continuousProfiler->SetContentionMonitor(contention_monitor_.get());
     Logger::Info("ConfigureContinuousProfiler: Events masks configured for continuous profiler");
     return true;
 }
@@ -3810,6 +3813,18 @@ HRESULT STDMETHODCALLTYPE CorProfiler::ThreadDestroyed(ThreadID threadId)
         continuousProfiler->ThreadDestroyed(threadId);
     }
 
+    if (contention_monitor_ != nullptr)
+    {
+        // Missed-Stop backstop: a waiter that died while blocked would otherwise
+        // leak its wait edge and the lock's concurrency forever. The ThreadID is
+        // still valid for the duration of this callback, so map it to the OS tid.
+        DWORD osThreadId = 0;
+        if (SUCCEEDED(this->info_->GetThreadInfo(threadId, &osThreadId)) && osThreadId != 0)
+        {
+            contention_monitor_->OnThreadDestroyed(static_cast<uint64_t>(osThreadId));
+        }
+    }
+
     if (stack_walker_impl_)
     {
         stack_walker_impl_->OnThreadDestroyed(threadId);
@@ -3840,6 +3855,24 @@ HRESULT STDMETHODCALLTYPE CorProfiler::ThreadAssignedToOSThread(ThreadID managed
     return S_OK;
 }
 
+DWORD CorProfiler::GetCurrentOsThreadId() const
+{
+    // Contention events are delivered synchronously on the contending thread, so
+    // the current managed thread IS the contender. eventThread is 0 for these
+    // events and must not be used. Map managed -> OS tid (the wait-for graph key).
+    ThreadID managedThreadId = 0;
+    if (FAILED(this->info_->GetCurrentThreadID(&managedThreadId)) || managedThreadId == 0)
+    {
+        return 0;
+    }
+    DWORD osThreadId = 0;
+    if (FAILED(this->info_->GetThreadInfo(managedThreadId, &osThreadId)))
+    {
+        return 0;
+    }
+    return osThreadId;
+}
+
 HRESULT STDMETHODCALLTYPE CorProfiler::EventPipeEventDelivered(EVENTPIPE_PROVIDER provider,
                                                                DWORD              eventId,
                                                                DWORD              eventVersion,
@@ -3856,6 +3889,33 @@ HRESULT STDMETHODCALLTYPE CorProfiler::EventPipeEventDelivered(EVENTPIPE_PROVIDE
     if (continuousProfiler != nullptr && eventId == 10 && eventVersion == 4)
     {
         continuousProfiler->AllocationTick(cbEventData, eventData);
+    }
+    else if (contention_monitor_ != nullptr && eventId == 81)
+    {
+        // ContentionStart. The runtime hands us no stack (numStackFrames == 0) and
+        // eventThread == 0; the contender is the current thread. Record the wait
+        // edge contender -> lock and the best-effort owner from the payload.
+        const auto* payload = continuous_profiler::DecodeEventPayload<
+            continuous_profiler::ContentionStartV2Payload>(reinterpret_cast<const unsigned char*>(eventData),
+                                                           static_cast<size_t>(cbEventData));
+        if (payload != nullptr)
+        {
+            contention_monitor_->OnContentionStart(GetCurrentOsThreadId(),
+                                                   static_cast<uint64_t>(payload->LockOwnerThreadId),
+                                                   static_cast<uint64_t>(payload->LockObjectId));
+        }
+    }
+    else if (contention_monitor_ != nullptr && eventId == 91)
+    {
+        // ContentionStop. Payload carries no lock id; the monitor recovers it by
+        // reverse-resolving the current OS thread id through its wait-for graph.
+        const auto* payload = continuous_profiler::DecodeEventPayload<
+            continuous_profiler::ContentionStopV1Payload>(reinterpret_cast<const unsigned char*>(eventData),
+                                                          static_cast<size_t>(cbEventData));
+        if (payload != nullptr)
+        {
+            contention_monitor_->OnContentionStop(GetCurrentOsThreadId(), payload->DurationNs);
+        }
     }
     return S_OK;
 }

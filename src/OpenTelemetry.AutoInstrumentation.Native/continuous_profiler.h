@@ -46,28 +46,42 @@ struct FunctionIdentifier
     ModuleID module_id;
     bool     is_valid;
     UINT_PTR native_ip;
+    // Nonzero marks a synthetic (profiler-generated) frame whose label is a pure function of
+    // this tag - e.g. a deadlock-cycle root keyed by the smallest OS tid. 0 for all real frames.
+    uint64_t synthetic_tag;
 
     static FunctionIdentifier Managed(mdToken token, ModuleID mod, bool valid)
     {
-        return {token, mod, valid, 0};
+        return {token, mod, valid, 0, 0};
     }
     static FunctionIdentifier Native(UINT_PTR ip)
     {
-        return {0, 0, true, ip};
+        return {0, 0, true, ip, 0};
     }
     static FunctionIdentifier ManagedInvalid()
     {
-        return {0, 0, false, 0};
+        return {0, 0, false, 0, 0};
+    }
+    // Self-describing synthetic frame: no metadata/IP resolution, its label is built from the
+    // tag at Lookup time. tag must be nonzero (0 means "not synthetic").
+    static FunctionIdentifier Synthetic(uint64_t tag)
+    {
+        return {0, 0, true, 0, tag};
     }
     bool IsNative() const
     {
-        return is_valid && function_token == 0 && native_ip != 0;
+        return is_valid && function_token == 0 && native_ip != 0 && synthetic_tag == 0;
+    }
+    bool IsSynthetic() const
+    {
+        return synthetic_tag != 0;
     }
     bool operator==(const FunctionIdentifier& p) const
     {
         if (is_valid != p.is_valid)
             return false;
-        return function_token == p.function_token && module_id == p.module_id && native_ip == p.native_ip;
+        return function_token == p.function_token && module_id == p.module_id && native_ip == p.native_ip &&
+               synthetic_tag == p.synthetic_tag;
     }
 };
 
@@ -155,7 +169,7 @@ struct std::hash<continuous_profiler::FunctionIdentifier>
 {
     std::size_t operator()(const continuous_profiler::FunctionIdentifier& k) const noexcept
     {
-        return hash_combine(k.function_token, k.module_id, k.is_valid, k.native_ip);
+        return hash_combine(k.function_token, k.module_id, k.is_valid, k.native_ip, k.synthetic_tag);
     }
 };
 
@@ -304,7 +318,10 @@ private:
     NameCache<FunctionIdentifier, trace::WSTRING*> function_name_cache_;
     NameCache<FunctionIdentifierResolveArgs, FunctionIdentifier> function_identifier_cache_;
     void GetFunctionName(FunctionIdentifier function_identifier, trace::WSTRING& result) const;
-
+    // Reusable storage for synthetic frame labels (e.g. deadlock-cycle roots). Lookup builds
+    // the label here and returns a pointer to it; safe because Lookup is only called under
+    // name_cache_lock and the caller copies the string before the next Lookup call.
+    trace::WSTRING synthetic_label_scratch_;
 };
 
 // We can get more AllocationTick events than we reasonably want to push to the cloud; this
@@ -334,6 +351,10 @@ private:
 
 enum class SamplingType : int32_t { Continuous = 1, SelectedThreads = 2 };
 
+// Owned by CorProfiler as a unique_ptr; ContinuousProfiler holds a non-owning raw pointer
+// to it (contention_monitor_ below). Forward-declared to avoid a header dependency here.
+class ContentionMonitor;
+
 class ContinuousProfiler
 {
 public:
@@ -357,6 +378,7 @@ public:
     void SetGlobalInfo12(ICorProfilerInfo12* info12);
     void SetGlobalInfo7(ICorProfilerInfo7* cor_profiler_info7);
     void                   SetStackWalker(IStackWalker* walker);
+    void          SetContentionMonitor(ContentionMonitor* monitor);
     IStackWalker* GetStackWalker() const;
     ThreadState* GetCurrentThreadState(ThreadID tid);
 
@@ -364,6 +386,11 @@ public:
     std::mutex thread_state_lock_;
     NamingHelper helper;
     std::unique_ptr<AllocationSubSampler> allocationSubSampler = nullptr;
+
+    // Non-owning handle to the Phase 1 contention/deadlock monitor. CorProfiler owns the
+    // unique_ptr and injects this raw pointer in InitThreadSampler. Driven once per
+    // continuous tick by CaptureSamples (after capture/resume). May be nullptr.
+    ContentionMonitor* contention_monitor_ = nullptr;
 
     // These cycle every sample and/or are owned externally
     ThreadSamplesBuffer* cur_cpu_writer_ = nullptr;

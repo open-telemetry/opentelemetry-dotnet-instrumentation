@@ -58,6 +58,15 @@ public:
                                COR_PRF_SNAPSHOT_DEFAULT, clientData, nullptr, 0);
     }
 
+    // Self-walk of the calling thread. Passing threadId 0 to DoStackSnapshot means
+    // "current thread", so no suspension and no native symbol machinery is needed.
+    // This is the cheap path for allocation/contention ticks that already run on
+    // the thread of interest.
+    HRESULT GetCurrentThreadStack(StackSnapshotCallbackContext* clientData)
+    {
+        return DoStackSnapshotUnseeded(0, clientData);
+    }
+
     virtual HRESULT GetThreadInfo(ThreadID managedThreadId, DWORD* osThreadId) = 0;
     virtual HRESULT GetFunctionFromIP(LPCBYTE ip, FunctionID* pFunctionId)     = 0;
     virtual HRESULT SuspendRuntime()  { return E_NOTIMPL; }

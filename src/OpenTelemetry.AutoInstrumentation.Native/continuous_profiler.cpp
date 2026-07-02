@@ -4,6 +4,7 @@
 // We want to use std::min, not the windows.h macro
 #define NOMINMAX
 #include "continuous_profiler.h"
+#include "contention_monitor.h"
 #include "stack_capture_types.h"
 #include "logger.h"
 #include <chrono>
@@ -289,7 +290,7 @@ constexpr auto kSelectedThreadsEndBatch   = 0x0B;
 
 constexpr auto kCurrentThreadSamplesBufferVersion = 1;
 
-constexpr FunctionIdentifier DefaultFunctionIdentifier = {0, 0, false};
+constexpr FunctionIdentifier DefaultFunctionIdentifier = {0, 0, false, 0, 0};
 
 ThreadSamplesBuffer::ThreadSamplesBuffer(std::vector<unsigned char>* buf) : buffer_(buf) {}
 ThreadSamplesBuffer::~ThreadSamplesBuffer()
@@ -545,7 +546,7 @@ void NamingHelper::ClearFunctionIdentifierCache()
 {
     if (func_id == 0)
     {
-        constexpr auto zero_valid_function_identifier = FunctionIdentifier{0, 0, true};
+        constexpr auto zero_valid_function_identifier = FunctionIdentifier{0, 0, true, 0, 0};
         return zero_valid_function_identifier;
     }
     ModuleID      module_id      = 0;
@@ -687,6 +688,19 @@ void NamingHelper::GetFunctionName(FunctionIdentifier function_identifier, trace
 
 trace::WSTRING* NamingHelper::Lookup(const FunctionIdentifier& function_identifier, SamplingStatistics& stats)
 {
+    // Synthetic frames (e.g. deadlock-cycle roots) are self-describing: the label is a pure
+    // function of synthetic_tag, so build it on the fly and never touch the LRU cache. This
+    // removes the seed/evict race entirely and keeps synthetic entries from displacing real
+    // frames under LRU pressure. Returning a pointer to the reusable scratch is safe because
+    // Lookup is always called under name_cache_lock and the caller (RecordFrame) copies the
+    // string before the next Lookup overwrites it.
+    if (function_identifier.IsSynthetic())
+    {
+        synthetic_label_scratch_.assign(WStr("Contention Cycle "));
+        synthetic_label_scratch_.append(trace::ToWSTRING(function_identifier.synthetic_tag));
+        return &synthetic_label_scratch_;
+    }
+
     trace::WSTRING* answer = function_name_cache_.Get(function_identifier);
     if (answer != nullptr)
     {
@@ -960,7 +974,10 @@ static void RemoveOutdatedEntries(std::unordered_map<trace_context, long long>& 
     }
     prof->nextOutdatedEntriesScan = nextScan;
 }
-
+static void ProjectDeadlockCycles(ContinuousProfiler*                                            prof,
+                                  ICorProfilerInfo7*                                             info7,
+                                  const std::vector<std::vector<uint64_t>>&                      cycles,
+                                  std::unordered_map<ThreadID, std::vector<FunctionIdentifier>>& threadStacksBuffer);
 // The implementation will suspend CLR for
 // .net and use thread suspension for netfx
 static void CaptureSamples(ContinuousProfiler*                                            prof,
@@ -1064,13 +1081,101 @@ static void CaptureSamples(ContinuousProfiler*                                  
 
     prof->stats_.num_threads = static_cast<int>(nonEmptyCount);
 
+    // Drive the contention/deadlock monitor from the continuous tick. This runs
+    // strictly AFTER capture/resume (threads are live again), so the monitor lock is never
+    // taken inside the CLR-suspended window - preserving the Phase 1 decoupling. A generous
+    // idle is safe: SweepStaleLocks never deletes a live deadlock (its concurrency stays
+    // >= 2), so a large idle only delays resolved-lock cleanup.
+    if (prof->contention_monitor_ != nullptr)
+    {
+        constexpr auto kContentionMaxIdle = std::chrono::minutes(1);
+        auto           cycles             = prof->contention_monitor_->OnSamplerTick(kContentionMaxIdle);
+        if (!cycles.empty())
+        {
+            ProjectDeadlockCycles(prof, info7, cycles, threadStacksBuffer);
+        }
+    }
+
     if (samplingType == SamplingType::Continuous)
     {
+
         ResolveSymbolsAndPublishBufferForAllThreads(prof, threadStacksBuffer);
     }
     else if (samplingType == SamplingType::SelectedThreads)
     {
         ResolveSymbolsAndPublishBufferForSelectedThreads(prof, threadStacksBuffer);
+    }
+}
+
+// Phase 2: render each detected deadlock cycle as a synthetic shared root frame so the pprof
+// exporter clubs every participant thread under one node that announces the cycle.
+//
+// Frame-order convention (verified end to end): capture pushes frames leaf-first
+// (front = tip, back = thread entry), the managed reader preserves that order, and the pprof
+// exporter emits location_id[0] = leaf. So the LAST vector element is the call-tree root.
+// Appending ONE identical synthetic frame via push_back therefore makes it the shared root
+// for every participant -> a single grouping node.
+//
+// Runs under name_cache_lock (already held by CaptureSamples).
+static void ProjectDeadlockCycles(ContinuousProfiler*                                            prof,
+                                  ICorProfilerInfo7*                                             info7,
+                                  const std::vector<std::vector<uint64_t>>&                      cycles,
+                                  std::unordered_map<ThreadID, std::vector<FunctionIdentifier>>& threadStacksBuffer)
+{
+    // Lazy inverse map osTid -> managed ThreadID, built only now that a deadlock exists (zero
+    // overhead on the common no-deadlock tick). Threads not captured this tick are naturally
+    // absent from threadStacksBuffer, which implements skip-and-root for free.
+    std::unordered_map<uint64_t, ThreadID> os_to_managed;
+    os_to_managed.reserve(threadStacksBuffer.size());
+    for (const auto& [managedId, stack] : threadStacksBuffer)
+    {
+        // Only threads actually captured THIS tick (non-empty vector) are projection targets.
+        // threadStacksBuffer retains an empty key for every known managed thread (seeded by
+        // ReserveCapacity), and the SelectedThreads path fills only the selected subset. Keying
+        // on presence-as-key would root a live-but-uncaptured thread onto an empty vector,
+        // emitting a bogus single-frame "Contention Cycle" sample and, on the selected path,
+        // leaking a non-selected thread into the selected output. Skipping empties is the
+        // correct skip-and-root: absent target -> skip that participant, still root the rest.
+        if (stack.empty())
+        {
+            continue;
+        }
+        DWORD osThreadId = 0;
+        if (info7->GetThreadInfo(managedId, &osThreadId) == S_OK && osThreadId != 0)
+        {
+            os_to_managed.emplace(static_cast<uint64_t>(osThreadId), managedId);
+        }
+    }
+
+    for (const auto& cycle : cycles)
+    {
+        if (cycle.empty())
+        {
+            continue;
+        }
+
+        // Smallest OS tid names the cycle deterministically and stably across ticks, so the
+        // synthetic node aggregates instead of fragmenting.
+        const uint64_t min_tid = *std::min_element(cycle.begin(), cycle.end());
+
+        // Self-describing synthetic frame: identical for every participant (keyed purely by
+        // min_tid) so pprof clubs them under one node, and stable across ticks so it aggregates.
+        // No cache pre-seed and no aliasing risk against real native IPs - synthetic_tag makes
+        // it distinct in operator== and the hash, and Lookup builds the
+        // "Contention Cycle {min_tid}" label from the tag alone.
+        const auto synthetic_id = FunctionIdentifier::Synthetic(min_tid);
+
+        // Append the shared synthetic root to every present participant. Missing participants
+        // (not captured this tick) are skipped; the rest are still rooted together.
+        for (const uint64_t os_tid : cycle)
+        {
+            const auto it = os_to_managed.find(os_tid);
+            if (it == os_to_managed.end())
+            {
+                continue; // skip-and-root: thread not captured this tick
+            }
+            threadStacksBuffer[it->second].push_back(synthetic_id);
+        }
     }
 }
 
@@ -1143,6 +1248,7 @@ static void SamplingThreadMain(ContinuousProfiler* prof)
             std::unique_lock<std::mutex> lock(prof->shutdown_mutex_);
             if (prof->shutdown_cv_.wait_for(lock, std::chrono::milliseconds(sleepTime),
                                             [prof] { return prof->IsShutdownRequested(); }))
+
             {
                 return; // Shutdown signaled
             }
@@ -1201,6 +1307,11 @@ void ContinuousProfiler::SetStackWalker(IStackWalker* walker)
     helper.stackWalker_ = walker;
 }
 
+void ContinuousProfiler::SetContentionMonitor(ContentionMonitor* monitor)
+{
+    contention_monitor_ = monitor;
+}
+
 IStackWalker* ContinuousProfiler::GetStackWalker() const
 {
     return stackWalker_;
@@ -1252,11 +1363,10 @@ ThreadState* ContinuousProfiler::GetCurrentThreadState(ThreadID tid)
 }
 
 // You can read about the ETW event format for AllocationTick at
-// https://docs.microsoft.com/en-us/dotnet/framework/performance/garbage-collection-etw-events#gcallocationtick_v3-event
+// https://docs.microsoft.com/en-us/dotnet/framework/performance/garbage-collection-etw-events#gcallocationtick_v3
 // or, if that is not working, a search for "GCAllocationTick ETW" will get you there.
 // As of this comment, the above link only documents v3 of the event, with v4 undocumented but
 // by source traversal differs only by the addition of the actual size of the just-allocated object
-// Do not be fooled by "AllocationAmount" which is set to the 100kb sampling limit.
 
 // https://github.com/dotnet/runtime/blob/cdb6e1d5f9075214c8a58ca75d5314b5dc64daed/src/coreclr/vm/ClrEtwAll.man#L1157
 
@@ -1276,12 +1386,23 @@ constexpr auto AllocationTickV4SizeWithoutTypeName    = 4 + 4 + 2 + 8 + EtwPoint
 
 static void CaptureAllocationStack(ContinuousProfiler* prof, std::vector<FunctionIdentifier>& threadStack)
 {
-    DoStackSnapshotParams doStackSnapshotParams(prof, &threadStack);
-    HRESULT               hr = prof->info7->DoStackSnapshot((ThreadID)NULL, &HandleStackFrame, COR_PRF_SNAPSHOT_DEFAULT,
-                                                            &doStackSnapshotParams, nullptr, 0);
-    if (FAILED(hr))
+    if (auto stackWalker = prof->GetStackWalker())
     {
-        trace::Logger::Debug("DoStackSnapshot failed. HRESULT=0x", std::setfill('0'), std::setw(8), std::hex, hr);
+        DoStackSnapshotParams params{prof, &threadStack};
+        auto                  frameProcessor = [&params](continuous_profiler::CapturedFrame* frame) -> HRESULT
+        {
+            if (frame->isUnmanagedFrame && frame->functionId == 0 && frame->instructionPointer != 0)
+            {
+                params.prof->stats_.total_frames++;
+                params.buffer->push_back(FunctionIdentifier::Native(frame->instructionPointer));
+                return S_OK;
+            }
+            return HandleStackFrame(frame->functionId, frame->instructionPointer, frame->frameInfo, frame->contextSize,
+                                    frame->context, &params);
+        };
+        continuous_profiler::StackCaptureRequest request{frameProcessor};
+        stackWalker->CaptureCurrentThreadStack(&request);
+        return;
     }
 }
 
@@ -1449,14 +1570,35 @@ void ContinuousProfiler::StartAllocationSampling(const unsigned int maxMemorySam
     }
     this->allocationSubSampler = std::make_unique<AllocationSubSampler>(maxMemorySamplesPerMinute, 60);
 
-    COR_PRF_EVENTPIPE_PROVIDER_CONFIG sessionConfig[] = {{WStr("Microsoft-Windows-DotNETRuntime"),
-                                                          0x1, // CLR_GC_KEYWORD
-                                                          // documentation says AllocationTick is at info but it lies
-                                                          COR_PRF_EVENTPIPE_VERBOSE, nullptr}};
-    HRESULT                           hr = this->info12->EventPipeStartSession(1, sessionConfig, false, &session_);
+    // COR_PRF_EVENTPIPE_PROVIDER_CONFIG sessionConfig[] = {{WStr("Microsoft-Windows-DotNETRuntime"),
+    //                                                       0x1 | 0x4000, // CLR_GC_KEYWORD | CONTENTION_KEYWORD
+    //                                                       // documentation says AllocationTick is at info but it lies
+    //                                                       COR_PRF_EVENTPIPE_VERBOSE, nullptr}};
+    // HRESULT                           hr = this->info12->EventPipeStartSession(1, sessionConfig, false, &session_);
+    // if (FAILED(hr))
+    //{
+    //     trace::Logger::Error("Could not enable allocation sampling: session pipe error", hr);
+    // }
+    //   Explicitly separate configs to force stack generation rules on the runtime
+    COR_PRF_EVENTPIPE_PROVIDER_CONFIG sessionConfig[] = {// Provider 1: Contention Tracking (Must be INFORMATIONAL to
+                                                         // guarantee stacks)
+                                                         {WStr("Microsoft-Windows-DotNETRuntime"),
+                                                          0x4000,                          // CONTENTION_KEYWORD
+                                                          COR_PRF_EVENTPIPE_INFORMATIONAL, // Level 4 (Ensures stable
+                                                                                           // stack capture)
+                                                          nullptr},
+                                                         // Provider 2: Allocation & GC Tracking (VERBOSE)
+                                                         {WStr("Microsoft-Windows-DotNETRuntime"),
+                                                          0x1, // CLR_GC_KEYWORD (Allocations / Ticks)
+                                                          COR_PRF_EVENTPIPE_VERBOSE, // Level 5
+                                                          nullptr}};
+
+    // Start session with cProviderConfigs = 2 and requestStack = true
+    auto hr = this->info12->EventPipeStartSession(2, sessionConfig, true, &session_);
     if (FAILED(hr))
     {
-        trace::Logger::Error("Could not enable allocation sampling: session pipe error", hr);
+        trace::Logger::Error("Could not enable allocation sampling: session pipe error. HRESULT=0x", std::setfill('0'),
+                             std::setw(8), std::hex, hr);
     }
 
     trace::Logger::Info("ContinuousProfiler::MemoryProfiling started.");

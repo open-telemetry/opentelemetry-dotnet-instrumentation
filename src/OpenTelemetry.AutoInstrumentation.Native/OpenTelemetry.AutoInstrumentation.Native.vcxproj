@@ -191,6 +191,8 @@
     <ClInclude Include="clr_runtime_capture.h" />
     <ClInclude Include="com_ptr.h" />
     <ClInclude Include="configuration.h" />
+    <ClInclude Include="contention_event_payloads.h" />
+    <ClInclude Include="contention_monitor.h" />
     <ClInclude Include="continuous_profiler_clr_helpers.h" />
     <ClInclude Include="continuous_profiler.h" />
     <ClInclude Include="cor_profiler.h" />
@@ -248,6 +250,7 @@
     <ClCompile Include="clr_helpers.cpp" />
     <ClCompile Include="clr_runtime_capture.cpp" />
     <ClCompile Include="configuration.cpp" />
+    <ClCompile Include="contention_monitor.cpp" />
     <ClCompile Include="continuous_profiler_clr_helpers.cpp" />
     <ClCompile Include="continuous_profiler.cpp" />
     <ClCompile Include="cor_profiler_base.cpp" />

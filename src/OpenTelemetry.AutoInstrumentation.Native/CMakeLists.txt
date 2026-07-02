@@ -207,6 +207,7 @@ add_library("OpenTelemetry.AutoInstrumentation.Native.static" STATIC
         clr_helpers.cpp
         clr_runtime_capture.cpp
         configuration.cpp
+        contention_monitor.cpp
         continuous_profiler_clr_helpers.cpp
         continuous_profiler.cpp
         cor_profiler_base.cpp
