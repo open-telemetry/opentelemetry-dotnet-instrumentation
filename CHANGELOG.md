@@ -72,6 +72,8 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 
 ### Removed
 
+ - Remove support for `OTEL_EXPERIMENTAL_CONFIG_FILE`.
+
 ### Fixed
 
 - Suppress instrumentation while starting the OpAMP client to prevent internal
