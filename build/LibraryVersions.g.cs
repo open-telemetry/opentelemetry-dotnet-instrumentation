@@ -67,7 +67,7 @@ public static partial class LibraryVersion
             "TestApplication.Log4NetBridge",
             [
                 new("3.3.0"),
-                new("3.3.1"),
+                new("3.3.2"),
             ]
         },
         {
@@ -91,7 +91,7 @@ public static partial class LibraryVersion
             [
                 new("5.2.3"),
                 new("6.1.5"),
-                new("7.0.1"),
+                new("7.0.2"),
             ]
         },
         {
@@ -140,7 +140,7 @@ public static partial class LibraryVersion
                 new("8.2.6"),
                 new("9.2.10", supportedFrameworks: [ "net10.0", "net9.0", "net8.0" ]),
                 new("10.1.3", supportedFrameworks: [ "net10.0" ]),
-                new("10.2.6", supportedFrameworks: [ "net10.0" ]),
+                new("10.2.7", supportedFrameworks: [ "net10.0" ]),
             ]
         },
         {
@@ -161,7 +161,7 @@ public static partial class LibraryVersion
             "TestApplication.Quartz",
             [
                 new("3.6.0"),
-                new("3.18.1"),
+                new("3.18.2"),
             ]
         },
         {
@@ -204,7 +204,7 @@ public static partial class LibraryVersion
             [
                 new("1.8.2"),
                 new("1.9.2"),
-                new("2.14.2"),
+                new("2.15.0"),
             ]
         },
         {

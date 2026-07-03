@@ -8,7 +8,6 @@
     <TargetFrameworks Condition="'$(OS)' == 'Windows_NT'">$(TargetFrameworks);net462</TargetFrameworks>
     
     <SignAssembly>true</SignAssembly>
-    <AssemblyOriginatorKeyFile>$(MSBuildThisFileDirectory)test-keypair.snk</AssemblyOriginatorKeyFile>
 
     <!-- CA1707: Identifiers should not contain underscores. It is typical pattern for test methods. -->
     <NoWarn>$(NoWarn);CA1707</NoWarn>

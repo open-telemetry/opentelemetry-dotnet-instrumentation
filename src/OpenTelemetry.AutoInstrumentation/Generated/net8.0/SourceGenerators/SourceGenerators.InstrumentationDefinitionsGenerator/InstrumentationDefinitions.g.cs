@@ -17,7 +17,7 @@ internal static partial class InstrumentationDefinitions
 {
     private static NativeCallTargetDefinition[] GetDefinitionsArray()
     {
-        var nativeCallTargetDefinitions = new List<NativeCallTargetDefinition>(54);
+        var nativeCallTargetDefinitions = new List<NativeCallTargetDefinition>(58);
         // Traces
         var tracerSettings = Instrumentation.TracerSettings.Value;
         if (tracerSettings.TracesEnabled)
@@ -78,6 +78,15 @@ internal static partial class InstrumentationDefinitions
             if (tracerSettings.EnabledInstrumentations.Contains(TracerInstrumentation.NServiceBus))
             {
                 nativeCallTargetDefinitions.Add(new("NServiceBus.Core", "NServiceBus.EndpointConfiguration", ".ctor", ["System.Void", "System.String"], 8, 0, 0, 9, 65535, 65535, AssemblyFullName, "OpenTelemetry.AutoInstrumentation.Instrumentations.NServiceBus.EndpointConfigurationIntegration"));
+            }
+
+            // OracleMda
+            if (tracerSettings.EnabledInstrumentations.Contains(TracerInstrumentation.OracleMda))
+            {
+                nativeCallTargetDefinitions.Add(new("Oracle.ManagedDataAccess", "Oracle.ManagedDataAccess.Client.OracleConnection", ".ctor", ["System.Void"], 23, 1, 0, 23, 65535, 65535, AssemblyFullName, "OpenTelemetry.AutoInstrumentation.Instrumentations.OracleMda.Integrations.OracleConnectionConstructorIntegration"));
+                nativeCallTargetDefinitions.Add(new("Oracle.ManagedDataAccess", "Oracle.ManagedDataAccess.Client.OracleConnection", ".ctor", ["System.Void", "System.String"], 23, 1, 0, 23, 65535, 65535, AssemblyFullName, "OpenTelemetry.AutoInstrumentation.Instrumentations.OracleMda.Integrations.OracleConnectionConstructorIntegration"));
+                nativeCallTargetDefinitions.Add(new("Oracle.ManagedDataAccess", "Oracle.ManagedDataAccess.Client.OracleConnection", "Open", ["System.Void"], 23, 1, 0, 23, 65535, 65535, AssemblyFullName, "OpenTelemetry.AutoInstrumentation.Instrumentations.OracleMda.Integrations.OracleConnectionOpenIntegration"));
+                nativeCallTargetDefinitions.Add(new("Oracle.ManagedDataAccess", "Oracle.ManagedDataAccess.Client.OracleConnection", "OpenAsync", ["System.Threading.Tasks.Task", "System.Threading.CancellationToken"], 23, 1, 0, 23, 65535, 65535, AssemblyFullName, "OpenTelemetry.AutoInstrumentation.Instrumentations.OracleMda.Integrations.OracleConnectionOpenIntegration"));
             }
 
             // RabbitMq

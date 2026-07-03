@@ -620,7 +620,7 @@ public sealed class AssemblyBindingUpdaterTests : IDisposable
         var directory = new DirectoryInfo(AppContext.BaseDirectory);
         while (directory != null)
         {
-            var candidate = Path.Combine(directory.FullName, "test-keypair.snk");
+            var candidate = Path.Combine(directory.FullName, "obj", "OpenTelemetry.AutoInstrumentation.snk");
             if (File.Exists(candidate))
             {
                 return candidate;
@@ -629,7 +629,7 @@ public sealed class AssemblyBindingUpdaterTests : IDisposable
             directory = directory.Parent;
         }
 
-        throw new FileNotFoundException("test-keypair.snk not found.");
+        throw new FileNotFoundException("Generated strong-name key not found.");
     }
 
     private sealed class TestLogger : IOtelLogger
