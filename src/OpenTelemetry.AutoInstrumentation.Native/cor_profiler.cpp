@@ -1281,6 +1281,26 @@ void CorProfiler::ConfigureContinuousProfilerInternal(const ContinuousProfilerPa
         this->continuousProfiler->StartThreadSampling();
     }
 
+    // Compute the shared runtime EventPipe session keyword set. Allocation sampling needs the GC
+    // keyword (AllocationTick); contention/deadlock detection is driven from the sampler tick, so
+    // the contention events (81/91) must be subscribed whenever any sampler runs - even if
+    // allocation sampling is off. The session verbosity is derived from these keywords: GC forces
+    // Verbose (AllocationTick is really a Verbose event), otherwise Informational is sufficient.
+    uint64_t eventPipeKeywords = 0;
+    if (params.allocationSamplingEnabled)
+    {
+        eventPipeKeywords |= continuous_profiler::kClrGcKeyword;
+    }
+    if (params.threadSamplingEnabled || selectiveSamplingConfigured)
+    {
+        eventPipeKeywords |= continuous_profiler::kClrContentionKeyword;
+    }
+
+    if (eventPipeKeywords != 0)
+    {
+        this->continuousProfiler->StartRuntimeEventPipeSession(eventPipeKeywords);
+    }
+
     if (params.allocationSamplingEnabled)
     {
         this->continuousProfiler->StartAllocationSampling(params.maxMemorySamplesPerMinute);
@@ -3890,31 +3910,33 @@ HRESULT STDMETHODCALLTYPE CorProfiler::EventPipeEventDelivered(EVENTPIPE_PROVIDE
     {
         continuousProfiler->AllocationTick(cbEventData, eventData);
     }
-    else if (contention_monitor_ != nullptr && eventId == 81)
+    else if (contention_monitor_ != nullptr && eventId == 81 && eventVersion == 2)
     {
         // ContentionStart. The runtime hands us no stack (numStackFrames == 0) and
         // eventThread == 0; the contender is the current thread. Record the wait
         // edge contender -> lock and the best-effort owner from the payload.
-        const auto* payload = continuous_profiler::DecodeEventPayload<
+        continuous_profiler::ContentionStartV2Payload payload{};
+        bool                                          ok = continuous_profiler::TryDecodeEventPayload<
             continuous_profiler::ContentionStartV2Payload>(reinterpret_cast<const unsigned char*>(eventData),
-                                                           static_cast<size_t>(cbEventData));
-        if (payload != nullptr)
+                                                           static_cast<size_t>(cbEventData), payload);
+        if (ok)
         {
             contention_monitor_->OnContentionStart(GetCurrentOsThreadId(),
-                                                   static_cast<uint64_t>(payload->LockOwnerThreadId),
-                                                   static_cast<uint64_t>(payload->LockObjectId));
+                                                   static_cast<uint64_t>(payload.LockOwnerThreadId),
+                                                   static_cast<uint64_t>(payload.LockObjectId));
         }
     }
-    else if (contention_monitor_ != nullptr && eventId == 91)
+    else if (contention_monitor_ != nullptr && eventId == 91 && eventVersion == 1)
     {
         // ContentionStop. Payload carries no lock id; the monitor recovers it by
         // reverse-resolving the current OS thread id through its wait-for graph.
-        const auto* payload = continuous_profiler::DecodeEventPayload<
+        continuous_profiler::ContentionStopV1Payload payload{};
+        bool                                         ok = continuous_profiler::TryDecodeEventPayload<
             continuous_profiler::ContentionStopV1Payload>(reinterpret_cast<const unsigned char*>(eventData),
-                                                          static_cast<size_t>(cbEventData));
-        if (payload != nullptr)
+                                                          static_cast<size_t>(cbEventData), payload);
+        if (ok)
         {
-            contention_monitor_->OnContentionStop(GetCurrentOsThreadId(), payload->DurationNs);
+            contention_monitor_->OnContentionStop(GetCurrentOsThreadId(), payload.DurationNs);
         }
     }
     return S_OK;

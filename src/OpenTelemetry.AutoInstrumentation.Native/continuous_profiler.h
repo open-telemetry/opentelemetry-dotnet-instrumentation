@@ -39,6 +39,17 @@ extern "C"
 
 namespace continuous_profiler
 {
+// Discriminates which flavor of synthetic root frame a FunctionIdentifier represents.
+// Real (non-synthetic) frames use None; synthetic frames select the label template in
+// NamingHelper::Lookup. Distinct kinds keep the two rendering paths visually separated
+// (deadlocks vs. non-deadlock stalls) while sharing the same synthetic-frame mechanism.
+enum class SyntheticKind : uint8_t
+{
+    None          = 0, // real frame
+    DeadlockCycle = 1, // rendered as "Contention Cycle {tag}", tag = min OS tid in the cycle
+    StalledGroup  = 2, // rendered as "Stalled Group {tag}", tag = lock_object_id
+};
+
 struct FunctionIdentifier
 {
     // Managed frame data
@@ -47,26 +58,32 @@ struct FunctionIdentifier
     bool     is_valid;
     UINT_PTR native_ip;
     // Nonzero marks a synthetic (profiler-generated) frame whose label is a pure function of
-    // this tag - e.g. a deadlock-cycle root keyed by the smallest OS tid. 0 for all real frames.
+    // this tag - e.g. a deadlock-cycle root keyed by the smallest OS tid, or a stalled-group
+    // root keyed by lock_object_id. 0 for all real frames.
     uint64_t synthetic_tag;
+    // Selects the label template for a synthetic frame. Ignored (must be None) for real frames.
+    // Two synthetics with the same tag but different kinds are distinct in equality and hash,
+    // so a lock id that happens to numerically equal an OS tid never collides across paths.
+    SyntheticKind synthetic_kind;
 
     static FunctionIdentifier Managed(mdToken token, ModuleID mod, bool valid)
     {
-        return {token, mod, valid, 0, 0};
+        return {token, mod, valid, 0, 0, SyntheticKind::None};
     }
     static FunctionIdentifier Native(UINT_PTR ip)
     {
-        return {0, 0, true, ip, 0};
+        return {0, 0, true, ip, 0, SyntheticKind::None};
     }
     static FunctionIdentifier ManagedInvalid()
     {
-        return {0, 0, false, 0, 0};
+        return {0, 0, false, 0, 0, SyntheticKind::None};
     }
     // Self-describing synthetic frame: no metadata/IP resolution, its label is built from the
-    // tag at Lookup time. tag must be nonzero (0 means "not synthetic").
-    static FunctionIdentifier Synthetic(uint64_t tag)
+    // tag and kind at Lookup time. tag must be nonzero (0 means "not synthetic") and kind
+    // must not be None.
+    static FunctionIdentifier Synthetic(uint64_t tag, SyntheticKind kind)
     {
-        return {0, 0, true, 0, tag};
+        return {0, 0, true, 0, tag, kind};
     }
     bool IsNative() const
     {
@@ -81,7 +98,7 @@ struct FunctionIdentifier
         if (is_valid != p.is_valid)
             return false;
         return function_token == p.function_token && module_id == p.module_id && native_ip == p.native_ip &&
-               synthetic_tag == p.synthetic_tag;
+               synthetic_tag == p.synthetic_tag && synthetic_kind == p.synthetic_kind;
     }
 };
 
@@ -169,7 +186,8 @@ struct std::hash<continuous_profiler::FunctionIdentifier>
 {
     std::size_t operator()(const continuous_profiler::FunctionIdentifier& k) const noexcept
     {
-        return hash_combine(k.function_token, k.module_id, k.is_valid, k.native_ip, k.synthetic_tag);
+        return hash_combine(k.function_token, k.module_id, k.is_valid, k.native_ip, k.synthetic_tag,
+                            static_cast<uint8_t>(k.synthetic_kind));
     }
 };
 
@@ -355,6 +373,13 @@ enum class SamplingType : int32_t { Continuous = 1, SelectedThreads = 2 };
 // to it (contention_monitor_ below). Forward-declared to avoid a header dependency here.
 class ContentionMonitor;
 
+// EventPipe keyword bits for the shared "Microsoft-Windows-DotNETRuntime" session that
+// ContinuousProfiler owns. CLR_GC_KEYWORD drives AllocationTick (used by allocation sampling,
+// emitted at Verbose); CONTENTION_KEYWORD drives ContentionStart/Stop (events 81/91, used by
+// the contention/deadlock monitor, emitted at Informational).
+constexpr uint64_t kClrGcKeyword         = 0x1;
+constexpr uint64_t kClrContentionKeyword = 0x4000;
+
 class ContinuousProfiler
 {
 public:
@@ -366,8 +391,9 @@ public:
     bool                        IsShutdownRequested() const;
     static void                 InitSelectiveSamplingBuffer();
     unsigned int                maxMemorySamplesPerMinute;
+    void                        StartRuntimeEventPipeSession(uint64_t keywords);
+    void                        StopEventPipeSession();
     void                        StartAllocationSampling(unsigned int maxMemorySamplesPerMinute);
-    void                        StopAllocationSampling();
     void                        AllocationTick(ULONG dataLen, LPCBYTE data);
     ICorProfilerInfo12*         info12 = nullptr;
     ICorProfilerInfo7*          info7 = nullptr;

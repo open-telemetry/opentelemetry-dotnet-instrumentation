@@ -688,15 +688,27 @@ void NamingHelper::GetFunctionName(FunctionIdentifier function_identifier, trace
 
 trace::WSTRING* NamingHelper::Lookup(const FunctionIdentifier& function_identifier, SamplingStatistics& stats)
 {
-    // Synthetic frames (e.g. deadlock-cycle roots) are self-describing: the label is a pure
-    // function of synthetic_tag, so build it on the fly and never touch the LRU cache. This
-    // removes the seed/evict race entirely and keeps synthetic entries from displacing real
-    // frames under LRU pressure. Returning a pointer to the reusable scratch is safe because
-    // Lookup is always called under name_cache_lock and the caller (RecordFrame) copies the
-    // string before the next Lookup overwrites it.
+    // Synthetic frames (e.g. deadlock-cycle roots, stalled-group roots) are self-describing:
+    // the label is a pure function of synthetic_kind + synthetic_tag, so build it on the fly
+    // and never touch the LRU cache. This removes the seed/evict race entirely and keeps
+    // synthetic entries from displacing real frames under LRU pressure. Returning a pointer
+    // to the reusable scratch is safe because Lookup is always called under name_cache_lock
+    // and the caller (RecordFrame) copies the string before the next Lookup overwrites it.
     if (function_identifier.IsSynthetic())
     {
-        synthetic_label_scratch_.assign(WStr("Contention Cycle "));
+        switch (function_identifier.synthetic_kind)
+        {
+            case SyntheticKind::StalledGroup:
+                // Non-deadlock convoy / slow-holder-across-IO. Tag = lock_object_id, stable across
+                // ticks so the same jam aggregates under one node.
+                synthetic_label_scratch_.assign(WStr("Stalled Group "));
+                break;
+            case SyntheticKind::DeadlockCycle:
+            default:
+                // Confirmed deadlock. Tag = smallest OS tid in the cycle, stable across ticks.
+                synthetic_label_scratch_.assign(WStr("Contention Cycle "));
+                break;
+        }
         synthetic_label_scratch_.append(trace::ToWSTRING(function_identifier.synthetic_tag));
         return &synthetic_label_scratch_;
     }
@@ -974,10 +986,15 @@ static void RemoveOutdatedEntries(std::unordered_map<trace_context, long long>& 
     }
     prof->nextOutdatedEntriesScan = nextScan;
 }
+
 static void ProjectDeadlockCycles(ContinuousProfiler*                                            prof,
                                   ICorProfilerInfo7*                                             info7,
                                   const std::vector<std::vector<uint64_t>>&                      cycles,
                                   std::unordered_map<ThreadID, std::vector<FunctionIdentifier>>& threadStacksBuffer);
+static void ProjectStalledGroups(ContinuousProfiler*                                            prof,
+                                 ICorProfilerInfo7*                                             info7,
+                                 const std::vector<StalledGroup>&                               groups,
+                                 std::unordered_map<ThreadID, std::vector<FunctionIdentifier>>& threadStacksBuffer);
 // The implementation will suspend CLR for
 // .net and use thread suspension for netfx
 static void CaptureSamples(ContinuousProfiler*                                            prof,
@@ -1073,32 +1090,47 @@ static void CaptureSamples(ContinuousProfiler*                                  
                                                [](const std::pair<const ThreadID, std::vector<FunctionIdentifier>>& v)
                                                { return !v.second.empty(); });
 
-    // Return early if all the buckets are empty
-    if (nonEmptyCount == 0)
+    // Drive the contention/deadlock/stall monitor BEFORE the empty-tick early return, so
+    // stale-lock sweeping and the multi-scan deadlock persistence gate keep advancing even on
+    // ticks where no thread stacks were captured. This still runs strictly AFTER capture/resume
+    // (threads are live again), so the monitor lock is never taken inside the CLR-suspended
+    // window - preserving the Phase 1 decoupling. A generous idle is safe: SweepStaleLocks
+    // never deletes a live deadlock (its concurrency stays >= 2), so a large idle only delays
+    // resolved-lock cleanup.
+    SamplerTickResult contentionTick;
+    if (prof->contention_monitor_ != nullptr)
+    {
+        constexpr auto kContentionMaxIdle = std::chrono::minutes(1);
+        // Phase 3: min_stall is the wall-clock threshold above which a live waiter is reported
+        // as a stalled group. Hardcoded for now; config-plumb via ConfigureContinuousProfiler
+        // in a follow-up. Live-stall detection is the primary value-add in this phase.
+        constexpr auto kMinStall = std::chrono::seconds(2);
+        contentionTick           = prof->contention_monitor_->OnSamplerTick(kMinStall, kContentionMaxIdle);
+    }
+
+    // Return early only when there is nothing to publish: no captured stacks, no deadlock
+    // cycles, AND no stalled groups to project onto them.
+    if (nonEmptyCount == 0 && contentionTick.deadlock_cycles.empty() && contentionTick.stalled_groups.empty())
     {
         return;
     }
 
     prof->stats_.num_threads = static_cast<int>(nonEmptyCount);
 
-    // Drive the contention/deadlock monitor from the continuous tick. This runs
-    // strictly AFTER capture/resume (threads are live again), so the monitor lock is never
-    // taken inside the CLR-suspended window - preserving the Phase 1 decoupling. A generous
-    // idle is safe: SweepStaleLocks never deletes a live deadlock (its concurrency stays
-    // >= 2), so a large idle only delays resolved-lock cleanup.
-    if (prof->contention_monitor_ != nullptr)
+    // Both projection paths coexist. is_deadlock (set by OnSamplerTick) dedups the two:
+    // ProjectStalledGroups skips any group whose lock is rendered by the cycle path, so
+    // no thread is ever double-rooted.
+    if (!contentionTick.deadlock_cycles.empty())
     {
-        constexpr auto kContentionMaxIdle = std::chrono::minutes(1);
-        auto           cycles             = prof->contention_monitor_->OnSamplerTick(kContentionMaxIdle);
-        if (!cycles.empty())
-        {
-            ProjectDeadlockCycles(prof, info7, cycles, threadStacksBuffer);
-        }
+        ProjectDeadlockCycles(prof, info7, contentionTick.deadlock_cycles, threadStacksBuffer);
+    }
+    if (!contentionTick.stalled_groups.empty())
+    {
+        ProjectStalledGroups(prof, info7, contentionTick.stalled_groups, threadStacksBuffer);
     }
 
     if (samplingType == SamplingType::Continuous)
     {
-
         ResolveSymbolsAndPublishBufferForAllThreads(prof, threadStacksBuffer);
     }
     else if (samplingType == SamplingType::SelectedThreads)
@@ -1159,11 +1191,11 @@ static void ProjectDeadlockCycles(ContinuousProfiler*                           
         const uint64_t min_tid = *std::min_element(cycle.begin(), cycle.end());
 
         // Self-describing synthetic frame: identical for every participant (keyed purely by
-        // min_tid) so pprof clubs them under one node, and stable across ticks so it aggregates.
-        // No cache pre-seed and no aliasing risk against real native IPs - synthetic_tag makes
-        // it distinct in operator== and the hash, and Lookup builds the
-        // "Contention Cycle {min_tid}" label from the tag alone.
-        const auto synthetic_id = FunctionIdentifier::Synthetic(min_tid);
+        // min_tid + DeadlockCycle kind) so pprof clubs them under one node, and stable across
+        // ticks so it aggregates. No cache pre-seed and no aliasing risk against real native
+        // IPs or against StalledGroup synthetics - kind + tag make it distinct in operator==
+        // and the hash, and Lookup builds the "Contention Cycle {min_tid}" label from them.
+        const auto synthetic_id = FunctionIdentifier::Synthetic(min_tid, SyntheticKind::DeadlockCycle);
 
         // Append the shared synthetic root to every present participant. Missing participants
         // (not captured this tick) are skipped; the rest are still rooted together.
@@ -1173,6 +1205,81 @@ static void ProjectDeadlockCycles(ContinuousProfiler*                           
             if (it == os_to_managed.end())
             {
                 continue; // skip-and-root: thread not captured this tick
+            }
+            threadStacksBuffer[it->second].push_back(synthetic_id);
+        }
+    }
+}
+
+// Phase 3: render each stalled group as a synthetic shared root frame keyed by lock_object_id,
+// mirroring ProjectDeadlockCycles' technique. Groups with is_deadlock == true are SKIPPED here:
+// the deadlock path already rendered them under "Contention Cycle", so this dedup prevents
+// double-rooting the same threads. Non-deadlock stalls (convoy, slow-holder-across-IO) render
+// as "Stalled Group {lock_object_id}" via the SyntheticKind::StalledGroup branch in
+// NamingHelper::Lookup.
+//
+// Frame-order convention (verified end to end): capture pushes frames leaf-first
+// (front = tip, back = thread entry), the managed reader preserves that order, and the pprof
+// exporter emits location_id[0] = leaf. So the LAST vector element is the call-tree root.
+// Appending ONE identical synthetic frame via push_back therefore makes it the shared root
+// for every waiter -> a single grouping node.
+//
+// Runs under name_cache_lock (already held by CaptureSamples).
+static void ProjectStalledGroups(ContinuousProfiler*                                            prof,
+                                 ICorProfilerInfo7*                                             info7,
+                                 const std::vector<StalledGroup>&                               groups,
+                                 std::unordered_map<ThreadID, std::vector<FunctionIdentifier>>& threadStacksBuffer)
+{
+    (void)prof; // reserved for future stats/logging; matches ProjectDeadlockCycles' signature
+
+    // Lazy inverse map osTid -> managed ThreadID, built only now that at least one stall exists
+    // (zero overhead on the common no-stall tick). Threads not captured this tick are naturally
+    // absent from threadStacksBuffer, which implements skip-and-root for free.
+    std::unordered_map<uint64_t, ThreadID> os_to_managed;
+    os_to_managed.reserve(threadStacksBuffer.size());
+    for (const auto& [managedId, stack] : threadStacksBuffer)
+    {
+        // Only threads actually captured THIS tick (non-empty vector) are projection targets.
+        // See ProjectDeadlockCycles for the full rationale (skip-and-root; avoids bogus
+        // single-frame samples and leaks into the SelectedThreads path).
+        if (stack.empty())
+        {
+            continue;
+        }
+        DWORD osThreadId = 0;
+        if (info7->GetThreadInfo(managedId, &osThreadId) == S_OK && osThreadId != 0)
+        {
+            os_to_managed.emplace(static_cast<uint64_t>(osThreadId), managedId);
+        }
+    }
+
+    for (const auto& group : groups)
+    {
+        // Dedup vs. the cycle path. A lock participating in a confirmed deadlock is rendered
+        // ONLY by ProjectDeadlockCycles as "Contention Cycle"; skipping it here guarantees
+        // the same threads are never double-rooted.
+        if (group.is_deadlock)
+        {
+            continue;
+        }
+        if (group.waiters.empty())
+        {
+            continue;
+        }
+
+        // Key the synthetic frame by lock_object_id: stable across ticks so the same jam
+        // aggregates under one node, and distinct from the DeadlockCycle kind so identical
+        // numeric tags across paths never collide.
+        const auto synthetic_id = FunctionIdentifier::Synthetic(group.lock_object_id, SyntheticKind::StalledGroup);
+
+        // Append the shared synthetic root to every present waiter. Missing waiters (not
+        // captured this tick) are skipped; the rest are still rooted together.
+        for (const auto& waiter : group.waiters)
+        {
+            const auto it = os_to_managed.find(waiter.os_tid);
+            if (it == os_to_managed.end())
+            {
+                continue; // skip-and-root: waiter not captured this tick
             }
             threadStacksBuffer[it->second].push_back(synthetic_id);
         }
@@ -1334,7 +1441,7 @@ void ContinuousProfiler::Shutdown()
     shutdown_cv_.notify_all();
     {
         std::unique_lock<std::shared_mutex> unique_lock(profiling_lock);
-        StopAllocationSampling();
+        StopEventPipeSession();
     }
 
     if (thread_sampling_thread_ != nullptr && thread_sampling_thread_->joinable())
@@ -1561,6 +1668,45 @@ void ContinuousProfiler::AllocationTick(ULONG dataLen, LPCBYTE data)
     AllocationSamplingAppendToBuffer(static_cast<int32_t>(localBytes.size()), localBytes.data());
 }
 
+void ContinuousProfiler::StartRuntimeEventPipeSession(const uint64_t keywords)
+{
+    if (!info12) // no info12 - we are on .Net Fx - EventPipe sessions are unavailable
+    {
+        trace::Logger::Warn("Ignore EventPipe session request, it is not supported for .Net Framework applications");
+        return;
+    }
+    if (keywords == 0)
+    {
+        return;
+    }
+    if (session_ != 0)
+    {
+        // A single shared session backs both allocation and contention features; if one is
+        // already running, keep its existing keyword subscription.
+        return;
+    }
+
+    // AllocationTick (CLR_GC_KEYWORD) is documented as Informational but is actually emitted at
+    // Verbose, so any GC-keyword session must run Verbose. Contention-only sessions (events 81/91)
+    // are Informational, so keep the level as low as the keyword set allows to reduce event volume.
+    const uint32_t loggingLevel =
+        (keywords & kClrGcKeyword) ? COR_PRF_EVENTPIPE_VERBOSE : COR_PRF_EVENTPIPE_INFORMATIONAL;
+
+    COR_PRF_EVENTPIPE_PROVIDER_CONFIG sessionConfig[] = {
+        {WStr("Microsoft-Windows-DotNETRuntime"), keywords, loggingLevel, nullptr}};
+
+    const HRESULT hr = this->info12->EventPipeStartSession(1, sessionConfig, false, &session_);
+    if (FAILED(hr))
+    {
+        trace::Logger::Error("Could not start runtime EventPipe session: session pipe error. HRESULT=0x",
+                             std::setfill('0'), std::setw(8), std::hex, hr);
+        session_ = 0;
+        return;
+    }
+
+    trace::Logger::Info("ContinuousProfiler runtime EventPipe session started.");
+}
+
 void ContinuousProfiler::StartAllocationSampling(const unsigned int maxMemorySamplesPerMinute)
 {
     if (!info12) // no info12 - we are on .Net Fx - ignore allocation sampling request
@@ -1570,43 +1716,12 @@ void ContinuousProfiler::StartAllocationSampling(const unsigned int maxMemorySam
     }
     this->allocationSubSampler = std::make_unique<AllocationSubSampler>(maxMemorySamplesPerMinute, 60);
 
-    // COR_PRF_EVENTPIPE_PROVIDER_CONFIG sessionConfig[] = {{WStr("Microsoft-Windows-DotNETRuntime"),
-    //                                                       0x1 | 0x4000, // CLR_GC_KEYWORD | CONTENTION_KEYWORD
-    //                                                       // documentation says AllocationTick is at info but it lies
-    //                                                       COR_PRF_EVENTPIPE_VERBOSE, nullptr}};
-    // HRESULT                           hr = this->info12->EventPipeStartSession(1, sessionConfig, false, &session_);
-    // if (FAILED(hr))
-    //{
-    //     trace::Logger::Error("Could not enable allocation sampling: session pipe error", hr);
-    // }
-    //   Explicitly separate configs to force stack generation rules on the runtime
-    COR_PRF_EVENTPIPE_PROVIDER_CONFIG sessionConfig[] = {// Provider 1: Contention Tracking (Must be INFORMATIONAL to
-                                                         // guarantee stacks)
-                                                         {WStr("Microsoft-Windows-DotNETRuntime"),
-                                                          0x4000,                          // CONTENTION_KEYWORD
-                                                          COR_PRF_EVENTPIPE_INFORMATIONAL, // Level 4 (Ensures stable
-                                                                                           // stack capture)
-                                                          nullptr},
-                                                         // Provider 2: Allocation & GC Tracking (VERBOSE)
-                                                         {WStr("Microsoft-Windows-DotNETRuntime"),
-                                                          0x1, // CLR_GC_KEYWORD (Allocations / Ticks)
-                                                          COR_PRF_EVENTPIPE_VERBOSE, // Level 5
-                                                          nullptr}};
-
-    // Start session with cProviderConfigs = 2 and requestStack = true
-    auto hr = this->info12->EventPipeStartSession(2, sessionConfig, true, &session_);
-    if (FAILED(hr))
-    {
-        trace::Logger::Error("Could not enable allocation sampling: session pipe error. HRESULT=0x", std::setfill('0'),
-                             std::setw(8), std::hex, hr);
-    }
-
     trace::Logger::Info("ContinuousProfiler::MemoryProfiling started.");
 }
 
-void ContinuousProfiler::StopAllocationSampling()
+void ContinuousProfiler::StopEventPipeSession()
 {
-    if (!info12) // no info12 - we are on .Net Fx - ignore allocation sampling stop request
+    if (!info12) // no info12 - we are on .Net Fx - no EventPipe session to stop
     {
         return;
     }
@@ -1618,12 +1733,12 @@ void ContinuousProfiler::StopAllocationSampling()
     HRESULT hr = this->info12->EventPipeStopSession(session_);
     if (FAILED(hr))
     {
-        trace::Logger::Error("Could not disable allocation sampling: session pipe error. HRESULT=0x", std::setfill('0'),
-                             std::setw(8), std::hex, hr);
+        trace::Logger::Error("Could not stop runtime EventPipe session: session pipe error. HRESULT=0x",
+                             std::setfill('0'), std::setw(8), std::hex, hr);
     }
     session_ = 0;
 
-    trace::Logger::Info("ContinuousProfiler allocation sampling session stopped.");
+    trace::Logger::Info("ContinuousProfiler runtime EventPipe session stopped.");
 }
 
 void ContinuousProfiler::ThreadCreated(ThreadID thread_id)

@@ -35,13 +35,14 @@ void ContentionMonitor::OnContentionStart(uint64_t contender_os_tid, uint64_t ow
     const auto prior                        = waits_for_.find(contender_os_tid);
     if (prior != waits_for_.end())
     {
-        if (prior->second == lock_object_id)
+        if (prior->second.lock_object_id == lock_object_id)
         {
             already_waiting_on_this_lock = true; // duplicate Start; do not double-count
         }
         else
         {
-            const auto old_lock = locks_.find(prior->second);
+            // no more waiting on the old lock: decrement its concurrency and retire the edge.
+            const auto old_lock = locks_.find(prior->second.lock_object_id);
             if (old_lock != locks_.end() && old_lock->second.concurrency > 0)
             {
                 old_lock->second.concurrency--;
@@ -50,7 +51,22 @@ void ContentionMonitor::OnContentionStart(uint64_t contender_os_tid, uint64_t ow
         }
     }
 
-    waits_for_[contender_os_tid] = lock_object_id;
+    // Phase 3: Capture per-waiter wait_start. CRITICAL: if already_waiting_on_this_lock,
+    // do NOT reset wait_start - that would erase a real long stall. Set wait_start ONLY
+    // when the edge is newly created OR changes to a different lock.
+    WaitEdge edge;
+    edge.lock_object_id = lock_object_id;
+    if (already_waiting_on_this_lock)
+    {
+        // Preserve existing wait_start to honor the original stall clock.
+        edge.wait_start = prior->second.wait_start;
+    }
+    else
+    {
+        // New edge or changed lock: start the stall clock now.
+        edge.wait_start = now;
+    }
+    waits_for_[contender_os_tid] = edge;
 
     const auto it = locks_.find(lock_object_id);
     if (it == locks_.end())
@@ -99,7 +115,7 @@ void ContentionMonitor::OnContentionStop(uint64_t contender_os_tid, double durat
         return;
     }
 
-    const uint64_t lock_object_id = edge->second;
+    const uint64_t lock_object_id = edge->second.lock_object_id;
     waits_for_.erase(edge); // single erase: the contender is no longer waiting
 
     const auto it = locks_.find(lock_object_id);
@@ -120,6 +136,7 @@ void ContentionMonitor::OnContentionStop(uint64_t contender_os_tid, double durat
         // COMPLETED episodes). It is intentionally a different quantity from the
         // tick-accumulated "observed stuck time" a periodic driver may add later.
         it->second.accumulated_duration_ns += duration_ns;
+        // TODO Phase 3+: if duration_ns >= min_stall, bump a completed-stall counter
 
         it->second.last_mutation = now;
     }
@@ -146,7 +163,7 @@ void ContentionMonitor::OnThreadDestroyed(uint64_t os_tid)
         return;
     }
 
-    const uint64_t lock_object_id = edge->second;
+    const uint64_t lock_object_id = edge->second.lock_object_id;
     waits_for_.erase(edge);
 
     const auto it = locks_.find(lock_object_id);
@@ -160,32 +177,57 @@ void ContentionMonitor::OnThreadDestroyed(uint64_t os_tid)
     }
 }
 
-std::vector<ContentionGroup> ContentionMonitor::SnapshotGroups()
+std::vector<StalledGroup> ContentionMonitor::SnapshotStalledGroups(std::chrono::steady_clock::duration min_stall)
 {
     std::lock_guard<std::mutex> guard(graph_lock_);
+    const auto                  now = std::chrono::steady_clock::now();
 
-    // One pass over waits_for_ bucketing contender OS tids by the lock they wait
-    // on. This materializes, on demand, the inverse index we deliberately do not
-    // store as state.
-    std::unordered_map<uint64_t, std::vector<uint64_t>> by_lock;
-    for (const auto& [contender_os_tid, lock_object_id] : waits_for_)
+    // One pass over waits_for_ bucketing by lock_object_id. Per waiter: compute
+    // observed = now - wait_start; keep the group iff max_observed >= min_stall.
+    // Compare in the duration domain (avoid float compares); store observed_wait_ns
+    // and max_observed_wait_ns as double ns for reporting.
+    std::unordered_map<uint64_t, std::vector<StalledWaiter>>          by_lock;
+    std::unordered_map<uint64_t, std::chrono::steady_clock::duration> max_observed_by_lock;
+
+    for (const auto& [waiter_os_tid, edge] : waits_for_)
     {
-        by_lock[lock_object_id].push_back(contender_os_tid);
+        const auto observed_duration = now - edge.wait_start;
+        if (observed_duration >= min_stall)
+        {
+            StalledWaiter sw;
+            sw.os_tid = waiter_os_tid;
+            sw.observed_wait_ns =
+                static_cast<double>(std::chrono::duration_cast<std::chrono::nanoseconds>(observed_duration).count());
+
+            by_lock[edge.lock_object_id].push_back(sw);
+
+            // Track max observed duration for this lock (in duration domain).
+            auto& current_max = max_observed_by_lock[edge.lock_object_id];
+            if (observed_duration > current_max)
+            {
+                current_max = observed_duration;
+            }
+        }
     }
 
-    std::vector<ContentionGroup> groups;
+    // Build StalledGroups from the bucketed waiters, joining owner_os_tid and
+    // accumulated_completed_ns from locks_. Leave is_deadlock at default (false);
+    // OnSamplerTick will set it via cross-ref with confirmed cycles.
+    std::vector<StalledGroup> groups;
     groups.reserve(by_lock.size());
-    for (auto& [lock_object_id, contenders] : by_lock)
+    for (auto& [lock_object_id, waiters] : by_lock)
     {
-        ContentionGroup group;
-        group.lock_object_id    = lock_object_id;
-        group.contender_os_tids = std::move(contenders);
+        StalledGroup group;
+        group.lock_object_id       = lock_object_id;
+        group.waiters              = std::move(waiters);
+        group.max_observed_wait_ns = static_cast<double>(
+            std::chrono::duration_cast<std::chrono::nanoseconds>(max_observed_by_lock[lock_object_id]).count());
 
         const auto it = locks_.find(lock_object_id);
         if (it != locks_.end())
         {
-            group.owner_os_tid            = it->second.owner_os_tid;
-            group.accumulated_duration_ns = it->second.accumulated_duration_ns;
+            group.owner_os_tid             = it->second.owner_os_tid;
+            group.accumulated_completed_ns = it->second.accumulated_duration_ns;
         }
 
         groups.push_back(std::move(group));
@@ -237,7 +279,7 @@ std::vector<std::vector<uint64_t>> ContentionMonitor::DetectDeadlocks()
         {
             return false; // not waiting -> chain ends
         }
-        const auto lit = locks_.find(wit->second);
+        const auto lit = locks_.find(wit->second.lock_object_id);
         if (lit == locks_.end())
         {
             return false; // lock entry already swept -> chain ends
@@ -284,7 +326,7 @@ std::vector<std::vector<uint64_t>> ContentionMonitor::DetectDeadlocks()
                     const auto wit = waits_for_.find(tid);
                     if (wit != waits_for_.end())
                     {
-                        cyclic_locks.insert(wit->second);
+                        cyclic_locks.insert(wit->second.lock_object_id);
                     }
                 }
                 raw_cycles.push_back(std::move(cycle));
@@ -344,7 +386,7 @@ std::vector<std::vector<uint64_t>> ContentionMonitor::DetectDeadlocks()
                 persisted = false;
                 break;
             }
-            const auto lit = locks_.find(wit->second);
+            const auto lit = locks_.find(wit->second.lock_object_id);
             if (lit == locks_.end() || lit->second.cycle_seen_scans < kPersistenceScans)
             {
                 persisted = false;
@@ -360,12 +402,53 @@ std::vector<std::vector<uint64_t>> ContentionMonitor::DetectDeadlocks()
     return confirmed;
 }
 
-std::vector<std::vector<uint64_t>> ContentionMonitor::OnSamplerTick(std::chrono::steady_clock::duration max_idle)
+std::unordered_set<uint64_t> ContentionMonitor::LockIdsForCycles(const std::vector<std::vector<uint64_t>>& cycles)
 {
-    // Do NOT hold graph_lock_ across these calls: SweepStaleLocks and DetectDeadlocks each
-    // acquire it internally and the mutex is non-recursive, so nesting would self-deadlock.
+    std::lock_guard<std::mutex> guard(graph_lock_);
+
+    // Derive the set of lock IDs participating in confirmed deadlock cycles from
+    // the SINGLE DetectDeadlocks() result. Do NOT re-run the cycle walk here:
+    // that would double-advance the persistence gate (cycle_seen_scans) and
+    // confirm deadlocks in 1 tick instead of 2.
+    std::unordered_set<uint64_t> deadlock_locks;
+    for (const auto& cycle : cycles)
+    {
+        for (const uint64_t tid : cycle)
+        {
+            const auto wit = waits_for_.find(tid);
+            if (wit != waits_for_.end())
+            {
+                deadlock_locks.insert(wit->second.lock_object_id);
+            }
+        }
+    }
+    return deadlock_locks;
+}
+
+SamplerTickResult ContentionMonitor::OnSamplerTick(std::chrono::steady_clock::duration min_stall,
+                                                   std::chrono::steady_clock::duration max_idle)
+{
+    // Do NOT hold graph_lock_ across these calls: each callee acquires it internally
+    // and the mutex is non-recursive, so nesting would self-deadlock. Run the deadlock
+    // walk EXACTLY ONCE per tick (it mutates cycle_seen_scans); derive the deadlock-lock
+    // set from THAT result, never via a second walk (persistence-gate correctness).
+
     SweepStaleLocks(max_idle);
-    return DetectDeadlocks();
+
+    SamplerTickResult result;
+    result.deadlock_cycles = DetectDeadlocks(); // single walk; owns graph_lock_
+
+    const auto deadlock_locks = LockIdsForCycles(result.deadlock_cycles); // derive from THAT result
+    result.stalled_groups     = SnapshotStalledGroups(min_stall);         // owns graph_lock_
+
+    // Cross-reference to set is_deadlock. A lock participating in a confirmed cycle
+    // is rendered by the deadlock path; ProjectStalledGroups will skip it (dedup).
+    for (auto& group : result.stalled_groups)
+    {
+        group.is_deadlock = (deadlock_locks.count(group.lock_object_id) != 0);
+    }
+
+    return result;
 }
 
 } // namespace continuous_profiler
