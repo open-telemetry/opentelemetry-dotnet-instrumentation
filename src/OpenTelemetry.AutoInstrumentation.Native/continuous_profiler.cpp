@@ -688,28 +688,44 @@ void NamingHelper::GetFunctionName(FunctionIdentifier function_identifier, trace
 
 trace::WSTRING* NamingHelper::Lookup(const FunctionIdentifier& function_identifier, SamplingStatistics& stats)
 {
-    // Synthetic frames (e.g. deadlock-cycle roots, stalled-group roots) are self-describing:
-    // the label is a pure function of synthetic_kind + synthetic_tag, so build it on the fly
-    // and never touch the LRU cache. This removes the seed/evict race entirely and keeps
-    // synthetic entries from displacing real frames under LRU pressure. Returning a pointer
-    // to the reusable scratch is safe because Lookup is always called under name_cache_lock
-    // and the caller (RecordFrame) copies the string before the next Lookup overwrites it.
+    // Synthetic frames (deadlock-cycle roots, stalled-group roots, and role markers under a
+    // stalled group) are self-describing: the label is a pure function of synthetic_kind +
+    // synthetic_tag, so build it on the fly and never touch the LRU cache. This removes the
+    // seed/evict race entirely and keeps synthetic entries from displacing real frames under
+    // LRU pressure. Returning a pointer to the reusable scratch is safe because Lookup is only
+    // called under name_cache_lock and the caller (RecordFrame) copies the string before the
+    // next Lookup overwrites it.
     if (function_identifier.IsSynthetic())
     {
         switch (function_identifier.synthetic_kind)
         {
             case SyntheticKind::StalledGroup:
-                // Non-deadlock convoy / slow-holder-across-IO. Tag = lock_object_id, stable across
-                // ticks so the same jam aggregates under one node.
+                // Non-deadlock convoy / slow-holder-across-IO. Tag = lock_object_id, stable
+                // across ticks so the same jam aggregates under one node.
                 synthetic_label_scratch_.assign(WStr("Stalled Group "));
+                synthetic_label_scratch_.append(trace::ToWSTRING(function_identifier.synthetic_tag));
                 break;
+
+            case SyntheticKind::StalledGroupOwner:
+                // Role marker under a Stalled Group root - identifies the lock holder (the
+                // culprit whose slow work is causing the convoy stall). The parent group root
+                // already carries the lock id, so this label is intentionally lock-agnostic.
+                synthetic_label_scratch_.assign(WStr("Lock Owner"));
+                break;
+
+            case SyntheticKind::StalledGroupWaiter:
+                // Role marker under a Stalled Group root - identifies threads blocked on the
+                // lock (the victims of the convoy stall). Parent group root carries the lock id.
+                synthetic_label_scratch_.assign(WStr("Lock Waiter"));
+                break;
+
             case SyntheticKind::DeadlockCycle:
             default:
                 // Confirmed deadlock. Tag = smallest OS tid in the cycle, stable across ticks.
-                synthetic_label_scratch_.assign(WStr("Contention Cycle "));
+                synthetic_label_scratch_.assign(WStr("Deadlock Cycle "));
+                synthetic_label_scratch_.append(trace::ToWSTRING(function_identifier.synthetic_tag));
                 break;
         }
-        synthetic_label_scratch_.append(trace::ToWSTRING(function_identifier.synthetic_tag));
         return &synthetic_label_scratch_;
     }
 
@@ -1104,7 +1120,7 @@ static void CaptureSamples(ContinuousProfiler*                                  
         // Phase 3: min_stall is the wall-clock threshold above which a live waiter is reported
         // as a stalled group. Hardcoded for now; config-plumb via ConfigureContinuousProfiler
         // in a follow-up. Live-stall detection is the primary value-add in this phase.
-        constexpr auto kMinStall = std::chrono::seconds(2);
+        constexpr auto kMinStall = std::chrono::milliseconds(450);
         contentionTick           = prof->contention_monitor_->OnSamplerTick(kMinStall, kContentionMaxIdle);
     }
 
@@ -1212,17 +1228,43 @@ static void ProjectDeadlockCycles(ContinuousProfiler*                           
 }
 
 // Phase 3: render each stalled group as a synthetic shared root frame keyed by lock_object_id,
-// mirroring ProjectDeadlockCycles' technique. Groups with is_deadlock == true are SKIPPED here:
-// the deadlock path already rendered them under "Contention Cycle", so this dedup prevents
-// double-rooting the same threads. Non-deadlock stalls (convoy, slow-holder-across-IO) render
-// as "Stalled Group {lock_object_id}" via the SyntheticKind::StalledGroup branch in
-// NamingHelper::Lookup.
+// with a role-marker sub-frame distinguishing the lock owner (culprit) from the waiters
+// (victims). Groups with is_deadlock == true are SKIPPED here: the deadlock path already
+// rendered them under "Contention Cycle", so this dedup prevents double-rooting.
+//
+// Frame layout per group (all three frames share the lock_id tag so pprof clusters them):
+//   Stalled Group <lock_id>       (group root, topmost)
+//   |-- Lock Waiter               (role marker; parent of every present waiter)
+//   |     |-- (waiter T1 stack)
+//   |     |-- (waiter T2 stack)
+//   |-- Lock Owner                (role marker; parent of the holder, if captured)
+//         |-- (owner T3 stack)
 //
 // Frame-order convention (verified end to end): capture pushes frames leaf-first
 // (front = tip, back = thread entry), the managed reader preserves that order, and the pprof
-// exporter emits location_id[0] = leaf. So the LAST vector element is the call-tree root.
-// Appending ONE identical synthetic frame via push_back therefore makes it the shared root
-// for every waiter -> a single grouping node.
+// exporter emits location_id[0] = leaf. push_back = call-tree root end, so pushing the role
+// marker FIRST and the group root SECOND yields: [stack..., role, group_root] with group_root
+// as the topmost frame and the role marker sitting between it and the thread's real code.
+//
+// Runs under name_cache_lock (already held by CaptureSamples).
+// Phase 3: render each stalled group as a synthetic shared root frame keyed by lock_object_id,
+// with a role-marker sub-frame distinguishing the lock owner (culprit) from the waiters
+// (victims). Groups with is_deadlock == true are SKIPPED here: the deadlock path already
+// rendered them under "Contention Cycle", so this dedup prevents double-rooting.
+//
+// Frame layout per group (all three frames share the lock_id tag so pprof clusters them):
+//   Stalled Group <lock_id>       (group root, topmost)
+//   |-- Lock Waiter               (role marker; parent of every present waiter)
+//   |     |-- (waiter T1 stack)
+//   |     |-- (waiter T2 stack)
+//   |-- Lock Owner                (role marker; parent of the holder, if captured)
+//         |-- (owner T3 stack)
+//
+// Frame-order convention (verified end to end): capture pushes frames leaf-first
+// (front = tip, back = thread entry), the managed reader preserves that order, and the pprof
+// exporter emits location_id[0] = leaf. push_back = call-tree root end, so pushing the role
+// marker FIRST and the group root SECOND yields: [stack..., role, group_root] with group_root
+// as the topmost frame and the role marker sitting between it and the thread's real code.
 //
 // Runs under name_cache_lock (already held by CaptureSamples).
 static void ProjectStalledGroups(ContinuousProfiler*                                            prof,
@@ -1257,7 +1299,7 @@ static void ProjectStalledGroups(ContinuousProfiler*                            
     {
         // Dedup vs. the cycle path. A lock participating in a confirmed deadlock is rendered
         // ONLY by ProjectDeadlockCycles as "Contention Cycle"; skipping it here guarantees
-        // the same threads are never double-rooted.
+        // the same threads are never double-rooted across the two paths.
         if (group.is_deadlock)
         {
             continue;
@@ -1267,13 +1309,15 @@ static void ProjectStalledGroups(ContinuousProfiler*                            
             continue;
         }
 
-        // Key the synthetic frame by lock_object_id: stable across ticks so the same jam
-        // aggregates under one node, and distinct from the DeadlockCycle kind so identical
-        // numeric tags across paths never collide.
-        const auto synthetic_id = FunctionIdentifier::Synthetic(group.lock_object_id, SyntheticKind::StalledGroup);
+        // Three synthetic frames share the lock_id tag so pprof clusters them under one root.
+        // Distinct SyntheticKind values keep them distinct in operator== / hash even though
+        // they share the tag, and Lookup renders each with its own label.
+        const auto group_root  = FunctionIdentifier::Synthetic(group.lock_object_id, SyntheticKind::StalledGroup);
+        const auto waiter_role = FunctionIdentifier::Synthetic(group.lock_object_id, SyntheticKind::StalledGroupWaiter);
+        const auto owner_role  = FunctionIdentifier::Synthetic(group.lock_object_id, SyntheticKind::StalledGroupOwner);
 
-        // Append the shared synthetic root to every present waiter. Missing waiters (not
-        // captured this tick) are skipped; the rest are still rooted together.
+        // Waiters: role marker THEN group root. Missing waiters (not captured this tick) are
+        // skipped; the rest are still rooted together under "Lock Waiter" under "Stalled Group L".
         for (const auto& waiter : group.waiters)
         {
             const auto it = os_to_managed.find(waiter.os_tid);
@@ -1281,7 +1325,38 @@ static void ProjectStalledGroups(ContinuousProfiler*                            
             {
                 continue; // skip-and-root: waiter not captured this tick
             }
-            threadStacksBuffer[it->second].push_back(synthetic_id);
+            threadStacksBuffer[it->second].push_back(waiter_role);
+            threadStacksBuffer[it->second].push_back(group_root);
+        }
+
+        // Owner: only if we have a nonzero, non-waiter owner captured this tick.
+        //   - owner_os_tid == 0 means unknown -> nothing to root.
+        //   - owner-is-waiter is a defensive guard for a stale event pairing. A normal Monitor
+        //     never puts an owner into its own wait set, so this is expected to be false in
+        //     production; the check just prevents accidental double-rooting under two role
+        //     markers if the invariant is ever violated by event drop / reorder.
+        //   - Not captured this tick -> skip-and-root (waiters still cluster under the group).
+        //
+        // Edge case (documented): a thread participating in multiple stalled groups (e.g.,
+        // owner of lock A AND waiter of lock B) will get role+root pairs from BOTH groups
+        // pushed onto its buffer. The pprof exporter renders that as nested Stalled Group
+        // nodes - a truthful (if visually busy) picture. If it becomes a problem, a per-tick
+        // "already rooted" set could be added.
+        if (group.owner_os_tid != 0)
+        {
+            const bool owner_is_waiter =
+                std::any_of(group.waiters.begin(), group.waiters.end(),
+                            [&](const StalledWaiter& w) { return w.os_tid == group.owner_os_tid; });
+
+            if (!owner_is_waiter)
+            {
+                const auto it = os_to_managed.find(group.owner_os_tid);
+                if (it != os_to_managed.end())
+                {
+                    threadStacksBuffer[it->second].push_back(owner_role);
+                    threadStacksBuffer[it->second].push_back(group_root);
+                }
+            }
         }
     }
 }

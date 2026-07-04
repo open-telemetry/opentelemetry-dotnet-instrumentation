@@ -45,9 +45,11 @@ namespace continuous_profiler
 // (deadlocks vs. non-deadlock stalls) while sharing the same synthetic-frame mechanism.
 enum class SyntheticKind : uint8_t
 {
-    None          = 0, // real frame
-    DeadlockCycle = 1, // rendered as "Contention Cycle {tag}", tag = min OS tid in the cycle
-    StalledGroup  = 2, // rendered as "Stalled Group {tag}", tag = lock_object_id
+    None                = 0, // real frame
+    DeadlockCycle       = 1, // rendered as "Contention Cycle {tag}", tag = min OS tid in the cycle
+    StalledGroup        = 2, // rendered as "Stalled Group {tag}", tag = lock_object_id
+    StalledGroupOwner   = 3, // role marker under a StalledGroup root: "Lock Owner"
+    StalledGroupWaiter  = 4, // role marker under a StalledGroup root: "Lock Waiter"
 };
 
 struct FunctionIdentifier

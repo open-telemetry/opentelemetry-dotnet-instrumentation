@@ -31,6 +31,9 @@ void ContentionMonitor::OnContentionStart(uint64_t contender_os_tid, uint64_t ow
     // It can survive only if Stop A was dropped (EventPipe buffer pressure). In
     // that case retire the old edge's bookkeeping so the overwrite below cannot
     // leak the old lock's count. This is the lazy equivalent of the missed Stop.
+    // this is to build robustness against EventPipe buffer pressure and dropped events.
+    // this maintain invariant : a thread can wait on at most one lock at a time, and a lock has at most one owner.
+    // deadlock detection relies on this invariant, so we must maintain it even in the face of dropped events.
     bool       already_waiting_on_this_lock = false;
     const auto prior                        = waits_for_.find(contender_os_tid);
     if (prior != waits_for_.end())
@@ -46,7 +49,7 @@ void ContentionMonitor::OnContentionStart(uint64_t contender_os_tid, uint64_t ow
             if (old_lock != locks_.end() && old_lock->second.concurrency > 0)
             {
                 old_lock->second.concurrency--;
-                old_lock->second.last_mutation = now;
+                old_lock->second.last_mutation = now; // refresh last_mutation to avoid stale sweep
             }
         }
     }
@@ -296,7 +299,9 @@ std::vector<std::vector<uint64_t>> ContentionMonitor::DetectDeadlocks()
     std::unordered_set<uint64_t>       finished;     // nodes whose chain is fully explored
     std::unordered_set<uint64_t>       cyclic_locks; // locks participating in a cycle this scan
     std::vector<std::vector<uint64_t>> raw_cycles;   // thread-id cycles found this scan
-
+    // DFS - each vertex has at most one successor, assume all keys of waits_for_ are root vertices
+    // each vertex may potentially represent a disjoint wait chain or connected wait chain, we determine
+    // deadlocks if there is back edge into the currently walked path. Outer for loop visits each root vertex
     for (const auto& entry : waits_for_)
     {
         const uint64_t start_tid = entry.first;
@@ -319,7 +324,7 @@ std::vector<std::vector<uint64_t>> ContentionMonitor::DetectDeadlocks()
             const auto pit = position.find(cur);
             if (pit != position.end())
             {
-                // Back-edge onto the current path: the cycle is path[pit..end].
+                // Back-edge onto the current path: the cycle is path[pit..end).
                 std::vector<uint64_t> cycle(path.begin() + static_cast<std::ptrdiff_t>(pit->second), path.end());
                 for (const uint64_t tid : cycle)
                 {
@@ -372,6 +377,7 @@ std::vector<std::vector<uint64_t>> ContentionMonitor::DetectDeadlocks()
     // Report only cycles whose every lock has persisted for at least this many
     // consecutive scans (observed this scan plus at least one prior). A true
     // deadlock is permanent, so it trivially clears the gate on the second scan.
+    // this is to account for spurious events that may cause a false positive in the first scan.
     constexpr uint32_t kPersistenceScans = 2;
 
     std::vector<std::vector<uint64_t>> confirmed;
