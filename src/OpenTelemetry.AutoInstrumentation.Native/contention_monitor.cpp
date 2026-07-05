@@ -431,28 +431,284 @@ std::unordered_set<uint64_t> ContentionMonitor::LockIdsForCycles(const std::vect
     return deadlock_locks;
 }
 
+// Phase 4a: Snapshot unified components of the wait-for graph.
+//
+// Algorithm (all under graph_lock_):
+//   1. Seed union-find: every waiter plus every referenced owner is a node.
+//   2. For each wait edge T -> owner(waits_for_[T].lock): union(T, owner). This
+//      treats the directed functional-graph edge as undirected for component-finding;
+//      cycle vs. handle is decided separately via deadlock_cycle_tids.
+//   3. Group nodes by union-find root; per component collect lock ids waited on
+//      and per-lock accumulated_completed_ns.
+//   4. Classify each member: waiter (in waits_for_) vs. non-waiting owner (only
+//      pulled in via someone else's edge).
+//   5. Set has_cycle iff any member is in the confirmed cycle set. In a functional
+//      graph, a component's cycle is unique, so every member is either in the cycle
+//      (deadlocked) or in a tree hanging off the cycle (blocked_by_deadlock).
+//   6. Surface: cycle components ALWAYS surface (confirmed deadlock is evidence);
+//      convoy components surface iff max_observed_wait >= min_stall (duration domain).
+std::vector<ContentionComponent> ContentionMonitor::SnapshotContentionComponents(
+    std::chrono::steady_clock::duration min_stall, const std::unordered_set<uint64_t>& deadlock_cycle_tids)
+{
+    std::lock_guard<std::mutex> guard(graph_lock_);
+    const auto                  now = std::chrono::steady_clock::now();
+
+    // --- Step 1 + 2: Union-find with path halving ---
+    std::unordered_map<uint64_t, uint64_t> parent;
+
+    auto make_set = [&parent](uint64_t x)
+    {
+        if (parent.count(x) == 0)
+        {
+            parent[x] = x;
+        }
+    };
+
+    auto find_root = [&parent](uint64_t x) -> uint64_t
+    {
+        while (parent[x] != x)
+        {
+            parent[x] = parent[parent[x]]; // path halving
+            x         = parent[x];
+        }
+        return x;
+    };
+
+    auto unite = [&](uint64_t a, uint64_t b)
+    {
+        const uint64_t ra = find_root(a);
+        const uint64_t rb = find_root(b);
+        if (ra != rb)
+        {
+            parent[ra] = rb;
+        }
+    };
+
+    for (const auto& [tid, edge] : waits_for_)
+    {
+        make_set(tid);
+        const auto lit = locks_.find(edge.lock_object_id);
+        if (lit != locks_.end())
+        {
+            const uint64_t owner = lit->second.owner_os_tid;
+            if (owner != 0 && owner != tid)
+            {
+                make_set(owner);
+                unite(tid, owner);
+            }
+        }
+    }
+
+    // --- Step 3: Group nodes by root; collect per-component lock ids ---
+    struct ComponentAccum
+    {
+        std::vector<uint64_t>               members;
+        std::unordered_set<uint64_t>        lock_ids;
+        std::chrono::steady_clock::duration max_observed{};
+        double                              accumulated_completed_ns = 0.0;
+    };
+    std::unordered_map<uint64_t, ComponentAccum> by_root;
+
+    for (const auto& [tid, _] : parent)
+    {
+        by_root[find_root(tid)].members.push_back(tid);
+    }
+    for (const auto& [tid, edge] : waits_for_)
+    {
+        by_root[find_root(tid)].lock_ids.insert(edge.lock_object_id);
+    }
+
+    // Sum accumulated_completed_ns across all locks in the component.
+    for (auto& [root, comp] : by_root)
+    {
+        for (const uint64_t lock_id : comp.lock_ids)
+        {
+            const auto lit = locks_.find(lock_id);
+            if (lit != locks_.end())
+            {
+                comp.accumulated_completed_ns += lit->second.accumulated_duration_ns;
+            }
+        }
+    }
+
+    // --- Steps 4, 5, 6: Classify, populate, apply surface rules ---
+    std::vector<ContentionComponent> result;
+    result.reserve(by_root.size());
+
+    for (auto& [root, comp] : by_root)
+    {
+        // Component key = min lock_object_id in component. Locks are more persistent
+        // than threads, giving stable dashboard aggregation.
+        uint64_t key = 0;
+        for (const uint64_t lock_id : comp.lock_ids)
+        {
+            if (key == 0 || lock_id < key)
+            {
+                key = lock_id;
+            }
+        }
+        if (key == 0)
+        {
+            // Degenerate: component has no waiters (only a lone owner pulled in by
+            // a stale edge). Skip - nothing meaningful to report.
+            continue;
+        }
+
+        // has_cycle iff any member is in the confirmed cycle set for THIS tick.
+        bool has_cycle = false;
+        for (const uint64_t tid : comp.members)
+        {
+            if (deadlock_cycle_tids.count(tid) != 0)
+            {
+                has_cycle = true;
+                break;
+            }
+        }
+
+        ContentionComponent out;
+        out.component_key            = key;
+        out.has_cycle                = has_cycle;
+        out.accumulated_completed_ns = comp.accumulated_completed_ns;
+
+        for (const uint64_t tid : comp.members)
+        {
+            const auto wit       = waits_for_.find(tid);
+            const bool is_waiter = (wit != waits_for_.end());
+
+            ContentionParticipant p;
+            p.os_tid           = tid;
+            p.observed_wait_ns = 0.0;
+
+            if (is_waiter)
+            {
+                const auto observed = now - wit->second.wait_start;
+                if (observed > comp.max_observed)
+                {
+                    comp.max_observed = observed;
+                }
+                p.observed_wait_ns =
+                    static_cast<double>(std::chrono::duration_cast<std::chrono::nanoseconds>(observed).count());
+            }
+
+            if (has_cycle)
+            {
+                // In a functional graph, every member of a component containing a
+                // cycle is a waiter (either in the cycle, or in a tree hanging off
+                // the cycle). Defensive fallback: a stray non-waiter also lands in
+                // blocked_by_deadlock rather than being dropped.
+                if (deadlock_cycle_tids.count(tid) != 0)
+                {
+                    out.deadlocked.push_back(p);
+                }
+                else
+                {
+                    out.blocked_by_deadlock.push_back(p);
+                }
+            }
+            else
+            {
+                if (is_waiter)
+                {
+                    out.waiters.push_back(p);
+                }
+                else
+                {
+                    // Non-waiting owner pulled in via someone else's edge.
+                    out.owner.push_back(p);
+                }
+            }
+        }
+
+        out.max_observed_wait_ns =
+            static_cast<double>(std::chrono::duration_cast<std::chrono::nanoseconds>(comp.max_observed).count());
+        // Reconstruct the ordered deadlock ring (marquee witness). out.deadlocked already
+        // holds exactly this component's cycle members (unordered). Canonicalize the rotation
+        // by starting at the smallest os_tid so the chain is identical every tick, then follow
+        // successor = owner(waits_for_[t].lock) until we return to the start. A confirmed cycle
+        // of k members yields exactly k edges; bound the walk by that count so a torn edge
+        // (erased mid event-update, since the monitor lock is dropped between events and this
+        // snapshot) cannot spin - we keep whatever partial ring we built.
+        if (has_cycle && !out.deadlocked.empty())
+        {
+            uint64_t start = out.deadlocked.front().os_tid;
+            for (const auto& p : out.deadlocked)
+            {
+                if (p.os_tid < start)
+                {
+                    start = p.os_tid;
+                }
+            }
+
+            const size_t max_steps = out.deadlocked.size();
+            uint64_t     cur       = start;
+            for (size_t step = 0; step < max_steps; ++step)
+            {
+                const auto wit = waits_for_.find(cur);
+                if (wit == waits_for_.end())
+                {
+                    break; // torn ring: waiter edge gone, keep partial chain
+                }
+                const uint64_t lock_id = wit->second.lock_object_id;
+                const auto     lit     = locks_.find(lock_id);
+                if (lit == locks_.end())
+                {
+                    break; // torn ring: lock swept, keep partial chain
+                }
+                const uint64_t owner = lit->second.owner_os_tid;
+                out.cycle_chain.push_back(DeadlockCycleEdge{cur, owner, lock_id});
+                if (owner == start)
+                {
+                    break; // ring closed
+                }
+                cur = owner;
+            }
+        }
+        // Surface rules:
+        //   - Cycle component: always surface (confirmed cycle IS the evidence,
+        //     independent of handle wait times).
+        //   - Convoy component: gate by min_stall in duration domain.
+        if (has_cycle || comp.max_observed >= min_stall)
+        {
+            result.push_back(std::move(out));
+        }
+    }
+
+    return result;
+}
+
 SamplerTickResult ContentionMonitor::OnSamplerTick(std::chrono::steady_clock::duration min_stall,
                                                    std::chrono::steady_clock::duration max_idle)
 {
     // Do NOT hold graph_lock_ across these calls: each callee acquires it internally
-    // and the mutex is non-recursive, so nesting would self-deadlock. Run the deadlock
-    // walk EXACTLY ONCE per tick (it mutates cycle_seen_scans); derive the deadlock-lock
-    // set from THAT result, never via a second walk (persistence-gate correctness).
+    // and the mutex is non-recursive. Run the deadlock walk EXACTLY ONCE per tick
+    // (it mutates cycle_seen_scans); derive the deadlock-lock set from THAT result.
 
     SweepStaleLocks(max_idle);
 
     SamplerTickResult result;
-    result.deadlock_cycles = DetectDeadlocks(); // single walk; owns graph_lock_
+    result.deadlock_cycles = DetectDeadlocks();
 
-    const auto deadlock_locks = LockIdsForCycles(result.deadlock_cycles); // derive from THAT result
-    result.stalled_groups     = SnapshotStalledGroups(min_stall);         // owns graph_lock_
-
-    // Cross-reference to set is_deadlock. A lock participating in a confirmed cycle
-    // is rendered by the deadlock path; ProjectStalledGroups will skip it (dedup).
+    // A/B old path: legacy per-lock stalled groups keyed by lock_object_id.
+    const auto deadlock_locks = LockIdsForCycles(result.deadlock_cycles);
+    result.stalled_groups     = SnapshotStalledGroups(min_stall);
     for (auto& group : result.stalled_groups)
     {
         group.is_deadlock = (deadlock_locks.count(group.lock_object_id) != 0);
     }
+
+    // Phase 4a NEW path: unified connected-component projection. Derive the tid set
+    // from the SAME confirmed cycles used above (no re-walk = no persistence-gate
+    // double advance). Lock-free set construction; SnapshotContentionComponents
+    // owns graph_lock_ for its single pass.
+    std::unordered_set<uint64_t> cycle_tids;
+    for (const auto& cycle : result.deadlock_cycles)
+    {
+        for (const uint64_t tid : cycle)
+        {
+            cycle_tids.insert(tid);
+        }
+    }
+    result.contention_components = SnapshotContentionComponents(min_stall, cycle_tids);
 
     return result;
 }

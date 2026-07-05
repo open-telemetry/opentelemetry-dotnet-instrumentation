@@ -81,14 +81,81 @@ struct StalledGroup
     bool                       is_deadlock = false;      // dedup: set by OnSamplerTick cross-ref
 };
 
-// Phase 3: Combined sampler tick result. Both rendering paths coexist:
-// - Deadlock path (UNCHANGED): renders confirmed cycles keyed by min_tid.
-// - Stall path (NEW): renders non-deadlock stalled groups keyed by lock_object_id.
-// is_deadlock dedups the two so each lock is rendered exactly once.
+// -------- Phase 4a output structs (NEW: unified component projection) --------
+//
+// A ContentionComponent is one weakly connected component of the wait-for graph.
+// Because the wait-for graph is a functional graph (each thread has out-degree <= 1
+// via waits_for_[T] -> owner(waits_for_[T].lock)), each component contains AT MOST
+// ONE cycle. This lets us render every "traffic jam" as ONE group:
+//   - No cycle: pure convoy, roles = { LockWaiter, LockOwner }.
+//   - Cycle present: deadlock + handles, roles = { Deadlocked, BlockedByDeadlock }.
+// This dissolves the Phase 3 edge case where a thread could appear in multiple
+// per-lock groups (owner of A, waiter of B): union-find puts it in exactly one group.
+struct ContentionParticipant
+{
+    uint64_t os_tid;
+    double   observed_wait_ns; // now - wait_start; 0.0 for a non-waiting owner
+};
+
+// Phase 4a+: one directed edge of a confirmed deadlock ring. Preserves the ordered
+// wait-for relation that DetectDeadlocks() proves but that has_cycle (a bool) and the
+// unordered `deadlocked` vector would otherwise discard. Per-edge semantics:
+//   os_tid is BLOCKED acquiring lock_object_id, which is currently held by waits_on_os_tid.
+// The edges form a CLOSED ring: for a cycle of length k, edge[i].waits_on_os_tid ==
+// edge[(i+1) % k].os_tid, and edge[k-1] closes back onto edge[0].os_tid. This is the
+// actionable deadlock witness - it names each thread, its successor, AND the exact lock
+// whose acquisition order created the cycle, which is what a user needs to fix it.
+struct DeadlockCycleEdge
+{
+    uint64_t os_tid;          // the blocked thread
+    uint64_t waits_on_os_tid; // successor in the ring: current owner of lock_object_id
+    uint64_t lock_object_id;  // the lock os_tid is blocked acquiring (held by waits_on_os_tid)
+};
+
+struct ContentionComponent
+{
+    // Component identity: min lock_object_id across all locks referenced within
+    // this component. Preferred over min(tid) because locks outlive threads, giving
+    // stable dashboard aggregation for pure convoys; cycles are permanent so both
+    // keys are equally stable there.
+    uint64_t component_key = 0;
+
+    // Cycle presence classifies the whole component. True iff any member appears
+    // in a confirmed deadlock cycle from DetectDeadlocks() this tick.
+    bool has_cycle = false;
+
+    // Cycle case (has_cycle == true): every member is a waiter in a functional
+    // graph, so these two vectors partition all members.
+    std::vector<ContentionParticipant> deadlocked;          // cycle members
+    std::vector<ContentionParticipant> blocked_by_deadlock; // handle members
+
+    // Ordered deadlock witness (populated iff has_cycle; empty otherwise). The SAME threads
+    // appear in `deadlocked` above, but there in arbitrary union-find order for metrics;
+    // here they are in true wait order as a closed ring, canonicalized to START at the
+    // smallest os_tid so the chain is byte-stable across ticks (matching the min_tid tag
+    // convention used for aggregation). A component's cycle is UNIQUE (functional graph:
+    // out-degree <= 1), so one ring per component is exact - no vector-of-cycles needed.
+    // Reconstructed locally in SnapshotContentionComponents by walking
+    // successor = owner(waits_for_[t].lock) from the min cycle member until the ring closes;
+    // this needs no extra input and no monitor signature change.
+    std::vector<DeadlockCycleEdge> cycle_chain;
+
+    // Convoy case (has_cycle == false):
+    std::vector<ContentionParticipant> waiters; // members with wait edges
+    std::vector<ContentionParticipant> owner;   // 0 or 1 non-waiting owner
+
+    double max_observed_wait_ns     = 0.0;
+    double accumulated_completed_ns = 0.0; // sum across all locks in component
+};
+
+// Combined sampler tick result. During Phase 4a A/B, BOTH old and new fields are
+// populated; the sampler flips between them via a compile-time flag. Retire the
+// old fields (stalled_groups, deadlock_cycles) in Phase 4c after validation.
 struct SamplerTickResult
 {
-    std::vector<StalledGroup>          stalled_groups;  // rendered by ProjectStalledGroups (skips is_deadlock)
-    std::vector<std::vector<uint64_t>> deadlock_cycles; // rendered by ProjectDeadlockCycles (UNCHANGED)
+    std::vector<StalledGroup>          stalled_groups;        // A/B old path
+    std::vector<std::vector<uint64_t>> deadlock_cycles;       // A/B old path
+    std::vector<ContentionComponent>   contention_components; // Phase 4a NEW path
 };
 
 // Self-contained. Owns its own mutex. Never acquires sampler/suspension locks.
@@ -112,6 +179,14 @@ public:
     // observed = now - wait_start; keep group iff max_observed >= min_stall. No
     // persistence gate: elapsed wall-clock IS the evidence (self-validating).
     std::vector<StalledGroup> SnapshotStalledGroups(std::chrono::steady_clock::duration min_stall);
+
+    // Phase 4a: Snapshot unified components of the wait-for graph. deadlock_cycle_tids
+    // is the union of confirmed cycle members from THIS tick's DetectDeadlocks(); the
+    // component is marked has_cycle iff any member appears in that set. min_stall
+    // gates convoy components; cycle components always surface (confirmed cycle IS
+    // the evidence). Owns graph_lock_.
+    std::vector<ContentionComponent> SnapshotContentionComponents(
+        std::chrono::steady_clock::duration min_stall, const std::unordered_set<uint64_t>& deadlock_cycle_tids);
 
     // Time-based GC. Deletes entries that are BOTH stale (now - last_mutation > max_idle)
     // AND drained (concurrency <= 1). Both conjuncts are required: stale-alone deletes

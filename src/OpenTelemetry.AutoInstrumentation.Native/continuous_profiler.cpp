@@ -298,6 +298,15 @@ ThreadSamplesBuffer::~ThreadSamplesBuffer()
     buffer_ = nullptr; // specifically don't delete as this is done by RecordProduced/ConsumeOneThreadSample
 }
 
+// -------- Phase 4a A/B flag --------
+// When true, the sampler renders contention via the unified component projection
+// (single "Deadlock Group" or "Stalled Group" per weakly connected component of
+// the wait-for graph). When false, it uses the legacy per-lock projections
+// (ProjectDeadlockCycles + ProjectStalledGroups) preserved for regression checks.
+// Flip to false only to reproduce a bug against the legacy behavior; the monitor
+// side computes both outputs each tick so switching is a zero-cost swap.
+constexpr bool kUseComponentProjection = true;
+
 #define CHECK_SAMPLES_BUFFER_LENGTH()                                                                                  \
     {                                                                                                                  \
         if (buffer_->size() >= kSamplesBufferMaximumSize)                                                              \
@@ -700,28 +709,109 @@ trace::WSTRING* NamingHelper::Lookup(const FunctionIdentifier& function_identifi
         switch (function_identifier.synthetic_kind)
         {
             case SyntheticKind::StalledGroup:
-                // Non-deadlock convoy / slow-holder-across-IO. Tag = lock_object_id, stable
-                // across ticks so the same jam aggregates under one node.
+            {
+                // Phase 4b enrichment: prefer "Stalled Group [MethodName on ThreadName]"
+                // when the projection derived a display name from the owner's leaf frame.
+                // Falls back to the numeric tag when the owner wasn't captured this tick,
+                // preserving Phase 4a behavior. Numeric tag remains the pprof clustering
+                // key (via synthetic_tag), so enrichment does not fragment the node.
                 synthetic_label_scratch_.assign(WStr("Stalled Group "));
-                synthetic_label_scratch_.append(trace::ToWSTRING(function_identifier.synthetic_tag));
+                const auto it = component_display_names_.find(function_identifier.synthetic_tag);
+                if (it != component_display_names_.end() && !it->second.empty())
+                {
+                    synthetic_label_scratch_.append(WStr("["));
+                    synthetic_label_scratch_.append(it->second);
+                    synthetic_label_scratch_.append(WStr("]"));
+                }
+                else
+                {
+                    synthetic_label_scratch_.append(trace::ToWSTRING(function_identifier.synthetic_tag));
+                }
                 break;
+            }
+
+            case SyntheticKind::DeadlockGroup:
+            {
+                // Phase 4b enrichment: prefer "Deadlock Group [MethodName on ThreadName]"
+                // derived from the min-tid cycle member (deterministic across ticks so
+                // the label stays stable). Fallback to numeric tag as above.
+                synthetic_label_scratch_.assign(WStr("Deadlock Group "));
+                const auto it = component_display_names_.find(function_identifier.synthetic_tag);
+                if (it != component_display_names_.end() && !it->second.empty())
+                {
+                    synthetic_label_scratch_.append(WStr("["));
+                    synthetic_label_scratch_.append(it->second);
+                    synthetic_label_scratch_.append(WStr("]"));
+                }
+                else
+                {
+                    synthetic_label_scratch_.append(trace::ToWSTRING(function_identifier.synthetic_tag));
+                }
+                break;
+            }
+
+            case SyntheticKind::DeadlockChainMember:
+            {
+                // Per-thread cycle node keyed by os_tid. The projection precomputed
+                // "Thread {A} waiting on lock held by {B}" (names with id fallback) into
+                // the same synthetic-tag label table used by the group roots. Tags never
+                // collide in practice: component_key is a large lock pointer, os_tid a
+                // small integer; and a collision would only mislabel a header, never crash.
+                // Fallback to a bare thread id if the projection left no entry (torn ring).
+                const auto it = component_display_names_.find(function_identifier.synthetic_tag);
+                if (it != component_display_names_.end() && !it->second.empty())
+                {
+                    synthetic_label_scratch_.assign(it->second);
+                }
+                else
+                {
+                    synthetic_label_scratch_.assign(WStr("Thread "));
+                    synthetic_label_scratch_.append(trace::ToWSTRING(function_identifier.synthetic_tag));
+                }
+                break;
+            }
 
             case SyntheticKind::StalledGroupOwner:
-                // Role marker under a Stalled Group root - identifies the lock holder (the
-                // culprit whose slow work is causing the convoy stall). The parent group root
-                // already carries the lock id, so this label is intentionally lock-agnostic.
+                // Shared intermediate marker for the lock holder. Static label.
                 synthetic_label_scratch_.assign(WStr("Lock Owner"));
                 break;
 
             case SyntheticKind::StalledGroupWaiter:
-                // Role marker under a Stalled Group root - identifies threads blocked on the
-                // lock (the victims of the convoy stall). Parent group root carries the lock id.
-                synthetic_label_scratch_.assign(WStr("Lock Waiter"));
+            {
+                // Shared intermediate grouping all stalled waiters. Names the owner
+                // they are all blocked behind. The projection stores the owner thread
+                // name under ~component_key (bitwise NOT of the root's tag) to avoid
+                // collision with the root's "Method on Thread" display name.
+                synthetic_label_scratch_.assign(WStr("Waiting for lock held by "));
+                const auto it = component_display_names_.find(~function_identifier.synthetic_tag);
+                if (it != component_display_names_.end() && !it->second.empty())
+                {
+                    synthetic_label_scratch_.append(it->second);
+                }
+                else
+                {
+                    synthetic_label_scratch_.assign(WStr("Waiting for lock"));
+                }
+                break;
+            }
+
+            case SyntheticKind::RoleDeadlocked:
+                // Shared intermediate marker grouping all cycle members under one node.
+                // Keyed by component_key; static label - display name lookup is on the
+                // per-thread DeadlockChainMember beneath this, not here.
+                synthetic_label_scratch_.assign(WStr("Deadlocked"));
+                break;
+
+            case SyntheticKind::RoleBlockedByDeadlock:
+                // Shared intermediate marker grouping all handle members under one node.
+                // Keyed by component_key; static label - per-thread DeadlockChainMember
+                // beneath this carries the "{name} blocked by {blocker}" display name.
+                synthetic_label_scratch_.assign(WStr("Blocked"));
                 break;
 
             case SyntheticKind::DeadlockCycle:
             default:
-                // Confirmed deadlock. Tag = smallest OS tid in the cycle, stable across ticks.
+                // Legacy Phase 2 label (kept for A/B). Tag = smallest OS tid in the cycle.
                 synthetic_label_scratch_.assign(WStr("Deadlock Cycle "));
                 synthetic_label_scratch_.append(trace::ToWSTRING(function_identifier.synthetic_tag));
                 break;
@@ -769,6 +859,19 @@ FunctionIdentifier NamingHelper::LookupManagedFunction(const FunctionID function
     const auto resolvedIdentifier = this->ResolveManagedFunctionIdentifier(cacheKey.function_id, frameInfo);
     function_identifier_cache_.Put(cacheKey, resolvedIdentifier);
     return resolvedIdentifier;
+}
+
+void NamingHelper::ClearComponentDisplayNames()
+{
+    component_display_names_.clear();
+}
+
+void NamingHelper::SetComponentDisplayName(uint64_t component_key, trace::WSTRING display_name)
+{
+    // emplace not operator[]: if the same key is set twice this tick (should not happen
+    // - each component has one component_key - but defensive), keep the first, matching
+    // the "primary participant" selection semantics in ProjectContentionComponents.
+    component_display_names_.emplace(component_key, std::move(display_name));
 }
 
 // This is slightly messy since we an only pass one parameter to the FrameCallback
@@ -1011,6 +1114,12 @@ static void ProjectStalledGroups(ContinuousProfiler*                            
                                  ICorProfilerInfo7*                                             info7,
                                  const std::vector<StalledGroup>&                               groups,
                                  std::unordered_map<ThreadID, std::vector<FunctionIdentifier>>& threadStacksBuffer);
+static void ProjectContentionComponents(
+    ContinuousProfiler*                                            prof,
+    ICorProfilerInfo7*                                             info7,
+    const std::vector<ContentionComponent>&                        components,
+    std::unordered_map<ThreadID, std::vector<FunctionIdentifier>>& threadStacksBuffer);
+
 // The implementation will suspend CLR for
 // .net and use thread suspension for netfx
 static void CaptureSamples(ContinuousProfiler*                                            prof,
@@ -1107,42 +1216,61 @@ static void CaptureSamples(ContinuousProfiler*                                  
                                                { return !v.second.empty(); });
 
     // Drive the contention/deadlock/stall monitor BEFORE the empty-tick early return, so
-    // stale-lock sweeping and the multi-scan deadlock persistence gate keep advancing even on
-    // ticks where no thread stacks were captured. This still runs strictly AFTER capture/resume
-    // (threads are live again), so the monitor lock is never taken inside the CLR-suspended
-    // window - preserving the Phase 1 decoupling. A generous idle is safe: SweepStaleLocks
-    // never deletes a live deadlock (its concurrency stays >= 2), so a large idle only delays
+    // stale-lock sweeping and the multi-scan deadlock persistence gate keep advancing even
+    // on ticks where no thread stacks were captured. This still runs strictly AFTER
+    // capture/resume (threads are live again), so the monitor lock is never taken inside
+    // the CLR-suspended window - preserving the Phase 1 decoupling. A generous idle is
+    // safe: SweepStaleLocks never deletes a live deadlock, so a large idle only delays
     // resolved-lock cleanup.
     SamplerTickResult contentionTick;
     if (prof->contention_monitor_ != nullptr)
     {
         constexpr auto kContentionMaxIdle = std::chrono::minutes(1);
-        // Phase 3: min_stall is the wall-clock threshold above which a live waiter is reported
-        // as a stalled group. Hardcoded for now; config-plumb via ConfigureContinuousProfiler
-        // in a follow-up. Live-stall detection is the primary value-add in this phase.
-        constexpr auto kMinStall = std::chrono::milliseconds(450);
-        contentionTick           = prof->contention_monitor_->OnSamplerTick(kMinStall, kContentionMaxIdle);
+        constexpr auto kMinStall          = std::chrono::milliseconds(450);
+        contentionTick                    = prof->contention_monitor_->OnSamplerTick(kMinStall, kContentionMaxIdle);
     }
 
-    // Return early only when there is nothing to publish: no captured stacks, no deadlock
-    // cycles, AND no stalled groups to project onto them.
-    if (nonEmptyCount == 0 && contentionTick.deadlock_cycles.empty() && contentionTick.stalled_groups.empty())
+    // Phase 4a A/B: pick the active projection path and check its data source for the
+    // empty-tick early return. The monitor computes BOTH old (deadlock_cycles +
+    // stalled_groups) and new (contention_components) paths per tick; the flag flips
+    // rendering only. Keeping the empty-tick check aligned with the ACTIVE path avoids
+    // running an expensive symbol-resolve/publish for data that will never be rendered.
+    bool haveContentionData;
+    if constexpr (kUseComponentProjection)
+    {
+        haveContentionData = !contentionTick.contention_components.empty();
+    }
+    else
+    {
+        haveContentionData = !contentionTick.deadlock_cycles.empty() || !contentionTick.stalled_groups.empty();
+    }
+    if (nonEmptyCount == 0 && !haveContentionData)
     {
         return;
     }
 
     prof->stats_.num_threads = static_cast<int>(nonEmptyCount);
 
-    // Both projection paths coexist. is_deadlock (set by OnSamplerTick) dedups the two:
-    // ProjectStalledGroups skips any group whose lock is rendered by the cycle path, so
-    // no thread is ever double-rooted.
-    if (!contentionTick.deadlock_cycles.empty())
+    // Route to the active projection path. In component mode, one function renders
+    // BOTH deadlock and convoy groups (unified model). In legacy mode, the two
+    // per-lock projections coexist with is_deadlock deduping between them.
+    if constexpr (kUseComponentProjection)
     {
-        ProjectDeadlockCycles(prof, info7, contentionTick.deadlock_cycles, threadStacksBuffer);
+        if (!contentionTick.contention_components.empty())
+        {
+            ProjectContentionComponents(prof, info7, contentionTick.contention_components, threadStacksBuffer);
+        }
     }
-    if (!contentionTick.stalled_groups.empty())
+    else
     {
-        ProjectStalledGroups(prof, info7, contentionTick.stalled_groups, threadStacksBuffer);
+        if (!contentionTick.deadlock_cycles.empty())
+        {
+            ProjectDeadlockCycles(prof, info7, contentionTick.deadlock_cycles, threadStacksBuffer);
+        }
+        if (!contentionTick.stalled_groups.empty())
+        {
+            ProjectStalledGroups(prof, info7, contentionTick.stalled_groups, threadStacksBuffer);
+        }
     }
 
     if (samplingType == SamplingType::Continuous)
@@ -1274,7 +1402,7 @@ static void ProjectStalledGroups(ContinuousProfiler*                            
 {
     (void)prof; // reserved for future stats/logging; matches ProjectDeadlockCycles' signature
 
-    // Lazy inverse map osTid -> managed ThreadID, built only now that at least one stall exists
+    // Lazy inverse map osTid -> managed ThreadID, built only when at least one stall exists
     // (zero overhead on the common no-stall tick). Threads not captured this tick are naturally
     // absent from threadStacksBuffer, which implements skip-and-root for free.
     std::unordered_map<uint64_t, ThreadID> os_to_managed;
@@ -1356,6 +1484,300 @@ static void ProjectStalledGroups(ContinuousProfiler*                            
                     threadStacksBuffer[it->second].push_back(owner_role);
                     threadStacksBuffer[it->second].push_back(group_root);
                 }
+            }
+        }
+    }
+}
+
+// Phase 4a: unified projection for a weakly connected component of the wait-for graph.
+// Phase 4b: also derives a per-component display name ("Method on Thread") from the
+// primary participant's captured leaf frame + thread name, so the group root renders as
+// "Stalled Group [OrderProcessor.SaveAsync on OrderWorker-3]" instead of a raw lock id.
+// The enrichment is computed BEFORE synthetic frames are pushed, so the leaf we sample
+// is always the thread's real code, never a role marker from a prior iteration.
+//
+// Frame layout per component (unchanged from Phase 4a):
+//
+//   Cycle case (has_cycle == true):                Convoy case (has_cycle == false):
+//     Deadlock Group [Method on Thread]              Stalled Group [Method on Thread]
+//     |-- Deadlocked                                 |-- Lock Waiter
+//     |     |-- (cycle-member T1 stack)              |     |-- (waiter T1 stack)
+//     |     |-- (cycle-member T2 stack)              |     |-- (waiter T2 stack)
+//     |-- Blocked                                    |-- Lock Owner
+//           |-- (handle-member T3 stack)                   |-- (owner T3 stack)
+//
+// Runs under name_cache_lock (already held by CaptureSamples).
+static void ProjectContentionComponents(
+    ContinuousProfiler*                                            prof,
+    ICorProfilerInfo7*                                             info7,
+    const std::vector<ContentionComponent>&                        components,
+    std::unordered_map<ThreadID, std::vector<FunctionIdentifier>>& threadStacksBuffer)
+{
+    // Reset per-tick overrides. Anything left from a prior tick would either be
+    // re-populated (still-active component) or stale (component resolved) - a
+    // clear-and-refill is simpler than diff maintenance.
+    prof->helper.ClearComponentDisplayNames();
+
+    // Lazy inverse map osTid -> managed ThreadID, built only when a component exists
+    // (zero overhead on the common no-contention tick). Threads not captured this tick
+    // are naturally absent from threadStacksBuffer, which implements skip-and-root for
+    // free. See ProjectDeadlockCycles for the full rationale on the empty-stack skip.
+    std::unordered_map<uint64_t, ThreadID> os_to_managed;
+    os_to_managed.reserve(threadStacksBuffer.size());
+    for (const auto& [managedId, stack] : threadStacksBuffer)
+    {
+        if (stack.empty())
+        {
+            continue;
+        }
+        DWORD osThreadId = 0;
+        if (info7->GetThreadInfo(managedId, &osThreadId) == S_OK && osThreadId != 0)
+        {
+            os_to_managed.emplace(static_cast<uint64_t>(osThreadId), managedId);
+        }
+    }
+
+    // Derive "MethodName on Thread" from a participant's captured leaf frame + thread
+    // name. Returns empty on any missing input; caller falls back to the numeric tag label.
+    //
+    // MVP takes stack.front() (the leaf) as-is. For convoy owners the leaf is typically the
+    // slow operation itself (HttpClient.Send etc.) - highly informative. For deadlocked
+    // cycle members the leaf is usually Monitor.Enter - less informative on its own but
+    // still combined with the thread name gives useful triage context. Phase 5 will layer
+    // a pattern-based skip heuristic (Monitor.Enter, WaitHandle.WaitOne, ...) to surface
+    // the first user-code frame instead of the wait primitive.
+    auto compute_display_name = [&](uint64_t participant_os_tid) -> trace::WSTRING
+    {
+        trace::WSTRING result;
+        const auto     itMap = os_to_managed.find(participant_os_tid);
+        if (itMap == os_to_managed.end())
+        {
+            return result;
+        }
+        const auto  managedId = itMap->second;
+        const auto& stack     = threadStacksBuffer[managedId];
+        if (!stack.empty())
+        {
+            // stack is leaf-first; front() is the tip of execution. Lookup returns a
+            // pointer we must COPY - subsequent Lookups may invalidate it via LRU
+            // eviction of the underlying cache entry.
+            const trace::WSTRING* leaf_name = prof->helper.Lookup(stack.front(), prof->stats_);
+            if (leaf_name != nullptr && !leaf_name->empty())
+            {
+                result.append(*leaf_name);
+            }
+        }
+        const ThreadState* state = GetThreadState(prof->managed_tid_to_state_, managedId);
+        if (state != nullptr && !state->thread_name_.empty())
+        {
+            if (!result.empty())
+            {
+                result.append(WStr(" on "));
+            }
+            result.append(state->thread_name_);
+        }
+        return result;
+    };
+
+    // Root one participant under (role_marker, group_root). Missing thread -> skip.
+    auto root_participant = [&](uint64_t os_tid, const FunctionIdentifier& role, const FunctionIdentifier& group_root)
+    {
+        const auto it = os_to_managed.find(os_tid);
+        if (it == os_to_managed.end())
+        {
+            return; // skip-and-root: participant not captured this tick
+        }
+        threadStacksBuffer[it->second].push_back(role);
+        threadStacksBuffer[it->second].push_back(group_root);
+    };
+
+    // Resolve an os_tid to a display name: managed thread name if known, raw id otherwise.
+    // Used for the deadlock ring labels; deliberately does NOT decode lock identities.
+    // Resolve an os_tid to a display name: managed thread name if known, raw id otherwise.
+    // Used for the thread identifierlabels, fall back on tid if display name is missing; deliberately does NOT decode
+    // lock identities.
+    auto name_for_tid = [&](uint64_t os_tid) -> trace::WSTRING
+    {
+        const auto it = os_to_managed.find(os_tid);
+        if (it != os_to_managed.end())
+        {
+            const ThreadState* state = GetThreadState(prof->managed_tid_to_state_, it->second);
+            if (state != nullptr && !state->thread_name_.empty())
+            {
+                return state->thread_name_;
+            }
+        }
+        // Prefix with "Thread " so the fallback is unambiguous when read in context
+        // e.g. "Thread 12345 waiting for lock held by Thread 67890"
+        trace::WSTRING fallback;
+        fallback.append(WStr("Thread "));
+        fallback.append(trace::ToWSTRING(os_tid));
+        return fallback;
+    };
+
+    for (const auto& comp : components)
+    {
+        // Pick the "primary" participant for display-name derivation:
+        //   Convoy: the owner (0 or 1 entry) - they hold the lock and their leaf is
+        //           usually the slow operation (the culprit).
+        //   Deadlock: the cycle member with the smallest os_tid - deterministic across
+        //             ticks so the derived label stays stable, which matters because
+        //             pprof clusters frames by exact label string. A fluctuating label
+        //             would fragment the group node across ticks.
+        uint64_t primary_os_tid = 0;
+        if (comp.has_cycle)
+        {
+            for (const auto& p : comp.deadlocked)
+            {
+                if (primary_os_tid == 0 || p.os_tid < primary_os_tid)
+                {
+                    primary_os_tid = p.os_tid;
+                }
+            }
+        }
+        else if (!comp.owner.empty())
+        {
+            primary_os_tid = comp.owner.front().os_tid;
+        }
+
+        // Convoy root label (Phase 4b): "Method on Thread" from the owner's leaf. Skipped
+        // for CYCLE components - the deadlock branch below emplaces a richer ring label
+        // ("A -> B -> ... -> A") for component_key instead. The !has_cycle guard is load-
+        // bearing: SetComponentDisplayName keeps the FIRST emplace, so setting the convoy
+        // label here would pin it and shadow the ring.
+        if (!comp.has_cycle && primary_os_tid != 0)
+        {
+            trace::WSTRING display = compute_display_name(primary_os_tid);
+            if (!display.empty())
+            {
+                prof->helper.SetComponentDisplayName(comp.component_key, std::move(display));
+            }
+        }
+
+        // Synthetic frames for this component share component_key as the tag so pprof
+        // clusters all participants under one root. Distinct SyntheticKind values keep
+        // them distinct in operator== / hash even though they share the tag.
+        const SyntheticKind root_kind  = comp.has_cycle ? SyntheticKind::DeadlockGroup : SyntheticKind::StalledGroup;
+        const auto          group_root = FunctionIdentifier::Synthetic(comp.component_key, root_kind);
+
+        // Deduped 3-frame push: per-thread member + shared intermediate + group root.
+        // Extracted because the pattern appears for all 4 participant roles.
+        auto push_member_frames = [&](uint64_t os_tid, const FunctionIdentifier& intermediate)
+        {
+            const auto it = os_to_managed.find(os_tid);
+            if (it == os_to_managed.end())
+            {
+                return; // skip-and-root: participant not captured this tick
+            }
+            const auto member = FunctionIdentifier::Synthetic(os_tid, SyntheticKind::DeadlockChainMember);
+            threadStacksBuffer[it->second].push_back(member);
+            threadStacksBuffer[it->second].push_back(intermediate);
+            threadStacksBuffer[it->second].push_back(group_root);
+        };
+
+        if (comp.has_cycle)
+        {
+            // Ring root label: "A -> B -> ... -> A" from the ordered cycle_chain.
+            if (!comp.cycle_chain.empty())
+            {
+                trace::WSTRING ring;
+                for (const auto& e : comp.cycle_chain)
+                {
+                    ring.append(name_for_tid(e.os_tid));
+                    ring.append(WStr(" -> "));
+                }
+                ring.append(name_for_tid(comp.cycle_chain.front().os_tid));
+                prof->helper.SetComponentDisplayName(comp.component_key, std::move(ring));
+            }
+
+            // successor map from the ordered ring: os_tid -> the tid it is blocked behind.
+            std::unordered_map<uint64_t, uint64_t> successor_of;
+            successor_of.reserve(comp.cycle_chain.size());
+            for (const auto& e : comp.cycle_chain)
+            {
+                successor_of.emplace(e.os_tid, e.waits_on_os_tid);
+            }
+
+            // Shared intermediate markers for segregation.
+            const auto deadlocked_role =
+                FunctionIdentifier::Synthetic(comp.component_key, SyntheticKind::RoleDeadlocked);
+            const auto blocked_role =
+                FunctionIdentifier::Synthetic(comp.component_key, SyntheticKind::RoleBlockedByDeadlock);
+
+            // Deadlocked cycle members: each waiter has a DIFFERENT successor, so
+            // per-thread label MUST name the specific blocker.
+            for (const auto& p : comp.deadlocked)
+            {
+                trace::WSTRING label;
+                label.append(name_for_tid(p.os_tid));
+                const auto sit = successor_of.find(p.os_tid);
+                if (sit != successor_of.end())
+                {
+                    label.append(WStr(" waiting for lock held by "));
+                    label.append(name_for_tid(sit->second));
+                }
+                else
+                {
+                    label.append(WStr(" (deadlocked)"));
+                }
+                prof->helper.SetComponentDisplayName(p.os_tid, std::move(label));
+                push_member_frames(p.os_tid, deadlocked_role);
+            }
+
+            // Blocked-by-deadlock: intermediate is static "Blocked", so per-thread
+            // MUST name who is blocking (cycle entry as representative).
+            const uint64_t cycle_entry_tid = comp.cycle_chain.empty() ? 0 : comp.cycle_chain.front().os_tid;
+
+            for (const auto& p : comp.blocked_by_deadlock)
+            {
+                trace::WSTRING label;
+                label.append(name_for_tid(p.os_tid));
+                label.append(WStr(" blocked by "));
+                if (cycle_entry_tid != 0)
+                {
+                    label.append(name_for_tid(cycle_entry_tid));
+                }
+                else
+                {
+                    label.append(WStr("deadlock cycle"));
+                }
+                prof->helper.SetComponentDisplayName(p.os_tid, std::move(label));
+                push_member_frames(p.os_tid, blocked_role);
+            }
+        }
+        else
+        {
+            // Convoy case. Intermediate "Waiting for lock held by {owner}" already
+            // names the blocker, so per-thread labels need only identify the thread
+            // itself - avoids the redundancy of repeating the owner on every waiter.
+            // This contrasts with deadlock where each member has a DIFFERENT blocker.
+
+            const auto stalled_role =
+                FunctionIdentifier::Synthetic(comp.component_key, SyntheticKind::StalledGroupWaiter);
+            const auto owner_intermediate =
+                FunctionIdentifier::Synthetic(comp.component_key, SyntheticKind::StalledGroupOwner);
+
+            // Store owner name under ~component_key for the intermediate label.
+            trace::WSTRING owner_display;
+            if (!comp.owner.empty())
+            {
+                owner_display = name_for_tid(comp.owner.front().os_tid);
+                prof->helper.SetComponentDisplayName(~comp.component_key, owner_display);
+            }
+
+            // Waiters: per-thread label is just the thread name (intermediate carries
+            // the "who" context). Keeps the tree scannable without repetitive noise.
+            for (const auto& p : comp.waiters)
+            {
+                prof->helper.SetComponentDisplayName(p.os_tid, name_for_tid(p.os_tid));
+                push_member_frames(p.os_tid, stalled_role);
+            }
+
+            // Owner (singular): per-thread label is just the thread name.
+            for (const auto& p : comp.owner)
+            {
+                prof->helper.SetComponentDisplayName(p.os_tid, name_for_tid(p.os_tid));
+                push_member_frames(p.os_tid, owner_intermediate);
             }
         }
     }
@@ -1705,7 +2127,7 @@ void ContinuousProfiler::AllocationTick(ULONG dataLen, LPCBYTE data)
     const HRESULT hr = info7->GetCurrentThreadID(&threadId);
     if (FAILED(hr))
     {
-        trace::Logger::Debug("GetCurrentThreadId failed, ", hr);
+        trace::Logger::Debug("GetCurrentThreadId failed. HRESULT=0x", std::setfill('0'), std::setw(8), std::hex, hr);
         return;
     }
 
@@ -1721,7 +2143,7 @@ void ContinuousProfiler::AllocationTick(ULONG dataLen, LPCBYTE data)
     }
     // Note that by using a local buffer that we will copy as a whole into the
     // "main" one later, we gain atomicity and improved concurrency, but lose out on a shared
-    // string-coding dictionary for all the allocation samples in a cycle.  The tradeoffs here
+    // string-coding dictionary for all the allocation samples in a cycle. The tradeoffs here
     // are non-obvious and the code+locking complexity to share codes would be high, so this will do
     // until proven otherwise.  The managed code specifically understands that the strings in each
     // allocation sample are coded separately so if this changes, that code will need to change too.

@@ -41,15 +41,30 @@ namespace continuous_profiler
 {
 // Discriminates which flavor of synthetic root frame a FunctionIdentifier represents.
 // Real (non-synthetic) frames use None; synthetic frames select the label template in
-// NamingHelper::Lookup. Distinct kinds keep the two rendering paths visually separated
-// (deadlocks vs. non-deadlock stalls) while sharing the same synthetic-frame mechanism.
+// NamingHelper::Lookup. Distinct kinds keep rendering paths visually separated while
+// sharing the same synthetic-frame mechanism. During Phase 4a A/B, both old and new
+// kinds coexist; retire the legacy ones (DeadlockCycle, StalledGroup used with lockId
+// tag) in Phase 4c after component projection is validated.
 enum class SyntheticKind : uint8_t
 {
-    None                = 0, // real frame
-    DeadlockCycle       = 1, // rendered as "Contention Cycle {tag}", tag = min OS tid in the cycle
-    StalledGroup        = 2, // rendered as "Stalled Group {tag}", tag = lock_object_id
-    StalledGroupOwner   = 3, // role marker under a StalledGroup root: "Lock Owner"
-    StalledGroupWaiter  = 4, // role marker under a StalledGroup root: "Lock Waiter"
+    None = 0, // real frame
+
+    // Legacy per-lock projection (Phase 2 + Phase 3, kept for A/B):
+    DeadlockCycle      = 1, // "Deadlock Cycle {min_tid}"
+    StalledGroup       = 2, // "Stalled Group {lock_object_id}" - REUSED for component root (convoy)
+    StalledGroupOwner  = 3, // "Lock Owner"                     - REUSED as convoy role marker
+    StalledGroupWaiter = 4, // "Lock Waiter"                    - REUSED as convoy role marker
+
+    // Phase 4a component projection (new):
+    DeadlockGroup         = 5, // "Deadlock Group {component_key}" - component root (cycle case)
+    RoleDeadlocked        = 6, // "Deadlocked"                     - cycle-member marker
+    RoleBlockedByDeadlock = 7, // "Blocked"                        - handle-member marker
+
+    // Phase 4a+ equal-opportunity namer: per-thread node UNDER a DeadlockGroup root,
+    // keyed by os_tid (NOT component_key) so members segregate instead of clubbing.
+    // Label "Thread {A} waiting on lock held by {B}" is precomputed by the projection
+    // into the shared synthetic-tag label table; see NamingHelper::Lookup.
+    DeadlockChainMember = 8,
 };
 
 struct FunctionIdentifier
@@ -334,6 +349,15 @@ public:
 
     [[nodiscard]] FunctionIdentifier ResolveManagedFunctionIdentifier(FunctionID func_id,
                                                                      COR_PRF_FRAME_INFO frame_info) const;
+    // Phase 4b enrichment: per-tick display name overrides for synthetic group-root
+    // frames (StalledGroup / DeadlockGroup). ProjectContentionComponents populates
+    // this via SetComponentDisplayName; Lookup consumes it when rendering the label.
+    // ClearComponentDisplayNames runs once at the start of each projection so stale
+    // entries from prior ticks cannot leak in. All three ops run under name_cache_lock
+    // (held by CaptureSamples), so no additional synchronization is required.
+    void ClearComponentDisplayNames();
+    void SetComponentDisplayName(uint64_t component_key, trace::WSTRING display_name);
+
 private:
     NameCache<FunctionIdentifier, trace::WSTRING*> function_name_cache_;
     NameCache<FunctionIdentifierResolveArgs, FunctionIdentifier> function_identifier_cache_;
@@ -342,6 +366,11 @@ private:
     // the label here and returns a pointer to it; safe because Lookup is only called under
     // name_cache_lock and the caller copies the string before the next Lookup call.
     trace::WSTRING synthetic_label_scratch_;
+
+    // Keyed by component_key (== synthetic_tag on StalledGroup / DeadlockGroup frames).
+    // A missing key means fall back to the numeric-tag label - preserves the existing
+    // behavior for components where no owner or cycle member was captured this tick.
+    std::unordered_map<uint64_t, trace::WSTRING> component_display_names_;
 };
 
 // We can get more AllocationTick events than we reasonably want to push to the cloud; this
