@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- Exclude shared files auto-included by Directory.Build.props to avoid CS0436
+         conflict with the same types exposed from the ProjectReference via InternalsVisibleTo. -->
+    <Compile Remove="..\dependency-libs\TestApplication.Shared\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\TestApplication.ContinuousProfiler\TestApplication.ContinuousProfiler.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="OpenTelemetry" />
+  </ItemGroup>
+</Project>

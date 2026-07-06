@@ -26,6 +26,7 @@ public static class Projects
         {
             public const string AspNet = "TestApplication.AspNet.NetFramework";
             public const string ContinuousProfilerNativeDep = "TestApplication.ContinuousProfiler.NativeDep";
+            public const string ContinuousProfilerContention = "TestApplication.ContinuousProfiler.Contention";
             public const string OwinIis = "TestApplication.Owin.IIS.NetFramework";
             public const string WcfIis = "TestApplication.Wcf.Server.IIS.NetFramework";
             public const string WcfServer = "TestApplication.Wcf.Server.NetFramework";
