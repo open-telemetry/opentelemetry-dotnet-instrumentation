@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 17
-VisualStudioVersion = 17.0.32112.339
+# Visual Studio Version 18
+VisualStudioVersion = 18.2.11415.280 d18.0
 MinimumVisualStudioVersion = 15.0.26124.0
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "OpenTelemetry.AutoInstrumentation.Native", "src\OpenTelemetry.AutoInstrumentation.Native\OpenTelemetry.AutoInstrumentation.Native.vcxproj", "{91B6272F-5780-4C94-8071-DBBA7B4F67F3}"
 	ProjectSection(ProjectDependencies) = postProject
@@ -264,7 +264,9 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestApplication.Sqlite.Micr
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestApplication.StartupHookIsolation", "test\test-applications\integrations\TestApplication.StartupHookIsolation\TestApplication.StartupHookIsolation.csproj", "{5A1944CD-8C7A-6D02-5B28-E053B78130CD}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestApplication.ContinuousProfiler.Contention", "test\test-applications\integrations\TestApplication.ContinuousProfiler.Contention\TestApplication.ContinuousProfiler.Contention.csproj", "{39BEFD0D-B7F3-469D-9736-BE6088809314}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestApplication.ContinuousProfiler.Contention", "test\test-applications\integrations\TestApplication.ContinuousProfiler.Contention\TestApplication.ContinuousProfiler.Contention.csproj", "{0E48FC13-0CA2-0730-72AE-D09A974A4C60}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestApplication.TracesLegacySource", "test\test-applications\integrations\TestApplication.TracesLegacySource\TestApplication.TracesLegacySource.csproj", "{69AED29B-35B0-49B6-956A-7FFBB5979736}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -1694,22 +1696,38 @@ Global
 		{5A1944CD-8C7A-6D02-5B28-E053B78130CD}.Release|x64.Build.0 = Release|x64
 		{5A1944CD-8C7A-6D02-5B28-E053B78130CD}.Release|x86.ActiveCfg = Release|x86
 		{5A1944CD-8C7A-6D02-5B28-E053B78130CD}.Release|x86.Build.0 = Release|x86
-		{39BEFD0D-B7F3-469D-9736-BE6088809314}.Debug|Any CPU.ActiveCfg = Debug|x64
-		{39BEFD0D-B7F3-469D-9736-BE6088809314}.Debug|Any CPU.Build.0 = Debug|x64
-		{39BEFD0D-B7F3-469D-9736-BE6088809314}.Debug|ARM64.ActiveCfg = Debug|x64
-		{39BEFD0D-B7F3-469D-9736-BE6088809314}.Debug|ARM64.Build.0 = Debug|x64
-		{39BEFD0D-B7F3-469D-9736-BE6088809314}.Debug|x64.ActiveCfg = Debug|x64
-		{39BEFD0D-B7F3-469D-9736-BE6088809314}.Debug|x64.Build.0 = Debug|x64
-		{39BEFD0D-B7F3-469D-9736-BE6088809314}.Debug|x86.ActiveCfg = Debug|x86
-		{39BEFD0D-B7F3-469D-9736-BE6088809314}.Debug|x86.Build.0 = Debug|x86
-		{39BEFD0D-B7F3-469D-9736-BE6088809314}.Release|Any CPU.ActiveCfg = Release|x64
-		{39BEFD0D-B7F3-469D-9736-BE6088809314}.Release|Any CPU.Build.0 = Release|x64
-		{39BEFD0D-B7F3-469D-9736-BE6088809314}.Release|ARM64.ActiveCfg = Release|x64
-		{39BEFD0D-B7F3-469D-9736-BE6088809314}.Release|ARM64.Build.0 = Release|x64
-		{39BEFD0D-B7F3-469D-9736-BE6088809314}.Release|x64.ActiveCfg = Release|x64
-		{39BEFD0D-B7F3-469D-9736-BE6088809314}.Release|x64.Build.0 = Release|x64
-		{39BEFD0D-B7F3-469D-9736-BE6088809314}.Release|x86.ActiveCfg = Release|x86
-		{39BEFD0D-B7F3-469D-9736-BE6088809314}.Release|x86.Build.0 = Release|x86
+		{0E48FC13-0CA2-0730-72AE-D09A974A4C60}.Debug|Any CPU.ActiveCfg = Debug|x64
+		{0E48FC13-0CA2-0730-72AE-D09A974A4C60}.Debug|Any CPU.Build.0 = Debug|x64
+		{0E48FC13-0CA2-0730-72AE-D09A974A4C60}.Debug|ARM64.ActiveCfg = Debug|x64
+		{0E48FC13-0CA2-0730-72AE-D09A974A4C60}.Debug|ARM64.Build.0 = Debug|x64
+		{0E48FC13-0CA2-0730-72AE-D09A974A4C60}.Debug|x64.ActiveCfg = Debug|x64
+		{0E48FC13-0CA2-0730-72AE-D09A974A4C60}.Debug|x64.Build.0 = Debug|x64
+		{0E48FC13-0CA2-0730-72AE-D09A974A4C60}.Debug|x86.ActiveCfg = Debug|x86
+		{0E48FC13-0CA2-0730-72AE-D09A974A4C60}.Debug|x86.Build.0 = Debug|x86
+		{0E48FC13-0CA2-0730-72AE-D09A974A4C60}.Release|Any CPU.ActiveCfg = Release|x64
+		{0E48FC13-0CA2-0730-72AE-D09A974A4C60}.Release|Any CPU.Build.0 = Release|x64
+		{0E48FC13-0CA2-0730-72AE-D09A974A4C60}.Release|ARM64.ActiveCfg = Release|x64
+		{0E48FC13-0CA2-0730-72AE-D09A974A4C60}.Release|ARM64.Build.0 = Release|x64
+		{0E48FC13-0CA2-0730-72AE-D09A974A4C60}.Release|x64.ActiveCfg = Release|x64
+		{0E48FC13-0CA2-0730-72AE-D09A974A4C60}.Release|x64.Build.0 = Release|x64
+		{0E48FC13-0CA2-0730-72AE-D09A974A4C60}.Release|x86.ActiveCfg = Release|x86
+		{0E48FC13-0CA2-0730-72AE-D09A974A4C60}.Release|x86.Build.0 = Release|x86
+		{69AED29B-35B0-49B6-956A-7FFBB5979736}.Debug|Any CPU.ActiveCfg = Debug|x64
+		{69AED29B-35B0-49B6-956A-7FFBB5979736}.Debug|Any CPU.Build.0 = Debug|x64
+		{69AED29B-35B0-49B6-956A-7FFBB5979736}.Debug|ARM64.ActiveCfg = Debug|x64
+		{69AED29B-35B0-49B6-956A-7FFBB5979736}.Debug|ARM64.Build.0 = Debug|x64
+		{69AED29B-35B0-49B6-956A-7FFBB5979736}.Debug|x64.ActiveCfg = Debug|x64
+		{69AED29B-35B0-49B6-956A-7FFBB5979736}.Debug|x64.Build.0 = Debug|x64
+		{69AED29B-35B0-49B6-956A-7FFBB5979736}.Debug|x86.ActiveCfg = Debug|x86
+		{69AED29B-35B0-49B6-956A-7FFBB5979736}.Debug|x86.Build.0 = Debug|x86
+		{69AED29B-35B0-49B6-956A-7FFBB5979736}.Release|Any CPU.ActiveCfg = Release|x64
+		{69AED29B-35B0-49B6-956A-7FFBB5979736}.Release|Any CPU.Build.0 = Release|x64
+		{69AED29B-35B0-49B6-956A-7FFBB5979736}.Release|ARM64.ActiveCfg = Release|x64
+		{69AED29B-35B0-49B6-956A-7FFBB5979736}.Release|ARM64.Build.0 = Release|x64
+		{69AED29B-35B0-49B6-956A-7FFBB5979736}.Release|x64.ActiveCfg = Release|x64
+		{69AED29B-35B0-49B6-956A-7FFBB5979736}.Release|x64.Build.0 = Release|x64
+		{69AED29B-35B0-49B6-956A-7FFBB5979736}.Release|x86.ActiveCfg = Release|x86
+		{69AED29B-35B0-49B6-956A-7FFBB5979736}.Release|x86.Build.0 = Release|x86
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -1809,7 +1827,8 @@ Global
 		{859E5A38-D2DD-7B4F-27F2-66887FFD8208} = {E409ADD3-9574-465C-AB09-4324D205CC7C}
 		{8D74F5D8-FCD8-4763-936C-B849967A93DA} = {E409ADD3-9574-465C-AB09-4324D205CC7C}
 		{5A1944CD-8C7A-6D02-5B28-E053B78130CD} = {E409ADD3-9574-465C-AB09-4324D205CC7C}
-		{39BEFD0D-B7F3-469D-9736-BE6088809314} = {E409ADD3-9574-465C-AB09-4324D205CC7C}
+		{0E48FC13-0CA2-0730-72AE-D09A974A4C60} = {E409ADD3-9574-465C-AB09-4324D205CC7C}
+		{69AED29B-35B0-49B6-956A-7FFBB5979736} = {E409ADD3-9574-465C-AB09-4324D205CC7C}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {160A1D00-1F5B-40F8-A155-621B4459D78F}
