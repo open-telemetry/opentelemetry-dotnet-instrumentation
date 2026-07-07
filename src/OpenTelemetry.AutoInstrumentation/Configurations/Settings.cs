@@ -60,24 +60,9 @@ internal abstract class Settings
 
     private static YamlConfiguration ReadYamlConfiguration()
     {
-        var experimentalConfigFile = Environment.GetEnvironmentVariable(ConfigurationKeys.FileBasedConfiguration.ExperimentalFileName);
-
         var configFile = Environment.GetEnvironmentVariable(ConfigurationKeys.FileBasedConfiguration.FileName);
 
-        if (!string.IsNullOrEmpty(configFile))
-        {
-            if (!string.IsNullOrEmpty(experimentalConfigFile))
-            {
-                Logger.Warning("Both OTEL_EXPERIMENTAL_CONFIG_FILE (deprecated) and OTEL_CONFIG_FILE are set. " +
-                    "Using OTEL_CONFIG_FILE and ignoring the deprecated variable.");
-            }
-        }
-        else if (!string.IsNullOrEmpty(experimentalConfigFile))
-        {
-            Logger.Warning("OTEL_EXPERIMENTAL_CONFIG_FILE is deprecated. Please use OTEL_CONFIG_FILE instead.");
-            configFile = experimentalConfigFile;
-        }
-        else
+        if (string.IsNullOrEmpty(configFile))
         {
             configFile = "config.yaml";
         }
