@@ -5,7 +5,24 @@ All notable changes to this component are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/compare/v1.16.0-beta.1..HEAD)
+## [Unreleased](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/compare/v1.16.0..HEAD)
+
+### Added
+
+### Changed
+
+#### Dependency updates
+
+### Deprecated
+
+### Removed
+
+### Fixed
+
+## [v1.16.0](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/tag/v1.16.0)
+
+This release includes all changes from [1.16.0-beta.1](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/tag/v1.16.0-beta.1)
+release.
 
 ### Added
 
@@ -43,7 +60,7 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
   - `OpenTelemetry.Instrumentation.SqlClient` from `1.15.2` to `1.16.0`,
   - `OpenTelemetry.Instrumentation.StackExchangeRedis` from `1.15.1-beta.2` to `1.16.0-beta.1`,
   - `OpenTelemetry.Instrumentation.Wcf` from `1.15.1-beta.2` to `1.16.0-beta.1`,
-  - `OpenTelemetry.OpAmp.Client` from `0.3.0-alpha.1` to `0.5.0-alpha.1`.
+  - `OpenTelemetry.OpAmp.Client` from `0.3.0-alpha.1` to `0.6.0-alpha.1`.
 - .NET only, following packages updated
   - `OpenTelemetry.Instrumentation.AspNetCore` from `1.15.2` to `1.16.0`,
   - `OpenTelemetry.Instrumentation.EntityFrameworkCore`
@@ -70,9 +87,9 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
   - `System.Text.Encodings.Web` from `10.0.7` to `10.0.9`,
   - `System.Text.Json` from `10.0.7` to `10.0.9`.
 
-### Deprecated
-
 ### Removed
+
+- Remove support for `OTEL_EXPERIMENTAL_CONFIG_FILE`.
 
 ### Fixed
 
