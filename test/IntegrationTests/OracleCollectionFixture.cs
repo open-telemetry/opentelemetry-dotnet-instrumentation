@@ -27,6 +27,7 @@ public class OracleCollectionFixture : ICollectionFixture<OracleFixture>
 public sealed class OracleFixture : IAsyncLifetime, IDisposable
 {
     private const int OraclePort = 1522;
+    private const int OracleContainerStartAttempts = 2;
     private const string OracleAdminUser = "ADMIN";
     private const string OracleDatabaseServiceName = "myatp_low";
     private const string OracleClientServiceName = "myatp_low";
@@ -550,19 +551,15 @@ if openssl s_client -help 2>&1 | grep -q -- '-verify_hostname'; then
 fi
 
 set +e
-openssl_output=""$(timeout 10 openssl s_client -connect ""${trace_host}:${trace_port}"" -servername ""$trace_host"" -CAfile /tmp/otel-test-root-ca.crt -verify_return_error $verify_hostname_args < /dev/null 2>&1)""
+openssl_output=""$(timeout 10 openssl s_client -connect ""${trace_host}:${trace_port}"" -servername ""$trace_host"" -CAfile /tmp/otel-test-root-ca.crt -verify_return_error -alpn 'h2,http/1.1' $verify_hostname_args < /dev/null 2>&1)""
 openssl_exit=$?
 set -e
 echo ""$openssl_output""
-if [ ""$openssl_exit"" -eq 0 ]; then
+if [ ""$openssl_exit"" -eq 0 ] && echo ""$openssl_output"" | grep -q -- '-----BEGIN CERTIFICATE-----'; then
   exit 0
 fi
 
-if echo ""$openssl_output"" | grep -q 'Verify return code: 0 (ok)'; then
-  exit 0
-fi
-
-exit ""$openssl_exit""
+exit 1
 ";
 
         return CreateBashCommand(script);
@@ -603,22 +600,39 @@ exit 1
 
     private static async Task<IContainer> LaunchOracleContainerAsync(int port, string password)
     {
-        var containersBuilder = new ContainerBuilder(OracleImage)
-            .WithEnvironment("WORKLOAD_TYPE", "ATP")
-            .WithEnvironment("ADMIN_PASSWORD", password)
-            .WithEnvironment("WALLET_PASSWORD", password)
-            .WithName($"oracle-adb-{port}")
-            .WithPrivileged(true)
-            .WithExtraHost(OracleOpenTelemetryTraceHost, "host-gateway")
-            .WithResourceMapping(Encoding.UTF8.GetBytes(CreateOracleEntrypointScript()), OracleEntrypointPath, 0, 0, ExecutableFileMode)
-            .WithEntrypoint(OracleEntrypointPath)
-            .WithPortBinding(port, OraclePort)
-            .WithWaitStrategy(Wait.ForUnixContainer().UntilInternalTcpPortIsAvailable(OraclePort));
+        for (var attempt = 1; attempt <= OracleContainerStartAttempts; attempt++)
+        {
+            var containersBuilder = new ContainerBuilder(OracleImage)
+                .WithEnvironment("WORKLOAD_TYPE", "ATP")
+                .WithEnvironment("ADMIN_PASSWORD", password)
+                .WithEnvironment("WALLET_PASSWORD", password)
+                .WithName($"oracle-adb-{port}-{attempt}")
+                .WithPrivileged(true)
+                .WithExtraHost(OracleOpenTelemetryTraceHost, "host-gateway")
+                .WithResourceMapping(Encoding.UTF8.GetBytes(CreateOracleEntrypointScript()), OracleEntrypointPath, 0, 0, ExecutableFileMode)
+                .WithEntrypoint(OracleEntrypointPath)
+                .WithPortBinding(port, OraclePort)
+                .WithWaitStrategy(Wait.ForUnixContainer().UntilInternalTcpPortIsAvailable(OraclePort));
 
-        var container = containersBuilder.Build();
-        await container.StartAsync().ConfigureAwait(false);
+            var container = containersBuilder.Build();
+            try
+            {
+                await container.StartAsync().ConfigureAwait(false);
+                return container;
+            }
+            catch (ContainerNotRunningException)
+            {
+                await container.DisposeAsync().ConfigureAwait(false);
+                if (attempt == OracleContainerStartAttempts)
+                {
+                    throw;
+                }
 
-        return container;
+                await Task.Delay(TimeSpan.FromSeconds(1)).ConfigureAwait(false);
+            }
+        }
+
+        throw new InvalidOperationException("Oracle container failed to start.");
     }
 
     private static string CreateOracleEntrypointScript()
@@ -678,7 +692,10 @@ exit
 
     private static async Task<string> CopyWalletAsync(IContainer container, int port)
     {
-        var walletDirectory = Path.Combine(Path.GetTempPath(), "oracle-adb-wallets", port.ToString(CultureInfo.InvariantCulture));
+        var walletDirectory = Path.Combine(
+            Path.GetTempPath(),
+            "oracle-adb-wallets",
+            $"{port.ToString(CultureInfo.InvariantCulture)}-{Guid.NewGuid():N}");
         Directory.CreateDirectory(walletDirectory);
 
         foreach (var fileName in WalletFiles)
@@ -858,7 +875,8 @@ internal sealed class OracleDatabaseOpenTelemetryCertificate : IDisposable
         serverRequest.CertificateExtensions.Add(new X509Extension("2.5.29.31", CreateCrlDistributionPointsExtension(crlUrl), critical: false));
 
         using var serverCertificateWithoutKey = serverRequest.Create(rootCertificate, notBefore, notAfter, Guid.NewGuid().ToByteArray());
-        var serverCertificate = serverCertificateWithoutKey.CopyWithPrivateKey(serverKey);
+        var serverCertificateWithEphemeralKey = serverCertificateWithoutKey.CopyWithPrivateKey(serverKey);
+        var serverCertificate = PersistPrivateKeyOnWindows(serverCertificateWithEphemeralKey);
         var rootCertificateCrlPem = CreateCertificateRevocationListPem(rootCertificate, rootKey, notBefore, notAfter);
 
         return new OracleDatabaseOpenTelemetryCertificate(
@@ -871,6 +889,31 @@ internal sealed class OracleDatabaseOpenTelemetryCertificate : IDisposable
     public void Dispose()
     {
         ServerCertificate.Dispose();
+    }
+
+    private static X509Certificate2 PersistPrivateKeyOnWindows(X509Certificate2 certificate)
+    {
+        if (!OperatingSystem.IsWindows())
+        {
+            return certificate;
+        }
+
+        using (certificate)
+        {
+            // Schannel cannot use the ephemeral key returned by CopyWithPrivateKey for TLS.
+            var certificateBytes = certificate.Export(X509ContentType.Pkcs12);
+#if NET9_0_OR_GREATER
+            return X509CertificateLoader.LoadPkcs12(
+                certificateBytes,
+                password: null,
+                X509KeyStorageFlags.UserKeySet | X509KeyStorageFlags.Exportable);
+#else
+            return new X509Certificate2(
+                certificateBytes,
+                password: (string?)null,
+                X509KeyStorageFlags.UserKeySet | X509KeyStorageFlags.Exportable);
+#endif
+        }
     }
 
     private static byte[] CreateCrlDistributionPointsExtension(string crlUrl)
