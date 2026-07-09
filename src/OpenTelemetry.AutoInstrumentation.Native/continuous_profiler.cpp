@@ -1389,6 +1389,14 @@ void ContinuousProfiler::AllocationTick(ULONG dataLen, LPCBYTE data)
         return;
     }
 
+    // The event must be at least large enough to contain every fixed-size field plus a
+    // one-character (null-terminated) type name; otherwise the offset math below underflows.
+    if (dataLen < AllocationTickV4SizeWithoutTypeName)
+    {
+        trace::Logger::Debug("AllocationTick: event payload too small (", dataLen, " bytes), ignoring.");
+        return;
+    }
+
     // In v4 it's the last field, so use a relative offset from the end
     uint64_t allocatedSize = *((uint64_t*)&(data[dataLen - 8]));
     // Here's the first byte of the typeName
