@@ -1,6 +1,11 @@
 #include "pch.h"
 
 #include "../../src/OpenTelemetry.AutoInstrumentation.Native/integration.h"
+#include "../../src/OpenTelemetry.AutoInstrumentation.Native/regex_utils.h"
+
+#ifdef _WIN32
+#include <Windows.h>
+#endif
 
 using namespace trace;
 
@@ -60,3 +65,73 @@ TEST(IntegrationTest, AssemblyReferenceVersionRejectsPartiallyParsedOversizedCom
     AssemblyReference ref(WStr("Some.Assembly, Version=1.65536.3.4"));
     EXPECT_EQ(ref.version, Version(0, 0, 0, 0));
 }
+
+#ifdef _WIN32
+// Memory-safety regression test for ExtractPublicKeyToken: the copy loop must bound itself to
+// the matched 8-byte token, not to the caller-supplied length. The 8-byte destination is placed
+// at the end of a committed page backed by a PAGE_NOACCESS guard page, so an over-write faults.
+namespace
+{
+
+class GuardedWriteBuffer
+{
+public:
+    explicit GuardedWriteBuffer(size_t size)
+    {
+        SYSTEM_INFO si{};
+        GetSystemInfo(&si);
+        const size_t page = si.dwPageSize;
+        base_             = static_cast<unsigned char*>(VirtualAlloc(nullptr, page * 2, MEM_RESERVE, PAGE_NOACCESS));
+        VirtualAlloc(base_, page, MEM_COMMIT, PAGE_READWRITE);
+        data_ = base_ + page - size;
+    }
+
+    ~GuardedWriteBuffer()
+    {
+        if (base_ != nullptr)
+        {
+            VirtualFree(base_, 0, MEM_RELEASE);
+        }
+    }
+
+    GuardedWriteBuffer(const GuardedWriteBuffer&)            = delete;
+    GuardedWriteBuffer& operator=(const GuardedWriteBuffer&) = delete;
+
+    unsigned char* data() const
+    {
+        return data_;
+    }
+
+private:
+    unsigned char* base_ = nullptr;
+    unsigned char* data_ = nullptr;
+};
+
+// SEH wrapper - must not own any C++ objects requiring unwinding.
+bool ExtractPublicKeyTokenFaults(const WSTRING& str, unsigned char* data, int length)
+{
+    __try
+    {
+        ExtractPublicKeyToken(str, data, length);
+        return false;
+    }
+    __except (GetExceptionCode() == EXCEPTION_ACCESS_VIOLATION ? EXCEPTION_EXECUTE_HANDLER : EXCEPTION_CONTINUE_SEARCH)
+    {
+        return true;
+    }
+}
+
+} // namespace
+
+TEST(IntegrationTest, ExtractPublicKeyTokenDoesNotWritePastBufferWhenLengthExceedsMatch)
+{
+    // 8-byte destination, but the caller asks for 10 bytes; the match only supplies 8.
+    const WSTRING      reference = L"PublicKeyToken=0123456789abcdef";
+    GuardedWriteBuffer buffer(8);
+
+    const bool faulted = ExtractPublicKeyTokenFaults(reference, buffer.data(), 10);
+
+    ASSERT_FALSE(faulted) << "ExtractPublicKeyToken wrote past the end of the destination buffer because the copy "
+                             "loop trusted the caller-supplied length instead of the matched token size.";
+}
+#endif

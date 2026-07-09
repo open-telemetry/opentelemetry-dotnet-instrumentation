@@ -148,9 +148,11 @@ bool ExtractPublicKeyToken(const WSTRING& str, unsigned char* data, const int le
 
     if (std::regex_search(str, match, re) && match.size() == 2)
     {
-        for (int i = 0; i < length; i++)
+        const auto token           = match.str(1);
+        const int  available_bytes = static_cast<int>(token.size() / 2);
+        for (int i = 0; i < length && i < available_bytes; i++)
         {
-            auto          s = match.str(1).substr(i * 2, 2);
+            auto          s = token.substr(i * 2, 2);
             unsigned long x;
             WSTRINGSTREAM ss(s);
             ss >> std::hex >> x;
@@ -166,9 +168,11 @@ bool ExtractPublicKeyToken(const WSTRING& str, unsigned char* data, const int le
 
     if (std::regex_search(narrow_str, match, re) && match.size() == 2)
     {
-        for (int i = 0; i < length; i++)
+        const auto token           = match.str(1);
+        const int  available_bytes = static_cast<int>(token.size() / 2);
+        for (int i = 0; i < length && i < available_bytes; i++)
         {
-            auto              s = match.str(1).substr(i * 2, 2);
+            auto              s = token.substr(i * 2, 2);
             unsigned long     x;
             std::stringstream ss(s);
             ss >> std::hex >> x;
