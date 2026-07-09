@@ -6,6 +6,10 @@ Instrumentation. Every plugin must implement
 additional extension points through the telemetry, OpAMP, selective sampling,
 and continuous profiling interfaces in this package.
 
+The Plugin API does not carry Semantic Versioning compatibility guarantees.
+Changes may be source or binary incompatible in any release, including a patch
+release, and do not, by themselves, require a major or minor version bump.
+
 Use the same `OpenTelemetry.AutoInstrumentation.PluginApi` package version as
 the OpenTelemetry .NET Automatic Instrumentation version that will load the
 plugin.
