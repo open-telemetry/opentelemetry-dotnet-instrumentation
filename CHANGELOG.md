@@ -45,6 +45,8 @@ release.
 ### Changed
 
 - OpAMP default port changed from 4318 to 4320.
+- [BREAKING] Plugin architecture overhaul: All plugins must now implement
+  the new API (OpenTelemetry.AutoInstrumentation.PluginApi) to function.
 
 #### Dependency updates
 
