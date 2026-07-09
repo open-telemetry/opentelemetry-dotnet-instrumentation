@@ -81,8 +81,29 @@ public:
         SYSTEM_INFO si{};
         GetSystemInfo(&si);
         const size_t page = si.dwPageSize;
-        base_             = static_cast<unsigned char*>(VirtualAlloc(nullptr, page * 2, MEM_RESERVE, PAGE_NOACCESS));
-        VirtualAlloc(base_, page, MEM_COMMIT, PAGE_READWRITE);
+
+        // The destination must fit within the committed page so that its final byte abuts the
+        // guard page; a larger request cannot be represented by this helper.
+        if (size == 0 || size > page)
+        {
+            return;
+        }
+
+        auto* base = static_cast<unsigned char*>(VirtualAlloc(nullptr, page * 2, MEM_RESERVE, PAGE_NOACCESS));
+        if (base == nullptr)
+        {
+            return;
+        }
+
+        if (VirtualAlloc(base, page, MEM_COMMIT, PAGE_READWRITE) == nullptr)
+        {
+            VirtualFree(base, 0, MEM_RELEASE);
+            return;
+        }
+
+        // Only publish base_/data_ once both allocations succeeded; on failure data() stays null
+        // and the test asserts on it rather than dereferencing an invalid pointer.
+        base_ = base;
         data_ = base_ + page - size;
     }
 
@@ -128,6 +149,7 @@ TEST(IntegrationTest, ExtractPublicKeyTokenDoesNotWritePastBufferWhenLengthExcee
     // 8-byte destination, but the caller asks for 10 bytes; the match only supplies 8.
     const WSTRING      reference = L"PublicKeyToken=0123456789abcdef";
     GuardedWriteBuffer buffer(8);
+    ASSERT_NE(buffer.data(), nullptr) << "Failed to set up the guard-page buffer for the test.";
 
     const bool faulted = ExtractPublicKeyTokenFaults(reference, buffer.data(), 10);
 
