@@ -292,9 +292,8 @@ HRESULT TracerTokens::WriteBeginMethod(void*                             rewrite
 
     if (signatureLength > signatureBufferSize)
     {
-        Logger::Warn("WriteBeginMethod: begin method signature (", signatureLength,
-                     " bytes) exceeds the buffer size ", signatureBufferSize,
-                     "; skipping instrumentation of this method to avoid a buffer overflow.");
+        Logger::Warn("WriteBeginMethod: begin method signature (", signatureLength, " bytes) exceeds the buffer size ",
+                     signatureBufferSize, "; skipping instrumentation of this method to avoid a buffer overflow.");
         return E_FAIL;
     }
 
@@ -550,7 +549,7 @@ HRESULT TracerTokens::WriteEndReturnMemberRef(void*           rewriterWrapperPtr
                      "; skipping instrumentation of this method to avoid a buffer overflow.");
         return E_FAIL;
     }
-    offset          = 0;
+    offset = 0;
 
     signature[offset++] = IMAGE_CEE_CS_CALLCONV_GENERICINST;
     signature[offset++] = 0x03;

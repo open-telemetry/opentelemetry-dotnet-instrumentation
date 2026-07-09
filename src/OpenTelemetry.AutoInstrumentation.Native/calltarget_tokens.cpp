@@ -322,7 +322,7 @@ mdMethodSpec CallTargetTokens::GetCallTargetDefaultValueMethodSpec(TypeSignature
     ULONG           methodArgumentSignatureSize;
     methodArgumentSignatureSize = methodArgument->GetSignature(methodArgumentSignature);
 
-    auto          signatureLength = 2 + methodArgumentSignatureSize;
+    auto signatureLength = 2 + methodArgumentSignatureSize;
     if (signatureLength > signatureBufferSize)
     {
         Logger::Warn("GetCallTargetDefaultValueMethodSpec: signature (", signatureLength,
@@ -464,9 +464,8 @@ HRESULT CallTargetTokens::ModifyLocalSig(ILRewriter*    reWriter,
 
     if (newSignatureSize > signatureBufferSize)
     {
-        Logger::Warn("ModifyLocalSig: the new locals signature (", newSignatureSize,
-                     " bytes) exceeds the buffer size ", signatureBufferSize,
-                     "; skipping instrumentation of this method to avoid a buffer overflow.");
+        Logger::Warn("ModifyLocalSig: the new locals signature (", newSignatureSize, " bytes) exceeds the buffer size ",
+                     signatureBufferSize, "; skipping instrumentation of this method to avoid a buffer overflow.");
         return E_FAIL;
     }
 
@@ -692,11 +691,11 @@ mdTypeSpec CallTargetTokens::GetTargetReturnValueTypeRef(TypeSignature* returnAr
     unsigned callTargetReturnTypeRefBuffer;
     auto     callTargetReturnTypeRefSize = CorSigCompressToken(callTargetReturnTypeRef, &callTargetReturnTypeRefBuffer);
 
-    auto          signatureLength = 3 + callTargetReturnTypeRefSize + returnSignatureLength;
+    auto signatureLength = 3 + callTargetReturnTypeRefSize + returnSignatureLength;
     if (signatureLength > signatureBufferSize)
     {
-        Logger::Warn("GetTargetReturnValueTypeRef: signature (", signatureLength,
-                     " bytes) exceeds the buffer size ", signatureBufferSize, ".");
+        Logger::Warn("GetTargetReturnValueTypeRef: signature (", signatureLength, " bytes) exceeds the buffer size ",
+                     signatureBufferSize, ".");
         return mdTypeSpecNil;
     }
     COR_SIGNATURE signature[signatureBufferSize];
