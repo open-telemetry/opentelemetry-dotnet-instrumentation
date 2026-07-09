@@ -21,6 +21,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\..\..\src\OpenTelemetry.AutoInstrumentation.PluginApi\OpenTelemetry.AutoInstrumentation.PluginApi.csproj" />
     <ProjectReference Include="..\dependency-libs\TestApplication.ContinuousProfiler.Vb\TestApplication.ContinuousProfiler.Vb.vbproj" />
   </ItemGroup>
 
