@@ -800,8 +800,16 @@ HRESULT CallTargetTokens::ModifyLocalSigAndInitialize(void*         rewriterWrap
     // Init locals
     if (*returnValueIndex != static_cast<ULONG>(ULONG_MAX))
     {
-        *firstInstruction =
-            rewriterWrapper->CallMember(GetCallTargetDefaultValueMethodSpec(&returnFunctionMethod), false);
+        const mdMethodSpec defaultValueMethodSpec = GetCallTargetDefaultValueMethodSpec(&returnFunctionMethod);
+        if (defaultValueMethodSpec == mdMethodSpecNil)
+        {
+            // The signature was too large to build safely; abort instrumentation rather than
+            // emitting a call to a nil token (which would produce invalid IL).
+            Logger::Warn("GetCallTargetDefaultValueMethodSpec() failed.");
+            return E_FAIL;
+        }
+
+        *firstInstruction = rewriterWrapper->CallMember(defaultValueMethodSpec, false);
         rewriterWrapper->StLocal(*returnValueIndex);
 
         rewriterWrapper->CallMember(GetCallTargetReturnValueDefaultMemberRef(*callTargetReturnToken), false);
