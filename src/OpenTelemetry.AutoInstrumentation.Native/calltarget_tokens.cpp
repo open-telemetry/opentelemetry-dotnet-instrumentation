@@ -323,6 +323,12 @@ mdMethodSpec CallTargetTokens::GetCallTargetDefaultValueMethodSpec(TypeSignature
     methodArgumentSignatureSize = methodArgument->GetSignature(methodArgumentSignature);
 
     auto          signatureLength = 2 + methodArgumentSignatureSize;
+    if (signatureLength > signatureBufferSize)
+    {
+        Logger::Warn("GetCallTargetDefaultValueMethodSpec: signature (", signatureLength,
+                     " bytes) exceeds the buffer size ", signatureBufferSize, ".");
+        return mdMethodSpecNil;
+    }
     COR_SIGNATURE signature[signatureBufferSize];
     unsigned      offset = 0;
     signature[offset++]  = IMAGE_CEE_CS_CALLCONV_GENERICINST;
@@ -454,6 +460,14 @@ HRESULT CallTargetTokens::ModifyLocalSig(ILRewriter*    reWriter,
         newLocalsCount += oldLocalsBuffer;
         newLocalsLen = CorSigCompressData(newLocalsCount, &newLocalsBuffer);
         newSignatureSize += newLocalsLen - oldLocalsLen;
+    }
+
+    if (newSignatureSize > signatureBufferSize)
+    {
+        Logger::Warn("ModifyLocalSig: the new locals signature (", newSignatureSize,
+                     " bytes) exceeds the buffer size ", signatureBufferSize,
+                     "; skipping instrumentation of this method to avoid a buffer overflow.");
+        return E_FAIL;
     }
 
     // New signature declaration
@@ -679,6 +693,12 @@ mdTypeSpec CallTargetTokens::GetTargetReturnValueTypeRef(TypeSignature* returnAr
     auto     callTargetReturnTypeRefSize = CorSigCompressToken(callTargetReturnTypeRef, &callTargetReturnTypeRefBuffer);
 
     auto          signatureLength = 3 + callTargetReturnTypeRefSize + returnSignatureLength;
+    if (signatureLength > signatureBufferSize)
+    {
+        Logger::Warn("GetTargetReturnValueTypeRef: signature (", signatureLength,
+                     " bytes) exceeds the buffer size ", signatureBufferSize, ".");
+        return mdTypeSpecNil;
+    }
     COR_SIGNATURE signature[signatureBufferSize];
     unsigned      offset = 0;
 
