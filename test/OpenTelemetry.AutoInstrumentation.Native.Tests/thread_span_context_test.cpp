@@ -1,6 +1,10 @@
 #include "pch.h"
 #include "../../src/OpenTelemetry.AutoInstrumentation.Native/continuous_profiler.h"
 
+#ifdef _WIN32
+#include <Windows.h>
+#endif
+
 TEST(ThreadSpanContextMapTest, BasicGet)
 {
     continuous_profiler::ThreadSpanContextMap      threadSpanContextMap;
@@ -67,3 +71,35 @@ TEST(ThreadSpanContextMapTest, RemoveBySpanContext)
     ASSERT_FALSE(threadSpanContextMap.GetContext(1).has_value());
     ASSERT_FALSE(threadSpanContextMap.GetContext(2).has_value());
 }
+
+#ifdef _WIN32
+// Memory-safety regression test for continuous_profiler.cpp: ContinuousProfilerSetNativeContext
+// must guard against a null profiler_info (its sibling exports do), which is the state before
+// profiler initialization / when profiling is disabled. Turned into a deterministic, catchable
+// access violation via SEH; a correct implementation returns without faulting.
+namespace
+{
+
+// SEH wrapper - must not own any C++ objects requiring unwinding.
+bool SetNativeContextFaults()
+{
+    __try
+    {
+        ContinuousProfilerSetNativeContext(1, 2, 3);
+        return false;
+    }
+    __except (GetExceptionCode() == EXCEPTION_ACCESS_VIOLATION ? EXCEPTION_EXECUTE_HANDLER : EXCEPTION_CONTINUE_SEARCH)
+    {
+        return true;
+    }
+}
+
+} // namespace
+
+TEST(ContinuousProfilerSafetyTest, SetNativeContextDoesNotDereferenceNullProfilerInfo)
+{
+    const bool faulted = SetNativeContextFaults();
+
+    ASSERT_FALSE(faulted) << "ContinuousProfilerSetNativeContext dereferenced a null profiler_info.";
+}
+#endif
