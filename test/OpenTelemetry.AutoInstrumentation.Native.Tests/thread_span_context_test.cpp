@@ -2,7 +2,7 @@
 #include "../../src/OpenTelemetry.AutoInstrumentation.Native/continuous_profiler.h"
 
 #ifdef _WIN32
-#include <Windows.h>
+#include <cstdlib>
 #include <memory>
 #endif
 
@@ -76,27 +76,18 @@ TEST(ThreadSpanContextMapTest, RemoveBySpanContext)
 #ifdef _WIN32
 // Memory-safety regression test for continuous_profiler.cpp: AllocationTick must validate the
 // event length before indexing; a too-short payload underflows `data[dataLen - 8]` (unsigned)
-// into an out-of-bounds read. Turned into a deterministic, catchable access violation via SEH.
+// into an out-of-bounds read.
+//
+// The call runs in a death-test subprocess: a correct AllocationTick returns cleanly and the
+// child exits 0. If a regression reintroduces the out-of-bounds read, the child crashes and the
+// ExitedWithCode(0) assertion fails - keeping the crash (and AllocationTick's still-held
+// std::shared_lock) isolated to the child instead of destabilizing this test process.
 namespace
 {
 
-// SEH wrapper - must not own any C++ objects requiring unwinding.
-bool AllocationTickFaults(continuous_profiler::ContinuousProfiler& profiler, const unsigned char* data, ULONG dataLen)
-{
-    __try
-    {
-        profiler.AllocationTick(dataLen, data);
-        return false;
-    }
-    __except (GetExceptionCode() == EXCEPTION_ACCESS_VIOLATION ? EXCEPTION_EXECUTE_HANDLER : EXCEPTION_CONTINUE_SEARCH)
-    {
-        return true;
-    }
-}
-
-} // namespace
-
-TEST(ContinuousProfilerSafetyTest, AllocationTickRejectsShortPayloadWithoutReadingPastBuffer)
+// Runs in the death-test child; kept as a helper so the EXPECT_EXIT statement has no bare commas
+// (the preprocessor would otherwise treat them as macro-argument separators).
+[[noreturn]] void RunAllocationTickWithShortPayload()
 {
     continuous_profiler::ContinuousProfiler profiler;
     // Force the sub-sampler to accept this event so AllocationTick reaches the parse
@@ -104,9 +95,15 @@ TEST(ContinuousProfilerSafetyTest, AllocationTickRejectsShortPayloadWithoutReadi
     profiler.allocationSubSampler = std::make_unique<continuous_profiler::AllocationSubSampler>(1000u, 60u);
 
     const unsigned char data[4] = {0, 0, 0, 0};
+    profiler.AllocationTick(4u, data);
 
-    const bool faulted = AllocationTickFaults(profiler, data, 4u);
+    std::exit(0);
+}
 
-    ASSERT_FALSE(faulted) << "AllocationTick read data[dataLen - 8] with dataLen < 8, underflowing the index.";
+} // namespace
+
+TEST(ContinuousProfilerSafetyTest, AllocationTickRejectsShortPayloadWithoutReadingPastBuffer)
+{
+    EXPECT_EXIT(RunAllocationTickWithShortPayload(), ::testing::ExitedWithCode(0), "");
 }
 #endif
