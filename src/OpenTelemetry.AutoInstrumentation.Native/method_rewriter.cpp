@@ -183,9 +183,8 @@ HRESULT TracerMethodRewriter::Rewrite(RejitHandlerModule* moduleHandler, RejitHa
         // Signature/local modification failed (e.g. the method's signature is too large to
         // instrument safely). Abort before committing any IL so the method is left unmodified
         // rather than producing an inconsistent method body.
-        Logger::Warn("*** CallTarget_RewriterCallback(): ModifyLocalSigAndInitialize() failed, skipping "
-                     "instrumentation for ",
-                     caller->type.name, ".", caller->name, "()");
+        Logger::Warn("*** CallTarget_RewriterCallback(): ModifyLocalSigAndInitialize() failed with hr=", hr,
+                     ", skipping instrumentation for ", caller->type.name, ".", caller->name, "()");
         return S_FALSE;
     }
 

@@ -337,6 +337,12 @@ mdMethodSpec CallTargetTokens::GetCallTargetDefaultValueMethodSpec(TypeSignature
     memcpy(&signature[offset], methodArgumentSignature, methodArgumentSignatureSize);
     offset += methodArgumentSignatureSize;
 
+    if (offset != signatureLength)
+    {
+        Logger::Warn("GetCallTargetDefaultValueMethodSpec: signature size mismatch.");
+        return mdMethodSpecNil;
+    }
+
     hr = module_metadata->metadata_emit->DefineMethodSpec(getDefaultMemberRef, signature, signatureLength,
                                                           &getDefaultMethodSpec);
     if (FAILED(hr))
@@ -516,6 +522,12 @@ HRESULT CallTargetTokens::ModifyLocalSig(ILRewriter*    reWriter,
     newSignatureBuffer[newSignatureOffset++] = ELEMENT_TYPE_VALUETYPE;
     memcpy(&newSignatureBuffer[newSignatureOffset], &callTargetStateTypeRefBuffer, callTargetStateTypeRefSize);
     newSignatureOffset += callTargetStateTypeRefSize;
+
+    if (newSignatureOffset != newSignatureSize)
+    {
+        Logger::Warn("ModifyLocalSig: signature size mismatch.");
+        return E_FAIL;
+    }
 
     // Get new locals token
     mdToken newLocalVarSig;
@@ -708,6 +720,12 @@ mdTypeSpec CallTargetTokens::GetTargetReturnValueTypeRef(TypeSignature* returnAr
     signature[offset++] = 0x01;
     memcpy(&signature[offset], returnSignatureBuffer, returnSignatureLength);
     offset += returnSignatureLength;
+
+    if (offset != signatureLength)
+    {
+        Logger::Warn("GetTargetReturnValueTypeRef: signature size mismatch.");
+        return mdTypeSpecNil;
+    }
 
     hr = module_metadata->metadata_emit->GetTokenFromTypeSpec(signature, signatureLength, &returnValueTypeSpec);
     if (FAILED(hr))

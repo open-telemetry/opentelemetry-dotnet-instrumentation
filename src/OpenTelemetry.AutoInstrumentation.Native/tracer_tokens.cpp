@@ -324,6 +324,12 @@ HRESULT TracerTokens::WriteBeginMethod(void*                             rewrite
         offset += argumentsSignatureSize[i];
     }
 
+    if (offset != signatureLength)
+    {
+        Logger::Warn("WriteBeginMethod: signature size mismatch.");
+        return E_FAIL;
+    }
+
     hr = module_metadata->metadata_emit->DefineMethodSpec(beginMethodFastPathRef, signature, signatureLength,
                                                           &beginMethodSpec);
     if (FAILED(hr))
@@ -571,6 +577,12 @@ HRESULT TracerTokens::WriteEndReturnMemberRef(void*           rewriterWrapperPtr
 
     memcpy(&signature[offset], returnSignatureBuffer, returnSignatureLength);
     offset += returnSignatureLength;
+
+    if (offset != signatureLength)
+    {
+        Logger::Warn("WriteEndReturnMemberRef: signature size mismatch.");
+        return E_FAIL;
+    }
 
     hr = module_metadata->metadata_emit->DefineMethodSpec(endMethodMemberRef, signature, signatureLength,
                                                           &endMethodSpec);
