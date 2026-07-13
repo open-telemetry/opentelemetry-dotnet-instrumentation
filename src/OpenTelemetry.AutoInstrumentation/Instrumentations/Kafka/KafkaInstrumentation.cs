@@ -31,6 +31,15 @@ internal static class KafkaInstrumentation
             {
                 activity.SetTag(MessagingAttributes.Keys.Kafka.ConsumerGroupId, groupId);
             }
+
+            if (BootstrapServersCache.TryGet(consumer, out var bootstrapServers))
+            {
+                var clusterId = KafkaClusterIdCache.GetClusterIdAndScheduleRefresh(bootstrapServers);
+                if (clusterId is not null)
+                {
+                    activity.SetTag(MessagingAttributes.Keys.Kafka.ClusterId, clusterId);
+                }
+            }
         }
 
         return activity;
@@ -62,7 +71,8 @@ internal static class KafkaInstrumentation
     public static Activity? StartProducerActivity<TTopicPartition, TMessage, TClient>(
         TTopicPartition partition,
         TMessage message,
-        TClient producer)
+        TClient producer,
+        object? rawProducer = null)
     where TTopicPartition : ITopicPartition
     where TMessage : IKafkaMessage
     where TClient : INamedClient
@@ -81,6 +91,16 @@ internal static class KafkaInstrumentation
                 producer);
 
             activity.SetTag(MessagingAttributes.Keys.Kafka.IsTombstone, message.Value is null);
+
+            if (rawProducer is not null &&
+                BootstrapServersCache.TryGet(rawProducer, out var bootstrapServers))
+            {
+                var clusterId = KafkaClusterIdCache.GetClusterIdAndScheduleRefresh(bootstrapServers);
+                if (clusterId is not null)
+                {
+                    activity.SetTag(MessagingAttributes.Keys.Kafka.ClusterId, clusterId);
+                }
+            }
         }
 
         return activity;
