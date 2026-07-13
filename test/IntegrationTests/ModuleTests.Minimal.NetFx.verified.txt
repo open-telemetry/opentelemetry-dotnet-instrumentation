@@ -4,5 +4,6 @@
   OpenTelemetry.Api.ProviderBuilderExtensions,
   OpenTelemetry.AutoInstrumentation,
   OpenTelemetry.AutoInstrumentation.Loader,
+  OpenTelemetry.AutoInstrumentation.PluginApi,
   OpenTelemetry.Exporter.OpenTelemetryProtocol
 ]

@@ -1,6 +1,6 @@
 header:
-  last-reviewed: '2026-06-18'
-  last-updated: '2026-06-18'
+  last-reviewed: '2026-07-01'
+  last-updated: '2026-07-01'
   schema-version: 2.0.0
   url: https://raw.githubusercontent.com/open-telemetry/opentelemetry-dotnet-instrumentation/main/.github/security-insights.yml
   comment: |
@@ -101,6 +101,8 @@ repository:
         comment: OpenTelemetry.AutoInstrumentation.BuildTasks NuGet package distributed from NuGet.org.
       - uri: https://www.nuget.org/packages/OpenTelemetry.AutoInstrumentation.Loader
         comment: OpenTelemetry.AutoInstrumentation.Loader NuGet package distributed from NuGet.org.
+      - uri: https://www.nuget.org/packages/OpenTelemetry.AutoInstrumentation.PluginApi
+        comment: OpenTelemetry.AutoInstrumentation.PluginApi NuGet package distributed from NuGet.org.
       - uri: https://www.nuget.org/packages/OpenTelemetry.AutoInstrumentation.Runtime.Managed
         comment: OpenTelemetry.AutoInstrumentation.Runtime.Managed NuGet package distributed from NuGet.org.
       - uri: https://www.nuget.org/packages/OpenTelemetry.AutoInstrumentation.Runtime.Native
