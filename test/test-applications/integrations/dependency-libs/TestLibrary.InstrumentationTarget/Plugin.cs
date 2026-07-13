@@ -2,15 +2,21 @@
 // SPDX-License-Identifier: Apache-2.0
 
 using OpenTelemetry.AutoInstrumentation;
+using OpenTelemetry.AutoInstrumentation.PluginApi;
 using TestLibrary.InstrumentationTarget.StrongNamedValidation;
 
 namespace TestLibrary.InstrumentationTarget;
 
-public class Plugin
+public class Plugin : IPlugin
 {
     public void Initializing()
     {
         Console.WriteLine($"{nameof(Plugin)}.{nameof(Initializing)}() invoked.");
+    }
+
+    public void Initialized()
+    {
+        Console.WriteLine($"{nameof(Plugin)}.{nameof(Initialized)}() invoked.");
     }
 
     internal InstrumentationDefinitions.Payload GetAllDefinitionsPayload()
