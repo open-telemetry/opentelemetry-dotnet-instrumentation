@@ -1,17 +1,21 @@
 // Copyright The OpenTelemetry Authors
 // SPDX-License-Identifier: Apache-2.0
 
+using OpenTelemetry.AutoInstrumentation.PluginApi;
+using OpenTelemetry.AutoInstrumentation.PluginApi.OpAmp;
 using OpenTelemetry.OpAmp.Client;
 using OpenTelemetry.OpAmp.Client.Settings;
 
 namespace TestApplication.Plugins;
 
+#pragma warning disable CA1515 // Consider making public types internal. Needed for AutoInstrumentation plugin loading.
 /// <summary>
-/// OpAmp partial of the plugin.
+/// OpAMP extensions of the plugin.
 /// </summary>
-public partial class Plugin
+public partial class Plugin : IPlugin, IOpAmpPlugin
+#pragma warning restore CA1515 // Consider making public types internal. Needed for AutoInstrumentation plugin loading.
 {
-    public void ConfigureOpAmpOptions(OpAmpClientSettings options)
+    public void ConfigureOpAmpOptions(OpAmpClientSettings settings)
     {
         Console.WriteLine($"{nameof(Plugin)}.{nameof(ConfigureOpAmpOptions)}() invoked.");
     }
