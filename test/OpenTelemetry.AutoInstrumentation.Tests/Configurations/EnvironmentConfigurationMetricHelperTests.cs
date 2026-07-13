@@ -4,6 +4,8 @@
 using OpenTelemetry.AutoInstrumentation.Configurations;
 using OpenTelemetry.AutoInstrumentation.Configurations.FileBasedConfiguration;
 using OpenTelemetry.AutoInstrumentation.Loading;
+using OpenTelemetry.AutoInstrumentation.PluginApi;
+using OpenTelemetry.AutoInstrumentation.PluginApi.Telemetry;
 using OpenTelemetry.AutoInstrumentation.Plugins;
 using OpenTelemetry.Metrics;
 
@@ -62,7 +64,7 @@ public class EnvironmentConfigurationMetricHelperTests
 
 #pragma warning disable CA1515 // Consider making public types internal. Needed for plugin purposes.
 #pragma warning disable CA1034 // Nested types should not be visible. It is used only for test purposes.
-    public class MetricReaderOptionsCapturingPlugin
+    public class MetricReaderOptionsCapturingPlugin : IPlugin, IConfigureMetricsOptions<MetricReaderOptions>
 #pragma warning restore CA1034 // Nested types should not be visible. It is used only for test purposes.
 #pragma warning restore CA1515 // Consider making public types internal. Needed for plugin purposes.
     {
@@ -71,6 +73,14 @@ public class EnvironmentConfigurationMetricHelperTests
         public void ConfigureMetricsOptions(MetricReaderOptions options)
         {
             Options = options;
+        }
+
+        public void Initialized()
+        {
+        }
+
+        public void Initializing()
+        {
         }
     }
 }
