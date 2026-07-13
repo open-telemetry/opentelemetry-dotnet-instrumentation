@@ -1597,6 +1597,7 @@ extern "C"
 
         if (profiler_info == nullptr)
         {
+            trace::Logger::Debug("ContinuousProfilerSetNativeContext skipped: profiler_info is null.");
             return;
         }
 
