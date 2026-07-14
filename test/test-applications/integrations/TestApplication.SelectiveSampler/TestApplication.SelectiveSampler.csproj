@@ -14,4 +14,7 @@
       <Link>ThreadSample.cs</Link>
     </Compile>
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\..\src\OpenTelemetry.AutoInstrumentation.PluginApi\OpenTelemetry.AutoInstrumentation.PluginApi.csproj" />
+  </ItemGroup>
 </Project>

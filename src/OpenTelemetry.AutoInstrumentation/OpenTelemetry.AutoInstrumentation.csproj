@@ -13,6 +13,7 @@
     <NoWarn>$(NoWarn);CA1031</NoWarn>
   </PropertyGroup>
   <ItemGroup>
+    <ProjectReference Include="..\OpenTelemetry.AutoInstrumentation.PluginApi\OpenTelemetry.AutoInstrumentation.PluginApi.csproj" />
     <ProjectReference Include="..\SourceGenerators\SourceGenerators.csproj" ReferenceOutputAssembly="false" OutputItemType="Analyzer" />
     <Compile Remove="$(GeneratedFolder)/*/**/*.cs" />
   </ItemGroup>
