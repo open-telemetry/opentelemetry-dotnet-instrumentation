@@ -28,7 +28,7 @@
     <PackageVersion Include="Microsoft.Extensions.Hosting" Version="10.0.9" />
     <PackageVersion Include="Microsoft.Extensions.Logging" Version="10.0.9" />
     <PackageVersion Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.9" />
-    <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="18.8.0" />
+    <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="18.8.1" />
     <PackageVersion Include="MongoDB.Driver" Version="3.10.0" />
     <PackageVersion Include="NSubstitute" Version="5.3.0" />
     <PackageVersion Include="MySql.Data" Version="9.7.0" />
