@@ -26,6 +26,7 @@
         { _W("OpenTelemetry.Api"), {1, 0, 0, 0} }, \
         { _W("OpenTelemetry.Api.ProviderBuilderExtensions"), {1, 0, 0, 0} }, \
         { _W("OpenTelemetry.AutoInstrumentation"), {auto_major, 0, 0, 0} }, \
+        { _W("OpenTelemetry.AutoInstrumentation.PluginApi"), {1, 0, 0, 0} }, \
         { _W("OpenTelemetry.Exporter.Console"), {1, 0, 0, 0} }, \
         { _W("OpenTelemetry.Exporter.OpenTelemetryProtocol"), {1, 0, 0, 0} }, \
         { _W("OpenTelemetry.Exporter.Prometheus.HttpListener"), {1, 0, 0, 0} }, \
@@ -173,6 +174,7 @@
         { _W("OpenTelemetry.Api"), {1, 0, 0, 0} }, \
         { _W("OpenTelemetry.Api.ProviderBuilderExtensions"), {1, 0, 0, 0} }, \
         { _W("OpenTelemetry.AutoInstrumentation"), {auto_major, 0, 0, 0} }, \
+        { _W("OpenTelemetry.AutoInstrumentation.PluginApi"), {1, 0, 0, 0} }, \
         { _W("OpenTelemetry.Exporter.Console"), {1, 0, 0, 0} }, \
         { _W("OpenTelemetry.Exporter.OpenTelemetryProtocol"), {1, 0, 0, 0} }, \
         { _W("OpenTelemetry.Exporter.Prometheus.HttpListener"), {1, 0, 0, 0} }, \
@@ -319,6 +321,7 @@
         { _W("OpenTelemetry.Api"), {1, 0, 0, 0} }, \
         { _W("OpenTelemetry.Api.ProviderBuilderExtensions"), {1, 0, 0, 0} }, \
         { _W("OpenTelemetry.AutoInstrumentation"), {auto_major, 0, 0, 0} }, \
+        { _W("OpenTelemetry.AutoInstrumentation.PluginApi"), {1, 0, 0, 0} }, \
         { _W("OpenTelemetry.Exporter.Console"), {1, 0, 0, 0} }, \
         { _W("OpenTelemetry.Exporter.OpenTelemetryProtocol"), {1, 0, 0, 0} }, \
         { _W("OpenTelemetry.Exporter.Prometheus.HttpListener"), {1, 0, 0, 0} }, \
@@ -383,6 +386,7 @@
         { _W("OpenTelemetry.Api"), {1, 0, 0, 0} }, \
         { _W("OpenTelemetry.Api.ProviderBuilderExtensions"), {1, 0, 0, 0} }, \
         { _W("OpenTelemetry.AutoInstrumentation"), {auto_major, 0, 0, 0} }, \
+        { _W("OpenTelemetry.AutoInstrumentation.PluginApi"), {1, 0, 0, 0} }, \
         { _W("OpenTelemetry.Exporter.Console"), {1, 0, 0, 0} }, \
         { _W("OpenTelemetry.Exporter.OpenTelemetryProtocol"), {1, 0, 0, 0} }, \
         { _W("OpenTelemetry.Exporter.Prometheus.HttpListener"), {1, 0, 0, 0} }, \
