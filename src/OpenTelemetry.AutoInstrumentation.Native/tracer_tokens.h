@@ -33,6 +33,9 @@ protected:
 public:
     TracerTokens(ModuleMetadata* module_metadata_ptr);
 
+    virtual bool ShouldLoadArgumentsByRef(const bool ignoreByRefInstrumentation);
+    virtual bool ShouldLoadCallTargetStateByRef();
+
     HRESULT WriteBeginMethod(void* rewriterWrapperPtr, mdTypeRef integrationTypeRef, const TypeInfo* currentType,
                              const std::vector<TypeSignature>& methodArguments,
                              const bool ignoreByRefInstrumentation, ILInstr** instruction);

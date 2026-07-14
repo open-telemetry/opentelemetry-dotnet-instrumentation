@@ -2,9 +2,11 @@
 // SPDX-License-Identifier: Apache-2.0
 
 #include "cor_profiler.h"
+#include "calltarget_trampoline.h"
 
 #include "corhlpr.h"
 #include <corprof.h>
+#include <functional>
 #include <string>
 #include <typeinfo>
 
@@ -109,7 +111,8 @@ HRESULT STDMETHODCALLTYPE CorProfiler::Initialize(IUnknown* cor_profiler_info_un
     }
 
     // code is ready to get runtime information
-    runtime_information_ = GetRuntimeInformation(this->info_);
+    runtime_information_           = GetRuntimeInformation(this->info_);
+    calltarget_trampoline_enabled_ = runtime_information_.is_desktop() && trace::IsCallTargetTrampolineEnabled();
 
     if (Logger::IsDebugEnabled())
     {
@@ -225,6 +228,11 @@ HRESULT STDMETHODCALLTYPE CorProfiler::Initialize(IUnknown* cor_profiler_info_un
     else
     {
         Logger::Info("JIT Inlining is enabled.");
+    }
+
+    if (calltarget_trampoline_enabled_)
+    {
+        Logger::Info("CallTarget trampoline mode is enabled.");
     }
 
     if (DisableOptimizations())
@@ -695,6 +703,17 @@ HRESULT STDMETHODCALLTYPE CorProfiler::ModuleLoadFinished(ModuleID module_id, HR
                     Logger::Warn("Failed to patch AppDomain creation, module id ", module_id, ", result ", hr);
                 }
             }
+
+            if (calltarget_trampoline_enabled_)
+            {
+                hr = GenerateCallTargetTrampolineType(this->info_, module_id, GetBytecodeInstrumentationAssembly());
+                if (FAILED(hr))
+                {
+                    Logger::Error("Failed to inject CallTarget trampoline type in mscorlib, module id ", module_id,
+                                  ", result ", hr);
+                    calltarget_trampoline_enabled_ = false;
+                }
+            }
         }
 #endif
 
@@ -1054,6 +1073,62 @@ bool CorProfiler::IsAttached() const
     return is_attached_;
 }
 
+bool CorProfiler::IsCallTargetTrampolineEnabled() const
+{
+    return calltarget_trampoline_enabled_;
+}
+
+bool CorProfiler::IsProfilerAssemblyLoadedIntoAppDomain(AppDomainID app_domain_id)
+{
+    return ProfilerAssemblyIsLoadedIntoAppDomain(app_domain_id);
+}
+
+ICorProfilerInfo7* CorProfiler::GetCorProfilerInfo() const
+{
+    return info_;
+}
+
+int CorProfiler::GetCallTargetTrampolineIntegrationIndex(const IntegrationDefinition& integration_definition)
+{
+    std::scoped_lock<std::mutex> lock(calltarget_trampoline_integration_map_lock_);
+    const auto&                  key      = integration_definition.integration_type.get_cache_key();
+    auto                         existing = calltarget_trampoline_integration_indexes_.find(key);
+    if (existing != calltarget_trampoline_integration_indexes_.end())
+    {
+        return existing->second;
+    }
+
+    const int index = static_cast<int>(calltarget_trampoline_integrations_.size());
+    calltarget_trampoline_integrations_.emplace_back(integration_definition.integration_type.assembly.str(),
+                                                     integration_definition.integration_type.name);
+    calltarget_trampoline_integration_indexes_.emplace(key, index);
+    return index;
+}
+
+const WCHAR* CorProfiler::GetCallTargetTrampolineIntegrationAssembly(int integration_index)
+{
+    std::scoped_lock<std::mutex> lock(calltarget_trampoline_integration_map_lock_);
+    if (integration_index < 0 || static_cast<size_t>(integration_index) >= calltarget_trampoline_integrations_.size())
+    {
+        Logger::Warn("GetCallTargetTrampolineIntegrationAssembly: invalid integration index ", integration_index);
+        return nullptr;
+    }
+
+    return calltarget_trampoline_integrations_[integration_index].first.c_str();
+}
+
+const WCHAR* CorProfiler::GetCallTargetTrampolineIntegrationType(int integration_index)
+{
+    std::scoped_lock<std::mutex> lock(calltarget_trampoline_integration_map_lock_);
+    if (integration_index < 0 || static_cast<size_t>(integration_index) >= calltarget_trampoline_integrations_.size())
+    {
+        Logger::Warn("GetCallTargetTrampolineIntegrationType: invalid integration index ", integration_index);
+        return nullptr;
+    }
+
+    return calltarget_trampoline_integrations_[integration_index].second.c_str();
+}
+
 void CorProfiler::AddInstrumentations(WCHAR* id, CallTargetDefinition* items, int size)
 {
     auto    _             = trace::Stats::Instance()->InitializeProfilerMeasure();
@@ -1340,6 +1415,14 @@ void CorProfiler::InitializeTraceMethods(WCHAR* id,
 HRESULT STDMETHODCALLTYPE CorProfiler::GetAssemblyReferences(const WCHAR*                           wszAssemblyPath,
                                                              ICorProfilerAssemblyReferenceProvider* pAsmRefProvider)
 {
+    if (calltarget_trampoline_enabled_)
+    {
+        Logger::Debug("GetAssemblyReferences skipping managed profiler assembly closure in CallTarget trampoline mode. "
+                      "AssemblyPath=",
+                      wszAssemblyPath);
+        return S_OK;
+    }
+
     if (IsAzureAppServices())
     {
         Logger::Debug(

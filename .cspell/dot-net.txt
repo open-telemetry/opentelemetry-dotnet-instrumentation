@@ -47,3 +47,5 @@ typeof
 WCFCORE
 Xunit
 appdomain
+mscorlib
+corlib

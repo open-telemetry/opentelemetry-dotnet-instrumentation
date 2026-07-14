@@ -53,6 +53,7 @@ bool IsNGENEnabled();
 bool IsDumpILRewriteEnabled();
 bool IsAzureAppServices();
 bool IsFailFastEnabled();
+bool IsCallTargetTrampolineEnabled();
 std::optional<bool> IsAssemblyRedirectionEnabled();
 
 }  // namespace trace

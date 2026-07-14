@@ -186,7 +186,9 @@
     <ClInclude Include="assembly_redirection.h" />
     <ClInclude Include="assembly_redirection_net.h" />
     <ClInclude Include="assembly_redirection_netfx.h" />
+    <ClInclude Include="calltarget_rewrite_tokens.h" />
     <ClInclude Include="calltarget_tokens.h" />
+    <ClInclude Include="calltarget_trampoline.h" />
     <ClInclude Include="class_factory.h" />
     <ClInclude Include="clr_runtime_capture.h" />
     <ClInclude Include="com_ptr.h" />
@@ -243,7 +245,9 @@
     <ClInclude Include="version.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="calltarget_rewrite_tokens.cpp" />
     <ClCompile Include="calltarget_tokens.cpp" />
+    <ClCompile Include="calltarget_trampoline.cpp" />
     <ClCompile Include="class_factory.cpp" />
     <ClCompile Include="clr_helpers.cpp" />
     <ClCompile Include="clr_runtime_capture.cpp" />
