@@ -109,16 +109,17 @@ internal static partial class DockerfileAnalyzer
     private static string GetModifiedImageName(DotnetSdkVersion requestedDotnetSdkVersion, ImageName imageName)
     {
         var (sdkVersion, suffix) = GetSdkVersionAndSuffix(imageName);
-        var modifiedTag = $"{GetNewVersion(sdkVersion, requestedDotnetSdkVersion)}-{suffix}";
+        var newVersion = GetNewVersion(sdkVersion, requestedDotnetSdkVersion);
+        var modifiedTag = suffix is null ? newVersion : $"{newVersion}-{suffix}";
 
         return ImageName.FormatImageName(imageName.Repository, imageName.Registry, modifiedTag, null);
     }
 
-    private static (string SdkVersion, string Suffix) GetSdkVersionAndSuffix(ImageName imageName)
+    private static (string SdkVersion, string? Suffix) GetSdkVersionAndSuffix(ImageName imageName)
     {
         // Extract sdk version and suffix from a tag like '8.0.403-alpine3.20'
         var parts = imageName.Tag!.Split('-', 2);
-        return (parts[0], parts[1]);
+        return (parts[0], parts.Length == 2 ? parts[1] : null);
     }
 
     private static bool IsDotnetSdkImage(ImageName imageName)
