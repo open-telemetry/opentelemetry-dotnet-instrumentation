@@ -290,6 +290,13 @@ HRESULT TracerTokens::WriteBeginMethod(void*                             rewrite
         }
     }
 
+    if (signatureLength > signatureBufferSize)
+    {
+        Logger::Warn("WriteBeginMethod: begin method signature (", signatureLength, " bytes) exceeds the buffer size ",
+                     signatureBufferSize, "; skipping instrumentation of this method to avoid a buffer overflow.");
+        return E_FAIL;
+    }
+
     COR_SIGNATURE signature[signatureBufferSize];
     unsigned      offset = 0;
 
@@ -315,6 +322,12 @@ HRESULT TracerTokens::WriteBeginMethod(void*                             rewrite
     {
         memcpy(&signature[offset], argumentsSignatureBuffer[i], argumentsSignatureSize[i]);
         offset += argumentsSignatureSize[i];
+    }
+
+    if (offset != signatureLength)
+    {
+        Logger::Warn("WriteBeginMethod: signature size mismatch.");
+        return E_FAIL;
     }
 
     hr = module_metadata->metadata_emit->DefineMethodSpec(beginMethodFastPathRef, signature, signatureLength,
@@ -535,7 +548,14 @@ HRESULT TracerTokens::WriteEndReturnMemberRef(void*           rewriterWrapperPtr
     auto            returnSignatureLength = returnArgument->GetSignature(returnSignatureBuffer);
 
     signatureLength = 4 + integrationTypeSize + currentTypeSize + returnSignatureLength;
-    offset          = 0;
+    if (signatureLength > signatureBufferSize)
+    {
+        Logger::Warn("WriteEndReturnMemberRef: end method signature (", signatureLength,
+                     " bytes) exceeds the buffer size ", signatureBufferSize,
+                     "; skipping instrumentation of this method to avoid a buffer overflow.");
+        return E_FAIL;
+    }
+    offset = 0;
 
     signature[offset++] = IMAGE_CEE_CS_CALLCONV_GENERICINST;
     signature[offset++] = 0x03;
@@ -557,6 +577,12 @@ HRESULT TracerTokens::WriteEndReturnMemberRef(void*           rewriterWrapperPtr
 
     memcpy(&signature[offset], returnSignatureBuffer, returnSignatureLength);
     offset += returnSignatureLength;
+
+    if (offset != signatureLength)
+    {
+        Logger::Warn("WriteEndReturnMemberRef: signature size mismatch.");
+        return E_FAIL;
+    }
 
     hr = module_metadata->metadata_emit->DefineMethodSpec(endMethodMemberRef, signature, signatureLength,
                                                           &endMethodSpec);
