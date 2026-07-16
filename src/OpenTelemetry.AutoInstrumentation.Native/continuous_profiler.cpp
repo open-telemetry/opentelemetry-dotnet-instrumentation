@@ -1606,6 +1606,12 @@ extern "C"
         // This method is called anytime thread-span association changes, e.g. when activity is started/stopped or
         // when suspension/resumption occurs.
 
+        if (profiler_info == nullptr)
+        {
+            trace::Logger::Debug("ContinuousProfilerSetNativeContext skipped: profiler_info is null.");
+            return;
+        }
+
         ThreadID      threadId;
         const HRESULT hr = profiler_info->GetCurrentThreadID(&threadId);
         if (FAILED(hr))
