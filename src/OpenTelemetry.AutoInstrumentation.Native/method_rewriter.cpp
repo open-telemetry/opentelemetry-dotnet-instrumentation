@@ -175,9 +175,18 @@ HRESULT TracerMethodRewriter::Rewrite(RejitHandlerModule* moduleHandler, RejitHa
     mdToken  exceptionToken        = mdTokenNil;
     mdToken  callTargetReturnToken = mdTokenNil;
     ILInstr* firstInstruction      = nullptr;
-    tracerTokens->ModifyLocalSigAndInitialize(&reWriterWrapper, caller, &callTargetStateIndex, &exceptionIndex,
-                                              &callTargetReturnIndex, &returnValueIndex, &callTargetStateToken,
-                                              &exceptionToken, &callTargetReturnToken, &firstInstruction);
+    hr = tracerTokens->ModifyLocalSigAndInitialize(&reWriterWrapper, caller, &callTargetStateIndex, &exceptionIndex,
+                                                   &callTargetReturnIndex, &returnValueIndex, &callTargetStateToken,
+                                                   &exceptionToken, &callTargetReturnToken, &firstInstruction);
+    if (FAILED(hr))
+    {
+        // Signature/local modification failed (e.g. the method's signature is too large to
+        // instrument safely). Abort before committing any IL so the method is left unmodified
+        // rather than producing an inconsistent method body.
+        Logger::Warn("*** CallTarget_RewriterCallback(): ModifyLocalSigAndInitialize() failed with hr=", hr,
+                     ", skipping instrumentation for ", caller->type.name, ".", caller->name, "()");
+        return S_FALSE;
+    }
 
     // ***
     // BEGIN METHOD PART
@@ -475,13 +484,17 @@ HRESULT TracerMethodRewriter::Rewrite(RejitHandlerModule* moduleHandler, RejitHa
     ILInstr* endMethodCallInstr;
     if (isVoid)
     {
-        tracerTokens->WriteEndVoidReturnMemberRef(&reWriterWrapper, integration_type_ref, &caller->type,
-                                                  &endMethodCallInstr);
+        hr = tracerTokens->WriteEndVoidReturnMemberRef(&reWriterWrapper, integration_type_ref, &caller->type,
+                                                       &endMethodCallInstr);
     }
     else
     {
-        tracerTokens->WriteEndReturnMemberRef(&reWriterWrapper, integration_type_ref, &caller->type, &retFuncArg,
-                                              &endMethodCallInstr);
+        hr = tracerTokens->WriteEndReturnMemberRef(&reWriterWrapper, integration_type_ref, &caller->type, &retFuncArg,
+                                                   &endMethodCallInstr);
+    }
+    if (FAILED(hr))
+    {
+        return S_FALSE;
     }
     reWriterWrapper.StLocal(callTargetReturnIndex);
 

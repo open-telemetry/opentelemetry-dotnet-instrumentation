@@ -2,6 +2,8 @@
 #include "../../src/OpenTelemetry.AutoInstrumentation.Native/continuous_profiler.h"
 
 #ifdef _WIN32
+#include <cstdlib>
+#include <memory>
 #include <Windows.h>
 #endif
 
@@ -73,6 +75,39 @@ TEST(ThreadSpanContextMapTest, RemoveBySpanContext)
 }
 
 #ifdef _WIN32
+// Memory-safety regression test for continuous_profiler.cpp: AllocationTick must validate the
+// event length before indexing; a too-short payload underflows `data[dataLen - 8]` (unsigned)
+// into an out-of-bounds read.
+//
+// The call runs in a death-test subprocess: a correct AllocationTick returns cleanly and the
+// child exits 0. If a regression reintroduces the out-of-bounds read, the child crashes and the
+// ExitedWithCode(0) assertion fails - keeping the crash (and AllocationTick's still-held
+// std::shared_lock) isolated to the child instead of destabilizing this test process.
+namespace
+{
+
+// Runs in the death-test child; kept as a helper so the EXPECT_EXIT statement has no bare commas
+// (the preprocessor would otherwise treat them as macro-argument separators).
+[[noreturn]] void RunAllocationTickWithShortPayload()
+{
+    continuous_profiler::ContinuousProfiler profiler;
+    // Force the sub-sampler to accept this event so AllocationTick reaches the parse
+    // (target-per-cycle >= 1 makes the first ShouldSample() return true).
+    profiler.allocationSubSampler = std::make_unique<continuous_profiler::AllocationSubSampler>(1000u, 60u);
+
+    const unsigned char data[4] = {0, 0, 0, 0};
+    profiler.AllocationTick(4u, data);
+
+    std::exit(0);
+}
+
+} // namespace
+
+TEST(ContinuousProfilerSafetyTest, AllocationTickRejectsShortPayloadWithoutReadingPastBuffer)
+{
+    EXPECT_EXIT(RunAllocationTickWithShortPayload(), ::testing::ExitedWithCode(0), "");
+}
+
 // Memory-safety regression test for continuous_profiler.cpp: ContinuousProfilerSetNativeContext
 // must guard against a null profiler_info (its sibling exports do), which is the state before
 // profiler initialization / when profiling is disabled. Turned into a deterministic, catchable

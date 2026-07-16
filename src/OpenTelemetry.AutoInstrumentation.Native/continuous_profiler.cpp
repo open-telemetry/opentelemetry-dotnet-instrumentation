@@ -1389,6 +1389,17 @@ void ContinuousProfiler::AllocationTick(ULONG dataLen, LPCBYTE data)
         return;
     }
 
+    // The event is a set of fixed-size fields followed by a UCS-2, null-terminated type name.
+    // The type-name region must be present, hold at least the 2-byte null terminator, and be a
+    // whole number of UCS-2 code units. Otherwise the character-count computation below
+    // (typeNameCharLen) underflows and the type name would be read past the end of the event.
+    if (dataLen < AllocationTickV4SizeWithoutTypeName + sizeof(WCHAR) ||
+        (dataLen - AllocationTickV4SizeWithoutTypeName) % sizeof(WCHAR) != 0)
+    {
+        trace::Logger::Debug("AllocationTick: event payload too small or malformed (", dataLen, " bytes), ignoring.");
+        return;
+    }
+
     // In v4 it's the last field, so use a relative offset from the end
     uint64_t allocatedSize = *((uint64_t*)&(data[dataLen - 8]));
     // Here's the first byte of the typeName
