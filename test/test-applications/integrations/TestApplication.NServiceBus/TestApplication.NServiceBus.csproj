@@ -22,8 +22,7 @@
     <PackageReference Include="NServiceBus" VersionOverride="$(LibraryVersion)" Condition=" '$(LibraryVersion)' != '' or ('$(TargetFramework)' != 'net472' and '$(TargetFramework)' != 'net9.0' and '$(TargetFramework)' != 'net8.0' ) " />
     <PackageReference Include="NServiceBus" VersionOverride="9.2.12" Condition=" '$(LibraryVersion)' == '' and ( '$(TargetFramework)' == 'net9.0' or '$(TargetFramework)' == 'net8.0' ) " />
     <PackageReference Include="NServiceBus" VersionOverride="8.2.7" Condition=" '$(LibraryVersion)' == '' and '$(TargetFramework)' == 'net472' " />
-    <PackageReference Include="System.Security.Cryptography.Xml" Condition=" '$(TargetFramework)' == 'net472' or ( '$(LibraryVersion)' != '' and '$(LibraryVersion)' &lt;= '9.0.0' )" />
-    <PackageReference Include="System.Security.Cryptography.Xml" VersionOverride="8.0.4" Condition=" '$(LibraryVersion)' == '9.2.10' " />
+    <PackageReference Include="System.Security.Cryptography.Xml" VersionOverride="8.0.4" Condition=" '$(LibraryVersion)' != '' and '$(LibraryVersion)' &lt;= '9.2.10' " />
     <PackageReference Include="System.Security.Cryptography.Xml" Condition=" '$(LibraryVersion)' == '10.1.3' " />
   </ItemGroup>
 
