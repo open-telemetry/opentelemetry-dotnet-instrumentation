@@ -228,8 +228,29 @@ internal static class Program
         };
 
         using var adminClient = new AdminClientBuilder(adminClientConfig).Build();
-        await adminClient.CreateTopicsAsync([
-            new TopicSpecification { Name = topic, ReplicationFactor = 1, NumPartitions = 1 }
-        ]).ConfigureAwait(false);
+
+        // The broker may not be ready to accept admin requests immediately after the
+        // container starts, so retry a few times before giving up.
+        const int maxAttempts = 10;
+        for (var attempt = 1; attempt <= maxAttempts; attempt++)
+        {
+            try
+            {
+                await adminClient.CreateTopicsAsync([
+                    new TopicSpecification { Name = topic, ReplicationFactor = 1, NumPartitions = 1 }
+                ]).ConfigureAwait(false);
+                return;
+            }
+            catch (CreateTopicsException ex) when (ex.Results.All(result => result.Error.Code == ErrorCode.TopicAlreadyExists))
+            {
+                // Topic was already created (e.g. by a previous attempt); nothing else to do.
+                return;
+            }
+            catch (KafkaException ex) when (attempt < maxAttempts)
+            {
+                Console.WriteLine($"CreateTopic attempt {attempt}/{maxAttempts} failed: {ex.Message}. Retrying...");
+                await Task.Delay(TimeSpan.FromSeconds(1)).ConfigureAwait(false);
+            }
+        }
     }
 }
