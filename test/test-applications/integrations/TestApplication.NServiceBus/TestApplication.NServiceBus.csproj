@@ -25,4 +25,9 @@
     <PackageReference Include="System.Security.Cryptography.Xml" Condition=" '$(TargetFramework)' == 'net472' or ( '$(LibraryVersion)' != '' and  '$(LibraryVersion)' &lt;= '9.0.0' )" />
   </ItemGroup>
 
+  <!-- TODO Ignore for now while working on test fixes, remove when main is fixed -->
+  <ItemGroup>
+    <NuGetAuditSuppress Include="https://github.com/advisories/GHSA-8q5v-6pqq-x66h" />
+  </ItemGroup>
+
 </Project>
