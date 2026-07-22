@@ -815,6 +815,9 @@ bool ParseType(PCCOR_SIGNATURE& pbCur, PCCOR_SIGNATURE pbEnd)
         case ELEMENT_TYPE_SZARRAY:
             // SZARRAY Type
 
+            if (pbCur >= pbEnd)
+                return false;
+
             if (*pbCur == ELEMENT_TYPE_CMOD_OPT || *pbCur == ELEMENT_TYPE_CMOD_REQD)
                 return false;
 
@@ -866,19 +869,22 @@ bool ParseType(PCCOR_SIGNATURE& pbCur, PCCOR_SIGNATURE pbEnd)
 // CustomMod* TYPEDBYREF we don't support
 bool ParseParamOrLocal(PCCOR_SIGNATURE& pbCur, PCCOR_SIGNATURE pbEnd)
 {
+    if (pbCur >= pbEnd)
+        return false;
+
     if (*pbCur == ELEMENT_TYPE_CMOD_OPT || *pbCur == ELEMENT_TYPE_CMOD_REQD)
     {
         return false;
     }
-
-    if (pbCur >= pbEnd)
-        return false;
 
     if (*pbCur == ELEMENT_TYPE_TYPEDBYREF)
         return false;
 
     if (*pbCur == ELEMENT_TYPE_BYREF)
         pbCur++;
+
+    if (pbCur >= pbEnd)
+        return false;
 
     if (*pbCur == ELEMENT_TYPE_PTR)
         pbCur++;
@@ -890,10 +896,10 @@ bool ParseParamOrLocal(PCCOR_SIGNATURE& pbCur, PCCOR_SIGNATURE pbEnd)
 // CustomMod* TYPEDBYREF we don't support
 bool ParseRetType(PCCOR_SIGNATURE& pbCur, PCCOR_SIGNATURE pbEnd)
 {
-    if (*pbCur == ELEMENT_TYPE_CMOD_OPT || *pbCur == ELEMENT_TYPE_CMOD_REQD)
+    if (pbCur >= pbEnd)
         return false;
 
-    if (pbCur >= pbEnd)
+    if (*pbCur == ELEMENT_TYPE_CMOD_OPT || *pbCur == ELEMENT_TYPE_CMOD_REQD)
         return false;
 
     if (*pbCur == ELEMENT_TYPE_TYPEDBYREF)

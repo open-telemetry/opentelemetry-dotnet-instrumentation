@@ -322,7 +322,13 @@ mdMethodSpec CallTargetTokens::GetCallTargetDefaultValueMethodSpec(TypeSignature
     ULONG           methodArgumentSignatureSize;
     methodArgumentSignatureSize = methodArgument->GetSignature(methodArgumentSignature);
 
-    auto          signatureLength = 2 + methodArgumentSignatureSize;
+    auto signatureLength = 2 + methodArgumentSignatureSize;
+    if (signatureLength > signatureBufferSize)
+    {
+        Logger::Warn("GetCallTargetDefaultValueMethodSpec: signature (", signatureLength,
+                     " bytes) exceeds the buffer size ", signatureBufferSize, ".");
+        return mdMethodSpecNil;
+    }
     COR_SIGNATURE signature[signatureBufferSize];
     unsigned      offset = 0;
     signature[offset++]  = IMAGE_CEE_CS_CALLCONV_GENERICINST;
@@ -330,6 +336,12 @@ mdMethodSpec CallTargetTokens::GetCallTargetDefaultValueMethodSpec(TypeSignature
 
     memcpy(&signature[offset], methodArgumentSignature, methodArgumentSignatureSize);
     offset += methodArgumentSignatureSize;
+
+    if (offset != signatureLength)
+    {
+        Logger::Warn("GetCallTargetDefaultValueMethodSpec: signature size mismatch.");
+        return mdMethodSpecNil;
+    }
 
     hr = module_metadata->metadata_emit->DefineMethodSpec(getDefaultMemberRef, signature, signatureLength,
                                                           &getDefaultMethodSpec);
@@ -456,6 +468,13 @@ HRESULT CallTargetTokens::ModifyLocalSig(ILRewriter*    reWriter,
         newSignatureSize += newLocalsLen - oldLocalsLen;
     }
 
+    if (newSignatureSize > signatureBufferSize)
+    {
+        Logger::Warn("ModifyLocalSig: the new locals signature (", newSignatureSize, " bytes) exceeds the buffer size ",
+                     signatureBufferSize, "; skipping instrumentation of this method to avoid a buffer overflow.");
+        return E_FAIL;
+    }
+
     // New signature declaration
     COR_SIGNATURE newSignatureBuffer[signatureBufferSize];
     newSignatureBuffer[newSignatureOffset++] = IMAGE_CEE_CS_CALLCONV_LOCAL_SIG;
@@ -503,6 +522,12 @@ HRESULT CallTargetTokens::ModifyLocalSig(ILRewriter*    reWriter,
     newSignatureBuffer[newSignatureOffset++] = ELEMENT_TYPE_VALUETYPE;
     memcpy(&newSignatureBuffer[newSignatureOffset], &callTargetStateTypeRefBuffer, callTargetStateTypeRefSize);
     newSignatureOffset += callTargetStateTypeRefSize;
+
+    if (newSignatureOffset != newSignatureSize)
+    {
+        Logger::Warn("ModifyLocalSig: signature size mismatch.");
+        return E_FAIL;
+    }
 
     // Get new locals token
     mdToken newLocalVarSig;
@@ -678,7 +703,13 @@ mdTypeSpec CallTargetTokens::GetTargetReturnValueTypeRef(TypeSignature* returnAr
     unsigned callTargetReturnTypeRefBuffer;
     auto     callTargetReturnTypeRefSize = CorSigCompressToken(callTargetReturnTypeRef, &callTargetReturnTypeRefBuffer);
 
-    auto          signatureLength = 3 + callTargetReturnTypeRefSize + returnSignatureLength;
+    auto signatureLength = 3 + callTargetReturnTypeRefSize + returnSignatureLength;
+    if (signatureLength > signatureBufferSize)
+    {
+        Logger::Warn("GetTargetReturnValueTypeRef: signature (", signatureLength, " bytes) exceeds the buffer size ",
+                     signatureBufferSize, ".");
+        return mdTypeSpecNil;
+    }
     COR_SIGNATURE signature[signatureBufferSize];
     unsigned      offset = 0;
 
@@ -689,6 +720,12 @@ mdTypeSpec CallTargetTokens::GetTargetReturnValueTypeRef(TypeSignature* returnAr
     signature[offset++] = 0x01;
     memcpy(&signature[offset], returnSignatureBuffer, returnSignatureLength);
     offset += returnSignatureLength;
+
+    if (offset != signatureLength)
+    {
+        Logger::Warn("GetTargetReturnValueTypeRef: signature size mismatch.");
+        return mdTypeSpecNil;
+    }
 
     hr = module_metadata->metadata_emit->GetTokenFromTypeSpec(signature, signatureLength, &returnValueTypeSpec);
     if (FAILED(hr))
@@ -781,8 +818,16 @@ HRESULT CallTargetTokens::ModifyLocalSigAndInitialize(void*         rewriterWrap
     // Init locals
     if (*returnValueIndex != static_cast<ULONG>(ULONG_MAX))
     {
-        *firstInstruction =
-            rewriterWrapper->CallMember(GetCallTargetDefaultValueMethodSpec(&returnFunctionMethod), false);
+        const mdMethodSpec defaultValueMethodSpec = GetCallTargetDefaultValueMethodSpec(&returnFunctionMethod);
+        if (defaultValueMethodSpec == mdMethodSpecNil)
+        {
+            // The signature was too large to build safely; abort instrumentation rather than
+            // emitting a call to a nil token (which would produce invalid IL).
+            Logger::Warn("GetCallTargetDefaultValueMethodSpec() failed.");
+            return E_FAIL;
+        }
+
+        *firstInstruction = rewriterWrapper->CallMember(defaultValueMethodSpec, false);
         rewriterWrapper->StLocal(*returnValueIndex);
 
         rewriterWrapper->CallMember(GetCallTargetReturnValueDefaultMemberRef(*callTargetReturnToken), false);
