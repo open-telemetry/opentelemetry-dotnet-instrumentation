@@ -27,6 +27,7 @@ internal sealed class MockProfilesCollector : IDisposable
 
     public MockProfilesCollector(ITestOutputHelper output, string host = "localhost")
     {
+        ProtobufDescriptorWarmup.Ensure();
         _output = output;
 #if NETFRAMEWORK
         _listener = new(output, HandleHttpRequests, host, "/v1development/profiles/");

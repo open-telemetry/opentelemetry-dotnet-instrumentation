@@ -33,6 +33,7 @@ internal sealed class MockSpansCollector : IDisposable
 
     public MockSpansCollector(ITestOutputHelper output, string host = "localhost")
     {
+        ProtobufDescriptorWarmup.Ensure();
         _output = output;
 
 #if NET
@@ -45,6 +46,7 @@ internal sealed class MockSpansCollector : IDisposable
 #if NET
     public MockSpansCollector(ITestOutputHelper output, X509Certificate2 serverCertificate)
     {
+        ProtobufDescriptorWarmup.Ensure();
         _output = output;
         _listener = new TestHttpServer(output, nameof(MockSpansCollector), serverCertificate, new PathHandler(HandleHttpRequests, "/v1/traces"));
     }

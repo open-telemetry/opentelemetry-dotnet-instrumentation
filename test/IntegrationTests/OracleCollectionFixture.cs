@@ -35,6 +35,12 @@ public sealed class OracleFixture : IAsyncLifetime, IDisposable
     private const string OracleEntrypointPath = "/u01/scripts/entrypoint-with-kstrc.sh";
     private const string OracleOpenTelemetryTraceHost = "host.docker.internal";
     private const UnixFileModes ExecutableFileMode = UnixFileModes.UserRead | UnixFileModes.UserWrite | UnixFileModes.UserExecute | UnixFileModes.GroupRead | UnixFileModes.GroupExecute | UnixFileModes.OtherRead | UnixFileModes.OtherExecute;
+
+    // Overall budget for making the Oracle container ready (container start + DB accepting
+    // SQL*Plus). Kept safely below the integration tests' `--blame-hang 5m` timeout so that a
+    // container that never becomes ready fails this collection fixture fast and locally,
+    // instead of hanging until the hang-dump timer aborts the entire test run.
+    private static readonly TimeSpan OracleReadinessBudget = TimeSpan.FromMinutes(4);
     private static readonly string OracleImage = ReadImageFrom("oracle.Dockerfile");
     private static readonly string[] WalletFiles =
     [
@@ -100,8 +106,10 @@ public sealed class OracleFixture : IAsyncLifetime, IDisposable
             return;
         }
 
-        _container = await LaunchOracleContainerAsync(Port, Password).ConfigureAwait(false);
-        await WaitForOracleDatabaseAsync(_container, Password).ConfigureAwait(false);
+        using var readinessCts = new CancellationTokenSource(OracleReadinessBudget);
+
+        _container = await LaunchOracleContainerAsync(Port, Password, readinessCts.Token).ConfigureAwait(false);
+        await WaitForOracleDatabaseAsync(_container, Password, readinessCts.Token).ConfigureAwait(false);
         WalletDirectory = await CopyWalletAsync(_container, Port).ConfigureAwait(false);
     }
 
@@ -598,7 +606,7 @@ exit 1
         return CreateBashCommand(script);
     }
 
-    private static async Task<IContainer> LaunchOracleContainerAsync(int port, string password)
+    private static async Task<IContainer> LaunchOracleContainerAsync(int port, string password, CancellationToken cancellationToken)
     {
         for (var attempt = 1; attempt <= OracleContainerStartAttempts; attempt++)
         {
@@ -617,7 +625,9 @@ exit 1
             var container = containersBuilder.Build();
             try
             {
-                await container.StartAsync().ConfigureAwait(false);
+                // Pass the readiness budget token so a container whose internal port never
+                // opens cancels the wait strategy instead of blocking indefinitely.
+                await container.StartAsync(cancellationToken).ConfigureAwait(false);
                 return container;
             }
             catch (ContainerNotRunningException)
@@ -628,7 +638,13 @@ exit 1
                     throw;
                 }
 
-                await Task.Delay(TimeSpan.FromSeconds(1)).ConfigureAwait(false);
+                await Task.Delay(TimeSpan.FromSeconds(1), cancellationToken).ConfigureAwait(false);
+            }
+            catch (OperationCanceledException)
+            {
+                // Readiness budget exhausted while starting the container; clean up and fail fast.
+                await container.DisposeAsync().ConfigureAwait(false);
+                throw;
             }
         }
 
@@ -665,7 +681,7 @@ exit 1
             });
     }
 
-    private static async Task WaitForOracleDatabaseAsync(IContainer container, string password)
+    private static async Task WaitForOracleDatabaseAsync(IContainer container, string password, CancellationToken cancellationToken)
     {
         var sql = @"
 set heading off feedback off pages 0
@@ -673,21 +689,28 @@ whenever sqlerror exit sql.sqlcode
 select 1 from dual;
 exit
 ";
-        var deadline = DateTime.UtcNow.AddMinutes(10);
         var command = CreateSqlPlusCommand(sql, password);
 
-        while (DateTime.UtcNow < deadline)
+        try
         {
-            var result = await container.ExecAsync(command).ConfigureAwait(false);
-            if (result.ExitCode == 0)
+            while (true)
             {
-                return;
+                cancellationToken.ThrowIfCancellationRequested();
+
+                var result = await container.ExecAsync(command, cancellationToken).ConfigureAwait(false);
+                if (result.ExitCode == 0)
+                {
+                    return;
+                }
+
+                await Task.Delay(TimeSpan.FromSeconds(5), cancellationToken).ConfigureAwait(false);
             }
-
-            await Task.Delay(TimeSpan.FromSeconds(5)).ConfigureAwait(false);
         }
-
-        throw new InvalidOperationException("Timed out waiting for Oracle ADB to accept SQLPlus connections.");
+        catch (OperationCanceledException)
+        {
+            // Readiness budget exhausted before the database accepted SQL*Plus connections.
+            throw new InvalidOperationException("Timed out waiting for Oracle ADB to accept SQLPlus connections.");
+        }
     }
 
     private static async Task<string> CopyWalletAsync(IContainer container, int port)
