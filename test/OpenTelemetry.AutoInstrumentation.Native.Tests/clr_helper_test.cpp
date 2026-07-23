@@ -3,6 +3,9 @@
 #include "../../src/OpenTelemetry.AutoInstrumentation.Native/clr_helpers.h"
 #include "test_helpers.h"
 
+#ifdef _WIN32
+#include <Windows.h>
+#endif
 #include <vector>
 
 using namespace trace;
@@ -266,3 +269,118 @@ TEST_F(CLRHelperTest, DoesNotFindDoubleNestedTypeDefsByName)
         EXPECT_EQ(typeDef, mdTypeDefNil) << "Failed type is : " << def << std::endl;
     }
 }
+
+#ifdef _WIN32
+// Memory-safety regression tests for the managed-metadata signature parser used by
+// FunctionMethodSignature::TryParse. ParseRetType/ParseType historically dereferenced *pbCur
+// before the pbCur < pbEnd bounds check, reading one byte past a truncated signature blob.
+// The signature bytes are placed at the end of a committed page backed by a PAGE_NOACCESS
+// guard page, so any over-read faults deterministically (caught via SEH).
+namespace
+{
+
+class GuardedSignatureBuffer
+{
+public:
+    explicit GuardedSignatureBuffer(const unsigned char* bytes, size_t size)
+    {
+        SYSTEM_INFO si{};
+        GetSystemInfo(&si);
+        const size_t page = si.dwPageSize;
+
+        // The signature must fit within the committed page so that its final byte abuts the
+        // guard page; a larger request cannot be represented by this helper.
+        if (size == 0 || size > page)
+        {
+            return;
+        }
+
+        auto* base = static_cast<unsigned char*>(VirtualAlloc(nullptr, page * 2, MEM_RESERVE, PAGE_NOACCESS));
+        if (base == nullptr)
+        {
+            return;
+        }
+
+        if (VirtualAlloc(base, page, MEM_COMMIT, PAGE_READWRITE) == nullptr)
+        {
+            VirtualFree(base, 0, MEM_RELEASE);
+            return;
+        }
+
+        // Only publish base_/data_ once both allocations succeeded; on failure data() stays null
+        // and the test asserts on it rather than computing an invalid pointer / copying into it.
+        base_ = base;
+        data_ = base_ + page - size; // last byte abuts the guard page
+        memcpy(data_, bytes, size);
+    }
+
+    ~GuardedSignatureBuffer()
+    {
+        if (base_ != nullptr)
+        {
+            VirtualFree(base_, 0, MEM_RELEASE);
+        }
+    }
+
+    GuardedSignatureBuffer(const GuardedSignatureBuffer&)            = delete;
+    GuardedSignatureBuffer& operator=(const GuardedSignatureBuffer&) = delete;
+
+    const unsigned char* data() const
+    {
+        return data_;
+    }
+
+private:
+    unsigned char* base_ = nullptr;
+    unsigned char* data_ = nullptr;
+};
+
+// SEH wrapper - must not own any C++ objects requiring unwinding.
+bool TryParseAccessesGuardPage(FunctionMethodSignature& signature, HRESULT& hrOut)
+{
+    __try
+    {
+        hrOut = signature.TryParse();
+        return false;
+    }
+    __except (GetExceptionCode() == EXCEPTION_ACCESS_VIOLATION ? EXCEPTION_EXECUTE_HANDLER : EXCEPTION_CONTINUE_SEARCH)
+    {
+        return true;
+    }
+}
+
+} // namespace
+
+TEST(CLRHelperSignatureSafetyTest, TruncatedSignatureBeforeReturnTypeDoesNotReadPastEnd)
+{
+    // [callconv = IMAGE_CEE_CS_CALLCONV_DEFAULT (0x00)] [param count = 1] and nothing else:
+    // after consuming both bytes pbCur == pbEnd, so ParseRetType must not dereference.
+    const unsigned char sig[] = {IMAGE_CEE_CS_CALLCONV_DEFAULT, 0x01};
+
+    GuardedSignatureBuffer buffer(sig, sizeof(sig));
+    ASSERT_NE(buffer.data(), nullptr) << "Failed to set up the guard-page buffer for the test.";
+    FunctionMethodSignature signature(buffer.data(), static_cast<unsigned>(sizeof(sig)));
+
+    HRESULT    hr      = E_UNEXPECTED;
+    const bool faulted = TryParseAccessesGuardPage(signature, hr);
+
+    ASSERT_FALSE(faulted) << "ParseRetType read one byte past the end of the signature buffer.";
+    ASSERT_EQ(hr, E_FAIL) << "A truncated signature must be rejected without reading past the buffer.";
+}
+
+TEST(CLRHelperSignatureSafetyTest, TrailingSzArrayElementDoesNotReadPastEnd)
+{
+    // [callconv 0x00] [param count 1] [ret type = ELEMENT_TYPE_SZARRAY (0x1D)] with no element type.
+    const unsigned char sig[] = {IMAGE_CEE_CS_CALLCONV_DEFAULT, 0x01, ELEMENT_TYPE_SZARRAY};
+
+    GuardedSignatureBuffer buffer(sig, sizeof(sig));
+    ASSERT_NE(buffer.data(), nullptr) << "Failed to set up the guard-page buffer for the test.";
+    FunctionMethodSignature signature(buffer.data(), static_cast<unsigned>(sizeof(sig)));
+
+    HRESULT    hr      = E_UNEXPECTED;
+    const bool faulted = TryParseAccessesGuardPage(signature, hr);
+
+    ASSERT_FALSE(faulted) << "ParseType (SZARRAY) read one byte past the end of the signature buffer.";
+    ASSERT_EQ(hr, E_FAIL) << "A signature ending in SZARRAY must be rejected without reading past the buffer.";
+}
+#endif
