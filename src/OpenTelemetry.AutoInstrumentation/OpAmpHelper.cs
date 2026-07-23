@@ -189,6 +189,6 @@ internal static class OpAmpHelper
         return attributeName
             is Constants.ResourceAttributes.AttributeServiceName
             or Constants.ResourceAttributes.AttributeServiceInstanceId
-            or Constants.ResourceAttributes.AttributeServiceNamespaceName;
+            or Constants.ResourceAttributes.AttributeServiceNamespace;
     }
 }
