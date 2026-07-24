@@ -26,6 +26,7 @@ internal sealed class MockLogsCollector : IDisposable
 
     public MockLogsCollector(ITestOutputHelper output, string host = "localhost")
     {
+        ProtobufDescriptorWarmup.Ensure();
         _output = output;
 
 #if NETFRAMEWORK
