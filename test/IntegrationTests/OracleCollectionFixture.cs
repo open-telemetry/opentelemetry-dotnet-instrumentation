@@ -565,7 +565,8 @@ set -e
 echo ""$openssl_output""
 echo ""openssl s_client exit code: ${openssl_exit}""
 
-if echo ""$openssl_output"" | grep -q -- '-----BEGIN CERTIFICATE-----' \
+if [ ""$openssl_exit"" -ne 124 ] && [ ""$openssl_exit"" -ne 137 ] \
+   && echo ""$openssl_output"" | grep -q -- '-----BEGIN CERTIFICATE-----' \
    && echo ""$openssl_output"" | grep -Eq 'Verify return code: 0 \(ok\)|Verification: OK'; then
   exit 0
 fi
