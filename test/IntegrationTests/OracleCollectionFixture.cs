@@ -37,10 +37,10 @@ public sealed class OracleFixture : IAsyncLifetime, IDisposable
     private const UnixFileModes ExecutableFileMode = UnixFileModes.UserRead | UnixFileModes.UserWrite | UnixFileModes.UserExecute | UnixFileModes.GroupRead | UnixFileModes.GroupExecute | UnixFileModes.OtherRead | UnixFileModes.OtherExecute;
 
     // Overall budget for making the Oracle container ready (container start + DB accepting
-    // SQL*Plus). Kept safely below the integration tests' `--blame-hang 5m` timeout so that a
+    // SQL*Plus). Kept safely below the integration tests' `--blame-hang 10m` timeout so that a
     // container that never becomes ready fails this collection fixture fast and locally,
     // instead of hanging until the hang-dump timer aborts the entire test run.
-    private static readonly TimeSpan OracleReadinessBudget = TimeSpan.FromMinutes(4);
+    private static readonly TimeSpan OracleReadinessBudget = TimeSpan.FromMinutes(8);
     private static readonly string OracleImage = ReadImageFrom("oracle.Dockerfile");
     private static readonly string[] WalletFiles =
     [

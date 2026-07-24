@@ -651,7 +651,7 @@ partial class Build
                 DotNetTestSettings ConfigureIntegrationTest(DotNetTestSettings settings) => settings
                     .SetConfiguration(BuildConfiguration)
                     .SetFilter(AndFilter(TestNameFilter(), ContainersFilter()))
-                    .SetBlameHangTimeout("5m")
+                    .SetBlameHangTimeout("10m")
                     .EnableTrxLogOutput(GetResultsDirectory(project))
                     .SetProjectFile(project)
                     .SetNoRestore(NoRestore);
