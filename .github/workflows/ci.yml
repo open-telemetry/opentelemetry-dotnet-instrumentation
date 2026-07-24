@@ -104,6 +104,17 @@ jobs:
         with: 
           install: localdb
 
+      # The Oracle ADB image is multi-GB and slow to pull. Pull it here, before the test run, so
+      # the download time is not counted against the Oracle fixture's readiness budget or the
+      # `--blame-hang` timer inside `dotnet test`. Only the x64 Linux leg runs the Oracle tests.
+      - name: Pre-pull Oracle database image
+        if: ${{ matrix.machine == 'ubuntu-22.04' }}
+        shell: bash
+        run: |
+          image="$(grep -oE 'ghcr.io/oracle/adb-free[^[:space:]]+' test/IntegrationTests/docker/oracle.Dockerfile)"
+          echo "Pre-pulling Oracle image: ${image}"
+          docker pull "${image}"
+
       - name: Run TestWorkflow
         shell: bash
         env:

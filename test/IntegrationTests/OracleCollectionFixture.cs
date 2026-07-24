@@ -563,7 +563,17 @@ openssl_output=""$(timeout 10 openssl s_client -connect ""${trace_host}:${trace_
 openssl_exit=$?
 set -e
 echo ""$openssl_output""
-if [ ""$openssl_exit"" -eq 0 ] && echo ""$openssl_output"" | grep -q -- '-----BEGIN CERTIFICATE-----'; then
+echo ""openssl s_client exit code: ${openssl_exit}""
+
+# Determine success from the verified handshake in the output rather than from the
+# openssl s_client exit code: with TLS 1.3 and an HTTP/2 (h2) endpoint, s_client routinely
+# returns a non-zero exit code after a fully successful, verified handshake (post-handshake
+# session-ticket read / the server closing the connection when fed from /dev/null). Gating on
+# that exit code makes this readiness check intermittently fail even though the endpoint is
+# reachable and its certificate verifies. -verify_return_error still aborts the handshake on an
+# actual verification failure, in which case the success markers below are absent.
+if echo ""$openssl_output"" | grep -q -- '-----BEGIN CERTIFICATE-----' \
+   && echo ""$openssl_output"" | grep -Eq 'Verify return code: 0 \(ok\)|Verification: OK'; then
   exit 0
 fi
 
