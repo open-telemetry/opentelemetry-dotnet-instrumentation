@@ -19,6 +19,9 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 
 ### Fixed
 
+- Use the standard `service.namespace` resource attribute when identifying an
+  application through OpAMP.
+
 ## [v1.16.0](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/tag/v1.16.0)
 
 This release includes all changes from [1.16.0-beta.1](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/tag/v1.16.0-beta.1)
