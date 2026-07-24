@@ -104,6 +104,23 @@ jobs:
         with: 
           install: localdb
 
+      # The Linux test leg is disk-heavy: it pulls many database images and the Oracle ADB image
+      # alone expands several GB of datafiles when it boots, which can exhaust the hosted runner's
+      # ~14 GB of free space on the OS disk. Give Docker more room by relocating its data-root
+      # onto the runner's much larger ephemeral /mnt disk (~70 GB). Must run before any image is pulled.
+      - name: Give Docker more disk space
+        if: ${{ runner.os == 'Linux' }}
+        shell: bash
+        run: |
+          df -h / /mnt || true
+          sudo systemctl stop docker.service docker.socket
+          sudo mkdir -p /mnt/docker
+          existing='{}'
+          if [ -f /etc/docker/daemon.json ]; then existing="$(sudo cat /etc/docker/daemon.json)"; fi
+          echo "${existing}" | jq '. + {"data-root":"/mnt/docker"}' | sudo tee /etc/docker/daemon.json
+          sudo systemctl start docker.service
+          docker info --format 'Docker Root Dir: {{ .DockerRootDir }}'
+
       # The Oracle ADB image is multi-GB and slow to pull. Pull it here, before the test run, so
       # the download time is not counted against the Oracle fixture's readiness budget or the
       # `--blame-hang` timer inside `dotnet test`. Only the x64 Linux leg runs the Oracle tests.
