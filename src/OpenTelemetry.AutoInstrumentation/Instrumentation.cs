@@ -254,19 +254,22 @@ internal static class Instrumentation
         var allocationSamplingEnabled = config.AllocationSamplingEnabled;
         Logger.Debug($"Continuous profiling configuration: Thread sampling enabled: {threadSamplingEnabled}, thread sampling interval: {config.ThreadSamplingInterval}, allocation sampling enabled: {allocationSamplingEnabled}, max memory samples per minute: {config.MaxMemorySamplesPerMinute}, export interval: {config.ExportInterval}, export timeout: {config.ExportTimeout}, continuous profiler exporter: {config.Exporter?.GetType()}");
 
-        if (threadSamplingEnabled || allocationSamplingEnabled)
+        if (threadSamplingEnabled && config.ThreadSamplingInterval == 0)
         {
-            if (config.Exporter == null)
-            {
-                Logger.Warning("Continuous profiler exporter is not configured. Feature will not be enabled.");
-                return;
-            }
-
-            if (!TryInitializeContinuousSamplingExport(config.Exporter, config.ThreadSamplingEnabled, config.AllocationSamplingEnabled, config.ExportInterval, config.ExportTimeout))
-            {
-                return;
-            }
+            Logger.Warning("Continuous profiler thread sampling interval must be greater than zero. Thread sampling will not be enabled.");
+            threadSamplingEnabled = false;
         }
+
+        var runtimeThreadSamplingConfigured =
+            !threadSamplingEnabled &&
+            config.ThreadSamplingInterval != 0 &&
+            config.Exporter != null &&
+            config.ExportInterval > TimeSpan.Zero &&
+            config.ExportTimeout > TimeSpan.Zero;
+
+        // Capture preparation independently of the effective initial state. Mixed-mode validation below may
+        // disable CPU sampling, but a later valid interval must still be able to enable the prepared pipeline.
+        var threadSamplingPrepared = threadSamplingEnabled || runtimeThreadSamplingConfigured;
 
         uint selectiveSamplingInterval = 0;
         var selectiveSamplingConfig = _pluginManager.GetFirstSelectiveSamplingConfiguration();
@@ -284,17 +287,7 @@ internal static class Instrumentation
                 Logger.Debug(
                     $"Selective sampling configuration: sampling interval: {selectiveSamplingConfig.SamplingInterval}, export interval: {selectiveSamplingConfig.ExportInterval}, export timeout: {selectiveSamplingConfig.ExportTimeout}, samples exporter: {selectiveSamplingConfig.Exporter.GetType()}");
                 selectiveSamplingInterval = selectiveSamplingConfig.SamplingInterval;
-                if (!TryInitializeSelectedThreadSamplingExport(selectiveSamplingConfig))
-                {
-                    return;
-                }
             }
-        }
-
-        if (!threadSamplingEnabled && !allocationSamplingEnabled && selectiveSamplingConfig == null)
-        {
-            // No sampling requested.
-            return;
         }
 
         var selectiveSamplingEnabled = selectiveSamplingInterval != 0;
@@ -303,18 +296,56 @@ internal static class Instrumentation
         {
             if (config.ThreadSamplingInterval <= selectiveSamplingInterval)
             {
-                Logger.Warning($"Continuous sampling interval must be higher than selective sampling interval. Selective sampling interval: {selectiveSamplingInterval}, continuous sampling interval: {config.ThreadSamplingInterval}");
+                Logger.Warning($"Continuous sampling interval must be higher than selective sampling interval. Thread sampling will not be enabled. Selective sampling interval: {selectiveSamplingInterval}, continuous sampling interval: {config.ThreadSamplingInterval}");
+                threadSamplingEnabled = false;
+            }
+            else if (config.ThreadSamplingInterval % selectiveSamplingInterval != 0)
+            {
+                Logger.Warning($"Continuous sampling interval must be a multiple of selective sampling interval. Thread sampling will not be enabled. Selective sampling interval: {selectiveSamplingInterval}, continuous sampling interval: {config.ThreadSamplingInterval}");
+                threadSamplingEnabled = false;
+            }
+        }
+
+        // Prepare the CPU sampling pipeline without starting the native sampling thread.
+        // Runtime reconfiguration can then enable CPU sampling without rebuilding managed or native resources.
+        var continuousSamplingPipelineRequired = threadSamplingPrepared || allocationSamplingEnabled;
+        if (continuousSamplingPipelineRequired)
+        {
+            if (config.Exporter == null)
+            {
+                Logger.Warning("Continuous profiler exporter is not configured. Feature will not be enabled.");
                 return;
             }
 
-            if (config.ThreadSamplingInterval % selectiveSamplingInterval != 0)
+            if (!TryInitializeContinuousSamplingExport(
+                    config.Exporter,
+                    threadSamplingPrepared,
+                    allocationSamplingEnabled,
+                    config.ExportInterval,
+                    config.ExportTimeout))
             {
-                Logger.Warning($"Continuous sampling interval must be a multiple of selective sampling interval. Selective sampling interval: {selectiveSamplingInterval}, continuous sampling interval: {config.ThreadSamplingInterval}");
                 return;
             }
         }
 
-        NativeMethods.ConfigureNativeContinuousProfiler(threadSamplingEnabled, config.ThreadSamplingInterval, allocationSamplingEnabled, config.MaxMemorySamplesPerMinute, selectiveSamplingInterval);
+        if (selectiveSamplingEnabled &&
+            !TryInitializeSelectedThreadSamplingExport(selectiveSamplingConfig!))
+        {
+            return;
+        }
+
+        if (!continuousSamplingPipelineRequired && !selectiveSamplingEnabled)
+        {
+            // No sampling requested.
+            return;
+        }
+
+        NativeMethods.ConfigureNativeContinuousProfiler(
+            threadSamplingEnabled,
+            threadSamplingPrepared ? config.ThreadSamplingInterval : 0,
+            allocationSamplingEnabled,
+            config.MaxMemorySamplesPerMinute,
+            selectiveSamplingInterval);
 #if NETFRAMEWORK
         // On .NET Framework, we need a dedicated canary thread for seeded stack walking
         _canaryThreadManager = new CanaryThreadManager();
@@ -341,14 +372,14 @@ internal static class Instrumentation
 
     private static bool TryInitializeContinuousSamplingExport(
         IContinuousProfilerExporter exporter,
-        bool threadSamplingEnabled,
+        bool threadSamplingPrepared,
         bool allocationSamplingEnabled,
         TimeSpan exportInterval,
         TimeSpan exportTimeout)
     {
         InitializeBufferProcessing(exportInterval, exportTimeout);
 
-        if (threadSamplingEnabled)
+        if (threadSamplingPrepared)
         {
             _sampleExporterBuilder?.AddHandler(SampleType.Continuous, exporter.ExportThreadSamples, exportTimeout);
         }

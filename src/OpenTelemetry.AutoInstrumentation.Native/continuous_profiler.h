@@ -18,6 +18,9 @@
 #include <unordered_map>
 #include <random>
 #include <unordered_set>
+#include <atomic>
+#include <condition_variable>
+#include <thread>
 
 #ifdef _WIN32
 #define EXPORTTHIS __declspec(dllexport)
@@ -334,13 +337,27 @@ private:
 
 enum class SamplingType : int32_t { Continuous = 1, SelectedThreads = 2 };
 
+struct ThreadSamplingConfiguration
+{
+    std::optional<unsigned int> threadSamplingInterval;
+    std::optional<unsigned int> selectedThreadsSamplingInterval;
+    uint64_t                    version;
+};
+
 class ContinuousProfiler
 {
 public:
-    std::optional<unsigned int> threadSamplingInterval;
-    std::optional<unsigned int> selectedThreadsSamplingInterval;
     std::chrono::time_point<std::chrono::steady_clock> nextOutdatedEntriesScan;
-    void                        StartThreadSampling();
+    ~ContinuousProfiler();
+    bool                        SetThreadSamplingInterval(unsigned int samplingInterval);
+    bool                        SetThreadSamplingEnabled(bool enabled);
+    void                        ConfigureSelectedThreadSampling(unsigned int samplingInterval);
+    unsigned int                GetConfiguredThreadSamplingInterval() const;
+    ThreadSamplingConfiguration GetThreadSamplingConfiguration() const;
+    bool WaitForSamplingConfigurationChange(uint64_t configurationVersion, unsigned int samplingInterval);
+    bool                        IsThreadSamplingStopRequested() const;
+    bool                        IsThreadSamplingThreadRunning() const;
+    uint64_t                    GetThreadSamplingThreadGeneration() const;
     void                        Shutdown();
     bool                        IsShutdownRequested() const;
     static void                 InitSelectiveSamplingBuffer();
@@ -369,13 +386,23 @@ public:
     ThreadSamplesBuffer* cur_cpu_writer_ = nullptr;
     SamplingStatistics stats_;
     void AllocateBuffer();
-    void PublishBuffer();
-    mutable std::mutex      shutdown_mutex_;
-    std::condition_variable shutdown_cv_;
+    void PublishBuffer(unsigned int samplingInterval);
 
 private:
-    std::atomic_bool             shutdown_requested_{ false };
+    HRESULT StartThreadSampling();
+    void    StopThreadSampling();
+
+    std::atomic_bool             shutdown_requested_{false};
+    std::atomic_bool             thread_sampling_stop_requested_{false};
+    mutable std::mutex           sampling_configuration_mutex_;
+    std::condition_variable      sampling_configuration_cv_;
+    unsigned int                configured_thread_sampling_interval_ = 0;
+    std::optional<unsigned int>  thread_sampling_interval_;
+    std::optional<unsigned int>  selected_threads_sampling_interval_;
+    uint64_t                     sampling_configuration_version_ = 0;
+    mutable std::mutex           thread_sampling_thread_mutex_;
     std::unique_ptr<std::thread> thread_sampling_thread_;
+    uint64_t                     thread_sampling_thread_generation_ = 0;
     EVENTPIPE_SESSION            session_ = 0;
     IStackWalker*                stackWalker_ = nullptr;
 };
@@ -385,8 +412,9 @@ private:
 void AllocationSamplingAppendToBuffer(int32_t appendLen, unsigned char* appendBuf);
 
 bool ThreadSamplingShouldProduceThreadSample();
-void ThreadSamplingRecordProducedThreadSample(std::vector<unsigned char>* buf);
+void ThreadSamplingRecordProducedThreadSample(std::vector<unsigned char>* buf, unsigned int samplingInterval);
 // Can return 0 if none are pending
 int32_t ThreadSamplingConsumeOneThreadSample(int32_t len, unsigned char* buf);
+unsigned int ThreadSamplingGetLastReadSamplingInterval();
 
 #endif // OTEL_CONTINUOUS_PROFILER_H_

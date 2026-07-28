@@ -59,16 +59,62 @@ internal static class NativeMethods
     }
 #endif
 
-    public static void ConfigureNativeContinuousProfiler(bool threadSamplingEnabled, uint threadSamplingInterval, bool allocationSamplingEnabled, uint maxMemorySamplesPerMinute, uint selectedThreadSamplingInterval)
+    public static void ConfigureNativeContinuousProfiler(
+        bool threadSamplingEnabled,
+        uint threadSamplingInterval,
+        bool allocationSamplingEnabled,
+        uint maxMemorySamplesPerMinute,
+        uint selectedThreadSamplingInterval)
     {
         if (IsWindows)
         {
-            Windows.ConfigureContinuousProfiler(threadSamplingEnabled, threadSamplingInterval, allocationSamplingEnabled, maxMemorySamplesPerMinute, selectedThreadSamplingInterval);
+            Windows.ConfigureContinuousProfiler(
+                threadSamplingEnabled,
+                threadSamplingInterval,
+                allocationSamplingEnabled,
+                maxMemorySamplesPerMinute,
+                selectedThreadSamplingInterval);
         }
         else
         {
-            NonWindows.ConfigureContinuousProfiler(threadSamplingEnabled, threadSamplingInterval, allocationSamplingEnabled, maxMemorySamplesPerMinute, selectedThreadSamplingInterval);
+            NonWindows.ConfigureContinuousProfiler(
+                threadSamplingEnabled,
+                threadSamplingInterval,
+                allocationSamplingEnabled,
+                maxMemorySamplesPerMinute,
+                selectedThreadSamplingInterval);
         }
+    }
+
+    public static void SetNativeContinuousProfilerSamplingInterval(uint threadSamplingInterval)
+    {
+        if (IsWindows)
+        {
+            Windows.SetContinuousProfilerSamplingInterval(threadSamplingInterval);
+        }
+        else
+        {
+            NonWindows.SetContinuousProfilerSamplingInterval(threadSamplingInterval);
+        }
+    }
+
+    public static void SetNativeContinuousProfilerEnabled(bool enabled)
+    {
+        if (IsWindows)
+        {
+            Windows.SetContinuousProfilerEnabled(enabled);
+        }
+        else
+        {
+            NonWindows.SetContinuousProfilerEnabled(enabled);
+        }
+    }
+
+    public static uint GetNativeContinuousProfilerSamplingInterval()
+    {
+        return IsWindows
+            ? Windows.GetContinuousProfilerSamplingInterval()
+            : NonWindows.GetContinuousProfilerSamplingInterval();
     }
 
     public static int ContinuousProfilerReadThreadSamples(int len, byte[] buf)
@@ -220,37 +266,54 @@ internal static class NativeMethods
 
         [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
         [DllImport("OpenTelemetry.AutoInstrumentation.Native.dll")]
-        public static extern void ConfigureContinuousProfiler(bool threadSamplingEnabled, uint threadSamplingInterval, bool allocationSamplingEnabled, uint maxMemorySamplesPerMinute, uint selectedThreadSamplingInterval);
+        public static extern void ConfigureContinuousProfiler(
+            bool threadSamplingEnabled,
+            uint threadSamplingInterval,
+            bool allocationSamplingEnabled,
+            uint maxMemorySamplesPerMinute,
+            uint selectedThreadSamplingInterval);
 
         [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
         [DllImport("OpenTelemetry.AutoInstrumentation.Native.dll")]
+        public static extern void SetContinuousProfilerSamplingInterval(uint threadSamplingInterval);
+
+        [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
+        [DllImport("OpenTelemetry.AutoInstrumentation.Native.dll")]
+        public static extern void SetContinuousProfilerEnabled(bool enabled);
+
+        [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
+        [DllImport("OpenTelemetry.AutoInstrumentation.Native.dll", CallingConvention = CallingConvention.Cdecl)]
         public static extern int ContinuousProfilerReadThreadSamples(int len, byte[] buf);
 
 #if NET
         [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
-        [DllImport("OpenTelemetry.AutoInstrumentation.Native.dll")]
+        [DllImport("OpenTelemetry.AutoInstrumentation.Native.dll", CallingConvention = CallingConvention.Cdecl)]
         public static extern int ContinuousProfilerReadAllocationSamples(int len, byte[] buf);
 #endif
 
         [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
-        [DllImport("OpenTelemetry.AutoInstrumentation.Native.dll")]
+        [DllImport("OpenTelemetry.AutoInstrumentation.Native.dll", CallingConvention = CallingConvention.Cdecl)]
         public static extern int SelectiveSamplerReadThreadSamples(int len, byte[] buf);
 
         [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
-        [DllImport("OpenTelemetry.AutoInstrumentation.Native.dll")]
+        [DllImport("OpenTelemetry.AutoInstrumentation.Native.dll", CallingConvention = CallingConvention.Cdecl)]
         public static extern void ContinuousProfilerSetNativeContext(ulong traceIdHigh, ulong traceIdLow, ulong spanId);
 
         [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
-        [DllImport("OpenTelemetry.AutoInstrumentation.Native.dll")]
+        [DllImport("OpenTelemetry.AutoInstrumentation.Native.dll", CallingConvention = CallingConvention.Cdecl)]
         public static extern void ContinuousProfilerNotifySpanStopped(ulong traceIdHigh, ulong traceIdLow, ulong spanId);
 
         [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
-        [DllImport("OpenTelemetry.AutoInstrumentation.Native.dll")]
+        [DllImport("OpenTelemetry.AutoInstrumentation.Native.dll", CallingConvention = CallingConvention.Cdecl)]
         public static extern void SelectiveSamplingStart(ulong traceIdHigh, ulong traceIdLow);
 
         [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
-        [DllImport("OpenTelemetry.AutoInstrumentation.Native.dll")]
+        [DllImport("OpenTelemetry.AutoInstrumentation.Native.dll", CallingConvention = CallingConvention.Cdecl)]
         public static extern void SelectiveSamplingStop(ulong traceIdHigh, ulong traceIdLow);
+
+        [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
+        [DllImport("OpenTelemetry.AutoInstrumentation.Native.dll")]
+        public static extern uint GetContinuousProfilerSamplingInterval();
     }
 
     // assume .NET Core if not running on Windows
@@ -272,36 +335,53 @@ internal static class NativeMethods
 
         [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
         [DllImport("OpenTelemetry.AutoInstrumentation.Native")]
-        public static extern void ConfigureContinuousProfiler(bool threadSamplingEnabled, uint threadSamplingInterval, bool allocationSamplingEnabled, uint maxMemorySamplesPerMinute, uint selectedThreadSamplingInterval);
+        public static extern void ConfigureContinuousProfiler(
+            bool threadSamplingEnabled,
+            uint threadSamplingInterval,
+            bool allocationSamplingEnabled,
+            uint maxMemorySamplesPerMinute,
+            uint selectedThreadSamplingInterval);
 
         [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
         [DllImport("OpenTelemetry.AutoInstrumentation.Native")]
+        public static extern void SetContinuousProfilerSamplingInterval(uint threadSamplingInterval);
+
+        [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
+        [DllImport("OpenTelemetry.AutoInstrumentation.Native")]
+        public static extern void SetContinuousProfilerEnabled(bool enabled);
+
+        [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
+        [DllImport("OpenTelemetry.AutoInstrumentation.Native", CallingConvention = CallingConvention.Cdecl)]
         public static extern int ContinuousProfilerReadThreadSamples(int len, byte[] buf);
 
 #if NET
         [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
-        [DllImport("OpenTelemetry.AutoInstrumentation.Native")]
+        [DllImport("OpenTelemetry.AutoInstrumentation.Native", CallingConvention = CallingConvention.Cdecl)]
         public static extern int ContinuousProfilerReadAllocationSamples(int len, byte[] buf);
 #endif
 
         [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
-        [DllImport("OpenTelemetry.AutoInstrumentation.Native")]
+        [DllImport("OpenTelemetry.AutoInstrumentation.Native", CallingConvention = CallingConvention.Cdecl)]
         public static extern int SelectiveSamplerReadThreadSamples(int len, byte[] buf);
 
         [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
-        [DllImport("OpenTelemetry.AutoInstrumentation.Native")]
+        [DllImport("OpenTelemetry.AutoInstrumentation.Native", CallingConvention = CallingConvention.Cdecl)]
         public static extern void ContinuousProfilerSetNativeContext(ulong traceIdHigh, ulong traceIdLow, ulong spanId);
 
         [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
-        [DllImport("OpenTelemetry.AutoInstrumentation.Native")]
+        [DllImport("OpenTelemetry.AutoInstrumentation.Native", CallingConvention = CallingConvention.Cdecl)]
         public static extern void ContinuousProfilerNotifySpanStopped(ulong traceIdHigh, ulong traceIdLow, ulong spanId);
 
         [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
-        [DllImport("OpenTelemetry.AutoInstrumentation.Native")]
+        [DllImport("OpenTelemetry.AutoInstrumentation.Native", CallingConvention = CallingConvention.Cdecl)]
         public static extern void SelectiveSamplingStart(ulong traceIdHigh, ulong traceIdLow);
 
         [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
-        [DllImport("OpenTelemetry.AutoInstrumentation.Native")]
+        [DllImport("OpenTelemetry.AutoInstrumentation.Native", CallingConvention = CallingConvention.Cdecl)]
         public static extern void SelectiveSamplingStop(ulong traceIdHigh, ulong traceIdLow);
+
+        [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
+        [DllImport("OpenTelemetry.AutoInstrumentation.Native")]
+        public static extern uint GetContinuousProfilerSamplingInterval();
     }
 }

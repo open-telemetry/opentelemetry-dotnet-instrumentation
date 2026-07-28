@@ -4,6 +4,12 @@
 using System.Diagnostics;
 using My.Custom.Test.Namespace;
 
+if (args.Contains("--runtime-reconfiguration"))
+{
+    TestApplication.ContinuousProfiler.RuntimeReconfigurationScenario.Run();
+    return;
+}
+
 using ActivitySource activitySource = new("TestApplication.ContinuousProfiler", "1.0.0");
 
 using var activity = activitySource.StartActivity();

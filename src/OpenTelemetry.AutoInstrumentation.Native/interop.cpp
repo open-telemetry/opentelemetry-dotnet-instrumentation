@@ -11,6 +11,7 @@
 
 #include "cor_profiler.h"
 #include "configuration.h"
+#include "continuous_profiler.h"
 
 #ifndef _WIN32
 #include <dlfcn.h>
@@ -53,9 +54,38 @@ EXTERN_C VOID STDAPICALLTYPE ConfigureContinuousProfiler(bool         threadSamp
                                                          unsigned int maxMemorySamplesPerMinute,
                                                          unsigned int selectedThreadSamplingInterval)
 {
-    return trace::profiler->ConfigureContinuousProfiler(threadSamplingEnabled, threadSamplingInterval,
-                                                        allocationSamplingEnabled, maxMemorySamplesPerMinute,
-                                                        selectedThreadSamplingInterval);
+    if (trace::profiler != nullptr)
+    {
+        trace::profiler->ConfigureContinuousProfiler(threadSamplingEnabled, threadSamplingInterval,
+                                                     allocationSamplingEnabled, maxMemorySamplesPerMinute,
+                                                     selectedThreadSamplingInterval);
+    }
+}
+
+EXTERN_C VOID STDAPICALLTYPE SetContinuousProfilerSamplingInterval(unsigned int threadSamplingInterval)
+{
+    if (trace::profiler != nullptr)
+    {
+        trace::profiler->SetContinuousProfilerSamplingInterval(threadSamplingInterval);
+    }
+}
+
+EXTERN_C VOID STDAPICALLTYPE SetContinuousProfilerEnabled(bool enabled)
+{
+    if (trace::profiler != nullptr)
+    {
+        trace::profiler->SetContinuousProfilerEnabled(enabled);
+    }
+}
+
+EXTERN_C unsigned int STDAPICALLTYPE GetContinuousProfilerSamplingInterval()
+{
+    return trace::profiler == nullptr ? 0 : trace::profiler->GetContinuousProfilerSamplingInterval();
+}
+
+EXTERN_C unsigned int STDAPICALLTYPE GetContinuousProfilerLastReadSamplingInterval()
+{
+    return ThreadSamplingGetLastReadSamplingInterval();
 }
 
 EXTERN_C VOID STDAPICALLTYPE InitializeTraceMethods(WCHAR* id,
