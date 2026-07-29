@@ -48,21 +48,25 @@ constexpr auto kVolatileFunctionIdentifierCacheSize = 2000;
 /*
   Locking/threading design:
   We have the following shared data structures:
-  - A buffer for captured thread samples, used by a single writing thread and a single (managed) reading one
+  - A queue of captured thread sample batches, used by a single writing thread and a single (managed) reading one
   - A buffer for captured allocation samples, used by any application thread at any time
-  - a name cache (data structure for building humnan-readable stack traces), used during both thread and
+  - a name cache (data structure for building human-readable stack traces), used during both thread and
     allocation sampling
   - a cache of thread id->thread name (set by each thread itself, used during either sample type)
   - a cache of thread span context state (set by any application thread at any time, used during either sample type)
+  - thread sampling configuration and the native sampling thread lifecycle
 
   In general we want to keep locks "adjacent" to just one data structure and usage of them local to one
   modifying/reading method to simplify analysis.  However, there are some special cases.
   Here are the locks in use:
-  - cpu_buffer_lock guarding access to the thread samples buffer
+  - cpu_buffer_lock guarding access to the queue of thread sample batches
   - allocation_buffer_lock guarding access to the buffer for allocation samples
   - name_cache_lock, guarding the data structures used for function/class name lookup
   - thread_state_lock_ guarding the thread name map
   - thread_span_context_lock guarding that data structure
+  - sampling_configuration_mutex_ guarding the sampling intervals and configuration version; changes notify
+    sampling_configuration_cv_ so the sampling thread can update its schedule immediately
+  - thread_sampling_thread_mutex_ serializing sampling thread start, stop, and configuration changes
   - (special) a profiling_lock so only one type of profiling (thread stacks or allocation sample) runs at a time
 
   The special cases worth calling out about locking behavior are:

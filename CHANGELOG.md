@@ -9,6 +9,9 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 
 ### Added
 
+- Add runtime reconfiguration for continuous profiler thread sampling, including
+  enabling or disabling sampling and updating the sampling interval.
+
 ### Changed
 
 #### Dependency updates
