@@ -241,9 +241,9 @@ TEST(ContinuousProfilerConfigurationTest, ConcurrentSettersDoNotCreateDuplicateS
 
     const auto runConcurrently = [](auto&& operation)
     {
-        constexpr auto callCount = 8;
-        std::promise<void> startPromise;
-        auto               start = startPromise.get_future().share();
+        constexpr auto                 callCount = 8;
+        std::promise<void>             startPromise;
+        auto                           start = startPromise.get_future().share();
         std::vector<std::future<bool>> results;
         results.reserve(callCount);
 
