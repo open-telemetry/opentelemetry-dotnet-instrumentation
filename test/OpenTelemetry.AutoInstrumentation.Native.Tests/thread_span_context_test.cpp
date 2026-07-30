@@ -171,6 +171,38 @@ TEST(ContinuousProfilerConfigurationTest, ActiveIntervalChangeWakesConfiguration
     ASSERT_TRUE(profiler.SetThreadSamplingEnabled(false));
 }
 
+TEST(ContinuousProfilerConfigurationTest, ShutdownWakesConfigurationWaiterImmediately)
+{
+    continuous_profiler::ContinuousProfiler profiler;
+
+    const auto initialConfiguration = profiler.GetThreadSamplingConfiguration();
+
+    std::promise<void> waiterStarted;
+    auto               waiterStartedFuture = waiterStarted.get_future();
+    auto               shutdownRequested   = std::async(std::launch::async,
+                                                        [&profiler, &waiterStarted, version = initialConfiguration.version]()
+                                                        {
+                                            waiterStarted.set_value();
+                                            return profiler.WaitForSamplingConfigurationChange(version, 10000u);
+                                        });
+
+    waiterStartedFuture.wait();
+    profiler.Shutdown();
+
+    const auto waitStatus = shutdownRequested.wait_for(std::chrono::seconds(2));
+    if (waitStatus != std::future_status::ready)
+    {
+        // Ensure the async waiter is released before its future is destroyed if the assertion fails.
+        profiler.Shutdown();
+        shutdownRequested.wait();
+    }
+
+    ASSERT_EQ(std::future_status::ready, waitStatus);
+    ASSERT_TRUE(shutdownRequested.get());
+    ASSERT_TRUE(profiler.IsShutdownRequested());
+    ASSERT_EQ(initialConfiguration.version, profiler.GetThreadSamplingConfiguration().version);
+}
+
 TEST(ContinuousProfilerBufferTest, PreservesBatchOrderAndSamplingIntervalMetadata)
 {
     unsigned char output[1];

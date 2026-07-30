@@ -1351,6 +1351,10 @@ bool ContinuousProfiler::SetThreadSamplingInterval(const unsigned int samplingIn
             ++sampling_configuration_version_;
         }
         threadRequired = thread_sampling_interval_.has_value() || selected_threads_sampling_interval_.has_value();
+        if (threadRequired)
+        {
+            thread_sampling_stop_requested_.store(false, std::memory_order_release);
+        }
     }
 
     if (schedulerChanged)
@@ -1361,7 +1365,6 @@ bool ContinuousProfiler::SetThreadSamplingInterval(const unsigned int samplingIn
 
     if (threadRequired)
     {
-        thread_sampling_stop_requested_.store(false, std::memory_order_release);
         return SUCCEEDED(StartThreadSampling());
     }
 
@@ -1416,11 +1419,7 @@ bool ContinuousProfiler::SetThreadSamplingEnabled(const bool enabled)
             ++sampling_configuration_version_;
         }
         threadRequired = thread_sampling_interval_.has_value() || selected_threads_sampling_interval_.has_value();
-    }
-
-    if (!threadRequired)
-    {
-        thread_sampling_stop_requested_.store(true, std::memory_order_release);
+        thread_sampling_stop_requested_.store(!threadRequired, std::memory_order_release);
     }
 
     if (schedulerChanged)
@@ -1434,7 +1433,6 @@ bool ContinuousProfiler::SetThreadSamplingEnabled(const bool enabled)
 
     if (threadRequired)
     {
-        thread_sampling_stop_requested_.store(false, std::memory_order_release);
         return SUCCEEDED(StartThreadSampling());
     }
 
@@ -1472,6 +1470,8 @@ void ContinuousProfiler::ConfigureSelectedThreadSampling(const unsigned int samp
             selected_threads_sampling_interval_ = samplingInterval;
             ++sampling_configuration_version_;
         }
+
+        thread_sampling_stop_requested_.store(false, std::memory_order_release);
     }
 
     if (schedulerChanged)
@@ -1479,7 +1479,6 @@ void ContinuousProfiler::ConfigureSelectedThreadSampling(const unsigned int samp
         sampling_configuration_cv_.notify_all();
     }
 
-    thread_sampling_stop_requested_.store(false, std::memory_order_release);
     StartThreadSampling();
 }
 
@@ -1558,7 +1557,10 @@ HRESULT ContinuousProfiler::StartThreadSampling()
 
 void ContinuousProfiler::StopThreadSampling()
 {
-    thread_sampling_stop_requested_.store(true, std::memory_order_release);
+    {
+        std::lock_guard<std::mutex> configuration_guard(sampling_configuration_mutex_);
+        thread_sampling_stop_requested_.store(true, std::memory_order_release);
+    }
     sampling_configuration_cv_.notify_all();
 
     if (thread_sampling_thread_ != nullptr && thread_sampling_thread_->joinable())
@@ -1568,13 +1570,19 @@ void ContinuousProfiler::StopThreadSampling()
     }
 
     thread_sampling_thread_.reset();
-    thread_sampling_stop_requested_.store(false, std::memory_order_release);
+    {
+        std::lock_guard<std::mutex> configuration_guard(sampling_configuration_mutex_);
+        thread_sampling_stop_requested_.store(false, std::memory_order_release);
+    }
 }
 
 void ContinuousProfiler::Shutdown()
 {
-    shutdown_requested_.store(true, std::memory_order_release);
-    thread_sampling_stop_requested_.store(true, std::memory_order_release);
+    {
+        std::lock_guard<std::mutex> configuration_guard(sampling_configuration_mutex_);
+        shutdown_requested_.store(true, std::memory_order_release);
+        thread_sampling_stop_requested_.store(true, std::memory_order_release);
+    }
     sampling_configuration_cv_.notify_all();
 
     std::lock_guard<std::mutex> thread_guard(thread_sampling_thread_mutex_);
