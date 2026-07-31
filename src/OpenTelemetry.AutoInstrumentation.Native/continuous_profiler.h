@@ -389,4 +389,7 @@ void ThreadSamplingRecordProducedThreadSample(std::vector<unsigned char>* buf);
 // Can return 0 if none are pending
 int32_t ThreadSamplingConsumeOneThreadSample(int32_t len, unsigned char* buf);
 
+bool SelectiveSamplingShouldProduceThreadSample();
+void SelectiveSamplingRecordProducedThreadSample(int32_t appendLen, unsigned char* appendBuf);
+
 #endif // OTEL_CONTINUOUS_PROFILER_H_

@@ -87,6 +87,7 @@ static std::vector<unsigned char>* allocation_buffer      = new std::vector<unsi
 
 static std::mutex                 selective_sampling_buffer_lock = std::mutex();
 static std::vector<unsigned char> selective_sampling_buffer;
+static bool                       selective_sampling_buffer_saturated = false;
 
 static std::mutex                                thread_span_context_lock;
 static continuous_profiler::ThreadSpanContextMap thread_span_context_map;
@@ -158,7 +159,13 @@ int32_t ThreadSamplingConsumeOneThreadSample(int32_t len, unsigned char* buf)
     return static_cast<int32_t>(to_use_len);
 }
 
-static void AppendToSelectedThreadsSampleBuffer(int32_t appendLen, unsigned char* appendBuf)
+bool SelectiveSamplingShouldProduceThreadSample()
+{
+    std::lock_guard<std::mutex> guard(selective_sampling_buffer_lock);
+    return !selective_sampling_buffer_saturated;
+}
+
+void SelectiveSamplingRecordProducedThreadSample(int32_t appendLen, unsigned char* appendBuf)
 {
     if (appendLen <= 0 || appendBuf == nullptr)
     {
@@ -166,12 +173,27 @@ static void AppendToSelectedThreadsSampleBuffer(int32_t appendLen, unsigned char
     }
     std::lock_guard<std::mutex> guard(selective_sampling_buffer_lock);
 
-    if (selective_sampling_buffer.size() + appendLen >= kSamplesBufferMaximumSize)
+    if (selective_sampling_buffer_saturated)
     {
-        trace::Logger::Warn("Discarding samples for selected threads. Buffer is full.");
         return;
     }
-    selective_sampling_buffer.insert(selective_sampling_buffer.end(), appendBuf, &appendBuf[appendLen]);
+
+    const auto appendSize = static_cast<size_t>(appendLen);
+    if (appendSize >= kSamplesBufferMaximumSize)
+    {
+        trace::Logger::Warn("Discarding samples for selected threads. Sample batch exceeds the buffer capacity.");
+        return;
+    }
+
+    if (selective_sampling_buffer.size() + appendSize >= kSamplesBufferMaximumSize)
+    {
+        selective_sampling_buffer_saturated = true;
+        trace::Logger::Warn(
+            "Discarding samples for selected threads. Buffer is full. Further captures will be skipped until the "
+            "buffer is read.");
+        return;
+    }
+    selective_sampling_buffer.insert(selective_sampling_buffer.end(), appendBuf, &appendBuf[appendSize]);
 }
 
 bool continuous_profiler::trace_context::IsDefault() const
@@ -242,6 +264,7 @@ static int32_t SelectiveSamplingConsumeAndClearBuffer(int32_t len, unsigned char
     }
     memcpy(buf, selective_sampling_buffer.data(), to_use_len);
     selective_sampling_buffer.clear();
+    selective_sampling_buffer_saturated = false;
 
     return static_cast<int32_t>(to_use_len);
 }
@@ -923,7 +946,7 @@ static void ResolveSymbolsAndPublishBufferForSelectedThreads(
     localBuf.EndSelectedThreadsBatch();
 
     // TODO: write out stats
-    AppendToSelectedThreadsSampleBuffer(static_cast<int32_t>(localBytes.size()), localBytes.data());
+    SelectiveSamplingRecordProducedThreadSample(static_cast<int32_t>(localBytes.size()), localBytes.data());
 }
 
 static void RemoveOutdatedEntries(std::unordered_map<trace_context, long long>& selectiveSamplingTraceSet,
@@ -968,6 +991,11 @@ static void CaptureSamples(ContinuousProfiler*                                  
                            const SamplingType                                             samplingType,
                            std::unordered_map<ThreadID, std::vector<FunctionIdentifier>>& threadStacksBuffer)
 {
+    if (samplingType == SamplingType::SelectedThreads && !SelectiveSamplingShouldProduceThreadSample())
+    {
+        return;
+    }
+
     // before trying to suspend the runtime, acquire exclusive lock
     // it's not safe to try to suspend the runtime after other locks are acquired
     // if there is application thread in the middle of AllocationTick
