@@ -20,6 +20,7 @@
     <Compile Include="..\IntegrationTests\Helpers\OutputHelper.cs" />
     <Compile Include="..\IntegrationTests\Helpers\PathHandler.cs" />
     <Compile Include="..\IntegrationTests\Helpers\ProcessHelper.cs" />
+    <Compile Include="..\IntegrationTests\Helpers\ProtobufDescriptorWarmup.cs" />
     <Compile Include="..\IntegrationTests\Helpers\TcpPortProvider.cs" />
     <Compile Include="..\IntegrationTests\Helpers\TestAppStartupMode.cs" />
     <Compile Include="..\IntegrationTests\Helpers\TestHelper.cs" />

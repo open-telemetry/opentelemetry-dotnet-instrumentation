@@ -20,6 +20,7 @@ public class KafkaCollectionFixture : ICollectionFixture<KafkaFixture>
 /// </summary>
 public class KafkaFixture : IAsyncLifetime
 {
+    private const int ContainerStartAttempts = 3;
     private static readonly string KafkaImage = ReadImageFrom("kafka.Dockerfile");
     private readonly string _kafkaContainerName;
     private readonly string _testNetworkName;
@@ -59,29 +60,50 @@ public class KafkaFixture : IAsyncLifetime
 
     private async Task<IContainer?> LaunchKafkaContainer(INetwork? containerNetwork)
     {
-        var container = new ContainerBuilder(KafkaImage)
-            .WithName(_kafkaContainerName)
-            .WithPortBinding(Port)
-            .WithEnvironment("KAFKA_BROKER_ID", "1")
-            .WithEnvironment("KAFKA_AUTO_CREATE_TOPICS_ENABLE", "false")
-            .WithEnvironment("KAFKA_LISTENER_SECURITY_PROTOCOL_MAP", "PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT,CONTROLLER:PLAINTEXT")
-            .WithEnvironment("KAFKA_ADVERTISED_LISTENERS", $"PLAINTEXT://{_kafkaContainerName}:29092,PLAINTEXT_HOST://localhost:{Port}")
-            .WithEnvironment("KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR", "1")
-            .WithEnvironment("KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS", "0")
-            .WithEnvironment("KAFKA_TRANSACTION_STATE_LOG_MIN_ISR", "1")
-            .WithEnvironment("KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR", "1")
-            .WithEnvironment("KAFKA_PROCESS_ROLES", "broker,controller")
-            .WithEnvironment("KAFKA_NODE_ID", "1")
-            .WithEnvironment("KAFKA_CONTROLLER_QUORUM_VOTERS", $"1@{_kafkaContainerName}:29093")
-            .WithEnvironment("KAFKA_LISTENERS", $"PLAINTEXT://{_kafkaContainerName}:29092,CONTROLLER://{_kafkaContainerName}:29093,PLAINTEXT_HOST://0.0.0.0:{Port}")
-            .WithEnvironment("KAFKA_INTER_BROKER_LISTENER_NAME", "PLAINTEXT")
-            .WithEnvironment("KAFKA_CONTROLLER_LISTENER_NAMES", "CONTROLLER")
-            .WithEnvironment("CLUSTER_ID", Guid.NewGuid().ToString())
-            .WithNetwork(containerNetwork)
-            .Build();
+        // The container name is stable across attempts because the advertised/controller
+        // listeners reference it as the in-network host name; a failed attempt is disposed
+        // (which removes the container) before the name is reused.
+        for (var attempt = 1; attempt <= ContainerStartAttempts; attempt++)
+        {
+            var container = new ContainerBuilder(KafkaImage)
+                .WithName(_kafkaContainerName)
+                .WithPortBinding(Port)
+                .WithEnvironment("KAFKA_BROKER_ID", "1")
+                .WithEnvironment("KAFKA_AUTO_CREATE_TOPICS_ENABLE", "false")
+                .WithEnvironment("KAFKA_LISTENER_SECURITY_PROTOCOL_MAP", "PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT,CONTROLLER:PLAINTEXT")
+                .WithEnvironment("KAFKA_ADVERTISED_LISTENERS", $"PLAINTEXT://{_kafkaContainerName}:29092,PLAINTEXT_HOST://localhost:{Port}")
+                .WithEnvironment("KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR", "1")
+                .WithEnvironment("KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS", "0")
+                .WithEnvironment("KAFKA_TRANSACTION_STATE_LOG_MIN_ISR", "1")
+                .WithEnvironment("KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR", "1")
+                .WithEnvironment("KAFKA_PROCESS_ROLES", "broker,controller")
+                .WithEnvironment("KAFKA_NODE_ID", "1")
+                .WithEnvironment("KAFKA_CONTROLLER_QUORUM_VOTERS", $"1@{_kafkaContainerName}:29093")
+                .WithEnvironment("KAFKA_LISTENERS", $"PLAINTEXT://{_kafkaContainerName}:29092,CONTROLLER://{_kafkaContainerName}:29093,PLAINTEXT_HOST://0.0.0.0:{Port}")
+                .WithEnvironment("KAFKA_INTER_BROKER_LISTENER_NAME", "PLAINTEXT")
+                .WithEnvironment("KAFKA_CONTROLLER_LISTENER_NAMES", "CONTROLLER")
+                .WithEnvironment("CLUSTER_ID", Guid.NewGuid().ToString())
+                .WithNetwork(containerNetwork)
+                .WithWaitStrategy(Wait.ForUnixContainer().UntilInternalTcpPortIsAvailable(Port))
+                .Build();
 
-        await container.StartAsync().ConfigureAwait(false);
+            try
+            {
+                await container.StartAsync().ConfigureAwait(false);
+                return container;
+            }
+            catch (ContainerNotRunningException)
+            {
+                await container.DisposeAsync().ConfigureAwait(false);
+                if (attempt == ContainerStartAttempts)
+                {
+                    throw;
+                }
 
-        return container;
+                await Task.Delay(TimeSpan.FromSeconds(1)).ConfigureAwait(false);
+            }
+        }
+
+        throw new InvalidOperationException("Kafka container failed to start.");
     }
 }
