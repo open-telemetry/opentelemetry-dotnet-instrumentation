@@ -77,7 +77,7 @@ jobs:
     steps:
 
       - name: Checkout code
-        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 0 # fetching all, needed to correctly calculate version
           persist-credentials: false
@@ -103,6 +103,34 @@ jobs:
         uses: potatoqualitee/mssqlsuite@2291d923e83859edd871679c05b379037376761f # v1.12
         with: 
           install: localdb
+
+      # The Linux test leg is disk-heavy: it pulls many database images and the Oracle ADB image
+      # alone expands several GB of datafiles when it boots, which can exhaust the hosted runner's
+      # ~14 GB of free space on the OS disk. Give Docker more room by relocating its data-root
+      # onto the runner's much larger ephemeral /mnt disk (~70 GB). Must run before any image is pulled.
+      - name: Give Docker more disk space
+        if: ${{ runner.os == 'Linux' }}
+        shell: bash
+        run: |
+          df -h / /mnt || true
+          sudo systemctl stop docker.service docker.socket
+          sudo mkdir -p /mnt/docker
+          existing='{}'
+          if [ -f /etc/docker/daemon.json ]; then existing="$(sudo cat /etc/docker/daemon.json)"; fi
+          echo "${existing}" | jq '. + {"data-root":"/mnt/docker"}' | sudo tee /etc/docker/daemon.json
+          sudo systemctl start docker.service
+          docker info --format 'Docker Root Dir: {{ .DockerRootDir }}'
+
+      # The Oracle ADB image is multi-GB and slow to pull. Pull it here, before the test run, so
+      # the download time is not counted against the Oracle fixture's readiness budget or the
+      # `--blame-hang` timer inside `dotnet test`. Only the x64 Linux leg runs the Oracle tests.
+      - name: Pre-pull Oracle database image
+        if: ${{ matrix.machine == 'ubuntu-22.04' }}
+        shell: bash
+        run: |
+          image="$(grep -oE 'ghcr.io/oracle/adb-free[^[:space:]]+' test/IntegrationTests/docker/oracle.Dockerfile)"
+          echo "Pre-pulling Oracle image: ${image}"
+          docker pull "${image}"
 
       - name: Run TestWorkflow
         shell: bash
@@ -138,7 +166,7 @@ jobs:
     steps:
 
       - name: Checkout code
-        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 0 # fetching all, needed to correctly calculate version
           persist-credentials: false
@@ -179,7 +207,7 @@ jobs:
     steps:
 
       - name: Checkout code
-        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 0 # fetching all, needed to correctly calculate version
           persist-credentials: false
@@ -302,7 +330,7 @@ jobs:
     steps:
 
     - name: Checkout code
-      uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+      uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       with:
         fetch-depth: 0 # fetching all, needed to correctly calculate version
         persist-credentials: false
@@ -346,7 +374,7 @@ jobs:
     steps:
       
       - name: Checkout code
-        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 0 # fetching all, needed to correctly calculate version
           persist-credentials: false
