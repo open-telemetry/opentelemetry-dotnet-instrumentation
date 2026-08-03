@@ -76,7 +76,7 @@ public static partial class LibraryVersion
                 new("5.0.0", additionalMetaData: new() { { "NLogExtensionsLogging", "5.0.0" } }),
                 new("5.3.4", additionalMetaData: new() { { "NLogExtensionsLogging", "5.3.15" } }),
                 new("6.0.0", additionalMetaData: new() { { "NLogExtensionsLogging", "6.0.0" } }),
-                new("6.1.3", additionalMetaData: new() { { "NLogExtensionsLogging", "6.1.3" } }),
+                new("6.1.4", additionalMetaData: new() { { "NLogExtensionsLogging", "6.1.4" } }),
             ]
         },
         {
@@ -123,7 +123,7 @@ public static partial class LibraryVersion
             "TestApplication.MySqlData",
             [
                 new("9.0.0"),
-                new("9.7.0"),
+                new("26.7.0"),
             ]
         },
         {
@@ -147,21 +147,21 @@ public static partial class LibraryVersion
             "TestApplication.OracleMda.NetFramework",
             [
                 new("23.5.1", supportedFrameworks: [ "net472" ]),
-                new("23.26.200", supportedFrameworks: [ "net472" ]),
+                new("23.26.300", supportedFrameworks: [ "net472" ]),
             ]
         },
         {
             "TestApplication.OracleMda.Core",
             [
                 new("23.5.1"),
-                new("23.26.200"),
+                new("23.26.300"),
             ]
         },
         {
             "TestApplication.Quartz",
             [
                 new("3.6.0"),
-                new("3.18.2"),
+                new("3.19.1"),
             ]
         },
         {
@@ -187,7 +187,7 @@ public static partial class LibraryVersion
             [
                 new("2.6.122"),
                 new("2.12.14"),
-                new("3.0.47-preview", supportedFrameworks: [ "net10.0", "net9.0", "net8.0" ]),
+                new("3.1.3", supportedFrameworks: [ "net10.0", "net9.0", "net8.0" ]),
             ]
         },
         {
