@@ -15,7 +15,7 @@
     <PackageVersion Include="Grpc.AspNetCore" Version="2.67.0" />
     <PackageVersion Include="Grpc.Net.Client" Version="2.67.0" />
     <PackageVersion Include="Grpc.Net.Client.Web" Version="2.67.0" />
-    <PackageVersion Include="Grpc.Tools" Version="2.68.1" />
+    <PackageVersion Include="Grpc.Tools" Version="2.83.0" />
     <PackageVersion Include="log4net" Version="3.3.2" />
     <PackageVersion Include="MassTransit" Version="8.5.10" />
     <PackageVersion Include="Microsoft.AspNetCore.SignalR.Client" Version="10.0.9" />
@@ -30,7 +30,7 @@
     <PackageVersion Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.9" />
     <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="18.8.1" />
     <PackageVersion Include="MongoDB.Driver" Version="3.10.0" />
-    <PackageVersion Include="NSubstitute" Version="5.3.0" />
+    <PackageVersion Include="NSubstitute" Version="6.0.0" />
     <PackageVersion Include="MySql.Data" Version="9.7.0" />
     <PackageVersion Include="MySqlConnector" Version="2.6.1" />
     <PackageVersion Include="Newtonsoft.Json" Version="13.0.4" />
@@ -48,7 +48,7 @@
     <PackageVersion Include="Quartz.Extensions.DependencyInjection" Version="3.18.2" />
     <PackageVersion Include="Quartz.Extensions.Hosting" Version="3.18.2" />
     <PackageVersion Include="RabbitMQ.Client" Version="7.2.1" />
-    <PackageVersion Include="SharpCompress" Version="0.50.0" />
+    <PackageVersion Include="SharpCompress" Version="0.50.3" />
     <PackageVersion Include="Snappier" Version="1.3.1" />
     <PackageVersion Include="StackExchange.Redis" Version="3.0.47-preview" />
     <PackageVersion Include="StrongNamer" Version="0.2.5" />

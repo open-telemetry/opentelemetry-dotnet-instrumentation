@@ -4,7 +4,10 @@
   commitBodyTable: true,
   commitMessageAction: "Bump",
   dependencyDashboard: false,
-  extends: ["config:best-practices"],
+  extends: [
+    "config:best-practices",
+    "helpers:pinGitHubActionDigestsToSemver"
+  ],
   labels: ["dependencies"],
   prConcurrentLimit: 20,
   customManagers: [
