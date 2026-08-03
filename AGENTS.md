@@ -10,10 +10,10 @@ startup hook and/or a native CLR Profiler that rewrites IL at runtime.
 
 ## Build and test
 
-Builds are driven by [Nuke](https://nuke.build). `./build.cmd` (Windows) /
-`./build.sh` (Linux, macOS) bootstrap `dotnet nuke`; run `dotnet tool restore`
-first if using `dotnet nuke` directly. The default target is
-`BuildTracer`; main artifact is `bin/tracer-home`.
+Builds are driven by [Nuke](https://github.com/nuke-build/nuke). `./build.cmd`
+(Windows) / `./build.sh` (Linux, macOS) bootstrap `dotnet nuke`; run
+`dotnet tool restore` first if using `dotnet nuke` directly. The default target
+is `BuildTracer`; main artifact is `bin/tracer-home`.
 
 ```cmd
 dotnet nuke --help                 :: list all targets and parameters
