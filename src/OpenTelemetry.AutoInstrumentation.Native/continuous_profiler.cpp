@@ -178,21 +178,17 @@ void SelectiveSamplingRecordProducedThreadSample(int32_t appendLen, unsigned cha
         return;
     }
 
-    const auto appendSize = static_cast<size_t>(appendLen);
-    if (appendSize >= kSamplesBufferMaximumSize)
-    {
-        trace::Logger::Warn("Discarding samples for selected threads. Sample batch exceeds the buffer capacity.");
-        return;
-    }
-
-    if (selective_sampling_buffer.size() + appendSize >= kSamplesBufferMaximumSize)
+    const auto appendSize        = static_cast<size_t>(appendLen);
+    const auto remainingCapacity = static_cast<size_t>(kSamplesBufferMaximumSize) - selective_sampling_buffer.size();
+    if (appendSize >= remainingCapacity)
     {
         selective_sampling_buffer_saturated = true;
         trace::Logger::Warn(
-            "Discarding samples for selected threads. Buffer is full. Further captures will be skipped until the "
-            "buffer is read.");
+            "Discarding samples for selected threads. Sample batch does not fit in the remaining buffer capacity. "
+            "Further captures will be skipped until the buffer is read.");
         return;
     }
+
     selective_sampling_buffer.insert(selective_sampling_buffer.end(), appendBuf, &appendBuf[appendSize]);
 }
 
@@ -258,12 +254,13 @@ static int32_t SelectiveSamplingConsumeAndClearBuffer(int32_t len, unsigned char
     std::lock_guard<std::mutex> guard(selective_sampling_buffer_lock);
     const size_t                to_use_len = std::min(selective_sampling_buffer.size(), static_cast<size_t>(len));
 
-    if (to_use_len == 0)
+    if (to_use_len > 0)
     {
-        return 0;
+        memcpy(buf, selective_sampling_buffer.data(), to_use_len);
     }
-    memcpy(buf, selective_sampling_buffer.data(), to_use_len);
     selective_sampling_buffer.clear();
+    // A valid read also acknowledges an oversized batch that could not be buffered, so it must release
+    // backpressure even when there are no bytes to return.
     selective_sampling_buffer_saturated = false;
 
     return static_cast<int32_t>(to_use_len);
@@ -949,39 +946,67 @@ static void ResolveSymbolsAndPublishBufferForSelectedThreads(
     SelectiveSamplingRecordProducedThreadSample(static_cast<int32_t>(localBytes.size()), localBytes.data());
 }
 
-static void RemoveOutdatedEntries(std::unordered_map<trace_context, long long>& selectiveSamplingTraceSet,
-                                  ContinuousProfiler*                           prof)
+bool TryAddSelectiveSamplingTrace(const trace_context& context, const std::chrono::steady_clock::time_point now)
 {
-    const auto now = std::chrono::steady_clock::now();
+    std::lock_guard<std::mutex> selective_sampling_guard(selective_sampling_lock);
 
-    if (prof->nextOutdatedEntriesScan > now)
+    if (selective_sampling_trace_map.size() >= kSelectiveSamplingMaxTraces)
     {
-        return;
+        return false;
     }
 
-    auto nextScan = now + std::chrono::minutes(kSelectiveSamplingMaxAgeMinutes);
-    // Remove entries queued more than kSelectiveSamplingMaxAgeMinutes minutes ago.
-    for (auto it = selectiveSamplingTraceSet.begin(); it != selectiveSamplingTraceSet.end();)
+    const auto deadline = now + std::chrono::minutes(kSelectiveSamplingMaxAgeMinutes);
+    selective_sampling_trace_map[context] =
+        std::chrono::duration_cast<std::chrono::milliseconds>(deadline.time_since_epoch()).count();
+    return true;
+}
+
+void RemoveSelectiveSamplingTrace(const trace_context& context)
+{
+    std::lock_guard<std::mutex> selective_sampling_guard(selective_sampling_lock);
+    selective_sampling_trace_map.erase(context);
+}
+
+static bool HasActiveSelectiveSamplingEntries(ContinuousProfiler* prof, const std::chrono::steady_clock::time_point now)
+{
+    std::lock_guard<std::mutex> selective_sampling_guard(selective_sampling_lock);
+
+    if (prof->nextOutdatedEntriesScan <= now)
     {
-        const auto deadline = std::chrono::time_point<std::chrono::steady_clock>(std::chrono::milliseconds(it->second));
-        if (now >= deadline)
+        auto nextScan = now + std::chrono::minutes(kSelectiveSamplingMaxAgeMinutes);
+        // Remove entries queued more than kSelectiveSamplingMaxAgeMinutes minutes ago.
+        for (auto it = selective_sampling_trace_map.begin(); it != selective_sampling_trace_map.end();)
         {
-            trace::Logger::Warn("SelectiveSampling: removing outdated entry for trace {",
-                                "traceIdHigh: ", it->first.trace_id_high_, ", traceIdLow: ", it->first.trace_id_low_,
-                                "} because it was enqueued more than ", kSelectiveSamplingMaxAgeMinutes,
-                                " minutes ago");
-            it = selectiveSamplingTraceSet.erase(it);
-        }
-        else
-        {
-            if (deadline < nextScan)
+            const auto deadline =
+                std::chrono::time_point<std::chrono::steady_clock>(std::chrono::milliseconds(it->second));
+            if (now >= deadline)
             {
-                nextScan = deadline;
+                trace::Logger::Warn("SelectiveSampling: removing outdated entry for trace {",
+                                    "traceIdHigh: ", it->first.trace_id_high_,
+                                    ", traceIdLow: ", it->first.trace_id_low_, "} because it was enqueued more than ",
+                                    kSelectiveSamplingMaxAgeMinutes, " minutes ago");
+                it = selective_sampling_trace_map.erase(it);
             }
-            ++it;
+            else
+            {
+                if (deadline < nextScan)
+                {
+                    nextScan = deadline;
+                }
+                ++it;
+            }
         }
+        prof->nextOutdatedEntriesScan = nextScan;
     }
-    prof->nextOutdatedEntriesScan = nextScan;
+
+    return !selective_sampling_trace_map.empty();
+}
+
+bool TryPrepareSelectedThreadSampling(ContinuousProfiler* prof, const std::chrono::steady_clock::time_point now)
+{
+    const bool shouldProduceThreadSample         = SelectiveSamplingShouldProduceThreadSample();
+    const bool hasActiveSelectiveSamplingEntries = HasActiveSelectiveSamplingEntries(prof, now);
+    return shouldProduceThreadSample && hasActiveSelectiveSamplingEntries;
 }
 
 // The implementation will suspend CLR for
@@ -991,7 +1016,8 @@ static void CaptureSamples(ContinuousProfiler*                                  
                            const SamplingType                                             samplingType,
                            std::unordered_map<ThreadID, std::vector<FunctionIdentifier>>& threadStacksBuffer)
 {
-    if (samplingType == SamplingType::SelectedThreads && !SelectiveSamplingShouldProduceThreadSample())
+    if (samplingType == SamplingType::SelectedThreads &&
+        !TryPrepareSelectedThreadSampling(prof, std::chrono::steady_clock::now()))
     {
         return;
     }
@@ -1018,7 +1044,6 @@ static void CaptureSamples(ContinuousProfiler*                                  
     // Checks to avoid unnecessary suspends.
     if (samplingType == SamplingType::SelectedThreads)
     {
-        RemoveOutdatedEntries(selective_sampling_trace_map, prof);
         if (selective_sampling_trace_map.empty())
         {
             return;
@@ -1655,30 +1680,23 @@ extern "C"
     }
     EXPORTTHIS void SelectiveSamplingStart(uint64_t traceIdHigh, uint64_t traceIdLow)
     {
+        if (profiler_info == nullptr)
         {
-            std::lock_guard<std::mutex> guard(selective_sampling_lock);
-
-            if (profiler_info == nullptr)
-            {
-                return;
-            }
-
-            const continuous_profiler::trace_context context = {traceIdHigh, traceIdLow};
-            if (context.IsDefault())
-            {
-                return;
-            }
-
-            // Don't allow for too many samples at once
-            if (selective_sampling_trace_map.size() < kSelectiveSamplingMaxTraces)
-            {
-                const auto deadline =
-                    std::chrono::steady_clock::now() + std::chrono::minutes(kSelectiveSamplingMaxAgeMinutes);
-                selective_sampling_trace_map[context] =
-                    std::chrono::duration_cast<std::chrono::milliseconds>(deadline.time_since_epoch()).count();
-                return;
-            }
+            return;
         }
+
+        const continuous_profiler::trace_context context = {traceIdHigh, traceIdLow};
+        if (context.IsDefault())
+        {
+            return;
+        }
+
+        // Don't allow for too many samples at once
+        if (continuous_profiler::TryAddSelectiveSamplingTrace(context, std::chrono::steady_clock::now()))
+        {
+            return;
+        }
+
         trace::Logger::Warn("SelectiveSamplingStart: ignoring request to start sampling for trace {",
                             "traceIdHigh: ", traceIdHigh, ", traceIdLow: ", traceIdLow,
                             "} because maximum number of traces is already being sampled.");
@@ -1696,7 +1714,6 @@ extern "C"
         {
             return;
         }
-        std::lock_guard<std::mutex> guard(selective_sampling_lock);
-        selective_sampling_trace_map.erase(context);
+        continuous_profiler::RemoveSelectiveSamplingTrace(context);
     }
 }

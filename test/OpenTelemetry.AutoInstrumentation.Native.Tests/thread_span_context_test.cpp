@@ -2,6 +2,7 @@
 #include "../../src/OpenTelemetry.AutoInstrumentation.Native/continuous_profiler.h"
 
 #include <algorithm>
+#include <chrono>
 #include <vector>
 
 #ifdef _WIN32
@@ -14,6 +15,8 @@ namespace
 {
 
 constexpr auto kTestSamplesBufferMaximumSize = 200 * 1024;
+constexpr auto kTestTraceIdHigh              = uint64_t{0x11};
+constexpr auto kTestTraceIdLow               = uint64_t{0x22};
 
 class SelectiveSamplingBufferTest : public ::testing::Test
 {
@@ -38,6 +41,22 @@ protected:
     {
         auto buffer = CreateReadBuffer();
         Drain(buffer);
+    }
+};
+
+class SelectiveSamplingPreparationTest : public SelectiveSamplingBufferTest
+{
+protected:
+    void SetUp() override
+    {
+        SelectiveSamplingBufferTest::SetUp();
+        continuous_profiler::RemoveSelectiveSamplingTrace({kTestTraceIdHigh, kTestTraceIdLow});
+    }
+
+    void TearDown() override
+    {
+        continuous_profiler::RemoveSelectiveSamplingTrace({kTestTraceIdHigh, kTestTraceIdLow});
+        SelectiveSamplingBufferTest::TearDown();
     }
 };
 
@@ -145,12 +164,12 @@ TEST_F(SelectiveSamplingBufferTest, OverflowBlocksSamplingAndPreservesBufferedDa
     ASSERT_TRUE(SelectiveSamplingShouldProduceThreadSample());
 }
 
-TEST_F(SelectiveSamplingBufferTest, OversizedFirstBatchIsRejectedWithoutSaturating)
+TEST_F(SelectiveSamplingBufferTest, OversizedFirstBatchBlocksSamplingUntilValidEmptyRead)
 {
     std::vector<unsigned char> oversizedSample(kTestSamplesBufferMaximumSize, 0x33);
     SelectiveSamplingRecordProducedThreadSample(static_cast<int32_t>(oversizedSample.size()), oversizedSample.data());
 
-    ASSERT_TRUE(SelectiveSamplingShouldProduceThreadSample());
+    ASSERT_FALSE(SelectiveSamplingShouldProduceThreadSample());
 
     auto output = CreateReadBuffer();
     ASSERT_EQ(0, Drain(output));
@@ -168,6 +187,41 @@ TEST_F(SelectiveSamplingBufferTest, InvalidReadDoesNotClearSaturation)
     ASSERT_FALSE(SelectiveSamplingShouldProduceThreadSample());
     ASSERT_EQ(0, SelectiveSamplerReadThreadSamples(0, nullptr));
     ASSERT_FALSE(SelectiveSamplingShouldProduceThreadSample());
+}
+
+TEST_F(SelectiveSamplingPreparationTest, SaturationDoesNotPreventOutdatedTraceCleanup)
+{
+    std::vector<unsigned char> acceptedSample = {0x11, 0x22};
+    std::vector<unsigned char> overflowingSample(kTestSamplesBufferMaximumSize - acceptedSample.size(), 0x33);
+    SelectiveSamplingRecordProducedThreadSample(static_cast<int32_t>(acceptedSample.size()), acceptedSample.data());
+    SelectiveSamplingRecordProducedThreadSample(static_cast<int32_t>(overflowingSample.size()),
+                                                overflowingSample.data());
+    ASSERT_FALSE(SelectiveSamplingShouldProduceThreadSample());
+
+    continuous_profiler::ContinuousProfiler profiler{};
+    const auto                              now = std::chrono::steady_clock::now();
+    profiler.nextOutdatedEntriesScan            = now;
+    ASSERT_TRUE(continuous_profiler::TryAddSelectiveSamplingTrace({kTestTraceIdHigh, kTestTraceIdLow}, now));
+
+    ASSERT_FALSE(continuous_profiler::TryPrepareSelectedThreadSampling(&profiler, now + std::chrono::minutes(16)));
+    ASSERT_FALSE(SelectiveSamplingShouldProduceThreadSample());
+
+    auto output = CreateReadBuffer();
+    ASSERT_EQ(acceptedSample.size(), static_cast<size_t>(Drain(output)));
+    ASSERT_FALSE(continuous_profiler::TryPrepareSelectedThreadSampling(&profiler, now));
+}
+
+TEST_F(SelectiveSamplingPreparationTest, EmptyTraceSetPreventsSelectedThreadSampling)
+{
+    continuous_profiler::ContinuousProfiler profiler{};
+    const auto                              now = std::chrono::steady_clock::now();
+    profiler.nextOutdatedEntriesScan            = now + std::chrono::minutes(1);
+
+    ASSERT_TRUE(SelectiveSamplingShouldProduceThreadSample());
+    ASSERT_FALSE(continuous_profiler::TryPrepareSelectedThreadSampling(&profiler, now));
+
+    ASSERT_TRUE(continuous_profiler::TryAddSelectiveSamplingTrace({kTestTraceIdHigh, kTestTraceIdLow}, now));
+    ASSERT_TRUE(continuous_profiler::TryPrepareSelectedThreadSampling(&profiler, now));
 }
 
 #ifdef _WIN32
