@@ -215,12 +215,13 @@ draft, or get closed.
 ### Telemetry attributes need a *released* semantic convention
 
 - A merged semantic-conventions PR is not enough — maintainers block until the
-  convention appears in a stable semconv release, and will file
-  `CHANGES_REQUESTED` "to avoid unintentional merge". If the convention doesn't
-  exist yet, the ask is to go and fix semconv first.
-- Check the exact attribute name against the semconv version in use rather than
-  from memory (`service.namespace` vs `service.namespace.name` was corrected in
-  review), and note in the PR when a convention is still
+  convention appears in a stable
+  [Semantic Conventions](https://github.com/open-telemetry/semantic-conventions)
+  release. If the convention doesn't exist yet, the ask is to go and fix
+  Semantic Conventions first.
+- Check the exact attribute name against the Semantic Conventions version in use
+  rather than from memory (`service.namespace` vs `service.namespace.name` was
+  corrected in review), and note in the PR when a convention is still
   Experimental/Development.
 
 ### Dependency versions are a deliberate policy, not "latest"
