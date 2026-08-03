@@ -7,7 +7,7 @@
   <ItemGroup>
     <PackageReference Include="Npgsql" />
     <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Condition=" '$(TargetFramework)' != 'net9.0' and '$(TargetFramework)' != 'net8.0' " />
-    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" VersionOverride="9.0.4" Condition=" '$(TargetFramework)' == 'net9.0' or '$(TargetFramework)' == 'net8.0' " />
+    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" VersionOverride="10.0.3" Condition=" '$(TargetFramework)' == 'net9.0' or '$(TargetFramework)' == 'net8.0' " />
   </ItemGroup>
 
 </Project>
