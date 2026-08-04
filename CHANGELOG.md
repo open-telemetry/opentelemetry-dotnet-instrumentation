@@ -10,7 +10,7 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 ### Added
 
 - Support for [StackExchange.Redis](https://www.nuget.org/packages/StackExchange.Redis)
-  traces instrumentation for versions `3.1.x`+.
+  traces instrumentation for versions `3.1.x`+ for .NET only.
 
 ### Changed
 
