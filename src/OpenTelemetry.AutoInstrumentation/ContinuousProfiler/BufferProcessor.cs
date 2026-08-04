@@ -14,9 +14,9 @@ internal class BufferProcessor
 
     private readonly byte[] _buffer = new byte[BufferSize];
 
-    private readonly Dictionary<SampleType, (Action<byte[], int, CancellationToken> Handler, TimeSpan ExportTimeout)> _sampleHandlers;
+    private readonly Dictionary<SampleType, (Action<byte[], int, uint, CancellationToken> Handler, TimeSpan ExportTimeout)> _sampleHandlers;
 
-    public BufferProcessor(Dictionary<SampleType, (Action<byte[], int, CancellationToken> Handler, TimeSpan ExportTimeout)> sampleHandlers)
+    public BufferProcessor(Dictionary<SampleType, (Action<byte[], int, uint, CancellationToken> Handler, TimeSpan ExportTimeout)> sampleHandlers)
     {
         _sampleHandlers = sampleHandlers ?? throw new ArgumentNullException(nameof(sampleHandlers));
     }
@@ -25,7 +25,7 @@ internal class BufferProcessor
     {
         foreach (var sampleType in _sampleHandlers.Keys)
         {
-            var read = ReadBuffer(sampleType);
+            var (read, samplingInterval) = ReadBuffer(sampleType);
             if (read <= 0)
             {
                 continue;
@@ -36,7 +36,7 @@ internal class BufferProcessor
             using var cts = new CancellationTokenSource(timeout);
             try
             {
-                handler(_buffer, read, cts.Token);
+                handler(_buffer, read, samplingInterval, cts.Token);
             }
             catch (Exception e)
             {
@@ -45,11 +45,12 @@ internal class BufferProcessor
         }
     }
 
-    private int ReadBuffer(SampleType sampleType)
+    private (int Read, uint SamplingInterval) ReadBuffer(SampleType sampleType)
     {
-        return sampleType switch
+        uint samplingInterval = 0;
+        var read = sampleType switch
         {
-            SampleType.Continuous => NativeMethods.ContinuousProfilerReadThreadSamples(_buffer.Length, _buffer, out _),
+            SampleType.Continuous => NativeMethods.ContinuousProfilerReadThreadSamples(_buffer.Length, _buffer, out samplingInterval),
             SampleType.SelectedThreads => NativeMethods.SelectiveSamplerReadThreadSamples(_buffer.Length, _buffer),
 #if NET
             SampleType.Allocation => NativeMethods.ContinuousProfilerReadAllocationSamples(_buffer.Length, _buffer),
@@ -58,5 +59,7 @@ internal class BufferProcessor
 #endif
             _ => throw new ArgumentOutOfRangeException(nameof(sampleType), sampleType, null)
         };
+
+        return (read, samplingInterval);
     }
 }

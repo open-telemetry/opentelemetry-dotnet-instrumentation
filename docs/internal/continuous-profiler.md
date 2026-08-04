@@ -333,15 +333,16 @@ example](../plugins.md#continuous-profiling).
 
 ### Exporter contract
 
-Two methods has to be implemented by Exporter
+The exporter must implement two methods:
 
 ```csharp
-public void ExportThreadSamples(byte[] buffer, int read, CancellationToken cancellationToken);
+public void ExportThreadSamples(byte[] buffer, int read, uint samplingInterval, CancellationToken cancellationToken);
 public void ExportAllocationSamples(byte[] buffer, int read, CancellationToken cancellationToken);
 ```
 
 Both accept buffer produced by the native code, the length of filled
-data, and cancellation token.
+data, and cancellation token. `ExportThreadSamples` also receives the sampling
+interval in milliseconds that was used to produce that specific batch.
 The Exporter is responsible both for parsing this buffer and exporting it.
 
 Example: [`OtlpOverHttpExporter`](../../test/test-applications/integrations/TestApplication.ContinuousProfiler/Exporter/OtlpOverHttpExporter.cs).

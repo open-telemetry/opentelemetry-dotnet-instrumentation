@@ -12,6 +12,7 @@ public class RuntimeReconfigurationPlugin : BasePlugin, IContinuousProfilerPlugi
 {
     private const uint InitialThreadSamplingInterval = 1000u;
     private static int _threadExportCount;
+    private static uint _lastThreadSamplingInterval;
 
     public ContinuousProfilerConfiguration GetFirstContinuousProfilerConfiguration()
     {
@@ -28,10 +29,13 @@ public class RuntimeReconfigurationPlugin : BasePlugin, IContinuousProfilerPlugi
 
     internal static int GetThreadExportCount() => Volatile.Read(ref _threadExportCount);
 
+    internal static uint GetLastThreadSamplingInterval() => Volatile.Read(ref _lastThreadSamplingInterval);
+
     private sealed class CountingExporter : IContinuousProfilerExporter
     {
-        public void ExportThreadSamples(byte[] buffer, int read, CancellationToken cancellationToken)
+        public void ExportThreadSamples(byte[] buffer, int read, uint samplingInterval, CancellationToken cancellationToken)
         {
+            Volatile.Write(ref _lastThreadSamplingInterval, samplingInterval);
             Interlocked.Increment(ref _threadExportCount);
         }
 

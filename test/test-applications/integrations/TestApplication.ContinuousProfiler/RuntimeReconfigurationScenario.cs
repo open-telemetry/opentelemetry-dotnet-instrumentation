@@ -45,6 +45,9 @@ internal static class RuntimeReconfigurationScenario
 
             var exportCount = WaitForExportAfter(0, TimeSpan.FromSeconds(4));
             Ensure(exportCount > 0, "Repeated ConfigureContinuousProfiler did not enable CPU sampling.");
+            Ensure(
+                RuntimeReconfigurationPlugin.GetLastThreadSamplingInterval() == ActiveInterval,
+                "The exporter did not receive the active sampling interval.");
 
             Ensure(
                 !RuntimeContinuousProfilerNativeMethods.SetContinuousProfilerSamplingInterval(0),
@@ -56,6 +59,9 @@ internal static class RuntimeReconfigurationScenario
             Ensure(
                 exportCountAfterIntervalChange > exportCount,
                 "Changing the sampling interval did not wake the sampling thread.");
+            Ensure(
+                RuntimeReconfigurationPlugin.GetLastThreadSamplingInterval() == ReconfiguredInterval,
+                "The exporter did not receive the reconfigured sampling interval.");
 
             Ensure(
                 RuntimeContinuousProfilerNativeMethods.SetContinuousProfilerEnabled(false),

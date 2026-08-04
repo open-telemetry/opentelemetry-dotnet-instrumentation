@@ -22,7 +22,7 @@ public class TestPlugin : BasePlugin, IContinuousProfilerPlugin
             MaxMemorySamplesPerMinute = 200u,
             ExportInterval = TimeSpan.FromMilliseconds(500),
             ExportTimeout = TimeSpan.FromSeconds(5),
-            Exporter = new OtlpOverHttpExporter(TimeSpan.FromMilliseconds(threadSamplingInterval), new SampleNativeFormatParser())
+            Exporter = new OtlpOverHttpExporter(new SampleNativeFormatParser())
         };
     }
 }

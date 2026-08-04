@@ -13,8 +13,9 @@ public interface IContinuousProfilerExporter
     /// </summary>
     /// <param name="buffer">data buffer</param>
     /// <param name="read">read count</param>
+    /// <param name="samplingInterval">sampling interval in milliseconds</param>
     /// <param name="cancellationToken">cancellation token</param>
-    void ExportThreadSamples(byte[] buffer, int read, CancellationToken cancellationToken);
+    void ExportThreadSamples(byte[] buffer, int read, uint samplingInterval, CancellationToken cancellationToken);
 
     /// <summary>
     /// Export allocation samples.
