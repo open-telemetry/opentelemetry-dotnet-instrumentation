@@ -117,9 +117,11 @@ internal static class NativeMethods
             : NonWindows.GetContinuousProfilerSamplingInterval();
     }
 
-    public static int ContinuousProfilerReadThreadSamples(int len, byte[] buf)
+    public static int ContinuousProfilerReadThreadSamples(int len, byte[] buf, out uint samplingInterval)
     {
-        return IsWindows ? Windows.ContinuousProfilerReadThreadSamples(len, buf) : NonWindows.ContinuousProfilerReadThreadSamples(len, buf);
+        return IsWindows
+            ? Windows.ContinuousProfilerReadThreadSamples(len, buf, out samplingInterval)
+            : NonWindows.ContinuousProfilerReadThreadSamples(len, buf, out samplingInterval);
     }
 
 #if NET
@@ -286,7 +288,7 @@ internal static class NativeMethods
 
         [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
         [DllImport("OpenTelemetry.AutoInstrumentation.Native.dll", CallingConvention = CallingConvention.Cdecl)]
-        public static extern int ContinuousProfilerReadThreadSamples(int len, byte[] buf);
+        public static extern int ContinuousProfilerReadThreadSamples(int len, byte[] buf, out uint samplingInterval);
 
 #if NET
         [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
@@ -358,7 +360,7 @@ internal static class NativeMethods
 
         [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
         [DllImport("OpenTelemetry.AutoInstrumentation.Native", CallingConvention = CallingConvention.Cdecl)]
-        public static extern int ContinuousProfilerReadThreadSamples(int len, byte[] buf);
+        public static extern int ContinuousProfilerReadThreadSamples(int len, byte[] buf, out uint samplingInterval);
 
 #if NET
         [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]

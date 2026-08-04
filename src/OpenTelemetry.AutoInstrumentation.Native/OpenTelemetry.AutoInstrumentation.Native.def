@@ -13,7 +13,6 @@ EXPORTS
     SetContinuousProfilerSamplingInterval
     SetContinuousProfilerEnabled
     GetContinuousProfilerSamplingInterval
-    GetContinuousProfilerLastReadSamplingInterval
     ContinuousProfilerReadThreadSamples
     ContinuousProfilerReadAllocationSamples
     SelectiveSamplerReadThreadSamples

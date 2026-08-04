@@ -96,7 +96,6 @@ struct ThreadSampleBatch
 
 static std::mutex                    cpu_buffer_lock = std::mutex();
 static std::deque<ThreadSampleBatch> cpu_buffers;
-static thread_local unsigned int     last_read_thread_sampling_interval;
 
 static std::mutex                  allocation_buffer_lock = std::mutex();
 static std::vector<unsigned char>* allocation_buffer      = new std::vector<unsigned char>();
@@ -139,26 +138,30 @@ void ThreadSamplingRecordProducedThreadSample(std::vector<unsigned char>* buf, c
     }
 }
 // Can return 0 if none are pending
-int32_t ThreadSamplingConsumeOneThreadSample(int32_t len, unsigned char* buf)
+int32_t ThreadSamplingConsumeOneThreadSample(int32_t len, unsigned char* buf, unsigned int* samplingInterval)
 {
+    if (samplingInterval == nullptr)
+    {
+        trace::Logger::Warn("Unexpected null sampling interval to ThreadSampling_ConsumeOneThreadSample");
+        return 0;
+    }
+
+    *samplingInterval = 0;
     if (len <= 0 || buf == nullptr)
     {
-        last_read_thread_sampling_interval = 0;
         trace::Logger::Warn("Unexpected 0/null buffer to ThreadSampling_ConsumeOneThreadSample");
         return 0;
     }
+
     std::unique_ptr<std::vector<unsigned char>> to_use;
+    unsigned int                                to_use_sampling_interval = 0;
     {
         std::lock_guard<std::mutex> guard(cpu_buffer_lock);
         if (!cpu_buffers.empty())
         {
-            last_read_thread_sampling_interval = cpu_buffers.front().sampling_interval;
-            to_use                             = std::move(cpu_buffers.front().buffer);
+            to_use_sampling_interval = cpu_buffers.front().sampling_interval;
+            to_use                   = std::move(cpu_buffers.front().buffer);
             cpu_buffers.pop_front();
-        }
-        else
-        {
-            last_read_thread_sampling_interval = 0;
         }
     }
     if (to_use == nullptr)
@@ -168,16 +171,11 @@ int32_t ThreadSamplingConsumeOneThreadSample(int32_t len, unsigned char* buf)
     const size_t to_use_len = static_cast<int>(std::min(to_use->size(), static_cast<size_t>(len)));
     if (to_use_len == 0)
     {
-        last_read_thread_sampling_interval = 0;
         return 0;
     }
     memcpy(buf, to_use->data(), to_use_len);
+    *samplingInterval = to_use_sampling_interval;
     return static_cast<int32_t>(to_use_len);
-}
-
-unsigned int ThreadSamplingGetLastReadSamplingInterval()
-{
-    return last_read_thread_sampling_interval;
 }
 
 static void AppendToSelectedThreadsSampleBuffer(int32_t appendLen, unsigned char* appendBuf)
@@ -1943,9 +1941,10 @@ void NameCache<TKey, TValue>::Clear()
 
 extern "C"
 {
-    EXPORTTHIS int32_t ContinuousProfilerReadThreadSamples(int32_t len, unsigned char* buf)
+    EXPORTTHIS int32_t ContinuousProfilerReadThreadSamples(int32_t len, unsigned char* buf,
+                                                           unsigned int* samplingInterval)
     {
-        return ThreadSamplingConsumeOneThreadSample(len, buf);
+        return ThreadSamplingConsumeOneThreadSample(len, buf, samplingInterval);
     }
     EXPORTTHIS int32_t ContinuousProfilerReadAllocationSamples(int32_t len, unsigned char* buf)
     {

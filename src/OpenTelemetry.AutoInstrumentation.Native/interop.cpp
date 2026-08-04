@@ -11,7 +11,6 @@
 
 #include "cor_profiler.h"
 #include "configuration.h"
-#include "continuous_profiler.h"
 
 #ifndef _WIN32
 #include <dlfcn.h>
@@ -73,11 +72,6 @@ EXTERN_C BOOL STDAPICALLTYPE SetContinuousProfilerEnabled(bool enabled)
 EXTERN_C unsigned int STDAPICALLTYPE GetContinuousProfilerSamplingInterval()
 {
     return trace::profiler == nullptr ? 0 : trace::profiler->GetContinuousProfilerSamplingInterval();
-}
-
-EXTERN_C unsigned int STDAPICALLTYPE GetContinuousProfilerLastReadSamplingInterval()
-{
-    return ThreadSamplingGetLastReadSamplingInterval();
 }
 
 EXTERN_C VOID STDAPICALLTYPE InitializeTraceMethods(WCHAR* id,

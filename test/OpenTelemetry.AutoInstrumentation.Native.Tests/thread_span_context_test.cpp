@@ -206,32 +206,33 @@ TEST(ContinuousProfilerConfigurationTest, ShutdownWakesConfigurationWaiterImmedi
 TEST(ContinuousProfilerBufferTest, PreservesBatchOrderAndSamplingIntervalMetadata)
 {
     unsigned char output[1];
-    while (ThreadSamplingConsumeOneThreadSample(sizeof(output), output) > 0)
+    unsigned int  samplingInterval;
+    while (ThreadSamplingConsumeOneThreadSample(sizeof(output), output, &samplingInterval) > 0)
     {
     }
-    ASSERT_EQ(0u, ThreadSamplingGetLastReadSamplingInterval());
+    ASSERT_EQ(0u, samplingInterval);
 
     ThreadSamplingRecordProducedThreadSample(new std::vector<unsigned char>{0x11}, 10000u);
     ThreadSamplingRecordProducedThreadSample(new std::vector<unsigned char>{0x22}, 20000u);
     ASSERT_FALSE(ThreadSamplingShouldProduceThreadSample());
 
-    ASSERT_EQ(1, ThreadSamplingConsumeOneThreadSample(sizeof(output), output));
+    ASSERT_EQ(1, ThreadSamplingConsumeOneThreadSample(sizeof(output), output, &samplingInterval));
     ASSERT_EQ(0x11, output[0]);
-    ASSERT_EQ(10000u, ThreadSamplingGetLastReadSamplingInterval());
+    ASSERT_EQ(10000u, samplingInterval);
 
     ThreadSamplingRecordProducedThreadSample(new std::vector<unsigned char>{0x33}, 30000u);
     ASSERT_FALSE(ThreadSamplingShouldProduceThreadSample());
 
-    ASSERT_EQ(1, ThreadSamplingConsumeOneThreadSample(sizeof(output), output));
+    ASSERT_EQ(1, ThreadSamplingConsumeOneThreadSample(sizeof(output), output, &samplingInterval));
     ASSERT_EQ(0x22, output[0]);
-    ASSERT_EQ(20000u, ThreadSamplingGetLastReadSamplingInterval());
+    ASSERT_EQ(20000u, samplingInterval);
 
-    ASSERT_EQ(1, ThreadSamplingConsumeOneThreadSample(sizeof(output), output));
+    ASSERT_EQ(1, ThreadSamplingConsumeOneThreadSample(sizeof(output), output, &samplingInterval));
     ASSERT_EQ(0x33, output[0]);
-    ASSERT_EQ(30000u, ThreadSamplingGetLastReadSamplingInterval());
+    ASSERT_EQ(30000u, samplingInterval);
 
-    ASSERT_EQ(0, ThreadSamplingConsumeOneThreadSample(sizeof(output), output));
-    ASSERT_EQ(0u, ThreadSamplingGetLastReadSamplingInterval());
+    ASSERT_EQ(0, ThreadSamplingConsumeOneThreadSample(sizeof(output), output, &samplingInterval));
+    ASSERT_EQ(0u, samplingInterval);
 }
 
 TEST(ContinuousProfilerConfigurationTest, CpuReconfigurationDoesNotRestartOrCorruptSelectiveSampling)

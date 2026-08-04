@@ -49,7 +49,7 @@ internal class BufferProcessor
     {
         return sampleType switch
         {
-            SampleType.Continuous => NativeMethods.ContinuousProfilerReadThreadSamples(_buffer.Length, _buffer),
+            SampleType.Continuous => NativeMethods.ContinuousProfilerReadThreadSamples(_buffer.Length, _buffer, out _),
             SampleType.SelectedThreads => NativeMethods.SelectiveSamplerReadThreadSamples(_buffer.Length, _buffer),
 #if NET
             SampleType.Allocation => NativeMethods.ContinuousProfilerReadAllocationSamples(_buffer.Length, _buffer),

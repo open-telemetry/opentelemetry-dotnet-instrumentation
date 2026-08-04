@@ -30,7 +30,8 @@
 
 extern "C"
 {
-    EXPORTTHIS int32_t ContinuousProfilerReadThreadSamples(int32_t len, unsigned char* buf);
+    EXPORTTHIS int32_t ContinuousProfilerReadThreadSamples(int32_t len, unsigned char* buf,
+                                                           unsigned int* samplingInterval);
     EXPORTTHIS int32_t ContinuousProfilerReadAllocationSamples(int32_t len, unsigned char* buf);
     EXPORTTHIS int32_t SelectiveSamplerReadThreadSamples(int32_t len, unsigned char* buf);
     // ReSharper disable CppInconsistentNaming
@@ -414,7 +415,6 @@ void AllocationSamplingAppendToBuffer(int32_t appendLen, unsigned char* appendBu
 bool ThreadSamplingShouldProduceThreadSample();
 void ThreadSamplingRecordProducedThreadSample(std::vector<unsigned char>* buf, unsigned int samplingInterval);
 // Can return 0 if none are pending
-int32_t ThreadSamplingConsumeOneThreadSample(int32_t len, unsigned char* buf);
-unsigned int ThreadSamplingGetLastReadSamplingInterval();
+int32_t ThreadSamplingConsumeOneThreadSample(int32_t len, unsigned char* buf, unsigned int* samplingInterval);
 
 #endif // OTEL_CONTINUOUS_PROFILER_H_
