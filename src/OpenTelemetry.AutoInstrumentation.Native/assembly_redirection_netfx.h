@@ -12,7 +12,7 @@
         { _W("Microsoft.Extensions.Configuration"), {10, 0, 0, 9} }, \
         { _W("Microsoft.Extensions.Configuration.Abstractions"), {10, 0, 0, 9} }, \
         { _W("Microsoft.Extensions.Configuration.Binder"), {10, 0, 0, 9} }, \
-        { _W("Microsoft.Extensions.Configuration.EnvironmentVariables"), {10, 0, 0, 0} }, \
+        { _W("Microsoft.Extensions.Configuration.EnvironmentVariables"), {10, 0, 0, 9} }, \
         { _W("Microsoft.Extensions.DependencyInjection"), {10, 0, 0, 9} }, \
         { _W("Microsoft.Extensions.DependencyInjection.Abstractions"), {10, 0, 0, 9} }, \
         { _W("Microsoft.Extensions.Diagnostics.Abstractions"), {10, 0, 0, 9} }, \
@@ -161,7 +161,7 @@
         { _W("Microsoft.Extensions.Configuration"), {10, 0, 0, 9} }, \
         { _W("Microsoft.Extensions.Configuration.Abstractions"), {10, 0, 0, 9} }, \
         { _W("Microsoft.Extensions.Configuration.Binder"), {10, 0, 0, 9} }, \
-        { _W("Microsoft.Extensions.Configuration.EnvironmentVariables"), {10, 0, 0, 0} }, \
+        { _W("Microsoft.Extensions.Configuration.EnvironmentVariables"), {10, 0, 0, 9} }, \
         { _W("Microsoft.Extensions.DependencyInjection"), {10, 0, 0, 9} }, \
         { _W("Microsoft.Extensions.DependencyInjection.Abstractions"), {10, 0, 0, 9} }, \
         { _W("Microsoft.Extensions.Diagnostics.Abstractions"), {10, 0, 0, 9} }, \
@@ -310,7 +310,7 @@
         { _W("Microsoft.Extensions.Configuration"), {10, 0, 0, 9} }, \
         { _W("Microsoft.Extensions.Configuration.Abstractions"), {10, 0, 0, 9} }, \
         { _W("Microsoft.Extensions.Configuration.Binder"), {10, 0, 0, 9} }, \
-        { _W("Microsoft.Extensions.Configuration.EnvironmentVariables"), {10, 0, 0, 0} }, \
+        { _W("Microsoft.Extensions.Configuration.EnvironmentVariables"), {10, 0, 0, 9} }, \
         { _W("Microsoft.Extensions.DependencyInjection"), {10, 0, 0, 9} }, \
         { _W("Microsoft.Extensions.DependencyInjection.Abstractions"), {10, 0, 0, 9} }, \
         { _W("Microsoft.Extensions.Diagnostics.Abstractions"), {10, 0, 0, 9} }, \
@@ -376,7 +376,7 @@
         { _W("Microsoft.Extensions.Configuration"), {10, 0, 0, 9} }, \
         { _W("Microsoft.Extensions.Configuration.Abstractions"), {10, 0, 0, 9} }, \
         { _W("Microsoft.Extensions.Configuration.Binder"), {10, 0, 0, 9} }, \
-        { _W("Microsoft.Extensions.Configuration.EnvironmentVariables"), {10, 0, 0, 0} }, \
+        { _W("Microsoft.Extensions.Configuration.EnvironmentVariables"), {10, 0, 0, 9} }, \
         { _W("Microsoft.Extensions.DependencyInjection"), {10, 0, 0, 9} }, \
         { _W("Microsoft.Extensions.DependencyInjection.Abstractions"), {10, 0, 0, 9} }, \
         { _W("Microsoft.Extensions.Diagnostics.Abstractions"), {10, 0, 0, 9} }, \
