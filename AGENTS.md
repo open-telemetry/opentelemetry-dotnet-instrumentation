@@ -28,14 +28,14 @@ dotnet nuke --help                 :: list all targets and parameters
 
 Useful parameters (apply to the test targets):
 
-- `--test-project <substring>` — select test projects by name substring.
-- `--test-name <substring>` — becomes an xunit `FullyQualifiedName~` filter.
-- `--test-target-framework net8.0|net9.0|net10.0|net462|net472|...` — otherwise
+- `--test-project <substring>` - select test projects by name substring.
+- `--test-name <substring>` - becomes an xunit `FullyQualifiedName~` filter.
+- `--test-target-framework net8.0|net9.0|net10.0|net462|net472|...` - otherwise
   every TFM the project supports is run.
-- `--containers linux|windows|windows-only|none` — integration tests are
-  tagged `[Trait("Containers", "Linux"|"Windows")]`; use `none` to skip every
+- `--containers linux|windows|windows-only|none` - integration tests are
+  tagged `[Trait("Containers", "Linux"|"Windows|Any")]`; use `none` to skip every
   test needing Docker.
-- `--test-count N` — repeat runs, for flakiness checks.
+- `--test-count N` - repeat runs, for flakiness checks.
 - `--configuration Debug`, `--platform x86|x64|ARM64`, `--skip <target>`.
 
 Running one integration test:
@@ -53,14 +53,14 @@ Test logs and profiler logs land in `test-artifacts/`.
 
 ### Lint and format
 
-- `dotnet format .\OpenTelemetry.AutoInstrumentation.sln --verify-no-changes` —
+- `dotnet format .\OpenTelemetry.AutoInstrumentation.sln --verify-no-changes` -
   exactly what the `dotnet format` CI check runs. Warnings are errors
   (`TreatWarningsAsErrors`), analysis level is `latest-All`, StyleCop is on
   solution-wide, nullable + implicit usings are enabled.
 - `./scripts/format-native.sh` (after `./scripts/download-clang-tools.sh`) for
   C++.
-- `nuke InstallDocumentationTools ValidateDocumentation` for markdownlint +
-  cspell; `nuke MarkdownLintFix` auto-fixes. Requires Node.js.
+- `dotnet nuke InstallDocumentationTools ValidateDocumentation` for markdownlint
+  & cspell; `nuke MarkdownLintFix` auto-fixes. Requires Node.js.
 
 ### Local telemetry backend
 
@@ -74,36 +74,36 @@ an instrumented app directly. `examples/playground` is a scratch app for this.
 
 Read `docs/design.md` for the full picture. The moving parts:
 
-- `src/OpenTelemetry.AutoInstrumentation.Native` — C++ CLR Profiler
+- `src/OpenTelemetry.AutoInstrumentation.Native` - C++ CLR Profiler
   (`cor_profiler.cpp`, `il_rewriter*`, `method_rewriter.cpp`, plus the
   CallTarget token helpers). Receives instrumentation definitions from managed
   code, requests ReJIT for target methods, and rewrites their IL. On .NET
   Framework it also injects the Loader at startup and performs assembly
   reference redirection.
-- `src/OpenTelemetry.AutoInstrumentation.StartupHook` — .NET-only entry point
+- `src/OpenTelemetry.AutoInstrumentation.StartupHook` - .NET-only entry point
   (`StartupHook.Initialize()`), loaded via `DOTNET_STARTUP_HOOKS`.
-- `src/OpenTelemetry.AutoInstrumentation.Loader` — creates
+- `src/OpenTelemetry.AutoInstrumentation.Loader` - creates
   `Loader.Startup`, hooks `AssemblyResolve`/`AssemblyLoadContext` so SDK and
   instrumentation assemblies resolve, then reflectively calls
   `Instrumentation.Initialize` in the managed profiler.
-- `src/OpenTelemetry.AutoInstrumentation` — the managed profiler: SDK setup
+- `src/OpenTelemetry.AutoInstrumentation` - the managed profiler: SDK setup
   (`Instrumentation.cs`, `Configurations/`), CallTarget infrastructure
   (`CallTarget/`), DuckTyping (`DuckTyping/`), bytecode instrumentations
   (`Instrumentations/`), plugin hooks (`Plugins/`), vendored code (`Vendors/`).
-- `src/OpenTelemetry.AutoInstrumentation.Assemblies{,.NetFramework}` — pull in
+- `src/OpenTelemetry.AutoInstrumentation.Assemblies{,.NetFramework}` - pull in
   the OpenTelemetry SDK + instrumentation library packages that get copied into
   the distribution; `...AdditionalDeps` produces the additional-deps files.
-- `src/SourceGenerators` — `InstrumentationDefinitionsGenerator` scans
+- `src/SourceGenerators` - `InstrumentationDefinitionsGenerator` scans
   `[InstrumentMethod]` attributes and emits the `InstrumentationDefinitions`
   partial (`GetDefinitionsArray`) that is handed to the native side as
   `NativeCallTargetDefinition[]`. Generated output is under
   `src/OpenTelemetry.AutoInstrumentation/Generated/<tfm>/`.
-- `src/OpenTelemetry.AutoInstrumentation.PluginApi`, `nuget/` — public plugin
+- `src/OpenTelemetry.AutoInstrumentation.PluginApi`, `nuget/` - public plugin
   API and the NuGet package layouts (`OpenTelemetry.AutoInstrumentation`,
   `...Runtime.Native`).
-- `build/` — the Nuke project (`Build.cs` + `Build.Steps*.cs` per platform,
+- `build/` - the Nuke project (`Build.cs` + `Build.Steps*.cs` per platform,
   `Projects.cs` names all projects, `TargetFramework.cs` the TFM matrix).
-- `tools/LibraryVersionsGenerator` — generates the tested-library version
+- `tools/LibraryVersionsGenerator` - generates the tested-library version
   matrix.
 
 Two instrumentation styles coexist: **source instrumentations** (upstream
@@ -118,7 +118,7 @@ An instrumentation is a static class under
 parameterTypeNames, minimumVersion, maximumVersion, integrationName, type)]`
 attributes, exposing `OnMethodBegin`/`OnMethodEnd` (or
 `OnAsyncMethodEnd`) returning `CallTargetState`/`CallTargetReturn`. Nothing
-needs to be registered manually — the source generator picks the attributes up.
+needs to be registered manually - the source generator picks the attributes up.
 
 Instrumentation code must not reference the instrumented library directly (one
 build has to work across many library versions): use `DuckTyping/` interfaces
@@ -130,18 +130,18 @@ it in `docs/config.md`.
 ### Tests
 
 - `test/OpenTelemetry.AutoInstrumentation.Tests`, `...Loader.Tests`,
-  `...StartupHook.Tests`, `...BuildTasks.Tests` — managed unit tests.
-- `test/OpenTelemetry.AutoInstrumentation.Native.Tests` — C++ (gtest).
-- `test/OpenTelemetry.AutoInstrumentation.Bootstrapping.Tests` — run by the
+  `...StartupHook.Tests`, `...BuildTasks.Tests` - managed unit tests.
+- `test/OpenTelemetry.AutoInstrumentation.Native.Tests` - C++ (gtest).
+- `test/OpenTelemetry.AutoInstrumentation.Bootstrapping.Tests` - run by the
   `RunManagedUnitTests` target through a dedicated harness, not plain
   `dotnet test`.
-- `test/IntegrationTests` — the highest-value suite: launches a real
+- `test/IntegrationTests` - the highest-value suite: launches a real
   instrumented app from `test/test-applications/integrations/` against mock
   OTLP collectors (`Helpers/Mock*Collector.cs`, `TestHelper.cs`) and asserts on
   the exported telemetry. One test class per instrumented library; feature
   work without a dedicated app goes into `SmokeTests`. Some assertions use
   Verify snapshots (`*.verified.txt`).
-- `test/NuGetPackagesTests` + `test/test-applications/nuget-packages/` — the
+- `test/NuGetPackagesTests` + `test/test-applications/nuget-packages/` - the
   NuGet deployment mode.
 
 Library version coverage strategy (lowest non-vulnerable, one per major, latest,
@@ -159,7 +159,7 @@ manually rather than looping locally.
 - Central package management: versions live in `Directory.Packages.props` files
   (root, `src/`, `test/`, `tools/`, `src/OpenTelemetry.AutoInstrumentation.Assemblies/`);
   don't put versions on `PackageReference`.
-- Version numbers come from git tags via MinVer (`v` prefix) — don't hand-edit
+- Version numbers come from git tags via MinVer (`v` prefix) - don't hand-edit
   version properties.
 - Update `CHANGELOG.md` under `## [Unreleased]` for user-visible changes, and
   `docs/config.md` for anything configurable. PRs are expected to be small and
@@ -168,7 +168,7 @@ manually rather than looping locally.
   hand-edited; see `docs/internal/vendored-code.md` for the mechanical changes
   applied when vendoring (namespace prefixing, making the contract internal).
 - `*.g.cs` files and `src/OpenTelemetry.AutoInstrumentation/Generated/` are
-  generated — change the generator or its input instead.
+  generated - change the generator or its input instead.
 - Instrumentation must never crash the host application: runtime errors are
   logged (`AutoInstrumentationEventSource`, `Logging/`) and swallowed;
   only invalid configuration at init may fail (see `FailFastSettings`).
@@ -184,7 +184,7 @@ draft, or get closed.
 
 - Use an `Assisted-by: <model>` commit trailer (per the
   [OpenTelemetry GenAI policy](https://github.com/open-telemetry/community/blob/main/policies/genai.md)),
-  **not** `Co-authored-by:` — even if your tooling defaults to the latter. A PR
+  **not** `Co-authored-by:` - even if your tooling defaults to the latter. A PR
   has been held with "without this we cannot proceed" purely over this.
 - Write the PR body yourself, following the `Why` / `What` / `Tests` template.
   "Some meaningful PR description" was requested in the same breath as the
@@ -199,14 +199,14 @@ draft, or get closed.
 
 - Unrelated fixes found along the way get sent to their own PR ("Can we make
   this fix separate from this PR?"), even genuinely good ones like a COM leak
-  fix inside a feature branch. Adjacent tooling ideas likewise — a new
+  fix inside a feature branch. Adjacent tooling ideas likewise - a new
   security-lint workflow was asked to be its own PR rather than a rider.
 - Incidental churn draws review comments more reliably than anything else:
   changed quoting style, an extra config key, one line removed too many, a dead
   file added to a `vcxproj`. Expect "What is the reason for this change?" and a
   stalled PR. Revert anything you cannot justify in one sentence.
 - Improvement ideas raised in review are usually deferred to follow-up issues on
-  purpose — "one step at a time". Don't grow the diff in response to them; agree
+  purpose - "one step at a time". Don't grow the diff in response to them; agree
   on an issue instead.
 - Preserve existing behavior when refactoring, and say so explicitly. Reviewers
   do diff the semantics: a `PluginManager` rewrite was caught returning after the
@@ -214,7 +214,7 @@ draft, or get closed.
 
 ### Telemetry attributes need a *released* semantic convention
 
-- A merged semantic-conventions PR is not enough — maintainers block until the
+- A merged semantic-conventions PR is not enough - maintainers block until the
   convention appears in a stable
   [Semantic Conventions](https://github.com/open-telemetry/semantic-conventions)
   release. If the convention doesn't exist yet, the ask is to go and fix
@@ -232,7 +232,7 @@ draft, or get closed.
   `src/OpenTelemetry.AutoInstrumentation.Assemblies/Directory.Packages.props`
   toward latest gets rejected as "against the discussed dependency management
   strategy".
-- A version belongs in the highest `Directory.Packages.props` that needs it —
+- A version belongs in the highest `Directory.Packages.props` that needs it -
   putting a package needed by both `src/` and `test/` only in
   `test/Directory.Packages.props` draws a review comment.
 - Before proposing a library upgrade, check the package's dependency tab: the
@@ -252,7 +252,7 @@ draft, or get closed.
   options and the compatibility implications; do not pick one unilaterally and
   ship it.
 - Avoid leaving a mixed semantic model (some keys AppDomain-local, others
-  promoted to process environment variables) — that inconsistency, not the
+  promoted to process environment variables) - that inconsistency, not the
   change itself, is what drew objection.
 - Environment-variable defaults and file-based (YAML) config defaults are not
   always the same. Documentation claims about a default are checked against both
@@ -285,8 +285,8 @@ draft, or get closed.
 - Manage COM lifetimes with `ComPtr` rather than raw interface pointers.
 - No unused declarations, no files added to the project that nothing builds, and
   file names must describe what the file actually contains.
-- Changes to profiler runtime behavior — thread suspension, stack walking, any
-  loader call made while a sampled thread is suspended — attract requests for an
+- Changes to profiler runtime behavior - thread suspension, stack walking, any
+  loader call made while a sampled thread is suspended - attract requests for an
   opt-out switch and for symmetry with existing walk paths. Assume conservative
   reviewers here and explain the failure modes you considered.
 - `src/OpenTelemetry.AutoInstrumentation.Native/lib/` is vendored code (see
@@ -295,10 +295,9 @@ draft, or get closed.
 
 ### Triage CI before asking for a review
 
-- Merge `main` into the branch first. "Most/all of your failings is related to
-  already fixed stuff" is a routine comment.
+- Merge `main` into the branch first.
 - Recognize the infrastructure failure modes that are not your change: Azurite
   API-version mismatches, stale container digests, arm container timeouts, and
   the timing-sensitive continuous-profiler/collector-expectation tests. There is
   no automatic test-retry layer, so a single red leg is not proof of a
-  regression — confirm with `verify-test.yml` before "fixing" it.
+  regression - confirm with `verify-test.yml` before "fixing" it.
