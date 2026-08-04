@@ -26,6 +26,7 @@ internal sealed class MockMetricsCollector : IDisposable
 
     public MockMetricsCollector(ITestOutputHelper output, string host = "localhost")
     {
+        ProtobufDescriptorWarmup.Ensure();
         _output = output;
 #if NETFRAMEWORK
         _listener = new(output, HandleHttpRequests, host, "/v1/metrics/");

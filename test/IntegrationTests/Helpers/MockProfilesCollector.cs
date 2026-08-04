@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 using System.Collections.Concurrent;
+using System.Diagnostics;
 using System.Globalization;
 using System.Text;
 using OpenTelemetry.Proto.Collector.Profiles.V1Development;
@@ -26,6 +27,7 @@ internal sealed class MockProfilesCollector : IDisposable
 
     public MockProfilesCollector(ITestOutputHelper output, string host = "localhost")
     {
+        ProtobufDescriptorWarmup.Ensure();
         _output = output;
 #if NETFRAMEWORK
         _listener = new(output, HandleHttpRequests, host, "/v1development/profiles/");
@@ -61,11 +63,41 @@ internal sealed class MockProfilesCollector : IDisposable
         _collectedExpectation = new(collectedExpectation, description);
     }
 
-    public void AssertCollected()
+    public void AssertCollected(TimeSpan? timeout = null)
     {
         if (_collectedExpectation == null)
         {
             throw new InvalidOperationException("Expectation for collected profiling snapshot was not set");
+        }
+
+        timeout ??= TestTimeout.Expectation;
+
+        // The instrumented application exports profiles asynchronously, so batches can still be
+        // in-flight when the process exits. Enumerating the BlockingCollection produces a
+        // non-destructive point-in-time snapshot (it does not consume items, so a subsequent
+        // AssertExpectations call still sees them). Poll until the number of collected batches
+        // stops growing for a short grace period, or the timeout elapses, before evaluating the
+        // expectation. This avoids failing just because the final export had not arrived yet.
+        var pollInterval = TimeSpan.FromMilliseconds(200);
+        var stabilizationPeriod = TestTimeout.NoExpectation;
+        var stopwatch = Stopwatch.StartNew();
+        var lastCount = _profilesSnapshots.Count;
+        var lastChange = stopwatch.Elapsed;
+
+        while (stopwatch.Elapsed < timeout.Value)
+        {
+            Thread.Sleep(pollInterval);
+
+            var currentCount = _profilesSnapshots.Count;
+            if (currentCount != lastCount)
+            {
+                lastCount = currentCount;
+                lastChange = stopwatch.Elapsed;
+            }
+            else if (currentCount > 0 && stopwatch.Elapsed - lastChange >= stabilizationPeriod)
+            {
+                break;
+            }
         }
 
         var collected = _profilesSnapshots.Select(collected => collected.ExportProfilesServiceRequest).ToArray();
