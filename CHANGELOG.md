@@ -38,13 +38,36 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
   - `OpenTelemetry.Instrumentation.EntityFrameworkCore`
     from `1.16.0-beta.1` to `1.17.0-beta.1`.
 - .NET Framework only, following packages updated
-  - `OpenTelemetry.Instrumentation.AspNet` from `1.16.0` to `1.17.0`.
+  - `Microsoft.Bcl.AsyncInterfaces` from `10.0.9` to `10.0.10`,
+  - `Microsoft.Extensions.Configuration` from `10.0.9` to `10.0.10`,
+  - `Microsoft.Extensions.Configuration.Abstractions` from `10.0.9` to `10.0.10`,
+  - `Microsoft.Extensions.Configuration.Binder` from `10.0.9` to `10.0.10`,
+  - `Microsoft.Extensions.Configuration.EnvironmentVariables` from `10.0.9` to `10.0.10`,
+  - `Microsoft.Extensions.DependencyInjection` from `10.0.9` to `10.0.10`,
+  - `Microsoft.Extensions.DependencyInjection.Abstractions`
+    from `10.0.9` to `10.0.10`,
+  - `Microsoft.Extensions.Diagnostics.Abstractions` from `10.0.9` to `10.0.10`,
+  - `Microsoft.Extensions.Logging` from `10.0.9` to `10.0.10`,
+  - `Microsoft.Extensions.Logging.Abstractions` from `10.0.9` to `10.0.10`,
+  - `Microsoft.Extensions.Logging.Configuration` from `10.0.9` to `10.0.10`,
+  - `Microsoft.Extensions.Options` from `10.0.9` to `10.0.10`,
+  - `Microsoft.Extensions.Options.ConfigurationExtensions`
+    from `10.0.9` to `10.0.10`,
+  - `Microsoft.Extensions.Primitives` from `10.0.9` to `10.0.10`,
+  - `OpenTelemetry.Instrumentation.AspNet` from `1.16.0` to `1.17.0`,
+  - `System.Diagnostics.DiagnosticSource` from `10.0.9` to `10.0.10`,
+  - `System.IO.Pipelines` from `10.0.9` to `10.0.10`,
+  - `System.Text.Encodings.Web` from `10.0.9` to `10.0.10`,
+  - `System.Text.Json` from `10.0.9` to `10.0.10`.
 
 ### Deprecated
 
 ### Removed
 
 ### Fixed
+
+- Use the standard `service.namespace` resource attribute instead of `service.namespace.name`
+  when identifying an application through OpAMP.
 
 ## [v1.16.0](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/tag/v1.16.0)
 
