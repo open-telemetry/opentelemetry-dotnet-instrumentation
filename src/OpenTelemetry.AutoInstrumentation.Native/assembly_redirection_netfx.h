@@ -8,19 +8,20 @@
 #define ASSEMBLY_REDIRECTION_NETFX \
     { 462, { \
         { _W("Google.Protobuf"), {3, 35, 1, 0} }, \
-        { _W("Microsoft.Bcl.AsyncInterfaces"), {10, 0, 0, 9} }, \
-        { _W("Microsoft.Extensions.Configuration"), {10, 0, 0, 9} }, \
-        { _W("Microsoft.Extensions.Configuration.Abstractions"), {10, 0, 0, 9} }, \
-        { _W("Microsoft.Extensions.Configuration.Binder"), {10, 0, 0, 9} }, \
-        { _W("Microsoft.Extensions.DependencyInjection"), {10, 0, 0, 9} }, \
-        { _W("Microsoft.Extensions.DependencyInjection.Abstractions"), {10, 0, 0, 9} }, \
-        { _W("Microsoft.Extensions.Diagnostics.Abstractions"), {10, 0, 0, 9} }, \
-        { _W("Microsoft.Extensions.Logging"), {10, 0, 0, 9} }, \
-        { _W("Microsoft.Extensions.Logging.Abstractions"), {10, 0, 0, 9} }, \
-        { _W("Microsoft.Extensions.Logging.Configuration"), {10, 0, 0, 9} }, \
-        { _W("Microsoft.Extensions.Options"), {10, 0, 0, 9} }, \
-        { _W("Microsoft.Extensions.Options.ConfigurationExtensions"), {10, 0, 0, 9} }, \
-        { _W("Microsoft.Extensions.Primitives"), {10, 0, 0, 9} }, \
+        { _W("Microsoft.Bcl.AsyncInterfaces"), {10, 0, 0, 10} }, \
+        { _W("Microsoft.Extensions.Configuration"), {10, 0, 0, 10} }, \
+        { _W("Microsoft.Extensions.Configuration.Abstractions"), {10, 0, 0, 10} }, \
+        { _W("Microsoft.Extensions.Configuration.Binder"), {10, 0, 0, 10} }, \
+        { _W("Microsoft.Extensions.Configuration.EnvironmentVariables"), {10, 0, 0, 10} }, \
+        { _W("Microsoft.Extensions.DependencyInjection"), {10, 0, 0, 10} }, \
+        { _W("Microsoft.Extensions.DependencyInjection.Abstractions"), {10, 0, 0, 10} }, \
+        { _W("Microsoft.Extensions.Diagnostics.Abstractions"), {10, 0, 0, 10} }, \
+        { _W("Microsoft.Extensions.Logging"), {10, 0, 0, 10} }, \
+        { _W("Microsoft.Extensions.Logging.Abstractions"), {10, 0, 0, 10} }, \
+        { _W("Microsoft.Extensions.Logging.Configuration"), {10, 0, 0, 10} }, \
+        { _W("Microsoft.Extensions.Options"), {10, 0, 0, 10} }, \
+        { _W("Microsoft.Extensions.Options.ConfigurationExtensions"), {10, 0, 0, 10} }, \
+        { _W("Microsoft.Extensions.Primitives"), {10, 0, 0, 10} }, \
         { _W("Microsoft.Win32.Primitives"), {4, 0, 3, 0} }, \
         { _W("OpenTelemetry"), {1, 0, 0, 0} }, \
         { _W("OpenTelemetry.Api"), {1, 0, 0, 0} }, \
@@ -32,22 +33,22 @@
         { _W("OpenTelemetry.Exporter.Prometheus.HttpListener"), {1, 0, 0, 0} }, \
         { _W("OpenTelemetry.Exporter.Zipkin"), {1, 0, 0, 0} }, \
         { _W("OpenTelemetry.Extensions.Propagators"), {1, 0, 0, 0} }, \
-        { _W("OpenTelemetry.Instrumentation.AspNet"), {1, 16, 0, 1128} }, \
-        { _W("OpenTelemetry.Instrumentation.AspNet.TelemetryHttpModule"), {1, 16, 0, 1128} }, \
-        { _W("OpenTelemetry.Instrumentation.GrpcNetClient"), {1, 16, 0, 1132} }, \
-        { _W("OpenTelemetry.Instrumentation.Http"), {1, 16, 0, 1135} }, \
-        { _W("OpenTelemetry.Instrumentation.Process"), {1, 16, 0, 1136} }, \
-        { _W("OpenTelemetry.Instrumentation.Quartz"), {1, 15, 1, 1027} }, \
-        { _W("OpenTelemetry.Instrumentation.Runtime"), {1, 15, 1, 1029} }, \
-        { _W("OpenTelemetry.Instrumentation.SqlClient"), {1, 16, 0, 1138} }, \
-        { _W("OpenTelemetry.Instrumentation.StackExchangeRedis"), {1, 16, 0, 1137} }, \
-        { _W("OpenTelemetry.Instrumentation.Wcf"), {1, 16, 0, 1139} }, \
+        { _W("OpenTelemetry.Instrumentation.AspNet"), {1, 17, 0, 1203} }, \
+        { _W("OpenTelemetry.Instrumentation.AspNet.TelemetryHttpModule"), {1, 17, 0, 1203} }, \
+        { _W("OpenTelemetry.Instrumentation.GrpcNetClient"), {1, 17, 0, 1208} }, \
+        { _W("OpenTelemetry.Instrumentation.Http"), {1, 17, 0, 1210} }, \
+        { _W("OpenTelemetry.Instrumentation.Process"), {1, 17, 0, 1214} }, \
+        { _W("OpenTelemetry.Instrumentation.Quartz"), {1, 17, 0, 1213} }, \
+        { _W("OpenTelemetry.Instrumentation.Runtime"), {1, 17, 0, 1215} }, \
+        { _W("OpenTelemetry.Instrumentation.SqlClient"), {1, 17, 0, 1216} }, \
+        { _W("OpenTelemetry.Instrumentation.StackExchangeRedis"), {1, 17, 0, 1217} }, \
+        { _W("OpenTelemetry.Instrumentation.Wcf"), {1, 17, 0, 1218} }, \
         { _W("OpenTelemetry.OpAmp.Client"), {0, 6, 0, 1162} }, \
-        { _W("OpenTelemetry.Resources.Azure"), {1, 15, 1, 1031} }, \
-        { _W("OpenTelemetry.Resources.Host"), {1, 15, 1, 1036} }, \
-        { _W("OpenTelemetry.Resources.OperatingSystem"), {1, 15, 1, 1039} }, \
-        { _W("OpenTelemetry.Resources.Process"), {1, 15, 1, 1069} }, \
-        { _W("OpenTelemetry.Resources.ProcessRuntime"), {1, 15, 1, 1040} }, \
+        { _W("OpenTelemetry.Resources.Azure"), {1, 17, 0, 1240} }, \
+        { _W("OpenTelemetry.Resources.Host"), {1, 17, 0, 1244} }, \
+        { _W("OpenTelemetry.Resources.OperatingSystem"), {1, 17, 0, 1245} }, \
+        { _W("OpenTelemetry.Resources.Process"), {1, 17, 0, 1243} }, \
+        { _W("OpenTelemetry.Resources.ProcessRuntime"), {1, 17, 0, 1246} }, \
         { _W("OpenTelemetry.Shims.OpenTracing"), {1, 0, 0, 0} }, \
         { _W("OpenTracing"), {0, 12, 1, 0} }, \
         { _W("System.AppContext"), {4, 1, 2, 0} }, \
@@ -64,7 +65,7 @@
         { _W("System.Data.Common"), {4, 2, 0, 0} }, \
         { _W("System.Diagnostics.Contracts"), {4, 0, 1, 0} }, \
         { _W("System.Diagnostics.Debug"), {4, 0, 11, 0} }, \
-        { _W("System.Diagnostics.DiagnosticSource"), {10, 0, 0, 9} }, \
+        { _W("System.Diagnostics.DiagnosticSource"), {10, 0, 0, 10} }, \
         { _W("System.Diagnostics.FileVersionInfo"), {4, 0, 2, 0} }, \
         { _W("System.Diagnostics.Process"), {4, 1, 2, 0} }, \
         { _W("System.Diagnostics.StackTrace"), {4, 1, 0, 0} }, \
@@ -86,7 +87,7 @@
         { _W("System.IO.FileSystem.Watcher"), {4, 0, 2, 0} }, \
         { _W("System.IO.IsolatedStorage"), {4, 0, 2, 0} }, \
         { _W("System.IO.MemoryMappedFiles"), {4, 0, 2, 0} }, \
-        { _W("System.IO.Pipelines"), {10, 0, 0, 9} }, \
+        { _W("System.IO.Pipelines"), {10, 0, 0, 10} }, \
         { _W("System.IO.Pipes"), {4, 0, 2, 0} }, \
         { _W("System.IO.UnmanagedMemoryStream"), {4, 0, 3, 0} }, \
         { _W("System.Linq"), {4, 1, 2, 0} }, \
@@ -135,8 +136,8 @@
         { _W("System.Security.SecureString"), {4, 1, 0, 0} }, \
         { _W("System.Text.Encoding"), {4, 0, 11, 0} }, \
         { _W("System.Text.Encoding.Extensions"), {4, 0, 11, 0} }, \
-        { _W("System.Text.Encodings.Web"), {10, 0, 0, 9} }, \
-        { _W("System.Text.Json"), {10, 0, 0, 9} }, \
+        { _W("System.Text.Encodings.Web"), {10, 0, 0, 10} }, \
+        { _W("System.Text.Json"), {10, 0, 0, 10} }, \
         { _W("System.Text.RegularExpressions"), {4, 1, 1, 0} }, \
         { _W("System.Threading"), {4, 0, 11, 0} }, \
         { _W("System.Threading.Overlapped"), {4, 1, 0, 0} }, \
@@ -156,19 +157,20 @@
     }}, \
     { 470, { \
         { _W("Google.Protobuf"), {3, 35, 1, 0} }, \
-        { _W("Microsoft.Bcl.AsyncInterfaces"), {10, 0, 0, 9} }, \
-        { _W("Microsoft.Extensions.Configuration"), {10, 0, 0, 9} }, \
-        { _W("Microsoft.Extensions.Configuration.Abstractions"), {10, 0, 0, 9} }, \
-        { _W("Microsoft.Extensions.Configuration.Binder"), {10, 0, 0, 9} }, \
-        { _W("Microsoft.Extensions.DependencyInjection"), {10, 0, 0, 9} }, \
-        { _W("Microsoft.Extensions.DependencyInjection.Abstractions"), {10, 0, 0, 9} }, \
-        { _W("Microsoft.Extensions.Diagnostics.Abstractions"), {10, 0, 0, 9} }, \
-        { _W("Microsoft.Extensions.Logging"), {10, 0, 0, 9} }, \
-        { _W("Microsoft.Extensions.Logging.Abstractions"), {10, 0, 0, 9} }, \
-        { _W("Microsoft.Extensions.Logging.Configuration"), {10, 0, 0, 9} }, \
-        { _W("Microsoft.Extensions.Options"), {10, 0, 0, 9} }, \
-        { _W("Microsoft.Extensions.Options.ConfigurationExtensions"), {10, 0, 0, 9} }, \
-        { _W("Microsoft.Extensions.Primitives"), {10, 0, 0, 9} }, \
+        { _W("Microsoft.Bcl.AsyncInterfaces"), {10, 0, 0, 10} }, \
+        { _W("Microsoft.Extensions.Configuration"), {10, 0, 0, 10} }, \
+        { _W("Microsoft.Extensions.Configuration.Abstractions"), {10, 0, 0, 10} }, \
+        { _W("Microsoft.Extensions.Configuration.Binder"), {10, 0, 0, 10} }, \
+        { _W("Microsoft.Extensions.Configuration.EnvironmentVariables"), {10, 0, 0, 10} }, \
+        { _W("Microsoft.Extensions.DependencyInjection"), {10, 0, 0, 10} }, \
+        { _W("Microsoft.Extensions.DependencyInjection.Abstractions"), {10, 0, 0, 10} }, \
+        { _W("Microsoft.Extensions.Diagnostics.Abstractions"), {10, 0, 0, 10} }, \
+        { _W("Microsoft.Extensions.Logging"), {10, 0, 0, 10} }, \
+        { _W("Microsoft.Extensions.Logging.Abstractions"), {10, 0, 0, 10} }, \
+        { _W("Microsoft.Extensions.Logging.Configuration"), {10, 0, 0, 10} }, \
+        { _W("Microsoft.Extensions.Options"), {10, 0, 0, 10} }, \
+        { _W("Microsoft.Extensions.Options.ConfigurationExtensions"), {10, 0, 0, 10} }, \
+        { _W("Microsoft.Extensions.Primitives"), {10, 0, 0, 10} }, \
         { _W("Microsoft.Win32.Primitives"), {4, 0, 3, 0} }, \
         { _W("OpenTelemetry"), {1, 0, 0, 0} }, \
         { _W("OpenTelemetry.Api"), {1, 0, 0, 0} }, \
@@ -180,22 +182,22 @@
         { _W("OpenTelemetry.Exporter.Prometheus.HttpListener"), {1, 0, 0, 0} }, \
         { _W("OpenTelemetry.Exporter.Zipkin"), {1, 0, 0, 0} }, \
         { _W("OpenTelemetry.Extensions.Propagators"), {1, 0, 0, 0} }, \
-        { _W("OpenTelemetry.Instrumentation.AspNet"), {1, 16, 0, 1128} }, \
-        { _W("OpenTelemetry.Instrumentation.AspNet.TelemetryHttpModule"), {1, 16, 0, 1128} }, \
-        { _W("OpenTelemetry.Instrumentation.GrpcNetClient"), {1, 16, 0, 1132} }, \
-        { _W("OpenTelemetry.Instrumentation.Http"), {1, 16, 0, 1135} }, \
-        { _W("OpenTelemetry.Instrumentation.Process"), {1, 16, 0, 1136} }, \
-        { _W("OpenTelemetry.Instrumentation.Quartz"), {1, 15, 1, 1027} }, \
-        { _W("OpenTelemetry.Instrumentation.Runtime"), {1, 15, 1, 1029} }, \
-        { _W("OpenTelemetry.Instrumentation.SqlClient"), {1, 16, 0, 1138} }, \
-        { _W("OpenTelemetry.Instrumentation.StackExchangeRedis"), {1, 16, 0, 1137} }, \
-        { _W("OpenTelemetry.Instrumentation.Wcf"), {1, 16, 0, 1139} }, \
+        { _W("OpenTelemetry.Instrumentation.AspNet"), {1, 17, 0, 1203} }, \
+        { _W("OpenTelemetry.Instrumentation.AspNet.TelemetryHttpModule"), {1, 17, 0, 1203} }, \
+        { _W("OpenTelemetry.Instrumentation.GrpcNetClient"), {1, 17, 0, 1208} }, \
+        { _W("OpenTelemetry.Instrumentation.Http"), {1, 17, 0, 1210} }, \
+        { _W("OpenTelemetry.Instrumentation.Process"), {1, 17, 0, 1214} }, \
+        { _W("OpenTelemetry.Instrumentation.Quartz"), {1, 17, 0, 1213} }, \
+        { _W("OpenTelemetry.Instrumentation.Runtime"), {1, 17, 0, 1215} }, \
+        { _W("OpenTelemetry.Instrumentation.SqlClient"), {1, 17, 0, 1216} }, \
+        { _W("OpenTelemetry.Instrumentation.StackExchangeRedis"), {1, 17, 0, 1217} }, \
+        { _W("OpenTelemetry.Instrumentation.Wcf"), {1, 17, 0, 1218} }, \
         { _W("OpenTelemetry.OpAmp.Client"), {0, 6, 0, 1162} }, \
-        { _W("OpenTelemetry.Resources.Azure"), {1, 15, 1, 1031} }, \
-        { _W("OpenTelemetry.Resources.Host"), {1, 15, 1, 1036} }, \
-        { _W("OpenTelemetry.Resources.OperatingSystem"), {1, 15, 1, 1039} }, \
-        { _W("OpenTelemetry.Resources.Process"), {1, 15, 1, 1069} }, \
-        { _W("OpenTelemetry.Resources.ProcessRuntime"), {1, 15, 1, 1040} }, \
+        { _W("OpenTelemetry.Resources.Azure"), {1, 17, 0, 1240} }, \
+        { _W("OpenTelemetry.Resources.Host"), {1, 17, 0, 1244} }, \
+        { _W("OpenTelemetry.Resources.OperatingSystem"), {1, 17, 0, 1245} }, \
+        { _W("OpenTelemetry.Resources.Process"), {1, 17, 0, 1243} }, \
+        { _W("OpenTelemetry.Resources.ProcessRuntime"), {1, 17, 0, 1246} }, \
         { _W("OpenTelemetry.Shims.OpenTracing"), {1, 0, 0, 0} }, \
         { _W("OpenTracing"), {0, 12, 1, 0} }, \
         { _W("System.AppContext"), {4, 1, 2, 0} }, \
@@ -212,7 +214,7 @@
         { _W("System.Data.Common"), {4, 2, 0, 0} }, \
         { _W("System.Diagnostics.Contracts"), {4, 0, 1, 0} }, \
         { _W("System.Diagnostics.Debug"), {4, 0, 11, 0} }, \
-        { _W("System.Diagnostics.DiagnosticSource"), {10, 0, 0, 9} }, \
+        { _W("System.Diagnostics.DiagnosticSource"), {10, 0, 0, 10} }, \
         { _W("System.Diagnostics.FileVersionInfo"), {4, 0, 2, 0} }, \
         { _W("System.Diagnostics.Process"), {4, 1, 2, 0} }, \
         { _W("System.Diagnostics.StackTrace"), {4, 1, 0, 0} }, \
@@ -234,7 +236,7 @@
         { _W("System.IO.FileSystem.Watcher"), {4, 0, 2, 0} }, \
         { _W("System.IO.IsolatedStorage"), {4, 0, 2, 0} }, \
         { _W("System.IO.MemoryMappedFiles"), {4, 0, 2, 0} }, \
-        { _W("System.IO.Pipelines"), {10, 0, 0, 9} }, \
+        { _W("System.IO.Pipelines"), {10, 0, 0, 10} }, \
         { _W("System.IO.Pipes"), {4, 0, 2, 0} }, \
         { _W("System.IO.UnmanagedMemoryStream"), {4, 0, 3, 0} }, \
         { _W("System.Linq"), {4, 1, 2, 0} }, \
@@ -283,8 +285,8 @@
         { _W("System.Security.SecureString"), {4, 1, 0, 0} }, \
         { _W("System.Text.Encoding"), {4, 0, 11, 0} }, \
         { _W("System.Text.Encoding.Extensions"), {4, 0, 11, 0} }, \
-        { _W("System.Text.Encodings.Web"), {10, 0, 0, 9} }, \
-        { _W("System.Text.Json"), {10, 0, 0, 9} }, \
+        { _W("System.Text.Encodings.Web"), {10, 0, 0, 10} }, \
+        { _W("System.Text.Json"), {10, 0, 0, 10} }, \
         { _W("System.Text.RegularExpressions"), {4, 1, 1, 0} }, \
         { _W("System.Threading"), {4, 0, 11, 0} }, \
         { _W("System.Threading.Overlapped"), {4, 1, 0, 0} }, \
@@ -304,19 +306,20 @@
     }}, \
     { 471, { \
         { _W("Google.Protobuf"), {3, 35, 1, 0} }, \
-        { _W("Microsoft.Bcl.AsyncInterfaces"), {10, 0, 0, 9} }, \
-        { _W("Microsoft.Extensions.Configuration"), {10, 0, 0, 9} }, \
-        { _W("Microsoft.Extensions.Configuration.Abstractions"), {10, 0, 0, 9} }, \
-        { _W("Microsoft.Extensions.Configuration.Binder"), {10, 0, 0, 9} }, \
-        { _W("Microsoft.Extensions.DependencyInjection"), {10, 0, 0, 9} }, \
-        { _W("Microsoft.Extensions.DependencyInjection.Abstractions"), {10, 0, 0, 9} }, \
-        { _W("Microsoft.Extensions.Diagnostics.Abstractions"), {10, 0, 0, 9} }, \
-        { _W("Microsoft.Extensions.Logging"), {10, 0, 0, 9} }, \
-        { _W("Microsoft.Extensions.Logging.Abstractions"), {10, 0, 0, 9} }, \
-        { _W("Microsoft.Extensions.Logging.Configuration"), {10, 0, 0, 9} }, \
-        { _W("Microsoft.Extensions.Options"), {10, 0, 0, 9} }, \
-        { _W("Microsoft.Extensions.Options.ConfigurationExtensions"), {10, 0, 0, 9} }, \
-        { _W("Microsoft.Extensions.Primitives"), {10, 0, 0, 9} }, \
+        { _W("Microsoft.Bcl.AsyncInterfaces"), {10, 0, 0, 10} }, \
+        { _W("Microsoft.Extensions.Configuration"), {10, 0, 0, 10} }, \
+        { _W("Microsoft.Extensions.Configuration.Abstractions"), {10, 0, 0, 10} }, \
+        { _W("Microsoft.Extensions.Configuration.Binder"), {10, 0, 0, 10} }, \
+        { _W("Microsoft.Extensions.Configuration.EnvironmentVariables"), {10, 0, 0, 10} }, \
+        { _W("Microsoft.Extensions.DependencyInjection"), {10, 0, 0, 10} }, \
+        { _W("Microsoft.Extensions.DependencyInjection.Abstractions"), {10, 0, 0, 10} }, \
+        { _W("Microsoft.Extensions.Diagnostics.Abstractions"), {10, 0, 0, 10} }, \
+        { _W("Microsoft.Extensions.Logging"), {10, 0, 0, 10} }, \
+        { _W("Microsoft.Extensions.Logging.Abstractions"), {10, 0, 0, 10} }, \
+        { _W("Microsoft.Extensions.Logging.Configuration"), {10, 0, 0, 10} }, \
+        { _W("Microsoft.Extensions.Options"), {10, 0, 0, 10} }, \
+        { _W("Microsoft.Extensions.Options.ConfigurationExtensions"), {10, 0, 0, 10} }, \
+        { _W("Microsoft.Extensions.Primitives"), {10, 0, 0, 10} }, \
         { _W("OpenTelemetry"), {1, 0, 0, 0} }, \
         { _W("OpenTelemetry.Api"), {1, 0, 0, 0} }, \
         { _W("OpenTelemetry.Api.ProviderBuilderExtensions"), {1, 0, 0, 0} }, \
@@ -327,32 +330,32 @@
         { _W("OpenTelemetry.Exporter.Prometheus.HttpListener"), {1, 0, 0, 0} }, \
         { _W("OpenTelemetry.Exporter.Zipkin"), {1, 0, 0, 0} }, \
         { _W("OpenTelemetry.Extensions.Propagators"), {1, 0, 0, 0} }, \
-        { _W("OpenTelemetry.Instrumentation.AspNet"), {1, 16, 0, 1128} }, \
-        { _W("OpenTelemetry.Instrumentation.AspNet.TelemetryHttpModule"), {1, 16, 0, 1128} }, \
-        { _W("OpenTelemetry.Instrumentation.GrpcNetClient"), {1, 16, 0, 1132} }, \
-        { _W("OpenTelemetry.Instrumentation.Http"), {1, 16, 0, 1135} }, \
-        { _W("OpenTelemetry.Instrumentation.Process"), {1, 16, 0, 1136} }, \
-        { _W("OpenTelemetry.Instrumentation.Quartz"), {1, 15, 1, 1027} }, \
-        { _W("OpenTelemetry.Instrumentation.Runtime"), {1, 15, 1, 1029} }, \
-        { _W("OpenTelemetry.Instrumentation.SqlClient"), {1, 16, 0, 1138} }, \
-        { _W("OpenTelemetry.Instrumentation.StackExchangeRedis"), {1, 16, 0, 1137} }, \
-        { _W("OpenTelemetry.Instrumentation.Wcf"), {1, 16, 0, 1139} }, \
+        { _W("OpenTelemetry.Instrumentation.AspNet"), {1, 17, 0, 1203} }, \
+        { _W("OpenTelemetry.Instrumentation.AspNet.TelemetryHttpModule"), {1, 17, 0, 1203} }, \
+        { _W("OpenTelemetry.Instrumentation.GrpcNetClient"), {1, 17, 0, 1208} }, \
+        { _W("OpenTelemetry.Instrumentation.Http"), {1, 17, 0, 1210} }, \
+        { _W("OpenTelemetry.Instrumentation.Process"), {1, 17, 0, 1214} }, \
+        { _W("OpenTelemetry.Instrumentation.Quartz"), {1, 17, 0, 1213} }, \
+        { _W("OpenTelemetry.Instrumentation.Runtime"), {1, 17, 0, 1215} }, \
+        { _W("OpenTelemetry.Instrumentation.SqlClient"), {1, 17, 0, 1216} }, \
+        { _W("OpenTelemetry.Instrumentation.StackExchangeRedis"), {1, 17, 0, 1217} }, \
+        { _W("OpenTelemetry.Instrumentation.Wcf"), {1, 17, 0, 1218} }, \
         { _W("OpenTelemetry.OpAmp.Client"), {0, 6, 0, 1162} }, \
-        { _W("OpenTelemetry.Resources.Azure"), {1, 15, 1, 1031} }, \
-        { _W("OpenTelemetry.Resources.Host"), {1, 15, 1, 1036} }, \
-        { _W("OpenTelemetry.Resources.OperatingSystem"), {1, 15, 1, 1039} }, \
-        { _W("OpenTelemetry.Resources.Process"), {1, 15, 1, 1069} }, \
-        { _W("OpenTelemetry.Resources.ProcessRuntime"), {1, 15, 1, 1040} }, \
+        { _W("OpenTelemetry.Resources.Azure"), {1, 17, 0, 1240} }, \
+        { _W("OpenTelemetry.Resources.Host"), {1, 17, 0, 1244} }, \
+        { _W("OpenTelemetry.Resources.OperatingSystem"), {1, 17, 0, 1245} }, \
+        { _W("OpenTelemetry.Resources.Process"), {1, 17, 0, 1243} }, \
+        { _W("OpenTelemetry.Resources.ProcessRuntime"), {1, 17, 0, 1246} }, \
         { _W("OpenTelemetry.Shims.OpenTracing"), {1, 0, 0, 0} }, \
         { _W("OpenTracing"), {0, 12, 1, 0} }, \
         { _W("System.Buffers"), {4, 0, 5, 0} }, \
         { _W("System.Data.Common"), {4, 2, 0, 0} }, \
-        { _W("System.Diagnostics.DiagnosticSource"), {10, 0, 0, 9} }, \
+        { _W("System.Diagnostics.DiagnosticSource"), {10, 0, 0, 10} }, \
         { _W("System.Diagnostics.StackTrace"), {4, 1, 0, 0} }, \
         { _W("System.Diagnostics.Tracing"), {4, 2, 0, 0} }, \
         { _W("System.Globalization.Extensions"), {4, 1, 0, 0} }, \
         { _W("System.IO.Compression"), {4, 2, 0, 0} }, \
-        { _W("System.IO.Pipelines"), {10, 0, 0, 9} }, \
+        { _W("System.IO.Pipelines"), {10, 0, 0, 10} }, \
         { _W("System.Memory"), {4, 0, 5, 0} }, \
         { _W("System.Net.Http"), {4, 2, 0, 0} }, \
         { _W("System.Net.Sockets"), {4, 2, 0, 0} }, \
@@ -361,27 +364,28 @@
         { _W("System.Runtime.Serialization.Primitives"), {4, 2, 0, 0} }, \
         { _W("System.Security.Cryptography.Algorithms"), {4, 3, 0, 0} }, \
         { _W("System.Security.SecureString"), {4, 1, 0, 0} }, \
-        { _W("System.Text.Encodings.Web"), {10, 0, 0, 9} }, \
-        { _W("System.Text.Json"), {10, 0, 0, 9} }, \
+        { _W("System.Text.Encodings.Web"), {10, 0, 0, 10} }, \
+        { _W("System.Text.Json"), {10, 0, 0, 10} }, \
         { _W("System.Threading.Overlapped"), {4, 1, 0, 0} }, \
         { _W("System.Threading.Tasks.Extensions"), {4, 2, 4, 0} }, \
         { _W("System.Xml.XPath.XDocument"), {4, 1, 0, 0} }, \
     }}, \
     { 472, { \
         { _W("Google.Protobuf"), {3, 35, 1, 0} }, \
-        { _W("Microsoft.Bcl.AsyncInterfaces"), {10, 0, 0, 9} }, \
-        { _W("Microsoft.Extensions.Configuration"), {10, 0, 0, 9} }, \
-        { _W("Microsoft.Extensions.Configuration.Abstractions"), {10, 0, 0, 9} }, \
-        { _W("Microsoft.Extensions.Configuration.Binder"), {10, 0, 0, 9} }, \
-        { _W("Microsoft.Extensions.DependencyInjection"), {10, 0, 0, 9} }, \
-        { _W("Microsoft.Extensions.DependencyInjection.Abstractions"), {10, 0, 0, 9} }, \
-        { _W("Microsoft.Extensions.Diagnostics.Abstractions"), {10, 0, 0, 9} }, \
-        { _W("Microsoft.Extensions.Logging"), {10, 0, 0, 9} }, \
-        { _W("Microsoft.Extensions.Logging.Abstractions"), {10, 0, 0, 9} }, \
-        { _W("Microsoft.Extensions.Logging.Configuration"), {10, 0, 0, 9} }, \
-        { _W("Microsoft.Extensions.Options"), {10, 0, 0, 9} }, \
-        { _W("Microsoft.Extensions.Options.ConfigurationExtensions"), {10, 0, 0, 9} }, \
-        { _W("Microsoft.Extensions.Primitives"), {10, 0, 0, 9} }, \
+        { _W("Microsoft.Bcl.AsyncInterfaces"), {10, 0, 0, 10} }, \
+        { _W("Microsoft.Extensions.Configuration"), {10, 0, 0, 10} }, \
+        { _W("Microsoft.Extensions.Configuration.Abstractions"), {10, 0, 0, 10} }, \
+        { _W("Microsoft.Extensions.Configuration.Binder"), {10, 0, 0, 10} }, \
+        { _W("Microsoft.Extensions.Configuration.EnvironmentVariables"), {10, 0, 0, 10} }, \
+        { _W("Microsoft.Extensions.DependencyInjection"), {10, 0, 0, 10} }, \
+        { _W("Microsoft.Extensions.DependencyInjection.Abstractions"), {10, 0, 0, 10} }, \
+        { _W("Microsoft.Extensions.Diagnostics.Abstractions"), {10, 0, 0, 10} }, \
+        { _W("Microsoft.Extensions.Logging"), {10, 0, 0, 10} }, \
+        { _W("Microsoft.Extensions.Logging.Abstractions"), {10, 0, 0, 10} }, \
+        { _W("Microsoft.Extensions.Logging.Configuration"), {10, 0, 0, 10} }, \
+        { _W("Microsoft.Extensions.Options"), {10, 0, 0, 10} }, \
+        { _W("Microsoft.Extensions.Options.ConfigurationExtensions"), {10, 0, 0, 10} }, \
+        { _W("Microsoft.Extensions.Primitives"), {10, 0, 0, 10} }, \
         { _W("OpenTelemetry"), {1, 0, 0, 0} }, \
         { _W("OpenTelemetry.Api"), {1, 0, 0, 0} }, \
         { _W("OpenTelemetry.Api.ProviderBuilderExtensions"), {1, 0, 0, 0} }, \
@@ -392,31 +396,31 @@
         { _W("OpenTelemetry.Exporter.Prometheus.HttpListener"), {1, 0, 0, 0} }, \
         { _W("OpenTelemetry.Exporter.Zipkin"), {1, 0, 0, 0} }, \
         { _W("OpenTelemetry.Extensions.Propagators"), {1, 0, 0, 0} }, \
-        { _W("OpenTelemetry.Instrumentation.AspNet"), {1, 16, 0, 1128} }, \
-        { _W("OpenTelemetry.Instrumentation.AspNet.TelemetryHttpModule"), {1, 16, 0, 1128} }, \
-        { _W("OpenTelemetry.Instrumentation.GrpcNetClient"), {1, 16, 0, 1132} }, \
-        { _W("OpenTelemetry.Instrumentation.Http"), {1, 16, 0, 1135} }, \
-        { _W("OpenTelemetry.Instrumentation.Process"), {1, 16, 0, 1136} }, \
-        { _W("OpenTelemetry.Instrumentation.Quartz"), {1, 15, 1, 1027} }, \
-        { _W("OpenTelemetry.Instrumentation.Runtime"), {1, 15, 1, 1029} }, \
-        { _W("OpenTelemetry.Instrumentation.SqlClient"), {1, 16, 0, 1138} }, \
-        { _W("OpenTelemetry.Instrumentation.StackExchangeRedis"), {1, 16, 0, 1137} }, \
-        { _W("OpenTelemetry.Instrumentation.Wcf"), {1, 16, 0, 1139} }, \
+        { _W("OpenTelemetry.Instrumentation.AspNet"), {1, 17, 0, 1203} }, \
+        { _W("OpenTelemetry.Instrumentation.AspNet.TelemetryHttpModule"), {1, 17, 0, 1203} }, \
+        { _W("OpenTelemetry.Instrumentation.GrpcNetClient"), {1, 17, 0, 1208} }, \
+        { _W("OpenTelemetry.Instrumentation.Http"), {1, 17, 0, 1210} }, \
+        { _W("OpenTelemetry.Instrumentation.Process"), {1, 17, 0, 1214} }, \
+        { _W("OpenTelemetry.Instrumentation.Quartz"), {1, 17, 0, 1213} }, \
+        { _W("OpenTelemetry.Instrumentation.Runtime"), {1, 17, 0, 1215} }, \
+        { _W("OpenTelemetry.Instrumentation.SqlClient"), {1, 17, 0, 1216} }, \
+        { _W("OpenTelemetry.Instrumentation.StackExchangeRedis"), {1, 17, 0, 1217} }, \
+        { _W("OpenTelemetry.Instrumentation.Wcf"), {1, 17, 0, 1218} }, \
         { _W("OpenTelemetry.OpAmp.Client"), {0, 6, 0, 1162} }, \
-        { _W("OpenTelemetry.Resources.Azure"), {1, 15, 1, 1031} }, \
-        { _W("OpenTelemetry.Resources.Host"), {1, 15, 1, 1036} }, \
-        { _W("OpenTelemetry.Resources.OperatingSystem"), {1, 15, 1, 1039} }, \
-        { _W("OpenTelemetry.Resources.Process"), {1, 15, 1, 1069} }, \
-        { _W("OpenTelemetry.Resources.ProcessRuntime"), {1, 15, 1, 1040} }, \
+        { _W("OpenTelemetry.Resources.Azure"), {1, 17, 0, 1240} }, \
+        { _W("OpenTelemetry.Resources.Host"), {1, 17, 0, 1244} }, \
+        { _W("OpenTelemetry.Resources.OperatingSystem"), {1, 17, 0, 1245} }, \
+        { _W("OpenTelemetry.Resources.Process"), {1, 17, 0, 1243} }, \
+        { _W("OpenTelemetry.Resources.ProcessRuntime"), {1, 17, 0, 1246} }, \
         { _W("OpenTelemetry.Shims.OpenTracing"), {1, 0, 0, 0} }, \
         { _W("OpenTracing"), {0, 12, 1, 0} }, \
         { _W("System.Buffers"), {4, 0, 5, 0} }, \
-        { _W("System.Diagnostics.DiagnosticSource"), {10, 0, 0, 9} }, \
-        { _W("System.IO.Pipelines"), {10, 0, 0, 9} }, \
+        { _W("System.Diagnostics.DiagnosticSource"), {10, 0, 0, 10} }, \
+        { _W("System.IO.Pipelines"), {10, 0, 0, 10} }, \
         { _W("System.Memory"), {4, 0, 5, 0} }, \
         { _W("System.Numerics.Vectors"), {4, 1, 6, 0} }, \
         { _W("System.Runtime.CompilerServices.Unsafe"), {6, 0, 3, 0} }, \
-        { _W("System.Text.Encodings.Web"), {10, 0, 0, 9} }, \
-        { _W("System.Text.Json"), {10, 0, 0, 9} }, \
+        { _W("System.Text.Encodings.Web"), {10, 0, 0, 10} }, \
+        { _W("System.Text.Json"), {10, 0, 0, 10} }, \
         { _W("System.Threading.Tasks.Extensions"), {4, 2, 4, 0} }, \
     }}
