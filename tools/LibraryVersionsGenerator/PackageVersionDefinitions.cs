@@ -298,6 +298,7 @@ internal static class PackageVersionDefinitions
                 new("2.6.122"),
                 new("2.12.14"),
                 new("3.0.25", supportedTargetFrameworks: ["net10.0", "net9.0", "net8.0"], supportedExecutionFrameworks: ["net10.0", "net9.0", "net8.0"]),
+                new("3.1.0", supportedTargetFrameworks: ["net10.0", "net9.0", "net8.0"], supportedExecutionFrameworks: ["net10.0", "net9.0", "net8.0"]), // first version with the new internal ConnectImplAsync signature
                 new("*", supportedTargetFrameworks: ["net10.0", "net9.0", "net8.0"], supportedExecutionFrameworks: ["net10.0", "net9.0", "net8.0"])
             ]
         },
