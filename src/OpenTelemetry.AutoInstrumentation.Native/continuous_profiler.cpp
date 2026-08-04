@@ -1941,8 +1941,9 @@ void NameCache<TKey, TValue>::Clear()
 
 extern "C"
 {
-    EXPORTTHIS int32_t ContinuousProfilerReadThreadSamples(int32_t len, unsigned char* buf,
-                                                           unsigned int* samplingInterval)
+    EXPORTTHIS int32_t ContinuousProfilerReadThreadSamples(int32_t        len,
+                                                           unsigned char* buf,
+                                                           unsigned int*  samplingInterval)
     {
         return ThreadSamplingConsumeOneThreadSample(len, buf, samplingInterval);
     }
