@@ -253,11 +253,13 @@ public:
     //
     // Continuous Profiler methods
     //
-    void ConfigureContinuousProfiler(bool threadSamplingEnabled, unsigned int threadSamplingInterval,
-                                     bool allocationSamplingEnabled, unsigned int maxMemorySamplesPerMinute,
-                                     unsigned int selectedThreadsSamplingInterval);
-    void SetContinuousProfilerSamplingInterval(unsigned int threadSamplingInterval);
-    void SetContinuousProfilerEnabled(bool enabled);
+    bool         ConfigureContinuousProfiler(bool         threadSamplingEnabled,
+                                             unsigned int threadSamplingInterval,
+                                             bool         allocationSamplingEnabled,
+                                             unsigned int maxMemorySamplesPerMinute,
+                                             unsigned int selectedThreadsSamplingInterval);
+    bool         SetContinuousProfilerSamplingInterval(unsigned int threadSamplingInterval);
+    bool         SetContinuousProfilerEnabled(bool enabled);
     unsigned int GetContinuousProfilerSamplingInterval();
 
     //

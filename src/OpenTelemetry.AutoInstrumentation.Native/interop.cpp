@@ -48,34 +48,26 @@ EXTERN_C VOID STDAPICALLTYPE SetSqlClientNetFxILRewriteEnabled(bool enabled)
     return trace::SetSqlClientNetFxILRewriteEnabled(enabled);
 }
 
-EXTERN_C VOID STDAPICALLTYPE ConfigureContinuousProfiler(bool         threadSamplingEnabled,
+EXTERN_C BOOL STDAPICALLTYPE ConfigureContinuousProfiler(bool         threadSamplingEnabled,
                                                          unsigned int threadSamplingInterval,
                                                          bool         allocationSamplingEnabled,
                                                          unsigned int maxMemorySamplesPerMinute,
                                                          unsigned int selectedThreadSamplingInterval)
 {
-    if (trace::profiler != nullptr)
-    {
-        trace::profiler->ConfigureContinuousProfiler(threadSamplingEnabled, threadSamplingInterval,
-                                                     allocationSamplingEnabled, maxMemorySamplesPerMinute,
-                                                     selectedThreadSamplingInterval);
-    }
+    return trace::profiler != nullptr &&
+           trace::profiler->ConfigureContinuousProfiler(threadSamplingEnabled, threadSamplingInterval,
+                                                        allocationSamplingEnabled, maxMemorySamplesPerMinute,
+                                                        selectedThreadSamplingInterval);
 }
 
-EXTERN_C VOID STDAPICALLTYPE SetContinuousProfilerSamplingInterval(unsigned int threadSamplingInterval)
+EXTERN_C BOOL STDAPICALLTYPE SetContinuousProfilerSamplingInterval(unsigned int threadSamplingInterval)
 {
-    if (trace::profiler != nullptr)
-    {
-        trace::profiler->SetContinuousProfilerSamplingInterval(threadSamplingInterval);
-    }
+    return trace::profiler != nullptr && trace::profiler->SetContinuousProfilerSamplingInterval(threadSamplingInterval);
 }
 
-EXTERN_C VOID STDAPICALLTYPE SetContinuousProfilerEnabled(bool enabled)
+EXTERN_C BOOL STDAPICALLTYPE SetContinuousProfilerEnabled(bool enabled)
 {
-    if (trace::profiler != nullptr)
-    {
-        trace::profiler->SetContinuousProfilerEnabled(enabled);
-    }
+    return trace::profiler != nullptr && trace::profiler->SetContinuousProfilerEnabled(enabled);
 }
 
 EXTERN_C unsigned int STDAPICALLTYPE GetContinuousProfilerSamplingInterval()

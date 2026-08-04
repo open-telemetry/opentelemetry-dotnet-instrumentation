@@ -59,7 +59,7 @@ internal static class NativeMethods
     }
 #endif
 
-    public static void ConfigureNativeContinuousProfiler(
+    public static bool ConfigureNativeContinuousProfiler(
         bool threadSamplingEnabled,
         uint threadSamplingInterval,
         bool allocationSamplingEnabled,
@@ -68,7 +68,7 @@ internal static class NativeMethods
     {
         if (IsWindows)
         {
-            Windows.ConfigureContinuousProfiler(
+            return Windows.ConfigureContinuousProfiler(
                 threadSamplingEnabled,
                 threadSamplingInterval,
                 allocationSamplingEnabled,
@@ -77,7 +77,7 @@ internal static class NativeMethods
         }
         else
         {
-            NonWindows.ConfigureContinuousProfiler(
+            return NonWindows.ConfigureContinuousProfiler(
                 threadSamplingEnabled,
                 threadSamplingInterval,
                 allocationSamplingEnabled,
@@ -86,27 +86,27 @@ internal static class NativeMethods
         }
     }
 
-    public static void SetNativeContinuousProfilerSamplingInterval(uint threadSamplingInterval)
+    public static bool SetNativeContinuousProfilerSamplingInterval(uint threadSamplingInterval)
     {
         if (IsWindows)
         {
-            Windows.SetContinuousProfilerSamplingInterval(threadSamplingInterval);
+            return Windows.SetContinuousProfilerSamplingInterval(threadSamplingInterval);
         }
         else
         {
-            NonWindows.SetContinuousProfilerSamplingInterval(threadSamplingInterval);
+            return NonWindows.SetContinuousProfilerSamplingInterval(threadSamplingInterval);
         }
     }
 
-    public static void SetNativeContinuousProfilerEnabled(bool enabled)
+    public static bool SetNativeContinuousProfilerEnabled(bool enabled)
     {
         if (IsWindows)
         {
-            Windows.SetContinuousProfilerEnabled(enabled);
+            return Windows.SetContinuousProfilerEnabled(enabled);
         }
         else
         {
-            NonWindows.SetContinuousProfilerEnabled(enabled);
+            return NonWindows.SetContinuousProfilerEnabled(enabled);
         }
     }
 
@@ -266,7 +266,8 @@ internal static class NativeMethods
 
         [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
         [DllImport("OpenTelemetry.AutoInstrumentation.Native.dll")]
-        public static extern void ConfigureContinuousProfiler(
+        [return: MarshalAs(UnmanagedType.Bool)]
+        public static extern bool ConfigureContinuousProfiler(
             bool threadSamplingEnabled,
             uint threadSamplingInterval,
             bool allocationSamplingEnabled,
@@ -275,11 +276,13 @@ internal static class NativeMethods
 
         [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
         [DllImport("OpenTelemetry.AutoInstrumentation.Native.dll")]
-        public static extern void SetContinuousProfilerSamplingInterval(uint threadSamplingInterval);
+        [return: MarshalAs(UnmanagedType.Bool)]
+        public static extern bool SetContinuousProfilerSamplingInterval(uint threadSamplingInterval);
 
         [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
         [DllImport("OpenTelemetry.AutoInstrumentation.Native.dll")]
-        public static extern void SetContinuousProfilerEnabled(bool enabled);
+        [return: MarshalAs(UnmanagedType.Bool)]
+        public static extern bool SetContinuousProfilerEnabled(bool enabled);
 
         [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
         [DllImport("OpenTelemetry.AutoInstrumentation.Native.dll", CallingConvention = CallingConvention.Cdecl)]
@@ -335,7 +338,8 @@ internal static class NativeMethods
 
         [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
         [DllImport("OpenTelemetry.AutoInstrumentation.Native")]
-        public static extern void ConfigureContinuousProfiler(
+        [return: MarshalAs(UnmanagedType.Bool)]
+        public static extern bool ConfigureContinuousProfiler(
             bool threadSamplingEnabled,
             uint threadSamplingInterval,
             bool allocationSamplingEnabled,
@@ -344,11 +348,13 @@ internal static class NativeMethods
 
         [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
         [DllImport("OpenTelemetry.AutoInstrumentation.Native")]
-        public static extern void SetContinuousProfilerSamplingInterval(uint threadSamplingInterval);
+        [return: MarshalAs(UnmanagedType.Bool)]
+        public static extern bool SetContinuousProfilerSamplingInterval(uint threadSamplingInterval);
 
         [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
         [DllImport("OpenTelemetry.AutoInstrumentation.Native")]
-        public static extern void SetContinuousProfilerEnabled(bool enabled);
+        [return: MarshalAs(UnmanagedType.Bool)]
+        public static extern bool SetContinuousProfilerEnabled(bool enabled);
 
         [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
         [DllImport("OpenTelemetry.AutoInstrumentation.Native", CallingConvention = CallingConvention.Cdecl)]

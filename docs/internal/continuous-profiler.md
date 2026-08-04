@@ -72,6 +72,14 @@ continuous thread sampling. `SetContinuousProfilerSamplingInterval(uint)` change
 the configured interval and, when sampling is active, wakes the sampling thread
 immediately.
 
+The managed interop methods `ConfigureNativeContinuousProfiler`,
+`SetNativeContinuousProfilerSamplingInterval`, and
+`SetNativeContinuousProfilerEnabled` return `true` when the requested native
+operation succeeds and `false` when it cannot be applied. Successful idempotent
+start and stop operations also return `true`. A `false` result means the complete
+request was not applied; initialization needed by other sampling modes may still
+have succeeded.
+
 To enable thread sampling later when it is initially disabled, the initial
 managed configuration must prepare the thread-sampling export pipeline with an
 exporter, a non-zero sampling interval, and positive export interval and timeout.

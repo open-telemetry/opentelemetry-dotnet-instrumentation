@@ -1249,7 +1249,7 @@ bool CorProfiler::InitThreadSampler()
     return true;
 }
 
-void CorProfiler::ConfigureContinuousProfiler(const bool         threadSamplingEnabled,
+bool CorProfiler::ConfigureContinuousProfiler(const bool         threadSamplingEnabled,
                                               const unsigned int threadSamplingInterval,
                                               const bool         allocationSamplingEnabled,
                                               const unsigned int maxMemorySamplesPerMinute,
@@ -1269,7 +1269,7 @@ void CorProfiler::ConfigureContinuousProfiler(const bool         threadSamplingE
     if (!is_attached_)
     {
         Logger::Debug("ConfigureContinuousProfiler: profiler is not attached.");
-        return;
+        return false;
     }
 
     const bool selectiveSamplingConfigured    = selectedThreadsSamplingInterval != 0;
@@ -1280,7 +1280,7 @@ void CorProfiler::ConfigureContinuousProfiler(const bool         threadSamplingE
         // Do not consume the once flag for a no-op call. A later AppDomain may
         // provide the first actual profiler configuration.
         Logger::Debug("ConfigureContinuousProfiler: no sampling type configured.");
-        return;
+        return true;
     }
 
     const ContinuousProfilerInitializationParams initializationParams{allocationSamplingEnabled,
@@ -1296,7 +1296,7 @@ void CorProfiler::ConfigureContinuousProfiler(const bool         threadSamplingE
     if (FAILED(sampling_initialization_result_))
     {
         Logger::Warn("ContinuousProfiler: unable to initialize sampler.");
-        return;
+        return false;
     }
 
     if (threadSamplingInterval != 0)
@@ -1304,21 +1304,24 @@ void CorProfiler::ConfigureContinuousProfiler(const bool         threadSamplingE
         continuous_profiler_thread_sampling_prepared_ = true;
     }
 
-    if (!ApplyThreadSamplingConfigurationLocked(threadSamplingEnabled, threadSamplingInterval))
+    const bool configured = ApplyThreadSamplingConfigurationLocked(threadSamplingEnabled, threadSamplingInterval);
+    if (!configured)
     {
         Logger::Warn("ContinuousProfiler: unable to apply thread sampling configuration.");
     }
+
+    return configured;
 }
 
-void CorProfiler::SetContinuousProfilerSamplingInterval(const unsigned int threadSamplingInterval)
+bool CorProfiler::SetContinuousProfilerSamplingInterval(const unsigned int threadSamplingInterval)
 {
     std::lock_guard<std::mutex> configuration_guard(sampling_configuration_lock_);
     if (!is_attached_)
     {
-        return;
+        return false;
     }
 
-    SetContinuousProfilerSamplingIntervalLocked(threadSamplingInterval);
+    return SetContinuousProfilerSamplingIntervalLocked(threadSamplingInterval);
 }
 
 bool CorProfiler::SetContinuousProfilerSamplingIntervalLocked(const unsigned int threadSamplingInterval)
@@ -1351,15 +1354,15 @@ bool CorProfiler::SetContinuousProfilerSamplingIntervalLocked(const unsigned int
     return false;
 }
 
-void CorProfiler::SetContinuousProfilerEnabled(const bool enabled)
+bool CorProfiler::SetContinuousProfilerEnabled(const bool enabled)
 {
     std::lock_guard<std::mutex> configuration_guard(sampling_configuration_lock_);
     if (!is_attached_)
     {
-        return;
+        return false;
     }
 
-    SetContinuousProfilerEnabledLocked(enabled);
+    return SetContinuousProfilerEnabledLocked(enabled);
 }
 
 bool CorProfiler::SetContinuousProfilerEnabledLocked(const bool enabled)

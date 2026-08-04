@@ -25,7 +25,8 @@ internal static class RuntimeContinuousProfilerNativeMethods
 #else
     [DllImport("OpenTelemetry.AutoInstrumentation.Native.dll")]
 #endif
-    public static extern void ConfigureContinuousProfiler(
+    [return: MarshalAs(UnmanagedType.Bool)]
+    public static extern bool ConfigureContinuousProfiler(
         bool threadSamplingEnabled,
         uint threadSamplingInterval,
         bool allocationSamplingEnabled,
@@ -38,7 +39,8 @@ internal static class RuntimeContinuousProfilerNativeMethods
 #else
     [DllImport("OpenTelemetry.AutoInstrumentation.Native.dll")]
 #endif
-    public static extern void SetContinuousProfilerSamplingInterval(uint threadSamplingInterval);
+    [return: MarshalAs(UnmanagedType.Bool)]
+    public static extern bool SetContinuousProfilerSamplingInterval(uint threadSamplingInterval);
 
     [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
 #if NET
@@ -46,7 +48,8 @@ internal static class RuntimeContinuousProfilerNativeMethods
 #else
     [DllImport("OpenTelemetry.AutoInstrumentation.Native.dll")]
 #endif
-    public static extern void SetContinuousProfilerEnabled(bool enabled);
+    [return: MarshalAs(UnmanagedType.Bool)]
+    public static extern bool SetContinuousProfilerEnabled(bool enabled);
 
 #if NET
     private static IntPtr ImportResolver(string libraryName, Assembly assembly, DllImportSearchPath? searchPath)

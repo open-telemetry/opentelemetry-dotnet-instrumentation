@@ -340,12 +340,15 @@ internal static class Instrumentation
             return;
         }
 
-        NativeMethods.ConfigureNativeContinuousProfiler(
-            threadSamplingEnabled,
-            threadSamplingPrepared ? config.ThreadSamplingInterval : 0,
-            allocationSamplingEnabled,
-            config.MaxMemorySamplesPerMinute,
-            selectiveSamplingInterval);
+        if (!NativeMethods.ConfigureNativeContinuousProfiler(
+                threadSamplingEnabled,
+                threadSamplingPrepared ? config.ThreadSamplingInterval : 0,
+                allocationSamplingEnabled,
+                config.MaxMemorySamplesPerMinute,
+                selectiveSamplingInterval))
+        {
+            Logger.Warning("The native continuous profiler could not apply the complete sampling configuration.");
+        }
 #if NETFRAMEWORK
         // On .NET Framework, we need a dedicated canary thread for seeded stack walking
         _canaryThreadManager = new CanaryThreadManager();

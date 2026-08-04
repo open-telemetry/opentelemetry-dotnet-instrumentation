@@ -20,12 +20,23 @@ internal static class RuntimeReconfigurationScenario
 
         try
         {
-            RuntimeContinuousProfilerNativeMethods.ConfigureContinuousProfiler(
-                threadSamplingEnabled: true,
-                threadSamplingInterval: ActiveInterval,
-                allocationSamplingEnabled: false,
-                maxMemorySamplesPerMinute: 0,
-                selectedThreadSamplingInterval: 0);
+            Ensure(
+                !RuntimeContinuousProfilerNativeMethods.ConfigureContinuousProfiler(
+                    threadSamplingEnabled: true,
+                    threadSamplingInterval: 0,
+                    allocationSamplingEnabled: false,
+                    maxMemorySamplesPerMinute: 0,
+                    selectedThreadSamplingInterval: 0),
+                "ConfigureContinuousProfiler reported success for an invalid sampling interval.");
+
+            Ensure(
+                RuntimeContinuousProfilerNativeMethods.ConfigureContinuousProfiler(
+                    threadSamplingEnabled: true,
+                    threadSamplingInterval: ActiveInterval,
+                    allocationSamplingEnabled: false,
+                    maxMemorySamplesPerMinute: 0,
+                    selectedThreadSamplingInterval: 0),
+                "ConfigureContinuousProfiler failed to enable CPU sampling.");
 
             Thread.Sleep(TimeSpan.FromSeconds(2));
             Ensure(
@@ -35,13 +46,20 @@ internal static class RuntimeReconfigurationScenario
             var exportCount = WaitForExportAfter(0, TimeSpan.FromSeconds(4));
             Ensure(exportCount > 0, "Repeated ConfigureContinuousProfiler did not enable CPU sampling.");
 
-            RuntimeContinuousProfilerNativeMethods.SetContinuousProfilerSamplingInterval(ReconfiguredInterval);
+            Ensure(
+                !RuntimeContinuousProfilerNativeMethods.SetContinuousProfilerSamplingInterval(0),
+                "SetContinuousProfilerSamplingInterval reported success for an invalid sampling interval.");
+            Ensure(
+                RuntimeContinuousProfilerNativeMethods.SetContinuousProfilerSamplingInterval(ReconfiguredInterval),
+                "SetContinuousProfilerSamplingInterval failed.");
             var exportCountAfterIntervalChange = WaitForExportAfter(exportCount, TimeSpan.FromSeconds(3));
             Ensure(
                 exportCountAfterIntervalChange > exportCount,
                 "Changing the sampling interval did not wake the sampling thread.");
 
-            RuntimeContinuousProfilerNativeMethods.SetContinuousProfilerEnabled(false);
+            Ensure(
+                RuntimeContinuousProfilerNativeMethods.SetContinuousProfilerEnabled(false),
+                "SetContinuousProfilerEnabled failed to disable CPU sampling.");
             var stoppedExportCount = WaitForExporterIdle(TimeSpan.FromMilliseconds(500), TimeSpan.FromSeconds(3));
             Ensure(stoppedExportCount >= 0, "The CPU exporter did not become idle after thread sampling was disabled.");
 
@@ -50,7 +68,9 @@ internal static class RuntimeReconfigurationScenario
                 RuntimeReconfigurationPlugin.GetThreadExportCount() == stoppedExportCount,
                 "A CPU sample was exported while thread sampling was disabled.");
 
-            RuntimeContinuousProfilerNativeMethods.SetContinuousProfilerEnabled(true);
+            Ensure(
+                RuntimeContinuousProfilerNativeMethods.SetContinuousProfilerEnabled(true),
+                "SetContinuousProfilerEnabled failed to enable CPU sampling.");
             Ensure(
                 WaitForExportAfter(stoppedExportCount, TimeSpan.FromSeconds(3)) > stoppedExportCount,
                 "No CPU sample was exported after thread sampling was re-enabled.");
@@ -59,7 +79,7 @@ internal static class RuntimeReconfigurationScenario
         }
         finally
         {
-            RuntimeContinuousProfilerNativeMethods.SetContinuousProfilerEnabled(false);
+            _ = RuntimeContinuousProfilerNativeMethods.SetContinuousProfilerEnabled(false);
         }
     }
 
