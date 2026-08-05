@@ -1,7 +1,7 @@
-FROM mcr.microsoft.com/dotnet/sdk:11.0.100-preview.5-alpine3.23@sha256:ece03cbbf88296297f8caaeda3d352cf27966226860846096568d68f6058debc
+FROM mcr.microsoft.com/dotnet/sdk:11.0.100-rc.1-alpine3.24@sha256:5be53e6cab2dacc7d3024739857174f80828b6bbc867ec96c95faa57a9c20b08
 
-# renovate: datasource=repology depName=clang21
-ARG CLANG21_VERSION=21.1.8-r3
+# renovate: datasource=repology depName=clang22
+ARG CLANG22_VERSION=22.1.3-r2
 # renovate: datasource=repology depName=cmake
 ARG CMAKE_VERSION=4.2.3-r0
 # renovate: datasource=repology depName=make
@@ -22,7 +22,7 @@ ARG GRPC_PLUGINS_VERSION=1.78.1-r2
 RUN apk update \
     && apk upgrade \
     && apk add --no-cache --update \
-        clang21="${CLANG21_VERSION}" \
+        clang22="${CLANG22_VERSION}" \
         cmake="${CMAKE_VERSION}" \
         make="${MAKE_VERSION}" \
         bash="${BASH_VERSION}" \
