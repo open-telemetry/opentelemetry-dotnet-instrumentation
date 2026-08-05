@@ -1,5 +1,7 @@
 FROM ubuntu:18.04@sha256:152dc042452c496007f07ca9127571cb9c29697f42acbfad72324b2bb2e43c98
 
+#TODO NET11TODO put here exact versions as arguments as in other docker images
+
 RUN apt-get update && \
     apt-get install -y \
     apt-transport-https \
@@ -27,7 +29,7 @@ RUN curl -fsSL -o cmake.sh https://github.com/Kitware/CMake/releases/download/v3
 COPY ./scripts/dotnet-install.sh ./dotnet-install.sh
 
 RUN chmod +x ./dotnet-install.sh \
-    && ./dotnet-install.sh -v 11.0.100-preview.5.26302.115 --install-dir /usr/share/dotnet --no-path \
+    && ./dotnet-install.sh -v 11.0.100-preview.6.26359.118 --install-dir /usr/share/dotnet --no-path \
     && rm dotnet-install.sh
 
 WORKDIR /project
