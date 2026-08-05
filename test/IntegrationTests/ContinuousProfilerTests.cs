@@ -192,7 +192,7 @@ public class ContinuousProfilerTests : TestHelper
 #if NET11_0_OR_GREATER
         stackTrace.Add("My.Custom.Test.Namespace.ClassA.OTelAutoCallbackTest(My.Custom.Test.Namespace.ClassA.Callback, System.Int32)");
 #elif NETFRAMEWORK || DEBUG
-      stackTrace.Add(
+        stackTrace.Add(
             Environment.OSVersion.Platform == PlatformID.Win32NT && Environment.Is64BitProcess
                 ? "clr.dll"
                 : "Unknown_Native_Function(unknown)");
@@ -313,7 +313,7 @@ public class ContinuousProfilerTests : TestHelper
             // DSS yields nothing for them; their presence proves the RTL native walk is working.
             // Security/AV DLLs (e.g. Protector64.dll) may also appear between kernel frames.
             bool hasIoCompletion = frames.Any(f => f.Contains("NtRemoveIoCompletion", StringComparison.OrdinalIgnoreCase));
-            bool hasGetQueued    = frames.Any(f => f.Contains("GetQueuedCompletionStatus", StringComparison.OrdinalIgnoreCase));
+            bool hasGetQueued = frames.Any(f => f.Contains("GetQueuedCompletionStatus", StringComparison.OrdinalIgnoreCase));
 
             if (hasIoCompletion && hasGetQueued)
             {
