@@ -3,7 +3,9 @@
 
 using System.Collections.Concurrent;
 using System.Globalization;
+#if NETFRAMEWORK
 using System.Net;
+#endif
 #if NET
 using System.Security.Cryptography.X509Certificates;
 #endif
