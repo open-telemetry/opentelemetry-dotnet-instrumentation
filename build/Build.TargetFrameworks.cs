@@ -6,6 +6,7 @@ using static Nuke.Common.Tools.DotNet.DotNetTasks;
 
 partial class Build
 {
+    // TODO NET11TODO revert this temporary workaround when NuGet packages compatible with the .NET 11 SDK are available.
     private readonly Dictionary<string, string[]> _targetFrameworksByProject =
         new(OperatingSystem.IsWindows() ? StringComparer.OrdinalIgnoreCase : StringComparer.Ordinal);
 
