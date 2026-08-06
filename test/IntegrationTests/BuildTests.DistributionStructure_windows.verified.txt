@@ -4,6 +4,7 @@
   \instrument.sh,
   \net\Google.Protobuf.dll,
   \net\Microsoft.Extensions.Configuration.Binder.dll,
+  \net\Microsoft.Extensions.Configuration.EnvironmentVariables.dll,
   \net\Microsoft.Extensions.Configuration.dll,
   \net\Microsoft.Extensions.DependencyInjection.dll,
   \net\Microsoft.Extensions.Logging.Configuration.dll,
