@@ -1,0 +1,21 @@
+<Project>
+
+  <Target Name="CollectTargetFrameworks">
+    <ReadLinesFromFile File="$(ProjectsFile)">
+      <Output TaskParameter="Lines" ItemName="Projects" />
+    </ReadLinesFromFile>
+
+    <MSBuild Projects="@(Projects)"
+             Targets="GetTargetFrameworks"
+             BuildInParallel="true"
+             SkipNonexistentTargets="true">
+      <Output TaskParameter="TargetOutputs" ItemName="ProjectBuildMetadata" />
+    </MSBuild>
+
+    <WriteLinesToFile File="$(OutputFile)"
+                      Lines="@(ProjectBuildMetadata->'%(FullPath)|%(TargetFrameworks)')"
+                      Overwrite="true"
+                      Encoding="UTF-8" />
+  </Target>
+
+</Project>
