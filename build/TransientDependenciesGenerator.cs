@@ -118,6 +118,7 @@ internal static class TransientDependenciesGenerator
 
     public static void Run(Project targetProject)
     {
+        // TODO NET11TODO revert this temporary workaround when NuGet packages compatible with the .NET 11 SDK are available.
         var deps = Generator.EnumerateDependencies(targetProject.Path);
         var packages = targetProject.Solution.Directory / "src" / Projects.AutoInstrumentationAssemblies /
                        "Directory.Packages.props";
