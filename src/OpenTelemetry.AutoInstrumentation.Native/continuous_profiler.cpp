@@ -178,9 +178,10 @@ void SelectiveSamplingRecordProducedThreadSample(int32_t appendLen, unsigned cha
         return;
     }
 
-    const auto appendSize        = static_cast<size_t>(appendLen);
-    const auto remainingCapacity = static_cast<size_t>(kSamplesBufferMaximumSize) - selective_sampling_buffer.size();
-    if (appendSize >= remainingCapacity)
+    const auto appendSize  = static_cast<size_t>(appendLen);
+    const auto maximumSize = static_cast<size_t>(kSamplesBufferMaximumSize);
+    const auto currentSize = selective_sampling_buffer.size();
+    if (currentSize > maximumSize || appendSize > maximumSize - currentSize)
     {
         selective_sampling_buffer_saturated = true;
         trace::Logger::Warn(
@@ -189,7 +190,11 @@ void SelectiveSamplingRecordProducedThreadSample(int32_t appendLen, unsigned cha
         return;
     }
 
-    selective_sampling_buffer.insert(selective_sampling_buffer.end(), appendBuf, &appendBuf[appendSize]);
+    selective_sampling_buffer.insert(selective_sampling_buffer.end(), appendBuf, appendBuf + appendSize);
+    if (selective_sampling_buffer.size() == maximumSize)
+    {
+        selective_sampling_buffer_saturated = true;
+    }
 }
 
 bool continuous_profiler::trace_context::IsDefault() const

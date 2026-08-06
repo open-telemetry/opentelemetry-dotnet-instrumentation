@@ -144,10 +144,29 @@ TEST_F(SelectiveSamplingBufferTest, SuccessfulAppendKeepsSamplingAdmissible)
     ASSERT_TRUE(std::equal(sample.begin(), sample.end(), output.begin()));
 }
 
+TEST_F(SelectiveSamplingBufferTest, ExactFitIsAcceptedAndBlocksSamplingUntilRead)
+{
+    std::vector<unsigned char> acceptedSample = {0x11, 0x22};
+    std::vector<unsigned char> exactFitSample(kTestSamplesBufferMaximumSize - acceptedSample.size(), 0x33);
+
+    SelectiveSamplingRecordProducedThreadSample(static_cast<int32_t>(acceptedSample.size()), acceptedSample.data());
+    SelectiveSamplingRecordProducedThreadSample(static_cast<int32_t>(exactFitSample.size()), exactFitSample.data());
+
+    ASSERT_FALSE(SelectiveSamplingShouldProduceThreadSample());
+
+    auto       output   = CreateReadBuffer();
+    const auto readSize = Drain(output);
+
+    ASSERT_EQ(kTestSamplesBufferMaximumSize, readSize);
+    ASSERT_TRUE(std::equal(acceptedSample.begin(), acceptedSample.end(), output.begin()));
+    ASSERT_TRUE(std::equal(exactFitSample.begin(), exactFitSample.end(), output.begin() + acceptedSample.size()));
+    ASSERT_TRUE(SelectiveSamplingShouldProduceThreadSample());
+}
+
 TEST_F(SelectiveSamplingBufferTest, OverflowBlocksSamplingAndPreservesBufferedDataUntilRead)
 {
     std::vector<unsigned char> acceptedSample = {0x11, 0x22};
-    std::vector<unsigned char> overflowingSample(kTestSamplesBufferMaximumSize - acceptedSample.size(), 0x33);
+    std::vector<unsigned char> overflowingSample(kTestSamplesBufferMaximumSize - acceptedSample.size() + 1, 0x33);
 
     SelectiveSamplingRecordProducedThreadSample(static_cast<int32_t>(acceptedSample.size()), acceptedSample.data());
     SelectiveSamplingRecordProducedThreadSample(static_cast<int32_t>(overflowingSample.size()),
@@ -166,7 +185,7 @@ TEST_F(SelectiveSamplingBufferTest, OverflowBlocksSamplingAndPreservesBufferedDa
 
 TEST_F(SelectiveSamplingBufferTest, OversizedFirstBatchBlocksSamplingUntilValidEmptyRead)
 {
-    std::vector<unsigned char> oversizedSample(kTestSamplesBufferMaximumSize, 0x33);
+    std::vector<unsigned char> oversizedSample(kTestSamplesBufferMaximumSize + 1, 0x33);
     SelectiveSamplingRecordProducedThreadSample(static_cast<int32_t>(oversizedSample.size()), oversizedSample.data());
 
     ASSERT_FALSE(SelectiveSamplingShouldProduceThreadSample());
@@ -179,7 +198,7 @@ TEST_F(SelectiveSamplingBufferTest, OversizedFirstBatchBlocksSamplingUntilValidE
 TEST_F(SelectiveSamplingBufferTest, InvalidReadDoesNotClearSaturation)
 {
     std::vector<unsigned char> acceptedSample = {0x11, 0x22};
-    std::vector<unsigned char> overflowingSample(kTestSamplesBufferMaximumSize - acceptedSample.size(), 0x33);
+    std::vector<unsigned char> overflowingSample(kTestSamplesBufferMaximumSize - acceptedSample.size() + 1, 0x33);
     SelectiveSamplingRecordProducedThreadSample(static_cast<int32_t>(acceptedSample.size()), acceptedSample.data());
     SelectiveSamplingRecordProducedThreadSample(static_cast<int32_t>(overflowingSample.size()),
                                                 overflowingSample.data());
@@ -192,7 +211,7 @@ TEST_F(SelectiveSamplingBufferTest, InvalidReadDoesNotClearSaturation)
 TEST_F(SelectiveSamplingPreparationTest, SaturationDoesNotPreventOutdatedTraceCleanup)
 {
     std::vector<unsigned char> acceptedSample = {0x11, 0x22};
-    std::vector<unsigned char> overflowingSample(kTestSamplesBufferMaximumSize - acceptedSample.size(), 0x33);
+    std::vector<unsigned char> overflowingSample(kTestSamplesBufferMaximumSize - acceptedSample.size() + 1, 0x33);
     SelectiveSamplingRecordProducedThreadSample(static_cast<int32_t>(acceptedSample.size()), acceptedSample.data());
     SelectiveSamplingRecordProducedThreadSample(static_cast<int32_t>(overflowingSample.size()),
                                                 overflowingSample.data());
