@@ -36,22 +36,27 @@ namespace OpenTelemetry.Instrumentation
     {
         /// <remarks>
         /// Pattern:<br/>
-        /// <code>^(?&lt;protocol&gt;[^[]*\\s*:\\s*\\\\{0,2})?(?&lt;host&gt;.*?)\\s*(?:[\\\\,]|$)\\s*(?&lt;nameOrPort&gt;.*?)\\s*(?:,|$)\\s*(?&lt;port&gt;.*)$</code><br/>
+        /// <code>^(?&lt;protocol&gt;[^:[]*\\s*:\\s*(?:[\\\\/]{0,2})?)?(?&lt;host&gt;\\[[^\\]]+\\]|.*?)\\s*(?:[\\\\,:]|$)\\s*(?&lt;nameOrPort&gt;.*?)\\s*(?:,|$)\\s*(?&lt;port&gt;.*)$</code><br/>
         /// Explanation:<br/>
         /// <code>
         /// ○ Match if at the beginning of the string.<br/>
         /// ○ Optional (greedy).<br/>
         ///     ○ "protocol" capture group.<br/>
-        ///         ○ Match a character other than '[' greedily any number of times.<br/>
+        ///         ○ Match a character in the set [^:[] greedily any number of times.<br/>
         ///         ○ Match a whitespace character atomically any number of times.<br/>
         ///         ○ Match ':'.<br/>
         ///         ○ Match a whitespace character greedily any number of times.<br/>
-        ///         ○ Match '\\' greedily at most 2 times.<br/>
+        ///         ○ Match a character in the set [/\\] greedily at most 2 times.<br/>
         /// ○ "host" capture group.<br/>
-        ///     ○ Match a character other than '\n' lazily any number of times.<br/>
+        ///     ○ Match with 2 alternative expressions.<br/>
+        ///         ○ Match a sequence of expressions.<br/>
+        ///             ○ Match '['.<br/>
+        ///             ○ Match a character other than ']' atomically at least once.<br/>
+        ///             ○ Match ']'.<br/>
+        ///         ○ Match a character other than '\n' lazily any number of times.<br/>
         /// ○ Match a whitespace character greedily any number of times.<br/>
         /// ○ Match with 2 alternative expressions.<br/>
-        ///     ○ Match a character in the set [,\\].<br/>
+        ///     ○ Match a character in the set [,:\\].<br/>
         ///     ○ Match if at the end of the string or if before an ending newline.<br/>
         /// ○ Match a whitespace character greedily any number of times.<br/>
         /// ○ "nameOrPort" capture group.<br/>
@@ -394,7 +399,7 @@ namespace System.Text.RegularExpressions.Generated
         /// <summary>Initializes the instance.</summary>
         private DataSourceRegex_1()
         {
-            base.pattern = "^(?<protocol>[^[]*\\s*:\\s*\\\\{0,2})?(?<host>.*?)\\s*(?:[\\\\,]|$)\\s*(?<nameOrPort>.*?)\\s*(?:,|$)\\s*(?<port>.*)$";
+            base.pattern = "^(?<protocol>[^:[]*\\s*:\\s*(?:[\\\\/]{0,2})?)?(?<host>\\[[^\\]]+\\]|.*?)\\s*(?:[\\\\,:]|$)\\s*(?<nameOrPort>.*?)\\s*(?:,|$)\\s*(?<port>.*)$";
             base.roptions = RegexOptions.None;
             base.internalMatchTimeout = TimeSpan.FromMilliseconds(1000);
             base.factory = new RunnerFactory();
@@ -451,10 +456,13 @@ namespace System.Text.RegularExpressions.Generated
                     char ch;
                     int alternation_branch = 0;
                     int alternation_branch1 = 0;
+                    int alternation_branch2 = 0;
                     int alternation_starting_capturepos = 0;
                     int alternation_starting_capturepos1 = 0;
+                    int alternation_starting_capturepos2 = 0;
                     int alternation_starting_pos = 0;
                     int alternation_starting_pos1 = 0;
+                    int alternation_starting_pos2 = 0;
                     int capture_starting_pos1 = 0;
                     int capture_starting_pos2 = 0;
                     int capture_starting_pos3 = 0;
@@ -499,11 +507,11 @@ namespace System.Text.RegularExpressions.Generated
                         //{
                             int capture_starting_pos = pos;
                             
-                            // Match a character other than '[' greedily any number of times.
+                            // Match a character in the set [^:[] greedily any number of times.
                             //{
                                 charloop_starting_pos = pos;
                                 
-                                int iteration = slice.IndexOf('[');
+                                int iteration = slice.IndexOfAny(':', '[');
                                 if (iteration < 0)
                                 {
                                     iteration = slice.Length;
@@ -585,12 +593,12 @@ namespace System.Text.RegularExpressions.Generated
                                 Utilities.StackPush(ref base.runstack!, ref stackpos, charloop_starting_pos1, charloop_ending_pos1, base.Crawlpos());
                             //}
                             
-                            // Match '\\' greedily at most 2 times.
+                            // Match a character in the set [/\\] greedily at most 2 times.
                             //{
                                 charloop_starting_pos2 = pos;
                                 
                                 int iteration3 = 0;
-                                while (iteration3 < 2 && (uint)iteration3 < (uint)slice.Length && slice[iteration3] == '\\')
+                                while (iteration3 < 2 && (uint)iteration3 < (uint)slice.Length && (((ch = slice[iteration3]) == '/') | (ch == '\\')))
                                 {
                                     iteration3++;
                                 }
@@ -668,27 +676,94 @@ namespace System.Text.RegularExpressions.Generated
                     //{
                         capture_starting_pos1 = pos;
                         
-                        // Match a character other than '\n' lazily any number of times.
+                        // Match with 2 alternative expressions.
                         //{
-                            lazyloop_pos = pos;
-                            goto LazyLoopEnd;
+                            alternation_starting_pos = pos;
+                            alternation_starting_capturepos = base.Crawlpos();
                             
-                            LazyLoopBacktrack:
-                            UncaptureUntil(lazyloop_capturepos);
+                            // Branch 0
+                            //{
+                                // Match '['.
+                                if (slice.IsEmpty || slice[0] != '[')
+                                {
+                                    goto AlternationBranch;
+                                }
+                                
+                                // Match a character other than ']' atomically at least once.
+                                {
+                                    int iteration4 = slice.Slice(1).IndexOf(']');
+                                    if (iteration4 < 0)
+                                    {
+                                        iteration4 = slice.Length - 1;
+                                    }
+                                    
+                                    if (iteration4 == 0)
+                                    {
+                                        goto AlternationBranch;
+                                    }
+                                    
+                                    slice = slice.Slice(iteration4);
+                                    pos += iteration4;
+                                }
+                                
+                                // Match ']'.
+                                if ((uint)slice.Length < 2 || slice[1] != ']')
+                                {
+                                    goto AlternationBranch;
+                                }
+                                
+                                alternation_branch = 0;
+                                pos += 2;
+                                slice = inputSpan.Slice(pos);
+                                goto AlternationMatch;
+                                
+                                AlternationBranch:
+                                pos = alternation_starting_pos;
+                                slice = inputSpan.Slice(pos);
+                                UncaptureUntil(alternation_starting_capturepos);
+                            //}
+                            
+                            // Branch 1
+                            //{
+                                // Match a character other than '\n' lazily any number of times.
+                                //{
+                                    lazyloop_pos = pos;
+                                    goto LazyLoopEnd;
+                                    
+                                    LazyLoopBacktrack:
+                                    UncaptureUntil(lazyloop_capturepos);
+                                    base.CheckTimeout();
+                                    
+                                    pos = lazyloop_pos;
+                                    slice = inputSpan.Slice(pos);
+                                    if (slice.IsEmpty || slice[0] == '\n')
+                                    {
+                                        goto LoopBacktrack;
+                                    }
+                                    pos++;
+                                    slice = inputSpan.Slice(pos);
+                                    lazyloop_pos = pos;
+                                    
+                                    LazyLoopEnd:
+                                    lazyloop_capturepos = base.Crawlpos();
+                                //}
+                                
+                                alternation_branch = 1;
+                                goto AlternationMatch;
+                            //}
+                            
+                            AlternationBacktrack:
                             base.CheckTimeout();
                             
-                            pos = lazyloop_pos;
-                            slice = inputSpan.Slice(pos);
-                            if (slice.IsEmpty || slice[0] == '\n')
+                            switch (alternation_branch)
                             {
-                                goto LoopBacktrack;
+                                case 0:
+                                    goto AlternationBranch;
+                                case 1:
+                                    goto LazyLoopBacktrack;
                             }
-                            pos++;
-                            slice = inputSpan.Slice(pos);
-                            lazyloop_pos = pos;
                             
-                            LazyLoopEnd:
-                            lazyloop_capturepos = base.Crawlpos();
+                            AlternationMatch:;
                         //}
                         
                         base.Capture(2, capture_starting_pos1, pos);
@@ -696,7 +771,7 @@ namespace System.Text.RegularExpressions.Generated
                         goto CaptureSkipBacktrack1;
                         
                         CaptureBacktrack1:
-                        goto LazyLoopBacktrack;
+                        goto AlternationBacktrack;
                         
                         CaptureSkipBacktrack1:;
                     //}
@@ -705,14 +780,14 @@ namespace System.Text.RegularExpressions.Generated
                     //{
                         charloop_starting_pos3 = pos;
                         
-                        int iteration4 = 0;
-                        while ((uint)iteration4 < (uint)slice.Length && char.IsWhiteSpace(slice[iteration4]))
+                        int iteration5 = 0;
+                        while ((uint)iteration5 < (uint)slice.Length && char.IsWhiteSpace(slice[iteration5]))
                         {
-                            iteration4++;
+                            iteration5++;
                         }
                         
-                        slice = slice.Slice(iteration4);
-                        pos += iteration4;
+                        slice = slice.Slice(iteration5);
+                        pos += iteration5;
                         
                         charloop_ending_pos3 = pos;
                         goto CharLoopEnd3;
@@ -735,26 +810,26 @@ namespace System.Text.RegularExpressions.Generated
                     
                     // Match with 2 alternative expressions.
                     //{
-                        alternation_starting_pos = pos;
-                        alternation_starting_capturepos = base.Crawlpos();
+                        alternation_starting_pos1 = pos;
+                        alternation_starting_capturepos1 = base.Crawlpos();
                         
                         // Branch 0
                         //{
-                            // Match a character in the set [,\\].
-                            if (slice.IsEmpty || (((ch = slice[0]) != ',') & (ch != '\\')))
+                            // Match a character in the set [,:\\].
+                            if (slice.IsEmpty || (((ch = slice[0]) != ',') & (ch != ':') & (ch != '\\')))
                             {
-                                goto AlternationBranch;
+                                goto AlternationBranch1;
                             }
                             
-                            alternation_branch = 0;
+                            alternation_branch1 = 0;
                             pos++;
                             slice = inputSpan.Slice(pos);
-                            goto AlternationMatch;
+                            goto AlternationMatch1;
                             
-                            AlternationBranch:
-                            pos = alternation_starting_pos;
+                            AlternationBranch1:
+                            pos = alternation_starting_pos1;
                             slice = inputSpan.Slice(pos);
-                            UncaptureUntil(alternation_starting_capturepos);
+                            UncaptureUntil(alternation_starting_capturepos1);
                         //}
                         
                         // Branch 1
@@ -765,36 +840,36 @@ namespace System.Text.RegularExpressions.Generated
                                 goto CharLoopBacktrack3;
                             }
                             
-                            alternation_branch = 1;
-                            goto AlternationMatch;
+                            alternation_branch1 = 1;
+                            goto AlternationMatch1;
                         //}
                         
-                        AlternationBacktrack:
+                        AlternationBacktrack1:
                         base.CheckTimeout();
                         
-                        switch (alternation_branch)
+                        switch (alternation_branch1)
                         {
                             case 0:
-                                goto AlternationBranch;
+                                goto AlternationBranch1;
                             case 1:
                                 goto CharLoopBacktrack3;
                         }
                         
-                        AlternationMatch:;
+                        AlternationMatch1:;
                     //}
                     
                     // Match a whitespace character greedily any number of times.
                     //{
                         charloop_starting_pos4 = pos;
                         
-                        int iteration5 = 0;
-                        while ((uint)iteration5 < (uint)slice.Length && char.IsWhiteSpace(slice[iteration5]))
+                        int iteration6 = 0;
+                        while ((uint)iteration6 < (uint)slice.Length && char.IsWhiteSpace(slice[iteration6]))
                         {
-                            iteration5++;
+                            iteration6++;
                         }
                         
-                        slice = slice.Slice(iteration5);
-                        pos += iteration5;
+                        slice = slice.Slice(iteration6);
+                        pos += iteration6;
                         
                         charloop_ending_pos4 = pos;
                         goto CharLoopEnd4;
@@ -806,7 +881,7 @@ namespace System.Text.RegularExpressions.Generated
                         
                         if (charloop_starting_pos4 >= charloop_ending_pos4)
                         {
-                            goto AlternationBacktrack;
+                            goto AlternationBacktrack1;
                         }
                         pos = --charloop_ending_pos4;
                         slice = inputSpan.Slice(pos);
@@ -856,14 +931,14 @@ namespace System.Text.RegularExpressions.Generated
                     //{
                         charloop_starting_pos5 = pos;
                         
-                        int iteration6 = 0;
-                        while ((uint)iteration6 < (uint)slice.Length && char.IsWhiteSpace(slice[iteration6]))
+                        int iteration7 = 0;
+                        while ((uint)iteration7 < (uint)slice.Length && char.IsWhiteSpace(slice[iteration7]))
                         {
-                            iteration6++;
+                            iteration7++;
                         }
                         
-                        slice = slice.Slice(iteration6);
-                        pos += iteration6;
+                        slice = slice.Slice(iteration7);
+                        pos += iteration7;
                         
                         charloop_ending_pos5 = pos;
                         goto CharLoopEnd5;
@@ -886,26 +961,26 @@ namespace System.Text.RegularExpressions.Generated
                     
                     // Match with 2 alternative expressions.
                     //{
-                        alternation_starting_pos1 = pos;
-                        alternation_starting_capturepos1 = base.Crawlpos();
+                        alternation_starting_pos2 = pos;
+                        alternation_starting_capturepos2 = base.Crawlpos();
                         
                         // Branch 0
                         //{
                             // Match ','.
                             if (slice.IsEmpty || slice[0] != ',')
                             {
-                                goto AlternationBranch1;
+                                goto AlternationBranch2;
                             }
                             
-                            alternation_branch1 = 0;
+                            alternation_branch2 = 0;
                             pos++;
                             slice = inputSpan.Slice(pos);
-                            goto AlternationMatch1;
+                            goto AlternationMatch2;
                             
-                            AlternationBranch1:
-                            pos = alternation_starting_pos1;
+                            AlternationBranch2:
+                            pos = alternation_starting_pos2;
                             slice = inputSpan.Slice(pos);
-                            UncaptureUntil(alternation_starting_capturepos1);
+                            UncaptureUntil(alternation_starting_capturepos2);
                         //}
                         
                         // Branch 1
@@ -916,36 +991,36 @@ namespace System.Text.RegularExpressions.Generated
                                 goto CharLoopBacktrack5;
                             }
                             
-                            alternation_branch1 = 1;
-                            goto AlternationMatch1;
+                            alternation_branch2 = 1;
+                            goto AlternationMatch2;
                         //}
                         
-                        AlternationBacktrack1:
+                        AlternationBacktrack2:
                         base.CheckTimeout();
                         
-                        switch (alternation_branch1)
+                        switch (alternation_branch2)
                         {
                             case 0:
-                                goto AlternationBranch1;
+                                goto AlternationBranch2;
                             case 1:
                                 goto CharLoopBacktrack5;
                         }
                         
-                        AlternationMatch1:;
+                        AlternationMatch2:;
                     //}
                     
                     // Match a whitespace character greedily any number of times.
                     //{
                         charloop_starting_pos6 = pos;
                         
-                        int iteration7 = 0;
-                        while ((uint)iteration7 < (uint)slice.Length && char.IsWhiteSpace(slice[iteration7]))
+                        int iteration8 = 0;
+                        while ((uint)iteration8 < (uint)slice.Length && char.IsWhiteSpace(slice[iteration8]))
                         {
-                            iteration7++;
+                            iteration8++;
                         }
                         
-                        slice = slice.Slice(iteration7);
-                        pos += iteration7;
+                        slice = slice.Slice(iteration8);
+                        pos += iteration8;
                         
                         charloop_ending_pos6 = pos;
                         goto CharLoopEnd6;
@@ -957,7 +1032,7 @@ namespace System.Text.RegularExpressions.Generated
                         
                         if (charloop_starting_pos6 >= charloop_ending_pos6)
                         {
-                            goto AlternationBacktrack1;
+                            goto AlternationBacktrack2;
                         }
                         pos = --charloop_ending_pos6;
                         slice = inputSpan.Slice(pos);
@@ -974,14 +1049,14 @@ namespace System.Text.RegularExpressions.Generated
                         //{
                             charloop_starting_pos7 = pos;
                             
-                            int iteration8 = slice.IndexOf('\n');
-                            if (iteration8 < 0)
+                            int iteration9 = slice.IndexOf('\n');
+                            if (iteration9 < 0)
                             {
-                                iteration8 = slice.Length;
+                                iteration9 = slice.Length;
                             }
                             
-                            slice = slice.Slice(iteration8);
-                            pos += iteration8;
+                            slice = slice.Slice(iteration9);
+                            pos += iteration9;
                             
                             charloop_ending_pos7 = pos;
                             goto CharLoopEnd7;

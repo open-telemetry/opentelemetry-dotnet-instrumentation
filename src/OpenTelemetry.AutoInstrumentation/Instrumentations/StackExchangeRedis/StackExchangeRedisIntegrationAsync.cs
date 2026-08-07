@@ -18,6 +18,18 @@ namespace OpenTelemetry.AutoInstrumentation.Instrumentations.StackExchangeRedis;
     maximumVersion: StackExchangeRedisConstants.MaximumVersion,
     integrationName: StackExchangeRedisConstants.IntegrationName,
     type: InstrumentationType.Trace)]
+#if NET
+[InstrumentMethod(// releases 3.1.0+
+    assemblyName: StackExchangeRedisConstants.AssemblyName,
+    typeName: StackExchangeRedisConstants.ConnectionMultiplexerTypeName,
+    methodName: StackExchangeRedisConstants.ConnectImplAsyncMethodName,
+    returnTypeName: StackExchangeRedisConstants.TaskConnectionMultiplexerTypeName,
+    parameterTypeNames: [StackExchangeRedisConstants.ConfigurationOptionsTypeName, StackExchangeRedisConstants.TextWriterTypeName, StackExchangeRedisConstants.NullableServerTypeTypeName, StackExchangeRedisConstants.CircuitBreakerTypeName],
+    minimumVersion: StackExchangeRedisConstants.MinimumVersion3,
+    maximumVersion: StackExchangeRedisConstants.MaximumVersion,
+    integrationName: StackExchangeRedisConstants.IntegrationName,
+    type: InstrumentationType.Trace)]
+#endif
 public static class StackExchangeRedisIntegrationAsync
 {
     /// <summary>
