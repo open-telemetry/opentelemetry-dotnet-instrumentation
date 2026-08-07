@@ -380,6 +380,14 @@ private:
     IStackWalker*                stackWalker_ = nullptr;
 };
 
+// Internal selective-sampling state operations, public for unit testing.
+bool TryAddSelectiveSamplingTrace(const trace_context&                             context,
+                                  const std::chrono::steady_clock::time_point now);
+void RemoveSelectiveSamplingTrace(const trace_context& context);
+
+bool TryPrepareSelectedThreadSampling(ContinuousProfiler*                         prof,
+                                      const std::chrono::steady_clock::time_point now);
+
 } // namespace continuous_profiler
 
 void AllocationSamplingAppendToBuffer(int32_t appendLen, unsigned char* appendBuf);
@@ -388,5 +396,8 @@ bool ThreadSamplingShouldProduceThreadSample();
 void ThreadSamplingRecordProducedThreadSample(std::vector<unsigned char>* buf);
 // Can return 0 if none are pending
 int32_t ThreadSamplingConsumeOneThreadSample(int32_t len, unsigned char* buf);
+
+bool SelectiveSamplingShouldProduceThreadSample();
+void SelectiveSamplingRecordProducedThreadSample(int32_t appendLen, unsigned char* appendBuf);
 
 #endif // OTEL_CONTINUOUS_PROFILER_H_
