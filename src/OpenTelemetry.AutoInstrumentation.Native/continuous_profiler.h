@@ -342,7 +342,6 @@ struct ThreadSamplingConfiguration
 {
     std::optional<unsigned int> threadSamplingInterval;
     std::optional<unsigned int> selectedThreadsSamplingInterval;
-    uint64_t                    version;
 };
 
 class ContinuousProfiler
@@ -355,7 +354,8 @@ public:
     void                        ConfigureSelectedThreadSampling(unsigned int samplingInterval);
     unsigned int                GetConfiguredThreadSamplingInterval() const;
     ThreadSamplingConfiguration GetThreadSamplingConfiguration() const;
-    bool WaitForSamplingConfigurationChange(uint64_t configurationVersion, unsigned int samplingInterval);
+    bool TryReloadThreadSamplingConfiguration(ThreadSamplingConfiguration& configuration);
+    bool WaitForSamplingConfigurationChange(unsigned int samplingInterval);
     bool                        IsThreadSamplingStopRequested() const;
     bool                        IsThreadSamplingThreadRunning() const;
     uint64_t                    GetThreadSamplingThreadGeneration() const;
@@ -392,15 +392,18 @@ public:
 private:
     HRESULT StartThreadSampling();
     void    StopThreadSampling();
+    void    NotifySamplingConfigurationChanged();
+    void    NotifySamplingThread();
 
     std::atomic_bool             shutdown_requested_{false};
     std::atomic_bool             thread_sampling_stop_requested_{false};
+    std::atomic_bool             sampling_configuration_dirty_{true};
     mutable std::mutex           sampling_configuration_mutex_;
-    std::condition_variable      sampling_configuration_cv_;
+    std::mutex                   sampling_wait_mutex_;
+    std::condition_variable      sampling_thread_cv_;
     unsigned int                configured_thread_sampling_interval_ = 0;
     std::optional<unsigned int>  thread_sampling_interval_;
     std::optional<unsigned int>  selected_threads_sampling_interval_;
-    uint64_t                     sampling_configuration_version_ = 0;
     mutable std::mutex           thread_sampling_thread_mutex_;
     std::unique_ptr<std::thread> thread_sampling_thread_;
     uint64_t                     thread_sampling_thread_generation_ = 0;

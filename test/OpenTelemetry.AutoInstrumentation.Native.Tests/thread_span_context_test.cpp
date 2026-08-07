@@ -3,6 +3,7 @@
 
 #include <chrono>
 #include <future>
+#include <thread>
 
 #ifdef _WIN32
 #include <cstdlib>
@@ -87,7 +88,11 @@ TEST(ContinuousProfilerConfigurationTest, RuntimeReconfigurationStartsStopsAndDo
     ASSERT_TRUE(profiler.SetThreadSamplingInterval(10000u));
     const auto preparedConfiguration = profiler.GetThreadSamplingConfiguration();
     ASSERT_TRUE(profiler.SetThreadSamplingInterval(10000u));
-    ASSERT_EQ(preparedConfiguration.version, profiler.GetThreadSamplingConfiguration().version);
+    const auto repeatedPreparedConfiguration = profiler.GetThreadSamplingConfiguration();
+    ASSERT_EQ(preparedConfiguration.threadSamplingInterval.has_value(),
+              repeatedPreparedConfiguration.threadSamplingInterval.has_value());
+    ASSERT_EQ(preparedConfiguration.selectedThreadsSamplingInterval.has_value(),
+              repeatedPreparedConfiguration.selectedThreadsSamplingInterval.has_value());
 
     ASSERT_TRUE(profiler.SetThreadSamplingEnabled(true));
     ASSERT_TRUE(profiler.IsThreadSamplingThreadRunning());
@@ -109,7 +114,11 @@ TEST(ContinuousProfilerConfigurationTest, RuntimeReconfigurationStartsStopsAndDo
     const auto enabledConfiguration = profiler.GetThreadSamplingConfiguration();
     ASSERT_TRUE(profiler.SetThreadSamplingEnabled(true));
     ASSERT_EQ(initialGeneration, profiler.GetThreadSamplingThreadGeneration());
-    ASSERT_EQ(enabledConfiguration.version, profiler.GetThreadSamplingConfiguration().version);
+    const auto repeatedEnabledConfiguration = profiler.GetThreadSamplingConfiguration();
+    ASSERT_EQ(enabledConfiguration.threadSamplingInterval.value(),
+              repeatedEnabledConfiguration.threadSamplingInterval.value());
+    ASSERT_EQ(enabledConfiguration.selectedThreadsSamplingInterval.has_value(),
+              repeatedEnabledConfiguration.selectedThreadsSamplingInterval.has_value());
 
     ASSERT_TRUE(profiler.SetThreadSamplingEnabled(false));
     ASSERT_FALSE(profiler.IsThreadSamplingThreadRunning());
@@ -118,7 +127,11 @@ TEST(ContinuousProfilerConfigurationTest, RuntimeReconfigurationStartsStopsAndDo
 
     const auto disabledConfiguration = profiler.GetThreadSamplingConfiguration();
     ASSERT_TRUE(profiler.SetThreadSamplingEnabled(false));
-    ASSERT_EQ(disabledConfiguration.version, profiler.GetThreadSamplingConfiguration().version);
+    const auto repeatedDisabledConfiguration = profiler.GetThreadSamplingConfiguration();
+    ASSERT_EQ(disabledConfiguration.threadSamplingInterval.has_value(),
+              repeatedDisabledConfiguration.threadSamplingInterval.has_value());
+    ASSERT_EQ(disabledConfiguration.selectedThreadsSamplingInterval.has_value(),
+              repeatedDisabledConfiguration.selectedThreadsSamplingInterval.has_value());
 
     ASSERT_TRUE(profiler.SetThreadSamplingEnabled(true));
     ASSERT_TRUE(profiler.IsThreadSamplingThreadRunning());
@@ -128,79 +141,87 @@ TEST(ContinuousProfilerConfigurationTest, RuntimeReconfigurationStartsStopsAndDo
     ASSERT_TRUE(profiler.SetThreadSamplingEnabled(false));
 }
 
-TEST(ContinuousProfilerConfigurationTest, ActiveIntervalChangeWakesConfigurationWaiterImmediately)
+TEST(ContinuousProfilerConfigurationTest, RapidUpdatesReloadLatestConfiguration)
 {
-    continuous_profiler::ContinuousProfiler profiler;
+    continuous_profiler::ContinuousProfiler          profiler;
+    continuous_profiler::ThreadSamplingConfiguration configuration;
+
+    ASSERT_TRUE(profiler.TryReloadThreadSamplingConfiguration(configuration));
+    ASSERT_FALSE(configuration.threadSamplingInterval.has_value());
+    ASSERT_FALSE(configuration.selectedThreadsSamplingInterval.has_value());
+    ASSERT_FALSE(profiler.TryReloadThreadSamplingConfiguration(configuration));
 
     ASSERT_TRUE(profiler.SetThreadSamplingInterval(10000u));
+
+    // Keep the sampling thread in ReserveCapacity so this test is the only consumer of the dirty flag.
+    std::unique_lock<std::mutex> samplingThreadGate(profiler.thread_state_lock_);
     ASSERT_TRUE(profiler.SetThreadSamplingEnabled(true));
-    const auto initialConfiguration = profiler.GetThreadSamplingConfiguration();
-    const auto initialGeneration    = profiler.GetThreadSamplingThreadGeneration();
+    ASSERT_TRUE(profiler.SetThreadSamplingInterval(5000u));
+    ASSERT_TRUE(profiler.SetThreadSamplingInterval(1234u));
 
-    std::promise<void> waiterStarted;
-    auto               waiterStartedFuture  = waiterStarted.get_future();
-    auto               configurationChanged = std::async(std::launch::async,
-                                                         [&profiler, &waiterStarted, version = initialConfiguration.version]()
-                                                         {
-                                               waiterStarted.set_value();
-                                               return profiler.WaitForSamplingConfigurationChange(version, 10000u);
-                                           });
+    ASSERT_TRUE(profiler.TryReloadThreadSamplingConfiguration(configuration));
+    ASSERT_EQ(1234u, configuration.threadSamplingInterval.value());
+    ASSERT_FALSE(configuration.selectedThreadsSamplingInterval.has_value());
+    ASSERT_FALSE(profiler.TryReloadThreadSamplingConfiguration(configuration));
 
-    waiterStartedFuture.wait();
-    const auto intervalChanged = profiler.SetThreadSamplingInterval(1234u);
-    if (!intervalChanged)
-    {
-        // Ensure the async waiter is released before its future is destroyed if the assertion fails.
-        profiler.SetThreadSamplingEnabled(false);
-    }
-
-    ASSERT_TRUE(intervalChanged);
-
-    const auto waitStatus = configurationChanged.wait_for(std::chrono::seconds(2));
-    if (waitStatus != std::future_status::ready)
-    {
-        // Ensure the async waiter is released before its future is destroyed if the assertion fails.
-        profiler.SetThreadSamplingEnabled(false);
-    }
-
-    ASSERT_EQ(std::future_status::ready, waitStatus);
-    ASSERT_TRUE(configurationChanged.get());
-    ASSERT_EQ(initialGeneration, profiler.GetThreadSamplingThreadGeneration());
-    ASSERT_EQ(1234u, profiler.GetThreadSamplingConfiguration().threadSamplingInterval.value());
+    // Leave a pending reload for the real sampling thread before releasing it.
+    ASSERT_TRUE(profiler.SetThreadSamplingInterval(4321u));
+    ASSERT_TRUE(profiler.SetThreadSamplingInterval(1234u));
+    samplingThreadGate.unlock();
 
     ASSERT_TRUE(profiler.SetThreadSamplingEnabled(false));
 }
 
-TEST(ContinuousProfilerConfigurationTest, ShutdownWakesConfigurationWaiterImmediately)
+TEST(ContinuousProfilerConfigurationTest, DisableWakesLongSamplingWaitImmediately)
 {
     continuous_profiler::ContinuousProfiler profiler;
 
-    const auto initialConfiguration = profiler.GetThreadSamplingConfiguration();
+    ASSERT_TRUE(profiler.SetThreadSamplingInterval(60000u));
+    ASSERT_TRUE(profiler.SetThreadSamplingEnabled(true));
+    std::this_thread::sleep_for(std::chrono::milliseconds(100));
 
-    std::promise<void> waiterStarted;
-    auto               waiterStartedFuture = waiterStarted.get_future();
-    auto               shutdownRequested   = std::async(std::launch::async,
-                                                        [&profiler, &waiterStarted, version = initialConfiguration.version]()
-                                                        {
-                                            waiterStarted.set_value();
-                                            return profiler.WaitForSamplingConfigurationChange(version, 10000u);
-                                        });
-
-    waiterStartedFuture.wait();
-    profiler.Shutdown();
-
-    const auto waitStatus = shutdownRequested.wait_for(std::chrono::seconds(2));
+    auto samplingDisabled =
+        std::async(std::launch::async, [&profiler]() { return profiler.SetThreadSamplingEnabled(false); });
+    const auto waitStatus = samplingDisabled.wait_for(std::chrono::seconds(2));
     if (waitStatus != std::future_status::ready)
     {
-        // Ensure the async waiter is released before its future is destroyed if the assertion fails.
+        // Wake the sampling thread before destroying the future if the assertion fails.
         profiler.Shutdown();
-        shutdownRequested.wait();
+        samplingDisabled.wait();
     }
 
     ASSERT_EQ(std::future_status::ready, waitStatus);
-    ASSERT_TRUE(shutdownRequested.get());
+    if (waitStatus == std::future_status::ready)
+    {
+        ASSERT_TRUE(samplingDisabled.get());
+    }
+    ASSERT_FALSE(profiler.IsThreadSamplingThreadRunning());
+}
+
+TEST(ContinuousProfilerConfigurationTest, ShutdownWakesLongSamplingWaitImmediately)
+{
+    continuous_profiler::ContinuousProfiler profiler;
+
+    ASSERT_TRUE(profiler.SetThreadSamplingInterval(60000u));
+    ASSERT_TRUE(profiler.SetThreadSamplingEnabled(true));
+    std::this_thread::sleep_for(std::chrono::milliseconds(100));
+
+    auto       shutdownCompleted = std::async(std::launch::async, [&profiler]() { profiler.Shutdown(); });
+    const auto waitStatus        = shutdownCompleted.wait_for(std::chrono::seconds(2));
+    if (waitStatus != std::future_status::ready)
+    {
+        // A second notification avoids blocking on future destruction if the first wake was lost.
+        profiler.Shutdown();
+        shutdownCompleted.wait();
+    }
+
+    ASSERT_EQ(std::future_status::ready, waitStatus);
+    if (waitStatus == std::future_status::ready)
+    {
+        shutdownCompleted.get();
+    }
     ASSERT_TRUE(profiler.IsShutdownRequested());
-    ASSERT_EQ(initialConfiguration.version, profiler.GetThreadSamplingConfiguration().version);
+    ASSERT_FALSE(profiler.IsThreadSamplingThreadRunning());
 }
 
 TEST(ContinuousProfilerBufferTest, PreservesBatchOrderAndSamplingIntervalMetadata)
@@ -245,7 +266,11 @@ TEST(ContinuousProfilerConfigurationTest, CpuReconfigurationDoesNotRestartOrCorr
     const auto selectiveConfiguration    = profiler.GetThreadSamplingConfiguration();
 
     ASSERT_TRUE(profiler.SetThreadSamplingInterval(120000u));
-    ASSERT_EQ(selectiveConfiguration.version, profiler.GetThreadSamplingConfiguration().version);
+    const auto preparedMixedConfiguration = profiler.GetThreadSamplingConfiguration();
+    ASSERT_EQ(selectiveConfiguration.threadSamplingInterval.has_value(),
+              preparedMixedConfiguration.threadSamplingInterval.has_value());
+    ASSERT_EQ(selectiveConfiguration.selectedThreadsSamplingInterval.value(),
+              preparedMixedConfiguration.selectedThreadsSamplingInterval.value());
     ASSERT_EQ(selectiveThreadGeneration, profiler.GetThreadSamplingThreadGeneration());
 
     ASSERT_TRUE(profiler.SetThreadSamplingEnabled(true));
@@ -259,7 +284,8 @@ TEST(ContinuousProfilerConfigurationTest, CpuReconfigurationDoesNotRestartOrCorr
     const auto configuration = profiler.GetThreadSamplingConfiguration();
     ASSERT_EQ(120000u, profiler.GetConfiguredThreadSamplingInterval());
     ASSERT_EQ(120000u, configuration.threadSamplingInterval.value());
-    ASSERT_EQ(validMixedConfiguration.version, configuration.version);
+    ASSERT_EQ(validMixedConfiguration.selectedThreadsSamplingInterval.value(),
+              configuration.selectedThreadsSamplingInterval.value());
 
     ASSERT_TRUE(profiler.SetThreadSamplingEnabled(false));
     ASSERT_TRUE(profiler.IsThreadSamplingThreadRunning());

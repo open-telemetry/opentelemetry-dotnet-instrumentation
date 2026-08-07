@@ -9,6 +9,7 @@ internal static class RuntimeReconfigurationScenario
 {
     private const uint InitialInterval = 1000u;
     private const uint ActiveInterval = 5000u;
+    private const uint IntermediateInterval = 2000u;
     private const uint ReconfiguredInterval = 1000u;
 
     public static void Run()
@@ -52,16 +53,21 @@ internal static class RuntimeReconfigurationScenario
             Ensure(
                 !RuntimeContinuousProfilerNativeMethods.SetContinuousProfilerSamplingInterval(0),
                 "SetContinuousProfilerSamplingInterval reported success for an invalid sampling interval.");
+
+            // Rapid accepted updates may be coalesced, but the sampler must eventually use the latest one.
+            Ensure(
+                RuntimeContinuousProfilerNativeMethods.SetContinuousProfilerSamplingInterval(IntermediateInterval),
+                "SetContinuousProfilerSamplingInterval failed for the intermediate interval.");
             Ensure(
                 RuntimeContinuousProfilerNativeMethods.SetContinuousProfilerSamplingInterval(ReconfiguredInterval),
-                "SetContinuousProfilerSamplingInterval failed.");
-            var exportCountAfterIntervalChange = WaitForExportAfter(exportCount, TimeSpan.FromSeconds(3));
+                "SetContinuousProfilerSamplingInterval failed for the final interval.");
+            var exportCountAfterIntervalChange = WaitForSamplingInterval(
+                ReconfiguredInterval,
+                exportCount,
+                TimeSpan.FromSeconds(3));
             Ensure(
                 exportCountAfterIntervalChange > exportCount,
-                "Changing the sampling interval did not wake the sampling thread.");
-            Ensure(
-                RuntimeReconfigurationPlugin.GetLastThreadSamplingInterval() == ReconfiguredInterval,
-                "The exporter did not receive the reconfigured sampling interval.");
+                "The sampler did not observe the reconfigured sampling interval.");
 
             Ensure(
                 RuntimeContinuousProfilerNativeMethods.SetContinuousProfilerEnabled(false),
@@ -104,6 +110,28 @@ internal static class RuntimeReconfigurationScenario
         }
 
         return RuntimeReconfigurationPlugin.GetThreadExportCount();
+    }
+
+    private static int WaitForSamplingInterval(uint samplingInterval, int previousExportCount, TimeSpan timeout)
+    {
+        var stopwatch = Stopwatch.StartNew();
+        while (stopwatch.Elapsed < timeout)
+        {
+            var exportCount = RuntimeReconfigurationPlugin.GetThreadExportCount();
+            if (exportCount > previousExportCount &&
+                RuntimeReconfigurationPlugin.GetLastThreadSamplingInterval() == samplingInterval)
+            {
+                return exportCount;
+            }
+
+            // A capture already in progress, or a completed batch already queued for export,
+            // may still use the previous interval after the setter accepts the change.
+            Thread.Sleep(50);
+        }
+
+        return RuntimeReconfigurationPlugin.GetLastThreadSamplingInterval() == samplingInterval
+            ? RuntimeReconfigurationPlugin.GetThreadExportCount()
+            : previousExportCount;
     }
 
     private static int WaitForExporterIdle(TimeSpan quietPeriod, TimeSpan timeout)
