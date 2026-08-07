@@ -14,7 +14,7 @@ jobs:
   build-windows:
     uses: ./.github/workflows/_build.yml
     with:
-      artifact-name: windows-2022
-      runner: windows-2022
+      artifact-name: windows-2025-vs2026
+      runner: windows-2025-vs2026
       environment-type: host
       log-directory: C:\ProgramData\OpenTelemetry .NET AutoInstrumentation\logs

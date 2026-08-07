@@ -1,28 +1,28 @@
-FROM mcr.microsoft.com/dotnet/sdk:10.0.302-alpine3.23@sha256:d8ee39817ca03a3757288e83c37ed73cc969a286c603b827c7cbe33add1c2d1c
+FROM mcr.microsoft.com/dotnet/sdk:11.0.100-preview.6-alpine3.24@sha256:db8d1af6c24410400f4e69525f0bee161c01c193ab50278363acabb4f7dad689
 
-# renovate: datasource=repology depName=clang21
-ARG CLANG21_VERSION=21.1.2-r2
+# renovate: datasource=repology depName=clang22
+ARG CLANG22_VERSION=22.1.3-r2
 # renovate: datasource=repology depName=cmake
-ARG CMAKE_VERSION=4.1.3-r0
+ARG CMAKE_VERSION=4.2.3-r0
 # renovate: datasource=repology depName=make
-ARG MAKE_VERSION=4.4.1-r3
+ARG MAKE_VERSION=4.4.1-r4
 # renovate: datasource=repology depName=bash
-ARG BASH_VERSION=5.3.3-r1
+ARG BASH_VERSION=5.3.9-r1
 # renovate: datasource=repology depName=alpine-sdk
-ARG ALPINE_SDK_VERSION=1.1-r0
+ARG ALPINE_SDK_VERSION=1.1-r1
 # renovate: datasource=repology depName=protobuf
 ARG PROTOBUF_VERSION=31.1-r1
 # renovate: datasource=repology depName=protobuf-dev
 ARG PROTOBUF_DEV_VERSION=31.1-r1
 # renovate: datasource=repology depName=grpc
-ARG GRPC_VERSION=1.76.0-r2
+ARG GRPC_VERSION=1.78.1-r2
 # renovate: datasource=repology depName=grpc-plugins
-ARG GRPC_PLUGINS_VERSION=1.76.0-r2
+ARG GRPC_PLUGINS_VERSION=1.78.1-r2
 
 RUN apk update \
     && apk upgrade \
     && apk add --no-cache --update \
-        clang21="${CLANG21_VERSION}" \
+        clang22="${CLANG22_VERSION}" \
         cmake="${CMAKE_VERSION}" \
         make="${MAKE_VERSION}" \
         bash="${BASH_VERSION}" \
@@ -40,8 +40,7 @@ COPY ./scripts/dotnet-install.sh ./dotnet-install.sh
 
 # Install older SDKs using the install script
 RUN chmod +x ./dotnet-install.sh \
-    && ./dotnet-install.sh -v 9.0.316 --install-dir /usr/share/dotnet --no-path \
-    && ./dotnet-install.sh -v 8.0.423 --install-dir /usr/share/dotnet --no-path \
+    && ./dotnet-install.sh -v 10.0.302 --install-dir /usr/share/dotnet --no-path \
     && rm dotnet-install.sh
 
 WORKDIR /project
