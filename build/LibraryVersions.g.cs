@@ -26,7 +26,7 @@ public static partial class LibraryVersion
             "TestApplication.Elasticsearch",
             [
                 new("8.15.10"),
-                new("9.4.2"),
+                new("9.5.0"),
             ]
         },
         {
@@ -36,7 +36,7 @@ public static partial class LibraryVersion
                 new("8.0.23"),
                 new("9.0.12"),
                 new("10.0.0", supportedFrameworks: [ "net10.0" ]),
-                new("10.0.9", supportedFrameworks: [ "net10.0" ]),
+                new("10.0.10", supportedFrameworks: [ "net10.0" ]),
             ]
         },
         {
@@ -179,7 +179,7 @@ public static partial class LibraryVersion
                 new("8.0.0"),
                 new("9.0.0"),
                 new("10.0.0"),
-                new("10.0.9"),
+                new("10.0.10"),
             ]
         },
         {
@@ -187,7 +187,9 @@ public static partial class LibraryVersion
             [
                 new("2.6.122"),
                 new("2.12.14"),
-                new("3.0.47-preview", supportedFrameworks: [ "net10.0", "net9.0", "net8.0" ]),
+                new("3.0.25", supportedFrameworks: [ "net10.0", "net9.0", "net8.0" ]),
+                new("3.1.0", supportedFrameworks: [ "net10.0", "net9.0", "net8.0" ]),
+                new("3.1.13", supportedFrameworks: [ "net10.0", "net9.0", "net8.0" ]),
             ]
         },
         {
@@ -214,7 +216,7 @@ public static partial class LibraryVersion
                 new("9.0.0", supportedFrameworks: [ "net9.0" ]),
                 new("6.0.0", supportedFrameworks: [ "net462" ]),
                 new("10.0.0", supportedFrameworks: [ "net8.0", "net9.0" ]),
-                new("10.0.9", supportedFrameworks: [ "net462", "net10.0" ]),
+                new("10.0.10", supportedFrameworks: [ "net462", "net10.0" ]),
             ]
         },
         {

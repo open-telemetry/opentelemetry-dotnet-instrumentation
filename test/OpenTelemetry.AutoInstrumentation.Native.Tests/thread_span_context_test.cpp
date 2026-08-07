@@ -1,15 +1,68 @@
 #include "pch.h"
 #include "../../src/OpenTelemetry.AutoInstrumentation.Native/continuous_profiler.h"
 
+#include <algorithm>
 #include <chrono>
 #include <future>
 #include <thread>
+#include <vector>
 
 #ifdef _WIN32
 #include <cstdlib>
 #include <memory>
 #include <Windows.h>
 #endif
+
+namespace
+{
+
+constexpr auto kTestSamplesBufferMaximumSize = 200 * 1024;
+constexpr auto kTestTraceIdHigh              = uint64_t{0x11};
+constexpr auto kTestTraceIdLow               = uint64_t{0x22};
+
+class SelectiveSamplingBufferTest : public ::testing::Test
+{
+protected:
+    static std::vector<unsigned char> CreateReadBuffer()
+    {
+        return std::vector<unsigned char>(kTestSamplesBufferMaximumSize);
+    }
+
+    static int32_t Drain(std::vector<unsigned char>& buffer)
+    {
+        return SelectiveSamplerReadThreadSamples(static_cast<int32_t>(buffer.size()), buffer.data());
+    }
+
+    void SetUp() override
+    {
+        auto buffer = CreateReadBuffer();
+        Drain(buffer);
+    }
+
+    void TearDown() override
+    {
+        auto buffer = CreateReadBuffer();
+        Drain(buffer);
+    }
+};
+
+class SelectiveSamplingPreparationTest : public SelectiveSamplingBufferTest
+{
+protected:
+    void SetUp() override
+    {
+        SelectiveSamplingBufferTest::SetUp();
+        continuous_profiler::RemoveSelectiveSamplingTrace({kTestTraceIdHigh, kTestTraceIdLow});
+    }
+
+    void TearDown() override
+    {
+        continuous_profiler::RemoveSelectiveSamplingTrace({kTestTraceIdHigh, kTestTraceIdLow});
+        SelectiveSamplingBufferTest::TearDown();
+    }
+};
+
+} // namespace
 
 TEST(ThreadSpanContextMapTest, BasicGet)
 {
@@ -338,6 +391,120 @@ TEST(ContinuousProfilerConfigurationTest, ConcurrentSettersDoNotCreateDuplicateS
     ASSERT_TRUE(runConcurrently([&profiler]() { return profiler.SetThreadSamplingEnabled(false); }));
     ASSERT_FALSE(profiler.IsThreadSamplingThreadRunning());
     ASSERT_EQ(1u, profiler.GetThreadSamplingThreadGeneration());
+}
+
+TEST_F(SelectiveSamplingBufferTest, SuccessfulAppendKeepsSamplingAdmissible)
+{
+    std::vector<unsigned char> sample = {0x11, 0x22};
+
+    ASSERT_TRUE(SelectiveSamplingShouldProduceThreadSample());
+    SelectiveSamplingRecordProducedThreadSample(static_cast<int32_t>(sample.size()), sample.data());
+    ASSERT_TRUE(SelectiveSamplingShouldProduceThreadSample());
+
+    auto       output   = CreateReadBuffer();
+    const auto readSize = Drain(output);
+
+    ASSERT_EQ(sample.size(), static_cast<size_t>(readSize));
+    ASSERT_TRUE(std::equal(sample.begin(), sample.end(), output.begin()));
+}
+
+TEST_F(SelectiveSamplingBufferTest, ExactFitIsAcceptedAndBlocksSamplingUntilRead)
+{
+    std::vector<unsigned char> acceptedSample = {0x11, 0x22};
+    std::vector<unsigned char> exactFitSample(kTestSamplesBufferMaximumSize - acceptedSample.size(), 0x33);
+
+    SelectiveSamplingRecordProducedThreadSample(static_cast<int32_t>(acceptedSample.size()), acceptedSample.data());
+    SelectiveSamplingRecordProducedThreadSample(static_cast<int32_t>(exactFitSample.size()), exactFitSample.data());
+
+    ASSERT_FALSE(SelectiveSamplingShouldProduceThreadSample());
+
+    auto       output   = CreateReadBuffer();
+    const auto readSize = Drain(output);
+
+    ASSERT_EQ(kTestSamplesBufferMaximumSize, readSize);
+    ASSERT_TRUE(std::equal(acceptedSample.begin(), acceptedSample.end(), output.begin()));
+    ASSERT_TRUE(std::equal(exactFitSample.begin(), exactFitSample.end(), output.begin() + acceptedSample.size()));
+    ASSERT_TRUE(SelectiveSamplingShouldProduceThreadSample());
+}
+
+TEST_F(SelectiveSamplingBufferTest, OverflowBlocksSamplingAndPreservesBufferedDataUntilRead)
+{
+    std::vector<unsigned char> acceptedSample = {0x11, 0x22};
+    std::vector<unsigned char> overflowingSample(kTestSamplesBufferMaximumSize - acceptedSample.size() + 1, 0x33);
+
+    SelectiveSamplingRecordProducedThreadSample(static_cast<int32_t>(acceptedSample.size()), acceptedSample.data());
+    SelectiveSamplingRecordProducedThreadSample(static_cast<int32_t>(overflowingSample.size()),
+                                                overflowingSample.data());
+
+    ASSERT_FALSE(SelectiveSamplingShouldProduceThreadSample());
+    ASSERT_FALSE(SelectiveSamplingShouldProduceThreadSample());
+
+    auto       output   = CreateReadBuffer();
+    const auto readSize = Drain(output);
+
+    ASSERT_EQ(acceptedSample.size(), static_cast<size_t>(readSize));
+    ASSERT_TRUE(std::equal(acceptedSample.begin(), acceptedSample.end(), output.begin()));
+    ASSERT_TRUE(SelectiveSamplingShouldProduceThreadSample());
+}
+
+TEST_F(SelectiveSamplingBufferTest, OversizedFirstBatchBlocksSamplingUntilValidEmptyRead)
+{
+    std::vector<unsigned char> oversizedSample(kTestSamplesBufferMaximumSize + 1, 0x33);
+    SelectiveSamplingRecordProducedThreadSample(static_cast<int32_t>(oversizedSample.size()), oversizedSample.data());
+
+    ASSERT_FALSE(SelectiveSamplingShouldProduceThreadSample());
+
+    auto output = CreateReadBuffer();
+    ASSERT_EQ(0, Drain(output));
+    ASSERT_TRUE(SelectiveSamplingShouldProduceThreadSample());
+}
+
+TEST_F(SelectiveSamplingBufferTest, InvalidReadDoesNotClearSaturation)
+{
+    std::vector<unsigned char> acceptedSample = {0x11, 0x22};
+    std::vector<unsigned char> overflowingSample(kTestSamplesBufferMaximumSize - acceptedSample.size() + 1, 0x33);
+    SelectiveSamplingRecordProducedThreadSample(static_cast<int32_t>(acceptedSample.size()), acceptedSample.data());
+    SelectiveSamplingRecordProducedThreadSample(static_cast<int32_t>(overflowingSample.size()),
+                                                overflowingSample.data());
+
+    ASSERT_FALSE(SelectiveSamplingShouldProduceThreadSample());
+    ASSERT_EQ(0, SelectiveSamplerReadThreadSamples(0, nullptr));
+    ASSERT_FALSE(SelectiveSamplingShouldProduceThreadSample());
+}
+
+TEST_F(SelectiveSamplingPreparationTest, SaturationDoesNotPreventOutdatedTraceCleanup)
+{
+    std::vector<unsigned char> acceptedSample = {0x11, 0x22};
+    std::vector<unsigned char> overflowingSample(kTestSamplesBufferMaximumSize - acceptedSample.size() + 1, 0x33);
+    SelectiveSamplingRecordProducedThreadSample(static_cast<int32_t>(acceptedSample.size()), acceptedSample.data());
+    SelectiveSamplingRecordProducedThreadSample(static_cast<int32_t>(overflowingSample.size()),
+                                                overflowingSample.data());
+    ASSERT_FALSE(SelectiveSamplingShouldProduceThreadSample());
+
+    continuous_profiler::ContinuousProfiler profiler{};
+    const auto                              now = std::chrono::steady_clock::now();
+    profiler.nextOutdatedEntriesScan            = now;
+    ASSERT_TRUE(continuous_profiler::TryAddSelectiveSamplingTrace({kTestTraceIdHigh, kTestTraceIdLow}, now));
+
+    ASSERT_FALSE(continuous_profiler::TryPrepareSelectedThreadSampling(&profiler, now + std::chrono::minutes(16)));
+    ASSERT_FALSE(SelectiveSamplingShouldProduceThreadSample());
+
+    auto output = CreateReadBuffer();
+    ASSERT_EQ(acceptedSample.size(), static_cast<size_t>(Drain(output)));
+    ASSERT_FALSE(continuous_profiler::TryPrepareSelectedThreadSampling(&profiler, now));
+}
+
+TEST_F(SelectiveSamplingPreparationTest, EmptyTraceSetPreventsSelectedThreadSampling)
+{
+    continuous_profiler::ContinuousProfiler profiler{};
+    const auto                              now = std::chrono::steady_clock::now();
+    profiler.nextOutdatedEntriesScan            = now + std::chrono::minutes(1);
+
+    ASSERT_TRUE(SelectiveSamplingShouldProduceThreadSample());
+    ASSERT_FALSE(continuous_profiler::TryPrepareSelectedThreadSampling(&profiler, now));
+
+    ASSERT_TRUE(continuous_profiler::TryAddSelectiveSamplingTrace({kTestTraceIdHigh, kTestTraceIdLow}, now));
+    ASSERT_TRUE(continuous_profiler::TryPrepareSelectedThreadSampling(&profiler, now));
 }
 
 #ifdef _WIN32

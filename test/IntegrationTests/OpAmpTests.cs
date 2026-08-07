@@ -26,7 +26,9 @@ public class OpAmpTests : TestHelper
 
         SetEnvironmentVariable("OTEL_DOTNET_AUTO_OPAMP_ENABLED", "true");
         SetEnvironmentVariable("OTEL_DOTNET_AUTO_OPAMP_SERVER_URL", $"http://localhost:{server.Port}/v1/opamp");
-        SetEnvironmentVariable("OTEL_RESOURCE_ATTRIBUTES", "opamp.test=true");
+        SetEnvironmentVariable(
+            "OTEL_RESOURCE_ATTRIBUTES",
+            "opamp.test=true,service.namespace=my-namespace");
 
         AgentDescription? agentDescriptionFrame = null;
 
@@ -45,6 +47,9 @@ public class OpAmpTests : TestHelper
         server.AssertExpectations();
 
         Assert.NotNull(agentDescriptionFrame);
+        Assert.Contains(
+            agentDescriptionFrame.IdentifyingAttributes,
+            a => a.Key == "service.namespace" && a.Value.StringValue == "my-namespace");
         Assert.Contains(agentDescriptionFrame.NonIdentifyingAttributes, a => a.Key == "opamp.test");
     }
 

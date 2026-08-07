@@ -5,6 +5,7 @@
 
 #include "corhlpr.h"
 #include <corprof.h>
+#include <algorithm>
 #include <string>
 #include <typeinfo>
 
@@ -2001,13 +2002,16 @@ std::string CorProfiler::GetILCodes(const std::string&              title,
             }
             else if (cInstr->m_opcode == CEE_LDSTR)
             {
-                WCHAR szString[1024];
-                ULONG szStringLength;
-                auto  hr = metadata_import->GetUserString((mdString)cInstr->m_Arg32, szString, 1024, &szStringLength);
+                constexpr ULONG kUserStringBufferSize = 1024;
+                WCHAR           szString[kUserStringBufferSize];
+                ULONG           szStringLength;
+                auto hr = metadata_import->GetUserString((mdString)cInstr->m_Arg32, szString, kUserStringBufferSize,
+                                                         &szStringLength);
                 if (SUCCEEDED(hr))
                 {
+                    const ULONG safeLength = std::min<ULONG>(szStringLength, kUserStringBufferSize);
                     orig_sstream << "  | \"";
-                    orig_sstream << ToString(WSTRING(szString, szStringLength));
+                    orig_sstream << ToString(WSTRING(szString, safeLength));
                     orig_sstream << "\"";
                 }
             }
