@@ -606,6 +606,11 @@ HRESULT STDMETHODCALLTYPE CorProfiler::ModuleLoadFinished(ModuleID module_id, HR
         return S_OK;
     }
 
+    return TryRejitModule(module_id);
+}
+
+HRESULT CorProfiler::TryRejitModule(ModuleID module_id)
+{
     const auto& module_info = GetModuleInfo(this->info_, module_id);
     if (!module_info.IsValid())
     {
@@ -1307,9 +1312,9 @@ void CorProfiler::InitializeTraceMethods(WCHAR* id,
         WSTRING integration_type_name     = WSTRING(integration_type_name_ptr);
         WSTRING configuration_string      = WSTRING(configuration_string_ptr);
 
+        const auto integration_type = TypeReference(integration_assembly_name, integration_type_name, {}, {});
         std::vector<IntegrationDefinition> integrationDefinitions =
-            GetIntegrationsFromTraceMethodsConfiguration(integration_assembly_name, integration_type_name,
-                                                         configuration_string);
+            GetIntegrationsFromTraceMethodsConfiguration(integration_type, configuration_string);
         std::scoped_lock<std::mutex> moduleLock(module_ids_lock_);
 
         Logger::Info("InitializeTraceMethods: Total number of modules to analyze: ", module_ids_.size());

@@ -365,8 +365,7 @@ namespace
 } // namespace
 
     std::vector<IntegrationDefinition> GetIntegrationsFromTraceMethodsConfiguration(
-    const WSTRING& integration_assembly_name,
-    const WSTRING& integration_type_name,
+    const TypeReference integration_type,
     const WSTRING& configuration_string);
 
 } // namespace trace
