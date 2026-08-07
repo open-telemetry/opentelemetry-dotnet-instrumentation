@@ -10,4 +10,4 @@ jobs:
   welcome:
     permissions:
       pull-requests: write # To post the welcome comment
-    uses: open-telemetry/shared-workflows/.github/workflows/first-time-pr.yml@94425809b433630371efafff2067f2c5b19f3fc2 # v0.5.0
+    uses: open-telemetry/shared-workflows/.github/workflows/first-time-pr.yml@f13d0cb656d7244ca8c1638b6996dbaef1083bdd # v0.6.0
