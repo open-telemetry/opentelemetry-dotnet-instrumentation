@@ -4,13 +4,13 @@
 namespace OpenTelemetry.AutoInstrumentation.PluginApi.ContinuousProfiling;
 
 /// <summary>
-/// Provides extension points for configuring continuous profiler.
+/// Provides the initial continuous profiler configuration.
 /// </summary>
 public interface IContinuousProfilerPlugin
 {
     /// <summary>
-    /// Get continuous profiler configuration.
+    /// Gets the continuous profiler configuration used during initialization.
     /// </summary>
-    /// <returns>configuration</returns>
+    /// <returns>The initial continuous profiler configuration.</returns>
     ContinuousProfilerConfiguration GetFirstContinuousProfilerConfiguration();
 }

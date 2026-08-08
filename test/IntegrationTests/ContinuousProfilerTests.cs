@@ -116,6 +116,21 @@ public class ContinuousProfilerTests : TestHelper
         collector.ResourceExpector.AssertExpectations();
     }
 
+    [Fact]
+    [Trait("Category", "EndToEnd")]
+    public void RuntimeReconfigurationStartsStopsAndWakesCpuSampler()
+    {
+        EnableBytecodeInstrumentation();
+        SetEnvironmentVariable(
+            "OTEL_DOTNET_AUTO_PLUGINS",
+            "TestApplication.ContinuousProfiler.RuntimeReconfigurationPlugin, TestApplication.ContinuousProfiler, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null");
+
+        var (standardOutput, _, _) = RunTestApplication(
+            new TestSettings { Arguments = "--runtime-reconfiguration" });
+
+        Assert.Contains("runtime-reconfiguration-completed", standardOutput, StringComparison.Ordinal);
+    }
+
     private static bool ExpectCollected(ICollection<ExportProfilesServiceRequest> c)
     {
         foreach (var request in c)

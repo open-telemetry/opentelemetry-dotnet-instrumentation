@@ -30,8 +30,8 @@ suspends execution and the samples for all managed threads are saved in the buff
 then the runtime resumes.
 
 A separate managed thread processes data from the buffer and exports it
-in the format defined by the plugin. To make the process more efficient, the
-sampler uses two independent buffers to store samples alternately.
+in the format defined by the plugin. Completed sample batches are placed in a
+first-in, first-out queue that holds at most two batches.
 
 ### Requirements
 
@@ -50,40 +50,76 @@ the same.
 
 Implement custom plugin. See plugin section.
 
-### Configuration defaults
+### Initial configuration
 
-* `threadSamplingEnabled = true;`: Enables thread sampling.
-* `var threadSamplingInterval = 10000u;`: Sampling interval, in milliseconds.
-  Lowest recommended value is 1000.
-* `var exportInterval = TimeSpan.FromMilliseconds(500);`: Interval for reading
-  the data from buffers and call the exporter. This setting is common for both
-  thread and allocation sampling.
-* `object continuousProfilerExporter = new ConsoleExporter();`: Exporter to be
-  used for both thread and allocation sampling.
+The default configuration disables thread and allocation sampling. Sampling and
+export intervals are zero, and no exporter is configured.
+
+To enable thread sampling, implement a
+[continuous profiling plugin](../plugins.md#continuous-profiling) and provide a
+positive sampling interval, positive export interval and timeout, and an
+exporter. The lowest recommended sampling interval is 1000 milliseconds.
+
+### Runtime reconfiguration
+
+Native continuous profiler resources are initialized once per process. Later
+calls to `ConfigureContinuousProfiler` update only the enabled state and sampling
+interval for thread sampling. Allocation and selective sampling retain their
+initial configuration.
+
+After initialization, `SetContinuousProfilerEnabled(bool)` starts or stops
+continuous thread sampling. `SetContinuousProfilerSamplingInterval(uint)` changes
+the configured interval and, when sampling is active, wakes the sampling thread
+immediately.
+
+The managed interop methods `ConfigureNativeContinuousProfiler`,
+`SetNativeContinuousProfilerSamplingInterval`, and
+`SetNativeContinuousProfilerEnabled` return `true` when the requested native
+operation succeeds and `false` when it cannot be applied. Successful idempotent
+start and stop operations also return `true`. A `false` result means the complete
+request was not applied; initialization needed by other sampling modes may still
+have succeeded.
+
+To enable thread sampling later when it is initially disabled, the initial
+managed configuration must prepare the thread-sampling export pipeline with an
+exporter, a non-zero sampling interval, and positive export interval and timeout.
+Runtime operations cannot initialize this pipeline.
+
+Start and stop operations are idempotent and use at most one native sampling
+thread. The thread is shared with selective sampling, so disabling continuous
+thread sampling does not stop it while selective sampling remains enabled.
+Runtime interval changes must satisfy the [selective sampling interval
+constraints](./selective-sampling.md#limits).
+
+These operations are internal managed/native interop and are not part of the
+`IContinuousProfilerPlugin` contract.
 
 ### Escape hatch
 
-The profiler limits its own behavior when both buffers used to store sampled
-data are full.
+The profiler limits its own behavior when both slots in the completed-batch
+queue are full.
 
 This scenario might happen when the data processing thread is not able
 to export data the given period of time.
 
-Thread sampling resumes when any of the buffers are empty.
+Thread sampling resumes when a slot becomes available.
 
 ### Troubleshoot the .NET profiler
 
 #### How do I know if it's working?
 
-At startup, the OpenTelemetry Instrumentation for .NET logs the string
-`ContinuousProfiler::StartThreadSampling` at `info` log level.
-
-You can grep for this in the native logs for the instrumentation
-to see something like this:
+When the shared native sampling thread starts or stops, the OpenTelemetry
+Instrumentation for .NET logs these strings at `info` level:
 
 ```text
-10/12/22 12:10:31.962 PM [12096|22036] [info] ContinuousProfiler::StartThreadSampling
+ContinuousProfiler sampling thread started.
+ContinuousProfiler sampling thread stopped.
 ```
+
+These messages describe the lifecycle of the thread shared by continuous and
+selective sampling. A runtime CPU enable or disable operation may reuse that
+thread and therefore emit neither message. Check the debug configuration log and
+exported thread samples to verify continuous thread sampling.
 
 #### How can I see Continuous Profiling configuration?
 
@@ -169,7 +205,7 @@ If you don't see `[StackCapture] Canary thread ready` in the logs:
 
 1. Ensure thread sampling is enabled in the plugin configuration
 2. Check that the profiler is successfully attached (look for
-   `ContinuousProfiler::StartThreadSampling` in the logs)
+   `ContinuousProfiler sampling thread started.` in the logs)
 
 ## Allocation sampling
 
@@ -271,7 +307,7 @@ between your process and the Collector.
 
 ## Plugin
 
-For now, the plugins is responsible for
+For now, the plugin is responsible for
 
 * defining configuration for continuous profiling
 * providing exporter for the allocation and profiling data
@@ -283,29 +319,11 @@ For now, the plugins is responsible for
 > It will be subject to change, when <https://github.com/open-telemetry/oteps/pull/239>
 > or <https://github.com/open-telemetry/oteps/pull/237> will be ready and merged.
 
-As other methods, `GetContinuousProfilerConfiguration` is called by reflection
-and convention.
-
-```csharp
-/// <summary>
-/// Configure Continuous Profiler.
-/// </summary>
-/// <returns>(threadSamplingEnabled, threadSamplingInterval, allocationSamplingEnabled, maxMemorySamplesPerMinute, exportInterval, exportTimeout, continuousProfilerExporter)</returns>
-public Tuple<bool, uint, bool, uint, TimeSpan, TimeSpan, object> GetContinuousProfilerConfiguration()
-{
-    var threadSamplingEnabled = true; // enables thread sampling
-    var threadSamplingInterval = 10000u; // interval to stop CLR runtime and fetch stacks. 10 000ms is Splunk default. 1000ms is the lowest supported value by Splunk. The code does not contain any limitations. Plugin is responsible for checks.
-    var allocationSamplingEnabled = true; // enables allocation sampling (ignored on .NET Framework)
-    var maxMemorySamplesPerMinute = 200u; // max number of samples in minutes. 200 is tested default value by Splunk.
-    var exportInterval = TimeSpan.FromMilliseconds(500); // Pause time before next execution of exporting/reading buffer  process
-    var exportTimeout = TimeSpan.FromMilliseconds(500); // Export timeout
-    object continuousProfilerExporter = new ConsoleExporter();
-    return Tuple.Create(threadSamplingEnabled, threadSamplingInterval, allocationSamplingEnabled, maxMemorySamplesPerMinute, exportInterval, exportTimeout, continuousProfilerExporter);
-}
-```
-
-if more than one plugin implement `GetContinuousProfilerConfiguration` only
-the first one will be used. Other will be ignored.
+Implement
+`IContinuousProfilerPlugin.GetFirstContinuousProfilerConfiguration()` and
+return a `ContinuousProfilerConfiguration`. Only the first plugin that implements
+this interface is used. See the [continuous profiling plugin
+example](../plugins.md#continuous-profiling).
 
 > [!NOTE]  
 > On .NET Framework, the `allocationSamplingEnabled` setting is ignored since
@@ -315,15 +333,16 @@ the first one will be used. Other will be ignored.
 
 ### Exporter contract
 
-Two methods has to be implemented by Exporter
+The exporter must implement two methods:
 
 ```csharp
-public void ExportThreadSamples(byte[] buffer, int read, CancellationToken cancellationToken);
+public void ExportThreadSamples(byte[] buffer, int read, uint samplingInterval, CancellationToken cancellationToken);
 public void ExportAllocationSamples(byte[] buffer, int read, CancellationToken cancellationToken);
 ```
 
 Both accept buffer produced by the native code, the length of filled
-data, and cancellation token.
+data, and cancellation token. `ExportThreadSamples` also receives the sampling
+interval in milliseconds that was used to produce that specific batch.
 The Exporter is responsible both for parsing this buffer and exporting it.
 
 Example: [`OtlpOverHttpExporter`](../../test/test-applications/integrations/TestApplication.ContinuousProfiler/Exporter/OtlpOverHttpExporter.cs).
