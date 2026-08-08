@@ -60,6 +60,7 @@ proto
 protobuf
 protos
 RABBITMQ
+SASL
 Serilog
 Sonoma
 spdlog

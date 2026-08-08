@@ -24,6 +24,7 @@ public class KafkaTests : TestHelper
     private const string KafkaDestinationPartitionAttributeName = "messaging.kafka.destination.partition";
     private const string KafkaMessageOffsetAttributeName = "messaging.kafka.message.offset";
     private const string KafkaMessageTombstoneAttributeName = "messaging.kafka.message.tombstone";
+    private const string KafkaClusterIdAttributeName = "messaging.kafka.cluster.id";
     private const string KafkaInstrumentationScopeName = "OpenTelemetry.AutoInstrumentation.Kafka";
     private const string KafkaProducerClientIdAttributeValue = "rdkafka#producer-1";
     private const string KafkaConsumerClientIdAttributeValue = "rdkafka#consumer-2";
@@ -48,6 +49,7 @@ public class KafkaTests : TestHelper
         SkipIfUnsupportedPlatform(packageVersion);
 
         var topicName = $"test-topic-{packageVersion}";
+        var supportsClusterId = packageVersion.Length == 0 || Version.Parse(packageVersion) >= new Version(2, 0, 0);
 
         using var collector = new MockSpansCollector(Output);
         SetExporter(collector);
@@ -67,7 +69,7 @@ public class KafkaTests : TestHelper
                 "Failed Consume attempt.");
         }
 
-        // Successful produce attempts after topic was created with admin client.
+        // Successful produce attempts.
         collector.Expect(KafkaInstrumentationScopeName, VersionHelper.AutoInstrumentationVersion, span => span.Kind == Span.Types.SpanKind.Producer && ValidateProducerSpan(span, topicName, 0), "Successful ProduceAsync attempt.");
         collector.Expect(KafkaInstrumentationScopeName, VersionHelper.AutoInstrumentationVersion, span => span.Kind == Span.Types.SpanKind.Producer && ValidateProducerSpan(span, topicName, -1), "Successful Produce attempt without delivery handler set.");
         collector.Expect(KafkaInstrumentationScopeName, VersionHelper.AutoInstrumentationVersion, span => span.Kind == Span.Types.SpanKind.Producer && ValidateProducerSpan(span, topicName, 0), "Successful Produce attempt with delivery handler set.");
@@ -81,6 +83,16 @@ public class KafkaTests : TestHelper
         collector.Expect(KafkaInstrumentationScopeName, VersionHelper.AutoInstrumentationVersion, span => span.Kind == Span.Types.SpanKind.Consumer && ValidateConsumerSpan(span, topicName, 2), "Third successful Consume attempt.");
 
         collector.ExpectCollected(collection => ValidatePropagation(collection, topicName));
+
+        if (supportsClusterId)
+        {
+            // messaging.kafka.cluster.id is resolved asynchronously in the background, so it may
+            // be absent on the earliest spans. Assert it is eventually present on at least one
+            // producer and one consumer span, rather than requiring it on every span.
+            collector.ExpectCollected(collection => collection.Any(c => c.Span.Kind == Span.Types.SpanKind.Producer && HasNonEmptyClusterId(c.Span.Attributes)));
+            collector.ExpectCollected(collection => collection.Any(c => c.Span.Kind == Span.Types.SpanKind.Consumer && HasNonEmptyClusterId(c.Span.Attributes)));
+        }
+
         EnableBytecodeInstrumentation();
 
         RunTestApplication(new TestSettings
@@ -171,6 +183,12 @@ public class KafkaTests : TestHelper
         return ValidateCommonAttributes(span.Attributes, topicName, KafkaProducerClientIdAttributeValue, MessagingPublishOperationAttributeValue, partition, KafkaMessageKeyAttributeValue) &&
                isTombstone == tombstoneExpected &&
                span.Status is null;
+    }
+
+    private static bool HasNonEmptyClusterId(IReadOnlyCollection<KeyValue> attributes)
+    {
+        var clusterId = attributes.SingleOrDefault(kv => kv.Key == KafkaClusterIdAttributeName)?.Value.StringValue;
+        return !string.IsNullOrEmpty(clusterId);
     }
 
     private static bool ValidateCommonAttributes(IReadOnlyCollection<KeyValue> attributes, string topicName, string clientId, string operationName, int partition, string? expectedMessageKey)
