@@ -567,8 +567,9 @@ instrumentation/development:
         # Default is false
         set_document: false
       npgsql:
-        # Whether the Npgsql instrumentation propagates the W3C traceparent through PostgreSQL application_name.
-        # This adds one database round trip per command and replaces the connection's configured application_name.
+        # Whether the Npgsql instrumentation propagates the W3C traceparent through PostgreSQL application_name for non-multiplexed commands and Npgsql 10 COPY operations.
+        # This adds one database round trip per traced operation. Multiplexed connectors are safely skipped because application_name is physical-session state.
+        # The configured application_name is restored before the next untraced operation on the same physical connection.
         # Default is false
         context_propagation: false
       oraclemda: 

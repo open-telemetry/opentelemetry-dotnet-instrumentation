@@ -298,6 +298,35 @@ value as `postgresql.application_name` on its
 [`db.server.query_sample` event](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/42f949127580c0d00088b785cd0b35842dc0ddb8/receiver/postgresqlreceiver/metadata.yaml).
 Query-sample collection is disabled by default and requires `pg_monitor`; see the
 [pinned receiver configuration](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/42f949127580c0d00088b785cd0b35842dc0ddb8/receiver/postgresqlreceiver/README.md).
+Propagation executes `SET application_name` through Npgsql's synchronous
+[`ExecuteInternalCommand` path](https://github.com/npgsql/npgsql/blob/d3768398c17877b3a916c3c4d87e8e11698991fc/src/Npgsql/Internal/NpgsqlConnector.cs#L2864-L2875)
+before each traced operation. Npgsql flushes that command and waits for its
+`CommandComplete` and `ReadyForQuery` responses, so propagation adds one
+database round trip per traced operation. It does not alter, prefix, or combine
+the application's SQL. As Npgsql ends the user action, while it still owns the
+connector, the instrumentation executes `RESET application_name` through the
+same path. This adds one cleanup round trip per propagated operation and
+restores the configured value before control returns to the caller or the
+connector can be used for another operation. See Npgsql's
+[`EndUserAction` lifecycle](https://github.com/npgsql/npgsql/blob/d3768398c17877b3a916c3c4d87e8e11698991fc/src/Npgsql/Internal/NpgsqlConnector.cs#L2687-L2724).
+These internal commands use PostgreSQL's Simple Query flow, which discards the
+previous unnamed statement and portal; Npgsql's explicitly prepared and
+automatically prepared statements are named and remain associated with the
+physical connection. See the PostgreSQL
+[extended-query protocol rules](https://www.postgresql.org/docs/17/protocol-flow.html#PROTOCOL-FLOW-EXT-QUERY)
+and Npgsql's
+[prepared-statement documentation](https://www.npgsql.org/doc/prepare.html).
+Because `SET` and `RESET` are real PostgreSQL statements, an observer polling
+during their short execution can theoretically sample them. Cleanup is
+deferred while a transaction is failed so that `ROLLBACK` can run first, then
+executed as the recovery action ends successfully.
+Npgsql 10+ COPY operations are covered through its
+[`TraceCopyStart` lifecycle](https://github.com/npgsql/npgsql/blob/d3768398c17877b3a916c3c4d87e8e11698991fc/src/Npgsql/Internal/NpgsqlConnector.cs#L2964-L2980).
+Multiplexing is not supported: `application_name` is physical-session state,
+while Npgsql can write multiple logical commands to the same connector in one
+[multiplexing loop](https://github.com/npgsql/npgsql/blob/d3768398c17877b3a916c3c4d87e8e11698991fc/src/Npgsql/MultiplexingDataSource.cs#L176-L199).
+The instrumentation safely skips propagation and logs one warning when it
+detects a multiplexed connector.
 
 ## Propagators
 
