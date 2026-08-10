@@ -170,7 +170,7 @@ public static partial class LibraryVersion
                 new("5.1.2"),
                 new("6.8.1"),
                 new("7.0.0"),
-                new("7.2.1"),
+                new("7.2.2"),
             ]
         },
         {
