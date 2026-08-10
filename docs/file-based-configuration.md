@@ -566,6 +566,11 @@ instrumentation/development:
         # Whether the GraphQL instrumentation can pass raw queries through the graphql.document attribute. Queries might contain sensitive information.
         # Default is false
         set_document: false
+      npgsql:
+        # Whether the Npgsql instrumentation propagates the W3C traceparent through PostgreSQL application_name.
+        # This adds one database round trip per command and replaces the connection's configured application_name.
+        # Default is false
+        context_propagation: false
       oraclemda: 
         # Whether the Oracle Client instrumentation can enable database OpenTelemetry tracing and propagate context to the server.
         database_opentelemetry_tracing: false
