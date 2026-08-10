@@ -63,6 +63,11 @@ EXTERN_C BOOL STDAPICALLTYPE ConfigureContinuousProfiler(bool         threadSamp
                                                         selectedThreadSamplingInterval);
 }
 
+EXTERN_C BOOL STDAPICALLTYPE ShutdownContinuousProfiler()
+{
+    return trace::profiler != nullptr && trace::profiler->ShutdownContinuousProfiler();
+}
+
 EXTERN_C BOOL STDAPICALLTYPE SetContinuousProfilerSamplingInterval(unsigned int threadSamplingInterval)
 {
     return trace::profiler != nullptr && trace::profiler->SetContinuousProfilerSamplingInterval(threadSamplingInterval);

@@ -11,6 +11,8 @@ internal static class RuntimeReconfigurationScenario
     private const uint ActiveInterval = 2000u;
     private const uint IntermediateInterval = 1500u;
     private const uint ReconfiguredInterval = 1000u;
+    private const uint UnpreparedInterval = 50u;
+    private const int ThreadSamplesBufferSize = 200 * 1024;
 #if NET
     private const uint AllocationRate = 60000u;
     private const uint ReconfiguredAllocationRate = 30000u;
@@ -169,22 +171,68 @@ internal static class RuntimeReconfigurationScenario
                 "No allocation sample was exported after allocation sampling was re-enabled.");
 #endif
 
+            Ensure(
+                RuntimeContinuousProfilerNativeMethods.ShutdownContinuousProfiler(),
+                "ShutdownContinuousProfiler failed to stop continuous profiling.");
+            Ensure(
+                !RuntimeContinuousProfilerNativeMethods.SetContinuousProfilerEnabled(true),
+                "CPU sampling was re-enabled after continuous profiling was shut down.");
+#if NET
+            Ensure(
+                RuntimeContinuousProfilerNativeMethods.GetContinuousProfilerAllocationSamplingRate() == 0,
+                "Allocation sampling remained enabled after continuous profiling was shut down.");
+#endif
+            Ensure(
+                RuntimeContinuousProfilerNativeMethods.ShutdownContinuousProfiler(),
+                "ShutdownContinuousProfiler was not idempotent.");
+
             Console.WriteLine("runtime-reconfiguration-completed");
         }
         finally
         {
-#if NET
-            _ = RuntimeContinuousProfilerNativeMethods.ConfigureContinuousProfiler(
-                threadSamplingEnabled: false,
-                threadSamplingInterval: ReconfiguredInterval,
-                threadSamplingExportPipelinePrepared: false,
-                allocationSamplingEnabled: false,
-                maxMemorySamplesPerMinute: AllocationRate,
-                allocationSamplingExportPipelinePrepared: false,
-                selectedThreadSamplingInterval: 0);
-#else
+            _ = RuntimeContinuousProfilerNativeMethods.ShutdownContinuousProfiler();
+        }
+    }
+
+    public static void VerifyUnpreparedThreadSamplingIsRejected()
+    {
+        try
+        {
+            // Initialize the native profiler without preparing either managed export pipeline.
+            // A non-zero, disabled allocation rate makes this an initialization request without
+            // starting allocation sampling, including on .NET Framework.
+            Ensure(
+                RuntimeContinuousProfilerNativeMethods.ConfigureContinuousProfiler(
+                    threadSamplingEnabled: false,
+                    threadSamplingInterval: 0,
+                    threadSamplingExportPipelinePrepared: false,
+                    allocationSamplingEnabled: false,
+                    maxMemorySamplesPerMinute: 1,
+                    allocationSamplingExportPipelinePrepared: false,
+                    selectedThreadSamplingInterval: 0),
+                "ConfigureContinuousProfiler failed to initialize the native profiler.");
+
+            Ensure(
+                !RuntimeContinuousProfilerNativeMethods.SetContinuousProfilerSamplingInterval(UnpreparedInterval),
+                "SetContinuousProfilerSamplingInterval configured an unprepared CPU export pipeline.");
+            Ensure(
+                !RuntimeContinuousProfilerNativeMethods.SetContinuousProfilerEnabled(true),
+                "SetContinuousProfilerEnabled enabled sampling without a prepared CPU export pipeline.");
+
+            Thread.Sleep(TimeSpan.FromMilliseconds(UnpreparedInterval * 5u));
+            var buffer = new byte[ThreadSamplesBufferSize];
+            var read = RuntimeContinuousProfilerNativeMethods.ContinuousProfilerReadThreadSamples(
+                buffer.Length,
+                buffer,
+                out var samplingInterval);
+            Ensure(read == 0, "A CPU sample was captured without a prepared export pipeline.");
+            Ensure(samplingInterval == 0, "An unprepared CPU sampling interval was published.");
+
+            Console.WriteLine("runtime-unprepared-thread-rejected");
+        }
+        finally
+        {
             _ = RuntimeContinuousProfilerNativeMethods.SetContinuousProfilerEnabled(false);
-#endif
         }
     }
 

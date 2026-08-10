@@ -235,6 +235,28 @@ internal static class Instrumentation
         _pluginManager.Initialized();
     }
 
+    internal static void ShutdownNativeContinuousProfilerBestEffort(Func<bool> shutdownContinuousProfiler)
+    {
+        try
+        {
+            if (!shutdownContinuousProfiler())
+            {
+                Logger.Warning("Failed to shut down the native continuous profiler after managed initialization failed.");
+            }
+        }
+        catch (Exception ex)
+        {
+            try
+            {
+                Logger.Warning(ex, "Failed to shut down the native continuous profiler after managed initialization failed.");
+            }
+            catch (Exception)
+            {
+                // Rollback is best-effort and must not mask the managed initialization failure.
+            }
+        }
+    }
+
     private static void TryInitializeContinuousProfiling()
     {
         try
@@ -353,34 +375,61 @@ internal static class Instrumentation
             return;
         }
 
-        // Build the managed reader/exporter before native sampling can start.
-        // If construction fails, no native sampling service is left running without a consumer.
-        _sampleExporter = _sampleExporterBuilder?.Build();
+        // Construct the managed exporter before native sampling can start, but defer its activity callbacks and
+        // reader thread until native initialization has completed.
+        var sampleExporter = _sampleExporterBuilder?.Build();
+        var nativeConfigurationCompleted = false;
 
-        if (!NativeMethods.ConfigureNativeContinuousProfiler(
+        try
+        {
+            var nativeConfigurationApplied = NativeMethods.ConfigureNativeContinuousProfiler(
                 threadSamplingEnabled,
                 threadSamplingPrepared ? config.ThreadSamplingInterval : 0,
                 threadSamplingPrepared,
                 allocationSamplingEnabled,
                 allocationSamplingPrepared ? config.MaxMemorySamplesPerMinute : 0,
                 allocationSamplingPrepared,
-                selectiveSamplingInterval))
-        {
-            Logger.Warning("The native continuous profiler could not apply the complete sampling configuration.");
-        }
-#if NETFRAMEWORK
-        // On .NET Framework, we need a dedicated canary thread for seeded stack walking
-        _canaryThreadManager = new CanaryThreadManager();
-        if (!_canaryThreadManager.Start(TimeSpan.FromSeconds(5)))
-        {
-            Logger.Error("Failed to start canary thread. Continuous profiling will not be enabled.");
-            _canaryThreadManager.Dispose();
-            _canaryThreadManager = null;
-            return;
-        }
+                selectiveSamplingInterval);
+            nativeConfigurationCompleted = true;
 
-        Logger.Information("Canary thread started successfully for .NET Framework profiling.");
+            if (!nativeConfigurationApplied)
+            {
+                // A false result can represent a partial configuration. Keep the exporter available for any
+                // sampling modes that were successfully initialized.
+                Logger.Warning("The native continuous profiler could not apply the complete sampling configuration.");
+            }
+#if NETFRAMEWORK
+            // On .NET Framework, we need a dedicated canary thread for seeded stack walking
+            _canaryThreadManager = new CanaryThreadManager();
+            if (!_canaryThreadManager.Start(TimeSpan.FromSeconds(5)))
+            {
+                Logger.Error("Failed to start canary thread. Continuous profiling will not be enabled.");
+                ShutdownNativeContinuousProfilerBestEffort(NativeMethods.ShutdownNativeContinuousProfiler);
+                _canaryThreadManager.Dispose();
+                _canaryThreadManager = null;
+                sampleExporter?.Dispose();
+                return;
+            }
+
+            Logger.Information("Canary thread started successfully for .NET Framework profiling.");
 #endif
+            sampleExporter?.Start();
+            _sampleExporter = sampleExporter;
+        }
+        catch
+        {
+            if (nativeConfigurationCompleted)
+            {
+                ShutdownNativeContinuousProfilerBestEffort(NativeMethods.ShutdownNativeContinuousProfiler);
+            }
+
+#if NETFRAMEWORK
+            _canaryThreadManager?.Dispose();
+            _canaryThreadManager = null;
+#endif
+            sampleExporter?.Dispose();
+            throw;
+        }
     }
 
     private static bool TryInitializeSelectedThreadSamplingExport(SelectiveSamplerConfiguration configuration)

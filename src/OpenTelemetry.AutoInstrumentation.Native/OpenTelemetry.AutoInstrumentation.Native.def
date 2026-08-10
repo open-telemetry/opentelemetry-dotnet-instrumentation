@@ -10,6 +10,7 @@ EXPORTS
     SetSqlClientNetFxILRewriteEnabled
     InitializeTraceMethods
     ConfigureContinuousProfiler
+    ShutdownContinuousProfiler
     SetContinuousProfilerSamplingInterval
     SetContinuousProfilerEnabled
     GetContinuousProfilerSamplingInterval

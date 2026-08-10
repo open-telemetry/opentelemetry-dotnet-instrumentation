@@ -131,6 +131,18 @@ public class ContinuousProfilerTests : TestHelper
         Assert.Contains("runtime-reconfiguration-completed", standardOutput, StringComparison.Ordinal);
     }
 
+    [Fact]
+    [Trait("Category", "EndToEnd")]
+    public void RuntimeReconfigurationRejectsUnpreparedThreadPipeline()
+    {
+        EnableBytecodeInstrumentation();
+
+        var (standardOutput, _, _) = RunTestApplication(
+            new TestSettings { Arguments = "--runtime-unprepared-thread" });
+
+        Assert.Contains("runtime-unprepared-thread-rejected", standardOutput, StringComparison.Ordinal);
+    }
+
 #if NET
     [Fact]
     [Trait("Category", "EndToEnd")]

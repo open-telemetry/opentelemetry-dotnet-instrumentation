@@ -260,6 +260,7 @@ public:
                                              unsigned int maxMemorySamplesPerMinute,
                                              bool         allocationSamplingExportPipelinePrepared,
                                              unsigned int selectedThreadsSamplingInterval);
+    bool         ShutdownContinuousProfiler();
     bool         SetContinuousProfilerSamplingInterval(unsigned int threadSamplingInterval);
     bool         SetContinuousProfilerEnabled(bool enabled);
     unsigned int GetContinuousProfilerSamplingInterval();

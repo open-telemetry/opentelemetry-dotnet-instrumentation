@@ -16,10 +16,15 @@ internal class SampleExporter : IDisposable
     private readonly TimeSpan _exportTimeout;
     private readonly BufferProcessor _bufferProcessor;
     private readonly ManualResetEventSlim _shutdownTrigger = new(false);
+    private readonly object _lifecycleLock = new();
+
     // Additional async local required to get full set of notifications,
     // see https://github.com/dotnet/runtime/issues/67276#issuecomment-1089877762
-    private readonly AsyncLocal<Activity?>? _supportingActivityAsyncLocal;
-    private readonly Thread? _thread;
+    private AsyncLocal<Activity?>? _supportingActivityAsyncLocal;
+    private Thread? _thread;
+    private bool _activityTrackingEnabled;
+    private bool _disposed;
+    private bool _started;
 
     public SampleExporter(BufferProcessor bufferProcessor, TimeSpan exportInterval, TimeSpan exportTimeout)
     {
@@ -40,30 +45,86 @@ internal class SampleExporter : IDisposable
         _exportInterval = exportInterval;
         _exportTimeout = exportTimeout;
         _bufferProcessor = bufferProcessor;
+    }
 
-        _supportingActivityAsyncLocal = new AsyncLocal<Activity?>(ActivityChanged);
-        Activity.CurrentChanged += Activity_CurrentChanged;
-
-        Logger.Debug("Initializing Continuous Profiler export thread.");
-
-        _thread = new Thread(SampleReadingThread)
+    public void Start()
+    {
+        lock (_lifecycleLock)
         {
-            Name = BackgroundThreadName,
-            IsBackground = true
-        };
-        _thread.Start();
+#if NET
+            ObjectDisposedException.ThrowIf(_disposed, this);
+#else
+            if (_disposed)
+            {
+                throw new ObjectDisposedException(nameof(SampleExporter));
+            }
+#endif
+
+            if (_started)
+            {
+                return;
+            }
+
+            Logger.Debug("Initializing Continuous Profiler export thread.");
+
+            try
+            {
+                _supportingActivityAsyncLocal = new AsyncLocal<Activity?>(ActivityChanged);
+                Activity.CurrentChanged += Activity_CurrentChanged;
+                _activityTrackingEnabled = true;
+                _supportingActivityAsyncLocal.Value = Activity.Current;
+
+                _thread = new Thread(SampleReadingThread)
+                {
+                    Name = BackgroundThreadName,
+                    IsBackground = true
+                };
+                _thread.Start();
+                _started = true;
+            }
+            catch
+            {
+                if (_activityTrackingEnabled)
+                {
+                    Activity.CurrentChanged -= Activity_CurrentChanged;
+                    _activityTrackingEnabled = false;
+                }
+
+                _supportingActivityAsyncLocal = null;
+                _thread = null;
+                throw;
+            }
+        }
     }
 
     public void Dispose()
     {
-        Activity.CurrentChanged -= Activity_CurrentChanged;
+        Thread? thread;
+        lock (_lifecycleLock)
+        {
+            if (_disposed)
+            {
+                return;
+            }
+
+            _disposed = true;
+            if (_activityTrackingEnabled)
+            {
+                Activity.CurrentChanged -= Activity_CurrentChanged;
+                _activityTrackingEnabled = false;
+            }
+
+            _supportingActivityAsyncLocal = null;
+            _shutdownTrigger.Set();
+            thread = _thread;
+        }
 
         var configuredGracePeriod = 2 * _exportTimeout.TotalMilliseconds;
         var finalGracePeriod = (int)Math.Min(configuredGracePeriod, 60000);
-        _shutdownTrigger.Set();
-        if (_thread != null && !_thread.Join(finalGracePeriod))
+        if (thread != null && !thread.Join(finalGracePeriod))
         {
             Logger.Warning("Continuous profiler's exporter thread failed to terminate in required time.");
+            return;
         }
 
         _shutdownTrigger.Dispose();
@@ -91,9 +152,10 @@ internal class SampleExporter : IDisposable
 
     private void Activity_CurrentChanged(object? sender, ActivityChangedEventArgs e)
     {
-        if (_supportingActivityAsyncLocal != null)
+        var supportingActivityAsyncLocal = _supportingActivityAsyncLocal;
+        if (supportingActivityAsyncLocal != null)
         {
-            _supportingActivityAsyncLocal.Value = e.Current;
+            supportingActivityAsyncLocal.Value = e.Current;
         }
     }
 

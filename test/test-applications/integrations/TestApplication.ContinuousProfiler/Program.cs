@@ -10,6 +10,12 @@ if (args.Contains("--runtime-reconfiguration"))
     return;
 }
 
+if (args.Contains("--runtime-unprepared-thread"))
+{
+    TestApplication.ContinuousProfiler.RuntimeReconfigurationScenario.VerifyUnpreparedThreadSamplingIsRejected();
+    return;
+}
+
 #if NET
 if (args.Contains("--runtime-unprepared-allocation"))
 {

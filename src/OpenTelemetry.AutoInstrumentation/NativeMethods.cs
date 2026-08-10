@@ -92,6 +92,13 @@ internal static class NativeMethods
         }
     }
 
+    public static bool ShutdownNativeContinuousProfiler()
+    {
+        return IsWindows
+            ? Windows.ShutdownContinuousProfiler()
+            : NonWindows.ShutdownContinuousProfiler();
+    }
+
     public static bool SetNativeContinuousProfilerSamplingInterval(uint threadSamplingInterval)
     {
         if (IsWindows)
@@ -287,6 +294,11 @@ internal static class NativeMethods
         [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
         [DllImport("OpenTelemetry.AutoInstrumentation.Native.dll")]
         [return: MarshalAs(UnmanagedType.Bool)]
+        public static extern bool ShutdownContinuousProfiler();
+
+        [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
+        [DllImport("OpenTelemetry.AutoInstrumentation.Native.dll")]
+        [return: MarshalAs(UnmanagedType.Bool)]
         public static extern bool SetContinuousProfilerSamplingInterval(uint threadSamplingInterval);
 
         [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
@@ -357,6 +369,11 @@ internal static class NativeMethods
             uint maxMemorySamplesPerMinute,
             bool allocationSamplingExportPipelinePrepared,
             uint selectedThreadSamplingInterval);
+
+        [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
+        [DllImport("OpenTelemetry.AutoInstrumentation.Native")]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        public static extern bool ShutdownContinuousProfiler();
 
         [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
         [DllImport("OpenTelemetry.AutoInstrumentation.Native")]

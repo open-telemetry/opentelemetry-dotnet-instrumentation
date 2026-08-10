@@ -261,6 +261,31 @@ TEST(ContinuousProfilerConfigurationTest, ShutdownWakesLongSamplingWaitImmediate
     ASSERT_FALSE(profiler.SetThreadSamplingInterval(1000u));
 }
 
+TEST(ContinuousProfilerConfigurationTest, ShutdownStopsMixedCpuAndSelectiveSamplingAndRejectsRestart)
+{
+    continuous_profiler::ContinuousProfiler profiler;
+
+    profiler.ConfigureSelectedThreadSampling(60000u);
+    ASSERT_TRUE(profiler.SetThreadSamplingInterval(120000u));
+    ASSERT_TRUE(profiler.SetThreadSamplingEnabled(true));
+    ASSERT_TRUE(profiler.IsThreadSamplingThreadRunning());
+    ASSERT_EQ(0u, profiler.GetAllocationSamplingRate());
+
+    profiler.Shutdown();
+
+    ASSERT_TRUE(profiler.IsShutdownRequested());
+    ASSERT_FALSE(profiler.IsThreadSamplingThreadRunning());
+    ASSERT_EQ(0u, profiler.GetAllocationSamplingRate());
+    ASSERT_FALSE(profiler.SetThreadSamplingEnabled(true));
+    ASSERT_FALSE(profiler.SetThreadSamplingInterval(120000u));
+    ASSERT_FALSE(profiler.SetAllocationSamplingConfiguration(true, 100u));
+
+    // The rollback is intentionally idempotent and permanently fail-closed.
+    profiler.Shutdown();
+    ASSERT_FALSE(profiler.IsThreadSamplingThreadRunning());
+    ASSERT_EQ(0u, profiler.GetAllocationSamplingRate());
+}
+
 TEST(ContinuousProfilerConfigurationTest, AllocationSamplingRejectsZeroRate)
 {
     continuous_profiler::ContinuousProfiler profiler;

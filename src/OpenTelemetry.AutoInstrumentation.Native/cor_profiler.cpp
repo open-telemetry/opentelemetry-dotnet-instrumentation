@@ -1303,6 +1303,12 @@ bool CorProfiler::ConfigureContinuousProfiler(const bool         threadSamplingE
         return false;
     }
 
+    if (continuousProfiler == nullptr || continuousProfiler->IsShutdownRequested())
+    {
+        Logger::Warn("ContinuousProfiler: sampling was permanently shut down after managed initialization failed.");
+        return false;
+    }
+
     // Managed initialization sets these signals only after registering the
     // corresponding export handlers. Retain them for runtime calls, which
     // cannot build a managed export pipeline themselves.
@@ -1325,6 +1331,39 @@ bool CorProfiler::ConfigureContinuousProfiler(const bool         threadSamplingE
     }
 
     return threadSamplingConfigured && allocationSamplingConfigured;
+}
+
+bool CorProfiler::ShutdownContinuousProfiler()
+{
+    std::lock_guard<std::mutex> configuration_guard(sampling_configuration_lock_);
+    if (!is_attached_)
+    {
+        return false;
+    }
+
+    // This is a fail-closed rollback for managed initialization. The managed export
+    // pipeline is no longer available, so neither runtime setters nor a later
+    // ConfigureContinuousProfiler call may restart process-wide sampling.
+    continuous_profiler_thread_sampling_prepared_     = false;
+    continuous_profiler_allocation_sampling_prepared_ = false;
+    continuous_profiler_sampling_interval_            = 0;
+    continuous_profiler_initialized_.store(false, std::memory_order_release);
+
+    if (continuousProfiler == nullptr)
+    {
+        return true;
+    }
+
+    continuousProfiler->Shutdown();
+    const bool threadSamplingStopped     = !continuousProfiler->IsThreadSamplingThreadRunning();
+    const bool allocationSamplingStopped = continuousProfiler->GetAllocationSamplingRate() == 0;
+    if (!threadSamplingStopped || !allocationSamplingStopped)
+    {
+        Logger::Warn("ContinuousProfiler: unable to stop all sampling services during managed initialization "
+                     "rollback.");
+    }
+
+    return threadSamplingStopped && allocationSamplingStopped;
 }
 
 bool CorProfiler::SetContinuousProfilerSamplingInterval(const unsigned int threadSamplingInterval)
