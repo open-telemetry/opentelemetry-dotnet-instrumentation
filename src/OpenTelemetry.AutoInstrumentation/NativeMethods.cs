@@ -62,8 +62,10 @@ internal static class NativeMethods
     public static bool ConfigureNativeContinuousProfiler(
         bool threadSamplingEnabled,
         uint threadSamplingInterval,
+        bool threadSamplingExportPipelinePrepared,
         bool allocationSamplingEnabled,
         uint maxMemorySamplesPerMinute,
+        bool allocationSamplingExportPipelinePrepared,
         uint selectedThreadSamplingInterval)
     {
         if (IsWindows)
@@ -71,8 +73,10 @@ internal static class NativeMethods
             return Windows.ConfigureContinuousProfiler(
                 threadSamplingEnabled,
                 threadSamplingInterval,
+                threadSamplingExportPipelinePrepared,
                 allocationSamplingEnabled,
                 maxMemorySamplesPerMinute,
+                allocationSamplingExportPipelinePrepared,
                 selectedThreadSamplingInterval);
         }
         else
@@ -80,8 +84,10 @@ internal static class NativeMethods
             return NonWindows.ConfigureContinuousProfiler(
                 threadSamplingEnabled,
                 threadSamplingInterval,
+                threadSamplingExportPipelinePrepared,
                 allocationSamplingEnabled,
                 maxMemorySamplesPerMinute,
+                allocationSamplingExportPipelinePrepared,
                 selectedThreadSamplingInterval);
         }
     }
@@ -272,8 +278,10 @@ internal static class NativeMethods
         public static extern bool ConfigureContinuousProfiler(
             bool threadSamplingEnabled,
             uint threadSamplingInterval,
+            bool threadSamplingExportPipelinePrepared,
             bool allocationSamplingEnabled,
             uint maxMemorySamplesPerMinute,
+            bool allocationSamplingExportPipelinePrepared,
             uint selectedThreadSamplingInterval);
 
         [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
@@ -344,8 +352,10 @@ internal static class NativeMethods
         public static extern bool ConfigureContinuousProfiler(
             bool threadSamplingEnabled,
             uint threadSamplingInterval,
+            bool threadSamplingExportPipelinePrepared,
             bool allocationSamplingEnabled,
             uint maxMemorySamplesPerMinute,
+            bool allocationSamplingExportPipelinePrepared,
             uint selectedThreadSamplingInterval);
 
         [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]

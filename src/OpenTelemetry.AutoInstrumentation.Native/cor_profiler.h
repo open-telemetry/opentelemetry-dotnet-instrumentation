@@ -34,8 +34,6 @@ namespace trace
 {
 struct ContinuousProfilerInitializationParams
 {
-    bool         allocationSamplingEnabled;
-    unsigned int maxMemorySamplesPerMinute;
     unsigned int selectedThreadsSamplingInterval;
 };
 
@@ -71,6 +69,7 @@ private:
     HRESULT sampling_initialization_result_ = E_FAIL;
     bool continuous_profiler_thread_sampling_prepared_ = false;
     unsigned int continuous_profiler_sampling_interval_ = 0;
+    bool continuous_profiler_allocation_sampling_prepared_ = false;
     HRESULT STDMETHODCALLTYPE ThreadAssignedToOSThread(ThreadID managedThreadId, DWORD osThreadId) override;
 
 
@@ -149,6 +148,7 @@ private:
     bool InitThreadSampler();
     HRESULT InitializeContinuousProfiler(const ContinuousProfilerInitializationParams& params);
     bool ApplyThreadSamplingConfigurationLocked(bool enabled, unsigned int samplingInterval);
+    bool ApplyAllocationSamplingConfigurationLocked(bool enabled, unsigned int maxMemorySamplesPerMinute);
     bool SetContinuousProfilerSamplingIntervalLocked(unsigned int samplingInterval);
     bool SetContinuousProfilerEnabledLocked(bool enabled);
 
@@ -255,12 +255,15 @@ public:
     //
     bool         ConfigureContinuousProfiler(bool         threadSamplingEnabled,
                                              unsigned int threadSamplingInterval,
+                                             bool         threadSamplingExportPipelinePrepared,
                                              bool         allocationSamplingEnabled,
                                              unsigned int maxMemorySamplesPerMinute,
+                                             bool         allocationSamplingExportPipelinePrepared,
                                              unsigned int selectedThreadsSamplingInterval);
     bool         SetContinuousProfilerSamplingInterval(unsigned int threadSamplingInterval);
     bool         SetContinuousProfilerEnabled(bool enabled);
     unsigned int GetContinuousProfilerSamplingInterval();
+    unsigned int GetContinuousProfilerAllocationSamplingRate();
 
     //
     // IL Rewriting methods

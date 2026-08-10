@@ -64,12 +64,15 @@ constexpr auto kVolatileFunctionIdentifierCacheSize = 2000;
   - name_cache_lock, guarding the data structures used for function/class name lookup
   - thread_state_lock_ guarding the thread name map
   - thread_span_context_lock guarding that data structure
-  - sampling_configuration_mutex_ guarding shared sampling intervals; changes set sampling_configuration_dirty_ and
-    notify sampling_thread_cv_ under sampling_wait_mutex_ so the sampling thread can reload its local snapshot
-  - thread_sampling_thread_mutex_ serializing sampling thread start, stop, and configuration changes
-  - (special) a profiling_lock so only one type of profiling (thread stacks or allocation sample) runs at a time
+  - sampling_state_mutex_ guarding the effective sampling configuration, stop request, and sampling thread lifecycle;
 
-  The special cases worth calling out about locking behavior are:
+  configuration changes set sampling_configuration_dirty_ as a lock-free hint for the sampling thread
+  -
+  sampling_stop_cv_ waited on by WaitForStop and notified only when the sampling thread must stop
+  - (special) a
+  profiling_lock so only one type of profiling (thread stacks or allocation sample) runs at a time
+ The special cases
+  worth calling out about locking behavior are:
   - Because the stack sampler pauses the CLR, to avoid deadlock it needs to know that no application thread
     is holding a lock it needs (e.g., thread_span_context_lock) while it is paused.  So, it acquires
     all the necessary locks at once before pausing the CLR.
@@ -1074,7 +1077,7 @@ static void CaptureSamples(ContinuousProfiler*                                  
     // Selective sampling lock
     std::lock_guard<std::mutex> selective_sampling_guard(selective_sampling_lock);
 
-    if (prof->IsShutdownRequested() || prof->IsThreadSamplingStopRequested())
+    if (prof->IsThreadSamplingStopRequested())
     {
         return;
     }
@@ -1226,7 +1229,7 @@ static void SamplingThreadMain(ContinuousProfiler* prof)
         configuration = prof->GetThreadSamplingConfiguration();
     }
 
-    while (!prof->IsShutdownRequested() && !prof->IsThreadSamplingStopRequested())
+    while (!prof->IsThreadSamplingStopRequested())
     {
         if (prof->TryReloadThreadSamplingConfiguration(configuration))
         {
@@ -1251,23 +1254,9 @@ static void SamplingThreadMain(ContinuousProfiler* prof)
             return;
         }
 
-        if (prof->WaitForSamplingConfigurationChange(sleepTime))
+        if (prof->WaitForStop(sleepTime))
         {
-            if (prof->IsShutdownRequested() || prof->IsThreadSamplingStopRequested())
-            {
-                return;
-            }
-
-            iteration = 0;
-            continue;
-        }
-
-        // A configuration update can race with the sampling timeout. Reload at this cycle boundary
-        // instead of starting an expensive capture with a snapshot that is already known to be stale.
-        if (prof->TryReloadThreadSamplingConfiguration(configuration))
-        {
-            iteration = 0;
-            continue;
+            return;
         }
 
         const auto samplingType = GetNextSamplingType(configuration, iteration);
@@ -1281,11 +1270,6 @@ static void SamplingThreadMain(ContinuousProfiler* prof)
             samplingType == SamplingType::Continuous ? configuration.threadSamplingInterval.value() : 0;
         CaptureSamples(prof, info7, samplingType, threadStacksBuffer,
                        configuration.selectedThreadsSamplingInterval.has_value(), continuousSamplingInterval);
-
-        if (prof->IsShutdownRequested())
-        {
-            return;
-        }
 
         const auto now = std::chrono::steady_clock::now();
         // In order to avoid the need to recreate the vectors each iteration,
@@ -1378,159 +1362,122 @@ static bool IsValidThreadSamplingInterval(const unsigned int                 sam
 
 bool ContinuousProfiler::SetThreadSamplingInterval(const unsigned int samplingInterval)
 {
-    std::lock_guard<std::mutex> thread_guard(thread_sampling_thread_mutex_);
+    std::lock_guard<std::mutex> state_guard(sampling_state_mutex_);
     if (IsShutdownRequested())
     {
         return false;
     }
 
-    bool schedulerChanged;
-    bool threadRequired;
+    if (!IsValidThreadSamplingInterval(samplingInterval, selected_threads_sampling_interval_))
     {
-        std::lock_guard<std::mutex> configuration_guard(sampling_configuration_mutex_);
-        if (!IsValidThreadSamplingInterval(samplingInterval, selected_threads_sampling_interval_))
-        {
-            return false;
-        }
-
-        configured_thread_sampling_interval_ = samplingInterval;
-        schedulerChanged =
-            thread_sampling_interval_.has_value() && thread_sampling_interval_.value() != samplingInterval;
-        if (schedulerChanged)
-        {
-            thread_sampling_interval_ = samplingInterval;
-        }
-        threadRequired = thread_sampling_interval_.has_value() || selected_threads_sampling_interval_.has_value();
-        if (threadRequired)
-        {
-            thread_sampling_stop_requested_.store(false, std::memory_order_release);
-        }
+        return false;
     }
 
-    if (schedulerChanged)
+    configured_thread_sampling_interval_ = samplingInterval;
+    const bool effectiveConfigurationChanged =
+        thread_sampling_interval_.has_value() && thread_sampling_interval_.value() != samplingInterval;
+    if (effectiveConfigurationChanged)
     {
-        NotifySamplingConfigurationChanged();
+        thread_sampling_interval_ = samplingInterval;
+        sampling_configuration_dirty_.store(true, std::memory_order_release);
     }
 
-    if (threadRequired)
-    {
-        return SUCCEEDED(StartThreadSampling());
-    }
-
-    return true;
+    return !IsThreadSamplingRequiredLocked() || SUCCEEDED(StartThreadSamplingLocked());
 }
 
 bool ContinuousProfiler::SetThreadSamplingEnabled(const bool enabled)
 {
-    std::lock_guard<std::mutex> thread_guard(thread_sampling_thread_mutex_);
+    std::unique_lock<std::mutex> state_lock(sampling_state_mutex_);
     if (IsShutdownRequested())
     {
         return false;
     }
 
-    bool schedulerChanged;
-    bool threadRequired;
+    bool effectiveConfigurationChanged;
+    if (enabled)
     {
-        std::lock_guard<std::mutex> configuration_guard(sampling_configuration_mutex_);
-        if (enabled)
+        if (configured_thread_sampling_interval_ == 0)
         {
-            if (configured_thread_sampling_interval_ == 0)
-            {
-                trace::Logger::Warn(
-                    "ContinuousProfiler: cannot enable thread sampling before configuring a sampling interval.");
-                return false;
-            }
-
-            if (!IsValidThreadSamplingInterval(configured_thread_sampling_interval_,
-                                               selected_threads_sampling_interval_))
-            {
-                return false;
-            }
-
-            schedulerChanged = !thread_sampling_interval_.has_value() ||
-                               thread_sampling_interval_.value() != configured_thread_sampling_interval_;
-            if (schedulerChanged)
-            {
-                thread_sampling_interval_ = configured_thread_sampling_interval_;
-            }
-        }
-        else
-        {
-            schedulerChanged = thread_sampling_interval_.has_value();
-            if (schedulerChanged)
-            {
-                thread_sampling_interval_.reset();
-            }
+            trace::Logger::Warn(
+                "ContinuousProfiler: cannot enable thread sampling before configuring a sampling interval.");
+            return false;
         }
 
-        threadRequired = thread_sampling_interval_.has_value() || selected_threads_sampling_interval_.has_value();
-        thread_sampling_stop_requested_.store(!threadRequired, std::memory_order_release);
-    }
+        if (!IsValidThreadSamplingInterval(configured_thread_sampling_interval_, selected_threads_sampling_interval_))
+        {
+            return false;
+        }
 
-    if (schedulerChanged)
+        effectiveConfigurationChanged = !thread_sampling_interval_.has_value() ||
+                                        thread_sampling_interval_.value() != configured_thread_sampling_interval_;
+        if (effectiveConfigurationChanged)
+        {
+            thread_sampling_interval_ = configured_thread_sampling_interval_;
+        }
+    }
+    else
     {
-        NotifySamplingConfigurationChanged();
+        effectiveConfigurationChanged = thread_sampling_interval_.has_value();
+        if (effectiveConfigurationChanged)
+        {
+            thread_sampling_interval_.reset();
+        }
     }
 
-    if (threadRequired)
+    if (effectiveConfigurationChanged)
     {
-        return SUCCEEDED(StartThreadSampling());
+        sampling_configuration_dirty_.store(true, std::memory_order_release);
     }
 
-    StopThreadSampling();
+    if (IsThreadSamplingRequiredLocked())
+    {
+        return SUCCEEDED(StartThreadSamplingLocked());
+    }
+
+    StopThreadSamplingLocked(state_lock);
     return true;
 }
 
 void ContinuousProfiler::ConfigureSelectedThreadSampling(const unsigned int samplingInterval)
 {
-    std::lock_guard<std::mutex> thread_guard(thread_sampling_thread_mutex_);
+    std::lock_guard<std::mutex> state_guard(sampling_state_mutex_);
     if (IsShutdownRequested())
     {
         return;
     }
 
-    bool schedulerChanged;
+    if (samplingInterval == 0)
     {
-        std::lock_guard<std::mutex> configuration_guard(sampling_configuration_mutex_);
-        if (samplingInterval == 0)
-        {
-            trace::Logger::Warn("ContinuousProfiler: selective sampling interval must be greater than zero.");
-            return;
-        }
-
-        if (configured_thread_sampling_interval_ != 0 &&
-            !IsValidThreadSamplingInterval(configured_thread_sampling_interval_, samplingInterval))
-        {
-            return;
-        }
-
-        schedulerChanged = !selected_threads_sampling_interval_.has_value() ||
-                           selected_threads_sampling_interval_.value() != samplingInterval;
-        if (schedulerChanged)
-        {
-            selected_threads_sampling_interval_ = samplingInterval;
-        }
-
-        thread_sampling_stop_requested_.store(false, std::memory_order_release);
+        trace::Logger::Warn("ContinuousProfiler: selective sampling interval must be greater than zero.");
+        return;
     }
 
-    if (schedulerChanged)
+    if (configured_thread_sampling_interval_ != 0 &&
+        !IsValidThreadSamplingInterval(configured_thread_sampling_interval_, samplingInterval))
     {
-        NotifySamplingConfigurationChanged();
+        return;
     }
 
-    StartThreadSampling();
+    const bool effectiveConfigurationChanged = !selected_threads_sampling_interval_.has_value() ||
+                                               selected_threads_sampling_interval_.value() != samplingInterval;
+    if (effectiveConfigurationChanged)
+    {
+        selected_threads_sampling_interval_ = samplingInterval;
+        sampling_configuration_dirty_.store(true, std::memory_order_release);
+    }
+
+    StartThreadSamplingLocked();
 }
 
 unsigned int ContinuousProfiler::GetConfiguredThreadSamplingInterval() const
 {
-    std::lock_guard<std::mutex> configuration_guard(sampling_configuration_mutex_);
+    std::lock_guard<std::mutex> state_guard(sampling_state_mutex_);
     return configured_thread_sampling_interval_;
 }
 
 ThreadSamplingConfiguration ContinuousProfiler::GetThreadSamplingConfiguration() const
 {
-    std::lock_guard<std::mutex> configuration_guard(sampling_configuration_mutex_);
+    std::lock_guard<std::mutex> state_guard(sampling_state_mutex_);
     return {thread_sampling_interval_, selected_threads_sampling_interval_};
 }
 
@@ -1545,63 +1492,51 @@ bool ContinuousProfiler::TryReloadThreadSamplingConfiguration(ThreadSamplingConf
     return true;
 }
 
-bool ContinuousProfiler::WaitForSamplingConfigurationChange(const unsigned int samplingInterval)
+bool ContinuousProfiler::WaitForStop(const unsigned int samplingInterval)
 {
-    std::unique_lock<std::mutex> lock(sampling_wait_mutex_);
-    return sampling_thread_cv_.wait_for(lock, std::chrono::milliseconds(samplingInterval),
-                                        [this]
-                                        {
-                                            return IsShutdownRequested() || IsThreadSamplingStopRequested() ||
-                                                   sampling_configuration_dirty_.load(std::memory_order_acquire);
-                                        });
-}
-
-void ContinuousProfiler::NotifySamplingConfigurationChanged()
-{
-    std::lock_guard<std::mutex> wait_guard(sampling_wait_mutex_);
-    sampling_configuration_dirty_.store(true, std::memory_order_release);
-    sampling_thread_cv_.notify_all();
-}
-
-void ContinuousProfiler::NotifySamplingThread()
-{
-    std::lock_guard<std::mutex> wait_guard(sampling_wait_mutex_);
-    sampling_thread_cv_.notify_all();
+    std::unique_lock<std::mutex> state_lock(sampling_state_mutex_);
+    return sampling_stop_cv_.wait_for(state_lock, std::chrono::milliseconds(samplingInterval),
+                                      [this] { return thread_sampling_stop_requested_; });
 }
 
 bool ContinuousProfiler::IsThreadSamplingStopRequested() const
 {
-    return thread_sampling_stop_requested_.load(std::memory_order_acquire);
+    std::lock_guard<std::mutex> state_guard(sampling_state_mutex_);
+    return thread_sampling_stop_requested_;
 }
 
 bool ContinuousProfiler::IsThreadSamplingThreadRunning() const
 {
-    std::lock_guard<std::mutex> thread_guard(thread_sampling_thread_mutex_);
-    return thread_sampling_thread_ != nullptr && thread_sampling_thread_->joinable() &&
-           !IsThreadSamplingStopRequested();
+    std::lock_guard<std::mutex> state_guard(sampling_state_mutex_);
+    return thread_sampling_thread_state_ == SamplingThreadState::Running && thread_sampling_thread_ != nullptr &&
+           thread_sampling_thread_->joinable() && !thread_sampling_stop_requested_;
 }
 
 uint64_t ContinuousProfiler::GetThreadSamplingThreadGeneration() const
 {
-    std::lock_guard<std::mutex> thread_guard(thread_sampling_thread_mutex_);
+    std::lock_guard<std::mutex> state_guard(sampling_state_mutex_);
     return thread_sampling_thread_generation_;
 }
 
-HRESULT ContinuousProfiler::StartThreadSampling()
+bool ContinuousProfiler::IsThreadSamplingRequiredLocked() const
 {
-    if (thread_sampling_thread_ != nullptr)
-    {
-        if (thread_sampling_thread_->joinable())
-        {
-            return S_OK;
-        }
+    return thread_sampling_interval_.has_value() || selected_threads_sampling_interval_.has_value();
+}
 
-        thread_sampling_thread_.reset();
+HRESULT ContinuousProfiler::StartThreadSamplingLocked()
+{
+    if (thread_sampling_thread_state_ != SamplingThreadState::Stopped)
+    {
+        // A running thread needs no action. A stopping thread will be restarted
+        // by the join owner if the latest effective configuration still needs it.
+        return S_OK;
     }
 
     try
     {
-        thread_sampling_thread_ = std::make_unique<std::thread>(SamplingThreadMain, this);
+        thread_sampling_stop_requested_ = false;
+        thread_sampling_thread_         = std::make_unique<std::thread>(SamplingThreadMain, this);
+        thread_sampling_thread_state_   = SamplingThreadState::Running;
         ++thread_sampling_thread_generation_;
         trace::Logger::Info("ContinuousProfiler sampling thread started.");
         return S_OK;
@@ -1615,37 +1550,53 @@ HRESULT ContinuousProfiler::StartThreadSampling()
         trace::Logger::Error("ContinuousProfiler: unable to start sampling thread.");
     }
 
+    thread_sampling_stop_requested_ = true;
+    thread_sampling_thread_state_   = SamplingThreadState::Stopped;
+    thread_sampling_thread_.reset();
     return E_FAIL;
 }
 
 void ContinuousProfiler::StopThreadSampling()
 {
-    thread_sampling_stop_requested_.store(true, std::memory_order_release);
-    NotifySamplingThread();
+    std::unique_lock<std::mutex> state_lock(sampling_state_mutex_);
+    StopThreadSamplingLocked(state_lock);
+}
 
-    if (thread_sampling_thread_ != nullptr && thread_sampling_thread_->joinable())
+void ContinuousProfiler::StopThreadSamplingLocked(std::unique_lock<std::mutex>& stateLock)
+{
+    thread_sampling_stop_requested_ = true;
+
+    if (thread_sampling_thread_state_ != SamplingThreadState::Running)
     {
-        thread_sampling_thread_->join();
+        return;
+    }
+
+    thread_sampling_thread_state_ = SamplingThreadState::Stopping;
+    auto samplingThread           = std::move(thread_sampling_thread_);
+
+    stateLock.unlock();
+
+    sampling_stop_cv_.notify_all();
+
+    if (samplingThread != nullptr && samplingThread->joinable())
+    {
+        samplingThread->join();
         trace::Logger::Info("ContinuousProfiler sampling thread stopped.");
     }
 
-    thread_sampling_thread_.reset();
-    thread_sampling_stop_requested_.store(false, std::memory_order_release);
+    stateLock.lock();
+    thread_sampling_thread_state_ = SamplingThreadState::Stopped;
+    if (!IsShutdownRequested() && IsThreadSamplingRequiredLocked())
+    {
+        StartThreadSamplingLocked();
+    }
 }
 
 void ContinuousProfiler::Shutdown()
 {
     shutdown_requested_.store(true, std::memory_order_release);
-    thread_sampling_stop_requested_.store(true, std::memory_order_release);
-    NotifySamplingThread();
-
-    std::lock_guard<std::mutex> thread_guard(thread_sampling_thread_mutex_);
-    {
-        std::unique_lock<std::shared_mutex> unique_lock(profiling_lock);
-        StopAllocationSampling();
-    }
-
     StopThreadSampling();
+    SetAllocationSamplingConfiguration(false, 0);
 }
 
 bool ContinuousProfiler::IsShutdownRequested() const
@@ -1716,6 +1667,12 @@ AllocationSubSampler::AllocationSubSampler(uint32_t targetPerCycle_, uint32_t se
     , rand(std::default_random_engine((unsigned int)(nextCycleStartMillis.count())))
 {
 }
+
+uint32_t AllocationSubSampler::GetTargetPerCycle() const
+{
+    return targetPerCycle;
+}
+
 void AllocationSubSampler::AdvanceCycle(std::chrono::milliseconds now)
 {
     nextCycleStartMillis = now + std::chrono::seconds(secondsPerCycle);
@@ -1865,37 +1822,82 @@ void ContinuousProfiler::AllocationTick(ULONG dataLen, LPCBYTE data)
     AllocationSamplingAppendToBuffer(static_cast<int32_t>(localBytes.size()), localBytes.data());
 }
 
-void ContinuousProfiler::StartAllocationSampling(const unsigned int maxMemorySamplesPerMinute)
+bool ContinuousProfiler::SetAllocationSamplingConfiguration(const bool         enabled,
+                                                            const unsigned int maxMemorySamplesPerMinute)
 {
-    if (!info12) // no info12 - we are on .Net Fx - ignore allocation sampling request
+    if (enabled && maxMemorySamplesPerMinute == 0)
     {
-        trace::Logger::Warn("Ignore Allocation Sampling request, it is not supported for .Net Framework applications");
-        return;
+        trace::Logger::Warn("ContinuousProfiler: max memory samples per minute must be greater than zero.");
+        return false;
     }
-    this->allocationSubSampler = std::make_unique<AllocationSubSampler>(maxMemorySamplesPerMinute, 60);
+
+    std::unique_lock<std::shared_mutex> unique_lock(profiling_lock);
+    if (enabled && IsShutdownRequested())
+    {
+        return false;
+    }
+
+    return enabled ? StartAllocationSamplingLocked(maxMemorySamplesPerMinute) : StopAllocationSamplingLocked();
+}
+
+unsigned int ContinuousProfiler::GetAllocationSamplingRate() const
+{
+    std::shared_lock<std::shared_mutex> shared_lock(profiling_lock);
+    return session_ != 0 && allocationSubSampler != nullptr ? allocationSubSampler->GetTargetPerCycle() : 0;
+}
+
+bool ContinuousProfiler::StartAllocationSamplingLocked(const unsigned int maxMemorySamplesPerMinute)
+{
+    if (!info12)
+    {
+        trace::Logger::Warn("Allocation sampling is not supported for .NET Framework applications.");
+        return false;
+    }
+
+    if (session_ != 0)
+    {
+        if (this->allocationSubSampler != nullptr &&
+            this->allocationSubSampler->GetTargetPerCycle() == maxMemorySamplesPerMinute)
+        {
+            return true;
+        }
+
+        auto allocationSubSampler  = std::make_unique<AllocationSubSampler>(maxMemorySamplesPerMinute, 60);
+        this->allocationSubSampler = std::move(allocationSubSampler);
+        trace::Logger::Info("ContinuousProfiler allocation sampling rate updated.");
+        return true;
+    }
+
+    auto allocationSubSampler = std::make_unique<AllocationSubSampler>(maxMemorySamplesPerMinute, 60);
 
     COR_PRF_EVENTPIPE_PROVIDER_CONFIG sessionConfig[] = {{WStr("Microsoft-Windows-DotNETRuntime"),
                                                           0x1, // CLR_GC_KEYWORD
                                                           // documentation says AllocationTick is at info but it lies
                                                           COR_PRF_EVENTPIPE_VERBOSE, nullptr}};
-    HRESULT                           hr = this->info12->EventPipeStartSession(1, sessionConfig, false, &session_);
+    EVENTPIPE_SESSION                 session         = 0;
+    HRESULT                           hr = this->info12->EventPipeStartSession(1, sessionConfig, false, &session);
     if (FAILED(hr))
     {
         trace::Logger::Error("Could not enable allocation sampling: session pipe error", hr);
+        return false;
     }
 
+    this->allocationSubSampler = std::move(allocationSubSampler);
+    session_                   = session;
     trace::Logger::Info("ContinuousProfiler::MemoryProfiling started.");
+    return true;
 }
 
-void ContinuousProfiler::StopAllocationSampling()
+bool ContinuousProfiler::StopAllocationSamplingLocked()
 {
     if (!info12) // no info12 - we are on .Net Fx - ignore allocation sampling stop request
     {
-        return;
+        return true;
     }
     if (session_ == 0)
     {
-        return;
+        allocationSubSampler.reset();
+        return true;
     }
 
     HRESULT hr = this->info12->EventPipeStopSession(session_);
@@ -1903,10 +1905,13 @@ void ContinuousProfiler::StopAllocationSampling()
     {
         trace::Logger::Error("Could not disable allocation sampling: session pipe error. HRESULT=0x", std::setfill('0'),
                              std::setw(8), std::hex, hr);
+        return false;
     }
     session_ = 0;
+    allocationSubSampler.reset();
 
     trace::Logger::Info("ContinuousProfiler allocation sampling session stopped.");
+    return true;
 }
 
 void ContinuousProfiler::ThreadCreated(ThreadID thread_id)

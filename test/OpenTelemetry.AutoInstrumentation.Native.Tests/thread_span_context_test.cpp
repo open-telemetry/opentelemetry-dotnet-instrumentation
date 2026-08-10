@@ -194,33 +194,22 @@ TEST(ContinuousProfilerConfigurationTest, RuntimeReconfigurationStartsStopsAndDo
     ASSERT_TRUE(profiler.SetThreadSamplingEnabled(false));
 }
 
-TEST(ContinuousProfilerConfigurationTest, RapidUpdatesReloadLatestConfiguration)
+TEST(ContinuousProfilerConfigurationTest, ConfigurationChangesDoNotWakeStopWait)
 {
-    continuous_profiler::ContinuousProfiler          profiler;
-    continuous_profiler::ThreadSamplingConfiguration configuration;
+    continuous_profiler::ContinuousProfiler profiler;
 
-    ASSERT_TRUE(profiler.TryReloadThreadSamplingConfiguration(configuration));
-    ASSERT_FALSE(configuration.threadSamplingInterval.has_value());
-    ASSERT_FALSE(configuration.selectedThreadsSamplingInterval.has_value());
-    ASSERT_FALSE(profiler.TryReloadThreadSamplingConfiguration(configuration));
-
-    ASSERT_TRUE(profiler.SetThreadSamplingInterval(10000u));
-
-    // Keep the sampling thread in ReserveCapacity so this test is the only consumer of the dirty flag.
-    std::unique_lock<std::mutex> samplingThreadGate(profiler.thread_state_lock_);
+    ASSERT_TRUE(profiler.SetThreadSamplingInterval(1000u));
     ASSERT_TRUE(profiler.SetThreadSamplingEnabled(true));
-    ASSERT_TRUE(profiler.SetThreadSamplingInterval(5000u));
-    ASSERT_TRUE(profiler.SetThreadSamplingInterval(1234u));
 
-    ASSERT_TRUE(profiler.TryReloadThreadSamplingConfiguration(configuration));
-    ASSERT_EQ(1234u, configuration.threadSamplingInterval.value());
-    ASSERT_FALSE(configuration.selectedThreadsSamplingInterval.has_value());
-    ASSERT_FALSE(profiler.TryReloadThreadSamplingConfiguration(configuration));
+    auto stopWait = std::async(std::launch::async, [&profiler]() { return profiler.WaitForStop(300u); });
+    std::this_thread::sleep_for(std::chrono::milliseconds(50));
 
-    // Leave a pending reload for the real sampling thread before releasing it.
-    ASSERT_TRUE(profiler.SetThreadSamplingInterval(4321u));
-    ASSERT_TRUE(profiler.SetThreadSamplingInterval(1234u));
-    samplingThreadGate.unlock();
+    ASSERT_TRUE(profiler.SetThreadSamplingInterval(500u));
+    ASSERT_TRUE(profiler.SetThreadSamplingInterval(250u));
+    ASSERT_EQ(std::future_status::timeout, stopWait.wait_for(std::chrono::milliseconds(100)));
+    ASSERT_EQ(std::future_status::ready, stopWait.wait_for(std::chrono::seconds(1)));
+    ASSERT_FALSE(stopWait.get());
+    ASSERT_EQ(250u, profiler.GetThreadSamplingConfiguration().threadSamplingInterval.value());
 
     ASSERT_TRUE(profiler.SetThreadSamplingEnabled(false));
 }
@@ -261,13 +250,6 @@ TEST(ContinuousProfilerConfigurationTest, ShutdownWakesLongSamplingWaitImmediate
 
     auto       shutdownCompleted = std::async(std::launch::async, [&profiler]() { profiler.Shutdown(); });
     const auto waitStatus        = shutdownCompleted.wait_for(std::chrono::seconds(2));
-    if (waitStatus != std::future_status::ready)
-    {
-        // A second notification avoids blocking on future destruction if the first wake was lost.
-        profiler.Shutdown();
-        shutdownCompleted.wait();
-    }
-
     ASSERT_EQ(std::future_status::ready, waitStatus);
     if (waitStatus == std::future_status::ready)
     {
@@ -275,6 +257,25 @@ TEST(ContinuousProfilerConfigurationTest, ShutdownWakesLongSamplingWaitImmediate
     }
     ASSERT_TRUE(profiler.IsShutdownRequested());
     ASSERT_FALSE(profiler.IsThreadSamplingThreadRunning());
+    ASSERT_FALSE(profiler.SetThreadSamplingEnabled(true));
+    ASSERT_FALSE(profiler.SetThreadSamplingInterval(1000u));
+}
+
+TEST(ContinuousProfilerConfigurationTest, AllocationSamplingRejectsZeroRate)
+{
+    continuous_profiler::ContinuousProfiler profiler;
+
+    ASSERT_FALSE(profiler.SetAllocationSamplingConfiguration(true, 0u));
+    ASSERT_TRUE(profiler.SetAllocationSamplingConfiguration(false, 0u));
+}
+
+TEST(ContinuousProfilerConfigurationTest, AllocationSamplingEnableFailsWhenUnsupported)
+{
+    continuous_profiler::ContinuousProfiler profiler;
+
+    ASSERT_FALSE(profiler.SetAllocationSamplingConfiguration(true, 100u));
+    ASSERT_EQ(0u, profiler.GetAllocationSamplingRate());
+    ASSERT_TRUE(profiler.SetAllocationSamplingConfiguration(false, 0u));
 }
 
 TEST(ContinuousProfilerBufferTest, PreservesBatchOrderAndSamplingIntervalMetadata)
@@ -391,6 +392,55 @@ TEST(ContinuousProfilerConfigurationTest, ConcurrentSettersDoNotCreateDuplicateS
     ASSERT_TRUE(runConcurrently([&profiler]() { return profiler.SetThreadSamplingEnabled(false); }));
     ASSERT_FALSE(profiler.IsThreadSamplingThreadRunning());
     ASSERT_EQ(1u, profiler.GetThreadSamplingThreadGeneration());
+}
+
+TEST(ContinuousProfilerConfigurationTest, ReenableWhileThreadIsStoppingIsDeferredAndRestartedOnce)
+{
+    continuous_profiler::ContinuousProfiler profiler;
+
+    ASSERT_TRUE(profiler.SetThreadSamplingInterval(60000u));
+
+    // SamplingThreadMain takes this lock during startup. Holding it keeps the old
+    // thread alive until the test has submitted a concurrent re-enable request.
+    std::unique_lock<std::mutex> threadStateGate(profiler.thread_state_lock_);
+    const auto                   initiallyEnabled = profiler.SetThreadSamplingEnabled(true);
+    if (!initiallyEnabled)
+    {
+        threadStateGate.unlock();
+        ASSERT_TRUE(initiallyEnabled);
+        return;
+    }
+
+    const auto initialGeneration = profiler.GetThreadSamplingThreadGeneration();
+    auto       disableResult =
+        std::async(std::launch::async, [&profiler]() { return profiler.SetThreadSamplingEnabled(false); });
+
+    const auto stoppingDeadline = std::chrono::steady_clock::now() + std::chrono::seconds(2);
+    while (profiler.IsThreadSamplingThreadRunning() && std::chrono::steady_clock::now() < stoppingDeadline)
+    {
+        std::this_thread::yield();
+    }
+    const auto stoppingObserved = !profiler.IsThreadSamplingThreadRunning();
+
+    auto enableResult =
+        std::async(std::launch::async, [&profiler]() { return profiler.SetThreadSamplingEnabled(true); });
+    const auto enableCompletedWhileStopping = enableResult.wait_for(std::chrono::seconds(1));
+
+    threadStateGate.unlock();
+
+    const auto disableCompleted = disableResult.wait_for(std::chrono::seconds(2));
+    const auto enableCompleted  = enableResult.wait_for(std::chrono::seconds(2));
+
+    ASSERT_TRUE(stoppingObserved);
+    ASSERT_EQ(std::future_status::ready, enableCompletedWhileStopping);
+    ASSERT_EQ(std::future_status::ready, disableCompleted);
+    ASSERT_EQ(std::future_status::ready, enableCompleted);
+    ASSERT_TRUE(disableResult.get());
+    ASSERT_TRUE(enableResult.get());
+    ASSERT_TRUE(profiler.IsThreadSamplingThreadRunning());
+    ASSERT_EQ(initialGeneration + 1, profiler.GetThreadSamplingThreadGeneration());
+
+    ASSERT_TRUE(profiler.SetThreadSamplingEnabled(false));
 }
 
 TEST_F(SelectiveSamplingBufferTest, SuccessfulAppendKeepsSamplingAdmissible)

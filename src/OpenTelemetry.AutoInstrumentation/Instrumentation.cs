@@ -260,6 +260,12 @@ internal static class Instrumentation
             threadSamplingEnabled = false;
         }
 
+        if (allocationSamplingEnabled && config.MaxMemorySamplesPerMinute == 0)
+        {
+            Logger.Warning("Continuous profiler max memory samples per minute must be greater than zero. Allocation sampling will not be enabled.");
+            allocationSamplingEnabled = false;
+        }
+
         var runtimeThreadSamplingConfigured =
             !threadSamplingEnabled &&
             config.ThreadSamplingInterval != 0 &&
@@ -270,6 +276,13 @@ internal static class Instrumentation
         // Capture preparation independently of the effective initial state. Mixed-mode validation below may
         // disable CPU sampling, but a later valid interval must still be able to enable the prepared pipeline.
         var threadSamplingPrepared = threadSamplingEnabled || runtimeThreadSamplingConfigured;
+        var runtimeAllocationSamplingConfigured =
+            !allocationSamplingEnabled &&
+            config.MaxMemorySamplesPerMinute != 0 &&
+            config.Exporter != null &&
+            config.ExportInterval > TimeSpan.Zero &&
+            config.ExportTimeout > TimeSpan.Zero;
+        var allocationSamplingPrepared = allocationSamplingEnabled || runtimeAllocationSamplingConfigured;
 
         uint selectiveSamplingInterval = 0;
         var selectiveSamplingConfig = _pluginManager.GetFirstSelectiveSamplingConfiguration();
@@ -306,9 +319,9 @@ internal static class Instrumentation
             }
         }
 
-        // Prepare the CPU sampling pipeline without starting the native sampling thread.
-        // Runtime reconfiguration can then enable CPU sampling without rebuilding managed or native resources.
-        var continuousSamplingPipelineRequired = threadSamplingPrepared || allocationSamplingEnabled;
+        // Prepare sampling export handlers without starting the corresponding native sampling service.
+        // Runtime reconfiguration can then enable sampling without rebuilding managed or native resources.
+        var continuousSamplingPipelineRequired = threadSamplingPrepared || allocationSamplingPrepared;
         if (continuousSamplingPipelineRequired)
         {
             if (config.Exporter == null)
@@ -320,7 +333,7 @@ internal static class Instrumentation
             if (!TryInitializeContinuousSamplingExport(
                     config.Exporter,
                     threadSamplingPrepared,
-                    allocationSamplingEnabled,
+                    allocationSamplingPrepared,
                     config.ExportInterval,
                     config.ExportTimeout))
             {
@@ -340,11 +353,17 @@ internal static class Instrumentation
             return;
         }
 
+        // Build the managed reader/exporter before native sampling can start.
+        // If construction fails, no native sampling service is left running without a consumer.
+        _sampleExporter = _sampleExporterBuilder?.Build();
+
         if (!NativeMethods.ConfigureNativeContinuousProfiler(
                 threadSamplingEnabled,
                 threadSamplingPrepared ? config.ThreadSamplingInterval : 0,
+                threadSamplingPrepared,
                 allocationSamplingEnabled,
-                config.MaxMemorySamplesPerMinute,
+                allocationSamplingPrepared ? config.MaxMemorySamplesPerMinute : 0,
+                allocationSamplingPrepared,
                 selectiveSamplingInterval))
         {
             Logger.Warning("The native continuous profiler could not apply the complete sampling configuration.");
@@ -362,7 +381,6 @@ internal static class Instrumentation
 
         Logger.Information("Canary thread started successfully for .NET Framework profiling.");
 #endif
-        _sampleExporter = _sampleExporterBuilder?.Build();
     }
 
     private static bool TryInitializeSelectedThreadSamplingExport(SelectiveSamplerConfiguration configuration)
@@ -376,7 +394,7 @@ internal static class Instrumentation
     private static bool TryInitializeContinuousSamplingExport(
         IContinuousProfilerExporter exporter,
         bool threadSamplingPrepared,
-        bool allocationSamplingEnabled,
+        bool allocationSamplingPrepared,
         TimeSpan exportInterval,
         TimeSpan exportTimeout)
     {
@@ -387,7 +405,7 @@ internal static class Instrumentation
             _sampleExporterBuilder?.AddHandler(SampleType.Continuous, exporter.ExportThreadSamples, exportTimeout);
         }
 
-        if (allocationSamplingEnabled)
+        if (allocationSamplingPrepared)
         {
             _sampleExporterBuilder?.AddHandler(SampleType.Allocation, exporter.ExportAllocationSamples, exportTimeout);
         }

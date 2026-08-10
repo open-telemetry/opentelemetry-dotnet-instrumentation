@@ -29,9 +29,17 @@ internal static class RuntimeContinuousProfilerNativeMethods
     public static extern bool ConfigureContinuousProfiler(
         bool threadSamplingEnabled,
         uint threadSamplingInterval,
+        bool threadSamplingExportPipelinePrepared,
         bool allocationSamplingEnabled,
         uint maxMemorySamplesPerMinute,
+        bool allocationSamplingExportPipelinePrepared,
         uint selectedThreadSamplingInterval);
+
+#if NET
+    [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
+    [DllImport(NativeLibraryName)]
+    public static extern uint GetContinuousProfilerAllocationSamplingRate();
+#endif
 
     [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
 #if NET

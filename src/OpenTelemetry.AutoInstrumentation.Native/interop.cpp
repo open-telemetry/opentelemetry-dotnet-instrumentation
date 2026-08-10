@@ -49,13 +49,17 @@ EXTERN_C VOID STDAPICALLTYPE SetSqlClientNetFxILRewriteEnabled(bool enabled)
 
 EXTERN_C BOOL STDAPICALLTYPE ConfigureContinuousProfiler(bool         threadSamplingEnabled,
                                                          unsigned int threadSamplingInterval,
+                                                         bool         threadSamplingExportPipelinePrepared,
                                                          bool         allocationSamplingEnabled,
                                                          unsigned int maxMemorySamplesPerMinute,
+                                                         bool         allocationSamplingExportPipelinePrepared,
                                                          unsigned int selectedThreadSamplingInterval)
 {
     return trace::profiler != nullptr &&
            trace::profiler->ConfigureContinuousProfiler(threadSamplingEnabled, threadSamplingInterval,
-                                                        allocationSamplingEnabled, maxMemorySamplesPerMinute,
+                                                        threadSamplingExportPipelinePrepared, allocationSamplingEnabled,
+                                                        maxMemorySamplesPerMinute,
+                                                        allocationSamplingExportPipelinePrepared,
                                                         selectedThreadSamplingInterval);
 }
 
@@ -72,6 +76,11 @@ EXTERN_C BOOL STDAPICALLTYPE SetContinuousProfilerEnabled(bool enabled)
 EXTERN_C unsigned int STDAPICALLTYPE GetContinuousProfilerSamplingInterval()
 {
     return trace::profiler == nullptr ? 0 : trace::profiler->GetContinuousProfilerSamplingInterval();
+}
+
+EXTERN_C unsigned int STDAPICALLTYPE GetContinuousProfilerAllocationSamplingRate()
+{
+    return trace::profiler == nullptr ? 0 : trace::profiler->GetContinuousProfilerAllocationSamplingRate();
 }
 
 EXTERN_C VOID STDAPICALLTYPE InitializeTraceMethods(WCHAR* id,

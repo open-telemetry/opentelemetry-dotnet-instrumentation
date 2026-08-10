@@ -63,14 +63,15 @@ exporter. The lowest recommended sampling interval is 1000 milliseconds.
 ### Runtime reconfiguration
 
 Native continuous profiler resources are initialized once per process. Later
-calls to `ConfigureContinuousProfiler` update only the enabled state and sampling
-interval for thread sampling. Allocation and selective sampling retain their
-initial configuration.
+calls to `ConfigureContinuousProfiler` update the enabled state and sampling
+rate for thread and allocation sampling. Selective sampling retains its initial
+configuration.
 
 After initialization, `SetContinuousProfilerEnabled(bool)` starts or stops
 continuous thread sampling. `SetContinuousProfilerSamplingInterval(uint)` changes
-the configured interval and, when sampling is active, wakes the sampling thread
-immediately.
+the configured interval. The sampling thread observes interval changes at cycle
+boundaries; a cycle already waiting or in progress may use the previous interval.
+Stopping the sampling service still wakes the thread immediately.
 
 The managed interop methods `ConfigureNativeContinuousProfiler`,
 `SetNativeContinuousProfilerSamplingInterval`, and
@@ -84,6 +85,14 @@ To enable thread sampling later when it is initially disabled, the initial
 managed configuration must prepare the thread-sampling export pipeline with an
 exporter, a non-zero sampling interval, and positive export interval and timeout.
 Runtime operations cannot initialize this pipeline.
+
+The same preparation rule applies to allocation sampling. To enable it later,
+provide an exporter, a non-zero `MaxMemorySamplesPerMinute`, and positive export
+interval and timeout in the initial managed configuration. A later
+`ConfigureContinuousProfiler` call can then enable or disable allocation
+sampling or update its maximum sample rate. Managed initialization explicitly
+signals native code only after the corresponding export handler is registered;
+runtime calls cannot promote an unprepared pipeline.
 
 Start and stop operations are idempotent and use at most one native sampling
 thread. The thread is shared with selective sampling, so disabling continuous

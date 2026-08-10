@@ -118,7 +118,7 @@ public class ContinuousProfilerTests : TestHelper
 
     [Fact]
     [Trait("Category", "EndToEnd")]
-    public void RuntimeReconfigurationStartsStopsAndWakesCpuSampler()
+    public void RuntimeReconfigurationStartsStopsAndUpdatesProfiler()
     {
         EnableBytecodeInstrumentation();
         SetEnvironmentVariable(
@@ -130,6 +130,20 @@ public class ContinuousProfilerTests : TestHelper
 
         Assert.Contains("runtime-reconfiguration-completed", standardOutput, StringComparison.Ordinal);
     }
+
+#if NET
+    [Fact]
+    [Trait("Category", "EndToEnd")]
+    public void RuntimeReconfigurationRejectsUnpreparedAllocationPipeline()
+    {
+        EnableBytecodeInstrumentation();
+
+        var (standardOutput, _, _) = RunTestApplication(
+            new TestSettings { Arguments = "--runtime-unprepared-allocation" });
+
+        Assert.Contains("runtime-unprepared-allocation-rejected", standardOutput, StringComparison.Ordinal);
+    }
+#endif
 
     private static bool ExpectCollected(ICollection<ExportProfilesServiceRequest> c)
     {

@@ -10,6 +10,14 @@ if (args.Contains("--runtime-reconfiguration"))
     return;
 }
 
+#if NET
+if (args.Contains("--runtime-unprepared-allocation"))
+{
+    TestApplication.ContinuousProfiler.RuntimeReconfigurationScenario.VerifyUnpreparedAllocationIsRejected();
+    return;
+}
+#endif
+
 using ActivitySource activitySource = new("TestApplication.ContinuousProfiler", "1.0.0");
 
 using var activity = activitySource.StartActivity();

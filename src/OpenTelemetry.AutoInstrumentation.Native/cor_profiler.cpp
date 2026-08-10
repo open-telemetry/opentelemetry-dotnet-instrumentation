@@ -1252,14 +1252,18 @@ bool CorProfiler::InitThreadSampler()
 
 bool CorProfiler::ConfigureContinuousProfiler(const bool         threadSamplingEnabled,
                                               const unsigned int threadSamplingInterval,
+                                              const bool         threadSamplingExportPipelinePrepared,
                                               const bool         allocationSamplingEnabled,
                                               const unsigned int maxMemorySamplesPerMinute,
+                                              const bool         allocationSamplingExportPipelinePrepared,
                                               const unsigned int selectedThreadsSamplingInterval)
 {
     Logger::Info("ConfigureContinuousProfiler: thread sampling enabled: ", threadSamplingEnabled,
                  ", thread sampling interval: ", threadSamplingInterval,
+                 ", thread sampling export pipeline prepared: ", threadSamplingExportPipelinePrepared,
                  ", allocation sampling enabled: ", allocationSamplingEnabled,
                  ", max memory samples per minute: ", maxMemorySamplesPerMinute,
+                 ", allocation sampling export pipeline prepared: ", allocationSamplingExportPipelinePrepared,
                  ", selected threads sampling interval: ", selectedThreadsSamplingInterval);
 
     std::lock_guard<std::mutex> configuration_guard(sampling_configuration_lock_);
@@ -1275,7 +1279,8 @@ bool CorProfiler::ConfigureContinuousProfiler(const bool         threadSamplingE
 
     const bool selectiveSamplingConfigured    = selectedThreadsSamplingInterval != 0;
     const bool profilerInitializationRequired = threadSamplingEnabled || threadSamplingInterval != 0 ||
-                                                allocationSamplingEnabled || selectiveSamplingConfigured;
+                                                allocationSamplingEnabled || maxMemorySamplesPerMinute != 0 ||
+                                                selectiveSamplingConfigured;
     if (continuousProfiler == nullptr && !profilerInitializationRequired)
     {
         // Do not consume the once flag for a no-op call. A later AppDomain may
@@ -1284,13 +1289,11 @@ bool CorProfiler::ConfigureContinuousProfiler(const bool         threadSamplingE
         return true;
     }
 
-    const ContinuousProfilerInitializationParams initializationParams{allocationSamplingEnabled,
-                                                                      maxMemorySamplesPerMinute,
-                                                                      selectedThreadsSamplingInterval};
+    const ContinuousProfilerInitializationParams initializationParams{selectedThreadsSamplingInterval};
 
-    // Native profiler resources, allocation sampling and selective sampling are
-    // process-level and retain their one-time initialization semantics. CPU
-    // sampling state is deliberately applied after call_once on every call.
+    // Native profiler resources and selective sampling retain their one-time
+    // initialization semantics. Thread and allocation sampling state is applied
+    // after call_once on every call.
     std::call_once(sampling_init_flag_, [this, &initializationParams]()
                    { sampling_initialization_result_ = InitializeContinuousProfiler(initializationParams); });
 
@@ -1300,18 +1303,28 @@ bool CorProfiler::ConfigureContinuousProfiler(const bool         threadSamplingE
         return false;
     }
 
-    if (threadSamplingInterval != 0)
+    // Managed initialization sets these signals only after registering the
+    // corresponding export handlers. Retain them for runtime calls, which
+    // cannot build a managed export pipeline themselves.
+    if (threadSamplingExportPipelinePrepared && threadSamplingInterval != 0)
     {
         continuous_profiler_thread_sampling_prepared_ = true;
     }
-
-    const bool configured = ApplyThreadSamplingConfigurationLocked(threadSamplingEnabled, threadSamplingInterval);
-    if (!configured)
+    if (allocationSamplingExportPipelinePrepared && maxMemorySamplesPerMinute != 0)
     {
-        Logger::Warn("ContinuousProfiler: unable to apply thread sampling configuration.");
+        continuous_profiler_allocation_sampling_prepared_ = true;
     }
 
-    return configured;
+    const bool threadSamplingConfigured =
+        ApplyThreadSamplingConfigurationLocked(threadSamplingEnabled, threadSamplingInterval);
+    const bool allocationSamplingConfigured =
+        ApplyAllocationSamplingConfigurationLocked(allocationSamplingEnabled, maxMemorySamplesPerMinute);
+    if (!threadSamplingConfigured || !allocationSamplingConfigured)
+    {
+        Logger::Warn("ContinuousProfiler: unable to apply complete sampling configuration.");
+    }
+
+    return threadSamplingConfigured && allocationSamplingConfigured;
 }
 
 bool CorProfiler::SetContinuousProfilerSamplingInterval(const unsigned int threadSamplingInterval)
@@ -1408,6 +1421,39 @@ bool CorProfiler::ApplyThreadSamplingConfigurationLocked(const bool enabled, con
     return SetContinuousProfilerSamplingIntervalLocked(threadSamplingInterval) && disabled;
 }
 
+bool CorProfiler::ApplyAllocationSamplingConfigurationLocked(const bool         enabled,
+                                                             const unsigned int maxMemorySamplesPerMinute)
+{
+    if (enabled && maxMemorySamplesPerMinute == 0)
+    {
+        Logger::Warn("ContinuousProfiler: max memory samples per minute must be greater than zero.");
+        return false;
+    }
+
+    if (this->continuousProfiler == nullptr)
+    {
+        if (enabled)
+        {
+            Logger::Warn("ContinuousProfiler: cannot enable allocation sampling before profiler initialization.");
+        }
+        return !enabled;
+    }
+
+    if (enabled && !continuous_profiler_allocation_sampling_prepared_)
+    {
+        Logger::Warn(
+            "ContinuousProfiler: cannot enable allocation sampling because its export pipeline was not initialized.");
+        return false;
+    }
+
+    if (!this->continuousProfiler->SetAllocationSamplingConfiguration(enabled, maxMemorySamplesPerMinute))
+    {
+        return false;
+    }
+
+    return true;
+}
+
 unsigned int CorProfiler::GetContinuousProfilerSamplingInterval()
 {
     std::lock_guard<std::mutex> configuration_guard(sampling_configuration_lock_);
@@ -1419,12 +1465,16 @@ unsigned int CorProfiler::GetContinuousProfilerSamplingInterval()
     return this->continuousProfiler->GetConfiguredThreadSamplingInterval();
 }
 
+unsigned int CorProfiler::GetContinuousProfilerAllocationSamplingRate()
+{
+    std::lock_guard<std::mutex> configuration_guard(sampling_configuration_lock_);
+    return this->continuousProfiler == nullptr ? 0 : this->continuousProfiler->GetAllocationSamplingRate();
+}
+
 HRESULT CorProfiler::InitializeContinuousProfiler(const ContinuousProfilerInitializationParams& params)
 {
-    Logger::Info("ConfigureContinuousProfiler: one-time initialization. Allocation sampling enabled: ",
-                 params.allocationSamplingEnabled,
-                 ", max memory samples per minute: ", params.maxMemorySamplesPerMinute,
-                 ", selected threads sampling interval: ", params.selectedThreadsSamplingInterval);
+    Logger::Info("ConfigureContinuousProfiler: one-time initialization. Selected threads sampling interval: ",
+                 params.selectedThreadsSamplingInterval);
 
     const bool selectiveSamplingConfigured = params.selectedThreadsSamplingInterval != 0;
 
@@ -1439,11 +1489,6 @@ HRESULT CorProfiler::InitializeContinuousProfiler(const ContinuousProfilerInitia
         this->continuousProfiler->nextOutdatedEntriesScan = std::chrono::steady_clock::now();
         continuous_profiler::ContinuousProfiler::InitSelectiveSamplingBuffer();
         this->continuousProfiler->ConfigureSelectedThreadSampling(params.selectedThreadsSamplingInterval);
-    }
-
-    if (params.allocationSamplingEnabled)
-    {
-        this->continuousProfiler->StartAllocationSampling(params.maxMemorySamplesPerMinute);
     }
 
     return S_OK;
