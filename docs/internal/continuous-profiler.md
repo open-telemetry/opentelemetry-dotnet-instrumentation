@@ -62,24 +62,31 @@ exporter. The lowest recommended sampling interval is 1000 milliseconds.
 
 ### Runtime reconfiguration
 
-Native continuous profiler resources are initialized once per process. Later
-calls to `ConfigureContinuousProfiler` update the enabled state and sampling
-rate for thread and allocation sampling. Selective sampling retains its initial
-configuration.
+Native continuous profiler resources are initialized once per process through
+`ConfigureContinuousProfiler`. Runtime setters do not initialize native resources
+or managed export pipelines. After initialization, the six setters are:
 
-After initialization, `SetContinuousProfilerEnabled(bool)` starts or stops
-continuous thread sampling. `SetContinuousProfilerSamplingInterval(uint)` changes
-the configured interval. The sampling thread observes interval changes at cycle
-boundaries; a cycle already waiting or in progress may use the previous interval.
-Stopping the sampling service still wakes the thread immediately.
+- `SetContinuousProfilerEnabled(bool)` and
+  `SetContinuousProfilerSamplingInterval(uint)` for CPU sampling.
+- `SetContinuousProfilerAllocationSamplingEnabled(bool)` and
+  `SetContinuousProfilerMaxMemorySamplesPerMinute(uint)` for allocation sampling.
+- `SetContinuousProfilerSnapshotsEnabled(bool)` and
+  `SetContinuousProfilerSnapshotSamplingInterval(uint)` for snapshot (selective)
+  sampling.
 
-The managed interop methods `ConfigureNativeContinuousProfiler`,
-`SetNativeContinuousProfilerSamplingInterval`, and
-`SetNativeContinuousProfilerEnabled` return `true` when the requested native
-operation succeeds and `false` when it cannot be applied. Successful idempotent
-start and stop operations also return `true`. A `false` result means the complete
-request was not applied; initialization needed by other sampling modes may still
-have succeeded.
+Value setters retain the configured value while the corresponding service is
+disabled. An enable setter reuses that value. The shared CPU/snapshot sampling
+thread observes interval changes at cycle boundaries; a cycle already waiting or
+in progress may use the previous interval. Configuration changes do not wake the
+stop condition variable. Stopping the final service does wake the thread
+immediately.
+
+The corresponding managed interop methods use the
+`SetNativeContinuousProfiler...` prefix. They return `true` when the requested
+native operation succeeds and `false` when it cannot be applied. Successful
+idempotent start and stop operations also return `true`. A `false` result means
+the complete request was not applied; initialization needed by other sampling
+modes may still have succeeded.
 
 To enable thread sampling later when it is initially disabled, the initial
 managed configuration must prepare the thread-sampling export pipeline with an
@@ -88,9 +95,10 @@ Runtime operations cannot initialize this pipeline.
 
 The same preparation rule applies to allocation sampling. To enable it later,
 provide an exporter, a non-zero `MaxMemorySamplesPerMinute`, and positive export
-interval and timeout in the initial managed configuration. A later
-`ConfigureContinuousProfiler` call can then enable or disable allocation
-sampling or update its maximum sample rate. Managed initialization explicitly
+interval and timeout in the initial managed configuration. The allocation
+setters can then enable or disable sampling and update its maximum sample rate.
+Snapshots can be disabled, re-enabled, or updated only when selective sampling
+was prepared during initial configuration. Managed initialization explicitly
 signals native code only after the corresponding export handler is registered;
 runtime calls cannot promote an unprepared pipeline.
 

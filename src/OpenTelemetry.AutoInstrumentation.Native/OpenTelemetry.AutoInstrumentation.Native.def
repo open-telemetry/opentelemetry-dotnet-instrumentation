@@ -13,6 +13,10 @@ EXPORTS
     ShutdownContinuousProfiler
     SetContinuousProfilerSamplingInterval
     SetContinuousProfilerEnabled
+    SetContinuousProfilerAllocationSamplingEnabled
+    SetContinuousProfilerMaxMemorySamplesPerMinute
+    SetContinuousProfilerSnapshotsEnabled
+    SetContinuousProfilerSnapshotSamplingInterval
     GetContinuousProfilerSamplingInterval
     GetContinuousProfilerAllocationSamplingRate
     ContinuousProfilerReadThreadSamples

@@ -352,8 +352,11 @@ public:
     ~ContinuousProfiler();
     bool                        SetThreadSamplingInterval(unsigned int samplingInterval);
     bool                        SetThreadSamplingEnabled(bool enabled);
+    bool                        SetSelectedThreadSamplingInterval(unsigned int samplingInterval);
+    bool                        SetSelectedThreadSamplingEnabled(bool enabled);
     void                        ConfigureSelectedThreadSampling(unsigned int samplingInterval);
     unsigned int                GetConfiguredThreadSamplingInterval() const;
+    unsigned int                GetConfiguredSelectedThreadSamplingInterval() const;
     ThreadSamplingConfiguration GetThreadSamplingConfiguration() const;
     bool TryReloadThreadSamplingConfiguration(ThreadSamplingConfiguration& configuration);
     bool WaitForStop(unsigned int samplingInterval);
@@ -364,6 +367,9 @@ public:
     bool                        IsShutdownRequested() const;
     static void                 InitSelectiveSamplingBuffer();
     bool                        SetAllocationSamplingConfiguration(bool enabled, unsigned int maxMemorySamplesPerMinute);
+    bool                        SetAllocationSamplingEnabled(bool enabled);
+    bool                        SetMaxMemorySamplesPerMinute(unsigned int maxMemorySamplesPerMinute);
+    unsigned int                GetConfiguredMaxMemorySamplesPerMinute() const;
     unsigned int                GetAllocationSamplingRate() const;
     void                        AllocationTick(ULONG dataLen, LPCBYTE data);
     ICorProfilerInfo12*         info12 = nullptr;
@@ -410,11 +416,13 @@ private:
     std::condition_variable      sampling_stop_cv_;
     bool                         thread_sampling_stop_requested_      = true;
     unsigned int                 configured_thread_sampling_interval_ = 0;
+    unsigned int                 configured_selected_threads_sampling_interval_ = 0;
     std::optional<unsigned int>  thread_sampling_interval_;
     std::optional<unsigned int>  selected_threads_sampling_interval_;
     SamplingThreadState          thread_sampling_thread_state_ = SamplingThreadState::Stopped;
     std::unique_ptr<std::thread> thread_sampling_thread_;
     uint64_t                     thread_sampling_thread_generation_ = 0;
+    unsigned int                 configured_max_memory_samples_per_minute_ = 0;
     EVENTPIPE_SESSION            session_ = 0;
     IStackWalker*                stackWalker_ = nullptr;
 };

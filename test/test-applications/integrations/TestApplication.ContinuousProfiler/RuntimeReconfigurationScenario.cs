@@ -11,6 +11,7 @@ internal static class RuntimeReconfigurationScenario
     private const uint ActiveInterval = 2000u;
     private const uint IntermediateInterval = 1500u;
     private const uint ReconfiguredInterval = 1000u;
+    private const uint ReconfiguredSnapshotInterval = 200u;
     private const uint UnpreparedInterval = 50u;
     private const int ThreadSamplesBufferSize = 200 * 1024;
 #if NET
@@ -28,41 +29,25 @@ internal static class RuntimeReconfigurationScenario
         try
         {
             Ensure(
-                !RuntimeContinuousProfilerNativeMethods.ConfigureContinuousProfiler(
-                    threadSamplingEnabled: true,
-                    threadSamplingInterval: 0,
-                    threadSamplingExportPipelinePrepared: false,
-                    allocationSamplingEnabled: false,
-                    maxMemorySamplesPerMinute: 0,
-                    allocationSamplingExportPipelinePrepared: false,
-                    selectedThreadSamplingInterval: 0),
-                "ConfigureContinuousProfiler reported success for an invalid sampling interval.");
-
+                !RuntimeContinuousProfilerNativeMethods.SetContinuousProfilerSamplingInterval(0),
+                "SetContinuousProfilerSamplingInterval reported success for an invalid sampling interval.");
             Ensure(
-                RuntimeContinuousProfilerNativeMethods.ConfigureContinuousProfiler(
-                    threadSamplingEnabled: true,
-                    threadSamplingInterval: ActiveInterval,
-                    threadSamplingExportPipelinePrepared: false,
-                    allocationSamplingEnabled: false,
-                    maxMemorySamplesPerMinute: 0,
-                    allocationSamplingExportPipelinePrepared: false,
-                    selectedThreadSamplingInterval: 0),
-                "ConfigureContinuousProfiler failed to enable CPU sampling.");
+                RuntimeContinuousProfilerNativeMethods.SetContinuousProfilerSamplingInterval(ActiveInterval),
+                "SetContinuousProfilerSamplingInterval failed to set the active interval.");
+            Ensure(
+                RuntimeContinuousProfilerNativeMethods.SetContinuousProfilerEnabled(true),
+                "SetContinuousProfilerEnabled failed to enable CPU sampling.");
 
             Thread.Sleep(TimeSpan.FromMilliseconds(750));
             Ensure(
                 RuntimeReconfigurationPlugin.GetThreadExportCount() == 0,
-                "Repeated ConfigureContinuousProfiler did not apply the new sampling interval.");
+                "SetContinuousProfilerSamplingInterval did not apply the new sampling interval.");
 
             var exportCount = WaitForExportAfter(0, TimeSpan.FromSeconds(3));
-            Ensure(exportCount > 0, "Repeated ConfigureContinuousProfiler did not enable CPU sampling.");
+            Ensure(exportCount > 0, "SetContinuousProfilerEnabled did not enable CPU sampling.");
             Ensure(
                 RuntimeReconfigurationPlugin.GetLastThreadSamplingInterval() == ActiveInterval,
                 "The exporter did not receive the active sampling interval.");
-
-            Ensure(
-                !RuntimeContinuousProfilerNativeMethods.SetContinuousProfilerSamplingInterval(0),
-                "SetContinuousProfilerSamplingInterval reported success for an invalid sampling interval.");
 
             // Rapid accepted updates may be coalesced, but the sampler must eventually use the latest one.
             Ensure(
@@ -99,15 +84,14 @@ internal static class RuntimeReconfigurationScenario
 
 #if NET
             Ensure(
-                RuntimeContinuousProfilerNativeMethods.ConfigureContinuousProfiler(
-                    threadSamplingEnabled: false,
-                    threadSamplingInterval: ReconfiguredInterval,
-                    threadSamplingExportPipelinePrepared: false,
-                    allocationSamplingEnabled: true,
-                    maxMemorySamplesPerMinute: AllocationRate,
-                    allocationSamplingExportPipelinePrepared: false,
-                    selectedThreadSamplingInterval: 0),
-                "ConfigureContinuousProfiler failed to enable allocation sampling.");
+                !RuntimeContinuousProfilerNativeMethods.SetContinuousProfilerMaxMemorySamplesPerMinute(0),
+                "SetContinuousProfilerMaxMemorySamplesPerMinute reported success for an invalid sampling rate.");
+            Ensure(
+                RuntimeContinuousProfilerNativeMethods.SetContinuousProfilerMaxMemorySamplesPerMinute(AllocationRate),
+                "SetContinuousProfilerMaxMemorySamplesPerMinute failed to set the active sampling rate.");
+            Ensure(
+                RuntimeContinuousProfilerNativeMethods.SetContinuousProfilerAllocationSamplingEnabled(true),
+                "SetContinuousProfilerAllocationSamplingEnabled failed to enable allocation sampling.");
             Ensure(
                 RuntimeContinuousProfilerNativeMethods.GetContinuousProfilerAllocationSamplingRate() == AllocationRate,
                 "The allocation sampler did not apply the configured sampling rate.");
@@ -115,30 +99,17 @@ internal static class RuntimeReconfigurationScenario
             Ensure(allocationExportCount > 0, "No allocation sample was exported after allocation sampling was enabled.");
 
             Ensure(
-                RuntimeContinuousProfilerNativeMethods.ConfigureContinuousProfiler(
-                    threadSamplingEnabled: false,
-                    threadSamplingInterval: ReconfiguredInterval,
-                    threadSamplingExportPipelinePrepared: false,
-                    allocationSamplingEnabled: true,
-                    maxMemorySamplesPerMinute: ReconfiguredAllocationRate,
-                    allocationSamplingExportPipelinePrepared: false,
-                    selectedThreadSamplingInterval: 0),
-                "ConfigureContinuousProfiler failed to update the allocation sampling rate.");
+                RuntimeContinuousProfilerNativeMethods.SetContinuousProfilerMaxMemorySamplesPerMinute(
+                    ReconfiguredAllocationRate),
+                "SetContinuousProfilerMaxMemorySamplesPerMinute failed to update the allocation sampling rate.");
             Ensure(
                 RuntimeContinuousProfilerNativeMethods.GetContinuousProfilerAllocationSamplingRate() ==
                     ReconfiguredAllocationRate,
                 "The allocation sampler did not apply the reconfigured sampling rate.");
 
             Ensure(
-                RuntimeContinuousProfilerNativeMethods.ConfigureContinuousProfiler(
-                    threadSamplingEnabled: false,
-                    threadSamplingInterval: ReconfiguredInterval,
-                    threadSamplingExportPipelinePrepared: false,
-                    allocationSamplingEnabled: false,
-                    maxMemorySamplesPerMinute: ReconfiguredAllocationRate,
-                    allocationSamplingExportPipelinePrepared: false,
-                    selectedThreadSamplingInterval: 0),
-                "ConfigureContinuousProfiler failed to disable allocation sampling.");
+                RuntimeContinuousProfilerNativeMethods.SetContinuousProfilerAllocationSamplingEnabled(false),
+                "SetContinuousProfilerAllocationSamplingEnabled failed to disable allocation sampling.");
             Ensure(
                 RuntimeContinuousProfilerNativeMethods.GetContinuousProfilerAllocationSamplingRate() == 0,
                 "The allocation sampler still reports an active rate after it was disabled.");
@@ -153,15 +124,11 @@ internal static class RuntimeReconfigurationScenario
                 "An allocation sample was exported while allocation sampling was disabled.");
 
             Ensure(
-                RuntimeContinuousProfilerNativeMethods.ConfigureContinuousProfiler(
-                    threadSamplingEnabled: false,
-                    threadSamplingInterval: ReconfiguredInterval,
-                    threadSamplingExportPipelinePrepared: false,
-                    allocationSamplingEnabled: true,
-                    maxMemorySamplesPerMinute: AllocationRate,
-                    allocationSamplingExportPipelinePrepared: false,
-                    selectedThreadSamplingInterval: 0),
-                "ConfigureContinuousProfiler failed to re-enable allocation sampling.");
+                RuntimeContinuousProfilerNativeMethods.SetContinuousProfilerMaxMemorySamplesPerMinute(AllocationRate),
+                "SetContinuousProfilerMaxMemorySamplesPerMinute failed to restore the allocation sampling rate.");
+            Ensure(
+                RuntimeContinuousProfilerNativeMethods.SetContinuousProfilerAllocationSamplingEnabled(true),
+                "SetContinuousProfilerAllocationSamplingEnabled failed to re-enable allocation sampling.");
             Ensure(
                 RuntimeContinuousProfilerNativeMethods.GetContinuousProfilerAllocationSamplingRate() == AllocationRate,
                 "The allocation sampler did not restore the configured sampling rate.");
@@ -172,16 +139,46 @@ internal static class RuntimeReconfigurationScenario
 #endif
 
             Ensure(
+                !RuntimeContinuousProfilerNativeMethods.SetContinuousProfilerSnapshotSamplingInterval(0),
+                "SetContinuousProfilerSnapshotSamplingInterval reported success for an invalid sampling interval.");
+            Ensure(
+                RuntimeContinuousProfilerNativeMethods.SetContinuousProfilerSnapshotsEnabled(false),
+                "SetContinuousProfilerSnapshotsEnabled failed to disable snapshots.");
+            Ensure(
+                RuntimeContinuousProfilerNativeMethods.SetContinuousProfilerSnapshotSamplingInterval(
+                    ReconfiguredSnapshotInterval),
+                "SetContinuousProfilerSnapshotSamplingInterval failed to update the snapshot sampling interval.");
+            Ensure(
+                RuntimeContinuousProfilerNativeMethods.SetContinuousProfilerSnapshotsEnabled(true),
+                "SetContinuousProfilerSnapshotsEnabled failed to re-enable snapshots.");
+
+            Ensure(
                 RuntimeContinuousProfilerNativeMethods.ShutdownContinuousProfiler(),
                 "ShutdownContinuousProfiler failed to stop continuous profiling.");
             Ensure(
                 !RuntimeContinuousProfilerNativeMethods.SetContinuousProfilerEnabled(true),
                 "CPU sampling was re-enabled after continuous profiling was shut down.");
+            Ensure(
+                !RuntimeContinuousProfilerNativeMethods.SetContinuousProfilerSamplingInterval(ReconfiguredInterval),
+                "The CPU sampling interval was updated after continuous profiling was shut down.");
 #if NET
+            Ensure(
+                !RuntimeContinuousProfilerNativeMethods.SetContinuousProfilerAllocationSamplingEnabled(true),
+                "Allocation sampling was re-enabled after continuous profiling was shut down.");
+            Ensure(
+                !RuntimeContinuousProfilerNativeMethods.SetContinuousProfilerMaxMemorySamplesPerMinute(AllocationRate),
+                "The allocation sampling rate was updated after continuous profiling was shut down.");
             Ensure(
                 RuntimeContinuousProfilerNativeMethods.GetContinuousProfilerAllocationSamplingRate() == 0,
                 "Allocation sampling remained enabled after continuous profiling was shut down.");
 #endif
+            Ensure(
+                !RuntimeContinuousProfilerNativeMethods.SetContinuousProfilerSnapshotsEnabled(true),
+                "Snapshots were re-enabled after continuous profiling was shut down.");
+            Ensure(
+                !RuntimeContinuousProfilerNativeMethods.SetContinuousProfilerSnapshotSamplingInterval(
+                    ReconfiguredSnapshotInterval),
+                "The snapshot sampling interval was updated after continuous profiling was shut down.");
             Ensure(
                 RuntimeContinuousProfilerNativeMethods.ShutdownContinuousProfiler(),
                 "ShutdownContinuousProfiler was not idempotent.");
@@ -198,7 +195,7 @@ internal static class RuntimeReconfigurationScenario
     {
         try
         {
-            // Initialize the native profiler without preparing either managed export pipeline.
+            // Initialize the native profiler without preparing any managed export pipeline.
             // A non-zero, disabled allocation rate makes this an initialization request without
             // starting allocation sampling, including on .NET Framework.
             Ensure(
@@ -218,6 +215,13 @@ internal static class RuntimeReconfigurationScenario
             Ensure(
                 !RuntimeContinuousProfilerNativeMethods.SetContinuousProfilerEnabled(true),
                 "SetContinuousProfilerEnabled enabled sampling without a prepared CPU export pipeline.");
+            Ensure(
+                !RuntimeContinuousProfilerNativeMethods.SetContinuousProfilerSnapshotSamplingInterval(
+                    UnpreparedInterval),
+                "SetContinuousProfilerSnapshotSamplingInterval configured an unprepared snapshot export pipeline.");
+            Ensure(
+                !RuntimeContinuousProfilerNativeMethods.SetContinuousProfilerSnapshotsEnabled(true),
+                "SetContinuousProfilerSnapshotsEnabled enabled snapshots without a prepared export pipeline.");
 
             Thread.Sleep(TimeSpan.FromMilliseconds(UnpreparedInterval * 5u));
             var buffer = new byte[ThreadSamplesBufferSize];
@@ -233,6 +237,7 @@ internal static class RuntimeReconfigurationScenario
         finally
         {
             _ = RuntimeContinuousProfilerNativeMethods.SetContinuousProfilerEnabled(false);
+            _ = RuntimeContinuousProfilerNativeMethods.SetContinuousProfilerSnapshotsEnabled(false);
         }
     }
 
@@ -254,19 +259,18 @@ internal static class RuntimeReconfigurationScenario
             Ensure(
                 RuntimeContinuousProfilerNativeMethods.GetContinuousProfilerAllocationSamplingRate() == 0,
                 "The allocation sampler started without a prepared export pipeline.");
+            Ensure(
+                !RuntimeContinuousProfilerNativeMethods.SetContinuousProfilerMaxMemorySamplesPerMinute(AllocationRate),
+                "SetContinuousProfilerMaxMemorySamplesPerMinute configured an unprepared allocation export pipeline.");
+            Ensure(
+                !RuntimeContinuousProfilerNativeMethods.SetContinuousProfilerAllocationSamplingEnabled(true),
+                "SetContinuousProfilerAllocationSamplingEnabled enabled allocation sampling without a prepared export pipeline.");
 
             Console.WriteLine("runtime-unprepared-allocation-rejected");
         }
         finally
         {
-            _ = RuntimeContinuousProfilerNativeMethods.ConfigureContinuousProfiler(
-                threadSamplingEnabled: false,
-                threadSamplingInterval: 0,
-                threadSamplingExportPipelinePrepared: false,
-                allocationSamplingEnabled: false,
-                maxMemorySamplesPerMinute: 0,
-                allocationSamplingExportPipelinePrepared: false,
-                selectedThreadSamplingInterval: 0);
+            _ = RuntimeContinuousProfilerNativeMethods.SetContinuousProfilerAllocationSamplingEnabled(false);
         }
     }
 #endif

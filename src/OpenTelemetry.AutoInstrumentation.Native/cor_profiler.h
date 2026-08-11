@@ -70,6 +70,7 @@ private:
     bool continuous_profiler_thread_sampling_prepared_ = false;
     unsigned int continuous_profiler_sampling_interval_ = 0;
     bool continuous_profiler_allocation_sampling_prepared_ = false;
+    bool continuous_profiler_snapshots_sampling_prepared_ = false;
     HRESULT STDMETHODCALLTYPE ThreadAssignedToOSThread(ThreadID managedThreadId, DWORD osThreadId) override;
 
 
@@ -151,6 +152,10 @@ private:
     bool ApplyAllocationSamplingConfigurationLocked(bool enabled, unsigned int maxMemorySamplesPerMinute);
     bool SetContinuousProfilerSamplingIntervalLocked(unsigned int samplingInterval);
     bool SetContinuousProfilerEnabledLocked(bool enabled);
+    bool SetContinuousProfilerAllocationSamplingEnabledLocked(bool enabled);
+    bool SetContinuousProfilerMaxMemorySamplesPerMinuteLocked(unsigned int maxMemorySamplesPerMinute);
+    bool SetContinuousProfilerSnapshotsEnabledLocked(bool enabled);
+    bool SetContinuousProfilerSnapshotSamplingIntervalLocked(unsigned int samplingInterval);
 
 public:
     CorProfiler() = default;
@@ -263,6 +268,10 @@ public:
     bool         ShutdownContinuousProfiler();
     bool         SetContinuousProfilerSamplingInterval(unsigned int threadSamplingInterval);
     bool         SetContinuousProfilerEnabled(bool enabled);
+    bool         SetContinuousProfilerAllocationSamplingEnabled(bool enabled);
+    bool         SetContinuousProfilerMaxMemorySamplesPerMinute(unsigned int maxMemorySamplesPerMinute);
+    bool         SetContinuousProfilerSnapshotsEnabled(bool enabled);
+    bool         SetContinuousProfilerSnapshotSamplingInterval(unsigned int samplingInterval);
     unsigned int GetContinuousProfilerSamplingInterval();
     unsigned int GetContinuousProfilerAllocationSamplingRate();
 

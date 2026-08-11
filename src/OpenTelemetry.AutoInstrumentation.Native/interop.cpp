@@ -78,6 +78,28 @@ EXTERN_C BOOL STDAPICALLTYPE SetContinuousProfilerEnabled(bool enabled)
     return trace::profiler != nullptr && trace::profiler->SetContinuousProfilerEnabled(enabled);
 }
 
+EXTERN_C BOOL STDAPICALLTYPE SetContinuousProfilerAllocationSamplingEnabled(bool enabled)
+{
+    return trace::profiler != nullptr && trace::profiler->SetContinuousProfilerAllocationSamplingEnabled(enabled);
+}
+
+EXTERN_C BOOL STDAPICALLTYPE SetContinuousProfilerMaxMemorySamplesPerMinute(unsigned int maxMemorySamplesPerMinute)
+{
+    return trace::profiler != nullptr &&
+           trace::profiler->SetContinuousProfilerMaxMemorySamplesPerMinute(maxMemorySamplesPerMinute);
+}
+
+EXTERN_C BOOL STDAPICALLTYPE SetContinuousProfilerSnapshotsEnabled(bool enabled)
+{
+    return trace::profiler != nullptr && trace::profiler->SetContinuousProfilerSnapshotsEnabled(enabled);
+}
+
+EXTERN_C BOOL STDAPICALLTYPE SetContinuousProfilerSnapshotSamplingInterval(unsigned int snapshotSamplingInterval)
+{
+    return trace::profiler != nullptr &&
+           trace::profiler->SetContinuousProfilerSnapshotSamplingInterval(snapshotSamplingInterval);
+}
+
 EXTERN_C unsigned int STDAPICALLTYPE GetContinuousProfilerSamplingInterval()
 {
     return trace::profiler == nullptr ? 0 : trace::profiler->GetContinuousProfilerSamplingInterval();

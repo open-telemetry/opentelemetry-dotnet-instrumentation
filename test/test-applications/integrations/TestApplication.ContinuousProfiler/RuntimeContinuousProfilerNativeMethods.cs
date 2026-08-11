@@ -70,6 +70,42 @@ internal static class RuntimeContinuousProfilerNativeMethods
 
     [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
 #if NET
+    [DllImport(NativeLibraryName)]
+#else
+    [DllImport("OpenTelemetry.AutoInstrumentation.Native.dll")]
+#endif
+    [return: MarshalAs(UnmanagedType.Bool)]
+    public static extern bool SetContinuousProfilerAllocationSamplingEnabled(bool enabled);
+
+    [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
+#if NET
+    [DllImport(NativeLibraryName)]
+#else
+    [DllImport("OpenTelemetry.AutoInstrumentation.Native.dll")]
+#endif
+    [return: MarshalAs(UnmanagedType.Bool)]
+    public static extern bool SetContinuousProfilerMaxMemorySamplesPerMinute(uint maxMemorySamplesPerMinute);
+
+    [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
+#if NET
+    [DllImport(NativeLibraryName)]
+#else
+    [DllImport("OpenTelemetry.AutoInstrumentation.Native.dll")]
+#endif
+    [return: MarshalAs(UnmanagedType.Bool)]
+    public static extern bool SetContinuousProfilerSnapshotsEnabled(bool enabled);
+
+    [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
+#if NET
+    [DllImport(NativeLibraryName)]
+#else
+    [DllImport("OpenTelemetry.AutoInstrumentation.Native.dll")]
+#endif
+    [return: MarshalAs(UnmanagedType.Bool)]
+    public static extern bool SetContinuousProfilerSnapshotSamplingInterval(uint snapshotSamplingInterval);
+
+    [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
+#if NET
     [DllImport(NativeLibraryName, CallingConvention = CallingConvention.Cdecl)]
 #else
     [DllImport("OpenTelemetry.AutoInstrumentation.Native.dll", CallingConvention = CallingConvention.Cdecl)]
