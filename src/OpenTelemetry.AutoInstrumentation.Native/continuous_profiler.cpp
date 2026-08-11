@@ -119,6 +119,32 @@ static std::mutex name_cache_lock = std::mutex();
 
 static std::shared_mutex profiling_lock = std::shared_mutex();
 
+// EventPipeStartSession can synchronously deliver allocation events on its caller thread.
+// That caller already owns profiling_lock exclusively, so a reentrant allocation callback
+// from the same profiler instance must not try to acquire the lock again.
+static thread_local const continuous_profiler::ContinuousProfiler* allocation_sampling_start_owner = nullptr;
+
+class AllocationSamplingStartScope
+{
+public:
+    explicit AllocationSamplingStartScope(const continuous_profiler::ContinuousProfiler* profiler)
+        : previous_owner_(allocation_sampling_start_owner)
+    {
+        allocation_sampling_start_owner = profiler;
+    }
+
+    ~AllocationSamplingStartScope()
+    {
+        allocation_sampling_start_owner = previous_owner_;
+    }
+
+    AllocationSamplingStartScope(const AllocationSamplingStartScope&)            = delete;
+    AllocationSamplingStartScope& operator=(const AllocationSamplingStartScope&) = delete;
+
+private:
+    const continuous_profiler::ContinuousProfiler* previous_owner_;
+};
+
 // After feature sets settle down, perhaps this should be refactored and have a single static instance of ThreadSampler.
 static std::atomic<ICorProfilerInfo7*> profiler_info{nullptr};
 
@@ -1745,8 +1771,8 @@ void ContinuousProfiler::AllocationTick(ULONG dataLen, LPCBYTE data)
     // and return early if attempt was unsuccessful -
     // CaptureSamples acquired exclusive lock
     // and it's not safe to proceed
-    std::shared_lock<std::shared_mutex> shared_lock(profiling_lock, std::try_to_lock);
-    if (!shared_lock.owns_lock())
+    std::shared_lock<std::shared_mutex> shared_lock(profiling_lock, std::defer_lock);
+    if (allocation_sampling_start_owner != this && !shared_lock.try_lock())
     {
         // can't continue if suspension already started
         trace::Logger::Debug("Possible runtime suspension in progress, can't safely process allocation tick.");
@@ -1871,22 +1897,26 @@ bool ContinuousProfiler::StartAllocationSamplingLocked(const unsigned int maxMem
         return true;
     }
 
-    auto allocationSubSampler = std::make_unique<AllocationSubSampler>(maxMemorySamplesPerMinute, 60);
+    this->allocationSubSampler = std::make_unique<AllocationSubSampler>(maxMemorySamplesPerMinute, 60);
 
     COR_PRF_EVENTPIPE_PROVIDER_CONFIG sessionConfig[] = {{WStr("Microsoft-Windows-DotNETRuntime"),
                                                           0x1, // CLR_GC_KEYWORD
                                                           // documentation says AllocationTick is at info but it lies
                                                           COR_PRF_EVENTPIPE_VERBOSE, nullptr}};
     EVENTPIPE_SESSION                 session         = 0;
-    HRESULT                           hr = this->info12->EventPipeStartSession(1, sessionConfig, false, &session);
+    HRESULT                           hr;
+    {
+        AllocationSamplingStartScope startScope(this);
+        hr = this->info12->EventPipeStartSession(1, sessionConfig, false, &session);
+    }
     if (FAILED(hr))
     {
+        this->allocationSubSampler.reset();
         trace::Logger::Error("Could not enable allocation sampling: session pipe error", hr);
         return false;
     }
 
-    this->allocationSubSampler = std::move(allocationSubSampler);
-    session_                   = session;
+    session_ = session;
     trace::Logger::Info("ContinuousProfiler::MemoryProfiling started.");
     return true;
 }
