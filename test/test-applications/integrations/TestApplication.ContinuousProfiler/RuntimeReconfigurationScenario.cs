@@ -10,7 +10,8 @@ internal static class RuntimeReconfigurationScenario
     private const uint InitialInterval = 1000u;
     private const uint ActiveInterval = 2000u;
     private const uint IntermediateInterval = 1500u;
-    private const uint ReconfiguredInterval = 1000u;
+    private const uint ReconfiguredInterval = 1200u;
+    private const uint InitialSnapshotInterval = 100u;
     private const uint ReconfiguredSnapshotInterval = 200u;
     private const uint UnpreparedInterval = 50u;
     private const int ThreadSamplesBufferSize = 200 * 1024;
@@ -138,6 +139,39 @@ internal static class RuntimeReconfigurationScenario
                 "No allocation sample was exported after allocation sampling was re-enabled.");
 #endif
 
+            var exportCountBeforeRepeatedConfiguration = RuntimeReconfigurationPlugin.GetThreadExportCount();
+            Ensure(
+                RuntimeContinuousProfilerNativeMethods.ConfigureContinuousProfiler(
+                    threadSamplingEnabled: false,
+                    threadSamplingInterval: InitialInterval,
+                    threadSamplingExportPipelinePrepared: true,
+                    allocationSamplingEnabled: false,
+#if NET
+                    maxMemorySamplesPerMinute: AllocationRate,
+                    allocationSamplingExportPipelinePrepared: true,
+#else
+                    maxMemorySamplesPerMinute: 0,
+                    allocationSamplingExportPipelinePrepared: false,
+#endif
+                    selectedThreadSamplingInterval: InitialSnapshotInterval,
+                    out var isRepeatedConfigurationOwner),
+                "A repeated ConfigureContinuousProfiler call did not return the initial configuration result.");
+            Ensure(
+                !isRepeatedConfigurationOwner,
+                "A repeated ConfigureContinuousProfiler call reported ownership of one-time native initialization.");
+            Ensure(
+                RuntimeContinuousProfilerNativeMethods.GetContinuousProfilerSamplingInterval() == ReconfiguredInterval,
+                "A repeated ConfigureContinuousProfiler call overwrote the runtime CPU sampling interval.");
+            Ensure(
+                WaitForExportAfter(exportCountBeforeRepeatedConfiguration, TimeSpan.FromSeconds(3)) >
+                    exportCountBeforeRepeatedConfiguration,
+                "A repeated ConfigureContinuousProfiler call disabled runtime CPU sampling.");
+#if NET
+            Ensure(
+                RuntimeContinuousProfilerNativeMethods.GetContinuousProfilerAllocationSamplingRate() == AllocationRate,
+                "A repeated ConfigureContinuousProfiler call overwrote runtime allocation sampling state.");
+#endif
+
             Ensure(
                 !RuntimeContinuousProfilerNativeMethods.SetContinuousProfilerSnapshotSamplingInterval(0),
                 "SetContinuousProfilerSnapshotSamplingInterval reported success for an invalid sampling interval.");
@@ -206,8 +240,10 @@ internal static class RuntimeReconfigurationScenario
                     allocationSamplingEnabled: false,
                     maxMemorySamplesPerMinute: 1,
                     allocationSamplingExportPipelinePrepared: false,
-                    selectedThreadSamplingInterval: 0),
+                    selectedThreadSamplingInterval: 0,
+                    out var isInitializationOwner),
                 "ConfigureContinuousProfiler failed to initialize the native profiler.");
+            Ensure(isInitializationOwner, "The first ConfigureContinuousProfiler call did not report initialization ownership.");
 
             Ensure(
                 !RuntimeContinuousProfilerNativeMethods.SetContinuousProfilerSamplingInterval(UnpreparedInterval),
@@ -254,8 +290,10 @@ internal static class RuntimeReconfigurationScenario
                     allocationSamplingEnabled: true,
                     maxMemorySamplesPerMinute: AllocationRate,
                     allocationSamplingExportPipelinePrepared: false,
-                    selectedThreadSamplingInterval: 0),
+                    selectedThreadSamplingInterval: 0,
+                    out var isInitializationOwner),
                 "ConfigureContinuousProfiler enabled allocation sampling without a prepared export pipeline.");
+            Ensure(isInitializationOwner, "The first ConfigureContinuousProfiler call did not report initialization ownership.");
             Ensure(
                 RuntimeContinuousProfilerNativeMethods.GetContinuousProfilerAllocationSamplingRate() == 0,
                 "The allocation sampler started without a prepared export pipeline.");

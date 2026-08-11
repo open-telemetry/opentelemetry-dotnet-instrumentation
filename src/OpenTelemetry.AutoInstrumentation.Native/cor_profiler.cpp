@@ -1256,8 +1256,11 @@ bool CorProfiler::ConfigureContinuousProfiler(const bool         threadSamplingE
                                               const bool         allocationSamplingEnabled,
                                               const unsigned int maxMemorySamplesPerMinute,
                                               const bool         allocationSamplingExportPipelinePrepared,
-                                              const unsigned int selectedThreadsSamplingInterval)
+                                              const unsigned int selectedThreadsSamplingInterval,
+                                              bool&              isInitializationOwner)
 {
+    isInitializationOwner = false;
+
     Logger::Info("ConfigureContinuousProfiler: thread sampling enabled: ", threadSamplingEnabled,
                  ", thread sampling interval: ", threadSamplingInterval,
                  ", thread sampling export pipeline prepared: ", threadSamplingExportPipelinePrepared,
@@ -1291,16 +1294,40 @@ bool CorProfiler::ConfigureContinuousProfiler(const bool         threadSamplingE
 
     const ContinuousProfilerInitializationParams initializationParams{selectedThreadsSamplingInterval};
 
-    // Native profiler resources and selective sampling retain their one-time
-    // initialization semantics. Thread and allocation sampling state is applied
-    // after call_once on every call.
+    // Native resources, export-pipeline capabilities, and initial sampling state are
+    // process-wide. A later AppDomain must not overwrite runtime configuration that
+    // was applied after the first initialization.
     std::call_once(sampling_init_flag_,
-                   [this, &initializationParams]()
+                   [this, &initializationParams, &isInitializationOwner, threadSamplingExportPipelinePrepared,
+                    threadSamplingInterval, allocationSamplingExportPipelinePrepared, maxMemorySamplesPerMinute,
+                    threadSamplingEnabled, allocationSamplingEnabled]()
                    {
+                       isInitializationOwner           = true;
                        sampling_initialization_result_ = InitializeContinuousProfiler(initializationParams);
                        continuous_profiler_snapshots_sampling_prepared_ =
                            SUCCEEDED(sampling_initialization_result_) &&
                            initializationParams.selectedThreadsSamplingInterval != 0;
+
+                       if (FAILED(sampling_initialization_result_))
+                       {
+                           return;
+                       }
+
+                       // Managed initialization sets these signals only after registering the
+                       // corresponding export handlers. Retain them for runtime calls, which
+                       // cannot build a managed export pipeline themselves.
+                       continuous_profiler_thread_sampling_prepared_ =
+                           threadSamplingExportPipelinePrepared && threadSamplingInterval != 0;
+                       continuous_profiler_allocation_sampling_prepared_ =
+                           allocationSamplingExportPipelinePrepared && maxMemorySamplesPerMinute != 0;
+
+                       const bool threadSamplingConfigured =
+                           ApplyThreadSamplingConfigurationLocked(threadSamplingEnabled, threadSamplingInterval);
+                       const bool allocationSamplingConfigured =
+                           ApplyAllocationSamplingConfigurationLocked(allocationSamplingEnabled,
+                                                                      maxMemorySamplesPerMinute);
+                       sampling_initial_configuration_result_ =
+                           threadSamplingConfigured && allocationSamplingConfigured;
                    });
 
     if (FAILED(sampling_initialization_result_))
@@ -1315,28 +1342,12 @@ bool CorProfiler::ConfigureContinuousProfiler(const bool         threadSamplingE
         return false;
     }
 
-    // Managed initialization sets these signals only after registering the
-    // corresponding export handlers. Retain them for runtime calls, which
-    // cannot build a managed export pipeline themselves.
-    if (threadSamplingExportPipelinePrepared && threadSamplingInterval != 0)
-    {
-        continuous_profiler_thread_sampling_prepared_ = true;
-    }
-    if (allocationSamplingExportPipelinePrepared && maxMemorySamplesPerMinute != 0)
-    {
-        continuous_profiler_allocation_sampling_prepared_ = true;
-    }
-
-    const bool threadSamplingConfigured =
-        ApplyThreadSamplingConfigurationLocked(threadSamplingEnabled, threadSamplingInterval);
-    const bool allocationSamplingConfigured =
-        ApplyAllocationSamplingConfigurationLocked(allocationSamplingEnabled, maxMemorySamplesPerMinute);
-    if (!threadSamplingConfigured || !allocationSamplingConfigured)
+    if (!sampling_initial_configuration_result_)
     {
         Logger::Warn("ContinuousProfiler: unable to apply complete sampling configuration.");
     }
 
-    return threadSamplingConfigured && allocationSamplingConfigured;
+    return sampling_initial_configuration_result_;
 }
 
 bool CorProfiler::ShutdownContinuousProfiler()

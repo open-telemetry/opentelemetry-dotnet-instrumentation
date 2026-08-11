@@ -81,6 +81,7 @@ public class ContinuousProfilerTests
 
         var exception = Record.Exception(
             () => Instrumentation.ShutdownNativeContinuousProfilerBestEffort(
+                true,
                 () =>
                 {
                     calls++;
@@ -92,13 +93,56 @@ public class ContinuousProfilerTests
     }
 
     [Fact]
+    public void BestEffortNativeProfilerShutdownDoesNotInvokeNativeShutdownForNonOwner()
+    {
+        var calls = 0;
+
+        var exception = Record.Exception(
+            () => Instrumentation.ShutdownNativeContinuousProfilerBestEffort(
+                false,
+                () =>
+                {
+                    calls++;
+                    throw new InvalidOperationException("The non-owner must not invoke native shutdown.");
+                }));
+
+        Assert.Null(exception);
+        Assert.Equal(0, calls);
+    }
+
+    [Fact]
     public void BestEffortNativeProfilerShutdownDoesNotPropagateNativeException()
     {
         var exception = Record.Exception(
             () => Instrumentation.ShutdownNativeContinuousProfilerBestEffort(
+                true,
                 () => throw new DllNotFoundException("Test native shutdown failure.")));
 
         Assert.Null(exception);
+    }
+
+    [Theory]
+    [InlineData(false, false)]
+    [InlineData(false, true)]
+    [InlineData(true, false)]
+    [InlineData(true, true)]
+    public void AllocationSamplingPreparationIsPlatformAware(
+        bool allocationSamplingEnabled,
+        bool runtimeAllocationSamplingConfigured)
+    {
+        var configuration = Instrumentation.GetEffectiveAllocationSamplingConfiguration(
+            allocationSamplingEnabled,
+            runtimeAllocationSamplingConfigured);
+
+#if NET
+        Assert.Equal(allocationSamplingEnabled, configuration.Enabled);
+        Assert.Equal(
+            allocationSamplingEnabled || runtimeAllocationSamplingConfigured,
+            configuration.Prepared);
+#else
+        Assert.False(configuration.Enabled);
+        Assert.False(configuration.Prepared);
+#endif
     }
 
     private static Dictionary<SampleType, (Action<byte[], int, uint, CancellationToken> Handler, TimeSpan ExportTimeout)> CreateHandlers()

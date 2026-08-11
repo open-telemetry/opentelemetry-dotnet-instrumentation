@@ -53,14 +53,29 @@ EXTERN_C BOOL STDAPICALLTYPE ConfigureContinuousProfiler(bool         threadSamp
                                                          bool         allocationSamplingEnabled,
                                                          unsigned int maxMemorySamplesPerMinute,
                                                          bool         allocationSamplingExportPipelinePrepared,
-                                                         unsigned int selectedThreadSamplingInterval)
+                                                         unsigned int selectedThreadSamplingInterval,
+                                                         BOOL*        isInitializationOwner)
 {
-    return trace::profiler != nullptr &&
-           trace::profiler->ConfigureContinuousProfiler(threadSamplingEnabled, threadSamplingInterval,
-                                                        threadSamplingExportPipelinePrepared, allocationSamplingEnabled,
-                                                        maxMemorySamplesPerMinute,
-                                                        allocationSamplingExportPipelinePrepared,
-                                                        selectedThreadSamplingInterval);
+    if (isInitializationOwner == nullptr)
+    {
+        return FALSE;
+    }
+
+    *isInitializationOwner = FALSE;
+    if (trace::profiler == nullptr)
+    {
+        return FALSE;
+    }
+
+    bool       initializationOwner = false;
+    const bool configured =
+        trace::profiler->ConfigureContinuousProfiler(threadSamplingEnabled, threadSamplingInterval,
+                                                     threadSamplingExportPipelinePrepared, allocationSamplingEnabled,
+                                                     maxMemorySamplesPerMinute,
+                                                     allocationSamplingExportPipelinePrepared,
+                                                     selectedThreadSamplingInterval, initializationOwner);
+    *isInitializationOwner = initializationOwner ? TRUE : FALSE;
+    return configured;
 }
 
 EXTERN_C BOOL STDAPICALLTYPE ShutdownContinuousProfiler()

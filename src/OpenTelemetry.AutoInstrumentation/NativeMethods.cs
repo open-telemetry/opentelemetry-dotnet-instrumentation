@@ -66,7 +66,8 @@ internal static class NativeMethods
         bool allocationSamplingEnabled,
         uint maxMemorySamplesPerMinute,
         bool allocationSamplingExportPipelinePrepared,
-        uint selectedThreadSamplingInterval)
+        uint selectedThreadSamplingInterval,
+        out bool isInitializationOwner)
     {
         if (IsWindows)
         {
@@ -77,7 +78,8 @@ internal static class NativeMethods
                 allocationSamplingEnabled,
                 maxMemorySamplesPerMinute,
                 allocationSamplingExportPipelinePrepared,
-                selectedThreadSamplingInterval);
+                selectedThreadSamplingInterval,
+                out isInitializationOwner);
         }
         else
         {
@@ -88,7 +90,8 @@ internal static class NativeMethods
                 allocationSamplingEnabled,
                 maxMemorySamplesPerMinute,
                 allocationSamplingExportPipelinePrepared,
-                selectedThreadSamplingInterval);
+                selectedThreadSamplingInterval,
+                out isInitializationOwner);
         }
     }
 
@@ -317,7 +320,8 @@ internal static class NativeMethods
             bool allocationSamplingEnabled,
             uint maxMemorySamplesPerMinute,
             bool allocationSamplingExportPipelinePrepared,
-            uint selectedThreadSamplingInterval);
+            uint selectedThreadSamplingInterval,
+            [MarshalAs(UnmanagedType.Bool)] out bool isInitializationOwner);
 
         [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
         [DllImport("OpenTelemetry.AutoInstrumentation.Native.dll")]
@@ -416,7 +420,8 @@ internal static class NativeMethods
             bool allocationSamplingEnabled,
             uint maxMemorySamplesPerMinute,
             bool allocationSamplingExportPipelinePrepared,
-            uint selectedThreadSamplingInterval);
+            uint selectedThreadSamplingInterval,
+            [MarshalAs(UnmanagedType.Bool)] out bool isInitializationOwner);
 
         [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
         [DllImport("OpenTelemetry.AutoInstrumentation.Native")]

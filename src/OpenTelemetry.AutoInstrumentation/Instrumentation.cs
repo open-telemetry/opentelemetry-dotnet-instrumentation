@@ -235,8 +235,15 @@ internal static class Instrumentation
         _pluginManager.Initialized();
     }
 
-    internal static void ShutdownNativeContinuousProfilerBestEffort(Func<bool> shutdownContinuousProfiler)
+    internal static void ShutdownNativeContinuousProfilerBestEffort(
+        bool isInitializationOwner,
+        Func<bool> shutdownContinuousProfiler)
     {
+        if (!isInitializationOwner)
+        {
+            return;
+        }
+
         try
         {
             if (!shutdownContinuousProfiler())
@@ -255,6 +262,17 @@ internal static class Instrumentation
                 // Rollback is best-effort and must not mask the managed initialization failure.
             }
         }
+    }
+
+    internal static (bool Enabled, bool Prepared) GetEffectiveAllocationSamplingConfiguration(
+        bool allocationSamplingEnabled,
+        bool runtimeAllocationSamplingConfigured)
+    {
+#if NET
+        return (allocationSamplingEnabled, allocationSamplingEnabled || runtimeAllocationSamplingConfigured);
+#else
+        return (false, false);
+#endif
     }
 
     private static void TryInitializeContinuousProfiling()
@@ -282,11 +300,13 @@ internal static class Instrumentation
             threadSamplingEnabled = false;
         }
 
+#if NET
         if (allocationSamplingEnabled && config.MaxMemorySamplesPerMinute == 0)
         {
             Logger.Warning("Continuous profiler max memory samples per minute must be greater than zero. Allocation sampling will not be enabled.");
             allocationSamplingEnabled = false;
         }
+#endif
 
         var runtimeThreadSamplingConfigured =
             !threadSamplingEnabled &&
@@ -304,7 +324,9 @@ internal static class Instrumentation
             config.Exporter != null &&
             config.ExportInterval > TimeSpan.Zero &&
             config.ExportTimeout > TimeSpan.Zero;
-        var allocationSamplingPrepared = allocationSamplingEnabled || runtimeAllocationSamplingConfigured;
+        (allocationSamplingEnabled, var allocationSamplingPrepared) = GetEffectiveAllocationSamplingConfiguration(
+            allocationSamplingEnabled,
+            runtimeAllocationSamplingConfigured);
 
         uint selectiveSamplingInterval = 0;
         var selectiveSamplingConfig = _pluginManager.GetFirstSelectiveSamplingConfiguration();
@@ -378,7 +400,7 @@ internal static class Instrumentation
         // Construct the managed exporter before native sampling can start, but defer its activity callbacks and
         // reader thread until native initialization has completed.
         var sampleExporter = _sampleExporterBuilder?.Build();
-        var nativeConfigurationCompleted = false;
+        var isNativeInitializationOwner = false;
 
         try
         {
@@ -389,8 +411,8 @@ internal static class Instrumentation
                 allocationSamplingEnabled,
                 allocationSamplingPrepared ? config.MaxMemorySamplesPerMinute : 0,
                 allocationSamplingPrepared,
-                selectiveSamplingInterval);
-            nativeConfigurationCompleted = true;
+                selectiveSamplingInterval,
+                out isNativeInitializationOwner);
 
             if (!nativeConfigurationApplied)
             {
@@ -404,7 +426,7 @@ internal static class Instrumentation
             if (!_canaryThreadManager.Start(TimeSpan.FromSeconds(5)))
             {
                 Logger.Error("Failed to start canary thread. Continuous profiling will not be enabled.");
-                ShutdownNativeContinuousProfilerBestEffort(NativeMethods.ShutdownNativeContinuousProfiler);
+                ShutdownNativeContinuousProfilerBestEffort(isNativeInitializationOwner, NativeMethods.ShutdownNativeContinuousProfiler);
                 _canaryThreadManager.Dispose();
                 _canaryThreadManager = null;
                 sampleExporter?.Dispose();
@@ -418,10 +440,7 @@ internal static class Instrumentation
         }
         catch
         {
-            if (nativeConfigurationCompleted)
-            {
-                ShutdownNativeContinuousProfilerBestEffort(NativeMethods.ShutdownNativeContinuousProfiler);
-            }
+            ShutdownNativeContinuousProfilerBestEffort(isNativeInitializationOwner, NativeMethods.ShutdownNativeContinuousProfiler);
 
 #if NETFRAMEWORK
             _canaryThreadManager?.Dispose();

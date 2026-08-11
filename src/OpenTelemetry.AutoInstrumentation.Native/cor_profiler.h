@@ -67,6 +67,7 @@ private:
     std::once_flag sampling_init_flag_;
     std::mutex sampling_configuration_lock_;
     HRESULT sampling_initialization_result_ = E_FAIL;
+    bool sampling_initial_configuration_result_ = false;
     bool continuous_profiler_thread_sampling_prepared_ = false;
     unsigned int continuous_profiler_sampling_interval_ = 0;
     bool continuous_profiler_allocation_sampling_prepared_ = false;
@@ -264,7 +265,8 @@ public:
                                              bool         allocationSamplingEnabled,
                                              unsigned int maxMemorySamplesPerMinute,
                                              bool         allocationSamplingExportPipelinePrepared,
-                                             unsigned int selectedThreadsSamplingInterval);
+                                             unsigned int selectedThreadsSamplingInterval,
+                                             bool&        isInitializationOwner);
     bool         ShutdownContinuousProfiler();
     bool         SetContinuousProfilerSamplingInterval(unsigned int threadSamplingInterval);
     bool         SetContinuousProfilerEnabled(bool enabled);
