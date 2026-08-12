@@ -352,6 +352,10 @@ class ContinuousProfiler
 public:
     std::chrono::time_point<std::chrono::steady_clock> nextOutdatedEntriesScan;
     ~ContinuousProfiler();
+    bool                        SetInitialThreadSamplingConfiguration(bool         threadSamplingEnabled,
+                                                                      unsigned int threadSamplingInterval,
+                                                                      bool         selectedThreadSamplingEnabled,
+                                                                      unsigned int selectedThreadsSamplingInterval);
     bool                        SetThreadSamplingInterval(unsigned int samplingInterval);
     bool                        SetThreadSamplingEnabled(bool enabled);
     bool                        SetSelectedThreadSamplingInterval(unsigned int samplingInterval);

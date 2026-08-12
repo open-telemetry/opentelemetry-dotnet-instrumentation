@@ -1520,6 +1520,68 @@ static bool IsValidSelectedThreadSamplingInterval(const unsigned int            
            IsValidThreadSamplingInterval(threadSamplingInterval.value(), samplingInterval);
 }
 
+bool ContinuousProfiler::SetInitialThreadSamplingConfiguration(const bool         threadSamplingEnabled,
+                                                               const unsigned int threadSamplingInterval,
+                                                               const bool         selectedThreadSamplingEnabled,
+                                                               const unsigned int selectedThreadsSamplingInterval)
+{
+    std::unique_lock<std::mutex> state_lock(sampling_state_mutex_);
+    if (IsShutdownRequested())
+    {
+        return false;
+    }
+
+    std::optional<unsigned int> effectiveThreadSamplingInterval;
+    if (threadSamplingEnabled)
+    {
+        effectiveThreadSamplingInterval = threadSamplingInterval;
+    }
+
+    std::optional<unsigned int> effectiveSelectedThreadsSamplingInterval;
+    if (selectedThreadSamplingEnabled)
+    {
+        effectiveSelectedThreadsSamplingInterval = selectedThreadsSamplingInterval;
+    }
+
+    // Validate the complete effective configuration before publishing either side.
+    // Prepared but disabled pipelines retain their interval without constraining an
+    // active pipeline until they are explicitly enabled.
+    if (selectedThreadSamplingEnabled)
+    {
+        if (!IsValidSelectedThreadSamplingInterval(selectedThreadsSamplingInterval, effectiveThreadSamplingInterval))
+        {
+            return false;
+        }
+    }
+    else if (threadSamplingEnabled &&
+             !IsValidThreadSamplingInterval(threadSamplingInterval, effectiveSelectedThreadsSamplingInterval))
+    {
+        return false;
+    }
+
+    const bool effectiveConfigurationChanged =
+        thread_sampling_interval_ != effectiveThreadSamplingInterval ||
+        selected_threads_sampling_interval_ != effectiveSelectedThreadsSamplingInterval;
+
+    configured_thread_sampling_interval_           = threadSamplingInterval;
+    configured_selected_threads_sampling_interval_ = selectedThreadsSamplingInterval;
+    thread_sampling_interval_                      = effectiveThreadSamplingInterval;
+    selected_threads_sampling_interval_            = effectiveSelectedThreadsSamplingInterval;
+
+    if (effectiveConfigurationChanged)
+    {
+        sampling_configuration_dirty_.store(true, std::memory_order_release);
+    }
+
+    if (IsThreadSamplingRequiredLocked())
+    {
+        return SUCCEEDED(StartThreadSamplingLocked());
+    }
+
+    StopThreadSamplingLocked(state_lock);
+    return true;
+}
+
 bool ContinuousProfiler::SetSelectedThreadSamplingInterval(const unsigned int samplingInterval)
 {
     std::lock_guard<std::mutex> state_guard(sampling_state_mutex_);

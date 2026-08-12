@@ -154,9 +154,11 @@ private:
     bool InitThreadSampler();
     bool TryEnterContinuousProfilerCallback(std::shared_lock<std::shared_mutex>& callbackLock);
     HRESULT InitializeContinuousProfiler(const ContinuousProfilerInitializationParams& params);
-    bool ApplyThreadSamplingConfigurationLocked(bool enabled, unsigned int samplingInterval);
+    bool    ApplyInitialThreadSamplingConfigurationLocked(bool         threadSamplingEnabled,
+                                                          unsigned int threadSamplingInterval,
+                                                          bool         selectedThreadSamplingEnabled,
+                                                          unsigned int selectedThreadsSamplingInterval);
     bool ApplyAllocationSamplingConfigurationLocked(bool enabled, unsigned int maxMemorySamplesPerMinute);
-    bool ApplySnapshotsSamplingConfigurationLocked(bool enabled, unsigned int samplingInterval);
     bool SetContinuousProfilerSamplingIntervalLocked(unsigned int samplingInterval);
     bool SetContinuousProfilerEnabledLocked(bool enabled);
     bool SetContinuousProfilerAllocationSamplingEnabledLocked(bool enabled);

@@ -1370,16 +1370,15 @@ bool CorProfiler::ConfigureContinuousProfiler(const bool         threadSamplingE
                            allocationSamplingExportPipelinePrepared && maxMemorySamplesPerMinute != 0;
 
                        const bool threadSamplingConfigured =
-                           ApplyThreadSamplingConfigurationLocked(threadSamplingEnabled, threadSamplingInterval);
+                           ApplyInitialThreadSamplingConfigurationLocked(threadSamplingEnabled, threadSamplingInterval,
+                                                                         selectedThreadSamplingEnabled,
+                                                                         initializationParams
+                                                                             .selectedThreadsSamplingInterval);
                        const bool allocationSamplingConfigured =
                            ApplyAllocationSamplingConfigurationLocked(allocationSamplingEnabled,
                                                                       maxMemorySamplesPerMinute);
-                       const bool snapshotsSamplingConfigured =
-                           ApplySnapshotsSamplingConfigurationLocked(selectedThreadSamplingEnabled,
-                                                                     initializationParams
-                                                                         .selectedThreadsSamplingInterval);
                        sampling_initial_configuration_result_ =
-                           threadSamplingConfigured && allocationSamplingConfigured && snapshotsSamplingConfigured;
+                           threadSamplingConfigured && allocationSamplingConfigured;
                    });
 
     if (FAILED(sampling_initialization_result_))
@@ -1643,25 +1642,56 @@ bool CorProfiler::SetContinuousProfilerSnapshotSamplingIntervalLocked(const unsi
     return this->continuousProfiler->SetSelectedThreadSamplingInterval(samplingInterval);
 }
 
-bool CorProfiler::ApplyThreadSamplingConfigurationLocked(const bool enabled, const unsigned int threadSamplingInterval)
+bool CorProfiler::ApplyInitialThreadSamplingConfigurationLocked(const bool         threadSamplingEnabled,
+                                                                const unsigned int threadSamplingInterval,
+                                                                const bool         selectedThreadSamplingEnabled,
+                                                                const unsigned int selectedThreadsSamplingInterval)
 {
-    if (enabled)
+    if (threadSamplingEnabled && threadSamplingInterval == 0)
     {
-        // Validate and publish the interval before enabling. A rejected update
-        // leaves the last known-good CPU configuration running.
-        return SetContinuousProfilerSamplingIntervalLocked(threadSamplingInterval) &&
-               SetContinuousProfilerEnabledLocked(true);
+        Logger::Warn("ContinuousProfiler: thread sampling interval must be greater than zero.");
+        return false;
     }
 
-    // Stop first so a simultaneous interval change cannot publish one sample at
-    // the new period before the requested disabled state takes effect.
-    const bool disabled = SetContinuousProfilerEnabledLocked(false);
-    if (threadSamplingInterval == 0)
+    if (selectedThreadSamplingEnabled && selectedThreadsSamplingInterval == 0)
     {
-        return disabled;
+        Logger::Warn("ContinuousProfiler: snapshot sampling interval must be greater than zero.");
+        return false;
     }
 
-    return SetContinuousProfilerSamplingIntervalLocked(threadSamplingInterval) && disabled;
+    if (this->continuousProfiler == nullptr)
+    {
+        if (threadSamplingEnabled || selectedThreadSamplingEnabled)
+        {
+            Logger::Warn("ContinuousProfiler: cannot enable thread sampling before profiler initialization.");
+        }
+        return !threadSamplingEnabled && !selectedThreadSamplingEnabled;
+    }
+
+    if ((threadSamplingEnabled || threadSamplingInterval != 0) && !continuous_profiler_thread_sampling_prepared_)
+    {
+        Logger::Warn(
+            "ContinuousProfiler: cannot configure thread sampling because its export pipeline was not initialized.");
+        return false;
+    }
+
+    if ((selectedThreadSamplingEnabled || selectedThreadsSamplingInterval != 0) &&
+        !continuous_profiler_snapshots_sampling_prepared_)
+    {
+        Logger::Warn(
+            "ContinuousProfiler: cannot configure snapshots because their export pipeline was not initialized.");
+        return false;
+    }
+
+    if (!this->continuousProfiler->SetInitialThreadSamplingConfiguration(threadSamplingEnabled, threadSamplingInterval,
+                                                                         selectedThreadSamplingEnabled,
+                                                                         selectedThreadsSamplingInterval))
+    {
+        return false;
+    }
+
+    continuous_profiler_sampling_interval_ = this->continuousProfiler->GetConfiguredThreadSamplingInterval();
+    return true;
 }
 
 bool CorProfiler::ApplyAllocationSamplingConfigurationLocked(const bool         enabled,
@@ -1695,23 +1725,6 @@ bool CorProfiler::ApplyAllocationSamplingConfigurationLocked(const bool         
     }
 
     return true;
-}
-
-bool CorProfiler::ApplySnapshotsSamplingConfigurationLocked(const bool enabled, const unsigned int samplingInterval)
-{
-    if (enabled)
-    {
-        return SetContinuousProfilerSnapshotSamplingIntervalLocked(samplingInterval) &&
-               SetContinuousProfilerSnapshotsEnabledLocked(true);
-    }
-
-    const bool disabled = SetContinuousProfilerSnapshotsEnabledLocked(false);
-    if (samplingInterval == 0)
-    {
-        return disabled;
-    }
-
-    return SetContinuousProfilerSnapshotSamplingIntervalLocked(samplingInterval) && disabled;
 }
 
 unsigned int CorProfiler::GetContinuousProfilerSamplingInterval()
