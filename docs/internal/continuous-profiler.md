@@ -66,11 +66,11 @@ Native continuous profiler resources are initialized once per process through
 `ConfigureContinuousProfiler`. Runtime setters do not initialize native resources
 or managed export pipelines. After initialization, the six setters are:
 
-- `SetContinuousProfilerEnabled(bool)` and
+* `SetContinuousProfilerEnabled(bool)` and
   `SetContinuousProfilerSamplingInterval(uint)` for CPU sampling.
-- `SetContinuousProfilerAllocationSamplingEnabled(bool)` and
+* `SetContinuousProfilerAllocationSamplingEnabled(bool)` and
   `SetContinuousProfilerMaxMemorySamplesPerMinute(uint)` for allocation sampling.
-- `SetContinuousProfilerSnapshotsEnabled(bool)` and
+* `SetContinuousProfilerSnapshotsEnabled(bool)` and
   `SetContinuousProfilerSnapshotSamplingInterval(uint)` for snapshot (selective)
   sampling.
 
