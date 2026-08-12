@@ -18,8 +18,8 @@ COPY ./scripts/dotnet-install.sh ./dotnet-install.sh
 
 # Install older SDKs using the install script as there are no arm64 SDK packages.
 RUN chmod +x ./dotnet-install.sh \
-    && ./dotnet-install.sh -v 10.0.302 --install-dir /usr/share/dotnet --no-path \
-    && ./dotnet-install.sh -v 8.0.423 --install-dir /usr/share/dotnet --no-path \
+    && ./dotnet-install.sh -v 10.0.400 --install-dir /usr/share/dotnet --no-path \
+    && ./dotnet-install.sh -v 8.0.424 --install-dir /usr/share/dotnet --no-path \
     && rm dotnet-install.sh
 
 WORKDIR /project
