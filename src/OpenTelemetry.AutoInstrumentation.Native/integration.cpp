@@ -37,8 +37,8 @@ AssemblyReference* AssemblyReference::GetFromCache(const WSTRING& str)
     return aref;
 }
 
-std::vector<IntegrationDefinition> GetIntegrationsFromTraceMethodsConfiguration(
-    const TypeReference integration_type, const WSTRING& configuration_string)
+std::vector<IntegrationDefinition> GetIntegrationsFromTraceMethodsConfiguration(const TypeReference integration_type,
+                                                                                const WSTRING& configuration_string)
 {
     std::vector<IntegrationDefinition> integrationDefinitions;
 

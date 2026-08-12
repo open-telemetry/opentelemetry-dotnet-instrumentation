@@ -76,7 +76,7 @@ void RejitPreprocessor<RejitRequestDefinition>::ProcessTypeDefForRejit(const Rej
             continue;
         }
 
-        const auto numOfArgs                = functionInfo.method_signature.NumberOfArguments();
+        const auto numOfArgs = functionInfo.method_signature.NumberOfArguments();
         if (wildcard_enabled)
         {
             if (tracemethodintegration_wildcard_ignored_methods.find(caller.name) !=
@@ -93,7 +93,7 @@ void RejitPreprocessor<RejitRequestDefinition>::ProcessTypeDefForRejit(const Rej
             }
         }
 
-        auto       is_exact_signature_match = GetIsExactSignatureMatch(definition);
+        auto is_exact_signature_match = GetIsExactSignatureMatch(definition);
 
         if (is_exact_signature_match)
         {

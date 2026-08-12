@@ -35,8 +35,7 @@ std::string ToString(const WCHAR* wstr, std::size_t nbChars)
         return std::string();
 
     std::string tmpStr(tmp_buffer_size, 0);
-    int         size_needed =
-        WideCharToMultiByte(CP_UTF8, 0, wstr, (int)nbChars, &tmpStr[0], tmp_buffer_size, NULL, NULL);
+    int size_needed = WideCharToMultiByte(CP_UTF8, 0, wstr, (int)nbChars, &tmpStr[0], tmp_buffer_size, NULL, NULL);
     if (size_needed < tmp_buffer_size)
     {
         return tmpStr.substr(0, size_needed);
