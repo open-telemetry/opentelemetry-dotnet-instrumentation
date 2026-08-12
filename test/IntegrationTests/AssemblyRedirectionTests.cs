@@ -35,15 +35,15 @@ public class AssemblyRedirectionTests(ITestOutputHelper output) : TestHelper("As
     // Case 2: Equal version, should NOT be redirected with/without native profiler
     // TODO currently different test jobs use different versions of .net runtime:
     //   - test-build-container (ubuntu-22.04, alpine, alpine-x64, linux-musl): DS file version 10.0.426.12010
-    //   - test-build-managed (net10.0, windows-2022): DS file version 10.0.1026.32716
-    [InlineData("10.0.10", AssemblyName, "10.0.0.0", "10.0.1026.32716", true)]
-    [InlineData("10.0.10", AssemblyName, "10.0.0.0", "10.0.1026.32716", false)]
+    //   - test-build-managed (net10.0, windows-2022): DS file version 10.0.1126.37416
+    [InlineData("10.0.11", AssemblyName, "10.0.0.0", "10.0.1126.37416", true)]
+    [InlineData("10.0.11", AssemblyName, "10.0.0.0", "10.0.1126.37416", false)]
     // Case 3: Higher version is not possible for DiagnosticSource on .NET 10, the instrumentation tool is already using the highest possible version
 #elif NETFRAMEWORK
     // Case 1: Lower version should be redirected (native profiler mandatory)
-    [InlineData("6.0.0", AssemblyName, "10.0.0.10", "10.0.1026.32716")]
+    [InlineData("6.0.0", AssemblyName, "10.0.0.11", "10.0.1126.37416")]
     // Case 2: Equal version, should NOT be redirected (native profiler mandatory)
-    [InlineData("10.0.10", AssemblyName, "10.0.0.10", "10.0.1026.32716")]
+    [InlineData("10.0.11", AssemblyName, "10.0.0.11", "10.0.1126.37416")]
     // Case 3: Higher version is not possible for DiagnosticSource on .NET 10, the instrumentation tool is already using the highest possible version
 #endif
     public void SubmitsTraces(
