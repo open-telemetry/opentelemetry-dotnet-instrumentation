@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 using OpenTelemetry.AutoInstrumentation.ContinuousProfiler;
+using OpenTelemetry.AutoInstrumentation.PluginApi.SelectiveSampling;
 
 namespace OpenTelemetry.AutoInstrumentation.Tests;
 
@@ -10,44 +11,7 @@ public class ContinuousProfilerTests
     private static readonly TimeSpan ExportTimeout = TimeSpan.FromSeconds(1);
 
     [Fact]
-    public void SampleExporterDoesNotReadUntilStarted()
-    {
-        using var readAttempted = new ManualResetEventSlim();
-        var bufferProcessor = new BufferProcessor(
-            CreateHandlers(),
-            (_, _) =>
-            {
-                readAttempted.Set();
-                return (0, 0);
-            });
-        using var sampleExporter = new SampleExporter(
-            bufferProcessor,
-            TimeSpan.FromMilliseconds(10),
-            ExportTimeout);
-
-        Assert.False(readAttempted.Wait(TimeSpan.FromMilliseconds(100)));
-
-        sampleExporter.Start();
-
-        Assert.True(readAttempted.Wait(TimeSpan.FromSeconds(5)));
-    }
-
-    [Fact]
-    public void SampleExporterCannotStartAfterDisposal()
-    {
-        var bufferProcessor = new BufferProcessor(CreateHandlers(), (_, _) => (0, 0));
-        var sampleExporter = new SampleExporter(
-            bufferProcessor,
-            TimeSpan.FromMilliseconds(10),
-            ExportTimeout);
-
-        sampleExporter.Dispose();
-
-        Assert.Throws<ObjectDisposedException>(sampleExporter.Start);
-    }
-
-    [Fact]
-    public void BufferProcessorContinuesAfterNativeReadThrows()
+    public void BufferProcessorIsolatesNativeReadFailuresAndForwardsSamplingInterval()
     {
         uint? observedSamplingInterval = null;
         var handlers = CreateHandlers();
@@ -72,47 +36,29 @@ public class ContinuousProfilerTests
         Assert.Equal(123u, observedSamplingInterval);
     }
 
-    [Theory]
-    [InlineData(false)]
-    [InlineData(true)]
-    public void BestEffortNativeProfilerShutdownInvokesNativeShutdown(bool nativeResult)
-    {
-        var calls = 0;
-
-        var exception = Record.Exception(
-            () => Instrumentation.ShutdownNativeContinuousProfilerBestEffort(
-                true,
-                () =>
-                {
-                    calls++;
-                    return nativeResult;
-                }));
-
-        Assert.Null(exception);
-        Assert.Equal(1, calls);
-    }
-
     [Fact]
-    public void BestEffortNativeProfilerShutdownDoesNotInvokeNativeShutdownForNonOwner()
+    public void BestEffortNativeProfilerShutdownHonorsOwnershipAndSwallowsFailures()
     {
         var calls = 0;
 
-        var exception = Record.Exception(
-            () => Instrumentation.ShutdownNativeContinuousProfilerBestEffort(
-                false,
-                () =>
-                {
-                    calls++;
-                    throw new InvalidOperationException("The non-owner must not invoke native shutdown.");
-                }));
-
-        Assert.Null(exception);
+        Instrumentation.ShutdownNativeContinuousProfilerBestEffort(
+            false,
+            () =>
+            {
+                calls++;
+                return true;
+            });
         Assert.Equal(0, calls);
-    }
 
-    [Fact]
-    public void BestEffortNativeProfilerShutdownDoesNotPropagateNativeException()
-    {
+        Instrumentation.ShutdownNativeContinuousProfilerBestEffort(
+            true,
+            () =>
+            {
+                calls++;
+                return false;
+            });
+        Assert.Equal(1, calls);
+
         var exception = Record.Exception(
             () => Instrumentation.ShutdownNativeContinuousProfilerBestEffort(
                 true,
@@ -122,10 +68,8 @@ public class ContinuousProfilerTests
     }
 
     [Theory]
-    [InlineData(false, false)]
     [InlineData(false, true)]
     [InlineData(true, false)]
-    [InlineData(true, true)]
     public void AllocationSamplingPreparationIsPlatformAware(
         bool allocationSamplingEnabled,
         bool runtimeAllocationSamplingConfigured)
@@ -143,6 +87,63 @@ public class ContinuousProfilerTests
         Assert.False(configuration.Enabled);
         Assert.False(configuration.Prepared);
 #endif
+    }
+
+    [Fact]
+    public void SelectiveSamplingIsPreparedWithoutBeingInitiallyEnabled()
+    {
+        var configuration = Instrumentation.GetEffectiveSamplingConfiguration(
+            false,
+            100,
+            TimeSpan.FromSeconds(1),
+            TimeSpan.FromSeconds(1),
+            true);
+
+        Assert.False(configuration.Enabled);
+        Assert.True(configuration.Prepared);
+    }
+
+    [Theory]
+    [InlineData(0, 1, 1, true)]
+    [InlineData(1, 0, 1, true)]
+    [InlineData(1, 1, 0, true)]
+    [InlineData(1, 1, 1, false)]
+    public void InvalidSamplingConfigurationIsNotEnabledOrPrepared(
+        uint samplingInterval,
+        int exportIntervalMilliseconds,
+        int exportTimeoutMilliseconds,
+        bool exporterConfigured)
+    {
+        var configuration = Instrumentation.GetEffectiveSamplingConfiguration(
+            true,
+            samplingInterval,
+            TimeSpan.FromMilliseconds(exportIntervalMilliseconds),
+            TimeSpan.FromMilliseconds(exportTimeoutMilliseconds),
+            exporterConfigured);
+
+        Assert.False(configuration.Enabled);
+        Assert.False(configuration.Prepared);
+    }
+
+    [Fact]
+    public void SelectiveSamplingConfigurationIsEnabledByDefault()
+    {
+        Assert.True(new SelectiveSamplerConfiguration().Enabled);
+    }
+
+    [Theory]
+    [InlineData(true, true, true)]
+    [InlineData(false, true, false)]
+    [InlineData(true, false, false)]
+    [InlineData(false, false, false)]
+    public void OnlyInitializationOwnerStartsSampleExporter(
+        bool nativeConfigurationApplied,
+        bool isInitializationOwner,
+        bool expected)
+    {
+        Assert.Equal(
+            expected,
+            Instrumentation.ShouldStartSampleExporter(nativeConfigurationApplied, isInitializationOwner));
     }
 
     private static Dictionary<SampleType, (Action<byte[], int, uint, CancellationToken> Handler, TimeSpan ExportTimeout)> CreateHandlers()

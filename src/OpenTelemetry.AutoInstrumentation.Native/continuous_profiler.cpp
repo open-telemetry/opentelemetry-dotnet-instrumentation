@@ -563,6 +563,11 @@ void ThreadSpanContextMap::Remove(ThreadID threadId)
     thread_span_context_map.erase(threadId);
 }
 
+void ThreadSpanContextMap::Clear()
+{
+    thread_span_context_map.clear();
+}
+
 std::unordered_map<ThreadID, thread_span_context>::const_iterator ThreadSpanContextMap::begin() const
 {
     return thread_span_context_map.begin();
@@ -1005,10 +1010,9 @@ static void ResolveSymbolsAndPublishBufferForSelectedThreads(
     SelectiveSamplingRecordProducedThreadSample(static_cast<int32_t>(localBytes.size()), localBytes.data());
 }
 
-bool TryAddSelectiveSamplingTrace(const trace_context& context, const std::chrono::steady_clock::time_point now)
+static bool TryAddSelectiveSamplingTraceLocked(const trace_context&                        context,
+                                               const std::chrono::steady_clock::time_point now)
 {
-    std::lock_guard<std::mutex> selective_sampling_guard(selective_sampling_lock);
-
     if (selective_sampling_trace_map.size() >= kSelectiveSamplingMaxTraces)
     {
         return false;
@@ -1018,6 +1022,12 @@ bool TryAddSelectiveSamplingTrace(const trace_context& context, const std::chron
     selective_sampling_trace_map[context] =
         std::chrono::duration_cast<std::chrono::milliseconds>(deadline.time_since_epoch()).count();
     return true;
+}
+
+bool TryAddSelectiveSamplingTrace(const trace_context& context, const std::chrono::steady_clock::time_point now)
+{
+    std::lock_guard<std::mutex> selective_sampling_guard(selective_sampling_lock);
+    return TryAddSelectiveSamplingTraceLocked(context, now);
 }
 
 void RemoveSelectiveSamplingTrace(const trace_context& context)
@@ -1320,7 +1330,6 @@ void ContinuousProfiler::SetGlobalInfo7(ICorProfilerInfo7* cor_profiler_info7)
 {
     info7               = cor_profiler_info7;
     this->helper.info7_ = cor_profiler_info7;
-    profiler_info.store(cor_profiler_info7, std::memory_order_release);
 }
 
 void ContinuousProfiler::SetGlobalInfo12(ICorProfilerInfo12* cor_profiler_info12)
@@ -1328,6 +1337,30 @@ void ContinuousProfiler::SetGlobalInfo12(ICorProfilerInfo12* cor_profiler_info12
     // ICorProfilerInfo12 derives from ICorProfilerInfo7, so we can use it as ICorProfilerInfo7
     SetGlobalInfo7(cor_profiler_info12);
     info12 = cor_profiler_info12;
+}
+
+void ContinuousProfiler::PublishGlobalInfo() const
+{
+    profiler_info.store(info7, std::memory_order_release);
+}
+
+void ContinuousProfiler::ClearGlobalInfo()
+{
+    // Close the callback fast path before clearing the associated process-wide state.
+    // ContinuousProfilerSetNativeContext rechecks this value while holding the map lock,
+    // so a callback that observed the old value cannot repopulate the map after this clear.
+    profiler_info.store(nullptr, std::memory_order_release);
+
+    {
+        std::lock_guard<std::mutex> guard(thread_span_context_lock);
+        thread_span_context_map.Clear();
+    }
+
+    {
+        std::lock_guard<std::mutex> guard(selective_sampling_lock);
+        selective_sampling_trace_map.clear();
+        selective_sampling_thread_buffer.clear();
+    }
 }
 
 void ContinuousProfiler::SetStackWalker(IStackWalker* walker)
@@ -1353,6 +1386,13 @@ void ContinuousProfiler::InitSelectiveSamplingBuffer()
 ContinuousProfiler::~ContinuousProfiler()
 {
     Shutdown();
+
+    std::lock_guard<std::mutex> guard(thread_state_lock_);
+    for (const auto& threadStateEntry : managed_tid_to_state_)
+    {
+        delete threadStateEntry.second;
+    }
+    managed_tid_to_state_.clear();
 }
 
 static bool IsValidThreadSamplingInterval(const unsigned int                 samplingInterval,
@@ -1617,12 +1657,6 @@ bool ContinuousProfiler::IsThreadSamplingThreadRunning() const
            thread_sampling_thread_->joinable() && !thread_sampling_stop_requested_;
 }
 
-uint64_t ContinuousProfiler::GetThreadSamplingThreadGeneration() const
-{
-    std::lock_guard<std::mutex> state_guard(sampling_state_mutex_);
-    return thread_sampling_thread_generation_;
-}
-
 bool ContinuousProfiler::IsThreadSamplingRequiredLocked() const
 {
     return thread_sampling_interval_.has_value() || selected_threads_sampling_interval_.has_value();
@@ -1642,7 +1676,6 @@ HRESULT ContinuousProfiler::StartThreadSamplingLocked()
         thread_sampling_stop_requested_ = false;
         thread_sampling_thread_         = std::make_unique<std::thread>(SamplingThreadMain, this);
         thread_sampling_thread_state_   = SamplingThreadState::Running;
-        ++thread_sampling_thread_generation_;
         trace::Logger::Info("ContinuousProfiler sampling thread started.");
         return S_OK;
     }
@@ -2170,9 +2203,15 @@ void NameCache<TKey, TValue>::Clear()
 
 extern "C"
 {
-    EXPORTTHIS int32_t ContinuousProfilerReadThreadSamples(int32_t        len,
-                                                           unsigned char* buf,
-                                                           unsigned int*  samplingInterval)
+    // ABI compatibility wrapper for managed runtimes that do not consume per-batch sampling metadata.
+    EXPORTTHIS int32_t ContinuousProfilerReadThreadSamples(int32_t len, unsigned char* buf)
+    {
+        unsigned int ignoredSamplingInterval;
+        return ThreadSamplingConsumeOneThreadSample(len, buf, &ignoredSamplingInterval);
+    }
+    EXPORTTHIS int32_t ContinuousProfilerReadThreadSamplesV2(int32_t        len,
+                                                             unsigned char* buf,
+                                                             unsigned int*  samplingInterval)
     {
         return ThreadSamplingConsumeOneThreadSample(len, buf, samplingInterval);
     }
@@ -2211,13 +2250,18 @@ extern "C"
             return;
         }
         std::lock_guard<std::mutex> guard(thread_span_context_lock);
+        if (profiler_info.load(std::memory_order_acquire) != current_profiler_info)
+        {
+            return;
+        }
 
         const continuous_profiler::thread_span_context newSpanContext = {traceIdHigh, traceIdLow, spanId};
         thread_span_context_map.Put(threadId, newSpanContext);
     }
     EXPORTTHIS void SelectiveSamplingStart(uint64_t traceIdHigh, uint64_t traceIdLow)
     {
-        if (profiler_info.load(std::memory_order_acquire) == nullptr)
+        auto* const current_profiler_info = profiler_info.load(std::memory_order_acquire);
+        if (current_profiler_info == nullptr)
         {
             return;
         }
@@ -2228,8 +2272,20 @@ extern "C"
             return;
         }
 
-        // Don't allow for too many samples at once
-        if (continuous_profiler::TryAddSelectiveSamplingTrace(context, std::chrono::steady_clock::now()))
+        bool traceAdded;
+        {
+            std::lock_guard<std::mutex> guard(selective_sampling_lock);
+            if (profiler_info.load(std::memory_order_acquire) != current_profiler_info)
+            {
+                return;
+            }
+
+            // Don't allow for too many samples at once.
+            traceAdded =
+                continuous_profiler::TryAddSelectiveSamplingTraceLocked(context, std::chrono::steady_clock::now());
+        }
+
+        if (traceAdded)
         {
             return;
         }

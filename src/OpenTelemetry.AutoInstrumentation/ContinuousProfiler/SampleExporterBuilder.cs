@@ -18,6 +18,14 @@ internal class SampleExporterBuilder
 
     public SampleExporterBuilder AddHandler(SampleType type, Action<byte[], int, uint, CancellationToken> handler, TimeSpan exportTimeout)
     {
+#if NET
+        ArgumentOutOfRangeException.ThrowIfLessThanOrEqual(exportTimeout, TimeSpan.Zero);
+#else
+        if (exportTimeout <= TimeSpan.Zero)
+        {
+            throw new ArgumentOutOfRangeException(nameof(exportTimeout));
+        }
+#endif
         _sampleHandlers.Add(type, (handler, exportTimeout));
         return this;
     }

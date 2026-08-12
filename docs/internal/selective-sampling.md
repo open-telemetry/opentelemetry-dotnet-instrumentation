@@ -35,6 +35,9 @@ The native-side sampling thread, and managed-side exporter thread
 are shared with continuous profiler, if it is enabled.
 
 Continuous profiling and selective sampling can be enabled independently.
+Selective sampling can also be prepared without being started by setting
+`SelectiveSamplerConfiguration.Enabled` to `false`. The configured interval and
+export pipeline are then available to a later runtime enable operation.
 
 ## Requirements
 

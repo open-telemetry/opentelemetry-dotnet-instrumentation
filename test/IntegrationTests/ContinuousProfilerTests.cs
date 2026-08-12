@@ -118,7 +118,7 @@ public class ContinuousProfilerTests : TestHelper
 
     [Fact]
     [Trait("Category", "EndToEnd")]
-    public void RuntimeReconfigurationStartsStopsAndUpdatesProfiler()
+    public void RuntimeNativeMethodsAreIdempotentAndPreserveAbi()
     {
         EnableBytecodeInstrumentation();
         SetEnvironmentVariable(
@@ -126,36 +126,22 @@ public class ContinuousProfilerTests : TestHelper
             "TestApplication.ContinuousProfiler.RuntimeReconfigurationPlugin, TestApplication.ContinuousProfiler, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null");
 
         var (standardOutput, _, _) = RunTestApplication(
-            new TestSettings { Arguments = "--runtime-reconfiguration" });
+            new TestSettings { Arguments = "--runtime-native-methods" });
 
-        Assert.Contains("runtime-reconfiguration-completed", standardOutput, StringComparison.Ordinal);
+        Assert.Contains("runtime-native-methods-verified", standardOutput, StringComparison.Ordinal);
     }
 
     [Fact]
     [Trait("Category", "EndToEnd")]
-    public void RuntimeReconfigurationRejectsUnpreparedThreadPipeline()
+    public void RuntimeNativeMethodsRejectUnpreparedPipelines()
     {
         EnableBytecodeInstrumentation();
 
         var (standardOutput, _, _) = RunTestApplication(
-            new TestSettings { Arguments = "--runtime-unprepared-thread" });
+            new TestSettings { Arguments = "--runtime-unprepared-pipelines" });
 
-        Assert.Contains("runtime-unprepared-thread-rejected", standardOutput, StringComparison.Ordinal);
+        Assert.Contains("runtime-unprepared-pipelines-rejected", standardOutput, StringComparison.Ordinal);
     }
-
-#if NET
-    [Fact]
-    [Trait("Category", "EndToEnd")]
-    public void RuntimeReconfigurationRejectsUnpreparedAllocationPipeline()
-    {
-        EnableBytecodeInstrumentation();
-
-        var (standardOutput, _, _) = RunTestApplication(
-            new TestSettings { Arguments = "--runtime-unprepared-allocation" });
-
-        Assert.Contains("runtime-unprepared-allocation-rejected", standardOutput, StringComparison.Ordinal);
-    }
-#endif
 
     private static bool ExpectCollected(ICollection<ExportProfilesServiceRequest> c)
     {

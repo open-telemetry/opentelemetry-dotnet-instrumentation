@@ -10,6 +10,7 @@
 #include "corprof.h"
 #include <atomic>
 #include <mutex>
+#include <shared_mutex>
 #include <string>
 #include <unordered_map>
 #include <vector>
@@ -34,6 +35,7 @@ namespace trace
 {
 struct ContinuousProfilerInitializationParams
 {
+    bool         selectedThreadSamplingExportPipelinePrepared;
     unsigned int selectedThreadsSamplingInterval;
 };
 
@@ -63,6 +65,8 @@ private:
 
     continuous_profiler::ContinuousProfiler* continuousProfiler;
     std::atomic_bool continuous_profiler_initialized_ = {false};
+    std::atomic_bool continuous_profiler_initialization_in_progress_ = {false};
+    std::shared_mutex continuous_profiler_callback_lock_;
     std::unique_ptr<continuous_profiler::StackWalkerImpl>       stack_walker_impl_;
     std::once_flag sampling_init_flag_;
     std::mutex sampling_configuration_lock_;
@@ -148,9 +152,11 @@ private:
     //
     void InternalAddInstrumentation(WCHAR* id, CallTargetDefinition* items, int size, bool isDerived);
     bool InitThreadSampler();
+    bool TryEnterContinuousProfilerCallback(std::shared_lock<std::shared_mutex>& callbackLock);
     HRESULT InitializeContinuousProfiler(const ContinuousProfilerInitializationParams& params);
     bool ApplyThreadSamplingConfigurationLocked(bool enabled, unsigned int samplingInterval);
     bool ApplyAllocationSamplingConfigurationLocked(bool enabled, unsigned int maxMemorySamplesPerMinute);
+    bool ApplySnapshotsSamplingConfigurationLocked(bool enabled, unsigned int samplingInterval);
     bool SetContinuousProfilerSamplingIntervalLocked(unsigned int samplingInterval);
     bool SetContinuousProfilerEnabledLocked(bool enabled);
     bool SetContinuousProfilerAllocationSamplingEnabledLocked(bool enabled);
@@ -265,6 +271,8 @@ public:
                                              bool         allocationSamplingEnabled,
                                              unsigned int maxMemorySamplesPerMinute,
                                              bool         allocationSamplingExportPipelinePrepared,
+                                             bool         selectedThreadSamplingEnabled,
+                                             bool         selectedThreadSamplingExportPipelinePrepared,
                                              unsigned int selectedThreadsSamplingInterval,
                                              bool&        isInitializationOwner);
     bool         ShutdownContinuousProfiler();

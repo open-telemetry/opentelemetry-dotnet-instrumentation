@@ -9,6 +9,11 @@ namespace OpenTelemetry.AutoInstrumentation.PluginApi.SelectiveSampling;
 public sealed class SelectiveSamplerConfiguration
 {
     /// <summary>
+    /// Gets or sets a value indicating whether selective sampling is initially enabled.
+    /// </summary>
+    public bool Enabled { get; set; } = true;
+
+    /// <summary>
     /// Gets or sets sampling interval.
     /// </summary>
     public uint SamplingInterval { get; set; }

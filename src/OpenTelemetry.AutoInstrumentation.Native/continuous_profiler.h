@@ -30,8 +30,9 @@
 
 extern "C"
 {
-    EXPORTTHIS int32_t ContinuousProfilerReadThreadSamples(int32_t len, unsigned char* buf,
-                                                           unsigned int* samplingInterval);
+    EXPORTTHIS int32_t ContinuousProfilerReadThreadSamples(int32_t len, unsigned char* buf);
+    EXPORTTHIS int32_t ContinuousProfilerReadThreadSamplesV2(int32_t len, unsigned char* buf,
+                                                             unsigned int* samplingInterval);
     EXPORTTHIS int32_t ContinuousProfilerReadAllocationSamples(int32_t len, unsigned char* buf);
     EXPORTTHIS int32_t SelectiveSamplerReadThreadSamples(int32_t len, unsigned char* buf);
     // ReSharper disable CppInconsistentNaming
@@ -266,6 +267,7 @@ public:
     std::optional<thread_span_context>                                GetContext(ThreadID threadId);
     void                                                              Remove(const thread_span_context& spanContext);
     void                                                              Remove(ThreadID threadId);
+    void                                                              Clear();
     std::unordered_map<ThreadID, thread_span_context>::const_iterator begin() const;
     std::unordered_map<ThreadID, thread_span_context>::const_iterator end() const;
 
@@ -362,7 +364,6 @@ public:
     bool WaitForStop(unsigned int samplingInterval);
     bool                        IsThreadSamplingStopRequested() const;
     bool                        IsThreadSamplingThreadRunning() const;
-    uint64_t                    GetThreadSamplingThreadGeneration() const;
     void                        Shutdown();
     bool                        IsShutdownRequested() const;
     static void                 InitSelectiveSamplingBuffer();
@@ -380,6 +381,8 @@ public:
 
     void SetGlobalInfo12(ICorProfilerInfo12* info12);
     void SetGlobalInfo7(ICorProfilerInfo7* cor_profiler_info7);
+    void PublishGlobalInfo() const;
+    static void ClearGlobalInfo();
     void                   SetStackWalker(IStackWalker* walker);
     IStackWalker* GetStackWalker() const;
     ThreadState* GetCurrentThreadState(ThreadID tid);
@@ -421,7 +424,6 @@ private:
     std::optional<unsigned int>  selected_threads_sampling_interval_;
     SamplingThreadState          thread_sampling_thread_state_ = SamplingThreadState::Stopped;
     std::unique_ptr<std::thread> thread_sampling_thread_;
-    uint64_t                     thread_sampling_thread_generation_ = 0;
     unsigned int                 configured_max_memory_samples_per_minute_ = 0;
     EVENTPIPE_SESSION            session_ = 0;
     IStackWalker*                stackWalker_ = nullptr;

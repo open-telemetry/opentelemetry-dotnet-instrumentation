@@ -47,14 +47,16 @@ EXTERN_C VOID STDAPICALLTYPE SetSqlClientNetFxILRewriteEnabled(bool enabled)
     return trace::SetSqlClientNetFxILRewriteEnabled(enabled);
 }
 
-EXTERN_C BOOL STDAPICALLTYPE ConfigureContinuousProfiler(bool         threadSamplingEnabled,
-                                                         unsigned int threadSamplingInterval,
-                                                         bool         threadSamplingExportPipelinePrepared,
-                                                         bool         allocationSamplingEnabled,
-                                                         unsigned int maxMemorySamplesPerMinute,
-                                                         bool         allocationSamplingExportPipelinePrepared,
-                                                         unsigned int selectedThreadSamplingInterval,
-                                                         BOOL*        isInitializationOwner)
+EXTERN_C BOOL STDAPICALLTYPE ConfigureContinuousProfilerV2(bool         threadSamplingEnabled,
+                                                           unsigned int threadSamplingInterval,
+                                                           bool         threadSamplingExportPipelinePrepared,
+                                                           bool         allocationSamplingEnabled,
+                                                           unsigned int maxMemorySamplesPerMinute,
+                                                           bool         allocationSamplingExportPipelinePrepared,
+                                                           bool         selectedThreadSamplingEnabled,
+                                                           bool         selectedThreadSamplingExportPipelinePrepared,
+                                                           unsigned int selectedThreadSamplingInterval,
+                                                           BOOL*        isInitializationOwner)
 {
     if (isInitializationOwner == nullptr)
     {
@@ -73,9 +75,28 @@ EXTERN_C BOOL STDAPICALLTYPE ConfigureContinuousProfiler(bool         threadSamp
                                                      threadSamplingExportPipelinePrepared, allocationSamplingEnabled,
                                                      maxMemorySamplesPerMinute,
                                                      allocationSamplingExportPipelinePrepared,
+                                                     selectedThreadSamplingEnabled,
+                                                     selectedThreadSamplingExportPipelinePrepared,
                                                      selectedThreadSamplingInterval, initializationOwner);
     *isInitializationOwner = initializationOwner ? TRUE : FALSE;
     return configured;
+}
+
+// ABI compatibility wrapper for managed runtimes released before runtime reconfiguration was added.
+// Keep the name, return type, calling convention, and five-argument signature unchanged.
+EXTERN_C VOID STDAPICALLTYPE ConfigureContinuousProfiler(bool         threadSamplingEnabled,
+                                                         unsigned int threadSamplingInterval,
+                                                         bool         allocationSamplingEnabled,
+                                                         unsigned int maxMemorySamplesPerMinute,
+                                                         unsigned int selectedThreadSamplingInterval)
+{
+    BOOL       ignoredInitializationOwner    = FALSE;
+    const bool selectedThreadSamplingEnabled = selectedThreadSamplingInterval != 0;
+    ConfigureContinuousProfilerV2(threadSamplingEnabled, threadSamplingEnabled ? threadSamplingInterval : 0,
+                                  threadSamplingEnabled, allocationSamplingEnabled,
+                                  allocationSamplingEnabled ? maxMemorySamplesPerMinute : 0, allocationSamplingEnabled,
+                                  selectedThreadSamplingEnabled, selectedThreadSamplingEnabled,
+                                  selectedThreadSamplingInterval, &ignoredInitializationOwner);
 }
 
 EXTERN_C BOOL STDAPICALLTYPE ShutdownContinuousProfiler()

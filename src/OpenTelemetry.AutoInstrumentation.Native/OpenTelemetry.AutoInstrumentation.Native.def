@@ -10,6 +10,7 @@ EXPORTS
     SetSqlClientNetFxILRewriteEnabled
     InitializeTraceMethods
     ConfigureContinuousProfiler
+    ConfigureContinuousProfilerV2
     ShutdownContinuousProfiler
     SetContinuousProfilerSamplingInterval
     SetContinuousProfilerEnabled
@@ -20,6 +21,7 @@ EXPORTS
     GetContinuousProfilerSamplingInterval
     GetContinuousProfilerAllocationSamplingRate
     ContinuousProfilerReadThreadSamples
+    ContinuousProfilerReadThreadSamplesV2
     ContinuousProfilerReadAllocationSamples
     SelectiveSamplerReadThreadSamples
     ContinuousProfilerSetNativeContext

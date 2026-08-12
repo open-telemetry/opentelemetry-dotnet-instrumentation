@@ -26,15 +26,30 @@ internal static class RuntimeContinuousProfilerNativeMethods
     [DllImport("OpenTelemetry.AutoInstrumentation.Native.dll")]
 #endif
     [return: MarshalAs(UnmanagedType.Bool)]
-    public static extern bool ConfigureContinuousProfiler(
+    public static extern bool ConfigureContinuousProfilerV2(
         bool threadSamplingEnabled,
         uint threadSamplingInterval,
         bool threadSamplingExportPipelinePrepared,
         bool allocationSamplingEnabled,
         uint maxMemorySamplesPerMinute,
         bool allocationSamplingExportPipelinePrepared,
+        bool selectedThreadSamplingEnabled,
+        bool selectedThreadSamplingExportPipelinePrepared,
         uint selectedThreadSamplingInterval,
         [MarshalAs(UnmanagedType.Bool)] out bool isInitializationOwner);
+
+    [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
+#if NET
+    [DllImport(NativeLibraryName, EntryPoint = "ConfigureContinuousProfiler")]
+#else
+    [DllImport("OpenTelemetry.AutoInstrumentation.Native.dll", EntryPoint = "ConfigureContinuousProfiler")]
+#endif
+    public static extern void ConfigureContinuousProfilerLegacy(
+        bool threadSamplingEnabled,
+        uint threadSamplingInterval,
+        bool allocationSamplingEnabled,
+        uint maxMemorySamplesPerMinute,
+        uint selectedThreadSamplingInterval);
 
     [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
 #if NET
@@ -119,10 +134,24 @@ internal static class RuntimeContinuousProfilerNativeMethods
 #else
     [DllImport("OpenTelemetry.AutoInstrumentation.Native.dll", CallingConvention = CallingConvention.Cdecl)]
 #endif
-    public static extern int ContinuousProfilerReadThreadSamples(
+    public static extern int ContinuousProfilerReadThreadSamplesV2(
         int len,
         byte[] buffer,
         out uint samplingInterval);
+
+    [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
+#if NET
+    [DllImport(
+        NativeLibraryName,
+        EntryPoint = "ContinuousProfilerReadThreadSamples",
+        CallingConvention = CallingConvention.Cdecl)]
+#else
+    [DllImport(
+        "OpenTelemetry.AutoInstrumentation.Native.dll",
+        EntryPoint = "ContinuousProfilerReadThreadSamples",
+        CallingConvention = CallingConvention.Cdecl)]
+#endif
+    public static extern int ContinuousProfilerReadThreadSamplesLegacy(int len, byte[] buffer);
 
 #if NET
     private static IntPtr ImportResolver(string libraryName, Assembly assembly, DllImportSearchPath? searchPath)

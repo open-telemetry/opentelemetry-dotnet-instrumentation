@@ -63,8 +63,12 @@ exporter. The lowest recommended sampling interval is 1000 milliseconds.
 ### Runtime reconfiguration
 
 Native continuous profiler resources are initialized once per process through
-`ConfigureContinuousProfiler`. Runtime setters do not initialize native resources
-or managed export pipelines. After initialization, the six setters are:
+`ConfigureContinuousProfilerV2`. The original `ConfigureContinuousProfiler`
+entrypoint remains an ABI-compatible wrapper for older managed runtimes. The
+managed batch reader similarly uses `ContinuousProfilerReadThreadSamplesV2`;
+the original two-argument `ContinuousProfilerReadThreadSamples` entrypoint is
+retained for older managed runtimes. Runtime setters do not initialize native
+resources or managed export pipelines. After initialization, the six setters are:
 
 * `SetContinuousProfilerEnabled(bool)` and
   `SetContinuousProfilerSamplingInterval(uint)` for CPU sampling.
@@ -84,9 +88,10 @@ immediately.
 The corresponding managed interop methods use the
 `SetNativeContinuousProfiler...` prefix. They return `true` when the requested
 native operation succeeds and `false` when it cannot be applied. Successful
-idempotent start and stop operations also return `true`. A `false` result means
-the complete request was not applied; initialization needed by other sampling
-modes may still have succeeded.
+idempotent start and stop operations also return `true`. The managed exporter is
+started only by the `AppDomain` that successfully owns the one-time native
+initialization. A failed initial configuration does not start an exporter and
+the owner stops any sampling service that was partially configured.
 
 To enable thread sampling later when it is initially disabled, the initial
 managed configuration must prepare the thread-sampling export pipeline with an
@@ -98,9 +103,11 @@ provide an exporter, a non-zero `MaxMemorySamplesPerMinute`, and positive export
 interval and timeout in the initial managed configuration. The allocation
 setters can then enable or disable sampling and update its maximum sample rate.
 Snapshots can be disabled, re-enabled, or updated only when selective sampling
-was prepared during initial configuration. Managed initialization explicitly
-signals native code only after the corresponding export handler is registered;
-runtime calls cannot promote an unprepared pipeline.
+was prepared during initial configuration. Set
+`SelectiveSamplerConfiguration.Enabled` to `false` to prepare that pipeline
+without starting snapshot sampling. Managed initialization explicitly signals
+native code only after the corresponding export handler is registered; runtime
+calls cannot promote an unprepared pipeline.
 
 Start and stop operations are idempotent and use at most one native sampling
 thread. The thread is shared with selective sampling, so disabling continuous

@@ -4,25 +4,17 @@
 using System.Diagnostics;
 using My.Custom.Test.Namespace;
 
-if (args.Contains("--runtime-reconfiguration"))
+if (args.Contains("--runtime-native-methods"))
 {
-    TestApplication.ContinuousProfiler.RuntimeReconfigurationScenario.Run();
+    TestApplication.ContinuousProfiler.RuntimeReconfigurationScenario.VerifyNativeMethodsContract();
     return;
 }
 
-if (args.Contains("--runtime-unprepared-thread"))
+if (args.Contains("--runtime-unprepared-pipelines"))
 {
-    TestApplication.ContinuousProfiler.RuntimeReconfigurationScenario.VerifyUnpreparedThreadSamplingIsRejected();
+    TestApplication.ContinuousProfiler.RuntimeReconfigurationScenario.VerifyUnpreparedPipelinesAreRejected();
     return;
 }
-
-#if NET
-if (args.Contains("--runtime-unprepared-allocation"))
-{
-    TestApplication.ContinuousProfiler.RuntimeReconfigurationScenario.VerifyUnpreparedAllocationIsRejected();
-    return;
-}
-#endif
 
 using ActivitySource activitySource = new("TestApplication.ContinuousProfiler", "1.0.0");
 
