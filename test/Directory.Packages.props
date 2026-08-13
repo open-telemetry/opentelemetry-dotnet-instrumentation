@@ -32,7 +32,7 @@
     <PackageVersion Include="MongoDB.Driver" Version="3.10.0" />
     <PackageVersion Include="NSubstitute" Version="6.2.0" />
     <PackageVersion Include="MySql.Data" Version="26.7.0" />
-    <PackageVersion Include="MySqlConnector" Version="2.6.1" />
+    <PackageVersion Include="MySqlConnector" Version="2.6.2" />
     <PackageVersion Include="Newtonsoft.Json" Version="13.0.4" />
     <PackageVersion Include="NLog" Version="6.1.4" />
     <PackageVersion Include="NLog.Extensions.Logging" Version="6.1.4" />
@@ -65,6 +65,7 @@
     <PackageVersion Include="System.Text.Json" Version="10.0.11" />
     <PackageVersion Include="System.ValueTuple" Version="4.6.2" />
     <PackageVersion Include="Testcontainers" Version="4.13.0" />
+    <PackageVersion Include="SSH.NET" Version="2026.0.0" /> <!-- needed to fix https://github.com/advisories/GHSA-q939-rpr3-3284, remove when Testcontainers is updated -->
     <PackageVersion Include="Verify.Xunit" Version="31.12.5" />
     <PackageVersion Include="xunit" Version="2.9.3" />
     <PackageVersion Include="xunit.runner.visualstudio" Version="2.8.2" />
