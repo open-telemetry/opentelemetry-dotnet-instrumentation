@@ -56,10 +56,13 @@ jobs:
       - name: Install zip
         uses: montudor/action-zip@0852c26906e00f8a315c704958823928d8018b28 # v1.0.0
 
-      - name: Create ZIP artifacts
+      - name: Create ZIP artifacts and prepare SBOM source
         shell: bash
         run: |
           set -euo pipefail
+          sbom_source="${RUNNER_TEMP}/sbom-source"
+          mkdir -p "${sbom_source}"
+
           packages=(
             "alpine-x64 linux-musl-x64"
             "alpine-arm64 linux-musl-arm64"
@@ -73,27 +76,9 @@ jobs:
           for package in "${packages[@]}"; do
             read -r dir archive <<< "${package}"
             src="./bin-${dir}"
-            (cd "${src}" && zip -qq -r "../opentelemetry-dotnet-instrumentation-${archive}.zip" ./* && cd ..)
-          done
-
-      # Syft accepts one source per SBOM, so extract each final ZIP under a
-      # distinct root and scan the combined tree for the single release SBOM.
-      - name: Extract release ZIPs for SBOM
-        shell: bash
-        run: |
-          set -euo pipefail
-          sbom_source="${RUNNER_TEMP}/sbom-source"
-          archives=(./opentelemetry-dotnet-instrumentation-*.zip)
-
-          if [[ "${#archives[@]}" -ne 7 ]]; then
-            echo "Expected 7 release ZIPs, found ${#archives[@]}" >&2
-            exit 1
-          fi
-
-          mkdir -p "${sbom_source}"
-          for archive in "${archives[@]}"; do
-            archive_name="$(basename "${archive}" .zip)"
-            unzip -q "${archive}" -d "${sbom_source}/${archive_name}"
+            archive_file="opentelemetry-dotnet-instrumentation-${archive}.zip"
+            (cd "${src}" && zip -qq -r "../${archive_file}" ./* && cd ..)
+            unzip -q "${archive_file}" -d "${sbom_source}/${archive}"
           done
 
       - name: Generate SBOM from release ZIPs
