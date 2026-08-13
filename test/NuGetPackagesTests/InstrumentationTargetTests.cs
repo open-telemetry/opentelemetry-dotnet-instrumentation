@@ -111,12 +111,13 @@ public class InstrumentationTargetTests : TestHelper
     {
         var projectFile = $"{TargetAppName}.csproj";
         var projectText = File.ReadAllText(projectFile);
+
 #if NET
-        projectText = projectText.Replace("<TargetFramework>net8.0</TargetFramework>", $"<TargetFramework>{tfm}</TargetFramework>", StringComparison.Ordinal);
+        projectText = projectText.Replace("<TargetFramework>net10.0</TargetFramework>", $"<TargetFramework>{tfm}</TargetFramework>", StringComparison.Ordinal);
         projectText = projectText.Replace("<ImplicitUsings>enable</ImplicitUsings>", $"<ImplicitUsings>disable</ImplicitUsings>", StringComparison.Ordinal);
         projectText = projectText.Replace("<Nullable>enable</Nullable>", $"<Nullable>disable</Nullable>", StringComparison.Ordinal);
 #else
-        projectText = projectText.Replace("<TargetFramework>net8.0</TargetFramework>", $"<TargetFramework>{tfm}</TargetFramework>");
+        projectText = projectText.Replace("<TargetFramework>net10.0</TargetFramework>", $"<TargetFramework>{tfm}</TargetFramework>");
         projectText = projectText.Replace("<ImplicitUsings>enable</ImplicitUsings>", $"<ImplicitUsings>disable</ImplicitUsings>");
         projectText = projectText.Replace("<Nullable>enable</Nullable>", $"<Nullable>disable</Nullable>");
 #endif
@@ -179,7 +180,7 @@ public class InstrumentationTargetTests : TestHelper
 
         // Always create the app targeting a fixed framework version to simplify
         // text replacement in the project file.
-        Assert.Equal(0, RunDotNetCli($"new console --framework net8.0"));
+        Assert.Equal(0, RunDotNetCli($"new console --framework net10.0"));
 
         ChangeProjectDefaultsAndTargetFramework(tfm);
 

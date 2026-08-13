@@ -8,6 +8,5 @@ runs:
       uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6.0.0
       with:
         dotnet-version: |
-          8.0.424
-          9.0.317
           10.0.400
+          11.0.100-preview.7.26381.103

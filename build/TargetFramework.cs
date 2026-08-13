@@ -27,9 +27,8 @@ public class TargetFramework : Enumeration
     public static readonly TargetFramework NET47 = new("net47");
     public static readonly TargetFramework NET471 = new("net471");
     public static readonly TargetFramework NET472 = new("net472");
-    public static readonly TargetFramework NET8_0 = new("net8.0");
-    public static readonly TargetFramework NET9_0 = new("net9.0");
     public static readonly TargetFramework NET10_0 = new("net10.0");
+    public static readonly TargetFramework NET11_0 = new("net11.0");
 
     public string OutputFolder { get; private init; }
 
@@ -40,7 +39,7 @@ public class TargetFramework : Enumeration
 
     // should be in version order
     public static readonly TargetFramework[] Net = [
-        NET8_0, NET9_0, NET10_0
+        NET10_0, NET11_0
     ];
 
     public static implicit operator string(TargetFramework framework)

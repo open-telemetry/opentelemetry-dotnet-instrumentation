@@ -11,8 +11,8 @@ env:
   DOTNET_CLI_TELEMETRY_OPTOUT: 1
 
 jobs:
-  build-ubuntu1604-native-container:
-    name: Build native container on Ubuntu 16.04
+  build-ubuntu1804-native-container:
+    name: Build native container on Ubuntu 18.04
     runs-on: ubuntu-24.04
     timeout-minutes: 60
     steps:
@@ -26,9 +26,9 @@ jobs:
         id: prepare-build-environment
         uses: ./.github/actions/prepare-build-environment
         with:
-          artifact-name: ubuntu1604-native
+          artifact-name: ubuntu1804-native
           environment-type: container
-          dockerfile: ./docker/ubuntu1604.dockerfile
+          dockerfile: ./docker/ubuntu1804.dockerfile
 
       - name: Build native library in Docker container
         env:
@@ -45,7 +45,7 @@ jobs:
         if: ${{ !cancelled() }}
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
-          name: bin-ubuntu1604-native
+          name: bin-ubuntu1804-native
           path: bin/tracer-home
         continue-on-error: true
 
