@@ -68,11 +68,11 @@ TEST(IntegrationTest, AssemblyReferenceVersionRejectsPartiallyParsedOversizedCom
 
 TEST(IntegrationTest, MatchesSecretsPatternRecognizesOtlpHeaders)
 {
-    const std::string environment_variables[]{
-        "OTEL_EXPORTER_OTLP_HEADERS=authorization=Bearer%20super-secret-token",
-        "OTEL_EXPORTER_OTLP_TRACES_HEADERS=authorization=Bearer%20super-secret-token",
-        "OTEL_EXPORTER_OTLP_METRICS_HEADERS=authorization=Bearer%20super-secret-token",
-        "OTEL_EXPORTER_OTLP_LOGS_HEADERS=authorization=Bearer%20super-secret-token"};
+    const std::string
+        environment_variables[]{"OTEL_EXPORTER_OTLP_HEADERS=authorization=Bearer%20super-secret-token",
+                                "OTEL_EXPORTER_OTLP_TRACES_HEADERS=authorization=Bearer%20super-secret-token",
+                                "OTEL_EXPORTER_OTLP_METRICS_HEADERS=authorization=Bearer%20super-secret-token",
+                                "OTEL_EXPORTER_OTLP_LOGS_HEADERS=authorization=Bearer%20super-secret-token"};
 
     for (const auto& environment_variable : environment_variables)
     {
