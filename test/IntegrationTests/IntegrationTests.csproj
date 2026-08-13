@@ -20,6 +20,7 @@
     <PackageReference Include="Newtonsoft.Json" />
     <PackageReference Include="StrongNamer" Condition="$(TargetFramework.StartsWith('net4'))" />
     <PackageReference Include="Testcontainers" />
+    <PackageReference Include="SSH.NET" /> <!-- needed to fix https://github.com/advisories/GHSA-q939-rpr3-3284, remove when Testcontainers is updated -->
     <PackageReference Include="Verify.Xunit" />
     <PackageReference Include="Xunit.SkippableFact" />
   </ItemGroup>
