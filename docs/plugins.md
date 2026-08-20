@@ -240,6 +240,7 @@ public class MySelectiveSamplerPlugin : IPlugin, ISelectiveSamplerPlugin
     {
         return new SelectiveSamplerConfiguration
         {
+            Enabled = false,
             SamplingInterval = 200,
             ExportInterval = TimeSpan.FromMilliseconds(50),
             ExportTimeout = TimeSpan.FromSeconds(5),
@@ -248,6 +249,10 @@ public class MySelectiveSamplerPlugin : IPlugin, ISelectiveSamplerPlugin
     }
 }
 ```
+
+`Enabled` defaults to `true`. Set it to `false` to prepare the selective
+sampling exporter and interval during initialization without starting snapshot
+sampling. A later runtime configuration can then enable the prepared pipeline.
 
 `Exporter` must implement `ISelectiveSamplerExporter`.
 

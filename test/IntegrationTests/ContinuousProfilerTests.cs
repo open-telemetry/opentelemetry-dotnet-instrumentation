@@ -116,6 +116,33 @@ public class ContinuousProfilerTests : TestHelper
         collector.ResourceExpector.AssertExpectations();
     }
 
+    [Fact]
+    [Trait("Category", "EndToEnd")]
+    public void RuntimeNativeMethodsAreIdempotentAndPreserveAbi()
+    {
+        EnableBytecodeInstrumentation();
+        SetEnvironmentVariable(
+            "OTEL_DOTNET_AUTO_PLUGINS",
+            "TestApplication.ContinuousProfiler.RuntimeReconfigurationPlugin, TestApplication.ContinuousProfiler, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null");
+
+        var (standardOutput, _, _) = RunTestApplication(
+            new TestSettings { Arguments = "--runtime-native-methods" });
+
+        Assert.Contains("runtime-native-methods-verified", standardOutput, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    [Trait("Category", "EndToEnd")]
+    public void RuntimeNativeMethodsRejectUnpreparedPipelines()
+    {
+        EnableBytecodeInstrumentation();
+
+        var (standardOutput, _, _) = RunTestApplication(
+            new TestSettings { Arguments = "--runtime-unprepared-pipelines" });
+
+        Assert.Contains("runtime-unprepared-pipelines-rejected", standardOutput, StringComparison.Ordinal);
+    }
+
     private static bool ExpectCollected(ICollection<ExportProfilesServiceRequest> c)
     {
         foreach (var request in c)

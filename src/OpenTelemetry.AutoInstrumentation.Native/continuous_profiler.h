@@ -18,6 +18,9 @@
 #include <unordered_map>
 #include <random>
 #include <unordered_set>
+#include <atomic>
+#include <condition_variable>
+#include <thread>
 
 #ifdef _WIN32
 #define EXPORTTHIS __declspec(dllexport)
@@ -28,6 +31,8 @@
 extern "C"
 {
     EXPORTTHIS int32_t ContinuousProfilerReadThreadSamples(int32_t len, unsigned char* buf);
+    EXPORTTHIS int32_t ContinuousProfilerReadThreadSamplesV2(int32_t len, unsigned char* buf,
+                                                             unsigned int* samplingInterval);
     EXPORTTHIS int32_t ContinuousProfilerReadAllocationSamples(int32_t len, unsigned char* buf);
     EXPORTTHIS int32_t SelectiveSamplerReadThreadSamples(int32_t len, unsigned char* buf);
     // ReSharper disable CppInconsistentNaming
@@ -262,6 +267,7 @@ public:
     std::optional<thread_span_context>                                GetContext(ThreadID threadId);
     void                                                              Remove(const thread_span_context& spanContext);
     void                                                              Remove(ThreadID threadId);
+    void                                                              Clear();
     std::unordered_map<ThreadID, thread_span_context>::const_iterator begin() const;
     std::unordered_map<ThreadID, thread_span_context>::const_iterator end() const;
 
@@ -314,6 +320,7 @@ class AllocationSubSampler
 {
 public:
     AllocationSubSampler(uint32_t targetPerCycle, uint32_t secondsPerCycle);
+    uint32_t GetTargetPerCycle() const;
     bool ShouldSample();
     // internal implementation detail that is public for unit testing purposes
     void AdvanceCycle(std::chrono::milliseconds now);
@@ -334,19 +341,41 @@ private:
 
 enum class SamplingType : int32_t { Continuous = 1, SelectedThreads = 2 };
 
+struct ThreadSamplingConfiguration
+{
+    std::optional<unsigned int> threadSamplingInterval;
+    std::optional<unsigned int> selectedThreadsSamplingInterval;
+};
+
 class ContinuousProfiler
 {
 public:
-    std::optional<unsigned int> threadSamplingInterval;
-    std::optional<unsigned int> selectedThreadsSamplingInterval;
     std::chrono::time_point<std::chrono::steady_clock> nextOutdatedEntriesScan;
-    void                        StartThreadSampling();
+    ~ContinuousProfiler();
+    bool                        SetInitialThreadSamplingConfiguration(bool         threadSamplingEnabled,
+                                                                      unsigned int threadSamplingInterval,
+                                                                      bool         selectedThreadSamplingEnabled,
+                                                                      unsigned int selectedThreadsSamplingInterval);
+    bool                        SetThreadSamplingInterval(unsigned int samplingInterval);
+    bool                        SetThreadSamplingEnabled(bool enabled);
+    bool                        SetSelectedThreadSamplingInterval(unsigned int samplingInterval);
+    bool                        SetSelectedThreadSamplingEnabled(bool enabled);
+    void                        ConfigureSelectedThreadSampling(unsigned int samplingInterval);
+    unsigned int                GetConfiguredThreadSamplingInterval() const;
+    unsigned int                GetConfiguredSelectedThreadSamplingInterval() const;
+    ThreadSamplingConfiguration GetThreadSamplingConfiguration() const;
+    bool TryReloadThreadSamplingConfiguration(ThreadSamplingConfiguration& configuration);
+    bool WaitForStop(unsigned int samplingInterval);
+    bool                        IsThreadSamplingStopRequested() const;
+    bool                        IsThreadSamplingThreadRunning() const;
     void                        Shutdown();
     bool                        IsShutdownRequested() const;
     static void                 InitSelectiveSamplingBuffer();
-    unsigned int                maxMemorySamplesPerMinute;
-    void                        StartAllocationSampling(unsigned int maxMemorySamplesPerMinute);
-    void                        StopAllocationSampling();
+    bool                        SetAllocationSamplingConfiguration(bool enabled, unsigned int maxMemorySamplesPerMinute);
+    bool                        SetAllocationSamplingEnabled(bool enabled);
+    bool                        SetMaxMemorySamplesPerMinute(unsigned int maxMemorySamplesPerMinute);
+    unsigned int                GetConfiguredMaxMemorySamplesPerMinute() const;
+    unsigned int                GetAllocationSamplingRate() const;
     void                        AllocationTick(ULONG dataLen, LPCBYTE data);
     ICorProfilerInfo12*         info12 = nullptr;
     ICorProfilerInfo7*          info7 = nullptr;
@@ -356,6 +385,8 @@ public:
 
     void SetGlobalInfo12(ICorProfilerInfo12* info12);
     void SetGlobalInfo7(ICorProfilerInfo7* cor_profiler_info7);
+    void PublishGlobalInfo() const;
+    static void ClearGlobalInfo();
     void                   SetStackWalker(IStackWalker* walker);
     IStackWalker* GetStackWalker() const;
     ThreadState* GetCurrentThreadState(ThreadID tid);
@@ -369,13 +400,35 @@ public:
     ThreadSamplesBuffer* cur_cpu_writer_ = nullptr;
     SamplingStatistics stats_;
     void AllocateBuffer();
-    void PublishBuffer();
-    mutable std::mutex      shutdown_mutex_;
-    std::condition_variable shutdown_cv_;
+    void PublishBuffer(unsigned int samplingInterval);
 
 private:
-    std::atomic_bool             shutdown_requested_{ false };
+    enum class SamplingThreadState
+    {
+        Stopped,
+        Running,
+        Stopping
+    };
+
+    HRESULT StartThreadSamplingLocked();
+    void    StopThreadSampling();
+    void    StopThreadSamplingLocked(std::unique_lock<std::mutex>& stateLock);
+    bool    IsThreadSamplingRequiredLocked() const;
+    bool    StartAllocationSamplingLocked(unsigned int maxMemorySamplesPerMinute);
+    bool    StopAllocationSamplingLocked();
+
+    std::atomic_bool             shutdown_requested_{false};
+    std::atomic_bool             sampling_configuration_dirty_{true};
+    mutable std::mutex           sampling_state_mutex_;
+    std::condition_variable      sampling_stop_cv_;
+    bool                         thread_sampling_stop_requested_      = true;
+    unsigned int                 configured_thread_sampling_interval_ = 0;
+    unsigned int                 configured_selected_threads_sampling_interval_ = 0;
+    std::optional<unsigned int>  thread_sampling_interval_;
+    std::optional<unsigned int>  selected_threads_sampling_interval_;
+    SamplingThreadState          thread_sampling_thread_state_ = SamplingThreadState::Stopped;
     std::unique_ptr<std::thread> thread_sampling_thread_;
+    unsigned int                 configured_max_memory_samples_per_minute_ = 0;
     EVENTPIPE_SESSION            session_ = 0;
     IStackWalker*                stackWalker_ = nullptr;
 };
@@ -393,9 +446,9 @@ bool TryPrepareSelectedThreadSampling(ContinuousProfiler*                       
 void AllocationSamplingAppendToBuffer(int32_t appendLen, unsigned char* appendBuf);
 
 bool ThreadSamplingShouldProduceThreadSample();
-void ThreadSamplingRecordProducedThreadSample(std::vector<unsigned char>* buf);
+void ThreadSamplingRecordProducedThreadSample(std::vector<unsigned char>* buf, unsigned int samplingInterval);
 // Can return 0 if none are pending
-int32_t ThreadSamplingConsumeOneThreadSample(int32_t len, unsigned char* buf);
+int32_t ThreadSamplingConsumeOneThreadSample(int32_t len, unsigned char* buf, unsigned int* samplingInterval);
 
 bool SelectiveSamplingShouldProduceThreadSample();
 void SelectiveSamplingRecordProducedThreadSample(int32_t appendLen, unsigned char* appendBuf);

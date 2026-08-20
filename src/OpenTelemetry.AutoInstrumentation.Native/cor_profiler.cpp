@@ -63,7 +63,8 @@ CorProfiler* profiler = nullptr;
 //
 HRESULT STDMETHODCALLTYPE CorProfiler::Initialize(IUnknown* cor_profiler_info_unknown)
 {
-    auto _                   = trace::Stats::Instance()->InitializeMeasure();
+    auto _ = trace::Stats::Instance()->InitializeMeasure();
+    continuous_profiler_initialized_.store(false, std::memory_order_release);
     this->continuousProfiler = nullptr;
 
     CorProfilerBase::Initialize(cor_profiler_info_unknown);
@@ -918,6 +919,9 @@ HRESULT STDMETHODCALLTYPE CorProfiler::ModuleUnloadStarted(ModuleID module_id)
 
 HRESULT STDMETHODCALLTYPE CorProfiler::Shutdown()
 {
+    std::lock_guard<std::mutex> sampling_configuration_guard(sampling_configuration_lock_);
+    continuous_profiler_initialized_.store(false, std::memory_order_release);
+    continuous_profiler::ContinuousProfiler::ClearGlobalInfo();
     if (continuousProfiler != nullptr)
     {
         continuousProfiler->Shutdown();
@@ -956,19 +960,32 @@ HRESULT STDMETHODCALLTYPE CorProfiler::ProfilerDetachSucceeded()
 
     CorProfilerBase::ProfilerDetachSucceeded();
 
-    // keep this lock until we are done using the module,
-    // to prevent it from unloading while in use
-    std::lock_guard<std::mutex> guard(module_ids_lock_);
+    std::lock_guard<std::mutex> sampling_configuration_guard(sampling_configuration_lock_);
 
-    // double check if is_attached_ has changed to avoid possible race condition with shutdown function
+    // ConfigureContinuousProfiler and the runtime setters use the same lock.
+    // Mark the profiler detached while holding it so a concurrent runtime call
+    // cannot change the sampling configuration after detach.
     if (!is_attached_)
     {
         return S_OK;
     }
 
+    is_attached_.store(false);
+    continuous_profiler_initialized_.store(false, std::memory_order_release);
+    continuous_profiler::ContinuousProfiler::ClearGlobalInfo();
+
+    // ProfilerDetachSucceeded is too late for continuous-profiler teardown. In particular,
+    // ContinuousProfiler::Shutdown calls ICorProfilerInfo12::EventPipeStopSession when allocation
+    // sampling is active, and the CLR forbids calls through its interfaces from this callback.
+    // A detach initiator must stop all profiler-owned threads and EventPipe sessions before it
+    // calls RequestProfilerDetach.
+
+    // keep this lock until we are done using the module,
+    // to prevent it from unloading while in use
+    std::lock_guard<std::mutex> guard(module_ids_lock_);
+
     Logger::Info("Detaching profiler.");
     Logger::Flush();
-    is_attached_.store(false);
     return S_OK;
 }
 
@@ -1188,11 +1205,8 @@ bool CorProfiler::InitThreadSampler()
     // 2. InitThreadSampler must must be executing in context of main thread
     // InitThreadSampler is called from managed code
     // And more importantly, the main thread calls InitThreadSampler
-    ThreadID mainThreadId = 0;
-    if (auto hr = info_->GetCurrentThreadID(&mainThreadId); SUCCEEDED(hr))
-    {
-        ThreadAssignedToOSThread(mainThreadId, ::GetCurrentThreadId());
-    }
+    ThreadID   mainThreadId          = 0;
+    const bool mainThreadIdAvailable = SUCCEEDED(info_->GetCurrentThreadID(&mainThreadId));
 #endif
 
     DWORD pdvEventsLow;
@@ -1204,85 +1218,553 @@ bool CorProfiler::InitThreadSampler()
         return false;
     }
 
-    pdvEventsLow |= COR_PRF_MONITOR_THREADS | COR_PRF_ENABLE_STACK_SNAPSHOT;
+    auto initializedProfiler = std::make_unique<continuous_profiler::ContinuousProfiler>();
+    initializedProfiler->SetGlobalInfo12(this->info12_);
+    initializedProfiler->SetGlobalInfo7(this->info_);
+    using continuous_profiler::RuntimeType;
+    RuntimeType runtime                = runtime_information_.is_desktop() ? RuntimeType::DotNetFramework
+                                         : runtime_information_.is_core()  ? RuntimeType::DotNetCore
+                                                                           : RuntimeType::Unknown;
+    auto        initializedStackWalker = std::make_unique<continuous_profiler::StackWalkerImpl>(this->info_, runtime);
+    initializedProfiler->SetStackWalker(initializedStackWalker.get());
+#if defined(_WIN32)
+    if (mainThreadIdAvailable)
+    {
+        initializedStackWalker->OnThreadAssignedToOSThread(mainThreadId, ::GetCurrentThreadId());
+    }
+#endif
 
+    // SetEventMask2 may make the CLR event mask observable before it returns. Publish
+    // the native callback state first so a concurrent one-shot thread callback cannot
+    // observe an uninitialized profiler and permanently lose its thread mapping.
+    // Keep the managed activity callback gate (profiler_info) closed until the CLR
+    // has accepted the mask.
+    continuous_profiler_initialization_in_progress_.store(true, std::memory_order_release);
+    stack_walker_impl_       = std::move(initializedStackWalker);
+    this->continuousProfiler = initializedProfiler.get();
+    continuous_profiler_initialized_.store(true, std::memory_order_release);
+
+    pdvEventsLow |= COR_PRF_MONITOR_THREADS | COR_PRF_ENABLE_STACK_SNAPSHOT;
     hr = this->info_->SetEventMask2(pdvEventsLow, pdvEventsHigh);
     if (FAILED(hr))
     {
+        // Stop new native callbacks, then wait for any callback that already observed
+        // the open gate before rolling back and destroying the staged state.
+        continuous_profiler_initialized_.store(false, std::memory_order_release);
+        continuous_profiler::ContinuousProfiler::ClearGlobalInfo();
+        {
+            std::unique_lock<std::shared_mutex> callback_lock(continuous_profiler_callback_lock_);
+            initializedProfiler->SetStackWalker(nullptr);
+            this->continuousProfiler = nullptr;
+            stack_walker_impl_.reset();
+        }
+        continuous_profiler_initialization_in_progress_.store(false, std::memory_order_release);
         Logger::Warn("ConfigureContinuousProfiler: Failed to set event masks for continuous profiler.");
         return false;
     }
 
-    this->continuousProfiler = new continuous_profiler::ContinuousProfiler();
-    this->continuousProfiler->SetGlobalInfo12(this->info12_);
-    this->continuousProfiler->SetGlobalInfo7(this->info_);
-    using continuous_profiler::RuntimeType;
-    RuntimeType runtime = runtime_information_.is_desktop() ? RuntimeType::DotNetFramework
-                          : runtime_information_.is_core()  ? RuntimeType::DotNetCore
-                                                            : RuntimeType::Unknown;
-    stack_walker_impl_  = std::make_unique<continuous_profiler::StackWalkerImpl>(this->info_, runtime);
-    this->continuousProfiler->SetStackWalker(stack_walker_impl_.get());
+    // Managed activity callbacks are started only after this initialization succeeds.
+    this->continuousProfiler->PublishGlobalInfo();
+    initializedProfiler.release();
+    continuous_profiler_initialization_in_progress_.store(false, std::memory_order_release);
+
     Logger::Info("ConfigureContinuousProfiler: Events masks configured for continuous profiler");
     return true;
 }
 
-void CorProfiler::ConfigureContinuousProfiler(bool         threadSamplingEnabled,
-                                              unsigned int threadSamplingInterval,
-                                              bool         allocationSamplingEnabled,
-                                              unsigned int maxMemorySamplesPerMinute,
-                                              unsigned int selectedThreadsSamplingInterval)
+bool CorProfiler::TryEnterContinuousProfilerCallback(std::shared_lock<std::shared_mutex>& callbackLock)
 {
-    ContinuousProfilerParams params{threadSamplingEnabled, threadSamplingInterval, allocationSamplingEnabled,
-                                    maxMemorySamplesPerMinute, selectedThreadsSamplingInterval};
-    // Guard against multiple initialization: In .NET Framework, this method may be called
-    // once per AppDomain, but the continuous profiler is a process-level singleton.
-    // std::call_once ensures thread-safe one-time initialization across all AppDomains.
-    std::call_once(sampling_init_flag_, [this, &params]() { ConfigureContinuousProfilerInternal(params); });
+    if (!continuous_profiler_initialized_.load(std::memory_order_acquire))
+    {
+        return false;
+    }
+
+    // The callback state is process-lifetime after successful initialization, so
+    // quiescence is needed only while SetEventMask2 can still require rollback.
+    if (continuous_profiler_initialization_in_progress_.load(std::memory_order_acquire))
+    {
+        callbackLock = std::shared_lock<std::shared_mutex>(continuous_profiler_callback_lock_);
+    }
+
+    return continuous_profiler_initialized_.load(std::memory_order_acquire);
 }
 
-void CorProfiler::ConfigureContinuousProfilerInternal(const ContinuousProfilerParams& params)
+bool CorProfiler::ConfigureContinuousProfiler(const bool         threadSamplingEnabled,
+                                              const unsigned int threadSamplingInterval,
+                                              const bool         threadSamplingExportPipelinePrepared,
+                                              const bool         allocationSamplingEnabled,
+                                              const unsigned int maxMemorySamplesPerMinute,
+                                              const bool         allocationSamplingExportPipelinePrepared,
+                                              const bool         selectedThreadSamplingEnabled,
+                                              const bool         selectedThreadSamplingExportPipelinePrepared,
+                                              const unsigned int selectedThreadsSamplingInterval,
+                                              bool&              isInitializationOwner)
 {
-    Logger::Info("ConfigureContinuousProfiler: thread sampling enabled: ", params.threadSamplingEnabled,
-                 ", thread sampling interval: ", params.threadSamplingInterval,
-                 ", allocationSamplingEnabled: ", params.allocationSamplingEnabled,
-                 ", max memory samples per minute: ", params.maxMemorySamplesPerMinute,
-                 ", selected threads sampling interval: ", params.selectedThreadsSamplingInterval);
+    isInitializationOwner = false;
 
-    const bool selectiveSamplingConfigured = params.selectedThreadsSamplingInterval != 0;
+    Logger::Info("ConfigureContinuousProfiler: thread sampling enabled: ", threadSamplingEnabled,
+                 ", thread sampling interval: ", threadSamplingInterval,
+                 ", thread sampling export pipeline prepared: ", threadSamplingExportPipelinePrepared,
+                 ", allocation sampling enabled: ", allocationSamplingEnabled,
+                 ", max memory samples per minute: ", maxMemorySamplesPerMinute,
+                 ", allocation sampling export pipeline prepared: ", allocationSamplingExportPipelinePrepared,
+                 ", selected thread sampling enabled: ", selectedThreadSamplingEnabled,
+                 ", selected thread sampling export pipeline prepared: ", selectedThreadSamplingExportPipelinePrepared,
+                 ", selected threads sampling interval: ", selectedThreadsSamplingInterval);
 
-    if (!params.threadSamplingEnabled && !params.allocationSamplingEnabled && !selectiveSamplingConfigured)
+    std::lock_guard<std::mutex> configuration_guard(sampling_configuration_lock_);
+
+    // Shutdown owns the same lock. Recheck attachment after acquiring it so a
+    // runtime call that was blocked by Shutdown cannot recreate profiler
+    // resources or a sampling thread after teardown.
+    if (!is_attached_)
     {
-        Logger::Debug("ConfigureContinuousProfiler: no sampling type configured.");
-        return;
+        Logger::Debug("ConfigureContinuousProfiler: profiler is not attached.");
+        return false;
     }
+
+    const bool profilerInitializationRequired =
+        threadSamplingEnabled || threadSamplingInterval != 0 || allocationSamplingEnabled ||
+        maxMemorySamplesPerMinute != 0 || selectedThreadSamplingEnabled ||
+        selectedThreadSamplingExportPipelinePrepared || selectedThreadsSamplingInterval != 0;
+    if (continuousProfiler == nullptr && !profilerInitializationRequired)
+    {
+        // Do not consume the once flag for a no-op call. A later AppDomain may
+        // provide the first actual profiler configuration.
+        Logger::Debug("ConfigureContinuousProfiler: no sampling type configured.");
+        return true;
+    }
+
+    const ContinuousProfilerInitializationParams initializationParams{selectedThreadSamplingExportPipelinePrepared,
+                                                                      selectedThreadsSamplingInterval};
+
+    // Native resources, export-pipeline capabilities, and initial sampling state are
+    // process-wide. A later AppDomain must not overwrite runtime configuration that
+    // was applied after the first initialization.
+    std::call_once(sampling_init_flag_,
+                   [this, &initializationParams, &isInitializationOwner, threadSamplingExportPipelinePrepared,
+                    threadSamplingInterval, allocationSamplingExportPipelinePrepared, maxMemorySamplesPerMinute,
+                    threadSamplingEnabled, allocationSamplingEnabled, selectedThreadSamplingEnabled]()
+                   {
+                       sampling_initialization_result_ = InitializeContinuousProfiler(initializationParams);
+                       continuous_profiler_snapshots_sampling_prepared_ =
+                           SUCCEEDED(sampling_initialization_result_) &&
+                           initializationParams.selectedThreadSamplingExportPipelinePrepared &&
+                           initializationParams.selectedThreadsSamplingInterval != 0;
+
+                       if (FAILED(sampling_initialization_result_))
+                       {
+                           return;
+                       }
+
+                       // Managed code starts the single process-wide exporter only for the
+                       // AppDomain that successfully initialized the native profiler.
+                       isInitializationOwner = true;
+
+                       // Managed initialization sets these signals only after registering the
+                       // corresponding export handlers. Retain them for runtime calls, which
+                       // cannot build a managed export pipeline themselves.
+                       continuous_profiler_thread_sampling_prepared_ =
+                           threadSamplingExportPipelinePrepared && threadSamplingInterval != 0;
+                       continuous_profiler_allocation_sampling_prepared_ =
+                           allocationSamplingExportPipelinePrepared && maxMemorySamplesPerMinute != 0;
+
+                       const bool threadSamplingConfigured =
+                           ApplyInitialThreadSamplingConfigurationLocked(threadSamplingEnabled, threadSamplingInterval,
+                                                                         selectedThreadSamplingEnabled,
+                                                                         initializationParams
+                                                                             .selectedThreadsSamplingInterval);
+                       const bool allocationSamplingConfigured =
+                           ApplyAllocationSamplingConfigurationLocked(allocationSamplingEnabled,
+                                                                      maxMemorySamplesPerMinute);
+                       sampling_initial_configuration_result_ =
+                           threadSamplingConfigured && allocationSamplingConfigured;
+                   });
+
+    if (FAILED(sampling_initialization_result_))
+    {
+        Logger::Warn("ContinuousProfiler: unable to initialize sampler.");
+        return false;
+    }
+
+    if (continuousProfiler == nullptr || continuousProfiler->IsShutdownRequested())
+    {
+        Logger::Warn("ContinuousProfiler: sampling was permanently shut down after managed initialization failed.");
+        return false;
+    }
+
+    if (!sampling_initial_configuration_result_)
+    {
+        Logger::Warn("ContinuousProfiler: unable to apply complete sampling configuration.");
+    }
+
+    return sampling_initial_configuration_result_;
+}
+
+bool CorProfiler::ShutdownContinuousProfiler()
+{
+    std::lock_guard<std::mutex> configuration_guard(sampling_configuration_lock_);
+    if (!is_attached_)
+    {
+        return false;
+    }
+
+    // This is a fail-closed rollback for managed initialization. The managed export
+    // pipeline is no longer available, so neither runtime setters nor a later
+    // ConfigureContinuousProfiler call may restart process-wide sampling.
+    continuous_profiler_thread_sampling_prepared_     = false;
+    continuous_profiler_allocation_sampling_prepared_ = false;
+    continuous_profiler_snapshots_sampling_prepared_  = false;
+    continuous_profiler_sampling_interval_            = 0;
+    continuous_profiler_initialized_.store(false, std::memory_order_release);
+    continuous_profiler::ContinuousProfiler::ClearGlobalInfo();
+
+    if (continuousProfiler == nullptr)
+    {
+        return true;
+    }
+
+    continuousProfiler->Shutdown();
+    const bool threadSamplingStopped     = !continuousProfiler->IsThreadSamplingThreadRunning();
+    const bool allocationSamplingStopped = continuousProfiler->GetAllocationSamplingRate() == 0;
+    if (!threadSamplingStopped || !allocationSamplingStopped)
+    {
+        Logger::Warn("ContinuousProfiler: unable to stop all sampling services during managed initialization "
+                     "rollback.");
+    }
+
+    return threadSamplingStopped && allocationSamplingStopped;
+}
+
+bool CorProfiler::SetContinuousProfilerSamplingInterval(const unsigned int threadSamplingInterval)
+{
+    std::lock_guard<std::mutex> configuration_guard(sampling_configuration_lock_);
+    if (!is_attached_)
+    {
+        return false;
+    }
+
+    return SetContinuousProfilerSamplingIntervalLocked(threadSamplingInterval);
+}
+
+bool CorProfiler::SetContinuousProfilerSamplingIntervalLocked(const unsigned int threadSamplingInterval)
+{
+    if (threadSamplingInterval == 0)
+    {
+        Logger::Warn("ContinuousProfiler: thread sampling interval must be greater than zero.");
+        return false;
+    }
+
+    if (this->continuousProfiler == nullptr)
+    {
+        Logger::Warn("ContinuousProfiler: cannot set thread sampling interval before profiler initialization.");
+        return false;
+    }
+
+    if (!continuous_profiler_thread_sampling_prepared_)
+    {
+        Logger::Warn(
+            "ContinuousProfiler: cannot configure thread sampling because its export pipeline was not initialized.");
+        return false;
+    }
+
+    if (this->continuousProfiler->SetThreadSamplingInterval(threadSamplingInterval))
+    {
+        continuous_profiler_sampling_interval_ = this->continuousProfiler->GetConfiguredThreadSamplingInterval();
+        return true;
+    }
+
+    return false;
+}
+
+bool CorProfiler::SetContinuousProfilerEnabled(const bool enabled)
+{
+    std::lock_guard<std::mutex> configuration_guard(sampling_configuration_lock_);
+    if (!is_attached_)
+    {
+        return false;
+    }
+
+    return SetContinuousProfilerEnabledLocked(enabled);
+}
+
+bool CorProfiler::SetContinuousProfilerEnabledLocked(const bool enabled)
+{
+    if (this->continuousProfiler == nullptr)
+    {
+        if (enabled)
+        {
+            Logger::Warn("ContinuousProfiler: cannot enable thread sampling before profiler initialization.");
+        }
+        return !enabled;
+    }
+
+    if (enabled && !continuous_profiler_thread_sampling_prepared_)
+    {
+        Logger::Warn(
+            "ContinuousProfiler: cannot enable thread sampling because its export pipeline was not initialized.");
+        return false;
+    }
+
+    return this->continuousProfiler->SetThreadSamplingEnabled(enabled);
+}
+
+bool CorProfiler::SetContinuousProfilerAllocationSamplingEnabled(const bool enabled)
+{
+    std::lock_guard<std::mutex> configuration_guard(sampling_configuration_lock_);
+    if (!is_attached_)
+    {
+        return false;
+    }
+
+    return SetContinuousProfilerAllocationSamplingEnabledLocked(enabled);
+}
+
+bool CorProfiler::SetContinuousProfilerAllocationSamplingEnabledLocked(const bool enabled)
+{
+    if (this->continuousProfiler == nullptr)
+    {
+        if (enabled)
+        {
+            Logger::Warn("ContinuousProfiler: cannot enable allocation sampling before profiler initialization.");
+        }
+        return !enabled;
+    }
+
+    if (enabled && !continuous_profiler_allocation_sampling_prepared_)
+    {
+        Logger::Warn(
+            "ContinuousProfiler: cannot enable allocation sampling because its export pipeline was not initialized.");
+        return false;
+    }
+
+    return this->continuousProfiler->SetAllocationSamplingEnabled(enabled);
+}
+
+bool CorProfiler::SetContinuousProfilerMaxMemorySamplesPerMinute(const unsigned int maxMemorySamplesPerMinute)
+{
+    std::lock_guard<std::mutex> configuration_guard(sampling_configuration_lock_);
+    if (!is_attached_)
+    {
+        return false;
+    }
+
+    return SetContinuousProfilerMaxMemorySamplesPerMinuteLocked(maxMemorySamplesPerMinute);
+}
+
+bool CorProfiler::SetContinuousProfilerMaxMemorySamplesPerMinuteLocked(const unsigned int maxMemorySamplesPerMinute)
+{
+    if (maxMemorySamplesPerMinute == 0)
+    {
+        Logger::Warn("ContinuousProfiler: max memory samples per minute must be greater than zero.");
+        return false;
+    }
+
+    if (this->continuousProfiler == nullptr)
+    {
+        Logger::Warn("ContinuousProfiler: cannot set max memory samples before profiler initialization.");
+        return false;
+    }
+
+    if (!continuous_profiler_allocation_sampling_prepared_)
+    {
+        Logger::Warn("ContinuousProfiler: cannot configure allocation sampling because its export pipeline was not "
+                     "initialized.");
+        return false;
+    }
+
+    return this->continuousProfiler->SetMaxMemorySamplesPerMinute(maxMemorySamplesPerMinute);
+}
+
+bool CorProfiler::SetContinuousProfilerSnapshotsEnabled(const bool enabled)
+{
+    std::lock_guard<std::mutex> configuration_guard(sampling_configuration_lock_);
+    if (!is_attached_)
+    {
+        return false;
+    }
+
+    return SetContinuousProfilerSnapshotsEnabledLocked(enabled);
+}
+
+bool CorProfiler::SetContinuousProfilerSnapshotsEnabledLocked(const bool enabled)
+{
+    if (this->continuousProfiler == nullptr)
+    {
+        if (enabled)
+        {
+            Logger::Warn("ContinuousProfiler: cannot enable snapshots before profiler initialization.");
+        }
+        return !enabled;
+    }
+
+    if (enabled && !continuous_profiler_snapshots_sampling_prepared_)
+    {
+        Logger::Warn("ContinuousProfiler: cannot enable snapshots because their export pipeline was not initialized.");
+        return false;
+    }
+
+    return this->continuousProfiler->SetSelectedThreadSamplingEnabled(enabled);
+}
+
+bool CorProfiler::SetContinuousProfilerSnapshotSamplingInterval(const unsigned int samplingInterval)
+{
+    std::lock_guard<std::mutex> configuration_guard(sampling_configuration_lock_);
+    if (!is_attached_)
+    {
+        return false;
+    }
+
+    return SetContinuousProfilerSnapshotSamplingIntervalLocked(samplingInterval);
+}
+
+bool CorProfiler::SetContinuousProfilerSnapshotSamplingIntervalLocked(const unsigned int samplingInterval)
+{
+    if (samplingInterval == 0)
+    {
+        Logger::Warn("ContinuousProfiler: snapshot sampling interval must be greater than zero.");
+        return false;
+    }
+
+    if (this->continuousProfiler == nullptr)
+    {
+        Logger::Warn("ContinuousProfiler: cannot set snapshot sampling interval before profiler initialization.");
+        return false;
+    }
+
+    if (!continuous_profiler_snapshots_sampling_prepared_)
+    {
+        Logger::Warn(
+            "ContinuousProfiler: cannot configure snapshots because their export pipeline was not initialized.");
+        return false;
+    }
+
+    return this->continuousProfiler->SetSelectedThreadSamplingInterval(samplingInterval);
+}
+
+bool CorProfiler::ApplyInitialThreadSamplingConfigurationLocked(const bool         threadSamplingEnabled,
+                                                                const unsigned int threadSamplingInterval,
+                                                                const bool         selectedThreadSamplingEnabled,
+                                                                const unsigned int selectedThreadsSamplingInterval)
+{
+    if (threadSamplingEnabled && threadSamplingInterval == 0)
+    {
+        Logger::Warn("ContinuousProfiler: thread sampling interval must be greater than zero.");
+        return false;
+    }
+
+    if (selectedThreadSamplingEnabled && selectedThreadsSamplingInterval == 0)
+    {
+        Logger::Warn("ContinuousProfiler: snapshot sampling interval must be greater than zero.");
+        return false;
+    }
+
+    if (this->continuousProfiler == nullptr)
+    {
+        if (threadSamplingEnabled || selectedThreadSamplingEnabled)
+        {
+            Logger::Warn("ContinuousProfiler: cannot enable thread sampling before profiler initialization.");
+        }
+        return !threadSamplingEnabled && !selectedThreadSamplingEnabled;
+    }
+
+    if ((threadSamplingEnabled || threadSamplingInterval != 0) && !continuous_profiler_thread_sampling_prepared_)
+    {
+        Logger::Warn(
+            "ContinuousProfiler: cannot configure thread sampling because its export pipeline was not initialized.");
+        return false;
+    }
+
+    if ((selectedThreadSamplingEnabled || selectedThreadsSamplingInterval != 0) &&
+        !continuous_profiler_snapshots_sampling_prepared_)
+    {
+        Logger::Warn(
+            "ContinuousProfiler: cannot configure snapshots because their export pipeline was not initialized.");
+        return false;
+    }
+
+    if (!this->continuousProfiler->SetInitialThreadSamplingConfiguration(threadSamplingEnabled, threadSamplingInterval,
+                                                                         selectedThreadSamplingEnabled,
+                                                                         selectedThreadsSamplingInterval))
+    {
+        return false;
+    }
+
+    continuous_profiler_sampling_interval_ = this->continuousProfiler->GetConfiguredThreadSamplingInterval();
+    return true;
+}
+
+bool CorProfiler::ApplyAllocationSamplingConfigurationLocked(const bool         enabled,
+                                                             const unsigned int maxMemorySamplesPerMinute)
+{
+    if (enabled && maxMemorySamplesPerMinute == 0)
+    {
+        Logger::Warn("ContinuousProfiler: max memory samples per minute must be greater than zero.");
+        return false;
+    }
+
+    if (this->continuousProfiler == nullptr)
+    {
+        if (enabled)
+        {
+            Logger::Warn("ContinuousProfiler: cannot enable allocation sampling before profiler initialization.");
+        }
+        return !enabled;
+    }
+
+    if (enabled && !continuous_profiler_allocation_sampling_prepared_)
+    {
+        Logger::Warn(
+            "ContinuousProfiler: cannot enable allocation sampling because its export pipeline was not initialized.");
+        return false;
+    }
+
+    if (!this->continuousProfiler->SetAllocationSamplingConfiguration(enabled, maxMemorySamplesPerMinute))
+    {
+        return false;
+    }
+
+    return true;
+}
+
+unsigned int CorProfiler::GetContinuousProfilerSamplingInterval()
+{
+    std::lock_guard<std::mutex> configuration_guard(sampling_configuration_lock_);
+    if (this->continuousProfiler == nullptr)
+    {
+        return continuous_profiler_sampling_interval_;
+    }
+
+    return this->continuousProfiler->GetConfiguredThreadSamplingInterval();
+}
+
+unsigned int CorProfiler::GetContinuousProfilerAllocationSamplingRate()
+{
+    std::lock_guard<std::mutex> configuration_guard(sampling_configuration_lock_);
+    return this->continuousProfiler == nullptr ? 0 : this->continuousProfiler->GetAllocationSamplingRate();
+}
+
+HRESULT CorProfiler::InitializeContinuousProfiler(const ContinuousProfilerInitializationParams& params)
+{
+    Logger::Info("ConfigureContinuousProfiler: one-time initialization. Selected threads sampling interval: ",
+                 params.selectedThreadsSamplingInterval);
+
+    const bool selectiveSamplingPrepared =
+        params.selectedThreadSamplingExportPipelinePrepared && params.selectedThreadsSamplingInterval != 0;
 
     if (!InitThreadSampler())
     {
         Logger::Warn("ContinuousProfiler: unable to init sampler.");
-        return;
+        return E_FAIL;
     }
 
-    if (params.threadSamplingEnabled)
+    if (selectiveSamplingPrepared)
     {
-        this->continuousProfiler->threadSamplingInterval = params.threadSamplingInterval;
-    }
-    if (selectiveSamplingConfigured)
-    {
-        this->continuousProfiler->selectedThreadsSamplingInterval = params.selectedThreadsSamplingInterval;
-        this->continuousProfiler->nextOutdatedEntriesScan         = std::chrono::steady_clock::now();
+        this->continuousProfiler->nextOutdatedEntriesScan = std::chrono::steady_clock::now();
         continuous_profiler::ContinuousProfiler::InitSelectiveSamplingBuffer();
     }
 
-    if (params.threadSamplingEnabled || selectiveSamplingConfigured)
-    {
-        Logger::Info("ContinuousProfiler::StartThreadSampling");
-        this->continuousProfiler->StartThreadSampling();
-    }
-
-    if (params.allocationSamplingEnabled)
-    {
-        this->continuousProfiler->StartAllocationSampling(params.maxMemorySamplesPerMinute);
-    }
+    return S_OK;
 }
 
 void CorProfiler::InitializeTraceMethods(WCHAR* id,
@@ -3796,26 +4278,20 @@ HRESULT STDMETHODCALLTYPE CorProfiler::JITCachedFunctionSearchStarted(FunctionID
 
 HRESULT STDMETHODCALLTYPE CorProfiler::ThreadCreated(ThreadID threadId)
 {
-    if (continuousProfiler != nullptr)
+    std::shared_lock<std::shared_mutex> callback_lock;
+    if (TryEnterContinuousProfilerCallback(callback_lock))
     {
         continuousProfiler->ThreadCreated(threadId);
-    }
-
-    if (stack_walker_impl_)
-    {
         stack_walker_impl_->OnThreadCreated(threadId);
     }
     return S_OK;
 }
 HRESULT STDMETHODCALLTYPE CorProfiler::ThreadDestroyed(ThreadID threadId)
 {
-    if (continuousProfiler != nullptr)
+    std::shared_lock<std::shared_mutex> callback_lock;
+    if (TryEnterContinuousProfilerCallback(callback_lock))
     {
         continuousProfiler->ThreadDestroyed(threadId);
-    }
-
-    if (stack_walker_impl_)
-    {
         stack_walker_impl_->OnThreadDestroyed(threadId);
     }
 
@@ -3823,13 +4299,10 @@ HRESULT STDMETHODCALLTYPE CorProfiler::ThreadDestroyed(ThreadID threadId)
 }
 HRESULT STDMETHODCALLTYPE CorProfiler::ThreadNameChanged(ThreadID threadId, ULONG cchName, WCHAR name[])
 {
-    if (continuousProfiler != nullptr)
+    std::shared_lock<std::shared_mutex> callback_lock;
+    if (TryEnterContinuousProfilerCallback(callback_lock))
     {
         continuousProfiler->ThreadNameChanged(threadId, cchName, name);
-    }
-
-    if (stack_walker_impl_)
-    {
         stack_walker_impl_->OnThreadNameChanged(threadId, cchName, name);
     }
 
@@ -3837,7 +4310,8 @@ HRESULT STDMETHODCALLTYPE CorProfiler::ThreadNameChanged(ThreadID threadId, ULON
 }
 HRESULT STDMETHODCALLTYPE CorProfiler::ThreadAssignedToOSThread(ThreadID managedThreadId, DWORD osThreadId)
 {
-    if (stack_walker_impl_)
+    std::shared_lock<std::shared_mutex> callback_lock;
+    if (TryEnterContinuousProfilerCallback(callback_lock))
     {
         stack_walker_impl_->OnThreadAssignedToOSThread(managedThreadId, osThreadId);
     }
@@ -3857,7 +4331,8 @@ HRESULT STDMETHODCALLTYPE CorProfiler::EventPipeEventDelivered(EVENTPIPE_PROVIDE
                                                                ULONG              numStackFrames,
                                                                UINT_PTR           stackFrames[])
 {
-    if (continuousProfiler != nullptr && eventId == 10 && eventVersion == 4)
+    std::shared_lock<std::shared_mutex> callback_lock;
+    if (TryEnterContinuousProfilerCallback(callback_lock) && eventId == 10 && eventVersion == 4)
     {
         continuousProfiler->AllocationTick(cbEventData, eventData);
     }

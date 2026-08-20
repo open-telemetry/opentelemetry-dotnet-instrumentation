@@ -235,6 +235,85 @@ internal static class Instrumentation
         _pluginManager.Initialized();
     }
 
+    internal static void ShutdownNativeContinuousProfilerBestEffort(
+        bool isInitializationOwner,
+        Func<bool> shutdownContinuousProfiler)
+    {
+        if (!isInitializationOwner)
+        {
+            return;
+        }
+
+        try
+        {
+            if (!shutdownContinuousProfiler())
+            {
+                Logger.Warning("Failed to shut down the native continuous profiler after managed initialization failed.");
+            }
+        }
+        catch (Exception ex)
+        {
+            try
+            {
+                Logger.Warning(ex, "Failed to shut down the native continuous profiler after managed initialization failed.");
+            }
+            catch (Exception)
+            {
+                // Rollback is best-effort and must not mask the managed initialization failure.
+            }
+        }
+    }
+
+    internal static (bool Enabled, bool Prepared) GetEffectiveAllocationSamplingConfiguration(
+        bool allocationSamplingEnabled,
+        bool runtimeAllocationSamplingConfigured)
+    {
+#if NET
+        return (allocationSamplingEnabled, allocationSamplingEnabled || runtimeAllocationSamplingConfigured);
+#else
+        return (false, false);
+#endif
+    }
+
+    internal static (bool Enabled, bool Prepared) GetEffectiveAllocationSamplingConfiguration(
+        bool enabled,
+        uint maxMemorySamplesPerMinute,
+        TimeSpan exportInterval,
+        TimeSpan exportTimeout,
+        bool exporterConfigured)
+    {
+        var configuration = GetEffectiveSamplingConfiguration(
+            enabled,
+            maxMemorySamplesPerMinute,
+            exportInterval,
+            exportTimeout,
+            exporterConfigured);
+
+        return GetEffectiveAllocationSamplingConfiguration(configuration.Enabled, configuration.Prepared);
+    }
+
+    internal static (bool Enabled, bool Prepared) GetEffectiveSamplingConfiguration(
+        bool enabled,
+        uint samplingInterval,
+        TimeSpan exportInterval,
+        TimeSpan exportTimeout,
+        bool exporterConfigured)
+    {
+        var prepared =
+            samplingInterval != 0 &&
+            exportInterval > TimeSpan.Zero &&
+            exportTimeout > TimeSpan.Zero &&
+            exporterConfigured;
+
+        return (enabled && prepared, prepared);
+    }
+
+    internal static bool ShouldStartSampleExporter(bool nativeConfigurationApplied, bool isInitializationOwner)
+    {
+        // Only the successful initialization owner may consume the process-wide native FIFOs.
+        return nativeConfigurationApplied && isInitializationOwner;
+    }
+
     private static void TryInitializeContinuousProfiling()
     {
         try
@@ -254,7 +333,76 @@ internal static class Instrumentation
         var allocationSamplingEnabled = config.AllocationSamplingEnabled;
         Logger.Debug($"Continuous profiling configuration: Thread sampling enabled: {threadSamplingEnabled}, thread sampling interval: {config.ThreadSamplingInterval}, allocation sampling enabled: {allocationSamplingEnabled}, max memory samples per minute: {config.MaxMemorySamplesPerMinute}, export interval: {config.ExportInterval}, export timeout: {config.ExportTimeout}, continuous profiler exporter: {config.Exporter?.GetType()}");
 
-        if (threadSamplingEnabled || allocationSamplingEnabled)
+        if (threadSamplingEnabled && config.ThreadSamplingInterval == 0)
+        {
+            Logger.Warning("Continuous profiler thread sampling interval must be greater than zero. Thread sampling will not be enabled.");
+            threadSamplingEnabled = false;
+        }
+
+#if NET
+        if (allocationSamplingEnabled && config.MaxMemorySamplesPerMinute == 0)
+        {
+            Logger.Warning("Continuous profiler max memory samples per minute must be greater than zero. Allocation sampling will not be enabled.");
+            allocationSamplingEnabled = false;
+        }
+#endif
+
+        (threadSamplingEnabled, var threadSamplingPrepared) = GetEffectiveSamplingConfiguration(
+            threadSamplingEnabled,
+            config.ThreadSamplingInterval,
+            config.ExportInterval,
+            config.ExportTimeout,
+            config.Exporter != null);
+        (allocationSamplingEnabled, var allocationSamplingPrepared) = GetEffectiveAllocationSamplingConfiguration(
+            allocationSamplingEnabled,
+            config.MaxMemorySamplesPerMinute,
+            config.ExportInterval,
+            config.ExportTimeout,
+            config.Exporter != null);
+
+        var selectiveSamplingEnabled = false;
+        var selectiveSamplingPrepared = false;
+        uint selectiveSamplingInterval = 0;
+        var selectiveSamplingConfig = _pluginManager.GetFirstSelectiveSamplingConfiguration();
+        if (selectiveSamplingConfig != null)
+        {
+            (selectiveSamplingEnabled, selectiveSamplingPrepared) = GetEffectiveSamplingConfiguration(
+                selectiveSamplingConfig.Enabled,
+                selectiveSamplingConfig.SamplingInterval,
+                selectiveSamplingConfig.ExportInterval,
+                selectiveSamplingConfig.ExportTimeout,
+                selectiveSamplingConfig.Exporter != null);
+
+            if (!selectiveSamplingPrepared)
+            {
+                Logger.Warning("Invalid selective sampling configuration. Feature will not be enabled.");
+            }
+            else
+            {
+                Logger.Debug(
+                    $"Selective sampling configuration: sampling interval: {selectiveSamplingConfig.SamplingInterval}, export interval: {selectiveSamplingConfig.ExportInterval}, export timeout: {selectiveSamplingConfig.ExportTimeout}, samples exporter: {selectiveSamplingConfig.Exporter!.GetType()}");
+                selectiveSamplingInterval = selectiveSamplingConfig.SamplingInterval;
+            }
+        }
+
+        if (threadSamplingEnabled && selectiveSamplingEnabled)
+        {
+            if (config.ThreadSamplingInterval <= selectiveSamplingInterval)
+            {
+                Logger.Warning($"Continuous sampling interval must be higher than selective sampling interval. Thread sampling will not be enabled. Selective sampling interval: {selectiveSamplingInterval}, continuous sampling interval: {config.ThreadSamplingInterval}");
+                threadSamplingEnabled = false;
+            }
+            else if (config.ThreadSamplingInterval % selectiveSamplingInterval != 0)
+            {
+                Logger.Warning($"Continuous sampling interval must be a multiple of selective sampling interval. Thread sampling will not be enabled. Selective sampling interval: {selectiveSamplingInterval}, continuous sampling interval: {config.ThreadSamplingInterval}");
+                threadSamplingEnabled = false;
+            }
+        }
+
+        // Prepare sampling export handlers without starting the corresponding native sampling service.
+        // Runtime reconfiguration can then enable sampling without rebuilding managed or native resources.
+        var continuousSamplingPipelineRequired = threadSamplingPrepared || allocationSamplingPrepared;
+        if (continuousSamplingPipelineRequired)
         {
             if (config.Exporter == null)
             {
@@ -262,73 +410,88 @@ internal static class Instrumentation
                 return;
             }
 
-            if (!TryInitializeContinuousSamplingExport(config.Exporter, config.ThreadSamplingEnabled, config.AllocationSamplingEnabled, config.ExportInterval, config.ExportTimeout))
+            if (!TryInitializeContinuousSamplingExport(
+                    config.Exporter,
+                    threadSamplingPrepared,
+                    allocationSamplingPrepared,
+                    config.ExportInterval,
+                    config.ExportTimeout))
             {
                 return;
             }
         }
 
-        uint selectiveSamplingInterval = 0;
-        var selectiveSamplingConfig = _pluginManager.GetFirstSelectiveSamplingConfiguration();
-        if (selectiveSamplingConfig != null)
+        if (selectiveSamplingPrepared &&
+            !TryInitializeSelectedThreadSamplingExport(selectiveSamplingConfig!))
         {
-            if (selectiveSamplingConfig.SamplingInterval == 0 ||
-                selectiveSamplingConfig.ExportInterval <= TimeSpan.Zero ||
-                selectiveSamplingConfig.ExportTimeout <= TimeSpan.Zero ||
-                selectiveSamplingConfig.Exporter == null)
-            {
-                Logger.Warning("Invalid selective sampling configuration. Feature will not be enabled.");
-            }
-            else
-            {
-                Logger.Debug(
-                    $"Selective sampling configuration: sampling interval: {selectiveSamplingConfig.SamplingInterval}, export interval: {selectiveSamplingConfig.ExportInterval}, export timeout: {selectiveSamplingConfig.ExportTimeout}, samples exporter: {selectiveSamplingConfig.Exporter.GetType()}");
-                selectiveSamplingInterval = selectiveSamplingConfig.SamplingInterval;
-                if (!TryInitializeSelectedThreadSamplingExport(selectiveSamplingConfig))
-                {
-                    return;
-                }
-            }
+            return;
         }
 
-        if (!threadSamplingEnabled && !allocationSamplingEnabled && selectiveSamplingConfig == null)
+        if (!continuousSamplingPipelineRequired && !selectiveSamplingPrepared)
         {
             // No sampling requested.
             return;
         }
 
-        var selectiveSamplingEnabled = selectiveSamplingInterval != 0;
+        // Construct the managed exporter before native sampling can start, but defer its activity callbacks and
+        // reader thread until native initialization has completed.
+        var sampleExporter = _sampleExporterBuilder?.Build();
+        var isNativeInitializationOwner = false;
 
-        if (threadSamplingEnabled && selectiveSamplingEnabled)
+        try
         {
-            if (config.ThreadSamplingInterval <= selectiveSamplingInterval)
+            var nativeConfigurationApplied = NativeMethods.ConfigureNativeContinuousProfiler(
+                threadSamplingEnabled,
+                threadSamplingPrepared ? config.ThreadSamplingInterval : 0,
+                threadSamplingPrepared,
+                allocationSamplingEnabled,
+                allocationSamplingPrepared ? config.MaxMemorySamplesPerMinute : 0,
+                allocationSamplingPrepared,
+                selectiveSamplingEnabled,
+                selectiveSamplingPrepared,
+                selectiveSamplingInterval,
+                out isNativeInitializationOwner);
+
+            if (!nativeConfigurationApplied)
             {
-                Logger.Warning($"Continuous sampling interval must be higher than selective sampling interval. Selective sampling interval: {selectiveSamplingInterval}, continuous sampling interval: {config.ThreadSamplingInterval}");
-                return;
+                Logger.Warning("The native continuous profiler could not apply the complete sampling configuration.");
             }
 
-            if (config.ThreadSamplingInterval % selectiveSamplingInterval != 0)
+            if (!ShouldStartSampleExporter(nativeConfigurationApplied, isNativeInitializationOwner))
             {
-                Logger.Warning($"Continuous sampling interval must be a multiple of selective sampling interval. Selective sampling interval: {selectiveSamplingInterval}, continuous sampling interval: {config.ThreadSamplingInterval}");
+                ShutdownNativeContinuousProfilerBestEffort(isNativeInitializationOwner, NativeMethods.ShutdownNativeContinuousProfiler);
+                sampleExporter?.Dispose();
                 return;
             }
-        }
-
-        NativeMethods.ConfigureNativeContinuousProfiler(threadSamplingEnabled, config.ThreadSamplingInterval, allocationSamplingEnabled, config.MaxMemorySamplesPerMinute, selectiveSamplingInterval);
 #if NETFRAMEWORK
-        // On .NET Framework, we need a dedicated canary thread for seeded stack walking
-        _canaryThreadManager = new CanaryThreadManager();
-        if (!_canaryThreadManager.Start(TimeSpan.FromSeconds(5)))
-        {
-            Logger.Error("Failed to start canary thread. Continuous profiling will not be enabled.");
-            _canaryThreadManager.Dispose();
-            _canaryThreadManager = null;
-            return;
-        }
+            // On .NET Framework, we need a dedicated canary thread for seeded stack walking
+            _canaryThreadManager = new CanaryThreadManager();
+            if (!_canaryThreadManager.Start(TimeSpan.FromSeconds(5)))
+            {
+                Logger.Error("Failed to start canary thread. Continuous profiling will not be enabled.");
+                ShutdownNativeContinuousProfilerBestEffort(isNativeInitializationOwner, NativeMethods.ShutdownNativeContinuousProfiler);
+                _canaryThreadManager.Dispose();
+                _canaryThreadManager = null;
+                sampleExporter?.Dispose();
+                return;
+            }
 
-        Logger.Information("Canary thread started successfully for .NET Framework profiling.");
+            Logger.Information("Canary thread started successfully for .NET Framework profiling.");
 #endif
-        _sampleExporter = _sampleExporterBuilder?.Build();
+            sampleExporter?.Start();
+            _sampleExporter = sampleExporter;
+        }
+        catch
+        {
+            ShutdownNativeContinuousProfilerBestEffort(isNativeInitializationOwner, NativeMethods.ShutdownNativeContinuousProfiler);
+
+#if NETFRAMEWORK
+            _canaryThreadManager?.Dispose();
+            _canaryThreadManager = null;
+#endif
+            sampleExporter?.Dispose();
+            throw;
+        }
     }
 
     private static bool TryInitializeSelectedThreadSamplingExport(SelectiveSamplerConfiguration configuration)
@@ -341,19 +504,19 @@ internal static class Instrumentation
 
     private static bool TryInitializeContinuousSamplingExport(
         IContinuousProfilerExporter exporter,
-        bool threadSamplingEnabled,
-        bool allocationSamplingEnabled,
+        bool threadSamplingPrepared,
+        bool allocationSamplingPrepared,
         TimeSpan exportInterval,
         TimeSpan exportTimeout)
     {
         InitializeBufferProcessing(exportInterval, exportTimeout);
 
-        if (threadSamplingEnabled)
+        if (threadSamplingPrepared)
         {
             _sampleExporterBuilder?.AddHandler(SampleType.Continuous, exporter.ExportThreadSamples, exportTimeout);
         }
 
-        if (allocationSamplingEnabled)
+        if (allocationSamplingPrepared)
         {
             _sampleExporterBuilder?.AddHandler(SampleType.Allocation, exporter.ExportAllocationSamples, exportTimeout);
         }

@@ -10,6 +10,7 @@
 #include "corprof.h"
 #include <atomic>
 #include <mutex>
+#include <shared_mutex>
 #include <string>
 #include <unordered_map>
 #include <vector>
@@ -32,12 +33,9 @@ class ContinuousProfiler;
 
 namespace trace
 {
-struct ContinuousProfilerParams
+struct ContinuousProfilerInitializationParams
 {
-    bool         threadSamplingEnabled;
-    unsigned int threadSamplingInterval;
-    bool         allocationSamplingEnabled;
-    unsigned int maxMemorySamplesPerMinute;
+    bool         selectedThreadSamplingExportPipelinePrepared;
     unsigned int selectedThreadsSamplingInterval;
 };
 
@@ -66,8 +64,18 @@ private:
     bool is_desktop_iis = false;
 
     continuous_profiler::ContinuousProfiler* continuousProfiler;
+    std::atomic_bool continuous_profiler_initialized_ = {false};
+    std::atomic_bool continuous_profiler_initialization_in_progress_ = {false};
+    std::shared_mutex continuous_profiler_callback_lock_;
     std::unique_ptr<continuous_profiler::StackWalkerImpl>       stack_walker_impl_;
     std::once_flag sampling_init_flag_;
+    std::mutex sampling_configuration_lock_;
+    HRESULT sampling_initialization_result_ = E_FAIL;
+    bool sampling_initial_configuration_result_ = false;
+    bool continuous_profiler_thread_sampling_prepared_ = false;
+    unsigned int continuous_profiler_sampling_interval_ = 0;
+    bool continuous_profiler_allocation_sampling_prepared_ = false;
+    bool continuous_profiler_snapshots_sampling_prepared_ = false;
     HRESULT STDMETHODCALLTYPE ThreadAssignedToOSThread(ThreadID managedThreadId, DWORD osThreadId) override;
 
 
@@ -144,7 +152,19 @@ private:
     //
     void InternalAddInstrumentation(WCHAR* id, CallTargetDefinition* items, int size, bool isDerived);
     bool InitThreadSampler();
-    void ConfigureContinuousProfilerInternal(const ContinuousProfilerParams& params);
+    bool TryEnterContinuousProfilerCallback(std::shared_lock<std::shared_mutex>& callbackLock);
+    HRESULT InitializeContinuousProfiler(const ContinuousProfilerInitializationParams& params);
+    bool    ApplyInitialThreadSamplingConfigurationLocked(bool         threadSamplingEnabled,
+                                                          unsigned int threadSamplingInterval,
+                                                          bool         selectedThreadSamplingEnabled,
+                                                          unsigned int selectedThreadsSamplingInterval);
+    bool ApplyAllocationSamplingConfigurationLocked(bool enabled, unsigned int maxMemorySamplesPerMinute);
+    bool SetContinuousProfilerSamplingIntervalLocked(unsigned int samplingInterval);
+    bool SetContinuousProfilerEnabledLocked(bool enabled);
+    bool SetContinuousProfilerAllocationSamplingEnabledLocked(bool enabled);
+    bool SetContinuousProfilerMaxMemorySamplesPerMinuteLocked(unsigned int maxMemorySamplesPerMinute);
+    bool SetContinuousProfilerSnapshotsEnabledLocked(bool enabled);
+    bool SetContinuousProfilerSnapshotSamplingIntervalLocked(unsigned int samplingInterval);
 
 public:
     CorProfiler() = default;
@@ -247,8 +267,25 @@ public:
     //
     // Continuous Profiler methods
     //
-    void ConfigureContinuousProfiler(bool threadSamplingEnabled, unsigned int threadSamplingInterval, bool allocationSamplingEnabled, unsigned int maxMemorySamplesPerMinute, 
-        unsigned int selectedThreadsSamplingInterval);
+    bool         ConfigureContinuousProfiler(bool         threadSamplingEnabled,
+                                             unsigned int threadSamplingInterval,
+                                             bool         threadSamplingExportPipelinePrepared,
+                                             bool         allocationSamplingEnabled,
+                                             unsigned int maxMemorySamplesPerMinute,
+                                             bool         allocationSamplingExportPipelinePrepared,
+                                             bool         selectedThreadSamplingEnabled,
+                                             bool         selectedThreadSamplingExportPipelinePrepared,
+                                             unsigned int selectedThreadsSamplingInterval,
+                                             bool&        isInitializationOwner);
+    bool         ShutdownContinuousProfiler();
+    bool         SetContinuousProfilerSamplingInterval(unsigned int threadSamplingInterval);
+    bool         SetContinuousProfilerEnabled(bool enabled);
+    bool         SetContinuousProfilerAllocationSamplingEnabled(bool enabled);
+    bool         SetContinuousProfilerMaxMemorySamplesPerMinute(unsigned int maxMemorySamplesPerMinute);
+    bool         SetContinuousProfilerSnapshotsEnabled(bool enabled);
+    bool         SetContinuousProfilerSnapshotSamplingInterval(unsigned int samplingInterval);
+    unsigned int GetContinuousProfilerSamplingInterval();
+    unsigned int GetContinuousProfilerAllocationSamplingRate();
 
     //
     // IL Rewriting methods

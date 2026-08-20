@@ -41,7 +41,7 @@ public class AllocationPlugin : BasePlugin, IContinuousProfilerPlugin
             MaxMemorySamplesPerMinute = 200u,
             ExportInterval = TimeSpan.FromMilliseconds(500),
             ExportTimeout = TimeSpan.FromMilliseconds(5000),
-            Exporter = new OtlpOverHttpExporter(TimeSpan.FromMilliseconds(threadSamplingInterval), new SampleNativeFormatParser())
+            Exporter = new OtlpOverHttpExporter(new SampleNativeFormatParser())
         };
     }
 }

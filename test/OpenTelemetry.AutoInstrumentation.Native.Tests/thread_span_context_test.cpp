@@ -3,6 +3,7 @@
 
 #include <algorithm>
 #include <chrono>
+#include <cstdint>
 #include <vector>
 
 #ifdef _WIN32
@@ -50,11 +51,13 @@ protected:
     void SetUp() override
     {
         SelectiveSamplingBufferTest::SetUp();
+        continuous_profiler::ContinuousProfiler::ClearGlobalInfo();
         continuous_profiler::RemoveSelectiveSamplingTrace({kTestTraceIdHigh, kTestTraceIdLow});
     }
 
     void TearDown() override
     {
+        continuous_profiler::ContinuousProfiler::ClearGlobalInfo();
         continuous_profiler::RemoveSelectiveSamplingTrace({kTestTraceIdHigh, kTestTraceIdLow});
         SelectiveSamplingBufferTest::TearDown();
     }
@@ -127,6 +130,178 @@ TEST(ThreadSpanContextMapTest, RemoveBySpanContext)
 
     ASSERT_FALSE(threadSpanContextMap.GetContext(1).has_value());
     ASSERT_FALSE(threadSpanContextMap.GetContext(2).has_value());
+}
+
+TEST(ContinuousProfilerConfigurationTest, ThreadSamplingConfigurationIsIdempotentAndRetainsInterval)
+{
+    continuous_profiler::ContinuousProfiler profiler;
+
+    ASSERT_FALSE(profiler.SetThreadSamplingEnabled(true));
+    ASSERT_FALSE(profiler.IsThreadSamplingThreadRunning());
+
+    ASSERT_TRUE(profiler.SetThreadSamplingInterval(10000u));
+    ASSERT_TRUE(profiler.SetThreadSamplingInterval(10000u));
+    ASSERT_FALSE(profiler.GetThreadSamplingConfiguration().threadSamplingInterval.has_value());
+
+    ASSERT_TRUE(profiler.SetThreadSamplingEnabled(true));
+    ASSERT_TRUE(profiler.IsThreadSamplingThreadRunning());
+    auto configuration = profiler.GetThreadSamplingConfiguration();
+    ASSERT_EQ(10000u, configuration.threadSamplingInterval.value());
+
+    ASSERT_TRUE(profiler.SetThreadSamplingInterval(1234u));
+    ASSERT_TRUE(profiler.IsThreadSamplingThreadRunning());
+    configuration = profiler.GetThreadSamplingConfiguration();
+    ASSERT_EQ(1234u, configuration.threadSamplingInterval.value());
+    ASSERT_EQ(1234u, profiler.GetConfiguredThreadSamplingInterval());
+
+    ASSERT_FALSE(profiler.SetThreadSamplingInterval(0));
+    configuration = profiler.GetThreadSamplingConfiguration();
+    ASSERT_EQ(1234u, configuration.threadSamplingInterval.value());
+
+    ASSERT_TRUE(profiler.SetThreadSamplingEnabled(true));
+    ASSERT_EQ(1234u, profiler.GetThreadSamplingConfiguration().threadSamplingInterval.value());
+
+    ASSERT_TRUE(profiler.SetThreadSamplingEnabled(false));
+    ASSERT_FALSE(profiler.IsThreadSamplingThreadRunning());
+    ASSERT_FALSE(profiler.GetThreadSamplingConfiguration().threadSamplingInterval.has_value());
+    ASSERT_EQ(1234u, profiler.GetConfiguredThreadSamplingInterval());
+
+    ASSERT_TRUE(profiler.SetThreadSamplingEnabled(false));
+    ASSERT_FALSE(profiler.IsThreadSamplingThreadRunning());
+
+    ASSERT_TRUE(profiler.SetThreadSamplingEnabled(true));
+    ASSERT_TRUE(profiler.IsThreadSamplingThreadRunning());
+    ASSERT_EQ(1234u, profiler.GetThreadSamplingConfiguration().threadSamplingInterval.value());
+
+    ASSERT_TRUE(profiler.SetThreadSamplingEnabled(false));
+}
+
+TEST(ContinuousProfilerConfigurationTest, CpuAndSnapshotConfigurationRemainIndependentAndIdempotent)
+{
+    continuous_profiler::ContinuousProfiler profiler;
+
+    ASSERT_TRUE(profiler.SetThreadSamplingInterval(1000u));
+    ASSERT_TRUE(profiler.SetThreadSamplingEnabled(true));
+    ASSERT_TRUE(profiler.SetThreadSamplingEnabled(true));
+    ASSERT_TRUE(profiler.IsThreadSamplingThreadRunning());
+
+    ASSERT_FALSE(profiler.SetSelectedThreadSamplingInterval(1000u));
+    ASSERT_FALSE(profiler.SetSelectedThreadSamplingInterval(600u));
+    ASSERT_EQ(0u, profiler.GetConfiguredSelectedThreadSamplingInterval());
+    ASSERT_TRUE(profiler.SetSelectedThreadSamplingInterval(100u));
+    ASSERT_TRUE(profiler.SetSelectedThreadSamplingEnabled(true));
+    ASSERT_TRUE(profiler.SetSelectedThreadSamplingEnabled(true));
+    auto configuration = profiler.GetThreadSamplingConfiguration();
+    ASSERT_EQ(1000u, configuration.threadSamplingInterval.value());
+    ASSERT_EQ(100u, configuration.selectedThreadsSamplingInterval.value());
+
+    ASSERT_TRUE(profiler.SetSelectedThreadSamplingEnabled(false));
+    ASSERT_TRUE(profiler.SetSelectedThreadSamplingEnabled(false));
+    ASSERT_TRUE(profiler.IsThreadSamplingThreadRunning());
+    configuration = profiler.GetThreadSamplingConfiguration();
+    ASSERT_EQ(1000u, configuration.threadSamplingInterval.value());
+    ASSERT_FALSE(configuration.selectedThreadsSamplingInterval.has_value());
+    ASSERT_EQ(100u, profiler.GetConfiguredSelectedThreadSamplingInterval());
+
+    ASSERT_TRUE(profiler.SetSelectedThreadSamplingEnabled(true));
+    ASSERT_FALSE(profiler.SetThreadSamplingInterval(100u));
+    ASSERT_FALSE(profiler.SetThreadSamplingInterval(150u));
+    ASSERT_EQ(1000u, profiler.GetConfiguredThreadSamplingInterval());
+
+    ASSERT_TRUE(profiler.SetThreadSamplingEnabled(false));
+    ASSERT_TRUE(profiler.SetThreadSamplingEnabled(false));
+    ASSERT_TRUE(profiler.IsThreadSamplingThreadRunning());
+    configuration = profiler.GetThreadSamplingConfiguration();
+    ASSERT_FALSE(configuration.threadSamplingInterval.has_value());
+    ASSERT_EQ(100u, configuration.selectedThreadsSamplingInterval.value());
+
+    ASSERT_TRUE(profiler.SetSelectedThreadSamplingEnabled(false));
+    ASSERT_FALSE(profiler.IsThreadSamplingThreadRunning());
+}
+
+TEST(ContinuousProfilerConfigurationTest, ShutdownIsIdempotentAndRejectsReconfiguration)
+{
+    continuous_profiler::ContinuousProfiler profiler;
+
+    ASSERT_TRUE(profiler.SetSelectedThreadSamplingInterval(100u));
+    ASSERT_TRUE(profiler.SetSelectedThreadSamplingEnabled(true));
+    ASSERT_TRUE(profiler.SetThreadSamplingInterval(1000u));
+    ASSERT_TRUE(profiler.SetThreadSamplingEnabled(true));
+    ASSERT_TRUE(profiler.IsThreadSamplingThreadRunning());
+
+    profiler.Shutdown();
+
+    ASSERT_TRUE(profiler.IsShutdownRequested());
+    ASSERT_FALSE(profiler.IsThreadSamplingThreadRunning());
+    ASSERT_EQ(0u, profiler.GetAllocationSamplingRate());
+    ASSERT_FALSE(profiler.SetThreadSamplingEnabled(true));
+    ASSERT_FALSE(profiler.SetThreadSamplingInterval(1000u));
+    ASSERT_FALSE(profiler.SetAllocationSamplingConfiguration(true, 100u));
+    ASSERT_FALSE(profiler.SetSelectedThreadSamplingEnabled(true));
+    ASSERT_FALSE(profiler.SetSelectedThreadSamplingInterval(100u));
+    ASSERT_FALSE(profiler.SetAllocationSamplingEnabled(true));
+    ASSERT_FALSE(profiler.SetMaxMemorySamplesPerMinute(100u));
+
+    // The rollback is intentionally idempotent and permanently fail-closed.
+    profiler.Shutdown();
+    ASSERT_FALSE(profiler.IsThreadSamplingThreadRunning());
+    ASSERT_EQ(0u, profiler.GetAllocationSamplingRate());
+}
+
+TEST(ContinuousProfilerConfigurationTest, AllocationSamplingValidatesConfigurationAndUnsupportedRuntime)
+{
+    continuous_profiler::ContinuousProfiler profiler;
+
+    ASSERT_FALSE(profiler.SetMaxMemorySamplesPerMinute(0u));
+    ASSERT_EQ(0u, profiler.GetConfiguredMaxMemorySamplesPerMinute());
+    ASSERT_FALSE(profiler.SetAllocationSamplingEnabled(true));
+    ASSERT_TRUE(profiler.SetAllocationSamplingEnabled(false));
+    ASSERT_FALSE(profiler.SetAllocationSamplingConfiguration(true, 0u));
+
+    ASSERT_TRUE(profiler.SetMaxMemorySamplesPerMinute(100u));
+    ASSERT_EQ(100u, profiler.GetConfiguredMaxMemorySamplesPerMinute());
+    ASSERT_FALSE(profiler.SetAllocationSamplingEnabled(true));
+    ASSERT_EQ(0u, profiler.GetAllocationSamplingRate());
+    ASSERT_EQ(100u, profiler.GetConfiguredMaxMemorySamplesPerMinute());
+
+    ASSERT_TRUE(profiler.SetMaxMemorySamplesPerMinute(200u));
+    ASSERT_EQ(200u, profiler.GetConfiguredMaxMemorySamplesPerMinute());
+    ASSERT_TRUE(profiler.SetAllocationSamplingEnabled(false));
+
+    ASSERT_FALSE(profiler.SetAllocationSamplingConfiguration(true, 100u));
+    ASSERT_EQ(0u, profiler.GetAllocationSamplingRate());
+    ASSERT_TRUE(profiler.SetAllocationSamplingConfiguration(false, 0u));
+}
+
+TEST(ContinuousProfilerBufferTest, NativeReadersPreserveBatchMetadataAndLegacyAbi)
+{
+    unsigned char output[1];
+    unsigned int  samplingInterval;
+    while (ContinuousProfilerReadThreadSamplesV2(sizeof(output), output, &samplingInterval) > 0)
+    {
+    }
+    ASSERT_EQ(0u, samplingInterval);
+
+    ThreadSamplingRecordProducedThreadSample(new std::vector<unsigned char>{0x11}, 10000u);
+    ThreadSamplingRecordProducedThreadSample(new std::vector<unsigned char>{0x22}, 20000u);
+    ASSERT_FALSE(ThreadSamplingShouldProduceThreadSample());
+
+    ASSERT_EQ(1, ContinuousProfilerReadThreadSamplesV2(sizeof(output), output, &samplingInterval));
+    ASSERT_EQ(0x11, output[0]);
+    ASSERT_EQ(10000u, samplingInterval);
+
+    ThreadSamplingRecordProducedThreadSample(new std::vector<unsigned char>{0x33}, 30000u);
+    ASSERT_FALSE(ThreadSamplingShouldProduceThreadSample());
+
+    ASSERT_EQ(1, ContinuousProfilerReadThreadSamples(sizeof(output), output));
+    ASSERT_EQ(0x22, output[0]);
+
+    ASSERT_EQ(1, ContinuousProfilerReadThreadSamplesV2(sizeof(output), output, &samplingInterval));
+    ASSERT_EQ(0x33, output[0]);
+    ASSERT_EQ(30000u, samplingInterval);
+
+    ASSERT_EQ(0, ContinuousProfilerReadThreadSamplesV2(sizeof(output), output, &samplingInterval));
+    ASSERT_EQ(0u, samplingInterval);
 }
 
 TEST_F(SelectiveSamplingBufferTest, SuccessfulAppendKeepsSamplingAdmissible)
@@ -241,6 +416,28 @@ TEST_F(SelectiveSamplingPreparationTest, EmptyTraceSetPreventsSelectedThreadSamp
 
     ASSERT_TRUE(continuous_profiler::TryAddSelectiveSamplingTrace({kTestTraceIdHigh, kTestTraceIdLow}, now));
     ASSERT_TRUE(continuous_profiler::TryPrepareSelectedThreadSampling(&profiler, now));
+}
+
+TEST_F(SelectiveSamplingPreparationTest, GlobalInfoPublicationIsExplicitAndClearRemovesSelectiveState)
+{
+    continuous_profiler::ContinuousProfiler::ClearGlobalInfo();
+
+    continuous_profiler::ContinuousProfiler profiler{};
+    const auto                              now = std::chrono::steady_clock::now();
+    profiler.nextOutdatedEntriesScan            = now + std::chrono::minutes(1);
+
+    // SelectiveSamplingStart only uses the pointer as a publication gate. Keeping
+    // this deliberately non-dereferenceable makes an accidental CLR call fail fast.
+    profiler.SetGlobalInfo7(reinterpret_cast<ICorProfilerInfo7*>(std::uintptr_t{1}));
+    SelectiveSamplingStart(kTestTraceIdHigh, kTestTraceIdLow);
+    ASSERT_FALSE(continuous_profiler::TryPrepareSelectedThreadSampling(&profiler, now));
+
+    profiler.PublishGlobalInfo();
+    SelectiveSamplingStart(kTestTraceIdHigh, kTestTraceIdLow);
+    ASSERT_TRUE(continuous_profiler::TryPrepareSelectedThreadSampling(&profiler, now));
+
+    continuous_profiler::ContinuousProfiler::ClearGlobalInfo();
+    ASSERT_FALSE(continuous_profiler::TryPrepareSelectedThreadSampling(&profiler, now));
 }
 
 #ifdef _WIN32

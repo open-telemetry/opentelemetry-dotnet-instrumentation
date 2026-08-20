@@ -9,6 +9,9 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 
 ### Added
 
+- Add runtime reconfiguration for continuous profiler CPU, allocation, and
+  snapshot sampling, including enabling or disabling each service and updating
+  sampling intervals or maximum sample rates.
 - Support for [StackExchange.Redis](https://www.nuget.org/packages/StackExchange.Redis)
   traces instrumentation for versions `3.1.x`+ for .NET only.
 
