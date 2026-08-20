@@ -9,7 +9,7 @@
     <PackageVersion Include="Elastic.Clients.Elasticsearch" Version="9.5.0" />
     <PackageVersion Include="Google.Protobuf" Version="3.35.1" />
     <PackageVersion Include="GraphQL" Version="8.8.4" />
-    <PackageVersion Include="GraphQL.MicrosoftDI" Version="8.8.4" />
+    <PackageVersion Include="GraphQL.MicrosoftDI" Version="8.8.5" />
     <PackageVersion Include="GraphQL.Server.Transports.AspNetCore" Version="8.3.3" />
     <PackageVersion Include="GraphQL.Server.Ui.GraphiQL" Version="8.3.3" />
     <PackageVersion Include="Grpc.AspNetCore" Version="2.83.0" />
