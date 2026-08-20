@@ -72,16 +72,16 @@ public class SelectiveSamplerTests : TestHelper
         // Based on the test app, samples for all the threads should be collected at least 2 times.
         Assert.True(groupedByTimestampAscending.Count(
             samples =>
-                !IndicatesSelectiveSampling(samples) &&
-                samples.Any(HasSpanContextAssociated) &&
-                samples.Count(sample => sample.SelectedForFrequentSampling) == 1)
+                IsContinuousProfilingSamplesBatch(samples) &&
+                samples.Count() > 1 &&
+                samples.Any(sample => sample.SelectedForFrequentSampling && HasSpanContextAssociated(sample)))
                     > 1);
 
         // Sampling starts early, at the start of instrumentation init.
         var groupingStartingWithAllThreadSamples = groupedByTimestampAscending
             .SkipWhile(
                 samples =>
-                    IndicatesSelectiveSampling(samples) ||
+                    IsSelectiveSamplingSamplesBatch(samples) ||
                     CollectedBeforeSpanStarted(samples) ||
                     CollectedBeforeFrequentSamplingStarted(samples))
             // Omit last group from verification, as it may be collected after activity stopped.
@@ -114,10 +114,10 @@ public class SelectiveSamplerTests : TestHelper
 #endif
                 // Sample for thread selected for frequent sampling when collecting samples of all threads
                 // should be marked with SelectedForFrequentSampling flag.
-                var selectedForFrequentSampling = group.SingleOrDefault(sample => sample.SelectedForFrequentSampling);
-                if (selectedForFrequentSampling != null)
+                var selectedForFrequentSampling = group.Where(sample => sample.SelectedForFrequentSampling).ToList();
+                if (selectedForFrequentSampling.Count > 0)
                 {
-                    Assert.True(HasSpanContextAssociated(selectedForFrequentSampling));
+                    AssertExpectedSelectedSamples(selectedForFrequentSampling);
                 }
                 else
                 {
@@ -127,9 +127,9 @@ public class SelectiveSamplerTests : TestHelper
             }
             else
             {
-                Assert.True(IndicatesSelectiveSampling(group));
-                var sample = Assert.Single(group);
-                Assert.True(HasSpanContextAssociated(sample));
+                Assert.True(IsSelectiveSamplingSamplesBatch(group));
+
+                AssertExpectedSelectedSamples(group.ToList());
                 selectiveSinceLastContinuous++;
             }
         }
@@ -140,9 +140,18 @@ public class SelectiveSamplerTests : TestHelper
         return group.All(sample => sample.Source == "continuous-profiler");
     }
 
-    private static bool IndicatesSelectiveSampling(IGrouping<long, ConsoleThreadSample> samples)
+    private static bool IsSelectiveSamplingSamplesBatch(IGrouping<long, ConsoleThreadSample> samples)
     {
-        return samples.Count() == 1 && samples.Single().Source == "selective-sampler";
+        return samples.All(sample => sample.Source == "selective-sampler");
+    }
+
+    private static void AssertExpectedSelectedSamples(List<ConsoleThreadSample> samples)
+    {
+        // This test application has one serial flow and a single async handoff. During that handoff,
+        // both the source and destination thread can briefly be associated with the same activity.
+        Assert.InRange(samples.Count, 1, 2);
+        Assert.All(samples, sample => Assert.True(HasSpanContextAssociated(sample)));
+        Assert.Single(samples.Select(sample => (sample.TraceIdHigh, sample.TraceIdLow, sample.SpanId)).Distinct());
     }
 
     private static bool CollectedBeforeSpanStarted(IGrouping<long, ConsoleThreadSample> samples)
