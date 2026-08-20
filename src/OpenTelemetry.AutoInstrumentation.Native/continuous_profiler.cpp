@@ -1043,9 +1043,11 @@ static bool CaptureFunctionIdentifiersForThreads(
         const HRESULT                            hr = stackWalker->CaptureStacks(selectedThreads, &request);
         if (FAILED(hr))
         {
-            trace::Logger::Debug("Stack capture failed. HRESULT=0x", std::setfill('0'), std::setw(8), std::hex, hr);
-            threadStacksBuffer.clear();
-            return false;
+            // CaptureStacks reports an aggregate failure when any requested thread cannot be captured.
+            // Preserve stacks captured for other threads and let the non-empty check below discard cycles
+            // that produced no usable stacks.
+            trace::Logger::Debug("Some thread stacks could not be captured. HRESULT=0x", std::setfill('0'),
+                                 std::setw(8), std::hex, hr);
         }
 
         return true;
