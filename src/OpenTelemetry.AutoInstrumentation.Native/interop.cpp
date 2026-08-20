@@ -58,6 +58,27 @@ EXTERN_C VOID STDAPICALLTYPE ConfigureContinuousProfiler(bool         threadSamp
                                                         selectedThreadSamplingInterval);
 }
 
+EXTERN_C INT32 STDAPICALLTYPE
+ApplyContinuousProfilerConfigurationV1(const continuous_profiler::RuntimeSamplerConfigurationV1* configuration)
+{
+    if (trace::profiler == nullptr)
+    {
+        return static_cast<INT32>(continuous_profiler::RuntimeSamplerApplyResult::ShuttingDown);
+    }
+
+    return static_cast<INT32>(trace::profiler->ApplyContinuousProfilerConfigurationV1(configuration));
+}
+
+EXTERN_C INT32 STDAPICALLTYPE GetContinuousProfilerStateV1(continuous_profiler::RuntimeSamplerStateV1* state)
+{
+    if (trace::profiler == nullptr)
+    {
+        return static_cast<INT32>(continuous_profiler::RuntimeSamplerStateQueryResult::InvalidArgument);
+    }
+
+    return static_cast<INT32>(trace::profiler->GetContinuousProfilerStateV1(state));
+}
+
 EXTERN_C VOID STDAPICALLTYPE InitializeTraceMethods(WCHAR* id,
                                                     WCHAR* integration_assembly_name_ptr,
                                                     WCHAR* integration_type_name_ptr,

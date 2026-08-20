@@ -9,6 +9,9 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 
 ### Added
 
+- Added a protocol-neutral native runtime configuration contract for dynamically
+  enabling, updating, disabling, and re-enabling continuous profiling producers.
+  ([#5360](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/issues/5360))
 - Support for [StackExchange.Redis](https://www.nuget.org/packages/StackExchange.Redis)
   traces instrumentation for versions `3.1.x`+ for .NET only.
 

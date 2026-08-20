@@ -39,17 +39,17 @@ public:
                                std::chrono::milliseconds probeTimeout = std::chrono::milliseconds(250));
     ~ClrRuntimeCapture() = default;
 
+    HRESULT PrepareForStackWalking() noexcept override;
     HRESULT SuspendRuntime() override;
     void    ResumeRuntime() noexcept override;
 
-    HRESULT CaptureStack(ThreadID                      managedThreadId,
-                         StackSnapshotCallbackContext* clientData) override;
+    HRESULT CaptureStack(ThreadID managedThreadId, StackSnapshotCallbackContext* clientData) override;
 
 private:
     IProfilerApi* profilerApi_;
 
 #if defined(_WIN32) && defined(_M_AMD64)
-    std::unique_ptr<StackWalkGuard> stackWalkGuard_;
+    std::unique_ptr<StackWalkGuard>        stackWalkGuard_;
     std::unique_ptr<SafeNativeWalkService> nativeWalk_;
 #endif
 };

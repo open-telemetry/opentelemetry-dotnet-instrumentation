@@ -10,7 +10,6 @@
 #include <unordered_set>
 #include "string_utils.h"
 
-
 namespace continuous_profiler
 {
 /// @brief Forward declaration of per-frame data contract delivered to the consumer during stack capture.
@@ -34,14 +33,16 @@ class IStackWalker
 public:
     virtual ~IStackWalker() = default;
 
+    /// @brief Starts stack-walking helpers before sampling can suspend the
+    /// runtime or an application thread.
+    virtual HRESULT PrepareForStackWalking() noexcept = 0;
+
     /// @brief Capture stacks for the given threads.
     /// Implementation owns all suspension/resume logic.
-    virtual HRESULT CaptureStacks(const std::unordered_set<ThreadID>& threads,
-                                  StackCaptureRequest*                request) = 0;
+    virtual HRESULT CaptureStacks(const std::unordered_set<ThreadID>& threads, StackCaptureRequest* request) = 0;
 
     /// @brief Resolve a native IP to a human-readable symbol name.
-    virtual HRESULT ResolveNativeSymbolName(UINT_PTR        instructionPointer,
-                                            trace::WSTRING& outName) = 0;
+    virtual HRESULT ResolveNativeSymbolName(UINT_PTR instructionPointer, trace::WSTRING& outName) = 0;
 };
 
 /// @brief Lifecycle events forwarded from CLR callbacks.
