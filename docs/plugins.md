@@ -258,6 +258,10 @@ configuration. Only the first configured plugin implementing
 `IContinuousProfilerPlugin` is used. If no plugin provides a configuration, the
 default continuous profiler configuration is used.
 
+See the [continuous profiler shared service definition](./internal/continuous-profiler.md#shared-service-definition)
+for the process-wide sampling and lifecycle semantics. The plugin API described
+below remains the current startup configuration surface.
+
 ```csharp
 using System;
 using OpenTelemetry.AutoInstrumentation.PluginApi;

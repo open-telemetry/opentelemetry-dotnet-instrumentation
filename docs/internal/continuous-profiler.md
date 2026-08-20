@@ -16,6 +16,193 @@ events:
 
 You can export stack traces to any observability back end that supports profiling.
 
+## Shared service definition
+
+> [!NOTE]
+> This section defines the proposed, protocol-neutral service contract for
+> [dynamic continuous profiler configuration](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/issues/5360).
+> It is the target data-plane contract for the native profiler.
+> Transport-specific control-plane integration and a public managed dynamic
+> configuration API are separate follow-up work.
+
+The continuous profiler is one process-wide data-plane service. It coordinates
+three sampling modes:
+
+| Sampling mode | Producer | Captured data |
+| ------------- | -------- | ------------- |
+| Continuous thread sampling (CPU sampling) | Shared thread-sampling worker | Complete stacks for eligible managed threads |
+| Selective thread sampling | Shared thread-sampling worker | Complete stacks for threads associated with selected trace contexts |
+| Allocation sampling | Allocation EventPipe session | Sampled allocation and the complete stack that caused it |
+
+Continuous and selective thread sampling share at most one native worker.
+Allocation sampling has a separate producer lifecycle because an inactive
+EventPipe session has a runtime cost. Managed buffer readers and exporters are
+consumers of these native producers. How configuration reaches the service and
+how samples are transported after a consumer reads them are outside this
+definition.
+
+### Terms
+
+The following terms have the same meaning for startup and runtime configuration:
+
+* **Effective configuration**: The coherent set of settings currently used by
+  all three sampling modes.
+* **Configuration transition**: Replacement of one effective configuration by
+  another. A producer observes either the old configuration or the new one,
+  never a mixture of fields from both.
+* **Capture cycle**: One scheduling and capture pass by the shared
+  thread-sampling worker.
+* **Sample**: One captured event and its stack. An ordinary sample is
+  publishable only when its stack is complete.
+* **Batch**: A bounded group of complete samples handed from native code to a
+  managed consumer. A thread-sampling batch records the interval used to
+  capture it.
+* **Disable**: A reversible transition that stops one sampling mode from
+  producing new samples. It is not process shutdown.
+* **Terminal shutdown**: The irreversible process-level profiler transition
+  that stops every producer and prevents restart.
+* **Safe boundary**: A point where a transition can take effect without
+  publishing an incomplete stack or leaving a suspended runtime or thread.
+
+### Process-wide invariants
+
+The native service preserves these observable invariants:
+
+1. There is one continuous profiler service and one effective configuration per
+   process. A .NET Framework `AppDomain` does not own either one.
+2. Repeated managed initialization cannot replace process-wide configuration by
+   accident. Unloading an `AppDomain` is not terminal profiler shutdown and does
+   not reset the effective configuration.
+3. Native bootstrap establishes profiling capability, not sampling policy.
+   Bootstrap alone starts no thread-sampling producer worker or EventPipe
+   session. It may create dormant safety helpers that are required before a
+   later enablement.
+4. An all-disabled process that has never sampled has no thread-sampling
+   producer worker and no allocation EventPipe session.
+5. At most one managed consumer may destructively read the process-wide native
+   buffers. Native producers must not continue indefinitely when no consumer can
+   drain them.
+6. Invalid configuration or a failed producer transition leaves the previous
+   effective configuration in force.
+7. Native profiling failures are bounded, logged, and contained. They must not
+   escape into the instrumented application.
+
+The mechanism used to select or replace the managed consumer is intentionally not
+defined here. Only the single-consumer and no-unconsumed-production guarantees are
+shared profiler semantics.
+
+### Configuration semantics
+
+A configuration transition is atomic from the producers' point of view. This is
+an observable guarantee and does not require a particular interop API shape. A
+single complete request and a serialized set of field operations are both valid
+implementation choices if producers cannot observe an invalid intermediate state.
+
+Configuration is observed at a capture-cycle boundary. A cycle that already
+started, or was already scheduled using a coherent previous configuration, may
+finish with that configuration. Its data remains valid: the corresponding batch
+contains the sampling interval that was actually used. A configuration change does
+not retroactively invalidate a complete sample or batch.
+
+Enable, disable, and re-enable operations are idempotent. Enabling the first
+thread-sampling mode creates or activates the shared worker. Disabling the final
+thread-sampling mode stops production promptly. Re-enabling sampling must not
+create duplicate workers. Whether an idle worker is retained in a quiescent state
+or joined and recreated later is an internal lifecycle choice, provided these
+observable guarantees hold.
+
+When both continuous and selective thread sampling are enabled, their intervals
+must form a valid pair as described in the
+[selective sampling limits](./selective-sampling.md#limits). A transition that
+would expose an invalid pair is rejected as a whole.
+
+### Producer lifecycle
+
+The shared thread-sampling producer has these logical states:
+
+| State | Required behavior |
+| ----- | ----------------- |
+| Never activated | No worker exists and no thread sampling occurs. |
+| Active | Exactly one worker serves every enabled thread-sampling mode. |
+| Inactive after use | No thread sampling occurs; a worker may be quiescent or may have been joined. |
+| Terminal | The worker is joined, resources are released, and sampling cannot restart. |
+
+An interval update takes effect at a capture-cycle boundary. Disabling one
+thread-sampling mode does not stop the shared worker while the other mode remains
+active.
+
+Allocation sampling has an independent lifecycle:
+
+| Transition | Required behavior |
+| ---------- | ----------------- |
+| Enable | Lazily start one EventPipe session. |
+| Rate update | Replace the sampling rate without creating a duplicate session. |
+| Disable | Stop the session, finish protected in-flight writes, and release allocation-specific resources. |
+| Re-enable | Establish one new session. |
+| Terminal shutdown | Stop the session once and prevent restart. |
+
+An allocation enable request on an unsupported runtime, or an EventPipe start or
+stop failure, must not leave a partially applied effective configuration.
+
+### Capture, buffering, and shutdown
+
+Ordinary disable and terminal shutdown have different urgency, but both preserve
+the safety of the instrumented process:
+
+* A reversible disable may let already-started work reach a safe boundary. Any
+  published sample must contain a complete stack.
+* Terminal shutdown may abort the current stack walk. An incomplete current stack
+  is discarded; complete stacks captured earlier remain valid.
+* Runtime and per-thread suspension are always released through the normal guard
+  path before the transition completes.
+
+Native buffers are bounded. When a consumer cannot keep up, the profiler may skip
+a capture cycle or discard a complete sample according to the existing escape-hatch
+behavior. Back pressure must not block the application indefinitely, corrupt a
+batch, or expose an incomplete stack as an ordinary sample.
+
+Producer and consumer transitions follow this ordering:
+
+```text
+Enable:
+    prepare consumer -> enable native producer
+
+Disable:
+    stop native production at a safe boundary -> drain complete buffers -> quiesce consumer
+```
+
+This ordering is independent of the configuration transport.
+
+### Native implementation requirements
+
+A native implementation of this definition must:
+
+* select foundational CLR profiling capabilities early enough to permit later
+  enablement when the runtime does not allow those capabilities to be added safely;
+* bootstrap process-wide state once without treating the first configuration
+  source or `AppDomain` as the service owner;
+* validate a coherent candidate before changing producer state;
+* ensure the shared worker observes one coherent configuration per capture cycle;
+* preserve the actual sampling interval with each continuous-thread batch;
+* make ordinary disable and terminal shutdown idempotent and race-safe; and
+* cover startup-disabled, enable, update, disable, re-enable, transition failure,
+  and shutdown races with deterministic native tests.
+
+### Deferred contracts
+
+This shared definition deliberately does not choose or define:
+
+* OpAMP documents, merge rules, hashes, status reporting, or transport behavior;
+* precedence between startup and control-plane configuration;
+* revisions, generations, compare-and-apply, or an exact versioned interop ABI;
+* a managed-host claim, token, lease, or `AppDomain` recovery protocol;
+* whether the shared worker is retained while inactive; or
+* changes to the public plugin API.
+
+Those mechanisms require separate review after the sampling semantics above are
+agreed. A native implementation can then select mechanisms that preserve this
+contract without coupling the data plane to OpAMP.
+
 ## Thread sampling
 
 You can enable thread sampling using the custom plugin, which
