@@ -48,10 +48,31 @@ RuntimeSamplerConfiguration AllocationOnly(const std::uint32_t samplesPerMinute)
     return {std::nullopt, std::nullopt, samplesPerMinute};
 }
 
-void AssertConfiguration(const ContinuousProfiler& profiler, const RuntimeSamplerConfiguration& expected)
+RuntimeSamplerConfiguration PeriodicAndAllocation(const std::uint32_t samplesPerMinute)
 {
-    ASSERT_TRUE(profiler.GetConfiguration() == expected);
+    return {kPeriodicIntervalMilliseconds, std::nullopt, samplesPerMinute};
 }
+
+class ConfigurationApplier
+{
+public:
+    explicit ConfigurationApplier(ContinuousProfiler& profiler) : profiler_(profiler) {}
+
+    bool Apply(const RuntimeSamplerConfiguration& candidate)
+    {
+        if (!profiler_.ApplyConfiguration(current_, candidate))
+        {
+            return false;
+        }
+
+        current_ = candidate;
+        return true;
+    }
+
+private:
+    ContinuousProfiler&         profiler_;
+    RuntimeSamplerConfiguration current_;
+};
 
 class FakeStackWalker final : public IStackWalker
 {
@@ -168,95 +189,113 @@ private:
 
 TEST(ContinuousProfilerLifecycleTest, AllDisabledConfigurationDoesNotCreateAWorker)
 {
-    ContinuousProfiler profiler;
-    FakeStackWalker    stackWalker;
+    ContinuousProfiler   profiler;
+    FakeStackWalker      stackWalker;
+    ConfigurationApplier applier(profiler);
     profiler.SetStackWalker(&stackWalker);
 
-    AssertConfiguration(profiler, AllDisabled());
-    ASSERT_FALSE(profiler.IsThreadSamplingThreadRunning());
-    ASSERT_TRUE(profiler.ApplyConfiguration(AllDisabled()));
-    ASSERT_FALSE(profiler.IsThreadSamplingThreadRunning());
-    AssertConfiguration(profiler, AllDisabled());
+    ASSERT_FALSE(profiler.HasThreadSamplingWorker());
+    ASSERT_TRUE(applier.Apply(AllDisabled()));
+    ASSERT_FALSE(profiler.HasThreadSamplingWorker());
     ASSERT_EQ(0, stackWalker.prepareCalls);
 }
 
-TEST(ContinuousProfilerLifecycleTest, ThreadModesShareOneWorkerAndStopOnlyAfterTheFinalDisable)
+TEST(ContinuousProfilerLifecycleTest, ThreadModesShareOneWorkerThatQuiescesAfterTheFinalDisable)
 {
-    ContinuousProfiler profiler;
-    FakeStackWalker    stackWalker;
+    ContinuousProfiler   profiler;
+    FakeStackWalker      stackWalker;
+    ConfigurationApplier applier(profiler);
     profiler.SetStackWalker(&stackWalker);
 
-    ASSERT_TRUE(profiler.ApplyConfiguration(PeriodicOnly()));
-    ASSERT_TRUE(profiler.IsThreadSamplingThreadRunning());
-    AssertConfiguration(profiler, PeriodicOnly());
+    ASSERT_TRUE(applier.Apply(PeriodicOnly()));
+    ASSERT_TRUE(profiler.HasThreadSamplingWorker());
+    ASSERT_FALSE(profiler.IsThreadSamplingWorkerQuiescent());
     ASSERT_EQ(1, stackWalker.prepareCalls);
 
-    ASSERT_TRUE(profiler.ApplyConfiguration(BothThreadModes()));
-    ASSERT_TRUE(profiler.IsThreadSamplingThreadRunning());
-    AssertConfiguration(profiler, BothThreadModes());
+    ASSERT_TRUE(applier.Apply(BothThreadModes()));
+    ASSERT_TRUE(profiler.HasThreadSamplingWorker());
 
-    ASSERT_TRUE(profiler.ApplyConfiguration(SelectiveOnly()));
-    ASSERT_TRUE(profiler.IsThreadSamplingThreadRunning());
-    AssertConfiguration(profiler, SelectiveOnly());
+    ASSERT_TRUE(applier.Apply(SelectiveOnly()));
+    ASSERT_TRUE(profiler.HasThreadSamplingWorker());
 
-    ASSERT_TRUE(profiler.ApplyConfiguration(AllDisabled()));
-    ASSERT_FALSE(profiler.IsThreadSamplingThreadRunning());
-    AssertConfiguration(profiler, AllDisabled());
+    ASSERT_TRUE(applier.Apply(AllDisabled()));
+    ASSERT_TRUE(profiler.HasThreadSamplingWorker());
+    ASSERT_TRUE(profiler.IsThreadSamplingWorkerQuiescent());
 
-    ASSERT_TRUE(profiler.ApplyConfiguration(PeriodicOnly()));
-    ASSERT_TRUE(profiler.IsThreadSamplingThreadRunning());
-    AssertConfiguration(profiler, PeriodicOnly());
-    ASSERT_EQ(2, stackWalker.prepareCalls);
+    ASSERT_TRUE(applier.Apply(PeriodicOnly()));
+    ASSERT_TRUE(profiler.HasThreadSamplingWorker());
+    ASSERT_FALSE(profiler.IsThreadSamplingWorkerQuiescent());
+    ASSERT_EQ(1, stackWalker.prepareCalls);
 
-    ASSERT_TRUE(profiler.ApplyConfiguration(AllDisabled()));
-    ASSERT_FALSE(profiler.IsThreadSamplingThreadRunning());
+    ASSERT_TRUE(applier.Apply(AllDisabled()));
+    ASSERT_TRUE(profiler.HasThreadSamplingWorker());
+    ASSERT_TRUE(profiler.IsThreadSamplingWorkerQuiescent());
 }
 
-TEST(ContinuousProfilerLifecycleTest, UnsupportedAllocationRollsBackACombinedThreadTransition)
+TEST(ContinuousProfilerLifecycleTest, UnsupportedAllocationRejectsCombinedConfigurationBeforeWorkerCreation)
 {
-    ContinuousProfiler profiler;
-    FakeStackWalker    stackWalker;
+    ContinuousProfiler   profiler;
+    FakeStackWalker      stackWalker;
+    ConfigurationApplier applier(profiler);
     profiler.SetStackWalker(&stackWalker);
     const RuntimeSamplerConfiguration unsupportedCandidate{kPeriodicIntervalMilliseconds, std::nullopt, 200u};
 
-    ASSERT_FALSE(profiler.ApplyConfiguration(unsupportedCandidate));
+    ASSERT_FALSE(applier.Apply(unsupportedCandidate));
 
-    ASSERT_FALSE(profiler.IsThreadSamplingThreadRunning());
-    AssertConfiguration(profiler, AllDisabled());
+    ASSERT_FALSE(profiler.HasThreadSamplingWorker());
     ASSERT_FALSE(profiler.allocationSubSampler);
+}
+
+TEST(ContinuousProfilerLifecycleTest, FailedAllocationActivationLeavesTheWorkerQuiescentAndReusable)
+{
+    FakeAllocationSamplingSessionProvider sessions;
+    sessions.startResults = {{E_FAIL, 0}};
+    ContinuousProfiler   profiler(&sessions);
+    FakeStackWalker      stackWalker;
+    ConfigurationApplier applier(profiler);
+    profiler.SetStackWalker(&stackWalker);
+
+    ASSERT_FALSE(applier.Apply(PeriodicAndAllocation(100)));
+
+    ASSERT_TRUE(profiler.HasThreadSamplingWorker());
+    ASSERT_TRUE(profiler.IsThreadSamplingWorkerQuiescent());
+    ASSERT_EQ(1, stackWalker.prepareCalls);
+
+    ASSERT_TRUE(applier.Apply(PeriodicOnly()));
+    ASSERT_TRUE(profiler.HasThreadSamplingWorker());
+    ASSERT_EQ(1, stackWalker.prepareCalls);
 }
 
 TEST(ContinuousProfilerLifecycleTest, StackWalkingPreparationFailureRejectsTheThreadTransition)
 {
-    ContinuousProfiler profiler;
-    FakeStackWalker    stackWalker;
+    ContinuousProfiler   profiler;
+    FakeStackWalker      stackWalker;
+    ConfigurationApplier applier(profiler);
     stackWalker.prepareResult = E_FAIL;
     profiler.SetStackWalker(&stackWalker);
 
-    ASSERT_FALSE(profiler.ApplyConfiguration(PeriodicOnly()));
+    ASSERT_FALSE(applier.Apply(PeriodicOnly()));
 
     ASSERT_EQ(1, stackWalker.prepareCalls);
-    ASSERT_FALSE(profiler.IsThreadSamplingThreadRunning());
-    AssertConfiguration(profiler, AllDisabled());
+    ASSERT_FALSE(profiler.HasThreadSamplingWorker());
 }
 
 TEST(ContinuousProfilerLifecycleTest, ShutdownIsTerminalAndIdempotent)
 {
-    ContinuousProfiler profiler;
-    FakeStackWalker    stackWalker;
+    ContinuousProfiler   profiler;
+    FakeStackWalker      stackWalker;
+    ConfigurationApplier applier(profiler);
     profiler.SetStackWalker(&stackWalker);
-    ASSERT_TRUE(profiler.ApplyConfiguration(BothThreadModes()));
-    ASSERT_TRUE(profiler.IsThreadSamplingThreadRunning());
+    ASSERT_TRUE(applier.Apply(BothThreadModes()));
+    ASSERT_TRUE(profiler.HasThreadSamplingWorker());
 
     profiler.Shutdown();
     profiler.Shutdown();
 
     ASSERT_TRUE(profiler.IsShutdownRequested());
-    ASSERT_FALSE(profiler.IsThreadSamplingThreadRunning());
-    AssertConfiguration(profiler, AllDisabled());
-    ASSERT_FALSE(profiler.ApplyConfiguration(PeriodicOnly()));
-    ASSERT_FALSE(profiler.IsThreadSamplingThreadRunning());
-    AssertConfiguration(profiler, AllDisabled());
+    ASSERT_FALSE(profiler.HasThreadSamplingWorker());
+    ASSERT_FALSE(applier.Apply(PeriodicOnly()));
+    ASSERT_FALSE(profiler.HasThreadSamplingWorker());
 }
 
 TEST(ContinuousProfilerAllocationLifecycleTest, EnableAndRateUpdateReuseOneEventPipeSession)
@@ -264,24 +303,22 @@ TEST(ContinuousProfilerAllocationLifecycleTest, EnableAndRateUpdateReuseOneEvent
     FakeAllocationSamplingSessionProvider sessions;
     sessions.startResults = {{S_OK, 101}};
     sessions.stopResults  = {S_OK};
-    ContinuousProfiler profiler(&sessions);
+    ContinuousProfiler   profiler(&sessions);
+    ConfigurationApplier applier(profiler);
 
-    ASSERT_TRUE(profiler.ApplyConfiguration(AllocationOnly(100)));
+    ASSERT_TRUE(applier.Apply(AllocationOnly(100)));
     ASSERT_EQ(1u, sessions.startCalls);
     ASSERT_TRUE(sessions.stoppedSessions.empty());
     ASSERT_TRUE(profiler.allocationSubSampler);
-    AssertConfiguration(profiler, AllocationOnly(100));
 
-    ASSERT_TRUE(profiler.ApplyConfiguration(AllocationOnly(200)));
+    ASSERT_TRUE(applier.Apply(AllocationOnly(200)));
     ASSERT_EQ(1u, sessions.startCalls);
     ASSERT_TRUE(sessions.stoppedSessions.empty());
     ASSERT_TRUE(profiler.allocationSubSampler);
-    AssertConfiguration(profiler, AllocationOnly(200));
 
-    ASSERT_TRUE(profiler.ApplyConfiguration(AllDisabled()));
+    ASSERT_TRUE(applier.Apply(AllDisabled()));
     ASSERT_EQ((std::vector<EVENTPIPE_SESSION>{101}), sessions.stoppedSessions);
     ASSERT_FALSE(profiler.allocationSubSampler);
-    AssertConfiguration(profiler, AllDisabled());
 }
 
 TEST(ContinuousProfilerAllocationLifecycleTest, FailedDisableRollsBackAndCanBeRetried)
@@ -289,18 +326,17 @@ TEST(ContinuousProfilerAllocationLifecycleTest, FailedDisableRollsBackAndCanBeRe
     FakeAllocationSamplingSessionProvider sessions;
     sessions.startResults = {{S_OK, 202}};
     sessions.stopResults  = {E_FAIL, S_OK};
-    ContinuousProfiler profiler(&sessions);
+    ContinuousProfiler   profiler(&sessions);
+    ConfigurationApplier applier(profiler);
 
-    ASSERT_TRUE(profiler.ApplyConfiguration(AllocationOnly(100)));
-    ASSERT_FALSE(profiler.ApplyConfiguration(AllDisabled()));
+    ASSERT_TRUE(applier.Apply(AllocationOnly(100)));
+    ASSERT_FALSE(applier.Apply(AllDisabled()));
     ASSERT_EQ((std::vector<EVENTPIPE_SESSION>{202}), sessions.stoppedSessions);
     ASSERT_TRUE(profiler.allocationSubSampler);
-    AssertConfiguration(profiler, AllocationOnly(100));
 
-    ASSERT_TRUE(profiler.ApplyConfiguration(AllDisabled()));
+    ASSERT_TRUE(applier.Apply(AllDisabled()));
     ASSERT_EQ((std::vector<EVENTPIPE_SESSION>{202, 202}), sessions.stoppedSessions);
     ASSERT_FALSE(profiler.allocationSubSampler);
-    AssertConfiguration(profiler, AllDisabled());
 }
 
 TEST(ContinuousProfilerAllocationLifecycleTest, FailedStartIsCleanedUpBeforeReenable)
@@ -308,19 +344,18 @@ TEST(ContinuousProfilerAllocationLifecycleTest, FailedStartIsCleanedUpBeforeReen
     FakeAllocationSamplingSessionProvider sessions;
     sessions.startResults = {{E_FAIL, 303}, {S_OK, 404}};
     sessions.stopResults  = {E_FAIL, S_OK, S_OK};
-    ContinuousProfiler profiler(&sessions);
+    ContinuousProfiler   profiler(&sessions);
+    ConfigurationApplier applier(profiler);
 
-    ASSERT_FALSE(profiler.ApplyConfiguration(AllocationOnly(100)));
+    ASSERT_FALSE(applier.Apply(AllocationOnly(100)));
     ASSERT_EQ(1u, sessions.startCalls);
     ASSERT_EQ((std::vector<EVENTPIPE_SESSION>{303}), sessions.stoppedSessions);
     ASSERT_FALSE(profiler.allocationSubSampler);
-    AssertConfiguration(profiler, AllDisabled());
 
-    ASSERT_TRUE(profiler.ApplyConfiguration(AllocationOnly(100)));
+    ASSERT_TRUE(applier.Apply(AllocationOnly(100)));
     ASSERT_EQ(2u, sessions.startCalls);
     ASSERT_EQ((std::vector<EVENTPIPE_SESSION>{303, 303}), sessions.stoppedSessions);
     ASSERT_TRUE(profiler.allocationSubSampler);
-    AssertConfiguration(profiler, AllocationOnly(100));
 
     profiler.Shutdown();
     ASSERT_EQ((std::vector<EVENTPIPE_SESSION>{303, 303, 404}), sessions.stoppedSessions);
@@ -330,13 +365,13 @@ TEST(ContinuousProfilerAllocationLifecycleTest, SuccessfulStartWithoutASessionIs
 {
     FakeAllocationSamplingSessionProvider sessions;
     sessions.startResults = {{S_OK, 0}};
-    ContinuousProfiler profiler(&sessions);
+    ContinuousProfiler   profiler(&sessions);
+    ConfigurationApplier applier(profiler);
 
-    ASSERT_FALSE(profiler.ApplyConfiguration(AllocationOnly(100)));
+    ASSERT_FALSE(applier.Apply(AllocationOnly(100)));
     ASSERT_EQ(1u, sessions.startCalls);
     ASSERT_TRUE(sessions.stoppedSessions.empty());
     ASSERT_FALSE(profiler.allocationSubSampler);
-    AssertConfiguration(profiler, AllDisabled());
 }
 
 TEST(ContinuousProfilerAllocationLifecycleTest, TerminalShutdownStopsTheSessionOnce)
@@ -346,15 +381,15 @@ TEST(ContinuousProfilerAllocationLifecycleTest, TerminalShutdownStopsTheSessionO
     sessions.stopResults  = {S_OK};
 
     {
-        ContinuousProfiler profiler(&sessions);
-        ASSERT_TRUE(profiler.ApplyConfiguration(AllocationOnly(100)));
+        ContinuousProfiler   profiler(&sessions);
+        ConfigurationApplier applier(profiler);
+        ASSERT_TRUE(applier.Apply(AllocationOnly(100)));
 
         profiler.Shutdown();
         profiler.Shutdown();
 
         ASSERT_TRUE(profiler.IsShutdownRequested());
-        ASSERT_FALSE(profiler.ApplyConfiguration(AllocationOnly(200)));
-        AssertConfiguration(profiler, AllDisabled());
+        ASSERT_FALSE(applier.Apply(AllocationOnly(200)));
     }
 
     ASSERT_EQ((std::vector<EVENTPIPE_SESSION>{505}), sessions.stoppedSessions);
@@ -364,8 +399,9 @@ TEST(ContinuousProfilerAllocationLifecycleTest, ConcurrentShutdownStopsTheSessio
 {
     BlockingAllocationSamplingSessionProvider sessions;
     ContinuousProfiler                        profiler(&sessions);
+    ConfigurationApplier                      applier(profiler);
     bool                                      applySucceeded = false;
-    std::thread applyThread([&] { applySucceeded = profiler.ApplyConfiguration(AllocationOnly(100)); });
+    std::thread                               applyThread([&] { applySucceeded = applier.Apply(AllocationOnly(100)); });
     sessions.WaitUntilStartIsEntered();
 
     std::mutex              shutdownStateMutex;
@@ -406,5 +442,4 @@ TEST(ContinuousProfilerAllocationLifecycleTest, ConcurrentShutdownStopsTheSessio
     ASSERT_TRUE(profiler.IsShutdownRequested());
     ASSERT_EQ(1u, sessions.StopCalls());
     ASSERT_EQ(606u, sessions.StoppedSession());
-    AssertConfiguration(profiler, AllDisabled());
 }

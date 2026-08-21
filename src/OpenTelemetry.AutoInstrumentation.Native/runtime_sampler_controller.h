@@ -22,7 +22,8 @@ public:
 
     virtual bool IsAllocationSamplingSupported() const noexcept                                = 0;
     virtual bool Bootstrap() noexcept                                                          = 0;
-    virtual bool ApplyConfiguration(const RuntimeSamplerConfiguration& configuration) noexcept = 0;
+    virtual bool ApplyConfiguration(const RuntimeSamplerConfiguration& previousConfiguration,
+                                    const RuntimeSamplerConfiguration& configuration) noexcept = 0;
     virtual void ShutdownSampling() noexcept                                                   = 0;
 };
 
@@ -44,10 +45,6 @@ public:
     RuntimeSamplerController(const RuntimeSamplerController&)            = delete;
     RuntimeSamplerController& operator=(const RuntimeSamplerController&) = delete;
 
-    // Initializes the sampler foundation without applying a configuration or
-    // starting any sampling producer. A failed preparation is sticky, just as
-    // a bootstrap requested by an apply is.
-    bool                          Prepare() noexcept;
     RuntimeSamplerApplyResult     ApplyConfiguration(const RuntimeSamplerConfiguration& configuration) noexcept;
     RuntimeSamplerApplyResult     ApplyInitialConfiguration(const RuntimeSamplerConfiguration& configuration) noexcept;
     RuntimeSamplerControllerState GetState() const noexcept;

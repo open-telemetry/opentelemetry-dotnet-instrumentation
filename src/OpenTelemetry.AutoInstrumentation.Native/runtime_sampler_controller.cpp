@@ -15,12 +15,6 @@ RuntimeSamplerController::~RuntimeSamplerController()
     Shutdown();
 }
 
-bool RuntimeSamplerController::Prepare() noexcept
-{
-    std::lock_guard<std::mutex> guard(mutex_);
-    return !shutdown_requested_ && EnsureBootstrappedLocked();
-}
-
 RuntimeSamplerApplyResult RuntimeSamplerController::ApplyConfiguration(
     const RuntimeSamplerConfiguration& configuration) noexcept
 {
@@ -90,9 +84,10 @@ RuntimeSamplerApplyResult RuntimeSamplerController::ApplyConfigurationLocked(
         return RuntimeSamplerApplyResult::BootstrapFailed;
     }
 
-    // Once bootstrap has succeeded, even an all-disabled candidate must reach
-    // the lifecycle so that already-created producers are quiesced.
-    if (bootstrap_succeeded_ && !lifecycle_.ApplyConfiguration(configuration))
+    // Once bootstrap has succeeded, even an all-disabled candidate reaches the
+    // lifecycle so that any producer resources left by a failed transition can
+    // be quiesced before controller state is established.
+    if (bootstrap_succeeded_ && !lifecycle_.ApplyConfiguration(active_configuration_, configuration))
     {
         return RuntimeSamplerApplyResult::ActivationFailed;
     }

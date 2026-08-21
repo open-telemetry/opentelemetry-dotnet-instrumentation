@@ -48,12 +48,12 @@ The native service preserves these observable invariants:
 2. Repeated managed initialization cannot replace process-wide configuration by
    accident. Unloading an `AppDomain` is not terminal profiler shutdown and does
    not reset the effective configuration.
-3. Native bootstrap establishes profiling capability, not sampling policy.
-   Bootstrap alone starts no thread-sampling producer worker or EventPipe
-   session. It may create dormant safety helpers that are required before a
-   later enablement.
-4. An all-disabled process that has never sampled has no thread-sampling
-   producer worker and no allocation EventPipe session.
+3. Profiler initialization and an initially all-disabled configuration do not
+   enable continuous-profiler-specific CLR events or bootstrap native continuous
+   profiler machinery. The first valid configuration that enables a sampling
+   feature performs this initialization once.
+4. Until that first enablement, the process has no thread-sampling producer
+   worker and no allocation EventPipe session.
 5. At most one managed consumer may destructively read the process-wide native
    buffers. Native producers must not continue indefinitely when no consumer can
    drain them.
@@ -80,11 +80,10 @@ contains the sampling interval that was actually used. A configuration change do
 not retroactively invalidate a complete sample or batch.
 
 Enable, disable, and re-enable operations are idempotent. Enabling the first
-thread-sampling mode creates or activates the shared worker. Disabling the final
-thread-sampling mode stops production promptly. Re-enabling sampling must not
-create duplicate workers. Whether an idle worker is retained in a quiescent state
-or joined and recreated later is an internal lifecycle choice, provided these
-observable guarantees hold.
+thread-sampling mode lazily creates the shared worker once. Disabling the final
+thread-sampling mode stops production promptly and retains the worker in a
+non-producing quiescent wait. Re-enabling sampling wakes the retained worker.
+Only terminal shutdown joins it.
 
 When both continuous and selective thread sampling are enabled, their intervals
 must form a valid pair as described in the
@@ -99,8 +98,8 @@ The shared thread-sampling producer has these logical states:
 | ----- | ----------------- |
 | Never activated | No worker exists and no thread sampling occurs. |
 | Active | Exactly one worker serves every enabled thread-sampling mode. |
-| Inactive after use | No thread sampling occurs; a worker may be quiescent or may have been joined. |
-| Terminal | The worker is joined, resources are released, and sampling cannot restart. |
+| Quiescent after use | The retained worker waits without producing thread samples. |
+| Terminal | The worker is joined exactly once, resources are released, and sampling cannot restart. |
 
 An interval update takes effect at a capture-cycle boundary. Disabling one
 thread-sampling mode does not stop the shared worker while the other mode remains
@@ -152,12 +151,16 @@ This ordering is independent of the configuration transport.
 
 A native implementation of this definition must:
 
-* select foundational CLR profiling capabilities early enough to permit later
-  enablement when the runtime does not allow those capabilities to be added safely;
-* bootstrap process-wide state once without treating the first configuration
-  source or `AppDomain` as the service owner;
+* defer continuous-profiler-specific CLR event-mask configuration and native
+  bootstrap until the first valid configuration enables a sampling feature;
+* bootstrap process-wide state once without treating that configuration source
+  or `AppDomain` as the service owner;
+* keep one authoritative complete configuration, while producer workers retain
+  only the execution state needed to observe it;
 * validate a coherent candidate before changing producer state;
 * ensure the shared worker observes one coherent configuration per capture cycle;
+* lazily create the shared worker once, quiesce it on ordinary disable, wake it
+  on re-enable, and join it only during terminal shutdown;
 * preserve the actual sampling interval with each continuous-thread batch;
 * make ordinary disable and terminal shutdown idempotent and race-safe; and
 * cover startup-disabled, enable, update, disable, re-enable, transition failure,
@@ -171,7 +174,6 @@ This shared definition deliberately does not choose or define:
 * precedence between startup and control-plane configuration;
 * revisions, generations, compare-and-apply, or an exact versioned interop ABI;
 * a managed-host claim, token, lease, or `AppDomain` recovery protocol;
-* whether the shared worker is retained while inactive; or
 * changes to the public plugin API.
 
 Those mechanisms require separate review after the sampling semantics above are

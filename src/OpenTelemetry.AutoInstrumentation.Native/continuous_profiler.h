@@ -356,18 +356,19 @@ public:
     explicit ContinuousProfiler(
         IAllocationSamplingSessionProvider* allocationSamplingSessionProvider = nullptr) noexcept;
     ~ContinuousProfiler();
-    bool                        ApplyConfiguration(const RuntimeSamplerConfiguration& configuration);
-    RuntimeSamplerConfiguration GetConfiguration() const;
-    bool                        IsThreadSamplingThreadRunning() const;
-    void                        Shutdown();
-    bool                        IsShutdownRequested() const;
-    static void                 InitSelectiveSamplingBuffer();
-    void                        AllocationTick(ULONG dataLen, LPCBYTE data);
-    ICorProfilerInfo12*         info12 = nullptr;
-    ICorProfilerInfo7*          info7  = nullptr;
-    static void                 ThreadCreated(ThreadID thread_id);
-    void                        ThreadDestroyed(ThreadID thread_id);
-    void                        ThreadNameChanged(ThreadID thread_id, ULONG cch_name, WCHAR name[]);
+    bool                ApplyConfiguration(const RuntimeSamplerConfiguration& previousConfiguration,
+                                           const RuntimeSamplerConfiguration& configuration);
+    bool                HasThreadSamplingWorker() const;
+    bool                IsThreadSamplingWorkerQuiescent() const;
+    void                Shutdown();
+    bool                IsShutdownRequested() const;
+    static void         InitSelectiveSamplingBuffer();
+    void                AllocationTick(ULONG dataLen, LPCBYTE data);
+    ICorProfilerInfo12* info12 = nullptr;
+    ICorProfilerInfo7*  info7  = nullptr;
+    static void         ThreadCreated(ThreadID thread_id);
+    void                ThreadDestroyed(ThreadID thread_id);
+    void                ThreadNameChanged(ThreadID thread_id, ULONG cch_name, WCHAR name[]);
 
     void          SetGlobalInfo12(ICorProfilerInfo12* info12);
     void          SetGlobalInfo7(ICorProfilerInfo7* cor_profiler_info7);
@@ -398,13 +399,15 @@ private:
     bool    TryCleanupFailedAllocationSession();
     void    StopAllocationSamplingForShutdown();
 
-    mutable std::mutex           configuration_transition_mutex_;
     mutable std::mutex           sampling_state_mutex_;
     std::condition_variable      sampling_state_cv_;
-    RuntimeSamplerConfiguration  configuration_;
-    std::uint64_t                configuration_generation_       = 0;
-    bool                         thread_sampling_stop_requested_ = false;
+    std::optional<std::uint32_t> periodic_thread_sampling_interval_;
+    std::optional<std::uint32_t> selective_thread_sampling_interval_;
+    std::uint64_t                thread_configuration_generation_              = 0;
+    std::uint64_t                acknowledged_thread_configuration_generation_ = 0;
+    bool                         thread_sampling_worker_exited_                = false;
     std::once_flag               selective_sampling_init_flag_;
+    std::once_flag               shutdown_once_;
     std::atomic_bool             shutdown_requested_{false};
     std::atomic_bool             allocation_sampling_enabled_{false};
     std::unique_ptr<std::thread> thread_sampling_thread_;

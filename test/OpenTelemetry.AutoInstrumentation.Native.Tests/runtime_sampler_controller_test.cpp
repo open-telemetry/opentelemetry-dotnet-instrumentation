@@ -41,6 +41,7 @@ public:
     int         applyCount                  = 0;
     int         shutdownCount               = 0;
 
+    std::vector<RuntimeSamplerConfiguration> previousConfigurations;
     std::vector<RuntimeSamplerConfiguration> appliedConfigurations;
 
     bool IsAllocationSamplingSupported() const noexcept override
@@ -55,9 +56,11 @@ public:
         return bootstrapSucceeds;
     }
 
-    bool ApplyConfiguration(const RuntimeSamplerConfiguration& configuration) noexcept override
+    bool ApplyConfiguration(const RuntimeSamplerConfiguration& previousConfiguration,
+                            const RuntimeSamplerConfiguration& configuration) noexcept override
     {
         applyCount++;
+        previousConfigurations.push_back(previousConfiguration);
         appliedConfigurations.push_back(configuration);
         return activationSucceeds;
     }
@@ -92,41 +95,6 @@ TEST(RuntimeSamplerControllerTest, AllDisabledInitialConfigurationCommitsWithout
     ASSERT_EQ(0, lifecycle.applyCount);
 }
 
-TEST(RuntimeSamplerControllerTest, PrepareBootstrapsFoundationWithoutApplyingAConfiguration)
-{
-    FakeRuntimeSamplerLifecycle lifecycle;
-    RuntimeSamplerController    controller(lifecycle);
-
-    ASSERT_TRUE(controller.Prepare());
-    ASSERT_TRUE(controller.Prepare());
-
-    AssertState(controller, 0u, AllDisabled());
-    ASSERT_EQ(1, lifecycle.bootstrapCount);
-    ASSERT_EQ(0, lifecycle.applyCount);
-
-    controller.Shutdown();
-    ASSERT_EQ(1, lifecycle.shutdownCount);
-}
-
-TEST(RuntimeSamplerControllerTest, FailedPrepareIsStickyAndRemainsFailClosed)
-{
-    FakeRuntimeSamplerLifecycle lifecycle;
-    lifecycle.bootstrapSucceeds = false;
-    RuntimeSamplerController controller(lifecycle);
-
-    ASSERT_FALSE(controller.Prepare());
-    lifecycle.bootstrapSucceeds = true;
-    ASSERT_FALSE(controller.Prepare());
-    ASSERT_EQ(RuntimeSamplerApplyResult::BootstrapFailed, controller.ApplyConfiguration(PeriodicSampling(1000u)));
-
-    AssertState(controller, 0u, AllDisabled());
-    ASSERT_EQ(1, lifecycle.bootstrapCount);
-    ASSERT_EQ(0, lifecycle.applyCount);
-
-    controller.Shutdown();
-    ASSERT_EQ(1, lifecycle.shutdownCount);
-}
-
 TEST(RuntimeSamplerControllerTest, ExplicitAllDisabledConfigurationPreventsALaterLegacySeed)
 {
     FakeRuntimeSamplerLifecycle lifecycle;
@@ -152,7 +120,10 @@ TEST(RuntimeSamplerControllerTest, BootstrapIsLazyAndRunsOnlyOnce)
 
     ASSERT_EQ(1, lifecycle.bootstrapCount);
     ASSERT_EQ(2, lifecycle.applyCount);
+    ASSERT_EQ(2u, lifecycle.previousConfigurations.size());
     ASSERT_EQ(2u, lifecycle.appliedConfigurations.size());
+    ASSERT_TRUE(lifecycle.previousConfigurations[0] == AllDisabled());
+    ASSERT_TRUE(lifecycle.previousConfigurations[1] == PeriodicSampling(1000u));
     ASSERT_TRUE(lifecycle.appliedConfigurations[0] == PeriodicSampling(1000u));
     ASSERT_TRUE(lifecycle.appliedConfigurations[1] == PeriodicSampling(2000u));
     AssertState(controller, 3u, PeriodicSampling(2000u));
@@ -173,6 +144,9 @@ TEST(RuntimeSamplerControllerTest, FailedBootstrapIsStickyAndFailsClosed)
     ASSERT_EQ(1, lifecycle.bootstrapCount);
     ASSERT_EQ(0, lifecycle.applyCount);
     AssertState(controller, 1u, AllDisabled());
+
+    controller.Shutdown();
+    ASSERT_EQ(1, lifecycle.shutdownCount);
 }
 
 TEST(RuntimeSamplerControllerTest, ChangedAndUnchangedCandidatesHaveDeterministicGenerations)
@@ -215,6 +189,9 @@ TEST(RuntimeSamplerControllerTest, ActivationFailurePreservesLastKnownGoodConfig
 
     ASSERT_EQ(1, lifecycle.bootstrapCount);
     ASSERT_EQ(3, lifecycle.applyCount);
+    ASSERT_TRUE(lifecycle.previousConfigurations[0] == AllDisabled());
+    ASSERT_TRUE(lifecycle.previousConfigurations[1] == PeriodicSampling(1000u));
+    ASSERT_TRUE(lifecycle.previousConfigurations[2] == PeriodicSampling(1000u));
 }
 
 TEST(RuntimeSamplerControllerTest, FirstSuccessfulInitialConfigurationWins)
@@ -266,6 +243,7 @@ TEST(RuntimeSamplerControllerTest, AllDisabledInitialAfterBootstrapIsEstablished
     AssertState(controller, 1u, AllDisabled());
     ASSERT_EQ(1, lifecycle.bootstrapCount);
     ASSERT_EQ(3, lifecycle.applyCount);
+    ASSERT_TRUE(lifecycle.previousConfigurations.back() == AllDisabled());
     ASSERT_TRUE(lifecycle.appliedConfigurations.back() == AllDisabled());
 }
 

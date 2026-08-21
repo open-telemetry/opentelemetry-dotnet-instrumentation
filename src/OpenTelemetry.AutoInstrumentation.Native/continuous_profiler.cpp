@@ -1444,39 +1444,61 @@ void ContinuousProfiler::SamplingThreadMain() noexcept
         while (true)
         {
             RuntimeSamplerConfiguration cycleConfiguration;
+            std::uint64_t               cycleGeneration;
             {
                 std::unique_lock<std::mutex> lock(sampling_state_mutex_);
-                if (shutdown_requested_.load(std::memory_order_acquire) || thread_sampling_stop_requested_)
+                if (shutdown_requested_.load(std::memory_order_acquire))
                 {
-                    return;
+                    break;
                 }
 
-                cycleConfiguration = configuration_;
-                if (!cycleConfiguration.HasThreadSampling())
+                if (!periodic_thread_sampling_interval_.has_value() && !selective_thread_sampling_interval_.has_value())
                 {
-                    return;
+                    const auto quiescentGeneration                = thread_configuration_generation_;
+                    acknowledged_thread_configuration_generation_ = quiescentGeneration;
+                    sampling_state_cv_.notify_all();
+                    sampling_state_cv_.wait(lock,
+                                            [this, quiescentGeneration]
+                                            {
+                                                return shutdown_requested_.load(std::memory_order_acquire) ||
+                                                       thread_configuration_generation_ != quiescentGeneration;
+                                            });
+                    continue;
                 }
 
-                if (observedGeneration != configuration_generation_)
+                cycleConfiguration = {periodic_thread_sampling_interval_, selective_thread_sampling_interval_,
+                                      std::nullopt};
+                cycleGeneration    = thread_configuration_generation_;
+
+                if (observedGeneration != cycleGeneration)
                 {
-                    observedGeneration = configuration_generation_;
+                    observedGeneration = cycleGeneration;
                     iteration          = 0;
                 }
 
                 const unsigned int sleepTime = GetSleepTime(cycleConfiguration);
                 if (sleepTime == 0)
                 {
-                    trace::Logger::Warn("Unexpected sampling interval configured, exiting sampling thread.");
-                    return;
+                    trace::Logger::Warn("Unexpected sampling interval configured, quiescing sampling thread.");
+                    sampling_state_cv_.wait(lock,
+                                            [this, cycleGeneration] {
+                                                return shutdown_requested_.load(std::memory_order_acquire) ||
+                                                       thread_configuration_generation_ != cycleGeneration;
+                                            });
+                    continue;
                 }
 
                 if (sampling_state_cv_.wait_for(lock, std::chrono::milliseconds(sleepTime),
-                                                [this] {
+                                                [this, cycleGeneration] {
                                                     return shutdown_requested_.load(std::memory_order_acquire) ||
-                                                           thread_sampling_stop_requested_;
+                                                           thread_configuration_generation_ != cycleGeneration;
                                                 }))
                 {
-                    return;
+                    if (shutdown_requested_.load(std::memory_order_acquire))
+                    {
+                        break;
+                    }
+                    continue;
                 }
             }
 
@@ -1501,7 +1523,7 @@ void ContinuousProfiler::SamplingThreadMain() noexcept
 
                 if (IsShutdownRequested())
                 {
-                    return;
+                    break;
                 }
 
                 const auto now = std::chrono::steady_clock::now();
@@ -1558,6 +1580,12 @@ void ContinuousProfiler::SamplingThreadMain() noexcept
         {
         }
     }
+
+    {
+        std::lock_guard<std::mutex> lock(sampling_state_mutex_);
+        thread_sampling_worker_exited_ = true;
+    }
+    sampling_state_cv_.notify_all();
 }
 
 void ContinuousProfiler::SetGlobalInfo7(ICorProfilerInfo7* cor_profiler_info7)
@@ -1639,185 +1667,178 @@ ContinuousProfiler::~ContinuousProfiler()
     managed_tid_to_state_.clear();
 }
 
-bool ContinuousProfiler::ApplyConfiguration(const RuntimeSamplerConfiguration& candidate)
+bool ContinuousProfiler::ApplyConfiguration(const RuntimeSamplerConfiguration& previous,
+                                            const RuntimeSamplerConfiguration& candidate)
 {
-    std::unique_lock<std::mutex> transitionLock(configuration_transition_mutex_);
+    std::unique_lock<std::mutex> stateLock(sampling_state_mutex_);
     if (shutdown_requested_.load(std::memory_order_acquire))
     {
         return false;
     }
 
-    std::unique_ptr<std::thread> threadToJoin;
-    bool                         transitionSucceeded = false;
-    bool                         stoppedActiveWorker = false;
-
+    if (previous == candidate)
     {
-        std::unique_lock<std::mutex> stateLock(sampling_state_mutex_);
-        const auto                   previous = configuration_;
-        if (previous == candidate)
+        return true;
+    }
+
+    if (candidate.selectiveThreadSamplingIntervalMilliseconds.has_value())
+    {
+        try
         {
-            return true;
+            std::call_once(selective_sampling_init_flag_, [] { InitSelectiveSamplingBuffer(); });
         }
-
-        if (candidate.selectiveThreadSamplingIntervalMilliseconds.has_value())
+        catch (const std::exception& exception)
         {
-            try
-            {
-                std::call_once(selective_sampling_init_flag_, [] { InitSelectiveSamplingBuffer(); });
-            }
-            catch (const std::exception& exception)
-            {
-                trace::Logger::Error("Unable to initialize selective sampling buffers: ", exception.what());
-                return false;
-            }
-            catch (...)
-            {
-                trace::Logger::Error("Unable to initialize selective sampling buffers.");
-                return false;
-            }
+            trace::Logger::Error("Unable to initialize selective sampling buffers: ", exception.what());
+            return false;
         }
-
-        const bool startThread                = !previous.HasThreadSampling() && candidate.HasThreadSampling();
-        const bool stopThread                 = previous.HasThreadSampling() && !candidate.HasThreadSampling();
-        const bool threadConfigurationChanged = previous.periodicThreadSamplingIntervalMilliseconds !=
-                                                    candidate.periodicThreadSamplingIntervalMilliseconds ||
-                                                previous.selectiveThreadSamplingIntervalMilliseconds !=
-                                                    candidate.selectiveThreadSamplingIntervalMilliseconds;
-
-        std::unique_ptr<std::thread> stagedThread;
-        if (startThread)
+        catch (...)
         {
-            if (stackWalker_ == nullptr || FAILED(stackWalker_->PrepareForStackWalking()))
-            {
-                trace::Logger::Error("Unable to prepare safe stack walking for continuous profiling.");
-                return false;
-            }
+            trace::Logger::Error("Unable to initialize selective sampling buffers.");
+            return false;
+        }
+    }
 
-            try
-            {
-                // The new thread blocks on sampling_state_mutex_ until the full
-                // producer transition commits below.
-                stagedThread = std::make_unique<std::thread>(&ContinuousProfiler::SamplingThreadMain, this);
-            }
-            catch (const std::exception& exception)
-            {
-                trace::Logger::Error("Unable to start continuous profiler sampling thread: ", exception.what());
-                return false;
-            }
-            catch (...)
-            {
-                trace::Logger::Error("Unable to start continuous profiler sampling thread.");
-                return false;
-            }
+    if (candidate.HasAllocationSampling() && info12 == nullptr && allocation_sampling_session_provider_ == nullptr)
+    {
+        trace::Logger::Warn("Allocation sampling is not supported for .NET Framework applications.");
+        return false;
+    }
+
+    if (candidate.HasThreadSampling() && thread_sampling_worker_exited_)
+    {
+        trace::Logger::Error("Continuous profiler sampling worker is unavailable after an unexpected exit.");
+        return false;
+    }
+
+    if (candidate.HasThreadSampling() && thread_sampling_thread_ == nullptr)
+    {
+        if (stackWalker_ == nullptr || FAILED(stackWalker_->PrepareForStackWalking()))
+        {
+            trace::Logger::Error("Unable to prepare safe stack walking for continuous profiling.");
+            return false;
         }
 
         try
         {
-            transitionSucceeded = ApplyAllocationConfiguration(previous.maxAllocationSamplesPerMinute,
-                                                               candidate.maxAllocationSamplesPerMinute);
+            // The worker cannot observe a partially applied candidate because
+            // it waits on sampling_state_mutex_ until publication below. Once
+            // created, it remains available in quiescence for the process
+            // lifetime and is joined only by terminal shutdown.
+            thread_sampling_thread_ = std::make_unique<std::thread>(&ContinuousProfiler::SamplingThreadMain, this);
         }
         catch (const std::exception& exception)
         {
-            trace::Logger::Error("Unable to apply allocation sampling configuration: ", exception.what());
-            transitionSucceeded = false;
+            trace::Logger::Error("Unable to start continuous profiler sampling thread: ", exception.what());
+            return false;
         }
         catch (...)
         {
-            trace::Logger::Error("Unable to apply allocation sampling configuration.");
-            transitionSucceeded = false;
-        }
-
-        if (!transitionSucceeded)
-        {
-            if (startThread)
-            {
-                threadToJoin = std::move(stagedThread);
-            }
-        }
-        else
-        {
-            // RuntimeSamplerConfiguration contains only optional integer values,
-            // so publication is a non-throwing final commit after all fallible
-            // resource transitions have succeeded.
-            configuration_ = candidate;
-            if (threadConfigurationChanged)
-            {
-                ++configuration_generation_;
-            }
-
-            if (startThread)
-            {
-                thread_sampling_stop_requested_ = false;
-                thread_sampling_thread_         = std::move(stagedThread);
-            }
-            else if (stopThread)
-            {
-                thread_sampling_stop_requested_ = true;
-                threadToJoin                    = std::move(thread_sampling_thread_);
-                stoppedActiveWorker             = true;
-            }
+            trace::Logger::Error("Unable to start continuous profiler sampling thread.");
+            return false;
         }
     }
 
-    if (threadToJoin != nullptr)
+    try
+    {
+        if (!ApplyAllocationConfiguration(previous.maxAllocationSamplesPerMinute,
+                                          candidate.maxAllocationSamplesPerMinute))
+        {
+            return false;
+        }
+    }
+    catch (const std::exception& exception)
+    {
+        trace::Logger::Error("Unable to apply allocation sampling configuration: ", exception.what());
+        return false;
+    }
+    catch (...)
+    {
+        trace::Logger::Error("Unable to apply allocation sampling configuration.");
+        return false;
+    }
+
+    const bool threadConfigurationChanged =
+        previous.periodicThreadSamplingIntervalMilliseconds != candidate.periodicThreadSamplingIntervalMilliseconds ||
+        previous.selectiveThreadSamplingIntervalMilliseconds != candidate.selectiveThreadSamplingIntervalMilliseconds;
+    const bool waitForQuiescence = previous.HasThreadSampling() && !candidate.HasThreadSampling();
+
+    // Publish only the state consumed by the retained thread worker. The
+    // RuntimeSamplerController remains the sole owner of the complete active
+    // configuration and its externally visible generation.
+    periodic_thread_sampling_interval_  = candidate.periodicThreadSamplingIntervalMilliseconds;
+    selective_thread_sampling_interval_ = candidate.selectiveThreadSamplingIntervalMilliseconds;
+    if (threadConfigurationChanged)
+    {
+        ++thread_configuration_generation_;
+    }
+    const auto committedThreadGeneration = thread_configuration_generation_;
+
+    stateLock.unlock();
+    if (threadConfigurationChanged)
     {
         sampling_state_cv_.notify_all();
-        if (threadToJoin->joinable())
-        {
-            threadToJoin->join();
-        }
-        if (stoppedActiveWorker)
-        {
-            LogProfilerInfoNoThrow("ContinuousProfiler sampling thread stopped.");
-        }
     }
 
-    if (transitionSucceeded && candidate.HasThreadSampling())
+    if (waitForQuiescence)
+    {
+        stateLock.lock();
+        sampling_state_cv_.wait(stateLock,
+                                [this, committedThreadGeneration]
+                                {
+                                    return acknowledged_thread_configuration_generation_ >= committedThreadGeneration ||
+                                           thread_sampling_worker_exited_;
+                                });
+        stateLock.unlock();
+    }
+
+    if (candidate.HasThreadSampling())
     {
         LogProfilerInfoNoThrow("ContinuousProfiler thread sampling configured.");
     }
 
-    return transitionSucceeded;
+    return true;
 }
 
-RuntimeSamplerConfiguration ContinuousProfiler::GetConfiguration() const
-{
-    std::lock_guard<std::mutex> guard(sampling_state_mutex_);
-    return configuration_;
-}
-
-bool ContinuousProfiler::IsThreadSamplingThreadRunning() const
+bool ContinuousProfiler::HasThreadSamplingWorker() const
 {
     std::lock_guard<std::mutex> guard(sampling_state_mutex_);
     return thread_sampling_thread_ != nullptr && thread_sampling_thread_->joinable();
 }
 
+bool ContinuousProfiler::IsThreadSamplingWorkerQuiescent() const
+{
+    std::lock_guard<std::mutex> guard(sampling_state_mutex_);
+    return thread_sampling_thread_ != nullptr && !thread_sampling_worker_exited_ &&
+           !periodic_thread_sampling_interval_.has_value() && !selective_thread_sampling_interval_.has_value() &&
+           acknowledged_thread_configuration_generation_ >= thread_configuration_generation_;
+}
+
 void ContinuousProfiler::Shutdown()
 {
-    std::unique_lock<std::mutex> transitionLock(configuration_transition_mutex_);
-    if (shutdown_requested_.exchange(true, std::memory_order_acq_rel))
-    {
-        return;
-    }
+    std::call_once(shutdown_once_,
+                   [this]
+                   {
+                       std::unique_ptr<std::thread> threadToJoin;
+                       {
+                           std::lock_guard<std::mutex> stateLock(sampling_state_mutex_);
+                           shutdown_requested_.store(true, std::memory_order_release);
+                           periodic_thread_sampling_interval_.reset();
+                           selective_thread_sampling_interval_.reset();
+                           ++thread_configuration_generation_;
+                           threadToJoin = std::move(thread_sampling_thread_);
+                       }
 
-    std::unique_ptr<std::thread> threadToJoin;
-    {
-        std::lock_guard<std::mutex> stateLock(sampling_state_mutex_);
-        configuration_ = RuntimeSamplerConfiguration{};
-        ++configuration_generation_;
-        thread_sampling_stop_requested_ = true;
-        threadToJoin                    = std::move(thread_sampling_thread_);
-    }
+                       sampling_state_cv_.notify_all();
+                       if (threadToJoin != nullptr && threadToJoin->joinable())
+                       {
+                           threadToJoin->join();
+                           LogProfilerInfoNoThrow("ContinuousProfiler sampling thread stopped.");
+                       }
 
-    sampling_state_cv_.notify_all();
-    if (threadToJoin != nullptr && threadToJoin->joinable())
-    {
-        threadToJoin->join();
-        LogProfilerInfoNoThrow("ContinuousProfiler sampling thread stopped.");
-    }
-
-    StopAllocationSamplingForShutdown();
-    ClearGlobalInfo();
+                       StopAllocationSamplingForShutdown();
+                       ClearGlobalInfo();
+                   });
 }
 
 bool ContinuousProfiler::IsShutdownRequested() const

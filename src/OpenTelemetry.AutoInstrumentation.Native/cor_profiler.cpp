@@ -68,18 +68,6 @@ static void LogContinuousProfilerErrorNoThrow(const Args&... args) noexcept
     }
 }
 
-template <typename... Args>
-static void LogContinuousProfilerWarningNoThrow(const Args&... args) noexcept
-{
-    try
-    {
-        Logger::Warn(args...);
-    }
-    catch (...)
-    {
-    }
-}
-
 CorProfiler* profiler = nullptr;
 
 CorProfiler::CorProfiler() : runtime_sampler_controller_(*this) {}
@@ -233,8 +221,7 @@ HRESULT STDMETHODCALLTYPE CorProfiler::Initialize(IUnknown* cor_profiler_info_un
     tracer_integration_preprocessor = std::make_unique<TracerRejitPreprocessor>(rejit_handler, work_offloader);
 
     DWORD event_mask = COR_PRF_DISABLE_TRANSPARENCY_CHECKS_UNDER_FULL_TRUST | COR_PRF_MONITOR_MODULE_LOADS |
-                       COR_PRF_MONITOR_ASSEMBLY_LOADS | COR_PRF_MONITOR_APPDOMAIN_LOADS | COR_PRF_ENABLE_REJIT |
-                       COR_PRF_MONITOR_THREADS | COR_PRF_ENABLE_STACK_SNAPSHOT;
+                       COR_PRF_MONITOR_ASSEMBLY_LOADS | COR_PRF_MONITOR_APPDOMAIN_LOADS | COR_PRF_ENABLE_REJIT;
 
 #ifdef _WIN32
     if (runtime_information_.is_desktop())
@@ -308,14 +295,6 @@ HRESULT STDMETHODCALLTYPE CorProfiler::Initialize(IUnknown* cor_profiler_info_un
     this->info_->AddRef();
     is_attached_.store(true);
     profiler = this;
-
-    // Prepare stack walking and the process-wide sampler foundation before any
-    // managed configuration arrives. Sampling producers are started only by a
-    // later successful configuration apply.
-    if (!runtime_sampler_controller_.Prepare())
-    {
-        LogContinuousProfilerWarningNoThrow("ContinuousProfiler: sampler foundation is unavailable.");
-    }
 
     return S_OK;
 }
@@ -1217,6 +1196,24 @@ bool CorProfiler::InitThreadSampler()
         return true;
     }
 
+    DWORD eventMaskLow;
+    DWORD eventMaskHigh;
+    auto  hr = this->info_->GetEventMask2(&eventMaskLow, &eventMaskHigh);
+    if (FAILED(hr))
+    {
+        Logger::Warn("ConfigureContinuousProfiler: Failed to take event masks for continuous profiler.");
+        return false;
+    }
+
+    eventMaskLow |= COR_PRF_MONITOR_THREADS | COR_PRF_ENABLE_STACK_SNAPSHOT;
+
+    hr = this->info_->SetEventMask2(eventMaskLow, eventMaskHigh);
+    if (FAILED(hr))
+    {
+        Logger::Warn("ConfigureContinuousProfiler: Failed to set event masks for continuous profiler.");
+        return false;
+    }
+
     auto sampler = std::make_unique<continuous_profiler::ContinuousProfiler>();
     if (this->info12_ != nullptr)
     {
@@ -1270,7 +1267,7 @@ void CorProfiler::RecordCurrentThreadAssignmentForContinuousProfiler() noexcept
         // The CLR does not report ThreadAssignedToOSThread for the .NET
         // Framework main thread. The legacy configuration call is made from
         // managed code on that thread, so refresh the mapping there as well as
-        // during early preparation.
+        // during lazy sampler initialization.
         ThreadID currentThreadId = 0;
         if (const auto hr = info_->GetCurrentThreadID(&currentThreadId); SUCCEEDED(hr))
         {
@@ -1331,7 +1328,8 @@ bool CorProfiler::Bootstrap() noexcept
     return false;
 }
 
-bool CorProfiler::ApplyConfiguration(const continuous_profiler::RuntimeSamplerConfiguration& configuration) noexcept
+bool CorProfiler::ApplyConfiguration(const continuous_profiler::RuntimeSamplerConfiguration& previousConfiguration,
+                                     const continuous_profiler::RuntimeSamplerConfiguration& configuration) noexcept
 {
     try
     {
@@ -1345,7 +1343,7 @@ bool CorProfiler::ApplyConfiguration(const continuous_profiler::RuntimeSamplerCo
         }
 
         auto sampler = continuous_profiler_callbacks_.load(std::memory_order_acquire);
-        return sampler != nullptr && sampler->ApplyConfiguration(configuration);
+        return sampler != nullptr && sampler->ApplyConfiguration(previousConfiguration, configuration);
     }
     catch (const std::exception& exception)
     {

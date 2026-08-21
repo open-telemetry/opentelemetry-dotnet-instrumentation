@@ -150,7 +150,8 @@ private:
     bool TryEnterContinuousProfilerCallback(std::shared_lock<std::shared_mutex>& callbackLock) noexcept;
     bool IsAllocationSamplingSupported() const noexcept override;
     bool Bootstrap() noexcept override;
-    bool ApplyConfiguration(const continuous_profiler::RuntimeSamplerConfiguration& configuration) noexcept override;
+    bool ApplyConfiguration(const continuous_profiler::RuntimeSamplerConfiguration& previousConfiguration,
+                            const continuous_profiler::RuntimeSamplerConfiguration& configuration) noexcept override;
     void ShutdownSampling() noexcept override;
 
 public:
