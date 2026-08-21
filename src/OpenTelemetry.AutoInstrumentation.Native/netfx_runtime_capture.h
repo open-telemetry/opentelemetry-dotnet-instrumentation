@@ -65,7 +65,7 @@ struct CanarySnapshot
 
 struct NetFxCaptureOptions
 {
-    std::chrono::milliseconds probeTimeout    = std::chrono::milliseconds(250);
+    std::chrono::milliseconds probeTimeout     = std::chrono::milliseconds(250);
     const wchar_t*            canaryNamePrefix = L"OpenTelemetry Profiler Canary Thread";
 
     bool IsCanaryThreadName(const std::wstring& threadName) const
@@ -77,31 +77,32 @@ struct NetFxCaptureOptions
 class NetFxRuntimeCapture final : public IRuntimeCapture
 {
 public:
-    explicit NetFxRuntimeCapture(IProfilerApi*              profilerApi,
-                                 const NetFxCaptureOptions& options = {});
+    explicit NetFxRuntimeCapture(IProfilerApi* profilerApi, const NetFxCaptureOptions& options = {});
     ~NetFxRuntimeCapture() = default;
 
     NetFxRuntimeCapture(const NetFxRuntimeCapture&)            = delete;
     NetFxRuntimeCapture& operator=(const NetFxRuntimeCapture&) = delete;
 
-    HRESULT SuspendRuntime() override { return S_OK; }
-    void    ResumeRuntime() noexcept override {}
+    HRESULT PrepareForStackWalking() noexcept override;
+    HRESULT SuspendRuntime() override
+    {
+        return S_OK;
+    }
+    void ResumeRuntime() noexcept override {}
 
-    HRESULT CaptureStack(ThreadID                      managedThreadId,
-                         StackSnapshotCallbackContext* clientData) override;
+    HRESULT CaptureStack(ThreadID managedThreadId, StackSnapshotCallbackContext* clientData) override;
 
     void OnThreadDestroyed(ThreadID threadId) override;
     void OnThreadNameChanged(ThreadID threadId, ULONG cchName, WCHAR name[]) override;
     void OnThreadAssignedToOSThread(ThreadID managedThreadId, DWORD osThreadId) override;
 
-
 private:
     CanarySnapshot SnapshotCanary() const;
     void           ReelectCanaryLocked();
 
-    IProfilerApi*                          profilerApi_;
-    NetFxCaptureOptions                    options_;
-    std::unique_ptr<StackWalkGuard>        stackWalkGuard_;
+    IProfilerApi*                   profilerApi_;
+    NetFxCaptureOptions             options_;
+    std::unique_ptr<StackWalkGuard> stackWalkGuard_;
 #if defined(_M_AMD64)
     std::unique_ptr<SafeNativeWalkService> nativeWalk_;
 #endif

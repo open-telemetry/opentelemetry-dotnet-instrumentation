@@ -9,7 +9,9 @@
 #include "cor.h"
 #include "corprof.h"
 #include <atomic>
+#include <memory>
 #include <mutex>
+#include <shared_mutex>
 #include <string>
 #include <unordered_map>
 #include <vector>
@@ -21,6 +23,7 @@
 #include "pal.h"
 #include "rejit_preprocessor.h"
 #include "rejit_handler.h"
+#include "runtime_sampler_controller.h"
 #include <unordered_set>
 #include "clr_helpers.h"
 #include "stack_walker_impl.h"
@@ -32,44 +35,37 @@ class ContinuousProfiler;
 
 namespace trace
 {
-struct ContinuousProfilerParams
-{
-    bool         threadSamplingEnabled;
-    unsigned int threadSamplingInterval;
-    bool         allocationSamplingEnabled;
-    unsigned int maxMemorySamplesPerMinute;
-    unsigned int selectedThreadsSamplingInterval;
-};
-
-class CorProfiler : public CorProfilerBase
+class CorProfiler : public CorProfilerBase, private continuous_profiler::IRuntimeSamplerLifecycle
 {
 private:
-    std::atomic_bool is_attached_ = {false};
-    RuntimeInformation runtime_information_;
+    std::atomic_bool                   is_attached_ = {false};
+    RuntimeInformation                 runtime_information_;
     std::vector<IntegrationDefinition> integration_definitions_;
 
     std::unordered_set<WSTRING> definitions_ids_;
-    std::mutex definitions_ids_lock_;
+    std::mutex                  definitions_ids_lock_;
 
     // Startup helper variables
     WSTRING home_path;
-    bool assembly_redirection_enabled_ = false;
-    bool first_jit_compilation_completed = false;
-    bool startup_fix_required = false;
+    bool    assembly_redirection_enabled_   = false;
+    bool    first_jit_compilation_completed = false;
+    bool    startup_fix_required            = false;
 
-    bool corlib_module_loaded = false;
-    AppDomainID corlib_app_domain_id = 0;
-    bool managed_profiler_loaded_domain_neutral = false;
+    bool                            corlib_module_loaded                   = false;
+    AppDomainID                     corlib_app_domain_id                   = 0;
+    bool                            managed_profiler_loaded_domain_neutral = false;
     std::unordered_set<AppDomainID> managed_profiler_loaded_app_domains;
     std::unordered_set<AppDomainID> first_jit_compilation_app_domains;
-    bool in_azure_app_services = false;
-    bool is_desktop_iis = false;
+    bool                            in_azure_app_services = false;
+    bool                            is_desktop_iis        = false;
 
-    continuous_profiler::ContinuousProfiler* continuousProfiler;
-    std::unique_ptr<continuous_profiler::StackWalkerImpl>       stack_walker_impl_;
-    std::once_flag sampling_init_flag_;
+    std::shared_ptr<continuous_profiler::StackWalkerImpl>    stack_walker_impl_;
+    std::unique_ptr<continuous_profiler::ContinuousProfiler> continuous_profiler_;
+    std::atomic<continuous_profiler::ContinuousProfiler*>    continuous_profiler_callbacks_{nullptr};
+    std::atomic_bool                                         continuous_profiler_callbacks_enabled_{false};
+    std::shared_mutex                                        continuous_profiler_callback_lock_;
+    continuous_profiler::RuntimeSamplerController            runtime_sampler_controller_;
     HRESULT STDMETHODCALLTYPE ThreadAssignedToOSThread(ThreadID managedThreadId, DWORD osThreadId) override;
-
 
     //
     // CallTarget Members
@@ -77,13 +73,13 @@ private:
     // The variables 'enable_by_ref_instrumentation' and 'enable_calltarget_state_by_ref' will always be true,
     // but instead of removing them and the conditional branches they affect, we will keep the variables to make
     // future upstream pulls easier.
-    std::shared_ptr<RejitHandler> rejit_handler = nullptr;
-    bool enable_by_ref_instrumentation = true;
-    bool enable_calltarget_state_by_ref = true;
+    std::shared_ptr<RejitHandler>            rejit_handler                   = nullptr;
+    bool                                     enable_by_ref_instrumentation   = true;
+    bool                                     enable_calltarget_state_by_ref  = true;
     std::unique_ptr<TracerRejitPreprocessor> tracer_integration_preprocessor = nullptr;
 
     // Cor assembly properties
-    AssemblyProperty corAssemblyProperty{};
+    AssemblyProperty   corAssemblyProperty{};
     AssemblyReference* managed_profiler_assembly_reference;
 
     //
@@ -94,7 +90,7 @@ private:
     //
     // Module helper variables
     //
-    std::mutex module_ids_lock_;
+    std::mutex            module_ids_lock_;
     std::vector<ModuleID> module_ids_;
 
     //
@@ -109,7 +105,11 @@ private:
     //
     // Loader methods. These are only used on the .NET Framework.
     //
-    HRESULT RunAutoInstrumentationLoader(const ComPtr<IMetaDataEmit2>&, const ModuleID module_id, const mdToken function_token, const FunctionInfo& caller, const ModuleMetadata& module_metadata);
+    HRESULT RunAutoInstrumentationLoader(const ComPtr<IMetaDataEmit2>&,
+                                         const ModuleID        module_id,
+                                         const mdToken         function_token,
+                                         const FunctionInfo&   caller,
+                                         const ModuleMetadata& module_metadata);
     HRESULT GenerateLoaderMethod(const ModuleID module_id, mdMethodDef* ret_method_token);
     HRESULT GenerateLoaderType(const ModuleID module_id,
                                mdTypeDef*     loader_type,
@@ -135,8 +135,10 @@ private:
     // Helper methods
     //
     void RewritingPInvokeMaps(const ModuleMetadata& module_metadata, const WSTRING& nativemethods_type_name);
-    bool GetIntegrationTypeRef(ModuleMetadata& module_metadata, ModuleID module_id,
-                               const IntegrationDefinition& integration_definition, mdTypeRef& integration_type_ref);
+    bool GetIntegrationTypeRef(ModuleMetadata&              module_metadata,
+                               ModuleID                     module_id,
+                               const IntegrationDefinition& integration_definition,
+                               mdTypeRef&                   integration_type_ref);
     bool ProfilerAssemblyIsLoadedIntoAppDomain(AppDomainID app_domain_id);
 
     //
@@ -144,10 +146,16 @@ private:
     //
     void InternalAddInstrumentation(WCHAR* id, CallTargetDefinition* items, int size, bool isDerived);
     bool InitThreadSampler();
-    void ConfigureContinuousProfilerInternal(const ContinuousProfilerParams& params);
+    void RecordCurrentThreadAssignmentForContinuousProfiler() noexcept;
+    bool TryEnterContinuousProfilerCallback(std::shared_lock<std::shared_mutex>& callbackLock) noexcept;
+    bool IsAllocationSamplingSupported() const noexcept override;
+    bool Bootstrap() noexcept override;
+    bool ApplyConfiguration(const continuous_profiler::RuntimeSamplerConfiguration& previousConfiguration,
+                            const continuous_profiler::RuntimeSamplerConfiguration& configuration) noexcept override;
+    void ShutdownSampling() noexcept override;
 
 public:
-    CorProfiler() = default;
+    CorProfiler();
 
     bool IsAttached() const;
 
@@ -155,13 +163,15 @@ public:
 
 #ifdef _WIN32
     // GetAssemblyAndSymbolsBytes is used when injecting the Loader into a .NET Framework application.
-    void GetAssemblyAndSymbolsBytes(BYTE** pAssemblyArray, int* assemblySize, BYTE** pSymbolsArray,
-                                    int* symbolsSize) const;
+    void GetAssemblyAndSymbolsBytes(BYTE** pAssemblyArray,
+                                    int*   assemblySize,
+                                    BYTE** pSymbolsArray,
+                                    int*   symbolsSize) const;
 
     // Return redirection table used in runtime
     // that will match TFM folder to load assemblies.
     // It may not be actual .NET Framework version.
-    int  GetNetFrameworkRedirectionVersion() const;
+    int GetNetFrameworkRedirectionVersion() const;
 #endif
 
     std::string GetILCodes(const std::string&              title,
@@ -196,17 +206,23 @@ public:
     // ReJIT Methods
     //
 
-    HRESULT STDMETHODCALLTYPE ReJITCompilationStarted(FunctionID functionId, ReJITID rejitId,
-                                                      BOOL fIsSafeToBlock) override;
+    HRESULT STDMETHODCALLTYPE ReJITCompilationStarted(FunctionID functionId,
+                                                      ReJITID    rejitId,
+                                                      BOOL       fIsSafeToBlock) override;
 
-    HRESULT STDMETHODCALLTYPE GetReJITParameters(ModuleID moduleId, mdMethodDef methodId,
+    HRESULT STDMETHODCALLTYPE GetReJITParameters(ModuleID                     moduleId,
+                                                 mdMethodDef                  methodId,
                                                  ICorProfilerFunctionControl* pFunctionControl) override;
 
-    HRESULT STDMETHODCALLTYPE ReJITCompilationFinished(FunctionID functionId, ReJITID rejitId, HRESULT hrStatus,
-                                                       BOOL fIsSafeToBlock) override;
+    HRESULT STDMETHODCALLTYPE ReJITCompilationFinished(FunctionID functionId,
+                                                       ReJITID    rejitId,
+                                                       HRESULT    hrStatus,
+                                                       BOOL       fIsSafeToBlock) override;
 
-    HRESULT STDMETHODCALLTYPE ReJITError(ModuleID moduleId, mdMethodDef methodId, FunctionID functionId,
-                                         HRESULT hrStatus) override;
+    HRESULT STDMETHODCALLTYPE ReJITError(ModuleID    moduleId,
+                                         mdMethodDef methodId,
+                                         FunctionID  functionId,
+                                         HRESULT     hrStatus) override;
 
     HRESULT STDMETHODCALLTYPE JITCachedFunctionSearchStarted(FunctionID functionId, BOOL* pbUseCachedFunction) override;
 
@@ -232,7 +248,7 @@ public:
     //
     // ICorProfilerCallback6 methods
     //
-    HRESULT STDMETHODCALLTYPE GetAssemblyReferences(const WCHAR* wszAssemblyPath,
+    HRESULT STDMETHODCALLTYPE GetAssemblyReferences(const WCHAR*                           wszAssemblyPath,
                                                     ICorProfilerAssemblyReferenceProvider* pAsmRefProvider) override;
 
     //
@@ -247,8 +263,15 @@ public:
     //
     // Continuous Profiler methods
     //
-    void ConfigureContinuousProfiler(bool threadSamplingEnabled, unsigned int threadSamplingInterval, bool allocationSamplingEnabled, unsigned int maxMemorySamplesPerMinute, 
-        unsigned int selectedThreadsSamplingInterval);
+    void                                           ConfigureContinuousProfiler(bool         threadSamplingEnabled,
+                                                                               unsigned int threadSamplingInterval,
+                                                                               bool         allocationSamplingEnabled,
+                                                                               unsigned int maxMemorySamplesPerMinute,
+                                                                               unsigned int selectedThreadsSamplingInterval);
+    continuous_profiler::RuntimeSamplerApplyResult ApplyContinuousProfilerConfigurationV1(
+        const continuous_profiler::RuntimeSamplerConfigurationV1* configuration) noexcept;
+    continuous_profiler::RuntimeSamplerStateQueryResult GetContinuousProfilerStateV1(
+        continuous_profiler::RuntimeSamplerStateV1* state) const noexcept;
 
     //
     // IL Rewriting methods

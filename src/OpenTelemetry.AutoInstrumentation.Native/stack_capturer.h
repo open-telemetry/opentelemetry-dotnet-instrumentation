@@ -28,6 +28,11 @@ public:
     virtual ~IStackCapturer() = default;
 
     /// <summary>
+    /// Starts stack-walking helpers before any runtime or thread suspension.
+    /// </summary>
+    virtual HRESULT PrepareForStackWalking() noexcept = 0;
+
+    /// <summary>
     /// Captures stacks for specified threads via seedless DoStackSnapshot.
     /// And uses RTL based native walk fallback on Windows x64 when DSS fails (e.g. thread in native code with no
     /// managed frames on top).
@@ -35,7 +40,7 @@ public:
     /// <param name="threads">Set of managed thread IDs to capture</param>
     /// <param name="clientData">Callback context passed to DoStackSnapshotUnseeded</param>
     /// <returns>S_OK on success, error HRESULT otherwise</returns>
-    /// 
+    ///
     /// THREAD SAFETY CONTRACT:
     /// - Caller MUST NOT hold locks that sampled threads might acquire
     /// - Implementation handles ALL suspension/resume logic
@@ -49,7 +54,7 @@ public:
     {
         (void)instructionPointer;
         (void)outName;
-        return S_FALSE;  // Not available in seedless phase
+        return S_FALSE; // Not available in seedless phase
     }
 
     // Thread lifecycle notifications (for future NetFx canary coordination)
@@ -66,9 +71,8 @@ public:
 /// <param name="profilerInfo">CLR profiler API</param>
 /// <param name="runtimeType">Runtime being profiled (.NET Core or .NET Framework)</param>
 /// <returns>Heap-allocated capturer (caller owns), or nullptr on error</returns>
-std::unique_ptr<IStackCapturer> CreateStackCapturer(
-    ICorProfilerInfo2*  profilerInfo,
-    continuous_profiler::RuntimeType runtimeType);
+std::unique_ptr<IStackCapturer> CreateStackCapturer(ICorProfilerInfo2*               profilerInfo,
+                                                    continuous_profiler::RuntimeType runtimeType);
 
 } // namespace ProfilerStackCapture
 

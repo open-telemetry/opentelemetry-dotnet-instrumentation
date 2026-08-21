@@ -54,6 +54,11 @@ public:
 
     ~StackCaptureImpl() override = default;
 
+    HRESULT PrepareForStackWalking() noexcept override
+    {
+        return runtime_ != nullptr ? runtime_->PrepareForStackWalking() : E_FAIL;
+    }
+
     HRESULT CaptureStacks(const std::unordered_set<ThreadID>& threads, void* clientData) override
     {
         if (threads.empty())
