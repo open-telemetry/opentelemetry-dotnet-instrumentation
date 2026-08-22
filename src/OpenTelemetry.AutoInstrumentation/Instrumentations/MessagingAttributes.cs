@@ -24,6 +24,7 @@ internal static class MessagingAttributes
             public const string MessageKey = "messaging.kafka.message.key";
             public const string PartitionOffset = "messaging.kafka.message.offset";
             public const string IsTombstone = "messaging.kafka.message.tombstone";
+            public const string ClusterId = "messaging.kafka.cluster.id";
         }
 
         internal static class RabbitMq

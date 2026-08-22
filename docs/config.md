@@ -196,6 +196,11 @@ due to lack of stable semantic convention.
 
 \[8\]: `Confluent.Kafka` is supported from version ≥1.8.2 on ARM64
        for Windows and Linux, and ≥1.9.2 on macOS.
+       For versions ≥2.0.0, the `messaging.kafka.cluster.id` span attribute
+       is populated automatically. Cluster ID is fetched once per unique
+       bootstrap-servers string via a background `AdminClient` call;
+       SASL/SSL client configuration is forwarded so authenticated
+       clusters are supported.
 
 \[9\]: `MongoDB.Driver` needs bytecode instrumentation only for < `3.7.0`
         versions, `3.7.0+` uses only source instrumentation.
