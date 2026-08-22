@@ -242,9 +242,9 @@ bool MatchesSecretsPattern(const std::string& str)
     }
 
     // Pattern to match environment variables containing sensitive data
-    // Matches: API, TOKEN, SECRET, KEY, PASSWORD, PASS, PWD, HEADER, CREDENTIALS
-    // at word boundaries (preceded/followed by _ or start/end of string)
-    static std::regex re("(?:^|_)(API|TOKEN|SECRET|KEY|PASSWORD|PASS|PWD|HEADER|CREDENTIALS)(?:_|$)",
+    // Matches: API, TOKEN, SECRET, KEY, PASSWORD, PASS, PWD, HEADER, HEADERS, CREDENTIALS
+    // at environment variable name boundaries (preceded by _ or start, followed by _, =, or end)
+    static std::regex re("(?:^|_)(API|TOKEN|SECRET|KEY|PASSWORD|PASS|PWD|HEADERS?|CREDENTIALS)(?:_|=|$)",
                          std::regex_constants::ECMAScript | std::regex_constants::icase);
 
     return std::regex_search(str, re);
