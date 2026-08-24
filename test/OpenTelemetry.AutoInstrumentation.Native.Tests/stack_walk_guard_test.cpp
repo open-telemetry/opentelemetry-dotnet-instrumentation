@@ -55,3 +55,19 @@ TEST(StackWalkGuardTest, StartIsIdempotentAndEnablesProbes)
     ASSERT_TRUE(guard.ScheduleDssProbe());
     ASSERT_EQ(StackWalkGuard::ProbeResult::Success, guard.AwaitProbeResult());
 }
+
+TEST(StackWalkGuardTest, StopIsTerminalAndIdempotent)
+{
+    FakeProfilerApi api;
+    StackWalkGuard  guard(&api, std::chrono::seconds(1), std::chrono::seconds(1));
+
+    ASSERT_TRUE(guard.Start());
+
+    guard.Stop();
+    guard.Stop();
+
+    ASSERT_FALSE(guard.IsStarted());
+    ASSERT_FALSE(guard.IsIdle());
+    ASSERT_FALSE(guard.Start());
+    ASSERT_FALSE(guard.ScheduleDssProbe());
+}

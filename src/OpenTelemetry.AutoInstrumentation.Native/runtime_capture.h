@@ -64,7 +64,7 @@ public:
     /// <summary>
     /// Shutdown signal (release waiters, e.g. canary wait).  Default no-op.
     /// </summary>
-    virtual void Stop() {}
+    virtual void Stop() noexcept {}
 };
 
 } // namespace ProfilerStackCapture

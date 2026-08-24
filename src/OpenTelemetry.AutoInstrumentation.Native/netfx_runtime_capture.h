@@ -84,6 +84,7 @@ public:
     NetFxRuntimeCapture& operator=(const NetFxRuntimeCapture&) = delete;
 
     HRESULT PrepareForStackWalking() noexcept override;
+    void    Stop() noexcept override;
     HRESULT SuspendRuntime() override
     {
         return S_OK;

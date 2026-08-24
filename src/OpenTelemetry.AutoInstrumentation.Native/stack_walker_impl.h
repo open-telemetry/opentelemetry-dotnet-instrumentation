@@ -32,6 +32,15 @@ public:
         return capturer_ != nullptr ? capturer_->PrepareForStackWalking() : E_FAIL;
     }
 
+    /// @brief Stops helper threads while retaining this callback-visible facade.
+    void Stop() noexcept
+    {
+        if (capturer_ != nullptr)
+        {
+            capturer_->Stop();
+        }
+    }
+
     HRESULT CaptureStacks(const std::unordered_set<ThreadID>& threads, StackCaptureRequest* request) override
     {
         if (capturer_ == nullptr)

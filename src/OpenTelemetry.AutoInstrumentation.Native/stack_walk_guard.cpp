@@ -78,14 +78,23 @@ StackWalkGuard::StackWalkGuard(IProfilerApi*             profilerApi,
 
 StackWalkGuard::~StackWalkGuard()
 {
+    Stop();
+}
+
+void StackWalkGuard::Stop() noexcept
+{
+    std::unique_ptr<std::thread> worker;
     {
         std::lock_guard<std::mutex> lk(mutex_);
-        state_ = State::Stopping;
+        abandon_ = true;
+        state_   = State::Stopping;
+        worker   = std::move(worker_);
     }
     cv_.notify_all();
-    if (worker_ && worker_->joinable())
-        worker_->join();
-    worker_.reset();
+    if (worker != nullptr && worker->joinable())
+    {
+        worker->join();
+    }
 }
 
 bool StackWalkGuard::Start() noexcept
@@ -273,6 +282,10 @@ void StackWalkGuard::WorkerLoop()
         {
             {
                 std::lock_guard<std::mutex> lk(mutex_);
+                if (state_ == State::Stopping)
+                {
+                    break;
+                }
                 result_ = ProbeResult::Failed;
                 state_  = State::Idle;
                 SetStage(ProbeStage::None);

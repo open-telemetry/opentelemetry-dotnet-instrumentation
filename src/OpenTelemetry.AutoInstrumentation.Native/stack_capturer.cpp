@@ -25,9 +25,10 @@ namespace ProfilerStackCapture
 /// All probe and walk machinery is owned by each IRuntimeCapture instance;
 /// this class only orchestrates the batch lifecycle and dispatch.
 ///
-/// Shutdown: implicit via member destruction order. runtime_ is declared
-/// after profilerApi_ so it is destroyed first - joining its StackWalkGuard
-/// worker thread before the IProfilerApi it references is destroyed.
+/// Shutdown: Stop() terminates runtime helpers without destroying this
+/// callback-visible facade. Member destruction remains a fallback: runtime_
+/// is declared after profilerApi_ so it is destroyed first, joining its
+/// StackWalkGuard worker before the IProfilerApi it references is destroyed.
 ///
 /// Destructor chain:
 ///
@@ -57,6 +58,14 @@ public:
     HRESULT PrepareForStackWalking() noexcept override
     {
         return runtime_ != nullptr ? runtime_->PrepareForStackWalking() : E_FAIL;
+    }
+
+    void Stop() noexcept override
+    {
+        if (runtime_ != nullptr)
+        {
+            runtime_->Stop();
+        }
     }
 
     HRESULT CaptureStacks(const std::unordered_set<ThreadID>& threads, void* clientData) override

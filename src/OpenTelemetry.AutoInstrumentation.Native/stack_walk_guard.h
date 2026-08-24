@@ -112,6 +112,10 @@ public:
     // profiler does not create a helper thread.
     bool Start() noexcept;
 
+    // Stops and joins the safety worker. Call from outside the safety worker.
+    // Idempotent and terminal: Start() rejects attempts to restart afterwards.
+    void Stop() noexcept;
+
     // CanaryDss: STL gate + (if canary != 0) DSS on a coast-clear thread.
     // canary == 0 reduces to STL-only.
     // Available on all Windows architectures.

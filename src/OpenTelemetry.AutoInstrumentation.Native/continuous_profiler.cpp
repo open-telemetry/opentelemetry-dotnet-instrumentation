@@ -1841,7 +1841,7 @@ void ContinuousProfiler::Shutdown()
                    });
 }
 
-bool ContinuousProfiler::IsShutdownRequested() const
+bool ContinuousProfiler::IsShutdownRequested() const noexcept
 {
     return shutdown_requested_.load(std::memory_order_acquire);
 }

@@ -1191,11 +1191,6 @@ void CorProfiler::InternalAddInstrumentation(WCHAR* id, CallTargetDefinition* it
 
 bool CorProfiler::InitThreadSampler()
 {
-    if (continuous_profiler_callbacks_.load(std::memory_order_acquire) != nullptr)
-    {
-        return true;
-    }
-
     DWORD eventMaskLow;
     DWORD eventMaskHigh;
     auto  hr = this->info_->GetEventMask2(&eventMaskLow, &eventMaskHigh);
@@ -1206,13 +1201,6 @@ bool CorProfiler::InitThreadSampler()
     }
 
     eventMaskLow |= COR_PRF_MONITOR_THREADS | COR_PRF_ENABLE_STACK_SNAPSHOT;
-
-    hr = this->info_->SetEventMask2(eventMaskLow, eventMaskHigh);
-    if (FAILED(hr))
-    {
-        Logger::Warn("ConfigureContinuousProfiler: Failed to set event masks for continuous profiler.");
-        return false;
-    }
 
     auto sampler = std::make_unique<continuous_profiler::ContinuousProfiler>();
     if (this->info12_ != nullptr)
@@ -1228,15 +1216,27 @@ bool CorProfiler::InitThreadSampler()
     RuntimeType runtime     = runtime_information_.is_desktop() ? RuntimeType::DotNetFramework
                               : runtime_information_.is_core()  ? RuntimeType::DotNetCore
                                                                 : RuntimeType::Unknown;
-    auto        stackWalker = std::make_shared<continuous_profiler::StackWalkerImpl>(this->info_, runtime);
+    auto        stackWalker = std::make_unique<continuous_profiler::StackWalkerImpl>(this->info_, runtime);
 
     sampler->SetStackWalker(stackWalker.get());
-    sampler->PublishGlobalInfo();
 
+    stack_walker_impl_   = std::move(stackWalker);
     continuous_profiler_ = std::move(sampler);
-    std::atomic_store_explicit(&stack_walker_impl_, stackWalker, std::memory_order_release);
+
+    // Publish the fully initialized callback facade before enabling CLR
+    // callbacks. The facade and its walker remain at stable addresses until
+    // the CorProfiler itself is destroyed; terminal shutdown only stops their
+    // internal producers.
     continuous_profiler_callbacks_.store(continuous_profiler_.get(), std::memory_order_release);
-    continuous_profiler_callbacks_enabled_.store(true, std::memory_order_release);
+
+    hr = this->info_->SetEventMask2(eventMaskLow, eventMaskHigh);
+    if (FAILED(hr))
+    {
+        Logger::Warn("ConfigureContinuousProfiler: Failed to set event masks for continuous profiler.");
+        return false;
+    }
+
+    continuous_profiler_->PublishGlobalInfo();
     RecordCurrentThreadAssignmentForContinuousProfiler();
     Logger::Info("ContinuousProfiler: process-wide sampler initialized.");
     return true;
@@ -1252,22 +1252,16 @@ void CorProfiler::RecordCurrentThreadAssignmentForContinuousProfiler() noexcept
 
     try
     {
-        std::shared_lock<std::shared_mutex> callbackLock;
-        if (!TryEnterContinuousProfilerCallback(callbackLock))
-        {
-            return;
-        }
-
-        const auto stackWalker = std::atomic_load_explicit(&stack_walker_impl_, std::memory_order_acquire);
-        if (stackWalker == nullptr)
+        const auto sampler     = continuous_profiler_callbacks_.load(std::memory_order_acquire);
+        const auto stackWalker = stack_walker_impl_.get();
+        if (sampler == nullptr || sampler->IsShutdownRequested() || stackWalker == nullptr)
         {
             return;
         }
 
         // The CLR does not report ThreadAssignedToOSThread for the .NET
-        // Framework main thread. The legacy configuration call is made from
-        // managed code on that thread, so refresh the mapping there as well as
-        // during lazy sampler initialization.
+        // Framework main thread. Managed configuration is invoked on that
+        // thread, so refresh its mapping before applying the configuration.
         ThreadID currentThreadId = 0;
         if (const auto hr = info_->GetCurrentThreadID(&currentThreadId); SUCCEEDED(hr))
         {
@@ -1285,25 +1279,6 @@ void CorProfiler::RecordCurrentThreadAssignmentForContinuousProfiler() noexcept
         }
     }
 #endif
-}
-
-bool CorProfiler::TryEnterContinuousProfilerCallback(std::shared_lock<std::shared_mutex>& callbackLock) noexcept
-{
-    if (!continuous_profiler_callbacks_enabled_.load(std::memory_order_acquire))
-    {
-        return false;
-    }
-
-    try
-    {
-        callbackLock = std::shared_lock<std::shared_mutex>(continuous_profiler_callback_lock_);
-    }
-    catch (...)
-    {
-        return false;
-    }
-
-    return continuous_profiler_callbacks_enabled_.load(std::memory_order_acquire);
 }
 
 bool CorProfiler::IsAllocationSamplingSupported() const noexcept
@@ -1334,15 +1309,9 @@ bool CorProfiler::ApplyConfiguration(const continuous_profiler::RuntimeSamplerCo
     try
     {
         // RuntimeSamplerController serializes ApplyConfiguration with
-        // ShutdownSampling, so the sampler cannot be destroyed during this
-        // call. Avoid holding the CLR-callback gate while starting or stopping
-        // EventPipe because those APIs may deliver callbacks synchronously.
-        if (!continuous_profiler_callbacks_enabled_.load(std::memory_order_acquire))
-        {
-            return false;
-        }
-
-        auto sampler = continuous_profiler_callbacks_.load(std::memory_order_acquire);
+        // ShutdownSampling. The published facade remains alive after shutdown;
+        // the controller prevents configuration from reaching it once terminal.
+        const auto sampler = continuous_profiler_callbacks_.load(std::memory_order_acquire);
         return sampler != nullptr && sampler->ApplyConfiguration(previousConfiguration, configuration);
     }
     catch (const std::exception& exception)
@@ -1358,19 +1327,7 @@ bool CorProfiler::ApplyConfiguration(const continuous_profiler::RuntimeSamplerCo
 
 void CorProfiler::ShutdownSampling() noexcept
 {
-    continuous_profiler_callbacks_enabled_.store(false, std::memory_order_release);
-    auto sampler = continuous_profiler_callbacks_.exchange(nullptr, std::memory_order_acq_rel);
-
-    // A callback can observe the enabled flag immediately before it is
-    // cleared. Briefly taking the exclusive lock waits for callbacks that
-    // already entered, while the second flag check makes queued callbacks
-    // return without loading the sampler. Do not hold this lock while stopping
-    // EventPipe: the runtime may synchronously wait for a callback that also
-    // passes through this gate.
-    {
-        std::unique_lock<std::shared_mutex> callbackLock(continuous_profiler_callback_lock_);
-    }
-
+    const auto sampler = continuous_profiler_callbacks_.load(std::memory_order_acquire);
     if (sampler != nullptr)
     {
         try
@@ -1387,14 +1344,10 @@ void CorProfiler::ShutdownSampling() noexcept
         }
     }
 
-    if (continuous_profiler_ != nullptr)
+    if (stack_walker_impl_ != nullptr)
     {
-        continuous_profiler_->SetStackWalker(nullptr);
-        continuous_profiler_.reset();
+        stack_walker_impl_->Stop();
     }
-
-    std::atomic_store_explicit(&stack_walker_impl_, std::shared_ptr<continuous_profiler::StackWalkerImpl>{},
-                               std::memory_order_release);
 }
 
 void CorProfiler::ConfigureContinuousProfiler(bool         threadSamplingEnabled,
@@ -3989,31 +3942,27 @@ HRESULT STDMETHODCALLTYPE CorProfiler::JITCachedFunctionSearchStarted(FunctionID
 
 HRESULT STDMETHODCALLTYPE CorProfiler::ThreadCreated(ThreadID threadId)
 {
-    std::shared_lock<std::shared_mutex> callbackLock;
-    if (!TryEnterContinuousProfilerCallback(callbackLock))
+    const auto sampler = continuous_profiler_callbacks_.load(std::memory_order_acquire);
+    if (sampler == nullptr || sampler->IsShutdownRequested())
     {
         return S_OK;
     }
 
-    if (auto sampler = continuous_profiler_callbacks_.load(std::memory_order_acquire); sampler != nullptr)
+    try
     {
-        try
-        {
-            sampler->ThreadCreated(threadId);
-        }
-        catch (const std::exception& exception)
-        {
-            LogContinuousProfilerErrorNoThrow("ContinuousProfiler: ThreadCreated sampler callback failed: ",
-                                              exception.what());
-        }
-        catch (...)
-        {
-            LogContinuousProfilerErrorNoThrow("ContinuousProfiler: ThreadCreated sampler callback failed.");
-        }
+        sampler->ThreadCreated(threadId);
+    }
+    catch (const std::exception& exception)
+    {
+        LogContinuousProfilerErrorNoThrow("ContinuousProfiler: ThreadCreated sampler callback failed: ",
+                                          exception.what());
+    }
+    catch (...)
+    {
+        LogContinuousProfilerErrorNoThrow("ContinuousProfiler: ThreadCreated sampler callback failed.");
     }
 
-    if (auto stackWalker = std::atomic_load_explicit(&stack_walker_impl_, std::memory_order_acquire);
-        stackWalker != nullptr)
+    if (const auto stackWalker = stack_walker_impl_.get(); stackWalker != nullptr)
     {
         try
         {
@@ -4034,31 +3983,27 @@ HRESULT STDMETHODCALLTYPE CorProfiler::ThreadCreated(ThreadID threadId)
 }
 HRESULT STDMETHODCALLTYPE CorProfiler::ThreadDestroyed(ThreadID threadId)
 {
-    std::shared_lock<std::shared_mutex> callbackLock;
-    if (!TryEnterContinuousProfilerCallback(callbackLock))
+    const auto sampler = continuous_profiler_callbacks_.load(std::memory_order_acquire);
+    if (sampler == nullptr || sampler->IsShutdownRequested())
     {
         return S_OK;
     }
 
-    if (auto sampler = continuous_profiler_callbacks_.load(std::memory_order_acquire); sampler != nullptr)
+    try
     {
-        try
-        {
-            sampler->ThreadDestroyed(threadId);
-        }
-        catch (const std::exception& exception)
-        {
-            LogContinuousProfilerErrorNoThrow("ContinuousProfiler: ThreadDestroyed sampler callback failed: ",
-                                              exception.what());
-        }
-        catch (...)
-        {
-            LogContinuousProfilerErrorNoThrow("ContinuousProfiler: ThreadDestroyed sampler callback failed.");
-        }
+        sampler->ThreadDestroyed(threadId);
+    }
+    catch (const std::exception& exception)
+    {
+        LogContinuousProfilerErrorNoThrow("ContinuousProfiler: ThreadDestroyed sampler callback failed: ",
+                                          exception.what());
+    }
+    catch (...)
+    {
+        LogContinuousProfilerErrorNoThrow("ContinuousProfiler: ThreadDestroyed sampler callback failed.");
     }
 
-    if (auto stackWalker = std::atomic_load_explicit(&stack_walker_impl_, std::memory_order_acquire);
-        stackWalker != nullptr)
+    if (const auto stackWalker = stack_walker_impl_.get(); stackWalker != nullptr)
     {
         try
         {
@@ -4079,31 +4024,27 @@ HRESULT STDMETHODCALLTYPE CorProfiler::ThreadDestroyed(ThreadID threadId)
 }
 HRESULT STDMETHODCALLTYPE CorProfiler::ThreadNameChanged(ThreadID threadId, ULONG cchName, WCHAR name[])
 {
-    std::shared_lock<std::shared_mutex> callbackLock;
-    if (!TryEnterContinuousProfilerCallback(callbackLock))
+    const auto sampler = continuous_profiler_callbacks_.load(std::memory_order_acquire);
+    if (sampler == nullptr || sampler->IsShutdownRequested())
     {
         return S_OK;
     }
 
-    if (auto sampler = continuous_profiler_callbacks_.load(std::memory_order_acquire); sampler != nullptr)
+    try
     {
-        try
-        {
-            sampler->ThreadNameChanged(threadId, cchName, name);
-        }
-        catch (const std::exception& exception)
-        {
-            LogContinuousProfilerErrorNoThrow("ContinuousProfiler: ThreadNameChanged sampler callback failed: ",
-                                              exception.what());
-        }
-        catch (...)
-        {
-            LogContinuousProfilerErrorNoThrow("ContinuousProfiler: ThreadNameChanged sampler callback failed.");
-        }
+        sampler->ThreadNameChanged(threadId, cchName, name);
+    }
+    catch (const std::exception& exception)
+    {
+        LogContinuousProfilerErrorNoThrow("ContinuousProfiler: ThreadNameChanged sampler callback failed: ",
+                                          exception.what());
+    }
+    catch (...)
+    {
+        LogContinuousProfilerErrorNoThrow("ContinuousProfiler: ThreadNameChanged sampler callback failed.");
     }
 
-    if (auto stackWalker = std::atomic_load_explicit(&stack_walker_impl_, std::memory_order_acquire);
-        stackWalker != nullptr)
+    if (const auto stackWalker = stack_walker_impl_.get(); stackWalker != nullptr)
     {
         try
         {
@@ -4124,14 +4065,14 @@ HRESULT STDMETHODCALLTYPE CorProfiler::ThreadNameChanged(ThreadID threadId, ULON
 }
 HRESULT STDMETHODCALLTYPE CorProfiler::ThreadAssignedToOSThread(ThreadID managedThreadId, DWORD osThreadId)
 {
-    std::shared_lock<std::shared_mutex> callbackLock;
-    if (!TryEnterContinuousProfilerCallback(callbackLock))
+    // The acquire-load publishes stack_walker_impl_ as well as the sampler.
+    const auto sampler = continuous_profiler_callbacks_.load(std::memory_order_acquire);
+    if (sampler == nullptr || sampler->IsShutdownRequested())
     {
         return S_OK;
     }
 
-    if (auto stackWalker = std::atomic_load_explicit(&stack_walker_impl_, std::memory_order_acquire);
-        stackWalker != nullptr)
+    if (const auto stackWalker = stack_walker_impl_.get(); stackWalker != nullptr)
     {
         try
         {
@@ -4165,16 +4106,15 @@ HRESULT STDMETHODCALLTYPE CorProfiler::EventPipeEventDelivered(EVENTPIPE_PROVIDE
                                                                ULONG              numStackFrames,
                                                                UINT_PTR           stackFrames[])
 {
-    std::shared_lock<std::shared_mutex> callbackLock;
-    if (!TryEnterContinuousProfilerCallback(callbackLock))
+    const auto sampler = continuous_profiler_callbacks_.load(std::memory_order_acquire);
+    if (sampler == nullptr || sampler->IsShutdownRequested())
     {
         return S_OK;
     }
 
     try
     {
-        if (auto sampler = continuous_profiler_callbacks_.load(std::memory_order_acquire);
-            sampler != nullptr && eventId == 10 && eventVersion == 4)
+        if (eventId == 10 && eventVersion == 4)
         {
             sampler->AllocationTick(cbEventData, eventData);
         }

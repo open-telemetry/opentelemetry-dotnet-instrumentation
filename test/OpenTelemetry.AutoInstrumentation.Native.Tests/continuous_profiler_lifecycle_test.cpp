@@ -3,6 +3,7 @@
 
 #include "pch.h"
 #include "../../src/OpenTelemetry.AutoInstrumentation.Native/continuous_profiler.h"
+#include "../../src/OpenTelemetry.AutoInstrumentation.Native/cor_profiler.h"
 
 #include <atomic>
 #include <condition_variable>
@@ -10,6 +11,42 @@
 #include <mutex>
 #include <thread>
 #include <vector>
+
+// dllmain.cpp is not linked into the native test executable.
+HINSTANCE DllHandle = nullptr;
+
+namespace trace
+{
+
+class CorProfilerContinuousProfilerTestAccess
+{
+public:
+    static continuous_profiler::ContinuousProfiler* InstallSampler(CorProfiler& profiler)
+    {
+        auto  sampler                 = std::make_unique<continuous_profiler::ContinuousProfiler>();
+        auto* result                  = sampler.get();
+        profiler.continuous_profiler_ = std::move(sampler);
+        profiler.continuous_profiler_callbacks_.store(result, std::memory_order_release);
+        return result;
+    }
+
+    static continuous_profiler::ContinuousProfiler* OwnedSampler(const CorProfiler& profiler)
+    {
+        return profiler.continuous_profiler_.get();
+    }
+
+    static continuous_profiler::ContinuousProfiler* PublishedSampler(const CorProfiler& profiler)
+    {
+        return profiler.continuous_profiler_callbacks_.load(std::memory_order_acquire);
+    }
+
+    static void ShutdownSampling(CorProfiler& profiler)
+    {
+        profiler.ShutdownSampling();
+    }
+};
+
+} // namespace trace
 
 namespace
 {
@@ -186,6 +223,30 @@ private:
 };
 
 } // namespace
+
+TEST(CorProfilerContinuousProfilerTest, TerminalShutdownRetainsFacadeAndMakesLateCallbacksNoOp)
+{
+    trace::CorProfiler profiler;
+    auto*              sampler    = trace::CorProfilerContinuousProfilerTestAccess::InstallSampler(profiler);
+    trace::WSTRING     threadName = WStr("before-shutdown");
+
+    ASSERT_EQ(sampler, trace::CorProfilerContinuousProfilerTestAccess::OwnedSampler(profiler));
+    ASSERT_EQ(sampler, trace::CorProfilerContinuousProfilerTestAccess::PublishedSampler(profiler));
+    ASSERT_EQ(S_OK, profiler.ThreadNameChanged(101, static_cast<ULONG>(threadName.size()), threadName.data()));
+    ASSERT_EQ(1u, sampler->managed_tid_to_state_.count(101));
+
+    trace::CorProfilerContinuousProfilerTestAccess::ShutdownSampling(profiler);
+    trace::CorProfilerContinuousProfilerTestAccess::ShutdownSampling(profiler);
+
+    ASSERT_TRUE(sampler->IsShutdownRequested());
+    ASSERT_EQ(sampler, trace::CorProfilerContinuousProfilerTestAccess::OwnedSampler(profiler));
+    ASSERT_EQ(sampler, trace::CorProfilerContinuousProfilerTestAccess::PublishedSampler(profiler));
+
+    threadName = WStr("after-shutdown");
+    ASSERT_EQ(S_OK, profiler.ThreadNameChanged(202, static_cast<ULONG>(threadName.size()), threadName.data()));
+    ASSERT_EQ(1u, sampler->managed_tid_to_state_.count(101));
+    ASSERT_EQ(0u, sampler->managed_tid_to_state_.count(202));
+}
 
 TEST(ContinuousProfilerLifecycleTest, AllDisabledConfigurationDoesNotCreateAWorker)
 {

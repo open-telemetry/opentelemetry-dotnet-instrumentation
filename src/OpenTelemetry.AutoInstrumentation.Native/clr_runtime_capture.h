@@ -40,6 +40,7 @@ public:
     ~ClrRuntimeCapture() = default;
 
     HRESULT PrepareForStackWalking() noexcept override;
+    void    Stop() noexcept override;
     HRESULT SuspendRuntime() override;
     void    ResumeRuntime() noexcept override;
 

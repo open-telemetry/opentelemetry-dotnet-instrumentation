@@ -33,6 +33,11 @@ public:
     virtual HRESULT PrepareForStackWalking() noexcept = 0;
 
     /// <summary>
+    /// Stops stack-walking helpers while retaining this callback-visible facade.
+    /// </summary>
+    virtual void Stop() noexcept = 0;
+
+    /// <summary>
     /// Captures stacks for specified threads via seedless DoStackSnapshot.
     /// And uses RTL based native walk fallback on Windows x64 when DSS fails (e.g. thread in native code with no
     /// managed frames on top).

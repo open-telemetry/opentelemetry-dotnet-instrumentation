@@ -11,7 +11,6 @@
 #include <atomic>
 #include <memory>
 #include <mutex>
-#include <shared_mutex>
 #include <string>
 #include <unordered_map>
 #include <vector>
@@ -59,12 +58,11 @@ private:
     bool                            in_azure_app_services = false;
     bool                            is_desktop_iis        = false;
 
-    std::shared_ptr<continuous_profiler::StackWalkerImpl>    stack_walker_impl_;
+    std::unique_ptr<continuous_profiler::StackWalkerImpl>    stack_walker_impl_;
     std::unique_ptr<continuous_profiler::ContinuousProfiler> continuous_profiler_;
-    std::atomic<continuous_profiler::ContinuousProfiler*>    continuous_profiler_callbacks_{nullptr};
-    std::atomic_bool                                         continuous_profiler_callbacks_enabled_{false};
-    std::shared_mutex                                        continuous_profiler_callback_lock_;
-    continuous_profiler::RuntimeSamplerController            runtime_sampler_controller_;
+    // Published once after both owners are initialized and never cleared.
+    std::atomic<continuous_profiler::ContinuousProfiler*> continuous_profiler_callbacks_{nullptr};
+    continuous_profiler::RuntimeSamplerController         runtime_sampler_controller_;
     HRESULT STDMETHODCALLTYPE ThreadAssignedToOSThread(ThreadID managedThreadId, DWORD osThreadId) override;
 
     //
@@ -147,7 +145,6 @@ private:
     void InternalAddInstrumentation(WCHAR* id, CallTargetDefinition* items, int size, bool isDerived);
     bool InitThreadSampler();
     void RecordCurrentThreadAssignmentForContinuousProfiler() noexcept;
-    bool TryEnterContinuousProfilerCallback(std::shared_lock<std::shared_mutex>& callbackLock) noexcept;
     bool IsAllocationSamplingSupported() const noexcept override;
     bool Bootstrap() noexcept override;
     bool ApplyConfiguration(const continuous_profiler::RuntimeSamplerConfiguration& previousConfiguration,
@@ -278,6 +275,7 @@ public:
     //
     HRESULT RewriteILSystemDataCommandText(const ModuleID module_id);
 
+    friend class CorProfilerContinuousProfilerTestAccess;
     friend class TracerMethodRewriter;
 };
 

@@ -361,7 +361,7 @@ public:
     bool                HasThreadSamplingWorker() const;
     bool                IsThreadSamplingWorkerQuiescent() const;
     void                Shutdown();
-    bool                IsShutdownRequested() const;
+    bool                IsShutdownRequested() const noexcept;
     static void         InitSelectiveSamplingBuffer();
     void                AllocationTick(ULONG dataLen, LPCBYTE data);
     ICorProfilerInfo12* info12 = nullptr;
